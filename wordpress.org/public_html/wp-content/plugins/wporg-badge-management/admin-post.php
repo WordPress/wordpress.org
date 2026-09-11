@@ -16,16 +16,16 @@ function manage_badges() {
 
 	check_admin_referer( 'wporg_profile_badges' );
 
-	$badges_to_assign = $_POST['badges'] ?? array();
+	$badges_to_assign = array_map( 'sanitize_key', (array) wp_unslash( $_POST['badges'] ?? array() ) );
 	$badges_to_assign = array_intersect( (array) $badges_to_assign, get_option( 'wporg_profile_badges', [] ) );
-	$badge_action    = $_POST['badge-action'] ?? '';
+	$badge_action    = sanitize_key( $_POST['badge-action'] ?? '' );
 
 	if ( empty( $badges_to_assign ) || ! in_array( $badge_action, [ 'add', 'remove' ], true ) ) {
 		wp_safe_redirect( admin_url( 'tools.php?page=profile-badges' ) );
 		exit;
 	}
 
-	$users = isset( $_POST['users'] ) ? array_filter( array_map( 'trim', preg_split( "/[,\n]+/", wp_unslash( $_POST['users'] ) ) ) ) : array();
+	$users = isset( $_POST['users'] ) ? array_filter( array_map( 'trim', preg_split( "/[,\n]+/", sanitize_textarea_field( wp_unslash( $_POST['users'] ) ) ) ) ) : array();
 
 	$unknown_users = [];
 	$operate_on_users = [];

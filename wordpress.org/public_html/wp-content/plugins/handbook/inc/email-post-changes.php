@@ -31,7 +31,7 @@ class WPorg_Handbook_Email_Post_Changes {
 	}
 
 	public static function update_watchlist() {
-		$post_id = absint( $_GET['post_id'] );
+		$post_id = absint( $_GET['post_id'] ?? 0 );
 		if ( ! $post_id || ! $post = get_post( $post_id ) ) {
 			wp_safe_redirect( home_url( '/' ) );
 			exit;
@@ -43,7 +43,7 @@ class WPorg_Handbook_Email_Post_Changes {
 		}
 
 		$watch = ! empty( $_GET['watch'] );
-		$verify = wp_verify_nonce( $_GET['_wpnonce'], ( $watch ? 'watch-' : 'unwatch-' ) . $post_id );
+		$verify = wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), ( $watch ? 'watch-' : 'unwatch-' ) . $post_id );
 
 		// Subscribing needs read access; unsubscribing only removes the caller, so it must always be allowed.
 		if ( $verify && ( ! $watch || current_user_can( 'read_post', $post_id ) ) ) {

@@ -172,7 +172,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ) {
 				// User is requesting a further redirect afterward, let's make sure it's a legit target.
-				$redirect_to_requested = str_replace( ' ', '%20', $_REQUEST['redirect_to'] ); // Encode spaces.
+				$redirect_to_requested = str_replace( ' ', '%20', esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) ) ); // Encode spaces.
 				$redirect_to_requested = function_exists( 'wp_sanitize_redirect' ) ? wp_sanitize_redirect( $redirect_to_requested ) : $redirect_to_requested;
 				if ( $this->_is_valid_targeted_domain( $redirect_to_requested ) ) {
 					$redirect_to = $redirect_to_requested;

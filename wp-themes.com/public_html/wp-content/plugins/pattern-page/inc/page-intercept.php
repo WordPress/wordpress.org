@@ -51,7 +51,8 @@ function get_pattern_name_from_url() {
 		return '';
 	}
 
-	return sanitize_text_field( urldecode( $_GET['pattern_name'] ) );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_text_field() strips percent-encoded octets, so it runs after urldecode() rather than around the raw value.
+	return sanitize_text_field( urldecode( wp_unslash( $_GET['pattern_name'] ) ) );
 }
 
 /**

@@ -164,6 +164,7 @@ add_action( 'wp_ajax_nopriv_o2_read', function() {
 	}
 
 	if ( isset( $_REQUEST['queryVars'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- This guard rejects malformed requests, so it has to look at the value as sent.
 		check_for_invalid_query_vars( $_REQUEST['queryVars'], 'o2 queryVars' );
 	}
 }, 9 );
@@ -309,6 +310,7 @@ add_action( 'send_headers', function() {
 	];
 
 	foreach ( $share_by_email_fields as $field ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- Checks the submitted value's type, which sanitizing it first would hide.
 		if ( isset( $_POST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
 			die_bad_request( "non-scalar $field in Jetpack Share By Email" );
 		}
@@ -341,7 +343,8 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
-	$charset = str_replace( array( ',', ' ' ), '', strtoupper( trim( $_POST['charset'] ?? '' ) ) );
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- A guard that inspects every incoming request to reject malformed ones; it runs before any handler that would own a nonce.
+	$charset = str_replace( array( ',', ' ' ), '', strtoupper( trim( sanitize_text_field( wp_unslash( $_POST['charset'] ?? '' ) ) ) ) );
 
 	if ( function_exists( 'mb_list_encodings' ) && ! in_array( $charset, mb_list_encodings(), true ) ) {
 		die_bad_request( 'Invalid Charset' );

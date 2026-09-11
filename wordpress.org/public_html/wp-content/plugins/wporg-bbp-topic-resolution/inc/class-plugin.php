@@ -136,14 +136,19 @@ class Plugin {
 
 		$resolutions = $this->get_topic_resolutions();
 
-		// Post value passed
+		/*
+		 * Post value passed. This only repopulates the form after a submission bbPress
+		 * has already nonce-checked; nothing is stored here.
+		 */
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( bbp_is_topic_form_post_request() && isset( $_POST[ self::META_KEY ] ) ) {
-			$resolution = $this->sanitize_topic_resolution( $_POST[ self::META_KEY ] );
+			$resolution = $this->sanitize_topic_resolution( sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ) ) );
 
 		// No post value passed
 		} else if ( bbp_is_single_topic() || bbp_is_topic_edit() ) {
 			$resolution = $this->get_topic_resolution( array( 'id' => bbp_get_topic_id() ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( empty( $resolution ) ) {
 			$resolution = $this->get_default_topic_resolution();
@@ -191,9 +196,16 @@ class Plugin {
 		}
 
 		$resolution = $this->get_default_topic_resolution();
+
+		/*
+		 * Runs on bbp_new_topic_post_extras and bbp_edit_topic_post_extras; bbPress
+		 * verifies the nonce in its own form handler before these hooks fire.
+		 */
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( isset( $_POST[ self::META_KEY ] ) ) {
-			$resolution = $this->sanitize_topic_resolution( $_POST[ self::META_KEY ] );
+			$resolution = $this->sanitize_topic_resolution( sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ) ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$this->set_topic_resolution( array(
 			'id'         => $topic_id,
@@ -278,7 +290,7 @@ class Plugin {
 		$topic_id   = intval( $_POST['topic_id'] );
 		$topic      = bbp_get_topic( $topic_id );
 		$user_id    = get_current_user_id();
-		$resolution = $_POST[ self::META_KEY ];
+		$resolution = sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ?? '' ) );
 
 		// Resolution must be enabled on the topic's forum, not on the one being viewed.
 		if ( $topic && ! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic->ID ) ) ) {

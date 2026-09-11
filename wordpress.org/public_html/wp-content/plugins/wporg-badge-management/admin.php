@@ -23,7 +23,7 @@ function render() {
 	$tabs['settings'] = 'Settings';
 
 	// Create a set of tabs for managing badges and listing users with badges.
-	$active_tab = ( $_GET['tab'] ?? '' ) ?: array_key_first( $tabs );
+	$active_tab = sanitize_key( $_GET['tab'] ?? '' ) ?: array_key_first( $tabs );
 	$active_tab = array_key_exists( $active_tab, $tabs ) ? $active_tab : array_key_first( $tabs );
 
 	echo '<h2 class="nav-tab-wrapper">';

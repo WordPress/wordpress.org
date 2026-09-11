@@ -396,8 +396,14 @@ class Plugin {
 				if ( isset( $_POST['translation_source'] ) && 'frontend' == $_POST['translation_source'] ) {
 					$source = 'frontend';
 					if ( isset( $_POST['externalTranslationSource'] ) ) {
-						$suggestion_source     = sanitize_text_field( $_POST['externalTranslationSource'] );
-						$suggested_translation = sanitize_text_field( $_POST['externalTranslationUsed'] );
+						/*
+						 * Guarded on GlotPress's translations_post route, which verifies its
+						 * add-translation nonce and 403s before dispatching.
+						 */
+						// phpcs:disable WordPress.Security.NonceVerification.Missing
+						$suggestion_source     = sanitize_text_field( wp_unslash( $_POST['externalTranslationSource'] ) );
+						$suggested_translation = sanitize_text_field( wp_unslash( $_POST['externalTranslationUsed'] ?? '' ) );
+						// phpcs:enable WordPress.Security.NonceVerification.Missing
 						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
 					}
 				}

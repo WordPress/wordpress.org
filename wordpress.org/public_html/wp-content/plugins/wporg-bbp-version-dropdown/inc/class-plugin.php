@@ -58,9 +58,13 @@ class Plugin {
 		$other_version = '';
 		$versions = $this->get_wp_versions();
 
-		// Post value passed
+		/*
+		 * Post value passed. This only repopulates the form after a submission bbPress
+		 * has already nonce-checked; nothing is stored here.
+		 */
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		if ( bbp_is_topic_form_post_request() && isset( $_POST[ self::META_KEY ] ) ) {
-			$version = $this->sanitize_wp_version( $_POST[ self::META_KEY ] );
+			$version = $this->sanitize_wp_version( sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ) ) );
 
 		// No post value passed
 		} else if ( bbp_is_single_topic() || bbp_is_topic_edit() ) {
@@ -69,6 +73,7 @@ class Plugin {
 				$version = 0;
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! empty( $version ) && ! array_key_exists( $version, $versions ) ) {
 			$other_version = $version;
@@ -93,11 +98,19 @@ class Plugin {
 	public function topic_post_extras( $topic_id ) {
 		$version = false;
 		$versions = $this->get_wp_versions();
-		if ( ( $_POST[ self::META_KEY ] ) && in_array( $_POST[ self::META_KEY ], $versions ) ) {
-			$version = $this->sanitize_wp_version( $_POST[ self::META_KEY ] );
+
+		/*
+		 * Runs on bbp_new_topic_post_extras and bbp_edit_topic_post_extras; bbPress
+		 * verifies the nonce in its own form handler before these hooks fire.
+		 */
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$submitted = sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ?? '' ) );
+		if ( $submitted && in_array( $submitted, $versions ) ) {
+			$version = $this->sanitize_wp_version( $submitted );
 		} else if ( isset( $_POST['wp_other_version'] ) ) {
-			$version = $this->sanitize_wp_version( $_POST['wp_other_version'] );
+			$version = $this->sanitize_wp_version( sanitize_text_field( wp_unslash( $_POST['wp_other_version'] ) ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( false !== $version ) {
 			$this->set_topic_version( array(

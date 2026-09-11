@@ -114,10 +114,9 @@ class Plugin {
 		if (
 			bbp_is_post_request() &&
 			empty( $_POST['action'] ) &&
-			! empty( $_GET['action'] ) &&
-			in_array( $_GET['action'], self::VALID_ACTIONS, true )
+			in_array( sanitize_key( $_GET['action'] ?? '' ), self::VALID_ACTIONS, true )
 		) {
-			$_POST['action'] = $_GET['action'];
+			$_POST['action'] = sanitize_key( $_GET['action'] );
 		}
 	}
 
@@ -183,7 +182,7 @@ class Plugin {
 
 		$term_id = $term->term_id;
 		$auth    = 'nonce';
-		$user_id = isset( $_REQUEST['user_id'] ) ? $_REQUEST['user_id'] : get_current_user_id(); // Must pass nonce check below.
+		$user_id = isset( $_REQUEST['user_id'] ) ? absint( $_REQUEST['user_id'] ) : get_current_user_id(); // Must pass nonce check below.
 
 		// If a user_id + token is provided, verify the request and maybe use the provided user_id.
 		if ( isset( $_GET['token'] ) ) {
@@ -865,12 +864,12 @@ To unsubscribe from future emails, click here:
 	protected function has_valid_unsubscription_token() {
 		if (
 			! isset( $_GET['token'] ) ||
-			2 !== substr_count( $_GET['token'], '|' )
+			2 !== substr_count( sanitize_text_field( wp_unslash( $_GET['token'] ) ), '|' )
 		) {
 			return false;
 		}
 
-		$provided_token            = rtrim( $_GET['token'], '>' );
+		$provided_token            = rtrim( sanitize_text_field( wp_unslash( $_GET['token'] ) ), '>' );
 		list( $user_id, $expiry, ) = explode( '|', $provided_token );
 		$term                      = $this->get_current_term();
 		$user                      = get_user_by( 'id', intval( $user_id ) );

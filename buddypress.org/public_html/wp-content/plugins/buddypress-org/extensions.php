@@ -256,7 +256,7 @@ add_filter( 'bp_get_activity_content_body', 'bporg_code_trick', 1 );
 
 function bporg_redirect_to_search() {
 	if ( bp_is_current_component( 'search' ) ) {
-		$terms = isset( $_REQUEST['s'] ) ? stripslashes( $_REQUEST['s'] ) : '';
+		$terms = sanitize_text_field( wp_unslash( $_REQUEST['s'] ?? '' ) );
 		bp_core_redirect( add_query_arg( array( 's' => $terms ), bp_get_root_domain() ) );
 	}
 }

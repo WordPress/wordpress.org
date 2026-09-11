@@ -417,7 +417,7 @@ function wporg_themes_post_author_meta_box( $post ) {
  */
 function wporg_themes_author_lookup() {
 	check_ajax_referer( 'wporg_themes_author_lookup' );
-	$term = $_REQUEST['term'];
+	$term = sanitize_text_field( wp_unslash( $_REQUEST['term'] ?? '' ) );
 	$args = array(
 		'search' => $term.'*',
 		'search_columns' => array( 'user_login', 'user_nicename' ),

@@ -20,6 +20,8 @@
 	<exclude-pattern>*/plugins/plugin-directory/libs/*</exclude-pattern>
 	<exclude-pattern>*/plugins/theme-directory/lib/*</exclude-pattern>
 	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>
+	<!-- WP Super Cache's advanced-cache.php drop-in, which runs before WordPress loads. -->
+	<exclude-pattern>*/wp15.wordpress.net/public_html/content/advanced-cache.php</exclude-pattern>
 
 	<!-- Exclude generated wp-scripts asset files. -->
 	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>

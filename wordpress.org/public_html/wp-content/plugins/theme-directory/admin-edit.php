@@ -614,7 +614,7 @@ function wporg_themes_save_meta_box_data( $post_id ) {
 	if ( ! isset( $_POST['wporg_themes_meta_box_nonce'] ) ) {
 		return;
 	}
-	if ( ! wp_verify_nonce( $_POST['wporg_themes_meta_box_nonce'], 'wporg_themes_meta_box' ) ) {
+	if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wporg_themes_meta_box_nonce'] ) ), 'wporg_themes_meta_box' ) ) {
 		return;
 	}
 	// TODO should this be a post type specific capability?

@@ -64,11 +64,11 @@ class Detector {
 	 */
 	private function set_locale() {
 		if ( ! empty( $_GET[ self::GET_NAME ] ) ) {
-			$get_locale = $this->sanitize_locale( $_GET[ self::GET_NAME ] );
+			$get_locale = $this->sanitize_locale( sanitize_text_field( wp_unslash( $_GET[ self::GET_NAME ] ) ) );
 
 			$this->locale = $this->check_variants( $get_locale ) ?: $this->locale;
 		} elseif ( ! empty( $_COOKIE[ self::COOKIE_NAME ] ) ) {
-			$locale = $this->sanitize_locale( $_COOKIE[ self::COOKIE_NAME ] );
+			$locale = $this->sanitize_locale( sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE_NAME ] ) ) );
 
 			if ( in_array( $locale, $this->active_locales, true ) ) {
 				$this->locale = $locale;

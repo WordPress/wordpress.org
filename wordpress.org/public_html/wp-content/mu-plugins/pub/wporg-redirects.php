@@ -17,7 +17,7 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 
 		// WordPress.org does not have a specific site search, only the global WordPress.org search
 		} elseif ( ! empty( $_GET['s'] ) && false === strpos( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/search/' ) ) {
-			wp_safe_redirect( '/search/' . urlencode( wp_unslash( $_GET['s'] ) ) . '/', 301 );
+			wp_safe_redirect( '/search/' . urlencode( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) . '/', 301 );
 			exit;
 
 		} elseif ( is_404() ) {

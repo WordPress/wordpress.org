@@ -119,7 +119,7 @@ class WordPressTV_Subtitles_Upload {
 			wp_die( 'You can only subtitle videos.' );
 		}
 
-		if ( empty( $_POST['wptv_wporg_username'] ) || empty( $_POST['wptv_author_email'] ) || ! is_email( $_POST['wptv_author_email'] ) ) {
+		if ( empty( $_POST['wptv_wporg_username'] ) || empty( $_POST['wptv_author_email'] ) || ! is_email( wp_unslash( $_POST['wptv_author_email'] ) ) ) {
 			$this->error( 4 );
 		}
 

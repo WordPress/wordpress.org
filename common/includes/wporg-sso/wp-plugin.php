@@ -486,7 +486,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function login_form_defaults( $defaults ) {
 			if ( ! empty( $_GET['redirect_to'] ) ) {
-				$defaults['redirect'] = $_GET['redirect_to']; // always ultimately checked for safety at redir time
+				$defaults['redirect'] = esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ); // Always ultimately checked for safety at redir time.
 			} elseif ( $referer = wp_get_referer() ) {
 				$_GET['redirect_to'] = $referer;
 				$defaults['redirect'] = $referer;
@@ -564,7 +564,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$user = wp_get_current_user();
 
 			// Redirect back to the requested location.. the referer.. or failing that, the current sites front page after it's all done.
-			$logout_redirect = ( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ?: wp_get_referer() ) ?: home_url( '/' );
+			$logout_redirect = ( esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ) ?: wp_get_referer() ) ?: home_url( '/' );
 
 			// Never to wp-admin.
 			if ( str_contains( $logout_redirect, '/wp-admin/' ) ) {
@@ -635,7 +635,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return;
 			}
 
-			$remote_token = wp_unslash( $_GET['sso_token'] );
+			$remote_token = sanitize_text_field( wp_unslash( $_GET['sso_token'] ) );
 			$remote_token = $this->_validate_remote_token( $remote_token );
 
 			// Log the user in if successful.
@@ -650,7 +650,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 
 			if ( isset( $_GET['redirect_to'] ) ) {
-				$redirect_to = wp_unslash( $_GET['redirect_to'] );
+				$redirect_to = esc_url_raw( wp_unslash( $_GET['redirect_to'] ) );
 			} else {
 				// Generate the current url based on the current hostname and request uri.
 				$redirect_to = set_url_scheme( 'http://' . $this->host . ( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) ) );
@@ -706,7 +706,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 
 			// Validate the logout token.
-			$remote_token = wp_unslash( $_GET['sso_logout'] );
+			$remote_token = sanitize_text_field( wp_unslash( $_GET['sso_logout'] ) );
 			$remote_token = $this->_validate_remote_token( $remote_token );
 			if ( ! $remote_token || ! $remote_token['valid'] ) {
 				return;
@@ -728,7 +728,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Default to the logout confirmation screen, or back to the source site if possible.
 			$redirect_to = $this->sso_host_url . '/loggedout';
 			if ( ! empty( $_REQUEST['redirect_to'] ) ) {
-				$requested_redirect_to = wp_unslash( $_REQUEST['redirect_to'] );
+				$requested_redirect_to = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
 				$redirect_to           = add_query_arg( 'redirect_to', urlencode( $requested_redirect_to ), $redirect_to );
 
 				// If the requested redirect_to is valid, use it.

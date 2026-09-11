@@ -18,7 +18,7 @@ class Browse_Happy_Locale {
 		self::$active_locales[] = 'en_US';
 
 		if ( isset( $_GET['locale'] ) )
-			$get_locale = preg_replace( '/[^A-Z_-]/i', '', $_GET['locale'] );
+			$get_locale = preg_replace( '/[^A-Z_-]/i', '', sanitize_text_field( wp_unslash( $_GET['locale'] ) ) );
 
 		if ( isset( $get_locale ) && $maybe = self::check_variants( $get_locale ) )
 			self::$locale = $maybe;
