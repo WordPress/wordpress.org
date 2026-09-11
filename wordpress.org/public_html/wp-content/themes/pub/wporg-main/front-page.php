@@ -13,7 +13,6 @@
  * @package WordPressdotorg\Theme
  */
 
-
 namespace WordPressdotorg\MainTheme;
 
 global $rosetta;

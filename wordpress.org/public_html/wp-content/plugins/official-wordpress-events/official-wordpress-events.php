@@ -925,7 +925,7 @@ class Official_WordPress_Events {
 		$api_keys = array( OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
 
 		if ( 'cli' === php_sapi_name() ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log, not rendered.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI console output; the guard above restricts this to php_sapi_name() === 'cli'.
 			echo "\n" . $message;
 		}
 
