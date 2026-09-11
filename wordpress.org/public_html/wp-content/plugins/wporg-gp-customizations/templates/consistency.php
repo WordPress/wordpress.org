@@ -14,7 +14,7 @@ gp_tmpl_header();
 	<p class="consistency-fields">
 		<span class="consistency-field">
 			<label for="original">Original</label>
-			<input id="original" type="text" name="search" required value="<?php echo gp_esc_attr_with_entities( $search ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes attributes while preserving literal entities. ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
+			<input id="original" type="text" name="search" required value="<?php echo gp_esc_attr_with_entities( $search ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- gp_esc_attr_with_entities() escapes the value for an attribute and double-encodes existing entities so they render literally. ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
 		</span>
 
 		<span class="consistency-field">
@@ -97,7 +97,7 @@ if ( $performed_search && ! $results ) {
 		foreach ( $translations_unique_counts as $translation => $count ) {
 			printf(
 				'<li>%s <small>(%s)</small> <a class="anchor-jumper with-tooltip" aria-label="Go to translation" href="#%s">&darr;</a></li>',
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 				str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) ),
 				esc_html( 1 === $count ? $count . ' time' : $count . ' times' ),
 				esc_attr( 't-' . md5( $translation ) )
@@ -135,7 +135,7 @@ if ( $performed_search && ! $results ) {
 			printf(
 				'<tr id="%s" class="new-translation"><th colspan="2"><strong>%s</strong> %s %s</th></tr>',
 				esc_attr( 't-' . md5( $translation ) ),
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 				esc_translation( $translation ),
 				wp_kses_post( $next_arrow ),
 				wp_kses_post( $prev_arrow )
@@ -179,7 +179,7 @@ if ( $performed_search && ! $results ) {
 					sprintf(
 						'<div class="string">%s%s</div>
 						<div class="meta">Project: <a href="/projects/%s/%s/">%s</a>%s</div>',
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						esc_translation( $result->original_singular ),
 						wp_kses_post( $original_context ),
 						esc_attr( $result->project_path ),
@@ -194,7 +194,7 @@ if ( $performed_search && ! $results ) {
 							Added: %s
 						</div>',
 						$locale_is_rtl ? ' rtl' : '',
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						esc_translation( $result->translation ),
 						esc_attr( $result->project_path ),
 						esc_attr( $set ),

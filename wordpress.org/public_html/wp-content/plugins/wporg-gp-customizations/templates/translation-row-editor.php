@@ -102,18 +102,18 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 							?>
 							<div class="source-string__singular">
 								<span class="original"><?php echo prepare_original( $singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span>
-								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities. ?></span>
+								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></span>
 							</div>
 						<?php else : ?>
 							<div class="source-string__singular">
 								<small>Singular:</small>
 								<span class="original"><?php echo prepare_original( $singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span>
-								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities. ?></span>
+								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></span>
 							</div>
 							<div class="source-string__plural">
 								<small>Plural:</small>
 								<span class="original"><?php echo prepare_original( $plural ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span>
-								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->plural ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities. ?></span>
+								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->plural ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></span>
 							</div>
 						<?php endif; ?>
 					</div>
@@ -122,7 +122,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						<?php if ( wporg_gp_should_display_original_context( $translation ) ) : ?>
 							<details open class="source-details__context">
 								<summary>Context</summary>
-								<span class="context bubble"><?php echo esc_translation( $translation->context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities. ?></span>
+								<span class="context bubble"><?php echo esc_translation( $translation->context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></span>
 							</details>
 						<?php endif; ?>
 						<?php

@@ -469,7 +469,7 @@ function wporg_gp_translate_textarea( $entry, $permissions, $index = 0 ) {
 			endforeach;
 		endif;
 		?>
-		<textarea placeholder="Enter translation here" class="foreign-text" name="translation[<?php echo esc_attr( $entry->original_id ); ?>][]" id="translation_<?php echo esc_attr( $entry->original_id ); ?>_<?php echo esc_attr( $index ); ?>" <?php disabled( ! $can_edit ); ?>><?php echo esc_translation( gp_array_get( $entry->translations, $index ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities. ?></textarea>
+		<textarea placeholder="Enter translation here" class="foreign-text" name="translation[<?php echo esc_attr( $entry->original_id ); ?>][]" id="translation_<?php echo esc_attr( $entry->original_id ); ?>_<?php echo esc_attr( $index ); ?>" <?php disabled( ! $can_edit ); ?>><?php echo esc_translation( gp_array_get( $entry->translations, $index ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></textarea>
 	</div>
 	<?php
 }

@@ -82,7 +82,7 @@ $priority_char = array(
 		if ( ! count( array_filter( $translation->translations, 'gp_is_not_null' ) ) ) :
 			echo wp_kses_post( $missing_text );
 		elseif ( ! $translation->plural || 1 === $locale->nplurals ) :
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 			echo '<span class="translation-text">' . esc_translation( $translation->translations[0] ) . '</span>';
 		elseif ( $translation->plural && 2 === $locale->nplurals && 'n != 1' === $locale->plural_expression ) :
 			?>
@@ -93,7 +93,7 @@ $priority_char = array(
 					if ( ! isset( $translation->translations[0] ) || gp_is_empty_string( $translation->translations[0] ) ) {
 						echo wp_kses_post( $missing_text );
 					} else {
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						echo '<span class="translation-text">' . esc_translation( $translation->translations[0] ) . '</span>';
 					}
 					?>
@@ -104,7 +104,7 @@ $priority_char = array(
 					if ( ! isset( $translation->translations[1] ) || gp_is_empty_string( $translation->translations[1] ) ) {
 						echo wp_kses_post( $missing_text );
 					} else {
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						echo '<span class="translation-text">' . esc_translation( $translation->translations[1] ) . '</span>';
 					}
 					?>
@@ -124,7 +124,7 @@ $priority_char = array(
 					if ( ! isset( $translation->translations[ $plural_index ] ) || gp_is_empty_string( $translation->translations[ $plural_index ] ) ) {
 						echo wp_kses_post( $missing_text );
 					} else {
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes HTML while preserving literal entities.
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						echo '<span class="translation-text">' . esc_translation( $translation->translations[ $plural_index ] ) . '</span>';
 					}
 					?>
