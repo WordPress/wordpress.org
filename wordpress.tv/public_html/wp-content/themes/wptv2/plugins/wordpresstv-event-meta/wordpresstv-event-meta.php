@@ -67,7 +67,8 @@ class WordPressTV_Event_Meta {
 
 		foreach ( $this->fields() as $field ) {
 			$key = $field['key'];
-			$value = $_POST['term_meta'][ $key ] ?? '';
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Runs on edited_event and created_event; core verifies the term nonce before firing them.
+			$value = sanitize_text_field( wp_unslash( $_POST['term_meta'][ $key ] ?? '' ) );
 			$value = sanitize_text_field( $value );
 
 			if ( $value ) {

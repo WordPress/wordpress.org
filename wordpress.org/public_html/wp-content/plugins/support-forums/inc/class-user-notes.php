@@ -63,7 +63,7 @@ class User_Notes {
 		$post_id   = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 
 		$note_id   = isset( $_POST['note_id'] ) ? (int) $_POST['note_id'] : 0;
-		$note_text = isset( $_POST['note_text'] ) ? wp_kses( $_POST['note_text'], array( 'a' => array( 'href' => true ) ) ) : '';
+		$note_text = isset( $_POST['note_text'] ) ? wp_kses( wp_unslash( $_POST['note_text'] ), array( 'a' => array( 'href' => true ) ) ) : '';
 
 		if ( ! $user_id || ! $note_text ) {
 			return;

@@ -22,7 +22,7 @@ class WPTV_Anon_Upload {
 			empty( $_POST['wptvvideon'] ) ||
 			(
 				empty( $_POST['wptv_uploaded_by'] ) &&
-				! wp_verify_nonce( $_POST['wptvvideon'], 'wptv-upload-video' )
+				! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wptvvideon'] ?? '' ) ), 'wptv-upload-video' )
 			)
 		) {
 			$this->errors = 15; /* no-nonce / invalid nonce */
@@ -102,7 +102,8 @@ class WPTV_Anon_Upload {
 			return $this->error( 13 );
 		}
 
-		if ( ! empty( $_POST['wptv_producer_username'] ) && ! wporg_username_exists( $_POST['wptv_producer_username'] ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- init() checks the upload nonce before dispatching here.
+		if ( ! empty( $_POST['wptv_producer_username'] ) && ! wporg_username_exists( sanitize_user( wp_unslash( $_POST['wptv_producer_username'] ?? '' ) ) ) ) {
 			return $this->error( 14 );
 		}
 
@@ -113,7 +114,8 @@ class WPTV_Anon_Upload {
 
 			if ( empty( $_POST['wptv_email'] ) ) {
 				return $this->error( 11 );
-			} elseif ( ! is_email( $_POST['wptv_email'] ) ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing -- init() checks the upload nonce before dispatching here.
+			} elseif ( ! is_email( sanitize_email( wp_unslash( $_POST['wptv_email'] ?? '' ) ) ) ) {
 				return $this->error( 12 );
 			}
 
@@ -150,7 +152,8 @@ class WPTV_Anon_Upload {
 			return new WP_Error( 'upload_error', 'Invalid file name.' );
 		}
 
-		$name = $_FILES['wptv_file']['name'];
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- init() checks the upload nonce before dispatching here.
+		$name = sanitize_file_name( wp_unslash( $_FILES['wptv_file']['name'] ?? '' ) );
 		add_filter( 'wp_handle_upload_prefilter', array( &$this, 'video_filename' ), 5 );
 
 		$file = wp_handle_upload( $_FILES['wptv_file'], $overrides );
@@ -230,7 +233,8 @@ class WPTV_Anon_Upload {
 		}
 
 		// quick file extension check
-		$name_parts = pathinfo( $_FILES['wptv_file']['name'] );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- init() checks the upload nonce before dispatching here.
+		$name_parts = pathinfo( sanitize_file_name( wp_unslash( $_FILES['wptv_file']['name'] ?? '' ) ) );
 
 		if ( ! empty( $name_parts['extension'] ) ) {
 			// Changes to this must be synced with the anonymous JavaScript function in anon-upload-template.php

@@ -429,11 +429,11 @@ class WordPressTV_Theme {
 			return;
 		}
 
-		if ( ! isset( $_POST['video_info_metabox_nonce'] ) || ! wp_verify_nonce( $_POST['video_info_metabox_nonce'], 'edit-video-info' ) ) {
+		if ( ! isset( $_POST['video_info_metabox_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['video_info_metabox_nonce'] ?? '' ) ), 'edit-video-info' ) ) {
 			return;
 		}
 
-		$slides_url = esc_url_raw( $_POST['_wptv_slides_url'] );
+		$slides_url = esc_url_raw( wp_unslash( $_POST['_wptv_slides_url'] ?? '' ) );
 
 		if ( $slides_url ) {
 			update_post_meta( $post_id, '_wptv_slides_url', $slides_url );

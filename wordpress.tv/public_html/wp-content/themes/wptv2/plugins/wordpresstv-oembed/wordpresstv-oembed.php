@@ -49,9 +49,9 @@ class WordCampTV_oEmbed {
 		}
 
 		if ( is_ssl() ) {
-			$_lookup_url = str_replace( 'http:', 'https:', $_GET['url'] );
+			$_lookup_url = str_replace( 'http:', 'https:', esc_url_raw( wp_unslash( $_GET['url'] ?? '' ) ) );
 		} else {
-			$_lookup_url = str_replace( 'https:', 'http:', $_GET['url'] );
+			$_lookup_url = str_replace( 'https:', 'http:', esc_url_raw( wp_unslash( $_GET['url'] ?? '' ) ) );
 		}
 
 		// Do a quick check to see if the URL starts with the blog's URL
@@ -120,7 +120,7 @@ class WordCampTV_oEmbed {
 		// Figure out the format
 		$format = 'json';
 		if ( ! empty( $_GET['format'] ) ) {
-			$format = $_GET['format'];
+			$format = sanitize_key( $_GET['format'] ?? '' );
 		}
 
 		// Output the response

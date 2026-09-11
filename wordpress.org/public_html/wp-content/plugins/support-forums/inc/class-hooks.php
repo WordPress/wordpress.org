@@ -1076,7 +1076,8 @@ class Hooks {
 				return;
 			}
 
-			$site_url = esc_url_raw( apply_filters( 'pre_user_url', $_POST['site_url'] ) );
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Runs on bbp_new_topic and bbp_edit_topic; bbPress verifies the nonce in its own form handler before this hook fires.
+			$site_url = esc_url_raw( apply_filters( 'pre_user_url', esc_url_raw( wp_unslash( $_POST['site_url'] ?? '' ) ) ) );
 
 			if ( $site_url ) {
 				$protocols = implode( '|', array( 'http', 'https' ) );

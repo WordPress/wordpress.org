@@ -104,7 +104,7 @@ class Performance_Optimizations {
 		}
 
 		if ( isset( $_GET['intext'] ) ) {
-			$search_terms .= ' intext:"' . esc_attr( $_GET['intext'] ) . '"';
+			$search_terms .= ' intext:"' . esc_attr( sanitize_text_field( wp_unslash( $_GET['intext'] ?? '' ) ) ) . '"';
 		}
 
 		if ( $search_terms ) {

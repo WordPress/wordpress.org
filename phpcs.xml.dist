@@ -153,6 +153,16 @@
 		</properties>
 	</rule>
 
+	<!-- Project functions that verify a nonce. -->
+	<rule ref="WordPress.Security.NonceVerification">
+		<properties>
+			<property name="customNonceVerificationFunctions" type="array">
+				<!-- bbPress wrapper around wp_verify_nonce(), with an added same-origin check. -->
+				<element value="bbp_verify_nonce_request"/>
+			</property>
+		</properties>
+	</rule>
+
 	<!-- PHPUnit requires test files to be named after the test class they contain. -->
 	<rule ref="WordPress.Files.FileName">
 		<exclude-pattern>*/tests/*</exclude-pattern>
