@@ -27,6 +27,12 @@ class Plugin {
 			$this->restrict_rest_queries( $post_type );
 		}
 
+		add_filter( 'rest_comment_query', [ $this, 'restrict_comment_queries' ] );
+
+		foreach ( [ 'load-edit.php', 'load-edit-comments.php' ] as $screen ) {
+			add_action( $screen, [ $this, 'withdraw_post_capabilities' ] );
+		}
+
 		add_action( 'admin_bar_menu', [ $this, 'remove_non_accessible_menu_items' ], 100 );
 
 		if ( apply_filters( 'wporg_o2_enable_pending_for_unknown_users', true ) ) {
@@ -101,12 +107,25 @@ class Plugin {
 	}
 
 	/**
+	 * Whether the current user is one of the people the pending queue is for.
+	 *
+	 * The count is site-wide, and the grant hands 'edit_posts' to every
+	 * logged-in WordPress.org account, so that capability is not enough on
+	 * its own.
+	 *
+	 * @return bool True when the current user reviews posts on this site.
+	 */
+	public function user_may_review_posts() {
+		return current_user_can( 'edit_posts' ) && ! $this->is_granted_non_member();
+	}
+
+	/**
 	 * Adds pending posts count before pending comments count.
 	 *
 	 * @param \WP_Admin_Bar $wp_admin_bar The admin bar instance.
 	 */
 	public function add_pending_posts_count_to_admin_bar( $wp_admin_bar ) {
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		if ( ! $this->user_may_review_posts() ) {
 			return;
 		}
 
@@ -131,7 +150,7 @@ class Plugin {
 	 * Adds icon for the pending posts count.
 	 */
 	public function add_pending_posts_icon_to_admin_bar() {
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		if ( ! $this->user_may_review_posts() ) {
 			return;
 		}
 
@@ -270,6 +289,21 @@ class Plugin {
 	}
 
 	/**
+	 * Whether the current user's posting capabilities come from the grant.
+	 *
+	 * Everybody else -- logged out visitors, site members, super admins -- holds
+	 * their capabilities through a role, so the restrictions that exist to
+	 * contain the grant have to leave them alone.
+	 *
+	 * @return bool True when the current user is a non-member holding granted capabilities.
+	 */
+	public function is_granted_non_member() {
+		$user_id = get_current_user_id();
+
+		return (bool) $user_id && ! is_user_member_of_blog( $user_id ) && ! is_super_admin( $user_id );
+	}
+
+	/**
 	 * Adds post capabilities to current user.
 	 *
 	 * @param array   $allcaps An array of all the user's capabilities.
@@ -288,6 +322,20 @@ class Plugin {
 		$allcaps['edit_published_posts'] = true;
 
 		return $allcaps;
+	}
+
+	/**
+	 * Stops granting capabilities for the remainder of the request.
+	 *
+	 * Attached to the wp-admin content list screens, which gate on 'edit_posts'
+	 * and are no part of what the grant is for, so that core's own capability
+	 * check turns a non-member away.
+	 *
+	 * Members are unaffected, because their capabilities come from a role
+	 * rather than from this filter.
+	 */
+	public function withdraw_post_capabilities() {
+		remove_filter( 'user_has_cap', [ $this, 'add_post_capabilities' ], 10 );
 	}
 
 	/**
@@ -310,11 +358,11 @@ class Plugin {
 	 * @return array Filtered WP_Query arguments.
 	 */
 	public function restrict_non_public_queries( $args ) {
-		$user_id = get_current_user_id();
-
-		if ( ! $user_id || is_user_member_of_blog( $user_id ) || is_super_admin( $user_id ) ) {
+		if ( ! $this->is_granted_non_member() ) {
 			return $args;
 		}
+
+		$user_id = get_current_user_id();
 
 		// 'inherit' is the attachments route's default status, so it is readable without the grant.
 		$public_statuses = array_merge( get_post_stati( [ 'public' => true ] ), [ 'inherit' ] );
@@ -325,6 +373,40 @@ class Plugin {
 		$args['author']         = $user_id;
 		$args['author__in']     = [];
 		$args['author__not_in'] = [];
+
+		return $args;
+	}
+
+	/**
+	 * Restricts REST comment queries to the records a non-member may read.
+	 *
+	 * Core gates the collection's moderation parameters -- 'status', 'type' and
+	 * 'author_email' -- on 'edit_posts', which the grant supplies, so they have
+	 * to be constrained here instead.
+	 *
+	 * @param array $args An array of arguments for WP_Comment_Query.
+	 * @return array Filtered WP_Comment_Query arguments.
+	 */
+	public function restrict_comment_queries( $args ) {
+		if ( ! $this->is_granted_non_member() ) {
+			return $args;
+		}
+
+		// Notes are editorial comments, for the people who can edit the post they hang off.
+		$args['type']     = 'comment';
+		$args['type__in'] = [];
+
+		// A commenter's address is never published.
+		$args['author_email'] = '';
+
+		/*
+		 * Held, spammed and trashed records are scoped to the caller's own,
+		 * which is all core would return from them anyway.
+		 */
+		$approved = [ 'approve', 'approved', '1' ];
+		if ( array_diff( array_map( 'strval', (array) ( $args['status'] ?? '' ) ), $approved ) ) {
+			$args['user_id'] = get_current_user_id();
+		}
 
 		return $args;
 	}
