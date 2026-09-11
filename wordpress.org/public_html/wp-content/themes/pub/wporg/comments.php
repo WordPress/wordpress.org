@@ -34,7 +34,7 @@ if ( post_password_required() ) {
 			if ( 1 === $comment_count ) {
 				printf(
 					/* translators: 1: title. */
-					esc_html_e( 'One thought on &ldquo;%1$s&rdquo;', 'wporg' ),
+					esc_html__( 'One thought on &ldquo;%1$s&rdquo;', 'wporg' ),
 					'<span>' . esc_html( get_the_title() ) . '</span>'
 				);
 			} else {
