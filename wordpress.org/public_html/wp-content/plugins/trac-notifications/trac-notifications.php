@@ -365,7 +365,7 @@ class wporg_trac_notifications {
 
 		$activity = $meta['get_reporter_last_activity'];
 
-		if ( count( $activity['tickets'] ) >= 5 ) {
+		if ( count( $activity['tickets'] ) < 1 || count( $activity['tickets'] ) >= 5 ) {
 			return;
 		}
 
@@ -374,7 +374,7 @@ class wporg_trac_notifications {
 			return;
 		}
 
-		// Print the login of the account the reporter resolved to, escaped like the follower names above.
+		// Name the account the reporter resolved to, not the string the note was handed.
 		$reporter_login = esc_html( $reporter->user_login );
 
 		if ( 1 == count( $activity['tickets'] ) ) {

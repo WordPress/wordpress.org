@@ -30,15 +30,15 @@ if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) && file_exists( $_tests_dir 
 require_once $_tests_dir . '/includes/functions.php';
 
 /**
- * Loads the component pages class as it runs on make.wordpress.org/core.
+ * Loads the plugin's classes as they run on make.wordpress.org/core.
  *
- * The plugin's main file needs a Trac API key and only does anything on the
- * Make network, so the class under test is loaded on its own and told which
- * site it is on for the duration of its constructor.
+ * Both files need a Make `home_url` and a Trac API key and only do anything on
+ * the Make network. The main file's load-time `new wporg_trac_notifications`
+ * is inert because it runs before the `home_url` filter below, so it must stay
+ * ahead of that filter; the component pages class is then built for the Make
+ * network for tests to use. Tests that need a plugin instance build their own.
  */
 function wporg_trac_components_manually_load_plugin() {
-	// The main plugin class does nothing outside the Make network, so its
-	// bootstrap instance is inert here; tests build their own instance.
 	require_once dirname( __DIR__ ) . '/trac-notifications.php';
 	require_once dirname( __DIR__ ) . '/trac-components.php';
 

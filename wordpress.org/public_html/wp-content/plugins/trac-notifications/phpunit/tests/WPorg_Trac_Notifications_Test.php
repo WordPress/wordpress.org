@@ -213,6 +213,13 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 	}
 
 	/**
+	 * No note is shown when the reporter has no recorded tickets.
+	 */
+	public function test_no_note_when_the_reporter_has_no_tickets(): void {
+		$this->assertSame( '', $this->render_note( self::REPORTER, 0 ) );
+	}
+
+	/**
 	 * Asserts the note's text names the reporter's login and nothing the reporter string added.
 	 *
 	 * @param string $note The rendered note.
