@@ -103,6 +103,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 		return array(
 			'trailing break'  => array( self::REPORTER . '<br />' ),
 			'trailing image'  => array( self::REPORTER . '<img src="x.png">' ),
+			'event handler'   => array( self::REPORTER . '<img src=x onerror="doStuff()">' ),
 			'wrapped in span' => array( '<span>' . self::REPORTER . '</span>' ),
 		);
 	}
@@ -217,12 +218,16 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 	 * @param string $note The rendered note.
 	 */
 	protected function assert_note_holds_only_the_login( string $note ): void {
-		preg_match( '#<span class="note">(.*)</span>#s', $note, $matches );
+		preg_match( '#<span class="note">(.*?)</span>#s', $note, $matches );
 
 		$this->assertNotEmpty( $matches, 'The note text is present.' );
 		$this->assertStringNotContainsString( '<br />', $matches[1] );
 		$this->assertStringNotContainsString( '<img', $matches[1] );
 		$this->assertStringNotContainsString( '<span>', $matches[1] );
+		// The note names the resolved login, not the reporter string it was handed:
+		// an escaped copy of the raw string would leave &lt;/&gt; entities behind.
+		$this->assertStringNotContainsString( '&lt;', $matches[1] );
+		$this->assertStringNotContainsString( '&gt;', $matches[1] );
 		$this->assertSame( 1, substr_count( $note, '<img' ), 'The avatar is the only image in the note.' );
 	}
 }
