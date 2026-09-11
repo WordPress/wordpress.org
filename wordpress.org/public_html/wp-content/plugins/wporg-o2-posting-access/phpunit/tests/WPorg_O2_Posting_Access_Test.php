@@ -316,6 +316,262 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 	}
 
 	/*
+	 * REST comment reads: core gates the collection's moderation parameters on
+	 * 'edit_posts', which the grant supplies. As with posts, the rows stay
+	 * hidden either way -- what the restriction is for is 'X-WP-Total'.
+	 */
+
+	/**
+	 * Runs a comments collection request and returns its total.
+	 *
+	 * @param array $params Query parameters to set on the request.
+	 * @return array The response status, total, and row count.
+	 */
+	protected function query_comments( $params ) {
+		$request = new WP_REST_Request( 'GET', '/wp/v2/comments' );
+
+		foreach ( $params as $key => $value ) {
+			$request->set_param( $key, $value );
+		}
+
+		$response = rest_do_request( $request );
+		$headers  = $response->get_headers();
+
+		return array(
+			'status' => $response->get_status(),
+			'total'  => isset( $headers['X-WP-Total'] ) ? (int) $headers['X-WP-Total'] : null,
+			'rows'   => count( (array) $response->get_data() ),
+		);
+	}
+
+	/**
+	 * Seeds a held comment on a private post belonging to somebody else.
+	 *
+	 * @return int The comment ID.
+	 */
+	protected function seed_others_held_comment() {
+		$author = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post   = $this->factory()->post->create(
+			array(
+				'post_author' => $author,
+				'post_status' => 'private',
+			)
+		);
+
+		return $this->factory()->comment->create(
+			array(
+				'comment_post_ID'      => $post,
+				'comment_approved'     => '0',
+				'comment_content'      => 'Reporting abuse from 203.0.113.9',
+				'comment_author_email' => 'reporter@example.org',
+			)
+		);
+	}
+
+	/**
+	 * A held comment on somebody else's private post is not a non-member's to
+	 * search, by content or by any of the author fields 'search' spans.
+	 */
+	public function test_non_member_cannot_search_others_held_comments() {
+		$comment_id = $this->seed_others_held_comment();
+
+		$result = $this->query_comments(
+			array(
+				'include' => array( $comment_id ),
+				'status'  => 'hold',
+				'search'  => 'Reporting abuse',
+			)
+		);
+
+		$this->assertLessThan( 400, $result['status'], 'Core still permits the request; the restriction is on what it counts.' );
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['rows'] );
+	}
+
+	/**
+	 * 'status' also reaches spam and trash, which hold the moderation queue.
+	 */
+	public function test_non_member_cannot_count_others_spam_comments() {
+		$author = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post   = $this->factory()->post->create( array( 'post_author' => $author ) );
+		$this->factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post,
+				'comment_approved' => 'spam',
+			)
+		);
+
+		$result = $this->query_comments( array( 'status' => 'spam' ) );
+
+		$this->assertSame( 0, $result['total'] );
+	}
+
+	/**
+	 * A commenter's address is never published, so the parameter is dropped
+	 * rather than honoured -- a matching and a non-matching address have to be
+	 * indistinguishable.
+	 */
+	public function test_non_member_cannot_confirm_a_commenter_email() {
+		$post = $this->factory()->post->create();
+		$this->factory()->comment->create(
+			array(
+				'comment_post_ID'      => $post,
+				'comment_approved'     => '1',
+				'comment_author_email' => 'known@example.org',
+			)
+		);
+
+		$hit  = $this->query_comments( array( 'author_email' => 'known@example.org' ) );
+		$miss = $this->query_comments( array( 'author_email' => 'guess@example.org' ) );
+
+		$this->assertSame( $hit['total'], $miss['total'] );
+	}
+
+	/**
+	 * Notes are editorial comments, and are stored approved, so the status
+	 * restriction does not reach them -- excluding the type is what does.
+	 */
+	public function test_non_member_cannot_count_editorial_notes() {
+		$author = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post   = $this->factory()->post->create(
+			array(
+				'post_author' => $author,
+				'post_status' => 'draft',
+			)
+		);
+		$note   = $this->factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post,
+				'comment_type'     => 'note',
+				'comment_approved' => '1',
+				'comment_content'  => 'Hold until the embargo lifts',
+			)
+		);
+
+		$result = $this->query_comments(
+			array(
+				'include' => array( $note ),
+				'type'    => 'note',
+				'search'  => 'embargo',
+			)
+		);
+
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['rows'] );
+	}
+
+	/**
+	 * Approved comments are public, so the ordinary collection is left alone.
+	 */
+	public function test_non_member_approved_comment_queries_are_untouched() {
+		$post = $this->factory()->post->create();
+		$this->factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post,
+				'comment_approved' => '1',
+			)
+		);
+
+		$result = $this->query_comments( array() );
+
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['rows'] );
+	}
+
+	/**
+	 * The restriction scopes to the caller rather than refusing outright, so a
+	 * non-member can still see their own comment while it waits for approval.
+	 */
+	public function test_non_member_still_sees_their_own_held_comment() {
+		$this->seed_others_held_comment();
+		$post = $this->factory()->post->create();
+		$this->factory()->comment->create(
+			array(
+				'comment_post_ID'  => $post,
+				'comment_approved' => '0',
+				'user_id'          => $this->non_member,
+			)
+		);
+
+		$result = $this->query_comments( array( 'status' => 'hold' ) );
+
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['rows'] );
+	}
+
+	/**
+	 * Moderators are outside the grant, so nothing about their queries changes.
+	 */
+	public function test_member_comment_queries_are_untouched() {
+		$comment_id = $this->seed_others_held_comment();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'editor' ) ) );
+
+		$result = $this->query_comments(
+			array(
+				'include' => array( $comment_id ),
+				'status'  => 'hold',
+			)
+		);
+
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['rows'] );
+	}
+
+	/*
+	 * wp-admin screens: the grant is for posting, and core hands two content
+	 * list screens to anyone holding 'edit_posts'.
+	 */
+
+	/**
+	 * The posts list is a moderation screen, and gates on 'edit_posts' alone.
+	 */
+	public function test_posts_list_screen_withdraws_the_grant() {
+		do_action( 'load-edit.php' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+
+		$this->assertFalse( current_user_can( 'edit_posts' ) );
+		$this->assertFalse( current_user_can( 'publish_posts' ) );
+	}
+
+	/**
+	 * So is the comments list.
+	 */
+	public function test_comments_list_screen_withdraws_the_grant() {
+		do_action( 'load-edit-comments.php' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+
+		$this->assertFalse( current_user_can( 'edit_posts' ) );
+	}
+
+	/**
+	 * Withdrawing the grant is a no-op for anyone whose capabilities come from
+	 * a role, so moderation screens keep working.
+	 */
+	public function test_member_keeps_capabilities_on_list_screens() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'editor' ) ) );
+
+		do_action( 'load-edit.php' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+
+		$this->assertTrue( current_user_can( 'edit_posts' ) );
+		$this->assertTrue( current_user_can( 'edit_others_posts' ) );
+	}
+
+	/**
+	 * The pending count in the Toolbar is site-wide, and links to a screen a
+	 * non-member may not open.
+	 */
+	public function test_pending_count_is_hidden_from_non_members() {
+		$this->assertFalse( $this->plugin->user_may_review_posts() );
+	}
+
+	/**
+	 * The people the queue is for still see it.
+	 */
+	public function test_pending_count_is_shown_to_members() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'editor' ) ) );
+
+		$this->assertTrue( $this->plugin->user_may_review_posts() );
+	}
+
+	/*
 	 * Publishing policy: user_can_publish() decides who skips review.
 	 */
 
