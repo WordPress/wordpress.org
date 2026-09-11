@@ -77,7 +77,7 @@ class WPTV_Anon_Upload {
 
 		// For an XHR request, just send the redirect location, don't redirect to it.
 		if ( isset( $_GET['xhr'] ) ) {
-			die( esc_url_raw( $redir ) );
+			die( $redir ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- URL response with encoded query values, including description newlines.
 		}
 
 		wp_redirect( $redir );
