@@ -43,11 +43,14 @@ function output_response( $data ) {
 		call_headers( 'application/javascript' );
 
 		echo '/**/' .
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSONP response body; the callback is restricted to [a-zA-Z0-9_.] on the line above.
 			preg_replace('/[^a-zA-Z0-9_.]/', '', $_GET['callback'] ) .
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSONP response body; the callback is restricted to [a-zA-Z0-9_.] on the line above.
 			'(' . $json_data . ')';
 	} else {
 		call_headers( 'application/json' );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSONP response body; the callback is restricted to [a-zA-Z0-9_.] on the line above.
 		echo $json_data;
 	}
 }
