@@ -228,12 +228,14 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 	$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 	if ( ! $plugin ) {
 		$stats['error']++;
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "ERROR: Plugin not found: $plugin_slug\n\n";
 		continue;
 	}
 
 	if ( 'publish' != $plugin->post_status ) {
 		$stats['error']++;
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "ERROR: Plugin not published: $plugin_slug\n\n";
 		continue;
 	}
@@ -266,9 +268,13 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 		$body = str_replace( 'PLUGIN_LINK', get_permalink( $plugin ), $body );
 		$body = str_replace( 'LINK<br /><br />DETAILS', '<pre>' . $vuln_desc . '</pre>', $body );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "Subject: $subject\n\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "To: $to\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "CC: $cc_list\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo str_replace( "<br />", "\n", $body );
 
 		if ( 'live' != OPERATION_MODE ) {
@@ -292,9 +298,13 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 		$body = str_replace( 'PLUGIN_LINK', get_permalink( $plugin ), $body );
 		$body = str_replace( 'REPORT<br /><br />OPTIONAL_ADDITIONAL', '<pre>' . $vuln_desc . '</pre>', $body );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "Subject: $subject\n\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "To: $to\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "CC: $cc_list\n";
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo str_replace( "<br />", "\n", $body );
 
 		if ( 'live' != OPERATION_MODE ) {

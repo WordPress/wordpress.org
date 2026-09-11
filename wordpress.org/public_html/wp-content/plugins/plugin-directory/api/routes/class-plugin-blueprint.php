@@ -83,6 +83,7 @@ class Plugin_Blueprint extends Base {
 		header( 'Access-Control-Allow-Origin: *' );
 
 		// We already have a json string, returning would double-encode it.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
 		die( $blueprint['contents'] );
 	}
 
@@ -114,6 +115,7 @@ class Plugin_Blueprint extends Base {
 
 						if ( $output ) {
 							header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
 							die( $output );
 						}
 					}
@@ -135,6 +137,7 @@ class Plugin_Blueprint extends Base {
 
 					if ( $output ) {
 						header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
 						die( $output );
 					}
 				}

@@ -242,6 +242,7 @@ class Import {
 		 */
 		foreach ( $svn_tags_deleted as $svn_deleted_tag ) {
 			if ( Plugin_Directory::remove_release( $plugin, $svn_deleted_tag ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI context, callers write the message to STDERR.
 				echo "Plugin tag {$svn_deleted_tag} deleted; release removed.\n";
 			}
 		}
@@ -720,6 +721,7 @@ class Import {
 			}
 
 			if ( $versions_to_build ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI context, callers write the message to STDERR.
 				echo "Building ZIPs for {$plugin_slug}: " . implode( ', ', $versions_to_build ) . "\n";
 			}
 		}

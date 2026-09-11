@@ -42,12 +42,15 @@ function display_top_table( $stats, $n = 20 ) {
 
 	foreach ( $top as $row ) {
 		// $vals = array_values( (array) $row );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo $row[0] . "\t\t\t" . number_format( $row[1] ) . "\n";
 	}
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo "Top $n Total: " . number_format( array_reduce( $top, __NAMESPACE__ . '\callback_sum' ) ) . "\n";
 
 	$tail_n = count( $tail );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo "Other $tail_n: " . number_format( array_reduce( $tail, __NAMESPACE__ . '\callback_sum' ) ) . "\n";
 
 }
