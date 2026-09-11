@@ -240,6 +240,7 @@ function add_activity_to_profile( array $request_args ) : bool {
 	} else {
 		$success = false;
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 		trigger_error( 'Adding activity failed with error: ' . $response_body, E_USER_WARNING );
 	}
 

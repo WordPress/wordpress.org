@@ -45,6 +45,7 @@ the_post();
 						<li>
 							<?php
 							/* translators: 1: URL to PHP; 2: PHP Version */
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Translated string carrying an anchor, already through wp_kses_post().
 							printf( wp_kses_post( __( '<a href="%1$s">PHP</a> version %2$s or greater.', 'wporg' ) ), 'https://www.php.net/', RECOMMENDED_PHP );
 							?>
 						</li>
@@ -81,7 +82,7 @@ the_post();
 						printf(
 							/* translators: 1: PHP Version including; 2: MySQL Version */
 							wp_kses_post( __( 'Note: If you are in a legacy environment where you only have older PHP or MySQL versions, WordPress also works with PHP %1$s+ and MySQL %2$s+, but these versions have reached official End Of Life and as such <strong>may expose your site to security vulnerabilities</strong>.', 'wporg' ) ),
-							MINIMUM_PHP,
+							esc_html( MINIMUM_PHP ),
 							'5.0'
 						);
 						?>
@@ -98,7 +99,7 @@ the_post();
 							<li>
 								<?php
 								/* translators: PHP Version */
-								printf( esc_html__( 'PHP %s or greater', 'wporg' ), RECOMMENDED_PHP );
+								printf( esc_html__( 'PHP %s or greater', 'wporg' ), esc_html( RECOMMENDED_PHP ) );
 								?>
 							</li>
 							<li>

@@ -290,7 +290,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				printf(
 					'<meta http-equiv="refresh" content="1;url=%1$s" />' . 
 					'<a href="%1$s">%1$s</a>',
-					$to
+					esc_url( $to )
 				);
 				exit;
 			}
