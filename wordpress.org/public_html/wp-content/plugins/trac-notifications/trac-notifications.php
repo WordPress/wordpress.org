@@ -365,7 +365,7 @@ class wporg_trac_notifications {
 
 		$activity = $meta['get_reporter_last_activity'];
 
-		if ( count( $activity['tickets'] ) >= 5 ) {
+		if ( count( $activity['tickets'] ) < 1 || count( $activity['tickets'] ) >= 5 ) {
 			return;
 		}
 
@@ -374,19 +374,25 @@ class wporg_trac_notifications {
 			return;
 		}
 
+		// Name the account the reporter resolved to, not the string the note was handed.
+		$reporter_login = esc_html( $reporter->user_login );
+
 		if ( 1 == count( $activity['tickets'] ) ) {
-			$output = sprintf( '<strong>Make sure %s receives a warm welcome.</strong><br/>', $ticket['reporter'] );
+			$output = sprintf( '<strong>Make sure %s receives a warm welcome.</strong><br/>', $reporter_login );
 
 			if ( ! empty( $activity['comments'] ) ) {
-				$output .= 'They&#8217;ve commented before, but it&#8127;s their first ticket!';
+				$output .= 'They&#8217;ve commented before, but it&#8217;s their first ticket!';
 			} else {
-				$output .= 'It&#8127;s their first ticket!';
+				$output .= 'It&#8217;s their first ticket!';
 			}
 		} else {
 			$mapping = array( 2 => 'second', 3 => 'third', 4 => 'fourth' );
 
-			$output = sprintf( '<strong>This is only %s&#8217;s %s ticket!</strong><br/>Previously:',
-				$ticket['reporter'], $mapping[ count( $activity['tickets'] ) ] );
+			$output = sprintf(
+				'<strong>This is only %s&#8217;s %s ticket!</strong><br/>Previously:',
+				$reporter_login,
+				$mapping[ count( $activity['tickets'] ) ]
+			);
 
 				foreach ( $activity['tickets'] as $t ) {
 					if ( $t['id'] != $ticket['id'] ) {
