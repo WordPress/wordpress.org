@@ -44,6 +44,9 @@ class Moderators {
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'add_post_status_to_query' ) );
 		add_filter( 'bbp_is_topic_pending',             array( $this, 'archived_is_pending_topic' ), 10, 2 );
 
+		// Preserve the existing manual count lifecycle for archived posts.
+		add_filter( 'bbp_pre_update_counts_on_transition_post_status', array( $this, 'skip_archived_count_transition' ), 10, 3 );
+
 		// Adjust the list of admin links for topics and replies.
 		add_filter( 'bbp_topic_admin_links',            array( $this, 'admin_links' ), 10, 2 );
 		add_filter( 'bbp_reply_admin_links',            array( $this, 'admin_links' ), 10, 2 );
@@ -388,6 +391,27 @@ class Moderators {
 		$r[ self::ARCHIVED ] = _x( 'Archived', 'post', 'wporg-forums' );
 
 		return $r;
+	}
+
+	/**
+	 * Skip bbPress count updates involving the archived status.
+	 *
+	 * Archived posts are already counted as hidden by archive_post() and
+	 * unarchive_post(). Treat transitions between archived and another hidden
+	 * status as no count change, while preserving those manual public-boundary
+	 * updates.
+	 *
+	 * @param null|bool $check      Whether to short-circuit count updates.
+	 * @param string    $new_status New post status.
+	 * @param string    $old_status Old post status.
+	 * @return null|bool False for archived transitions, or the original value.
+	 */
+	public function skip_archived_count_transition( $check, $new_status, $old_status ) {
+		if ( in_array( self::ARCHIVED, array( $new_status, $old_status ), true ) ) {
+			return false;
+		}
+
+		return $check;
 	}
 
 	public function archive_handler( $action = '' ) {

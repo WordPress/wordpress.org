@@ -1170,6 +1170,11 @@ class Hooks {
 	 * @return array Filtered reply data.
 	 */
 	public function update_replies_count_on_editing_reply( $data ) {
+		// Newer bbPress versions update counts after the status is persisted.
+		if ( function_exists( 'bbp_update_counts_on_transition_post_status' ) ) {
+			return $data;
+		}
+
 		// Bail if the reply is not published.
 		if ( 'publish' !== get_post_status( $data['ID'] ) ) {
 			return $data;
@@ -1389,6 +1394,11 @@ class Hooks {
 		$reply_author_name = bbp_get_reply_author_display_name( $reply_id );
 
 		remove_all_filters( 'bbp_get_reply_content' );
+
+		// The content is fetched again as the message is assembled, so keep it to the supported blocks.
+		if ( Plugin::get_instance()->blocks ) {
+			add_filter( 'bbp_get_reply_content', array( Plugin::get_instance()->blocks, 'limit_blocks' ), 7 );
+		}
 
 		// Strip tags from text and set up message body.
 		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );
