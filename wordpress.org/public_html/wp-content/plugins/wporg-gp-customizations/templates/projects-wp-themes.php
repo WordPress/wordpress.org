@@ -16,12 +16,12 @@ gp_tmpl_header();
 ?>
 
 <div class="project-header">
-	<p class="project-description"><?php echo apply_filters( 'project_description', $project->description, $project ); ?></p>
+	<p class="project-description"><?php echo wp_kses_post( apply_filters( 'project_description', $project->description, $project ) ); ?></p>
 
 	<div class="project-box">
 		<div class="project-box-header">
 			<div class="project-icon">
-				<?php echo $icon; ?>
+				<?php echo wp_kses_post( $icon ); ?>
 			</div>
 
 			<ul class="project-meta">
@@ -53,7 +53,7 @@ gp_tmpl_header();
 		<thead>
 			<tr>
 				<?php foreach ( $table_headings as $key => $heading ) : ?>
-				<th class="col-<?php echo $key; ?>"><?php echo $heading; ?></th>
+				<th class="col-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $heading ); ?></th>
 				<?php endforeach; ?>
 			</tr>
 		</thead>
@@ -98,7 +98,7 @@ gp_tmpl_header();
 
 									endif;
 
-									echo '<td data-column-title="' . esc_attr( $table_headings[ $subproject_slug ] ) . '" data-sort-value="' . esc_attr( $percent ) . '" class="percent' . $percent_class .'">'. gp_link_get( $link_url, $link_text ) . '</td>';
+									echo '<td data-column-title="' . esc_attr( $table_headings[ $subproject_slug ] ) . '" data-sort-value="' . esc_attr( $percent ) . '" class="percent' . esc_attr( $percent_class ) . '">' . wp_kses_post( gp_link_get( $link_url, $link_text ) ) . '</td>';
 								else :
 									echo '<td class="none" data-column-title="" data-sort-value="-1">&mdash;</td>';
 								endif;

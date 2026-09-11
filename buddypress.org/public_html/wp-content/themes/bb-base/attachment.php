@@ -27,9 +27,9 @@ if ( have_posts() ) :
 				printf(
 					/* translators: 1: Date; 2: Time; 3: Category list; 4: Comment feed URL. */
 					wp_kses_post( __( 'This entry was posted on %1$s at %2$s and is filed under %3$s. You can follow any responses to this entry through the <a href="%4$s">RSS 2.0</a> feed.', 'bborg' ) ),
-					get_the_time( 'l, F jS, Y' ),
-					get_the_time(),
-					get_the_category_list(', '),
+					esc_html( get_the_time( 'l, F jS, Y' ) ),
+					esc_html( get_the_time() ),
+					wp_kses_post( get_the_category_list( ', ' ) ),
 					esc_url( get_post_comments_feed_link() )
 				);
 

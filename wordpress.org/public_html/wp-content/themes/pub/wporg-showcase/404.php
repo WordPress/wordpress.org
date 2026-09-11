@@ -60,6 +60,7 @@ $wp_query = new WP_Query( array( 'no_found_rows' => true, 'post_type' => 'post',
 												<br style='clear: both;' />
 											</div>\n";
 
+										// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup assembled in this file from literal strings.
 										echo $output;
 									}
 								?>

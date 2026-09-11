@@ -14,12 +14,12 @@ gp_enqueue_script( 'chartist' );
 gp_tmpl_header();
 ?>
 <div class="project-header">
-	<p class="project-description"><?php echo apply_filters( 'project_description', $project->description, $project ); ?></p>
+	<p class="project-description"><?php echo wp_kses_post( apply_filters( 'project_description', $project->description, $project ) ); ?></p>
 
 	<div class="project-box">
 		<div class="project-box-header">
 			<div class="project-icon">
-				<?php echo $icon; ?>
+				<?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icon producers escape their markup; preserve responsive image attributes. ?>
 			</div>
 
 			<ul class="project-meta">
@@ -69,8 +69,8 @@ gp_tmpl_header();
 			foreach ( $data['editors'] as $editor ) {
 				$editors_list[] = sprintf(
 					'<a href="https://profiles.wordpress.org/%s/">%s</a>',
-					$editor->nicename,
-					$editor->display_name ? $editor->display_name : $editor->nicename
+					esc_attr( $editor->nicename ),
+					esc_html( $editor->display_name ? $editor->display_name : $editor->nicename )
 				);
 			}
 
@@ -82,8 +82,8 @@ gp_tmpl_header();
 			foreach ( $data['contributors'] as $contributor ) {
 				$contributor_list[] = sprintf(
 					'<a href="https://profiles.wordpress.org/%s/">%s</a>',
-					$contributor->nicename,
-					$contributor->display_name ? $contributor->display_name : $contributor->nicename
+					esc_attr( $contributor->nicename ),
+					esc_html( $contributor->display_name ? $contributor->display_name : $contributor->nicename )
 				);
 			}
 
@@ -98,13 +98,13 @@ gp_tmpl_header();
 					<p><strong>Contributors:</strong> %s</p>
 				</div>',
 				$has_editors ? ' has-editors' : ' no-editors',
-				$locale->english_name,
+				esc_html( $locale->english_name ),
 				/* translators: %s: Number of people. */
 				sprintf( esc_html( _n( '%s person', '%s persons', $data['count'] ) ), esc_html( number_format_i18n( $data['count'] ) ) ),
 				esc_url( gp_url_join( '/locale', $locale->slug, 'default', $project->path ) ),
-				$locale->wp_locale,
-				wp_sprintf( '%l', $editors_list ),
-				wp_sprintf( '%l', $contributor_list )
+				esc_html( $locale->wp_locale ),
+				wp_kses_post( wp_sprintf( '%l', $editors_list ) ),
+				wp_kses_post( wp_sprintf( '%l', $contributor_list ) )
 			);
 		}
 		echo '</div>';

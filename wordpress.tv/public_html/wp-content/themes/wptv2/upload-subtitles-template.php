@@ -169,7 +169,7 @@ if ( post_password_required() ) :
 			<?php /* translators: %s: Contact form URL. */ ?>
 			<p><?php printf( wp_kses_post( __( 'Hey there! If you&#8217;re interested in subtitling or captioning videos for WordPress.tv, please fill out the <a href="%s">contact form</a>, and we&#8217;ll be in touch.', 'wptv' ) ), 'https://wordpress.tv/contact/' ); ?></p>
 			<div class="pass-form">
-				<?php echo get_the_password_form(); ?>
+				<?php echo get_the_password_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core template markup and the_title-filtered value; escaping would print the markup. ?>
 			</div>
 		</div>
 	</div>
@@ -243,9 +243,9 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 
 <div class="container">
 	<div class="video-upload">
-		<?php echo $message; ?>
+		<?php echo wp_kses_post( $message ); ?>
 
-		<p>Subtitling: <a href="<?php echo esc_url( get_permalink( $parent->ID ) ); ?>"><?php echo apply_filters( 'the_title', $parent->post_title ); ?></a></p>
+		<p>Subtitling: <a href="<?php echo esc_url( get_permalink( $parent->ID ) ); ?>"><?php echo apply_filters( 'the_title', $parent->post_title ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core template markup and the_title-filtered value; escaping would print the markup. ?></a></p>
 
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="video-upload-form" enctype="multipart/form-data">
 

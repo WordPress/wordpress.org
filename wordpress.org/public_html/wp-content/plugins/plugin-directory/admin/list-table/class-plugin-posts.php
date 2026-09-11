@@ -211,7 +211,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$classes[] = 'level-0';
 		}
 		?>
-		<tr id="post-<?php echo $post->ID; ?>" class="<?php echo implode( ' ', get_post_class( $classes, $post->ID ) ); ?>">
+		<tr id="post-<?php echo esc_attr( $post->ID ); ?>" class="<?php echo esc_attr( implode( ' ', get_post_class( $classes, $post->ID ) ) ); ?>">
 			<?php $this->single_row_columns( $post ); ?>
 		</tr>
 		<?php
@@ -329,8 +329,8 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	<form method="get"><table style="display: none"><tbody id="inlineedit">
 
 		<tr id="inline-edit"
-			class="inline-edit-row inline-edit-row-post inline-edit-<?php echo $screen->post_type; ?> quick-edit-row quick-edit-row-post"
-			style="display: none"><td colspan="<?php echo $this->get_column_count(); ?>" class="colspanchange">
+			class="inline-edit-row inline-edit-row-post inline-edit-<?php echo esc_attr( $screen->post_type ); ?> quick-edit-row quick-edit-row-post"
+			style="display: none"><td colspan="<?php echo esc_attr( $this->get_column_count() ); ?>" class="colspanchange">
 
 		<fieldset class="inline-edit-col-left">
 			<legend class="inline-edit-legend"><?php esc_html_e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
@@ -626,7 +626,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			?>
 		</fieldset>
 		<fieldset class="alignleft actions hide-if-js bulk-plugin_close bulk-plugin_disable" disabled="disabled">
-			<select name="close_reason" id="close_reason<?php echo $maybe_dash_two; ?>">
+			<select name="close_reason" id="close_reason<?php echo esc_attr( $maybe_dash_two ); ?>">
 				<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></option>
 				<?php foreach ( Template::get_close_reasons() as $key => $label ) : ?>
 					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
@@ -744,10 +744,10 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			return;
 		}
 
-		echo number_format_i18n( (int) $post->_submitted_zip_loc ) ?: '-';
+		echo esc_html( number_format_i18n( (int) $post->_submitted_zip_loc ) ) ?: '-';
 	}
 
 	public function column_submitted_date( $post ) {
-		echo gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 );
+		echo esc_html( gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 ) );
 	}
 }

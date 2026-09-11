@@ -15,4 +15,5 @@ if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 	wp_enqueue_script( 'comment-reply' );
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( '<!-- wp:wporg/global-header /-->' );

@@ -152,7 +152,7 @@ class Plugin {
 
 		echo '<div class="notice notice-info notice-alt with-dashicon">';
 		echo '<span class="dashicons dashicons-email-alt"></span>';
-		echo "<p>{$message}</p>";
+		printf( '<p>%s</p>', wp_kses_post( $message ) );
 		echo '</div>';
 	}
 
@@ -206,11 +206,11 @@ class Plugin {
 							'<input type="submit" name="confirm" value="%5$s">' .
 							'&nbsp<a href="%6$s">%7$s</a>' .
 						'</form>',
-						get_bloginfo('name'),
+						esc_html( get_bloginfo( 'name' ) ),
 						sprintf(
 							/* translators: 1: Plugin, Theme, or Tag name. */
 							esc_html__( 'Do you wish to unsubscribe from future emails for %s?', 'wporg-forums' ),
-							$term->name
+							esc_html( $term->name )
 						),
 						esc_attr( $_SERVER['REQUEST_URI'] ),
 						esc_attr( wp_get_raw_referer() ),

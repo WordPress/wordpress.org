@@ -14,11 +14,11 @@ gp_tmpl_header();
 
 	<div class="locale-box">
 		<ul class="name">
-			<li class="english"><?php echo $locale->english_name; ?></li>
-			<li class="native"><?php echo $locale->native_name; ?></li>
+			<li class="english"><?php echo esc_html( $locale->english_name ); ?></li>
+			<li class="native"><?php echo esc_html( $locale->native_name ); ?></li>
 			<li class="code">
 				<?php
-				echo $locale->wp_locale;
+				echo esc_html( $locale->wp_locale );
 
 				if ( count( $variants ) > 1 ) {
 					?>
@@ -28,10 +28,10 @@ gp_tmpl_header();
 							$selected =
 							printf(
 								'<option name="%s" data-project-url="%s"%s>%s</option>',
-								$variant,
+								esc_attr( $variant ),
 								esc_url( gp_url_join( '/locale', $locale_slug, $variant, $project->slug ) ),
 								( $set_slug == $variant ) ? ' selected="selected"' : '',
-								ucfirst( $variant )
+								esc_html( ucfirst( $variant ) )
 							);
 						}
 						?>
@@ -51,13 +51,7 @@ gp_tmpl_header();
 			<?php endif; ?>
 		</ul>
 		<div class="contributors">
-			<?php
-			$contributors = sprintf(
-				'<span class="dashicons dashicons-admin-users"></span><br />%s',
-				isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0
-			);
-			?>
-			<a href="<?php echo esc_url( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale );?>"><?php echo $contributors; ?></a>
+			<a href="<?php echo esc_url( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale ); ?>"><span class="dashicons dashicons-admin-users"></span><br /><?php echo esc_html( isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0 ); ?></a>
 		</div>
 	</div>
 </div>
@@ -70,7 +64,7 @@ gp_tmpl_header();
 				'<li><a href="%s"%s>%s</a></li>',
 				esc_url( gp_url_join( '/locale', $locale_slug, $set_slug, $top_level_project->slug ) ),
 				( $top_level_project->path == $project_path ) ? ' class="current"' : '',
-				$top_level_project->name
+				esc_html( $top_level_project->name )
 			);
 		}
 		?>
@@ -153,7 +147,7 @@ gp_tmpl_header();
 
 if ( isset( $pages ) && $pages['pages'] > 1 ) {
 	echo '<div class="projects-paging">';
-	echo gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] );
+	echo wp_kses_post( gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] ) );
 	echo '</div>';
 }
 
@@ -208,22 +202,22 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 		$classes .= ' project-' . sanitize_title_with_dashes( str_replace( '/', '-', $sub_project->path ) );
 		$classes .= ' percent-' . $percent_complete;
 		?>
-		<div class="project <?php echo $classes; ?>">
+		<div class="project <?php echo esc_attr( $classes ); ?>">
 			<div class="project-top">
 				<div class="project-icon">
-					<a href="<?php echo esc_url( $project_url ); ?>"><?php echo $project_icon; ?></a>
+					<a href="<?php echo esc_url( $project_url ); ?>"><?php echo $project_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icon producers escape their markup; preserve responsive image attributes. ?></a>
 				</div>
 
 				<div class="project-name">
 					<h4>
-						<?php echo gp_link_get( $project_url, wp_trim_words( $project_name, 10 ) ); ?>
+						<?php echo wp_kses_post( gp_link_get( $project_url, esc_html( wp_trim_words( $project_name, 10 ) ) ) ); ?>
 					</h4>
 				</div>
 				<div class="project-description">
 					<p><?php
 						$description = wp_strip_all_tags( $sub_project->description );
 						$description = str_replace( array( 'WordPress.org Plugin Page', 'WordPress.org Theme Page' ), '', $description );
-						echo wp_trim_words( $description, 15 );
+						echo esc_html( wp_trim_words( $description, 15 ) );
 					?></p>
 				</div>
 			</div>
@@ -231,28 +225,28 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 			<div class="project-status">
 				<div class="project-status-sub-projects">
 					<span class="project-status-title">Projects</span>
-					<span class="project-status-value"><?php echo number_format_i18n( $sub_projects_count ); ?></span>
+					<span class="project-status-value"><?php echo esc_html( number_format_i18n( $sub_projects_count ) ); ?></span>
 				</div>
 				<div class="project-status-waiting">
 					<span class="project-status-title">Waiting/Fuzzy</span>
-					<span class="project-status-value"><?php echo number_format_i18n( $waiting + $fuzzy ); ?></span>
+					<span class="project-status-value"><?php echo esc_html( number_format_i18n( $waiting + $fuzzy ) ); ?></span>
 				</div>
 				<div class="project-status-remaining">
 					<span class="project-status-title">Remaining</span>
-					<span class="project-status-value"><?php echo number_format_i18n( $remaining ); ?></span>
+					<span class="project-status-value"><?php echo esc_html( number_format_i18n( $remaining ) ); ?></span>
 				</div>
 				<div class="project-status-progress">
 					<span class="project-status-title">Progress</span>
-					<span class="project-status-value"><?php echo number_format_i18n( $percent_complete ); ?>%</span>
+					<span class="project-status-value"><?php echo esc_html( number_format_i18n( $percent_complete ) ); ?>%</span>
 				</div>
 			</div>
 
 			<div class="percent">
-				<div class="percent-complete" style="width:<?php echo $percent_complete; ?>%;"></div>
+				<div class="percent-complete" style="width:<?php echo esc_attr( $percent_complete ); ?>%;"></div>
 			</div>
 
 			<div class="project-bottom">
-				<?php echo gp_link_get( $project_url, 'Translate Project', [ 'class' => 'button contribute-button' ] ); ?>
+				<?php echo wp_kses_post( gp_link_get( $project_url, 'Translate Project', [ 'class' => 'button contribute-button' ] ) ); ?>
 			</div>
 		</div>
 		<?php
@@ -270,7 +264,7 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 <?php
 if ( isset( $pages ) && $pages['pages'] > 1 ) {
 	echo '<div class="projects-paging">';
-	echo gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] );
+	echo wp_kses_post( gp_pagination( $pages['page'], $pages['per_page'], $pages['results'] ) );
 	echo '</div>';
 }
 ?>

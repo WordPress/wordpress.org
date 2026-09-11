@@ -757,13 +757,15 @@ class Hooks {
 
 					// Output create button alongside search form except for reviews, which already have the button in a section rendered above this one.
 					if( $is_reviews ) {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress renders and escapes the search form.
 						echo $searchform;
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress renders and escapes the search form.
 						echo $searchform;
-						echo $btn;
+						echo wp_kses_post( $btn );
 					}
 				} else {
-					echo $btn;
+					echo wp_kses_post( $btn );
 				}
 				echo "</div>\n";
 			}
@@ -1392,6 +1394,11 @@ class Hooks {
 		$reply_author_name = bbp_get_reply_author_display_name( $reply_id );
 
 		remove_all_filters( 'bbp_get_reply_content' );
+
+		// The content is fetched again as the message is assembled, so keep it to the supported blocks.
+		if ( Plugin::get_instance()->blocks ) {
+			add_filter( 'bbp_get_reply_content', array( Plugin::get_instance()->blocks, 'limit_blocks' ), 7 );
+		}
 
 		// Strip tags from text and set up message body.
 		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );

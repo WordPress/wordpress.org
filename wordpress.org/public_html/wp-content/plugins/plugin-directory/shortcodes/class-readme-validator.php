@@ -138,6 +138,6 @@ class Readme_Validator {
 			$output .= '</div>';
 		}
 
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 }

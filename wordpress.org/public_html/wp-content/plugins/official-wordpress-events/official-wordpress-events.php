@@ -550,6 +550,7 @@ class Official_WordPress_Events {
 
 		if ( ! $successful_response || ! $body_is_valid ) {
 			trigger_error(
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log, not rendered.
 				"This function had to abort because the request failed. If it didn't, it would mark scheduled events as postponed. Failed response: " . var_export( $response, true ),
 				E_USER_WARNING
 			);
@@ -888,6 +889,7 @@ class Official_WordPress_Events {
 				'%s error for %s: %s',
 				__METHOD__,
 				esc_html( parse_url( site_url(), PHP_URL_HOST ) ),
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log, not rendered.
 				sanitize_text_field( $error )
 			), E_USER_WARNING );
 
@@ -923,6 +925,7 @@ class Official_WordPress_Events {
 		$api_keys = array( OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
 
 		if ( 'cli' === php_sapi_name() ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI console output; the guard above restricts this to php_sapi_name() === 'cli'.
 			echo "\n" . $message;
 		}
 

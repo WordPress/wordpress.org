@@ -476,7 +476,7 @@ class Review_Tools {
 			)
 		);
 
-		die( "Queued SVN import for {$plugin_slug}." );
+		die( esc_html( "Queued SVN import for {$plugin_slug}." ) );
 	}
 
 	/**
@@ -508,6 +508,6 @@ class Review_Tools {
 			0
 		);
 
-		die( "Queued i18n import for {$plugin_slug}." );
+		die( esc_html( "Queued i18n import for {$plugin_slug}." ) );
 	}
 }

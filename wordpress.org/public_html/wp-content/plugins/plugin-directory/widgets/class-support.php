@@ -39,8 +39,10 @@ class Support extends \WP_Widget {
 			$resolutions = false;
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['before_widget'];
-		echo $args['before_title'] . $title . $args['after_title'];
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 
 		if ( $resolutions ) :
 		?>
@@ -66,6 +68,7 @@ class Support extends \WP_Widget {
 		</p>
 
 		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['after_widget'];
 	}
 }

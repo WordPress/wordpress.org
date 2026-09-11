@@ -448,6 +448,7 @@ abstract class WP_Credits {
 		} elseif ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 			echo json_encode( $results );
 		} else {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (serialized PHP); escaping would corrupt the format.
 			echo serialize( $results );
 		}
 	}

@@ -17,24 +17,24 @@ gp_tmpl_header();
 		// Localize the links to the currently viewed locale.
 		$description = WordPressdotorg\GlotPress\Customizations\Plugin::get_instance()->localize_links( $description, $locale->wp_locale );
 
-		echo $description;
+		echo wp_kses_post( $description );
 	?></p>
 
-	<div class="project-box percent-<?php echo $project_status->percent_complete; ?>">
+	<div class="project-box percent-<?php echo esc_attr( $project_status->percent_complete ); ?>">
 		<div class="project-box-header">
 			<div class="project-icon">
-				<?php echo $project_icon; ?>
+				<?php echo $project_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icon producers escape their markup; preserve responsive image attributes. ?>
 			</div>
 
 			<ul class="project-meta">
-				<li class="project-name"><?php echo $sub_project->name; ?></li>
-				<li class="locale-english"><?php echo $locale->english_name; ?></li>
+				<li class="project-name"><?php echo esc_html( $sub_project->name ); ?></li>
+				<li class="locale-english"><?php echo esc_html( $locale->english_name ); ?></li>
 				<?php if ( $locale->english_name !== $locale->native_name ) : ?>
-					<li class="locale-native"><?php echo $locale->native_name; ?></li>
+					<li class="locale-native"><?php echo esc_html( $locale->native_name ); ?></li>
 				<?php endif; ?>
 				<li class="locale-code">
 					<?php
-					echo $locale->wp_locale;
+					echo esc_html( $locale->wp_locale );
 
 					if ( count( $variants ) > 1 ) {
 						?>
@@ -43,10 +43,10 @@ gp_tmpl_header();
 							foreach ( $variants as $variant ) {
 								printf(
 									'<option name="%s" data-project-url="%s"%s>%s</option>',
-									$variant,
+									esc_attr( $variant ),
 									esc_url( gp_url_join( '/locale', $locale_slug, $variant, $sub_project->path ) ),
 									( $set_slug == $variant ) ? ' selected="selected"' : '',
-									ucfirst( $variant )
+									esc_html( ucfirst( $variant ) )
 								);
 							}
 							?>
@@ -67,12 +67,12 @@ gp_tmpl_header();
 			</ul>
 
 			<div class="project-status">
-				<?php echo $project_status->percent_complete . '%'; ?>
+				<?php echo esc_html( $project_status->percent_complete ) . '%'; ?>
 			</div>
 		</div>
 
 		<div class="project-status-progress percent">
-			<div class="percent-complete" style="width:<?php echo $project_status->percent_complete; ?>%;"></div>
+			<div class="percent-complete" style="width:<?php echo esc_attr( $project_status->percent_complete ); ?>%;"></div>
 		</div>
 
 		<div class="project-box-footer">
@@ -85,8 +85,8 @@ gp_tmpl_header();
 							printf(
 								'<li><a href="%s">%s <span>%s</span></a>',
 								esc_url( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ) ),
-								$sub_project->name,
-								$sub_project_status->percent_complete . '%'
+								esc_html( $sub_project->name ),
+								esc_html( $sub_project_status->percent_complete ) . '%'
 							);
 						}
 
@@ -96,8 +96,8 @@ gp_tmpl_header();
 							printf(
 								'<li><a href="%s">%s <span>%s</span></a>',
 								esc_url( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ) ) ),
-								$_sub_project->name,
-								$status->percent_complete . '%'
+								esc_html( $_sub_project->name ),
+								esc_html( $status->percent_complete ) . '%'
 							);
 						}
 						?>
@@ -130,14 +130,14 @@ if ( 'wp-plugins' === $project->path ) {
 		?>
 		<div class="wporg-notice wporg-notice-info">
 			<p>Translations for the readme are published almost immediately.
-				The initial language pack for the plugin will be generated when 90% of the <a href="<?php echo esc_url( gp_url_project( $sub_project->path, gp_url_join( $stable_project_slug, $locale->slug, $set_slug ) ) ); ?>"><?php echo $stable_project_name; ?></a> sub-project strings have been translated (currently <?php echo $status->percent_complete . '%'; ?>).</p>
+				The initial language pack for the plugin will be generated when 90% of the <a href="<?php echo esc_url( gp_url_project( $sub_project->path, gp_url_join( $stable_project_slug, $locale->slug, $set_slug ) ) ); ?>"><?php echo esc_html( $stable_project_name ); ?></a> sub-project strings have been translated (currently <?php echo esc_html( $status->percent_complete ) . '%'; ?>).</p>
 		</div>
 		<?php
 	}
 } elseif ( 'wp-themes' === $project->path ) {
 	?>
 	<div class="wporg-notice wporg-notice-info">
-		<p>The initial language pack for the theme will be generated when 90% of the project strings have been translated (currently <?php echo $sub_project_status->percent_complete . '%'; ?>).</p>
+		<p>The initial language pack for the theme will be generated when 90% of the project strings have been translated (currently <?php echo esc_html( $sub_project_status->percent_complete ) . '%'; ?>).</p>
 	</div>
 	<?php
 }
@@ -164,9 +164,9 @@ if ( 'wp-plugins' === $project->path ) {
 					<td class="set-name">
 						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), $sub_project->name ); ?></strong>
 						<?php if ( $sub_project_status->percent_complete > 90 ) : ?>
-							<span class="sub-project-status percent-90"><?php echo $sub_project_status->percent_complete; ?>%</span>
+							<span class="sub-project-status percent-90"><?php echo esc_html( $sub_project_status->percent_complete ); ?>%</span>
 						<?php else : ?>
-							<span class="sub-project-status"><?php echo $sub_project_status->percent_complete; ?>%</span>
+							<span class="sub-project-status"><?php echo esc_html( $sub_project_status->percent_complete ); ?>%</span>
 						<?php endif; ?>
 					</td>
 					<td class="stats translated">
@@ -214,9 +214,9 @@ if ( 'wp-plugins' === $project->path ) {
 					<td class="set-name">
 						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), $sub_project->name ); ?></strong>
 						<?php if ( $status->percent_complete > 90 ) : ?>
-							<span class="sub-project-status percent-90"><?php echo $status->percent_complete; ?>%</span>
+							<span class="sub-project-status percent-90"><?php echo esc_html( $status->percent_complete ); ?>%</span>
 						<?php else : ?>
-							<span class="sub-project-status"><?php echo $status->percent_complete; ?>%</span>
+							<span class="sub-project-status"><?php echo esc_html( $status->percent_complete ); ?>%</span>
 						<?php endif; ?>
 					</td>
 					<td class="stats translated">
@@ -266,7 +266,7 @@ if ( 'wp-plugins' === $project->path ) {
 				}
 
 				foreach ( $contributor->detailed as $detail_project_id => $detail_data ) {
-					$detailed .= '<strong class="detailed__project-name">' . $detail_data->project->name . ':</strong>';
+					$detailed .= '<strong class="detailed__project-name">' . esc_html( $detail_data->project->name ) . ':</strong>';
 
 					if ( $detail_data->total_count > 0 ) {
 						$total_count = gp_link_get(
@@ -395,17 +395,17 @@ if ( 'wp-plugins' === $project->path ) {
 							</div>
 						</td>
 					</tr>',
-					$contributor->nicename,
+					esc_attr( $contributor->nicename ),
 					get_avatar( $contributor->email, 40 ),
 					$contributor->is_editor ? '<span class="translation-editor">Editor</span>' : '',
-					$contributor->nicename,
-					$contributor->display_name ?: $contributor->nicename,
-					human_time_diff( strtotime( $contributor->last_update ) ),
-					number_format_i18n( $contributor->total_count ),
-					number_format_i18n( $contributor->current_count ),
-					number_format_i18n( $contributor->waiting_count ),
-					number_format_i18n( $contributor->fuzzy_count ),
-					$detailed
+					esc_attr( $contributor->nicename ),
+					esc_html( $contributor->display_name ?: $contributor->nicename ),
+					esc_html( human_time_diff( strtotime( $contributor->last_update ) ) ),
+					esc_html( number_format_i18n( $contributor->total_count ) ),
+					esc_html( number_format_i18n( $contributor->current_count ) ),
+					esc_html( number_format_i18n( $contributor->waiting_count ) ),
+					esc_html( number_format_i18n( $contributor->fuzzy_count ) ),
+					wp_kses_post( $detailed )
 				);
 			}
 			?>
@@ -427,10 +427,10 @@ if ( 'wp-plugins' === $project->path ) {
 				foreach ( $locale_contributors['editors']['project'] as $editor ) {
 					printf(
 						'<li><a href="https://profiles.wordpress.org/%s/">%s</a> <a href="https://profiles.wordpress.org/%s/">%s</a></li>',
-						$editor->nicename,
+						esc_attr( $editor->nicename ),
 						get_avatar( $editor->email, 40 ),
-						$editor->nicename,
-						$editor->display_name ?: $editor->nicename
+						esc_attr( $editor->nicename ),
+						esc_html( $editor->display_name ?: $editor->nicename )
 					);
 				}
 				?>
@@ -451,9 +451,9 @@ if ( 'wp-plugins' === $project->path ) {
 				foreach ( $locale_contributors['editors']['inherited'] as $editor ) {
 					printf(
 						'<li><a href="https://profiles.wordpress.org/%s/">%s %s</a></li>',
-						$editor->nicename,
+						esc_attr( $editor->nicename ),
 						get_avatar( $editor->email, 15 ),
-						$editor->display_name ? $editor->display_name : $editor->nicename
+						esc_html( $editor->display_name ? $editor->display_name : $editor->nicename )
 					);
 				}
 				?>

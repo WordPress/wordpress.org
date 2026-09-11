@@ -86,7 +86,7 @@ add_action( 'wp_head', function() use( $latest_release_version, $latest_release_
 			"softwareVersion": <?php echo wp_json_encode( $latest_release_version ); ?>,
 			"fileFormat": "application/zip",
 			"downloadUrl": "<?php echo esc_url( $latest_release_zip_url ); ?>",
-			"dateModified": "<?php echo gmdate( 'Y-m-d\TH:i:s\+00:00', $latest_release_zip_ts ); ?>",
+			"dateModified": "<?php echo esc_attr( gmdate( 'Y-m-d\TH:i:s\+00:00', $latest_release_zip_ts ) ); ?>",
 			"applicationCategory": "WebApplication",
 			"offers": {
 				"@type": "Offer",
@@ -244,7 +244,7 @@ the_post();
 							printf(
 								/* translators: 1: PHP version; 2: URL to PHP website; 3: URL to MySQL website; 4: MySQL version; 5: URL to MariaDB website; 6: MariaDB version */
 								wp_kses_post( __( 'We recommend servers running version %1$s or greater of <a href="%2$s">PHP</a> and <a href="%3$s">MySQL</a> version %4$s <em>OR</em> <a href="%5$s">MariaDB</a> version %6$s or greater.', 'wporg' ) ),
-								RECOMMENDED_PHP,
+								esc_html( RECOMMENDED_PHP ),
 								'https://www.php.net/',
 								'https://www.mysql.com/',
 								'5.7',

@@ -222,6 +222,7 @@ function save_plugin( $data, $existing_post = null ) {
 $imported_slugs = array();
 
 foreach ( $browse_sections as $section ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import progress written to the console, not HTML.
 	echo "Fetching plugins in '{$section}' section...\n";
 
 	$slugs = fetch_slugs( $base_url, $section, $per_section );
@@ -239,6 +240,7 @@ foreach ( $browse_sections as $section ) {
 
 		$missing = array_diff( $batch, array_keys( $batch_data ) );
 		if ( $missing ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import progress written to the console, not HTML.
 			echo "  Skipped (not found): " . implode( ', ', $missing ) . "\n";
 		}
 	}
@@ -255,6 +257,7 @@ foreach ( $browse_sections as $section ) {
 		) );
 		if ( $existing ) {
 			wp_set_object_terms( $existing[0]->ID, $section, 'plugin_section', true );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import progress written to the console, not HTML.
 			echo "    {$slug}... {$existing[0]->post_title} (tagged)\n";
 		}
 	}
@@ -266,6 +269,7 @@ foreach ( $browse_sections as $section ) {
 			continue;
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import progress written to the console, not HTML.
 		echo "    {$slug}...";
 
 		$post = save_plugin( $all_plugin_data[ $slug ] );
@@ -276,10 +280,12 @@ foreach ( $browse_sections as $section ) {
 
 		wp_set_object_terms( $post->ID, $section, 'plugin_section', true );
 		$imported_slugs[] = $slug;
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import progress written to the console, not HTML.
 		echo " {$post->post_title} (done)\n";
 		$imported++;
 	}
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import progress written to the console, not HTML.
 	echo "  {$section}: {$imported} new, " . count( $existing_slugs ) . " tagged.\n\n";
 }
 

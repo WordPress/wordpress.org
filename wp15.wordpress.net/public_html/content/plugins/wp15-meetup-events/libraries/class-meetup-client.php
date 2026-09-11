@@ -226,6 +226,7 @@ class Meetup_Client {
 				$wait        = min( $retry_after * $attempt_count, 30 );
 
 				if ( 'cli' === php_sapi_name() ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import progress written to the console, not HTML.
 					echo "\nRequest failed $attempt_count times. Pausing for $wait seconds before retrying.";
 				}
 
@@ -235,6 +236,7 @@ class Meetup_Client {
 
 		if ( $attempt_count === $max_attempts && 'cli' === php_sapi_name() ) {
 			if ( 200 !== $response_code || is_wp_error( $response ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import progress written to the console, not HTML.
 				echo "\nRequest failed $attempt_count times. Giving up.";
 			}
 		}
@@ -316,6 +318,7 @@ class Meetup_Client {
 		}
 
 		if ( 'cli' === php_sapi_name() ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import progress written to the console, not HTML.
 			echo "\nPausing for $period seconds to avoid rate-limiting.";
 		}
 

@@ -77,6 +77,7 @@
 					$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
 				}
 				if ( $term_subscription ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Subscription renderer escapes fields and includes a confirmation handler.
 					echo '<div>' . $term_subscription . "</div>\n";
 				}
 			?>
@@ -88,7 +89,9 @@
 			<div>
 				<h2><?php esc_html_e( 'Topics', 'wporg-forums' ); ?></h2>
 
-				<?php echo do_blocks(
+				<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
+				echo do_blocks(
 					sprintf(
 						'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"topic-views is-style-cards-grid","layout":{"type":"grid"},"fontSize":"small"} -->
 						<div class="topic-views wp-block-group is-style-cards-grid">%s</div>

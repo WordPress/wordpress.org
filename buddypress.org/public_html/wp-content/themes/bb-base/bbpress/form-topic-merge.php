@@ -1,9 +1,8 @@
 <?php
-
 /**
  * Merge Topic
  *
- * @package bbPress
+ * @package bb-base
  * @subpackage Theme
  */
 

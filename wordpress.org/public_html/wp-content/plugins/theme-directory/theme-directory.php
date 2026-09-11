@@ -379,13 +379,13 @@ function wporg_themes_post_author_meta_box( $post ) {
 
 	$user = new WP_User($value);
 
-	echo "<input type='text' id='post_author_username' value='{$user->user_login}' />";
-	echo "<input type='hidden' id='post_author_override' name='post_author_override' value='{$value}' />";
+	printf( '<input type="text" id="post_author_username" value="%s" />', esc_attr( $user->user_login ) );
+	printf( '<input type="hidden" id="post_author_override" name="post_author_override" value="%s" />', esc_attr( $value ) );
 ?>
 	<script>
 	jQuery( document ).ready( function( $ ) {
 		$( "#post_author_username" ).autocomplete( {
-			source: ajaxurl + '?action=author-lookup&_ajax_nonce=<?php echo wp_create_nonce( 'wporg_themes_author_lookup' ); ?>',
+			source: ajaxurl + '?action=author-lookup&_ajax_nonce=<?php echo esc_js( wp_create_nonce( 'wporg_themes_author_lookup' ) ); ?>',
 			minLength: 2,
 			delay: 700,
 			autoFocus: true,

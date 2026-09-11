@@ -28,26 +28,20 @@ gp_tmpl_header();
 
 			$wp_locale = ( isset( $locale->wp_locale ) ) ? $locale->wp_locale : $locale->slug;
 			?>
-			<div class="locale <?php echo 'percent-' . $percent_complete; ?>">
+			<div class="locale <?php echo 'percent-' . esc_attr( $percent_complete ); ?>">
 				<ul class="name">
-					<li class="english"><?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), $locale->english_name ) ?></li>
-					<li class="native"><?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), $locale->native_name ) ?></li>
-					<li class="code"><?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), $wp_locale ) ?></li>
+					<li class="english"><?php echo wp_kses_post( gp_link_get( gp_url_join( '/locale', $locale->slug ), esc_html( $locale->english_name ) ) ); ?></li>
+					<li class="native"><?php echo wp_kses_post( gp_link_get( gp_url_join( '/locale', $locale->slug ), esc_html( $locale->native_name ) ) ); ?></li>
+					<li class="code"><?php echo wp_kses_post( gp_link_get( gp_url_join( '/locale', $locale->slug ), esc_html( $wp_locale ) ) ); ?></li>
 				</ul>
 				<div class="contributors">
-					<?php
-					$contributors = sprintf(
-						'<span class="dashicons dashicons-admin-users"></span><br />%s',
-						isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0
-					);
-					?>
-					<a href="<?php echo esc_url( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale ); ?>"><?php echo $contributors; ?></a>
+					<a href="<?php echo esc_url( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale ); ?>"><span class="dashicons dashicons-admin-users"></span><br /><?php echo esc_html( isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0 ); ?></a>
 				</div>
 				<div class="percent">
-					<div class="percent-complete" style="width:<?php echo $percent_complete; ?>%;"></div>
+					<div class="percent-complete" style="width:<?php echo esc_attr( $percent_complete ); ?>%;"></div>
 				</div>
 				<div class="locale-button">
-					<?php echo gp_link_get( gp_url_join( '/locale', $locale->slug ), 'Contribute Translation', [ 'class' => 'button contribute-button' ] ); ?>
+					<?php echo wp_kses_post( gp_link_get( gp_url_join( '/locale', $locale->slug ), 'Contribute Translation', [ 'class' => 'button contribute-button' ] ) ); ?>
 				</div>
 			</div>
 		<?php endforeach; ?>

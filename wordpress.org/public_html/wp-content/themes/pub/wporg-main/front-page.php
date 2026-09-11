@@ -13,8 +13,6 @@
  * @package WordPressdotorg\Theme
  */
 
-// phpcs:disable WordPress.XSS.EscapeOutput.UnsafePrintingFunction, WordPress.XSS.EscapeOutput.OutputNotEscaped
-
 namespace WordPressdotorg\MainTheme;
 
 global $rosetta;
@@ -81,7 +79,7 @@ get_header( 'wporg' );
 			}
 		}
 	</style>
-	<?php echo do_blocks( $banner_blocks ); ?>
+	<?php echo do_blocks( $banner_blocks ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 
 	<header id="masthead" class="site-header" role="banner">
 		<div class="site-branding">
@@ -110,7 +108,7 @@ get_header( 'wporg' );
 					printf(
 						/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
 						esc_html__( '%s%% of the web uses WordPress, from hobby blogs to the biggest news sites online.', 'wporg' ),
-						number_format_i18n( WP_MARKET_SHARE )
+						esc_html( number_format_i18n( WP_MARKET_SHARE ) )
 					);
 					?>
 				</p>
@@ -195,7 +193,7 @@ get_header( 'wporg' );
 									'wporg'
 								)
 							),
-							number_format_i18n( $meetups )
+							esc_html( number_format_i18n( $meetups ) )
 						);
 						?>
 					</p>
@@ -245,6 +243,7 @@ get_header( 'wporg' );
 					$featured->the_post();
 
 					the_title( sprintf( '<h5><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h5>' );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Thumbnail markup and the_excerpt filter output; escaping would print the markup.
 					echo '<div class="entry-summary">' . apply_filters( 'the_excerpt', get_the_excerpt() ) . '</div>';
 				}
 
@@ -321,6 +320,7 @@ get_header( 'wporg' );
 							printf(
 								'<div class="col-3"><a href="%1$s">%2$s</a></div>',
 								esc_url( $post_url ),
+								// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Thumbnail markup and the_excerpt filter output; escaping would print the markup.
 								$thumbnail
 							);
 						endforeach;
@@ -343,7 +343,7 @@ get_header( 'wporg' );
 							printf(
 								'<li><a href="%1$s"><img src="https://s.w.org/images/notableusers/%2$s-2x.png?version=2" alt="%2$s" width="130" height="57" /></a></li>',
 								esc_url( $user_links[ $slug ] ),
-								$slug
+								esc_attr( $slug )
 							);
 						endforeach;
 						?>

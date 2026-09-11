@@ -154,6 +154,7 @@ class Duplicate_Translations {
 						$result['original_id'],
 						$result['translation_set_id'],
 					);
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI query output written to the console, not HTML.
 					echo $prepared_query . "\n";
 					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 					$duplicated = $wpdb->get_results( $prepared_query, ARRAY_A );

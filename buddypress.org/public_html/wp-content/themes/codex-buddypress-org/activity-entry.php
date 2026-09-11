@@ -12,7 +12,10 @@
 		</div>
 
 		<div class="activity-header">
-			<?php global $activities_template; echo $activities_template->activity->action; ?>
+			<?php
+			global $activities_template;
+			echo wp_kses_post( $activities_template->activity->action );
+			?>
 		</div>
 
 		<?php if ( bp_activity_has_content() ) : ?>
@@ -62,7 +65,7 @@
 
 			<?php endif; ?>
 
-			<span class="time"><?php echo bp_core_time_since( bp_get_activity_date_recorded() ); ?></span>
+			<span class="time"><?php echo esc_html( bp_core_time_since( bp_get_activity_date_recorded() ) ); ?></span>
 
 			<?php //do_action( 'bp_activity_entry_meta' ) ?>
 

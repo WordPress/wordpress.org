@@ -22,7 +22,9 @@ function rosetta_entry_meta() {
 	printf(
 		/* translators: 1: post date 2: post author */
 		esc_html__( 'Posted on %1$s by %2$s.', 'rosetta' ),
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Date, author and category markup assembled above from escaped parts.
 		$time_string,
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Date, author and category markup assembled above from escaped parts.
 		$author_string
 	);
 	echo ' ';
@@ -37,6 +39,7 @@ function rosetta_entry_meta() {
 		printf(
 			/* translators: %s: list of categories */
 			esc_html__( 'Filed under %s.', 'rosetta' ),
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Date, author and category markup assembled above from escaped parts.
 			$categories_string
 		);
 	}
@@ -63,11 +66,11 @@ function rosetta_release_row( $release, $alt_class=false, $first_of_branch_class
 	}
 	$last_branch = $release['branch'];
 	$classes_str = implode(' ', $classes);
-	print "<tr class='$classes_str'>";
-	print "\t<td>".$release['version']."</td>";
-	print "\t<td>".date_i18n(__('Y-M-d', 'rosetta'), $release['builton'])."</td>";
-	print "\t<td><a href='".$release['zip_url']."'>zip</a> <small>(<a href='".$release['zip_url'].".md5'>md5</a>)</small></td>";
-	print "\t<td><a href='".$release['targz_url']."'>tar.gz</a> <small>(<a href='".$release['targz_url'].".md5'>md5</a>)</small></td>";
-	print "</tr>";
+	print '<tr class="' . esc_attr( $classes_str ) . '">';
+	print "\t<td>" . esc_html( $release['version'] ) . '</td>';
+	print "\t<td>" . esc_html( date_i18n( __( 'Y-M-d', 'rosetta' ), $release['builton'] ) ) . '</td>';
+	print "\t<td><a href='" . esc_url( $release['zip_url'] ) . "'>zip</a> <small>(<a href='" . esc_url( $release['zip_url'] . '.md5' ) . "'>md5</a>)</small></td>";
+	print "\t<td><a href='" . esc_url( $release['targz_url'] ) . "'>tar.gz</a> <small>(<a href='" . esc_url( $release['targz_url'] . '.md5' ) . "'>md5</a>)</small></td>";
+	print '</tr>';
 
 }

@@ -70,10 +70,10 @@ gp_tmpl_header();
 									$percent_class = 90;
 								}
 								$percent_class = 'percent' . $percent_class;
-								echo '<td data-column-title="' . esc_attr( $project_name ) . '" data-sort-value="'. esc_attr( $percent ) . '" class="' . $percent_class .'"><a href="' . esc_url( $projecturl ) . '" title="' . esc_attr( $project_link_title ) . '">' . number_format( $percent ) . '</a></td>';
+								echo '<td data-column-title="' . esc_attr( $project_name ) . '" data-sort-value="' . esc_attr( $percent ) . '" class="' . esc_attr( $percent_class ) . '"><a href="' . esc_url( $projecturl ) . '" title="' . esc_attr( $project_link_title ) . '">' . number_format( $percent ) . '</a></td>';
 							} else {
 								$percent_class = 'percent' . (int) ( $percent / 10 ) * 10;
-								echo '<td data-column-title="' . esc_attr( $project_name ) . '" data-sort-value="' . esc_attr( $percent ) . '" class="' . $percent_class .'"><a href="' . esc_url( $projecturl ) . '">' . $percent . '%</a></td>';
+								echo '<td data-column-title="' . esc_attr( $project_name ) . '" data-sort-value="' . esc_attr( $percent ) . '" class="' . esc_attr( $percent_class ) . '"><a href="' . esc_url( $projecturl ) . '">' . esc_html( $percent ) . '%</a></td>';
 							}
 
 						} else {

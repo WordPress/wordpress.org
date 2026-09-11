@@ -1027,7 +1027,7 @@ class WPORG_Themes_Upload {
 			error_reporting( $error_reporting );
 
 			// Output the Theme Check results. This is the only HTML that this function outputs.
-			echo $theme_check_output;
+			echo wp_kses_post( $theme_check_output );
 
 			if ( ! $result && $args['block_on_themecheck'] ) {
 				// Log it to slack.
@@ -1442,7 +1442,7 @@ class WPORG_Themes_Upload {
 		$verdict = $result ? array( 'tc-pass', __( 'Pass', 'wporg-themes' ) ) : array( 'tc-fail', __( 'Fail', 'wporg-themes' ) );
 		/* translators: %s: Scan verdict. */
 		echo '<h2>' . sprintf( esc_html__( 'Results of Automated Theme Scanning: %s', 'wporg-themes' ), vsprintf( '<span class="%1$s">%2$s</span>', array_map( 'esc_html', $verdict ) ) ) . '</h2>';
-		echo '<ul class="tc-result">' . display_themechecks() . '</ul>';
+		echo '<ul class="tc-result">' . wp_kses_post( display_themechecks() ) . '</ul>';
 		echo '<div class="notice notice-info"><p>' . esc_html__( 'Note: While the automated theme scan is based on the Theme Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the theme will pass review. All submitted themes are reviewed manually before approval.', 'wporg-themes' ) . '</p></div>';
 
 		return $result;

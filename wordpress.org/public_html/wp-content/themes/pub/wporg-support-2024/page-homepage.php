@@ -24,7 +24,7 @@ get_header(); ?>
 		<?php do_action( 'bbp_template_notices' ); ?>
 
 		<section id="forum-welcome">
-			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/welcome-cards"} /-->' ); ?>
+			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/welcome-cards"} /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 		</section>
 
 		<section>
@@ -34,7 +34,7 @@ get_header(); ?>
 		<section class="forums-homepage-topics">
 			<h2 class="has-heading-5-font-size"><?php esc_html_e( 'Topics', 'wporg-forums' ); ?></h2>
 
-			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/forums-views"} /-->' ); ?>
+			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/forums-views"} /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 		</section>
 
 		<section class="clear helpful-links">

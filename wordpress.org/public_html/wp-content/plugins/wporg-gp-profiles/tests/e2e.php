@@ -35,9 +35,11 @@ function main( $case ) {
 	try {
 		add_action( 'gp_pre_can_user', __NAMESPACE__ . '\grant_editor_capabilities', 10, 2 );
 		call_user_func( __NAMESPACE__ . "\\test_$case", $translator );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test script console output, not HTML.
 		echo "\nThe daily digest count should have been bumped on https://profiles.wordpress.org/$translator->user_nicename/, and/or the reviewer. \n";
 
 	} catch ( Exception $exception ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test script console output, not HTML.
 		echo $exception->getMessage();
 	}
 }

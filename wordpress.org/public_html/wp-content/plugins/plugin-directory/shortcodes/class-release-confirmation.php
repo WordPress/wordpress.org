@@ -108,15 +108,25 @@ class Release_Confirmation {
 			printf(
 				/* translators: %s: List of plugin links. */
 				'<p><em>' . esc_html__( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins' ) . '</em></p>',
-				wp_sprintf_l( '%l', array_filter( array_map( function( $plugin ) {
-					if ( 'publish' == get_post_status( $plugin ) ) {
-						return sprintf(
-							'<a href="%s">%s</a>',
-							esc_url( get_permalink( $plugin ) ),
-							esc_html( get_the_title( $plugin ) )
-						);
-					}
-				}, $not_enabled ) ) )
+				wp_kses_post(
+					wp_sprintf_l(
+						'%l',
+						array_filter(
+							array_map(
+								function ( $plugin ) {
+									if ( 'publish' === get_post_status( $plugin ) ) {
+										return sprintf(
+											'<a href="%s">%s</a>',
+											esc_url( get_permalink( $plugin ) ),
+											esc_html( get_the_title( $plugin ) )
+										);
+									}
+								},
+								$not_enabled
+							)
+						)
+					)
+				)
 			);
 		}
 
@@ -187,11 +197,11 @@ class Release_Confirmation {
 						esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
 						esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
 					),
-					implode( ', ', $data['committer'] ),
+					esc_html( implode( ', ', $data['committer'] ) ),
 				),
-				self::get_actions( $plugin, $data ),
+				self::get_actions( $plugin, $data ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Button attributes and labels are escaped in get_actions().
 				self::get_approval_text( $plugin, $data, $current_release ) . // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped when built.
-					self::get_rollout_strategy( $plugin, $data )
+					self::get_rollout_strategy( $plugin, $data ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped controls generated below include an intentional onchange handler.
 			);
 		}
 
@@ -229,8 +239,8 @@ class Release_Confirmation {
 			printf(
 				/* translators: 1: Number of confirmations, 2: Number of required confirmations. */
 				esc_html__( '%1$s of %2$s required confirmations.', 'wporg-plugins' ),
-				number_format_i18n( count( $data['confirmations'] ) ),
-				number_format_i18n( $plugin->release_confirmation )
+				esc_html( number_format_i18n( count( $data['confirmations'] ) ) ),
+				esc_html( number_format_i18n( $plugin->release_confirmation ) )
 			);
 		}
 
@@ -256,7 +266,7 @@ class Release_Confirmation {
 			printf(
 				'<span title="%s">%s</span><br>',
 				esc_attr( gmdate( 'Y-m-d H:i:s', $time ) ),
-				$approved_text
+				esc_html( $approved_text )
 			);
 		}
 
@@ -269,7 +279,7 @@ class Release_Confirmation {
 					/* translators: 1: User name, 2: Time since the release was discarded. */
 					esc_html__( 'Discarded by %1$s, %2$s ago.', 'wporg-plugins' ),
 					esc_html( $user->display_name ?: $user->user_login ),
-					human_time_diff( $data['discarded']['time'] )
+					esc_html( human_time_diff( $data['discarded']['time'] ) )
 				)
 			);
 		}
@@ -377,7 +387,7 @@ class Release_Confirmation {
 
 				$buttons[] = sprintf(
 					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</button>',
-					$confirm_link,
+					esc_attr( $confirm_link ),
 					esc_attr(
 						sprintf(
 							/* translators: 1: Version number, 2: Plugin name. */
@@ -386,12 +396,12 @@ class Release_Confirmation {
 							$plugin->post_title
 						)
 					),
-					__( 'Confirm', 'wporg-plugins' )
+					esc_html__( 'Confirm', 'wporg-plugins' )
 				);
 
 				$buttons[] = sprintf(
 					'<button formaction="%s" class="wp-element-button button discard-release has-very-light-gray-background-color has-charcoal-1-color" data-2fa-required data-2fa-message="%s">%s</button>',
-					$discard_link,
+					esc_attr( $discard_link ),
 					esc_attr(
 						sprintf(
 							/* translators: 1: Version number, 2: Plugin name. */
@@ -400,7 +410,7 @@ class Release_Confirmation {
 							$plugin->post_title
 						)
 					),
-					__( 'Discard', 'wporg-plugins' )
+					esc_html__( 'Discard', 'wporg-plugins' )
 				);
 
 			}
@@ -412,8 +422,8 @@ class Release_Confirmation {
 			// Plugin reviewers can undo a discard within 48hrs.
 			$buttons[] = sprintf(
 				'<button formaction="%s" class="wp-element-button button undo-discard">%s</buttona>',
-				Template::get_release_confirmation_link( $data['tag'], $plugin, 'undo-discard' ),
-				__( 'Undo Discard', 'wporg-plugins' )
+				esc_url( Template::get_release_confirmation_link( $data['tag'], $plugin, 'undo-discard' ) ),
+				esc_html__( 'Undo Discard', 'wporg-plugins' )
 			);
 		}
 

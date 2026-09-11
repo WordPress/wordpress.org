@@ -9,7 +9,7 @@
 <div class="wrap">
 	<h2><?php esc_html_e( 'Edit Translation Editor', 'rosetta' ); ?></h2>
 
-	<?php echo $feedback_message; ?>
+	<?php echo $feedback_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice markup assembled by get_feedback_message() from escaped parts. ?>
 
 	<p><?php
 		$user = get_user_by( 'id', $user_id );
@@ -17,8 +17,8 @@
 			/* translators: %s: WP.org profile link */
 			esc_html__( 'You are currently editing the user %s.', 'rosetta' ),
 			sprintf( '<a href="%1$s">%2$s</a>',
-				'https://profiles.wordpress.org/' . $user->user_nicename . '/',
-				$user->user_login
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				esc_html( $user->user_login )
 			)
 		);
 	?></p>

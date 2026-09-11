@@ -13,6 +13,7 @@ $version = isset( $_REQUEST['version'] ) ? $_REQUEST['version'] : null;
 foreach ( [ 'slug', 'version' ] as $field ) {
 	if ( $$field && ! is_string( $$field ) ) {
 		header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request' );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Field name comes from the literal list iterated above, not from the request.
 		die( "?{$field}= invalid." );
 	}
 }

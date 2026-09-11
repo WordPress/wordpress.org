@@ -13,12 +13,12 @@ gp_tmpl_header();
 ?>
 
 <div class="project-header">
-	<p class="project-description"><?php echo apply_filters( 'project_description', $project->description, $project ); ?></p>
+	<p class="project-description"><?php echo wp_kses_post( apply_filters( 'project_description', $project->description, $project ) ); ?></p>
 
 	<div class="project-box">
 		<div class="project-box-header">
 			<div class="project-icon">
-				<?php echo $icon; ?>
+				<?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icon producers escape their markup; preserve responsive image attributes. ?>
 			</div>
 
 			<ul class="project-meta">

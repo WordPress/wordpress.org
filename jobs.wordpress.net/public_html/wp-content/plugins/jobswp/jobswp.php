@@ -103,7 +103,7 @@ class Jobs_Dot_WP {
 		add_filter( 'manage_posts_columns',           array( $this, 'posts_columns' ), 8, 2 );
 		add_action( 'manage_job_posts_custom_column', array( $this, 'custom_posts_columns' ), 10, 2 );
 
-		add_filter( 'the_content',                    array( $this, 'add_post_a_job_form' ) );
+		add_filter( 'the_content', array( $this, 'add_post_a_job_form' ), 12 );
 		add_filter( 'wp_kses_allowed_html',           array( $this, 'wp_kses_allowed_html' ), 10, 2 );
 		add_filter( 'body_class',                     array( $this, 'body_class' ) );
 
@@ -430,6 +430,7 @@ class Jobs_Dot_WP {
 		if ( ! $post_type_object )
 			return;
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Close-link markup assembled by _get_close_link().
 		echo $this->_get_close_link( $post, 'button button-large alignright' );
 	}
 
@@ -633,8 +634,19 @@ class Jobs_Dot_WP {
 	/**
 	 * Inserts the post-a-job form into the body of the post-a-job page.
 	 *
+	 * The form is rebuilt from $_POST on every render, so its markup should
+	 * not be handed back to the remaining the_content filters. Two things
+	 * keep it out of their way, and both are deliberate:
+	 *
+	 * - get_template_part() echoes the template and returns null, so the `.=`
+	 *   calls below append nothing; the form goes straight to the output
+	 *   stream and never becomes part of $content. Do not "tidy" this by
+	 *   buffering the template into $content.
+	 * - This filter runs at priority 12, above core's do_shortcode() at 11,
+	 *   so submitted values are never re-parsed as markup.
+	 *
 	 * @param string $content Existing page content.
-	 * @return string The content appended with the post-a-job form
+	 * @return string The content, unchanged; the form is echoed directly.
 	 */
 	public function add_post_a_job_form( $content ) {
 		if ( ! $this->skip_content && is_page( 'post-a-job' ) ) {
