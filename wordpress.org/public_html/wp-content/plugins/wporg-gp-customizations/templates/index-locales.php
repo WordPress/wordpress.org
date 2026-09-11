@@ -35,13 +35,7 @@ gp_tmpl_header();
 					<li class="code"><?php echo wp_kses_post( gp_link_get( gp_url_join( '/locale', $locale->slug ), esc_html( $wp_locale ) ) ); ?></li>
 				</ul>
 				<div class="contributors">
-					<?php
-					$contributors = sprintf(
-						'<span class="dashicons dashicons-admin-users"></span><br />%s',
-						isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0
-					);
-					?>
-					<a href="<?php echo esc_url( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale ); ?>"><?php echo esc_html( $contributors ); ?></a>
+					<a href="<?php echo esc_url( 'https://make.wordpress.org/polyglots/teams/?locale=' . $locale->wp_locale ); ?>"><span class="dashicons dashicons-admin-users"></span><br /><?php echo esc_html( isset( $contributors_count[ $locale->slug ] ) ? $contributors_count[ $locale->slug ] : 0 ); ?></a>
 				</div>
 				<div class="percent">
 					<div class="percent-complete" style="width:<?php echo esc_attr( $percent_complete ); ?>%;"></div>
