@@ -129,7 +129,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 
 		$this->assertStringContainsString( '<p class="ticket-note note-new-reporter">', $note );
 		$this->assertStringContainsString( "class='avatar", $note, 'The note carries the reporter\'s avatar.' );
-		$this->assertStringContainsString( '<strong>Make sure firsttimer receives a warm welcome.</strong><br/>It&#8217;s their first ticket!', $note );
+		$this->assertStringContainsString( '<strong>Make sure firsttimer receives a warm welcome.</strong><br />It&#8217;s their first ticket!', $note );
 	}
 
 	/**
@@ -147,7 +147,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 	public function test_repeat_ticket_note_links_the_previous_tickets(): void {
 		$note = $this->render_note( self::REPORTER, 3 );
 
-		$this->assertStringContainsString( '<strong>This is only firsttimer&#8217;s third ticket!</strong><br/>Previously:', $note );
+		$this->assertStringContainsString( '<strong>This is only firsttimer&#8217;s third ticket!</strong><br />Previously:', $note );
 		$this->assertStringContainsString( 'href="https://core.trac.wordpress.org/ticket/48"', $note );
 		$this->assertStringContainsString( 'href="https://core.trac.wordpress.org/ticket/49"', $note );
 		$this->assertStringNotContainsString( 'ticket/50"', $note, 'The ticket being viewed is not listed as a previous one.' );
@@ -228,7 +228,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 		preg_match( '#<span class="note">(.*?)</span>#s', $note, $matches );
 
 		$this->assertNotEmpty( $matches, 'The note text is present.' );
-		$this->assertStringNotContainsString( '<br />', $matches[1] );
+		$this->assertSame( 1, preg_match_all( '#<br\s*/?>#i', $matches[1] ), 'The template supplies the only line break in the note.' );
 		$this->assertStringNotContainsString( '<img', $matches[1] );
 		$this->assertStringNotContainsString( '<span>', $matches[1] );
 		// The note names the resolved login, not the reporter string it was handed:
