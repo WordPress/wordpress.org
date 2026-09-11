@@ -136,7 +136,7 @@ class Tags {
 	 */
 	public static function prevent_direct_tag_creation( $term, $taxonomy, $args ) {
 		if ( self::is_mergeable_taxonomy( $taxonomy ) ) {
-			$post_type = $_POST['post_type'] ?? '';
+			$post_type = sanitize_key( $_POST['post_type'] ?? '' );
 			$photo_post_type = Registrations::get_post_type();
 			// Check if this is coming from the add tag form (and not programmatic).
 			if (
@@ -234,8 +234,7 @@ class Tags {
 		}
 		check_admin_referer( 'update-tag_' . $from_term_id );
 
-		$new_slug_raw = isset( $_POST['slug'] ) ? wp_unslash( $_POST['slug'] ) : '';
-		$new_slug     = sanitize_title( $new_slug_raw );
+		$new_slug = sanitize_title( wp_unslash( $_POST['slug'] ?? '' ) );
 
 		// Bail if the slug field was not changed or is empty.
 		if ( '' === $new_slug ) {
@@ -345,8 +344,7 @@ class Tags {
 			return;
 		}
 
-		$new_slug_raw = isset( $_POST['slug'] ) ? wp_unslash( $_POST['slug'] ) : '';
-		$new_slug     = sanitize_title( $new_slug_raw );
+		$new_slug = sanitize_title( wp_unslash( $_POST['slug'] ?? '' ) );
 
 		// Bail if the slug field was not changed or is empty.
 		if ( '' === $new_slug || $new_slug === $from->slug ) {

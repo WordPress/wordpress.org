@@ -208,7 +208,7 @@ class Flagged {
 	 * @param WP_Screen $current_screen Current WP_Screen object.
 	 */
 	public static function restrict_photo_editing( $screen ) {
-		$post_id = $_GET['post'] ?? null;
+		$post_id = absint( $_GET['post'] ?? 0 );
 		if ( $post_id && $screen && Registrations::get_post_type() === $screen->id ) {
 			$post = get_post( $post_id );
 			if (

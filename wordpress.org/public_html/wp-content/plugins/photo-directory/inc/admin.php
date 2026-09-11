@@ -1017,7 +1017,7 @@ class Admin {
 		}
 
 		if ( 'attachment' === $screen->id ) {
-			$post_id = wp_get_post_parent_id( $_GET['post'] );
+			$post_id = wp_get_post_parent_id( absint( $_GET['post'] ?? 0 ) );
 			if ( ! $post_id ) {
 				return;
 			}
@@ -1394,7 +1394,7 @@ class Admin {
 			return;
 		}
 
-		$photo_contrib_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? filter_var( $_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP ) : '';
+		$photo_contrib_ip = filter_var( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ), FILTER_VALIDATE_IP );
 		if ( $photo_contrib_ip ) {
 			update_post_meta( $post->ID, Registrations::get_meta_key( 'contributor_ip' ), $photo_contrib_ip );
 		}
@@ -1700,13 +1700,13 @@ class Admin {
 
 		// If a random photo is being requested, then redirect to one.
 		if (
-			'1' === ( $_GET['skipphoto'] ?? false )
+			'1' === sanitize_key( $_GET['skipphoto'] ?? '' )
 		&&
-			'edit' === ( $_GET['action'] ?? false )
+			'edit' === sanitize_key( $_GET['action'] ?? '' )
 		&&
 			! empty( $_GET['post'] )
 		) {
-			$exclude_photos = [ intval( $_GET['post'] ) ];
+			$exclude_photos = [ absint( $_GET['post'] ) ];
 
 			$next_photo = Posts::get_next_post_in_queue( 'rand', '', $exclude_photos );
 
@@ -1729,9 +1729,9 @@ class Admin {
 		&&
 			is_main_query()
 		&&
-			Registrations::get_post_type() === ( $_GET['post_type'] ?? false )
+			Registrations::get_post_type() === sanitize_key( $_GET['post_type'] ?? '' )
 		&&
-			'pending' === ( $_GET['post_status'] ?? '' )
+			'pending' === sanitize_key( $_GET['post_status'] ?? '' )
 		) {
 			$vars[] = 'random';
 		}
