@@ -1025,10 +1025,22 @@ class Uploads {
 				)
 				. '<div id="ug_photo_preview_wrap" class="ugc-photo-preview" hidden>' . "\n"
 				. sprintf(
+					'<button type="button" id="ug_photo_preview_button" class="ugc-photo-preview__button" aria-haspopup="dialog" aria-controls="ug_photo_preview_dialog" title="%1$s" aria-label="%1$s">' . "\n",
+					esc_attr__( 'View larger preview', 'wporg-photos' )
+				)
+				. sprintf(
 					'<img id="ug_photo_preview" alt="%s" />' . "\n",
 					esc_attr__( 'Selected photo preview', 'wporg-photos' )
 				)
+				. "</button>\n"
 				. "</div>\n"
+				. '<dialog id="ug_photo_preview_dialog" class="ugc-photo-preview-dialog">' . "\n"
+				. sprintf(
+					'<button type="button" class="ugc-photo-preview-dialog__close" aria-label="%s">&times;</button>' . "\n",
+					esc_attr__( 'Close preview', 'wporg-photos' )
+				)
+				. '<img id="ug_photo_preview_large" alt="" />' . "\n"
+				. "</dialog>\n"
 				. "</div>\n"
 				. sprintf(
 					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d"]' . "\n",

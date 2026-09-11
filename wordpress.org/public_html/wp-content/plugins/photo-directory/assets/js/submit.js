@@ -58,6 +58,8 @@ function photoSubmitInit() {
 		} );
 	}
 
+	photoInitFilePreviewDialog();
+
 	// Disable jQuery Validation, if still in use.
 	if ( window.jQuery && window.jQuery.validator ) {
 		jQuery( photo_upload_form ).validate().settings.ignore = "*";
@@ -193,6 +195,45 @@ function photoShowFieldError( field ) {
 }
 
 /**
+ * Initializes the expandable photo preview dialog.
+ */
+function photoInitFilePreviewDialog() {
+	const previewButton = document.getElementById( 'ug_photo_preview_button' );
+	const dialog = document.getElementById( 'ug_photo_preview_dialog' );
+
+	if ( ! previewButton || ! dialog || typeof dialog.showModal !== 'function' ) {
+		return;
+	}
+
+	previewButton.addEventListener( 'click', () => {
+		const previewImg = document.getElementById( 'ug_photo_preview' );
+		const largeImg = document.getElementById( 'ug_photo_preview_large' );
+
+		if ( ! previewImg || ! previewImg.src || ! largeImg ) {
+			return;
+		}
+
+		largeImg.src = previewImg.src;
+		largeImg.alt = previewImg.alt;
+		dialog.showModal();
+	} );
+
+	const closeButton = dialog.querySelector( '.ugc-photo-preview-dialog__close' );
+	if ( closeButton ) {
+		closeButton.addEventListener( 'click', () => {
+			dialog.close();
+		} );
+	}
+
+	// Close when the backdrop (the dialog element itself) is clicked.
+	dialog.addEventListener( 'click', ( e ) => {
+		if ( e.target === dialog ) {
+			dialog.close();
+		}
+	} );
+}
+
+/**
  * Shows a local thumbnail preview of the selected photo.
  *
  * @param {string} dataUrl - Data URL of the selected image.
@@ -201,15 +242,24 @@ function photoShowFieldError( field ) {
 function photoShowFilePreview( dataUrl, fileName ) {
 	const previewWrap = document.getElementById( 'ug_photo_preview_wrap' );
 	const previewImg = document.getElementById( 'ug_photo_preview' );
+	const largeImg = document.getElementById( 'ug_photo_preview_large' );
 
 	if ( ! previewWrap || ! previewImg ) {
 		return;
 	}
 
-	previewImg.src = dataUrl;
-	previewImg.alt = fileName
+	const alt = fileName
 		? PhotoDir.preview_alt + ': ' + fileName
 		: PhotoDir.preview_alt;
+
+	previewImg.src = dataUrl;
+	previewImg.alt = alt;
+
+	if ( largeImg ) {
+		largeImg.src = dataUrl;
+		largeImg.alt = alt;
+	}
+
 	previewWrap.hidden = false;
 }
 
@@ -219,13 +269,25 @@ function photoShowFilePreview( dataUrl, fileName ) {
 function photoClearFilePreview() {
 	const previewWrap = document.getElementById( 'ug_photo_preview_wrap' );
 	const previewImg = document.getElementById( 'ug_photo_preview' );
+	const largeImg = document.getElementById( 'ug_photo_preview_large' );
+	const dialog = document.getElementById( 'ug_photo_preview_dialog' );
 
 	if ( ! previewWrap || ! previewImg ) {
 		return;
 	}
 
+	if ( dialog && dialog.open ) {
+		dialog.close();
+	}
+
 	previewImg.removeAttribute( 'src' );
 	previewImg.alt = PhotoDir.preview_alt;
+
+	if ( largeImg ) {
+		largeImg.removeAttribute( 'src' );
+		largeImg.alt = '';
+	}
+
 	previewWrap.hidden = true;
 }
 
