@@ -18,7 +18,7 @@ get_header(); ?>
 			<h1><?php single_cat_title(); ?></h1>
 
 			<div>
-			<?php echo do_blocks(
+			<?php echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 				sprintf(
 					'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"32.3%%"},"fontSize":"small"} -->
 					<div class="wp-block-group is-style-cards-grid has-small-font-size">%s</div>

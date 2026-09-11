@@ -224,7 +224,7 @@ class Ratings_Compat {
 <div class="review-ratings">
 	<div>
 		<div style="font-weight:bold;"><?php esc_html_e( 'Average Rating', 'wporg-forums' ); ?></div>
-		<?php echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' ); ?>
+		<?php echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 		<div class="reviews-submit-link">
 		<?php
 			if ( is_user_logged_in() ) {
@@ -262,7 +262,7 @@ class Ratings_Compat {
 				'<span>' . esc_html( number_format_i18n( $this->reviews_count ) ) . '</span>'
 			);
 		?></div>
-		<?php echo do_blocks( '<!-- wp:wporg/ratings-bars /-->' ); ?>
+		<?php echo do_blocks( '<!-- wp:wporg/ratings-bars /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 	</div>
 </div>
 		<?php

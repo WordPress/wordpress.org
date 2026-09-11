@@ -81,7 +81,7 @@ get_header( 'wporg' );
 			}
 		}
 	</style>
-	<?php echo do_blocks( $banner_blocks ); ?>
+	<?php echo do_blocks( $banner_blocks ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 
 	<header id="masthead" class="site-header" role="banner">
 		<div class="site-branding">

@@ -19,6 +19,7 @@ $widget_args = array(
 	'after_title'  => '</h2>',
 );
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( '<!-- wp:template-part {"slug":"grid-controls"} /-->' );
 
 ?>
@@ -95,6 +96,7 @@ echo do_blocks( '<!-- wp:template-part {"slug":"grid-controls"} /-->' );
 			</header>
 
 			<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 			echo do_blocks( <<<BLOCKS
 			<!-- wp:query {"tagName":"div","className":"plugin-cards"} -->
 				<div class="wp-block-query plugin-cards">
