@@ -359,7 +359,7 @@ class Hooks {
 	 */
 	public function redirect_update_php_page() {
 		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
-			wp_redirect( home_url( '/update-php/' ), 301 );
+			wp_safe_redirect( home_url( '/update-php/' ), 301 );
 			exit;
 		}
 	}

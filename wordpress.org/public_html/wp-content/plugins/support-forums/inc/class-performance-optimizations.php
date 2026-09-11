@@ -167,6 +167,7 @@ class Performance_Optimizations {
 				$url = jetpack_photon_url( $url );
 			}
 
+			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Photon CDN host, so the target is deliberately off-site.
 			wp_redirect( $url, 301 );
 			exit;
 		}

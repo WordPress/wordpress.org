@@ -230,7 +230,7 @@ class Rosetta_Roles {
 					check_admin_referer( 'add-translation-editor', '_nonce_add-translation-editor' );
 
 					if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
 						exit;
 					}
 
@@ -249,14 +249,14 @@ class Rosetta_Roles {
 					}
 
 					if ( ! $user_details ) {
-						wp_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
+						wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 						exit;
 					}
 
 					if ( ! is_user_member_of_blog( $user_details->ID ) ) {
 						$added = add_existing_user_to_blog( array( 'user_id' => $user_details->ID, 'role' => 'subscriber' ) );
 						if ( ! $added || is_wp_error( $added ) ) {
-							wp_redirect( add_query_arg( array( 'error' => 'not-added-to-site' ), $redirect ) );
+							wp_safe_redirect( add_query_arg( array( 'error' => 'not-added-to-site' ), $redirect ) );
 							exit;
 						}
 
@@ -265,7 +265,7 @@ class Rosetta_Roles {
 					}
 
 					if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user_details->roles ) || in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user_details->roles ) ) {
-						wp_redirect( add_query_arg( array( 'error' => 'user-exists' ), $redirect ) );
+						wp_safe_redirect( add_query_arg( array( 'error' => 'user-exists' ), $redirect ) );
 						exit;
 					}
 
@@ -274,24 +274,24 @@ class Rosetta_Roles {
 						$this->update_translation_editor( $user_details );
 
 						$redirect = add_query_arg( 'user_id', $user_details->ID, $redirect );
-						wp_redirect( add_query_arg( array( 'update' => 'user-added-custom-projects' ), $redirect ) );
+						wp_safe_redirect( add_query_arg( array( 'update' => 'user-added-custom-projects' ), $redirect ) );
 						exit;
 					} else {
 						$this->update_translation_editor( $user_details, array( 'all' ) );
 
-						wp_redirect( add_query_arg( array( 'update' => 'user-added' ), $redirect ) );
+						wp_safe_redirect( add_query_arg( array( 'update' => 'user-added' ), $redirect ) );
 						exit;
 					}
 				case 'remove-translation-editors':
 					check_admin_referer( 'bulk-translation-editors' );
 
 					if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
 						exit;
 					}
 
 					if ( empty( $_REQUEST['translation-editors'] ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
 						exit;
 					}
 
@@ -302,25 +302,33 @@ class Rosetta_Roles {
 						$count++;
 					}
 
-					wp_redirect( add_query_arg( array( 'update' => 'user-removed', 'count' => $count ), $redirect ) );
+					wp_safe_redirect(
+						add_query_arg(
+							array(
+								'update' => 'user-removed',
+								'count'  => $count,
+							),
+							$redirect
+						)
+					);
 					exit;
 				case 'remove-translation-editor':
 					check_admin_referer( 'remove-translation-editor' );
 
 					if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
 						exit;
 					}
 
 					if ( empty( $_REQUEST['translation-editor'] ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
 						exit;
 					}
 
 					$user_id = (int) $_REQUEST['translation-editor'];
 					$this->remove_translation_editor( $user_id );
 
-					wp_redirect( add_query_arg( array( 'update' => 'user-removed' ), $redirect ) );
+					wp_safe_redirect( add_query_arg( array( 'update' => 'user-removed' ), $redirect ) );
 					exit;
 			}
 		}
@@ -335,24 +343,24 @@ class Rosetta_Roles {
 		$redirect = menu_page_url( 'translation-editors', false );
 
 		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
-			wp_redirect( $redirect );
+			wp_safe_redirect( $redirect );
 			exit;
 		}
 
 		$user_details = get_user_by( 'id', $user_id );
 
 		if ( ! $user_details ) {
-			wp_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
+			wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 			exit;
 		}
 
 		if ( ! is_user_member_of_blog( $user_details->ID ) ) {
-			wp_redirect( add_query_arg( array( 'error' => 'not-a-member' ), $redirect ) );
+			wp_safe_redirect( add_query_arg( array( 'error' => 'not-a-member' ), $redirect ) );
 			exit;
 		}
 
 		if ( ! in_array( self::TRANSLATION_EDITOR_ROLE, $user_details->roles ) && ! in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user_details->roles ) ) {
-			wp_redirect( add_query_arg( array( 'error' => 'user-cannot' ), $redirect ) );
+			wp_safe_redirect( add_query_arg( array( 'error' => 'user-cannot' ), $redirect ) );
 			exit;
 		}
 
@@ -376,7 +384,7 @@ class Rosetta_Roles {
 					$this->update_translation_editor( $user_details, $projects );
 				}
 
-				wp_redirect( add_query_arg( array( 'update' => 'user-updated' ), $redirect ) );
+				wp_safe_redirect( add_query_arg( array( 'update' => 'user-updated' ), $redirect ) );
 				exit;
 		}
 	}

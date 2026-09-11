@@ -75,6 +75,7 @@ class WPorg_GP_Help_Page_Route extends GP_Route {
 	function getting_started() {
 		remove_action( 'gp_after_notices', array( wporg_gp_help_page(), 'after_notices' ) );
 
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Handbook lives on make.wordpress.org, so wp_safe_redirect() would send the visitor to the admin instead.
 		wp_redirect( WPorg_GP_Help_Page::handbook_link, 301 );
 		exit;
 	}

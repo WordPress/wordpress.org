@@ -80,7 +80,7 @@ class WPTV_Anon_Upload {
 			die( $redir );
 		}
 
-		wp_redirect( $redir );
+		wp_safe_redirect( $redir );
 		exit;
 	}
 
