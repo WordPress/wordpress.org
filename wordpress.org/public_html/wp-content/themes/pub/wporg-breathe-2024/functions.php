@@ -229,7 +229,7 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 			$people_url        = home_url( '/pledges/' );
 			$is_pledges_active = trailingslashit( $people_url ) === trailingslashit( home_url( $wp->request ) );
 			$people_item       = array(
-				'label'     => esc_html__( 'People', 'wporg-5ftf' ),
+				'label'     => esc_html__( 'People', 'wporg' ),
 				'url'       => esc_url( $people_url ),
 				'className' => $is_pledges_active ? 'current-menu-item' : '',
 			);
@@ -388,7 +388,7 @@ function welcome_box() {
 	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
-		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu' ); ?></strong></a>
+		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu', 'wporg' ); ?></strong></a>
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
 			<button
@@ -683,20 +683,12 @@ function __translations_in_private_functions() {
  */
 function modify_handbook_search_block_action( $block_content, $block ) {
 	if ( function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() ) {
-		$html = wp_html_split( $block_content );
+		$tags = new \WP_HTML_Tag_Processor( $block_content );
 		
-		foreach ( $html as &$token ) {
-			if ( 0 === strpos( $token, '<form' ) ) {
-				$token = preg_replace(
-					'/action="[^"]*"/',
-					'action="' . esc_url( home_url( '/handbook/' ) ) . '"',
-					$token
-				);
-				break;
-			}
+		if ( $tags->next_tag( 'form' ) ) {
+			 $tags->set_attribute( 'action', esc_url( home_url( '/handbook/' ) ) );
+			 $block_content = $tags->get_updated_html();
 		}
-		
-		$block_content = implode( '', $html );
 	}
 	return $block_content;
 }
@@ -772,12 +764,12 @@ function modify_site_title_block( $block_content, $block ) {
 	// On the project and updates sites replace the link with a Make home page link
 	if ( '/project/' === $site->path || '/updates/' === $site->path ) {
 		$make_home_url = 'https://' . $site->domain;
-		$block_content = preg_replace( 
+		$block_content = preg_replace(
 			'/<a\b[^>]*>(.*?)<\/a>/',
 			'<a target="_self" rel="home" href="' . esc_url( $make_home_url ) . '">' . 
 			esc_html__( 'Make WordPress', 'wporg' ) . 
-			'</a>', 
-			$block_content 
+			'</a>',
+			$block_content
 		);
 	}
 
@@ -797,7 +789,6 @@ add_action(
 				"ready.o2",
 				function () {
 					setTimeout( () => Prism.highlightAll(), 10 );
-					console.log( "test" );
 				}
 			);',
 			'after'
