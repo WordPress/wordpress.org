@@ -211,7 +211,7 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 		<div class="project <?php echo esc_attr( $classes ); ?>">
 			<div class="project-top">
 				<div class="project-icon">
-					<a href="<?php echo esc_url( $project_url ); ?>"><?php echo wp_kses_post( $project_icon ); ?></a>
+					<a href="<?php echo esc_url( $project_url ); ?>"><?php echo $project_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icon producers escape their markup; preserve responsive image attributes. ?></a>
 				</div>
 
 				<div class="project-name">

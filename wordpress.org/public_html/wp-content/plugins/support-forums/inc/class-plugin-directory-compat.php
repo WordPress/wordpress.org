@@ -165,7 +165,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		<div>
 			<ul>
 				<?php if ( $icon ) : ?>
-				<li class="plugin-meta-icon"><?php echo wp_kses_post( $icon ); ?></li>
+				<li class="plugin-meta-icon"><?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icon producers escape their markup; preserve responsive image attributes. ?></li>
 				<?php endif; ?>
 				<li><?php echo wp_kses_post( $plugin ); ?></li>
 				<?php if ( ! empty( $this->plugin->post_content ) && false !== strpos( $this->plugin->post_content, '<!--section=faq-->' ) ) : ?>

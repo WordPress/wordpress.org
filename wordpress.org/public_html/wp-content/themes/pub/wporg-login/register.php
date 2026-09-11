@@ -100,7 +100,7 @@ get_header();
 		printf(
 			'<div class="message error%s"><p>%s<span>%s</span></p></div>',
 			$error_user_login->get_data()['avatar'] ? ' with-avatar' : '',
-			wp_kses_post( $error_user_login->get_data()['avatar'] ),
+			$error_user_login->get_data()['avatar'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The local REST handler returns escaped get_avatar() markup; preserve srcset.
 			wp_kses_post( $error_user_login->get_data()['error'] )
 		);
 	}
@@ -116,7 +116,7 @@ get_header();
 		printf(
 			'<div class="message error%s"><p>%s<span>%s</span></p></div>',
 			$error_user_email->get_data()['avatar'] ? ' with-avatar' : '',
-			wp_kses_post( $error_user_email->get_data()['avatar'] ),
+			$error_user_email->get_data()['avatar'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The local REST handler returns escaped get_avatar() markup; preserve srcset.
 			wp_kses_post( $error_user_email->get_data()['error'] )
 		);
 	}

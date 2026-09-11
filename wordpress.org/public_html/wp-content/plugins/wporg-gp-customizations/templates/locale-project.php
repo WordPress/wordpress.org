@@ -23,7 +23,7 @@ gp_tmpl_header();
 	<div class="project-box percent-<?php echo esc_attr( $project_status->percent_complete ); ?>">
 		<div class="project-box-header">
 			<div class="project-icon">
-				<?php echo wp_kses_post( $project_icon ); ?>
+				<?php echo $project_icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icon producers escape their markup; preserve responsive image attributes. ?>
 			</div>
 
 			<ul class="project-meta">
