@@ -1466,7 +1466,7 @@ class Plugin_Directory {
 		}
 
 		if ( is_comment_feed() ) {
-			wp_redirect( 'https://wordpress.org/plugins/', 301 );
+			wp_safe_redirect( 'https://wordpress.org/plugins/', 301 );
 			die();
 		}
 

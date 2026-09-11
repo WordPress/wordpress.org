@@ -539,7 +539,15 @@ class Jobs_Dot_WP {
 			$sendback = remove_query_arg( array( 'close-job', 'closed-job', 'ids'), $sendback );
 		}
 
-		wp_redirect( add_query_arg( array( 'closed-job' => 1, 'ids' => $post_id ), $sendback ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'closed-job' => 1,
+					'ids'        => $post_id,
+				),
+				$sendback
+			)
+		);
 		exit();
 	}
 

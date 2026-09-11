@@ -239,7 +239,7 @@ function wporg_themes_suspend_theme() {
 	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
 
 	if ( ! $post_id ) {
-		wp_redirect( admin_url( 'edit.php' ) );
+		wp_safe_redirect( admin_url( 'edit.php' ) );
 		exit();
 	}
 
@@ -264,7 +264,7 @@ function wporg_themes_suspend_theme() {
 		'post_status' => 'suspend',
 	) );
 
-	wp_redirect( add_query_arg( 'suspended', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	wp_safe_redirect( add_query_arg( 'suspended', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_suspend', 'wporg_themes_suspend_theme' );
@@ -276,7 +276,7 @@ function wporg_themes_reinstate_theme() {
 	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
 
 	if ( ! $post_id ) {
-		wp_redirect( admin_url( 'edit.php' ) );
+		wp_safe_redirect( admin_url( 'edit.php' ) );
 		exit();
 	}
 
@@ -307,7 +307,7 @@ function wporg_themes_reinstate_theme() {
 	 */
 	add_post_meta( $post_id, '_wporg_themes_reinstated', true );
 
-	wp_redirect( add_query_arg( 'reinstated', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	wp_safe_redirect( add_query_arg( 'reinstated', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_reinstate', 'wporg_themes_reinstate_theme' );
@@ -339,7 +339,7 @@ function wporg_themes_delist_theme() {
 	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
 
 	if ( ! $post_id ) {
-		wp_redirect( admin_url( 'edit.php' ) );
+		wp_safe_redirect( admin_url( 'edit.php' ) );
 		exit();
 	}
 
@@ -364,7 +364,7 @@ function wporg_themes_delist_theme() {
 		'post_status' => 'delist',
 	) );
 
-	wp_redirect( add_query_arg( 'delisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	wp_safe_redirect( add_query_arg( 'delisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_delist', 'wporg_themes_delist_theme' );
@@ -376,7 +376,7 @@ function wporg_themes_relist_theme() {
 	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
 
 	if ( ! $post_id ) {
-		wp_redirect( admin_url( 'edit.php' ) );
+		wp_safe_redirect( admin_url( 'edit.php' ) );
 		exit();
 	}
 
@@ -401,7 +401,7 @@ function wporg_themes_relist_theme() {
 		'post_status' => 'publish',
 	) );
 
-	wp_redirect( add_query_arg( 'relisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	wp_safe_redirect( add_query_arg( 'relisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_relist', 'wporg_themes_relist_theme' );

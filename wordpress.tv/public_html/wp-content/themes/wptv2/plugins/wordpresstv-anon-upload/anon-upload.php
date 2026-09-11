@@ -80,7 +80,7 @@ class WPTV_Anon_Upload {
 			die( $redir ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- URL response with encoded query values, including description newlines.
 		}
 
-		wp_redirect( $redir );
+		wp_safe_redirect( $redir );
 		exit;
 	}
 

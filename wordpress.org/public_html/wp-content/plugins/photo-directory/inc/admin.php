@@ -1708,7 +1708,7 @@ class Admin {
 			$next_photo = Posts::get_next_post_in_queue( 'rand', '', $exclude_photos );
 
 			if ( $next_photo ) {
-				wp_redirect( get_edit_post_link( $next_photo->ID, 'url' ), 302 );
+				wp_safe_redirect( get_edit_post_link( $next_photo->ID, 'url' ), 302 );
 				exit;
 			}
 		}
