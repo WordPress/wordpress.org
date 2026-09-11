@@ -232,8 +232,11 @@ class WPTV_Anon_Upload {
 			return $this->error( 1 );
 		}
 
-		// quick file extension check
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- init() checks the upload nonce before dispatching here.
+		/*
+		 * quick file extension check
+		 * init() checks the upload nonce before dispatching here.
+		 */
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$name_parts = pathinfo( sanitize_file_name( wp_unslash( $_FILES['wptv_file']['name'] ?? '' ) ) );
 
 		if ( ! empty( $name_parts['extension'] ) ) {

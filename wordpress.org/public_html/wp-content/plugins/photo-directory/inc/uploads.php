@@ -662,6 +662,13 @@ class Uploads {
 			return 'too-many-files';
 		}
 
+		/*
+		 * Reached through the Frontend Uploader plugin's fu_should_process_content_upload
+		 * filter, which its upload_content() applies only after verifying the fu_nonce
+		 * that the upload form carries.
+		 */
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+
 		// Check file size.
 		if ( ! empty( $_FILES['files']['size'][0] ) ) {
 			$file_size = (int) $_FILES['files']['size'][0];
@@ -702,6 +709,7 @@ class Uploads {
 		if ( empty( $_POST['photo_license'] ) ) {
 			return 'checkbox_unchecked_license';
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		// The same fields and sanitizers `sanitize_submitted_description()` stores them with.
 		$fields = [
@@ -735,6 +743,7 @@ class Uploads {
 	 */
 	public static function get_uploaded_file_hash() {
 		if ( ! self::$_hash && ! empty( $_FILES['files']['tmp_name'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Only reached from the Frontend Uploader pipeline, which verifies its fu_nonce before running any of it.
 			self::$_hash = md5_file( sanitize_text_field( wp_unslash( $_FILES['files']['tmp_name'][0] ?? '' ) ) );
 		}
 

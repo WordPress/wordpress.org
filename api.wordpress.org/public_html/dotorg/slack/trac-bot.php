@@ -20,8 +20,11 @@ namespace Dotorg\Slack\Trac {
 		return;
 	}
 
-	// Prevent recursion.
-	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Webhook endpoint; the request is authenticated by its signature, not a nonce.
+	/*
+	 * Prevent recursion.
+	 * Webhook endpoint; the request is authenticated by its signature, not a nonce.
+	 */
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing
 	if ( sanitize_text_field( wp_unslash( $_POST['user_name'] ?? '' ) ) === 'slackbot' ) {
 		return;
 	}

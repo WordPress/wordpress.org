@@ -715,7 +715,7 @@ class Jobs_Dot_WP {
 
 			// Only query for job if no errors thus far.
 			if ( ! $has_errors ) {
-				$job = $this->get_job_by_token( $_POST['job_token'] );
+				$job = $this->get_job_by_token( sanitize_text_field( wp_unslash( $_POST['job_token'] ?? '' ) ) );
 				if ( ! $job ) {
 					$has_errors = __( 'The provided job token does not match an open or pending job posting.', 'jobswp' );
 				}
@@ -804,15 +804,17 @@ EMAIL;
 			}
 			// Validate syntax of certain fields
 			if ( ! $has_errors ) :
-				if ( ! is_email( $_POST['email'] ) ) {
+				$howtoapply_method = sanitize_key( $_POST['howtoapply_method'] ?? '' );
+
+				if ( ! is_email( wp_unslash( $_POST['email'] ?? '' ) ) ) {
 					$has_errors = __( 'The provided "Email Address" is not a proper email address.', 'jobswp' );
 					unset( $_POST['email'] );
-				} elseif ( 'email' == $_POST['howtoapply_method'] && ! is_email( $_POST['howtoapply'] ) ) {
+				} elseif ( 'email' == $howtoapply_method && ! is_email( wp_unslash( $_POST['howtoapply'] ?? '' ) ) ) {
 					$has_errors = __( 'The provided "How to Apply" email address is not a proper email address.', 'jobswp' );
 					unset( $_POST['howtoapply'] );
-				} elseif ( 'web' == $_POST['howtoapply_method'] && is_email( $_POST['howtoapply'] ) ) {
+				} elseif ( 'web' == $howtoapply_method && is_email( wp_unslash( $_POST['howtoapply'] ?? '' ) ) ) {
 					$has_errors = __( 'The provided "How to Apply" online form address appear to be an email address. Either supply a website address or change the dropdown to "Email Address".', 'jobswp' );
-				} elseif ( 'web' == $_POST['howtoapply_method'] && ! wp_http_validate_url( esc_url_raw( $_POST['howtoapply'] ) ) ) {
+				} elseif ( 'web' == $howtoapply_method && ! wp_http_validate_url( esc_url_raw( wp_unslash( $_POST['howtoapply'] ?? '' ) ) ) ) {
 					$has_errors = __( 'The provided "How to Apply" online form address is not a proper URL.', 'jobswp' );
 				}
 			endif;
@@ -841,8 +843,10 @@ EMAIL;
 					// Generate and store a unique token for the job, primarily to be used by
 					// job posters to close their jobs themselves despite the site's lack of
 					// users.
-					$_POST['job_token'] = $this->generate_job_token( $job_id );
-					add_post_meta( $job_id, 'job_token', $_POST['job_token'], true );
+					$job_token = $this->generate_job_token( $job_id );
+
+					$_POST['job_token'] = $job_token;
+					add_post_meta( $job_id, 'job_token', $job_token, true );
 
 					$this->success = $job_id;
 				}
@@ -865,13 +869,23 @@ EMAIL;
 			return new WP_Error( 'jobswp_missing_user', __( 'The username configured for posting jobs does not exist.', 'jobswp' ) );
 		}
 
+		/*
+		 * save_job() calls check_admin_referer( 'jobswppostjob' ) before invoking this
+		 * method, which is where the nonce for every value read here is verified.
+		 *
+		 * wp_insert_post() expects slashed data and runs the content through the
+		 * content_save_pre filters swapped in below, so the two submitted fields are
+		 * handed over as sent rather than unslashed and sanitized here.
+		 */
+		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 		$args = array(
 			'post_author'  => $user->ID,
-			'post_content' => $_POST['job_description'],
+			'post_content' => $_POST['job_description'] ?? '',
 			'post_status'  => 'draft',
-			'post_title'   => $_POST['job_title'],
+			'post_title'   => $_POST['job_title'] ?? '',
 			'post_type'    => 'job',
 		);
+		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
 		// Filter job posting content as if a comment, not a post
 		remove_filter( 'content_save_pre', 'wp_filter_post_kses' );
@@ -884,16 +898,27 @@ EMAIL;
 
 			// Save job_category. Make sure it's one that is actually defined.
 			$cats = wp_list_pluck( Jobs_Dot_WP::get_job_categories(), 'slug' );
-			if ( in_array( $_POST['category'], $cats ) )
-				wp_set_object_terms( $job_id, array( $_POST['category'] ), 'job_category', false );
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- save_job() verified the jobswppostjob nonce before calling this.
+			$category = sanitize_title( wp_unslash( $_POST['category'] ?? '' ) );
+			if ( in_array( $category, $cats ) ) {
+				wp_set_object_terms( $job_id, array( $category ), 'job_category', false );
+			}
 
 			// Save each meta field
 			foreach( $this->meta_fields as $field ) {
-				if ( ! isset( $_POST[ $field ] ) || ! $_POST[ $field ] )
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing -- save_job() verified the jobswppostjob nonce before calling this.
+				if ( empty( $_POST[ $field ] ) ) {
 					continue;
+				}
 
-				// Massage and sanitize the field value depending on field
-				$val = self::validate_job_field( $field, $_POST[ $field ], $_POST );
+				/*
+				 * Massage and sanitize the field value depending on field.
+				 * validate_job_field() strips tags and applies sanitize_email() or
+				 * esc_url_raw() per field, but PHPCS only recognises global functions
+				 * as sanitizers, so the static call needs the annotation below.
+				 */
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$val = self::validate_job_field( $field, wp_unslash( $_POST[ $field ] ), $_POST );
 
 				add_post_meta( $job_id, $field, $val );
 			}

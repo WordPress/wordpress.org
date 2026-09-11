@@ -209,7 +209,7 @@ class Commits_List_Table extends WP_List_Table {
 			}
 			echo '</select>';
 
-			echo '<input type="text" name="revisions" placeholder="Revs: 1:HEAD or 1,2,4,5" value="' . esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['revisions'] ?? '' ) ) ) .'">';
+			echo '<input type="text" name="revisions" placeholder="Revs: 1:HEAD or 1,2,4,5" value="' . esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['revisions'] ?? '' ) ) ) . '">';
 
 			echo '<input type="submit" class="button button-secondary" value="Filter">';
 			echo '</div>';

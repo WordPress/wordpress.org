@@ -136,6 +136,7 @@ class Tags {
 	 */
 	public static function prevent_direct_tag_creation( $term, $taxonomy, $args ) {
 		if ( self::is_mergeable_taxonomy( $taxonomy ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- A pre_insert_term guard that only ever rejects the term; it changes nothing.
 			$post_type = sanitize_key( $_POST['post_type'] ?? '' );
 			$photo_post_type = Registrations::get_post_type();
 			// Check if this is coming from the add tag form (and not programmatic).

@@ -18,7 +18,7 @@ class Trac_Notifications_HTTP_Server {
 		 * secret with hash_equals(), so the secret is passed through as sent rather than
 		 * sanitized. The arguments must reach json_decode() unchanged.
 		 */
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$this->serve( sanitize_key( $_GET['call'] ?? '' ), wp_unslash( $_GET['secret'] ?? '' ), json_decode( wp_unslash( $_POST['arguments'] ?? '' ), true ) );
 	}
 

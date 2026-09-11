@@ -165,8 +165,12 @@ function jobswp_text_field( $field_name, $field_label, $required = false, $type 
  */
 function jobswp_required_field_classes( $field ) {
 	$classes = 'required';
-	if ( $_POST && ( ! isset( $_POST[ $field ] ) || '' == trim( $_POST[ $field ] ) ) )
+
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Re-renders the form after a submission that save_job() already checked against the jobswppostjob nonce.
+	if ( $_POST && '' === trim( sanitize_text_field( wp_unslash( $_POST[ $field ] ?? '' ) ) ) ) {
 		$classes .= ' lacks-input';
+	}
+
 	return $classes;
 }
 

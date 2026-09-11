@@ -146,7 +146,7 @@ class wporg_trac_notifications {
 			wp_send_json_error();
 		}
 
-		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), "manage_ticket_notifications" ) ) {
+		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'manage_ticket_notifications' ) ) {
 			wp_send_json_error();
 		}
 
@@ -195,6 +195,7 @@ class wporg_trac_notifications {
 		}
 		$username = wp_get_current_user()->user_login;
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Read-only: returns which of the submitted tickets the current user is already subscribed to, and mints the nonce the write endpoint requires.
 		$queried_tickets = array_map( 'absint', (array) ( $_POST['tickets'] ?? array() ) );
 		if ( count( $queried_tickets ) > 100 ) {
 			wp_send_json_error();

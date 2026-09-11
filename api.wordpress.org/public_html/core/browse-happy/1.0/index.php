@@ -21,8 +21,13 @@ if ( empty( $_REQUEST['useragent'] ) ) {
 $user_agent = $_REQUEST['useragent'];
 $data = browsehappy_parse_user_agent( $user_agent );
 
-// Collect a sample: One out of every 25.
-// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded, so the WP sanitizers are unavailable. The callback is restricted with preg_replace() and the user agent is only parsed.
+/*
+ * Collect a sample: One out of every 25.
+ * Standalone endpoint; WordPress is not loaded, so the WP sanitizers are
+ * unavailable. The callback is restricted with preg_replace() and the user
+ * agent is only parsed.
+ */
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 if ( 0 === strpos( $_SERVER['HTTP_USER_AGENT'], 'WordPress/' ) && 1 === rand( 1, 25 ) ) {
 	require( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) . '/includes/hyperdb/bb-10-hyper-db.php' );
 	bh_record_data( $user_agent, $data );
