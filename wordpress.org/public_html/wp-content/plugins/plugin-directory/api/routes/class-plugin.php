@@ -399,13 +399,13 @@ class Plugin extends Base {
 				<h4 class="review-title"><?php echo esc_html( $review->post_title ); ?></h4>
 				<div class="star-rating">
 				<?php
-					/* Core has .star-rating .star colour styling, which is why we use a custom wrapper and template */
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Star and byline markup built by Template helpers from escaped values.
-					echo Template::dashicons_stars( array(
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Star and byline markup built by Template helpers from escaped values.
-						'rating'   => $review->post_rating,
-						'template' => '<span class="star %1$s"></span>',
-					) );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core has .star-rating .star colour styling, so this uses a custom wrapper and template; dashicons_stars() returns that markup.
+					echo Template::dashicons_stars(
+						array(
+							'rating'   => (int) $review->post_rating,
+							'template' => '<span class="star %1$s"></span>',
+						)
+					);
 				?>
 				</div>
 			</div>

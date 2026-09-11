@@ -17,7 +17,9 @@ get_header(); ?>
 				<div>
 
 					<section class="helphub-front-page">
-						<?php echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
+						<?php
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
+						echo do_blocks(
 							sprintf(
 								'<!-- wp:heading -->
 								<h2 class="wp-block-heading screen-reader-text">%s</h2>

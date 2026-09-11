@@ -4,7 +4,9 @@
 <section class="forums-homepage-list">
 	<h2 class="has-heading-5-font-size"><?php esc_html_e( 'Forums', 'wporg-forums' ); ?></h2>
 
-	<?php echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
+	<?php
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
+	echo do_blocks(
 		sprintf(
 			'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"bbp-forums is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"32.3%%"},"fontSize":"small"} -->
 			<div id="forums-list-%s" class="bbp-forums wp-block-group is-style-cards-grid has-small-font-size">%s</div>
@@ -19,7 +21,9 @@
 <section class="forums-homepage-topics">
 	<h2 class="has-heading-5-font-size"><?php esc_html_e( 'Topics', 'wporg-forums' ); ?></h2>
 
-	<?php echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
+	<?php
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
+	echo do_blocks(
 		sprintf(
 			'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"is-style-cards-grid","layout":{"type":"grid","minimumColumnWidth":"32.3%%"},"fontSize":"small"} -->
 			<div class="wp-block-group is-style-cards-grid has-small-font-size">%s</div>

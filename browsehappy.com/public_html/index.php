@@ -61,8 +61,8 @@ defined( 'ABSPATH' ) || die();
 		<div class="wrap">
 			<section id="about">
 				<h2><?php esc_html_e( 'What is Browse Happy?', 'browsehappy' ); ?></h2>
-				<p><?php $what = __( 'Using an outdated browser makes your computer unsafe. Browse Happy is a way for you to find out what are the latest versions of the major browsers around. You can also learn about alternative browsers that may fit you even better than the one you are currently using.', 'browsehappy' );
-echo esc_html( $what ); ?></p>
+				<?php $what = __( 'Using an outdated browser makes your computer unsafe. Browse Happy is a way for you to find out what are the latest versions of the major browsers around. You can also learn about alternative browsers that may fit you even better than the one you are currently using.', 'browsehappy' ); ?>
+				<p><?php echo esc_html( $what ); ?></p>
 			</section><!-- #about -->
 			<section id="share">
 				<h2><?php esc_html_e( 'Share the Happiness', 'browsehappy' ); ?></h2>

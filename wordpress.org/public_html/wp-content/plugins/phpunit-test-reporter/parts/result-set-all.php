@@ -26,18 +26,18 @@ echo Display::get_display_css(); ?>
           <a
             href="<?php echo esc_url( sprintf( 'https://core.trac.wordpress.org/changeset/%d', $rev_id ) ); ?>"
             title="<?php echo esc_attr( apply_filters( 'the_title', $revision->post_title ) ); ?>">
-            r<?php echo esc_html( $rev_id ); ?>
+			r<?php echo esc_html( $rev_id ); ?>
           </a>
         </td>
 
         <td>
             <span class="ptr-status-badge ptr-status-badge-passed">
-			        <?php echo (int) $num_passed; ?>
+					<?php echo (int) $num_passed; ?>
             </span>
         </td>
         <td>
             <span class="ptr-status-badge ptr-status-badge-failed">
-			        <?php echo (int) $num_failed; ?>
+					<?php echo (int) $num_failed; ?>
             </span>
         </td>
         <td>

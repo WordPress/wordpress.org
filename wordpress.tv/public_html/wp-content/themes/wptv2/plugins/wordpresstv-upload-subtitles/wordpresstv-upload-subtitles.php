@@ -455,7 +455,7 @@ class WordPressTV_Subtitles_Upload {
 
 			if ( $pending_subs ) {
 				echo '<div class="updated"><p><a href="upload.php?post_mime_type=' . urlencode( 'application/ttml+xml' ) .
-				     '&amp;detached=1">Subtitles awaiting moderation (' . (int) $pending_subs . ')</a></p></div>';
+					'&amp;detached=1">Subtitles awaiting moderation (' . (int) $pending_subs . ')</a></p></div>';
 			}
 		}
 	}

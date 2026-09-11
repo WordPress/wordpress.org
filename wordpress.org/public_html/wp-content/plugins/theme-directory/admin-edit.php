@@ -587,7 +587,7 @@ function wporg_themes_meta_box_callback( $post ) {
 		}
 		?>
 		<p><?php echo $text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Version label built above with esc_html() and an (int)-cast ticket id. ?> -
-			<select name="wporg_themes_status[<?php echo esc_attr( base64_encode( $version ) ); // base64 because version numbers don't work so well as parts of keys ?>]">
+			<select name="wporg_themes_status[<?php echo esc_attr( base64_encode( $version ) ); // base64 because version numbers don't work so well as parts of keys. ?>]">
 				<option value="new" <?php selected( $status, 'new' ); ?>><?php esc_html_e( 'New', 'wporg-themes' ); ?></option>
 				<?php if ( 'approved' === $status ) : ?>
 					<?php // `approved` is a transient Trac-driven pre-release state; only shown so the current value displays correctly. ?>

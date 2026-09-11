@@ -6,7 +6,7 @@
 		foreach ( $posts as $post ) {
 
 			$evenodd = abs( $evenodd - 1 );
-			echo '<div class="row row-'. esc_attr( $evenodd ) . '">';
+			echo '<div class="row row-' . esc_attr( $evenodd ) . '">';
 
 			echo '<div class="job-date">' . get_the_date( 'M j' ) . '</div>';
 			echo '<div class="job-title">';

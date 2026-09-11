@@ -26,7 +26,7 @@ if ( empty( $suggestions ) ) {
 						if ( $user ) {
 							printf(
 								' | By <a href="https://profiles.wordpress.org/%s">%s</a>',
- 								esc_html( $user->user_nicename ),
+								esc_html( $user->user_nicename ),
 								esc_html( $user->display_name )
 							);
 						}

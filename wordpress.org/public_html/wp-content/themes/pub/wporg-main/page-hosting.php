@@ -37,7 +37,7 @@ $hosting_cache_buster = '9';
                             <a href="https://pressable.com/host-with-pressable-wporg/" rel="nofollow">
                                 <img
                                     alt=""
-                                    src="https://s.w.org/hosting/pressable.png?<?php echo esc_attr( $hosting_cache_buster ); ?>"
+									src="https://s.w.org/hosting/pressable.png?<?php echo esc_attr( $hosting_cache_buster ); ?>"
                                     height="100"
                                     width="100"
                                 />
@@ -81,7 +81,7 @@ $hosting_cache_buster = '9';
                             <a href="https://www.hostinger.com/special/wordpress" rel="nofollow">
                                 <img
                                     alt=""
-                                    src="https://s.w.org/hosting/hostinger.png?<?php echo esc_attr( $hosting_cache_buster ); ?>"
+									src="https://s.w.org/hosting/hostinger.png?<?php echo esc_attr( $hosting_cache_buster ); ?>"
                                     height="100"
                                     width="100"
                                 />
