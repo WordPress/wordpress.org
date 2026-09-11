@@ -8,9 +8,9 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		<div class="wrapper">
 			<div class="section">
 				<div class="col-12" role="main">
-					<h3>The <?php echo $rosetta->rosetta->get_glotpress_locale()->english_name; ?> translation of WordPress is inactive</h3>
+					<h3>The <?php echo esc_html( $rosetta->rosetta->get_glotpress_locale()->english_name ); ?> translation of WordPress is inactive</h3>
 					<p><a href="https://wordpress.org/download/">Download the English version instead</a>.</p>
-					<p>If you&#8217;re interested in translating WordPress to <?php echo $rosetta->rosetta->get_glotpress_locale()->english_name; ?>,
+					<p>If you&#8217;re interested in translating WordPress to <?php echo esc_html( $rosetta->rosetta->get_glotpress_locale()->english_name ); ?>,
 					join <a href="https://make.wordpress.org/polyglots/">the Polyglots team</a> and find out how.</p>
 				</div>
 			</div>
@@ -32,6 +32,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 					$hw = image_hwstring( HEADER_IMAGE_WIDTH, HEADER_IMAGE_HEIGHT );
 					printf(
 						'<img class="shot" %ssrc="%s" alt="" />',
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Image dimension attribute pair built above from the image size.
 						$hw,
 						esc_url( $header_image )
 					);

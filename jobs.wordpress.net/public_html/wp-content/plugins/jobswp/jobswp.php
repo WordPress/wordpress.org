@@ -430,6 +430,7 @@ class Jobs_Dot_WP {
 		if ( ! $post_type_object )
 			return;
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Close-link markup assembled by _get_close_link().
 		echo $this->_get_close_link( $post, 'button button-large alignright' );
 	}
 

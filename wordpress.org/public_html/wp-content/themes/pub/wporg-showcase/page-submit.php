@@ -74,7 +74,7 @@ if ( empty( $_POST ) || $error ) {
 	<?php endif; // $error ?>
 
 <form action="/showcase/submit-a-wordpress-site/#return" method="post" id="submitform">
-	<input type="hidden" name="comment_post_ID" value="<?php echo $post->ID; ?>" />
+	<input type="hidden" name="comment_post_ID" value="<?php echo (int) $post->ID; ?>" />
 
 	<p><label for="submitname"><?php esc_html_e( 'Your Name', 'wporg-showcase' ); ?></label><br />
 	<input type="text" name="submitname" id="submitname" class="text" value="<?php echo esc_attr( $submitname ); ?>" size="28" tabindex="2" required></p>

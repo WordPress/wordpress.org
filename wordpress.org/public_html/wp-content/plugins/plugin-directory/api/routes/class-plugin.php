@@ -399,11 +399,13 @@ class Plugin extends Base {
 				<h4 class="review-title"><?php echo esc_html( $review->post_title ); ?></h4>
 				<div class="star-rating">
 				<?php
-					/* Core has .star-rating .star colour styling, which is why we use a custom wrapper and template */
-					echo Template::dashicons_stars( array(
-						'rating'   => $review->post_rating,
-						'template' => '<span class="star %1$s"></span>',
-					) );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core has .star-rating .star colour styling, so this uses a custom wrapper and template; dashicons_stars() returns that markup.
+					echo Template::dashicons_stars(
+						array(
+							'rating'   => (int) $review->post_rating,
+							'template' => '<span class="star %1$s"></span>',
+						)
+					);
 				?>
 				</div>
 			</div>
@@ -422,14 +424,16 @@ class Plugin extends Base {
 				printf(
 					/* translators: 1: Review author, 2: Review date. */
 					esc_html__( 'By %1$s on %2$s', 'wporg-plugins' ),
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Star and byline markup built by Template helpers from escaped values.
 					$review_author_markup,
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Star and byline markup built by Template helpers from escaped values.
 					'<span class="review-date">' . date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ) . '</span>'
 				);
 				?>
 			</p>
 		</div>
 	</div>
-	<div class="review-body"><?php echo $review->post_content; ?></div>
+	<div class="review-body"><?php echo wp_kses_post( $review->post_content ); ?></div>
 </div>
 <?php
 		return ob_get_clean();

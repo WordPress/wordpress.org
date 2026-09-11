@@ -424,6 +424,7 @@ function bb_base_get_plugin_rating_html( $rating = false, $num_ratings = 0 ) {
  * @return void
  */
 function bb_base_homepage_topics( $args = false ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Buffered bbPress loop-topics template part; escaping would print the rendered markup.
 	echo bb_base_get_homepage_topics( $args );
 }
 
@@ -496,6 +497,7 @@ add_action( 'bbp_clean_post_cache', 'bb_base_purge_homepage_topics' );
  * @return void
  */
 function bb_base_support_topics() {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Buffered bbPress content-archive-topic template part; escaping would print the rendered markup.
 	echo bb_base_get_support_topics();
 }
 

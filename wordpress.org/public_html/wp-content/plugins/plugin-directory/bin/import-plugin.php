@@ -68,6 +68,7 @@ if ( $opts['create'] && ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
 	) );
 
 	if ( is_wp_error( $create_result ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "Failed. {$plugin_slug} post was not be found, and failed to be created.\n";
 		fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $create_result->get_error_message() . "\n" );
 		exit( 1 );
@@ -77,16 +78,20 @@ if ( $opts['create'] && ! Plugin_Directory::get_plugin_post( $plugin_slug ) ) {
 // If async, queue it to be parsed instead.
 if ( $opts['async'] ) {
 	Jobs\Plugin_Import::queue( $plugin_slug, array( 'tags_touched' => $changed_tags ) );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo "Queueing Import for $plugin_slug... OK\n";
 	die();
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 echo "Processing Import for $plugin_slug... ";
 try {
 	$importer = new CLI\Import();
 	$importer->import_from_svn( $plugin_slug, $changed_tags );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo 'OK. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
 } catch ( \Exception $e ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo 'Failed. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
 
 	fwrite( STDERR, "[{$plugin_slug}] Plugin Import Failed: " . $e->getMessage() . "\n" );

@@ -11,7 +11,7 @@ header('Content-Type: ' . feed_content_type('rss2') . '; charset=' . get_option(
 $more = 1;
 
 ?>
-<?php echo '<?xml version="1.0" encoding="'.get_option('blog_charset').'"?'.'>'; ?>
+<?php echo '<?xml version="1.0" encoding="' . get_option( 'blog_charset' ) . '"?' . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- RSS feed body: the XML declaration and core feed values, not HTML. ?>
 
 <rss version="2.0"
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
@@ -28,18 +28,18 @@ $more = 1;
 	<atom:link href="<?php self_link(); ?>" rel="self" type="application/rss+xml" />
 	<link><?php bloginfo_rss('url') ?></link>
 	<description><?php bloginfo_rss("description") ?></description>
-	<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', get_lastpostmodified('GMT'), false); ?></pubDate>
+	<pubDate><?php echo mysql2date( 'D, d M Y H:i:s +0000', get_lastpostmodified( 'GMT' ), false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- RSS feed body: the XML declaration and core feed values, not HTML. ?></pubDate>
 	<?php the_generator( 'rss2' ); ?>
-	<language><?php echo get_option('rss_language'); ?></language>
-	<sy:updatePeriod><?php echo apply_filters( 'rss_update_period', 'hourly' ); ?></sy:updatePeriod>
-	<sy:updateFrequency><?php echo apply_filters( 'rss_update_frequency', '1' ); ?></sy:updateFrequency>
+	<language><?php echo get_option( 'rss_language' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- RSS feed body: the XML declaration and core feed values, not HTML. ?></language>
+	<sy:updatePeriod><?php echo apply_filters( 'rss_update_period', 'hourly' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- RSS feed body: the XML declaration and core feed values, not HTML. ?></sy:updatePeriod>
+	<sy:updateFrequency><?php echo apply_filters( 'rss_update_frequency', '1' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- RSS feed body: the XML declaration and core feed values, not HTML. ?></sy:updateFrequency>
 	<?php do_action('rss2_head'); ?>
 	<?php while( have_posts()) : the_post(); ?>
 	<item>
 		<title><?php the_title_rss() ?></title>
 		<link><?php the_permalink_rss() ?></link>
 		<comments><?php comments_link(); ?></comments>
-		<pubDate><?php echo mysql2date('D, d M Y H:i:s +0000', get_post_time('Y-m-d H:i:s', true), false); ?></pubDate>
+		<pubDate><?php echo mysql2date( 'D, d M Y H:i:s +0000', get_post_time( 'Y-m-d H:i:s', true ), false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- RSS feed body: the XML declaration and core feed values, not HTML. ?></pubDate>
 		<dc:creator><?php the_author() ?></dc:creator>
 		<?php the_category_rss() ?>
 

@@ -59,8 +59,8 @@ use WP15\Theme;
 							?>
 						</p>
 
-						<?php echo wp_oembed_get( 'https://mercantile.wordpress.org/product/wordpress-15th-anniversary-mug/' ); ?>
-						<?php echo wp_oembed_get( 'https://mercantile.wordpress.org/product/wordpress-15th-anniversary-tshirt/' ); ?>
+						<?php echo wp_oembed_get( 'https://mercantile.wordpress.org/product/wordpress-15th-anniversary-mug/' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_oembed_get() returns the embed markup. ?>
+						<?php echo wp_oembed_get( 'https://mercantile.wordpress.org/product/wordpress-15th-anniversary-tshirt/' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_oembed_get() returns the embed markup. ?>
 
 					</div>
 

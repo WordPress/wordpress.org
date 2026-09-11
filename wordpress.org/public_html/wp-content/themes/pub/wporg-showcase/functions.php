@@ -151,12 +151,12 @@ function the_content_limit( $max_char, $more_link_text = '(more...)', $stripteas
 	$content = strip_tags( $content );
 
 	if ( ! empty( $_GET['p'] ) && strlen( $_GET['p'] ) > 0 ) {
-		echo "<p>" . $content . "</p>";
+		echo '<p>' . esc_html( $content ) . '</p>';
 	} else if ( ( strlen( $content ) > $max_char ) && ( $espacio = strpos( $content, " ", $max_char ) ) ) {
 		$content = substr( $content, 0, $espacio );
-		echo "<p>" . $content . "..." . "</p>";
+		echo '<p>' . esc_html( $content ) . '...</p>';
 	} else {
-		echo "<p>" . $content . "</p>";
+		echo '<p>' . esc_html( $content ) . '</p>';
 	}
 }
 
@@ -178,6 +178,7 @@ function popular_tags ($number = 10) {
 	}
 
 	$out .= '</ul>';
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup assembled in this file from already-escaped parts.
 	echo $out;
 }
 

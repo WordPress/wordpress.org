@@ -30,7 +30,7 @@ if ( $user ) {
 	}
 } ?>
 
-<?php echo Display::get_display_css(); ?>
+<?php echo Display::get_display_css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Display::get_display_css() returns the report stylesheet, and the link markup is built here. ?>
 
 <?php
 $parent = get_post( $report->post_parent );

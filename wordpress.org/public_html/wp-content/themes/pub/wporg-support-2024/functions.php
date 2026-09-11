@@ -526,6 +526,7 @@ function wporg_support_get_forums_list() {
 	// Calculate how many spare columns there are to fill at the end of a 3 column grid
 	$columns_to_fill = 3 - ( $forums_count % 3 );
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 	echo do_blocks(
 		sprintf(
 			'<!-- wp:group {"className":"forums-homepage-themes-plugins span-%1$s"} -->

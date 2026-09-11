@@ -22,7 +22,9 @@ function rosetta_entry_meta() {
 	printf(
 		/* translators: 1: post date 2: post author */
 		esc_html__( 'Posted on %1$s by %2$s.', 'rosetta' ),
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Date, author and category markup assembled above from escaped parts.
 		$time_string,
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Date, author and category markup assembled above from escaped parts.
 		$author_string
 	);
 	echo ' ';
@@ -37,6 +39,7 @@ function rosetta_entry_meta() {
 		printf(
 			/* translators: %s: list of categories */
 			esc_html__( 'Filed under %s.', 'rosetta' ),
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Date, author and category markup assembled above from escaped parts.
 			$categories_string
 		);
 	}

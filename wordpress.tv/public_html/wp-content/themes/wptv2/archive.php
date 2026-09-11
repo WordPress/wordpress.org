@@ -43,7 +43,7 @@ global $wp_query, $post, $wptv;
 		elseif ( isset( $wp_query->query_vars['taxonomy'] ) ) :
 			$tax   = get_taxonomy( $wp_query->query_vars['taxonomy'] );
 			$terms = get_term_by( 'slug', $wp_query->query_vars['term'], $wp_query->query_vars['taxonomy'] );
-			print( "$tax->label: $terms->name" );
+			printf( '%s: %s', esc_html( $tax->label ), esc_html( $terms->name ) );
 
 		elseif ( is_search() ) :
 			/* translators: %s: Search query. */
@@ -83,6 +83,7 @@ global $wp_query, $post, $wptv;
 							if ( has_excerpt() ) {
 								$excerpt .= ' &#8212; ' . get_the_excerpt();
 							}
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the_excerpt filter output is already the rendered excerpt.
 							echo apply_filters( 'the_excerpt', $excerpt );
 						?>
 					</span>

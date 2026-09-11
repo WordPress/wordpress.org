@@ -20,6 +20,8 @@
 	<exclude-pattern>*/plugins/plugin-directory/libs/*</exclude-pattern>
 	<exclude-pattern>*/plugins/theme-directory/lib/*</exclude-pattern>
 	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>
+	<!-- Near-verbatim copy of vendor/google/cloud-storage/src/StreamWrapper.php; kept diffable against upstream. -->
+	<exclude-pattern>*/plugins/photo-directory/inc/google-cloud-storage-stream-metadata.php</exclude-pattern>
 
 	<!-- Exclude generated wp-scripts asset files. -->
 	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
@@ -149,6 +151,8 @@
 				<element value="wporg_login_wordpress_url"/>
 				<!-- Returns selected() markup or an esc_attr()'d value attribute; see jobs.wordpress.net plugins/jobswp/jobswp-template.php. -->
 				<element value="jobswp_field_value"/>
+				<!-- Returns esc_html( $text ); see themes/pub/wporg-main/functions.php. -->
+				<element value="esc_html___"/>
 			</property>
 		</properties>
 	</rule>

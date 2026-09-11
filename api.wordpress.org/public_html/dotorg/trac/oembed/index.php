@@ -159,6 +159,7 @@ header( 'Content-Security-Policy: sandbox allow-scripts allow-top-navigation-by-
 
 $cache_key = sha1( $url );
 if ( $data = wp_cache_get( $cache_key, 'trac-oembed' ) ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- oEmbed response body (JSON or XML); escaping would corrupt the format.
 	die( $data );
 }
 
@@ -191,6 +192,7 @@ if (
 ) {
 	$output = '<h1>Temporarily Unavailable</h1>';
 	wp_cache_set( $cache_key, $output, 'trac-oembed', MINUTE_IN_SECONDS );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- oEmbed response body (JSON or XML); escaping would corrupt the format.
 	die( $output );
 }
 
@@ -356,4 +358,5 @@ $data = $doc->saveHTML();
 
 wp_cache_set( $cache_key, $data, 'trac-oembed', HOUR_IN_SECONDS );
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- oEmbed response body (JSON or XML); escaping would corrupt the format.
 echo $data;

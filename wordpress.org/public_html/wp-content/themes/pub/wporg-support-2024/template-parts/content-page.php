@@ -18,6 +18,7 @@
 	<div class="entry-content">
 		<div class="container">
 			<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 			echo do_blocks( '<!-- wp:wporg/table-of-contents /-->' );
 
 			the_content();

@@ -36,6 +36,7 @@
 					defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY &&
 					bbp_is_single_view() && 'reviews' === bbp_get_view_id()
 				) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 					echo do_blocks(
 						sprintf(
 							'<!-- wp:wporg/notice {"type":"warning"} -->

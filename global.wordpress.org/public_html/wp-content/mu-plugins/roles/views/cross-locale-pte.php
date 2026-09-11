@@ -11,7 +11,7 @@
 		<?php esc_html_e( 'Cross-Locale PTEs', 'rosetta' ); ?>
 	</h2>
 
-	<?php echo $feedback_message; ?>
+	<?php echo $feedback_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice markup assembled by get_feedback_message() from escaped parts. ?>
 
 	<p><?php esc_html_e( 'This is the list of our current Cross-Locale PTEs.', 'rosetta' ); ?></p>
 	<table class="wp-list-table widefat fixed striped translation-editors">
