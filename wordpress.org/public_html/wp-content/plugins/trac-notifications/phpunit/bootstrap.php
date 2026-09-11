@@ -37,6 +37,9 @@ require_once $_tests_dir . '/includes/functions.php';
  * site it is on for the duration of its constructor.
  */
 function wporg_trac_components_manually_load_plugin() {
+	// The main plugin class does nothing outside the Make network, so its
+	// bootstrap instance is inert here; tests build their own instance.
+	require_once dirname( __DIR__ ) . '/trac-notifications.php';
 	require_once dirname( __DIR__ ) . '/trac-components.php';
 
 	$make_core = function () {
