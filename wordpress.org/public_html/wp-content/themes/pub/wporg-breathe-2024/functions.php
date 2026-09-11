@@ -229,7 +229,7 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 			$people_url        = home_url( '/pledges/' );
 			$is_pledges_active = trailingslashit( $people_url ) === trailingslashit( home_url( $wp->request ) );
 			$people_item       = array(
-				'label'     => esc_html__( 'People', 'wporg-5ftf' ),
+				'label'     => esc_html__( 'People', 'wporg' ),
 				'url'       => esc_url( $people_url ),
 				'className' => $is_pledges_active ? 'current-menu-item' : '',
 			);
