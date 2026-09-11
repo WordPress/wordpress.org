@@ -23,7 +23,9 @@ class Make_Core_Trac_Components {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-		add_action( 'the_content', array( $this, 'the_content' ), 5 );
+		// Append the generated block after the shortcode pass so it is not processed a
+		// second time. do_shortcode runs at 11; 99 also clears later shortcode filters.
+		add_action( 'the_content', array( $this, 'the_content' ), 99 );
 		add_action( 'save_post_component', array( $this, 'save_post' ), 10, 2 );
 		add_action( 'wp_head', array( $this, 'wp_head' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
@@ -472,7 +474,7 @@ jQuery( function( $ ) {
 		}
 
 		if ( $post->post_parent ) {
-			$top_level = '<h4>This is a subcomponent of the <a href="' . get_permalink( $post->post_parent ) . '">' . get_post( $post->post_parent )->post_title . '</a> component.</h4>';
+			$top_level = '<h4>This is a subcomponent of the <a href="' . esc_url( get_permalink( $post->post_parent ) ) . '">' . esc_html( get_post( $post->post_parent )->post_title ) . '</a> component.</h4>';
 			$content = $top_level . "\n\n" . $content;
 		}
 
@@ -489,7 +491,7 @@ jQuery( function( $ ) {
 		$subcomponents = array();
 		if ( $subcomponents_query->have_posts() ) {
 			foreach ( $subcomponents_query->posts as $subcomponent ) {
-				$subcomponents[ $subcomponent->ID ] = '<a href="' . get_permalink( $subcomponent ) . '">' . $subcomponent->post_title . '</a>';
+				$subcomponents[ $subcomponent->ID ] = '<a href="' . esc_url( get_permalink( $subcomponent ) ) . '">' . esc_html( $subcomponent->post_title ) . '</a>';
 			}
 			echo wp_sprintf( "<h4>Subcomponents: %l.</h4>", $subcomponents );
 		}
@@ -507,7 +509,7 @@ jQuery( function( $ ) {
 				echo '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a> (' . esc_html( get_the_date() ) . ")</li>\n";
 			}
 			echo '</ul>';
-			echo 'View all posts tagged <a href="' . esc_url( get_term_link( $post->post_name, 'post_tag' ) ) . '">' . esc_html( $post->post_name ) . "</a>.\n\n";
+			echo '<p>View all posts tagged <a href="' . esc_url( get_term_link( $post->post_name, 'post_tag' ) ) . '">' . esc_html( $post->post_name ) . '</a>.</p>';
 			wp_reset_postdata();
 		}
 
@@ -525,14 +527,14 @@ jQuery( function( $ ) {
 				echo '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a> (' . esc_html( get_the_date() ) . ")</li>\n";
 			}
 			echo '</ul>';
-			echo 'View all posts tagged <a href="' . esc_url( get_term_link( $post->post_name, 'post_tag' ) ) . '">' . esc_html( $post->post_name ) . "</a>.\n\n";
+			echo '<p>View all posts tagged <a href="' . esc_url( get_term_link( $post->post_name, 'post_tag' ) ) . '">' . esc_html( $post->post_name ) . '</a>.</p>';
 			wp_reset_postdata();
 		}
 		restore_current_blog();
 
 		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => self::POST_TYPE_NAME, 'echo' => false, 'title_li' => false, 'exclude' => implode( ',', array_keys( $subcomponents ) ) ) );
 		if ( $sub_pages ) {
-			echo "<h3>Pages under " . get_the_title() . "</h3>\n";
+			echo '<h3>Pages under ' . esc_html( get_the_title() ) . "</h3>\n";
 			echo "<ul>$sub_pages</ul>";
 			echo "\n\n";
 		}
@@ -546,7 +548,7 @@ jQuery( function( $ ) {
 		$maintainers = get_post_meta( $post->ID, '_active_maintainers', true );
 		if ( $maintainers ) {
 			$maintainers = array_map( 'trim', explode( ',', $maintainers ) );
-			echo 'Component maintainers: ';
+			echo '<p>Component maintainers:</p>';
 			echo '<ul class="maintainers">';
 			foreach ( $maintainers as $maintainer ) {
 				$maintainer = get_user_by( 'login', $maintainer );
@@ -557,14 +559,14 @@ jQuery( function( $ ) {
 				printf( '<li><a href="//profiles.wordpress.org/%s/">%s %s</a></li>',
 					esc_attr( $maintainer->user_nicename ),
 					get_avatar( $maintainer->user_email, 36 ),
-					$maintainer->display_name ?: $maintainer->user_login
+					esc_html( $maintainer->display_name ?: $maintainer->user_login )
 				);
 			}
 			echo "</ul>\n\n";
 		}
 
-		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of {$this->trac_name()} are always seeking to mentor others to impart their knowledge.\n\n";
-		echo "<strong>Want to help? Start following this component!</strong> <a href='/{$this->trac}/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
+		echo '<p>Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of ' . esc_html( $this->trac_name() ) . ' are always seeking to mentor others to impart their knowledge.</p>';
+		echo '<p><strong>Want to help? Start following this component!</strong> <a href="' . esc_url( "/{$this->trac}/notifications/" ) . '">Adjust your notifications here</a>. Feel free to dig into any ticket.</p>';
 
 		$followers = $this->api->get_component_followers( $component );
 		if ( $followers ) {
@@ -572,7 +574,7 @@ jQuery( function( $ ) {
 			$followers = $wpdb->get_results( "SELECT user_login, user_nicename, user_email FROM $wpdb->users WHERE user_login IN ($followers)" );
 		}
 		if ( $followers ) {
-			echo 'Contributors following this component:';
+			echo '<p>Contributors following this component:</p>';
 			echo '<ul class="followers">';
 			foreach ( $followers as $follower ) {
 				echo '<li><a title="' . esc_attr( $follower->user_login ) . '" href="//profiles.wordpress.org/' . esc_attr( $follower->user_nicename ) . '/">';

@@ -55,5 +55,27 @@ require $_tests_dir . '/includes/bootstrap.php';
 // The save path under test is wp-admin's edit_post().
 require_once ABSPATH . 'wp-admin/includes/admin.php';
 
+if ( ! function_exists( 'switch_to_blog' ) ) {
+	/**
+	 * No-op stand-in for the multisite blog switch when the suite runs single-site.
+	 *
+	 * @param int   $new_blog_id The blog to switch to.
+	 * @param mixed $deprecated  Unused.
+	 * @return bool
+	 */
+	function switch_to_blog( $new_blog_id, $deprecated = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- Mirrors the core signature.
+		return true;
+	}
+
+	/**
+	 * No-op stand-in for restoring the current blog when the suite runs single-site.
+	 *
+	 * @return bool
+	 */
+	function restore_current_blog() {
+		return true;
+	}
+}
+
 // Include the base test case.
 require __DIR__ . '/includes/testcase.php';
