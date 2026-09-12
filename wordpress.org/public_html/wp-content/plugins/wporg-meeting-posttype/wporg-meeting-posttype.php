@@ -383,16 +383,16 @@ class Meeting_Post_Type {
 		 */
 		$recurring = sanitize_key( $_POST['recurring'] ?? '' );
 
-		$meta['team']        = sanitize_text_field( wp_unslash( $_POST['team'] ?? '' ) );
-		$meta['start_date']  = sanitize_text_field( wp_unslash( $_POST['start_date'] ?? '' ) );
-		$meta['end_date']    = sanitize_text_field( wp_unslash( $_POST['end_date'] ?? '' ) );
-		$meta['time']        = sanitize_text_field( wp_unslash( $_POST['time'] ?? '' ) );
-		$meta['recurring']   = in_array( $recurring, array( 'weekly', 'biweekly', 'occurrence', 'monthly' ), true ) ? $recurring : '';
-		$meta['occurrence']  = ( isset( $_POST['occurrence'] ) && 'occurrence' === $meta['recurring']
+		$meta['team']       = sanitize_text_field( wp_unslash( $_POST['team'] ?? '' ) );
+		$meta['start_date'] = sanitize_text_field( wp_unslash( $_POST['start_date'] ?? '' ) );
+		$meta['end_date']   = sanitize_text_field( wp_unslash( $_POST['end_date'] ?? '' ) );
+		$meta['time']       = sanitize_text_field( wp_unslash( $_POST['time'] ?? '' ) );
+		$meta['recurring']  = in_array( $recurring, array( 'weekly', 'biweekly', 'occurrence', 'monthly' ), true ) ? $recurring : '';
+		$meta['occurrence'] = ( isset( $_POST['occurrence'] ) && 'occurrence' === $meta['recurring']
 		                         && is_array( $_POST['occurrence'] )
 		                         ? array_map( 'intval', $_POST['occurrence'] ) : array() );
-		$meta['link']        = esc_url_raw( wp_unslash( $_POST['link'] ?? '' ) );
-		$meta['location']    = sanitize_text_field( wp_unslash( $_POST['location'] ?? '' ) );
+		$meta['link']       = esc_url_raw( wp_unslash( $_POST['link'] ?? '' ) );
+		$meta['location']   = sanitize_text_field( wp_unslash( $_POST['location'] ?? '' ) );
 
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $post->ID, $key, $value );

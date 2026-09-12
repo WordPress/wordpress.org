@@ -85,7 +85,7 @@ add_filter( 'bp_group_members_count_user_join_filter', 'bporg_group_members_coun
 function bporg_redirect() {
 
 	// Explode the request. parse_url() is used here to exclude any query args which caused some redirects to be missed.
-	$uri_chunks = explode( '/', parse_url( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH ) );
+	$uri_chunks = explode( '/', wp_parse_url( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH ) );
 
 	// No path, no redirects to handle.
 	if ( empty( $uri_chunks[1] ) ) {

@@ -43,7 +43,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 	 */
 	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	$submitted_message = is_string( $_POST['message'] ?? '' ) ? wp_unslash( $_POST['message'] ) : '';
-	if ( '' == sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) ) ) {
+	if ( '' === sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) ) ) {
 		$your_name = true;
 		$error = true;
 	}
@@ -58,7 +58,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$error = true;
 	}
 
-	if ( '' == sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) ) ) {
+	if ( '' === sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) ) ) {
 		$subject = true;
 		$error = true;
 	}

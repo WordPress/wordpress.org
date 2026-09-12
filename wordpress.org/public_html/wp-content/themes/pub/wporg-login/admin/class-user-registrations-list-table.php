@@ -65,7 +65,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 				$url = admin_url( 'admin.php?page=user-registrations' );
 				if ( $is_search ) {
-					$url = add_query_arg( 's', urlencode( sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ) ), $url );
+					$url = add_query_arg( 's', rawurlencode( sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ) ), $url );
 				}
 
 				if ( 'all' !== $view ) {
@@ -278,7 +278,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		);
 
 		$sort_column = sanitize_key( $_GET['orderby'] ?? 'pending_id' );
-		$sort_order = strtoupper( sanitize_key( $_GET['order'] ?? 'DESC' ) );
+		$sort_order  = strtoupper( sanitize_key( $_GET['order'] ?? 'DESC' ) );
 
 		if ( ! in_array( $sort_order, [ 'DESC', 'ASC' ] ) ) {
 			$sort_order = 'DESC';

@@ -169,6 +169,16 @@
 		</properties>
 	</rule>
 
+	<!--
+		Reading $_GET on a page that also processes a form. Most of this estate is
+		read-only endpoints and admin list tables filtering by query string, where
+		there is no nonce to check, so the warning is noise at a volume that hides
+		the rest. NonceVerification.Missing, which fires on $_POST, stays an error.
+	-->
+	<rule ref="WordPress.Security.NonceVerification.Recommended">
+		<severity>0</severity>
+	</rule>
+
 	<!-- PHPUnit requires test files to be named after the test class they contain. -->
 	<rule ref="WordPress.Files.FileName">
 		<exclude-pattern>*/tests/*</exclude-pattern>

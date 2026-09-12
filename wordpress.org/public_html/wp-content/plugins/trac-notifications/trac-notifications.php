@@ -22,7 +22,7 @@ class wporg_trac_notifications {
 		if ( $make_site[2] !== 'make.wordpress.org' || ! in_array( $trac, $this->tracs_supported ) ) {
 			return;
 		}
-		if ( 'core' === $trac && in_array( sanitize_key( $_GET['trac'] ?? '' ), $this->tracs_supported_extra ) ) {
+		if ( 'core' === $trac && in_array( sanitize_key( $_GET['trac'] ?? '' ), $this->tracs_supported_extra, true ) ) {
 			$trac = sanitize_key( $_GET['trac'] );
 		}
 

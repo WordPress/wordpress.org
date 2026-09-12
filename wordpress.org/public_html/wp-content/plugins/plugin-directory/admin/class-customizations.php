@@ -904,8 +904,8 @@ class Customizations {
 		$comment_author_email = wp_slash( $user->user_email );
 		$comment_author_url   = wp_slash( $user->user_url );
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Passed to wp_new_comment(), which expects slashed input and applies kses according to the unfiltered_html check below.
-		$comment_content      = wp_slash( trim( wp_unslash( $_POST['content'] ?? '' ) ) );
-		$comment_type         = isset( $_POST['comment_type'] ) ? sanitize_key( wp_unslash( $_POST['comment_type'] ) ) : '';
+		$comment_content = wp_slash( trim( wp_unslash( $_POST['content'] ?? '' ) ) );
+		$comment_type    = isset( $_POST['comment_type'] ) ? sanitize_key( wp_unslash( $_POST['comment_type'] ) ) : '';
 
 		if ( current_user_can( 'unfiltered_html' ) ) {
 			if ( ! isset( $_POST['_wp_unfiltered_html_comment'] ) ) {

@@ -47,6 +47,7 @@ class Serve {
 	 * @return array An array containing the vital details for the ZIP request.
 	 */
 	protected function determine_request() {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- wp_parse_url() is unavailable; this class runs outside WordPress.
 		$path = parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH );
 		$zip  = basename( $path );
 

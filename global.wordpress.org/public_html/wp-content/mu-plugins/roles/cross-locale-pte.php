@@ -133,7 +133,7 @@ class Cross_Locale_PTE {
 	public static function update_cross_locale_pte() {
 		global $wpdb;
 
-		$projects = array_filter( array_map( 'strval', explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['projects'] ?? '' ) ) ) ) );
+		$projects         = array_filter( array_map( 'strval', explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['projects'] ?? '' ) ) ) ) );
 		$current_projects = self::get_users_projects( self::$user->ID );
 
 		$projects_to_remove = array_diff( $current_projects, $projects );

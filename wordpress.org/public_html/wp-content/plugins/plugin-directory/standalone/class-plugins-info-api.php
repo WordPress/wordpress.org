@@ -54,7 +54,7 @@ class Plugins_Info_API {
 
 			default:
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
-				if ( 'POST' != strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+				if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
 					die( '<p>Action not implemented. <a href="https://codex.wordpress.org/WordPress.org_API">API Docs</a>.</p>' );
 				} else {
 					$this->output( (object) [ 'error' => 'Action not implemented' ], 400 );
@@ -398,8 +398,8 @@ class Plugins_Info_API {
 		 * is not loaded yet, and sanitizing would change what gets restored.
 		 */
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput
-		$host                   = $_SERVER['HTTP_HOST'] ?? '';
-		$request_uri            = $_SERVER['REQUEST_URI'] ?? '';
+		$host        = $_SERVER['HTTP_HOST'] ?? '';
+		$request_uri = $_SERVER['REQUEST_URI'] ?? '';
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 		$_SERVER['HTTP_HOST']   = 'wordpress.org';
 		$_SERVER['REQUEST_URI'] = '/plugins/';

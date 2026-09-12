@@ -106,10 +106,10 @@ function display_reports_page( $details ) {
 				$counts = [];
 				foreach ( $details as $r ) {
 					$counts[] = (object)[
-						'id' => $r->ID,
-						'name' => $r->display_name ?: $r->user_nicename,
-						'slug' => $r->user_nicename,
-						'link' => 'https://profiles.wordpress.org/' . $r->user_nicename . '/',
+						'id'    => $r->ID,
+						'name'  => $r->display_name ?: $r->user_nicename,
+						'slug'  => $r->user_nicename,
+						'link'  => 'https://profiles.wordpress.org/' . $r->user_nicename . '/',
 						'count' => $r->count
 					];
 				}
@@ -131,7 +131,7 @@ function display_reports_page( $details ) {
 				foreach ( $details as $c ) {
 					$link = add_query_arg(
 						[
-							'page' => str_replace( 'reports', 'edit', $page ),
+							'page'   => str_replace( 'reports', 'edit', $page ),
 							'author' => $c->user_login,
 						],
 						admin_url( 'admin.php' )
@@ -167,7 +167,7 @@ function display_reports_page( $details ) {
 				foreach ( $details as $c ) {
 					$link = add_query_arg(
 						[
-							'page' => str_replace( 'reports', 'edit', $page ),
+							'page'      => str_replace( 'reports', 'edit', $page ),
 							'revisions' => $c->revisions
 						],
 						admin_url( 'admin.php' )
@@ -298,7 +298,7 @@ function display_reports_page( $details ) {
 					$link = add_query_arg(
 						[
 							'page' => str_replace( 'reports', 'edit', $page ),
-							's' => $p->prop_name,
+							's'    => $p->prop_name,
 						],
 						admin_url( 'admin.php' )
 					);
@@ -350,7 +350,7 @@ function display_reports_page( $details ) {
 				foreach ( $details as $c ) {
 					$link = add_query_arg(
 						[
-							'page' => str_replace( 'reports', 'edit', $page ),
+							'page'      => str_replace( 'reports', 'edit', $page ),
 							'revisions' => $c->revisions
 						],
 						admin_url( 'admin.php' )
@@ -385,7 +385,7 @@ function display_reports_page( $details ) {
 				foreach ( $details as $c ) {
 					$link = add_query_arg(
 						[
-							'page' => str_replace( 'reports', 'edit', $page ),
+							'page'      => str_replace( 'reports', 'edit', $page ),
 							'revisions' => $c->revisions
 						],
 						admin_url( 'admin.php' )

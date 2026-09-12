@@ -6,4 +6,6 @@ vendor/
 .phpcs-branch/
 *.phpcs
 *.orig.phpcs
+/*.diff
+/*.orig
 .svn/

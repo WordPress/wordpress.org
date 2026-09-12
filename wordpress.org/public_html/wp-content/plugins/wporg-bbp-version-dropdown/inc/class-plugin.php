@@ -105,7 +105,7 @@ class Plugin {
 		 */
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		$submitted = sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ?? '' ) );
-		if ( $submitted && in_array( $submitted, $versions ) ) {
+		if ( $submitted && in_array( $submitted, $versions, true ) ) {
 			$version = $this->sanitize_wp_version( $submitted );
 		} else if ( isset( $_POST['wp_other_version'] ) ) {
 			$version = $this->sanitize_wp_version( sanitize_text_field( wp_unslash( $_POST['wp_other_version'] ) ) );

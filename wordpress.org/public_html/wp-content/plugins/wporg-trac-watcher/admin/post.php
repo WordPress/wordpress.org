@@ -11,8 +11,8 @@ add_action( 'admin_post_svn_save', function() {
 	check_admin_referer( 'edit_svn_prop' );
 
 	$svns = get_svns_for_current_site();
-	$svn = $svns[ sanitize_key( $_REQUEST['svn'] ?? '' ) ] ?? false;
-	$rev = absint( $_REQUEST['revision'] ?? 0 );
+	$svn  = $svns[ sanitize_key( $_REQUEST['svn'] ?? '' ) ] ?? false;
+	$rev  = absint( $_REQUEST['revision'] ?? 0 );
 
 	if ( empty( $svn ) ) {
 		die( -1 );
@@ -148,8 +148,8 @@ add_action( 'admin_post_svn_reparse', function() {
 	check_admin_referer( 'reparse_svn' );
 
 	$svns = get_svns_for_current_site();
-	$svn = $svns[ sanitize_key( $_REQUEST['svn'] ?? '' ) ] ?? false;
-	$rev = absint( $_REQUEST['revision'] ?? 0 );
+	$svn  = $svns[ sanitize_key( $_REQUEST['svn'] ?? '' ) ] ?? false;
+	$rev  = absint( $_REQUEST['revision'] ?? 0 );
 
 	if ( empty( $svn ) || empty( $rev ) ) {
 		die( -1 );

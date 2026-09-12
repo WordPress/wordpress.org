@@ -30,6 +30,7 @@ class Readme_Validator {
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Stateless validator; the submitted readme is parsed and echoed back, nothing is stored.
 		if ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decodes the readme the form posted, in strict mode.
 			$readme_contents = base64_decode( sanitize_text_field( wp_unslash( $_POST['readme_contents'] ?? '' ) ), true );
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing

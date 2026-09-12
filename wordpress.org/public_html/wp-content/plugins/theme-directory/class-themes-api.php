@@ -178,7 +178,7 @@ class Themes_API {
 			$this->$action();
 		} else {
 			// Assume a friendly wp hacker :)
-			if ( 'POST' != strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) ) {
+			if ( 'POST' !== strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) ) {
 				wp_die( 'Action not implemented. <a href="https://codex.wordpress.org/WordPress.org_API">API Docs</a>' );
 			} else {
 				$this->response = (object) array( 'error' => 'Action not implemented' );

@@ -630,33 +630,36 @@ function wporg_login_block_account( $user, $reason = '' ) {
 	return true;
 }
 
-add_action( 'load-toplevel_page_user-registrations', function() {
-	// Perform bulk actions.
-	$action = sanitize_key( $_REQUEST['action'] ?? ( $_REQUEST['action2'] ?? '' ) );
-	if (
-		empty( $_REQUEST['pending_ids'] ) ||
-		'reg_block' !== $action ||
-		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ?? '' ) ), 'bulk-toplevel_page_user-registrations' )
-	) {
-		return;
-	}
-
-	$reason = sanitize_text_field( wp_unslash( $_REQUEST['block_reason'] ?? '' ) );
-	foreach ( array_map( 'absint', (array) ( $_REQUEST['pending_ids'] ?? array() ) ) as $pending_id ) {
-		$pending_user = wporg_get_pending_user( $pending_id );
-		if ( ! $pending_user ) {
-			continue;
+add_action(
+	'load-toplevel_page_user-registrations',
+	function () {
+		// Perform bulk actions.
+		$action = sanitize_key( $_REQUEST['action'] ?? ( $_REQUEST['action2'] ?? '' ) );
+		if (
+			empty( $_REQUEST['pending_ids'] ) ||
+			'reg_block' !== $action ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ?? '' ) ), 'bulk-toplevel_page_user-registrations' )
+		) {
+			return;
 		}
 
-		if ( $pending_user['created'] ) {
-			wporg_login_block_account( $pending_user, $reason );
-		} else {
-			wporg_login_block_registration( $pending_user );
-		}
-	}
+		$reason = sanitize_text_field( wp_unslash( $_REQUEST['block_reason'] ?? '' ) );
+		foreach ( array_map( 'absint', (array) ( $_REQUEST['pending_ids'] ?? array() ) ) as $pending_id ) {
+			$pending_user = wporg_get_pending_user( $pending_id );
+			if ( ! $pending_user ) {
+				continue;
+			}
 
-	$url = remove_query_arg( array( 'pending_ids', 'action', 'action2', '_wpnonce', '_wp_http_referer' ) );
-	$url = add_query_arg( 'action', 'blocked_account', $url );
-	wp_safe_redirect( $url );
-	exit;
-} );
+			if ( $pending_user['created'] ) {
+				wporg_login_block_account( $pending_user, $reason );
+			} else {
+				wporg_login_block_registration( $pending_user );
+			}
+		}
+
+		$url = remove_query_arg( array( 'pending_ids', 'action', 'action2', '_wpnonce', '_wp_http_referer' ) );
+		$url = add_query_arg( 'action', 'blocked_account', $url );
+		wp_safe_redirect( $url );
+		exit;
+	}
+);

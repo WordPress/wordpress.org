@@ -366,7 +366,7 @@ function block_login_register_actions() {
 	unset( $_REQUEST['sensei_reg_password'], $_POST['sensei_reg_password'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 	// By unsetting these, sensei can't process a login.
-	if ( 'sensei-login' == sanitize_key( $_REQUEST['form'] ?? '' ) ) {
+	if ( 'sensei-login' === sanitize_key( $_REQUEST['form'] ?? '' ) ) {
 		unset( $_REQUEST['_wpnonce'], $_REQUEST['log'], $_REQUEST['pwd'], $_POST['log'], $_POST['pwd'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	}
 }

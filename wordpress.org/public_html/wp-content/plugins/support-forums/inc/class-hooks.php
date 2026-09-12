@@ -912,7 +912,7 @@ class Hooks {
 			//
 			// parse_url is used here to remove any additional query args from the REQUEST_URI before redirection
 			// The SSO code handles the urlencoding of the redirect_to parameter
-			$url_parts = parse_url( set_url_scheme( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) );
+			$url_parts       = wp_parse_url( set_url_scheme( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) );
 			$constructed_url = $url_parts['scheme'] . '://' . $url_parts['host'] . (isset($url_parts['path'])?$url_parts['path']:'');
 
 			if ( class_exists( 'WPOrg_SSO' ) ) {

@@ -818,12 +818,12 @@ EMAIL;
 				if ( ! is_email( wp_unslash( $_POST['email'] ?? '' ) ) ) {
 					$has_errors = __( 'The provided "Email Address" is not a proper email address.', 'jobswp' );
 					unset( $_POST['email'] );
-				} elseif ( 'email' == $howtoapply_method && ! is_email( wp_unslash( $_POST['howtoapply'] ?? '' ) ) ) {
+				} elseif ( 'email' === $howtoapply_method && ! is_email( wp_unslash( $_POST['howtoapply'] ?? '' ) ) ) {
 					$has_errors = __( 'The provided "How to Apply" email address is not a proper email address.', 'jobswp' );
 					unset( $_POST['howtoapply'] );
-				} elseif ( 'web' == $howtoapply_method && is_email( wp_unslash( $_POST['howtoapply'] ?? '' ) ) ) {
+				} elseif ( 'web' === $howtoapply_method && is_email( wp_unslash( $_POST['howtoapply'] ?? '' ) ) ) {
 					$has_errors = __( 'The provided "How to Apply" online form address appear to be an email address. Either supply a website address or change the dropdown to "Email Address".', 'jobswp' );
-				} elseif ( 'web' == $howtoapply_method && ! wp_http_validate_url( esc_url_raw( wp_unslash( $_POST['howtoapply'] ?? '' ) ) ) ) {
+				} elseif ( 'web' === $howtoapply_method && ! wp_http_validate_url( esc_url_raw( wp_unslash( $_POST['howtoapply'] ?? '' ) ) ) ) {
 					$has_errors = __( 'The provided "How to Apply" online form address is not a proper URL.', 'jobswp' );
 				}
 			endif;
@@ -909,7 +909,7 @@ EMAIL;
 			$cats = wp_list_pluck( Jobs_Dot_WP::get_job_categories(), 'slug' );
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- save_job() verified the jobswppostjob nonce before calling this.
 			$category = sanitize_title( wp_unslash( $_POST['category'] ?? '' ) );
-			if ( in_array( $category, $cats ) ) {
+			if ( in_array( $category, $cats, true ) ) {
 				wp_set_object_terms( $job_id, array( $category ), 'job_category', false );
 			}
 

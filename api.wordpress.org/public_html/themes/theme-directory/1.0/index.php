@@ -17,6 +17,7 @@ require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
 function api_send_json( $data ) {
 	// Allow cross-domain calls from *.wordpress.org
+	// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText -- Hostname pattern, correctly lowercase.
 	if ( isset( $_SERVER['HTTP_ORIGIN'] ) && preg_match( '!^https?://([^.]+\.)?wordpress\.org/?$!i', sanitize_text_field( wp_unslash( $_SERVER['HTTP_ORIGIN'] ?? '' ) ) ) ) {
 		header( 'Access-Control-Allow-Origin: ' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_ORIGIN'] ?? '' ) ) );
 		header( 'Access-Control-Allow-Credentials: true' ); // Allow cookies to be used.
@@ -59,7 +60,7 @@ switch ( sanitize_key( $_REQUEST['action'] ?? '' ) ) {
 
 		$theme_slug = sanitize_key( wp_unslash( $_REQUEST['theme'] ?? '' ) );
 
-		if ( 'add-favorite' == sanitize_key( $_REQUEST['action'] ?? '' ) ) {
+		if ( 'add-favorite' === sanitize_key( $_REQUEST['action'] ?? '' ) ) {
 			$result = wporg_themes_add_favorite( $theme_slug );
 		} else {
 			$result = wporg_themes_remove_favorite( $theme_slug );

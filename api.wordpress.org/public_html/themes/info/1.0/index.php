@@ -153,7 +153,7 @@ echo $api->get_result( $format );
 
 // Cache when a theme doesn't exist. See the validation handler above.
 if (
-	'theme_information' == $api_action &&
+	'theme_information' === $api_action &&
 	isset( $slug ) &&
 	404 == http_response_code() &&
 	// Validate that the theme doesn't exist for update-checks, as a sanity check.

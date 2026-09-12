@@ -382,7 +382,7 @@ add_action( 'init', function() {
 		return;
 	}
 
-	$path = parse_url( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH );
+	$path = wp_parse_url( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH );
 	if ( str_ends_with( $path, '/wp-activate.php' ) ) {
 		die_bad_request( 'Invalid request to wp-activate.php' );
 	}

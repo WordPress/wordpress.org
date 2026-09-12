@@ -90,7 +90,7 @@ class WordCampTV_Unisubs {
 
 		if ( isset( $_GET['url'] ) ) {
 			// Do a quick check to see if the URL starts with the blog's URL
-			if ( home_url() != substr( esc_url_raw( wp_unslash( $_GET['url'] ?? '' ) ), 0, strlen( home_url() ) ) ) {
+			if ( home_url() !== substr( esc_url_raw( wp_unslash( $_GET['url'] ?? '' ) ), 0, strlen( home_url() ) ) ) {
 				$this->fourohfour();
 			}
 

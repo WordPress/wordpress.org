@@ -123,7 +123,7 @@ class Locale_Associations implements Admin_Page {
 			return new WP_Error( 'missing_data' );
 		}
 
-		$locale = sanitize_text_field( wp_unslash( $_POST['locale'] ) );
+		$locale    = sanitize_text_field( wp_unslash( $_POST['locale'] ) );
 		$subdomain = sanitize_text_field( wp_unslash( $_POST['subdomain'] ) );
 
 		if ( 0 !== strpos( $locale, 'test' ) ) {

@@ -28,6 +28,7 @@ $format  = 'json'; // json, jsonp, xml, or php
  * sanitizers are unavailable. Each field is validated by Plugins_Info_API_Request.
  */
 // phpcs:disable WordPress.Security.ValidatedSanitizedInput
+// phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable -- Usage example; the die() above ends the real request.
 $method  = $_REQUEST['method'] ?? '';
 $request = $_REQUEST['request'] ?? array();
 // phpcs:enable WordPress.Security.ValidatedSanitizedInput
