@@ -53,7 +53,8 @@ class Plugins_Info_API {
 				break;
 
 			default:
-				if ( 'POST' != strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) ) {
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
+				if ( 'POST' != strtoupper( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
 					die( '<p>Action not implemented. <a href="https://codex.wordpress.org/WordPress.org_API">API Docs</a>.</p>' );
 				} else {
 					$this->output( (object) [ 'error' => 'Action not implemented' ], 400 );
@@ -344,7 +345,8 @@ class Plugins_Info_API {
 		header( 'Content-Type: ' . $this->formats[ $this->format ] );
 
 		if ( $http_code ) {
-			header( sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? '' ) ) . "$http_code $http_code", true, $http_code );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
+			header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . "$http_code $http_code", true, $http_code );
 		}
 
 		switch ( $this->format ) {
@@ -391,8 +393,14 @@ class Plugins_Info_API {
 		global $wpdb;
 		define( 'REST_REQUEST', true );
 
-		$host                   = sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) );
-		$request_uri            = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+		/*
+		 * Stashed so the real values can be put back after wp-load.php has run. WordPress
+		 * is not loaded yet, and sanitizing would change what gets restored.
+		 */
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput
+		$host                   = $_SERVER['HTTP_HOST'] ?? '';
+		$request_uri            = $_SERVER['REQUEST_URI'] ?? '';
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 		$_SERVER['HTTP_HOST']   = 'wordpress.org';
 		$_SERVER['REQUEST_URI'] = '/plugins/';
 

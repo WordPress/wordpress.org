@@ -10,14 +10,14 @@ if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 
 add_action( 'init', function() {
 	if (
-		'/.well-known/security.txt' === esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ||
-		'/security.txt' === esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) )
+		'/.well-known/security.txt' === wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ||
+		'/security.txt' === wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) )
 	) {
 		security_txt();
 		exit;
 	}
 
-	if ( '/.well-known/change-password' === esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) {
+	if ( '/.well-known/change-password' === wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) {
 		wp_safe_redirect( 'https://profiles.wordpress.org/profile/profile/edit/group/3/?screen=password' );
 		exit;
 	}

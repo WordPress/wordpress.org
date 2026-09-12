@@ -58,7 +58,7 @@ class Audit_Log {
 				'one-click'   => ( isset( $_POST['List-Unsubscribe'] ) && 'One-Click' === $_POST['List-Unsubscribe'] ) ? ' (one-click)' : '',
 
 				// Not used in the printf, but included in meta
-				'request-uri' => esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ),
+				'request-uri' => wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ),
 				'referer'     => wp_get_raw_referer(),
 			],
 			$user_id,
@@ -110,7 +110,7 @@ class Audit_Log {
 		}
 
 		// Determine what triggered this change.
-		$where_from = ! ms_is_switched() ? home_url( '/' ) : sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+		$where_from = ! ms_is_switched() ? home_url( '/' ) : sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 		$where_from = explode( '?', $where_from )[0];
 		$where_from = wp_parse_url( $where_from, PHP_URL_HOST ) ?: $where_from;
 

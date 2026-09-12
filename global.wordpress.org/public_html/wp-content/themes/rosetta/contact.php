@@ -200,7 +200,7 @@ Email: ' . $message_data['email'] . '
 Blog URI: ' . $message_data['blog_url'] . '
 IP Address: ' . $message_data['ip'] . '
 Browser: ' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ) . '
-Sent From: ' . esc_url_raw( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
+Sent From: ' . esc_url_raw( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
 
 		$headers = array();
 		$headers[] = 'From: ' . $message_data['name'] . ' <' . $message_data['email'].'>';

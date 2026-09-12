@@ -8,7 +8,8 @@ namespace WordPressdotorg\API\Patterns;
  * This is cached by nginx, so we don't have to worry about the performance costs of loading WP, and don't need to
  * do any any object caching.
  */
-main( esc_url_raw( wp_unslash( $_SERVER['QUERY_STRING'] ?? '' ) ) );
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- main() loads WordPress itself, so its sanitizers do not exist at this point; it parses the string with parse_str() before use.
+main( $_SERVER['QUERY_STRING'] ?? '' );
 
 /**
  * Last minute rewrite of headers, to correct URLs set by the internal API endpoint.

@@ -44,7 +44,7 @@ class Plugin_Search {
 			// Don't load Jetpack Search if it's a front-end ?s=... query, as we'll be redirecting away anyway.
 			isset( $_GET['s'] ) &&
 			// Running super-early, before wp_is_serving_rest_request() returns truthful.
-			! str_contains( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/wp-json/' ) &&
+			! str_contains( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/wp-json/' ) &&
 			// Never return early in an API context.
 			( ! defined( 'WPORG_IS_API' ) || ! WPORG_IS_API )
 		) {

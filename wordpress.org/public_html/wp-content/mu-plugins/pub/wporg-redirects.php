@@ -11,12 +11,12 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 			exit;
 
 		// temp fix for /Blocks, rm later
-		} elseif ( 0 === strpos( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/Blocks' ) ) {
+		} elseif ( 0 === strpos( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/Blocks' ) ) {
 			wp_safe_redirect( '/blocks/', 301 );
 			exit;
 
 		// WordPress.org does not have a specific site search, only the global WordPress.org search
-		} elseif ( ! empty( $_GET['s'] ) && false === strpos( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/search/' ) ) {
+		} elseif ( ! empty( $_GET['s'] ) && false === strpos( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/search/' ) ) {
 			wp_safe_redirect( '/search/' . urlencode( sanitize_text_field( wp_unslash( $_GET['s'] ) ) ) . '/', 301 );
 			exit;
 
@@ -62,7 +62,7 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
-				if ( 0 === strpos( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), $test ) ) {
+				if ( 0 === strpos( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), $test ) ) {
 
 					$code = 301;
 					if ( is_array( $redirect ) ) {
@@ -86,7 +86,7 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
  */
 add_action( 'template_redirect', function() {
 	$host = sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) );
-	$path = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+	$path = wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 
 	if ( ! is_404() ) {
 		return;
@@ -157,7 +157,7 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
-	$path = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) );
+	$path = wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) );
 	// Remove the site prefix.
 	$path = preg_replace( '!^' . preg_quote( wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '!' ) . '!', '/', $path );
 
@@ -205,7 +205,7 @@ function wporg_redirect_site_not_found() {
 
 		// Singular => Plural
 		case 'profile.wordpress.org':
-			$location = 'https://profiles.wordpress.org' . esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+			$location = 'https://profiles.wordpress.org' . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 			break;
 
 		// WordPress.org => WordPress.net
@@ -270,9 +270,13 @@ function wporg_redirect_site_not_found() {
 	if ( ! headers_sent() ) {
 		header( 'Location: ' . $location, true, $status_code );
 	} else {
-		// Headers should not have been sent at this point in time.
-		// On some pages, such as wp-cron.php the request has been terminated prior to WordPress loading, and so headers were "sent".
-		printf( '<a href="%1$s">%2$s</a>', esc_url( $location ), esc_html( $location ) );
+		/*
+		 * Headers should not have been sent at this point in time.
+		 * On some pages, such as wp-cron.php the request has been terminated prior to WordPress loading, and so headers were "sent".
+		 *
+		 * sunrise.php runs before kses.php loads, so the esc_*() helpers are unavailable here.
+		 */
+		printf( '<a href="%1$s">%1$s</a>', htmlspecialchars( $location, ENT_QUOTES, 'UTF-8' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above.
 	}
 	exit;
 }
@@ -281,7 +285,7 @@ function wporg_redirect_site_not_found() {
  * Redirect w.org/contributor-training/ to it's new home on Learn.
  */
 add_action( 'template_redirect', function() {
-	$path = strtolower( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) );
+	$path = strtolower( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) );
 	if ( 'wordpress.org' !== sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) || ! str_starts_with( $path, '/contributor-training' ) ) {
 		return;
 	}
@@ -312,7 +316,7 @@ add_action( 'template_redirect', function() {
 
 // Add wp.org redirect from developer.wp.org see: https://github.com/WordPress/wporg-developer/issues/452
 add_action( 'parse_request', function() {
-	$path = strtolower( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) );
+	$path = strtolower( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) );
 	if ( 'developer.wordpress.org' !== sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) || '/themes/getting-started/wordpress-licensing-the-gpl/' !== $path ) {
 		return;
 	}

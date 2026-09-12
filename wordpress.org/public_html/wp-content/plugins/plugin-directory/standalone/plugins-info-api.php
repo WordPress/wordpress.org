@@ -22,8 +22,14 @@ $_REQUEST = array(
 );
 
 $format  = 'json'; // json, jsonp, xml, or php
-$method  = sanitize_key( $_REQUEST['method'] ?? '' );
-$request = wp_unslash( $_REQUEST['request'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Structured API request; each field is validated by Plugins_Info_API_Request.
+/*
+ * This example documents standalone use, where WordPress is not loaded and its
+ * sanitizers are unavailable. Each field is validated by Plugins_Info_API_Request.
+ */
+// phpcs:disable WordPress.Security.ValidatedSanitizedInput
+$method  = $_REQUEST['method'] ?? '';
+$request = $_REQUEST['request'] ?? array();
+// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 
 require __DIR__ . '/class-plugins-info-api.php';
 require __DIR__ . '/class-plugins-info-api-request.php';

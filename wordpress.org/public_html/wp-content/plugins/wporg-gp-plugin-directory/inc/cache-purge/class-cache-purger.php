@@ -51,7 +51,7 @@ class Cache_Purger {
 	 * @param \GP_Translation $translation Created/updated translation.
 	 */
 	public function queue_translation_for_cache_purge( $translation ) {
-		if ( ! $this->project_is_plugin( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) ) {
+		if ( ! $this->project_is_plugin( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) ) {
 			return;
 		}
 

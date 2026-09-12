@@ -211,7 +211,7 @@ class Plugin {
 							esc_html__( 'Do you wish to unsubscribe from future emails for %s?', 'wporg-forums' ),
 							esc_html( $term->name )
 						),
-						esc_attr( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ),
+						esc_attr( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ),
 						esc_attr( wp_get_raw_referer() ),
 						esc_attr__( 'Yes, unsubscribe me', 'wporg-forums' ),
 						esc_url( get_term_link( $term ) ),

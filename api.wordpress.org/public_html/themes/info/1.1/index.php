@@ -3,7 +3,8 @@
 header( 'Access-Control-Allow-Origin: *' );
 
 if ( isset( $_GET['callback'] ) && is_string( $_GET['callback'] ) ) {
-	$callback = preg_replace( '/[^a-z0-9_]/i', '', sanitize_text_field( wp_unslash( $_GET['callback'] ?? '' ) ) );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here. The pattern restricts the callback to [a-z0-9_].
+	$callback = preg_replace( '/[^a-z0-9_]/i', '', $_GET['callback'] );
 } else {
 	$callback = false;
 }

@@ -219,7 +219,7 @@ add_filter( 'index_template_hierarchy', 'wporg_login_filter_templates' );
 add_filter( 'wporg_noindex_request', function( $noindex ) {
 
 	// Don't no-index the front page, see https://meta.trac.wordpress.org/ticket/5530
-	if ( '/' === esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) {
+	if ( '/' === wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) {
 		return $noindex;
 	}
 

@@ -268,7 +268,7 @@ add_filter( 'xmlrpc_methods', function( $methods ) {
 add_action( 'send_headers', function() {
 	if ( isset( $_REQUEST['EGOTEC'] ) ) {
 		die_bad_request( 'EGOTEC request parameter set' );
-	} elseif ( str_contains( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '$acunetix' ) ) {
+	} elseif ( str_contains( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '$acunetix' ) ) {
 		die_bad_request( 'acunetix request' );
 	}
 } );
@@ -280,7 +280,7 @@ add_action( 'send_headers', function() {
  * warnings downstream when the value is used in esc_attr().
  */
 add_action( 'send_headers', function() {
-	if ( ! str_starts_with( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/patterns/' ) ) {
+	if ( ! str_starts_with( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/patterns/' ) ) {
 		return;
 	}
 
@@ -382,7 +382,7 @@ add_action( 'init', function() {
 		return;
 	}
 
-	$path = parse_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH );
+	$path = parse_url( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH );
 	if ( str_ends_with( $path, '/wp-activate.php' ) ) {
 		die_bad_request( 'Invalid request to wp-activate.php' );
 	}

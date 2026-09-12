@@ -32,7 +32,8 @@ function like_escape( $text ) {
 endif;
 
 if ( ! empty( $_GET['version'] ) ) {
-	$version = preg_replace( '/^([.0-9]+).*/', '$1', sanitize_text_field( wp_unslash( $_GET['version'] ?? '' ) ) );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded here, so its sanitizers are unavailable. The pattern reduces the value to digits and dots.
+	$version = preg_replace( '/^([.0-9]+).*/', '$1', $_GET['version'] ?? '' );
 } elseif ( 'cli' == php_sapi_name() && isset( $argv[1] ) ) {
 	$version = preg_replace( '/^([.0-9]+).*/', '$1', $argv[1] );
 } else {
@@ -53,7 +54,8 @@ $locale = false;
 if ( ( isset( $_GET['locale'] ) && 'en_US' != $_GET['locale'] ) || ( 'cli' == php_sapi_name() && isset( $argv[2] ) ) ) {
 	require GLOTPRESS_LOCALES_PATH;
 
-	$gp_locale = GP_Locales::by_field( 'wp_locale', isset( $argv[2] ) ? $argv[2] : sanitize_text_field( wp_unslash( $_GET['locale'] ?? '' ) ) );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded here, so its sanitizers are unavailable. The locale only matters if GP_Locales knows it.
+	$gp_locale = GP_Locales::by_field( 'wp_locale', isset( $argv[2] ) ? $argv[2] : ( $_GET['locale'] ?? '' ) );
 	if ( $gp_locale ) {
 		$locale = $gp_locale;
 	}

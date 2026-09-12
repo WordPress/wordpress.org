@@ -36,7 +36,8 @@ class Serve {
 	 * @return array An array containing the vital details for the ZIP request.
 	 */
 	protected function determine_request() {
-		$path = parse_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
+		$path = parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH );
 		$zip  = basename( $path );
 
 		if ( preg_match( '!^(?P<slug>[a-z0-9-_]+)(\.(?P<version>.+?))?\.zip(?P<signature>\.sig)?$!i', $zip, $m ) ) {
@@ -101,7 +102,8 @@ class Serve {
 		$redirect = 'https://downloads.wordpress.org/plugin/' . basename( $file );
 
 		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
-			$redirect .= '?' . esc_url_raw( wp_unslash( $_SERVER['QUERY_STRING'] ?? '' ) );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
+			$redirect .= '?' . ( $_SERVER['QUERY_STRING'] ?? '' );
 		}
 
 		// CORS, to match the ZIP passthrough.
@@ -254,8 +256,10 @@ class Serve {
 				stamp BETWEEN %s AND %s
 			LIMIT 1",
 			$request['slug'],
-			sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ),
-			sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ),
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
+			$_SERVER['REMOTE_ADDR'] ?? '',
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
+			$_SERVER['HTTP_USER_AGENT'] ?? '',
 			gmdate( 'Y-m-d 00:00:00' ),
 			gmdate( 'Y-m-d 23:59:59' )
 		) );
@@ -277,8 +281,10 @@ class Serve {
 
 		$wpdb->insert( $stats_dedup_log_table, array(
 			'plugin_slug' => $request['slug'],
-			'client_ip'   => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ),
-			'user_agent'  => sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ),
+			// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
+			'client_ip'   => $_SERVER['REMOTE_ADDR'] ?? '',
+			'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? '',
+			// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 			'stamp'       => gmdate( 'Y-m-d H:i:s' ),
 		) );
 	}
@@ -287,7 +293,8 @@ class Serve {
 	 * Bail with a 404.
 	 */
 	protected function error() {
-		$protocol  = isset( $_SERVER['SERVER_PROTOCOL'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? '' ) ) : 'HTTP/1.1';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
+		$protocol  = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
 		$protocol .= ' ';
 
 		header( $protocol . '404 File not found' );
