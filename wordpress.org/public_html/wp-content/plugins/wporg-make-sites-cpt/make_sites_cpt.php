@@ -160,8 +160,8 @@ function make_site_save_postdata( $post_id ) {
 	$weekly_meeting_when  = sanitize_text_field( wp_unslash( $_POST['weekly_meeting_when'] ?? '' ) );
 	$weekly_meeting_where = sanitize_text_field( wp_unslash( $_POST['weekly_meeting_where'] ?? '' ) );
 
-	update_post_meta( $post_id, 'weekly_meeting',       $weekly_meeting );
-	update_post_meta( $post_id, 'weekly_meeting_when',  wp_slash( $weekly_meeting_when ) );
+	update_post_meta( $post_id, 'weekly_meeting', $weekly_meeting );
+	update_post_meta( $post_id, 'weekly_meeting_when', wp_slash( $weekly_meeting_when ) );
 	update_post_meta( $post_id, 'weekly_meeting_where', wp_slash( $weekly_meeting_where ) );
 
 	if ( is_multisite() ) {

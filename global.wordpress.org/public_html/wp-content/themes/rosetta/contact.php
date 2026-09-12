@@ -48,7 +48,14 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$error = true;
 	}
 
-	$submitted_email = ( isset( $_POST['your_email'] ) && is_string( $_POST['your_email'] ) ? wp_unslash( $_POST['your_email'] ) : '' );
+	/*
+	 * Validated as typed. sanitize_email() first would strip a non-ASCII domain and
+	 * let the stripped address through is_email(), mailing somewhere the visitor
+	 * never asked for and showing no error. Escaped at every echo, and the mail
+	 * headers below still get sanitize_email().
+	 */
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	$submitted_email = isset( $_POST['your_email'] ) && is_string( $_POST['your_email'] ) ? wp_unslash( $_POST['your_email'] ) : '';
 	if ( ! is_email( $submitted_email ) ) {
 		$your_email = true;
 		$error = true;
@@ -187,7 +194,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$akismet_comment['comment_content']      = $submitted_message;
 		$query_string = '';
 		foreach ( $akismet_comment as $key => $data ) {
-			$query_string .= $key . '=' . urlencode( $data ) . '&';
+			$query_string .= $key . '=' . rawurlencode( $data ) . '&';
 		}
 		$response = akismet_http_post( $query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port );
 		if ( 'true' == $response[1] ) {

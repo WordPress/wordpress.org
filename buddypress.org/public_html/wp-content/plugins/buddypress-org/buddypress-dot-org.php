@@ -57,9 +57,10 @@ function bporg_admin_redirect() {
 		return;
 	}
 
-	// Allow registered unprivileged admin-ajax.php requests for
-	// profiles.wordpress.org to pass through.
 	/*
+	 * Allow registered unprivileged admin-ajax.php requests for
+	 * profiles.wordpress.org to pass through.
+	 *
 	 * admin-ajax.php dispatches on the raw action, so both halves of the test below
 	 * have to use that same value. sanitize_key() lowercases and drops dots, which
 	 * made has_action() miss any nopriv action carrying either.
