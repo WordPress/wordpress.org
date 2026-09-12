@@ -878,15 +878,7 @@ EMAIL;
 			return new WP_Error( 'jobswp_missing_user', __( 'The username configured for posting jobs does not exist.', 'jobswp' ) );
 		}
 
-		/*
-		 * save_job() calls check_admin_referer( 'jobswppostjob' ) before invoking this
-		 * method, which is where the nonce for every value read here is verified.
-		 *
-		 * wp_insert_post() expects slashed data and runs the content through the
-		 * content_save_pre filters swapped in below, so the two submitted fields are
-		 * handed over as sent rather than unslashed and sanitized here.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- save_job() calls check_admin_referer( 'jobswppostjob' ) before invoking this method, which is where the nonce for every value read here is verified. wp_insert_post() expects slashed data and runs the content through the content_save_pre filters swapped in below, so the two submitted fields are handed over as sent rather than unslashed and sanitized here.
 		$args = array(
 			'post_author'  => $user->ID,
 			'post_content' => $_POST['job_description'] ?? '',
@@ -920,13 +912,7 @@ EMAIL;
 					continue;
 				}
 
-				/*
-				 * Massage and sanitize the field value depending on field.
-				 * validate_job_field() strips tags and applies sanitize_email() or
-				 * esc_url_raw() per field, but PHPCS only recognises global functions
-				 * as sanitizers, so the static call needs the annotation below.
-				 */
-				// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Massage and sanitize the field value depending on field. validate_job_field() strips tags and applies sanitize_email() or esc_url_raw() per field, but PHPCS only recognises global functions as sanitizers, so the static call needs the annotation below.
 				$val = self::validate_job_field( $field, $_POST[ $field ], $_POST );
 
 				add_post_meta( $job_id, $field, $val );

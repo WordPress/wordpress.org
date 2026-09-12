@@ -3,12 +3,7 @@
 Template Name: Contact Page
 */
 
-/*
- * This is a public contact form served to logged-out visitors, for whom every nonce
- * resolves to the same value, so a nonce would not establish intent here. Akismet
- * screens the submission before the mail is sent.
- */
-// phpcs:disable WordPress.Security.NonceVerification.Missing
+// phpcs:disable WordPress.Security.NonceVerification.Missing -- This is a public contact form served to logged-out visitors, for whom every nonce resolves to the same value, so a nonce would not establish intent here. Akismet screens the submission before the mail is sent.
 
 function rosetta_set_sender( &$phpmailer ) {
 	// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Sender is a PHPMailer property.
@@ -34,27 +29,14 @@ if ( ! empty( $_POST['submit'] ) ) {
 	// Check values
 	$error = $your_name = $blog_name = $your_email = $blog_url = $message = false;
 
-	/*
-	 * Kept as typed. Stripping tags here would silently eat anything containing
-	 * "<" -- "a < b", or an address written as <user@example.org> -- from the
-	 * email, from what Akismet scores, and from the box the visitor sees when
-	 * the form comes back with an error. The email body runs it through
-	 * wp_kses() below, Akismet urlencodes it, and every echo escapes it.
-	 */
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Message keeps any "<" the visitor typed; wp_kses() strips the email body, Akismet urlencodes it, and every echo escapes it.
 	$submitted_message = is_string( $_POST['message'] ?? '' ) ? wp_unslash( $_POST['message'] ) : '';
 	if ( '' === sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) ) ) {
 		$your_name = true;
 		$error = true;
 	}
 
-	/*
-	 * Validated as typed. sanitize_email() first would strip a non-ASCII domain and
-	 * let the stripped address through is_email(), mailing somewhere the visitor
-	 * never asked for and showing no error. Escaped at every echo, and the mail
-	 * headers below still get sanitize_email().
-	 */
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- is_email() below validates the address as typed; escaped at every echo, and the mail headers still get sanitize_email().
 	$submitted_email = isset( $_POST['your_email'] ) && is_string( $_POST['your_email'] ) ? wp_unslash( $_POST['your_email'] ) : '';
 	if ( ! is_email( $submitted_email ) ) {
 		$your_email = true;

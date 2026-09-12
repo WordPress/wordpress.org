@@ -169,11 +169,7 @@ class WordPress_Map_Users_Import extends WP_Import {
 			return;
 		}
 
-		/*
-		 * The author mapping form emits the import-wordpress nonce, which the WordPress
-		 * Importer verifies when it dispatches this step of the import.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The author mapping form emits the import-wordpress nonce, which the WordPress Importer verifies when it dispatches this step of the import.
 		$catchall_user_id = absint( $_POST['user_catchall'] );
 
 		$username_mapping = [];

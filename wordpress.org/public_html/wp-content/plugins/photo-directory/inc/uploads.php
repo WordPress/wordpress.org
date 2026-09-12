@@ -662,12 +662,7 @@ class Uploads {
 			return 'too-many-files';
 		}
 
-		/*
-		 * Reached through the Frontend Uploader plugin's fu_should_process_content_upload
-		 * filter, which its upload_content() applies only after verifying the fu_nonce
-		 * that the upload form carries.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Reached through the Frontend Uploader plugin's fu_should_process_content_upload filter, which its upload_content() applies only after verifying the fu_nonce that the upload form carries.
 
 		// Check file size.
 		if ( ! empty( $_FILES['files']['size'][0] ) ) {

@@ -123,11 +123,7 @@ class WordPressTV_Subtitles_Upload {
 			$this->error( 4 );
 		}
 
-		/*
-		 * sanitize_text() is a local wrapper that runs the value through sanitize_text_field(),
-		 * which PHPCS cannot see through the method call.
-		 */
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_text() is a local wrapper that runs the value through sanitize_text_field(), which PHPCS cannot see through the method call.
 		$wporg_username = $this->sanitize_text( wp_unslash( $_POST['wptv_wporg_username'] ?? '' ) );
 		$author_email   = $this->sanitize_text( wp_unslash( $_POST['wptv_author_email'] ?? '' ) );
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

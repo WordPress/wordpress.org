@@ -68,11 +68,7 @@ class Locale_Associations implements Admin_Page {
 	 * Handles actions like adding/deleting locale associations.
 	 */
 	public function action() {
-		/*
-		 * This only picks which handler runs; each one verifies its own nonce before
-		 * changing anything.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- This only picks which handler runs; each one verifies its own nonce before changing anything.
 		$current_action = sanitize_key( $_POST['action'] ?? '' );
 
 		if ( ! isset( $_POST['_wpnonce'] ) || ! in_array( $current_action, [ 'add-association', 'delete-association' ], true ) ) {

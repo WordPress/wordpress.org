@@ -58,11 +58,7 @@ class Plugin {
 		$other_version = '';
 		$versions = $this->get_wp_versions();
 
-		/*
-		 * Post value passed. This only repopulates the form after a submission bbPress
-		 * has already nonce-checked; nothing is stored here.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Post value passed. This only repopulates the form after a submission bbPress has already nonce-checked; nothing is stored here.
 		if ( bbp_is_topic_form_post_request() && isset( $_POST[ self::META_KEY ] ) ) {
 			$version = $this->sanitize_wp_version( sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ) ) );
 
@@ -99,11 +95,7 @@ class Plugin {
 		$version = false;
 		$versions = $this->get_wp_versions();
 
-		/*
-		 * Runs on bbp_new_topic_post_extras and bbp_edit_topic_post_extras; bbPress
-		 * verifies the nonce in its own form handler before these hooks fire.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Runs on bbp_new_topic_post_extras and bbp_edit_topic_post_extras; bbPress verifies the nonce in its own form handler before these hooks fire.
 		$submitted = sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ?? '' ) );
 		if ( $submitted && in_array( $submitted, $versions, true ) ) {
 			$version = $this->sanitize_wp_version( $submitted );

@@ -393,11 +393,7 @@ class Plugins_Info_API {
 		global $wpdb;
 		define( 'REST_REQUEST', true );
 
-		/*
-		 * Stashed so the real values can be put back after wp-load.php has run. WordPress
-		 * is not loaded yet, and sanitizing would change what gets restored.
-		 */
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- Stashed so the real values can be put back after wp-load.php has run. WordPress is not loaded yet, and sanitizing would change what gets restored.
 		$host        = $_SERVER['HTTP_HOST'] ?? '';
 		$request_uri = $_SERVER['REQUEST_URI'] ?? '';
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput

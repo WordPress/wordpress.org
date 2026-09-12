@@ -964,12 +964,7 @@ abstract class Directory_Compat {
 		&&
 			( isset( $_POST['wporg_compat_slug'] ) && $_POST['wporg_compat_slug'] == $this->slug() )
 		) {
-			/*
-			 * Check against the canonical plugin/theme records for slug existence.
-			 * Runs on bbp_new_topic; bbPress verifies the nonce in its own form
-			 * handler before this hook fires.
-			 */
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Check against the canonical plugin/theme records for slug existence. Runs on bbp_new_topic; bbPress verifies the nonce in its own form handler before this hook fires.
 			$object = $this->get_object( sanitize_key( wp_unslash( $_POST['wporg_compat_slug'] ?? '' ) ) );
 
 			if ( ! empty( $object ) ) {

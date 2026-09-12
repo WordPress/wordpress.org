@@ -136,11 +136,7 @@ class Plugin {
 
 		$resolutions = $this->get_topic_resolutions();
 
-		/*
-		 * Post value passed. This only repopulates the form after a submission bbPress
-		 * has already nonce-checked; nothing is stored here.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Post value passed. This only repopulates the form after a submission bbPress has already nonce-checked; nothing is stored here.
 		if ( bbp_is_topic_form_post_request() && isset( $_POST[ self::META_KEY ] ) ) {
 			$resolution = $this->sanitize_topic_resolution( sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ) ) );
 
@@ -197,11 +193,7 @@ class Plugin {
 
 		$resolution = $this->get_default_topic_resolution();
 
-		/*
-		 * Runs on bbp_new_topic_post_extras and bbp_edit_topic_post_extras; bbPress
-		 * verifies the nonce in its own form handler before these hooks fire.
-		 */
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Runs on bbp_new_topic_post_extras and bbp_edit_topic_post_extras; bbPress verifies the nonce in its own form handler before these hooks fire.
 		if ( isset( $_POST[ self::META_KEY ] ) ) {
 			$resolution = $this->sanitize_topic_resolution( sanitize_text_field( wp_unslash( $_POST[ self::META_KEY ] ) ) );
 		}

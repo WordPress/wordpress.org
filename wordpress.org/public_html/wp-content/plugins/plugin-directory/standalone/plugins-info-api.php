@@ -23,11 +23,7 @@ $_REQUEST = array(
 
 $format  = 'json'; // json, jsonp, xml, or php
 
-/*
- * This example documents standalone use, where WordPress is not loaded and its
- * sanitizers are unavailable. Each field is validated by Plugins_Info_API_Request.
- */
-// phpcs:disable WordPress.Security.ValidatedSanitizedInput
+// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- This example documents standalone use, where WordPress is not loaded and its sanitizers are unavailable. Each field is validated by Plugins_Info_API_Request.
 // phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable -- Usage example; the die() above ends the real request.
 $method  = $_REQUEST['method'] ?? '';
 $request = $_REQUEST['request'] ?? array();
