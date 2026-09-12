@@ -1390,7 +1390,8 @@ class Plugin_Directory {
 
 		// If it's an old search query, handle that too.
 		if ( 'search.php' == get_query_var( 'name' ) && isset( $_GET['q'] ) ) {
-			wp_safe_redirect( site_url( '/search/' . rawurlencode( sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ) ) . '/' ), 301 );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_text_field() strips %XX octets; rawurlencode() is what makes the term safe for the path.
+			wp_safe_redirect( site_url( '/search/' . rawurlencode( wp_unslash( $_GET['q'] ?? '' ) ) . '/' ), 301 );
 			die();
 		}
 

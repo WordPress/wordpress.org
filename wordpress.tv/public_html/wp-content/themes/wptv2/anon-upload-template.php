@@ -369,7 +369,7 @@ if ( isset( $_GET['post_category'] ) ) {
 
 					<p>
 						<label for="wptv_producer_username"><?php esc_html_e( 'Producer WordPress.org Username' ); ?></label>
-						<input type="text" id="wptv_producer_username" name="wptv_producer_username" value="<?php echo esc_attr( sanitize_user( wp_unslash( $_GET['wptv_producer_username'] ?? '' ) ) ); ?>" />
+						<input type="text" id="wptv_producer_username" name="wptv_producer_username" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_producer_username'] ?? '' ) ); ?>" />
 					</p>
 					<p>
 						<label for="wptv_speakers"><?php esc_html_e( 'Speakers' ); ?></label>

@@ -521,7 +521,7 @@ function wporg_login_errors_nicify( $errors, $redirect_to ) {
 		'invalid_username' => sprintf(
 			/* translators: %s: <strong>UserLogin</strong> */
 			__( "<strong>Error:</strong> The username %s is not registered on WordPress.org. If you're unsure of your username, you can attempt to log in using your email address instead.", 'wporg' ),
-			'<strong>' . esc_html( sanitize_user( wp_unslash( $_POST['log'] ?? '' ) ) ) . '</strong>' // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login form served to logged-out visitors; there is no nonce to verify.
+			'<strong>' . esc_html( wp_unslash( $_POST['log'] ?? '' ) ) . '</strong>' // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Public login form served to logged-out visitors; there is no nonce to verify.
 		),
 
 		'must_change_password' => sprintf(
@@ -569,7 +569,7 @@ function wporg_remember_where_user_came_from() {
 
 	// Make sure value is a string, since setcookie requires it to be.
 	$came_from = isset( $_REQUEST['redirect_to'] )
-		? sanitize_text_field( wp_unslash( $_REQUEST['redirect_to'] ) )
+		? esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) )
 		: esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
 	if ( ! $came_from ) {
 		return;

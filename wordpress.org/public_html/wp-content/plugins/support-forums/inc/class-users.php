@@ -121,7 +121,7 @@ class Users {
 	public function save_custom_fields( $user_id ) {
 		if ( current_user_can( 'moderate' ) && isset( $_POST['title'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Runs on personal_options_update and edit_user_profile_update; core verifies the update-user nonce before firing them.
-			update_user_option( $user_id, 'title', sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) ) );
+			update_user_option( $user_id, 'title', wp_slash( sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) ) ) );
 		}
 
 		$auto_topic_subscription = isset( $_POST['auto_topic_subscription'] );

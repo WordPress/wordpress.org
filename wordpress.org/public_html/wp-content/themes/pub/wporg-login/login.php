@@ -8,7 +8,8 @@
 get_header();
 
 // Prefill the username if possible.
-$username = sanitize_user( wp_unslash( $_REQUEST['user'] ?? ( wp_parse_auth_cookie()['username'] ?? '' ) ) );
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Prefills the field with what was typed; sanitize_user() would show "jose" for "jos\u00e9". Escaped on output.
+$username = wp_unslash( $_REQUEST['user'] ?? ( wp_parse_auth_cookie()['username'] ?? '' ) );
 if ( ! is_string( $username ) ) {
 	$username = '';
 }

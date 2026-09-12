@@ -59,12 +59,20 @@ function bporg_admin_redirect() {
 
 	// Allow registered unprivileged admin-ajax.php requests for
 	// profiles.wordpress.org to pass through.
+	/*
+	 * admin-ajax.php dispatches on the raw action, so both halves of the test below
+	 * have to use that same value. sanitize_key() lowercases and drops dots, which
+	 * made has_action() miss any nopriv action carrying either.
+	 */
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	$ajax_action = isset( $_REQUEST['action'] ) && is_string( $_REQUEST['action'] ) ? wp_unslash( $_REQUEST['action'] ) : '';
+
 	if (
 		'profiles.wordpress.org' === sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) &&
-		isset( $_REQUEST['action'] ) &&
+		$ajax_action &&
 		(
-			has_action( 'wp_ajax_nopriv_' . sanitize_key( $_REQUEST['action'] ?? '' ) ) ||
-			in_array( $_REQUEST['action'], [ 'webauthn_preregister', 'webauthn_register', 'webauthn_delete_key', 'rest_nonce', 'wporg_xprofile_field_suggestions' ] )
+			has_action( 'wp_ajax_nopriv_' . $ajax_action ) ||
+			in_array( $ajax_action, [ 'webauthn_preregister', 'webauthn_register', 'webauthn_delete_key', 'rest_nonce', 'wporg_xprofile_field_suggestions' ], true )
 		)
 	) {
 		return;

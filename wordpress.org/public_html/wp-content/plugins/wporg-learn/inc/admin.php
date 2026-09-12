@@ -551,7 +551,7 @@ function language_bulk_edit_save( $post_id ) {
 		return;
 	}
 
-	update_post_meta( $post_id, 'language', sanitize_text_field( wp_unslash( $_REQUEST['language'] ) ) );
+	update_post_meta( $post_id, 'language', wp_slash( sanitize_text_field( wp_unslash( $_REQUEST['language'] ) ) ) );
 }
 
 /**

@@ -343,8 +343,13 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
-	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- A guard that inspects every incoming request to reject malformed ones; it runs before any handler that would own a nonce.
-	$charset = str_replace( array( ',', ' ' ), '', strtoupper( trim( sanitize_text_field( wp_unslash( $_POST['charset'] ?? '' ) ) ) ) );
+	/*
+	 * Derived exactly as wp-trackback.php does, from the raw value: sanitizing first
+	 * would normalise charset=<b>UTF-8</b> to UTF-8, pass the check below, and hand
+	 * core the unsanitised string this guard exists to stop (Core #60261).
+	 */
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing
+	$charset = str_replace( array( ',', ' ' ), '', strtoupper( trim( $_POST['charset'] ?? '' ) ) );
 
 	if ( function_exists( 'mb_list_encodings' ) && ! in_array( $charset, mb_list_encodings(), true ) ) {
 		die_bad_request( 'Invalid Charset' );
