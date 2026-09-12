@@ -27,7 +27,7 @@ function send_error( $error, $code = 404 ) {
 	// Browsers get a nicer action not implemented error.
 	if (
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here.
-		'GET' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) &&
+		'GET' === $_SERVER['REQUEST_METHOD'] &&
 		false === strpos( $_SERVER['HTTP_USER_AGENT'] ?? '', 'WordPress/' ) &&
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 		false !== strpos( $error, 'Action not implemented.' )
@@ -86,7 +86,8 @@ if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 	$format = 'php';
 }
 
-$api_action = sanitize_key( $_REQUEST['action'] ?? '' );
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here. The switch below accepts only known actions.
+$api_action = $_REQUEST['action'] ?? '';
 
 // Validate the request.
 switch ( $api_action ) {

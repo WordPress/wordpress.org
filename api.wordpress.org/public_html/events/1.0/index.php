@@ -178,7 +178,7 @@ function parse_request() {
 			FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
 		);
 
-		$location_args['ip'] = $public_ip ? $public_ip : ( $_SERVER['REMOTE_ADDR'] ?? '' );
+		$location_args['ip'] = $public_ip ? $public_ip : $_SERVER['REMOTE_ADDR'];
 	}
 
 	return $location_args;

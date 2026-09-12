@@ -120,7 +120,7 @@ if ( ! verify_slack_signature( $raw_body ) ) {
 // Dispatch: slash command vs. interactivity callback.
 if ( isset( $_POST['payload'] ) ) {
 	// The JSON body has to reach json_decode() as Slack sent it.
-	$payload = json_decode( $_POST['payload'] ?? '', true );
+	$payload = json_decode( $_POST['payload'], true );
 	handle_interaction( $payload );
 	exit;
 }
