@@ -270,9 +270,13 @@ function wporg_redirect_site_not_found() {
 	if ( ! headers_sent() ) {
 		header( 'Location: ' . $location, true, $status_code );
 	} else {
-		// Headers should not have been sent at this point in time.
-		// On some pages, such as wp-cron.php the request has been terminated prior to WordPress loading, and so headers were "sent".
-		printf( '<a href="%1$s">%2$s</a>', esc_url( $location ), esc_html( $location ) );
+		/*
+		 * Headers should not have been sent at this point in time.
+		 * On some pages, such as wp-cron.php the request has been terminated prior to WordPress loading, and so headers were "sent".
+		 *
+		 * sunrise.php runs before kses.php loads, so the esc_*() helpers are unavailable here.
+		 */
+		printf( '<a href="%1$s">%1$s</a>', htmlspecialchars( $location, ENT_QUOTES, 'UTF-8' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above.
 	}
 	exit;
 }
