@@ -310,8 +310,8 @@ add_action( 'send_headers', function() {
 	];
 
 	foreach ( $share_by_email_fields as $field ) {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- Checks the submitted value's type before anything normalises it.
-		if ( isset( $_POST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- Checks the submitted value's type before anything normalises it; this runs on send_headers to reject malformed requests, ahead of any handler that would have a nonce to verify.
+		if ( isset( $_POST[ $field ] ) && ! is_scalar( $_POST[ $field ] ) ) {
 			die_bad_request( "non-scalar $field in Jetpack Share By Email" );
 		}
 	}

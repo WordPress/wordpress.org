@@ -151,7 +151,7 @@ class NSFW_Handler {
 
 		$topic_title = bbp_get_topic_title( $topic_id );
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Runs on bbp_new_topic_post_extras and bbp_edit_topic_post_extras; bbPress verifies the nonce in its own form handler before this hook fires.
-		$topic_url  = esc_url_raw( wp_unslash( $_POST['site_url'] ?? '' ) );
+		$topic_url  = sanitize_text_field( wp_unslash( $_POST['site_url'] ?? '' ) );
 		$topic_tags = sanitize_text_field( wp_unslash( $_POST['bbp_topic_tags'] ?? '' ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
