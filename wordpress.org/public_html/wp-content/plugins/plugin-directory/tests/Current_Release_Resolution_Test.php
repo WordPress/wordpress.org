@@ -618,7 +618,7 @@ class Current_Release_Resolution_Test extends TestCase {
 
 		ob_start();
 		Release_Confirmation::single_plugin( get_post( $this->plugin->ID ) );
-		$listing = ob_get_clean();
+		$listing = (string) ob_get_clean();
 
 		$this->assertStringContainsString(
 			'<a href="https://profiles.wordpress.org/' . $login . '/">' . $login . '</a>',
