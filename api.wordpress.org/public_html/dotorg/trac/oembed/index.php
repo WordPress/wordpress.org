@@ -49,7 +49,8 @@ $trac_baseurl = '^(?P<baseurl>https://(?P<trac>meta|core)\.trac\.wordpress\.org/
 $allowed_urls = [
 	'!' . $trac_baseurl . '(?P<type>ticket|changeset)/\d+$!iD',
 	'!' . $trac_baseurl . '(?P<type>query)[?].+$!iD',
-	'!' . $trac_baseurl . '(?P<type>milestone)/[a-z0-9.]+[ ]?[a-z0-9.]*$!iD',
+	// The separator is %20 once esc_url_raw() has been over the URL, and a literal space if not.
+	'!' . $trac_baseurl . '(?P<type>milestone)/[a-z0-9.]+(?:[ ]|%20)?[a-z0-9.]*$!iD',
 	'!' . $trac_baseurl . '(?P<type>ticketgraph)([?]component=[^&]+)?$!iD',
 ];
 
