@@ -14,6 +14,59 @@ use function Dotorg\API\Events\{
  */
 class Test_Events extends TestCase {
 	/**
+	 * @group unit
+	 */
+	public function test_parse_request_without_wordpress(): void {
+		$saved = [ $_GET, $_POST, $_REQUEST, $_SERVER ];
+		try {
+			$_GET = [ 'latitude' => '47.6', 'longitude' => '-122.3', 'country' => 'US' ];
+			$_POST = [];
+			$_REQUEST = $_GET + [
+				'location' => "  O'Fallon  ",
+				'timezone' => 'America/Chicago',
+				'locale'   => 'en_US',
+				'ip'       => '8.8.8.8',
+			];
+			$this->assertSame( [
+				'restrict_by_country' => true,
+				'latitude'            => 47.6,
+				'longitude'           => -122.3,
+				'country'             => 'US',
+				'location_name'       => "O'Fallon",
+				'timezone'            => 'America/Chicago',
+				'locale'              => 'en_US',
+				'ip'                  => '8.8.8.8',
+			], \Dotorg\API\Events\parse_request() );
+
+			$_REQUEST['ip'] = '127.0.0.1';
+			$_SERVER['REMOTE_ADDR'] = '1.1.1.1';
+			$this->assertSame( '1.1.1.1', \Dotorg\API\Events\parse_request()['ip'] );
+
+			$_GET = $_REQUEST = [];
+			$_POST = [ 'location_data' => [ 'location_name' => 'A\\B', 'country' => 'US' ] ];
+			$this->assertSame( $_POST['location_data'], \Dotorg\API\Events\parse_request() );
+		} finally {
+			[ $_GET, $_POST, $_REQUEST, $_SERVER ] = $saved;
+		}
+	}
+
+	/**
+	 * @group unit
+	 */
+	public function test_client_detection_uses_request_user_agent_without_wordpress(): void {
+		$saved = $_SERVER;
+		try {
+			$_SERVER['HTTP_USER_AGENT'] = 'WordPress/6.9; https://example.org';
+			$this->assertTrue( is_client_core() );
+			$this->assertFalse( is_client_core( 'Other client' ) );
+			unset( $_SERVER['HTTP_USER_AGENT'] );
+			$this->assertFalse( is_client_core() );
+		} finally {
+			$_SERVER = $saved;
+		}
+	}
+
+	/**
 	 * Asserts that an HTTP response is valid and contains an event.
 	 */
 	public function assertResponseHasEvent( $response ) {

@@ -898,7 +898,7 @@ class Customizations {
 		$comment_author       = wp_slash( $user->display_name );
 		$comment_author_email = wp_slash( $user->user_email );
 		$comment_author_url   = wp_slash( $user->user_url );
-		$comment_content      = trim( wp_kses_post( wp_unslash( $_POST['content'] ?? '' ) ) );
+		$comment_content      = wp_slash( trim( wp_kses_post( wp_unslash( $_POST['content'] ?? '' ) ) ) );
 		$comment_type         = isset( $_POST['comment_type'] ) ? sanitize_key( wp_unslash( $_POST['comment_type'] ) ) : '';
 
 		if ( current_user_can( 'unfiltered_html' ) ) {

@@ -33,7 +33,8 @@ class Consistency extends GP_Route {
 		$search = $set = $project = '';
 		$search_case_sensitive = false;
 
-		$search = sanitize_text_field( wp_unslash( $_REQUEST['search'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Exact original text may contain HTML and whitespace; query() prepares it and the template escapes it.
+		$search = isset( $_REQUEST['search'] ) && is_string( $_REQUEST['search'] ) ? wp_unslash( $_REQUEST['search'] ) : '';
 
 		if ( ! empty( $_REQUEST['set'] ) ) {
 			$set = sanitize_text_field( wp_unslash( $_REQUEST['set'] ) );

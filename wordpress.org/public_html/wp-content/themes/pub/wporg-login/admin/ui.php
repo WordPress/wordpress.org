@@ -171,7 +171,8 @@ function wporg_login_admin_settings_page() {
 			update_option( 'recaptcha_v3_threshold', $recaptcha_v3_threshold );
 		}
 
-		$block_words = sanitize_textarea_field( wp_unslash( $_POST['registration_block_words'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Literal substring rules retain boundary spaces; the settings form escapes them on output.
+		$block_words = isset( $_POST['registration_block_words'] ) && is_string( $_POST['registration_block_words'] ) ? wp_unslash( $_POST['registration_block_words'] ) : '';
 		if ( $block_words ) {
 			$block_words = str_replace( "\r", '', $block_words ); // We're not trimming the lines (So spaces before/after can be included to match full words only), but need to remove the 'arrrs.
 			$block_words = explode( "\n", $block_words );

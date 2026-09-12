@@ -18,12 +18,14 @@ class Readme_Validator {
 		$readme_url      = '';
 		$readme_contents = '';
 		if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
-			$readme_url = esc_url_raw( wp_unslash( $_REQUEST['readme'] ?? '' ) );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Resolve bare slugs before sanitizing the resulting URL below.
+			$readme_url = wp_unslash( $_REQUEST['readme'] );
 
 			// If it's a slug..
 			if ( $readme_url === sanitize_title_with_dashes( $readme_url ) ) {
 				$readme_url = 'https://wordpress.org/plugins/' . $readme_url . '/';
 			}
+			$readme_url = esc_url_raw( $readme_url );
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Stateless validator; the submitted readme is parsed and echoed back, nothing is stored.
