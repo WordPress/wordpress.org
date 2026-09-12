@@ -111,7 +111,8 @@ class Upload_Token {
 			return;
 		}
 
-		$username   = sanitize_text_field( wp_unslash( $_REQUEST['user'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Looked up below as a login, then an email, then a slug, so the identifier has to match what is stored, percent-encoding included. Escaped where it is echoed.
+		$username   = isset( $_REQUEST['user'] ) && is_string( $_REQUEST['user'] ) ? wp_unslash( $_REQUEST['user'] ) : '';
 		$expiration = sanitize_text_field( wp_unslash( $_REQUEST['expiration'] ?? '' ) );
 		if ( ! $expiration ) {
 			$expiration = gmdate( 'Y-m-d H:i:s', time() + WEEK_IN_SECONDS );
