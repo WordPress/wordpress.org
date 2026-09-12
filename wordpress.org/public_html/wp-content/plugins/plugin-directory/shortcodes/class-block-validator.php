@@ -13,7 +13,8 @@ class Block_Validator {
 	 */
 	public static function display() {
 		ob_start();
-		$plugin_url = esc_url_raw( wp_unslash( $_REQUEST['plugin_url'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The field is echoed back exactly as typed so it can be corrected; run_check_plugin_repo() also accepts a bare plugin slug and a git@github.com: address, neither of which survives URL escaping.
+		$plugin_url = isset( $_REQUEST['plugin_url'] ) && is_string( $_REQUEST['plugin_url'] ) ? wp_unslash( $_REQUEST['plugin_url'] ) : '';
 
 		if ( is_user_logged_in() ) :
 			?>
@@ -80,7 +81,8 @@ class Block_Validator {
 			</details>
 			<?php
 			if ( ! empty( $_POST['plugin_url'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['block-nonce'] ?? '' ) ), 'validate-block-plugin' ) ) {
-				self::validate_block( esc_url_raw( wp_unslash( $_POST['plugin_url'] ) ) );
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- run_check_plugin_repo() takes a bare plugin slug or a git@github.com: address as well as a URL, checks the host against its own allow list, and escapes the value into any rejection message.
+				self::validate_block( is_string( $_POST['plugin_url'] ) ? wp_unslash( $_POST['plugin_url'] ) : '' );
 			} elseif ( ! empty( $_POST['block-directory-upload'] ) ) {
 				self::handle_file_upload();
 			} elseif ( ! empty( $_POST['block-directory-edit'] ) ) {

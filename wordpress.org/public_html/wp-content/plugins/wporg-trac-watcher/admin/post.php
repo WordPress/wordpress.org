@@ -31,7 +31,8 @@ add_action( 'admin_post_svn_save', function() {
 
 	$the_prop = false;
 	if ( ! empty( $_REQUEST['prop_name_orig'] ) ) {
-		$the_prop = wp_list_filter( $props, [ 'prop_name' => sanitize_text_field( wp_unslash( $_REQUEST['prop_name_orig'] ) ) ] );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- This addresses an existing row, so it has to match the stored prop name, which the log parser takes verbatim from the commit message and can hold markup an administrator is here to correct.
+		$the_prop = wp_list_filter( $props, [ 'prop_name' => wp_unslash( $_REQUEST['prop_name_orig'] ) ] );
 		$the_prop = $the_prop ? array_shift( $the_prop ) : false;
 	}
 
