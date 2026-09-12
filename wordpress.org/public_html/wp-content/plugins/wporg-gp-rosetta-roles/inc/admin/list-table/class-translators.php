@@ -42,7 +42,7 @@ class Translators extends WP_List_Table {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- WP_User_Query matches this against logins and addresses, which may legitimately contain a percent sign, and escapes it for LIKE itself.
-		$search   = trim( is_string( $_REQUEST['s'] ?? '' ) ? wp_unslash( $_REQUEST['s'] ) : '' );
+		$search   = trim( isset( $_REQUEST['s'] ) && is_string( $_REQUEST['s'] ) ? wp_unslash( $_REQUEST['s'] ) : '' );
 		$per_page = $this->get_items_per_page( 'translators_per_page', 10 );
 		$paged    = $this->get_pagenum();
 

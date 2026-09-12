@@ -66,7 +66,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 				$url = admin_url( 'admin.php?page=user-registrations' );
 				if ( $is_search ) {
 					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Carries the current search over to the other views, so it has to be the same string get_join_where_sql() matched on.
-					$url = add_query_arg( 's', rawurlencode( is_string( $_GET['s'] ?? '' ) ? wp_unslash( $_GET['s'] ) : '' ), $url );
+					$url = add_query_arg( 's', rawurlencode( isset( $_GET['s'] ) && is_string( $_GET['s'] ) ? wp_unslash( $_GET['s'] ) : '' ), $url );
 				}
 
 				if ( 'all' !== $view ) {
@@ -180,7 +180,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$where .= ' ';
 
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Matched against a stored address, which may legitimately contain a percent sign, and one branch below matches it exactly; every query interpolating it is prepared.
-			$search_term = is_string( $_GET['s'] ?? '' ) ? wp_unslash( $_GET['s'] ) : '';
+			$search_term = isset( $_GET['s'] ) && is_string( $_GET['s'] ) ? wp_unslash( $_GET['s'] ) : '';
 			$search_like = '%' . $wpdb->esc_like( $search_term ) . '%';
 			
 			// Limit searches to where they're likely, for performance.

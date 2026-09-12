@@ -340,8 +340,8 @@ class Ratings_Compat {
 
 		$topic_content = false;
 		if ( ! empty( $_POST['bbp_topic_content'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Apply the new-topic pre-content filters. This allows for various forum hooks to remove links. Runs on bbp_new_topic_pre_extras; bbPress verifies the nonce in its own form handler before this hook fires.
-			$topic_content = apply_filters( 'bbp_new_topic_pre_content', wp_kses_post( wp_unslash( $_POST['bbp_topic_content'] ?? '' ) ) );
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- bbp_new_topic_pre_content takes the slashed value, as bbPress passes it; bbp_filter_kses() on that hook unslashes and re-slashes it itself, and the link check has to see the content the save path will store. Runs on bbp_new_topic_pre_extras; bbPress verifies the nonce in its own form handler before this hook fires.
+			$topic_content = apply_filters( 'bbp_new_topic_pre_content', $_POST['bbp_topic_content'] );
 		}
 
 		if (

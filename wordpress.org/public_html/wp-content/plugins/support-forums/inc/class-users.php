@@ -334,7 +334,7 @@ class Users {
 		}
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The address is checked as typed, because bbPress goes on to validate and store this same value; repairing it here would move the blocklist check onto a string nobody saves.
-		$submitted_email = is_string( $_POST['email'] ?? '' ) ? wp_unslash( $_POST['email'] ) : '';
+		$submitted_email = isset( $_POST['email'] ) && is_string( $_POST['email'] ) ? wp_unslash( $_POST['email'] ) : '';
 
 		if (
 			$user_email !== $submitted_email &&

@@ -308,7 +308,7 @@ if ( isset( $_GET['post_category'] ) ) {
 						<p>
 							<label for="wptv_email"><?php esc_html_e( 'Email address' ); ?><span class="required"> * </span></label>
 							<?php // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The field shows the address as typed, so a mistyped one can be corrected here instead of being silently repaired into a different one. ?>
-							<input type="text" id="wptv_email" name="wptv_email" value="<?php echo esc_attr( is_string( $_GET['wptv_email'] ?? '' ) ? wp_unslash( $_GET['wptv_email'] ) : '' ); ?>" />
+							<input type="text" id="wptv_email" name="wptv_email" value="<?php echo esc_attr( isset( $_GET['wptv_email'] ) && is_string( $_GET['wptv_email'] ) ? wp_unslash( $_GET['wptv_email'] ) : '' ); ?>" />
 						</p>
 					<?php endif; ?>
 

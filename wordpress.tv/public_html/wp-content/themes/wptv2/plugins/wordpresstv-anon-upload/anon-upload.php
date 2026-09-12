@@ -113,7 +113,7 @@ class WPTV_Anon_Upload {
 			}
 
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- init() checks the upload nonce before dispatching here; the address stored further down is the one that was posted, so this is the value that has to pass is_email().
-			$posted_email = is_string( $_POST['wptv_email'] ?? '' ) ? wp_unslash( $_POST['wptv_email'] ) : '';
+			$posted_email = isset( $_POST['wptv_email'] ) && is_string( $_POST['wptv_email'] ) ? wp_unslash( $_POST['wptv_email'] ) : '';
 
 			if ( '' === $posted_email ) {
 				return $this->error( 11 );
