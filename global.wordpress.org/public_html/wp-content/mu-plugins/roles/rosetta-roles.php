@@ -235,8 +235,8 @@ class Rosetta_Roles {
 					}
 
 					$user_details = null;
-					// The field takes a login, an email address, or a user ID, so it is not sanitize_user()'d.
-					$user = sanitize_text_field( wp_unslash( $_REQUEST['user'] ?? '' ) );
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve exact login/email/ID values for lookup; text sanitizers corrupt valid email addresses.
+					$user = isset( $_REQUEST['user'] ) && is_string( $_REQUEST['user'] ) ? trim( wp_unslash( $_REQUEST['user'] ) ) : '';
 					if ( false !== strpos( $user, '@' ) ) {
 						$user_details = get_user_by( 'email', $user );
 					} elseif ( is_numeric( $user ) ) {

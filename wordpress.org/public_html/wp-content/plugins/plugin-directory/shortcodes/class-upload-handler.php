@@ -195,7 +195,8 @@ class Upload_Handler {
 		}
 
 		$zip_file         = sanitize_text_field( wp_unslash( $_FILES['zip_file']['tmp_name'] ?? '' ) );
-		$upload_comment   = trim( sanitize_textarea_field( wp_unslash( $_POST['comment'] ?? '' ) ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve code and encoded URLs; both the audit log and attachment content use esc_html().
+		$upload_comment   = isset( $_POST['comment'] ) && is_string( $_POST['comment'] ) ? trim( wp_unslash( $_POST['comment'] ) ) : '';
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 		$has_upload_token = $this->has_valid_upload_token();
 		$this->plugin_dir = Filesystem::unzip( $zip_file );

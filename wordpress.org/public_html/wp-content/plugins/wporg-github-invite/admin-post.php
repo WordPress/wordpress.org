@@ -15,7 +15,8 @@ add_action( 'admin_post_github_invite', function() {
 
 	check_admin_referer( 'github_invite' );
 
-	$input    = sanitize_textarea_field( wp_unslash( $_POST['invite'] ?? '' ) );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve the exact identifier for email validation or profile lookup below.
+	$input    = isset( $_POST['invite'] ) && is_string( $_POST['invite'] ) ? trim( wp_unslash( $_POST['invite'] ) ) : '';
 	$team_ids = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['team_id'] ?? [] ) );
 	$team_ids = array_intersect( $team_ids, get_allowed_teams() );
 	$team_ids = array_map( 'intval', $team_ids );

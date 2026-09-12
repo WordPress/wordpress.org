@@ -79,8 +79,8 @@ class Cross_Locale_PTE {
 		if ( ! empty( $_REQUEST['user'] ) ) {
 			check_admin_referer( 'cross-locale-pte', '_nonce_cross-locale-pte' );
 
-			// The field takes either a login or an email address, so it is not sanitize_user()'d.
-			$user_key = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve exact login/email values for lookup; text sanitizers corrupt valid email addresses.
+			$user_key = is_string( $_REQUEST['user'] ) ? trim( wp_unslash( $_REQUEST['user'] ) ) : '';
 
 			self::$user = get_user_by( 'login', $user_key );
 			if ( ! self::$user ) {

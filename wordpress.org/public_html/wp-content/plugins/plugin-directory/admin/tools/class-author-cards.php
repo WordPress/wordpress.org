@@ -75,7 +75,8 @@ class Author_Cards {
 			return;
 		}
 
-		$usernames = ! empty( $_REQUEST['users'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['users'] ) ) : '';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve exact identifiers for user lookup; the form value is escaped below.
+		$usernames = isset( $_REQUEST['users'] ) && is_string( $_REQUEST['users'] ) ? trim( wp_unslash( $_REQUEST['users'] ) ) : '';
 
 		echo '<div class="wrap author-cards">';
 		echo '<h1>' . esc_html__( 'Author Cards', 'wporg-plugins' ) . '</h1>';

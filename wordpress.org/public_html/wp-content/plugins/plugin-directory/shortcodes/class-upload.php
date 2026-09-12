@@ -641,7 +641,8 @@ class Upload {
 						<?php esc_html_e( 'Additional Information', 'wporg-plugins' ); ?><br>
 						<textarea name="comment" rows="3" cols="80"><?php
 							if ( ! empty( $_REQUEST['comment'] ) ) {
-								echo esc_textarea( sanitize_textarea_field( wp_unslash( $_REQUEST['comment'] ?? '' ) ) );
+								// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve literal comment text and escape it for the textarea.
+								echo esc_textarea( isset( $_REQUEST['comment'] ) && is_string( $_REQUEST['comment'] ) ? wp_unslash( $_REQUEST['comment'] ) : '' );
 							}
 							?></textarea>
 					</label>

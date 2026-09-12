@@ -25,7 +25,8 @@ function manage_badges() {
 		exit;
 	}
 
-	$users = isset( $_POST['users'] ) ? array_filter( array_map( 'trim', preg_split( "/[,\n]+/", sanitize_textarea_field( wp_unslash( $_POST['users'] ) ) ) ) ) : array();
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve exact identifiers for find_user_id(); text sanitizers corrupt valid email addresses.
+	$users = isset( $_POST['users'] ) && is_string( $_POST['users'] ) ? array_filter( array_map( 'trim', preg_split( "/[,\n]+/", wp_unslash( $_POST['users'] ) ) ) ) : array();
 
 	$unknown_users = [];
 	$operate_on_users = [];
