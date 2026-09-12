@@ -466,9 +466,9 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 	if ( $redirect_to ) {
 		$from = sanitize_text_field( $redirect_to );
 	} elseif ( !empty( $_REQUEST['from'] ) ) {
-		$from = esc_url_raw( wp_unslash( $_REQUEST['from'] ?? '' ) );
+		$from = is_string( $_REQUEST['from'] ) ? esc_url_raw( wp_unslash( $_REQUEST['from'] ) ) : '';
 	} elseif ( !empty( $_REQUEST['redirect_to'] ) ) {
-		$from = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) );
+		$from = is_string( $_REQUEST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) ) : '';
 	}
 
 	if ( str_contains( $from, 'buddypress.org' ) ) {
@@ -568,7 +568,7 @@ function wporg_remember_where_user_came_from() {
 	}
 
 	// Make sure value is a string, since setcookie requires it to be.
-	$came_from = isset( $_REQUEST['redirect_to'] )
+	$came_from = isset( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] )
 		? esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) )
 		: esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
 	if ( ! $came_from ) {

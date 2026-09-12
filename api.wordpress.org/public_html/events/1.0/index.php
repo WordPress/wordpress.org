@@ -274,7 +274,7 @@ function build_response( $location, $location_args ) {
 			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
-		if ( isset( $_REQUEST['number'] ) ) {
+		if ( isset( $_REQUEST['number'] ) && is_numeric( $_REQUEST['number'] ) ) {
 			$event_args['number'] = abs( (int) $_REQUEST['number'] );
 		}
 

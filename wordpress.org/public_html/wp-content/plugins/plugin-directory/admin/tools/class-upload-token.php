@@ -111,7 +111,7 @@ class Upload_Token {
 			return;
 		}
 
-		$username   = sanitize_user( wp_unslash( $_REQUEST['user'] ?? '' ) );
+		$username   = sanitize_text_field( wp_unslash( $_REQUEST['user'] ?? '' ) );
 		$expiration = sanitize_text_field( wp_unslash( $_REQUEST['expiration'] ?? '' ) );
 		if ( ! $expiration ) {
 			$expiration = gmdate( 'Y-m-d H:i:s', time() + WEEK_IN_SECONDS );
