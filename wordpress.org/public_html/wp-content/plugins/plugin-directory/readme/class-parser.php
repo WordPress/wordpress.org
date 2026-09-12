@@ -657,12 +657,16 @@ class Parser {
 	}
 
 	/**
-	 * @access protected
+	 * Reduce readme text to the markup the directory accepts in a readme section.
+	 *
+	 * Public so that a value which stands in for a readme section (the plugin
+	 * file's Description header when there is no readme) can go through the same
+	 * list instead of carrying a copy of it.
 	 *
 	 * @param string $text
 	 * @return string
 	 */
-	protected function filter_text( $text ) {
+	public function filter_text( $text ) {
 		$text = trim( $text );
 
 		$allowed = array(
