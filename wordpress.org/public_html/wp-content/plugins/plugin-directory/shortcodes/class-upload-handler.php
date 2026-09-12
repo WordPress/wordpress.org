@@ -918,7 +918,9 @@ class Upload_Handler {
 		}
 
 		// Upload folders are already year/month based. A second-based prefix should be specific enough.
-		$original_name              = sanitize_file_name( wp_unslash( $_FILES['zip_file']['name'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- $submitted_name records what the author sent, so it is stored as-is; the filename built from it is sanitized.
+		$submitted_name             = isset( $_FILES['zip_file']['name'] ) && is_string( $_FILES['zip_file']['name'] ) ? wp_unslash( $_FILES['zip_file']['name'] ) : '';
+		$original_name              = sanitize_file_name( $submitted_name );
 		$_FILES['zip_file']['name'] = gmdate( 'd_H-i-s' ) . '_' . $original_name;
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
@@ -951,7 +953,7 @@ class Upload_Handler {
 
 			// Save some basic details with the ZIP.
 			update_post_meta( $attachment->ID, 'version', $this->plugin['Version'] );
-			update_post_meta( $attachment->ID, 'submitted_name', $original_name );
+			update_post_meta( $attachment->ID, 'submitted_name', wp_slash( $submitted_name ) );
 
 			if ( $plugin_check_result ) {
 				update_post_meta( $attachment->ID, 'pc_verdict', $plugin_check_result['verdict'] );

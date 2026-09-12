@@ -30,7 +30,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 	$error = $your_name = $blog_name = $your_email = $blog_url = $message = false;
 
 	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Message keeps any "<" the visitor typed; wp_kses() strips the email body, Akismet urlencodes it, and every echo escapes it.
-	$submitted_message = is_string( $_POST['message'] ?? '' ) ? wp_unslash( $_POST['message'] ) : '';
+	$submitted_message = isset( $_POST['message'] ) && is_string( $_POST['message'] ) ? wp_unslash( $_POST['message'] ) : '';
 	if ( '' === sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) ) ) {
 		$your_name = true;
 		$error = true;
