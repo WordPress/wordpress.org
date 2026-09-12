@@ -44,6 +44,7 @@ class Test_Events extends TestCase {
 
 			$_GET = $_REQUEST = [];
 			$_POST = [ 'location_data' => [ 'location_name' => 'A\\B', 'country' => 'US' ] ];
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Reads back the fixture assigned on the line above.
 			$this->assertSame( $_POST['location_data'], \Dotorg\API\Events\parse_request() );
 		} finally {
 			[ $_GET, $_POST, $_REQUEST, $_SERVER ] = $saved;

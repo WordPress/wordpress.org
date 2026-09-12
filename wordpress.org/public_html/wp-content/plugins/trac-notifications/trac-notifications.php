@@ -427,10 +427,11 @@ class wporg_trac_notifications {
 			$changes = array();
 
 			foreach ( array( 'milestone', 'component', 'focus' ) as $type ) {
+				$submitted = array();
+
 				if ( ! empty( $_POST['notifications'][ $type ] ) ) {
-					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The submitted values are this array's keys, sanitized on the next line.
-					$submitted = (array) wp_unslash( $_POST['notifications'][ $type ] );
-					$submitted = array_map( 'sanitize_text_field', array_keys( $submitted ) );
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The submitted values are this array's keys, sanitized on the same line.
+					$submitted = array_map( 'sanitize_text_field', array_keys( (array) wp_unslash( $_POST['notifications'][ $type ] ) ) );
 
 					foreach ( $submitted as $value ) {
 						if ( empty( $notifications[ $type ][ $value ] ) ) {
@@ -440,8 +441,14 @@ class wporg_trac_notifications {
 					}
 				}
 
+				/*
+				 * Compared against the same sanitized list the insert loop used. Re-reading
+				 * $_POST here would mean a value the sanitizer altered gets inserted above
+				 * and deleted again in the one request. Keys that look numeric arrive as
+				 * ints, hence the cast.
+				 */
 				foreach ( $notifications[ $type ] as $value => $on ) {
-					if ( empty( $_POST['notifications'][ $type ][ $value ] ) ) {
+					if ( ! in_array( (string) $value, $submitted, true ) ) {
 						$changes['delete'][] = compact( 'username', 'type', 'value' );
 						unset( $notifications[ $type ][ $value ] );
 					}

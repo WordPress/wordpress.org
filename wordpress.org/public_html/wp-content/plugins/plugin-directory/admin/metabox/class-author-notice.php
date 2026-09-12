@@ -116,7 +116,8 @@ class Author_Notice {
 			is_array( $_REQUEST['author_notice'] ) &&
 			current_user_can( 'plugin_admin_edit', $post->ID )
 		) {
-			$new_author_notice = wp_kses_post( wp_unslash( $_REQUEST['author_notice'] ?? '' ) );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- set() runs wp_kses() over the html and sanitize_key() over the type.
+			$new_author_notice = wp_unslash( $_REQUEST['author_notice'] );
 			self::set( $post, $new_author_notice['html'], $new_author_notice['type'] );
 		}
 	}

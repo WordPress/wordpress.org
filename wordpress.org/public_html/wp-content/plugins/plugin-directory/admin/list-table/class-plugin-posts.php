@@ -111,8 +111,11 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		} else {
 			$post_counts = (array) wp_count_posts( $post_type, 'readable' );
 
-			if ( isset( $_REQUEST['post_status'] ) && in_array( $_REQUEST['post_status'], $avail_post_stati ) ) {
-				$total_items = $post_counts[ sanitize_key( $_REQUEST['post_status'] ?? '' ) ];
+			// Sanitized once, so the check below and the lookup cannot disagree.
+			$post_status = isset( $_REQUEST['post_status'] ) && is_string( $_REQUEST['post_status'] ) ? sanitize_key( $_REQUEST['post_status'] ) : '';
+
+			if ( $post_status && in_array( $post_status, $avail_post_stati, true ) ) {
+				$total_items = $post_counts[ $post_status ];
 			} elseif ( ! empty( $_REQUEST['show_sticky'] ) ) {
 				$total_items = $this->sticky_posts_count;
 			} elseif ( isset( $_GET['author'] ) && $_GET['author'] == get_current_user_id() ) {

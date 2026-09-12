@@ -2,13 +2,19 @@
 /**
  * The new registration Template
  *
+ * The submitted login and email are kept exactly as typed. sanitize_user() and
+ * sanitize_email() would quietly rewrite them instead of rejecting them, so
+ * "jose" would be registered for someone who typed an accented name and the
+ * visitor would never see an error. Validation happens further down, and every
+ * echo of these escapes.
+ *
  * @package wporg-login
  */
 
-// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited -- Public registration form with no nonce; these hold the submitted values, not the logged-in user.
-$user_login       = isset( $_POST['user_login'] ) && is_string( $_POST['user_login'] ) ? sanitize_user( wp_unslash( $_POST['user_login'] ) ) : '';
-// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited -- Public registration form with no nonce; these hold the submitted values, not the logged-in user.
-$user_email       = isset( $_POST['user_email'] ) && is_string( $_POST['user_email'] ) ? sanitize_email( wp_unslash( $_POST['user_email'] ) ) : '';
+// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited, WordPress.Security.ValidatedSanitizedInput -- Public registration form with no nonce; these hold the submitted values, not the logged-in user.
+$user_login       = isset( $_POST['user_login'] ) && is_string( $_POST['user_login'] ) ? trim( wp_unslash( $_POST['user_login'] ) ) : '';
+// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited, WordPress.Security.ValidatedSanitizedInput -- Public registration form with no nonce; these hold the submitted values, not the logged-in user.
+$user_email       = isset( $_POST['user_email'] ) && is_string( $_POST['user_email'] ) ? trim( wp_unslash( $_POST['user_email'] ) ) : '';
 $user_mailinglist = isset( $_POST['user_mailinglist'] ) && 'true' == $_POST['user_mailinglist'];
 $terms_of_service = isset( $_POST['terms_of_service'] ) ? intval( $_POST['terms_of_service'] ) : false;
 

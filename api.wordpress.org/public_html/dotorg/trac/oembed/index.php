@@ -25,7 +25,6 @@ libxml_use_internal_errors( true );
 header( 'X-WP-Embed: true' );
 
 $url = esc_url_raw( wp_unslash( $_GET['url'] ?? '' ) );
-$url = is_string( $url ) ? wp_unslash( $url ) : '';
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );

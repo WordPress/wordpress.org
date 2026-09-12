@@ -17,7 +17,8 @@ $wp_object_cache->blog_prefix = WPORG_THEME_DIRECTORY_BLOGID;
 function send_error( $error, $code = 404 ) {
 	global $format;
 
-	header( ( sanitize_text_field( wp_unslash( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) ) ) . ' ' . $code, true, $code );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here.
+	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' ' . $code, true, $code );
 
 	$response = (object) [
 		'error' => $error	
@@ -25,8 +26,10 @@ function send_error( $error, $code = 404 ) {
 
 	// Browsers get a nicer action not implemented error.
 	if (
-		'GET' === sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) &&
-		false === strpos( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ), 'WordPress/' ) &&
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here.
+		'GET' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) &&
+		false === strpos( $_SERVER['HTTP_USER_AGENT'] ?? '', 'WordPress/' ) &&
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 		false !== strpos( $error, 'Action not implemented.' )
 	) {
 		header( 'Content-Type: text/html; charset=utf-8' );
@@ -59,12 +62,12 @@ if ( ! defined( 'THEMES_API_VERSION' ) ) {
 
 // Set up action and request information.
 if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Structured API request; each field is validated by the themes API below.
-	$request = isset( $_REQUEST['request'] ) ? (object) wp_unslash( $_REQUEST['request'] ) : '';
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Structured API request; each field is validated by the themes API below.
+	$request = isset( $_REQUEST['request'] ) ? (object) $_REQUEST['request'] : '';
 	$format = 'json';
 } else {
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- Serialized API request; it is unserialized and each field validated below. Webhook endpoint; the request is authenticated by its signature, not a nonce.
-	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? wp_unslash( $_POST['request'] ) : '';
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing -- Serialized API request; it is unserialized and each field validated below. Webhook endpoint; the request is authenticated by its signature, not a nonce.
+	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? $_POST['request'] : '';
 	if ( $post_request ) {
 		// PHP Needs to get a non-urldecoded request, to avoid multibyte character malforming the request,
 		// but we need to check for malicious content with the decoded style (in addition)

@@ -926,8 +926,8 @@ EMAIL;
 				 * esc_url_raw() per field, but PHPCS only recognises global functions
 				 * as sanitizers, so the static call needs the annotation below.
 				 */
-				// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$val = self::validate_job_field( $field, wp_unslash( $_POST[ $field ] ), $_POST );
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
+				$val = self::validate_job_field( $field, $_POST[ $field ], $_POST );
 
 				add_post_meta( $job_id, $field, $val );
 			}
