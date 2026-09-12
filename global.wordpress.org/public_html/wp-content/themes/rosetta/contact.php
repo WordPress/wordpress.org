@@ -33,6 +33,16 @@ if ( ! empty( $_POST['submit'] ) ) {
 
 	// Check values
 	$error = $your_name = $blog_name = $your_email = $blog_url = $message = false;
+
+	/*
+	 * Kept as typed. Stripping tags here would silently eat anything containing
+	 * "<" -- "a < b", or an address written as <user@example.org> -- from the
+	 * email, from what Akismet scores, and from the box the visitor sees when
+	 * the form comes back with an error. The email body runs it through
+	 * wp_kses() below, Akismet urlencodes it, and every echo escapes it.
+	 */
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	$submitted_message = is_string( $_POST['message'] ?? '' ) ? wp_unslash( $_POST['message'] ) : '';
 	if ( '' == sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) ) ) {
 		$your_name = true;
 		$error = true;
@@ -43,7 +53,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$error = true;
 	}
 
-	if ( '' == sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) ) ) {
+	if ( '' === trim( $submitted_message ) ) {
 		$blog_description = true;
 		$error = true;
 	}
@@ -138,7 +148,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="message"><?php esc_html_e( 'Your Message:', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) ) ); ?></textarea></span>
+							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( $submitted_message ); ?></textarea></span>
 							<?php esc_html_e( 'Say something!', 'rosetta' ); ?>
 						</td>
 					</tr>
@@ -148,7 +158,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="message"><?php esc_html_e( 'Your Message:', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) ) ); ?></textarea></span>
+							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( $submitted_message ); ?></textarea></span>
 						</td>
 					</tr>
 				<?php } ?>
@@ -173,7 +183,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$akismet_comment['comment_author']       = '';
 		$akismet_comment['comment_author_email'] = sanitize_email( wp_unslash( $_POST['your_email'] ?? '' ) );
 		$akismet_comment['comment_author_url']   = esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) );
-		$akismet_comment['comment_content']      = sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) );
+		$akismet_comment['comment_content']      = $submitted_message;
 		$query_string = '';
 		foreach ( $akismet_comment as $key => $data ) {
 			$query_string .= $key . '=' . urlencode( stripslashes( $data ) ) . '&';
@@ -190,7 +200,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$message_data['email']    = sanitize_email( wp_unslash( $_POST['your_email'] ?? '' ) );
 		$message_data['blog_url'] = esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) );
 		$message_data['subject']  = sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) );
-		$message_data['message']  = wp_kses( wp_unslash( $_POST['message'] ?? '' ), array() );
+		$message_data['message']  = wp_kses( $submitted_message, array() );
 
 		// Let's send an email
 		$message = $message_data['message'] . '
