@@ -12,7 +12,7 @@ Template Name: Contact Page
 
 function rosetta_set_sender( &$phpmailer ) {
 	// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Sender is a PHPMailer property.
-	$phpmailer->Sender = sanitize_email( wp_unslash( $_POST['your_email'] ?? '' ) );
+	$phpmailer->Sender = sanitize_email( ( isset( $_POST['your_email'] ) && is_string( $_POST['your_email'] ) ? wp_unslash( $_POST['your_email'] ) : '' ) );
 }
 
 get_header();
@@ -48,7 +48,8 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$error = true;
 	}
 
-	if ( ! is_email( sanitize_email( wp_unslash( $_POST['your_email'] ?? '' ) ) ) ) {
+	$submitted_email = ( isset( $_POST['your_email'] ) && is_string( $_POST['your_email'] ) ? wp_unslash( $_POST['your_email'] ) : '' );
+	if ( ! is_email( $submitted_email ) ) {
 		$your_email = true;
 		$error = true;
 	}
@@ -97,7 +98,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="your_email"><?php esc_html_e( 'Your Email:', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( sanitize_email( wp_unslash( $_POST['your_email'] ?? '' ) ) ); ?>" /></span>
+							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( $submitted_email ); ?>" /></span>
 							<?php esc_html_e( 'Your email address did not appear to be valid. Please check it.', 'rosetta' ); ?>
 						</td>
 					</tr>
@@ -107,7 +108,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="your_email"><?php esc_html_e( 'Your Email:', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( sanitize_email( wp_unslash( $_POST['your_email'] ?? '' ) ) ); ?>" /></span>
+							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( $submitted_email ); ?>" /></span>
 						</td>
 					</tr>
 				<?php } ?>
@@ -181,7 +182,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$akismet_comment['blog']                 = home_url();
 		$akismet_comment['comment_type']         = 'contact_form';
 		$akismet_comment['comment_author']       = '';
-		$akismet_comment['comment_author_email'] = sanitize_email( wp_unslash( $_POST['your_email'] ?? '' ) );
+		$akismet_comment['comment_author_email'] = $submitted_email;
 		$akismet_comment['comment_author_url']   = esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) );
 		$akismet_comment['comment_content']      = $submitted_message;
 		$query_string = '';
@@ -197,7 +198,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$message_data = array();
 		$message_data['ip']       = preg_replace( '/[^0-9., ]/', '', sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) );
 		$message_data['name']     = sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) );
-		$message_data['email']    = sanitize_email( wp_unslash( $_POST['your_email'] ?? '' ) );
+		$message_data['email']    = sanitize_email( $submitted_email );
 		$message_data['blog_url'] = esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) );
 		$message_data['subject']  = sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) );
 		$message_data['message']  = wp_kses( $submitted_message, array() );

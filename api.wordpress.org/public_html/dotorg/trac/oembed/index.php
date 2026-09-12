@@ -24,7 +24,7 @@ libxml_use_internal_errors( true );
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = esc_url_raw( wp_unslash( $_GET['url'] ?? '' ) );
+$url = isset( $_GET['url'] ) && is_string( $_GET['url'] ) ? esc_url_raw( wp_unslash( $_GET['url'] ) ) : '';
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );

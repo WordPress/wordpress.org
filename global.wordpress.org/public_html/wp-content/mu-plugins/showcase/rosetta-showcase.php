@@ -158,7 +158,7 @@ class Rosetta_Showcase {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Runs on save_post, which core only fires after verifying the post edit nonce; the capability is checked above.
 		$url = esc_url_raw( wp_unslash( $_POST['rosetta_showcase_url'] ) );
 
-		update_post_meta( $post_id, '_rosetta_showcase_url', $url );
+		update_post_meta( $post_id, '_rosetta_showcase_url', wp_slash( $url ) );
 	}
 
 	/**

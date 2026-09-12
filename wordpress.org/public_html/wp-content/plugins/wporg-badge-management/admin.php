@@ -23,7 +23,8 @@ function render() {
 	$tabs['settings'] = 'Settings';
 
 	// Create a set of tabs for managing badges and listing users with badges.
-	$active_tab = sanitize_key( $_GET['tab'] ?? '' ) ?: array_key_first( $tabs );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Tab keys contain a colon ('list_users:{slug}') that sanitize_key() strips; the array_key_exists() check below is the validation.
+	$active_tab = ( isset( $_GET['tab'] ) && is_string( $_GET['tab'] ) ? wp_unslash( $_GET['tab'] ) : '' ) ?: array_key_first( $tabs );
 	$active_tab = array_key_exists( $active_tab, $tabs ) ? $active_tab : array_key_first( $tabs );
 
 	echo '<h2 class="nav-tab-wrapper">';

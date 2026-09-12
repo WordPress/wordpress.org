@@ -486,7 +486,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function login_form_defaults( $defaults ) {
 			if ( ! empty( $_GET['redirect_to'] ) ) {
-				$defaults['redirect'] = esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ); // Always ultimately checked for safety at redir time.
+				$defaults['redirect'] = isset( $_GET['redirect_to'] ) && is_string( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : ''; // Always ultimately checked for safety at redir time.
 			} elseif ( $referer = wp_get_referer() ) {
 				$_GET['redirect_to'] = $referer;
 				$defaults['redirect'] = $referer;
@@ -564,7 +564,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$user = wp_get_current_user();
 
 			// Redirect back to the requested location.. the referer.. or failing that, the current sites front page after it's all done.
-			$logout_redirect = ( esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ) ?: wp_get_referer() ) ?: home_url( '/' );
+			$logout_redirect = ( ( isset( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) ) : '' ) ?: wp_get_referer() ) ?: home_url( '/' );
 
 			// Never to wp-admin.
 			if ( str_contains( $logout_redirect, '/wp-admin/' ) ) {
@@ -650,7 +650,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 
 			if ( isset( $_GET['redirect_to'] ) ) {
-				$redirect_to = esc_url_raw( wp_unslash( $_GET['redirect_to'] ) );
+				$redirect_to = isset( $_GET['redirect_to'] ) && is_string( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
 			} else {
 				// Generate the current url based on the current hostname and request uri.
 				$redirect_to = set_url_scheme( 'http://' . $this->host . ( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) ) );
@@ -728,7 +728,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Default to the logout confirmation screen, or back to the source site if possible.
 			$redirect_to = $this->sso_host_url . '/loggedout';
 			if ( ! empty( $_REQUEST['redirect_to'] ) ) {
-				$requested_redirect_to = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) );
+				$requested_redirect_to = isset( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) ) : '';
 				$redirect_to           = add_query_arg( 'redirect_to', urlencode( $requested_redirect_to ), $redirect_to );
 
 				// If the requested redirect_to is valid, use it.

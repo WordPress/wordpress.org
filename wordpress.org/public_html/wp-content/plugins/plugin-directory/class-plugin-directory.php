@@ -1240,7 +1240,7 @@ class Plugin_Directory {
 		switch ( $term->taxonomy ) {
 			case 'plugin_section':
 				if ( 'favorites' == $term->slug ) {
-					$user = get_query_var( 'favorites_user' ) ?? sanitize_user( wp_unslash( $_GET['favorites_user'] ?? '' ) );
+					$user = get_query_var( 'favorites_user' ) ?: sanitize_user( wp_unslash( $_GET['favorites_user'] ?? '' ) );
 					$user = get_user_by( 'slug', $user );
 					if ( $user && $user != wp_get_current_user() ) {
 						$name = sprintf(

@@ -436,7 +436,7 @@ class WordPressTV_Theme {
 		$slides_url = esc_url_raw( wp_unslash( $_POST['_wptv_slides_url'] ?? '' ) );
 
 		if ( $slides_url ) {
-			update_post_meta( $post_id, '_wptv_slides_url', $slides_url );
+			update_post_meta( $post_id, '_wptv_slides_url', wp_slash( $slides_url ) );
 		} else {
 			delete_post_meta( $post_id, '_wptv_slides_url' );
 		}

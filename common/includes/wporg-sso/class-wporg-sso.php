@@ -61,7 +61,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			$this->sso_signup_url = $this->sso_host_url . '/register';
 
 			if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
-				$this->host   = sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) );
+				$this->host   = wp_strip_all_tags( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) );
 				$this->script = wp_strip_all_tags( wp_unslash( $_SERVER['SCRIPT_NAME'] ?? '' ) );
 			}
 		}

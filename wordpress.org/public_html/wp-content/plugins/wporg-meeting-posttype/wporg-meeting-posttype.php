@@ -394,8 +394,9 @@ class Meeting_Post_Type {
 		$meta['link']       = esc_url_raw( wp_unslash( $_POST['link'] ?? '' ) );
 		$meta['location']   = sanitize_text_field( wp_unslash( $_POST['location'] ?? '' ) );
 
+		/* update_post_meta() unslashes what it is given, so re-slash the sanitized values. */
 		foreach ( $meta as $key => $value ) {
-			update_post_meta( $post->ID, $key, $value );
+			update_post_meta( $post->ID, $key, wp_slash( $value ) );
 		}
 	}
 

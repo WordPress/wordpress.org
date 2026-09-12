@@ -630,7 +630,7 @@ class HelpHub_Post_Types_Post_Type {
 
 			// Save it.
 			if ( 'read_time' !== $f ) {
-				update_post_meta( $post_id, '_' . $f, ${$f} );
+				update_post_meta( $post_id, '_' . $f, wp_slash( ${$f} ) );
 			}
 		} // End foreach().
 
