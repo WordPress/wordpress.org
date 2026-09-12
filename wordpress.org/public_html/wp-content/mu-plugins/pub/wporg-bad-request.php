@@ -310,7 +310,7 @@ add_action( 'send_headers', function() {
 	];
 
 	foreach ( $share_by_email_fields as $field ) {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- Checks the submitted value's type, which sanitizing it first would hide.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- Checks the submitted value's type before anything normalises it.
 		if ( isset( $_POST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
 			die_bad_request( "non-scalar $field in Jetpack Share By Email" );
 		}
@@ -343,12 +343,7 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
-	/*
-	 * Derived exactly as wp-trackback.php does, from the raw value: sanitizing first
-	 * would normalise charset=<b>UTF-8</b> to UTF-8, pass the check below, and hand
-	 * core the unsanitised string this guard exists to stop (Core #60261).
-	 */
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing -- Derives the charset exactly as wp-trackback.php does, from the raw value, so the check below sees what core will see (Core #60261). Inspects every incoming request, ahead of any handler that would own a nonce.
 	$charset = str_replace( array( ',', ' ' ), '', strtoupper( trim( $_POST['charset'] ?? '' ) ) );
 
 	if ( function_exists( 'mb_list_encodings' ) && ! in_array( $charset, mb_list_encodings(), true ) ) {

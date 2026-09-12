@@ -417,7 +417,7 @@ add_action( 'admin_post_login_resend_email', function() {
 		wp_die();
 	}
 
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email; sanitize_email() rewrites IDN and single-label domains, so neither would match.
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email.
 	$email = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? wp_unslash( $_REQUEST['email'] ) : '';
 
 	check_admin_referer( 'resend_' . $email );
@@ -443,7 +443,7 @@ add_action( 'admin_post_login_mark_as_cleared', function() {
 		wp_die();
 	}
 
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email; sanitize_email() rewrites IDN and single-label domains, so neither would match.
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email.
 	$email = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? wp_unslash( $_REQUEST['email'] ) : '';
 
 	check_admin_referer( 'clear_' . $email );
@@ -478,7 +478,7 @@ add_action( 'admin_post_login_block', function() {
 		wp_die();
 	}
 
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email; sanitize_email() rewrites IDN and single-label domains, so neither would match.
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email.
 	$email = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? wp_unslash( $_REQUEST['email'] ) : '';
 
 	check_admin_referer( 'block_' . $email );
@@ -517,7 +517,7 @@ add_action( 'admin_post_login_delete', function() {
 		wp_die();
 	}
 
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email; sanitize_email() rewrites IDN and single-label domains, so neither would match.
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email.
 	$email = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? wp_unslash( $_REQUEST['email'] ) : '';
 
 	check_admin_referer( 'delete_' . $email );
