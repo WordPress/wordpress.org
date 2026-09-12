@@ -607,6 +607,27 @@ class Current_Release_Resolution_Test extends TestCase {
 	}
 
 	/**
+	 * Committer profile links remain links in the release listing.
+	 */
+	public function test_release_listing_renders_committer_profile_link(): void {
+		$login   = 'release-committer-' . ( ++self::$plugin_count );
+		$user_id = wp_create_user( $login, wp_generate_password(), $login . '@example.org' );
+
+		$this->assertIsInt( $user_id );
+		$this->add_release( self::HELD_TAG, self::RENAMED_VERSION, array( 'committer' => array( $login ) ) );
+
+		ob_start();
+		Release_Confirmation::single_plugin( get_post( $this->plugin->ID ) );
+		$listing = ob_get_clean();
+
+		$this->assertStringContainsString(
+			'<a href="https://profiles.wordpress.org/' . $login . '/">' . $login . '</a>',
+			$listing
+		);
+		$this->assertStringNotContainsString( '&lt;a href=', $listing );
+	}
+
+	/**
 	 * The listing's cooldown line follows the same resolution as the rest of the
 	 * UI: with the stable tag flipped to trunk at an unchanged version, the
 	 * fallback-resolved release is the current one and keeps its line.

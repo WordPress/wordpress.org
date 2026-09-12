@@ -197,7 +197,7 @@ class Release_Confirmation {
 						esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
 						esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
 					),
-					esc_html( implode( ', ', $data['committer'] ) ),
+					implode( ', ', $data['committer'] ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Each committer link escapes its URL and label above.
 				),
 				self::get_actions( $plugin, $data ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Button attributes and labels are escaped in get_actions().
 				self::get_approval_text( $plugin, $data, $current_release ) . // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped when built.
