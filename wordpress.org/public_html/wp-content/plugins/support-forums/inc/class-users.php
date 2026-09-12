@@ -333,10 +333,12 @@ class Users {
 			return;
 		}
 
+		$submitted_email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+
 		if (
-			$user_email !== $_POST['email'] &&
-			is_email( sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ) ) &&
-			is_email_address_unsafe( sanitize_email( wp_unslash( $_POST['email'] ?? '' ) ) )
+			$user_email !== $submitted_email &&
+			is_email( $submitted_email ) &&
+			is_email_address_unsafe( $submitted_email )
 		) {
 			bbp_add_error( 'bbp_user_email_invalid', __( '<strong>Error:</strong> That email address cannot be used.', 'wporg-forums' ), array( 'form-field' => 'email' ) );
 

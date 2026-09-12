@@ -107,7 +107,8 @@ if ( ! isset( $_GET['embed'] ) ) {
 	);
 
 	if ( ! empty( $_GET['api_key'] ) ) {
-		$embed_url = add_query_arg( 'api_key', sanitize_text_field( wp_unslash( $_GET['api_key'] ?? '' ) ), $embed_url );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Opaque credential forwarded verbatim; sanitize_text_field() would strip %XX octets out of it.
+		$embed_url = add_query_arg( 'api_key', is_string( $_GET['api_key'] ) ? wp_unslash( $_GET['api_key'] ) : '', $embed_url );
 	}
 
 	$embed_url .= '#el=' . $id;

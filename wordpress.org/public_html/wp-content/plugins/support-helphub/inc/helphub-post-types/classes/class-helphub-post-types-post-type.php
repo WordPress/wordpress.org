@@ -618,7 +618,7 @@ class HelpHub_Post_Types_Post_Type {
 						$values = array_keys( $field_data[ $f ]['options'] );
 					}
 					$submitted = sanitize_text_field( wp_unslash( $_POST[ $f ] ?? '' ) );
-					${$f}      = in_array( $submitted, $values, true ) ? $submitted : '';
+					${$f}      = in_array( $submitted, array_map( 'strval', $values ), true ) ? $submitted : '';
 					break;
 				case 'date':
 					${$f} = isset( $_POST[ $f ] ) ? strtotime( wp_strip_all_tags( wp_unslash( $_POST[ $f ] ) ) ) : '';

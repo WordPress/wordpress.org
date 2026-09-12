@@ -187,7 +187,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$akismet_comment['comment_content']      = $submitted_message;
 		$query_string = '';
 		foreach ( $akismet_comment as $key => $data ) {
-			$query_string .= $key . '=' . urlencode( stripslashes( $data ) ) . '&';
+			$query_string .= $key . '=' . urlencode( $data ) . '&';
 		}
 		$response = akismet_http_post( $query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port );
 		if ( 'true' == $response[1] ) {
