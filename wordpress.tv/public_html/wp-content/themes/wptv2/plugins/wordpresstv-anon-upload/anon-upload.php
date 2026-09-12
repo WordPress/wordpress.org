@@ -102,8 +102,8 @@ class WPTV_Anon_Upload {
 			return $this->error( 13 );
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- init() checks the upload nonce before dispatching here.
-		if ( ! empty( $_POST['wptv_producer_username'] ) && ! wporg_username_exists( sanitize_user( wp_unslash( $_POST['wptv_producer_username'] ?? '' ) ) ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- init() checks the upload nonce before dispatching here; the name is recorded as it was posted, so the account has to exist under that name and not under a repaired version of it.
+		if ( ! empty( $_POST['wptv_producer_username'] ) && ! wporg_username_exists( is_string( $_POST['wptv_producer_username'] ) ? wp_unslash( $_POST['wptv_producer_username'] ) : '' ) ) {
 			return $this->error( 14 );
 		}
 
@@ -112,10 +112,12 @@ class WPTV_Anon_Upload {
 				return $this->error( 10 );
 			}
 
-			if ( empty( $_POST['wptv_email'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- init() checks the upload nonce before dispatching here; the address stored further down is the one that was posted, so this is the value that has to pass is_email().
+			$posted_email = is_string( $_POST['wptv_email'] ?? '' ) ? wp_unslash( $_POST['wptv_email'] ) : '';
+
+			if ( '' === $posted_email ) {
 				return $this->error( 11 );
-				// phpcs:ignore WordPress.Security.NonceVerification.Missing -- init() checks the upload nonce before dispatching here.
-			} elseif ( ! is_email( sanitize_email( wp_unslash( $_POST['wptv_email'] ?? '' ) ) ) ) {
+			} elseif ( ! is_email( $posted_email ) ) {
 				return $this->error( 12 );
 			}
 

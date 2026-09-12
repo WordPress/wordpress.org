@@ -497,8 +497,8 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 	}
 
 	$updated_email = false;
-	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
-	$new_email = trim( sanitize_email( wp_unslash( $_POST['user_email'] ?? '' ) ) );
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Public login and registration forms are served to logged-out visitors, so reCAPTCHA is the anti-automation check here, not a nonce; the email-in-use endpoint below is what validates the address, and it has to see what was typed rather than a repaired version of it.
+	$new_email = trim( is_string( $_POST['user_email'] ?? '' ) ? wp_unslash( $_POST['user_email'] ) : '' );
 	if (
 		'pending' === $state &&
 		empty( $pending_user['meta']['changed_email'] ) && // Only if they've not changed it before.

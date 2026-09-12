@@ -307,7 +307,7 @@ if ( isset( $_GET['post_category'] ) ) {
 						</p>
 						<p>
 							<label for="wptv_email"><?php esc_html_e( 'Email address' ); ?><span class="required"> * </span></label>
-							<input type="text" id="wptv_email" name="wptv_email" value="<?php echo esc_attr( sanitize_email( wp_unslash( $_GET['wptv_email'] ?? '' ) ) ); ?>" />
+							<input type="text" id="wptv_email" name="wptv_email" value="<?php echo esc_attr( is_string( $_GET['wptv_email'] ?? '' ) ? wp_unslash( $_GET['wptv_email'] ) : '' ); ?>" />
 						</p>
 					<?php endif; ?>
 
