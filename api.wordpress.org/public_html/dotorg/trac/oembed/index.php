@@ -24,8 +24,7 @@ libxml_use_internal_errors( true );
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = $_GET['url'] ?? '';
-$url = is_string( $url ) ? wp_unslash( $url ) : '';
+$url = isset( $_GET['url'] ) && is_string( $_GET['url'] ) ? esc_url_raw( wp_unslash( $_GET['url'] ) ) : '';
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );
@@ -38,7 +37,7 @@ $allowed_hosts = [
 
 if (
 	! $url ||
-	'GET' !== $_SERVER['REQUEST_METHOD'] ||
+	'GET' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ||
 	! in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ), $allowed_hosts, true )
 ) {
 	header( 'HTTP/1.1 404 Not Found', true, 404 );
@@ -50,7 +49,8 @@ $trac_baseurl = '^(?P<baseurl>https://(?P<trac>meta|core)\.trac\.wordpress\.org/
 $allowed_urls = [
 	'!' . $trac_baseurl . '(?P<type>ticket|changeset)/\d+$!iD',
 	'!' . $trac_baseurl . '(?P<type>query)[?].+$!iD',
-	'!' . $trac_baseurl . '(?P<type>milestone)/[a-z0-9.]+[ ]?[a-z0-9.]*$!iD',
+	// The separator is %20 once esc_url_raw() has been over the URL, and a literal space if not.
+	'!' . $trac_baseurl . '(?P<type>milestone)/[a-z0-9.]+(?:[ ]|%20)?[a-z0-9.]*$!iD',
 	'!' . $trac_baseurl . '(?P<type>ticketgraph)([?]component=[^&]+)?$!iD',
 ];
 
@@ -108,7 +108,8 @@ if ( ! isset( $_GET['embed'] ) ) {
 	);
 
 	if ( ! empty( $_GET['api_key'] ) ) {
-		$embed_url = add_query_arg( 'api_key', wp_unslash( $_GET['api_key'] ), $embed_url );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Opaque credential, forwarded verbatim and never rendered.
+		$embed_url = add_query_arg( 'api_key', is_string( $_GET['api_key'] ) ? wp_unslash( $_GET['api_key'] ) : '', $embed_url );
 	}
 
 	$embed_url .= '#el=' . $id;

@@ -120,7 +120,8 @@ class Users {
 	 */
 	public function save_custom_fields( $user_id ) {
 		if ( current_user_can( 'moderate' ) && isset( $_POST['title'] ) ) {
-			update_user_option( $user_id, 'title', sanitize_text_field( $_POST['title'] ) );
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Runs on personal_options_update and edit_user_profile_update; core verifies the update-user nonce before firing them.
+			update_user_option( $user_id, 'title', wp_slash( sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) ) ) );
 		}
 
 		$auto_topic_subscription = isset( $_POST['auto_topic_subscription'] );
@@ -332,10 +333,13 @@ class Users {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The address is checked as typed, because bbPress goes on to validate and store this same value; repairing it here would move the blocklist check onto a string nobody saves.
+		$submitted_email = isset( $_POST['email'] ) && is_string( $_POST['email'] ) ? wp_unslash( $_POST['email'] ) : '';
+
 		if (
-			$user_email !== $_POST['email'] &&
-			is_email( $_POST['email'] ) &&
-			is_email_address_unsafe( $_POST['email'] )
+			$user_email !== $submitted_email &&
+			is_email( $submitted_email ) &&
+			is_email_address_unsafe( $submitted_email )
 		) {
 			bbp_add_error( 'bbp_user_email_invalid', __( '<strong>Error:</strong> That email address cannot be used.', 'wporg-forums' ), array( 'form-field' => 'email' ) );
 
@@ -647,7 +651,7 @@ class Users {
 		if (
 			isset( $_POST['bulk-topic-unsub'], $_POST['_wpnonce'] ) &&
 			( bbp_is_user_home() || current_user_can( 'edit_user', $user_id ) ) &&
-			wp_verify_nonce( $_POST['_wpnonce'], 'bulk_unsubscribe_' . $user_id )
+			wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'bulk_unsubscribe_' . $user_id )
 		) {
 			bbp_remove_user_from_all_objects( $user_id, '_bbp_subscription' );
 		}

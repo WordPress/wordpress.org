@@ -14,6 +14,212 @@ use function Dotorg\API\Events\{
  */
 class Test_Events extends TestCase {
 	/**
+	 * Parses request fixtures without loading WordPress.
+	 *
+	 * @group unit
+	 */
+	public function test_parse_request_without_wordpress(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification -- Back up simulated request data for restoration after the test.
+		$saved = [ $_GET, $_POST, $_REQUEST, $_SERVER ];
+		try {
+			$coordinates = [
+				'latitude'  => '47.6',
+				'longitude' => '-122.3',
+				'country'   => 'US',
+			];
+			$_GET        = $coordinates;
+			$_POST       = [];
+			$_REQUEST    = $coordinates + [
+				'location' => "  O'Fallon  ",
+				'timezone' => 'America/Chicago',
+				'locale'   => 'en_US',
+				'ip'       => '8.8.8.8',
+			];
+			$this->assertSame(
+				[
+					'restrict_by_country' => true,
+					'latitude'            => '47.6',
+					'longitude'           => '-122.3',
+					'country'             => 'US',
+					'location_name'       => "O'Fallon",
+					'timezone'            => 'America/Chicago',
+					'locale'              => 'en_US',
+					'ip'                  => '8.8.8.8',
+				],
+				\Dotorg\API\Events\parse_request()
+			);
+
+			$_REQUEST['ip']         = '127.0.0.1';
+			$_SERVER['REMOTE_ADDR'] = '1.1.1.1';
+			$this->assertSame( '1.1.1.1', \Dotorg\API\Events\parse_request()['ip'] );
+
+			$location_data = [
+				'location_name' => 'A\\B',
+				'country'       => 'US',
+			];
+			$_GET          = [];
+			$_REQUEST      = [];
+			$_POST         = [ 'location_data' => $location_data ];
+			$this->assertSame( $location_data, \Dotorg\API\Events\parse_request() );
+		} finally {
+			[ $_GET, $_POST, $_REQUEST, $_SERVER ] = $saved;
+		}
+	}
+
+	/**
+	 * Detects Core clients with or without a request user agent.
+	 *
+	 * @group unit
+	 */
+	public function test_client_detection_uses_request_user_agent_without_wordpress(): void {
+		$saved = $_SERVER;
+		try {
+			$_SERVER['HTTP_USER_AGENT'] = 'WordPress/6.9; https://example.org';
+			$this->assertTrue( is_client_core() );
+			$this->assertFalse( is_client_core( 'Other client' ) );
+			unset( $_SERVER['HTTP_USER_AGENT'] );
+			$this->assertFalse( is_client_core() );
+		} finally {
+			$_SERVER = $saved;
+		}
+	}
+
+	/**
+	 * Keeps zero coordinates usable for both GET and POST requests.
+	 *
+	 * @group unit
+	 * @dataProvider data_zero_coordinates
+	 *
+	 * @param array $coordinates Request coordinates.
+	 */
+	public function test_zero_coordinates_resolve_to_a_location( array $coordinates ): void {
+		// phpcs:ignore WordPress.Security.NonceVerification -- Back up simulated request data for restoration after the test.
+		$saved = [ $_GET, $_POST, $_REQUEST ];
+		try {
+			$_GET     = $coordinates;
+			$_POST    = [];
+			$_REQUEST = $coordinates;
+			$expected = [ 'description' => false ] + $coordinates;
+
+			$this->assertSame( $expected, get_location( \Dotorg\API\Events\parse_request() ) );
+
+			$_GET     = [];
+			$_REQUEST = [];
+			$_POST    = [ 'location_data' => $coordinates ];
+
+			$this->assertSame( $expected, get_location( \Dotorg\API\Events\parse_request() ) );
+		} finally {
+			[ $_GET, $_POST, $_REQUEST ] = $saved;
+		}
+	}
+
+	/**
+	 * Keeps a geographic filter when either coordinate is zero.
+	 *
+	 * @group unit
+	 * @dataProvider data_zero_coordinates
+	 *
+	 * @param array $coordinates Request coordinates.
+	 */
+	public function test_zero_coordinates_constrain_event_queries( array $coordinates ): void {
+		global $wpdb;
+
+		$saved_db = $wpdb;
+		// phpcs:ignore WordPress.Security.NonceVerification -- Back up simulated request data for restoration after the test.
+		$saved_request = $_REQUEST;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Replace the database with a mock to capture the query without executing it.
+		$wpdb = $this->getMockBuilder( \stdClass::class )->addMethods( [ 'prepare', 'get_results' ] )->getMock();
+		$wpdb->expects( $this->once() )->method( 'prepare' )->willReturnCallback(
+			function ( $query, $values ) use ( $coordinates ) {
+				$this->assertStringContainsString( '`latitude` BETWEEN %f AND %f AND `longitude` BETWEEN %f AND %f', $query );
+				$bounds = \Dotorg\API\Events\get_bounded_coordinates( $coordinates['latitude'], $coordinates['longitude'], 100 );
+				$this->assertSame(
+					[ 'meetup', $bounds['latitude']['min'], $bounds['latitude']['max'], $bounds['longitude']['min'], $bounds['longitude']['max'] ],
+					array_slice( $values, 0, 5 )
+				);
+
+				// Stop before database access or the later event-pinning queries.
+				throw new \RuntimeException( 'Captured the nearby event query.' );
+			}
+		);
+
+		try {
+			$_REQUEST = [];
+			$this->expectException( \RuntimeException::class );
+			$this->expectExceptionMessage( 'Captured the nearby event query.' );
+			build_response( [ 'description' => false ] + $coordinates, [] );
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the original database after the test.
+			$wpdb     = $saved_db;
+			$_REQUEST = $saved_request;
+		}
+	}
+
+	/**
+	 * Provides zero coordinates in the formats clients can send.
+	 *
+	 * @return array
+	 */
+	public static function data_zero_coordinates(): array {
+		return [
+			'equator'        => [
+				[
+					'latitude'  => '0.0000',
+					'longitude' => '32.5',
+				],
+			],
+			'prime-meridian' => [
+				[
+					'latitude'  => '51.5',
+					'longitude' => '0.0000',
+				],
+			],
+			'zero-strings'   => [
+				[
+					'latitude'  => '0',
+					'longitude' => '0',
+				],
+			],
+			'zero-integers'  => [
+				[
+					'latitude'  => 0,
+					'longitude' => 0,
+				],
+			],
+			'zero-floats'    => [
+				[
+					'latitude'  => 0.0,
+					'longitude' => 0.0,
+				],
+			],
+		];
+	}
+
+	/**
+	 * Does not turn nonnumeric coordinates into a valid zero coordinate.
+	 *
+	 * @group unit
+	 */
+	public function test_invalid_coordinates_do_not_resolve_to_a_location(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification -- Back up simulated request data for restoration after the test.
+		$saved = [ $_GET, $_POST, $_REQUEST ];
+		try {
+			$_POST    = [];
+			$_REQUEST = [];
+			foreach ( [ 'latitude', 'longitude' ] as $field ) {
+				$_GET           = [
+					'latitude'  => '47.6',
+					'longitude' => '-122.3',
+				];
+				$_GET[ $field ] = 'invalid';
+				$this->assertFalse( get_location( \Dotorg\API\Events\parse_request() ) );
+			}
+		} finally {
+			[ $_GET, $_POST, $_REQUEST ] = $saved;
+		}
+	}
+
+	/**
 	 * Asserts that an HTTP response is valid and contains an event.
 	 */
 	public function assertResponseHasEvent( $response ) {

@@ -61,8 +61,8 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			$this->sso_signup_url = $this->sso_host_url . '/register';
 
 			if ( ! empty( $_SERVER['HTTP_HOST'] ) ) {
-				$this->host   = $_SERVER['HTTP_HOST'];
-				$this->script = $_SERVER['SCRIPT_NAME'];
+				$this->host   = wp_strip_all_tags( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) );
+				$this->script = wp_strip_all_tags( wp_unslash( $_SERVER['SCRIPT_NAME'] ?? '' ) );
 			}
 		}
 
@@ -131,7 +131,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			// Always include the redirect_to if not set, to avoid cross-origin redirect issues.
 			if ( empty( $redirect_to ) ) {
-				$redirect_to = 'https://' . $this->host . $_SERVER['REQUEST_URI'];
+				$redirect_to = 'https://' . $this->host . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 			}
 
 			if ( ! empty( $redirect_to ) && $this->_is_valid_targeted_domain( $redirect_to ) ) {
@@ -164,6 +164,11 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		/**
 		 * Get a safe redirect URL (ie: a wordpress.org-based one) from $_REQUEST['redirect_to'] or a safe alternative.
 		 *
+		 * Values here are sanitized with wp_strip_all_tags() rather than esc_url_raw().
+		 * This class is reached from sunrise.php, which runs before kses.php is loaded,
+		 * and esc_url() calls into it. Every candidate is checked against
+		 * _is_valid_targeted_domain() before it is used.
+		 *
 		 * @return string Safe redirect URL from $_REQUEST['redirect_to']
 		 */
 		protected function _get_safer_redirect_to( $default = 'https://wordpress.org/' ) {
@@ -172,20 +177,21 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ) {
 				// User is requesting a further redirect afterward, let's make sure it's a legit target.
-				$redirect_to_requested = str_replace( ' ', '%20', $_REQUEST['redirect_to'] ); // Encode spaces.
+				$redirect_to_requested = str_replace( ' ', '%20', wp_strip_all_tags( wp_unslash( $_REQUEST['redirect_to'] ) ) ); // Encode spaces.
 				$redirect_to_requested = function_exists( 'wp_sanitize_redirect' ) ? wp_sanitize_redirect( $redirect_to_requested ) : $redirect_to_requested;
 				if ( $this->_is_valid_targeted_domain( $redirect_to_requested ) ) {
 					$redirect_to = $redirect_to_requested;
 				}
 			} else if ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
 				// We didn't get a redirect_to, but we got a referrer, use that if a valid target.
-				$redirect_to_referrer = $_SERVER['HTTP_REFERER'];
+				$redirect_to_referrer = wp_strip_all_tags( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
 				if ( $this->_is_valid_targeted_domain( $redirect_to_referrer ) && $this->sso_host != parse_url( $redirect_to_referrer, PHP_URL_HOST ) ) {
 					$redirect_to = $redirect_to_referrer;
 				}
 			} elseif ( ! $this->is_sso_host() ) {
 				// Otherwise, attempt to guess the parent dir of where they came from and validate that.
-				$redirect_to_source_parent = preg_replace( '/\/[^\/]+\.php\??.*$/', '/', "https://{$this->host}{$_SERVER['REQUEST_URI']}" );
+				$request_uri               = wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+				$redirect_to_source_parent = preg_replace( '/\/[^\/]+\.php\??.*$/', '/', "https://{$this->host}{$request_uri}" );
 				if ( $this->_is_valid_targeted_domain( $redirect_to_source_parent ) ) {
 					$redirect_to = $redirect_to_source_parent;
 				}
@@ -280,7 +286,13 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			// In the event headers have been sent already, output a HTML redirect.
 			if ( headers_sent() ) {
-				if ( function_exists( 'esc_url' ) ) {
+				/*
+				 * esc_url() is defined before this class is reached from sunrise.php, but
+				 * it calls into kses.php, which is loaded later. Test for that rather than
+				 * for esc_url() itself. $to has already been through
+				 * _is_valid_targeted_domain(), so escaping it for the attribute is enough.
+				 */
+				if ( function_exists( 'wp_kses_normalize_entities' ) ) {
 					$to = esc_url( $to );
 				} else {
 					// This is not a replacement for esc_url().

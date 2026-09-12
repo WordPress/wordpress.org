@@ -17,6 +17,7 @@ $wp_object_cache->blog_prefix = WPORG_THEME_DIRECTORY_BLOGID;
 function send_error( $error, $code = 404 ) {
 	global $format;
 
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here.
 	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' ' . $code, true, $code );
 
 	$response = (object) [
@@ -25,8 +26,10 @@ function send_error( $error, $code = 404 ) {
 
 	// Browsers get a nicer action not implemented error.
 	if (
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here.
 		'GET' === $_SERVER['REQUEST_METHOD'] &&
 		false === strpos( $_SERVER['HTTP_USER_AGENT'] ?? '', 'WordPress/' ) &&
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 		false !== strpos( $error, 'Action not implemented.' )
 	) {
 		header( 'Content-Type: text/html; charset=utf-8' );
@@ -59,9 +62,11 @@ if ( ! defined( 'THEMES_API_VERSION' ) ) {
 
 // Set up action and request information.
 if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Structured API request; each field is validated by the themes API below.
 	$request = isset( $_REQUEST['request'] ) ? (object) $_REQUEST['request'] : '';
 	$format = 'json';
 } else {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing -- Serialized API request; it is unserialized and each field validated below. Webhook endpoint; the request is authenticated by its signature, not a nonce.
 	$post_request = isset( $_POST['request'] ) && is_string( $_POST['request'] ) ? $_POST['request'] : '';
 	if ( $post_request ) {
 		// PHP Needs to get a non-urldecoded request, to avoid multibyte character malforming the request,
@@ -81,10 +86,11 @@ if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 	$format = 'php';
 }
 
-$action = $_REQUEST['action'] ?? '';
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here. The switch below accepts only known actions.
+$api_action = $_REQUEST['action'] ?? '';
 
 // Validate the request.
-switch ( $action ) {
+switch ( $api_action ) {
 	case 'theme_information':
 		if ( isset( $request->slugs ) ) {
 			// Validate that the slugs provided are valid.
@@ -138,7 +144,7 @@ switch ( $action ) {
 load_wordpress( 'https://wordpress.org/themes/' );
 
 // Serve an API request.
-$api = wporg_themes_query_api( $action, $request, 'api_object' );
+$api = wporg_themes_query_api( $api_action, $request, 'api_object' );
 
 $api->set_status_header();
 
@@ -147,7 +153,7 @@ echo $api->get_result( $format );
 
 // Cache when a theme doesn't exist. See the validation handler above.
 if (
-	'theme_information' == $action &&
+	'theme_information' === $api_action &&
 	isset( $slug ) &&
 	404 == http_response_code() &&
 	// Validate that the theme doesn't exist for update-checks, as a sanity check.

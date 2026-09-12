@@ -18,17 +18,22 @@ class Readme_Validator {
 		$readme_url      = '';
 		$readme_contents = '';
 		if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Resolve bare slugs before sanitizing the resulting URL below.
 			$readme_url = wp_unslash( $_REQUEST['readme'] );
 
 			// If it's a slug..
 			if ( $readme_url === sanitize_title_with_dashes( $readme_url ) ) {
 				$readme_url = 'https://wordpress.org/plugins/' . $readme_url . '/';
 			}
+			$readme_url = esc_url_raw( $readme_url );
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Stateless validator; the submitted readme is parsed and echoed back, nothing is stored.
 		if ( ! empty( $_POST['readme_contents'] ) && is_string( $_POST['readme_contents'] ) ) {
-			$readme_contents = base64_decode( wp_unslash( $_POST['readme_contents'] ), true );
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decodes the readme the form posted, in strict mode.
+			$readme_contents = base64_decode( sanitize_text_field( wp_unslash( $_POST['readme_contents'] ?? '' ) ), true );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		// If the user has specified a plugin URL, validate the stable tags readme (Well, try to, we don't know it's exact filename).
 		if ( $readme_url && preg_match( '!^https?://([^./]+\.)?wordpress.org/plugins/(?P<slug>[^/]+)!i', $readme_url, $m ) ) {

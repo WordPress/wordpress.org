@@ -169,11 +169,12 @@ class WordPress_Map_Users_Import extends WP_Import {
 			return;
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- The author mapping form emits the import-wordpress nonce, which the WordPress Importer verifies when it dispatches this step of the import.
 		$catchall_user_id = absint( $_POST['user_catchall'] );
 
 		$username_mapping = [];
 		if ( ! empty( $_POST['freeform'] ) ) {
-			$raw_mapping = $_POST['freeform_user_map'];
+			$raw_mapping = sanitize_textarea_field( wp_unslash( $_POST['freeform_user_map'] ?? '' ) );
 			$raw_mapping = explode( "\n", $raw_mapping );
 
 			foreach ( $raw_mapping as $line ) {
@@ -185,11 +186,12 @@ class WordPress_Map_Users_Import extends WP_Import {
 				$username_mapping[ $line[0] ] = $line[1];
 			}
 		} else {
-			$raw_mapping = $_POST['unmatched_authors'];
+			$raw_mapping = array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['unmatched_authors'] ?? array() ) );
 			foreach ( $raw_mapping as $old_id => $new_name ) {
 				$username_mapping[ $old_logins_by_id[ $old_id ] ] = $new_name;
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		// $username_mapping is arrays of array( 'old username' => 'new username' ).
 		$new_usernames_prepared = array_map( 'esc_sql', $username_mapping );

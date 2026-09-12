@@ -396,8 +396,10 @@ class Plugin {
 				if ( isset( $_POST['translation_source'] ) && 'frontend' == $_POST['translation_source'] ) {
 					$source = 'frontend';
 					if ( isset( $_POST['externalTranslationSource'] ) ) {
-						$suggestion_source     = sanitize_text_field( $_POST['externalTranslationSource'] );
-						$suggested_translation = sanitize_text_field( $_POST['externalTranslationUsed'] );
+						// phpcs:disable WordPress.Security.NonceVerification.Missing -- Guarded on GlotPress's translations_post route, which verifies its add-translation nonce and 403s before dispatching.
+						$suggestion_source     = sanitize_text_field( wp_unslash( $_POST['externalTranslationSource'] ) );
+						$suggested_translation = sanitize_text_field( wp_unslash( $_POST['externalTranslationUsed'] ?? '' ) );
+						// phpcs:enable WordPress.Security.NonceVerification.Missing
 						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
 					}
 				}
@@ -646,7 +648,7 @@ class Plugin {
 		if ( isset( $_SERVER['HTTP_ORIGIN'] ) ) {
 			switch ( $_SERVER['HTTP_ORIGIN'] ) {
 				case 'https://playground.wordpress.net':
-					header( 'Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] );
+					header( 'Access-Control-Allow-Origin: ' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_ORIGIN'] ?? '' ) ) );
 			}
 		}
 		header( 'Vary: origin' );

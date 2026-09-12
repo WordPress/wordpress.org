@@ -8,14 +8,15 @@
 get_header();
 
 // Prefill the username if possible.
-$username = $_REQUEST['user'] ?? ( wp_parse_auth_cookie()['username'] ?? '' );
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Prefills the field with the login as typed; escaped on output.
+$username = wp_unslash( $_REQUEST['user'] ?? ( wp_parse_auth_cookie()['username'] ?? '' ) );
 if ( ! is_string( $username ) ) {
 	$username = '';
 }
 
 // Redirect is validated at redirect time, just pass through whatever we can.
 if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ) {
-	$redirect = wp_unslash( $_REQUEST['redirect_to'] );
+	$redirect = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) );
 } elseif ( $referer = wp_get_referer() ) {
 	$redirect = $referer;
 } else {

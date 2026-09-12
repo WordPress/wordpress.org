@@ -63,7 +63,7 @@ class User_Notes {
 		$post_id   = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 
 		$note_id   = isset( $_POST['note_id'] ) ? (int) $_POST['note_id'] : 0;
-		$note_text = isset( $_POST['note_text'] ) ? wp_kses( $_POST['note_text'], array( 'a' => array( 'href' => true ) ) ) : '';
+		$note_text = isset( $_POST['note_text'] ) ? wp_kses( wp_unslash( $_POST['note_text'] ), array( 'a' => array( 'href' => true ) ) ) : '';
 
 		if ( ! $user_id || ! $note_text ) {
 			return;
@@ -74,10 +74,11 @@ class User_Notes {
 			return;
 		}
 
-		$this->add_user_note( $user_id, $note_text, $post_id, $note_id );
+		// add_user_note() passes the text to the metadata API, which expects slashed data.
+		$this->add_user_note( $user_id, wp_slash( $note_text ), $post_id, $note_id );
 
 		if ( $should_redirect ) {
-			$redirect_url = set_url_scheme( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+			$redirect_url = set_url_scheme( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
 
 			// Redirect to clear form data.
 			bbp_redirect( $redirect_url );

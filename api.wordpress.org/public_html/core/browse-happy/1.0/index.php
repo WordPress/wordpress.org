@@ -1,5 +1,17 @@
 <?php
+/**
+ * Browse Happy API: parses a user agent string and reports the browser it names.
+ *
+ * Standalone endpoint; WordPress is not loaded here, so its sanitizers are
+ * unavailable. The JSONP callback is restricted with preg_replace() and the
+ * user agent is only parsed.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput
+ *
+ * @package BrowseHappy
+ */
 
+// Pulls in browsehappy_parse_user_agent().
 require dirname( __FILE__ ) . '/parse.php';
 
 $jsonp = '';

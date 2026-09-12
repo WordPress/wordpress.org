@@ -547,11 +547,11 @@ function add_language_bulk_edit_field( $column_name, $post_type ) {
  * @return void
  */
 function language_bulk_edit_save( $post_id ) {
-	if ( empty( $_REQUEST['language'] ) || empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'bulk-posts' ) ) {
+	if ( empty( $_REQUEST['language'] ) || empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'bulk-posts' ) ) {
 		return;
 	}
 
-	update_post_meta( $post_id, 'language', $_REQUEST['language'] );
+	update_post_meta( $post_id, 'language', wp_slash( sanitize_text_field( wp_unslash( $_REQUEST['language'] ) ) ) );
 }
 
 /**

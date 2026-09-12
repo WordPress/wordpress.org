@@ -181,7 +181,7 @@ add_action( 'sensei_course_learning_mode_load_theme', __NAMESPACE__ . '\wporg_fi
  * Format a date query var into a DateTime object.
  */
 function wporg_learn_get_date( $query_var ) {
-	$date = sanitize_text_field( $_GET[ $query_var ] ?? '' );
+	$date = sanitize_text_field( wp_unslash( $_GET[ $query_var ] ?? '' ) );
 
 	return \DateTime::createFromFormat( 'Y-m-d', $date ?? '', new \DateTimeZone( 'UTC' ) );
 }
@@ -265,7 +265,7 @@ function restrict_my_courses_page_access() {
 		return;
 	}
 	if ( ! is_user_logged_in() && is_page( Sensei()->settings->get_my_courses_page_id() ) ) {
-		$redirect_to = wp_unslash( $_GET['redirect_to'] ?? '' ) ?: sensei_get_current_page_url();
+		$redirect_to = esc_url_raw( wp_unslash( $_GET['redirect_to'] ?? '' ) ) ?: sensei_get_current_page_url();
 
 		wp_safe_redirect( wp_login_url( $redirect_to ) );
 		exit;
@@ -305,7 +305,7 @@ function sensei_login_form_before() {
 		 * This differs from Sensei which doesn't respect the redirect_to parameter.
 		 * Validation will occur by the login redirection code.
 		 */
-		$redirect_to = wp_unslash( $_GET['redirect_to'] ?? '' ) ?: sensei_get_current_page_url();
+		$redirect_to = esc_url_raw( wp_unslash( $_GET['redirect_to'] ?? '' ) ) ?: sensei_get_current_page_url();
 
 		// Replace the form with a call to action to WordPress.org.
 		$html = preg_replace(
@@ -366,7 +366,7 @@ function block_login_register_actions() {
 	unset( $_REQUEST['sensei_reg_password'], $_POST['sensei_reg_password'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 	// By unsetting these, sensei can't process a login.
-	if ( 'sensei-login' == ( $_REQUEST['form'] ?? '' ) ) {
+	if ( 'sensei-login' === sanitize_key( $_REQUEST['form'] ?? '' ) ) {
 		unset( $_REQUEST['_wpnonce'], $_REQUEST['log'], $_REQUEST['pwd'], $_POST['log'], $_POST['pwd'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 	}
 }

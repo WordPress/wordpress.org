@@ -63,7 +63,7 @@ class Author {
 	public static function lookup_author() {
 		check_ajax_referer( 'wporg_plugins_author_lookup' );
 
-		$term = sanitize_text_field( wp_unslash( $_REQUEST['term'] ) );
+		$term = sanitize_text_field( wp_unslash( $_REQUEST['term'] ?? '' ) );
 
 		$user_query = new \WP_User_Query( array(
 			'search'         => $term . '*',

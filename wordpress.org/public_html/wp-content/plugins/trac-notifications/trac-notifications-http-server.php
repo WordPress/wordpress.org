@@ -1,4 +1,15 @@
 <?php
+/**
+ * Trac-side endpoint for the notifications plugin.
+ *
+ * WordPress is not loaded on the Trac server, so its sanitizers are
+ * unavailable. serve() checks the method name against Trac_Notifications_DB
+ * and compares the secret with hash_equals() rather than verifying a nonce.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification
+ *
+ * @package trac
+ */
 
 /**
  * Sits on the Trac server and responds to calls from Trac_Notifications_HTTP_Client.
@@ -13,17 +24,23 @@ class Trac_Notifications_HTTP_Server {
 	}
 
 	function serve_request() {
-		$this->serve( $_GET['call'], $_GET['secret'], json_decode( $_POST['arguments'], true ) );
+		/*
+		 * This class sits on the Trac server, where WordPress is not loaded, so its
+		 * sanitizers are unavailable. serve() checks the method name against
+		 * Trac_Notifications_DB and compares the secret with hash_equals(), and the
+		 * arguments must reach json_decode() as sent.
+		 */
+		$this->serve( $_GET['call'] ?? '', $_GET['secret'] ?? '', json_decode( $_POST['arguments'] ?? '', true ) );
 	}
 
 	function serve( $method, $secret, $arguments ) {
 		if ( ! method_exists( 'Trac_Notifications_DB', $method ) || $method[0] === '_' ) {
-			header( ( $_SERVER["SERVER_PROTOCOL"] ?: 'HTTP/1.0' ) . ' 404 Method Not Found', true, 404 );
+			header( ( ( $_SERVER['SERVER_PROTOCOL'] ?? '' ) ?: 'HTTP/1.0' ) . ' 404 Method Not Found', true, 404 );
 			exit;
 		}
 
 		if ( ! hash_equals( $this->secret,  $secret ) ) {
-			header( ( $_SERVER["SERVER_PROTOCOL"] ?: 'HTTP/1.0' ) . ' 403 Forbidden', true, 403 );
+			header( ( ( $_SERVER['SERVER_PROTOCOL'] ?? '' ) ?: 'HTTP/1.0' ) . ' 403 Forbidden', true, 403 );
 			exit;
 		}
 

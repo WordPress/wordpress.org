@@ -11,7 +11,7 @@ $requires_2fa = user_requires_2fa( $user );
 $should_2fa   = user_should_2fa( $user ); // If they're on this page, this should be truthful.
 $redirect_to  = wporg_login_wordpress_url();
 if ( isset( $_REQUEST['redirect_to'] ) ) {
-	$redirect_to = wp_validate_redirect( wp_unslash( $_REQUEST['redirect_to'] ), $redirect_to );
+	$redirect_to = wp_validate_redirect( esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ), $redirect_to );
 }
 
 // If the user is here in error, redirect off.

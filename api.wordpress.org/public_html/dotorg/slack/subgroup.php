@@ -1,4 +1,18 @@
 <?php
+/**
+ * Slack app backing the /subgroup slash command and its modal, which lists
+ * and edits subgroup channel membership.
+ *
+ * Standalone endpoint; WordPress is not loaded here, so its sanitizers
+ * are unavailable.
+ *
+ * Every request is authenticated by verify_slack_signature() against the
+ * raw body, not by a nonce.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Slack
+ */
 
 namespace Dotorg\Slack\Subgroup;
 
@@ -83,6 +97,7 @@ function ack_and_finish() {
 }
 
 function verify_slack_signature( $body ) {
+	// Both are compared against a signature computed from the raw body.
 	$timestamp = $_SERVER['HTTP_X_SLACK_REQUEST_TIMESTAMP'] ?? '';
 	$signature = $_SERVER['HTTP_X_SLACK_SIGNATURE'] ?? '';
 	if ( ! $timestamp || ! $signature ) {
@@ -104,6 +119,7 @@ if ( ! verify_slack_signature( $raw_body ) ) {
 
 // Dispatch: slash command vs. interactivity callback.
 if ( isset( $_POST['payload'] ) ) {
+	// The JSON body has to reach json_decode() as Slack sent it.
 	$payload = json_decode( $_POST['payload'], true );
 	handle_interaction( $payload );
 	exit;

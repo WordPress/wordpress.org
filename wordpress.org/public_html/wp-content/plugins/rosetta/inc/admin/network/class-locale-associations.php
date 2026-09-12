@@ -68,11 +68,14 @@ class Locale_Associations implements Admin_Page {
 	 * Handles actions like adding/deleting locale associations.
 	 */
 	public function action() {
-		if ( ! isset( $_POST['_wpnonce'] ) || ! isset( $_POST['action'] ) || ! in_array( $_POST['action'], [ 'add-association', 'delete-association' ], true ) ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- This only picks which handler runs; each one verifies its own nonce before changing anything.
+		$current_action = sanitize_key( $_POST['action'] ?? '' );
+
+		if ( ! isset( $_POST['_wpnonce'] ) || ! in_array( $current_action, [ 'add-association', 'delete-association' ], true ) ) {
 			return;
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		$current_action = $_POST['action'];
 		$result = null;
 
 		switch ( $current_action ) {
@@ -108,16 +111,16 @@ class Locale_Associations implements Admin_Page {
 	private function action_add_association() {
 		global $wpdb;
 
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'add-association' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'add-association' ) ) {
 			return new WP_Error( 'nonce_failure' );
 		}
 
-		if ( empty( $_POST['locale'] ) || empty( $_POST['locale'] ) ) {
+		if ( empty( $_POST['locale'] ) || empty( $_POST['subdomain'] ) ) {
 			return new WP_Error( 'missing_data' );
 		}
 
-		$locale = sanitize_text_field( $_POST['locale'] );
-		$subdomain = sanitize_text_field( $_POST['subdomain'] );
+		$locale    = sanitize_text_field( wp_unslash( $_POST['locale'] ) );
+		$subdomain = sanitize_text_field( wp_unslash( $_POST['subdomain'] ) );
 
 		if ( 0 !== strpos( $locale, 'test' ) ) {
 			$locales = get_available_languages();
@@ -166,7 +169,7 @@ class Locale_Associations implements Admin_Page {
 
 		$id = (int) $_POST['id'];
 
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'delete-association-' . $id ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'delete-association-' . $id ) ) {
 			return new WP_Error( 'nonce_failure' );
 		}
 

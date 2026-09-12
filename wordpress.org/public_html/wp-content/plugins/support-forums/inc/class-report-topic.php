@@ -183,15 +183,15 @@ class Report_Topic {
 
 		$nonce_action = sprintf(
 			'topic_report_reply_%d',
-			(int) $_POST['wporg-support-report-topic']
+			absint( $_POST['wporg-support-report-topic'] ?? 0 )
 		);
 
 		// Verify the nonce  to acknowledge the action.
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'], $nonce_action ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), $nonce_action ) ) {
 			return;
 		}
 
-		$report = get_post( (int) $_POST['wporg-support-report-topic'] );
+		$report = get_post( absint( $_POST['wporg-support-report-topic'] ?? 0 ) );
 
 		// Ensure this is a report post type being replied to.
 		if ( 'reported_topics' !== get_post_type( $report ) ) {
@@ -529,7 +529,7 @@ The WordPress.org Team',
 			'comment_status' => 'closed',
 			'ping_status'    => 'closed',
 			'meta_input' => array(
-				'_bbp_author_ip' => $_SERVER['REMOTE_ADDR'],
+				'_bbp_author_ip' => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ),
 			),
 		);
 
@@ -562,11 +562,11 @@ The WordPress.org Team',
 		if ( isset( $_POST['wporg-support-report-topic'] ) ) {
 			$action = sprintf(
 				'report-topic-%d',
-				$_POST['wporg-support-report-topic']
+				absint( $_POST['wporg-support-report-topic'] ?? 0 )
 			);
 
 			// Verify that the nonce is valid.
-			if ( ! wp_verify_nonce( $_POST['_wpnonce'], $action ) ) {
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), $action ) ) {
 				return;
 			}
 
@@ -578,7 +578,7 @@ The WordPress.org Team',
 				return;
 			}
 
-			$validate_term = get_term( (int) $_POST['topic-report-reason'], 'report_reasons' );
+			$validate_term = get_term( absint( $_POST['topic-report-reason'] ?? 0 ), 'report_reasons' );
 			if ( null === $validate_term || is_wp_error( $validate_term ) ) {
 				$this->add_frontend_notice(
 					'error',
@@ -588,15 +588,15 @@ The WordPress.org Team',
 			}
 
 			remove_action( 'set_object_terms', array( $this, 'detect_manual_modlook' ), 10 );
-			wp_add_object_terms( $_POST['wporg-support-report-topic'], 'modlook', 'topic-tag' );
+			wp_add_object_terms( absint( $_POST['wporg-support-report-topic'] ?? 0 ), 'modlook', 'topic-tag' );
 
 			$this->add_modlook_history(
-				(int) $_POST['wporg-support-report-topic'],
+				absint( $_POST['wporg-support-report-topic'] ?? 0 ),
 				wp_slash( sanitize_textarea_field( wp_unslash( $_POST['topic-report-reason-details'] ) ) ),
 				$validate_term->term_id
 			);
 
-			wp_safe_redirect( get_the_permalink( $_POST['wporg-support-report-topic'] ) );
+			wp_safe_redirect( get_the_permalink( absint( $_POST['wporg-support-report-topic'] ?? 0 ) ) );
 
 			exit();
 		}
@@ -604,17 +604,17 @@ The WordPress.org Team',
 		if ( isset( $_GET['wporg-support-remove-modlook'] ) && current_user_can( 'moderate' ) ) {
 			$action = sprintf(
 				'remove-topic-modlook-%d',
-				$_GET['wporg-support-remove-modlook']
+				absint( $_GET['wporg-support-remove-modlook'] ?? 0 )
 			);
 
 			// Verify that the nonce is valid.
-			if ( ! wp_verify_nonce( $_GET['_wpnonce'], $action ) ) {
+			if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), $action ) ) {
 				return;
 			}
 
-			wp_remove_object_terms( $_GET['wporg-support-remove-modlook'], 'modlook', 'topic-tag' );
+			wp_remove_object_terms( absint( $_GET['wporg-support-remove-modlook'] ?? 0 ), 'modlook', 'topic-tag' );
 
-			wp_safe_redirect( get_the_permalink( $_GET['wporg-support-remove-modlook'] ) );
+			wp_safe_redirect( get_the_permalink( absint( $_GET['wporg-support-remove-modlook'] ?? 0 ) ) );
 
 			exit();
 		}

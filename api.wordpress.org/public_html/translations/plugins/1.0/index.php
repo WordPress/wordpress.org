@@ -1,4 +1,14 @@
 <?php
+/**
+ * Serves the translations API: the available language packs for a plugin.
+ *
+ * Standalone endpoint; WordPress is not loaded here, so its sanitizers
+ * are unavailable.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput
+ *
+ * @package WordPressdotorg\API\Translations
+ */
 
 $base_dir = dirname( dirname( dirname( __DIR__ ) ) );
 require( $base_dir . '/translations/lib.php' );

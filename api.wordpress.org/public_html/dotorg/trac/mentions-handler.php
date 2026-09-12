@@ -11,7 +11,8 @@ if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== \Dotorg\Slack\Trac\URL_
 	exit;
 }
 
-$payload = json_decode( wp_unslash( $_POST['payload'] ) );
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- JSON body, reaching json_decode() as sent. Webhook endpoint; the request is authenticated by its signature, not a nonce.
+$payload = json_decode( wp_unslash( $_POST['payload'] ?? '' ) );
 
 require_once WP_PLUGIN_DIR . '/wporg-notifications.php';
 $notif = WPOrg_Notifications::get_instance();

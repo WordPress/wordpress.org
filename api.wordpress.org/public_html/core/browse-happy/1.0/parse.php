@@ -3,6 +3,7 @@
  * @package BrowseHappy
  */
 
+// Pulls in the browser token tables.
 require dirname( __FILE__ ) . '/browsers.php';
 
 /**

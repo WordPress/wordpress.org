@@ -17,7 +17,8 @@ function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low
 			return false;
 		}
 		$result = wporg_login_recaptcha_api(
-			$_POST['_reCaptcha_v3_token'],
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+			sanitize_text_field( wp_unslash( $_POST['_reCaptcha_v3_token'] ?? '' ) ),
 			RECAPTCHA_V3_PRIVKEY
 		);
 
@@ -42,7 +43,8 @@ function wporg_login_check_recapcha_status( $check_v3_action = false, $block_low
 	}
 
 	$result = wporg_login_recaptcha_api(
-		$_POST['g-recaptcha-response'],
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+		sanitize_text_field( wp_unslash( $_POST['g-recaptcha-response'] ?? '' ) ),
 		RECAPTCHA_INVIS_PRIVKEY
 	);
 
@@ -75,7 +77,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	$profile_key        = wp_generate_password( 24, false, false );
 	$hashed_profile_key = time() . ':' . wp_hash_password( $profile_key );
 
-	$source = $_COOKIE['wporg_came_from'] ?? '';
+	$source = esc_url_raw( wp_unslash( $_COOKIE['wporg_came_from'] ?? '' ) );
 	if ( $source ) {
 		$source = remove_query_arg( [ 'SAMLRequest', 'RelayState' ], $source );
 	}
@@ -87,8 +89,8 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		'user_activation_key' => '',
 		'user_profile_key'    => $hashed_profile_key,
 		'meta'                => $meta + array(
-			'registration_ip'         => $_SERVER['REMOTE_ADDR'], // Spam & fraud control. Will be discarded after the account is created.
-			'registration_ip_country' => ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ) : '' ),
+			'registration_ip'         => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ), // Spam & fraud control. Will be discarded after the account is created.
+			'registration_ip_country' => ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ), 'country_short' ) : '' ),
 			'source'                  => $source,
 		),
 		'scores'              => array(
@@ -100,7 +102,8 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	// reCaptcha v3 logging.
 	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
 		$recaptcha_api = wporg_login_recaptcha_api(
-			$_POST['_reCaptcha_v3_token'],
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+			sanitize_text_field( wp_unslash( $_POST['_reCaptcha_v3_token'] ?? '' ) ),
 			RECAPTCHA_V3_PRIVKEY
 		);
 		$pending_user['scores']['pending'] = -1;
@@ -385,13 +388,14 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 	// Update the pending record with the new details.
 	$pending_user['created']                      = 1;
 	$pending_user['created_date']                 = gmdate( 'Y-m-d H:i:s' );
-	$pending_user['meta']['confirmed_ip']         = $_SERVER['REMOTE_ADDR'];
-	$pending_user['meta']['confirmed_ip_country'] = ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( $_SERVER['REMOTE_ADDR'], 'country_short' ): '' );
+	$pending_user['meta']['confirmed_ip']         = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
+	$pending_user['meta']['confirmed_ip_country'] = ( is_callable( 'WordPressdotorg\GeoIP\query' ) ? \WordPressdotorg\GeoIP\query( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ), 'country_short' ) : '' );
 
 	// reCaptcha v3 logging.
 	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
 		$recaptcha_api = wporg_login_recaptcha_api(
-			$_POST['_reCaptcha_v3_token'],
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+			sanitize_text_field( wp_unslash( $_POST['_reCaptcha_v3_token'] ?? '' ) ),
 			RECAPTCHA_V3_PRIVKEY
 		);
 		$pending_user['scores']['create'] = -1;
@@ -493,7 +497,8 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 	}
 
 	$updated_email = false;
-	$new_email     = trim( wp_unslash( $_POST['user_email'] ?? '' ) );
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Public login and registration forms are served to logged-out visitors, so reCAPTCHA is the anti-automation check here, not a nonce; the email-in-use endpoint below is what validates the address, and it has to see what was typed rather than a repaired version of it.
+	$new_email = trim( isset( $_POST['user_email'] ) && is_string( $_POST['user_email'] ) ? wp_unslash( $_POST['user_email'] ) : '' );
 	if (
 		'pending' === $state &&
 		empty( $pending_user['meta']['changed_email'] ) && // Only if they've not changed it before.

@@ -11,7 +11,7 @@ get_header();
 <p class="center"><?php esc_html_e( 'You are now logged out.', 'wporg' ); ?></p>
 
 <?php
-	$redirect_to = wp_unslash( $_REQUEST['redirect_to'] ?? '' );
+	$redirect_to = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) );
 	$redirect_to = wp_sanitize_redirect( $redirect_to );
 	$redirect_to = wp_validate_redirect( $redirect_to );
 

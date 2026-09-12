@@ -199,7 +199,7 @@ class Rosetta_Roles {
 	 */
 	public function load_translation_editors_page() {
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
-			$this->load_edit_translation_editor( $_REQUEST['user_id'] );
+			$this->load_edit_translation_editor( absint( $_REQUEST['user_id'] ) );
 		} else {
 			$this->load_translation_editors();
 		}
@@ -210,7 +210,7 @@ class Rosetta_Roles {
 	 */
 	public function render_translation_editors_page() {
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
-			$this->render_edit_translation_editor( $_REQUEST['user_id'] );
+			$this->render_edit_translation_editor( absint( $_REQUEST['user_id'] ) );
 		} else {
 			$this->render_translation_editors();
 		}
@@ -235,7 +235,8 @@ class Rosetta_Roles {
 					}
 
 					$user_details = null;
-					$user = wp_unslash( $_REQUEST['user'] );
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve exact login/email/ID values for lookup; text sanitizers corrupt valid email addresses.
+					$user = isset( $_REQUEST['user'] ) && is_string( $_REQUEST['user'] ) ? trim( wp_unslash( $_REQUEST['user'] ) ) : '';
 					if ( false !== strpos( $user, '@' ) ) {
 						$user_details = get_user_by( 'email', $user );
 					} elseif ( is_numeric( $user ) ) {
@@ -269,7 +270,7 @@ class Rosetta_Roles {
 						exit;
 					}
 
-					$projects = empty( $_REQUEST['projects'] ) ? '' : $_REQUEST['projects'];
+					$projects = sanitize_text_field( wp_unslash( $_REQUEST['projects'] ?? '' ) );
 					if ( 'custom' === $projects ) {
 						$this->update_translation_editor( $user_details );
 
@@ -364,7 +365,7 @@ class Rosetta_Roles {
 			exit;
 		}
 
-		$action = empty( $_REQUEST['action'] ) ? '' : $_REQUEST['action'];
+		$action = sanitize_key( $_REQUEST['action'] ?? '' );
 		switch ( $action ) {
 			case 'update-translation-editor':
 				check_admin_referer( 'update-translation-editor_' . $user_details->ID );
@@ -375,7 +376,7 @@ class Rosetta_Roles {
 				$all_projects = wp_list_pluck( $all_projects, 'id' );
 				$all_projects = array_map( 'intval', $all_projects );
 
-				$projects = explode( ',', $_REQUEST['projects'] );
+				$projects = explode( ',', sanitize_text_field( wp_unslash( $_REQUEST['projects'] ?? '' ) ) );
 				if ( in_array( 'all', $projects, true ) ) {
 					$this->update_translation_editor( $user_details, array( 'all' ) );
 				} else {
@@ -833,15 +834,18 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			),
 		);
 
-		if ( isset( $_REQUEST['error'], $messages['error'][ $_REQUEST['error'] ] ) ) {
+		$error  = sanitize_key( $_REQUEST['error'] ?? '' );
+		$update = sanitize_key( $_REQUEST['update'] ?? '' );
+
+		if ( isset( $messages['error'][ $error ] ) ) {
 			$message = sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				$messages['error'][ $_REQUEST['error'] ]
+				$messages['error'][ $error ]
 			);
-		} elseif ( isset( $_REQUEST['update'], $messages['update'][ $_REQUEST['update'] ] ) ) {
+		} elseif ( isset( $messages['update'][ $update ] ) ) {
 			$message = sprintf(
 				'<div class="notice notice-success"><p>%s</p></div>',
-				$messages['update'][ $_REQUEST['update'] ]
+				$messages['update'][ $update ]
 			);
 		}
 
