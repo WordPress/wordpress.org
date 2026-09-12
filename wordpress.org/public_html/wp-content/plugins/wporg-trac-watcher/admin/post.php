@@ -23,8 +23,8 @@ add_action( 'admin_post_svn_save', function() {
 		die( -1 );
 	}
 
-	// find_user_id() also accepts a profiles.wordpress.org URL, which sanitize_user() would mangle.
-	$user = Props\find_user_id( sanitize_text_field( wp_unslash( $_REQUEST['user_id'] ?? '' ) ) ) ?: null;
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- find_user_id() matches this against a login, a nicename, an email address, a profiles.wordpress.org URL or a user ID, so it has to arrive exactly as typed or it resolves to the wrong account.
+	$user = Props\find_user_id( is_string( $_REQUEST['user_id'] ?? '' ) ? wp_unslash( $_REQUEST['user_id'] ) : '' ) ?: null;
 
 	// Operation save. Step one, find the prop.
 	$props = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$svn['props_table']} WHERE revision = %d", $rev ) );
