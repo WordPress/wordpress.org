@@ -398,7 +398,7 @@ function welcome_box() {
 				data-hide="<?php esc_attr_e( 'Hide welcome box', 'wporg' ); ?>"
 			><span><?php esc_html_e( 'Hide welcome box', 'wporg' ); ?></span></button>
 		</div>
-		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo $cookie; ?>" data-hash="<?php echo $content_hash; ?>">
+		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo esc_attr( $cookie ); ?>" data-hash="<?php echo esc_attr( $content_hash ); ?>">
 			<script type="text/javascript">
 				const elContent = document.getElementById( 'make-welcome-content' );
 
@@ -725,7 +725,7 @@ function breathe_content_nav( $nav_id ) {
 	$nav_class = ( is_single() ) ? 'navigation-post' : 'navigation-paging';
 
 	?>
-	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo $nav_class; ?>">
+	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo esc_attr( $nav_class ); ?>">
 		<h2 class="screen-reader-text"><?php esc_html_e( 'Post navigation', 'wporg' ); ?></h2>
 
 	<?php if ( is_single() ) : // navigation links for single posts ?>

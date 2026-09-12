@@ -162,8 +162,7 @@ class Make_Core_Trac_Components {
 	function meta_box_cb( $post ) {
 		wp_nonce_field( 'component-settings_' . $post->ID, 'component-settings-nonce', false );
 		if ( $post->post_parent != 0 ) {
-			$checked = checked( (bool) get_post_meta( $post->ID, '_page_is_subcomponent', true ), true, false );
-			echo '<p><label for="page-is-subcomponent"><input type="checkbox"' . $checked . ' name="page-is-subcomponent" id="page-is-subcomponent" /> This page is a subcomponent</label></p>';
+			echo '<p><label for="page-is-subcomponent"><input type="checkbox"' . checked( (bool) get_post_meta( $post->ID, '_page_is_subcomponent', true ), true, false ) . ' name="page-is-subcomponent" id="page-is-subcomponent" /> This page is a subcomponent</label></p>';
 		}
 		if ( ! $this->page_is_component( $post ) ) {
 			return;
@@ -489,9 +488,9 @@ jQuery( function( $ ) {
 		$subcomponents = array();
 		if ( $subcomponents_query->have_posts() ) {
 			foreach ( $subcomponents_query->posts as $subcomponent ) {
-				$subcomponents[ $subcomponent->ID ] = '<a href="' . get_permalink( $subcomponent ) . '">' . $subcomponent->post_title . '</a>';
+				$subcomponents[ $subcomponent->ID ] = '<a href="' . esc_url( get_permalink( $subcomponent ) ) . '">' . esc_html( $subcomponent->post_title ) . '</a>';
 			}
-			echo wp_sprintf( "<h4>Subcomponents: %l.</h4>", $subcomponents );
+			echo wp_kses_post( wp_sprintf( '<h4>Subcomponents: %l.</h4>', $subcomponents ) );
 		}
 
 		$recent_posts = new WP_Query( array(
@@ -501,7 +500,7 @@ jQuery( function( $ ) {
 			'tag_slug__in' => $post->post_name
 		) );
 		if ( $recent_posts->have_posts() ) {
-			echo "<h3>Recent posts on the make/{$this->trac} blog</h3>\n<ul>";
+			echo '<h3>Recent posts on the make/' . esc_html( $this->trac ) . " blog</h3>\n<ul>";
 			while ( $recent_posts->have_posts() ) {
 				$recent_posts->the_post();
 				echo '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a> (' . esc_html( get_the_date() ) . ")</li>\n";
@@ -532,8 +531,8 @@ jQuery( function( $ ) {
 
 		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => self::POST_TYPE_NAME, 'echo' => false, 'title_li' => false, 'exclude' => implode( ',', array_keys( $subcomponents ) ) ) );
 		if ( $sub_pages ) {
-			echo "<h3>Pages under " . get_the_title() . "</h3>\n";
-			echo "<ul>$sub_pages</ul>";
+			echo '<h3>Pages under ' . esc_html( get_the_title() ) . "</h3>\n";
+			echo '<ul>' . wp_kses_post( $sub_pages ) . '</ul>';
 			echo "\n\n";
 		}
 
@@ -557,14 +556,14 @@ jQuery( function( $ ) {
 				printf( '<li><a href="//profiles.wordpress.org/%s/">%s %s</a></li>',
 					esc_attr( $maintainer->user_nicename ),
 					get_avatar( $maintainer->user_email, 36 ),
-					$maintainer->display_name ?: $maintainer->user_login
+					esc_html( $maintainer->display_name ?: $maintainer->user_login )
 				);
 			}
 			echo "</ul>\n\n";
 		}
 
-		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of {$this->trac_name()} are always seeking to mentor others to impart their knowledge.\n\n";
-		echo "<strong>Want to help? Start following this component!</strong> <a href='/{$this->trac}/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
+		echo "\n" . 'Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of ' . esc_html( $this->trac_name() ) . " are always seeking to mentor others to impart their knowledge.\n\n";
+		echo "<strong>Want to help? Start following this component!</strong> <a href='" . esc_url( '/' . $this->trac . '/notifications/' ) . "'>Adjust your notifications here</a>. Feel free to dig into any ticket.\n\n";
 
 		$followers = $this->api->get_component_followers( $component );
 		if ( $followers ) {
@@ -683,22 +682,40 @@ jQuery( function( $ ) {
 		$last_x .= '<span class="history ' . $direction . '"></span></span>' . "\n\n";
 
 		if ( ! is_singular() ) {
-			echo $last_x;
+			echo wp_kses_post( $last_x );
 		}
 		echo '<table class="trac-summary">';
-		echo '<thead><tr><th class="title">' . $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) . '</th>';
+		echo '<thead><tr><th class="title">' . wp_kses_post( $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) ) . '</th>';
 		foreach ( $component_type[ $component ] as $type => $count ) {
 			if ( $count ) {
-				echo '<th>' . $this->trac_query_link( $type, array( 'component' => $component, 'type' => $type, 'group' => 'milestone' ) ) . '</th>';
+				echo '<th>' . wp_kses_post(
+					$this->trac_query_link(
+						$type,
+						array(
+							'component' => $component,
+							'type'      => $type,
+							'group'     => 'milestone',
+						)
+					)
+				) . '</th>';
 			}
 		}
 		echo '</tr></thead>';
 		foreach ( $component_milestone_type[ $component ] as $milestone => $type_count ) {
-			echo '<tr><th>' . $this->trac_query_link( $milestone, array( 'component' => $component, 'milestone' => $milestone, 'group' => $type ) ) . '</th>';
+			echo '<tr><th>' . wp_kses_post(
+				$this->trac_query_link(
+					$milestone,
+					array(
+						'component' => $component,
+						'milestone' => $milestone,
+						'group'     => $type,
+					)
+				)
+			) . '</th>';
 			foreach ( $type_count as $type => $count ) {
 				if ( $component_type[ $component ][ $type ] ) {
 					if ( $count ) {
-						echo '<td class="count">' . $this->trac_query_link( $count, compact( 'component', 'milestone', 'type' ) ) . '</td>';
+						echo '<td class="count">' . wp_kses_post( $this->trac_query_link( $count, compact( 'component', 'milestone', 'type' ) ) ) . '</td>';
 					} else {
 						echo '<td class="count zero">0</td>';
 					}
@@ -708,7 +725,7 @@ jQuery( function( $ ) {
 		}
 		echo "</table>\n\n";
 		if ( is_singular() ) {
-			echo $last_x;
+			echo wp_kses_post( $last_x );
 		}
 	}
 
@@ -719,7 +736,14 @@ jQuery( function( $ ) {
 			$count = count( $unreplied_tickets );
 			/* translators: %d: Number of tickets. */
 			echo '<h3>' . sprintf( esc_html( _n( '%d ticket that has no replies', '%d tickets that have no replies', $count ) ), (int) $count ) . '</h3>';
-			echo '<a href="' . $this->trac_query( array( 'component' => $component, 'id' => implode( ',', wp_list_pluck( $unreplied_tickets, 'id' ) ) ) ) . '">View list on Trac</a>';
+			echo '<a href="' . esc_url(
+				$this->trac_query(
+					array(
+						'component' => $component,
+						'id'        => implode( ',', wp_list_pluck( $unreplied_tickets, 'id' ) ),
+					)
+				)
+			) . '">View list on Trac</a>';
 			$this->render_tickets( $unreplied_tickets );
 		}
 
@@ -734,7 +758,15 @@ jQuery( function( $ ) {
 				(int) $count,
 				esc_html( $next_milestone_object->milestone )
 			) . '</h3>';
-			echo $this->trac_query_link( 'View list in Trac', array( 'component' => $component, 'milestone' => $next_milestone_object->milestone ) );
+			echo wp_kses_post(
+				$this->trac_query_link(
+					'View list in Trac',
+					array(
+						'component' => $component,
+						'milestone' => $next_milestone_object->milestone,
+					)
+				)
+			);
 			$this->render_tickets( $next_milestone );
 		}
 
@@ -753,14 +785,14 @@ jQuery( function( $ ) {
 
 		foreach ( $types as $type => $title ) {
 			$count = $tickets_by_type[ $type ] ?? 0;
-			printf( '<strong>%s: %d</strong> ', $title, $count );
-			echo $this->trac_query_link( 'View list on Trac', compact( 'component', 'type' ) );
+			printf( '<strong>%s: %d</strong> ', esc_html( $title ), (int) $count );
+			echo wp_kses_post( $this->trac_query_link( 'View list on Trac', compact( 'component', 'type' ) ) );
 			echo '<br>';
 		}
 	}
 
 	function trac_query_link( $text, $args ) {
-		return '<a href="' . $this->trac_query( $args ) . '">' . $text . '</a>';
+		return '<a href="' . esc_url( $this->trac_query( $args ) ) . '">' . esc_html( $text ) . '</a>';
 	}
 
 	function trac_query( $args ) {
@@ -775,9 +807,9 @@ jQuery( function( $ ) {
 		echo '<ul class="ticket-list">';
 		foreach ( $tickets as $ticket ) {
 			$ticket = (object) $ticket;
-			echo '<li><a href="' . $this->trac_url() . '/ticket/' . $ticket->id . '">#' . $ticket->id . '</a> &nbsp;' . esc_html( $ticket->summary );
+			echo '<li><a href="' . esc_url( $this->trac_url() . '/ticket/' . $ticket->id ) . '">#' . (int) $ticket->id . '</a> &nbsp;' . esc_html( $ticket->summary );
 			if ( ! empty( $ticket->focuses ) ) {
-				echo ' <span class="focus">' . implode( '</span> <span class="focus">', explode( ', ', esc_html( $ticket->focuses ) ) ) . '</span>';
+				echo ' <span class="focus">' . wp_kses_post( implode( '</span> <span class="focus">', array_map( 'esc_html', explode( ', ', $ticket->focuses ) ) ) ) . '</span>';
 			}
 			echo "</li>\n";
 		}
@@ -797,7 +829,7 @@ jQuery( function( $ ) {
 		$topics = explode( ' ', $attr[0] );
 		$both = in_array( 'focus', $topics ) && in_array( 'component', $topics );
 
-		echo '<select class="tickets-by-topic" data-location="' . $this->trac_url() . '/">';
+		echo '<select class="tickets-by-topic" data-location="' . esc_url( $this->trac_url() . '/' ) . '">';
 		if ( $both ) {
 			$default = 'Select a focus or component';
 		} elseif ( in_array( 'focus', $topics ) ) {
@@ -805,12 +837,12 @@ jQuery( function( $ ) {
 		} else {
 			$default = 'Select a component';
 		}
-		echo '<option value="" selected="selected">' . $default . '</option>';
+		echo '<option value="" selected="selected">' . esc_html( $default ) . '</option>';
 		if ( in_array( 'focus', $topics ) ) {
 			$focuses = array( 'accessibility', 'admin', 'coding-standards', 'css', 'docs', 'javascript', 'multisite', 'performance', 'php-compatibility', 'privacy', 'rest-api', 'rtl', 'sustainability', 'template', 'ui', 'ui-copy' );
 			
 			foreach ( $focuses as $focus ) {
-				echo '<option value="focus/' . esc_attr( rawurlencode( $focus ) ) . '">' . $focus . ( $both ? ' (focus)' : '' ) . '</option>';
+				echo '<option value="focus/' . esc_attr( rawurlencode( $focus ) ) . '">' . esc_html( $focus ) . ( $both ? ' (focus)' : '' ) . '</option>';
 			}
 		}
 		if ( $both ) {
@@ -865,20 +897,28 @@ jQuery( function( $ ) {
 		if ( ! empty( $this->breakdown_component_type[ $component ] ) ) {
 			$open_tickets = array_sum( $this->breakdown_component_type[ $component ] );
 		}
-		echo '<td class="right"><a href="' . esc_attr( $this->get_component_url( $component ) ) . '">' . $open_tickets . '</a></td>';
+		echo '<td class="right"><a href="' . esc_url( $this->get_component_url( $component ) ) . '">' . (int) $open_tickets . '</a></td>';
 		if ( $history['change'] ) {
 			$count = sprintf( "%+d", $history['change'] );
 			if ( $history['change'] > 0 ) {
 				$count = $this->trac_query_link( $count, ['component' => $component, 'time' => date( 'm/d/y', strtotime( '-7 days' ) ) ] );
 			}
-			echo '<td class="right">' . $arrow . ' ' . $count . '</td>';
+			echo '<td class="right">' . wp_kses_post( $arrow ) . ' ' . wp_kses_post( $count ) . '</td>';
 		} else {
 			echo '<td></td>';
 		}
 
 		if ( isset( $this->breakdown_component_unreplied[ $component ] ) ) {
 			$unreplied = $this->breakdown_component_unreplied[ $component ];
-			echo '<td class="right">' . $this->trac_query_link( count( $unreplied ), array( 'component' => $component, 'id' => implode( ',', $unreplied ) ) );
+			echo '<td class="right">' . wp_kses_post(
+				$this->trac_query_link(
+					count( $unreplied ),
+					array(
+						'component' => $component,
+						'id'        => implode( ',', $unreplied ),
+					)
+				)
+			);
 			echo ' <span style="color: red; font-weight: bold">!!</span></td>';
 		} else {
 			echo '<td></td>';

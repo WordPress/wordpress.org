@@ -50,8 +50,8 @@ get_header();
 
 <p><?php
 	printf(
-		__u( 'Welcome back %s, Some of our policies have been updated, please review the items below before continuing.', 'wporg' ),
-		$user->display_name ?: $user->user_login
+		esc_html( __u( 'Welcome back %s, Some of our policies have been updated, please review the items below before continuing.', 'wporg' ) ),
+		esc_html( $user->display_name ?: $user->user_login )
 	);
 ?></p>
 
@@ -96,7 +96,7 @@ wp_set_current_user( 0 );
 
 // This is just for during development until strings are finalised.
 function _eu( $s ) {
-	echo $s;
+	echo esc_html( $s );
 }
 function __u( $s ) {
 	return $s;

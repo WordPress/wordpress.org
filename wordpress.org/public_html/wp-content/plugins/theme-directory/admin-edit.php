@@ -239,7 +239,7 @@ function wporg_themes_suspend_theme() {
 	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
 
 	if ( ! $post_id ) {
-		wp_redirect( admin_url( 'edit.php' ) );
+		wp_safe_redirect( admin_url( 'edit.php' ) );
 		exit();
 	}
 
@@ -264,7 +264,7 @@ function wporg_themes_suspend_theme() {
 		'post_status' => 'suspend',
 	) );
 
-	wp_redirect( add_query_arg( 'suspended', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	wp_safe_redirect( add_query_arg( 'suspended', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_suspend', 'wporg_themes_suspend_theme' );
@@ -276,7 +276,7 @@ function wporg_themes_reinstate_theme() {
 	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
 
 	if ( ! $post_id ) {
-		wp_redirect( admin_url( 'edit.php' ) );
+		wp_safe_redirect( admin_url( 'edit.php' ) );
 		exit();
 	}
 
@@ -307,7 +307,7 @@ function wporg_themes_reinstate_theme() {
 	 */
 	add_post_meta( $post_id, '_wporg_themes_reinstated', true );
 
-	wp_redirect( add_query_arg( 'reinstated', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	wp_safe_redirect( add_query_arg( 'reinstated', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_reinstate', 'wporg_themes_reinstate_theme' );
@@ -339,7 +339,7 @@ function wporg_themes_delist_theme() {
 	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
 
 	if ( ! $post_id ) {
-		wp_redirect( admin_url( 'edit.php' ) );
+		wp_safe_redirect( admin_url( 'edit.php' ) );
 		exit();
 	}
 
@@ -364,7 +364,7 @@ function wporg_themes_delist_theme() {
 		'post_status' => 'delist',
 	) );
 
-	wp_redirect( add_query_arg( 'delisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	wp_safe_redirect( add_query_arg( 'delisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'reinstated', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_delist', 'wporg_themes_delist_theme' );
@@ -376,7 +376,7 @@ function wporg_themes_relist_theme() {
 	$post_id = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
 
 	if ( ! $post_id ) {
-		wp_redirect( admin_url( 'edit.php' ) );
+		wp_safe_redirect( admin_url( 'edit.php' ) );
 		exit();
 	}
 
@@ -401,7 +401,7 @@ function wporg_themes_relist_theme() {
 		'post_status' => 'publish',
 	) );
 
-	wp_redirect( add_query_arg( 'relisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
+	wp_safe_redirect( add_query_arg( 'relisted', 1, remove_query_arg( array( 'trashed', 'untrashed', 'deleted', 'ids', 'suspended', 'delisted', 'relisted' ), wp_get_referer() ) ) );
 	exit();
 }
 add_filter( 'admin_action_relist', 'wporg_themes_relist_theme' );
@@ -511,15 +511,15 @@ function wporg_themes_repopackage_custom_columns( $column, $post_id ) {
 	switch ( $column ) {
 		case 'ticket':
 			if ( $theme->ticket ) {
-				printf( '<a href="%1$s">%2$s</a>', esc_url( 'https://themes.trac.wordpress.org/ticket/' . $theme->ticket ), '#' . $theme->ticket );
+				printf( '<a href="%1$s">%2$s</a>', esc_url( 'https://themes.trac.wordpress.org/ticket/' . $theme->ticket ), esc_html( '#' . $theme->ticket ) );
 			}
 			break;
 		case 'theme-url':
 		case 'author-url':
-			echo make_clickable( $theme->$column );
+			echo wp_kses_post( make_clickable( $theme->$column ) );
 			break;
 		default:
-			echo $theme->$column;
+			echo esc_html( $theme->$column );
 	}
 }
 add_action( 'manage_repopackage_posts_custom_column', 'wporg_themes_repopackage_custom_columns', 10, 2 );
@@ -586,8 +586,8 @@ function wporg_themes_meta_box_callback( $post ) {
 			$text = '<a href="https://themes.trac.wordpress.org/ticket/' . (int)$ticket . '">' . $text . '</a>';
 		}
 		?>
-		<p><?php echo $text; ?> -
-			<select name="wporg_themes_status[<?php echo base64_encode( $version ); // base64 because version numbers don't work so well as parts of keys ?>]">
+		<p><?php echo $text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Version label built above with esc_html() and an (int)-cast ticket id. ?> -
+			<select name="wporg_themes_status[<?php echo esc_attr( base64_encode( $version ) ); // base64 because version numbers don't work so well as parts of keys. ?>]">
 				<option value="new" <?php selected( $status, 'new' ); ?>><?php esc_html_e( 'New', 'wporg-themes' ); ?></option>
 				<?php if ( 'approved' === $status ) : ?>
 					<?php // `approved` is a transient Trac-driven pre-release state; only shown so the current value displays correctly. ?>

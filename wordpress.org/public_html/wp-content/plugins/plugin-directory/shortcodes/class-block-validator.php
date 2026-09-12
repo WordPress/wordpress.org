@@ -74,7 +74,7 @@ class Block_Validator {
 					wp_enqueue_script( 'jquery' );
 					wp_add_inline_script( 'jquery-migrate', $upload_script );
 				} else {
-					printf( '<script>%s</script>', $upload_script );
+					wp_print_inline_script_tag( $upload_script );
 				}
 			?>
 			</details>
@@ -109,7 +109,7 @@ class Block_Validator {
 			}
 
 			if ( ! empty( $message ) ) {
-				echo "<div class='notice notice-warning notice-alt'><p>{$message}</p></div>\n";
+				echo '<div class="notice notice-warning notice-alt"><p>' . wp_kses_post( $message ) . '</p></div>' . "\n";
 			}
 		}
 
@@ -178,11 +178,11 @@ class Block_Validator {
 
 		echo '<p>';
 		if ( self::plugin_is_in_block_directory( $plugin->post_name ) ) {
-			echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
+			wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
 			// translators: %s plugin title.
 			echo '<button class="button button-secondary button-large" type="submit" name="block-directory-edit" value="remove">' . sprintf( esc_html__( 'Remove %s from Block Directory', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</button>';
 		} else if ( ! $has_errors ) {
-			echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
+			wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
 			// translators: %s plugin title.
 			echo '<button class="button button-primary button-large" type="submit" name="block-directory-edit" value="add">' . sprintf( esc_html__( 'Add %s to Block Directory', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</button>';
 		}
@@ -367,7 +367,7 @@ class Block_Validator {
 			$output .= '</div>';
 		}
 
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	/**

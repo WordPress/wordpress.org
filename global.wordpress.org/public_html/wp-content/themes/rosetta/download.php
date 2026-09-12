@@ -24,7 +24,7 @@ the_post();
 ?>
 			<h3 id="latest"><?php esc_html_e( 'Latest release', 'rosetta' ); ?></h3>
 			<table class="releases latest">
-				<?php echo rosetta_release_row( $releases['latest'], 'alt' ); ?>
+				<?php echo rosetta_release_row( $releases['latest'], 'alt' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Release table row markup assembled by rosetta_release_row(). ?>
 			</table>
 <?php
 		endif;

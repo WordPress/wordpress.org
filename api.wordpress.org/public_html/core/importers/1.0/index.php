@@ -22,6 +22,7 @@ if ( version_compare( $version, '5.4-beta', '>=' ) ) {
 }
 
 $response = array( 'importers' => $popular_importers, 'translated' => false );
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON or serialized PHP); escaping would corrupt the format.
 echo defined( 'JSON_RESPONSE' ) ? json_encode( $response ) : serialize( $response );
 
 function __( $string ) { return $string; }

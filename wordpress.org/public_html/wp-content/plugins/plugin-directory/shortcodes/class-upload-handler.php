@@ -1057,6 +1057,7 @@ class Upload_Handler {
 		$success = ( 201 === $http_response_code );
 
 		if ( ! $success ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 			trigger_error( "Helpscout update failed: $http_response_code: " . var_export( $result, true ), E_USER_WARNING );
 		}
 

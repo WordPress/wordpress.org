@@ -56,6 +56,7 @@ function update_pomo_files() {
 		$mo_content  = wp_remote_retrieve_body( $mo_response );
 
 		if ( ! $po_content || ! $mo_content || false === strpos( $po_content, 'Project-Id-Version: Meta - wp15.wordpress.net' ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 			trigger_error( "Invalid PO/MO content for {$set->wp_locale}." );
 			continue;
 		}

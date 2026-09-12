@@ -99,7 +99,7 @@ add_action( 'browsehappy_version', 'browsehappy_echo_version' );
 add_filter( 'get_browsehappy_version', 'browsehappy_fetch_version' );
 
 function browsehappy_echo_version( $browser ) {
-	echo browsehappy_fetch_version( $browser );
+	echo esc_html( browsehappy_fetch_version( $browser ) );
 }
 
 function browsehappy_fetch_version( $browser, $normalize = true, $rank = true ) {

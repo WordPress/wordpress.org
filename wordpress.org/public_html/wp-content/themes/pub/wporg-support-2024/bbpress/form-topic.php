@@ -36,6 +36,7 @@
 					defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY &&
 					bbp_is_single_view() && 'reviews' === bbp_get_view_id()
 				) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 					echo do_blocks(
 						sprintf(
 							'<!-- wp:wporg/notice {"type":"warning"} -->
@@ -281,7 +282,7 @@
 						/* translators: %s: Email address. */
 						wp_kses_post( __( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ) ),
 						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
-						WordPressdotorg\Forums\MODERATION_EMAIL
+						esc_html( WordPressdotorg\Forums\MODERATION_EMAIL )
 					);
 				?></p>
 			<?php endif; ?>

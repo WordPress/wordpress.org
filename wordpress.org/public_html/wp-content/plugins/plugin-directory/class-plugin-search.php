@@ -96,6 +96,7 @@ class Plugin_Search {
 			"/([ ]*)(\'[^\']+\') => ([\[\'])/" => '$1$2 => $3',
 		];
 		$export = preg_replace(array_keys($patterns), array_values($patterns), $export);
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Local var_export() debug helper; the export is PHP source, not HTML.
 		if ((bool)$return) return $export; else echo $export;
 	}
 

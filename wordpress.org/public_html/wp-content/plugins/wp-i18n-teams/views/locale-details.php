@@ -21,6 +21,7 @@
 			<strong><?php esc_html_e( 'Sites:', 'wporg' ); ?></strong>
 			<?php
 			if ( $locale_data['sites'] ) :
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Anchor list assembled above from esc_url() and esc_html() escaped parts.
 				echo implode( ', ', array_map( function( $site ) {
 					return sprintf(
 						'<a href="%s">%s (%s)</a>',
@@ -35,7 +36,7 @@
 		</li>
 		<li>
 			<strong><?php esc_html_e( 'Latest release:', 'wporg' ); ?></strong>
-			<?php echo $locale_data['latest_release'] ? $locale_data['latest_release'] : '&mdash;'; ?>
+			<?php echo $locale_data['latest_release'] ? esc_html( $locale_data['latest_release'] ) : '&mdash;'; ?>
 		</li>
 		<li>
 			<strong><?php esc_html_e( 'WordPress Locale:', 'wporg' ); ?></strong>
@@ -47,7 +48,7 @@
 		</li>
 		<li>
 			<strong><?php esc_html_e( 'Translation Projects:', 'wporg' ); ?></strong>
-			<a href="https://translate.wordpress.org/locale/<?php echo $locale->slug; ?>">translate.wordpress.org/locale/<?php echo $locale->slug; ?></a>
+			<a href="https://translate.wordpress.org/locale/<?php echo esc_attr( $locale->slug ); ?>">translate.wordpress.org/locale/<?php echo esc_html( $locale->slug ); ?></a>
 		</li>
 	</ul>
 
@@ -155,6 +156,7 @@
 				esc_html( $translator['display_name'] )
 			);
 		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Anchor list assembled above from esc_url() and esc_html() escaped parts.
 		echo wp_sprintf( '%l.', $translators );
 		?>
 	</p>
@@ -174,6 +176,7 @@
 				esc_html( $translator['display_name'] )
 			);
 		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Anchor list assembled above from esc_url() and esc_html() escaped parts.
 		echo wp_sprintf( '%l.', $translators );
 		?>
 	</p>

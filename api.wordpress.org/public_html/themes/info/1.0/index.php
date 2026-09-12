@@ -30,6 +30,7 @@ function send_error( $error, $code = 404 ) {
 		false !== strpos( $error, 'Action not implemented.' )
 	) {
 		header( 'Content-Type: text/html; charset=utf-8' );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body in the requested format; escaping would corrupt it.
 		die( "<p>{$error}</p>" );
 	}
 
@@ -42,6 +43,7 @@ function send_error( $error, $code = 404 ) {
 	}
 
 	if ( 'php' === $format ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body in the requested format; escaping would corrupt it.
 		echo serialize( $response );
 	} else {
 		// JSON format
@@ -142,6 +144,7 @@ $api = wporg_themes_query_api( $api_action, $request, 'api_object' );
 
 $api->set_status_header();
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body in the requested format; escaping would corrupt it.
 echo $api->get_result( $format );
 
 // Cache when a theme doesn't exist. See the validation handler above.

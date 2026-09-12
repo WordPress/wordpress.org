@@ -42,17 +42,17 @@ defined( 'ABSPATH' ) || die();
 	<div id="main">
 		<ul id="browserlist" class="wrap">
 <?php foreach ( browsehappy_get_browser_data() as $browser => $data ) : ?>
-			<li id="<?php echo $browser; ?>">
+			<li id="<?php echo esc_attr( $browser ); ?>">
 				<a href="<?php echo esc_url( $data->url ); ?>" title="<?php echo esc_attr( $data->long_name ); ?>">
 					<div class="icon"></div>
-					<h2 lang="en"><?php echo $data->name; ?></h2>
-					<p class="info"><?php echo $data->info; ?></p>
+					<h2 lang="en"><?php echo esc_html( $data->name ); ?></h2>
+					<p class="info"><?php echo esc_html( $data->info ); ?></p>
 					<?php /* translators: %s: Browser version. */ ?>
 					<p class="version"><?php printf( esc_html__( 'Latest Version: %s', 'browsehappy' ), '<strong>' . esc_html( apply_filters( 'get_browsehappy_version', $browser ) ) . '</strong>' ); ?></p>
 					<p class="website"><?php esc_html_e( 'Visit website for more info', 'browsehappy' ); ?></p>
 				</a>
 				<?php do_action( 'browsehappy_browser_after', $browser ); ?>
-			</li><!-- #<?php echo $browser; ?> -->
+			</li><!-- #<?php echo esc_html( $browser ); ?> -->
 <?php endforeach; ?>
 		</ul><!-- #browserlist -->
 	</div><!-- #main -->
@@ -61,8 +61,8 @@ defined( 'ABSPATH' ) || die();
 		<div class="wrap">
 			<section id="about">
 				<h2><?php esc_html_e( 'What is Browse Happy?', 'browsehappy' ); ?></h2>
-				<p><?php $what = __( 'Using an outdated browser makes your computer unsafe. Browse Happy is a way for you to find out what are the latest versions of the major browsers around. You can also learn about alternative browsers that may fit you even better than the one you are currently using.', 'browsehappy' );
-echo $what; ?></p>
+				<?php $what = __( 'Using an outdated browser makes your computer unsafe. Browse Happy is a way for you to find out what are the latest versions of the major browsers around. You can also learn about alternative browsers that may fit you even better than the one you are currently using.', 'browsehappy' ); ?>
+				<p><?php echo esc_html( $what ); ?></p>
 			</section><!-- #about -->
 			<section id="share">
 				<h2><?php esc_html_e( 'Share the Happiness', 'browsehappy' ); ?></h2>
@@ -90,18 +90,22 @@ echo $what; ?></p>
 $redirect_uri = home_url( '/' );
 if ( isset( $_GET['locale'] ) )
 	$redirect_uri = add_query_arg( 'locale', urlencode( sanitize_text_field( wp_unslash( $_GET['locale'] ) ) ), $redirect_uri );
-$facebook_pieces = array(
-	'app_id=180651631983617', // Browse Happy app
-	'link=' . home_url( '/' ),
-	'picture=' . get_template_directory_uri() . '/imgs/apple-touch-icon-114x114.png',
-	'name=' . urlencode( __( 'Browse Happy', 'browsehappy' ) ),
-	'description=' . urlencode( $what ),
-	'message=' . urlencode( __( 'Online. Worry-free. Upgrade your browser today!', 'browsehappy' ) ),
-	'display=popup',
-	'redirect_uri=' . $redirect_uri,
+
+$facebook_args = array(
+	'app_id'       => '180651631983617', // Browse Happy app.
+	'link'         => home_url( '/' ),
+	'picture'      => get_template_directory_uri() . '/imgs/apple-touch-icon-114x114.png',
+	'name'         => __( 'Browse Happy', 'browsehappy' ),
+	'description'  => $what,
+	'message'      => __( 'Online. Worry-free. Upgrade your browser today!', 'browsehappy' ),
+	'display'      => 'popup',
+	'redirect_uri' => $redirect_uri,
 );
+
+// add_query_arg() leaves the values it is given alone, so they are encoded here.
+$facebook_url = add_query_arg( rawurlencode_deep( $facebook_args ), 'https://www.facebook.com/dialog/feed' );
 ?>
-						<li class="facebook"><a onclick="window.open(this.href, 'fbshare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=325,width=540'); return false;" href="https://www.facebook.com/dialog/feed?<?php echo implode( '&', $facebook_pieces ); ?>" title="<?php esc_attr_e( 'Share on Facebook', 'browsehappy' ); ?>">Facebook</a></li>
+						<li class="facebook"><a onclick="window.open(this.href, 'fbshare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=325,width=540'); return false;" href="<?php echo esc_url( $facebook_url ); ?>" title="<?php esc_attr_e( 'Share on Facebook', 'browsehappy' ); ?>">Facebook</a></li>
 					</ul>
 				</nav>
 			</section><!-- #share -->

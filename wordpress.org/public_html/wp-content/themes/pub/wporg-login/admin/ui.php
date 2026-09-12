@@ -147,7 +147,8 @@ function wporg_login_admin_page() {
 
 	if ( isset( $_GET['action'] ) ) {
 		echo '<div class="updated notice"><p>';
-		echo esc_html( wporg_login_admin_action_text( sanitize_key( $_GET['action'] ?? '' ) ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Selects a fixed display message without changing state.
+		echo esc_html( wporg_login_admin_action_text( sanitize_key( wp_unslash( $_GET['action'] ) ) ) );
 		echo '</p></div>';
 	}
 
@@ -245,7 +246,7 @@ function wporg_login_admin_settings_page() {
 					$allow++;
 				}
 
-				printf( '<div class="notice notice-success"><p>%d IPs added to the allow list.</p></div>', $allow );
+				printf( '<div class="notice notice-success"><p>%d IPs added to the allow list.</p></div>', (int) $allow );
 
 				wporg_login_admin_settings_page_log_changes( 'IP Allow', [], $ip_allow );
 			}
@@ -257,7 +258,7 @@ function wporg_login_admin_settings_page() {
 					$blocked++;
 				}
 
-				printf( '<div class="notice notice-success"><p>%d IPs blocked from registration.</p></div>', $blocked );
+				printf( '<div class="notice notice-success"><p>%d IPs blocked from registration.</p></div>', (int) $blocked );
 
 				wporg_login_admin_settings_page_log_changes( 'IP Block', [], $ip_allow );
 			}
@@ -424,7 +425,7 @@ add_action( 'admin_post_login_resend_email', function() {
 	}
 
 	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'resent-email' ) );
+		die( esc_html( wporg_login_admin_action_text( 'resent-email' ) ) );
 	}
 
 	wp_safe_redirect( add_query_arg(
@@ -458,7 +459,7 @@ add_action( 'admin_post_login_mark_as_cleared', function() {
 	}
 
 	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'approved' ) );
+		die( esc_html( wporg_login_admin_action_text( 'approved' ) ) );
 	}
 
 	wp_safe_redirect( add_query_arg(
@@ -481,7 +482,7 @@ add_action( 'admin_post_login_block', function() {
 	wporg_login_block_registration( $email );
 
 	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'blocked' ) );
+		die( esc_html( wporg_login_admin_action_text( 'blocked' ) ) );
 	}
 
 	wp_safe_redirect( add_query_arg(
@@ -522,7 +523,7 @@ add_action( 'admin_post_login_delete', function() {
 	}
 
 	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'deleted' ) );
+		die( esc_html( wporg_login_admin_action_text( 'deleted' ) ) );
 	}
 
 	wp_safe_redirect( add_query_arg(
@@ -559,7 +560,7 @@ add_action( 'admin_post_login_block_account', function() {
 	}
 
 	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'blocked_account' ) );
+		die( esc_html( wporg_login_admin_action_text( 'blocked_account' ) ) );
 	}
 
 	wp_safe_redirect( add_query_arg(

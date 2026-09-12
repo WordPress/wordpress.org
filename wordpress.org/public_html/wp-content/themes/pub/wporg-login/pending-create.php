@@ -158,7 +158,7 @@ get_header();
 				/* translators: %s: Support email address. */
 				esc_html__( 'Please contact %s for more details.', 'wporg' ),
 				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
-				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+				'<a href="' . esc_url( 'mailto:' . $sso::SUPPORT_EMAIL ) . '">' . esc_html( $sso::SUPPORT_EMAIL ) . '</a>'
 			);
 		?></p>
 	</div>

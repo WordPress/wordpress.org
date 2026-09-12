@@ -64,7 +64,7 @@ get_header();
 						'wporg'
 					)
 				),
-				'<code>' . number_format_i18n( $codes_available ) . '</code>'
+				'<code>' . esc_html( number_format_i18n( $codes_available ) ) . '</code>'
 			);
 		}
 

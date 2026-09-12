@@ -46,9 +46,11 @@ class SVN_Access extends Base {
 
 		foreach ( $svn_access as $slug => $users ) {
 			$slug = ltrim( $slug, '/' );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generates SVN authz config text, not HTML.
 			echo "\n[/$slug]\n";
 
 			foreach ( $users as $user => $access ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generates SVN authz config text, not HTML.
 				echo "$user = $access\n";
 			}
 		}

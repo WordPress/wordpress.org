@@ -11,7 +11,7 @@ do_blocks( '<!-- wp:wporg/link-wrapper /-->' ); // Import the styles
 <div class="plugin-card wp-block-wporg-link-wrapper is-style-no-underline">
 	<div class="entry">
 		<div class="entry-thumbnail">
-			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
+			<?php echo Template::get_plugin_icon( get_post(), 'html' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() output and Template::get_plugin_icon() markup; escaping would print the markup. ?>
 		</div>
 
 		<header class="entry-header">

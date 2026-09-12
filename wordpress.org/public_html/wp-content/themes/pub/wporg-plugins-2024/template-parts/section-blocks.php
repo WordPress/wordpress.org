@@ -74,11 +74,11 @@ $allowed_svg = array(
 			?>
 			<li class="<?php echo esc_attr( $block_classes ); ?>">
 				<?php if ( false !== strpos( $block_icon, '<svg' ) ) : ?>
-					<span class="block-icon" <?php echo $block_style; ?>>
+					<span class="block-icon" <?php echo $block_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Style attribute built above from sanitize_hex_color() values. ?>>
 						<?php echo wp_kses( str_replace( '<svg ', '<svg role="img" aria-hidden="true" focusable="false" ', $block_icon ), $allowed_svg ); ?>
 					</span>
 				<?php elseif ( $block_icon ) : ?>
-					<span class="block-icon dashicons dashicons-<?php echo esc_attr( $block_icon ); ?>" <?php echo $block_style; ?>></span>
+					<span class="block-icon dashicons dashicons-<?php echo esc_attr( $block_icon ); ?>" <?php echo $block_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Style attribute built above from sanitize_hex_color() values. ?>></span>
 				<?php else : ?>
 					<span class="block-icon dashicons dashicons-block-default"></span>
 				<?php endif; ?>

@@ -65,8 +65,8 @@ function render() {
 		if ( $message ) {
 			printf(
 				'<div class="notice notice-%s is-dismissable"><p>%s</p></div>',
-				$class,
-				$message
+				esc_attr( $class ),
+				wp_kses_post( $message )
 			);
 		}
 	}
@@ -80,7 +80,7 @@ function render() {
 		<table class="form-table">
 			<tr>
 				<th scope="row"><label for="invite">GitHub Email, GitHub URL, WordPress.org user slug, or WordPress.org Profile URL</label></th>
-				<td><input type="text" name="invite" id="invite" class="regular-text" placeholder="https://profiles.wordpress.org/<?php echo wp_get_current_user()->user_nicename; ?>/"></td>
+				<td><input type="text" name="invite" id="invite" class="regular-text" placeholder="https://profiles.wordpress.org/<?php echo esc_attr( wp_get_current_user()->user_nicename ); ?>/"></td>
 			</tr>
 			<tr>
 				<th scope="row"><label for="team">Teams</label></th>
@@ -119,8 +119,8 @@ function render() {
 								<em>%s ago</em>
 								%s
 							</p>',
-							$pending->login ?: $pending->email,
-							human_time_diff( strtotime( $pending->created_at ) ),
+							esc_html( $pending->login ?: $pending->email ),
+							esc_html( human_time_diff( strtotime( $pending->created_at ) ) ),
 							$cancel_url ? '<a class="button" href="' . esc_url( $cancel_url ) . '">Cancel</a>' : ''
 						);
 					}

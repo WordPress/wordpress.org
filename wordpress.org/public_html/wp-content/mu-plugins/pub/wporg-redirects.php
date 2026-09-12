@@ -272,7 +272,7 @@ function wporg_redirect_site_not_found() {
 	} else {
 		// Headers should not have been sent at this point in time.
 		// On some pages, such as wp-cron.php the request has been terminated prior to WordPress loading, and so headers were "sent".
-		echo "<a href='$location'>$location</a>";
+		printf( '<a href="%1$s">%2$s</a>', esc_url( $location ), esc_html( $location ) );
 	}
 	exit;
 }

@@ -266,12 +266,12 @@ class Favorites {
 
 		if ( $favorites_current_user ) {
 			if ( ! is_user_logged_in() ) {
-				wp_redirect( home_url() );
+				wp_safe_redirect( home_url() );
 				exit;
 			}
 
 			$current_user = wp_get_current_user();
-			wp_redirect( home_url( '/' . self::PATH . '/' . $current_user->user_nicename ) );
+			wp_safe_redirect( home_url( '/' . self::PATH . '/' . $current_user->user_nicename ) );
 			exit;
 		}
 	}
@@ -654,7 +654,7 @@ class Favorites {
 			return;
 		}
 
-		echo '<div class="wporg-photo-favorite-count">' . number_format_i18n( self::count_photo_favorites( $post_id ) ) . '</div>';
+		echo '<div class="wporg-photo-favorite-count">' . esc_html( number_format_i18n( self::count_photo_favorites( $post_id ) ) ) . '</div>';
 	}
 
 	/**

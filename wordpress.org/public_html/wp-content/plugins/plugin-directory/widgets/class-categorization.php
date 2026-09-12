@@ -48,6 +48,7 @@ class Categorization extends \WP_Widget {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['before_widget'];
 		?>
 
@@ -69,6 +70,7 @@ class Categorization extends \WP_Widget {
 			</p>
 		</div>
 		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['after_widget'];
 	}
 }

@@ -30,7 +30,7 @@ class Author {
 		<script>
 			jQuery( function( $ ) {
 				$( '#post_author_username' ).autocomplete( {
-					source: '<?php echo $source; ?>',
+					source: <?php echo wp_json_encode( $source, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>,
 					minLength: 2,
 					delay: 700,
 					autoFocus: true,

@@ -902,6 +902,7 @@ abstract class Directory_Compat {
 		}
 
 		if ( $term_subscription ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Subscription renderer escapes fields and includes a confirmation handler.
 			echo $term_subscription;
 		}
 	}

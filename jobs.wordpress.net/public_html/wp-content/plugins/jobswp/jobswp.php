@@ -430,6 +430,7 @@ class Jobs_Dot_WP {
 		if ( ! $post_type_object )
 			return;
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Close-link markup assembled by _get_close_link().
 		echo $this->_get_close_link( $post, 'button button-large alignright' );
 	}
 
@@ -538,7 +539,15 @@ class Jobs_Dot_WP {
 			$sendback = remove_query_arg( array( 'close-job', 'closed-job', 'ids'), $sendback );
 		}
 
-		wp_redirect( add_query_arg( array( 'closed-job' => 1, 'ids' => $post_id ), $sendback ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'closed-job' => 1,
+					'ids'        => $post_id,
+				),
+				$sendback
+			)
+		);
 		exit();
 	}
 

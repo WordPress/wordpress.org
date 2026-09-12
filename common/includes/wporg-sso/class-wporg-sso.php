@@ -291,6 +291,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				printf(
 					'<meta http-equiv="refresh" content="1;url=%1$s" />' . 
 					'<a href="%1$s">%1$s</a>',
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above, with a fallback for environments without WordPress helpers.
 					$to
 				);
 				exit;

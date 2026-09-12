@@ -38,4 +38,4 @@
 	<dt><label for="project[active]"><?php esc_html_e( 'Active', 'glotpress' ); ?></label> <input type="checkbox" id="project[active]" name="project[active]" <?php gp_checked( $project->active ); ?> /></dt>
 </dl>
 
-<?php echo gp_js_focus_on( 'project[name]' ); ?>
+<?php echo gp_js_focus_on( 'project[name]' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes the element ID with esc_js(). ?>

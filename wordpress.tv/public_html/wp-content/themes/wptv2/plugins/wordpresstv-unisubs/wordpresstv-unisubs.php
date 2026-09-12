@@ -63,7 +63,7 @@ class WordCampTV_Unisubs {
 		if ( get_query_var( 'guid' ) && ! get_query_var( 'unisubs' ) ) {
 			$post = $this->get_post_by_guid( get_query_var( 'guid' ) );
 			if ( $post ) {
-				wp_redirect( get_permalink( $post ) );
+				wp_safe_redirect( get_permalink( $post ) );
 				exit();
 			}
 		}
@@ -145,6 +145,7 @@ class WordCampTV_Unisubs {
 
 		// Redirect to the SWF file if we need to.
 		if ( isset( $_GET['redirect_to_swf'] ) ) {
+			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirects to the player SWF on v.wordpress.com, built with esc_url_raw() above.
 			wp_redirect( $data['swf'] );
 			exit();
 		}
@@ -165,6 +166,7 @@ class WordCampTV_Unisubs {
 				echo '<' . '?xml version="1.0" encoding="utf-8" standalone="yes"?>' . "\n";
 				echo "<item>\n";
 				foreach ( $data as $tag => $value ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- XML response element; the value is htmlspecialchars()'d and the tag name is an internal key.
 					echo "	<{$tag}>" . htmlspecialchars( $value ) . "</{$tag}>\n";
 				}
 				echo '</item>';

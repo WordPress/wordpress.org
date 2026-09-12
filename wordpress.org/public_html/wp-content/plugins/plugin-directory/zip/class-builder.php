@@ -92,9 +92,11 @@ class Builder {
 				$res = SVN::add( $plugin_folder );
 			}
 			if ( ! $res['result'] ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 				throw new Exception( __METHOD__ . ": Failed to create {$plugin_folder}." );
 			}
 		} else {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( __METHOD__ . ': Failed to create checkout of ' . PLUGIN_ZIP_SVN_URL . '.' );
 		}
 
@@ -413,6 +415,7 @@ class Builder {
 			$remote_files && 
 			! wp_list_filter( $remote_files, [ 'kind' => 'file' ] )
 		) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( __METHOD__ . ": Could not create SVN export of {$this->plugin_version_svn_url}: Path appears not to have any files." );
 		}
 
@@ -424,6 +427,7 @@ class Builder {
 			$res                          = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		}
 		if ( ! $res['result'] ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( __METHOD__ . ': ' . ( $res['errors'][0]['error_message'] ?? 'unknown error' ), 404 );
 		}
 
@@ -489,6 +493,7 @@ class Builder {
 		), $zip_build_output, $return_value );
 
 		if ( $return_value ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( __METHOD__ . ': ZIP generation failed, return code: ' . $return_value, 503 );
 		}
 	}

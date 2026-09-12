@@ -45,7 +45,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 
 				printf(
 					'<div class="bbp-template-notice warning"><p>%s</p></div>',
-					$msg
+					wp_kses_post( $msg )
 				);
 			}
 		}
@@ -61,7 +61,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 
 			<p class="bbp-user-email"><?php
 				/* translators: %s: user's email address */
-				printf( esc_html__( 'Email: %s', 'wporg-forums' ), bbp_get_displayed_user_field( 'user_email' ) );
+				printf( esc_html__( 'Email: %s', 'wporg-forums' ), esc_html( bbp_get_displayed_user_field( 'user_email' ) ) );
 			?></p>
 
 		<?php endif; ?>
@@ -74,7 +74,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 				printf(
 					/* translators: 1: User's WordPress.org profile link, 2: User's Slack username, 3: make.wordpress.org/chat URL. */
 					wp_kses_post( __( '%1$s on WordPress.org, %2$s on <a href="%3$s">Slack</a>', 'wporg-forums' ) ),
-					wporg_support_get_wporg_profile_link(),
+					wp_kses_post( wporg_support_get_wporg_profile_link() ),
 					'@' . esc_html( $slack_username ),
 					'https://make.wordpress.org/chat/'
 				);
@@ -82,13 +82,13 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 				printf(
 					/* translators: 1: WordPress.org and Slack username, 2: URL for information about Slack. */
 					wp_kses_post( __( '%1$s on WordPress.org and <a href="%2$s">Slack</a>', 'wporg-forums' ) ),
-					wporg_support_get_wporg_profile_link(),
+					wp_kses_post( wporg_support_get_wporg_profile_link() ),
 					'https://make.wordpress.org/chat/'
 				);
 			} else {
 				/* translators: %s: user's WordPress.org profile link */
 				printf( esc_html__( '%s on WordPress.org', 'wporg-forums' ),
-					wporg_support_get_wporg_profile_link()
+					wp_kses_post( wporg_support_get_wporg_profile_link() )
 				);
 			}
 		?></p>
@@ -111,7 +111,7 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 		) {
 			?><p class="bbp-user-forum-role"><?php
 			/* translators: %s: user's forum role */
-			printf( esc_html__( 'Forum Role: %s', 'wporg-forums' ), bbp_get_user_display_role() );
+			printf( esc_html__( 'Forum Role: %s', 'wporg-forums' ), esc_html( bbp_get_user_display_role() ) );
 			?></p><?php
 		}
 		?>
@@ -127,30 +127,30 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 
 		<p class="bbp-user-member-since"><?php
 			/* translators: %s: user's registration date */
-			printf( esc_html__( 'Member Since: %s', 'wporg-forums' ), wporg_support_get_user_registered_date() );
+			printf( esc_html__( 'Member Since: %s', 'wporg-forums' ), esc_html( wporg_support_get_user_registered_date() ) );
 		?></p>
 
 		<p class="bbp-user-topic-count"><?php
 			/* translators: %s: number of user's topics */
-			printf( esc_html__( 'Topics Started: %s', 'wporg-forums' ), number_format_i18n( wporg_support_get_user_topics_count() ) );
+			printf( esc_html__( 'Topics Started: %s', 'wporg-forums' ), esc_html( number_format_i18n( wporg_support_get_user_topics_count() ) ) );
 		?></p>
 
 		<p class="bbp-user-reply-count"><?php
 			/* translators: %s: number of user's replies */
-			printf( esc_html__( 'Replies Created: %s', 'wporg-forums' ), number_format_i18n( bbp_get_user_reply_count_raw() ) );
+			printf( esc_html__( 'Replies Created: %s', 'wporg-forums' ), esc_html( number_format_i18n( bbp_get_user_reply_count_raw() ) ) );
 		?></p>
 
 		<?php if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && WPORG_SUPPORT_FORUMS_BLOGID == get_current_blog_id() ) : ?>
 			<p class="bbp-user-review-count"><?php
 				/* translators: %s: number of user's reviews */
-				printf( esc_html__( 'Reviews Written: %s', 'wporg-forums' ), number_format_i18n( wporg_support_get_user_reviews_count() ) );
+				printf( esc_html__( 'Reviews Written: %s', 'wporg-forums' ), esc_html( number_format_i18n( wporg_support_get_user_reviews_count() ) ) );
 			?></p>
 		<?php endif; ?>
 
 		<?php if ( bbp_is_user_home() || current_user_can( 'moderate' ) ) : ?>
 			<p class="bbp-user-report-count"><?php
 				/* translators: %s: number of user's reviews */
-				printf( esc_html__( 'Reports Submitted: %s', 'wporg-forums' ), number_format_i18n( wporg_support_get_user_report_count() ) );
+				printf( esc_html__( 'Reports Submitted: %s', 'wporg-forums' ), esc_html( number_format_i18n( wporg_support_get_user_report_count() ) ) );
 			?></p>
 		<?php endif; ?>
 	</div>

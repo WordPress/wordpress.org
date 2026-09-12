@@ -85,6 +85,7 @@ if ( $send_slack ) {
 	];
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 echo "Processing I18N Import for $plugin_slug...\n";
 try {
 	if ( 'readme' === $type ) {
@@ -120,6 +121,7 @@ try {
 		$slack_client->send( '#meta-language-packs' );
 	}
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo "OK. Took {$runtime}s\n";
 } catch ( Exception $e ) {
 	$runtime = round( microtime( 1 ) - $start_time, 2 );
@@ -147,6 +149,7 @@ try {
 		$slack_client->send( '#meta-language-packs' );
 	}
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo "Failed. Took {$runtime}s\n";
 
 	fwrite( STDERR, "[{$plugin_slug}] Plugin I18N Import Failed: " . $e->getMessage() . "\n" );

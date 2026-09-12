@@ -562,7 +562,7 @@ class Tags {
 			return;
 		}
 
-		wp_redirect( $new_link, 301 );
+		wp_safe_redirect( $new_link, 301 );
 		exit;
 	}
 

@@ -292,7 +292,7 @@ class Flagged {
 		}
 
 		if ( $output ) {
-			echo $output;
+			echo wp_kses_post( $output );
 		}
 	}
 
@@ -306,29 +306,29 @@ class Flagged {
 		if ( Registrations::get_post_type() === get_post_type( $post ) ) {
 			$post_status = self::get_post_status();
 			$is_flagged = get_post_status( $post ) === $post_status;
-			$selected = $is_flagged ? 'selected' : '';
 			$label_text = __( 'Flagged', 'wporg-photos' );
-			$label = $is_flagged ? "<span id=\"post-status-display\">{$label_text}</span>" : '';
-	
-			echo "
+			?>
 			<script>
 			document.addEventListener('DOMContentLoaded', function() {
 				const select = document.querySelector('select#post_status');
 				const option = document.createElement('option');
-				option.value = '{$post_status}';
-				option.innerHTML = '{$label_text}';
-				option.selected = '{$selected}' === 'selected';
+				const labelText = <?php echo wp_json_encode( $label_text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
+				option.value = <?php echo wp_json_encode( $post_status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
+				option.textContent = labelText;
+				option.selected = <?php echo wp_json_encode( $is_flagged ); ?>;
 				select.appendChild(option);
-	
-				const label = document.querySelector('.misc-pub-section label');
-				label.innerHTML += '{$label}';
 
 				if (option.selected) {
-					document.getElementById('post-status-display').innerHTML = '{$label_text}';
+					const label = document.querySelector('.misc-pub-section label');
+					const status = document.createElement('span');
+					status.id = 'post-status-display';
+					status.textContent = labelText;
+					label.appendChild(status);
+					document.getElementById('post-status-display').textContent = labelText;
 				}
 			});
 			</script>
-			";
+			<?php
 		}
 	}
 
@@ -389,7 +389,7 @@ class Flagged {
 				// Function to add the new status
 				function addNewStatus(target) {
 					const select = target.querySelector('select[name="_status"]');
-					const post_status = '<?php echo self::get_post_status(); ?>';
+					const post_status = <?php echo wp_json_encode( self::get_post_status(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 
 					if (select) {
 						const optionExists = Array.from(select.options).some(opt => opt.value === post_status);
@@ -402,7 +402,7 @@ class Flagged {
 
 				// Function to check if a new node is the Quick Edit or Bulk Edit form
 				function checkNewNode(target) {
-					if (target instanceof HTMLElement && (target.classList.contains('inline-edit-<?php echo Registrations::get_post_type(); ?>') || target.id === 'bulk-edit')) {
+					if (target instanceof HTMLElement && (target.classList.contains(<?php echo wp_json_encode( 'inline-edit-' . Registrations::get_post_type(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>) || target.id === 'bulk-edit')) {
 						addNewStatus(target);
 					}
 				}

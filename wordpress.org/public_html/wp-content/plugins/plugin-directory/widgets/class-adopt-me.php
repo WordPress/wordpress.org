@@ -30,8 +30,10 @@ class Adopt_Me extends \WP_Widget {
 
 		if ( $is_adopt_me ) {
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 			echo $args['before_widget'];
-			echo $args['before_title'] . $title . $args['after_title'];
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+			echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 			?>
 
 			<div>
@@ -43,6 +45,7 @@ class Adopt_Me extends \WP_Widget {
 			</div>
 			<?php
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 			echo $args['after_widget'];
 		}
 	}

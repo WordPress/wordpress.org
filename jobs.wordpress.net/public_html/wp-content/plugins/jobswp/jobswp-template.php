@@ -114,6 +114,7 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 			<div class="job-location">Location</div>
 		</div>';
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Field and help-text markup assembled by the template helpers.
 	echo $output;
 }
 
@@ -148,6 +149,7 @@ function jobswp_text_field( $field_name, $field_label, $required = false, $type 
 	);
 
 	if ( $help_text ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Field and help-text markup assembled by the template helpers.
 		echo '<div class="job-help-text">' . $help_text . "</div>\n";
 	}
 

@@ -9,7 +9,7 @@
 <dl>
 	<dt><label for="set[locale]"><?php esc_html_e( 'Locale', 'glotpress' ); ?></label></dt>
 	<dd>
-		<?php echo gp_locales_dropdown( 'set[locale]', $set->locale ); ?>
+		<?php echo gp_locales_dropdown( 'set[locale]', $set->locale ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress builds this dropdown with escaped gp_select() output. ?>
 		<a href="#" id="copy"><?php esc_html_e( 'Use as name', 'glotpress' ); ?></a>
 	</dd>
 
@@ -23,7 +23,7 @@
 	<dt><label for="set[project_id]"><?php esc_html_e( 'Project (ID)', 'glotpress' ); ?></label></dt>
 	<dd><input type="text" name="set[project_id]" value="<?php echo esc_attr( $set->project_id ); ?>" id="set[project_id]">
 </dl>
-<?php echo gp_js_focus_on( 'set[locale]' ) . "\n"; ?>
+<?php echo gp_js_focus_on( 'set[locale]' ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes the element ID with esc_js(). ?>
 <script type="text/javascript">
 	jQuery('#copy').click(function() {
 		var text = jQuery('#set\\[locale\\] option:selected').html().replace(/^\S+\s+\S+\s+/, '').replace(/&mdash|—/, '');

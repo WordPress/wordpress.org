@@ -209,6 +209,7 @@ class Rosetta_Showcase {
 					esc_url( (string) get_edit_post_link( $post_id ) ),
 					/* translators: %s: post title */
 					esc_attr( sprintf( __( '&#8220;%s&#8221; (Edit)', 'rosetta' ), $title ) ),
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Title markup assembled above from escaped parts.
 					$title
 				);
 				break;

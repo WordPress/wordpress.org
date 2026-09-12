@@ -14,7 +14,7 @@ gp_tmpl_header();
 	<p class="consistency-fields">
 		<span class="consistency-field">
 			<label for="original">Original</label>
-			<input id="original" type="text" name="search" required value="<?php echo gp_esc_attr_with_entities( $search ); ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
+			<input id="original" type="text" name="search" required value="<?php echo gp_esc_attr_with_entities( $search ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- gp_esc_attr_with_entities() escapes the value for an attribute and double-encodes existing entities so they render literally. ?>" class="consistency-form-search" placeholder="Enter original to search for&hellip;">
 		</span>
 
 		<span class="consistency-field">
@@ -37,6 +37,7 @@ gp_tmpl_header();
 			);
 			$sets = array_diff_key( $sets, array_flip( $sets_to_hide ) );
 			$locale_options = array_merge( $locale_options, $sets );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes select attributes and option labels.
 			echo gp_select(
 				'set',
 				$locale_options,
@@ -56,6 +57,7 @@ gp_tmpl_header();
 				'' => 'All Projects',
 			];
 			$project_options = $project_options + $projects;
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes select attributes and option labels.
 			echo gp_select(
 				'project',
 				$project_options,
@@ -90,13 +92,14 @@ if ( $performed_search && ! $results ) {
 	if ( ! $has_different_translations ) {
 		echo '<div class="notice"><p>All originals have the same translations.</p></div>';
 	} else {
-		echo '<div id="translations-overview" class="notice wporg-notice-warning"><p>There are ' . $translations_unique_count . ' different translations. <a id="toggle-translations-unique" href="#show">View</a></p>';
+		echo '<div id="translations-overview" class="notice wporg-notice-warning"><p>There are ' . esc_html( $translations_unique_count ) . ' different translations. <a id="toggle-translations-unique" href="#show">View</a></p>';
 		echo '<ul class="translations-unique hidden">';
 		foreach ( $translations_unique_counts as $translation => $count ) {
 			printf(
 				'<li>%s <small>(%s)</small> <a class="anchor-jumper with-tooltip" aria-label="Go to translation" href="#%s">&darr;</a></li>',
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 				str_replace( ' ', '<span class="space"> </span>', esc_translation( $translation ) ),
-				1 === $count ? $count . ' time' : $count . ' times',
+				esc_html( 1 === $count ? $count . ' time' : $count . ' times' ),
 				esc_attr( 't-' . md5( $translation ) )
 			);
 		}
@@ -132,9 +135,10 @@ if ( $performed_search && ! $results ) {
 			printf(
 				'<tr id="%s" class="new-translation"><th colspan="2"><strong>%s</strong> %s %s</th></tr>',
 				esc_attr( 't-' . md5( $translation ) ),
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 				esc_translation( $translation ),
-				$next_arrow,
-				$prev_arrow
+				wp_kses_post( $next_arrow ),
+				wp_kses_post( $prev_arrow )
 			);
 
 			foreach ( $results as $result ) {
@@ -171,16 +175,17 @@ if ( $performed_search && ! $results ) {
 
 				printf(
 					'<tr class="%s"><td>%s</td><td>%s</td></tr>',
-					isset( $parent_project->name ) ? sanitize_title( 'project-' . $parent_project->name ) : '',
+					isset( $parent_project->name ) ? esc_attr( sanitize_title( 'project-' . $parent_project->name ) ) : '',
 					sprintf(
 						'<div class="string">%s%s</div>
 						<div class="meta">Project: <a href="/projects/%s/%s/">%s</a>%s</div>',
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						esc_translation( $result->original_singular ),
-						$original_context,
-						$result->project_path,
-						$set,
-						$project_name,
-						$active_text
+						wp_kses_post( $original_context ),
+						esc_attr( $result->project_path ),
+						esc_attr( $set ),
+						esc_html( $project_name ),
+						wp_kses_post( $active_text )
 				),
 					sprintf(
 						'<div class="string%s">%s</div>
@@ -189,12 +194,13 @@ if ( $performed_search && ! $results ) {
 							Added: %s
 						</div>',
 						$locale_is_rtl ? ' rtl' : '',
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						esc_translation( $result->translation ),
-						$result->project_path,
-						$set,
-						$result->original_id,
-						$result->translation_id,
-						$result->translation_added
+						esc_attr( $result->project_path ),
+						esc_attr( $set ),
+						intval( $result->original_id ),
+						intval( $result->translation_id ),
+						esc_html( $result->translation_added )
 					)
 				);
 			}

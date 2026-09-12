@@ -26,6 +26,7 @@ class WPorg_GP_Help_Page {
 
 	function after_hello() {
 		if ( is_user_logged_in() || $this->is_notice_hidden() ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Help link markup built here from a class constant.
 			echo '<em><a class="secondary" href="' . self::handbook_link . '">Need help?</a></em>';
 		}
 	}
@@ -50,7 +51,7 @@ class WPorg_GP_Help_Page {
 		<div class="notice" id="help-notice">
 			<p>
 				New to Translating WordPress?
-				Read through our <a href="<?php echo self::handbook_link; ?>" target="_blank">Translator Handbook</a> to get started.
+				Read through our <a href="<?php echo esc_url( self::handbook_link ); ?>" target="_blank">Translator Handbook</a> to get started.
 				<a id="hide-help-notice" class="secondary" style="float: right;" href="<?php echo esc_url( $hide_url ); ?>">Hide</a>
 			</p>
 		</div>
@@ -75,6 +76,7 @@ class WPorg_GP_Help_Page_Route extends GP_Route {
 	function getting_started() {
 		remove_action( 'gp_after_notices', array( wporg_gp_help_page(), 'after_notices' ) );
 
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Handbook lives on make.wordpress.org, so wp_safe_redirect() would send the visitor to the admin instead.
 		wp_redirect( WPorg_GP_Help_Page::handbook_link, 301 );
 		exit;
 	}

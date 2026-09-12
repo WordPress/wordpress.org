@@ -48,7 +48,7 @@ $more_links['history'] = '<a href="' . esc_url( $original_history ) . '">Transla
  */
 $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_links, $project, $locale, $translation_set, $translation );
 ?>
-<tr class="editor <?php echo gp_translation_row_classes( $translation ); ?>" id="editor-<?php echo esc_attr( $translation->row_id ); ?>" row="<?php echo esc_attr( $translation->row_id ); ?>">
+<tr class="editor <?php gp_translation_row_classes( $translation ); ?>" id="editor-<?php echo esc_attr( $translation->row_id ); ?>" row="<?php echo esc_attr( $translation->row_id ); ?>">
 	<td colspan="<?php echo $can_approve ? 5 : 4; ?>">
 		<div class="editor-panel">
 			<div class="editor-panel__left">
@@ -56,8 +56,8 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 					<?php
 					$status = sprintf(
 						'<span class="panel-header__bubble%s">%s</span>',
-						$translation->translation_status ? ' panel-header__bubble--' . $translation->translation_status : '',
-						display_status( $translation->translation_status )
+						esc_attr( $translation->translation_status ? ' panel-header__bubble--' . $translation->translation_status : '' ),
+						esc_html( display_status( $translation->translation_status ) )
 					);
 
 					$warnings_count = wporg_gp_count_warnings( $translation );
@@ -69,7 +69,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						) . '</span>';
 					}
 					?>
-					<h3>Original <?php echo $status . $warnings_info; ?></h3>
+					<h3>Original <?php echo wp_kses_post( $status ) . wp_kses_post( $warnings_info ); ?></h3>
 					<div class="panel-header-actions">
 						<button type="button" class="panel-header-actions__cancel with-tooltip" aria-label="Close current editor">
 							<span class="screen-reader-text">Close</span><span aria-hidden="true" class="dashicons dashicons-no-alt"></span>
@@ -101,19 +101,19 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						if ( ! $translation->plural ) :
 							?>
 							<div class="source-string__singular">
-								<span class="original"><?php echo prepare_original( $singular ); ?></span>
-								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); ?></span>
+								<span class="original"><?php echo prepare_original( $singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span>
+								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></span>
 							</div>
 						<?php else : ?>
 							<div class="source-string__singular">
 								<small>Singular:</small>
-								<span class="original"><?php echo prepare_original( $singular ); ?></span>
-								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); ?></span>
+								<span class="original"><?php echo prepare_original( $singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span>
+								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></span>
 							</div>
 							<div class="source-string__plural">
 								<small>Plural:</small>
-								<span class="original"><?php echo prepare_original( $plural ); ?></span>
-								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->plural ); ?></span>
+								<span class="original"><?php echo prepare_original( $plural ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span>
+								<span aria-hidden="true" class="original-raw"><?php echo esc_translation( $translation->plural ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></span>
 							</div>
 						<?php endif; ?>
 					</div>
@@ -122,7 +122,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						<?php if ( wporg_gp_should_display_original_context( $translation ) ) : ?>
 							<details open class="source-details__context">
 								<summary>Context</summary>
-								<span class="context bubble"><?php echo esc_translation( $translation->context ); ?></span>
+								<span class="context bubble"><?php echo esc_translation( $translation->context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></span>
 							</details>
 						<?php endif; ?>
 						<?php
@@ -182,10 +182,10 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 											<li>
 												<button
 														class="translation-form-list__tab with-tooltip<?php echo ( 0 === $plural_index ) ? ' translation-form-list__tab--active' : ''; ?>"
-														data-plural-index="<?php echo $plural_index; ?>"
-														aria-label="<?php printf( 'This plural form is used for numbers like: %s', $plural_string ); ?>"
+														data-plural-index="<?php echo esc_attr( $plural_index ); ?>"
+														aria-label="<?php printf( 'This plural form is used for numbers like: %s', esc_attr( $plural_string ) ); ?>"
 														type="button">
-													<?php echo $plural_string; ?>
+													<?php echo esc_html( $plural_string ); ?>
 												</button>
 											</li>
 										<?php endforeach; ?>
@@ -233,7 +233,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 									</button>
 								</div>
 							<?php elseif ( is_user_logged_in() ) : ?>
-								<?php echo apply_filters( 'wporg_translate_cannot_edit_translation_hint', '<p class="info">Sorry, you are not allowed to edit this translation.</p>', $translation ); ?>
+								<?php echo wp_kses_post( apply_filters( 'wporg_translate_cannot_edit_translation_hint', '<p class="info">Sorry, you are not allowed to edit this translation.</p>', $translation ) ); ?>
 							<?php else : ?>
 								<p class="info">
 									<?php
@@ -265,7 +265,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 				</div>-->
 				<div class="panel-content">
 					<?php ob_start(); ?>
-					<div class="meta" id="sidebar-div-meta-<?php echo $translation->row_id; ?>">
+					<div class="meta" id="sidebar-div-meta-<?php echo esc_attr( $translation->row_id ); ?>">
 						<?php gp_tmpl_load( 'translation-row-editor-meta-feedback', get_defined_vars() ); ?>
 						<?php if ( $translation->translation_status && ( $can_approve_translation || $can_reject_self ) ) : ?>
 							<div class="status-actions">
@@ -292,20 +292,20 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 						<dl>
 							<dt><?php esc_html_e( 'Status:', 'glotpress' ); ?></dt>
 							<dd>
-								<?php echo display_status( $translation->translation_status ); ?>
+								<?php echo esc_html( display_status( $translation->translation_status ) ); ?>
 							</dd>
 						</dl>
 
 						<?php if ( $translation->translation_added && $translation->translation_added !== '0000-00-00 00:00:00' ) : ?>
 							<dl>
 								<dt><?php esc_html_e( 'Added:', 'glotpress' ); ?></dt>
-								<dd><?php echo $translation->translation_added; ?> UTC</dd>
+								<dd><?php echo esc_html( $translation->translation_added ); ?> UTC</dd>
 							</dl>
 						<?php endif; ?>
 						<?php if ( $translation->date_modified && $translation->date_modified !== '0000-00-00 00:00:00' && $translation->date_modified !== $translation->translation_added ) : ?>
 							<dl>
 								<dt><?php esc_html_e( 'Last modified:', 'glotpress' ); ?></dt>
-								<dd><?php echo $translation->date_modified; ?> UTC</dd>
+								<dd><?php echo esc_html( $translation->date_modified ); ?> UTC</dd>
 							</dl>
 						<?php endif; ?>
 						<?php if ( $translation->user ) : ?>
@@ -336,6 +336,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 							<?php if ( $can_write ) : ?>
 								<dd>
 								<?php
+									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes select attributes and option labels.
 									echo gp_select(
 										'priority-' . $translation->original_id,
 										GP::$original->get_static( 'priorities' ),
@@ -349,7 +350,7 @@ $more_links = apply_filters( 'gp_translation_row_template_more_links', $more_lin
 								?>
 									</dd>
 							<?php else : ?>
-								<dd><?php echo gp_array_get( GP::$original->get_static( 'priorities' ), $translation->priority, 'unknown' ); ?></dd>
+								<dd><?php echo esc_html( gp_array_get( GP::$original->get_static( 'priorities' ), $translation->priority, 'unknown' ) ); ?></dd>
 							<?php endif; ?>
 						</dl>
 					</div>

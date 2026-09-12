@@ -19,7 +19,7 @@ get_template_part( 'header', 'wporg' );
 	<div id="content" class="site-content row gutters">
 		<header id="masthead" class="site-header col-12" role="banner">
 			<div class="site-branding">
-				<p class="site-title"><a href="<?php echo esc_url( get_permalink( get_post()->post_parent ) ); ?>" rel="bookmark"><?php echo get_the_title( get_post()->post_parent ); ?></a></p>
+				<p class="site-title"><a href="<?php echo esc_url( get_permalink( get_post()->post_parent ) ); ?>" rel="bookmark"><?php echo esc_html( get_the_title( get_post()->post_parent ) ); ?></a></p>
 
 				<?php if ( ! empty( $menu_items ) ) : ?>
 				<nav id="site-navigation" class="main-navigation" role="navigation">

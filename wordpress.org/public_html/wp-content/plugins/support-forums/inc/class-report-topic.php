@@ -650,7 +650,7 @@ The WordPress.org Team',
 		$is_reported      = has_term( 'modlook', 'topic-tag', $topic_id );
 
 		if ( $is_reported ) {
-			$report_text = __( 'This topic has been reported', 'wporg-forums' );
+			$report_text = esc_html__( 'This topic has been reported', 'wporg-forums' );
 		}
 		else {
 			$action = sprintf(
@@ -710,12 +710,13 @@ The WordPress.org Team',
 				'<br><a href="%s" class="button">%s</a>',
 				esc_url( $this->remove_topic_modlook_url() ),
 				// translators: `modlook` is the term used for posts tagged by users when they want a moderator to have a look.
-				__( 'Remove modlook', 'wporg-support' )
+				esc_html__( 'Remove modlook', 'wporg-support' )
 			);
 		}
 
 		printf(
 			'<li class="topic-report">%s</li>',
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Form fields are escaped above; preserve the report form.
 			$report_text
 		);
 
@@ -742,7 +743,7 @@ The WordPress.org Team',
 			printf(
 				'<li class="topic-previous-reports">%s<ul class="previous-reports">%s</ul></li>',
 				esc_html__( 'Previous reports:', 'wporg-support' ),
-				implode( ' ', $lines )
+				wp_kses_post( implode( ' ', $lines ) )
 			);
 		}
 	}

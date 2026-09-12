@@ -10,7 +10,7 @@
 		?>
 	</h2>
 
-	<?php echo $feedback_message; ?>
+	<?php echo $feedback_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice markup assembled by get_feedback_message() from escaped parts. ?>
 
 	<form method="get">
 		<input type="hidden" name="page" value="translation-editors">

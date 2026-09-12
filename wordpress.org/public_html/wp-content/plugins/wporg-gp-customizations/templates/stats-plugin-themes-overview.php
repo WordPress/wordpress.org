@@ -23,10 +23,10 @@ $main_column_title = trim( ucwords( $view ), 's' );
 	<table id="stats-table" class="table">
 		<thead>
 			<tr>
-				<th><span class="with-tooltip" aria-label="Sorted by active installations"><?php echo $main_column_title; ?></span></th>
+				<th><span class="with-tooltip" aria-label="Sorted by active installations"><?php echo esc_html( $main_column_title ); ?></span></th>
 				<?php
 					foreach ( $columns as $title ) {
-						printf( "<th>%s</th>", $title );
+						printf( '<th>%s</th>', esc_html( $title ) );
 					}
 
 				?>
@@ -48,9 +48,9 @@ $main_column_title = trim( ucwords( $view ), 's' );
 					'<th title="%s" data-column-title="%s" data-sort-value="%s"><a href="%s">%s</a></th>',
 					esc_attr( sprintf( __( "%s+ Active Installations" ), number_format_i18n( $details->installs ) ) ),
 					esc_attr( $main_column_title ),
-					$details->installs,
+					esc_attr( $details->installs ),
 					esc_url( $project_overview_link ),
-					$details->project->name
+					esc_html( $details->project->name )
 				);
 
 				foreach ( $columns as $field => $title ) {
@@ -71,11 +71,11 @@ $main_column_title = trim( ucwords( $view ), 's' );
 					$percent_class = 'percent' . (int) ( $percent / 10 ) * 10;
 
 					printf( '<td class="%s" data-column-title="%s" data-sort-value="%s"><a href="%s">%s</a></td>',
-						$percent_class,
-						$title,
-						$sort_value,
+						esc_attr( $percent_class ),
+						esc_attr( $title ),
+						esc_attr( $sort_value ),
 						esc_url( $link ),
-						$cell_text
+						esc_html( $cell_text )
 					);
 				}
 				echo '</tr>';

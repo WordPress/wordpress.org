@@ -47,18 +47,18 @@ class Reviews {
 					</div><div class="review">
 						<header>
 							<div class="header-top">
-								<?php echo Template::dashicons_stars( $review->post_rating ); ?>
-								<h3 class="review-title"><a class="url" href="<?php echo esc_url( 'https://wordpress.org/support/topic/' . $review->post_name . '/' ); ?>"><?php echo get_the_title( $review ); ?></a></h3>
+								<?php echo wp_kses_post( Template::dashicons_stars( $review->post_rating ) ); ?>
+								<h3 class="review-title"><a class="url" href="<?php echo esc_url( 'https://wordpress.org/support/topic/' . $review->post_name . '/' ); ?>"><?php echo esc_html( get_the_title( $review ) ); ?></a></h3>
 							</div>
 							<div class="header-bottom">
 								<span class="review-author author vcard"><?php the_author_posts_link(); ?></span>
-								<span class="review-date"><?php echo date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ); ?></span>
+								<span class="review-date"><?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ) ); ?></span>
 								<?php if ( $reply_count ) : ?>
 								<span class="review-replies"><?php /* translators: %s: Number of replies. */ printf( esc_html( _n( '%s reply', '%s replies', $reply_count, 'wporg-plugins' ) ), esc_html( number_format_i18n( $reply_count ) ) ); ?></span>
 								<?php endif; ?>
 							</div>
 						</header>
-						<div class="review-content"><?php echo wp_strip_all_tags( get_the_content() ); ?></div>
+						<div class="review-content"><?php echo esc_html( wp_strip_all_tags( get_the_content() ) ); ?></div>
 					</div>
 				</article>
 			<?php

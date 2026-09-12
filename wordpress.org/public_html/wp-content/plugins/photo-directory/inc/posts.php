@@ -233,6 +233,7 @@ class Posts {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Attachment URLs are served from the photo storage host, so the target is off-site.
 		wp_redirect( wp_get_attachment_url( $post->ID ) );
 		exit;
 	}

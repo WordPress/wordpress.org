@@ -589,7 +589,7 @@ class Customizations {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
 				esc_html__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
-				$new_slug
+				esc_html( $new_slug )
 			) );
 		}
 
@@ -606,7 +606,7 @@ class Customizations {
 			if ( $result['errors'] ) {
 				$error = 'Error renaming SVN repository: ' . var_export( $result['errors'], true );
 				Tools::audit_log( $error, $plugin->ID );
-				wp_die( $error ); // Abort before the post is altered.
+				wp_die( esc_html( $error ) ); // Abort before the post is altered.
 			} else {
 				Tools::audit_log(
 					sprintf(
@@ -669,7 +669,7 @@ class Customizations {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
 				esc_html__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
-				$original_slug
+				esc_html( $original_slug )
 			) );
 		}
 

@@ -386,7 +386,7 @@ class WordPressTV_Subtitles_Upload {
 			</style>
 			<strong>Content of the subtitles file</strong><br>
 
-			<div id="subs-content"><?php echo $file_content; ?></div>
+			<div id="subs-content"><?php echo $file_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- File contents are escaped above before inserting line breaks. ?></div>
 
 			<div class="subs-info">
 				<input type="hidden" name="wptv-subtitles" value="1"/>
@@ -462,7 +462,7 @@ class WordPressTV_Subtitles_Upload {
 
 			if ( $pending_subs ) {
 				echo '<div class="updated"><p><a href="upload.php?post_mime_type=' . urlencode( 'application/ttml+xml' ) .
-				     '&amp;detached=1">Subtitles awaiting moderation (' . $pending_subs . ')</a></p></div>';
+					'&amp;detached=1">Subtitles awaiting moderation (' . (int) $pending_subs . ')</a></p></div>';
 			}
 		}
 	}

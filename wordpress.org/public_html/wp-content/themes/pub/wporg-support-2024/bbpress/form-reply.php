@@ -22,7 +22,20 @@ if ( bbp_is_reply_edit() ) : ?>
 			<?php do_action( 'bbp_theme_before_reply_form' ); ?>
 
 			<fieldset class="bbp-form">
-				<legend><?php printf( esc_html__( 'Reply To: %s', 'wporg-forums' ), ( bbp_get_form_reply_to() ) ? sprintf( esc_html__( 'Reply #%1$s in %2$s', 'wporg-forums' ), bbp_get_form_reply_to(), bbp_get_topic_title() ) : bbp_get_topic_title() ); ?></legend>
+				<legend>
+					<?php
+					printf(
+						/* translators: %s: Topic title or reply description. */
+						esc_html__( 'Reply To: %s', 'wporg-forums' ),
+						bbp_get_form_reply_to() ? sprintf(
+							/* translators: 1: Reply ID, 2: Topic title. */
+							esc_html__( 'Reply #%1$s in %2$s', 'wporg-forums' ),
+							esc_html( bbp_get_form_reply_to() ),
+							wp_kses_post( bbp_get_topic_title() )
+						) : wp_kses_post( bbp_get_topic_title() )
+					);
+					?>
+				</legend>
 
 				<?php do_action( 'bbp_theme_before_reply_form_notices' ); ?>
 
@@ -41,7 +54,7 @@ if ( bbp_is_reply_edit() ) : ?>
 							printf(
 								/* translators: %s: forum title */
 								esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies, however your posting capabilities still allow you to post.', 'wporg-forums' ),
-								bbp_get_forum_title( bbp_get_topic_forum_id() )
+								esc_html( bbp_get_forum_title( bbp_get_topic_forum_id() ) )
 							);
 						?></p>
 					</div>
@@ -195,7 +208,8 @@ if ( bbp_is_reply_edit() ) : ?>
 
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
-			<p><?php printf( esc_html__( 'The topic &#8216;%s&#8217; is closed to new replies.', 'wporg-forums' ), bbp_get_topic_title() ); ?></p>
+			<p><?php /* translators: %s: Topic title. */ ?>
+			<?php printf( esc_html__( 'The topic &#8216;%s&#8217; is closed to new replies.', 'wporg-forums' ), wp_kses_post( bbp_get_topic_title() ) ); ?></p>
 		</div>
 	</div>
 
@@ -203,7 +217,8 @@ if ( bbp_is_reply_edit() ) : ?>
 
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
-			<p><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'wporg-forums' ), bbp_get_forum_title( bbp_get_topic_forum_id() ) ); ?></p>
+			<p><?php /* translators: %s: Forum title. */ ?>
+			<?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'wporg-forums' ), esc_html( bbp_get_forum_title( bbp_get_topic_forum_id() ) ) ); ?></p>
 		</div>
 	</div>
 
@@ -237,7 +252,7 @@ if ( bbp_is_reply_edit() ) : ?>
 						/* translators: %s: Email address. */
 						wp_kses_post( __( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ) ),
 						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
-						WordPressdotorg\Forums\MODERATION_EMAIL
+						esc_html( WordPressdotorg\Forums\MODERATION_EMAIL )
 					);
 				?></p>
 			<?php endif; ?>
