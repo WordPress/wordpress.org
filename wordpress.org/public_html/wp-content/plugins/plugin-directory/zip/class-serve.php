@@ -1,7 +1,18 @@
 <?php
+/**
+ * Serves a Zip file.
+ *
+ * This class runs outside WordPress, so its sanitizers are unavailable.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput
+ *
+ * @package WordPressdotorg\Plugin_Directory\Zip
+ */
+
 namespace WordPressdotorg\Plugin_Directory\Zip;
 
 use Exception;
+
 
 /**
  * Serves a Zip file.
@@ -36,7 +47,6 @@ class Serve {
 	 * @return array An array containing the vital details for the ZIP request.
 	 */
 	protected function determine_request() {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
 		$path = parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH );
 		$zip  = basename( $path );
 
@@ -102,7 +112,6 @@ class Serve {
 		$redirect = 'https://downloads.wordpress.org/plugin/' . basename( $file );
 
 		if ( ! empty( $_SERVER['QUERY_STRING'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
 			$redirect .= '?' . ( $_SERVER['QUERY_STRING'] ?? '' );
 		}
 
@@ -256,9 +265,7 @@ class Serve {
 				stamp BETWEEN %s AND %s
 			LIMIT 1",
 			$request['slug'],
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
 			$_SERVER['REMOTE_ADDR'] ?? '',
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
 			$_SERVER['HTTP_USER_AGENT'] ?? '',
 			gmdate( 'Y-m-d 00:00:00' ),
 			gmdate( 'Y-m-d 23:59:59' )
@@ -281,10 +288,8 @@ class Serve {
 
 		$wpdb->insert( $stats_dedup_log_table, array(
 			'plugin_slug' => $request['slug'],
-			// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
 			'client_ip'   => $_SERVER['REMOTE_ADDR'] ?? '',
 			'user_agent'  => $_SERVER['HTTP_USER_AGENT'] ?? '',
-			// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 			'stamp'       => gmdate( 'Y-m-d H:i:s' ),
 		) );
 	}
@@ -293,7 +298,6 @@ class Serve {
 	 * Bail with a 404.
 	 */
 	protected function error() {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- This class runs outside WordPress, so its sanitizers are unavailable.
 		$protocol  = $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1';
 		$protocol .= ' ';
 

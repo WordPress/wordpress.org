@@ -1,4 +1,14 @@
 <?php
+/**
+ * Serves the translations API: the available language packs for WordPress core.
+ *
+ * Standalone endpoint; WordPress is not loaded here, so its sanitizers
+ * are unavailable.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput
+ *
+ * @package WordPressdotorg\API\Translations
+ */
 
 $base_dir = dirname( dirname( dirname( __DIR__ ) ) );
 require( $base_dir . '/translations/lib.php' );
@@ -7,12 +17,11 @@ require( $base_dir . '/includes/hyperdb/bb-10-hyper-db.php' );
 require( $base_dir . '/includes/object-cache.php' );
 wp_cache_init();
 
+
 $version = WP_CORE_LATEST_RELEASE;
 if ( isset( $_REQUEST['version'] ) ) {
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded here, so its sanitizers are unavailable.
 	$version = $_REQUEST['version'] ?? '';
 	if ( empty( $version ) || ! is_string( $version ) || ! is_numeric( $version[0] ) ) {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded here, so its sanitizers are unavailable.
 		header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' 400 Bad Request' );
 		die( '?version= must be a valid WordPress version' );
 	}
@@ -25,7 +34,6 @@ $translations = find_all_translations_for_core( $version );
 header( 'Access-Control-Allow-Origin: *' );
 header( 'Access-Control-Expose-Headers: X-Translations-Count' );
 header( 'X-Translations-Count:' . count( $translations ) );
-// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded here, so its sanitizers are unavailable.
 if ( 'HEAD' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
 	exit;
 }

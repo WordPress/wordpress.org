@@ -1,4 +1,18 @@
 <?php
+/**
+ * Slack app backing the /subgroup slash command and its modal, which lists
+ * and edits subgroup channel membership.
+ *
+ * Standalone endpoint; WordPress is not loaded here, so its sanitizers
+ * are unavailable.
+ *
+ * Every request is authenticated by verify_slack_signature() against the
+ * raw body, not by a nonce.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Slack
+ */
 
 namespace Dotorg\Slack\Subgroup;
 
@@ -83,10 +97,9 @@ function ack_and_finish() {
 }
 
 function verify_slack_signature( $body ) {
-	// phpcs:disable WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded here, so its sanitizers are unavailable. Both are compared against a signature computed from the raw body.
+	// Both are compared against a signature computed from the raw body.
 	$timestamp = $_SERVER['HTTP_X_SLACK_REQUEST_TIMESTAMP'] ?? '';
 	$signature = $_SERVER['HTTP_X_SLACK_SIGNATURE'] ?? '';
-	// phpcs:enable WordPress.Security.ValidatedSanitizedInput
 	if ( ! $timestamp || ! $signature ) {
 		return false;
 	}
@@ -106,12 +119,7 @@ if ( ! verify_slack_signature( $raw_body ) ) {
 
 // Dispatch: slash command vs. interactivity callback.
 if ( isset( $_POST['payload'] ) ) {
-	/*
-	 * Webhook endpoint; the request is authenticated by its signature, which is
-	 * verified above, not a nonce. The JSON body has to reach json_decode() as
-	 * Slack sent it, so it is neither unslashed nor sanitized.
-	 */
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing
+	// The JSON body has to reach json_decode() as Slack sent it.
 	$payload = json_decode( $_POST['payload'] ?? '', true );
 	handle_interaction( $payload );
 	exit;
@@ -119,15 +127,9 @@ if ( isset( $_POST['payload'] ) ) {
 handle_slash_command();
 
 function handle_slash_command() {
-	/*
-	 * Webhook endpoint; the request is authenticated by its signature, not a nonce.
-	 * Standalone endpoint; WordPress is not loaded here, so its sanitizers are unavailable.
-	 */
-	// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
 	$channel_id = $_POST['channel_id'] ?? '';
 	$user_id    = $_POST['user_id'] ?? '';
 	$trigger_id = $_POST['trigger_id'] ?? '';
-	// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
 
 	// trigger_id is only valid for 3s, and listing every subgroup's membership will take
 	// longer than that. Open a loading view now, then views.update after we have the data.
