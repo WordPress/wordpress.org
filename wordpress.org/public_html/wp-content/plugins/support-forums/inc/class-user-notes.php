@@ -74,7 +74,8 @@ class User_Notes {
 			return;
 		}
 
-		$this->add_user_note( $user_id, $note_text, $post_id, $note_id );
+		// add_user_note() passes the text to the metadata API, which expects slashed data.
+		$this->add_user_note( $user_id, wp_slash( $note_text ), $post_id, $note_id );
 
 		if ( $should_redirect ) {
 			$redirect_url = set_url_scheme( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );

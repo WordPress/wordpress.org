@@ -138,8 +138,9 @@ function parse_request() {
 
 	// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
 	if ( isset( $_GET['latitude'], $_GET['longitude'] ) ) {
-		$location_args['latitude']  = floatval( $_GET['latitude'] ?? 0 );
-		$location_args['longitude'] = floatval( $_GET['longitude'] ?? 0 );
+		// get_location() validates these values; casting here would turn invalid input into zero.
+		$location_args['latitude']  = $_GET['latitude'];
+		$location_args['longitude'] = $_GET['longitude'];
 	}
 
 	if ( isset( $_GET['country'] ) ) {
@@ -277,7 +278,7 @@ function build_response( $location, $location_args ) {
 			$event_args['number'] = abs( (int) $_REQUEST['number'] );
 		}
 
-		if ( ! empty( $location['latitude'] ) ) {
+		if ( isset( $location['latitude'], $location['longitude'] ) && is_numeric( $location['latitude'] ) && is_numeric( $location['longitude'] ) ) {
 			$event_args['nearby'] = array(
 				'latitude'  => $location['latitude'],
 				'longitude' => $location['longitude'],
@@ -616,8 +617,8 @@ function get_location( $args = array() ) {
 	// Coordinates provided
 	if (
 		! $location && (
-			! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
-			! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
+			isset( $args['latitude'], $args['longitude'] ) &&
+			is_numeric( $args['latitude'] ) && is_numeric( $args['longitude'] )
 		)
 	) {
 		$location = array(

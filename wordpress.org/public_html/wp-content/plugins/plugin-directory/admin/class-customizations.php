@@ -337,6 +337,11 @@ class Customizations {
 
 		check_admin_referer( 'bulk-posts' );
 
+		$post_ids = array_filter( array_map( 'absint', (array) ( $_REQUEST['post'] ?? array() ) ) );
+		if ( ! $post_ids ) {
+			return;
+		}
+
 		$new_status = false;
 		$from_state = false;
 		$meta_data  = false;
@@ -386,8 +391,8 @@ class Customizations {
 		$closed = 0;
 		$args = array(
 			'post_type'      => 'plugin',
-			'post__in'       => array_map( 'absint', (array) ( $_REQUEST['post'] ?? array() ) ),
-			'posts_per_page' => count( (array) ( $_REQUEST['post'] ?? array() ) ),
+			'post__in'       => $post_ids,
+			'posts_per_page' => count( $post_ids ),
 		);
 		if ( $from_state ) {
 			$args['post_status'] = $from_state;

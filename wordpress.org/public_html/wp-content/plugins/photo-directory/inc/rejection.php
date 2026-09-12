@@ -1119,11 +1119,11 @@ JS;
 				continue;
 			}
 
-			// sanitize_textarea_field() strips the tags wp_strip_all_tags() used to take off here.
-			$value = sanitize_textarea_field( wp_unslash( $_POST[ $meta_key ] ?? '' ) );
+			// Strip markup without removing percent-encoded URLs from the note.
+			$value = wp_strip_all_tags( wp_unslash( $_POST[ $meta_key ] ?? '' ) );
 
 			if ( $value ) {
-				update_post_meta( $post_id, $meta_key, $value );
+				update_post_meta( $post_id, $meta_key, wp_slash( $value ) );
 			} else {
 				delete_post_meta( $post_id, $meta_key );
 			}
