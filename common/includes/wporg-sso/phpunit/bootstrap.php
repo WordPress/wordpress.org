@@ -60,6 +60,19 @@ function wporg_sso_manually_load_plugin(): void {
 	require_once dirname( __DIR__ ) . '/wp-plugin.php';
 	require_once dirname( __DIR__ ) . '/bb-plugin.php';
 
+	/*
+	 * Hash passwords at bcrypt's cheapest cost. Every fixture user costs a hash,
+	 * and at the default cost that is most of the suite's runtime. The tests here
+	 * are about the SSO's own checks, not about how strongly WordPress stores a
+	 * password, and hashing and checking still agree with each other.
+	 */
+	add_filter(
+		'wp_hash_password_options',
+		function ( $options ) {
+			return array_merge( $options, array( 'cost' => 4 ) );
+		}
+	);
+
 	// Registered by the constructor on production; the redemption records are keyless without it.
 	wp_cache_add_global_groups( WPOrg_SSO::REMOTE_TOKEN_CACHE_GROUP );
 }
