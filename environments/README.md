@@ -168,6 +168,18 @@ npm run translate:test
 
 **Translation Events 2024 design:** the events routes render the legacy templates unless the new block theme is enabled. To preview it, add `"config": { "TRANSLATION_EVENTS_NEW_DESIGN": true }` to `translate/.wp-env.override.json` and restart.
 
+### WordPress.org SSO
+
+A test-only environment for the shared single sign-on code in `common/includes/wporg-sso/`. The SSO is a library rather than a plugin, so it is mounted at `wp-content/wporg-sso` instead of being activated, and its PHPUnit suite runs from there.
+
+`WP_ENVIRONMENT_TYPE` is set to `production` so the SSO uses the hosts it uses in production (`login.wordpress.org` and friends) rather than the shortcuts it takes on local installs.
+
+**Run tests:**
+
+```bash
+npm run sso:test
+```
+
 ### Handbook (in-plugin)
 
 The Handbook plugin has its own `.wp-env.json` in `wordpress.org/public_html/wp-content/plugins/handbook/`.

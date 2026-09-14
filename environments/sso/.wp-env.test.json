@@ -1,0 +1,15 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [],
+	"mappings": {
+		"wp-content/wporg-sso": "../common/includes/wporg-sso"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash sso/bin/after-start-test.sh"
+	},
+	"config": {
+		"WP_ENVIRONMENT_TYPE": "production"
+	}
+}

@@ -123,3 +123,12 @@ suites:
     script: translate:test
     paths:
       - 'environments/translate/**'
+
+  sso:
+    type: wordpress
+    name: WordPress.org SSO
+    script: sso:test
+    paths:
+      - 'environments/sso/**'
+      # Mounted for its suite but not activated, so not read from the environment's plugin list.
+      - 'common/includes/wporg-sso/**'
