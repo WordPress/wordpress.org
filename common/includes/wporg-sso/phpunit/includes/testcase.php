@@ -141,6 +141,14 @@ abstract class WPOrg_SSO_TestCase extends TestCase {
 
 		wp_set_current_user( 0 );
 
+		/*
+		 * Again, because the reset above fires `set_current_user` and so bumps
+		 * the action counters past the snapshot the line above restored. Done in
+		 * this order so the reset itself runs against baseline hooks rather than
+		 * whatever the test registered.
+		 */
+		$this->restore_hooks();
+
 		parent::tearDown();
 	}
 
