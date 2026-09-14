@@ -45,8 +45,10 @@ class Committers extends \WP_Widget {
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Committers', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['before_widget'];
-		echo $args['before_title'] . $title . $args['after_title'];
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 		?>
 
 		<ul id="committer-list" class="committer-list">
@@ -55,13 +57,13 @@ class Committers extends \WP_Widget {
 				<li data-user="<?php echo esc_attr( $committer->user_nicename ); ?>">
 					<?php echo get_avatar( $committer->ID, 32 ); ?>
 					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$committer->user_nicename}/" ); ?>">
-						<?php echo $committer->display_name ?: $committer->user_nicename; ?>
+						<?php echo esc_html( $committer->display_name ?: $committer->user_nicename ); ?>
 					</a><br>
 
 					<?php if ( current_user_can( 'plugin_remove_committer', $post ) ) : ?>
 					<small>
 						<?php echo current_user_can( 'plugin_review' ) ? esc_html( $committer->user_email ) . ' ' : ''; ?>
-						<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
+						<button class="button-link remove"><?php esc_html_e( 'Remove', 'wporg-plugins' ); ?></button>
 					</small>
 					<?php endif; ?>
 				</li>
@@ -84,7 +86,7 @@ class Committers extends \WP_Widget {
 							<# if ( data.email ) { #>
 								<span class="email">{{ data.email }}</span>
 							<# } #>
-							<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
+							<button class="button-link remove"><?php esc_html_e( 'Remove', 'wporg-plugins' ); ?></button>
 						</small>
 					</li>
 				</script>
@@ -93,6 +95,7 @@ class Committers extends \WP_Widget {
 		</ul>
 
 		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['after_widget'];
 	}
 }

@@ -787,4 +787,642 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 		$this->assertSame( 'Post', $this->plugin->replace_post_button_label( 'Post', 'Post', 'Noun, a post', 'o2' ) );
 		$this->assertSame( 'Post', $this->plugin->replace_post_button_label( 'Post', 'Post', 'Verb, to post', 'default' ) );
 	}
+
+	/*
+	 * Writes: the granted capabilities are primitive, so every write path that
+	 * takes a post ID has to be held to 'edit_post' on that specific ID.
+	 */
+
+	/**
+	 * Seeds a post belonging to somebody else, plus a revision of it.
+	 *
+	 * Seeded with no current user so the pending downgrade does not apply and
+	 * the fixture really is another author's private, published content.
+	 *
+	 * @param string $status Optional. Status for the seeded post.
+	 * @return array{0:int,1:WP_Post} The post ID and its latest revision.
+	 */
+	protected function seed_others_post_with_revision( $status = 'private' ) {
+		$current = get_current_user_id();
+		wp_set_current_user( 0 );
+
+		$author  = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_author'  => $author,
+				'post_status'  => $status,
+				'post_title'   => 'Embargoed plan',
+				'post_content' => 'First draft, with the part that was later removed.',
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Second draft.',
+			)
+		);
+
+		$revisions = wp_get_post_revisions( $post_id );
+		$revision  = array_shift( $revisions );
+
+		wp_set_current_user( $current );
+
+		$this->assertInstanceOf( WP_Post::class, $revision, 'The fixture needs a revision to be meaningful.' );
+
+		return array( $post_id, $revision );
+	}
+
+	/**
+	 * Creates a post owned by the non-member to hang foreign objects off.
+	 *
+	 * @return int The new post's ID.
+	 */
+	protected function create_own_post() {
+		return wp_insert_post(
+			array(
+				'post_title'   => 'Carrier',
+				'post_content' => 'Body.',
+				'post_status'  => 'publish',
+				'post_author'  => $this->non_member,
+			)
+		);
+	}
+
+	/**
+	 * The reparent itself: a non-member must not be able to take ownership of
+	 * another author's revision by pointing it at a post of their own.
+	 */
+	public function test_non_member_cannot_reparent_another_authors_revision() {
+		list( $post_id, $revision ) = $this->seed_others_post_with_revision();
+		$carrier                    = $this->create_own_post();
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $revision->ID,
+				'post_parent' => $carrier,
+			)
+		);
+
+		$this->assertSame( 0, $result );
+		$this->assertSame( $post_id, (int) get_post( $revision->ID )->post_parent );
+	}
+
+	/**
+	 * What the reparent would buy: core authorizes a revision read against its
+	 * parent, so a revision that still names its real parent stays unreadable.
+	 */
+	public function test_non_member_cannot_read_another_authors_revision() {
+		list( $post_id, $revision ) = $this->seed_others_post_with_revision();
+		$carrier                    = $this->create_own_post();
+
+		wp_update_post(
+			array(
+				'ID'          => $revision->ID,
+				'post_parent' => $carrier,
+			)
+		);
+
+		foreach ( array( $post_id, $carrier ) as $parent ) {
+			$request = new WP_REST_Request( 'GET', "/wp/v2/posts/{$parent}/revisions/{$revision->ID}" );
+			$request->set_param( 'context', 'edit' );
+
+			$response = rest_do_request( $request );
+
+			$this->assertGreaterThanOrEqual( 400, $response->get_status(), "Revision was readable under parent {$parent}." );
+			$this->assertStringNotContainsString( 'later removed', wp_json_encode( $response->get_data() ) );
+		}
+	}
+
+	/**
+	 * Hierarchical content: reparenting somebody else's page also rewrites its
+	 * permalink, so the same check has to cover pages.
+	 */
+	public function test_non_member_cannot_reparent_another_authors_page() {
+		wp_set_current_user( 0 );
+		$author  = $this->factory()->user->create( array( 'role' => 'editor' ) );
+		$section = $this->factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_author' => $author,
+			)
+		);
+		$page_id = $this->factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_author' => $author,
+				'post_parent' => $section,
+			)
+		);
+		wp_set_current_user( $this->non_member );
+
+		$carrier = $this->create_own_post();
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $page_id,
+				'post_parent' => $carrier,
+			)
+		);
+
+		$this->assertSame( 0, $result );
+		$this->assertSame( $section, (int) get_post( $page_id )->post_parent );
+	}
+
+	/**
+	 * The check is on the object rather than on one field, so a caller supplying
+	 * content for somebody else's post is refused the same way a caller supplying
+	 * a parent is.
+	 */
+	public function test_non_member_cannot_overwrite_another_authors_post() {
+		list( $post_id ) = $this->seed_others_post_with_revision( 'publish' );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Overwritten.',
+				'post_title'   => 'Overwritten.',
+			)
+		);
+
+		$this->assertSame( 0, $result );
+		$this->assertSame( 'Second draft.', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * Attachments are routed through wp_insert_attachment(), a separate entry
+	 * point into the same insert, so they are pinned too.
+	 */
+	public function test_non_member_cannot_reparent_another_authors_attachment() {
+		wp_set_current_user( 0 );
+		$author        = $this->factory()->user->create( array( 'role' => 'editor' ) );
+		$attachment_id = $this->factory()->attachment->create( array( 'post_author' => $author ) );
+		wp_set_current_user( $this->non_member );
+
+		$carrier = $this->create_own_post();
+
+		wp_update_post(
+			array(
+				'ID'          => $attachment_id,
+				'post_parent' => $carrier,
+			)
+		);
+
+		$this->assertNotSame( $carrier, (int) get_post( $attachment_id )->post_parent );
+	}
+
+	/**
+	 * The legitimate case the caller exists for: attaching an upload of your own
+	 * to a post of your own has to keep working.
+	 */
+	public function test_non_member_can_attach_their_own_attachment_to_their_own_post() {
+		$carrier       = $this->create_own_post();
+		$attachment_id = $this->factory()->attachment->create( array( 'post_author' => $this->non_member ) );
+
+		wp_update_post(
+			array(
+				'ID'          => $attachment_id,
+				'post_parent' => $carrier,
+			)
+		);
+
+		$this->assertSame( $carrier, (int) get_post( $attachment_id )->post_parent );
+	}
+
+	/**
+	 * Editing your own submission is the whole point of the grant.
+	 */
+	public function test_non_member_can_still_update_their_own_post() {
+		$post_id = $this->create_own_post();
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Edited by the author.',
+			)
+		);
+
+		$this->assertSame( $post_id, $result );
+		$this->assertSame( 'Edited by the author.', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * Membership is not the boundary: a role that carries no claim over other
+	 * people's posts gets the same treatment as a non-member. o2's update path
+	 * runs the same attachment cleanup as its create path, so an author editing
+	 * a post of their own reaches it too.
+	 */
+	public function test_author_member_cannot_reparent_another_authors_revision() {
+		list( $post_id, $revision ) = $this->seed_others_post_with_revision();
+
+		$member = $this->factory()->user->create( array( 'role' => 'author' ) );
+		wp_set_current_user( $member );
+
+		$carrier = wp_insert_post(
+			array(
+				'post_title'   => 'Member carrier',
+				'post_content' => 'Body.',
+				'post_status'  => 'publish',
+				'post_author'  => $member,
+			)
+		);
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $revision->ID,
+				'post_parent' => $carrier,
+			)
+		);
+
+		$this->assertSame( 0, $result );
+		$this->assertSame( $post_id, (int) get_post( $revision->ID )->post_parent );
+	}
+
+	/**
+	 * Members are unaffected: an editor edits other people's posts by design.
+	 */
+	public function test_member_can_still_update_another_authors_post() {
+		list( $post_id ) = $this->seed_others_post_with_revision( 'publish' );
+
+		$editor = $this->factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Edited by an editor.',
+			)
+		);
+
+		$this->assertSame( $post_id, $result );
+		$this->assertSame( 'Edited by an editor.', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * 'edit_others_posts' is only the generic name for the capability, and a post
+	 * type can name its own. Somebody who may edit other people's posts is still
+	 * refused on a type whose capability they were never given, because the check
+	 * asks about the object rather than about a capability name.
+	 */
+	public function test_generic_others_capability_does_not_exempt_a_custom_post_type() {
+		register_post_type(
+			'wporg_capped_cpt',
+			array(
+				'public'          => true,
+				'map_meta_cap'    => true,
+				'capability_type' => array( 'wporg_test_capped', 'wporg_test_cappeds' ),
+			)
+		);
+
+		wp_set_current_user( 0 );
+		$author  = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_type'    => 'wporg_capped_cpt',
+				'post_author'  => $author,
+				'post_content' => 'Original.',
+			)
+		);
+
+		$editor = $this->factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor );
+
+		$has_generic_cap = current_user_can( 'edit_others_posts' );
+		$can_edit_object = current_user_can( 'edit_post', $post_id );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Overwritten.',
+			)
+		);
+
+		unregister_post_type( 'wporg_capped_cpt' );
+
+		$this->assertTrue( $has_generic_cap, 'The fixture needs the generic capability for this test to mean anything.' );
+		$this->assertFalse( $can_edit_object, 'The fixture needs the object check to fail for this test to mean anything.' );
+		$this->assertSame( 0, $result );
+		$this->assertSame( 'Original.', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * The other half of that: holding the post type's own capabilities satisfies
+	 * the object check, so a handbook editor keeps working on handbook pages.
+	 */
+	public function test_post_type_capability_permits_the_update() {
+		register_post_type(
+			'wporg_capped_cpt',
+			array(
+				'public'          => true,
+				'map_meta_cap'    => true,
+				'capability_type' => array( 'wporg_test_capped', 'wporg_test_cappeds' ),
+			)
+		);
+
+		wp_set_current_user( 0 );
+		$author  = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_type'    => 'wporg_capped_cpt',
+				'post_author'  => $author,
+				'post_content' => 'Original.',
+			)
+		);
+
+		$editor = $this->factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor );
+
+		$grant = function ( $caps ) {
+			$caps['edit_others_wporg_test_cappeds']    = true;
+			$caps['edit_published_wporg_test_cappeds'] = true;
+
+			return $caps;
+		};
+		add_filter( 'user_has_cap', $grant );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Edited by a handbook editor.',
+			)
+		);
+
+		remove_filter( 'user_has_cap', $grant );
+		unregister_post_type( 'wporg_capped_cpt' );
+
+		$this->assertSame( $post_id, $result );
+		$this->assertSame( 'Edited by a handbook editor.', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * The status half of the same point: another author's private post needs
+	 * 'edit_private_posts' on top of 'edit_others_posts', and the object check
+	 * asks for both because map_meta_cap() does.
+	 */
+	public function test_others_capability_alone_does_not_reach_a_private_post() {
+		wp_set_current_user( 0 );
+		$author  = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_author'  => $author,
+				'post_status'  => 'private',
+				'post_content' => 'Original.',
+			)
+		);
+
+		$user = $this->factory()->user->create( array( 'role' => 'author' ) );
+		wp_set_current_user( $user );
+
+		// A role holding 'edit_others_posts' without 'edit_private_posts'.
+		$grant = function ( $caps ) {
+			$caps['edit_others_posts']    = true;
+			$caps['edit_published_posts'] = true;
+
+			return $caps;
+		};
+		add_filter( 'user_has_cap', $grant );
+
+		$has_others_cap  = current_user_can( 'edit_others_posts' );
+		$can_edit_object = current_user_can( 'edit_post', $post_id );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Overwritten.',
+			)
+		);
+
+		remove_filter( 'user_has_cap', $grant );
+
+		$this->assertTrue( $has_others_cap, 'The fixture needs the others capability for this test to mean anything.' );
+		$this->assertFalse( $can_edit_object, 'The fixture needs the object check to fail for this test to mean anything.' );
+		$this->assertSame( 0, $result );
+		$this->assertSame( 'Original.', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * Core registers custom_css without map_meta_cap, which makes 'edit_post'
+	 * resolve to the type's own 'edit_css' without recursing, and that is not a
+	 * capability any role is granted. Ownership has nothing to do with it: the
+	 * check fails for the administrator who saved the CSS in the first place just
+	 * as readily. The Customizer writes Additional CSS through wp_update_post(),
+	 * so a type answering that way has to be left to its own authorization.
+	 */
+	public function test_post_type_without_meta_capability_mapping_is_untouched() {
+		wp_set_current_user( 0 );
+		$first_admin = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		$css_id      = $this->factory()->post->create(
+			array(
+				'post_type'    => 'custom_css',
+				'post_status'  => 'publish',
+				'post_title'   => 'wporg-test-theme',
+				'post_author'  => $first_admin,
+				'post_content' => 'body { color: #000; }',
+			)
+		);
+
+		$admin = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$can_edit_object = current_user_can( 'edit_post', $css_id );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $css_id,
+				'post_content' => 'body { color: #fff; }',
+			)
+		);
+
+		$this->assertFalse( $can_edit_object, 'This test is about a type whose edit_post check denies even an administrator.' );
+		$this->assertSame( $css_id, $result );
+		$this->assertSame( 'body { color: #fff; }', get_post( $css_id )->post_content );
+	}
+
+	/**
+	 * A revision whose parent row is gone resolves to no post type at all. Core
+	 * denies 'edit_post' in that case, so the guard has to ask rather than treat
+	 * an unresolved type as permission.
+	 */
+	public function test_orphaned_revision_is_still_refused() {
+		global $wpdb;
+
+		list( $post_id, $revision ) = $this->seed_others_post_with_revision();
+		$carrier                    = $this->create_own_post();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Orphaning a revision has no API equivalent.
+		$wpdb->delete( $wpdb->posts, array( 'ID' => $post_id ) );
+		clean_post_cache( $post_id );
+		clean_post_cache( $revision->ID );
+
+		$can_edit_object = current_user_can( 'edit_post', $revision->ID );
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $revision->ID,
+				'post_parent' => $carrier,
+			)
+		);
+
+		$this->assertFalse( $can_edit_object, 'Core denies the orphan, so the guard has something to agree with.' );
+		$this->assertSame( 0, $result );
+		$this->assertNotSame( $carrier, (int) get_post( $revision->ID )->post_parent );
+	}
+
+	/**
+	 * Resolving a revision with no parent must not fall through to the global
+	 * $post: get_post( 0 ) returns it, so the capability model would be read off
+	 * whatever the request happens to be rendering.
+	 */
+	public function test_revision_with_no_parent_does_not_consult_the_global_post() {
+		global $wpdb, $post;
+
+		list( , $revision ) = $this->seed_others_post_with_revision();
+		$carrier            = $this->create_own_post();
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Detaching a revision has no API equivalent.
+		$wpdb->update( $wpdb->posts, array( 'post_parent' => 0 ), array( 'ID' => $revision->ID ) );
+		clean_post_cache( $revision->ID );
+
+		$previous_global = $post;
+
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- Standing in for a request that is rendering a post.
+		$post = get_post(
+			$this->factory()->post->create(
+				array(
+					'post_type'   => 'custom_css',
+					'post_status' => 'publish',
+					'post_title'  => 'wporg-test-theme',
+				)
+			)
+		);
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $revision->ID,
+				'post_parent' => $carrier,
+			)
+		);
+
+		$post = $previous_global;
+		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertSame( 0, $result );
+		$this->assertNotSame( $carrier, (int) get_post( $revision->ID )->post_parent );
+	}
+
+	/**
+	 * A refused update reports itself as empty content, which says nothing about
+	 * why, so the action is the only thing an operator has to go on.
+	 */
+	public function test_refusal_fires_an_action() {
+		list( $post_id ) = $this->seed_others_post_with_revision( 'publish' );
+
+		$refused = array();
+		$spy     = function ( $refused_post_id, $user_id ) use ( &$refused ) {
+			$refused[] = array( $refused_post_id, $user_id );
+		};
+		add_action( 'wporg_o2_posting_access_update_refused', $spy, 10, 2 );
+
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Overwritten.',
+			)
+		);
+
+		remove_action( 'wporg_o2_posting_access_update_refused', $spy, 10 );
+
+		$this->assertSame( array( array( $post_id, $this->non_member ) ), $refused );
+	}
+
+	/**
+	 * Changing one field re-saves the whole row, and the row goes through the
+	 * current user's content filters on the way. A caller without 'unfiltered_html'
+	 * therefore rewrites the stored content of a post written by somebody who had
+	 * it, quite apart from whatever the caller was trying to change. The refusal
+	 * has to land before any of that: no rewritten content, no revision on the
+	 * victim's post, no save_post.
+	 */
+	public function test_refused_update_leaves_the_stored_row_alone() {
+		wp_set_current_user( 0 );
+		$author = $this->factory()->user->create( array( 'role' => 'editor' ) );
+		grant_super_admin( $author );
+		wp_set_current_user( $author );
+
+		$raw     = '<p>Keep</p><script>alert(1)</script><div onclick="x()">Hi</div>';
+		$post_id = wp_insert_post(
+			array(
+				'post_author'  => $author,
+				'post_status'  => 'publish',
+				'post_title'   => 'Written with unfiltered_html',
+				'post_content' => $raw,
+			)
+		);
+
+		$this->assertSame( $raw, get_post( $post_id )->post_content, 'The fixture needs markup the attacker could not have written.' );
+
+		wp_set_current_user( $this->non_member );
+		$carrier = $this->create_own_post();
+
+		$saved = 0;
+		$spy   = function ( $saved_post_id ) use ( &$saved, $post_id ) {
+			if ( $saved_post_id === $post_id ) {
+				++$saved;
+			}
+		};
+		add_action( 'save_post', $spy );
+
+		$result = wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_parent' => $carrier,
+			)
+		);
+
+		remove_action( 'save_post', $spy );
+		clean_post_cache( $post_id );
+
+		$this->assertSame( 0, $result );
+		$this->assertSame( $raw, get_post( $post_id )->post_content );
+		$this->assertSame( 0, (int) get_post( $post_id )->post_parent );
+		$this->assertCount( 0, wp_get_post_revisions( $post_id ) );
+		$this->assertSame( 0, $saved );
+	}
+
+	/**
+	 * Cron, WP-CLI and importers run with no current user and must not be caught.
+	 */
+	public function test_update_with_no_current_user_is_untouched() {
+		list( $post_id ) = $this->seed_others_post_with_revision( 'publish' );
+
+		wp_set_current_user( 0 );
+
+		$result = wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => 'Edited by a script.',
+			)
+		);
+
+		$this->assertSame( $post_id, $result );
+	}
+
+	/**
+	 * A genuinely empty post still reports itself as empty, so the filter's
+	 * original meaning is preserved for everyone else.
+	 */
+	public function test_empty_content_is_still_reported_empty() {
+		$post_id = $this->create_own_post();
+
+		$this->assertTrue( $this->plugin->restrict_updates_to_editable_posts( true, array( 'ID' => $post_id ) ) );
+		$this->assertTrue( $this->plugin->restrict_updates_to_editable_posts( true, array() ) );
+	}
+
+	/**
+	 * Creating a post supplies no ID, so nothing about creation changes.
+	 */
+	public function test_insert_without_an_id_is_untouched() {
+		$this->assertFalse( $this->plugin->restrict_updates_to_editable_posts( false, array() ) );
+		$this->assertFalse( $this->plugin->restrict_updates_to_editable_posts( false, array( 'ID' => 0 ) ) );
+	}
 }

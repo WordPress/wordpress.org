@@ -330,7 +330,7 @@ function wporg_login_language_switcher( $display = true ) {
 			<?php endif; ?>
 			<label for="language-switcher-locales">
 				<span aria-hidden="true" class="dashicons dashicons-translation"></span>
-				<span class="screen-reader-text"><?php _e( 'Select the language:', 'wporg' ); ?></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Select the language:', 'wporg' ); ?></span>
 			</label>
 			<select id="language-switcher-locales" name="locale">
 				<?php

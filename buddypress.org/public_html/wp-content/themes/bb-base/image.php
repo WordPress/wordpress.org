@@ -5,8 +5,8 @@ if ( have_posts() ) :
 	while ( have_posts() ) :
 		the_post();
 		?>
-		<h2 id="post-<?php the_ID(); ?>"><a href="<?php echo get_permalink($post->post_parent); ?>" rev="attachment"><?php echo get_the_title($post->post_parent); ?></a> &raquo; <?php the_title(); ?></h2>
-		<p class="attachment"><a href="<?php echo wp_get_attachment_url($post->ID); ?>"><?php echo wp_get_attachment_image( $post->ID, 'medium' ); ?></a></p>
+		<h2 id="post-<?php the_ID(); ?>"><a href="<?php echo esc_url( get_permalink( $post->post_parent ) ); ?>" rev="attachment"><?php echo esc_html( get_the_title( $post->post_parent ) ); ?></a> &raquo; <?php the_title(); ?></h2>
+		<p class="attachment"><a href="<?php echo esc_url( wp_get_attachment_url( $post->ID ) ); ?>"><?php echo wp_get_attachment_image( $post->ID, 'medium' ); ?></a></p>
 		<p class="wp-caption"><?php if ( !empty($post->post_excerpt) ) the_excerpt(); // this is the "caption" ?></p>
 		<?php the_content( esc_html__( 'Read more &laquo;', 'bborg' ) ); ?>
 		<dl id="meta">
@@ -14,13 +14,13 @@ if ( have_posts() ) :
 			<dd>
 				<?php
 				/* translators: 1: Date; 2: time. */
-				printf( __( '%1$s at %2$s' ), get_the_time( 'l, F jS, Y' ), get_the_time() );
+				printf( esc_html__( '%1$s at %2$s' ), esc_html( get_the_time( 'l, F jS, Y' ) ), esc_html( get_the_time() ) );
 				?>
 			</dd>
 			<dd>
 				<?php
 				/* translators: author posts link */
-				printf( __( 'by <cite>%s</cite>', 'bborg' ), get_the_author_posts_link() );
+				printf( wp_kses_post( __( 'by <cite>%s</cite>', 'bborg' ) ), wp_kses_post( get_the_author_posts_link() ) );
 				?>
 			</dd>
 			<?php the_tags( "\t\t\t\t\t<dt>" . esc_html__( 'Tagged as', 'bborg' ) . "</dt>\n\t\t\t\t\t<dd>", "</dd>\t\t\t\t\t<dd>", "</dd>\n" ); ?>
@@ -34,7 +34,7 @@ if ( have_posts() ) :
 			<dd><a href="<?php trackback_url(); ?>" rel="trackback"><?php esc_html_e( 'your own site', 'bbporg' ); ?></a></dd>
 			<?php endif;
 				if ( 'open' == $post->comment_status ) :
-					_e( '<dt>Respond if</dt><dd><a href="#respond">you&#8217;d like to leave feedback</a></dd>', 'bbporg' );
+					echo wp_kses_post( __( '<dt>Respond if</dt><dd><a href="#respond">you&#8217;d like to leave feedback</a></dd>', 'bbporg' ) );
 				endif;
 				edit_post_link( esc_html__( 'Edit', 'bbporg' ), "\t\t\t\t\t<dt>" . esc_html__( 'You can', 'bborg' ) . "</dt>\n\t\t\t\t\t<dd>", "</dd>\n");
 			?>

@@ -58,6 +58,7 @@ class SVN_Import {
 		) );
 
 		if ( ! $last_revision ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 			trigger_error( "Theme Importing aborting, no starting revision known. Set 'svn_import_last_revision' option. Latest Revision: [{$latest_revision}]", E_USER_WARNING );
 			return;
 		}
@@ -144,6 +145,7 @@ class SVN_Import {
 					wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'theme_directory_svn_import', $args );
 					return;
 				} else {
+					// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Cron import task; the message is logged, not rendered.
 					throw new Exception( 'Theme Import Failure: ' . $return->get_error_code() . ' ' . $return->get_error_message() );
 				}
 			}

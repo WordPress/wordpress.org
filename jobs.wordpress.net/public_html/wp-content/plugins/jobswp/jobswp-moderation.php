@@ -103,7 +103,7 @@ echo '</td>';
 			echo '</tbody>';
 			echo '</table>';
 		} else {
-			echo __( 'No similar jobs found.', 'jobswp' );
+			echo esc_html__( 'No similar jobs found.', 'jobswp' );
 		}
 	}
 

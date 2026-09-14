@@ -20,8 +20,10 @@ $response = ob_get_clean();
 
 if ( $callback ) {
 	header( 'Content-Type: text/javascript; charset=UTF-8' );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body (JSONP or JSON); escaping would corrupt the format.
 	echo "$callback($response);";
 } else {
 	header( 'Content-Type: application/json; charset=UTF-8' );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body (JSONP or JSON); escaping would corrupt the format.
 	echo $response;
 }

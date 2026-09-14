@@ -59,7 +59,7 @@ class Committers extends \WP_List_Table {
 	 * @access public
 	 */
 	public function no_items() {
-		_e( 'No committers found.', 'wporg-plugins' );
+		esc_html_e( 'No committers found.', 'wporg-plugins' );
 	}
 
 	/**
@@ -95,7 +95,7 @@ class Committers extends \WP_List_Table {
 	 */
 	public function display() {
 		?>
-		<table class="<?php echo implode( ' ', $this->get_table_classes() ); ?>">
+		<table class="<?php echo esc_attr( implode( ' ', $this->get_table_classes() ) ); ?>">
 			<colgroup>
 				<col width="40px" />
 				<col />
@@ -115,7 +115,7 @@ class Committers extends \WP_List_Table {
 	 */
 	public function display_rows() {
 		foreach ( $this->items as $user_object ) {
-			echo "\n\t" . $this->single_row( $user_object );
+			echo "\n\t" . $this->single_row( $user_object ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Row values are escaped below; preserve core action buttons and registered columns.
 		}
 	}
 
@@ -126,15 +126,15 @@ class Committers extends \WP_List_Table {
 		?>
 		<tr id="add-committer" class="add-committer wp-hidden-children">
 			<td colspan="2">
-				<button type="button" id="add-committer-toggle" class="button-link"><?php _e( '+ Add New Committer', 'wporg-plugins' ); ?></button>
+				<button type="button" id="add-committer-toggle" class="button-link"><?php esc_html_e( '+ Add New Committer', 'wporg-plugins' ); ?></button>
 				<p class="wp-hidden-child">
 					<?php wp_nonce_field( 'add-committer', '_ajax_nonce', false ); ?>
 					<span id="committer-error" class="notice notice-alt notice-error" style="display:none;"></span>
 					<label>
 						<input type="text" name="add_committer" class="form-required" value="" aria-required="true" placeholder="<?php esc_attr_e( 'WordPress.org username', 'wporg-plugins' ); ?>">
-						<span class="screen-reader-text"><?php _e( 'Add a new committer', 'wporg-plugins' ); ?></span>
+						<span class="screen-reader-text"><?php esc_html_e( 'Add a new committer', 'wporg-plugins' ); ?></span>
 					</label>
-					<input type="button" id="add-committer-submit" class="button" data-wp-lists="add:the-committer-list:add-committer::post_id=<?php echo get_post()->ID; ?>" value="<?php _e( 'Add Committer', 'wporg-plugins' ); ?>">
+					<input type="button" id="add-committer-submit" class="button" data-wp-lists="add:the-committer-list:add-committer::post_id=<?php echo (int) get_post()->ID; ?>" value="<?php esc_attr_e( 'Add Committer', 'wporg-plugins' ); ?>">
 				</p>
 			</td>
 		</tr>
@@ -160,9 +160,9 @@ class Committers extends \WP_List_Table {
 		$actions = array();
 
 		// Check if the committer for this row is removable.
-		$post_id = get_post()->ID;
+		$post_id = (int) get_post()->ID;
 		if ( current_user_can( 'plugin_remove_committer', $post_id ) ) {
-			$actions['delete'] = "<a class='submitremove' data-wp-lists='delete:the-committer-list:committer-{$user_object->ID}:faafaa:post_id={$post_id}' href='" . wp_nonce_url( 'users.php?action=remove&amp;committer=' . $user_object->ID, "remove-committer-{$user_object->ID}" ) . "'>" . __( 'Remove', 'wporg-plugins' ) . '</a>';
+			$actions['delete'] = "<a class='submitremove' data-wp-lists='delete:the-committer-list:committer-{$user_object->ID}:faafaa:post_id={$post_id}' href='" . wp_nonce_url( 'users.php?action=remove&amp;committer=' . $user_object->ID, "remove-committer-{$user_object->ID}" ) . "'>" . esc_html__( 'Remove', 'wporg-plugins' ) . '</a>';
 		}
 
 		/**
@@ -176,7 +176,7 @@ class Committers extends \WP_List_Table {
 		$row = "<tr id='committer-$user_object->ID'>";
 
 		foreach ( $columns as $column_name => $column_display_name ) {
-			$data    = 'data-colname="' . wp_strip_all_tags( $column_display_name ) . '"';
+			$data    = 'data-colname="' . esc_attr( wp_strip_all_tags( $column_display_name ) ) . '"';
 			$classes = "$column_name column-$column_name";
 
 			if ( $primary === $column_name ) {
@@ -186,7 +186,7 @@ class Committers extends \WP_List_Table {
 				$classes .= ' hidden';
 			}
 
-			$row .= "<td class='$classes' $data>";
+			$row .= "<td class='" . esc_attr( $classes ) . "' $data>";
 			switch ( $column_name ) {
 				case 'avatar':
 					$row .= get_avatar( $user_object->ID, 32 );
@@ -196,8 +196,8 @@ class Committers extends \WP_List_Table {
 					$row .= sprintf(
 						'<strong><a href="%s">%s</a></strong><br />&lt;%s&gt;',
 						esc_url( '//profiles.wordpress.org/' . $user_object->user_nicename . '/' ),
-						$user_object->user_login,
-						$user_object->user_email
+						esc_html( $user_object->user_login ),
+						esc_html( $user_object->user_email )
 					);
 					break;
 

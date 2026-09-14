@@ -32,7 +32,7 @@ class Internal_Notes {
 		wp_nonce_field( 'get-comments', 'add_comment_nonce', false );
 		?>
 		<p class="hide-if-no-js" id="add-new-comment">
-			<a class="button" href="#commentstatusdiv"><?php _e( 'Add note', 'wporg-plugins' ); ?></a>
+			<a class="button" href="#commentstatusdiv"><?php esc_html_e( 'Add note', 'wporg-plugins' ); ?></a>
 		</p>
 		<?php
 		$wp_list_table->display( true );

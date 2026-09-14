@@ -175,6 +175,7 @@ class Template {
 			);
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Meta tags assembled above from esc_attr()-escaped values.
 		echo implode( "\n", $metas );
 	}
 

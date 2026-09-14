@@ -27,6 +27,7 @@ namespace WordPressdotorg\Openverse\Theme;
 $target_url = get_target_url();
 
 if ( is_redirect_enabled() && is_valid_target_url( $target_url ) ) {
+	// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Deliberate redirect to the external Openverse site; is_valid_target_url() checks the target above.
 	wp_redirect( $target_url, 301 );
 	exit;
 } else {

@@ -359,7 +359,7 @@ class Hooks {
 	 */
 	public function redirect_update_php_page() {
 		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
-			wp_redirect( home_url( '/update-php/' ), 301 );
+			wp_safe_redirect( home_url( '/update-php/' ), 301 );
 			exit;
 		}
 	}
@@ -757,13 +757,15 @@ class Hooks {
 
 					// Output create button alongside search form except for reviews, which already have the button in a section rendered above this one.
 					if( $is_reviews ) {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress renders and escapes the search form.
 						echo $searchform;
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress renders and escapes the search form.
 						echo $searchform;
-						echo $btn;
+						echo wp_kses_post( $btn );
 					}
 				} else {
-					echo $btn;
+					echo wp_kses_post( $btn );
 				}
 				echo "</div>\n";
 			}
@@ -1028,13 +1030,14 @@ class Hooks {
 				// Display site URL for logged-in users only.
 				if ( is_user_logged_in() ) {
 					printf( '<p class="wporg-bbp-topic-site-url">%1$s <a href="%2$s" rel="nofollow ugc">%2$s</a></p>',
-						__( 'The page I need help with:', 'wporg-forums' ),
+						esc_html__( 'The page I need help with:', 'wporg-forums' ),
 						esc_url( $site_url )
 					);
 				} else {
 					printf( '<p class="wporg-bbp-topic-site-url">%1$s <em>%2$s</em></p>',
-						__( 'The page I need help with:', 'wporg-forums' ),
-						sprintf( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ), wp_login_url() )
+						esc_html__( 'The page I need help with:', 'wporg-forums' ),
+						/* translators: %s: URL of the log in page. */
+						sprintf( wp_kses_post( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ) ), esc_url( wp_login_url() ) )
 					);
 				}
 			}
@@ -1055,9 +1058,9 @@ class Hooks {
 			$site_url = ( bbp_is_topic_edit() ) ? get_post_meta( $topic_id, self::SITE_URL_META, true ) : '';
 			?>
 			<p>
-				<label for="site_url"><?php _e( 'Link to the page you need help with:', 'wporg-forums' ) ?></label><br />
+				<label for="site_url"><?php esc_html_e( 'Link to the page you need help with:', 'wporg-forums' ); ?></label><br />
 				<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="400" aria-describedby="site_url_description" /><br />
-				<em id="site_url_description"><?php _e( 'This link will only be shown to logged-in users.', 'wporg-forums' ); ?></em>
+				<em id="site_url_description"><?php esc_html_e( 'This link will only be shown to logged-in users.', 'wporg-forums' ); ?></em>
 			</p>
 			<?php
 		endif;
@@ -1167,6 +1170,11 @@ class Hooks {
 	 * @return array Filtered reply data.
 	 */
 	public function update_replies_count_on_editing_reply( $data ) {
+		// Newer bbPress versions update counts after the status is persisted.
+		if ( function_exists( 'bbp_update_counts_on_transition_post_status' ) ) {
+			return $data;
+		}
+
 		// Bail if the reply is not published.
 		if ( 'publish' !== get_post_status( $data['ID'] ) ) {
 			return $data;
@@ -1386,6 +1394,11 @@ class Hooks {
 		$reply_author_name = bbp_get_reply_author_display_name( $reply_id );
 
 		remove_all_filters( 'bbp_get_reply_content' );
+
+		// The content is fetched again as the message is assembled, so keep it to the supported blocks.
+		if ( Plugin::get_instance()->blocks ) {
+			add_filter( 'bbp_get_reply_content', array( Plugin::get_instance()->blocks, 'limit_blocks' ), 7 );
+		}
 
 		// Strip tags from text and set up message body.
 		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );

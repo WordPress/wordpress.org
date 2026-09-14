@@ -1,0 +1,12 @@
+# Vendored copy of Trac's own assets.
+trac/common/
+
+# Generated from wp4.css by `npm run build:css`.
+wp4-rtl.css
+
+# Frozen legacy stylesheets, kept byte-for-byte as served.
+blog-wp4.css
+codex-wp4.css
+forum-ie7.css
+forum-wp4.css
+forum-wp4-rtl.css

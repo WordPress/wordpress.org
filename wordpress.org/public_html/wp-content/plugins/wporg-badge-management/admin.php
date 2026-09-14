@@ -70,7 +70,7 @@ function render_list_users_tab( $slug ) {
 	$users = get_users_with_badge( $slug );
 
 	// List users with badges.
-	echo '<h2>Users with Badge "' . ( $badges[ $slug ] ?? '' ) . '" (' . number_format_i18n( count( $users ) ) .')</h2>';
+	echo '<h2>Users with Badge "' . esc_html( $badges[ $slug ] ?? '' ) . '" (' . esc_html( number_format_i18n( count( $users ) ) ) . ')</h2>';
 	if ( $users ) {
 
 		// Lots of WP_User objects is extra hungry.
@@ -120,7 +120,7 @@ function render_list_users_tab( $slug ) {
 
 		}
 		echo '</ul>';
-		echo '<textarea rows="10" style="width:100%">' . implode( ', ', wp_list_pluck( $users, 'user_login' ) ) . '</textarea>';
+		echo '<textarea rows="10" style="width:100%">' . esc_textarea( implode( ', ', wp_list_pluck( $users, 'user_login' ) ) ) . '</textarea>';
 	} else {
 		echo '<p><em>No users have this badge.</em></p>';
 	}
@@ -154,13 +154,14 @@ function render_manage_tab() {
 		}
 
 		if ( $messages ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice built from a literal format string with intval()-cast counts.
 			echo '<div id="message" class="updated notice is-dismissible"><p>' . implode( '<br>', $messages ) . '</p></div>';
 		}
 	}
 
 	// Render a form with a textarea for the user, a selection for the action, and a checkbox of each team that this site can manage.
 	?>
-	<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<input type="hidden" name="action" value="wporg_profile_manage_badges">
 		<?php wp_nonce_field( 'wporg_profile_badges' ); ?>
 		<table class="form-table">
@@ -215,7 +216,7 @@ function render_settings() {
 
 	?>
 	<h1>Settings</h1>
-	<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<input type="hidden" name="action" value="badge_settings">
 		<?php wp_nonce_field( 'badge_settings' ); ?>
 		<table class="form-table">

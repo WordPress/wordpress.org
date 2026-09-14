@@ -18,9 +18,11 @@ if ( ! is_search() && isset( $_GET['show_filters'] ) ) {
 	<!-- /wp:group -->
 	FILTERS;
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 	echo do_blocks( $filter_blocks );
 
 	return;
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( '<!-- wp:navigation {"menuSlug":"section-bar","ariaLabel":"'. esc_attr( 'Category menu', 'wporg-plugins' ) .'","overlayMenu":"never","layout":{"type":"flex","orientation":"horizontal","justifyContent":"left","flexWrap":"nowrap"},"fontSize":"small","className":"is-style-button-list"} /-->' );

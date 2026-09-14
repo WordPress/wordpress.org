@@ -51,6 +51,7 @@ while ( $query->have_posts() ) {
 	$query->the_post();
 	$plugin = get_post();
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo $plugin->post_name;
 	echo "\n";
 
@@ -92,5 +93,7 @@ echo number_format( $count_plugins ) . " plugins\n";
 echo number_format( $count_with_blocks ) . " have blocks\n";
 echo number_format( $count_with_files ) . " have asset files\n";
 echo "\n";
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 echo "Plugins missing blocks:\n" . join( "\n", $plugins_missing_blocks ) . "\n\n";
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 echo "Plugins missing assets:\n" . join( "\n", $plugins_missing_assets ) . "\n\n";

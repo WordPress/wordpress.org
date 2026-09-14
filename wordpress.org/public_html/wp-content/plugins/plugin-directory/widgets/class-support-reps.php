@@ -48,8 +48,10 @@ class Support_Reps extends \WP_Widget {
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Support Reps', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['before_widget'];
-		echo $args['before_title'] . $title . $args['after_title'];
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 		?>
 
 		<ul id="support-rep-list" class="support-rep-list">
@@ -59,13 +61,13 @@ class Support_Reps extends \WP_Widget {
 				<li data-user="<?php echo esc_attr( $support_rep->user_nicename ); ?>">
 					<?php echo get_avatar( $support_rep->ID, 32 ); ?>
 					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$support_rep->user_nicename}/" ); ?>">
-						<?php echo $support_rep->display_name ?: $support_rep->user_nicename; ?>
+						<?php echo esc_html( $support_rep->display_name ?: $support_rep->user_nicename ); ?>
 					</a><br>
 
 					<?php if ( current_user_can( 'plugin_remove_support_rep', $post ) ) : ?>
 					<small>
 						<?php echo current_user_can( 'plugin_review' ) ? esc_html( $support_rep->user_email ) . ' ' : ''; ?>
-						<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
+						<button class="button-link remove"><?php esc_html_e( 'Remove', 'wporg-plugins' ); ?></button>
 					</small>
 					<?php endif; ?>
 				</li>
@@ -88,7 +90,7 @@ class Support_Reps extends \WP_Widget {
 							<# if ( data.email ) { #>
 								<span class="email">{{ data.email }}</span>
 							<# } #>
-							<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
+							<button class="button-link remove"><?php esc_html_e( 'Remove', 'wporg-plugins' ); ?></button>
 						</small>
 					</li>
 				</script>
@@ -97,6 +99,7 @@ class Support_Reps extends \WP_Widget {
 		</ul>
 
 		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['after_widget'];
 	}
 }

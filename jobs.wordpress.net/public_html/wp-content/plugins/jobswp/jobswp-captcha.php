@@ -190,7 +190,7 @@ class Jobs_Dot_WP_Captcha {
 	 */
 	public static function add_notice( $type ) {
 		if ( 'verify' == $type ) {
-			echo ' <strong><em>' . __( 'Note that you must also fill out the captcha field.', 'jobswp' ) . '</em></strong>';
+			echo ' <strong><em>' . esc_html__( 'Note that you must also fill out the captcha field.', 'jobswp' ) . '</em></strong>';
 		}
 	}
 }

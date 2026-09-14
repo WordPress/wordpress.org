@@ -26,7 +26,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				<span class="vcard bbp-user-profile-link">
 					<a class="url fn n" href="<?php bbp_user_profile_url(); ?>" title="<?php
 						/* translators: %s: user's display name */
-						printf( esc_attr__( "%s's Profile", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+						printf( esc_attr__( "%s's Profile", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 					?>" rel="me"><?php esc_html_e( 'Profile', 'wporg-forums' ); ?></a>
 				</span>
 			</li>
@@ -35,7 +35,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				<span class='bbp-user-topics-created-link'>
 					<a href="<?php bbp_user_topics_created_url(); ?>" title="<?php
 						/* translators: %s: user's display name */
-						printf( esc_attr__( "%s's Topics Started", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+						printf( esc_attr__( "%s's Topics Started", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 					?>"><?php esc_html_e( 'Topics Started', 'wporg-forums' ); ?></a>
 				</span>
 			</li>
@@ -44,7 +44,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				<span class='bbp-user-replies-created-link'>
 					<a href="<?php bbp_user_replies_created_url(); ?>" title="<?php
 						/* translators: %s: user's display name */
-						printf( esc_attr__( "%s's Replies Created", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+						printf( esc_attr__( "%s's Replies Created", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 					?>"><?php esc_html_e( 'Replies Created', 'wporg-forums' ); ?></a>
 				</span>
 			</li>
@@ -54,7 +54,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					<span class='bbp-user-reviews-link'>
 						<a href="<?php bbp_user_profile_url(); ?>reviews/" title="<?php
 							/* translators: %s: user's display name */
-							printf( esc_attr__( "%s's Reviews Written", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+							printf( esc_attr__( "%s's Reviews Written", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 						?>"><?php esc_html_e( 'Reviews Written', 'wporg-forums' ); ?></a>
 					</span>
 				</li>
@@ -65,7 +65,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					<span class='bbp-user-reviews-link'>
 						<a href="<?php bbp_user_profile_url(); ?>reports/" title="<?php
 							/* translators: %s: user's display name */
-							printf( esc_attr__( "%s's Submitted Reports", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+							printf( esc_attr__( "%s's Submitted Reports", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 						?>"><?php esc_html_e( 'Reports Submitted', 'wporg-forums' ); ?></a>
 					</span>
 				</li>
@@ -75,7 +75,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				<span class='bbp-user-topics-replied-to-link'>
 					<a href="<?php bbp_user_profile_url(); ?>replied-to/" title="<?php
 						/* translators: %s: user's display name */
-						printf( esc_attr__( 'Topics %s Has Replied To', 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+						printf( esc_attr__( 'Topics %s Has Replied To', 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 					?>"><?php esc_html_e( 'Topics Replied To', 'wporg-forums' ); ?></a>
 				</span>
 			</li>
@@ -85,7 +85,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					<span class='bbp-user-engagements-created-link'>
 						<a href="<?php bbp_user_engagements_url(); ?>" title="<?php
 							/* translators: %s: user's display name */
-							printf( esc_attr__( "%s's Engagements", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+							printf( esc_attr__( "%s's Engagements", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 						?>"><?php esc_html_e( 'Engagements', 'wporg-forums' ); ?></a>
 					</span>
 				</li>
@@ -96,7 +96,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					<span class="bbp-user-favorites-link">
 						<a href="<?php bbp_favorites_permalink(); ?>" title="<?php
 							/* translators: %s: user's display name */
-							printf( esc_attr__( "%s's Favorites", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+							printf( esc_attr__( "%s's Favorites", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 						?>"><?php esc_html_e( 'Favorites', 'wporg-forums' ); ?></a>
 					</span>
 				</li>
@@ -109,7 +109,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 						<span class="bbp-user-subscriptions-link">
 							<a href="<?php bbp_subscriptions_permalink(); ?>" title="<?php
 								/* translators: %s: user's display name */
-								printf( esc_attr__( "%s's Subscriptions", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+								printf( esc_attr__( "%s's Subscriptions", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 							?>"><?php esc_html_e( 'Subscriptions', 'wporg-forums' ); ?></a>
 						</span>
 					</li>
@@ -119,7 +119,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 					<span class="bbp-user-edit-link">
 						<a href="<?php bbp_user_profile_edit_url(); ?>" title="<?php
 							/* translators: %s: user's display name */
-							printf( esc_attr__( "Edit %s's Profile", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+							printf( esc_attr__( "Edit %s's Profile", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 						?>"><?php esc_html_e( 'Edit Forum Profile', 'wporg-forums' ); ?></a>
 					</span>
 				</li>
@@ -128,9 +128,10 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				<?php if ( $is_caped || bbp_is_user_home() ) : ?>
 				<li>
 					<span class="wporg-profile-edit-link">
-					<a href="https://profiles.wordpress.org/<?php echo bbp_get_displayed_user_field( 'user_nicename' ); ?>/profile/edit/" title="<?php
+					<a href="https://profiles.wordpress.org/<?php echo esc_attr( rawurlencode( bbp_get_displayed_user_field( 'user_nicename' ) ) ); ?>/profile/edit/" title="
+						<?php
 							/* translators: %s: user's display name */
-							printf( esc_attr__( "Edit %s's WordPress.org Profile", 'wporg-forums' ), bbp_get_displayed_user_field( 'display_name' ) );
+							printf( esc_attr__( "Edit %s's WordPress.org Profile", 'wporg-forums' ), esc_attr( bbp_get_displayed_user_field( 'display_name' ) ) );
 						?>"><?php esc_html_e( 'Edit WP.org Profile', 'wporg-forums' ); ?></a>
 					</span>
 				</li>

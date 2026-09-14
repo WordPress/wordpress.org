@@ -72,7 +72,7 @@ class Cross_Locale_PTE {
 		$redirect = menu_page_url( 'cross-locale-pte', false );
 
 		if ( ! current_user_can( self::MANAGE_CROSS_LOCALE_PTES_CAP ) ) {
-			wp_redirect( $redirect );
+			wp_safe_redirect( $redirect );
 			exit;
 		}
 
@@ -85,9 +85,9 @@ class Cross_Locale_PTE {
 			}
 
 			if ( self::$user ) {
-				wp_redirect( add_query_arg( array( 'user_id' => self::$user->ID ), $redirect ) );
+				wp_safe_redirect( add_query_arg( array( 'user_id' => self::$user->ID ), $redirect ) );
 			} else {
-				wp_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
+				wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 			}
 			exit;
 		}
@@ -95,7 +95,7 @@ class Cross_Locale_PTE {
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
 			self::$user = get_user_by( 'id', $_REQUEST['user_id'] );
 			if ( ! self::$user ) {
-				wp_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
+				wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 				exit;
 			}
 		}
@@ -165,7 +165,7 @@ class Cross_Locale_PTE {
 			self::$user->ID, self::ALL_LOCALES ) );
 		}
 
-		wp_redirect( add_query_arg( array( 'user_id' => self::$user->ID ), menu_page_url( 'cross-locale-pte', false ) ) );
+		wp_safe_redirect( add_query_arg( array( 'user_id' => self::$user->ID ), menu_page_url( 'cross-locale-pte', false ) ) );
 		exit;
 	}
 

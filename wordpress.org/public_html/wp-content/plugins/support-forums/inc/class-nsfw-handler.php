@@ -29,7 +29,7 @@ class NSFW_Handler {
 	 */
 	public function add_term_meta() {
 		// Output a helping text indicating what to use the description field for.
-		echo '<p>' . __( 'Please provide a reason for adding this term in the description field', 'wporg-forums' ) . '</p>';
+		echo '<p>' . esc_html__( 'Please provide a reason for adding this term in the description field', 'wporg-forums' ) . '</p>';
 	}
 
 	/**

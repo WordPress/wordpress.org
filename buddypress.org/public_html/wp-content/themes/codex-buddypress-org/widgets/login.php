@@ -12,18 +12,20 @@ class BPOrg_Login_Widget extends WP_Widget {
 		if ( is_user_logged_in() ) : ?>
 
 			<?php
-				echo $before_widget;
-				echo $before_title . __( 'Logged In As', 'bp-follow' ) . $after_title; ?>
+				echo $before_widget; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+				echo $before_title . esc_html__( 'Logged In As', 'bp-follow' ) . $after_title;
+			?>
 
 			<?php do_action( 'bp_before_sidebar_me' ) ?>
 
 			<div id="sidebar-me">
-				<a href="<?php echo bp_loggedin_user_domain() ?>">
+				<a href="<?php echo esc_url( bp_loggedin_user_domain() ); ?>">
 					<?php bp_loggedin_user_avatar( 'type=thumb&width=40&height=40' ) ?>
 				</a>
 
-				<h4><?php echo bp_core_get_userlink( bp_loggedin_user_id() ) ?></h4>
-				<a class="button logout" href="<?php echo wp_logout_url( bp_get_root_domain() ) ?>"><?php _e( 'Log Out', 'buddypress' ) ?></a>
+				<h4><?php echo wp_kses_post( bp_core_get_userlink( bp_loggedin_user_id() ) ); ?></h4>
+				<a class="button logout" href="<?php echo esc_url( wp_logout_url( bp_get_root_domain() ) ); ?>"><?php esc_html_e( 'Log Out', 'buddypress' ); ?></a>
 
 				<?php do_action( 'bp_sidebar_me' ) ?>
 			</div>
@@ -39,24 +41,29 @@ class BPOrg_Login_Widget extends WP_Widget {
 			<?php do_action( 'bp_before_sidebar_login_form' ) ?>
 
 			<?php
-				echo $before_widget;
-				echo $before_title . __( 'Log In', 'bp-follow' ) . $after_title; ?>
+				echo $before_widget; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+				echo $before_title . esc_html__( 'Log In', 'bp-follow' ) . $after_title;
+			?>
 
 			<p id="login-text">
-				<?php _e( 'To start connecting please log in first.', 'buddypress' ) ?>
+				<?php esc_html_e( 'To start connecting please log in first.', 'buddypress' ); ?>
 				<?php if ( bp_get_signup_allowed() ) : ?>
-					<?php printf( __( ' You can also <a href="%s" title="Create an account">create an account</a>.', 'buddypress' ), site_url( BP_REGISTER_SLUG . '/' ) ) ?>
+					<?php
+					/* translators: %s: URL of the account registration page. */
+					printf( wp_kses_post( __( ' You can also <a href="%s" title="Create an account">create an account</a>.', 'buddypress' ) ), esc_url( site_url( BP_REGISTER_SLUG . '/' ) ) );
+					?>
 				<?php endif; ?>
 			</p>
 
-			<form name="login-form" id="sidebar-login-form" class="standard-form" action="<?php echo site_url( 'wp-login.php', 'login_post' ) ?>" method="post">
-				<label><?php _e( 'Username', 'buddypress' ) ?><br />
-				<input type="text" name="log" id="sidebar-user-login" class="input" value="<?php echo attribute_escape(stripslashes($user_login)); ?>" /></label>
+			<form name="login-form" id="sidebar-login-form" class="standard-form" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>" method="post">
+				<label><?php esc_html_e( 'Username', 'buddypress' ); ?><br />
+				<input type="text" name="log" id="sidebar-user-login" class="input" value="<?php echo esc_attr( stripslashes( $user_login ) ); ?>" /></label>
 
-				<label><?php _e( 'Password', 'buddypress' ) ?><br />
+				<label><?php esc_html_e( 'Password', 'buddypress' ); ?><br />
 				<input type="password" name="pwd" id="sidebar-user-pass" class="input" value="" /></label>
 
-				<p class="forgetmenot"><label><input name="rememberme" type="checkbox" id="sidebar-rememberme" value="forever" /> <?php _e( 'Remember Me', 'buddypress' ) ?></label></p>
+				<p class="forgetmenot"><label><input name="rememberme" type="checkbox" id="sidebar-rememberme" value="forever" /> <?php esc_html_e( 'Remember Me', 'buddypress' ); ?></label></p>
 
 				<?php do_action( 'bp_sidebar_login_form' ) ?>
 				<input type="submit" name="wp-submit" id="sidebar-wp-submit" value="<?php esc_attr_e('Log In'); ?>" tabindex="100" />
@@ -67,7 +74,10 @@ class BPOrg_Login_Widget extends WP_Widget {
 
 		<?php endif; ?>
 
-		<?php echo $after_widget; ?>
+		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $after_widget;
+		?>
 
 	<?php
 	}

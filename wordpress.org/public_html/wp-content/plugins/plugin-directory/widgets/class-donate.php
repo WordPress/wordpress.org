@@ -30,18 +30,21 @@ class Donate extends \WP_Widget {
 		if ( $donate_link ) {
 			$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Donate', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 			echo $args['before_widget'];
-			echo $args['before_title'] . $title . $args['after_title'];
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+			echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 			?>
 
-			<p class="aside"><?php _e( 'Would you like to support the advancement of this plugin?', 'wporg-plugins' ); ?></p>
+			<p class="aside"><?php esc_html_e( 'Would you like to support the advancement of this plugin?', 'wporg-plugins' ); ?></p>
 			<p>
 				<a href="<?php echo esc_url( $donate_link ); ?>" rel="nofollow ugc">
-					<?php _e( 'Donate to this plugin', 'wporg-plugins' ); ?>
+					<?php esc_html_e( 'Donate to this plugin', 'wporg-plugins' ); ?>
 				</a>
 			</p>
 
 			<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 			echo $args['after_widget'];
 		}
 	}

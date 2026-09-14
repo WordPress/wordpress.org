@@ -66,9 +66,10 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	// Allow for w.org plugins to block registrations based on spam checks, etc.
 	if ( null !== ( $pre_register_error = apply_filters( 'wporg_login_pre_registration', null, $user_login, $user_email, $meta ) ) ) {
 		if ( is_wp_error( $pre_register_error ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registration error markup assembled from escaped parts.
 			wp_die( $pre_register_error );
 		}
-		wp_die( __( 'Registration Blocked. Please stop.', 'wporg' ) );
+		wp_die( esc_html__( 'Registration Blocked. Please stop.', 'wporg' ) );
 	}
 
 	$profile_key        = wp_generate_password( 24, false, false );
@@ -160,7 +161,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 
 	$inserted = wporg_update_pending_user( $pending_user );
 	if ( ! $inserted ) {
-		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
+		wp_die( esc_html__( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
 	}
 
 	wporg_login_send_confirmation_email( $user_email );
@@ -372,7 +373,7 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 		wp_slash( $user_email )
 	);
 	if ( ! $user_id ) {
-		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
+		wp_die( esc_html__( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
 	}
 
 	// Update the registration date to the earlier one.

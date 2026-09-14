@@ -28,7 +28,7 @@ function meta_robots() {
 			$noindex = 'noindex,follow';
 		}
 
-		echo '<meta name="robots" content="' . $noindex . '" />' . "\n";
+		echo '<meta name="robots" content="' . esc_attr( $noindex ) . '" />' . "\n";
 	}
 }
 add_action( 'wp_head', __NAMESPACE__ . '\meta_robots', 10, 1 );

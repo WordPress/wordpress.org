@@ -5,7 +5,7 @@
 
 		<?php if ( $toc = Codex_Loader::create_page_toc() ): ?>
 		<div class="widget table-of-contents-widget listified">
-			<?php echo $toc; ?>
+			<?php echo wp_kses_post( $toc ); ?>
 		</div>
 		<?php endif; ?>
 
@@ -26,7 +26,7 @@
 			$children = wp_list_pages('title_li=&echo=0&child_of=' . $post->ID);
 			if ( $children ) {
 				$rel = '<ul>' . $children . '</ul>';
-				echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Subpages</h2>' . $rel . '</div>';
+				echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Subpages</h2>' . wp_kses_post( $rel ) . '</div>';
 				$show_related = false;
 			}
 		} ?>
@@ -43,7 +43,7 @@
 						$rel  .= '<li><a href="' . esc_url( get_permalink( $related->ID ) ) . '" title="' . esc_attr( wp_strip_all_tags( $title ) ) . '">' . $title . '</a></li>';
 					}
 					$rel = '<ul>' . $rel . '</ul>';
-					echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Related</h2>' . $rel . '</div>';
+					echo '<div class="related-content-widget widget listified"><h2 class="widgettitle">Related</h2>' . wp_kses_post( $rel ) . '</div>';
 				}
 			}
 		?>
@@ -65,8 +65,8 @@
 				<li><?php edit_post_link( __( 'Edit This Page', 'bborg' ) ); ?></li>
 			<?php endif; ?>
 			<?php if ( ! is_user_logged_in() ) : ?>
-				<li><a href="<?php echo wp_login_url(); ?>">Log In</a></li>
-				<li><a href="<?php echo wp_registration_url(); ?>">Register</a></li>
+				<li><a href="<?php echo esc_url( wp_login_url() ); ?>">Log In</a></li>
+				<li><a href="<?php echo esc_url( wp_registration_url() ); ?>">Register</a></li>
 			<?php endif; ?>
 		</ul>
 	</div>

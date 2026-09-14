@@ -90,7 +90,7 @@ function import_revisions( $svn ) {
 	if ( ! is_numeric( $last_revision ) ) {
 		$last_revision = 0;
 		// When setting up a new table, this needs to be commented out to force the import.
-		trigger_error( "Can't find max row for {$db_table} to import {$svn_url} revisions.", E_USER_WARNING );
+		trigger_error( "Can't find max row for {$db_table} to import {$svn_url} revisions.", E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 		return false;
 	}
 

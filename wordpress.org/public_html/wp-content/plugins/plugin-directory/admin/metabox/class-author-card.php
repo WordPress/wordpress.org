@@ -115,7 +115,7 @@ class Author_Card {
 		<div class="profile-personal">
 			<?php echo get_avatar( $author->ID, 48 ); ?>
 			<div class="profile-details">
-				<strong><a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>/"><?php echo $author->user_login; ?></a></strong>
+				<strong><a href="//profiles.wordpress.org/<?php echo esc_attr( $author->user_nicename ); ?>/"><?php echo esc_html( $author->user_login ); ?></a></strong>
 				<?php
 				$author_links = array(
 					sprintf(
@@ -129,12 +129,12 @@ class Author_Card {
 						esc_attr__( 'Click to search Help Scout for mentions of this author', 'wporg-plugins' )
 					),
 				);
-				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', $author_links );
+				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', array_map( 'wp_kses_post', $author_links ) );
 				?>
 
 				<span class="profile-links">
-					<a href="//profiles.wordpress.org/<?php echo $author->user_nicename; ?>/"><?php _e( 'profile', 'wporg-plugins' ); ?></a> |
-					<a href="//wordpress.org/support/users/<?php echo $author->user_nicename; ?>/"><?php _e( 'support', 'wporg-plugins' ); ?></a>
+					<a href="//profiles.wordpress.org/<?php echo esc_attr( $author->user_nicename ); ?>/"><?php esc_html_e( 'profile', 'wporg-plugins' ); ?></a> |
+					<a href="//wordpress.org/support/users/<?php echo esc_attr( $author->user_nicename ); ?>/"><?php esc_html_e( 'support', 'wporg-plugins' ); ?></a>
 				</span>
 
 				<div class="profile-email">
@@ -147,16 +147,17 @@ class Author_Card {
 							esc_attr__( 'Click to search Help Scout for emails sent to/from this email address', 'wporg-plugins' )
 						),
 					);
-					vprintf( '<span class="profile-sp-link">[ %s ]</span>', $author_email_links );
+					vprintf( '<span class="profile-sp-link">[ %s ]</span>', array_map( 'wp_kses_post', $author_email_links ) );
 					?>
 				</div>
 				<div class="profile-join">
 					<?php
 					/* translators: 1: time ago, 2: registration date */
 					printf(
-						__( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
-						human_time_diff( strtotime( $author->user_registered ) ),
-						date( 'Y-M-d', strtotime( $author->user_registered ) )
+						/* translators: 1: Time since registration, 2: Registration date. */
+						esc_html__( 'Joined %1$s ago (%2$s)', 'wporg-plugins' ),
+						esc_html( human_time_diff( strtotime( $author->user_registered ) ) ),
+						esc_html( gmdate( 'Y-M-d', strtotime( $author->user_registered ) ) )
 					);
 					?>
 				</div>
@@ -165,7 +166,7 @@ class Author_Card {
 
 		<?php if ( ! empty( $author->user_url ) ) : ?>
 			<p class="profile-url">
-				<?php _e( 'Author URL:', 'wporg-plugins' ); ?>
+				<?php esc_html_e( 'Author URL:', 'wporg-plugins' ); ?>
 				<a href="<?php echo esc_url( $author->user_url ); ?>"><?php echo esc_html( $author->user_url ); ?></a>
 			</p>
 		<?php endif; ?>
@@ -201,7 +202,7 @@ class Author_Card {
 						);
 					}
 					/* translators: %s: comma-separated list of negative user status labels */
-					echo '<p>' . sprintf( __( 'This user is: %s', 'wporg-plugins' ), implode( ', ', $labels ) ) . '</p>';
+					echo '<p>' . sprintf( esc_html__( 'This user is: %s', 'wporg-plugins' ), wp_kses_post( implode( ', ', $labels ) ) ) . '</p>';
 				}
 
 				$user_notes = get_user_meta( $user->ID, '_wporg_bbp_user_notes', true );
@@ -210,7 +211,7 @@ class Author_Card {
 			// Include any warning flags.
 			$warning_flags = self::get_user_flags( $author->ID, $author_plugins );
 			if ( $warning_flags ) {
-				echo '<strong>' . __( 'Warning Flags:', 'wporg-plugins' ) . '</strong>';
+				echo '<strong>' . esc_html__( 'Warning Flags:', 'wporg-plugins' ) . '</strong>';
 				echo '<ul class="plugin-flagged">';
 				foreach ( $warning_flags as $flag => $reasons ) {
 					echo '<li class="plugin-flagged-' . esc_attr( $flag ) . '"><strong>' . esc_html( strtoupper( $flag ) ) . ' (' . esc_html( count( $reasons ) ) . '):</strong> ' . esc_html( implode( '; ', $reasons ) ) . '</li>';
@@ -237,14 +238,15 @@ class Author_Card {
 
 				/* translators: %s: comma-separated list of plugin author's IP addresses */
 				printf(
-					'<p>' . __( 'IPs : %s', 'wporg-plugins' ) . '</p>',
-					implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) )
+					/* translators: %s: List of IP addresses. */
+					'<p>' . esc_html__( 'IPs : %s', 'wporg-plugins' ) . '</p>',
+					wp_kses_post( implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) ) )
 				);
 			}
 
 			// Include any user notes.
 			if ( ! empty( $user_notes ) ) {
-				_e( 'User notes:', 'wporg-plugins' );
+				esc_html_e( 'User notes:', 'wporg-plugins' );
 				echo '<ul>';
 				foreach ( $user_notes as $note ) {
 					$note_meta = sprintf(
@@ -257,7 +259,7 @@ class Author_Card {
 					$note_html  = apply_filters( 'comment_text', $note->text, null, array() );
 					$note_html .= sprintf( '<p class="textright">%s</p>', $note_meta );
 
-					echo '<li>' . $note_html . '</li>' . "\n";
+					echo '<li>' . wp_kses_post( $note_html ) . '</li>' . "\n";
 				}
 				echo '</ul>';
 			}
@@ -267,9 +269,10 @@ class Author_Card {
 		<div class="profile-plugins">
 			<?php
 			if ( empty( $author_commit ) && empty( $author_plugins ) ) {
-				_e( 'Not a developer on any plugin.', 'wporg-plugins' );
+				esc_html_e( 'Not a developer on any plugin.', 'wporg-plugins' );
 			} else {
-				echo '<strong>' . sprintf( _n( '%d plugin:', '%d plugins:', count( $all_plugins ), 'wporg-plugins' ), count( $all_plugins ) ) . '</strong>';
+				/* translators: %d: Number of plugins. */
+				echo '<strong>' . sprintf( esc_html( _n( '%d plugin:', '%d plugins:', count( $all_plugins ), 'wporg-plugins' ) ), count( $all_plugins ) ) . '</strong>';
 
 				echo '<ul>';
 				self::display_plugin_links( $all_plugins, $author_plugins, $author_commit );
@@ -500,7 +503,7 @@ class Author_Card {
 				esc_attr( implode( ' ', $classes ) ),
 				esc_attr( implode( ' ', $tooltips ) ),
 				esc_attr( get_permalink( $plugin ) ),
-				$plugin->post_name
+				esc_html( $plugin->post_name )
 			);
 
 			if ( $note ) {
@@ -512,7 +515,7 @@ class Author_Card {
 					'<a href="%s" title="%s">%s</a>',
 					esc_url( get_edit_post_link( $plugin->ID, '' ) ),
 					esc_attr__( 'Edit this plugin', 'wporg-plugins' ),
-					__( 'Edit', 'wporg-plugins' )
+					esc_html__( 'Edit', 'wporg-plugins' )
 				),
 				sprintf(
 					'<a href="//make.wordpress.org/pluginrepo/?s=%s" title="%s">P2</a>',
@@ -527,7 +530,7 @@ class Author_Card {
 			] );
 
 			if ( $extra ) {
-				echo ' ' . $extra;
+				echo ' ' . wp_kses_post( $extra );
 			}
 
 			echo '</span></li>' . "\n";

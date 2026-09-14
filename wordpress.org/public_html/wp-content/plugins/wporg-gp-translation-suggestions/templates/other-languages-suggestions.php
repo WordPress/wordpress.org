@@ -9,6 +9,7 @@ if ( empty( $suggestions ) ) {
 		echo '<div class="translation-suggestion with-tooltip" tabindex="0" role="button" data-suggestion-locale="' . esc_html( strtolower( $suggestion['locale'] ) ) . '" aria-pressed="false" aria-label="Copy translation">';
 
 			echo '<span class="translation-suggestion__translation">';
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 				echo esc_translation( $suggestion['translation'] );
 
 				echo '<span class="translation-suggestion__translation-meta">';
@@ -25,7 +26,7 @@ if ( empty( $suggestions ) ) {
 						if ( $user ) {
 							printf(
 								' | By <a href="https://profiles.wordpress.org/%s">%s</a>',
- 								$user->user_nicename,
+								esc_html( $user->user_nicename ),
 								esc_html( $user->display_name )
 							);
 						}
@@ -34,6 +35,7 @@ if ( empty( $suggestions ) ) {
 				echo '</span>';
 			echo '</span>';
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 			echo '<span aria-hidden="true" class="translation-suggestion__translation-raw">' . esc_translation( $suggestion['translation'] ) . '</span>';
 
 			echo '<button type="button" class="button is-small copy-suggestion">Copy</button>';

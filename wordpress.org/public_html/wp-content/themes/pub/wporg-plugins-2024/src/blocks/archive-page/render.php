@@ -12,6 +12,7 @@ if ( ! $wp_query->have_posts() ) {
 // TODO: There's no block for this.
 $archive_description = get_the_archive_description();
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( <<<BLOCKS
 <!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|40"}}},"layout":{"type":"default"}} -->
 <div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--40)">

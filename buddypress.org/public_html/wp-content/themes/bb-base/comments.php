@@ -35,7 +35,7 @@
 	<?php else : ?>
 
 		<div id="respond">
-			<form action="<?php echo site_url( '/wp-comments-post.php' ); ?>" method="post" id="commentform">
+			<form action="<?php echo esc_url( site_url( '/wp-comments-post.php' ) ); ?>" method="post" id="commentform">
 				<fieldset>
 					<legend><?php comment_form_title( esc_html__( 'Leave a Reply', 'bborg' ), esc_html__( 'Leave a Reply to %s', 'bborg' ) ); ?></legend>
 					<p class="cancel-reply"><?php cancel_comment_reply_link( esc_html__( 'Cancel Comment Reply', 'bborg' ) ); ?></p>

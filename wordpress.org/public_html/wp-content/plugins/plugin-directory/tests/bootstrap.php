@@ -30,6 +30,7 @@ elseif ( ! $_tests_dir ) {
 }
 
 if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test harness console output, not HTML.
 	echo "Could not find $_tests_dir/includes/functions.php\n";
 	exit( 1 );
 }

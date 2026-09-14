@@ -365,7 +365,7 @@ class Moderation {
 				$output = self::format_flags( $flags );
 
 				if ( $echo ) {
-					echo $output;
+					echo wp_kses_post( $output );
 				}
 			}
 		}
@@ -716,7 +716,7 @@ https://wordpress.org/photos/
 			$flags[ 'new user account' ] = 'possible';
 		}
 
-		echo self::format_flags( $flags );
+		echo wp_kses_post( self::format_flags( $flags ) );
 	}
 
 	/**
@@ -868,10 +868,10 @@ CSS;
 
 		echo '<table id="dashboard-photo-moderators" class="wp-list-table widefat fixed striped table-view-list">';
 		echo '<thead><tr>';
-		echo '<th>' . __( 'Moderator', 'wporg-photos' ) . '</th>';
+		echo '<th>' . esc_html__( 'Moderator', 'wporg-photos' ) . '</th>';
 		echo '<th class="col-num-approved" title="' . esc_attr__( 'Number of photos approved', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-up"></span></th>';
 		echo '<th class="col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
-		echo '<th class="col-last-mod-date">' . __( 'Last Moderated', 'wporg-photos' ) . '</th>';
+		echo '<th class="col-last-mod-date">' . esc_html__( 'Last Moderated', 'wporg-photos' ) . '</th>';
 		echo '</tr></thead>';
 		echo '<tbody>';
 
@@ -898,12 +898,12 @@ CSS;
 			echo '<td>' . ( $count_approved ? sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( add_query_arg( [ 'post_status' => 'publish' ], $base_edit_url ) ),
-				number_format_i18n( $count_approved )
+				esc_html( number_format_i18n( $count_approved ) )
 			) : '0' ) . '</td>';
 			echo '<td>' . ( $count_rejected ? sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( add_query_arg( [ 'post_status' => Rejection::get_post_status() ], $base_edit_url ) ),
-				number_format_i18n( $count_rejected )
+				esc_html( number_format_i18n( $count_rejected ) )
 			) : '0' ) . '</td>';
 
 			echo '<td>';
@@ -912,9 +912,9 @@ CSS;
 				$edit_url = get_edit_post_link( $last_moderated->ID );
 				$last_mod_date = get_the_date( 'Y-m-d', $last_moderated->ID );
 				if ( $edit_url ) {
-					printf( '<a href="%s">%s</a>', esc_url( $edit_url ), $last_mod_date );
+					printf( '<a href="%s">%s</a>', esc_url( $edit_url ), esc_html( $last_mod_date ) );
 				} else {
-					echo $last_mod_date;
+					echo esc_html( $last_mod_date );
 				}
 			}
 			echo '</td>';

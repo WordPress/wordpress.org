@@ -21,6 +21,7 @@ class Plugin {
 		}
 
 		add_filter( 'user_has_cap', [ $this, 'add_post_capabilities' ], 10, 4 );
+		add_filter( 'wp_insert_post_empty_content', [ $this, 'restrict_updates_to_editable_posts' ], 10, 2 );
 		add_action( 'registered_post_type', [ $this, 'restrict_rest_queries' ] );
 
 		foreach ( get_post_types() as $post_type ) {
@@ -288,6 +289,87 @@ class Plugin {
 		$allcaps['edit_published_posts'] = true;
 
 		return $allcaps;
+	}
+
+	/**
+	 * Blocks updates to existing posts the current user cannot edit.
+	 *
+	 * The capabilities added in add_post_capabilities() are primitive capabilities,
+	 * which say nothing about the object they are used on, and the same is true of
+	 * the ones a low-privileged role carries. A caller that acts on a post ID
+	 * without asking 'edit_post' about that specific ID therefore reads them as
+	 * permission over every row in the table. Ask on the caller's behalf, and let
+	 * the write short-circuit when the answer is no.
+	 *
+	 * The post type is read from the stored row rather than from the incoming data,
+	 * and a revision defers to its parent, which is how map_meta_cap() reads them
+	 * too. Inserts are untouched: a row that does not exist yet has nobody to take
+	 * it from.
+	 *
+	 * @param bool  $maybe_empty Whether the post should be considered "empty".
+	 * @param array $postarr     Array of post data.
+	 * @return bool Filtered value.
+	 */
+	public function restrict_updates_to_editable_posts( $maybe_empty, $postarr ) {
+		if ( $maybe_empty ) {
+			return $maybe_empty;
+		}
+
+		$post_id = (int) ( $postarr['ID'] ?? 0 );
+
+		if ( ! $post_id || ! get_current_user_id() ) {
+			return $maybe_empty;
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return $maybe_empty;
+		}
+
+		/*
+		 * get_post( 0 ) hands back whatever is in the global $post, so a revision
+		 * with no parent has to stay itself rather than borrow the page it is being
+		 * asked about from.
+		 */
+		$target = $post;
+		if ( 'revision' === $target->post_type && $target->post_parent ) {
+			$target = get_post( $target->post_parent );
+		}
+
+		$post_type = $target ? get_post_type_object( $target->post_type ) : null;
+
+		/*
+		 * A post type that does not map meta capabilities answers 'edit_post' with
+		 * a primitive of its own that no role is granted, so the question denies a
+		 * site administrator as readily as anybody else. Core's custom_css is one
+		 * of those, and the Customizer saves Additional CSS through wp_update_post(),
+		 * so asking would break it. Authorization for those types is whatever the
+		 * code registering them decided it is.
+		 *
+		 * A type that will not resolve at all is not exempt: core answers 'edit_post'
+		 * for those by denying, or by falling back to 'edit_others_posts', and either
+		 * is a better answer than letting the write through.
+		 */
+		if ( $post_type && ! $post_type->map_meta_cap ) {
+			return $maybe_empty;
+		}
+
+		if ( current_user_can( 'edit_post', $post_id ) ) {
+			return $maybe_empty;
+		}
+
+		/**
+		 * Fires when an update is refused because the current user cannot edit the post.
+		 *
+		 * The caller sees wp_insert_post() report the post as empty, which says
+		 * nothing about why, so anything diagnosing a refused save needs this.
+		 *
+		 * @param int $post_id The post the update was aimed at.
+		 * @param int $user_id The user the update was refused for.
+		 */
+		do_action( 'wporg_o2_posting_access_update_refused', $post_id, get_current_user_id() );
+
+		return true;
 	}
 
 	/**

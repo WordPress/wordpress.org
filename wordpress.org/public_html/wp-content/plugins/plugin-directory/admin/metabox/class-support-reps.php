@@ -107,6 +107,6 @@ class Support_Reps {
 
 		$result = Tools::remove_plugin_support_rep( $plugin_slug, $support_rep );
 
-		wp_die( $result );
+		wp_die( esc_html( $result ) );
 	}
 }

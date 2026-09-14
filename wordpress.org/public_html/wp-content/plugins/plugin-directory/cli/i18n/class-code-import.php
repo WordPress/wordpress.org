@@ -32,6 +32,7 @@ class Code_Import extends I18n_Import {
 
 		$files = SVN::ls( $svn_url );
 		if ( ! $files ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( "Plugin has no files in {$tag}." );
 		}
 
@@ -45,6 +46,7 @@ class Code_Import extends I18n_Import {
 
 		$valid = $this->is_plugin_valid( $export_directory );
 		if ( is_wp_error( $valid ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( 'Plugin is not compatible with language packs: ' . $valid->get_error_message() );
 		}
 
@@ -66,6 +68,7 @@ class Code_Import extends I18n_Import {
 
 		$result = $this->set_glotpress_for_plugin( $this->plugin, 'code' );
 		if ( is_wp_error( $result ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( $result->get_error_message() );
 		}
 

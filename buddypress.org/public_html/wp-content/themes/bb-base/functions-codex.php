@@ -37,7 +37,7 @@ function codex_get_breadcrumb() {
 
 		krsort( $crumb );
 		$crumb = implode( ' &rarr; ', $crumb );
-		echo $crumb;
+		echo wp_kses_post( $crumb );
 	}
 }
 

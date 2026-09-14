@@ -40,7 +40,7 @@ if ( is_singular( 'page' ) ) : ?>
 
             <?php endif; ?>
 
-            <p class="date">Updated <strong><?php echo human_time_diff( get_the_modified_time( 'U', get_queried_object_id() ) ); ?></strong> ago / Published <strong><?php echo human_time_diff( get_the_time( 'U', get_queried_object_id() ) ); ?></strong> ago</p>
+		<p class="date">Updated <strong><?php echo esc_html( human_time_diff( get_the_modified_time( 'U', get_queried_object_id() ) ) ); ?></strong> ago / Published <strong><?php echo esc_html( human_time_diff( get_the_time( 'U', get_queried_object_id() ) ) ); ?></strong> ago</p>
 
         </div>
 
