@@ -336,6 +336,35 @@ async function photoCheckFileValidations( field ) {
 }
 
 /**
+ * Active FileReader for the photo preview / dimension check, if any.
+ *
+ * @type {FileReader|null}
+ */
+let photoFileReader = null;
+
+/**
+ * Handles failure to read or decode the selected photo.
+ *
+ * @param {HTMLElement} field - The HTML file input field element.
+ * @param {File} file - The file that was being processed.
+ * @param {Boolean} checkDimensions - Whether dimension validation was in progress.
+ */
+function photoHandleSelectedFileLoadFailure( field, file, checkDimensions ) {
+	if ( field.files.item( 0 ) !== file ) {
+		return;
+	}
+
+	photoClearFilePreview();
+
+	if ( ! checkDimensions ) {
+		return;
+	}
+
+	field.setCustomValidity( PhotoDir.err_file_unreadable );
+	photoShowFileError( field );
+}
+
+/**
  * Loads the selected file via FileReader for preview and optional dimension checks.
  *
  * An appropriate error message is defined if the file is too long or too short.
@@ -350,13 +379,29 @@ function photoLoadSelectedFile( field, checkDimensions ) {
 	const MIN_SIZE = PhotoDir.min_file_dimension; // In px.
 	const MAX_SIZE = PhotoDir.max_file_dimension; // In px.
 
+	// Abort any in-flight read from a previous selection.
+	if ( photoFileReader ) {
+		photoFileReader.abort();
+		photoFileReader = null;
+	}
+
 	const files = field.files;
 
 	if ( files.length > 0 ) {
 		const reader = new FileReader();
 		const file = files.item( 0 );
 
-		reader.addEventListener( 'load', async (e) => {
+		photoFileReader = reader;
+
+		reader.addEventListener( 'load', (e) => {
+			if ( photoFileReader === reader ) {
+				photoFileReader = null;
+			}
+
+			if ( field.files.item( 0 ) !== file ) {
+				return;
+			}
+
 			photoShowFilePreview( e.target.result, file.name );
 
 			if ( ! checkDimensions ) {
@@ -367,6 +412,10 @@ function photoLoadSelectedFile( field, checkDimensions ) {
 			img.src = e.target.result;
 
 			img.decode().then( () => {
+				if ( field.files.item( 0 ) !== file ) {
+					return;
+				}
+
 				let file_width = img.width;
 				let file_height = img.height;
 
@@ -380,8 +429,24 @@ function photoLoadSelectedFile( field, checkDimensions ) {
 				}
 
 				photoShowFileError( field );
+			} ).catch( () => {
+				photoHandleSelectedFileLoadFailure( field, file, checkDimensions );
 			} );
-		}, false );
+		} );
+
+		reader.addEventListener( 'error', () => {
+			if ( photoFileReader === reader ) {
+				photoFileReader = null;
+			}
+
+			photoHandleSelectedFileLoadFailure( field, file, checkDimensions );
+		} );
+
+		reader.addEventListener( 'abort', () => {
+			if ( photoFileReader === reader ) {
+				photoFileReader = null;
+			}
+		} );
 
 		reader.readAsDataURL( file );
 

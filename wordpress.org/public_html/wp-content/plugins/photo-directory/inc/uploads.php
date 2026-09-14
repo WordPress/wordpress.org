@@ -288,6 +288,7 @@ class Uploads {
 					'min_file_size' => self::get_minimum_photo_file_size(),
 
 					// File dimensions.
+					'err_file_unreadable'   => __( 'The selected photo could not be loaded. Please try a different JPEG image.', 'wporg-photos' ),
 					'err_file_too_long'     => sprintf(
 						/** translators: %d: The maximum number of pixels. */
 						__( 'The selected file cannot be longer in either length or width than %dpx.', 'wporg-photos' ),
