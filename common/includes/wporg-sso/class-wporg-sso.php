@@ -20,6 +20,22 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 */
 		const REMOTE_TOKEN_TIMEOUT = 300;
 
+		/**
+		 * Clock skew allowed between the host minting a token and the host redeeming it.
+		 *
+		 * @var int
+		 */
+		const REMOTE_TOKEN_CLOCK_SKEW = 30;
+
+		/**
+		 * The object cache group recording which remote tokens have been redeemed.
+		 *
+		 * Registered as a global group, so the record is shared by every site on the network.
+		 *
+		 * @var string
+		 */
+		const REMOTE_TOKEN_CACHE_GROUP = 'wporg_sso_used_tokens';
+
 		const VALID_HOSTS = [
 			'wordpress.org',
 			'bbpress.org',
