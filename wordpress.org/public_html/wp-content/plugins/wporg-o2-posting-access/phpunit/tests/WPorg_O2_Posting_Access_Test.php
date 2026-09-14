@@ -65,6 +65,94 @@ class WPorg_O2_Posting_Access_Test extends WPorg_O2_Posting_Access_TestCase {
 	}
 
 	/**
+	 * A meta capability that belongs to somebody else is not a posting question,
+	 * however it happens to resolve. map_meta_cap() lets any plugin name a meta
+	 * capability of its own and answer it with a core primitive, and the grant
+	 * must not hand that plugin its answer.
+	 */
+	public function test_grant_does_not_answer_a_foreign_meta_capability() {
+		$map = function ( $caps, $cap ) {
+			if ( 'wporg_test_foreign_cap' === $cap ) {
+				return array( 'edit_posts' );
+			}
+
+			return $caps;
+		};
+		add_filter( 'map_meta_cap', $map, 10, 2 );
+
+		$granted = current_user_can( 'edit_posts' );
+		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- A stand-in for another plugin's meta capability.
+		$foreign = current_user_can( 'wporg_test_foreign_cap' );
+
+		remove_filter( 'map_meta_cap', $map, 10 );
+
+		$this->assertTrue( $granted, 'The fixture needs the primitive for this test to mean anything.' );
+		$this->assertFalse( $foreign );
+	}
+
+	/**
+	 * The same holds for a meta capability resolving to either of the other two
+	 * primitives the grant hands out.
+	 */
+	public function test_grant_does_not_answer_a_foreign_capability_mapped_to_publishing() {
+		$map = function ( $caps, $cap ) {
+			if ( 'wporg_test_foreign_cap' === $cap ) {
+				return array( 'publish_posts', 'edit_published_posts' );
+			}
+
+			return $caps;
+		};
+		add_filter( 'map_meta_cap', $map, 10, 2 );
+
+		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- A stand-in for another plugin's meta capability.
+		$foreign = current_user_can( 'wporg_test_foreign_cap' );
+
+		remove_filter( 'map_meta_cap', $map, 10 );
+
+		$this->assertFalse( $foreign );
+	}
+
+	/**
+	 * The core meta capabilities that resolve onto the granted primitives are
+	 * the point of granting them, so they keep working on the user's own post.
+	 */
+	public function test_non_member_can_edit_and_publish_their_own_post() {
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_author' => $this->non_member,
+				'post_status' => 'draft',
+			)
+		);
+
+		$comment_id = $this->factory()->comment->create( array( 'comment_post_ID' => $post_id ) );
+
+		$this->assertTrue( current_user_can( 'edit_post', $post_id ) );
+		$this->assertTrue( current_user_can( 'publish_post', $post_id ) );
+		$this->assertTrue( current_user_can( 'edit_post_meta', $post_id, 'wporg_test_meta' ) );
+		$this->assertTrue( current_user_can( 'edit_comment', $comment_id ) );
+	}
+
+	/**
+	 * And they still stop at somebody else's post, which needs a capability the
+	 * grant does not include.
+	 */
+	public function test_non_member_cannot_edit_another_authors_post() {
+		$author  = $this->factory()->user->create( array( 'role' => 'author' ) );
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_author' => $author,
+				'post_status' => 'draft',
+			)
+		);
+
+		$comment_id = $this->factory()->comment->create( array( 'comment_post_ID' => $post_id ) );
+
+		$this->assertFalse( current_user_can( 'edit_post', $post_id ) );
+		$this->assertFalse( current_user_can( 'edit_post_meta', $post_id, 'wporg_test_meta' ) );
+		$this->assertFalse( current_user_can( 'edit_comment', $comment_id ) );
+	}
+
+	/**
 	 * Logged out visitors must never be granted anything.
 	 */
 	public function test_logged_out_user_receives_no_capabilities() {
