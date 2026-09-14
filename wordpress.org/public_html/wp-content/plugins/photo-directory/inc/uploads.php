@@ -1034,7 +1034,10 @@ class Uploads {
 				)
 				. "</button>\n"
 				. "</div>\n"
-				. '<dialog id="ug_photo_preview_dialog" class="ugc-photo-preview-dialog">' . "\n"
+				. sprintf(
+					'<dialog id="ug_photo_preview_dialog" class="ugc-photo-preview-dialog" aria-label="%s">' . "\n",
+					esc_attr__( 'Photo preview', 'wporg-photos' )
+				)
 				. sprintf(
 					'<button type="button" class="ugc-photo-preview-dialog__close" aria-label="%s">&times;</button>' . "\n",
 					esc_attr__( 'Close preview', 'wporg-photos' )
