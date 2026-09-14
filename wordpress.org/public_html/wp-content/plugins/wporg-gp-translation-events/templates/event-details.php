@@ -109,7 +109,7 @@ Templates::header(
 				</ul>
 			</div>
 		<?php endif; ?>
-		<?php if ( ! empty( $attendees_not_contributing ) && current_user_can( 'edit_translation_event', $event->id() ) ) : ?>
+		<?php if ( ! empty( $attendees_not_contributing ) && ! $event->is_past() && current_user_can( 'edit_translation_event', $event->id() ) ) : ?>
 			<div class="event-attendees">
 				<h2>
 				<?php
