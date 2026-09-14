@@ -70,6 +70,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			parent::__construct();
 
 			if ( $this->has_host() ) {
+				wp_cache_add_global_groups( self::REMOTE_TOKEN_CACHE_GROUP );
+
 				add_action( 'init', array( $this, 'redirect_all_login_or_signup_to_sso' ) );
 				// De-hooking the password change notification, too high volume on wp.org, for no admin value.
 				remove_action( 'after_password_reset', 'wp_password_change_notification' );
@@ -639,7 +641,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$remote_token = $this->_validate_remote_token( $remote_token );
 
 			// Log the user in if successful.
-			if ( $remote_token && $remote_token['valid'] && $remote_token['user'] ) {
+			if ( $remote_token && $remote_token['valid'] && $remote_token['user'] && $this->_claim_remote_token( $remote_token['sso_hash'] ) ) {
 				// Disable stream logging of this "login".
 				add_filter( 'wp_stream_log_data', '__return_false' );
 
@@ -742,6 +744,25 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
+		 * Claims a remote token for single use.
+		 *
+		 * @param string $sso_hash The token's validated signature, which is its canonical identity.
+		 * @return bool False if the token has already been redeemed, true otherwise.
+		 */
+		protected function _claim_remote_token( $sso_hash ) {
+			$key = hash( 'sha256', $sso_hash );
+			$ttl = self::REMOTE_TOKEN_TIMEOUT + self::REMOTE_TOKEN_CLOCK_SKEW;
+
+			// add() rather than get()/set(): the check and the write need to be atomic.
+			if ( wp_cache_add( $key, 1, self::REMOTE_TOKEN_CACHE_GROUP, $ttl ) ) {
+				return true;
+			}
+
+			// add() also fails when the cache is unreachable, which isn't the same as the token being spent.
+			return false === wp_cache_get( $key, self::REMOTE_TOKEN_CACHE_GROUP );
+		}
+
+		/**
 		 * Normalize a host for use in a remote token.
 		 *
 		 * Comparisons are case-insensitive and ignore the port, matching how the
@@ -820,9 +841,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			list( $user_id, $sso_hash, $valid_until, $remember_me, $session_token ) = explode( '|', $sso_token, 5 );
 
 			$expiration_valid = (
-				// +/- 5s on a 5s timeout.
-				$valid_until >= ( time() - self::REMOTE_TOKEN_TIMEOUT ) &&
-				$valid_until <= ( time() + ( self::REMOTE_TOKEN_TIMEOUT * 2 ) )
+				$valid_until >= time() &&
+				$valid_until <= ( time() + self::REMOTE_TOKEN_TIMEOUT + self::REMOTE_TOKEN_CLOCK_SKEW )
 			);
 
 			$valid_hash = false;
@@ -880,7 +900,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				'valid',
 				'user',
 				'remember_me',
-				'session_token'
+				'session_token',
+				'sso_hash'
 			);
 		}
 
