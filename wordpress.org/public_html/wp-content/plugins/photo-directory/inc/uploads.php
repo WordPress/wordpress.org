@@ -254,7 +254,7 @@ class Uploads {
 
 			wp_enqueue_script(
 				'wporg-photos-submit',
-				plugins_url( 'assets/js/submit.js', dirname( __FILE__ ) ),
+				plugins_url( 'assets/js/submit.js', WPORG_PHOTO_DIRECTORY_MAIN_FILE ),
 				[],
 				filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/js/submit.js' ),
 				true
