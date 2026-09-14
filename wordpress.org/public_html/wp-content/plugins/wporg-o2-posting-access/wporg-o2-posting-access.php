@@ -13,6 +13,33 @@ namespace WordPressdotorg\o2\Posting_Access;
 class Plugin {
 
 	/**
+	 * Capability names add_post_capabilities() is prepared to answer for.
+	 *
+	 * The capabilities it grants, plus every core meta capability map_meta_cap()
+	 * can resolve onto one of them. The comment entries reach them by way of
+	 * 'edit_post' on the comment's post.
+	 *
+	 * @var string[]
+	 */
+	const POST_CAPS = [
+		'publish_posts',
+		'edit_posts',
+		'edit_published_posts',
+		'edit_post',
+		'edit_page',
+		'publish_post',
+		'read_post',
+		'read_page',
+		'add_post_meta',
+		'edit_post_meta',
+		'delete_post_meta',
+		'edit_comment',
+		'add_comment_meta',
+		'edit_comment_meta',
+		'delete_comment_meta',
+	];
+
+	/**
 	 * Initializes actions and filters.
 	 */
 	public function init() {
@@ -273,6 +300,12 @@ class Plugin {
 	/**
 	 * Adds post capabilities to current user.
 	 *
+	 * The grant answers questions about posting, so it is applied only when
+	 * posting is what was asked about. map_meta_cap() resolves a meta capability
+	 * to primitives before this filter runs, and another plugin's meta capability
+	 * is free to resolve to one of the primitives below; without the check on
+	 * $args[0] the grant would answer that question too, in the affirmative.
+	 *
 	 * @param array   $allcaps An array of all the user's capabilities.
 	 * @param array   $caps    Actual capabilities for meta capability.
 	 * @param array   $args    Optional parameters passed to has_cap(), typically object ID.
@@ -281,6 +314,10 @@ class Plugin {
 	 */
 	public function add_post_capabilities( $allcaps, $caps, $args, $user ) {
 		if ( empty( $user->ID ) || ! empty( $allcaps['publish_posts'] ) || is_user_member_of_blog( $user->ID ) ) {
+			return $allcaps;
+		}
+
+		if ( ! in_array( $args[0] ?? '', self::POST_CAPS, true ) ) {
 			return $allcaps;
 		}
 
