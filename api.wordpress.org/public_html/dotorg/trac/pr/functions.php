@@ -504,7 +504,9 @@ function trac_comment_code_block( $fence ) {
  * @return string|false The span with its headings converted, or false if it cannot be built.
  */
 function trac_comment_headings( $text ) {
-	$text = preg_replace( '~^[ \t>]*\K(?=={1,6}[ \t])~m', '!', $text );
+	$skipped = trac_comment_skipped();
+
+	$text = preg_replace( "~^{$skipped}*\K(?=={1,6}[ \t])~mu", '!', $text );
 	if ( null === $text ) {
 		return false;
 	}

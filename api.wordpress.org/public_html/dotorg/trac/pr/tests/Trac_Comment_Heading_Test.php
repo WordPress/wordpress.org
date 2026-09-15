@@ -255,11 +255,16 @@ class Trac_Comment_Heading_Test extends TestCase {
 	 */
 	public function data_wiki_headings(): array {
 		return array(
-			'bare'       => array( "== Summary\n", '!== Summary' ),
-			'closed'     => array( "== Summary ==\n", '!== Summary ==' ),
-			'indented'   => array( "Text.\n\n  = Summary =\n", "\n  !=" ),
-			'deepest'    => array( "====== Summary\n", '!====== Summary' ),
-			'tab spaced' => array( "==\tSummary\n", "!==\tSummary" ),
+			'bare'           => array( "== Summary\n", '!== Summary' ),
+			'closed'         => array( "== Summary ==\n", '!== Summary ==' ),
+			'indented'       => array( "Text.\n\n  = Summary =\n", "\n  !=" ),
+			'deepest'        => array( "====== Summary\n", '!====== Summary' ),
+			'tab spaced'     => array( "==\tSummary\n", "!==\tSummary" ),
+			// Trac steps over Python's whitespace, which is wider than PCRE's.
+			'no-break'       => array( "Text.\n\n\u{00A0}== Summary\n", "\u{00A0}!== Summary" ),
+			'en space'       => array( "Text.\n\n\u{2002}== Summary\n", "\u{2002}!== Summary" ),
+			'ideographic'    => array( "Text.\n\n\u{3000}== Summary\n", "\u{3000}!== Summary" ),
+			'unit separator' => array( "Text.\n\n\x1f== Summary\n", "\x1f!== Summary" ),
 		);
 	}
 
