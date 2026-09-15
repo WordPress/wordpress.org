@@ -265,6 +265,10 @@ class Trac_Comment_Heading_Test extends TestCase {
 			'en space'       => array( "Text.\n\n\u{2002}== Summary\n", "\u{2002}!== Summary" ),
 			'ideographic'    => array( "Text.\n\n\u{3000}== Summary\n", "\u{3000}!== Summary" ),
 			'unit separator' => array( "Text.\n\n\x1f== Summary\n", "\x1f!== Summary" ),
+			// The same class again, this time separating the marker from the title.
+			'no-break sep'   => array( "Text.\n\n==\u{00A0}Summary\n", "!==\u{00A0}Summary" ),
+			'en space sep'   => array( "Text.\n\n==\u{2002}Summary\n", "!==\u{2002}Summary" ),
+			'cited sep'      => array( "Text.\n\n> ==\u{00A0}Summary\n", "> !==\u{00A0}Summary" ),
 		);
 	}
 
@@ -288,6 +292,7 @@ class Trac_Comment_Heading_Test extends TestCase {
 	public function data_inert_equals(): array {
 		return array(
 			'no space' => array( "=Summary\n" ),
+			'citation' => array( "==> Not a heading.\n" ),
 			'too deep' => array( "======= Summary\n" ),
 			'arrow'    => array( "=> Returns the value.\n" ),
 		);

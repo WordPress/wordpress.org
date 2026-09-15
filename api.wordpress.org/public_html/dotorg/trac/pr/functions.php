@@ -506,7 +506,10 @@ function trac_comment_code_block( $fence ) {
 function trac_comment_headings( $text ) {
 	$skipped = trac_comment_skipped();
 
-	$text = preg_replace( "~^{$skipped}*\K(?=={1,6}[ \t])~mu", '!', $text );
+	// A heading is separated by whitespace alone; a `>` after its `=` run is text.
+	$space = str_replace( '>', '', $skipped );
+
+	$text = preg_replace( "~^{$skipped}*\K(?=={1,6}{$space})~mu", '!', $text );
 	if ( null === $text ) {
 		return false;
 	}
