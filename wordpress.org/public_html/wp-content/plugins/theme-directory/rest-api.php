@@ -17,7 +17,7 @@ add_action( 'parse_request', function( $wp ) {
 		return;
 	}
 
-	$_GET['_jsonp'] = $_GET['callback'];
+	$_GET['_jsonp'] = sanitize_text_field( wp_unslash( $_GET['callback'] ) );
 
 	unset( $_GET['callback'], $_REQUEST['callback'] );
 }, 9 );

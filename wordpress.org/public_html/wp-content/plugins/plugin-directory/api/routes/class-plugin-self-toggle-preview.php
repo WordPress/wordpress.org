@@ -79,7 +79,7 @@ class Plugin_Self_Toggle_Preview extends Base {
 
 		// Add an audit-log entry as to why this has happened.
 		Tools::audit_log(
-			sprintf( 'Plugin preview %s. Reason: Author Request from %s', $did, $_SERVER['REMOTE_ADDR'] ),
+			sprintf( 'Plugin preview %s. Reason: Author Request from %s', $did, sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) ),
 			$plugin
 		);
 

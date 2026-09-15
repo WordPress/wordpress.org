@@ -231,8 +231,8 @@ function restrict_invited_user_role() {
 
 	check_admin_referer( 'add-user', '_wpnonce_add-user' );
 
-	// Validate the exact value core persists; sanitizing it could validate a different role.
-	$role = isset( $_REQUEST['role'] ) && is_string( $_REQUEST['role'] ) ? $_REQUEST['role'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	// Validate the exact value core persists; sanitizing or unslashing it could validate a different role.
+	$role = isset( $_REQUEST['role'] ) && is_string( $_REQUEST['role'] ) ? $_REQUEST['role'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 	wp_ensure_editable_role( $role );
 }
 

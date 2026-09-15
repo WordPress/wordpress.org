@@ -697,14 +697,14 @@ function tax_save_term_fields( $term_id ) {
 	update_term_meta(
 		$term_id,
 		'dashicon-class',
-		sanitize_text_field( $_POST['dashicon-class'] )
+		sanitize_text_field( wp_unslash( $_POST['dashicon-class'] ?? '' ) )
 	);
 
-	$is_sticky = $_POST['sticky'] ?? 0;
+	$is_sticky = rest_sanitize_boolean( $_POST['sticky'] ?? 0 );
 	update_term_meta(
 		$term_id,
 		'sticky',
-		rest_sanitize_boolean( $is_sticky )
+		$is_sticky
 	);
 }
 

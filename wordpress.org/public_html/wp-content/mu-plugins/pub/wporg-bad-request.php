@@ -164,6 +164,7 @@ add_action( 'wp_ajax_nopriv_o2_read', function() {
 	}
 
 	if ( isset( $_REQUEST['queryVars'] ) ) {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- This guard rejects malformed requests, so it has to look at the value as sent.
 		check_for_invalid_query_vars( $_REQUEST['queryVars'], 'o2 queryVars' );
 	}
 }, 9 );
@@ -267,7 +268,7 @@ add_filter( 'xmlrpc_methods', function( $methods ) {
 add_action( 'send_headers', function() {
 	if ( isset( $_REQUEST['EGOTEC'] ) ) {
 		die_bad_request( 'EGOTEC request parameter set' );
-	} elseif ( str_contains( $_SERVER['REQUEST_URI'], '$acunetix' ) ) {
+	} elseif ( str_contains( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '$acunetix' ) ) {
 		die_bad_request( 'acunetix request' );
 	}
 } );
@@ -279,7 +280,7 @@ add_action( 'send_headers', function() {
  * warnings downstream when the value is used in esc_attr().
  */
 add_action( 'send_headers', function() {
-	if ( ! str_starts_with( $_SERVER['REQUEST_URI'], '/patterns/' ) ) {
+	if ( ! str_starts_with( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/patterns/' ) ) {
 		return;
 	}
 
@@ -309,7 +310,8 @@ add_action( 'send_headers', function() {
 	];
 
 	foreach ( $share_by_email_fields as $field ) {
-		if ( isset( $_POST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.InputNotValidated -- Checks the submitted value's type before anything normalises it; this runs on send_headers to reject malformed requests, ahead of any handler that would have a nonce to verify.
+		if ( isset( $_POST[ $field ] ) && ! is_scalar( $_POST[ $field ] ) ) {
 			die_bad_request( "non-scalar $field in Jetpack Share By Email" );
 		}
 	}
@@ -341,6 +343,7 @@ add_action( 'template_redirect', function() {
 		return;
 	}
 
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing -- Derives the charset exactly as wp-trackback.php does, from the raw value, so the check below sees what core will see (Core #60261). Inspects every incoming request, ahead of any handler that would own a nonce.
 	$charset = str_replace( array( ',', ' ' ), '', strtoupper( trim( $_POST['charset'] ?? '' ) ) );
 
 	if ( function_exists( 'mb_list_encodings' ) && ! in_array( $charset, mb_list_encodings(), true ) ) {
@@ -379,7 +382,7 @@ add_action( 'init', function() {
 		return;
 	}
 
-	$path = parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH );
+	$path = wp_parse_url( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH );
 	if ( str_ends_with( $path, '/wp-activate.php' ) ) {
 		die_bad_request( 'Invalid request to wp-activate.php' );
 	}
@@ -407,7 +410,7 @@ function die_bad_request( $reference = '' ) {
 
 	// Use a prettier error page on WordPress.org
 	if (
-		str_contains( $_SERVER['HTTP_HOST'], 'wordpress.org' ) &&
+		str_contains( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), 'wordpress.org' ) &&
 		! defined( 'XMLRPC_REQUEST' ) && ! defined( 'REST_REQUEST' ) &&
 		! is_admin() /* admin-ajax, admin-post */
 	) {

@@ -662,9 +662,11 @@ class Uploads {
 			return 'too-many-files';
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Reached through the Frontend Uploader plugin's fu_should_process_content_upload filter, which its upload_content() applies only after verifying the fu_nonce that the upload form carries.
+
 		// Check file size.
 		if ( ! empty( $_FILES['files']['size'][0] ) ) {
-			$file_size = $_FILES['files']['size'][0];
+			$file_size = (int) $_FILES['files']['size'][0];
 			// Check if file is too large.
 			//   (This is actually a fallback check in the event the MAX_FILE_SIZE
 			//   directive in the upload form is missing or has been tampered with.
@@ -678,7 +680,7 @@ class Uploads {
 			}
 		}
 
-		list( $width, $length, $image_type ) = getimagesize( $_FILES['files']['tmp_name'][0] );
+		list( $width, $length, $image_type ) = getimagesize( sanitize_text_field( wp_unslash( $_FILES['files']['tmp_name'][0] ) ) );
 
 		// Check image type.
 		if ( ! in_array( $image_type, [ IMG_JPG, IMG_JPEG ] ) ) {
@@ -695,13 +697,14 @@ class Uploads {
 			return 'file-too-short';
 		}
 
-		if ( ! isset( $_POST['photo_copyright'] ) || ! $_POST['photo_copyright'] ) {
+		if ( empty( $_POST['photo_copyright'] ) ) {
 			return 'checkbox_unchecked_copyright';
 		}
 
-		if ( ! isset( $_POST['photo_license'] ) || ! $_POST['photo_license'] ) {
+		if ( empty( $_POST['photo_license'] ) ) {
 			return 'checkbox_unchecked_license';
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		// The same fields and sanitizers `sanitize_submitted_description()` stores them with.
 		$fields = [
@@ -735,7 +738,8 @@ class Uploads {
 	 */
 	public static function get_uploaded_file_hash() {
 		if ( ! self::$_hash && ! empty( $_FILES['files']['tmp_name'] ) ) {
-			self::$_hash = md5_file( $_FILES['files']['tmp_name'][0] );
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Only reached from the Frontend Uploader pipeline, which verifies its fu_nonce before running any of it.
+			self::$_hash = md5_file( sanitize_text_field( wp_unslash( $_FILES['files']['tmp_name'][0] ?? '' ) ) );
 		}
 
 		return self::$_hash;

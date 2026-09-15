@@ -28,8 +28,8 @@ function add_site_navigation_menus( $menus ) {
 
 	// This accounts for test and local environments.
 	$scheme = wp_parse_url( home_url(), PHP_URL_SCHEME ) ?: 'https';
-	$host   = $_SERVER['HTTP_HOST'] ?? wp_parse_url( home_url(), PHP_URL_HOST ) ?: 'localhost';
-	$path   = parse_url( ( $_SERVER['REQUEST_URI'] ?? '/' ) ?: '/', PHP_URL_PATH );
+	$host   = sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? ( wp_parse_url( home_url(), PHP_URL_HOST ) ?: 'localhost' ) ) );
+	$path   = wp_parse_url( ( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) ) ?: '/', PHP_URL_PATH );
 	$url    = $scheme . '://' . $host . $path;
 
 	$items = array(
@@ -395,7 +395,7 @@ function filter_navigation_block( $block_content, $block ) {
 				$tags->set_bookmark( 'parent-li' );
 				$tags->next_tag( 'a' );
 
-				if ( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] === $tags->get_attribute( 'href' ) ) {
+				if ( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) === $tags->get_attribute( 'href' ) ) {
 					$tags->seek( 'parent-li' );
 					$tags->add_class( 'current-menu-item' );
 					break;

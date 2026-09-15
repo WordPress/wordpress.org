@@ -184,17 +184,20 @@ class Upload_Handler {
 	 * @return string|WP_Error Confirmation message on success, WP_Error object on failure.
 	 */
 	public function process_upload( $for_plugin = 0 ) {
-		if ( UPLOAD_ERR_OK !== $_FILES['zip_file']['error'] ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- the nonce is verified by Upload::shortcode_handler() before this runs.
+		if ( ! isset( $_FILES['zip_file']['error'] ) || UPLOAD_ERR_OK !== (int) $_FILES['zip_file']['error'] ) {
 			return new WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
 
 		// Validate the maximum upload size.
-		if ( $_FILES['zip_file']['size'] > wp_max_upload_size() ) {
+		if ( isset( $_FILES['zip_file']['size'] ) && (int) $_FILES['zip_file']['size'] > wp_max_upload_size() ) {
 			return new WP_Error( 'error_upload', __( 'Error in file upload.', 'wporg-plugins' ) );
 		}
 
-		$zip_file         = $_FILES['zip_file']['tmp_name'];
-		$upload_comment   = trim( wp_unslash( $_POST['comment'] ?? '' ) );
+		$zip_file = sanitize_text_field( wp_unslash( $_FILES['zip_file']['tmp_name'] ?? '' ) );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve code and encoded URLs; both the audit log and attachment content use esc_html().
+		$upload_comment = isset( $_POST['comment'] ) && is_string( $_POST['comment'] ) ? trim( wp_unslash( $_POST['comment'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 		$has_upload_token = $this->has_valid_upload_token();
 		$this->plugin_dir = Filesystem::unzip( $zip_file );
 
@@ -589,7 +592,7 @@ class Upload_Handler {
 
 		// First time submission, track some additional metadata.
 		if ( ! $updating_existing ) {
-			$post_args['meta_input']['_author_ip']         = preg_replace( '/[^0-9a-fA-F:., ]/', '', $_SERVER['REMOTE_ADDR'] );
+			$post_args['meta_input']['_author_ip']         = preg_replace( '/[^0-9a-fA-F:., ]/', '', sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) );
 			$post_args['meta_input']['_submitted_date']    = time();
 			$post_args['meta_input']['_used_upload_token'] = $has_upload_token;
 		}
@@ -908,14 +911,18 @@ class Upload_Handler {
 	 * @return WP_Post|WP_Error Attachment post or upload error.
 	 */
 	public function save_zip_file( $post_id, $upload_comment, $plugin_check_result = false ) {
-		$zip_hash = sha1_file( $_FILES['zip_file']['tmp_name'] );
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- the nonce is verified by Upload::shortcode_handler() before this runs.
+		$zip_hash = sha1_file( sanitize_text_field( wp_unslash( $_FILES['zip_file']['tmp_name'] ?? '' ) ) );
 		if ( in_array( $zip_hash, get_post_meta( $post_id, 'uploaded_zip_hash' ) ?: [], true ) ) {
 			return new WP_Error( 'already_uploaded', __( "You've already uploaded that ZIP file.", 'wporg-plugins' ) );
 		}
 
 		// Upload folders are already year/month based. A second-based prefix should be specific enough.
-		$original_name              = $_FILES['zip_file']['name'];
-		$_FILES['zip_file']['name'] = date( 'd_H-i-s' ) . '_' . $_FILES['zip_file']['name'];
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- $submitted_name records what the author sent, so it is stored as-is; the filename built from it is sanitized.
+		$submitted_name             = isset( $_FILES['zip_file']['name'] ) && is_string( $_FILES['zip_file']['name'] ) ? wp_unslash( $_FILES['zip_file']['name'] ) : '';
+		$original_name              = sanitize_file_name( $submitted_name );
+		$_FILES['zip_file']['name'] = gmdate( 'd_H-i-s' ) . '_' . $original_name;
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		add_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		add_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
@@ -946,7 +953,7 @@ class Upload_Handler {
 
 			// Save some basic details with the ZIP.
 			update_post_meta( $attachment->ID, 'version', $this->plugin['Version'] );
-			update_post_meta( $attachment->ID, 'submitted_name', $original_name );
+			update_post_meta( $attachment->ID, 'submitted_name', wp_slash( $submitted_name ) );
 
 			if ( $plugin_check_result ) {
 				update_post_meta( $attachment->ID, 'pc_verdict', $plugin_check_result['verdict'] );
@@ -978,7 +985,7 @@ class Upload_Handler {
 	 * An upload token can be used to bypass various plugin checks.
 	 */
 	public function has_valid_upload_token() {
-		$token = wp_unslash( $_REQUEST['upload_token'] ?? '' );
+		$token = sanitize_text_field( wp_unslash( $_REQUEST['upload_token'] ?? '' ) );
 
 		return $token && Upload_Token::instance()->is_valid_for_user( get_current_user_id(), $token );
 	}

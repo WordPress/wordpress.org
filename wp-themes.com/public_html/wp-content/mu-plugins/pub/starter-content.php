@@ -73,7 +73,7 @@ class Starter_Content {
 		// Allow using `?use-starter-content=0` to disable the starter content for a request.
 		if (
 			isset( $_GET['use-starter-content'] ) &&
-			! $_GET['use-starter-content']
+			! sanitize_text_field( wp_unslash( $_GET['use-starter-content'] ) )
 		) {
 			return false;
 		}

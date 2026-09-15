@@ -28,7 +28,7 @@ function privacy_process_request( $type ) {
 		return compact( 'email', 'error_message', 'success', 'nonce_action' );
 	}
 
-	// phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+	// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve the exact account identifier for validation by the GDPR API. The nonce is checked for logged-in users below, and reCAPTCHA gates the rest.
 	$email           = trim( wp_unslash( $_POST['email'] ) );
 	$requesting_user = is_user_logged_in() ? wp_get_current_user()->user_login : false;
 	$email_user      = get_user_by( 'email', $email );
@@ -47,7 +47,7 @@ function privacy_process_request( $type ) {
 		$error_message = esc_html__( 'Your form session has expired. Please try again.', 'wporg' );
 	} elseif (
 		is_user_logged_in() &&
-		! wp_verify_nonce( wp_unslash( $_POST['_wpnonce'] ), $nonce_action )
+		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), $nonce_action )
 	) {
 		$error_message = esc_html__( 'Your form session has expired. Please try again.', 'wporg' );
 	} elseif (

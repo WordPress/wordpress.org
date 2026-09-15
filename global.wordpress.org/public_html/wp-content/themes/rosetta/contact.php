@@ -3,8 +3,11 @@
 Template Name: Contact Page
 */
 
+// phpcs:disable WordPress.Security.NonceVerification.Missing -- This is a public contact form served to logged-out visitors, for whom every nonce resolves to the same value, so a nonce would not establish intent here. Akismet screens the submission before the mail is sent.
+
 function rosetta_set_sender( &$phpmailer ) {
-	$phpmailer->Sender = $_POST['your_email'];
+	// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Sender is a PHPMailer property.
+	$phpmailer->Sender = sanitize_email( ( isset( $_POST['your_email'] ) && is_string( $_POST['your_email'] ) ? wp_unslash( $_POST['your_email'] ) : '' ) );
 }
 
 get_header();
@@ -25,22 +28,27 @@ if ( ! empty( $_POST['submit'] ) ) {
 
 	// Check values
 	$error = $your_name = $blog_name = $your_email = $blog_url = $message = false;
-	if ( '' == $_POST['your_name'] ) {
+
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Message keeps any "<" the visitor typed; wp_kses() strips the email body, Akismet urlencodes it, and every echo escapes it.
+	$submitted_message = isset( $_POST['message'] ) && is_string( $_POST['message'] ) ? wp_unslash( $_POST['message'] ) : '';
+	if ( '' === sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) ) ) {
 		$your_name = true;
 		$error = true;
 	}
 
-	if ( ! validate_email( $_POST['your_email'] ) ) {
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- is_email() below validates the address as typed; escaped at every echo, and the mail headers still get sanitize_email().
+	$submitted_email = isset( $_POST['your_email'] ) && is_string( $_POST['your_email'] ) ? wp_unslash( $_POST['your_email'] ) : '';
+	if ( ! is_email( $submitted_email ) ) {
 		$your_email = true;
 		$error = true;
 	}
 
-	if ( '' == $_POST['message'] ) {
+	if ( '' === trim( $submitted_message ) ) {
 		$blog_description = true;
 		$error = true;
 	}
 
-	if ( '' == $_POST['subject'] ) {
+	if ( '' === sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) ) ) {
 		$subject = true;
 		$error = true;
 	}
@@ -58,7 +66,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="your_name"><?php esc_html_e( 'Your Name:', 'rosetta' ); ?> </label>
 						</td>
 						<td>
-							<span><input name="your_name" type="text" id="your_name" value="<?php echo esc_attr( $_POST['your_name'] ); ?>" /></span>
+							<span><input name="your_name" type="text" id="your_name" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) ) ); ?>" /></span>
 							<?php esc_html_e( 'Let us know your name.', 'rosetta' ); ?>
 						</td>
 					</tr>
@@ -68,7 +76,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="your_name"><?php esc_html_e( 'Your Name:', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span><input name="your_name" type="text" id="your_name" value="<?php echo esc_attr( $_POST['your_name'] ); ?>" /></span>
+							<span><input name="your_name" type="text" id="your_name" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) ) ); ?>" /></span>
 						</td>
 					</tr>
 				<?php } ?>
@@ -79,7 +87,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="your_email"><?php esc_html_e( 'Your Email:', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( $_POST['your_email'] ); ?>" /></span>
+							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( $submitted_email ); ?>" /></span>
 							<?php esc_html_e( 'Your email address did not appear to be valid. Please check it.', 'rosetta' ); ?>
 						</td>
 					</tr>
@@ -89,7 +97,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="your_email"><?php esc_html_e( 'Your Email:', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( $_POST['your_email'] ); ?>" /></span>
+							<span><input name="your_email" type="text" id="your_email" value="<?php echo esc_attr( $submitted_email ); ?>" /></span>
 						</td>
 					</tr>
 				<?php } ?>
@@ -99,7 +107,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 						<label for="blog_url"><?php esc_html_e( 'URI of your blog:', 'rosetta' ); ?></label>
 					</td>
 					<td>
-						<span><input name="blog_url" type="text" id="blog_url" value="<?php echo esc_attr( $_POST['blog_url'] ); ?>" /></span>
+						<span><input name="blog_url" type="text" id="blog_url" value="<?php echo esc_attr( esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) ) ); ?>" /></span>
 					</td>
 				</tr>
 
@@ -109,7 +117,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="subject"><?php esc_html_e( 'What&rsquo;s this about?', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span><input name="subject" type="text" id="subject" value="<?php echo esc_attr( $_POST['subject'] ); ?>" /></span>
+							<span><input name="subject" type="text" id="subject" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) ) ); ?>" /></span>
 							<?php esc_html_e( 'Write something!', 'rosetta' ); ?>
 						</td>
 					</tr>
@@ -119,7 +127,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="subject"><?php esc_html_e( 'What&rsquo;s this about?', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span><input name="subject" type="text" id="subject" value="<?php echo esc_attr( $_POST['subject'] ); ?>" /></span>
+							<span><input name="subject" type="text" id="subject" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) ) ); ?>" /></span>
 						</td>
 					</tr>
 				<?php } ?>
@@ -130,7 +138,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="message"><?php esc_html_e( 'Your Message:', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( $_POST['message'] ); ?></textarea></span>
+							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( $submitted_message ); ?></textarea></span>
 							<?php esc_html_e( 'Say something!', 'rosetta' ); ?>
 						</td>
 					</tr>
@@ -140,7 +148,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 							<label for="message"><?php esc_html_e( 'Your Message:', 'rosetta' ); ?></label>
 						</td>
 						<td>
-							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( $_POST['message'] ); ?></textarea></span>
+							<span class="message"><textarea name="message" id="message"><?php echo esc_textarea( $submitted_message ); ?></textarea></span>
 						</td>
 					</tr>
 				<?php } ?>
@@ -157,18 +165,18 @@ if ( ! empty( $_POST['submit'] ) ) {
 	} else { // If all the info is good
 
 		// Akismet checking
-		$comment['user_ip']              = preg_replace( '/[^0-9., ]/', '', $_SERVER['REMOTE_ADDR'] );
-		$comment['user_agent']           = $_SERVER['HTTP_USER_AGENT'];
-		$comment['referrer']             = $_SERVER['HTTP_REFERER'];
-		$comment['blog']                 = home_url();
-		$comment['comment_type']         = 'contact_form';
-		$comment['comment_author']       = '';
-		$comment['comment_author_email'] = $_POST['your_email'];
-		$comment['comment_author_url']   = $_POST['blog_url'];
-		$comment['comment_content']      = stripslashes( $_POST['message'] );
+		$akismet_comment['user_ip']              = preg_replace( '/[^0-9., ]/', '', sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) );
+		$akismet_comment['user_agent']           = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) );
+		$akismet_comment['referrer']             = esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
+		$akismet_comment['blog']                 = home_url();
+		$akismet_comment['comment_type']         = 'contact_form';
+		$akismet_comment['comment_author']       = '';
+		$akismet_comment['comment_author_email'] = $submitted_email;
+		$akismet_comment['comment_author_url']   = esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) );
+		$akismet_comment['comment_content']      = $submitted_message;
 		$query_string = '';
-		foreach ( $comment as $key => $data ) {
-			$query_string .= $key . '=' . urlencode( stripslashes( $data ) ) . '&';
+		foreach ( $akismet_comment as $key => $data ) {
+			$query_string .= $key . '=' . rawurlencode( $data ) . '&';
 		}
 		$response = akismet_http_post( $query_string, $akismet_api_host, '/1.1/comment-check', $akismet_api_port );
 		if ( 'true' == $response[1] ) {
@@ -177,12 +185,12 @@ if ( ! empty( $_POST['submit'] ) ) {
 
 		// Sanitization
 		$message_data = array();
-		$message_data['ip']       = preg_replace( '/[^0-9., ]/', '', $_SERVER['REMOTE_ADDR'] );
-		$message_data['name']     = sanitize_text_field( $_POST['your_name'] );
-		$message_data['email']    = sanitize_email( $_POST['your_email'] );
-		$message_data['blog_url'] = esc_url_raw( $_POST['blog_url'] );
-		$message_data['subject']  = sanitize_text_field( $_POST['subject'] );
-		$message_data['message']  = wp_kses( stripslashes( $_POST['message'] ), array() );
+		$message_data['ip']       = preg_replace( '/[^0-9., ]/', '', sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) );
+		$message_data['name']     = sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) );
+		$message_data['email']    = sanitize_email( $submitted_email );
+		$message_data['blog_url'] = esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) );
+		$message_data['subject']  = sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) );
+		$message_data['message']  = wp_kses( $submitted_message, array() );
 
 		// Let's send an email
 		$message = $message_data['message'] . '
@@ -191,8 +199,8 @@ Name: ' . $message_data['name'] . '
 Email: ' . $message_data['email'] . '
 Blog URI: ' . $message_data['blog_url'] . '
 IP Address: ' . $message_data['ip'] . '
-Browser: ' . sanitize_text_field( $_SERVER['HTTP_USER_AGENT'] ) . '
-Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+Browser: ' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ?? '' ) ) . '
+Sent From: ' . esc_url_raw( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
 
 		$headers = array();
 		$headers[] = 'From: ' . $message_data['name'] . ' <' . $message_data['email'].'>';
@@ -281,3 +289,5 @@ Sent From: ' . esc_url_raw( $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
 	</script>
 <?php
 get_footer();
+
+// phpcs:enable WordPress.Security.NonceVerification.Missing

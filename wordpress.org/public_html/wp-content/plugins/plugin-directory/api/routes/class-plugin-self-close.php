@@ -74,7 +74,7 @@ class Plugin_Self_Close extends Base {
 
 		// Add an audit-log entry as to why this has happened.
 		Tools::audit_log(
-			sprintf( 'Plugin closed. Reason: Author Self-close Request from %s', $_SERVER['REMOTE_ADDR'] ),
+			sprintf( 'Plugin closed. Reason: Author Self-close Request from %s', sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) ),
 			$plugin
 		);
 

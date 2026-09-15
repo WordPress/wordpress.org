@@ -11,7 +11,7 @@ if ( empty( $_SERVER['REQUEST_URI'] ) ) {
 }
 
 add_action( 'init', function() {
-	if ( '/llms.txt' !== $_SERVER['REQUEST_URI'] ) {
+	if ( '/llms.txt' !== wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) {
 		return;
 	}
 

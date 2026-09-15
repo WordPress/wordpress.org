@@ -590,7 +590,7 @@ class Support_Compat {
 			'topic-php' === get_query_var( 'pagename' ) &&
 			isset( $_GET['id'] ) &&
 			is_string( $_GET['id'] ) &&
-			ctype_digit( $_GET['id'] )
+			ctype_digit( sanitize_text_field( wp_unslash( $_GET['id'] ?? '' ) ) )
 		) {
 			$topic_id = absint( $_GET['id'] );
 		}

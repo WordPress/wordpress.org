@@ -148,12 +148,12 @@ function wporg_login_admin_page() {
 	if ( isset( $_GET['action'] ) ) {
 		echo '<div class="updated notice"><p>';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Selects a fixed display message without changing state.
-			echo esc_html( wporg_login_admin_action_text( sanitize_key( wp_unslash( $_GET['action'] ) ) ) );
+		echo esc_html( wporg_login_admin_action_text( sanitize_key( wp_unslash( $_GET['action'] ) ) ) );
 		echo '</p></div>';
 	}
 
 	echo '<form>';
-	printf( '<input type="hidden" name="page" value="%s">', esc_attr( $_GET['page'] ) );
+	printf( '<input type="hidden" name="page" value="%s">', esc_attr( sanitize_text_field( wp_unslash( $_GET['page'] ?? '' ) ) ) );
 
 	$wp_list_table->views();
 	$wp_list_table->search_box( 'Search', 's' );
@@ -165,13 +165,14 @@ function wporg_login_admin_page() {
 
 function wporg_login_admin_settings_page() {
 	if ( $_POST && check_admin_referer( 'update_login_settings' ) ) {
-		$recaptcha_v3_threshold = wp_unslash( $_POST['recaptcha_v3_threshold'] ?? '' );
+		$recaptcha_v3_threshold = sanitize_text_field( wp_unslash( $_POST['recaptcha_v3_threshold'] ?? '' ) );
 		if ( $recaptcha_v3_threshold ) {
 			$recaptcha_v3_threshold = sprintf( "%.1f", $recaptcha_v3_threshold );
 			update_option( 'recaptcha_v3_threshold', $recaptcha_v3_threshold );
 		}
 
-		$block_words = wp_unslash( $_POST['registration_block_words'] ?? '' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Literal substring rules retain boundary spaces; the settings form escapes them on output.
+		$block_words = isset( $_POST['registration_block_words'] ) && is_string( $_POST['registration_block_words'] ) ? wp_unslash( $_POST['registration_block_words'] ) : '';
 		if ( $block_words ) {
 			$block_words = str_replace( "\r", '', $block_words ); // We're not trimming the lines (So spaces before/after can be included to match full words only), but need to remove the 'arrrs.
 			$block_words = explode( "\n", $block_words );
@@ -187,7 +188,7 @@ function wporg_login_admin_settings_page() {
 			update_option( 'registration_block_words', $block_words );
 		}
 
-		$banned_email_domains = wp_unslash( $_POST['banned_email_domains'] ?? '' );
+		$banned_email_domains = sanitize_textarea_field( wp_unslash( $_POST['banned_email_domains'] ?? '' ) );
 		if ( $banned_email_domains ) {
 			$banned_email_domains = explode( "\n", $banned_email_domains );
 			$banned_email_domains = array_values( array_unique( array_filter( array_map( 'trim', $banned_email_domains ) ) ) );
@@ -203,7 +204,7 @@ function wporg_login_admin_settings_page() {
 			update_site_option( 'banned_email_domains', $banned_email_domains );
 		}
 
-		$never_spam_tokens = wp_unslash( $_POST['never_spam_tokens'] ?? '' );
+		$never_spam_tokens = sanitize_textarea_field( wp_unslash( $_POST['never_spam_tokens'] ?? '' ) );
 		if ( $never_spam_tokens ) {
 			$never_spam_tokens = str_replace( "\r", '', $never_spam_tokens );
 			$never_spam_tokens = explode( "\n", $never_spam_tokens );
@@ -219,8 +220,8 @@ function wporg_login_admin_settings_page() {
 			update_option( 'never_spam_tokens', $never_spam_tokens );
 		}
 
-		$ip_block = wp_unslash( $_POST['ip_block'] ?? '' );
-		$ip_allow = wp_unslash( $_POST['ip_allow'] ?? '' );
+		$ip_block = sanitize_textarea_field( wp_unslash( $_POST['ip_block'] ?? '' ) );
+		$ip_allow = sanitize_textarea_field( wp_unslash( $_POST['ip_allow'] ?? '' ) );
 		if ( $ip_block || $ip_allow ) {
 			wp_cache_add_global_groups( array( 'registration-limit' ) );
 
@@ -239,7 +240,7 @@ function wporg_login_admin_settings_page() {
 			};
 
 			if ( $ip_allow ) {
-				$time_to_allow = wp_unslash( $_POST['ip_allow_time'] ?? DAY_IN_SECONDS );
+				$time_to_allow = absint( $_POST['ip_allow_time'] ?? DAY_IN_SECONDS );
 				$allow = 0;
 				foreach ( $expand_to_range( $ip_allow ) as $ip ) {
 					wp_cache_set( $ip, 'whitelist', 'registration-limit', $time_to_allow );
@@ -251,7 +252,7 @@ function wporg_login_admin_settings_page() {
 				wporg_login_admin_settings_page_log_changes( 'IP Allow', [], $ip_allow );
 			}
 			if ( $ip_block ) {
-				$time_to_block = wp_unslash( $_POST['ip_block_time'] ?? DAY_IN_SECONDS );
+				$time_to_block = absint( $_POST['ip_block_time'] ?? DAY_IN_SECONDS );
 				$blocked = 0;
 				foreach ( $expand_to_range( $ip_block ) as $ip ) {
 					wp_cache_set( $ip, 999, 'registration-limit', $time_to_block );
@@ -416,7 +417,8 @@ add_action( 'admin_post_login_resend_email', function() {
 		wp_die();
 	}
 
-	$email = $_REQUEST['email'] ?? '';
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email.
+	$email = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? wp_unslash( $_REQUEST['email'] ) : '';
 
 	check_admin_referer( 'resend_' . $email );
 
@@ -441,14 +443,15 @@ add_action( 'admin_post_login_mark_as_cleared', function() {
 		wp_die();
 	}
 
-	$email = $_REQUEST['email'] ?? '';
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email.
+	$email = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? wp_unslash( $_REQUEST['email'] ) : '';
 
 	check_admin_referer( 'clear_' . $email );
 
 	$user = wporg_get_pending_user( $email );
 	if ( $user ) {
 		// If a spectator role is specified, note that.
-		if ( ( $_REQUEST['role'] ?? '' ) === 'spectator' ) {
+		if ( sanitize_key( $_REQUEST['role'] ?? '' ) === 'spectator' ) {
 			$user['meta']['role'] = 'spectator';
 		}
 
@@ -475,7 +478,8 @@ add_action( 'admin_post_login_block', function() {
 		wp_die();
 	}
 
-	$email = $_REQUEST['email'] ?? '';
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email.
+	$email = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? wp_unslash( $_REQUEST['email'] ) : '';
 
 	check_admin_referer( 'block_' . $email );
 
@@ -513,7 +517,8 @@ add_action( 'admin_post_login_delete', function() {
 		wp_die();
 	}
 
-	$email = $_REQUEST['email'] ?? '';
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The nonce below and wporg_get_pending_user() both key on the raw stored user_email.
+	$email = isset( $_REQUEST['email'] ) && is_string( $_REQUEST['email'] ) ? wp_unslash( $_REQUEST['email'] ) : '';
 
 	check_admin_referer( 'delete_' . $email );
 
@@ -539,14 +544,15 @@ add_action( 'admin_post_login_block_account', function() {
 		wp_die();
 	}
 
-	$user   = $_REQUEST['user'] ?? '';
-	$reason = $_REQUEST['block_reason'] ?? '';
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Keys the same pending-user lookup as the email actions above.
+	$user   = isset( $_REQUEST['user'] ) && is_string( $_REQUEST['user'] ) ? wp_unslash( $_REQUEST['user'] ) : '';
+	$reason = sanitize_text_field( wp_unslash( $_REQUEST['block_reason'] ?? '' ) );
 	if ( empty( $user ) ) {
 		die();
 	}
 
 	$pending_user = wporg_get_pending_user( $user );
-	if ( ! $user ) {
+	if ( ! $pending_user ) {
 		die();
 	}
 
@@ -629,33 +635,36 @@ function wporg_login_block_account( $user, $reason = '' ) {
 	return true;
 }
 
-add_action( 'load-toplevel_page_user-registrations', function() {
-	// Perform bulk actions.
-	$action = $_REQUEST['action'] ?? ( $_REQUEST['action2'] ?? '' );
-	if (
-		empty( $_REQUEST['pending_ids'] ) ||
-		'reg_block' !== $action ||
-		! wp_verify_nonce( $_REQUEST['_wpnonce'], 'bulk-toplevel_page_user-registrations' )
-	) {
-		return;
-	}
-
-	$reason = $_REQUEST['block_reason'] ?? '';
-	foreach ( (array) $_REQUEST['pending_ids'] as $pending_id ) {
-		$pending_user = wporg_get_pending_user( $pending_id );
-		if ( ! $pending_user ) {
-			continue;
+add_action(
+	'load-toplevel_page_user-registrations',
+	function () {
+		// Perform bulk actions.
+		$action = sanitize_key( $_REQUEST['action'] ?? ( $_REQUEST['action2'] ?? '' ) );
+		if (
+			empty( $_REQUEST['pending_ids'] ) ||
+			'reg_block' !== $action ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ?? '' ) ), 'bulk-toplevel_page_user-registrations' )
+		) {
+			return;
 		}
 
-		if ( $pending_user['created'] ) {
-			wporg_login_block_account( $pending_user, $reason );
-		} else {
-			wporg_login_block_registration( $pending_user );
-		}
-	}
+		$reason = sanitize_text_field( wp_unslash( $_REQUEST['block_reason'] ?? '' ) );
+		foreach ( array_map( 'absint', (array) ( $_REQUEST['pending_ids'] ?? array() ) ) as $pending_id ) {
+			$pending_user = wporg_get_pending_user( $pending_id );
+			if ( ! $pending_user ) {
+				continue;
+			}
 
-	$url = remove_query_arg( array( 'pending_ids', 'action', 'action2', '_wpnonce', '_wp_http_referer' ) );
-	$url = add_query_arg( 'action', 'blocked_account', $url );
-	wp_safe_redirect( $url );
-	exit;
-} );
+			if ( $pending_user['created'] ) {
+				wporg_login_block_account( $pending_user, $reason );
+			} else {
+				wporg_login_block_registration( $pending_user );
+			}
+		}
+
+		$url = remove_query_arg( array( 'pending_ids', 'action', 'action2', '_wpnonce', '_wp_http_referer' ) );
+		$url = add_query_arg( 'action', 'blocked_account', $url );
+		wp_safe_redirect( $url );
+		exit;
+	}
+);

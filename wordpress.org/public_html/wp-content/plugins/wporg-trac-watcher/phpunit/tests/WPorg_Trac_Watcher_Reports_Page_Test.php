@@ -115,6 +115,9 @@ class WPorg_Trac_Watcher_Reports_Page_Test extends WPorg_Trac_Watcher_TestCase {
 	 * registered menus and dies on a miss, and the version call re-parses the page
 	 * call's argument as part of the query string it inherits, so urlencode_deep()
 	 * catches it on the way through. Both sinks should still hold on their own.
+	 *
+	 * The slug is run through sanitize_key() on the way in, so the markup is gone
+	 * before it reaches either sink rather than being escaped at them.
 	 */
 	public function test_report_links_escape_a_page_from_the_request(): void {
 		$_REQUEST['page'] = self::MARKUP_VALUE;
@@ -123,7 +126,7 @@ class WPorg_Trac_Watcher_Reports_Page_Test extends WPorg_Trac_Watcher_TestCase {
 
 		$this->assertStringNotContainsString( '<img', $output );
 		$this->assertStringContainsString(
-			'value="&quot;&gt;&lt;img src=x onerror=alert(1)&gt;"',
+			'value="imgsrcxonerroralert1"',
 			$output,
 			'The page slug is missing from the form, so the assertion above would pass vacuously.'
 		);

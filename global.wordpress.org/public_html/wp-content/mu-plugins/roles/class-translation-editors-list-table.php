@@ -64,13 +64,14 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * Prepare the list for display.
 	 */
 	public function prepare_items() {
-		$search   = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- WP_User_Query matches this against logins and addresses, which may legitimately contain a percent sign, and escapes it for LIKE itself.
+		$search   = trim( isset( $_REQUEST['s'] ) && is_string( $_REQUEST['s'] ) ? wp_unslash( $_REQUEST['s'] ) : '' );
 		$per_page = $this->get_items_per_page( 'translation_editors_per_page', 10 );
 		$paged    = $this->get_pagenum();
 
 		$role__in = $this->user_roles;
 		if ( isset( $_REQUEST['role'] ) ) {
-			$role__in = $_REQUEST['role'];
+			$role__in = array_map( 'sanitize_key', (array) wp_unslash( $_REQUEST['role'] ) );
 		}
 
 		$args = array(
@@ -86,11 +87,11 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		}
 
 		if ( isset( $_REQUEST['orderby'] ) ) {
-			$args['orderby'] = $_REQUEST['orderby'];
+			$args['orderby'] = sanitize_key( $_REQUEST['orderby'] );
 		}
 
 		if ( isset( $_REQUEST['order'] ) ) {
-			$args['order'] = $_REQUEST['order'];
+			$args['order'] = sanitize_key( $_REQUEST['order'] );
 		}
 
 		$user_query = new WP_User_Query( $args );
