@@ -498,6 +498,32 @@ function trac_comment_code_block( $fence ) {
 }
 
 /**
+ * Converts the ATX headings of one span to Trac headings.
+ *
+ * @param string $text A span of the pull request lying outside any fenced code block.
+ * @return string|false The span with its headings converted, or false if it cannot be built.
+ */
+function trac_comment_headings( $text ) {
+	$text = preg_replace( '~^[ \t>]*\K(?=={1,6}[ \t])~m', '!', $text );
+	if ( null === $text ) {
+		return false;
+	}
+
+	$text = preg_replace_callback(
+		'~^(?P<cite>[ \t]*>[ \t>]*)?[ \t]{0,3}(?P<hashes>\#{1,6})[ \t]+(?P<text>.+?)(?:[ \t]+\#+)?[ \t]*$~m',
+		function ( $m ) {
+			$level = str_repeat( '=', strlen( $m['hashes'] ) );
+			$cite  = '' === $m['cite'] ? '' : rtrim( $m['cite'] ) . ' ';
+
+			return "{$cite}{$level} {$m['text']} {$level}";
+		},
+		$text
+	);
+
+	return is_string( $text ) ? $text : false;
+}
+
+/**
  * Converts one span of pull request text to Trac wiki markup.
  *
  * The body's own wiki syntax is escaped before any is added, so only the markup
@@ -642,6 +668,7 @@ function trac_comment_link_target( $url ) {
  * This:
  *  - Strips HTML comments
  *  - Converts code blocks
+ *  - Converts headings
  *  - Converts image embeds
  *  - Converts links
  *  - Converts tables
@@ -666,7 +693,14 @@ function format_github_content_for_trac_comment( $desc ) {
 	}
 
 	foreach ( $parts as $i => $part ) {
-		$part = ( $i % 2 ) ? trac_comment_code_block( $part ) : trac_comment_wiki_text( $part );
+		if ( $i % 2 ) {
+			$part = trac_comment_code_block( $part );
+		} else {
+			// A heading is a whole line, and only this split's spans begin and end where lines do.
+			$part = trac_comment_headings( $part );
+			$part = is_string( $part ) ? trac_comment_wiki_text( $part ) : false;
+		}
+
 		if ( false === $part ) {
 			return false;
 		}
