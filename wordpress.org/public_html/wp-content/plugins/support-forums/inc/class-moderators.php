@@ -18,18 +18,17 @@ class Moderators {
 		// Scripts and styles.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
-		// Allow keymasters and moderators to edit users.
-		add_filter( 'bbp_map_primary_meta_caps',        array( $this, 'map_meta_caps' ), 10, 4 );
-		add_action( 'bbp_post_request',                 array( $this, 'edit_user_handler' ), 0 );
-
-		// Strip credential and site-role fields moderators must not set. bbPress is at 1.
-		add_action( 'bbp_post_request', array( $this, 'restrict_profile_edit_fields' ), 0 );
-
-		// Allow moderators to manage user roles.
-		add_filter( 'bbp_get_caps_for_role',            array( $this, 'bbp_get_caps_for_role' ), 10, 2 );
-
-		// Limit which roles a moderator can assign to a user. Before bbp_profile_update_role().
-		add_action( 'bbp_profile_update',               array( $this, 'bbp_profile_update' ), 1 );
+		// Use bbPress's field-level Super Moderator policy when available.
+		if ( function_exists( 'bbp_current_user_can_edit_user_field' ) ) {
+			add_filter( 'bbp_allow_super_mods', array( $this, 'allow_super_mods' ) );
+		} else {
+			// Preserve the existing policy while older bbPress versions are deployed.
+			add_filter( 'bbp_map_primary_meta_caps', array( $this, 'map_meta_caps' ), 10, 4 );
+			add_action( 'bbp_post_request',          array( $this, 'edit_user_handler' ), 0 );
+			add_action( 'bbp_post_request',          array( $this, 'restrict_profile_edit_fields' ), 0 );
+			add_filter( 'bbp_get_caps_for_role',     array( $this, 'bbp_get_caps_for_role' ), 10, 2 );
+			add_action( 'bbp_profile_update',        array( $this, 'bbp_profile_update' ), 1 );
+		}
 
 		// Append 'view=all' to forum, topic, and reply URLs in moderator views.
 		add_filter( 'bbp_get_forum_permalink',          array( $this, 'add_view_all' ) );
@@ -177,6 +176,28 @@ class Moderators {
 				filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'css/styles-moderators.css' )
 			);
 		}
+	}
+
+	/**
+	 * Enable bbPress's Super Moderator policy on the main support forums.
+	 *
+	 * On front-end bbPress profiles, moderators may edit profile fields and email
+	 * addresses, and assign non-staff forum roles. Their access excludes passwords,
+	 * WordPress roles, staff forum roles, and protected users. Keymasters retain
+	 * broader front-end controls, while wp-admin keeps native WordPress permissions.
+	 * Core bbPress filters allow individual parts of this policy to be adjusted.
+	 *
+	 * Locale forums continue to honor their own bbPress setting.
+	 *
+	 * @param bool $allow Whether Super Moderators are enabled.
+	 * @return bool
+	 */
+	public function allow_super_mods( $allow ) {
+		if ( Plugin::get_instance()->is_main_forums ) {
+			$allow = true;
+		}
+
+		return $allow;
 	}
 
 	/**
