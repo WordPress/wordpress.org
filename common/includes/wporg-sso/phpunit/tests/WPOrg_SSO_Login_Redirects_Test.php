@@ -53,12 +53,48 @@ class WPOrg_SSO_Login_Redirects_Test extends WPOrg_SSO_TestCase {
 	public function test_login_screens_go_to_the_sso_host(): void {
 		$sso = $this->make_sso( 'bbpress.org', '/wp-login.php', '/wp-login.php' );
 
-		$redirect = $this->catch_redirect( array( $sso, 'redirect_all_login_or_signup_to_sso' ) );
+		$redirect = $this->without_header_warnings(
+			function () use ( $sso ) {
+				return $this->catch_redirect( array( $sso, 'redirect_all_login_or_signup_to_sso' ) );
+			}
+		);
 
 		$this->assertStringStartsWith( 'https://login.wordpress.org/', $redirect->to );
-		$this->assertSame( 301, $redirect->status );
+
+		// 302: the target names a bounce ticket belonging to this browser and this login.
+		$this->assertSame( 302, $redirect->status );
+
 		$this->assertSame( 'bbpress.org', $this->query_arg( $redirect->to, 'from' ) );
-		$this->assertSame( 'https://bbpress.org/', $this->query_arg( $redirect->to, 'redirect_to' ) );
+
+		$destination = (string) $this->query_arg( $redirect->to, 'redirect_to' );
+
+		$this->assertStringStartsWith( 'https://bbpress.org/', $destination );
+
+		$this->assertMatchesRegularExpression( '/^[a-f0-9]{64}$/', (string) $this->query_arg( $destination, 'sso_bounce' ) );
+	}
+
+	/**
+	 * A login headed for another host on the network is not ticketed here.
+	 *
+	 * A host-only cookie would never reach the host the token comes back to.
+	 *
+	 * @return void
+	 */
+	public function test_login_bound_for_another_host_is_not_ticketed(): void {
+		$_REQUEST['redirect_to'] = 'https://buddypress.org/members/';
+
+		$sso = $this->make_sso( 'bbpress.org', '/wp-login.php', '/wp-login.php' );
+
+		$redirect = $this->without_header_warnings(
+			function () use ( $sso ) {
+				return $this->catch_redirect( array( $sso, 'redirect_all_login_or_signup_to_sso' ) );
+			}
+		);
+
+		$destination = (string) $this->query_arg( $redirect->to, 'redirect_to' );
+
+		$this->assertStringStartsWith( 'https://buddypress.org/members/', $destination );
+		$this->assertNull( $this->query_arg( $destination, 'sso_bounce' ) );
 	}
 
 	/**

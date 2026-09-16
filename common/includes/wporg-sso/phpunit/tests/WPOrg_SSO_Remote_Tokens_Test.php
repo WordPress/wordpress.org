@@ -20,6 +20,13 @@ defined( 'ABSPATH' ) || die();
 class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 
 	/**
+	 * The bounce ticket the destination's browser holds.
+	 *
+	 * @var string
+	 */
+	protected const BOUNCE_TICKET = 'a-bounce-ticket';
+
+	/**
 	 * The user the tokens are minted for.
 	 *
 	 * @var WP_User
@@ -108,6 +115,44 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 		$_COOKIE = array();
 
 		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Serves a remote-login request, whatever it decides to do about the token.
+	 *
+	 * A restart issues a ticket, and setcookie() warns under CLI.
+	 *
+	 * @param WPOrg_SSO_Test_Double $sso The instance serving the request.
+	 * @return WPOrg_SSO_Redirect_Exception The redirect the request ended in.
+	 */
+	protected function redeem( WPOrg_SSO_Test_Double $sso ): WPOrg_SSO_Redirect_Exception {
+		return $this->without_header_warnings(
+			function () use ( $sso ) {
+				return $this->catch_redirect( array( $sso, 'maybe_perform_remote_login' ) );
+			}
+		);
+	}
+
+	/**
+	 * The fingerprint the SSO host mints a token against.
+	 *
+	 * @return string
+	 */
+	protected function bounce_fingerprint(): string {
+		return hash( 'sha256', self::BOUNCE_TICKET );
+	}
+
+	/**
+	 * Gives the browser the bounce ticket a login started on the destination leaves.
+	 *
+	 * Held after `arrive_at_the_destination_host()`, the ticket being the destination's.
+	 *
+	 * @return string The ticket's fingerprint.
+	 */
+	protected function hold_a_bounce_ticket(): string {
+		$_COOKIE[ WPOrg_SSO::REMOTE_BOUNCE_COOKIE ] = self::BOUNCE_TICKET;
+
+		return $this->bounce_fingerprint();
 	}
 
 	/**
@@ -454,9 +499,10 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 	public function test_remote_login_starts_a_session(): void {
 		$session = $this->log_the_user_in();
 
-		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', $this->bounce_fingerprint() );
 
 		$this->arrive_at_the_destination_host();
+		$this->hold_a_bounce_ticket();
 
 		$sso = $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' );
 
@@ -481,16 +527,14 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 	 * @return void
 	 */
 	public function test_replayed_remote_login_does_not_start_a_session(): void {
-		$token = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', $this->hold_a_bounce_ticket() );
 
-		$_GET['sso_token'] = $token;
-
-		$this->catch_redirect( array( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ), 'maybe_perform_remote_login' ) );
+		$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
 
 		wp_set_current_user( 0 );
 		$this->issued_cookies = array();
 
-		$this->catch_redirect( array( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ), 'maybe_perform_remote_login' ) );
+		$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
 
 		$this->assertSame( 0, get_current_user_id() );
 		$this->assertEmpty( $this->issued_auth_cookie() );
@@ -502,12 +546,248 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 	 * @return void
 	 */
 	public function test_remote_login_with_a_foreign_token_starts_no_session(): void {
-		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'bbpress.org' );
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'bbpress.org', $this->hold_a_bounce_ticket() );
 
-		$this->catch_redirect( array( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ), 'maybe_perform_remote_login' ) );
+		$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
 
 		$this->assertSame( 0, get_current_user_id() );
 		$this->assertEmpty( $this->issued_auth_cookie() );
+	}
+
+	/**
+	 * A token is refused by a browser that never got the ticket it was minted for.
+	 *
+	 * @return void
+	 */
+	public function test_token_is_refused_without_the_ticket(): void {
+		$token = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', $this->bounce_fingerprint() );
+
+		$this->assertFalse( $this->make_sso( 'wordcamp.org' )->validate_remote_token( $token )['valid'] );
+	}
+
+	/**
+	 * A token is refused by a browser holding some other ticket.
+	 *
+	 * @return void
+	 */
+	public function test_token_is_refused_with_another_browsers_ticket(): void {
+		$token = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', $this->bounce_fingerprint() );
+
+		$validated = $this->make_sso( 'wordcamp.org' )->validate_remote_token( $token, hash( 'sha256', 'someone-elses-ticket' ) );
+
+		$this->assertFalse( $validated['valid'] );
+	}
+
+	/**
+	 * A token validates for the browser holding the ticket it was minted against.
+	 *
+	 * @return void
+	 */
+	public function test_token_validates_for_the_browser_that_asked_for_it(): void {
+		$token = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', $this->bounce_fingerprint() );
+
+		$this->assertTrue( $this->make_sso( 'wordcamp.org' )->validate_remote_token( $token, $this->bounce_fingerprint() )['valid'] );
+	}
+
+	/**
+	 * The fingerprint the destination sent is signed, and then dropped.
+	 *
+	 * @return void
+	 */
+	public function test_the_minted_token_is_bound_to_the_fingerprint_it_was_given(): void {
+		$sso = $this->make_sso( 'login.wordpress.org' );
+
+		$redirect = $sso->maybe_add_remote_login_bounce( 'https://wordcamp.org/schedule/?sso_bounce=' . $this->bounce_fingerprint(), $this->user );
+
+		$this->assertNull( $this->query_arg( $redirect, 'sso_bounce' ), 'The destination compares against its own cookie and never needs the fingerprint back.' );
+
+		$token = (string) $this->query_arg( $redirect, 'sso_token' );
+
+		$this->assertTrue( $this->make_sso( 'wordcamp.org' )->validate_remote_token( $token, $this->bounce_fingerprint() )['valid'] );
+		$this->assertFalse( $this->make_sso( 'wordcamp.org' )->validate_remote_token( $token )['valid'] );
+	}
+
+	/**
+	 * A hand-off link passed to somebody else logs them in as nobody.
+	 *
+	 * The whole point of the ticket: a token is only good in the browser it names.
+	 *
+	 * @return void
+	 */
+	public function test_a_shared_hand_off_link_starts_no_session(): void {
+		$minted = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', hash( 'sha256', 'the-minting-browsers-ticket' ) );
+
+		// A second browser, holding a ticket of its own.
+		$this->hold_a_bounce_ticket();
+
+		$_GET['sso_token'] = $minted;
+
+		$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$this->assertSame( 0, get_current_user_id() );
+		$this->assertEmpty( $this->issued_auth_cookie() );
+	}
+
+	/**
+	 * A token arriving at a browser with no ticket at all starts no session.
+	 *
+	 * @return void
+	 */
+	public function test_an_unticketed_browser_starts_no_session(): void {
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
+
+		$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$this->assertSame( 0, get_current_user_id() );
+		$this->assertEmpty( $this->issued_auth_cookie() );
+	}
+
+	/**
+	 * A hand-off that cannot be accepted is asked for again, with a ticket.
+	 *
+	 * @return void
+	 */
+	public function test_an_unaccepted_hand_off_is_restarted_with_a_ticket(): void {
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
+
+		$redirect = $this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$this->assertStringStartsWith( 'https://login.wordpress.org/', $redirect->to );
+
+		$destination = (string) $this->query_arg( $redirect->to, 'redirect_to' );
+
+		$this->assertStringStartsWith( 'https://wordcamp.org/schedule/', $destination );
+		$this->assertSame( '1', $this->query_arg( $destination, 'sso_retry' ) );
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Hashed below, as the SSO does.
+		$ticket = wp_unslash( $_COOKIE[ WPOrg_SSO::REMOTE_BOUNCE_COOKIE ] ?? '' );
+
+		$this->assertNotEmpty( $ticket, 'The restart has to leave the browser a ticket to be asked for one.' );
+		$this->assertSame( hash( 'sha256', $ticket ), $this->query_arg( $destination, 'sso_bounce' ) );
+	}
+
+	/**
+	 * A hand-off naming a missing user is restarted like any other.
+	 *
+	 * Restarting only for real users would make the response reveal which exist.
+	 *
+	 * @return void
+	 */
+	public function test_a_hand_off_for_a_missing_user_is_restarted_like_any_other(): void {
+		$missing = $this->user->ID + 100000;
+
+		$this->assertFalse( get_user_by( 'id', $missing ), 'The user has to be missing for this to test anything.' );
+
+		$_GET['sso_token'] = implode( '|', array( (string) $missing, str_repeat( 'a', 64 ), (string) ( time() + 60 ), '', '' ) );
+
+		$missing_user = $this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
+
+		$real_user = $this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$this->assertStringStartsWith( 'https://login.wordpress.org/', $missing_user->to );
+		$this->assertSame(
+			$this->query_arg( $real_user->to, 'from' ),
+			$this->query_arg( $missing_user->to, 'from' ),
+			'A missing user has to be indistinguishable from a real one.'
+		);
+	}
+
+	/**
+	 * A hand-off headed for another host is landed there, not asked for again.
+	 *
+	 * The ticket a restart issues is host-only, so it could never reach that host.
+	 *
+	 * @return void
+	 */
+	public function test_a_hand_off_bound_for_another_host_is_not_restarted(): void {
+		$_GET['sso_token']   = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
+		$_GET['redirect_to'] = 'https://buddypress.org/';
+
+		$redirect = $this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$this->assertSame( 'https://buddypress.org/', $redirect->to );
+		$this->assertSame( 0, get_current_user_id(), 'A hand-off nobody could redeem has to leave the browser logged out.' );
+		$this->assertArrayNotHasKey( WPOrg_SSO::REMOTE_BOUNCE_COOKIE, $_COOKIE );
+	}
+
+	/**
+	 * A hand-off off the network is not turned into a round trip through the SSO host.
+	 *
+	 * Where it lands instead is `_safe_redirect()`'s to decide, and this double replaces that.
+	 *
+	 * @return void
+	 */
+	public function test_a_hand_off_cannot_be_restarted_off_the_network(): void {
+		$_GET['sso_token']   = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
+		$_GET['redirect_to'] = 'https://example.org/';
+
+		$redirect = $this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$this->assertStringStartsNotWith( 'https://login.wordpress.org/', $redirect->to );
+		$this->assertArrayNotHasKey( WPOrg_SSO::REMOTE_BOUNCE_COOKIE, $_COOKIE );
+	}
+
+	/**
+	 * A hand-off on wordpress.org is landed; those hosts already share the login cookie.
+	 *
+	 * @return void
+	 */
+	public function test_a_hand_off_on_wordpress_org_is_not_restarted(): void {
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'profiles.wordpress.org' );
+
+		$redirect = $this->redeem( $this->make_sso( 'profiles.wordpress.org', '/index.php', '/me/' ) );
+
+		$this->assertSame( 'https://profiles.wordpress.org/me/', $redirect->to );
+		$this->assertArrayNotHasKey( WPOrg_SSO::REMOTE_BOUNCE_COOKIE, $_COOKIE );
+	}
+
+	/**
+	 * A hand-off this browser already spent is landed, not asked for again.
+	 *
+	 * Its ticket signs the token, so a restart would only mint what it holds.
+	 *
+	 * @return void
+	 */
+	public function test_a_spent_hand_off_is_not_restarted(): void {
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', $this->hold_a_bounce_ticket() );
+
+		$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		wp_set_current_user( 0 );
+
+		$redirect = $this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$this->assertSame( 'https://wordcamp.org/schedule/', $redirect->to );
+	}
+
+	/**
+	 * A hand-off is restarted once, so a browser that cannot keep the ticket lands.
+	 *
+	 * @return void
+	 */
+	public function test_a_restarted_hand_off_is_not_restarted_again(): void {
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
+		$_GET['sso_retry'] = '1';
+
+		$redirect = $this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$this->assertSame( 'https://wordcamp.org/schedule/', $redirect->to );
+		$this->assertSame( 0, get_current_user_id() );
+	}
+
+	/**
+	 * A hand-off nobody could have asked for is not worth a round trip.
+	 *
+	 * @return void
+	 */
+	public function test_an_expired_hand_off_is_not_restarted(): void {
+		$_GET['sso_token'] = $this->forge_token( time() - 1 );
+
+		$redirect = $this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+		$this->assertSame( 'https://wordcamp.org/schedule/', $redirect->to );
 	}
 
 	/**
@@ -516,7 +796,7 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 	 * @return void
 	 */
 	public function test_remote_login_strips_the_token_from_the_landing_url(): void {
-		$token = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
+		$token = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', $this->hold_a_bounce_ticket() );
 
 		$_GET['sso_token'] = $token;
 
@@ -581,6 +861,43 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 		$redirect = $sso->maybe_add_remote_login_bounce( 'https://make.wordpress.org/core/', $this->user );
 
 		$this->assertSame( 'https://make.wordpress.org/core/', $redirect );
+	}
+
+	/**
+	 * The SSO host never hands a token to itself.
+	 *
+	 * Reached on local installs, where every host is the SSO host; in production
+	 * the wordpress.org rule gets there first.
+	 *
+	 * @return void
+	 */
+	public function test_post_login_redirect_to_the_sso_host_gets_no_token(): void {
+		$sso = $this->make_sso( 'wordcamp.org' );
+
+		// As a local install is configured: the site is its own SSO host.
+		$sso->sso_host = 'wordcamp.org';
+
+		$redirect = $sso->maybe_add_remote_login_bounce( 'https://wordcamp.org/wp-admin/', $this->user );
+
+		$this->assertSame( 'https://wordcamp.org/wp-admin/', $redirect );
+	}
+
+	/**
+	 * The SSO host is recognised as itself even when it carries a port.
+	 *
+	 * Local installs put the port in `sso_host`; a parsed redirect host never has
+	 * one, so comparing the two raw never matches.
+	 *
+	 * @return void
+	 */
+	public function test_post_login_redirect_to_a_ported_sso_host_gets_no_token(): void {
+		$sso = $this->make_sso( 'wordcamp.org:8888' );
+
+		$sso->sso_host = 'wordcamp.org:8888';
+
+		$redirect = $sso->maybe_add_remote_login_bounce( 'https://wordcamp.org/wp-admin/', $this->user );
+
+		$this->assertSame( 'https://wordcamp.org/wp-admin/', $redirect );
 	}
 
 	/**
@@ -825,13 +1142,17 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 	public function test_binding_rejects_are_logged_once_per_host(): void {
 		remove_filter( 'wporg_sso_log_binding_rejects', '__return_false' );
 
+		// Only a ticketed hand-off that fails after being restarted is worth hearing about.
+		$_GET['sso_retry'] = '1';
+		$bounce            = $this->hold_a_bounce_ticket();
+
 		$token = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'bbpress.org' );
 		$sso   = $this->make_sso( 'wordcamp.org' );
 
 		$logged = $this->capture_warnings(
-			function () use ( $sso, $token ) {
-				$sso->validate_remote_token( $token );
-				$sso->validate_remote_token( $token );
+			function () use ( $sso, $token, $bounce ) {
+				$sso->validate_remote_token( $token, $bounce );
+				$sso->validate_remote_token( $token, $bounce );
 			}
 		);
 
@@ -847,12 +1168,40 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 	public function test_ordinary_tokens_are_not_logged(): void {
 		remove_filter( 'wporg_sso_log_binding_rejects', '__return_false' );
 
+		// Set, or the assertion would pass on nothing having been logged yet.
+		$_GET['sso_retry'] = '1';
+		$bounce            = $this->hold_a_bounce_ticket();
+
 		$sso = $this->make_sso( 'wordcamp.org' );
 
 		$logged = $this->capture_warnings(
-			function () use ( $sso ) {
-				$sso->validate_remote_token( $this->forge_token( time() + 60 ) );
-				$sso->validate_remote_token( $this->forge_token( time() - 60 ) );
+			function () use ( $sso, $bounce ) {
+				$sso->validate_remote_token( $this->forge_token( time() + 60, '', 'wordcamp.org', $bounce ), $bounce );
+				$sso->validate_remote_token( $this->forge_token( time() - 60, '', 'wordcamp.org', $bounce ), $bounce );
+			}
+		);
+
+		$this->assertSame( array(), $logged );
+	}
+
+	/**
+	 * A retry marker on its own logs nothing, the marker coming from the URL.
+	 *
+	 * Otherwise anyone could spend the dedup window and mask a real reject.
+	 *
+	 * @return void
+	 */
+	public function test_an_unticketed_retry_is_not_logged(): void {
+		remove_filter( 'wporg_sso_log_binding_rejects', '__return_false' );
+
+		$_GET['sso_retry'] = '1';
+
+		$token = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'bbpress.org' );
+		$sso   = $this->make_sso( 'wordcamp.org' );
+
+		$logged = $this->capture_warnings(
+			function () use ( $sso, $token ) {
+				$sso->validate_remote_token( $token );
 			}
 		);
 
@@ -896,11 +1245,12 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 	 * @param int    $valid_until   Timestamp the token expires at.
 	 * @param string $session_token The session to bind the token to.
 	 * @param string $target_host   The host the token is issued for.
+	 * @param string $bounce        Fingerprint of the ticket the browser holds.
 	 * @return string
 	 */
-	protected function forge_token( int $valid_until, string $session_token = '', string $target_host = 'wordcamp.org' ): string {
+	protected function forge_token( int $valid_until, string $session_token = '', string $target_host = 'wordcamp.org', string $bounce = '' ): string {
 		$hash = $this->make_sso( 'login.wordpress.org' )
-			->generate_remote_token_hash( $this->user, $valid_until, false, $session_token, $target_host );
+			->generate_remote_token_hash( $this->user, $valid_until, false, $session_token, $target_host, $bounce );
 
 		return implode( '|', array( (string) $this->user->ID, $hash, (string) $valid_until, '', $session_token ) );
 	}

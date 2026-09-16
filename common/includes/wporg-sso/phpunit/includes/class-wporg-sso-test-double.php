@@ -59,10 +59,11 @@ class WPOrg_SSO_Test_Double extends WP_WPOrg_SSO {
 	 *
 	 * @param WP_User $user        The user the token is for.
 	 * @param string  $target_host The host the token is issued for.
+	 * @param string  $bounce      Fingerprint of the browser's bounce ticket.
 	 * @return string
 	 */
-	public function generate_remote_token( WP_User $user, string $target_host = '' ): string {
-		return $this->_generate_remote_token( $user, $target_host );
+	public function generate_remote_token( WP_User $user, string $target_host = '', string $bounce = '' ): string {
+		return $this->_generate_remote_token( $user, $target_host, $bounce );
 	}
 
 	/**
@@ -73,20 +74,22 @@ class WPOrg_SSO_Test_Double extends WP_WPOrg_SSO {
 	 * @param bool    $remember_me   Whether the login should be remembered.
 	 * @param string  $session_token The session the token is bound to.
 	 * @param string  $target_host   The host the token is issued for.
+	 * @param string  $bounce        Fingerprint of the browser's bounce ticket.
 	 * @return string
 	 */
-	public function generate_remote_token_hash( WP_User $user, int $valid_until, bool $remember_me = false, string $session_token = '', string $target_host = '' ): string {
-		return $this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token, $target_host );
+	public function generate_remote_token_hash( WP_User $user, int $valid_until, bool $remember_me = false, string $session_token = '', string $target_host = '', string $bounce = '' ): string {
+		return $this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token, $target_host, $bounce );
 	}
 
 	/**
 	 * Validates a remote token against the current host.
 	 *
 	 * @param string $sso_token The raw token from the URL.
+	 * @param string $bounce    Fingerprint of the browser's bounce ticket.
 	 * @return array
 	 */
-	public function validate_remote_token( string $sso_token ): array {
-		return $this->_validate_remote_token( $sso_token );
+	public function validate_remote_token( string $sso_token, string $bounce = '' ): array {
+		return $this->_validate_remote_token( $sso_token, $bounce );
 	}
 
 	/**
