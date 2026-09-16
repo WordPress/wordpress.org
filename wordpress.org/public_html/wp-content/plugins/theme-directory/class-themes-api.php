@@ -926,20 +926,14 @@ class Themes_API {
 		if ( class_exists( 'GlotPress_Translate_Bridge' ) ) {
 			$glotpress_project = "wp-themes/{$phil->slug}";
 
-			$phil->name = self::sanitize_translation(
-				GlotPress_Translate_Bridge::translate( $phil->name, $glotpress_project )
-			);
+			$phil->name = self::translate_header( $phil->name, $glotpress_project );
 
 			if ( isset( $phil->description ) ) {
-				$phil->description = self::sanitize_translation(
-					GlotPress_Translate_Bridge::translate( $phil->description, $glotpress_project )
-				);
+				$phil->description = self::translate_header( $phil->description, $glotpress_project );
 			}
 
 			if ( isset( $phil->sections['description'] ) ) {
-				$phil->sections['description'] = self::sanitize_translation(
-					GlotPress_Translate_Bridge::translate( $phil->sections['description'], $glotpress_project )
-				);
+				$phil->sections['description'] = self::translate_header( $phil->sections['description'], $glotpress_project );
 			}
 
 		}
@@ -971,6 +965,23 @@ class Themes_API {
 	}
 
 	/* Helper functions */
+
+	/**
+	 * Replaces a header with its translation, reduced to what the header may hold.
+	 *
+	 * The bridge answers with the value it was given when there is no translation,
+	 * which is every value in English, so the stored one is handed back untouched.
+	 *
+	 * @param string $value             The stored header.
+	 * @param string $glotpress_project The theme's GlotPress project.
+	 *
+	 * @return string The translation, or the stored header.
+	 */
+	private static function translate_header( $value, $glotpress_project ) {
+		$translation = GlotPress_Translate_Bridge::translate( $value, $glotpress_project );
+
+		return $translation === $value ? $value : self::sanitize_translation( $translation );
+	}
 
 	/**
 	 * Reduces a translated header to the value the header may hold.

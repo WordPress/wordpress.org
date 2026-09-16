@@ -423,7 +423,7 @@ class Plugin_I18n {
 			return wp_strip_all_tags( $translation );
 		}
 
-		// The parser stores a title and a short description entity-encoded, so encode here too.
+		// Encoded because the readme path stores these encoded, and quotes reach attributes.
 		if ( 'title' === $key || 'excerpt' === $key ) {
 			return esc_html( wp_strip_all_tags( $translation ) );
 		}
