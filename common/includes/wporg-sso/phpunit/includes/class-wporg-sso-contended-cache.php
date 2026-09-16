@@ -14,10 +14,6 @@ declare( strict_types = 1 );
  * unreachable", and the SSO tells them apart by reading the key back. Here the
  * read succeeds, which is the shape of a lost race rather than an outage.
  *
- * The first read of the ticket key misses and every later one hits, which is
- * the interleaving that matters: this request read the ticket as unspent, the
- * other one claimed it, and only the claim can still tell them apart.
- *
  * Only the ticket key is contended. Everything else, users and token claims
  * included, has to keep working or the request never reaches the claim.
  */
@@ -29,13 +25,6 @@ class WPOrg_SSO_Contended_Cache {
 	 * @var object
 	 */
 	protected object $inner;
-
-	/**
-	 * Whether the contended key has been read once already.
-	 *
-	 * @var bool
-	 */
-	protected bool $read = false;
 
 	/**
 	 * Wraps the cache the rest of the request keeps using.
@@ -64,7 +53,7 @@ class WPOrg_SSO_Contended_Cache {
 	}
 
 	/**
-	 * Reports the ticket key as present, after the first read.
+	 * Reports the ticket key as present, the other request having claimed it.
 	 *
 	 * @param int|string $key   The key to read.
 	 * @param string     $group The group to read from.
@@ -74,10 +63,9 @@ class WPOrg_SSO_Contended_Cache {
 	 */
 	public function get( int|string $key, string $group = '', bool $force = false, ?bool &$found = null ): mixed {
 		if ( $this->is_contended( $key, $group ) ) {
-			$found      = $this->read;
-			$this->read = true;
+			$found = true;
 
-			return $found ? 1 : false;
+			return 1;
 		}
 
 		return $this->inner->get( $key, $group, $force, $found );

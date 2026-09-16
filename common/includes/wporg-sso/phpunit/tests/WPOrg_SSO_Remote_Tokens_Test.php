@@ -691,7 +691,7 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 		$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
 
 		$this->assertSame( $this->user->ID, get_current_user_id(), 'The hand-off has to succeed for this to test the spending.' );
-		$this->assertSame( '', $this->make_sso( 'wordcamp.org' )->current_bounce_fingerprint() );
+		$this->assertFalse( $this->make_sso( 'wordcamp.org' )->claim_bounce_fingerprint( $this->bounce_fingerprint() ) );
 	}
 
 	/**
@@ -713,7 +713,7 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 		$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
 
 		$this->assertSame( 0, get_current_user_id(), 'The hand-off has to be refused for this to test anything.' );
-		$this->assertSame( $fingerprint, $this->make_sso( 'wordcamp.org' )->current_bounce_fingerprint() );
+		$this->assertTrue( $this->make_sso( 'wordcamp.org' )->claim_bounce_fingerprint( $fingerprint ) );
 	}
 
 	/**
@@ -730,8 +730,6 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 		$_GET['sso_retry'] = '1';
 
 		$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
-
-		$this->assertSame( $pending, $this->make_sso( 'wordcamp.org' )->current_bounce_fingerprint() );
 
 		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', $pending );
 

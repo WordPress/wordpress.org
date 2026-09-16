@@ -968,19 +968,16 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		/**
 		 * The fingerprint of the bounce ticket the current request carries.
 		 *
-		 * @return string Empty when the browser holds no ticket, or has spent it.
+		 * Whether the ticket is still good is the claim's business, so that it stays
+		 * the one read of the key, taken after the write that decides it.
+		 *
+		 * @return string Empty when the browser holds no ticket.
 		 */
 		protected function _current_bounce_fingerprint() {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Hashed below; never stored, compared, or output as-is.
 			$ticket = wp_unslash( $_COOKIE[ self::REMOTE_BOUNCE_COOKIE ] ?? '' );
 
-			if ( ! is_string( $ticket ) ) {
-				return '';
-			}
-
-			$fingerprint = $this->_bounce_fingerprint( $ticket );
-
-			return $this->_bounce_is_spent( $fingerprint ) ? '' : $fingerprint;
+			return is_string( $ticket ) ? $this->_bounce_fingerprint( $ticket ) : '';
 		}
 
 		/**
