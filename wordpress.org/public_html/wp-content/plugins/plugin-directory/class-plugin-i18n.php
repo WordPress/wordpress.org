@@ -45,6 +45,13 @@ class Plugin_I18n {
 	public static $set_cache = true;
 
 	/**
+	 * Readme parser, held only for its field sanitizer.
+	 *
+	 * @var Readme\Parser|null
+	 */
+	private $readme_parser = null;
+
+	/**
 	 * Fetch the instance of the Plugin_I18n class.
 	 *
 	 * @static
@@ -366,6 +373,11 @@ class Plugin_I18n {
 			return $a_len == $b_len ? 0 : ($a_len > $b_len ? -1 : 1);
 		} );
 
+		// Markers are ours; one arriving in stored content would pick its own substitution site.
+		$content = self::remove_translation_markers( $content );
+
+		$untranslated = $content;
+
 		// Mark each original for translation
 		foreach ( $originals as $original_id => $original ) {
 			if ( isset( $translations[ $original_id ] ) ) {
@@ -376,7 +388,44 @@ class Plugin_I18n {
 		// Translate the marked originals.
 		$content = $this->translate_marked_gp_originals( $content, $translations, $originals );
 
-		return $content;
+		if ( $content === $untranslated ) {
+			return $content;
+		}
+
+		return $this->sanitize_translation( $key, $content );
+	}
+
+	/**
+	 * Strips this class's substitution markers from a value it did not mark.
+	 *
+	 * @param string $content The content to be searched.
+	 * @return string The content, with no marker syntax of its own left in it.
+	 */
+	public static function remove_translation_markers( $content ) {
+		return preg_replace( '/___TRANSLATION_\d+___/', '', $content );
+	}
+
+	/**
+	 * Reduces a translated field to the markup it accepts.
+	 *
+	 * Runs on the assembled field, not on each substituted translation: a
+	 * translation that is harmless alone can still land somewhere its own
+	 * sanitizer cannot see, such as inside an attribute.
+	 *
+	 * @param string $key         The translation key, as passed to {@see Plugin_I18n::translate()}.
+	 * @param string $translation The assembled field, or a single translation.
+	 * @return string The value, reduced to the field's own allow-list.
+	 */
+	public function sanitize_translation( $key, $translation ) {
+		if ( 'title' === $key || 'excerpt' === $key || str_starts_with( $key, 'block_title:' ) ) {
+			return wp_strip_all_tags( $translation );
+		}
+
+		if ( ! $this->readme_parser ) {
+			$this->readme_parser = new Readme\Parser( '' );
+		}
+
+		return $this->readme_parser->filter_text( $translation );
 	}
 
 	/**
