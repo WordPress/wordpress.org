@@ -422,11 +422,10 @@ class Screenshots {
 		);
 		$figure .= '</a>';
 
+		$caption = self::escape_block_delimiters( self::filter_caption( $caption ) );
+
 		if ( '' !== $caption ) {
-			$figure .= sprintf(
-				'<figcaption class="wp-element-caption">%s</figcaption>',
-				self::escape_block_delimiters( self::filter_caption( $caption ) )
-			);
+			$figure .= sprintf( '<figcaption class="wp-element-caption">%s</figcaption>', $caption );
 		}
 
 		$figure .= '</figure>';

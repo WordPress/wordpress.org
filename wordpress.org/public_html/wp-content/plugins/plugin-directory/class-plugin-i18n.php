@@ -399,11 +399,19 @@ class Plugin_I18n {
 	/**
 	 * Strips this class's substitution markers from a value it did not mark.
 	 *
+	 * Removing a marker closes the gap it leaves, and the text on either side can
+	 * meet as a marker of its own, so this repeats until none is left. Each pass
+	 * shortens the content, so it ends.
+	 *
 	 * @param string $content The content to be searched.
 	 * @return string The content, with no marker syntax of its own left in it.
 	 */
 	public static function remove_translation_markers( $content ) {
-		return preg_replace( '/___TRANSLATION_\d+___/', '', $content );
+		do {
+			$content = preg_replace( '/___TRANSLATION_\d+___/', '', $content, -1, $removed );
+		} while ( $removed );
+
+		return $content;
 	}
 
 	/**

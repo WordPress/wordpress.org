@@ -147,6 +147,15 @@ class Plugin_I18n_Sanitization_Test extends TestCase {
 	}
 
 	/**
+	 * A marker split across a marker does not survive the one that wraps it.
+	 */
+	public function test_a_marker_cannot_be_spliced_from_the_text_around_one(): void {
+		$crafted = '___TRAN___TRANSLATION_1___SLATION_7___';
+
+		$this->assertSame( '', Plugin_I18n::remove_translation_markers( $crafted ) );
+	}
+
+	/**
 	 * Sanitizing the assembled field catches what a substitution opened up.
 	 */
 	public function test_assembled_field_drops_an_attribute_a_substitution_opened(): void {
