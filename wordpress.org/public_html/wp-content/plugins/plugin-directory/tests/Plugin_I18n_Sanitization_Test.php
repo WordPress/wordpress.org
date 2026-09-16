@@ -113,6 +113,18 @@ class Plugin_I18n_Sanitization_Test extends TestCase {
 		$translation = 'Mon Plugin <script>alert(1)</script><a href="#" data-wp-bind--href="context.t">x</a>';
 
 		$this->assertSame( 'Mon Plugin x', $this->i18n->sanitize_translation( $key, $translation ) );
+		$this->assertStringNotContainsString( 'alert', $this->i18n->sanitize_translation( $key, $translation ) );
+	}
+
+	/**
+	 * The title and short description are stored entity-encoded, so a translation is too.
+	 *
+	 * A block title is not: it is stored as the block declared it.
+	 */
+	public function test_plain_text_fields_match_their_stored_encoding(): void {
+		$this->assertSame( 'Tom &amp; Jerry &lt; Co', $this->i18n->sanitize_translation( 'title', 'Tom & Jerry < Co' ) );
+		$this->assertSame( 'Tom &amp; Jerry', $this->i18n->sanitize_translation( 'excerpt', 'Tom &amp; Jerry' ) );
+		$this->assertSame( 'Tom & Jerry', $this->i18n->sanitize_translation( 'block_title:' . md5( 'B' ), 'Tom & Jerry' ) );
 	}
 
 	/**

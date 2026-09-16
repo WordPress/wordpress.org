@@ -373,10 +373,10 @@ class Plugin_I18n {
 			return $a_len == $b_len ? 0 : ($a_len > $b_len ? -1 : 1);
 		} );
 
+		$stored = $content;
+
 		// Markers are ours; one arriving in stored content would pick its own substitution site.
 		$content = self::remove_translation_markers( $content );
-
-		$untranslated = $content;
 
 		// Mark each original for translation
 		foreach ( $originals as $original_id => $original ) {
@@ -386,13 +386,14 @@ class Plugin_I18n {
 		}
 
 		// Translate the marked originals.
-		$content = $this->translate_marked_gp_originals( $content, $translations, $originals );
+		$translated = $this->translate_marked_gp_originals( $content, $translations, $originals );
 
-		if ( $content === $untranslated ) {
-			return $content;
+		// Nothing was marked, so the stored value stands as it was.
+		if ( $translated === $content ) {
+			return $stored;
 		}
 
-		return $this->sanitize_translation( $key, $content );
+		return $this->sanitize_translation( $key, $translated );
 	}
 
 	/**
@@ -417,8 +418,14 @@ class Plugin_I18n {
 	 * @return string The value, reduced to the field's own allow-list.
 	 */
 	public function sanitize_translation( $key, $translation ) {
-		if ( 'title' === $key || 'excerpt' === $key || str_starts_with( $key, 'block_title:' ) ) {
+		// A block title is stored as the block declared it, so markup is all there is to drop.
+		if ( str_starts_with( $key, 'block_title:' ) ) {
 			return wp_strip_all_tags( $translation );
+		}
+
+		// The parser stores a title and a short description entity-encoded, so encode here too.
+		if ( 'title' === $key || 'excerpt' === $key ) {
+			return esc_html( wp_strip_all_tags( $translation ) );
 		}
 
 		if ( ! $this->readme_parser ) {

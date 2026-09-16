@@ -814,31 +814,6 @@ function wporg_themes_slug_from_name( $name ) {
 }
 
 /**
- * The markup a theme's style.css headers may carry into the directory.
- *
- * Shared so a translation of a header can be held to the list its original passed.
- *
- * @return array An allow-list in `wp_kses()` form.
- */
-function wporg_themes_get_allowed_tags() {
-	return array(
-		'a'       => array(
-			'href'  => array(),
-			'title' => array(),
-		),
-		'abbr'    => array(
-			'title' => array(),
-		),
-		'acronym' => array(
-			'title' => array(),
-		),
-		'code'    => array(),
-		'em'      => array(),
-		'strong'  => array(),
-	);
-}
-
-/**
  * Custom version of core's deprecated `get_theme_data()` function merged with some WP_Theme changes.
  *
  * This function exists purely because we can't create a `WP_Theme` instance
@@ -868,7 +843,21 @@ function wporg_themes_get_header_data( $theme_file ) {
 		'UpdateURI'   => 'Update URI',
 	);
 
-	$themes_allowed_tags = wporg_themes_get_allowed_tags();
+	$themes_allowed_tags = array(
+		'a'       => array(
+			'href'  => array(),
+			'title' => array(),
+		),
+		'abbr'    => array(
+			'title' => array(),
+		),
+		'acronym' => array(
+			'title' => array(),
+		),
+		'code'    => array(),
+		'em'      => array(),
+		'strong'  => array(),
+	);
 
 	/*
 	 * If it's a remote file, download it first.
