@@ -813,9 +813,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				// The token is the only authority here, so it ends only the session of the account that asked.
 				if ( get_current_user_id() === $remote_token['user']->ID ) {
 					wp_logout();
-				} elseif ( ! get_current_user_id() ) {
-					// Nobody to log out, but a cookie naming a session already gone can go with it.
-					wp_clear_auth_cookie();
 				}
 			}
 
