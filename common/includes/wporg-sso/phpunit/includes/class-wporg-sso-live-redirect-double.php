@@ -42,9 +42,10 @@ class WPOrg_SSO_Live_Redirect_Double extends WP_WPOrg_SSO {
 	 *
 	 * @param WP_User $user        The user the token is for.
 	 * @param string  $target_host The host the token is issued for.
+	 * @param string  $bounce      Fingerprint of the browser's bounce ticket.
 	 * @return string
 	 */
-	public function generate_remote_token( WP_User $user, string $target_host = '' ): string {
-		return $this->_generate_remote_token( $user, $target_host );
+	public function generate_remote_token( WP_User $user, string $target_host = '', string $bounce = '' ): string {
+		return $this->_generate_remote_token( $user, $target_host, $bounce );
 	}
 }

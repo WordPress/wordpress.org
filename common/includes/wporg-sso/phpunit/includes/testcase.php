@@ -253,6 +253,33 @@ abstract class WPOrg_SSO_TestCase extends TestCase {
 	}
 
 	/**
+	 * The bounce ticket a browser holds during a hand-off.
+	 *
+	 * @var string
+	 */
+	protected const BOUNCE_TICKET = 'a-bounce-ticket';
+
+	/**
+	 * The fingerprint the SSO host mints a token against.
+	 *
+	 * @return string
+	 */
+	protected function bounce_fingerprint(): string {
+		return hash( 'sha256', static::BOUNCE_TICKET );
+	}
+
+	/**
+	 * Gives the browser the bounce ticket a login on the destination leaves it.
+	 *
+	 * @return string The ticket's fingerprint.
+	 */
+	protected function hold_a_bounce_ticket(): string {
+		$_COOKIE[ WPOrg_SSO::REMOTE_BOUNCE_COOKIE ] = static::BOUNCE_TICKET;
+
+		return $this->bounce_fingerprint();
+	}
+
+	/**
 	 * Returns the value of a query argument in a URL.
 	 *
 	 * @param string $url The URL to read.

@@ -28,13 +28,23 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		const REMOTE_TOKEN_CLOCK_SKEW = 30;
 
 		/**
+		 * How long a bounce ticket is good for.
+		 *
+		 * Long enough for a user-paced login, and the cookie's own lifetime, so a
+		 * ticket never outlives the record of it being spent.
+		 *
+		 * @var int
+		 */
+		const REMOTE_BOUNCE_TIMEOUT = 3600;
+
+		/**
 		 * The cookie holding this browser's claim on an in-flight remote login.
 		 *
 		 * `__Host-` cookies cannot carry a `Domain`, so no sibling host can set this one.
 		 *
 		 * @var string
 		 */
-		const REMOTE_BOUNCE_COOKIE = '__Host-wporg_sso_bounce';
+		const REMOTE_BOUNCE_COOKIE = '__Host-wporg_sso_bounce_v2';
 
 		/**
 		 * The object cache group recording which remote tokens have been redeemed.
