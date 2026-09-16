@@ -15,6 +15,32 @@ class WPOrg_SSO_Test_Double extends WP_WPOrg_SSO {
 	use WPOrg_SSO_Captures_Redirects;
 
 	/**
+	 * Bounce ticket cookies written during the request, in order.
+	 *
+	 * @var array[]
+	 */
+	public array $bounce_cookies = array();
+
+	/**
+	 * Records the ticket cookie instead of emitting a header CLI would drop.
+	 *
+	 * @param string $ticket  The ticket to store.
+	 * @param array  $options Attributes for `setcookie()`.
+	 */
+	protected function _set_bounce_cookie( $ticket, $options ) { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore -- Named for the method it overrides.
+		$this->bounce_cookies[] = compact( 'ticket', 'options' );
+	}
+
+	/**
+	 * Gives this browser a bounce ticket.
+	 *
+	 * @return string The ticket's fingerprint.
+	 */
+	public function issue_bounce_ticket(): string {
+		return $this->_issue_bounce_ticket();
+	}
+
+	/**
 	 * Whether the passed host, domain, or URL belongs to the WordPress.org network.
 	 *
 	 * @param mixed $host A domain, hostname, or URL.
@@ -90,6 +116,25 @@ class WPOrg_SSO_Test_Double extends WP_WPOrg_SSO {
 	 */
 	public function validate_remote_token( string $sso_token, string $bounce = '' ): array {
 		return $this->_validate_remote_token( $sso_token, $bounce );
+	}
+
+	/**
+	 * The fingerprint of the bounce ticket this request carries, if unspent.
+	 *
+	 * @return string
+	 */
+	public function current_bounce_fingerprint(): string {
+		return $this->_current_bounce_fingerprint();
+	}
+
+	/**
+	 * Claims a bounce ticket for the hand-off it answers.
+	 *
+	 * @param string $bounce The fingerprint to claim.
+	 * @return bool
+	 */
+	public function claim_bounce_fingerprint( string $bounce ): bool {
+		return $this->_claim_bounce_fingerprint( $bounce );
 	}
 
 	/**

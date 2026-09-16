@@ -172,15 +172,49 @@ class WPOrg_SSO_Safe_Redirect_Test extends WPOrg_SSO_TestCase {
 	}
 
 	/**
-	 * A hand-off cannot be pointed off the network by its own query string.
+	 * An accepted hand-off cannot be pointed off the network by its query string.
 	 *
 	 * `_maybe_perform_remote_login()` passes `redirect_to` through unchecked,
 	 * so without the re-validation below it this is an open redirect on every
-	 * host the SSO serves.
+	 * host the SSO serves. The ticket is what gets the request past the binding
+	 * guard and onto that branch; without one it restarts instead and never
+	 * reaches the redirect this is about.
 	 *
 	 * @return void
 	 */
-	public function test_a_hand_off_cannot_be_redirected_off_the_network(): void {
+	public function test_an_accepted_hand_off_cannot_be_redirected_off_the_network(): void {
+		$user = new WP_User( $this->factory->user->create() );
+
+		$bounce = $this->hold_a_bounce_ticket();
+
+		$_GET['sso_token']   = $this->make_live_sso( 'login.wordpress.org' )->generate_remote_token( $user, 'wordcamp.org', $bounce );
+		$_GET['redirect_to'] = 'https://evil.com/steal';
+
+		$sso = $this->make_live_sso( 'wordcamp.org', '/schedule/' );
+
+		$redirect = $this->without_header_warnings(
+			function () use ( $sso ) {
+				return $this->catch_redirect( array( $sso, 'maybe_perform_remote_login' ) );
+			}
+		);
+
+		// The hand-off was accepted, so the redirect below is the accept branch's.
+		$this->assertSame( $user->ID, get_current_user_id() );
+
+		$this->assertSame( 'https://wordcamp.org/schedule/', $redirect->to );
+		$this->assertStringNotContainsString( 'evil.com', $redirect->to );
+	}
+
+	/**
+	 * A hand-off that never gets accepted is not an open redirect either.
+	 *
+	 * Without a ticket the request fails the binding guard, and a restart is
+	 * refused because the destination is foreign, leaving `redirect_to` to be
+	 * re-validated on the way out.
+	 *
+	 * @return void
+	 */
+	public function test_a_refused_hand_off_cannot_be_redirected_off_the_network(): void {
 		$user = new WP_User( $this->factory->user->create() );
 
 		$_GET['sso_token']   = $this->make_live_sso( 'login.wordpress.org' )->generate_remote_token( $user, 'wordcamp.org' );
@@ -189,6 +223,8 @@ class WPOrg_SSO_Safe_Redirect_Test extends WPOrg_SSO_TestCase {
 		$sso = $this->make_live_sso( 'wordcamp.org', '/schedule/' );
 
 		$redirect = $this->catch_redirect( array( $sso, 'maybe_perform_remote_login' ) );
+
+		$this->assertSame( 0, get_current_user_id() );
 
 		$this->assertSame( 'https://wordcamp.org/schedule/', $redirect->to );
 		$this->assertStringNotContainsString( 'evil.com', $redirect->to );
