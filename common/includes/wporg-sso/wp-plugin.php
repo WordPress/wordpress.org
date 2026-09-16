@@ -651,11 +651,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$remote_token = $this->_validate_remote_token( $remote_token, $bounce );
 
 			/*
-			 * A request with no ticket cannot be the browser that asked, however well
-			 * the token signs. Both claims are taken before anyone is logged in, so two
-			 * hand-offs racing for one ticket cannot both come out of this authenticated.
-			 * The token goes first, so failing to claim it leaves the ticket to be spent
-			 * by whichever hand-off it was really issued for.
+			 * Both claimed before anyone is logged in, so hand-offs racing for one ticket
+			 * settle on one; the token first, so failing it leaves the ticket for its own.
 			 */
 			if (
 				$bounce &&
@@ -858,8 +855,6 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 		/**
 		 * Whether a remote token has already been redeemed.
-		 *
-		 * Reads the claim without making one.
 		 *
 		 * @param string $sso_hash The signature the token carries.
 		 * @return bool False when the token is unspent, or the cache cannot say.

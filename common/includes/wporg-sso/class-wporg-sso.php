@@ -42,10 +42,6 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 *
 		 * `__Host-` cookies cannot carry a `Domain`, so no sibling host can set this one.
 		 *
-		 * Versioned: tickets predating REMOTE_BOUNCE_TIMEOUT never lapse, so they would
-		 * come back unspent once their claim aged out. Browsers holding one restart the
-		 * hand-off instead and are issued a ticket that does lapse.
-		 *
 		 * @var string
 		 */
 		const REMOTE_BOUNCE_COOKIE = '__Host-wporg_sso_bounce_v2';
