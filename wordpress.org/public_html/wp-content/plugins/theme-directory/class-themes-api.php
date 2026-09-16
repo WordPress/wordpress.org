@@ -926,14 +926,23 @@ class Themes_API {
 		if ( class_exists( 'GlotPress_Translate_Bridge' ) ) {
 			$glotpress_project = "wp-themes/{$phil->slug}";
 
-			$phil->name = GlotPress_Translate_Bridge::translate( $phil->name, $glotpress_project );
+			$phil->name = self::sanitize_translation(
+				'name',
+				GlotPress_Translate_Bridge::translate( $phil->name, $glotpress_project )
+			);
 
 			if ( isset( $phil->description ) ) {
-				$phil->description = GlotPress_Translate_Bridge::translate( $phil->description, $glotpress_project );
+				$phil->description = self::sanitize_translation(
+					'description',
+					GlotPress_Translate_Bridge::translate( $phil->description, $glotpress_project )
+				);
 			}
 
 			if ( isset( $phil->sections['description'] ) ) {
-				$phil->sections['description'] = GlotPress_Translate_Bridge::translate( $phil->sections['description'], $glotpress_project );
+				$phil->sections['description'] = self::sanitize_translation(
+					'sections/description',
+					GlotPress_Translate_Bridge::translate( $phil->sections['description'], $glotpress_project )
+				);
 			}
 
 		}
@@ -965,6 +974,25 @@ class Themes_API {
 	}
 
 	/* Helper functions */
+
+	/**
+	 * Reduces a translated field to the markup the field accepts.
+	 *
+	 * The translation replaces a value sanitized at import and narrowed again
+	 * above, so it passes the same boundaries rather than inherit their result.
+	 *
+	 * @param string $field The field being translated: 'name', 'description', or 'sections/description'.
+	 * @param string $value The translation as GlotPress stored it.
+	 *
+	 * @return string The translation, reduced to what the field accepts.
+	 */
+	public static function sanitize_translation( $field, $value ) {
+		if ( 'sections/description' !== $field ) {
+			return wp_strip_all_tags( $value );
+		}
+
+		return wp_kses( $value, wporg_themes_get_allowed_tags() );
+	}
 
 	/**
 	 * Fixes mangled descriptions.
