@@ -226,8 +226,8 @@ class Blocks {
 
 		// Unbalanced delimiters stay literal innerContent, invisible to the filter and live again after the next parse.
 		if ( $this->has_unsupported_block( parse_blocks( $output ) ) ) {
-			// Escaped rather than removed, and taken from the original rather than the round trip that inflated it.
-			return str_replace( '<!--', '&lt;!--', $content );
+			// Every delimiter is an HTML comment, so stripping the markup leaves nothing to parse.
+			return wp_strip_all_tags( $content );
 		}
 
 		return $output;
