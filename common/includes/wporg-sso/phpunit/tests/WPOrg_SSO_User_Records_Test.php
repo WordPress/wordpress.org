@@ -120,6 +120,20 @@ class WPOrg_SSO_User_Records_Test extends WPOrg_SSO_TestCase {
 	}
 
 	/**
+	 * An array-shaped reset that did not change the hash records nothing.
+	 *
+	 * A branch that gave up on the array and read an empty string would stamp
+	 * every reset, unchanged hash or not.
+	 */
+	public function test_array_shaped_old_data_with_an_unchanged_hash_is_not_recorded(): void {
+		$old_user_data = array( 'user_pass' => $this->user->user_pass );
+
+		$this->sso->record_last_password_change_reset( 'unused', $this->user->ID, $old_user_data );
+
+		$this->assertSame( '', get_user_meta( $this->user->ID, 'last_password_change', true ) );
+	}
+
+	/**
 	 * A reset that did not change the hash records nothing.
 	 *
 	 * @return void
