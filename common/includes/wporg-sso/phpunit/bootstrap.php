@@ -91,4 +91,5 @@ require __DIR__ . '/includes/class-wporg-sso-live-redirect-double.php';
 require __DIR__ . '/includes/class-wporg-sso-unreachable-cache.php';
 require __DIR__ . '/includes/class-wporg-sso-contended-cache.php';
 require __DIR__ . '/includes/class-wporg-sso-recording-cache.php';
+require __DIR__ . '/includes/class-wporg-sso-negative-caching-cache.php';
 require __DIR__ . '/includes/testcase.php';

@@ -756,6 +756,46 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 	}
 
 	/**
+	 * A ticket is claimed even against a cache that keeps its misses.
+	 *
+	 * Reading the key before claiming it loses the claim on such a cache, and
+	 * loses it quietly: the claim fails open, nothing is recorded, and the
+	 * ticket goes on being good.
+	 */
+	public function test_a_ticket_is_claimed_against_a_cache_that_keeps_misses(): void {
+		$fingerprint = $this->hold_a_bounce_ticket();
+
+		$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org', $fingerprint );
+
+		// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- Standing in a cache that keeps misses, then putting the real one back.
+		$real_cache                 = $GLOBALS['wp_object_cache'];
+		$GLOBALS['wp_object_cache'] = new WPOrg_SSO_Negative_Caching_Cache( $real_cache );
+
+		try {
+			$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+
+			$this->assertSame( $this->user->ID, get_current_user_id(), 'The hand-off has to be accepted for its claim to be worth testing.' );
+
+			// A second token against the ticket the first hand-off answered.
+			$stranger = new WP_User( $this->factory->user->create( array( 'user_login' => 'sso-second' ) ) );
+
+			$_GET['sso_token'] = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $stranger, 'wordcamp.org', $fingerprint );
+			$_GET['sso_retry'] = '1';
+
+			wp_set_current_user( 0 );
+			$this->issued_cookies = array();
+
+			$this->redeem( $this->make_sso( 'wordcamp.org', '/index.php', '/schedule/' ) );
+		} finally {
+			$GLOBALS['wp_object_cache'] = $real_cache;
+		}
+		// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->assertSame( 0, get_current_user_id() );
+		$this->assertEmpty( $this->issued_auth_cookie() );
+	}
+
+	/**
 	 * A hand-off that loses the race for a ticket starts no session.
 	 *
 	 * Both claims are taken before anyone is logged in, so two tokens signed
