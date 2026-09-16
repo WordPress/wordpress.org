@@ -2,8 +2,8 @@
 /**
  * Tests that a translated theme header is held to the header's markup boundary.
  *
- * A translation replaces the sanitized Name or Description for every consumer of
- * the API, the localised directory pages among them.
+ * A translation replaces the Name or Description for every consumer of the API,
+ * the localised directory pages among them.
  *
  * @package theme-directory
  */
@@ -23,51 +23,23 @@ use PHPUnit\Framework\TestCase;
 class Themes_API_Translation_Test extends TestCase {
 
 	/**
-	 * Data provider for {@see test_plain_text_fields_drop_all_markup()}.
-	 *
-	 * @return array<string, array{0: string}>
-	 */
-	public static function plain_text_field_provider(): array {
-		return array(
-			'name'        => array( 'name' ),
-			'description' => array( 'description' ),
-		);
-	}
-
-	/**
-	 * The Name and the flattened Description are plain text by the time they are returned.
-	 *
-	 * @param string $field The field being translated.
-	 */
-	#[DataProvider( 'plain_text_field_provider' )]
-	public function test_plain_text_fields_drop_all_markup( string $field ): void {
-		$translation = 'Mon Thème <script id="x">alert(1)</script><em>joli</em>';
-
-		$this->assertSame( 'Mon Thème joli', Themes_API::sanitize_translation( $field, $translation ) );
-	}
-
-	/**
-	 * Data provider for {@see test_description_section_keeps_header_markup_only()}.
+	 * Data provider for {@see test_translation_matches_the_stored_header()}.
 	 *
 	 * @return array<string, array{0: string, 1: string}>
 	 */
-	public static function description_section_provider(): array {
+	public static function translation_provider(): array {
 		return array(
-			'script dropped'              => array(
-				'Un thème <script>alert(1)</script>joli',
-				'Un thème alert(1)joli',
+			'markup dropped'              => array(
+				'Mon Thème <script id="x">alert(1)</script><em>joli</em>',
+				'Mon Thème joli',
 			),
 			'event attribute dropped'     => array(
 				'<strong onmouseover="alert(1)">joli</strong>',
-				'<strong>joli</strong>',
+				'joli',
 			),
-			'directive dropped'           => array(
-				'<a href="https://example.org/" data-wp-bind--href="context.t">doc</a>',
-				'<a href="https://example.org/">doc</a>',
-			),
-			'header markup survives'      => array(
-				'Un thème <strong>joli</strong>, voir la <a href="https://example.org/" title="doc">doc</a>.',
-				'Un thème <strong>joli</strong>, voir la <a href="https://example.org/" title="doc">doc</a>.',
+			'shortcode delimiters inert'  => array(
+				'Un thème [gallery] joli',
+				'Un thème &#91;gallery&#93; joli',
 			),
 			'entities are not re-encoded' => array(
 				'Th&egrave;me &amp; style',
@@ -77,13 +49,14 @@ class Themes_API_Translation_Test extends TestCase {
 	}
 
 	/**
-	 * The Description section carries the markup a style.css header may carry.
+	 * Every translated header is plain text with inert shortcode delimiters, as the
+	 * import leaves the English value.
 	 *
 	 * @param string $translation The translation as GlotPress stored it.
 	 * @param string $expected    The value the API may return.
 	 */
-	#[DataProvider( 'description_section_provider' )]
-	public function test_description_section_keeps_header_markup_only( string $translation, string $expected ): void {
-		$this->assertSame( $expected, Themes_API::sanitize_translation( 'sections/description', $translation ) );
+	#[DataProvider( 'translation_provider' )]
+	public function test_translation_matches_the_stored_header( string $translation, string $expected ): void {
+		$this->assertSame( $expected, Themes_API::sanitize_translation( $translation ) );
 	}
 }
