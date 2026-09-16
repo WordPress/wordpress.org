@@ -226,7 +226,7 @@ class Blocks {
 
 		// Unbalanced delimiters stay literal innerContent, invisible to the filter and live again after the next parse.
 		if ( $this->has_unsupported_block( parse_blocks( $output ) ) ) {
-			// Delimiters are HTML comments, and any comment left behind is only escaped again by the next save.
+			// Delimiters are HTML comments, and a save restores only bare wp: ones; anything else comes back escaped.
 			$content = preg_replace( '/<!--.*?-->/s', '', $content ) ?? $content;
 
 			// An opener with no closer would comment out everything after it, so drop it and keep that content.
