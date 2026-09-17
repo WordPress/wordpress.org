@@ -214,7 +214,14 @@ function configure_site( int $blog_id, string $title, string $locale = '', bool 
 		update_option( '_bbp_include_root', false );
 	}
 
-	flush_rewrite_rules( false );
+	/*
+	 * Not flush_rewrite_rules(): switch_to_blog() swaps the database context but
+	 * leaves $wp_rewrite initialised for the site this request loaded, so a flush
+	 * here stores the forums' rules on the directory sub-sites, without the post
+	 * types their own plugins register. Dropping the option lets each site
+	 * regenerate its rules on first request, in its own fully loaded context.
+	 */
+	delete_option( 'rewrite_rules' );
 
 	restore_current_blog();
 }

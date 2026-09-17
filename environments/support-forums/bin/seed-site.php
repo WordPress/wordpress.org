@@ -107,13 +107,25 @@ if ( WPORG_THEME_DIRECTORY_BLOGID === $current_blog_id ) {
 		\WP_CLI::error( 'The theme-directory plugin is not loaded on this site.' );
 	}
 
-	ensure_directory_record(
+	$theme_id = ensure_directory_record(
 		'repopackage',
 		'twentytwentyfour',
 		'Twenty Twenty-Four',
 		'Twenty Twenty-Four is designed to be flexible, versatile and applicable to any website.',
 		'themeauthor'
 	);
+
+	/*
+	 * The theme directory stores this meta keyed by version, and
+	 * Themes_API::get_theme() indexes it by version without checking the shape,
+	 * so a bare record makes every theme page a TypeError. import-themes.php
+	 * writes the same keys.
+	 */
+	$version = '1.0';
+	update_post_meta( $theme_id, '_screenshot', array( $version => 'screenshot.png' ) );
+	update_post_meta( $theme_id, '_status', array( $version => 'live' ) );
+	update_post_meta( $theme_id, '_requires', array( $version => '6.4' ) );
+	update_post_meta( $theme_id, '_requires_php', array( $version => '7.0' ) );
 
 	\WP_CLI::success( 'Seeded the theme directory dependency.' );
 	return;
