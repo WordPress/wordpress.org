@@ -7,12 +7,15 @@
 
 declare( strict_types = 1 );
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
  * @group capabilities
  */
+#[Group( 'capabilities' )]
 class Capabilities_Committer_Identity_Test extends TestCase {
 
 	/**
@@ -238,6 +241,7 @@ class Capabilities_Committer_Identity_Test extends TestCase {
 	 * @param string $attacker_login A login that loosely equals the committer's.
 	 * @return void
 	 */
+	#[DataProvider( 'data_colliding_logins' )]
 	public function test_numeric_string_collision_is_denied( string $attacker_login ): void {
 		$this->create_user( self::COMMITTER_LOGIN );
 		$this->add_committer( self::COMMITTER_LOGIN );
