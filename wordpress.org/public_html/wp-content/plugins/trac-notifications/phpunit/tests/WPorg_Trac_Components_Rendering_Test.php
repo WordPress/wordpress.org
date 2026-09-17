@@ -130,6 +130,19 @@ class WPorg_Trac_Components_Rendering_Test extends WPorg_Trac_Components_TestCas
 	}
 
 	/**
+	 * The block's boilerplate is wrapped in paragraphs, since it runs after wpautop.
+	 */
+	public function test_block_boilerplate_is_wrapped_in_paragraphs(): void {
+		$this->set_display_name( 'Plain Name' );
+
+		$html = $this->render_component();
+
+		$this->assertStringContainsString( '<p>Component maintainers:</p>', $html );
+		$this->assertStringContainsString( '<p>Many contributors help maintain', $html );
+		$this->assertStringContainsString( '<p><strong>Want to help?', $html );
+	}
+
+	/**
 	 * The maintainer display name is HTML-escaped in the output.
 	 */
 	public function test_maintainer_display_name_is_escaped(): void {
