@@ -160,6 +160,9 @@ class Plugin_Release_Confirmation extends Base {
 
 	/**
 	 * Validate that the user can manage releases for the given plugin.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool True if the user may manage the plugin's releases.
 	 */
 	public function permission_can_access_plugin( $request ) {
 		if ( ! $this->can_manage_releases( $request ) ) {
