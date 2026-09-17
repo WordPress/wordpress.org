@@ -16,6 +16,7 @@ require_once dirname( __FILE__ ) . '/inc/class-shortcodes.php';
  * Registry of actions and filters
  */
 add_action( 'init', array( 'WPOrg_Cli\Markdown_Import', 'action_init' ) );
+add_action( 'init', array( 'WPOrg_Cli\Markdown_Import', 'action_register_meta' ) );
 add_action( 'init', array( 'WPOrg_Cli\Shortcodes', 'action_init' ) );
 add_action( 'wporg_cli_manifest_import', array( 'WPOrg_Cli\Markdown_Import', 'action_wporg_cli_manifest_import' ) );
 add_action( 'wporg_cli_markdown_import', array( 'WPOrg_Cli\Markdown_Import', 'action_wporg_cli_markdown_import' ) );

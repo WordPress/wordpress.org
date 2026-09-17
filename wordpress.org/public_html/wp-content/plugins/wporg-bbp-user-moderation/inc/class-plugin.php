@@ -133,7 +133,7 @@ class Plugin {
 			'post_id' => bbp_get_topic_id(),
 		) );
 		if ( false !== $link ) {
-			echo $link;
+			echo wp_kses_post( $link );
 		}
 	}
 
@@ -146,7 +146,7 @@ class Plugin {
 			'post_id' => bbp_get_reply_id(),
 		) );
 		if ( false !== $link ) {
-			echo $link;
+			echo wp_kses_post( $link );
 		}
 	}
 

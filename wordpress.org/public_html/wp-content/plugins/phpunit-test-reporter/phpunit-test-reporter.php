@@ -27,7 +27,13 @@ add_action( 'init', array( 'PTR\Display', 'action_init_register_shortcode' ) );
 add_action( 'get_post_metadata', array( 'PTR\Display', 'filter_get_post_metadata' ), 10, 4 );
 add_action( 'body_class', array( 'PTR\Display', 'filter_body_class' ) );
 add_action( 'post_class', array( 'PTR\Display', 'filter_post_class' ) );
-add_action( 'the_content', array( 'PTR\Display', 'filter_the_content' ) );
+// This callback discards its $content input and returns a freshly rendered report,
+// so it must run after every shortcode-parsing pass or that generated markup — which
+// contains esc_html'd, submitter-controlled data — gets fed back to the parser.
+// Core's do_shortcode is at priority 11; a late priority (99) also runs after any
+// third-party shortcode filter registered above that. add_filter (not add_action) as
+// the returned value is used.
+add_filter( 'the_content', array( 'PTR\Display', 'filter_the_content' ), 99 );
 add_action( 'rest_api_init', array( 'PTR\RestAPI', 'register_routes' ) );
 add_action( 'load-edit.php', 'ptr_load_edit_php' );
 

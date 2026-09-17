@@ -1,0 +1,12 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"plugins": [
+		"GlotPress/GlotPress",
+		"https://downloads.wordpress.org/plugin/sqlite-object-cache.zip",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-translation-events"
+	],
+	"lifecycleScripts": {
+		"afterStart": "bash translate/bin/after-start-test.sh"
+	}
+}

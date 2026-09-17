@@ -69,12 +69,14 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 	
 		// Step 2. Is that Trac Ticket still what we expect?
 		$matched_existing_ref = false;
-		foreach ( $existing_refs as $ref ) {
-			if (
-				$ref->trac === $pr_data->trac_ticket[0] &&
-				$ref->ticket === $pr_data->trac_ticket[1]
-			) {
-				$matched_existing_ref = true;
+		if ( $pr_data->trac_ticket ) {
+			foreach ( $existing_refs as $ref ) {
+				if (
+					$ref->trac === $pr_data->trac_ticket[0] &&
+					(int) $ref->ticket === (int) $pr_data->trac_ticket[1]
+				) {
+					$matched_existing_ref = true;
+				}
 			}
 		}
 
@@ -83,11 +85,14 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 		unset( $_pr_data_no_ticket->trac_ticket, $_pr_data_no_ticket->body );
 
 		// Step 3. If not in DB, or $pr_data->trac_ticket isn't yet in the DB, add a new row of it.
+		$user_id = 0;
+		$new_ref = false;
+
 		if ( $pr_data->trac_ticket && ( ! $existing_refs || ! $matched_existing_ref ) ) {
 
 			$user_id = (int) find_wporg_user_by_github( $pr_data->user->name, 'ID' );
 
-			$wpdb->insert(
+			$new_ref = (bool) $wpdb->insert(
 				'trac_github_prs',
 				[
 					'created'      => gmdate( 'Y-m-d H:i:s', strtotime( $pr_data->created_at ) ),
@@ -100,6 +105,10 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 					'author'       => $user_id,
 				]
 			);
+		}
+
+		// Only the request whose row was added mentions the PR on the ticket.
+		if ( $new_ref ) {
 
 			// Add a mention to the Trac Ticket.
 			$trac = get_trac_instance( $pr_data->trac_ticket[0] );

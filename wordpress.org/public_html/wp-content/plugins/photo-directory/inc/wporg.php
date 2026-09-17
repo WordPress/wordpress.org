@@ -103,7 +103,7 @@ class WPorg {
 
 		// Perform redirect if appropriate.
 		if ( $do_redirect ) {
-			wp_redirect( 'https://wordpress.org' );
+			wp_safe_redirect( 'https://wordpress.org' );
 		}
 	}
 

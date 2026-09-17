@@ -24,6 +24,7 @@ elseif ( ! $_tests_dir ) {
 }
 
 if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test bootstrap console output, not HTML.
 	echo "Could not find $_tests_dir/includes/functions.php\n";
 	exit( 1 );
 }
@@ -49,5 +50,6 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
 
-// Include utility functions.
+// Include the base test case and utility functions.
+require __DIR__ . '/includes/testcase.php';
 require __DIR__ . '/includes/utils.php';

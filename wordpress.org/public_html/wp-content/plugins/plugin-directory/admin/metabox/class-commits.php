@@ -28,7 +28,7 @@ class Commits {
 		$changes = $wpdb->get_results( $wpdb->prepare(
 			"SELECT * FROM trac_plugins WHERE `slug` = %s AND category = 'changeset' ORDER BY `pubdate` DESC LIMIT %d",
 			$post->post_name,
-			self::REVS_TO_SHOW
+			(int) self::REVS_TO_SHOW
 		) );
 
 		echo '<table class="widefat changesets">';
@@ -55,8 +55,8 @@ class Commits {
 				</tr>\n",
 				sprintf(
 					'<a href="https://profiles.wordpress.org/%s/">%s</a>',
-					$user->user_nicename ?? $change->username,
-					$user->user_login ?? $change->username
+					esc_attr( $user->user_nicename ?? $change->username ),
+					esc_html( $user->user_login ?? $change->username )
 				),
 				esc_html( $change->pubdate ),
 				sprintf(
@@ -64,14 +64,14 @@ class Commits {
 					esc_url( $change->link ),
 					esc_html( $change->title )
 				),
-				implode( ' ', $actions )
+				wp_kses_post( implode( ' ', $actions ) )
 			);
 		}
 
 		echo '</table>';
 		printf(
 			'<small>Showing the last %d revisions</small>',
-			self::REVS_TO_SHOW
+			(int) self::REVS_TO_SHOW
 		);
 	}
 

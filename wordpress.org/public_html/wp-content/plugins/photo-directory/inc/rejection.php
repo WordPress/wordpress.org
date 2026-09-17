@@ -46,7 +46,7 @@ class Rejection {
 			],
 			'copyright'     => [
 				'label' => __( 'Copyright: Potential copyright/ownership infringement', 'wporg-photos' ),
-				'email' => __( "The photo has been previously posted elsewhere, but due to our limited resources we are unable to verify its ownership. We require that you 'have the copyright or other legal ownership for any photo you submit'. This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.\n\nIf you do have the copyright, we apologize, but hope you understand our abundance of caution. Reply to let us know and provide some verification of that fact and we can remove the block that would prevent you from resubmitting the photo.", 'wporg-photos' ),
+				'email' => __( 'The photo has been previously posted elsewhere so we are unable to accept it due to potential copyright and/or licensing conflicts.', 'wporg-photos' ),
 			],
 			'faces'         => [
 				'label' => __( 'Faces: Contains human face(s)', 'wporg-photos' ),
@@ -873,9 +873,11 @@ class Rejection {
 		}
 
 		echo '<div class="misc-pub-section curtime misc-pub-curtime">';
-		printf( __( 'Rejected by: %s', 'wporg-photos' ), '<b>' . $rejection_user . '</b>' );
+		/* translators: %s: Name of the rejecting user. */
+		printf( esc_html__( 'Rejected by: %s', 'wporg-photos' ), '<b>' . wp_kses_post( $rejection_user ) . '</b>' );
 		echo '<br>';
-		printf( __( 'Rejected on: %s', 'wporg-photos' ), '<b>' . $rejection_date . '</b>' );
+		/* translators: %s: Rejection date. */
+		printf( esc_html__( 'Rejected on: %s', 'wporg-photos' ), '<b>' . esc_html( $rejection_date ) . '</b>' );
 		echo '</div>';
 	}
 
@@ -1008,7 +1010,7 @@ JS;
 			echo "</label></div>\n";
 		}
 
-		echo '<label for="rejected_reason">' . __( 'Reject due to:', 'wporg-photos' ) . '<br>';
+		echo '<label for="rejected_reason">' . esc_html__( 'Reject due to:', 'wporg-photos' ) . '<br>';
 		printf(
 			'<select id="rejected_reason" name="rejected_reason"%s>',
 			disabled( true, $is_disabled, false )
@@ -1018,7 +1020,7 @@ JS;
 				'<option value="%s"%s>%s</option>' . "\n",
 				esc_attr( $reason ),
 				selected( $selected, $reason, false ),
-				sanitize_text_field( $args['label'] )
+				esc_html( $args['label'] )
 			);
 		}
 		echo '</select></label>';
@@ -1029,23 +1031,23 @@ JS;
 		$note_to_user_label_class = ( $is_disabled ? '' : ' pending_moderator_note_to_user' );
 
 		// Markup for optional note to send to user in rejection email.
-		echo '<label for="moderator_note_to_user" class="moderator_note_to_user' . esc_attr( $note_to_user_label_class ) . '">' . __( '(Optional) Note to user on rejection:', 'wporg-photos' );
-		echo '<p class="description"><em>' . __( 'Included in rejection email.', 'wporg-photos' ) . '</em></p>';
+		echo '<label for="moderator_note_to_user" class="moderator_note_to_user' . esc_attr( $note_to_user_label_class ) . '">' . esc_html__( '(Optional) Note to user on rejection:', 'wporg-photos' );
+		echo '<p class="description"><em>' . esc_html__( 'Included in rejection email.', 'wporg-photos' ) . '</em></p>';
 		echo '<textarea id="moderator_note_to_user" name="moderator_note_to_user" rows="4"' . disabled( true, $is_disabled, false ) . '>';
 		echo esc_textarea( self::get_moderator_note_to_user( $post, 'reject' ) );
 		echo '</textarea>';
 		echo '</label>';
 
 		// Markup for optional note sent to user in approval email.
-		echo '<label for="moderator_note_to_user_on_publish" class="moderator_note_to_user_on_publish' . esc_attr( $note_to_user_label_class ) . '">' . __( '(Optional) Note to user on approval:', 'wporg-photos' );
-		echo '<p class="description"><em>' . __( 'Included in approval email.', 'wporg-photos' ) . '</em></p>';
+		echo '<label for="moderator_note_to_user_on_publish" class="moderator_note_to_user_on_publish' . esc_attr( $note_to_user_label_class ) . '">' . esc_html__( '(Optional) Note to user on approval:', 'wporg-photos' );
+		echo '<p class="description"><em>' . esc_html__( 'Included in approval email.', 'wporg-photos' ) . '</em></p>';
 		echo '<textarea id="moderator_note_to_user_on_publish" name="moderator_note_to_user_on_publish" rows="4"' . disabled( true, $is_disabled, false ) . '>';
 		echo esc_textarea( self::get_moderator_note_to_user( $post, 'publish' ) );
 		echo '</textarea>';
 		echo '</label>';
 
 		// Markup for optional private note for moderator-eyes only.
-		echo '<label for="moderator_private_note">' . __( '(Optional) Private moderators-only note:', 'wporg-photos' );
+		echo '<label for="moderator_private_note">' . esc_html__( '(Optional) Private moderators-only note:', 'wporg-photos' );
 		echo '<textarea id="moderator_private_note" name="moderator_private_note" rows="4">';
 		echo esc_textarea( self::get_moderator_private_note( $post ) );
 		echo '</textarea>';
@@ -1065,7 +1067,7 @@ JS;
 		printf( '<div class="reject-action%s">', $is_rejected ? ' post-is-rejected' : '' );
 		printf(
 			'<input type="submit" name="%s" id="reject-post" value="%s" class="button button-large">',
-			self::$action,
+			esc_attr( self::$action ),
 			$is_rejected ? esc_attr__( 'Update', 'wporg-photos' ) : esc_attr__( 'Reject', 'wporg-photos' )
 		);
 		echo '</div>';
@@ -1199,13 +1201,13 @@ JS;
 	public static function custom_rejection_columns( $column_name, $post_id ) {
 		switch ( $column_name ) {
 			case 'rejected_by':
-				echo self::get_rejection_user( $post_id, 'link' );
+				echo wp_kses_post( self::get_rejection_user( $post_id, 'link' ) );
 				break;
 			case 'rejected_on':
-				echo self::get_rejection_date( $post_id );
+				echo esc_html( self::get_rejection_date( $post_id ) );
 				break;
 			case 'rejected_reason':
-				echo self::get_rejection_reason( $post_id );
+				echo esc_html( self::get_rejection_reason( $post_id ) );
 				// Add asterisk to denote there was a moderator note to user.
 				if ( self::get_moderator_note_to_user( $post_id, 'reject' ) || self::get_moderator_note_to_user( $post_id, 'publish' ) ) {
 					echo '*';
@@ -1314,7 +1316,7 @@ JS;
 
 		// If post is rejected, remove all existing post statuses from dropdown.
 		if ( self::is_post_rejected( $post ) ) {
-			echo <<<JS
+			?>
 			<script>
 			document.addEventListener('DOMContentLoaded', function () {
 				// Remove the 'Submit for Review' button.
@@ -1324,14 +1326,14 @@ JS;
 				document.querySelector("body.post-type-photo #preview-action")?.remove();
 
 				// Add rejected post status to status display.
-				document.querySelector("body.post-type-photo .misc-pub-post-status #post-status-display").innerText = "{$status_label}";
+				document.querySelector("body.post-type-photo .misc-pub-post-status #post-status-display").innerText = <?php echo wp_json_encode( $status_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 
 				// Change visibility display to indicate it is hidden.
-				document.querySelector("body.post-type-photo .misc-pub-visibility #post-visibility-display").innerText = "{$visibility_label}";
+				document.querySelector("body.post-type-photo .misc-pub-visibility #post-visibility-display").innerText = <?php echo wp_json_encode( $visibility_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 			} );
 			</script>
 
-JS;
+			<?php
 		}
 	}
 
@@ -1368,7 +1370,7 @@ JS;
 
 		echo '<table id="dashboard-photo-rejection-stats" class="wp-list-table widefat fixed striped table-view-list">';
 		echo '<thead><tr>';
-		echo '<th>' . __( 'Rejection reason', 'wporg-photos' ) . '</th>';
+		echo '<th>' . esc_html__( 'Rejection reason', 'wporg-photos' ) . '</th>';
 		echo '<th class="col-num col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
 		echo '<th class="col-num col-percent-rejected" title="' . esc_attr( 'Percentage of overall rejections', 'wporg-photos' ) . '">%</th>';
 		echo '</tr></thead>';
@@ -1384,12 +1386,12 @@ JS;
 
 			echo '<tr>';
 			echo '<td title="' . esc_attr( $data['label'] ) . '">' . esc_html( $reason ) . '</td>';
-			echo '<td>' . number_format_i18n( $data['count'] ) . '</td>';
-			echo '<td>' . $rejection_pct . '%</td>';
+			echo '<td>' . esc_html( number_format_i18n( $data['count'] ) ) . '</td>';
+			echo '<td>' . esc_html( $rejection_pct ) . '%</td>';
 			echo "</tr>\n";
 		}
 
-		echo '<tr class="row-sum"><td>' . __( 'Total', 'wporg-photos' ) . '</td><td>' . number_format_i18n( $total_rejections ) . '</td><td>100%</td></tr>';
+		echo '<tr class="row-sum"><td>' . esc_html__( 'Total', 'wporg-photos' ) . '</td><td>' . esc_html( number_format_i18n( $total_rejections ) ) . '</td><td>100%</td></tr>';
 		echo '</tbody></table>';
 		echo '</div>';
 	}

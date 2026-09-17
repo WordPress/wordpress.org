@@ -99,6 +99,39 @@
 
 					}
 				);
+				$( document ).on(
+					'click',
+					'.load-more-events-btn',
+					function ( e ) {
+						$( this ).text('Loading...').prop('disabled', true);
+						let eventType = $( this ).data('event-type');
+						let nextPage = $( this ).data('event-next-page');
+						const url = `/events/?${encodeURIComponent(eventType)}=${encodeURIComponent(nextPage)}&format=html`;
+
+						fetch(url)
+							.then(response => {
+								if (!response.ok) {
+									throw new Error(`HTTP error! Status: ${response.status}`);
+								}
+								return response.json();
+							})
+							.then(response => {
+								const $html = $(response.data.html);
+								const $listItems = $html.find('li');
+								if ( 0 === response.data.nextPage ){
+									$(this).hide();
+								} else {
+									$(this).data('event-next-page', response.data.nextPage);
+								}
+								$(this).parent().prev('.wp-block-wporg-event-list').find('ul').append($listItems);
+								$(this).text('Load more').prop('disabled', false);
+							})
+							.catch(error => {
+								console.error('Error fetching next page:', error);
+							});
+					}
+				);
+				
 
 			}
 		);

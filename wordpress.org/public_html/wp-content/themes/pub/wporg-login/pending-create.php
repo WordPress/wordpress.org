@@ -18,8 +18,8 @@ if ( ! empty( $sso::$matched_route_params['confirm_user'] ) ) {
 	die();
 }
 
-$activation_user = $_COOKIE['wporg_confirm_user'] ?? false;
-$activation_key  = $_COOKIE['wporg_confirm_key']  ?? false;
+$activation_user = is_string( $_COOKIE['wporg_confirm_user'] ?? null ) ? $_COOKIE['wporg_confirm_user'] : '';
+$activation_key  = is_string( $_COOKIE['wporg_confirm_key']  ?? null ) ? $_COOKIE['wporg_confirm_key']  : '';
 
 $pending_user = wporg_get_pending_user( $activation_user );
 if ( ! $pending_user ) {
@@ -28,7 +28,7 @@ if ( ! $pending_user ) {
 }
 
 // Already logged in.. Warn about duplicate accounts, etc.
-if ( is_user_logged_in() && $activation_user != wp_get_current_user()->user_login ) {
+if ( is_user_logged_in() && $activation_user !== wp_get_current_user()->user_login ) {
 	wp_safe_redirect( home_url( '/linkexpired/register-logged-in' ) );
 	exit;
 }
@@ -152,27 +152,28 @@ get_header();
 		<p><?php
 			printf(
 				/* translators: %s Email address */
-				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . '<br>' .
-				__( 'Please contact %s for more details.', 'wporg' ),
+				esc_html__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . '<br>' .
+				/* translators: %s: Support email address. */
+				esc_html__( 'Please contact %s for more details.', 'wporg' ),
 				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
-				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+				'<a href="' . esc_url( 'mailto:' . $sso::SUPPORT_EMAIL ) . '">' . esc_html( $sso::SUPPORT_EMAIL ) . '</a>'
 			);
 		?></p>
 	</div>
 	<?php } ?>
 
 	<p class="intro">
-		<?php _e( 'Set your password and complete your WordPress.org Profile information.', 'wporg' ); ?>
+		<?php esc_html_e( 'Set your password and complete your WordPress.org Profile information.', 'wporg' ); ?>
 	</p>
 
 	<p class="login-login">
-		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
+		<label for="user_login"><?php esc_html_e( 'Username', 'wporg' ); ?></label>
 		<input type="text" disabled="disabled" class="disabled" value="<?php echo esc_attr( $activation_user ); ?>" size="20" />
 	</p>
 
 	<div class="user-pass1-wrap" <?php echo ( $pending_user['cleared'] ? '' : "style='display:none;'" ); ?>>
 		<p>
-			<label for="pass1"><?php _e( 'Password', 'wporg' ); ?></label>
+			<label for="pass1"><?php esc_html_e( 'Password', 'wporg' ); ?></label>
 		</p>
 
 		<div class="wp-pwd">
@@ -183,7 +184,7 @@ get_header();
 			<button type="button" class="button button-secondary wp-hide-pw hide-if-no-js" aria-label="<?php esc_attr_e( 'Hide password', 'wporg' ); ?>">
 				<span class="dashicons dashicons-hidden" aria-hidden="true"></span>
 			</button>
-			<div id="pass-strength-result" class="hide-if-no-js" aria-live="polite"><?php _e( 'Strength indicator', 'wporg' ); ?></div>
+			<div id="pass-strength-result" class="hide-if-no-js" aria-live="polite"><?php esc_html_e( 'Strength indicator', 'wporg' ); ?></div>
 		</div>
 	</div>
 
@@ -194,7 +195,7 @@ get_header();
 
 	<?php
 		if ( $error_recapcha_status ) {
-			echo '<div class="message error"><p>' . __( 'Please try again.', 'wporg' ) . '</p></div>';
+			echo '<div class="message error"><p>' . esc_html__( 'Please try again.', 'wporg' ) . '</p></div>';
 		}
 	?>
 
@@ -205,7 +206,7 @@ get_header();
 </form>
 
 <p id="nav">
-	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer();

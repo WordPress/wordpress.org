@@ -32,7 +32,10 @@ if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
 	exit;
 }
 
-// TODO: Parse the body and bump stats.
+/*
+ * TODO: Parse the body and bump stats. Needs an origin check or rate limiting when implementing —
+ * this endpoint is unauthenticated and sends `Access-Control-Allow-Origin: *`.
+ */
 
 // Accept the notification. Return 200 OK regardless.
 http_response_code( 200 );

@@ -1,6 +1,6 @@
 <?php get_header(); ?>
 
-<h2 id="post-home"><?php _e( 'Support', 'bborg' ); ?></h2>
+<h2 id="post-home"><?php esc_html_e( 'Support', 'bborg' ); ?></h2>
 
 <?php if ( 1 === bbp_get_paged() ) : // cached first page ?>
 

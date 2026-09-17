@@ -1,9 +1,8 @@
 <?php
-
 /**
  * Replies Loop - Single Reply
  *
- * @package bbPress
+ * @package bb-base
  * @subpackage Theme
  */
 

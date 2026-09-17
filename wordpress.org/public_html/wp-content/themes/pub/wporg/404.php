@@ -23,7 +23,7 @@ get_header(); ?>
 					<?php
 					printf(
 						/* translators: Home URL. */
-						__( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg' ), // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+						wp_kses_post( __( 'Try searching from the field above, or go to the <a href="%s">home page</a>.', 'wporg' ) ),
 						esc_url( get_home_url() )
 					);
 					?>

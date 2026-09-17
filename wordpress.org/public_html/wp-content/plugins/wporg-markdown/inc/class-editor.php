@@ -67,6 +67,7 @@ class Editor {
 		printf(
 			'<div class="notice notice-warning"><p>%s</p><p><a href="%s">%s</a></p></div>',
 			'This page is maintained on GitHub. Content, title, and slug edits here will be discarded on next sync.',
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Edit link markup assembled above from escaped parts.
 			$this->get_markdown_edit_link( $post->ID ),
 			'Edit on GitHub'
 		);

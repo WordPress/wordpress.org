@@ -55,6 +55,19 @@ class Blocks {
 		add_filter( 'bbp_edit_reply_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
 		add_filter( 'bbp_new_topic_pre_content',  [ $this, 'reverse_twemoji_upon_save' ], 5 );
 		add_filter( 'bbp_edit_topic_pre_content', [ $this, 'reverse_twemoji_upon_save' ], 5 );
+
+		// Keep forum content to the blocks the forums support, on the way in and on the way out.
+		foreach ( [ 'topic', 'reply', 'forum' ] as $type ) {
+			// After the rest of bbPress' content filters have run, before the content is stored.
+			add_filter( "bbp_new_{$type}_pre_content", [ $this, 'limit_blocks' ], 100 );
+			add_filter( "bbp_edit_{$type}_pre_content", [ $this, 'limit_blocks' ], 100 );
+
+			// Before Blocks Everywhere renders the stored content, which it does at priority 8.
+			add_filter( "bbp_get_{$type}_content", [ $this, 'limit_blocks' ], 7 );
+		}
+
+		// And again where the blocks actually run, past anything that could change the content.
+		add_filter( 'pre_render_block', [ $this, 'block_pre_render' ], 10, 2 );
 	}
 
 	/**
@@ -166,6 +179,180 @@ class Blocks {
 		return array_unique( $blocks );
 	}
 
+	/**
+	 * The blocks that forum content may contain.
+	 *
+	 * This is the list the editor is offered by ::allowed_blocks(), minus the narrowing that
+	 * only applies to what the editor puts in the inserter. Keep the two in step.
+	 *
+	 * @return string[]
+	 */
+	protected function supported_blocks() {
+		return [
+			'core/paragraph',
+			'core/list',
+			'core/list-item',
+			'core/code',
+			'core/quote',
+			'core/image',
+			'core/embed',
+		];
+	}
+
+	/**
+	 * Reduce forum content to the blocks that ::supported_blocks() lists.
+	 *
+	 * @param string $content Forum, topic, or reply content.
+	 * @return string
+	 */
+	public function limit_blocks( $content ) {
+		if ( ! is_string( $content ) || ! has_blocks( $content ) ) {
+			return $content;
+		}
+
+		$blocks = parse_blocks( $content );
+
+		// Leave content that needs no changes exactly as it was written.
+		if ( ! $this->has_unsupported_block( $blocks ) ) {
+			return $content;
+		}
+
+		$output = '';
+		foreach ( $this->filter_blocks( $blocks ) as $block ) {
+			$output .= serialize_block( $block );
+		}
+
+		$output = ltrim( $output );
+
+		// Unbalanced delimiters stay literal innerContent, invisible to the filter and live again after the next parse.
+		if ( $this->has_unsupported_block( parse_blocks( $output ) ) ) {
+			// Delimiters are HTML comments, and a save restores only bare wp: ones; anything else comes back escaped.
+			$content = preg_replace( '/<!--.*?-->/s', '', $content ) ?? $content;
+
+			// An opener with no closer would comment out everything after it, so drop it and keep that content.
+			$content = str_replace( '<!--', '', $content );
+
+			// Removing one comment can join what surrounded it into another, so fall back to text if it did.
+			return $this->has_unsupported_block( parse_blocks( $content ) ) ? wp_strip_all_tags( $content ) : $content;
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Keep an unsupported block from rendering in forum content.
+	 *
+	 * ::limit_blocks() guards the stored string, which later filters can still change; this
+	 * guards the parsed block itself, at every depth and before its callback runs.
+	 *
+	 * @param string|null $pre_render   Pre-rendered content, or null to render the block.
+	 * @param array       $parsed_block The block about to be rendered.
+	 * @return string|null Empty string to drop the block, otherwise $pre_render.
+	 */
+	public function block_pre_render( $pre_render, $parsed_block ) {
+		if ( null !== $pre_render || empty( $parsed_block['blockName'] ) ) {
+			return $pre_render;
+		}
+
+		foreach ( [ 'topic', 'reply', 'forum' ] as $type ) {
+			if ( ! doing_filter( "bbp_get_{$type}_content" ) ) {
+				continue;
+			}
+
+			return in_array( $parsed_block['blockName'], $this->supported_blocks(), true ) ? $pre_render : '';
+		}
+
+		return $pre_render;
+	}
+
+	/**
+	 * Whether a parsed block tree names a block the forums don't support.
+	 *
+	 * @param array[] $blocks Parsed blocks.
+	 * @return bool
+	 */
+	protected function has_unsupported_block( $blocks ) {
+		$supported = $this->supported_blocks();
+
+		foreach ( $blocks as $block ) {
+			// Text between blocks carries no block name, and is left to KSES.
+			if ( isset( $block['blockName'] ) && ! in_array( $block['blockName'], $supported, true ) ) {
+				return true;
+			}
+
+			if ( ! empty( $block['innerBlocks'] ) && $this->has_unsupported_block( $block['innerBlocks'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Drop the blocks the forums don't support, at every depth.
+	 *
+	 * @param array[] $blocks Parsed blocks.
+	 * @return array[]
+	 */
+	protected function filter_blocks( $blocks ) {
+		$supported = $this->supported_blocks();
+		$kept      = [];
+
+		foreach ( $blocks as $block ) {
+			if ( isset( $block['blockName'] ) && ! in_array( $block['blockName'], $supported, true ) ) {
+				continue;
+			}
+
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$block = $this->filter_inner_blocks( $block );
+			}
+
+			$kept[] = $block;
+		}
+
+		return $kept;
+	}
+
+	/**
+	 * Filter a block's children, keeping its innerContent placeholders in step with them.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array
+	 */
+	protected function filter_inner_blocks( $block ) {
+		$inner_blocks  = [];
+		$inner_content = [];
+		$position      = 0;
+
+		foreach ( $block['innerContent'] as $chunk ) {
+			// Anything but null is literal markup, and keeps its place.
+			if ( null !== $chunk ) {
+				$inner_content[] = $chunk;
+				continue;
+			}
+
+			$inner_block = $block['innerBlocks'][ $position ] ?? null;
+			++$position;
+
+			if ( ! $inner_block ) {
+				continue;
+			}
+
+			$filtered = $this->filter_blocks( [ $inner_block ] );
+			if ( ! $filtered ) {
+				continue;
+			}
+
+			$inner_blocks[]  = $filtered[0];
+			$inner_content[] = null;
+		}
+
+		$block['innerBlocks']  = $inner_blocks;
+		$block['innerContent'] = $inner_content;
+
+		return $block;
+	}
+
 	public function editor_settings( $settings ) {
 		if ( ! $this->is_review_related() ) {
 			// This adds the image block, but only with 'add from url' as an option.
@@ -228,6 +415,15 @@ class Blocks {
 			return bbp_current_user_can_publish_topics() || bbp_current_user_can_publish_replies();
 		};
 
+		$callback = $oembed_proxy_route_args[0]['callback'];
+
+		// Discovery fetches the client-supplied URL; rendering has it off (embed_oembed_discover), so the preview shouldn't either.
+		$oembed_proxy_route_args[0]['callback'] = function ( $request ) use ( $callback ) {
+			$request['discover'] = false;
+
+			return call_user_func( $callback, $request );
+		};
+
 		register_rest_route(
 			'oembed/1.0',
 			'/proxy',
@@ -266,7 +462,8 @@ class Blocks {
 			</p>',
 			checked( get_user_option( 'block_editor', $user_id ), 'disabled', false ),
 			sprintf(
-				__( 'Disable the <a href="%s">Block Editor</a> for new topics and replies.', 'wporg-forums' ),
+				/* translators: %s: Block editor documentation URL. */
+				wp_kses_post( __( 'Disable the <a href="%s">Block Editor</a> for new topics and replies.', 'wporg-forums' ) ),
 				'https://wordpress.org/support/article/wordpress-editor/'
 			)
 		);

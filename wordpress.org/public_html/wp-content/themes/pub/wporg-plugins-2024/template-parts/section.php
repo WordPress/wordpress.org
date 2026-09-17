@@ -17,5 +17,5 @@ $classes = implode( ' ', $classes );
 
 <div id="<?php echo esc_attr( $prefix . $section_slug ); ?>" class="<?php echo esc_attr( $classes ); ?>">
 	<h2 id="<?php echo esc_attr( $section_slug . '-header' ); ?>"><?php echo esc_html( $section_title ); ?></h2>
-	<?php echo $section_content; ?>
+	<?php echo $section_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered readme section markup. ?>
 </div>

@@ -26,7 +26,7 @@
 
 		<?php else : // have_posts ?>
 
-			<p><?php _e( 'Sorry, no sites in the Showcase matched your criteria.', 'wporg-showcase' ); ?></p>
+			<p><?php esc_html_e( 'Sorry, no sites in the Showcase matched your criteria.', 'wporg-showcase' ); ?></p>
 
 		<?php endif; ?>
 

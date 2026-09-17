@@ -71,6 +71,7 @@ while ( $query->have_posts() ) {
 	$query->the_post();
 	$plugin = get_post();
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo "Checking $plugin->post_name\n";
 
 	$url = 'https://plugins.svn.wordpress.org/' . $plugin->post_name . '/tags/' . $plugin->stable_tag;
@@ -98,7 +99,9 @@ while ( $query->have_posts() ) {
 
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 echo "Good plugins:\n" . join( "\n", $good_plugins ) . "\n\n";
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 echo "Problem plugins:\n" . join( "\n", $error_plugins ) . "\n\n";
 
 echo "Checked: " . number_format( $count_checked) . "\n";

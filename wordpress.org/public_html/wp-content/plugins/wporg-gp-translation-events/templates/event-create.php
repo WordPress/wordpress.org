@@ -2,6 +2,7 @@
 /**
  * Template for event form.
  */
+
 namespace Wporg\TranslationEvents\Templates;
 
 use Wporg\TranslationEvents\Event\Event;

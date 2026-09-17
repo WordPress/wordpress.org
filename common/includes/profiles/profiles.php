@@ -66,6 +66,7 @@ function post( array $request_args ) : string {
 
 	} finally {
 		if ( $error ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 			trigger_error( $error, E_USER_WARNING );
 		}
 	}

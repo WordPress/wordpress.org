@@ -165,13 +165,13 @@ class Theme_Directory_Compat extends Directory_Compat {
 				<?php if ( ! empty( $icon ) ) : ?>
 					<li class="theme-meta-icon"><img src="<?php echo esc_url( $icon ); ?>"></li> 
 				<?php endif; ?>
-				<li><?php echo $theme; ?></li>
-				<li><?php echo $support; ?></li>
-				<li><?php echo $active; ?></li>
-				<li><?php echo $unresolved; ?></li>
-				<li><?php echo $reviews; ?></li>
+				<li><?php echo wp_kses_post( $theme ); ?></li>
+				<li><?php echo wp_kses_post( $support ); ?></li>
+				<li><?php echo wp_kses_post( $active ); ?></li>
+				<li><?php echo wp_kses_post( $unresolved ); ?></li>
+				<li><?php echo wp_kses_post( $reviews ); ?></li>
 				<?php if ( $create ) : ?>
-				<li class="create-topic"><?php echo $create; ?></li>
+				<li class="create-topic"><?php echo wp_kses_post( $create ); ?></li>
 				<?php endif; ?>
 			</ul>
 		</div>

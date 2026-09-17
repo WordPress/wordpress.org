@@ -214,8 +214,7 @@ code {
 }
 
 #login h1 a {
-	background-image: url(../images/wporg-logo.png);
-	background-image: none, url(../images/wporg-logo.svg);
+	background-image: url(../images/wporg-logo.svg?2);
 	-webkit-background-size: 256px;
 	background-size: 256px;
 	background-position: center top;

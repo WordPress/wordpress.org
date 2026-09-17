@@ -225,6 +225,29 @@ function wporg_themes_restrict_search_to_published( $es_query_args, $query ) {
 add_filter( 'jetpack_search_es_query_args', 'wporg_themes_restrict_search_to_published', 10, 2 );
 
 /**
+ * Adds the `default` language to the fields Jetpack Search queries against.
+ *
+ * Jetpack builds its Elasticsearch query against locale-specific analyzed
+ * fields only (`title.en`, `content.en`, etc.), chosen by the language WP.com
+ * detected for each document at index time. That detection is unreliable on
+ * short theme descriptions, so many themes are indexed as non-English and have
+ * no `.en` fields at all, making them unfindable in search. The `.default`
+ * analyzed fields exist on every document regardless of detected language, so
+ * including them ensures every theme can match.
+ *
+ * @param array $languages The languages Jetpack Search will query against.
+ * @return array
+ */
+function wporg_themes_search_default_language_fields( $languages ) {
+	if ( ! in_array( 'default', $languages, true ) ) {
+		$languages[] = 'default';
+	}
+
+	return $languages;
+}
+add_filter( 'jetpack_search_query_languages', 'wporg_themes_search_default_language_fields' );
+
+/**
  * Filters SQL clauses, to prioritize translated themes.
  *
  * @param array $clauses

@@ -1,9 +1,8 @@
 <?php
-
 /**
  * Single Topic Part
  *
- * @package bbPress
+ * @package bb-base
  * @subpackage Theme
  */
 

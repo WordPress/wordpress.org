@@ -63,7 +63,7 @@ the_post();
 						<?php
 						printf(
 							/* translators: %s Link to https://wordpress.org/download/releases/#betas */
-							__( 'You can find the latest beta releases on the <a href="%s">Beta Releases</a> page.', 'wporg' ),
+							wp_kses_post( __( 'You can find the latest beta releases on the <a href="%s">Beta Releases</a> page.', 'wporg' ) ),
 							'https://wordpress.org/download/releases/#betas'
 						);
 						?>
@@ -86,7 +86,7 @@ the_post();
 						<?php
 						printf(
 							/* translators: %s Link to the latest nightly release ZIP. */
-							__( 'You can download the latest nightly release here: <a href="%s">wordpress-latest.zip</a>.', 'wporg' ),
+							wp_kses_post( __( 'You can download the latest nightly release here: <a href="%s">wordpress-latest.zip</a>.', 'wporg' ) ),
 							'https://wordpress.org/nightly-builds/wordpress-latest.zip'
 						);
 						?>

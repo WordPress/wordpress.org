@@ -22,6 +22,7 @@
 		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-contributor-moderation",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-slack-integrations",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-profiles",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-gp-translation-events",
 		"https://downloads.wordpress.org/plugin/logged-out-admin-bar.zip"
 	],
 	"themes": [
@@ -31,6 +32,7 @@
 	],
 	"mappings": {
 		"wp-content/mu-plugins": "./mocks/mu-plugins",
+		"wp-content/themes/wporg-translate-events-2024": "../wordpress.org/public_html/wp-content/plugins/wporg-gp-translation-events/themes/wporg-translate-events-2024",
 		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/env-bin": "./translate/bin"

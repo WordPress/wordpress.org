@@ -18,7 +18,6 @@ namespace WordPressdotorg\HelpHub;
 define( 'PLUGIN', __FILE__ );
 
 require __DIR__ . '/inc/helphub-codex-languages/class-helphub-codex-languages.php';
-require __DIR__ . '/inc/helphub-contributors/helphub-contributors.php';
 require __DIR__ . '/inc/helphub-post-types/helphub-post-types.php';
 require __DIR__ . '/inc/helphub-read-time/helphub-read-time.php';
 require __DIR__ . '/inc/helphub-front-page-blocks/helphub-front-page-blocks.php';

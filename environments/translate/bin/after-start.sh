@@ -44,6 +44,10 @@ $WP wp eval '
 	gp_upgrade_db();
 '
 
+# Translation Events also only creates its tables when is_admin() is true.
+echo "Ensuring Translation Events schema is up to date..."
+$WP wp eval 'Wporg\TranslationEvents\Upgrade::upgrade_if_needed();'
+
 # wporg-gp-custom-stats reads from extra tables (user_translations_count, etc.)
 # that production maintains manually — the plugin does not create them.
 echo "Creating wporg-gp-custom-stats tables..."
@@ -130,6 +134,27 @@ $WP wp eval '
 	}
 '
 
+# Create a contributor account. rosetta-roles treats `admin` as a global
+# administrator, so contributor permission paths are never exercised.
+echo "Creating the contributor test user..."
+$WP wp eval '
+	if ( get_user_by( "login", "translator" ) ) {
+		echo "  translator exists, skipping\n";
+		return;
+	}
+	$user_id = wp_insert_user( array(
+		"user_login" => "translator",
+		"user_pass"  => "password",
+		"user_email" => "translator@example.test",
+		"role"       => "subscriber",
+	) );
+	if ( is_wp_error( $user_id ) ) {
+		fwrite( STDERR, "  could not create translator: " . $user_id->get_error_message() . "\n" );
+		return;
+	}
+	echo "  created translator (id={$user_id})\n";
+'
+
 # Auto-seed real fixtures on first start.
 if [ -z "$($WP wp option get wporg_translate_env_seeded 2>/dev/null)" ]; then
 	echo "Seeding hello-dolly (plugin)..."
@@ -137,6 +162,9 @@ if [ -z "$($WP wp option get wporg_translate_env_seeded 2>/dev/null)" ]; then
 
 	echo "Seeding twentytwenty (theme)..."
 	$WP wp eval-file wp-content/env-bin/import-from-wporg.php theme twentytwenty
+
+	echo "Seeding demo Translation Events..."
+	$WP wp eval-file wp-content/env-bin/seed-events.php
 
 	$WP wp option update wporg_translate_env_seeded "$(date +%s)"
 else

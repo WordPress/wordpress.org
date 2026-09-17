@@ -23,7 +23,9 @@ class Make_Core_Trac_Components {
 		add_action( 'init', array( $this, 'init' ) );
 		add_action( 'pre_get_posts', array( $this, 'pre_get_posts' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-		add_action( 'the_content', array( $this, 'the_content' ), 5 );
+		// Append the generated block after the shortcode pass so it is not processed a
+		// second time. do_shortcode runs at 11; 99 also clears later shortcode filters.
+		add_action( 'the_content', array( $this, 'the_content' ), 99 );
 		add_action( 'save_post_component', array( $this, 'save_post' ), 10, 2 );
 		add_action( 'wp_head', array( $this, 'wp_head' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'wp_enqueue_scripts' ) );
@@ -32,6 +34,8 @@ class Make_Core_Trac_Components {
 		add_action( 'manage_component_posts_custom_column', array( $this, 'manage_posts_custom_column' ), 10, 2 );
 		add_filter( 'wp_nav_menu_objects', array( $this, 'highlight_menu_component_link' ) );
 		add_filter( 'map_meta_cap', [ $this, 'map_meta_cap' ], 10, 4 );
+		add_action( 'load-post.php', [ $this, 'load_post_screen' ] );
+		add_filter( 'wp_insert_post_data', [ $this, 'keep_component_author' ], 10, 2 );
 	}
 
 	function trac_url() {
@@ -81,6 +85,7 @@ class Make_Core_Trac_Components {
 			'show_ui' => true,
 			'labels' => $labels,
 			'capabilities' => array(
+				'create_posts'           => 'edit_others_posts',
 				'delete_published_posts' => 'manage_options',
 			),
 			'menu_icon' => 'dashicons-admin-generic',
@@ -159,13 +164,16 @@ class Make_Core_Trac_Components {
 	function meta_box_cb( $post ) {
 		wp_nonce_field( 'component-settings_' . $post->ID, 'component-settings-nonce', false );
 		if ( $post->post_parent != 0 ) {
-			$checked = checked( (bool) get_post_meta( $post->ID, '_page_is_subcomponent', true ), true, false );
-			echo '<p><label for="page-is-subcomponent"><input type="checkbox"' . $checked . ' name="page-is-subcomponent" id="page-is-subcomponent" /> This page is a subcomponent</label></p>';
+			echo '<p><label for="page-is-subcomponent"><input type="checkbox"' . checked( (bool) get_post_meta( $post->ID, '_page_is_subcomponent', true ), true, false ) . ' name="page-is-subcomponent" id="page-is-subcomponent" /> This page is a subcomponent</label></p>';
 		}
 		if ( ! $this->page_is_component( $post ) ) {
 			return;
 		}
 		$value = get_post_meta( $post->ID, '_active_maintainers', true );
+		if ( ! $this->can_edit_maintainers() ) {
+			echo '<p>Active maintainers: ' . ( $value ? esc_html( $value ) : 'none' ) . '</p>';
+			return;
+		}
 		echo '<p><label for="active-maintainers">Active maintainers (WP.org usernames, comma-separated)</label> <input type="text" class="large-text" id="active-maintainers" name="active-maintainers" value="' . esc_attr( $value ) . '" />';
 	}
 
@@ -182,7 +190,7 @@ class Make_Core_Trac_Components {
 			update_post_meta( $post->ID, '_page_is_subcomponent', isset( $_POST['page-is-subcomponent'] ) );
 		}
 
-		if ( isset( $_POST['active-maintainers'] ) ) {
+		if ( isset( $_POST['active-maintainers'] ) && $this->can_edit_maintainers() ) {
 			update_post_meta( $post->ID, '_active_maintainers', sanitize_text_field( wp_unslash( $_POST['active-maintainers'] ) ) );
 		}
 	}
@@ -252,6 +260,11 @@ class Make_Core_Trac_Components {
 	/**
 	 * Allows component maintainers to edit their components if they are at least a Contributor.
 	 *
+	 * Only the per-post capabilities are mapped, and only against the post that
+	 * was passed in. The plural `edit_others_posts` has no post to map against
+	 * and is left alone; see load_post_screen() for how the edit form gets by
+	 * without it.
+	 *
 	 * @param array  $required_caps The user's actual capabilities.
 	 * @param string $cap           Capability name.
 	 * @param int    $user_id       The user ID.
@@ -259,22 +272,132 @@ class Make_Core_Trac_Components {
 	 * @return array Primitive caps.
 	 */
 	public function map_meta_cap( $required_caps, $cap, $user_id, $context ) {
-		if ( $user_id && in_array( $cap, [ 'edit_post', 'publish_post', 'edit_others_posts' ], true ) ) {
-			if ( empty( $context[0] ) ) {
-				$context[0] = isset( $_POST['post_ID'] ) ? absint( $_POST['post_ID'] ) : 0;
-			}
+		if ( ! in_array( $cap, [ 'edit_post', 'publish_post' ], true ) ) {
+			return $required_caps;
+		}
 
-			if ( 'component' === get_post_type( $context[0] ) ) {
-				$user_name   = get_user_by( 'id', $user_id )->user_login;
-				$maintainers = array_map( 'trim', explode( ',', get_post_meta( $context[0], '_active_maintainers', true ) ) );
+		$post = isset( $context[0] ) ? get_post( $context[0] ) : null;
+		if ( ! $post || self::POST_TYPE_NAME !== $post->post_type ) {
+			return $required_caps;
+		}
 
-				if ( in_array( $user_name, $maintainers, true ) ) {
-					$required_caps = ['edit_posts'];
-				}
+		if ( ! $this->is_maintainer( $user_id, $post->ID ) ) {
+			return $required_caps;
+		}
+
+		return [ 'edit_posts' ];
+	}
+
+	/**
+	 * Lets a maintainer save a component page they did not author.
+	 *
+	 * The edit form submits the page's existing author in a hidden field, and
+	 * because it differs from the current user, core then requires the plural
+	 * `edit_others_posts` before it saves. For a verified save or preview of a
+	 * component the current user maintains, that field is dropped instead: core
+	 * fills in the current user, asks for nothing more, and
+	 * keep_component_author() puts the stored author back on the way in.
+	 */
+	public function load_post_screen() {
+		// Nothing to work around: core accepts whatever author they submit.
+		if ( current_user_can( 'edit_others_posts' ) ) {
+			return;
+		}
+
+		if ( ! in_array( $_POST['action'] ?? '', [ 'editpost', 'preview' ], true ) ) {
+			return;
+		}
+
+		$post_id = isset( $_POST['post_ID'] ) ? absint( $_POST['post_ID'] ) : 0;
+		$post    = $post_id ? get_post( $post_id ) : null;
+		if ( ! $post || self::POST_TYPE_NAME !== $post->post_type ) {
+			return;
+		}
+
+		$nonce = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'update-post_' . $post_id ) ) {
+			return;
+		}
+
+		if ( ! $this->is_maintainer( get_current_user_id(), $post_id ) ) {
+			return;
+		}
+
+		// Changing the author is not part of maintaining the page.
+		$author = isset( $_POST['post_author'] ) ? (int) $_POST['post_author'] : 0;
+		if ( ! empty( $_POST['post_author_override'] ) || $author !== (int) $post->post_author ) {
+			return;
+		}
+
+		unset( $_POST['post_author'] );
+	}
+
+	/**
+	 * Keeps a component page's author when someone editing by delegation saves it.
+	 *
+	 * Core only asks for `edit_others_posts` when a different author is submitted.
+	 * A save that leaves the field out, such as Quick Edit or a maintainer's save
+	 * from the edit form (see load_post_screen()), gets the current user as
+	 * author instead, and a maintainer would take the page over without meaning
+	 * to.
+	 *
+	 * @param array $data    Slashed, sanitized post data.
+	 * @param array $postarr Slashed, sanitized, and processed post data, as passed to wp_insert_post().
+	 * @return array Post data.
+	 */
+	public function keep_component_author( $data, $postarr ) {
+		if ( self::POST_TYPE_NAME !== ( $data['post_type'] ?? '' ) || empty( $postarr['ID'] ) || ! is_user_logged_in() ) {
+			return $data;
+		}
+
+		$existing = get_post( $postarr['ID'] );
+		if ( ! $existing || (int) $data['post_author'] === (int) $existing->post_author ) {
+			return $data;
+		}
+
+		if ( current_user_can( 'edit_others_posts' ) ) {
+			return $data;
+		}
+
+		$data['post_author'] = $existing->post_author;
+
+		return $data;
+	}
+
+	/**
+	 * Whether a user is listed as an active maintainer of a component page.
+	 *
+	 * Logins are compared case-insensitively, as get_user_by() resolves them.
+	 *
+	 * @param int $user_id The user ID.
+	 * @param int $post_id The component page ID.
+	 * @return bool
+	 */
+	public function is_maintainer( $user_id, $post_id ) {
+		$user = $user_id ? get_user_by( 'id', $user_id ) : false;
+		if ( ! $user ) {
+			return false;
+		}
+
+		foreach ( $this->get_component_maintainers_by_post( $post_id ) as $maintainer ) {
+			if ( 0 === strcasecmp( $maintainer, $user->user_login ) ) {
+				return true;
 			}
 		}
 
-		return $required_caps;
+		return false;
+	}
+
+	/**
+	 * Whether the current user may change who maintains a component.
+	 *
+	 * Maintainers edit their page; who maintains it is decided by someone who can
+	 * already edit every component page.
+	 *
+	 * @return bool
+	 */
+	public function can_edit_maintainers() {
+		return current_user_can( 'edit_others_posts' );
 	}
 
 	function wp_enqueue_scripts() {
@@ -314,8 +437,10 @@ ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #
 .history.growing:before, .history.shrinking:before { font-family: Dashicons; font-size: 30px; vertical-align: middle; line-height: 15px; }
 .history.growing:before { content: "\f142"; color: red }
 .history.shrinking:before { content: "\f140"; color: green }
-td.right { text-align: right; }
-body.post-type-archive-component table td { vertical-align: middle; }
+td.right, th.right { text-align: right; }
+body.post-type-archive-component table th,
+body.post-type-archive-component table td { vertical-align: middle; padding: 4px 8px; border-bottom: 1px solid #eee; }
+body.post-type-archive-component table tr:last-child td { border-bottom: none; }
 td.maintainers { padding-top: 4px; padding-bottom: 4px; height: 26px; }
 td.maintainers img.avatar { margin-right: 5px; }
 .component-info .create-new-ticket { float: right; margin-top: 25px; }
@@ -348,7 +473,7 @@ jQuery( function( $ ) {
 		}
 
 		if ( $post->post_parent ) {
-			$top_level = '<h4>This is a subcomponent of the <a href="' . get_permalink( $post->post_parent ) . '">' . get_post( $post->post_parent )->post_title . '</a> component.</h4>';
+			$top_level = '<h4>This is a subcomponent of the <a href="' . esc_url( get_permalink( $post->post_parent ) ) . '">' . esc_html( get_post( $post->post_parent )->post_title ) . '</a> component.</h4>';
 			$content = $top_level . "\n\n" . $content;
 		}
 
@@ -365,9 +490,9 @@ jQuery( function( $ ) {
 		$subcomponents = array();
 		if ( $subcomponents_query->have_posts() ) {
 			foreach ( $subcomponents_query->posts as $subcomponent ) {
-				$subcomponents[ $subcomponent->ID ] = '<a href="' . get_permalink( $subcomponent ) . '">' . $subcomponent->post_title . '</a>';
+				$subcomponents[ $subcomponent->ID ] = '<a href="' . esc_url( get_permalink( $subcomponent ) ) . '">' . esc_html( $subcomponent->post_title ) . '</a>';
 			}
-			echo wp_sprintf( "<h4>Subcomponents: %l.</h4>", $subcomponents );
+			echo wp_kses_post( wp_sprintf( '<h4>Subcomponents: %l.</h4>', $subcomponents ) );
 		}
 
 		$recent_posts = new WP_Query( array(
@@ -377,13 +502,13 @@ jQuery( function( $ ) {
 			'tag_slug__in' => $post->post_name
 		) );
 		if ( $recent_posts->have_posts() ) {
-			echo "<h3>Recent posts on the make/{$this->trac} blog</h3>\n<ul>";
+			echo '<h3>Recent posts on the make/' . esc_html( $this->trac ) . " blog</h3>\n<ul>";
 			while ( $recent_posts->have_posts() ) {
 				$recent_posts->the_post();
-				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
+				echo '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a> (' . esc_html( get_the_date() ) . ")</li>\n";
 			}
 			echo '</ul>';
-			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
+			echo '<p>View all posts tagged <a href="' . esc_url( get_term_link( $post->post_name, 'post_tag' ) ) . '">' . esc_html( $post->post_name ) . '</a>.</p>';
 			wp_reset_postdata();
 		}
 
@@ -398,18 +523,18 @@ jQuery( function( $ ) {
 			echo "<h3>Recent posts on the make/test blog</h3>\n<ul>";
 			while ( $flow_posts->have_posts() ) {
 				$flow_posts->the_post();
-				echo '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a> (' . get_the_date() . ")</li>\n";
+				echo '<li><a href="' . esc_url( get_permalink() ) . '">' . esc_html( get_the_title() ) . '</a> (' . esc_html( get_the_date() ) . ")</li>\n";
 			}
 			echo '</ul>';
-			echo 'View all posts tagged <a href="' . get_term_link( $post->post_name, 'post_tag' ) . '">' . $post->post_name . "</a>.\n\n";
+			echo '<p>View all posts tagged <a href="' . esc_url( get_term_link( $post->post_name, 'post_tag' ) ) . '">' . esc_html( $post->post_name ) . '</a>.</p>';
 			wp_reset_postdata();
 		}
 		restore_current_blog();
 
 		$sub_pages = wp_list_pages( array( 'child_of' => $post->ID, 'post_type' => self::POST_TYPE_NAME, 'echo' => false, 'title_li' => false, 'exclude' => implode( ',', array_keys( $subcomponents ) ) ) );
 		if ( $sub_pages ) {
-			echo "<h3>Pages under " . get_the_title() . "</h3>\n";
-			echo "<ul>$sub_pages</ul>";
+			echo '<h3>Pages under ' . esc_html( get_the_title() ) . "</h3>\n";
+			echo '<ul>' . wp_kses_post( $sub_pages ) . '</ul>';
 			echo "\n\n";
 		}
 
@@ -422,7 +547,7 @@ jQuery( function( $ ) {
 		$maintainers = get_post_meta( $post->ID, '_active_maintainers', true );
 		if ( $maintainers ) {
 			$maintainers = array_map( 'trim', explode( ',', $maintainers ) );
-			echo 'Component maintainers: ';
+			echo '<p>Component maintainers:</p>';
 			echo '<ul class="maintainers">';
 			foreach ( $maintainers as $maintainer ) {
 				$maintainer = get_user_by( 'login', $maintainer );
@@ -433,14 +558,14 @@ jQuery( function( $ ) {
 				printf( '<li><a href="//profiles.wordpress.org/%s/">%s %s</a></li>',
 					esc_attr( $maintainer->user_nicename ),
 					get_avatar( $maintainer->user_email, 36 ),
-					$maintainer->display_name ?: $maintainer->user_login
+					esc_html( $maintainer->display_name ?: $maintainer->user_login )
 				);
 			}
 			echo "</ul>\n\n";
 		}
 
-		echo "\n" . "Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of {$this->trac_name()} are always seeking to mentor others to impart their knowledge.\n\n";
-		echo "<strong>Want to help? Start following this component!</strong> <a href='/{$this->trac}/notifications/'>Adjust your notifications here</a>. Feel free to dig into any ticket." . "\n\n";
+		echo '<p>Many contributors help maintain one or more components. These maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of ' . esc_html( $this->trac_name() ) . ' are always seeking to mentor others to impart their knowledge.</p>';
+		echo '<p><strong>Want to help? Start following this component!</strong> <a href="' . esc_url( "/{$this->trac}/notifications/" ) . '">Adjust your notifications here</a>. Feel free to dig into any ticket.</p>';
 
 		$followers = $this->api->get_component_followers( $component );
 		if ( $followers ) {
@@ -448,7 +573,7 @@ jQuery( function( $ ) {
 			$followers = $wpdb->get_results( "SELECT user_login, user_nicename, user_email FROM $wpdb->users WHERE user_login IN ($followers)" );
 		}
 		if ( $followers ) {
-			echo 'Contributors following this component:';
+			echo '<p>Contributors following this component:</p>';
 			echo '<ul class="followers">';
 			foreach ( $followers as $follower ) {
 				echo '<li><a title="' . esc_attr( $follower->user_login ) . '" href="//profiles.wordpress.org/' . esc_attr( $follower->user_nicename ) . '/">';
@@ -525,7 +650,12 @@ jQuery( function( $ ) {
 		}
 
 		if ( is_singular() ) {
-			echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $component_count ), $component_count ) . ' in the ' . $component . ' component</h3>';
+			echo '<h3>' . sprintf(
+				/* translators: 1: Number of tickets. 2: Component name. */
+				esc_html( _n( '%1$s open ticket in the %2$s component', '%1$s open tickets in the %2$s component', $component_count ) ),
+				(int) $component_count,
+				esc_html( $component )
+			) . '</h3>';
 		}
 
 		$history = $this->api->get_component_history( $component, self::last_x_days );
@@ -554,22 +684,40 @@ jQuery( function( $ ) {
 		$last_x .= '<span class="history ' . $direction . '"></span></span>' . "\n\n";
 
 		if ( ! is_singular() ) {
-			echo $last_x;
+			echo wp_kses_post( $last_x );
 		}
 		echo '<table class="trac-summary">';
-		echo '<thead><tr><th class="title">' . $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) . '</th>';
+		echo '<thead><tr><th class="title">' . wp_kses_post( $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) ) . '</th>';
 		foreach ( $component_type[ $component ] as $type => $count ) {
 			if ( $count ) {
-				echo '<th>' . $this->trac_query_link( $type, array( 'component' => $component, 'type' => $type, 'group' => 'milestone' ) ) . '</th>';
+				echo '<th>' . wp_kses_post(
+					$this->trac_query_link(
+						$type,
+						array(
+							'component' => $component,
+							'type'      => $type,
+							'group'     => 'milestone',
+						)
+					)
+				) . '</th>';
 			}
 		}
 		echo '</tr></thead>';
 		foreach ( $component_milestone_type[ $component ] as $milestone => $type_count ) {
-			echo '<tr><th>' . $this->trac_query_link( $milestone, array( 'component' => $component, 'milestone' => $milestone, 'group' => $type ) ) . '</th>';
+			echo '<tr><th>' . wp_kses_post(
+				$this->trac_query_link(
+					$milestone,
+					array(
+						'component' => $component,
+						'milestone' => $milestone,
+						'group'     => $type,
+					)
+				)
+			) . '</th>';
 			foreach ( $type_count as $type => $count ) {
 				if ( $component_type[ $component ][ $type ] ) {
 					if ( $count ) {
-						echo '<td class="count">' . $this->trac_query_link( $count, compact( 'component', 'milestone', 'type' ) ) . '</td>';
+						echo '<td class="count">' . wp_kses_post( $this->trac_query_link( $count, compact( 'component', 'milestone', 'type' ) ) ) . '</td>';
 					} else {
 						echo '<td class="count zero">0</td>';
 					}
@@ -579,7 +727,7 @@ jQuery( function( $ ) {
 		}
 		echo "</table>\n\n";
 		if ( is_singular() ) {
-			echo $last_x;
+			echo wp_kses_post( $last_x );
 		}
 	}
 
@@ -588,8 +736,16 @@ jQuery( function( $ ) {
 
 		if ( $unreplied_tickets ) {
 			$count = count( $unreplied_tickets );
-			echo '<h3>' . sprintf( _n( '%d ticket that has no replies', '%d tickets that have no replies', $count ), $count ) . '</h3>';
-			echo '<a href="' . $this->trac_query( array( 'component' => $component, 'id' => implode( ',', wp_list_pluck( $unreplied_tickets, 'id' ) ) ) ) . '">View list on Trac</a>';
+			/* translators: %d: Number of tickets. */
+			echo '<h3>' . sprintf( esc_html( _n( '%d ticket that has no replies', '%d tickets that have no replies', $count ) ), (int) $count ) . '</h3>';
+			echo '<a href="' . esc_url(
+				$this->trac_query(
+					array(
+						'component' => $component,
+						'id'        => implode( ',', wp_list_pluck( $unreplied_tickets, 'id' ) ),
+					)
+				)
+			) . '">View list on Trac</a>';
 			$this->render_tickets( $unreplied_tickets );
 		}
 
@@ -598,15 +754,29 @@ jQuery( function( $ ) {
 		if ( $next_milestone ) {
 			$count = count( $next_milestone );
 			$next_milestone_object = (object) $next_milestone[0];
-			echo '<h3>' . sprintf( _n( '%s ticket slated for ' . $next_milestone_object->milestone, '%s tickets slated for ' . $next_milestone_object->milestone, $count ), $count ) . '</h3>';
-			echo $this->trac_query_link( 'View list in Trac', array( 'component' => $component, 'milestone' => $next_milestone_object->milestone ) );
+			echo '<h3>' . sprintf(
+				/* translators: 1: Number of tickets, 2: Milestone name. */
+				esc_html( _n( '%1$s ticket slated for %2$s', '%1$s tickets slated for %2$s', $count ) ),
+				(int) $count,
+				esc_html( $next_milestone_object->milestone )
+			) . '</h3>';
+			echo wp_kses_post(
+				$this->trac_query_link(
+					'View list in Trac',
+					array(
+						'component' => $component,
+						'milestone' => $next_milestone_object->milestone,
+					)
+				)
+			);
 			$this->render_tickets( $next_milestone );
 		}
 
 		$tickets_by_type = (array) $this->api->get_ticket_counts_for_component( $component );
 
 		$count = array_sum( $tickets_by_type );
-		echo '<h3>' . sprintf( _n( '%s open ticket', '%s open tickets', $count ), $count ) . '</h3>';
+		/* translators: %s: Number of tickets. */
+		echo '<h3>' . sprintf( esc_html( _n( '%s open ticket', '%s open tickets', $count ) ), (int) $count ) . '</h3>';
 
 		$types = array(
 			'enhancement'     => 'Open enhancements',
@@ -617,14 +787,14 @@ jQuery( function( $ ) {
 
 		foreach ( $types as $type => $title ) {
 			$count = $tickets_by_type[ $type ] ?? 0;
-			printf( '<strong>%s: %d</strong> ', $title, $count );
-			echo $this->trac_query_link( 'View list on Trac', compact( 'component', 'type' ) );
+			printf( '<strong>%s: %d</strong> ', esc_html( $title ), (int) $count );
+			echo wp_kses_post( $this->trac_query_link( 'View list on Trac', compact( 'component', 'type' ) ) );
 			echo '<br>';
 		}
 	}
 
 	function trac_query_link( $text, $args ) {
-		return '<a href="' . $this->trac_query( $args ) . '">' . $text . '</a>';
+		return '<a href="' . esc_url( $this->trac_query( $args ) ) . '">' . esc_html( $text ) . '</a>';
 	}
 
 	function trac_query( $args ) {
@@ -639,9 +809,9 @@ jQuery( function( $ ) {
 		echo '<ul class="ticket-list">';
 		foreach ( $tickets as $ticket ) {
 			$ticket = (object) $ticket;
-			echo '<li><a href="' . $this->trac_url() . '/ticket/' . $ticket->id . '">#' . $ticket->id . '</a> &nbsp;' . esc_html( $ticket->summary );
+			echo '<li><a href="' . esc_url( $this->trac_url() . '/ticket/' . $ticket->id ) . '">#' . (int) $ticket->id . '</a> &nbsp;' . esc_html( $ticket->summary );
 			if ( ! empty( $ticket->focuses ) ) {
-				echo ' <span class="focus">' . implode( '</span> <span class="focus">', explode( ', ', esc_html( $ticket->focuses ) ) ) . '</span>';
+				echo ' <span class="focus">' . wp_kses_post( implode( '</span> <span class="focus">', array_map( 'esc_html', explode( ', ', $ticket->focuses ) ) ) ) . '</span>';
 			}
 			echo "</li>\n";
 		}
@@ -661,7 +831,7 @@ jQuery( function( $ ) {
 		$topics = explode( ' ', $attr[0] );
 		$both = in_array( 'focus', $topics ) && in_array( 'component', $topics );
 
-		echo '<select class="tickets-by-topic" data-location="' . $this->trac_url() . '/">';
+		echo '<select class="tickets-by-topic" data-location="' . esc_url( $this->trac_url() . '/' ) . '">';
 		if ( $both ) {
 			$default = 'Select a focus or component';
 		} elseif ( in_array( 'focus', $topics ) ) {
@@ -669,12 +839,12 @@ jQuery( function( $ ) {
 		} else {
 			$default = 'Select a component';
 		}
-		echo '<option value="" selected="selected">' . $default . '</option>';
+		echo '<option value="" selected="selected">' . esc_html( $default ) . '</option>';
 		if ( in_array( 'focus', $topics ) ) {
 			$focuses = array( 'accessibility', 'admin', 'coding-standards', 'css', 'docs', 'javascript', 'multisite', 'performance', 'php-compatibility', 'privacy', 'rest-api', 'rtl', 'sustainability', 'template', 'ui', 'ui-copy' );
 			
 			foreach ( $focuses as $focus ) {
-				echo '<option value="focus/' . esc_attr( rawurlencode( $focus ) ) . '">' . $focus . ( $both ? ' (focus)' : '' ) . '</option>';
+				echo '<option value="focus/' . esc_attr( rawurlencode( $focus ) ) . '">' . esc_html( $focus ) . ( $both ? ' (focus)' : '' ) . '</option>';
 			}
 		}
 		if ( $both ) {
@@ -709,7 +879,7 @@ jQuery( function( $ ) {
 		static $once = true;
 		if ( $once ) {
 			$once = false;
-			echo '<thead><tr><td>Component</td><td>Tickets</td><td>7 Days</td><td>0&nbsp;Replies</td><td>Maintainers</td></tr></thead>';
+			echo '<thead><tr><th>Component</th><th class="right">Tickets</th><th class="right">7 Days</th><th class="right">0&nbsp;Replies</th><th>Maintainers</th></tr></thead>';
 		}
 
 		$arrow = '';
@@ -720,29 +890,37 @@ jQuery( function( $ ) {
 
 		echo '<tr>';
 		if ( $post->post_parent ) {
-			echo '<td>&mdash; <a href="' . get_permalink() . '">' . $post->post_title . '</a></td>';
+			echo '<td>&mdash; <a href="' . esc_url( get_permalink() ) . '">' . esc_html( $post->post_title ) . '</a></td>';
 		} else {
-			echo '<td><a href="' . get_permalink() . '"><strong>' . $post->post_title . '</strong></a></td>';
+			echo '<td><a href="' . esc_url( get_permalink() ) . '"><strong>' . esc_html( $post->post_title ) . '</strong></a></td>';
 		}
 
 		$open_tickets = 0;
 		if ( ! empty( $this->breakdown_component_type[ $component ] ) ) {
 			$open_tickets = array_sum( $this->breakdown_component_type[ $component ] );
 		}
-		echo '<td class="right"><a href="' . esc_attr( $this->get_component_url( $component ) ) . '">' . $open_tickets . '</a></td>';
+		echo '<td class="right"><a href="' . esc_url( $this->get_component_url( $component ) ) . '">' . (int) $open_tickets . '</a></td>';
 		if ( $history['change'] ) {
 			$count = sprintf( "%+d", $history['change'] );
 			if ( $history['change'] > 0 ) {
 				$count = $this->trac_query_link( $count, ['component' => $component, 'time' => date( 'm/d/y', strtotime( '-7 days' ) ) ] );
 			}
-			echo '<td class="right">' . $arrow . ' ' . $count . '</td>';
+			echo '<td class="right">' . wp_kses_post( $arrow ) . ' ' . wp_kses_post( $count ) . '</td>';
 		} else {
 			echo '<td></td>';
 		}
 
 		if ( isset( $this->breakdown_component_unreplied[ $component ] ) ) {
 			$unreplied = $this->breakdown_component_unreplied[ $component ];
-			echo '<td class="right">' . $this->trac_query_link( count( $unreplied ), array( 'component' => $component, 'id' => implode( ',', $unreplied ) ) );
+			echo '<td class="right">' . wp_kses_post(
+				$this->trac_query_link(
+					count( $unreplied ),
+					array(
+						'component' => $component,
+						'id'        => implode( ',', $unreplied ),
+					)
+				)
+			);
 			echo ' <span style="color: red; font-weight: bold">!!</span></td>';
 		} else {
 			echo '<td></td>';

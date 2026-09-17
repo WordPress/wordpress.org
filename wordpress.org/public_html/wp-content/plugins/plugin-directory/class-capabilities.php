@@ -127,7 +127,7 @@ class Capabilities {
 			$committers = array( get_user_by( 'ID', $post->post_author )->user_login );
 		}
 
-		if ( in_array( $user->user_login, $committers ) ) {
+		if ( in_array( $user->user_login, $committers, true ) ) {
 			$required_caps[] = 'exist';
 		}
 

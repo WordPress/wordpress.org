@@ -88,7 +88,12 @@ function load_files() {
 	require_once get_includes_path() . 'sensei.php';
 	require_once get_includes_path() . 'taxonomy.php';
 	require_once get_includes_path() . 'export.php';
+	require_once get_includes_path() . 'upload.php';
 	require_once get_includes_path() . 'utils.php';
+	require_once get_includes_path() . 'activity-kit-rest.php';
+	require_once get_includes_path() . 'activity-kit-settings.php';
+	require_once get_includes_path() . 'activity-kit-stats-page.php';
+	require_once get_includes_path() . 'activity-kit-import.php';
 }
 
 /**

@@ -1,5 +1,12 @@
 <?php
+/**
+ * Registers the event-flag block, which renders a flag showing whether the current user is hosting, attending, hosted, or attended the event.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
+
 use Wporg\TranslationEvents\Translation_Events;
 
 register_block_type(
@@ -16,12 +23,15 @@ register_block_type(
 				return '';
 			}
 			$current_user_attendee = Translation_Events::get_attendee_repository()->is_user_attending( $event_id, get_current_user_id() );
-			$event_flag = false;
-			if ( $current_user_attendee ) {
-				$event_flag = 'Attending';
-				if ( $current_user_attendee->is_host() ) {
-					$event_flag = 'Host';
-				}
+			$event_flag = '';
+
+			if ( ! $current_user_attendee ) {
+				return '';
+			}
+			if ( $event->is_past() ) {
+				$event_flag = $current_user_attendee->is_host() ? __( 'Hosted', 'wporg-translate-events-2024' ) : __( 'Attended', 'wporg-translate-events-2024' );
+			} else {
+				$event_flag = $current_user_attendee->is_host() ? __( 'Hosting', 'wporg-translate-events-2024' ) : __( 'Attending', 'wporg-translate-events-2024' );
 			}
 
 			if ( ! $event_flag ) {

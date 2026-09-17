@@ -73,6 +73,7 @@ class Internal {
 		echo "[/]\n";
 		echo "* = r\n";
 		foreach ( array_unique( $all_access_users ) as $u ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generates SVN authz config text, not HTML.
 			echo "{$u} = rw\n";
 		}
 		echo "\n";
@@ -86,7 +87,9 @@ class Internal {
 
 			printf(
 				"[%s]\n%s = rw\n\n",
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generates SVN authz config text, not HTML.
 				'/' . $r->slug,
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generates SVN authz config text, not HTML.
 				$r->user
 			);
 

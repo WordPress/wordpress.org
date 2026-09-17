@@ -117,7 +117,7 @@ class Plugin {
 			return;
 		}
 
-		echo '<span class="topic-resolved-indicator">' . __( 'Resolved', 'wporg-forums' ) . '</span>';
+		echo '<span class="topic-resolved-indicator">' . esc_html__( 'Resolved', 'wporg-forums' ) . '</span>';
 	}
 
 	/**
@@ -232,7 +232,8 @@ class Plugin {
 		// Display the current topic resolution if the user can't update it.
 		$user_id = get_current_user_id();
 		if ( bbp_is_topic_edit() || ! $this->user_can_resolve( $user_id, $topic_id ) ) {
-			printf( esc_html__( 'Status: %s', 'wporg-forums' ), $resolutions[ $resolution ] );
+			/* translators: %s: Resolution status. */
+			printf( esc_html__( 'Status: %s', 'wporg-forums' ), esc_html( $resolutions[ $resolution ] ) );
 
 		// Display the form to update the topic resolution.
 		} else {
@@ -264,10 +265,6 @@ class Plugin {
 	 * @param string $action The requested action to compare this function to
 	 */
 	public function topic_resolution_handler( $action = '' ) {
-		if ( ! $this->is_enabled_on_forum() ) {
-			return false;
-		}
-
 		// Bail if the action isn't meant for this function.
 		if ( $action != 'wporg_bbp_topic_resolution' ) {
 			return;
@@ -283,6 +280,11 @@ class Plugin {
 		$topic      = bbp_get_topic( $topic_id );
 		$user_id    = get_current_user_id();
 		$resolution = $_POST[ self::META_KEY ];
+
+		// Resolution must be enabled on the topic's forum, not on the one being viewed.
+		if ( $topic && ! $this->is_enabled_on_forum( bbp_get_topic_forum_id( $topic->ID ) ) ) {
+			return false;
+		}
 
 		// Check for empty topic id.
 		if ( empty( $topic_id ) || ! $topic ) {
@@ -509,11 +511,9 @@ class Plugin {
 	 * @return bool True if allowed, false if not
 	 */
 	public function user_can_resolve( $user_id, $topic_id ) {
-		$post     = false;
-		$topic_id = bbp_get_topic_id();
-		if ( $topic_id ) {
-			$post = get_post( $topic_id );
-		}
+		// Authorize against the requested topic, only falling back to the displayed one.
+		$topic_id = bbp_get_topic_id( $topic_id );
+		$post     = $topic_id ? bbp_get_topic( $topic_id ) : false;
 
 		if ( $user_id && $post && ( user_can( $user_id, 'moderate', $topic_id ) || $user_id == $post->post_author ) ) {
 			$retval = true;

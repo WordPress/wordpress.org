@@ -39,7 +39,7 @@ function security_txt() {
 	header( 'Content-Type: text/plain')
 	?>
 Contact: https://hackerone.com/wordpress
-Expires: <?php echo gmdate( 'Y-m-d', $expires ); ?>T15:00:00.000Z
+Expires: <?php echo esc_html( gmdate( 'Y-m-d', $expires ) ); ?>T15:00:00.000Z
 Acknowledgments: https://hackerone.com/wordpress/thanks
 Canonical: https://wordpress.org/.well-known/security.txt
 Policy: https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/

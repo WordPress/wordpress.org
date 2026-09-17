@@ -18,12 +18,9 @@ class Plugin_Categorization extends Base {
 			[
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'save_external_repository_url' ],
-				'permission_callback' => function( $request ) {
-					return current_user_can(
-						'plugin_admin_edit',
-						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
-					);
-				},
+				'permission_callback' => [ $this, 'permission_check_action' ],
+				'wporg_capability'    => 'plugin_admin_edit',
+				'wporg_action'        => 'save_categorization',
 				'args'                => [
 					'plugin_slug' => [
 						'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
@@ -41,12 +38,9 @@ class Plugin_Categorization extends Base {
 			[
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'save_external_support_url' ],
-				'permission_callback' => function( $request ) {
-					return current_user_can(
-						'plugin_admin_edit',
-						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
-					);
-				},
+				'permission_callback' => [ $this, 'permission_check_action' ],
+				'wporg_capability'    => 'plugin_admin_edit',
+				'wporg_action'        => 'save_categorization',
 				'args'                => [
 					'plugin_slug' => [
 						'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],

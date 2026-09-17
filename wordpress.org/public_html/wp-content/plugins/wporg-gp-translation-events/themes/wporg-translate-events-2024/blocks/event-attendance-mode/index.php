@@ -1,5 +1,12 @@
 <?php
+/**
+ * Registers the event-attendance-mode block, which renders an attendee's on-site or remote attendance mode.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
+
 use Wporg\TranslationEvents\Translation_Events;
 
 register_block_type(

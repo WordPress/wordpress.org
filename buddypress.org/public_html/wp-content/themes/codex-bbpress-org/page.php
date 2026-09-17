@@ -1,7 +1,7 @@
 <?php get_header(); ?>
 <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
 				<h2 id="post-<?php the_ID(); ?>"><?php the_title(); ?></h2>
-				<div style="margin-bottom: 20px;"><?php echo codex_get_breadcrumb(); ?></div>
+				<div style="margin-bottom: 20px;"><?php codex_get_breadcrumb(); ?></div>
 				<?php if ( get_the_content() ) :
 
 						the_content( __( '<p class="serif">Read the rest of this page &rarr;</p>', 'buddypress' ) );

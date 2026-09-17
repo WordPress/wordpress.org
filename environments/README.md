@@ -5,7 +5,7 @@ Local development environments for WordPress.org projects, powered by [`wp-env`]
 ## Prerequisites
 
 - [Docker](https://www.docker.com/products/docker-desktop/) installed and running
-- [Node.js](https://nodejs.org/) >= 20
+- [Node.js](https://nodejs.org/) — the version in [.nvmrc](.nvmrc) (`nvm use`)
 
 ## Setup
 
@@ -129,15 +129,23 @@ A local instance of translate.wordpress.org with GlotPress, the `wporg-gp-*` plu
 npm run translate:env start
 ```
 
-First start auto-imports `hello-dolly` (plugin) and `twentytwenty` (theme) so the `WordPress Plugins` and `WordPress Themes` project containers have real fixtures.
+First start auto-imports `hello-dolly` (plugin) and `twentytwenty` (theme) so the `WordPress Plugins` and `WordPress Themes` project containers have real fixtures. It also seeds a few demo Translation Events (active, upcoming, past, and draft) with hosts and attendees.
 
 **Access:** `http://localhost:8888`
+
+**Users:** `admin` / `password` is a GlotPress global administrator, so it can approve translations everywhere and never sees a permission check fail. `translator` / `password` is a plain subscriber with no GlotPress permissions — use it to check what a contributor sees, such as suggestions going to waiting instead of current. The dev login button fills in `admin`, so type the contributor credentials by hand.
 
 **Import a plugin or theme's translations on demand:**
 
 ```bash
 npm run translate:import -- plugin akismet
 npm run translate:import -- theme twentytwentyfour
+```
+
+**Seed demo events on demand** (idempotent):
+
+```bash
+npm run translate:seed-events
 ```
 
 **Re-seed** (clears the seed flag so the next `start` re-imports fixtures):
@@ -152,7 +160,15 @@ npm run translate:refresh
 npm run translate:env -- run cli -- wp <command>
 ```
 
+**Run tests** (the Translation Events plugin's PHPUnit suite, in a dedicated test environment):
+
+```bash
+npm run translate:test
+```
+
 **Local overrides:** create `translate/.wp-env.override.json` (git-ignored) to override config values like `WP_HOME` / `WP_SITEURL` for testing behind a custom hostname.
+
+**Translation Events 2024 design:** the events routes render the legacy templates unless the new block theme is enabled. To preview it, add `"config": { "TRANSLATION_EVENTS_NEW_DESIGN": true }` to `translate/.wp-env.override.json` and restart.
 
 ### Support Forums
 
@@ -192,6 +208,18 @@ All accounts use the password `password`.
 | `themesupport` | `bbp_participant` | Theme support rep; subscriber on the Themes sub-site (unused) |
 | `visitor` | `bbp_participant` | Regular site visitor |
 
+### WordPress.org SSO
+
+A test-only environment for the shared single sign-on code in `common/includes/wporg-sso/`. The SSO is a library rather than a plugin, so it is mounted at `wp-content/wporg-sso` instead of being activated, and its PHPUnit suite runs from there.
+
+`WP_ENVIRONMENT_TYPE` is set to `production` so the SSO uses the hosts it uses in production (`login.wordpress.org` and friends) rather than the shortcuts it takes on local installs.
+
+**Run tests:**
+
+```bash
+npm run sso:test
+```
+
 ### Handbook (in-plugin)
 
 The Handbook plugin has its own `.wp-env.json` in `wordpress.org/public_html/wp-content/plugins/handbook/`.
@@ -203,10 +231,10 @@ cd wordpress.org/public_html/wp-content/plugins/handbook
 npx wp-env start
 ```
 
-**Run tests:**
+**Run tests:** use the test environment in this directory instead — it starts a dedicated instance and runs the suite in one step:
 
 ```bash
-npx wp-env run phpunit phpunit -c /var/www/html/wp-content/plugins/handbook/phpunit.xml
+npm run handbook:test
 ```
 
 ## Common Commands

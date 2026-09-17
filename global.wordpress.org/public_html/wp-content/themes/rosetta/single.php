@@ -34,7 +34,7 @@
 
 				endwhile;
 			else: ?>
-				<p><?php _e( 'Sorry, no posts matched your criteria.', 'rosetta' ); ?></p>
+				<p><?php esc_html_e( 'Sorry, no posts matched your criteria.', 'rosetta' ); ?></p>
 			<?php endif; ?>
 
 			<?php posts_nav_link(' &#8212; ', __( '&laquo; Newer Posts', 'rosetta' ), __( 'Older Posts &raquo;', 'rosetta' ) ); ?>

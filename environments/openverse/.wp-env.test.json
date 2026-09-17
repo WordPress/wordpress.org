@@ -1,0 +1,12 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [],
+	"themes": [
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg-openverse"
+	],
+	"lifecycleScripts": {
+		"afterStart": "bash openverse/bin/after-start-test.sh"
+	}
+}

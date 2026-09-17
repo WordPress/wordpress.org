@@ -451,26 +451,25 @@ add_action( 'gp_footer', function() {
  */
 function wporg_gp_translate_textarea( $entry, $permissions, $index = 0 ) {
 	list( $can_edit, $can_approve ) = $permissions;
-	$disabled = $can_edit ? '' : 'disabled="disabled"';
 	?>
-	<div class="textareas<?php echo ( 0 === $index ) ? ' active' : ''; ?>" data-plural-index="<?php echo $index; ?>">
+	<div class="textareas<?php echo ( 0 === $index ) ? ' active' : ''; ?>" data-plural-index="<?php echo esc_attr( $index ); ?>">
 		<?php
 		if ( isset( $entry->warnings[ $index ] ) ) :
 			$warnings = $entry->warnings[ $index ];
 			foreach ( $warnings as $key => $value ) :
 				?>
 				<div class="warning secondary">
-					<strong><?php _e( 'Warning:', 'glotpress' ); ?></strong> <?php echo esc_html( $value ); ?>
+					<strong><?php esc_html_e( 'Warning:', 'glotpress' ); ?></strong> <?php echo esc_html( $value ); ?>
 
 					<?php if ( $can_approve ) : ?>
-						<a href="#" class="discard-warning" data-nonce="<?php echo esc_attr( wp_create_nonce( 'discard-warning_' . $index . $key ) ); ?>" data-key="<?php echo esc_attr( $key ); ?>" data-index="<?php echo esc_attr( $index ); ?>"><?php _e( 'Discard', 'glotpress' ); ?></a>
+						<a href="#" class="discard-warning" data-nonce="<?php echo esc_attr( wp_create_nonce( 'discard-warning_' . $index . $key ) ); ?>" data-key="<?php echo esc_attr( $key ); ?>" data-index="<?php echo esc_attr( $index ); ?>"><?php esc_html_e( 'Discard', 'glotpress' ); ?></a>
 					<?php endif; ?>
 				</div>
 				<?php
 			endforeach;
 		endif;
 		?>
-		<textarea placeholder="Enter translation here" class="foreign-text" name="translation[<?php echo esc_attr( $entry->original_id ); ?>][]" id="translation_<?php echo esc_attr( $entry->original_id ); ?>_<?php echo esc_attr( $index ); ?>" <?php echo $disabled; // WPCS: XSS ok. ?>><?php echo esc_translation( gp_array_get( $entry->translations, $index ) ); // WPCS: XSS ok. ?></textarea>
+		<textarea placeholder="Enter translation here" class="foreign-text" name="translation[<?php echo esc_attr( $entry->original_id ); ?>][]" id="translation_<?php echo esc_attr( $entry->original_id ); ?>_<?php echo esc_attr( $index ); ?>" <?php disabled( ! $can_edit ); ?>><?php echo esc_translation( gp_array_get( $entry->translations, $index ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></textarea>
 	</div>
 	<?php
 }
@@ -509,14 +508,14 @@ function wporg_references( $project, $entry ) {
 			list( $file, $line ) = array_pad( explode( ':', $reference ), 2, 0 );
 			if ( $source_url = $project->source_url( $file, $line ) ) :
 				?>
-				<li><a target="_blank" href="<?php echo $source_url; ?>"><?php echo $file.':'.$line ?></a></li>
+				<li><a target="_blank" href="<?php echo esc_url( $source_url ); ?>"><?php echo esc_html( $file . ':' . $line ); ?></a></li>
 			<?php
 			elseif ( wp_http_validate_url( $reference ) ) :
 				?>
 				<li><a target="_blank" href="<?php echo esc_url( $reference ); ?>"><?php echo esc_html( $reference ); ?></a></li>
 			<?php
 			else :
-				echo "<li>$file:$line</li>";
+				echo '<li>' . esc_html( "$file:$line" ) . '</li>';
 			endif;
 		endforeach;
 		?>

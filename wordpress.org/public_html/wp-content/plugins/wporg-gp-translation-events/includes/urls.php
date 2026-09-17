@@ -38,11 +38,11 @@ class Urls {
 	}
 
 	public static function event_trash( int $event_id ): string {
-		return gp_url( '/events/trash/' . $event_id );
+		return wp_nonce_url( gp_url( '/events/trash/' . $event_id ), 'trash_translation_event_' . $event_id );
 	}
 
 	public static function event_delete( int $event_id ): string {
-		return gp_url( '/events/delete/' . $event_id );
+		return wp_nonce_url( gp_url( '/events/delete/' . $event_id ), 'delete_translation_event_' . $event_id );
 	}
 
 	public static function event_create(): string {
@@ -86,10 +86,10 @@ class Urls {
 	}
 
 	public static function event_remove_attendee( int $event_id, int $user_id ): string {
-		return gp_url( "/events/$event_id/attendees/remove/$user_id" );
+		return wp_nonce_url( gp_url( "/events/$event_id/attendees/remove/$user_id" ), "remove_translation_event_attendee_{$event_id}_{$user_id}" );
 	}
 
 	public static function event_toggle_attendance_mode( int $event_id, int $user_id ): string {
-		return gp_url( "/events/attendance-mode/$event_id/$user_id" );
+		return wp_nonce_url( gp_url( "/events/attendance-mode/$event_id/$user_id" ), "toggle_translation_event_attendance_mode_{$event_id}_{$user_id}" );
 	}
 }

@@ -296,25 +296,34 @@ class Commits_List_Table extends WP_List_Table {
 					}
 				}
 
+				// A committer who has no wp.org account is shown by their SVN username alone.
 				$user = get_user_by( 'login', $item->author );
-				$output .= sprintf(
-					'<br><a href="https://profiles.wordpress.org/%s/">%s %s<br>%s</a>',
-					$user->user_nicename,
-					get_avatar( $user, 32 ),
-					esc_html( $user->display_name ),
-					esc_html( $user->user_login )
-				);
+				if ( $user ) {
+					$output .= sprintf(
+						'<br><a href="%1$s">%2$s %3$s<br>%4$s</a>',
+						esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+						get_avatar( $user, 32 ),
+						esc_html( $user->display_name ),
+						esc_html( $user->user_login )
+					);
+				} else {
+					$output .= sprintf( '<br>%s', esc_html( $item->author ) );
+				}
 
 
 				return $output;
 
 			case 'author':
 				$user = get_user_by( 'login', $item->author );
+				if ( ! $user ) {
+					return esc_html( $item->author );
+				}
+
 				return sprintf(
-					'<a href="https://profiles.wordpress.org/%s">%s %s</a>',
-					$user->user_nicename,
+					'<a href="%1$s">%2$s %3$s</a>',
+					esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
 					get_avatar( $user, 32 ),
-					$user->display_name
+					esc_html( $user->display_name )
 				);
 
 			case 'message':
@@ -324,24 +333,32 @@ class Commits_List_Table extends WP_List_Table {
 				foreach ( $item->props as $prop => $user_id ) {
 					$user = $user_id ? get_user_by( 'ID', $user_id ) : false;
 
-					if ( false === stripos( $message, $prop ) ) {
-						$message .= "<em>Missed Prop: $prop</em> ";
+					/*
+					 * The message has already been passed through esc_html() by format_for_trac(), so the
+					 * prop has to be escaped before it's matched against it, and before it's inserted.
+					 */
+					$prop_html = esc_html( $prop );
+
+					if ( false === stripos( $message, $prop_html ) ) {
+						$message .= "<em>Missed Prop: {$prop_html}</em> ";
 					}
 
 					if ( $user && strtolower( $prop ) != strtolower( $user->user_login ) && strtolower( $prop ) != strtolower( $user->user_nicename ) ) {
 						// User is a typo or mis-prop.
-						$message = str_ireplace( $prop, "<del class='replace'>{$prop}</del><ins>{$user->user_nicename}</ins>", $message );
+						$nicename = esc_html( $user->user_nicename );
+						$message  = str_ireplace( $prop_html, "<del class='replace'>{$prop_html}</del><ins>{$nicename}</ins>", $message );
 					} else {
 						// All else.
 						$tag     = $user ? 'ins' : 'del';
-						$message = str_ireplace( $prop, "<{$tag}>{$prop}</{$tag}>", $message );
+						$message = str_ireplace( $prop_html, "<{$tag}>{$prop_html}</{$tag}>", $message );
 					}
 				}
 
 				return "<div>{$message}</div>";
 
 			case 'props':
-				$can_edit = current_user_can( 'publish_posts' );
+				// Must match what the handlers in admin/post.php require, see the note there.
+				$can_edit = current_user_can( 'edit_others_posts' );
 				$output   = '<div class="propslist">';
 
 				foreach ( $item->props as $prop => $user_id ) {
@@ -362,7 +379,7 @@ class Commits_List_Table extends WP_List_Table {
 					$prop_display_name_different = ( $user && $user->display_name != $prop );
 
 					$output .= $avatar;
-					$output .= $user ? $user->display_name : $prop;
+					$output .= esc_html( $user ? $user->display_name : $prop );
 
 					if ( $prop_is_different_from_user ) {
 						$output .= " <em>typo</em>";

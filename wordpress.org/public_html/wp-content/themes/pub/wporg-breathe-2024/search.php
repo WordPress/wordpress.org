@@ -21,9 +21,11 @@ get_header(); ?>
 			<header class="page-header">
 				<h1 class="page-title">
 					<?php if ( $is_handbook ) {
-						printf( __( 'Handbook Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
+						/* translators: %s: Search query. */
+						printf( esc_html__( 'Handbook Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
 					} else {
-						printf( __( 'Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
+						/* translators: %s: Search query. */
+						printf( esc_html__( 'Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
 					} ?>
 
 					<span class="controls">

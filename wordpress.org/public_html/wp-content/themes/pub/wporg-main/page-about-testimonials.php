@@ -33,8 +33,16 @@ restore_current_blog();
 
 if ( $testimonials_post instanceof \WP_Post ) {
 	// We only need the URLs in the post_content.
-	preg_match_all( '|https://\S+|', $testimonials_post->post_content, $testimonials );
-	$testimonials = $testimonials[0];
+	preg_match_all( '|https://\S+|', $testimonials_post->post_content, $matches );
+
+	// Keep only well-formed https URLs; the loose \S+ match otherwise admits quotes and angle brackets.
+	$testimonials = array();
+	foreach ( $matches[0] as $url ) {
+		$url = esc_url_raw( $url );
+		if ( $url && 'https' === wp_parse_url( $url, PHP_URL_SCHEME ) ) {
+			$testimonials[] = $url;
+		}
+	}
 } else {
 	$testimonials = [];
 }

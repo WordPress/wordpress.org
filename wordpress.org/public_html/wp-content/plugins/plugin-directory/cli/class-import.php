@@ -70,6 +70,34 @@ class Import {
 	public $plugin;
 
 	/**
+	 * Whether a tag's code changed since its release's confirmation state was established.
+	 *
+	 * Each release remembers the revision it was approved at; a newer commit to the tag means it
+	 * changed. Older releases from before we tracked that lean on the best revision we have, and when
+	 * unsure are treated as changed rather than trusted — just once, until they record their own.
+	 *
+	 * @param array|false $release      Stored release record, per Plugin_Directory::get_release().
+	 * @param int         $tag_revision The tag path's current "Last Changed Rev".
+	 * @return bool Whether the tag changed after the recorded source revision.
+	 */
+	public static function tag_modified_after_release( $release, $tag_revision ) {
+		if ( ! $release ) {
+			return false;
+		}
+
+		if ( isset( $release['source_revision'] ) ) {
+			return (int) $tag_revision > (int) $release['source_revision'];
+		}
+
+		// An unbuilt legacy release isn't served, so nothing to protect: leave it for the backfill, don't wipe its confirmations.
+		if ( empty( $release['zips_built'] ) ) {
+			return false;
+		}
+
+		return (int) $tag_revision > (int) ( $release['zips_built_from_revision'] ?? 0 );
+	}
+
+	/**
 	 * Process an import for a Plugin into the Plugin Directory.
 	 *
 	 * @throws \Exception
@@ -141,6 +169,14 @@ class Import {
 			$this->warnings['version_header_unexpected_chars'] = $version;
 		}
 
+		// Stored as post meta, served by the API, and used as a path component downstream.
+		if ( $version && ! self::version_is_path_safe( $version ) ) {
+			$this->warnings['invalid_version_header'] = $version;
+
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
+			throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'invalid_version_header', $version ) );
+		}
+
 		/*
 		 * Warn when the plugin's Version header doesn't appear to match the tag it was released from.
 		 *
@@ -165,6 +201,7 @@ class Import {
 			if ( ! $update_uri_valid || $update_uri_matches['slug'] !== $plugin_slug ) {
 				$this->warnings['invalid_update_uri'] = $headers->UpdateURI;
 
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 				throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'invalid_update_uri' ) );
 			}
 		}
@@ -190,6 +227,7 @@ class Import {
 		if ( $unmet_dependencies ) {
 			$this->warnings['unmet_dependencies'] = $unmet_dependencies;
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( Readme_Validator::instance()->translate_code_to_message( 'unmet_dependencies', $unmet_dependencies ) );
 		}
 		unset( $_requires_plugins, $unmet_dependencies );
@@ -204,6 +242,7 @@ class Import {
 		 */
 		foreach ( $svn_tags_deleted as $svn_deleted_tag ) {
 			if ( Plugin_Directory::remove_release( $plugin, $svn_deleted_tag ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI context, callers write the message to STDERR.
 				echo "Plugin tag {$svn_deleted_tag} deleted; release removed.\n";
 			}
 		}
@@ -215,6 +254,17 @@ class Import {
 				throw new Exception( 'Plugin cannot be released from trunk due to release confirmation being enabled.' );
 			}
 
+			// Per-tag last-changed rev/author, from the listing export_and_parse_plugin() already fetched.
+			$tag_last_changed = [];
+			foreach ( $tagged_versions as $tag_meta ) {
+				if ( isset( $tag_meta['tag'] ) ) {
+					$tag_last_changed[ $tag_meta['tag'] ] = [
+						'revision' => (int) ( $tag_meta['revision'] ?? 0 ),
+						'author'   => (string) ( $tag_meta['author'] ?? '' ),
+					];
+				}
+			}
+
 			// Check to see if the commit has touched tags that don't have known confirmed releases.
 			foreach ( $svn_changed_tags as $svn_changed_tag ) {
 				if ( 'trunk' === $svn_changed_tag ) {
@@ -222,19 +272,55 @@ class Import {
 				}
 
 				$release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
-				if ( ! $release ) {
-					// Use the actual version for stable releases, otherwise fallback to the tag name, as we don't have the actual header data.
-					$release_version = ( $svn_changed_tag === $stable_tag ) ? $version : $svn_changed_tag;
 
-					Plugin_Directory::add_release(
-						$plugin,
-						[
-							'tag'       => $svn_changed_tag,
-							'version'   => $release_version,
-							'committer' => [ $last_committer ],
-							'revision'  => [ $last_revision ]
-						]
-					);
+				// get_release()'s trunk@ fallback can match a different release; only act on an exact-tag record.
+				if ( $release && (string) ( $release['tag'] ?? '' ) !== (string) $svn_changed_tag ) {
+					$release = false;
+				}
+
+				// $last_revision/$last_committer describe the stable path; other tags need their own.
+				if ( isset( $tag_last_changed[ $svn_changed_tag ] ) ) {
+					$tag_revision  = $tag_last_changed[ $svn_changed_tag ]['revision'];
+					$tag_committer = $tag_last_changed[ $svn_changed_tag ]['author'] ?: $last_committer;
+				} elseif ( $svn_changed_tag === $stable_tag ) {
+					$tag_revision  = (int) $last_revision;
+					$tag_committer = $last_committer;
+				} else {
+					// Unknown revision (tag deleted mid-import, or listing failure): don't guess and risk a false reset.
+					$this->warnings['tag_revision_unresolved'][] = $svn_changed_tag;
+					continue;
+				}
+
+				// Re-committed code must re-confirm, not inherit the tag's old approval; an unchanged re-import is a no-op.
+				$modified_after_release = self::tag_modified_after_release( $release, $tag_revision );
+
+				if ( ! $release || $modified_after_release ) {
+					if ( $svn_changed_tag === $stable_tag ) {
+						// Stable release, described by the parsed plugin headers; don't clobber a stored version with an empty header.
+						$release_version = $version ?: ( ( $release['version'] ?? '' ) ?: $svn_changed_tag );
+					} elseif ( $release ) {
+						// Keep the stored version; there's no header data for non-stable tags.
+						$release_version = $release['version'] ?: $svn_changed_tag;
+					} else {
+						// New non-stable release; fallback to the tag name.
+						$release_version = $svn_changed_tag;
+					}
+
+					$release_data = [
+						'tag'             => $svn_changed_tag,
+						'version'         => $release_version,
+						'committer'       => [ $tag_committer ],
+						'revision'        => [ $tag_revision ],
+						// Baseline for later modification checks.
+						'source_revision' => $tag_revision,
+					];
+
+					// Discard the prior approval when re-opening a modified release.
+					if ( $modified_after_release ) {
+						$release_data['reset_confirmation'] = true;
+					}
+
+					Plugin_Directory::add_release( $plugin, $release_data );
 
 					/*
 					 * Trigger the release confirmation email.
@@ -252,7 +338,7 @@ class Import {
 						$plugin,
 						$who_to_email,
 						[
-							'who'     => $last_committer,
+							'who'     => $tag_committer,
 							'readme'  => $readme,
 							'headers' => $headers,
 							'version' => $release_version,
@@ -260,13 +346,29 @@ class Import {
 					);
 					$email->send();
 
-					echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
+					if ( $modified_after_release ) {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI progress output.
+						echo "Plugin release {$svn_changed_tag} modified after release; confirmation reset.\n";
+					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI progress output.
+						echo "Plugin release {$svn_changed_tag} not confirmed; email triggered.\n";
+					}
+				} elseif ( ! isset( $release['source_revision'] ) ) {
+					// Legacy record, unchanged: record its baseline so later checks are tag-specific.
+					Plugin_Directory::add_release(
+						$plugin,
+						[
+							'tag'             => $svn_changed_tag,
+							'source_revision' => $tag_revision,
+						]
+					);
 				}
 			}
 
 			// Now check to see if the stable has been confirmed.
 			$release = Plugin_Directory::get_release( $plugin, $stable_tag );
 			if ( ! $release ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 				throw new Exception( "Plugin release {$stable_tag} not found." );
 			}
 
@@ -297,7 +399,7 @@ class Import {
 					 * This can be a confirmed release, but one which isn't set as stable.
 					 */
 					$this_release = Plugin_Directory::get_release( $plugin, $svn_changed_tag );
-					if ( $this_release['confirmed'] && ! $this_release['zips_built'] ) {
+					if ( $this_release && $this_release['confirmed'] && ! $this_release['zips_built'] ) {
 						$zips_to_build[] = $this_release['tag'];
 					}
 				}
@@ -330,6 +432,7 @@ class Import {
 				 */
 				do_action( 'wporg_plugins_import_release_pending', $plugin, $release, $data );
 
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 				throw new Exception( "Plugin release {$stable_tag} not confirmed." );
 			}
 
@@ -357,7 +460,14 @@ class Import {
 				$content .= "\n\n<!--section={$section}-->\n{$section_content}";
 			}
 		} elseif ( ! empty( $headers->Description ) ) {
-			$content = "<!--section=description-->\n{$headers->Description}";
+			// No readme: the plugin file header stands in for the description section,
+			// so it gets the same treatment the readme parser gives a section.
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Header keys as core's get_plugin_data() names them.
+			$description = $readme->filter_text( $headers->Description );
+			// A header that filters to nothing keeps whatever was stored, rather than writing an empty section.
+			if ( '' !== $description ) {
+				$content = "<!--section=description-->\n" . $description;
+			}
 		}
 
 		// Use the Readme name, as long as it's not the plugin slug.
@@ -535,29 +645,7 @@ class Import {
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
 		}
 
-		// Add the release to storage.
-		if ( 'trunk' != $stable_tag ) {
-			Plugin_Directory::add_release(
-				$plugin,
-				[
-					'tag'       => $stable_tag,
-					'version'   => $version,
-					'committer' => [ $last_committer ],
-					'revision'  => [ $last_revision ]
-				]
-			);
-		} elseif ( 'trunk' === $stable_tag && version_compare( $version, $plugin->version, '>' ) ) {
-			// This is a new version, released from trunk.
-			Plugin_Directory::add_release(
-				$plugin,
-				[
-					'tag'       => "trunk@{$version}",
-					'version'   => $version,
-					'committer' => [ $last_committer ],
-					'revision'  => [ $last_revision ]
-				]
-			);
-		}
+		self::record_release( $plugin, $stable_tag, $version, $current_stable_tag, $last_committer, $last_revision );
 
 		$this->rebuild_affected_zips( $plugin_slug, $stable_tag, $current_stable_tag, $svn_changed_tags, $svn_revision_triggered );
 
@@ -640,6 +728,7 @@ class Import {
 			}
 
 			if ( $versions_to_build ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI context, callers write the message to STDERR.
 				echo "Building ZIPs for {$plugin_slug}: " . implode( ', ', $versions_to_build ) . "\n";
 			}
 		}
@@ -651,8 +740,8 @@ class Import {
 		// Rebuild/Build $build_zips
 		try {
 			// This will rebuild the ZIP.
-			$zip_builder = new Builder();
-			$zip_builder->build(
+			$zip_builder    = new Builder();
+			$built_versions = $zip_builder->build(
 				$plugin_slug,
 				array_unique( $versions_to_build ),
 				$svn_revision_triggered ?
@@ -661,24 +750,22 @@ class Import {
 				$stable_tag
 			);
 		} catch ( Exception $e ) {
+			$failed_versions = array_unique( $versions_to_build );
+			$error           = preg_replace( '/[\r\n\t]+/', ' ', $e->getMessage() );
+
+			$this->warnings['zip_build_failed'] = [
+				'versions' => $failed_versions,
+				'message'  => $error,
+			];
+
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Routed to the error log via E_USER_WARNING; raw is fine.
+			trigger_error( sprintf( '%s: ZIP build failed for %s: %s', $plugin_slug, implode( ', ', $failed_versions ), $error ), E_USER_WARNING );
+
 			return false;
 		}
 
-		// Mark the ZIPs as being built.
-		foreach ( $versions_to_build as $tag ) {
-			if ( 'trunk' === $tag ) {
-				continue;
-			}
-
-			Plugin_Directory::add_release(
-				$plugin,
-				[
-					'tag'                      => $tag,
-					'zips_built'               => true,
-					'zips_built_from_revision' => ( $zip_builder->plugins_revision ?? 0 ) ?: $svn_revision_triggered,
-				]
-			);
-		}
+		// Mark only the ZIPs that actually built, each with its export revision.
+		Plugin_Directory::mark_zips_built( $plugin, $built_versions );
 
 		return true;
 	}
@@ -725,9 +812,10 @@ class Import {
 			}
 
 			$tagged_versions[ $tag ] = [
-				'tag'    => $entry['filename'],
-				'author' => $entry['author'],
-				'date'   => $entry['date'],
+				'tag'      => $entry['filename'],
+				'author'   => $entry['author'],
+				'date'     => $entry['date'],
+				'revision' => (int) ( $entry['revision'] ?? 0 ),
 			];
 		}
 
@@ -791,6 +879,7 @@ class Import {
 		}
 
 		if ( ! $svn_info['result'] ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( 'Could not find stable SVN URL: ' . ( $svn_info['errors'] ? implode( ' ', reset( $svn_info['errors'] ) ) : 'Unknown error' ) );
 		}
 
@@ -809,6 +898,7 @@ class Import {
 		 * causes a recursive checkout many multiple gigabytes in size, causing issues for WordPress.org.
 		 */
 		if ( ! wp_list_filter( SVN::ls( $stable_url, true ), [ 'kind' => 'file' ] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( "Could not create SVN export of {$stable_url}: Path appears not to have any files." );
 		}
 
@@ -826,6 +916,7 @@ class Import {
 				throw new Exception( 'Plugin has no files in trunk, nor tags.' );
 			}
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( 'Could not create SVN export: ' . ( $svn_export['errors'] ? implode( ' ', reset( $svn_export['errors'] ) ) : 'Unknown error' ) );
 		}
 
@@ -1279,6 +1370,65 @@ class Import {
 		}
 
 		return (object) $headers;
+	}
+
+	/**
+	 * Determine whether a plugin's Version header can be used as a path component.
+	 *
+	 * @param mixed $version The plugin's Version header value.
+	 * @return bool True when the value is safe to use in a path, false otherwise.
+	 */
+	public static function version_is_path_safe( $version ) {
+		if ( ! is_string( $version ) || '' === $version ) {
+			return false;
+		}
+
+		if ( preg_match( '#[[:cntrl:]]#', $version ) ) {
+			return false;
+		}
+
+		$segments = preg_split( '#[/\\\\]#', $version );
+
+		return '' !== $segments[0] && ! array_intersect( array( '.', '..' ), $segments );
+	}
+
+	/**
+	 * Record the release the plugin's stable ref now serves.
+	 *
+	 * A tagged stable ref always gets a row. Trunk gets a `trunk@{version}` row
+	 * when the version is new, or when trunk is newly stable: a flip from a tag
+	 * at an unchanged version still changes the served code, and the row's
+	 * fresh date is what the update-source writer holds the release on.
+	 *
+	 * @param \WP_Post   $plugin              The plugin post, still carrying the previous version meta.
+	 * @param string     $stable_tag          The stable tag being imported.
+	 * @param string     $version             The Version header being imported.
+	 * @param string     $previous_stable_tag The stable tag before this import.
+	 * @param string     $committer           The committer of the release.
+	 * @param int|string $revision            The revision of the release.
+	 */
+	public static function record_release( $plugin, $stable_tag, $version, $previous_stable_tag, $committer, $revision ) {
+		if ( 'trunk' !== $stable_tag ) {
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'       => $stable_tag,
+					'version'   => $version,
+					'committer' => [ $committer ],
+					'revision'  => [ $revision ],
+				]
+			);
+		} elseif ( 'trunk' !== $previous_stable_tag || version_compare( $version, $plugin->version, '>' ) ) {
+			Plugin_Directory::add_release(
+				$plugin,
+				[
+					'tag'       => "trunk@{$version}",
+					'version'   => $version,
+					'committer' => [ $committer ],
+					'revision'  => [ $revision ],
+				]
+			);
+		}
 	}
 
 	/**

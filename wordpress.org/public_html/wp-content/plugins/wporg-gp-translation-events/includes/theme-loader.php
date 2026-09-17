@@ -63,7 +63,6 @@ class Theme_Loader {
 					);
 					wp_scripts()->remove(
 						array(
-							'gp-common',
 							'wporg-plugins-skip-link-focus-fix',
 						)
 					);

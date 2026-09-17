@@ -39,13 +39,13 @@ class Plugin_Comments extends \WP_Post_Comments_List_Table {
 
 		wp_nonce_field( 'fetch-list-' . get_class( $this ), '_ajax_fetch_list_nonce' );
 		?>
-		<table class="<?php echo implode( ' ', $this->get_table_classes() ); ?>" data-comment-type="<?php echo esc_attr( $this->comment_type ); ?>" style="display:none;">
+		<table class="<?php echo esc_attr( implode( ' ', $this->get_table_classes() ) ); ?>" data-comment-type="<?php echo esc_attr( $this->comment_type ); ?>" style="display:none;">
 			<colgroup>
 				<col width="15%">
 				<col width="65%">
 				<col width="20%">
 			</colgroup>
-			<tbody id="the-comment-list"<?php if ( $singular ) { echo " data-wp-lists='list:$singular'"; } ?>>
+			<tbody id="the-comment-list"<?php echo $singular ? ' data-wp-lists="' . esc_attr( 'list:' . $singular ) . '"' : ''; ?>>
 			<?php
 			if ( ! $output_empty ) {
 				$this->display_rows_or_placeholder();

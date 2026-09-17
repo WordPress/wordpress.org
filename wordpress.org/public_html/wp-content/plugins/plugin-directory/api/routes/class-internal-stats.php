@@ -24,6 +24,30 @@ class Internal_Stats extends Base {
 			'callback'            => array( $this, 'bulk_update_stats' ),
 			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
 		) );
+
+		register_rest_route(
+			'plugins/v1',
+			'/stats',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_stats' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * Gets public Plugin Directory statistics.
+	 *
+	 * @param \WP_REST_Request $request The REST API request.
+	 * @return array The public statistics.
+	 */
+	public function get_stats( $request ) {
+		$counts = wp_count_posts( 'plugin' );
+
+		return array(
+			'queue_count' => (int) ( $counts->new ?? 0 ),
+		);
 	}
 
 	/**

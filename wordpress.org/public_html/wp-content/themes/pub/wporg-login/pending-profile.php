@@ -18,8 +18,8 @@ if ( ! empty( $sso::$matched_route_params['profile_user'] ) ) {
 	die();
 }
 
-$profile_user = $_COOKIE['wporg_profile_user'] ?? false;
-$profile_key  = $_COOKIE['wporg_profile_key']  ?? false;
+$profile_user = is_string( $_COOKIE['wporg_profile_user'] ?? null ) ? $_COOKIE['wporg_profile_user'] : '';
+$profile_key  = is_string( $_COOKIE['wporg_profile_key']  ?? null ) ? $_COOKIE['wporg_profile_key']  : '';
 
 $pending_user = wporg_get_pending_user( $profile_user );
 
@@ -66,36 +66,37 @@ get_header();
 	<?php
 	if ( $pending_user['cleared'] ) {
 		printf(
-			'<h2>' . __( 'Confirm your email address', 'wporg' ) . '</h2>' .
+			'<h2>' . esc_html__( 'Confirm your email address', 'wporg' ) . '</h2>' .
 			/* translators: %s Email address */
-			'<p>' . __( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ) . '</p>' .
-			'<p>' . '<a href="#" class="resend" data-account="%s">' . __( 'Resend confirmation email.', 'wporg' ) . '</a></p>' .
-			( $email_change_available ? '<a href="#" class="change-email">' . __( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
+			'<p>' . esc_html__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ) . '</p>' .
+			'<p><a href="#" class="resend" data-account="%s">' . esc_html__( 'Resend confirmation email.', 'wporg' ) . '</a></p>' .
+			( $email_change_available ? '<a href="#" class="change-email">' . esc_html__( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
 			'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
 			esc_attr( $pending_user['user_email'] )
 		);
 	} else {
 		printf(
-			'<h2>' . __( 'Your account is pending approval', 'wporg' ) . '</h2>' .
+			'<h2>' . esc_html__( 'Your account is pending approval', 'wporg' ) . '</h2>' .
 			/* translators: %s Email address */
-			'<p>' . __( 'You will receive an email at %s to set your password when approved.', 'wporg' ) . '</p>' .
-			'<p>' . __( 'Please contact %s for more details.', 'wporg' ) . '</p>' .
-			( $email_change_available ? '<a href="#" class="change-email">' . __( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
+			'<p>' . esc_html__( 'You will receive an email at %s to set your password when approved.', 'wporg' ) . '</p>' .
+			/* translators: %s: Support email address. */
+			'<p>' . esc_html__( 'Please contact %s for more details.', 'wporg' ) . '</p>' .
+			( $email_change_available ? '<a href="#" class="change-email">' . esc_html__( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
 			'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
-			'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+			'<a href="' . esc_url( 'mailto:' . $sso::SUPPORT_EMAIL ) . '">' . esc_html( $sso::SUPPORT_EMAIL ) . '</a>'
 		);
 	}
 
 	if ( 'local' === wp_get_environment_type() && ! empty( $_COOKIE['emailed_url'] ) ) {
 		printf(
 			'<br><br><strong>Local Development</strong>: The URL emailed to you is: <a href="%1$s">%1$s</a>.',
-			wp_unslash( $_COOKIE['emailed_url'] )
+			esc_url( sanitize_url( wp_unslash( $_COOKIE['emailed_url'] ) ) )
 		);
 	}
 	?>
 
 	<p class="login-email hidden">
-		<label for="user_email"><?php _e( 'Email', 'wporg' ); ?></label>
+		<label for="user_email"><?php esc_html_e( 'Email', 'wporg' ); ?></label>
 		<input type="text" name="user_email" value="<?php echo esc_attr( $pending_user['user_email'] ); ?>" size="20" maxlength="100" />
 	</p>
 
@@ -116,7 +117,7 @@ get_header();
 </form>
 
 <p id="nav">
-	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer(); ?>

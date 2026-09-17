@@ -29,7 +29,7 @@ class Controls {
 			<div id="misc-publishing-actions">
 				<?php
 				self::display_meta();
-				self::display_release_cooldown();
+				self::display_release_hold();
 				self::display_post_status();
 				?>
 			</div>
@@ -46,46 +46,58 @@ class Controls {
 	}
 
 	/**
-	 * Display the release cooldown status and (for reviewers) a force-release control.
+	 * Display the release hold status and (for reviewers) a force-release control.
 	 *
-	 * Bails when there's no current release to gate, when the release has no cooldown
-	 * delay (feature off at release-creation, or already force-released), or when the
-	 * cooldown window has elapsed.
+	 * A current release is held from the update API either by an automated security
+	 * review block, which has no expiry, or by the release cooldown while its window
+	 * runs. Bails when there's no current release, or when it is neither blocked nor
+	 * still in cooldown. A block takes precedence in the message, since it is the hold
+	 * that actually withholds the version and it outlasts the cooldown.
 	 */
-	protected static function display_release_cooldown() {
+	protected static function display_release_hold() {
 		$post = get_post();
 
-		$version = get_post_meta( $post->ID, 'version', true );
-		if ( ! $version ) {
-			return;
-		}
-
-		$release = Plugin_Directory::get_release( $post, $version );
+		// Resolved from the stable tag, so the hold shows even when the Version header is empty or disagrees.
+		$release = API_Update_Updater::get_current_release( $post );
 		if ( ! $release ) {
 			return;
 		}
 
-		$release_delay = (int) ( $release['release_delay'] ?? 0 );
-		if ( ! $release_delay ) {
+		$release_version = $release['version'];
+		$is_blocked      = API_Update_Updater::is_release_blocked( $release );
+
+		$release_delay  = (int) ( $release['release_delay'] ?? 0 );
+		$cooldown_until = $release_delay ? API_Update_Updater::compute_release_time( $post, $release ) + $release_delay : 0;
+		$in_cooldown    = $cooldown_until > time();
+
+		if ( ! $is_blocked && ! $in_cooldown ) {
 			return;
 		}
 
-		$cooldown_until = API_Update_Updater::compute_release_time( $post, $release ) + $release_delay;
-		if ( $cooldown_until <= time() ) {
-			return;
-		}
+		// The force-release reason justifies the override; a block is lifted on review, a cooldown bypassed for urgency.
+		$reason_placeholder = $is_blocked
+			? __( 'e.g. reviewed the findings, not exploitable', 'wporg-plugins' )
+			: __( 'e.g. urgent security fix for CVE-…', 'wporg-plugins' );
 
 		?>
-		<div class="misc-pub-section misc-pub-release-cooldown">
+		<div class="misc-pub-section misc-pub-release-hold">
 			<p>
 			<?php
-			printf(
-				/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
-				esc_html__( 'Version %1$s is in the release cooldown — it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
-				esc_html( $version ),
-				esc_html( human_time_diff( time(), $cooldown_until ) ),
-				esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
-			);
+			if ( $is_blocked ) {
+				printf(
+					/* translators: %s: version */
+					esc_html__( 'Version %s is blocked by an automated security review, it is withheld from the update API, and sites keep receiving the previously distributed version.', 'wporg-plugins' ),
+					esc_html( $release_version )
+				);
+			} else {
+				printf(
+					/* translators: 1: version, 2: relative time until cooldown expires, 3: absolute UTC timestamp */
+					esc_html__( 'Version %1$s is in the release cooldown, it will be served to sites in %2$s (at %3$s UTC).', 'wporg-plugins' ),
+					esc_html( $release_version ),
+					esc_html( human_time_diff( time(), $cooldown_until ) ),
+					esc_html( gmdate( 'Y-m-d H:i', $cooldown_until ) )
+				);
+			}
 			?>
 			</p>
 			<?php if ( current_user_can( 'plugin_review', $post ) ) : ?>
@@ -96,16 +108,16 @@ class Controls {
 						name="force_release_reason"
 						rows="2"
 						style="width: 100%;"
-						placeholder="<?php esc_attr_e( 'e.g. urgent security fix for CVE-…', 'wporg-plugins' ); ?>"
+						placeholder="<?php echo esc_attr( $reason_placeholder ); ?>"
 					></textarea>
 				</p>
 				<p>
-					<button type="submit" name="force_release_version" value="<?php echo esc_attr( $version ); ?>" class="button">
+					<button type="submit" name="force_release_tag" value="<?php echo esc_attr( $release['tag'] ); ?>" class="button">
 						<?php
 						printf(
 							/* translators: %s: version */
 							esc_html__( 'Force-release %s now', 'wporg-plugins' ),
-							esc_html( $version )
+							esc_html( $release_version )
 						);
 						?>
 					</button>
@@ -121,7 +133,7 @@ class Controls {
 	 * @param int $post_id The post being saved.
 	 */
 	public static function save_post( $post_id ) {
-		if ( empty( $_POST['force_release_version'] ) ) {
+		if ( empty( $_POST['force_release_tag'] ) ) {
 			return;
 		}
 
@@ -138,10 +150,10 @@ class Controls {
 		// and to make the security boundary explicit.
 		check_admin_referer( 'update-post_' . $post_id );
 
-		$version           = get_post_meta( $post->ID, 'version', true );
-		$submitted_version = sanitize_text_field( wp_unslash( $_POST['force_release_version'] ) );
-		if ( $submitted_version !== $version ) {
-			// Submitted version doesn't match current — a newer commit landed since the form was rendered.
+		// Staleness guard on the release identity: a commit that moved the stable tag since the form rendered lands a different release here.
+		$release       = API_Update_Updater::get_current_release( $post );
+		$submitted_tag = sanitize_text_field( wp_unslash( $_POST['force_release_tag'] ) );
+		if ( ! $release || $submitted_tag !== (string) $release['tag'] ) {
 			return;
 		}
 
@@ -221,30 +233,37 @@ class Controls {
 
 			<?php if ( 'closed' === $post->post_status ) : ?>
 
-				<p><?php printf( __( 'Close Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
+				<?php /* translators: %s: Close reason. */ ?>
+				<p><?php printf( esc_html__( 'Close Reason: %s', 'wporg-plugins' ), '<strong>' . esc_html( $close_reason_label ) . '</strong>' ); ?></p>
 
 			<?php elseif ( 'disabled' === $post->post_status ) : ?>
 
-				<p><?php printf( __( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . $close_reason_label . '</strong>' ); ?></p>
+				<?php /* translators: %s: Disable reason. */ ?>
+				<p><?php printf( esc_html__( 'Disable Reason: %s', 'wporg-plugins' ), '<strong>' . esc_html( $close_reason_label ) . '</strong>' ); ?></p>
 
 			<?php elseif ( 'rejected' === $post->post_status ) : ?>
 
-				<p><?php printf(
-						__( 'Rejection Reason: %s', 'wporg-plugins' ),
-						'<strong>' . $rejection_reason_label . '</strong>'
-				); ?></p>
+				<p>
+					<?php
+					printf(
+						/* translators: %s: Rejection reason. */
+						esc_html__( 'Rejection Reason: %s', 'wporg-plugins' ),
+						'<strong>' . esc_html( $rejection_reason_label ) . '</strong>'
+					);
+					?>
+				</p>
 
 			<?php elseif ( 'publish' === $post->post_status ) : ?>
 
 				<?php if ( $active_installs >= '20000' ) : ?>
-					<p><strong><?php _e( 'Notice:', 'wporg-plugins' ); ?></strong> <?php _e( 'Due to the large volume of active users, the developers should be warned and their plugin remain open save under extreme circumstances.', 'wporg-plugins' ); ?>.</p>
+					<p><strong><?php esc_html_e( 'Notice:', 'wporg-plugins' ); ?></strong> <?php esc_html_e( 'Due to the large volume of active users, the developers should be warned and their plugin remain open save under extreme circumstances.', 'wporg-plugins' ); ?>.</p>
 				<?php endif; ?>
 
 			<?php endif; ?>
 
 			<?php if ( array_intersect( $statuses, [ 'closed', 'disabled' ] ) ) { ?>
 				<p>
-					<label for="close_reason"><?php _e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
+					<label for="close_reason"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></label>
 					<select name="close_reason" id="close_reason">
 						<?php foreach ( $close_reasons as $key => $label ) : ?>
 							<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $close_reason ); ?>><?php echo esc_html( $label ); ?></option>
@@ -264,7 +283,7 @@ class Controls {
 
 				if ( $status === 'rejected' ) { ?>
 					<p>
-						<label for="rejection_reason"><?php _e( 'Rejection Reason:', 'wporg-plugins' ); ?></label>
+						<label for="rejection_reason"><?php esc_html_e( 'Rejection Reason:', 'wporg-plugins' ); ?></label>
 						<select name="rejection_reason" id="rejection_reason">
 							<?php foreach ( $rejection_reasons as $key => $label ) : ?>
 								<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $key, $rejection_reason ); ?>><?php echo esc_html( $label ); ?></option>
@@ -276,7 +295,7 @@ class Controls {
 				printf(
 					'<p><button type="submit" name="post_status" value="%s" class="button set-plugin-status">%s</button></p>',
 					esc_attr( $status ),
-					self::get_status_button_label( $status )
+					esc_html( self::get_status_button_label( $status ) )
 				);
 			} ?>
 		</div><!-- .misc-pub-section -->
@@ -291,46 +310,54 @@ class Controls {
 		?>
 		<table class="misc-pub-section misc-pub-meta">
 			<tr>
-				<td><?php _e( 'Status:', 'wporg-plugins' ); ?></td>
+				<td><?php esc_html_e( 'Status:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php echo esc_html( get_post_status_object( $post->post_status )->label ); ?></strong></td>
 			</tr>
 
 			<tr>
-				<td><?php _e( 'Version:', 'wporg-plugins' ); ?></td>
+				<td><?php esc_html_e( 'Version:', 'wporg-plugins' ); ?></td>
 				<td><strong><?php echo esc_html( $post->version ); ?></strong></td>
 			</tr>
 
 			<tr>
-				<td><?php _e( 'Updated:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php
+				<td><?php esc_html_e( 'Updated:', 'wporg-plugins' ); ?></td>
+				<td><strong>
+				<?php
 					printf(
 						'<span title="%s">%s ago</span>',
 						esc_attr( $post->last_updated ),
-						human_time_diff( strtotime( $post->last_updated ) )
+						esc_html( human_time_diff( strtotime( $post->last_updated ) ) )
 					);
-				?></strong></td>
+				?>
+				</strong></td>
 			</tr>
 
 			<tr>
-				<td><?php _e( 'Submitted:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php
-					$submitted_date = min( array_filter( [
-						$post->_submitted_date,           // Submitted date stored since 2017-04-11
-						$post->_approved,                 // The approval date is the next best thing.
-						strtotime( $post->post_date_gmt ) // Fallback to the post_date, which should be similar to approval date.
-					] ) );
+				<td><?php esc_html_e( 'Submitted:', 'wporg-plugins' ); ?></td>
+				<td><strong>
+				<?php
+					$submitted_date = min(
+						array_filter(
+							[
+								$post->_submitted_date,           // Submitted date stored since 2017-04-11.
+								$post->_approved,                 // The approval date is the next best thing.
+								strtotime( $post->post_date_gmt ), // Fallback to the post_date, which should be similar to approval date.
+							]
+						)
+					);
 
 					printf(
 						'<span title="%s">%s ago</span>',
 						esc_attr( gmdate( 'Y-m-d H:i:s', $submitted_date ) ),
-						human_time_diff( $submitted_date )
+						esc_html( human_time_diff( $submitted_date ) )
 					);
-				?></strong></td>
+				?>
+				</strong></td>
 			</tr>
 
 			<tr>
-				<td><?php _e( 'Installs:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php echo Template::active_installs( false, $post ); ?></strong></td>
+				<td><?php esc_html_e( 'Installs:', 'wporg-plugins' ); ?></td>
+				<td><strong><?php echo esc_html( Template::active_installs( false, $post ) ); ?></strong></td>
 			</tr>
 
 			<?php if (
@@ -341,9 +368,11 @@ class Controls {
 			<tr>
 				<td><?php echo esc_html( "Installs of {$post->version}:" ); ?></td>
 				<td><strong><?php
-					echo Template::format_active_installs_for_display(
-						Template::sanitize_active_installs(
-							\WordPressdotorg\Stats\plugin_active_installs( $post->post_name, $post->version )
+					echo esc_html(
+						Template::format_active_installs_for_display(
+							Template::sanitize_active_installs(
+								\WordPressdotorg\Stats\plugin_active_installs( $post->post_name, $post->version )
+							)
 						)
 					);
 				?></strong></td>
@@ -352,8 +381,8 @@ class Controls {
 
 			<?php if ( $post->tested ) : ?>
 			<tr>
-				<td><?php _e( 'Tested With:', 'wporg-plugins' ); ?></td>
-				<td><strong><?php printf( 'WordPress %s', $post->tested ); ?></strong></td>
+				<td><?php esc_html_e( 'Tested With:', 'wporg-plugins' ); ?></td>
+				<td><strong><?php printf( 'WordPress %s', esc_html( $post->tested ) ); ?></strong></td>
 			</tr>
 			<?php endif; ?>
 		</table><!-- .misc-pub-section -->

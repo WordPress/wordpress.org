@@ -68,10 +68,10 @@ global $wptv, $originalcontent;
 			<div class="video-downloads">
 <?php
 							if ( ! empty( $mp4_links ) ) {
-								echo 'MP4: ' . join( ', ', $mp4_links ) . '<br/>';
+								echo 'MP4: ' . wp_kses_post( join( ', ', $mp4_links ) ) . '<br/>';
 							}
 							if ( ! empty( $ogg_link ) ) {
-								echo "OGG: $ogg_link";
+								echo 'OGG: ' . wp_kses_post( $ogg_link );
 							}
 ?>
 			</div>
@@ -98,7 +98,7 @@ global $wptv, $originalcontent;
 						}
 
 						if ( ! empty( $ttml_links ) ) {
-							echo 'TTML: ' . join( ', ', $ttml_links ) . '<br />';
+							echo 'TTML: ' . wp_kses_post( join( ', ', $ttml_links ) ) . '<br />';
 						}
 
 						printf( '<a href="%s">Subtitle this video &rarr;</a>', esc_url( add_query_arg( 'video', $video->post_id, home_url( 'subtitle/' ) ) ) );

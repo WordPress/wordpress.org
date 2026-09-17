@@ -27,7 +27,7 @@ class Validate_Readme extends Ability_Base {
 			'wporg/plugins--plugin-directory--validate-readme',
 			array(
 				'label'               => 'Validate Plugin Readme',
-				'description'         => 'Validates a WordPress plugin readme.txt or readme.md file and returns errors, warnings, and notes. Accepts either the file content directly or a URL to fetch it from.',
+				'description'         => 'Validates a WordPress plugin readme.txt or readme.md file and returns errors, warnings, and notes. Accepts the file content directly, or the URL of a readme on the WordPress.org plugin or theme SVN or on raw.githubusercontent.com.',
 				'category'            => 'wporg-plugins-plugin-directory',
 				'input_schema'        => array(
 					'type'       => 'object',
@@ -39,7 +39,7 @@ class Validate_Readme extends Ability_Base {
 						'url'     => array(
 							'type'        => 'string',
 							'format'      => 'uri',
-							'description' => 'URL to a readme.txt or readme.md file to fetch and validate. Must end in readme.txt or readme.md. Provide either url or content, not both.',
+							'description' => 'URL of a readme.txt or readme.md file on plugins.svn.wordpress.org, themes.svn.wordpress.org, or raw.githubusercontent.com. A readme hosted anywhere else must be passed as content instead. Provide either url or content, not both.',
 						),
 					),
 				),

@@ -13,6 +13,7 @@ namespace WordPressdotorg\Forums;
 
 \WordPressdotorg\skip_to( '#content' );
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( '<!-- wp:wporg/global-header {"style":{"border":{"bottom":{"color":"var:preset|color|white-opacity-15","style":"solid","width":"1px"}}}} /-->' );
 
 $is_forums_home = function_exists( 'bbp_is_forum_archive' ) && bbp_is_forum_archive();
@@ -41,6 +42,7 @@ if ( ( $is_forums_home || is_front_page() || $is_homepage )
 	);
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	? '<!-- wp:pattern {"slug":"wporg-support/local-nav-home"} /-->'
 	: '<!-- wp:pattern {"slug":"wporg-support/local-nav"} /-->'
@@ -55,6 +57,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	<div id="content" class="site-content">
 		<?php if ( is_front_page() || $is_homepage ) :
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 			echo do_blocks(
 				sprintf(
 					'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
@@ -96,6 +99,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 
 		elseif ( $is_forums_home ) :
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 			echo do_blocks(
 				sprintf(
 					'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
@@ -137,6 +141,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 		else :
 
 			if ( ! $is_user_profile && ! is_404() ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 				echo do_blocks(
 					sprintf(
 						'<!-- wp:group {"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
@@ -158,6 +163,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 			}
 
 			if ( ! ( $is_user_profile || $is_reviews || $is_plugin || $is_theme || $is_single_forum ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 				echo do_blocks(
 					'<!-- wp:group {"style":{"spacing":{padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
 					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">

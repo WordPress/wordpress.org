@@ -373,19 +373,19 @@ function wporg_themes_author_metabox_override( $post_type, $post ) {
 function wporg_themes_post_author_meta_box( $post ) {
 	global $user_ID;
 ?>
-<label class="screen-reader-text" for="post_author_override"><?php _e('Author'); ?></label>
+<label class="screen-reader-text" for="post_author_override"><?php esc_html_e( 'Author' ); ?></label>
 <?php
 	$value = empty($post->ID) ? $user_ID : $post->post_author;
 
 	$user = new WP_User($value);
 
-	echo "<input type='text' id='post_author_username' value='{$user->user_login}' />";
-	echo "<input type='hidden' id='post_author_override' name='post_author_override' value='{$value}' />";
+	printf( '<input type="text" id="post_author_username" value="%s" />', esc_attr( $user->user_login ) );
+	printf( '<input type="hidden" id="post_author_override" name="post_author_override" value="%s" />', esc_attr( $value ) );
 ?>
 	<script>
 	jQuery( document ).ready( function( $ ) {
 		$( "#post_author_username" ).autocomplete( {
-			source: ajaxurl + '?action=author-lookup&_ajax_nonce=<?php echo wp_create_nonce( 'wporg_themes_author_lookup' ); ?>',
+			source: ajaxurl + '?action=author-lookup&_ajax_nonce=<?php echo esc_js( wp_create_nonce( 'wporg_themes_author_lookup' ) ); ?>',
 			minLength: 2,
 			delay: 700,
 			autoFocus: true,
@@ -572,9 +572,7 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		// Allow theme titles to change in case or accent: `ThemeName` => `Themename` + `ThemeName` => `ThemèName`
 		if ( $theme_post_name !== $theme_data['Name'] ) {
 			// Theme name has been updated. Make sure it still sanitizes to the same post.
-			$name_slugified = remove_accents( $theme_data['Name'] );
-			$name_slugified = preg_replace( '/%[a-f0-9]{2}/i', '', $name_slugified );
-			$name_slugified = sanitize_title_with_dashes( $name_slugified );
+			$name_slugified = wporg_themes_slug_from_name( $theme_data['Name'] );
 
 			if ( $name_slugified === $post->post_name ) {
 				// The new name still ends up at the same post_name slug value, let them have it.
@@ -591,6 +589,10 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 				'fields' => 'slugs'
 			) )
 		);
+
+		// SVN commits skip the upload's shortcode check, so make the delimiters inert here.
+		$theme_post_name           = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_post_name );
+		$theme_data['Description'] = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_data['Description'] );
 
 		wp_update_post( array(
 			'ID'           => $post_id,
@@ -791,6 +793,24 @@ function wporg_themes_remove_wpthemescom( $theme_slug ) {
 			),
 		) );
 	}
+}
+
+/**
+ * Derives the directory slug for a theme name.
+ *
+ * Kept to ASCII, so the value survives the second sanitize that `wp_insert_post()`
+ * runs on `post_name`. The upload maps the default theme names (`twenty-*`) after this.
+ *
+ * @param string $name The theme name, as read from the `Theme Name:` header.
+ * @return string The slug; empty when nothing of the name can be kept.
+ */
+function wporg_themes_slug_from_name( $name ) {
+	// Convert accented characters, drop what cannot be converted, and drop '%' so nothing reads as an encoded octet.
+	$slug = preg_replace( '/[%\x80-\xff]/', '', remove_accents( (string) $name ) );
+	$slug = sanitize_title_with_dashes( $slug );
+
+	// Underscores alone survive the sanitizer; a slug needs a letter or a digit.
+	return preg_match( '/[a-z0-9]/', $slug ) ? $slug : '';
 }
 
 /**

@@ -49,7 +49,7 @@ function get_workshop_application_field_schema() {
 				'default'           => '',
 			),
 			'online-presence'         => array(
-				'sanitize_callback' => 'sanitize_textarea_field',
+				'sanitize_callback' => __NAMESPACE__ . '\sanitize_application_text',
 				'label'             => __( 'Where can we find you online? Please share links to your website(s) and as many social media accounts as applicable, including but not limited to Twitter, LinkedIn, Facebook, Instagram, etc.', 'wporg-learn' ),
 				'type'              => 'string',
 				'required'          => true,
@@ -63,35 +63,35 @@ function get_workshop_application_field_schema() {
 				'default'           => '',
 			),
 			'description'             => array(
-				'sanitize_callback' => 'sanitize_textarea_field',
+				'sanitize_callback' => __NAMESPACE__ . '\sanitize_application_text',
 				'label'             => __( 'Full workshop description', 'wporg-learn' ),
 				'type'              => 'string',
 				'required'          => true,
 				'default'           => '',
 			),
 			'description-short'       => array(
-				'sanitize_callback' => 'sanitize_textarea_field',
+				'sanitize_callback' => __NAMESPACE__ . '\sanitize_application_text',
 				'label'             => __( 'Brief workshop description (less than 150 words)', 'wporg-learn' ),
 				'type'              => 'string',
 				'required'          => true,
 				'default'           => '',
 			),
 			'learning-objectives'     => array(
-				'sanitize_callback' => 'sanitize_textarea_field',
+				'sanitize_callback' => __NAMESPACE__ . '\sanitize_application_text',
 				'label'             => __( 'What are the learning objectives for this workshop?', 'wporg-learn' ),
 				'type'              => 'string',
 				'required'          => true,
 				'default'           => '',
 			),
 			'comprehension-questions' => array(
-				'sanitize_callback' => 'sanitize_textarea_field',
+				'sanitize_callback' => __NAMESPACE__ . '\sanitize_application_text',
 				'label'             => __( 'What comprehension questions should we ask at the end of your workshop? List at least 3 but no more than 10 questions for workshop viewers to answer on their own or discuss with a group to ensure they properly understood the material.', 'wporg-learn' ),
 				'type'              => 'string',
 				'required'          => true,
 				'default'           => '',
 			),
 			'audience'                => array(
-				'sanitize_callback' => function( $value ) {
+				'sanitize_callback' => function ( $value ) {
 					if ( ! is_array( $value ) ) {
 						return array();
 					}
@@ -107,7 +107,7 @@ function get_workshop_application_field_schema() {
 				'default'           => array(),
 			),
 			'experience-level'        => array(
-				'sanitize_callback' => function( $value ) {
+				'sanitize_callback' => function ( $value ) {
 					if ( ! is_array( $value ) ) {
 						return array();
 					}
@@ -131,7 +131,7 @@ function get_workshop_application_field_schema() {
 				'default'           => 'en_US',
 			),
 			'comments'                => array(
-				'sanitize_callback' => 'sanitize_textarea_field',
+				'sanitize_callback' => __NAMESPACE__ . '\sanitize_application_text',
 				'label'             => __( 'Is there anything else you think we should know?', 'wporg-learn' ),
 				'type'              => 'string',
 				'required'          => false,
@@ -145,6 +145,42 @@ function get_workshop_application_field_schema() {
 				'default'           => '',
 			),
 		),
+	);
+}
+
+/**
+ * Sanitize a free-text application field.
+ *
+ * Control characters are removed, character references are resolved, tags are stripped, and
+ * square brackets are swapped for parentheses so the text is stored and rendered as plain prose.
+ * The order matters: the block editor resolves character references when the post is saved, and
+ * kses removes the same control characters, so this normalises the text the way those later
+ * steps will before deciding what to strip or swap. Resolving runs to a fixpoint so nested
+ * spellings settle in one place rather than one layer per save.
+ *
+ * @param string $value
+ *
+ * @return string
+ */
+function sanitize_application_text( $value ) {
+	if ( ! is_scalar( $value ) ) {
+		return '';
+	}
+
+	// Same set wp_kses_no_null() removes on save.
+	$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F]/', '', (string) $value );
+
+	do {
+		$previous = $value;
+		$value    = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	} while ( $value !== $previous );
+
+	return strtr(
+		sanitize_textarea_field( $value ),
+		array(
+			'[' => '(',
+			']' => ')',
+		)
 	);
 }
 
@@ -168,7 +204,7 @@ function get_workshop_application_form_submission() {
 	}
 
 	$submission = array_map(
-		function( $item ) {
+		function ( $item ) {
 			// Ensure arrays don't contain items that are empty strings.
 			if ( is_array( $item ) ) {
 				$item = array_filter( $item );
@@ -226,6 +262,14 @@ function validate_workshop_application_form_submission( $submission ) {
  * @param array $submission
  */
 function process_workshop_application_form_submission( $submission ) {
+	// The submission is authored as the current user, so require a logged-in request instead of relying on the form only being rendered for logged-in visitors.
+	if ( ! is_user_logged_in() ) {
+		return new WP_Error(
+			'submission_error',
+			__( 'You need to be logged in to submit an application.', 'wporg-learn' )
+		);
+	}
+
 	$nonce = $submission['nonce'] ?? '';
 	$user  = $submission['wporg-user-name'] ?? '';
 	if ( ! wp_verify_nonce( $nonce, 'workshop-application-' . $user ) ) {
@@ -277,6 +321,13 @@ function process_workshop_application_form_submission( $submission ) {
 		),
 	);
 
+	/*
+	 * The submitted values were unslashed on the way in (get_workshop_application_form_submission),
+	 * but wp_insert_post() and update_post_meta() both expect slashed data and strip one level
+	 * before storing. Re-slash so a backslash in a blurb survives instead of being silently eaten.
+	 */
+	$post_args = wp_slash( $post_args );
+
 	$result = wp_insert_post( $post_args );
 
 	if ( is_wp_error( $result ) ) {
@@ -286,7 +337,7 @@ function process_workshop_application_form_submission( $submission ) {
 		);
 	}
 
-	add_post_meta( $result, 'presenter_wporg_username', $validated['wporg-user-name'] );
+	add_post_meta( $result, 'presenter_wporg_username', wp_slash( $validated['wporg-user-name'] ) );
 
 	return true;
 }
@@ -394,7 +445,7 @@ function prepare_post_content_from_submission( $submission ) {
 		$split   = explode( "\n", $content );
 		$split   = array_filter(
 			array_map(
-				function( $item ) {
+				function ( $item ) {
 					// Attempt to strip out list item enumeration characters.
 					$item = preg_replace( '/^([*\-]+|[1-9]{1,2}[\.\)]?|[A-Z]+[\.\)]+) ?/', '', $item );
 
@@ -433,7 +484,8 @@ function render_workshop_application_form() {
 		$processed  = process_workshop_application_form_submission( $submission );
 
 		if ( is_wp_error( $processed ) ) {
-			$state = 'error';
+			// A refused logged-out request shows the log-in prompt, not the form with its nonce.
+			$state = is_user_logged_in() ? 'error' : 'logged-out';
 		} else {
 			$state = 'success';
 		}
@@ -448,7 +500,7 @@ function render_workshop_application_form() {
 		$form         = wp_parse_args( $submission, $defaults );
 		$errors       = $processed;
 		$error_fields = array_map(
-			function( $code ) {
+			function ( $code ) {
 				return preg_replace(
 					array(
 						'/^submission:/',

@@ -13,6 +13,33 @@ namespace WordPressdotorg\o2\Posting_Access;
 class Plugin {
 
 	/**
+	 * Capability names add_post_capabilities() is prepared to answer for.
+	 *
+	 * The capabilities it grants, plus every core meta capability map_meta_cap()
+	 * can resolve onto one of them. The comment entries reach them by way of
+	 * 'edit_post' on the comment's post.
+	 *
+	 * @var string[]
+	 */
+	const POST_CAPS = [
+		'publish_posts',
+		'edit_posts',
+		'edit_published_posts',
+		'edit_post',
+		'edit_page',
+		'publish_post',
+		'read_post',
+		'read_page',
+		'add_post_meta',
+		'edit_post_meta',
+		'delete_post_meta',
+		'edit_comment',
+		'add_comment_meta',
+		'edit_comment_meta',
+		'delete_comment_meta',
+	];
+
+	/**
 	 * Initializes actions and filters.
 	 */
 	public function init() {
@@ -21,6 +48,19 @@ class Plugin {
 		}
 
 		add_filter( 'user_has_cap', [ $this, 'add_post_capabilities' ], 10, 4 );
+		add_filter( 'wp_insert_post_empty_content', [ $this, 'restrict_updates_to_editable_posts' ], 10, 2 );
+		add_action( 'registered_post_type', [ $this, 'restrict_rest_queries' ] );
+
+		foreach ( get_post_types() as $post_type ) {
+			$this->restrict_rest_queries( $post_type );
+		}
+
+		add_filter( 'rest_comment_query', [ $this, 'restrict_comment_queries' ] );
+
+		foreach ( [ 'load-edit.php', 'load-edit-comments.php' ] as $screen ) {
+			add_action( $screen, [ $this, 'withdraw_post_capabilities' ] );
+		}
+
 		add_action( 'admin_bar_menu', [ $this, 'remove_non_accessible_menu_items' ], 100 );
 
 		if ( apply_filters( 'wporg_o2_enable_pending_for_unknown_users', true ) ) {
@@ -32,6 +72,7 @@ class Plugin {
 
 			add_filter( 'gettext_with_context', [ $this, 'replace_post_button_label' ], 10, 4 );
 			add_filter( 'o2_create_post', [ $this, 'save_new_post_as_pending' ] );
+			add_filter( 'wp_insert_post_data', array( $this, 'enforce_pending_status' ) );
 			add_filter( 'the_title', [ $this, 'prepend_pending_notice' ], 10, 2 );
 			add_filter( 'comments_open', [ $this, 'close_comments_for_pending_posts' ], 10, 2 );
 		}
@@ -94,12 +135,25 @@ class Plugin {
 	}
 
 	/**
+	 * Whether the current user is one of the people the pending queue is for.
+	 *
+	 * The count is site-wide, and the grant hands 'edit_posts' to every
+	 * logged-in WordPress.org account, so that capability is not enough on
+	 * its own.
+	 *
+	 * @return bool True when the current user reviews posts on this site.
+	 */
+	public function user_may_review_posts() {
+		return current_user_can( 'edit_posts' ) && ! $this->is_granted_non_member();
+	}
+
+	/**
 	 * Adds pending posts count before pending comments count.
 	 *
 	 * @param \WP_Admin_Bar $wp_admin_bar The admin bar instance.
 	 */
 	public function add_pending_posts_count_to_admin_bar( $wp_admin_bar ) {
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		if ( ! $this->user_may_review_posts() ) {
 			return;
 		}
 
@@ -124,7 +178,7 @@ class Plugin {
 	 * Adds icon for the pending posts count.
 	 */
 	public function add_pending_posts_icon_to_admin_bar() {
-		if ( ! current_user_can( 'edit_posts' ) ) {
+		if ( ! $this->user_may_review_posts() ) {
 			return;
 		}
 
@@ -154,6 +208,39 @@ class Plugin {
 		$post->post_status = 'pending';
 
 		return $post;
+	}
+
+	/**
+	 * Applies the 'pending' status to submissions from users who can't publish.
+	 *
+	 * The capabilities granted in add_post_capabilities() are primitive capabilities
+	 * that every write path honors, so the review step can't live on o2's front end
+	 * 'o2_create_post' filter alone -- it has to apply wherever a post is created.
+	 * Only posts a logged-in user is authoring for themselves are affected, so
+	 * editorial and programmatic inserts are left alone.
+	 *
+	 * @param array $data An array of slashed, sanitized, and processed post data.
+	 * @return array Filtered post data.
+	 */
+	public function enforce_pending_status( $data ) {
+		$author = (int) ( $data['post_author'] ?? 0 );
+
+		if ( ! $author || get_current_user_id() !== $author ) {
+			return $data;
+		}
+
+		$exempt_statuses = array( 'draft', 'pending', 'auto-draft', 'trash', 'inherit' );
+		if ( in_array( $data['post_status'], $exempt_statuses, true ) ) {
+			return $data;
+		}
+
+		if ( $this->user_can_publish( $author ) ) {
+			return $data;
+		}
+
+		$data['post_status'] = 'pending';
+
+		return $data;
 	}
 
 	/**
@@ -230,7 +317,28 @@ class Plugin {
 	}
 
 	/**
+	 * Whether the current user's posting capabilities come from the grant.
+	 *
+	 * Everybody else -- logged out visitors, site members, super admins -- holds
+	 * their capabilities through a role, so the restrictions that exist to
+	 * contain the grant have to leave them alone.
+	 *
+	 * @return bool True when the current user is a non-member holding granted capabilities.
+	 */
+	public function is_granted_non_member() {
+		$user_id = get_current_user_id();
+
+		return (bool) $user_id && ! is_user_member_of_blog( $user_id ) && ! is_super_admin( $user_id );
+	}
+
+	/**
 	 * Adds post capabilities to current user.
+	 *
+	 * The grant answers questions about posting, so it is applied only when
+	 * posting is what was asked about. map_meta_cap() resolves a meta capability
+	 * to primitives before this filter runs, and another plugin's meta capability
+	 * is free to resolve to one of the primitives below; without the check on
+	 * $args[0] the grant would answer that question too, in the affirmative.
 	 *
 	 * @param array   $allcaps An array of all the user's capabilities.
 	 * @param array   $caps    Actual capabilities for meta capability.
@@ -239,7 +347,11 @@ class Plugin {
 	 * @return array Array of all the user's capabilities.
 	 */
 	public function add_post_capabilities( $allcaps, $caps, $args, $user ) {
-		if ( ! is_user_logged_in() || in_array( 'publish_posts', $allcaps, true ) || is_user_member_of_blog( $user->ID ) ) {
+		if ( empty( $user->ID ) || ! empty( $allcaps['publish_posts'] ) || is_user_member_of_blog( $user->ID ) ) {
+			return $allcaps;
+		}
+
+		if ( ! in_array( $args[0] ?? '', self::POST_CAPS, true ) ) {
 			return $allcaps;
 		}
 
@@ -248,6 +360,174 @@ class Plugin {
 		$allcaps['edit_published_posts'] = true;
 
 		return $allcaps;
+	}
+
+	/**
+	 * Blocks updates to existing posts the current user cannot edit.
+	 *
+	 * The capabilities added in add_post_capabilities() are primitive capabilities,
+	 * which say nothing about the object they are used on, and the same is true of
+	 * the ones a low-privileged role carries. A caller that acts on a post ID
+	 * without asking 'edit_post' about that specific ID therefore reads them as
+	 * permission over every row in the table. Ask on the caller's behalf, and let
+	 * the write short-circuit when the answer is no.
+	 *
+	 * The post type is read from the stored row rather than from the incoming data,
+	 * and a revision defers to its parent, which is how map_meta_cap() reads them
+	 * too. Inserts are untouched: a row that does not exist yet has nobody to take
+	 * it from.
+	 *
+	 * @param bool  $maybe_empty Whether the post should be considered "empty".
+	 * @param array $postarr     Array of post data.
+	 * @return bool Filtered value.
+	 */
+	public function restrict_updates_to_editable_posts( $maybe_empty, $postarr ) {
+		if ( $maybe_empty ) {
+			return $maybe_empty;
+		}
+
+		$post_id = (int) ( $postarr['ID'] ?? 0 );
+
+		if ( ! $post_id || ! get_current_user_id() ) {
+			return $maybe_empty;
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return $maybe_empty;
+		}
+
+		/*
+		 * get_post( 0 ) hands back whatever is in the global $post, so a revision
+		 * with no parent has to stay itself rather than borrow the page it is being
+		 * asked about from.
+		 */
+		$target = $post;
+		if ( 'revision' === $target->post_type && $target->post_parent ) {
+			$target = get_post( $target->post_parent );
+		}
+
+		$post_type = $target ? get_post_type_object( $target->post_type ) : null;
+
+		/*
+		 * A post type that does not map meta capabilities answers 'edit_post' with
+		 * a primitive of its own that no role is granted, so the question denies a
+		 * site administrator as readily as anybody else. Core's custom_css is one
+		 * of those, and the Customizer saves Additional CSS through wp_update_post(),
+		 * so asking would break it. Authorization for those types is whatever the
+		 * code registering them decided it is.
+		 *
+		 * A type that will not resolve at all is not exempt: core answers 'edit_post'
+		 * for those by denying, or by falling back to 'edit_others_posts', and either
+		 * is a better answer than letting the write through.
+		 */
+		if ( $post_type && ! $post_type->map_meta_cap ) {
+			return $maybe_empty;
+		}
+
+		if ( current_user_can( 'edit_post', $post_id ) ) {
+			return $maybe_empty;
+		}
+
+		/**
+		 * Fires when an update is refused because the current user cannot edit the post.
+		 *
+		 * The caller sees wp_insert_post() report the post as empty, which says
+		 * nothing about why, so anything diagnosing a refused save needs this.
+		 *
+		 * @param int $post_id The post the update was aimed at.
+		 * @param int $user_id The user the update was refused for.
+		 */
+		do_action( 'wporg_o2_posting_access_update_refused', $post_id, get_current_user_id() );
+
+		return true;
+	}
+
+	/**
+	 * Stops granting capabilities for the remainder of the request.
+	 *
+	 * Attached to the wp-admin content list screens, which gate on 'edit_posts'
+	 * and are no part of what the grant is for, so that core's own capability
+	 * check turns a non-member away.
+	 *
+	 * Members are unaffected, because their capabilities come from a role
+	 * rather than from this filter.
+	 */
+	public function withdraw_post_capabilities() {
+		remove_filter( 'user_has_cap', [ $this, 'add_post_capabilities' ], 10 );
+	}
+
+	/**
+	 * Restricts REST collection queries for a post type.
+	 *
+	 * @param string $post_type Post type key.
+	 * @return void
+	 */
+	public function restrict_rest_queries( $post_type ) {
+		add_filter( "rest_{$post_type}_query", [ $this, 'restrict_non_public_queries' ] );
+	}
+
+	/**
+	 * Restricts REST queries for non-public post statuses to the user's own posts.
+	 *
+	 * A query mixing public and non-public statuses is scoped whole, because one
+	 * set of WP_Query arguments cannot express "public by anyone, non-public by me".
+	 *
+	 * @param array $args An array of arguments for WP_Query.
+	 * @return array Filtered WP_Query arguments.
+	 */
+	public function restrict_non_public_queries( $args ) {
+		if ( ! $this->is_granted_non_member() ) {
+			return $args;
+		}
+
+		$user_id = get_current_user_id();
+
+		// 'inherit' is the attachments route's default status, so it is readable without the grant.
+		$public_statuses = array_merge( get_post_stati( [ 'public' => true ] ), [ 'inherit' ] );
+		if ( ! array_diff( (array) ( $args['post_status'] ?? [] ), $public_statuses ) ) {
+			return $args;
+		}
+
+		$args['author']         = $user_id;
+		$args['author__in']     = [];
+		$args['author__not_in'] = [];
+
+		return $args;
+	}
+
+	/**
+	 * Restricts REST comment queries to the records a non-member may read.
+	 *
+	 * Core gates the collection's moderation parameters -- 'status', 'type' and
+	 * 'author_email' -- on 'edit_posts', which the grant supplies, so they have
+	 * to be constrained here instead.
+	 *
+	 * @param array $args An array of arguments for WP_Comment_Query.
+	 * @return array Filtered WP_Comment_Query arguments.
+	 */
+	public function restrict_comment_queries( $args ) {
+		if ( ! $this->is_granted_non_member() ) {
+			return $args;
+		}
+
+		// Notes are editorial comments, for the people who can edit the post they hang off.
+		$args['type']     = 'comment';
+		$args['type__in'] = [];
+
+		// A commenter's address is never published.
+		$args['author_email'] = '';
+
+		/*
+		 * Held, spammed and trashed records are scoped to the caller's own,
+		 * which is all core would return from them anyway.
+		 */
+		$approved = [ 'approve', 'approved', '1' ];
+		if ( array_diff( array_map( 'strval', (array) ( $args['status'] ?? '' ) ), $approved ) ) {
+			$args['user_id'] = get_current_user_id();
+		}
+
+		return $args;
 	}
 }
 

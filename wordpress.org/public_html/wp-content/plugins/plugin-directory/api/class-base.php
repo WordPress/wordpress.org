@@ -7,10 +7,23 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
  * @package WordPressdotorg_Plugin_Directory
  */
 class Base {
+
+	/**
+	 * The request parameter that carries a privileged route's action nonce.
+	 *
+	 * Kept separate from `_wpnonce`, which core's cookie authentication claims for
+	 * the generic `wp_rest` action before a route is reached.
+	 *
+	 * @var string
+	 */
+	const ACTION_NONCE_PARAM = '_wporg_action';
+
 	/**
 	 * Initializes REST API customizations.
 	 */
 	public static function init() {
+		add_filter( 'rest_request_before_callbacks', array( __CLASS__, 'reject_cross_origin_write' ), 10, 3 );
+
 		self::load_routes();
 	}
 
@@ -94,5 +107,173 @@ class Base {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Mints the nonce a privileged route requires, bound to the action it authorizes.
+	 *
+	 * @param string $action  The route action, such as `add_committer`.
+	 * @param string $subject Optional. What the action is performed on, usually a plugin slug.
+	 * @return string The nonce to pass as {@see Base::ACTION_NONCE_PARAM}.
+	 */
+	public static function action_nonce( $action, $subject = '' ) {
+		return wp_create_nonce( self::action_nonce_name( $action, $subject ) );
+	}
+
+	/**
+	 * Names the nonce action for a privileged route.
+	 *
+	 * @param string $action  The route action, such as `add_committer`.
+	 * @param string $subject Optional. What the action is performed on, usually a plugin slug.
+	 * @return string The nonce action.
+	 */
+	protected static function action_nonce_name( $action, $subject = '' ) {
+		$subject = (string) $subject;
+
+		return 'wporg_plugins_' . $action . ( '' !== $subject ? ':' . $subject : '' );
+	}
+
+	/**
+	 * A Permission Check callback which requires the capability and action a route declares.
+	 *
+	 * Routes name both alongside their callback:
+	 *
+	 *     'permission_callback' => array( $this, 'permission_check_action' ),
+	 *     'wporg_capability'    => 'plugin_add_committer',
+	 *     'wporg_action'        => 'add_committer',
+	 *
+	 * The capability is checked against the request's plugin, and the nonce is bound to its
+	 * slug plus any further `wporg_nonce_params` the route lists, such as a release tag. A
+	 * route whose subject is not a plugin slug calls {@see Base::verify_action_nonce()}
+	 * itself with whatever identifies its own.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool|\WP_Error True when both hold, false or WP_Error upon failure.
+	 */
+	public function permission_check_action( $request ) {
+		$attributes = $request->get_attributes();
+
+		// A route that declares neither is refused rather than checked against nothing.
+		if ( empty( $attributes['wporg_capability'] ) || empty( $attributes['wporg_action'] ) ) {
+			return false;
+		}
+
+		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+
+		if ( ! $plugin || ! current_user_can( $attributes['wporg_capability'], $plugin ) ) {
+			return false;
+		}
+
+		$subject = array( $request['plugin_slug'] );
+
+		foreach ( $attributes['wporg_nonce_params'] ?? array() as $param ) {
+			$subject[] = $request[ $param ];
+		}
+
+		return $this->verify_action_nonce( $request, $attributes['wporg_action'], implode( ':', $subject ) );
+	}
+
+	/**
+	 * Verifies that a request carries the nonce for the action it is asking for.
+	 *
+	 * Returns the same error code as a stale `wp_rest` nonce, so the routes that turn
+	 * that into a "link has expired" page keep doing so.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @param string           $action  The route action, such as `add_committer`.
+	 * @param string           $subject Optional. What the action is performed on.
+	 * @return bool|\WP_Error True if the nonce is valid, WP_Error upon failure.
+	 */
+	public function verify_action_nonce( $request, $action, $subject = '' ) {
+		$nonce = $request->get_param( self::ACTION_NONCE_PARAM );
+
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, self::action_nonce_name( $action, $subject ) ) ) {
+			return new \WP_Error(
+				'rest_cookie_invalid_nonce',
+				__( 'Sorry! You cannot do that.', 'wporg-plugins' ),
+				array( 'status' => \WP_Http::FORBIDDEN )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Keeps a cookie-authenticated write to this namespace on the directory's own pages.
+	 *
+	 * The login cookie is shared across the wordpress.org hosts, so the session does not
+	 * say which host a request came from; `Origin` does.
+	 *
+	 * Routes whose permission callback is `__return_true` are exempt, such as the
+	 * blueprint Playground fetches from its own origin: the session is not what
+	 * authorizes those.
+	 *
+	 * @param mixed            $response Result to send to the client.
+	 * @param array            $handler  Route handler used for the request.
+	 * @param \WP_REST_Request $request  Request used to generate the response.
+	 * @return mixed The response, or WP_Error when the write came from elsewhere.
+	 */
+	public static function reject_cross_origin_write( $response, $handler, $request ) {
+		if ( null !== $response ) {
+			return $response;
+		}
+
+		if ( ! str_starts_with( strtolower( ltrim( $request->get_route(), '/' ) ), 'plugins/v1/' ) ) {
+			return $response;
+		}
+
+		if ( in_array( $request->get_method(), array( 'GET', 'HEAD', 'OPTIONS' ), true ) ) {
+			return $response;
+		}
+
+		if ( isset( $handler['permission_callback'] ) && '__return_true' === $handler['permission_callback'] ) {
+			return $response;
+		}
+
+		if ( ! is_user_logged_in() ) {
+			return $response;
+		}
+
+		$origin = get_http_origin();
+		if ( ! $origin || in_array( $origin, self::same_site_origins(), true ) ) {
+			return $response;
+		}
+
+		return new \WP_Error(
+			'rest_cross_origin_write',
+			__( 'Sorry! You cannot do that.', 'wporg-plugins' ),
+			array( 'status' => \WP_Http::FORBIDDEN )
+		);
+	}
+
+	/**
+	 * The origins this site's own pages are served from.
+	 *
+	 * Each localised directory is its own site, so `home_url()` already names the host
+	 * that served the page making the request. Anything the mapping does not cover is
+	 * a legitimate write refused, which is what the filter is for.
+	 *
+	 * @return array The origins a write may carry.
+	 */
+	protected static function same_site_origins() {
+		$origins = array();
+
+		foreach ( array( home_url(), admin_url() ) as $url ) {
+			$parts = wp_parse_url( $url );
+
+			if ( ! empty( $parts['scheme'] ) && ! empty( $parts['host'] ) ) {
+				$origins[] = $parts['scheme'] . '://' . $parts['host'] .
+					( empty( $parts['port'] ) ? '' : ':' . $parts['port'] );
+			}
+		}
+
+		/**
+		 * Filters the origins a `plugins/v1` write may be made from.
+		 *
+		 * @param array $origins Origins serving this directory's own pages.
+		 */
+		$origins = apply_filters( 'wporg_plugins_same_site_origins', array_unique( $origins ) );
+
+		return array_map( 'strval', (array) $origins );
 	}
 }

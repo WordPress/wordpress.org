@@ -37,11 +37,15 @@ function render() {
 	}
 	echo '</h2>';
 
-	// Let the user know that this is accessible by ajyone with the ... capability.
-	printf(
-		'<div class="notice notice-success"><p>Anyone with the <code>%s</code> capability on this site can manage badges.</p></div>',
-		get_option( 'wporg_profile_badge_required_cap', 'manage_options' )
-	);
+	// Let the user know who else can manage badges on this site.
+	if ( 'manage_network' === get_required_cap() ) {
+		echo '<div class="notice notice-success"><p>Only super admins can manage badges on this site.</p></div>';
+	} else {
+		printf(
+			'<div class="notice notice-success"><p>Super admins, and users with a role on this site and the <code>%s</code> capability, can manage badges.</p></div>',
+			esc_html( get_required_cap() )
+		);
+	}
 
 	switch ( explode( ':', $active_tab )[0] ) {
 		case 'list_users':
@@ -66,7 +70,7 @@ function render_list_users_tab( $slug ) {
 	$users = get_users_with_badge( $slug );
 
 	// List users with badges.
-	echo '<h2>Users with Badge "' . ( $badges[ $slug ] ?? '' ) . '" (' . number_format_i18n( count( $users ) ) .')</h2>';
+	echo '<h2>Users with Badge "' . esc_html( $badges[ $slug ] ?? '' ) . '" (' . esc_html( number_format_i18n( count( $users ) ) ) . ')</h2>';
 	if ( $users ) {
 
 		// Lots of WP_User objects is extra hungry.
@@ -116,7 +120,7 @@ function render_list_users_tab( $slug ) {
 
 		}
 		echo '</ul>';
-		echo '<textarea rows="10" style="width:100%">' . implode( ', ', wp_list_pluck( $users, 'user_login' ) ) . '</textarea>';
+		echo '<textarea rows="10" style="width:100%">' . esc_textarea( implode( ', ', wp_list_pluck( $users, 'user_login' ) ) ) . '</textarea>';
 	} else {
 		echo '<p><em>No users have this badge.</em></p>';
 	}
@@ -150,13 +154,14 @@ function render_manage_tab() {
 		}
 
 		if ( $messages ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice built from a literal format string with intval()-cast counts.
 			echo '<div id="message" class="updated notice is-dismissible"><p>' . implode( '<br>', $messages ) . '</p></div>';
 		}
 	}
 
 	// Render a form with a textarea for the user, a selection for the action, and a checkbox of each team that this site can manage.
 	?>
-	<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<input type="hidden" name="action" value="wporg_profile_manage_badges">
 		<?php wp_nonce_field( 'wporg_profile_badges' ); ?>
 		<table class="form-table">
@@ -195,20 +200,23 @@ function render_manage_tab() {
 	<?php
 }
 
-function render_settings() {	
+/**
+ * Renders the settings tab.
+ */
+function render_settings() {
 
 	// Add a note to the team.
 	$note_to_team = get_option( 'wporg_profile_badge_note_to_team', '' );
 
 	// The minimum capability required to manage badges on this site.
-	$current_cap = get_option( 'wporg_profile_badge_required_cap', 'manage_options' );
+	$current_cap = get_required_cap();
 
 	// Allow super-admins to set the badges users on this site can assign.
 	$allowed_badges = get_option( 'wporg_profile_badges', [] );
 
 	?>
 	<h1>Settings</h1>
-	<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<input type="hidden" name="action" value="badge_settings">
 		<?php wp_nonce_field( 'badge_settings' ); ?>
 		<table class="form-table">
@@ -222,16 +230,8 @@ function render_settings() {
 			<tr>
 				<th scope="row"><label for="required_role">Required Cap to Manage Badges</label></th>
 				<td>
-					<?php
-					$role_caps = [
-						'publish_posts'  => 'Can publish posts (Author+)',
-						'manage_options' => 'Can manage options (Admin+)',
-						'manage_network' => 'Can manage network (Super Admin)',
-					];
-
-					?>
-					<select name="required_role" id="required_role">
-						<?php foreach ( $role_caps as $cap => $desc ) : ?>
+					<select name="required_role" id="required_role" <?php disabled( ! current_user_can_change_required_cap() ); ?>>
+						<?php foreach ( get_required_cap_choices() as $cap => $desc ) : ?>
 							<option
 								value="<?php echo esc_attr( $cap ); ?>"
 								<?php selected( $current_cap, $cap ); ?>
@@ -241,7 +241,10 @@ function render_settings() {
 							</option>
 						<?php endforeach; ?>
 					</select>
-					<p class="description">Select the minimum user role required to manage badges on this site.</p>
+					<p class="description">Select the minimum user role required to manage badges on this site. Only users with a role on this site qualify; super admins can always manage badges, and only a super admin can limit it to super admins.</p>
+					<?php if ( ! current_user_can_change_required_cap() ) : ?>
+						<p class="description"><em>Only administrators can change this setting.</em></p>
+					<?php endif; ?>
 				</td>
 			</tr>
 			<tr>

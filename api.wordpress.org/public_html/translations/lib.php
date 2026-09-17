@@ -117,7 +117,7 @@ function find_all_translations_for_type_and_domain( $type, $domain = 'default', 
 		$_translations[ $key ] = $translation;
 		$_translations[ $key ]->english_name = $locale->english_name;
 		$_translations[ $key ]->native_name = $locale->native_name;
-		$_translations[ $key ]->package = sprintf( "$base_url/%s/%s.zip", $translation->version, $translation->language );
+		$_translations[ $key ]->package = sprintf( "$base_url/%s/%s.zip", rawurlencode( $translation->version ), rawurlencode( $translation->language ) );
 		$_translations[ $key ]->iso = (object) $isos;
 
 		if ( 'core' === $type ) {

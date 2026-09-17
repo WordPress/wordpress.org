@@ -13,11 +13,11 @@ $wp_query = new WP_Query( array( 'no_found_rows' => true, 'post_type' => 'post',
 
 					<div class="col-5">
 						<div class="storycontent">
-								<h2><?php _e( 'Page Not Found', 'wporg-showcase' ); ?></h2>
-								<p><?php _e( 'Sorry, we could not not find that site in the Showcase. We do have many others available though. Here&#8217;s one chosen at random!', 'wporg-showcase' ); ?></p>
+								<h2><?php esc_html_e( 'Page Not Found', 'wporg-showcase' ); ?></h2>
+								<p><?php esc_html_e( 'Sorry, we could not not find that site in the Showcase. We do have many others available though. Here&#8217;s one chosen at random!', 'wporg-showcase' ); ?></p>
 								<?php //breadcrumb(); ?>
 								<h2><?php the_title(); ?></h2>
-								<a href=' http://<?php get_site_domain( false ); ?>'>
+								<a href="<?php echo esc_url( 'http://' . get_site_domain( false, false ) ); ?>">
 									<?php site_screenshot_tag( 518, 'screenshot site-screenshot'); ?>
 								</a>
 								<?php the_content(); ?>
@@ -38,10 +38,18 @@ $wp_query = new WP_Query( array( 'no_found_rows' => true, 'post_type' => 'post',
 											$image_src = substr($value, 0, $space);
 											$image_desc = substr($value, $space+1);
 
+											$thumb_src = add_query_arg(
+												array(
+													'w' => 155,
+													'h' => 155,
+												),
+												$image_src
+											);
+
 											$output .= "<dl class='gallery-item'>";
 											$output .= "
 												<dt class='gallery-icon'>
-													<a href='$image_src' title='$image_desc'><img src='$image_src?w=155&h=155' /></a>
+													<a href='" . esc_url( $image_src ) . "' title='" . esc_attr( $image_desc ) . "'><img src='" . esc_url( $thumb_src ) . "' /></a>
 												</dt>";
 											$output .= "</dl>";
 											if ( $key > 0 && $key+1 % 2 == 0 )
@@ -52,6 +60,7 @@ $wp_query = new WP_Query( array( 'no_found_rows' => true, 'post_type' => 'post',
 												<br style='clear: both;' />
 											</div>\n";
 
+										// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup assembled in this file from literal strings.
 										echo $output;
 									}
 								?>

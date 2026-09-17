@@ -14,7 +14,7 @@ function cache_key_members( $channel_id ) {
 }
 
 function invalidate_channel_lists() {
-	wp_cache_delete( 'bot_active_channels', CACHE_GROUP );
+	wp_cache_delete( 'active_channels', CACHE_GROUP );
 	wp_cache_delete( 'archived_channels', CACHE_GROUP );
 }
 
@@ -182,7 +182,7 @@ function handle_block_action( $payload ) {
 				api_call( 'conversations.invite', [
 					'channel' => $channel_to_join,
 					'users'   => $user_id,
-				] );
+				], channel_token( $channel_to_join ) );
 				invalidate_members( $channel_to_join );
 			}
 
@@ -845,15 +845,34 @@ function rotate_subgroup( $channel_id, $parent_id, $parent_name, $user_id, $mana
 }
 
 function list_all_private_channels( $include_archived = false ) {
-	$active = wp_cache_get( 'bot_active_channels', CACHE_GROUP );
+	$active = wp_cache_get( 'active_channels', CACHE_GROUP );
 	if ( false === $active ) {
-		$r      = api_call( 'conversations.list', [
+		// The bot token only lists channels the bot was invited to. Merge in the
+		// owner's listing, as the archived branch below already does.
+		$params = [
 			'exclude_archived' => true,
 			'types'            => 'private_channel',
 			'limit'            => 999,
+		];
+		[ $bot_active, $user_active ] = api_multi_call( [
+			[ 'conversations.list', $params, null ],
+			[ 'conversations.list', $params, SUBGROUP_USER_TOKEN ],
 		] );
-		$active = $r['channels'] ?? [];
-		wp_cache_set( 'bot_active_channels', $active, CACHE_GROUP, CACHE_TTL_ACTIVE_CHANNELS );
+
+		// Tag what the bot is in: it cannot act on anything else.
+		$active = [];
+		foreach ( $bot_active['channels'] ?? [] as $g ) {
+			$g['bot_member']    = true;
+			$active[ $g['id'] ] = $g;
+		}
+		foreach ( $user_active['channels'] ?? [] as $g ) {
+			if ( ! isset( $active[ $g['id'] ] ) ) {
+				$g['bot_member']    = false;
+				$active[ $g['id'] ] = $g;
+			}
+		}
+		$active = array_values( $active );
+		wp_cache_set( 'active_channels', $active, CACHE_GROUP, CACHE_TTL_ACTIVE_CHANNELS );
 	}
 
 	if ( ! $include_archived ) {
@@ -912,6 +931,19 @@ function find_channel( $channel_id ) {
 }
 
 /*
+ * The token that can act on a channel: the bot where it is a member, the owner
+ * token everywhere else.
+ */
+function channel_token( $channel_id ) {
+	foreach ( list_all_private_channels() as $g ) {
+		if ( $g['id'] === $channel_id ) {
+			return empty( $g['bot_member'] ) ? SUBGROUP_USER_TOKEN : null;
+		}
+	}
+	return null;
+}
+
+/*
  * Populate the member-list cache for every channel in $channel_ids that isn't
  * already cached, using a single parallel batch. Avoids N sequential round-trips
  * when rendering a listing.
@@ -928,7 +960,7 @@ function prime_members_cache( array $channel_ids ) {
 	}
 	$calls = [];
 	foreach ( $to_fetch as $id ) {
-		$calls[] = [ 'conversations.members', [ 'channel' => $id, 'limit' => 999 ], null ];
+		$calls[] = [ 'conversations.members', [ 'channel' => $id, 'limit' => 999 ], channel_token( $id ) ];
 	}
 	$results = api_multi_call( $calls );
 	foreach ( $to_fetch as $i => $id ) {
@@ -944,7 +976,7 @@ function get_members( $channel_id ) {
 		$r       = api_call( 'conversations.members', [
 			'channel' => $channel_id,
 			'limit'   => 999,
-		] );
+		], channel_token( $channel_id ) );
 		$members = $r['members'] ?? [];
 		wp_cache_set( $key, $members, CACHE_GROUP, CACHE_TTL_MEMBERS );
 	}
@@ -1128,43 +1160,46 @@ function build_manage_view( $parent, $user_id, $root_view_id ) {
 				'type' => 'section',
 				'text' => [ 'type' => 'mrkdwn', 'text' => implode( "\n", $lines ) ],
 			];
-			$blocks[] = [
-				'type'     => 'actions',
-				'elements' => [
-					[
-						'type'      => 'button',
-						'text'      => [ 'type' => 'plain_text', 'text' => 'Rename' ],
-						'action_id' => 'rename_subgroup',
-						'value'     => $g['id'],
-					],
-					[
-						'type'      => 'button',
-						'text'      => [ 'type' => 'plain_text', 'text' => 'Rotate' ],
-						'action_id' => 'rotate_subgroup',
-						'value'     => $g['id'],
-						'confirm'   => [
-							'title'   => [ 'type' => 'plain_text', 'text' => 'Rotate channel?' ],
-							'text'    => [ 'type' => 'mrkdwn', 'text' => "Archive `{$g['name']}` with a year suffix and create a fresh copy with only you as a member." ],
-							'confirm' => [ 'type' => 'plain_text', 'text' => 'Rotate' ],
-							'deny'    => [ 'type' => 'plain_text', 'text' => 'Cancel' ],
+			// Rename, Rotate and Archive act on the channel, so they need the bot in it.
+			if ( ! empty( $g['bot_member'] ) ) {
+				$blocks[] = [
+					'type'     => 'actions',
+					'elements' => [
+						[
+							'type'      => 'button',
+							'text'      => [ 'type' => 'plain_text', 'text' => 'Rename' ],
+							'action_id' => 'rename_subgroup',
+							'value'     => $g['id'],
+						],
+						[
+							'type'      => 'button',
+							'text'      => [ 'type' => 'plain_text', 'text' => 'Rotate' ],
+							'action_id' => 'rotate_subgroup',
+							'value'     => $g['id'],
+							'confirm'   => [
+								'title'   => [ 'type' => 'plain_text', 'text' => 'Rotate channel?' ],
+								'text'    => [ 'type' => 'mrkdwn', 'text' => "Archive `{$g['name']}` with a year suffix and create a fresh copy with only you as a member." ],
+								'confirm' => [ 'type' => 'plain_text', 'text' => 'Rotate' ],
+								'deny'    => [ 'type' => 'plain_text', 'text' => 'Cancel' ],
+							],
+						],
+						[
+							'type'      => 'button',
+							'text'      => [ 'type' => 'plain_text', 'text' => 'Archive' ],
+							'style'     => 'danger',
+							'action_id' => 'archive_subgroup',
+							'value'     => $g['id'],
+							'confirm'   => [
+								'title'   => [ 'type' => 'plain_text', 'text' => 'Archive channel?' ],
+								'text'    => [ 'type' => 'mrkdwn', 'text' => "Archive `{$g['name']}`?" ],
+								'confirm' => [ 'type' => 'plain_text', 'text' => 'Archive' ],
+								'deny'    => [ 'type' => 'plain_text', 'text' => 'Cancel' ],
+								'style'   => 'danger',
+							],
 						],
 					],
-					[
-						'type'      => 'button',
-						'text'      => [ 'type' => 'plain_text', 'text' => 'Archive' ],
-						'style'     => 'danger',
-						'action_id' => 'archive_subgroup',
-						'value'     => $g['id'],
-						'confirm'   => [
-							'title'   => [ 'type' => 'plain_text', 'text' => 'Archive channel?' ],
-							'text'    => [ 'type' => 'mrkdwn', 'text' => "Archive `{$g['name']}`?" ],
-							'confirm' => [ 'type' => 'plain_text', 'text' => 'Archive' ],
-							'deny'    => [ 'type' => 'plain_text', 'text' => 'Cancel' ],
-							'style'   => 'danger',
-						],
-					],
-				],
-			];
+				];
+			}
 		}
 	}
 

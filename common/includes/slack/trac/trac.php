@@ -15,6 +15,11 @@ class Trac implements User {
 	protected $commit_username;
 	protected $ticket_username;
 
+	// Set dynamically per-Trac in __construct(); declared explicitly to
+	// avoid the PHP 8.2+ deprecation notice for implicit dynamic properties.
+	protected $trac;
+	protected $name;
+
 	// 'title', 'fields', 'description'
 	protected $primary_channel_ticket_format = 'description';
 
@@ -289,6 +294,23 @@ class Trac implements User {
 			return $this->primary_channel_ticket_format;
 		}
 		return 'description';
+	}
+
+	/**
+	 * Stop message text people typed from being read as Slack markup.
+	 *
+	 * Escapes only & and <, the two characters mrkdwn needs to build a link or a
+	 * broadcast. > is left alone so quoted replies still render as blockquotes, and
+	 * unlike htmlspecialchars() this can't turn a mis-encoded body into an empty string.
+	 *
+	 * Text placed inside a <url|label> link needs > escaped as well, or it closes the
+	 * link early; those few call sites use htmlspecialchars() with ENT_SUBSTITUTE.
+	 *
+	 * @param string $text Text to escape.
+	 * @return string
+	 */
+	public static function escape_for_slack( $text ) {
+		return str_replace( array( '&', '<' ), array( '&amp;', '&lt;' ), $text );
 	}
 
 	static function format_for_slack( $text ) {

@@ -871,14 +871,23 @@ label {
 	margin-bottom: var(--space-20);
 }
 
+.job-detail__body ol,
 .job-detail__body ul {
 	margin-bottom: var(--space-20);
 	padding-left: var(--space-20);
 }
 
+.job-detail__body ol {
+	padding-left: var(--space-30);
+}
+
 .job-detail__body li {
 	margin-bottom: 8px;
 	list-style: disc;
+}
+
+.job-detail__body ol > li {
+	list-style: decimal;
 }
 
 /* Sidebar */

@@ -27,14 +27,14 @@ class Elasticsearch_Status {
 			'plugin-tools',
 			'ES Index Status',
 			'ES Index Status',
-			'plugin_admin',
+			'plugin_approve',
 			'es-index-status',
 			array( $this, 'render' )
 		);
 	}
 
 	public function render() {
-		if ( ! current_user_can( 'plugin_admin' ) ) {
+		if ( ! current_user_can( 'plugin_approve' ) ) {
 			return;
 		}
 
@@ -44,7 +44,7 @@ class Elasticsearch_Status {
 		<div class="wrap">
 			<h1>ElasticSearch Index Status</h1>
 			<p>Checks that all published plugins exist in the ElasticSearch index.</p>
-			<p>Total plugins to check: <strong><?php echo number_format_i18n( $total ); ?></strong></p>
+			<p>Total plugins to check: <strong><?php echo esc_html( number_format_i18n( $total ) ); ?></strong></p>
 
 			<p>
 				<button id="es-check-start" class="button button-primary">Start Check</button>
@@ -249,7 +249,7 @@ class Elasticsearch_Status {
 	public function ajax_check_batch() {
 		check_ajax_referer( 'es-index-check-batch' );
 
-		if ( ! current_user_can( 'plugin_admin' ) ) {
+		if ( ! current_user_can( 'plugin_approve' ) ) {
 			wp_send_json_error( 'Permission denied.' );
 		}
 
@@ -294,7 +294,7 @@ class Elasticsearch_Status {
 	public function ajax_reindex() {
 		check_ajax_referer( 'es-index-check-batch' );
 
-		if ( ! current_user_can( 'plugin_admin' ) ) {
+		if ( ! current_user_can( 'plugin_approve' ) ) {
 			wp_send_json_error( 'Permission denied.' );
 		}
 
