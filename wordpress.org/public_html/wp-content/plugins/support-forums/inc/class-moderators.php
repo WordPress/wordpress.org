@@ -21,6 +21,7 @@ class Moderators {
 		// Use bbPress's field-level Super Moderator policy when available.
 		if ( function_exists( 'bbp_current_user_can_edit_user_field' ) ) {
 			add_filter( 'bbp_allow_super_mods', array( $this, 'allow_super_mods' ) );
+			add_filter( 'bbp_map_primary_meta_caps', array( $this, 'map_profile_view_caps' ), 10, 4 );
 		} else {
 			// Preserve the existing policy while older bbPress versions are deployed.
 			add_filter( 'bbp_map_primary_meta_caps', array( $this, 'map_meta_caps' ), 10, 4 );
@@ -198,6 +199,53 @@ class Moderators {
 		}
 
 		return $allow;
+	}
+
+	/**
+	 * Extend the Super Moderator policy to the profile a moderator is looking at.
+	 *
+	 * Core grants the policy's capabilities only while the profile editor itself is open,
+	 * so a profile page cannot ask whether to link to it. Answer the same question on the
+	 * surrounding profile, under the same conditions bbPress applies. Remove once bbPress
+	 * widens its own scope.
+	 *
+	 * @param array  $caps            Capabilities bbPress mapped the request to.
+	 * @param string $cap             Capability name.
+	 * @param int    $current_user_id Current user ID.
+	 * @param array  $args            Capability context, typically the object ID.
+	 * @return array Filtered capabilities.
+	 */
+	public function map_profile_view_caps( $caps, $cap, $current_user_id, $args ) {
+		if ( ! in_array( $cap, array( 'edit_user', 'promote_user' ), true ) ) {
+			return $caps;
+		}
+
+		// bbPress covers the editor, and wp-admin keeps native WordPress permissions.
+		if ( is_admin() || bbp_is_single_user_edit() || ! bbp_is_single_user() ) {
+			return $caps;
+		}
+
+		if ( ! bbp_allow_super_mods() ) {
+			return $caps;
+		}
+
+		$user_id = ! empty( $args[0] ) ? (int) $args[0] : bbp_get_displayed_user_id();
+
+		// Users can always edit themselves, so only map for others.
+		if ( empty( $user_id ) || $user_id === $current_user_id ) {
+			return $caps;
+		}
+
+		// Super moderators cannot edit keymasters or site administrators.
+		if (
+			bbp_is_user_keymaster( $user_id )
+			|| user_can( $user_id, 'manage_options' )
+			|| is_super_admin( $user_id )
+		) {
+			return $caps;
+		}
+
+		return array( 'moderate' );
 	}
 
 	/**
