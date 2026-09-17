@@ -95,7 +95,7 @@ class Plugin_Release_Confirmation extends Base {
 		if (
 			is_array( $result ) && isset( $result['code'] ) &&
 			(
-				preg_match( '!^/plugins/v1/plugin/([^/]+)/release-confirmation(/[^/]+)?$!', $request->get_route(), $m )
+				preg_match( '!^/plugins/v1/plugin/([^/]+)/release-confirmation(/[^/]+){0,2}$!', $request->get_route(), $m )
 				||
 				'/plugins/v1/release-confirmation-access' === $request->get_route()
 			)
