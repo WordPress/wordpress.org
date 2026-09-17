@@ -102,7 +102,7 @@ do_action( 'bbp_template_before_user_details' ); ?>
 				</li>
 			<?php endif; ?>
 
-			<?php if ( bbp_is_user_home() || current_user_can( 'edit_users' ) ) : ?>
+			<?php if ( bbp_is_user_home() || current_user_can( 'edit_user', bbp_get_displayed_user_id() ) ) : ?>
 
 				<?php if ( bbp_is_subscriptions_active() ) : ?>
 					<li class="<?php if ( bbp_is_subscriptions() ) :?>current<?php endif; ?>">
