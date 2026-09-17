@@ -134,23 +134,43 @@ class Base {
 	}
 
 	/**
-	 * A Permission Check callback which requires both the capability and the route's own nonce.
+	 * A Permission Check callback which requires the capability and action a route declares.
 	 *
-	 * The nonce is bound to the request's `plugin_slug`; a route without one calls
-	 * {@see Base::verify_action_nonce()} itself with whatever identifies its subject.
+	 * Routes name both alongside their callback:
 	 *
-	 * @param \WP_REST_Request $request    The Rest API Request.
-	 * @param string           $capability The capability the action requires.
-	 * @param string           $action     The route action, such as `add_committer`.
-	 * @param mixed            $subject    Optional. What the capability is checked against.
+	 *     'permission_callback' => array( $this, 'permission_check_action' ),
+	 *     'wporg_capability'    => 'plugin_add_committer',
+	 *     'wporg_action'        => 'add_committer',
+	 *
+	 * The capability is checked against the request's plugin, and the nonce is bound to its
+	 * slug plus any further `wporg_nonce_params` the route lists, such as a release tag. A
+	 * route whose subject is not a plugin slug calls {@see Base::verify_action_nonce()}
+	 * itself with whatever identifies its own.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
 	 * @return bool|\WP_Error True when both hold, false or WP_Error upon failure.
 	 */
-	public function permission_check_action( $request, $capability, $action, $subject = null ) {
-		if ( ! current_user_can( $capability, $subject ) ) {
+	public function permission_check_action( $request ) {
+		$attributes = $request->get_attributes();
+
+		// A route that declares neither is refused rather than checked against nothing.
+		if ( empty( $attributes['wporg_capability'] ) || empty( $attributes['wporg_action'] ) ) {
 			return false;
 		}
 
-		return $this->verify_action_nonce( $request, $action, $request['plugin_slug'] ?? '' );
+		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+
+		if ( ! $plugin || ! current_user_can( $attributes['wporg_capability'], $plugin ) ) {
+			return false;
+		}
+
+		$subject = array( $request['plugin_slug'] );
+
+		foreach ( $attributes['wporg_nonce_params'] ?? array() as $param ) {
+			$subject[] = $request[ $param ];
+		}
+
+		return $this->verify_action_nonce( $request, $attributes['wporg_action'], implode( ':', $subject ) );
 	}
 
 	/**

@@ -27,11 +27,9 @@ class Plugin_Self_Transfer extends Base {
 					}
 				]
 			],
-			'permission_callback' => function( $request ) {
-				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-
-				return $this->permission_check_action( $request, 'plugin_self_transfer', 'self_transfer', $plugin );
-			},
+			'permission_callback' => [ $this, 'permission_check_action' ],
+			'wporg_capability'    => 'plugin_self_transfer',
+			'wporg_action'        => 'self_transfer',
 		] );
 
 		add_filter( 'rest_pre_echo_response', [ $this, 'override_cookie_expired_message' ], 10, 3 );

@@ -22,11 +22,9 @@ class Plugin_Self_Close extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 				],
 			],
-			'permission_callback' => function( $request ) {
-				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-
-				return $this->permission_check_action( $request, 'plugin_self_close', 'self_close', $plugin );
-			},
+			'permission_callback' => [ $this, 'permission_check_action' ],
+			'wporg_capability'    => 'plugin_self_close',
+			'wporg_action'        => 'self_close',
 		] );
 
 		add_filter( 'rest_pre_echo_response', [ $this, 'override_cookie_expired_message' ], 10, 3 );

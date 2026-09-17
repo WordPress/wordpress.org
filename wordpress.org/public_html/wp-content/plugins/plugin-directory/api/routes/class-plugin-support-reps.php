@@ -38,14 +38,9 @@ class Plugin_Support_Reps extends Base {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'add_support_rep' ),
-				'permission_callback' => function( $request ) {
-					return $this->permission_check_action(
-						$request,
-						'plugin_add_support_rep',
-						'add_support_rep',
-						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
-					);
-				},
+				'permission_callback' => array( $this, 'permission_check_action' ),
+				'wporg_capability'    => 'plugin_add_support_rep',
+				'wporg_action'        => 'add_support_rep',
 				'args'                => array(
 					'plugin_slug' => array(
 						'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
@@ -58,14 +53,9 @@ class Plugin_Support_Reps extends Base {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/support-reps/(?P<support_rep>[^/]+)/?', array(
 			'methods'             => WP_REST_Server::DELETABLE,
 			'callback'            => array( $this, 'remove_support_rep' ),
-			'permission_callback' => function( $request ) {
-				return $this->permission_check_action(
-					$request,
-					'plugin_remove_support_rep',
-					'remove_support_rep',
-					Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
-				);
-			},
+			'permission_callback' => array( $this, 'permission_check_action' ),
+			'wporg_capability'    => 'plugin_remove_support_rep',
+			'wporg_action'        => 'remove_support_rep',
 			'args'                => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),

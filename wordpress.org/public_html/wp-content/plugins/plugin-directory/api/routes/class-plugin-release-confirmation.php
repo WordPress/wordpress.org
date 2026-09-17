@@ -29,16 +29,9 @@ class Plugin_Release_Confirmation extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 				],
 			],
-			'permission_callback' => function( $request ) {
-				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-
-				return $this->permission_check_action(
-					$request,
-					'plugin_manage_releases',
-					'enable_release_confirmation',
-					$plugin
-				);
-			},
+			'permission_callback' => [ $this, 'permission_check_action' ],
+			'wporg_capability'    => 'plugin_manage_releases',
+			'wporg_action'        => 'enable_release_confirmation',
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)', [
@@ -52,9 +45,10 @@ class Plugin_Release_Confirmation extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_tag_callback' ],
 				]
 			],
-			'permission_callback' => function ( $request ) {
-				return $this->permission_can_access_release( $request, 'confirm_release' );
-			},
+			'permission_callback' => [ $this, 'permission_can_access_release' ],
+			'wporg_capability'    => 'plugin_manage_releases',
+			'wporg_action'        => 'confirm_release',
+			'wporg_nonce_params'  => [ 'plugin_tag' ],
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/discard', [
@@ -68,9 +62,10 @@ class Plugin_Release_Confirmation extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_tag_callback' ],
 				]
 			],
-			'permission_callback' => function ( $request ) {
-				return $this->permission_can_access_release( $request, 'discard_release' );
-			},
+			'permission_callback' => [ $this, 'permission_can_access_release' ],
+			'wporg_capability'    => 'plugin_manage_releases',
+			'wporg_action'        => 'discard_release',
+			'wporg_nonce_params'  => [ 'plugin_tag' ],
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/undo-discard', [
@@ -84,13 +79,10 @@ class Plugin_Release_Confirmation extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_tag_callback' ],
 				]
 			],
-			'permission_callback' => function( $request ) {
-				if ( current_user_can( 'plugin_review' ) ) {
-					return $this->permission_can_access_release( $request, 'undo_discard_release' );
-				}
-
-				return false;
-			},
+			'permission_callback' => [ $this, 'permission_can_undo_discard' ],
+			'wporg_capability'    => 'plugin_manage_releases',
+			'wporg_action'        => 'undo_discard_release',
+			'wporg_nonce_params'  => [ 'plugin_tag' ],
 		] );
 
 		add_filter( 'rest_pre_echo_response', [ $this, 'override_cookie_expired_message' ], 10, 3 );
@@ -123,31 +115,37 @@ class Plugin_Release_Confirmation extends Base {
 	/**
 	 * Validate that the user can manage releases for the given tag, and meant to.
 	 *
-	 * The nonce is bound to the tag as well as the plugin, so one release's link does
-	 * not authorize another's. It runs before the 2FA hand-off in
+	 * These routes list `plugin_tag` among their nonce params, so the token is bound to
+	 * the tag as well as the plugin and one release's link does not authorize another's.
+	 * The check runs before the 2FA hand-off in
 	 * {@see Plugin_Release_Confirmation::permission_can_access_plugin()}, which would
 	 * otherwise redirect a request this route goes on to refuse.
 	 *
 	 * @param \WP_REST_Request $request The Rest API Request.
-	 * @param string           $action  The route action, such as `discard_release`.
 	 * @return bool|\WP_Error True when both hold, false or WP_Error upon failure.
 	 */
-	public function permission_can_access_release( $request, $action ) {
-		if ( ! $this->can_manage_releases( $request ) ) {
-			return false;
-		}
-
-		$verified = $this->verify_action_nonce(
-			$request,
-			$action,
-			$request['plugin_slug'] . ':' . $request['plugin_tag']
-		);
+	public function permission_can_access_release( $request ) {
+		$verified = $this->permission_check_action( $request );
 
 		if ( true !== $verified ) {
 			return $verified;
 		}
 
 		return $this->permission_can_access_plugin( $request );
+	}
+
+	/**
+	 * Validate that a reviewer can undo the discarding of the given release.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool|\WP_Error True when the reviewer may, false or WP_Error upon failure.
+	 */
+	public function permission_can_undo_discard( $request ) {
+		if ( ! current_user_can( 'plugin_review' ) ) {
+			return false;
+		}
+
+		return $this->permission_can_access_release( $request );
 	}
 
 	/**
