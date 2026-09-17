@@ -13,6 +13,7 @@ class WordPressTV_Theme {
 			require_once get_template_directory() . '/plugins/wordpresstv-rest/wordpresstv-rest.php';
 			require_once get_template_directory() . '/plugins/wordpresstv-anon-upload/anon-upload.php';
 			require_once get_template_directory() . '/plugins/wordpresstv-upload-subtitles/wordpresstv-upload-subtitles.php';
+			require_once get_template_directory() . '/plugins/wordpresstv-deltascribe/wordpresstv-deltascribe.php';
 			require_once get_template_directory() . '/plugins/wordpresstv-open-graph/wordpresstv-open-graph.php';
 			require_once get_template_directory() . '/plugins/wordpresstv-event-meta/wordpresstv-event-meta.php';
 

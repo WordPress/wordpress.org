@@ -1,0 +1,89 @@
+html,
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+
+#page {
+	height: auto;
+	min-height: 100%;
+	position: relative;
+	width: 100%;
+}
+
+#header {
+	margin: 0;
+	padding-top: 10px;
+}
+
+#footer {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	left: 0;
+}
+
+.noscript-show p {
+	margin: 0 !important;
+}
+
+.container {
+	overflow: hidden;
+}
+
+.video-upload h3 {
+	font-size: 22px;
+}
+
+.video-upload table tr th,
+.video-upload table tr td {
+	padding: 7px 0;
+	line-height: 1.4em;
+}
+
+.video-upload table tr th {
+	width: 180px;
+	font-weight: bold;
+}
+
+.video-upload table tr th label .required {
+	line-height: 15px;
+	vertical-align: bottom;
+	margin: 0 3px;
+}
+
+.video-upload input[type="text"] {
+	border-radius: 3px;
+	border: 1px solid #dfdfdf;
+	color: #333;
+	background-color: #fff;
+	padding: 4px;
+	width: 329px;
+	max-width: 329px;
+}
+
+.video-upload input[type="text"]:focus {
+	border-color: #bbb;
+}
+
+#deltascribe-instructions {
+	overflow: auto;
+}
+
+#deltascribe-start-form p.last,
+#deltascribe-start-form table tr td.last {
+	padding: 15px 0;
+	text-align: left;
+}
+
+#deltascribe-start-form input[type="submit"] {
+	font-size: 15px;
+	padding: 4px 12px;
+}
+
+.video-upload .pass-form label {
+	float: none;
+	display: inline;
+	width: auto;
+}
