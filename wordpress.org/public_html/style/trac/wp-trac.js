@@ -436,10 +436,18 @@ let wpTrac,
 				if ( href.match( /\.(jpg|jpeg|png|gif|svg|webp)$/i ) ) {
 					const image = new window.Image();
 					image.src = href;
+					let alt = appendTo.find( '.comment' );
+					if ( alt.length > 0 ) {
+						alt = alt.text();
+					} else {
+						// Use attachment filename if it has no description.
+						alt = el.find( '.trac-attachment-name' ).text();
+					}
 					image.onload = function () {
 						$( '<img />' )
 							.attr( {
 								src: href,
+								alt: alt.trim(),
 								width: image.width,
 								height: image.height,
 								class: 'trac-image-preview',

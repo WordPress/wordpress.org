@@ -209,7 +209,7 @@ ${edited_comment if edited_comment is not none else change.comment}</textarea>
     <li class="trac-field-${field_name}${' trac-conflict' if preview and field_name in conflicts else ''}">
       <strong class="trac-field-${field_name}">${field.label}</strong>
 #         if field_name == 'attachment':
-      <a href="${href.attachment('ticket', ticket.id, field.new)}"><em>${field.new}</em></a><a href="${href('raw-attachment', 'ticket', ticket.id, field.new)}" title="Download" class="trac-rawlink">&#8203;</a> added
+      <a href="${href.attachment('ticket', ticket.id, field.new)}"><em>${field.new}</em></a><a href="${href('raw-attachment', 'ticket', ticket.id, field.new)}" class="trac-rawlink"><span aria-hidden="true">&#8203;</span><span class="screen-reader-text">Download <span class="trac-attachment-name">${field.new}</span></span></a> added
 #         elif 'rendered' in field:
       ${field.rendered}
 #         elif field.old and field.new:
