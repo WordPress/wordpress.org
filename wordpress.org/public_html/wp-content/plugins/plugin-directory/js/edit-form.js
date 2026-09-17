@@ -209,6 +209,7 @@
 			var data = new FormData()
 			data.append( $file.prop( 'name' ), file_input.files[0] );
 			data.append( 'admin', true );
+			data.append( '_wporg_action', pluginDirectory.uploadNonce );
 
 			wp.apiRequest( {
 				path: restEndpoint,
