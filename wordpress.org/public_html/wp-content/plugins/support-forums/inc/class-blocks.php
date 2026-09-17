@@ -65,6 +65,9 @@ class Blocks {
 			// Before Blocks Everywhere renders the stored content, which it does at priority 8.
 			add_filter( "bbp_get_{$type}_content", [ $this, 'limit_blocks' ], 7 );
 		}
+
+		// And again where the blocks actually run, past anything that could change the content.
+		add_filter( 'pre_render_block', [ $this, 'block_pre_render' ], 10, 2 );
 	}
 
 	/**
@@ -219,7 +222,47 @@ class Blocks {
 			$output .= serialize_block( $block );
 		}
 
-		return ltrim( $output );
+		$output = ltrim( $output );
+
+		// Unbalanced delimiters stay literal innerContent, invisible to the filter and live again after the next parse.
+		if ( $this->has_unsupported_block( parse_blocks( $output ) ) ) {
+			// Delimiters are HTML comments, and a save restores only bare wp: ones; anything else comes back escaped.
+			$content = preg_replace( '/<!--.*?-->/s', '', $content ) ?? $content;
+
+			// An opener with no closer would comment out everything after it, so drop it and keep that content.
+			$content = str_replace( '<!--', '', $content );
+
+			// Removing one comment can join what surrounded it into another, so fall back to text if it did.
+			return $this->has_unsupported_block( parse_blocks( $content ) ) ? wp_strip_all_tags( $content ) : $content;
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Keep an unsupported block from rendering in forum content.
+	 *
+	 * ::limit_blocks() guards the stored string, which later filters can still change; this
+	 * guards the parsed block itself, at every depth and before its callback runs.
+	 *
+	 * @param string|null $pre_render   Pre-rendered content, or null to render the block.
+	 * @param array       $parsed_block The block about to be rendered.
+	 * @return string|null Empty string to drop the block, otherwise $pre_render.
+	 */
+	public function block_pre_render( $pre_render, $parsed_block ) {
+		if ( null !== $pre_render || empty( $parsed_block['blockName'] ) ) {
+			return $pre_render;
+		}
+
+		foreach ( [ 'topic', 'reply', 'forum' ] as $type ) {
+			if ( ! doing_filter( "bbp_get_{$type}_content" ) ) {
+				continue;
+			}
+
+			return in_array( $parsed_block['blockName'], $this->supported_blocks(), true ) ? $pre_render : '';
+		}
+
+		return $pre_render;
 	}
 
 	/**

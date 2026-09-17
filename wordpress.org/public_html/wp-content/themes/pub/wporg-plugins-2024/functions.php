@@ -9,6 +9,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
@@ -109,9 +110,10 @@ function scripts() {
 		if ( $post && current_user_can( 'plugin_admin_edit', $post ) ) {
 			wp_enqueue_script( 'wporg-plugins-categorization', get_stylesheet_directory_uri() . '/js/section-categorization.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-categorization.js' ), true );
 			wp_localize_script( 'wporg-plugins-categorization', 'categorizationOptions', [
-				'restUrl'    => get_rest_url(),
-				'restNonce'  => wp_create_nonce( 'wp_rest' ),
-				'pluginSlug' => $post->post_name,
+				'restUrl'     => get_rest_url(),
+				'restNonce'   => wp_create_nonce( 'wp_rest' ),
+				'actionNonce' => Base::action_nonce( 'save_categorization', $post->post_name ),
+				'pluginSlug'  => $post->post_name,
 			] );
 		}
 	}

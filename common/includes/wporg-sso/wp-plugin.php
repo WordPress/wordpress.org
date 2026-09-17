@@ -70,6 +70,8 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			parent::__construct();
 
 			if ( $this->has_host() ) {
+				wp_cache_add_global_groups( self::REMOTE_TOKEN_CACHE_GROUP );
+
 				add_action( 'init', array( $this, 'redirect_all_login_or_signup_to_sso' ) );
 				// De-hooking the password change notification, too high volume on wp.org, for no admin value.
 				remove_action( 'after_password_reset', 'wp_password_change_notification' );
@@ -333,14 +335,22 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						$redirect_to_sso_login = add_query_arg( $_GET, $redirect_to_sso_login );
 					}
 
+					// The ticket is host-only, so issue one only where the hand-off returns.
+					if (
+						! $this->_is_wordpress_org_host( $this->host ) &&
+						$this->_normalize_token_host( (string) wp_parse_url( $redirect_req, PHP_URL_HOST ) ) === $this->_normalize_token_host( $this->host )
+					) {
+						$redirect_req = add_query_arg( 'sso_bounce', $this->_issue_bounce_ticket(), $redirect_req );
+					}
+
 					// Pay extra attention to the post-process redirect_to
 					$redirect_to_sso_login = add_query_arg( 'redirect_to', urlencode( $redirect_req ), $redirect_to_sso_login );
-					if ( ! preg_match( '!wordpress\.org$!', $this->host ) ) {
+					if ( ! $this->_is_wordpress_org_host( $this->host ) ) {
 						$redirect_to_sso_login = add_query_arg( 'from', $this->host, $redirect_to_sso_login );
 					}
 
-					// And actually redirect to the SSO login
-					$this->_safe_redirect( $redirect_to_sso_login, 301 );
+					// 302, not 301: the target names a ticket that belongs to this browser and this login only.
+					$this->_safe_redirect( $redirect_to_sso_login, 302 );
 
 				} else {
 					// Otherwise, filter the login_url to point to the SSO
@@ -635,11 +645,23 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return;
 			}
 
+			$bounce       = $this->_current_bounce_fingerprint();
+			$landing_url  = $this->_remote_login_landing_url();
 			$remote_token = sanitize_text_field( wp_unslash( $_GET['sso_token'] ) );
-			$remote_token = $this->_validate_remote_token( $remote_token );
+			$remote_token = $this->_validate_remote_token( $remote_token, $bounce );
 
-			// Log the user in if successful.
-			if ( $remote_token && $remote_token['valid'] && $remote_token['user'] ) {
+			/*
+			 * Both claimed before anyone is logged in, so hand-offs racing for one ticket
+			 * settle on one; the token first, so failing it leaves the ticket for its own.
+			 */
+			if (
+				$bounce &&
+				$remote_token &&
+				$remote_token['valid'] &&
+				$remote_token['user'] &&
+				$this->_claim_remote_token( $remote_token['sso_hash'] ) &&
+				$this->_claim_bounce_fingerprint( $bounce )
+			) {
 				// Disable stream logging of this "login".
 				add_filter( 'wp_stream_log_data', '__return_false' );
 
@@ -647,16 +669,27 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				wp_set_auth_cookie( $remote_token['user']->ID, (bool) $remote_token['remember_me'], true, $remote_token['session_token'] );
 
 				remove_filter( 'wp_stream_log_data', '__return_false' );
+			} else {
+				$this->_maybe_restart_remote_login( $remote_token, $landing_url, $bounce );
 			}
 
-			if ( isset( $_GET['redirect_to'] ) ) {
-				$redirect_to = isset( $_GET['redirect_to'] ) && is_string( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
+			$this->_safe_redirect( $landing_url );
+			exit;
+		}
+
+		/**
+		 * Where a remote-login request lands once its token has been dealt with.
+		 *
+		 * @return string The URL to redirect to.
+		 */
+		protected function _remote_login_landing_url() {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- No nonce is possible cross-domain; is_string() keeps `redirect_to[]=` from reaching str_contains() as an array.
+			if ( isset( $_GET['redirect_to'] ) && is_string( $_GET['redirect_to'] ) ) {
+				$redirect_to = esc_url_raw( wp_unslash( $_GET['redirect_to'] ) );
 			} else {
-				// Generate the current url based on the current hostname and request uri.
 				$redirect_to = set_url_scheme( 'http://' . $this->host . ( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) ) );
 
-				// Remove the sso_token parameter, as we've now used it.
-				$redirect_to = remove_query_arg( 'sso_token', $redirect_to );
+				$redirect_to = remove_query_arg( array( 'sso_token', 'sso_bounce', 'sso_retry' ), $redirect_to );
 			}
 
 			// If we're going to land on a login page, go back home to avoid a potential endless loop.
@@ -664,8 +697,51 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				$redirect_to = home_url( '/' );
 			}
 
-			$this->_safe_redirect( $redirect_to );
-			exit;
+			return $redirect_to;
+		}
+
+		/**
+		 * Asks the SSO host for a hand-off token bound to this browser.
+		 *
+		 * A token can legitimately arrive before the browser holds a ticket; asking
+		 * again mints one it can redeem. Once only, and whatever user it names.
+		 *
+		 * @param array  $remote_token The token as validated.
+		 * @param string $destination  Where the hand-off was headed.
+		 * @param string $bounce       Fingerprint of the bounce ticket this browser holds.
+		 * @return void Redirects and exits when the hand-off can be restarted.
+		 */
+		protected function _maybe_restart_remote_login( $remote_token, $destination, $bounce = '' ) {
+			if (
+				$this->_is_retry_attempt() ||
+				( $bounce && ! empty( $remote_token['valid'] ) ) ||
+				// Keyed on the token, not the ticket redeeming spends, so a replay still lands.
+				( ! empty( $remote_token['sso_hash'] ) && $this->_remote_token_is_spent( $remote_token['sso_hash'] ) ) ||
+				empty( $remote_token['expiration_valid'] ) ||
+				// The ticket is host-only, so a restart only helps where the hand-off returns.
+				$this->_normalize_token_host( (string) wp_parse_url( $destination, PHP_URL_HOST ) ) !== $this->_normalize_token_host( $this->host ) ||
+				$this->_is_wordpress_org_host( $this->host )
+			) {
+				return;
+			}
+
+			$destination = add_query_arg(
+				array(
+					'sso_bounce' => $this->_issue_bounce_ticket(),
+					'sso_retry'  => 1,
+				),
+				$destination
+			);
+
+			$this->_safe_redirect(
+				add_query_arg(
+					array(
+						'from'        => $this->host,
+						'redirect_to' => rawurlencode( $destination ),
+					),
+					$this->sso_login_url
+				)
+			);
 		}
 
 		public function maybe_add_remote_login_bounce_to_post_login_url( $redirect, $requested, $user ) {
@@ -685,9 +761,20 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// If it's on a different _supported_ host, bounce through the remote-login.
 			$redirect_host = parse_url( $redirect, PHP_URL_HOST );
 
-			if ( $user && $this->_is_valid_targeted_domain( $redirect_host ) && ! preg_match( '!wordpress.org$!i', $redirect_host ) ) {
-				$redirect  = set_url_scheme( $redirect, 'https' );
-				$sso_token = $this->_generate_remote_token( $user, $redirect_host );
+			// Never hand off to the SSO host itself; it set the cookie the user already holds.
+			if (
+				$user &&
+				$this->_normalize_token_host( $redirect_host ) !== $this->_normalize_token_host( $this->sso_host ) &&
+				$this->_is_valid_targeted_domain( $redirect_host ) &&
+				! $this->_is_wordpress_org_host( $redirect_host )
+			) {
+				$redirect = set_url_scheme( $redirect, 'https' );
+
+				// Sign the fingerprint the destination sent, then drop it: it compares against its own cookie.
+				$bounce   = $this->_bounce_from_url( $redirect );
+				$redirect = remove_query_arg( 'sso_bounce', $redirect );
+
+				$sso_token = $this->_generate_remote_token( $user, $redirect_host, $bounce );
 				$redirect  = add_query_arg( 'sso_token', urlencode( $sso_token ), $redirect );
 			}
 
@@ -712,18 +799,22 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 				return;
 			}
 
-			// If the session noted in the remote-logout is different from current, destroy that session first.
-			$current_token = wp_get_session_token();
-			if (
-				$remote_token['session_token'] &&
-				wp_get_session_token() !== $remote_token['session_token']
-			) {
-				$manager = WP_Session_Tokens::get_instance( $remote_token['user']->ID );
-				$manager->destroy( $remote_token['session_token'] );
-			}
+			// A spent token still lands where the logout was headed; the session is long gone.
+			if ( $this->_claim_remote_token( $remote_token['sso_hash'] ) ) {
+				// If the session noted in the remote-logout is different from current, destroy that session first.
+				if (
+					$remote_token['session_token'] &&
+					wp_get_session_token() !== $remote_token['session_token']
+				) {
+					$manager = WP_Session_Tokens::get_instance( $remote_token['user']->ID );
+					$manager->destroy( $remote_token['session_token'] );
+				}
 
-			// Perform the logout. This will destroy the *current* session, logging the user out of all sites.
-			wp_logout();
+				// The token is the only authority here, so it ends only the session of the account that asked.
+				if ( get_current_user_id() === $remote_token['user']->ID ) {
+					wp_logout();
+				}
+			}
 
 			// Default to the logout confirmation screen, or back to the source site if possible.
 			$redirect_to = $this->sso_host_url . '/loggedout';
@@ -742,22 +833,41 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		}
 
 		/**
-		 * Normalize a host for use in a remote token.
+		 * Claims a remote token for single use.
 		 *
-		 * Comparisons are case-insensitive and ignore the port, matching how the
-		 * rest of the SSO code treats hostnames.
-		 *
-		 * @param string $host A hostname, possibly with a port.
-		 * @return string The normalized hostname.
+		 * @param string $sso_hash The token's validated signature, which is its canonical identity.
+		 * @return bool False if the token has already been redeemed, true otherwise.
 		 */
-		protected function _normalize_token_host( $host ) {
-			$host = strtolower( (string) $host );
+		protected function _claim_remote_token( $sso_hash ) {
+			$ttl = self::REMOTE_TOKEN_TIMEOUT + self::REMOTE_TOKEN_CLOCK_SKEW;
 
-			if ( false !== strpos( $host, ':' ) ) {
-				$host = strstr( $host, ':', true );
+			// add() rather than get()/set(): the check and the write need to be atomic.
+			if ( wp_cache_add( hash( 'sha256', $sso_hash ), 1, self::REMOTE_TOKEN_CACHE_GROUP, $ttl ) ) {
+				return true;
 			}
 
-			return $host;
+			// add() also fails when the cache is unreachable, which isn't the same as the token being spent.
+			return ! $this->_remote_token_is_spent( $sso_hash );
+		}
+
+		/**
+		 * Whether a remote token has already been redeemed.
+		 *
+		 * @param string $sso_hash The signature the token carries.
+		 * @return bool False when the token is unspent, or the cache cannot say.
+		 */
+		protected function _remote_token_is_spent( $sso_hash ) {
+			return false !== wp_cache_get( hash( 'sha256', $sso_hash ), self::REMOTE_TOKEN_CACHE_GROUP );
+		}
+
+		/**
+		 * Whether this hand-off has already been restarted once.
+		 *
+		 * @return bool
+		 */
+		protected function _is_retry_attempt() {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A cross-domain hand-off cannot carry a nonce; this only marks a retry.
+			return ! empty( $_GET['sso_retry'] );
 		}
 
 		/**
@@ -766,9 +876,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 * @param WP_User $user        The User for the token.
 		 * @param string  $target_host The host the token is issued for. The token is
 		 *                             only accepted back on this same host.
+		 * @param string  $bounce      Fingerprint of the bounce ticket the destination gave
+		 *                             the browser, which has to still hold it to redeem.
 		 * @return string The SSO token.
 		 */
-		protected function _generate_remote_token( $user, $target_host = '' ) {
+		protected function _generate_remote_token( $user, $target_host = '', $bounce = '' ) {
 			// Use a super-short timeout for the token. It's only going to be used once.
 			$valid_until = time() + self::REMOTE_TOKEN_TIMEOUT;
 
@@ -778,18 +890,39 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			 */
 			$auth_cookie_parts = wp_parse_auth_cookie( '', 'logged_in' );
 			$remember_me       = ! empty( $_POST['rememberme'] ) || ( $auth_cookie_parts && $auth_cookie_parts['expiration'] >= ( time() + ( 2 * DAY_IN_SECONDS ) ) );
-			$session_token     = wp_get_session_token();
 
-			$hash        = $this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token, $target_host );
-			$sso_token   = $user->ID . '|' . $hash . '|' . $valid_until . '|' . $remember_me . '|' . $session_token;
+			/*
+			 * Keeps the destination on the session the login created, so revoking that
+			 * session reaches it. A fresh login names it only in the response.
+			 *
+			 * @see https://core.trac.wordpress.org/ticket/61874
+			 */
+			$session_token = wp_get_session_token();
+
+			if ( ! $session_token && (int) ( $this->last_auth_cookie['user_id'] ?? 0 ) === (int) $user->ID ) {
+				$session_token = $this->last_auth_cookie['token'] ?? '';
+			}
+
+			$hash      = $this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token, $target_host, $bounce );
+			$sso_token = $user->ID . '|' . $hash . '|' . $valid_until . '|' . $remember_me . '|' . $session_token;
 
 			return $sso_token;
 		}
 
 		/**
 		 * Generate a hash for remote-login for non-wordpress.org domains
+		 *
+		 * @param WP_User $user          The user the token is for.
+		 * @param int     $valid_until   Timestamp the token lapses at.
+		 * @param bool    $remember_me   Whether the login should outlive the session.
+		 * @param string  $session_token The session the token belongs to.
+		 * @param string  $target_host   The host the token may be spent on.
+		 * @param string  $bounce        Fingerprint of the bounce ticket the browser holds,
+		 *                               read from the `redirect_to` when minting and from the
+		 *                               destination's cookie when redeeming.
+		 * @return string The signature.
 		 */
-		protected function _generate_remote_token_hash( $user, $valid_until, $remember_me = false, $session_token = '', $target_host = '' ) {
+		protected function _generate_remote_token_hash( $user, $valid_until, $remember_me = false, $session_token = '', $target_host = '', $bounce = '' ) {
 			/*
 			 * Scope the token to the destination's registrable domain (wordcamp.org,
 			 * bbpress.org, ...) rather than the exact host, so it stays valid across
@@ -800,19 +933,139 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			// re-use the same frag that Auth cookies use to invalidate sessions.
 			$pass_frag = substr( $user->user_pass, 8, 4 );
-			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until . '|' . $session_token . '|' . $target_host, 'wporg_sso' );
-			$hash      = hash_hmac( 'sha256', $user->user_login . '|' . $valid_until . '|' . (int) $remember_me . '|' . $session_token . '|' . $target_host, $key );
+			$key       = wp_hash( $user->user_login . '|' . $pass_frag . '|' . $valid_until . '|' . $session_token . '|' . $target_host . '|' . $bounce, 'wporg_sso' );
+			$hash      = hash_hmac( 'sha256', $user->user_login . '|' . $valid_until . '|' . (int) $remember_me . '|' . $session_token . '|' . $target_host . '|' . $bounce, $key );
 
 			return $hash;
 		}
 
 		/**
+		 * The fingerprint a bounce ticket is known by outside the browser holding it.
+		 *
+		 * @param string $ticket The ticket to fingerprint.
+		 * @return string The fingerprint, or an empty string when there is no ticket.
+		 */
+		protected function _bounce_fingerprint( $ticket ) {
+			return $ticket ? hash( 'sha256', $ticket ) : '';
+		}
+
+		/**
+		 * The bounce ticket fingerprint a redirect target carries, if any.
+		 *
+		 * Anything else reads as none, so only a fingerprint ever reaches a signature.
+		 *
+		 * @param string $url The redirect target to read.
+		 * @return string The fingerprint, or an empty string when there is none.
+		 */
+		protected function _bounce_from_url( $url ) {
+			parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $args );
+
+			$bounce = $args['sso_bounce'] ?? '';
+
+			return ( is_string( $bounce ) && preg_match( '/^[a-f0-9]{64}$/', $bounce ) ) ? $bounce : '';
+		}
+
+		/**
+		 * The fingerprint of the bounce ticket the current request carries.
+		 *
+		 * Whether the ticket is still good is the claim's business, so that it stays
+		 * the one read of the key, taken after the write that decides it.
+		 *
+		 * @return string Empty when the browser holds no ticket.
+		 */
+		protected function _current_bounce_fingerprint() {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Hashed below; never stored, compared, or output as-is.
+			$ticket = wp_unslash( $_COOKIE[ self::REMOTE_BOUNCE_COOKIE ] ?? '' );
+
+			return is_string( $ticket ) ? $this->_bounce_fingerprint( $ticket ) : '';
+		}
+
+		/**
+		 * Writes the bounce ticket cookie.
+		 *
+		 * Its own method so tests can read back what was sent; `setcookie()` only
+		 * emits a header, which is nothing at all under CLI.
+		 *
+		 * @param string $ticket  The ticket to store.
+		 * @param array  $options Attributes for `setcookie()`.
+		 */
+		protected function _set_bounce_cookie( $ticket, $options ) {
+			setcookie( self::REMOTE_BOUNCE_COOKIE, $ticket, $options );
+		}
+
+		/**
+		 * Claims a bounce ticket for the one hand-off it answers.
+		 *
+		 * Outlives the cookie, so a ticket can never come back unspent. Prefixed to
+		 * keep the record clear of the token signatures in the same group.
+		 *
+		 * @param string $bounce The fingerprint to claim.
+		 * @return bool False if the ticket has already answered a hand-off.
+		 */
+		protected function _claim_bounce_fingerprint( $bounce ) {
+			if ( ! $bounce ) {
+				return false;
+			}
+
+			$ttl = self::REMOTE_BOUNCE_TIMEOUT + self::REMOTE_TOKEN_CLOCK_SKEW;
+
+			// add() rather than get()/set(): two hand-offs can race for one ticket.
+			if ( wp_cache_add( 'bounce_' . $bounce, 1, self::REMOTE_TOKEN_CACHE_GROUP, $ttl ) ) {
+				return true;
+			}
+
+			// add() also fails when the cache is unreachable, which isn't the same as the ticket being spent.
+			return ! $this->_bounce_is_spent( $bounce );
+		}
+
+		/**
+		 * Whether a bounce ticket has already answered a hand-off.
+		 *
+		 * @param string $bounce The fingerprint to check.
+		 * @return bool False when the ticket is unspent, or the cache cannot say.
+		 */
+		protected function _bounce_is_spent( $bounce ) {
+			return false !== wp_cache_get( 'bounce_' . $bounce, self::REMOTE_TOKEN_CACHE_GROUP );
+		}
+
+		/**
+		 * Gives this browser a bounce ticket for a login about to start.
+		 *
+		 * `__Host-` requires Secure and a root path with no `Domain`; Lax because the
+		 * token returns on a top-level navigation. Rotated so that two hand-offs a
+		 * second apart differ, and lapsing so none outlives its spent record.
+		 *
+		 * @return string The ticket's fingerprint, to hand to the SSO host.
+		 */
+		protected function _issue_bounce_ticket() {
+			$ticket = wp_generate_password( 32, false );
+
+			$this->_set_bounce_cookie(
+				$ticket,
+				array(
+					'expires'  => time() + self::REMOTE_BOUNCE_TIMEOUT,
+					'path'     => '/',
+					'secure'   => true,
+					'httponly' => true,
+					'samesite' => 'Lax',
+				)
+			);
+
+			// setcookie() only writes a header, so record the ticket for the rest of this request.
+			$_COOKIE[ self::REMOTE_BOUNCE_COOKIE ] = $ticket;
+
+			return $this->_bounce_fingerprint( $ticket );
+		}
+
+		/**
 		 * Validates a SSO token is valid.
 		 *
-		 * @param string $token The raw token from the URL, wp_unslash() it please.
+		 * @param string $sso_token The raw token from the URL, wp_unslash() it please.
+		 * @param string $bounce    Fingerprint of the bounce ticket this browser holds.
+		 *                          Empty for the logout hand-off, which is not ticketed.
 		 * @return array If the token was valid.
 		 */
-		protected function _validate_remote_token( $sso_token ) {
+		protected function _validate_remote_token( $sso_token, $bounce = '' ) {
 			if ( ! is_string( $sso_token ) || 4 !== substr_count( $sso_token, '|' ) ) {
 				wp_die( 'Invalid token.' );
 			}
@@ -820,17 +1073,16 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			list( $user_id, $sso_hash, $valid_until, $remember_me, $session_token ) = explode( '|', $sso_token, 5 );
 
 			$expiration_valid = (
-				// +/- 5s on a 5s timeout.
-				$valid_until >= ( time() - self::REMOTE_TOKEN_TIMEOUT ) &&
-				$valid_until <= ( time() + ( self::REMOTE_TOKEN_TIMEOUT * 2 ) )
+				$valid_until >= time() &&
+				$valid_until <= ( time() + self::REMOTE_TOKEN_TIMEOUT + self::REMOTE_TOKEN_CLOCK_SKEW )
 			);
 
 			$valid_hash = false;
 			$user       = get_user_by( 'id', $user_id );
 			if ( $user ) {
 				$valid_hash = hash_equals(
-					// Validate against the current host's family (see _generate_remote_token_hash()).
-					$this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token, $this->host ),
+					// Validate against the current host's family and this browser's ticket (see _generate_remote_token_hash()).
+					$this->_generate_remote_token_hash( $user, $valid_until, $remember_me, $session_token, $this->host, $bounce ),
 					$sso_hash
 				);
 			}
@@ -838,22 +1090,16 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Validate that the remote login token is valid.
 			$valid = ( $expiration_valid && $valid_hash );
 
-			/*
-			 * Temporary rollout check: log tokens that are well-formed and unexpired
-			 * but don't validate for the current host's family, so we can confirm the
-			 * scoping above isn't affecting legitimate sign-ins. Deduped per host
-			 * (10 min) so it can't be flooded, and behind a filter so it's easy to turn
-			 * off. Under normal traffic this logs nothing. Remove after rollout.
-			 */
 			/**
 			 * Filters whether to log remote tokens that fail the host scope check.
 			 *
-			 * Temporary rollout aid; see the block above in
-			 * WP_WPOrg_SSO::_validate_remote_token() where the hook fires.
+			 * Temporary rollout aid; remove with the logging below. Defaults to a restart
+			 * by a browser holding a ticket, the only case where a reject is unexpected;
+			 * the retry marker alone is request-supplied. Filter to true to log them all.
 			 *
-			 * @param bool $log_rejects Whether to log. Default true.
+			 * @param bool $log_rejects Whether to log. Default true on a ticketed restart.
 			 */
-			$log_rejects = apply_filters( 'wporg_sso_log_binding_rejects', true );
+			$log_rejects = apply_filters( 'wporg_sso_log_binding_rejects', $bounce && $this->_is_retry_attempt() );
 
 			if ( ! $valid && $expiration_valid && $user && ! $valid_hash && $log_rejects ) {
 				$registrable = $this->_get_targetted_host( $this->_normalize_token_host( $this->host ) );
@@ -878,9 +1124,11 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			return compact(
 				'valid',
+				'expiration_valid',
 				'user',
 				'remember_me',
-				'session_token'
+				'session_token',
+				'sso_hash'
 			);
 		}
 

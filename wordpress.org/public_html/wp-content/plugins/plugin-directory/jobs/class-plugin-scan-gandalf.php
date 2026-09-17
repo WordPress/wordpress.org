@@ -477,7 +477,8 @@ class Plugin_Scan_Gandalf {
 		$already_notified[ $record['verdict_hash'] ] = time();
 		update_post_meta( $plugin->ID, self::NOTIFIED_META_KEY, $already_notified );
 
-		if ( ! defined( 'PLUGIN_REVIEW_ALERT_SLACK_CHANNEL' ) || ! function_exists( 'slack_dm' ) ) {
+		$channels = self::alert_channels( $record );
+		if ( ! $channels || ! function_exists( 'slack_dm' ) ) {
 			return;
 		}
 
@@ -617,16 +618,39 @@ class Plugin_Scan_Gandalf {
 			$fallback .= sprintf( ' (max risk %s)', number_format( (float) $record['max_risk_score'], 1 ) );
 		}
 
-		slack_dm(
-			[
-				'text'        => $fallback,
-				'username'    => 'Gandalf',
-				'blocks'      => $blocks,
-				'attachments' => $attachments,
-			],
-			PLUGIN_REVIEW_ALERT_SLACK_CHANNEL,
-			true
-		);
+		$payload = [
+			'text'        => $fallback,
+			'username'    => 'Gandalf',
+			'blocks'      => $blocks,
+			'attachments' => $attachments,
+		];
+
+		foreach ( $channels as $channel ) {
+			slack_dm( $payload, $channel, true );
+		}
+	}
+
+	/**
+	 * Return the Slack channels a completed scan is announced in.
+	 *
+	 * Blocked releases go to a dedicated channel as well, so the block log
+	 * stays readable next to the general findings feed.
+	 *
+	 * @param array $record The completed scan record.
+	 * @return array The channels to notify.
+	 */
+	protected static function alert_channels( $record ) {
+		$channels = [];
+
+		if ( defined( 'PLUGIN_REVIEW_ALERT_SLACK_CHANNEL' ) && PLUGIN_REVIEW_ALERT_SLACK_CHANNEL ) {
+			$channels[] = PLUGIN_REVIEW_ALERT_SLACK_CHANNEL;
+		}
+
+		if ( 'blocked' === $record['action'] && defined( 'PLUGIN_REVIEW_BLOCKED_SLACK_CHANNEL' ) && PLUGIN_REVIEW_BLOCKED_SLACK_CHANNEL ) {
+			$channels[] = PLUGIN_REVIEW_BLOCKED_SLACK_CHANNEL;
+		}
+
+		return array_unique( $channels );
 	}
 
 	/**

@@ -7,6 +7,8 @@
 
 declare( strict_types = 1 );
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
 
@@ -15,6 +17,7 @@ use WordPressdotorg\Plugin_Directory\CLI\Import;
  *
  * @group import
  */
+#[Group( 'import' )]
 class Import_Version_Is_Path_Safe_Test extends TestCase {
 
 	/**
@@ -25,6 +28,7 @@ class Import_Version_Is_Path_Safe_Test extends TestCase {
 	 * @param mixed $version The Version header value under test.
 	 * @return void
 	 */
+	#[DataProvider( 'safe_provider' )]
 	public function test_safe( $version ): void {
 		$this->assertTrue(
 			Import::version_is_path_safe( $version ),
@@ -40,6 +44,7 @@ class Import_Version_Is_Path_Safe_Test extends TestCase {
 	 * @param mixed $version The Version header value under test.
 	 * @return void
 	 */
+	#[DataProvider( 'unsafe_provider' )]
 	public function test_unsafe( $version ): void {
 		$this->assertFalse(
 			Import::version_is_path_safe( $version ),

@@ -18,18 +18,18 @@ class Moderators {
 		// Scripts and styles.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
-		// Allow keymasters and moderators to edit users.
-		add_filter( 'bbp_map_primary_meta_caps',        array( $this, 'map_meta_caps' ), 10, 4 );
-		add_action( 'bbp_post_request',                 array( $this, 'edit_user_handler' ), 0 );
-
-		// Strip credential and site-role fields moderators must not set. bbPress is at 1.
-		add_action( 'bbp_post_request', array( $this, 'restrict_profile_edit_fields' ), 0 );
-
-		// Allow moderators to manage user roles.
-		add_filter( 'bbp_get_caps_for_role',            array( $this, 'bbp_get_caps_for_role' ), 10, 2 );
-
-		// Limit which roles a moderator can assign to a user. Before bbp_profile_update_role().
-		add_action( 'bbp_profile_update',               array( $this, 'bbp_profile_update' ), 1 );
+		// Use bbPress's field-level Super Moderator policy when available.
+		if ( function_exists( 'bbp_current_user_can_edit_user_field' ) ) {
+			add_filter( 'bbp_allow_super_mods', array( $this, 'allow_super_mods' ) );
+			add_filter( 'bbp_map_primary_meta_caps', array( $this, 'map_profile_view_caps' ), 10, 4 );
+		} else {
+			// Preserve the existing policy while older bbPress versions are deployed.
+			add_filter( 'bbp_map_primary_meta_caps', array( $this, 'map_meta_caps' ), 10, 4 );
+			add_action( 'bbp_post_request',          array( $this, 'edit_user_handler' ), 0 );
+			add_action( 'bbp_post_request',          array( $this, 'restrict_profile_edit_fields' ), 0 );
+			add_filter( 'bbp_get_caps_for_role',     array( $this, 'bbp_get_caps_for_role' ), 10, 2 );
+			add_action( 'bbp_profile_update',        array( $this, 'bbp_profile_update' ), 1 );
+		}
 
 		// Append 'view=all' to forum, topic, and reply URLs in moderator views.
 		add_filter( 'bbp_get_forum_permalink',          array( $this, 'add_view_all' ) );
@@ -177,6 +177,77 @@ class Moderators {
 				filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'css/styles-moderators.css' )
 			);
 		}
+	}
+
+	/**
+	 * Enable bbPress's Super Moderator policy on the main support forums.
+	 *
+	 * On front-end bbPress profiles, moderators may edit profile fields and email
+	 * addresses, and assign non-staff forum roles. Their access excludes passwords,
+	 * WordPress roles, staff forum roles, and protected users. Keymasters retain
+	 * broader front-end controls, while wp-admin keeps native WordPress permissions.
+	 * Core bbPress filters allow individual parts of this policy to be adjusted.
+	 *
+	 * Locale forums continue to honor their own bbPress setting.
+	 *
+	 * @param bool $allow Whether Super Moderators are enabled.
+	 * @return bool
+	 */
+	public function allow_super_mods( $allow ) {
+		if ( Plugin::get_instance()->is_main_forums ) {
+			$allow = true;
+		}
+
+		return $allow;
+	}
+
+	/**
+	 * Extend the Super Moderator policy to the profile a moderator is looking at.
+	 *
+	 * Core grants the policy's capabilities only while the profile editor itself is open,
+	 * so a profile page cannot ask whether to link to it. Answer the same question on the
+	 * surrounding profile, under the same conditions bbPress applies. Remove once bbPress
+	 * widens its own scope.
+	 *
+	 * @see https://bbpress.trac.wordpress.org/ticket/3685
+	 *
+	 * @param array  $caps            Capabilities bbPress mapped the request to.
+	 * @param string $cap             Capability name.
+	 * @param int    $current_user_id Current user ID.
+	 * @param array  $args            Capability context, typically the object ID.
+	 * @return array Filtered capabilities.
+	 */
+	public function map_profile_view_caps( $caps, $cap, $current_user_id, $args ) {
+		if ( ! in_array( $cap, array( 'edit_user', 'promote_user' ), true ) ) {
+			return $caps;
+		}
+
+		// Only on a front-end profile; bbPress covers the editor, wp-admin stays native.
+		if ( is_admin() || bbp_is_single_user_edit() || ! bbp_is_single_user() ) {
+			return $caps;
+		}
+
+		if ( ! bbp_allow_super_mods() ) {
+			return $caps;
+		}
+
+		$user_id = ! empty( $args[0] ) ? (int) $args[0] : bbp_get_displayed_user_id();
+
+		// Users can always edit themselves, so only map for others.
+		if ( empty( $user_id ) || $user_id === $current_user_id ) {
+			return $caps;
+		}
+
+		// Super moderators cannot edit keymasters or site administrators.
+		if (
+			bbp_is_user_keymaster( $user_id )
+			|| user_can( $user_id, 'manage_options' )
+			|| is_super_admin( $user_id )
+		) {
+			return $caps;
+		}
+
+		return array( 'moderate' );
 	}
 
 	/**

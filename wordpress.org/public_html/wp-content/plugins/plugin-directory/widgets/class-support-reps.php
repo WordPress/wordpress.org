@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
 
+use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -39,6 +40,8 @@ class Support_Reps extends \WP_Widget {
 			wp_localize_script( 'wporg-plugins-support-reps', 'supportRepsWidget', array(
 				'restUrl'             => get_rest_url(),
 				'restNonce'           => wp_create_nonce( 'wp_rest' ),
+				'addNonce'            => Base::action_nonce( 'add_support_rep', $post->post_name ),
+				'removeNonce'         => Base::action_nonce( 'remove_support_rep', $post->post_name ),
 				'pluginSlug'          => $post->post_name,
 				'removeSupportRepAYS' => __( 'Are you sure you want to remove %s as a support rep?', 'wporg-plugins' ),
 			) );

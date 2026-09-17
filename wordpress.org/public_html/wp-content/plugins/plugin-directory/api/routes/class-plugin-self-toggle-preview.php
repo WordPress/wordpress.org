@@ -22,11 +22,9 @@ class Plugin_Self_Toggle_Preview extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 				],
 			],
-			'permission_callback' => function( $request ) {
-				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-
-				return current_user_can( 'plugin_toggle_public_preview', $plugin );
-			},
+			'permission_callback' => [ $this, 'permission_check_action' ],
+			'wporg_capability'    => 'plugin_toggle_public_preview',
+			'wporg_action'        => 'self_toggle_preview',
 		] );
 
 		add_filter( 'rest_pre_echo_response', [ $this, 'override_cookie_expired_message' ], 10, 3 );
@@ -42,7 +40,7 @@ class Plugin_Self_Toggle_Preview extends Base {
 		) {
 			if ( 'rest_cookie_invalid_nonce' == $result['code'] ) {
 				wp_die( 'The link you have followed has expired.' );
-			} elseif ( 'rest_forbidden' == $result['code'] ) {
+			} elseif ( 'rest_forbidden' === $result['code'] || 'rest_cross_origin_write' === $result['code'] ) {
 				wp_die( "Sorry, You can't do that." );
 			}
 		}

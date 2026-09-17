@@ -5,12 +5,14 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Approved;
 
 /**
  * @group email
  */
+#[Group( 'email' )]
 class Email_Base_Test extends TestCase {
 
 	/**
