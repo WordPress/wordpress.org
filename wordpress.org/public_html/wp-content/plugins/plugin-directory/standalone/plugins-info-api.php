@@ -27,7 +27,7 @@ $format  = 'json'; // json, jsonp, xml, or php
 // phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable -- Usage example; the die() above ends the real request.
 $method  = $_REQUEST['method'] ?? '';
 $request = $_REQUEST['request'] ?? array();
-// phpcs:enable WordPress.Security.ValidatedSanitizedInput
+// phpcs:enable WordPress.Security.ValidatedSanitizedInput, Squiz.PHP.NonExecutableCode.Unreachable
 
 require __DIR__ . '/class-plugins-info-api.php';
 require __DIR__ . '/class-plugins-info-api-request.php';
