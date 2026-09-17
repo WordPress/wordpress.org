@@ -194,15 +194,26 @@ function activate_on_site( int $blog_id, array $plugins ): void {
  * @param int    $blog_id Blog to configure.
  * @param string $title   Site title.
  * @param string $locale  WPLANG value, or '' for the network default.
+ * @param bool   $forums  Whether this site serves forums.
  *
  * @return void
  */
-function configure_site( int $blog_id, string $title, string $locale = '' ): void {
+function configure_site( int $blog_id, string $title, string $locale = '', bool $forums = false ): void {
 	switch_to_blog( $blog_id );
 
 	update_option( 'blogname', $title );
 	update_option( 'WPLANG', $locale );
 	update_option( 'permalink_structure', '/%postname%/' );
+
+	/*
+	 * Production serves the archive from /forums/ but each forum from
+	 * /forum/<slug>/. bbPress only drops the root slug from those child
+	 * permalinks when the root is excluded.
+	 */
+	if ( $forums ) {
+		update_option( '_bbp_include_root', false );
+	}
+
 	flush_rewrite_rules( false );
 
 	restore_current_blog();
@@ -330,14 +341,14 @@ update_site_option( 'allowedthemes', $allowed_themes );
 switch_theme( 'wporg-support-2024' );
 
 \WP_CLI::log( 'Configuring sites...' );
-configure_site( (int) get_current_blog_id(), 'WordPress.org Forums' );
+configure_site( (int) get_current_blog_id(), 'WordPress.org Forums', '', true );
 
 /*
  * A locale forum is a locale forum by two things: IS_ROSETTA_NETWORK, which
  * mocks/../support-env.php defines from WPORG_LOCAL_ROSETTA_BLOGID, and the
  * locale itself. Installing the language pack is left to the developer.
  */
-configure_site( $rosetta_blog, 'Rosetta Forums', 'de_DE' );
+configure_site( $rosetta_blog, 'Rosetta Forums', 'de_DE', true );
 configure_site( $plugins_blog, 'Plugin Directory (forum dependency)' );
 configure_site( $themes_blog, 'Theme Directory (forum dependency)' );
 
