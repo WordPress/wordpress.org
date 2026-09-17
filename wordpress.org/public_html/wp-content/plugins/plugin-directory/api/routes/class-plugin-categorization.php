@@ -19,8 +19,10 @@ class Plugin_Categorization extends Base {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'save_external_repository_url' ],
 				'permission_callback' => function( $request ) {
-					return current_user_can(
+					return $this->permission_check_action(
+						$request,
 						'plugin_admin_edit',
+						'save_categorization',
 						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 					);
 				},
@@ -42,8 +44,10 @@ class Plugin_Categorization extends Base {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'save_external_support_url' ],
 				'permission_callback' => function( $request ) {
-					return current_user_can(
+					return $this->permission_check_action(
+						$request,
 						'plugin_admin_edit',
+						'save_categorization',
 						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 					);
 				},

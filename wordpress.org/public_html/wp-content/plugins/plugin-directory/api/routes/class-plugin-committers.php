@@ -39,8 +39,10 @@ class Plugin_Committers extends Base {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'add_committer' ),
 				'permission_callback' => function( $request ) {
-					return current_user_can(
+					return $this->permission_check_action(
+						$request,
 						'plugin_add_committer',
+						'add_committer',
 						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 					);
 				},
@@ -57,8 +59,10 @@ class Plugin_Committers extends Base {
 			'methods'             => WP_REST_Server::DELETABLE,
 			'callback'            => array( $this, 'revoke_committer' ),
 			'permission_callback' => function( $request ) {
-				return current_user_can(
+				return $this->permission_check_action(
+					$request,
 					'plugin_remove_committer',
+					'remove_committer',
 					Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 				);
 			},

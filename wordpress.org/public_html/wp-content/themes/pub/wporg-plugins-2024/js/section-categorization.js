@@ -33,7 +33,8 @@
 
 		let fieldInput = form.querySelector( 'input[name="' + field_name + '"]' ),
 			button = form.querySelector( '.button-small' )?.classList.add( 'spinner' ),
-			url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/' + form.id + '/?_wpnonce=' + pluginDir.restNonce;
+			url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/' + form.id + '/?_wpnonce=' + pluginDir.restNonce
+				+ '&_wporg_action=' + pluginDir.actionNonce;
 			originalValue = fieldInput.dataset.originalValue ?? '';
 
 		submitButton.disabled = true;

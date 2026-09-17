@@ -25,7 +25,7 @@ class Plugin_Self_Close extends Base {
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-				return current_user_can( 'plugin_self_close', $plugin );
+				return $this->permission_check_action( $request, 'plugin_self_close', 'self_close', $plugin );
 			},
 		] );
 

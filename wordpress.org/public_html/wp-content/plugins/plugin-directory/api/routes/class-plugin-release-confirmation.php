@@ -32,7 +32,12 @@ class Plugin_Release_Confirmation extends Base {
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-				return current_user_can( 'plugin_manage_releases', $plugin );
+				return $this->permission_check_action(
+					$request,
+					'plugin_manage_releases',
+					'enable_release_confirmation',
+					$plugin
+				);
 			},
 		] );
 
@@ -47,7 +52,9 @@ class Plugin_Release_Confirmation extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_tag_callback' ],
 				]
 			],
-			'permission_callback' => [ $this, 'permission_can_access_plugin' ],
+			'permission_callback' => function ( $request ) {
+				return $this->permission_can_access_release( $request, 'confirm_release' );
+			},
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/discard', [
@@ -61,7 +68,9 @@ class Plugin_Release_Confirmation extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_tag_callback' ],
 				]
 			],
-			'permission_callback' => [ $this, 'permission_can_access_plugin' ],
+			'permission_callback' => function ( $request ) {
+				return $this->permission_can_access_release( $request, 'discard_release' );
+			},
 		] );
 
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/release-confirmation/(?P<plugin_tag>[^/]+)/undo-discard', [
@@ -77,7 +86,7 @@ class Plugin_Release_Confirmation extends Base {
 			],
 			'permission_callback' => function( $request ) {
 				if ( current_user_can( 'plugin_review' ) ) {
-					return $this->permission_can_access_plugin( $request );
+					return $this->permission_can_access_release( $request, 'undo_discard_release' );
 				}
 
 				return false;
@@ -108,12 +117,52 @@ class Plugin_Release_Confirmation extends Base {
 	}
 
 	/**
+	 * Validate that the user can manage releases for the given tag, and meant to.
+	 *
+	 * The nonce is bound to the tag as well as the plugin, so one release's link does
+	 * not authorize another's. It runs before the 2FA hand-off in
+	 * {@see Plugin_Release_Confirmation::permission_can_access_plugin()}, which would
+	 * otherwise redirect a request this route goes on to refuse.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @param string           $action  The route action, such as `discard_release`.
+	 * @return bool|\WP_Error True when both hold, false or WP_Error upon failure.
+	 */
+	public function permission_can_access_release( $request, $action ) {
+		if ( ! $this->can_manage_releases( $request ) ) {
+			return false;
+		}
+
+		$verified = $this->verify_action_nonce(
+			$request,
+			$action,
+			$request['plugin_slug'] . ':' . $request['plugin_tag']
+		);
+
+		if ( true !== $verified ) {
+			return $verified;
+		}
+
+		return $this->permission_can_access_plugin( $request );
+	}
+
+	/**
+	 * Whether the current user may manage the requested plugin's releases.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool True if the plugin exists and the user may manage its releases.
+	 */
+	protected function can_manage_releases( $request ) {
+		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+
+		return $plugin && current_user_can( 'plugin_manage_releases', $plugin );
+	}
+
+	/**
 	 * Validate that the user can manage releases for the given plugin.
 	 */
 	public function permission_can_access_plugin( $request ) {
-		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-
-		if ( ! $plugin || ! current_user_can( 'plugin_manage_releases', $plugin ) ) {
+		if ( ! $this->can_manage_releases( $request ) ) {
 			return false;
 		}
 
@@ -129,10 +178,12 @@ class Plugin_Release_Confirmation extends Base {
 
 		// Before we say no, check if the user just needs to validate their 2FA.
 		if ( $status && $status['needs_revalidate'] && 'GET' === $request->get_method() ) {
+			// The route's own nonce has to survive the trip through revalidation.
 			$current_rest_url = add_query_arg(
 				array(
-					'_wpnonce'         => wp_create_nonce( 'wp_rest' ),
-					'_wp_http_referer' => wp_get_referer(),
+					'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+					'_wp_http_referer'       => wp_get_referer(),
+					self::ACTION_NONCE_PARAM => $request->get_param( self::ACTION_NONCE_PARAM ),
 				),
 				get_rest_url( null, $request->get_route() )
 			);

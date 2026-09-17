@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
 
+use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -38,6 +39,8 @@ class Committers extends \WP_Widget {
 			wp_localize_script( 'wporg-plugins-committers', 'committersWidget', array(
 				'restUrl'            => get_rest_url(),
 				'restNonce'          => wp_create_nonce( 'wp_rest' ),
+				'addNonce'           => Base::action_nonce( 'add_committer', $post->post_name ),
+				'removeNonce'        => Base::action_nonce( 'remove_committer', $post->post_name ),
 				'pluginSlug'         => $post->post_name,
 				'removeCommitterAYS' => __( 'Are you sure you want to remove %s as a committer?', 'wporg-plugins' ),
 			) );

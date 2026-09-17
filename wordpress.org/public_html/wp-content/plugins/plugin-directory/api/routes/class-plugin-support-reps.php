@@ -39,8 +39,10 @@ class Plugin_Support_Reps extends Base {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'add_support_rep' ),
 				'permission_callback' => function( $request ) {
-					return current_user_can(
+					return $this->permission_check_action(
+						$request,
 						'plugin_add_support_rep',
+						'add_support_rep',
 						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 					);
 				},
@@ -57,8 +59,10 @@ class Plugin_Support_Reps extends Base {
 			'methods'             => WP_REST_Server::DELETABLE,
 			'callback'            => array( $this, 'remove_support_rep' ),
 			'permission_callback' => function( $request ) {
-				return current_user_can(
+				return $this->permission_check_action(
+					$request,
 					'plugin_remove_support_rep',
+					'remove_support_rep',
 					Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
 				);
 			},

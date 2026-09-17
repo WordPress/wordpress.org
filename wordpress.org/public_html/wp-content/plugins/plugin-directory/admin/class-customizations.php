@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Admin;
 
 use \WordPressdotorg\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\API\Base;
 use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Tools\SVN;
 use \WordPressdotorg\Plugin_Directory\Tools\Helpscout;
@@ -134,7 +135,7 @@ class Customizations {
 	 * @return void.
 	 */
 	public function enqueue_assets( $hook_suffix ) {
-		global $post_type;
+		global $post, $post_type;
 
 		if ( 'plugin' === $post_type ) {
 			switch ( $hook_suffix ) {
@@ -147,6 +148,7 @@ class Customizations {
 						'rejectPluginAYS'      => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
 						'removeCommitterAYS'   => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
 						'removeSupportRepAYS'  => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
+						'uploadNonce'          => Base::action_nonce( 'upload', $post->ID ),
 					) );
 					break;
 

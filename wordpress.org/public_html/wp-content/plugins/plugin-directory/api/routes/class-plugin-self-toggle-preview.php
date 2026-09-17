@@ -25,7 +25,12 @@ class Plugin_Self_Toggle_Preview extends Base {
 			'permission_callback' => function( $request ) {
 				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
 
-				return current_user_can( 'plugin_toggle_public_preview', $plugin );
+				return $this->permission_check_action(
+					$request,
+					'plugin_toggle_public_preview',
+					'self_toggle_preview',
+					$plugin
+				);
 			},
 		] );
 
