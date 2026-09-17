@@ -133,6 +133,8 @@ First start auto-imports `hello-dolly` (plugin) and `twentytwenty` (theme) so th
 
 **Access:** `http://localhost:8888`
 
+**Users:** `admin` / `password` is a GlotPress global administrator, so it can approve translations everywhere and never sees a permission check fail. `translator` / `password` is a plain subscriber with no GlotPress permissions — use it to check what a contributor sees, such as suggestions going to waiting instead of current. The dev login button fills in `admin`, so type the contributor credentials by hand.
+
 **Import a plugin or theme's translations on demand:**
 
 ```bash

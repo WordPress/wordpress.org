@@ -45,6 +45,13 @@ class Plugin_I18n {
 	public static $set_cache = true;
 
 	/**
+	 * Readme parser, held only for its field sanitizer.
+	 *
+	 * @var Readme\Parser|null
+	 */
+	private $readme_parser = null;
+
+	/**
 	 * Fetch the instance of the Plugin_I18n class.
 	 *
 	 * @static
@@ -366,6 +373,11 @@ class Plugin_I18n {
 			return $a_len == $b_len ? 0 : ($a_len > $b_len ? -1 : 1);
 		} );
 
+		$stored = $content;
+
+		// Markers are ours; one arriving in stored content would pick its own substitution site.
+		$content = self::remove_translation_markers( $content );
+
 		// Mark each original for translation
 		foreach ( $originals as $original_id => $original ) {
 			if ( isset( $translations[ $original_id ] ) ) {
@@ -374,9 +386,57 @@ class Plugin_I18n {
 		}
 
 		// Translate the marked originals.
-		$content = $this->translate_marked_gp_originals( $content, $translations, $originals );
+		$translated = $this->translate_marked_gp_originals( $content, $translations, $originals );
 
-		return $content;
+		// Nothing was marked, so the stored value stands as it was.
+		if ( $translated === $content ) {
+			return $stored;
+		}
+
+		return $this->sanitize_translation( $key, $translated );
+	}
+
+	/**
+	 * Strips this class's substitution markers from a value it did not mark.
+	 *
+	 * Leaves a space where each one was. Deleting them instead would close the gap,
+	 * and the text on either side could meet as a marker of its own; a space cannot
+	 * appear in one, so nothing can form across it and a single pass is enough.
+	 *
+	 * @param string $content The content to be searched.
+	 * @return string The content, with no marker syntax of its own left in it.
+	 */
+	public static function remove_translation_markers( $content ) {
+		return preg_replace( '/___TRANSLATION_\d+___/', ' ', $content );
+	}
+
+	/**
+	 * Reduces a translated field to the markup it accepts.
+	 *
+	 * Runs on the assembled field, not on each substituted translation: a
+	 * translation that is harmless alone can still land somewhere its own
+	 * sanitizer cannot see, such as inside an attribute.
+	 *
+	 * @param string $key         The translation key, as passed to {@see Plugin_I18n::translate()}.
+	 * @param string $translation The assembled field, or a single translation.
+	 * @return string The value, reduced to the field's own allow-list.
+	 */
+	public function sanitize_translation( $key, $translation ) {
+		// A block title is stored as the block declared it, so markup is all there is to drop.
+		if ( str_starts_with( $key, 'block_title:' ) ) {
+			return wp_strip_all_tags( $translation );
+		}
+
+		// Encoded because the readme path stores these encoded, and quotes reach attributes.
+		if ( 'title' === $key || 'excerpt' === $key ) {
+			return esc_html( wp_strip_all_tags( $translation ) );
+		}
+
+		if ( ! $this->readme_parser ) {
+			$this->readme_parser = new Readme\Parser( '' );
+		}
+
+		return $this->readme_parser->filter_text( $translation );
 	}
 
 	/**
