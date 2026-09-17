@@ -7,7 +7,6 @@
 
 declare( strict_types = 1 );
 
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 
@@ -18,7 +17,6 @@ use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
  *
  * @group filesystem
  */
-#[Group( 'filesystem' )]
 class Filesystem_Symlink_Test extends TestCase {
 
 	/**

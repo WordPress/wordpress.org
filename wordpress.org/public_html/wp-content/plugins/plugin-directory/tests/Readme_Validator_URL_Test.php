@@ -7,8 +7,6 @@
 
 declare( strict_types = 1 );
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Readme\Validator;
 
@@ -21,7 +19,6 @@ use WordPressdotorg\Plugin_Directory\Readme\Validator;
  *
  * @group readme
  */
-#[Group( 'readme' )]
 class Readme_Validator_URL_Test extends TestCase {
 
 	/**
@@ -101,7 +98,6 @@ class Readme_Validator_URL_Test extends TestCase {
 	 * @param string $url The URL under test.
 	 * @return void
 	 */
-	#[DataProvider( 'allowed_url_provider' )]
 	public function test_allowed_url_is_fetched( string $url ): void {
 		Validator::instance()->validate_url( $url );
 
@@ -150,7 +146,6 @@ class Readme_Validator_URL_Test extends TestCase {
 	 * @param string $body The response body.
 	 * @return void
 	 */
-	#[DataProvider( 'non_200_response_provider' )]
 	public function test_non_200_response_is_reported( int $code, string $body ): void {
 		$respond = function () use ( $code, $body ) {
 			$response                     = self::http_response( $body );
@@ -207,7 +202,6 @@ class Readme_Validator_URL_Test extends TestCase {
 	 * @param string $url The URL under test.
 	 * @return void
 	 */
-	#[DataProvider( 'disallowed_host_provider' )]
 	public function test_disallowed_host_is_not_fetched( string $url ): void {
 		$result = Validator::instance()->validate_url( $url );
 
@@ -223,7 +217,6 @@ class Readme_Validator_URL_Test extends TestCase {
 	 * @param string $url The URL under test.
 	 * @return void
 	 */
-	#[DataProvider( 'disallowed_path_provider' )]
 	public function test_disallowed_path_is_not_fetched( string $url ): void {
 		$result = Validator::instance()->validate_url( $url );
 

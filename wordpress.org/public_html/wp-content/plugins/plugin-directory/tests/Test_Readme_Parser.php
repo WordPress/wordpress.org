@@ -6,7 +6,6 @@
  */
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 
@@ -17,7 +16,6 @@ use WordPressdotorg\Plugin_Directory\Readme\Parser;
  *
  * @group readme-parser
  */
-#[Group( 'readme-parser' )]
 class Test_Readme_Parser extends TestCase {
 
 	/**

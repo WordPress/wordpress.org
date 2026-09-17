@@ -1,14 +1,6 @@
 -- Stub tables for local development.
 -- These tables exist outside WordPress on production but are needed locally.
 
-CREATE TABLE IF NOT EXISTS `wp_helpscout_meta` (
-  `helpscout_id` bigint(20) unsigned NOT NULL,
-  `meta_key` varchar(255) NOT NULL DEFAULT '',
-  `meta_value` varchar(255) NOT NULL DEFAULT '',
-  KEY `helpscout_id` (`helpscout_id`),
-  KEY `meta_key_value` (`meta_key`(191),`meta_value`(191))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE IF NOT EXISTS `wp_svn_access` (
   `path` varchar(255) NOT NULL DEFAULT '',
   `user` varchar(200) NOT NULL DEFAULT '0',

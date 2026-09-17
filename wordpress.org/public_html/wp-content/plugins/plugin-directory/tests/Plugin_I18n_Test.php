@@ -5,14 +5,12 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Plugin_I18n;
 
 /**
  * @group i18n
  */
-#[Group( 'i18n' )]
 class Plugin_I18n_Test extends TestCase {
 
 	/**

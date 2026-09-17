@@ -8,8 +8,6 @@
 
 declare( strict_types = 1 );
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,7 +15,6 @@ use PHPUnit\Framework\TestCase;
  *
  * @group capabilities
  */
-#[Group( 'capabilities' )]
 class Plugin_Read_Permission_Test extends TestCase {
 
 	/**
@@ -198,7 +195,6 @@ class Plugin_Read_Permission_Test extends TestCase {
 	 * @param string $post_status Public plugin status under test.
 	 * @return void
 	 */
-	#[DataProvider( 'data_public_statuses' )]
 	public function test_public_statuses_are_readable( string $post_status ): void {
 		$plugin = $this->create_plugin( $post_status );
 
@@ -227,7 +223,6 @@ class Plugin_Read_Permission_Test extends TestCase {
 	 * @param string $post_status Non-public plugin status under test.
 	 * @return void
 	 */
-	#[DataProvider( 'data_non_public_statuses' )]
 	public function test_non_public_statuses_are_hidden_from_subscribers( string $post_status ): void {
 		$plugin     = $this->create_plugin( $post_status );
 		$subscriber = $this->create_user( 'plainsubscriber' );

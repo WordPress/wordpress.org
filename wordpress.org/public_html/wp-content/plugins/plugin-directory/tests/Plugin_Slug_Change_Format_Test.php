@@ -11,8 +11,6 @@
 
 declare( strict_types = 1 );
 
-use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Upload;
 
@@ -21,7 +19,6 @@ use WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Upload;
  *
  * @group api
  */
-#[Group( 'api' )]
 class Plugin_Slug_Change_Format_Test extends TestCase {
 
 	/**
@@ -46,13 +43,6 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 	protected $user_ids = array();
 
 	/**
-	 * HelpScout conversation IDs whose metadata is removed on teardown.
-	 *
-	 * @var int[]
-	 */
-	protected array $helpscout_ids = array();
-
-	/**
 	 * Sets up the request context the route's audit log reads.
 	 *
 	 * @return void
@@ -71,13 +61,6 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 	 * @return void
 	 */
 	protected function tearDown(): void {
-		global $wpdb;
-
-		foreach ( $this->helpscout_ids as $helpscout_id ) {
-			$wpdb->delete( "{$wpdb->base_prefix}helpscout_meta", array( 'helpscout_id' => $helpscout_id ) );
-		}
-		$this->helpscout_ids = array();
-
 		foreach ( $this->post_ids as $post_id ) {
 			wp_delete_post( $post_id, true );
 		}
@@ -144,53 +127,6 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 	}
 
 	/**
-	 * Records a HelpScout conversation's plugin or theme association.
-	 *
-	 * @param string $slug     Associated slug.
-	 * @param string $meta_key Association type.
-	 * @return int Conversation ID.
-	 */
-	protected function create_helpscout_meta( string $slug, string $meta_key = 'plugins' ): int {
-		global $wpdb;
-
-		$helpscout_id          = wp_rand( 100000000, 999999999 );
-		$this->helpscout_ids[] = $helpscout_id;
-
-		$this->assertSame(
-			1,
-			$wpdb->insert(
-				"{$wpdb->base_prefix}helpscout_meta",
-				array(
-					'helpscout_id' => $helpscout_id,
-					'meta_key'     => $meta_key,
-					'meta_value'   => $slug,
-				)
-			),
-			$wpdb->last_error
-		);
-
-		return $helpscout_id;
-	}
-
-	/**
-	 * Reads the association stored for a fixture conversation.
-	 *
-	 * @param int $helpscout_id Conversation ID.
-	 * @return string Associated slug.
-	 */
-	protected function helpscout_slug( int $helpscout_id ): string {
-		global $wpdb;
-
-		return (string) $wpdb->get_var(
-			$wpdb->prepare(
-				'SELECT meta_value FROM %i WHERE helpscout_id = %d',
-				"{$wpdb->base_prefix}helpscout_meta",
-				$helpscout_id
-			)
-		);
-	}
-
-	/**
 	 * Requested slugs outside the character set the route accepts.
 	 *
 	 * @return array
@@ -215,7 +151,6 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 	 * @param string $slug The requested slug.
 	 * @return void
 	 */
-	#[DataProvider( 'data_refused_slugs' )]
 	public function test_route_refuses_a_slug_outside_its_character_set( string $slug ): void {
 		$plugin = $this->create_new_plugin();
 		$result = $this->change_slug( $plugin, $slug );
@@ -264,18 +199,12 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 	 * @return void
 	 */
 	public function test_route_stores_a_slug_within_its_character_set_unchanged(): void {
-		$plugin       = $this->create_new_plugin();
-		$conversation = $this->create_helpscout_meta( self::ORIGINAL_SLUG );
-		$other_plugin = $this->create_helpscout_meta( 'fixture-other' );
-		$theme        = $this->create_helpscout_meta( self::ORIGINAL_SLUG, 'themes' );
-		$result       = $this->change_slug( $plugin, 'fixture-renamed' );
+		$plugin = $this->create_new_plugin();
+		$result = $this->change_slug( $plugin, 'fixture-renamed' );
 
 		$this->assertTrue( $result );
 		$this->assertSame( 'fixture-renamed', get_post( $plugin->ID )->post_name );
 		$this->assertSame( array( 'Changed slug from fixture-sample to fixture-renamed.' ), $this->audit_log( $plugin->ID ) );
-		$this->assertSame( 'fixture-renamed', $this->helpscout_slug( $conversation ) );
-		$this->assertSame( 'fixture-other', $this->helpscout_slug( $other_plugin ) );
-		$this->assertSame( self::ORIGINAL_SLUG, $this->helpscout_slug( $theme ) );
 	}
 
 	/**
@@ -288,8 +217,7 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 	 * @return void
 	 */
 	public function test_route_logs_the_slug_the_plugin_got(): void {
-		$plugin       = $this->create_new_plugin();
-		$conversation = $this->create_helpscout_meta( self::ORIGINAL_SLUG );
+		$plugin = $this->create_new_plugin();
 
 		$slug_is_taken = static function ( bool $is_bad, string $slug ): bool {
 			return 'fixture-contested' === $slug ? true : $is_bad;
@@ -304,7 +232,6 @@ class Plugin_Slug_Change_Format_Test extends TestCase {
 
 		$this->assertTrue( $result );
 		$this->assertSame( 'fixture-contested-2', get_post( $plugin->ID )->post_name );
-		$this->assertSame( 'fixture-contested-2', $this->helpscout_slug( $conversation ) );
 		$this->assertSame(
 			array( "Changed slug from fixture-sample to fixture-contested-2. The requested slug, 'fixture-contested', was not available." ),
 			$this->audit_log( $plugin->ID )

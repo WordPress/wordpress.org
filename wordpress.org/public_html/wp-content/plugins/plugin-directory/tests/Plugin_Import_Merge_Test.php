@@ -5,14 +5,12 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
 
 /**
  * @group jobs
  */
-#[Group( 'jobs' )]
 class Plugin_Import_Merge_Test extends TestCase {
 
 	/**

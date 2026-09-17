@@ -5,7 +5,6 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
-use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\CLI\SVN_Watcher;
 
@@ -14,7 +13,6 @@ use WordPressdotorg\Plugin_Directory\CLI\SVN_Watcher;
  *
  * @group cli
  */
-#[Group( 'cli' )]
 class SVN_Watcher_Log_Summary_Test extends TestCase {
 
 	/**
