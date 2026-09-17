@@ -108,7 +108,11 @@ class Plugin_Release_Confirmation extends Base {
 				'/plugins/v1/release-confirmation-access' === $request->get_route()
 			)
 		) {
-			if ( 'rest_cookie_invalid_nonce' == $result['code'] || 'rest_forbidden' == $result['code'] ) {
+			if (
+				'rest_cookie_invalid_nonce' === $result['code'] ||
+				'rest_forbidden' === $result['code'] ||
+				'rest_cross_origin_write' === $result['code']
+			) {
 				wp_die( 'The link you have followed has expired.' );
 			}
 		}

@@ -42,7 +42,7 @@ class Plugin_Self_Close extends Base {
 		) {
 			if ( 'rest_cookie_invalid_nonce' == $result['code'] ) {
 				wp_die( 'The link you have followed has expired.' );
-			} elseif ( 'rest_forbidden' == $result['code'] ) {
+			} elseif ( 'rest_forbidden' === $result['code'] || 'rest_cross_origin_write' === $result['code'] ) {
 				wp_die( "Sorry, You can't do that." );
 			}
 		}

@@ -184,8 +184,9 @@ class Base {
 	 * The login cookie is shared across the wordpress.org hosts, so the session does not
 	 * say which host a request came from; `Origin` does.
 	 *
-	 * Routes registered without a permission check are exempt, such as the blueprint
-	 * Playground fetches from its own origin: the session is not what authorizes those.
+	 * Routes whose permission callback is `__return_true` are exempt, such as the
+	 * blueprint Playground fetches from its own origin: the session is not what
+	 * authorizes those.
 	 *
 	 * @param mixed            $response Result to send to the client.
 	 * @param array            $handler  Route handler used for the request.
@@ -228,9 +229,9 @@ class Base {
 	/**
 	 * The origins this site's own pages are served from.
 	 *
-	 * Whether the localised hosts carry their own `home_url()` is decided by the host
-	 * mapping, which lives outside this repository; the filter is there for it to add
-	 * them. Anything missing here is a legitimate write refused.
+	 * Each localised directory is its own site, so `home_url()` already names the host
+	 * that served the page making the request. Anything the mapping does not cover is
+	 * a legitimate write refused, which is what the filter is for.
 	 *
 	 * @return array The origins a write may carry.
 	 */
