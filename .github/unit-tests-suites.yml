@@ -124,6 +124,13 @@ suites:
     paths:
       - 'environments/translate/**'
 
+  support-forums:
+    type: wordpress
+    name: Support Forums
+    script: support:test
+    paths:
+      - 'environments/support-forums/**'
+
   sso:
     type: wordpress
     name: WordPress.org SSO

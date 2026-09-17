@@ -1,0 +1,18 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/bbpress.zip",
+		"../wordpress.org/public_html/wp-content/plugins/support-forums"
+	],
+	"mappings": {
+		"wp-content/env-bin": "./support-forums/bin"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash support-forums/bin/after-start-test.sh"
+	},
+	"config": {
+		"WPORG_SUPPORT_FORUMS_BLOGID": 1
+	}
+}
