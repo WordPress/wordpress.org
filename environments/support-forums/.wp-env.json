@@ -1,11 +1,11 @@
 {
 	"core": "WordPress/WordPress#master",
 	"phpVersion": "8.4",
+	"multisite": true,
 	"testsEnvironment": false,
 	"plugins": [
 		"https://downloads.wordpress.org/plugin/bbpress.zip",
-		"https://downloads.wordpress.org/plugin/gutenberg.17.9.0.zip",
-		"https://downloads.wordpress.org/plugin/blocks-everywhere.zip",
+		"https://downloads.wordpress.org/plugin/jetpack.zip",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-user-moderation",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-user-mention-autocomplete",
 		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-user-badges",
@@ -22,13 +22,12 @@
 		"WordPress/wporg-parent-2021#build"
 	],
 	"mappings": {
-		".htaccess": "./support-forums/bin/.htaccess",
-		"wp-content/wporg/style": "../wordpress.org/public_html/style",
 		"wp-content/mu-plugins": "./mocks/mu-plugins",
 		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/plugins/plugin-directory": "../wordpress.org/public_html/wp-content/plugins/plugin-directory",
-		"wp-content/plugins/theme-directory": "../wordpress.org/public_html/wp-content/plugins/theme-directory"
+		"wp-content/plugins/theme-directory": "../wordpress.org/public_html/wp-content/plugins/theme-directory",
+		"wp-content/env-bin": "./support-forums/bin"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash support-forums/bin/after-start.sh"
@@ -36,11 +35,13 @@
 	"config": {
 		"WP_DEBUG": true,
 		"JETPACK_DEV_DEBUG": true,
-		"WPORGPATH": "/var/www/html/wp-content/wporg",
 		"WP_ENVIRONMENT_TYPE": "local",
+		"WPORGPATH": "/var/www/html/",
+		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php",
+		"PLUGINS_TABLE_PREFIX": "wp_",
 		"WPORG_SUPPORT_FORUMS_BLOGID": 1,
 		"WPORG_PLUGIN_DIRECTORY_BLOGID": 2,
 		"WPORG_THEME_DIRECTORY_BLOGID": 3,
-		"PLUGINS_TABLE_PREFIX": "wp_2_"
+		"WPORG_LOCAL_ROSETTA_BLOGID": 4
 	}
 }
