@@ -409,6 +409,25 @@ ensure_page( 'welcome', 'Welcome to Support', 'Placeholder for the support welco
 ensure_page( 'guidelines', 'Forum Guidelines', 'Placeholder for the forum guidelines; see wordpress.org/support/guidelines/ for the real copy.' );
 
 /*
+ * Drop the widgets a fresh install drops into the sidebars. The support theme
+ * treats helphub-sidebar as active if anything is in it, which adds the
+ * helphub-with-sidebar body class and renders WordPress' default Search and
+ * Recent Posts blocks where production has the HelpHub page navigation. That
+ * navigation comes from HelpHub, which this environment does not run.
+ */
+\WP_CLI::log( 'Clearing default sidebar widgets...' );
+$sidebars = (array) get_option( 'sidebars_widgets', array() );
+foreach ( array_keys( $sidebars ) as $sidebar_id ) {
+	if ( 'wp_inactive_widgets' === $sidebar_id || 'array_version' === $sidebar_id ) {
+		continue;
+	}
+
+	$sidebars['wp_inactive_widgets'] = array_merge( (array) ( $sidebars['wp_inactive_widgets'] ?? array() ), (array) $sidebars[ $sidebar_id ] );
+	$sidebars[ $sidebar_id ]         = array();
+}
+update_option( 'sidebars_widgets', $sidebars );
+
+/*
  * Topics, so the forum index, the resolution filters and the directory compat
  * views all have something to render. A topic reaches /plugin/<slug>/ by
  * sitting in the compat forum with the directory slug in the topic-plugin (or
