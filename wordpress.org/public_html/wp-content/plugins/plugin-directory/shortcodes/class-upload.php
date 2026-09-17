@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
+use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Template;
 use function WordPressdotorg\Two_Factor\get_onboarding_account_url;
 
@@ -305,6 +306,7 @@ class Upload {
 									<form>
 										<input type="hidden" name="action" value="request-slug-change" />
 										<input type="hidden" name="id" value="<?php echo esc_attr( $plugin->ID ); ?>" />
+										<input type="hidden" name="<?php echo esc_attr( Base::ACTION_NONCE_PARAM ); ?>" value="<?php echo esc_attr( Base::action_nonce( 'upload', $plugin->ID ) ); ?>" />
 
 										<div class="notice notice-info notice-alt">
 											<p><?php esc_html_e( 'Your chosen slug cannot be guaranteed, and is subject to change based on the results of your review.', 'wporg-plugins' ); ?></p>

@@ -1,6 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 
+use WordPressdotorg\Plugin_Directory\API\Base;
+
 // Explicitly require dependencies so this file can be sourced outside the Plugin Directory.
 require_once __DIR__ . '/class-plugin-geopattern.php';
 require_once __DIR__ . '/class-plugin-geopattern-svg.php';
@@ -948,7 +950,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_close', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-close' )
 		);
 	}
@@ -963,7 +968,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_transfer', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-transfer' )
 		);
 	}
@@ -978,7 +986,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_toggle_preview', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-toggle-preview' )
 		);
 	}
@@ -993,7 +1004,11 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ), 'dismiss' => 1 ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_toggle_preview', $post->post_name ),
+				'dismiss'                => 1,
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-toggle-preview' )
 		);
 	}
@@ -1008,7 +1023,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'enable_release_confirmation', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/release-confirmation' )
 		);
 	}
@@ -1026,10 +1044,13 @@ class Template {
 
 		if ( 'approve' === $what ) {
 			$endpoint = 'plugin/%s/release-confirmation/%s';
+			$action   = 'confirm_release';
 		} elseif ( 'discard' === $what ) {
 			$endpoint = 'plugin/%s/release-confirmation/%s/discard';
+			$action   = 'discard_release';
 		} elseif ( 'undo-discard' === $what ) {
 			$endpoint = 'plugin/%s/release-confirmation/%s/undo-discard';
+			$action   = 'undo_discard_release';
 		} else {
 			return '';
 		}
@@ -1037,7 +1058,10 @@ class Template {
 		$url = home_url( 'wp-json/plugins/v1/' . sprintf( $endpoint, urlencode( $post->post_name ), urlencode( $tag ) ) );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( $action, $post->post_name . ':' . $tag ),
+			),
 			$url
 		);
 	}
