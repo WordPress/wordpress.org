@@ -209,6 +209,8 @@ class Moderators {
 	 * surrounding profile, under the same conditions bbPress applies. Remove once bbPress
 	 * widens its own scope.
 	 *
+	 * @see https://bbpress.trac.wordpress.org/ticket/3685
+	 *
 	 * @param array  $caps            Capabilities bbPress mapped the request to.
 	 * @param string $cap             Capability name.
 	 * @param int    $current_user_id Current user ID.
