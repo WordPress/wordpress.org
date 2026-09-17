@@ -49,14 +49,25 @@ function ensure_directory_record( string $post_type, string $slug, string $title
 
 	$user = get_user_by( 'login', $author );
 
+	/*
+	 * Plugin_Directory::filter_wp_insert_post_data() reads post_modified and
+	 * post_modified_gmt out of $postarr for every `plugin` post, so they have to
+	 * be passed explicitly. A fixed date also keeps the fixtures stable.
+	 */
+	$date = '2022-08-20 01:00:00';
+
 	$post_id = wp_insert_post(
 		array(
-			'post_type'    => $post_type,
-			'post_status'  => 'publish',
-			'post_name'    => $slug,
-			'post_title'   => $title,
-			'post_content' => $content,
-			'post_author'  => $user ? $user->ID : 1,
+			'post_type'         => $post_type,
+			'post_status'       => 'publish',
+			'post_name'         => $slug,
+			'post_title'        => $title,
+			'post_content'      => $content,
+			'post_author'       => $user ? $user->ID : 1,
+			'post_date'         => $date,
+			'post_date_gmt'     => $date,
+			'post_modified'     => $date,
+			'post_modified_gmt' => $date,
 		),
 		true
 	);

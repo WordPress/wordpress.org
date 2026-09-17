@@ -2,11 +2,10 @@
 /**
  * Forum creation helpers shared by seed.php and seed-site.php.
  *
- * No strict_types declaration: the callers are evaluated inline by
- * `wp eval-file`, where a declare() cannot be the first statement.
- *
  * @package support-forums-env
  */
+
+declare( strict_types = 1 );
 
 namespace WordPressdotorg\Forums\Env;
 
@@ -29,6 +28,10 @@ function default_forums(): array {
 /**
  * Create a bbPress forum, optionally as a specific post ID.
  *
+ * When an ID is required and something else already occupies it, this errors
+ * rather than adopting it: the compat views would then resolve to the wrong
+ * post, which is harder to notice than a failed start.
+ *
  * @param string $title     Forum title.
  * @param string $content   Forum description.
  * @param int    $import_id Post ID to create the forum as, or 0 for the next available.
@@ -36,15 +39,33 @@ function default_forums(): array {
  * @return int The forum's post ID.
  */
 function ensure_forum( string $title, string $content, int $import_id = 0 ): int {
-	if ( $import_id && get_post( $import_id ) ) {
-		return $import_id;
+	$slug = sanitize_title( $title );
+
+	if ( $import_id ) {
+		$existing = get_post( $import_id );
+
+		if ( $existing ) {
+			if ( bbp_get_forum_post_type() !== $existing->post_type || $slug !== $existing->post_name ) {
+				\WP_CLI::error(
+					sprintf(
+						'Post %d is a %s named "%s", but the "%s" forum has to be created as that ID. Destroy the environment and start again.',
+						$import_id,
+						$existing->post_type,
+						$existing->post_name,
+						$title
+					)
+				);
+			}
+
+			return $import_id;
+		}
 	}
 
 	$existing = get_posts(
 		array(
 			'post_type'   => bbp_get_forum_post_type(),
 			'post_status' => 'any',
-			'name'        => sanitize_title( $title ),
+			'name'        => $slug,
 			'numberposts' => 1,
 		)
 	);

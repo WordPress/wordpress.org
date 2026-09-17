@@ -213,6 +213,15 @@ On production each locale forum is its own network with `IS_ROSETTA_NETWORK` def
 
 **Forum IDs:** the `Plugins`, `Themes` and `Reviews` forums are created as the post IDs that `Plugin::PLUGINS_FORUM_ID` and `Support_Compat::HIDDEN_FORUMS` hard-code for production (21261, 21262, 21272, plus two legacy IDs). The directory compat views, the review forum, and the hidden-forum filtering all key off those, so they cannot be left to auto-increment.
 
+**What to try:** `hello-dolly` is seeded on the plugin directory with a committer, a contributor and a support rep; `twentytwentyfour` is seeded on the theme directory with an author. Visit `/plugin/hello-dolly/`, `/theme/twentytwentyfour/`, and either followed by `reviews/`. Ratings submitted through the review form persist in the local `ratings` table, so the star filters and rating edits work.
+
+**Local boundaries.** The environment deliberately does not reach production:
+
+- Badge assignments would otherwise be a live POST to `profiles.wordpress.org`. `Badge_Automation` registers its hooks locally, because `assign_badge()` lives in the mounted `mu-plugins/pub/profile-helpers.php`, and `Profiles\queue()` dispatches synchronously for anything that is not `production` while `api()` only redirects the URL for `staging`. `mocks/mu-plugins/wporg-profiles-local.php` answers those requests and records the associations in local tables.
+- Outbound mail is short-circuited; the forums mail on subscriptions, moderation and reports.
+- `WPORG_Ratings` is a local stand-in. `Ratings_Compat` guards on `class_exists()` alone, so the stub implements every method it calls rather than a subset.
+- SSO, two-factor account management and the rest of the Profiles service are not reproduced.
+
 **User accounts:**
 
 All accounts use the password `password`.

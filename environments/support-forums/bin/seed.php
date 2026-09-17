@@ -121,10 +121,11 @@ function ensure_user( string $login, string $display_name ): int {
 }
 
 /**
- * Give users a role on one site of the network.
+ * Add users to one site of the network and give them a role there.
  *
- * Setting a role writes the site's capability meta, which is also what makes
- * the user a member of that site.
+ * Forum roles go through bbp_set_user_role() rather than WP_User::set_role():
+ * it is the API bbPress expects, and it fires the bbp_set_user_role filter that
+ * Badge_Automation::sync_support_team_badge() listens on.
  *
  * @param int   $blog_id Blog to assign the roles on.
  * @param array $roles   Map of user login to role name.
@@ -138,6 +139,16 @@ function set_roles( int $blog_id, array $roles ): void {
 		$user = get_user_by( 'login', $login );
 		if ( ! $user ) {
 			\WP_CLI::warning( "No such user '{$login}'; skipping role assignment." );
+			continue;
+		}
+
+		$added = add_user_to_blog( $blog_id, (int) $user->ID, 'subscriber' );
+		if ( is_wp_error( $added ) ) {
+			\WP_CLI::error( "Could not add '{$login}' to blog {$blog_id}: " . $added->get_error_message() );
+		}
+
+		if ( str_starts_with( $role, 'bbp_' ) && function_exists( 'bbp_set_user_role' ) ) {
+			bbp_set_user_role( (int) $user->ID, $role );
 			continue;
 		}
 
@@ -178,17 +189,19 @@ function activate_on_site( int $blog_id, array $plugins ): void {
 }
 
 /**
- * Set a site's title and permalink structure.
+ * Set a site's title, locale and permalink structure.
  *
  * @param int    $blog_id Blog to configure.
  * @param string $title   Site title.
+ * @param string $locale  WPLANG value, or '' for the network default.
  *
  * @return void
  */
-function configure_site( int $blog_id, string $title ): void {
+function configure_site( int $blog_id, string $title, string $locale = '' ): void {
 	switch_to_blog( $blog_id );
 
 	update_option( 'blogname', $title );
+	update_option( 'WPLANG', $locale );
 	update_option( 'permalink_structure', '/%postname%/' );
 	flush_rewrite_rules( false );
 
@@ -318,7 +331,13 @@ switch_theme( 'wporg-support-2024' );
 
 \WP_CLI::log( 'Configuring sites...' );
 configure_site( (int) get_current_blog_id(), 'WordPress.org Forums' );
-configure_site( $rosetta_blog, 'Rosetta Forums' );
+
+/*
+ * A locale forum is a locale forum by two things: IS_ROSETTA_NETWORK, which
+ * mocks/../support-env.php defines from WPORG_LOCAL_ROSETTA_BLOGID, and the
+ * locale itself. Installing the language pack is left to the developer.
+ */
+configure_site( $rosetta_blog, 'Rosetta Forums', 'de_DE' );
 configure_site( $plugins_blog, 'Plugin Directory (forum dependency)' );
 configure_site( $themes_blog, 'Theme Directory (forum dependency)' );
 
