@@ -166,13 +166,15 @@ class WPORG_Ratings {
 			return (int) ( $counts[ $rating ] ?? 0 );
 		}
 
-		$total = array_sum( $counts );
-
-		if ( ! $total && 'theme' === $type ) {
+		/*
+		 * The seeded summary carries its own total, which the distribution the
+		 * themes API returns need not add up to, so prefer it over the sum.
+		 */
+		if ( 'theme' === $type && ! self::get_ratings( $type, $slug ) ) {
 			return (int) self::get_seeded_theme_meta( $slug, 'num_ratings' );
 		}
 
-		return (int) $total;
+		return (int) array_sum( $counts );
 	}
 
 	/**
