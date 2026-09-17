@@ -209,7 +209,7 @@ The blog IDs are pinned in `.wp-env.json` (`WPORG_PLUGIN_DIRECTORY_BLOGID` and f
 
 **Note that the plugin and theme directories here exist only as forum dependencies. Use the Plugin Directory and Theme Directory environments to work on the directories themselves.**
 
-On production each locale forum is its own network with `IS_ROSETTA_NETWORK` defined, which a single `wp-config.php` cannot express. `mocks/mu-plugins/wporg-rosetta-network.php` defines it for the blog named by `WPORG_LOCAL_ROSETTA_BLOGID` instead.
+On production each locale forum is its own network with `IS_ROSETTA_NETWORK` defined, which a single `wp-config.php` cannot express. `mocks/mu-plugins/wporg-support-env.php` defines it for the blog named by `WPORG_LOCAL_ROSETTA_BLOGID` instead.
 
 **Forum IDs:** the `Plugins`, `Themes` and `Reviews` forums are created as the post IDs that `Plugin::PLUGINS_FORUM_ID` and `Support_Compat::HIDDEN_FORUMS` hard-code for production (21261, 21262, 21272, plus two legacy IDs). The directory compat views, the review forum, and the hidden-forum filtering all key off those, so they cannot be left to auto-increment.
 

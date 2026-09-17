@@ -24,10 +24,9 @@
 		"wp-content/mu-plugins": "./mocks/mu-plugins",
 		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
-		"wp-content/mu-plugins/wporg-support-env.php": "./support-forums/mu-plugins/support-env.php",
 		"wp-content/plugins/plugin-directory": "../wordpress.org/public_html/wp-content/plugins/plugin-directory",
 		"wp-content/plugins/theme-directory": "../wordpress.org/public_html/wp-content/plugins/theme-directory",
-		"wp-content/plugins/wporg-ratings/wporg-ratings.php": "./support-forums/mu-plugins/wporg-ratings-plugin.php",
+		"wp-content/plugins/wporg-ratings/wporg-ratings.php": "./support-forums/plugins/wporg-ratings.php",
 		"wp-content/plugins/jetpack": "https://downloads.wordpress.org/plugin/jetpack.zip",
 		"wp-content/env-bin": "./support-forums/bin"
 	},
