@@ -5,12 +5,14 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Tools\Tokenisation_Helpers;
 
 /**
  * @group tokenisation
  */
+#[Group( 'tokenisation' )]
 class Tokenisation_Helpers_Test extends TestCase {
 
 	private function calls( string $php, string $function_name ): array {
