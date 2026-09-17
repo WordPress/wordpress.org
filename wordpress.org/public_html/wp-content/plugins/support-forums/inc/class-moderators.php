@@ -220,7 +220,7 @@ class Moderators {
 			return $caps;
 		}
 
-		// bbPress covers the editor, and wp-admin keeps native WordPress permissions.
+		// Only on a front-end profile; bbPress covers the editor, wp-admin stays native.
 		if ( is_admin() || bbp_is_single_user_edit() || ! bbp_is_single_user() ) {
 			return $caps;
 		}
