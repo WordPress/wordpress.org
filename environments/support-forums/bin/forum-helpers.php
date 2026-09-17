@@ -28,9 +28,8 @@ function default_forums(): array {
 /**
  * Create a bbPress forum, optionally as a specific post ID.
  *
- * When an ID is required and something else already occupies it, this errors
- * rather than adopting it: the compat views would then resolve to the wrong
- * post, which is harder to notice than a failed start.
+ * Errors rather than adopting a post that already holds a required ID, which
+ * would point the compat views at the wrong content.
  *
  * @param string $title     Forum title.
  * @param string $content   Forum description.

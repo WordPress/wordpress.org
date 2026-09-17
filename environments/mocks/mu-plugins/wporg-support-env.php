@@ -15,18 +15,11 @@
 
 declare( strict_types = 1 );
 
-// Only the support forums environment defines this.
 if ( ! defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
 	return;
 }
 
-/*
- * On production each locale forum is its own network with IS_ROSETTA_NETWORK
- * defined, which one wp-config.php cannot express. header.php and
- * Audit_Log::get_moderator_profile_url() gate on the constant, so define it for
- * the blog WPORG_LOCAL_ROSETTA_BLOGID names. mu-plugins load after
- * ms-settings.php, so the current blog is already known here.
- */
+// mu-plugins load after ms-settings.php, so the current blog is already known.
 if ( ! defined( 'IS_ROSETTA_NETWORK' )
 	&& defined( 'WPORG_LOCAL_ROSETTA_BLOGID' )
 	&& is_multisite()
@@ -35,8 +28,5 @@ if ( ! defined( 'IS_ROSETTA_NETWORK' )
 	define( 'IS_ROSETTA_NETWORK', true );
 }
 
-/*
- * The forums mail on subscriptions, moderation actions and reports. There is no
- * transport in the container, so every send is a slow failure; short-circuit it.
- */
+// Without a transport in the container every send is a slow failure.
 add_filter( 'pre_wp_mail', '__return_true' );

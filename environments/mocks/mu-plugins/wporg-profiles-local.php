@@ -1,17 +1,12 @@
 <?php
 /**
  * Plugin Name: WordPress.org Profiles (local stub)
- * Description: Keeps profile badge and activity writes inside the local
- *              environment. `assign_badge()` and friends live in
- *              mu-plugins/pub/profile-helpers.php, which every environment
- *              mounts, so Badge_Automation and the directories register their
- *              hooks locally. WordPressdotorg\Profiles\queue() then dispatches
- *              synchronously for anything that is not `production`, and api()
- *              only redirects the URL for `staging` — so on a local install an
- *              awarded badge is a real POST to profiles.wordpress.org.
- *
- *              Badge associations are persisted when the environment provides
- *              the bpmain_wporg_groups tables, and otherwise acknowledged.
+ * Description: Keeps profile badge writes inside the local environment.
+ *              Profiles\queue() dispatches synchronously outside production and
+ *              api() only redirects the URL for `staging`, so an awarded badge
+ *              would otherwise be a real POST to profiles.wordpress.org.
+ *              Associations are stored when the bpmain_wporg_groups tables
+ *              exist, and acknowledged when they do not.
  *
  * @package wporg-env
  */
@@ -20,6 +15,11 @@ declare( strict_types = 1 );
 
 namespace WordPressdotorg\Env\Profiles;
 
+/**
+ * The Profiles endpoint profile-helpers.php posts to.
+ *
+ * @var string
+ */
 const HANDLER_URL = 'https://profiles.wordpress.org/wp-admin/admin-ajax.php';
 
 /**

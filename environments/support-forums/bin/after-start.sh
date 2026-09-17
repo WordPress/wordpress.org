@@ -2,9 +2,8 @@
 #
 # Runs after wp-env start. Sets up permalinks and seeds the forum network.
 #
-# wp-env creates the multisite network and writes its subdirectory .htaccess
-# itself (see the "multisite" key in .wp-env.json), so this only has to fill
-# the network with content.
+# wp-env creates the network and its .htaccess itself (the "multisite" key in
+# .wp-env.json), so this only fills the network with content.
 #
 
 set -euo pipefail
@@ -16,10 +15,8 @@ WP="npx wp-env $CONFIG run cli --"
 # `wp-env start --auto-port` both change.
 SITE_URL="$( $WP wp option get siteurl --skip-plugins --skip-themes | tr -d '[:space:]' )"
 
-# bbPress and the directory compat views need pretty permalinks, and wp-env
-# resets the structure to core's default whenever it reconfigures WordPress.
-# No --hard: save_mod_rewrite_rules() is a no-op on multisite, where wp-env
-# owns the network's .htaccess.
+# Reapplied on every start because wp-env resets the structure whenever it
+# reconfigures WordPress. No --hard: it is a no-op on multisite.
 echo "Setting up permalinks..."
 $WP wp rewrite structure '/%postname%/'
 

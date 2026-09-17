@@ -2,17 +2,9 @@
 /**
  * Seed the WordPress.org Support Forums local environment.
  *
- * Creates the `/plugins`, `/themes` and `/rosetta` sub-sites, the full set of
- * forum user types, and the default forums on the main forums site.
- *
- * The compat forums are created with the post IDs that Plugin and Support_Compat
- * hard-code for production. Without that the `/plugin/<slug>/` and
- * `/theme/<slug>/` views, the reviews forum, and the hidden-forum filtering all
- * point at posts that do not exist locally.
- *
- * Content that needs a sub-site's own post types and taxonomies registered is
- * seeded by seed-site.php, which runs per sub-site once the plugins activated
- * here are loaded.
+ * Creates the sub-sites, users, roles and forums. Content that needs a
+ * sub-site's own post types registered is seeded by seed-site.php, which runs
+ * once the plugins activated here are loaded.
  *
  * Idempotent: gated on the wporg_support_env_seeded option, which
  * `npm run support:refresh` clears.
@@ -123,8 +115,7 @@ function ensure_user( string $login, string $display_name ): int {
 /**
  * Add users to one site of the network and give them a role there.
  *
- * Forum roles go through bbp_set_user_role() rather than WP_User::set_role():
- * it is the API bbPress expects, and it fires the bbp_set_user_role filter that
+ * Forum roles go through bbp_set_user_role(), which fires the filter
  * Badge_Automation::sync_support_team_badge() listens on.
  *
  * @param int   $blog_id Blog to assign the roles on.
@@ -207,19 +198,16 @@ function configure_site( int $blog_id, string $title, string $locale = '', bool 
 
 	/*
 	 * Production serves the archive from /forums/ but each forum from
-	 * /forum/<slug>/. bbPress only drops the root slug from those child
-	 * permalinks when the root is excluded.
+	 * /forum/<slug>/, and bbPress only drops the root slug when it is excluded.
 	 */
 	if ( $forums ) {
 		update_option( '_bbp_include_root', false );
 	}
 
 	/*
-	 * Not flush_rewrite_rules(): switch_to_blog() swaps the database context but
-	 * leaves $wp_rewrite initialised for the site this request loaded, so a flush
-	 * here stores the forums' rules on the directory sub-sites, without the post
-	 * types their own plugins register. Dropping the option lets each site
-	 * regenerate its rules on first request, in its own fully loaded context.
+	 * Not flush_rewrite_rules(): switch_to_blog() leaves $wp_rewrite initialised
+	 * for the site this request loaded, so a flush here would store the forums'
+	 * rules on the sub-sites. Dropping the option regenerates them in context.
 	 */
 	delete_option( 'rewrite_rules' );
 
@@ -299,10 +287,7 @@ function ensure_page( string $slug, string $title, string $content ): int {
 	return (int) $page_id;
 }
 
-/*
- * The blog IDs are pinned in .wp-env.json, so the sub-sites have to be created
- * in this order. Bail rather than leave a network the constants misdescribe.
- */
+// The blog IDs are pinned in .wp-env.json, so creation order matters.
 $plugins_blog = ensure_site( 'plugins', 'Plugin Directory (forum dependency)' );
 $themes_blog  = ensure_site( 'themes', 'Theme Directory (forum dependency)' );
 $rosetta_blog = ensure_site( 'rosetta', 'Rosetta Forums' );
@@ -379,9 +364,8 @@ set_roles(
 );
 
 /*
- * Support_Compat::HIDDEN_FORUMS and the Plugin::*_FORUM_ID constants are
- * production post IDs, so the compat forums have to be created as those exact
- * posts. Titles match the production forums.
+ * HIDDEN_FORUMS and the Plugin::*_FORUM_ID constants are production post IDs,
+ * so the compat forums have to be created as those exact posts.
  */
 \WP_CLI::log( 'Creating forums...' );
 $compat_forums = array(
@@ -407,20 +391,15 @@ foreach ( default_forums() as $forum_title => $forum_content ) {
 	ensure_forum( $forum_title, $forum_content );
 }
 
-/*
- * wporg_support_add_site_navigation_menus() hardcodes /welcome/ and
- * /guidelines/ in the local nav for English sites, so those pages have to exist.
- */
+// The support theme hardcodes /welcome/ and /guidelines/ in its local nav.
 \WP_CLI::log( 'Creating pages...' );
 ensure_page( 'welcome', 'Welcome to Support', 'Placeholder for the support welcome page; see wordpress.org/support/welcome/ for the real copy.' );
 ensure_page( 'guidelines', 'Forum Guidelines', 'Placeholder for the forum guidelines; see wordpress.org/support/guidelines/ for the real copy.' );
 
 /*
- * Drop the widgets a fresh install drops into the sidebars. The support theme
- * treats helphub-sidebar as active if anything is in it, which adds the
- * helphub-with-sidebar body class and renders WordPress' default Search and
- * Recent Posts blocks where production has the HelpHub page navigation. That
- * navigation comes from HelpHub, which this environment does not run.
+ * A fresh install seeds helphub-sidebar, which makes the theme add the
+ * helphub-with-sidebar class and render stock widgets where production has the
+ * HelpHub navigation this environment does not run.
  */
 \WP_CLI::log( 'Clearing default sidebar widgets...' );
 $sidebars = (array) get_option( 'sidebars_widgets', array() );
@@ -435,10 +414,8 @@ foreach ( array_keys( $sidebars ) as $sidebar_id ) {
 update_option( 'sidebars_widgets', $sidebars );
 
 /*
- * Topics, so the forum index, the resolution filters and the directory compat
- * views all have something to render. A topic reaches /plugin/<slug>/ by
- * sitting in the compat forum with the directory slug in the topic-plugin (or
- * topic-theme) taxonomy, which is how Directory_Compat queries for them.
+ * Directory_Compat finds a topic by the directory slug in its topic-plugin or
+ * topic-theme term, so /plugin/<slug>/ needs both the forum and the term.
  */
 \WP_CLI::log( 'Creating topics...' );
 $installing = ensure_forum( 'Installing WordPress', '' );
@@ -482,11 +459,7 @@ ensure_topic(
 	array( 'topic-theme' => 'twentytwentyfour' )
 );
 
-/*
- * A review is a topic in the reviews forum carrying the directory slug and a
- * rating, recorded both as post meta and through WPORG_Ratings so the star
- * filters and the average agree.
- */
+// The rating is stored twice so the star filters and the average agree.
 $review = ensure_topic(
 	Plugin::REVIEWS_FORUM_ID,
 	'Still charming after all these years',
@@ -516,11 +489,7 @@ switch_theme( 'wporg-support-2024' );
 \WP_CLI::log( 'Configuring sites...' );
 configure_site( (int) get_current_blog_id(), 'WordPress.org Forums', '', true );
 
-/*
- * A locale forum is a locale forum by two things: IS_ROSETTA_NETWORK, which
- * mocks/../support-env.php defines from WPORG_LOCAL_ROSETTA_BLOGID, and the
- * locale itself. Installing the language pack is left to the developer.
- */
+// The language pack itself is left to the developer.
 configure_site( $rosetta_blog, 'Rosetta Forums', 'de_DE', true );
 configure_site( $plugins_blog, 'Plugin Directory (forum dependency)' );
 configure_site( $themes_blog, 'Theme Directory (forum dependency)' );

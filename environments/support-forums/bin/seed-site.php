@@ -6,11 +6,6 @@
  * their post types and taxonomies are registered on this request. Which site it
  * seeds is decided by the blog IDs pinned in .wp-env.json.
  *
- * Directory_Compat::get_object_by_slug_and_type() reads directory posts straight
- * out of the sub-site tables, and get_authors()/get_contributors()/
- * get_support_reps() read the plugin committer taxonomies, so the `/plugin/` and
- * `/theme/` forum views need a record on each directory to resolve against.
- *
  * Idempotent: every record is looked up before it is created.
  *
  * Usage:
@@ -49,11 +44,7 @@ function ensure_directory_record( string $post_type, string $slug, string $title
 
 	$user = get_user_by( 'login', $author );
 
-	/*
-	 * Plugin_Directory::filter_wp_insert_post_data() reads post_modified and
-	 * post_modified_gmt out of $postarr for every `plugin` post, so they have to
-	 * be passed explicitly. A fixed date also keeps the fixtures stable.
-	 */
+	// Plugin_Directory::filter_wp_insert_post_data() requires the modified dates.
 	$date = '2022-08-20 01:00:00';
 
 	$post_id = wp_insert_post(
@@ -116,10 +107,8 @@ if ( WPORG_THEME_DIRECTORY_BLOGID === $current_blog_id ) {
 	);
 
 	/*
-	 * The theme directory stores this meta keyed by version, and
-	 * Themes_API::get_theme() indexes it by version without checking the shape,
-	 * so a bare record makes every theme page a TypeError. import-themes.php
-	 * writes the same keys.
+	 * Themes_API::get_theme() indexes this meta by version without checking its
+	 * shape, so a record without it makes the theme page a TypeError.
 	 */
 	$version = '1.0';
 	update_post_meta( $theme_id, '_screenshot', array( $version => 'screenshot.png' ) );

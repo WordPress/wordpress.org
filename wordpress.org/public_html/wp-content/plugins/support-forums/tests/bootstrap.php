@@ -51,12 +51,10 @@ if ( ! file_exists( $_tests_dir . 'includes/functions.php' ) ) {
 	exit( 1 );
 }
 
-// Required by the WordPress test suite when the polyfills are installed there.
 if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) && file_exists( $_tests_dir . 'vendor/yoast/phpunit-polyfills' ) ) {
 	define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', $_tests_dir . 'vendor/yoast/phpunit-polyfills' );
 }
 
-// Gives access to tests_add_filter().
 require_once $_tests_dir . 'includes/functions.php';
 
 /**

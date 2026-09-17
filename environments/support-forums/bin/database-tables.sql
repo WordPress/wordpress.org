@@ -1,8 +1,6 @@
 -- Stub tables for the support forums local environment.
--- These live outside WordPress on production, but the plugin and theme
--- directory dependencies on the `/plugins` and `/themes` sub-sites read from
--- them, Ratings_Compat joins `ratings` for the review filter views, and the
--- Profiles stub records badge associations in the bpmain_wporg_groups tables.
+-- These live outside WordPress on production, but the directory sub-sites, the
+-- review filter views and the Profiles stub all read from them.
 --
 -- The `wp_` prefixed tables match PLUGINS_TABLE_PREFIX in .wp-env.json.
 
