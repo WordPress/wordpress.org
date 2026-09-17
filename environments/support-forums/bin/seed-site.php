@@ -128,6 +128,16 @@ if ( WPORG_LOCAL_ROSETTA_BLOGID === $current_blog_id ) {
 		ensure_forum( $forum_title, $forum_content );
 	}
 
+	$forum_id = ensure_forum( 'Installing WordPress', '' );
+	$topic_id = ensure_topic(
+		$forum_id,
+		'Installation auf Deutsch schlaegt fehl',
+		'Die Installation bricht bei der Datenbankverbindung ab. Hat jemand einen Tipp?',
+		'visitor',
+		array( 'topic_resolved' => 'no' )
+	);
+	ensure_reply( $topic_id, $forum_id, 'Pruefe bitte die Zugangsdaten in der wp-config.php.', 'rosettamoderator' );
+
 	switch_theme( 'wporg-support-2024' );
 
 	\WP_CLI::success( 'Seeded the rosetta forums.' );

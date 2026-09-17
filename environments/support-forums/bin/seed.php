@@ -219,6 +219,79 @@ function configure_site( int $blog_id, string $title, string $locale = '', bool 
 	restore_current_blog();
 }
 
+/**
+ * Fetch a page's real content from wordpress.org/support.
+ *
+ * The directory environments seed themselves from the live wp-json API rather
+ * than carry copies of production content, so do the same here.
+ *
+ * @param string $slug Page slug.
+ *
+ * @return array{title: string, content: string}|null The page, or null when it
+ *                                                    could not be fetched.
+ */
+function fetch_support_page( string $slug ): ?array {
+	$response = wp_remote_get(
+		add_query_arg( 'slug', $slug, 'https://wordpress.org/support/wp-json/wp/v2/pages' ),
+		array( 'timeout' => 15 )
+	);
+	if ( is_wp_error( $response ) ) {
+		return null;
+	}
+
+	$pages = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( ! is_array( $pages ) || ! isset( $pages[0]['content']['rendered'] ) ) {
+		return null;
+	}
+
+	return array(
+		'title'   => (string) ( $pages[0]['title']['rendered'] ?? '' ),
+		'content' => (string) $pages[0]['content']['rendered'],
+	);
+}
+
+/**
+ * Find or create a page at a fixed slug, preferring the real content.
+ *
+ * @param string $slug    Page slug.
+ * @param string $title   Fallback title, used when the import fails.
+ * @param string $content Fallback content, used when the import fails.
+ *
+ * @return int The page's post ID.
+ */
+function ensure_page( string $slug, string $title, string $content ): int {
+	$existing = get_page_by_path( $slug );
+	if ( $existing ) {
+		return (int) $existing->ID;
+	}
+
+	// Fall back to the placeholder when offline, rather than failing the seed.
+	$imported = fetch_support_page( $slug );
+	if ( $imported && '' !== $imported['content'] ) {
+		$title   = $imported['title'] ?: $title;
+		$content = $imported['content'];
+		\WP_CLI::log( "Imported /{$slug}/ from wordpress.org/support." );
+	}
+
+	$page_id = wp_insert_post(
+		array(
+			'post_type'    => 'page',
+			'post_status'  => 'publish',
+			'post_name'    => $slug,
+			'post_title'   => $title,
+			'post_content' => $content,
+			'post_author'  => 1,
+		),
+		true
+	);
+	if ( is_wp_error( $page_id ) ) {
+		\WP_CLI::error( "Could not create the '{$slug}' page: " . $page_id->get_error_message() );
+	}
+
+	\WP_CLI::log( "Created page '/{$slug}/'." );
+	return (int) $page_id;
+}
+
 /*
  * The blog IDs are pinned in .wp-env.json, so the sub-sites have to be created
  * in this order. Bail rather than leave a network the constants misdescribe.
@@ -325,6 +398,80 @@ foreach ( $compat_forums as $forum_id => $forum ) {
 
 foreach ( default_forums() as $forum_title => $forum_content ) {
 	ensure_forum( $forum_title, $forum_content );
+}
+
+/*
+ * wporg_support_add_site_navigation_menus() hardcodes /welcome/ and
+ * /guidelines/ in the local nav for English sites, so those pages have to exist.
+ */
+\WP_CLI::log( 'Creating pages...' );
+ensure_page( 'welcome', 'Welcome to Support', 'Placeholder for the support welcome page; see wordpress.org/support/welcome/ for the real copy.' );
+ensure_page( 'guidelines', 'Forum Guidelines', 'Placeholder for the forum guidelines; see wordpress.org/support/guidelines/ for the real copy.' );
+
+/*
+ * Topics, so the forum index, the resolution filters and the directory compat
+ * views all have something to render. A topic reaches /plugin/<slug>/ by
+ * sitting in the compat forum with the directory slug in the topic-plugin (or
+ * topic-theme) taxonomy, which is how Directory_Compat queries for them.
+ */
+\WP_CLI::log( 'Creating topics...' );
+$installing = ensure_forum( 'Installing WordPress', '' );
+$fixing     = ensure_forum( 'Fixing WordPress', '' );
+
+$topic = ensure_topic(
+	$installing,
+	'Blank page after installing',
+	'I finished the five minute install and every page is blank. Where should I start looking?',
+	'visitor',
+	array( 'topic_resolved' => 'yes' )
+);
+ensure_reply( $topic, $installing, 'Turn on WP_DEBUG and check your error log; a blank page is almost always a fatal.', 'moderator' );
+
+$topic = ensure_topic(
+	$fixing,
+	'Media uploads fail with an HTTP error',
+	'Every upload over about two megabytes fails with "HTTP error". Smaller files are fine.',
+	'visitor',
+	array( 'topic_resolved' => 'no' )
+);
+ensure_reply( $topic, $fixing, 'That is usually a server limit rather than WordPress. What are your upload_max_filesize and post_max_size set to?', 'keymaster' );
+ensure_reply( $topic, $fixing, 'Both are 2M, so that explains it. Thanks!', 'visitor' );
+
+$topic = ensure_topic(
+	Plugin::PLUGINS_FORUM_ID,
+	'Hello Dolly shows no lyric in the admin bar',
+	'The plugin is active but no lyric appears. Is there a setting I am missing?',
+	'visitor',
+	array( 'topic_resolved' => 'no' ),
+	array( 'topic-plugin' => 'hello-dolly' )
+);
+ensure_reply( $topic, Plugin::PLUGINS_FORUM_ID, 'It renders in the admin only. Which screen are you looking at?', 'pluginsupport' );
+
+ensure_topic(
+	Plugin::THEMES_FORUM_ID,
+	'Twenty Twenty-Four template parts will not save',
+	'Editing a template part in the site editor appears to work, but the change is gone after a reload.',
+	'visitor',
+	array( 'topic_resolved' => 'no' ),
+	array( 'topic-theme' => 'twentytwentyfour' )
+);
+
+/*
+ * A review is a topic in the reviews forum carrying the directory slug and a
+ * rating, recorded both as post meta and through WPORG_Ratings so the star
+ * filters and the average agree.
+ */
+$review = ensure_topic(
+	Plugin::REVIEWS_FORUM_ID,
+	'Still charming after all these years',
+	'Does exactly one thing and does it well. A fine example of a tiny plugin.',
+	'visitor',
+	array( 'rating' => 5 ),
+	array( 'topic-plugin' => 'hello-dolly' )
+);
+if ( class_exists( 'WPORG_Ratings' ) ) {
+	$reviewer = get_user_by( 'login', 'visitor' );
+	\WPORG_Ratings::set_rating( $review, 'plugin', 'hello-dolly', (int) $reviewer->ID, 5 );
 }
 
 // Every forum site runs the same stack as the main forums.

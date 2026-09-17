@@ -28,7 +28,8 @@
 		"wp-content/plugins/theme-directory": "../wordpress.org/public_html/wp-content/plugins/theme-directory",
 		"wp-content/plugins/wporg-ratings/wporg-ratings.php": "./support-forums/plugins/wporg-ratings.php",
 		"wp-content/plugins/jetpack": "https://downloads.wordpress.org/plugin/jetpack.zip",
-		"wp-content/env-bin": "./support-forums/bin"
+		"wp-content/env-bin": "./support-forums/bin",
+		"style": "../wordpress.org/public_html/style"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash support-forums/bin/after-start.sh"

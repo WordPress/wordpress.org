@@ -101,21 +101,28 @@ class WPORG_Ratings {
 	/**
 	 * The summary the theme importer seeds onto a repopackage post.
 	 *
+	 * Deliberately a direct query rather than get_posts(). Ratings_Compat is
+	 * constructed from Directory_Compat::maybe_load() on pre_get_posts, so a
+	 * WP_Query here re-enters that hook and recurses until memory runs out.
+	 *
+	 * @global \wpdb $wpdb
+	 *
 	 * @param string $slug Theme slug.
 	 * @param string $key  Meta key: rating, num_ratings or ratings.
 	 * @return mixed Meta value, or null when there is no such theme.
 	 */
 	private static function get_seeded_theme_meta( string $slug, string $key ) {
-		$posts = get_posts(
-			array(
-				'post_type'   => 'repopackage',
-				'post_status' => 'any',
-				'name'        => $slug,
-				'numberposts' => 1,
+		global $wpdb;
+
+		$post_id = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_name = %s AND post_type = %s LIMIT 1",
+				$slug,
+				'repopackage'
 			)
 		);
 
-		return $posts ? get_post_meta( $posts[0]->ID, $key, true ) : null;
+		return $post_id ? get_post_meta( $post_id, $key, true ) : null;
 	}
 
 	/**
