@@ -325,7 +325,7 @@ function wporg_login_language_switcher( $display = true ) {
 	?>
 	<div class="language-switcher">
 		<form id="language-switcher" action="" method="GET">
-			<?php if ( !empty( $_GET['redirect_to'] ) ): ?>
+			<?php if ( ! empty( $_GET['redirect_to'] ) && is_string( $_GET['redirect_to'] ) ) : ?>
 				<input type="hidden" name="redirect_to" value="<?php echo esc_attr( esc_url_raw( wp_unslash( $_GET['redirect_to'] ?? '' ) ) ); ?>" />
 			<?php endif; ?>
 			<label for="language-switcher-locales">

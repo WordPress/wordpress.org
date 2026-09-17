@@ -43,6 +43,8 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$error = true;
 	}
 
+	$submitted_blog_url = esc_url_raw( isset( $_POST['blog_url'] ) && is_string( $_POST['blog_url'] ) ? wp_unslash( $_POST['blog_url'] ) : '' );
+
 	if ( '' === trim( $submitted_message ) ) {
 		$blog_description = true;
 		$error = true;
@@ -107,7 +109,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 						<label for="blog_url"><?php esc_html_e( 'URI of your blog:', 'rosetta' ); ?></label>
 					</td>
 					<td>
-						<span><input name="blog_url" type="text" id="blog_url" value="<?php echo esc_attr( esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) ) ); ?>" /></span>
+						<span><input name="blog_url" type="text" id="blog_url" value="<?php echo esc_attr( $submitted_blog_url ); ?>" /></span>
 					</td>
 				</tr>
 
@@ -172,7 +174,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$akismet_comment['comment_type']         = 'contact_form';
 		$akismet_comment['comment_author']       = '';
 		$akismet_comment['comment_author_email'] = $submitted_email;
-		$akismet_comment['comment_author_url']   = esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) );
+		$akismet_comment['comment_author_url']   = $submitted_blog_url;
 		$akismet_comment['comment_content']      = $submitted_message;
 		$query_string = '';
 		foreach ( $akismet_comment as $key => $data ) {
@@ -188,7 +190,7 @@ if ( ! empty( $_POST['submit'] ) ) {
 		$message_data['ip']       = preg_replace( '/[^0-9., ]/', '', sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ) );
 		$message_data['name']     = sanitize_text_field( wp_unslash( $_POST['your_name'] ?? '' ) );
 		$message_data['email']    = sanitize_email( $submitted_email );
-		$message_data['blog_url'] = esc_url_raw( wp_unslash( $_POST['blog_url'] ?? '' ) );
+		$message_data['blog_url'] = $submitted_blog_url;
 		$message_data['subject']  = sanitize_text_field( wp_unslash( $_POST['subject'] ?? '' ) );
 		$message_data['message']  = wp_kses( $submitted_message, array() );
 
