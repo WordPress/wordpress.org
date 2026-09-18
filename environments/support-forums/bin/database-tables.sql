@@ -64,19 +64,3 @@ CREATE TABLE IF NOT EXISTS `bpmain_wporg_groups_members` (
   `date_modified` datetime NOT NULL,
   PRIMARY KEY (`group_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Add `date` where an earlier start created the table without it. Without the
--- column, get_plugin_reviews() and sync_ratings() are an unknown-column error.
-SET @add_date := IF(
-  EXISTS (
-    SELECT 1 FROM `information_schema`.`COLUMNS`
-     WHERE `TABLE_SCHEMA` = DATABASE()
-       AND `TABLE_NAME` = 'ratings'
-       AND `COLUMN_NAME` = 'date'
-  ),
-  'DO 0',
-  'ALTER TABLE `ratings` ADD COLUMN `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER `rating`'
-);
-PREPARE add_date FROM @add_date;
-EXECUTE add_date;
-DEALLOCATE PREPARE add_date;
