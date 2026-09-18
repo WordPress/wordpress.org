@@ -11,6 +11,10 @@
  * stub is worse than none: the guard passes and the first missing method is a
  * fatal. Every method the directories and the forums call is implemented here.
  *
+ * The public methods leave their parameters untyped, as production does. Callers
+ * pass post meta and compat objects straight through, so a declared scalar type
+ * would turn what production shrugs off into a TypeError only seen locally.
+ *
  * @package wporg-env
  */
 
@@ -147,12 +151,12 @@ class WPORG_Ratings {
 	 * @param string $slug Object slug.
 	 * @return array Counts keyed 1 through 5.
 	 */
-	public static function get_rating_counts( string $type, string $slug ): array {
+	public static function get_rating_counts( $type, $slug ): array {
 		$counts  = array_fill( 1, 5, 0 );
-		$ratings = self::get_ratings( $type, $slug );
+		$ratings = self::get_ratings( (string) $type, (string) $slug );
 
 		if ( ! $ratings && 'theme' === $type ) {
-			$seeded = self::get_seeded_theme_meta( $slug, 'ratings' );
+			$seeded = self::get_seeded_theme_meta( (string) $slug, 'ratings' );
 			return $seeded ? array_replace( $counts, (array) $seeded ) : $counts;
 		}
 
@@ -174,7 +178,8 @@ class WPORG_Ratings {
 	 * @param int    $rating Star level, or 0 for all of them.
 	 * @return int
 	 */
-	public static function get_rating_count( string $type, string $slug, int $rating = 0 ): int {
+	public static function get_rating_count( $type, $slug, $rating = 0 ): int {
+		$rating = (int) $rating;
 		$counts = self::get_rating_counts( $type, $slug );
 
 		if ( $rating ) {
@@ -182,8 +187,8 @@ class WPORG_Ratings {
 		}
 
 		// The API's distribution need not add up to num_ratings, so prefer the stored total.
-		if ( 'theme' === $type && ! self::get_ratings( $type, $slug ) ) {
-			return (int) self::get_seeded_theme_meta( $slug, 'num_ratings' );
+		if ( 'theme' === $type && ! self::get_ratings( (string) $type, (string) $slug ) ) {
+			return (int) self::get_seeded_theme_meta( (string) $slug, 'num_ratings' );
 		}
 
 		return (int) array_sum( $counts );
@@ -196,11 +201,11 @@ class WPORG_Ratings {
 	 * @param string $slug Object slug.
 	 * @return float
 	 */
-	public static function get_avg_rating( string $type, string $slug ): float {
-		$ratings = array_column( self::get_ratings( $type, $slug ), 'rating' );
+	public static function get_avg_rating( $type, $slug ): float {
+		$ratings = array_column( self::get_ratings( (string) $type, (string) $slug ), 'rating' );
 
 		if ( ! $ratings ) {
-			return 'theme' === $type ? (float) self::get_seeded_theme_meta( $slug, 'rating' ) : 0.0;
+			return 'theme' === $type ? (float) self::get_seeded_theme_meta( (string) $slug, 'rating' ) : 0.0;
 		}
 
 		return array_sum( $ratings ) / count( $ratings );
@@ -214,9 +219,9 @@ class WPORG_Ratings {
 	 * @param int    $user_id User ID.
 	 * @return int The rating, or 0 when the user has not rated it.
 	 */
-	public static function get_user_rating( string $type, string $slug, int $user_id ): int {
-		foreach ( self::get_ratings( $type, $slug ) as $row ) {
-			if ( $user_id === (int) $row->user_id ) {
+	public static function get_user_rating( $type, $slug, $user_id ): int {
+		foreach ( self::get_ratings( (string) $type, (string) $slug ) as $row ) {
+			if ( (int) $user_id === (int) $row->user_id ) {
 				return (int) $row->rating;
 			}
 		}
@@ -236,8 +241,10 @@ class WPORG_Ratings {
 	 * @param int    $rating  Star level, 1 through 5.
 	 * @return void
 	 */
-	public static function set_rating( int $post_id, string $type, string $slug, int $user_id, int $rating ): void {
+	public static function set_rating( $post_id, $type, $slug, $user_id, $rating ): void {
 		global $wpdb;
+
+		$rating = (int) $rating;
 
 		if ( ! self::has_table() || $rating < 1 || $rating > 5 ) {
 			return;
@@ -247,10 +254,10 @@ class WPORG_Ratings {
 		$wpdb->replace(
 			'ratings',
 			array(
-				'post_id'     => $post_id,
-				'object_type' => $type,
-				'object_slug' => $slug,
-				'user_id'     => $user_id,
+				'post_id'     => (int) $post_id,
+				'object_type' => (string) $type,
+				'object_slug' => (string) $slug,
+				'user_id'     => (int) $user_id,
 				'rating'      => $rating,
 			),
 			array( '%d', '%s', '%s', '%d', '%d' )
@@ -268,10 +275,10 @@ class WPORG_Ratings {
 	 * @param int    $user_id User ID. Unused; part of the production signature.
 	 * @return void
 	 */
-	public static function clear_cache( int $post_id, string $type = '', string $slug = '', int $user_id = 0 ): void {
+	public static function clear_cache( $post_id, $type = '', $slug = '', $user_id = 0 ): void {
 		unset( $type, $slug, $user_id );
 
-		clean_post_cache( $post_id );
+		clean_post_cache( (int) $post_id );
 	}
 
 	/**
@@ -282,11 +289,11 @@ class WPORG_Ratings {
 	 * @param int $post_id Deleted post ID.
 	 * @return void
 	 */
-	public static function delete_rating( int $post_id ): void {
+	public static function delete_rating( $post_id ): void {
 		global $wpdb;
 
 		if ( self::has_table() ) {
-			$wpdb->delete( 'ratings', array( 'post_id' => $post_id ), array( '%d' ) );
+			$wpdb->delete( 'ratings', array( 'post_id' => (int) $post_id ), array( '%d' ) );
 		}
 	}
 
@@ -296,7 +303,9 @@ class WPORG_Ratings {
 	 * @param float $rating Star rating.
 	 * @return string Escaped HTML.
 	 */
-	public static function get_dashicons_stars( float $rating ): string {
+	public static function get_dashicons_stars( $rating ): string {
+		$rating = (float) $rating;
+
 		// Callers pass stored meta straight through, so an out-of-range value must not reach str_repeat().
 		$stars = min( 5, max( 0, (int) round( $rating ) ) );
 
@@ -315,7 +324,7 @@ class WPORG_Ratings {
 	 * @param bool   $required Whether a rating is required.
 	 * @return void
 	 */
-	public static function get_dashicons_form( string $type, string $slug, bool $required = false ): void {
+	public static function get_dashicons_form( $type, $slug, $required = false ): void {
 		$current = self::get_user_rating( $type, $slug, get_current_user_id() ) ?: 5;
 
 		printf(

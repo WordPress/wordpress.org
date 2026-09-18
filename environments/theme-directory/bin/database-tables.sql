@@ -20,3 +20,27 @@ CREATE TABLE IF NOT EXISTS `ratings` (
   UNIQUE KEY `object_user` (`object_type`,`object_slug`,`user_id`),
   KEY `post_id` (`post_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- `CREATE TABLE IF NOT EXISTS` skips environments started before `object_user`
+-- existed, and MySQL has no `CREATE INDEX IF NOT EXISTS`, so migrate those in
+-- place: collapse any duplicate rows onto the newest, then swap the indexes.
+DELETE `r` FROM `ratings` AS `r`
+  JOIN `ratings` AS `newer`
+    ON `newer`.`object_type` = `r`.`object_type`
+   AND `newer`.`object_slug` = `r`.`object_slug`
+   AND `newer`.`user_id` = `r`.`user_id`
+   AND `newer`.`id` > `r`.`id`;
+
+SET @migrate := IF(
+  EXISTS (
+    SELECT 1 FROM `information_schema`.`STATISTICS`
+     WHERE `TABLE_SCHEMA` = DATABASE()
+       AND `TABLE_NAME` = 'ratings'
+       AND `INDEX_NAME` = 'object_user'
+  ),
+  'DO 0',
+  'ALTER TABLE `ratings` DROP INDEX `object_type`, DROP INDEX `user_id`, ADD UNIQUE KEY `object_user` (`object_type`,`object_slug`,`user_id`)'
+);
+PREPARE migrate FROM @migrate;
+EXECUTE migrate;
+DEALLOCATE PREPARE migrate;

@@ -11,10 +11,11 @@
  * Usage:
  *   wp eval-file wp-content/env-bin/seed-site.php --url=<sub-site url>
  *
+ * No strict_types declaration: eval-file evaluates the file inline, where a
+ * declare() cannot be the first statement.
+ *
  * @package support-forums-env
  */
-
-declare( strict_types = 1 );
 
 namespace WordPressdotorg\Forums\Env;
 

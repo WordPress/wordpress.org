@@ -5,6 +5,8 @@
  * @package support-forums
  */
 
+declare( strict_types = 1 );
+
 namespace WordPressdotorg\Forums\Tests;
 
 if ( 'cli' !== php_sapi_name() ) {

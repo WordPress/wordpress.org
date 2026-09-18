@@ -12,10 +12,11 @@
  * Usage:
  *   wp eval-file wp-content/env-bin/seed.php
  *
+ * No strict_types declaration: eval-file evaluates the file inline, where a
+ * declare() cannot be the first statement.
+ *
  * @package support-forums-env
  */
-
-declare( strict_types = 1 );
 
 namespace WordPressdotorg\Forums\Env;
 
@@ -471,8 +472,9 @@ $review = ensure_topic(
 	array( 'rating' => 5 ),
 	array( 'topic-plugin' => 'hello-dolly' )
 );
-if ( class_exists( 'WPORG_Ratings' ) ) {
-	$reviewer = get_user_by( 'login', 'visitor' );
+
+$reviewer = get_user_by( 'login', 'visitor' );
+if ( $reviewer && class_exists( 'WPORG_Ratings' ) ) {
 	\WPORG_Ratings::set_rating( $review, 'plugin', 'hello-dolly', (int) $reviewer->ID, 5 );
 }
 

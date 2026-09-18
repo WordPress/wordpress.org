@@ -38,7 +38,7 @@
 		"sso:test:env": "wp-env --config sso/.wp-env.test.json",
 		"sso:test": "npm run sso:test:env -- start && npm run sso:test:env -- run cli --env-cwd=wp-content/wporg-sso phpunit",
 		"support:env": "wp-env --config support-forums/.wp-env.json",
-		"support:refresh": "npm run support:env -- run cli -- wp option delete wporg_support_env_seeded && bash support-forums/bin/after-start.sh",
+		"support:refresh": "npm run support:env -- run cli -- wp option delete wporg_support_env_seeded; bash support-forums/bin/after-start.sh",
 		"support:test:env": "wp-env --config support-forums/.wp-env.test.json",
 		"support:test": "npm run support:test:env -- start && npm run support:test:env -- run cli --env-cwd=wp-content/plugins/support-forums phpunit"
 	},
