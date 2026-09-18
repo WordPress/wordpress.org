@@ -11,11 +11,10 @@
  * Usage:
  *   wp eval-file wp-content/env-bin/seed-site.php --url=<sub-site url>
  *
- * No strict_types declaration: eval-file evaluates the file inline, where a
- * declare() cannot be the first statement.
- *
  * @package support-forums-env
  */
+
+declare( strict_types = 1 );
 
 namespace WordPressdotorg\Forums\Env;
 
@@ -72,7 +71,7 @@ function ensure_directory_record( string $post_type, string $slug, string $title
 
 $current_blog_id = (int) get_current_blog_id();
 
-if ( WPORG_PLUGIN_DIRECTORY_BLOGID === $current_blog_id ) {
+if ( (int) WPORG_PLUGIN_DIRECTORY_BLOGID === $current_blog_id ) {
 	if ( ! taxonomy_exists( 'plugin_committers' ) ) {
 		\WP_CLI::error( 'The plugin-directory plugin is not loaded on this site.' );
 	}
@@ -93,7 +92,7 @@ if ( WPORG_PLUGIN_DIRECTORY_BLOGID === $current_blog_id ) {
 	return;
 }
 
-if ( WPORG_THEME_DIRECTORY_BLOGID === $current_blog_id ) {
+if ( (int) WPORG_THEME_DIRECTORY_BLOGID === $current_blog_id ) {
 	if ( ! post_type_exists( 'repopackage' ) ) {
 		\WP_CLI::error( 'The theme-directory plugin is not loaded on this site.' );
 	}
@@ -120,7 +119,7 @@ if ( WPORG_THEME_DIRECTORY_BLOGID === $current_blog_id ) {
 	return;
 }
 
-if ( WPORG_LOCAL_ROSETTA_BLOGID === $current_blog_id ) {
+if ( (int) WPORG_LOCAL_ROSETTA_BLOGID === $current_blog_id ) {
 	if ( ! function_exists( 'bbp_get_forum_post_type' ) ) {
 		\WP_CLI::error( 'bbPress is not loaded on this site.' );
 	}

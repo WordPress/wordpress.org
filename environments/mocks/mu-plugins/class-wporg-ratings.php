@@ -114,6 +114,15 @@ class WPORG_Ratings {
 	private static function get_seeded_theme_meta( string $slug, string $key ) {
 		global $wpdb;
 
+		// repopackage posts live on the theme directory blog, not the one the request is rendering.
+		$switched = defined( 'WPORG_THEME_DIRECTORY_BLOGID' )
+			&& is_multisite()
+			&& get_current_blog_id() !== (int) WPORG_THEME_DIRECTORY_BLOGID;
+
+		if ( $switched ) {
+			switch_to_blog( (int) WPORG_THEME_DIRECTORY_BLOGID );
+		}
+
 		$post_id = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts} WHERE post_name = %s AND post_type = %s LIMIT 1",
@@ -122,7 +131,13 @@ class WPORG_Ratings {
 			)
 		);
 
-		return $post_id ? get_post_meta( $post_id, $key, true ) : null;
+		$meta = $post_id ? get_post_meta( $post_id, $key, true ) : null;
+
+		if ( $switched ) {
+			restore_current_blog();
+		}
+
+		return $meta;
 	}
 
 	/**
@@ -282,7 +297,8 @@ class WPORG_Ratings {
 	 * @return string Escaped HTML.
 	 */
 	public static function get_dashicons_stars( float $rating ): string {
-		$stars = (int) round( $rating );
+		// Callers pass stored meta straight through, so an out-of-range value must not reach str_repeat().
+		$stars = min( 5, max( 0, (int) round( $rating ) ) );
 
 		return sprintf(
 			'<span class="wporg-ratings" aria-label="%s">%s</span>',

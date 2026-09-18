@@ -43,6 +43,14 @@ function locate_tests_dir(): string {
 	return rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib/tests/phpunit/';
 }
 
+/*
+ * The suite runs single-site, while WPORG_SUPPORT_FORUMS_BLOGID is set to 1 in
+ * .wp-env.test.json. Anything guarded on that constant together with
+ * is_multisite() therefore takes the single-site path here, so a test can only
+ * prove the behaviour, never that it is scoped to the forums blog. Proving the
+ * latter needs a multisite bootstrap and a second blog.
+ */
+
 $_tests_dir = locate_tests_dir();
 
 if ( ! file_exists( $_tests_dir . 'includes/functions.php' ) ) {

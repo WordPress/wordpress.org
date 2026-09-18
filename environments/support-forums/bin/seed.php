@@ -12,11 +12,10 @@
  * Usage:
  *   wp eval-file wp-content/env-bin/seed.php
  *
- * No strict_types declaration: eval-file evaluates the file inline, where a
- * declare() cannot be the first statement.
- *
  * @package support-forums-env
  */
+
+declare( strict_types = 1 );
 
 namespace WordPressdotorg\Forums\Env;
 
@@ -140,6 +139,10 @@ function set_roles( int $blog_id, array $roles ): void {
 
 		if ( str_starts_with( $role, 'bbp_' ) && function_exists( 'bbp_set_user_role' ) ) {
 			bbp_set_user_role( (int) $user->ID, $role );
+
+			// bbp_set_user_role() only drops a previous bbPress role, so the membership default has to go explicitly.
+			$scoped = new WP_User( $user->ID, '', $blog_id );
+			$scoped->remove_role( 'subscriber' );
 			continue;
 		}
 

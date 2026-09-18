@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `bb_themes_stats` (
   PRIMARY KEY (`slug`,`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+-- The UNIQUE KEY is what lets WPORG_Ratings::set_rating() upsert a review.
 CREATE TABLE IF NOT EXISTS `ratings` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `object_type` varchar(20) NOT NULL DEFAULT '',
@@ -16,7 +17,6 @@ CREATE TABLE IF NOT EXISTS `ratings` (
   `post_id` bigint(20) unsigned NOT NULL DEFAULT 0,
   `rating` tinyint(3) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
-  KEY `object_type` (`object_type`,`object_slug`),
-  KEY `user_id` (`user_id`),
+  UNIQUE KEY `object_user` (`object_type`,`object_slug`,`user_id`),
   KEY `post_id` (`post_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
