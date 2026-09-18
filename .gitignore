@@ -4,4 +4,8 @@ vendor/
 .phpunit.result.cache
 .phpcs.cache
 .phpcs-branch/
+*.phpcs
+*.orig.phpcs
+/*.diff
+/*.orig
 .svn/

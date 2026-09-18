@@ -13,7 +13,8 @@ class Block_Validator {
 	 */
 	public static function display() {
 		ob_start();
-		$plugin_url = $_REQUEST['plugin_url'] ?? '';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The field is echoed back exactly as typed so it can be corrected; run_check_plugin_repo() also accepts a bare plugin slug and a git@github.com: address, neither of which survives URL escaping.
+		$plugin_url = isset( $_REQUEST['plugin_url'] ) && is_string( $_REQUEST['plugin_url'] ) ? wp_unslash( $_REQUEST['plugin_url'] ) : '';
 
 		if ( is_user_logged_in() ) :
 			?>
@@ -79,12 +80,12 @@ class Block_Validator {
 			?>
 			</details>
 			<?php
-
-			if ( $_POST && ! empty( $_POST['plugin_url'] ) && wp_verify_nonce( $_POST['block-nonce'], 'validate-block-plugin' ) ) {
-				self::validate_block( $_POST['plugin_url'] );
-			} elseif ( $_POST && ! empty( $_POST['block-directory-upload'] ) ) {
+			if ( ! empty( $_POST['plugin_url'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['block-nonce'] ?? '' ) ), 'validate-block-plugin' ) ) {
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- run_check_plugin_repo() takes a bare plugin slug or a git@github.com: address as well as a URL, checks the host against its own allow list, and escapes the value into any rejection message.
+				self::validate_block( is_string( $_POST['plugin_url'] ) ? wp_unslash( $_POST['plugin_url'] ) : '' );
+			} elseif ( ! empty( $_POST['block-directory-upload'] ) ) {
 				self::handle_file_upload();
-			} elseif ( $_POST && ! empty( $_POST['block-directory-edit'] ) ) {
+			} elseif ( ! empty( $_POST['block-directory-edit'] ) ) {
 				self::handle_edit_form();
 			}
 			?>
@@ -100,11 +101,11 @@ class Block_Validator {
 	protected static function handle_file_upload() {
 		if (
 			! empty( $_POST['block-upload-nonce'] )
-			&& wp_verify_nonce( $_POST['block-upload-nonce'], 'wporg-block-upload' )
-			&& 'upload' === $_POST['action']
+			&& wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['block-upload-nonce'] ?? '' ) ), 'wporg-block-upload' )
+			&& 'upload' === sanitize_key( $_POST['action'] ?? '' )
 			) {
-			if ( UPLOAD_ERR_OK === $_FILES['zip_file']['error'] ) {
-				self::validate_block_from_zip( $_FILES['zip_file']['tmp_name'] );
+			if ( isset( $_FILES['zip_file']['error'] ) && UPLOAD_ERR_OK === (int) $_FILES['zip_file']['error'] ) {
+				self::validate_block_from_zip( sanitize_text_field( wp_unslash( $_FILES['zip_file']['tmp_name'] ?? '' ) ) );
 			} else {
 				$message = __( 'Error in file upload.', 'wporg-plugins' );
 			}
@@ -117,23 +118,23 @@ class Block_Validator {
 	}
 
 	protected static function handle_edit_form() {
-		$post = get_post( intval( $_POST['plugin-id'] ) );
-		if ( $post && wp_verify_nonce( $_POST['block-directory-nonce'], 'block-directory-edit-' . $post->ID ) ) {
+		$post = get_post( intval( $_POST['plugin-id'] ?? 0 ) );
+		if ( $post && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['block-directory-nonce'] ?? '' ) ), 'block-directory-edit-' . $post->ID ) ) {
 			if ( current_user_can( 'edit_post', $post->ID ) || current_user_can( 'plugin_admin_edit', $post->ID ) ) {
 				$terms = wp_list_pluck( get_the_terms( $post->ID, 'plugin_section' ) ?: [], 'slug' );
-				if ( 'add' === $_POST['block-directory-edit'] ) {
+				if ( 'add' === sanitize_key( $_POST['block-directory-edit'] ?? '' ) ) {
 					$terms[] = 'block';
-				} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
+				} elseif ( 'remove' === sanitize_key( $_POST['block-directory-edit'] ?? '' ) ) {
 					$terms = array_diff( $terms, array( 'block' ) );
 				}
 				$result = wp_set_object_terms( $post->ID, $terms, 'plugin_section' );
 				if ( !is_wp_error( $result ) && !empty( $result ) ) {
-					if ( 'add' === $_POST['block-directory-edit'] ) {
+					if ( 'add' === sanitize_key( $_POST['block-directory-edit'] ?? '' ) ) {
 						Tools::audit_log( 'Plugin added to block directory.', $post->ID );
 						self::maybe_send_email_plugin_added( $post );
 						Plugin_Import::queue( $post->post_name, array( 'tags_touched' => array( $post->stable_tag ) ) );
 						echo '<div class="notice notice-success notice-alt"><p>' . esc_html__( 'Plugin added to the block directory.', 'wporg-plugins' ) . '</p></div>';
-					} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
+					} elseif ( 'remove' === sanitize_key( $_POST['block-directory-edit'] ?? '' ) ) {
 						Tools::audit_log( 'Plugin removed from block directory.', $post->ID );
 						echo '<div class="notice notice-info notice-alt"><p>' . esc_html__( 'Plugin removed from the block directory.', 'wporg-plugins' ) . '</p></div>';
 					}
@@ -145,8 +146,8 @@ class Block_Validator {
 	}
 
 	protected static function handle_send_email() {
-		$post = get_post( intval( $_POST['plugin-id'] ) );
-		if ( $post && 'error' === $_POST['block-directory-email'] && wp_verify_nonce( $_POST['block-directory-email-nonce'], 'block-directory-email-' . $post->ID ) ) {
+		$post = get_post( intval( $_POST['plugin-id'] ?? 0 ) );
+		if ( $post && 'error' === sanitize_key( $_POST['block-directory-email'] ?? '' ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['block-directory-email-nonce'] ?? '' ) ), 'block-directory-email-' . $post->ID ) ) {
 			if ( current_user_can( 'edit_post', $post->ID ) ) {
 				if ( self::maybe_send_email_block_error( $post ) ) {
 						echo '<div class="notice notice-success notice-alt"><p>' . esc_html__( 'Email sent.', 'wporg-plugins' ) . '</p></div>';

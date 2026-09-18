@@ -19,7 +19,7 @@ show_admin_bar( true );
  * @return bool
  */
 function bb_base_is_codex() {
-	return (bool) strstr( $_SERVER['HTTP_HOST'], 'codex' );
+	return (bool) strstr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), 'codex' );
 }
 
 /**
@@ -28,7 +28,7 @@ function bb_base_is_codex() {
  * @return bool
  */
 function bb_base_is_buddypress() {
-	$retval = (bool) strstr( $_SERVER['HTTP_HOST'], 'buddypress' );
+	$retval = (bool) strstr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), 'buddypress' );
 	return (bool) apply_filters( 'bb_base_is_buddypress', $retval );
 }
 
@@ -38,7 +38,7 @@ function bb_base_is_buddypress() {
  * @return bool
  */
 function bb_base_is_bbpress() {
-	$retval = (bool) strstr( $_SERVER['HTTP_HOST'], 'bbpress' );
+	$retval = (bool) strstr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), 'bbpress' );
 	return (bool) apply_filters( 'bb_base_is_bbpress', $retval );
 }
 
@@ -120,9 +120,10 @@ function bb_base_topic_search_query( $escaped = true ) {
 		return false;
 	}
 
-	$query = apply_filters( 'bb_base_topic_search_query', $_GET['ts'] );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The term is searched for as typed, markup and percent-encoding included; the $escaped branch below escapes it for the form field.
+	$query = apply_filters( 'bb_base_topic_search_query', wp_unslash( $_GET['ts'] ) );
 	if ( true === $escaped ) {
-		$query = stripslashes( esc_attr( $query ) );
+		$query = esc_attr( $query );
 	}
 
 	return $query;
@@ -134,9 +135,10 @@ function bb_base_reply_search_query( $escaped = true ) {
 		return false;
 	}
 
-	$query = apply_filters( 'bb_base_reply_search_query', $_GET['rs'] );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The term is searched for as typed, markup and percent-encoding included; the $escaped branch below escapes it for the form field.
+	$query = apply_filters( 'bb_base_reply_search_query', wp_unslash( $_GET['rs'] ) );
 	if ( true === $escaped ) {
-		$query = stripslashes( esc_attr( $query ) );
+		$query = esc_attr( $query );
 	}
 
 	return $query;
@@ -148,9 +150,10 @@ function bb_base_plugin_search_query( $escaped = true ) {
 		return false;
 	}
 
-	$query = apply_filters( 'bb_base_plugin_search_query', $_GET['ps'] );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The term is searched for as typed, markup and percent-encoding included; the $escaped branch below escapes it for the form field.
+	$query = apply_filters( 'bb_base_plugin_search_query', wp_unslash( $_GET['ps'] ) );
 	if ( true === $escaped ) {
-		$query = stripslashes( esc_attr( $query ) );
+		$query = esc_attr( $query );
 	}
 
 	return $query;

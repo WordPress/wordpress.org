@@ -421,6 +421,7 @@ class Plugin_Scan {
 		// Run plugin check via CLI
 		$start_time = microtime(1);
 		$env_vars   = [
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Process environment, not request input; passed through verbatim.
 			'PATH'               => $_ENV['PATH'] ?? '/usr/local/bin:/usr/bin:/bin',
 			'WP_CLI_CONFIG_PATH' => WP_CLI_CONFIG_PATH,
 		];

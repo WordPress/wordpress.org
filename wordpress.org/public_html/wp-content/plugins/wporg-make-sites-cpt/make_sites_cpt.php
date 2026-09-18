@@ -148,7 +148,7 @@ function make_site_save_postdata( $post_id ) {
 		return;
 	}
 
-	if ( ! wp_verify_nonce( $_POST['make_site_nonce'], 'make_site_nonce' ) ) {
+	if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['make_site_nonce'] ) ), 'make_site_nonce' ) ) {
 		return;
 	}
 
@@ -157,15 +157,15 @@ function make_site_save_postdata( $post_id ) {
 	}
 
 	$weekly_meeting       = empty( $_POST['weekly_meeting'] ) ? '' : '1';
-	$weekly_meeting_when  = sanitize_text_field( $_POST['weekly_meeting_when'] );
-	$weekly_meeting_where = sanitize_text_field( $_POST['weekly_meeting_where'] );
+	$weekly_meeting_when  = sanitize_text_field( wp_unslash( $_POST['weekly_meeting_when'] ?? '' ) );
+	$weekly_meeting_where = sanitize_text_field( wp_unslash( $_POST['weekly_meeting_where'] ?? '' ) );
 
-	update_post_meta( $post_id, 'weekly_meeting',       $weekly_meeting );
-	update_post_meta( $post_id, 'weekly_meeting_when',  $weekly_meeting_when );
-	update_post_meta( $post_id, 'weekly_meeting_where', $weekly_meeting_where );
+	update_post_meta( $post_id, 'weekly_meeting', $weekly_meeting );
+	update_post_meta( $post_id, 'weekly_meeting_when', wp_slash( $weekly_meeting_when ) );
+	update_post_meta( $post_id, 'weekly_meeting_where', wp_slash( $weekly_meeting_where ) );
 
 	if ( is_multisite() ) {
-		$make_site_id = intval( $_POST['make_site_id'] );
+		$make_site_id = intval( $_POST['make_site_id'] ?? 0 );
 		update_post_meta( $post_id, 'make_site_id', $make_site_id );
 	}
 }

@@ -15,14 +15,15 @@ if ( !function_exists( 'bporg_unhook_single_user_filter' ) )
 	include_once( plugin_dir_path( __FILE__ ) . 'extensions.php' );
 
 // Always show the toolbar
-if ( 'profiles.wordpress.org' != $_SERVER['HTTP_HOST'] )
+if ( 'profiles.wordpress.org' !== sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) ) {
 	add_filter( 'show_admin_bar', '__return_true' );
+}
 
 function bporg_maintenance() {
 	if ( is_super_admin() )
 		return;
 
-	if ( 'buddypress.org' == $_SERVER['HTTP_HOST'] ) {
+	if ( 'buddypress.org' === sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) ) {
 		header( 'Retry-After: 7200' );
 		wp_die( 'BuddyPress.org is down for maintenance. See you tomorrow!', 'Be back soon!', array( 'response' => 503 ) );
 	}
@@ -56,14 +57,17 @@ function bporg_admin_redirect() {
 		return;
 	}
 
-	// Allow registered unprivileged admin-ajax.php requests for
-	// profiles.wordpress.org to pass through.
+	// Allow registered unprivileged admin-ajax.php requests for profiles.wordpress.org to pass through.
+
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- admin-ajax.php dispatches on the raw action, so both halves of the test below match on that same value.
+	$ajax_action = isset( $_REQUEST['action'] ) && is_string( $_REQUEST['action'] ) ? wp_unslash( $_REQUEST['action'] ) : '';
+
 	if (
-		'profiles.wordpress.org' == $_SERVER['HTTP_HOST'] &&
-		isset( $_REQUEST['action'] ) &&
+		'profiles.wordpress.org' === sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) &&
+		$ajax_action &&
 		(
-			has_action( 'wp_ajax_nopriv_' . $_REQUEST['action'] ) ||
-			in_array( $_REQUEST['action'], [ 'webauthn_preregister', 'webauthn_register', 'webauthn_delete_key', 'rest_nonce', 'wporg_xprofile_field_suggestions' ] )
+			has_action( 'wp_ajax_nopriv_' . $ajax_action ) ||
+			in_array( $ajax_action, [ 'webauthn_preregister', 'webauthn_register', 'webauthn_delete_key', 'rest_nonce', 'wporg_xprofile_field_suggestions' ], true )
 		)
 	) {
 		return;

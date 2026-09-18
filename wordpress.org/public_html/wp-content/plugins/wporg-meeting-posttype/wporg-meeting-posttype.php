@@ -9,6 +9,13 @@ Author URI:  http://wordpress.org/
 Text Domain: wporg
 */
 
+/*
+ * The class body sits inside an `if ( ! class_exists() ):` wrapper without the matching
+ * indent, so the scope sniff reads every line in the file as one level short.
+ *
+ * phpcs:disable Generic.WhiteSpace.ScopeIndent
+ */
+
 if ( !class_exists('Meeting_Post_Type') ):
 class Meeting_Post_Type {
 
@@ -350,7 +357,7 @@ class Meeting_Post_Type {
 		global $post;
 
 		// Verify nonce
-		if ( !isset( $_POST['meeting_nonce'] ) || !wp_verify_nonce( $_POST['meeting_nonce'], 'save_meeting_meta_'.$post_id ) ) {
+		if ( ! isset( $_POST['meeting_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['meeting_nonce'] ) ), 'save_meeting_meta_' . $post_id ) ) {
 			return $post_id;
 		}
 
@@ -369,21 +376,27 @@ class Meeting_Post_Type {
 			return $post_id;
 		}
 
-		$meta['team']        = ( isset( $_POST['team'] ) ? esc_textarea( $_POST['team'] ) : '' );
-		$meta['start_date']  = ( isset( $_POST['start_date'] ) ? esc_textarea( $_POST['start_date'] ) : '' );
-		$meta['end_date']    = ( isset( $_POST['end_date'] ) ? esc_textarea( $_POST['end_date'] ) : '' );
-		$meta['time']        = ( isset( $_POST['time'] ) ? esc_textarea( $_POST['time'] ) : '' );
-		$meta['recurring']   = ( isset( $_POST['recurring'] )
-		                         && in_array( $_POST['recurring'], array( 'weekly', 'biweekly', 'occurrence', 'monthly' ) )
-		                         ? ( $_POST['recurring'] ) : '' );
-		$meta['occurrence']  = ( isset( $_POST['occurrence'] ) && 'occurrence' === $meta['recurring']
+		/*
+		 * These are stored, not printed, so each value is sanitized rather than
+		 * escaped. The metabox escapes them again with esc_attr() and esc_url()
+		 * when it renders them back into the form.
+		 */
+		$recurring = sanitize_key( $_POST['recurring'] ?? '' );
+
+		$meta['team']       = sanitize_text_field( wp_unslash( $_POST['team'] ?? '' ) );
+		$meta['start_date'] = sanitize_text_field( wp_unslash( $_POST['start_date'] ?? '' ) );
+		$meta['end_date']   = sanitize_text_field( wp_unslash( $_POST['end_date'] ?? '' ) );
+		$meta['time']       = sanitize_text_field( wp_unslash( $_POST['time'] ?? '' ) );
+		$meta['recurring']  = in_array( $recurring, array( 'weekly', 'biweekly', 'occurrence', 'monthly' ), true ) ? $recurring : '';
+		$meta['occurrence'] = ( isset( $_POST['occurrence'] ) && 'occurrence' === $meta['recurring']
 		                         && is_array( $_POST['occurrence'] )
 		                         ? array_map( 'intval', $_POST['occurrence'] ) : array() );
-		$meta['link']        = ( isset( $_POST['link'] ) ? esc_url( $_POST['link'] ) : '' );
-		$meta['location']    = ( isset( $_POST['location'] ) ? esc_textarea( $_POST['location'] ) : '' );
+		$meta['link']       = esc_url_raw( wp_unslash( $_POST['link'] ?? '' ) );
+		$meta['location']   = sanitize_text_field( wp_unslash( $_POST['location'] ?? '' ) );
 
+		/* update_post_meta() unslashes what it is given, so re-slash the sanitized values. */
 		foreach ( $meta as $key => $value ) {
-			update_post_meta( $post->ID, $key, $value );
+			update_post_meta( $post->ID, $key, wp_slash( $value ) );
 		}
 	}
 

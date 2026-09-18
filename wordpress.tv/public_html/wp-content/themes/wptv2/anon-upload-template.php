@@ -303,25 +303,26 @@ if ( isset( $_GET['post_category'] ) ) {
 					<?php if ( ! is_user_logged_in() ) : ?>
 						<p>
 							<label for="wptv_uploaded_by"><?php esc_html_e( 'Uploaded by' ); ?><span class="required"> * </span></label>
-							<input type="text" id="wptv_uploaded_by" name="wptv_uploaded_by" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_uploaded_by'] ?? '' ) ); ?>" />
+							<input type="text" id="wptv_uploaded_by" name="wptv_uploaded_by" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['wptv_uploaded_by'] ?? '' ) ) ); ?>" />
 						</p>
 						<p>
 							<label for="wptv_email"><?php esc_html_e( 'Email address' ); ?><span class="required"> * </span></label>
-							<input type="text" id="wptv_email" name="wptv_email" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_email'] ?? '' ) ); ?>" />
+							<?php // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The field shows the address as typed, so a mistyped one can be corrected here instead of being silently repaired into a different one. ?>
+							<input type="text" id="wptv_email" name="wptv_email" value="<?php echo esc_attr( isset( $_GET['wptv_email'] ) && is_string( $_GET['wptv_email'] ) ? wp_unslash( $_GET['wptv_email'] ) : '' ); ?>" />
 						</p>
 					<?php endif; ?>
 
 					<p>
 						<label for="wptv_video_title"><?php esc_html_e( 'Video title' ); ?></label>
-						<input type="text" id="wptv_video_title" name="wptv_video_title" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_video_title'] ?? '' ) ); ?>" />
+						<input type="text" id="wptv_video_title" name="wptv_video_title" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['wptv_video_title'] ?? '' ) ) ); ?>" />
 					</p>
 					<p>
 						<label for="wptv_language"><?php esc_html_e( 'Language' ); ?></label>
-						<input type="text" id="wptv_language" name="wptv_language" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_language'] ?? '' ) ); ?>" />
+						<input type="text" id="wptv_language" name="wptv_language" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['wptv_language'] ?? '' ) ) ); ?>" />
 					</p>
 					<p>
 						<label for="wptv_date"><?php esc_html_e( 'Date Recorded' ); ?></label>
-						<input type="date" id="wptv_date" name="wptv_date" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_date'] ?? '' ) ); ?>" />
+						<input type="date" id="wptv_date" name="wptv_date" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['wptv_date'] ?? '' ) ) ); ?>" />
 					</p>
 
 					<div class="location">
@@ -373,19 +374,19 @@ if ( isset( $_GET['post_category'] ) ) {
 					</p>
 					<p>
 						<label for="wptv_speakers"><?php esc_html_e( 'Speakers' ); ?></label>
-						<input type="text" id="wptv_speakers" name="wptv_speakers" placeholder="John Smith, Jane Doe" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_speakers'] ?? '' ) ); ?>" />
+						<input type="text" id="wptv_speakers" name="wptv_speakers" placeholder="John Smith, Jane Doe" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['wptv_speakers'] ?? '' ) ) ); ?>" />
 					</p>
 					<p>
 						<label for="wptv_event"><?php esc_html_e( 'Event' ); ?></label>
-						<input type="text" id="wptv_event" name="wptv_event" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_event'] ?? '' ) ); ?>" />
+						<input type="text" id="wptv_event" name="wptv_event" value="<?php echo esc_attr( sanitize_text_field( wp_unslash( $_GET['wptv_event'] ?? '' ) ) ); ?>" />
 					</p>
 					<p>
 						<label for="wptv_video_description"><?php esc_html_e( 'Description' ); ?></label>
-						<textarea name="wptv_video_description" id="wptv_video_description" rows="8" cols="40"><?php echo esc_textarea( wp_unslash( $_GET['wptv_video_description'] ?? '' ) ); ?></textarea>
+						<textarea name="wptv_video_description" id="wptv_video_description" rows="8" cols="40"><?php echo esc_textarea( sanitize_textarea_field( wp_unslash( $_GET['wptv_video_description'] ?? '' ) ) ); ?></textarea>
 					</p>
 					<p>
 						<label for="wptv_slides_url"><?php esc_html_e( 'Slides URL' ); ?></label>
-						<input type="text" name="wptv_slides_url" id="wptv_slides_url" value="<?php echo esc_attr( wp_unslash( $_GET['wptv_slides_url'] ?? '' ) ); ?>" />
+						<input type="text" name="wptv_slides_url" id="wptv_slides_url" value="<?php echo esc_attr( esc_url_raw( wp_unslash( $_GET['wptv_slides_url'] ?? '' ) ) ); ?>" />
 					</p>
 					<p>
 						<label for="wptv_file"><?php esc_html_e( 'Video file' ); ?><span class="required"> * </span></label>

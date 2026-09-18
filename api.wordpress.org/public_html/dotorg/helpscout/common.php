@@ -22,18 +22,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Retrieve the incoming payload, and verify it's from HelpScout.
  */
 function get_request() {
-	global $HTTP_RAW_POST_DATA;
+	global $raw_post_data;
 
 	// HelpScout sends json data in the POST, so grab it from the input directly.
-	$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
+	$raw_post_data = file_get_contents( 'php://input' );
 
 	// Check the signature matches.
-	if ( ! is_from_helpscout( $HTTP_RAW_POST_DATA, $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ?? '' ) ) {
+	if ( ! is_from_helpscout( $raw_post_data, sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ?? '' ) ) ) ) {
 		exit;
 	}
 
 	// get the info from HS.
-	return json_decode( $HTTP_RAW_POST_DATA );
+	return json_decode( $raw_post_data );
 }
 
 // function to verify signature from HelpScout

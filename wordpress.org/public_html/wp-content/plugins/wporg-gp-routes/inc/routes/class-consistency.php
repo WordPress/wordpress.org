@@ -33,12 +33,11 @@ class Consistency extends GP_Route {
 		$search = $set = $project = '';
 		$search_case_sensitive = false;
 
-		if ( isset( $_REQUEST['search'] ) && strlen( $_REQUEST['search'] ) ) {
-			$search = wp_unslash( $_REQUEST['search'] );
-		}
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Exact original text may contain HTML and whitespace; query() prepares it and the template escapes it.
+		$search = isset( $_REQUEST['search'] ) && is_string( $_REQUEST['search'] ) ? wp_unslash( $_REQUEST['search'] ) : '';
 
 		if ( ! empty( $_REQUEST['set'] ) ) {
-			$set = wp_unslash( $_REQUEST['set'] );
+			$set = sanitize_text_field( wp_unslash( $_REQUEST['set'] ) );
 			if ( ! isset( $sets[ $set ] ) ) {
 				$set = '';
 			}
@@ -48,8 +47,9 @@ class Consistency extends GP_Route {
 			$search_case_sensitive = true;
 		}
 
-		if ( ! empty( $_REQUEST['project'] ) && isset( self::PROJECTS[ $_REQUEST['project'] ] ) ) {
-			$project = $_REQUEST['project'];
+		$requested_project = sanitize_text_field( wp_unslash( $_REQUEST['project'] ?? '' ) );
+		if ( isset( self::PROJECTS[ $requested_project ] ) ) {
+			$project = $requested_project;
 		}
 
 		$locale        = '';

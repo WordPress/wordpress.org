@@ -462,7 +462,7 @@ class Review_Tools {
 	 * admin-ajax.php handler for queueing a plugin import.
 	 */
 	static function svn_sync() {
-		$plugin_slug = sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) );
+		$plugin_slug = sanitize_text_field( wp_unslash( $_REQUEST['slug'] ?? '' ) );
 
 		check_ajax_referer( 'wporg_plugins_svn_sync-' . $plugin_slug );
 
@@ -483,7 +483,7 @@ class Review_Tools {
 	 * admin-ajax.php handler for queueing a plugin i18n import.
 	 */
 	static function i18n_import() {
-		$plugin_slug = sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) );
+		$plugin_slug = sanitize_text_field( wp_unslash( $_REQUEST['slug'] ?? '' ) );
 
 		check_ajax_referer( 'wporg_plugins_i18n_import-' . $plugin_slug );
 

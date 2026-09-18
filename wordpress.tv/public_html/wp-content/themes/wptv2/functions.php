@@ -147,14 +147,14 @@ class WordPressTV_Theme {
 		}
 
 		// Learn.WordPress.org category changed from social-learning to online workshops.
-		if ( str_starts_with( $_SERVER['REQUEST_URI'], '/category/social-learning' ) ) {
-			$url = str_replace( '/social-learning', '/learn-wordpress-online-workshops', $_SERVER['REQUEST_URI'] );
+		if ( str_starts_with( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/category/social-learning' ) ) {
+			$url = str_replace( '/social-learning', '/learn-wordpress-online-workshops', wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
 			wp_safe_redirect( $url, 301 );
 			die();
 		}
 
 		// Redirect /upload to submit-video
-		if ( 'upload' === trim( $_SERVER['REQUEST_URI'], '/' ) ) {
+		if ( 'upload' === trim( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/' ) ) {
 			wp_safe_redirect( '/submit-video/', 301 );
 			die();
 		}
@@ -429,14 +429,14 @@ class WordPressTV_Theme {
 			return;
 		}
 
-		if ( ! isset( $_POST['video_info_metabox_nonce'] ) || ! wp_verify_nonce( $_POST['video_info_metabox_nonce'], 'edit-video-info' ) ) {
+		if ( ! isset( $_POST['video_info_metabox_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['video_info_metabox_nonce'] ?? '' ) ), 'edit-video-info' ) ) {
 			return;
 		}
 
-		$slides_url = esc_url_raw( $_POST['_wptv_slides_url'] );
+		$slides_url = esc_url_raw( wp_unslash( $_POST['_wptv_slides_url'] ?? '' ) );
 
 		if ( $slides_url ) {
-			update_post_meta( $post_id, '_wptv_slides_url', $slides_url );
+			update_post_meta( $post_id, '_wptv_slides_url', wp_slash( $slides_url ) );
 		} else {
 			delete_post_meta( $post_id, '_wptv_slides_url' );
 		}

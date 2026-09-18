@@ -7,8 +7,8 @@
 
 $sso = WPOrg_SSO::get_instance();
 
-$token_cookie      = $_COOKIE[ $sso::LOGIN_TOS_COOKIE ] ?? false;
-$login_remember_me = $_COOKIE[ $sso::LOGIN_TOS_COOKIE . '_remember' ] ?? false;
+$token_cookie      = sanitize_text_field( wp_unslash( $_COOKIE[ $sso::LOGIN_TOS_COOKIE ] ?? '' ) ) ?: false;
+$login_remember_me = sanitize_text_field( wp_unslash( $_COOKIE[ $sso::LOGIN_TOS_COOKIE . '_remember' ] ?? '' ) ) ?: false;
 
 $user_id = wp_validate_auth_cookie( $token_cookie, 'tos_token' );
 if (
@@ -25,7 +25,7 @@ wp_set_current_user( $user->ID );
 // Record the TOS agreement.
 if (
 	! empty( $_POST['_tos_nonce'] ) &&
-	wp_verify_nonce( $_POST['_tos_nonce'], 'agree_to_tos' )
+	wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_tos_nonce'] ?? '' ) ), 'agree_to_tos' )
 ) {
 	// Agreement has been reached.
 
@@ -73,7 +73,7 @@ get_header();
 
 <form method="POST">
 	<?php wp_nonce_field( 'agree_to_tos', '_tos_nonce', false ); ?>
-	<input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( wp_unslash( $_REQUEST['redirect_to'] ) ); ?>" />
+	<input type="hidden" name="_wp_http_referer" value="<?php echo esc_attr( esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ) ); ?>" />
 	<p class="login-submit">
 		<input type="submit" class="button-primary" value="<?php esc_attr_eu( 'I agree', 'wporg' ); ?>">
 	</p>
