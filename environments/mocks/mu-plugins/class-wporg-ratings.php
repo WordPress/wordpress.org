@@ -250,7 +250,7 @@ class WPORG_Ratings {
 			return;
 		}
 
-		// Relies on the table's UNIQUE KEY over object_type, object_slug and user_id.
+		// Upserts on the UNIQUE KEY; the date feeds get_plugin_reviews() and sync_ratings().
 		$wpdb->replace(
 			'ratings',
 			array(
@@ -259,8 +259,9 @@ class WPORG_Ratings {
 				'object_slug' => (string) $slug,
 				'user_id'     => (int) $user_id,
 				'rating'      => $rating,
+				'date'        => current_time( 'mysql' ),
 			),
-			array( '%d', '%s', '%s', '%d', '%d' )
+			array( '%d', '%s', '%s', '%d', '%d', '%s' )
 		);
 
 		self::clear_cache( $post_id );
