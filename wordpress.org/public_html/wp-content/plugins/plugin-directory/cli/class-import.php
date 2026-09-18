@@ -480,8 +480,15 @@ class Import {
 			$plugin->post_title = strip_tags( $headers->Name );
 		}
 
+		/*
+		 * The readme's short description is sanitized by the parser; the file header that
+		 * stands in for it is not, so give it the same treatment before it can be a fallback.
+		 */
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Header keys as core's get_plugin_data() names them.
+		$header_excerpt = esc_html( wp_strip_all_tags( $headers->Description ) );
+
 		$plugin->post_content = trim( $content ) ?: $plugin->post_content;
-		$plugin->post_excerpt = trim( $readme->short_description ) ?: $headers->Description ?: $plugin->post_excerpt;
+		$plugin->post_excerpt = trim( $readme->short_description ) ?: $header_excerpt ?: $plugin->post_excerpt;
 
 		/*
 		 * Bump last updated if:

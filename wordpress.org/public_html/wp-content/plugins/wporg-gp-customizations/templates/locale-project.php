@@ -5,7 +5,7 @@ $breadcrumb   = array();
 $breadcrumb[] = gp_link_get( '/', __( 'Locales' ) );
 $breadcrumb[] = gp_link_get( gp_url_join( '/locale', $locale_slug, $set_slug ), esc_html( $locale->english_name ) );
 $breadcrumb[] = gp_link_get( gp_url_join( '/locale', $locale_slug, $set_slug, $project->path ), esc_html( $project->name ) );
-$breadcrumb[] = $sub_project->name;
+$breadcrumb[] = esc_html( $sub_project->name );
 gp_breadcrumb( $breadcrumb );
 gp_tmpl_header();
 ?>
@@ -17,7 +17,7 @@ gp_tmpl_header();
 		// Localize the links to the currently viewed locale.
 		$description = WordPressdotorg\GlotPress\Customizations\Plugin::get_instance()->localize_links( $description, $locale->wp_locale );
 
-		echo wp_kses_post( $description );
+		echo wporg_kses_description( $description );
 	?></p>
 
 	<div class="project-box percent-<?php echo esc_attr( $project_status->percent_complete ); ?>">
@@ -162,7 +162,7 @@ if ( 'wp-plugins' === $project->path ) {
 				?>
 				<tr>
 					<td class="set-name">
-						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), $sub_project->name ); ?></strong>
+						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), esc_html( $sub_project->name ) ); ?></strong>
 						<?php if ( $sub_project_status->percent_complete > 90 ) : ?>
 							<span class="sub-project-status percent-90"><?php echo esc_html( $sub_project_status->percent_complete ); ?>%</span>
 						<?php else : ?>
@@ -212,7 +212,7 @@ if ( 'wp-plugins' === $project->path ) {
 				?>
 				<tr>
 					<td class="set-name">
-						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), $sub_project->name ); ?></strong>
+						<strong><?php gp_link( gp_url_project( $sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), esc_html( $sub_project->name ) ); ?></strong>
 						<?php if ( $status->percent_complete > 90 ) : ?>
 							<span class="sub-project-status percent-90"><?php echo esc_html( $status->percent_complete ); ?>%</span>
 						<?php else : ?>
