@@ -144,6 +144,8 @@
 			<!-- serialize_block_attributes() escapes attribute JSON for use inside a block comment delimiter. -->
 			<property name="customEscapingFunctions" type="array">
 				<element value="serialize_block_attributes"/>
+				<!-- wporg_kses_description() is wp_kses() against a fixed allow-list; see wporg-gp-customizations/templates/helper-functions.php. -->
+				<element value="wporg_kses_description"/>
 			</property>
 			<!-- Please note: Only add a function here after confirming it escapes its own return value! -->
 			<property name="customAutoEscapedFunctions" type="array">

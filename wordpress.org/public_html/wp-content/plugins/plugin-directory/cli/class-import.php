@@ -480,8 +480,10 @@ class Import {
 			$plugin->post_title = strip_tags( $headers->Name );
 		}
 
+		$header_excerpt = esc_html( wp_strip_all_tags( $headers->Description ) ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Header key as core's get_plugin_data() names it.
+
 		$plugin->post_content = trim( $content ) ?: $plugin->post_content;
-		$plugin->post_excerpt = trim( $readme->short_description ) ?: $headers->Description ?: $plugin->post_excerpt;
+		$plugin->post_excerpt = trim( $readme->short_description ) ?: $header_excerpt ?: $plugin->post_excerpt;
 
 		/*
 		 * Bump last updated if:

@@ -607,3 +607,30 @@ function wporg_gp_should_display_original_context( $translation ) {
 
 	return true;
 }
+
+/**
+ * Filters a project description down to the markup a description may carry.
+ *
+ * @param string $description Project description.
+ * @return string The description, limited to the markup the importers compose into it.
+ */
+function wporg_kses_description( $description ) {
+	return wp_kses(
+		$description,
+		array(
+			'a'      => array(
+				'href'  => true,
+				'title' => true,
+				'rel'   => true,
+			),
+			'br'     => array(),
+			'code'   => array(),
+			'em'     => array(),
+			'li'     => array(),
+			'ol'     => array(),
+			'p'      => array(),
+			'strong' => array(),
+			'ul'     => array(),
+		)
+	);
+}
