@@ -611,11 +611,6 @@ function wporg_gp_should_display_original_context( $translation ) {
 /**
  * Filters a project description down to the markup a description may carry.
  *
- * Descriptions are composed from plugin and theme headers, so they cannot go through
- * `wp_kses_post()`: it grants `data-*` and `style` on every element, which is enough to
- * hand the Interactivity API runtime a `javascript:` URL or to lay an anchor over the
- * viewport.
- *
  * @param string $description Project description.
  * @return string The description, limited to the markup the importers compose into it.
  */
