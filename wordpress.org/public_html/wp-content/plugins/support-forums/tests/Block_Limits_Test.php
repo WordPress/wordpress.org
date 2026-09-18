@@ -13,7 +13,8 @@ use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Forums\Blocks;
 
 /**
- * Covers Blocks::limit_blocks() and Blocks::block_pre_render().
+ * Covers Blocks::limit_blocks(), Blocks::block_pre_render(), and the filters the
+ * constructor registers for them.
  *
  * @group blocks
  */
@@ -74,6 +75,27 @@ class Block_Limits_Test extends TestCase {
 	protected function add_temporary_filter( string $hook, callable $callback ): void {
 		add_filter( $hook, $callback );
 		$this->added_filters[] = array( $hook, $callback );
+	}
+
+	/**
+	 * The constructor wires up the filters every other test here bypasses.
+	 *
+	 * The behaviour tests call limit_blocks() and block_pre_render() directly,
+	 * so dropping the registrations would leave them green while forum content
+	 * went unfiltered. The priorities are part of the contract: 100 puts the
+	 * limiter after bbPress' own content filters and before the content is
+	 * stored, and 7 puts it before Blocks Everywhere renders at 8.
+	 *
+	 * @return void
+	 */
+	public function test_constructor_registers_the_content_filters(): void {
+		foreach ( array( 'topic', 'reply', 'forum' ) as $type ) {
+			$this->assertSame( 100, has_filter( "bbp_new_{$type}_pre_content", array( self::$blocks, 'limit_blocks' ) ) );
+			$this->assertSame( 100, has_filter( "bbp_edit_{$type}_pre_content", array( self::$blocks, 'limit_blocks' ) ) );
+			$this->assertSame( 7, has_filter( "bbp_get_{$type}_content", array( self::$blocks, 'limit_blocks' ) ) );
+		}
+
+		$this->assertSame( 10, has_filter( 'pre_render_block', array( self::$blocks, 'block_pre_render' ) ) );
 	}
 
 	/**
