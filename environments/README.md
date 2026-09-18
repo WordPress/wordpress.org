@@ -170,6 +170,78 @@ npm run translate:test
 
 **Translation Events 2024 design:** the events routes render the legacy templates unless the new block theme is enabled. To preview it, add `"config": { "TRANSLATION_EVENTS_NEW_DESIGN": true }` to `translate/.wp-env.override.json` and restart.
 
+### Support Forums
+
+A local instance of the WordPress.org Support Forums with bbPress, the `wporg-support-2024` theme, and the `wporg-bbp-*` supporting plugins. It runs as a multisite network, because the forums read the plugin and theme directories out of sibling sub-sites.
+
+**Start:**
+
+```bash
+npm run support:env start
+```
+
+**Access:** `http://localhost:8888`
+
+**Re-seed** (clears the seed flag, then re-runs the seed):
+
+```bash
+npm run support:refresh
+```
+
+**WP CLI:**
+
+```bash
+npm run support:env -- run cli -- wp <command>
+```
+
+Add `--url=localhost:8888/rosetta` (or `/plugins`, `/themes`) to target a sub-site.
+
+**The network:**
+
+| Blog | Path | Purpose |
+|---|---|---|
+| 1 | `/` | The global support forums — the site under development |
+| 2 | `/plugins` | Plugin Directory, a dependency of the `/plugin/<slug>/` forum views |
+| 3 | `/themes` | Theme Directory, a dependency of the `/theme/<slug>/` forum views |
+| 4 | `/rosetta` | A locale ("Rosetta") forum, for the locale-only code paths |
+
+The blog IDs are pinned in `.wp-env.json` (`WPORG_PLUGIN_DIRECTORY_BLOGID` and friends), so the seed creates the sub-sites in that order and fails loudly if they come out differently.
+
+**Note that the plugin and theme directories here exist only as forum dependencies. Use the Plugin Directory and Theme Directory environments to work on the directories themselves.**
+
+On production each locale forum is its own network with `IS_ROSETTA_NETWORK` defined, which a single `wp-config.php` cannot express. `mocks/mu-plugins/wporg-support-env.php` defines it for the blog named by `WPORG_LOCAL_ROSETTA_BLOGID` instead.
+
+**Forum IDs:** the `Plugins`, `Themes` and `Reviews` forums are created as the post IDs that `Plugin::PLUGINS_FORUM_ID` and `Support_Compat::HIDDEN_FORUMS` hard-code for production (21261, 21262, 21272, plus two legacy IDs). The directory compat views, the review forum, and the hidden-forum filtering all key off those, so they cannot be left to auto-increment.
+
+**What to try:** `hello-dolly` is seeded on the plugin directory with a committer, a contributor and a support rep; `twentytwentyfour` is seeded on the theme directory with an author. Visit `/plugin/hello-dolly/`, `/theme/twentytwentyfour/`, and either followed by `reviews/`. Ratings submitted through the review form persist in the local `ratings` table, so the star filters and rating edits work.
+
+**Local boundaries.** The environment deliberately does not reach production:
+
+- Badge assignments would otherwise be a live POST to `profiles.wordpress.org`. `Badge_Automation` registers its hooks locally, because `assign_badge()` lives in the mounted `mu-plugins/pub/profile-helpers.php`, and `Profiles\queue()` dispatches synchronously for anything that is not `production` while `api()` only redirects the URL for `staging`. `mocks/mu-plugins/wporg-profiles-local.php` answers those requests and records the associations in local tables.
+- Outbound mail is short-circuited; the forums mail on subscriptions, moderation and reports.
+- `WPORG_Ratings` is a local stand-in. `Ratings_Compat` guards on `class_exists()` alone, so the stub implements every method it calls rather than a subset.
+- SSO, two-factor account management and the rest of the Profiles service are not reproduced.
+
+**User accounts:**
+
+All accounts use the password `password`.
+
+| Username | Role on `/` | Role on `/rosetta` | Notes |
+|---|---|---|---|
+| `admin` | Network administrator | Network administrator | Full network admin access |
+| `keymaster` | `bbp_keymaster` | `bbp_participant` | Top-level forum admin; can manage all forum content |
+| `moderator` | `bbp_moderator` | `bbp_participant` | Can moderate topics and replies |
+| `rosettakeymaster` | `bbp_participant` | `bbp_keymaster` | Keymaster of the locale forum |
+| `rosettamoderator` | `bbp_participant` | `bbp_moderator` | Moderator of the locale forum |
+| `pluginauthor` | `bbp_participant` | `bbp_participant` | Committer on the seeded Hello Dolly plugin |
+| `plugincontributor` | `bbp_participant` | `bbp_participant` | Contributor on the seeded Hello Dolly plugin |
+| `pluginsupport` | `bbp_participant` | `bbp_participant` | Support rep on the seeded Hello Dolly plugin |
+| `themeauthor` | `bbp_participant` | `bbp_participant` | Author of the seeded Twenty Twenty-Four theme |
+| `themesupport` | `bbp_participant` | `bbp_participant` | Theme support rep; no production equivalent yet |
+| `visitor` | `bbp_participant` | `bbp_participant` | Regular forum visitor |
+
+**Block editor:** the forums use the block editor through [Blocks Everywhere](https://github.com/Automattic/blocks-everywhere), which is not installed here — it needs a Gutenberg old enough to break against WordPress trunk until [Automattic/blocks-everywhere#211](https://github.com/Automattic/blocks-everywhere/pull/211) lands. `Plugin::__construct()` loads the block support only when that plugin is present, so the environment runs on bbPress' plain editor until then.
+
 ### WordPress.org SSO
 
 A test-only environment for the shared single sign-on code in `common/includes/wporg-sso/`. The SSO is a library rather than a plugin, so it is mounted at `wp-content/wporg-sso` instead of being activated, and its PHPUnit suite runs from there.
