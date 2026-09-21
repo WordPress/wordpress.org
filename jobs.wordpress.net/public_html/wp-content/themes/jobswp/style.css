@@ -890,6 +890,28 @@ label {
 	list-style: decimal;
 }
 
+.job-detail__body blockquote {
+	background-color: var(--color-light-grey-2);
+	border-left: 4px solid var(--color-blueberry-2);
+	border-radius: var(--radius);
+	color: var(--color-charcoal-3);
+	margin: var(--space-20) var(--space-30);
+	padding: var(--space-20) var(--space-30);
+}
+.job-detail__body blockquote > :last-child {
+	margin-bottom: 0;
+}
+.job-detail__body blockquote cite {
+	display: block;
+	margin-top: var(--space-10);
+	font-size: var(--font-size-sm);
+	font-style: italic;
+	color: var(--color-charcoal-4);
+}
+.job-detail__body blockquote blockquote {
+	background-color: transparent;
+}
+
 /* Sidebar */
 .job-sidebar {
 	position: sticky;
@@ -1000,6 +1022,13 @@ label {
 
 	.job-detail-candidates__grid {
 		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 600px) {
+	.job-detail__body blockquote {
+		margin-inline: 0;
+		padding: var(--space-20);
 	}
 }
 
