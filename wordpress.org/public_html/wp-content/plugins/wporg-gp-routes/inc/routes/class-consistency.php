@@ -203,6 +203,7 @@ class Consistency extends GP_Route {
 			LIMIT 0, 500
 		";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query string with dynamic clauses is safely prepared using $wpdb->prepare().
 		$results = $wpdb->get_results( $wpdb->prepare( $query, $query_params ) );
 
 		if ( ! $results ) {
