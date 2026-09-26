@@ -13,8 +13,18 @@ use GP_Route;
  */
 class Consistency extends GP_Route {
 
+	/**
+	 * Cache group used for WordPress.org Translate.
+	 *
+	 * @var string
+	 */
 	private $cache_group = 'wporg-translate';
 
+	/**
+	 * Top-level projects for consistency search.
+	 *
+	 * @var array
+	 */
 	const PROJECTS = array(
 		1      => 'WordPress',
 		523    => 'Themes',
@@ -25,7 +35,9 @@ class Consistency extends GP_Route {
 	);
 
 	/**
-	 * Prints a search form and the search results for a consistency view.
+	 * Displays a search form and the search results for a consistency view.
+	 *
+	 * @return void
 	 */
 	public function get_search_form() {
 		$sets = $this->get_translation_sets();
@@ -97,7 +109,7 @@ class Consistency extends GP_Route {
 	/**
 	 * Retrieves a list of unique translation sets.
 	 *
-	 * @return array Array of sets.
+	 * @return array Array of translation sets keyed by 'locale/slug'.
 	 */
 	private function get_translation_sets() {
 		global $wpdb;
@@ -128,9 +140,16 @@ class Consistency extends GP_Route {
 	/**
 	 * Performs the search query.
 	 *
-	 * @param array $args Query arguments.
+	 * @param array $args {
+	 *     Query arguments.
 	 *
-	 * @return array The search results.
+	 *     @type string $search         The exact original string to search for.
+	 *     @type string $locale         The locale slug.
+	 *     @type string $set_slug       The translation set slug.
+	 *     @type bool   $case_sensitive Whether to perform a case-sensitive search.
+	 *     @type int    $project        Optional. Project ID to limit results to.
+	 * }
+	 * @return object Array of query result objects.
 	 */
 	private function query( $args ) {
 		global $wpdb;
@@ -194,6 +213,16 @@ class Consistency extends GP_Route {
 		return $results;
 	}
 
+	/**
+	 * Natural order sort callback.
+	 *
+	 * Compares items hierarchically by translation string, original context,
+	 * and project path.
+	 *
+	 * @param object $a First object to compare.
+	 * @param object $b Second object to compare.
+	 * @return int Less than 0 if $a is less than $b, 0 if equal, greater than 0 otherwise.
+	 */
 	public function _sort_callback( $a, $b ) {
 		$sort = strnatcmp( (string) $a->translation, (string) $b->translation );
 		if ( 0 === $sort ) {
