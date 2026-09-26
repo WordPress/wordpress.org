@@ -52,7 +52,7 @@ class Consistency extends GP_Route {
 		}
 
 		if ( isset( $_REQUEST['set'] ) && is_string( $_REQUEST['set'] ) ) {
-			$raw_set = wp_unslash( $_REQUEST['set'] );
+			$raw_set = sanitize_text_field( wp_unslash( $_REQUEST['set'] ) );
 			if ( isset( $sets[ $raw_set ] ) ) {
 				$set = $raw_set;
 			}
