@@ -84,13 +84,15 @@ class Consistency extends GP_Route {
 
 		if ( '' !== $search && $locale && $set_slug ) {
 			$performed_search = true;
-			$results          = $this->query( [
-				'search'         => $search,
-				'locale'         => $locale,
-				'set_slug'       => $set_slug,
-				'case_sensitive' => $search_case_sensitive,
-				'project'        => $project,
-			] );
+			$results          = $this->query(
+				[
+					'search'         => $search,
+					'locale'         => $locale,
+					'set_slug'       => $set_slug,
+					'case_sensitive' => $search_case_sensitive,
+					'project'        => $project,
+				]
+			);
 
 			$translations               = wp_list_pluck( $results, 'translation', 'translation_id' );
 			$translations               = array_map( 'strval', $translations );
