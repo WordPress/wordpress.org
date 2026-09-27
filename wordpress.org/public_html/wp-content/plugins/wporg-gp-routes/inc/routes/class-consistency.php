@@ -120,16 +120,27 @@ class Consistency extends GP_Route {
 
 		if ( empty( $sets ) ) {
 			$_sets = $wpdb->get_results(
-				"SELECT MIN(name) AS name, locale, slug
-				 FROM {$wpdb->gp_translation_sets}
-				 GROUP BY locale, slug
-				 ORDER BY name ASC"
+				"SELECT MIN(ts.name) AS name, ts.locale, ts.slug
+				FROM {$wpdb->gp_translation_sets} ts
+				JOIN {$wpdb->gp_projects} p ON p.id = ts.project_id
+				WHERE p.active = 1
+				GROUP BY ts.locale, ts.slug
+				ORDER BY name ASC"
 			);
 
 			$sets = array();
 			if ( $_sets ) {
 				foreach ( $_sets as $set ) {
-					$sets[ "{$set->locale}/{$set->slug}" ] = $set->name;
+					// Compare the locale with our mu-plugin.
+					if ( ! GP_Locales::exists( $set->locale ) ) {
+						continue;
+					}
+					// Hide three-part entries (e.g., de/formal/default, pt/ao90/default).
+					if ( substr_count( $key, '/' ) > 1 ) {
+						continue;
+					}
+
+				$sets[ "{$set->locale}/{$set->slug}" ] = $set->name;
 				}
 			}
 
