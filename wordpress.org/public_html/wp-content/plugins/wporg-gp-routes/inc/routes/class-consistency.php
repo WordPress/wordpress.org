@@ -71,9 +71,12 @@ class Consistency extends GP_Route {
 		$locale_is_rtl = false;
 
 		if ( $set && str_contains( $set, '/' ) ) {
-			list( $locale, $set_slug ) = explode( '/', $set, 2 );
-			$gp_locale                 = GP_Locales::by_slug( $locale );
-			$locale_is_rtl             = $gp_locale && 'rtl' === $gp_locale->text_direction;
+			$last_slash_pos = strrpos( $set, '/' );
+			$locale         = substr( $set, 0, $last_slash_pos );
+			$set_slug       = substr( $set, $last_slash_pos + 1 );
+
+			$gp_locale     = GP_Locales::by_slug( $locale );
+			$locale_is_rtl = $gp_locale && 'rtl' === $gp_locale->text_direction;
 		}
 
 		$results                    = [];
@@ -131,12 +134,8 @@ class Consistency extends GP_Route {
 			$sets = array();
 			if ( $_sets ) {
 				foreach ( $_sets as $set ) {
-					// Compare the locale with our mu-plugin.
+					// Compare locales with our mu-plugin.
 					if ( ! GP_Locales::exists( $set->locale ) ) {
-						continue;
-					}
-					// Hide three-part entries (e.g., de/formal/default, pt/ao90/default).
-					if ( substr_count( $key, '/' ) > 1 ) {
 						continue;
 					}
 
