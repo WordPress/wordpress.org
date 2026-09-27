@@ -72,6 +72,13 @@ class Locale_Associations implements Admin_Page {
 			return;
 		}
 
+		if ( ! current_user_can( 'manage_sites' ) ) {
+			wp_die(
+				esc_html__( 'Sorry, you are not allowed to manage locale associations.', 'rosetta' ),
+				403
+			);
+		}
+
 		$current_action = $_POST['action'];
 		$result = null;
 
@@ -112,12 +119,12 @@ class Locale_Associations implements Admin_Page {
 			return new WP_Error( 'nonce_failure' );
 		}
 
-		if ( empty( $_POST['locale'] ) || empty( $_POST['subdomain'] ) ) {
+		$locale    = isset( $_POST['locale'] ) ? sanitize_text_field( wp_unslash( $_POST['locale'] ) ) : '';
+		$subdomain = isset( $_POST['subdomain'] ) ? sanitize_key( $_POST['subdomain'] ) : '';
+
+		if ( empty( $locale ) || empty( $subdomain ) ) {
 			return new WP_Error( 'missing_data' );
 		}
-
-		$locale = sanitize_text_field( $_POST['locale'] );
-		$subdomain = sanitize_text_field( $_POST['subdomain'] );
 
 		if ( 0 !== strpos( $locale, 'test' ) ) {
 			$available_locales = $this->get_available_wp_locales();
@@ -157,7 +164,7 @@ class Locale_Associations implements Admin_Page {
 	 *
 	 * @return true|\WP_Error True on success, WP_Error on failure.
 	 */
-	public function action_delete_association() {
+	private function action_delete_association() {
 		global $wpdb;
 
 		if ( empty( $_POST['id'] ) ) {
