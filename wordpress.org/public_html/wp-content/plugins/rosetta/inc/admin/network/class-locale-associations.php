@@ -120,8 +120,8 @@ class Locale_Associations implements Admin_Page {
 		$subdomain = sanitize_text_field( $_POST['subdomain'] );
 
 		if ( 0 !== strpos( $locale, 'test' ) ) {
-			$locales = get_available_languages();
-			if ( ! in_array( $locale, $locales, true ) ) {
+			$available_locales = $this->get_available_wp_locales();
+			if ( ! in_array( $locale, $available_locales, true ) ) {
 				return new WP_Error( 'locale_does_not_exist' );
 			}
 		}
