@@ -3,6 +3,12 @@
 // Locale detection.
 require dirname( __FILE__ ) . '/inc/locale.php';
 
+/**
+ * Retrieves data and metadata for supported browsers or a single specified browser.
+ *
+ * @param string|false $browser Optional. Key of a specific browser to retrieve (e.g. 'chrome', 'firefox'). Default false (returns an array of all browsers).
+ * @return array<string, object>|object|false Array of browser data objects if $browser is false, browser object if found, or false if not found.
+ */
 function browsehappy_get_browser_data( $browser = false ) {
 
 	// In order to avoid non-English language translations of browser
@@ -101,10 +107,30 @@ function browsehappy_get_browser_data( $browser = false ) {
 add_action( 'browsehappy_version', 'browsehappy_echo_version' );
 add_filter( 'get_browsehappy_version', 'browsehappy_fetch_version' );
 
+/**
+ * Echoes the current version of a browser.
+ * Hooked to the 'browsehappy_version' action.
+ *
+ * @param string $browser Browser identifier.
+ */
 function browsehappy_echo_version( $browser ) {
 	echo esc_html( browsehappy_fetch_version( $browser ) );
 }
 
+/**
+ * Fetches the latest stable version of a browser from Wikidata or transient cache.
+ *
+ * Queries the Wikidata SPARQL API endpoint using the entity identifier mapped in
+ * 'browsehappy_get_browser_data()'. Results are cached indefinitely via transients
+ * and purged via scheduled cron.
+ *
+ * Hooked to the 'get_browsehappy_version' filter.
+ *
+ * @param string $browser   Browser identifier.
+ * @param bool   $normalize Optional. Whether to normalize the retrieved version string. Default true.
+ * @param bool   $rank      Optional. Whether to filter by 'PreferredRank' first. Default true.
+ * @return string|false Version string on success, false on failure.
+ */
 function browsehappy_fetch_version( $browser, $normalize = true, $rank = true ) {
 
 	$fragment = browsehappy_get_browser_data( $browser )->wikidata;
@@ -193,6 +219,16 @@ function browsehappy_fetch_version( $browser, $normalize = true, $rank = true ) 
 	return $version;
 }
 
+/**
+ * Normalizes a raw version number based on the browser's normalization rules.
+ *
+ * Trims version components depending on whether the browser requests
+ * major-only (1) or major.minor (1.5, keeping minor if non-zero).
+ *
+ * @param string $browser Browser identifier.
+ * @param string $version Raw version string.
+ * @return string Normalized version string.
+ */
 function browsehappy_normalize_version( $browser, $version ) {
 
 	$normalize = browsehappy_get_browser_data( $browser )->normalized;
@@ -214,6 +250,10 @@ function browsehappy_normalize_version( $browser, $version ) {
 
 add_action( 'init', 'browsehappy_schedule_version_check' );
 
+/**
+ * Schedules a recurring event to clear browser version caches twice daily.
+ * Hooked to the 'init' action.
+ */
 function browsehappy_schedule_version_check() {
 	if ( ! wp_next_scheduled( 'browsehappy_clear_version_cache' ) ) {
 		wp_schedule_event( time(), 'twicedaily', 'browsehappy_clear_version_cache' );
@@ -222,6 +262,10 @@ function browsehappy_schedule_version_check() {
 
 add_action( 'browsehappy_clear_version_cache', 'browsehappy_clear_version_cache' );
 
+/**
+ * Deletes transient caches for all browser versions.
+ * Hooked to the 'browsehappy_clear_version_cache' cron event.
+ */
 function browsehappy_clear_version_cache() {
 	$browsers = array_keys( browsehappy_get_browser_data() );
 	foreach ( $browsers as $browser ) {
@@ -233,7 +277,12 @@ add_action( 'init', 'browsehappy_init' );
 
 remove_action( 'template_redirect', 'wp_old_slug_redirect' );
 
-// Runs at end of init. Supplants global WP object.
+/**
+ * Runs at the end of init to set default rewrite rules and supplant the global $wp object.
+ * Hooked to the 'init' action.
+ *
+ * @global WP $wp Global WordPress environment object.
+ */
 function browsehappy_init() {
 	if ( false === get_option( 'rewrite_rules' ) ) {
 		add_option( 'rewrite_rules', '' );
@@ -255,6 +304,12 @@ else :
 	}
 endif;
 
+/**
+ * Loads the theme textdomain for internationalization and sets the text direction.
+ * Hooked to the 'after_setup_theme' action.
+ *
+ * @global WP_Locale $wp_locale Global WordPress locale object.
+ */
 function browsehappy_load_textdomain() {
 	load_theme_textdomain( 'browsehappy', get_template_directory() . '/languages' );
 
@@ -268,6 +323,10 @@ if ( function_exists( 'browsehappy_parse_user_agent' ) ) {
 	add_action( 'browsehappy_browser_notice', 'browsehappy_browser_notice' );
 }
 
+/**
+ * Outputs an HTML warning notice if the visitor's browser is out of date or insecure.
+ * Hooked to the 'browsehappy_browser_notice' action.
+ */
 function browsehappy_browser_notice() {
 	$ua = $_SERVER['HTTP_USER_AGENT'];
 	$results = browsehappy_parse_user_agent( $ua );
@@ -304,6 +363,10 @@ if ( class_exists( 'Browse_Happy_Locale' ) ) {
 	add_action( 'browsehappy_locale_notice', 'browsehappy_locale_notice' );
 }
 
+/**
+ * Outputs a notice offering to switch to English if the current locale is non-English.
+ * Hooked to the 'browsehappy_locale_notice' action.
+ */
 function browsehappy_locale_notice() {
 	if ( 0 === strpos( Browse_Happy_Locale::locale(), 'en' ) ) {
 		return;
