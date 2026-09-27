@@ -70,13 +70,11 @@ class Consistency extends GP_Route {
 		$set_slug      = '';
 		$locale_is_rtl = false;
 
+		// Valid sets always consist of "locale/slug" (e.g. "de/default", "de/formal").
 		if ( $set && str_contains( $set, '/' ) ) {
-			$last_slash_pos = strrpos( $set, '/' );
-			$locale         = substr( $set, 0, $last_slash_pos );
-			$set_slug       = substr( $set, $last_slash_pos + 1 );
-
-			$gp_locale     = GP_Locales::by_slug( $locale );
-			$locale_is_rtl = $gp_locale && 'rtl' === $gp_locale->text_direction;
+			list( $locale, $set_slug ) = explode( '/', $set, 2 );
+			$gp_locale                 = GP_Locales::by_slug( $locale );
+			$locale_is_rtl             = $gp_locale && 'rtl' === $gp_locale->text_direction;
 		}
 
 		$results                    = [];
@@ -139,7 +137,14 @@ class Consistency extends GP_Route {
 						continue;
 					}
 
-					$sets[ "{$set->locale}/{$set->slug}" ] = $set->name;
+					$key = "{$set->locale}/{$set->slug}";
+
+					// Hide duplicate entries with more than one slash (e.g. nl/formal/default).
+					if ( substr_count( $key, '/' ) > 1 ) {
+						continue;
+					}
+
+					$sets[ $key ] = $set->name;
 				}
 			}
 
