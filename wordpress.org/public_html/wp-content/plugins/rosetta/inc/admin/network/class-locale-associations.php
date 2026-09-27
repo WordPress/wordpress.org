@@ -112,7 +112,7 @@ class Locale_Associations implements Admin_Page {
 			return new WP_Error( 'nonce_failure' );
 		}
 
-		if ( empty( $_POST['locale'] ) || empty( $_POST['locale'] ) ) {
+		if ( empty( $_POST['locale'] ) || empty( $_POST['subdomain'] ) ) {
 			return new WP_Error( 'missing_data' );
 		}
 
