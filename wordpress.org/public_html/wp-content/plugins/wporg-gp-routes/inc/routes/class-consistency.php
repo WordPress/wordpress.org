@@ -140,7 +140,7 @@ class Consistency extends GP_Route {
 						continue;
 					}
 
-				$sets[ "{$set->locale}/{$set->slug}" ] = $set->name;
+					$sets[ "{$set->locale}/{$set->slug}" ] = $set->name;
 				}
 			}
 
