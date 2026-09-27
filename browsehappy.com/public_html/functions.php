@@ -7,90 +7,93 @@ function browsehappy_get_browser_data( $browser = false ) {
 
 	// In order to avoid non-English language translations of browser
 	// descriptions from being invalidated due to string changes, until such time
-	// as traslators submit translations, only English will immediately show the
+	// as translators submit translations, only English will immediately show the
 	// latest strings. Other languages will temporarily show the outdated (but
 	// translated at least) strings.
 	$latest_strings = ( ! class_exists( 'Browse_Happy_Locale' ) || 0 === strpos( Browse_Happy_Locale::locale(), 'en' ) );
 
 	$data = array(
 		'chrome' => (object) array(
-			'name' => 'Google Chrome',
-			'long_name' => 'Google Chrome',
-			'wikipedia' => 'Google_Chrome',
-			'wikidata' => 'Q777',
+			'name'       => 'Google Chrome',
+			'long_name'  => 'Google Chrome',
+			'wikipedia'  => 'Google_Chrome',
+			'wikidata'   => 'Q777',
 			'normalized' => 1, // just first number
-			'facebook' => 'googlechrome',
-			'url' => class_exists( 'Browse_Happy_Locale' ) && 'zh_CN' === Browse_Happy_Locale::locale() ? 'https://www.google.cn/chrome' : 'https://www.google.com/chrome',
-			'info' => ( $latest_strings ?
+			'facebook'   => 'googlechrome',
+			'url'        => class_exists( 'Browse_Happy_Locale' ) && 'zh_CN' === Browse_Happy_Locale::locale() ? 'https://www.google.cn/chrome' : 'https://www.google.com/chrome',
+			'info'       => ( $latest_strings ?
 				__( '&#8220;Get more done with the new Google Chrome. A more simple, secure, and faster web browser than ever, with Google’s smarts built-in.&#8221;', 'browsehappy' )
 				: __( '&#8220;A fast new browser from Google. Try&nbsp;it&nbsp;now!&#8221;', 'browsehappy' )
 			),
 		),
 		'firefox' => (object) array(
-			'name' => 'Mozilla Firefox',
-			'long_name' => 'Mozilla Firefox',
-			'wikipedia' => 'Firefox',
-			'wikidata' => 'Q698',
+			'name'       => 'Mozilla Firefox',
+			'long_name'  => 'Mozilla Firefox',
+			'wikipedia'  => 'Firefox',
+			'wikidata'   => 'Q698',
 			'normalized' => 1.5, // include second number if non-zero
-			'facebook' => 'Firefox',
-			'url' => 'https://www.mozilla.org/firefox/',
-			'info' => ( $latest_strings ?
-				 __( '&#8220;Faster page loading, less memory usage and packed with features, the new Firefox is here.&#8221;', 'browsehappy' )
-				 : __( "&#8220;Your online security is Firefox's top priority. Firefox is free, and made to help you get the most out of the&nbsp;web.&#8221;", 'browsehappy' )
+			'facebook'   => 'Firefox',
+			'url'        => 'https://www.mozilla.org/firefox/',
+			'info'       => ( $latest_strings ?
+				__( '&#8220;Faster page loading, less memory usage and packed with features, the new Firefox is here.&#8221;', 'browsehappy' )
+				: __( "&#8220;Your online security is Firefox's top priority. Firefox is free, and made to help you get the most out of the&nbsp;web.&#8221;", 'browsehappy' )
 			),
 		),
 		'safari' => (object) array(
-			'name' => 'Safari',
-			'long_name' => 'Apple Safari',
-			'wikipedia' => 'Safari',
-			'wikidata' => 'Q35773',
+			'name'       => 'Safari',
+			'long_name'  => 'Apple Safari',
+			'wikipedia'  => 'Safari',
+			'wikidata'   => 'Q35773',
 			'normalized' => 1.5, // include second number if non-zero
-			'facebook' => false,
-			'url' => 'https://www.apple.com/safari/',
-			'info' => ( $latest_strings ?
+			'facebook'   => false,
+			'url'        => 'https://www.apple.com/safari/',
+			'info'       => ( $latest_strings ?
 				__( '&#8220;Safari is faster and more energy efficient than other browsers. You can shop safely and simply in Safari on your Mac.&#8221;', 'browsehappy' )
 				: str_replace( 'and Windows ', '', __( '&#8220;Safari for Mac and Windows from Apple, the world’s most innovative&nbsp;browser.&#8221;', 'browsehappy' ) )
 			),
 		),
 		'vivaldi' => (object) array(
-			'name' => 'Vivaldi',
-			'long_name' => 'Vivaldi',
-			'wikipedia' => 'Vivaldi_(web_browser)',
-			'wikidata' => 'Q18913176',
+			'name'       => 'Vivaldi',
+			'long_name'  => 'Vivaldi',
+			'wikipedia'  => 'Vivaldi_(web_browser)',
+			'wikidata'   => 'Q18913176',
 			'normalized' => 1.5, // include second number if non-zero
-			'facebook' => 'vivaldi.browser',
-			'url' => 'https://vivaldi.com/',
-			'info' => __( '&#8220;Powerful. Personal. Private. It&#8217;s a web browser. But fun, with clever features.&#8221;', 'browsehappy' ),
+			'facebook'   => 'vivaldi.browser',
+			'url'        => 'https://vivaldi.com/',
+			'info'       => __( '&#8220;Powerful. Personal. Private. It&#8217;s a web browser. But fun, with clever features.&#8221;', 'browsehappy' ),
 		),
 		'edge' => (object) array(
-			'name' => 'Microsoft Edge',
-			'long_name' => 'Microsoft Edge',
-			'wikipedia' => 'Microsoft_Edge',
-			'wikidata' => 'Q18698690',
+			'name'       => 'Microsoft Edge',
+			'long_name'  => 'Microsoft Edge',
+			'wikipedia'  => 'Microsoft_Edge',
+			'wikidata'   => 'Q18698690',
 			'normalized' => 1, // just first number
-			'facebook' => 'MicrosoftEdge',
-			'url' => 'https://www.microsoft.com/edge',
-			'info' => ( $latest_strings ?
+			'facebook'   => 'MicrosoftEdge',
+			'url'        => 'https://www.microsoft.com/edge',
+			'info'       => ( $latest_strings ?
 				__( '&#8220;Microsoft Edge offers world-class performance with more privacy, more productivity, and more value while you browse.&#8221;', 'browsehappy' )
 				: __( '&#8220;Microsoft Edge ranks first when put to real world page load tests. Whether you use the web to search, watch or play, this browser won&#8217;t slow you down.&#8221;', 'browsehappy' )
 			),
 		),
 		'brave' => (object) array(
-			'name' => 'Brave',
-			'long_name' => 'Brave',
-			'wikipedia' => 'Brave_(web_browser)',
-			'wikidata' => 'Q22906900',
+			'name'       => 'Brave',
+			'long_name'  => 'Brave',
+			'wikipedia'  => 'Brave_(web_browser)',
+			'wikidata'   => 'Q22906900',
 			'normalized' => 1.5, // include second number if non-zero
-			'facebook' => 'bravetheinternet',
-			'url' => 'https://brave.com/',
-			'info' => __( '&#8220;The Brave browser is a fast, private and secure web browser for PC, Mac and mobile.&#8221;', 'browsehappy' ),
+			'facebook'   => 'bravetheinternet',
+			'url'        => 'https://brave.com/',
+			'info'       => __( '&#8220;The Brave browser is a fast, private and secure web browser for PC, Mac and mobile.&#8221;', 'browsehappy' ),
 		),
 	);
-	if ( false === $browser )
-		return $data;
 
-	if ( ! isset( $data[ $browser ] ) )
+	if ( false === $browser ) {
+		return $data;
+	}
+
+	if ( ! isset( $data[ $browser ] ) ) {
 		return false;
+	}
 
 	return $data[ $browser ];
 }
@@ -133,13 +136,15 @@ function browsehappy_fetch_version( $browser, $normalize = true, $rank = true ) 
 		ORDER BY DESC (?version) {$limit}
 	";
 
-	$request = wp_remote_get( add_query_arg(
-		array(
-			'format' => 'json',
-			'query'  => rawurlencode( $query ),
-		),
-		'https://query.wikidata.org/bigdata/namespace/wdq/sparql'
-	) );
+	$request = wp_remote_get(
+		add_query_arg(
+			array(
+				'format' => 'json',
+				'query'  => rawurlencode( $query ),
+			),
+			'https://query.wikidata.org/bigdata/namespace/wdq/sparql'
+		)
+	);
 
 	if ( is_wp_error( $request ) ) {
 		return false;
@@ -210,16 +215,18 @@ function browsehappy_normalize_version( $browser, $version ) {
 add_action( 'init', 'browsehappy_schedule_version_check' );
 
 function browsehappy_schedule_version_check() {
-	if ( ! wp_next_scheduled( 'browsehappy_clear_version_cache' ) )
+	if ( ! wp_next_scheduled( 'browsehappy_clear_version_cache' ) ) {
 		wp_schedule_event( time(), 'twicedaily', 'browsehappy_clear_version_cache' );
+	}
 }
 
 add_action( 'browsehappy_clear_version_cache', 'browsehappy_clear_version_cache' );
 
 function browsehappy_clear_version_cache() {
 	$browsers = array_keys( browsehappy_get_browser_data() );
-	foreach ( $browsers as $browser )
+	foreach ( $browsers as $browser ) {
 		delete_transient( 'browsehappy_version_' . $browser );
+	}
 }
 
 add_action( 'init', 'browsehappy_init' );
@@ -228,8 +235,9 @@ remove_action( 'template_redirect', 'wp_old_slug_redirect' );
 
 // Runs at end of init. Supplants global WP object.
 function browsehappy_init() {
-	if ( false === get_option( 'rewrite_rules' ) )
+	if ( false === get_option( 'rewrite_rules' ) ) {
 		add_option( 'rewrite_rules', '' );
+	}
 
 	global $wp;
 	$wp = new BrowseHappy_WP;
@@ -256,8 +264,9 @@ function browsehappy_load_textdomain() {
 
 add_action( 'after_setup_theme', 'browsehappy_load_textdomain' );
 
-if ( function_exists( 'browsehappy_parse_user_agent' ) )
+if ( function_exists( 'browsehappy_parse_user_agent' ) ) {
 	add_action( 'browsehappy_browser_notice', 'browsehappy_browser_notice' );
+}
 
 function browsehappy_browser_notice() {
 	$ua = $_SERVER['HTTP_USER_AGENT'];
@@ -291,17 +300,22 @@ function browsehappy_browser_notice() {
 	<?php
 }
 
-if ( class_exists( 'Browse_Happy_Locale' ) )
+if ( class_exists( 'Browse_Happy_Locale' ) ) {
 	add_action( 'browsehappy_locale_notice', 'browsehappy_locale_notice' );
+}
 
 function browsehappy_locale_notice() {
-	if ( 0 === strpos( Browse_Happy_Locale::locale(), 'en' ) ) // && Browse_Happy_Locale::$guessed )
+	if ( 0 === strpos( Browse_Happy_Locale::locale(), 'en' ) ) {
 		return;
+	}
 	?>
 	<div id="i18n-alert">
 		<p><?php
 			/* translators: "English" should be translated directly and not to the name of your language. */
-			printf( wp_kses_post( __( 'Browse Happy is also available in English. <a href="%s">Click here to change the language to English</a>.', 'browsehappy' ) ), '/?locale=en' );
+			printf(
+				wp_kses_post( __( 'Browse Happy is also available in English. <a href="%s">Click here to change the language to English</a>.', 'browsehappy' ) ),
+				'/?locale=en'
+			);
 		?></p>
 	</div>
 	<?php
