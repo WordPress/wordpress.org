@@ -137,7 +137,9 @@ class Locale_Main implements Site {
 					Role\Locale_Manager::get_name(),
 				];
 				return $options;
-			}, 10, 1
+			},
+			10,
+			1
 		);
 
 		// Options for Jetpack's subscription module.
