@@ -1,9 +1,10 @@
 <?php
 namespace WordPressdotorg\Rosetta\Site;
 
-use WordPressdotorg\Rosetta\Filter;
 use WordPressdotorg\Rosetta\Jetpack;
+use WP_Customize_Manager;
 use WP_Site;
+use WP_User;
 
 class Locale_Team implements Site {
 
@@ -57,47 +58,30 @@ class Locale_Team implements Site {
 		$jetpack_module_manager->setup();
 
 		// Options for Jetpack's sharing module.
-		$options = new Filter\Options();
-		$options->add_option(
-			( new Filter\Option() )
-				->set_name( 'sharing-options' )
-				->set_callback( function() {
-					return [
-						'global' => [
-							'button_style'  => 'icon-text',
-							'sharing_label' => __( 'Share this:', 'rosetta' ),
-							'open_links'    => 'same',
-							'show'          => [ 'post' ],
-							'custom'        => [],
-						],
-					];
-				} )
-		);
-		$options->add_option(
-			( new Filter\Option() )
-				->set_name( 'sharing-services' )
-				->set_callback( function() {
-					return [
-						'visible' => [ 'facebook', 'twitter', 'email' ],
-						'hidden'  => [],
-					];
-				} )
-		);
-		$options->add_filter_option(
-			( new Filter\Option() )
-				->set_name( 'stats_options' )
-				->set_callback( function( $options ) {
-					$options['roles'] = [
-						'administrator',
-						'editor',
-						'author',
-					];
-					return $options;
-				} )
-				->set_num_args( 1 )
-		);
+		add_filter( 'pre_option_sharing-options', function () {
+			return [
+				'global' => [
+					'button_style'  => 'icon-text',
+					'sharing_label' => __( 'Share this:', 'rosetta' ),
+					'open_links'    => 'same',
+					'show'          => [ 'post' ],
+					'custom'        => [],
+				],
+			];
+		} );
 
-		$options->setup();
+		add_filter( 'pre_option_sharing-services', function () {
+			return [
+				'visible' => [ 'facebook', 'twitter', 'email' ],
+				'hidden'  => [],
+			];
+		} );
+
+		add_filter( 'option_stats_options', function ( $options ) {
+			$options          = is_array( $options ) ? $options : [];
+			$options['roles'] = [ 'administrator', 'editor', 'author' ];
+			return $options;
+		}, 10, 1 );
 	}
 
 	/**
@@ -106,7 +90,7 @@ class Locale_Team implements Site {
 	private function initialize_user_role_customizations() {
 		add_filter( 'user_has_cap', [ $this, 'extend_editors_capabilities' ], 10, 4 );
 		add_filter( 'editable_roles', [ $this, 'remove_administrator_from_editable_roles' ] );
-		add_action( 'customize_register',  [ $this, 'allow_editors_to_change_site_title_in_customizer' ], 20 );
+		add_action( 'customize_register', [ $this, 'allow_editors_to_change_site_title_in_customizer' ], 20 );
 	}
 
 	/**
@@ -120,7 +104,7 @@ class Locale_Team implements Site {
 	 * @return array An array of user's capabilities.
 	 */
 	public function extend_editors_capabilities( $allcaps, $caps, $args, $user ) {
-		if ( ! in_array( 'editor', $user->roles ) ) {
+		if ( ! in_array( 'editor', (array) $user->roles, true ) ) {
 			return $allcaps;
 		}
 
@@ -153,7 +137,14 @@ class Locale_Team implements Site {
 	 * @param WP_Customize_Manager $wp_customize The customizer object.
 	 */
 	public function allow_editors_to_change_site_title_in_customizer( $wp_customize ) {
-		$wp_customize->get_setting( 'blogname' )->capability = 'edit_theme_options';
-		$wp_customize->get_setting( 'blogdescription' )->capability = 'edit_theme_options';
+		$blogname = $wp_customize->get_setting( 'blogname' );
+		if ( $blogname ) {
+			$blogname->capability = 'edit_theme_options';
+		}
+
+		$blogdescription = $wp_customize->get_setting( 'blogdescription' );
+		if ( $blogdescription ) {
+			$blogdescription->capability = 'edit_theme_options';
+		}
 	}
 }
