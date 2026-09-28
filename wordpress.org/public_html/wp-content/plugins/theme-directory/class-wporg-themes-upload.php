@@ -1573,8 +1573,11 @@ class WPORG_Themes_Upload {
 		$line_breaks = array( "\r", "\n", "\v", "\f", "\x1c", "\x1d", "\x1e", "\xc2\x85", "\xe2\x80\xa8", "\xe2\x80\xa9" );
 		$value       = str_replace( $line_breaks, ' ', $value );
 
-		// An escape that could not be applied returns nothing rather than the raw value.
-		$value = preg_replace( '/\[|\{|\|(?=[|-])/', '!$0', $value );
+		/*
+		 * Inline formatting is escaped too: `__()` in a message is otherwise an underline that eats the text around it.
+		 * An escape that could not be applied returns nothing rather than the raw value.
+		 */
+		$value = preg_replace( '/\[|\{|\|(?=[|-])|__|~~|,,|\^|`|\*\*/', '!$0', $value );
 		if ( null === $value ) {
 			return '';
 		}
@@ -1712,6 +1715,9 @@ TICKET;
 			$part = str_replace( '<br>', ' ', $part );
 
 			if ( $i % 2 ) {
+				// Trac shows block content verbatim; decoded before the braces, so an encoded `}}}` is caught too.
+				$part = html_entity_decode( $part, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
 				// `!` does not escape inside a block, so any run of the code's own braces is broken up.
 				$part = preg_replace( '/([{}])(?=\1\1)/', '$1 ', $part );
 
@@ -1722,13 +1728,16 @@ TICKET;
 
 			$part = self::escape_trac_wiki( $part );
 
-			// Converted after the escape, so the checker's own links stay links.
-			$parts[ $i ] = preg_replace( '/<a\s?href\s?=\s?[\'|"]([^"|\']*)[\'|"]>([^<]*)<\/a>/i', '[$1 $2]', $part );
+			// Converted after the escape, so the checker's own links stay links, `target` and all.
+			$part = preg_replace( '/<a\s+href\s*=\s*[\'"]([^"\']*)[\'"][^>]*>([^<]*)<\/a>/i', '[$1 $2]', $part );
 
 			// A pass above that PCRE gave up on would drop this half of the message.
-			if ( ! is_string( $parts[ $i ] ) ) {
+			if ( ! is_string( $part ) ) {
 				return 'A Theme Check message could not be formatted for Trac.';
 			}
+
+			// Decoded last, so an encoded tag can't become a link.
+			$parts[ $i ] = str_replace( array( '&lt;', '&gt;' ), array( '<', '>' ), $part );
 		}
 
 		return implode( '', $parts );
@@ -1756,11 +1765,6 @@ TICKET;
 		if ( $tc_errors ) {
 			foreach ( $tc_errors as $e ) {
 				$e = self::format_themecheck_error_for_trac( $e );
-
-				// Decode some entities.
-				$e = preg_replace_callback( '!(&[lg]t;)!', function( $f ) {
-					return html_entity_decode( $f[0] );
-				}, $e );
 
 				if ( '' !== $e && 'INFO' !== substr( $e, 0, 4 ) ) {
 					$tc_results[] = '* ' . $e;
