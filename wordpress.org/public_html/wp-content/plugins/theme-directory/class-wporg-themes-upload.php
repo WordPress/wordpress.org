@@ -869,7 +869,7 @@ class WPORG_Themes_Upload {
 		if (
 			$this->theme->parent() &&
 			! in_array( 'buddypress', $this->theme->get( 'Tags' ) ) &&
-			! $this->is_parent_available()
+			empty( $this->theme->post_parent )
 		) {
 			$style_errors->add(
 				'invalid_parent',
@@ -1363,17 +1363,6 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
-	 * Whether the parent theme for this theme is available in the repository.
-	 *
-	 * True once export_parent_theme() has placed the parent's live version beside the child.
-	 *
-	 * @return bool
-	 */
-	public function is_parent_available() {
-		return ! empty( $this->theme->post_parent );
-	}
-
-	/**
 	 * Exports a parent theme's live version from the directory next to the child theme.
 	 *
 	 * Core resolves a child's parent in the child's theme root first, so Theme Check
@@ -1573,10 +1562,7 @@ class WPORG_Themes_Upload {
 		$line_breaks = array( "\r", "\n", "\v", "\f", "\x1c", "\x1d", "\x1e", "\xc2\x85", "\xe2\x80\xa8", "\xe2\x80\xa9" );
 		$value       = str_replace( $line_breaks, ' ', $value );
 
-		/*
-		 * Inline formatting is escaped too: `__()` in a message is otherwise an underline that eats the text around it.
-		 * An escape that could not be applied returns nothing rather than the raw value.
-		 */
+		// Inline formatting too (`__()` would underline the text around it); a failed escape returns nothing.
 		$value = preg_replace( '/\[|\{|\|(?=[|-])|__|~~|,,|\^|`|\*\*/', '!$0', $value );
 		if ( null === $value ) {
 			return '';
