@@ -1562,8 +1562,14 @@ class WPORG_Themes_Upload {
 		$line_breaks = array( "\r", "\n", "\v", "\f", "\x1c", "\x1d", "\x1e", "\xc2\x85", "\xe2\x80\xa8", "\xe2\x80\xa9" );
 		$value       = str_replace( $line_breaks, ' ', $value );
 
-		// Inline formatting too (`__()` would underline the text around it); a failed escape returns nothing.
-		$value = preg_replace( '/\[|\{|\|(?=[|-])|__|~~|,,|\^|`|\*\*/', '!$0', $value );
+		// An escape that could not be applied returns nothing rather than the raw value.
+		$value = preg_replace( '/\[|\{|\|(?=[|-])/', '!$0', $value );
+		if ( null === $value ) {
+			return '';
+		}
+
+		// Inline formatting (`__()` would underline the text around it), skipping link targets, where a `!` would break the URL.
+		$value = preg_replace( '/(?<![-a-zA-Z0-9+.])[a-zA-Z][-a-zA-Z0-9+._]*:[\w\/?!#@](?<!_)(?:(?:\|(?=[^|\s])|[^|<>\s])*[\w\/=](?<!_))?(*SKIP)(*FAIL)|__|~~|,,|\^|`|\*\*/u', '!$0', $value );
 		if ( null === $value ) {
 			return '';
 		}
@@ -1591,7 +1597,7 @@ class WPORG_Themes_Upload {
 				// A keyword is space-separated, so it takes the slug and the link the escape.
 				$this->trac_ticket->keywords[]  = 'child-theme';
 				$this->trac_ticket->keywords[]  = 'parent-' . sanitize_title( $parent );
-				$this->trac_ticket->parent_link = 'Parent Theme: https://wordpress.org/themes/' . self::escape_trac_wiki( $parent );
+				$this->trac_ticket->parent_link = 'Parent Theme: ' . self::escape_trac_wiki( 'https://wordpress.org/themes/' . $parent );
 			}
 		}
 

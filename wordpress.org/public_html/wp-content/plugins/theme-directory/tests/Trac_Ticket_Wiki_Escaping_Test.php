@@ -622,6 +622,52 @@ class Trac_Ticket_Wiki_Escaping_Test extends TestCase {
 	}
 
 	/**
+	 * Inline formatting can't start inside a link target, so URL headers are left intact.
+	 *
+	 * @return void
+	 */
+	public function test_inline_formatting_in_url_headers_is_left_alone() {
+		$description = $this->compose_description(
+			array(
+				'Theme URI'  => 'https://example.org/my__theme/x**y',
+				'Author URI' => 'https://example.net/a,,b~~c',
+			)
+		);
+
+		$this->assertStringContainsString( 'Theme URL - https://example.org/my__theme/x**y', $description );
+		$this->assertStringContainsString( 'Author URL - https://example.net/a,,b~~c', $description );
+	}
+
+	/**
+	 * The parent link is escaped as a URL, so a slug with underscores still links to the theme.
+	 *
+	 * @return void
+	 */
+	public function test_parent_link_keeps_underscores() {
+		$description = $this->compose_description( array( 'Template' => 'my__parent' ) );
+
+		$this->assertStringContainsString( 'Parent Theme: https://wordpress.org/themes/my__parent', $description );
+	}
+
+	/**
+	 * A Theme Check link keeps its target, and formatting after a URL ends is still escaped.
+	 *
+	 * @return void
+	 */
+	public function test_link_targets_in_a_message_are_left_alone() {
+		$this->register_themecheck(
+			array( "<span class='tc-lead tc-warning'>WARNING</span>: See <a href='https://developer.wordpress.org/reference/functions/__/'>the docs</a> or https://example.org/x__ for <strong>__</strong>." )
+		);
+
+		$results = ( new WPORG_Themes_Upload() )->generate_themecheck_results_for_trac();
+
+		$this->assertStringContainsString( '[https://developer.wordpress.org/reference/functions/__/ the docs]', $results );
+
+		// Trac ends a link before a trailing `_`, so the underline there is live and escaped.
+		$this->assertStringContainsString( "https://example.org/x!__ for '''!__'''", $results );
+	}
+
+	/**
 	 * Quoted code shows the characters Theme Check encoded, not their entities.
 	 *
 	 * @return void
