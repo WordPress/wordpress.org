@@ -51,7 +51,6 @@ class Locale_Team implements Site {
 	private function initialize_jetpack_customizations() {
 		$jetpack_module_manager = new Jetpack\Module_Manager( [
 			'stats',
-			'markdown',
 			'subscriptions',
 			'sharedaddy',
 		] );
