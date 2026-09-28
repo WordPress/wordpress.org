@@ -132,8 +132,8 @@ class Plugin {
 	 * @return string Valid timezone identifier or empty string.
 	 */
 	public function filter_timezone_string() {
-		/** 
-		 * translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
+		/**
+		 * Translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
 		 * or a valid timezone string (America/New_York). See https://www.php.net/manual/timezones.php
 		 * for all timezone strings supported by PHP.
 		 */
@@ -163,7 +163,7 @@ class Plugin {
 		}
 
 		/**
-		 * translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
+		 * Translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
 		 * or a valid timezone string (America/New_York). See https://www.php.net/manual/timezones.php
 		 * for all timezone strings supported by PHP.
 		 */
