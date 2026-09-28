@@ -101,7 +101,8 @@ class Locale_Main implements Site {
 		$jetpack_module_manager->setup();
 
 		// Options for Jetpack's sharing module.
-		add_filter( 'pre_option_sharing-options',
+		add_filter(
+			'pre_option_sharing-options',
 			function () {
 				return [
 					'global' => [
@@ -115,7 +116,8 @@ class Locale_Main implements Site {
 			}
 		);
 
-		add_filter( 'pre_option_sharing-services',
+		add_filter(
+			'pre_option_sharing-services',
 			function () {
 				return [
 					'visible' => [ 'mastodon', 'twitter', 'facebook', 'linkedin', 'email' ],
@@ -124,7 +126,8 @@ class Locale_Main implements Site {
 			}
 		);
 
-		add_filter( 'option_stats_options',
+		add_filter(
+			'option_stats_options',
 			function ( $options ) {
 				$options          = is_array( $options ) ? $options : [];
 				$options['roles'] = [
