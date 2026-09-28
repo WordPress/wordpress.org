@@ -87,46 +87,55 @@ class Locale_Main implements Site {
 	 * Initializes customizations for Jetpack.
 	 */
 	private function initialize_jetpack_customizations() {
-		$jetpack_module_manager = new Jetpack\Module_Manager( [
-			'stats',
-			'videopress',
-			'contact-form',
-			'sharedaddy',
-			'shortcodes',
-			'subscriptions',
-		] );
+		$jetpack_module_manager = new Jetpack\Module_Manager(
+			[
+				'stats',
+				'videopress',
+				'contact-form',
+				'sharedaddy',
+				'shortcodes',
+				'subscriptions',
+			]
+		);
+
 		$jetpack_module_manager->setup();
 
 		// Options for Jetpack's sharing module.
-		add_filter( 'pre_option_sharing-options', function () {
-			return [
-				'global' => [
-					'button_style'  => 'icon-text',
-					'sharing_label' => __( 'Share this:', 'rosetta' ),
-					'open_links'    => 'same',
-					'show'          => [ 'post' ],
-					'custom'        => [],
-				],
-			];
-		} );
+		add_filter( 'pre_option_sharing-options', function ()
+			{
+				return [
+					'global' => [
+						'button_style'  => 'icon-text',
+						'sharing_label' => __( 'Share this:', 'rosetta' ),
+						'open_links'    => 'same',
+						'show'          => [ 'post' ],
+						'custom'        => [],
+					],
+				];
+			}
+		);
 
-		add_filter( 'pre_option_sharing-services', function () {
-			return [
-				'visible' => [ 'mastodon', 'twitter', 'facebook', 'linkedin' 'email' ],
-				'hidden'  => [],
-			];
-		} );
+		add_filter( 'pre_option_sharing-services', function ()
+			{
+				return [
+					'visible' => [ 'mastodon', 'twitter', 'facebook', 'linkedin' 'email' ],
+					'hidden'  => [],
+				];
+			}
+		);
 
-		add_filter( 'option_stats_options', function ( $options ) {
-			$options          = is_array( $options ) ? $options : [];
-			$options['roles'] = [
-				'administrator',
-				'editor',
-				'author',
-				Role\Locale_Manager::get_name(),
-			];
-			return $options;
-		}, 10, 1 );
+		add_filter( 'option_stats_options', function ( $options )
+			{
+				$options          = is_array( $options ) ? $options : [];
+				$options['roles'] = [
+					'administrator',
+					'editor',
+					'author',
+					Role\Locale_Manager::get_name(),
+				];
+				return $options;
+			}, 10, 1
+		);
 
 		// Options for Jetpack's subscription module.
 		add_filter( 'pre_option_stb_enabled', '__return_zero' );
