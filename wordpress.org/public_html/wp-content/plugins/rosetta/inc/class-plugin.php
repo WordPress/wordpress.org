@@ -120,10 +120,10 @@ class Plugin {
 	 */
 	private function filter_date_options() {
 		add_filter( 'pre_option_timezone_string', [ $this, 'filter_timezone_string' ] );
-		add_filter( 'pre_option_gmt_offset',      [ $this, 'filter_gmt_offset' ], 11 );
-		add_filter( 'pre_option_date_format',     [ $this, 'filter_date_format' ] );
-		add_filter( 'pre_option_time_format',     [ $this, 'filter_time_format' ] );
-		add_filter( 'pre_option_start_of_week',   [ $this, 'filter_start_of_week' ] );
+		add_filter( 'pre_option_gmt_offset', [ $this, 'filter_gmt_offset' ], 11 );
+		add_filter( 'pre_option_date_format', [ $this, 'filter_date_format' ] );
+		add_filter( 'pre_option_time_format', [ $this, 'filter_time_format' ] );
+		add_filter( 'pre_option_start_of_week', [ $this, 'filter_start_of_week' ] );
 	}
 
 	/**
