@@ -108,7 +108,7 @@ class Locale_Main implements Site {
 
 		add_filter( 'pre_option_sharing-services', function () {
 			return [
-				'visible' => [ 'facebook', 'twitter', 'email' ],
+				'visible' => [ 'mastodon', 'twitter', 'facebook', 'linkedin' 'email' ],
 				'hidden'  => [],
 			];
 		} );
