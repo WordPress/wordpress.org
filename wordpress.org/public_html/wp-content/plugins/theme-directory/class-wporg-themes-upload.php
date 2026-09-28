@@ -865,10 +865,10 @@ class WPORG_Themes_Upload {
 			);
 		}
 
-		// Check for child theme's parent in the directory (non-buddypress only)
+		// Check for child theme's parent in the directory (non-buddypress only).
 		if (
 			$this->theme->parent() &&
-			! in_array( 'buddypress', $this->theme->get( 'Tags' ) ) &&
+			! in_array( 'buddypress', $this->theme->get( 'Tags' ), true ) &&
 			empty( $this->theme->post_parent )
 		) {
 			$style_errors->add(
