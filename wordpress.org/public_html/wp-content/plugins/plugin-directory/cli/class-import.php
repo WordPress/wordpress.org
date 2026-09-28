@@ -63,6 +63,13 @@ class Import {
 	public $warnings = array();
 
 	/**
+	 * Whether the plugin being imported has any files in /trunk/.
+	 *
+	 * @var bool
+	 */
+	protected $trunk_has_files = true;
+
+	/**
 	 * The last plugin imported.
 	 *
 	 * @var \WP_Post
@@ -705,6 +712,11 @@ class Import {
 			$versions_to_build[] = $stable_tag;
 		}
 
+		// Tag-only plugins have nothing in trunk to ZIP.
+		if ( ! $this->trunk_has_files ) {
+			$versions_to_build = array_diff( $versions_to_build, array( 'trunk' ) );
+		}
+
 		$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 
 		// Don't rebuild release-confirmation-required tags.
@@ -796,6 +808,8 @@ class Import {
 
 		// Find the trunk readme file, list remotely to avoid checking out the entire directory.
 		$trunk_files = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/trunk" ) ?: array();
+
+		$this->trunk_has_files = (bool) $trunk_files;
 
 		// Find the list of tagged versions of the plugin.
 		$tagged_versions    = [];
