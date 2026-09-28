@@ -13,7 +13,8 @@
 			path: restEndpoint,
 			type: 'PATCH',
 			data: {
-				post_name: slug
+				post_name: slug,
+				_wporg_action: $form.find('input[name="_wporg_action"]').val()
 			}
 		} )
 		.done( function() {

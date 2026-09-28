@@ -6,6 +6,7 @@ global $wp_query;
 $search_placeholder = esc_attr__( 'Search plugins', 'wporg-plugins' );
 $search_button      = esc_attr__( 'Search plugins', 'wporg-plugins' );
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( <<<BLOCKS
 	<!-- wp:group {"align":"wide","className":"wporg-filter-bar wporg-plugins__filters wporg-plugins__filters__no-count","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
 	<div class="wp-block-group alignwide wporg-filter-bar wporg-plugins__filters wporg-plugins__filters__no-count">

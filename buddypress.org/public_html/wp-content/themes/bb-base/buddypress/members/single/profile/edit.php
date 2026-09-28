@@ -7,7 +7,8 @@ if ( bp_has_profile( 'profile_group_id=' . bp_get_current_profile_group_id() ) )
 
 	<?php do_action( 'bp_before_profile_field_content' ); ?>
 
-		<h4><?php printf( __( "Editing '%s' Profile Group", "buddypress" ), bp_get_the_profile_group_name() ); ?></h4>
+		<?php /* translators: %s: Profile group name. */ ?>
+		<h4><?php printf( esc_html__( "Editing '%s' Profile Group", 'buddypress' ), esc_html( bp_get_the_profile_group_name() ) ); ?></h4>
 
 		<ul class="button-nav">
 
@@ -23,21 +24,21 @@ if ( bp_has_profile( 'profile_group_id=' . bp_get_current_profile_group_id() ) )
 
 				<?php if ( 'textbox' == bp_get_the_profile_field_type() ) : ?>
 
-					<label for="<?php bp_the_profile_field_input_name(); ?>"><?php bp_the_profile_field_name(); ?> <?php if ( bp_get_the_profile_field_is_required() ) : ?><?php _e( '(required)', 'buddypress' ); ?><?php endif; ?></label>
+					<label for="<?php bp_the_profile_field_input_name(); ?>"><?php bp_the_profile_field_name(); ?> <?php echo bp_get_the_profile_field_is_required() ? esc_html__( '(required)', 'buddypress' ) : ''; ?></label>
 					<input type="text" name="<?php bp_the_profile_field_input_name(); ?>" id="<?php bp_the_profile_field_input_name(); ?>" value="<?php bp_the_profile_field_edit_value(); ?>" <?php if ( bp_get_the_profile_field_is_required() ) : ?>aria-required="true"<?php endif; ?>/>
 
 				<?php endif; ?>
 
 				<?php if ( 'textarea' == bp_get_the_profile_field_type() ) : ?>
 
-					<label for="<?php bp_the_profile_field_input_name(); ?>"><?php bp_the_profile_field_name(); ?> <?php if ( bp_get_the_profile_field_is_required() ) : ?><?php _e( '(required)', 'buddypress' ); ?><?php endif; ?></label>
+					<label for="<?php bp_the_profile_field_input_name(); ?>"><?php bp_the_profile_field_name(); ?> <?php echo bp_get_the_profile_field_is_required() ? esc_html__( '(required)', 'buddypress' ) : ''; ?></label>
 					<textarea rows="5" cols="40" name="<?php bp_the_profile_field_input_name(); ?>" id="<?php bp_the_profile_field_input_name(); ?>" <?php if ( bp_get_the_profile_field_is_required() ) : ?>aria-required="true"<?php endif; ?>><?php bp_the_profile_field_edit_value(); ?></textarea>
 
 				<?php endif; ?>
 
 				<?php if ( 'selectbox' == bp_get_the_profile_field_type() ) : ?>
 
-					<label for="<?php bp_the_profile_field_input_name(); ?>"><?php bp_the_profile_field_name(); ?> <?php if ( bp_get_the_profile_field_is_required() ) : ?><?php _e( '(required)', 'buddypress' ); ?><?php endif; ?></label>
+					<label for="<?php bp_the_profile_field_input_name(); ?>"><?php bp_the_profile_field_name(); ?> <?php echo bp_get_the_profile_field_is_required() ? esc_html__( '(required)', 'buddypress' ) : ''; ?></label>
 					<select name="<?php bp_the_profile_field_input_name(); ?>" id="<?php bp_the_profile_field_input_name(); ?>" <?php if ( bp_get_the_profile_field_is_required() ) : ?>aria-required="true"<?php endif; ?>>
 						<?php bp_the_profile_field_options(); ?>
 					</select>
@@ -46,7 +47,7 @@ if ( bp_has_profile( 'profile_group_id=' . bp_get_current_profile_group_id() ) )
 
 				<?php if ( 'multiselectbox' == bp_get_the_profile_field_type() ) : ?>
 
-					<label for="<?php bp_the_profile_field_input_name(); ?>"><?php bp_the_profile_field_name(); ?> <?php if ( bp_get_the_profile_field_is_required() ) : ?><?php _e( '(required)', 'buddypress' ); ?><?php endif; ?></label>
+					<label for="<?php bp_the_profile_field_input_name(); ?>"><?php bp_the_profile_field_name(); ?> <?php echo bp_get_the_profile_field_is_required() ? esc_html__( '(required)', 'buddypress' ) : ''; ?></label>
 					<select name="<?php bp_the_profile_field_input_name(); ?>" id="<?php bp_the_profile_field_input_name(); ?>" multiple="multiple" <?php if ( bp_get_the_profile_field_is_required() ) : ?>aria-required="true"<?php endif; ?>>
 
 						<?php bp_the_profile_field_options(); ?>
@@ -55,7 +56,7 @@ if ( bp_has_profile( 'profile_group_id=' . bp_get_current_profile_group_id() ) )
 
 					<?php if ( !bp_get_the_profile_field_is_required() ) : ?>
 
-						<a class="clear-value" href="javascript:clear( '<?php bp_the_profile_field_input_name(); ?>' );"><?php _e( 'Clear', 'buddypress' ); ?></a>
+						<a class="clear-value" href="javascript:clear( '<?php bp_the_profile_field_input_name(); ?>' );"><?php esc_html_e( 'Clear', 'buddypress' ); ?></a>
 
 					<?php endif; ?>
 
@@ -64,13 +65,17 @@ if ( bp_has_profile( 'profile_group_id=' . bp_get_current_profile_group_id() ) )
 				<?php if ( 'radio' == bp_get_the_profile_field_type() ) : ?>
 
 					<div class="radio">
-						<span class="label"><?php bp_the_profile_field_name(); ?> <?php if ( bp_get_the_profile_field_is_required() ) : ?><?php _e( '(required)', 'buddypress' ); ?><?php endif; ?></span>
+						<span class="label"><?php bp_the_profile_field_name(); ?>
+						<?php
+						if ( bp_get_the_profile_field_is_required() ) :
+							?>
+							<?php esc_html_e( '(required)', 'buddypress' ); ?><?php endif; ?></span>
 
 						<?php bp_the_profile_field_options(); ?>
 
 						<?php if ( !bp_get_the_profile_field_is_required() ) : ?>
 
-							<a class="clear-value" href="javascript:clear( '<?php bp_the_profile_field_input_name(); ?>' );"><?php _e( 'Clear', 'buddypress' ); ?></a>
+							<a class="clear-value" href="javascript:clear( '<?php bp_the_profile_field_input_name(); ?>' );"><?php esc_html_e( 'Clear', 'buddypress' ); ?></a>
 
 						<?php endif; ?>
 					</div>
@@ -80,7 +85,11 @@ if ( bp_has_profile( 'profile_group_id=' . bp_get_current_profile_group_id() ) )
 				<?php if ( 'checkbox' == bp_get_the_profile_field_type() ) : ?>
 
 					<div class="checkbox">
-						<span class="label"><?php bp_the_profile_field_name(); ?> <?php if ( bp_get_the_profile_field_is_required() ) : ?><?php _e( '(required)', 'buddypress' ); ?><?php endif; ?></span>
+						<span class="label"><?php bp_the_profile_field_name(); ?>
+						<?php
+						if ( bp_get_the_profile_field_is_required() ) :
+							?>
+							<?php esc_html_e( '(required)', 'buddypress' ); ?><?php endif; ?></span>
 
 						<?php bp_the_profile_field_options(); ?>
 					</div>
@@ -90,7 +99,11 @@ if ( bp_has_profile( 'profile_group_id=' . bp_get_current_profile_group_id() ) )
 				<?php if ( 'datebox' == bp_get_the_profile_field_type() ) : ?>
 
 					<div class="datebox">
-						<label for="<?php bp_the_profile_field_input_name(); ?>_day"><?php bp_the_profile_field_name(); ?> <?php if ( bp_get_the_profile_field_is_required() ) : ?><?php _e( '(required)', 'buddypress' ); ?><?php endif; ?></label>
+						<label for="<?php bp_the_profile_field_input_name(); ?>_day"><?php bp_the_profile_field_name(); ?>
+						<?php
+						if ( bp_get_the_profile_field_is_required() ) :
+							?>
+							<?php esc_html_e( '(required)', 'buddypress' ); ?><?php endif; ?></label>
 
 						<select name="<?php bp_the_profile_field_input_name(); ?>_day" id="<?php bp_the_profile_field_input_name(); ?>_day" <?php if ( bp_get_the_profile_field_is_required() ) : ?>aria-required="true"<?php endif; ?>>
 
@@ -123,7 +136,7 @@ if ( bp_has_profile( 'profile_group_id=' . bp_get_current_profile_group_id() ) )
 	<?php do_action( 'bp_after_profile_field_content' ); ?>
 
 	<div class="submit">
-		<input type="submit" name="profile-group-edit-submit" id="profile-group-edit-submit" value="<?php _e( 'Save Changes', 'buddypress' ); ?> " />
+		<input type="submit" name="profile-group-edit-submit" id="profile-group-edit-submit" value="<?php esc_attr_e( 'Save Changes', 'buddypress' ); ?> " />
 	</div>
 
 	<input type="hidden" name="field_ids" id="field_ids" value="<?php bp_the_profile_group_field_ids(); ?>" />

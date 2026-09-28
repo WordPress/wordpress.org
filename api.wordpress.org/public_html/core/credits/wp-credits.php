@@ -65,6 +65,7 @@ abstract class WP_Credits {
 		'6.8' => '2024-10-23 00:00:00',
 		'6.9' => '2025-03-25 00:00:00',
 		'7.0' => '2025-11-12 00:00:00',
+		'7.1' => '2026-03-27 00:00:00',
 	);
 
 	final public static function factory( $version, $gp_locale ) {
@@ -447,6 +448,7 @@ abstract class WP_Credits {
 		} elseif ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 			echo json_encode( $results );
 		} else {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (serialized PHP); escaping would corrupt the format.
 			echo serialize( $results );
 		}
 	}

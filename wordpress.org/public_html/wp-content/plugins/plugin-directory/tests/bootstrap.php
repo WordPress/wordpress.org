@@ -30,6 +30,7 @@ elseif ( ! $_tests_dir ) {
 }
 
 if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test harness console output, not HTML.
 	echo "Could not find $_tests_dir/includes/functions.php\n";
 	exit( 1 );
 }
@@ -49,6 +50,22 @@ function manually_load_plugin() {
 	require_once dirname( __DIR__ ) . '/plugin-directory.php';
 }
 tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );
+
+/**
+ * Matches WordPress's test bcrypt cost for tests using PHPUnit's base TestCase.
+ *
+ * @param array  $options   Password hashing options.
+ * @param string $algorithm Password hashing algorithm.
+ * @return array Password hashing options.
+ */
+function wp_hash_password_options( array $options, string $algorithm ): array {
+	if ( PASSWORD_BCRYPT === $algorithm ) {
+		$options['cost'] = 5;
+	}
+
+	return $options;
+}
+tests_add_filter( 'wp_hash_password_options', __NAMESPACE__ . '\wp_hash_password_options', 1, 2 );
 
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';

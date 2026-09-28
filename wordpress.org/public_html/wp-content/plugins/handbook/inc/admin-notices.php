@@ -86,8 +86,9 @@ class WPorg_Handbook_Admin_Notices {
 
 			printf(
 				/* translators: 1: example landing page title that includes post type name, 2: comma-separated list of acceptable post slugs */
-				__( '<strong>Welcome to your new handbook!</strong> It is recommended that the first post you create is the landing page for the handbook. You can title it anything you like (suggestions: <code>%1$s</code> or <code>Welcome</code>). However, you must ensure that it has one of the following slugs: %2$s. The slug will ultimately be omitted from the page&#8216;s permalink URL, but will still appear in the permalinks for sub-pages.', 'wporg' ),
-				WPorg_Handbook::get_name( $current_screen->post_type ),
+				wp_kses_post( __( '<strong>Welcome to your new handbook!</strong> It is recommended that the first post you create is the landing page for the handbook. You can title it anything you like (suggestions: <code>%1$s</code> or <code>Welcome</code>). However, you must ensure that it has one of the following slugs: %2$s. The slug will ultimately be omitted from the page&#8216;s permalink URL, but will still appear in the permalinks for sub-pages.', 'wporg' ) ),
+				esc_html( WPorg_Handbook::get_name( $current_screen->post_type ) ),
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Slug list is deliberately <code>-wrapped markup, built above.
 				implode( ', ', $suggested_slugs )
 			);
 			echo "</p></div>\n";
@@ -126,8 +127,9 @@ class WPorg_Handbook_Admin_Notices {
 		echo '<div class="notice notice-error"><p>';
 		printf(
 			/* translators: 1: example landing page title that includes post type name, 2: comma-separated list of acceptable post slugs */
-			__( '<strong>Warning:</strong> A landing page for this handbook has not been created or is not published. You can title it anything you like (suggestions: <code>%1$s</code> or <code>Welcome</code>). However, you must ensure that it has one of the following slugs: %2$s. The slug will ultimately be omitted from the page&#8216;s permalink URL, but will still appear in the permalinks for its sub-pages. Without this page your handbook&#8216;s URL will show a seemingly random handbook page.', 'wporg' ),
-			WPorg_Handbook::get_name( $handbook_post_type ),
+			wp_kses_post( __( '<strong>Warning:</strong> A landing page for this handbook has not been created or is not published. You can title it anything you like (suggestions: <code>%1$s</code> or <code>Welcome</code>). However, you must ensure that it has one of the following slugs: %2$s. The slug will ultimately be omitted from the page&#8216;s permalink URL, but will still appear in the permalinks for its sub-pages. Without this page your handbook&#8216;s URL will show a seemingly random handbook page.', 'wporg' ) ),
+			esc_html( WPorg_Handbook::get_name( $handbook_post_type ) ),
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Slug list is deliberately <code>-wrapped markup, built above.
 			implode( ', ', $suggested_slugs )
 		);
 		echo "</p></div>\n";
@@ -172,9 +174,9 @@ class WPorg_Handbook_Admin_Notices {
 			echo '<div class="notice notice-info"><p>';
 			printf(
 				/* translators: 1: URL to remote manifest. 2: cron interval. */
-				__( '<strong>This is an imported handbook!</strong> This handbook is imported according to a <a href="%1$s">remote manifest</a>. Any local changes will be overwritten during the next import, so make any changes at the remote location. Import interval: <strong>%2$s</strong>.', 'wporg' ),
-				$handbook_config['manifest'],
-				$interval_display
+				wp_kses_post( __( '<strong>This is an imported handbook!</strong> This handbook is imported according to a <a href="%1$s">remote manifest</a>. Any local changes will be overwritten during the next import, so make any changes at the remote location. Import interval: <strong>%2$s</strong>.', 'wporg' ) ),
+				esc_url( $handbook_config['manifest'] ),
+				esc_html( $interval_display )
 			);
 			echo "</p></div>\n";
 		}
@@ -223,8 +225,8 @@ class WPorg_Handbook_Admin_Notices {
 			echo '<div class="notice notice-warning"><p>';
 			printf(
 				/* translators: %s: cron interval. */
-				__( '<strong>Misconfigured cron interval!</strong> This imported handbook has a misconfigured cron interval. The config defines an interval of <strong>%s</strong>, which has not been defined. The fallback import interval shown in a notice above includes the default cron interval currently in use.', 'wporg' ),
-				$interval_display
+				wp_kses_post( __( '<strong>Misconfigured cron interval!</strong> This imported handbook has a misconfigured cron interval. The config defines an interval of <strong>%s</strong>, which has not been defined. The fallback import interval shown in a notice above includes the default cron interval currently in use.', 'wporg' ) ),
+				esc_html( $interval_display )
 			);
 			echo "</p></div>\n";
 		}

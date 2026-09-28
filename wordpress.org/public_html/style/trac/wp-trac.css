@@ -435,6 +435,7 @@ div.attachment #preview .diff .entry h2 a {
 }
 
 .report div.reports h2 {
+	border-bottom: 1px solid #ddd; /* report.css draws a 2pt solid #b00 line */
 	-webkit-box-shadow: none;
 	box-shadow: none;
 }
@@ -1034,15 +1035,58 @@ div.trac-content {
 	background: #eaf2fa; /* current TOC item */
 }
 
-.wikipage h2 {
-	-webkit-box-shadow: none;
-	box-shadow: none;
-}
-
 /* There's already a border on the title, no need for a border on links in titles */
 .wikipage h2 :link, .wikipage h2 :visited,
 .wikipage h3 :link, .wikipage h3 :visited {
 	border-bottom: none;
+}
+
+/* wiki.css styles `section` headings with class-qualified selectors that out-specify the wp4.css element rules; match that specificity. */
+h1.section,
+h2.section,
+h3.section,
+h4.section,
+h5.section,
+h6.section {
+	color: inherit;
+	background: none;
+}
+
+h2.section {
+	font-size: 22px;
+	margin-top: 0;
+	padding: .2em .3em .1em .5rem;
+	border-bottom: 1px solid #ddd;
+}
+
+h3.section {
+	font-size: 14px;
+	font-weight: 700;
+	margin-top: 1em;
+	margin-bottom: 1em;
+	padding: .2em .3em .1em .5rem;
+	border-bottom: 1px dashed #ddd;
+}
+
+h4.section {
+	font-size: 14px;
+	font-weight: 700;
+}
+
+h6.section {
+	font-style: normal;
+}
+
+/* wiki.css pulls post-heading elements up by -1em !important to offset the underline padding removed above. */
+h2.section + *,
+h3.section + * {
+	margin-top: 1em !important;
+}
+
+h2.section:target,
+h3.section:target {
+	background: #fbffb6;
+	box-shadow: none;
 }
 
 /* Gravatars and Comments */

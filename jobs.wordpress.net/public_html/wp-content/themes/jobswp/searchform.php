@@ -7,7 +7,7 @@
 ?>
 <form role="search" method="get" class="search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
 	<label>
-		<span class="screen-reader-text"><?php _ex( 'Search for:', 'label', 'jobswp' ); ?></span>
+		<span class="screen-reader-text"><?php echo esc_html_x( 'Search for:', 'label', 'jobswp' ); ?></span>
 		<input type="search" class="search-field" placeholder="<?php echo esc_attr_x( 'What kind of job are you looking for?', 'placeholder', 'jobswp' ); ?>" value="<?php echo esc_attr( get_search_query() ); ?>" name="s" title="<?php echo esc_attr_x( 'Find Jobs:', 'label', 'jobswp' ); ?>">
 	</label>
 	<input type="submit" class="btn btn-primary btn-sm search-submit" value="<?php echo esc_attr_x( 'Find Jobs', 'submit button', 'jobswp' ); ?>">

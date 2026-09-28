@@ -27,6 +27,7 @@ class Readme_Import extends I18n_Import {
 
 		$files = SVN::ls( $svn_url );
 		if ( ! $files ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( "Plugin has no files in {$tag}." );
 		}
 
@@ -144,6 +145,7 @@ class Readme_Import extends I18n_Import {
 
 		$result = $this->set_glotpress_for_plugin( $this->plugin, 'readme' );
 		if ( is_wp_error( $result ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( $result->get_error_message() );
 		}
 

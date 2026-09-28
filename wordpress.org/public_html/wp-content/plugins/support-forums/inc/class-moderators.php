@@ -18,15 +18,18 @@ class Moderators {
 		// Scripts and styles.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 
-		// Allow keymasters and moderators to edit users.
-		add_filter( 'bbp_map_primary_meta_caps',        array( $this, 'map_meta_caps' ), 10, 4 );
-		add_action( 'bbp_post_request',                 array( $this, 'edit_user_handler' ), 0 );
-
-		// Allow moderators to manage user roles.
-		add_filter( 'bbp_get_caps_for_role',            array( $this, 'bbp_get_caps_for_role' ), 10, 2 );
-
-		// Limit which roles a moderator can assign to a user. Before bbp_profile_update_role().
-		add_action( 'bbp_profile_update',               array( $this, 'bbp_profile_update' ), 1 );
+		// Use bbPress's field-level Super Moderator policy when available.
+		if ( function_exists( 'bbp_current_user_can_edit_user_field' ) ) {
+			add_filter( 'bbp_allow_super_mods', array( $this, 'allow_super_mods' ) );
+			add_filter( 'bbp_map_primary_meta_caps', array( $this, 'map_profile_view_caps' ), 10, 4 );
+		} else {
+			// Preserve the existing policy while older bbPress versions are deployed.
+			add_filter( 'bbp_map_primary_meta_caps', array( $this, 'map_meta_caps' ), 10, 4 );
+			add_action( 'bbp_post_request',          array( $this, 'edit_user_handler' ), 0 );
+			add_action( 'bbp_post_request',          array( $this, 'restrict_profile_edit_fields' ), 0 );
+			add_filter( 'bbp_get_caps_for_role',     array( $this, 'bbp_get_caps_for_role' ), 10, 2 );
+			add_action( 'bbp_profile_update',        array( $this, 'bbp_profile_update' ), 1 );
+		}
 
 		// Append 'view=all' to forum, topic, and reply URLs in moderator views.
 		add_filter( 'bbp_get_forum_permalink',          array( $this, 'add_view_all' ) );
@@ -40,6 +43,9 @@ class Moderators {
 		add_filter( 'bbp_after_has_topics_parse_args',  array( $this, 'add_post_status_to_query' ) );
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'add_post_status_to_query' ) );
 		add_filter( 'bbp_is_topic_pending',             array( $this, 'archived_is_pending_topic' ), 10, 2 );
+
+		// Preserve the existing manual count lifecycle for archived posts.
+		add_filter( 'bbp_pre_update_counts_on_transition_post_status', array( $this, 'skip_archived_count_transition' ), 10, 3 );
 
 		// Adjust the list of admin links for topics and replies.
 		add_filter( 'bbp_topic_admin_links',            array( $this, 'admin_links' ), 10, 2 );
@@ -174,6 +180,77 @@ class Moderators {
 	}
 
 	/**
+	 * Enable bbPress's Super Moderator policy on the main support forums.
+	 *
+	 * On front-end bbPress profiles, moderators may edit profile fields and email
+	 * addresses, and assign non-staff forum roles. Their access excludes passwords,
+	 * WordPress roles, staff forum roles, and protected users. Keymasters retain
+	 * broader front-end controls, while wp-admin keeps native WordPress permissions.
+	 * Core bbPress filters allow individual parts of this policy to be adjusted.
+	 *
+	 * Locale forums continue to honor their own bbPress setting.
+	 *
+	 * @param bool $allow Whether Super Moderators are enabled.
+	 * @return bool
+	 */
+	public function allow_super_mods( $allow ) {
+		if ( Plugin::get_instance()->is_main_forums ) {
+			$allow = true;
+		}
+
+		return $allow;
+	}
+
+	/**
+	 * Extend the Super Moderator policy to the profile a moderator is looking at.
+	 *
+	 * Core grants the policy's capabilities only while the profile editor itself is open,
+	 * so a profile page cannot ask whether to link to it. Answer the same question on the
+	 * surrounding profile, under the same conditions bbPress applies. Remove once bbPress
+	 * widens its own scope.
+	 *
+	 * @see https://bbpress.trac.wordpress.org/ticket/3685
+	 *
+	 * @param array  $caps            Capabilities bbPress mapped the request to.
+	 * @param string $cap             Capability name.
+	 * @param int    $current_user_id Current user ID.
+	 * @param array  $args            Capability context, typically the object ID.
+	 * @return array Filtered capabilities.
+	 */
+	public function map_profile_view_caps( $caps, $cap, $current_user_id, $args ) {
+		if ( ! in_array( $cap, array( 'edit_user', 'promote_user' ), true ) ) {
+			return $caps;
+		}
+
+		// Only on a front-end profile; bbPress covers the editor, wp-admin stays native.
+		if ( is_admin() || bbp_is_single_user_edit() || ! bbp_is_single_user() ) {
+			return $caps;
+		}
+
+		if ( ! bbp_allow_super_mods() ) {
+			return $caps;
+		}
+
+		$user_id = ! empty( $args[0] ) ? (int) $args[0] : bbp_get_displayed_user_id();
+
+		// Users can always edit themselves, so only map for others.
+		if ( empty( $user_id ) || $user_id === $current_user_id ) {
+			return $caps;
+		}
+
+		// Super moderators cannot edit keymasters or site administrators.
+		if (
+			bbp_is_user_keymaster( $user_id )
+			|| user_can( $user_id, 'manage_options' )
+			|| is_super_admin( $user_id )
+		) {
+			return $caps;
+		}
+
+		return array( 'moderate' );
+	}
+
+	/**
 	 * Allow keymasters and moderators to edit users without having
 	 * an Administrator role on the site.
 	 *
@@ -261,6 +338,34 @@ class Moderators {
 		// If it's an allowed role, add it back so it can be processed by bbp_profile_update_role().
 		if ( in_array( $new_forum_role, $allowed_roles, true ) ) {
 			$_POST['bbp-forums-role'] = $new_forum_role;
+		}
+	}
+
+	/**
+	 * Strip the role and password fields before bbPress calls edit_user().
+	 *
+	 * Runs at priority 0, ahead of bbp_edit_user_handler() (priority 1); the
+	 * bbp_profile_update() hook is too late for the site role, as core commits
+	 * set_role() before firing profile_update.
+	 *
+	 * @param string $action The requested action.
+	 */
+	public function restrict_profile_edit_fields( $action = '' ) {
+		if ( 'bbp-update-user' !== $action || is_admin() ) {
+			return;
+		}
+
+		// Keymasters legitimately manage users and roles.
+		if ( bbp_is_user_keymaster( get_current_user_id() ) ) {
+			return;
+		}
+
+		// Site roles are never assigned through the front-end profile handler.
+		unset( $_POST['role'] );
+
+		// Only the account owner may change their own password.
+		if ( bbp_get_displayed_user_id() !== get_current_user_id() ) {
+			unset( $_POST['pass1'], $_POST['pass2'] );
 		}
 	}
 
@@ -357,6 +462,27 @@ class Moderators {
 		$r[ self::ARCHIVED ] = _x( 'Archived', 'post', 'wporg-forums' );
 
 		return $r;
+	}
+
+	/**
+	 * Skip bbPress count updates involving the archived status.
+	 *
+	 * Archived posts are already counted as hidden by archive_post() and
+	 * unarchive_post(). Treat transitions between archived and another hidden
+	 * status as no count change, while preserving those manual public-boundary
+	 * updates.
+	 *
+	 * @param null|bool $check      Whether to short-circuit count updates.
+	 * @param string    $new_status New post status.
+	 * @param string    $old_status Old post status.
+	 * @return null|bool False for archived transitions, or the original value.
+	 */
+	public function skip_archived_count_transition( $check, $new_status, $old_status ) {
+		if ( in_array( self::ARCHIVED, array( $new_status, $old_status ), true ) ) {
+			return false;
+		}
+
+		return $check;
 	}
 
 	public function archive_handler( $action = '' ) {
@@ -1194,7 +1320,8 @@ class Moderators {
 		$user = get_user_by( 'id', get_post_meta( bbp_get_reply_id(), self::MODERATOR_REPLY_AUTHOR, true ) );
 
 		printf(
-			'<em>' . __( 'Posted by <a href="%s">@%s</a>.', 'wporg-forums' ) . '</em><br/>',
+			/* translators: 1: Profile URL, 2: Username. */
+			'<em>' . wp_kses_post( __( 'Posted by <a href="%1$s">@%2$s</a>.', 'wporg-forums' ) ) . '</em><br/>',
 			esc_url( bbp_get_user_profile_url( $user->ID ) ),
 			esc_html( $user->user_nicename )
 		);

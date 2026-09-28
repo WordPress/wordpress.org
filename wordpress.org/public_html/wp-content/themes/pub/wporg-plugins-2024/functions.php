@@ -9,6 +9,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
@@ -109,9 +110,10 @@ function scripts() {
 		if ( $post && current_user_can( 'plugin_admin_edit', $post ) ) {
 			wp_enqueue_script( 'wporg-plugins-categorization', get_stylesheet_directory_uri() . '/js/section-categorization.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-categorization.js' ), true );
 			wp_localize_script( 'wporg-plugins-categorization', 'categorizationOptions', [
-				'restUrl'    => get_rest_url(),
-				'restNonce'  => wp_create_nonce( 'wp_rest' ),
-				'pluginSlug' => $post->post_name,
+				'restUrl'     => get_rest_url(),
+				'restNonce'   => wp_create_nonce( 'wp_rest' ),
+				'actionNonce' => Base::action_nonce( 'save_categorization', $post->post_name ),
+				'pluginSlug'  => $post->post_name,
 			] );
 		}
 	}
@@ -405,6 +407,23 @@ function update_archive_description( $description ) {
 	);
 }
 add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );
+
+/**
+ * Point the Language Suggest block at the directory's own suggestion API.
+ *
+ * @param string $endpoint Default endpoint URL.
+ * @return string Endpoint URL for the current request.
+ */
+function language_suggest_endpoint( $endpoint ) {
+	$endpoint = rest_url( '/plugins/v2/locale-banner' );
+
+	if ( is_singular( 'plugin' ) ) {
+		$endpoint = add_query_arg( 'plugin_slug', get_queried_object()->post_name, $endpoint );
+	}
+
+	return $endpoint;
+}
+add_filter( 'wporg_language_suggest_endpoint', __NAMESPACE__ . '\language_suggest_endpoint' );
 
 /**
  * Custom template tags for this theme.

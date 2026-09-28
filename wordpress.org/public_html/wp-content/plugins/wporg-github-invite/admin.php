@@ -65,8 +65,8 @@ function render() {
 		if ( $message ) {
 			printf(
 				'<div class="notice notice-%s is-dismissable"><p>%s</p></div>',
-				$class,
-				$message
+				esc_attr( $class ),
+				wp_kses_post( $message )
 			);
 		}
 	}
@@ -74,13 +74,13 @@ function render() {
 	?>
 	<div class="wrap" id="wp_learn_admin">
 	<h1>Invite GitHub Member</h1>
-	<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<input type="hidden" name="action" value="github_invite">
 		<?php wp_nonce_field( 'github_invite' ); ?>
 		<table class="form-table">
 			<tr>
 				<th scope="row"><label for="invite">GitHub Email, GitHub URL, WordPress.org user slug, or WordPress.org Profile URL</label></th>
-				<td><input type="text" name="invite" id="invite" class="regular-text" placeholder="https://profiles.wordpress.org/<?php echo wp_get_current_user()->user_nicename; ?>/"></td>
+				<td><input type="text" name="invite" id="invite" class="regular-text" placeholder="https://profiles.wordpress.org/<?php echo esc_attr( wp_get_current_user()->user_nicename ); ?>/"></td>
 			</tr>
 			<tr>
 				<th scope="row"><label for="team">Teams</label></th>
@@ -119,8 +119,8 @@ function render() {
 								<em>%s ago</em>
 								%s
 							</p>',
-							$pending->login ?: $pending->email,
-							human_time_diff( strtotime( $pending->created_at ) ),
+							esc_html( $pending->login ?: $pending->email ),
+							esc_html( human_time_diff( strtotime( $pending->created_at ) ) ),
 							$cancel_url ? '<a class="button" href="' . esc_url( $cancel_url ) . '">Cancel</a>' : ''
 						);
 					}
@@ -136,7 +136,7 @@ function render() {
 		?>
 		<hr>
 		<h1>Settings</h1>
-		<form method="post" action="<?php echo admin_url( 'admin-post.php' ) ?>">
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<input type="hidden" name="action" value="github_invite_settings">
 			<?php wp_nonce_field( 'github_invite_settings' ); ?>
 			<table class="form-table">

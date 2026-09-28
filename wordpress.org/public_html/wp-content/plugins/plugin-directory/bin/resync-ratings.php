@@ -47,6 +47,7 @@ foreach ( $slugs as $i => $slug ) {
         	continue;
 	}
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo $i . '/' . count( $slugs ) . "\t" . $post->post_name . "\n";
 
 	update_post_meta(
