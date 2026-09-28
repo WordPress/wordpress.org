@@ -89,7 +89,9 @@ class Locale_Team implements Site {
 				$options          = is_array( $options ) ? $options : [];
 				$options['roles'] = [ 'administrator', 'editor', 'author' ];
 				return $options;
-			}, 10, 1
+			},
+			10,
+			1
 		);
 	}
 
