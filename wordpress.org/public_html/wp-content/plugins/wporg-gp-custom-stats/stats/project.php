@@ -179,9 +179,8 @@ class WPorg_GP_Project_Stats {
 					$now,
 					$now
 				);
-			
 
-				// If we're processing a large batch, add them as we go to avoid query lengths & memory limits
+				// If we're processing a large batch, add them as we go to avoid query lengths & memory limits.
 				if ( count( $values ) > 50 ) {
 					$wpdb->query(
 						"INSERT INTO {$wpdb->project_translation_status}
