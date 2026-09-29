@@ -18,6 +18,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   phpcs:
     name: PHP Coding Standards
@@ -27,6 +30,7 @@ jobs:
     - uses: actions/checkout@v7
       with:
         fetch-depth: 0
+        persist-credentials: false
 
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
@@ -47,4 +51,6 @@ jobs:
       run: composer install --no-interaction --prefer-dist
 
     - name: Lint PHP
-      run: BASE_REF=${{ github.base_ref }} php .github/bin/phpcs-branch.php
+      run: php .github/bin/phpcs-branch.php
+      env:
+        BASE_REF: ${{ github.base_ref }}
