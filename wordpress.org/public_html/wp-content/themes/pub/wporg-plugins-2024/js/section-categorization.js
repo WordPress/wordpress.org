@@ -4,39 +4,40 @@
 		const error = result.status + ': ' + result.statusText;
 		//result = JSON.parse( result.responseText );
 		//if ( typeof result.message !== 'undefined' ) {
-		alert( error );
+		// eslint-disable-next-line no-alert
+		window.alert( error );
 		//}
 	};
 
 	document.addEventListener( 'submit', ( event ) => {
 		const form = event.target.closest( 'form' );
-		const submitButton = form.querySelector( 'button[type="submit"]' );
-		const successMsg = form.querySelector( '.success-msg' );
 
 		if ( ! form || ! [ 'commercial', 'community' ].includes( form.id ) ) {
 			return;
 		}
 
+		const submitButton = form.querySelector( 'button[type="submit"]' );
+		const successMsg = form.querySelector( '.success-msg' );
+
 		event.preventDefault();
 
 		successMsg?.classList.remove( 'saved' );
 
-		let field_name = '';
+		let fieldName = '';
+		let restName = '';
 
 		if ( 'commercial' === form.id ) {
-			field_name = 'external_support_url';
-			rest_name = 'supportURL';
+			fieldName = 'external_support_url';
+			restName = 'supportURL';
 		} else {
-			field_name = 'external_repository_url';
-			rest_name = 'repositoryURL';
+			fieldName = 'external_repository_url';
+			restName = 'repositoryURL';
 		}
 
-		let fieldInput = form.querySelector(
-				'input[name="' + field_name + '"]'
+		const fieldInput = form.querySelector(
+				'input[name="' + fieldName + '"]'
 			),
-			button = form
-				.querySelector( '.button-small' )
-				?.classList.add( 'spinner' ),
+			button = form.querySelector( '.button-small' ),
 			url =
 				pluginDir.restUrl +
 				'plugins/v1/plugin/' +
@@ -49,6 +50,7 @@
 				pluginDir.actionNonce,
 			originalValue = fieldInput.dataset.originalValue ?? '';
 
+		button?.classList.add( 'spinner' );
 		submitButton.disabled = true;
 
 		fetch( url, {
@@ -57,7 +59,7 @@
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify( {
-				[ rest_name ]: fieldInput.value,
+				[ restName ]: fieldInput.value,
 			} ),
 		} )
 			.then( ( response ) => {
@@ -71,10 +73,10 @@
 			} )
 			.then( ( data ) => {
 				let fieldValue;
-				if ( typeof data[ rest_name ] !== 'undefined' ) {
+				if ( typeof data[ restName ] !== 'undefined' ) {
 					successMsg?.classList.add( 'saved' );
 					// Use value sanitized and saved by server.
-					fieldValue = data[ rest_name ];
+					fieldValue = data[ restName ];
 				} else {
 					// Restore original value.
 					fieldValue = originalValue;

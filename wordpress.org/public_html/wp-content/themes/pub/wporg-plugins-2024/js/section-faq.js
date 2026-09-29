@@ -1,20 +1,20 @@
 ( function ( $ ) {
-	var questions = $( 'dt', '#faq' );
+	const questions = $( 'dt', '#faq' );
 
 	questions
 		.each( function ( index, question ) {
-			var $question = $( question ),
+			const $question = $( question ),
 				$button = $( '<button />' ),
 				$h3 = $( '<h3 />' );
 
 			$question.html( $h3.html( $button.text( $question.text() ) ) );
 		} )
 		.on( 'click', function ( event ) {
-			var $question = $( event.currentTarget );
-
 			if ( 'keydown' === event.type && 13 !== event.which ) {
 				return;
 			}
+
+			const $question = $( event.currentTarget );
 
 			if ( ! $question.is( '.open' ) ) {
 				$question
@@ -34,7 +34,7 @@
 				.slideToggle( 200 );
 
 			if ( window.location.hash ) {
-				var scrollPaddingTop = parseInt(
+				const scrollPaddingTop = parseInt(
 					$( 'html' ).css( 'scroll-padding-top' ) || 0
 				);
 
@@ -47,7 +47,7 @@
 		} );
 
 	if ( window.location.hash ) {
-		var uriHash = window.location.hash.substr( 1 ),
+		let uriHash = window.location.hash.substr( 1 ),
 			uriElement = document.getElementById( uriHash );
 
 		if ( ! uriElement ) {
@@ -68,6 +68,6 @@
 			}
 		}
 
-		jQuery( uriElement ).trigger( 'click' );
+		$( uriElement ).trigger( 'click' );
 	}
-} )( jQuery );
+} )( window.jQuery );

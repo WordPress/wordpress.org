@@ -1,4 +1,4 @@
-/* globals google:object */
+/* global google */
 google.charts.load( 'current', {
 	packages: [ 'corechart' ],
 } );
@@ -14,9 +14,8 @@ google.charts.load( 'current', {
 			jsonpCallback: 'wporgPluginStatsDownloads',
 		} ).done( function ( downloads ) {
 			google.charts.setOnLoadCallback( function () {
-				var data = new google.visualization.DataTable(),
-					count = 0,
-					sml;
+				const data = new google.visualization.DataTable();
+				let count = 0;
 
 				data.addColumn( 'date', settings.l10n.date );
 				data.addColumn( 'number', settings.l10n.downloads );
@@ -28,7 +27,7 @@ google.charts.load( 'current', {
 					count++;
 				} );
 
-				sml = data.getNumberOfRows() < 225;
+				const sml = data.getNumberOfRows() < 225;
 
 				new google.visualization.LineChart(
 					document.getElementById( 'plugin-download-stats' )
@@ -75,12 +74,10 @@ google.charts.load( 'current', {
 			dataType: 'jsonp',
 			jsonpCallback: 'wporgPluginStatsSummary',
 		} ).done( function ( summary ) {
-			var $tbody = $( '#plugin-download-history-stats' ).find(
-					'tbody:last-child'
-				),
-				$row,
-				count,
-				field;
+			const $tbody = $( '#plugin-download-history-stats' ).find(
+				'tbody:last-child'
+			);
+			let $row, count, field;
 
 			for ( field in summary ) {
 				if ( ! summary.hasOwnProperty( field ) ) {
@@ -109,12 +106,10 @@ google.charts.load( 'current', {
 			}
 
 			google.charts.setOnLoadCallback( function () {
-				var barHeaders = [ '' ],
-					barValues = [ '' ],
-					versionList = [],
-					data,
-					formatter,
-					index;
+				const barHeaders = [ '' ];
+				const barValues = [ '' ];
+				const versionList = [];
+				let index;
 
 				// Gather and sort the list of versions.
 				$.each( versions, function ( version ) {
@@ -143,13 +138,13 @@ google.charts.load( 'current', {
 					barValues.push( versions[ version ] );
 				} );
 
-				data = google.visualization.arrayToDataTable( [
+				const data = google.visualization.arrayToDataTable( [
 					barHeaders,
 					barValues,
 				] );
 
 				// Format it as percentages
-				formatter = new google.visualization.NumberFormat( {
+				const formatter = new google.visualization.NumberFormat( {
 					fractionDigits: 1,
 					suffix: '%',
 				} );

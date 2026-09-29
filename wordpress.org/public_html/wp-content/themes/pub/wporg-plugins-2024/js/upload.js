@@ -1,7 +1,7 @@
 ( function ( $ ) {
 	$( 'dialog.slug-change' ).on( 'submit', function ( e ) {
 		e.preventDefault();
-		var $form = $( e.target ),
+		const $form = $( e.target ),
 			$errorNotice = $form.find( '.notice-error p' ),
 			pluginId = $form.find( 'input[name="id"]' ).val(),
 			slug = $form.find( 'input[name="post_name"]' ).val(),
@@ -23,7 +23,7 @@
 				window.location.reload();
 			} )
 			.fail( function ( response, statusText ) {
-				var errorHtml = response?.responseJSON?.message || statusText;
+				const errorHtml = response?.responseJSON?.message || statusText;
 
 				$errorNotice.html( errorHtml ).parent().removeClass( 'hidden' );
 
@@ -34,7 +34,7 @@
 	// Show the filename on the button when a file is selected.
 	$( 'input.plugin-file' )
 		.on( 'change', function ( e ) {
-			var $span = $( this ).parent().find( 'span' ),
+			const $span = $( this ).parent().find( 'span' ),
 				fileName = e.target.value.split( '\\' ).pop();
 
 			if ( ! $span.data( 'defaultText' ) ) {
@@ -62,7 +62,7 @@
 
 	// Prevent duplicate submissions by disabling the submit button
 	$( 'form.plugin-upload-form' ).on( 'submit', function () {
-		var $button = $( this ).find( 'input[type="submit"]' ),
+		const $button = $( this ).find( 'input[type="submit"]' ),
 			uploadingLabel = $button.data( 'uploadingLabel' );
 
 		$button.prop( 'disabled', true );
@@ -71,4 +71,4 @@
 			$button.val( uploadingLabel );
 		}
 	} );
-} )( jQuery );
+} )( window.jQuery );
