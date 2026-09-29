@@ -1098,6 +1098,7 @@ class Template {
 			'wp-cli'               => 'WP-CLI Only Plugins',
 			'storefront'           => 'Storefront',
 			'not-owner'            => 'Not the submitters plugin',
+			'scraping'             => 'Scraping',
 			'script-insertion'     => 'Script Insertion Plugins are Dangerous',
 			'demo'                 => 'Test/Demo plugin (non functional)',
 			'translation'          => 'Translation of existing plugin',
