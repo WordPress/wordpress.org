@@ -5,7 +5,11 @@ google.charts.load( 'current', {
 
 ( function( $, settings ) {
 	$( function () {
-		$.getJSON('https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&limit=267&callback=?', function( downloads ) {
+		$.ajax( {
+			url: 'https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&limit=267',
+			dataType: 'jsonp',
+			jsonpCallback: 'wporgPluginStatsDownloads'
+		} ).done( function( downloads ) {
 			google.charts.setOnLoadCallback( function() {
 				var data = new google.visualization.DataTable(),
 					count = 0,
@@ -16,7 +20,7 @@ google.charts.load( 'current', {
 
 				$.each( downloads, function( key, value ) {
 					data.addRow();
-					data.setValue( count, 0, new Date( key ) );
+					data.setValue( count, 0, new Date( key + 'T00:00:00' ) );
 					data.setValue( count, 1, Number( value ) );
 					count++;
 				} );
@@ -26,12 +30,10 @@ google.charts.load( 'current', {
 				new google.visualization.LineChart( document.getElementById( 'plugin-download-stats' ) ).draw( data, {
 					colors: ['#253578'],
 					legend: { position: 'none' },
-					titlePosition: 'in',
-					axisTitlesPosition: 'in',
 					chartArea: {
 						height: 280,
 						left: ( sml ? 50 : 0 ),
-						width: ( sml ? 482 : '100%' )
+						right: 0
 					},
 					hAxis: {
 						textStyle: { color: 'black', fontSize: 9 },
@@ -43,7 +45,6 @@ google.charts.load( 'current', {
 						viewWindowMode: 'explicit',
 						viewWindow: { min: 0 }
 					},
-					bar: { groupWidth: ( data.getNumberOfRows() > 100 ? '100%' : null ) },
 					height: 350,
 					curveType: 'function',
 					trendlines: {
@@ -61,7 +62,11 @@ google.charts.load( 'current', {
 			} );
 		} );
 
-		$.getJSON('https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&historical_summary=1&callback=?', function( summary ) {
+		$.ajax( {
+			url: 'https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&historical_summary=1',
+			dataType: 'jsonp',
+			jsonpCallback: 'wporgPluginStatsSummary'
+		} ).done( function( summary ) {
 			var $tbody = $( '#plugin-download-history-stats' ).find( 'tbody:last-child' ),
 				$row, count, field;
 
@@ -79,7 +84,11 @@ google.charts.load( 'current', {
 			}
 		} );
 
-		$.getJSON( 'https://api.wordpress.org/stats/plugin/1.0/?slug=' + settings.slug + '&callback=?', function ( versions ) {
+		$.ajax( {
+			url: 'https://api.wordpress.org/stats/plugin/1.0/?slug=' + settings.slug,
+			dataType: 'jsonp',
+			jsonpCallback: 'wporgPluginStatsVersions'
+		} ).done( function ( versions ) {
 			if ( 0 === versions.length ) {
 				$( '#plugin-version-stats' ).text( settings.l10n.noData );
 				return;
@@ -89,12 +98,13 @@ google.charts.load( 'current', {
 				var barHeaders  = [ '' ],
 					barValues   = [ '' ],
 					versionList = [],
-					index       = 0,
-					data, formatter;
+					data, formatter, index;
 
 				// Gather and sort the list of versions.
 				$.each( versions, function( version ) {
-					versionList.push( version );
+					if ( 'other' !== version ) {
+						versionList.push( version );
+					}
 				} );
 
 				// Sort the version list by version.
@@ -104,9 +114,9 @@ google.charts.load( 'current', {
 					return ( a[0] !== b[0] ) ? a[0]-b[0] : a[1]-b[1];
 				} );
 
-				// Move 'other' versions to the beginning.
-				if ( 'other' === versionList[ versionList.length - 1 ] ) {
-					versionList.unshift( versionList.pop() );
+				// Put 'other' versions at the beginning.
+				if ( versions.hasOwnProperty( 'other' ) ) {
+					versionList.unshift( 'other' );
 				}
 
 				// Add all the versions
@@ -126,11 +136,9 @@ google.charts.load( 'current', {
 					suffix: '%'
 				} );
 
-				$.each( barValues, function( value ) {
-					if ( barValues[ value ] ) {
-						formatter.format( data, ++index );
-					}
-				} );
+				for ( index = 1; index < data.getNumberOfColumns(); index++ ) {
+					formatter.format( data, index );
+				}
 
 				new google.visualization.BarChart( document.getElementById( 'plugin-version-stats' ) ).draw( data, {
 					legend: {
