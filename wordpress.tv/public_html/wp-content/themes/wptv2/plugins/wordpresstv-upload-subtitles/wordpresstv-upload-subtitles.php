@@ -244,6 +244,10 @@ class WordPressTV_Subtitles_Upload {
 		$approve       = ! empty( $post_data['wptv-approve-subtitles'] );
 		$attachment_id = $post_data['ID'];
 
+		if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
+        	return $post_data;
+ 	   }
+
 		$attachment_meta = get_post_meta( $attachment_id, '_wptv_submitted_subtitles', true );
 		if ( empty( $attachment_meta ) ) {
 			wp_die( 'Missing attachment metadata.' ); // Cannot show errors other than die(...)
