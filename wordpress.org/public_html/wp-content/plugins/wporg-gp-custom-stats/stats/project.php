@@ -101,7 +101,7 @@ class WPorg_GP_Project_Stats {
 			SUM( stats.all ) as `all`, SUM( stats.current ) as `current`, SUM( stats.waiting ) as `waiting`,
 			SUM( stats.fuzzy ) as `fuzzy`, SUM( stats.warnings ) as `warnings`, SUM( stats.untranslated ) as `untranslated`,
 			( SUM( stats.waiting ) > 0 OR SUM( stats.fuzzy ) > 0 ) as `has_pending`,
-			NOW() as `date_added`, NOW() as `date_modified`
+			UTC_TIMESTAMP() as `date_added`, UTC_TIMESTAMP() as `date_modified`
 		FROM {$wpdb->project_translation_status} stats
 			LEFT JOIN {$wpdb->gp_projects} p ON stats.project_id = p.id
 		WHERE
