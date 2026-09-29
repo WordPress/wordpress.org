@@ -5,8 +5,9 @@
 | Module | What it does |
 |---|---|
 | [WPOrgSidebar](Modules/WPOrgSidebar) | Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests next to each conversation. |
+| [WPOrgWebhooks](Modules/WPOrgWebhooks) | Sends conversation events to WordPress.org, which records them as contributor stats. |
 
-It talks to [`api.wordpress.org/dotorg/freescout/`](../api.wordpress.org/public_html/dotorg/freescout), which does the WordPress.org lookups.
+Both talk to [`api.wordpress.org/dotorg/freescout/`](../api.wordpress.org/public_html/dotorg/freescout), which does the WordPress.org lookups.
 
 ## Development
 
@@ -37,3 +38,5 @@ Configuration, in FreeScout's `.env`:
 |---|---|
 | `WPORG_API_URL` | `https://api.wordpress.org/dotorg/freescout/` (the default) |
 | `WPORG_API_SECRET` | Shared secret; must match `FREESCOUT_SECRET` on api.wordpress.org. |
+
+FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events from the queue.
