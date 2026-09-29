@@ -107,6 +107,7 @@ class WordPressTV_Subtitles_Upload {
 
 		if ( ! wp_verify_nonce( $nonce, 'wptv-upload-subtitles' ) ) {
 			wp_die( 'Invalid form data. Please go back and try again.' );
+		}
 
 		if ( empty( $_POST['wptv_video_id'] ) ) {
 			wp_die( 'Requires a video context.' );
