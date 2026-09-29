@@ -33,7 +33,6 @@ class WPorg_GP_Warning_Stats {
 	public function __construct() {
 		global $wpdb, $gp_table_prefix;
 
-		add_action( 'gp_translation_created', array( $this, 'translation_updated' ) );
 		add_action( 'gp_translation_saved', array( $this, 'translation_updated' ) );
 
 		// DB writes are delayed until shutdown to bulk-update the stats during imports.
