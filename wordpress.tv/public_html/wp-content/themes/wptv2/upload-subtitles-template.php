@@ -305,10 +305,14 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 		<h3><?php esc_html_e( 'Instructions', 'wptv' ); ?></h3>
 
 		<?php
-			$instructions = get_post( 17639 );
-			setup_postdata( $instructions );
-			the_content();
-			wp_reset_postdata();
+			global $post;
+			$instructions_post = get_post( 17639 );
+			if ( $instructions_post ) {
+				$post = $instructions_post;
+				setup_postdata( $post );
+				the_content();
+				wp_reset_postdata();
+			}
 		?>
 	</div>
 </div>
