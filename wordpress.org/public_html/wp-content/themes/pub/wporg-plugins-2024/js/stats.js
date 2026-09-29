@@ -20,7 +20,7 @@ google.charts.load( 'current', {
 
 				$.each( downloads, function( key, value ) {
 					data.addRow();
-					data.setValue( count, 0, new Date( key ) );
+					data.setValue( count, 0, new Date( key + 'T00:00:00' ) );
 					data.setValue( count, 1, Number( value ) );
 					count++;
 				} );
