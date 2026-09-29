@@ -112,7 +112,7 @@ class WPorg_GP_Warning_Stats {
 			return;
 		}
 
-		$now    = current_time( 'mysql', 1 );
+		$now    = gmdate( 'Y-m-d H:i:s' );
 		$chunks = array_chunk( $this->warning_stats, 50 );
 
 		foreach ( $chunks as $chunk ) {
