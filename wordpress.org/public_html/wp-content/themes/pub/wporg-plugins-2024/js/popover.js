@@ -1,4 +1,4 @@
-( function( $ ) {
+( function ( $ ) {
 	var $document = $( document );
 
 	function closePopover( $popover, $trigger ) {
@@ -7,7 +7,7 @@
 		$document.off( 'click.popover-close keydown.popover-close' );
 	}
 
-	$( '.popover-trigger' ).each( function() {
+	$( '.popover-trigger' ).each( function () {
 		var $el = $( this );
 		var target = $el.data( 'target' );
 		var $target = $( '#' + target );
@@ -16,7 +16,7 @@
 			return;
 		}
 
-		$el.on( 'click', function( event ) {
+		$el.on( 'click', function ( event ) {
 			if ( $target.hasClass( 'is-visible' ) ) {
 				return;
 			}
@@ -28,19 +28,26 @@
 
 			var $closeButton = $target.find( '.popover-close' );
 
-			$closeButton.on( 'click.popover-close', function() {
+			$closeButton.on( 'click.popover-close', function () {
 				closePopover( $target, $el );
 			} );
 
 			$closeButton.focus();
 
-			$document.on( 'click.popover-close keydown.popover-close', function( event ) {
-				if ( 'keydown' === event.type && 27 === event.which ) { // Esc key.
-					closePopover( $target, $el );
-				} else if (  $target[0] !== event.target && ! $.contains( $target[0], event.target ) ) {
-					closePopover( $target, $el );
+			$document.on(
+				'click.popover-close keydown.popover-close',
+				function ( event ) {
+					if ( 'keydown' === event.type && 27 === event.which ) {
+						// Esc key.
+						closePopover( $target, $el );
+					} else if (
+						$target[ 0 ] !== event.target &&
+						! $.contains( $target[ 0 ], event.target )
+					) {
+						closePopover( $target, $el );
+					}
 				}
-			} );
+			);
 		} );
 	} );
 } )( jQuery );
