@@ -2,7 +2,11 @@
 
 [FreeScout](https://freescout.net/) modules for the WordPress.org email helpdesk, which replaces HelpScout.
 
-Each module lives in its own directory in [`Modules/`](Modules).
+| Module | What it does |
+|---|---|
+| [WPOrgSidebar](Modules/WPOrgSidebar) | Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests next to each conversation. |
+
+It talks to [`api.wordpress.org/dotorg/freescout/`](../api.wordpress.org/public_html/dotorg/freescout), which does the WordPress.org lookups.
 
 ## Development
 
@@ -26,3 +30,10 @@ FreeScout core is installed and updated by the systems team. This folder only ad
 1. Check out `freescout.wordpress.net/Modules/` as FreeScout's `Modules/` folder. Modules installed through FreeScout's UI, like premium ones, sit next to ours as unversioned folders.
 2. After every deploy, and after every FreeScout core update, run `php artisan freescout:after-app-update` as the web server user. It clears FreeScout's caches, runs migrations, and restarts the queue worker.
 3. An admin switches new modules on under Manage » Modules. To remove a module, switch it off there first, and remove its code in a later deploy.
+
+Configuration, in FreeScout's `.env`:
+
+| Variable | Value |
+|---|---|
+| `WPORG_API_URL` | `https://api.wordpress.org/dotorg/freescout/` (the default) |
+| `WPORG_API_SECRET` | Shared secret; must match `FREESCOUT_SECRET` on api.wordpress.org. |

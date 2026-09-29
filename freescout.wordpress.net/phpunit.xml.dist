@@ -20,5 +20,7 @@ Output goes to stderr because FreeScout middleware calls header(), which fails o
 		<env name="CACHE_DRIVER" value="array" force="true"/>
 		<env name="SESSION_DRIVER" value="array" force="true"/>
 		<env name="QUEUE_DRIVER" value="sync" force="true"/>
+		<env name="WPORG_API_URL" value="http://127.0.0.1:9/" force="true"/>
+		<env name="WPORG_API_SECRET" value="test-secret" force="true"/>
 	</php>
 </phpunit>
