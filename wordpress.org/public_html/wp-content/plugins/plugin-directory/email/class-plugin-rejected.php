@@ -215,7 +215,7 @@ If you've gotten all the way down here and still think we should be hosting your
 	 */
 	public function reason_scraping() {
 		return __(
-			'Your plugin has been rejected because it retrieves or extracts content from third-party websites by scraping it.
+			'Your plugin has been rejected because it retrieves or extracts content from third-party websites by scraping them.
 
 <strong>Why this is not permitted</strong>
 
