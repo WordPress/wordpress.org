@@ -5,7 +5,12 @@ google.charts.load( 'current', {
 
 ( function( $, settings ) {
 	$( function () {
-		$.getJSON('https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&limit=267&callback=?', function( downloads ) {
+		// Unique callback names: jQuery Migrate 3.6.0 generates the same one for concurrent JSONP requests.
+		$.ajax( {
+			url: 'https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&limit=267',
+			dataType: 'jsonp',
+			jsonpCallback: 'wporgPluginStatsDownloads'
+		} ).done( function( downloads ) {
 			google.charts.setOnLoadCallback( function() {
 				var data = new google.visualization.DataTable(),
 					count = 0,
@@ -61,7 +66,11 @@ google.charts.load( 'current', {
 			} );
 		} );
 
-		$.getJSON('https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&historical_summary=1&callback=?', function( summary ) {
+		$.ajax( {
+			url: 'https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&historical_summary=1',
+			dataType: 'jsonp',
+			jsonpCallback: 'wporgPluginStatsSummary'
+		} ).done( function( summary ) {
 			var $tbody = $( '#plugin-download-history-stats' ).find( 'tbody:last-child' ),
 				$row, count, field;
 
@@ -79,7 +88,11 @@ google.charts.load( 'current', {
 			}
 		} );
 
-		$.getJSON( 'https://api.wordpress.org/stats/plugin/1.0/?slug=' + settings.slug + '&callback=?', function ( versions ) {
+		$.ajax( {
+			url: 'https://api.wordpress.org/stats/plugin/1.0/?slug=' + settings.slug,
+			dataType: 'jsonp',
+			jsonpCallback: 'wporgPluginStatsVersions'
+		} ).done( function ( versions ) {
 			if ( 0 === versions.length ) {
 				$( '#plugin-version-stats' ).text( settings.l10n.noData );
 				return;
