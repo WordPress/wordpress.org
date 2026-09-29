@@ -5,7 +5,6 @@ google.charts.load( 'current', {
 
 ( function( $, settings ) {
 	$( function () {
-		// Unique callback names: jQuery Migrate 3.6.0 generates the same one for concurrent JSONP requests.
 		$.ajax( {
 			url: 'https://api.wordpress.org/stats/plugin/1.0/downloads.php?slug=' + settings.slug + '&limit=267',
 			dataType: 'jsonp',
