@@ -3,6 +3,8 @@
  * Title: Article Sidebar
  * Slug: wporg-documentation-2022/article-sidebar
  * Inserter: no
+ *
+ * @package WordPressdotorg\Theme\Documentation_2022
  */
 
 ?>

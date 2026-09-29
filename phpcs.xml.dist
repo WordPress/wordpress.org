@@ -24,7 +24,7 @@
 	<exclude-pattern>*/plugins/photo-directory/inc/google-cloud-storage-stream-metadata.php</exclude-pattern>
 
 	<!-- Exclude generated wp-scripts asset files. -->
-	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
+	<exclude-pattern>*/build/*.asset.php</exclude-pattern>
 
 	<!-- Scan all (php) files in the current folder and subfolders -->
 	<file>.</file>

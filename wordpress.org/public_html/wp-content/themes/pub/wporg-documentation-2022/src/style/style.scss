@@ -7,7 +7,7 @@
 :where(main) a:where(:not(.wp-element-button,.wp-block-wporg-link-wrapper)):focus,
 :where(main) button:where(:not([class*="wp-block-button"])):focus {
 	border-radius: 2px;
-	outline: 1.5px solid currentColor;
+	outline: 1.5px solid currentcolor;
 	outline-offset: 1.5px;
 }
 
@@ -15,7 +15,10 @@ p.has-background {
 	padding: var(--wp--preset--spacing--20);
 }
 
-/* Both blocks are in the local header, but only one should be shown at any given time. */
+/*
+ * Both blocks are in the local header, but only one should be shown at any
+ * given time.
+ */
 body.archive .wp-block-wporg-local-navigation-bar .wp-block-post-title {
 	display: none;
 }
@@ -39,7 +42,7 @@ body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
 
 	&:focus {
 		border-radius: 2px;
-		outline: 1.5px solid currentColor;
+		outline: 1.5px solid currentcolor;
 		outline-offset: 1.5px;
 	}
 }
