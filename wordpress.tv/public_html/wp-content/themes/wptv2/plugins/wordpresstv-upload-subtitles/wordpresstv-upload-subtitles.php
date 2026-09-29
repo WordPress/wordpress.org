@@ -192,14 +192,14 @@ class WordPressTV_Subtitles_Upload {
 			$language['label']
 		);
 
+		// Subtitles remain unattached (post_parent = 0) until approved.
 		wp_update_post(
 			wp_slash(
 				array(
 					'ID'           => $subs_attachment_id,
 					'post_content' => $post_content,
 					'post_title'   => sprintf( 'Subtitles: %s (%s)', $parent->post_title, $language['label'] ),
-				//	'post_parent'  => $parent->ID, // easier to look for unapproved subtitles attachment if they are "unattached"?
-					)
+				)
 			)
 		);
 
