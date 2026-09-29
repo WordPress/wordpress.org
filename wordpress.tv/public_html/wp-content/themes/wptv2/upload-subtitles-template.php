@@ -304,16 +304,14 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 	<div id="subtitle-instructions">
 		<h3><?php esc_html_e( 'Instructions', 'wptv' ); ?></h3>
 
-		<?php
-			global $post;
-			$instructions_post = get_post( 17639 );
-			if ( $instructions_post ) {
-				$post = $instructions_post;
-				setup_postdata( $post );
-				the_content();
-				wp_reset_postdata();
-			}
-		?>
+	<?php
+		$instructions_post = get_post( 17639 );
+		if ( $instructions_post instanceof WP_Post ) {
+			setup_postdata( $instructions_post );
+			the_content();
+			wp_reset_postdata();
+		}
+	?>
 	</div>
 </div>
 
