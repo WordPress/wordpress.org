@@ -87,6 +87,9 @@ class Plugin {
 	 * ensures a single cron event is scheduled to process it.
 	 */
 	public function schedule_tm_update() {
+		// Temporarily disabled while the TM queue backlog floods Cavalcade.
+		return;
+
 		remove_action( 'gp_translation_created', array( $this, 'translation_updated' ), 3 );
 		remove_action( 'gp_translation_saved', array( $this, 'translation_updated' ), 3 );
 
