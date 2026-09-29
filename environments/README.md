@@ -281,7 +281,7 @@ A local [FreeScout](https://freescout.net/) with the modules from [`freescout.wo
 npm run freescout:start
 ```
 
-Then log in at http://127.0.0.1:8890 as `admin@wordpress.test` / `password`. Replies sent to senders land in Mailpit at http://127.0.0.1:8891.
+Then open http://127.0.0.1:8890 and log in with WordPress.org: a mock login page lets you pick an account, e.g. `admin`, which is connected to the FreeScout admin. Its other accounts cover new users (`reviewer`), no two-factor authentication (`no2fa`), and blocked accounts (`blocked`). Replies sent to senders land in Mailpit at http://127.0.0.1:8891.
 
 What's running:
 
@@ -291,7 +291,7 @@ What's running:
 | `db` | MariaDB, with a separate `freescout-test` database for the tests. |
 | `greenmail` | Mail server FreeScout fetches the **Plugins** and **Themes** mailboxes from, over IMAP. Two sample emails are delivered on first start. |
 | `mailpit` | Catches outgoing mail. |
-| `mock-api` | Stands in for `api.wordpress.org/dotorg/freescout/`: checks request signatures, answers sidebar panels with the data it received, and logs webhook events (`npm run freescout:logs`). |
+| `mock-api` | Stands in for `api.wordpress.org/dotorg/freescout/`: checks request signatures, answers sidebar panels with the data it received, and logs webhook events (`npm run freescout:logs`). Also stands in for login.wordpress.org's SAML identity provider at http://127.0.0.1:8892/idp, signing with a key that's only for local development. |
 
 `freescout.wordpress.net/Modules/` is mounted as FreeScout's `Modules/` folder, like production's checkout. Every start switches all modules on and runs `freescout:after-app-update`, as production does after a deploy. To try another module, like a premium one, copy it into `freescout.wordpress.net/Modules/` and restart; don't commit it. After switching branches, run `npm run freescout:setup`: FreeScout errors on every page while it still has a removed module cached.
 

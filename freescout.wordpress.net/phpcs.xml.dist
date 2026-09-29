@@ -23,6 +23,19 @@
 		<exclude name="WordPress.WP" />
 		<exclude name="WordPress.DB" />
 		<exclude name="WordPress.Security" />
+		<!-- SAML messages are base64 by definition. -->
+		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode" />
+		<exclude name="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode" />
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="allowed_custom_properties" type="array">
+				<element value="documentElement" />
+				<element value="nextSibling" />
+				<element value="textContent" />
+			</property>
+		</properties>
 	</rule>
 
 	<rule ref="Generic.PHP.RequireStrictTypes" />

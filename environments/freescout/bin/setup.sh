@@ -58,6 +58,11 @@ done
 # What production runs after every deploy.
 php "$app/artisan" --no-interaction freescout:after-app-update
 
+# The admin logs in as "admin" at the mock WordPress.org login.
+if [ -f "$app/Modules/WPOrgSSO/module.json" ]; then
+	php "$app/artisan" --no-interaction wporgsso:connect admin@wordpress.test admin > /dev/null
+fi
+
 # Deliver the sample emails once; FreeScout's scheduler fetches them within a minute.
 if [ ! -f "$app/storage/.wporg-fixtures-sent" ]; then
 	for eml in /srv/env/fixtures/*.eml; do
@@ -72,5 +77,9 @@ fi
 touch /tmp/wporg-setup-done
 
 echo
-echo "FreeScout: ${APP_URL}  (admin@wordpress.test / password)"
+if [ -f "$app/Modules/WPOrgSSO/module.json" ]; then
+	echo "FreeScout: ${APP_URL}  (log in as \"admin\" at the mock WordPress.org login)"
+else
+	echo "FreeScout: ${APP_URL}  (admin@wordpress.test / password)"
+fi
 echo "Outgoing mail: http://127.0.0.1:${MAILPIT_PORT:-8891}"

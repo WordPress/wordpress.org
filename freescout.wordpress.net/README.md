@@ -6,8 +6,9 @@
 |---|---|
 | [WPOrgSidebar](Modules/WPOrgSidebar) | Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests next to each conversation. |
 | [WPOrgWebhooks](Modules/WPOrgWebhooks) | Sends conversation events to WordPress.org, which records them as contributor stats. |
+| [WPOrgSSO](Modules/WPOrgSSO) | Agents log in with their WordPress.org account, through login.wordpress.org; there's no other way in. Every user is connected to a WordPress.org account, and new users are created from one. Name, email, and avatar are updated from it at every login. |
 
-Both talk to [`api.wordpress.org/dotorg/freescout/`](../api.wordpress.org/public_html/dotorg/freescout), which does the WordPress.org lookups.
+All three talk to [`api.wordpress.org/dotorg/freescout/`](../api.wordpress.org/public_html/dotorg/freescout), which does the WordPress.org lookups.
 
 ## Development
 
@@ -16,7 +17,7 @@ Run FreeScout locally with these modules, test mail, and a mock of the api.wordp
 ```bash
 cd environments
 npm install
-npm run freescout:start   # http://127.0.0.1:8890, admin@wordpress.test / password
+npm run freescout:start   # http://127.0.0.1:8890, log in as "admin" at the mock WordPress.org login
 npm run freescout:test
 ```
 
@@ -38,5 +39,16 @@ Configuration, in FreeScout's `.env`:
 |---|---|
 | `WPORG_API_URL` | `https://api.wordpress.org/dotorg/freescout/` (the default) |
 | `WPORG_API_SECRET` | Shared secret; must match `FREESCOUT_SECRET` on api.wordpress.org. |
+| `WPORG_SSO_IDP_ENTITY_ID` | The identity provider's entity ID, from its settings page on login.wordpress.org. Default: `https://login.wordpress.org`. |
+| `WPORG_SSO_IDP_URL` | The identity provider's login URL, from the same page. Default: `https://login.wordpress.org/wp-login.php?action=idp`. |
+| `WPORG_SSO_IDP_CERT` | The identity provider's signing certificate, without the BEGIN/END lines. Until it and `WPORG_API_SECRET` are set, logins stay as they are, so users can be connected first. |
+| `WPORG_SSO_PASSWORD_LOGIN` | Break-glass: `true` lets administrators log in with their FreeScout password at `/login?password=1`. Off by default; every such login is logged. |
 
-FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events from the queue.
+To switch on WPOrgSSO:
+
+1. On login.wordpress.org, add FreeScout as a trusted service provider in wp-saml-idp: entity ID `<APP_URL>/wporgsso/metadata`, ACS URL `<APP_URL>/wporgsso/acs`. The metadata URL serves both.
+2. Switch the module on. Until `WPORG_SSO_IDP_CERT` and `WPORG_API_SECRET` are set, logins stay as they are.
+3. Connect the existing users to their WordPress.org accounts, on their profile or with `php artisan wporgsso:connect <email> <wporg-username>`. Connect at least the administrators; their accounts need two-factor authentication.
+4. Set the `WPORG_SSO_*` variables. From then on, everyone logs in with WordPress.org, and administrators add new users by WordPress.org username.
+
+FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events and `WPOrgSSO` updates avatars from the queue.
