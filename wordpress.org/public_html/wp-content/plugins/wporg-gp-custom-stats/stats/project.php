@@ -35,12 +35,17 @@ class WPorg_GP_Project_Stats {
 		add_action( 'shutdown', array( $this, 'shutdown' ) );
 
 		// Cron task to cache the wp-themes/wp-plugins string counts.
-		if ( ! wp_next_scheduled( 'wporg_gp_stats_cache_waiting_strings' ) ) {
-			wp_schedule_event( time(), 'twicedaily', 'wporg_gp_stats_cache_waiting_strings' );
-		}
+		add_action( 'init', array( $this, 'register_crons' ) );
+
 		add_action( 'wporg_gp_stats_cache_waiting_strings', array( $this, 'cache_wp_themes_wp_plugins_strings' ) );
 
 		$wpdb->project_translation_status = $gp_table_prefix . 'project_translation_status';
+	}
+
+	public function register_crons(): void {
+		if ( ! wp_next_scheduled( 'wporg_gp_stats_cache_waiting_strings' ) ) {
+			wp_schedule_event( time(), 'twicedaily', 'wporg_gp_stats_cache_waiting_strings' );
+		}
 	}
 
 	/**
