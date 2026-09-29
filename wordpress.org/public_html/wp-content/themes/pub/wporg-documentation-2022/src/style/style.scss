@@ -1,0 +1,45 @@
+/*
+ * Note: only add styles here in cases where you can't achieve the style with
+ * templates or theme.json settings.
+ */
+
+/* Add default focus style. */
+:where(main) a:where(:not(.wp-element-button,.wp-block-wporg-link-wrapper)):focus,
+:where(main) button:where(:not([class*="wp-block-button"])):focus {
+	border-radius: 2px;
+	outline: 1.5px solid currentColor;
+	outline-offset: 1.5px;
+}
+
+p.has-background {
+	padding: var(--wp--preset--spacing--20);
+}
+
+/* Both blocks are in the local header, but only one should be shown at any given time. */
+body.archive .wp-block-wporg-local-navigation-bar .wp-block-post-title {
+	display: none;
+}
+
+body.single .wp-block-wporg-local-navigation-bar .wp-block-query-title,
+body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
+	display: none;
+}
+
+.wp-block-term-description p {
+	margin: 0;
+}
+
+.entry-content h2 > a,
+.wporg-front-page-footer a {
+	text-decoration-line: none;
+
+	&:hover {
+		text-decoration-line: underline;
+	}
+
+	&:focus {
+		border-radius: 2px;
+		outline: 1.5px solid currentColor;
+		outline-offset: 1.5px;
+	}
+}
