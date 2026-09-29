@@ -119,6 +119,40 @@ npm run browsehappy:env start
 
 **Access:** `http://localhost:8888`
 
+### Documentation
+
+A local instance of [WordPress.org/documentation](https://wordpress.org/documentation/) with the `wporg-documentation-2022` theme and the Support HelpHub plugin.
+
+**Start:**
+
+```bash
+npm run documentation:env start
+```
+
+First start imports the categories, pages, articles, and WordPress version pages from the live site's REST API, keeping their production IDs. The API only serves rendered content to logged-out requests, so the posts are imported as rendered HTML rather than block markup.
+
+**Re-seed** (clears the import flag, then re-imports):
+
+```bash
+npm run documentation:refresh
+```
+
+**Access:** `http://localhost:8888`
+
+**WP CLI:**
+
+```bash
+npm run documentation:env -- run cli -- wp <command>
+```
+
+**Theme assets:** the theme's `build/` directory is committed. After changing anything in `src/`, rebuild from the theme directory:
+
+```bash
+cd ../wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022
+npm install
+npm run build
+```
+
 ### Translate
 
 A local instance of translate.wordpress.org with GlotPress, the `wporg-gp-*` plugins active on production, and the `pub/wporg` theme.
