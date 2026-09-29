@@ -115,7 +115,7 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		$pending_user['meta']['heuristics'] = wporg_registration_check_private_heuristics( compact( 'user_login', 'user_email' ) );
 	}
 
-	$passes_heuristics  = 'allow' === $pending_user['meta']['heuristics'];
+	$passes_heuristics  = 'block' !== $pending_user['meta']['heuristics'];
 	$passes_recaptcha   = (float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 );
 	$has_blocked_word   = wporg_login_has_blocked_word( $pending_user );
 	$passes_block_words = ! $has_blocked_word;
@@ -522,7 +522,7 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 			}
 
 			// If the new email fails our checks, and the user hasn't manually been approved..
-			if ( 'allow' !== $pending_user['meta']['heuristics'] && $pending_user['cleared'] < 2 ) {
+			if ( 'block' === $pending_user['meta']['heuristics'] && $pending_user['cleared'] < 2 ) {
 				$pending_user['cleared'] = 0;
 			}
 		}
