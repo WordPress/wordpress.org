@@ -15,30 +15,57 @@ class Translation_Memory_Client {
 	const API_ENDPOINT      = 'https://translate.wordpress.com/api/tm/';
 	const API_BULK_ENDPOINT = 'https://translate.wordpress.com/api/tm/-bulk';
 	const BATCH_SIZE        = 500;
+	const DRAIN_TIME_LIMIT  = 30;
 
 	/**
-	 * Updates translation memory.
+	 * Processes the persistent queue in batches, oldest first.
 	 *
-	 * Without args: claims a batch from the persistent queue.
-	 * With args: processes those translation_ids directly (legacy payloads were
-	 * keyed by original_id, so array_values handles both shapes).
+	 * Runs every minute and keeps claiming batches until the queue is empty,
+	 * the lock can't be acquired, a request fails, or the time limit is hit.
+	 * The limit is checked before each batch, so it leaves room for the last
+	 * batch (up to a 10s request) to finish within the minute.
+	 */
+	public static function drain() {
+		$start = time();
+
+		while ( time() - $start < self::DRAIN_TIME_LIMIT ) {
+			$batch = Plugin::with_lock( 'queue_lock', function () {
+				// Drop this process's cached copy so appends made by other
+				// requests since the previous batch are included.
+				wp_cache_delete( Plugin::TM_QUEUE_OPTION, 'options' );
+
+				$queue = Plugin::read_queue();
+				if ( ! $queue ) {
+					return array();
+				}
+
+				$batch = array_slice( $queue, 0, self::BATCH_SIZE, true );
+				Plugin::write_queue( array_slice( $queue, count( $batch ), null, true ) );
+				return array_keys( $batch );
+			}, 3 );
+
+			if ( ! $batch ) {
+				return;
+			}
+
+			$result = self::update( $batch );
+			if ( is_wp_error( $result ) && 'no_translations' !== $result->get_error_code() ) {
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Updates translation memory for the given translation_ids.
+	 *
+	 * Legacy payloads were keyed by original_id, so array_values handles both
+	 * shapes. Events without args are a no-op; the recurring drain processes
+	 * the persistent queue.
 	 *
 	 * @param array|null $translations  Optional translation_ids to process.
 	 * @return true|\WP_Error
 	 */
 	public static function update( $translations = null ) {
-		if ( null === $translations ) {
-			$translations = Plugin::with_lock( 'queue_lock', function () {
-				$queue = Plugin::read_queue();
-				if ( ! $queue ) {
-					return array();
-				}
-				$batch = array_slice( $queue, 0, self::BATCH_SIZE, true );
-				Plugin::write_queue( array_slice( $queue, count( $batch ), null, true ) );
-				return array_keys( $batch );
-			} );
-		}
-
 		if ( ! $translations ) {
 			return true;
 		}
