@@ -55,15 +55,16 @@ class WordPressTV_Subtitles_Upload {
 
 		$filepath = $file['file'];
 
-		$attachment                   = array();
-		$attachment['post_title']     = $this->sanitize_text( $name );
-		$attachment['guid']           = $file['url'];
-		$attachment['post_mime_type'] = $file['type'];
-		$attachment['post_content']   = '';
-		$attachment['post_author']    = $this->drafts_author;
+		$attachment = array(
+			'post_title'     => sanitize_text_field( wp_unslash( $name ) ),
+			'guid'           => $file['url'],
+			'post_mime_type' => $file['type'],
+			'post_content'   => '',
+			'post_author'    => $this->drafts_author,
+		);
 
 		// expects slashed
-		$attachment_id = wp_insert_attachment( add_magic_quotes( $attachment ), $filepath );
+		$attachment_id = wp_insert_attachment( wp_slash( $attachment ), $filepath );
 
 		if ( ! is_wp_error( $attachment_id ) ) {
 			wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $filepath ) );
@@ -124,8 +125,8 @@ class WordPressTV_Subtitles_Upload {
 			$this->error( 4 );
 		}
 
-		$wporg_username = $this->sanitize_text( $_POST['wptv_wporg_username'] );
-		$author_email   = $this->sanitize_text( $_POST['wptv_author_email'] );
+		$wporg_username = sanitize_user( wp_unslash( $_POST['wptv_wporg_username'] ?? '' ) );
+		$author_email   = sanitize_email( wp_unslash( $_POST['wptv_author_email'] ?? '' ) );
 
 		if ( empty( $_POST['wptv_language'] ) ) {
 			$this->error( 7 );
@@ -505,25 +506,6 @@ class WordPressTV_Subtitles_Upload {
 			'success' => 1,
 		), home_url( 'subtitle' ) ) );
 		exit;
-	}
-
-	// expects slashed, returns unslashed
-	function sanitize_text( $str, $remove_line_breaks = true ) {
-		$str = str_replace( '\\', '', $str );
-
-		if ( $remove_line_breaks ) {
-			$str = sanitize_text_field( $str );
-		} else {
-			$str = wp_check_invalid_utf8( $str );
-			$str = wp_strip_all_tags( $str );
-
-			$match = array();
-			while ( preg_match( '/%[a-f0-9]{2}/i', $str, $match ) ) {
-				$str = str_replace( $match[0], '', $str );
-			}
-		}
-
-		return htmlspecialchars( $str, ENT_QUOTES, 'UTF-8' );
 	}
 }
 
