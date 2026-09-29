@@ -5,6 +5,7 @@ on:
     paths:
     - '**.php'
     - phpcs.xml.dist
+    - freescout.wordpress.net/phpcs.xml.dist
     - composer.json
     - .github/workflows/phpcs.yml
     - .github/bin/phpcs-branch.php
@@ -12,6 +13,7 @@ on:
     branches: [trunk]
     paths:
     - '**.php'
+    - freescout.wordpress.net/phpcs.xml.dist
 
 # Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
 concurrency:
@@ -37,7 +39,7 @@ jobs:
       with:
         php-version: '8.4'
         coverage: none
-        tools: composer:v2
+        tools: composer:v2, cs2pr
       env:
         COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -54,3 +56,13 @@ jobs:
       run: php .github/bin/phpcs-branch.php
       env:
         BASE_REF: ${{ github.base_ref }}
+
+    # Excluded from the root ruleset; FreeScout code has its own standard.
+    - name: Lint FreeScout PHP
+      if: ${{ !cancelled() }}
+      # The checkstyle report becomes inline annotations on the PR.
+      run: |
+        STATUS=0
+        vendor/bin/phpcs --standard=freescout.wordpress.net/phpcs.xml.dist --report-full --report-checkstyle=phpcs-freescout.xml || STATUS=$?
+        cs2pr phpcs-freescout.xml || true
+        exit $STATUS
