@@ -245,8 +245,8 @@ class WordPressTV_Subtitles_Upload {
 		$attachment_id = $post_data['ID'];
 
 		if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
-        	return $post_data;
- 	   }
+			return $post_data;
+		}
 
 		$attachment_meta = get_post_meta( $attachment_id, '_wptv_submitted_subtitles', true );
 		if ( empty( $attachment_meta ) ) {
