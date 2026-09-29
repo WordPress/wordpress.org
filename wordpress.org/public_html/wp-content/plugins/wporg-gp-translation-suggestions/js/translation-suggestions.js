@@ -493,7 +493,7 @@
 	 */
 	function addSuggestion() {
 		var $row = $( this );
-		if ( ! $row ) {
+		if ( ! $row.length ) {
 			return;
 		}
 		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' ) == 'translation' ? 'tm' : $row.data( 'suggestion-source' );
