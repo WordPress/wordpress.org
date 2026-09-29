@@ -30,12 +30,10 @@ google.charts.load( 'current', {
 				new google.visualization.LineChart( document.getElementById( 'plugin-download-stats' ) ).draw( data, {
 					colors: ['#253578'],
 					legend: { position: 'none' },
-					titlePosition: 'in',
-					axisTitlesPosition: 'in',
 					chartArea: {
 						height: 280,
 						left: ( sml ? 50 : 0 ),
-						width: ( sml ? 482 : '100%' )
+						right: 0
 					},
 					hAxis: {
 						textStyle: { color: 'black', fontSize: 9 },
@@ -47,7 +45,6 @@ google.charts.load( 'current', {
 						viewWindowMode: 'explicit',
 						viewWindow: { min: 0 }
 					},
-					bar: { groupWidth: ( data.getNumberOfRows() > 100 ? '100%' : null ) },
 					height: 350,
 					curveType: 'function',
 					trendlines: {
@@ -101,12 +98,13 @@ google.charts.load( 'current', {
 				var barHeaders  = [ '' ],
 					barValues   = [ '' ],
 					versionList = [],
-					index       = 0,
-					data, formatter;
+					data, formatter, index;
 
 				// Gather and sort the list of versions.
 				$.each( versions, function( version ) {
-					versionList.push( version );
+					if ( 'other' !== version ) {
+						versionList.push( version );
+					}
 				} );
 
 				// Sort the version list by version.
@@ -116,9 +114,9 @@ google.charts.load( 'current', {
 					return ( a[0] !== b[0] ) ? a[0]-b[0] : a[1]-b[1];
 				} );
 
-				// Move 'other' versions to the beginning.
-				if ( 'other' === versionList[ versionList.length - 1 ] ) {
-					versionList.unshift( versionList.pop() );
+				// Put 'other' versions at the beginning.
+				if ( versions.hasOwnProperty( 'other' ) ) {
+					versionList.unshift( 'other' );
 				}
 
 				// Add all the versions
@@ -138,11 +136,9 @@ google.charts.load( 'current', {
 					suffix: '%'
 				} );
 
-				$.each( barValues, function( value ) {
-					if ( barValues[ value ] ) {
-						formatter.format( data, ++index );
-					}
-				} );
+				for ( index = 1; index < data.getNumberOfColumns(); index++ ) {
+					formatter.format( data, index );
+				}
 
 				new google.visualization.BarChart( document.getElementById( 'plugin-version-stats' ) ).draw( data, {
 					legend: {
