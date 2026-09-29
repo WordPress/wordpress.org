@@ -179,27 +179,28 @@ class WPorg_GP_Project_Stats {
 					$now,
 					$now
 				);
-			}
+			
 
-			// If we're processing a large batch, add them as we go to avoid query lengths & memory limits
-			if ( count( $values ) > 50 ) {
-				$wpdb->query(
-					"INSERT INTO {$wpdb->project_translation_status}
-						( `project_id`, `locale`, `locale_slug`,
-						  `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `has_pending`,
-						  `date_added`, `date_modified` )
-					 VALUES " . implode( ', ', $values ) . "
-					 ON DUPLICATE KEY UPDATE
-						`all`           = VALUES(`all`),
-						`current`       = VALUES(`current`),
-						`waiting`       = VALUES(`waiting`),
-						`fuzzy`         = VALUES(`fuzzy`),
-						`warnings`      = VALUES(`warnings`),
-						`untranslated`  = VALUES(`untranslated`),
-						`has_pending`   = VALUES(`has_pending`),
-						`date_modified` = VALUES(`date_modified`)"
-				);
-				$values = array();
+				// If we're processing a large batch, add them as we go to avoid query lengths & memory limits
+				if ( count( $values ) > 50 ) {
+					$wpdb->query(
+						"INSERT INTO {$wpdb->project_translation_status}
+							( `project_id`, `locale`, `locale_slug`,
+							  `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `has_pending`,
+							  `date_added`, `date_modified` )
+						 VALUES " . implode( ', ', $values ) . "
+						 ON DUPLICATE KEY UPDATE
+							`all`           = VALUES(`all`),
+							`current`       = VALUES(`current`),
+							`waiting`       = VALUES(`waiting`),
+							`fuzzy`         = VALUES(`fuzzy`),
+							`warnings`      = VALUES(`warnings`),
+							`untranslated`  = VALUES(`untranslated`),
+							`has_pending`   = VALUES(`has_pending`),
+							`date_modified` = VALUES(`date_modified`)"
+					);
+					$values = array();
+				}
 			}
 		}
 		$this->projects_to_update = array();
