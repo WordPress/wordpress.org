@@ -12,6 +12,9 @@ use WP_Block_Supports;
 // Block files.
 require_once __DIR__ . '/src/article-list/index.php';
 
+// Redirects.
+require_once __DIR__ . '/inc/redirects.php';
+
 /**
  * Actions and filters.
  */
