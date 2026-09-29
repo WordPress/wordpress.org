@@ -14,7 +14,7 @@ class Translation_Memory_Client {
 
 	const API_ENDPOINT      = 'https://translate.wordpress.com/api/tm/';
 	const API_BULK_ENDPOINT = 'https://translate.wordpress.com/api/tm/-bulk';
-	const BATCH_SIZE        = 500;
+	const BATCH_SIZE        = 100;
 	const DRAIN_TIME_LIMIT  = 30;
 
 	/**
