@@ -1,0 +1,56 @@
+name: FreeScout Modules
+
+on:
+  pull_request:
+    paths:
+      - 'freescout.wordpress.net/**'
+      - 'environments/freescout/**'
+      - '.github/workflows/freescout.yml'
+  push:
+    branches: [ trunk ]
+    paths:
+      - 'freescout.wordpress.net/**'
+      - 'environments/freescout/**'
+      - '.github/workflows/freescout.yml'
+  # FreeScout core is updated outside this repository; catch breakage before it reaches production.
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: "FreeScout ${{ matrix.ref }}"
+    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # The latest release, and what's coming next.
+        ref: [ dist, master ]
+    env:
+      FREESCOUT_REF: ${{ matrix.ref }}
+      COMPOSE: docker compose --file environments/freescout/docker-compose.yml
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Start FreeScout
+        run: $COMPOSE up --detach --build --wait
+
+      - name: Set up FreeScout
+        run: $COMPOSE exec -T --user www-data app bash /srv/env/bin/setup.sh
+
+      - name: Run module tests
+        run: $COMPOSE exec -T --user www-data app bash /srv/env/bin/test.sh
+
+      - name: Show FreeScout log
+        if: failure()
+        run: $COMPOSE exec -T app bash -c 'tail -n 100 storage/logs/laravel-*.log'

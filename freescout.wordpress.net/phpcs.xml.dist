@@ -8,6 +8,7 @@
 	<arg name="extensions" value="php" />
 
 	<file>.</file>
+	<file>../environments/freescout</file>
 
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 

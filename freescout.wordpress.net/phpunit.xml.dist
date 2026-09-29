@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Runs against a FreeScout install: /var/www/html, or the path in FREESCOUT_PATH.
+Runs against a FreeScout install: /var/www/html, or the path in FREESCOUT_PATH. Locally: npm run freescout:test (from environments/).
 Output goes to stderr because FreeScout middleware calls header(), which fails once anything is written to stdout.
 -->
 <phpunit

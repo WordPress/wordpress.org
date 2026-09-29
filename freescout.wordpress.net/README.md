@@ -6,7 +6,16 @@ Each module lives in its own directory in [`Modules/`](Modules).
 
 ## Development
 
-See [AGENTS.md](AGENTS.md) for the rules modules must follow. The most important one: FreeScout core is updated independently of this repository, so modules must survive core changes and fail softly.
+Run FreeScout locally with these modules, test mail, and a mock of the api.wordpress.org endpoints:
+
+```bash
+cd environments
+npm install
+npm run freescout:start   # http://127.0.0.1:8890, admin@wordpress.test / password
+npm run freescout:test
+```
+
+See the [environments guide](../environments/README.md#freescout-helpdesk) for details, and [AGENTS.md](AGENTS.md) for the rules modules must follow. The most important one: FreeScout core is updated independently of this repository, so modules must survive core changes and fail softly.
 
 Contributions follow the usual Meta workflow: open a pull request on the GitHub mirror, referencing a Meta Trac ticket.
 

@@ -271,6 +271,44 @@ npx wp-env start
 npm run handbook:test
 ```
 
+### FreeScout (helpdesk)
+
+A local [FreeScout](https://freescout.net/) with the modules from [`freescout.wordpress.net/`](../freescout.wordpress.net). FreeScout isn't WordPress, so this environment uses Docker Compose directly instead of `wp-env`.
+
+**Start:**
+
+```bash
+npm run freescout:start
+```
+
+Then log in at http://127.0.0.1:8890 as `admin@wordpress.test` / `password`. Replies sent to senders land in Mailpit at http://127.0.0.1:8891.
+
+What's running:
+
+| Service | Purpose |
+|---|---|
+| `app` | FreeScout's latest release on nginx and PHP-FPM 8.3 (FreeScout's recommended nginx config), with the scheduler and queue worker production would run from cron. |
+| `db` | MariaDB, with a separate `freescout-test` database for the tests. |
+| `greenmail` | Mail server FreeScout fetches the **Plugins** and **Themes** mailboxes from, over IMAP. Two sample emails are delivered on first start. |
+| `mailpit` | Catches outgoing mail. |
+| `mock-api` | Stands in for `api.wordpress.org/dotorg/freescout/`: checks request signatures, answers sidebar panels with the data it received, and logs webhook events (`npm run freescout:logs`). |
+
+`freescout.wordpress.net/Modules/` is mounted as FreeScout's `Modules/` folder, like production's checkout. Every start switches all modules on and runs `freescout:after-app-update`, as production does after a deploy. To try another module, like a premium one, copy it into `freescout.wordpress.net/Modules/` and restart; don't commit it. After switching branches, run `npm run freescout:setup`: FreeScout errors on every page while it still has a removed module cached.
+
+To send more mail in:
+
+```bash
+npm run freescout:env -- exec app bash -c 'printf "Subject: Hi\r\n\r\nHello\r\n" | curl -s --url smtp://greenmail:3025 --mail-from someone@example.org --mail-rcpt plugins@wordpress.test --upload-file -'
+```
+
+**Run tests:**
+
+```bash
+npm run freescout:test
+```
+
+**Other FreeScout versions:** `FREESCOUT_REF` takes any FreeScout branch or release tag, e.g. `FREESCOUT_REF=master npm run freescout:start`. Each gets its own database and storage; pass the same `FREESCOUT_REF` to stop or destroy it. **Artisan:** `npm run freescout:artisan -- <command>`. **Stop / destroy:** `npm run freescout:stop`, `npm run freescout:destroy`.
+
 ## Common Commands
 
 ```bash
