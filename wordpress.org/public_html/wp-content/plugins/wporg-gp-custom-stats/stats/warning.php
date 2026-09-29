@@ -1,12 +1,35 @@
 <?php
 
 /**
- * This class records translation warnings.
+ * Translation warning statistics handler.
+ *
+ * @package WPorg_GlotPress
+ * @subpackage Warning_Stats
+ */
+
+/**
+ * Records translation warnings.
+ *
+ * Collects warnings triggered during translation updates/creations in GlotPress,
+ * aggregates them in memory, and writes them in batches to the database.
  */
 class WPorg_GP_Warning_Stats {
 
+	/**
+	 * Accumulated warning statistics awaiting database insertion.
+	 *
+	 * Array of deduplicated entries keyed by an MD5 hash.
+	 *
+	 * @var array<string, array<string, mixed>>
+	 */
 	private $warning_stats = array();
 
+	/**
+	 * Sets up action hooks and defines the database table name.
+	 *
+	 * @global wpdb   $wpdb            WordPress database abstraction object.
+	 * @global string $gp_table_prefix GlotPress table prefix.
+	 */
 	public function __construct() {
 		global $wpdb, $gp_table_prefix;
 
@@ -19,6 +42,14 @@ class WPorg_GP_Warning_Stats {
 		$wpdb->dotorg_translation_warnings = $gp_table_prefix . 'dotorg_translation_warnings';
 	}
 
+	/**
+	 * Gathers and deduplicates warnings when a translation is created or updated.
+	 *
+	 * Flushes the collected warnings to the database if the in-memory threshold (500) is reached.
+	 *
+	 * @param GP_Translation $translation The translation object being saved.
+	 * @return void
+	 */
 	public function translation_updated( $translation ) {
 		if ( empty( $translation->warnings ) ) {
 			return;
@@ -66,6 +97,14 @@ class WPorg_GP_Warning_Stats {
 		}
 	}
 
+	/**
+	 * Writes accumulated warning statistics to the database in batches.
+	 *
+	 * Divides the in-memory array into chunks of 50 records to avoid query length and memory limit issues.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 * @return void
+	 */
 	public function write_stats_to_database() {
 		global $wpdb;
 
@@ -94,11 +133,13 @@ class WPorg_GP_Warning_Stats {
 			}
 
 			if ( ! empty( $values ) ) {
+				// phpcs:disable WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery
 				$wpdb->query(
 					"INSERT INTO {$wpdb->dotorg_translation_warnings}
 					(`user_id`, `locale`, `locale_slug`, `project_path`, `translation_id`, `warning`, `timestamp`, `message`)
 					VALUES " . implode( ', ', $values )
 				);
+				// phpcs:enable WordPress.DB.PreparedSQL, WordPress.DB.DirectDatabaseQuery
 			}
 		}
 
