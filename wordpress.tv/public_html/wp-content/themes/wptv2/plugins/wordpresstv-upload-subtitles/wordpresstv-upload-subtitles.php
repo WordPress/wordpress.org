@@ -103,15 +103,10 @@ class WordPressTV_Subtitles_Upload {
 	 * When the POST request is fired with the subtitles form and action.
 	 */
 	function post() {
-		if (
-			empty( $_POST['wptv-upload-subtitles-nonce'] ) ||
-			(
-				empty( $_POST['wptv_wporg_username'] ) &&
-				! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wptv-upload-subtitles-nonce'] ) ), 'wptv-upload-subtitles' )
-			)
-		) {
+		$nonce = isset( $_POST['wptv-upload-subtitles-nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['wptv-upload-subtitles-nonce'] ) ) : '';
+
+		if ( ! wp_verify_nonce( $nonce, 'wptv-upload-subtitles' ) ) {
 			wp_die( 'Invalid form data. Please go back and try again.' );
-		}
 
 		if ( empty( $_POST['wptv_video_id'] ) ) {
 			wp_die( 'Requires a video context.' );
