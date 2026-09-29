@@ -44,15 +44,23 @@ class Translation_Memory_Client {
 				return array_keys( $batch );
 			}, 3 );
 
+			if ( false === $batch ) {
+				echo "Translation Memory: queue lock busy, stopping.\n";
+				return;
+			}
+
 			if ( ! $batch ) {
 				return;
 			}
 
 			$result = self::update( $batch );
 			if ( is_wp_error( $result ) && 'no_translations' !== $result->get_error_code() ) {
+				printf( "Translation Memory: request failed (%s), stopping.\n", $result->get_error_code() );
 				return;
 			}
 		}
+
+		echo "Translation Memory: time limit reached.\n";
 	}
 
 	/**
