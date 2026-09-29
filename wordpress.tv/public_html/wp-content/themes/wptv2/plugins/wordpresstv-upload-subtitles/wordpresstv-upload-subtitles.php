@@ -192,12 +192,16 @@ class WordPressTV_Subtitles_Upload {
 			$language['label']
 		);
 
-		wp_update_post( array(
-			'ID'           => $subs_attachment_id,
-			'post_content' => $post_content,
-			'post_title'   => sprintf( 'Subtitles: %s (%s)', $parent->post_title, $language['label'] ),
-		//	'post_parent'  => $parent->ID, // easier to look for unapproved subtitles attachment if they are "unattached"?
-		) );
+		wp_update_post(
+			wp_slash(
+				array(
+					'ID'           => $subs_attachment_id,
+					'post_content' => $post_content,
+					'post_title'   => sprintf( 'Subtitles: %s (%s)', $parent->post_title, $language['label'] ),
+				//	'post_parent'  => $parent->ID, // easier to look for unapproved subtitles attachment if they are "unattached"?
+					)
+			)
+		);
 
 		$subs_attachment_meta = array(
 			'video_attachment_id' => $video_attachment->ID,
