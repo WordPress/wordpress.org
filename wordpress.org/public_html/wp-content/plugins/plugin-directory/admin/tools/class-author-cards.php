@@ -78,22 +78,22 @@ class Author_Cards {
 		$usernames = ! empty( $_REQUEST['users'] ) ? $_REQUEST['users'] : '';
 
 		echo '<div class="wrap author-cards">';
-		echo '<h1>' . __( 'Author Cards', 'wporg-plugins' ) . '</h1>';
+		echo '<h1>' . esc_html__( 'Author Cards', 'wporg-plugins' ) . '</h1>';
 
-		echo '<p>' . __( 'This is a tool to display an author card for one or more specified users.', 'wporg-plugins' ) . '</p>';
+		echo '<p>' . esc_html__( 'This is a tool to display an author card for one or more specified users.', 'wporg-plugins' ) . '</p>';
 
 		echo '<form method="GET">';
 		echo '<table class="form-table"><tbody><tr>';
-		echo '<th scope="row"><label for="users">' . __( 'Users', 'wporg-plugins' ) . '</label></th><td>';
+		echo '<th scope="row"><label for="users">' . esc_html__( 'Users', 'wporg-plugins' ) . '</label></th><td>';
 		echo '<input name="page" type="hidden" value="' . esc_attr( $_REQUEST['page'] ) . '">';
 		echo '<input name="users" type="text" id="users" value="' . esc_attr( $usernames ) . '" class="regular-text">';
-		echo '<p>' . __( 'Comma-separated list of user slugs, logins, and/or email addresses.', 'wporg-plugins' ) . '</p>';
+		echo '<p>' . esc_html__( 'Comma-separated list of user slugs, logins, and/or email addresses.', 'wporg-plugins' ) . '</p>';
 		echo '</td></tr></tbody></table>';
 		echo '<p class="submit"><input type="submit" id="submit" class="button button-primary" value="' . esc_attr__( 'Submit', 'wporg-plugins' ) . '"></p>';
 		echo '</form>';
 
 		if ( $usernames ) {
-			echo '<h2>' . __( 'Results', 'wporg-plugins' ) . '</h2>';
+			echo '<h2>' . esc_html__( 'Results', 'wporg-plugins' ) . '</h2>';
 
 			echo '<div class="main">';
 
@@ -130,7 +130,7 @@ class Author_Cards {
 						echo '<img class="avatar" src="https://gravatar.com/avatar/?d=mystery"><span class="profile-details"><strong>';
 						echo esc_html( $username );
 						echo '</strong></span></p>';
-						echo '<p><em>' . __( 'No user found with this slug, login, or email address.', 'wporg-plugins' ) . '</em></p>';
+						echo '<p><em>' . esc_html__( 'No user found with this slug, login, or email address.', 'wporg-plugins' ) . '</em></p>';
 						echo '</div>';
 					}
 				}

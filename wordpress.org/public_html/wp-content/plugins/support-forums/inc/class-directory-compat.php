@@ -462,6 +462,13 @@ abstract class Directory_Compat {
 		if ( ! $user ) {
 			return $retval;
 		}
+
+		// The compat object is loaded from the request, not from $topic_id.
+		$terms = get_the_terms( $topic_id, $this->taxonomy() );
+		if ( empty( $terms ) || is_wp_error( $terms ) || ! in_array( (string) $this->slug(), wp_list_pluck( $terms, 'slug' ), true ) ) {
+			return $retval;
+		}
+
 		if (
 			( ! empty( $this->authors ) && in_array( $user->user_nicename, $this->authors, true ) )
 		||
@@ -895,6 +902,7 @@ abstract class Directory_Compat {
 		}
 
 		if ( $term_subscription ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Subscription renderer escapes fields and includes a confirmation handler.
 			echo $term_subscription;
 		}
 	}

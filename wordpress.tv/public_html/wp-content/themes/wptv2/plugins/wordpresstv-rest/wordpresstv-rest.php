@@ -264,7 +264,7 @@ class WordPressTV_REST_API {
 
 	function error( $message, $http_code = 404 ) {
 		status_header( $http_code );
-		exit( $message );
+		exit( esc_html( $message ) );
 	}
 }
 

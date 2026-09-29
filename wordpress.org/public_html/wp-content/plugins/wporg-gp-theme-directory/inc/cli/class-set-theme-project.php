@@ -116,7 +116,10 @@ class Set_Theme_Project extends WP_CLI_Command {
 				'description' => 'Description',
 			)
 		);
-		$theme_data = array_map( 'strip_tags', $theme_data );
+		$theme_data = array_map( 'wp_strip_all_tags', $theme_data );
+
+		// Tag stripping keeps a bare `<`, which kses reads back as a tag once the description is composed into markup.
+		$theme_data['description'] = esc_html( $theme_data['description'] );
 
 		// Screenshot
 		$theme_data['screenshot'] = '';

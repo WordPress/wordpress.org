@@ -11,9 +11,12 @@ use WP_Query;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Translation_Events;
 
-class Event_Repository implements Event_Repository_Interface {
-	private const POST_TYPE = Translation_Events::CPT;
-
+/**
+ * Stores and retrieves events.
+ */
+class Event_Repository {
+	private const POST_TYPE      = Translation_Events::CPT;
+	private const CACHE_DURATION = DAY_IN_SECONDS;
 	protected DateTimeImmutable $now;
 	private Attendee_Repository $attendee_repository;
 
@@ -53,8 +56,8 @@ class Event_Repository implements Event_Repository_Interface {
 			array(
 				'post_type'    => self::POST_TYPE,
 				'post_name'    => $event->slug(),
-				'post_title'   => $event->title(),
-				'post_content' => $event->description(),
+				'post_title'   => wp_slash( $event->title() ),
+				'post_content' => wp_slash( $event->description() ),
 				'post_status'  => $event->status(),
 				'post_parent'  => $post_parent,
 			)
@@ -77,8 +80,8 @@ class Event_Repository implements Event_Repository_Interface {
 			array(
 				'ID'           => $event->id(),
 				'post_name'    => $event->slug(),
-				'post_title'   => $event->title(),
-				'post_content' => $event->description(),
+				'post_title'   => wp_slash( $event->title() ),
+				'post_content' => wp_slash( $event->description() ),
 				'post_status'  => $event->status(),
 				'post_parent'  => $post_parent,
 			)
@@ -88,6 +91,7 @@ class Event_Repository implements Event_Repository_Interface {
 		}
 
 		$this->update_event_meta( $event );
+		$this->invalidate_cache( $event->id() );
 		return $event->id();
 	}
 
@@ -96,6 +100,7 @@ class Event_Repository implements Event_Repository_Interface {
 		if ( ! $result ) {
 			return false;
 		}
+		$this->invalidate_cache( $event->id() );
 		return $event;
 	}
 
@@ -121,10 +126,15 @@ class Event_Repository implements Event_Repository_Interface {
 			array( '%d' ),
 		);
 		// phpcs:enable
+		$this->invalidate_cache( $event->id() );
 		return $event;
 	}
 
 	public function get_event( int $id ): ?Event {
+		if ( wp_cache_get( 'translation_event_' . $id ) ) {
+			return wp_cache_get( 'translation_event_' . $id );
+		}
+
 		$post = $this->get_event_post( $id );
 		if ( ! $post ) {
 			return null;
@@ -148,7 +158,7 @@ class Event_Repository implements Event_Repository_Interface {
 			);
 			$event->set_id( $post->ID );
 			$event->set_slug( $post->post_name );
-
+			wp_cache_set( 'translation_event_' . $post->ID, $event, '', self::CACHE_DURATION );
 			return $event;
 		} catch ( Exception $e ) {
 			// This should not be possible as it means data in the database is invalid.
@@ -495,10 +505,10 @@ class Event_Repository implements Event_Repository_Interface {
 	}
 
 	/**
-	 * @throws InvalidStart
-	 * @throws InvalidEnd
-	 * @throws InvalidStatus
-	 * @throws Exception
+	 * @throws Invalid_Start  When a queried event has an invalid start date.
+	 * @throws Invalid_End    When a queried event has an invalid end date.
+	 * @throws Invalid_Status When a queried event has an invalid status.
+	 * @throws Exception      When the pagination arguments are inconsistent.
 	 */
 	private function execute_events_query(
 		int $page,
@@ -554,6 +564,10 @@ class Event_Repository implements Event_Repository_Interface {
 		$events = array();
 		foreach ( $posts as $post ) {
 			$meta = $this->get_event_meta( $post->ID );
+			if ( empty( $meta['start'] ) || empty( $meta['end'] ) || empty( $meta['timezone'] ) ) {
+				// If the event is missing any of the required meta fields, we skip it.
+				continue;
+			}
 
 			$title = $post->post_title;
 			if ( empty( $title ) ) {
@@ -561,10 +575,6 @@ class Event_Repository implements Event_Repository_Interface {
 				// that do not have a title. To work around that, we set the title of those events to a single space.
 				$title = ' ';
 			}
-			if ( empty( $meta['attendance_mode'] ) ) {
-				$meta['attendance_mode'] = 'onsite';
-			}
-
 			$event = new Event(
 				intval( $post->post_author ),
 				$meta['start'],
@@ -581,8 +591,11 @@ class Event_Repository implements Event_Repository_Interface {
 			$events[] = $event;
 
 		}
-
-		return new Events_Query_Result( $events, $page, $query->max_num_pages );
+		$num_of_pages = $query->max_num_pages;
+		if ( -1 === $page_size ) {
+			$num_of_pages = empty( $events ) ? 0 : 1;
+		}
+		return new Events_Query_Result( $events, $page, $num_of_pages );
 	}
 
 	private function get_event_post( int $event_id ): ?WP_Post {
@@ -611,11 +624,16 @@ class Event_Repository implements Event_Repository_Interface {
 			return null;
 		}
 
+		$attendance_mode = $meta['_event_attendance_mode'][0] ?? 'onsite';
+		if ( ! in_array( $attendance_mode, Event::ATTENDANCE_MODES, true ) ) {
+			$attendance_mode = 'onsite'; // Stored before the model validated it.
+		}
+
 		return array(
 			'start'           => new Event_Start_Date( $meta['_event_start'][0], $utc ),
 			'end'             => new Event_End_Date( $meta['_event_end'][0], $utc ),
 			'timezone'        => new DateTimeZone( $meta['_event_timezone'][0] ),
-			'attendance_mode' => ! isset( $meta['_event_attendance_mode'][0] ) ? 'onsite' : $meta['_event_attendance_mode'][0],
+			'attendance_mode' => $attendance_mode,
 		);
 	}
 
@@ -633,6 +651,15 @@ class Event_Repository implements Event_Repository_Interface {
 		update_post_meta( $event->id(), '_event_timezone', $event->timezone()->getName() );
 		update_post_meta( $event->id(), '_hosts', $hosts_ids );
 		update_post_meta( $event->id(), '_event_attendance_mode', $event->attendance_mode() );
+	}
+
+	/**
+	 * Remove an event from the object cache.
+	 *
+	 * @param int $event_id Event ID.
+	 */
+	public function invalidate_cache( int $event_id ): void {
+		wp_cache_delete( 'translation_event_' . $event_id );
 	}
 }
 

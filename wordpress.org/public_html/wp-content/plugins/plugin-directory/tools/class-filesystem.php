@@ -125,6 +125,8 @@ class Filesystem {
 		foreach ( $filtered as $file ) {
 			if ( in_array( $file->getFilename(), [ '.', '..' ] ) ) {
 				continue;
+			} elseif ( $file->isLink() ) {
+				continue;
 			} elseif ( 'files' === $type && ! $file->isFile() ) {
 				continue;
 			} elseif ( 'directories' === $type && ! $file->isDir() ) {

@@ -1,8 +1,16 @@
+<?php
+/**
+ * Codex breadcrumb navigation.
+ *
+ * @package codex-buddypress-org
+ */
+
+?>
 
 	<div id="subnav">
 
 		<div id="subnav-inner">
-			<?php echo codex_get_breadcrumb(); ?>
+			<?php codex_get_breadcrumb(); ?>
 		</div>
 
 	</div>

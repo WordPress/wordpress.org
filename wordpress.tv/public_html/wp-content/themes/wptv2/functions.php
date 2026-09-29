@@ -477,9 +477,11 @@ class WordPressTV_Theme {
 			<?php if ( $comment->comment_type != 'pingback' ) : ?>
 
 				<small class="commentmetadata">
-					<a href="#comment-<?php comment_ID() ?>" title=""><?php printf( __( '%1$s at %2$s', 'wptv' ), get_comment_date(), get_comment_time() ); ?></a>
+					<?php /* translators: 1: Comment date, 2: Comment time. */ ?>
+					<a href="#comment-<?php comment_ID(); ?>" title=""><?php printf( esc_html__( '%1$s at %2$s', 'wptv' ), esc_html( get_comment_date() ), esc_html( get_comment_time() ) ); ?></a>
 					<?php
 						edit_comment_link( __( 'edit', 'wptv' ), '&nbsp;&nbsp;', '' );
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered markup: core link helpers, the_content/the_title filter output, and widget before/after wrappers.
 						echo comment_reply_link( array(
 							'depth'     => $depth,
 							'max_depth' => $args['max_depth'],
@@ -492,7 +494,7 @@ class WordPressTV_Theme {
 
 			<div class="commenttext">
 				<?php if ( $comment->comment_approved == '0' ) : ?>
-					<em><?php _e( 'Your comment is awaiting moderation.', 'wptv' ); ?></em>
+					<em><?php esc_html_e( 'Your comment is awaiting moderation.', 'wptv' ); ?></em>
 				<?php endif; // comment_approved == 0 ?>
 
 				<?php comment_text(); ?>
@@ -532,6 +534,7 @@ class WordPressTV_Theme {
 			}
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered markup: core link helpers, the_content/the_title filter output, and widget before/after wrappers.
 		echo $video;
 
 		add_filter( 'the_content', array( $this, 'remove_shortcodes' ) );
@@ -556,6 +559,7 @@ class WordPressTV_Theme {
 		if ( $html_code ) {
 			$ret = '<img src="' . $ret . '" alt="' . esc_attr( $post->post_title ) . '" />';
 		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered markup: core link helpers, the_content/the_title filter output, and widget before/after wrappers.
 		echo $ret;
 	}
 
@@ -693,6 +697,7 @@ class WordPressTV_Theme {
 
 			if ( in_category( $category ) ) {
 				$link = get_category_link( $category );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered markup: core link helpers, the_content/the_title filter output, and widget before/after wrappers.
 				echo $before . ' <a href="' . esc_url( $link ) . '">' . esc_html( $category->name ) . '</a>';
 				break; // only one category is printed
 			}
@@ -713,6 +718,7 @@ class WordPressTV_Theme {
 
 		foreach ( $terms as $term ) {
 			$link = get_term_link( $term, 'event' );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered markup: core link helpers, the_content/the_title filter output, and widget before/after wrappers.
 			echo $before . '<a href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a>' . $after;
 			break; // only the first one event is printed
 		}
@@ -741,7 +747,7 @@ class WordPressTV_Theme {
 			$count   = $display_count ? ' <span class="tag-count">' . absint( $term->count ) . '</span>' : '';
 			$links[] = '<a href="' . esc_url( get_term_link( $term, $taxonomy ) ) . '">' . esc_html( $term->name ) . $count . '</a>';
 		}
-		echo $before . join( $sep, $links ) . $after;
+		echo wp_kses_post( $before . join( $sep, $links ) . $after );
 	}
 
 	/**
@@ -901,7 +907,7 @@ class WordCampTV_Walker_Nav_Menu extends Walker {
 		?>
 		<div>
 			<h3>
-				<?php echo apply_filters( 'the_title', $item->title ); ?>
+				<?php echo apply_filters( 'the_title', $item->title ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered markup: core link helpers, the_content/the_title filter output, and widget before/after wrappers. ?>
 				<a href="<?php echo esc_url( $item->url ); ?>" class="view-more"><?php esc_html_e( 'More &rarr;' ); ?></a>
 			</h3>
 			<ul class="video-list four-col">

@@ -1,4 +1,4 @@
-/* globals wpTracAutoCompleteUsers, wpTracContributorLabels, wpTracCurrentUser */
+/* globals wpTracCurrentUser */
 let wpTrac,
 	coreKeywordList,
 	gardenerKeywordList,
@@ -318,8 +318,8 @@ let wpTrac,
 		}[ projectSlug ] || 'https://wordpress.org/support/';
 
 	wpTrac = {
-		gardener: 'undefined' !== typeof wpBugGardener,
-		currentUser: 'undefined' !== typeof wpTracCurrentUser ? wpTracCurrentUser : '',
+		gardener: true === window.wpBugGardener,
+		currentUser: wpTracCurrentUser,
 
 		init() {
 			// Gardener status as a body class, for rules that cannot see the flag.
@@ -338,8 +338,8 @@ let wpTrac,
 				wpTrac.nonGardeners();
 			}
 
-			if ( 'undefined' !== typeof wpTracContributorLabels ) {
-				wpTrac.showContributorLabels( wpTracContributorLabels );
+			if ( window.wpTracContributorLabels ) {
+				wpTrac.showContributorLabels( window.wpTracContributorLabels );
 			}
 
 			wpTrac.autocomplete.init();
@@ -830,9 +830,7 @@ let wpTrac,
 			}
 
 			// Demote the nav "Preferences" link to the footer.
-			$( '#altlinks' ).prepend(
-				'<a class="preferences-link" href="' + ( window.tracBaseUrl || '' ) + '/prefs">Trac UI Preferences</a> '
-			);
+			$( '#altlinks' ).prepend( '<a class="preferences-link" href="/prefs">Trac UI Preferences</a> ' );
 
 			// Prevent emoji in ticket text from being replaced with <img> tags.
 			$( '#field-description, #comment, textarea[name="edited_comment"]' ).addClass( 'wp-exclude-emoji' );
@@ -1397,8 +1395,8 @@ let wpTrac,
 						return;
 					}
 
-					if ( 'undefined' !== typeof wpTracAutoCompleteUsers ) {
-						settings = wpTracAutoCompleteUsers;
+					if ( window.wpTracAutoCompleteUsers ) {
+						settings = window.wpTracAutoCompleteUsers;
 					}
 
 					this.initTicketParticipants();

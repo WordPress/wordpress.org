@@ -9,6 +9,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
@@ -98,27 +99,28 @@ function scripts() {
 	wp_scripts()->add_data( 'jquery-core', 'group', 1 );
 	wp_scripts()->add_data( 'jquery-migrate', 'group', 1 );
 
-	wp_enqueue_script( 'wporg-navigation', get_stylesheet_directory_uri() . '/js/navigation.js', array(), '20181209', true );
-	wp_enqueue_script( 'wporg-skip-link-focus-fix', get_stylesheet_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
+	wp_enqueue_script( 'wporg-navigation', get_stylesheet_directory_uri() . '/js/navigation.js', array(), filemtime( __DIR__ . '/js/navigation.js' ), true );
+	wp_enqueue_script( 'wporg-skip-link-focus-fix', get_stylesheet_directory_uri() . '/js/skip-link-focus-fix.js', array(), filemtime( __DIR__ . '/js/skip-link-focus-fix.js' ), true );
 
 	if ( is_singular( 'plugin' ) ) {
-		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), '20171002', true );
+		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), filemtime( __DIR__ . '/js/popover.js' ), true );
 		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-faq.js' ), true );
 
 		$post = get_post();
 		if ( $post && current_user_can( 'plugin_admin_edit', $post ) ) {
 			wp_enqueue_script( 'wporg-plugins-categorization', get_stylesheet_directory_uri() . '/js/section-categorization.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-categorization.js' ), true );
 			wp_localize_script( 'wporg-plugins-categorization', 'categorizationOptions', [
-				'restUrl'    => get_rest_url(),
-				'restNonce'  => wp_create_nonce( 'wp_rest' ),
-				'pluginSlug' => $post->post_name,
+				'restUrl'     => get_rest_url(),
+				'restNonce'   => wp_create_nonce( 'wp_rest' ),
+				'actionNonce' => Base::action_nonce( 'save_categorization', $post->post_name ),
+				'pluginSlug'  => $post->post_name,
 			] );
 		}
 	}
 
 	if ( get_query_var( 'plugin_advanced' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), false, true );
-		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20220929', true );
+		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), filemtime( __DIR__ . '/js/stats.js' ), true );
 
 		wp_localize_script( 'wporg-plugins-stats', 'pluginStats', array(
 			'slug' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',
@@ -405,6 +407,23 @@ function update_archive_description( $description ) {
 	);
 }
 add_filter( 'get_the_archive_description', __NAMESPACE__ . '\update_archive_description' );
+
+/**
+ * Point the Language Suggest block at the directory's own suggestion API.
+ *
+ * @param string $endpoint Default endpoint URL.
+ * @return string Endpoint URL for the current request.
+ */
+function language_suggest_endpoint( $endpoint ) {
+	$endpoint = rest_url( '/plugins/v2/locale-banner' );
+
+	if ( is_singular( 'plugin' ) ) {
+		$endpoint = add_query_arg( 'plugin_slug', get_queried_object()->post_name, $endpoint );
+	}
+
+	return $endpoint;
+}
+add_filter( 'wporg_language_suggest_endpoint', __NAMESPACE__ . '\language_suggest_endpoint' );
 
 /**
  * Custom template tags for this theme.

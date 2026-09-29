@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan_Gandalf;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
@@ -212,6 +213,46 @@ class Gandalf_Scan_Endpoint_Test extends TestCase {
 	}
 
 	/**
+	 * A high-risk callback blocks the release end to end.
+	 */
+	public function test_high_risk_callback_blocks_release(): void {
+		update_post_meta(
+			$this->plugin->ID,
+			'releases',
+			array(
+				array(
+					'date'                     => time(),
+					'tag'                      => self::VERSION,
+					'version'                  => self::VERSION,
+					'zips_built'               => true,
+					'zips_built_from_revision' => 0,
+					'confirmations'            => array(),
+					'confirmed'                => true,
+					'confirmations_required'   => 0,
+					'committer'                => array(),
+					'revision'                 => array(),
+					'release_delay'            => DAY_IN_SECONDS,
+				),
+			)
+		);
+
+		// Pin the block threshold the test was written against; the shipped default disables blocking.
+		$threshold_filter = static function (): float {
+			return 8.0;
+		};
+		add_filter( 'wporg_plugins_security_scan_block_risk_score', $threshold_filter );
+
+		$response = $this->dispatch( $this->payload( array( 'max_risk_score' => 9.8 ) ) );
+
+		remove_filter( 'wporg_plugins_security_scan_block_risk_score', $threshold_filter );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$release = Plugin_Directory::get_release( get_post( $this->plugin->ID ), self::VERSION );
+		$this->assertTrue( API_Update_Updater::is_release_blocked( $release ) );
+	}
+
+	/**
 	 * A production-shaped failure report is accepted and recorded.
 	 */
 	public function test_failed_callback_is_accepted(): void {
@@ -320,6 +361,65 @@ class Gandalf_Scan_Endpoint_Test extends TestCase {
 
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertPendingScanUntouched();
+	}
+
+	/**
+	 * A completed callback that reports no verdict is rejected by the route schema.
+	 *
+	 * The verdict fields cannot be marked required — a failed report omits them
+	 * legitimately — so the status validator enforces that half of the contract.
+	 */
+	public function test_completed_callback_without_verdict_is_rejected(): void {
+		foreach ( array( 'verdict_hash', 'findings_count', 'severity_counts', 'max_risk_score', 'findings', 'report_url' ) as $field ) {
+			$payload = $this->payload();
+			unset( $payload[ $field ] );
+
+			$response = $this->dispatch( $payload );
+
+			$this->assertSame( 400, $response->get_status(), "Missing {$field} was accepted." );
+			$this->assertStringContainsString( $field, $response->get_data()['data']['params']['status'] );
+			$this->assertPendingScanUntouched();
+		}
+	}
+
+	/**
+	 * A failed callback that reports no error is rejected by the route schema.
+	 */
+	public function test_failed_callback_without_error_is_rejected(): void {
+		$response = $this->dispatch(
+			array(
+				'status'       => 'failed',
+				'scan_id'      => self::SCAN_ID,
+				'subject_type' => 'plugin',
+				'slug'         => $this->plugin->post_name,
+				'version'      => self::VERSION,
+				'release_ref'  => self::VERSION,
+				'completed_at' => time(),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertStringContainsString( 'error', $response->get_data()['data']['params']['status'] );
+		$this->assertPendingScanUntouched();
+	}
+
+	/**
+	 * A completed callback reporting a verdict with no findings is accepted.
+	 */
+	public function test_completed_callback_without_findings_is_accepted(): void {
+		$response = $this->dispatch(
+			$this->payload(
+				array(
+					'findings_count'  => 0,
+					'findings'        => array(),
+					'severity_counts' => array(),
+					'max_risk_score'  => 0,
+				)
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertEmpty( get_post_meta( $this->plugin->ID, Plugin_Scan_Gandalf::PENDING_META_KEY, true ) );
 	}
 
 	/**

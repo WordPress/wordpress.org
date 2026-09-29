@@ -23,6 +23,7 @@ class SVN_Watcher {
 
 		$last_rev_processed = $this->get_option( $svn_rev_option_name );
 		if ( ! $last_rev_processed ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( "Unknown Revision to parse from, please check the value of {$svn_rev_option_name} in the options table." );
 		}
 
@@ -92,6 +93,7 @@ class SVN_Watcher {
 				// Check the status of the cronjobs are sane, as the exception will trigger it to be marked as `failed`.
 				wp_schedule_single_event( time() + 30, 'plugin_directory_check_cronjobs' );
 
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 				throw new Exception( 'Could not fetch plugins.svn logs: ' . implode( ', ', $logs['errors'] ) );
 			} else {
 				// If the job fails again within the next minute, throw an exception (as above)

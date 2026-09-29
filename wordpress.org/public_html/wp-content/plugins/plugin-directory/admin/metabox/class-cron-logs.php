@@ -46,7 +46,7 @@ class Cron_Logs {
 				] as $field => $name
 			) {
 				if ( ! empty( $job->args[0][ $field ] ) ) {
-					$task_desc .= '<span>' . $name . ': ' . ( is_array( $job->args[0][ $field ] ) ? implode( ', ', $job->args[0][ $field ] ) : $job->args[0][ $field ] ) . '</span>';
+					$task_desc .= '<span>' . $name . ': ' . esc_html( is_array( $job->args[0][ $field ] ) ? implode( ', ', $job->args[0][ $field ] ) : $job->args[0][ $field ] ) . '</span>';
 				}
 			}
 
@@ -96,11 +96,11 @@ class Cron_Logs {
 				</tr>',
 				esc_attr( $job->id ),
 				esc_attr( human_time_diff( $job->nextrun ?: $job->start ) . ' ago' ),
-				date( 'Y-m-d H:i:s', $job->nextrun ?: $job->start ),
-				$task_name,
+				esc_html( gmdate( 'Y-m-d H:i:s', $job->nextrun ?: $job->start ) ),
+				esc_html( $task_name ),
 				esc_html( $job->status ),
-				$task_desc,
-				$logs,
+				wp_kses_post( $task_desc ),
+				wp_kses_post( $logs ),
 				esc_html( json_encode( $job->args[0] ?? $job->args, JSON_PRETTY_PRINT ) )
 			);
 		}

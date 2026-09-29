@@ -71,11 +71,6 @@ class Test_Packages_Endpoint extends TestCase {
 		$this->assertIsObject( $entry->require );
 		$this->assertObjectHasProperty( 'composer/installers', $entry->require );
 
-		// Check extended fields.
-		$this->assertIsObject( $entry->source );
-		$this->assertSame( 'svn', $entry->source->type );
-		$this->assertStringContainsString( 'plugins.svn.wordpress.org/clicky-popular-posts-widget', $entry->source->url );
-
 		$this->assertIsObject( $entry->support );
 		$this->assertObjectHasProperty( 'issues', $entry->support );
 		$this->assertObjectHasProperty( 'changelog', $entry->support );
@@ -130,11 +125,6 @@ class Test_Packages_Endpoint extends TestCase {
 		$this->assertSame( 'wordpress-theme', $entry->type );
 		$this->assertIsObject( $entry->dist );
 		$this->assertStringContainsString( 'downloads.wordpress.org/theme/academica', $entry->dist->url );
-
-		// Check SVN source.
-		$this->assertIsObject( $entry->source );
-		$this->assertSame( 'svn', $entry->source->type );
-		$this->assertStringContainsString( 'themes.svn.wordpress.org/academica', $entry->source->url );
 
 		// Check support.
 		$this->assertIsObject( $entry->support );

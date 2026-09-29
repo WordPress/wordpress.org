@@ -125,6 +125,7 @@ function get_whitelist() {
 			'fabiankaegy',
 			'francina',
 			'hellofromTonya', // @hellofromtonya on Slack
+			'im3dabasia1', // @Eshaan Dabasiya on Slack
 			'ironprogrammer',
 			'James Roberts', // @jamesroberts on Slack
 			'JeffPaul',

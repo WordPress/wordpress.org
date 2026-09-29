@@ -27,8 +27,7 @@ class Upgrade {
 		dbDelta( self::get_database_schema_sql() );
 
 		// Run version-specific upgrades.
-		$is_running_tests = 'yes' === getenv( 'WPORG_TRANSLATION_EVENTS_TESTS' );
-		if ( $previous_version < 3 && ! $is_running_tests ) {
+		if ( $previous_version < 3 ) {
 			try {
 				self::v3_set_is_new_contributor();
 			} catch ( Exception $e ) {

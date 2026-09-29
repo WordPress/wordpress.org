@@ -359,6 +359,7 @@ class Update_Source_Hold_Test extends TestCase {
 		$release['version'] = $long_version;
 
 		update_post_meta( $this->plugin->ID, 'version', $long_version );
+		update_post_meta( $this->plugin->ID, 'stable_tag', $long_version );
 		update_post_meta( $this->plugin->ID, 'releases', array( $release ) );
 		$this->insert_served_row( substr( $long_version, 0, 128 ) );
 
@@ -378,6 +379,7 @@ class Update_Source_Hold_Test extends TestCase {
 		$release['version'] = $long_version;
 
 		update_post_meta( $this->plugin->ID, 'version', $long_version );
+		update_post_meta( $this->plugin->ID, 'stable_tag', $long_version );
 		update_post_meta( $this->plugin->ID, 'releases', array( $release ) );
 		$this->insert_served_row( substr( $long_version, 0, 128 ) );
 

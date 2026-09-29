@@ -149,8 +149,17 @@ if ( ! isset( $_GET['embed'] ) ) {
 header( 'Content-Type: text/html; charset=UTF-8' );
 header( 'X-Content-Type-Options: nosniff' );
 
+/*
+ * The iframe's sandbox covers that element, not this response, which is reachable directly.
+ * Re-serving third-party markup is the point of this endpoint, so the sandbox is the boundary
+ * rather than the markup: the document cannot act as this origin, and it shows nothing the Trac
+ * URL it mirrors does not already show to the same audience.
+ */
+header( 'Content-Security-Policy: sandbox allow-scripts allow-top-navigation-by-user-activation' );
+
 $cache_key = sha1( $url );
 if ( $data = wp_cache_get( $cache_key, 'trac-oembed' ) ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- oEmbed response body (JSON or XML); escaping would corrupt the format.
 	die( $data );
 }
 
@@ -183,6 +192,7 @@ if (
 ) {
 	$output = '<h1>Temporarily Unavailable</h1>';
 	wp_cache_set( $cache_key, $output, 'trac-oembed', MINUTE_IN_SECONDS );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- oEmbed response body (JSON or XML); escaping would corrupt the format.
 	die( $output );
 }
 
@@ -308,6 +318,10 @@ foreach ( $elements_to_remove as $el ) {
 // Add a script to the header.
 $js = <<<JS
 (function() {
+	if ( window.parent === window ) {
+		return;
+	}
+
 	var id = ( document.location.hash.match(/el=([0-9a-f]+)(&|$)/) || [ '', '' ] )[1];
 
 	function send() {
@@ -323,7 +337,10 @@ $js = <<<JS
 	window.addEventListener( 'DOMContentLoaded', send );
 })();
 JS;
-$doc->getElementsByTagName( 'head' )[0]->appendChild( $doc->createElement( 'script', $js ) );
+
+$reporter = $doc->createElement( 'script' );
+$reporter->appendChild( $doc->createTextNode( $js ) );
+$doc->getElementsByTagName( 'head' )[0]->appendChild( $reporter );
 
 $css = <<<CSS
 html {
@@ -341,4 +358,5 @@ $data = $doc->saveHTML();
 
 wp_cache_set( $cache_key, $data, 'trac-oembed', HOUR_IN_SECONDS );
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- oEmbed response body (JSON or XML); escaping would corrupt the format.
 echo $data;

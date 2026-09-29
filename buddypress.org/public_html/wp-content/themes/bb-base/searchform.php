@@ -1,4 +1,12 @@
-			<form id="searchform" method="get" action="<?php echo get_settings('home'); ?>">
+<?php
+/**
+ * Site search form.
+ *
+ * @package bb-base
+ */
+
+?>
+			<form id="searchform" method="get" action="<?php echo esc_url( get_option( 'home' ) ); ?>">
 				<fieldset>
 					<legend><span><?php esc_html_e( 'Search this website', 'bborg' ); ?></span></legend>
 					<label for="search"><?php esc_html_e( 'for:', 'bborg' ); ?></label>

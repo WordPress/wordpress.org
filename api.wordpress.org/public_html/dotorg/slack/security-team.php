@@ -95,6 +95,7 @@ function api_call() {
 		exit;
 	}
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response listing usernames; the trailing newline is significant.
 	echo implode( "\n", $team ) . "\n"; // Trailing newline critical.
 	exit;
 }

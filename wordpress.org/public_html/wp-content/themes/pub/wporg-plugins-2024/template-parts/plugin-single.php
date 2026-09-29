@@ -33,7 +33,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			<div>
 				<div class="entry-thumbnail">
 					<?php
-					// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Template::get_plugin_icon() returns the icon markup.
 					echo Template::get_plugin_icon( $post, 'html' );
 					?>
 				</div>

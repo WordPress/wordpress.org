@@ -108,6 +108,7 @@ class Plugin_Scan {
 			// Fetch the plugin to scan.
 			$local_path = self::export_plugin_locally( $plugin->post_name, $tag );
 			if ( ! $local_path ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 				echo "Failed to export plugin {$plugin->post_name} tag {$tag} for scanning.\n";
 				continue;
 			}
@@ -152,6 +153,8 @@ class Plugin_Scan {
 	public static function notify_plugin_authors( $plugin, $results, $tag ) {
 		ob_start();
 
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text email body composed in an output buffer; escaping would corrupt it.
+
 		printf(
 			"Found %d errors in %d files.\n\n",
 			$results[ 'totals' ][ 'errors' ],
@@ -195,6 +198,8 @@ class Plugin_Scan {
 			}
 		}
 
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+
 		$body = ob_get_clean();
 
 		if ( ! $body ) {
@@ -203,7 +208,8 @@ class Plugin_Scan {
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
-			echo "\n==== Plugin Check Results for {$plugin->post_name} EMAIL ====\n";
+			echo "\n==== Plugin Check Results for {$plugin->post_name} EMAIL ====\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			echo $body;
 		}
 
@@ -353,7 +359,7 @@ class Plugin_Scan {
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
-			echo "\n==== Plugin Check Results for {$plugin->post_name} {$tag} SLACK LOG ====\n";
+			echo "\n==== Plugin Check Results for {$plugin->post_name} {$tag} SLACK LOG ====\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			echo $fallback . "\n" . $table;
 		}
@@ -383,7 +389,7 @@ class Plugin_Scan {
 		$svn_url    = Import::PLUGIN_SVN_BASE . '/' . $plugin_slug . ( 'trunk' === $tag ? '/trunk' : '/tags/' . $tag );
 
 		// Create a checkout of the ZIP SVN
-		$res = SVN::export( $svn_url, $local_path, [ '--force' /* Overwrite the folder contents */ ] );
+		$res = SVN::export( $svn_url, $local_path, [ '--force' /* Overwrite the folder contents */, '--ignore-externals' /* Don't pull committer-controlled remote trees into the scan */ ] );
 
 		if ( ! $res['result'] ) {
 			return false;
@@ -475,9 +481,12 @@ class Plugin_Scan {
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
-			echo "\n==== Plugin Check Results for {$plugin_slug} ====\n";
+			echo "\n==== Plugin Check Results for {$plugin_slug} ====\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			echo "Total Time: {$total_time}s\nReturn Code:{$return_code}.\n";
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			if ( $stderr ) echo "STDERR: {$stderr}\n";
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			if ( $output ) echo "OUTPUT: {$output}\n";
 		}
 
