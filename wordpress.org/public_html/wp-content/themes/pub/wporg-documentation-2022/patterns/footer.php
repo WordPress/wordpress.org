@@ -3,6 +3,8 @@
  * Title: Footer Content
  * Slug: wporg-documentation-2022/footer-content
  * Inserter: no
+ *
+ * @package WordPressdotorg\Theme\Documentation_2022
  */
 
 ?>

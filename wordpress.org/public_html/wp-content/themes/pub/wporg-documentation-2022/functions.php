@@ -1,10 +1,15 @@
 <?php
+/**
+ * WordPress.org Documentation theme functions.
+ *
+ * @package WordPressdotorg\Theme\Documentation_2022
+ */
 
 namespace WordPressdotorg\Theme\Documentation_2022;
 
 use WP_Block_Supports;
 
-// Block files
+// Block files.
 require_once __DIR__ . '/src/article-list/index.php';
 
 /**
@@ -18,7 +23,7 @@ add_filter( 'comment_form_defaults', __NAMESPACE__ . '\comment_form_defaults' );
 add_filter( 'comment_form_field_comment', __NAMESPACE__ . '\hide_field_after_submission' );
 add_filter( 'comment_form_submit_field', __NAMESPACE__ . '\hide_field_after_submission' );
 add_filter( 'comment_post_redirect', __NAMESPACE__ . '\comment_post_redirect', 10, 2 );
-add_filter( 'render_block_core/term-description', __NAMESPACE__ . '\inject_term_description', 10, 3 );
+add_filter( 'render_block_core/term-description', __NAMESPACE__ . '\inject_term_description', 10, 2 );
 add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\custom_open_graph_tags' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 
@@ -35,7 +40,7 @@ add_action( 'admin_bar_menu', __NAMESPACE__ . '\hide_site_editor_node', 999 );
 function hide_site_editor_node( $bar ) {
 	$bar->remove_node( 'site-editor' );
 }
-// Enable Jetpack opengraph by default
+// Enable Jetpack opengraph by default.
 add_filter( 'jetpack_enable_open_graph', '__return_true' );
 
 // Enforce log in to leave feedback.
@@ -76,7 +81,7 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 	$breadcrumbs[0]['title'] = __( 'Home', 'wporg-docs' );
 
 	if ( is_category() ) {
-		// Format: home / topic page / category
+		// Format: home / topic page / category.
 		$category    = get_queried_object();
 		$breadcrumbs = array( $breadcrumbs[0] );
 		if ( $category->category_parent ) {
@@ -91,21 +96,21 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 			'title' => $category->name,
 		);
 	} elseif ( is_singular( 'helphub_article' ) ) {
-		// Format: home / topic page / category / article title
+		// Format: home / topic page / category / article title.
 		$breadcrumbs = array( $breadcrumbs[0] );
 		$categories  = get_the_category();
 		if ( $categories ) {
 			$cats_without_parents = wp_list_filter( $categories, array( 'parent' => 0 ) );
-			$cats_with_parents = wp_list_filter( $categories, array( 'parent' => 0 ), 'NOT' );
+			$cats_with_parents    = wp_list_filter( $categories, array( 'parent' => 0 ), 'NOT' );
 			if ( $cats_without_parents ) {
-				$category = reset( $cats_without_parents );
+				$category      = reset( $cats_without_parents );
 				$breadcrumbs[] = array(
 					'url'   => get_topic_permalink( $category ),
 					'title' => $category->name,
 				);
 			}
 			if ( $cats_with_parents ) {
-				$category = reset( $cats_with_parents );
+				$category      = reset( $cats_with_parents );
 				$breadcrumbs[] = array(
 					'url'   => get_term_link( $category->term_id, $category->taxonomy ),
 					'title' => $category->name,
@@ -123,6 +128,9 @@ function set_site_breadcrumbs( $breadcrumbs ) {
 
 /**
  * Get the topic landing page permalink for a given parent category.
+ *
+ * @param \WP_Term $category The top-level category.
+ * @return string Topic landing page URL, or an empty string.
  */
 function get_topic_permalink( $category ) {
 	if ( empty( $category->slug ) ) {
@@ -155,7 +163,7 @@ function pre_get_posts( $query ) {
 			'orderby',
 			array(
 				'menu_order' => 'desc',
-				'title' => 'asc',
+				'title'      => 'asc',
 			)
 		);
 	}
@@ -173,7 +181,7 @@ function modify_query_loop_block_query_vars( $query, $block ) {
 	if ( 'helphub_article' === $block->context['query']['postType'] ) {
 		$query['orderby'] = array(
 			'menu_order' => 'desc',
-			'title' => 'asc',
+			'title'      => 'asc',
 		);
 	}
 
@@ -183,8 +191,8 @@ function modify_query_loop_block_query_vars( $query, $block ) {
 /**
  * Modify the redirect after a feedback comment is submitted on an Article.
  *
- * @param string     $location
- * @param WP_Comment $comment
+ * @param string     $location The redirect URL.
+ * @param WP_Comment $comment  The submitted comment.
  *
  * @return string
  */
@@ -286,13 +294,12 @@ function hide_field_after_submission( $field ) {
  *
  * This finds the corresponding category for the given topic page and shows that description.
  *
- * @param string   $block_content The block content.
- * @param array    $block         The full block, including name and attributes.
- * @param WP_Block $instance      The block instance.
+ * @param string $block_content The block content.
+ * @param array  $block         The full block, including name and attributes.
  *
  * @return string Updated block content.
  */
-function inject_term_description( $block_content, $block, $instance ) {
+function inject_term_description( $block_content, $block ) {
 	global $post;
 	$topic_pages = array(
 		'overview',
@@ -310,9 +317,9 @@ function inject_term_description( $block_content, $block, $instance ) {
 			: array();
 
 		// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
-		$parent = WP_Block_Supports::$block_to_render;
+		$parent                             = WP_Block_Supports::$block_to_render;
 		WP_Block_Supports::$block_to_render = $block;
-		$wrapper_attributes = get_block_wrapper_attributes( $extra_attributes );
+		$wrapper_attributes                 = get_block_wrapper_attributes( $extra_attributes );
 		WP_Block_Supports::$block_to_render = $parent;
 
 		return '<div ' . $wrapper_attributes . '>' . $term_description . '</div>';
@@ -356,7 +363,7 @@ function custom_open_graph_tags( $tags = array() ) {
 			'twitter:card'    => 'summary_large_image',
 			'twitter:creator' => '@WordPress',
 		);
-	} else if ( is_category() ) {
+	} elseif ( is_category() ) {
 		$tags['og:image'] = 'https://wordpress.org/files/2022/08/embed-image.png';
 		return $tags;
 	}
@@ -371,9 +378,9 @@ function custom_open_graph_tags( $tags = array() ) {
 
 	if ( is_page() ) {
 		$term_slug = ( 'overview' === $post->post_name ) ? 'wordpress-overview' : $post->post_name;
-		$term = get_term_by( 'slug', $term_slug, 'category' );
+		$term      = get_term_by( 'slug', $term_slug, 'category' );
 		if ( $term ) {
-			$desc = trim( strip_tags( term_description( $term->term_id ) ) );
+			$desc = wp_strip_all_tags( term_description( $term->term_id ) );
 		}
 	}
 
@@ -388,29 +395,33 @@ function custom_open_graph_tags( $tags = array() ) {
 
 /**
  * Provide a list of local navigation menus.
+ *
+ * Replaces any menus passed in, this site only has its own.
+ *
+ * @return array Local navigation menus, keyed by menu slug.
  */
-function add_site_navigation_menus( $menus ) {
+function add_site_navigation_menus() {
 	return array(
 		'documentation' => array(
 			array(
 				'label' => __( 'WordPress Overview', 'wporg-docs' ),
-				'url' => '/overview/',
+				'url'   => '/overview/',
 			),
 			array(
 				'label' => __( 'Technical Guides', 'wporg-docs' ),
-				'url' => '/technical-guides/',
+				'url'   => '/technical-guides/',
 			),
 			array(
 				'label' => __( 'Support Guides', 'wporg-docs' ),
-				'url' => '/support-guides/',
+				'url'   => '/support-guides/',
 			),
 			array(
 				'label' => __( 'Customization', 'wporg-docs' ),
-				'url' => '/customization/',
+				'url'   => '/customization/',
 			),
 			array(
 				'label' => __( 'Get Involved', 'wporg-docs' ),
-				'url' => 'https://make.wordpress.org/docs/',
+				'url'   => 'https://make.wordpress.org/docs/',
 			),
 		),
 	);

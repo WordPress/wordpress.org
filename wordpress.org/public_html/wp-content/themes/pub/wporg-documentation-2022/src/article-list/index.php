@@ -19,13 +19,13 @@ function init() {
 	register_block_type(
 		dirname( __DIR__, 2 ) . '/build/article-list',
 		array(
-			'render_callback' => function ( $attributes, $content, $block ) {
+			'render_callback' => function ( $attributes ) {
 				if ( is_category( 'default-themes' ) ) {
-					return render_default_themes_block( $attributes, $content, $block );
-				} else if ( is_category() ) {
-					return render_category_block( $attributes, $content, $block );
-				} else if ( ! empty( $attributes['category'] ) ) {
-					return render_landing_block( $attributes, $content, $block );
+					return render_default_themes_block();
+				} elseif ( is_category() ) {
+					return render_category_block();
+				} elseif ( ! empty( $attributes['category'] ) ) {
+					return render_landing_block( $attributes );
 				}
 
 				return '';
@@ -37,15 +37,13 @@ function init() {
 /**
  * Render the content for a topic landing page.
  *
- * @param array    $attributes Block attributes.
- * @param string   $content    Block default content.
- * @param WP_Block $block      Block instance.
+ * @param array $attributes Block attributes.
  *
  * @return string Returns the block markup.
  */
-function render_landing_block( $attributes, $content, $block ) {
+function render_landing_block( $attributes ) {
 	$markup = '';
-	$term = get_term_by( 'slug', $attributes['category'], 'category' );
+	$term   = get_term_by( 'slug', $attributes['category'], 'category' );
 	if ( ! $term ) {
 		return '';
 	}
@@ -53,16 +51,18 @@ function render_landing_block( $attributes, $content, $block ) {
 	$sections = get_terms(
 		array(
 			'hide_empty' => false,
-			'taxonomy' => $term->taxonomy,
-			'orderby' => 'name',
-			'order' => 'asc',
-			'parent' => $term->term_id,
+			'taxonomy'   => $term->taxonomy,
+			'orderby'    => 'name',
+			'order'      => 'asc',
+			'parent'     => $term->term_id,
 		)
 	);
 
-	// Sort categories by term meta `sort_order`.
-	// This can be set on terms with wp-cli, there's no UI (yet).
-	// wp term meta add [term_id] sort_order [value]
+	/*
+	 * Sort categories by term meta `sort_order`.
+	 * This can be set on terms with wp-cli, there's no UI (yet):
+	 * wp term meta add [term_id] sort_order [value]
+	 */
 	usort(
 		$sections,
 		function ( $a, $b ) {
@@ -125,13 +125,9 @@ function get_section_markup( $section ) {
 /**
  * Render the block content for "Default Themes" category.
  *
- * @param array    $attributes Block attributes.
- * @param string   $content    Block default content.
- * @param WP_Block $block      Block instance.
- *
  * @return string Returns the block markup.
  */
-function render_default_themes_block( $attributes, $content, $block ) {
+function render_default_themes_block() {
 	global $post;
 	if ( ! have_posts() ) {
 		return '';
@@ -152,11 +148,11 @@ function render_default_themes_block( $attributes, $content, $block ) {
 		$found_articles = get_posts(
 			array(
 				'posts_per_page' => 1,
-				'post_type' => 'helphub_article',
-				'name' => $post->post_name . '-changelog',
+				'post_type'      => 'helphub_article',
+				'name'           => $post->post_name . '-changelog',
 			)
 		);
-		$changelog = false;
+		$changelog      = false;
 		if ( $found_articles ) {
 			$changelog = $found_articles[0];
 		}
@@ -212,13 +208,9 @@ function render_default_themes_block( $attributes, $content, $block ) {
 /**
  * Render the block content for all other categories.
  *
- * @param array    $attributes Block attributes.
- * @param string   $content    Block default content.
- * @param WP_Block $block      Block instance.
- *
  * @return string Returns the block markup.
  */
-function render_category_block( $attributes, $content, $block ) {
+function render_category_block() {
 	global $post;
 	if ( ! have_posts() ) {
 		return '';

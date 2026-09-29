@@ -3,6 +3,8 @@
  * Title: Front Page Content
  * Slug: wporg-documentation-2022/front-page-content
  * Inserter: no
+ *
+ * @package WordPressdotorg\Theme\Documentation_2022
  */
 
 ?>

@@ -3,6 +3,8 @@
  * Title: Page Header
  * Slug: wporg-documentation-2022/page-header
  * Categories: wporg
+ *
+ * @package WordPressdotorg\Theme\Documentation_2022
  */
 
 ?>
