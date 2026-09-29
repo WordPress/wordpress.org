@@ -445,7 +445,7 @@
 			case 'DeepL':
 				return container.find( '.translation-suggestion.with-tooltip.deepl' ).length > 0;
 			case 'OL':
-				return container.find( '.translation-suggestion.other-language' ).length > 0;
+				return container.find( '.translation-suggestion.with-tooltip' ).length > 0;
 			default:
 				return false;
 		}
