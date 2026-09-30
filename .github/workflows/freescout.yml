@@ -45,7 +45,7 @@ jobs:
       # Pulls and starts the other services, and initializes the database, while the app image builds.
       - name: Start services
         run: |
-          ( $COMPOSE up --detach db greenmail mailpit mock-api > "$RUNNER_TEMP/services.log" 2>&1; echo $? > "$RUNNER_TEMP/services.exit" ) &
+          ( $COMPOSE up --detach db greenmail mailpit mock-api > "$RUNNER_TEMP/services.log" 2>&1; echo $? > "$RUNNER_TEMP/services.exit" ) > /dev/null 2>&1 &
 
       - uses: docker/setup-buildx-action@v4
 
@@ -58,6 +58,7 @@ jobs:
           targets: app
           load: true
           set: |
+            app.context=environments/freescout
             app.cache-from=type=gha,scope=freescout-${{ matrix.ref }}
             app.cache-to=type=gha,mode=max,scope=freescout-${{ matrix.ref }}
 
