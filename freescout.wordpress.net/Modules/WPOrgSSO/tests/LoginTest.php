@@ -93,6 +93,16 @@ final class LoginTest extends SsoTestCase {
 	}
 
 	/**
+	 * A key sent as an array gets the login page's error, not an error page.
+	 *
+	 * @return void
+	 */
+	public function test_array_key_is_refused(): void {
+		$this->get( '/wporgsso/complete?key[]=x' )->assertRedirect( route( 'login' ) );
+		$this->assertGuest();
+	}
+
+	/**
 	 * A response to another browser's login request doesn't log this one in.
 	 *
 	 * @return void

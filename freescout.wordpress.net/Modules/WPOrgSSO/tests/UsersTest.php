@@ -427,6 +427,11 @@ final class UsersTest extends SsoTestCase {
 		);
 		$this->assertSame( 'rita', Account::for_user( (int) $user->id )->username );
 
+		// Filled in right away, since the profile no longer lets anyone change it.
+		$user->refresh();
+		$this->assertSame( 'Rita', $user->first_name );
+		$this->assertSame( 'rita@example.org', $user->email );
+
 		$this->assertSame(
 			1,
 			\Artisan::call(
@@ -488,6 +493,53 @@ final class UsersTest extends SsoTestCase {
 		$this->assertNotNull( $user );
 		$this->assertNotEquals( User::INVITE_STATE_ACTIVATED, $user->invite_state );
 		$this->assertSame( 'rita', Account::for_user( (int) $user->id )->username );
+	}
+
+	/**
+	 * In break-glass mode, new users get no invite, whose setup link would be refused.
+	 *
+	 * @return void
+	 */
+	public function test_break_glass_creates_user_without_invite(): void {
+		config( array( 'wporgsso.password_login' => true ) );
+
+		$this->create( 'rita' )->assertRedirect();
+
+		$user = User::query()->where( 'email', 'rita@example.org' )->first();
+		$this->assertNotNull( $user );
+		$this->assertEquals( User::INVITE_STATE_ACTIVATED, $user->invite_state );
+	}
+
+	/**
+	 * An account whose email a user already has points to connecting that user, instead of core's email error.
+	 *
+	 * @return void
+	 */
+	public function test_create_refuses_account_whose_email_is_taken(): void {
+		$existing        = $this->create_user( User::ROLE_USER );
+		$existing->email = 'rita@example.org';
+		$existing->save();
+
+		$this->create( 'rita' )->assertSessionHasErrors( 'wporg_username' );
+
+		$this->assertSame( 1, User::query()->where( 'email', 'rita@example.org' )->count() );
+		$this->assertNull( Account::for_user( (int) $existing->id ) );
+	}
+
+	/**
+	 * A username sent as an array is refused like a missing one, not with an error page.
+	 *
+	 * @return void
+	 */
+	public function test_create_refuses_array_username(): void {
+		$this->post(
+			'/users/wizard',
+			array(
+				'_token'         => csrf_token(),
+				'role'           => User::ROLE_USER,
+				'wporg_username' => array( 'rita' ),
+			)
+		)->assertSessionHasErrors( 'wporg_username' );
 	}
 
 	/**

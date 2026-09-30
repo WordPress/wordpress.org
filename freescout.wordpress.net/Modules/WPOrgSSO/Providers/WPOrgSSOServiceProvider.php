@@ -177,7 +177,7 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 			static function (): void {
 				// Without the API, core's own form stays, rather than one that can't look anyone up.
 				if ( Client::from_config()->is_configured() ) {
-					self::render( 'create_user', array( 'passwords' => self::passwords_available() ) );
+					self::render( 'create_user', array( 'passwords' => ! self::enforced() ) );
 				}
 			}
 		);
@@ -205,7 +205,7 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 				$wporg_user = $request->attributes->get( self::REQUEST_ACCOUNT );
 				if ( $wporg_user instanceof WordPressOrgUser && $user->id ) {
 					// There's nothing to invite them to once they log in with WordPress.org.
-					if ( ! self::passwords_available() ) {
+					if ( self::enforced() ) {
 						$user->invite_state = User::INVITE_STATE_ACTIVATED;
 					}
 

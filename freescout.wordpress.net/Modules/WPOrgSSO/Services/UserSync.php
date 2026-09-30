@@ -35,7 +35,7 @@ final class UserSync {
 			$user->first_name = $fields['first_name'];
 			$user->last_name  = $fields['last_name'];
 
-			if ( 0 !== strcasecmp( (string) $user->email, $fields['email'] ) ) {
+			if ( '' !== $fields['email'] && 0 !== strcasecmp( (string) $user->email, $fields['email'] ) ) {
 				if ( self::email_is_free( $fields['email'], (int) $user->id ) ) {
 					$user->email = $fields['email'];
 				} else {

@@ -26,5 +26,5 @@ return array(
 	),
 
 	// Break-glass: lets administrators log in with their FreeScout password. Every such login is logged.
-	'password_login' => (bool) env( 'WPORG_SSO_PASSWORD_LOGIN', false ),
+	'password_login' => filter_var( env( 'WPORG_SSO_PASSWORD_LOGIN', false ), FILTER_VALIDATE_BOOLEAN ),
 );

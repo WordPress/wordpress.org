@@ -96,8 +96,8 @@ final class SsoController extends Controller {
 	 * @return RedirectResponse
 	 */
 	public function complete( Request $request ): RedirectResponse {
-		$key     = (string) $request->query( 'key', '' );
-		$result  = '' !== $key ? \Cache::pull( self::handoff_key( $key ) ) : null;
+		$key     = $request->query( 'key', '' );
+		$result  = is_string( $key ) && '' !== $key ? \Cache::pull( self::handoff_key( $key ) ) : null;
 		$pending = (array) $request->session()->get( WPOrgSSOServiceProvider::SESSION_REQUEST_IDS, array() );
 
 		// Refuses responses to another browser's request, so nobody can log someone else into their account.
@@ -163,8 +163,10 @@ final class SsoController extends Controller {
 	public function lookup( Request $request ): JsonResponse {
 		$this->authorize( 'create', User::class );
 
+		$username = $request->query( 'username', '' );
+
 		try {
-			$wporg_user = WordPressOrgUser::find( (string) $request->query( 'username', '' ), Client::from_config() );
+			$wporg_user = WordPressOrgUser::find( is_string( $username ) ? $username : '', Client::from_config() );
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSSO] Lookup failed: ' . $e->getMessage() );
 

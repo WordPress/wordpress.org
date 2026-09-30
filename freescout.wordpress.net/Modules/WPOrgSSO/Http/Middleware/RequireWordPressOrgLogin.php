@@ -122,8 +122,11 @@ final class RequireWordPressOrgLogin {
 				return redirect()->route( 'users.create' )->withErrors( array( 'wporg_username' => $error ) )->withInput();
 			}
 
-			// Agents log in through WordPress.org, so they never need the password or the invite to set one.
-			if ( ! WPOrgSSOServiceProvider::passwords_available() ) {
+			/*
+			 * Agents log in through WordPress.org, so they never need the password or the invite to set one. Not even in
+			 * break-glass mode, where invite setups stay closed and administrators get a password from the command line.
+			 */
+			if ( WPOrgSSOServiceProvider::enforced() ) {
 				$request->merge( array( 'password' => User::generateRandomPassword() ) );
 				$request->offsetUnset( 'send_invite' );
 			}
@@ -294,7 +297,7 @@ final class RequireWordPressOrgLogin {
 
 		if ( ! Account::for_user( (int) $user->id ) ) {
 			// Only administrators connect users, and only once; after that, the account can't be switched.
-			if ( $auth_user instanceof User && $auth_user->isAdmin() && '' !== trim( (string) $request->input( 'wporg_username', '' ) ) ) {
+			if ( $auth_user instanceof User && $auth_user->isAdmin() && '' !== self::wporg_username( $request ) ) {
 				$error = self::resolve_account( $request, $user );
 
 				return $error ? array( 'wporg_username' => $error ) : array();
@@ -327,7 +330,7 @@ final class RequireWordPressOrgLogin {
 	 * @return string Error message, empty on success.
 	 */
 	private static function resolve_account( Request $request, ?User $user ): string {
-		$username = trim( (string) $request->input( 'wporg_username', '' ) );
+		$username = self::wporg_username( $request );
 		if ( '' === $username ) {
 			return __( 'Enter the WordPress.org username of the user.' );
 		}
@@ -355,11 +358,31 @@ final class RequireWordPressOrgLogin {
 		}
 
 		if ( ! $user ) {
-			$request->merge( $wporg_user->user_fields() );
+			$fields = $wporg_user->user_fields();
+
+			// Otherwise core's unique email error asks for another address, which the next submit replaces again.
+			$existing = User::query()->where( 'email', $fields['email'] )->first();
+			if ( $existing ) {
+				return __( 'That WordPress.org account\'s email address belongs to :name; connect them on their profile instead.', array( 'name' => $existing->getFullName() ) );
+			}
+
+			$request->merge( $fields );
 		}
 
 		$request->attributes->set( WPOrgSSOServiceProvider::REQUEST_ACCOUNT, $wporg_user );
 
 		return '';
+	}
+
+	/**
+	 * The WordPress.org username a user form names.
+	 *
+	 * @param Request $request Request.
+	 * @return string Username, empty if none was given.
+	 */
+	private static function wporg_username( Request $request ): string {
+		$username = $request->input( 'wporg_username', '' );
+
+		return is_string( $username ) ? trim( $username ) : '';
 	}
 }

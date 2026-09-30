@@ -13,6 +13,7 @@ use App\User;
 use Illuminate\Console\Command;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Services\Client;
+use Modules\WPOrgSSO\Services\UserSync;
 use Modules\WPOrgSSO\Services\WordPressOrgUser;
 
 /**
@@ -85,6 +86,9 @@ final class ConnectAccount extends Command {
 		}
 
 		$this->info( $user->email . ' logs in as ' . $wporg_user->username . ' on WordPress.org.' );
+
+		// The profile no longer lets anyone change what the account fills in.
+		UserSync::sync( $user, $wporg_user );
 
 		if ( ! $wporg_user->two_factor ) {
 			$this->warn( 'That account has no two-factor authentication, which it needs to log in.' );

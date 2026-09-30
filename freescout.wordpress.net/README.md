@@ -50,3 +50,5 @@ Optional:
 | `WPORG_SSO_PASSWORD_LOGIN` | `false` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Every such login is logged. |
 
 FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events and `WPOrgSSO` updates avatars from the queue.
+
+Behind a proxy, set core's `APP_TRUSTED_PROXIES`, so `WPOrgSSO` rate-limits its login endpoints per visitor rather than for everyone at once. Leave `SESSION_SAME_SITE` unset or `lax`: with `strict`, the browser drops the session cookie on the way back from login.wordpress.org, and every login fails.
