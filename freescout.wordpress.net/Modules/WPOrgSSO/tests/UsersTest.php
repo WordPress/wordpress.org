@@ -242,6 +242,23 @@ final class UsersTest extends SsoTestCase {
 				'user_id' => $user->id,
 			)
 		)->assertRedirect( route( 'login' ) );
+
+		// Nor does saving someone else's profile with a photo.
+		$other = $this->create_user( User::ROLE_USER );
+		$this->log_in( $other, 'other' );
+
+		$file = (string) tempnam( sys_get_temp_dir(), 'photo' );
+		file_put_contents( $file, self::image( 0, 255, 0 ) );
+
+		$response = $this->call(
+			'POST',
+			route( 'users.profile.save', array( 'id' => $user->id ) ),
+			array( '_token' => csrf_token() ),
+			array(),
+			array( 'photo_url' => new \Illuminate\Http\UploadedFile( $file, 'me.png', 'image/png', null, null, true ) )
+		);
+		unlink( $file );
+		$response->assertSessionMissing( 'errors' );
 	}
 
 	/**

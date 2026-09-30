@@ -11,8 +11,10 @@ namespace Modules\WPOrgSSO\Providers;
 
 use App\User;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Modules\WPOrgSSO\Console\ConnectAccount;
 use Modules\WPOrgSSO\Console\SetPassword;
 use Modules\WPOrgSSO\Entities\Account;
@@ -77,6 +79,13 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 	public const REQUEST_ACCOUNT = 'wporgsso.account';
 
 	/**
+	 * Request attribute marking a login as one through WordPress.org.
+	 *
+	 * @var string
+	 */
+	public const REQUEST_SSO_LOGIN = 'wporgsso.sso_login';
+
+	/**
 	 * Registers the module's dependencies.
 	 *
 	 * @return void
@@ -101,13 +110,6 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 
 		$this->register_hooks();
 	}
-
-	/**
-	 * Request attribute marking a login as one through WordPress.org.
-	 *
-	 * @var string
-	 */
-	public const REQUEST_SSO_LOGIN = 'wporgsso.sso_login';
 
 	/**
 	 * Whether administrators may log in with their FreeScout password.
@@ -241,6 +243,38 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 					$account->delete();
 				}
 			}
+		);
+
+		/*
+		 * In break-glass mode, only administrators may log in with a password. Everyone else gets core's answer to a
+		 * wrong password, after the same password check and attempt count, so the form confirms nobody's password.
+		 */
+		\Eventy::addFilter(
+			'login.custom_check',
+			static function ( $errors, $request = null ) {
+				if ( ! $request instanceof Request || ! self::password_login_enabled() || ! self::enforced() ) {
+					return $errors;
+				}
+
+				$email = $request->input( 'email' );
+				$user  = is_string( $email ) ? User::query()->where( 'email', $email )->first() : null;
+				if ( ! $user || $user->isAdmin() ) {
+					return $errors;
+				}
+
+				$password = $request->input( 'password' );
+				\Hash::check( is_string( $password ) ? $password : '', (string) $user->password );
+
+				$controller = $request->route() ? $request->route()->getController() : null;
+				app( RateLimiter::class )->hit(
+					Str::lower( $email ) . '|' . $request->ip(),
+					$controller && method_exists( $controller, 'decayMinutes' ) ? (int) $controller->decayMinutes() : 1
+				);
+
+				return array( 'email' => array( trans( 'auth.failed' ) ) );
+			},
+			20,
+			2
 		);
 
 		/*

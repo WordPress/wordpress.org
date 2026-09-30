@@ -437,6 +437,26 @@ final class LoginTest extends SsoTestCase {
 	}
 
 	/**
+	 * In break-glass mode, anyone else's right password gets the answer to a wrong one, and counts as a failed attempt.
+	 *
+	 * @return void
+	 */
+	public function test_password_login_does_not_confirm_others_passwords(): void {
+		config( array( 'wporgsso.password_login' => true ) );
+
+		$this->post(
+			route( 'login' ),
+			array(
+				'email'    => $this->user->email,
+				'password' => 'secret',
+			)
+		)->assertSessionHasErrors( array( 'email' => trans( 'auth.failed' ) ) );
+
+		$this->assertGuest();
+		$this->assertSame( 1, app( \Illuminate\Cache\RateLimiter::class )->attempts( strtolower( $this->user->email ) . '|127.0.0.1' ) );
+	}
+
+	/**
 	 * In break-glass mode, administrators stay logged in only after a password login, not after any other login
 	 * without WordPress.org, like one from a reset or invite link.
 	 *

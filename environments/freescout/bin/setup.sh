@@ -58,14 +58,23 @@ done
 # What production runs after every deploy.
 php "$app/artisan" --no-interaction freescout:after-app-update
 
-# The admin logs in as $WPORG_USERNAME at the mock WordPress.org login.
+# The admin logs in as $WPORG_USERNAME at the mock WordPress.org login; against the mock API, as its "admin".
+username="${WPORG_USERNAME:-}"
+if [ -z "$username" ] && [[ "$WPORG_API_URL" == http://mock-api:* ]]; then
+	username=admin
+fi
+
 if [ -f "$app/Modules/WPOrgSSO/module.json" ]; then
-	username="${WPORG_USERNAME:-admin}"
-	# Logging in syncs the admin's email from WordPress.org, so it's found by role.
-	# shellcheck disable=SC2016 # $app is PHP, not shell.
-	admin="$( php -r 'require "/var/www/html/vendor/autoload.php"; $app = require "/var/www/html/bootstrap/app.php"; $app->make( Illuminate\Contracts\Console\Kernel::class )->bootstrap(); echo App\User::where( "role", App\User::ROLE_ADMIN )->orderBy( "id" )->value( "email" );' )"
-	php "$app/artisan" --no-interaction wporgsso:connect --force "$admin" "$username" > /dev/null ||
-		echo "Could not connect the admin to the WordPress.org account $username; run setup again to retry." >&2
+	if [ -z "$username" ]; then
+		# api.wordpress.org's "admin" is a real account, which would fill in the admin.
+		echo "Set WPORG_USERNAME to your WordPress.org username to log in." >&2
+	else
+		# Logging in syncs the admin's email from WordPress.org, so it's found by role.
+		# shellcheck disable=SC2016 # $app is PHP, not shell.
+		admin="$( php -r 'require "/var/www/html/vendor/autoload.php"; $app = require "/var/www/html/bootstrap/app.php"; $app->make( Illuminate\Contracts\Console\Kernel::class )->bootstrap(); echo App\User::where( "role", App\User::ROLE_ADMIN )->orderBy( "id" )->value( "email" );' )"
+		php "$app/artisan" --no-interaction wporgsso:connect --force "$admin" "$username" > /dev/null ||
+			echo "Could not connect the admin to the WordPress.org account $username; run setup again to retry." >&2
+	fi
 fi
 
 # Deliver the sample emails once; FreeScout's scheduler fetches them within a minute.
@@ -82,8 +91,10 @@ fi
 touch /tmp/wporg-setup-done
 
 echo
-if [ -f "$app/Modules/WPOrgSSO/module.json" ]; then
+if [ -f "$app/Modules/WPOrgSSO/module.json" ] && [ -n "$username" ]; then
 	echo "FreeScout: ${APP_URL}  (log in as \"$username\" at the mock WordPress.org login)"
+elif [ -f "$app/Modules/WPOrgSSO/module.json" ]; then
+	echo "FreeScout: ${APP_URL}  (set WPORG_USERNAME to log in)"
 else
 	echo "FreeScout: ${APP_URL}  (admin@wordpress.test / password)"
 fi

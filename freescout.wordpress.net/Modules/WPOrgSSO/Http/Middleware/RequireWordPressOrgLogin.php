@@ -290,8 +290,9 @@ final class RequireWordPressOrgLogin {
 	 * @return array Errors by field, empty on success.
 	 */
 	private static function handle_profile( Request $request, ?User $auth_user ): array {
+		// Core turns away those who can't change the user, without revealing the connection.
 		$user = User::find( (int) $request->route( 'id' ) );
-		if ( ! $user ) {
+		if ( ! $user || ! $auth_user instanceof User || ! $auth_user->can( 'update', $user ) ) {
 			return array();
 		}
 

@@ -136,9 +136,10 @@
 
 					if ( response.connected_to ) {
 						notes.push(
+							// A function, so "$&" and the like in a name stay as they are.
 							strings.connected_to.replace(
 								':name',
-								response.connected_to
+								() => response.connected_to
 							)
 						);
 					}

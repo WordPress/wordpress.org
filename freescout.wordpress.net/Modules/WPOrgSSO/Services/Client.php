@@ -14,7 +14,8 @@ use RuntimeException;
 /**
  * Posts JSON payloads to api.wordpress.org, signed with a shared secret.
  *
- * The receiving side verifies the signature header against the raw request body.
+ * The receiving side verifies the signature header against the raw request body. Each module has its own copy, so
+ * any of them can be switched off without breaking the others.
  */
 final class Client {
 
