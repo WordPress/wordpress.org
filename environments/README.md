@@ -310,10 +310,12 @@ security add-generic-password -a "$USER" -s wporg-freescout-api -w
 Then start FreeScout against api.wordpress.org:
 
 ```bash
-WPORG_API_URL=https://api.wordpress.org/dotorg/freescout/ WPORG_API_SECRET="$(security find-generic-password -s wporg-freescout-api -w)" npm run freescout:start
+WPORG_API_URL=https://api.wordpress.org/dotorg/freescout/ WPORG_API_SECRET="$(security find-generic-password -s wporg-freescout-api -w)" WPORG_USERNAME=<your username> npm run freescout:start
 ```
 
-This is production data, so WPOrgWebhooks stays off: local conversations would count toward production's contributor stats. Run `npm run freescout:start` without the variables to go back to the mock; the tests always use their own values.
+This is production data, so WPOrgWebhooks stays off: local conversations would count toward production's contributor stats. The mock's accounts don't exist there, so add `WPORG_USERNAME=<your username>` to connect the FreeScout admin to your own account, and type that username at the mock login. Logging in syncs the admin's name and email from WordPress.org. Run `npm run freescout:start` without the variables to go back to the mock; the tests always use their own values.
+
+If your hosts file points `api.wordpress.org` at a sandbox, FreeScout reaches it without your proxy and gets a 403; comment the entry out while testing.
 
 **Run tests:**
 

@@ -29,6 +29,7 @@ services:
       DB_TEST_PASSWORD: freescout
       WPORG_API_URL: ${WPORG_API_URL:-http://mock-api:8080/}
       WPORG_API_SECRET: ${WPORG_API_SECRET:-local-secret}
+      WPORG_USERNAME: ${WPORG_USERNAME:-admin}
       # The mock identity provider in mock-api; its key is for local development only.
       WPORG_SSO_IDP_ENTITY_ID: http://127.0.0.1:${MOCK_IDP_PORT:-8892}/idp
       WPORG_SSO_IDP_URL: http://127.0.0.1:${MOCK_IDP_PORT:-8892}/idp

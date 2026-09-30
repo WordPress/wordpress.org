@@ -2,8 +2,8 @@
 /**
  * Mock of login.wordpress.org's SAML identity provider.
  *
- * Instead of a WordPress.org login, it asks which mock account to log in as, then posts a response signed with
- * saml/idp.key like wp-saml-idp does. The key is for local development only.
+ * Instead of a WordPress.org login, it asks which account to log in as, a mock one or any username, then posts a
+ * response signed with saml/idp.key like wp-saml-idp does. The key is for local development only.
  *
  * @package WordPressdotorg\FreeScout\Environment
  */
@@ -35,13 +35,13 @@ $idp     = new IdentityProvider(
 
 header( 'Content-Type: text/html; charset=utf-8' );
 
-$username = (string) ( $_POST['username'] ?? '' );
+$username = trim( (string) ( $_POST['username'] ?? '' ) );
 
-if ( isset( $accounts[ $username ] ) ) {
+if ( '' !== $username ) {
 	$response = $idp->response(
 		array(
 			'username'       => $username,
-			'email'          => $accounts[ $username ]['email'],
+			'email'          => $accounts[ $username ]['email'] ?? '',
 			'acs'            => $request['acs'],
 			'audience'       => $request['issuer'],
 			'in_response_to' => $request['id'],
@@ -60,7 +60,7 @@ if ( isset( $accounts[ $username ] ) ) {
 ?>
 <!doctype html>
 <title>Mock WordPress.org login</title>
-<style>body { font-family: sans-serif; max-width: 30em; margin: 4em auto; } button { display: block; width: 100%; margin: .5em 0; padding: .75em; text-align: left; }</style>
+<style>body { font-family: sans-serif; max-width: 30em; margin: 4em auto; } button, input { display: block; box-sizing: border-box; width: 100%; margin: .5em 0; padding: .75em; text-align: left; }</style>
 <h1>Mock WordPress.org login</h1>
 <p>Log in to <?php echo esc( $request['issuer'] ); ?> as:</p>
 <form method="post">
@@ -73,4 +73,11 @@ if ( isset( $accounts[ $username ] ) ) {
 			<?php echo $account['blocked'] ? '— blocked' : ''; ?>
 		</button>
 	<?php endforeach; ?>
+</form>
+<form method="post">
+	<input type="hidden" name="SAMLRequest" value="<?php echo esc( $saml_request ); ?>">
+	<input type="hidden" name="RelayState" value="<?php echo esc( $relay_state ); ?>">
+	<label for="username">Or any username, for a real account when FreeScout uses api.wordpress.org:</label>
+	<input id="username" name="username" required>
+	<button type="submit">Log in</button>
 </form>
