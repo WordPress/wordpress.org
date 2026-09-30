@@ -86,3 +86,5 @@ This folder has its own standard, [`phpcs.xml.dist`](phpcs.xml.dist); the root r
 - `declare( strict_types = 1 );` is enforced. Type every parameter and return value.
 - PHP compatibility is checked against PHP 8.3.
 - No sniffs that need WordPress: file names (PSR-4 instead), WordPress API alternatives, escaping, sanitizing, and nonces. Escape output with Blade's `{{ }}` or `e()`.
+
+JavaScript in `Modules/*/Public/js/` follows the WordPress JavaScript Coding Standards through `wp-scripts lint-js`: run `npm install` and `npm run lint:js` in this folder. FreeScout loads these files as plain scripts, with its own `jQuery`, so they're wrapped in `( function ( $ ) { … } )( jQuery );` rather than using modules.
