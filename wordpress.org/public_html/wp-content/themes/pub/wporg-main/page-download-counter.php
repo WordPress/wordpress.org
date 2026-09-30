@@ -13,7 +13,7 @@ $branch = WP_CORE_STABLE_BRANCH;
 
 if (
 	isset( $_GET['branch'] )
-	&& preg_match( '/^[0-9]\.[0-9]$/', wp_unslash( $_GET['branch'] ), $matches ) // phpcs:ignore WordPress.VIP
+	&& preg_match( '/^[0-9]\.[0-9]$/', sanitize_text_field( wp_unslash( $_GET['branch'] ) ), $matches )
 	&& version_compare( WP_CORE_STABLE_BRANCH, $matches[0], '>' )
 ) {
 	$branch = $matches[0];

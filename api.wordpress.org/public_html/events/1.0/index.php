@@ -1,4 +1,14 @@
 <?php
+/**
+ * Standalone Events API. WordPress is not loaded and request values are not slashed.
+ * Input is validated by validate_request() and the location and event lookups.
+ * This public, read-only endpoint does not require a nonce.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Events
+ */
+
 namespace Dotorg\API\Events;
 use stdClass;
 
@@ -128,31 +138,32 @@ function parse_request() {
 
 	// If a precise location is known, use a GET request. The values here should come from the `location` key of the result of a POST request.
 	if ( isset( $_GET['latitude'], $_GET['longitude'] ) ) {
+		// get_location() validates these values; casting here would turn invalid input into zero.
 		$location_args['latitude']  = $_GET['latitude'];
 		$location_args['longitude'] = $_GET['longitude'];
 	}
 
 	if ( isset( $_GET['country'] ) ) {
-		$location_args['country']             = $_GET['country'];
+		$location_args['country']             = is_string( $_GET['country'] ) ? $_GET['country'] : '';
 		$location_args['restrict_by_country'] = true;
 	}
 
 	// If a precise location is not known, create a POST request with a bunch of data which can be used to determine a precise location for future GET requests.
 	if ( isset( $_POST['location_data'] ) ) {
-		$location_args = $_POST['location_data'];
+		$location_args = (array) $_POST['location_data'];
 	}
 
 	// Simplified parameters for lookup by location (city) name, with optional timezone and locale params for extra context.
 	if ( isset( $_REQUEST['location'] ) ) {
-		$location_args['location_name'] = trim( $_REQUEST['location'] );
+		$location_args['location_name'] = is_string( $_REQUEST['location'] ) ? trim( $_REQUEST['location'] ) : '';
 	}
 
 	if ( isset( $_REQUEST['timezone'] ) ) {
-		$location_args['timezone'] = $_REQUEST['timezone'];
+		$location_args['timezone'] = is_string( $_REQUEST['timezone'] ) ? $_REQUEST['timezone'] : '';
 	}
 
 	if ( isset( $_REQUEST['locale'] ) ) {
-		$location_args['locale'] = $_REQUEST['locale'];
+		$location_args['locale'] = is_string( $_REQUEST['locale'] ) ? $_REQUEST['locale'] : '';
 	}
 
 	if ( isset( $_REQUEST['ip'] ) ) {
@@ -162,7 +173,7 @@ function parse_request() {
 		 * as the dev's browser IP.
 		 */
 		$public_ip = filter_var(
-			$_REQUEST['ip'],
+			is_string( $_REQUEST['ip'] ) ? $_REQUEST['ip'] : '',
 			FILTER_VALIDATE_IP,
 			FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
 		);
@@ -259,15 +270,15 @@ function build_response( $location, $location_args ) {
 
 	if ( $location ) {
 		$event_args = array(
-			'is_client_core'      => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
+			'is_client_core'      => is_client_core(),
 			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
-		if ( isset( $_REQUEST['number'] ) ) {
-			$event_args['number'] = $_REQUEST['number'];
+		if ( isset( $_REQUEST['number'] ) && is_numeric( $_REQUEST['number'] ) ) {
+			$event_args['number'] = abs( (int) $_REQUEST['number'] );
 		}
 
-		if ( ! empty( $location['latitude'] ) ) {
+		if ( isset( $location['latitude'], $location['longitude'] ) && is_numeric( $location['latitude'] ) && is_numeric( $location['longitude'] ) ) {
 			$event_args['nearby'] = array(
 				'latitude'  => $location['latitude'],
 				'longitude' => $location['longitude'],
@@ -290,13 +301,13 @@ function build_response( $location, $location_args ) {
 		$events = maybe_add_regional_wordcamps(
 			$events,
 			get_regional_wordcamp_data(),
-			$_SERVER['HTTP_USER_AGENT'],
+			$_SERVER['HTTP_USER_AGENT'] ?? '',
 			time(),
 			$location
 		);
 
-		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'], time(), $location['country'] ?? '' );
-		$events = pin_next_workshop_discussion_group( $events, $_SERVER['HTTP_USER_AGENT'] );
+		$events = pin_next_online_wordcamp( $events, $_SERVER['HTTP_USER_AGENT'] ?? '', time(), $location['country'] ?? '' );
+		$events = pin_next_workshop_discussion_group( $events, $_SERVER['HTTP_USER_AGENT'] ?? '' );
 		$events = pin_one_off_events( $events, time() );
 		$events = remove_duplicate_events( $events );
 
@@ -331,7 +342,7 @@ function build_response( $location, $location_args ) {
  * @return bool
  */
 function is_client_core( $user_agent = null ) {
-	return str_starts_with( $user_agent ?? $_SERVER['HTTP_USER_AGENT'], 'WordPress/' );
+	return str_starts_with( $user_agent ?? ( $_SERVER['HTTP_USER_AGENT'] ?? '' ), 'WordPress/' );
 }
 
 /**
@@ -606,8 +617,8 @@ function get_location( $args = array() ) {
 	// Coordinates provided
 	if (
 		! $location && (
-			! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
-			! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
+			isset( $args['latitude'], $args['longitude'] ) &&
+			is_numeric( $args['latitude'] ) && is_numeric( $args['longitude'] )
 		)
 	) {
 		$location = array(

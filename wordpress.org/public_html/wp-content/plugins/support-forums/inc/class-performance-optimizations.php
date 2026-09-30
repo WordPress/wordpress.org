@@ -104,7 +104,7 @@ class Performance_Optimizations {
 		}
 
 		if ( isset( $_GET['intext'] ) ) {
-			$search_terms .= ' intext:"' . esc_attr( $_GET['intext'] ) . '"';
+			$search_terms .= ' intext:"' . esc_attr( sanitize_text_field( wp_unslash( $_GET['intext'] ?? '' ) ) ) . '"';
 		}
 
 		if ( $search_terms ) {
@@ -131,10 +131,10 @@ class Performance_Optimizations {
 		if (
 			isset( $wp_query->query['paged'] ) &&
 			in_array( $wp_query->query['paged'], [ 0, 1 ] ) &&
-			'POST' !== $_SERVER['REQUEST_METHOD']
+			'POST' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) )
 		) {
 			// Generate the current URL.
-			$current_url = $_SERVER['REQUEST_URI'];
+			$current_url = wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 			// Remove the path components.
 			$current_url = preg_replace( '!^' . preg_quote( parse_url( home_url('/'), PHP_URL_PATH ), '!' ) . '!i', '', $current_url );
 			$current_url = home_url( $current_url );

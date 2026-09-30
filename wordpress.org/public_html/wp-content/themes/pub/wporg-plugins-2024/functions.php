@@ -65,7 +65,7 @@ add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
  * Handle the root-level redirect to trailing-slash'd uri which redirect_canonical() usually does.
  */
 function enforce_trailing_slash() {
-	if ( '/plugins' === $_SERVER['REQUEST_URI'] ) {
+	if ( '/plugins' === wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) {
 		wp_safe_redirect( '/plugins/' );
 		die();
 	}

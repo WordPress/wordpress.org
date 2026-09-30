@@ -150,7 +150,7 @@ function the_content_limit( $max_char, $more_link_text = '(more...)', $stripteas
 	$content = str_replace( ']]>', ']]&gt;', $content );
 	$content = strip_tags( $content );
 
-	if ( ! empty( $_GET['p'] ) && strlen( $_GET['p'] ) > 0 ) {
+	if ( ! empty( $_GET['p'] ) ) {
 		echo '<p>' . esc_html( $content ) . '</p>';
 	} else if ( ( strlen( $content ) > $max_char ) && ( $espacio = strpos( $content, " ", $max_char ) ) ) {
 		$content = substr( $content, 0, $espacio );
@@ -191,7 +191,7 @@ function breadcrumb() { ?>
 				/* translators: %s: search query */
 				printf( esc_html__( '&raquo; Search for: %s', 'wporg-showcase' ), get_search_query() );
 			?>
-		<?php elseif ( strstr( $_SERVER['REQUEST_URI'], '/showcase/archives' ) ) : ?>
+		<?php elseif ( strstr( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/showcase/archives' ) ) : ?>
 			<?php esc_html_e( '&raquo; Archives', 'wporg-showcase' ); ?>
 		<?php else : ?>
 			<?php if ( is_category() ) : ?>

@@ -87,8 +87,8 @@ If you have no questions, concerns, or comments, please do not reply to this ema
 		 *
 		 * TODO: This may be better done by re-using a Rosetta-provided function.
 		 */
-		if ( 'wordpress.org' !== $_SERVER['HTTP_HOST'] ) {
-			$template = str_replace( '://wordpress.org/', '://' . $_SERVER['HTTP_HOST'] . '/', $template );
+		if ( 'wordpress.org' !== sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) ) {
+			$template = str_replace( '://wordpress.org/', '://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . '/', $template );
 		}
 
 		return $template;

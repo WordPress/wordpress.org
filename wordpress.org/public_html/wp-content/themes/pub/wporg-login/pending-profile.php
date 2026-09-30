@@ -18,8 +18,8 @@ if ( ! empty( $sso::$matched_route_params['profile_user'] ) ) {
 	die();
 }
 
-$profile_user = is_string( $_COOKIE['wporg_profile_user'] ?? null ) ? $_COOKIE['wporg_profile_user'] : '';
-$profile_key  = is_string( $_COOKIE['wporg_profile_key']  ?? null ) ? $_COOKIE['wporg_profile_key']  : '';
+$profile_user = is_string( $_COOKIE['wporg_profile_user'] ?? null ) ? sanitize_text_field( wp_unslash( $_COOKIE['wporg_profile_user'] ) ) : '';
+$profile_key  = is_string( $_COOKIE['wporg_profile_key'] ?? null ) ? sanitize_text_field( wp_unslash( $_COOKIE['wporg_profile_key'] ) ) : '';
 
 $pending_user = wporg_get_pending_user( $profile_user );
 

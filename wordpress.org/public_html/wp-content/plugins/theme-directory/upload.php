@@ -78,8 +78,8 @@ function wporg_themes_render_upload_shortcode() {
 
 	if (
 		! empty( $_POST['_wpnonce'] ) &&
-		wp_verify_nonce( $_POST['_wpnonce'], 'wporg-themes-upload' ) &&
-		'upload' === $_POST['action']
+		wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), 'wporg-themes-upload' ) &&
+		'upload' === sanitize_key( $_POST['action'] ?? '' )
 	) {
 		$messages = wporg_themes_process_upload();
 
@@ -210,6 +210,7 @@ function wporg_themes_process_upload( ) {
 	}
 
 	$upload  = new WPORG_Themes_Upload;
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The upload entry is passed whole to WPORG_Themes_Upload, which runs validate_upload() on it before touching the file.
 	$message = $upload->process_upload( $_FILES['zip_file'] );
 
 	if ( ! is_wp_error( $message ) && function_exists( 'bump_stats_extra' ) ) {

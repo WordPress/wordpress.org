@@ -184,7 +184,7 @@ class Markdown_Import {
 		}
 		$post_id = (int) $_GET['post'];
 		if ( ! current_user_can( 'edit_post', $post_id )
-			|| ! wp_verify_nonce( $_GET[ self::$nonce_name ], self::$input_name )
+			|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET[ self::$nonce_name ] ) ), self::$input_name )
 			|| ! in_array( get_post_type( $post_id ), self::$supported_post_types, true ) ) {
 			return;
 		}
@@ -239,12 +239,13 @@ class Markdown_Import {
 			return;
 		}
 
-		if ( ! wp_verify_nonce( $_POST[ self::$nonce_name ], self::$input_name )
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ self::$nonce_name ] ) ), self::$input_name )
 			|| ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
 
-		$submitted = wp_unslash( $_POST[ self::$input_name ] );
+		// The field holds a source URL, so esc_url_raw() keeps any percent-encoding that sanitize_text_field() would strip.
+		$submitted = esc_url_raw( wp_unslash( $_POST[ self::$input_name ] ) );
 		if ( '' === $submitted ) {
 			update_post_meta( $post_id, self::$meta_key, '' );
 			return;

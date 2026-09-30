@@ -152,9 +152,9 @@ class Random {
 		&&
 			is_main_query()
 		&&
-			Registrations::get_post_type() === ( $_GET['post_type'] ?? false )
+			Registrations::get_post_type() === sanitize_key( $_GET['post_type'] ?? '' )
 		&&
-			'pending' === ( $_GET['post_status'] ?? '' )
+			'pending' === sanitize_key( $_GET['post_status'] ?? '' )
 		);
 	}
 

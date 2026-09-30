@@ -13,6 +13,11 @@
  *   ]
  * }
  *
+ * Standalone endpoint; WordPress is not loaded here, so its sanitizers and
+ * wp_json_encode() are unavailable.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput, WordPress.WP.AlternativeFunctions.json_encode_json_encode
+ *
  * @package WordPressdotorg\API\Composer
  */
 
@@ -21,13 +26,10 @@ declare( strict_types = 1 );
 header( 'Content-Type: application/json; charset=utf-8' );
 header( 'Access-Control-Allow-Origin: *' );
 
-// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Direct server variable check.
 if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
-	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' 405 Method Not Allowed', true, 405 );
 	header( 'Allow: POST' );
 
-	// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- No WP loaded.
 	echo json_encode( array( 'error' => 'Only POST requests are accepted.' ) );
 	exit;
 }
@@ -40,5 +42,4 @@ if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
 // Accept the notification. Return 200 OK regardless.
 http_response_code( 200 );
 
-// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- No WP loaded.
 echo json_encode( array( 'status' => 'ok' ) );

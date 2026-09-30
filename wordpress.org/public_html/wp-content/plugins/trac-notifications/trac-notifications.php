@@ -22,8 +22,8 @@ class wporg_trac_notifications {
 		if ( $make_site[2] !== 'make.wordpress.org' || ! in_array( $trac, $this->tracs_supported ) ) {
 			return;
 		}
-		if ( 'core' === $trac && isset( $_GET['trac'] ) && in_array( $_GET['trac'], $this->tracs_supported_extra ) ) {
-			$trac = $_GET['trac'];
+		if ( 'core' === $trac && in_array( sanitize_key( $_GET['trac'] ?? '' ), $this->tracs_supported_extra, true ) ) {
+			$trac = sanitize_key( $_GET['trac'] );
 		}
 
 		$this->trac = $trac;
@@ -146,13 +146,13 @@ class wporg_trac_notifications {
 			wp_send_json_error();
 		}
 
-		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], "manage_ticket_notifications" ) ) {
+		if ( empty( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'manage_ticket_notifications' ) ) {
 			wp_send_json_error();
 		}
 
 		$username = wp_get_current_user()->user_login;
 
-		$ticket = absint( $_POST['trac-ticket-sub'] );
+		$ticket = absint( $_POST['trac-ticket-sub'] ?? 0 );
 		if ( ! $ticket ) {
 			wp_send_json_error();
 		}
@@ -161,7 +161,7 @@ class wporg_trac_notifications {
 			wp_send_json_error();
 		}
 
-		$action = $_POST['action'];
+		$action = sanitize_key( $_POST['action'] ?? '' );
 		if ( ! $action ) {
 			wp_send_json_error();
 		}
@@ -195,7 +195,8 @@ class wporg_trac_notifications {
 		}
 		$username = wp_get_current_user()->user_login;
 
-		$queried_tickets = (array) $_POST['tickets'];
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Read-only: returns which of the submitted tickets the current user is already subscribed to, and mints the nonce the write endpoint requires.
+		$queried_tickets = array_map( 'absint', (array) ( $_POST['tickets'] ?? array() ) );
 		if ( count( $queried_tickets ) > 100 ) {
 			wp_send_json_error();
 		}
@@ -220,7 +221,7 @@ class wporg_trac_notifications {
 		}
 		$username = wp_get_current_user()->user_login;
 
-		$ticket_id = absint( $_GET['trac-notifications'] );
+		$ticket_id = absint( $_GET['trac-notifications'] ?? 0 );
 		if ( ! $ticket_id ) {
 			exit;
 		}
@@ -408,7 +409,7 @@ class wporg_trac_notifications {
 
 	function notification_settings_page() {
 		if ( ! is_user_logged_in() ) {
-			$current_url = esc_url_raw( 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+			$current_url = esc_url_raw( 'https://' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) . wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
 			return 'Please <a href="' . esc_url( add_query_arg( 'redirect_to', $current_url, 'https://login.wordpress.org/' ) ) . '">log in</a> to save your notification preferences.';
 		}
 
@@ -426,8 +427,13 @@ class wporg_trac_notifications {
 			$changes = array();
 
 			foreach ( array( 'milestone', 'component', 'focus' ) as $type ) {
+				$submitted = array();
+
 				if ( ! empty( $_POST['notifications'][ $type ] ) ) {
-					foreach ( $_POST['notifications'][ $type ] as $value => $on ) {
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The submitted values are this array's keys, sanitized on the same line.
+					$submitted = array_map( 'sanitize_text_field', array_keys( (array) wp_unslash( $_POST['notifications'][ $type ] ) ) );
+
+					foreach ( $submitted as $value ) {
 						if ( empty( $notifications[ $type ][ $value ] ) ) {
 							$changes['insert'][] = compact( 'username', 'type', 'value' );
 							$notifications[ $type ][ $value ] = true;
@@ -435,8 +441,14 @@ class wporg_trac_notifications {
 					}
 				}
 
+				/*
+				 * Compared against the same sanitized list the insert loop used. Re-reading
+				 * $_POST here would mean a value the sanitizer altered gets inserted above
+				 * and deleted again in the one request. Keys that look numeric arrive as
+				 * ints, hence the cast.
+				 */
 				foreach ( $notifications[ $type ] as $value => $on ) {
-					if ( empty( $_POST['notifications'][ $type ][ $value ] ) ) {
+					if ( ! in_array( (string) $value, $submitted, true ) ) {
 						$changes['delete'][] = compact( 'username', 'type', 'value' );
 						unset( $notifications[ $type ][ $value ] );
 					}

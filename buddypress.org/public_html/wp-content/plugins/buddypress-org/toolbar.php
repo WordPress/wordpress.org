@@ -26,7 +26,7 @@ function bporg_toolbar_tweaks() {
 	remove_action( 'bp_setup_admin_bar', 'bp_members_admin_bar_my_account_menu', 4 );
 
 	// WordPress.org Profiles site specific removals
-	if ( 'profiles.wordpress.org' === $_SERVER['HTTP_HOST'] ) {
+	if ( 'profiles.wordpress.org' === sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) ) {
 		remove_action( 'admin_bar_menu', 'bp_groups_group_admin_menu',   99  );
 		remove_action( 'admin_bar_menu', 'bp_admin_bar_my_account_root', 100 );
 	}

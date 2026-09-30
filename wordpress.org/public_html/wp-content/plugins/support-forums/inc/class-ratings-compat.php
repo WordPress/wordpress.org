@@ -340,7 +340,7 @@ class Ratings_Compat {
 
 		$topic_content = false;
 		if ( ! empty( $_POST['bbp_topic_content'] ) ) {
-			// Apply the new-topic pre-content filters. This allows for various forum hooks to remove links.
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- bbp_new_topic_pre_content takes the slashed value, as bbPress passes it; bbp_filter_kses() on that hook unslashes and re-slashes it itself, and the link check has to see the content the save path will store. Runs on bbp_new_topic_pre_extras; bbPress verifies the nonce in its own form handler before this hook fires.
 			$topic_content = apply_filters( 'bbp_new_topic_pre_content', $_POST['bbp_topic_content'] );
 		}
 
@@ -362,7 +362,7 @@ class Ratings_Compat {
 					'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews'
 				)
 			);
-		} elseif ( ! empty( $_COOKIE['wporg_review_to_pending'] ) ) {
+		} elseif ( ! empty( sanitize_text_field( wp_unslash( $_COOKIE['wporg_review_to_pending'] ?? '' ) ) ) ) {
 			add_filter( 'bbp_new_topic_pre_insert', function( $data ) {
 				// If this is still for a review..
 				if ( Plugin::REVIEWS_FORUM_ID == $data['post_parent'] ) {
@@ -372,7 +372,7 @@ class Ratings_Compat {
 					$data['post_status'] = bbp_get_pending_status_id();
 
 					// Add a meta field to find these moderated reviews later.
-					$data['meta_input']['_wporg_moderation_reason'] = $_COOKIE['wporg_review_to_pending'];
+					$data['meta_input']['_wporg_moderation_reason'] = sanitize_text_field( wp_unslash( $_COOKIE['wporg_review_to_pending'] ?? '' ) );
 				}
 
 				return $data;

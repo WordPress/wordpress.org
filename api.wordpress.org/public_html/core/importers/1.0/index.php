@@ -6,6 +6,7 @@ header( 'Content-Type: ' . ( defined( 'JSON_RESPONSE' ) ? 'application/json' : '
 
 $version = '';
 if ( isset( $_REQUEST['version'] ) ) { // Introduced in WordPress 4.6.
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded, so the WP sanitizers are unavailable. The version is reduced to a known set below.
 	$version = str_replace( '-src', '', $_REQUEST['version'] );
 }
 

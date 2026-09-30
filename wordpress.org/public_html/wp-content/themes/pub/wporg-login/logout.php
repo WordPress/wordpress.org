@@ -6,7 +6,7 @@
  */
 
 // This will be validated at redirect time.
-$redirect_to = !empty( $_GET['redirect_to'] ) ? $_GET['redirect_to'] : home_url( '/loggedout/' );
+$redirect_to = ! empty( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : home_url( '/loggedout/' );
 
 if ( ! is_user_logged_in() ) {
 	wp_safe_redirect( $redirect_to );

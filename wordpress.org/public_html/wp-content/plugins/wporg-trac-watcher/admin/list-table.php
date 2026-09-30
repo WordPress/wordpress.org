@@ -163,7 +163,7 @@ class Commits_List_Table extends WP_List_Table {
 					printf(
 						'<option value="%s" %s>%s</option>',
 						esc_attr( $v ),
-						selected( $_REQUEST['version'] ?? '', $v ),
+						selected( sanitize_text_field( wp_unslash( $_REQUEST['version'] ?? '' ) ), $v ),
 						esc_html( $v )
 					);
 				}
@@ -178,7 +178,7 @@ class Commits_List_Table extends WP_List_Table {
 					printf(
 						'<option value="%s" %s>%s</option>',
 						esc_attr( $b ),
-						selected( $_REQUEST['branch'] ?? '', $b ),
+						selected( sanitize_text_field( wp_unslash( $_REQUEST['branch'] ?? '' ) ), $b ),
 						esc_html( $b )
 					);
 				}
@@ -200,7 +200,7 @@ class Commits_List_Table extends WP_List_Table {
 					printf(
 						'<option value="%s" %s>%s (%s)</option>',
 						esc_attr( $a->author ),
-						selected( $_REQUEST['author'] ?? '', $a->author ),
+						selected( sanitize_text_field( wp_unslash( $_REQUEST['author'] ?? '' ) ), $a->author ),
 						esc_html( $a->author ),
 						esc_html( number_format_i18n( $a->count ) )
 					);
@@ -209,7 +209,7 @@ class Commits_List_Table extends WP_List_Table {
 			}
 			echo '</select>';
 
-			echo '<input type="text" name="revisions" placeholder="Revs: 1:HEAD or 1,2,4,5" value="' . esc_attr( $_REQUEST['revisions'] ?? '' ) .'">';
+			echo '<input type="text" name="revisions" placeholder="Revs: 1:HEAD or 1,2,4,5" value="' . esc_attr( sanitize_text_field( wp_unslash( $_REQUEST['revisions'] ?? '' ) ) ) . '">';
 
 			echo '<input type="submit" class="button button-secondary" value="Filter">';
 			echo '</div>';
@@ -217,7 +217,7 @@ class Commits_List_Table extends WP_List_Table {
 	}
 
 	function get_views() {
-		$url = add_query_arg( 'page', $_REQUEST['page'], admin_url( 'admin.php' ) );
+		$url = add_query_arg( 'page', sanitize_key( $_REQUEST['page'] ?? '' ), admin_url( 'admin.php' ) );
 
 		$views = [
 			'all' => '<a href="' . esc_url( $url ) . '">All</a>',

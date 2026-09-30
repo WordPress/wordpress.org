@@ -446,11 +446,14 @@ class Translation_Memory extends GP_Route {
 		if ( ! $is_request_valid || ! $is_source_set || ! $translation ) {
 			return;
 		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- $is_request_valid above confines this to GlotPress's translations_post route, which verifies its add-translation nonce and 403s before dispatching.
 		self::update_one_external_translation(
 			$translation->translation_0,
-			sanitize_text_field( $_POST['externalTranslationSource'] ),
-			sanitize_text_field( $_POST['externalTranslationUsed'] ),
+			sanitize_text_field( wp_unslash( $_POST['externalTranslationSource'] ) ),
+			sanitize_text_field( wp_unslash( $_POST['externalTranslationUsed'] ) ),
 		);
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 
 	/**

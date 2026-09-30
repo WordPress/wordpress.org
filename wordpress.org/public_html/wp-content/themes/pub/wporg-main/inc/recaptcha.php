@@ -57,8 +57,9 @@ function check_status() {
 
 	$verify = array(
 		'secret'   => RECAPTCHA_INVIS_PRIVKEY,
-		'remoteip' => wp_unslash( $_SERVER['REMOTE_ADDR'] ),
-		'response' => wp_unslash( $_POST['g-recaptcha-response'] ),
+		'remoteip' => sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) ),
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The reCAPTCHA token is the check being made here; it is what the forms use in place of a nonce.
+		'response' => sanitize_text_field( wp_unslash( $_POST['g-recaptcha-response'] ) ),
 	);
 
 	$resp = wp_remote_post( 'https://www.google.com/recaptcha/api/siteverify', array( 'body' => $verify ) );

@@ -8,7 +8,7 @@ include __DIR__ . '/common.php';
 
 // $request is the validated HelpScout request.
 $request = get_request();
-$event   = $_SERVER['HTTP_X_HELPSCOUT_EVENT'] ?? '';
+$event   = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_HELPSCOUT_EVENT'] ?? '' ) );
 
 // Warm the caches.
 get_email_thread( $request->id, true );

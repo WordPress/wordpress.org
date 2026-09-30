@@ -238,7 +238,7 @@ class Locale_Banner extends Base {
 			return $res;
 		}
 
-		$http_locales = $this->get_http_locales( $_SERVER['HTTP_ACCEPT_LANGUAGE'] );
+		$http_locales = $this->get_http_locales( sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '' ) ) );
 
 		if ( is_array( $http_locales ) ) {
 			foreach ( $http_locales as $http_locale ) {

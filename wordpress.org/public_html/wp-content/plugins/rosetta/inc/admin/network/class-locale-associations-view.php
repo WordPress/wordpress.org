@@ -60,8 +60,8 @@ class Locale_Associations_View implements Admin_Page_View {
 
 		$code = sprintf(
 			'%s|%s',
-			$_GET['performed_action'],
-			isset( $_GET['updated'] ) ? $_GET['updated'] : $_GET['error']
+			sanitize_key( $_GET['performed_action'] ),
+			isset( $_GET['updated'] ) ? sanitize_key( $_GET['updated'] ) : sanitize_key( $_GET['error'] )
 		);
 
 		switch ( $code ) {
