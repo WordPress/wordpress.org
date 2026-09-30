@@ -45,7 +45,21 @@ A module that breaks after a core update can take down the **entire helpdesk**, 
 
 ### Testing against core
 
-Tests run against a real FreeScout and database, using `phpunit.xml.dist` and the shared harness in `tests/`. Modules aren't active in the test database, so each test registers the provider under test (`$this->app->register( … )`).
+Tests run inside the local environment (`environments/freescout/`), against a real FreeScout and database:
+
+```bash
+npm run freescout:test                          # from environments/
+npm run freescout:test -- --filter SidebarTest  # extra arguments go to PHPUnit
+FREESCOUT_REF=master npm run freescout:start     # try upcoming core changes
+```
+
+`npm run freescout:logs` shows the web server and the mock API's record of every webhook event. What modules log with `\Log::error()` goes to FreeScout's app log instead (also under Manage » Logs in the UI):
+
+```bash
+npm run freescout:env -- exec app bash -c 'tail -f storage/logs/laravel-*.log'
+```
+
+Modules aren't active in the test database, so each test registers the provider under test (`$this->app->register( … )`). Registering after boot leaves module routes out of the name index; call `$this->app['router']->getRoutes()->refreshNameLookups()` before using `route()`. CI runs the suite against the latest `dist` release and `master` on every change and daily, since core updates don't come with a commit here.
 
 ---
 
@@ -55,7 +69,7 @@ Tests run against a real FreeScout and database, using `phpunit.xml.dist` and th
 - **`authorUrl` / `detailsUrl`:** never point these at `freescout.net`. Core treats such modules as official and requires a paid license activation.
 - **Activation state** lives in the `modules` DB table; the `active` field in `module.json` is ignored by core.
 - **New module:** add its directory under `Modules/`. Once it's deployed, an admin switches it on under Manage » Modules.
-- **After changing module files:** run `php artisan freescout:clear-cache`.
+- **After changing module files:** run `php artisan freescout:clear-cache` (`npm run freescout:artisan -- freescout:clear-cache`).
 - **Routes:** register them in the provider with `loadRoutesFrom()`, and pass URLs to JavaScript through `data-` attributes rather than FreeScout's generated laroute files.
 
 ---
