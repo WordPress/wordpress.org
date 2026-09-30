@@ -196,8 +196,6 @@ if ( ! $parent || ! in_array( $parent->post_status, array( 'publish', 'private' 
 	wp_die( 'You can not subtitle this video, sorry.' );
 }
 
-nocache_headers();
-
 get_header();
 
 $message = '';
@@ -269,7 +267,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 				<tr>
 					<th><label for="wptv_author_email"><?php esc_html_e( 'Email Address', 'wptv' ); ?><span class="required"> * </span></label></th>
 					<td>
-						<input type="text" id="wptv_author_email" name="wptv_author_email" />
+						<input type="email" id="wptv_author_email" name="wptv_author_email" />
 					</td>
 				</tr>
 
@@ -291,7 +289,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 				</tr>
 
 				<tr>
-					<td colspan="2"><em>* All field are required</em></td>
+					<td colspan="2"><em>* All fields are required</em></td>
 				</tr>
 
 				<tr>
