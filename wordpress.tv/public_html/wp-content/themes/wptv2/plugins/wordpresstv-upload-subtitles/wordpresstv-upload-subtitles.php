@@ -43,7 +43,7 @@ class WordPressTV_Subtitles_Upload {
 	/**
 	 * Enqueue front-end scripts for the subtitle upload form.
 	 */
-	function enqueue_scripts() {
+	public function enqueue_scripts() {
 		if ( ! is_page_template( 'upload-subtitles-template.php' ) ) {
 			return;
 		}
