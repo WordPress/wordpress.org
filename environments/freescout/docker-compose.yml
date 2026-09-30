@@ -66,7 +66,7 @@ services:
 
   # Outgoing mail: replies to senders land here instead of the internet.
   mailpit:
-    image: axllent/mailpit:latest
+    image: axllent/mailpit:v1.31.3
     ports:
       - "${MAILPIT_PORT:-8891}:8025"
 
