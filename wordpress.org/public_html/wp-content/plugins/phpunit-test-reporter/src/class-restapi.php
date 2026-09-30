@@ -13,6 +13,36 @@ class RestAPI {
 	public static function register_routes() {
 		register_rest_route(
 			'wp-unit-test-api/v1',
+			'rtc-performance-results',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( __CLASS__, 'add_performance_results_callback' ),
+				'args'                => array(
+					'results'          => array(
+						'required'          => true,
+						'description'       => 'Performance test results keyed by approach and scenario.',
+						'type'              => 'object',
+						'validate_callback' => array( __CLASS__, 'validate_callback' ),
+					),
+					'env'              => array(
+						'required'          => true,
+						'description'       => 'Environment information for the test run.',
+						'type'              => 'object',
+						'validate_callback' => array( __CLASS__, 'validate_callback' ),
+					),
+					'environment_name' => array(
+						'required'          => false,
+						'description'       => 'Human-readable label for the environment under test.',
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+				'permission_callback' => array( __CLASS__, 'permission' ),
+			)
+		);
+
+		register_rest_route(
+			'wp-unit-test-api/v1',
 			'results',
 			array(
 				'methods'             => 'POST',
@@ -62,7 +92,7 @@ class RestAPI {
 				return true;
 			case 'env':
 			case 'results':
-				if ( null === json_decode( $value ) ) {
+				if ( is_string( $value ) && null === json_decode( $value ) ) {
 					return new WP_Error(
 						'rest_invalid',
 						__( 'Value must be encoded JSON.', 'ptr' ),
@@ -93,6 +123,74 @@ class RestAPI {
 			);
 		}
 		return true;
+	}
+
+	public static function add_performance_results_callback( $data ) {
+		$parameters = $data->get_params();
+
+		// env and results are decoded by the REST API when Content-Type is application/json.
+		$env     = is_array( $parameters['env'] ) ? $parameters['env'] : (array) json_decode( $parameters['env'], true );
+		$results = is_array( $parameters['results'] ) ? $parameters['results'] : (array) json_decode( $parameters['results'], true );
+
+		$php_version = '';
+		if ( ! empty( $env['php_version'] ) ) {
+			$parts       = explode( '.', $env['php_version'] );
+			$php_version = $parts[0] . '.' . $parts[1];
+		}
+
+		$db_version = ! empty( $env['mysql_version'] ) ? $env['mysql_version'] : '';
+		$wp_version = ! empty( $env['wp_version'] ) ? strip_tags( $env['wp_version'] ) : '';
+
+		$env_name = ! empty( $parameters['environment_name'] ) ? strip_tags( $parameters['environment_name'] ) : '';
+
+		$current_user = wp_get_current_user();
+
+		$post_title = $current_user->user_login;
+		if ( $env_name ) {
+			$post_title .= ' - ' . $env_name;
+		}
+		if ( $wp_version ) {
+			$post_title .= ' - WP ' . $wp_version;
+		}
+		if ( $php_version ) {
+			$post_title .= ' - PHP ' . $php_version;
+		}
+
+		$post_id = wp_insert_post(
+			array(
+				'post_title'   => $post_title,
+				'post_content' => '',
+				'post_status'  => 'publish',
+				'post_author'  => $current_user->ID,
+				'post_type'    => 'rtc-perf-result',
+			),
+			true
+		);
+
+		if ( is_wp_error( $post_id ) ) {
+			return $post_id;
+		}
+
+		if ( $php_version ) {
+			wp_set_object_terms( $post_id, array( $php_version ), 'php-version' );
+		}
+		if ( $db_version ) {
+			wp_set_object_terms( $post_id, array( $db_version ), 'db-version' );
+		}
+		update_post_meta( $post_id, 'env', $env );
+		update_post_meta( $post_id, 'results', $results );
+		update_post_meta( $post_id, 'environment_name', $env_name );
+
+		$response = new \WP_REST_Response(
+			array(
+				'id'   => $post_id,
+				'link' => get_permalink( $post_id ),
+			)
+		);
+		$response->set_status( 201 );
+		$response->header( 'Content-Type', 'application/json' );
+
+		return $response;
 	}
 
 	public static function add_results_callback( $data ) {

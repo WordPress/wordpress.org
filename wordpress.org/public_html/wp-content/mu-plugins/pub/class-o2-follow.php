@@ -230,7 +230,7 @@ class o2_follow {
 			}
 
 			$link = add_query_arg( $query_args, home_url( '/', is_ssl() ? 'https' : 'http' ) );
-			$link = wp_nonce_url( $link, 'post-comment-subscribe' );
+			$link = wp_nonce_url( $link, 'post-comment-subscribe-' . $post_id );
 
 			$actions[31] = [
 				'action'       => 'follow',
@@ -272,7 +272,16 @@ class o2_follow {
 			die;
 		}
 
-		if ( ! wp_verify_nonce( $_GET['_wpnonce'], 'post-comment-subscribe' ) ) {
+		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), 'post-comment-subscribe-' . $post_id ) ) {
+			die;
+		}
+
+		// Following delivers the post's comments by email, so it needs the same gate as reading it.
+		$can_read = current_user_can( 'edit_post', $post_id )
+			|| ( ! post_password_required( $post )
+				&& ( is_post_publicly_viewable( $post ) || current_user_can( 'read_post', $post_id ) ) );
+
+		if ( ! $can_read ) {
 			die;
 		}
 

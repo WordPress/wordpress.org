@@ -1,5 +1,12 @@
 .photos-random .pagination-links {
 	display: none;
+
+}
+.photo-contributor-more-info {
+	overflow-wrap: anywhere;
+}
+.photo-contributor-more-info strong.ipv6 {
+	font-size: 0.68rem;
 }
 .photo-contributor-rejection-stats {
 	width: 100%;
@@ -167,4 +174,9 @@ body.post-type-photo #wp-content-editor-container {
 }
 #dashboard-photo-rejection-stats .row-sum td {
 	border-top: 1px solid #c3c4c7;
+}
+
+/* Fix overflow issue related to https://core.trac.wordpress.org/ticket/64547 */
+body.post-type-photo #major-publishing-actions {
+	display: block;
 }

@@ -16,8 +16,7 @@ function jobswp_get_job_meta( $post_id, $meta_key ) {
 
 	switch ( $meta_key ) :
 		case 'location':
-			if ( empty( $val ) )
-				$val = 'N/A';
+			$val = empty( $val ) ? 'N/A' : esc_html( $val );
 			break;
 		case 'jobtype':
 			if ( 'ppt' == $val )
@@ -41,17 +40,20 @@ function jobswp_get_job_meta( $post_id, $meta_key ) {
 					$method = 'phone';
 			}
 			if ( 'email' == $method ) {
-				$val = sprintf( __( 'Via <a href="%s">email</a>', 'jobswp' ), esc_attr( 'mailto:' . sanitize_email( $val ) ) );
+				$val = sprintf(
+					/* translators: %s: mailto link wrapping the word "email". */
+					__( 'Via %s', 'jobswp' ),
+					sprintf( '<a href="%s">email</a>', esc_attr( 'mailto:' . sanitize_email( $val ) ) )
+				);
 			} elseif ( 'web' == $method ) {
 				// Prepend 'http://' if no protocol was specified by job poster
 				if ( 0 !== strpos( $val, 'http' ) )
 					$val = 'http://' . $val;
 				$val = sprintf(
-					/* translators: %s: Link to job application web form. */
+					/* translators: %s: Link wrapping the words "web form". */
 					__( 'Via %s', 'jobswp' ),
 					sprintf(
-						/* translators: %s: URL to job application web form. */
-						'<a href="%s" rel="nofollow ugc noopener">' . __( 'web form', 'jobswp' ) . '</a>',
+						'<a href="%s" rel="nofollow ugc noopener">web form</a>',
 						esc_url( $val )
 					)
 				);
@@ -59,6 +61,8 @@ function jobswp_get_job_meta( $post_id, $meta_key ) {
 				$val = esc_html( $val );
 			}
 			break;
+		default:
+			$val = esc_html( $val );
 	endswitch;
 
 	return apply_filters( 'jobswp_metadata', $val, $post_id, $meta_key );
@@ -77,16 +81,15 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 	$output = '<div class="row row-head">';
 	$link = $before;
 	if ( $category ) {
-			$link .= '<a href="' . get_term_feed_link( $category->term_id, $category->taxonomy ) . '"';
-			$title = ' title="' . $category->name . '"';
-			$alt = ' alt="' . $category->name . '"';
-			$link .= $title;
-			$link .= '>';
-			$link .= '</a> ';
-			$link .= '<a href="' . get_term_link( $category, 'job_category' ) . '" ';
-			$link .= 'title="' . sprintf( __( 'View all jobs listed under %s', 'jobswp' ), esc_attr( $category->name ) ) . '"';
-			$link .= '>';
-			$link .= apply_filters( 'list_cats', $category->name, $category ).'</a>';
+		$link .= sprintf(
+			'<a href="%1$s" title="%2$s"></a> <a href="%3$s" title="%4$s">%5$s</a>',
+			esc_url( get_term_feed_link( $category->term_id, $category->taxonomy ) ),
+			esc_attr( $category->name ),
+			esc_url( get_term_link( $category, 'job_category' ) ),
+			/* translators: %s: Job category name. */
+			esc_attr( sprintf( __( 'View all jobs listed under %s', 'jobswp' ), $category->name ) ),
+			esc_html( apply_filters( 'list_cats', $category->name, $category ) )
+		);
 	}
 
 	$orig_jobscnt = $jobscnt;
@@ -100,19 +103,18 @@ function jobswp_archive_header( $before = '', $after = '', $jobscnt = 0, $catego
 
 	$link .= " <span class='posts-count'>($orig_jobscnt)</span> $after";
 	$output .= $link;
-    $output .= '<div class="grid_2 omega jobs-count">';
+	$output .= '<div class="jobs-count">';
 
-	$output .= '<a href="' . $feed_link . '"><div class="dashicons dashicons-rss"></div></a><span>' . $jobscnt . '</span></div>
+	$output .= '<a href="' . esc_url( $feed_link ) . '">RSS</a> <span>' . $jobscnt . '</span></div>
 		</div>
-		<div class="clear"></div>
 		<div class="row job-list-col-labels">
-			<div class="job-date grid_2 alpha">Date Posted</div>
-			<div class="job-title grid_4">Job Title</div>
-			<div class="job-type grid_1 alpha omega">Job Type</div>
-			<div class="job-location grid_2 omega">Location</div>
-			<div class="clear"></div>
+			<div class="job-date">Date Posted</div>
+			<div class="job-title">Job Title</div>
+			<div class="job-type">Job Type</div>
+			<div class="job-location">Location</div>
 		</div>';
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Field and help-text markup assembled by the template helpers.
 	echo $output;
 }
 
@@ -147,6 +149,7 @@ function jobswp_text_field( $field_name, $field_label, $required = false, $type 
 	);
 
 	if ( $help_text ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Field and help-text markup assembled by the template helpers.
 		echo '<div class="job-help-text">' . $help_text . "</div>\n";
 	}
 
@@ -172,6 +175,12 @@ function jobswp_required_field_classes( $field ) {
 /**
  * Returns the appropriate field value markup for use in appropriate form field.
  *
+ * Returns a complete attribute pair (`value='…'`), or selected() output for the
+ * select fields, meant to be echoed between attributes inside a tag rather than
+ * inside an attribute's quotes. The value is run through esc_attr(). Returns
+ * nothing when there is no submitted value. The job description is not handled
+ * here because it carries HTML; see jobswp_field_description_value().
+ *
  * @param string $field Field name/key
  * @param string $option_value Related value, if appropriate. (e.g. the other
  *  value to compare against for selected() or checked())
@@ -180,23 +189,38 @@ function jobswp_required_field_classes( $field ) {
 function jobswp_field_value( $field, $option_value = '' ) {
 	$val = '';
 
-	if ( $_POST && isset( $_POST[ $field ] ) && ! empty( $_POST[ $field ] ) ) {
-		// Allow certain HTML in job_description field
-		if ( 'job_description' == $field )
-			$val = stripslashes( wp_filter_kses( trim( $_POST[ $field ] ) ) );
-		else
-			$val = esc_attr( trim( strip_tags( stripslashes( $_POST[ $field ] ) ) ) );
+	if ( $_POST && isset( $_POST[ $field ] ) && ! empty( $_POST[ $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Display-only form redisplay.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- Slashes are stripped and the value is escaped on the same line.
+		$val = esc_attr( trim( strip_tags( stripslashes( $_POST[ $field ] ) ) ) );
 	}
 
 	// Output appropriate attribute based on field type
 	if ( $val ) {
 		if ( in_array( $field, array( 'category', 'howtoapply_method', 'jobtype' ) ) )
 			return selected( $val, $option_value, false );
-		elseif ( 'job_description' == $field )
-			return $val;
 		else
 			return "value='$val'";
 	}
+}
+
+/**
+ * Returns the submitted job description, with its allowed HTML preserved.
+ *
+ * The return value is kses-filtered HTML meant for an element body. It carries
+ * unescaped quotes, so unlike jobswp_field_value() it must never be printed
+ * into an attribute.
+ *
+ * @return string
+ */
+function jobswp_field_description_value() {
+	$field = 'job_description';
+
+	if ( $_POST && isset( $_POST[ $field ] ) && ! empty( $_POST[ $field ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Display-only form redisplay.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- wp_filter_kses() unslashes and kses-filters the value, then re-slashes it; the outer stripslashes() undoes that.
+		return stripslashes( wp_filter_kses( trim( $_POST[ $field ] ) ) );
+	}
+
+	return '';
 }
 
 /**

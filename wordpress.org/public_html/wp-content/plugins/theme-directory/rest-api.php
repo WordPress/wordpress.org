@@ -37,6 +37,7 @@ add_filter( 'rest_pre_echo_response', function( $result ) {
 	global $wp;
 
 	if ( defined( 'THEMES_API_VERSION' ) && '1.0' === THEMES_API_VERSION ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (serialized PHP); escaping would corrupt the format.
 		echo serialize( $result );
 		exit;
 	}
@@ -46,14 +47,14 @@ add_filter( 'rest_pre_echo_response', function( $result ) {
 
 // Include the REST API Endpoints at the appropriate time.
 add_action( 'rest_api_init', function() {
-	include __DIR__ . '/rest-api/class-internal.php';
-	include __DIR__ . '/rest-api/class-info-endpoint.php';
-	include __DIR__ . '/rest-api/class-query-endpoint.php';
-	include __DIR__ . '/rest-api/class-commercial-shops-endpoint.php';
-	include __DIR__ . '/rest-api/class-features-endpoint.php';
-	include __DIR__ . '/rest-api/class-tags-endpoint.php';
-	include __DIR__ . '/rest-api/class-themes-auto-review.php';
-	include __DIR__ . '/rest-api/class-theme-categorization.php';
-	include __DIR__ . '/rest-api/class-theme-review-stats.php';
-	include __DIR__ . '/rest-api/class-theme-preview.php';
+	include_once __DIR__ . '/rest-api/class-internal.php';
+	include_once __DIR__ . '/rest-api/class-info-endpoint.php';
+	include_once __DIR__ . '/rest-api/class-query-endpoint.php';
+	include_once __DIR__ . '/rest-api/class-commercial-shops-endpoint.php';
+	include_once __DIR__ . '/rest-api/class-features-endpoint.php';
+	include_once __DIR__ . '/rest-api/class-tags-endpoint.php';
+	include_once __DIR__ . '/rest-api/class-themes-auto-review.php';
+	include_once __DIR__ . '/rest-api/class-theme-categorization.php';
+	include_once __DIR__ . '/rest-api/class-theme-review-stats.php';
+	include_once __DIR__ . '/rest-api/class-theme-preview.php';
 } );

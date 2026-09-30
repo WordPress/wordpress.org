@@ -83,7 +83,7 @@ class Plugin_Blueprint extends Base {
 		header( 'Access-Control-Allow-Origin: *' );
 
 		// We already have a json string, returning would double-encode it.
-		die( $blueprint['contents'] );
+		die( $blueprint['contents'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
 	}
 
 	protected function get_zip_url_by_slug( $slug ) {
@@ -114,6 +114,7 @@ class Plugin_Blueprint extends Base {
 
 						if ( $output ) {
 							header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
 							die( $output );
 						}
 					}
@@ -135,6 +136,7 @@ class Plugin_Blueprint extends Base {
 
 					if ( $output ) {
 						header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
 						die( $output );
 					}
 				}
@@ -166,7 +168,7 @@ class Plugin_Blueprint extends Base {
 		$zip_blueprint = (object)[
 			'landingPage' => $landing_page,
 			'preferredVersions' => (object)[
-				'php' => '8.0',
+				'php' => SUPPORTED_PHP, // Minimum recommended PHP.
 				'wp'  => 'latest',
 			],
 			'phpExtensionBundles' => [
@@ -183,7 +185,7 @@ class Plugin_Blueprint extends Base {
 		if ( $install_pcp ) {
 			$steps[] = (object)[
 				'step' => 'installPlugin',
-				'pluginZipFile' => (object)[
+				'pluginData' => (object)[
 					'resource' => 'wordpress.org/plugins',
 					'slug'     => 'plugin-check',
 				]
@@ -195,7 +197,7 @@ class Plugin_Blueprint extends Base {
 		if ( $helper_zip && $install_prh ) {
 			$steps[] = (object)[
 				'step' => 'installPlugin',
-				'pluginZipFile' => [
+				'pluginData' => [
 					'resource' => 'url',
 					'url'      => $helper_zip,
 				],
@@ -210,7 +212,7 @@ class Plugin_Blueprint extends Base {
 			foreach ( $dependencies as $slug ) {
 				$steps[] = (object)[
 					'step' => 'installPlugin',
-					'pluginZipFile' => [
+					'pluginData' => [
 						'resource' => 'wordpress.org/plugins',
 						'slug'     => sanitize_title( $slug ),
 					],
@@ -224,7 +226,7 @@ class Plugin_Blueprint extends Base {
 		// Now the plugin itself
 		$steps[] = (object)[
 			'step' => 'installPlugin',
-			'pluginZipFile' => (object)[
+			'pluginData' => (object)[
 				'resource' => 'url',
 				'url'      => $zip_url,
 			],

@@ -1,9 +1,8 @@
 <?php
-
 /**
  * Search
  *
- * @package bbPress
+ * @package bb-base
  * @subpackage Theme
  */
 

@@ -307,6 +307,10 @@
 	 * @return {void}
 	 **/
 	function maybeFetchDeeplSuggestions( editor ) {
+		// If the locale is not supported, do not fetch suggestions.
+		if ( "" === gpTranslationSuggestions.get_external_translations.get_deepl_locale ) {
+			return;
+		}
 		maybeFetchExternalSuggestions( editor, 'DeepL', gpTranslationSuggestions.get_external_translations.get_deepl_translations, window.WPORG_TRANSLATION_MEMORY_DEEPL_API_URL );
 	}
 

@@ -28,6 +28,7 @@
     var timer = null;
     var updating = false;
     var queued = false;
+    var values = null;
 
     // Return true iff the values have changed
     function values_changed(new_values) {
@@ -81,6 +82,8 @@
 
     // Trigger a request after the given timeout
     function trigger() {
+      if (values === null)
+        values = form.serializeArray();
       if (!updating) {
         if (timer)
           clearTimeout(timer);
@@ -91,10 +94,8 @@
       return true;
     }
 
-    var values = form.serializeArray();
     // See #11510
-    return inputs.bind('input cut paste keydown keypress change blur',
-                       trigger);
+    return inputs.on('input cut paste keydown keypress change focus blur', trigger);
   };
 
   // Enable automatic previewing to <textarea> elements.
@@ -153,7 +154,22 @@
       // "input" event to detect editing using IMEs on Firefox,
       // "cut" and "paste" events to detect editing using context
       // menu on Internet Explorer (#11510)
-      $(this).bind('input cut paste keydown keypress blur', trigger);
+      $(this).on('input cut paste keydown keypress blur', trigger);
     });
   };
+
+  // Callback for autoPreview that renders response and makes the container
+  // for rendered text (typically a div) visible.
+  $.fn.showOnPreview = function() {
+    var $preview = $(this);
+    return function(textarea, text, rendered) {
+      $preview.html(rendered);
+      if (text) {
+        $preview.show();
+      } else {
+        $preview.hide();
+      }
+    }
+  }
+
 })(jQuery);

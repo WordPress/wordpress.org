@@ -1,0 +1,83 @@
+name: FreeScout Modules
+
+on:
+  pull_request:
+    paths:
+      - 'freescout.wordpress.net/**'
+      - 'environments/freescout/**'
+      - '.github/workflows/freescout.yml'
+  push:
+    branches: [ trunk ]
+    paths:
+      - 'freescout.wordpress.net/**'
+      - 'environments/freescout/**'
+      - '.github/workflows/freescout.yml'
+  # FreeScout core is updated outside this repository; catch breakage before it reaches production.
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: "FreeScout ${{ matrix.ref }}"
+    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # The latest release, and what's coming next.
+        ref: [ dist, master ]
+    env:
+      FREESCOUT_REF: ${{ matrix.ref }}
+      COMPOSE: docker compose --file environments/freescout/docker-compose.yml --file environments/freescout/docker-compose.ci.yml
+    steps:
+      - uses: actions/checkout@v7
+
+      # Pulls and starts the other services, and initializes the database, while the app image builds.
+      - name: Start services
+        run: |
+          ( $COMPOSE up --detach db greenmail mailpit mock-api > "$RUNNER_TEMP/services.log" 2>&1; echo $? > "$RUNNER_TEMP/services.exit" ) > /dev/null 2>&1 &
+
+      - uses: docker/setup-buildx-action@v4
+
+      # The Actions cache spares the PHP extension build, and composer install until the FreeScout ref moves.
+      - name: Build FreeScout
+        uses: docker/bake-action@v7
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
+        with:
+          source: .
+          files: environments/freescout/docker-compose.yml
+          targets: app
+          load: true
+          set: |
+            app.context=environments/freescout
+            app.cache-from=type=gha,scope=freescout-${{ matrix.ref }}
+            app.cache-to=type=gha,mode=max,scope=freescout-${{ matrix.ref }}
+
+      - name: Start FreeScout
+        run: |
+          timeout 300 bash -c "until [ -f '$RUNNER_TEMP/services.exit' ]; do sleep 0.2; done"
+          cat "$RUNNER_TEMP/services.log"
+          [ "$( cat "$RUNNER_TEMP/services.exit" )" = 0 ]
+          $COMPOSE up --detach --no-build --wait
+
+      - name: Set up FreeScout
+        run: $COMPOSE exec -T --user www-data app bash /srv/env/bin/setup.sh
+
+      - name: Run module tests
+        run: $COMPOSE exec -T --user www-data app bash /srv/env/bin/test.sh
+
+      - name: Show FreeScout log
+        if: failure()
+        run: $COMPOSE exec -T app bash -c 'tail -n 100 storage/logs/laravel-*.log'

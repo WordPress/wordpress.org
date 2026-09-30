@@ -125,10 +125,10 @@ class Rosetta_Showcase {
 	public function showcase_meta_box( $post ) {
 		$url = get_post_meta( $post->ID, '_rosetta_showcase_url', true );
 		?>
-		<p><label for="rosetta_showcase_url"><?php _e( 'URL', 'rosetta' ); ?></label>
+		<p><label for="rosetta_showcase_url"><?php esc_html_e( 'URL', 'rosetta' ); ?></label>
 			<input style="margin-left: 0; width: 98%" name="rosetta_showcase_url" id="rosetta_showcase_url" type="text" value="<?php echo esc_url( $url ); ?>" /></p>
-		<label for="excerpt"><?php _e( 'Description', 'rosetta' ); ?></label>
-		<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt"><?php echo $post->post_excerpt; // textarea_escaped ?></textarea>
+		<label for="excerpt"><?php esc_html_e( 'Description', 'rosetta' ); ?></label>
+		<textarea rows="1" cols="40" name="excerpt" tabindex="6" id="excerpt"><?php echo $post->post_excerpt; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The classic editor supplies an edit-context post; format_to_edit() has already escaped the excerpt for this textarea. ?></textarea>
 		<?php
 	}
 
@@ -205,9 +205,10 @@ class Rosetta_Showcase {
 				$title = _draft_or_post_title();
 				printf(
 					'<a class="row-title" href="%s" aria-label="%s">%s</a>',
-					get_edit_post_link( $post_id ),
+					esc_url( (string) get_edit_post_link( $post_id ) ),
 					/* translators: %s: post title */
 					esc_attr( sprintf( __( '&#8220;%s&#8221; (Edit)', 'rosetta' ), $title ) ),
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Title markup assembled above from escaped parts.
 					$title
 				);
 				break;

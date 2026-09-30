@@ -1,4 +1,8 @@
 {
 	"core": "WordPress/WordPress#master",
-	"plugins": [ "." ]
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"."
+	]
 }
