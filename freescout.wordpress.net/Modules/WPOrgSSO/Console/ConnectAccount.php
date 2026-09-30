@@ -95,7 +95,7 @@ final class ConnectAccount extends Command {
 		}
 
 		if ( $wporg_user->blocked ) {
-			$this->warn( 'That account is blocked on WordPress.org, so it can\'t log in.' );
+			$this->warn( 'That account is blocked on WordPress.org, so it can’t log in.' );
 		}
 
 		return 0;

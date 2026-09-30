@@ -337,7 +337,7 @@ final class RequireWordPressOrgLogin {
 
 		$client = Client::from_config();
 		if ( ! $client->is_configured() ) {
-			return __( 'WordPress.org accounts can\'t be looked up until WPORG_API_SECRET is set.' );
+			return __( 'WordPress.org accounts can’t be looked up until WPORG_API_SECRET is set.' );
 		}
 
 		try {
@@ -363,11 +363,11 @@ final class RequireWordPressOrgLogin {
 			// Otherwise core's unique email error asks for another address, which the next submit replaces again.
 			$existing = User::query()->where( 'email', $fields['email'] )->first();
 			if ( $existing && User::STATUS_DELETED === (int) $existing->status ) {
-				return __( 'That WordPress.org account\'s email address belongs to :name, a deleted user.', array( 'name' => $existing->getFullName() ) );
+				return __( 'That WordPress.org account’s email address belongs to :name, a deleted user.', array( 'name' => $existing->getFullName() ) );
 			}
 
 			if ( $existing ) {
-				return __( 'That WordPress.org account\'s email address belongs to :name; connect them on their profile instead.', array( 'name' => $existing->getFullName() ) );
+				return __( 'That WordPress.org account’s email address belongs to :name; connect them on their profile instead.', array( 'name' => $existing->getFullName() ) );
 			}
 
 			$request->merge( $fields );
