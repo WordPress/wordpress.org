@@ -1,0 +1,12 @@
+{
+  "core": "WordPress/WordPress#master",
+  "phpVersion": "8.4",
+  "testsEnvironment": false,
+  "themes": ["../browsehappy.com/public_html"],
+  "lifecycleScripts": {
+    "afterStart": "bash browsehappy/bin/after-start.sh"
+  },
+  "config": {
+    "WP_DEBUG": true
+  }
+}

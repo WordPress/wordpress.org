@@ -39,6 +39,6 @@ $description = sprintf(
 </div>
 <!-- /wp:group -->
 
-<!-- wp:wporg/language-suggest {"align":"full","endpoint":"<?php echo esc_attr( rest_url( '/plugins/v2/locale-banner' ) ); ?>"} -->
-<div class="wp-block-wporg-language-suggest alignfull" data-endpoint="<?php echo esc_attr( rest_url( '/plugins/v2/locale-banner' ) ); ?>"></div>
+<!-- wp:wporg/language-suggest {"align":"full"} -->
+<div class="wp-block-wporg-language-suggest alignfull"></div>
 <!-- /wp:wporg/language-suggest -->

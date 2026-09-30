@@ -1,9 +1,0 @@
-html {
-	font-size: ($type__base-mobile / 16px) * 1rem;
-}
-
-@include breakpoint( $ms-breakpoint ) {
-	html {
-		font-size: ($type__base / 16px) * 1rem;
-	}
-}

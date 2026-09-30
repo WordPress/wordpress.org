@@ -53,6 +53,18 @@ function get_style_variations() {
 	return $variations;
 }
 
+/**
+ * Returns the value used for the `style_variation` query argument of a variation.
+ *
+ * Shared by the styles endpoint and the link persistence so a variation has one URL spelling.
+ *
+ * @param array $variation Variation, as returned by get_style_variations().
+ * @return string Lower-cased, URL-encoded title.
+ */
+function get_variation_query_value( $variation ) {
+	return rawurlencode( strtolower( $variation['title'] ) );
+}
+
 require_once __DIR__ . '/inc/global-style-page.php';
 require_once __DIR__ . '/inc/page-intercept.php';
 require_once __DIR__ . '/inc/styles-endpoint.php';

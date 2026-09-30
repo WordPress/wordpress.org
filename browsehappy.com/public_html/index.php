@@ -1,28 +1,29 @@
-<?php defined( 'ABSPATH' ) or die(); ?>
+<?php
+/**
+ * The main template file.
+ *
+ * phpcs:disable WordPress.WP.EnqueuedResources
+ *
+ * @package browsehappy
+ */
+
+defined( 'ABSPATH' ) || die();
+?>
 <!DOCTYPE html>
 
-<!--[if lt IE 7 ]> <html <?php language_attributes(); ?> class="no-js ie6"> <![endif]-->
-<!--[if IE 7 ]>    <html <?php language_attributes(); ?> class="no-js ie7"> <![endif]-->
-<!--[if IE 8 ]>    <html <?php language_attributes(); ?> class="no-js ie8"> <![endif]-->
-<!--[if IE 9 ]>    <html <?php language_attributes(); ?> class="no-js ie9"> <![endif]-->
-<!--[if (gt IE 9)|!(IE)]><!--> <html <?php language_attributes(); ?> class="no-js"> <!--<![endif]-->
+<html <?php language_attributes(); ?> class="no-js">
 
 <head>
 	<meta charset="utf-8">
-	<title><?php _e( 'Browse Happy', 'browsehappy' ); ?></title>
+	<title><?php esc_html_e( 'Browse Happy', 'browsehappy' ); ?></title>
 	<meta name="description" content="<?php esc_attr_e( 'Online. Worry-free. Upgrade your browser today!', 'browsehappy' ); ?>" />
 	<meta name="author" content="WordPress" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-	<link rel="stylesheet" href="<?php echo get_template_directory_uri(); ?>/style.css?15" />
-	<script src="<?php echo get_template_directory_uri(); ?>/js/modernizr-1.6.min.js"></script>
+	<link rel="stylesheet" href="<?php echo esc_url( get_template_directory_uri() . '/style.css?15' ); ?>" />
+	<script src="<?php echo esc_url( get_template_directory_uri() . '/js/modernizr-1.6.min.js' ); ?>"></script>
 	<script src="https://use.typekit.com/lsw6yis.js"></script>
 	<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-
-	<!--[if lt IE 7]>
-		<script src="<?php echo get_template_directory_uri(); ?>/js/pngfix.min.js"></script>
-		<script>DD_belatedPNG.fix('#i18n-alert, header, #browserlist li .icon, footer, #share nav li a, #byline a');</script>
-	<![endif]-->
 
 <?php wp_head(); ?>
 </head>
@@ -33,24 +34,25 @@
 
 	<header>
 		<hgroup class="wrap">
-			<h1><?php _e( 'Browse <em>Happy</em>', 'browsehappy' ); ?></h1>
-			<h2><?php _e( 'Online. Worry-free. <em>Upgrade your browser today</em>!', 'browsehappy' ); ?></h2>
+			<h1><?php echo wp_kses_post( __( 'Browse <em>Happy</em>', 'browsehappy' ) ); ?></h1>
+			<h2><?php echo wp_kses_post( __( 'Online. Worry-free. <em>Upgrade your browser today</em>!', 'browsehappy' ) ); ?></h2>
 		</hgroup>
 	</header>
 	<?php do_action( 'browsehappy_browser_notice' ); ?>
 	<div id="main">
 		<ul id="browserlist" class="wrap">
 <?php foreach ( browsehappy_get_browser_data() as $browser => $data ) : ?>
-			<li id="<?php echo $browser; ?>">
+			<li id="<?php echo esc_attr( $browser ); ?>">
 				<a href="<?php echo esc_url( $data->url ); ?>" title="<?php echo esc_attr( $data->long_name ); ?>">
 					<div class="icon"></div>
-					<h2 lang="en"><?php echo $data->name; ?></h2>
-					<p class="info"><?php echo $data->info; ?></p>
-					<p class="version"><?php printf( __( 'Latest Version: %s', 'browsehappy' ), '<strong>' . apply_filters( 'get_browsehappy_version', $browser ) . '</strong>' ); ?></p>
-					<p class="website"><?php _e( 'Visit website for more info', 'browsehappy' ); ?></p>
+					<h2 lang="en"><?php echo esc_html( $data->name ); ?></h2>
+					<p class="info"><?php echo esc_html( $data->info ); ?></p>
+					<?php /* translators: %s: Browser version. */ ?>
+					<p class="version"><?php printf( esc_html__( 'Latest Version: %s', 'browsehappy' ), '<strong>' . esc_html( apply_filters( 'get_browsehappy_version', $browser ) ) . '</strong>' ); ?></p>
+					<p class="website"><?php esc_html_e( 'Visit website for more info', 'browsehappy' ); ?></p>
 				</a>
 				<?php do_action( 'browsehappy_browser_after', $browser ); ?>
-			</li><!-- #<?php echo $browser; ?> -->
+			</li><!-- #<?php echo esc_html( $browser ); ?> -->
 <?php endforeach; ?>
 		</ul><!-- #browserlist -->
 	</div><!-- #main -->
@@ -58,12 +60,12 @@
 	<footer>
 		<div class="wrap">
 			<section id="about">
-				<h2><?php _e( 'What is Browse Happy?', 'browsehappy' ); ?></h2>
-				<p><?php $what = __( 'Using an outdated browser makes your computer unsafe. Browse Happy is a way for you to find out what are the latest versions of the major browsers around. You can also learn about alternative browsers that may fit you even better than the one you are currently using.', 'browsehappy' );
-echo $what; ?></p>
+				<h2><?php esc_html_e( 'What is Browse Happy?', 'browsehappy' ); ?></h2>
+				<?php $what = __( 'Using an outdated browser makes your computer unsafe. Browse Happy is a way for you to find out what are the latest versions of the major browsers around. You can also learn about alternative browsers that may fit you even better than the one you are currently using.', 'browsehappy' ); ?>
+				<p><?php echo esc_html( $what ); ?></p>
 			</section><!-- #about -->
 			<section id="share">
-				<h2><?php _e( 'Share the Happiness', 'browsehappy' ); ?></h2>
+				<h2><?php esc_html_e( 'Share the Happiness', 'browsehappy' ); ?></h2>
 				<nav>
 					<ul>
 						<li class="tumblr">
@@ -88,23 +90,27 @@ echo $what; ?></p>
 $redirect_uri = home_url( '/' );
 if ( isset( $_GET['locale'] ) )
 	$redirect_uri = add_query_arg( 'locale', urlencode( $_GET['locale'] ), $redirect_uri );
-$facebook_pieces = array(
-	'app_id=180651631983617', // Browse Happy app
-	'link=' . home_url( '/' ),
-	'picture=' . get_template_directory_uri() . '/imgs/apple-touch-icon-114x114.png',
-	'name=' . urlencode( __( 'Browse Happy', 'browsehappy' ) ),
-	'description=' . urlencode( $what ),
-	'message=' . urlencode( __( 'Online. Worry-free. Upgrade your browser today!', 'browsehappy' ) ),
-	'display=popup',
-	'redirect_uri=' . $redirect_uri,
+
+$facebook_args = array(
+	'app_id'       => '180651631983617', // Browse Happy app.
+	'link'         => home_url( '/' ),
+	'picture'      => get_template_directory_uri() . '/imgs/apple-touch-icon-114x114.png',
+	'name'         => __( 'Browse Happy', 'browsehappy' ),
+	'description'  => $what,
+	'message'      => __( 'Online. Worry-free. Upgrade your browser today!', 'browsehappy' ),
+	'display'      => 'popup',
+	'redirect_uri' => $redirect_uri,
 );
+
+// add_query_arg() leaves the values it is given alone, so they are encoded here.
+$facebook_url = add_query_arg( rawurlencode_deep( $facebook_args ), 'https://www.facebook.com/dialog/feed' );
 ?>
-						<li class="facebook"><a onclick="window.open(this.href, 'fbshare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=325,width=540'); return false;" href="https://www.facebook.com/dialog/feed?<?php echo implode( '&', $facebook_pieces ); ?>" title="<?php esc_attr_e( 'Share on Facebook', 'browsehappy' ); ?>">Facebook</a></li>
+						<li class="facebook"><a onclick="window.open(this.href, 'fbshare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=325,width=540'); return false;" href="<?php echo esc_url( $facebook_url ); ?>" title="<?php esc_attr_e( 'Share on Facebook', 'browsehappy' ); ?>">Facebook</a></li>
 					</ul>
 				</nav>
 			</section><!-- #share -->
 			<div id="byline">
-				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'browsehappy' ) ); ?>" title="WordPress"><?php printf( __( 'Brought to you by %s', 'browsehappy' ), '<strong>WordPress</strong>' ); ?></a>
+				<a href="<?php echo esc_url( __( 'https://wordpress.org/', 'browsehappy' ) ); ?>" title="WordPress"><?php printf( /* translators: %s: WordPress, in bold. */ esc_html__( 'Brought to you by %s', 'browsehappy' ), '<strong>WordPress</strong>' ); ?></a>
 			</div><!-- #byline -->
 		</div>
 	</footer>

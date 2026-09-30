@@ -9,6 +9,9 @@
 namespace WordPressdotorg\Profiles;
 use WP_Error, WP_User;
 
+const USER_BADGES_CACHE_GROUP      = 'user_meta';
+const USER_BADGES_CACHE_KEY_PREFIX = 'wporg-profiles-user-badges:';
+
 /**
  * Assign a badge to a given user.
  * 
@@ -69,15 +72,22 @@ function get_users_with_badge( string $badge ) : array {
 /**
  * Get a list of badges for a given user.
  *
- * WARNING: Uncached. Excludes dynamically allocated badges.
+ * Excludes dynamically allocated badges.
  *
- * @param $users mixed The user to fetch the badged for. A WP_User/ID/Login/Email.
+ * @param mixed $user The user to fetch the badges for. A WP_User/ID/Login/Email.
  * @return array An array of badge names keyed by slug.
  */
 function get_user_badges( $user ) {
 	global $wpdb;
 
-	$user_id = find_user_id( $user );
+	$user_id = (int) find_user_id( $user );
+
+	$cache_key = USER_BADGES_CACHE_KEY_PREFIX . $user_id;
+	$badges    = wp_cache_get( $cache_key, USER_BADGES_CACHE_GROUP, false, $found );
+
+	if ( $found ) {
+		return $badges;
+	}
 
 	$badges = $wpdb->get_results( $wpdb->prepare(
 		"SELECT slug, name
@@ -88,7 +98,22 @@ function get_user_badges( $user ) {
 		$user_id
 	), ARRAY_A );
 
-	return array_column( $badges, 'name', 'slug' );
+	$badges = array_column( $badges, 'name', 'slug' );
+
+	wp_cache_set( $cache_key, $badges, USER_BADGES_CACHE_GROUP, HOUR_IN_SECONDS );
+
+	return $badges;
+}
+
+/**
+ * Clear cached badges for a given user.
+ *
+ * @param mixed $user The user to clear cached badges for. A WP_User/ID/Login/Email.
+ */
+function clear_user_badges_cache( $user ) {
+	$user_id = (int) find_user_id( $user );
+
+	wp_cache_delete( USER_BADGES_CACHE_KEY_PREFIX . $user_id, USER_BADGES_CACHE_GROUP );
 }
 
 /**
@@ -146,23 +171,21 @@ function get_user_details( $user ) {
 
 /**
  * Record an activity item for a user.
- * 
+ *
  * @param $component string     The component to be used for the acitivity.
  * @param $type      string     The type of the activity in that component.
  * @param $user      int|string ID, Login, or Slug of user.
  * @param $args      array      The args for the activity item. See `bp_activity_add()`.
  */
 function add_activity( string $component, string $type, $user, array $args ) {
-	$request = api( [
+	return queue( array_merge( $args, [
 		'action'    => 'wporg_handle_activity',
 		'source'    => 'generic',
 		'component' => $component,
 		'type'      => $type,
 		'user'      => $user,
-		'args'      => $args,
-	] );
-
-	return ( 200 === wp_remote_retrieve_response_code( $request ) );
+		'user_id'   => find_user_id( $user ),
+	] ) );
 }
 
 /**
@@ -174,15 +197,13 @@ function add_activity( string $component, string $type, $user, array $args ) {
  * @return bool
  */
 function update_profile( $field, $value, $user ) {
-	$request = api( [
+	return queue( [
 		'action' => 'wporg_update_profile',
-		'user'   => $user instanceOf WP_User ? $user->ID : $user,
+		'user'   => $user instanceOf WP_User ? $user->ID : find_user_id( $user ),
 		'fields' => [
 			$field => $value
 		],
 	] );
-
-	return ( 200 === wp_remote_retrieve_response_code( $request ) );
 }
 
 /**
@@ -191,9 +212,10 @@ function update_profile( $field, $value, $user ) {
  * @param $action string The action to perform; 'add', 'remove', 'list'.
  * @param $badge  string The badge group to assign.
  * @param $users  mixed  The user(s) to assign to. A WP_User/ID/Login/Email/Slug (or array of) of the user(s) to assign.
+ * @param $async   bool   Whether to queue the request for asynchronous processing or send it immediately. Default true (async).
  * @return bool
  */
-function badge_api( string $action, string $badge, $users = array() ) : bool {
+function badge_api( string $action, string $badge, $users = array(), $async = true ) : bool {
 	$users = is_object( $users ) ? [ $users ] : (array) $users;
 	$users = array_filter( array_map( __NAMESPACE__ . '\find_user_id', $users ) );
 
@@ -221,16 +243,26 @@ function badge_api( string $action, string $badge, $users = array() ) : bool {
 		return true;
 	}
 
-	$request = api( [
+	$payload = [
 		'action'  => 'wporg_handle_association',
 		'source'  => 'generic-badge',
 		'command' => $action,
 		'users'   => $users,
 		'badge'   => $badge,
-	] );
+	];
 
-	// Note: Success or error message may be present in the return cookies.
-	return ( 200 === wp_remote_retrieve_response_code( $request ) );
+	if ( $async ) {
+		return queue( $payload );
+	} else {
+		$response = api( $payload );
+		$success  = ! is_wp_error( $response ) && 200 == wp_remote_retrieve_response_code( $response );
+
+		if ( $success ) {
+			array_walk( $users, __NAMESPACE__ . '\clear_user_badges_cache' );
+		}
+
+		return $success;
+	}
 }
 
 /**
@@ -271,6 +303,36 @@ function find_user_id( $user ) {
 	}
 
 	return $_user->ID ?? false;
+}
+
+/**
+ * Queue a profiles sync request for later processing.
+ *
+ * @param array $args The request arguments. Must include 'action'.
+ * @return bool
+ */
+function queue( array $args ) : bool {
+	global $wpdb;
+
+	// Outside production there's no CLI worker draining the sync queue, so dispatch
+	// synchronously through the AJAX handler to exercise the full code path.
+	if ( 'production' !== wp_get_environment_type() ) {
+		$response = api( $args );
+
+		return ! is_wp_error( $response ) && 200 == wp_remote_retrieve_response_code( $response );
+	}
+
+	$action = $args['action'];
+	unset( $args['action'] );
+
+	return (bool) $wpdb->insert(
+		'bpmain_wporg_profiles_sync_queue',
+		[
+			'action' => $action,
+			'args'   => wp_json_encode( $args ),
+		],
+		[ '%s', '%s' ]
+	);
 }
 
 /**

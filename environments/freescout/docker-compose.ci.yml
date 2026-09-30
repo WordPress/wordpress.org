@@ -1,0 +1,7 @@
+# CI overrides for docker-compose.yml: every run starts from an empty database, so it needn't touch the disk.
+services:
+  db:
+    volumes: !override
+      - ./db:/docker-entrypoint-initdb.d:ro
+    tmpfs:
+      - /var/lib/mysql

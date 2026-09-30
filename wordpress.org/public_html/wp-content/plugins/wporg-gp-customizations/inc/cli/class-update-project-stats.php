@@ -272,6 +272,7 @@ class Update_Project_Stats extends WP_CLI_Command {
 			'fuzzy'         => $stats['fuzzy'],
 			'warnings'      => isset( $stats['warnings'] ) ? $stats['warnings'] : 0,
 			'untranslated'  => $stats['untranslated'],
+			'has_pending'   => ( $stats['waiting'] > 0 || $stats['fuzzy'] > 0 ) ? 1 : 0,
 			'date_modified' => current_time( 'mysql' ),
 		);
 
@@ -305,15 +306,16 @@ class Update_Project_Stats extends WP_CLI_Command {
 					'%d', // fuzzy
 					'%d', // warnings
 					'%d', // untranslated
+					'%d', // has_pending
 					'%s', // date_modified
 				),
 				array( '%d' )
 			);
-		} 
+		}
         // else {
 		// 	// Insert new record
 		// 	$data['date_added'] = current_time( 'mysql' );
-			
+
 		// 	$result = $wpdb->insert(
 		// 		"{$wpdb->project_translation_status}",
 		// 		$data,
@@ -327,6 +329,7 @@ class Update_Project_Stats extends WP_CLI_Command {
 		// 			'%d', // fuzzy
 		// 			'%d', // warnings
 		// 			'%d', // untranslated
+		// 			'%d', // has_pending
 		// 			'%s', // date_added
 		// 			'%s', // date_modified
 		// 		)

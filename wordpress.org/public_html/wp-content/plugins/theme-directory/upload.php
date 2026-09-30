@@ -104,13 +104,48 @@ function wporg_themes_render_upload_shortcode() {
 		}
 	}
 
+	$upload_script = <<<'JS'
+		( function() {
+			document.getElementById( 'upload_form' ).addEventListener( 'submit', function( event ) {
+				/*
+				 * Defer, to see whether another submit handler (such as the
+				 * 2FA revalidation modal) cancels the submission.
+				 */
+				setTimeout( function() {
+					if ( event.defaultPrevented ) {
+						return;
+					}
+
+					var button = document.getElementById( 'upload_button' );
+
+					button.disabled    = true;
+					button.textContent = button.dataset.uploadingLabel;
+				} );
+			} );
+		} )();
+JS;
+
+	$upload_style = <<<'CSS'
+		#upload_button:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+CSS;
+
+	wp_register_script( 'wporg-themes-upload', false, array(), '1.0', true );
+	wp_enqueue_script( 'wporg-themes-upload' );
+	wp_add_inline_script( 'wporg-themes-upload', $upload_script );
+
+	wp_register_style( 'wporg-themes-upload', false, array(), '1.0' );
+	wp_enqueue_style( 'wporg-themes-upload' );
+	wp_add_inline_style( 'wporg-themes-upload', $upload_style );
+
 	return $notice . '<h2>' . __( 'Select your zipped theme file', 'wporg-themes' ) . '</h2>
 		<form
 			enctype="multipart/form-data"
 			id="upload_form"
 			method="POST"
 			action=""
-			onsubmit="document.getElementById(\'upload_button\').disabled = true"
 			data-2fa-required
 		>
 			' . wp_nonce_field( 'wporg-themes-upload', '_wpnonce', true, false ) . '
@@ -128,7 +163,7 @@ function wporg_themes_render_upload_shortcode() {
 				<label><input type="checkbox" required="required" name="required_terms[gpl]"><span>' . sprintf( __( 'The theme, and all included assets, <a href="%s">are licenced as GPL or are under a GPL compatible license</a>.', 'wporg-themes' ), 'https://make.wordpress.org/themes/handbook/review/required/#1-licensing-copyright' ) . '</span></label>
 			</p>
 
-			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
+			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '" data-uploading-label="' . esc_attr__( 'Uploading&hellip;', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
 		</form>';
 }
 

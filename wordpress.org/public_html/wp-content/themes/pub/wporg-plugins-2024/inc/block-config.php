@@ -26,7 +26,11 @@ add_filter( 'render_block_wporg/language-suggest', __NAMESPACE__ . '\filter_lang
 function add_site_navigation_menus( $menus ) {
 	global $wp;
 
-	$url = 'https://' . $_SERVER['HTTP_HOST'] . parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+	// This accounts for test and local environments.
+	$scheme = wp_parse_url( home_url(), PHP_URL_SCHEME ) ?: 'https';
+	$host   = $_SERVER['HTTP_HOST'] ?? wp_parse_url( home_url(), PHP_URL_HOST ) ?: 'localhost';
+	$path   = parse_url( ( $_SERVER['REQUEST_URI'] ?? '/' ) ?: '/', PHP_URL_PATH );
+	$url    = $scheme . '://' . $host . $path;
 
 	$items = array(
 		'plugins' => array(
@@ -236,7 +240,7 @@ function wporg_query_filter_in_form( $key ) {
 function wporg_query_total_label( $label, $count ) {
 
 	if ( ! is_search() ) {
-		return;
+		return '';
 	}
 
 	$plugin_business_model = get_query_var( 'plugin_business_model' );
@@ -327,14 +331,16 @@ function set_rating_data( $data, $post_id ) {
 }
 
 /**
- * Filters the search block to remove the required attribute, and add the query fields.
+ * Filters the search block to remove the required attribute on search results, and add the query fields.
  *
  * @param string $block_content
  * @return string
  */
 function filter_search_block( $block_content ) {
-	// Remove the required attribute
-	$block_content = preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
+	if ( is_search() ) {
+		// Remove the required attribute, so an empty submission can clear the current search.
+		$block_content = preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
+	}
 
 	/* Temporarily disable this until filters are enabled.
 	// Insert the current query filters into the search form.

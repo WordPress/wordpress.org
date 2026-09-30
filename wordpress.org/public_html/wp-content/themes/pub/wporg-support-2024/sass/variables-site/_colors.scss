@@ -1,3 +1,4 @@
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }

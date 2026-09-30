@@ -34,7 +34,7 @@ switch ( $post->page_template ) {
 			<div class="site-branding">
 				<h1 class="site-title">
 					<a href="<?php echo esc_url( get_permalink() ); ?>" rel="bookmark">
-						<?php echo get_the_title(); ?>
+						<?php echo esc_html( get_the_title() ); ?>
 					</a>
 				</h1>
 

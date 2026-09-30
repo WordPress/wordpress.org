@@ -67,7 +67,7 @@ function notify_workshop_presenter( $post ) {
 
 	$unique_presenter_wporg_username = array_unique( array_map( 'trim', explode( ',', $presenter_wporg_username ) ) );
 	$permalink                       = get_permalink( $post );
-	$title                           = wp_kses_data( $post->post_title );
+	$title                           = esc_html( $post->post_title );
 	$content                         = wp_trim_words(
 		strip_shortcodes( has_excerpt( $post ) ? $post->post_excerpt : $post->post_content ),
 		55
@@ -80,22 +80,21 @@ function notify_workshop_presenter( $post ) {
 			continue;
 		}
 
-		$request_body = array(
-			'action'       => 'wporg_handle_activity',
-			'component'    => 'learn',
-			'type'         => 'workshop_presenter_assign',
-			'user_id'      => $user_id,
-			'primary_link' => $permalink,
-			'item_id'      => $post->ID,
-			'content'      => $content,
-			'message'      => sprintf(
-				'Assigned as a presenter on the Learn WordPress tutorial, <i><a href="%s">%s</a></i>',
-				$permalink,
-				$title,
-			),
+		Profiles_API\add_activity(
+			'learn',
+			'workshop_presenter_assign',
+			$user_id,
+			array(
+				'primary_link' => $permalink,
+				'item_id'      => $post->ID,
+				'content'      => $content,
+				'message'      => sprintf(
+					'Assigned as a presenter on the Learn WordPress tutorial, <i><a href="%s">%s</a></i>',
+					esc_url( $permalink ),
+					$title,
+				),
+			)
 		);
-
-		Profiles_API\api( $request_body );
 	}
 }
 
@@ -103,33 +102,34 @@ function notify_workshop_presenter( $post ) {
 /**
  * Add an activity to a user's profile when they complete a course.
  */
-function add_course_completed_activity( string $status, int $user_id, int $course_id, int $comment_id, ?string $previous_status ) : void {
+function add_course_completed_activity( string $status, int $user_id, int $course_id, int $comment_id, ?string $previous_status ): void {
 	if ( 'complete' !== $status || 'complete' === $previous_status ) {
 		return;
 	}
 
 	$course_url = get_permalink( $course_id );
-
-	$request_body = array(
-		'action'       => 'wporg_handle_activity',
-		'component'    => 'learn',
-		'type'         => 'learn_course_complete',
-		'user_id'      => $user_id,
-		'primary_link' => $course_url,
-		'item_id'      => $course_id,
-
-		'message' => sprintf(
-			'Completed the course <em><a href="%s">%s</a></em> on learn.wordpress.org',
-			$course_url,
-			wp_kses_data( get_the_title( $course_id ) )
-		),
+	Profiles_API\add_activity(
+		'learn',
+		'learn_course_complete',
+		$user_id,
+		array(
+			'primary_link' => $course_url,
+			'item_id'      => $course_id,
+			'message'      => sprintf(
+				'Completed the course <em><a href="%s">%s</a></em> on learn.wordpress.org',
+				esc_url( $course_url ),
+				esc_html( get_the_title( $course_id ) )
+			),
+		)
 	);
 
-	Profiles_API\api( $request_body );
-
-	$course_slug = get_post( $course_id )->post_name;
-	switch ( $course_slug ) {
+	// Assign badges for some courses.
+	switch ( get_post( $course_id )->post_name ) {
+		case '50-hours-wordpress-credits':
 		case 'wordpress-credits':
+		case 'wordpress-credits-developer-track':
+		case 'wordpress-credits-designer-track':
+		case 'wordpress-credits-self-onboarding-pilot':
 			Profiles_API\assign_badge( 'credits-graduate', $user_id );
 			break;
 	}

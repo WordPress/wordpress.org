@@ -30,19 +30,22 @@ class Adopt_Me extends \WP_Widget {
 
 		if ( $is_adopt_me ) {
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 			echo $args['before_widget'];
-			echo $args['before_title'] . $title . $args['after_title'];
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+			echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 			?>
 
 			<div>
 				<p>
-					<?php _e( 'This plugin is seeking new, active, developers. Are you interested in assuming that responsibility?', 'wporg-plugins' ); ?></p>
+					<?php esc_html_e( 'This plugin is seeking new, active, developers. Are you interested in assuming that responsibility?', 'wporg-plugins' ); ?></p>
 				<p>
-					<a class="button" href="https://developer.wordpress.org/plugins/wordpress-org/take-over-an-existing-plugin/"><?php _e( 'Read more', 'wporg-plugins' ); ?></a>
+					<a class="button" href="https://developer.wordpress.org/plugins/wordpress-org/take-over-an-existing-plugin/"><?php esc_html_e( 'Read more', 'wporg-plugins' ); ?></a>
 				</p>
 			</div>
 			<?php
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 			echo $args['after_widget'];
 		}
 	}

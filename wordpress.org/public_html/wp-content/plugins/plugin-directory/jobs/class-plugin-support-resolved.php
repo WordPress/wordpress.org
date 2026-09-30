@@ -64,7 +64,7 @@ class Plugin_Support_Resolved {
 			);
 		}
 
-		foreach ( array_chunk( $plugin_stats, 1000, true ) as $plugin_stats_chunk ) {
+		foreach ( array_chunk( $plugin_stats, 100, true ) as $plugin_stats_chunk ) {
 			foreach ( $plugin_stats_chunk as $plugin_slug => $stats ) {
 				$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 				if ( ! $plugin || 'publish' !== $plugin->post_status ) {

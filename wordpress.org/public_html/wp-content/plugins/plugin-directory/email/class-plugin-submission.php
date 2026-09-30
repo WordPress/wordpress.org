@@ -9,7 +9,7 @@ class Plugin_Submission extends Markdown_Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( 'Successful Plugin Submission - %s', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -19,7 +19,7 @@ class Plugin_Submission extends Markdown_Base {
 	public function markdown() {
 
 		$placeholders = [
-			'###NAME###' => $this->plugin->post_title,
+			'###NAME###' => $this->plugin_title(),
 			'###SLUG###' => $this->plugin->post_name,
 		];
 

@@ -1,0 +1,9 @@
+{
+	"name": "wporg/wporg-abilities",
+	"description": "WordPress.org Abilities API integration with MCP server.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"wordpress/mcp-adapter": "^0.4"
+	}
+}

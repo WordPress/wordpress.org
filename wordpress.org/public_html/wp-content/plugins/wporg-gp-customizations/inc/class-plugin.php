@@ -314,6 +314,7 @@ class Plugin {
 			! $translation->id &&
 			! empty( $args['user_id'] ) &&
 			'waiting' === $args['status'] &&
+			! empty( GP::$current_route ) &&
 			GP::$current_route->class_name === 'GP_Route_Translation' &&
 			GP::$current_route->last_method_called === 'translations_post'
 		) {
@@ -385,7 +386,7 @@ class Plugin {
 
 				if ( isset( $_POST['source'] ) && 'translate-live' == $_POST['source'] ) {
 					$this->imported_source = 'playground';
-				} elseif ( ! isset( $_POST['source'] ) && 'Import' == $_POST['submit'] ) {
+				} elseif ( ! isset( $_POST['source'] ) && isset( $_POST['submit'] ) && 'Import' == $_POST['submit'] ) {
 					$this->imported_source = 'import';
 				} else {
 					return;
@@ -862,7 +863,7 @@ class Plugin {
 			wp_cache_set( self::GTE_EMAIL_ADDRESSES, $gte_email_addresses, self::CACHE_GROUP, 12 * HOUR_IN_SECONDS );
 		}
 
-		if ( in_array( $user->user_email, $gte_email_addresses ) ) {
+		if ( in_array( $user->user_email, $gte_email_addresses, true ) ) {
 			return true;
 		}
 

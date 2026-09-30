@@ -15,7 +15,7 @@ class Release_Confirmation extends Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( 'Pending release for %s', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 

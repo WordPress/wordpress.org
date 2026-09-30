@@ -2,8 +2,10 @@
 namespace WordPressdotorg\Plugin_Directory\Admin;
 
 use \WordPressdotorg\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\API\Base;
 use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Tools\SVN;
+use \WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use \WordPressdotorg\Plugin_Directory\Template;
 use \WordPressdotorg\Plugin_Directory\Readme\Validator;
 use \WordPressdotorg\Plugin_Directory\Admin\List_Table\Plugin_Posts;
@@ -70,11 +72,15 @@ class Customizations {
 		add_filter( 'wp_ajax_delete-support-rep', array( __NAMESPACE__ . '\Metabox\Support_Reps', 'remove_support_rep' ) );
 		add_action( 'wp_ajax_plugin-author-lookup', array( __NAMESPACE__ . '\Metabox\Author', 'lookup_author' ) );
 		add_action( 'wp_ajax_plugin-svn-sync', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'svn_sync' ) );
+		add_action( 'wp_ajax_plugin-i18n-import', array( __NAMESPACE__ . '\Metabox\Review_Tools', 'i18n_import' ) );
 		add_action( 'wp_ajax_plugin-set-reviewer', array( __NAMESPACE__ . '\Metabox\Reviewer', 'xhr_set_reviewer' ) );
+		add_action( 'wp_ajax_plugin-elasticsearch', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_response' ) );
+		add_action( 'wp_ajax_plugin-elasticsearch-reindex', array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'ajax_reindex' ) );
 
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Release_Confirmation', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Reviewer', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Controls', 'save_post' ) );
 	}
 
 	/**
@@ -129,7 +135,7 @@ class Customizations {
 	 * @return void.
 	 */
 	public function enqueue_assets( $hook_suffix ) {
-		global $post_type;
+		global $post, $post_type;
 
 		if ( 'plugin' === $post_type ) {
 			switch ( $hook_suffix ) {
@@ -138,10 +144,11 @@ class Customizations {
 					wp_enqueue_script( 'plugin-admin-post-js', plugins_url( 'js/edit-form.js',PLUGIN_FILE ), array( 'wp-util', 'wp-lists', 'wp-api' ), filemtime( PLUGIN_DIR . '/js/edit-form.js') );
 
 					wp_localize_script( 'plugin-admin-post-js', 'pluginDirectory', array(
-						'approvePluginAYS'    => __( 'Are you sure you want to approve this plugin?', 'wporg-plugins' ),
-						'rejectPluginAYS'     => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
-						'removeCommitterAYS'  => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
-						'removeSupportRepAYS' => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
+						'approvePluginConfirm' => __( 'Double-click to Approve', 'wporg-plugins' ),
+						'rejectPluginAYS'      => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
+						'removeCommitterAYS'   => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
+						'removeSupportRepAYS'  => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
+						'uploadNonce'          => Base::action_nonce( 'upload', $post->ID ),
 					) );
 					break;
 
@@ -176,7 +183,7 @@ class Customizations {
 		global $submenu;
 		?>
 		<div class="wrap">
-			<h1><?php _e( 'Plugin Tools', 'wporg-plugins' ); ?></h1>
+			<h1><?php esc_html_e( 'Plugin Tools', 'wporg-plugins' ); ?></h1>
 			<ul>
 				<?php
 				foreach ( $submenu['plugin-tools'] ?? [] as $page ) {
@@ -434,6 +441,7 @@ class Customizations {
 	 */
 	public function show_permalink( $post ) {
 		if ( 'plugin' === $post->post_type && 'publish' === $post->post_status ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core assembles and escapes this markup itself.
 			echo get_sample_permalink_html( $post );
 		}
 	}
@@ -582,8 +590,8 @@ class Customizations {
 		if ( $existing_plugin && $existing_plugin->ID != $plugin->ID ) {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
-				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
-				$new_slug
+				esc_html__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
+				esc_html( $new_slug )
 			) );
 		}
 
@@ -600,7 +608,7 @@ class Customizations {
 			if ( $result['errors'] ) {
 				$error = 'Error renaming SVN repository: ' . var_export( $result['errors'], true );
 				Tools::audit_log( $error, $plugin->ID );
-				wp_die( $error ); // Abort before the post is altered.
+				wp_die( esc_html( $error ) ); // Abort before the post is altered.
 			} else {
 				Tools::audit_log(
 					sprintf(
@@ -662,8 +670,8 @@ class Customizations {
 		if ( $slug !== $original_slug ) {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
-				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
-				$original_slug
+				esc_html__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
+				esc_html( $original_slug )
 			) );
 		}
 
@@ -742,7 +750,7 @@ class Customizations {
 		add_meta_box(
 			'emailsdiv',
 			__( 'Emails', 'wporg-plugins' ),
-			array( __NAMESPACE__ . '\Metabox\Helpscout', 'display' ),
+			array( Helpscout::class, 'admin_metabox_display' ),
 			'plugin', 'normal', 'high'
 		);
 
@@ -781,6 +789,18 @@ class Customizations {
 				array( __NAMESPACE__ . '\Metabox\Author_Notice', 'display' ),
 				'plugin', 'normal', 'high'
 			);
+
+			if (
+				class_exists( '\Automattic\Jetpack\Search\Classic_Search' ) &&
+				in_array( wp_get_environment_type(), array( 'staging', 'production' ), true )
+			) {
+				add_meta_box(
+					'plugin-elasticsearch',
+					__( 'ElasticSearch Index', 'wporg-plugins' ),
+					array( __NAMESPACE__ . '\Metabox\Elasticsearch', 'display' ),
+					'plugin', 'normal', 'low'
+				);
+			}
 		}
 
 		// Remove unnecessary metaboxes.
@@ -809,7 +829,7 @@ class Customizations {
 		if ( 'internal-note' === $comment->comment_type && isset( $_REQUEST['mode'] ) && 'single' === $_REQUEST['mode'] ) {
 			$allowed_actions = array( 'reply' => true );
 
-			if ( current_user_can( 'manage_comments' ) ) {
+			if ( current_user_can( 'moderate_comments' ) ) {
 				$allowed_actions['trash']     = true;
 				$allowed_actions['untrash']   = true;
 				$allowed_actions['quickedit'] = true;
@@ -872,7 +892,7 @@ class Customizations {
 
 		$user = wp_get_current_user();
 		if ( ! $user->exists() ) {
-			wp_die( __( 'Sorry, you must be logged in to reply to a comment.', 'wporg-plugins' ) );
+			wp_die( esc_html__( 'Sorry, you must be logged in to reply to a comment.', 'wporg-plugins' ) );
 		}
 
 		$user_ID              = $user->ID;
@@ -894,7 +914,7 @@ class Customizations {
 		}
 
 		if ( '' == $comment_content ) {
-			wp_die( __( 'ERROR: please type a comment.', 'wporg-plugins' ) );
+			wp_die( esc_html__( 'ERROR: please type a comment.', 'wporg-plugins' ) );
 		}
 
 		$comment_parent = 0;
