@@ -17,6 +17,9 @@
 	display: grid;
 	grid-template-columns: repeat( auto-fill, minmax( min( 100%, 440px ), 540px ) );
 	gap: 18px;
+
+	/* The cards' own bottom margin, which the grid's gap replaces. */
+	margin-bottom: 18px;
 }
 
 /* Like the Modules Directory's subscribe note. */
