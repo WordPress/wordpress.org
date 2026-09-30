@@ -103,13 +103,16 @@ final class Account extends Model {
 	/**
 	 * Finds the user connected to a WordPress.org account.
 	 *
+	 * A deleted user doesn't count: core keeps them, and their account can go to whoever replaces them.
+	 *
 	 * @param string $username WordPress.org username.
 	 * @return User|null
 	 */
 	public static function user_for( string $username ): ?User {
 		$account = self::query()->where( 'username', $username )->first();
+		$user    = $account ? User::find( $account->user_id ) : null;
 
-		return $account ? User::find( $account->user_id ) : null;
+		return $user && ! $user->isDeleted() ? $user : null;
 	}
 
 	/**
@@ -120,6 +123,12 @@ final class Account extends Model {
 	 * @return self
 	 */
 	public static function connect( int $user_id, string $username ): self {
+		// A deleted user's connection survives when they were deleted with the module off; it makes way here.
+		$held = self::query()->where( 'username', $username )->where( 'user_id', '!=', $user_id )->first();
+		if ( $held && ! self::user_for( $username ) ) {
+			$held->delete();
+		}
+
 		return self::query()->updateOrCreate( array( 'user_id' => $user_id ), array( 'username' => $username ) );
 	}
 }

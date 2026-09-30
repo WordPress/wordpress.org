@@ -104,6 +104,25 @@ final class UsersTest extends SsoTestCase {
 	}
 
 	/**
+	 * A deleted user's account, kept when they were deleted with the module off, goes to whoever replaces them.
+	 *
+	 * @return void
+	 */
+	public function test_deleted_user_frees_account_for_new_user(): void {
+		$deleted = $this->create_user();
+		Account::connect( (int) $deleted->id, 'rita' );
+		$deleted->status = User::STATUS_DELETED;
+		$deleted->save();
+
+		$this->create( 'rita' )->assertRedirect()->assertSessionMissing( 'errors' );
+
+		$user = User::query()->where( 'email', 'rita@example.org' )->first();
+		$this->assertNotNull( $user );
+		$this->assertSame( 'rita', Account::for_user( (int) $user->id )->username );
+		$this->assertNull( Account::for_user( (int) $deleted->id ) );
+	}
+
+	/**
 	 * The lookup previews an account for the create form.
 	 *
 	 * @return void
