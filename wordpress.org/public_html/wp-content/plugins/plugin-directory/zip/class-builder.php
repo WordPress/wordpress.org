@@ -412,7 +412,7 @@ class Builder {
 		 */
 		$remote_files = SVN::ls( $this->plugin_version_svn_url, true );
 		if (
-			$remote_files && 
+			is_array( $remote_files ) &&
 			! wp_list_filter( $remote_files, [ 'kind' => 'file' ] )
 		) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
@@ -435,7 +435,7 @@ class Builder {
 		$this->plugins_revision = $res['revision'];
 
 		// Verify that the specified plugin zip will contain files.
-		if ( ! array_diff( scandir( $this->tmp_build_dir ), array( '.', '..' ) ) ) {
+		if ( ! array_diff( scandir( $build_dir ), array( '.', '..' ) ) ) {
 			throw new Exception( __METHOD__ . ': No files exist in the plugin directory', 404 );
 		}
 

@@ -120,9 +120,8 @@ class DashiconsRtlCssPlugin {
 }
 
 /*
- * Add the theme's standalone entries -- the global stylesheet and the legacy
- * screenshots bundle -- to the block entries that @wordpress/scripts discovers
- * automatically under `src/`.
+ * Add the theme's global stylesheet to the block entries that @wordpress/scripts
+ * discovers automatically under `src/`.
  */
 const getEntryPoints = config.entry;
 config.entry = async () => {
@@ -134,7 +133,6 @@ config.entry = async () => {
 	return {
 		...entryPoints,
 		style: path.resolve( __dirname, 'client/main.scss' ),
-		theme: path.resolve( __dirname, 'client/theme.js' ),
 	};
 };
 
