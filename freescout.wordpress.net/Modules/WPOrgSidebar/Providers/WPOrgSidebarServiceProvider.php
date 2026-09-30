@@ -56,8 +56,11 @@ final class WPOrgSidebarServiceProvider extends ServiceProvider {
 		$blacklist = (array) config( 'app.debug_blacklist', array() );
 
 		foreach ( array( '_ENV', '_SERVER' ) as $key ) {
-			$blacklist[ $key ]   = (array) ( $blacklist[ $key ] ?? array() );
-			$blacklist[ $key ][] = 'WPORG_API_SECRET';
+			$blacklist[ $key ] = (array) ( $blacklist[ $key ] ?? array() );
+
+			if ( ! in_array( 'WPORG_API_SECRET', $blacklist[ $key ], true ) ) {
+				$blacklist[ $key ][] = 'WPORG_API_SECRET';
+			}
 		}
 
 		config( array( 'app.debug_blacklist' => $blacklist ) );
