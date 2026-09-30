@@ -38,7 +38,7 @@ Configuration, in FreeScout's `.env`. Required:
 | Variable | Value |
 |---|---|
 | `WPORG_API_SECRET` | Shared secret; must match `FREESCOUT_SECRET` on api.wordpress.org. |
-| `WPORG_SSO_IDP_CERT` | The identity provider's signing certificate, without the BEGIN/END lines. Until it and `WPORG_API_SECRET` are set, logins stay as they are, so users can be connected first. |
+| `WPORG_SSO_IDP_CERT` | The identity provider's signing certificate, on one line, with or without the BEGIN/END lines. Until it and `WPORG_API_SECRET` are set, logins stay as they are, so users can be connected first. |
 
 Optional:
 

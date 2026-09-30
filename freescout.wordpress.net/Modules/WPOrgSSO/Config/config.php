@@ -21,7 +21,7 @@ return array(
 		'entity_id' => env( 'WPORG_SSO_IDP_ENTITY_ID', 'https://login.wordpress.org' ),
 		'url'       => env( 'WPORG_SSO_IDP_URL', 'https://login.wordpress.org/wp-login.php?action=idp' ),
 
-		// Base64 body of its signing certificate, without the BEGIN/END lines.
+		// Its signing certificate, on one line: .env values can't span lines. The BEGIN/END markers are optional.
 		'cert'      => env( 'WPORG_SSO_IDP_CERT', '' ),
 	),
 

@@ -68,6 +68,20 @@ final class LoginTest extends SsoTestCase {
 	}
 
 	/**
+	 * The certificate may keep its BEGIN/END markers, as long as it's on one line.
+	 *
+	 * @return void
+	 */
+	public function test_accepts_certificate_with_markers(): void {
+		config( array( 'wporgsso.idp.cert' => '-----BEGIN CERTIFICATE-----' . $this->idp->certificate_body() . '-----END CERTIFICATE-----' ) );
+
+		$location = $this->post_to_acs( $this->start_login( 'rita' ) );
+
+		$this->complete( $location )->assertRedirect( route( 'dashboard' ) );
+		$this->assertAuthenticatedAs( $this->user );
+	}
+
+	/**
 	 * Logged-in users are sent on from the login page, as before.
 	 *
 	 * @return void
