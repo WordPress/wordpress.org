@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<ruleset name="WordPress.org FreeScout Coding Standards">
+	<description>WordPress Coding Standards for FreeScout code, without the sniffs that assume WordPress.</description>
+
+	<!-- Show sniff codes in all reports -->
+	<arg value="ps" />
+	<arg name="colors" />
+	<arg name="extensions" value="php" />
+
+	<file>.</file>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+
+	<!-- Blade templates are escaped by {{ }}, and aren't PHP phpcs can parse. -->
+	<exclude-pattern>*.blade.php</exclude-pattern>
+
+	<config name="testVersion" value="8.3-" />
+	<rule ref="PHPCompatibility" />
+
+	<rule ref="WordPress">
+		<exclude name="WordPress.Files.FileName" />
+		<exclude name="WordPress.WP" />
+		<exclude name="WordPress.DB" />
+		<exclude name="WordPress.Security" />
+	</rule>
+
+	<rule ref="Generic.PHP.RequireStrictTypes" />
+</ruleset>
