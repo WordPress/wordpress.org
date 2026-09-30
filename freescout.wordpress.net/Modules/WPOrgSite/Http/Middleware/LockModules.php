@@ -37,8 +37,10 @@ final class LockModules {
 	 */
 	public function handle( Request $request, Closure $next ): Response {
 		$action = $request->route() ? (string) $request->route()->getActionName() : '';
+		$user   = $request->user();
 
-		if ( 'App\Http\Controllers\ModulesController@ajax' === $action && in_array( $request->input( 'action' ), self::ACTIONS, true ) ) {
+		// Runs before the route's auth and roles middleware; leave anyone they'd turn away to them.
+		if ( $user && $user->isAdmin() && 'App\Http\Controllers\ModulesController@ajax' === $action && in_array( $request->input( 'action' ), self::ACTIONS, true ) ) {
 			// Successful, like core's own errors; the page only shows the message of those.
 			return response()->json(
 				array(

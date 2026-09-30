@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgSite\Tests;
 
+use App\User;
 use Modules\WPOrgSite\Providers\WPOrgSiteServiceProvider;
 use WordPressdotorg\FreeScout\Tests\TestCase;
 
@@ -54,6 +55,19 @@ final class LockModulesTest extends TestCase {
 	 */
 	public function test_lets_other_actions_through(): void {
 		$this->assertNotSame( 'Modules are updated and removed on the server, not from this page.', $this->post_action( 'unknown' )->json( 'msg' ) );
+	}
+
+	/**
+	 * Anyone FreeScout would turn away is still turned away, rather than answered.
+	 *
+	 * @return void
+	 */
+	public function test_leaves_others_to_freescout(): void {
+		$this->actingAs( $this->create_user( User::ROLE_USER ) );
+		$this->post_action( 'delete' )->assertStatus( 403 );
+
+		auth()->logout();
+		$this->post_action( 'delete' )->assertRedirect( route( 'login' ) );
 	}
 
 	/**
