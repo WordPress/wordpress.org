@@ -308,16 +308,22 @@ class Stats_Report {
 			$stats['all-hs-warning'] = true;
 		}
 
+		// FreeScout's counterpart: all mailboxes when HelpScout's are, otherwise the plugins mailbox.
+		$email_field_prefix = 'hs-' === $stats_field_prefix ? 'email-' : 'email-plugins-';
+
 		$emails = $wpdb->get_results( $wpdb->prepare(
 			"SELECT `name`, `value`, SUM(views) AS count
 			FROM %i
-			WHERE `name` IN( %s, %s )
+			WHERE `name` IN( %s, %s, %s, %s )
 				AND `value` IN( {$reviewer_nicenames_list} )
 				AND `date` > %s
 			GROUP BY `name`, `value`",
 			'stats_extras',
 			$stats_field_prefix . 'total',
 			$stats_field_prefix . 'replies',
+			// FreeScout stats, see api.wordpress.org/public_html/dotorg/freescout/webhook.php.
+			$email_field_prefix . 'total',
+			$email_field_prefix . 'replies',
 			$stats['start_date']
 		) );
 
@@ -325,7 +331,7 @@ class Stats_Report {
 			$user  = get_user_by( 'slug', $row->value );
 			$field = str_ends_with( $row->name, '-total' ) ? 'Email Actions' : 'Email Replies';
 			$stats['data'][ $user->ID ] ??= [];
-			$stats['data'][ $user->ID ][ $field ] = $row->count;
+			$stats['data'][ $user->ID ][ $field ] = ( $stats['data'][ $user->ID ][ $field ] ?? 0 ) + $row->count;
 		}
 
 		uasort( $stats['data'], function( $a, $b ) {

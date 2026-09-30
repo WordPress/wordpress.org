@@ -84,6 +84,7 @@ Because this Git repository is a read-only mirror of the `meta.svn.wordpress.org
 ### 2. HelpScout Sidebar Applications (`api.wordpress.org/public_html/dotorg/helpscout/`)
 *   Provides dynamic JSON endpoints integrated as custom sidebar apps in HelpScout.
 *   Retrieves database information about directories, plugins, themes, and user registration dates to provide customer service teams with immediate context when answering support/review tickets.
+*   Being replaced by FreeScout, whose endpoints live in `api.wordpress.org/public_html/dotorg/freescout/` and are called by the modules in `freescout.wordpress.net/`. Keep the two directories separate so `helpscout/` can be deleted once HelpScout is retired.
 
 ### 3. "Gandalf" Security Scanner (`wordpress.org/public_html/wp-content/plugins/plugin-directory/jobs/`)
 *   **Class `Plugin_Scan_Gandalf`:** Integrates with `https://gandalf.wordpress.org/scan` to automatically scan newly uploaded plugin zip archives.
