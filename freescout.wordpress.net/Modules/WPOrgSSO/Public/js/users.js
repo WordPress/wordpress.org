@@ -5,10 +5,12 @@
  * - The profile doesn't offer to change what WordPress.org keeps up to date, or passwords.
  *
  * The server enforces all of this; these only keep the forms from offering it.
+ *
+ * @param {jQuery} $ jQuery.
  */
 ( function ( $ ) {
 	$( function () {
-		var $account = $( '#wporgsso-account' );
+		const $account = $( '#wporgsso-account' );
 
 		if ( ! $account.length ) {
 			return;
@@ -19,37 +21,48 @@
 			$( '#first_name, #last_name, #email' ).prop( 'disabled', true );
 
 			// The photo is the WordPress.org avatar: show it, without upload or delete, or nothing if there's none.
-			var $photo = $( 'input[name="photo_url"]' ).closest( '.form-group' );
+			const $photo = $( 'input[name="photo_url"]' ).closest(
+				'.form-group'
+			);
 			if ( $photo.find( '#user-profile-photo' ).length ) {
-				$photo.find( 'input[name="photo_url"], .block-help, #user-photo-delete' ).remove();
+				$photo
+					.find(
+						'input[name="photo_url"], .block-help, #user-photo-delete'
+					)
+					.remove();
 			} else {
 				$photo.remove();
 			}
 		}
 
 		if ( ! $account.data( 'password-login' ) ) {
-			$( 'a[href*="/users/password/"]' ).closest( '.form-group' ).remove();
+			$( 'a[href*="/users/password/"]' )
+				.closest( '.form-group' )
+				.remove();
 		}
 
 		if ( ! $account.data( 'password-emails' ) ) {
-			$( '.reset-password-trigger, .send-invite-trigger, .resend-invite-trigger' ).remove();
+			$(
+				'.reset-password-trigger, .send-invite-trigger, .resend-invite-trigger'
+			).remove();
 		}
 	} );
 
 	$( function () {
-		var $username = $( '#wporgsso-username[data-lookup-url]' );
-		var $status = $( '#wporgsso-status' );
-		var $fields = $( '#first_name, #last_name, #email' );
-		var strings = $( '#wporgsso-user' ).data( 'strings' ) || {};
-		var lookup = null;
+		const $username = $( '#wporgsso-username[data-lookup-url]' );
 
 		if ( ! $username.length ) {
 			return;
 		}
 
+		const $status = $( '#wporgsso-status' );
+		const $fields = $( '#first_name, #last_name, #email' );
+		const strings = $( '#wporgsso-user' ).data( 'strings' ) || {};
+		let lookup = null;
+
 		// First thing in the form, after the role.
-		var $form = $username.closest( 'form' );
-		var $role = $form.find( '#role' ).closest( '.form-group' );
+		const $form = $username.closest( 'form' );
+		const $role = $form.find( '#role' ).closest( '.form-group' );
 		if ( $role.length ) {
 			$role.after( $( '#wporgsso-user' ) );
 		} else {
@@ -57,27 +70,40 @@
 		}
 
 		// Adds someone who already has an account, rather than creating one; core has no hook for these strings.
-		$form.closest( '.panel-wizard' ).find( '.wizard-header h1' ).text( strings.heading );
+		$form
+			.closest( '.panel-wizard' )
+			.find( '.wizard-header h1' )
+			.text( strings.heading );
 		$form.find( 'button[type="submit"]' ).text( strings.submit );
-		document.title = document.title.replace( strings.core_title, strings.title );
+		document.title = document.title.replace(
+			strings.core_title,
+			strings.title
+		);
 
 		// Agents log in with WordPress.org: no password to set, and no invite to set one, once that's enforced.
 		if ( ! $( '#wporgsso-user' ).data( 'passwords' ) ) {
-			$form.find( '#password' ).prop( 'required', false ).closest( '.form-group' ).remove();
+			$form
+				.find( '#password' )
+				.prop( 'required', false )
+				.closest( '.form-group' )
+				.remove();
 			$form.find( '#send_invite' ).closest( '.form-group' ).remove();
 		}
-		$fields.prop( 'required', false ).removeAttr( 'autofocus' ).each( function () {
-			var $group = $( this ).closest( '.form-group' );
+		$fields
+			.prop( 'required', false )
+			.removeAttr( 'autofocus' )
+			.each( function () {
+				const $group = $( this ).closest( '.form-group' );
 
-			// Keep a field visible if the server rejected its value, e.g. an email another user has.
-			if ( ! $group.hasClass( 'has-error' ) ) {
-				$group.hide();
-			}
-		} );
+				// Keep a field visible if the server rejected its value, e.g. an email another user has.
+				if ( ! $group.hasClass( 'has-error' ) ) {
+					$group.hide();
+				}
+			} );
 		$username.trigger( 'focus' );
 
 		$username.on( 'change', function () {
-			var username = $.trim( $username.val() );
+			const username = $.trim( $username.val() );
 
 			if ( lookup ) {
 				lookup.abort();
@@ -90,18 +116,31 @@
 				return;
 			}
 
-			lookup = $.getJSON( $username.data( 'lookup-url' ), { username: username } )
+			lookup = $.getJSON( $username.data( 'lookup-url' ), {
+				username,
+			} )
 				.done( function ( response ) {
-					var user = response.user;
-					var notes = [ $.trim( user.first_name + ' ' + user.last_name ) + ' <' + user.email + '>' ];
+					const user = response.user;
+					const name = $.trim(
+						user.first_name + ' ' + user.last_name
+					);
+					// Only administrators get the email address.
+					const notes = [
+						user.email ? name + ' <' + user.email + '>' : name,
+					];
 
 					$username.val( user.username );
 					$( '#first_name' ).val( user.first_name );
 					$( '#last_name' ).val( user.last_name );
-					$( '#email' ).val( user.email );
+					$( '#email' ).val( user.email || '' );
 
 					if ( response.connected_to ) {
-						notes.push( strings.connected_to.replace( ':name', response.connected_to ) );
+						notes.push(
+							strings.connected_to.replace(
+								':name',
+								response.connected_to
+							)
+						);
 					}
 					if ( user.blocked ) {
 						notes.push( strings.blocked );
@@ -114,7 +153,10 @@
 				} )
 				.fail( function ( xhr, textStatus ) {
 					if ( 'abort' !== textStatus ) {
-						$status.text( ( xhr.responseJSON && xhr.responseJSON.error ) || strings.lookup_failed );
+						$status.text(
+							( xhr.responseJSON && xhr.responseJSON.error ) ||
+								strings.lookup_failed
+						);
 					}
 				} );
 		} );
