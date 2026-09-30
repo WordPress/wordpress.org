@@ -12,6 +12,7 @@ Context for AI coding agents and developers working on the WordPress.org FreeSco
   - `WPOrgSidebar` — WordPress.org panels in the conversation sidebar, loaded over AJAX from `api.wordpress.org/dotorg/freescout/`.
   - `WPOrgWebhooks` — queues conversation events to `api.wordpress.org/dotorg/freescout/webhook.php`, which records contributor stats.
   - `WPOrgSSO` — logs agents in through login.wordpress.org's SAML identity provider (wp-saml-idp, in the private dotorg repository), and connects every user to a WordPress.org account. Its SAML library is committed in its `vendor/`: FreeScout doesn't install module dependencies. After changing its `composer.json`, run `composer install --no-dev` in the module and commit `vendor/` (`git add -f`: the root `.gitignore` ignores it).
+  - `WPOrgSite` — tweaks for how WordPress.org runs FreeScout, rather than features; add new ones here instead of starting a module. So far, it refuses to update or delete modules from the Modules page, and lays its cards out in columns.
 - `tests/` — shared PHPUnit bootstrap and base `TestCase`.
 
 Premium (paid) modules must never be committed here.
