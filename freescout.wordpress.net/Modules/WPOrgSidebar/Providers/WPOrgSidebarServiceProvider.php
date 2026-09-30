@@ -26,6 +26,15 @@ final class WPOrgSidebarServiceProvider extends ServiceProvider {
 	public const ALIAS = 'wporgsidebar';
 
 	/**
+	 * Registers the module.
+	 *
+	 * @return void
+	 */
+	public function register(): void {
+		$this->hide_secret_from_debug_pages();
+	}
+
+	/**
 	 * Boots the module.
 	 *
 	 * @return void
@@ -36,6 +45,25 @@ final class WPOrgSidebarServiceProvider extends ServiceProvider {
 		$this->loadRoutesFrom( __DIR__ . '/../Http/routes.php' );
 
 		$this->register_hooks();
+	}
+
+	/**
+	 * Keeps the signing secret off the Whoops error pages that APP_DEBUG shows, which list the environment.
+	 *
+	 * @return void
+	 */
+	private function hide_secret_from_debug_pages(): void {
+		$blacklist = (array) config( 'app.debug_blacklist', array() );
+
+		foreach ( array( '_ENV', '_SERVER' ) as $key ) {
+			$blacklist[ $key ] = (array) ( $blacklist[ $key ] ?? array() );
+
+			if ( ! in_array( 'WPORG_API_SECRET', $blacklist[ $key ], true ) ) {
+				$blacklist[ $key ][] = 'WPORG_API_SECRET';
+			}
+		}
+
+		config( array( 'app.debug_blacklist' => $blacklist ) );
 	}
 
 	/**
