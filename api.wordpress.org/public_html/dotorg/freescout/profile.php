@@ -31,24 +31,41 @@ function render_profile( object $request ): string {
 	if ( $email ) {
 		$user = get_user_by( 'email', $email );
 
+		$links = array();
+
 		if ( $user ) {
-			$html .= '<p>Profile: <a href="' . esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ) . '">' . esc_html( $user->user_nicename ) . '</a></p>';
-			$html .= '<p><a href="' . esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/profile/edit/group/3/' ) . '">Account &amp; Security</a></p>';
-			$html .= '<p><a href="' . esc_url( 'https://wordpress.org/support/users/' . $user->user_nicename . '/' ) . '">Forum Profile</a></p>';
+			$forums_status = '';
+			if ( ! empty( $user->wporg_419_capabilities['bbp_blocked'] ) ) {
+				$forums_status = render_badge( 'Forums: Blocked', 'error' );
+			} elseif ( ! empty( $user->wporg_419_capabilities['bbp_spectator'] ) ) {
+				$forums_status = render_badge( 'Forums: Spectator', 'warning' );
+			}
+
+			$html .= sprintf(
+				'<p class="wporg-sidebar-lead"><a href="%s">%s</a> %s</p>',
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				esc_html( $user->user_nicename ),
+				$forums_status
+			);
 
 			// When the account email doesn't match the sender's, show the account email too.
 			if ( $sender_email && strcasecmp( $sender_email, $user->user_email ) ) {
-				$html .= '<p>Account Email: ' . esc_html( $user->user_email ) . '</p>';
+				$html .= '<p class="wporg-sidebar-meta">Account email: ' . esc_html( $user->user_email ) . '</p>';
 			}
 
-			if ( ! empty( $user->wporg_419_capabilities['bbp_blocked'] ) ) {
-				$html .= '<p><strong>Forums Status: BLOCKED</strong></p>';
-			} elseif ( ! empty( $user->wporg_419_capabilities['bbp_spectator'] ) ) {
-				$html .= '<p><strong>Forums Status: Spectator</strong></p>';
-			}
+			$links['Account & Security'] = 'https://profiles.wordpress.org/' . $user->user_nicename . '/profile/edit/group/3/';
+			$links['Forum Profile']          = 'https://wordpress.org/support/users/' . $user->user_nicename . '/';
 		} else {
-			$html .= '<p>No profile found</p>';
+			$html .= '<p class="wporg-sidebar-empty">No profile found</p>';
 		}
+
+		$links['Search pending signups'] = add_query_arg( 's', rawurlencode( $sender_email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations' );
+
+		$html .= '<ul class="wporg-sidebar-links">';
+		foreach ( $links as $label => $url ) {
+			$html .= '<li><a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></li>';
+		}
+		$html .= '</ul>';
 
 		$html .= render_pending_signups( $sender_email, $email );
 	}
@@ -95,32 +112,28 @@ function render_pending_signups( string $sender_email, string $email ): string {
 	);
 
 	if ( $records ) {
-		$html .= '<p>Signups found:</p>';
-		$html .= '<ul>';
+		$html .= '<h5 class="wporg-sidebar-heading">Signups</h5>';
+		$html .= '<ul class="wporg-sidebar-items">';
 
 		foreach ( $records as $record ) {
-			$status = 'Pending';
+			$status = render_badge( 'Pending', 'warning' );
 			if ( $record->created ) {
-				$status = 'Created';
+				$status = render_badge( 'Created', 'success' );
 			} elseif ( ! $record->cleared ) {
-				$status = 'Caught in Spam';
+				$status = render_badge( 'Caught in Spam', 'error' );
 			}
 
 			$html .= sprintf(
-				'<li><a href="%s">%s <strong>%s</strong></a></li>',
+				'<li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="%s">%s</a> %s%s</li>',
 				esc_url( add_query_arg( 's', rawurlencode( $record->user_email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations' ) ),
-				esc_html( $record->user_login . ( strcasecmp( $sender_email, $record->user_email ) ? ' (' . $record->user_email . ')' : '' ) ),
-				esc_html( $status )
+				esc_html( $record->user_login ),
+				$status,
+				strcasecmp( $sender_email, $record->user_email ) ? '<div class="wporg-sidebar-item-meta">' . esc_html( $record->user_email ) . '</div>' : ''
 			);
 		}
 
 		$html .= '</ul>';
 	}
-
-	$html .= sprintf(
-		'<p><a href="%s">Search pending signups</a></p>',
-		esc_url( add_query_arg( 's', rawurlencode( $sender_email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations' ) )
-	);
 
 	return $html;
 }
@@ -136,19 +149,19 @@ function render_slack_user( ?object $slack_user ): string {
 		return '';
 	}
 
+	$html       = '<h5 class="wporg-sidebar-heading">Slack</h5>';
 	$slack_data = json_decode( (string) $slack_user->profiledata );
 	if ( ! $slack_data ) {
-		return '<hr/><ul><li>Slack: Has clicked signup link, but likely not finalized Slack signup flow.</li></ul>';
+		return $html . '<p class="wporg-sidebar-meta">Clicked the signup link, but likely didn’t finish signing up.</p>';
 	}
 
-	$html  = '<hr/>';
-	$html .= '<ul>';
-	$html .= '<li>Slack: <a href="' . esc_url( 'https://wordpress.slack.com/archives/' . $slack_user->dm_id ) . '">' . esc_html( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ) . '</a></li>';
-	$html .= '<li>Account ' . ( ! empty( $slack_data->deleted ) ? 'Deactivated' : 'Enabled' ) . '</li>';
-	$html .= '<li>Last Updated: ' . esc_html( gmdate( 'Y-m-d H:i:s', (int) $slack_data->updated ) ) . '</li>';
-	$html .= '</ul>';
-
-	return $html;
+	return $html . sprintf(
+		'<ul class="wporg-sidebar-items"><li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="%s">%s</a> %s<div class="wporg-sidebar-item-meta">Updated %s</div></li></ul>',
+		esc_url( 'https://wordpress.slack.com/archives/' . $slack_user->dm_id ),
+		esc_html( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ),
+		! empty( $slack_data->deleted ) ? render_badge( 'Deactivated', 'error' ) : render_badge( 'Active', 'success' ),
+		esc_html( gmdate( 'Y-m-d', (int) $slack_data->updated ) )
+	);
 }
 
 send_html( render_profile( get_request() ) );

@@ -21,7 +21,7 @@ require __DIR__ . '/common.php';
  */
 function render_privacy_requests( object $request ): string {
 	if ( empty( $request->sender->email ) ) {
-		return 'No email found';
+		return '<p class="wporg-sidebar-empty">No email found</p>';
 	}
 
 	// This needs to run as a user.
@@ -29,7 +29,7 @@ function render_privacy_requests( object $request ): string {
 
 	$email = get_user_email_for_email( $request );
 	$html  = sprintf(
-		'<p>Search <a href="%s">Erasures</a> | <a href="%s">Exports</a></p>',
+		'<ul class="wporg-sidebar-links"><li><a href="%s">Search erasures</a></li><li><a href="%s">Search exports</a></li></ul>',
 		esc_url( add_query_arg( 's', rawurlencode( $email ), admin_url( 'erase-personal-data.php' ) ) ),
 		esc_url( add_query_arg( 's', rawurlencode( $email ), admin_url( 'export-personal-data.php' ) ) )
 	);
@@ -58,10 +58,10 @@ function render_privacy_requests( object $request ): string {
 	rsort( $request_ids );
 
 	if ( ! $request_ids ) {
-		return $html . '<p>No requests found.</p>';
+		return $html . '<p class="wporg-sidebar-empty">No requests found.</p>';
 	}
 
-	$html .= '<ul>';
+	$html .= '<ul class="wporg-sidebar-items">';
 
 	foreach ( $request_ids as $request_id ) {
 		$user_request = wp_get_user_request( $request_id );
@@ -82,12 +82,18 @@ function render_privacy_requests( object $request ): string {
 			default                => ucwords( str_replace( '_', ' ', $user_request->action_name ) ),
 		};
 
+		$tone = match ( $user_request->status ) {
+			'request-completed' => 'success',
+			'request-failed'    => 'error',
+			default             => 'warning',
+		};
+
 		$html .= sprintf(
-			"<li title='%s'>%s: <strong>%s %s</strong></li>\n",
+			'<li class="wporg-sidebar-item" title="%s"><span class="wporg-sidebar-item-title">%s</span> %s<div class="wporg-sidebar-item-meta">%s</div></li>',
 			esc_attr( implode( ', ', $dates ) ),
-			esc_html( gmdate( 'Y-m-d', (int) min( array_keys( $dates ) ) ) ),
 			esc_html( $type ),
-			esc_html( get_post_status_object( $user_request->status )->label )
+			render_badge( get_post_status_object( $user_request->status )->label, $tone ),
+			esc_html( gmdate( 'Y-m-d', (int) min( array_keys( $dates ) ) ) )
 		);
 	}
 

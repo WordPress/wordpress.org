@@ -52,9 +52,8 @@ function render_plugins_themes( object $request ): string {
 		$post_ids = get_items_by_slug( $mentioned[ $type ] );
 
 		if ( $post_ids ) {
-			$html .= '<p><strong>' . esc_html( ucwords( $type ) ) . ' mentioned in this email:</strong></p>';
+			$html .= '<h5 class="wporg-sidebar-heading">' . esc_html( ucwords( $type ) ) . ' mentioned in this email</h5>';
 			$html .= render_items( $post_ids, $mailbox_email );
-			$html .= '<br/>';
 		}
 
 		restore_current_blog();
@@ -74,9 +73,8 @@ function render_plugins_themes( object $request ): string {
 					admin_url( 'edit.php' )
 				);
 
-				$html .= '<p><strong><a href="' . esc_url( $url ) . '">' . esc_html( ucwords( $type ) ) . ' owned:</a></strong></p>';
+				$html .= '<h5 class="wporg-sidebar-heading"><a href="' . esc_url( $url ) . '">' . esc_html( ucwords( $type ) ) . ' owned</a></h5>';
 				$html .= render_items( $post_ids, $mailbox_email );
-				$html .= '<br/>';
 			}
 
 			restore_current_blog();
@@ -164,13 +162,13 @@ function get_items_by_slug( array $slugs ): array {
  * @return string
  */
 function render_items( array $post_ids, string $mailbox_email ): string {
-	$html = '<ul>';
+	$html = '<ul class="wporg-sidebar-items">';
 
 	foreach ( $post_ids as $post_id ) {
 		$post          = get_post( (int) $post_id );
 		$type          = ( 'plugin' === $post->post_type ) ? 'plugin' : 'theme';
-		$post_status   = '';
-		$style         = 'color: green;';
+		$status        = '';
+		$tone          = 'neutral';
 		$reviewer      = false;
 		$last_modified = $post->post_modified_gmt;
 		$download_link = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
@@ -219,60 +217,68 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 		switch ( $post->post_status ) {
 			// Plugins.
 			case 'rejected':
-				$post_status   = '(Rejected)';
-				$style         = 'color: red;';
-				$download_link = '#'; // No zips exist for rejected plugins.
+				$status        = 'Rejected';
+				$tone          = 'error';
+				$download_link = ''; // No zips exist for rejected plugins.
 				break;
 			case 'closed':
 			case 'disabled':
-				$post_status = ucwords( $post->post_status );
+				$status = ucwords( $post->post_status );
 				// This is not perfect, but close enough.
 				if ( $post->_close_reason ) {
-					$post_status .= ': ' . ucwords( str_replace( '-', ' ', $post->_close_reason ) );
+					$status .= ': ' . ucwords( str_replace( '-', ' ', $post->_close_reason ) );
 				}
-				$post_status = "({$post_status})";
-				$style       = 'color: red;';
+				$tone = 'error';
 				break;
 			case 'pending':
 			case 'new':
-				$post_status = '(In Review)';
-				$style       = '';
+				$status = 'In Review';
+				$tone   = 'warning';
 				break;
 			case 'approved':
-				$post_status = '(Approved)';
-				$style       = '';
+				$status = 'Approved';
+				$tone   = 'success';
 				break;
 
 			// Themes.
 			case 'draft':
-				$post_status   = '(In Review or Rejected)';
-				$style         = '';
-				$download_link = '#'; // No zips exist for drafts.
+				$status        = 'In Review or Rejected';
+				$tone          = 'warning';
+				$download_link = ''; // No zips exist for drafts.
 				break;
 			case 'suspend':
-				$post_status = '(Suspended)';
-				$style       = 'color: red;';
+				$status = 'Suspended';
+				$tone   = 'error';
 				break;
 			case 'delist':
-				$post_status = '(Delisted)';
-				$style       = 'color: red;';
+				$status = 'Delisted';
+				$tone   = 'error';
 				break;
 		}
 
-		// Append assigned to, if known.
+		$meta = array(
+			esc_html( $post->post_name ),
+			'<span title="Last updated">' . esc_html( $short_last_updated ) . '</span>',
+		);
+
 		if ( $reviewer ) {
-			$post_status = str_replace( ')', ", Assigned to {$reviewer})", $post_status );
+			$meta[] = 'Assigned to ' . esc_html( $reviewer );
 		}
 
 		// Edit and permalinks are built by hand, as the post types aren't registered on this site.
+		$links = sprintf(
+			'<a href="%s" title="View on WordPress.org" aria-label="View on WordPress.org"><i class="glyphicon glyphicon-link"></i></a>',
+			esc_url( home_url( "/{$post->post_name}/" ) )
+		);
+		if ( $download_link ) {
+			$links .= sprintf(
+				' <a href="%s" title="Download" aria-label="Download"><i class="glyphicon glyphicon-download-alt"></i></a>',
+				esc_url( $download_link )
+			);
+		}
+
 		$html .= sprintf(
-			'<li>
-				<a href="%1$s" style="%2$s">%3$s</a>&nbsp;
-				<a href="%4$s" style="%2$s">#</a>&nbsp;
-				<a href="%5$s" style="%2$s">ↆ</a>&nbsp;%6$s<br>
-				<span style="%2$s">%7$s</span>&nbsp;
-				%8$s
-			</li>',
+			'<li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="%s">%s</a> %s<div class="wporg-sidebar-item-meta">%s <span class="wporg-sidebar-item-links">%s</span></div></li>',
 			esc_url(
 				add_query_arg(
 					array(
@@ -282,13 +288,10 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 					admin_url( 'post.php' )
 				)
 			),
-			esc_attr( $style ),
 			esc_html( $post->post_title ),
-			esc_url( home_url( "/{$post->post_name}/" ) ),
-			esc_url( $download_link ),
-			esc_html( $short_last_updated ),
-			esc_html( $post->post_name ),
-			esc_html( $post_status )
+			$status ? render_badge( $status, $tone ) : '',
+			implode( ' · ', $meta ),
+			$links
 		);
 	}
 

@@ -1,0 +1,120 @@
+/**
+ * Styles the WordPress.org sidebar panels, whose HTML api.wordpress.org renders with these classes.
+ */
+
+.wporg-sidebar-panel {
+	padding-top: 4px;
+	font-size: 13px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.wporg-sidebar-panel > :last-child {
+	margin-bottom: 0;
+}
+
+.wporg-sidebar-lead {
+	margin: 0 0 4px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.wporg-sidebar-meta,
+.wporg-sidebar-item-meta,
+.wporg-sidebar-empty {
+	color: #72808e;
+}
+
+.wporg-sidebar-meta,
+.wporg-sidebar-empty {
+	margin: 0 0 8px;
+}
+
+.wporg-sidebar-heading {
+	margin: 16px 0 4px;
+	color: #72808e;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.wporg-sidebar-panel > .wporg-sidebar-heading:first-child {
+	margin-top: 0;
+}
+
+.wporg-sidebar-heading a {
+	color: inherit;
+}
+
+.wporg-sidebar-links,
+.wporg-sidebar-items {
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+}
+
+.wporg-sidebar-links li {
+	margin: 0 0 2px;
+}
+
+.wporg-sidebar-item {
+	padding: 6px 0;
+	border-top: 1px solid #e3e8eb;
+}
+
+.wporg-sidebar-item:first-child {
+	border-top: 0;
+}
+
+.wporg-sidebar-item-title {
+	font-weight: 600;
+}
+
+.wporg-sidebar-item-meta {
+	margin-top: 1px;
+	font-size: 12px;
+}
+
+.wporg-sidebar-item-links a {
+	margin-left: 4px;
+	color: #93a1af;
+}
+
+.wporg-sidebar-item-links a:hover,
+.wporg-sidebar-item-links a:focus {
+	color: #0078d7;
+	text-decoration: none;
+}
+
+.wporg-sidebar-note {
+	margin: 0;
+}
+
+.wporg-sidebar-badge {
+	display: inline-block;
+	padding: 0 7px;
+	border-radius: 9px;
+	background-color: #eef1f4;
+	color: #4f5d69;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	white-space: nowrap;
+	vertical-align: 1px;
+}
+
+.wporg-sidebar-badge.is-success {
+	background-color: #e1f4e5;
+	color: #1d6b31;
+}
+
+.wporg-sidebar-badge.is-warning {
+	background-color: #fdf1d4;
+	color: #7a5200;
+}
+
+.wporg-sidebar-badge.is-error {
+	background-color: #fce4e4;
+	color: #a61d1d;
+}

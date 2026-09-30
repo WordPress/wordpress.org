@@ -16,7 +16,7 @@ Context for AI coding agents and developers working on the WordPress.org FreeSco
 
 Premium (paid) modules must never be committed here.
 
-The api.wordpress.org side lives in `api.wordpress.org/public_html/dotorg/freescout/`. Requests are JSON, signed with an HMAC-SHA256 of the body in `X-FreeScout-Signature` (shared secret: `WPORG_API_SECRET` here, `FREESCOUT_SECRET` there) and rejected after 15 minutes. `WPOrgSidebar/Services/ConversationPayload.php` and `WPOrgWebhooks/Services/EventPayload.php` define what's sent; change them together with the endpoints that read them. The sidebar inserts the endpoints' HTML as-is, so they must escape everything they output.
+The api.wordpress.org side lives in `api.wordpress.org/public_html/dotorg/freescout/`. Requests are JSON, signed with an HMAC-SHA256 of the body in `X-FreeScout-Signature` (shared secret: `WPORG_API_SECRET` here, `FREESCOUT_SECRET` there) and rejected after 15 minutes. `WPOrgSidebar/Services/ConversationPayload.php` and `WPOrgWebhooks/Services/EventPayload.php` define what's sent; change them together with the endpoints that read them. The sidebar inserts the endpoints' HTML as-is, so they must escape everything they output. Mark it up with the `wporg-sidebar-*` classes that `WPOrgSidebar/Public/css/sidebar.css` styles, and statuses with `render_badge()`, instead of inline styles; the local mock's sample panels use the same markup.
 
 "Customer" is FreeScout's term (`App\Customer`); in our own names and text, use "sender".
 

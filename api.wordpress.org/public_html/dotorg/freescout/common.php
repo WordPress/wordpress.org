@@ -100,6 +100,17 @@ function send_html( string $html ): never {
 }
 
 /**
+ * Renders a status badge; WPOrgSidebar's stylesheet colors it by tone.
+ *
+ * @param string $label Badge text.
+ * @param string $tone  One of success, warning, error, or neutral.
+ * @return string
+ */
+function render_badge( string $label, string $tone = 'neutral' ): string {
+	return sprintf( '<span class="wporg-sidebar-badge is-%s">%s</span>', esc_attr( $tone ), esc_html( $label ) );
+}
+
+/**
  * Determines the mailbox slug, e.g. "Plugins" => plugins.
  *
  * @param object $request Request payload.
