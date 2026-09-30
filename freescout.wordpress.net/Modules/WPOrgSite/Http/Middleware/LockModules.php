@@ -43,7 +43,7 @@ final class LockModules {
 			return response()->json(
 				array(
 					'status' => 'error',
-					'msg'    => __( 'Modules are updated and removed outside FreeScout.' ),
+					'msg'    => __( 'Modules are updated and removed on the server, not from this page.' ),
 				)
 			);
 		}

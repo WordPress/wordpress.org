@@ -41,7 +41,7 @@ final class LockModulesTest extends TestCase {
 				->assertExactJson(
 					array(
 						'status' => 'error',
-						'msg'    => 'Modules are updated and removed outside FreeScout.',
+						'msg'    => 'Modules are updated and removed on the server, not from this page.',
 					)
 				);
 		}
@@ -53,7 +53,7 @@ final class LockModulesTest extends TestCase {
 	 * @return void
 	 */
 	public function test_lets_other_actions_through(): void {
-		$this->assertNotSame( 'Modules are updated and removed outside FreeScout.', $this->post_action( 'unknown' )->json( 'msg' ) );
+		$this->assertNotSame( 'Modules are updated and removed on the server, not from this page.', $this->post_action( 'unknown' )->json( 'msg' ) );
 	}
 
 	/**
