@@ -21,6 +21,48 @@ class WordPressTV_Subtitles_Upload {
 		add_filter( 'attachment_fields_to_save', array( $this, 'moderate' ) );
 		add_filter( 'views_upload', array( $this, 'views_links' ) );
 		add_filter( 'post_mime_types', array( $this, 'post_mime_types' ) );
+
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'wp_ajax_wptv_get_subtitles_nonce', array( $this, 'ajax_get_nonce' ) );
+		add_action( 'wp_ajax_nopriv_wptv_get_subtitles_nonce', array( $this, 'ajax_get_nonce' ) );
+	}
+
+	/**
+	 * AJAX handler to provide a fresh nonce for the upload form.
+	 */
+	public function ajax_get_nonce() {
+		nocache_headers();
+
+		wp_send_json_success(
+			array(
+				'nonce' => wp_create_nonce( 'wptv-upload-subtitles' ),
+			)
+		);
+	}
+
+	/**
+	 * Enqueue front-end scripts for the subtitle upload form.
+	 */
+	function enqueue_scripts() {
+		if ( ! is_page_template( 'upload-subtitles-template.php' ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'wptv-upload-subtitles',
+			plugins_url( 'upload-subtitles.js', __FILE__ ),
+			array(),
+			'1.0.0',
+			true
+		);
+
+		wp_localize_script(
+			'wptv-upload-subtitles',
+			'wptvSubtitlesConfig',
+			array(
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			)
+		);
 	}
 
 	/**
