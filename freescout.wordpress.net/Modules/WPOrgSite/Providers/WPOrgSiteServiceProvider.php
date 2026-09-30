@@ -33,6 +33,15 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		$this->app['router']->pushMiddlewareToGroup( 'web', LockModules::class );
 
 		\Eventy::addFilter(
+			'stylesheets',
+			static function ( array $styles ): array {
+				$styles[] = \Module::getPublicPath( self::ALIAS ) . '/css/modules.css';
+
+				return $styles;
+			}
+		);
+
+		\Eventy::addFilter(
 			'javascripts',
 			static function ( array $javascripts ): array {
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/modules.js';

@@ -7,7 +7,7 @@
 | [WPOrgSidebar](Modules/WPOrgSidebar) | Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests next to each conversation. |
 | [WPOrgWebhooks](Modules/WPOrgWebhooks) | Sends conversation events to WordPress.org, which records them as contributor stats. |
 | [WPOrgSSO](Modules/WPOrgSSO) | Agents log in with their WordPress.org account, through login.wordpress.org; there's no other way in. Every user is connected to a WordPress.org account, and new users are created from one. Name, email, and avatar are updated from it at every login. |
-| [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: modules can't be updated or deleted from the Modules page. |
+| [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: modules can't be updated or deleted from the Modules page, and its cards fill the width in columns. |
 
 WPOrgSidebar, WPOrgWebhooks, and WPOrgSSO talk to [`api.wordpress.org/dotorg/freescout/`](../api.wordpress.org/public_html/dotorg/freescout), which does the WordPress.org lookups.
 
