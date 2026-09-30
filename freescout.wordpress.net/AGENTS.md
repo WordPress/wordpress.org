@@ -9,9 +9,12 @@ Context for AI coding agents and developers working on the WordPress.org FreeSco
 [FreeScout](https://github.com/freescout-help-desk/freescout) is a Laravel helpdesk. This folder contains **only our own FreeScout modules**, never FreeScout core:
 
 - `Modules/<Name>/` — one directory per module (`module.json`, `Providers/`, `Http/`, `Resources/`, `Database/Migrations/`, `Public/`, `tests/`).
+  - `WPOrgSidebar` — WordPress.org panels in the conversation sidebar, loaded over AJAX from `api.wordpress.org/dotorg/freescout/`.
 - `tests/` — shared PHPUnit bootstrap and base `TestCase`.
 
 Premium (paid) modules must never be committed here.
+
+The api.wordpress.org side lives in `api.wordpress.org/public_html/dotorg/freescout/`. Requests are JSON, signed with an HMAC-SHA256 of the body in `X-FreeScout-Signature` (shared secret: `WPORG_API_SECRET` here, `FREESCOUT_SECRET` there) and rejected after 15 minutes. `WPOrgSidebar/Services/ConversationPayload.php` defines what's sent; change it together with the endpoints that read it. The sidebar inserts the endpoints' HTML as-is, so they must escape everything they output.
 
 "Customer" is FreeScout's term (`App\Customer`); in our own names and text, use "sender".
 
@@ -66,8 +69,10 @@ Modules aren't active in the test database, so each test registers the provider 
 ## Module Conventions
 
 - **Naming:** prefix modules with `WPOrg` (directory `WPOrgSidebar`, alias `wporgsidebar`). Aliases are lowercase, unique, and must never change — they key the module's DB state, options, views (`wporgsidebar::view`), and public asset path.
+- **Name and icon:** `name` in `module.json` is what Manage » Modules shows (`WP.org Sidebar`), and what `module:enable` looks the module up by. `img` points at `Public/img/icon.svg`, the WordPress mark on `#3858e9`.
 - **`authorUrl` / `detailsUrl`:** never point these at `freescout.net`. Core treats such modules as official and requires a paid license activation.
 - **Activation state** lives in the `modules` DB table; the `active` field in `module.json` is ignored by core.
+- **Configuration** comes from the environment: `WPORG_API_URL` and `WPORG_API_SECRET`. Without a secret, modules stay quiet instead of failing.
 - **New module:** add its directory under `Modules/`. Once it's deployed, an admin switches it on under Manage » Modules.
 - **After changing module files:** run `php artisan freescout:clear-cache` (`npm run freescout:artisan -- freescout:clear-cache`).
 - **Routes:** register them in the provider with `loadRoutesFrom()`, and pass URLs to JavaScript through `data-` attributes rather than FreeScout's generated laroute files.
