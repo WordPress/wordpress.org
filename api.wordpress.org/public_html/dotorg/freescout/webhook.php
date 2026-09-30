@@ -2,8 +2,6 @@
 /**
  * FreeScout webhook: records contributor stats for helpdesk activity.
  *
- * Conversations aren't logged to the helpscout tables: the Plugin Directory builds HelpScout links from them.
- *
  * @package WordPressdotorg\API\FreeScout
  */
 

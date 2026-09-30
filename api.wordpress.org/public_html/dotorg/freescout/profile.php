@@ -138,7 +138,7 @@ function render_slack_user( ?object $slack_user ): string {
 
 	$slack_data = json_decode( (string) $slack_user->profiledata );
 	if ( ! $slack_data ) {
-		return '<hr/><ul><li>Slack: Has clicked signup link, but likely not finalised Slack signup flow.</li></ul>';
+		return '<hr/><ul><li>Slack: Has clicked signup link, but likely not finalized Slack signup flow.</li></ul>';
 	}
 
 	$html  = '<hr/>';

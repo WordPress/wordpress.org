@@ -68,7 +68,7 @@ function render_plugins_themes( object $request ): string {
 					admin_url( 'edit.php' )
 				);
 
-				$html .= '<p><strong><a href="' . esc_url( $url ) . '">' . esc_html( ucwords( $type ) ) . ' owned by this user:</a></strong></p>';
+				$html .= '<p><strong><a href="' . esc_url( $url ) . '">' . esc_html( ucwords( $type ) ) . ' owned:</a></strong></p>';
 				$html .= render_items( $post_ids, $mailbox_email );
 				$html .= '<br/>';
 			}

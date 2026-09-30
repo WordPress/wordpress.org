@@ -92,7 +92,6 @@ wp_send_json(
 			'first_name'   => (string) $user->first_name,
 			'last_name'    => (string) $user->last_name,
 			'email'        => $user->user_email,
-			// Gravatar's silhouette for accounts without an avatar.
 			'avatar_url'   => get_avatar_url(
 				$user,
 				array(

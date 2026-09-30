@@ -12,13 +12,6 @@ declare( strict_types = 1 );
 namespace WordPressdotorg\API\FreeScout;
 
 /**
- * Maximum age of a signed request, in seconds.
- *
- * @var int
- */
-const MAX_REQUEST_AGE = 15 * 60;
-
-/**
  * Loads WordPress for the given host.
  *
  * @param string $wp_init_host Site to load, e.g. https://wordpress.org/plugins/.
@@ -88,7 +81,7 @@ function is_valid_signature( string $body, string $signature ): bool {
  * @return bool
  */
 function is_fresh( object $payload ): bool {
-	return abs( time() - (int) ( $payload->sent_at ?? 0 ) ) <= MAX_REQUEST_AGE;
+	return abs( time() - (int) ( $payload->sent_at ?? 0 ) ) <= 15 * MINUTE_IN_SECONDS;
 }
 
 /**
