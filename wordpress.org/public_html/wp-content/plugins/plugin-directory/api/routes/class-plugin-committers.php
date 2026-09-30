@@ -38,12 +38,9 @@ class Plugin_Committers extends Base {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'add_committer' ),
-				'permission_callback' => function( $request ) {
-					return current_user_can(
-						'plugin_add_committer',
-						Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
-					);
-				},
+				'permission_callback' => array( $this, 'permission_check_action' ),
+				'wporg_capability'    => 'plugin_add_committer',
+				'wporg_action'        => 'add_committer',
 				'args'                => array(
 					'plugin_slug' => array(
 						'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
@@ -56,12 +53,9 @@ class Plugin_Committers extends Base {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/committers/(?P<committer>[^/]+)/?', array(
 			'methods'             => WP_REST_Server::DELETABLE,
 			'callback'            => array( $this, 'revoke_committer' ),
-			'permission_callback' => function( $request ) {
-				return current_user_can(
-					'plugin_remove_committer',
-					Plugin_Directory::get_plugin_post( $request['plugin_slug'] )
-				);
-			},
+			'permission_callback' => array( $this, 'permission_check_action' ),
+			'wporg_capability'    => 'plugin_remove_committer',
+			'wporg_action'        => 'remove_committer',
 			'args'                => array(
 				'plugin_slug' => array(
 					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
@@ -141,9 +135,9 @@ class Plugin_Committers extends Base {
 		$plugin_post = Plugin_Directory::get_plugin_post( $plugin_slug );
 
 		// Prevent a committer removing themselves, if they're the only committer.
-		if ( $user->user_login == wp_get_current_user()->user_login && ! current_user_can( 'plugin_review' ) ) {
+		if ( $user->user_login === wp_get_current_user()->user_login && ! current_user_can( 'plugin_review' ) ) {
 			$committers = Tools::get_plugin_committers( $plugin_slug );
-			if ( count( $committers ) == 1 && in_array( $user->user_login, $committers ) ) {
+			if ( count( $committers ) == 1 && in_array( $user->user_login, $committers, true ) ) {
 				return new WP_Error( 'failed', __( 'Sorry, you must have at least one committer.', 'wporg-plugins' ) );
 			}
 		}

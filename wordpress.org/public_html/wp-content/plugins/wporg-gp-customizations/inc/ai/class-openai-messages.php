@@ -14,6 +14,8 @@
 
 namespace WordPressdotorg\GlotPress\Customizations\AI;
 
+defined( 'ABSPATH' ) || exit;
+
 use GP_Locale;
 
 /**

@@ -20,7 +20,7 @@ class Block_Validator {
 
 		<div class="wrap block-validator">
 			<form method="post" action="." class="block-validator__plugin-form">
-				<label for="plugin_url"><?php _e( 'Plugin repo URL', 'wporg-plugins' ); ?></label>
+				<label for="plugin_url"><?php esc_html_e( 'Plugin repo URL', 'wporg-plugins' ); ?></label>
 				<div class="block-validator__plugin-input-container">
 					<input type="text" class="block-validator__plugin-input" id="plugin_url" name="plugin_url" placeholder="https://plugins.svn.wordpress.org/" value="<?php echo esc_attr( $plugin_url ); ?>" />
 					<input type="submit" class="wp-block-button__link block-validator__plugin-submit" value="<?php esc_attr_e( 'Check Plugin!', 'wporg-plugins' ); ?>" />
@@ -37,7 +37,7 @@ class Block_Validator {
 
 				<div class="plugin-upload-form-controls">
 					<input type="file" id="zip_file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
-					<label id="zip-file-label" for="zip_file"><?php _e( 'Select File', 'wporg-plugins' ); ?></label>
+					<label id="zip-file-label" for="zip_file"><?php esc_html_e( 'Select File', 'wporg-plugins' ); ?></label>
 
 					<div class="wp-block-button is-small">
 						<input id="upload_button" name="block-directory-upload" class="wp-block-button__link" type="submit" value="<?php esc_attr_e( 'Upload', 'wporg-plugins' ); ?>"/>
@@ -74,7 +74,7 @@ class Block_Validator {
 					wp_enqueue_script( 'jquery' );
 					wp_add_inline_script( 'jquery-migrate', $upload_script );
 				} else {
-					printf( '<script>%s</script>', $upload_script );
+					wp_print_inline_script_tag( $upload_script );
 				}
 			?>
 			</details>
@@ -91,7 +91,7 @@ class Block_Validator {
 		</div>
 		<?php else : ?>
 		<div class="wrap block-validator">
-			<p><?php _e( 'Please log in to use the block plugin checker.', 'wporg-plugins' ); ?></p>
+			<p><?php esc_html_e( 'Please log in to use the block plugin checker.', 'wporg-plugins' ); ?></p>
 		</div>
 		<?php endif;
 		return ob_get_clean();
@@ -110,7 +110,7 @@ class Block_Validator {
 			}
 
 			if ( ! empty( $message ) ) {
-				echo "<div class='notice notice-warning notice-alt'><p>{$message}</p></div>\n";
+				echo '<div class="notice notice-warning notice-alt"><p>' . wp_kses_post( $message ) . '</p></div>' . "\n";
 			}
 		}
 
@@ -132,10 +132,10 @@ class Block_Validator {
 						Tools::audit_log( 'Plugin added to block directory.', $post->ID );
 						self::maybe_send_email_plugin_added( $post );
 						Plugin_Import::queue( $post->post_name, array( 'tags_touched' => array( $post->stable_tag ) ) );
-						echo '<div class="notice notice-success notice-alt"><p>' . __( 'Plugin added to the block directory.', 'wporg-plugins' ) . '</p></div>';
+						echo '<div class="notice notice-success notice-alt"><p>' . esc_html__( 'Plugin added to the block directory.', 'wporg-plugins' ) . '</p></div>';
 					} elseif ( 'remove' === $_POST['block-directory-edit'] ) {
 						Tools::audit_log( 'Plugin removed from block directory.', $post->ID );
-						echo '<div class="notice notice-info notice-alt"><p>' . __( 'Plugin removed from the block directory.', 'wporg-plugins' ) . '</p></div>';
+						echo '<div class="notice notice-info notice-alt"><p>' . esc_html__( 'Plugin removed from the block directory.', 'wporg-plugins' ) . '</p></div>';
 					}
 				}
 			}
@@ -149,7 +149,7 @@ class Block_Validator {
 		if ( $post && 'error' === $_POST['block-directory-email'] && wp_verify_nonce( $_POST['block-directory-email-nonce'], 'block-directory-email-' . $post->ID ) ) {
 			if ( current_user_can( 'edit_post', $post->ID ) ) {
 				if ( self::maybe_send_email_block_error( $post ) ) {
-						echo '<div class="notice notice-success notice-alt"><p>' . __( 'Email sent.', 'wporg-plugins' ) . '</p></div>';
+						echo '<div class="notice notice-success notice-alt"><p>' . esc_html__( 'Email sent.', 'wporg-plugins' ) . '</p></div>';
 				}
 			}
 		}
@@ -179,13 +179,13 @@ class Block_Validator {
 
 		echo '<p>';
 		if ( self::plugin_is_in_block_directory( $plugin->post_name ) ) {
-			echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
+			wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
 			// translators: %s plugin title.
-			echo '<button class="button button-secondary button-large" type="submit" name="block-directory-edit" value="remove">' . sprintf( __( 'Remove %s from Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
+			echo '<button class="button button-secondary button-large" type="submit" name="block-directory-edit" value="remove">' . sprintf( esc_html__( 'Remove %s from Block Directory', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</button>';
 		} else if ( ! $has_errors ) {
-			echo wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
+			wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
 			// translators: %s plugin title.
-			echo '<button class="button button-primary button-large" type="submit" name="block-directory-edit" value="add">' . sprintf( __( 'Add %s to Block Directory', 'wporg-plugins' ), $plugin->post_title ) . '</button>';
+			echo '<button class="button button-primary button-large" type="submit" name="block-directory-edit" value="add">' . sprintf( esc_html__( 'Add %s to Block Directory', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</button>';
 		}
 
 		echo '</p>';
@@ -222,7 +222,7 @@ class Block_Validator {
 	 */
 	protected static function display_results( $checker ) {
 
-		echo '<h2>' . __( 'Results', 'wporg-plugins' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Results', 'wporg-plugins' ) . '</h2>';
 
 		$results = $checker->get_results();
 
@@ -230,7 +230,7 @@ class Block_Validator {
 			echo '<p>';
 			printf(
 				// translators: %1$s is the repo URL, %2$s is a version number.
-				__( 'Results for %1$s revision %2$s', 'wporg-plugins' ),
+				esc_html__( 'Results for %1$s revision %2$s', 'wporg-plugins' ),
 				'<code>' . esc_url( $checker->repo_url ) . '</code>',
 				esc_html( $checker->repo_revision )
 			);
@@ -253,20 +253,20 @@ class Block_Validator {
 		if ( $has_errors ) :
 			?>
 			<div class="notice notice-error notice-alt">
-				<p><?php _e( 'Some problems were found. They need to be addressed for your plugin to be included in the Block Directory.', 'wporg-plugins' ); ?></p>
+				<p><?php esc_html_e( 'Some problems were found. They need to be addressed for your plugin to be included in the Block Directory.', 'wporg-plugins' ); ?></p>
 			</div>
 		<?php elseif ( $checker->slug ) : ?>
 			<?php if ( self::plugin_is_in_block_directory( $checker->slug ) ) : ?>
 				<div class="notice notice-info notice-alt">
-					<p><?php _e( 'This plugin is already in the Block Directory.', 'wporg-plugins' ); ?></p>
+					<p><?php esc_html_e( 'This plugin is already in the Block Directory.', 'wporg-plugins' ); ?></p>
 				</div>
 			<?php elseif ( $has_warnings ) : ?>
 				<div class="notice notice-info notice-alt">
-					<p><?php _e( 'You can add your plugin to the Block Directory.', 'wporg-plugins' ); ?></p>
+					<p><?php esc_html_e( 'You can add your plugin to the Block Directory.', 'wporg-plugins' ); ?></p>
 				</div>
 			<?php else : ?>
 				<div class="notice notice-success notice-alt">
-					<p><?php _e( 'No issues were found. You can add your plugin to the Block Directory.', 'wporg-plugins' ); ?></p>
+					<p><?php esc_html_e( 'No issues were found. You can add your plugin to the Block Directory.', 'wporg-plugins' ); ?></p>
 				</div>
 			<?php endif; ?>
 		<?php else : ?>
@@ -274,7 +274,8 @@ class Block_Validator {
 				<p>
 					<?php
 					printf(
-						__( 'Your plugin passed the checks, but only plugins hosted on WordPress.org can be added to the Block Directory. <a href="%s">Upload your plugin to the WordPress.org repo,</a> then come back here to add it to the Block Directory.', 'wporg-plugins' ),
+						/* translators: %s: Plugin submission URL. */
+						wp_kses_post( __( 'Your plugin passed the checks, but only plugins hosted on WordPress.org can be added to the Block Directory. <a href="%s">Upload your plugin to the WordPress.org repo,</a> then come back here to add it to the Block Directory.', 'wporg-plugins' ) ),
 						esc_url( home_url( 'developers' ) )
 					);
 					?>
@@ -287,20 +288,20 @@ class Block_Validator {
 			$plugin = Plugin_Directory::get_plugin_post( $checker->slug );
 			if ( current_user_can( 'edit_post', $plugin->ID ) ) {
 				// Plugin reviewers etc
-				echo '<h3>' . __( 'Plugin Review Tools', 'wporg-plugins' ) . '</h3>';
+				echo '<h3>' . esc_html__( 'Plugin Review Tools', 'wporg-plugins' ) . '</h3>';
 
 				echo '<ul>';
-				echo '<li><a href="' . get_edit_post_link( $plugin->ID ) . '">' . __( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
-				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . __( 'Trac browser', 'wporg-plugins' ) . '</a></li>';
+				echo '<li><a href="' . esc_url( (string) get_edit_post_link( $plugin->ID ) ) . '">' . esc_html__( 'Edit plugin', 'wporg-plugins' ) . '</a></li>';
+				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . esc_html__( 'Trac browser', 'wporg-plugins' ) . '</a></li>';
 				echo '</ul>';
 
 				self::render_plugin_actions( $plugin, $has_errors );
 
 			} elseif ( current_user_can( 'plugin_admin_edit', $plugin->ID ) ) {
 				// Plugin committers
-				echo '<h3>' . __( 'Committer Tools', 'wporg-plugins' ) . '</h3>';
+				echo '<h3>' . esc_html__( 'Committer Tools', 'wporg-plugins' ) . '</h3>';
 				echo '<ul>';
-				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . __( 'Browse code on trac', 'wporg-plugins' ) . '</a></li>';
+				echo '<li><a href="' . esc_url( 'https://plugins.trac.wordpress.org/browser/' . $checker->slug . '/trunk' ) . '">' . esc_html__( 'Browse code on trac', 'wporg-plugins' ) . '</a></li>';
 				echo '</ul>';
 
 				self::render_plugin_actions( $plugin, $has_errors );
@@ -336,19 +337,21 @@ class Block_Validator {
 				$output .= "<p class='small'>{$labels['description']}</p>\n";
 			}
 			$output .= "<div class='notice notice-{$type} notice-alt'>\n";
-			foreach ( (array) $results_by_type[ $type ] as $item ) {
+			// Absent only via the fall-through above: block.json issues, no other errors.
+			foreach ( (array) ( $results_by_type[ $type ] ?? array() ) as $item ) {
 				// Only get details if this is a warning or error.
 				$details = ( 'info' === $type ) ? false : self::get_detailed_help( $item->check_name, $item );
+				$message = self::sanitize_message( $item->message );
 				if ( $details ) {
 					$details = '<p>' . implode( '</p><p>', (array) $details ) . '</p>';
-					$output .= "<details class='{$item->check_name}'><summary>{$item->message}</summary>{$details}</details>";
+					$output .= "<details class='{$item->check_name}'><summary>{$message}</summary>{$details}</details>";
 				} else {
-					$output .= "<p>{$item->message}</p>";
+					$output .= "<p>{$message}</p>";
 				}
 			}
-			// Collapse block.json warnings into one details at the end of warnings list.
+			// Collapse block.json issues into one details at the end of the errors list.
 			if ( 'error' === $type && ! empty( $block_json_issues ) ) {
-				$messages = wp_list_pluck( $block_json_issues, 'message' );
+				$messages = array_map( array( __CLASS__, 'sanitize_message' ), wp_list_pluck( $block_json_issues, 'message' ) );
 				$details = '<p>' . implode( '</p><p>', (array) $messages ) . '</p>';
 				$output .= sprintf(
 					'<details class="check_block_json_is_valid"><summary>%1$s</summary>%2$s</details>',
@@ -365,7 +368,32 @@ class Block_Validator {
 			$output .= '</div>';
 		}
 
-		echo $output;
+		echo wp_kses_post( $output );
+	}
+
+	/**
+	 * Restrict a checker result message to the markup the checks actually use.
+	 *
+	 * Messages recorded by Block_Plugin_Checker intentionally contain a little
+	 * markup, but they also interpolate plugin-controlled values such as readme
+	 * headers, block names and file paths. Those values are escaped where they
+	 * are interpolated; this is the backstop for anything that is missed.
+	 *
+	 * @param string $message A message recorded by Block_Plugin_Checker.
+	 * @return string The message, safe to output as HTML.
+	 */
+	protected static function sanitize_message( $message ) {
+		return wp_kses(
+			$message,
+			array(
+				'a'      => array( 'href' => true ),
+				'br'     => array(),
+				'code'   => array(),
+				'em'     => array(),
+				'strong' => array(),
+			),
+			array( 'http', 'https' )
+		);
 	}
 
 	/**
@@ -435,7 +463,7 @@ class Block_Validator {
 			case 'check_for_translation_function':
 				return sprintf(
 					// translators: %s is the link to the internationalization docs.
-					__( 'Block plugins should use <code>wp_set_script_translations</code> to load translations for each script file. <a href="%s">Learn more about internationalization.</a>', 'wporg-plugins' ),
+					__( 'Block plugins should load translations for each script file, either by registering blocks from <code>block.json</code> with a <code>textdomain</code> set, or by calling <code>wp_set_script_translations</code> directly. <a href="%s">Learn more about internationalization.</a>', 'wporg-plugins' ),
 					'https://developer.wordpress.org/block-editor/developers/internationalization/'
 				);
 			case 'check_total_size':

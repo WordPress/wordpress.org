@@ -25,7 +25,8 @@ if ( $email ) {
 
 	if ( isset( $user->user_nicename ) ) {
 		$html .= '<p>Profile: <a href="https://profiles.wordpress.org/' . $user->user_nicename . '/">'. $user->user_nicename .'</a></p>';
-		$html .= '<p>Forums: <a href="https://wordpress.org/support/users/'. $user->user_nicename . '/">'. $user->user_nicename .'</a></p>';
+		$html .= '<p><a href="https://profiles.wordpress.org/' . $user->user_nicename . '/profile/edit/group/3/">Account &amp; Security</a></p>';
+		$html .= '<p><a href="https://wordpress.org/support/users/'. $user->user_nicename . '/">Forum Profile</a></p>';
 
 		// When the Displayed account email doesn't match the email being displayed, output the user email address too.
 		if ( ! empty( $request->customer->email ) && strcasecmp( $request->customer->email, $user->user_email ) ) {

@@ -1,0 +1,22 @@
+/**
+ * Lays the Modules page's cards out in columns of up to 540px, as many as fit.
+ */
+
+/* Not in a collapsed panel, like the third-party modules, which would show otherwise. */
+.row-container:has( > .module-card ):not( .collapse:not( .in ) ) {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( min( 100%, 440px ), 540px ) );
+	gap: 18px;
+}
+
+/* Like the Modules Directory's subscribe note. */
+.row-container:has( > .module-card ) > :not( .module-card ) {
+	grid-column: 1 / -1;
+	margin-bottom: 0;
+}
+
+.row-container > .module-card {
+	float: none;
+	width: auto;
+	margin: 0;
+}

@@ -10,6 +10,8 @@ Description: Functionality for jobs.wordpress.net
 defined( 'ABSPATH' ) or die();
 
 require_once( dirname( __FILE__ ) . '/jobswp-captcha.php' );
+require_once( dirname( __FILE__ ) . '/jobswp-contact-form.php' );
+require_once( dirname( __FILE__ ) . '/jobswp-moderation.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-template.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-walker.php' );
 
@@ -101,7 +103,7 @@ class Jobs_Dot_WP {
 		add_filter( 'manage_posts_columns',           array( $this, 'posts_columns' ), 8, 2 );
 		add_action( 'manage_job_posts_custom_column', array( $this, 'custom_posts_columns' ), 10, 2 );
 
-		add_filter( 'the_content',                    array( $this, 'add_post_a_job_form' ) );
+		add_filter( 'the_content', array( $this, 'add_post_a_job_form' ), 12 );
 		add_filter( 'wp_kses_allowed_html',           array( $this, 'wp_kses_allowed_html' ), 10, 2 );
 		add_filter( 'body_class',                     array( $this, 'body_class' ) );
 
@@ -162,6 +164,19 @@ class Jobs_Dot_WP {
 	 * @return array The amended list of allowed tags
 	 */
 	public function wp_kses_allowed_html( $allowedtags, $content ) {
+		// Interface text needs links that are not permitted in job descriptions.
+		if ( 'jobswp-ui' === $content ) {
+			return array(
+				'a'      => array(
+					'href'  => true,
+					'rel'   => true,
+					'title' => true,
+				),
+				'em'     => array(),
+				'strong' => array(),
+			);
+		}
+
 		// Add permissable tags
 		$allowedtags['ol'] = array();
 		$allowedtags['ul'] = array();
@@ -395,7 +410,8 @@ class Jobs_Dot_WP {
 		}
 
 		echo '<div class="error"><p>';
-		printf( __( 'ERROR: The username configured for posting jobs &mdash; %s &mdash; does not exist.', 'jobswp' ), $this->get_jobposter( false ) );
+		/* translators: %s: Configured job poster username. */
+		printf( esc_html__( 'ERROR: The username configured for posting jobs &mdash; %s &mdash; does not exist.', 'jobswp' ), esc_html( $this->get_jobposter( false ) ) );
 		echo '</p></div>';
 	}
 
@@ -414,6 +430,7 @@ class Jobs_Dot_WP {
 		if ( ! $post_type_object )
 			return;
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Close-link markup assembled by _get_close_link().
 		echo $this->_get_close_link( $post, 'button button-large alignright' );
 	}
 
@@ -431,7 +448,7 @@ class Jobs_Dot_WP {
 		$close_link = add_query_arg( 'action', $action, admin_url( sprintf( $post_type_object->_edit_link, $post->ID ) ) );
 		$close_link = wp_nonce_url( $close_link, "$action-post_{$post->ID}" );
 
-		$link = '<a href="' . $close_link . '"';
+		$link = '<a href="' . esc_url( $close_link ) . '"';
 		if ( $class )
 			$link .= ' class="' . esc_attr( $class ) . '"';
 		$link .= ' title="' . esc_attr__( 'Close this job', 'jobswp' ) . '">';
@@ -480,32 +497,38 @@ class Jobs_Dot_WP {
 	function handle_close_job() {
 		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : null;
 
-		if ( ! $post_id )
-			wp_die( __( 'No job specified to close.', 'jobswp' ) );
+		if ( ! $post_id ) {
+			wp_die( esc_html__( 'No job specified to close.', 'jobswp' ) );
+		}
 
 		check_admin_referer( 'close-job-post_' . $post_id );
 
 		$post = get_post( $post_id );
 
-		if ( ! $post )
-			wp_die( __( 'The job you are trying to close no longer exists.', 'jobswp' ) );
+		if ( ! $post ) {
+			wp_die( esc_html__( 'The job you are trying to close no longer exists.', 'jobswp' ) );
+		}
 
 		$post_type = $post->post_type;
 		$post_type_object = get_post_type_object( $post_type );
 
-		if ( ! $post_type_object )
-			wp_die( __( 'Unknown post type.' ) );
+		if ( ! $post_type_object ) {
+			wp_die( esc_html__( 'Unknown post type.' ) );
+		}
 
-		if ( ! current_user_can( 'delete_post', $post_id ) )
-			wp_die( __( 'You are not allowed to close this job.', 'jobswp' ) );
+		if ( ! current_user_can( 'delete_post', $post_id ) ) {
+			wp_die( esc_html__( 'You are not allowed to close this job.', 'jobswp' ) );
+		}
 
 		if ( $user_id = wp_check_post_lock( $post_id ) ) {
 			$user = get_userdata( $user_id );
-			wp_die( sprintf( __( 'You cannot close this job. %s is currently editing.', 'jobswp' ), $user->display_name ) );
+			/* translators: %s: Display name of the user editing the job. */
+			wp_die( sprintf( esc_html__( 'You cannot close this job. %s is currently editing.', 'jobswp' ), esc_html( $user->display_name ) ) );
 		}
 
-		if ( ! $this->close_job( $post ) )
-			wp_die( __( 'Error in closing job.', 'jobswp' ) );
+		if ( ! $this->close_job( $post ) ) {
+			wp_die( esc_html__( 'Error in closing job.', 'jobswp' ) );
+		}
 
 		// Redirect back to jobs listing
 		$sendback = wp_get_referer();
@@ -516,7 +539,15 @@ class Jobs_Dot_WP {
 			$sendback = remove_query_arg( array( 'close-job', 'closed-job', 'ids'), $sendback );
 		}
 
-		wp_redirect( add_query_arg( array( 'closed-job' => 1, 'ids' => $post_id ), $sendback ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'closed-job' => 1,
+					'ids'        => $post_id,
+				),
+				$sendback
+			)
+		);
 		exit();
 	}
 
@@ -540,7 +571,7 @@ class Jobs_Dot_WP {
 			return;
 
 		echo '<div class="updated"><p>';
-		_e( 'Job closed.', 'jobswp' );
+		esc_html_e( 'Job closed.', 'jobswp' );
 		echo '</p></div>';
 	}
 
@@ -603,8 +634,19 @@ class Jobs_Dot_WP {
 	/**
 	 * Inserts the post-a-job form into the body of the post-a-job page.
 	 *
+	 * The form is rebuilt from $_POST on every render, so its markup should
+	 * not be handed back to the remaining the_content filters. Two things
+	 * keep it out of their way, and both are deliberate:
+	 *
+	 * - get_template_part() echoes the template and returns null, so the `.=`
+	 *   calls below append nothing; the form goes straight to the output
+	 *   stream and never becomes part of $content. Do not "tidy" this by
+	 *   buffering the template into $content.
+	 * - This filter runs at priority 12, above core's do_shortcode() at 11,
+	 *   so submitted values are never re-parsed as markup.
+	 *
 	 * @param string $content Existing page content.
-	 * @return string The content appended with the post-a-job form
+	 * @return string The content, unchanged; the form is echoed directly.
 	 */
 	public function add_post_a_job_form( $content ) {
 		if ( ! $this->skip_content && is_page( 'post-a-job' ) ) {
@@ -1219,3 +1261,73 @@ EMAIL;
 }
 
 Jobs_Dot_WP::get_instance();
+
+/**
+ * Fetches a paginated list of WordPress.org profiles that are "open to work".
+ *
+ * Results are cached per page for 1 hour via transients.
+ *
+ * @param int $page     Page number (1-based). Default 1.
+ * @param int $per_page Number of results per page. Default 10.
+ * @return array {
+ *     @type array $candidates Array of candidate objects.
+ *     @type int   $total      Total number of candidates across all pages.
+ *     @type int   $pages      Total number of pages.
+ * }
+ */
+function jobswp_get_open_to_work_candidates( $page = 1, $per_page = 10 ) {
+	$page     = max( 1, min( (int) $page, 100 ) );
+	$per_page = max( 1, min( (int) $per_page, 100 ) );
+	$transient_key = 'jobswp_otw_p' . $page . '_n' . $per_page;
+	$cached = get_transient( $transient_key );
+
+	if ( false !== $cached ) {
+		return $cached;
+	}
+
+	$url = add_query_arg(
+		array(
+			'page'     => $page,
+			'per_page' => $per_page,
+		),
+		'https://profiles.wordpress.org/wp-json/wporg-profiles/v1/jobs/open-to-work'
+	);
+
+	$response = wp_remote_get( $url, array( 'timeout' => 10 ) );
+
+	$empty = array(
+		'candidates' => array(),
+		'total'      => 0,
+		'pages'      => 0,
+	);
+
+	if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+		set_transient( $transient_key, $empty, 5 * MINUTE_IN_SECONDS );
+		return $empty;
+	}
+
+	$body = wp_remote_retrieve_body( $response );
+	$data = json_decode( $body );
+
+	if ( ! is_array( $data ) ) {
+		set_transient( $transient_key, $empty, 5 * MINUTE_IN_SECONDS );
+		return $empty;
+	}
+
+	$result = array(
+		'candidates' => $data,
+		'total'      => (int) wp_remote_retrieve_header( $response, 'x-wp-total' ),
+		'pages'      => (int) wp_remote_retrieve_header( $response, 'x-wp-totalpages' ),
+	);
+
+	// If API doesn't return pagination headers, fall back to what we have.
+	if ( ! $result['total'] ) {
+		$result['total'] = count( $data );
+		$result['pages'] = 1;
+	}
+
+	set_transient( $transient_key, $result, HOUR_IN_SECONDS );
+
+	return $result;
+}
+

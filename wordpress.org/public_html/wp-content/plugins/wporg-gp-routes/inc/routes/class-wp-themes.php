@@ -90,7 +90,7 @@ class WP_Themes extends WP_Directory {
 			}
 		} );
 
-		$project->icon = $this->get_theme_icon( $project, 64 );
+		$icon = $this->get_theme_icon( $project, 64 );
 
 		$this->tmpl( 'projects-wp-themes', get_defined_vars() );
 	}
@@ -109,7 +109,7 @@ class WP_Themes extends WP_Directory {
 			return $this->die_with_404();
 		}
 
-		$project->icon = $this->get_theme_icon( $project, 64 );
+		$icon = $this->get_theme_icon( $project, 64 );
 
 		$contributors_by_locale = gp_get_meta( 'wp-themes', $project->id, 'contributors-by-locale' );
 		if ( ! $contributors_by_locale || $contributors_by_locale['last_updated'] + HOUR_IN_SECONDS < time() ) {
@@ -142,7 +142,7 @@ class WP_Themes extends WP_Directory {
 			return $this->die_with_404();
 		}
 
-		$project->icon = $this->get_theme_icon( $project, 64 );
+		$icon = $this->get_theme_icon( $project, 64 );
 
 		$language_packs = $this->get_language_packs( 'theme', $project_slug );
 

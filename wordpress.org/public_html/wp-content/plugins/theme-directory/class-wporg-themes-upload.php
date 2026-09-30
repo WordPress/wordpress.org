@@ -76,6 +76,13 @@ class WPORG_Themes_Upload {
 	public $theme;
 
 	/**
+	 * The theme name.
+	 *
+	 * @var string
+	 */
+	public $theme_name = '';
+
+	/**
 	 * The theme slug being uploaded.
 	 *
 	 * @var string
@@ -190,6 +197,181 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
+	 * Reads a header from the theme being imported.
+	 *
+	 * The third argument to WP_Theme::display() must stay false. With translation
+	 * enabled, display() calls WP_Theme::load_textdomain(), which loads translation
+	 * files from the theme's own directory, and WordPress loads PHP translation
+	 * files (.l10n.php) by including them. The theme being imported is unreviewed
+	 * upload content, so no file from it may be included while it is validated.
+	 *
+	 * Headers are still marked up and sanitized exactly as display() would do, so
+	 * this is only a change of translation behavior and not of output.
+	 *
+	 * The same applies to casting a WP_Theme to a string or reading it as an array:
+	 * WP_Theme::__toString() and WP_Theme::offsetGet() both call display() with
+	 * translation left enabled. Read headers through this method instead.
+	 *
+	 * @param string $header The header to read, for example 'Name' or 'Version'.
+	 * @return string|false The header value, or false if the header is not set.
+	 */
+	public function get_theme_header( $header ) {
+		return $this->theme->display( $header, true, false );
+	}
+
+	/**
+	 * Refuses to load any translation file that resolves inside the extracted upload.
+	 *
+	 * `get_theme_header()` keeps the deliberate header reads from engaging
+	 * translation at all; this is the backstop for any path that does not, such as
+	 * casting a WP_Theme to a string. Paths outside the extracted upload, including
+	 * this plugin's own text domain, are left to load normally.
+	 *
+	 * @param bool   $override Whether the load was already overridden.
+	 * @param string $domain   Text domain being loaded. Unused; the check is by path.
+	 * @param string $mofile   Absolute path to the candidate translation file.
+	 * @return bool True to refuse a load from inside the extracted upload, otherwise $override.
+	 */
+	public function block_upload_textdomain( $override, $domain, $mofile ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Signature is set by the filter.
+		if ( ! $this->tmp_dir ) {
+			return $override;
+		}
+
+		$root = realpath( $this->tmp_dir );
+		if ( ! $root ) {
+			// Nothing left to guard: remove_files() deletes the tree while this filter is still attached.
+			return $override;
+		}
+
+		// An unresolvable path while a tree is on disk is refused rather than guessed at.
+		$dir = realpath( dirname( (string) $mofile ) );
+		if ( ! $dir ) {
+			return true;
+		}
+
+		return str_starts_with( trailingslashit( $dir ), trailingslashit( $root ) ) ? true : $override;
+	}
+
+	/**
+	 * Lists every file the package will contain.
+	 *
+	 * @return array Package-relative paths.
+	 */
+	public function package_files() {
+		$prefix = trailingslashit( $this->theme_dir );
+
+		return array_map(
+			static function ( $file ) use ( $prefix ) {
+				return substr( $file, strlen( $prefix ) );
+			},
+			$this->get_all_files( $this->theme_dir )
+		);
+	}
+
+	/**
+	 * Lists the packaged files that the automated review never reads.
+	 *
+	 * @return array Package-relative paths of the unreviewed files, sorted.
+	 */
+	public function unreviewable_files() {
+		// Lifted only to measure, so the diff isolates the dot-prefixed entries no filter can reach.
+		add_filter( 'theme_scandir_exclusions', '__return_empty_array' );
+		$reviewed = array_flip( array_values( (array) $this->theme->get_files( null, -1, false ) ) );
+		remove_filter( 'theme_scandir_exclusions', '__return_empty_array' );
+
+		$prefix     = trailingslashit( $this->theme_dir );
+		$unreviewed = array();
+
+		foreach ( $this->get_all_files( $this->theme_dir ) as $file ) {
+			if ( ! isset( $reviewed[ $file ] ) ) {
+				$unreviewed[] = substr( $file, strlen( $prefix ) );
+			}
+		}
+
+		sort( $unreviewed );
+
+		return $unreviewed;
+	}
+
+	/**
+	 * Lists the packaged files whose names are not portable.
+	 *
+	 * @param array $files Package-relative paths to test.
+	 * @return array The paths that are not portable, sorted.
+	 */
+	public static function non_portable_files( array $files ) {
+		$devices = array( 'CON', 'PRN', 'AUX', 'NUL', 'CONIN$', 'CONOUT$' );
+		for ( $i = 1; $i <= 9; $i++ ) {
+			$devices[] = 'COM' . $i;
+			$devices[] = 'LPT' . $i;
+		}
+
+		$not_portable = array();
+		$by_lowercase = array();
+
+		foreach ( $files as $file ) {
+			$by_lowercase[ strtolower( $file ) ][] = $file;
+
+			foreach ( explode( '/', $file ) as $segment ) {
+				// Win32 reads the device name from the segment up to its first period.
+				list( $device ) = explode( '.', $segment );
+
+				if (
+					preg_match( '/[<>:"|?*\\\\\x00-\x1f\x7f-\xff]/', $segment ) ||
+					preg_match( '/[. ]$/', $segment ) ||
+					in_array( strtoupper( $device ), $devices, true )
+				) {
+					$not_portable[] = $file;
+					break;
+				}
+			}
+		}
+
+		// A case-insensitive filesystem resolves every member of these groups to one file.
+		foreach ( $by_lowercase as $group ) {
+			if ( count( $group ) > 1 ) {
+				$not_portable = array_merge( $not_portable, $group );
+			}
+		}
+
+		$not_portable = array_unique( $not_portable );
+
+		sort( $not_portable );
+
+		return $not_portable;
+	}
+
+	/**
+	 * Renders a list of package paths for an error message.
+	 *
+	 * A rejected tree such as a committed `.git` directory holds thousands of paths, so
+	 * only the first few are named.
+	 *
+	 * @param array $files Package-relative paths.
+	 * @return string The escaped, comma-separated list.
+	 */
+	protected function format_file_list( array $files ) {
+		$listed = array_map(
+			static function ( $file ) {
+				// Escape non-printable bytes so every rejected name is visible.
+				return esc_html( addcslashes( $file, "\0..\37\177..\377" ) );
+			},
+			array_slice( $files, 0, 10 )
+		);
+		$list   = '<code>' . implode( '</code>, <code>', $listed ) . '</code>';
+
+		if ( count( $files ) > count( $listed ) ) {
+			$list .= sprintf(
+				/* translators: %d: number of further files not named in the message */
+				__( ', and %d more', 'wporg-themes' ),
+				count( $files ) - count( $listed )
+			);
+		}
+
+		return $list;
+	}
+
+	/**
 	 * Validate that a theme upload succeeded and was a valid file.
 	 */
 	public function validate_upload( $file ) {
@@ -249,18 +431,12 @@ class WPORG_Themes_Upload {
 
 		// Check out from SVN.
 		$this->create_tmp_dirs( $slug . '.' . $version );
-		$esc_svn = escapeshellarg( "https://themes.svn.wordpress.org/{$slug}/{$version}/" );
-		$this->exec_with_notify(
-			self::SVN . " export {$esc_svn} {$this->theme_dir} --force", // force as we've created the directory already.
-			$output,
-			$return_var
-		);
-		if ( $return_var ) {
-			return new WP_Error(
-				'svn_error',
-				implode( "\n", $output )
-			);
+		$svn_url  = "https://themes.svn.wordpress.org/{$slug}/{$version}/";
+		$exported = $this->svn_export( $svn_url, $this->theme_dir );
+		if ( is_wp_error( $exported ) ) {
+			return $exported;
 		}
+		$esc_svn = escapeshellarg( $svn_url );
 
 		// Fetch data from SVN if not known.
 		if ( ! $changeset ) {
@@ -292,7 +468,8 @@ class WPORG_Themes_Upload {
 
 		return $this->import( array( // return true | WP_Error
 			// Since this version is already in SVN, we shouldn't try to import it again.
-			'commit_to_svn' => false,
+			'commit_to_svn'    => false,
+			'expected_version' => $version,
 		) );
 	}
 
@@ -328,9 +505,76 @@ class WPORG_Themes_Upload {
 		return sprintf(
 			/* translators: 1: theme name, 2: Trac ticket URL */
 			__( 'Thank you for uploading %1$s to the WordPress Theme Directory. We&rsquo;ve sent you an email verifying that we&rsquo;ve received it. Feedback will be provided at <a href="%2$s">%2$s</a>', 'wporg-themes' ),
-			$this->theme->display( 'Name' ),
+			$this->get_theme_header( 'Name' ),
 			esc_url( 'https://themes.trac.wordpress.org/ticket/' . $this->trac_ticket->id )
 		);
+	}
+
+	/**
+	 * Determines whether a version string is a canonical, unambiguous theme version.
+	 *
+	 * Canonical means decimal segments joined by single periods and nothing else: the one
+	 * shape that maps identically across the style.css header, SVN directory, meta key, API
+	 * value, and package filename, so review and downloads can't resolve different trees.
+	 * Version zero ('0', '0.0', ...) is rejected: version_compare() makes it the lowest
+	 * possible version, and the bare form's falsiness invites `! $version` bugs downstream.
+	 *
+	 * @param string $version The version string to test.
+	 * @return bool True when the version is canonical.
+	 */
+	public static function is_canonical_version( $version ) {
+		return (bool) preg_match( '/^\d+(\.\d+)*$/D', (string) $version )
+			&& (bool) preg_match( '/[1-9]/', (string) $version );
+	}
+
+	/**
+	 * Collects the errors for a theme's Version header and its SVN directory identity.
+	 *
+	 * @param string       $version          The style.css Version header value.
+	 * @param string|false $expected_version SVN directory version the header must match; false to skip the check.
+	 * @return WP_Error The errors found; empty when the version is acceptable.
+	 */
+	public static function version_identity_errors( $version, $expected_version = false ) {
+		$errors = new WP_Error();
+
+		// Strict comparison: a '0' header is reported as invalid below, not as missing.
+		if ( '' === $version ) {
+			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
+
+			$error .= sprintf(
+				/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
+				__( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
+				'<code>Version:</code>',
+				'<code>style.css</code>',
+				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
+			);
+
+			$errors->add( 'no_version', $error );
+
+		} elseif ( ! self::is_canonical_version( $version ) ) {
+			$errors->add(
+				'invalid_version',
+				sprintf(
+					/* translators: %s: style.css */
+					__( 'Version strings must be a plain numeric version like 1.2 or 1.2.3. Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
+					'<code>style.css</code>'
+				)
+			);
+
+		} elseif ( false !== $expected_version && (string) $expected_version !== $version ) {
+			// The exported directory name must equal the version its tree declares, or review and downloads diverge.
+			$errors->add(
+				'version_mismatch',
+				sprintf(
+					/* translators: 1: SVN directory version, 2: style.css version */
+					__( 'The SVN directory version (%1$s) does not match the version declared in style.css (%2$s).', 'wporg-themes' ),
+					'<code>' . esc_html( (string) $expected_version ) . '</code>',
+					'<code>' . esc_html( $version ) . '</code>'
+				)
+			);
+		}
+
+		return $errors;
 	}
 
 	/**
@@ -350,6 +594,8 @@ class WPORG_Themes_Upload {
 				'block_on_themecheck' => true,
 				// Whether to create a Trac ticket for this import.
 				'create_trac_ticket'  => true,
+				// SVN directory version the tree's header must match; false to skip the check.
+				'expected_version'    => false,
 			)
 		);
 
@@ -389,8 +635,25 @@ class WPORG_Themes_Upload {
 		// Do we have a readme.txt? Fetch extra data from there too.
 		$this->readme = $this->get_readme_data( $theme_files );
 
+		$stylesheet = basename( dirname( $style_css ) );
+		$theme_root = dirname( dirname( $style_css ) );
+		$template   = get_file_data( $style_css, array( 'Template' => 'Template' ), 'theme' )['Template'];
+
+		// A child theme is checked against the directory's copy of its parent, placed beside it.
+		$parent_id = false;
+		if ( $template && $template !== $stylesheet ) {
+			$parent_id = $this->export_parent_theme( $template, $theme_root );
+			if ( is_wp_error( $parent_id ) ) {
+				return $parent_id;
+			}
+		}
+
 		// We have a stylesheet, let's set up the theme, theme post, and author.
-		$this->theme = new WP_Theme( basename( dirname( $style_css ) ), dirname( dirname( $style_css ) ) );
+		$this->theme              = $this->load_theme( $stylesheet, $theme_root );
+		$this->theme->post_parent = $parent_id;
+
+		// The theme's files are unreviewed: nothing in its tree may load as a translation file.
+		add_filter( 'override_load_textdomain', array( $this, 'block_upload_textdomain' ), 10, 3 );
 
 		// We need a screen shot. People love screen shots.
 		if ( ! $this->has_screenshot( $theme_files ) ) {
@@ -412,10 +675,7 @@ class WPORG_Themes_Upload {
 		$this->theme_name = $this->theme->get( 'Name' );
 
 		if ( ! $this->theme_slug ) {
-			// Determine the theme slug (ascii only for compatibility) based on the name of the theme in the stylesheet
-			$this->theme_slug = remove_accents( $this->theme_name );
-			$this->theme_slug = preg_replace( '/%[a-f0-9]{2}/i', '', $this->theme_slug );
-			$this->theme_slug = sanitize_title_with_dashes( $this->theme_slug );
+			$this->theme_slug = wporg_themes_slug_from_name( $this->theme_name );
 		}
 
 		// Account for "twenty" themes, these themes have slugs that do not match the normal conventions.
@@ -425,7 +685,7 @@ class WPORG_Themes_Upload {
 			$this->theme_slug
 		);
 
-		if ( ! $this->theme_name || ! $this->theme_slug ) {
+		if ( ! $this->theme_name ) {
 			$error = __( 'The theme has no name.', 'wporg-themes' ) . ' ';
 
 			$error .= sprintf(
@@ -437,6 +697,16 @@ class WPORG_Themes_Upload {
 			);
 
 			$style_errors->add( 'no_name', $error );
+		} elseif ( ! $this->theme_slug ) {
+			$style_errors->add(
+				'unsupported_name',
+				sprintf(
+					/* translators: 1: theme name, 2: style.css */
+					__( 'The theme name %1$s cannot be used, as theme names need at least one character that maps to a Latin letter (a-z) or a digit. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
+					'<code>' . $this->get_theme_header( 'Name' ) . '</code>',
+					'<code>style.css</code>'
+				)
+			);
 		}
 
 		// Do not allow themes with WordPress and Theme in the theme name.
@@ -528,6 +798,39 @@ class WPORG_Themes_Upload {
 			$style_errors->add( 'no_description', $error );
 		}
 
+		/*
+		 * The one-line headers that can carry the syntax, as
+		 * `error code => [ style.css line, value that gets stored ]`. The description
+		 * reaches `post_content`, the name reaches `post_title`, and the author is stored
+		 * as the `_author` post meta that the themes API reads back. Each is read the way
+		 * `create_or_update_theme_post()` reads it, so the check sees the value that would
+		 * be stored rather than the one in the file.
+		 *
+		 * `Theme URI` and `Author URI` need no entry: `WP_Theme::get()` returns them
+		 * through `esc_url_raw()`, which percent-encodes the delimiters.
+		 */
+		$stored_headers = array(
+			'shortcode_in_description' => array( 'Description', $theme_description ),
+			'shortcode_in_name'        => array( 'Theme Name', (string) $this->theme->get( 'Name' ) ),
+			'shortcode_in_author'      => array( 'Author', (string) $this->theme->get( 'Author' ) ),
+		);
+
+		foreach ( $stored_headers as $code => list( $header, $value ) ) {
+			if ( ! preg_match( '/' . get_shortcode_regex() . '/', $value ) ) {
+				continue;
+			}
+
+			$style_errors->add(
+				$code,
+				sprintf(
+					/* translators: 1: comment header line, 2: style.css */
+					__( 'The %1$s line in %2$s cannot contain shortcodes. Remove them and upload the theme again.', 'wporg-themes' ),
+					'<code>' . $header . ':</code>',
+					'<code>style.css</code>'
+				)
+			);
+		}
+
 		if ( ! $this->theme->get( 'Tags' ) ) {
 			$error = __( 'The theme has no tags.', 'wporg-themes' ) . ' ';
 
@@ -542,29 +845,9 @@ class WPORG_Themes_Upload {
 			$style_errors->add( 'no_tags', $error );
 		}
 
-		if ( ! $this->theme->get( 'Version' ) ) {
-			$error = __( 'The theme has no version.', 'wporg-themes' ) . ' ';
-
-			$error .= sprintf(
-				/* translators: 1: comment header line, 2: style.css, 3: wporg URL */
-				__( 'Add a %1$s line to your %2$s file and upload the theme again. <a href="%3$s">Theme Style Sheets</a>', 'wporg-themes' ),
-				'<code>Version:</code>',
-				'<code>style.css</code>',
-				__( 'https://developer.wordpress.org/themes/basics/main-stylesheet-style-css/', 'wporg-themes' )
-			);
-
-			$style_errors->add( 'no_version', $error );
-
-		} else if ( preg_match( '|[^\d\.]|', $this->theme->get( 'Version' ) ) ) {
-			$style_errors->add(
-				'invalid_version',
-				sprintf(
-					/* translators: %s: style.css */
-					__( 'Version strings can only contain numeric and period characters (like 1.2). Please fix your Version: line in %s and upload your theme again.', 'wporg-themes' ),
-					'<code>style.css</code>'
-				)
-			);
-		}
+		$style_errors->merge_from(
+			self::version_identity_errors( (string) $this->theme->get( 'Version' ), $args['expected_version'] )
+		);
 
 		// Version is greater than current version happens after authorship checks.
 
@@ -582,18 +865,19 @@ class WPORG_Themes_Upload {
 			);
 		}
 
-		// Check for child theme's parent in the directory (non-buddypress only)
+		// Check for child theme's parent in the directory (non-buddypress only).
 		if (
 			$this->theme->parent() &&
-			! in_array( 'buddypress', $this->theme->get( 'Tags' ) ) &&
-			! $this->is_parent_available()
+			! in_array( 'buddypress', $this->theme->get( 'Tags' ), true ) &&
+			empty( $this->theme->post_parent )
 		) {
 			$style_errors->add(
 				'invalid_parent',
 				sprintf(
 					/* translators: %s: parent theme */
 					__( 'There is no theme called %s in the directory. For child themes, you must use a parent theme that already exists in the directory.', 'wporg-themes' ),
-					'<code>' . $this->theme->parent() . '</code>'
+					// The slug, not the parent object: casting a WP_Theme to a string loads translations from its directory.
+					'<code>' . esc_html( $this->theme->get_template() ) . '</code>'
 				)
 			);
 		}
@@ -681,9 +965,45 @@ class WPORG_Themes_Upload {
 				sprintf(
 					/* translators: 1: theme name, 2: theme version, 3: style.css */
 					__( 'You need to upload a version of %1$s higher than %2$s. Increase the theme version number in %3$s, then upload your zip file again.', 'wporg-themes' ),
-					$this->theme->display( 'Name' ),
+					$this->get_theme_header( 'Name' ),
 					'<code>' . $this->theme_post->max_version . '</code>',
 					'<code>style.css</code>'
+				)
+			);
+		}
+
+		$unreviewable = $this->unreviewable_files();
+		if ( $unreviewable ) {
+			$style_errors->add(
+				'unreviewable_files',
+				sprintf(
+					/* translators: 1: number of files, 2: comma-separated list of file paths */
+					_n(
+						'The theme contains %1$d file that the automated review cannot read: %2$s. Remove it and upload the theme again.',
+						'The theme contains %1$d files that the automated review cannot read: %2$s. Remove them and upload the theme again.',
+						count( $unreviewable ),
+						'wporg-themes'
+					),
+					count( $unreviewable ),
+					$this->format_file_list( $unreviewable )
+				)
+			);
+		}
+
+		$not_portable = self::non_portable_files( $this->package_files() );
+		if ( $not_portable ) {
+			$style_errors->add(
+				'non_portable_filename',
+				sprintf(
+					/* translators: 1: number of files, 2: comma-separated list of file paths */
+					_n(
+						'The theme contains %1$d file whose name is not portable to every platform WordPress supports: %2$s. Rename it and upload the theme again.',
+						'The theme contains %1$d files whose names are not portable to every platform WordPress supports: %2$s. Rename them and upload the theme again.',
+						count( $not_portable ),
+						'wporg-themes'
+					),
+					count( $not_portable ),
+					$this->format_file_list( $not_portable )
 				)
 			);
 		}
@@ -710,7 +1030,7 @@ class WPORG_Themes_Upload {
 			error_reporting( $error_reporting );
 
 			// Output the Theme Check results. This is the only HTML that this function outputs.
-			echo $theme_check_output;
+			echo wp_kses_post( $theme_check_output );
 
 			if ( ! $result && $args['block_on_themecheck'] ) {
 				// Log it to slack.
@@ -762,6 +1082,21 @@ class WPORG_Themes_Upload {
 			}
 		}
 
+		// Create or update the theme post before Trac so the post ID is available for the preview link.
+		$result = $this->create_or_update_theme_post();
+		if ( is_wp_error( $result ) ) {
+			if ( $args['commit_to_svn'] ) {
+				// Since it's been added to SVN at this point, remove it from SVN to prevent future issues.
+				$this->remove_from_svn( 'Theme post creation failed: ' . $result->get_error_code() );
+			}
+
+			if ( $is_new_upload && $this->theme_post ) {
+				$this->delete_theme_post();
+			}
+
+			return $result;
+		}
+
 		// Create a Trac ticket for this theme version.
 		if ( $args['create_trac_ticket'] ) {
 			// Get all Trac ticket information set up.
@@ -770,25 +1105,39 @@ class WPORG_Themes_Upload {
 			// Talk to Trac and let them know about our new version. Or new theme.
 			$ticket_id = $this->create_or_update_trac_ticket();
 
-			if ( ! $ticket_id  ) {
+			if ( ! $ticket_id ) {
 				if ( $args['commit_to_svn'] ) {
 					// Since it's been added to SVN at this point, remove it from SVN to prevent future issues.
 					$this->remove_from_svn( 'Trac ticket creation failed.' );
+				}
+
+				if ( $is_new_upload && $this->theme_post ) {
+					$this->delete_theme_post();
 				}
 
 				return new WP_Error(
 					'failed_trac_ticket_creation',
 					sprintf(
 						/* translators: %s: mailto link */
-						__( 'There was an error creating a Trac ticket for your theme, please report this error to %s', 'wporg-themes' ),
+						__( 'There was an error creating a Trac ticket for your theme. This is usually temporary, so please wait a few minutes and try uploading again. If the error persists, report it to %s.', 'wporg-themes' ),
 						'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
 					)
 				);
 			}
+
+			// Write the ticket ID to post meta now that the Trac ticket exists.
+			$this->update_versioned_meta( '_ticket_id', $ticket_id );
+			add_post_meta( $this->theme_post->ID, sanitize_key( '_trac_ticket_' . $this->theme->get( 'Version' ) ), $ticket_id );
 		}
 
-		// Add a or update the Theme Directory entry for this theme.
-		$this->create_or_update_theme_post();
+		/*
+		 * Discard versions that are awaiting review, and maybe set this upload as live.
+		 * This runs after Trac ticket creation since auto-approved updates change version_status to 'live'.
+		 */
+		wporg_themes_update_version_status( $this->theme_post->ID, $this->theme->get( 'Version' ), $this->version_status );
+
+		// Refresh the post to include all meta written above.
+		$this->theme_post = $this->get_theme_post();
 
 		// Send theme author an email for peace of mind.
 		$this->send_email_notification();
@@ -838,7 +1187,8 @@ class WPORG_Themes_Upload {
 		mkdir( $this->theme_dir );
 		chmod( $this->theme_dir, 0777 );
 		if ( $create_svn_tmp ) {
-			$this->tmp_svn_dir = "{$this->tmp_dir}/svn";
+			// Not a valid theme slug, so a parent theme exported beside the child can't land on it.
+			$this->tmp_svn_dir = "{$this->tmp_dir}/svn.checkout";
 			mkdir( $this->tmp_svn_dir );
 			chmod( $this->tmp_svn_dir, 0777 );
 		}
@@ -1013,22 +1363,115 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
-	 * Whether the parent theme for this theme is available in the repository.
+	 * Exports a parent theme's live version from the directory next to the child theme.
 	 *
-	 * @return bool
+	 * Core resolves a child's parent in the child's theme root first, so Theme Check
+	 * and the parent validation then see the directory's copy.
+	 *
+	 * @param string $template   The child's `Template` header.
+	 * @param string $theme_root The theme root holding the child theme.
+	 * @return int|false|WP_Error The parent's post ID, false if the directory has no live
+	 *                            theme by that exact slug, or a WP_Error if the export failed.
 	 */
-	public function is_parent_available() {
-		$parent = get_posts( array(
-			'fields'           => 'ids',
-			'name'             => $this->theme->get_template(),
-			'posts_per_page'   => 1,
-			'post_type'        => 'repopackage',
-			'orderby'          => 'ID',
-			'suppress_filters' => false,
-		) );
-		$this->theme->post_parent = current( $parent );
+	protected function export_parent_theme( $template, $theme_root ) {
+		$parent = current(
+			get_posts(
+				array(
+					'name'             => $template,
+					'posts_per_page'   => 1,
+					'post_type'        => 'repopackage',
+					'orderby'          => 'ID',
+					'suppress_filters' => false,
+				)
+			)
+		);
 
-		return ! empty( $parent );
+		// The lookup sanitizes the name; only an exact match is the directory core looks in, and safe to write.
+		if ( ! $parent || $parent->post_name !== $template ) {
+			return false;
+		}
+
+		$live = array_map( 'strval', array_keys( (array) get_post_meta( $parent->ID, '_status', true ), 'live', true ) );
+		if ( ! $live ) {
+			return false;
+		}
+		usort( $live, 'version_compare' );
+		$version = end( $live );
+
+		// The upload may carry its own directory by that name; the directory's copy replaces it.
+		$destination = "{$theme_root}/{$template}";
+		if ( file_exists( $destination ) ) {
+			$this->exec_with_notify( self::RM . ' -rf ' . escapeshellarg( $destination ) );
+		}
+
+		// SVN's own output is logged by the export; the uploader gets a message, not raw paths.
+		if ( is_wp_error( $this->svn_export( "https://themes.svn.wordpress.org/{$template}/{$version}/", $destination ) ) ) {
+			return new WP_Error(
+				'parent_export_failed',
+				sprintf(
+					/* translators: %s: parent theme slug */
+					__( 'The parent theme %s could not be retrieved from the directory. Please try again later.', 'wporg-themes' ),
+					'<code>' . esc_html( $template ) . '</code>'
+				)
+			);
+		}
+
+		return $parent->ID;
+	}
+
+	/**
+	 * Exports a path from SVN, keeping only regular files and directories.
+	 *
+	 * @param string $url         The SVN URL to export.
+	 * @param string $destination The local directory to export into.
+	 * @return true|WP_Error True on success, WP_Error if the export failed.
+	 */
+	protected function svn_export( $url, $destination ) {
+		$esc_url         = escapeshellarg( $url );
+		$esc_destination = escapeshellarg( $destination );
+
+		$this->exec_with_notify(
+			// --ignore-externals: never let a committer's svn:externals pull a remote tree into the export.
+			self::SVN . " export {$esc_url} {$esc_destination} --force --ignore-externals", // force as the directory may exist already.
+			$output,
+			$return_var
+		);
+		if ( $return_var ) {
+			return new WP_Error(
+				'svn_error',
+				implode( "\n", $output )
+			);
+		}
+
+		// Remove any unexpected entries, we only need basic files and directories, anything else will cause problems when installed onto a site.
+		$this->exec_with_notify( "find {$esc_destination} -not -type f -not -type d -delete" );
+
+		return true;
+	}
+
+	/**
+	 * Loads the extracted theme, resolving its parent only from its own theme root.
+	 *
+	 * Core otherwise falls back to the site's installed themes when the parent isn't
+	 * beside the child, or when the parent is a block theme without an index.php.
+	 *
+	 * @param string $stylesheet The theme's directory name.
+	 * @param string $theme_root The directory holding the theme.
+	 * @return WP_Theme
+	 */
+	protected function load_theme( $stylesheet, $theme_root ) {
+		global $wp_theme_directories;
+
+		$theme_directories    = $wp_theme_directories;
+		$wp_theme_directories = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restored below.
+
+		try {
+			$theme = new WP_Theme( $stylesheet, $theme_root );
+		} finally {
+			$wp_theme_directories = $theme_directories; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the original.
+		}
+
+		return $theme;
 	}
 
 	/**
@@ -1094,23 +1537,52 @@ class WPORG_Themes_Upload {
 
 		// Display the errors.
 		$verdict = $result ? array( 'tc-pass', __( 'Pass', 'wporg-themes' ) ) : array( 'tc-fail', __( 'Fail', 'wporg-themes' ) );
-		echo '<h2>' . sprintf( __( 'Results of Automated Theme Scanning: %s', 'wporg-themes' ), vsprintf( '<span class="%1$s">%2$s</span>', $verdict ) ) . '</h2>';
-		echo '<ul class="tc-result">' . display_themechecks() . '</ul>';
-		echo '<div class="notice notice-info"><p>' . __( 'Note: While the automated theme scan is based on the Theme Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the theme will pass review. All submitted themes are reviewed manually before approval.', 'wporg-themes' ) . '</p></div>';
-
-		// Override ALL of the upload checks for child themes.
-		if ( $this->theme->parent() ) {
-			$result = true;
-		}
+		/* translators: %s: Scan verdict. */
+		echo '<h2>' . sprintf( esc_html__( 'Results of Automated Theme Scanning: %s', 'wporg-themes' ), vsprintf( '<span class="%1$s">%2$s</span>', array_map( 'esc_html', $verdict ) ) ) . '</h2>';
+		echo '<ul class="tc-result">' . wp_kses_post( display_themechecks() ) . '</ul>';
+		echo '<div class="notice notice-info"><p>' . esc_html__( 'Note: While the automated theme scan is based on the Theme Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the theme will pass review. All submitted themes are reviewed manually before approval.', 'wporg-themes' ) . '</p></div>';
 
 		return $result;
+	}
+
+	/**
+	 * Disables Trac wiki markup in a value read from the uploaded theme.
+	 *
+	 * Trac skips a construct preceded by `!`, so its openers are prefixed. Line-start
+	 * constructs have no such escape, so the line breaks reaching them are removed.
+	 *
+	 * @param string $value Value read from the uploaded theme.
+	 * @return string The value with wiki markup disabled.
+	 */
+	protected static function escape_trac_wiki( $value ) {
+		// Before the byte work below, and before a `/u` pattern has to read the value.
+		$value = self::strip_non_utf8( (string) $value );
+
+		// Trac splits on Python's line boundaries, which include NEL, LS and PS.
+		$line_breaks = array( "\r", "\n", "\v", "\f", "\x1c", "\x1d", "\x1e", "\xc2\x85", "\xe2\x80\xa8", "\xe2\x80\xa9" );
+		$value       = str_replace( $line_breaks, ' ', $value );
+
+		// An escape that could not be applied returns nothing rather than the raw value.
+		$value = preg_replace( '/\[|\{|\|(?=[|-])/', '!$0', $value );
+		if ( null === $value ) {
+			return '';
+		}
+
+		// Inline formatting (`__()` would underline the text around it), skipping link targets, where a `!` would break the URL.
+		$value = preg_replace( '/(?<![-a-zA-Z0-9+.])[a-zA-Z][-a-zA-Z0-9+._]*:[\w\/?!#@](?<!_)(?:(?:\|(?=[^|\s])|[^|<>\s])*[\w\/=](?<!_))?(*SKIP)(*FAIL)|__|~~|,,|\^|`|\*\*/u', '!$0', $value );
+		if ( null === $value ) {
+			return '';
+		}
+
+		// A leading `=` opens a heading, and its anchor becomes the element's `id`.
+		return 0 === preg_match( '/^[\s\x1c-\x1f\p{Z}]*=/u', $value ) ? $value : '!' . $value;
 	}
 
 	/**
 	 * Sets up all Trac ticket information that we need later.
 	 */
 	public function prepare_trac_ticket() {
-		$this->trac_ticket->summary = sprintf( 'THEME: %1$s – %2$s', $this->theme->display( 'Name' ), $this->theme->display( 'Version' ) );
+		$this->trac_ticket->summary = sprintf( 'THEME: %1$s – %2$s', $this->get_theme_header( 'Name' ), $this->get_theme_header( 'Version' ) );
 
 		// Keywords
 		$this->trac_ticket->keywords[] = 'theme-' . $this->theme_slug;
@@ -1119,9 +1591,13 @@ class WPORG_Themes_Upload {
 			if ( in_array( 'buddypress', $this->theme->get( 'Tags' ) ) ) {
 				$this->trac_ticket->keywords[] = 'buddypress';
 			} else {
+				// The parent lookup sanitizes before matching, so this header is still raw.
+				$parent = $this->theme->get_template();
+
+				// A keyword is space-separated, so it takes the slug and the link the escape.
 				$this->trac_ticket->keywords[]  = 'child-theme';
-				$this->trac_ticket->keywords[]  = 'parent-' . $this->theme->get_template();
-				$this->trac_ticket->parent_link = "Parent Theme: https://wordpress.org/themes/{$this->theme->get_template()}";
+				$this->trac_ticket->keywords[]  = 'parent-' . sanitize_title( $parent );
+				$this->trac_ticket->parent_link = 'Parent Theme: ' . self::escape_trac_wiki( 'https://wordpress.org/themes/' . $parent );
 			}
 		}
 
@@ -1141,8 +1617,10 @@ class WPORG_Themes_Upload {
 		$this->trac_ticket->priority = 'new theme';
 		if ( ! empty( $this->theme_post->_status ) ) {
 
-			// Is this an update to an existing, approved theme?
-			if ( 'live' === $this->theme_post->_status[ $this->theme_post->max_version ] ) {
+			// Is this an update to an existing, approved theme? An 'approved' status
+			// (live version still in release cooldown) counts as approved for ticket
+			// priority — the previous live version is still being served.
+			if ( in_array( $this->theme_post->_status[ $this->theme_post->max_version ], [ 'live', 'approved' ], true ) ) {
 				$this->trac_ticket->priority = 'theme update';
 
 				// Apparently not, it must be a new upload for previously unapproved theme.
@@ -1153,34 +1631,40 @@ class WPORG_Themes_Upload {
 
 		// Diff line.
 		if ( ! empty( $this->theme_post->max_version ) ) {
-			$this->trac_ticket->diff_line = "\nDiff with previous version: [{$this->trac_changeset}] https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}\n";
+			$this->trac_ticket->diff_line = "\nDiff with previous version: [{$this->trac_changeset}] https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->max_version}&new_path={$this->theme_slug}/{$this->get_theme_header( 'Version' )}\n";
 		}
 
 		// Description
-		$theme_description = $this->strip_non_utf8( (string) $this->theme->display( 'Description' ) );
+		$theme_description = self::escape_trac_wiki( $this->get_theme_header( 'Description' ) );
+		$theme_name        = self::escape_trac_wiki( $this->get_theme_header( 'Name' ) );
+		$theme_uri         = self::escape_trac_wiki( $this->get_theme_header( 'ThemeURI' ) );
+		$author_uri        = self::escape_trac_wiki( $this->get_theme_header( 'AuthorURI' ) );
+
+		// A URL path segment, and encoded as one so it cannot add `[[Image()]]` arguments.
+		$theme_screenshot = rawurlencode( (string) $this->theme->screenshot );
 
 		// ZIP location
-		$theme_zip_link = "https://downloads.wordpress.org/theme/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1";
+		$theme_zip_link = "https://downloads.wordpress.org/theme/{$this->theme_slug}.{$this->get_theme_header( 'Version' )}.zip?nostats=1";
 
 		$live_preview_link = add_query_arg(
 			'blueprint-url',
-			urlencode( rest_url( 'themes/v1/review-blueprint/' . $this->theme_post->ID . '-' . $this->theme_slug . '/' . $this->theme->display( 'Version' ) ) ),
+			urlencode( rest_url( 'themes/v1/review-blueprint/' . $this->theme_post->ID . '-' . $this->theme_slug . '/' . $this->get_theme_header( 'Version' ) ) ),
 			'https://playground.wordpress.net/'
 		);
 
 		// Hacky way to prevent a problem with xml-rpc.
 		$this->trac_ticket->description = <<<TICKET
-{$this->theme->display( 'Name' )} - {$this->theme->display( 'Version' )}
+{$theme_name} - {$this->get_theme_header( 'Version' )}
 
 {$theme_description}
 
-Theme URL - {$this->theme->display( 'ThemeURI' )}
-Author URL - {$this->theme->display( 'AuthorURI' )}
+Theme URL - {$theme_uri}
+Author URL - {$author_uri}
 
-Trac Browser - https://themes.trac.wordpress.org/browser/{$this->theme_slug}/{$this->theme->display( 'Version' )}
+Trac Browser - https://themes.trac.wordpress.org/browser/{$this->theme_slug}/{$this->get_theme_header( 'Version' )}
 WordPress.org - https://wordpress.org/themes/{$this->theme_slug}/
 
-SVN - https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}
+SVN - https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->get_theme_header( 'Version' )}
 ZIP - {$theme_zip_link}
 Live preview – [[{$live_preview_link}|https://playground.wordpress.net/#…]]
 
@@ -1189,7 +1673,7 @@ Live preview – [[{$live_preview_link}|https://playground.wordpress.net/#…]]
 History:
 [[TicketQuery(format=table, keywords=~theme-{$this->theme_slug}, col=id|summary|status|resolution|owner)]]
 
-[[Image(https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}/{$this->theme->screenshot}, width=640)]]
+[[Image(https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->get_theme_header( 'Version' )}/{$theme_screenshot}, width=640)]]
 TICKET;
 
 		$theme_check_results = $this->generate_themecheck_results_for_trac();
@@ -1197,6 +1681,58 @@ TICKET;
 			$this->trac_ticket->description .= "\nTheme Check Results:\n" . $theme_check_results;
 		}
 
+	}
+
+	/**
+	 * Turns one Theme Check message into the Trac markup the ticket carries.
+	 *
+	 * Text around the `<pre>` blocks is wiki markup and is escaped; a block renders
+	 * literally. Tags go first, so removing one cannot splice a delimiter together.
+	 *
+	 * @param string $error One Theme Check error message, as HTML.
+	 * @return string The message as Trac wiki markup.
+	 */
+	protected static function format_themecheck_error_for_trac( $error ) {
+		// With DELIM_CAPTURE the odd offsets hold the quoted code, and the tags around it are dropped.
+		$parts = preg_split( '!<pre[^>]*>(.*?)</pre>!s', self::strip_non_utf8( (string) $error ), -1, PREG_SPLIT_DELIM_CAPTURE );
+
+		// A PCRE failure, not an absent block; say so rather than show the reviewer a clean scan.
+		if ( false === $parts ) {
+			return 'A Theme Check message could not be formatted for Trac.';
+		}
+
+		foreach ( $parts as $i => $part ) {
+			$part = str_replace( array( '<strong>', '</strong>' ), array( "'''", "'''" ), $part );
+			$part = preg_replace( '!<span class=[^>]+>([^<]+)</span>!', '$1', $part );
+			$part = str_replace( '<br>', ' ', $part );
+
+			if ( $i % 2 ) {
+				// Trac shows block content verbatim; decoded before the braces, so an encoded `}}}` is caught too.
+				$part = html_entity_decode( $part, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+				// `!` does not escape inside a block, so any run of the code's own braces is broken up.
+				$part = preg_replace( '/([{}])(?=\1\1)/', '$1 ', $part );
+
+				// `#!default` takes the processor line, which the code would otherwise supply.
+				$parts[ $i ] = "\r\n{{{\r\n#!default\r\n" . $part . "\r\n}}}\r\n";
+				continue;
+			}
+
+			$part = self::escape_trac_wiki( $part );
+
+			// Converted after the escape, so the checker's own links stay links, `target` and all.
+			$part = preg_replace( '/<a\s+href\s*=\s*[\'"]([^"\']*)[\'"][^>]*>([^<]*)<\/a>/i', '[$1 $2]', $part );
+
+			// A pass above that PCRE gave up on would drop this half of the message.
+			if ( ! is_string( $part ) ) {
+				return 'A Theme Check message could not be formatted for Trac.';
+			}
+
+			// Decoded last, so an encoded tag can't become a link.
+			$parts[ $i ] = str_replace( array( '&lt;', '&gt;' ), array( '<', '>' ), $part );
+		}
+
+		return implode( '', $parts );
 	}
 
 	/*
@@ -1220,23 +1756,9 @@ TICKET;
 
 		if ( $tc_errors ) {
 			foreach ( $tc_errors as $e ) {
-				$trac_left = array( '<strong>', '</strong>' );
-				$trac_right= array( "'''", "'''" );
-				$html_link = '/<a\s?href\s?=\s?[\'|"]([^"|\']*)[\'|"]>([^<]*)<\/a>/i';
-				$html_new = '[$1 $2]';
-				$e = preg_replace( $html_link, $html_new, $e );
-				$e = str_replace( $trac_left, $trac_right, $e );
-				$e = preg_replace( '/<pre.*?>/', "\r\n{{{\r\n", $e );
-				$e = str_replace( '</pre>', "\r\n}}}\r\n", $e );
-				$e = preg_replace( '!<span class=[^>]+>([^<]+)</span>!', '$1', $e );
-				$e = str_replace( '<br>', ' ', $e );
+				$e = self::format_themecheck_error_for_trac( $e );
 
-				// Decode some entities.
-				$e = preg_replace_callback( '!(&[lg]t;)!', function( $f ) {
-					return html_entity_decode( $f[0] );
-				}, $e );
-
-				if ( 'INFO' !== substr( $e, 0, 4 ) ) {
+				if ( '' !== $e && 'INFO' !== substr( $e, 0, 4 ) ) {
 					$tc_results[] = '* ' . $e;
 				}
 			}
@@ -1279,18 +1801,29 @@ TICKET;
 		 */
 		$trac_ticket_reporter = wp_get_current_user()->user_login ?? $this->author->user_login;
 
-		// If there's a previous version and the most current version's status is `new`, we update.
-		if (
-			! empty( $this->theme_post->max_version ) &&
-			'new' == $this->theme_post->_status[ $this->theme_post->max_version ]
-		) {
-			$ticket_id = (int) $this->theme_post->_ticket_id[ $this->theme_post->max_version ];
+		$prev_status = $this->theme_post->_status[ $this->theme_post->max_version ?? '' ] ?? '';
+
+		/*
+		 * If the previous version is still on an open ticket — either awaiting review
+		 * (`new`) or approved and waiting out the release delay (`approved`) — update that
+		 * same ticket rather than opening a new one. Re-uploading resets the ticket's
+		 * changetime, so an approved update's release delay restarts from this upload and
+		 * the superseded version is simply demoted to `old`.
+		 */
+		if ( in_array( $prev_status, [ 'new', 'approved' ], true ) ) {
+			$ticket_id = (int) ( $this->theme_post->_ticket_id[ $this->theme_post->max_version ] ?? 0 );
 			$ticket    = $this->trac->ticket_get( $ticket_id );
 
 			// Make sure the ticket has not yet been resolved.
 			if ( $ticket && empty( $ticket[3]['resolution'] ) ) {
 				$result    = $this->trac->ticket_update( $ticket_id, $this->trac_ticket->description, array( 'summary' => $this->trac_ticket->summary, 'keywords' => implode( ' ', $this->trac_ticket->keywords ) ), true /* Trigger email notifications */ );
 				$ticket_id = $result ? $ticket_id : false;
+
+				// Keep an approved update in the `approved` window; the release-to-live
+				// cron promotes it once the delay (measured from this upload) elapses.
+				if ( 'approved' === $prev_status ) {
+					$this->version_status = 'approved';
+				}
 			} else {
 				$ticket_id = $this->trac->ticket_create( $this->trac_ticket->summary, $this->trac_ticket->description, array(
 					'type'      => 'theme',
@@ -1313,13 +1846,29 @@ TICKET;
 				'owner'     => '',
 			) );
 
-			// Themes team auto-approves theme-updates, so mark the theme as live immediately.
-			// Note that this only applies to new ticket creation, so it won't happen on themes with existing outstanding tickets.
-			if ( $this->trac_ticket->priority == 'theme update' ) {
-				$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
+			/*
+			 * Themes team auto-approves theme-updates. Note that this only applies to new
+			 * ticket creation, so it won't happen on themes with existing outstanding tickets.
+			 *
+			 * Skipped when ticket creation failed, as there's no ticket to act upon.
+			 */
+			if ( $ticket_id && 'theme update' === $this->trac_ticket->priority ) {
+				$release_delay = wporg_themes_get_release_cooldown_delay( $this->theme_slug );
+				if ( $release_delay ) {
+					// Land the update in the `approved` status; the release-to-live cron
+					// promotes it to live once the cooldown elapses. The previous live
+					// version continues to be served in the meantime.
+					$delay_hours = (int) round( $release_delay / HOUR_IN_SECONDS );
+					$this->trac->ticket_update( $ticket_id, sprintf( 'Theme Update for existing Live theme - automatically approved, will be marked live in %dhrs.', $delay_hours ), array( 'action' => 'new_no_review_delay' ), false );
 
-				$this->trac_ticket->resolution = 'live';
-				$this->version_status          = 'live';
+					$this->version_status = 'approved';
+				} else {
+					// Cooldown disabled: mark the theme live immediately.
+					$this->trac->ticket_update( $ticket_id, 'Theme Update for existing Live theme - automatically approved', array( 'action' => 'new_no_review' ), false );
+
+					$this->trac_ticket->resolution = 'live';
+					$this->version_status          = 'live';
+				}
 			}
 
 		}
@@ -1330,19 +1879,30 @@ TICKET;
 	}
 
 	/**
+	 * Update a versioned post meta value for the current theme version.
+	 *
+	 * @param string $meta_key   The meta key to update.
+	 * @param mixed  $meta_value The meta value to set for the current version.
+	 */
+	protected function update_versioned_meta( $meta_key, $meta_value ) {
+		$post_id   = $this->theme_post->ID;
+		$meta_data = array_filter( (array) get_post_meta( $post_id, $meta_key, true ) );
+
+		$meta_data[ $this->theme->get( 'Version' ) ] = $meta_value;
+
+		update_post_meta( $post_id, $meta_key, $meta_data );
+	}
+
+	/**
 	 * Creates or updates a theme post.
+	 *
+	 * @return true|WP_Error True on success, or the error when a new theme post could not be created.
 	 */
 	public function create_or_update_theme_post() {
 		$upload_date = current_time( 'mysql' );
 
-		// If we already have a post, get its ID.
-		if ( ! empty( $this->theme_post ) ) {
-			$post_id = $this->theme_post->ID;
-			// see wporg_themes_approve_version() for where the post is updated.
-
-		// Otherwise create it for this new theme.
-		} else {
-
+		// Create a new theme post if one doesn't exist yet.
+		if ( empty( $this->theme_post ) ) {
 			// Filter the tags to those that exist on the site already.
 			$tags = array_intersect(
 				$this->theme->get( 'Tags' ),
@@ -1366,6 +1926,32 @@ TICKET;
 				'post_type'      => 'repopackage',
 				'tags_input'     => $tags,
 			) );
+
+			if ( ! $post_id ) {
+				return new WP_Error(
+					'failed_post_creation',
+					sprintf(
+						/* translators: %s: mailto link */
+						__( 'There was an error saving your theme. Please try again, if this error persists report the error to %s.', 'wporg-themes' ),
+						'<a href="mailto:themes@wordpress.org">themes@wordpress.org</a>'
+					)
+				);
+			}
+
+			$this->theme_post = get_post( $post_id );
+
+			// wp_insert_post() sanitizes post_name again; refuse the upload if that changed the slug.
+			if ( $this->theme_post->post_name !== $this->theme_slug ) {
+				return new WP_Error(
+					'slug_mismatch',
+					sprintf(
+						/* translators: 1: theme slug, 2: style.css */
+						__( 'The theme name could not be stored as %1$s. Please change the name of your theme in %2$s and upload it again.', 'wporg-themes' ),
+						'<code>' . esc_html( $this->theme_slug ) . '</code>',
+						'<code>style.css</code>'
+					)
+				);
+			}
 		}
 
 		// Finally, add post meta.
@@ -1376,7 +1962,6 @@ TICKET;
 			'_requires'     => $this->sanitize_version_like_field( $this->theme->get( 'RequiresWP' ), 'requires' ),
 			'_requires_php' => $this->sanitize_version_like_field( $this->theme->get( 'RequiresPHP' ) ),
 			'_upload_date'  => $upload_date,
-			'_ticket_id'    => $this->trac_ticket->id,
 			'_screenshot'   => $this->theme->screenshot,
 		);
 
@@ -1386,23 +1971,28 @@ TICKET;
 		}
 
 		foreach ( $post_meta as $meta_key => $meta_value ) {
-			$meta_data = array_filter( (array) get_post_meta( $post_id, $meta_key, true ) );
-			$meta_data[ $this->theme->get( 'Version' ) ] = $meta_value;
-			update_post_meta( $post_id, $meta_key, $meta_data );
+			$this->update_versioned_meta( $meta_key, $meta_value );
 		}
 
-		// Add an additional row with the trac ticket ID, to make it possible to find the post by this ID later.
-		if ( $post_meta['_ticket_id'] ) {
-			add_post_meta( $post_id, sanitize_key( '_trac_ticket_' . $this->theme->get( 'Version' ) ), $post_meta['_ticket_id'] );
-		}
+		return true;
+	}
 
-		// Discard versions that are awaiting review, and maybe set this upload as live.
-		wporg_themes_update_version_status( $post_id, $this->theme->get( 'Version' ), $this->version_status );
+	/**
+	 * Deletes the theme post.
+	 *
+	 * Used to clean up a freshly created post when a new upload fails.
+	 * Temporarily detaches the fail-safe that prevents repopackages from
+	 * being deleted, which would otherwise wp_die() before the post is
+	 * removed, leaving an orphaned post without versioned meta behind.
+	 *
+	 * @return WP_Post|false|null Post data on success, false or null on failure.
+	 */
+	public function delete_theme_post() {
+		remove_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
+		$result = wp_delete_post( $this->theme_post->ID, true );
+		add_filter( 'before_delete_post', 'wporg_theme_no_delete_repopackage' );
 
-		// refresh the post to avoid stale data.
-		if ( $post_id ) {
-			$this->theme_post = $this->get_theme_post();
-		}
+		return $result;
 	}
 
 	/**
@@ -1431,7 +2021,7 @@ TICKET;
 				return trim( $line, "/\r\n\t " );
 			}, $output );
 
-			if ( in_array( $this->theme->display( 'Version' ), $svn_versions, true ) ) {
+			if ( in_array( $this->get_theme_header( 'Version' ), $svn_versions, true ) ) {
 				return new WP_Error( 'version_exists_in_svn', 'version_exists_in_svn' ); // Intentionally not translated or human-readable-text.
 			}
 		}
@@ -1443,7 +2033,7 @@ TICKET;
 		}
 
 		// Try to copy the previous version over.
-		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->theme->display( 'Version' )}" );
+		$new_version_dir = escapeshellarg( "{$this->tmp_svn_dir}/{$this->get_theme_header( 'Version' )}" );
 		$prev_version    = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme_post->max_version}" );
 		$this->exec_with_notify( self::SVN . " cp $prev_version $new_version_dir", $output, $return_var );
 		if ( $return_var > 0 ) {
@@ -1464,8 +2054,8 @@ TICKET;
 		$password = escapeshellarg( THEME_DROPBOX_PASSWORD );
 		$message  = escapeshellarg( sprintf(
 			'New version of %1$s - %2$s', // Intentionally not translated.
-			$this->theme->display( 'Name' ),
-			$this->theme->display( 'Version' )
+			$this->get_theme_header( 'Name' ),
+			$this->get_theme_header( 'Version' )
 		) );
 
 		/* DEBUGGING
@@ -1494,8 +2084,8 @@ TICKET;
 		}
 
 		$import_msg = empty( $this->theme_post ) ?  'New theme: %1$s - %2$s' : 'New version of %1$s - %2$s'; // Intentionally not translated
-		$import_msg = escapeshellarg( sprintf( $import_msg, $this->theme->display( 'Name' ), $this->theme->display( 'Version' ) ) );
-		$svn_path   = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->theme->display( 'Version' )}" );
+		$import_msg = escapeshellarg( sprintf( $import_msg, $this->get_theme_header( 'Name' ), $this->get_theme_header( 'Version' ) ) );
+		$svn_path   = escapeshellarg( "https://themes.svn.wordpress.org/{$this->theme_slug}/{$this->get_theme_header( 'Version' )}" );
 		$theme_path = escapeshellarg( $this->theme_dir );
 		$password   = escapeshellarg( THEME_DROPBOX_PASSWORD );
 
@@ -1526,13 +2116,13 @@ TICKET;
 			return false;
 		}
 
-		$svn_path = "{$this->theme_slug}/{$this->theme->display( 'Version' )}";
-		if ( ! $this->theme_slug || ! $this->theme->display( 'Version' ) || strlen( $svn_path ) < 3 ) {
+		$svn_path = "{$this->theme_slug}/{$this->get_theme_header( 'Version' )}";
+		if ( ! $this->theme_slug || ! $this->get_theme_header( 'Version' ) || strlen( $svn_path ) < 3 ) {
 			return false;
 		}
 
 		$import_msg = 'Removing theme %1$s - %2$s: %3$s';
-		$import_msg = escapeshellarg( sprintf( $import_msg, $this->theme->display( 'Name' ), $this->theme->display( 'Version' ), $reason ) );
+		$import_msg = escapeshellarg( sprintf( $import_msg, $this->get_theme_header( 'Name' ), $this->get_theme_header( 'Version' ), $reason ) );
 		$svn_path   = escapeshellarg( "https://themes.svn.wordpress.org/{$svn_path}" );
 		$password   = escapeshellarg( THEME_DROPBOX_PASSWORD );
 
@@ -1549,10 +2139,13 @@ TICKET;
 		 * Skip sending an email when..
 		 *  - The theme is to be made live immediately.
 		 *    `wporg_themes_approve_version()` will send a "Congratulations! It's live!" shortly.
+		 *  - The theme was auto-approved into the release cooldown. It's not awaiting
+		 *    review, so the "new version uploaded" feedback email doesn't apply; the
+		 *    "now live" email follows once the cooldown elapses.
 		 *  - No Trac ticket was created, so there's nothing to reference about where feedback is.
 		 */
 		if (
-			'live' === $this->version_status ||
+			in_array( $this->version_status, [ 'live', 'approved' ], true ) ||
 			! $this->trac_ticket->id
 		) {
 			return;
@@ -1562,8 +2155,8 @@ TICKET;
 			$email_subject = sprintf(
 				/* translators: 1: theme name, 2: theme version */
 				__( '[WordPress Themes] %1$s, new version %2$s', 'wporg-themes' ),
-				$this->theme->display( 'Name' ),
-				$this->theme->display( 'Version' )
+				$this->get_theme_header( 'Name' ),
+				$this->get_theme_header( 'Version' )
 			);
 
 			$email_content = sprintf(
@@ -1575,15 +2168,15 @@ Feedback will be provided at %3$s
 --
 The WordPress.org Themes Team
 https://make.wordpress.org/themes', 'wporg-themes' ),
-				$this->theme->display( 'Version' ),
-				$this->theme->display( 'Name' ),
+				$this->get_theme_header( 'Version' ),
+				$this->get_theme_header( 'Name' ),
 				'https://themes.trac.wordpress.org/ticket/' . $this->trac_ticket->id
 			);
 		} else {
 			$email_subject = sprintf(
 				/* translators: %s: theme name */
 				__( '[WordPress Themes] New Theme - %s', 'wporg-themes' ),
-				$this->theme->display( 'Name' )
+				$this->get_theme_header( 'Name' )
 			);
 
 			$email_content = sprintf(
@@ -1621,7 +2214,7 @@ Subscribe to the Themes Team blog to stay up to date with the latest requirement
 
 Thank you.
 The WordPress Themes Team', 'wporg-themes' ),
-				$this->theme->display( 'Name' ),
+				$this->get_theme_header( 'Name' ),
 				'https://themes.trac.wordpress.org/ticket/' . $this->trac_ticket->id
 			);
 		}
@@ -1648,13 +2241,13 @@ The WordPress Themes Team', 'wporg-themes' ),
 			json_encode([
 				'event_type'     => sprintf(
 					"%s %s %s",
-					$this->theme->display( 'Name' ),
-					$this->theme->display( 'Version' ),
+					$this->get_theme_header( 'Name' ),
+					$this->get_theme_header( 'Version' ),
 					$this->trac_ticket->priority
 				),
 				'client_payload' => [
 					'theme_slug'       => $this->theme_slug,
-					'theme_zip'        => "https://wordpress.org/themes/download/{$this->theme_slug}.{$this->theme->display( 'Version' )}.zip?nostats=1",
+					'theme_zip'        => "https://wordpress.org/themes/download/{$this->theme_slug}.{$this->get_theme_header( 'Version' )}.zip?nostats=1",
 					'accessible_ready' => in_array( 'accessibility-ready', $this->theme->get( 'Tags' ) ),
 					'trac_ticket_id'   => $this->trac_ticket->id,
 					'trac_priority'    => $this->trac_ticket->priority,
@@ -1705,7 +2298,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 	 * @return WP_Theme
 	 */
 	public function populate_post_with_meta( $theme ) {
-		foreach ( get_post_custom_keys( $theme->ID ) as $meta_key ) {
+		foreach ( (array) get_post_custom_keys( $theme->ID ) as $meta_key ) {
 			$theme->$meta_key = get_post_meta( $theme->ID, $meta_key, true );
 
 			if ( is_array( $theme->$meta_key ) ) {
@@ -1714,7 +2307,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 		}
 
 		// Save the highest recorded version number.
-		$uploaded_versions  = array_keys( $theme->_status );
+		$uploaded_versions  = is_array( $theme->_status ) ? array_keys( $theme->_status ) : array();
 		$theme->max_version = end( $uploaded_versions );
 
 		return $theme;
@@ -1738,7 +2331,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 	 * @param string $string The string to be converted.
 	 * @return string The converted string.
 	 */
-	protected function strip_non_utf8( $string ) {
+	protected static function strip_non_utf8( $string ) {
 		ini_set( 'mbstring.substitute_character', 'none' );
 
 		return mb_convert_encoding( $string, 'UTF-8', 'UTF-8' );
@@ -1861,7 +2454,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 						(
 							// When importing from SVN, include a 'Compare' link as the Changeset likely won't show a Diff unless the author did a `svn cp`.
 							'svn' === $this->importing_from && ! empty( $this->theme_post->max_version ) ?
-							"<https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->_last_live_version}&new_path={$this->theme_slug}/{$this->theme->display( 'Version' )}|Compare>" :
+							"<https://themes.trac.wordpress.org/changeset?old_path={$this->theme_slug}/{$this->theme_post->_last_live_version}&new_path={$this->theme_slug}/{$this->get_theme_header( 'Version' )}|Compare>" :
 							''
 						),
 				];
@@ -1881,7 +2474,7 @@ The WordPress Themes Team', 'wporg-themes' ),
 						'https://ts.w.org/wp-content/themes/%1$s/%2$s?ver=%3$s',
 						$this->theme_slug,
 						$this->theme->screenshot,
-						$this->theme->display( 'Version' )
+						$this->get_theme_header( 'Version' )
 					),
 				],
 				'fields' => $fields

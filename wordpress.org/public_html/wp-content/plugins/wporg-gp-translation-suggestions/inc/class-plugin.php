@@ -9,7 +9,18 @@ use WordPressdotorg\GlotPress\Bulk_Pretranslations\Deepl;
 
 class Plugin {
 
-	const TM_UPDATE_EVENT = 'wporg_translate_tm_update';
+	const TM_UPDATE_EVENT   = 'wporg_translate_tm_update';
+	const TM_DRAIN_EVENT    = 'wporg_translate_tm_drain';
+	const TM_DRAIN_SCHEDULE = 'wporg_translate_tm_minutely';
+	const TM_QUEUE_OPTION   = 'wporg_translate_tm_queue';
+
+	/**
+	 * Maximum number of translation IDs held in the persistent queue.
+	 *
+	 * Keeps the option small enough to stay cacheable and cheap to rewrite
+	 * under the lock. IDs beyond the cap are dropped.
+	 */
+	const TM_QUEUE_MAX = 20000;
 
 	/**
 	 * @var Plugin The singleton instance.
@@ -17,7 +28,11 @@ class Plugin {
 	private static $instance;
 
 	/**
-	 * @var array
+	 * Translation IDs queued during the current request.
+	 *
+	 * Keyed by translation_id for dedup; values are ignored.
+	 *
+	 * @var array<int, true>
 	 */
 	private $queue = array();
 
@@ -56,8 +71,25 @@ class Plugin {
 			add_action( 'shutdown', array( $this, 'schedule_tm_update' ), 3 );
 		}
 
+		add_filter( 'cron_schedules', array( $this, 'register_cron_schedules' ) );
 		add_action( self::TM_UPDATE_EVENT, array( Translation_Memory_Client::class, 'update' ) );
+		add_action( self::TM_DRAIN_EVENT, array( Translation_Memory_Client::class, 'drain' ) );
 		add_action( 'gp_translation_created', array( Translation_Memory::class, 'update_external_translations' ) );
+	}
+
+	/**
+	 * Registers the schedule for the TM queue drain.
+	 *
+	 * @param array $schedules An array of non-default cron schedules.
+	 * @return array An array of non-default cron schedules.
+	 */
+	public function register_cron_schedules( $schedules ) {
+		$schedules[ self::TM_DRAIN_SCHEDULE ] = array(
+			'interval' => MINUTE_IN_SECONDS,
+			'display'  => 'Every minute',
+		);
+
+		return $schedules;
 	}
 
 	/**
@@ -71,11 +103,17 @@ class Plugin {
 			return;
 		}
 
-		$this->queue[ $translation->original_id ] = $translation->id;
+		// Key by translation_id so distinct translations of the same original
+		// (e.g. different locales, plural forms) are all queued.
+		$this->queue[ (int) $translation->id ] = true;
 	}
 
 	/**
-	 * Schedules a single event to update translation memory for new translations.
+	 * Appends the request's queued translations to the persistent queue and
+	 * ensures the recurring drain event is scheduled.
+	 *
+	 * Translation Memory updates are best-effort: if the lock stays busy or the
+	 * queue is full, the request's translations are dropped.
 	 */
 	public function schedule_tm_update() {
 		remove_action( 'gp_translation_created', array( $this, 'translation_updated' ), 3 );
@@ -85,7 +123,71 @@ class Plugin {
 			return;
 		}
 
-		wp_schedule_single_event( time() + 60, self::TM_UPDATE_EVENT, array( 'translations' => $this->queue ) );
+		$new_ids = $this->queue;
+		$this->queue = array();
+
+		self::with_lock( 'queue_lock', function () use ( $new_ids ) {
+			$queue = self::read_queue();
+			if ( count( $queue ) < self::TM_QUEUE_MAX ) {
+				// Append so the drain processes the oldest translations first.
+				self::write_queue( array_slice( $queue + $new_ids, 0, self::TM_QUEUE_MAX, true ) );
+			}
+
+			// Checked under the lock so concurrent requests can't each schedule a recurring drain.
+			if ( ! wp_next_scheduled( self::TM_DRAIN_EVENT ) ) {
+				wp_schedule_event( time() + MINUTE_IN_SECONDS, self::TM_DRAIN_SCHEDULE, self::TM_DRAIN_EVENT );
+			}
+		}, 3 );
+	}
+
+	/**
+	 * Reads the persistent TM update queue.
+	 *
+	 * @return array<int, true> Set of translation_ids (value always true).
+	 */
+	public static function read_queue() {
+		$queue = get_option( self::TM_QUEUE_OPTION, array() );
+		return is_array( $queue ) ? $queue : array();
+	}
+
+	/**
+	 * Writes (or deletes, when empty) the persistent TM update queue.
+	 *
+	 * @param array<int, true> $queue Set of translation_ids.
+	 */
+	public static function write_queue( array $queue ) {
+		if ( ! $queue ) {
+			delete_option( self::TM_QUEUE_OPTION );
+			return;
+		}
+		update_option( self::TM_QUEUE_OPTION, $queue, false );
+	}
+
+	/**
+	 * Runs $callback while holding a memcached-backed lock.
+	 *
+	 * wp_cache_add maps to memcached ADD — atomic. Retries up to $attempts
+	 * times, 50ms apart; returns false without running the callback if the
+	 * lock is still held.
+	 *
+	 * @param string   $name     Lock name.
+	 * @param callable $callback
+	 * @param int      $attempts Optional. Number of attempts to acquire the lock. Default 1.
+	 * @return mixed The callback's return value, or false if the lock was not acquired.
+	 */
+	public static function with_lock( $name, callable $callback, $attempts = 1 ) {
+		while ( ! wp_cache_add( $name, 1, 'locks', 30 ) ) {
+			if ( --$attempts < 1 ) {
+				return false;
+			}
+			usleep( 50000 );
+		}
+
+		try {
+			return $callback();
+		} finally {
+			wp_cache_delete( $name, 'locks' );
+		}
 	}
 
 	/**

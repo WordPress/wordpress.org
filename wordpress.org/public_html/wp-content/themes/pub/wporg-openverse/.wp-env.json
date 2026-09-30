@@ -1,12 +1,10 @@
 {
+  "phpVersion": "8.4",
   "themes": [
     ".",
     "../wporg"
   ],
   "mappings": {
     "wp-content/mu-plugins": "./mu-plugins"
-  },
-  "config": {
-    "FEATURE_2021_GLOBAL_HEADER_FOOTER": true
   }
 }

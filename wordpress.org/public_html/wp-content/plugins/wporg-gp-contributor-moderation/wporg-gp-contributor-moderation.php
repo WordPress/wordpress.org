@@ -88,8 +88,8 @@ class WPORG_GP_Contributor_Moderation {
 	 * @return bool True if on target domain, false otherwise.
 	 */
 	private function is_target_domain() {
-		$current_host = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '';
-		return self::TARGET_DOMAIN === $current_host;
+		$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
+		return self::TARGET_DOMAIN === strtolower( (string) $site_host );
 	}
 
 	/**

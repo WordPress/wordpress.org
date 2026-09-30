@@ -1,0 +1,9 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fixture/block-register-dir",
+	"title": "Block Register Dir",
+	"category": "widgets",
+	"textdomain": "block-plugin-register-dir",
+	"editorScript": "file:./index.js"
+}
