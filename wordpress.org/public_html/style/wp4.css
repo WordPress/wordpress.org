@@ -247,7 +247,7 @@ a img.aligncenter {
 .wrapper .entry video,
 .wrapper .entry embed,
 .wrapper .entry object {
-	max-width: 100%;
+	max-width: 100% !important;
 }
 
 #wporg-header {
