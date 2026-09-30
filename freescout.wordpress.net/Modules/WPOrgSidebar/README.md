@@ -1,6 +1,6 @@
 # WP.org Sidebar
 
-Shows what WordPress.org knows about a conversation's sender, next to the conversation.
+Shows what WordPress.org knows about the person a conversation is about, next to the conversation. That's usually the sender; for bounces and Slack notifications it's the account they concern.
 
 ## What it shows
 
@@ -13,4 +13,4 @@ Panels load after the conversation, so a slow WordPress.org never holds it up. A
 
 ## Setup
 
-Needs `WPORG_API_SECRET`; see [configuration](../../README.md#deployment). The panels come from [`api.wordpress.org/dotorg/freescout/`](../../../api.wordpress.org/public_html/dotorg/freescout), which looks the sender up by their email address.
+Needs `WPORG_API_SECRET`; see [configuration](../../README.md#deployment). The panels come from [`api.wordpress.org/dotorg/freescout/`](../../../api.wordpress.org/public_html/dotorg/freescout), which is sent the conversation (sender, subject, recent messages, and text attachments) and works out whose WordPress.org account it's about.
