@@ -154,7 +154,7 @@ function render_slack_users( array $slack_users ): string {
 
 	foreach ( $slack_users as $slack_user ) {
 		$slack_data = json_decode( (string) $slack_user->profiledata );
-		if ( ! $slack_data ) {
+		if ( ! is_object( $slack_data ) || ! isset( $slack_data->updated ) ) {
 			$html .= '<li class="wporg-sidebar-item wporg-sidebar-meta">Clicked a signup link, but likely didn’t finish signing up.</li>';
 			continue;
 		}
@@ -162,7 +162,7 @@ function render_slack_users( array $slack_users ): string {
 		$html .= sprintf(
 			'<li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="%s">%s</a> %s<div class="wporg-sidebar-item-meta">Updated %s</div></li>',
 			esc_url( 'https://wordpress.slack.com/archives/' . $slack_user->dm_id ),
-			esc_html( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ),
+			esc_html( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ?? '' ),
 			! empty( $slack_data->deleted ) ? render_badge( 'Deactivated', 'error' ) : render_badge( 'Active', 'success' ),
 			esc_html( gmdate( 'Y-m-d', (int) $slack_data->updated ) )
 		);
