@@ -8,6 +8,7 @@ Output goes to stderr because FreeScout middleware calls header(), which fails o
 	colors="true"
 	stderr="true"
 	beStrictAboutOutputDuringTests="true"
+	cacheResult="false"
 >
 	<testsuites>
 		<testsuite name="modules">
