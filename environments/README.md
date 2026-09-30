@@ -301,6 +301,20 @@ To send more mail in:
 npm run freescout:env -- exec app bash -c 'printf "Subject: Hi\r\n\r\nHello\r\n" | curl -s --url smtp://greenmail:3025 --mail-from someone@example.org --mail-rcpt plugins@wordpress.test --upload-file -'
 ```
 
+**Real WordPress.org data:** with access to the helpdesk's API secret (`FREESCOUT_SECRET` on api.wordpress.org), the sidebar can show real WordPress.org data instead of the mock's. Store it in the macOS Keychain once: paste the secret when asked (twice). Pasting it there keeps it out of your shell history; add `-U` to replace a stored secret.
+
+```bash
+security add-generic-password -a "$USER" -s wporg-freescout-api -w
+```
+
+Then start FreeScout against api.wordpress.org:
+
+```bash
+WPORG_API_URL=https://api.wordpress.org/dotorg/freescout/ WPORG_API_SECRET="$(security find-generic-password -s wporg-freescout-api -w)" npm run freescout:start
+```
+
+This is production data, so WPOrgWebhooks stays off: local conversations would count toward production's contributor stats. Run `npm run freescout:start` without the variables to go back to the mock; the tests always use their own values.
+
 **Run tests:**
 
 ```bash

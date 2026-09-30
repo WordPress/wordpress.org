@@ -27,8 +27,8 @@ services:
       DB_TEST_DATABASE: freescout-test
       DB_TEST_USERNAME: freescout
       DB_TEST_PASSWORD: freescout
-      WPORG_API_URL: http://mock-api:8080/
-      WPORG_API_SECRET: local-secret
+      WPORG_API_URL: ${WPORG_API_URL:-http://mock-api:8080/}
+      WPORG_API_SECRET: ${WPORG_API_SECRET:-local-secret}
       MAILPIT_PORT: ${MAILPIT_PORT:-8891}
     volumes:
       - storage:/var/www/html/storage

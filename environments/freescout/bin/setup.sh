@@ -33,6 +33,16 @@ for manifest in "$app"/Modules/*/module.json; do
 	# shellcheck disable=SC2016 # $argv is PHP, not shell.
 	IFS=$'\t' read -r name alias < <( php -r '$m = json_decode( file_get_contents( $argv[1] ) ); echo $m->name, "\t", $m->alias, "\n";' "$manifest" )
 
+	if [ "$alias" = wporgwebhooks ] && [[ "$WPORG_API_URL" != http://mock-api:* ]]; then
+		# webhook.php counts events from agents it doesn't know, so local ones would end up in production's stats.
+		php "$app/artisan" --no-interaction module:disable "$name" > /dev/null
+		# Events queued against the mock would go out with the real URL and secret, which the job reads when it runs.
+		# shellcheck disable=SC2016 # $app is PHP, not shell.
+		php -r 'require "/var/www/html/vendor/autoload.php"; $app = require "/var/www/html/bootstrap/app.php"; $app->make( Illuminate\Contracts\Console\Kernel::class )->bootstrap(); DB::table( "jobs" )->where( "payload", "like", "%WPOrgWebhooks%" )->delete();'
+		echo "$name is off: it would send local conversations to WordPress.org."
+		continue
+	fi
+
 	php "$app/artisan" --no-interaction module:enable "$name"
 
 	if [ ! -L "$app/public/modules/$alias" ]; then
@@ -57,6 +67,9 @@ if [ ! -f "$app/storage/.wporg-fixtures-sent" ]; then
 	done
 	touch "$app/storage/.wporg-fixtures-sent"
 fi
+
+# Lets the entrypoint start the scheduler, now that the modules the queue worker may run are settled.
+touch /tmp/wporg-setup-done
 
 echo
 echo "FreeScout: ${APP_URL}  (admin@wordpress.test / password)"
