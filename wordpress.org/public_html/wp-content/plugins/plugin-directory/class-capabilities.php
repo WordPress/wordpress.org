@@ -90,18 +90,18 @@ class Capabilities {
 		}
 
 		// If a plugin is in the Beta or Featured views, they're not able to self-manage certain things. Require reviewer.
+		$is_beta     = is_object_in_term( $post->ID, 'plugin_section', 'beta' );
+		$is_featured = is_object_in_term( $post->ID, 'plugin_section', 'featured' );
+
 		if (
+			( $is_beta || $is_featured ) &&
 			in_array(
 				$cap,
 				array(
 					'plugin_self_close',
 					'plugin_self_transfer',
-					'plugin_toggle_public_preview',
-					'plugin_add_committer',
-					'plugin_remove_committer',
 				)
-			) &&
-			is_object_in_term( $post->ID, 'plugin_section', array( 'beta', 'featured' ) )
+			)
 		) {
 			$required_caps[] = 'plugin_review';
 		}
@@ -111,6 +111,15 @@ class Capabilities {
 			$required_caps[] = 'do_not_allow';
 		}
 
+		// For featured/beta plugins, only the owner can manage committers.
+		if (
+			( $is_featured || $is_beta ) &&
+			$user_id != $post->post_author &&
+			in_array( $cap, array( 'plugin_add_committer', 'plugin_remove_committer' ) )
+		) {
+			$required_caps[] = 'plugin_review';
+		}
+
 		// Committers
 		$committers = Tools::get_plugin_committers( $post->post_name );
 		// If there are no committers, use the plugin author if the plugin is published.
@@ -118,7 +127,7 @@ class Capabilities {
 			$committers = array( get_user_by( 'ID', $post->post_author )->user_login );
 		}
 
-		if ( in_array( $user->user_login, $committers ) ) {
+		if ( in_array( $user->user_login, $committers, true ) ) {
 			$required_caps[] = 'exist';
 		}
 

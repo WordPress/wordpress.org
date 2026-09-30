@@ -34,19 +34,17 @@ class WPORG_bbPress_Topic_Archive {
 	}
 
 	public function maybe_add_robots() {
-		global $post;
-
 		if (
-			is_singular()
+			bbp_is_single_topic()
 		&&
-			bbp_is_topic( $post->ID )
+			bbp_get_topic_id()
 		&&
 			(
 				// Thread last modified is over 3 years old
-				( time() - get_post_time( 'U', true, bbp_get_topic_last_active_id( $post->ID ) ) > 3 * YEAR_IN_SECONDS )
+				( time() - get_post_time( 'U', true, bbp_get_topic_last_active_id() ) > 3 * YEAR_IN_SECONDS )
 			||
 				// Closed thread with no replies
-				( bbp_is_topic_closed( $post->ID ) && ! bbp_get_topic_reply_count( $post->ID, true ) )
+				( bbp_is_topic_closed() && ! bbp_get_topic_reply_count( 0, true ) )
 			)
 		) {
 			echo '<meta name="robots" content="noindex,follow" />' . "\n";

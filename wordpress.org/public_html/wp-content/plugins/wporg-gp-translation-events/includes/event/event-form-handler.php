@@ -12,10 +12,22 @@ use Wporg\TranslationEvents\Stats\Stats_Calculator;
 use Wporg\TranslationEvents\Urls;
 
 class Event_Form_Handler {
-	private Event_Repository_Interface $event_repository;
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
+	private Event_Repository $event_repository;
+
 	private Notifications_Schedule $notifications_schedule;
 
-	public function __construct( DateTimeImmutable $now, Event_Repository_Interface $event_repository ) {
+	/**
+	 * Event_Form_Handler constructor.
+	 *
+	 * @param DateTimeImmutable $now              The value of "now".
+	 * @param Event_Repository  $event_repository Event repository.
+	 */
+	public function __construct( DateTimeImmutable $now, Event_Repository $event_repository ) {
 		$this->event_repository       = $event_repository;
 		$this->notifications_schedule = new Notifications_Schedule( $now, $this->event_repository );
 	}
@@ -87,22 +99,26 @@ class Event_Form_Handler {
 		} else {
 			// Create or update event.
 
+			if ( 'edit_event' === $action && ! empty( $event ) && empty( $form_data['event_timezone'] ) ) {
+				$form_data['event_timezone'] = $event->timezone()->getName();
+			}
+
 			try {
-				if ( 'edit_event' === $action && $event ) {
-					$form_data['event_timezone'] = $event->timezone()->getName();
-				}
 				$new_event = $this->parse_form_data( $form_data );
-			} catch ( InvalidTimeZone $e ) {
+			} catch ( Invalid_Time_Zone $e ) {
 				wp_send_json_error( esc_html__( 'Invalid time zone.', 'gp-translation-events' ), 422 );
 				return;
-			} catch ( InvalidStart $e ) {
+			} catch ( Invalid_Start $e ) {
 				wp_send_json_error( esc_html__( 'Invalid start date.', 'gp-translation-events' ), 422 );
 				return;
-			} catch ( InvalidEnd $e ) {
+			} catch ( Invalid_End $e ) {
 				wp_send_json_error( esc_html__( 'Invalid end date.', 'gp-translation-events' ), 422 );
 				return;
-			} catch ( InvalidStatus $e ) {
+			} catch ( Invalid_Status $e ) {
 				wp_send_json_error( esc_html__( 'Invalid status.', 'gp-translation-events' ), 422 );
+				return;
+			} catch ( Invalid_Attendance_Mode $e ) {
+				wp_send_json_error( esc_html__( 'Invalid attendance mode.', 'gp-translation-events' ), 422 );
 				return;
 			}
 
@@ -115,6 +131,7 @@ class Event_Form_Handler {
 			$invalid_slugs = array( 'new', 'edit', 'attend', 'my-events' );
 			if ( in_array( sanitize_title( $new_event->title() ), $invalid_slugs, true ) ) {
 				wp_send_json_error( esc_html__( 'Invalid slug.', 'gp-translation-events' ), 422 );
+				return;
 			}
 
 			if ( 'create_event' === $action ) {
@@ -130,6 +147,16 @@ class Event_Form_Handler {
 				$event = $this->event_repository->get_event( $new_event->id() );
 				if ( ! $event ) {
 					wp_send_json_error( esc_html__( 'Event does not exist.', 'gp-translation-events' ), 404 );
+					return;
+				}
+				if ( $event->is_trashed() ) {
+					wp_send_json_error( esc_html__( 'Trashed events must be restored before they can be edited.', 'gp-translation-events' ), 403 );
+					return;
+				}
+				// Publishing is ordinary host work; unpublishing hides the event like trashing does.
+				if ( $event->is_published() && $new_event->is_draft() && ! current_user_can( 'trash_translation_event', $event->id() ) ) {
+					wp_send_json_error( esc_html__( 'You do not have permissions to unpublish this event.', 'gp-translation-events' ), 403 );
+					return;
 				}
 
 				try {
@@ -188,10 +215,11 @@ class Event_Form_Handler {
 	// PHPCS erroneously thinks there should be only two throw tags.
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 	/**
-	 * @throws InvalidStart
-	 * @throws InvalidEnd
-	 * @throws InvalidTimeZone
-	 * @throws InvalidStatus
+	 * @throws Invalid_Start           When the start date is invalid.
+	 * @throws Invalid_End             When the end date is invalid.
+	 * @throws Invalid_Time_Zone       When the time zone is invalid.
+	 * @throws Invalid_Status          When the status is invalid.
+	 * @throws Invalid_Attendance_Mode When the attendance mode is invalid.
 	 */
 	// phpcs:enable
 	private function parse_form_data( array $data ): Event {
@@ -207,26 +235,30 @@ class Event_Form_Handler {
 		$attendance_mode = isset( $data['event_attendance_mode'] ) ? sanitize_text_field( wp_unslash( $data['event_attendance_mode'] ) ) : 'onsite';
 
 		$event_status = '';
-		if ( isset( $data['event_form_action'] ) && in_array( $data['event_form_action'], array( 'draft', 'publish', 'trash' ), true ) ) {
+		if ( isset( $data['event_form_action'] ) && in_array( $data['event_form_action'], array( 'draft', 'publish' ), true ) ) {
 			$event_status = sanitize_text_field( wp_unslash( $data['event_form_action'] ) );
 		}
 
 		try {
 			$timezone = new DateTimeZone( $event_timezone );
 		} catch ( Exception $e ) {
-			throw new InvalidTimeZone();
+			throw new Invalid_Time_Zone();
 		}
 
 		try {
-			$start = new Event_Start_Date( $event_start, $timezone );
+			$start_utc = new DateTime( $event_start, $timezone );
+			$start_utc = $start_utc->setTimezone( new DateTimeZone( 'UTC' ) );
+			$start     = new Event_Start_Date( $start_utc->format( 'Y-m-d H:i:s' ), $timezone );
 		} catch ( Exception $e ) {
-			throw new InvalidStart();
+			throw new Invalid_Start();
 		}
 
 		try {
-			$end = new Event_End_Date( $event_end, $timezone );
+			$end_utc = new DateTime( $event_end, $timezone );
+			$end_utc = $end_utc->setTimezone( new DateTimeZone( 'UTC' ) );
+			$end     = new Event_End_Date( $end_utc->format( 'Y-m-d H:i:s' ), $timezone );
 		} catch ( Exception $e ) {
-			throw new InvalidEnd();
+			throw new Invalid_End();
 		}
 
 		$event = new Event(

@@ -2,6 +2,7 @@
 /**
  * Events list page.
  */
+
 namespace Wporg\TranslationEvents\Templates;
 
 use Wporg\TranslationEvents\Event\Events_Query_Result;

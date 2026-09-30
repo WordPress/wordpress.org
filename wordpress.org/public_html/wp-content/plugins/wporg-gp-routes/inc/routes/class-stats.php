@@ -133,7 +133,7 @@ class Stats extends GP_Route {
 	public function get_stats_plugin_theme_overview( $locale, $locale_slug, $view = false ) {
 		global $wpdb;
 		if ( ! $locale || ! $locale_slug || ! $view ) {
-			wp_redirect( '/stats', 301 );
+			wp_safe_redirect( '/stats', 301 );
 			exit;
 		}
 
@@ -144,7 +144,7 @@ class Stats extends GP_Route {
 		}
 
 		if ( ! $gp_locale ) {
-			wp_redirect( '/stats', 301 );
+			wp_safe_redirect( '/stats', 301 );
 			exit;
 		}
 

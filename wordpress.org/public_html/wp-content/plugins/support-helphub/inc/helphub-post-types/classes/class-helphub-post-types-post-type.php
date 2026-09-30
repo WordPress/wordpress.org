@@ -188,7 +188,7 @@ class HelpHub_Post_Types_Post_Type {
 			'capability_type'       => 'post',
 			'has_archive'           => $this->archive_slug,
 			'hierarchical'          => false,
-			'supports'              => array( 'title', 'editor', 'excerpt', 'thumbnail', 'page-attributes', 'revisions' ),
+			'supports'              => array( 'title', 'editor', 'excerpt', 'thumbnail', 'author', 'page-attributes', 'revisions' ),
 			'menu_position'         => 5,
 			'menu_icon'             => 'dashicons-smiley',
 			'show_in_rest'          => true,
@@ -554,6 +554,7 @@ class HelpHub_Post_Types_Post_Type {
 			$html .= '</table>' . "\n";
 		} // End if().
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup assembled above from escaped parts.
 		echo $html;
 		/* @codingStandardsIgnoreLine */
 	} // End meta_box_content()

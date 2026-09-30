@@ -70,7 +70,7 @@ a img { border: 1px solid transparent; }
 
 	/* Screen Reader */
 	--bbbase-screen-reader-color: rgba(33, 117, 155, 1);
-	--bbbase-screen-reader-shador-color: rgba(0, 0, 0, 0.6);
+	--bbbase-screen-reader-shadow-color: rgba(0, 0, 0, 0.6);
 
 	/* Common Colors */
 	--bbbase-brightest-white: rgba(255, 255, 255, 1);

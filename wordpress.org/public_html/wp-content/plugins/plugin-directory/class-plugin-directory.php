@@ -3,7 +3,8 @@ namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Elasticsearch_Status, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 
 /**
  * The main Plugin Directory class, it handles most of the bootstrap and basic operations of the plugin.
@@ -52,6 +53,7 @@ class Plugin_Directory {
 		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
 		add_filter( 'allowed_redirect_hosts', array( $this, 'filter_redirect_hosts' ) );
 		add_filter( 'wp_get_attachment_url', array( $this, 'add_info_to_zip_url' ), 100, 2 );
+		add_action( 'post_updated', [ Helpscout::class, 'post_updated' ], 10, 3 );
 
 		add_filter( 'wp_resource_hints', array( $this, 'wp_resource_hints' ), 10, 2 );
 
@@ -109,6 +111,7 @@ class Plugin_Directory {
 		if ( defined( 'WP_ADMIN' ) && WP_ADMIN ) {
 			Customizations::instance();
 			Author_Cards::instance();
+			Elasticsearch_Status::instance();
 			Stats_Report::instance();
 			Upload_Token::instance();
 
@@ -201,7 +204,7 @@ class Plugin_Directory {
 			'menu_icon'    => 'dashicons-admin-plugins',
 			'capabilities' => array(
 				'edit_post'          => 'plugin_edit',
-				'read_post'          => 'read',
+				'read_post'          => 'plugin_admin_view',
 				'edit_posts'         => 'plugin_dashboard_access',
 				'edit_others_posts'  => 'plugin_edit_others',
 				'publish_posts'      => 'plugin_approve',
@@ -217,6 +220,7 @@ class Plugin_Directory {
 			'rewrite'           => false,
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_section',
@@ -250,6 +254,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'meta_box_cb'       => false,
 			'capabilities'      => array(
@@ -277,6 +282,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
@@ -295,6 +301,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'capabilities'      => array(
 				'assign_terms' => 'do_not_allow',
@@ -327,6 +334,7 @@ class Plugin_Directory {
 			),
 			'public'            => true,
 			'show_ui'           => true,
+			'show_in_rest'      => true,
 			'show_admin_column' => false,
 			'capabilities'      => array(
 				'assign_terms' => 'plugin_set_category',
@@ -402,154 +410,10 @@ class Plugin_Directory {
 			'label_count'               => _n_noop( 'Rejected <span class="count">(%s)</span>', 'Rejected <span class="count">(%s)</span>', 'wporg-plugins' ),
 		) );
 
-		/**
-		 * TODO
-		 * Use register_rest_field() to add array and object meta data to the API:
-		 * ratings, upgrade_notice, contributors, screenshots, sections, assets_screenshots,
-		 * assets_icons, assets_banners,
-		 */
-
-		register_meta( 'post', 'rating', array(
-			'type'         => 'number',
-			'description'  => __( 'Overall rating of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// todo 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'active_installs', array(
-			'type'              => 'integer',
-			'description'       => __( 'Number of installations.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'downloads', array(
-			'type'              => 'integer',
-			'description'       => __( 'Number of downloads.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'tested', array(
-			'description'  => __( 'The version of WordPress the plugin was tested with.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'requires', array(
-			'description'  => __( 'The minimum version of WordPress the plugin needs to run.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'requires_php', array(
-			'description'  => __( 'The minimum version of PHP the plugin needs to run.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'stable_tag', array(
-			'description'  => __( 'Stable version of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'absint',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'donate_link', array(
-			'description'       => __( 'Link to donate to the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'version', array(
-			'description'  => __( 'Current stable version.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_name', array(
-			'description'  => __( 'Name of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_plugin_uri', array(
-			'description'       => __( 'URL to the homepage of the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'header_name', array(
-			'description'  => __( 'Name of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_author', array(
-			'description'  => __( 'Name of the plugin author.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'header_author_uri', array(
-			'description'       => __( 'URL to the homepage of the author.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'header_description', array(
-			'description'  => __( 'Description of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'assets_icons', array(
-			'type'         => 'UserDefinedarray',
-			'description'  => __( 'Icon images of the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'assets_banners_color', array(
-			'description'  => __( 'Fallback color for the plugin.', 'wporg-plugins' ),
-			'single'       => true,
-			// TODO 'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest' => true,
-		) );
-
-		register_meta( 'post', 'support_threads', array(
-			'type'              => 'integer',
-			'description'       => __( 'Amount of support threads for the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
-
-		register_meta( 'post', 'support_threads_resolved', array(
-			'type'              => 'integer',
-			'description'       => __( 'Amount of resolved support threads for the plugin.', 'wporg-plugins' ),
-			'single'            => true,
-			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		) );
+		API\Plugin_Fields::register();
 
 		// Add the browse/* views.
-		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated|preview)' );
+		add_rewrite_tag( '%browse%', '(featured|popular|beta|blocks|block|new|favorites|adopt-me|updated|preview|dashboard-widgets)' );
 		add_permastruct( 'browse', 'browse/%browse%' );
 
 		// Create an archive for a users favorites too.
@@ -604,6 +468,8 @@ class Plugin_Directory {
 
 		add_shortcode( Shortcodes\Release_Confirmation::SHORTCODE, array( __NAMESPACE__ . '\Shortcodes\Release_Confirmation', 'display' ) );
 		add_action( 'template_redirect', array( __NAMESPACE__ . '\Shortcodes\Release_Confirmation', 'template_redirect' ) );
+
+		add_filter( 'wp_resource_hints', array( __NAMESPACE__ . '\Shortcodes\Screenshots', 'add_resource_hints' ), 10, 2 );
 	}
 
 	/**
@@ -638,7 +504,6 @@ class Plugin_Directory {
 	public function register_widgets() {
 		register_widget( __NAMESPACE__ . '\Widgets\Donate' );
 		register_widget( __NAMESPACE__ . '\Widgets\Meta' );
-		register_widget( __NAMESPACE__ . '\Widgets\Ratings' );
 		register_widget( __NAMESPACE__ . '\Widgets\Support' );
 		register_widget( __NAMESPACE__ . '\Widgets\Committers' );
 		register_widget( __NAMESPACE__ . '\Widgets\Contributors' );
@@ -807,7 +672,7 @@ class Plugin_Directory {
 		// For any invalid values passed to browse, set it to featured instead
 		if (
 			! empty ( $wp_query->query['browse'] ) &&
-			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated', 'preview' ) )
+			! in_array( $wp_query->query['browse'], array( 'featured', 'popular', 'beta', 'blocks', 'block', 'new', 'favorites', 'adopt-me', 'updated', 'preview', 'dashboard-widgets' ) )
 		) {
 			 $wp_query->query['browse']      = 'featured';
 			 $wp_query->query_vars['browse'] = 'featured';
@@ -815,6 +680,10 @@ class Plugin_Directory {
 
 		// Set up custom queries for the /browse/ URLs
 		switch ( $wp_query->get( 'browse' ) ) {
+			case 'featured':
+				$wp_query->query_vars['orderby'] ??= 'RAND(' . gmdate( 'Ymd' ) . ')';
+				break;
+
 			case 'beta':
 				$wp_query->query_vars['orderby'] ??= 'last_updated';
 
@@ -1444,12 +1313,15 @@ class Plugin_Directory {
 		// We've disabled WordPress's default 404 redirects, so we'll handle them ourselves.
 		if ( is_404() ) {
 
-			// [1] => plugins [2] => example-plugin-name [3..] => random().
-			$path = explode( '/', trailingslashit( explode( '?', $_SERVER['REQUEST_URI'] )[0] ) );
+			$path_prefix = wp_parse_url( home_url('/'), PHP_URL_PATH );
+			$path        = substr( $_SERVER['REQUEST_URI'], strlen( $path_prefix ) );
+			// [0] => example-plugin-name [1..] => random().
+			$path        = explode( '/', trailingslashit( explode( '?', $path )[0] ) );
+			$path_base   = $path[0];
 
-			if ( 'tags' === $path[2] ) {
-				if ( isset( $path[3] ) && ! empty( $path[3] ) ) {
-					wp_safe_redirect( home_url( '/search/' . urlencode( $path[3] ) . '/' ), 301 );
+			if ( 'tags' === $path_base ) {
+				if ( isset( $path[1] ) && ! empty( $path[1] ) ) {
+					wp_safe_redirect( home_url( '/search/' . urlencode( $path[1] ) . '/' ), 301 );
 					die();
 				} else {
 					wp_safe_redirect( home_url( '/' ), 301 );
@@ -1458,10 +1330,10 @@ class Plugin_Directory {
 			}
 
 			// The about page is now over at /developers/.
-			if ( 'about' === $path[2] ) {
-				if ( isset( $path[3] ) && 'add' == $path[3] ) {
+			if ( 'about' === $path_base ) {
+				if ( isset( $path[1] ) && 'add' == $path[1] ) {
 					wp_safe_redirect( home_url( '/developers/add/' ), 301 );
-				} elseif ( isset( $path[3] ) && 'validator' == $path[3] ) {
+				} elseif ( isset( $path[1] ) && 'validator' == $path[1] ) {
 					wp_safe_redirect( home_url( '/developers/readme-validator/' ), 301 );
 				} else {
 					wp_safe_redirect( home_url( '/developers/' ), 301 );
@@ -1470,21 +1342,22 @@ class Plugin_Directory {
 			}
 
 			// Browse 404s.
-			if ( 'browse' === $path[2] ) {
+			if ( 'browse' === $path_base ) {
 				wp_safe_redirect( home_url( '/' ), 301 );
 				die();
 			}
 
 			// The readme.txt page.
-			if ( 'readme.txt' === $path[2] ) {
+			if ( 'readme.txt' === $path_base ) {
 				status_header( 200 );
 				header( 'Content-type: text/plain' );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generated markup: a text/plain readme and GeoPattern SVG, neither of which survives escaping.
 				echo file_get_contents( __DIR__ . '/readme/readme.txt' );
 				die();
 			}
 
 			// Handle any plugin redirects.
-			if ( $path[2] && ( $plugin = self::get_plugin_post( $path[2] ) ) ) {
+			if ( $path_base && ( $plugin = self::get_plugin_post( $path_base ) ) ) {
 				$permalink = get_permalink( $plugin->ID );
 				if ( parse_url( $permalink, PHP_URL_PATH ) != $_SERVER['REQUEST_URI'] ) {
 					wp_safe_redirect( $permalink, 301 );
@@ -1493,8 +1366,8 @@ class Plugin_Directory {
 			}
 
 			// Otherwise, let's redirect to the search page.
-			if ( isset( $path[2] ) && ! empty( $path[2] ) ) {
-				wp_safe_redirect( home_url( '/search/' . urlencode( $path[2] ) . '/' ), 301 );
+			if ( isset( $path_base ) && ! empty( $path_base ) ) {
+				wp_safe_redirect( home_url( '/search/' . urlencode( $path_base ) . '/' ), 301 );
 				die();
 			}
 		}
@@ -1593,7 +1466,7 @@ class Plugin_Directory {
 		}
 
 		if ( is_comment_feed() ) {
-			wp_redirect( 'https://wordpress.org/plugins/', 301 );
+			wp_safe_redirect( 'https://wordpress.org/plugins/', 301 );
 			die();
 		}
 
@@ -1633,6 +1506,7 @@ class Plugin_Directory {
 		header( 'Cache-Control: public, max-age=' . YEAR_IN_SECONDS );
 		header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + YEAR_IN_SECONDS ) );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generated markup: a text/plain readme and GeoPattern SVG, neither of which survives escaping.
 		echo $icon->toSVG();
 		die();
 	}
@@ -1818,10 +1692,11 @@ class Plugin_Directory {
 	public static function get_release( $plugin, $tag ) {
 		$releases = self::get_releases( $plugin );
 
-		// Look for the version released as a tag.
-		$filtered = wp_list_filter( $releases, compact( 'tag' ) );
-		if ( $filtered ) {
-			return array_shift( $filtered );
+		// Match the exact tag; '1.4' and '1.40' are distinct releases, not a numeric match.
+		foreach ( $releases as $release ) {
+			if ( isset( $release['tag'] ) && (string) $release['tag'] === (string) $tag ) {
+				return $release;
+			}
 		}
 
 		// Look for the tag as a trunk version.
@@ -1844,21 +1719,44 @@ class Plugin_Directory {
 		if ( ! isset( $data['tag'] ) ) {
 			return false;
 		}
+
+		// PHP coerces numeric-string array keys to integers; release tags are strings.
+		$data['tag'] = (string) $data['tag'];
+
 		$plugin = self::get_plugin_post( $plugin );
 
-		$release = self::get_release( $plugin, $data['tag'] ) ?: [
-			'date'                     => time(),
-			'tag'                      => '',
-			'version'                  => '',
+		$releases = self::get_releases( $plugin );
+
+		// Strict match only: get_release()'s loose lookup ('1.4' == '1.40') could merge onto the wrong release. Only one release can exist in any given tag.
+		$release = false;
+		foreach ( $releases as $i => $r ) {
+			if ( isset( $r['tag'] ) && (string) $r['tag'] === $data['tag'] ) {
+				$release = $release ?: $r;
+				unset( $releases[ $i ] );
+			}
+		}
+
+		// Unconfirmed-state defaults, shared by fresh releases and resets so the two can't drift apart.
+		$confirmation_defaults = [
 			// Assume zips built if no release confirmation.
 			'zips_built'               => ! $plugin->release_confirmation,
 			'zips_built_from_revision' => 0,
 			'confirmations'            => [],
-			// Confirmed by default if no release confiration.
+			// Confirmed by default if no release confirmation.
 			'confirmed'                => ! $plugin->release_confirmation,
 			'confirmations_required'   => (int) $plugin->release_confirmation,
-			'committer'                => [],
-			'revision'                 => [],
+		];
+
+		$release = $release ?: $confirmation_defaults + [
+			'date'          => time(),
+			'tag'           => '',
+			'version'       => '',
+			'committer'     => [],
+			'revision'      => [],
+			// Captures the release cooldown active at creation time so future filter/constant
+			// changes don't retroactively affect in-flight releases. Reviewers force-release
+			// by overriding this to 0 — see API_Update_Updater::force_release().
+			'release_delay' => get_release_cooldown_delay( $plugin->post_name ),
 		];
 
 		// Fill the $release with the newish data. This could/should use wp_parse_args()?
@@ -1870,6 +1768,24 @@ class Plugin_Directory {
 			}
 		}
 
+		// Re-open a served release for fresh approval, clearing the old confirmation set the merge above can't. See Import::import_from_svn().
+		if ( ! empty( $data['reset_confirmation'] ) ) {
+			$release = array_merge( $release, $confirmation_defaults );
+
+			// Re-opened code is new: re-arm the cooldown (dropping any force-release bypass) and resurface by date.
+			$release['release_delay'] = get_release_cooldown_delay( $plugin->post_name );
+			$release['date']          = time();
+
+			// A prior discard is stale once the code changes: fully re-open so it can be confirmed.
+			unset( $release['discarded'] );
+		}
+		unset( $release['reset_confirmation'] );
+
+		// A discard voids approvals; clear them so undo_discard_release() can't restore stale confirmations.
+		if ( ! empty( $data['discarded'] ) ) {
+			$release['confirmations'] = [];
+		}
+
 		/*
 		 * Allow a discarded release to be reset.
 		 * See API\Routes\Plugin_Release_Confirmation::undo_discard_release()
@@ -1878,15 +1794,14 @@ class Plugin_Directory {
 			unset( $release['discarded'] );
 		}
 
-		$releases = self::get_releases( $plugin );
-
-		// Find any other releases using this slug (as in the case of updates) and remove it.
-		// Only one release can exist in any given tag.
-		foreach ( $releases as $i => $r ) {
-			if ( $r['tag'] === $release['tag'] ) {
-				unset( $releases[ $i ] );
-			}
+		/*
+		 * Clear a release block so the release can be served.
+		 * See Jobs\API_Update_Updater::force_release().
+		 */
+		if ( ! empty( $data['unblock'] ) ) {
+			unset( $release['release_block'] );
 		}
+		unset( $release['unblock'] );
 
 		// Add this release in
 		$releases[] = $release;
@@ -1897,6 +1812,35 @@ class Plugin_Directory {
 		} );
 
 		return update_post_meta( $plugin->ID, 'releases', $releases );
+	}
+
+	/**
+	 * Mark built ZIPs as such on their release records.
+	 *
+	 * @param string|\WP_Post $plugin         Plugin slug or post object.
+	 * @param array|false     $built_versions Map of built version => SVN revision, as returned by Zip\Builder::build().
+	 * @return void
+	 */
+	public static function mark_zips_built( $plugin, $built_versions ) {
+		if ( ! is_array( $built_versions ) ) {
+			return;
+		}
+
+		foreach ( $built_versions as $tag => $revision ) {
+			// Trunk has no release record.
+			if ( 'trunk' === $tag ) {
+				continue;
+			}
+
+			self::add_release(
+				$plugin,
+				[
+					'tag'                      => $tag,
+					'zips_built'               => true,
+					'zips_built_from_revision' => $revision,
+				]
+			);
+		}
 	}
 
 	/**
@@ -2079,8 +2023,8 @@ class Plugin_Directory {
 	 * @return \WP_Post|\WP_Error
 	 */
 	public static function create_plugin_post( array $args ) {
-		$title = $args['post_title'] ?: $args['post_name'];
-		$slug  = $args['post_name'] ?: sanitize_title( $title );
+		$title = ( $args['post_title'] ?? '' ) ?: $args['post_name'];
+		$slug  = ( $args['post_name'] ?? '' ) ?: sanitize_title( $title );
 
 		// Remove null items (date-related fields) to fallback to the defaults below.
 		$args = array_filter(

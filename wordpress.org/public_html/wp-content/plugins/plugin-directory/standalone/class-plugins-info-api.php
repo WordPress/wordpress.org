@@ -6,6 +6,7 @@ class Plugins_Info_API {
 	const CACHE_GROUP       = 'plugin_api_info';
 	const CACHE_EXPIRY      = 21600; // 6 hour cache, wporg_object_cache will spread this out.
 	const LONG_CACHE_EXPIRY = 86400; // 24 hour cache, wporg_object_cache will spread this out.
+	const QUERY_CACHEBUSTER = 2; // Increment to force query caches (including search) to be refreshed.
 
 	protected $format  = 'json';
 	protected $jsonp   = false;
@@ -17,7 +18,7 @@ class Plugins_Info_API {
 	);
 
 	function __construct( $format = 'json' ) {
-		if ( is_array( $format ) && 'jsonp' == $format[0] ) {
+		if ( is_array( $format ) && 'jsonp' == $format[0] && is_string( $format[1] ) ) {
 			$this->jsonp = preg_replace( '/[^a-zA-Z0-9_]/', '', $format[1] );
 			$format      = 'jsonp';
 		}
@@ -282,7 +283,7 @@ class Plugins_Info_API {
 	 * Generates a cache key for a given query_plugins request.
 	 */
 	protected function query_plugins_cache_key( $request ) {
-		return 'query_plugins:' . md5( serialize( $request->query_plugins_params_for_query() ) ) . ':' . ( $request->locale ?: 'en_US' );
+		return 'query_plugins:' . self::QUERY_CACHEBUSTER . ':' . md5( serialize( $request->query_plugins_params_for_query() ) );
 	}
 
 	/**
@@ -355,13 +356,16 @@ class Plugins_Info_API {
 				}
 				$json = function_exists( 'wp_json_encode' ) ? wp_json_encode( $response ) : json_encode( $response );
 				if ( 'jsonp' == $this->format ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 					echo "{$this->jsonp}($json)";
 				} else {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 					echo $json;
 				}
 				break;
 
 			case 'php':
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 				echo serialize( $response ? (object) $response : $response );
 				break;
 
@@ -444,6 +448,7 @@ class Plugins_Info_API {
 			};
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 		echo str_repeat( "\t", $tabs );
 		switch ( $type = gettype( $data ) ) {
 			case 'string':
@@ -453,25 +458,31 @@ class Plugins_Info_API {
 			case 'double':
 			case 'float':
 				list( $start, $close ) = $xml_tag( $key, $type, false );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 				echo "$start$data$close";
 				break;
 			case 'NULL':
 				list( $start, $close ) = $xml_tag( $key, $type, true );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 				echo $start;
 				break;
 			case 'array':
 				if ( empty( $data ) ) {
 					list( $start, $close ) = $xml_tag( $key, $type, true );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 					echo $start;
 					break;
 				}
 
 				list( $start, $close ) = $xml_tag( $key, $type, false );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 				echo "$start\n";
 				foreach ( $data as $k => $v ) {
 					$this->php_to_xml( $v, $tabs + 1, is_int( $k ) ? '' : $k );
 				}
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 				echo str_repeat( "\t", $tabs );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 				echo $close;
 				break;
 			case 'object':
@@ -481,19 +492,23 @@ class Plugins_Info_API {
 					}
 
 					list( $start, $close ) = $xml_tag( $key, $type, true );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 					echo $start;
 					break;
 				}
 
 				list( $start, $close ) = $xml_tag( $key, $type, false );
 				if ( $tabs ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 					echo $start;
 				}
 				foreach ( $array as $k => $v ) {
 					$this->php_to_xml( $v, $tabs + 1, $k );
 				}
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 				echo str_repeat( "\t", $tabs );
 				if ( $tabs ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON, JSONP, serialized PHP or XML); escaping would corrupt the format.
 					echo $close;
 				}
 				break;
