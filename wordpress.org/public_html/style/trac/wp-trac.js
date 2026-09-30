@@ -532,7 +532,7 @@ let wpTrac,
 
 				// Submit comment form on Cmd/Ctrl + Enter.
 				$( '#comment' ).on( 'keydown', function ( event ) {
-					if ( event.ctrlKey && ( event.keyCode === 10 || event.keyCode === 13 ) ) {
+					if ( ( event.ctrlKey || event.metaKey ) && event.key === 'Enter' ) {
 						$( 'input[name="submit"]' ).trigger( 'click' );
 					}
 				} );
@@ -673,7 +673,7 @@ let wpTrac,
 					isNewTicket = wpTrac.isNewTicket();
 
 				// Simple replacement for ticket summary.
-				if ( isNewTicket ) {
+				if ( isNewTicket && $summary.length && $summary.val() ) {
 					$summary.val( $summary.val().replaceAll( 'Wordpress', 'WordPress' ) );
 				}
 
@@ -742,9 +742,11 @@ let wpTrac,
 					$commit.append( firstLine + '&hellip;' );
 
 					const author = $el.find( '.username' ).data( 'username' );
-					$commit.append(
-						' by&nbsp;<a href="https://profiles.wordpress.org/' + author + '/">@' + author + '</a>'
-					);
+					if ( author ) {
+						$commit.append(
+							' by&nbsp;<a href="https://profiles.wordpress.org/' + encodeURIComponent( author ) + '/">@' + escapeHtml( author ) + '</a>'
+						);
+					}
 
 					const date = $el.find( '.time-ago' ).html();
 					$commit.append( ' ' + date );
@@ -950,7 +952,7 @@ let wpTrac,
 					? `<strong>Do not report potential security vulnerabilities here.</strong><br />Please email
 					<a class="mail-link" href="mailto:plugins@wordpress.org">plugins@wordpress.org</a>.`
 					: `<strong>Do not report potential security vulnerabilities here.</strong><br />See the
-					<a href="https://make.wordpress.org/core/handbook/reporting-security-vulnerabilities/">Security FAQ</a>
+					<a href="https://make.wordpress.org/core/handbook/testing/reporting-security-vulnerabilities/">Security FAQ</a>
 					and visit the <a href="https://hackerone.com/wordpress">WordPress HackerOne program</a>.`;
 
 			$form.before(
@@ -2327,10 +2329,10 @@ let wpTrac,
 				if ( authenticated ) {
 					params.set( 'authenticated', '1' );
 					if ( 'URL' in window ) {
-						params.set(
-							'_lastmod',
-							new URL( window.jQuery( 'a.timeline' ).last().prop( 'href' ) ).searchParams.get( 'from' )
-						);
+						const timelineHref = $( 'a.timeline' ).last().prop( 'href' );
+						if ( timelineHref ) {
+							params.set( '_lastmod', new URL( timelineHref ).searchParams.get( 'from' ) );
+						}
 					}
 				}
 				$.ajax( `${ apiEndpoint }?${ params }` ).done( function ( data ) {
@@ -2343,9 +2345,8 @@ let wpTrac,
 						prContainer.find( '.loading' ).remove();
 
 						// Render the PRs
-						for ( const i in data ) {
-							renderPR( prContainer, data[ i ] );
-						}
+						data.forEach( ( pr ) => renderPR( prContainer, pr ) );
+
 					} else {
 						// Change the loading placeholder
 						prContainer.find( '.loading div' ).html(
@@ -2677,8 +2678,8 @@ let wpTrac,
 
 					// If it's a plural, add the non-plural form.
 					words.forEach( ( word ) => {
-						if ( 's' === word.substr( -1 ) ) {
-							words.push( word.substr( 0, word.length - 1 ) );
+						if ( 's' === word.slice( -1 ) ) {
+							words.push( word.slice( 0, -1 ) );
 						}
 					} );
 
@@ -2720,7 +2721,7 @@ let wpTrac,
 			 */
 			let cacheBuster = $( 'script[src^="https://s.w.org"][src*="v="]' ).attr( 'src' );
 			if ( cacheBuster ) {
-				cacheBuster = ( cacheBuster.match( /v=([0-9]+)$/ ) || [] )[ 1 ];
+				cacheBuster = ( cacheBuster.match( /[?&]v=([0-9]+)/ ) || [] )[ 1 ];
 			}
 			const maybeAddCacheBuster = function ( href ) {
 				if ( cacheBuster && href.match( /https:\/\/s.w.org/i ) && href.match( /[.](css|js)$/ ) ) {
