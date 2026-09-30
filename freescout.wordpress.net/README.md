@@ -44,11 +44,4 @@ Configuration, in FreeScout's `.env`:
 | `WPORG_SSO_IDP_CERT` | The identity provider's signing certificate, without the BEGIN/END lines. Until it and `WPORG_API_SECRET` are set, logins stay as they are, so users can be connected first. |
 | `WPORG_SSO_PASSWORD_LOGIN` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Off by default; every such login is logged. |
 
-To switch on WPOrgSSO:
-
-1. On login.wordpress.org, add FreeScout as a trusted service provider in wp-saml-idp: entity ID `<APP_URL>/wporgsso/metadata`, ACS URL `<APP_URL>/wporgsso/acs`. The metadata URL serves both.
-2. Switch the module on. Until `WPORG_SSO_IDP_CERT` and `WPORG_API_SECRET` are set, logins stay as they are.
-3. Connect the existing users to their WordPress.org accounts, on their profile or with `php artisan wporgsso:connect <email> <wporg-username>`. Connect at least the administrators; their accounts need two-factor authentication.
-4. Set the `WPORG_SSO_*` variables. From then on, everyone logs in with WordPress.org, and administrators add new users by WordPress.org username.
-
 FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events and `WPOrgSSO` updates avatars from the queue.
