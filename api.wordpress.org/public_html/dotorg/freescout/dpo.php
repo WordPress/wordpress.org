@@ -34,15 +34,28 @@ function render_privacy_requests( object $request ): string {
 		esc_url( add_query_arg( 's', rawurlencode( $email ), admin_url( 'export-personal-data.php' ) ) )
 	);
 
-	$request_ids = get_posts(
-		array(
-			'post_type'      => 'user_request',
-			'title'          => $email,
-			'post_status'    => 'any',
-			'posts_per_page' => -1,
-			'fields'         => 'ids',
-		)
-	);
+	// The sender may have filed requests from their own address, not the account's.
+	$emails = array_unique( array_map( 'strtolower', array( $email, (string) $request->sender->email ) ) );
+
+	$request_ids = array();
+	foreach ( $emails as $requester_email ) {
+		$request_ids = array_merge(
+			$request_ids,
+			get_posts(
+				array(
+					'post_type'      => 'user_request',
+					'title'          => $requester_email,
+					'post_status'    => 'any',
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+				)
+			)
+		);
+	}
+
+	// Newest first.
+	$request_ids = array_unique( $request_ids );
+	rsort( $request_ids );
 
 	if ( ! $request_ids ) {
 		return $html . '<p>No requests found.</p>';

@@ -40,10 +40,16 @@ function render_plugins_themes( object $request ): string {
 
 	$html = '';
 
-	foreach ( get_plugin_or_theme_from_email( $request ) as $type => $slugs ) {
-		switch_to_blog( $sites[ $type ] );
+	$mentioned = get_plugin_or_theme_from_email( $request );
 
-		$post_ids = get_items_by_slug( $slugs );
+	foreach ( $sites as $type => $blog_id ) {
+		if ( empty( $mentioned[ $type ] ) ) {
+			continue;
+		}
+
+		switch_to_blog( $blog_id );
+
+		$post_ids = get_items_by_slug( $mentioned[ $type ] );
 
 		if ( $post_ids ) {
 			$html .= '<p><strong>' . esc_html( ucwords( $type ) ) . ' mentioned in this email:</strong></p>';
@@ -106,28 +112,17 @@ function get_user_items( \WP_User $user ): array {
 
 	$slugs = array_values( array_unique( $slugs ) );
 
-	if ( ! $slugs ) {
-		$ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT ID
-				FROM %i
-				WHERE post_type IN( 'plugin', 'repopackage' ) AND post_author = %d
-				ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'delist', 'closed', 'approved', 'suspended', 'suspend', 'rejected', 'draft' ), post_title",
-				$wpdb->posts,
-				$user->ID
-			)
-		);
-	} else {
-		$ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT ID
-				FROM %i
-				WHERE post_type IN( 'plugin', 'repopackage' ) AND ( post_author = %d OR post_name IN( " . implode( ', ', array_fill( 0, count( $slugs ), '%s' ) ) . " ) )
-				ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'delist', 'closed', 'approved', 'suspended', 'suspend', 'rejected', 'draft' ), post_title",
-				array_merge( array( $wpdb->posts, $user->ID ), $slugs )
-			)
-		);
-	}
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- The slug condition only adds placeholders.
+	$ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT ID
+			FROM %i
+			WHERE post_type IN( 'plugin', 'repopackage' ) AND ( post_author = %d" . ( $slugs ? ' OR post_name IN( ' . implode( ', ', array_fill( 0, count( $slugs ), '%s' ) ) . ' )' : '' ) . " )
+			ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'delist', 'closed', 'approved', 'suspended', 'suspend', 'rejected', 'draft' ), post_title",
+			array_merge( array( $wpdb->posts, $user->ID ), $slugs )
+		)
+	);
+	// phpcs:enable
 
 	return array_map( 'intval', $ids );
 }
