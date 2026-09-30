@@ -85,9 +85,32 @@ final class SyncSenderAvatar implements ShouldQueue {
 			if ( $customer->setPhotoFromRemoteFile( $this->avatar_url ) ) {
 				$customer->photo_type = Customer::PHOTO_TYPE_GRAVATAR;
 				$customer->save();
+			} elseif ( $customer->photo_url && $this->avatar_is_gone() ) {
+				$customer->removePhoto();
+				$customer->photo_type = null;
+				$customer->save();
 			}
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSidebar] Could not update the photo of sender ' . $customer->id . ': ' . $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Whether the account's avatar was removed; an unreachable Gravatar is inconclusive, so the copy stays.
+	 *
+	 * @return bool
+	 */
+	private function avatar_is_gone(): bool {
+		$context = stream_context_create(
+			array(
+				'http' => array(
+					'method'  => 'HEAD',
+					'timeout' => 10,
+				),
+			)
+		);
+		$headers = get_headers( $this->avatar_url, false, $context );
+
+		return is_array( $headers ) && 1 === preg_match( '#^HTTP/\S+ 404\b#', $headers[0] );
 	}
 }
