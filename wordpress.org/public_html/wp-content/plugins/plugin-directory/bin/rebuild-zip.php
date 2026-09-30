@@ -96,6 +96,7 @@ if ( ! $versions ) {
 	exit( 1 );
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 echo "Rebuilding ZIPs for $plugin_slug... ";
 try {
 	$zip_builder = new ZIP\Builder();
@@ -104,21 +105,29 @@ try {
 	if ( ! $plugin_post ) {
 		throw new Exception( 'Could not locate plugin post' );
 	}
-	$stable_tag = get_post_meta( $plugin_post->ID, 'stable_tag', true ) ?? 'trunk';
+	$stable_tag = get_post_meta( $plugin_post->ID, 'stable_tag', true );
+	if ( ! $stable_tag ) {
+		$stable_tag = 'trunk';
+	}
 
 	// (re)Build & Commit 5 Zips at a time to avoid limitations.
 	foreach ( array_chunk( $versions, 5 ) as $versions_to_build ) {
-		$zip_builder->build(
+		$built_versions = $zip_builder->build(
 			$plugin_slug,
 			$versions_to_build,
 			"{$plugin_slug}: Rebuild triggered by " . php_uname( 'n' ),
 			$stable_tag
 		);
+
+		// Mark only the ZIPs that actually built, each with its export revision.
+		Plugin_Directory::mark_zips_built( $plugin_post, $built_versions );
 	}
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo 'OK. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
 } catch ( Exception $e ) {
 	fwrite( STDERR, "{$plugin_slug}: Zip Rebuild failed: " . $e->getMessage() . "\n" );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo 'Failed. Took ' . round( microtime( 1 ) - $start_time, 2 ) . "s\n";
 	exit( 1 );
 }

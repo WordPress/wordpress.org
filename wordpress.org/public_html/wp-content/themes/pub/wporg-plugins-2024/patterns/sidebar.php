@@ -11,7 +11,7 @@
 <!-- wp:group -->
 <div class="wp-block-group">
 	<!-- wp:heading {"className":"widget-title"} -->
-	<h2 class="wp-block-heading widget-title">Ratings</h2>
+	<h2 class="wp-block-heading widget-title"><?php esc_html_e( 'Ratings', 'wporg-plugins' ); ?></h2>
 	<!-- /wp:heading -->
 
 	<!-- wp:wporg/ratings-stars /-->

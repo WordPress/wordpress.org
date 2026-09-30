@@ -9,6 +9,7 @@
  * Include locale specific styles.
  */
 require_once get_theme_root( 'wporg-parent-2021' ) . '/wporg-parent-2021/inc/rosetta-styles.php';
+require_once( __DIR__ . '/inc/block-config.php' );
 
 /**
  * Use the ‘Lead Topic’ uses the single topic part
@@ -409,7 +410,7 @@ function wporg_support_breadcrumb() {
 
 	// Home
 	$args['include_home']    = true;
-	$args['home_text']       = __( 'Home', 'wporg-forums' );
+	$args['home_text']       = __( 'Forums', 'wporg-forums' );
 
 	// Forum root
 	$args['include_root']    = false;
@@ -525,6 +526,7 @@ function wporg_support_get_forums_list() {
 	// Calculate how many spare columns there are to fill at the end of a 3 column grid
 	$columns_to_fill = 3 - ( $forums_count % 3 );
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 	echo do_blocks(
 		sprintf(
 			'<!-- wp:group {"className":"forums-homepage-themes-plugins span-%1$s"} -->
@@ -664,15 +666,6 @@ function wporg_support_pre_get_document_title( $title ) {
 add_filter( 'pre_get_document_title', 'wporg_support_pre_get_document_title' );
 
 /**
- * The Footer for our theme.
- *
- * @package WPBBP
- */
-function wporg_get_global_footer() {
-	require WPORGPATH . 'footer.php';
-}
-
-/**
  * Append an optimized site name.
  *
  * @param array $title Parts of the page title.
@@ -726,7 +719,7 @@ function wporg_support_get_slack_username( $user_id = 0 ) {
 
 	$data = wp_cache_get( "user_id:$user_id", 'slack_data' );
 	if ( false === $data ) {
-		$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d", $user_id ) );
+		$data = $wpdb->get_var( $wpdb->prepare( "SELECT profiledata FROM slack_users WHERE user_id = %d ORDER BY deactivated ASC LIMIT 1", $user_id ) );
 
 		// Cache nonexistence as an empty string.
 		wp_cache_add( "user_id:$user_id", (string) $data, 'slack_data', 1800 );
@@ -1127,7 +1120,7 @@ function wporg_support_add_moderation_notice() {
 		printf(
 			'<div class="bbp-template-notice %s"><p>%s</p></div>',
 			esc_attr( $notice_class ),
-			implode( '</p><p>', $notices )
+			wp_kses_post( implode( '</p><p>', $notices ) )
 		);
 	}
 }
@@ -1344,6 +1337,17 @@ function wporg_is_single_user_profile( bool $is_single_user_profile ) : bool {
 }
 add_filter( 'bbp_is_single_user_profile', 'wporg_is_single_user_profile' );
 
+/**
+ * Get the URL for the forums welcome page.
+ * This is translated so the URL can be customized per locale.
+ *
+ * @return string
+ */
+function wporg_support_get_welcome_url() {
+	/* Translators: URL for the welcome page. Check whether your site has a custom slug, eg. https://es.wordpress.org/support/bienvenida/ */
+	return __( 'https://wordpress.org/support/welcome/', 'wporg-forums' );
+}
+
 
 /** bb Base *******************************************************************/
 
@@ -1352,8 +1356,8 @@ function bb_base_search_form() {
 
 	<form role="search" method="get" id="searchform" action="https://wordpress.org/search/do-search.php">
 		<div>
-			<h3><?php _e( 'Forum Search', 'wporg-forums' ); ?></h3>
-			<label class="screen-reader-text hidden" for="search"><?php _e( 'Search for:', 'wporg-forums' ); ?></label>
+			<h3><?php esc_html_e( 'Forum Search', 'wporg-forums' ); ?></h3>
+			<label class="screen-reader-text hidden" for="search"><?php esc_html_e( 'Search for:', 'wporg-forums' ); ?></label>
 			<input name="search" class="text" id="forumsearchbox" value type="text" />
 			<input name="go" class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'wporg-forums' ); ?>" />
 			<input value="1" name="forums" type="hidden">
@@ -1368,9 +1372,9 @@ function bb_base_topic_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h3><?php _e( 'Forum Search', 'wporg-forums' ); ?></h3>
-			<label class="screen-reader-text hidden" for="ts"><?php _e( 'Search for:', 'wporg-forums' ); ?></label>
-			<input type="text" value="<?php echo bb_base_topic_search_query(); ?>" name="ts" id="ts" />
+			<h3><?php esc_html_e( 'Forum Search', 'wporg-forums' ); ?></h3>
+			<label class="screen-reader-text hidden" for="ts"><?php esc_html_e( 'Search for:', 'wporg-forums' ); ?></label>
+			<input type="text" value="<?php echo esc_attr( bb_base_topic_search_query() ); ?>" name="ts" id="ts" />
 			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'wporg-forums' ); ?>" />
 		</div>
 	</form>
@@ -1383,9 +1387,9 @@ function bb_base_reply_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h3><?php _e( 'Reply Search', 'wporg-forums' ); ?></h3>
-			<label class="screen-reader-text hidden" for="rs"><?php _e( 'Search for:', 'wporg-forums' ); ?></label>
-			<input type="text" value="<?php echo bb_base_reply_search_query(); ?>" name="rs" id="rs" />
+			<h3><?php esc_html_e( 'Reply Search', 'wporg-forums' ); ?></h3>
+			<label class="screen-reader-text hidden" for="rs"><?php esc_html_e( 'Search for:', 'wporg-forums' ); ?></label>
+			<input type="text" value="<?php echo esc_attr( bb_base_reply_search_query() ); ?>" name="rs" id="rs" />
 			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'wporg-forums' ); ?>" />
 		</div>
 	</form>
@@ -1398,9 +1402,9 @@ function bb_base_plugin_search_form() {
 
 	<form role="search" method="get" id="searchform" action="">
 		<div>
-			<h3><?php _e( 'Plugin Search', 'wporg-forums' ); ?></h3>
-			<label class="screen-reader-text hidden" for="ps"><?php _e( 'Search for:', 'wporg-forums' ); ?></label>
-			<input type="text" value="<?php echo bb_base_plugin_search_query(); ?>" name="ps" id="ts" />
+			<h3><?php esc_html_e( 'Plugin Search', 'wporg-forums' ); ?></h3>
+			<label class="screen-reader-text hidden" for="ps"><?php esc_html_e( 'Search for:', 'wporg-forums' ); ?></label>
+			<input type="text" value="<?php echo esc_attr( bb_base_plugin_search_query() ); ?>" name="ps" id="ts" />
 			<input class="button" type="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', 'wporg-forums' ); ?>" />
 		</div>
 	</form>
@@ -1473,35 +1477,52 @@ function bb_base_single_topic_description() {
 		$wp_version = WordPressdotorg\Forums\Version_Dropdown\get_topic_version( $topic_id );
 	}
 
-	?>
+	$forum_hidden = false;
+	if ( class_exists( 'WordPressdotorg\Forums\Support_Compat' ) ) {
+		$forum_hidden = in_array( bbp_get_topic_forum_id(), WordPressdotorg\Forums\Support_Compat::HIDDEN_FORUMS, true );
+	}
 
-	<li class="topic-forum"><?php
-		/* translators: %s: forum title */
-		printf( __( 'In: %s', 'wporg-forums' ),
+	if ( ! $forum_hidden ) {
+		echo '<li class="topic-forum">';
+		printf(
+			/* translators: %s: forum title */
+			esc_html__( 'In: %s', 'wporg-forums' ),
 			sprintf( '<a href="%s">%s</a>',
 				esc_url( bbp_get_forum_permalink( bbp_get_topic_forum_id() ) ),
-				bbp_get_topic_forum_title()
+				esc_html( bbp_get_topic_forum_title() )
 			)
 		);
-	?></li>
+		echo '</li>';
+	}
+
+	?>
 	<?php if ( !empty( $reply_count ) ) : ?>
-		<li class="reply-count"><?php echo $reply_count; ?></li>
+		<li class="reply-count"><?php echo wp_kses_post( $reply_count ); ?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $voice_count ) ) : ?>
-		<li class="voice-count"><?php echo $voice_count; ?></li>
+		<li class="voice-count"><?php echo esc_html( $voice_count ); ?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $last_reply  ) ) : ?>
 		<li class="topic-freshness-author"><?php
-			/* translators: %s: reply author link */
-			printf( __( 'Last reply from: %s', 'wporg-forums' ),
-				bbp_get_author_link( array( 'type' => 'name', 'post_id' => $last_reply, 'size' => '15' ) )
+			printf(
+				/* translators: %s: Reply author link. */
+				esc_html__( 'Last reply from: %s', 'wporg-forums' ),
+				wp_kses_post(
+					bbp_get_author_link(
+						array(
+							'type'    => 'name',
+							'post_id' => $last_reply,
+							'size'    => '15',
+						)
+					)
+				)
 			);
 		?></li>
 	<?php endif; ?>
 	<?php if ( !empty( $time_since  ) ) : ?>
 		<li class="topic-freshness-time"><?php
 			/* translators: %s: date/time link to the latest post */
-			printf( __( 'Last activity: %s', 'wporg-forums' ), $time_since );
+			printf( esc_html__( 'Last activity: %s', 'wporg-forums' ), wp_kses_post( $time_since ) );
 		?></li>
 	<?php endif; ?>
 	<?php if ( ! empty( $wp_version ) ) : ?>
@@ -1515,9 +1536,9 @@ function bb_base_single_topic_description() {
 	<?php if ( bbp_current_user_can_access_create_reply_form() /*bbp_is_topic_open( $_topic_id )*/ ) : ?>
 		<li class="create-reply"><a href="#new-post"><?php
 			if ( wporg_support_is_single_review() ) {
-				_e( 'Reply to Review', 'wporg-forums' );
+				esc_html_e( 'Reply to Review', 'wporg-forums' );
 			} else {
-				_e( 'Reply to Topic', 'wporg-forums' );
+				esc_html_e( 'Reply to Topic', 'wporg-forums' );
 			}
 		?></a></li>
 	<?php endif; ?>
@@ -1538,11 +1559,13 @@ function bb_base_single_forum_description() {
 
 	if ( bbp_get_forum_parent_id() ) : ?>
 		<li class="topic-parent"><?php
-			/* translators: %s: forum title */
-			printf( __( 'In: %s', 'wporg-forums' ),
-				sprintf( '<a href="%s">%s</a>',
+			printf(
+				/* translators: %s: Forum title. */
+				esc_html__( 'In: %s', 'wporg-forums' ),
+				sprintf(
+					'<a href="%s">%s</a>',
 					esc_url( bbp_get_forum_permalink( bbp_get_forum_parent_id() ) ),
-					bbp_get_forum_title( bbp_get_forum_parent_id() )
+					esc_html( bbp_get_forum_title( bbp_get_forum_parent_id() ) )
 				)
 			);
 		?></li>

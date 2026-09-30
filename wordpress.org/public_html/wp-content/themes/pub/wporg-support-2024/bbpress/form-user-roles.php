@@ -9,7 +9,7 @@
  */
 if ( bbp_is_user_keymaster( get_current_user_id() ) ) {
 ?><div>
-	<label for="role"><?php esc_html_e( 'Blog Role', 'bbpress' ); ?></label>
+	<label for="role"><?php esc_html_e( 'Blog Role', 'wporg-forums' ); ?></label>
 
 	<?php bbp_edit_user_blog_role(); ?>
 
@@ -17,7 +17,7 @@ if ( bbp_is_user_keymaster( get_current_user_id() ) ) {
 <?php } ?>
 
 <div>
-	<label for="forum-role"><?php esc_html_e( 'Forum Role', 'bbpress' ); ?></label>
+	<label for="forum-role"><?php esc_html_e( 'Forum Role', 'wporg-forums' ); ?></label>
 
 	<?php bbp_edit_user_forums_role(); ?>
 

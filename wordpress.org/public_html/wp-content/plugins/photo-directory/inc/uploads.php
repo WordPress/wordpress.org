@@ -42,6 +42,13 @@ class Uploads {
 	const SUBMIT_PAGE_SLUG = 'submit';
 
 	/**
+	 * The Frontend Uploader form layout used for photo uploads.
+	 *
+	 * @var string
+	 */
+	const FORM_LAYOUT = 'post_media';
+
+	/**
 	 * Memoized value of file hash.
 	 *
 	 * @var string
@@ -61,7 +68,7 @@ class Uploads {
 	public static function init() {
 		/* Image restrictions. */
 
-		add_filter( 'big_image_size_threshold',         [ __CLASS__, 'big_image_size_threshold' ] );
+		add_filter( 'big_image_size_threshold',         [ __CLASS__, 'big_image_size_threshold' ], 99999 );
 
 		/* Frontend Uploader customizations. */
 
@@ -91,11 +98,12 @@ class Uploads {
 
 		/* After submission, but before an upload initiates. */
 
-		add_filter( 'fu_should_process_content_upload', [ __CLASS__, 'can_proceed_with_upload' ] );
+		add_filter( 'fu_should_process_content_upload', [ __CLASS__, 'can_proceed_with_upload' ], 10, 2 );
 
 		/* After submission, but before post is created. */
 
-		add_filter( 'fu_before_create_post',            [ __CLASS__, 'make_post_pending_instead_of_private' ] );
+		add_filter( 'fu_before_create_post', [ __CLASS__, 'sanitize_submitted_description' ], 5 );
+		add_filter( 'fu_before_create_post', [ __CLASS__, 'make_post_pending_instead_of_private' ] );
 
 		/* After submission, after an upload completes. */
 
@@ -134,7 +142,7 @@ class Uploads {
 			'photo_license'            => sprintf(
 				/* translators: %s: Link to CC0 license */
 				__( 'I am making this photo available under the <a href="%s">CC0 license</a>. People will be able to use this image for any purpose, including resale, marketing, branding, etc without cost or attribution.', 'wporg-photos' ),
-				'https://creativecommons.org/share-your-work/public-domain/cc0/'
+				'https://creativecommons.org/publicdomain/zero/1.0/'
 			),
 			'photo_photograph'         => __( 'Photo is an actual photograph and not a screenshot or digital art.', 'wporg-photos' ),
 			'photo_high_quality'       => __( 'Photo is high quality (well composed and lit, not blurry, etc).', 'wporg-photos' ),
@@ -237,13 +245,29 @@ class Uploads {
 	 */
 	public static function wp_enqueue_scripts() {
 		if ( is_page( self::SUBMIT_PAGE_SLUG ) ) {
-			wp_enqueue_script( 'wporg-photos-submit', plugins_url( 'assets/js/submit.js', dirname( __FILE__ ) ), [], '1', true );
+			wp_enqueue_style(
+				'wporg-photos-submit',
+				plugins_url( 'assets/css/submit.css', WPORG_PHOTO_DIRECTORY_MAIN_FILE ),
+				[],
+				filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/css/submit.css' )
+			);
+
+			wp_enqueue_script(
+				'wporg-photos-submit',
+				plugins_url( 'assets/js/submit.js', WPORG_PHOTO_DIRECTORY_MAIN_FILE ),
+				[],
+				filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/js/submit.js' ),
+				true
+			);
 
 			wp_localize_script(
 				'wporg-photos-submit',
 				'PhotoDir',
 				[
 					'error_class'           => 'error',
+
+					// File preview.
+					'preview_alt'           => __( 'Selected photo preview', 'wporg-photos' ),
 
 					// Field required.
 					'err_field_required'    => __( 'This field is required.', 'wporg-photos' ),
@@ -264,6 +288,7 @@ class Uploads {
 					'min_file_size' => self::get_minimum_photo_file_size(),
 
 					// File dimensions.
+					'err_file_unreadable'   => __( 'The selected photo could not be loaded. Please try a different JPEG image.', 'wporg-photos' ),
 					'err_file_too_long'     => sprintf(
 						/** translators: %d: The maximum number of pixels. */
 						__( 'The selected file cannot be longer in either length or width than %dpx.', 'wporg-photos' ),
@@ -345,19 +370,35 @@ class Uploads {
 	 * @return string
 	 */
 	public static function disable_frontend_uploader_shortcode_unless_logged_in( $output, $tag ) {
-		if ( ! is_user_logged_in() ) {
-			$fu_shortcodes = [
-				'fu-upload-form',
-				'fu-upload-response',
-			];
+		$fu_shortcodes = [
+			'fu-upload-form',
+			'fu-upload-response',
+		];
+		$is_fu_shortcode = in_array( $tag, $fu_shortcodes, true );
 
-			if ( in_array( $tag, $fu_shortcodes ) ) {
-				$output = '<p>'
-					. sprintf(
-						__( 'Please <a href="%s">log in or create an account</a> so you can upload a photo.', 'wporg-photos' ),
-						esc_url( wp_login_url( get_permalink() ) ) )
-					. '</p>';
-			}
+		if ( ! is_user_logged_in() && $is_fu_shortcode ) {
+			$output = '<p>'
+				. sprintf(
+					__( 'Please <a href="%s">log in or create an account</a> so you can upload a photo.', 'wporg-photos' ),
+					esc_url( wp_login_url( get_permalink() ) ) )
+				. '</p>';
+		} elseif ( defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY && $is_fu_shortcode ) {
+			$output = do_blocks(
+				sprintf(
+					'<!-- wp:wporg/notice {"type":"warning"} -->
+					<div class="wp-block-wporg-notice is-warning-notice">
+						<div class="wp-block-wporg-notice__icon"></div>
+						<div class="wp-block-wporg-notice__content">
+							<p>%s</p>
+						</div>
+					</div>
+					<!-- /wp:wporg/notice -->',
+					sprintf(
+						__( 'New photo submissions are currently disabled. Please check back after the <a href="%s">holiday break.</a>', 'wporg-photos' ),
+						'https://wordpress.org/news/2024/12/holiday-break/'
+					)
+				)
+			);
 		}
 
 		return $output;
@@ -404,6 +445,9 @@ class Uploads {
 					break;
 				case 'file-not-jpg':
 					$rejection = __( 'Your submission must be an image in the JPEG format.', 'wporg-photos' );
+					break;
+				case 'shortcode-in-text':
+					$rejection = __( 'The title, description, and caption cannot contain shortcodes. Please remove them and submit again.', 'wporg-photos' );
 					break;
 				case 'file-too-large':
 					$rejection = sprintf(
@@ -453,6 +497,31 @@ class Uploads {
 		$notices['fu-spam']['text'] = $rejection;
 
 		return $notices;
+	}
+
+	/**
+	 * Sanitizes the submitted free-text fields as the plain text they are.
+	 *
+	 * @param array $post_array Array of post settings.
+	 * @return array
+	 */
+	public static function sanitize_submitted_description( $post_array ) {
+		// The description is the photo's alternative text, so it keeps its line breaks; the other two are single lines.
+		$fields = [
+			'post_title'   => 'sanitize_text_field',
+			'post_content' => 'sanitize_textarea_field',
+			'post_excerpt' => 'sanitize_text_field',
+		];
+
+		foreach ( $fields as $field => $sanitize ) {
+			if ( ! isset( $post_array[ $field ] ) ) {
+				continue;
+			}
+
+			$post_array[ $field ] = wp_slash( $sanitize( wp_unslash( $post_array[ $field ] ) ) );
+		}
+
+		return $post_array;
 	}
 
 	/**
@@ -521,10 +590,19 @@ class Uploads {
 	 * file being checked (as much as can be done without the file actually being
 	 * uploaded yet), etc. Checks `user_can_upload()` as the first step.
 	 *
-	 * @param bool $can Can the user upload the photo?
+	 * @param bool   $can    Can the user upload the photo?
+	 * @param string $layout Optional. Form layout used for the submission. Default ''.
 	 * @return bool True if user can upload the photo, else false.
 	 */
-	public static function can_proceed_with_upload( $can ) {
+	public static function can_proceed_with_upload( $can, $layout = '' ) {
+		$reason = '';
+
+		// Only allow the form layout that the submit form is built with.
+		if ( $can && self::FORM_LAYOUT !== $layout ) {
+			$can    = false;
+			$reason = 'invalid-form-layout';
+		}
+
 		// Check if user is able to upload.
 		if ( $can ) {
 			$can = self::user_can_upload();
@@ -570,6 +648,11 @@ class Uploads {
 	 *                      specific validation issue.
 	 */
 	protected static function validate_upload_form() {
+		// Frontend Uploader uploads the first file field, not the 'files' field checked below.
+		if ( count( $_FILES ) > 1 ) {
+			return 'too-many-files';
+		}
+
 		if ( ! empty( $_FILES['files']['error'][0] ) ) {
 			switch ( $_FILES['files']['error'][0] ) {
 				case UPLOAD_ERR_INI_SIZE:
@@ -635,6 +718,28 @@ class Uploads {
 
 		if ( ! isset( $_POST['photo_license'] ) || ! $_POST['photo_license'] ) {
 			return 'checkbox_unchecked_license';
+		}
+
+		// The same fields and sanitizers `sanitize_submitted_description()` stores them with.
+		$fields = [
+			'post_title'   => 'sanitize_text_field',
+			'post_content' => 'sanitize_textarea_field',
+			'post_excerpt' => 'sanitize_text_field',
+		];
+
+		foreach ( $fields as $field => $sanitize ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized on the next line, by whichever callback stores the field.
+			$submitted = isset( $_POST[ $field ] ) ? wp_unslash( $_POST[ $field ] ) : '';
+
+			// A field can arrive as an array, which Frontend Uploader drops before it builds the post.
+			if ( ! is_string( $submitted ) || '' === $submitted ) {
+				continue;
+			}
+
+			// Anything but a clean no-match is refused: preg_match() returns false when PCRE gives up.
+			if ( 0 !== preg_match( '/' . get_shortcode_regex() . '/', $sanitize( $submitted ) ) ) {
+				return 'shortcode-in-text';
+			}
 		}
 
 		return false;
@@ -804,7 +909,9 @@ class Uploads {
 
 		$file = array_shift( $_FILES );
 
-		update_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), $file['name'][0] );
+		$orig_filename = sanitize_file_name( $file['name'][0] );
+
+		update_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), $orig_filename );
 		update_post_meta( $post_id, Registrations::get_meta_key( 'original_filesize' ), $file['size'][0] );
 
 		// Store hash of file.
@@ -893,7 +1000,8 @@ class Uploads {
 			$content .= '<fieldset id="wporg-photo-upload">';
 
 			$content .= sprintf(
-				'[fu-upload-form form_layout="post_media" post_type="%s" title="%s" suppress_default_fields="true"]' . "\n",
+				'[fu-upload-form form_layout="%s" post_type="%s" title="%s" suppress_default_fields="true"]' . "\n",
+				esc_attr( self::FORM_LAYOUT ),
 				esc_attr( $post_type ),
 				esc_attr( __( 'Upload your photo', 'wporg-photos' ) )
 			);
@@ -916,6 +1024,27 @@ class Uploads {
 					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" accept="%s">' . "\n",
 					esc_attr( $valid_upload_mimetypes )
 				)
+				. '<div id="ug_photo_preview_wrap" class="ugc-photo-preview" hidden>' . "\n"
+				. sprintf(
+					'<button type="button" id="ug_photo_preview_button" class="ugc-photo-preview__button" aria-haspopup="dialog" aria-controls="ug_photo_preview_dialog" title="%1$s" aria-label="%1$s">' . "\n",
+					esc_attr__( 'View larger preview', 'wporg-photos' )
+				)
+				. sprintf(
+					'<img id="ug_photo_preview" alt="%s" />' . "\n",
+					esc_attr__( 'Selected photo preview', 'wporg-photos' )
+				)
+				. "</button>\n"
+				. "</div>\n"
+				. sprintf(
+					'<dialog id="ug_photo_preview_dialog" class="ugc-photo-preview-dialog" aria-label="%s">' . "\n",
+					esc_attr__( 'Photo preview', 'wporg-photos' )
+				)
+				. sprintf(
+					'<button type="button" class="ugc-photo-preview-dialog__close" aria-label="%s">&times;</button>' . "\n",
+					esc_attr__( 'Close preview', 'wporg-photos' )
+				)
+				. '<img id="ug_photo_preview_large" alt="" />' . "\n"
+				. "</dialog>\n"
 				. "</div>\n"
 				. sprintf(
 					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d"]' . "\n",
@@ -945,7 +1074,7 @@ class Uploads {
 				$content .= "</div>\n"; // End upload-checkbox-wrapper.
 
 				$content .= sprintf(
-					'[input type="submit" class="button-primary" value="%s"]' . "\n",
+					'[input type="submit" class="button-primary wp-block-button__link wp-element-button" value="%s"]' . "\n",
 					esc_attr( __( 'Submit', 'wporg-photos' ) )
 				)
 				. '[recaptcha]' . "\n";

@@ -180,26 +180,32 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 			$search_term = wp_unslash( $_GET['s'] );
 			$search_like = '%' . $wpdb->esc_like( $search_term ) . '%';
-
+			
 			// Limit searches to where they're likely, for performance.
 			if ( str_contains( $search_term, '@' ) ) {
+				$san_search_term = wporg_sanitize_email_for_search( $search_term );
+				$san_search_like = '%' . $wpdb->esc_like( $san_search_term ) . '%';
+
 				// If it looks like a full email, exact match.
 				if ( preg_match( '/^.{3,}@.+[.].+$/', $search_term ) ) {
 					// Looks like an email, so just search the emails.
 					$where .= $wpdb->prepare(
-						"AND registrations.user_email = %s",
-						$search_term
+						"AND ( registrations.user_email = %s OR registrations.user_email_san = %s )",
+						$search_term,
+						$san_search_term
 					);
 				} else {
 					// Otherwise, a wildcard on the email.
 					$where .= $wpdb->prepare(
-						"AND registrations.user_email LIKE %s",
-						$search_like
+						"AND ( registrations.user_email LIKE %s OR registrations.user_email_san LIKE %s )",
+						$search_like,
+						$san_search_like
 					);
 				}
 			} elseif (
 				// If it looks like an IP
 				preg_match( '/^\d{1,3}\.[0-9.]*$/', $search_term ) ||
+				preg_match( '/^[0-9a-f]+:[0-9a-f:]*$/', $search_term ) ||
 				// Or it looks like a country code, 
 				preg_match( '/^[A-Z]{2}$/', $search_term )
 			) {
@@ -214,10 +220,11 @@ class User_Registrations_List_Table extends WP_List_Table {
 					"AND (
 						registrations.user_login LIKE %s OR
 						registrations.user_email LIKE %s OR
+						registrations.user_email_san LIKE %s OR
 						registrations.meta LIKE %s OR
 						description.meta_value LIKE %s
 					)",
-					$search_like, $search_like, $search_like, $search_like
+					$search_like, $search_like, $search_like, $search_like, $search_like
 				);
 			}
 		}
@@ -284,19 +291,26 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$sort_order = 'DESC';
 		}
 
-		$per_page     = $_GET['per_page'] ?? $this->get_items_per_page( 'users_per_page', 100 );
+		// Bounds match core's users_per_page screen option, see set_screen_options().
+		$per_page = isset( $_GET['per_page'] )
+			? min( 999, max( 1, absint( $_GET['per_page'] ) ) )
+			: $this->get_items_per_page( 'users_per_page', 100 );
+
 		$current_page = $this->get_pagenum();
 
 		$join_where = $this->get_join_where_sql();
 
-		$per_page_offset = ($current_page-1) * $per_page;
+		$per_page_offset = ( $current_page - 1 ) * $per_page;
+
+		// Prepared separately; $join_where already contains prepared LIKE patterns.
+		$limit = $wpdb->prepare( 'LIMIT %d, %d', $per_page_offset, $per_page );
 
 		$this->items = $wpdb->get_results(
 			"SELECT SQL_CALC_FOUND_ROWS registrations.*
 			FROM {$wpdb->base_prefix}user_pending_registrations registrations
 			$join_where
 			ORDER BY {$sort_column} {$sort_order}
-			LIMIT {$per_page_offset}, {$per_page}"
+			$limit"
 		);
 
 		$total_items = $wpdb->get_var( 'SELECT FOUND_ROWS()' );
@@ -387,22 +401,22 @@ class User_Registrations_List_Table extends WP_List_Table {
 		printf(
 			'<abbr title="%s">%s ago</abbr>',
 			esc_attr( $item->user_registered ),
-			human_time_diff( strtotime( $item->user_registered ) )
+			esc_html( human_time_diff( strtotime( $item->user_registered ) ) )
 		);
 
 		if ( $item->created_date && '0000-00-00 00:00:00' !== $item->created_date ) {
 			printf(
 				'<br>Created: <abbr title="%s">%s ago</abbr>',
 				esc_attr( $item->created_date ),
-				human_time_diff( strtotime( $item->created_date ) )
+				esc_html( human_time_diff( strtotime( $item->created_date ) ) )
 			);
 		}
 	}
 
 	function column_user_login( $item ) {
 		if ( $item->created ) {
-			$url = esc_url( 'https://profiles.wordpress.org/' . $item->user_login . '/' );
-			echo "<a href='$url'>" . esc_html( $item->user_login ) . '</a>';
+			$url = 'https://profiles.wordpress.org/' . $item->user_login . '/';
+			echo '<a href="' . esc_url( $url ) . '">' . esc_html( $item->user_login ) . '</a>';
 
 			if (
 				$item->user &&
@@ -417,7 +431,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		echo '<hr>';
 
-		echo $this->link_to_search( $item->user_email );
+		echo wp_kses_post( $this->link_to_search( $item->user_email ) );
 
 		$row_actions = [];
 
@@ -468,6 +482,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		}
 
 		if ( $row_actions ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Action links are escaped above; retain core's row-toggle button.
 			echo $this->row_actions( $row_actions );
 		}
 
@@ -492,13 +507,13 @@ class User_Registrations_List_Table extends WP_List_Table {
 			$ips[] = $ip . ' ' . $meta->{$field . '_ip_country'};
 		}
 
-		echo implode( ', ', array_map( array( $this, 'link_to_Search' ), array_unique( $ips ) ) );
+		echo wp_kses_post( implode( ', ', array_map( array( $this, 'link_to_search' ), array_unique( $ips ) ) ) );
 
 		echo '<hr>';
 
-		foreach ( [ 'url', 'from', 'occ', 'interests', 'source' ] as $field ) {
+		foreach ( [ 'url', 'from', 'occ', 'interests', 'source', 'bypass' ] as $field ) {
 			if ( !empty( $meta->$field ) ) {
-				printf( "%s: %s<br>", esc_html( $field ), $this->link_to_search( $meta->$field ) );
+				printf( '%s: %s<br>', esc_html( $field ), wp_kses_post( $this->link_to_search( $meta->$field ) ) );
 			}
 		}
 
@@ -506,7 +521,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 		if ( $item->user ) {
 			// Forum profile description (this is where the spam usually is)
 			if ( $desc = get_user_meta( $item->user->ID, 'description', true ) ) {
-				printf( "forum bio: %s<br>", $this->link_to_search( $desc ) );
+				printf( 'forum bio: %s<br>', wp_kses_post( $this->link_to_search( $desc ) ) );
 			}
 		}
 
@@ -515,7 +530,11 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 	function column_scores( $item ) {
 
-		echo ( $item->cleared ? 'Passed' : 'Failed' ) . '<br>';
+		echo ( $item->cleared ? 'Passed' : 'Failed' );
+		if ( $item->cleared && 'spectator' === ( $item->meta->role ?? '' ) ) {
+			echo ' (mark as: spectator)';
+		}
+		echo '<br>';
 
 		foreach ( $item->scores as $type => $val ) {
 			printf(
@@ -583,15 +602,17 @@ class User_Registrations_List_Table extends WP_List_Table {
 			);
 			$url = wp_nonce_url( $url, 'clear_' . $item->user_email );
 			$row_actions['approve-reg'] = '<a href="' . esc_url( $url ) . '">Approve</a>';
+			$row_actions['approve-spectator'] = '<a href="' . esc_url( add_query_arg( 'role', 'spectator', $url ) ) . '">Approve as Spectator</a>';
 		}
 
 		if ( $row_actions ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Action links are escaped above; retain core's row-toggle button.
 			echo $this->row_actions( $row_actions );
 		}
 	}
 
 	function link_to_search( $s ) {
-		$parts = preg_split( '/([^\w\.-])/ui', $s, -1, PREG_SPLIT_DELIM_CAPTURE );
+		$parts = preg_split( '#([^\w\.:/-])#ui', $s, -1, PREG_SPLIT_DELIM_CAPTURE );
 		if ( ! $parts ) {
 			$parts = array( $s );
 		}

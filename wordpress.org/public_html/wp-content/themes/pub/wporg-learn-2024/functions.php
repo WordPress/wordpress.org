@@ -29,6 +29,7 @@ require_once __DIR__ . '/inc/template-helpers.php';
 /**
  * Actions and filters.
  */
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_admin_assets' );
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'sensei_quiz_question_inside_after', __NAMESPACE__ . '\sensei_question_add_closing_fieldset' );
 // Attached at 50 to inject after title, description, etc, so that only answers are in the fieldset.
@@ -45,11 +46,11 @@ add_filter( 'jetpack_implode_frontend_css', '__return_false', 99 );
 add_filter( 'post_thumbnail_html', __NAMESPACE__ . '\set_default_featured_image', 10, 5 );
 add_filter( 'search_template_hierarchy', __NAMESPACE__ . '\modify_search_template' );
 add_filter( 'sensei_learning_mode_lesson_status_icon', __NAMESPACE__ . '\modify_lesson_status_icon_add_aria', 10, 2 );
-add_filter( 'sensei_register_post_type_course', function( $args ) {
+add_filter( 'sensei_register_post_type_course', function ( $args ) {
 	$args['has_archive'] = 'courses';
 	return $args;
 } );
-add_filter( 'sensei_register_post_type_lesson', function( $args ) {
+add_filter( 'sensei_register_post_type_lesson', function ( $args ) {
 	$args['has_archive'] = 'lessons';
 	return $args;
 } );
@@ -113,6 +114,20 @@ function setup() {
 
 	add_filter( 'mkaz_code_syntax_force_loading', '__return_true' );
 	add_filter( 'mkaz_prism_css_path', __NAMESPACE__ . '\update_prism_css_path' );
+}
+
+/**
+ * Enqueue scripts and styles.
+ */
+function enqueue_admin_assets() {
+	$style_path = get_stylesheet_directory() . '/build/style/index.css';
+	$style_uri = get_stylesheet_directory_uri() . '/build/style/index.css';
+	wp_enqueue_style(
+		'wporg-learn-2024-admin-style',
+		$style_uri,
+		array(),
+		filemtime( $style_path )
+	);
 }
 
 /**
@@ -189,7 +204,7 @@ function maybe_enqueue_sensei_assets() {
 	if ( ( is_singular( 'lesson' ) || is_singular( 'quiz' ) ) && ! wp_style_is( 'sensei-course-theme-style', 'enqueued' ) ) {
 		wp_enqueue_style( 'sensei-learning-mode' );
 
-		add_filter( 'body_class', function( $classes ) {
+		add_filter( 'body_class', function ( $classes ) {
 			$sensei_body_class = 'sensei-course-theme';
 
 			if ( ! in_array( $sensei_body_class, $classes, true ) ) {
@@ -329,6 +344,10 @@ function add_site_navigation_menus( $menus ) {
 			'url'   => '/online-workshops/',
 		),
 		array(
+			'label' => __( 'Activity Library', 'wporg-learn' ),
+			'url'   => get_post_type_archive_link( 'activity_kit' ) ?: '/activity-library/',
+		),
+		array(
 			'label'     => __( 'My courses', 'wporg-learn' ),
 			'url'       => get_my_courses_page_url(),
 			'className' => 'has-separator',
@@ -347,6 +366,7 @@ function add_site_navigation_menus( $menus ) {
 		array(
 			'taxonomy'   => 'learning-pathway',
 			'hide_empty' => true,
+			'order'      => 'DESC',
 		)
 	);
 
@@ -358,7 +378,7 @@ function add_site_navigation_menus( $menus ) {
 
 	$learning_pathways_menu = array(
 		'label'   => __( 'Learning Pathways', 'wporg-learn' ),
-		'submenu' => array_map( function( $term ) {
+		'submenu' => array_map( function ( $term ) {
 			return array(
 				'label' => $term->name,
 				'url'   => get_term_link( $term ),
@@ -413,6 +433,23 @@ function get_learning_pathway_level_content( $learning_pathway ) {
 				'title' => __( 'Advanced development concepts', 'wporg-learn' ),
 				'description' => __( 'You’re confident in the WordPress development environment or have already built your own plugin or theme.', 'wporg-learn' ),
 				'see_all_aria_label' => 'See all advanced development concepts learning pathways',
+			),
+		),
+		'designer' => array(
+			'beginner' => array(
+				'title' => __( 'Beginner WordPress design', 'wporg-learn' ),
+				'description' => __( 'You’re new to designing for the web or want to learn how to use the Site Editor to customize a theme.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all beginner WordPress design learning pathways',
+			),
+			'intermediate' => array(
+				'title' => __( 'Intermediate WordPress design', 'wporg-learn' ),
+				'description' => __( 'You’re comfortable with web design best practices and using the Site Editor’s design tools.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all intermediate WordPress design learning pathways',
+			),
+			'advanced' => array(
+				'title' => __( 'Advanced WordPress design', 'wporg-learn' ),
+				'description' => __( 'You’re confident with customizing a Block theme, creating patterns, and integrating plugins.', 'wporg-learn' ),
+				'see_all_aria_label' => 'See all advanced WordPress design learning pathways',
 			),
 		),
 	);

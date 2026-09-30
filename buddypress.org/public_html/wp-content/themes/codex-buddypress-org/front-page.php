@@ -6,7 +6,7 @@
 
 			<div class="post">
 
-				<h3 id="post-<?php the_ID(); ?>"><?php the_title(); ?></h3>
+				<h2 id="post-<?php the_ID(); ?>"><?php the_title(); ?></h2>
 
 				<?php the_content(); ?>
 

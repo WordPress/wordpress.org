@@ -37,6 +37,7 @@ class Create_Route extends Route {
 			'',
 		);
 
+		$this->use_theme();
 		$this->tmpl(
 			'event-create',
 			array(

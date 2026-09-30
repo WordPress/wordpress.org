@@ -5,14 +5,18 @@ require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 require __DIR__ . '/functions.php';
 require __DIR__ . '/class-trac.php';
 
+$HTTP_RAW_POST_DATA = file_get_contents( 'php://input' );
+
 function verify_signature() {
+	global $HTTP_RAW_POST_DATA;
+
 	// Validate that the request came from GitHub.
 	if ( ! defined( 'GH_PRBOT_WEBHOOK_SECRET' ) ) {
 		return;
 	}
 
 	$sent_signature     = $_SERVER['HTTP_X_HUB_SIGNATURE'] ?? '';
-	$expected_signature = 'sha1=' . hash_hmac( 'sha1', file_get_contents( 'php://input' ), GH_PRBOT_WEBHOOK_SECRET );
+	$expected_signature = 'sha1=' . hash_hmac( 'sha1', $HTTP_RAW_POST_DATA, GH_PRBOT_WEBHOOK_SECRET );
 
 	if ( ! hash_equals( $expected_signature, $sent_signature ) ) {
 		header( 'HTTP/1.0 403 Forbidden', true, 403 );
@@ -27,7 +31,7 @@ if ( empty( $_SERVER['CONTENT_TYPE'] ) || 'application/json' !== $_SERVER['CONTE
 	die( 'Please set the Content type to application/json' );
 }
 
-$payload = json_decode( file_get_contents( 'php://input' ) );
+$payload = json_decode( $HTTP_RAW_POST_DATA );
 
 if ( ! empty( $_GET['trac'] ) ) {
 	define( 'WEBHOOK_TRAC_HINT', $_GET['trac'] );
@@ -65,12 +69,14 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 	
 		// Step 2. Is that Trac Ticket still what we expect?
 		$matched_existing_ref = false;
-		foreach ( $existing_refs as $ref ) {
-			if (
-				$ref->trac === $pr_data->trac_ticket[0] &&
-				$ref->ticket === $pr_data->trac_ticket[1]
-			) {
-				$matched_existing_ref = true;
+		if ( $pr_data->trac_ticket ) {
+			foreach ( $existing_refs as $ref ) {
+				if (
+					$ref->trac === $pr_data->trac_ticket[0] &&
+					(int) $ref->ticket === (int) $pr_data->trac_ticket[1]
+				) {
+					$matched_existing_ref = true;
+				}
 			}
 		}
 
@@ -79,11 +85,14 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 		unset( $_pr_data_no_ticket->trac_ticket, $_pr_data_no_ticket->body );
 
 		// Step 3. If not in DB, or $pr_data->trac_ticket isn't yet in the DB, add a new row of it.
+		$user_id = 0;
+		$new_ref = false;
+
 		if ( $pr_data->trac_ticket && ( ! $existing_refs || ! $matched_existing_ref ) ) {
 
 			$user_id = (int) find_wporg_user_by_github( $pr_data->user->name, 'ID' );
 
-			$wpdb->insert(
+			$new_ref = (bool) $wpdb->insert(
 				'trac_github_prs',
 				[
 					'created'      => gmdate( 'Y-m-d H:i:s', strtotime( $pr_data->created_at ) ),
@@ -96,6 +105,10 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 					'author'       => $user_id,
 				]
 			);
+		}
+
+		// Only the request whose row was added mentions the PR on the ticket.
+		if ( $new_ref ) {
 
 			// Add a mention to the Trac Ticket.
 			$trac = get_trac_instance( $pr_data->trac_ticket[0] );

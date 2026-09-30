@@ -7,15 +7,15 @@
  * @since 1.0.1
  */
 function bborg_toolbar_tweaks() {
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_my_account_menu',  0  );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_search_menu',      4  );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_my_account_item',  7  );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_wp_menu',          10 );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_site_menu',        30 );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_customize_menu',   40 );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_comments_menu',    60 );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_new_content_menu', 70 );
-	remove_action( 'admin_bar_menu', 'wp_admin_bar_edit_menu',        80 );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_my_account_menu',  0    );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_my_account_item',  7    );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_wp_menu',          10   );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_site_menu',        30   );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_customize_menu',   40   );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_comments_menu',    60   );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_new_content_menu', 70   );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_edit_menu',        80   );
+	remove_action( 'admin_bar_menu', 'wp_admin_bar_search_menu',      9999 );
 }
 add_action( 'add_admin_bar_menus', 'bborg_toolbar_tweaks', 11 );
 
@@ -254,12 +254,6 @@ add_action( 'admin_bar_menu', 'bbporg_new_admin_bar_wp_menu', 10 );
  */
 function bbporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 
-	$wp_admin_bar->add_menu( array(
-		'id'    => 'bbp-site-name',
-		'title' => __( 'bbPress.org' ),
-		'href'  => home_url( '/' )
-	) );
-
 	// Create submenu items.
 
 	if ( is_user_logged_in() ) {
@@ -267,39 +261,22 @@ function bbporg_new_admin_bar_site_menu( $wp_admin_bar ) {
 		// Add a link to create a new topic.
 		$wp_admin_bar->add_menu( array(
 			'id'     => 'bbp-new-topic',
+			'parent' => 'top-secondary',
 			'title'  => __( 'Create New Topic' ),
 			'href'   => 'https://bbpress.org/forums/new-topic/'
 		) );
-
-		// Add an option to visit the admin dashboard
-		if ( is_super_admin() ) {
-
-			$wp_admin_bar->add_group( array(
-				'parent' => 'bbp-site-name',
-				'id'     => 'bbp-site-name-super-admin',
-				'meta'   => array(
-					'class' => 'ab-sub-secondary',
-				),
-			) );
-
-			$wp_admin_bar->add_menu( array(
-				'parent' => 'bbp-site-name-super-admin',
-				'id'     => 'bbp-admin-link',
-				'title'  => __( 'Admin Dashbooard' ),
-				'href'   => get_admin_url()
-			) );
-		}
 
 	// Not logged in
 	} else {
 		$wp_admin_bar->add_menu( array(
 			'id'     => 'bbp-login',
+			'parent' => 'top-secondary',
 			'title'  => __( 'Log in' ),
 			'href'   => wp_login_url()
 		) );
 	}
 }
-add_action( 'admin_bar_menu', 'bbporg_new_admin_bar_site_menu', 20 );
+add_action( 'admin_bar_menu', 'bbporg_new_admin_bar_site_menu', 2 );
 
 /**
  * Add the "My Account" item.
@@ -344,7 +321,7 @@ function bbporg_admin_bar_my_account_item( $wp_admin_bar ) {
 		) );
 	}
 }
-add_action( 'admin_bar_menu', 'bbporg_admin_bar_my_account_item', 0 );
+add_action( 'admin_bar_menu', 'bbporg_admin_bar_my_account_item', 4 );
 
 /**
  * Add the "My Account" submenu items.
@@ -472,79 +449,3 @@ function bbporg_admin_bar_my_account_menu( $wp_admin_bar ) {
 	}
 }
 add_action( 'admin_bar_menu', 'bbporg_admin_bar_my_account_menu', 7 );
-
-/**
- * Force toolbar styling into looking like sub-navigation
- *
- * Note: slightly experimental - kind of a hack
- *
- * @author johnjamesjacoby
- * @since 1.0.3
- */
-function bbporg_toolbar_css_overrides() {
-?>
-	<style type="text/css">
-		/* Admin Bar */
-		<?php if ( is_main_site() && is_front_page() ) : ?>
-			#wpadminbar { display: none !important; }
-		<?php else : ?>
-			#wpadminbar { color: #555; background: #eee; top: 81px; border-bottom: 1px solid #ddd; height: 42px; }
-			#wpadminbar #wp-toolbar a.ab-item, #wpadminbar .quicklinks li#wp-admin-bar-bp-notifications > a { padding: 5px; }
-			#wpadminbar #wp-toolbar ul.ab-submenu a.ab-item { padding: 0 2em 0 1em; }
-			#wpadminbar #wp-toolbar .ab-top-secondary .menupop .menupop > a.ab-item  { padding: 0 1em 0 2em; }
-			#wpadminbar a.ab-item, #wpadminbar > #wp-toolbar span.ab-label, #wpadminbar > #wp-toolbar span.noticon { color: #555; }
-			#wpadminbar .ab-icon, #wpadminbar .ab-icon:before, #wpadminbar .ab-item:before, #wpadminbar .ab-item:after { color: #328C00; }
-			#wpadminbar .ab-top-menu > li:hover > .ab-item,
-			#wpadminbar .ab-top-menu > li.hover > .ab-item,
-			#wpadminbar .ab-top-menu > li > .ab-item:focus,
-			#wpadminbar.nojq .quicklinks .ab-top-menu > li > .ab-item:focus,
-			#wpadminbar-nojs .ab-top-menu > li.menupop:hover > .ab-item,
-			#wpadminbar:not(.mobile) .ab-top-menu > li:hover > .ab-item,
-			#wpadminbar .ab-top-menu > li.menupop.hover > .ab-item { color: #555; background: #e2e2e2; }
-			#wpadminbar > #wp-toolbar li:hover span.ab-label, #wpadminbar > #wp-toolbar li.hover span.ab-label, #wpadminbar > #wp-toolbar a:focus span.ab-label { color: #555; }
-			#wpadminbar li:hover .ab-icon:before, #wpadminbar li:hover .ab-item:before, #wpadminbar li:hover .ab-item:after, #wpadminbar li:hover #adminbarsearch:before { color: #999; }
-
-			/* Admin Bar: submenu */
-			#wpadminbar .menupop .ab-sub-wrapper { background: #eee; }
-			#wpadminbar .quicklinks .menupop .ab-submenu { background: #eee; }
-			#wpadminbar .quicklinks .menupop ul.ab-sub-secondary, #wpadminbar .quicklinks .menupop ul.ab-sub-secondary .ab-submenu { background: #ddd; }
-			#wpadminbar .ab-submenu .ab-item, #wpadminbar .quicklinks .menupop ul li a, #wpadminbar .quicklinks .menupop.hover ul li a, #wpadminbar-nojs .quicklinks .menupop:hover ul li a { color: #555; }
-			#wpadminbar .quicklinks li .blavatar, #wpadminbar .menupop .menupop > .ab-item:before { color: #f1f1f3; }
-			#wpadminbar .quicklinks .menupop ul li a:hover,
-			#wpadminbar .quicklinks .menupop ul li a:focus,
-			#wpadminbar .quicklinks .menupop ul li a:hover strong,
-			#wpadminbar .quicklinks .menupop ul li a:focus strong,
-			#wpadminbar .quicklinks .menupop.hover ul li a:hover,
-			#wpadminbar .quicklinks .menupop.hover ul li a:focus,
-			#wpadminbar.nojs .quicklinks .menupop:hover ul li a:hover,
-			#wpadminbar.nojs .quicklinks .menupop:hover ul li a:focus,
-			#wpadminbar li:hover .ab-icon:before,
-			#wpadminbar li:hover .ab-item:before,
-			#wpadminbar li a:focus .ab-icon:before,
-			#wpadminbar li .ab-item:focus:before,
-			#wpadminbar li.hover .ab-icon:before,
-			#wpadminbar li.hover .ab-item:before,
-			#wpadminbar li:hover .ab-item:after,
-			#wpadminbar li.hover .ab-item:after,
-			#wpadminbar li:hover #adminbarsearch:before { color: #328C00; }
-			#wpadminbar .quicklinks li a:hover .blavatar, #wpadminbar .menupop .menupop > .ab-item:hover:before { color: #328C00; }
-
-			/* Admin Bar: my account */
-			#wpadminbar .quicklinks li#wp-admin-bar-my-account.with-avatar > a img { border-color: #eee; background-color: #eee; }
-			#wpadminbar #wp-admin-bar-user-info .display-name { color: #555; }
-			#wpadminbar #wp-admin-bar-user-info a:hover .display-name { color: #328C00; }
-			#wpadminbar #wp-admin-bar-user-info .username { color: #000; }
-
-			/* Some responsive'ish tweaks */
-			@media screen and ( max-width: 460px ) {
-				#wpadminbar {
-					height: 56px;
-				}
-				#wpadminbar #wp-toolbar a.ab-item,
-				#wpadminbar .quicklinks li#wp-admin-bar-bp-notifications > a { padding: 0; }
-			}
-		<?php endif; ?>
-	</style>
-<?php
-}
-add_theme_support( 'admin-bar', array( 'callback' => 'bbporg_toolbar_css_overrides' ) );

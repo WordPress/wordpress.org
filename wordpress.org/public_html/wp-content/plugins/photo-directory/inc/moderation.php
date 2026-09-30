@@ -50,6 +50,16 @@ class Moderation {
 	const FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE = 0.50;
 
 	/**
+	 * Name of user meta key that acts as a flag for whether the user can manage photo_tags.
+	 *
+	 * Note: There are additional checks, such as the user also being a moderator or admin,
+	 * that are also considered.
+	 *
+	 * @var string
+	 */
+	const USER_META_CAN_MANAGE_PHOTO_TAGS = 'can_manage_photo_tags';
+
+	/**
 	 * Initializes component.
 	 */
 	public static function init() {
@@ -66,6 +76,9 @@ class Moderation {
 
 		// Disable moderating own posts.
 		add_filter( 'user_has_cap',                       [ __CLASS__, 'disable_own_post_editing' ], 10, 4 );
+
+		// Assign caps to moderators who can manage photo_tags.
+		add_filter( 'map_meta_cap',                       [ __CLASS__, 'assign_cap_manage_photo_tags' ], 10, 3 );
 
 		// Add column to users table with count of photos moderated.
 		add_filter( 'manage_users_columns',               [ __CLASS__, 'add_moderated_count_column' ] );
@@ -209,6 +222,47 @@ class Moderation {
 	}
 
 	/**
+	 * Allows management of photo tags to admins and to moderators who can manage photo_tags.
+	 *
+	 * By default, photo moderators are not permitted to edit photo_tags. However,
+	 * if the user has the 'can_manage_photo_tags' user meta set to 1, they can.
+	 *
+	 * @param string[] $caps    Primitive capabilities required of the user.
+	 * @param string   $cap     Capability being checked.
+	 * @param int      $user_id The user ID.
+	 * @return string[]
+	 */
+	public static function assign_cap_manage_photo_tags( $caps, $cap, $user_id ) {
+		// Bail early if this is not for the 'manage_photo_tags' cap.
+		if ( 'manage_photo_tags' !== $cap ) {
+			return $caps;
+		}
+
+		$is_caped = function_exists( 'is_caped' ) && is_caped( $user_id );
+
+		if ( ! is_user_member_of_blog() && ! $is_caped ) {
+			return $caps;
+		}
+
+		$allowed = (
+			// User is caped.
+			$is_caped
+		||
+			// User is admin.
+			user_can( $user_id, 'manage_options' )
+		||
+			// User can moderate photos and has associated user meta key set.
+			(
+				user_can( $user_id, 'edit_photos' )
+			&&
+				get_user_meta( $user_id, self::USER_META_CAN_MANAGE_PHOTO_TAGS, true )
+			)
+		);
+
+		return $allowed ? [ 'exist' ] : [ 'do_not_allow' ];
+	}
+
+	/**
 	 * Prevents moderators from being able to edit or moderate their own photos.
 	 *
 	 * @param array    $caps Array of key/value pairs where keys represent a
@@ -237,7 +291,7 @@ class Moderation {
 		}
 
 		// Bail if user isn't a moderator.
-		if ( ! user_can( $user->ID, 'photos_moderator' ) ) {
+		if ( ! user_can( $user->ID, 'edit_photos' ) ) {
 			return $caps;
 		}
 
@@ -311,7 +365,7 @@ class Moderation {
 				$output = self::format_flags( $flags );
 
 				if ( $echo ) {
-					echo $output;
+					echo wp_kses_post( $output );
 				}
 			}
 		}
@@ -321,6 +375,8 @@ class Moderation {
 
 	/**
 	 * Formats flags into a list for display.
+	 *
+	 * Flag names can originate from post meta, so no caller may pass markup through them.
 	 *
 	 * @param array $flags  Associative array of flags names (as keys) and
 	 *                      severity (as values). Severity can be one of
@@ -337,9 +393,13 @@ class Moderation {
 			$formatted .= sprintf(
 				'<li class="dashicons-before dashicons-flag %s" title="%s">%s</li>' . "\n",
 				esc_attr( $class ),
-				/* translators: 1: Moderation category, 2: Likelihood of the image being of the given moderation category */
-				sprintf( __( 'This image is flagged as potentially containing %1$s content: %2$s', 'wporg-photos' ), $flag, ucwords( str_replace( '_', ' ', $class ) ) ),
-				ucwords( $flag )
+				esc_attr( sprintf(
+					/* translators: 1: Moderation category, 2: Likelihood of the image being of the given moderation category */
+					__( 'This image is flagged as potentially containing %1$s content: %2$s', 'wporg-photos' ),
+					$flag,
+					ucwords( str_replace( '_', ' ', $class ) )
+				) ),
+				esc_html( ucwords( $flag ) )
 			);
 		}
 		$formatted .= "</ul>\n";
@@ -628,15 +688,15 @@ https://wordpress.org/photos/
 				else {
 					if ( $rejections_percentage >= self::FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'very_likely';
-						$message = __( 'very high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+						$message = __( 'very high rejection rate (%d%%)', 'wporg-photos' );
 					}
 					elseif ( $rejections_percentage >= self::FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'likely';
-						$message = __( 'high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+						$message = __( 'high rejection rate (%d%%)', 'wporg-photos' );
 					}
 					elseif ( $rejections_percentage >= self::FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'possible';
-						$message = __( 'rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+						$message = __( 'rejection rate (%d%%)', 'wporg-photos' );
 					}
 				}
 
@@ -656,7 +716,7 @@ https://wordpress.org/photos/
 			$flags[ 'new user account' ] = 'possible';
 		}
 
-		echo self::format_flags( $flags );
+		echo wp_kses_post( self::format_flags( $flags ) );
 	}
 
 	/**
@@ -699,8 +759,8 @@ https://wordpress.org/photos/
 		foreach ( $pending as $post ) {
 			$content .= sprintf(
 				"<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-				get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: __( "(unknown)", 'wporg-photos' ),
-				get_the_date( 'Y-m-d', $post ),
+				esc_html( get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: __( '(unknown)', 'wporg-photos' ) ),
+				esc_html( get_the_date( 'Y-m-d', $post ) ),
 				esc_html( get_the_content( null, false, $post ) ?: __( '(none provided)', 'wporg-photos' ) ),
 			);
 		}
@@ -739,7 +799,7 @@ https://wordpress.org/photos/
 				'meta_query'     => User::get_moderator_meta_query( $user_id, true ),
 			] );
 
-			$output = $query->found_posts;
+			$output = number_format_i18n( $query->found_posts );
 		}
 
 		return $output;
@@ -800,16 +860,18 @@ https://wordpress.org/photos/
 			#dashboard-photo-moderators .col-num-rejected {
 				width: 50px;
 			}
+			#dashboard-photo-moderators .col-last-mod-date {
+				width: 80px;
+			}
 CSS;
 		echo "</style>\n";
 
 		echo '<table id="dashboard-photo-moderators" class="wp-list-table widefat fixed striped table-view-list">';
 		echo '<thead><tr>';
-		echo '<th>' . __( 'Username', 'wporg-photos' ) . '</th>';
-		echo '<th>' . __( 'Name', 'wporg-photos' ) . '</th>';
+		echo '<th>' . esc_html__( 'Moderator', 'wporg-photos' ) . '</th>';
 		echo '<th class="col-num-approved" title="' . esc_attr__( 'Number of photos approved', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-up"></span></th>';
 		echo '<th class="col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
-		echo '<th>' . __( 'Last Moderated', 'wporg-photos' ) . '</th>';
+		echo '<th class="col-last-mod-date">' . esc_html__( 'Last Moderated', 'wporg-photos' ) . '</th>';
 		echo '</tr></thead>';
 		echo '<tbody>';
 
@@ -823,19 +885,25 @@ CSS;
 			}
 
 			echo '<tr>';
-			echo '<td>' . sprintf( '<a href="%s">%s</a>', esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ), $user->user_nicename ) . '</td>';
-			echo '<td>' . esc_html( $user->display_name ) . '</td>';
+			echo '<td>';
+			printf(
+				'<a href="%s">@%s</a><br>%s',
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				esc_html( $user->user_nicename ),
+				esc_html( $user->display_name )
+			);
+			echo '</td>';
 
 			$base_edit_url = add_query_arg( [ 'post_type' => Registrations::get_post_type(), 'author' => $user->ID ], admin_url( 'edit.php' ) );
 			echo '<td>' . ( $count_approved ? sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( add_query_arg( [ 'post_status' => 'publish' ], $base_edit_url ) ),
-				number_format_i18n( $count_approved )
+				esc_html( number_format_i18n( $count_approved ) )
 			) : '0' ) . '</td>';
 			echo '<td>' . ( $count_rejected ? sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( add_query_arg( [ 'post_status' => Rejection::get_post_status() ], $base_edit_url ) ),
-				number_format_i18n( $count_rejected )
+				esc_html( number_format_i18n( $count_rejected ) )
 			) : '0' ) . '</td>';
 
 			echo '<td>';
@@ -844,9 +912,9 @@ CSS;
 				$edit_url = get_edit_post_link( $last_moderated->ID );
 				$last_mod_date = get_the_date( 'Y-m-d', $last_moderated->ID );
 				if ( $edit_url ) {
-					printf( '<a href="%s">%s</a>', esc_url( $edit_url ), $last_mod_date );
+					printf( '<a href="%s">%s</a>', esc_url( $edit_url ), esc_html( $last_mod_date ) );
 				} else {
-					echo $last_mod_date;
+					echo esc_html( $last_mod_date );
 				}
 			}
 			echo '</td>';

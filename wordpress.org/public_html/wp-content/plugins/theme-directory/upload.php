@@ -1,4 +1,10 @@
 <?php
+use function WordPressdotorg\Two_Factor\{
+	Revalidation\get_status as get_revalidation_status,
+	Revalidation\get_url as get_revalidation_url,
+	Revalidation\enqueue_assets as enqueue_2fa_revalidation_assets,
+	get_onboarding_account_url as get_2fa_onboarding_account_url
+};
 
 /**
  * Registers the upload shortcode.
@@ -39,8 +45,36 @@ function wporg_themes_render_upload_shortcode() {
 		);
 	}
 
+	if ( ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+		return sprintf(
+			'<p>' . __( 'Before you can upload a new theme, <a href="%s">please enable Two-Factor Authentication</a>.', 'wporg-themes' ) . '</p>',
+			get_2fa_onboarding_account_url()
+		);
+	}
+	enqueue_2fa_revalidation_assets();
+
 	$notice       = '';
 	$terms_notice = '';
+
+	if ( defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY ) {
+		$notice = sprintf(
+			'<div class="wp-block-wporg-notice is-warning-notice">
+				<div class="wp-block-wporg-notice__icon"></div>
+				<div class="wp-block-wporg-notice__content">
+					<p>%s</p>
+				</div>
+			</div>',
+			sprintf(
+				__( 'New theme submissions are currently disabled. Please check back after the <a href="%s">holiday break.</a>', 'wporg-themes' ),
+				'https://wordpress.org/news/2024/12/holiday-break/'
+			)
+		);
+
+		// Updates can still occur.
+		if ( ! wporg_themes_has_theme() ) {
+			return $notice;
+		}
+	}
 
 	if (
 		! empty( $_POST['_wpnonce'] ) &&
@@ -70,11 +104,53 @@ function wporg_themes_render_upload_shortcode() {
 		}
 	}
 
+	$upload_script = <<<'JS'
+		( function() {
+			document.getElementById( 'upload_form' ).addEventListener( 'submit', function( event ) {
+				/*
+				 * Defer, to see whether another submit handler (such as the
+				 * 2FA revalidation modal) cancels the submission.
+				 */
+				setTimeout( function() {
+					if ( event.defaultPrevented ) {
+						return;
+					}
+
+					var button = document.getElementById( 'upload_button' );
+
+					button.disabled    = true;
+					button.textContent = button.dataset.uploadingLabel;
+				} );
+			} );
+		} )();
+JS;
+
+	$upload_style = <<<'CSS'
+		#upload_button:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+		}
+CSS;
+
+	wp_register_script( 'wporg-themes-upload', false, array(), '1.0', true );
+	wp_enqueue_script( 'wporg-themes-upload' );
+	wp_add_inline_script( 'wporg-themes-upload', $upload_script );
+
+	wp_register_style( 'wporg-themes-upload', false, array(), '1.0' );
+	wp_enqueue_style( 'wporg-themes-upload' );
+	wp_add_inline_style( 'wporg-themes-upload', $upload_style );
+
 	return $notice . '<h2>' . __( 'Select your zipped theme file', 'wporg-themes' ) . '</h2>
-		<form enctype="multipart/form-data" id="upload_form" method="POST" action="" onsubmit="jQuery(\'#upload_button\').attr(\'disabled\',\'disabled\'); return true;">
+		<form
+			enctype="multipart/form-data"
+			id="upload_form"
+			method="POST"
+			action=""
+			data-2fa-required
+		>
 			' . wp_nonce_field( 'wporg-themes-upload', '_wpnonce', true, false ) . '
 			<input type="hidden" name="action" value="upload"/>
-			<input type="file" id="zip_file" name="zip_file" size="25"/>
+			<input type="file" id="zip_file" name="zip_file" size="25" accept=".zip" required />
 			<p>
 				<small>' . sprintf( __( 'Maximum allowed file size: %s', 'wporg-themes' ), esc_html( size_format( wp_max_upload_size() ) ) ) . '</small>
 			</p>
@@ -87,7 +163,7 @@ function wporg_themes_render_upload_shortcode() {
 				<label><input type="checkbox" required="required" name="required_terms[gpl]"><span>' . sprintf( __( 'The theme, and all included assets, <a href="%s">are licenced as GPL or are under a GPL compatible license</a>.', 'wporg-themes' ), 'https://make.wordpress.org/themes/handbook/review/required/#1-licensing-copyright' ) . '</span></label>
 			</p>
 
-			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
+			<button id="upload_button" class="button" type="submit" value="' . esc_attr__( 'Upload', 'wporg-themes' ) . '" data-uploading-label="' . esc_attr__( 'Uploading&hellip;', 'wporg-themes' ) . '">' . esc_html__( 'Upload', 'wporg-themes' ) . '</button>
 		</form>';
 }
 
@@ -101,6 +177,17 @@ function wporg_themes_process_upload( ) {
 		return new WP_Error(
 			'not_logged_in',
 			__( 'You must be logged in to upload a new theme.', 'wporg-themes' )
+		);
+	}
+
+	$revalidation_status = get_revalidation_status();
+	if ( ! $revalidation_status || ! $revalidation_status['can_save'] ) {
+		return new WP_Error(
+			'2fa_required',
+			sprintf(
+				__( 'Two-Factor Authentication Required. Please validate your <a href="%s">two-factor authentication before uploading</a>.', 'wporg-themes' ),
+				esc_url( get_revalidation_url( get_permalink() ) ) // Note: This is included mostly for fallback cases, the JS should prevent this ever being seen.
+			)
 		);
 	}
 
@@ -125,8 +212,8 @@ function wporg_themes_process_upload( ) {
 	$upload  = new WPORG_Themes_Upload;
 	$message = $upload->process_upload( $_FILES['zip_file'] );
 
-	if ( ! is_wp_error( $message ) && function_exists( 'bump_stats_extras' ) ) {
-		bump_stats_extras( 'themes', 'upload_by_zip' );
+	if ( ! is_wp_error( $message ) && function_exists( 'bump_stats_extra' ) ) {
+		bump_stats_extra( 'themes', 'upload_by_zip' );
 	}
 
 	return $message;

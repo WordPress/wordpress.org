@@ -24,7 +24,7 @@ class SVN {
 		$esc_url = escapeshellarg( $url );
 
 		$options[]   = 'non-interactive';
-		if ( empty( $options['username'] ) ) {
+		if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
 			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
 		}
@@ -74,9 +74,17 @@ class SVN {
 	public static function import( $path, $url, $message, $options = array() ) {
 		$options[] = 'non-interactive';
 		$options['m'] = $message;
-		if ( empty( $options['username'] ) ) {
+		if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
 			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+
+		if ( empty( $options['username'] ) ) {
+			return [
+				'result'   => false,
+				'revision' => false,
+				'errors'   => [ 'No SVN credentials configured.' ],
+			];
 		}
 
 		$esc_options = self::parse_esc_parameters( $options );
@@ -124,6 +132,21 @@ class SVN {
 			$revision = (int) $m['revision'];
 			$result   = true;
 			$errors   = false;
+
+			// `svn export` materialises `svn:special` entries as real symlinks, which consumers would follow out of the export.
+			$scrub = self::shell_exec( "find $esc_destination ! -type d ! -type f -delete 2>&1" );
+
+			// A successful find is silent; consumers walk the export directly, so a partial scrub must not pass as success.
+			if ( trim( $scrub ) ) {
+				$result   = false;
+				$revision = false;
+				$errors   = array(
+					array(
+						'error_code'    => 'export_cleanup_failed',
+						'error_message' => 'Could not remove non-regular files from the export: ' . trim( $scrub ),
+					),
+				);
+			}
 		} else {
 			$result   = false;
 			$revision = false;
@@ -213,7 +236,9 @@ class SVN {
 	 * }
 	 */
 	public static function add( $file ) {
-		$options[]   = 'non-interactive';
+		$options = [
+			'non-interactive'
+		];
 		$esc_options = self::parse_esc_parameters( $options );
 
 		$esc_file     = escapeshellarg( $file );
@@ -247,9 +272,17 @@ class SVN {
 	public static function commit( $checkout, $message, $options = array() ) {
 		$options[] = 'non-interactive';
 		$options['m'] = $message;
-		if ( empty( $options['username'] ) ) {
+		if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
 			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+
+		if ( empty( $options['username'] ) ) {
+			return [
+				'result'   => false,
+				'revision' => false,
+				'errors'   => [ 'No SVN credentials configured.' ],
+			];
 		}
 
 		$esc_options = self::parse_esc_parameters( $options );
@@ -287,9 +320,17 @@ class SVN {
 	public static function mkdir( $url, $message, $options = array() ) {
 		$options[] = 'non-interactive';
 		$options['m'] = $message;
-		if ( empty( $options['username'] ) ) {
+		if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
 			$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
 			$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+		}
+
+		if ( empty( $options['username'] ) ) {
+			return [
+				'result'   => false,
+				'revision' => false,
+				'errors'   => [ 'No SVN credentials configured.' ],
+			];
 		}
 
 		$esc_options = self::parse_esc_parameters( $options );
@@ -339,6 +380,10 @@ class SVN {
 		$errors = libxml_use_internal_errors( true );
 		$xml    = simplexml_load_string( $output );
 		libxml_use_internal_errors( $errors );
+
+		if ( ! $xml || ! isset( $xml->list ) ) {
+			return false;
+		}
 
 		$files = [];
 		foreach ( $xml->list->children() as $entry ) {
@@ -443,27 +488,77 @@ class SVN {
 	 * }
 	 */
 	public static function rename( $from, $to, $options = array() ) {
+		return SVN::_copy_rename_helper( 'mv', $from, $to, $options );
+	}
+
+	/**
+	 * Copy a file or folder in a SVN checkout.
+	 *
+	 * @static
+	 *
+	 * @param string $source      The path of the file to copy. May be a URL.
+	 * @param string $destination The path to copy the file to. May be a URL.
+	 * @param array  $options  Optional. A list of options to pass to SVN. Default: empty array.
+	 * @return array {
+	 *    @type bool        $result   The result of the operation.
+	 *    @type int         $revision The revision.
+	 *    @type false|array $errors   Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function copy( $from, $to, $options = array() ) {
+		return SVN::_copy_rename_helper( 'cp', $from, $to, $options = array() );
+	}
+
+	/**
+	 * Helper function for copy and rename operations.
+	 *
+	 * @static
+	 * @param string $svn_op  The SVN operation to perform. 'cp' or 'mv'.
+	 * @param string $from    The path of the SVN folder to rename. May be a URL.
+	 * @param string $to      The new path of the SVN folder. May be a URL.
+	 * @param array  $options Optional. A list of options to pass to SVN. Default: empty array.
+	 * @return array {
+	 *    @type bool        $result   The result of the operation.
+	 *    @type int         $revision The revision.
+	 *    @type false|array $errors   Whether any errors or warnings were encountered.
+	 * }
+	 */
+	public static function _copy_rename_helper( $svn_op, $from, $to, $options = array() ) {
 		$options[] = 'non-interactive';
 		$is_url    = ( preg_match( '#https?://#i', $from ) && preg_match( '#https?://#i', $to ) );
 
 		if ( $is_url ) {
 			// Set the message if not provided.
 			if ( ! isset( $options['message'] ) && ! isset( $options['m'] ) ) {
-				$options['message'] = sprintf( "Rename %s to %s.", basename( $from ), basename( $to ) );
+				$options['message'] = sprintf(
+					"%s %s to %s.",
+					'mv' === $svn_op ? 'Rename' : 'Copy',
+					basename( $from ),
+					basename( $to )
+				);
+			}
+
+			if ( empty( $options['username'] ) && defined( 'PLUGIN_SVN_MANAGEMENT_USER' ) ) {
+				$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
+				$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
 			}
 
 			if ( empty( $options['username'] ) ) {
-				$options['username'] = PLUGIN_SVN_MANAGEMENT_USER;
-				$options['password'] = PLUGIN_SVN_MANAGEMENT_PASS;
+				return [
+					'result'   => false,
+					'revision' => false,
+					'errors'   => [ 'No SVN credentials configured.' ],
+				];
 			}
 		}
 
 		$esc_options = self::parse_esc_parameters( $options );
 
+		$esc_op   = escapeshellarg( $svn_op );
 		$esc_from = escapeshellarg( $from );
 		$esc_to   = escapeshellarg( $to );
 
-		$output = self::shell_exec( "svn mv $esc_from $esc_to $esc_options 2>&1" );
+		$output = self::shell_exec( "svn $esc_op $esc_from $esc_to $esc_options 2>&1" );
 		if ( $is_url && preg_match( '/Committed revision (?P<revision>\d+)[.]/i', $output, $m ) ) {
 			$revision = (int) $m['revision'];
 			$result   = true;
@@ -525,7 +620,7 @@ class SVN {
 	 *                     warning/error_code/error_message if detected.
 	 */
 	protected static function parse_svn_errors( $output ) {
-		if ( preg_match_all( '!^svn: (?P<warning>warning:)?\s*(?<error_code>[EW]\d+):\s*(?P<error_message>.+)$!im', $output, $messages, PREG_SET_ORDER ) ) {
+		if ( preg_match_all( '!^svn: (?P<warning>warning:)?\s*(?<error_code>[EW]\d+):\s*(?P<error_message>.+)$!im', $output ?? '', $messages, PREG_SET_ORDER ) ) {
 
 			// We only want the string keys - strip out the numeric keys
 			$messages = array_map( function ( $item ) {
@@ -548,11 +643,11 @@ class SVN {
 	 * @access protected
 	 *
 	 * @param string $command The command to be executed.
-	 * @return mixed The output from the executed command or NULL if an error occurred or the command produces no
-	 *               output.
+	 * @return mixed The output from the executed command, empty string if an error occurred or the command
+	 *               produces no output.
 	 */
 	protected static function shell_exec( $command ) {
-		return shell_exec( 'export LC_CTYPE="en_US.UTF-8" LANG="en_US.UTF-8"; ' . $command );
+		return shell_exec( 'export LC_CTYPE="en_US.UTF-8" LANG="en_US.UTF-8"; ' . $command ) ?? '';
 	}
 }
 

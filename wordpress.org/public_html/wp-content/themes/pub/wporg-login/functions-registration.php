@@ -66,9 +66,10 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 	// Allow for w.org plugins to block registrations based on spam checks, etc.
 	if ( null !== ( $pre_register_error = apply_filters( 'wporg_login_pre_registration', null, $user_login, $user_email, $meta ) ) ) {
 		if ( is_wp_error( $pre_register_error ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registration error markup assembled from escaped parts.
 			wp_die( $pre_register_error );
 		}
-		wp_die( __( 'Registration Blocked. Please stop.', 'wporg' ) );
+		wp_die( esc_html__( 'Registration Blocked. Please stop.', 'wporg' ) );
 	}
 
 	$profile_key        = wp_generate_password( 24, false, false );
@@ -114,11 +115,14 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		$pending_user['meta']['heuristics'] = wporg_registration_check_private_heuristics( compact( 'user_login', 'user_email' ) );
 	}
 
-	$passes_heuristics  = 'allow' === $pending_user['meta']['heuristics'];
+	$passes_heuristics  = in_array( $pending_user['meta']['heuristics'], [ 'allow', 'review' ], true );
 	$passes_recaptcha   = (float)$pending_user['scores']['pending'] >= (float) get_option( 'recaptcha_v3_threshold', 0.2 );
 	$has_blocked_word   = wporg_login_has_blocked_word( $pending_user );
 	$passes_block_words = ! $has_blocked_word;
 
+	if ( ! $passes_heuristics ) {
+		$pending_user['meta']['block_reason'] ??= 'Heuristics check failed';
+	}
 	if ( ! $passes_block_words ) {
 		$pending_user['meta']['block_reason'] ??= [ 'Block words', "{$has_blocked_word} found" ];
 	}
@@ -132,9 +136,32 @@ function wporg_login_create_pending_user( $user_login, $user_email, $meta = arra
 		$passes_block_words
 	);
 
+	// If the signup has a bypass-spam-checks token, approve it.
+	if (
+		! $pending_user['cleared'] &&
+		wporg_reg_has_signup_token( $pending_user ) &&
+		'block' !== ( $pending_user['meta']['heuristics'] ?? '' )
+	) {
+		$pending_user['cleared']        = 1;
+		$pending_user['meta']['bypass'] = 'yes';
+
+		// Clear the block reason if it doesn't contain specific information.
+		if (
+			in_array(
+				$pending_user['meta']['block_reason'] ?? false,
+				[
+					'Heuristics check failed',
+					'reCaptcha not met',
+				]
+			)
+		) {
+			unset( $pending_user['meta']['block_reason'] );
+		}
+	}
+
 	$inserted = wporg_update_pending_user( $pending_user );
 	if ( ! $inserted ) {
-		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
+		wp_die( esc_html__( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
 	}
 
 	wporg_login_send_confirmation_email( $user_email );
@@ -203,14 +230,19 @@ function wporg_login_send_confirmation_email( $user ) {
 /**
  * Fetches a pending user record from the database by username or Email.
  *
- * @param string|int $who The username, email address, or user ID.
+ * @param string|int|array $who The username, email address, user ID, or an
+ *                              existing pending user record.
+ * @return array|false The pending user record, or false if not found.
  */
 function wporg_get_pending_user( $who ) {
 	global $wpdb;
 
 	// Is it a pending user object already?
-	if ( is_array( $who ) && isset( $who['pending_id'] ) ) {
-		return $who;
+	if ( is_array( $who ) ) {
+		if ( empty( $who['pending_id'] ) ) {
+			return false;
+		}
+		$who = (int) $who['pending_id'];
 	}
 
 	if ( is_numeric( $who ) && (int) $who == $who ) {
@@ -227,10 +259,21 @@ function wporg_get_pending_user( $who ) {
 	}
 
 	$pending_user = $wpdb->get_row( $wpdb->prepare(
-		"SELECT * FROM `{$wpdb->base_prefix}user_pending_registrations` WHERE %i = %s LIMIT 1",
+		'SELECT * FROM %i WHERE %i = %s LIMIT 1',
+		"{$wpdb->base_prefix}user_pending_registrations",
 		$field,
 		$who
 	), ARRAY_A );
+
+	// Try again on the sanitized field..
+	if ( ! $pending_user && 'user_email' === $field ) {
+		$who          = wporg_sanitize_email_for_search( $who );
+		$pending_user = $wpdb->get_row( $wpdb->prepare(
+			'SELECT * FROM %i WHERE user_email_san = %s LIMIT 1',
+			"{$wpdb->base_prefix}user_pending_registrations",
+			$who
+		), ARRAY_A );
+	}
 
 	if ( ! $pending_user ) {
 		return false;
@@ -248,37 +291,20 @@ function wporg_get_pending_user( $who ) {
 }
 
 /**
- * Fetches a pending user record from the database by "inbox", ignoring plus addressing.
- */
-function wporg_get_pending_user_by_email_wildcard( $email ) {
-	global $wpdb;
-
-	$email_wildcard = preg_replace( '/[+][^@]+@/i', '+%@', $wpdb->esc_like( $email ) );  // abc+def@ghi => abc+%@ghi
-	$email_base     = preg_replace( '/[+][^@]+@/i', '@', $email ); // abc+def@ghi => abc@ghi
-
-	$matching_email = $wpdb->get_var( $sql = $wpdb->prepare(
-		"SELECT `user_email` FROM `{$wpdb->base_prefix}user_pending_registrations` WHERE ( `user_email` = %s OR `user_email` LIKE %s ) LIMIT 1",
-		$email_base,
-		$email_wildcard
-	) );
-
-	if ( $matching_email ) {
-		return wporg_get_pending_user( $matching_email );
-	}
-
-	return false;
-}
-
-/**
  * Update the pending user record, similar to `wp_update_user()` but for the not-yet-created user record.
  */
 function wporg_update_pending_user( $pending_user ) {
 	global $wpdb;
 
+	// Ensure we have the sanitized email for searching purposes.
+	if ( empty( $pending_user['user_email_san'] ) && ! empty( $pending_user['user_email'] ) ) {
+		$pending_user['user_email_san'] = wporg_sanitize_email_for_search( $pending_user['user_email'] );
+	}
+
 	// Allow altering the user fields.
 	$pending_user = apply_filters( 'wporg_login_registration_update_pending_user', $pending_user );
 
-	$pending_user['meta']   = json_encode( $pending_user['meta'] );
+	$pending_user['meta']   = json_encode( $pending_user['meta'], JSON_UNESCAPED_SLASHES );
 	$pending_user['scores'] = json_encode( $pending_user['scores'] );
 
 	if ( empty( $pending_user['pending_id'] ) ) {
@@ -347,7 +373,7 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 		wp_slash( $user_email )
 	);
 	if ( ! $user_id ) {
-		wp_die( __( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
+		wp_die( esc_html__( 'Error! Something went wrong with your registration. Try again?', 'wporg' ) );
 	}
 
 	// Update the registration date to the earlier one.
@@ -394,7 +420,12 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 				'interests' => 'Interests',
 			];
 
-			if( 'url' == $field ) {
+			if ( 'url' == $field ) {
+				// If the URL contains WordPress.org, just skip it.
+				if ( str_contains( strtolower( $value ), 'wordpress.org' ) ) {
+					continue;
+				}
+
 				wp_update_user( [ 'ID' => $user_id, 'user_url' => $value ] );
 			} else {
 				if ( $value ) {
@@ -409,6 +440,15 @@ function wporg_login_create_user_from_pending( $pending_user, $password = false 
 				wporg_update_user_profile_fields( $user_id, $profile_labels[$field], $value );
 			}
 		}
+	}
+
+	// Update their Profile name with their chosen user login for now.
+	wporg_update_user_profile_fields( $user_id, 'Name', $user_login );
+
+	// If a role is specified, set that.
+	if ( ( $pending_user['meta']['role'] ?? '' ) === 'spectator' && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+		$user = new WP_User( $user_id, '', WPORG_SUPPORT_FORUMS_BLOGID );
+		$user->set_role( 'bbp_spectator' );
 	}
 
 	return get_user_by( 'id', $user_id );
@@ -482,7 +522,7 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 			}
 
 			// If the new email fails our checks, and the user hasn't manually been approved..
-			if ( 'allow' !== $pending_user['meta']['heuristics'] && $pending_user['cleared'] < 2 ) {
+			if ( ! in_array( $pending_user['meta']['heuristics'], [ 'allow', 'review' ], true ) && $pending_user['cleared'] < 2 ) {
 				$pending_user['cleared'] = 0;
 			}
 		}
@@ -495,6 +535,16 @@ function wporg_login_save_profile_fields( $pending_user = false, $state = '' ) {
 			$pending_user['cleared']                = 0;
 			$pending_user['meta']['block_reason'] ??= [ 'Block words', "{$has_blocked_word} found" ];
 		}
+	}
+
+	// If the signup has a bypass-spam-checks token, approve it.
+	if (
+		! $pending_user['cleared'] &&
+		wporg_reg_has_signup_token( $pending_user ) &&
+		'block' !== ( $pending_user['meta']['heuristics'] ?? '' )
+	) {
+		$pending_user['cleared']        = 1;
+		$pending_user['meta']['bypass'] = 'yes';
 	}
 
 	if ( $pending_user ) {
@@ -534,4 +584,23 @@ function wporg_login_has_blocked_word( $user ) {
 	}
 
 	return false;
+}
+
+/**
+ * Sanitize an email into it's canonical form for searching.
+ *
+ * @param string $email The email address to sanitize.
+ * @return string The sanitized email address.
+ */
+function wporg_sanitize_email_for_search( $email ) {
+	$email_san = strtolower( $email );
+	$email_san = trim( $email_san );
+
+	// Remove plus addressing for the sanitized email.
+	$email_san = preg_replace( '/[+][^@]+@/i', '@', $email_san );
+
+	// Filter it when needed.
+	$email_san = apply_filters( 'wporg_sanitize_email_for_search', $email_san, $email );
+
+	return $email_san;
 }

@@ -10,7 +10,7 @@ class Plugin_Approved extends Markdown_Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( '%s has been approved!', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -66,7 +66,7 @@ Enjoy!', 'wporg-plugins' );
 
 		return sprintf(
 			$email_text,
-			$this->plugin->post_title,
+			$this->plugin_title(),
 			$this->user->user_login,
 			$this->plugin->post_name,
 			"https://profiles.wordpress.org/{$this->user->user_nicename}/profile/edit/group/3/?screen=svn-password"

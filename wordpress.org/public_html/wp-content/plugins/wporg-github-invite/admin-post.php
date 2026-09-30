@@ -15,8 +15,8 @@ add_action( 'admin_post_github_invite', function() {
 
 	check_admin_referer( 'github_invite' );
 
-	$input    = wp_unslash( $_POST['invite'] );
-	$team_ids = (array) wp_unslash( $_POST['team_id'] );
+	$input    = wp_unslash( $_POST['invite'] ?? '' );
+	$team_ids = (array) wp_unslash( $_POST['team_id'] ?? [] );
 	$team_ids = array_intersect( $team_ids, get_allowed_teams() );
 	$team_ids = array_map( 'intval', $team_ids );
 
@@ -118,7 +118,7 @@ add_action( 'admin_post_github_cancel_invite', function() {
 		wp_die( 'You do not have permission to do this' );
 	}
 
-	$id = (int) wp_unslash( $_GET['invite'] );
+	$id = (int) wp_unslash( $_GET['invite'] ?? '' );
 
 	check_admin_referer( 'github_cancel_invite_' . $id );
 
@@ -150,7 +150,7 @@ add_action( 'admin_post_github_invite_settings', function() {
 
 	check_admin_referer( 'github_invite_settings' );
 
-	$team_ids = wp_unslash( $_POST['team_id'] );
+	$team_ids = wp_unslash( $_POST['team_id'] ?? [] );
 	$team_ids = array_map( 'intval', $team_ids );
 
 	update_option( 'gh_invite_allowed_teams', $team_ids );

@@ -3,14 +3,16 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
 use WP_Error;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Scan;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WordPressdotorg\Plugin_Directory\Trademarks;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
-use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
+use WordPressdotorg\Plugin_Directory\Clients\Helpscout as Helpscout_Client;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submission_Email;
 
 /**
@@ -66,6 +68,113 @@ class Upload_Handler {
 	}
 
 	/**
+	 * Whether uploads are currently accepted for the current user.
+	 *
+	 * @param bool $is_update Whether this is an update to an existing plugin.
+	 * @return true|WP_Error True if uploads are accepted, WP_Error otherwise.
+	 */
+	public static function accepting_uploads( bool $is_update = false ) {
+		if ( defined( 'WPORG_ON_HOLIDAY' ) && WPORG_ON_HOLIDAY ) {
+			return new WP_Error(
+				'submissions_paused',
+				__( 'New plugin submissions are temporarily disabled during the holiday break.', 'wporg-plugins' )
+			);
+		}
+
+		if (
+			function_exists( 'WordPressdotorg\Two_Factor\user_requires_2fa' ) &&
+			class_exists( '\Two_Factor_Core' ) &&
+			\WordPressdotorg\Two_Factor\user_requires_2fa( wp_get_current_user() ) &&
+			! \Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
+		) {
+			return new WP_Error(
+				'2fa_required',
+				__( 'Two-factor authentication must be enabled on your account before submitting plugins.', 'wporg-plugins' )
+			);
+		}
+
+		if ( ! $is_update && function_exists( 'is_email_address_unsafe' ) && is_email_address_unsafe( wp_get_current_user()->user_email ) ) {
+			return new WP_Error(
+				'unsafe_email',
+				__( 'Your email host has email deliverability problems. Please update your email address first.', 'wporg-plugins' )
+			);
+		}
+
+		if ( ! $is_update ) {
+			$capacity = self::has_queue_capacity();
+			if ( is_wp_error( $capacity ) ) {
+				return $capacity;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether the current user has capacity to submit another plugin to the queue.
+	 *
+	 * Authors can have 1 plugin in the queue, or 10 if they have 1M+ total active installs.
+	 *
+	 * @return true|WP_Error True if under the limit, WP_Error with 'count' and 'maximum' data otherwise.
+	 */
+	public static function has_queue_capacity() {
+		$maximum = 1;
+
+		$active_installs = wp_list_pluck(
+			get_posts(
+				array(
+					'author'      => get_current_user_id(),
+					'post_type'   => 'plugin',
+					'post_status' => 'publish',
+					'numberposts' => -1,
+				)
+			),
+			'_active_installs'
+		);
+
+		$user_active_installs = array_sum( array_map( 'absint', $active_installs ) );
+
+		if ( $user_active_installs > 1000000 ) {
+			$maximum = 10;
+		}
+
+		$in_queue = get_posts(
+			array(
+				'post_type'   => 'plugin',
+				'post_status' => array( 'new', 'pending', 'approved' ),
+				'author'      => get_current_user_id(),
+				'numberposts' => -1,
+				'fields'      => 'ids',
+			)
+		);
+
+		$count = count( $in_queue );
+
+		if ( $count >= $maximum ) {
+			return new WP_Error(
+				'queue_limit',
+				sprintf(
+					/* translators: 1: number of plugins in queue, 2: maximum allowed */
+					_n(
+						'You already have %1$d plugin in the review queue (maximum %2$d). Please wait for your existing submission to be reviewed.',
+						'You already have %1$d plugins in the review queue (maximum %2$d). Please wait for your existing submissions to be reviewed.',
+						$count,
+						'wporg-plugins'
+					),
+					$count,
+					$maximum
+				),
+				array(
+					'count'   => $count,
+					'maximum' => $maximum,
+				)
+			);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Processes the plugin upload.
 	 *
 	 * Runs various tests and creates plugin post.
@@ -99,7 +208,7 @@ class Upload_Handler {
 		}
 
 		// Allow plugin reviewers to bypass some restrictions.
-		if ( $updating_existing && current_user_can( 'approve_plugins' ) && ! $has_upload_token ) {
+		if ( $updating_existing && current_user_can( 'plugin_approve' ) && ! $has_upload_token ) {
 			$has_upload_token = true;
 		}
 
@@ -359,7 +468,7 @@ class Upload_Handler {
 		if ( $readme_plugin_post && trim( $readme->name ) ) {
 			$error = __( 'README Error: The plugin has already been submitted.', 'wporg-plugins' );
 
-			if ( $readme_plugin_post->post_author != get_current_user_id() ) {
+			if ( reset( $readme_plugin_post )->post_author != get_current_user_id() ) {
 				return new WP_Error( 'already_submitted', $error . ' ' . sprintf(
 					/* translators: 1: plugin slug, 2: 'Plugin Name:' */
 					__( 'There is already a plugin with the name %1$s in the directory. You must rename your plugin by changing the %2$s line in your main plugin file and in your readme. Once you have done so, you may upload it again.', 'wporg-plugins' ),
@@ -526,8 +635,8 @@ class Upload_Handler {
 		}
 
 		// Store metadata about the uploaded ZIP.
-		// Count lines of PHP code, this is not 100% accurate but it's a good indicator.
-		$lines_of_code = (int) shell_exec( sprintf( "find %s -type f -name '*.php' -exec cat {} + | wc -l", escapeshellarg( $this->plugin_dir ) ) );
+		// Count lines of PHP code, this is not 100% accurate but it's a good indicator. Excludes 'vendor', 'vendor-prefixed', and 'vendor_prefixed' directories.
+		$lines_of_code = (int) shell_exec( sprintf( "find %s -type f -name '*.php' -not -path '*/vendor/*' -not -path '*/vendor*prefixed/*' -exec cat {} + | wc -l", escapeshellarg( $this->plugin_dir ) ) );
 
 		update_post_meta( $plugin_post->ID, '_submitted_zip_size', filesize( get_attached_file( $attachment->ID ) ) );
 		update_post_meta( $plugin_post->ID, '_submitted_zip_loc', $lines_of_code );
@@ -651,100 +760,41 @@ class Upload_Handler {
 			'acf-gallery',
 		);
 
+		// Slugs in the namespace used internally for rejected plugins.
+		if ( preg_match( Helpscout::REJECTED_SLUG_REGEX, $this->plugin_slug ) ) {
+			return true;
+		}
+
 		return in_array( $this->plugin_slug, $reserved_slugs );
 	}
 
 	/**
-	 * Sends a plugin through Plugin Check.
+	 * Checks the uploaded plugin via Plugin Check.
 	 *
 	 * @return array The results of the plugin check.
 	 */
 	public function check_plugin() {
-		// Run the checks.
-		if (
-			! defined( 'WPCLI' ) ||
-			! defined( 'WP_CLI_CONFIG_PATH' ) ||
-			// The plugin must be activated in order to have plugin-check run.
-			! defined( 'WP_PLUGIN_CHECK_VERSION' ) ||
-			// WordPress.org only..
-			! function_exists( 'notify_slack' )
-		) {
-			// If we can't run plugin-check, we'll just return a pass.
-			return [
-				'verdict' => true,
-				'results' => [],
-				'html'    => '',
-			];
+		// If we can't run plugin-check, we'll just return a pass.
+		$default_return = [
+			'verdict' => true,
+			'results' => [],
+			'html'    => '',
+		];
+
+		if ( ! function_exists( 'notify_slack' ) ) {
+			return $default_return;
 		}
 
-		// Run plugin check via CLI
-		$start_time = microtime(1);
-		exec(
-			'export WP_CLI_CONFIG_PATH=' . escapeshellarg( WP_CLI_CONFIG_PATH ) . '; ' .
-			'timeout 45 ' . // Timeout after 45s if plugin-check is not done.
-			WPCLI . ' --url=https://wordpress.org/plugins ' .
-			'plugin check ' .
-			'--error-severity=7 --warning-severity=6 --categories=plugin_repo --format=json ' .
-			'--slug=' . escapeshellarg( $this->plugin_slug ) . ' ' .
-			escapeshellarg( $this->plugin_root ),
-			$output,
-			$return_code
-		);
-		$total_time = round( microtime(1) - $start_time, 1 );
-
-		/**
-		 * Anything that plugin-check outputs that we want to discard completely.
-		 */
-		$is_ignored_code = static function( $code ) {
-			$ignored_codes = [
-			];
-
-			return (
-				in_array( $code, $ignored_codes, true ) ||
-				// All the Readme parser warnings are duplicated, we'll exclude those.
-				str_starts_with( $code, 'readme_parser_warnings_' )
-			);
-		};
-
-		/*
-		 * Convert the output into an array.
-		 * Format:
-		 * FILE: example.extension
-		 * [{.....}]
-		 *
-		 * FILE: example2.extension
-		 * [{.....}]
-		 */
-		$verdict  = true;
-		$results  = [];
-		foreach ( array_chunk( $output, 3 ) as $file_result ) {
-			if ( ! str_starts_with( $file_result[0], 'FILE:' ) ) {
-				continue;
-			}
-
-			$filename = trim( explode( ':' , $file_result[0], 2 )[1] );
-			$json     = json_decode( $file_result[1], true );
-
-			foreach ( $json as $record ) {
-				$record['file'] = $filename;
-
-				if ( $is_ignored_code( $record['code'] ) ) {
-					continue;
-				}
-
-				$results[] = $record;
-
-				// Record submission stats.
-				if ( function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
-					bump_stats_extra( 'plugin-check-' . $record['type'], $record['code'] );
-				}
-
-				// Determine if it failed the checks.
-				if ( $verdict && 'ERROR' === $record['type'] ) {
-					$verdict = false;
-				}
-			}
+		$result = Plugin_Scan::run_plugin_check( $this->plugin_slug, $this->plugin_root, '' /* should be stable tag */, 'new' );
+		if ( false === $result ) {
+			return $default_return;
 		}
+
+		$verdict         = $result['verdict'];
+		$results         = $result['results'];
+		$results_by_type = $result['results_by_type'];
+		$return_code     = $result['return_code'];
+		$total_time      = $result['total_time'];
 
 		// Generage the HTML for the Plugin Check output.
 		$html = sprintf(
@@ -754,25 +804,42 @@ class Upload_Handler {
 		if ( $results ) {
 			$html .= '<ul class="pc-result" style="list-style: disc">';
 			// Display errors, and then warnings.
-			foreach ( [ wp_list_filter( $results, [ 'type' => 'ERROR' ] ), wp_list_filter( $results, [ 'type' => 'ERROR' ], 'NOT' ) ] as $result_set ) {
-				foreach ( $result_set as $result ) {
+			foreach ( [ 'ERROR', 'ERRORS_LOW_SEVERITY', 'WARNING', 'WARNING_LOW_SEVERITY' ] as $result_type ) {
+				$result_set = $results_by_type[ $result_type ] ?? [];
+				if ( empty( $result_set ) ) {
+					continue;
+				}
+
+				// ERROR or WARNING
+				$result_label = str_replace( '_LOW_SEVERITY', '', $result_type );
+
+				$maybe_false_positive  = '';
+				if ( str_ends_with( $result_type, 'LOW_SEVERITY' ) ) {
+					$result_label .= '*';
+					$maybe_false_positive = __( 'This may be a false-positive, and will be manually checked by a reviewer.', 'wporg-plugins' );
+				}
+
+				foreach ( $result_set as $check_result ) {
 					$html .= sprintf(
-						'<li>%s <a href="%s">%s</a>: %s</li>',
-						esc_html( $result['file'] ),
-						esc_url( $result['docs'] ?? '' ),
-						esc_html( $result['type'] . ' ' . $result['code'] ),
-						esc_html( $result['message'] )
+						'<li>%s <a href="%s" title="%s">%s</a>: %s</li>',
+						esc_html( $check_result['file'] ),
+						esc_url( $check_result['docs'] ?? '' ),
+						esc_attr( $maybe_false_positive ),
+						esc_html( "{$result_label}: {$check_result['code']}" ),
+						$check_result['message'] // Already escaped.
 					);
 				}
 			}
 			$html .= '</ul>';
+
+			$html .= '<p>' . __( 'The above may contain false-positives. If you believe an error or warning is incorrect or a false-positive, please do not work around it. A reviewer will manually confirm this during the review process.', 'wporg-plugins' ) . '</p>';
 		}
-		$html .= __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will be approved, only that it is sufficient to be reviewed. All submitted plugins are checked manually to ensure they meet security and guideline standards before approval.', 'wporg-plugins' );
+		$html .= '<p>' . __( 'Note: While the automated plugin scan is based on the Plugin Review Guidelines, it is not a complete review. A successful result from the scan does not guarantee that the plugin will be approved, only that it is sufficient to be reviewed. All submitted plugins are checked manually to ensure they meet security and guideline standards before approval.', 'wporg-plugins' ) . '</p>';
 
 		// If the upload is blocked; log it to slack.
 		if ( ! $verdict ) {
 			// Slack dm the logs.
-			$zip_name = reset( $_FILES )['name'];
+			$zip_name = reset( $_FILES )['name'] ?? '';
 			$failpass = $verdict ? ':white_check_mark: passed' : ':x: failed';
 			if ( $return_code > 1 ) { // TODO: Temporary, as we're always hitting this branch.
 				$failpass = ' :rotating_light: errored: ' . $return_code;
@@ -789,9 +856,9 @@ class Upload_Handler {
 
 			// Include a simplified / merged version of the results for review.
 			$group_by_code = [ 'ERROR' => [], 'WARNING' => [] ];
-			foreach ( $results as $result ) {
-				$group_by_code[ $result['type'] ][ $result['code'] ] ??= [];
-				$group_by_code[ $result['type'] ][ $result['code'] ][] = $result;
+			foreach ( $results as $check_result ) {
+				$group_by_code[ $check_result['type'] ][ $check_result['code'] ] ??= [];
+				$group_by_code[ $check_result['type'] ][ $check_result['code'] ][] = $check_result;
 			}
 			foreach ( $group_by_code as $type => $codes ) {
 				foreach ( $codes as $code_results ) {
@@ -813,8 +880,14 @@ class Upload_Handler {
 			notify_slack( PLUGIN_CHECK_LOGS_SLACK_CHANNEL, $text, wp_get_current_user(), true );
 		} elseif ( $return_code ) {
 			// Log plugin-check timing out.
-			$zip_name   = reset( $_FILES )['name'];
-			$text       = ":rotating_light: Error: {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s\n";
+			$zip_name   = reset( $_FILES )['name'] ?? '';
+			$debug      = '';
+			if ( $result['output'] || $result['stderr'] ) {
+				$output = is_string( $result['output'] ) ? $result['output'] : implode( "\n", (array) $result['output'] );
+				$debug = trim( "{$output}\n===\n{$result['stderr']}", "\n=" );
+				$debug = "\n```{$debug}```";
+			}
+			$text       = ":rotating_light: Error: {$return_code} for {$zip_name}: {$this->plugin['Name']} ({$this->plugin_slug}) took {$total_time}s{$debug}";
 			notify_slack( PLUGIN_CHECK_LOGS_SLACK_CHANNEL, $text, wp_get_current_user(), true );
 		}
 
@@ -853,7 +926,17 @@ class Upload_Handler {
 			'post_excerpt' => $this->plugin['Description'],
 			'post_content' => esc_html( $upload_comment )
 		);
-		$attachment = media_handle_upload( 'zip_file', $post_id, $post_details );
+
+		/**
+		 * Filters the overrides passed to media_handle_upload() when saving a plugin ZIP.
+		 *
+		 * The overrides array is forwarded to wp_handle_upload(). See the
+		 * $overrides parameter of wp_handle_upload() for accepted keys.
+		 *
+		 * @param array $overrides Upload overrides.
+		 */
+		$overrides  = apply_filters( 'wporg_plugin_upload_overrides', array( 'test_form' => false ) );
+		$attachment = media_handle_upload( 'zip_file', $post_id, $post_details, $overrides );
 
 		remove_filter( 'site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
 		remove_filter( 'default_site_option_upload_filetypes', array( $this, 'whitelist_zip_files' ) );
@@ -912,7 +995,7 @@ class Upload_Handler {
 			return false;
 		}
 
-		return Tools::get_helpscout_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
+		return Helpscout::get_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
 	}
 
 	/**
@@ -960,7 +1043,7 @@ class Upload_Handler {
 			'status' => 'active',
 		];
 
-		$result = HelpScout::api(
+		$result = Helpscout_Client::api(
 			'/v2/conversations/' . $review_email->id . '/reply',
 			$payload,
 			'POST',
@@ -970,6 +1053,7 @@ class Upload_Handler {
 		$success = ( 201 === $http_response_code );
 
 		if ( ! $success ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 			trigger_error( "Helpscout update failed: $http_response_code: " . var_export( $result, true ), E_USER_WARNING );
 		}
 

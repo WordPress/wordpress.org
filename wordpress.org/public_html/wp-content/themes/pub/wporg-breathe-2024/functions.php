@@ -57,12 +57,12 @@ function wporg_breathe_styles() {
 		filemtime( get_theme_root() . '/wporg-parent-2021/build/block-styles.css' )
 	);
 
-	wp_enqueue_style( 'wporg-breathe', get_stylesheet_uri(), array( 'p2-breathe' ), filemtime( __DIR__ . '/style.css' ) );
+	wp_enqueue_style( 'wporg-breathe', get_stylesheet_uri(), array( 'p2-breathe', 'dashicons' ), filemtime( __DIR__ . '/style.css' ) );
 
 	// Preload the heading font(s).
 	if ( is_callable( 'global_fonts_preload' ) ) {
 		/* translators: Subsets can be any of cyrillic, cyrillic-ext, greek, greek-ext, vietnamese, latin, latin-ext. */
-		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg-breathe' );
+		$subsets = _x( 'Latin', 'Heading font subsets, comma separated', 'wporg' );
 		// All headings.
 		global_fonts_preload( 'Inter', $subsets );
 	}
@@ -171,19 +171,6 @@ function _merge_by_slug( ...$arrays ) {
 }
 
 /**
- * Register patterns from the patterns directory.
- */
-function wporg_breathe_register_patterns() {
-	$pattern_directory = new \DirectoryIterator( get_stylesheet_directory() . '/patterns/' );
-	foreach ( $pattern_directory as $file ) {
-		if ( $file->isFile() ) {
-			require $file->getPathname();
-		}
-	}
-}
-add_action( 'init', __NAMESPACE__ . '\wporg_breathe_register_patterns' );
-
-/**
  * Get the primary navigation menu object if it exists.
  */
 function wporg_breathe_get_local_nav_menu_object() {
@@ -206,11 +193,11 @@ function _maybe_add_login_item_to_menu( $menus ) {
 	global $wp;
 	$redirect_url = home_url( $wp->request );
 	$login_item = array(
-		'label' => __( 'Log in', 'wporg-breathe' ),
+		'label' => __( 'Log in', 'wporg' ),
 		'url' => wp_login_url( $redirect_url ),
 	);
 
-	if ( $menus['breathe'] ) {
+	if ( ! empty( $menus['breathe'] ) ) {
 		$login_item['className'] = 'has-separator';
 		$menus['breathe'][] = $login_item;
 	} else {
@@ -228,28 +215,64 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 		return;
 	}
 
+	// Build the "People" item once, gated on the team-pledges simulator being
+	// available on the current site. /pledges/ is a virtual page registered by
+	// mu-plugins/make-network/team-pledges.php, so prepending the link without
+	// the simulator results in a 404 on non-team subsites (and would fatal in
+	// page-pledges.php when get_current_team() returns null). Hoisted above the
+	// early returns so team sites without a primary nav still surface People.
+	$people_item = null;
+	if ( function_exists( 'WordPressdotorg\\Make\\Pledges\\get_current_team' ) ) {
+		$team = \WordPressdotorg\Make\Pledges\get_current_team();
+		if ( $team ) {
+			global $wp;
+			$people_url        = home_url( '/pledges/' );
+			$is_pledges_active = trailingslashit( $people_url ) === trailingslashit( home_url( $wp->request ) );
+			$people_item       = array(
+				'label'     => esc_html__( 'People', 'wporg' ),
+				'url'       => esc_url( $people_url ),
+				'className' => $is_pledges_active ? 'current-menu-item' : '',
+			);
+		}
+	}
+
 	$local_nav_menu_object = wporg_breathe_get_local_nav_menu_object();
 
 	if ( ! $local_nav_menu_object ) {
+		if ( $people_item ) {
+			$menus['breathe'] = array( $people_item );
+		}
 		return _maybe_add_login_item_to_menu( $menus );
 	}
 
 	$menu_items = wp_get_nav_menu_items( $local_nav_menu_object->term_id );
 
 	if ( ! $menu_items || empty( $menu_items ) ) {
+		if ( $people_item ) {
+			$menus['breathe'] = array( $people_item );
+		}
 		return _maybe_add_login_item_to_menu( $menus );
 	}
 
 	$menu = array_map(
 		function( $menu_item ) {
+			global $wp;
+			$is_current_page = trailingslashit( $menu_item->url ) === trailingslashit( home_url( $wp->request ) );
+
 			return array(
 				'label' => esc_html( $menu_item->title ),
-				'url' => esc_url( $menu_item->url )
+				'url' => esc_url( $menu_item->url ),
+				'className' => $is_current_page ? 'current-menu-item' : '',
 			);
 		},
-		// Limit local nav items to 6
-		array_slice( $menu_items, 0, 6 )
+		// Cap the inherited local-nav at 5 when we're prepending People (total = 6),
+		// or 6 when there's no People item to add.
+		array_slice( $menu_items, 0, $people_item ? 5 : 6 )
 	);
+
+	if ( $people_item ) {
+		array_unshift( $menu, $people_item );
+	}
 
 	$menus['breathe'] = $menu;
 
@@ -343,6 +366,7 @@ add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 function welcome_box() {
 	$welcome      = get_page_by_path( 'welcome' );
 	$cookie       = 'welcome-' . get_current_blog_id();
+	$path         = get_blog_details()->path;
 	$hash         = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
 	$content_hash = $welcome ? md5( $welcome->post_content ) : '';
 
@@ -364,7 +388,7 @@ function welcome_box() {
 	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
-		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu' ); ?></strong></a>
+		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu', 'wporg' ); ?></strong></a>
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
 			<button
@@ -372,16 +396,20 @@ function welcome_box() {
 				id="make-welcome-toggle"
 				data-show="<?php esc_attr_e( 'Show welcome box', 'wporg' ); ?>"
 				data-hide="<?php esc_attr_e( 'Hide welcome box', 'wporg' ); ?>"
-			><span><?php _e( 'Hide welcome box', 'wporg' ); ?></span></button>
+			><span><?php esc_html_e( 'Hide welcome box', 'wporg' ); ?></span></button>
 		</div>
-		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo $cookie; ?>" data-hash="<?php echo $content_hash; ?>">
+		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo esc_attr( $cookie ); ?>" data-hash="<?php echo esc_attr( $content_hash ); ?>">
 			<script type="text/javascript">
-				var elContent = document.getElementById( 'make-welcome-content' );
+				const elContent = document.getElementById( 'make-welcome-content' );
+
 				if ( elContent ) {
-					if ( -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash ) ) {
-						var elToggle = document.getElementById( 'make-welcome-toggle' ),
-							elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' ),
-							elContainer = document.querySelector( '.make-welcome' );
+					const hasCookieSetToHidden = -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash );
+					const isHome = window.location.pathname === '<?php echo esc_js( $path ); ?>';
+
+					if ( hasCookieSetToHidden || ! isHome ) {
+						const elToggle = document.getElementById( 'make-welcome-toggle' );
+						const elEditLink = document.getElementsByClassName( 'make-welcome-edit-post-link' );
+						const elContainer = document.querySelector( '.make-welcome' );
 
 						// It's hidden, hide it ASAP.
 						elContent.className += " hidden";
@@ -411,7 +439,7 @@ add_action( 'wporg_breathe_after_header', __NAMESPACE__ . '\welcome_box' );
 function javascript_notice() {
 	?>
 	<noscript class="js-disabled-notice">
-		<?php _e( 'Please enable JavaScript to view this page properly.', 'wporg' ); ?>
+		<?php esc_html_e( 'Please enable JavaScript to view this page properly.', 'wporg' ); ?>
 	</noscript>
 	<?php
 }
@@ -555,6 +583,7 @@ add_filter( 'wporg_noindex_request', __NAMESPACE__ . '\maybe_noindex' );
  * Currently handles the following teams:
  * - Core Performance
  * - Openverse
+ * - Playground
  *
  * Note: Defining a team's icon in this way also requires adjusting the site's styles to not expect
  * a ::before content of a dashicon font character. (Search style.css for: Adjustments for teams with SVG icons.)
@@ -586,16 +615,47 @@ function add_svg_icon_to_site_name() {
 			],
 		];
 
+	elseif ( '/playground/' === $site->path ) :
+		$svg = [
+			'viewbox' => '0 0 20 20',
+			'paths'   => [
+				'M12.4226 14.5825C12.4286 14.3131 12.4061 14.0201 12.3503 13.7039C12.1329 12.4716 11.4189 11.0521 10.1826 9.81571C8.94619 8.57933 7.52669 7.8654 6.29442 7.64795C5.97853 7.5922 5.68592 7.56975 5.4168 7.57569C5.88224 9.00652 6.787 10.5205 8.1331 11.8666C9.47873 13.2123 10.9922 14.1169 12.4226 14.5825ZM3.36813 6.3275C3.14159 4.42798 3.59436 2.68578 4.7961 1.48404C7.41899 -1.13885 12.6165 -0.193889 16.4051 3.59468C20.1936 7.38324 21.1386 12.5808 18.5157 15.2036C17.3135 16.4058 15.5705 16.8585 13.6701 16.6314C13.4934 16.9719 13.2678 17.284 12.9919 17.5599C11.7227 18.8291 9.68842 19.0344 7.63054 18.3064C7.51496 18.6778 7.32136 19.0113 7.04626 19.2864C5.80767 20.525 3.3861 20.1116 1.63753 18.363C-0.111035 16.6144 -0.524454 14.1929 0.714135 12.9543C0.988909 12.6795 1.3219 12.486 1.69285 12.3704C0.96373 10.3116 1.16857 8.27616 2.43837 7.00636C2.7146 6.73012 3.02707 6.50429 3.36813 6.3275ZM5.06371 5.85902C4.95395 4.47114 5.33586 3.39703 6.02247 2.71042C6.81773 1.91516 8.13284 1.52866 9.85322 1.84145C11.5655 2.15275 13.5023 3.14466 15.1787 4.82105C16.8551 6.49745 17.847 8.43428 18.1583 10.1465C18.4711 11.8669 18.0846 13.182 17.2893 13.9773C16.6025 14.6641 15.5278 15.0461 14.1391 14.9359C14.3018 12.9332 13.3392 10.5196 11.4089 8.58933C9.47914 6.65953 7.06613 5.69685 5.06371 5.85902ZM11.8657 16.2252C11.8334 16.263 11.8 16.2991 11.7655 16.3335C11.2555 16.8435 10.3747 17.1369 9.13587 16.9183C7.90359 16.7009 6.48409 15.9869 5.24772 14.7506C4.01134 13.5142 3.29741 12.0947 3.07996 10.8624C2.86135 9.62355 3.15474 8.74274 3.66475 8.23273C3.6994 8.19808 3.73577 8.16443 3.77385 8.13186C4.33353 9.84112 5.39321 11.5795 6.90673 13.093C8.41961 14.6059 10.1572 15.6653 11.8657 16.2252ZM4.02134 15.9769C4.64712 16.6027 5.3237 17.1268 6.02062 17.5438C5.99738 17.8222 5.90615 17.9738 5.81988 18.06C5.70404 18.1759 5.41511 18.336 4.82501 18.2353C4.23996 18.1354 3.5143 17.787 2.86391 17.1366C2.21352 16.4862 1.86515 15.7606 1.76527 15.1755C1.66453 14.5854 1.82467 14.2965 1.94051 14.1806C2.02572 14.0954 2.17765 14.0031 2.45584 13.9799C2.87263 14.6761 3.39625 15.3518 4.02134 15.9769Z',
+			],
+			'pathFillRule' => 'evenodd',
+			'pathClipRule' => 'evenodd',
+			'pathStroke' => 'none',
+		];
+
+	elseif ( '/ai/' === $site->path ) :
+		$svg = [
+			'viewbox' => '0 0 20 20',
+			'paths'   => [
+				'M17 5H16V3H11V5H9V3H4V5H3C1.9 5 1 5.9 1 7V15C1 16.1 1.9 17 3 17H17C18.1 17 19 16.1 19 15V7C19 5.9 18.1 5 17 5ZM17.5 15C17.5 15.3 17.3 15.5 17 15.5H3C2.7 15.5 2.5 15.3 2.5 15V7C2.5 6.7 2.7 6.5 3 6.5H17C17.3 6.5 17.5 6.7 17.5 7V15Z',
+				'M14 10L14.1474 10.3983C14.3406 10.9206 14.4373 11.1817 14.6278 11.3722C14.8183 11.5627 15.0794 11.6594 15.6017 11.8526L16 12L15.6017 12.1474C15.0794 12.3406 14.8183 12.4373 14.6278 12.6278C14.4373 12.8183 14.3406 13.0794 14.1474 13.6017L14 14L13.8526 13.6017C13.6594 13.0794 13.5627 12.8183 13.3722 12.6278C13.1817 12.4373 12.9206 12.3406 12.3983 12.1474L12 12L12.3983 11.8526C12.9206 11.6594 13.1817 11.5627 13.3722 11.3722C13.5627 11.1817 13.6594 10.9206 13.8526 10.3983L14 10Z',
+				'M12 8L12.0737 8.19915C12.1703 8.46029 12.2186 8.59086 12.3139 8.68611C12.4091 8.78136 12.5397 8.82968 12.8009 8.92631L13 9L12.8009 9.07369C12.5397 9.17032 12.4091 9.21864 12.3139 9.31389C12.2186 9.40914 12.1703 9.53971 12.0737 9.80085L12 10L11.9263 9.80085C11.8297 9.53971 11.7814 9.40914 11.6861 9.31389C11.5909 9.21864 11.4603 9.17032 11.1991 9.07369L11 9L11.1991 8.92631C11.4603 8.82968 11.5909 8.78136 11.6861 8.68611C11.7814 8.59086 11.8297 8.46029 11.9263 8.19915L12 8Z',
+				'M10.25 10L10.3421 10.2489C10.4629 10.5754 10.5233 10.7386 10.6424 10.8576C10.7614 10.9767 10.9246 11.0371 11.2511 11.1579L11.5 11.25L11.2511 11.3421C10.9246 11.4629 10.7614 11.5233 10.6424 11.6424C10.5233 11.7614 10.4629 11.9246 10.3421 12.2511L10.25 12.5L10.1579 12.2511C10.0371 11.9246 9.97671 11.7614 9.85764 11.6424C9.73857 11.5233 9.57536 11.4629 9.24893 11.3421L9 11.25L9.24893 11.1579C9.57536 11.0371 9.73857 10.9767 9.85764 10.8576C9.97671 10.7386 10.0371 10.5754 10.1579 10.2489L10.25 10Z'
+			],
+			'pathFillRule' => 'evenodd',
+			'pathClipRule' => 'evenodd',
+			'pathStroke' => 'none',
+		];
+
 	endif;
 
 	if ( empty( $svg['viewbox'] ) || empty( $svg['paths'] ) ) {
 		return;
 	}
 
-	printf( '<svg aria-hidden="true" role="img" viewBox="%s" xmlns="http://www.w3.org/2000/svg">' . "\n", esc_attr( $svg['viewbox'] ) );
+	printf( '<svg aria-hidden="true" role="img" viewBox="%s" xmlns="http://www.w3.org/2000/svg">' . "\n", esc_attr( $svg['viewbox'] ?? '' ) );
 
 	foreach ( $svg['paths'] as $path ) {
-		printf( "\t" . '<path d="%s" stroke="currentColor" fill="currentColor"/>' . "\n", esc_attr( $path ) );
+		printf(
+			"\t" . '<path d="%s" stroke="%s" fill="currentColor" fill-rule="%s" clip-rule="%s"/>' . "\n",
+			esc_attr( $path ),
+			esc_attr( $svg['pathStroke'] ?? 'currentColor' ),
+			esc_attr( $svg['pathFillRule'] ?? '' ),
+			esc_attr( $svg['pathClipRule'] ?? '' )
+		);
 	}
 
 	echo "</svg>";
@@ -604,12 +664,15 @@ add_action( 'wporg_breathe_before_name', __NAMESPACE__ . '\add_svg_icon_to_site_
 
 /**
  * Register translations for plugins without their own GlotPress project.
+ * This is in a function to avoid calling translation functions too early (at theme inclusion time).
  */
-// wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php
-/* translators: %s: Post title */
-__( 'Pending Review: %s', 'wporg' );
-__( 'Submit for review', 'wporg' );
-_n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
+function __translations_in_private_functions() {
+	// wp-content/plugins/wporg-o2-posting-access/wporg-o2-posting-access.php
+	/* translators: %s: Post title */
+	__( 'Pending Review: %s', 'wporg' );
+	__( 'Submit for review', 'wporg' );
+	_n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
+}
 
 /**
  * Modify the search block's form action for handbook pages.
@@ -620,20 +683,12 @@ _n_noop( '%s post awaiting review', '%s posts awaiting review', 'wporg' );
  */
 function modify_handbook_search_block_action( $block_content, $block ) {
 	if ( function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() ) {
-		$html = wp_html_split( $block_content );
+		$tags = new \WP_HTML_Tag_Processor( $block_content );
 		
-		foreach ( $html as &$token ) {
-			if ( 0 === strpos( $token, '<form' ) ) {
-				$token = preg_replace(
-					'/action="[^"]*"/',
-					'action="' . esc_url( home_url( '/handbook/' ) ) . '"',
-					$token
-				);
-				break;
-			}
+		if ( $tags->next_tag( 'form' ) ) {
+			 $tags->set_attribute( 'action', esc_url( home_url( '/handbook/' ) ) );
+			 $block_content = $tags->get_updated_html();
 		}
-		
-		$block_content = implode( '', $html );
 	}
 	return $block_content;
 }
@@ -662,22 +717,22 @@ function breathe_content_nav( $nav_id ) {
 	$nav_class = ( is_single() ) ? 'navigation-post' : 'navigation-paging';
 
 	?>
-	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo $nav_class; ?>">
-		<h2 class="screen-reader-text"><?php _e( 'Post navigation', 'p2-breathe' ); ?></h2>
+	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo esc_attr( $nav_class ); ?>">
+		<h2 class="screen-reader-text"><?php esc_html_e( 'Post navigation', 'wporg' ); ?></h2>
 
 	<?php if ( is_single() ) : // navigation links for single posts ?>
 
-		<?php previous_post_link( '<div class="nav-previous">%link</div>', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'p2-breathe' ) . '</span> %title' ); ?>
-		<?php next_post_link( '<div class="nav-next">%link</div>', '%title <span class="meta-nav">' . _x( '&rarr;', 'Next post link', 'p2-breathe' ) . '</span>' ); ?>
+		<?php previous_post_link( '<div class="nav-previous">%link</div>', '<span class="meta-nav">' . _x( '&larr;', 'Previous post link', 'wporg' ) . '</span> %title' ); ?>
+		<?php next_post_link( '<div class="nav-next">%link</div>', '%title <span class="meta-nav">' . _x( '&rarr;', 'Next post link', 'wporg' ) . '</span>' ); ?>
 
 	<?php elseif ( $wp_query->max_num_pages > 1 && ( is_home() || is_archive() || is_search() ) ) : // navigation links for home, archive, and search pages ?>
 
 		<?php if ( get_next_posts_link() ) : ?>
-		<div class="nav-previous"><?php next_posts_link( __( '<span class="meta-nav">&larr;</span> Older posts', 'p2-breathe' ) ); ?></div>
+		<div class="nav-previous"><?php next_posts_link( __( '<span class="meta-nav">&larr;</span> Older posts', 'wporg' ) ); ?></div>
 		<?php endif; ?>
 
 		<?php if ( get_previous_posts_link() ) : ?>
-		<div class="nav-next"><?php previous_posts_link( __( 'Newer posts <span class="meta-nav">&rarr;</span>', 'p2-breathe' ) ); ?></div>
+		<div class="nav-next"><?php previous_posts_link( __( 'Newer posts <span class="meta-nav">&rarr;</span>', 'wporg' ) ); ?></div>
 		<?php endif; ?>
 
 	<?php endif; ?>
@@ -685,3 +740,60 @@ function breathe_content_nav( $nav_id ) {
 	</nav><!-- #<?php echo esc_html( $nav_id ); ?> -->
 	<?php
 }
+
+/**
+ * Modify rendering of the site-title block.
+ * Insert the team icon before the anchor tag, if it exists.
+ * 
+ * On the project and updates sites, update the text and link so that in the local nav
+ * it appears as if pages from these sites belong to the home site, and not separate blogs.
+ */
+function modify_site_title_block( $block_content, $block ) {
+	ob_start();
+	do_action('wporg_breathe_before_name', 'front');
+	$icon = ob_get_clean();
+	
+	// Insert the icon inside the anchor tag, before the text
+	$block_content = preg_replace(
+		'/(<a\b[^>]*>)(.*?)(<\/a>)/',
+		'$1' . $icon . '$2$3',
+		$block_content
+	);
+	
+	$site = get_site();
+	// On the project and updates sites replace the link with a Make home page link
+	if ( '/project/' === $site->path || '/updates/' === $site->path ) {
+		$make_home_url = 'https://' . $site->domain;
+		$block_content = preg_replace(
+			'/<a\b[^>]*>(.*?)<\/a>/',
+			'<a target="_self" rel="home" href="' . esc_url( $make_home_url ) . '">' . 
+			esc_html__( 'Make WordPress', 'wporg' ) . 
+			'</a>',
+			$block_content
+		);
+	}
+
+	return $block_content;
+}
+add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\modify_site_title_block', 10, 2 );
+
+/**
+ * Inject a script to trigger Prism (syntax highlighter) after o2 content is rendered.
+ */
+add_action(
+	'wp_footer',
+	function () {
+		wp_add_inline_script(
+			'mkaz-code-syntax-prism-js',
+			'jQuery( document ).on(
+				"ready.o2",
+				function () {
+					setTimeout( () => Prism.highlightAll(), 10 );
+				}
+			);',
+			'after'
+		);
+	}
+);
+// Ensure assets are loaded, regardless of what's there on page load.
+add_filter( 'mkaz_code_syntax_force_loading', '__return_true' );

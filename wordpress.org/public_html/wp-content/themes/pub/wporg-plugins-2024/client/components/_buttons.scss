@@ -47,3 +47,8 @@ select + button.button {
 .wp-block-post-content a.button {
 	text-decoration: none;
 }
+
+/* See: https://meta.trac.wordpress.org/ticket/7818 */
+.wp-block-button__link {
+	width: auto;
+}

@@ -4,7 +4,7 @@
 
 <?php if ( have_comments() ) : ?>
 
-	<h2 id="comments"><?php comments_number('No Responses', 'One Response', '% Responses' );?> to &#8220;<?php the_title(); ?>&#8221;</h2>
+	<h2 id="comments"><?php comments_number('No Comments.', 'One Comment:', '% Comments:' );?></h2>
 	<ol class="commentlist">
 		<?php wp_list_comments(); ?>
 	</ol>
@@ -19,13 +19,13 @@
 
 		<h2 id="comments"><?php esc_html_e( 'There are no comments to display', 'bborg' ); ?></h2>
 
-	<?php elseif ( !is_page() ) : ?>
+	<?php elseif ( ! is_page() ) : ?>
 
-		<p class="nocomments"><?php esc_html_e( 'Comments are closed.', 'bborg' ); ?></p>
+		<h2 class="nocomments"><?php esc_html_e( 'Comments are closed.', 'bborg' ); ?></h2>
 
 	<?php endif; ?>
 <?php endif; ?>
-				
+
 <?php if ( comments_open() ) : ?>
 
 	<?php if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) : ?>
@@ -35,7 +35,7 @@
 	<?php else : ?>
 
 		<div id="respond">
-			<form action="<?php echo site_url( '/wp-comments-post.php' ); ?>" method="post" id="commentform">
+			<form action="<?php echo esc_url( site_url( '/wp-comments-post.php' ) ); ?>" method="post" id="commentform">
 				<fieldset>
 					<legend><?php comment_form_title( esc_html__( 'Leave a Reply', 'bborg' ), esc_html__( 'Leave a Reply to %s', 'bborg' ) ); ?></legend>
 					<p class="cancel-reply"><?php cancel_comment_reply_link( esc_html__( 'Cancel Comment Reply', 'bborg' ) ); ?></p>

@@ -1,6 +1,6 @@
 <?php get_header(); ?>
 <?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
-				<h3 id="post-<?php the_ID(); ?>"><?php the_title(); ?></h3>
+				<h2 id="post-<?php the_ID(); ?>"><?php the_title(); ?></h2>
 <?php
 	the_content( __( 'Read more &raquo;', 'bborg' ) );
 	wp_link_pages( array(

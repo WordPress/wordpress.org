@@ -109,6 +109,15 @@
 			"contentSize": "960px",
 			"wideSize": "1320px"
 		},
+		"spacing": {
+			"spacingSizes": [
+				{
+					"name": "4X-Small",
+					"slug": "5",
+					"size": "5px"
+				}
+			]
+		},
 		"typography": {
 			"fontSizes": [
 				{
@@ -146,6 +155,20 @@
 	},
 	"styles": {
 		"blocks": {
+			"core/embed": {
+				"spacing": {
+					"margin": {
+						"bottom": "var(--wp--style--block-gap)"
+					}
+				}
+			},
+			"core/image": {
+				"spacing": {
+					"margin": {
+						"bottom": "var(--wp--style--block-gap)"
+					}
+				}
+			},
 			"core/quote": {
 				"typography": {
 					"fontSize": "inherit",
