@@ -119,6 +119,23 @@ final class UsersTest extends SsoTestCase {
 	}
 
 	/**
+	 * Agents who may manage users look up accounts too, but only administrators see the private email address.
+	 *
+	 * @return void
+	 */
+	public function test_lookup_hides_email_from_non_administrators(): void {
+		$manager              = $this->create_user( User::ROLE_USER );
+		$manager->permissions = array( User::PERM_EDIT_USERS => true );
+		$manager->save();
+		$this->log_in( $manager, 'manager' );
+
+		$data = json_decode( (string) $this->get( route( 'wporgsso.lookup', array( 'username' => 'rita' ) ) )->assertStatus( 200 )->getContent(), true );
+
+		$this->assertSame( 'rita', $data['user']['username'] );
+		$this->assertArrayNotHasKey( 'email', $data['user'] );
+	}
+
+	/**
 	 * Only those who can create users can look up accounts.
 	 *
 	 * @return void
@@ -205,6 +222,26 @@ final class UsersTest extends SsoTestCase {
 				'user_id' => $user->id,
 			)
 		)->assertStatus( 403 );
+	}
+
+	/**
+	 * The photo refusal doesn't tell others which users are connected; core turns them away.
+	 *
+	 * @return void
+	 */
+	public function test_photo_refusal_is_only_for_those_who_may_change_the_user(): void {
+		$user = $this->create_user( User::ROLE_USER );
+		Account::connect( (int) $user->id, 'rita' );
+		\Auth::logout();
+
+		$this->post(
+			route( 'users.ajax' ),
+			array(
+				'_token'  => csrf_token(),
+				'action'  => 'delete_photo',
+				'user_id' => $user->id,
+			)
+		)->assertRedirect( route( 'login' ) );
 	}
 
 	/**
@@ -300,6 +337,40 @@ final class UsersTest extends SsoTestCase {
 	public function test_password_page_is_closed(): void {
 		$this->get( route( 'users.password', array( 'id' => $this->admin->id ) ) )
 			->assertRedirect( route( 'users.profile', array( 'id' => $this->admin->id ) ) );
+	}
+
+	/**
+	 * Even with the break-glass switch on, administrators can't email users a new password or an invite.
+	 *
+	 * @return void
+	 */
+	public function test_password_emails_stay_closed_in_break_glass(): void {
+		config( array( 'wporgsso.password_login' => true ) );
+		$user = $this->create_user( User::ROLE_USER );
+
+		$this->post(
+			route( 'users.ajax' ),
+			array(
+				'_token'  => csrf_token(),
+				'action'  => 'reset_password',
+				'user_id' => $user->id,
+			)
+		)->assertStatus( 403 );
+	}
+
+	/**
+	 * `wporgsso:password` gives administrators, and only them, a password for break-glass logins.
+	 *
+	 * @return void
+	 */
+	public function test_password_command(): void {
+		$admin = $this->create_user( User::ROLE_ADMIN );
+		$user  = $this->create_user( User::ROLE_USER );
+
+		$this->assertSame( 0, \Artisan::call( 'wporgsso:password', array( 'email' => $admin->email ) ) );
+		$this->assertTrue( \Hash::check( trim( \Artisan::output() ), (string) $admin->refresh()->password ) );
+
+		$this->assertSame( 1, \Artisan::call( 'wporgsso:password', array( 'email' => $user->email ) ) );
 	}
 
 	/**

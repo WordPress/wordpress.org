@@ -44,12 +44,12 @@ final class UserSync {
 			}
 
 			$user->save();
+
+			if ( '' !== $wporg_user->avatar_url ) {
+				SyncAvatar::dispatch( (int) $user->id, $wporg_user->avatar_url );
+			}
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSSO] Could not update user ' . $user->id . ': ' . $e->getMessage() );
-		}
-
-		if ( '' !== $wporg_user->avatar_url ) {
-			SyncAvatar::dispatch( (int) $user->id, $wporg_user->avatar_url );
 		}
 	}
 

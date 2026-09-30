@@ -328,17 +328,33 @@ final class LoginTest extends SsoTestCase {
 	public function test_password_pages_are_for_administrators_only(): void {
 		config( array( 'wporgsso.password_login' => true ) );
 
+		// Core logs them in; the session ends on the next request.
 		$this->post(
 			route( 'login' ),
 			array(
 				'email'    => $this->user->email,
-				'password' => 'password',
+				'password' => 'secret',
 			)
-		)->assertRedirect( route( 'login' ) );
+		);
+		$this->get( route( 'dashboard' ) )->assertRedirect( route( 'login' ) );
 		$this->assertGuest();
 
 		$this->post( route( 'password.email' ), array( 'email' => $this->user->email ) )->assertRedirect( route( 'login' ) );
 		$this->get( '/user-setup/' . str_repeat( 'a', User::INVITE_HASH_LENGTH ) . '/' . time() )->assertRedirect( route( 'login' ) );
+	}
+
+	/**
+	 * Even with the break-glass switch on, reset links aren't sent to administrators: their inbox isn't two-factor.
+	 *
+	 * @return void
+	 */
+	public function test_password_resets_stay_closed_in_break_glass(): void {
+		config( array( 'wporgsso.password_login' => true ) );
+		$admin = $this->create_user( User::ROLE_ADMIN );
+
+		$this->get( route( 'password.request' ) )->assertRedirect( route( 'login' ) );
+		$this->post( route( 'password.email' ), array( 'email' => $admin->email ) )->assertRedirect( route( 'login' ) );
+		$this->assertSame( 0, \DB::table( 'password_resets' )->where( 'email', $admin->email )->count() );
 	}
 
 	/**
@@ -352,9 +368,49 @@ final class LoginTest extends SsoTestCase {
 		$this->assertStringContainsString( 'name="password"', $this->core_login_form( route( 'login', array( 'password' => 1 ) ) ) );
 
 		$admin = $this->create_user( User::ROLE_ADMIN );
-		$this->actingAs( $admin )->get( route( 'dashboard' ) )->assertStatus( 200 );
+		$this->post(
+			route( 'login' ),
+			array(
+				'email'    => $admin->email,
+				'password' => 'secret',
+			)
+		);
+		$this->get( route( 'dashboard' ) )->assertStatus( 200 );
+	}
 
-		$this->actingAs( $this->user )->get( route( 'dashboard' ) )->assertRedirect( route( 'login' ) );
+	/**
+	 * In break-glass mode, a failed password login doesn't tell administrators' email addresses from others.
+	 *
+	 * @return void
+	 */
+	public function test_failed_password_login_does_not_reveal_administrators(): void {
+		config( array( 'wporgsso.password_login' => true ) );
+		$admin = $this->create_user( User::ROLE_ADMIN );
+
+		foreach ( array( $admin->email, $this->user->email, 'nobody@example.org' ) as $email ) {
+			$this->post(
+				route( 'login' ),
+				array(
+					'email'    => $email,
+					'password' => 'wrong',
+				)
+			)->assertSessionHasErrors( array( 'email' => trans( 'auth.failed' ) ) );
+		}
+	}
+
+	/**
+	 * In break-glass mode, administrators stay logged in only after a password login, not after any other login
+	 * without WordPress.org, like one from a reset or invite link.
+	 *
+	 * @return void
+	 */
+	public function test_other_logins_are_refused_in_break_glass(): void {
+		config( array( 'wporgsso.password_login' => true ) );
+
+		\Auth::login( $this->create_user( User::ROLE_ADMIN ) );
+
+		$this->get( route( 'dashboard' ) )->assertRedirect( route( 'login' ) );
+		$this->assertGuest();
 	}
 
 	/**

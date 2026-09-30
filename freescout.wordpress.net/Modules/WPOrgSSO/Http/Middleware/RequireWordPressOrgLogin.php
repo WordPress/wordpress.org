@@ -38,32 +38,34 @@ final class RequireWordPressOrgLogin {
 	private const RECHECK_SECONDS = 3600;
 
 	/**
-	 * Core actions that sign in with a FreeScout password; with the break-glass switch on, open to administrators.
+	 * Core action that signs in with a FreeScout password; with the break-glass switch on, open to administrators.
 	 *
-	 * @var string[]
+	 * @var string
 	 */
-	private const PASSWORD_ACTIONS = array(
-		'App\Http\Controllers\Auth\LoginController@login',
-		'App\Http\Controllers\Auth\ForgotPasswordController@showLinkRequestForm',
-		'App\Http\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail',
-		'App\Http\Controllers\Auth\ResetPasswordController@showResetForm',
-		'App\Http\Controllers\Auth\ResetPasswordController@reset',
-	);
+	public const PASSWORD_LOGIN_ACTION = 'App\Http\Controllers\Auth\LoginController@login';
 
 	/**
-	 * Core actions that create a password for a new user; nobody needs them.
+	 * Core actions that set a password through an email link; nobody needs them.
+	 *
+	 * Not even in break-glass mode: whoever reads an administrator's inbox would get in without WordPress.org's
+	 * two-factor authentication. Administrators get a password from `wporgsso:password` instead. Closing them here
+	 * only explains why; the provider's login listener refuses their logins, whatever core calls them.
 	 *
 	 * @var string[]
 	 */
 	private const SETUP_ACTIONS = array(
 		'App\Http\Controllers\Auth\RegisterController@showRegistrationForm',
 		'App\Http\Controllers\Auth\RegisterController@register',
+		'App\Http\Controllers\Auth\ForgotPasswordController@showLinkRequestForm',
+		'App\Http\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail',
+		'App\Http\Controllers\Auth\ResetPasswordController@showResetForm',
+		'App\Http\Controllers\Auth\ResetPasswordController@reset',
 		'App\Http\Controllers\OpenController@userSetup',
 		'App\Http\Controllers\OpenController@userSetupSave',
 	);
 
 	/**
-	 * Core actions that set or send passwords for a logged-in user.
+	 * Core actions that change the logged-in user's own password; with the break-glass switch on, open.
 	 *
 	 * @var string[]
 	 */
@@ -134,10 +136,15 @@ final class RequireWordPressOrgLogin {
 			}
 		}
 
+		// Only answers those who could change the user; core turns away everyone else, without revealing the connection.
+		$target = 'App\Http\Controllers\UsersController@ajax' === $action && in_array( $request->input( 'action' ), self::ACCOUNT_AJAX_ACTIONS, true )
+			? User::find( (int) $request->input( 'user_id' ) )
+			: null;
 		if (
-			'App\Http\Controllers\UsersController@ajax' === $action &&
-			in_array( $request->input( 'action' ), self::ACCOUNT_AJAX_ACTIONS, true ) &&
-			Account::for_user( (int) $request->input( 'user_id' ) )
+			$target instanceof User &&
+			$user instanceof User &&
+			$user->can( 'update', $target ) &&
+			Account::for_user( (int) $target->id )
 		) {
 			return response()->json(
 				array(
@@ -184,31 +191,29 @@ final class RequireWordPressOrgLogin {
 		}
 
 		if ( in_array( $action, self::SETUP_ACTIONS, true ) ) {
-			return redirect()->route( 'login' );
+			return redirect()->route( 'login' )->with( WPOrgSSOServiceProvider::SESSION_ERROR, __( 'Please log in with your WordPress.org account.' ) );
 		}
 
-		if ( in_array( $action, self::PASSWORD_ACTIONS, true ) && ! self::may_use_password( $request ) ) {
-			$error = WPOrgSSOServiceProvider::password_login_enabled()
-				? __( 'Only administrators can log in with a password.' )
-				: __( 'Please log in with your WordPress.org account.' );
-
-			return redirect()->route( 'login' )->with( WPOrgSSOServiceProvider::SESSION_ERROR, $error );
+		if ( 'App\Http\Controllers\UsersController@ajax' === $action && in_array( $request->input( 'action' ), self::PASSWORD_AJAX_ACTIONS, true ) ) {
+			return response()->json(
+				array(
+					'status' => 'error',
+					'msg'    => __( 'Users log in with their WordPress.org account.' ),
+				),
+				403
+			);
 		}
 
-		if ( ! WPOrgSSOServiceProvider::password_login_enabled() ) {
-			if ( in_array( $action, self::PASSWORD_PAGES, true ) ) {
-				return redirect()->route( 'users.profile', array( 'id' => $request->route( 'id' ) ) );
-			}
+		/*
+		 * In break-glass mode, core checks the password, so a failed login looks the same whoever it's for; the login
+		 * listener only lets administrators stay.
+		 */
+		if ( self::PASSWORD_LOGIN_ACTION === $action && ! WPOrgSSOServiceProvider::password_login_enabled() ) {
+			return redirect()->route( 'login' )->with( WPOrgSSOServiceProvider::SESSION_ERROR, __( 'Please log in with your WordPress.org account.' ) );
+		}
 
-			if ( 'App\Http\Controllers\UsersController@ajax' === $action && in_array( $request->input( 'action' ), self::PASSWORD_AJAX_ACTIONS, true ) ) {
-				return response()->json(
-					array(
-						'status' => 'error',
-						'msg'    => __( 'Users log in with their WordPress.org account.' ),
-					),
-					403
-				);
-			}
+		if ( ! WPOrgSSOServiceProvider::password_login_enabled() && in_array( $action, self::PASSWORD_PAGES, true ) ) {
+			return redirect()->route( 'users.profile', array( 'id' => $request->route( 'id' ) ) );
 		}
 
 		return null;
@@ -230,7 +235,9 @@ final class RequireWordPressOrgLogin {
 			return self::account_still_may_log_in( $username, $request );
 		}
 
-		return WPOrgSSOServiceProvider::password_login_enabled() && $user->isAdmin();
+		return WPOrgSSOServiceProvider::password_login_enabled()
+			&& $user->isAdmin()
+			&& $request->session()->get( WPOrgSSOServiceProvider::SESSION_PASSWORD_LOGIN );
 	}
 
 	/**
@@ -260,27 +267,6 @@ final class RequireWordPressOrgLogin {
 		}
 
 		return $wporg_user && '' === $wporg_user->login_error( $username );
-	}
-
-	/**
-	 * Whether a password page may be used: only in break-glass mode, and only for administrators' accounts.
-	 *
-	 * @param Request $request Request.
-	 * @return bool
-	 */
-	private static function may_use_password( Request $request ): bool {
-		if ( ! WPOrgSSOServiceProvider::password_login_enabled() ) {
-			return false;
-		}
-
-		// The forms themselves don't name an account yet.
-		if ( $request->isMethod( 'GET' ) ) {
-			return true;
-		}
-
-		$user = User::query()->where( 'email', (string) $request->input( 'email', '' ) )->first();
-
-		return $user && $user->isAdmin();
 	}
 
 	/**
@@ -346,8 +332,13 @@ final class RequireWordPressOrgLogin {
 			return __( 'Enter the WordPress.org username of the user.' );
 		}
 
+		$client = Client::from_config();
+		if ( ! $client->is_configured() ) {
+			return __( 'WordPress.org accounts can\'t be looked up until WPORG_API_SECRET is set.' );
+		}
+
 		try {
-			$wporg_user = WordPressOrgUser::find( $username, Client::from_config() );
+			$wporg_user = WordPressOrgUser::find( $username, $client );
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSSO] Lookup failed: ' . $e->getMessage() );
 

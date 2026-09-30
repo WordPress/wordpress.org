@@ -60,7 +60,8 @@ php "$app/artisan" --no-interaction freescout:after-app-update
 
 # The admin logs in as "admin" at the mock WordPress.org login.
 if [ -f "$app/Modules/WPOrgSSO/module.json" ]; then
-	php "$app/artisan" --no-interaction wporgsso:connect admin@wordpress.test admin > /dev/null
+	php "$app/artisan" --no-interaction wporgsso:connect admin@wordpress.test admin > /dev/null ||
+		echo "Could not connect the admin to the mock WordPress.org account; run setup again to retry." >&2
 fi
 
 # Deliver the sample emails once; FreeScout's scheduler fetches them within a minute.

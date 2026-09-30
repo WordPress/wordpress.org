@@ -47,7 +47,14 @@ final class ConnectAccount extends Command {
 			return 1;
 		}
 
-		$wporg_user = WordPressOrgUser::find( (string) $this->argument( 'username' ), Client::from_config() );
+		try {
+			$wporg_user = WordPressOrgUser::find( (string) $this->argument( 'username' ), Client::from_config() );
+		} catch ( \RuntimeException $e ) {
+			$this->error( 'WordPress.org could not be reached: ' . $e->getMessage() );
+
+			return 1;
+		}
+
 		if ( ! $wporg_user ) {
 			$this->error( 'There is no WordPress.org account with that username.' );
 
@@ -68,7 +75,15 @@ final class ConnectAccount extends Command {
 			return 1;
 		}
 
-		Account::connect( (int) $user->id, $wporg_user->username );
+		try {
+			Account::connect( (int) $user->id, $wporg_user->username );
+		} catch ( \Illuminate\Database\QueryException $e ) {
+			// Only if someone connected the same account a moment ago.
+			$this->error( 'Could not connect ' . $user->email . ': ' . $wporg_user->username . ' belongs to another user now.' );
+
+			return 1;
+		}
+
 		$this->info( $user->email . ' logs in as ' . $wporg_user->username . ' on WordPress.org.' );
 
 		if ( ! $wporg_user->two_factor ) {

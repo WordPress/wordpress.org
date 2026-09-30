@@ -29,6 +29,9 @@
 
 		if ( ! $account.data( 'password-login' ) ) {
 			$( 'a[href*="/users/password/"]' ).closest( '.form-group' ).remove();
+		}
+
+		if ( ! $account.data( 'password-emails' ) ) {
 			$( '.reset-password-trigger, .send-invite-trigger, .resend-invite-trigger' ).remove();
 		}
 	} );

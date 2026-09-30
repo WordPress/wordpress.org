@@ -181,9 +181,19 @@ abstract class SsoTestCase extends TestCase {
 	 */
 	protected function post_to_acs( string $saml_response ): string {
 		// OneLogin checks the response's destination against the URL it's read at.
+		$request_uri            = $_SERVER['REQUEST_URI'] ?? null;
 		$_SERVER['REQUEST_URI'] = '/wporgsso/acs';
 
-		$response = $this->post( '/wporgsso/acs', array( 'SAMLResponse' => $saml_response ) );
+		try {
+			$response = $this->post( '/wporgsso/acs', array( 'SAMLResponse' => $saml_response ) );
+		} finally {
+			if ( null === $request_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $request_uri;
+			}
+		}
+
 		$response->assertStatus( 303 );
 
 		return (string) $response->headers->get( 'Location' );

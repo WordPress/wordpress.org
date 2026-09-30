@@ -14,6 +14,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Modules\WPOrgSSO\Console\ConnectAccount;
+use Modules\WPOrgSSO\Console\SetPassword;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Http\Middleware\RequireWordPressOrgLogin;
 use Modules\WPOrgSSO\Services\Client;
@@ -62,6 +63,13 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 	public const SESSION_ERROR = 'wporgsso.error';
 
 	/**
+	 * Session key marking an administrator's password login in break-glass mode.
+	 *
+	 * @var string
+	 */
+	public const SESSION_PASSWORD_LOGIN = 'wporgsso.password_login';
+
+	/**
 	 * Request attribute carrying the WordPress.org account a user form resolved.
 	 *
 	 * @var string
@@ -87,7 +95,7 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 		$this->loadViewsFrom( __DIR__ . '/../Resources/views', self::ALIAS );
 		$this->loadRoutesFrom( __DIR__ . '/../Http/routes.php' );
 		$this->loadMigrationsFrom( __DIR__ . '/../Database/Migrations' );
-		$this->commands( array( ConnectAccount::class ) );
+		$this->commands( array( ConnectAccount::class, SetPassword::class ) );
 
 		$this->app['router']->pushMiddlewareToGroup( 'web', RequireWordPressOrgLogin::class );
 
@@ -156,10 +164,11 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 			}
 		);
 
+		// Reset links would get around WordPress.org's two-factor authentication, even in break-glass mode.
 		\Eventy::addFilter(
 			'auth.password_reset_available',
 			static function ( bool $available ): bool {
-				return $available && self::passwords_available();
+				return $available && ! self::enforced();
 			}
 		);
 
@@ -181,9 +190,10 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 				self::render(
 					'edit_user',
 					array(
-						'username'       => $account ? $account->username : '',
-						'can_connect'    => ! $account && (bool) optional( auth()->user() )->isAdmin() && Client::from_config()->is_configured(),
-						'password_login' => self::passwords_available(),
+						'username'        => $account ? $account->username : '',
+						'can_connect'     => ! $account && (bool) optional( auth()->user() )->isAdmin() && Client::from_config()->is_configured(),
+						'password_login'  => self::passwords_available(),
+						'password_emails' => ! self::enforced(),
 					)
 				);
 			}
@@ -233,12 +243,31 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 			}
 		);
 
+		/*
+		 * Only an administrator's password login in break-glass mode may stay; the middleware ends the session of any
+		 * other login without WordPress.org, like one from a reset or invite link, on its next request.
+		 */
 		\Event::listen(
 			Login::class,
 			static function ( Login $event ): void {
-				if ( ! request()->attributes->get( self::REQUEST_SSO_LOGIN ) ) {
-					\Log::warning( '[WPOrgSSO] Password login by ' . $event->user->email . '.' );
+				if ( request()->attributes->get( self::REQUEST_SSO_LOGIN ) || ! self::enforced() ) {
+					return;
 				}
+
+				$route = request()->route();
+				if (
+					self::password_login_enabled() &&
+					$event->user instanceof User &&
+					$event->user->isAdmin() &&
+					$route && RequireWordPressOrgLogin::PASSWORD_LOGIN_ACTION === $route->getActionName()
+				) {
+					request()->session()->put( self::SESSION_PASSWORD_LOGIN, true );
+					\Log::warning( '[WPOrgSSO] Login without WordPress.org by ' . $event->user->email . '.' );
+
+					return;
+				}
+
+				\Log::warning( '[WPOrgSSO] Refused a login without WordPress.org by ' . $event->user->email . '.' );
 			}
 		);
 	}
@@ -256,6 +285,7 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 		} catch ( \Illuminate\Database\QueryException $e ) {
 			// Only if another administrator connected the same account a moment ago; the user stays unconnected.
 			\Log::error( '[WPOrgSSO] Could not connect user ' . $user->id . ' to ' . $wporg_user->username . ': ' . $e->getMessage() );
+			\Session::flash( 'flash_error_floating', __( 'The user was saved, but not connected: :username belongs to another user now.', array( 'username' => $wporg_user->username ) ) );
 
 			return;
 		}

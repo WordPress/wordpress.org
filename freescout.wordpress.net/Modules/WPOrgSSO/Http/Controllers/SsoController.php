@@ -52,12 +52,11 @@ final class SsoController extends Controller {
 	 * @return RedirectResponse
 	 */
 	public function start( Request $request ): RedirectResponse {
-		$saml = Saml::from_config();
 		if ( ! WPOrgSSOServiceProvider::enforced() ) {
 			return redirect()->route( 'login' );
 		}
 
-		$login   = $saml->login_request();
+		$login   = Saml::from_config()->login_request();
 		$pending = (array) $request->session()->get( WPOrgSSOServiceProvider::SESSION_REQUEST_IDS, array() );
 
 		$pending[] = $login['request_id'];
@@ -176,11 +175,17 @@ final class SsoController extends Controller {
 			return response()->json( array( 'error' => __( 'There is no WordPress.org account with that username.' ) ), 404 );
 		}
 
-		$user = Account::user_for( $wporg_user->username );
+		$user    = Account::user_for( $wporg_user->username );
+		$details = $wporg_user->to_array();
+
+		// Private on WordPress.org; the form fills it in when the user is created.
+		if ( ! $request->user()->isAdmin() ) {
+			unset( $details['email'] );
+		}
 
 		return response()->json(
 			array(
-				'user'         => $wporg_user->to_array(),
+				'user'         => $details,
 				'connected_to' => $user ? $user->getFullName() : null,
 			)
 		);

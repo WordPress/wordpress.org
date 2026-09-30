@@ -1,4 +1,4 @@
-<div class="form-group{{ $errors->has( 'wporg_username' ) ? ' has-error' : '' }}" id="wporgsso-account" data-connected="{{ $username ? 1 : 0 }}" data-password-login="{{ $password_login ? 1 : 0 }}">
+<div class="form-group{{ $errors->has( 'wporg_username' ) ? ' has-error' : '' }}" id="wporgsso-account" data-connected="{{ $username ? 1 : 0 }}" data-password-login="{{ $password_login ? 1 : 0 }}" data-password-emails="{{ $password_emails ? 1 : 0 }}">
 	<label for="wporgsso-username" class="col-sm-2 control-label">{{ __( 'WordPress.org Username' ) }}</label>
 
 	<div class="col-sm-6">

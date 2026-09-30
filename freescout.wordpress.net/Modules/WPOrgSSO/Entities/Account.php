@@ -23,6 +23,13 @@ use Illuminate\Database\Eloquent\Model;
 final class Account extends Model {
 
 	/**
+	 * How long a user's username is cached, in minutes.
+	 *
+	 * @var int
+	 */
+	private const USERNAME_CACHE_MINUTES = 60;
+
+	/**
 	 * Table name.
 	 *
 	 * @var string
@@ -56,12 +63,15 @@ final class Account extends Model {
 	/**
 	 * The WordPress.org username a user is connected to, from the cache; checked on every request.
 	 *
+	 * Expires after an hour too, in case the table was changed without the model.
+	 *
 	 * @param int $user_id FreeScout user ID.
 	 * @return string Empty if the user isn't connected.
 	 */
 	public static function username_for( int $user_id ): string {
-		return (string) \Cache::rememberForever(
+		return (string) \Cache::remember(
 			self::username_cache_key( $user_id ),
+			self::USERNAME_CACHE_MINUTES,
 			static function () use ( $user_id ): string {
 				$account = self::for_user( $user_id );
 

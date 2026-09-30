@@ -42,7 +42,7 @@ Configuration, in FreeScout's `.env`:
 | `WPORG_SSO_IDP_ENTITY_ID` | The identity provider's entity ID, from its settings page on login.wordpress.org. Default: `https://login.wordpress.org`. |
 | `WPORG_SSO_IDP_URL` | The identity provider's login URL, from the same page. Default: `https://login.wordpress.org/wp-login.php?action=idp`. |
 | `WPORG_SSO_IDP_CERT` | The identity provider's signing certificate, without the BEGIN/END lines. Until it and `WPORG_API_SECRET` are set, logins stay as they are, so users can be connected first. |
-| `WPORG_SSO_PASSWORD_LOGIN` | Break-glass: `true` lets administrators log in with their FreeScout password at `/login?password=1`. Off by default; every such login is logged. |
+| `WPORG_SSO_PASSWORD_LOGIN` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Off by default; every such login is logged. |
 
 To switch on WPOrgSSO:
 
