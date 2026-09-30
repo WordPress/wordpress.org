@@ -153,7 +153,7 @@ function get_user_email_for_email( object $request ): string {
 
 	// Is this is a bounce for an email that we have included the username in the subject for?
 	if ( preg_match( '#Are your plugins ready, (.+?)[?]#i', $subject, $m ) ) {
-		$user = get_user_by( 'login', $m[1] );
+		$user = get_user_by( 'login', $m[1] ) ?: $user;
 	}
 
 	if ( ! $user && $email && is_bounce( $request ) ) {
