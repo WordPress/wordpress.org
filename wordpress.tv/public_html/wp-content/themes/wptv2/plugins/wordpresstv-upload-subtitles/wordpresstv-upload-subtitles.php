@@ -50,7 +50,7 @@ class WordPressTV_Subtitles_Upload {
 
 		wp_enqueue_script(
 			'wptv-upload-subtitles',
-			plugins_url( 'upload-subtitles.js', __FILE__ ),
+			get_template_directory_uri() . '/plugins/wordpresstv-upload-subtitles/upload-subtitles.js',
 			array(),
 			'1.0.0',
 			true
