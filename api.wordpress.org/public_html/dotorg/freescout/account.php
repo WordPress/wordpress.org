@@ -17,7 +17,7 @@ $wp_init_host = 'https://login.wordpress.org/';
 require __DIR__ . '/common.php';
 
 /**
- * Finds an account by username, or by the profile slug agents are more likely to know.
+ * Finds an account by username, which is how WordPress.org identifies it at login, or else by profile slug.
  *
  * @param string $username Username or profile slug.
  * @return \WP_User|false

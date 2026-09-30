@@ -18,6 +18,9 @@ namespace WordPressdotorg\API\FreeScout;
  * @return void
  */
 function load_wordpress( string $wp_init_host = '' ): void {
+	// Set by the config this loads, and read by account.php; without this it would stay local to this function.
+	global $nologin_accounts;
+
 	if ( ! $wp_init_host ) {
 		$wp_init_host = 'https://api.wordpress.org/';
 	}
@@ -222,7 +225,7 @@ function get_user_from_bounce( object $request ): \WP_User|false {
 
 			if (
 				isset( $attachment->content ) &&
-				(int) ( $attachment->size ?? 0 ) < 100 * KB_IN_BYTES &&
+				(int) ( $attachment->size ?? 0 ) <= 100 * KB_IN_BYTES &&
 				(
 					str_contains( $mime_type, 'message' ) ||
 					str_contains( $mime_type, 'text' ) ||
@@ -326,11 +329,10 @@ function strip_plus_address( string $email ): string {
 /**
  * Gets the possible plugins or themes a conversation is about.
  *
- * @param object $request        Request payload.
- * @param bool   $validate_slugs Whether to only return slugs of existing plugins and themes.
+ * @param object $request Request payload.
  * @return array Slugs, keyed by 'plugins' and 'themes'; types without slugs are omitted.
  */
-function get_plugin_or_theme_from_email( object $request, bool $validate_slugs = false ): array {
+function get_plugin_or_theme_from_email( object $request ): array {
 	$subject = (string) ( $request->conversation->subject ?? '' );
 
 	$possible = array(
@@ -434,11 +436,6 @@ function get_plugin_or_theme_from_email( object $request, bool $validate_slugs =
 	$possible['themes']  = array_values( array_unique( $possible['themes'] ) );
 	$possible['plugins'] = array_values( array_unique( $possible['plugins'] ) );
 
-	if ( $validate_slugs ) {
-		$possible['themes']  = filter_existing_slugs( $possible['themes'], WPORG_THEME_DIRECTORY_BLOGID, 'repopackage' );
-		$possible['plugins'] = filter_existing_slugs( $possible['plugins'], WPORG_PLUGIN_DIRECTORY_BLOGID, 'plugin' );
-	}
-
 	return array_filter( $possible );
 }
 
@@ -491,32 +488,6 @@ function get_plugin_slugs_by_title( string $title ): array {
 	restore_current_blog();
 
 	return wp_list_pluck( $plugins, 'post_name' );
-}
-
-/**
- * Keeps only the slugs of existing plugins or themes.
- *
- * @param array  $slugs     Slugs to check.
- * @param int    $blog_id   Directory site ID.
- * @param string $post_type Directory post type.
- * @return array
- */
-function filter_existing_slugs( array $slugs, int $blog_id, string $post_type ): array {
-	if ( ! $slugs ) {
-		return array();
-	}
-
-	switch_to_blog( $blog_id );
-	$posts = get_posts(
-		array(
-			'post_name__in' => $slugs,
-			'post_type'     => $post_type,
-			'post_status'   => 'any',
-		)
-	);
-	restore_current_blog();
-
-	return wp_list_pluck( $posts, 'post_name' );
 }
 
 /**

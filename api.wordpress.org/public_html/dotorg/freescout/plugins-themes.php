@@ -112,7 +112,7 @@ function get_user_items( \WP_User $user ): array {
 				"SELECT ID
 				FROM %i
 				WHERE post_type IN( 'plugin', 'repopackage' ) AND post_author = %d
-				ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'closed', 'approved', 'suspended', 'rejected', 'draft' ), post_title",
+				ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'delist', 'closed', 'approved', 'suspended', 'suspend', 'rejected', 'draft' ), post_title",
 				$wpdb->posts,
 				$user->ID
 			)
@@ -123,7 +123,7 @@ function get_user_items( \WP_User $user ): array {
 				"SELECT ID
 				FROM %i
 				WHERE post_type IN( 'plugin', 'repopackage' ) AND ( post_author = %d OR post_name IN( " . implode( ', ', array_fill( 0, count( $slugs ), '%s' ) ) . " ) )
-				ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'closed', 'approved', 'suspended', 'rejected', 'draft' ), post_title",
+				ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'delist', 'closed', 'approved', 'suspended', 'suspend', 'rejected', 'draft' ), post_title",
 				array_merge( array( $wpdb->posts, $user->ID ), $slugs )
 			)
 		);
