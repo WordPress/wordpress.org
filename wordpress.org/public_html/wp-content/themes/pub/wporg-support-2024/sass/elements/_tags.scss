@@ -1,0 +1,12 @@
+.tag {
+	display: inline-block;
+	padding: 4px 10px;
+	color: var(--wp--preset--color--white);
+	font-size: var(--preset--font-size--small);
+	border-radius: var(--wp--custom--button--border--radius);
+	background-color: var(--wp--preset--color--blueberry-4);
+
+	a {
+		color: var(--wp--preset--color--charcoal-1);
+	}
+}

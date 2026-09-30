@@ -4,9 +4,70 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3294598a8f116842137bf585c5ffe0f6",
+    "content-hash": "91ff2e4e8dd62cd82417b11e22d16c5d",
     "packages": [],
     "packages-dev": [
+        {
+            "name": "adhocore/jwt",
+            "version": "1.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/adhocore/php-jwt.git",
+                "reference": "ad417603d9d45578b6af2089ad5b78f101c82367"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/adhocore/php-jwt/zipball/ad417603d9d45578b6af2089ad5b78f101c82367",
+                "reference": "ad417603d9d45578b6af2089ad5b78f101c82367",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7.5 || ^8.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ahc\\Jwt\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jitendra Adhikari",
+                    "email": "jiten.adhikary@gmail.com"
+                }
+            ],
+            "description": "Ultra lightweight JSON web token (JWT) library for PHP5.5+.",
+            "keywords": [
+                "auth",
+                "json-web-token",
+                "jwt",
+                "jwt-auth",
+                "jwt-php",
+                "token"
+            ],
+            "support": {
+                "issues": "https://github.com/adhocore/php-jwt/issues",
+                "source": "https://github.com/adhocore/php-jwt/tree/1.1.3"
+            },
+            "funding": [
+                {
+                    "url": "https://paypal.me/ji10",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/adhocore",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-02-18T01:00:50+00:00"
+        },
         {
             "name": "composer/installers",
             "version": "v1.12.0",
@@ -174,19 +235,26 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-mu-plugins.git",
-                "reference": "993c85dc99f54a872101ff86adbc2925283e6d73"
+                "reference": "8ccf21ca4714dd89b420b8f5f62e9d718eea3f1d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/993c85dc99f54a872101ff86adbc2925283e6d73",
-                "reference": "993c85dc99f54a872101ff86adbc2925283e6d73",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/8ccf21ca4714dd89b420b8f5f62e9d718eea3f1d",
+                "reference": "8ccf21ca4714dd89b420b8f5f62e9d718eea3f1d",
                 "shasum": ""
             },
             "require": {
-                "composer/installers": "~1.0"
+                "adhocore/jwt": "^1.0"
             },
             "require-dev": {
-                "wporg/wporg-repo-tools": "dev-trunk"
+                "composer/installers": "~1.0",
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+                "phpcompatibility/phpcompatibility-wp": "*",
+                "phpunit/phpunit": "^9.5",
+                "wp-coding-standards/wpcs": "2.*",
+                "wp-phpunit/wp-phpunit": "~6.0",
+                "wporg/wporg-repo-tools": "dev-trunk",
+                "yoast/phpunit-polyfills": "^1.1"
             },
             "default-branch": true,
             "type": "wordpress-muplugin",
@@ -198,6 +266,14 @@
                     }
                 }
             },
+            "scripts": {
+                "format": [
+                    "phpcbf -p"
+                ],
+                "lint": [
+                    "phpcs"
+                ]
+            },
             "license": [
                 "GPL-2.0-or-later"
             ],
@@ -206,7 +282,7 @@
                 "source": "https://github.com/WordPress/wporg-mu-plugins/tree/trunk",
                 "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
             },
-            "time": "2022-02-08T18:10:12+00:00"
+            "time": "2026-05-13T07:28:16+00:00"
         }
     ],
     "aliases": [],
@@ -216,10 +292,10 @@
     },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
-    "platform-dev": [],
+    "platform": {},
+    "platform-dev": {},
     "platform-overrides": {
-        "php": "7.4"
+        "php": "8.4"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.9.0"
 }

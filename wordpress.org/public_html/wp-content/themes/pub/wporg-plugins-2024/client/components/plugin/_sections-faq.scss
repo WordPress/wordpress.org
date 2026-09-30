@@ -1,0 +1,70 @@
+.plugin-faq {
+
+	dl {
+		border-bottom: 1px solid var( --wp--preset--color--light-grey-1 );
+	}
+
+	dt {
+		border-top: 1px solid var( --wp--preset--color--light-grey-1 );
+		cursor: pointer;
+		padding: 1rem 0;
+
+		&:before {
+			content: "\f347";
+			float: right;
+			font-family: dashicons;
+			margin: 0 1rem;
+		}
+
+		&.open:before {
+			content: "\f343";
+		}
+
+		.button-link {
+			display: inherit;
+			text-align: inherit;
+
+			&.no-focus {
+				box-shadow: none;
+				outline: none;
+			}
+		}
+		h3 {
+			display: inline;
+			margin-top: 0 !important;
+			margin-bottom: 0;
+			color: var( --wp--custom--link--color--text );
+			font-size: var( --wp--preset--font-size--normal );
+			font-weight: 400;
+			text-decoration: underline;
+
+			button {
+				all: inherit;
+				max-width: calc(100% - 60px);
+
+				&:hover, 
+				&:focus {
+					text-decoration: underline;
+				}
+			}
+		}
+
+	}
+
+	dd {
+		display: none;
+		margin: 0 0 1rem;
+
+		.no-js & {
+			display: block;
+		}
+
+		& p {
+			margin: 0;
+		}
+
+		& p + p {
+			margin-top: 1rem;
+		}
+	}
+}

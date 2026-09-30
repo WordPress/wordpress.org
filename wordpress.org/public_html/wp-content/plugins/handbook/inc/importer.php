@@ -48,6 +48,13 @@ class WPorg_Handbook_Importer extends Importer {
 	protected $cron_interval = '15_minutes';
 
 	/**
+	 * The handbook being imported.
+	 *
+	 * @var WPorg_Handbook
+	 */
+	protected $handbook;
+
+	/**
 	 * Get the singleton instance, or create if needed.
 	 *
 	 * @return WPorg_Handbook_Importer

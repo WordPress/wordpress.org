@@ -2,6 +2,9 @@
 
 namespace WordPressdotorg\Forums;
 
+use function WordPressdotorg\Two_Factor\get_edit_account_url;
+use function WordPressdotorg\Slack\{activate as slack_activate, deactivate as slack_deactivate};
+
 class Hooks {
 
 	const SITE_URL_META = '_wporg_bbp_topic_site_url';
@@ -23,6 +26,8 @@ class Hooks {
 		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
 		add_filter( 'bbp_show_user_profile',           array( $this, 'allow_mods_to_view_inactive_users' ), 10, 2 );
+		add_action( 'init',                            array( $this, 'add_rewrite_rules' ) );
+
 
 		// Add bbPress support to the WordPress.org SEO plugin.
 		add_filter( 'wporg_canonical_base_url', array( $this, 'wporg_canonical_base_url' ) );
@@ -50,7 +55,16 @@ class Hooks {
 		remove_filter( 'bbp_get_topic_author_link', 'bbp_rel_nofollow' );
 		remove_filter( 'bbp_get_reply_author_link', 'bbp_rel_nofollow' );
 
-		// add ugc to links in topics and replies. These already have nofollow, this adds ugc as well
+		/*
+		 * Remove the nofollow filter from topic and reply content. It parses attributes with
+		 * shortcode_parse_atts(), which runs stripcslashes() over every value, and then re-emits
+		 * them without escaping. add_rel_ugc() below adds nofollow via wp_rel_callback(), which
+		 * escapes, so dropping this loses no behaviour.
+		 */
+		remove_filter( 'bbp_get_reply_content', 'bbp_rel_nofollow', 60 );
+		remove_filter( 'bbp_get_topic_content', 'bbp_rel_nofollow', 60 );
+
+		// add nofollow and ugc to links in topics and replies
 		add_filter( 'bbp_get_reply_content', array( $this, 'add_rel_ugc' ), 80 );
 		add_filter( 'bbp_get_topic_content', array( $this, 'add_rel_ugc' ), 80 );
 
@@ -74,6 +88,9 @@ class Hooks {
 
 		// Limit no-replies view to a certain number of days and hide resolved topics.
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
+
+		// Allow topics with the OP adding more details to show up in no-replies view.
+		add_filter( 'bbp_register_view_no_replies', array( $this, 'make_no_replies_consider_voices' ), 20 );
 
 		// Remove the description from the CPT to avoid Jetpack using it as the og:description.
 		add_filter( 'bbp_register_forum_post_type', array( $this, 'bbp_register_forum_post_type' ) );
@@ -135,13 +152,9 @@ class Hooks {
 		// Don't embed WordPress.org links with anchors included.
 		add_filter( 'pre_oembed_result', array( $this, 'pre_oembed_result_dont_embed_wordpress_org_anchors' ), 20, 2 );
 
-		// Add a user note when flagging/unflagging a user.
-		add_filter( 'wporg_bbp_flag_user', array( $this, 'log_user_flag_changes' ) );
-		add_filter( 'wporg_bbp_unflag_user', array( $this, 'log_user_flag_changes' ) );
-
 		// Break users sessions / passwords when they get blocked, on the main forums only.
-		if ( 'wordpress.org' === get_blog_details()->domain ) {
-			add_action( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
+		if ( function_exists( 'get_blog_details' ) && 'wordpress.org' === get_blog_details()->domain ) {
+			add_filter( 'bbp_set_user_role', array( $this, 'user_blocked_password_handler' ), 10, 3 );
 		}
 	}
 
@@ -253,6 +266,25 @@ class Hooks {
 	}
 
 	/**
+	 * Add rewrite rules.
+	 *
+	 * This function needs to live in this file, so that it's ran no matter what theme is dynamically activated by
+	 * the `template` / `stylesheet` callbacks above.
+	 */
+	function add_rewrite_rules() {
+		if ( ! function_exists( 'bbp_get_user_slug' ) ) {
+			return;
+		}
+
+		// e.g., https://wordpress.org/support/users/foo/edit/account/
+		add_rewrite_rule(
+			bbp_get_user_slug() . '/([^/]+)/' . bbp_get_edit_slug() . '/account/?$',
+			'index.php?' . bbp_get_user_rewrite_id() . '=$matches[1]&edit_account=1',
+			'top'
+		);
+	}
+
+	/**
 	 * Disable redirect_guess_404_permalink() for hidden topics.
 	 *
 	 * Prevents Spam, Pending, or Archived topics that the current user cannot view
@@ -327,7 +359,7 @@ class Hooks {
 	 */
 	public function redirect_update_php_page() {
 		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
-			wp_redirect( home_url( '/update-php/' ), 301 );
+			wp_safe_redirect( home_url( '/update-php/' ), 301 );
 			exit;
 		}
 	}
@@ -336,11 +368,19 @@ class Hooks {
 	 * Redirect legacy urls to their new permastructure.
 	 *  - /users/$id & /profile/$slug to /users/$slug
 	 *  - /users/profile/* => /users/$slug/*
-	 * 
+	 *
 	 * See also: Support_Compat in inc/class-support-compat.php
 	 */
 	public function redirect_legacy_urls() {
 		global $wp_query, $wp;
+
+		// Account information is no longer set in the support forums.
+		// We don't use `wp_get_current_user()` because super admins often reset data for other users.
+		if ( preg_match( '!^users/(?P<username>[^/]+)/edit/account!i', $wp->request, $matches ) ) {
+			$url = get_edit_account_url( get_user_by( 'slug', $matches['username'] ) );
+			wp_safe_redirect( $url, 301 );
+			exit;
+		};
 
 		// A user called 'profile' exists, but override it.
 		if ( 'profile' === get_query_var( 'bbp_user' ) ) {
@@ -387,11 +427,16 @@ class Hooks {
 	 * as it's a better destination for the users reaching the plugin forum from search engines.
 	 */
 	public function redirect_ask_question_plugin_forum() {
-		if (
-			'plugin' === get_query_var( 'bbp_view' ) &&
-			in_array( get_query_var( 'wporg_plugin' ), array( 'ask-question', 'technical-support' ) )
-		) {
+		if ( 'plugin' !== get_query_var( 'bbp_view' ) ) {
+			return;
+		}
+
+		if ( in_array( get_query_var( 'wporg_plugin' ), array( 'ask-question', 'technical-support', 'email' ) ) ) {
 			wp_safe_redirect( home_url( '/forum/how-to-and-troubleshooting/' ) );
+			exit;
+
+		} elseif ( in_array( get_query_var( 'wporg_plugin' ), array( 'developer' ) ) ) {
+			wp_safe_redirect( home_url( '/forum/wp-advanced/' ) );
 			exit;
 		}
 	}
@@ -630,11 +675,11 @@ class Hooks {
 		// Single topic.
 		if ( bbp_is_single_topic() ) {
 			$topic_id = bbp_get_topic_id();
-	
+
 			// Prepend label if thread is closed.
 			if ( bbp_is_topic_closed( $topic_id ) ) {
 				/* translators: %s: Excerpt of the topic's first post. */
-				$description = __( '[This thread is closed.] %s', 'wporg-support' );
+				$description = __( '[This thread is closed.] %s', 'wporg-forums' );
 			} else {
 				$description = '%s '; // trailing space is intentional
 			}
@@ -693,12 +738,12 @@ class Hooks {
 
 			if ( bbp_current_user_can_access_create_topic_form() ) {
 				$btn = sprintf(
-					'<a class="button button-secondary create-topic" href="#new-topic-0">%s</a>',
+					'<a class="button button-primary create-topic" href="#new-topic-0">%s</a>',
 					$is_reviews ? __( 'Create Review', 'wporg-forums' ) : __( 'Create Topic', 'wporg-forums' )
 				);
 			} elseif ( ! bbp_is_forum_closed() && ! is_user_logged_in() ) {
 				$btn = sprintf(
-					'<a class="button button-secondary create-topic login" href="%s">%s</a>',
+					'<a class="button button-primary create-topic login" href="%s">%s</a>',
 					wp_login_url(),
 					$is_reviews ? __( 'Log in to Create a Review', 'wporg-forums' ) : __( 'Log in to Create a Topic', 'wporg-forums' )
 				);
@@ -712,17 +757,15 @@ class Hooks {
 
 					// Output create button alongside search form except for reviews, which already have the button in a section rendered above this one.
 					if( $is_reviews ) {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress renders and escapes the search form.
 						echo $searchform;
 					} else {
-						printf(
-							/* translators: 1: markup for forums search field which is primary action, 2: markup for button to create topic */
-							__( '%1$s or %2$s', 'wporg-forums' ),
-							$searchform,
-							$btn
-						);
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress renders and escapes the search form.
+						echo $searchform;
+						echo wp_kses_post( $btn );
 					}
 				} else {
-					echo $btn;
+					echo wp_kses_post( $btn );
 				}
 				echo "</div>\n";
 			}
@@ -934,6 +977,38 @@ class Hooks {
 	}
 
 	/**
+	 * Modifies the No Replies view to look at the amount of voices instead of replies.
+     *
+     * This allows a topic OP to provide additional details without their topic
+     * going away from the No Replies view.
+	 *
+	 * @param array $args Array of query args for the view.
+	 * @return array
+	 */
+	public function make_no_replies_consider_voices( $args ) {
+		/*
+		 * Remove the default view arguments, in favor of a new meta_query instead.
+		 * Looping over an array of defined keys allows us to be forward compatible
+		 * if bbPress implements meta queries in the future.
+		 */
+		$default_keys = array( 'meta_key', 'meta_type', 'meta_value', 'meta_compare' );
+		foreach ( $default_keys as $key ) {
+			if ( isset( $args[ $key ] ) ) {
+				unset( $args[ $key ] );
+			}
+		}
+
+		$args['meta_query'][] = array(
+			'key'     => '_bbp_voice_count',
+			'type'    => 'NUMERIC',
+			'value'   => 2,
+			'compare' => '<',
+		);
+
+		return $args;
+	}
+
+	/**
 	 * Remove the Forum CPT description field to prevent Jetpack using it as the og:description on /forums/.
 	 */
 	public function bbp_register_forum_post_type( $args ) {
@@ -955,13 +1030,14 @@ class Hooks {
 				// Display site URL for logged-in users only.
 				if ( is_user_logged_in() ) {
 					printf( '<p class="wporg-bbp-topic-site-url">%1$s <a href="%2$s" rel="nofollow ugc">%2$s</a></p>',
-						__( 'The page I need help with:', 'wporg-forums' ),
+						esc_html__( 'The page I need help with:', 'wporg-forums' ),
 						esc_url( $site_url )
 					);
 				} else {
 					printf( '<p class="wporg-bbp-topic-site-url">%1$s <em>%2$s</em></p>',
-						__( 'The page I need help with:', 'wporg-forums' ),
-						sprintf( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ), wp_login_url() )
+						esc_html__( 'The page I need help with:', 'wporg-forums' ),
+						/* translators: %s: URL of the log in page. */
+						sprintf( wp_kses_post( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ) ), esc_url( wp_login_url() ) )
 					);
 				}
 			}
@@ -982,9 +1058,9 @@ class Hooks {
 			$site_url = ( bbp_is_topic_edit() ) ? get_post_meta( $topic_id, self::SITE_URL_META, true ) : '';
 			?>
 			<p>
-				<label for="site_url"><?php _e( 'Link to the page you need help with:', 'wporg-forums' ) ?></label><br />
+				<label for="site_url"><?php esc_html_e( 'Link to the page you need help with:', 'wporg-forums' ); ?></label><br />
 				<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="400" aria-describedby="site_url_description" /><br />
-				<em id="site_url_description"><?php _e( 'This link will only be shown to logged-in users.', 'wporg-forums' ); ?></em>
+				<em id="site_url_description"><?php esc_html_e( 'This link will only be shown to logged-in users.', 'wporg-forums' ); ?></em>
 			</p>
 			<?php
 		endif;
@@ -1094,6 +1170,11 @@ class Hooks {
 	 * @return array Filtered reply data.
 	 */
 	public function update_replies_count_on_editing_reply( $data ) {
+		// Newer bbPress versions update counts after the status is persisted.
+		if ( function_exists( 'bbp_update_counts_on_transition_post_status' ) ) {
+			return $data;
+		}
+
 		// Bail if the reply is not published.
 		if ( 'publish' !== get_post_status( $data['ID'] ) ) {
 			return $data;
@@ -1274,7 +1355,7 @@ class Hooks {
 
 		return $content;
 	}
-	
+
 	/**
 	 * Alter the bbPress topic freshness links to use the date in the title attribute rather than thread title.
 	 */
@@ -1287,8 +1368,8 @@ class Hooks {
 			$last_active = get_post_field( 'post_date', $topic_id );
 		}
 
-		// This is for translating the date components.
-		$datetime = date_create_immutable_from_format( 'Y-m-d H:i:s', $last_active );
+		// This is for translating the date components. $last_active is based on non-gmt fields, so the timezone must be passed.
+		$datetime = date_create_immutable_from_format( 'Y-m-d H:i:s', $last_active, wp_timezone() );
 		if ( ! $datetime ) {
 			return $anchor;
 		}
@@ -1300,19 +1381,24 @@ class Hooks {
 			'title="' . esc_attr( $title ) . '"',
 			'title="' . esc_attr(
 				// bbPress string from bbp_get_reply_post_date()
-				sprintf( _x( '%1$s at %2$s', 'date at time', 'wporg-support' ), $date, $time )
+				sprintf( _x( '%1$s at %2$s', 'date at time', 'wporg-forums' ), $date, $time )
 			) . '"',
 			$anchor
 		);
 	}
 
 	/**
-	 * Filter the topic subscription message to 
+	 * Filter the topic subscription message to
 	 */
 	public function bbp_subscription_mail_message( $message, $reply_id, $topic_id ) {
 		$reply_author_name = bbp_get_reply_author_display_name( $reply_id );
 
 		remove_all_filters( 'bbp_get_reply_content' );
+
+		// The content is fetched again as the message is assembled, so keep it to the supported blocks.
+		if ( Plugin::get_instance()->blocks ) {
+			add_filter( 'bbp_get_reply_content', array( Plugin::get_instance()->blocks, 'limit_blocks' ), 7 );
+		}
 
 		// Strip tags from text and set up message body.
 		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );
@@ -1359,13 +1445,15 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 	 * Catch a user being blocked / unblocked and set their password appropriately.
 	 *
 	 * Note: This method is called even when the users role is not changed.
+	 *
+	 * See Audit_Log class for where the note is set/updated.
 	 */
 	public function user_blocked_password_handler( $new_role, $user_id, \WP_User $user ) {
 		global $wpdb;
 
 		// ~~~ is a reset password on WordPress.org. Let's ignore those.
 		if ( '~~~' === $user->user_pass ) {
-			return;
+			return $new_role;
 		}
 
 		// bbPress 1.x used `{$user_pass}---{$secret}` while we're using the reverse here.
@@ -1373,23 +1461,9 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 		$blocked_prefix  = 'BLOCKED' . substr( wp_hash( 'bb_break_password' ), 0, 13 ) . '---';
 		$blocked_role    = bbp_get_blocked_role();
 		$password_broken = ( 0 === strpos( $user->user_pass, $blocked_prefix ) );
-		$note_text       = false;
 
 		// WP_User::has_role() does not exist, and WP_User::has_cap( 'bbp_blocked' ) will be truthful for super admins.
 		$user_has_blocked_role = ! empty( $user->roles ) && in_array( $blocked_role, $user->roles, true );
-
-		// Define what has blocked the user.
-		if ( ! ms_is_switched() ) {
-			$where_from = preg_replace( '!^https?://!i', '', home_url( is_admin() ? '/wp-admin' : '' ) );
-		} else {
-			// When we're switched, we can't determine the source of the switch, so we use a bit of URL parsing magic.
-			$where_from = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			if ( str_contains( $where_from, '?' ) ) {
-				list( $where_from, ) = explode( '?', $where_from );
-			}
-			// Trim actual filename off, just the major path component.
-			$where_from = preg_replace( '!/[^/?]+\.[a-z]{3}$!i', '', $where_from  );
-		}
 
 		if (
 			( $blocked_role === $new_role || $user_has_blocked_role ) &&
@@ -1413,15 +1487,13 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 			$manager = \WP_Session_Tokens::get_instance( $user->ID );
 			$manager->destroy_all();
 
-			// Add a user note about this action.
-			$note_text = sprintf(
-				$where_from ? 'Forum role changed to %s via %s.' : 'Forum role changed to %s.',
-				get_role( $new_role )->name,
-				$where_from
-			);
-
-			// Used in wporg-login to add context.
-			$note_text = apply_filters( 'wporg_bbp_forum_role_changed_note_text', $note_text, $user );
+			// Deactivate their Slack account if they have one.
+			if (
+				function_exists( 'WordPressdotorg\Slack\deactivate' ) &&
+				slack_deactivate( $user )
+			) {
+				update_user_meta( $user->ID, '_activate_slack_if_reactivated', time() );
+			}
 		} else if (
 			$password_broken &&
 			! $user_has_blocked_role
@@ -1440,38 +1512,18 @@ Log in and visit the topic to reply to the topic or unsubscribe from these email
 
 			clean_user_cache( $user );
 
-			// Add a user note about this action.
-			$note_text = sprintf(
-				$where_from ? 'Forum role changed to %s via %s.' : 'Forum role changed to %s.',
-				get_role( $new_role )->name,
-				$where_from
-			);
-
-			// Unused, here for consistency with above.
-			$note_text = apply_filters( 'wporg_bbp_forum_role_changed_note_text', $note_text, $user );
+			// If we auto-deactivated a user, reactivate their Slack account.
+			if (
+				function_exists( 'WordPressdotorg\Slack\activate' ) &&
+				get_user_meta( $user->ID, '_activate_slack_if_reactivated', true )
+			) {
+				slack_activate( $user );
+				delete_user_meta( $user->ID, '_activate_slack_if_reactivated' );
+			}
 		}
 
-		if ( $note_text ) {
-			// Add a user note about this action.
-			Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
-				$user->ID,
-				$note_text
-			);
-		}
-
+		// It's a filter, return the value.
+		return $new_role;
 	}
 
-	/**
-	 * Add a user note when a user is flagged / unflagged.
-	 */
-	function log_user_flag_changes( $user_id ) {
-		$flag_action = ( 'wporg_bbp_flag_user' === current_filter () ) ? 'flagged' : 'unflagged';
-
-		$note_text = "User {$flag_action}.";
-
-		Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
-			$user_id,
-			$note_text
-		);
-	}
 }

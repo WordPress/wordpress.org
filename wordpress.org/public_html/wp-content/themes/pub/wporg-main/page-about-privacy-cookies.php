@@ -82,6 +82,18 @@ the_post();
 						</thead>
 						<tbody>
 							<tr>
+								<th>_ga</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to distinguish users.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
+							<tr>
+								<th>_ga_&lt;property-id&gt;</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to persist session state.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
+							<tr>
 								<th>devicePixelRatio</th>
 								<td><?php esc_html_e( 'Browser default (1 year)', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Used to make the site responsive to the visitor&#8217;s screen size.', 'wporg' ); ?></td>
@@ -91,24 +103,6 @@ the_post();
 								<th>wordpress_test_cookie</th>
 								<td><?php esc_html_e( 'Session', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Tests that the browser accepts cookies.', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
-							</tr>
-							<tr>
-								<th>_ga</th>
-								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to distinguish users.', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
-							</tr>
-							<tr>
-								<th>_gat_&lt;property-id&gt;</th>
-								<td><?php esc_html_e( '1 minute', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to throttle request rate.', 'wporg' ); ?></td>
-								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
-							</tr>
-							<tr>
-								<th>_gid</th>
-								<td><?php esc_html_e( '24 hours', 'wporg' ); ?></td>
-								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to distinguish users.', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
 							</tr>
 							<tr>
@@ -162,6 +156,18 @@ the_post();
 						</thead>
 						<tbody>
 							<tr>
+								<th>_ga</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to distinguish users.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
+							<tr>
+								<th>_ga_&lt;property-id&gt;</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to persist session state.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
+							<tr>
 								<th>welcome-{blog_id}</th>
 								<td><?php esc_html_e( 'Permanent', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Used to record if you&#8217;ve chosen to hide the &#8220;Welcome&#8221; message at the top of the corresponding blog.', 'wporg' ); ?></td>
@@ -188,6 +194,18 @@ the_post();
 						</thead>
 						<tbody>
 							<tr>
+								<th>_ga</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to distinguish users.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
+							<tr>
+								<th>_ga_&lt;property-id&gt;</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to persist session state.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
+							<tr>
 								<th>trac_form_token</th>
 								<td><?php esc_html_e( 'Session', 'wporg' ); ?></td>
 								<td><?php esc_html_e( 'Used as a security token for cross-site request forgery protection.', 'wporg' ); ?></td>
@@ -213,6 +231,18 @@ the_post();
 							</tr>
 						</thead>
 						<tbody>
+							<tr>
+								<th>_ga</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to distinguish users.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
+							<tr>
+								<th>_ga_&lt;property-id&gt;</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to persist session state.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
 							<tr>
 								<th>codexToken</th>
 								<td><?php esc_html_e( '6 months', 'wporg' ); ?></td>
@@ -245,6 +275,18 @@ the_post();
 							</tr>
 						</thead>
 						<tbody>
+							<tr>
+								<th>_ga</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to distinguish users.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
+							<tr>
+								<th>_ga_&lt;property-id&gt;</th>
+								<td><?php esc_html_e( '2 years', 'wporg' ); ?></td>
+								<td><a href="https://developers.google.com/analytics/devguides/collection/analyticsjs/cookie-usage#gtagjs_google_analytics_4_-_cookie_usage"><?php esc_html_e( 'Google Analytics', 'wporg' ); ?></a> - <?php esc_html_e( 'Used to persist session state.', 'wporg' ); ?></td>
+								<td><?php esc_html_e( 'No', 'wporg' ); ?></td>
+							</tr>
 							<tr>
 								<th>camptix_client_stats</th>
 								<td><?php esc_html_e( '1 year', 'wporg' ); ?></td>

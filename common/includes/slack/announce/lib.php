@@ -31,24 +31,29 @@ function get_channel_info( $channel_id ) {
 	return $channel_info['channel'] ?? false;
 }
 
+/**
+ * Get the list of whitelisted users for a channel.
+ * Includes parent channel whitelisted users.
+ *
+ * @param string $channel The channel to get the whitelist for.
+ * @return array
+ */
 function get_whitelist_for_channel( $channel ) {
-	$whitelist = get_whitelist();
+	$whitelist       = get_whitelist();
+	$users           = $whitelist[ $channel ] ?? [];
+	$parent_channels = get_parent_channels( $channel );
 
-	$users = [];
+	foreach ( (array) $parent_channels as $parent ) {
+		// Avoid any circular references.
+		if ( ! $parent || $parent === $channel ) {
+			continue;
+		}
 
-	if ( ! empty( $whitelist[ $channel ] ) ) {
-		$users = $whitelist[ $channel ];
-	}
-
-	$parent_channel = get_parent_channel( $channel );
-	if ( $parent_channel && ! empty( $whitelist[ $parent_channel ] ) ) {
-		$users = array_merge( $users, $whitelist[ $parent_channel ] );
+		$users = array_merge( $users, $whitelist[ $parent ] ?? [] );
 	}
 
 	// Some users are listed twice, due to array_merge() in config & parent channel above.
-	$users = array_unique( $users );
-
-	return $users;
+	return array_unique( $users );
 }
 
 /**
@@ -102,53 +107,98 @@ function show_authorization( $user, $channel ) {
 	} elseif ( in_array( $channel, $channels ) ) {
 		$channels = array_filter( $channels, function( $c ) use ( $channel ) { return $c !== $channel; } );
 		if ( $channels ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 			printf( "You are allowed to use these commands in #%s (also %s).", $channel, '#' . implode( ' #', $channels ) );
 		} else {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 			echo "You are allowed to use these commands in in #$channel.";
 		}
 	} else {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 		printf( "You are not allowed to use these commands in #%s, but you are in #%s.", $channel, implode( ' #', $channels ) );
 	}
 
 	echo "\n";
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 	printf( "If you are a team lead and need to be granted access, contact an admin in <#%s|%s> for assistance.\n", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 	printf( "Your linked WordPress.org account that needs to be granted access is '%s'.", $user );
 }
 
-function get_parent_channel( $channel ) {
+/**
+ * Return the parent channels for a channel.
+ *
+ * @param string $channel The channel to get the parent channel for. eg. 'foobar-example'
+ * @return array|false The parent channels, or false if there is no parent channel.
+ */
+function get_parent_channels( $channel ) {
 	// Private groups are not actually channels.
 	if ( 'privategroup' === $channel ) {
 		return false;
 	}
 
-	list( $parent_channel, ) = explode( '-', $channel, 2 );
+	list( $root, ) = explode( '-', $channel, 2 );
+	$direct_root = $root;
 
 	// Some channels parents are not a 1:1 match.
-	switch ( $parent_channel ) {
-		case 'accessibility':
+	switch ( $root ) {
 		case 'design':
 		case 'feature':
 		case 'performance':
 		case 'tide':
-			$parent_channel = 'core';
+		case 'accessibility':
+		case 'core':
+			$root = 'core';
 			break;
+		case 'mentorship': // Such as #mentorship-cohort-july-2023
+			$root = 'contributor-mentorship';
+			break;
+		case 'campusconnect':
+		case 'wpcredits':
 		case 'community':
-			$parent_channel = 'community-team';
+			$root = 'community-team';
+			break;
+		case 'media':
+			$root = 'media-corps';
 			break;
 	}
 
-	// No parent channel!
-	if ( $parent_channel === $channel ) {
-		return false;
+	// Such as #6-4-release-leads, or #6-1-site-editor-merge
+	if ( preg_match( '!^\d-\d-!i', $channel ) ) {
+		$root = 'core';
 	}
 
-	// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel
-	if ( ! get_whitelist_for_channel( $parent_channel ) ) {
-		return false;
+	$parent_channels = [];
+
+	// For when a channel has multiple parents.
+	// Learn is a sub-team of Training, plus of #meta.
+	if ( 'meta-learn' === $channel ) {
+		$parent_channels[] = 'training';
 	}
 
-	return $parent_channel;
+	// When the switch above remapped to a team-level parent (e.g. wpcredits -> community-team),
+	// also inherit from the intermediate channel itself if it has its own whitelist.
+	// e.g. #wpcredits-spanish inherits from both #wpcredits and #community-team.
+	// Note: check the raw whitelist directly — calling get_whitelist_for_channel()
+	// here would recurse back through get_parent_channels() and infinite-loop.
+	if (
+		$direct_root !== $root &&
+		$direct_root !== $channel &&
+		! empty( get_whitelist()[ $direct_root ] )
+	) {
+		$parent_channels[] = $direct_root;
+	}
+
+	// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel.
+	if (
+		$root !== $channel &&
+		get_whitelist_for_channel( $root )
+	) {
+		$parent_channels[] = $root;
+	}
+
+	return array_unique( $parent_channels ) ?: false;
 }
 
 function run( $data ) {
@@ -210,17 +260,15 @@ function run( $data ) {
 	}
 
 	if ( str_word_count( $data['text'] ) <= 2 ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 		printf( "When making announcements, please use a descriptive message for notifications. %s is too short.", $data['text'] );
 		return;
 	}
 
-	// Default to an @here, unless explicitely an @channel OR it's a private group.
+	// Default to an @here, unless explicitely an @channel.
 	$command = 'here';
 	if ( $data['command'] === '/at-channel' ) {
 		$command = 'channel';
-	} elseif ( $channel === 'privategroup' ) {
-		// @channel and @group are interchangeable.
-		$command = 'group';
 	}
 
 	// Use their Slack Display name, falling back to their WordPress.org login if that's not available.
@@ -253,12 +301,18 @@ function run( $data ) {
 	$send->send( $channel_id );
 
 	// Broadcast this message as a non-@here to the "parent" channel too.
-	$parent_channel = get_parent_channel( $channel );
+	$parent_channels = get_parent_channels( $channel );
 
 	// Validate the parent channel exists.
-	if ( ! $parent_channel ) {
+	if ( ! $parent_channels ) {
 		return;
 	}
+
+	// Don't send to these parent channels.
+	$dont_send_to = [
+		'contributor-mentorship',
+		'wpcredits',
+	];
 
 	$text = $data['text'];
 	// Remove any @here or @channel
@@ -267,7 +321,19 @@ function run( $data ) {
 		$text = mb_substr( $text, 0, 100 ) . '...';
 	}
 
-	$send->set_text( 'In #' . $channel . ': ' . $text );
-	$send->send( '#' . $parent_channel );
+	foreach ( $parent_channels as $parent_channel ) {
+		if ( in_array( $parent_channel, $dont_send_to, true ) ) {
+			continue;
+		}
+
+		// #wpcredits and #wpcredits-* inherit from #community-team for whitelist
+		// purposes, but their announcements should stay within the wpcredits family.
+		if ( 'community-team' === $parent_channel && str_starts_with( $channel, 'wpcredits' ) ) {
+			continue;
+		}
+
+		$send->set_text( 'In #' . $channel . ': ' . $text );
+		$send->send( '#' . $parent_channel );
+	}
 }
 

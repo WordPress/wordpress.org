@@ -1,0 +1,65 @@
+@import "../variables-site/variables-site";
+
+html {
+	box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+
+	/* Inherit box-sizing to make it easier to change the property for components that leverage other behavior; see http://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+	box-sizing: inherit;
+}
+
+body {
+	background: var(--wp--preset--color--white); /* Fallback for when there is no custom background color defined. */
+}
+
+section {
+	margin-bottom: var(--wp--preset--spacing--40);
+}
+
+blockquote, q {
+	quotes: "" "";
+
+	&::before,
+	&::after {
+		content: "";
+		margin: 0;
+	}
+}
+
+blockquote {
+	border-left: 2px solid var(--wp--preset--color--charcoal-4);
+	color: var(--wp--preset--color--charcoal-4);
+	margin: var(--wp--preset--spacing--20) 0;
+	padding-left: var(--wp--preset--spacing--20);
+
+	cite {
+		font-size: ms( -2 );
+	}
+
+	p {
+		display: block;
+		margin: var(--wp--preset--spacing--20) 0;
+	}
+}
+
+p.has-background {
+	display: inline-block;
+	padding: var(--wp--preset--spacing--20);
+}
+
+@import "lists";
+
+img {
+	height: auto; /* Make sure images are scaled correctly. */
+	max-width: 100%; /* Adhere to container width. */
+}
+
+@import "tables";
+@import "notices";
+@import "banners";
+@import "badges";
+@import "tags";

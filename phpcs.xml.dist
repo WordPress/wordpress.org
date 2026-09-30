@@ -1,0 +1,170 @@
+<?xml version="1.0" ?>
+<ruleset name="WordPress.org Coding Standards">
+	<description>Apply customized version of WordPress Coding Standards to WordPress.org PHP scripts.</description>
+
+	<!-- Show sniff codes in all reports -->
+	<arg value="ps" />
+	<arg name="colors" />
+
+	<!-- Speed up scans: parallel workers, and a cache of unchanged file results. -->
+	<arg name="parallel" value="10" />
+	<arg name="cache" value=".phpcs.cache" />
+	<ini name="memory_limit" value="512M" />
+
+	<!-- Report file paths relative to the repository root. -->
+	<arg name="basepath" value="." />
+
+	<!-- Exclude 3rd-party files -->
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/plugins/plugin-directory/libs/*</exclude-pattern>
+	<exclude-pattern>*/plugins/theme-directory/lib/*</exclude-pattern>
+	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>
+	<!-- Near-verbatim copy of vendor/google/cloud-storage/src/StreamWrapper.php; kept diffable against upstream. -->
+	<exclude-pattern>*/plugins/photo-directory/inc/google-cloud-storage-stream-metadata.php</exclude-pattern>
+
+	<!-- Exclude generated wp-scripts asset files. -->
+	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
+
+	<!-- FreeScout is a Laravel app, not WordPress; it has its own standard in freescout.wordpress.net/phpcs.xml.dist. -->
+	<exclude-pattern>*/freescout.wordpress.net/*</exclude-pattern>
+	<exclude-pattern>*/environments/freescout/*</exclude-pattern>
+
+	<!-- Scan all (php) files in the current folder and subfolders -->
+	<file>.</file>
+	<arg name="extensions" value="php" />
+
+	<!-- WordPress.org runs recent versions of WordPress. -->
+	<config name="minimum_wp_version" value="6.9"/>
+
+	<!-- Check for PHP cross-version compatibility. -->
+	<config name="testVersion" value="8.4-"/>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress">
+		<!-- Not in the global excludes: PHPCompatibilityWP must keep covering its local patches. -->
+		<exclude-pattern>*/dotorg/trac/pr/adhocore-php-jwt/*</exclude-pattern>
+
+		<exclude name="WordPress.DB.DirectDatabaseQuery" />
+		<exclude name="WordPress.DB.SlowDBQuery" />
+
+		<!-- Config-driven rewrite utility; must never run as part of a lint standard. -->
+		<exclude name="WordPress.Utils.I18nTextDomainFixer" />
+
+		<!-- Short array syntax is already used throughout the codebase. -->
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax" />
+		<exclude name="Universal.Operators.DisallowShortTernary" />
+	</rule>
+
+	<!-- Custom capabilities used across the WordPress.org environment. -->
+	<!-- Please note: Using custom capabilities is allowed, just document them here please! -->
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<!-- Plugin Directory -->
+				<element value="plugin_add_committer"/>
+				<element value="plugin_add_support_rep"/>
+				<element value="plugin_admin_edit"/>
+				<element value="plugin_admin_view"/>
+				<element value="plugin_approve"/>
+				<element value="plugin_close"/>
+				<element value="plugin_dashboard_access"/>
+				<element value="plugin_disable"/>
+				<element value="plugin_edit"/>
+				<element value="plugin_edit_others"/>
+				<element value="plugin_edit_pending"/>
+				<element value="plugin_manage_releases"/>
+				<element value="plugin_reject"/>
+				<element value="plugin_remove_committer"/>
+				<element value="plugin_remove_support_rep"/>
+				<element value="plugin_review"/>
+				<element value="plugin_self_close"/>
+				<element value="plugin_self_transfer"/>
+				<element value="plugin_set_category"/>
+				<element value="plugin_set_section"/>
+				<element value="plugin_toggle_public_preview"/>
+				<!-- Theme Directory -->
+				<element value="suspend_theme"/>
+				<element value="reinstate_theme"/>
+				<element value="suspend_themes"/>
+				<element value="reinstate_themes"/>
+				<element value="theme_configure_categorization_options"/>
+				<!-- PHPUnit Test Reporter -->
+				<element value="edit_results"/>
+				<element value="publish_results"/>
+				<element value="edit_others_results"/>
+				<element value="read_private_results"/>
+				<!-- Translation Events -->
+				<element value="manage_translation_events"/>
+				<element value="create_translation_event"/>
+				<element value="view_translation_event"/>
+				<element value="edit_translation_event"/>
+				<element value="trash_translation_event"/>
+				<element value="delete_translation_event"/>
+				<element value="edit_translation_event_attendees"/>
+				<element value="edit_translation_event_title"/>
+				<element value="edit_translation_event_description"/>
+				<element value="edit_translation_event_start"/>
+				<element value="edit_translation_event_end"/>
+				<element value="edit_translation_event_timezone"/>
+				<element value="edit_translation_event_attendance_mode"/>
+				<!-- Support Forums -->
+				<element value="bbp_forums_admin"/>
+				<element value="edit_topic"/>
+				<element value="edit_reply"/>
+				<element value="read_topic"/>
+				<element value="keep_gate"/>
+				<element value="moderate"/>
+				<element value="throttle"/>
+				<element value="participate"/>
+				<element value="spectate"/>
+				<element value="assign_topic_tags"/>
+				<!-- Photo Directory -->
+				<element value="edit_photos"/>
+				<element value="delete_photos"/>
+				<element value="delete_others_photos"/>
+				<element value="publish_photos"/>
+				<element value="edit_others_photos"/>
+				<element value="edit_published_photos"/>
+				<element value="delete_published_photos"/>
+				<element value="delete_private_photos"/>
+				<element value="edit_private_photos"/>
+				<element value="read_private_photos"/>
+				<element value="manage_photo_tags"/>
+				<!-- Learn -->
+				<element value="manage_workshop_internal_notes"/>
+				<element value="edit_courses"/>
+				<element value="edit_lessons"/>
+				<element value="edit_any_learn_content"/>
+				<!-- HelpHub -->
+				<element value="manage_helphub"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Project functions that escape their own output. -->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<properties>
+			<!-- serialize_block_attributes() escapes attribute JSON for use inside a block comment delimiter. -->
+			<property name="customEscapingFunctions" type="array">
+				<element value="serialize_block_attributes"/>
+				<!-- wporg_kses_description() is wp_kses() against a fixed allow-list; see wporg-gp-customizations/templates/helper-functions.php. -->
+				<element value="wporg_kses_description"/>
+			</property>
+			<!-- Please note: Only add a function here after confirming it escapes its own return value! -->
+			<property name="customAutoEscapedFunctions" type="array">
+				<!-- Returns esc_url( $url ); see themes/pub/wporg-login/functions.php. -->
+				<element value="wporg_login_wordpress_url"/>
+				<!-- Returns selected() markup or an esc_attr()'d value attribute; see jobs.wordpress.net plugins/jobswp/jobswp-template.php. -->
+				<element value="jobswp_field_value"/>
+				<!-- Returns esc_html( $text ); see themes/pub/wporg-main/functions.php. -->
+				<element value="esc_html___"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- PHPUnit requires test files to be named after the test class they contain. -->
+	<rule ref="WordPress.Files.FileName">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+</ruleset>

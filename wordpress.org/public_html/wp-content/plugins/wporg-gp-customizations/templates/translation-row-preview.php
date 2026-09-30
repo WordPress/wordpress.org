@@ -29,14 +29,14 @@ $priority_char = array(
 		<?php
 		if ( ! $translation->plural ) :
 			?>
-			<span class="original-text"><?php echo prepare_original( $translation_singular ); ?></span>
+			<span class="original-text"><?php echo prepare_original( $translation_singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span>
 			<?php
 		else :
 			$translation_plural = isset( $translation->plural_glossary_markup ) ? $translation->plural_glossary_markup : esc_translation( $translation->plural );
 			?>
 			<ul>
-				<li><small>Singular:</small><br><span class="original-text"><?php echo prepare_original( $translation_singular ); ?></span></li>
-				<li><small>Plural:</small><br><span class="original-text"><?php echo prepare_original( $translation_plural ); ?></span></li>
+				<li><small>Singular:</small><br><span class="original-text"><?php echo prepare_original( $translation_singular ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span></li>
+				<li><small>Plural:</small><br><span class="original-text"><?php echo prepare_original( $translation_plural ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Originals and glossary markup are escaped before highlighting. ?></span></li>
 			</ul>
 			<?php
 		endif;
@@ -80,9 +80,9 @@ $priority_char = array(
 
 		$missing_text = "<span class='missing'>$edit_text</span>";
 		if ( ! count( array_filter( $translation->translations, 'gp_is_not_null' ) ) ) :
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			echo $missing_text;
+			echo wp_kses_post( $missing_text );
 		elseif ( ! $translation->plural || 1 === $locale->nplurals ) :
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 			echo '<span class="translation-text">' . esc_translation( $translation->translations[0] ) . '</span>';
 		elseif ( $translation->plural && 2 === $locale->nplurals && 'n != 1' === $locale->plural_expression ) :
 			?>
@@ -91,8 +91,9 @@ $priority_char = array(
 					<small>Singular:</small><br>
 					<?php
 					if ( ! isset( $translation->translations[0] ) || gp_is_empty_string( $translation->translations[0] ) ) {
-						echo $missing_text;
+						echo wp_kses_post( $missing_text );
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						echo '<span class="translation-text">' . esc_translation( $translation->translations[0] ) . '</span>';
 					}
 					?>
@@ -101,8 +102,9 @@ $priority_char = array(
 					<small>Plural:</small><br>
 					<?php
 					if ( ! isset( $translation->translations[1] ) || gp_is_empty_string( $translation->translations[1] ) ) {
-						echo $missing_text;
+						echo wp_kses_post( $missing_text );
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						echo '<span class="translation-text">' . esc_translation( $translation->translations[1] ) . '</span>';
 					}
 					?>
@@ -115,13 +117,14 @@ $priority_char = array(
 				$plural_string = implode(', ', $locale->numbers_for_index( $plural_index ) );
 				?>
 				<li>
-					<small class="with-tooltip" aria-label="<?php printf('This plural form is used for numbers like: %s', $plural_string ); ?>">
-						<?php echo $plural_string; ?>:
+					<small class="with-tooltip" aria-label="<?php printf( 'This plural form is used for numbers like: %s', esc_attr( $plural_string ) ); ?>">
+						<?php echo esc_html( $plural_string ); ?>:
 					</small><br>
 					<?php
 					if ( ! isset( $translation->translations[ $plural_index ] ) || gp_is_empty_string( $translation->translations[ $plural_index ] ) ) {
-						echo $missing_text;
+						echo wp_kses_post( $missing_text );
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						echo '<span class="translation-text">' . esc_translation( $translation->translations[ $plural_index ] ) . '</span>';
 					}
 					?>
@@ -132,6 +135,58 @@ $priority_char = array(
 		endif; ?>
 	</td>
 	<td class="actions">
-		<a href="#" class="action edit"><?php _e( 'Details', 'glotpress' ); ?></a>
+		<a href="#" class="action edit"><?php esc_html_e( 'Details', 'glotpress' ); ?></a>
 	</td>
+	<?php if ( wporg_translate_inline_actions_enabled_for_current_user( get_defined_vars() ) ) : ?>
+		<td class="inline-actions">
+			<?php
+			$current_status = $translation->translation_status;
+
+			// Mirrors the outer guards in gp-templates/translation-row-editor-meta-status.php:
+			// 1. Skip rows with no status at all (untranslated entries).
+			// 2. Skip changesrequested rows unless the changesrequested status is explicitly enabled.
+			$show_inline_buttons = $current_status
+				&& ( 'changesrequested' !== $current_status
+					|| apply_filters( 'gp_enable_changesrequested_status', false ) );
+			?>
+
+			<?php if ( $show_inline_buttons ) : ?>
+				<?php if ( 'current' !== $current_status ) : ?>
+					<button
+						type="button"
+						class="button is-small inline-action inline-action-approve"
+						data-translation-id="<?php echo esc_attr( $translation->id ); ?>"
+						data-status="current"
+						data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-current_' . $translation->id ) ); ?>"
+						title="<?php esc_attr_e( 'Approve this translation. Any existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"
+						aria-label="<?php esc_attr_e( 'Approve this translation', 'glotpress' ); ?>"
+					>+</button>
+				<?php endif; ?>
+
+				<?php if ( 'rejected' !== $current_status && 'changesrequested' !== $current_status ) : ?>
+					<button
+						type="button"
+						class="button is-small inline-action inline-action-reject"
+						data-translation-id="<?php echo esc_attr( $translation->id ); ?>"
+						data-status="rejected"
+						data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-rejected_' . $translation->id ) ); ?>"
+						title="<?php esc_attr_e( 'Reject this translation. The existing translation will be kept as part of the translation history.', 'glotpress' ); ?>"
+						aria-label="<?php esc_attr_e( 'Reject this translation', 'glotpress' ); ?>"
+					><strong>&minus;</strong></button>
+				<?php endif; ?>
+
+				<?php if ( 'fuzzy' !== $current_status ) : ?>
+					<button
+						type="button"
+						class="button is-small inline-action inline-action-fuzzy"
+						data-translation-id="<?php echo esc_attr( $translation->id ); ?>"
+						data-status="fuzzy"
+						data-nonce="<?php echo esc_attr( wp_create_nonce( 'update-translation-status-fuzzy_' . $translation->id ) ); ?>"
+						title="<?php esc_attr_e( 'Mark this translation as fuzzy for further review.', 'glotpress' ); ?>"
+						aria-label="<?php esc_attr_e( 'Mark this translation as fuzzy', 'glotpress' ); ?>"
+					><strong>~</strong></button>
+				<?php endif; ?>
+			<?php endif; ?>
+		</td>
+	<?php endif; ?>
 </tr>

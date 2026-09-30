@@ -30,8 +30,7 @@ class WPORG_Page_Limiter {
 		// 404 on high pages instead of performing a DB query.
 		add_action( 'parse_query', [ $this, 'parse_query' ], 100 );
 
-		// Limit WP_Query::max_num_pages to self::MAX_PAGES
-		add_filter( 'found_posts', [ $this, 'found_posts' ], 100, 2 );
+		add_filter( 'posts_results', [ $this, 'set_found_posts_max_pages' ], 100, 2 );
 
 		// BbPress Forum Topic pagination
 		add_filter( 'bbp_topic_pagination', [ $this, 'bbp_topic_pagination' ], 100 );
@@ -62,19 +61,22 @@ class WPORG_Page_Limiter {
 	}
 
 	// Make WordPress think there's only 50 pages
-	public function found_posts( $found_posts, $query ) {
+	public function set_found_posts_max_pages( $posts, $query ) {
 		if ( ! $query->is_main_query() ) {
-			return $found_posts;
+			return $posts;
 		}
 
 		// Set a 20 posts_per_page fallback just in case it's not set on the query.. Shouldn't actually be needed.
 		$posts_per_page = $query->query_vars['posts_per_page'] ?? 20;
 		$max_posts      = self::MAX_PAGES * $posts_per_page;
 
-		return min(
-			$found_posts,
-			$max_posts
-		);
+		$query->original_found_posts = $query->found_posts;
+		$query->found_posts = min( $query->found_posts, $max_posts );
+
+		// Update the max-pages value too.
+		$query->max_num_pages = (int) ceil( $query->found_posts / $posts_per_page );
+
+		return $posts;
 	}
 
 	// bbPress filter the max forum pagination

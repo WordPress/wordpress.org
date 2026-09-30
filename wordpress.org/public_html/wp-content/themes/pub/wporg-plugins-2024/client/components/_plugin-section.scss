@@ -1,0 +1,25 @@
+#main .plugin-section { /* #main prefix is to overrule inline block styles */
+    margin: 0 auto var( --wp--preset--spacing--60 );
+
+	&:last-of-type {
+		margin-bottom: 0;
+	}
+
+	.section-header {
+		display: flex;
+		column-gap: 10px;
+		justify-content: space-between;
+		margin-bottom: var( --wp--style--block-gap );
+		align-items: center;
+
+		> h2 {
+			margin-bottom: 0;
+		}
+	}
+
+	.section-link {
+		align-self: center;
+		flex: 0 0 auto;
+		text-decoration: underline;
+	}
+}

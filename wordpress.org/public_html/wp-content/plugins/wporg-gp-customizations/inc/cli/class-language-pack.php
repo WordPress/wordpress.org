@@ -128,6 +128,10 @@ class Language_Pack extends WP_CLI_Command {
 			WP_CLI::error( 'No version available.' );
 		}
 
+		if ( ! $this->version_is_path_safe( $version ) ) {
+			WP_CLI::error( 'Invalid version.' );
+		}
+
 		$svn_command  = $this->get_svn_command();
 		$svn_checkout = self::get_temp_directory( $slug );
 
@@ -202,6 +206,10 @@ class Language_Pack extends WP_CLI_Command {
 			WP_CLI::error( 'No version available.' );
 		}
 
+		if ( ! $this->version_is_path_safe( $version ) ) {
+			WP_CLI::error( 'Invalid version.' );
+		}
+
 		$svn_command  = $this->get_svn_command();
 		$svn_checkout = self::get_temp_directory( $slug );
 
@@ -274,14 +282,18 @@ class Language_Pack extends WP_CLI_Command {
 	 * @return false|string False on failure, stable tag on success.
 	 */
 	private function get_plugin_stable_tag( $plugin_slug ) {
-		$plugin = @file_get_contents( "https://api.wordpress.org/plugins/info/1.0/{$plugin_slug}.json?fields=stable_tag" );
+		$plugin = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/plugins/info/1.0/{$plugin_slug}.json?fields=stable_tag"
+			)
+		);
 		if ( ! $plugin ) {
 			return false;
 		}
 
 		$plugin = json_decode( $plugin );
 
-		return $plugin->stable_tag;
+		return $plugin->stable_tag ?? false;
 	}
 
 	/**
@@ -291,14 +303,18 @@ class Language_Pack extends WP_CLI_Command {
 	 * @return false|string False on failure, version on success.
 	 */
 	private function get_latest_theme_version( $theme_slug ) {
-		$theme = @file_get_contents( "https://api.wordpress.org/themes/info/1.1/?action=theme_information&request[slug]={$theme_slug}" );
+		$theme = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/themes/info/1.1/?action=theme_information&request[slug]={$theme_slug}"
+			)
+		);
 		if ( ! $theme ) {
 			return false;
 		}
 
 		$theme = json_decode( $theme );
 
-		return $theme->version;
+		return $theme->version ?? false;
 	}
 
 	/**
@@ -308,14 +324,46 @@ class Language_Pack extends WP_CLI_Command {
 	 * @return false|string False on failure, version on success.
 	 */
 	private function get_latest_plugin_version( $plugin_slug ) {
-		$plugin = @file_get_contents( "https://api.wordpress.org/plugins/info/1.0/{$plugin_slug}.json" );
+		$plugin = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/plugins/info/1.0/{$plugin_slug}.json"
+			)
+		);
 		if ( ! $plugin ) {
 			return false;
 		}
 
 		$plugin = json_decode( $plugin );
 
-		return $plugin->version;
+		return $plugin->version ?? false;
+	}
+
+	/**
+	 * Determines whether a version can be used as a path component.
+	 *
+	 * The version is interpolated into filesystem paths by build_language_packs(), so a value that could
+	 * step outside the directory it names has to be rejected before it gets there.
+	 *
+	 * This is a path guard only. It permits characters such as `"`, `<`, `>` and `=` that are unsafe in HTML
+	 * and URL contexts, so any consumer that renders the version into markup or a URL must escape it there
+	 * (the Language Packs templates use esc_html()/esc_url()). Passing this check does not make that escaping
+	 * redundant.
+	 *
+	 * @param mixed $version Version of a theme/plugin, from the API or the --version argument.
+	 * @return bool True if the version is safe to use in a path, false otherwise.
+	 */
+	private function version_is_path_safe( $version ) {
+		if ( ! is_string( $version ) || '' === $version ) {
+			return false;
+		}
+
+		if ( preg_match( '#[[:cntrl:]]#', $version ) ) {
+			return false;
+		}
+
+		$segments = preg_split( '#[/\\\\]#', $version );
+
+		return '' !== $segments[0] && ! array_intersect( [ '.', '..' ], $segments );
 	}
 
 	/**
@@ -511,6 +559,22 @@ class Language_Pack extends WP_CLI_Command {
 	}
 
 	/**
+	 * Builds a PHP file for translations.
+	 *
+	 * @param GP_Project          $gp_project The GlotPress project.
+	 * @param GP_Locale           $gp_locale  The GlotPress locale.
+	 * @param GP_Translation_Set  $set        The translation set.
+	 * @param Translation_Entry[] $entries    The translation entries.
+	 * @param string              $dest       Destination file name.
+	 * @return bool True on success, false on error.
+	 */
+	private function build_php_file( $gp_project, $gp_locale, $set, $entries, $dest ) {
+		$format  = gp_array_get( GP::$formats, 'php' );
+		$content = $format->print_exported_file( $gp_project, $gp_locale, $set, $entries );
+		return false !== file_put_contents( $dest, $content );
+	}
+
+	/**
 	 * Executes a command via exec().
 	 *
 	 * @param string $command The escaped command to execute.
@@ -583,6 +647,7 @@ class Language_Pack extends WP_CLI_Command {
 		wp_cache_add_global_groups( [ 'update-check-translations', 'translations-query' ] );
 		wp_cache_delete( "{$type}:{$language}:{$domain}", 'update-check-translations' );
 		wp_cache_delete( "{$type}:{$domain}:{$version}", 'translations-query' );
+		wp_cache_delete( "{$type}:{$domain}", 'translations-query' );
 
 		return true;
 	}
@@ -651,6 +716,7 @@ class Language_Pack extends WP_CLI_Command {
 			$json_file_base = "{$export_directory}/{$filename}";
 			$po_file        = "{$export_directory}/{$filename}.po";
 			$mo_file        = "{$export_directory}/{$filename}.mo";
+			$php_file       = "{$export_directory}/{$filename}.l10n.php";
 			$zip_file       = "{$export_directory}/{$filename}.zip";
 			$build_zip_file = "{$build_directory}/{$wp_locale}.zip";
 			$build_sig_file = "{$build_zip_file}.sig";
@@ -665,7 +731,13 @@ class Language_Pack extends WP_CLI_Command {
 			unset( $mapping['po'] );
 
 			// Create JED json files for each JS file.
-			$json_files = $this->build_json_files( $data->gp_project, $gp_locale, $set, $mapping, $json_file_base );
+			$additional_files = $this->build_json_files( $data->gp_project, $gp_locale, $set, $mapping, $json_file_base );
+
+			// Create PHP file.
+			$php_file_written = $this->build_php_file( $data->gp_project, $gp_locale, $set, $po_entries, $php_file );
+			if ( $php_file_written ) {
+				$additional_files[] = $php_file;
+			}
 
 			// Create PO file.
 			$last_modified = $this->build_po_file( $data->gp_project, $gp_locale, $set, $po_entries, $po_file );
@@ -702,7 +774,7 @@ class Language_Pack extends WP_CLI_Command {
 				escapeshellarg( $zip_file ),
 				escapeshellarg( $po_file ),
 				escapeshellarg( $mo_file ),
-				implode( ' ', array_map( 'escapeshellarg', $json_files ) )
+				implode( ' ', array_map( 'escapeshellarg', $additional_files ) )
 			) );
 
 			if ( is_wp_error( $result ) ) {

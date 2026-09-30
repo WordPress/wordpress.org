@@ -6,7 +6,9 @@ use GP;
 use GP_Locales;
 use GP_Translation;
 use WordPressdotorg\GlotPress\Customizations\CLI\Stats;
+use WordPressdotorg\GlotPress\Customizations\CLI\Duplicate_Translations;
 use WP_CLI;
+use WP_User;
 use function WordPressdotorg\Profiles\assign_badge;
 
 class Plugin {
@@ -15,6 +17,30 @@ class Plugin {
 	 * @var Plugin The singleton instance.
 	 */
 	private static $instance;
+
+	/**
+	 * @var array The IDs of the translations that have been imported.
+	 */
+	private array $imported_translation_ids = array();
+
+	/**
+	 * @var string The source of translations that have been imported.
+	 */
+	private string $imported_source = '';
+
+	/**
+	 * The cache key for the list of GTE email addresses.
+	 *
+	 * @var string
+	 */
+	const GTE_EMAIL_ADDRESSES = 'wporg_gte_email_addresses';
+
+	/**
+	 * The cache group for the list of GTE email addresses.
+	 *
+	 * @var string
+	 */
+	const CACHE_GROUP = 'wporg-translate';
 
 	/**
 	 * Returns always the same instance of this plugin.
@@ -65,14 +91,16 @@ class Plugin {
 		add_action( 'init', [ $this, 'register_cron_events' ] );
 		add_action( 'wporg_translate_update_contributor_profile_badges', [ $this, 'update_contributor_profile_badges' ] );
 		add_action( 'wporg_translate_update_polyglots_stats', [ $this, 'update_polyglots_stats' ] );
+		add_action( 'wporg_translate_duplicate_translations', [ $this, 'duplicate_translations' ] );
+		add_action( 'gp_translation_created', array( $this, 'log_translation_source' ) );
+		add_action( 'gp_translation_saved', array( $this, 'log_translation_source' ) );
+		add_action( 'gp_translations_imported', array( $this, 'log_imported_translations' ) );
 
 		// Toolbar.
 		add_action( 'admin_bar_menu', array( $this, 'add_profile_settings_to_admin_bar' ) );
 		add_action( 'admin_bar_menu', array( $this, 'replace_login_url_in_admin_bar' ), 20 );
 		add_action( 'admin_bar_init', array( $this, 'show_admin_bar' ) );
 		add_action( 'add_admin_bar_menus', array( $this, 'remove_admin_bar_menus' ) );
-
-		add_action( 'template_redirect', array( $this, 'jetpack_stats' ), 1 );
 
 		// Load the API endpoints.
 		add_action( 'rest_api_init', array( __NAMESPACE__ . '\REST_API\Base', 'load_endpoints' ) );
@@ -81,6 +109,56 @@ class Plugin {
 
 		// Correct `WP_Locale` for variant locales in project lists.
 		add_filter( 'gp_translation_sets_sort', [ $this, 'filter_gp_translation_sets_sort' ] );
+
+		// create permission for the translation events.
+		add_filter( 'user_has_cap', array( $this, 'gp_translation_events_can_create_events' ), 10, 4 );
+
+		// Add site tour items.
+		if ( isset( $_GET['site_tour'] ) && 'test' == $_GET['site_tour'] ) {
+			add_filter(
+				'gp_tour',
+				function() {
+					return array(
+						'ui-intro' => [
+							[
+								'title' => 'UI Introduction Tour',
+								'color' => '#3939c7',
+							],
+							[
+								'selector'         => '.source-string__singular',
+								'html'             => 'This is the original string, pay attention to underlined words: they are in the glossary of your locale and if the context fits you must use the translation suggested by the glossary',
+								'popover-position' => 'left',
+							],
+							[
+								'selector' => '.source-details__references',
+								'html'     => 'This is the comments, context and references area: it can contain very useful information such as placheholders meaning, context of the string, a link to the code that could contain more comments about the use of that string.',
+							],
+							[
+								'selector' => '.translation-wrapper .textareas',
+								'html'     => 'This is the area where you can suggest your translation. Good grammar helps! Also, always pay attention to context and the Glossary entries that may apply.',
+							],
+							[
+								'selector' => '.translation-actions',
+								'html'     => 'This is the buttons area where you can find the very helpful “Help” button!',
+							],
+							[
+								'selector' => '.suggestions-wrapper',
+								'html'     => 'This is the Translations memory and Other languages area, remember Translation Memory could be a very useful help, but it all depends on the context. Context is all!',
+							],
+							[
+								'selector' => '.sidebar-tabs',
+								'html'     => 'This is the meta information area, Discussion and History can give more context information about the string, Make sure you always check these as well, if available.',
+							],
+							[
+								'selector' => '.translation-actions__primary',
+								'html'     => 'When you\'re happy with your translation click on the “Suggest” button',
+							],
+						],
+					);
+				},
+				10
+			);
+		}
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->register_cli_commands();
@@ -141,6 +219,9 @@ class Plugin {
 		if ( ! wp_next_scheduled( 'wporg_translate_update_polyglots_stats' ) ) {
 			wp_schedule_event( time(), 'daily', 'wporg_translate_update_polyglots_stats' );
 		}
+		if ( ! wp_next_scheduled( 'wporg_translate_duplicate_translations' ) ) {
+			wp_schedule_event( time(), 'daily', 'wporg_translate_duplicate_translations' );
+		}
 	}
 
 	/**
@@ -195,6 +276,16 @@ class Plugin {
 	}
 
 	/**
+	 * Detects duplicate translations in the database in "current" status and sends a notification to Slack.
+	 *
+	 * @return void
+	 */
+	public function duplicate_translations() {
+		$duplicates = new Duplicate_Translations();
+		$duplicates( false, true, false, false );
+	}
+
+	/**
 	 * Applies capital_P_dangit() on translations.
 	 *
 	 * @param array          $args        Translation arguments.
@@ -223,6 +314,7 @@ class Plugin {
 			! $translation->id &&
 			! empty( $args['user_id'] ) &&
 			'waiting' === $args['status'] &&
+			! empty( GP::$current_route ) &&
 			GP::$current_route->class_name === 'GP_Route_Translation' &&
 			GP::$current_route->last_method_called === 'translations_post'
 		) {
@@ -272,6 +364,94 @@ class Plugin {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Stores source of a translation in database.
+	 *
+	 * @param GP_Translation $translation Translation instance.
+	 * @return void
+	 */
+	public function log_translation_source( GP_Translation $translation ) {
+		static $already_logged = array();
+		$key                   = ! $translation->translation_0 ? null : $translation->translation_0;
+		if ( isset( $already_logged[ $key ] ) ) {
+			return;
+		}
+		$already_logged[ $key ] = true;
+		$source                 = '';
+		if ( $translation && is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name ) {
+			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
+				$this->imported_translation_ids[] = $translation->id;
+
+				if ( isset( $_POST['source'] ) && 'translate-live' == $_POST['source'] ) {
+					$this->imported_source = 'playground';
+				} elseif ( ! isset( $_POST['source'] ) && isset( $_POST['submit'] ) && 'Import' == $_POST['submit'] ) {
+					$this->imported_source = 'import';
+				} else {
+					return;
+				}
+			}
+			if ( 'translations_post' === GP::$current_route->last_method_called ) {
+				if ( isset( $_POST['translation_source'] ) && 'frontend' == $_POST['translation_source'] ) {
+					$source = 'frontend';
+					if ( isset( $_POST['externalTranslationSource'] ) ) {
+						$suggestion_source     = sanitize_text_field( $_POST['externalTranslationSource'] );
+						$suggested_translation = sanitize_text_field( $_POST['externalTranslationUsed'] );
+						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
+					}
+				}
+			}
+		}
+		if ( $source ) {
+			gp_update_meta( $translation->id, 'source', $source, 'translation' );
+		}
+	}
+
+	/**
+	 * Save the source of a translation suggestion.
+	 *
+	 * @param object $translation Translation object.
+	 * @param string $suggested_translation Suggested translation string.
+	 * @param string $suggestion_source Suggestion source.
+	 *
+	 * @return void
+	 */
+	private function save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source ) {
+		$suggestion_used = $suggestion_source;
+		if ( $translation->translation_0 !== $suggested_translation ) {
+			$suggestion_used .= '_modified';
+		}
+		if ( $suggestion_used ) {
+			gp_update_meta( $translation->id, 'suggestion_used', $suggestion_used, 'translation' );
+		}
+
+	}
+
+	/**
+	 * Logs imported translations.
+	 *
+	 * @return void
+	 */
+	public function log_imported_translations() {
+		global $wpdb;
+		$source = $this->imported_source;
+		if ( ! $source && ! $this->imported_translation_ids ) {
+			return;
+		}
+		$sql        = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
+		$sql_vars   = array();
+		$sql_values = array_map(
+			function( $translation_id ) use ( $source, &$sql_vars ) {
+				$sql_vars[] = $translation_id;
+				$sql_vars[] = $source;
+				return '( "translation", %d, "source", %s )';
+			},
+			$this->imported_translation_ids
+		);
+		$sql       .= implode( ', ', $sql_values );
+		$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
+
 	}
 
 	/**
@@ -363,25 +543,12 @@ class Plugin {
 	}
 
 	/**
-	 * Adds support for Jetpack Stats.
-	 */
-	public function jetpack_stats() {
-		if ( ! function_exists( 'stats_hide_smile_css' ) ) {
-			return;
-		}
-
-		add_action( 'gp_head', 'stats_hide_smile_css' );
-		add_action( 'gp_head', 'stats_admin_bar_head', 100 );
-		add_action( 'gp_footer', array( 'Automattic\Jetpack\Stats\Tracking_Pixel', 'add_to_footer' ), 101 );
-	}
-
-	/**
 	 * Makes admin bar compatible with GlotPress' custom header
 	 * and script loader.
 	 */
 	public function show_admin_bar() {
-		add_action( 'gp_head', 'wp_admin_bar_header' );
-		add_action( 'gp_head', '_admin_bar_bump_cb' );
+		add_action( 'gp_head', 'wp_enqueue_admin_bar_header_styles' );
+		add_action( 'gp_head', 'wp_enqueue_admin_bar_bump_styles' );
 
 		gp_enqueue_script( 'admin-bar' );
 		gp_enqueue_style( 'admin-bar' );
@@ -456,6 +623,7 @@ class Plugin {
 	 * Registers CLI commands if WP-CLI is loaded.
 	 */
 	public function register_cli_commands() {
+		WP_CLI::add_command( 'wporg-translate duplicate-translations', __NAMESPACE__ . '\CLI\Duplicate_Translations_CLI', $args = [] );
 		WP_CLI::add_command( 'wporg-translate init-locale', __NAMESPACE__ . '\CLI\Init_Locale' );
 		WP_CLI::add_command( 'wporg-translate language-pack', __NAMESPACE__ . '\CLI\Language_Pack' );
 		WP_CLI::add_command( 'wporg-translate mass-create-sets', __NAMESPACE__ . '\CLI\Mass_Create_Sets' );
@@ -463,6 +631,8 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate export', __NAMESPACE__ . '\CLI\Export' );
 		WP_CLI::add_command( 'wporg-translate export-json', __NAMESPACE__ . '\CLI\Export_Json' );
 		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Stats_Print' );
+		WP_CLI::add_command( 'wporg-translate update-project-stats', __NAMESPACE__ . '\CLI\Update_Project_Stats' );
+		WP_CLI::add_command( 'wporg-translate check-percentage-translated-above-100-percent', __NAMESPACE__ . '\CLI\Check_Percentage_Translated_Above_100_Percent' );
 
 	}
 
@@ -645,5 +815,100 @@ class Plugin {
 
 		$reasons = isset( $locale_reasons[ $locale ] ) ? $locale_reasons[ $locale ] : array();
 		return array_merge( $default_reasons, $reasons );
+	}
+
+	/**
+	 * Filter the permission to create events for the user.
+	 *
+	 * wp-org-translation-events plugin.
+	 *
+	 * @return array All caps the user has.
+	 */
+	public function gp_translation_events_can_create_events( $allcaps, $caps, $args, $user ): array {
+		if ( in_array( 'create_translation_event', $caps, true ) ) {
+			if ( GP::$permission->user_can( $user, 'admin' ) ) {
+				$allcaps['create_translation_event'] = true;
+			} elseif ( current_user_can( 'manage_options' ) ) {
+				$allcaps['create_translation_event'] = true;
+			} elseif ( self::is_user_a_wporg_gte( $user ) ) {
+				$allcaps['create_translation_event'] = true;
+			}
+		}
+
+		return $allcaps;
+	}
+
+	/**
+	 * Indicates if the given user is a GTE at translate.wordpress.org.
+	 *
+	 * Caches the GTE email addresses for 12 hours.
+	 *
+	 * @param WP_User $user A user object.
+	 *
+	 * @return bool Whether the user is GTE for any of the languages to which the comments in the post belong.
+	 */
+	public static function is_user_a_wporg_gte( WP_User $user ): bool {
+		$locales             = GP_Locales::locales();
+		$gte_email_addresses = wp_cache_get( self::GTE_EMAIL_ADDRESSES, self::CACHE_GROUP );
+
+		if ( false === $gte_email_addresses ) {
+			$gte_email_addresses = array();
+			foreach ( $locales as $locale ) {
+				foreach ( self::get_gte_email_addresses( $locale->slug ) as $email ) {
+					$gte_email_addresses[] = $email;
+				}
+			}
+			$gte_email_addresses = array_unique( $gte_email_addresses );
+
+			wp_cache_set( self::GTE_EMAIL_ADDRESSES, $gte_email_addresses, self::CACHE_GROUP, 12 * HOUR_IN_SECONDS );
+		}
+
+		if ( in_array( $user->user_email, $gte_email_addresses, true ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Gets the general translation editors (GTE) emails for the given locale.
+	 *
+	 * @param string $locale The locale. E.g. 'zh-tw'.
+	 *
+	 * @return array The general translation editors (GTE) emails.
+	 */
+	public static function get_gte_email_addresses( string $locale ): array {
+		$email_addresses = array();
+
+		$gp_locale = GP_Locales::by_field( 'slug', $locale );
+		if ( ( ! defined( 'WPORG_TRANSLATE_BLOGID' ) ) || ( false === $gp_locale ) ) {
+			return $email_addresses;
+		}
+		$result  = get_sites(
+			array(
+				'locale'     => $gp_locale->wp_locale,
+				'network_id' => WPORG_GLOBAL_NETWORK_ID,
+				'path'       => '/',
+				'fields'     => 'ids',
+				'number'     => '1',
+			)
+		);
+		$site_id = array_shift( $result );
+		if ( ! $site_id ) {
+			return $email_addresses;
+		}
+
+		$users = get_users(
+			array(
+				'blog_id'     => $site_id,
+				'role'        => 'general_translation_editor',
+				'count_total' => false,
+			)
+		);
+		foreach ( $users as $user ) {
+			$email_addresses[] = $user->data->user_email;
+		}
+
+		return $email_addresses;
 	}
 }

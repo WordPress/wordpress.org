@@ -1,9 +1,8 @@
 <?php
-
 /**
  * BuddyPress - Users Header
  *
- * @package BuddyPress
+ * @package bb-base
  * @subpackage bp-legacy
  */
 

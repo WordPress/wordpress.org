@@ -1,6 +1,10 @@
 <?php
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( '<!-- wp:wporg/global-header /-->' );
+
+gp_enqueue_styles( array( 'gp-jquery-webui-popover', 'driver-js' ) );
+gp_enqueue_scripts( array( 'gp-tour' ) );
 
 ?>
 <script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
@@ -37,7 +41,7 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 	if ( gp_notice( 'error' ) ) :
 		?>
 		<div class="error">
-			<?php echo gp_notice( 'error' ); //TODO: run kses on notices ?>
+			<?php echo wp_kses_post( gp_notice( 'error' ) ); ?>
 		</div>
 		<?php
 	endif;
@@ -45,11 +49,11 @@ echo do_blocks( '<!-- wp:wporg/global-header /-->' );
 	if ( gp_notice() ) :
 		?>
 		<div class="notice">
-			<?php echo gp_notice(); ?>
+			<?php echo wp_kses_post( gp_notice() ); ?>
 		</div>
 		<?php
 	endif;
 
-	echo gp_breadcrumb();
+	echo wp_kses_post( gp_breadcrumb() );
 
 	do_action( 'gp_after_notices' );

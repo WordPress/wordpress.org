@@ -1,0 +1,367 @@
+.type-plugin {
+
+	.plugin-notice {
+		margin-top: 0;
+	}
+
+	.plugin-header {
+		&::before {
+			@include clearfix;
+		}
+
+		&::after {
+			@include clearfix;
+			@include clearfix-after;
+		}
+
+		border-bottom: 0;
+		padding-top: var( --wp--preset--spacing--40 ); /* This is overridden if we have a banner below. */
+
+		.entry-heading-container {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+
+			// This is to fix the buttons missing small padding on mobile
+			// Ideally we remove this when we update this single page.
+			@media screen and (max-width: 599px) {
+				--wp--custom--button--spacing--padding--top: 12px;
+				--wp--custom--button--spacing--padding--bottom: 12px;
+				--wp--custom--button--spacing--padding--left: 16px;
+				--wp--custom--button--spacing--padding--right: 16px;
+			}
+
+			@media screen and (min-width: 700px) {
+				flex-direction: row;
+			}
+
+			> *:first-child {
+				flex: 1;
+
+				display: flex;
+				align-items: center;
+			}
+		}
+
+		.plugin-actions {
+			margin-top: var(--wp--style--block-gap);
+			display: flex;
+			align-items: center;
+			gap: 16px;
+
+			@media screen and (min-width: 700px) {
+				margin-top: 0;
+				margin-inline-start: 1rem;
+			}
+
+			> div,
+			> .button {
+				display: inline-block;
+				text-align: center;
+			}
+
+			@media screen and (max-width: 34em) {
+				> .button.download-button {
+					display: none;
+				}
+			}
+			  
+		}
+
+		.plugin-title {
+			clear: none;
+			font-size: var( --wp--preset--font-size--heading-3 );
+			font-weight: 400;
+			line-height: var( --wp--custom--heading--level-3--typography--line-height );
+			margin: 0;
+
+			a {
+				color: inherit;
+				text-decoration: none;
+
+				&:hover {
+					text-decoration: underline;
+				}
+			}
+		}
+
+		.byline {
+			display: block;
+			color: var(--wp--preset--color--charcoal-4);
+			margin-top: 4px;
+		}
+	}
+
+	.plugin-banner + .plugin-header {
+		padding-top: 0;
+
+		> .notice:first-of-type {
+			margin-top: 0;
+		}
+	}
+
+	.tabs {
+		list-style: none;
+		margin:0;
+		border-bottom: 1px solid var( --wp--preset--color--light-grey-1 );
+
+		li {
+			display: inline-block;
+			margin-bottom: -1px;
+			border: 1px solid transparent;
+			font-size: 0.9rem;
+			transition: background .2s ease;
+
+			a {
+				border: 0;
+				display: block;
+				padding: 0.64rem 1.25rem;
+				background: white;
+				text-decoration: none;
+				color: var(--wp--preset--color--charcoal-1);
+				font-size: var(--wp--preset--font-size--normal);
+
+				&.active, &:hover {
+					background: var(--wp--preset--color--light-grey-2) !important;
+				}
+			}
+
+			&.active, &:hover {
+				border: 1px solid var( --wp--preset--color--light-grey-1 );
+			}
+		}
+
+		@media screen and (max-width:38em) {
+			border-top: 1px solid var( --wp--preset--color--light-grey-1 );
+
+			li {
+				display: block;
+				border: none;
+				border-bottom: 1px solid var( --wp--preset--color--light-grey-1 );
+				margin-bottom: 1px;
+
+				&.active, &:hover {
+					border: none;
+					border-bottom: 1px solid var( --wp--preset--color--light-grey-1 );
+				}
+			}
+		}
+	}
+
+	.entry-content {
+		@media screen and ( min-width: $ms-breakpoint ) {
+			float: left;
+			padding: 0;
+			width: 65%;
+		}
+
+		> div {
+			display:none;
+			border: 0;
+
+			~ button {
+				display:none;
+				border: 0;
+			}
+		}
+
+		ul > li > p, ol > li > p {
+			margin: 0;
+		}
+
+		#admin {
+			display:block !important;
+		}
+	}
+
+	.plugin-blocks-list {
+		list-style: none;
+		margin-left: 0;
+		padding-left: 0;
+
+		.plugin-blocks-list-item {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			margin-bottom: var( --wp--style--block-gap );
+		}
+
+		.block-icon {
+			display: inline-block;
+			margin-right: var( --wp--style--block-gap );
+			padding: var( --wp--style--block-gap );
+			width: 3.5rem; // 56px
+			height: 3.5rem; // 56px
+			border: 1px solid var( --wp--preset--color--light-grey-1 );
+			border-radius: 2px;
+			line-height: 16px; // to match svg.
+
+			&.dashicons {
+				color: inherit; // Prevent rating color being applied to star icons
+
+				&:before {
+					margin-left: -3px;
+				}
+			}
+
+			svg {
+				width: 16px;
+				height: 16px;
+				fill: currentColor;
+				margin-left: -1px;
+			}
+		}
+
+		.block-title {
+			align-self: center;
+			font-weight: bold;
+		}
+
+		.has-description {
+			.block-icon {
+				grid-row: 1 / span 2;
+			}
+
+			.block-title {
+				margin-bottom: 0.4em;
+			}
+		}
+	}
+
+	span#description,
+	span#reviews,
+	span#developers,
+	span#installation {
+		position:fixed;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ span#advanced:not(.displayed) ~ #section-links .tabs li#tablink-description,
+	span#reviews:target ~ #section-links .tabs li#tablink-reviews,
+	span#installation:target ~ #section-links .tabs li#tablink-installation,
+	span#developers:target ~ #section-links .tabs li#tablink-developers,
+	span#advanced.displayed ~ #section-links .tabs li#tablink-advanced  {
+		border-top: 1px solid var( --wp--preset--color--light-grey-1 );
+		border-left: 1px solid var( --wp--preset--color--light-grey-1 );
+		border-right: 1px solid var( --wp--preset--color--light-grey-1 );
+		border-bottom: 0;
+		padding-bottom: 1px;
+		background: #fff;
+
+		@media screen and (max-width:38em) {
+			&.active, &:hover {
+				padding-bottom: 1px !important;
+			}
+		}
+	}
+
+	span#section-links {
+		display: flex;
+		flex-flow: row wrap;
+		margin-top: var( --wp--preset--spacing--30 );
+
+		.tabs {
+			flex: 1 1 auto;
+			padding-left: 0;
+
+			@media screen and (max-width:38em) {
+				border: 1px solid var( --wp--preset--color--light-grey-1 ) !important;
+
+				li {
+					border: none !important;
+				}
+			}
+		}
+
+		@media screen and (max-width:38em) {
+			display: block;
+		}
+	}
+
+	#link-support {
+		border-bottom: 1px solid var( --wp--preset--color--light-grey-1 );
+		flex: 0 0 auto;
+		font-size: 0.9rem;
+		align-self: flex-end;
+
+		a {
+			display: inline-block;
+			padding: 0.64rem 0 0.64rem 1.25rem;
+			font-size: var(--wp--preset--font-size--normal);
+		}
+
+		@media screen and (max-width:38em) {
+			border-bottom: 0;
+			display: block;
+			width: 100%;
+
+			a {
+				padding-right: 1.25rem;
+			}
+		}
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-description,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #screenshots,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #faq,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #blocks,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers,
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers ~ button,
+	span#reviews:target ~ .entry-content #tab-reviews,
+	span#installation:target ~ .entry-content #tab-installation,
+	span#developers:target ~ .entry-content #tab-changelog,
+	span#developers:target ~ .entry-content #tab-developers,
+	span#developers:target ~ .entry-content #tab-developers ~ button,
+	span#developers:target ~ .entry-content #tab-developers .plugin-development {
+		display:block;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-content #tab-developers .plugin-development,
+	span#developers:target ~ .entry-content #tab-developers .plugin-contributors {
+		display:none;
+	}
+
+	span#reviews:not(:target) ~ span#installation:not(:target) ~ span#developers:not(:target) ~ .entry-meta .plugin-contributors,
+	span#reviews:target ~ .entry-meta .plugin-meta,
+	span#reviews:target ~ .entry-meta .plugin-support,
+	span#reviews:target ~ .entry-meta .plugin-donate,
+	span#reviews:target ~ .entry-meta .plugin-contributors,
+	span#installation:target ~ .entry-meta .plugin-contributors {
+		display:none;
+	}
+
+	@media screen and ( min-width: $ms-breakpoint ) {
+		.entry-content,
+		.entry-meta {
+			padding-left: 0;
+			padding-right: 0;
+		}
+
+		.entry-meta {
+			float: right;
+			width: 30%;
+		}
+	}
+
+	.plugin-danger-zone h4 {
+		margin-top: var( --wp--preset--spacing--60 );
+	}
+}
+
+
+.plugin-releases-listing {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.plugin-releases-listing tbody td:nth-child(4) div {
+	font-size: 14px;
+}
+
+.plugin-releases-listing-actions {
+	display: flex;
+	gap: 8px;
+	flex-direction: column;
+
+	@media screen and ( min-width: 34em ) {
+		flex-direction: row;
+	}
+}

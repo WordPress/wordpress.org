@@ -24,25 +24,19 @@ if ( $user ) {
 			'extra_attr' => 'style="vertical-align: middle;margin-right:5px;"',
 		)
 	);
-	if ( ! empty( $user->user_url ) ) {
-		$host .= '</a>';
-	}
-	if ( ! empty( $user->user_url ) ) {
-		$host .= '<a target="_blank" rel="nofollow" href="' . esc_url( $user->user_url ) . '">';
-	}
 	$host .= $user->display_name;
 	if ( ! empty( $user->user_url ) ) {
 		$host .= '</a>';
 	}
 } ?>
 
-<?php echo Display::get_display_css(); ?>
+<?php echo Display::get_display_css(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Display::get_display_css() returns the report stylesheet, and the link markup is built here. ?>
 
 <?php
 $parent = get_post( $report->post_parent );
 if ( $parent ) :
 	?>
-<p><a href="<?php echo esc_url( get_permalink( $parent ) ); ?>">&larr; <?php echo esc_html( $parent->post_name ) . ': ' . apply_filters( 'the_title', get_the_title( $parent ) ); ?></a></p>
+<p><a href="<?php echo esc_url( get_permalink( $parent ) ); ?>">&larr; <?php echo esc_html( $parent->post_name ) . ': ' . esc_html( $parent->post_title ); ?></a></p>
 <?php endif; ?>
 
 <p><a href="<?php echo esc_url( get_permalink( $report->ID ) ); ?>" title="<?php echo esc_attr( $status_title ); ?>" class="<?php echo esc_attr( 'ptr-status-badge ptr-status-badge-' . strtolower( $status ) ); ?>"><?php echo esc_html( $status ); ?></a></p>
@@ -53,6 +47,25 @@ if ( $parent ) :
 	<tr>
 		<td><strong>Host</strong></td>
 		<td><?php echo wp_kses_post( $host ); ?></td>
+	</tr>
+	<tr>
+		<td><strong>Test Date</strong></td>
+		<td>
+			<?php the_date(); ?>
+			<?php the_time(); ?>
+		</td>
+	</tr>
+	<tr>
+		<td><strong>Execution Time</strong></td>
+		<td>
+			<?php echo esc_html( Display::get_display_time( $report->ID ) ); ?>
+		</td>
+	</tr>
+	<tr>
+		<td><strong>Environment Name</strong></td>
+		<td>
+			<?php echo esc_html( Display::get_display_environment_name( $report->ID ) ); ?>
+		</td>
 	</tr>
 	<tr>
 		<td><strong>PHP Version</strong></td>

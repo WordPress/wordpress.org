@@ -99,7 +99,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $expected_sections = array(
+	public $expected_sections = array(
 		'description',
 		'installation',
 		'faq',
@@ -114,7 +114,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $alias_sections = array(
+	public $alias_sections = array(
 		'frequently_asked_questions' => 'faq',
 		'change_log'                 => 'changelog',
 		'screenshot'                 => 'screenshots',
@@ -125,7 +125,7 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $valid_headers = array(
+	public $valid_headers = array(
 		'tested'            => 'tested',
 		'tested up to'      => 'tested',
 		'requires'          => 'requires',
@@ -144,10 +144,29 @@ class Parser {
 	 *
 	 * @var array
 	 */
-	private $ignore_tags = array(
+	public $ignore_tags = array(
 		'plugin',
 		'wordpress',
 	);
+
+	/**
+	 * The maximum field lengths for the readme.
+	 *
+	 * @var array
+	 */
+	public $maximum_field_lengths = array(
+		'short_description' => 150,
+		'section'           => 2500,
+		'section-changelog' => 5000,
+		'section-faq'       => 5000,
+	);
+
+	/**
+	 * The raw contents of the readme file.
+	 *
+	 * @var string
+	 */
+	public $raw_contents = '';
 
 	/**
 	 * Parser constructor.
@@ -158,7 +177,7 @@ class Parser {
 	 * the parse_readme() function, not the parse_readme_contents() function, so
 	 * that they can be turned from a URL into plain text via the stream.
 	 */
-	public function __construct( $string ) {
+	public function __construct( $string = '' ) {
 		if (
 			(
 				// If it's longer than the Filesystem path limit or contains newlines, it's not worth a file_exists() check.
@@ -180,13 +199,36 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme( $file_or_url ) {
-		$context = stream_context_create( array(
-			'http' => array(
-				'user_agent' => 'WordPress.org Plugin Readme Parser',
-			)
-		) );
+		$is_http = (bool) preg_match( '!^https?://!i', $file_or_url );
 
-		$contents = file_get_contents( $file_or_url, false, $context );
+		// Prefer wp_safe_remote_get for HTTP fetches — it has a 5s timeout, so a hung readme host can't stall queue() or the SVN watcher. Fall back to a no-timeout file_get_contents when WP isn't loaded (early bootstrap / standalone CLI) or for non-HTTP sources (local files, data URIs).
+		if ( $is_http && function_exists( 'wp_safe_remote_get' ) ) {
+			$response = wp_safe_remote_get(
+				$file_or_url,
+				array(
+					'user-agent' => 'WordPress.org Plugin Readme Parser',
+				)
+			);
+
+			if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) >= 400 ) {
+				return false;
+			}
+
+			$contents = wp_remote_retrieve_body( $response );
+		} else {
+			$context = stream_context_create( array(
+				'http' => array(
+					'user_agent' => 'WordPress.org Plugin Readme Parser',
+				),
+			) );
+
+			// Suppress warnings for the common 404 / unreachable-URL case; downstream callers see an empty parser.
+			$contents = @file_get_contents( $file_or_url, false, $context );
+		}
+
+		if ( ! is_string( $contents ) ) {
+			return false;
+		}
 
 		return $this->parse_readme_contents( $contents );
 	}
@@ -196,6 +238,13 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme_contents( $contents ) {
+		// Belt-and-braces: external callers (or future code paths) shouldn't be able to fatal preg_match by passing a non-string.
+		if ( ! is_string( $contents ) ) {
+			return false;
+		}
+
+		$this->raw_contents = $contents;
+
 		if ( preg_match( '!!u', $contents ) ) {
 			$contents = preg_split( '!\R!u', $contents );
 		} else {
@@ -218,6 +267,14 @@ class Parser {
 		$line       = $this->get_first_nonwhitespace( $contents );
 		$this->name = $this->sanitize_text( trim( $line, "#= \t\0\x0B" ) );
 
+		// It's possible to leave the plugin name header off entirely.. 
+		if ( $this->parse_possible_header( $line, true /* only valid headers */ ) ) {
+			array_unshift( $contents, $line );
+
+			$this->warnings['invalid_plugin_name_header'] = true;
+			$this->name                                   = false;
+		}
+
 		// Strip Github style header\n==== underlines.
 		if ( ! empty( $contents ) && '' === trim( $contents[0], '=-' ) ) {
 			array_shift( $contents );
@@ -225,11 +282,16 @@ class Parser {
 
 		// Handle readme's which do `=== Plugin Name ===\nMy SuperAwesomePlugin Name\n...`
 		if ( 'plugin name' == strtolower( $this->name ) ) {
-			$this->name = $line = $this->get_first_nonwhitespace( $contents );
+			$this->warnings['invalid_plugin_name_header'] = true;
 
-			// Ensure that the line read wasn't an actual header or description.
-			if ( strlen( $line ) > 50 || preg_match( '~^(' . implode( '|', array_keys( $this->valid_headers ) ) . ')\s*:~i', $line ) ) {
-				$this->name = false;
+			$this->name = false;
+			$line       = $this->get_first_nonwhitespace( $contents );
+
+			// Ensure that the line read doesn't look like a description.
+			if ( strlen( $line ) < 50 && ! $this->parse_possible_header( $line, true /* only valid headers */ ) ) {
+				$this->name = $this->sanitize_text( trim( $line, "#= \t\0\x0B" ) );
+			} else {
+				// Put it back on the stack to be processed.
 				array_unshift( $contents, $line );
 			}
 		}
@@ -240,9 +302,11 @@ class Parser {
 		$line                = $this->get_first_nonwhitespace( $contents );
 		$last_line_was_blank = false;
 		do {
-			$value = null;
+			$value  = null;
+			$header = $this->parse_possible_header( $line );
+
 			// If it doesn't look like a header value, maybe break to the next section.
-			if ( ! str_contains( $line, ':' ) || str_starts_with( $line, '#' ) || str_starts_with( $line, '=' ) ) {
+			if ( ! $header ) {
 				if ( empty( $line ) ) {
 					// Some plugins have line-breaks within the headers...
 					$last_line_was_blank = true;
@@ -253,12 +317,10 @@ class Parser {
 				}
 			}
 
-			$bits                = explode( ':', trim( $line ), 2 );
-			list( $key, $value ) = $bits;
-			$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
+			list( $key, $value ) = $header;
 
 			if ( isset( $this->valid_headers[ $key ] ) ) {
-				$headers[ $this->valid_headers[ $key ] ] = trim( $value );
+				$headers[ $this->valid_headers[ $key ] ] = $value;
 			} elseif ( $last_line_was_blank ) {
 				// If we skipped over a blank line, and then ended up with an unexpected header, assume we parsed too far and ended up in the Short Description.
 				// This final line will be added back into the stack after the loop for further parsing.
@@ -273,8 +335,16 @@ class Parser {
 			$this->tags = explode( ',', $headers['tags'] );
 			$this->tags = array_map( 'trim', $this->tags );
 			$this->tags = array_filter( $this->tags );
-			$this->tags = array_diff( $this->tags, $this->ignore_tags );
-			$this->tags = array_slice( $this->tags, 0, 5 );
+
+			if ( array_intersect( $this->tags, $this->ignore_tags ) ) {
+				$this->warnings['ignored_tags'] = array_intersect( $this->tags, $this->ignore_tags );
+				$this->tags                     = array_diff( $this->tags, $this->ignore_tags );
+			}
+
+			if ( count( $this->tags ) > 5 ) {
+				$this->warnings['too_many_tags'] = array_slice( $this->tags, 5 );
+				$this->tags                      = array_slice( $this->tags, 0, 5 );
+			}
 		}
 		if ( ! empty( $headers['requires'] ) ) {
 			$this->requires = $this->sanitize_requires_version( $headers['requires'] );
@@ -297,34 +367,43 @@ class Parser {
 			$this->donate_link = $headers['donate_link'];
 		}
 		if ( ! empty( $headers['license'] ) ) {
-			// Handle the many cases of "License: GPLv2 - http://..."
+			// Handle "License: GPLv2 - http://..." and wrapped forms like "<http://...>" or "(http://...)".
 			if ( empty( $headers['license_uri'] ) && preg_match( '!(https?://\S+)!i', $headers['license'], $url ) ) {
-				$headers['license_uri'] = $url[1];
-				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n" );
+				$headers['license_uri'] = trim( $url[1], " -*\t\n\r\n()<>" );
+				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n()<>" );
 			}
-			$this->license = $headers['license'];
+
+			$this->license = $this->sanitize_text( $headers['license'] );
 		}
 		if ( ! empty( $headers['license_uri'] ) ) {
 			$this->license_uri = $headers['license_uri'];
+		}
+
+		// Validate the license specified.
+		if ( ! $this->license ) {
+			$this->warnings['license_missing'] = true;
+		} else {
+			$license_error = $this->validate_license( $this->license );
+			if ( true !== $license_error ) {
+				$this->warnings[ $license_error ] = $this->license;
+			}
 		}
 
 		// Parse the short description.
 		while ( ( $line = array_shift( $contents ) ) !== null ) {
 			$trimmed = trim( $line );
 			if ( empty( $trimmed ) ) {
-				$this->short_description .= "\n";
 				continue;
 			}
 			if ( ( '=' === $trimmed[0] && isset( $trimmed[1] ) && '=' === $trimmed[1] ) ||
 				 ( '#' === $trimmed[0] && isset( $trimmed[1] ) && '#' === $trimmed[1] )
 			) {
-
 				// Stop after any Markdown heading.
 				array_unshift( $contents, $line );
 				break;
 			}
 
-			$this->short_description .= $line . "\n";
+			$this->short_description .= $line . ' ';
 		}
 		$this->short_description = trim( $this->short_description );
 
@@ -394,6 +473,19 @@ class Parser {
 			unset( $this->sections['upgrade_notice'] );
 		}
 
+		foreach ( $this->sections as $section => $content ) {
+			$max_length = "section-{$section}";
+			if ( ! isset( $this->maximum_field_lengths[ $max_length ] ) ) {
+				$max_length = 'section';
+			}
+
+			$this->sections[ $section ] = $this->trim_length( $content, $max_length, 'words' );
+
+			if ( $content !== $this->sections[ $section ] ) {
+				$this->warnings["trimmed_section_{$section}"] = true;
+			}
+		}
+
 		// Display FAQs as a definition list.
 		if ( isset( $this->sections['faq'] ) ) {
 			$this->faq             = $this->parse_section( $this->sections['faq'] );
@@ -408,13 +500,20 @@ class Parser {
 		// Use the first line of the description for the short description if not provided.
 		if ( ! $this->short_description && ! empty( $this->sections['description'] ) ) {
 			$this->short_description = array_filter( explode( "\n", $this->sections['description'] ) )[0];
+			$this->warnings['no_short_description_present'] = true;
 		}
 
 		// Sanitize and trim the short_description to match requirements.
 		$this->short_description = $this->sanitize_text( $this->short_description );
 		$this->short_description = $this->parse_markdown( $this->short_description );
 		$this->short_description = wp_strip_all_tags( $this->short_description );
-		$this->short_description = $this->trim_length( $this->short_description, 150 );
+		$short_description       = $this->trim_length( $this->short_description, 'short_description' );
+		if ( $short_description !== $this->short_description ) {
+			if ( empty( $this->warnings['no_short_description_present'] ) ) {
+				$this->warnings['trimmed_short_description'] = true;
+			}
+			$this->short_description = $short_description;
+		}
 
 		if ( isset( $this->sections['screenshots'] ) ) {
 			preg_match_all( '#<li>(.*?)</li>#is', $this->sections['screenshots'], $screenshots, PREG_SET_ORDER );
@@ -464,7 +563,7 @@ class Parser {
 			}
 		}
 
-		return $line;
+		return $line ?? '';
 	}
 
 	/**
@@ -482,9 +581,34 @@ class Parser {
 	 *
 	 * @param string $desc
 	 * @param int    $length
+	 * @param string $type   The type of the length, 'char' or 'words'.
 	 * @return string
 	 */
-	protected function trim_length( $desc, $length = 150 ) {
+	protected function trim_length( $desc, $length = 150, $type = 'char' ) {
+		if ( is_string( $length ) ) {
+			$length = $this->maximum_field_lengths[ $length ] ?? $length;
+		}
+
+		if ( 'words' === $type ) {
+			// Split by whitespace, capturing it so we can put it back together.
+			$pieces = @preg_split( '/(\s+)/u', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+
+			// In the event of an error (Likely invalid UTF8 data), perform the same split, this time in a non-UTF8 safe manner, as a fallback.
+			if ( $pieces === false ) {
+				$pieces = preg_split( '/(\s+)/', $desc, -1, PREG_SPLIT_DELIM_CAPTURE );
+			}
+
+			$word_count_with_spaces = $length * 2;
+
+			if ( count( $pieces ) < $word_count_with_spaces ) {
+				return $desc;
+			}
+
+			$pieces = array_slice( $pieces, 0, $word_count_with_spaces );
+
+			return implode( '', $pieces ) . ' &hellip;';
+		}
+
 		// Apply the length restriction without counting html entities.
 		$str_length = mb_strlen( html_entity_decode( $desc ) ?: $desc );
 
@@ -507,12 +631,42 @@ class Parser {
 	}
 
 	/**
+	 * Parse a line to see if it's a header.
+	 *
 	 * @access protected
+	 *
+	 * @param string $line       The line from the readme to parse.
+	 * @param bool   $only_valid Whether to only return a valid known header.
+	 * @return false|array
+	 */
+	protected function parse_possible_header( $line, $only_valid = false ) {
+		if ( ! str_contains( $line, ':' ) || str_starts_with( $line, '#' ) || str_starts_with( $line, '=' ) ) {
+			return false;
+		}
+
+		list( $key, $value ) = explode( ':', $line, 2 );
+		$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
+		// Strip `<>` so the markdown autolink form `<https://example.com>` resolves like a bare URL.
+		$value               = trim( $value, " \t*-\r\n<>" );
+
+		if ( $only_valid && ! isset( $this->valid_headers[ $key ] ) ) {
+			return false;
+		}
+
+		return [ $key, $value ];
+	}
+
+	/**
+	 * Reduce readme text to the markup the directory accepts in a readme section.
+	 *
+	 * Public so that a value which stands in for a readme section (the plugin
+	 * file's Description header when there is no readme) can go through the same
+	 * list instead of carrying a copy of it.
 	 *
 	 * @param string $text
 	 * @return string
 	 */
-	protected function filter_text( $text ) {
+	public function filter_text( $text ) {
 		$text = trim( $text );
 
 		$allowed = array(
@@ -546,6 +700,10 @@ class Parser {
 		// TODO: make_clickable() will act inside shortcodes.
 		// $text = make_clickable( $text );
 		$text = wp_kses( $text, $allowed );
+
+		// Readme text has no use for HTML comments, and dropping them keeps
+		// comment syntax out of the fields that are later composed into markup.
+		$text = preg_replace( '#<!--.*?(?:-->|$)#s', '', $text );
 
 		// wpautop() will eventually replace all \n's with <br>s, and that isn't what we want (The text may be line-wrapped in the readme, we don't want that, we want paragraph-wrapped text)
 		// TODO: This incorrectly also applies within `<code>` tags which we don't want either.
@@ -591,15 +749,15 @@ class Parser {
 
 			// In the event that something invalid is used, we'll ignore it (Example: 'Joe Bloggs (Australian Translation)')
 			if ( ! $user ) {
+				$this->warnings['contributor_ignored'] ??= [];
+				$this->warnings['contributor_ignored'][] = $name;
 				unset( $users[ $i ] );
-				$this->warnings['contributor_ignored'] = true;
 				continue;
 			}
 
 			// Overwrite whatever the author has specified with the sanitized nicename.
 			$users[ $i ] = $user->user_nicename;
 		}
-
 		return $users;
 	}
 
@@ -805,6 +963,97 @@ class Parser {
 		}
 
 		return $markdown->transform( $text );
+	}
+
+	/**
+	 * Validate whether the license specified appears to be valid or not.
+	 *
+	 * NOTE: This does not require a SPDX license to be specified, but it should be a valid license nonetheless.
+	 *
+	 * @param string $license The specified license.
+	 * @return string|bool True if it looks good, error code on failure.
+	 */
+	public function validate_license( $license ) {
+		/*
+		 * This is a shortlist of keywords that are expected to be found in a valid license field.
+		 * See https://www.gnu.org/licenses/license-list.en.html for possible compatible licenses.
+		 */
+		$probably_compatible = [
+			'GPL', 'General Public License',
+			// 'GNU 2', 'GNU Public', 'GNU Version 2' explicitely not included, as it's not a specific license.
+			'MIT',
+			'ISC',
+			'Expat',
+			'Apache 2', 'Apache License 2',
+			'X11', 'Modified BSD', 'New BSD', '3 Clause BSD', 'BSD 3',
+			'FreeBSD', 'Simplified BSD', '2 Clause BSD', 'BSD 2',
+			'MPL', 'Mozilla Public License',
+			strrev( 'LPFTW' ), strrev( 'kcuf eht tahw od' ), // To avoid some code scanners..
+			'Public Domain', 'CC0', 'Unlicense',
+			'CC BY', // Note: BY-NC & BY-ND are a no-no. See below.
+			'zlib',
+		];
+
+		/*
+		 * This is a shortlist of keywords that are likely related to a non-GPL  compatible license.
+		 * See https://www.gnu.org/licenses/license-list.en.html for possible explanations.
+		 */
+		$probably_incompatible = [
+			'4 Clause BSD', 'BSD 4 Clause', 
+			'Apache 1',
+			'CC BY-NC', 'CC-NC', 'NonCommercial',
+			'CC BY-ND', 'NoDerivative',
+			'EUPL',
+			'OSL',
+			'Personal use', 'without permission', 'without prior auth', 'you may not',
+			'Proprietery', 'proprietary',
+		];
+
+		$sanitize_license = static function( $license ) {
+			$license = strtolower( $license );
+
+			// Localised or verbose licences.
+			$license = str_replace( 'licence', 'license', $license );
+			$license = str_replace( 'clauses', 'clause', $license ); // BSD
+			$license = str_replace( 'creative commons', 'cc', $license );
+
+			// If it looks like a full GPL statement, trim it back, for this function.
+			if ( 0 === stripos( $license, 'GNU GENERAL PUBLIC LICENSE Version 2, June 1991 Copyright (C) 1989' ) ) {
+				$license = 'gplv2';
+			}
+
+			// Replace 'Version 9' & v9 with '9' for simplicity.
+			$license = preg_replace( '/(version |v)([0-9])/i', '$2', $license );
+
+			// Remove unexpected characters
+			$license = preg_replace( '/(\s*[^a-z0-9. ]+\s*)/i', '', $license );
+
+			// Remove all spaces
+			$license = preg_replace( '/\s+/', '', $license );
+
+			return $license;
+		};
+
+		$probably_compatible   = array_map( $sanitize_license, $probably_compatible );
+		$probably_incompatible = array_map( $sanitize_license, $probably_incompatible );
+		$license               = $sanitize_license( $license );
+
+		// First check to see if it's most probably an incompatible license.
+		foreach ( $probably_incompatible as $match ) {
+			if ( str_contains( $license, $match ) ) {
+				return 'invalid_license';
+			}
+		}
+
+		// Check to see if it's likely compatible.
+		foreach ( $probably_compatible as $match ) {
+			if ( str_contains( $license, $match ) ) {
+				return true;
+			}
+		}
+
+		// If we've made it this far, it's neither likely incompatible, or likely compatible, so unknown.
+		return 'unknown_license';
 	}
 
 }

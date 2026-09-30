@@ -1,4 +1,31 @@
+.photos-random .pagination-links {
+	display: none;
+
+}
+.photo-contributor-more-info {
+	overflow-wrap: anywhere;
+}
+.photo-contributor-more-info strong.ipv6 {
+	font-size: 0.68rem;
+}
+.photo-contributor-rejection-stats {
+	width: 100%;
+}
+.photo-contributor-rejection-stats table {
+	text-align: left;
+	width: 100%;
+}
+
 .fixed .column-wporg-photo { font-weight: bold; width: 180px; }
+.fixed .column-wporg-photo-favorites {
+	width: 2.4rem;
+}
+.status-flagged {
+	background-color: rgba(255,150,150,0.15);
+}
+.striped > tbody > .status-flagged:nth-child(2n+1) {
+	background-color: rgba(255,150,150,0.3);
+}
 .photos-flagged {
 	list-style: none;
 }
@@ -12,12 +39,14 @@
 .photos-flagged li::before {
 	margin-right: 4px;
 }
-.photos-flagged li.very_likely,
-.photos-flagged li.likely {
+.photos-flagged li.very_likely {
 	background-color: #AA0000;
 }
-.photos-flagged li.possible {
+.photos-flagged li.likely {
 	background-color: darkorange;
+}
+.photos-flagged li.possible {
+	background-color: goldenrod;
 }
 
 dl.photos-flagged {
@@ -40,16 +69,114 @@ dl.photos-flagged dt {
 	max-height: initial;
 }
 
+.photos-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill,minmax(300px, 1fr));
+}
+
+.photos-grid > span {
+	position: relative;
+}
+
 .photos-photo-link {
 	display: inline-block;
 	overflow: hidden;
 }
+.photos-photo-link img {
+	max-width: 100%;
+}
 .photos-photo-link img.blurred {
 	filter: blur(4rem);
 }
+.photos-grid .photos-photo-link img {
+	height: 200px;
+	width: 300px;
+	object-fit: cover;
+	transition: all .25s;
+}
+.view-all-contributor-photos {
+	margin-bottom: 0.5rem;
+	margin-top: 1rem;
+	text-align: right;
+}
+.pending-notice {
+	position: absolute;
+	bottom: 8px;
+	left: 0;
+	background-color: rgba(102,6,0, 0.7);
+	color: #fff;
+	padding: 4px 10px;
+	width: 280px;
+	font-weight: bold;
+}
+
 .column-wporg-photo .photos-photo-link img.blurred {
 	filter: blur( 0.7rem );
 }
 .photo-moderator {
 	margin-top: 1rem;
+}
+
+#content.photo-missing-description,
+.photo-missing-note-to-user,
+.photo-missing-taxonomy {
+	border: 1px solid orange;
+	background-color: antiquewhite;
+}
+
+body.post-type-photo label[for="authordiv-hide"],
+body.post-type-photo #authordiv,
+body.post-type-photo label[for="likes_meta-hide"],
+body.post-type-photo label[for="postimagediv-hide"],
+body.post-type-photo #wp-content-editor-tools,
+body.post-type-photo #ed_toolbar,
+#photo_category-adder,
+#photo_color-adder,
+#photo_orientation-adder {
+	display: none;
+}
+
+body.post-type-photo #wp-content-editor-container {
+	margin-top: 2rem;
+}
+
+#photos_info dt {
+	font-weight:bold;
+	color: #777;
+}
+#photos_info dd {
+	margin-left: 1.5rem;
+	overflow-wrap: break-word;
+}
+
+.wp-heading-inline #photo-dir-skip-photo {
+	margin-left: 1rem;
+}
+
+.no-exif {
+	font-style: italic;
+}
+
+.photo-all-exif-container {
+	border-top: 1px solid #ccc;
+	margin-top: 6px;
+	padding-top: 6px;
+}
+.photo-all-exif {
+	overflow-wrap: anywhere;
+}
+
+#dashboard-photo-rejection-stats .col-num {
+	width: 50px;
+}
+#dashboard-photo-rejection-stats .row-sum {
+	font-weight: bold;
+}
+#dashboard-photo-rejection-stats .row-sum td {
+	border-top: 1px solid #c3c4c7;
+}
+
+/* Fix overflow issue related to https://core.trac.wordpress.org/ticket/64547 */
+body.post-type-photo #major-publishing-actions {
+	display: block;
 }

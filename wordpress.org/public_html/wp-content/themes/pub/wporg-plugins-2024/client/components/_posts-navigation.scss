@@ -1,0 +1,61 @@
+.pagination .nav-links {
+	text-align: center;
+	margin-top: var( --wp--style--block-gap );
+	padding-top: var( --wp--style--block-gap );
+
+	a {
+		text-decoration: none;
+	}
+
+	.page-numbers {
+		cursor: pointer;
+		display: inline-block;
+		min-width: 2em;
+		padding: 8px;
+		text-align: center;
+
+		&.next,
+		&.prev,
+		&.dots {
+			background: none;
+			font-size: 0.9em;
+			width: auto;
+		}
+		&.dots {
+			cursor: inherit;
+		}
+
+		@media screen and ( max-width: $ms-breakpoint ) {
+			&.prev,
+			&.next {
+				font-size: 0;
+				min-width: initial;
+				padding: 0;
+			}
+
+			&.prev:before,
+			&.next:after {
+				display: inline-block;
+				font-size: initial;
+				line-height: 1.5;
+				min-width: 2em;
+				padding: 8px;
+			}
+
+			&.prev:before {
+				content: '\2039'; /* &lsaquo; */
+			}
+
+			&.next:after {
+				content: '\203A'; /* &rsaquo; */
+			}
+		}
+	}
+	span.page-numbers {
+		font-weight: bold;
+	}
+
+	span.page-numbers.current {
+		text-decoration: underline;
+	}
+}

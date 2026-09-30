@@ -1,0 +1,52 @@
+@import "../variables-site/variables-site";
+
+/* User badges */
+
+.author-badge {
+	position: absolute;
+	top: var(--wp--preset--spacing--20);
+	left: var(--wp--preset--spacing--20);
+	padding: 2px 6px;
+	color: #fff;
+	font-size: 11px;
+	border-radius: var(--wp--custom--button--border--radius);
+
+	.topic-indicator + .bbp-topic-author & {
+		top: 40px;
+	}
+}
+
+.author-badge-moderator {
+	background-color: var(--wp--custom--color--moderator);
+}
+
+.author-badge-thread-starter {
+	background-color: var(--wp--custom--color--thread-starter);
+	color: var(--wp--preset--color--charcoal-1);
+}
+
+.author-badge-plugin {
+	background-color: var(--wp--custom--color--plugin-author);
+}
+
+.author-badge-theme {
+	background-color: var(--wp--custom--color--theme-author);
+}
+
+.author-badge-reporter {
+	background-color: var(--wp--custom--color--thread-reporter);
+	right: -2px;
+	left: initial;
+	border-radius: 2px 0 0 2px;
+}
+
+.bbp-view .bbp-topics,
+.bbp-search .bbp-search-results,
+.bbp-user-replies-created,
+.bbp-user-reports-submitted {
+
+	.author-badge-reporter {
+		left: initial;
+		right: 0;
+	}
+}

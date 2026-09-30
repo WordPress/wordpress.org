@@ -1,0 +1,109 @@
+.plugin-upload-form {
+
+	&.hidden {
+		display: none;
+	}
+
+	fieldset {
+		border: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	legend {
+		margin: 1rem 0;
+	}
+
+	/* Styles for the plugin_category checklist that was removed. */
+	.category-checklist {
+		list-style-type: none;
+		margin: 0 0 2rem;
+
+		li {
+			float: left;
+			padding: 0.5rem 0;
+			width: 50%;
+		}
+
+		@media screen and ( min-width: 48em ) {
+			li {
+				padding: 0;
+			}
+
+			label {
+				font-size: var( --wp--preset--font-size--small );
+			}
+		}
+	}
+
+	@media screen and ( min-width: 48em ) {
+		label.button {
+			line-height: 1.8;
+		}
+	}
+
+	.plugin-file {
+		height: 0.1px;
+		opacity: 0;
+		overflow: hidden;
+		position: absolute;
+		width: 0.1px;
+		z-index: -1;
+	}
+
+	.zip-file{
+		display: inline-block;
+	}
+
+}
+
+.plugin-queue-message {
+
+	code {
+		font-size: 1em;
+	}
+
+	dialog.slug-change input[type="text"] {
+		font-family: monospace;
+		font-size: 1.2em;
+		width: 20em;
+	}
+	
+}
+
+.plugin-submission-item {
+	&>div, .plugin-submission-file>div {
+		margin-top: 0.4rem;
+		margin-bottom: 0.4rem;
+	}
+	.plugin-submission-name {
+		font-weight: bold;
+		font-size: 1.2rem;
+	}
+	.plugin-submission-email + .plugin-submission-email-clarification{
+		margin-top: -0.4rem;
+	}
+	.plugin-submission-email-clarification{
+		font-size: 85%;
+	}
+	.plugin-submission-update-code {
+		margin-top: 0.6rem;
+		margin-bottom: 1rem;
+		.show-upload-additional{
+			display: inline-block;
+		}
+	}
+	.plugin-submission-file {
+		border-inline-start: 2px solid black;
+		padding: 0.4rem 1rem;
+		.plugin-submission-file__meta th {
+			text-align: start;
+		}
+		.plugin-submission-file__pcp{
+			display: inline-block;
+		}
+		&+.plugin-submission-file {
+			margin-top: 1rem;
+		}
+	}
+}

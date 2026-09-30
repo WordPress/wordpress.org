@@ -1,7 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
 
-use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
 
 /**
@@ -36,12 +36,14 @@ class Support_Reps extends \WP_Widget {
 		}, $support_reps );
 
 		if ( current_user_can( 'plugin_add_support_rep', $post ) || current_user_can( 'plugin_remove_support_rep', $post ) ) {
-			wp_enqueue_script( 'wporg-plugins-support-reps', plugins_url( 'js/support-reps.js', __FILE__ ), array( 'wp-util' ), true );
+			wp_enqueue_script( 'wporg-plugins-support-reps', plugins_url( 'js/support-reps.js', __FILE__ ), array( 'wp-util' ), filemtime( __DIR__ . '/js/support-reps.js' ) );
 			wp_localize_script( 'wporg-plugins-support-reps', 'supportRepsWidget', array(
 				'restUrl'             => get_rest_url(),
 				'restNonce'           => wp_create_nonce( 'wp_rest' ),
+				'addNonce'            => Base::action_nonce( 'add_support_rep', $post->post_name ),
+				'removeNonce'         => Base::action_nonce( 'remove_support_rep', $post->post_name ),
 				'pluginSlug'          => $post->post_name,
-				'removeSupportRepAYS' => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
+				'removeSupportRepAYS' => __( 'Are you sure you want to remove %s as a support rep?', 'wporg-plugins' ),
 			) );
 		} elseif ( ! $support_reps ) {
 			return;
@@ -49,23 +51,26 @@ class Support_Reps extends \WP_Widget {
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Support Reps', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['before_widget'];
-		echo $args['before_title'] . $title . $args['after_title'];
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 		?>
 
 		<ul id="support-rep-list" class="support-rep-list">
 
-			<?php foreach ( $support_reps as $support_rep ) : ?>
+			<?php foreach ( $support_reps as $support_rep ) :
+				if ( ! $support_rep ) continue; ?>
 				<li data-user="<?php echo esc_attr( $support_rep->user_nicename ); ?>">
 					<?php echo get_avatar( $support_rep->ID, 32 ); ?>
 					<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$support_rep->user_nicename}/" ); ?>">
-						<?php echo Template::encode( $support_rep->display_name ?: $support_rep->user_nicename ); ?>
+						<?php echo esc_html( $support_rep->display_name ?: $support_rep->user_nicename ); ?>
 					</a><br>
 
 					<?php if ( current_user_can( 'plugin_remove_support_rep', $post ) ) : ?>
 					<small>
 						<?php echo current_user_can( 'plugin_review' ) ? esc_html( $support_rep->user_email ) . ' ' : ''; ?>
-						<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
+						<button class="button-link remove"><?php esc_html_e( 'Remove', 'wporg-plugins' ); ?></button>
 					</small>
 					<?php endif; ?>
 				</li>
@@ -75,7 +80,7 @@ class Support_Reps extends \WP_Widget {
 			<li class="new">
 				<form id="add-support-rep" action="POST">
 					<input type="text" name="support_rep" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
-					<button type="submit" class="button button-secondary"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
+					<button type="submit" class="button button-secondary button-small"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
 				</form>
 
 				<script id="tmpl-new-support-rep" type="text/template">
@@ -88,7 +93,7 @@ class Support_Reps extends \WP_Widget {
 							<# if ( data.email ) { #>
 								<span class="email">{{ data.email }}</span>
 							<# } #>
-							<button class="button-link remove"><?php _e( 'Remove', 'wporg-plugins' ); ?></button>
+							<button class="button-link remove"><?php esc_html_e( 'Remove', 'wporg-plugins' ); ?></button>
 						</small>
 					</li>
 				</script>
@@ -97,6 +102,7 @@ class Support_Reps extends \WP_Widget {
 		</ul>
 
 		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['after_widget'];
 	}
 }

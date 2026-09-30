@@ -21,23 +21,43 @@ class Moderation {
 
 	/**
 	 * The threshold percentage of the number of rejections relative to the
-	 * number of approvals at which the user should be flagged as a warning
-	 * (in orange). Should be a lower value than
+	 * number of approvals+rejections at which the user should be flagged as a warning
+	 * (in yellow). Should be a lower value than
 	 * `FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE`.
 	 *
 	 * @var float
 	 */
-	const FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE = 0.1;
+	const FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE = 0.15;
 
 	/**
 	 * The threshold percentage of the number of rejections relative to the
-	 * number of approvals at which the user should be flagged as an alert
+	 * number of approvals+rejections at which the user should be flagged as an alert
 	 * (in red) rather than a warning (in orange). Should be a higher value than
 	 * `FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE`.
 	 *
 	 * @var float
 	 */
-	const FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE = 0.25;
+	const FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE = 0.30;
+
+	/**
+	 * The threshold percentage of the number of rejections relative to the
+	 * number of approvals+rejections at which the user should be flagged as
+	 * critical rather than an alert. Should be a higher value than
+	 * `FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE`.
+	 *
+	 * @var float
+	 */
+	const FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE = 0.50;
+
+	/**
+	 * Name of user meta key that acts as a flag for whether the user can manage photo_tags.
+	 *
+	 * Note: There are additional checks, such as the user also being a moderator or admin,
+	 * that are also considered.
+	 *
+	 * @var string
+	 */
+	const USER_META_CAN_MANAGE_PHOTO_TAGS = 'can_manage_photo_tags';
 
 	/**
 	 * Initializes component.
@@ -54,35 +74,52 @@ class Moderation {
 		add_action( 'wporg_photos_moderation_email_sent', [ __CLASS__, 'sent_user_email' ] );
 		add_filter( 'wporg_photos_pre_upload_form',       [ __CLASS__, 'output_list_of_pending_submissions_for_user' ] );
 
+		// Disable moderating own posts.
+		add_filter( 'user_has_cap',                       [ __CLASS__, 'disable_own_post_editing' ], 10, 4 );
+
+		// Assign caps to moderators who can manage photo_tags.
+		add_filter( 'map_meta_cap',                       [ __CLASS__, 'assign_cap_manage_photo_tags' ], 10, 3 );
+
 		// Add column to users table with count of photos moderated.
 		add_filter( 'manage_users_columns',               [ __CLASS__, 'add_moderated_count_column' ] );
 		add_filter( 'manage_users_custom_column',         [ __CLASS__, 'handle_moderated_count_column_data' ], 10, 3 );
 
 		// Modify Date column for photo posts table with name of moderator.
 		add_action( 'post_date_column_time',              [ __CLASS__, 'add_moderator_to_date_column' ], 10, 3 );
+
+		// Register dashboard widget.
+		add_action( 'wp_dashboard_setup',                 [ __CLASS__, 'dashboard_setup' ] );
 	}
 
 	/**
-	 * Adds the 'Photos Moderator' role.
+	 * Returns all capabilities for photos-related roles.
+	 *
+	 * @param bool $for_photos_admin Optional. Should capabilites include those
+	 *                               exclusive to Photo Admins?
+	 *                               Default false.
+	 * @return array
 	 */
-	public static function add_roles() {
-		add_role(
-			'photos_moderator',
-			__( 'Photos Moderator', 'wporg-photos' ),
-			[
-				// Capabilities for photo posts.
-				'read'                    => true,
-				'edit_photos'             => true,
-				'delete_photos'           => true,
-				'publish_photos'          => true,
-				'edit_others_photos'      => true,
-				'delete_others_photos'    => true,
-				'edit_published_photos'   => true,
-				'delete_published_photos' => true,
-				'edit_private_photos'     => true,
+	public static function get_photos_caps( $for_photos_admin = false ) {
+		$caps = [
+			// Capabilities for photo posts.
+			'read'                    => true,
+			'edit_photos'             => true,
+			'delete_photos'           => true,
+			'publish_photos'          => true,
+			'edit_others_photos'      => true,
+			'delete_others_photos'    => true,
+			'edit_published_photos'   => true,
+			'delete_published_photos' => true,
+			'upload_files'            => true,
+		];
+
+		if ( $for_photos_admin ) {
+			$caps = array_merge( $caps, [
+				// Manage flagged and private photos.
+				Flagged::get_capability() => true,
 				'delete_private_photos'   => true,
+				'edit_private_photos'     => true,
 				'read_private_photos'     => true,
-				'upload_files'            => true,
 				// Capabilities for posts and media.
 				'edit_posts'              => true,
 				'delete_posts'            => true,
@@ -91,14 +128,71 @@ class Moderation {
 				'delete_others_posts'     => true,
 				'edit_published_posts'    => true,
 				'delete_published_posts'  => true,
-				'edit_private_posts'      => true,
-				'delete_private_posts'    => true,
-				'read_private_posts'      => true,
 				'edit_post'               => true,
 				'delete_post'             => true,
 				'read_post'               => true,
-			]
+			] );
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Adds the photos-specific roles.
+	 *
+	 * Adds:
+	 * - photos_moderator: User who can moderate photos.
+	 * - photos_administrator: Same as photos moderator, but can additionally:
+	 *     - Access and manage private (aka flagged) photos.
+	 *     - Create/edit/delete posts.
+	 */
+	public static function add_roles() {
+		// Remove the roles first, in case the permission set has changed.
+		remove_role( 'photos_moderator' );
+		remove_role( 'photos_administrator' );
+
+		add_role(
+			'photos_moderator',
+			__( 'Photo Moderator', 'wporg-photos' ),
+			self::get_photos_caps()
 		);
+
+		$admin_caps = self::get_photos_caps( true );
+
+		add_role(
+			'photos_administrator',
+			__( 'Photo Admin', 'wporg-photos' ),
+			$admin_caps
+		);
+
+		// Add capabilites to administrator role.
+		$admin = get_role( 'administrator' );
+		if ( $admin ) {
+			foreach ( $admin_caps as $cap => $val ) {
+				$admin->add_cap( $cap );
+			}
+		}
+	}
+
+	/**
+	 * Removes the photo-specific roles.
+	 *
+	 * Removes:
+	 * - photos_moderator
+	 * - photos_administrator
+	 */
+	public static function remove_roles() {
+		remove_role( 'photos_moderator' );
+		remove_role( 'photos_administrator' );
+
+		// Remove added capabilites from administrator role.
+		$admin = get_role( 'administrator' );
+		foreach ( self::get_photos_caps( true ) as $cap => $val ) {
+			// Only remove photos-specific caps.
+			if ( false !== strpos( $cap, 'photo' ) ) {
+				$admin->remove_cap( $cap );
+			}
+		}
 	}
 
 	/**
@@ -122,6 +216,96 @@ class Moderation {
 			if ( $photos_moderator_role ) {
 				$caps = array_merge( (array) $photos_moderator_role->capabilities, (array) $caps );
 			}
+		}
+
+		return $caps;
+	}
+
+	/**
+	 * Allows management of photo tags to admins and to moderators who can manage photo_tags.
+	 *
+	 * By default, photo moderators are not permitted to edit photo_tags. However,
+	 * if the user has the 'can_manage_photo_tags' user meta set to 1, they can.
+	 *
+	 * @param string[] $caps    Primitive capabilities required of the user.
+	 * @param string   $cap     Capability being checked.
+	 * @param int      $user_id The user ID.
+	 * @return string[]
+	 */
+	public static function assign_cap_manage_photo_tags( $caps, $cap, $user_id ) {
+		// Bail early if this is not for the 'manage_photo_tags' cap.
+		if ( 'manage_photo_tags' !== $cap ) {
+			return $caps;
+		}
+
+		$is_caped = function_exists( 'is_caped' ) && is_caped( $user_id );
+
+		if ( ! is_user_member_of_blog() && ! $is_caped ) {
+			return $caps;
+		}
+
+		$allowed = (
+			// User is caped.
+			$is_caped
+		||
+			// User is admin.
+			user_can( $user_id, 'manage_options' )
+		||
+			// User can moderate photos and has associated user meta key set.
+			(
+				user_can( $user_id, 'edit_photos' )
+			&&
+				get_user_meta( $user_id, self::USER_META_CAN_MANAGE_PHOTO_TAGS, true )
+			)
+		);
+
+		return $allowed ? [ 'exist' ] : [ 'do_not_allow' ];
+	}
+
+	/**
+	 * Prevents moderators from being able to edit or moderate their own photos.
+	 *
+	 * @param array    $caps Array of key/value pairs where keys represent a
+	 *                       capability name and boolean values represent whether
+	 *                       the user has that capability.
+	 * @param string[] $cap  Required primitive capabilities for requested capability.
+	 * @param array    $args {
+	 *     Arguments that accompany the requested capability check.
+	 *
+	 *     @type string    $0 Requested capability.
+	 *     @type int       $1 Concerned user ID.
+	 *     @type mixed  ...$2 Optional second and further parameters, typically object ID.
+	 * }
+	 * @param WP_User  $user The user object.
+	 * @return array
+	 */
+	 public static function disable_own_post_editing( $caps, $cap, $args, $user ) {
+		// Bail if not a relevant capability.
+		if ( empty( $cap[0] ) || ! in_array( $cap[0], [ 'edit_photos', 'publish_photos' ] ) ) {
+			return $caps;
+		}
+
+		// Bail if no post context provided.
+		if ( ! isset( $args[2] ) ) {
+			return $caps;
+		}
+
+		// Bail if user isn't a moderator.
+		if ( ! user_can( $user->ID, 'edit_photos' ) ) {
+			return $caps;
+		}
+
+		$post = get_post( $args[2] );
+
+		// Bail if not a photo post.
+		if ( Registrations::get_post_type() !== $post->post_type ) {
+			return $caps;
+		}
+
+		// Disallow editing their own submission.
+		if ( isset( $post->post_author ) && $post->post_author == $user->ID ) {
+			$caps['edit_photos'] = false;
+			$caps['publish_photos'] = false;
 		}
 
 		return $caps;
@@ -169,8 +353,11 @@ class Moderation {
 			// Post is a photo post type.
 			get_post_type( $post ) === Registrations::get_post_type()
 		&&
-			// Post is pending.
-			'pending' === $post->post_status
+			// Post is in a non-published status that is still associated with a photo.
+			in_array( $post->post_status, [ 'draft', 'pending', 'private', Flagged::get_post_status() ] )
+		&&
+			// Post hasn't been unflagged.
+			! Flagged::was_unflagged( $post )
 		) {
 			$flags = Photo::get_filtered_moderation_assessment( $post->ID );
 
@@ -178,7 +365,7 @@ class Moderation {
 				$output = self::format_flags( $flags );
 
 				if ( $echo ) {
-					echo $output;
+					echo wp_kses_post( $output );
 				}
 			}
 		}
@@ -188,6 +375,8 @@ class Moderation {
 
 	/**
 	 * Formats flags into a list for display.
+	 *
+	 * Flag names can originate from post meta, so no caller may pass markup through them.
 	 *
 	 * @param array $flags  Associative array of flags names (as keys) and
 	 *                      severity (as values). Severity can be one of
@@ -204,9 +393,13 @@ class Moderation {
 			$formatted .= sprintf(
 				'<li class="dashicons-before dashicons-flag %s" title="%s">%s</li>' . "\n",
 				esc_attr( $class ),
-				/* translators: 1: Moderation category, 2: Likelihood of the image being of the given moderation category */
-				sprintf( __( 'This image is flagged as potentially containing %1$s content: %2$s', 'wporg-photos' ), $flag, ucwords( str_replace( '_', ' ', $class ) ) ),
-				ucwords( $flag )
+				esc_attr( sprintf(
+					/* translators: 1: Moderation category, 2: Likelihood of the image being of the given moderation category */
+					__( 'This image is flagged as potentially containing %1$s content: %2$s', 'wporg-photos' ),
+					$flag,
+					ucwords( str_replace( '_', ' ', $class ) )
+				) ),
+				esc_html( ucwords( $flag ) )
 			);
 		}
 		$formatted .= "</ul>\n";
@@ -257,7 +450,7 @@ class Moderation {
 
 		// Check for moderator's note to user.
 		$mod_note = '';
-		$mod_note_to_user = Rejection::get_moderator_note_to_user( $post );
+		$mod_note_to_user = Rejection::get_moderator_note_to_user( $post, 'publish' );
 		if ( $mod_note_to_user ) {
 			$mod_note = "\n" . __( 'Message from the moderator:', 'wporg-photos' ) . "\n{$mod_note_to_user}\n";
 		}
@@ -341,7 +534,7 @@ https://wordpress.org/photos/
 		}
 
 		// Check for moderator's note to user.
-		$mod_note = Rejection::get_moderator_note_to_user( $post );
+		$mod_note = Rejection::get_moderator_note_to_user( $post, 'reject' );
 		if ( $mod_note ) {
 			$rejection_message .= "\n" . __( 'Message from the moderator:', 'wporg-photos' ) . "\n" . $mod_note . "\n";
 		}
@@ -414,7 +607,7 @@ https://wordpress.org/photos/
 		}
 
 		// Check for moderator's note to user.
-		$mod_note = Rejection::get_moderator_note_to_user( $post );
+		$mod_note = Rejection::get_moderator_note_to_user( $post, 'reject' );
 		if ( $mod_note ) {
 			$rejection_message .= "\n" . __( 'Message from the moderator:', 'wporg-photos' ) . "\n" . $mod_note . "\n";
 		}
@@ -462,7 +655,7 @@ https://wordpress.org/photos/
 		$post_type = Registrations::get_post_type();
 
 		// Bail if not photo post type or not pending.
-		if ( get_post_type( $post ) !== $post_type || 'pending' !== $post->post_status ) {
+		if ( get_post_type( $post ) !== $post_type || ! in_array( $post->post_status, Photo::get_pending_post_statuses() ) ) {
 			return;
 		}
 
@@ -479,43 +672,37 @@ https://wordpress.org/photos/
 			$flags[ 'face detected' ] = 'very_likely';
 		}
 
-		// Flag if user has past rejections.
-		$rejections = Rejection::get_user_rejections( $post->post_author );
-		if ( $rejections ) {
-			$rejections_count = count( $rejections );
+		// Flag if user has notable number of past rejections.
+		$rejections_count = User::count_rejected_photos( $post->post_author );
+		if ( $rejections_count ) {
+				$rejections_level = $message = '';
 
-			// Don't count submission errors.
-			$submission_errors_count = array_reduce( $rejections, function ( $count, $item ) {
-				$reason = Rejection::get_rejection_reason( $item );
-				if ( 'submission-error' === $reason ) {
-					$count++;
-				}
-				return $count;
-			}, 0 );
-			$rejections_count -= $submission_errors_count;
-
-			if ( $rejections_count > 0 ) {
-				$rejections_level = '';
+				$rejections_percentage = $rejections_count / ( $rejections_count + $published_photos_count );
 
 				// A user with more rejections than approvals should be an alert.
-				if ( $rejections_count >= $published_photos_count ) {
+				if ( $rejections_count > $published_photos_count ) {
 					$rejections_level = 'very_likely';
+					$message = __( 'more rejections than approvals', 'wporg-photos' );
 				}
 				// Specify as alert or warning based on count relative to alert threshold.
 				else {
-					$reject_pct = $rejections_count / $published_photos_count;
-					if ( $reject_pct >= self::FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE ) {
+					if ( $rejections_percentage >= self::FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'very_likely';
+						$message = __( 'very high rejection rate (%d%%)', 'wporg-photos' );
 					}
-					elseif ( $reject_pct >= self::FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE ) {
+					elseif ( $rejections_percentage >= self::FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE ) {
+						$rejections_level = 'likely';
+						$message = __( 'high rejection rate (%d%%)', 'wporg-photos' );
+					}
+					elseif ( $rejections_percentage >= self::FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'possible';
+						$message = __( 'rejection rate (%d%%)', 'wporg-photos' );
 					}
 				}
 
-				if ( $rejections_level ) {
-					$flags[ sprintf( 'has rejections (<strong>%d</strong>)', $rejections_count ) ] = $rejections_level;
+				if ( $rejections_level && $message ) {
+					$flags[ sprintf( $message, round( $rejections_percentage * 100 , 0 ) ) ] = $rejections_level;
 				}
-			}
 		}
 
 		$user = get_user_by( 'id', $post->post_author );
@@ -529,7 +716,7 @@ https://wordpress.org/photos/
 			$flags[ 'new user account' ] = 'possible';
 		}
 
-		echo self::format_flags( $flags );
+		echo wp_kses_post( self::format_flags( $flags ) );
 	}
 
 	/**
@@ -549,19 +736,14 @@ https://wordpress.org/photos/
 			return $content;
 		}
 
-		$pending = get_posts( [
-			'posts_per_page' => -1,
-			'author'         => (int) $user_id,
-			'post_status'    => 'pending',
-			'post_type'      => Registrations::get_post_type(),
-		] );
+		$pending = User::get_pending_photos( $user_id, '' );
 
 		// Bail if user does not have any pending posts.
 		if ( ! $pending ) {
 			return $content;
 		}
 
-		$content .= '<h2>' . __( 'Submissions awaiting moderation', 'wporg-photos' ) . "</h2>\n";
+		$content .= '<h3>' . __( 'Submissions awaiting moderation', 'wporg-photos' ) . "</h3>\n";
 		$content .= '<p>';
 		$max_pending_submissions = User::get_concurrent_submission_limit( $user_id );
 		$content .= sprintf(
@@ -577,8 +759,8 @@ https://wordpress.org/photos/
 		foreach ( $pending as $post ) {
 			$content .= sprintf(
 				"<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-				get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: __( "(unknown)", 'wporg-photos' ),
-				get_the_date( 'Y-m-d', $post ),
+				esc_html( get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: __( '(unknown)', 'wporg-photos' ) ),
+				esc_html( get_the_date( 'Y-m-d', $post ) ),
 				esc_html( get_the_content( null, false, $post ) ?: __( '(none provided)', 'wporg-photos' ) ),
 			);
 		}
@@ -614,20 +796,10 @@ https://wordpress.org/photos/
 				'posts_per_page' => -1,
 				'post_status'    => [ 'publish', Rejection::get_post_status() ],
 				'post_type'      => Registrations::get_post_type(),
-				'meta_query'     => [
-					'relation' => 'OR',
-					[
-						'key'        => Registrations::get_meta_key( 'moderator' ),
-						'value'      => $user_id,
-					],
-					[
-						'key'        => 'rejected_by',
-						'value'      => $user_id,
-					],
-				],
+				'meta_query'     => User::get_moderator_meta_query( $user_id, true ),
 			] );
 
-			$output = $query->found_posts;
+			$output = number_format_i18n( $query->found_posts );
 		}
 
 		return $output;
@@ -657,8 +829,105 @@ https://wordpress.org/photos/
 		return $t_time;
 	}
 
+	/**
+	 * Registers the admin dashboard.
+	 */
+	public static function dashboard_setup() {
+		if ( current_user_can( 'edit_photos' ) ) {
+			wp_add_dashboard_widget(
+				'dashboard_photo_moderators',
+				__( 'Photo Moderators', 'wporg-photos' ),
+				[ __CLASS__, 'dashboard_photo_moderators' ]
+			);
+		}
+	}
+
+	/**
+	 * Outputs the Photo Moderators dashboard.
+	 */
+	public static function dashboard_photo_moderators() {
+		echo '<div class="main">';
+
+		// Get all users with the 'edit_photos' capability.
+		$args = [
+			'capability' => 'edit_photos',
+		];
+		$users = get_users( $args );
+
+		echo "<style>\n";
+		echo <<<CSS
+			#dashboard-photo-moderators .col-num-approved,
+			#dashboard-photo-moderators .col-num-rejected {
+				width: 50px;
+			}
+			#dashboard-photo-moderators .col-last-mod-date {
+				width: 80px;
+			}
+CSS;
+		echo "</style>\n";
+
+		echo '<table id="dashboard-photo-moderators" class="wp-list-table widefat fixed striped table-view-list">';
+		echo '<thead><tr>';
+		echo '<th>' . esc_html__( 'Moderator', 'wporg-photos' ) . '</th>';
+		echo '<th class="col-num-approved" title="' . esc_attr__( 'Number of photos approved', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-up"></span></th>';
+		echo '<th class="col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
+		echo '<th class="col-last-mod-date">' . esc_html__( 'Last Moderated', 'wporg-photos' ) . '</th>';
+		echo '</tr></thead>';
+		echo '<tbody>';
+
+		foreach ( $users as $user ) {
+			$count_approved = User::count_photos_moderated( $user->ID );
+			$count_rejected = User::count_photos_rejected_as_moderator( $user->ID );
+
+			// Bail if user has not moderated any photos.
+			if ( ! $count_approved && ! $count_rejected ) {
+				continue;
+			}
+
+			echo '<tr>';
+			echo '<td>';
+			printf(
+				'<a href="%s">@%s</a><br>%s',
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				esc_html( $user->user_nicename ),
+				esc_html( $user->display_name )
+			);
+			echo '</td>';
+
+			$base_edit_url = add_query_arg( [ 'post_type' => Registrations::get_post_type(), 'author' => $user->ID ], admin_url( 'edit.php' ) );
+			echo '<td>' . ( $count_approved ? sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( add_query_arg( [ 'post_status' => 'publish' ], $base_edit_url ) ),
+				esc_html( number_format_i18n( $count_approved ) )
+			) : '0' ) . '</td>';
+			echo '<td>' . ( $count_rejected ? sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( add_query_arg( [ 'post_status' => Rejection::get_post_status() ], $base_edit_url ) ),
+				esc_html( number_format_i18n( $count_rejected ) )
+			) : '0' ) . '</td>';
+
+			echo '<td>';
+			$last_moderated = User::get_last_moderated( $user->ID, true );
+			if ( $last_moderated ) {
+				$edit_url = get_edit_post_link( $last_moderated->ID );
+				$last_mod_date = get_the_date( 'Y-m-d', $last_moderated->ID );
+				if ( $edit_url ) {
+					printf( '<a href="%s">%s</a>', esc_url( $edit_url ), esc_html( $last_mod_date ) );
+				} else {
+					echo esc_html( $last_mod_date );
+				}
+			}
+			echo '</td>';
+			echo '</tr>';
+		}
+
+		echo '</tbody></table>';
+		echo '</div>';
+	}
+
 }
 
 register_activation_hook( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/photo-directory.php', [ __NAMESPACE__ . '\Moderation', 'add_roles' ] );
+register_deactivation_hook( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/photo-directory.php', [ __NAMESPACE__ . '\Moderation', 'remove_roles' ] );
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\Moderation', 'init' ] );

@@ -10,9 +10,6 @@ include __DIR__ . '/common.php';
 $request = get_request();
 $event   = $_SERVER['HTTP_X_HELPSCOUT_EVENT'] ?? '';
 
-// Handle the openverse webhook.
-openverse_webhook( $event, $request );
-
 // Warm the caches.
 get_email_thread( $request->id, true );
 
@@ -21,29 +18,6 @@ contributor_stats( $event, $request );
 
 // Record the email in the database.
 log_email( $event, $request );
-
-/**
- * Ping the Openverse webhook.
- */
-function openverse_webhook( $event, $request ) {
-	if (
-		'production' === wp_get_environment_type() &&
-		defined( 'HELPSCOUT_OPENVERSE_WEBHOOK' ) && HELPSCOUT_OPENVERSE_WEBHOOK &&
-		defined( 'HELPSCOUT_OPENVERSE_MAILBOXID' ) && HELPSCOUT_OPENVERSE_MAILBOXID &&
-		'convo.created' === $event &&
-		isset( $request->mailboxId ) && HELPSCOUT_OPENVERSE_MAILBOXID === $request->mailboxId
-	) {
-		$subject = $request->subject;
-		$url     = $request->_links->web->href;
-
-		wp_safe_remote_post(
-			HELPSCOUT_OPENVERSE_WEBHOOK,
-			[
-				'body' => wp_json_encode( compact( 'subject', 'url' ) )
-			]
-		);
-	}
-}
 
 /**
  * Record some Contributor stats.
@@ -81,25 +55,38 @@ function contributor_stats( $event, $request ) {
 	}
 
 	// Determine the WordPress.org user for this HelpScout user.
+	$stat_user  = 'HS-' . get_client()->name . '-' . $hs_user_id;
 	$wporg_user = get_wporg_user_for_helpscout_user( $hs_user_id );
 	if ( $wporg_user ) {
 		$stat_user = $wporg_user->user_nicename;
-	} else {
-		$client    = get_client();
-		$stat_user = "HS-{$client->name}-{$hs_user_id}";
 	}
+
+	// Per-mailbox stats.
+	$mailbox = get_mailbox_name( $request );
 
 	// Total actions performed by user.
 	bump_stats_extra( 'hs-total', $stat_user );
+
+	if ( $mailbox ) {
+		bump_stats_extra( 'hs-' . $mailbox . '-total', $stat_user );
+	}
 
 	// Specific actions performed by user, replies and outgoing emails are counted as replies.
 	switch ( $event ) {
 		case 'convo.agent.reply.created':
 			bump_stats_extra( 'hs-replies', $stat_user );
+
+			if ( $mailbox ) {
+				bump_stats_extra( 'hs-' . $mailbox . '-replies', $stat_user );
+			}
 			break;
 		case 'convo.created':
 			if ( 'user' === $request->createdBy->type ?? '' ) {
 				bump_stats_extra( 'hs-replies', $stat_user );
+
+				if ( $mailbox ) {
+					bump_stats_extra( 'hs-' . $mailbox . '-replies', $stat_user );
+				}
 			}
 			break;
 	}

@@ -171,14 +171,14 @@ class Photo {
 	 * wrapper seems touchy, failing to obtain EXIF data more times than not,
 	 * though it appears to be related to the image files themselves and doesn't
 	 * affect all files. Perhaps the stream is not a seekable as the
-	 * `exif_read_data()`docs suggest it needs to be.
+	 * `exif_read_data()` docs suggest it needs to be.
 	 *
 	 * This function essentially copies `wp_read_image_metadata()`. If that
 	 * function didn't find any EXIF data, then this is called. This does everything
 	 * that function does but with 2 changes:
 	 * - A check was added to the very beginning to bail early if EXIF had been extracted.
 	 * - The calls to `exif_read_data()` have been commented out and a call to
-	 *   `self::exif_read_data_as_data_stream()` as been added instead.
+	 *   `self::exif_read_data_as_data_stream()` has been added instead.
 	 *
 	 * Look for 'Start of retry_exif_read() specific changes here. ' to denote the
 	 * start of the section that is changed.
@@ -206,7 +206,13 @@ class Photo {
 			return false;
 		}
 
-		list( , , $image_type ) = wp_getimagesize( $file );
+		$image_size = wp_getimagesize( $file );
+
+		if ( false === $image_size ) {
+			return false;
+		}
+
+		list( , , $image_type ) = $image_size;
 
 		/*
 		 * EXIF contains a bunch of data we'll probably never need formatted in ways
@@ -384,18 +390,65 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		}
 
 		foreach ( array( 'title', 'caption', 'credit', 'copyright', 'camera', 'iso' ) as $key ) {
-			if ( $meta[ $key ] && ! seems_utf8( $meta[ $key ] ) ) {
-				$meta[ $key ] = utf8_encode( $meta[ $key ] );
+			if ( $meta[ $key ] && ! wp_is_valid_utf8( $meta[ $key ] ) ) {
+				$meta[ $key ] = mb_convert_encoding( $meta[ $key ], 'UTF-8', 'ISO-8859-1' );
 			}
 		}
 
 		foreach ( $meta['keywords'] as $key => $keyword ) {
-			if ( ! seems_utf8( $keyword ) ) {
-				$meta['keywords'][ $key ] = utf8_encode( $keyword );
+			if ( ! wp_is_valid_utf8( $keyword ) ) {
+				$meta['keywords'][ $key ] = mb_convert_encoding( $keyword, 'UTF-8', 'ISO-8859-1' );
 			}
 		}
 
 		return wp_kses_post_deep( $meta );
+	}
+
+	/**
+	 * Returns an array of post statuses for which a photo can be associated.
+	 *
+	 * @return string[] Array of post statuses.
+	 */
+	public static function get_post_statuses_with_photo() {
+		return (array) apply_filters(
+			'wporg_photos_post_statuses_with_photo',
+			[ 'draft', 'inherit', 'pending', 'private', 'publish' ]
+		);
+	}
+
+	/**
+	 * Returns an array of post statuses for which a photo can or had been
+	 * associated.
+	 *
+	 * These post statuses will be included in checks for already generated
+	 * photo hashes. This basically consists of posts statuses from
+	 * `self::get_post_statuses_with_photo()` and any added by the filter
+	 * (mainly to include new post statuses that don't actively have a photo
+	 * associated with them but did at one point, e.g. rejected photos).
+	 *
+	 * @return string[] Array of post statuses.
+	 */
+	public static function get_post_statuses_with_photo_hash() {
+		return (array) apply_filters(
+			'wporg_photos_post_statuses_with_photo_hash',
+			self::get_post_statuses_with_photo()
+		);
+	}
+
+	/**
+	 * Returns an array of photo post statuses that are considered pending.
+	 *
+	 * Posts with these statuses should count towards the user's current
+	 * submission count and are considered as being in the moderation queue.
+	 *
+	 * @return string[] Array of post statuses.
+	 */
+	public static function get_pending_post_statuses() {
+		return (array) apply_filters(
+			'wporg_photos_pending_post_statuses',
+			[ 'pending' ]
+		);
+
 	}
 
 	/**
@@ -405,7 +458,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 * @param string $hash The MD5 hash of a photo file. Should not be the hash
 	 *                     of a known photo as obviously the provided hash
 	 *                     would match itself.
-	 * @return bool True is the MD5 hash matches one for an existing photo.
+	 * @return bool True if the MD5 hash matches one for an existing photo.
 	 */
 	public static function hash_exists( $hash ) {
 		$dupe = get_posts( [
@@ -414,7 +467,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 				'key'        => Registrations::get_meta_key( 'file_hash' ),
 				'value'      => $hash,
 			] ],
-			'post_status'    => [ 'draft', 'pending', 'private', 'publish', Rejection::get_post_status() ],
+			'post_status'    => self::get_post_statuses_with_photo_hash(),
 			'post_type'      => Registrations::get_post_type(),
 			'posts_per_page' => 1,
 		] );
@@ -430,7 +483,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *                       ignored, forcing a new API fetch for data? Default
 	 *                       false.
 	 * @return array|false   Associative array of analysis info or false if the
-	 *                       image was invalid or not data was retrieved.
+	 *                       image was invalid or no data was retrieved.
 	 */
 	public static function fetch_analysis_from_api( $image_id, $force = false ) {
 		$photo_meta = wp_get_attachment_metadata( $image_id );
@@ -466,7 +519,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *                       ignored, forcing a new API fetch for data? Default
 	 *                       false.
 	 * @return array|false   Associative array of analysis info or false if the
-	 *                       image was invalid or not data was retrieved.
+	 *                       image was invalid or no data was retrieved.
 	 */
 	public static function get_analysis( $image_id, $force = false ) {
 		$results = self::fetch_analysis_from_api( $image_id, $force );
@@ -770,11 +823,12 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *
 	 * @param int   $post_id          The ID of the photo post type post.
 	 * @param array $skip_likelihoods Likelihoods to skip due to not being of concern.
+	 *                                Default ['very_unlikely', 'unlikely', 'possible'].
 	 * @return array
 	 */
-	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely' ] ) {
+	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely', 'possible' ] ) {
 		$flags = [];
-		$safe_search_flags = Photo::get_raw_moderation_assessment( $post_id );
+		$safe_search_flags = self::get_raw_moderation_assessment( $post_id );
 
 		foreach ( $safe_search_flags as $flag => $likelihood ) {
 			$likelihood = strtolower( $likelihood );
@@ -885,7 +939,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 
 			switch ( $key ) {
 				case 'aperture':
-					$value = 'f/' . $value;
+					$value = 'ƒ/' . $value;
 					break;
 				case 'created_timestamp':
 					$label = 'Created';
@@ -893,10 +947,20 @@ $exif = self::exif_read_data_as_data_stream( $file );
 					break;
 				case 'focal_length':
 					$label = 'Focal Length';
-					$value .= 'mm';
+					$value = number_format( (float) $value, 2 );
+					if ( 0 >= $value ) {
+						continue 2;
+					}
+					// Trim trailing zeroes after the decimal place, and potentially the decimal itself, then append 'mm'.
+					$value = rtrim( rtrim( $value, '0' ), '.' ) . 'mm';
 					break;
 				case 'iso':
 					$label = 'ISO';
+					// Cast to discard the arbitrary string EXIF can supply for this tag.
+					$value = (int) $value;
+					if ( 0 >= $value ) {
+						continue 2;
+					}
 					break;
 				case 'shutter_speed':
 					$label = 'Shutter Speed';
@@ -911,6 +975,113 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Determines if a photo has EXIF data.
+	 *
+	 * @param array $exif_keys Optional. EXIF keys to check for. An empty array will
+	 *                         check if any EXIF data exists. Default empty array.
+	 * @param int   $post_id   Optional. Post ID. Default null, indicating the current post.
+	 * @return bool True if the photo has EXIF data, else false.
+	 */
+	public static function has_exif( $exif_keys = [], $post_id = null ) {
+		$post_id = $post_id ?: get_the_ID();
+		$exif = self::get_exif( $post_id, $exif_keys );
+		return ! empty( $exif );
+	}
+
+	/**
+	 * Strips markups from text and UTF8 encodes it if it appears to be UTF8.
+	 *
+	 * @param string $text Text to strip of tags and UTF8 encode.
+	 * @return string
+	 */
+	public static function _strip_and_utf8_encode( $text ) {
+		$text = wp_kses( $text, 'strip' );
+
+		if ( $text && ! wp_is_valid_utf8( $text ) ) {
+			$text = mb_convert_encoding( $text, 'UTF-8', 'ISO-8859-1' );
+		}
+
+		return $text;
+	}
+
+	/**
+	 * Returns all EXIF data for a photo, not just the hardcoded subset returned
+	 * by `wp_read_image_metadata()`.
+	 *
+	 * Also returns the data completely raw, without any reformatting other than
+	 * sanitization.
+	 *
+	 * @param int $post_id The ID of the photo post.
+	 * @return false|array The sanitized raw EXIF data, or false if the file was
+	 *                     not found or `exif_read_data()` is not available.
+	 */
+	public static function get_all_exif( $post_id ) {
+		$image_id = get_post_thumbnail_id( $post_id );
+		$file = get_attached_file( $image_id );
+		$exif = [];
+
+		// Bail if `exif_read_data()` is not available or the file no longer exists.
+		if ( ! is_callable( 'exif_read_data' ) || ! file_exists( $file ) ) {
+			return false;
+		}
+
+		$exif = self::exif_read_data_as_data_stream( $file );
+
+		if ( ! $exif ) {
+			return [];
+		}
+
+		// Remap deprecated and unmapped properties.
+		// @see https://exiv2.org/tags.html
+		// @see https://github.com/exiftool/exiftool/blob/master/lib/Image/ExifTool/Exif.pm
+		// @see https://github.com/neos/metadata-extractor/blob/master/Classes/Domain/Extractor/ExifExtractor.php#L43
+		$remap = [
+			'GPSVersion'          => 'GPSVersionID',
+			'ISOSpeedRatings'     => 'PhotographicSensitivity',
+			'UndefinedTag:0x001F' => 'GPSHPositioningError',
+			'UndefinedTag:0x8830' => 'SensitivityType',
+			'UndefinedTag:0x8832' => 'RecommendedExposureIndex',
+			'UndefinedTag:0x9010' => 'OffsetTime',
+			'UndefinedTag:0x9011' => 'OffsetTimeOriginal',
+			'UndefinedTag:0x9012' => 'OffsetTimeDigitized',
+			'UndefinedTag:0x9400' => 'Temperature',
+			'UndefinedTag:0x9401' => 'Humidity',
+			'UndefinedTag:0x9402' => 'Pressure',
+			'UndefinedTag:0x9403' => 'WaterDepth',
+			'UndefinedTag:0x9404' => 'Acceleration',
+			'UndefinedTag:0x9405' => 'CameraElevationAngle',
+			'UndefinedTag:0x9999' => 'XiaomiSettings',
+			'UndefinedTag:0xA430' => 'CameraOwnerName',
+			'UndefinedTag:0xA431' => 'BodySerialNumber',
+			'UndefinedTag:0xA432' => 'LensSpecification',
+			'UndefinedTag:0xA433' => 'LensMake',
+			'UndefinedTag:0xA434' => 'LensModel',
+			'UndefinedTag:0xA435' => 'LensSerialNumber',
+			'UndefinedTag:0xA460' => 'CompositeImage',
+			'UndefinedTag:0xA500' => 'Gamma',
+		];
+		foreach ( $remap as $old => $new ) {
+			if ( isset( $exif[ $old ] ) ) {
+				$exif[ $new ] = $exif[ $old ];
+				unset( $exif[ $old ] );
+			}
+		}
+
+		// Ignore EXIF keys that are definitely not worth including.
+		$ignored_exif = apply_filters(
+			'wporg_photos-ignored_exif_keys',
+			[ 'UndefinedTag:0x9AAA' ]
+		);
+		if ( $ignored_exif && is_array( $ignored_exif ) ) {
+			foreach ( $ignored_exif as $key ) {
+				unset( $exif[ $key ] );
+			}
+		}
+
+		return map_deep( $exif, [__CLASS__, '_strip_and_utf8_encode' ] );
 	}
 
 	/**
@@ -953,12 +1124,12 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		$moderator = get_userdata( $moderator_id );
 
 		if ( get_current_user_id() === $moderator_id ) {
-			$link = '<b>you</b>';
+			$link = '<b>' . __( 'you', 'wporg-photos' ) . '</b>';
 		} else {
 			$link = sprintf(
 				'<span id="photo-moderator"><a href="%s">%s</a></span>',
 				esc_url( 'https://profiles.wordpress.org/' . $moderator->user_nicename . '/' ),
-				sanitize_text_field( $moderator->display_name )
+				esc_html( $moderator->display_name )
 			);
 		}
 
@@ -988,6 +1159,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *
 	 * This only applies for unpublished photos that also meet one of these
 	 * criteria:
+	 * - Post status is 'flagged'
 	 * - Flagged by Vision as being "possible" or more likely in any criteria category
 	 *
 	 * @param int|WP_Post|null Optional. The post or attachment. Default null,
@@ -1006,13 +1178,25 @@ $exif = self::exif_read_data_as_data_stream( $file );
 			return false;
 		}
 
+		$post_status = get_post_status( $post );
+
 		// Not controversial if it has been published.
-		if ( 'publish' === get_post_status( $post ) ) {
+		if ( 'publish' === $post_status ) {
 			return false;
 		}
 
+		// Not controversial if photo has been manually unflagged.
+		if ( Flagged::was_unflagged( $post ) ) {
+			return false;
+		}
+
+		// Controversial if photo is outright flagged.
+		if ( Flagged::get_post_status() === $post_status ) {
+			return true;
+		}
+
 		// Controversial if photo got flagged as 'possible' or more likely by Vision.
-		$flags = Photo::get_filtered_moderation_assessment( $post->ID );
+		$flags = self::get_filtered_moderation_assessment( $post->ID );
 		if ( ! empty( $flags ) ) {
 			return true;
 		}

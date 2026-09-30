@@ -8,6 +8,84 @@ _get_list_table( 'WP_Posts_List_Table' );
 
 class Plugin_Posts extends \WP_Posts_List_Table {
 
+	protected $sticky_posts_count = 0;
+	protected $is_trash           = false;
+	protected $column_order       = [
+		'cb',
+		'title',
+		'author',
+		'reviewer',
+		'zip',
+		'loc',
+		'comments',
+	];
+
+	/**
+	 * Engage the filters.
+	 */
+	public function __construct() {
+		parent::__construct();
+
+		add_filter( "manage_{$this->screen->post_type}_posts_columns", [ $this, 'filter_columns' ], 100 );
+		add_filter( "manage_{$this->screen->id}_sortable_columns", [ $this, 'filter_sortable_columns' ], 100 );
+		add_filter( 'hidden_columns', [ $this, 'filter_hidden_columns' ], 100, 3 );
+	}
+
+	/**
+	 * Add the custom columns and set the order.
+	 */
+	public function filter_columns( $columns ) {
+		// Rename some columns.
+		$columns['author']         = __( 'Submitter', 'wporg-plugins' );
+		$columns['reviewer']       = __( 'Assigned Reviewer', 'wporg-plugins' );
+		$columns['comments']       = '<span class = "vers comment-grey-bubble" title = "' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class = "screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
+		$columns['zip']            = 'Latest Zip';
+		$columns['loc']            = 'Lines of PHP Code'; 
+		$columns['submitted_date'] = 'Submitted Date'; 
+
+		// We don't want the stats column.
+		unset( $columns['stats'] );
+
+		$columns = array_merge( array_flip( $this->column_order ), $columns );
+
+		return $columns;
+	}
+
+	/**
+	 * The sortable columns.
+	 */
+	public function filter_sortable_columns( $columns ) {
+		$columns[ 'reviewer' ]       = [ 'assigned_reviewer_time', 'asc' ];
+		$columns[ 'zip' ]            = [ '_submitted_zip_size', 'asc' ];
+		$columns[ 'loc' ]            = [ '_submitted_zip_loc', 'asc' ];
+		$columns[ 'submitted_date' ] = [ '_submitted_date', 'asc' ];
+
+		return $columns;
+	}
+
+	/**
+	 * Hide some fields by default.
+	 */
+	public function filter_hidden_columns( $columns, $screen, $use_defaults ) {
+		if ( $screen->id !== $this->screen->id ) {
+			return $columns;
+		}
+
+		// Hide certain columns on default / published views.
+		if (
+			in_array( $_REQUEST['post_status'] ?? 'all', [ 'all', 'publish', 'disabled', 'closed' ] ) &&
+			empty( $_REQUEST['author'] ) &&
+			empty( $_REQUEST['reviewer'] )
+		) {
+			$columns[] = 'reviewer';
+			$columns[] = 'zip';
+			$columns[] = 'loc';
+			$columns[] = 'submitted_date';
+		}
+
+		return $columns;
+	}
+
 	/**
 	 *
 	 * @global array     $avail_post_stati
@@ -102,51 +180,6 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	}
 
 	/**
-	 *
-	 * @return array
-	 */
-	public function get_columns() {
-		$post_type     = $this->screen->post_type;
-		$posts_columns = array(
-			'cb'       => '<input type="checkbox" />',
-			/* translators: manage posts column name */
-			'title'    => _x( 'Title', 'column name', 'wporg-plugins' ),
-			'author'   => __( 'Submitter', 'wporg-plugins' ),
-			'reviewer' => __( 'Assigned Reviewer', 'wporg-plugins' ),
-		);
-
-		$taxonomies = get_object_taxonomies( $post_type, 'objects' );
-		$taxonomies = wp_filter_object_list( $taxonomies, array( 'show_admin_column' => true ), 'and', 'name' );
-		$taxonomies = apply_filters( "manage_taxonomies_for_{$post_type}_columns", $taxonomies, $post_type );
-		$taxonomies = array_filter( $taxonomies, 'taxonomy_exists' );
-
-		foreach ( $taxonomies as $taxonomy ) {
-			$column_key                   = 'taxonomy-' . $taxonomy;
-			$posts_columns[ $column_key ] = get_taxonomy( $taxonomy )->labels->name;
-		}
-
-		$posts_columns['comments'] = '<span class="vers comment-grey-bubble" title="' . esc_attr__( 'Internal Notes', 'wporg-plugins' ) . '"><span class="screen-reader-text">' . __( 'Internal Notes', 'wporg-plugins' ) . '</span></span>';
-		$posts_columns['date']     = __( 'Date', 'wporg-plugins' );
-
-		/**
-		 * Filter the columns displayed in the Plugins list table.
-		 *
-		 * @param array  $posts_columns An array of column names.
-		 * @param string $post_type     The post type slug.
-		 */
-		$posts_columns = apply_filters( 'manage_posts_columns', $posts_columns, $post_type );
-
-		/**
-		 * Filter the columns displayed in the Plugins list table.
-		 *
-		 * The dynamic portion of the hook name, `$post_type`, refers to the post type slug.
-		 *
-		 * @param array $post_columns An array of column names.
-		 */
-		return apply_filters( "manage_{$post_type}_posts_columns", $posts_columns );
-	}
-
-	/**
 	 * @global \WP_Post $post
 	 *
 	 * @param int|\WP_Post $post
@@ -178,7 +211,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$classes[] = 'level-0';
 		}
 		?>
-		<tr id="post-<?php echo $post->ID; ?>" class="<?php echo implode( ' ', get_post_class( $classes, $post->ID ) ); ?>">
+		<tr id="post-<?php echo esc_attr( $post->ID ); ?>" class="<?php echo esc_attr( implode( ' ', get_post_class( $classes, $post->ID ) ) ); ?>">
 			<?php $this->single_row_columns( $post ); ?>
 		</tr>
 		<?php
@@ -296,15 +329,15 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	<form method="get"><table style="display: none"><tbody id="inlineedit">
 
 		<tr id="inline-edit"
-			class="inline-edit-row inline-edit-row-post inline-edit-<?php echo $screen->post_type; ?> quick-edit-row quick-edit-row-post"
-			style="display: none"><td colspan="<?php echo $this->get_column_count(); ?>" class="colspanchange">
+			class="inline-edit-row inline-edit-row-post inline-edit-<?php echo esc_attr( $screen->post_type ); ?> quick-edit-row quick-edit-row-post"
+			style="display: none"><td colspan="<?php echo esc_attr( $this->get_column_count() ); ?>" class="colspanchange">
 
 		<fieldset class="inline-edit-col-left">
-			<legend class="inline-edit-legend"><?php _e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
+			<legend class="inline-edit-legend"><?php esc_html_e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
 			<div class="inline-edit-col">
 
 			<label>
-				<span class="title"><?php _e( 'Slug', 'wporg-plugins' ); ?></span>
+				<span class="title"><?php esc_html_e( 'Slug', 'wporg-plugins' ); ?></span>
 				<span class="input-text-wrap"><input type="text" name="post_name" value="" /></span>
 			</label>
 
@@ -329,9 +362,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	<?php endif; // count( $hierarchical_taxonomies ) ?>
 
 		<p class="submit inline-edit-save">
-			<button type="button" class="button cancel alignleft"><?php _e( 'Cancel', 'wporg-plugins' ); ?></button>
+			<button type="button" class="button cancel alignleft"><?php esc_html_e( 'Cancel', 'wporg-plugins' ); ?></button>
 			<?php wp_nonce_field( 'inlineeditnonce', '_inline_edit', false ); ?>
-			<button type="button" class="button button-primary save alignright"><?php _e( 'Update', 'wporg-plugins' ); ?></button>
+			<button type="button" class="button button-primary save alignright"><?php esc_html_e( 'Update', 'wporg-plugins' ); ?></button>
 			<span class="spinner"></span>
 			<input type="hidden" name="post_author" value="" />
 			<input type="hidden" name="post_view" value="<?php echo esc_attr( $m ); ?>" />
@@ -559,9 +592,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				<?php
 				wp_dropdown_users( [
 					'name'              => 'reviewer',
-					'selected'          => intval( $_REQUEST['reviewer'] ?? 0 ),
+					'selected'          => intval( $_REQUEST['reviewer'] ?? '' ),
 					'show_option_none'  => __( 'All Reviewers', 'wporg-plugins' ),
-					'option_none_value' => 0,
+					'option_none_value' => '',
 					'role__in'          => [ 'plugin_admin', 'plugin_reviewer' ],
 				] );
 				submit_button( __( 'Filter', 'wporg-plugins' ), 'secondary', false, false );
@@ -593,13 +626,23 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			?>
 		</fieldset>
 		<fieldset class="alignleft actions hide-if-js bulk-plugin_close bulk-plugin_disable" disabled="disabled">
-			<select name="close_reason" id="close_reason<?php echo $maybe_dash_two; ?>">
+			<select name="close_reason" id="close_reason<?php echo esc_attr( $maybe_dash_two ); ?>">
 				<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></option>
 				<?php foreach ( Template::get_close_reasons() as $key => $label ) : ?>
 					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</fieldset>
+
+		<fieldset class="alignleft actions hide-if-js bulk-plugin_reject" disabled="disabled">
+			<select name="rejection_reason" id="rejection_reason">
+				<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Rejection Reason:', 'wporg-plugins' ); ?></option>
+				<?php foreach ( Template::get_rejection_reasons() as $key => $label ) : ?>
+					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</fieldset>
+
 		<?php
 
 		// Output the JS+CSS needed
@@ -642,16 +685,69 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$reviewer_time = (int) ( $post->assigned_reviewer_time ?? 0 );
 
 		if ( $reviewer ) {
+			$args = [
+				'post_type' => $post->post_type,
+				'reviewer'  => $reviewer_id,
+			];
+
 			printf(
-				"<a href='%s'>%s</a><br><span>%s</span>",
-				add_query_arg( [ 'reviewer' => $reviewer_id ] ),
-				$reviewer->display_name ?: $reviewer->user_login,
-				sprintf(
+				'%s<br><span>%s</span>',
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_edit_link() runs the URL through esc_url(), and the link text is escaped here.
+				$this->get_edit_link( $args, esc_html( $reviewer->display_name ?: $reviewer->user_login ) ),
+				esc_html( sprintf(
 					/* translators: %s The time/date different, '1 hour' */
 					__( '%s ago', 'wporg-plugins' ),
 					human_time_diff( $reviewer_time )
-				)
+				) )
+			);
+		} else {
+			echo '-';
+		}
+	}
+
+	public function column_zip( $post ) {
+		$media = get_attached_media( 'application/zip', $post );
+
+		if ( ! $media || ! in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
+			echo '-';
+			return;
+		}
+
+		// Only display the latest.
+		$media = array_slice( $media, -1 );
+
+		foreach ( $media as $zip_file ) {
+			$zip_size = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
+
+			$url  = wp_get_attachment_url( $zip_file->ID );
+			$name = $zip_file->submitted_name;
+			if ( ! $name ) {
+				$name = preg_split( '/[?#]/', basename( $url ) )[0];
+				$name = explode( '_', $name, 3 )[2];
+			}
+
+			printf(
+				'<a href="%1$s">%2$s</a> v%3$s<br>%4$s<br>(<a href="%5$s" target="_blank">test</a> | <a href="%6$s" target="_blank">pcp</a>)<br>',
+				esc_url( $url ),
+				esc_html( $name ),
+				esc_html( $zip_file->version ),
+				esc_html( $zip_size ),
+				esc_url( Template::preview_link_zip( $post->post_name, $zip_file->ID ) ),
+				esc_url( Template::preview_link_zip( $post->post_name, $zip_file->ID, 'pcp' ) )
 			);
 		}
+	}
+
+	public function column_loc( $post ) {
+		if ( ! in_array( $post->post_status, [ 'new', 'pending', 'approved' ] ) ) {
+			echo '-';
+			return;
+		}
+
+		echo esc_html( number_format_i18n( (int) $post->_submitted_zip_loc ) ) ?: '-';
+	}
+
+	public function column_submitted_date( $post ) {
+		echo esc_html( gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 ) );
 	}
 }

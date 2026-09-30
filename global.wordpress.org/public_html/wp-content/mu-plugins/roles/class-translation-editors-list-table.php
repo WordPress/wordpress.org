@@ -106,7 +106,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * Output 'no users' message.
 	 */
 	public function no_items() {
-		_e( 'No translation editors were found.', 'rosetta' );
+		esc_html_e( 'No translation editors were found.', 'rosetta' );
 	}
 
 	/**
@@ -269,8 +269,8 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	public function column_cb( $user ) {
 		if ( $this->user_can_promote ) {
 			?>
-			<label class="screen-reader-text" for="cb-select-<?php echo $user->ID; ?>"><?php _e( 'Select translation editor', 'rosetta' ); ?></label>
-			<input id="cb-select-<?php echo $user->ID; ?>" type="checkbox" name="translation-editors[]" value="<?php echo $user->ID; ?>">
+			<label class="screen-reader-text" for="cb-select-<?php echo (int) $user->ID; ?>"><?php esc_html_e( 'Select translation editor', 'rosetta' ); ?></label>
+			<input id="cb-select-<?php echo (int) $user->ID; ?>" type="checkbox" name="translation-editors[]" value="<?php echo (int) $user->ID; ?>">
 			<?php
 		}
 	}
@@ -296,6 +296,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			$edit = "<strong>$user->user_login</strong>";
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Avatar and edit-link markup assembled above from escaped parts.
 		echo "$avatar $edit";
 	}
 
@@ -305,7 +306,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * @param WP_User $user The current user.
 	 */
 	public function column_name( $user ) {
-		echo "$user->first_name $user->last_name";
+		echo esc_html( "$user->first_name $user->last_name" );
 	}
 
 	/**
@@ -314,7 +315,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * @param WP_User $user The current user.
 	 */
 	public function column_email( $user ) {
-		echo "<a href='" . esc_url( "mailto:$user->user_email" ) . "'>$user->user_email</a>";
+		printf( '<a href="%1$s">%2$s</a>', esc_url( "mailto:$user->user_email" ), esc_html( $user->user_email ) );
 	}
 
 	/**
@@ -326,12 +327,12 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		$project_access_list = $this->rosetta_roles->get_users_projects( $user->ID );
 
 		if ( empty( $project_access_list ) ) {
-			_e( 'No projects', 'rosetta' );
+			esc_html_e( 'No projects', 'rosetta' );
 			return;
 		}
 
 		if ( in_array( 'all', $project_access_list, true ) ) {
-			_e( 'All projects', 'rosetta' );
+			esc_html_e( 'All projects', 'rosetta' );
 			return;
 		}
 
@@ -360,6 +361,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			}
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Project links are assembled above from escaped URLs and names.
 		echo implode( '<br>', $projects );
 	}
 }

@@ -1,1 +1,1 @@
-!function(){"use strict";var t=window.wp.date;(()=>{const a=document.querySelectorAll("[data-date-utc]");Array.from(a).forEach((a=>{const e=a.dataset.dateUtc;a.textContent=(0,t.format)("l, F j, Y, g:i a (\\U\\T\\CP)",e)}))})()}();
+(()=>{"use strict";const t=window.wp.date;(()=>{const a=document.querySelectorAll("[data-date-utc]");Array.from(a).forEach((a=>{const e=a.dataset.dateUtc;a.textContent=(0,t.format)("l, F j, Y, g:i a (\\U\\T\\CP)",e)}))})()})();

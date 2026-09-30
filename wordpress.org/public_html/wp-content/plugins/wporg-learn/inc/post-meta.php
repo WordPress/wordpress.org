@@ -14,22 +14,112 @@ defined( 'WPINC' ) || die();
  * Actions and filters.
  */
 add_action( 'init', __NAMESPACE__ . '\register' );
+add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_lesson_metaboxes' );
 add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_lesson_plan_metaboxes' );
 add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_workshop_metaboxes' );
 add_action( 'add_meta_boxes', __NAMESPACE__ . '\add_meeting_metaboxes' );
 add_action( 'save_post_lesson-plan', __NAMESPACE__ . '\save_lesson_plan_metabox_fields' );
+add_action( 'save_post_lesson', __NAMESPACE__ . '\save_lesson_meta_fields' );
 add_action( 'save_post_wporg_workshop', __NAMESPACE__ . '\save_workshop_meta_fields' );
 add_action( 'save_post_meeting', __NAMESPACE__ . '\save_meeting_metabox_fields' );
 add_action( 'admin_footer', __NAMESPACE__ . '\render_locales_list' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
+add_action( 'wp_insert_post', __NAMESPACE__ . '\set_default_lesson_preview', 10, 3 );
 
 /**
  * Register all post meta keys.
  */
 function register() {
+	register_common_meta();
+	register_course_meta();
+	register_lesson_meta();
 	register_lesson_plan_meta();
 	register_workshop_meta();
-	register_misc_meta();
+	register_activity_kit_meta();
+}
+
+/**
+ * Register post meta keys for courses.
+ */
+function register_course_meta() {
+	register_post_meta(
+		'course',
+		'_course_completion_success_message',
+		array(
+			'description'       => __( 'The message displayed to users upon successful course completion.', 'wporg-learn' ),
+			'type'              => 'string',
+			'single'            => true,
+			'sanitize_callback' => 'sanitize_text_field',
+			'show_in_rest'      => true,
+			'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+				return current_user_can( 'edit_post', $post_id );
+			},
+		)
+	);
+
+	register_post_meta(
+		'course',
+		'_course_completion_survey_link',
+		array(
+			'description'       => __( 'The survey link to be shown alongside the completion message.', 'wporg-learn' ),
+			'type'              => 'string',
+			'single'            => true,
+			'default'           => '',
+			'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+			'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+				return current_user_can( 'edit_post', $post_id );
+			},
+		)
+	);
+}
+
+/**
+ * Register post meta keys for lessons.
+ */
+function register_lesson_meta() {
+	register_post_meta(
+		'lesson',
+		'_lesson_featured',
+		array(
+			'description'       => __( 'Whether the lesson is featured.', 'wporg-learn' ),
+			'type'              => 'string',
+			'single'            => true,
+			'sanitize_callback' => 'sanitize_text_field',
+			'show_in_rest'      => true,
+			'auth_callback'     => function ( $allowed, $meta_key, $post_id ) {
+				return current_user_can( 'edit_post', $post_id );
+			},
+		),
+	);
+}
+
+/**
+ * Set public preview to be enabled on lessons created within a course by default.
+ * This post meta is registered by Sensei with no default value, so we set it here on lesson creation.
+ *
+ * @param int     $post_ID Post ID.
+ * @param WP_Post $post    Post object.
+ * @param bool    $update  Whether this is an existing post being updated.
+ */
+function set_default_lesson_preview( $post_ID, $post, $update ) {
+	// Only run for new lessons.
+	if ( $update || 'lesson' !== $post->post_type ) {
+		return;
+	}
+
+	// Check if the lesson belongs to a course.
+	$course_id = get_post_meta( $post_ID, '_lesson_course', true );
+
+	if ( empty( $course_id ) ) {
+		return;
+	}
+
+	$existing_value = get_post_meta( $post_ID, '_lesson_preview', true );
+
+	if ( '' === $existing_value ) {
+		update_post_meta( $post_ID, '_lesson_preview', 'preview' );
+	}
 }
 
 /**
@@ -73,48 +163,12 @@ function register_workshop_meta() {
 
 	register_post_meta(
 		$post_type,
-		'video_url',
-		array(
-			'description'       => __( "The URL of the Workshop's video.", 'wporg_learn' ),
-			'type'              => 'string',
-			'single'            => true,
-			'sanitize_callback' => 'esc_url_raw',
-			'show_in_rest'      => true,
-		)
-	);
-
-	register_post_meta(
-		$post_type,
 		'duration',
 		array(
 			'description'       => __( 'The duration in seconds of the workshop. Should be converted to a human readable string for display.', 'wporg_learn' ),
 			'type'              => 'integer',
 			'single'            => true,
 			'sanitize_callback' => 'absint',
-			'show_in_rest'      => true,
-		)
-	);
-
-	register_post_meta(
-		$post_type,
-		'presenter_wporg_username',
-		array(
-			'description'       => __( 'The WordPress.org user name of a presenter for this workshop.', 'wporg_learn' ),
-			'type'              => 'string',
-			'single'            => false,
-			'sanitize_callback' => 'sanitize_user',
-			'show_in_rest'      => true,
-		)
-	);
-
-	register_post_meta(
-		$post_type,
-		'other_contributor_wporg_username',
-		array(
-			'description'       => __( 'The WordPress.org user name of "other contributor" for this workshop.', 'wporg_learn' ),
-			'type'              => 'string',
-			'single'            => false,
-			'sanitize_callback' => 'sanitize_user',
 			'show_in_rest'      => true,
 		)
 	);
@@ -149,7 +203,7 @@ function register_workshop_meta() {
  *
  * For multiple post types, for example.
  */
-function register_misc_meta() {
+function register_common_meta() {
 	// Expiration field.
 	$post_types = array( 'lesson-plan', 'wporg_workshop', 'course', 'lesson' );
 	foreach ( $post_types as $post_type ) {
@@ -160,16 +214,14 @@ function register_misc_meta() {
 				'description'       => __( 'The date when the content of the post may be obsolete.', 'wporg_learn' ),
 				'type'              => 'string',
 				'single'            => true,
-				'sanitize_callback' => function( $value ) {
-					return filter_var( $value, FILTER_SANITIZE_STRING );
-				},
+				'sanitize_callback' => 'sanitize_text_field',
 				'show_in_rest'      => true,
 			)
 		);
 	}
 
 	// Language field.
-	$post_types = array( 'lesson-plan', 'wporg_workshop', 'meeting', 'course', 'lesson' );
+	$post_types = array( 'lesson-plan', 'wporg_workshop', 'meeting', 'course', 'lesson', 'activity_kit' );
 	foreach ( $post_types as $post_type ) {
 		register_post_meta(
 			$post_type,
@@ -180,6 +232,98 @@ function register_misc_meta() {
 				'single'            => true,
 				'default'           => 'en_US',
 				'sanitize_callback' => __NAMESPACE__ . '\sanitize_locale',
+				'show_in_rest'      => true,
+			)
+		);
+	}
+
+	// Duration field.
+	$post_types = array( 'course', 'lesson' );
+	foreach ( $post_types as $post_type ) {
+		register_post_meta(
+			$post_type,
+			'_duration',
+			array(
+				'description'       => __( 'The time required to complete the Course or Lesson.', 'wporg_learn' ),
+				'type'              => 'number',
+				'single'            => true,
+				'default'           => 0,
+				'sanitize_callback' => function ( $value ) {
+					return floatval( $value );
+				},
+				'show_in_rest'      => true,
+				'auth_callback'     => function () {
+					return current_user_can( 'edit_courses' ) || current_user_can( 'edit_lessons' );
+				},
+			)
+		);
+	}
+
+	// Presenter field.
+	$post_types = array( 'wporg_workshop', 'lesson' );
+	foreach ( $post_types as $post_type ) {
+		register_post_meta(
+			$post_type,
+			'presenter_wporg_username',
+			array(
+				'description'       => __( 'The WordPress.org user name of a presenter for this workshop.', 'wporg_learn' ),
+				'type'              => 'string',
+				'single'            => false,
+				'sanitize_callback' => 'sanitize_user',
+				'show_in_rest'      => true,
+			)
+		);
+	}
+
+	// Other contributor field.
+	$post_types = array( 'wporg_workshop', 'lesson' );
+	foreach ( $post_types as $post_type ) {
+		register_post_meta(
+			$post_type,
+			'other_contributor_wporg_username',
+			array(
+				'description'       => __( 'The WordPress.org user name of "other contributor" for this workshop.', 'wporg_learn' ),
+				'type'              => 'string',
+				'single'            => false,
+				'sanitize_callback' => 'sanitize_user',
+				'show_in_rest'      => true,
+			)
+		);
+	}
+
+	/*
+	 * `register_post_meta()` scopes a `sanitize_callback` to one object subtype, so the callbacks
+	 * below only run for the post types they are registered against. These keys hold URLs that
+	 * the theme prints, so also register them without a subtype: `sanitize_meta()` then has a
+	 * callback to fall back on for post types with no registration of their own.
+	 */
+	$url_meta_keys = array( 'video_url', 'slides_view_url', 'slides_download_url' );
+	foreach ( $url_meta_keys as $url_meta_key ) {
+		register_meta(
+			'post',
+			$url_meta_key,
+			array(
+				'type'              => 'string',
+				'single'            => true,
+				'sanitize_callback' => 'esc_url_raw',
+				'show_in_rest'      => false,
+			)
+		);
+	}
+
+	// Video URL field.
+	$post_types = array( 'wporg_workshop', 'lesson' );
+	foreach ( $post_types as $post_type ) {
+		register_post_meta(
+			$post_type,
+			'video_url',
+			array(
+				'description'       => 'wporg_workshop' === $post_type
+					? __( "The URL of the Workshop's video.", 'wporg_learn' )
+					: __( "The URL of the Lesson's video.", 'wporg_learn' ),
+				'type'              => 'string',
+				'single'            => true,
+				'sanitize_callback' => 'esc_url_raw',
 				'show_in_rest'      => true,
 			)
 		);
@@ -198,6 +342,11 @@ function register_misc_meta() {
  */
 function sanitize_locale( $meta_value, $meta_key, $object_type, $object_subtype ) {
 	$meta_value = trim( $meta_value );
+
+	if ( ! function_exists( 'WordPressdotorg\Locales\get_locales_with_english_names' ) ) {
+		return sanitize_text_field( $meta_value );
+	}
+
 	$locales = array_keys( get_locales_with_english_names() );
 
 	if ( ! in_array( $meta_value, $locales, true ) ) {
@@ -205,6 +354,32 @@ function sanitize_locale( $meta_value, $meta_key, $object_type, $object_subtype 
 	}
 
 	return $meta_value;
+}
+
+/**
+ * Sanitize an attachment ID, returning 0 when the attachment MIME type is not in the allowed list.
+ *
+ * Used as the sanitize_callback for activity kit attachment meta fields so that
+ * editors cannot save an arbitrary attachment ID that does not match the expected
+ * file type — even when bypassing the block-editor UI.
+ *
+ * @param mixed    $value         Raw meta value (expected integer attachment ID).
+ * @param string[] $allowed_mimes Allowed MIME types, e.g. array( 'application/pdf' ).
+ * @return int Validated attachment ID, or 0 if the ID is invalid or the MIME type is not allowed.
+ */
+function sanitize_attachment_id_by_mime( $value, array $allowed_mimes ) {
+	$id = absint( $value );
+	if ( ! $id ) {
+		return 0;
+	}
+
+	$mime = get_post_mime_type( $id );
+
+	if ( ! $mime || ! in_array( $mime, $allowed_mimes, true ) ) {
+		return 0;
+	}
+
+	return $id;
 }
 
 /**
@@ -229,7 +404,7 @@ function get_workshop_duration( WP_Post $workshop, $format = 'raw' ) {
 			if ( $interval->d > 0 ) {
 				$return = human_time_diff( 0, $interval->d * DAY_IN_SECONDS );
 			} elseif ( $interval->h > 0 ) {
-				$hours = human_time_diff( 0, $interval->h * HOUR_IN_SECONDS );
+				$hours  = human_time_diff( 0, $interval->h * HOUR_IN_SECONDS );
 				$return = $hours;
 
 				if ( $interval->i > 0 ) {
@@ -274,18 +449,28 @@ function get_available_post_type_locales( $meta_key, $post_type, $post_status, $
 		$and_post_status = "AND posts.post_status = '$post_status'";
 	}
 
-	$results = $wpdb->get_col( $wpdb->prepare(
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $and_post_status only includes $post_status if it matches an allowed string.
-		"
-		SELECT DISTINCT postmeta.meta_value
-		FROM {$wpdb->postmeta} postmeta
-			JOIN {$wpdb->posts} posts ON posts.ID = postmeta.post_id AND posts.post_type = %s $and_post_status
-		WHERE postmeta.meta_key = %s
-	",
-		$post_type,
-		$meta_key
+	$and_post_type = '';
+	if ( isset( $post_type ) ) {
+		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
+
+		if ( in_array( $post_type, $public_post_types ) ) {
+			$and_post_type = "AND posts.post_type = '$post_type'";
+		}
+	}
+
+	$results = $wpdb->get_col(
+		$wpdb->prepare(
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $and_post_status and $and_post_type only include $post_status and $post_type if they match an allowed string.
+			"SELECT DISTINCT postmeta.meta_value
+			FROM {$wpdb->postmeta} postmeta
+			JOIN {$wpdb->posts} posts ON posts.ID = postmeta.post_id
+			$and_post_type
+			$and_post_status
+			WHERE postmeta.meta_key = %s",
+			$meta_key
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	) );
+		)
+	);
 
 	if ( empty( $results ) ) {
 		return array();
@@ -294,7 +479,11 @@ function get_available_post_type_locales( $meta_key, $post_type, $post_status, $
 	$available_locales = array_fill_keys( $results, '' );
 
 	$locale_fn = "\WordPressdotorg\Locales\get_locales_with_{$label_language}_names";
-	$locales   = $locale_fn();
+	if ( ! function_exists( $locale_fn ) ) {
+		// Fallback for environments without WordPressdotorg\Locales: use locale codes as labels.
+		return array_combine( $results, $results );
+	}
+	$locales = $locale_fn();
 
 	return array_intersect_key( $locales, $available_locales );
 }
@@ -340,10 +529,12 @@ function save_lesson_plan_metabox_fields( $post_id ) {
 		return;
 	}
 
-	$view_url = filter_input( INPUT_POST, 'slides-view-url', FILTER_VALIDATE_URL ) ?: '';
+	$filtered_view_url = filter_input( INPUT_POST, 'slides-view-url', FILTER_VALIDATE_URL );
+	$view_url          = $filtered_view_url ? $filtered_view_url : '';
 	update_post_meta( $post_id, 'slides_view_url', $view_url );
 
-	$download_url = filter_input( INPUT_POST, 'slides-download-url', FILTER_VALIDATE_URL ) ?: '';
+	$filtered_download_url = filter_input( INPUT_POST, 'slides-download-url', FILTER_VALIDATE_URL );
+	$download_url          = $filtered_download_url ? $filtered_download_url : '';
 	update_post_meta( $post_id, 'slides_download_url', $download_url );
 
 	// This language meta field is rendered in the editor sidebar using a PluginDocumentSettingPanel block,
@@ -354,6 +545,37 @@ function save_lesson_plan_metabox_fields( $post_id ) {
 	if ( ! isset( $language ) || $language_default === $language ) {
 		update_post_meta( $post_id, 'language', $language_default );
 	}
+}
+
+/**
+ * Add meta boxes to the Edit Lesson screen.
+ *
+ * Todo these should be replaced with block editor panels.
+ */
+function add_lesson_metaboxes() {
+	add_meta_box(
+		'lesson-presenters',
+		__( 'Presenters', 'wporg_learn' ),
+		__NAMESPACE__ . '\render_metabox_workshop_presenters',
+		'lesson',
+		'side'
+	);
+
+	add_meta_box(
+		'lesson-other-contributors',
+		__( 'Other Contributors', 'wporg_learn' ),
+		__NAMESPACE__ . '\render_metabox_workshop_other_contributors',
+		'lesson',
+		'side'
+	);
+
+	add_meta_box(
+		'lesson-video-url',
+		__( 'Video URL (Reference only)', 'wporg_learn' ),
+		__NAMESPACE__ . '\render_metabox_lesson_video',
+		'lesson',
+		'side'
+	);
 }
 
 /**
@@ -416,16 +638,19 @@ function add_meeting_metaboxes( $post_type = '' ) {
 function render_metabox_workshop_details( WP_Post $post ) {
 	$duration_interval = get_workshop_duration( $post, 'interval' );
 	$locales           = get_locales_with_english_names();
-	$captions          = get_post_meta( $post->ID, 'video_caption_language' ) ?: array();
-	$all_lessons       = get_posts( array(
-		'post_type'      => 'lesson',
-		'post_status'    => 'publish',
-		'posts_per_page' => 999,
-		'orderby'        => 'title',
-		'order'          => 'asc',
-	) );
+	$captions_meta     = get_post_meta( $post->ID, 'video_caption_language' );
+	$captions          = $captions_meta ? $captions_meta : array();
 
 	require get_views_path() . 'metabox-workshop-details.php';
+}
+
+/**
+ * Render the Lesson Video meta box.
+ *
+ * @param WP_Post $post
+ */
+function render_metabox_lesson_video( WP_Post $post ) {
+	require get_views_path() . 'metabox-lesson-video.php';
 }
 
 /**
@@ -434,7 +659,8 @@ function render_metabox_workshop_details( WP_Post $post ) {
  * @param WP_Post $post
  */
 function render_metabox_workshop_presenters( WP_Post $post ) {
-	$presenters = get_post_meta( $post->ID, 'presenter_wporg_username' ) ?: array();
+	$presenters_meta = get_post_meta( $post->ID, 'presenter_wporg_username' );
+	$presenters      = $presenters_meta ? $presenters_meta : array();
 
 	require get_views_path() . 'metabox-workshop-presenters.php';
 }
@@ -445,7 +671,8 @@ function render_metabox_workshop_presenters( WP_Post $post ) {
  * @param WP_Post $post
  */
 function render_metabox_workshop_other_contributors( WP_Post $post ) {
-	$other_contributors = get_post_meta( $post->ID, 'other_contributor_wporg_username' ) ?: array();
+	$other_contributors_meta = get_post_meta( $post->ID, 'other_contributor_wporg_username' );
+	$other_contributors      = $other_contributors_meta ? $other_contributors_meta : array();
 
 	require get_views_path() . 'metabox-workshop-other-contributors.php';
 }
@@ -456,9 +683,10 @@ function render_metabox_workshop_other_contributors( WP_Post $post ) {
  * @param WP_Post $post
  */
 function render_metabox_workshop_application( WP_Post $post ) {
-	$schema = get_workshop_application_field_schema();
-	$application = wp_parse_args(
-		get_post_meta( $post->ID, 'original_application', true ) ?: array(),
+	$schema           = get_workshop_application_field_schema();
+	$application_meta = get_post_meta( $post->ID, 'original_application', true );
+	$application      = wp_parse_args(
+		$application_meta ? $application_meta : array(),
 		wp_list_pluck( $schema['properties'], 'default' )
 	);
 
@@ -471,8 +699,9 @@ function render_metabox_workshop_application( WP_Post $post ) {
  * @param WP_Post $post
  */
 function render_metabox_meeting_language( WP_Post $post ) {
-	$locales  = get_locales_with_english_names();
-	$language = get_post_meta( $post->ID, 'language', true ) ?: '';
+	$locales       = get_locales_with_english_names();
+	$language_meta = get_post_meta( $post->ID, 'language', true );
+	$language      = $language_meta ? $language_meta : '';
 
 	require get_views_path() . 'metabox-meeting-language.php';
 }
@@ -493,11 +722,13 @@ function save_workshop_meta_fields( $post_id ) {
 		return;
 	}
 
-	$video_url = filter_input( INPUT_POST, 'video-url', FILTER_SANITIZE_URL );
+	// Use the same escaper the meta key is registered with.
+	$video_url = esc_url_raw( (string) filter_input( INPUT_POST, 'video-url' ) );
 	update_post_meta( $post_id, 'video_url', $video_url );
 
 	$duration = filter_input( INPUT_POST, 'duration', FILTER_SANITIZE_NUMBER_INT, FILTER_REQUIRE_ARRAY );
 	if ( isset( $duration['h'], $duration['m'], $duration['s'] ) ) {
+		$duration = array_map( 'absint', $duration );
 		$duration = $duration['h'] * HOUR_IN_SECONDS + $duration['m'] * MINUTE_IN_SECONDS + $duration['s'];
 		update_post_meta( $post_id, 'duration', $duration );
 	}
@@ -509,9 +740,6 @@ function save_workshop_meta_fields( $post_id ) {
 			add_post_meta( $post_id, 'video_caption_language', $caption );
 		}
 	}
-
-	$lesson_id = filter_input( INPUT_POST, 'linked-lesson-id', FILTER_SANITIZE_NUMBER_INT );
-	update_post_meta( $post_id, 'linked_lesson_id', $lesson_id );
 
 	$presenter_wporg_username = filter_input( INPUT_POST, 'presenter-wporg-username' );
 	$presenter_usernames      = array_map( 'trim', explode( ',', $presenter_wporg_username ) );
@@ -533,7 +761,52 @@ function save_workshop_meta_fields( $post_id ) {
 
 	// This language meta field is rendered in the editor sidebar using a PluginDocumentSettingPanel block,
 	// which won't save the field on publish if it has the default value.
-	// Our custom workshops query for locale prioritized tutorials (see functions.php `wporg_archive_query_prioritize_locale`)
+	// Our custom query for locale prioritized tutorials (see locale.php `wporg_archive_query_prioritize_locale`)
+	// depends on it being set, so we force it to be updated after saving:
+	$language         = get_post_meta( $post_id, 'language', true );
+	$language_default = 'en_US';
+	if ( ! isset( $language ) || $language_default === $language ) {
+		update_post_meta( $post_id, 'language', $language_default );
+	}
+}
+
+/**
+ * Update the post meta values from the meta fields when the post is saved.
+ *
+ * @param int $post_id
+ */
+function save_lesson_meta_fields( $post_id ) {
+	if ( wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	// This nonce field is rendered in the Lesson Video metabox.
+	$nonce = filter_input( INPUT_POST, 'lesson-metabox-nonce' );
+	if ( ! wp_verify_nonce( $nonce, 'lesson-metaboxes' ) ) {
+		return;
+	}
+
+	$presenter_wporg_username = filter_input( INPUT_POST, 'presenter-wporg-username' );
+	$presenter_usernames      = array_map( 'trim', explode( ',', $presenter_wporg_username ) );
+	delete_post_meta( $post_id, 'presenter_wporg_username' );
+	if ( is_array( $presenter_usernames ) ) {
+		foreach ( $presenter_usernames as $username ) {
+			add_post_meta( $post_id, 'presenter_wporg_username', $username );
+		}
+	}
+
+	$other_contributor_wporg_username = filter_input( INPUT_POST, 'other-contributor-wporg-username' );
+	$other_contributor_usernames      = array_map( 'trim', explode( ',', $other_contributor_wporg_username ) );
+	delete_post_meta( $post_id, 'other_contributor_wporg_username' );
+	if ( is_array( $other_contributor_usernames ) ) {
+		foreach ( $other_contributor_usernames as $username ) {
+			add_post_meta( $post_id, 'other_contributor_wporg_username', $username );
+		}
+	}
+
+	// This language meta field is rendered in the editor sidebar using a PluginDocumentSettingPanel block,
+	// which won't save the field on publish if it has the default value.
+	// Our custom query for locale prioritized lessons (see locale.php `wporg_archive_query_prioritize_locale`)
 	// depends on it being set, so we force it to be updated after saving:
 	$language         = get_post_meta( $post_id, 'language', true );
 	$language_default = 'en_US';
@@ -560,7 +833,6 @@ function save_meeting_metabox_fields( $post_id ) {
 
 	$language = filter_input( INPUT_POST, 'meeting-language' );
 	update_post_meta( $post_id, 'language', $language );
-
 }
 
 /**
@@ -569,12 +841,39 @@ function save_meeting_metabox_fields( $post_id ) {
 function render_locales_list() {
 	global $typenow;
 
-	$post_types_with_language = array( 'lesson-plan', 'wporg_workshop', 'meeting', 'course', 'lesson' );
-	if ( in_array( $typenow, $post_types_with_language, true ) ) {
-		$locales = get_locales_with_english_names();
-
-		require get_views_path() . 'locales-list.php';
+	$post_types_with_language = array( 'lesson-plan', 'wporg_workshop', 'meeting', 'course', 'lesson', 'activity_kit' );
+	if ( ! in_array( $typenow, $post_types_with_language, true ) ) {
+		return;
 	}
+
+	if ( function_exists( 'WordPressdotorg\Locales\get_locales_with_english_names' ) ) {
+		$locales = get_locales_with_english_names();
+	} else {
+		$locales = array(
+			'en_US' => 'English (United States)',
+			'ar'    => 'Arabic',
+			'de_DE' => 'German',
+			'es_ES' => 'Spanish (Spain)',
+			'fr_FR' => 'French (France)',
+			'he_IL' => 'Hebrew',
+			'hi_IN' => 'Hindi',
+			'id_ID' => 'Indonesian',
+			'it_IT' => 'Italian',
+			'ja'    => 'Japanese',
+			'ko_KR' => 'Korean',
+			'nl_NL' => 'Dutch',
+			'pt_BR' => 'Portuguese (Brazil)',
+			'pt_PT' => 'Portuguese (Portugal)',
+			'ro_RO' => 'Romanian',
+			'ru_RU' => 'Russian',
+			'sv_SE' => 'Swedish',
+			'tr_TR' => 'Turkish',
+			'zh_CN' => 'Chinese (China)',
+			'zh_TW' => 'Chinese (Taiwan)',
+		);
+	}
+
+	require get_views_path() . 'locales-list.php';
 }
 
 /**
@@ -583,6 +882,9 @@ function render_locales_list() {
 function enqueue_editor_assets() {
 	enqueue_expiration_date_assets();
 	enqueue_language_meta_assets();
+	enqueue_lesson_featured_meta_assets();
+	enqueue_duration_meta_assets();
+	enqueue_course_completion_meta_assets();
 }
 
 /**
@@ -598,7 +900,7 @@ function enqueue_expiration_date_assets() {
 			wp_die( 'You need to run `yarn start` or `yarn build` to build the required assets.' );
 		}
 
-		$script_asset = require( $script_asset_path );
+		$script_asset = require $script_asset_path;
 		wp_enqueue_script(
 			'wporg-learn-expiration-date',
 			get_build_url() . 'expiration-date.js',
@@ -618,14 +920,14 @@ function enqueue_expiration_date_assets() {
 function enqueue_language_meta_assets() {
 	global $typenow;
 
-	$post_types_with_language = array( 'lesson-plan', 'wporg_workshop', 'meeting', 'course', 'lesson' );
+	$post_types_with_language = array( 'lesson-plan', 'wporg_workshop', 'meeting', 'course', 'lesson', 'activity_kit' );
 	if ( in_array( $typenow, $post_types_with_language, true ) ) {
 		$script_asset_path = get_build_path() . 'language-meta.asset.php';
 		if ( ! file_exists( $script_asset_path ) ) {
 			wp_die( 'You need to run `yarn start` or `yarn build` to build the required assets.' );
 		}
 
-		$script_asset = require( $script_asset_path );
+		$script_asset = require $script_asset_path;
 		wp_enqueue_script(
 			'wporg-learn-language-meta',
 			get_build_url() . 'language-meta.js',
@@ -636,4 +938,165 @@ function enqueue_language_meta_assets() {
 
 		wp_set_script_translations( 'wporg-learn-language-meta', 'wporg-learn' );
 	}
+}
+
+/**
+ * Enqueue scripts for the featured lesson meta block.
+ */
+function enqueue_lesson_featured_meta_assets() {
+	global $typenow;
+
+	if ( 'lesson' === $typenow ) {
+		$script_asset_path = get_build_path() . 'lesson-featured-meta.asset.php';
+		if ( ! file_exists( $script_asset_path ) ) {
+			wp_die( 'You need to run `yarn start` or `yarn build` to build the required assets.' );
+		}
+
+		$script_asset = require $script_asset_path;
+		wp_enqueue_script(
+			'wporg-learn-lesson-featured-meta',
+			get_build_url() . 'lesson-featured-meta.js',
+			$script_asset['dependencies'],
+			$script_asset['version'],
+			true
+		);
+
+		wp_set_script_translations( 'wporg-learn-lesson-featured-meta', 'wporg-learn' );
+	}
+}
+
+/**
+ * Enqueue scripts for the duration meta block.
+ */
+function enqueue_duration_meta_assets() {
+	global $typenow;
+
+	$post_types_with_duration = array( 'course', 'lesson' );
+	if ( in_array( $typenow, $post_types_with_duration, true ) ) {
+		$script_asset_path = get_build_path() . 'duration-meta.asset.php';
+		if ( ! file_exists( $script_asset_path ) ) {
+			wp_die( 'You need to run `yarn start` or `yarn build` to build the required assets.' );
+		}
+
+		$script_asset = require $script_asset_path;
+		wp_enqueue_script(
+			'wporg-learn-duration-meta',
+			get_build_url() . 'duration-meta.js',
+			$script_asset['dependencies'],
+			$script_asset['version'],
+			true
+		);
+
+		wp_set_script_translations( 'wporg-learn-duration-meta', 'wporg-learn' );
+	}
+}
+
+/**
+ * Enqueue scripts for the course completion meta block.
+ */
+function enqueue_course_completion_meta_assets() {
+	global $typenow;
+
+	if ( 'course' === $typenow ) {
+		$script_asset_path = get_build_path() . 'course-completion-meta.asset.php';
+		if ( ! file_exists( $script_asset_path ) ) {
+			wp_die( 'You need to run `yarn start` or `yarn build` to build the required assets.' );
+		}
+
+		$script_asset = require $script_asset_path;
+		wp_enqueue_script(
+			'wporg-learn-course-completion-meta',
+			get_build_url() . 'course-completion-meta.js',
+			$script_asset['dependencies'],
+			$script_asset['version'],
+			true
+		);
+
+		wp_set_script_translations( 'wporg-learn-course-completion-meta', 'wporg-learn' );
+	}
+}
+
+/**
+ * Register post meta keys for activity kits.
+ */
+function register_activity_kit_meta() {
+	$auth_callback = function ( $allowed, $meta_key, $post_id ) {
+		return current_user_can( 'edit_post', $post_id );
+	};
+
+	register_post_meta(
+		'activity_kit',
+		'_activity_duration',
+		array(
+			'description'       => __( 'Duration of the activity, e.g. "60–90 minutes".', 'wporg-learn' ),
+			'type'              => 'string',
+			'single'            => true,
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'show_in_rest'      => true,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'activity_kit',
+		'_activity_guide_pdf_id',
+		array(
+			'description'       => __( 'Attachment ID of the Facilitator Guide PDF.', 'wporg-learn' ),
+			'type'              => 'integer',
+			'single'            => true,
+			'default'           => 0,
+			'sanitize_callback' => function ( $value ) {
+				return sanitize_attachment_id_by_mime( $value, array( 'application/pdf' ) );
+			},
+			'show_in_rest'      => true,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'activity_kit',
+		'_activity_slides_pdf_id',
+		array(
+			'description'       => __( 'Attachment ID of the Slide Deck PDF.', 'wporg-learn' ),
+			'type'              => 'integer',
+			'single'            => true,
+			'default'           => 0,
+			'sanitize_callback' => function ( $value ) {
+				return sanitize_attachment_id_by_mime( $value, array( 'application/pdf' ) );
+			},
+			'show_in_rest'      => true,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'activity_kit',
+		'_activity_zip_id',
+		array(
+			'description'       => __( 'Attachment ID of the downloadable ZIP file for this activity kit.', 'wporg-learn' ),
+			'type'              => 'integer',
+			'single'            => true,
+			'default'           => 0,
+			'sanitize_callback' => function ( $value ) {
+				return sanitize_attachment_id_by_mime( $value, array( 'application/zip', 'application/x-zip', 'application/x-zip-compressed' ) );
+			},
+			'show_in_rest'      => true,
+			'auth_callback'     => $auth_callback,
+		)
+	);
+
+	register_post_meta(
+		'activity_kit',
+		'_activity_feedback_url',
+		array(
+			'description'       => __( 'Optional per-kit feedback form URL. Overrides the global setting when set.', 'wporg-learn' ),
+			'type'              => 'string',
+			'single'            => true,
+			'default'           => '',
+			'sanitize_callback' => 'esc_url_raw',
+			'show_in_rest'      => true,
+			'auth_callback'     => $auth_callback,
+		)
+	);
 }

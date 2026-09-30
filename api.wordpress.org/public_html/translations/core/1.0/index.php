@@ -10,7 +10,7 @@ wp_cache_init();
 $version = WP_CORE_LATEST_RELEASE;
 if ( isset( $_REQUEST['version'] ) ) {
 	$version = $_REQUEST['version'];
-	if ( ! is_string( $version ) || ! is_numeric( $version[0] ) ) {
+	if ( empty( $version ) || ! is_string( $version ) || ! is_numeric( $version[0] ) ) {
 		header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request' );
 		die( '?version= must be a valid WordPress version' );
 	}

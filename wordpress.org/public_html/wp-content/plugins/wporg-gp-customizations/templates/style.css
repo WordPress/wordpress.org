@@ -429,6 +429,8 @@ body.wporg-make #headline h2 a:before {
 	--gp-color-status-old-subtle: #cdc5e1;
 	--gp-color-status-waiting-subtle: #ffe399;
 	--gp-color-status-rejected-subtle: #eb9090;
+
+	--gp-color-tour: #d54e21;
 }
 
 .locale-sub-projects .stats,
@@ -2467,7 +2469,7 @@ table.translations tr.editor td {
 	}
 }
 
-.editor-panel__left .panel-header {
+.editor-panel__left .panel-header, .editor-panel__right {
 	position: -webkit-sticky;
 	position: sticky;
 	top: 0;
@@ -2482,7 +2484,7 @@ table.translations tr.editor td {
 @media screen and (min-width: 890px) {
 	.admin-bar .editor-panel__left .panel-header,
 	.admin-bar .editor-panel__right {
-		top: calc( var(--wp-global-header-height) + var(--wp-admin--admin-bar--height) );
+		top: calc( var(--wp-admin--admin-bar--height) );
 	}
 }
 
@@ -3146,9 +3148,7 @@ ul.sidebar-tabs {
 
 .meta,
 .meta.discussion,
-.meta.history,
-.meta.other-locales,
-.meta.translation-memory {
+.meta.others {
 	padding: 12px;
 }
 
@@ -3160,55 +3160,119 @@ ul.sidebar-tabs {
 	padding: 1rem 0;
 }
 
-.meta.history td:nth-child(1),
-.meta.history td:nth-child(3),
-.meta.history td:nth-child(4) {
+.meta.others .summary-translation-memory {
+	font-weight: bold;
+	padding: 1rem 0 0.5rem 0;
+}
+
+.meta.others td:nth-child(1),
+.meta.others td:nth-child(3),
+.meta.others td:nth-child(4) {
 	text-align: center;
 	vertical-align: middle;
 	overflow: hidden;
 }
 
-.meta.history th,
-.meta.history td {
+.meta.others th,
+.meta.others td {
 	padding: 4px !important;
 	border: 1px solid #72777C !important;
 }
 
-.meta.history th:nth-child(1) {
+.meta.others th:nth-child(1) {
 	width: 20%;
 	vertical-align: middle;
 }
 
-.meta.history  th:nth-child(2) {
+.meta.others th:nth-child(2) {
 	width: 50%;
 	vertical-align: middle;
 }
 
-.meta.history th:nth-child(3),
-.meta.history th:nth-child(4) {
+.meta.others th:nth-child(3),
+.meta.others th:nth-child(4) {
 	width: 15%;
 	vertical-align: middle;
 }
 
-.meta.other-locales ul, .meta.transation-memory ul {
+.meta.others ul {
 	margin: 0;
 	padding: 0;
 }
 
-.meta.translation-memory ul.suggestions-list,
-.meta.translation-memory summary {
-	list-style: none;
+.meta.others ul.suggestions-list,
+.meta.others summary {
 	margin-left: 0;
 }
 
-.meta.translation-memory div.translation-suggestion {
+.meta.others div.translation-suggestion {
 	margin: 1rem 0;
 }
 
-.meta.other-locales .locale.unique, .meta.other-locales .other-locales .locale {
+.meta.others .locale.unique, .meta.others .other-locales .locale {
 	width: 6rem;
 	background: #0073aa;
 	margin-right: 10px !important;
+}
+
+.meta.other-locales ul {
+	margin: 1rem 0.5rem;
+}
+
+.meta.other-locales .sidebar-other-locales.button.is-small.copy-suggestion {
+	margin-left: auto;
+}
+
+.meta.other-locales span.locale.unique {
+	margin-right: 14px;
+}
+
+.meta.other-locales .other-locales .locale {
+	min-width: 4em;
+	width: 4em;
+}
+
+.meta.history {
+	padding-top: 0.5rem;
+}
+
+.meta.history .translations {
+	border-top: #32373C 1px double;
+}
+
+.meta.translation-memory {
+	padding-top: 1rem;
+}
+
+.meta.translation-memory ul.suggestions-list:first-of-type {
+	margin-top: 1rem;
+}
+
+.meta.translation-memory ul.suggestions-list {
+	margin-bottom: 0;
+}
+
+.meta.translation-memory ul.suggestions-list li {
+	list-style: none;
+	margin-left: -1.2rem;
+}
+
+.meta.translation-memory div.translation-suggestion.with-tooltip.translation {
+	margin-bottom: 0;
+}
+
+.sidebar-div-others-translation-memory-content > summary {
+	list-style-type: none;
+}
+
+/* GlotPress Tour Overrides */
+a.tour-button {
+	text-shadow: none;
+	padding-top: 0;
+	text-decoration: none;
+}
+.pulse-wrapper {
+	margin: 0;
 }
 
 @media screen and (max-width: 530px), (min-width: 1024px) and (max-width: 1450px) {
@@ -3222,5 +3286,66 @@ ul.sidebar-tabs {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		vertical-align: top;
+	}
+}
+
+ul.other-locales li {
+	display: flex;
+	margin-bottom: 0.2rem;
+}
+
+.sidebar-div-others-other-locales-content > ul.other-locales > li > span {
+	min-width: 6rem;
+}
+
+.sidebar-div-others-other-locales-content > ul.other-locales > li > a {
+	display: flex;
+	flex: auto;
+}
+
+.sidebar-div-others-other-locales-content > ul.other-locales > li > ul {
+	display: flex;
+	flex-direction: column;
+	flex: auto;
+}
+
+.sidebar-div-others-history-content #translation-history-table > tbody > tr > td {
+	overflow: hidden;
+}
+
+#translations.table-virtual-pattern {
+	float: left;
+	width: 60%;
+}
+
+.preview-virtual-pattern {
+	max-width: 39%;
+	float: right;
+	padding: 1rem 1rem 0 1rem;
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+	border: 1px solid rgb(114, 119, 124);
+}
+
+.preview-virtual-pattern h2 {
+	text-align: center;
+	margin: 0.5rem 0;
+}
+.preview-virtual-pattern p.link-to-pattern {
+	text-align: center;
+	padding: 0 0 1rem 0;
+	margin: 0 -1rem;
+	border-bottom: 1px solid rgb(114, 119, 124);
+}
+
+@media screen and (max-width: 1280px) {
+	#translations.table-virtual-pattern {
+		float: none;
+		width: 100%;
+	}
+
+	.preview-virtual-pattern {
+		max-width: 100%;
+		float: none;
 	}
 }

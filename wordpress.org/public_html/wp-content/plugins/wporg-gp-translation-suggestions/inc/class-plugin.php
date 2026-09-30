@@ -4,10 +4,23 @@ namespace WordPressdotorg\GlotPress\TranslationSuggestions;
 
 use GP;
 use GP_Locales;
+use WordPressdotorg\GlotPress\TranslationSuggestions\Routes\Translation_Memory;
+use WordPressdotorg\GlotPress\Bulk_Pretranslations\Deepl;
 
 class Plugin {
 
-	const TM_UPDATE_EVENT = 'wporg_translate_tm_update';
+	const TM_UPDATE_EVENT   = 'wporg_translate_tm_update';
+	const TM_DRAIN_EVENT    = 'wporg_translate_tm_drain';
+	const TM_DRAIN_SCHEDULE = 'wporg_translate_tm_minutely';
+	const TM_QUEUE_OPTION   = 'wporg_translate_tm_queue';
+
+	/**
+	 * Maximum number of translation IDs held in the persistent queue.
+	 *
+	 * Keeps the option small enough to stay cacheable and cheap to rewrite
+	 * under the lock. IDs beyond the cap are dropped.
+	 */
+	const TM_QUEUE_MAX = 20000;
 
 	/**
 	 * @var Plugin The singleton instance.
@@ -15,7 +28,11 @@ class Plugin {
 	private static $instance;
 
 	/**
-	 * @var array
+	 * Translation IDs queued during the current request.
+	 *
+	 * Keyed by translation_id for dedup; values are ignored.
+	 *
+	 * @var array<int, true>
 	 */
 	private $queue = array();
 
@@ -54,7 +71,25 @@ class Plugin {
 			add_action( 'shutdown', array( $this, 'schedule_tm_update' ), 3 );
 		}
 
+		add_filter( 'cron_schedules', array( $this, 'register_cron_schedules' ) );
 		add_action( self::TM_UPDATE_EVENT, array( Translation_Memory_Client::class, 'update' ) );
+		add_action( self::TM_DRAIN_EVENT, array( Translation_Memory_Client::class, 'drain' ) );
+		add_action( 'gp_translation_created', array( Translation_Memory::class, 'update_external_translations' ) );
+	}
+
+	/**
+	 * Registers the schedule for the TM queue drain.
+	 *
+	 * @param array $schedules An array of non-default cron schedules.
+	 * @return array An array of non-default cron schedules.
+	 */
+	public function register_cron_schedules( $schedules ) {
+		$schedules[ self::TM_DRAIN_SCHEDULE ] = array(
+			'interval' => MINUTE_IN_SECONDS,
+			'display'  => 'Every minute',
+		);
+
+		return $schedules;
 	}
 
 	/**
@@ -68,11 +103,17 @@ class Plugin {
 			return;
 		}
 
-		$this->queue[ $translation->original_id ] = $translation->id;
+		// Key by translation_id so distinct translations of the same original
+		// (e.g. different locales, plural forms) are all queued.
+		$this->queue[ (int) $translation->id ] = true;
 	}
 
 	/**
-	 * Schedules a single event to update translation memory for new translations.
+	 * Appends the request's queued translations to the persistent queue and
+	 * ensures the recurring drain event is scheduled.
+	 *
+	 * Translation Memory updates are best-effort: if the lock stays busy or the
+	 * queue is full, the request's translations are dropped.
 	 */
 	public function schedule_tm_update() {
 		remove_action( 'gp_translation_created', array( $this, 'translation_updated' ), 3 );
@@ -82,7 +123,71 @@ class Plugin {
 			return;
 		}
 
-		wp_schedule_single_event( time() + 60, self::TM_UPDATE_EVENT, array( 'translations' => $this->queue ) );
+		$new_ids = $this->queue;
+		$this->queue = array();
+
+		self::with_lock( 'queue_lock', function () use ( $new_ids ) {
+			$queue = self::read_queue();
+			if ( count( $queue ) < self::TM_QUEUE_MAX ) {
+				// Append so the drain processes the oldest translations first.
+				self::write_queue( array_slice( $queue + $new_ids, 0, self::TM_QUEUE_MAX, true ) );
+			}
+
+			// Checked under the lock so concurrent requests can't each schedule a recurring drain.
+			if ( ! wp_next_scheduled( self::TM_DRAIN_EVENT ) ) {
+				wp_schedule_event( time() + MINUTE_IN_SECONDS, self::TM_DRAIN_SCHEDULE, self::TM_DRAIN_EVENT );
+			}
+		}, 3 );
+	}
+
+	/**
+	 * Reads the persistent TM update queue.
+	 *
+	 * @return array<int, true> Set of translation_ids (value always true).
+	 */
+	public static function read_queue() {
+		$queue = get_option( self::TM_QUEUE_OPTION, array() );
+		return is_array( $queue ) ? $queue : array();
+	}
+
+	/**
+	 * Writes (or deletes, when empty) the persistent TM update queue.
+	 *
+	 * @param array<int, true> $queue Set of translation_ids.
+	 */
+	public static function write_queue( array $queue ) {
+		if ( ! $queue ) {
+			delete_option( self::TM_QUEUE_OPTION );
+			return;
+		}
+		update_option( self::TM_QUEUE_OPTION, $queue, false );
+	}
+
+	/**
+	 * Runs $callback while holding a memcached-backed lock.
+	 *
+	 * wp_cache_add maps to memcached ADD — atomic. Retries up to $attempts
+	 * times, 50ms apart; returns false without running the callback if the
+	 * lock is still held.
+	 *
+	 * @param string   $name     Lock name.
+	 * @param callable $callback
+	 * @param int      $attempts Optional. Number of attempts to acquire the lock. Default 1.
+	 * @return mixed The callback's return value, or false if the lock was not acquired.
+	 */
+	public static function with_lock( $name, callable $callback, $attempts = 1 ) {
+		while ( ! wp_cache_add( $name, 1, 'locks', 30 ) ) {
+			if ( --$attempts < 1 ) {
+				return false;
+			}
+			usleep( 50000 );
+		}
+
+		try {
+			return $callback();
+		} finally {
+			wp_cache_delete( $name, 'locks' );
+		}
 	}
 
 	/**
@@ -100,7 +205,6 @@ class Plugin {
 		GP::$router->prepend( "/$set/-get-other-language-suggestions", array( __NAMESPACE__ . '\Routes\Other_Languages', 'get_suggestions' ) );
 		GP::$router->prepend( "/$set/-get-tm-openai-suggestions", array( __NAMESPACE__ . '\Routes\Translation_Memory', 'get_openai_suggestions' ) );
 		GP::$router->prepend( "/$set/-get-tm-deepl-suggestions", array( __NAMESPACE__ . '\Routes\Translation_Memory', 'get_deepl_suggestions' ) );
-		GP::$router->prepend( '/-save-external-suggestions', array( __NAMESPACE__ . '\Routes\Translation_Memory', 'update_external_translations' ), 'post' );
 	}
 
 	/**
@@ -129,7 +233,9 @@ class Plugin {
 		$gp_default_sort         = get_user_option( 'gp_default_sort' );
 		$get_openai_translations = ! empty( trim( gp_array_get( $gp_default_sort, 'openai_api_key' ) ) );
 		$get_deepl_translations  = ! empty( trim( gp_array_get( $gp_default_sort, 'deepl_api_key' ) ) );
-
+		$deepl 				     = new DeepL();
+		$deepl_locale 		     = $deepl->get_deepl_locale( $args['locale_slug'] );
+		
 		wp_localize_script(
 			'gp-translation-suggestions',
 			'gpTranslationSuggestions',
@@ -138,12 +244,12 @@ class Plugin {
 				'get_external_translations' => array(
 					'get_openai_translations' => $get_openai_translations,
 					'get_deepl_translations'  => $get_deepl_translations,
+					'get_deepl_locale'        => $deepl_locale,
 				),
 			)
 		);
 
 		gp_enqueue_script( 'gp-translation-suggestions' );
-
 		wp_add_inline_script(
 			'gp-translation-suggestions',
 			sprintf(
@@ -171,6 +277,11 @@ class Plugin {
 		// and have no results due to being too unique.
 		$query_tm = mb_strlen( $entry->singular ) <= 420;
 
+		// Used to add a link to add the OpenAI and the DeepL keys.
+		// We only show this link if the user has not added any of these keys yet.
+		$gp_default_sort = get_user_option( 'gp_default_sort' );
+		$openai_key      = trim( gp_array_get( $gp_default_sort, 'openai_api_key' ) );
+		$deepl_key       = trim( gp_array_get( $gp_default_sort, 'deepl_api_key' ) );
 		?>
 		<details open class="suggestions__translation-memory<?php echo $query_tm ? '' : ' initialized'; ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'translation-memory-suggestions-' . $entry->original_id ) ); ?>">
 			<summary>Suggestions from Translation Memory</summary>
@@ -178,6 +289,10 @@ class Plugin {
 				<p class="suggestions__loading-indicator">Loading <span aria-hidden="true" class="suggestions__loading-indicator__icon"><span></span><span></span><span></span></span></p>
 			<?php else : ?>
 				<p class="no-suggestions">No suggestions.</p>
+			<?php endif; ?>
+
+			<?php if ( empty( $openai_key ) && empty( $deepl_key ) ) : ?>
+				<p class="translation-suggestion__footer_message__for_suggestions">Get translation suggestions from <a href="https://translate.wordpress.org/settings/" target="_blank">OpenAI</a>  and from <a href="https://translate.wordpress.org/settings/" target="_blank">DeepL</a>. <a href="https://make.wordpress.org/polyglots/2023/03/29/adding-chatgpt-and-deepl-in-the-translation-memory/" target="_blank">More info</a>.</p>
 			<?php endif; ?>
 		</details>
 

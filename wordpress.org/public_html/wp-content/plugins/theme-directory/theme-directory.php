@@ -44,6 +44,52 @@ define( 'WPORG_THEMES_DEFAULT_BROWSE', 'popular' );
 define( 'WPORG_THEMES_E2E_REPO', 'WordPress/theme-review-e2e' );
 
 /**
+ * Delay between a theme version being approved (by a reviewer on Trac, or via the
+ * auto-approval path for theme updates) and it becoming the live version served to
+ * sites by the themes API. Approved versions are held in Trac's `approved` status and
+ * migrated to live by the theme_directory_trac_sync cron once this delay elapses (see
+ * Trac_Sync::release_to_live()); the previous live version (if any) continues to be
+ * served in the meantime. Mitigates supply-chain risks by giving scanners and humans a
+ * window to flag bad releases. Reviewers can bypass the delay with Trac's `approve and
+ * mark` / `mark this theme` actions, which close the ticket as live immediately.
+ *
+ * Defers to the shared WPORG_PLUGIN_THEME_RELEASE_DELAY constant when it's defined
+ * so the plugin and theme directories can be tuned (or disabled) in lockstep from a
+ * single override point.
+ *
+ * Defaults to 0 (cooldown disabled, versions go live immediately) for now; this will be
+ * raised once the surrounding workflow is ready. Can be pre-defined in global config to
+ * override the default.
+ */
+if ( ! defined( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY' ) ) {
+	define( 'WPORG_THEMES_RELEASE_COOL_DOWN_DELAY', defined( 'WPORG_PLUGIN_THEME_RELEASE_DELAY' ) ? WPORG_PLUGIN_THEME_RELEASE_DELAY : 0 );
+}
+
+/**
+ * Returns the release cooldown delay, in seconds, for a theme.
+ *
+ * The WPORG_THEMES_RELEASE_COOL_DOWN_DELAY constant provides the default, which is then
+ * passed through the `wporg_themes_release_cooldown_delay` filter so the delay can be
+ * shortened, extended, or removed (return 0 to disable the cooldown) on a per-theme basis.
+ * The theme slug is passed to the filter when it is known.
+ *
+ * @param string $theme_slug The slug of the theme being acted upon, if known.
+ * @return int Delay in seconds. 0 disables the cooldown (the version goes live immediately).
+ */
+function wporg_themes_get_release_cooldown_delay( $theme_slug = '' ) {
+	/**
+	 * Filters the release cooldown delay for a theme.
+	 *
+	 * Return 0 to disable the cooldown (the approved version goes live immediately), or a
+	 * larger/smaller number of seconds to lengthen or shorten the delay for this theme.
+	 *
+	 * @param int    $delay      The default delay in seconds (WPORG_THEMES_RELEASE_COOL_DOWN_DELAY).
+	 * @param string $theme_slug The slug of the theme being acted upon, or '' when not known.
+	 */
+	return (int) apply_filters( 'wporg_themes_release_cooldown_delay', WPORG_THEMES_RELEASE_COOL_DOWN_DELAY, $theme_slug );
+}
+
+/**
  * Things to change on activation.
  */
 function wporg_themes_activate() {
@@ -129,7 +175,7 @@ function wporg_themes_init() {
 				'menu_name'          => __( 'Packages', 'wporg-themes' ),
 			),
 			'description' => __( 'A package', 'wporg-themes' ),
-			'supports'    => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes' ),
+			'supports'    => array( 'title', 'editor', 'author', 'custom-fields', 'page-attributes', 'wporg-internal-notes', 'wporg-log-notes' ),
 			'taxonomies'  => array( 'category', 'post_tag', 'type' ),
 			'public'      => true,
 			'show_ui'     => true,
@@ -155,7 +201,7 @@ function wporg_themes_init() {
 				'parent_item_colon'  => __( 'Parent Theme Shop:', 'wporg-themes' ),
 				'menu_name'          => __( 'Theme Shops', 'wporg-themes' ),
 			),
-			'supports'            => array( 'title', 'editor', 'author', 'custom-fields' ),
+			'supports'            => array( 'title', 'editor', 'author', 'custom-fields', 'wporg-internal-notes', 'wporg-log-notes'  ),
 			'public'              => false,
 			'show_ui'             => true,
 			'exclude_from_search' => true,
@@ -327,19 +373,19 @@ function wporg_themes_author_metabox_override( $post_type, $post ) {
 function wporg_themes_post_author_meta_box( $post ) {
 	global $user_ID;
 ?>
-<label class="screen-reader-text" for="post_author_override"><?php _e('Author'); ?></label>
+<label class="screen-reader-text" for="post_author_override"><?php esc_html_e( 'Author' ); ?></label>
 <?php
 	$value = empty($post->ID) ? $user_ID : $post->post_author;
 
 	$user = new WP_User($value);
 
-	echo "<input type='text' id='post_author_username' value='{$user->user_login}' />";
-	echo "<input type='hidden' id='post_author_override' name='post_author_override' value='{$value}' />";
+	printf( '<input type="text" id="post_author_username" value="%s" />', esc_attr( $user->user_login ) );
+	printf( '<input type="hidden" id="post_author_override" name="post_author_override" value="%s" />', esc_attr( $value ) );
 ?>
 	<script>
 	jQuery( document ).ready( function( $ ) {
 		$( "#post_author_username" ).autocomplete( {
-			source: ajaxurl + '?action=author-lookup&_ajax_nonce=<?php echo wp_create_nonce( 'wporg_themes_author_lookup' ); ?>',
+			source: ajaxurl + '?action=author-lookup&_ajax_nonce=<?php echo esc_js( wp_create_nonce( 'wporg_themes_author_lookup' ) ); ?>',
 			minLength: 2,
 			delay: 700,
 			autoFocus: true,
@@ -392,7 +438,7 @@ function wporg_themes_author_lookup() {
 	}
 	exit;
 }
-add_action('wp_ajax_author-lookup', 'wporg_themes_author_lookup');
+add_action( 'wp_ajax_author-lookup', 'wporg_themes_author_lookup' );
 
 
 /* UPDATING THEME VERSIONS */
@@ -400,9 +446,9 @@ add_action('wp_ajax_author-lookup', 'wporg_themes_author_lookup');
 /**
  * Handles updating the status of theme versions.
  *
- * @param int       $post_id         Post ID.
- * @param string    $current_version The theme version to update.
- * @param string    $new_status      The status to update the current version to.
+ * @param int    $post_id         Post ID.
+ * @param string $current_version The theme version to update.
+ * @param string $new_status      The status to update the current version to.
  * @return int|bool Meta ID if the key didn't exist, true on successful update,
  *                  false on failure.
  */
@@ -423,6 +469,7 @@ function wporg_themes_update_version_status( $post_id, $current_version, $new_st
 		// There can only be one version with these statuses:
 		case 'new':
 		case 'live':
+		case 'approved':
 			// Discard all previous versions with that status.
 			foreach ( array_keys( $meta, $new_status ) as $version ) {
 				if ( version_compare( $version, $current_version, '<' ) ) {
@@ -525,9 +572,7 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		// Allow theme titles to change in case or accent: `ThemeName` => `Themename` + `ThemeName` => `ThemèName`
 		if ( $theme_post_name !== $theme_data['Name'] ) {
 			// Theme name has been updated. Make sure it still sanitizes to the same post.
-			$name_slugified = remove_accents( $theme_data['Name'] );
-			$name_slugified = preg_replace( '/%[a-f0-9]{2}/i', '', $name_slugified );
-			$name_slugified = sanitize_title_with_dashes( $name_slugified );
+			$name_slugified = wporg_themes_slug_from_name( $theme_data['Name'] );
 
 			if ( $name_slugified === $post->post_name ) {
 				// The new name still ends up at the same post_name slug value, let them have it.
@@ -544,6 +589,10 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 				'fields' => 'slugs'
 			) )
 		);
+
+		// SVN commits skip the upload's shortcode check, so make the delimiters inert here.
+		$theme_post_name           = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_post_name );
+		$theme_data['Description'] = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_data['Description'] );
 
 		wp_update_post( array(
 			'ID'           => $post_id,
@@ -607,6 +656,9 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 		}
 
 		wp_update_post( $post_args );
+
+		// Subscribe the author to the theme.
+		woprg_themes_subscribe_author_to_theme_forum( get_post( $post_id ) );
 	}
 
 	$content .= sprintf( __( 'Any feedback items are at %s.', 'wporg-themes' ), "https://themes.trac.wordpress.org/ticket/$ticket_id" ) . "\n\n--\n";
@@ -614,6 +666,9 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 	$content .= 'https://make.wordpress.org/themes';
 
 	wp_mail( get_user_by( 'id', $post->post_author )->user_email, $subject, $content, 'From: "WordPress Theme Directory" <themes@wordpress.org>' );
+
+	// Store some user-meta against the theme author, so that other code knows this is a current (or past) theme author.
+	update_user_meta( $post->post_author, 'has_themes', time() );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_approve_version', 10, 3 );
 
@@ -704,7 +759,7 @@ function wporg_themes_update_wpthemescom( $theme_slug, $theme_version ) {
 		wp_remote_post( "http://$server/", array(
 			'body'    => array(
 				'theme_update'        => $theme_slug,
-				'theme_version'       => $theme_version,
+				'theme_version'       => "$theme_version",
 				'theme_action'        => 'update',
 				'theme_update_secret' => THEME_PREVIEWS_SYNC_SECRET,
 			),
@@ -738,6 +793,24 @@ function wporg_themes_remove_wpthemescom( $theme_slug ) {
 			),
 		) );
 	}
+}
+
+/**
+ * Derives the directory slug for a theme name.
+ *
+ * Kept to ASCII, so the value survives the second sanitize that `wp_insert_post()`
+ * runs on `post_name`. The upload maps the default theme names (`twenty-*`) after this.
+ *
+ * @param string $name The theme name, as read from the `Theme Name:` header.
+ * @return string The slug; empty when nothing of the name can be kept.
+ */
+function wporg_themes_slug_from_name( $name ) {
+	// Convert accented characters, drop what cannot be converted, and drop '%' so nothing reads as an encoded octet.
+	$slug = preg_replace( '/[%\x80-\xff]/', '', remove_accents( (string) $name ) );
+	$slug = sanitize_title_with_dashes( $slug );
+
+	// Underscores alone survive the sanitizer; a slug needs a letter or a digit.
+	return preg_match( '/[a-z0-9]/', $slug ) ? $slug : '';
 }
 
 /**
@@ -793,11 +866,13 @@ function wporg_themes_get_header_data( $theme_file ) {
 	 * guarantee that the server will be happy with the User Agent.
 	 */
 	if ( str_contains( $theme_file, '://' ) ) {
-		$request = wp_remote_get( 
+		include_once ABSPATH . '/wp-admin/includes/file.php'; // For wp_tempnam().
+		$request = wp_remote_get(
 			$theme_file,
 			[
 				'user-agent' => 'WordPress.org Theme Directory',
 				'stream'     => true,
+				'filename'   => wp_tempnam( 'style.css' ),
 			]
 		);
 		$theme_file = $request['filename'] ?? false;
@@ -845,28 +920,31 @@ function wporg_themes_get_themes_for_query() {
 	}
 
 	$request = array();
-	if ( get_query_var( 'browse' ) ) {
+	if ( get_query_var( 'browse' ) && is_string( get_query_var( 'browse' ) ) ) {
 		$request['browse'] = get_query_var( 'browse' );
 
 		if ( 'favorites' === $request['browse'] ) {
 			$request['user'] = wp_get_current_user()->user_login;
 		}
 
-	} else if ( get_query_var( 'tag' ) ) {
+	} else if ( get_query_var( 'tag' ) && is_string( get_query_var( 'tag' ) ) ) {
 		$request['tag'] = (array) explode( '+', get_query_var( 'tag' ) );
 
-	} else if ( get_query_var( 's' ) ) {
+	} else if ( get_query_var( 's' ) && is_string( get_query_var( 's' ) ) ) {
 		$request['search'] = get_query_var( 's' );
 
 	} else if ( get_query_var( 'author' ) ) {
 		$request['author'] = get_user_by( 'id', get_query_var( 'author' ) )->user_nicename;
 
 	} else if ( get_query_var( 'name' ) || get_query_var( 'pagename' ) ) {
-		$request['theme'] = basename( get_query_var( 'name' ) ?: get_query_var( 'pagename' ) );
+		$name = get_query_var( 'name' ) ?: get_query_var( 'pagename' );
+		if ( is_string( $name ) ) {
+			$request['theme'] = basename( $name );
+		}
 	}
 
 	if ( get_query_var( 'paged' ) ) {
-		$request['page'] = (int)get_query_var( 'paged' );
+		$request['page'] = (int) get_query_var( 'paged' );
 	}
 
 	if ( empty( $request ) ) {
@@ -923,7 +1001,7 @@ function wporg_themes_prepare_themes_for_js() {
 
 function wporg_themes_theme_information( $slug ) {
 	return wporg_themes_query_api( 'theme_information', array(
-		'slug' => $slug,
+		'slug'   => $slug,
 		'fields' => array(
 			'description' => true,
 			'sections' => false,
@@ -1117,7 +1195,7 @@ function wporg_themes_glotpress_import_on_update( $theme, $theme_post ) {
 add_action( 'theme_upload', 'wporg_themes_glotpress_import_on_update', 100, 2 );
 
 /**
- * Hooks into the Suspend process to mark a theme as inactive in GlotPress.
+ * Hooks into the Suspend/Draft process to mark a theme as inactive in GlotPress.
  *
  * @param int  $post_id The post ID being suspended
  */
@@ -1128,8 +1206,34 @@ function wporg_themes_glotpress_mark_as_inactive_on_suspend( $post_id ) {
 	}
 
 	wporg_themes_glotpress_import( $post, 'inactive' );
+	wporg_themes_remove_wpthemescom( $post->post_name );
 }
 add_action( 'suspend_repopackage', 'wporg_themes_glotpress_mark_as_inactive_on_suspend' );
+add_action( 'publish_to_draft', 'wporg_themes_glotpress_mark_as_inactive_on_suspend' );
+
+/**
+ * Hooks into the publish process to mark a theme as active in GlotPress if it was deactivated.
+ *
+ * @param int  $post_id The post ID being published
+ */
+function wporg_themes_glotpress_mark_as_active_on_publish( $post_id, $post, $old_status ) {
+	// This is only intended to handle when a suspended/delisted theme is reinstated. Other functions handle when
+	// a new version of a published theme is uploaded.
+	if ( 'publish' === $old_status ) {
+		return;
+	}
+
+	$latest_version = array_search( 'live', $post->_status ?: [] );
+
+	if ( ! $latest_version ) {
+		return;
+	}
+
+	wporg_themes_glotpress_import( $post, $latest_version );
+
+	wporg_themes_update_wpthemescom( $post->post_name, $latest_version );
+}
+add_action( 'publish_repopackage', 'wporg_themes_glotpress_mark_as_active_on_publish', 10, 3 );
 
 /**
  * Import theme strings to GlotPress on approval.
@@ -1470,6 +1574,11 @@ function wporg_themes_canonical_url( $url ) {
 		$url = home_url( '/' );
 	}
 
+	// Pagination.
+	if ( get_query_var( 'paged' ) > 1 ) {
+		$url .= 'page/' . intval( get_query_var( 'paged' ) ) . '/';
+	}
+
 	return $url;
 }
 add_filter( 'wporg_canonical_url', 'wporg_themes_canonical_url' );
@@ -1482,3 +1591,143 @@ function wporg_themes_jetpack_seo_enable( $modules ) {
 	return array_values( array_merge( $modules, array( 'seo-tools' ) ) );
 }
 add_filter( 'jetpack_active_modules', 'wporg_themes_jetpack_seo_enable' );
+
+/**
+ * Subscribe a theme author to their theme support threads upon approval.
+ *
+ * @param WP_Post $post
+ */
+function woprg_themes_subscribe_author_to_theme_forum( $post ) {
+	if ( ! $post || ! defined( 'PLUGIN_API_INTERNAL_BEARER_TOKEN' ) ) {
+		return false;
+	}
+
+	$request = wp_remote_post(
+		'https://wordpress.org/support/wp-json/wporg-support/v1/subscribe-user-to-term',
+		[
+			'body'    => [
+				'type'    => 'theme',
+				'slug'    => $post->post_name,
+				'user_id' => $post->post_author,
+			],
+			'headers' => [
+				'Authorization' => 'Bearer ' . PLUGIN_API_INTERNAL_BEARER_TOKEN,
+			],
+		]
+	);
+
+	return 200 === wp_remote_retrieve_response_code( $request );
+}
+
+/**
+ * Record some stats on theme status changes.
+ *
+ * @param string $new_status
+ * @param string $old_status
+ * @param WP_Post $post
+ */
+function wporg_themes_status_change_stats( $new_status, $old_status, $post ) {
+	if ( 
+		'repopackage' !== $post->post_type ||
+		in_array( $new_status, [ 'draft', 'auto-draft' ] ) ||
+		! function_exists( 'bump_stats_extra' )
+	) {
+		return;
+	}
+
+	if ( 'suspend' == $old_status && 'publish' == $new_status ) {
+		$stat = 'reinstated';
+	} elseif( 'delist' == $old_status && 'publish' == $new_status ) {
+		$stat = 'relisted';
+	} else {
+		$stat = $new_status;
+	}
+ 
+	bump_stats_extra( 'themes', 'status-' . $stat );
+}
+add_action( 'transition_post_status', 'wporg_themes_status_change_stats', 10, 3 );
+
+/**
+ * Record the date a theme was put into it's current status.
+ *
+ * @param string $new_status
+ * @param string $old_status
+ * @param WP_Post $post
+ */
+function wporg_themes_status_change_metadata( $new_status, $old_status, $post ) {
+	$tracked_statii = [
+		'publish',
+		'suspend',
+		'delist',
+	];
+
+	if ( 
+		'repopackage' !== $post->post_type ||
+		$new_status === $old_status ||
+		(
+			! in_array( $new_status, $tracked_statii ) &&
+			! in_array( $old_status, $tracked_statii )
+		)
+	) {
+		return;
+	}
+
+	foreach ( $tracked_statii as $status ) {
+		delete_post_meta( $post->ID, "_{$status}_date" );
+	}
+
+	if ( in_array( $new_status, $tracked_statii ) ) {
+		update_post_meta( $post->ID, "_{$new_status}_date", current_time( 'mysql' ) );
+	}
+
+}
+add_action( 'transition_post_status', 'wporg_themes_status_change_metadata', 10, 3 );
+
+/**
+ * Check if a user has any themes.
+ *
+ * @param int|WP_User $user_id
+ * @param array       $status  The status of the themes to check for.
+ *
+ * @return bool
+ */
+function wporg_themes_has_theme( $user_id = 0, $status = [ 'publish', 'draft' ] ) {
+	if ( is_object( $user_id ) ) {
+		$user_id = $user_id->ID;
+	} elseif ( ! $user_id ) {
+		$user_id = get_current_user_id();
+	}
+
+	$themes = get_posts( [
+		'post_type'   => 'repopackage',
+		'post_status' => $status,
+		'author'      => $user_id,
+		'numberposts' => 1,
+		'fields'      => 'ids',
+	] );
+
+	return (bool) $themes;
+}
+
+/**
+ * Log metadata changes to internal notes.
+ *
+ * @param array $meta_keys The meta keys to log.
+ * @return array
+ */
+function wporg_themes_log_metadata_changes( $meta_keys ) {
+	// Don't keep track of the page template, we don't use that.
+	$meta_keys = array_diff(
+		$meta_keys,
+		array(
+			'_wp_page_template'
+		)
+	);
+
+	$meta_keys[] = '_live_version';
+	$meta_keys[] = 'external_support_url';
+	$meta_keys[] = 'external_repository_url';
+
+	return $meta_keys;
+}
+add_filter( 'wporg_internal_notes_logging_allowed_postmeta_keys', 'wporg_themes_log_metadata_changes' );

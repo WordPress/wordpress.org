@@ -1,0 +1,121 @@
+@import "../variables-site/variables-site";
+
+/* Include margin and padding in the width calculation of input and textarea. */
+input,
+textarea,
+select {
+	box-sizing: border-box;
+	line-height: var(--wp--custom--form--line-height);
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+	border: 1px solid var(--wp--custom--form--border--color);
+	box-shadow: var(--wp--custom--form--color--box-shadow);
+	border-radius: var(--wp--custom--form--border--radius);
+	clear: none;
+	cursor: pointer;
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	line-height: 0;
+	padding: 0 !important;
+	text-align: center;
+	vertical-align: middle;
+	margin: 0;
+
+	&:focus {
+		box-shadow: none;
+		color: var(--wp--custom--form--color--text);
+	}
+
+	&:focus-visible {
+		outline: -webkit-focus-ring-color auto 1px;
+	}
+}
+
+input[type="radio"] {
+	border-radius: 50%;
+
+	& + label {
+		margin-left: 0.5em;
+	}
+}
+
+@-moz-document url-prefix() {
+
+	input[type="checkbox"],
+	input[type="radio"],
+	.form-table input.tog {
+		margin-bottom: -1px;
+	}
+}
+
+select {
+	background: var(--wp--custom--form--color--background);
+	border: var(--wp--custom--form--border--width) var(--wp--custom--form--border--style) var(--wp--custom--form--border--color);
+	border-radius: var(--wp--custom--form--border--radius);
+	box-shadow: var(--wp--custom--form--color--box-shadow);
+	font-family: inherit;
+	min-height: 40px;
+}
+
+/* Search */
+input[type="search"]::-webkit-search-decoration {
+	display: none;
+}
+
+input[type="file"] {
+	padding: 3px 0;
+}
+
+label {
+	cursor: pointer;
+}
+
+input.readonly,
+input[readonly],
+textarea.readonly,
+textarea[readonly] {
+	background-color: var(--wp--preset--color--light-grey-1);
+}
+
+:-moz-placeholder {
+	color: #a9a9a9;
+}
+
+input:disabled,
+input.disabled,
+select:disabled,
+select.disabled,
+textarea:disabled,
+textarea.disabled {
+	background: var(--wp--custom--form--color--background);
+	border-color: var(--wp--custom--form--disabled--border-color);
+	box-shadow: none;
+	color: var(--wp--custom--form--disabled--color);
+}
+
+input[type="file"]:disabled,
+input[type="file"].disabled,
+input[type="range"]:disabled,
+input[type="range"].disabled {
+	background: none;
+	box-shadow: none;
+}
+
+input[type="checkbox"]:disabled,
+input[type="checkbox"].disabled,
+input[type="radio"]:disabled,
+input[type="radio"].disabled,
+input[type="checkbox"]:disabled:checked::before,
+input[type="checkbox"].disabled:checked::before,
+input[type="radio"]:disabled:checked::before,
+input[type="radio"].disabled:checked::before {
+	opacity: 0.7;
+}
+
+label,
+fieldset label {
+	vertical-align: middle;
+}

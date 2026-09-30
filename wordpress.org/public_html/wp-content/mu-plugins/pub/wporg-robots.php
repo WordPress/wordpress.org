@@ -18,13 +18,25 @@ function wporg_robots_txt( $robots ) {
 		           "Allow: /locale/$\n" .
 		           "Allow: /locale/*/glossary/$\n" .
 		           "Allow: /locale/*/stats/plugins/$\n" .
-		           "Allow: /locale/*/stats/themes/$\n";
+		           "Allow: /locale/*/stats/themes/$\n" .
+		           "Allow: /events/\n";
 
 	} elseif ( 'wordpress.org' === $blog_details->domain ) {
 		// WordPress.org/search/ should not be indexed.
 		$robots .= "\nUser-agent: *\n" .
 		           "Disallow: /search\n" .
 		           "Disallow: /?s=\n";
+
+	// AI Crawler Directives - explicitly welcome AI crawlers for training and retrieval.
+	$robots .= "\nUser-agent: GPTBot\nAllow: /\n\n" .
+	          "User-agent: ClaudeBot\nAllow: /\n\n" .
+	          "User-agent: anthropic-ai\nAllow: /\n\n" .
+	          "User-agent: Google-Extended\nAllow: /\n\n" .
+	          "User-agent: Applebot-Extended\nAllow: /\n\n" .
+	          "User-agent: PerplexityBot\nAllow: /\n\n" .
+	          "User-agent: Bytespider\nAllow: /\n\n" .
+	          "User-agent: CCBot\nAllow: /\n\n" .
+	          "User-agent: Copilot\nAllow: /\n";
 
 	} elseif ( 's-origin.wordpress.org' === $blog_details->domain ) {
 		// Placeholder for the s.w.org domain. See https://meta.trac.wordpress.org/ticket/5668
@@ -64,6 +76,8 @@ function wporg_robots_prefix_sitemaps( $robots ) {
 		$robots = "Sitemap: https://wordpress.org/news/sitemap.xml\n" .
 		          "Sitemap: https://wordpress.org/showcase/sitemap.xml\n" .
 		          "Sitemap: https://wordpress.org/documentation/sitemap.xml\n" .
+		          "Sitemap: https://wordpress.org/patterns/sitemap.xml\n" .
+		          "Sitemap: https://wordpress.org/photos/sitemap.xml\n" .
 		          $robots;
 	}
 
@@ -77,6 +91,51 @@ function wporg_robots_prefix_sitemaps( $robots ) {
 	) {
 		$robots = "Sitemap: https://{$blog_details->domain}/plugins/sitemap.xml\n" . $robots;
 		$robots = "Sitemap: https://{$blog_details->domain}/themes/sitemap.xml\n" . $robots;
+	}
+
+	// Should all sub-sites sitemaps be included?
+	$should_include_subsite_sitemaps = false;
+	if (
+		'developer.wordpress.org' === $blog_details->domain ||
+		'make.wordpress.org' === $blog_details->domain
+	) {
+		$should_include_subsite_sitemaps = true;
+	}
+
+	if ( $should_include_subsite_sitemaps && '/' === $blog_details->path ) {
+		// Check all subsites.
+		$sites = get_sites( [
+			'network_id' => $blog_details->site_id,
+			'domain'     => $blog_details->domain,
+			'public'     => 1,
+			'archived'   => 0,
+		] );
+		foreach ( $sites as $site ) {
+			if ( '/' === $site->path ) {
+				continue;
+			}
+
+			switch_to_blog( $site->blog_id );
+
+			// Are Jetpack Sitemaps enabled on a public site?
+			if ( Jetpack::is_module_active( 'sitemaps' ) && get_option( 'blog_public' ) ) {
+				// Load the modules, as the sitemaps may not be loaded.
+				Jetpack::load_modules();
+
+				if (
+					class_exists( 'Jetpack_Sitemap_Manager' ) &&
+					is_callable( 'Jetpack_Sitemap_Manager', 'callback_action_do_robotstxt' )
+				) {
+					$sitemaps = new Jetpack_Sitemap_Manager();
+					ob_start();
+					$sitemaps->callback_action_do_robotstxt();
+					$robots = ob_get_clean() . $robots;
+				}
+			}
+
+			restore_current_blog();
+		}
+
 	}
 
 	return $robots;

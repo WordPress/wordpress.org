@@ -92,22 +92,8 @@ class Registrations {
 			'show_ui'           => true,
 			'show_in_rest'      => true,
 			'rest_base'         => 'photos',
-			'capability_type'   => 'photos',
-			'capabilities'      => [
-				'edit_posts'             => 'edit_photos',
-				'delete_posts'           => 'delete_photos',
-				'publish_posts'          => 'publish_photos',
-				'edit_others_posts'      => 'edit_others_photos',
-				'delete_others_posts'    => 'delete_others_photos',
-				'edit_published_posts'   => 'edit_published_photos',
-				'delete_published_posts' => 'delete_published_photos',
-				'edit_private_posts'     => 'edit_private_photos',
-				'delete_private_posts'   => 'delete_private_photos',
-				'read_private_posts'     => 'read_private_photos',
-				'edit_post'              => 'edit_photo',
-				'delete_post'            => 'delete_photo',
-				'read_post'              => 'read_photo',
-			],
+			'capability_type'   => [ 'photo', 'photos' ],
+			'capabilities'      => [ 'create_posts' => 'do_not_allow' ],
 			'map_meta_cap'      => true,
 			'has_archive'       => true,
 			'hierarchical'      => false,
@@ -136,7 +122,7 @@ class Registrations {
 	}
 
 	/**
-	 * Reggisters taxonomies.
+	 * Registers taxonomies.
 	 */
 	public static function register_taxonomies() {
 		register_taxonomy( self::get_taxonomy( 'categories' ), self::get_post_type(), [
@@ -272,9 +258,9 @@ class Registrations {
 			'rest_base'             => 'photo-tags',
 			'rewrite'               => [ 'slug' => 't' ],
 			'capabilities'          => [
-				'manage_terms' => 'manage_options',
-				'edit_terms'   => 'manage_options',
-				'delete_terms' => 'manage_options',
+				'manage_terms' => 'manage_photo_tags',
+				'edit_terms'   => 'manage_photo_tags',
+				'delete_terms' => 'manage_photo_tags',
 				'assign_terms' => 'edit_photos',
 			]
 		] );

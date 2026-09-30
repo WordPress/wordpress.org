@@ -18,6 +18,11 @@ class CLI extends \WP_CLI_Command {
 	 * - Pages (c, color, submit)
 	 * - Taxonomy terms (categories, colors, orientations)
 	 *
+	 * ## OPTIONS
+	 *
+	 * [--force]
+	 * : Start initialize without prompting for confirmation.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     # Initialize site.
@@ -26,7 +31,11 @@ class CLI extends \WP_CLI_Command {
 	 * @when after_wp_load
 	 */
 	public function init( $args, $assoc_args ) {
-		WP_CLI::confirm( 'Continue with site initialization (to include creation of pages, taxonomy terms, and more)?' );
+		$force = $assoc_args['force'] ?? false;
+
+		if ( ! $force ) {
+			WP_CLI::confirm( 'Continue with site initialization (to include creation of pages, taxonomy terms, and more)?' );
+		}
 
 		// Create pages.
 		$pages_to_create = [

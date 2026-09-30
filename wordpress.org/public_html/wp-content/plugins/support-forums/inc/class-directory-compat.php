@@ -24,6 +24,9 @@ abstract class Directory_Compat {
 	abstract protected function do_view_header();
 
 	var $loaded       = false;
+	var $slug         = null;
+	var $ratings      = null;
+	var $stickies     = null;
 	var $authors      = null;
 	var $contributors = null;
 	var $support_reps = null;
@@ -34,6 +37,9 @@ abstract class Directory_Compat {
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
 			// Intercept feed requests prior to bbp_request_feed_trap at 10, before Performance::bbp_request_disable_missing_view_feeds at 9
 			add_filter( 'bbp_request', array( $this, 'request' ), 5 );
+
+			// Add feed links to head.
+			add_action( 'wp_head', array( $this, 'meta_link_to_feeds' ) );
 
 			// Add plugin or theme name to view feed titles.
 			add_filter( 'wp_title_rss', array( $this, 'title_correction_for_feed' ) );
@@ -53,6 +59,9 @@ abstract class Directory_Compat {
 
 			// Always check to see if a topic title needs a compat prefix.
 			add_filter( 'bbp_get_topic_title', array( $this, 'get_topic_title' ), 9, 2 );
+
+			// Enforce the published-status rule on the write path; priority 0 beats bbPress's handlers (1 and 10).
+			add_action( 'bbp_post_request', array( $this, 'block_unpublished_object_review' ), 0 );
 
 			// Always check to see if a new topic is being posted; this must run
 			// before subscriptions go out for `bbp_new_topic` at priority 10.
@@ -288,25 +297,7 @@ abstract class Directory_Compat {
 			$this->register_views();
 
 			// Set the term for this view so we can reuse it.
-			$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
-
-			// New compats won't have any support topics or reviews, so will
-			// not yet exist as a compat term.
-			if ( ! $this->term && $this->get_object( $this->slug() ) ) {
-				$term_name = $this->slug();
-				if ( ! sanitize_title( $term_name ) ) {
-					// This happens when the slug is all non-ascii such as %e5%8f%8b%e8%a8%80, which fails to insert.
-					$term_name = urldecode( $term_name );
-				}
-				$term = wp_insert_term( $term_name, $this->taxonomy(), array( 'slug' => $this->slug() ) );
-
-				// Term exists already? Race-condition, or get_term_by() couldn't find $slug..
-				if ( is_wp_error( $term ) && $term->get_error_data( 'term_exists' ) ) {
-					$this->term = get_term( $term->get_error_data( 'term_exists' ) );
-				} elseif ( ! is_wp_error( $term ) && isset( $term['term_id'] ) ) {
-					$this->term = get_term( $term['term_id'] );
-				}
-			}
+			$this->initialize_term();
 
 			// Add plugin- and theme-specific filters and actions.
 			add_action( 'wporg_compat_view_sidebar',       array( $this, 'do_view_sidebar' ) );
@@ -345,6 +336,67 @@ abstract class Directory_Compat {
 
 			$this->loaded = true;
 		}
+	}
+
+	/**
+	 * Initialises the WP_Term for the compat view.
+	 *
+	 * If the term does not exist, it will be created.
+	 */
+	public function initialize_term() {
+		if ( ! $this->slug() ) {
+			return;
+		}
+
+		$this->term = get_term_by( 'slug', $this->slug(), $this->taxonomy() );
+
+		if ( $this->term || ! $this->get_object( $this->slug() ) ) {
+			return;
+		}
+
+		$term_name = $this->slug();
+		if ( ! sanitize_title( $term_name ) ) {
+			// This happens when the slug is all non-ascii such as %e5%8f%8b%e8%a8%80, which fails to insert.
+			$term_name = urldecode( $term_name );
+		}
+
+		$term = wp_insert_term( $term_name, $this->taxonomy(), array( 'slug' => $this->slug() ) );
+
+		// Term exists already? Race-condition, or get_term_by() couldn't find $slug..
+		if ( is_wp_error( $term ) && $term->get_error_data( 'term_exists' ) ) {
+			$this->term = get_term( $term->get_error_data( 'term_exists' ) );
+		} elseif ( ! is_wp_error( $term ) && isset( $term['term_id'] ) ) {
+			$this->term = get_term( $term['term_id'] );
+		}
+	}
+
+	/**
+	 * Outputs `link` tags in the page head for the support and reviews feeds.
+	 */
+	public function meta_link_to_feeds() {
+		if ( ! $this->slug() ) {
+			return;
+		}
+
+		echo "\n";
+
+		$title_support_feed = 'theme' === $this->compat()
+			? __( 'Theme Support Feed', 'wporg-forums' )
+			: __( 'Plugin Support Feed', 'wporg-forums' );
+		printf(
+			'<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />' . "\n",
+			esc_attr( $title_support_feed ),
+			esc_url( home_url( sprintf( '/%s/%s/feed/', $this->compat(), $this->slug() ) ) )
+		);
+
+		$title_reviews_feed = 'theme' === $this->compat()
+			? __( 'Theme Reviews Feed', 'wporg-forums' )
+			: __( 'Plugin Reviews Feed', 'wporg-forums' );
+		printf(
+			'<link rel="alternate" type="application/rss+xml" title="%s" href="%s" />' . "\n",
+			esc_attr( $title_reviews_feed ),
+			esc_url( home_url( sprintf( '/%s/%s/reviews/feed/', $this->compat(), $this->slug() ) ) )
+		);
 	}
 
 	public function check_topic_for_compat() {
@@ -410,16 +462,23 @@ abstract class Directory_Compat {
 		if ( ! $user ) {
 			return $retval;
 		}
+
+		// The compat object is loaded from the request, not from $topic_id.
+		$terms = get_the_terms( $topic_id, $this->taxonomy() );
+		if ( empty( $terms ) || is_wp_error( $terms ) || ! in_array( (string) $this->slug(), wp_list_pluck( $terms, 'slug' ), true ) ) {
+			return $retval;
+		}
+
 		if (
-			( ! empty( $this->authors ) && in_array( $user->user_nicename, $this->authors ) )
+			( ! empty( $this->authors ) && in_array( $user->user_nicename, $this->authors, true ) )
 		||
-			( ! empty( $this->contributors ) && in_array( $user->user_nicename, $this->contributors ) )
+			( ! empty( $this->contributors ) && in_array( $user->user_nicename, $this->contributors, true ) )
 		||
-			( ! empty( $this->support_reps ) && in_array( $user->user_nicename, $this->support_reps ) )
+			( ! empty( $this->support_reps ) && in_array( $user->user_nicename, $this->support_reps, true ) )
 		||
 			// Back-compat for support reps added before https://meta.trac.wordpress.org/changeset/5867,
 			// can be removed once they are re-added via the Plugin Directory UI.
-			( is_a( $user, 'WP_User' ) && $user->supportrep == $this->slug() )
+			( is_a( $user, 'WP_User' ) && '' !== (string) $this->slug() && (string) $user->supportrep === (string) $this->slug() )
 		) {
 			$retval = true;
 		}
@@ -641,10 +700,10 @@ abstract class Directory_Compat {
 		// Prefix link to plugin/theme support or review forum with context.
 		if ( 'plugin' === $this->compat() ) {
 			/* translators: %s: link to plugin support or review forum */
-			$compat_breadcrumb = __( 'Plugin: %s', 'wporg-forums' );
+			$compat_breadcrumb = str_replace( ' ', '&nbsp;', __( 'Plugin: %s', 'wporg-forums' ) );
 		} else {
 			/* translators: %s: link to theme support or review forum */
-			$compat_breadcrumb = __( 'Theme: %s', 'wporg-forums' );
+			$compat_breadcrumb = str_replace( ' ', '&nbsp;', __( 'Theme: %s', 'wporg-forums' ) );
 		}
 
 		$r[1] = sprintf( $compat_breadcrumb, esc_html( $this->title() ) );
@@ -717,6 +776,42 @@ abstract class Directory_Compat {
 		}
 
 		return $retval;
+	}
+
+	/**
+	 * Reject review submissions the create-topic form would not offer.
+	 *
+	 * The create-topic-form filter only decides whether the review form is displayed; bbPress's
+	 * topic handlers never consult it, so the same rule is enforced here on the write path.
+	 *
+	 * @param string $action The bbPress POST action being handled.
+	 */
+	public function block_unpublished_object_review( $action = '' ) {
+		if ( 'bbp-new-topic' !== $action && 'bbp-edit-topic' !== $action ) {
+			return;
+		}
+
+		// Only guard submissions to the reviews forum.
+		if ( (int) Plugin::REVIEWS_FORUM_ID !== (int) bbp_get_form_topic_forum() ) {
+			return;
+		}
+
+		// The resolved slug, or this compat's query var.
+		$slug = $this->slug() ? $this->slug() : get_query_var( $this->query_var() );
+		if ( ! $slug ) {
+			return;
+		}
+
+		// Mirror the create-topic form: a published plugin, or a publicly-served theme.
+		$object     = self::get_object_by_slug_and_type( $slug, $this->compat() );
+		$reviewable = $object && ( 'plugin' !== $this->compat() || 'publish' === $object->post_status );
+
+		if ( ! $reviewable ) {
+			bbp_add_error(
+				'wporg_compat_unavailable_review',
+				__( '<strong>Error:</strong> This item is not available for reviews.', 'wporg-forums' )
+			);
+		}
 	}
 
 	/**
@@ -807,6 +902,7 @@ abstract class Directory_Compat {
 		}
 
 		if ( $term_subscription ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Subscription renderer escapes fields and includes a confirmation handler.
 			echo $term_subscription;
 		}
 	}
@@ -920,15 +1016,14 @@ abstract class Directory_Compat {
 		$cache_group = $type . '-objects';
 		$compat_object = wp_cache_get( $cache_key, $cache_group );
 		if ( false === $compat_object ) {
-
-			// Get the object information from the correct table.
+			// Only resolve publicly-served records; the other statuses are the private review pipeline.
 			if ( $type == 'theme' ) {
-				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'repopackage' LIMIT 1", WPORG_THEME_DIRECTORY_BLOGID, $slug ) );
+				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'repopackage' AND post_status IN ( 'publish', 'delist' ) LIMIT 1", WPORG_THEME_DIRECTORY_BLOGID, $slug ) );
 			} elseif ( $type == 'plugin' ) {
-				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug ) );
+				$compat_object = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->base_prefix}%d_posts WHERE post_name = %s AND post_type = 'plugin' AND post_status IN ( 'publish', 'closed', 'disabled' ) LIMIT 1", WPORG_PLUGIN_DIRECTORY_BLOGID, $slug ) );
 			}
 
-			wp_cache_set( $cache_key, $compat_object, $cache_group, DAY_IN_SECONDS );
+			wp_cache_set( $cache_key, $compat_object, $cache_group, HOUR_IN_SECONDS );
 		}
 		return $compat_object;
 	}
@@ -1074,6 +1169,13 @@ abstract class Directory_Compat {
 		}
 		$slugs = [];
 
+		// Nonexistent users have no objects; cache the empty result.
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			wp_cache_set( $cache_key, $slugs, $cache_group, HOUR_IN_SECONDS );
+			return $slugs;
+		}
+
 		// Themes.
 		if ( 'theme' == $this->compat() ) {
 			$slugs = $wpdb->get_col( $wpdb->prepare(
@@ -1094,11 +1196,11 @@ abstract class Directory_Compat {
 						LEFT JOIN %i AS tr ON tr.term_taxonomy_id = tt.term_taxonomy_id
 						LEFT JOIN %i AS p ON tr.object_id = p.ID
 					WHERE tt.taxonomy IN( 'plugin_contributors', 'plugin_support_reps', 'plugin_committers' ) AND t.name = %s",
-					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_terms',
-					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_taxonomy',
-					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_relationships',
-					$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_posts',
-					get_user_by( 'id', $user_id )->user_nicename
+				$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_terms',
+				$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_taxonomy',
+				$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_term_relationships',
+				$wpdb->base_prefix . WPORG_PLUGIN_DIRECTORY_BLOGID . '_posts',
+				$user->user_nicename
 			) );
 		}
 

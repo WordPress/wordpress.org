@@ -38,7 +38,7 @@ function register_callbacks() : void {
 /**
  * Add a activity when strings are suggested and approved.
  */
-function add_single_translation_activity( GP_Translation $new_translation, GP_Translation $previous_translation = null ) : void {
+function add_single_translation_activity( GP_Translation $new_translation, ?GP_Translation $previous_translation = null ) : void {
 	if ( ! should_notify( $new_translation->user_id ) ) {
 		return;
 	}
@@ -97,7 +97,7 @@ function add_single_translation_activity( GP_Translation $new_translation, GP_Tr
 		'activities' => $activities,
 	);
 
-	Profiles_API\api( $request_body );
+	Profiles_API\queue( $request_body );
 }
 
 /**
@@ -174,7 +174,7 @@ function add_bulk_translation_activity( GP_Project $project, GP_Locale $locale, 
 		'activities' => $activities,
 	);
 
-	Profiles_API\api( $request_body );
+	Profiles_API\queue( $request_body );
 }
 
 /**

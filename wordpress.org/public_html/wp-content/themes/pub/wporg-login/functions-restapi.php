@@ -5,28 +5,54 @@ function wporg_login_rest_routes() {
 		'methods'             => WP_REST_Server::READABLE,
 		'callback'            => 'wporg_login_rest_username_exists',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'login' => array(
+				'type' => 'string',
+			),
+		),
 	) );
 	register_rest_route( 'wporg/v1', '/username-available/?', array(
 		'methods'             => WP_REST_Server::READABLE,
 		'callback'            => 'wporg_login_rest_username_exists',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'login' => array(
+				'type' => 'string',
+			),
+		),
 	) );
 
 	register_rest_route( 'wporg/v1', '/email-in-use/(?P<email>.*)', array(
 		'methods'             => WP_REST_Server::READABLE,
 		'callback'            => 'wporg_login_rest_email_in_use',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'email' => array(
+				'type' => 'string',
+			),
+		),
 	) );
 	register_rest_route( 'wporg/v1', '/email-in-use/?', array(
 		'methods'             => WP_REST_Server::READABLE,
 		'callback'            => 'wporg_login_rest_email_in_use',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'email' => array(
+				'type' => 'string',
+			),
+		),
 	) );
 
 	register_rest_route( 'wporg/v1', '/resend-confirmation-email/?', array(
 		'methods'             => WP_REST_Server::EDITABLE,
 		'callback'            => 'wporg_login_rest_resend_confirmation_email',
 		'permission_callback' => '__return_true',
+		'args'                => array(
+			'account' => array(
+				'type'     => 'string',
+				'required' => true,
+			),
+		),
 	) );
 }
 add_action( 'rest_api_init', 'wporg_login_rest_routes' );
@@ -45,7 +71,23 @@ function wporg_login_rest_username_exists( $request ) {
 	}
 
 	// Check we don't have a pending registration for that username.
-	if ( $pending = wporg_get_pending_user( $login ) ) {
+	$pending = wporg_get_pending_user( $login );
+	if ( $pending && ! $pending['cleared'] ) {
+		// Account is in pending state, but requires manual human review, don't suggest sending a reset email.
+		$sso = WPOrg_SSO::get_instance();
+
+		return [
+			'available' => false,
+			'error' => sprintf(
+				__( 'That username is already in use.', 'wporg' ) . '<br>' .
+				__( 'Your account is pending approval. You will receive an email to set your password when approved.', 'wporg' ) . '<br>' .
+				/* translators: %s Support email address */
+				__( 'Please contact %s for more details.', 'wporg' ),
+				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+			),
+			'avatar' => get_avatar( $pending['user_email'], 64 ),
+		];
+	} elseif ( $pending ) {
 		return [
 			'available' => false,
 			'error' => __( 'That username is already in use.', 'wporg' ) . '<br>' .
@@ -96,12 +138,24 @@ function wporg_login_rest_email_in_use( $request ) {
 	// Check we don't have a pending registration for that email.
 	$pending = wporg_get_pending_user( $email );
 
-	// And that there's no pending account signups for other emails for that inbox.
-	if ( ! $pending && str_contains( $email, '+' ) ) {
-		$pending = wporg_get_pending_user_by_email_wildcard( $email );
-	}
+	if ( $pending && ! $pending['created'] && ! $pending['cleared'] ) {
+		// Account is in pending state, but requires manual human review, don't suggest sending a reset email.
+		$sso = WPOrg_SSO::get_instance();
 
-	if ( $pending && ! $pending['created'] ) {
+		return [
+			'available' => false,
+			'error' => sprintf(
+				__( 'That email address already has an account.', 'wporg' ) . '<br>' .
+				__( 'Your account is pending approval. You will receive an email to set your password when approved.', 'wporg' ) . '<br>' .
+				/* translators: %s Support email address */
+				__( 'Please contact %s for more details.', 'wporg' ),
+				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
+			),
+			'avatar' => get_avatar( $email, 64 ),
+		];
+
+	} elseif ( $pending && ! $pending['created'] ) {
+		// Account is in pending state, just needs the user to click through on the email, offer to resend the email.
 		return [
 			'available' => false,
 			'error' => __( 'That email address already has an account.', 'wporg' ) . '<br>' .
@@ -137,10 +191,7 @@ function wporg_login_rest_email_in_use( $request ) {
 function wporg_login_rest_resend_confirmation_email( $request ) {
 	$account = $request['account'];
 
-	$success_message = sprintf(
-		__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ),
-		'<code>' . esc_html( $account ) . '</code>'
-	);
+	$success_message = __( 'A confirmation email has been resent.', 'wporg' );
 
 	$pending_user = wporg_get_pending_user( $request['account'] );
 	if ( ! $pending_user || $pending_user['created'] || ! $pending_user['user_activation_key'] ) {

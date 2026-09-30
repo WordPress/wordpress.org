@@ -12,6 +12,7 @@ function getSortedEvents( events ) {
 		// Inject a human-readable start time.
 		event.startTime = wp.date.format( 'g:i a', d );
 		event.timezone = timezone;
+		event.type = event?.type === 'wordcamp' ? 'WordCamp' : toTitleCase(event.type);
 		if ( sortedEvents.hasOwnProperty( key ) ) {
 			sortedEvents[ key ].push( event );
 		} else {
@@ -19,6 +20,17 @@ function getSortedEvents( events ) {
 		}
 	} );
 	return sortedEvents;
+}
+
+/**
+ * Convert a string to title case.
+ *
+ * @param {string} str
+ */
+function toTitleCase(str = '') {
+    return str.replace(/\w\S*/g, function(word) {
+        return word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
+    });
 }
 
 jQuery( function( $ ) {

@@ -42,7 +42,7 @@ class WP_Plugins extends WP_Directory {
 			if ( 'default' != $set->locale_slug ) {
 				$locale_key = $set->locale . '/' . $set->locale_slug;
 			}
-			$sub_project = str_replace( "$project_path/", '', $set->path );
+			$sub_project = str_replace( "$project->path/", '', $set->path );
 			$sub_projects[ $sub_project ] = true;
 
 			/*
@@ -97,7 +97,7 @@ class WP_Plugins extends WP_Directory {
 			}
 		} );
 
-		$project->icon = $this->get_plugin_icon( $project, 64 );
+		$icon = $this->get_plugin_icon( $project, 64 );
 
 		$this->tmpl( 'projects-wp-plugins', get_defined_vars() );
 	}
@@ -114,7 +114,7 @@ class WP_Plugins extends WP_Directory {
 			return $this->die_with_404();
 		}
 
-		$project->icon = $this->get_plugin_icon( $project, 64 );
+		$icon = $this->get_plugin_icon( $project, 64 );
 
 		$contributors_by_locale = gp_get_meta( 'wp-plugins', $project->id, 'contributors-by-locale' );
 		if ( ! $contributors_by_locale || $contributors_by_locale['last_updated'] + HOUR_IN_SECONDS < time() ) {
@@ -147,14 +147,16 @@ class WP_Plugins extends WP_Directory {
 			return $this->die_with_404();
 		}
 
-		$project->icon = $this->get_plugin_icon( $project, 64 );
+		$icon = $this->get_plugin_icon( $project, 64 );
 
-		$http_context = stream_context_create( array(
-			'http' => array(
-				'user_agent' => 'WordPress.org Translate',
-			),
-		) );
-		$json = file_get_contents( "https://api.wordpress.org/translations/plugins/1.0/?slug={$project_slug}", null, $http_context );
+		$json = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/translations/plugins/1.0/?slug={$project_slug}",
+				array(
+					'user-agent' => 'WordPress.org Translate',
+				)
+			)
+		);
 		$language_packs = $json && '{' == $json[0] ? json_decode( $json ) : null;
 
 		$this->tmpl( 'projects-wp-plugins-language-packs', get_defined_vars() );

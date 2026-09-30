@@ -10,6 +10,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_i18n_Import;
 
 /**
  * The Plugin Review metabox.
@@ -114,29 +115,52 @@ class Review_Tools {
 
 		$zip_files = array();
 		foreach ( get_attached_media( 'application/zip', $post ) as $zip_file ) {
-			$zip_files[ $zip_file->post_date ] = array( wp_get_attachment_url( $zip_file->ID ), $zip_file );
+			$zip_files[ $zip_file->post_date ] = array(
+				wp_get_attachment_url( $zip_file->ID ),
+				$zip_file,
+				get_attached_file( $zip_file->ID )
+			);
 		}
 
 		if ( $zip_files ) {
 			uksort( $zip_files, function ( $a, $b ) {
-				return strtotime( $a ) < strtotime( $b );
+				return strtotime( $b ) <=> strtotime( $a );
 			} );
 
 			echo '<p><strong>Zip files:</strong></p>';
 			echo '<ul class="plugin-zip-files">';
 			foreach ( $zip_files as $zip_date => $zip ) {
-				list( $zip_url, $zip_file ) = $zip;
-				$zip_size                   = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
+				list( $zip_url, $zip_file, $file_on_disk ) = $zip;
+
+				if ( ! file_exists( $file_on_disk ) ) {
+					continue;
+				}
+
+				$zip_size    = size_format( filesize( $file_on_disk ), 1 );
+				$zip_preview = Template::preview_link_zip( $slug, $zip_file->ID );
+				$zip_pcp     = Template::preview_link_zip( $slug, $zip_file->ID, 'pcp' );
 
 				printf(
-					'<li>%1$s <a href="%2$s">%3$s</a> (%4$s)</li>',
+					'<li>%1$s v%2$s <a href="%3$s" title="%4$s">%5$s</a> (%6$s) (<a href="%7$s" target="_blank">preview</a> | <a href="%8$s" target="_blank">pcp</a>)</li>',
 					esc_html( $zip_date ),
+					esc_html( $zip_file->version ),
 					esc_url( $zip_url ),
-					esc_html( basename( $zip_url ) ),
-					esc_html( $zip_size )
+					esc_attr( trim( $zip_file->post_title . ' ' . $zip_file->post_content ) ),
+					esc_html( $zip_file->submitted_name ),
+					esc_html( $zip_size ),
+					esc_url( $zip_preview ),
+					esc_url( $zip_pcp ),
 				);
 			}
 			echo '</ul>';
+		}
+
+		// Ability to upload an additional ZIP.
+		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
+			echo '<label>
+				<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
+				<button class="button button-secondary plugin-upload-zip">' . esc_html__( 'Upload', 'wporg-plugins' ) . '</button>
+				</label>';
 		}
 
 		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
@@ -275,15 +299,74 @@ class Review_Tools {
 			echo '</ul>';
 		} else {
 			?>
-			<ul>
-				<li><a href='https://plugins.trac.wordpress.org/log/<?php echo esc_attr( $post->post_name ); ?>/'>Development Log</a></li>
-				<li><a href='https://plugins.svn.wordpress.org/<?php echo esc_attr( $post->post_name ); ?>/'>Subversion Repository</a></li>
-				<li><a href='https://plugins.trac.wordpress.org/browser/<?php echo esc_attr( $post->post_name ); ?>/'>Browse in Trac</a></li>
-				<li><a href='<?php echo esc_url( Template::download_link() ); ?>'>Download Current Version</a></li>
-				<?php if ( has_term( 'block', 'plugin_section', $post ) ) : ?>
-					<li><a href='https://wordpress.org/plugins/developers/block-plugin-validator/?plugin_url=<?php echo esc_attr( $post->post_name ); ?>'>Block Plugin Checker</a></li>
-				<?php endif; ?>
-			</ul>
+			<div style="display: flex; gap: 2em">
+				<ul>
+					<li><a href='https://plugins.trac.wordpress.org/log/<?php echo esc_attr( $post->post_name ); ?>/'>Development Log</a></li>
+					<li><a href='https://plugins.svn.wordpress.org/<?php echo esc_attr( $post->post_name ); ?>/'>Subversion Repository</a></li>
+					<li><a href='https://plugins.trac.wordpress.org/browser/<?php echo esc_attr( $post->post_name ); ?>/'>Browse in Trac</a></li>
+					<li><a href='<?php echo esc_url( Template::download_link() ); ?>'>Download Current Version</a></li>
+
+					<?php
+					// PCP Blueprint.
+					$pcp_blueprint = [
+						'landingPage'         => '/wp-admin/admin.php?page=plugin-check',
+						'phpExtensionBundles' => [
+							'kitchen-sink'
+						],
+						'steps'               => [
+							[
+								'step'     => 'login',
+								'username' => 'admin',
+								'password' => 'password',
+							],
+							[
+								'step'          => 'installPlugin',
+								'options'       => [
+									'activate' => false,
+								],
+								'pluginData' => [
+									'resource' => 'wordpress.org/plugins',
+									'slug'     => $post->post_name,
+								],
+							],
+							[
+								'step'          => 'installPlugin',
+								'pluginData' => [
+									'resource' => 'wordpress.org/plugins',
+									'slug'     => 'plugin-check',
+								],
+							],
+						]
+					];
+					// NOTE: Must be escaped with `esc_attr()` not `esc_url()` as the blueprint is not encoded.
+					$playground_with_pcp = 'https://playground.wordpress.net/#' . json_encode( $pcp_blueprint, JSON_UNESCAPED_SLASHES );
+					?>
+					<li><a href='<?php echo esc_url( 'https://playground.wordpress.net/?plugin=' . $post->post_name ); ?>' target='_blank'>Run in playground</a> (<a href='<?php echo esc_attr( $playground_with_pcp ); ?>' target='_blank'>PCP</a>)</li>
+
+					<?php if ( has_term( 'block', 'plugin_section', $post ) ) : ?>
+						<li><a href='https://wordpress.org/plugins/developers/block-plugin-validator/?plugin_url=<?php echo esc_attr( $post->post_name ); ?>'>Block Plugin Checker</a></li>
+					<?php endif; ?>
+				</ul>
+				<ul>
+					<li>API Endpoints:
+						<ul class="ul-disc">
+						<li><a href="<?php echo esc_url( 'https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&slug=' . $post->post_name ); ?>">Info</a></li>
+						<li><a href="<?php echo esc_url( rest_url( '/plugins/v1/plugin/' . $post->post_name ) ); ?>" title="Source-data for info endpoint">wp-json Info</a></li>
+						<?php
+							$update_check_payload = [
+								// This is a placeholder filename, it'll work for our purposes.
+								"{$post->post_name}/{$post->post_name}.php" => [
+									// This Update URI header should not exist in w.org plugins, but ensures this test request resolves to this plugin.
+									'UpdateURI' => "w.org/plugins/{$post->post_name}",
+									'Name'      => $post->post_title,
+									'Version'   => $post->version,
+								]
+							];
+						?>
+						<li><a href="<?php echo esc_url( 'https://api.wordpress.org/plugins/update-check/1.0/test.php?plugins=' . urlencode( json_encode( $update_check_payload ) ) ); ?>">Update Check</a></li>
+					</ul></li>
+				</ul>
+			</div>
 			<p>
 				<?php
 				$svn_sync_url = add_query_arg(
@@ -296,9 +379,20 @@ class Review_Tools {
 				);
 				?>
 				<a id="svn-sync" class="button button-secondary" href="<?php echo esc_url( $svn_sync_url ); ?>">Trigger svn sync</a>
+				<?php
+				$i18n_import_url = add_query_arg(
+					array(
+						'action'      => 'plugin-i18n-import',
+						'slug'        => $post->post_name,
+						'_ajax_nonce' => wp_create_nonce( 'wporg_plugins_i18n_import-' . $post->post_name ),
+					),
+					admin_url( 'admin-ajax.php' )
+				);
+				?>
+				<a id="i18n-import" class="button button-secondary" href="<?php echo esc_url( $i18n_import_url ); ?>">Trigger i18n import</a>
 				<script>
 				jQuery( function( $ ) {
-					$( '#svn-sync' ).click( function( e ) {
+					$( '#svn-sync, #i18n-import' ).click( function( e ) {
 						e.preventDefault();
 
 						var $this = $(this),
@@ -326,7 +420,7 @@ class Review_Tools {
 			}, $committers );
 
 			$cc_emails = wp_list_pluck( $committers, 'user_email' );
-			$cc_emails = implode( ', ', array_diff( $cc_emails, array( $author->user_email ) ) );
+			$cc_emails = implode( ',', array_diff( $cc_emails, array( $author->user_email ) ) );
 
 			if ( 'new' === $post->post_status || 'pending' === $post->post_status ) {
 				/* translators: %s: Plugin Title */
@@ -382,6 +476,38 @@ class Review_Tools {
 			)
 		);
 
-		die( "Queued SVN import for {$plugin_slug}." );
+		die( esc_html( "Queued SVN import for {$plugin_slug}." ) );
+	}
+
+	/**
+	 * admin-ajax.php handler for queueing a plugin i18n import.
+	 */
+	static function i18n_import() {
+		$plugin_slug = sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) );
+
+		check_ajax_referer( 'wporg_plugins_i18n_import-' . $plugin_slug );
+
+		$plugin     = \WordPressdotorg\Plugin_Directory\Plugin_Directory::get_plugin_post( $plugin_slug );
+		$stable_tag = $plugin ? $plugin->stable_tag : '';
+
+		$tags_touched = [ 'trunk' ];
+		if ( $stable_tag && 'trunk' !== $stable_tag ) {
+			$tags_touched[] = $stable_tag;
+		}
+
+		Plugin_i18n_Import::queue(
+			$plugin_slug,
+			array(
+				'tags_touched'   => $tags_touched,
+				'code_touched'   => true,
+				'readme_touched' => true,
+				'assets_touched' => true,
+				'revisions'      => [],
+				'source'         => 'wp-admin i18n-import button',
+			),
+			0
+		);
+
+		die( esc_html( "Queued i18n import for {$plugin_slug}." ) );
 	}
 }

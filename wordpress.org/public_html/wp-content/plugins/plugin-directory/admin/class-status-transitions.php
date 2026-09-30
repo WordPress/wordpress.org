@@ -8,6 +8,8 @@ use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Approved as Plugin_Approved_Email;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Rejected as Plugin_Rejected_Email;
 use WordPressdotorg\Plugin_Directory\Admin\Metabox\Reviewer as Reviewer_Metabox;
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
+use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 
 /**
  * All functionality related to Status Transitions.
@@ -25,6 +27,21 @@ class Status_Transitions {
 	}
 
 	/**
+	 * Hooks the status transition actions for the current request.
+	 *
+	 * The admin hooks `instance()` itself, which defers the work until a status
+	 * actually changes. Callers here are about to make a change they know about, so
+	 * the actions are attached directly — the constructor only runs the first time
+	 * the class is instantiated, which may already have happened.
+	 */
+	public static function init() {
+		$instance = self::instance();
+
+		add_action( 'transition_post_status', array( $instance, 'transition_post_status' ), 11, 3 );
+		add_action( 'post_updated', array( $instance, 'record_owner_change' ), 11, 3 );
+	}
+
+	/**
 	 * Constructor.
 	 */
 	private function __construct() {
@@ -33,27 +50,33 @@ class Status_Transitions {
 	}
 
 	/**
-	 * Get the list of allowed status transitions for a given plugin.
+	 * Get the list of allowed status transitions for a given plugin status & post.
 	 *
-	 * @param string $post_status Plugin post status.
+	 * @param string   $post_status Plugin post status.
+	 * @param \WP_Post $post        Plugin post object.
 	 *
 	 * @return array An array of allowed post status transitions.
 	 */
-	public static function get_allowed_transitions( $post_status ) {
+	public static function get_allowed_transitions( $post_status, $post ) {
+		// NOTE: $post_status and $post->post_status will differ, as it's used during a pre-update hook.
 		switch ( $post_status ) {
 			case 'new':
 				$transitions = array( 'pending', 'approved', 'rejected' );
 				break;
 			case 'pending':
-				$transitions = array( 'approved', 'rejected' );
+				$transitions = array( 'approved', 'rejected', 'new' );
 				break;
 			case 'approved':
 				// Plugins move from 'approved' to 'publish' on first commit, but cannot be published manually.
 				$transitions = array( 'disabled', 'closed' );
 				break;
 			case 'rejected':
-				// Rejections cannot be recovered.
 				$transitions = array();
+				// If it was rejected less than a week ago, allow it to be recovered.
+				$rejected_date = get_post_meta( $post->ID, '_rejected', true );
+				if ( $rejected_date >= strtotime( '-1 week' ) ) {
+					$transitions[] = 'pending';
+				}
 				break;
 			case 'publish':
 				$transitions = array( 'disabled', 'closed' );
@@ -94,7 +117,7 @@ class Status_Transitions {
 		}
 
 		// ...or it's a plugin admin...
-		if ( current_user_can( 'plugin_approve', $postarr['ID'] ) && in_array( $postarr['post_status'], self::get_allowed_transitions( $old_status ) ) ) {
+		if ( current_user_can( 'plugin_approve', $postarr['ID'] ) && in_array( $postarr['post_status'], self::get_allowed_transitions( $old_status, get_post( $postarr['ID'] ) ) ) ) {
 			return $data;
 		}
 
@@ -109,9 +132,13 @@ class Status_Transitions {
 		}
 
 		// ...DIE!!!!!
-		wp_die( __( 'You do not have permission to assign this post status to a plugin.', 'wporg-plugins' ), '', array(
-			'back_link' => true,
-		) );
+		wp_die(
+			esc_html__( 'You do not have permission to assign this post status to a plugin.', 'wporg-plugins' ),
+			'',
+			array(
+				'back_link' => true,
+			)
+		);
 	}
 
 	/**
@@ -139,6 +166,7 @@ class Status_Transitions {
 				break;
 
 			case 'rejected':
+				$this->save_rejected_reason( $post->ID );
 				$this->rejected( $post->ID, $post );
 				$this->clear_reviewer( $post );
 				break;
@@ -154,15 +182,24 @@ class Status_Transitions {
 				$this->save_close_reason( $post->ID );
 				$this->set_translation_status( $post, 'inactive' );
 				break;
+
+			case 'pending':
+				if ( 'rejected' === $old_status ) {
+					$this->restore_rejected_plugin( $post );
+				}
+
+			case 'new':
+				// If it's moved from Pending to new, unasign.
+				if ( 'pending' === $old_status ) {
+					$this->clear_reviewer( $post );
+				}
 		}
 
 		// Record the time a plugin was transitioned into a specific status.
-		if ( '0000-00-00 00:00:00' === $post->post_modified_gmt ) {
-			// Assume now.
-			update_post_meta( $post->ID, "_{$new_status}", time() );
-		} else {
-			update_post_meta( $post->ID, "_{$new_status}", strtotime( $post->post_modified_gmt ) );
-		}
+		update_post_meta( $post->ID, "_{$new_status}", time() );
+
+		// Clear any relevant caches.
+		$this->flush_caches( $post );
 	}
 
 	/**
@@ -209,6 +246,30 @@ class Status_Transitions {
 		$plugin_author = get_user_by( 'id', $post->post_author );
 
 		// Create SVN repo.
+		$this->approved_create_svn_repo( $post, $plugin_author );
+
+		// Grant commit access.
+		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
+
+		// Send email.
+		$email = new Plugin_Approved_Email( $post, $plugin_author );
+		$email->send();
+
+		Tools::audit_log( 'Plugin approved.', $post_id );
+	}
+
+	/**
+	 * Create a SVN repository for this plugin.
+	 *
+	 * @param \WP_Post $post          Post object.
+	 * @param \WP_User $plugin_author Plugin author. Optional.
+	 * @param int      $retry         Retry number. Do not manually set. Optional.
+	 * @return bool
+	 */
+	public function approved_create_svn_repo( $post, $plugin_author = null, $retry = 0 ) {
+		$post            = get_post( $post );
+		$plugin_author ??= get_user_by( 'id', $post->post_author );
+
 		$dir = Filesystem::temp_directory( $post->post_name );
 		foreach ( array( 'assets', 'tags', 'trunk' ) as $folder ) {
 			mkdir( "$dir/$folder", 0777 );
@@ -230,16 +291,35 @@ class Status_Transitions {
 		}
 		*/
 
-		SVN::import( $dir, 'http://plugins.svn.wordpress.org/' . $post->post_name, sprintf( 'Adding %1$s by %2$s.', $post->post_title, $plugin_author->user_login ) );
+		$result = SVN::import(
+			$dir,
+			'http://plugins.svn.wordpress.org/' . $post->post_name,
+			sprintf(
+				// WARNING: When changing this, please update the regex in SVN_Watcher::get_plugin_changes_between().
+				'Adding %1$s by %2$s.',
+				html_entity_decode( $post->post_title ),
+				$plugin_author->user_login
+			)
+		);
 
-		// Grant commit access.
-		Tools::grant_plugin_committer( $post->post_name, $plugin_author );
+		// Record the last failure attempt.
+		if ( ! $result['result'] ) {
+			Tools::audit_log( 'Error creating SVN repository: ' . var_export( $result['errors'] ?: $result, true ), $post->ID );
 
-		// Send email.
-		$email = new Plugin_Approved_Email( $post, $plugin_author );
-		$email->send();
+			// If we're running in a cron task, log the errors.
+			if ( wp_doing_cron() ) {
+				fwrite( STDERR, 'Error creating SVN repository for plugin ID ' . $post->ID . ': ' . var_export( $result, true ) );
+			}
 
-		Tools::audit_log( 'Plugin approved.', $post_id );
+			// Retry in a minute, with increasing 5 minute backoffs.
+			$retry_delay = max( $retry * 5, 1 ) * MINUTE_IN_SECONDS;
+			$retry++;
+			wp_schedule_single_event( time() + $retry_delay, 'create_svn_repo:' . $post->post_name, [ $post->ID, $plugin_author->ID, $retry ] );
+
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -270,14 +350,32 @@ class Status_Transitions {
 			[
 				'slug'            => $original_permalink,
 				'submission_date' => $submission_date,
+				'reason'          => sanitize_key( $_POST['rejection_reason'] ?? '' )
 			]
 		);
-		// ..and log rejection.
-		if ( $email->send() ) {
-			Tools::audit_log( 'Plugin rejected.', $post_id ); 
-		} else {
-			Tools::audit_log( 'Plugin rejected. Email not sent.', $post_id );
-		}
+
+		$email->send();
+	}
+
+	/**
+	 * Restores a rejected plugin.
+	 *
+	 * @param \WP_Post $post Post object.
+	 */
+	public function restore_rejected_plugin( $post ) {
+		$slug = $post->post_name;
+		$slug = preg_replace( '!^rejected-(.+)-rejected$!i', '$1', $slug );
+
+		// Change slug back to 'plugin-name'.
+		wp_update_post( array(
+			'ID'        => $post->ID,
+			'post_name' => $slug,
+		) );
+
+		delete_post_meta( $post->ID, '_rejection_reason' );
+		delete_post_meta( $post->ID, 'plugin_rejected_date' );
+
+		Tools::audit_log( 'Plugin rejection reverted.', $post->ID );
 	}
 
 	/**
@@ -330,7 +428,7 @@ class Status_Transitions {
 			return;
 		}
 
-		if ( ! current_user_can( 'plugin_approve', $post_id ) ) {
+		if ( ! current_user_can( 'plugin_close', $post_id ) ) {
 			return;
 		}
 
@@ -340,6 +438,28 @@ class Status_Transitions {
 		update_post_meta( $post_id, 'plugin_closed_date', current_time( 'mysql' ) );
 
 		Tools::audit_log( sprintf( 'Plugin closed. Reason: %s', $close_reason ), $post_id );
+	}
+
+	/**
+	 * Save the reason for rejecting a plugin.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function save_rejected_reason( $post_id ) {
+		if ( ! isset( $_REQUEST['rejection_reason'] ) ) {
+			return;
+		}
+
+		if ( ! current_user_can( 'plugin_reject', $post_id ) ) {
+			return;
+		}
+
+		$rejection_reason = sanitize_key( $_REQUEST['rejection_reason'] );
+
+		update_post_meta( $post_id, '_rejection_reason', $rejection_reason );
+		update_post_meta( $post_id, 'plugin_rejected_date', current_time( 'mysql' ) );
+
+		Tools::audit_log( sprintf( 'Plugin rejected. Reason: %s', $rejection_reason ), $post_id );
 	}
 
 	/**
@@ -375,5 +495,14 @@ class Status_Transitions {
 	public function clear_reviewer( $post ) {
 		// Unset the reviewer, but don't log it, as the triggering status changes should've been logged in some form.
 		Reviewer_Metabox::set_reviewer( $post, false, false );
+	}
+
+	/**
+	 * Flush the caches for the plugin.
+	 */
+	protected function flush_caches( $post ) {
+		// Update the API endpoints with the new data.
+		API_Update_Updater::update_single_plugin( $post->post_name );
+		Plugins_Info_API::flush_plugin_information_cache( $post->post_name );
 	}
 }

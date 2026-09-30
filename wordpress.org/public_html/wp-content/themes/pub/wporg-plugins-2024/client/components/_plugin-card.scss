@@ -1,0 +1,81 @@
+.plugin-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 100%;
+
+	.entry {
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.entry-title {
+		margin-bottom: 2px !important;
+		line-height: 1.3;
+
+		display: block;
+		display: -webkit-box;
+		overflow: hidden;
+		max-height: 2.6em; /* 2x line-height, non-webkit fallback */
+		font-weight: 500;
+		font-size: var(--wp--preset--font-size--heading-5);
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+
+		a {
+			display: block;
+			text-decoration: none;
+
+			&:focus {
+				box-shadow: none;
+			}
+		}
+	}
+
+	.entry-excerpt {
+		clear: both;
+		font-size: var( --wp--preset--font-size--small );
+
+		p {
+			margin: 0;
+		}
+	}
+
+	footer {
+		font-size: var( --wp--preset--font-size--small );
+		margin-top: var( --wp--style--block-gap );
+
+		span {
+			display: inline-block;
+			overflow: hidden;
+			line-height: var( --wp--preset--font-size--normal );
+			color: var( --wp--preset--color--charcoal-4 );
+
+			&.plugin-author {
+				width: 100%;
+
+				span {
+					color: var( --wp--preset--color--charcoal-1 );
+				}
+
+				path {
+					fill: var( --wp--preset--color--charcoal-1 );
+				}
+			}
+
+			svg {
+				height: 24px;
+				width: 24px;
+				vertical-align: bottom;
+
+				path {
+					fill: var( --wp--preset--color--charcoal-4 );
+				}
+			}
+		}
+
+		span.active-installs {
+			min-width: 48%;
+		}
+	}
+}

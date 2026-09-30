@@ -1,6 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 
+use WordPressdotorg\Plugin_Directory\API\Base;
+
 // Explicitly require dependencies so this file can be sourced outside the Plugin Directory.
 require_once __DIR__ . '/class-plugin-geopattern.php';
 require_once __DIR__ . '/class-plugin-geopattern-svg.php';
@@ -48,8 +50,11 @@ class Template {
 		// Print the schema.
 		if ( $schema ) {
 			echo PHP_EOL, '<script type="application/ld+json">', PHP_EOL;
-			// Output URLs without escaping the slashes, and print it human readable.
-			echo wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+			// Output URLs without escaping the slashes, and print it human readable. JSON_HEX_* keeps a stored '</script>' from closing the element.
+			echo wp_json_encode(
+				$schema,
+				JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+			);
 			echo PHP_EOL, '</script>', PHP_EOL;
 		}
 	}
@@ -163,7 +168,7 @@ class Template {
 	public static function output_meta() {
 		global $wp_query;
 
-		$metas   = [];
+		$metas = [];
 
 		if ( is_singular( 'plugin' ) ) {
 			$metas[] = sprintf(
@@ -172,6 +177,7 @@ class Template {
 			);
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Meta tags assembled above from esc_attr()-escaped values.
 		echo implode( "\n", $metas );
 	}
 
@@ -181,7 +187,11 @@ class Template {
 	public static function should_noindex_request( $noindex ) {
 		if ( get_query_var( 'plugin_advanced' ) ) {
 			$noindex = true;
-		} else if ( is_singular( 'plugin' ) && self::is_plugin_outdated() ) {
+		} elseif ( get_query_var( 'plugin_business_model' ) && get_query_var( 'browse' ) ) {
+			$noindex = true;
+		} elseif ( 'preview' == get_query_var( 'browse' ) ) {
+			$noindex = true;
+		} elseif ( is_singular( 'plugin' ) && self::is_plugin_outdated() ) {
 			$noindex = true;
 		}
 
@@ -245,21 +255,68 @@ class Template {
 	 */
 	public static function active_installs( $full = true, $post = null ) {
 		$post  = get_post( $post );
-		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0;
+		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0; // Already sanitized to a round number.
 
 		if ( 'closed' === $post->post_status ) {
 			$text = __( 'N/A', 'wporg-plugins' );
-		} elseif ( $count < 10 ) {
-			$text = __( 'Fewer than 10', 'wporg-plugins' );
-		} elseif ( $count >= 1000000 ) {
-			$million_count = intdiv( $count, 1000000 );
-			/* translators: %d: The integer number of million active installs */
-			$text = sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
 		} else {
-			$text = number_format_i18n( $count ) . '+';
+			$text = self::format_active_installs_for_display( $count );
 		}
 
 		return $full ? sprintf( __( '%s active installations', 'wporg-plugins' ), $text ) : $text;
+	}
+
+	/**
+	 * Formats the active installs count for display.
+	 *
+	 * @static
+	 *
+	 * @param int $count The active installs count.
+	 * @return string The formatted count.
+	 */
+	public static function format_active_installs_for_display( $count ) {
+		if ( $count < 10 ) {
+			return __( 'Fewer than 10', 'wporg-plugins' );
+		}
+
+		if ( $count >= 1000000 ) {
+			$million_count = intdiv( $count, 1000000 );
+
+			/* translators: %d: The integer number of million active installs */
+			return sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
+		}
+
+		return number_format_i18n( $count ) . '+';
+	}
+
+	/**
+	 * Sanitizes the Active Install count number to a rounded display value.
+	 *
+	 * @static
+	 *
+	 * @param int $active_installs The raw active install number.
+	 * @return int The sanitized version for display.
+	 */
+	public static function sanitize_active_installs( $active_installs ) {
+		if ( $active_installs > 10000000 ) {
+			// 10 million +
+			return 10000000;
+		} elseif ( $active_installs > 1000000 ) {
+			$round = 1000000;
+		} elseif ( $active_installs > 100000 ) {
+			$round = 100000;
+		} elseif ( $active_installs > 10000 ) {
+			$round = 10000;
+		} elseif ( $active_installs > 1000 ) {
+			$round = 1000;
+		} elseif ( $active_installs > 100 ) {
+			$round = 100;
+		} else {
+			// Rounded to ten, else 0
+			$round = 10;
+		}
+
+		return floor( $active_installs / $round ) * $round;
 	}
 
 	/**
@@ -303,7 +360,7 @@ class Template {
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
 	 * @return string
 	 */
-	public static function get_star_rating( $post = null ) {
+	public static function get_star_rating( $post = null, $linked = true ) {
 		$post = get_post( $post );
 
 		if ( class_exists( '\WPORG_Ratings' ) ) {
@@ -319,13 +376,13 @@ class Template {
 		return '<div class="plugin-rating">' .
 				Template::dashicons_stars( $rating ) .
 				'<span class="rating-count">(' .
-					'<a href="https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/">' .
+					( $linked ? '<a href="https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/">' : '' ) .
 					sprintf(
 						/* translators: 1: number of ratings */
 						__( '%1$s<span class="screen-reader-text"> total ratings</span>', 'wporg-plugins' ),
 						number_format_i18n( $num_ratings )
 					) .
-				'</a>' .
+				( $linked ? '</a>' : '' ) .
 				')</span>' .
 			'</div>';
 	}
@@ -397,9 +454,13 @@ class Template {
 			case 'html':
 
 				if ( $icon_2x && $icon_2x !== $icon ) {
-					return "<img class='plugin-icon' srcset='{$icon}, {$icon_2x} 2x' src='{$icon_2x}'>";
+					return sprintf(
+						'<img class="plugin-icon" srcset="%1$s, %2$s 2x" src="%2$s" alt="">',
+						esc_url( $icon ),
+						esc_url( $icon_2x )
+					);
 				} else {
-					return "<img class='plugin-icon' src='{$icon}'>";
+					return sprintf( '<img class="plugin-icon" src="%s" alt="">', esc_url( $icon ) );
 				}
 				break;
 
@@ -490,16 +551,14 @@ class Template {
 
 		switch ( $output ) {
 			case 'html':
-				$id    = "plugin-banner-{$plugin->post_name}";
-				$html  = "<style type='text/css'>";
-				$html .= "#{$id} { background-image: url('{$banner}'); }";
-				if ( ! empty( $banner_2x ) ) {
-					$html .= "@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 120dpi) { #{$id} { background-image: url('{$banner_2x}'); } }";
-				}
-				$html .= '</style>';
-				$html .= "<div class='plugin-banner' id='{$id}'></div>";
+				return sprintf(
+					'<div class="plugin-banner" id="%1$s"><img decoding="async" fetchpriority="high" alt="" src="%2$s" %3$s %4$s></div>',
+					esc_attr( "plugin-banner-{$plugin->post_name}" ),
+					esc_url( $banner ),
+					! empty( $banner_2x ) ? "srcset='" . esc_url( $banner ) . " 772w, " . esc_url( $banner_2x ) . " 1544w'" : '',
+					! empty( $banner_2x ) ? 'sizes="(min-width: 900px) 1544px, 772px"' : ''
+				);
 
-				return $html;
 				break;
 
 			case 'raw':
@@ -720,17 +779,147 @@ class Template {
 	}
 
 	/**
-	 * Properly encodes a string to UTF-8.
+	 * Is a live preview available for the plugin, and allowed for the current user to view?
 	 *
-	 * @static
-	 *
-	 * @param string $string
-	 * @return string
+	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @param 'view'|'edit'     $context Optional. 'view' to check if preview is available for public viewing. 'edit' to also check if available for current user to test. Default: view.
+	 * @return bool	True if a preview is available and the current user is permitted to see it.
 	 */
-	public static function encode( $string ) {
-		$string = mb_convert_encoding( $string, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
+	public static function is_preview_available( $post = null, $context = 'view' ) {
 
-		return ent2ncr( htmlspecialchars_decode( htmlentities( $string, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
+		if ( self::preview_link( $post ) ) {
+			// Plugin committers can use the plugin preview button to test if a blueprint exists.
+			if ( 'edit' === $context && current_user_can( 'plugin_admin_edit', $post ) ) {
+				return true;
+			}
+
+			// Other users can only use the preview button if plugin committers have enabled it.
+			$post = get_post( $post );
+			if ( get_post_meta( $post->ID, '_public_preview', true ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Generate a live preview (playground) link for a given plugin.
+	 *
+	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @return false|string The preview url. False if no preview is configured.
+	 */
+	public static function preview_link( $post = null, $locale = null ) {
+		$post = get_post( $post );
+
+		$blueprints = self::get_blueprints( $post );
+		// Note: for now, only use a file called `blueprint.json`.
+		if ( !isset( $blueprints['blueprint.json'] ) ) {
+			return false;
+		}
+		$blueprint = $blueprints['blueprint.json'];
+
+		$blueprint_url = $blueprint['url'];
+		$locale = $locale ?? get_locale();
+		$blueprint_url = add_query_arg( 'lang', $locale, $blueprint_url );
+
+		return sprintf( 'https://playground.wordpress.net/?plugin=%s&blueprint-url=%s', esc_attr($post->post_name), rawurlencode($blueprint_url) );
+	}
+
+	/**
+	 * Generate a live preview (playground) link for a zip attachment. Needed for newly uploaded plugins that have not yet been published.
+	 *
+	 * @param string $slug            The slug of the plugin post.
+	 * @param int $attachment_id      The ID of the attachment post corresponding to a plugin zip file. Must be attached to the post identified by $slug.
+	 * @return false|string           The preview URL.
+	 */
+	public static function preview_link_zip( $slug, $attachment_id, $type = null ) {
+
+		$file = get_attached_file( $attachment_id );
+		$zip_hash = self::preview_link_hash( $file );
+		if ( !$zip_hash ) {
+			return false;
+		}
+		$zip_blueprint = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?zip_hash=%s', esc_attr( $slug ), esc_attr( $zip_hash ) );
+		if ( is_string( $type ) ) {
+			$zip_blueprint = add_query_arg( 'type', strval( $type ), $zip_blueprint );
+		}
+		$zip_preview = add_query_arg( 'blueprint-url', urlencode($zip_blueprint), 'https://playground.wordpress.net/' );
+
+		return $zip_preview;
+	}
+
+	/**
+	 * Generate a live preview (playground) link for a published plugin that does not yet have a custom blueprint. Needed for developer testing.
+	 *
+	 * @param string $slug            The slug of the plugin post.
+	 * @param int $download_link      The URL of the zip download for the plugin.
+	 * @param bool $blueprint_only    False will return a full preview URL. True will return only a blueprint URL.
+	 * @return false|string           The preview or blueprint URL.
+	 */
+	public static function preview_link_developer( $slug, $download_link, $blueprint_only = false ) {
+
+		$url_hash = self::preview_link_hash( $download_link );
+		if ( !$url_hash ) {
+			return false;
+		}
+		$dev_blueprint = sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?url_hash=%s', esc_attr( $slug ), esc_attr( $url_hash ) );
+		if ( $blueprint_only ) {
+			return $dev_blueprint;
+		}
+		$url_preview = add_query_arg( 'blueprint-url', urlencode($dev_blueprint), 'https://playground.wordpress.net/' );
+
+		return $url_preview;
+	}
+
+	/**
+	 * Return a time-dependent variable for zip preview links.
+	 *
+	 * @param int $lifespan           The life span of the nonce, in seconds. Default is one week.
+	 * @return float                  The tick value.
+	 */
+	public static function preview_link_tick( $lifespan = WEEK_IN_SECONDS ) {
+		return ceil( time() / ( $lifespan / 2 ) );
+	}
+
+	/**
+	 * Return a nonce-style hash for zip preview links.
+	 *
+	 * @param string $zip_file        The filesystem path or URL of the zip file.
+	 * @param int $tick_offest        Number to subtract from the nonce tick. Use both 0 and -1 to verify older nonces.
+	 * @return false|string           The hash as a hex string; or false if the attachment ID is invalid.
+	 */
+	public static function preview_link_hash( $zip_file, $tick_offset = 0 ) {
+		if ( !$zip_file ) {
+			return false;
+		}
+		$tick = self::preview_link_tick() - $tick_offset;
+		return wp_hash( $tick . '|' . $zip_file, 'nonce' );
+	}
+
+	/**
+	 * Return a list of blueprints for the given plugin.
+	 *
+	 * @param int|\WP_Post|null $post    Optional. Post ID or post object. Defaults to global $post.
+	 * @return array An array of blueprints.
+	 */
+	public static function get_blueprints( $post = null ) {
+		$post = get_post( $post );
+
+		$out = array();
+
+		$blueprints = get_post_meta( $post->ID, 'assets_blueprints', true );
+		if ( $blueprints ) {
+			foreach ( $blueprints as $filename => $item ) {
+				if ( isset( $item['contents'] ) ) {
+					$out[ $filename ] = array(
+						'filename' => $filename,
+						'url' => sprintf( 'https://wordpress.org/plugins/wp-json/plugins/v1/plugin/%s/blueprint.json?rev=%d', $post->post_name, $item['revision'] )
+					);
+				}
+			}
+		}
+
+		return $out;
 	}
 
 	/**
@@ -761,7 +950,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_close', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-close' )
 		);
 	}
@@ -776,8 +968,48 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_transfer', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-transfer' )
+		);
+	}
+
+	/**
+	 * Generates a link to toggle the Live Preview button.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string URL to toggle status.
+	 */
+	public static function get_self_toggle_preview_link( $post = null ) {
+		$post = get_post( $post );
+
+		return add_query_arg(
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_toggle_preview', $post->post_name ),
+			),
+			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-toggle-preview' )
+		);
+	}
+
+	/**
+	 * Generates a link to dismiss a missing blueprint notice.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string URL to toggle status.
+	 */
+	public static function get_self_dismiss_blueprint_notice_link( $post = null ) {
+		$post = get_post( $post );
+
+		return add_query_arg(
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_toggle_preview', $post->post_name ),
+				'dismiss'                => 1,
+			),
+			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-toggle-preview' )
 		);
 	}
 
@@ -791,7 +1023,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'enable_release_confirmation', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/release-confirmation' )
 		);
 	}
@@ -799,28 +1034,35 @@ class Template {
 	/**
 	 * Generates a link to confirm a release.
 	 *
+	 * @param string            $tag  The tag to confirm.
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @param string            $what Optional. What operation to perform. Default: approve.
 	 * @return string URL to enable confirmations.
 	 */
-	public static function get_release_confirmation_link( $tag, $post = null) {
+	public static function get_release_confirmation_link( $tag, $post = null, $what = 'approve' ) {
 		$post = get_post( $post );
 
-		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
-			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/release-confirmation/' . $tag )
-		);
-	}
+		if ( 'approve' === $what ) {
+			$endpoint = 'plugin/%s/release-confirmation/%s';
+			$action   = 'confirm_release';
+		} elseif ( 'discard' === $what ) {
+			$endpoint = 'plugin/%s/release-confirmation/%s/discard';
+			$action   = 'discard_release';
+		} elseif ( 'undo-discard' === $what ) {
+			$endpoint = 'plugin/%s/release-confirmation/%s/undo-discard';
+			$action   = 'undo_discard_release';
+		} else {
+			return '';
+		}
 
-	/**
-	 * Generates a link to email the release confirmation link.
-	 *
-	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
-	 * @return string URL to enable confirmations.
-	 */
-	public static function get_release_confirmation_access_link() {
+		$url = home_url( 'wp-json/plugins/v1/' . sprintf( $endpoint, urlencode( $post->post_name ), urlencode( $tag ) ) );
+
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
-			home_url( 'wp-json/plugins/v1/release-confirmation-access' )
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( $action, $post->post_name . ':' . $tag ),
+			),
+			$url
 		);
 	}
 
@@ -841,24 +1083,108 @@ class Template {
 	}
 
 	/**
+	 * Returns the reasons for rejecting a plugin.
+	 *
+	 * @return array Rejection reason labels.
+	 */
+	public static function get_rejection_reasons() {
+		return array(
+			'3-month'              => '3 months without completion',
+			'core-supports'        => 'Code is already in core',
+			'duplicate-copy'       => 'Duplicate (copy) of another Plugin',
+			'library-or-framework' => 'Framework or Library Plugin',
+			'generic'              => "Something we're just not hosting",
+			'duplicate'            => 'New/renamed version of their own plugin',
+			'wp-cli'               => 'WP-CLI Only Plugins',
+			'storefront'           => 'Storefront',
+			'not-owner'            => 'Not the submitters plugin',
+			'scraping'             => 'Scraping',
+			'script-insertion'     => 'Script Insertion Plugins are Dangerous',
+			'demo'                 => 'Test/Demo plugin (non functional)',
+			'translation'          => 'Translation of existing plugin',
+			'banned'               => 'Banned developer trying to sneak back in',
+			'author-request'       => 'Author requested not to continue',
+			'security'             => 'Security concerns',
+			'common-plugin'        => 'Common plugin',
+			'other'                => 'OTHER: See notes',
+		);
+	}
+
+	/**
 	 * Returns the close/disable reason for a plugin.
 	 *
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
 	 * @return string Close/disable reason.
 	 */
 	public static function get_close_reason( $post = null ) {
+		return self::get_close_data( $post )['label'] ?? '';
+	}
+
+	/**
+	 * Returns the close/disable data for a plugin.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 */
+	public static function get_close_data( $post = null ) {
 		$post = get_post( $post );
-
-		$close_reasons = self::get_close_reasons();
-		$close_reason  = (string) get_post_meta( $post->ID, '_close_reason', true );
-
-		if ( isset( $close_reasons[ $close_reason ] ) ) {
-			$reason_label = $close_reasons[ $close_reason ];
-		} else {
-			$reason_label = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
+		if ( ! $post || ! in_array( $post->post_status, array( 'closed', 'disabled' ), true ) ) {
+			return false;
 		}
 
-		return $reason_label;
+		$result = [
+			'date'      => get_post_meta( $post->ID, 'plugin_closed_date', true ) ?: false,
+			'reason'    => (string) get_post_meta( $post->ID, '_close_reason', true ),
+			'label'     => '',
+			'permanent' => false,
+			'public'    => false,
+		];
+
+		/*
+		 * If the date is unknown, fallback to the last_updated time (then to post_modified_gmt, then to post_date_gmt..).
+		 *
+		 * This is not strictly correct, but the consistency in data is more important than the exact date, where the plugins
+		 * without the closed metadata are likely closed pre-2018.
+		 */
+		if ( ! $result['date'] ) {
+			$result['date'] = $post->last_updated ?: $post->post_modified_gmt;
+			if ( '0000-00-00 00:00:00' === $result['date'] ) {
+				$result['date'] = $post->post_date_gmt;
+			}
+		}
+
+		if (
+			// Assume by-author-request is permanent.
+			'author-request' === $result['reason'] ||
+			// Likewise for when it's closed due to merged-to-core.
+			'merged-into-core' === $result['reason'] ||
+			// Or if it's closed without committers.
+			! Tools::get_plugin_committers( $post->post_name )
+		) {
+			$result['permanent'] = true;
+		}
+
+		$result['label'] = self::get_close_reasons()[ $result['reason'] ] ?? false;
+
+		// If not known reason, use 'unknown'.
+		if ( ! $result['label'] ) {
+			$result['reason'] = 'unknown';
+			$result['label']  = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
+		}
+
+		// These reasons are never embargoed, and are shown immediately.
+		$unembargoed_closure_reasons = array(
+			'author-request',
+			'unused',
+			'merged-into-core',
+		);
+
+		// If it's closed for more than 60 days, it's not embargoed, or we're unsure about the close date, it's publicly known.
+		$days_closed = $result['date'] ? (int) ( ( time() - strtotime( $result['date'] ) ) / DAY_IN_SECONDS ) : false;
+		if ( ! $result['date'] || $days_closed >= 60 || in_array( $result['reason'], $unembargoed_closure_reasons, true ) ) {
+			$result['public'] = true;
+		}
+
+		return $result;	
 	}
 
 	/**
@@ -1120,5 +1446,23 @@ class Template {
 		}
 
 		return $sorted;
+	}
+
+	/**
+	 * Get the available rollout strategies for plugin updates.
+	 *
+	 * @return array
+	 */
+	static function get_rollout_strategies() {
+		return [
+			'' => [
+				'name' => __( 'Immediate (default)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
+			],
+			'manual-updates-24hr' => [
+				'name' => __( 'Manual updates only (24 hours)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites, but automatic updates will be disabled for 24 hours. After that, sites will receive the update as normal.', 'wporg-plugins' ),
+			],
+		];
 	}
 }

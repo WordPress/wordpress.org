@@ -10,7 +10,7 @@ namespace WordPressdotorg\Photo_Directory;
 class User {
 
 	/**
-	 * Maximum number of pending/concurrent submissions.
+	 * Maximum number of pending/concurrent submissions for infrequent contributors.
 	 *
 	 * Once this threshold is met, a user will be unable to make another
 	 * submission until a current submission is approved or rejected.
@@ -23,14 +23,82 @@ class User {
 	const MAX_PENDING_SUBMISSIONS = 5;
 
 	/**
-	 * The number of published posts before a given user is permitted to toggle
-	 * all of the confirmation checkboxes when submitting a photo.
+	 * Maximum number of pending/concurrent submissions for frequent contributors.
+	 *
+	 * Once this threshold is met, a user will be unable to make another
+	 * submission until a current submission is approved or rejected.
+	 *
+	 * @see `get_concurrent_submission_limit()` for actually retrieving the maximum
+	 * pending submissions for a user, since it can vary based on the user and may
+	 * be filtered.
+	 * @var int
+	 */
+	const MAX_PENDING_SUBMISSIONS_FREQUENT = 10;
+
+	/**
+	 * The number of published photos before a given user is granted additional
+	 * privileges.
+	 *
+	 * Includes, but not necessarily limited to:
+	 * - Increased pending submissions limit.
+	 * - Ability to toggle all of the confirmation checkboxes when submitting a photo.
 	 *
 	 * @var int
 	 */
 	const TOGGLE_ALL_THRESHOLD = 30;
 
+	/**
+	 * Initializes class.
+	 */
 	public static function init() {
+		// Hide certain user columns.
+		add_filter( "manage_users_columns", [ __CLASS__, 'hide_user_columns' ], 99 );
+
+		// Show empty state page for users without contributed photos.
+		add_action( 'pre_handle_404', [ __CLASS__, 'prevent_author_404s' ], 10, 2 );
+	}
+
+	/**
+	 * Hides certain user columns.
+	 *
+	 * @param array $columns The user columns being shown in the users table.
+	 * @return array The user columns to show, with certain columns removed.
+	 */
+	public static function hide_user_columns( $columns ) {
+		$columns_to_hide = [
+			'posts',
+			'user_jetpack',
+		];
+
+		foreach ( $columns_to_hide as $column ) {
+			unset( $columns[ $column ] );
+		}
+
+		return $columns;
+	}
+
+	/**
+	 * Prevents 404s for all author pages.
+	 *
+	 * By default, core will only prevent 404s on empty author archives
+	 * if the author is a member of the site. This preempts the handler
+	 * to prevent 404s for all author pages.
+	 *
+	 * @param bool     $preempt  Whether to short-circuit default header status handling. Default false.
+	 * @param WP_Query $query WordPress Query object.
+	 * @return bool
+	 */
+	public static function prevent_author_404s( $preempt, $query ) {
+		if ( ! $query->is_main_query() ) {
+			return $preempt;
+		}
+
+		$author = $query->get( 'author' );
+		if ( $query->is_author && is_numeric( $author ) && $author > 0 ) {
+			return true;
+		}
+
+		return $preempt;
 	}
 
 	/**
@@ -52,6 +120,48 @@ class User {
 		}
 
 		return count_user_posts( $user_id, Registrations::get_post_type(), true );
+	}
+
+	/**
+	 * Returns a count of photos of a given post status(es) by a user on this calendar day.
+	 *
+	 * @param string|string[] $post_status Optional. The post status(es) of photos to find.
+	 *                                     Default 'publish'.
+	 * @param int             $user_id     Optional. The user ID. If not defined, assumes
+	 *                                     global author. Default false.
+	 * @return int
+	 */
+	public static function count_photos_for_today( $post_status = 'publish', $user_id = false ) {
+		if (  ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID ?? 0;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		$today = new \DateTime( 'now', new \DateTimeZone( wp_timezone_string() ) );
+		// Set time to beginning of today.
+		$today->setTime( 0, 0, 0 );
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => $post_status,
+			'author'         => $user_id,
+			'date_query'     => [
+				[
+					'after'     => $today->format( 'Y-m-d H:i:s' ), // After start of today.
+					'inclusive' => true,
+				],
+			],
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		];
+
+		$query = new \WP_Query( $args );
+		return $query->found_posts;
 	}
 
 	/**
@@ -89,7 +199,27 @@ class User {
 			'fields'         => $fields,
 			'posts_per_page' => -1,
 			'author'         => $user_id,
-			'post_status'    => 'pending',
+			'post_status'    => Photo::get_pending_post_statuses(),
+			'post_type'      => Registrations::get_post_type(),
+		] );
+	}
+
+	/**
+	 * Returns the most recent photos for a given user.
+	 *
+	 * @param int  $user_id The user ID.
+	 * @param int  $number The number of photos to return.
+	 * @param bool $include_pending Include pending photos?
+	 * @return WP_Post[]
+	 */
+	public static function get_recent_photos( $user_id, $number, $include_pending = false ) {
+		$post_statuses = $include_pending ? Photo::get_pending_post_statuses() : [];
+		$post_statuses[] = 'publish';
+
+		return get_posts( [
+			'posts_per_page' => $number,
+			'author'         => $user_id,
+			'post_status'    => $post_statuses,
 			'post_type'      => Registrations::get_post_type(),
 		] );
 	}
@@ -97,11 +227,56 @@ class User {
 	/**
 	 * Returns a count of rejected photos for a user.
 	 *
+	 * @param int $user_id                    Optional. The user ID. If not defined,
+	 *                                        assumes global author. Default false.
+	 * @param bool $exclude_submission_errors Optional. Should photos rejected due
+	 *                                        to the 'submission-error' reason be
+	 *                                        excluded from the count? Default true.
+	 * @return int
+	 */
+	public static function count_rejected_photos( $user_id = false, $exclude_submission_errors = true ) {
+		global $wpdb;
+
+		if ( ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => Rejection::get_post_status(),
+			'author'         => $user_id,
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+		];
+
+		if ( $exclude_submission_errors ) {
+			$args['meta_query'] = [
+				[
+					'key'      => 'rejected_reason',
+					'value'    => 'submission-error',
+					'compare'  => '!=',
+				],
+			];
+		}
+
+		$query = new \WP_Query( $args );
+		return $query->found_posts;
+	}
+
+	/**
+	 * Returns a count of flagged photos for a user.
+	 *
 	 * @param int $user_id Optional. The user ID. If not defined, assumes global
 	 *                     author. Default false.
 	 * @return int
 	 */
-	public static function count_rejected_photos( $user_id = false ) {
+	public static function count_flagged_photos( $user_id = false ) {
 		global $wpdb;
 
 		if (  ! $user_id ) {
@@ -110,12 +285,152 @@ class User {
 			$user_id = $authordata->ID;
 		}
 
+		if ( ! $user_id ) {
+			return 0;
+		}
+
 		return (int) $wpdb->get_var( $wpdb->prepare(
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s AND post_status = %s AND post_author = %d",
 			Registrations::get_post_type(),
-			Rejection::get_post_status(),
+			Flagged::get_post_status(),
 			$user_id
 		) );
+	}
+
+	/**
+	 * Returns the 'meta_query' value for use in finding posts moderated (and also
+	 * optionally rejected) by a user.
+	 *
+	 * @param int $user_id            The user ID.
+	 * @param int $include_rejections Optional. Should the count of photos
+	 *                                rejected by the user be included in the
+	 *                                count? Default false.
+	 * @return array
+	 */
+	public static function get_moderator_meta_query( $user_id, $include_rejections = false ) {
+		if ( ! $user_id ) {
+			return [];
+		}
+
+		$moderator_query = [
+			'key'   => Registrations::get_meta_key( 'moderator' ),
+			'value' => $user_id,
+		];
+		$rejector_query = [
+			'key'   => 'rejected_by',
+			'value' => $user_id,
+		];
+
+		if ( $include_rejections ) {
+			$meta_query = [
+				'relation' => 'OR',
+				$moderator_query,
+				$rejector_query,
+			];
+		} else {
+			$meta_query = [ $moderator_query ];
+		}
+
+		return $meta_query;
+	}
+
+	/**
+	 * Returns the number of photos moderated by the user.
+	 *
+	 * By default, this does NOT include photo rejections unless the optional
+	 * argument is enabled.
+	 *
+	 * @param int $user_id            Optional. The user ID. If not defined,
+	 *                                assumes global author. Default false.
+	 * @param int $include_rejections Optional. Should the count of photos
+	 *                                rejected by the user be included in the
+	 *                                count? Default false.
+	 * @return int
+	 */
+	public static function count_photos_moderated( $user_id = false, $include_rejections = false ) {
+		if ( ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		$post_statuses = ['publish'];
+		if ( $include_rejections ) {
+			$post_statuses[] = Rejection::get_post_status();
+		}
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => $post_statuses,
+			'meta_query'     => self::get_moderator_meta_query( $user_id, $include_rejections ),
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+		];
+
+		$query = new \WP_Query( $args );
+
+		return $query->post_count;
+	}
+
+	/**
+	 * Returns the number of photos rejected by the user as a moderator.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes global
+	 *                     author. Default false.
+	 * @return int
+	 */
+	public static function count_photos_rejected_as_moderator( $user_id = false ) {
+		if ( ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		if ( ! $user_id ) {
+			return 0;
+		}
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => Rejection::get_post_status(),
+			'meta_query'     => [
+				[
+					'key'   => 'rejected_by',
+					'value' => $user_id,
+				],
+			],
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+		];
+
+		$query = new \WP_Query( $args );
+
+		return $query->post_count;
+	}
+
+	/**
+	 * Determines if a user is considered a frequent contributor.
+	 *
+	 * @param int $user_id Optional. The user ID. If not defined, assumes current
+	 *                     user. Default false.
+	 * @return bool True if user is considered a frequent contributor, else false.
+	 */
+	public static function is_frequent_contributor( $user_id = false ) {
+		$is_frequent = false;
+
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		if ( $user_id && self::count_published_photos( $user_id ) >= self::TOGGLE_ALL_THRESHOLD ) {
+			$is_frequent = true;
+		}
+
+		return $is_frequent;
 	}
 
 	/**
@@ -137,17 +452,7 @@ class User {
 	 * @return bool True if user can toggle confirmation checkboxes, else false.
 	 */
 	public static function can_toggle_confirmation_checkboxes( $user_id = false ) {
-		$can = false;
-
-		if ( ! $user_id ) {
-			$user_id = get_current_user_id();
-		}
-
-		if ( $user_id && self::count_published_photos( $user_id ) >= self::TOGGLE_ALL_THRESHOLD ) {
-			$can = true;
-		}
-
-		return $can;
+		return self::is_frequent_contributor( $user_id );
 	}
 
 	/**
@@ -166,7 +471,11 @@ class User {
 			return 0;
 		}
 
-		return apply_filters( 'wporg_photos_max_concurrent_submissions', self::MAX_PENDING_SUBMISSIONS, $user_id );
+		$limit = self::is_frequent_contributor( $user_id )
+			? self::MAX_PENDING_SUBMISSIONS_FREQUENT
+			: self::MAX_PENDING_SUBMISSIONS;
+
+		return apply_filters( 'wporg_photos_max_concurrent_submissions', $limit, $user_id );
 	}
 
 	/**
@@ -212,20 +521,55 @@ class User {
 
 		if ( $user_id ) {
 			$max_pending_submissions = self::get_concurrent_submission_limit( $user_id );
-			$posts = get_posts( [
-				'fields'         => 'ids',
-				'posts_per_page' => $max_pending_submissions,
-				'author'         => $user_id,
-				'post_status'    => 'pending',
-				'post_type'      => Registrations::get_post_type(),
-			] );
+			$pending_photos_count = self::count_pending_photos( $user_id );
 
-			if ( count( $posts ) < $max_pending_submissions ) {
+			if ( $pending_photos_count < $max_pending_submissions ) {
 				$limit_reached = false;
 			}
 		}
 
 		return $limit_reached;
+	}
+
+	/**
+	 * Returns the photo post most recently moderated by the user.
+	 *
+	 * @param int $user_id            Optional. The user ID. If not defined,
+	 *                                assumes global author. Default false.
+	 * @param int $include_rejections Optional. Should photos rejected by the
+	 *                                user be considered? Default false.
+	 * @return WP_Post|false The post, or false if no posts found.
+	 */
+	public static function get_last_moderated( $user_id = false, $include_rejections = false ) {
+		if ( ! $user_id ) {
+			global $authordata;
+
+			$user_id = $authordata->ID;
+		}
+
+		if ( ! $user_id ) {
+			return false;
+		}
+
+		$post_statuses = ['publish'];
+		if ( $include_rejections ) {
+			$post_statuses[] = Rejection::get_post_status();
+		}
+
+		$args = [
+			'post_type'      => Registrations::get_post_type(),
+			'post_status'    => $post_statuses,
+			'meta_query'     => self::get_moderator_meta_query( $user_id, $include_rejections ),
+			'posts_per_page' => 1,
+		];
+
+		$query = new \WP_Query( $args );
+
+		if ( $query->have_posts() ) {
+			return $query->posts[0];
+		}
+
+		return false;
 	}
 
 }

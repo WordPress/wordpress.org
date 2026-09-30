@@ -1,0 +1,70 @@
+
+
+@keyframes favme-anime {
+	0% {
+		opacity: 1;
+		font-size: var( --wp--preset--font-size--large );
+		-webkit-text-stroke-color: transparent;
+	}
+	25% {
+		opacity: 0.6;
+		color: #fff;
+		font-size: var( --wp--preset--font-size--small );
+		-webkit-text-stroke-width: 1px;
+		-webkit-text-stroke-color: #dc3232;
+	}
+	75% {
+		opacity: 0.6;
+		color: #fff;
+		font-size: var( --wp--preset--font-size--large );
+		-webkit-text-stroke-width: 1px;
+		-webkit-text-stroke-color: #dc3232;
+	}
+	100% {
+		opacity: 1;
+		font-size: var( --wp--preset--font-size--normal );
+		-webkit-text-stroke-color: transparent;
+	}
+}
+
+.plugin-favorite {
+	height: calc( 2 * var( --wp--custom--button--spacing--padding--top ) + 2 * var( --wp--preset--font-size--normal ) );
+	text-align: center;
+	vertical-align: top;
+	width: 36px;
+
+	.plugin-favorite-heart {
+		align-items: center;
+		background: none;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		color: #cbcdce;
+		cursor: pointer;
+		display: flex;
+		font-size: var( --wp--preset--font-size--large );
+		height: 100%;
+		justify-content: center;
+		line-height: 1;
+		margin: 0;
+		outline: none;
+		padding: 0;
+		text-decoration: none;
+
+		&.favorited {
+			color: #dc3232;
+		}
+
+		&:hover,
+		&:focus {
+			text-decoration: none;
+			color: var(----wp--preset--color--charcoal-2)
+		}
+
+		&:after {
+			content: "\f487";
+			font-family: dashicons;
+			vertical-align: top;
+		}
+	}
+}

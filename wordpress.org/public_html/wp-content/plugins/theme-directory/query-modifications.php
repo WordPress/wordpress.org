@@ -18,8 +18,10 @@ function wporg_themes_pre_get_posts( $query ) {
 		return;
 	}
 
-	// Default to the ~featured~ popular view
-	if ( empty( $query->query ) ) {
+	// Default to the popular view if this is a default query (ignore `paged`,
+	// so that `/themes/page/2/` correctly loads popular results).
+	$query_vars = array_diff( array_keys( $query->query ), [ 'paged' ] );
+	if ( empty( $query_vars ) ) {
 		$query->query_vars['browse'] = 'popular';
 	}
 
@@ -121,6 +123,30 @@ function wporg_themes_pre_get_posts( $query ) {
 			$query->query_vars['orderby'] = 'meta_value DESC';
 			break;
 
+		case 'commercial':
+			if ( ! isset( $query->query_vars['tax_query'] ) ) {
+				$query->query_vars['tax_query'] = array();
+			}
+			$query->query_vars['tax_query']['model'] = array(
+				'taxonomy' => 'theme_business_model',
+				'field'    => 'slug',
+				'terms'    => 'commercial',
+				'operator' => 'IN',
+			);
+			break;
+
+		case 'community':
+			if ( ! isset( $query->query_vars['tax_query'] ) ) {
+				$query->query_vars['tax_query'] = array();
+			}
+			$query->query_vars['tax_query']['model'] = array(
+				'taxonomy' => 'theme_business_model',
+				'field'    => 'slug',
+				'terms'    => 'community',
+				'operator' => 'IN',
+			);
+			break;
+
 		default:
 			// Force a 404 for anything else.
 			if ( $query->query_vars['browse'] ) {
@@ -136,6 +162,7 @@ function wporg_themes_pre_get_posts( $query ) {
 	if (
 		empty( $query->query_vars['name'] ) &&
 		empty( $query->query_vars['author_name'] ) &&
+		empty( $query->query_vars['author'] ) &&
 		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) ) &&
 		empty( $query->query_vars['meta_query']['trac_sync_ticket_id'] ) && // jobs/class-trac-sync.php - Always needs to find the post, and looks up via a meta search.
 		empty( $query->query_vars['meta_query']['theme_uri_search'] ) // class-wporg-themes-upload.php - Searching all known themes by meta value.
@@ -159,6 +186,66 @@ function wporg_themes_pre_get_posts( $query ) {
 	}
 }
 add_action( 'pre_get_posts', 'wporg_themes_pre_get_posts' );
+
+/**
+ * Restricts Jetpack Search (Elasticsearch) theme searches to published themes.
+ *
+ * Without this, the ES hit total counts themes in non-public statuses that are
+ * then dropped when the results are loaded for display, leaving search pages
+ * with fewer cards than the total implies.
+ *
+ * @param array    $es_query_args The raw Elasticsearch query args.
+ * @param WP_Query $query         The originating WP_Query object.
+ * @return array
+ */
+function wporg_themes_restrict_search_to_published( $es_query_args, $query ) {
+	if ( ! $query instanceof WP_Query || 'repopackage' !== $query->get( 'post_type' ) ) {
+		return $es_query_args;
+	}
+
+	$status_filter = array(
+		'terms' => array(
+			'post_status' => array( 'publish' ),
+		),
+	);
+
+	// Merge into the filter tree, matching Jetpack's `and` grouping.
+	if ( empty( $es_query_args['filter'] ) ) {
+		$es_query_args['filter'] = $status_filter;
+	} elseif ( isset( $es_query_args['filter']['and'] ) ) {
+		$es_query_args['filter']['and'][] = $status_filter;
+	} else {
+		$es_query_args['filter'] = array(
+			'and' => array( $es_query_args['filter'], $status_filter ),
+		);
+	}
+
+	return $es_query_args;
+}
+add_filter( 'jetpack_search_es_query_args', 'wporg_themes_restrict_search_to_published', 10, 2 );
+
+/**
+ * Adds the `default` language to the fields Jetpack Search queries against.
+ *
+ * Jetpack builds its Elasticsearch query against locale-specific analyzed
+ * fields only (`title.en`, `content.en`, etc.), chosen by the language WP.com
+ * detected for each document at index time. That detection is unreliable on
+ * short theme descriptions, so many themes are indexed as non-English and have
+ * no `.en` fields at all, making them unfindable in search. The `.default`
+ * analyzed fields exist on every document regardless of detected language, so
+ * including them ensures every theme can match.
+ *
+ * @param array $languages The languages Jetpack Search will query against.
+ * @return array
+ */
+function wporg_themes_search_default_language_fields( $languages ) {
+	if ( ! in_array( 'default', $languages, true ) ) {
+		$languages[] = 'default';
+	}
+
+	return $languages;
+}
+add_filter( 'jetpack_search_query_languages', 'wporg_themes_search_default_language_fields' );
 
 /**
  * Filters SQL clauses, to prioritize translated themes.

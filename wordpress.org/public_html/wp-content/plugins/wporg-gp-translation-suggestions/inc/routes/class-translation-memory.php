@@ -6,6 +6,8 @@ use GP;
 use GP_Locales;
 use GP_Route;
 use WordPressdotorg\GlotPress\TranslationSuggestions\Translation_Memory_Client;
+use WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Client;
+use WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Messages;
 use const WordPressdotorg\GlotPress\TranslationSuggestions\PLUGIN_DIR;
 
 class Translation_Memory extends GP_Route {
@@ -181,86 +183,31 @@ class Translation_Memory extends GP_Route {
 	 * @return array
 	 */
 	private function get_openai_suggestion( $original_singular, $locale, $locale_glossary, string $set_slug ): array {
-		$openai_query    = '';
-		$glossary_query  = '';
-		$gp_default_sort = get_user_option( 'gp_default_sort' );
-		$openai_key      = gp_array_get( $gp_default_sort, 'openai_api_key' );
-		if ( empty( trim( $openai_key ) ) ) {
+		$client = new OpenAI_Client();
+
+		if ( ! $client->is_ready() ) {
 			return array();
 		}
 		if ( $this->is_TM_translation_100_accurate( $original_singular, $locale, $set_slug ) ) {
 			return array();
 		}
-		$openai_prompt      = gp_array_get( $gp_default_sort, 'openai_custom_prompt' );
-		$openai_temperature = gp_array_get( $gp_default_sort, 'openai_temperature', 0 );
-		if ( ! is_float( $openai_temperature ) || $openai_temperature < 0 || $openai_temperature > 2 ) {
-			$openai_temperature = 0;
-		}
 
-		$glossary_entries = array();
-		foreach ( $locale_glossary->get_entries() as $gp_glossary_entry ) {
-			if ( strpos( strtolower( $original_singular ), strtolower( $gp_glossary_entry->term ) ) !== false ) {
-				// Use the translation as key, because we could have multiple translations with the same term.
-				$glossary_entries[ $gp_glossary_entry->translation ] = $gp_glossary_entry->term;
-			}
-		}
-		if ( ! empty( $glossary_entries ) ) {
-			$glossary_query = ' The following terms are translated as follows: ';
-			foreach ( $glossary_entries as $translation => $term ) {
-				$glossary_query .= '"' . $term . '" is translated as "' . $translation . '"';
-				if ( array_key_last( $glossary_entries ) != $translation ) {
-					$glossary_query .= ', ';
-				}
-			}
-			$glossary_query .= '.';
-		}
-
-		$gp_locale     = GP_Locales::by_field( 'slug', $locale );
-		$openai_query .= ' Translate the following text to ' . $gp_locale->english_name . ": \n";
-		$openai_query .= '"' . $original_singular . '"';
-
-		$messages = array(
-			array(
-				'role'    => 'system',
-				'content' => $openai_prompt . $glossary_query,
-			),
-			array(
-				'role'    => 'user',
-				'content' => $openai_query,
-			),
+		$gp_locale = GP_Locales::by_field( 'slug', $locale );
+		$messages_builder = new OpenAI_Messages(
+			$original_singular,
+			$gp_locale,
+			$locale_glossary->get_entries()
 		);
+		$messages = $messages_builder->build_translation_messages();
+		$result = $client->chat_completion( $messages );
 
-		$openai_response = wp_remote_post(
-			'https://api.openai.com/v1/chat/completions',
-			array(
-				'timeout' => 20,
-				'headers' => array(
-					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . $openai_key,
-				),
-				'body'    => wp_json_encode(
-					array(
-						'model'       => 'gpt-3.5-turbo',
-						'max_tokens'  => 1000,
-						'n'           => 1,
-						'messages'    => $messages,
-						'temperature' => $openai_temperature,
-					)
-				),
-			)
-		);
-		if ( is_wp_error( $openai_response ) ) {
+		if ( false === $result ) {
 			return array();
 		}
-		$response_status = wp_remote_retrieve_response_code( $openai_response );
-		if ( 200 !== $response_status ) {
-			return array();
-		}
-		$output = json_decode( wp_remote_retrieve_body( $openai_response ), true );
-		$this->update_openai_tokens_used( $output['usage']['total_tokens'] );
 
-		$message                           = $output['choices'][0]['message'];
-		$response['openai']['translation'] = trim( trim( $message['content'] ), '"' );
+		$this->update_openai_tokens_used( $result['usage']['total_tokens'] ?? 0 );
+
+		$response['openai']['translation'] = $result['content'];
 		$response['openai']['diff']        = '';
 
 		return $response;
@@ -277,9 +224,11 @@ class Translation_Memory extends GP_Route {
 	 * @return array
 	 */
 	private function get_deepl_suggestion( string $original_singular, string $locale, string $set_slug ): array {
-		$free_url        = 'https://api-free.deepl.com/v2/translate';
 		$gp_default_sort = get_user_option( 'gp_default_sort' );
 		$deepl_api_key   = gp_array_get( $gp_default_sort, 'deepl_api_key' );
+		$deepl_url_free  = 'https://api-free.deepl.com/v2/translate';
+		$deepl_url_pro   = 'https://api.deepl.com/v2/translate';
+		$deepl_url       = gp_array_get( $gp_default_sort, 'deepl_use_api_pro', false ) ? $deepl_url_pro : $deepl_url_free;
 		if ( empty( trim( $deepl_api_key ) ) ) {
 			return array();
 		}
@@ -290,19 +239,24 @@ class Translation_Memory extends GP_Route {
 		if ( $this->is_TM_translation_100_accurate( $original_singular, $locale, $set_slug ) ) {
 			return array();
 		}
-		$deepl_response = wp_remote_post(
-			$free_url,
-			array(
-				'timeout' => 20,
-				'body'    => array(
-					'auth_key'    => $deepl_api_key,
-					'text'        => $original_singular,
-					'source_lang' => 'EN',
-					'target_lang' => $target_lang,
-					'formality'   => $this->get_language_formality( $target_lang, $set_slug ),
-				),
+
+		$options = array(
+			'timeout' => 20,
+			'headers' => array(
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'DeepL-Auth-Key ' . $deepl_api_key,
 			),
+			'body' => wp_json_encode( array(
+				'text'        => array( $original_singular ),
+				'target_lang' => $target_lang,
+				'formality'   => $this->get_language_formality( $target_lang, $set_slug ),
+			)),
 		);
+		$deepl_response = wp_remote_post(
+			$deepl_url,
+			$options
+		);
+
 		if ( is_wp_error( $deepl_response ) ) {
 			return array();
 		}
@@ -482,50 +436,36 @@ class Translation_Memory extends GP_Route {
 	}
 
 	/**
-	 * Updates the external translations used by each user.
+	 * Update the number of external translations used.
 	 *
 	 * @return void
 	 */
-	public function update_external_translations() {
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'wporg-editor-settings' ) ) {
-			wp_send_json_error( array( 'message' => esc_html__( 'Invalid nonce.', 'glotpress' ) ), 403 );
+	public static function update_external_translations( $translation ) {
+		$is_source_set    = isset( $_POST['externalTranslationSource'] ) && isset( $_POST['externalTranslationUsed'] );
+		$is_request_valid = is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name && 'translations_post' === GP::$current_route->last_method_called;
+		if ( ! $is_request_valid || ! $is_source_set || ! $translation ) {
+			return;
 		}
-		if ( ! isset( $_POST['translation'] ) ) {
-			wp_send_json_error( array( 'message' => esc_html__( 'Translation parameter is not present.', 'glotpress' ) ), 400 );
-		}
-		if ( ! isset( $_POST['openAITranslationsUsed'] ) && ! isset( $_POST['deeplTranslationsUsed'] ) ) {
-			wp_send_json_error( array( 'message' => esc_html__( 'Translation suggested parameter is not present.', 'glotpress' ) ), 400 );
-		}
-		if ( isset( $_POST['openAITranslationsUsed'] ) ) {
-			$this->update_one_external_translation(
-				$_POST['translation'],
-				$_POST['openAITranslationsUsed'],
-				'openai_translations_used',
-				'openai_same_translations_used'
-			);
-		}
-		if ( isset( $_POST['deeplTranslationsUsed'] ) ) {
-			$this->update_one_external_translation(
-				$_POST['translation'],
-				$_POST['deeplTranslationsUsed'],
-				'deepl_translations_used',
-				'deepl_same_translations_used'
-			);
-		}
-		wp_send_json_success();
+		self::update_one_external_translation(
+			$translation->translation_0,
+			sanitize_text_field( $_POST['externalTranslationSource'] ),
+			sanitize_text_field( $_POST['externalTranslationUsed'] ),
+		);
 	}
 
 	/**
 	 * Updates an external translation used by each user.
 	 *
 	 * @param string $translation                     The translation.
+	 * @param string $suggestion_source               The suggestion_source.
 	 * @param string $suggestion                      The suggestion.
-	 * @param string $external_translations_used      The external translations used.
-	 * @param string $external_same_translations_used The external same translations used.
 	 *
 	 * @return void
 	 */
-	private function update_one_external_translation( string $translation, string $suggestion, string $external_translations_used, string $external_same_translations_used ) {
+	private static function update_one_external_translation( string $translation, string $suggestion_source, string $suggestion ) {
+		$external_translations_used      = $suggestion_source . '_translations_used';
+		$external_same_translations_used = $suggestion_source . '_same_translations_used';
+
 		$is_the_same_translation  = $translation == $suggestion;
 		$gp_external_translations = get_user_option( 'gp_external_translations' );
 		$translations_used        = gp_array_get( $gp_external_translations, $external_translations_used, 0 );

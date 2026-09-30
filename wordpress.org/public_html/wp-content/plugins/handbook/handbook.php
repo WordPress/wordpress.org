@@ -24,6 +24,7 @@ require_once __DIR__ . '/inc/email-post-changes.php';
 require_once __DIR__ . '/inc/walker.php';
 require_once __DIR__ . '/inc/watchlist.php';
 require_once __DIR__ . '/inc/blocks.php';
+require_once __DIR__ . '/inc/landing-page.php';
 
 add_action( 'plugins_loaded', function () {
 	if ( class_exists( 'WordPressdotorg\\Markdown\\Importer' ) ) {

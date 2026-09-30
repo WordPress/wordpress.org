@@ -1,5 +1,9 @@
 <?php
 
+// Allow playground access.
+header( 'Access-Control-Allow-Origin: *' );
+header( 'Content-Type: ' . ( defined( 'JSON_RESPONSE' ) ? 'application/json' : 'text/plain' ) );
+
 $version = '';
 if ( isset( $_REQUEST['version'] ) ) { // Introduced in WordPress 4.6.
 	$version = str_replace( '-src', '', $_REQUEST['version'] );
@@ -17,6 +21,7 @@ if ( version_compare( $version, '5.4-beta', '>=' ) ) {
 }
 
 $response = array( 'importers' => $popular_importers, 'translated' => false );
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSON or serialized PHP); escaping would corrupt the format.
 echo defined( 'JSON_RESPONSE' ) ? json_encode( $response ) : serialize( $response );
 
 function __( $string ) { return $string; }

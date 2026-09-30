@@ -9,6 +9,13 @@ namespace WordPressdotorg\Photo_Directory;
 
 class Posts {
 
+	const META_KEY_MISSING_TAXONOMIES = '_missing_taxonomies';
+
+	/**
+	 * The registered image size that should be used for photos included in feeds.
+	 */
+	const RSS_PHOTO_SIZE = 'medium_large';
+
 	/**
 	 * Initializer.
 	 */
@@ -21,8 +28,15 @@ class Posts {
 		add_action( 'template_redirect',  [ __CLASS__, 'redirect_attachment_page_to_photo' ] );
 		add_filter( 'attachment_link',    [ __CLASS__, 'use_photo_url_instead_of_media_permalink_url' ], 10, 2 );
 
+		// Ensure all custom taxonomies have been assigned values before publication.
+		// Note: The add_action and hook priority are duplicated in `require_taxonomies_before_publishing()`.
+		add_action( 'transition_post_status', [ __CLASS__, 'require_taxonomies_before_publishing' ], 1, 3 );
+
 		// Sync photo post content to photo media on update.
 		add_action( 'post_updated',       [ __CLASS__, 'sync_photo_post_to_photo_media_on_update' ], 5, 3 );
+
+		// Photo content is plain text (the alternative text), never post markup.
+		add_filter( 'the_content', [ __CLASS__, 'render_content_as_plain_text' ], PHP_INT_MIN );
 
 		// Offset subsequent paginations of front page by number of posts on front page.
 		add_action( 'pre_get_posts',      [ __CLASS__, 'offset_front_page_paginations' ], 11 );
@@ -35,7 +49,11 @@ class Posts {
 		// Dedicate primary feed to photos.
 		add_action( 'request',            [ __CLASS__, 'make_primary_feed_all_photos' ] );
 		add_filter( 'the_content_feed',   [ __CLASS__, 'add_photo_to_rss_feed' ] );
+		add_action( 'rss2_item',          [ __CLASS__, 'add_photo_as_enclosure_to_rss_feed' ] );
 		add_filter( 'wp_get_attachment_image_attributes', [ __CLASS__, 'feed_attachment_image_attributes' ], 10, 3 );
+
+		// Allow the photos to be included in Jetpack Sitemaps.
+		add_filter( 'jetpack_sitemap_post_types', [ __CLASS__, 'jetpack_sitemap_post_types' ] );
 	}
 
 	/**
@@ -52,6 +70,48 @@ class Posts {
 		$response->set_data( $data );
 
 		return $response;
+	}
+
+	/**
+	 * Prevents publication of a photo if any custom taxonomy hasn't been assigned
+	 * at least one value.
+	 *
+	 * @param string  $new_status The new post status.
+	 * @param string  $old_status The old post status.
+	 * @param WP_Post $post       The post object.
+	 */
+	public static function require_taxonomies_before_publishing( $new_status, $old_status, $post ) {
+		// Bail if post is not being published.
+		if ( 'publish' !== $new_status ) {
+			return;
+		}
+
+		// Bail if not a photo post.
+		if ( Registrations::get_post_type() !== $post->post_type ) {
+			return;
+		}
+
+		// Assume all custom taxonomies are required.
+		$required_taxonomies = Registrations::get_taxonomy( 'all' );
+		$missing_taxonomies = [];
+
+		// Check each required taxonomy.
+		foreach ( $required_taxonomies as $taxonomy ) {
+			$terms = wp_get_post_terms( $post->ID, $taxonomy, [ 'fields' => 'ids' ] );
+			if ( count( $terms ) == 0 ) {
+				$missing_taxonomies[] = $taxonomy;
+			}
+		}
+
+		if ( $missing_taxonomies ) {
+			// Prevent publishing.
+			remove_action( 'transition_post_status', [ __CLASS__, 'require_taxonomies_before_publishing' ], 1 );
+			wp_update_post( [ 'ID' => $post->ID, 'post_status' => $old_status ] );
+			add_action( 'transition_post_status', [ __CLASS__, 'require_taxonomies_before_publishing' ], 1, 3 );
+
+			// Store the missing taxonomies to later display them in an admin notice.
+			update_post_meta( $post->ID, self::META_KEY_MISSING_TAXONOMIES, $missing_taxonomies );
+		}
 	}
 
 	/**
@@ -173,6 +233,7 @@ class Posts {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Attachment URLs are served from the photo storage host, so the target is off-site.
 		wp_redirect( wp_get_attachment_url( $post->ID ) );
 		exit;
 	}
@@ -197,6 +258,35 @@ class Posts {
 		}
 
 		return wp_get_attachment_url( $post_id );
+	}
+
+	/**
+	 * Renders a photo's content as the plain text it is.
+	 *
+	 * A photo's content is the alternative text submitted with it. The submit
+	 * form and its sanitization treat that as plain text, so the content must
+	 * not be interpreted as post markup on output either. It is escaped here,
+	 * ahead of every other 'the_content' callback, so that they only ever see
+	 * text.
+	 *
+	 * Keys on the global post, like core's own content callbacks, so it applies
+	 * to whatever 'the_content' is run for while a photo is the current post.
+	 * The reverse also holds: a photo's content filtered while another post is
+	 * global, such as an excerpt built outside the loop, is not escaped here.
+	 * Nothing on the site does that.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public static function render_content_as_plain_text( $content ) {
+		if ( Registrations::get_post_type() !== get_post_type() ) {
+			return $content;
+		}
+
+		$content = esc_html( $content );
+
+		// Shortcode and URL syntax stay visible text: hide the characters shortcodes and embeds key on.
+		return str_replace( [ '[', '://' ], [ '&#91;', '&#58;//' ], $content );
 	}
 
 	/**
@@ -266,7 +356,7 @@ class Posts {
 	 *       or use the count of results on the first page, so no need to do yet.
 	 */
 	public static function fix_front_page_pagination_count( $posts, $query ) {
-		if ( $query->is_home() ) {
+		if ( $query->is_home() && $query->is_main_query() ) {
 			$front_page_count  = get_option( 'posts_per_page' );
 			$archives_per_page = 30;
 
@@ -274,6 +364,10 @@ class Posts {
 			$total_posts = $query->found_posts - $front_page_count;
 			if ( $total_posts > 0 ) {
 				$count += ceil( $total_posts / $archives_per_page );
+			}
+			// Account for logged-out pagination limit on w.org.
+			if ( defined( '\WPORG_Page_Limiter::MAX_PAGES' ) && ! is_user_logged_in() ) {
+				$count = min( $count, \WPORG_Page_Limiter::MAX_PAGES );
 			}
 			$query->max_num_pages = $count;
 		}
@@ -288,13 +382,15 @@ class Posts {
 	 * by the current user.
 	 *
 	 * @param string $orderby The field to order posts by when determining the
-	 *                        next post in queue. Default 'date'.
+	 *                        next post in queue, e.g. 'date'. Default 'rand'.
 	 * @param string $order   The sort order used when determining the next post
 	 *                        in queue. Either 'ASC' or 'DESC'. Default 'ASC'.
+	 * @param int[]  $exclude Array of post IDs to exclude from being selected
+	 *                        next. Default empty array.
 	 * @return WP_Post|false The next post, or false if there are no other posts
 	 *                       available for the user to moderate.
 	 */
-	public static function get_next_post_in_queue( $orderby = 'date', $order = 'ASC' ) {
+	public static function get_next_post_in_queue( $orderby = 'rand', $order = 'ASC', $exclude = [] ) {
 		$next = false;
 
 		if ( 'rand' === $orderby ) {
@@ -308,21 +404,10 @@ class Posts {
 			'author__not_in' => [ get_current_user_id() ],
 			'order'          => $order,
 			'orderby'        => $orderby,
+			'post__not_in'   => $exclude,
 			'posts_per_page' => 1,
 			'post_status'    => 'pending',
 			'post_type'      => Registrations::get_post_type(),
-			'meta_query'     => [
-				'relation'   => 'OR',
-				[
-					'key'     => '_edit_lock',
-					'compare' => 'NOT EXISTS',
-				],
-				[
-					'key'     => '_edit_lock',
-					'value'   => '',
-					'compare' => '='
-				],
-			],
 		] );
 
 		if ( $posts ) {
@@ -355,14 +440,59 @@ class Posts {
 	public static function add_photo_to_rss_feed( $content ) {
 		global $post;
 
+		$content = trim( strip_tags( $content ) );
+
 		if ( $post && Registrations::get_post_type() === get_post_type( $post ) && has_post_thumbnail( $post->ID ) ) {
 			$content = '<figure>'
-				. get_the_post_thumbnail( $post->ID, 'medium_large', [ 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
-				. ( $content ? "<figcaption>{$content}</figcaption>\n" : '' )
+				. get_the_post_thumbnail( $post->ID, self::RSS_PHOTO_SIZE, [ 'alt' => $content, 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
+				. get_the_post_thumbnail( $post->ID, self::RSS_PHOTO_SIZE, [ 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
+				. ( $content ? "<figcaption aria-hidden=\"true\">{$content}</figcaption>\n" : '' )
 				. "</figure>\n";
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Outputs an `enclosure` tag for a photo in RSS feeds of photos.
+	 */
+	public static function add_photo_as_enclosure_to_rss_feed() {
+		global $post;
+
+		// Bail if not a photo post.
+		if ( ! $post || Registrations::get_post_type() !== get_post_type( $post ) ) {
+			return;
+		}
+
+		// Bail if somehow there is no associated photo.
+		$photo_id = get_post_thumbnail_id( $post );
+		if ( ! $photo_id ) {
+			return;
+		}
+
+		// Get the photo's URL.
+		$photo_url = get_the_post_thumbnail_url( $post, self::RSS_PHOTO_SIZE );
+
+		// Get the photo's MIME type.
+		$mime_type = get_post_mime_type( $photo_id );
+
+		// Get the photo's file size.
+		$photo_meta = wp_get_attachment_metadata( $photo_id );
+		if ( 'full' === self::RSS_PHOTO_SIZE ) {
+			$filesize = $photo_meta['filesize'] ?? '';
+		} else {
+			$filesize = $photo_meta['sizes'][ self::RSS_PHOTO_SIZE ]['filesize'] ?? '';
+		}
+
+		if ( $photo_url && $mime_type && $filesize ) {
+			// Output the enclosure tag.
+			printf(
+				'<enclosure url="%s" length="%s" type="%s" />' . "\n",
+				esc_url( $photo_url ),
+				esc_attr( $filesize ),
+				esc_attr( $mime_type )
+			);
+		}
 	}
 
 	/**
@@ -382,6 +512,92 @@ class Posts {
 		}
 
 		return $attr;
+	}
+
+	/**
+	 * Retrieves the WP_Post object representing a given photo.
+	 *
+	 * Adapted from /plugins/plugin-directory/class-plugin-directory.php: get_plugin_post()
+	 *
+	 * @global \WP_Post $post WordPress post object.
+	 *
+	 * @param int|string|\WP_Post $plugin_slug The slug of the photo to retrieve.
+	 * @return \WP_Post|bool
+	 */
+	public static function get_photo_post( $photo_slug = null ) {
+		if ( $photo_slug instanceof \WP_Post ) {
+			return $photo_slug;
+		}
+
+		// Handle int $photo_slug being passed. NOT numeric slugs
+		if (
+			is_int( $photo_slug ) &&
+			( $post = get_post( $photo_slug ) ) &&
+			( $post->ID === $photo_slug )
+		) {
+			return $post;
+		}
+
+		// Use the global $post object when appropriate
+		if (
+			! empty( $GLOBALS['post']->post_type ) &&
+			Registrations::get_post_type() === $GLOBALS['post']->post_type
+		) {
+			// Default to the global object.
+			if ( is_null( $photo_slug ) || 0 === $photo_slug ) {
+				return get_post( $GLOBALS['post']->ID );
+			}
+
+			// Avoid hitting the database if it matches.
+			if ( $photo_slug == $GLOBALS['post']->post_name ) {
+				return get_post( $GLOBALS['post']->ID );
+			}
+		}
+
+		$photo_slug = sanitize_title_for_query( $photo_slug );
+		if ( ! $photo_slug ) {
+			return false;
+		}
+
+		$post    = false;
+		$post_id = wp_cache_get( $photo_slug, 'photo-slugs' );
+		if ( 0 === $post_id ) {
+			// Unknown photo slug.
+			return false;
+		} elseif ( $post_id ) {
+			$post = get_post( $post_id );
+		}
+
+		if ( ! $post ) {
+			// get_post_by_slug();
+			$posts = get_posts( [
+				'post_type'   => Registrations::get_post_type(),
+				'name'        => $photo_slug,
+				'post_status' => [ 'publish' ], // Only concerned with published photos.
+			] );
+
+			if ( ! $posts ) {
+				$post = false;
+				wp_cache_add( 0, $photo_slug, 'photo-slugs' );
+			} else {
+				$post = reset( $posts );
+				wp_cache_add( $post->ID, $photo_slug, 'photo-slugs' );
+			}
+		}
+
+		return $post;
+	}
+
+	/**
+	 * The array of post types to be included in the sitemap.
+	 *
+	 * @param array $post_types List of included post types.
+	 * @return array
+	 */
+	public static function jetpack_sitemap_post_types( $post_types ) {
+		$post_types[] = Registrations::get_post_type();
+
+		return $post_types;
 	}
 
 }

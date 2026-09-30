@@ -41,7 +41,7 @@ class Committers {
 
 		check_ajax_referer( 'add-committer' );
 
-		if ( ! current_user_can( 'plugin_add_committer', $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
+		if ( ! current_user_can( 'plugin_add_committer', $post_id ) ) {
 			wp_die( -1 );
 		}
 
@@ -98,7 +98,7 @@ class Committers {
 
 		check_ajax_referer( "remove-committer-$id" );
 
-		if ( ! current_user_can( 'plugin_remove_committer', $post_id ) || 'publish' !== get_post_status( $post_id ) ) {
+		if ( ! current_user_can( 'plugin_remove_committer', $post_id ) ) {
 			wp_die( -1 );
 		}
 
@@ -115,6 +115,6 @@ class Committers {
 
 		$result = Tools::revoke_plugin_committer( $plugin_slug, $committer );
 
-		wp_die( $result );
+		wp_die( esc_html( $result ) );
 	}
 }

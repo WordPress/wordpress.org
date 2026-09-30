@@ -1,0 +1,14 @@
+.widget-area {
+	margin: 0 auto;
+	padding: var( --wp--preset--spacing--40 ) 0;
+
+	.widget-title {
+		margin-top: var( --wp--preset--spacing--50 );
+		font-size: var( --wp--preset--font-size--heading-1 );
+		font-weight: var( --wp--custom--heading--typography--font-weight );
+	}
+
+	.textwidget {
+		text-wrap: pretty;
+	}
+}

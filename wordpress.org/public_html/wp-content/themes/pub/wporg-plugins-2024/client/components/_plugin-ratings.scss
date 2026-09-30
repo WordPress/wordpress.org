@@ -1,0 +1,31 @@
+.plugin-rating {
+	line-height: 1;
+	margin: 0 10px 8px 0;
+
+	.wporg-ratings {
+		display: inline-block;
+		margin-right: 5px;
+	}
+
+	/* plugin-card */
+	.rating-count {
+		color: var( --wp--preset--color--charcoal-4 );
+		font-size: var( --wp--preset--font-size--extra-small );
+		vertical-align: text-bottom;
+
+		a {
+			color: inherit;
+			cursor: hand;
+			text-decoration: none;
+		}
+	}
+}
+
+[class*='dashicons-star-'] {
+	color: var( --wp--preset--color--pomegrade-1 );
+}
+
+// Flip the half star for rating.
+.rtl .dashicons-star-half {
+	transform: rotateY(180deg);
+}

@@ -129,16 +129,22 @@ function get_user_email_for_email( $request ) {
 		$user = false;
 	}
 
+	// Is this is a bounce for an email that we have included the username in the subject for?
+	if ( preg_match( '#Are your plugins ready, (.+?)[?]#i', $subject, $m ) ) {
+		$user = get_user_by( 'login', $m[1] );
+	}
+
 	// Determine if this is a bounce, and if so, find out who for.
 	if ( ! $user && $email && $email_id ) {
 		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $customer->fname ?? false ), ( $customer->first ?? false ), ( $customer->lname ?? false ), ( $customer->last ?? false ) ] ) ) );
-		$subject_lower = strtolower( $subject );
+		$subject_lower = strtolower( $subject ?? '' );
 
 		if (
 			str_contains( $from, 'mail delivery' ) ||
 			str_contains( $from, 'postmaster' ) ||
 			str_contains( $from, 'mailer-daemon' ) ||
 			str_contains( $from, 'noreply' ) ||
+			str_contains( $subject_lower, 'undeliverable' ) ||
 			str_contains( $subject_lower, 'undelivered mail' ) ||
 			str_contains( $subject_lower, 'returned mail' ) ||
 			str_contains( $subject_lower, 'returned to sender' ) ||
@@ -246,6 +252,15 @@ function get_user_from_emails( $emails ) {
 		if ( $user ) {
 			return $user;
 		}
+
+		// If the email is a plus address, try without. This is common with auto-responders it seems.
+		if ( str_contains( $maybe_email, '+' ) ) {
+			$maybe_email = preg_replace( '/[+].+@/', '@', $maybe_email );
+			$user        = get_user_by( 'email', $maybe_email );
+			if ( $user ) {
+				return $user;
+			}
+		}
 	}
 
 	return false;
@@ -255,8 +270,9 @@ function get_user_from_emails( $emails ) {
  * Get the possible plugins or themes from the email.
  */
 function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
-	$subject  = $request->subject ?? ( $request->ticket->subject ?? '' );
-	$email_id = $request->id      ?? ( $request->ticket->id      ?? 0 );
+	$subject    = $request->subject   ?? ( $request->ticket->subject ?? '' );
+	$email_id   = $request->id        ?? ( $request->ticket->id      ?? 0 );
+	$mailbox_id = $request->mailboxId ?? ( $request->mailbox->id     ?? 0 );
 
 	$possible = [
 		'themes'  => [],
@@ -268,14 +284,60 @@ function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
 		$possible['themes'][] = sanitize_title_with_dashes( trim( explode( ':', $subject )[1] ) );
 	}
 
-	// Plugin reviews, match the format of "[WordPress Plugin Directory] {Type Of Email}: {Plugin Title}"
-	if ( preg_match( '!\[WordPress Plugin Directory\][^:]+: (?P<title>.+)$!i', $subject, $m ) ) {
+	/*
+	 * Plugin reviews, match the format of either:
+	 *
+	 * "[WordPress Plugin Directory] {Type Of Email}: {Plugin Title}"
+	 * "[WordPress Plugin Directory] {Type Of Email} - {Plugin Title}"
+	 * "[Translated WordPress Plugin Directory] {Translated Type} - {Plugin Title}
+	 *
+	 * Because of translations, we can't be sure of the exact wording, so we'll just hope that it matches the general format.
+	 * NOTE: \p{Pd} is Regex for a dash-like character, which includes hyphens and ndashes.
+	 */
+	if (
+		(
+			'plugins' === get_mailbox_name( $mailbox_id ) &&
+			(
+				preg_match( '!\[[^]]+\][^:]+: (?P<title>.+)$!i', $subject, $m ) ||
+				preg_match( '!\[[^]]+\].+? \p{Pd} (?P<title>.+)$!iu', $subject, $m )
+			)
+		) || (
+			// Same as above, but in non-plugins mailboxes using the English strings only.
+			preg_match( '!\[WordPress Plugin Directory\][^:]+: (?P<title>.+)$!i', $subject, $m ) ||
+			preg_match( '!\[WordPress Plugin Directory\].+? \p{Pd} (?P<title>.+)$!iu', $subject, $m )
+		)
+	) {
 		switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
 		$plugins = get_posts( [
-			'title'       => trim( $m['title'] ),
+			// Post titles are always escaped.
+			'title'       => esc_html( trim( $m['title'] ) ),
 			'post_type'   => 'plugin',
 			'post_status' => 'any',
 		] );
+
+		// Although the above should always catch it, let's try again with the unescaped title.
+		if ( ! $plugins ) {
+			$plugins = get_posts( [
+				'title'       => trim( $m['title'] ),
+				'post_type'   => 'plugin',
+				'post_status' => 'any',
+			] );
+		}
+
+		// If that really didn't work, check the plugin_name_history
+		if ( ! $plugins ) {
+			$plugins = get_posts( [
+				'post_type'   => 'plugin',
+				'post_status' => 'any',
+				'meta_query'  => [
+					[
+						'key'     => 'plugin_name_history',
+						'compare' => 'LIKE',
+						'value'   => '"' . trim( $m['title'] ) . '"',
+					],
+				]
+			] );
+		}
 		restore_current_blog();
 
 		// As we're searching by title, multiple plugins may come up.
@@ -324,6 +386,18 @@ function get_plugin_or_theme_from_email( $request, $validate_slugs = false ) {
 
 					$possible[ $type ][] = $slug;
 				}
+			}
+
+			// If we have an edit url.. fetch that too. This is usually in a note from a reviewer.
+			if ( preg_match( '!wordpress\.org/(?P<type>(plugins|themes))/wp-admin/post.php\?post=(?P<id>\d+)!i', $email_text . $thread->body, $m ) ) {
+				$site_id = 'plugins' == $m['type'] ? WPORG_PLUGIN_DIRECTORY_BLOGID : WPORG_THEME_DIRECTORY_BLOGID;
+
+				switch_to_blog( $site_id );
+				$post = get_post( $m['id'] );
+				if ( $post ) {
+					$possible[ $m['type'] ][] = $post->post_name;
+				}
+				restore_current_blog();
 			}
 		}
 	}
@@ -427,7 +501,7 @@ function get_wporg_user_for_helpscout_user( $hs_id, $instance = false ) {
 	}
 
 	if ( $user ) {
-		wp_cache_set( $cache_key, $user->ID, 'helpscout-users', MONTH_IN_SECONDS );
+		wp_cache_set( $cache_key, $user->ID, 'helpscout-users', DAY_IN_SECONDS );
 	}
 
 	return $user;

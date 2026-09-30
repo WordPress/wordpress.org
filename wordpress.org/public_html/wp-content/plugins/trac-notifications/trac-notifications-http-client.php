@@ -1,6 +1,9 @@
 <?php
 
 class Trac_Notifications_HTTP_Client implements Trac_Notifications_API {
+	public $target;
+	public $secret;
+
 	function __construct( $target, $secret ) {
 		$this->target = $target;
 		$this->secret = $secret;

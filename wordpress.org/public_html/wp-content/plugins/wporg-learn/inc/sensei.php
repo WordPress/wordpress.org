@@ -2,8 +2,9 @@
 
 namespace WPOrg_Learn\Sensei;
 
-use Exception;
-use Sensei_Course, Sensei_Lesson, Sensei_Course_Enrolment_Manager;
+use Exception, WP_Post;
+use Sensei_Course, Sensei_Lesson, Sensei_Course_Enrolment_Manager, WooThemes_Sensei_Certificates;
+use Sensei\Admin\Content_Duplicators\Post_Duplicator;
 
 defined( 'WPINC' ) || die();
 
@@ -16,7 +17,24 @@ add_action( 'sensei_single_course_content_inside_after', __NAMESPACE__ . '\remov
 add_filter( 'sensei_load_default_supported_theme_wrappers', '__return_false' );
 add_action( 'sensei_before_main_content', __NAMESPACE__ . '\theme_wrapper_start' );
 add_action( 'sensei_after_main_content', __NAMESPACE__ . '\theme_wrapper_end' );
-add_action( 'init', __NAMESPACE__ . '\wporg_correct_sensei_slugs' );
+add_action( 'init', __NAMESPACE__ . '\wporg_correct_sensei_slugs', 9 );
+add_action( 'template_redirect', __NAMESPACE__ . '\restrict_my_courses_page_access' );
+add_filter( 'sensei_login_url', __NAMESPACE__ . '\sensei_login_url', 20, 2 );
+add_filter( 'sensei_registration_url', __NAMESPACE__ . '\sensei_registration_url', 20, 2 );
+// Disable the Sensei user register page, use the WordPress registration page, see 'sensei_registration_url' filter.
+add_filter( 'sensei_use_wp_register_link', '__return_true' );
+// Repalce the Sensei login/register form contents.
+add_action( 'sensei_login_form_before', __NAMESPACE__ . '\sensei_login_form_before' );
+add_action( 'sensei_register_form_start', __NAMESPACE__ . '\sensei_register_form_start' );
+// Disable Sensei user login & creation.
+add_filter( 'init', __NAMESPACE__ . '\block_login_register_actions', 1 );
+
+// Don't create certificate reservations for non-templated certificates.
+add_action( 'init', __NAMESPACE__ . '\disable_certificate_reservations' );
+
+// Give duplicated lessons their own quiz questions instead of sharing the original's.
+add_action( 'added_post_meta', __NAMESPACE__ . '\unshare_duplicated_quiz_question', 10, 4 );
+add_filter( 'sensei_duplicate_post_ignore_meta', __NAMESPACE__ . '\detach_duplicated_lesson_from_course', 10, 3 );
 
 /**
  * Slugs in Sensei are translatable, which won't work for our site and the language switcher.
@@ -163,3 +181,343 @@ function wporg_fix_learning_mode_header_space() {
 	wp_add_inline_style( 'learning-mode-header-fix', $custom_styles );
 }
 add_action( 'sensei_course_learning_mode_load_theme', __NAMESPACE__ . '\wporg_fix_learning_mode_header_space' );
+
+/**
+ * Format a date query var into a DateTime object.
+ */
+function wporg_learn_get_date( $query_var ) {
+	$date = sanitize_text_field( $_GET[ $query_var ] ?? '' );
+
+	return \DateTime::createFromFormat( 'Y-m-d', $date ?? '', new \DateTimeZone( 'UTC' ) );
+}
+
+/**
+ * Get the number of unique learners between two dates.
+ *
+ * @param \DateTime $from_date
+ * @param \DateTime $to_date
+ *
+ * @return int
+ */
+function wporg_learn_get_student_count( $from_date, $to_date ) {
+
+	if ( ! $from_date || ! $to_date ) {
+		return 0;
+	}
+
+	global $wpdb;
+
+	return $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(DISTINCT user_id) FROM $wpdb->comments as c
+            INNER JOIN $wpdb->commentmeta AS cm ON c.comment_ID = cm.comment_id
+			WHERE c.comment_type = 'sensei_course_status'
+            AND cm.meta_key = 'start'
+            AND cm.meta_value >= %s
+            AND cm.meta_value <= %s",
+			array(
+				$from_date->format( 'Y-m-d H:i:s' ),
+				$to_date->format( 'Y-m-d H:i:s' ),
+			)
+		)
+	);
+}
+
+/**
+ * Add script to count unique learners
+ */
+function wporg_learn_add_student_count_to_reports( $type ) {
+	if ( 'users' !== $type ) {
+		return; // Only show the count on the students report screen.
+	}
+
+	$from_date = wporg_learn_get_date( 'from_date' );
+	$to_date   = wporg_learn_get_date( 'to_date' );
+
+	$student_count = wporg_learn_get_student_count( $from_date, $to_date );
+
+	?>
+	<div class="actions bulkactions">
+		<label><?php esc_html_e( 'Total number of students', 'wporg-learn' ); ?></label>
+		<input
+				class="sensei-date-picker"
+				name="from_date"
+				type="text"
+				autocomplete="off"
+				placeholder="<?php echo esc_attr( __( 'From Date', 'wporg-learn' ) ); ?>"
+				value="<?php echo esc_attr( $from_date ? $from_date->format( 'Y-m-d' ) : '' ); ?>"
+		/>
+		<input
+				class="sensei-date-picker"
+				name="to_date"
+				type="text"
+				autocomplete="off"
+				placeholder="<?php echo esc_attr( __( 'To Date', 'wporg-learn' ) ); ?>"
+				value="<?php echo esc_attr( $to_date ? $to_date->format( 'Y-m-d' ) : '' ); ?>"
+		/>
+		<label>: <?php echo (int) $student_count; ?></label>
+	</div>
+	<br>
+	<?php
+}
+add_action( 'sensei_reports_overview_before_top_filters', __NAMESPACE__ . '\wporg_learn_add_student_count_to_reports' );
+
+/**
+ * Redirect requests for the "My Courses" page to the login page and back, if logged out.
+ */
+function restrict_my_courses_page_access() {
+	if ( ! function_exists( 'Sensei' ) ) {
+		return;
+	}
+	if ( ! is_user_logged_in() && is_page( Sensei()->settings->get_my_courses_page_id() ) ) {
+		$redirect_to = wp_unslash( $_GET['redirect_to'] ?? '' ) ?: sensei_get_current_page_url();
+
+		wp_safe_redirect( wp_login_url( $redirect_to ) );
+		exit;
+	}
+}
+
+/**
+ * Don't use the Sensei My Courses page as the login page.
+ */
+function sensei_login_url( $url, $redirect = '' ) {
+	return wp_login_url( $redirect );
+}
+
+/**
+ * Don't use the Sensei My Courses page as the registration page, but equally don't use the register page.
+ *
+ * Sensei uses the registration page for all logged out users, and the login page for all logged in users.
+ * This is a poor user experience, as it means that the 'Take Course' links will direct to the registration page, rather than the login page.
+ * For that reason, we're filtering the registration location to the login page.
+ */
+function sensei_registration_url( $url, $redirect = '' ) {
+	return wp_login_url( $redirect );
+}
+
+/**
+ * Replace the Sensei My Courses login form with a call to action to WordPress.org.
+ */
+function sensei_login_form_before() {
+	// Start an output buffer, we'll remove the form content in the post-login-form filter.
+	ob_start();
+
+	add_action( 'sensei_login_form_after', function () {
+		$html = ob_get_clean();
+
+		/*
+		 * Use the provided redirect_to, or the current page failing that.
+		 * This differs from Sensei which doesn't respect the redirect_to parameter.
+		 * Validation will occur by the login redirection code.
+		 */
+		$redirect_to = wp_unslash( $_GET['redirect_to'] ?? '' ) ?: sensei_get_current_page_url();
+
+		// Replace the form with a call to action to WordPress.org.
+		$html = preg_replace(
+			'!<form.+</form>!is',
+			sprintf(
+				'<div class="wp-block-button"><a href="%s" class="wp-block-button__link wp-element-button button button-primary">%s</a></div>',
+				esc_url( wp_login_url( $redirect_to ) ),
+				__( 'Log In', 'wporg-learn' ),
+			),
+			$html
+		);
+
+		echo wp_kses_post( $html );
+	} );
+}
+
+/**
+ * Replace the Sensei registration form with a call to action to WordPress.org.
+ */
+function sensei_register_form_start() {
+	// Start an output buffer, we'll replace the form content in the post-login-form filter.
+	ob_start();
+
+	add_action( 'sensei_register_form_end', function () {
+		// We don't need any of the output buffer contents, since we're just in the <form> tag.
+		ob_end_clean();
+
+		// Output a registration button.
+		printf(
+			'<div class="wp-block-button"><a href="%s" class="wp-block-button__link wp-element-button button button-secondary">%s</a></div>',
+			esc_url( wp_registration_url() ),
+			esc_html__( 'Register', 'wporg-learn' ),
+		);
+
+		/*
+		 * Add some custom styles for the My Courses page to remove the registation form border.
+		 *
+		 * This styles it to match the login section beside it.
+		 */
+		echo '<style>#my-courses #customer_login form { border: unset; margin: unset; padding: unset; } </style>';
+	} );
+}
+
+/**
+ * Forcibly disable Sensei user login & creation.
+ *
+ * Even if registrations are disabled, sensei still processes the form, for security we don't want this.
+ */
+function block_login_register_actions() {
+	if ( function_exists( 'Sensei' ) ) {
+		remove_action( 'init', array( Sensei()->frontend ?? false, 'sensei_process_registration' ), 2 );
+		remove_filter( 'init', array( Sensei()->frontend ?? false, 'sensei_handle_login_request' ), 10 ); // Yes, Sensei calls it a filter.
+	}
+
+	// We're also going to forcefully disable the POST'd fields, incase the above action names change.
+
+	// By unsetting this, it forces Sensei not to be able to create a user.
+	unset( $_REQUEST['sensei_reg_password'], $_POST['sensei_reg_password'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+	// By unsetting these, sensei can't process a login.
+	if ( 'sensei-login' == ( $_REQUEST['form'] ?? '' ) ) {
+		unset( $_REQUEST['_wpnonce'], $_REQUEST['log'], $_REQUEST['pwd'], $_POST['log'], $_POST['pwd'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	}
+}
+
+/**
+ * Check if a lesson has a published course.
+ *
+ * @param int $lesson_id The ID of the lesson.
+ * @return bool True if the lesson has a published course, false otherwise.
+ */
+function get_lesson_has_published_course( $lesson_id ) {
+	$course_id = get_post_meta( $lesson_id, '_lesson_course', true );
+	$course_status = get_post_status( $course_id );
+
+	return ! empty( $course_id ) && 'publish' === $course_status;
+}
+
+/**
+ * Disable certificate reservations for non-templated certificates.
+ */
+function disable_certificate_reservations() {
+	if ( ! class_exists( 'WooThemes_Sensei_Certificates' ) ) {
+		return;
+	}
+
+	$instance = WooThemes_Sensei_Certificates::instance();
+
+	remove_action( 'sensei_course_status_updated', array( $instance, 'handle_course_completed' ), 9, 3 );
+
+	add_action( 'sensei_course_status_updated', static function ( $status, $user_id, $course_id ) use ( $instance ) {
+		/*
+		 * WPORG: Only generate certificates for templated certificates.
+		 *
+		 * The default behavior is to reserve a certificate hash and clutters the database.
+		 */
+		$template_id = get_post_meta( $course_id, '_course_certificate_template', true );
+		if (
+			! $template_id ||
+			! in_array( get_post_status( $template_id ), array( 'publish', 'private' ) ) || // Exclude draft templates.
+			empty( get_post( $template_id )->post_author ?? 0 ) // System-generated default templates not edited by someone.
+		) {
+			return;
+		}
+
+		// Call the original handler.
+		$instance->handle_course_completed( $status, $user_id, $course_id );
+	}, 9, 3 );
+}
+
+/**
+ * Replace a question Sensei attached to a duplicated quiz with a copy of it.
+ *
+ * When duplicating a lesson, Sensei creates a new quiz but attaches the original
+ * question posts to it. Editing those questions in the copy (e.g. to translate
+ * it) then overwrites the original lesson's quiz.
+ *
+ * See https://github.com/WordPress/Learn/issues/2805
+ * See https://github.com/Automattic/sensei/issues/7674
+ *
+ * @param int    $meta_id     ID of the added metadata entry.
+ * @param int    $question_id ID of the post the metadata was added to.
+ * @param string $meta_key    Metadata key.
+ * @param mixed  $quiz_id     Metadata value.
+ * @return void
+ */
+function unshare_duplicated_quiz_question( int $meta_id, int $question_id, string $meta_key, $quiz_id ): void {
+	if ( '_quiz_id' !== $meta_key ) {
+		return;
+	}
+
+	if ( ! doing_action( 'admin_action_duplicate_lesson' ) && ! doing_action( 'admin_action_duplicate_course_with_lessons' ) ) {
+		return;
+	}
+
+	$question = get_post( $question_id );
+	if ( ! $question instanceof WP_Post || ! in_array( $question->post_type, array( 'question', 'multiple_question' ), true ) ) {
+		return;
+	}
+
+	$quiz_id = (int) $quiz_id;
+
+	// Copies only belong to the new quiz, which also keeps this from acting on them.
+	if ( array( $quiz_id ) === array_map( 'intval', get_post_meta( $question_id, '_quiz_id' ) ) ) {
+		return;
+	}
+
+	$order_key = '_quiz_question_order' . $quiz_id;
+	$order     = get_post_meta( $question_id, $order_key, true );
+
+	$ignore_order_meta = static function ( array $ignore_meta ) use ( $question_id ): array {
+		$order_keys = preg_grep( '/^_quiz_question_order\d+$/', array_keys( get_post_custom( $question_id ) ) );
+
+		return array_merge( $ignore_meta, $order_keys );
+	};
+	$keep_status       = static function ( array $args ) use ( $question ): array {
+		$args['post_status'] = $question->post_status;
+
+		return $args;
+	};
+
+	add_filter( 'sensei_duplicate_post_ignore_meta', $ignore_order_meta );
+	add_filter( 'sensei_duplicate_post_args', $keep_status );
+	$copy = ( new Post_Duplicator() )->duplicate( $question, '' );
+	remove_filter( 'sensei_duplicate_post_ignore_meta', $ignore_order_meta );
+	remove_filter( 'sensei_duplicate_post_args', $keep_status );
+
+	if ( ! $copy ) {
+		return;
+	}
+
+	add_post_meta( $copy->ID, $order_key, $order );
+	add_post_meta( $copy->ID, '_quiz_id', $quiz_id );
+
+	// Sensei diffs against this list on save to find removed questions.
+	$question_order = get_post_meta( $quiz_id, '_question_order', true );
+	if ( is_array( $question_order ) ) {
+		$question_order = array_map(
+			static fn( $id ) => (int) $id === $question_id ? (string) $copy->ID : $id,
+			$question_order
+		);
+		update_post_meta( $quiz_id, '_question_order', $question_order );
+	}
+
+	delete_post_meta( $question_id, '_quiz_id', $quiz_id );
+	delete_post_meta( $question_id, $order_key );
+}
+
+/**
+ * Keep a duplicated lesson out of the original lesson's course.
+ *
+ * Duplicated lessons are mostly translations, and courses are per locale, so a
+ * copy left in the original course would show up there once published.
+ *
+ * See https://github.com/WordPress/Learn/issues/2805
+ *
+ * @param array   $ignore_meta Meta keys not copied to the duplicate.
+ * @param array   $new_post    Arguments the duplicate is created with.
+ * @param WP_Post $post        Post being duplicated.
+ * @return array
+ */
+function detach_duplicated_lesson_from_course( array $ignore_meta, array $new_post, WP_Post $post ): array {
+	if ( 'lesson' !== $post->post_type || ! doing_action( 'admin_action_duplicate_lesson' ) ) {
+		return $ignore_meta;
+	}
+
+	$order_keys = preg_grep( '/^_order_\d+$/', array_keys( get_post_custom( $post->ID ) ) );
+
+	return array_merge( $ignore_meta, array( '_lesson_course' ), $order_keys );
+}

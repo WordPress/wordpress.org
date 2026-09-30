@@ -1,0 +1,682 @@
+<?php
+
+/*
+ * Template Name: Pledges
+ *
+ * Note: Pledges is a simulated page, rather than actually existing in the database; see `mu-plugins/make-network/team-pledges.php`.
+ *
+ * Page 1 of the Five for the Future redesign — team contributor directory.
+ * Output over intent: ranks contributors by recent shipped work, decays inactive contributors.
+ */
+
+namespace WordPressdotorg\Make\Breathe_2024;
+use WordPressdotorg\Make\Pledges;
+
+defined( 'WPINC' ) || die();
+
+require_once __DIR__ . '/inc/contribution-metrics.php';
+
+// Enqueue BEFORE get_header() so wp_print_styles (priority 8 on wp_head)
+// flushes the <link> into <head>. Enqueuing after get_header() would miss
+// that flush and force the late-styles fallback to emit the <link> near
+// </body>, causing a visible FOUC on the redesigned grid.
+//
+// /pledges/ is a virtual route registered by the team-pledges mu-plugin, so
+// is_page_template() never reports it — we can't gate via wp_enqueue_scripts
+// in functions.php. Template-level enqueue is the correct seam.
+wp_enqueue_style(
+	'wporg-breathe-page-pledges',
+	get_stylesheet_directory_uri() . '/css/page-pledges.css',
+	array( 'wporg-breathe' ),
+	filemtime( __DIR__ . '/css/page-pledges.css' )
+);
+wp_enqueue_script(
+	'wporg-breathe-page-pledges',
+	get_stylesheet_directory_uri() . '/js/page-pledges.js',
+	array(),
+	filemtime( __DIR__ . '/js/page-pledges.js' ),
+	true
+);
+
+get_header();
+
+$current_team = Pledges\get_current_team();
+
+// ------------------------------------------------------------------
+// Teams without wired-up tracking get an invitation page instead of
+// the directory. Renders the legacy /pledges/ context as an invite to
+// help bring contribution tracking to the team.
+// ------------------------------------------------------------------
+if ( ! ContributionMetrics\team_has_tracking_data( $current_team->post_name ) ) {
+	$team_slug    = $current_team->post_name;
+	$handbook_url = 'https://make.wordpress.org/' . $team_slug . '/handbook/';
+	/* translators: %s: team name */
+	$handbook_label = sprintf( __( 'Open the %s Handbook', 'wporg-5ftf' ), $current_team->post_title );
+	?>
+	<div id="primary" class="content-area">
+		<div class="site-content template-pledges template-pledges-guide" role="main">
+
+			<header class="page-header pledges-hero">
+				<h1 class="page-title">
+					<?php echo esc_html( sprintf( __( 'People contributing to %s', 'wporg-5ftf' ), $current_team->post_title ) ); ?>
+				</h1>
+				<p class="pledges-subtitle">
+					<?php esc_html_e( 'Help bring contribution tracking to this team.', 'wporg-5ftf' ); ?>
+				</p>
+			</header>
+
+			<article id="post-pledges" class="page type-page status-publish hentry pledges-article">
+				<div class="entry-content">
+
+					<div class="pledges-guide-intro">
+						<p>
+							<?php
+							echo wp_kses_data( sprintf(
+								/* translators: %s: team name */
+								__( 'We don\'t yet have automated contribution tracking for the <strong>%s</strong> team. Sponsors, recruiters, and team reps can\'t see who is shipping tracked work — only a list of people who opted in.', 'wporg-5ftf' ),
+								esc_html( $current_team->post_title )
+							) );
+							?>
+						</p>
+						<p>
+							<strong><?php esc_html_e( 'You could lead this. Here is the path:', 'wporg-5ftf' ); ?></strong>
+						</p>
+					</div>
+
+					<ol class="pledges-guide-steps">
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Review the team handbook', 'wporg-5ftf' ); ?></h3>
+							<p><?php esc_html_e( 'Read it cover to cover. Understand what this team works on, how decisions get made, who the team reps are, and what existing recognition looks like.', 'wporg-5ftf' ); ?></p>
+							<p><a class="pledges-guide-link" href="<?php echo esc_url( $handbook_url ); ?>"><?php echo esc_html( $handbook_label ); ?></a></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Join the team on Slack', 'wporg-5ftf' ); ?></h3>
+							<p>
+								<?php
+								echo wp_kses_data( sprintf(
+									/* translators: %s: team channel name e.g. #core */
+									__( 'Most coordination happens in <code>#%s</code> on the Make WordPress Slack workspace.', 'wporg-5ftf' ),
+									esc_html( $team_slug )
+								) );
+								?>
+							</p>
+							<p><a class="pledges-guide-link" href="https://make.wordpress.org/chat/"><?php esc_html_e( 'Get a Slack account', 'wporg-5ftf' ); ?></a></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Attend one or two team meetings', 'wporg-5ftf' ); ?></h3>
+							<p><?php esc_html_e( 'Meeting times are in the handbook. Show up, introduce yourself, listen. Do not propose anything yet — just get a sense of the rhythm and the open work.', 'wporg-5ftf' ); ?></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Propose a metrics discussion', 'wporg-5ftf' ); ?></h3>
+							<p><?php esc_html_e( 'Once you have earned standing in the team, propose a discussion (in a meeting or async) to define what counts as a tracked contribution. What types of work? What impact levels? Which signals should be tracked, and which intentionally ignored?', 'wporg-5ftf' ); ?></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Collect, store, and cache the agreed metrics', 'wporg-5ftf' ); ?></h3>
+							<p><?php esc_html_e( 'Wire the agreed signals into the wp.org data pipeline alongside the existing Trac and GitHub aggregation. Add per-source ingest, indexed storage, and hour-cached aggregation matching the existing pattern.', 'wporg-5ftf' ); ?></p>
+						</li>
+
+						<li class="pledges-guide-step">
+							<h3><?php esc_html_e( 'Wire this page up', 'wporg-5ftf' ); ?></h3>
+							<p>
+								<?php
+								echo wp_kses_data( sprintf(
+									/* translators: 1: file path, 2: constant name */
+									__( 'Update <code>%1$s</code> to include the team and its new data source, then add the team\'s slug to <code>%2$s</code>. This page will switch from this guide to the contributor directory automatically.', 'wporg-5ftf' ),
+									'inc/contribution-metrics.php',
+									'TEAMS_WITH_DATA'
+								) );
+								?>
+							</p>
+						</li>
+					</ol>
+
+				</div>
+			</article>
+
+		</div>
+	</div>
+	<div style="display: none;"><div id="content"></div></div>
+	<?php
+	get_sidebar();
+	get_footer();
+	return;
+}
+
+$contributors = Pledges\get_team_contributors(
+	$current_team->post_name,
+	$current_team->post_title
+);
+
+// ------------------------------------------------------------------
+// Real contribution metrics from Trac props + GitHub activity.
+// One bulk DB call per signal source, hour-cached.
+// ------------------------------------------------------------------
+$window_days = ContributionMetrics\resolve_window_days(
+	isset( $_GET['window'] ) ? $_GET['window'] : ContributionMetrics\WINDOW_DAYS_DEFAULT
+);
+
+$metrics = ContributionMetrics\get_team_contribution_metrics(
+	array_keys( $contributors ),
+	$current_team->post_name,
+	$window_days
+);
+
+foreach ( $contributors as $uid => &$c ) {
+	$user_metrics                = isset( $metrics[ $uid ] ) ? $metrics[ $uid ] : ContributionMetrics\empty_metrics();
+	$bucket                      = ContributionMetrics\format_active_bucket( $user_metrics['last_activity'] );
+	$c['_metrics_high']          = (int) $user_metrics['high_count'];
+	$c['_metrics_medium']        = (int) $user_metrics['medium_count'];
+	$c['_metrics_low']           = (int) $user_metrics['low_count'];
+	$c['_metrics_weighted']      = (int) $user_metrics['weighted_volume'];
+	$c['_metrics_active_bucket'] = $bucket['bucket'];
+	$c['_metrics_active_class']  = $bucket['class'];
+	$c['_metrics_top_repos']     = array_keys( $user_metrics['top_repos'] );
+	$c['_metrics_window_days']   = $window_days;
+}
+unset( $c );
+
+uasort(
+	$contributors,
+	function ( $a, $b ) {
+		return $b['_metrics_weighted'] - $a['_metrics_weighted'];
+	}
+);
+
+// Split the list into active (verified output in window) vs inactive.
+// The spec is explicit: directory ranks by recent shipped work and decays
+// contributors who stopped. Inactive ones are hidden from the default view.
+$active_contributors   = array();
+$inactive_contributors = array();
+foreach ( $contributors as $uid => $c ) {
+	if ( (int) $c['_metrics_weighted'] > 0 ) {
+		$active_contributors[ $uid ] = $c;
+	} else {
+		$inactive_contributors[ $uid ] = $c;
+	}
+}
+
+// `?show_inactive=1` opt-in to render inactive ones too (still beneath the active list).
+$show_inactive = ! empty( $_GET['show_inactive'] );
+
+// Sponsorship filter is URL-driven so the view is bookmarkable and survives
+// time-window navigations (the window chips are full-page reloads). Default
+// matches the historical JS default so existing links don't shift meaning.
+$sponsorship_default = 'independent';
+$sponsorship_allowed = array( 'all', 'independent', 'sponsored' );
+// is_string() guard before sanitize_key(): a URL like ?sponsorship[]=foo makes
+// $_GET['sponsorship'] an array, which would TypeError sanitize_key() on PHP 8
+// and 500 the page.
+$sponsorship_raw = isset( $_GET['sponsorship'] ) ? wp_unslash( $_GET['sponsorship'] ) : '';
+$sponsorship     = is_string( $sponsorship_raw ) ? sanitize_key( $sponsorship_raw ) : '';
+if ( ! in_array( $sponsorship, $sponsorship_allowed, true ) ) {
+	$sponsorship = $sponsorship_default;
+}
+
+$total_count       = count( $contributors );
+$inactive_count    = count( $inactive_contributors );
+$independent_count = 0;
+$sponsored_count   = 0;
+foreach ( $contributors as $c ) {
+	if ( ! empty( $c['sponsored'] ) ) {
+		$sponsored_count++;
+	} else {
+		$independent_count++;
+	}
+}
+
+// Visible active count under the current sponsorship filter, so the initial
+// render's "N active contributors" matches what the user actually sees and
+// doesn't twitch when the JS recomputes after hydration.
+$visible_active_count   = 0;
+$visible_inactive_count = 0;
+foreach ( $active_contributors as $c ) {
+	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
+	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
+		$visible_active_count++;
+	}
+}
+foreach ( $inactive_contributors as $c ) {
+	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
+	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
+		$visible_inactive_count++;
+	}
+}
+
+// Chip URL builder. home_url('/pledges/') already includes the team site path,
+// so no REQUEST_URI concat needed. Each filter group's links carry the *other*
+// groups' state forward so switching one dimension doesn't silently reset the
+// others (see issue #374).
+$pledges_url = home_url( '/pledges/' );
+$default_w   = ContributionMetrics\WINDOW_DAYS_DEFAULT;
+
+$build_pledges_url = function ( $window, $sponsorship_value ) use ( $pledges_url, $default_w, $show_inactive, $sponsorship_default ) {
+	$args = array();
+	if ( $window !== $default_w ) {
+		$args['window'] = $window;
+	}
+	if ( $sponsorship_value !== $sponsorship_default ) {
+		$args['sponsorship'] = $sponsorship_value;
+	}
+	if ( $show_inactive ) {
+		$args['show_inactive'] = 1;
+	}
+	return $args ? add_query_arg( $args, $pledges_url ) : $pledges_url;
+};
+
+// ------------------------------------------------------------------
+// Your standing: pre-compute the logged-in viewer's state so the
+// "Your standing" block + jump-to-card pill can render server-side.
+// Anonymous visitors usually hit a cached response — they always get
+// the same "Sign in" card. Logged-in visitors bypass page cache and
+// get a per-user render.
+// ------------------------------------------------------------------
+$current_user_id = get_current_user_id();
+$standing_state  = '';         // logged-out | ranked | filtered-out | not-ranked | '' (hide block)
+$standing_rank   = 0;
+$standing_user   = null;
+
+if ( ! $current_user_id ) {
+	$standing_state = 'logged-out';
+} elseif ( isset( $contributors[ $current_user_id ] ) ) {
+	$standing_user        = $contributors[ $current_user_id ];
+	$user_row_sponsorship = empty( $standing_user['sponsored'] ) ? 'independent' : 'sponsored';
+
+	if ( isset( $active_contributors[ $current_user_id ] ) ) {
+		// Single-pass rank lookup. array_search() against array_keys() built a
+		// full keys array first and then scanned it — two passes' worth of
+		// work for the same answer when foreach can short-circuit on match.
+		$position = 0;
+		foreach ( $active_contributors as $uid => $_unused_contributor ) {
+			$position++;
+			if ( (int) $uid === (int) $current_user_id ) {
+				$standing_rank = $position;
+				break;
+			}
+		}
+
+		$standing_state = ( 'all' === $sponsorship || $user_row_sponsorship === $sponsorship )
+			? 'ranked'
+			: 'filtered-out';
+	} else {
+		$standing_state = 'not-ranked';
+	}
+}
+// If the viewer is logged in but not on this team's opt-in roster, leave
+// $standing_state empty so the block is hidden entirely (no useful info to show).
+
+?>
+
+<div id="primary" class="content-area">
+	<div class="site-content template-pledges template-pledges-v2" role="main">
+
+		<header class="page-header pledges-hero">
+			<h1 class="page-title">
+				<?php echo esc_html( sprintf( __( 'People contributing to %s', 'wporg-5ftf' ), $current_team->post_title ) ); ?>
+			</h1>
+			<p class="pledges-subtitle">
+				<?php esc_html_e( 'Ranked by recent shipped work, not by pledged hours.', 'wporg-5ftf' ); ?>
+			</p>
+		</header>
+
+		<article id="post-pledges" class="page type-page status-publish hentry pledges-article">
+			<div class="entry-content">
+
+				<?php if ( $contributors ) : ?>
+
+					<?php if ( $standing_state ) : ?>
+						<section class="pledges-standing pledges-standing-<?php echo esc_attr( $standing_state ); ?>" aria-labelledby="pledges-standing-eyebrow">
+							<p id="pledges-standing-eyebrow" class="pledges-standing-eyebrow">
+								<?php esc_html_e( 'Your standing', 'wporg-5ftf' ); ?>
+							</p>
+
+							<?php if ( 'logged-out' === $standing_state ) : ?>
+								<?php
+								// /pledges/ is a virtual route registered by the team-pledges
+								// mu-plugin and is the only URL this template renders. Use the
+								// static path so home_url() doesn't re-prepend the subsite path:
+								// home_url('/themes/pledges/') on the themes subsite would emit
+								// /themes/themes/pledges/ because home_url() appends the path
+								// argument verbatim onto get_option('home'). Re-add the three
+								// filter args explicitly so login round-trips don't drop the
+								// active window/sponsorship/show-inactive view.
+								$login_redirect_args = array();
+								foreach ( array( 'window', 'sponsorship', 'show_inactive' ) as $login_redirect_arg ) {
+									if ( isset( $_GET[ $login_redirect_arg ] ) && is_string( $_GET[ $login_redirect_arg ] ) ) {
+										$login_redirect_args[ $login_redirect_arg ] = sanitize_text_field( wp_unslash( $_GET[ $login_redirect_arg ] ) );
+									}
+								}
+								$login_redirect = $login_redirect_args
+									? add_query_arg( $login_redirect_args, home_url( '/pledges/' ) )
+									: home_url( '/pledges/' );
+								$login_url      = wp_login_url( $login_redirect );
+								?>
+								<div class="pledges-standing-card pledges-standing-card-signin">
+									<span class="pledges-standing-avatar pledges-standing-avatar-placeholder" aria-hidden="true">
+										<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+											<path d="M5.5 8.5v-2a4.5 4.5 0 019 0v2"/>
+											<rect x="4" y="8.5" width="12" height="8" rx="1.5"/>
+											<path d="M10 12v2"/>
+										</svg>
+									</span>
+									<div class="pledges-standing-body">
+										<strong class="pledges-standing-title"><?php esc_html_e( 'Sign in to see where you stand.', 'wporg-5ftf' ); ?></strong>
+										<p class="pledges-standing-sub"><?php esc_html_e( 'Your rank, recent impact, and a jump-to-card link will appear here.', 'wporg-5ftf' ); ?></p>
+									</div>
+									<a class="pledges-standing-action" href="<?php echo esc_url( $login_url ); ?>"><?php esc_html_e( 'Sign in', 'wporg-5ftf' ); ?> &rarr;</a>
+								</div>
+
+							<?php elseif ( 'not-ranked' === $standing_state ) : ?>
+								<div class="pledges-standing-card pledges-standing-card-not-ranked">
+									<span class="pledges-standing-avatar">
+										<?php echo wp_kses_post( get_avatar( $standing_user['email'], 56 ) ); ?>
+									</span>
+									<div class="pledges-standing-body">
+										<strong class="pledges-standing-title"><?php esc_html_e( 'You are not ranked in this team.', 'wporg-5ftf' ); ?></strong>
+										<p class="pledges-standing-sub">
+											<?php
+											echo esc_html( sprintf(
+												/* translators: 1: team name, 2: window in days */
+												__( 'Land a high- or medium-impact contribution to %1$s in the last %2$d days to appear here.', 'wporg-5ftf' ),
+												$current_team->post_title,
+												$window_days
+											) );
+											?>
+										</p>
+									</div>
+								</div>
+
+							<?php elseif ( 'ranked' === $standing_state || 'filtered-out' === $standing_state ) : ?>
+								<?php
+								// Both twins always render whenever the user has impact. JS
+								// flips [hidden] between them on every client-side sponsorship
+								// change so the user always has a "Clear filters" affordance
+								// even when their card gets filtered out mid-session, and so
+								// the swap also covers the inverse path (lands filtered-out,
+								// clears the filter via the toolbar, ranked twin un-hides).
+								$contributor                 = $standing_user;
+								$contributor['_rank']        = $standing_rank;
+								$contributor['_is_you']      = true;
+								$contributor['_is_standing'] = true;
+								// The only chip that can exclude the user is the one opposite
+								// their sponsorship — so the label is deterministic regardless
+								// of which twin is initially visible.
+								$exclusion_label = empty( $standing_user['sponsored'] )
+									? __( 'Sponsored', 'wporg-5ftf' )
+									: __( 'Independent', 'wporg-5ftf' );
+								$is_filtered    = ( 'filtered-out' === $standing_state );
+								?>
+								<div class="pledges-standing-card pledges-standing-card-ranked"<?php echo $is_filtered ? ' hidden' : ''; ?>>
+									<?php require __DIR__ . '/content-pledge.php'; ?>
+								</div>
+								<div class="pledges-standing-card pledges-standing-card-filtered"<?php echo $is_filtered ? '' : ' hidden'; ?>>
+									<span class="pledges-standing-avatar">
+										<?php echo wp_kses_post( get_avatar( $standing_user['email'], 56 ) ); ?>
+									</span>
+									<div class="pledges-standing-body">
+										<strong class="pledges-standing-title"><?php esc_html_e( 'You\'re hidden by current filters.', 'wporg-5ftf' ); ?></strong>
+										<p class="pledges-standing-sub">
+											<?php
+											echo wp_kses_data( sprintf(
+												/* translators: 1: contributor name, 2: sponsorship status word (independent/sponsored), 3: name of the chip currently excluding the user */
+												__( '%1$s &mdash; %2$s contributor. The <strong>%3$s</strong> filter is excluding you.', 'wporg-5ftf' ),
+												esc_html( $standing_user['name'] ),
+												empty( $standing_user['sponsored'] ) ? esc_html__( 'independent', 'wporg-5ftf' ) : esc_html__( 'sponsored', 'wporg-5ftf' ),
+												esc_html( $exclusion_label )
+											) );
+											?>
+										</p>
+									</div>
+									<a class="pledges-standing-action" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?> &rarr;</a>
+								</div>
+							<?php endif; ?>
+						</section>
+					<?php endif; ?>
+
+					<div class="pledges-howitworks" id="pledges-howitworks" role="note">
+						<div class="pledges-howitworks-icon" aria-hidden="true">i</div>
+						<div class="pledges-howitworks-body">
+							<strong><?php esc_html_e( 'How this page works', 'wporg-5ftf' ); ?></strong>
+							<p>
+								<?php esc_html_e( 'Contributors are ranked by recent contribution impact, not by pledged hours. Activity is tracked from release credits in Trac and GitHub work (merged PRs, pushes, closed issues), sorted into high, medium, and low impact. Low-impact contributions (typo fixes, whitespace) don\'t factor into the ranking. Inactive contributors gradually drop down the list.', 'wporg-5ftf' ); ?>
+							</p>
+						</div>
+						<button type="button" class="pledges-howitworks-dismiss" aria-label="<?php esc_attr_e( 'Dismiss', 'wporg-5ftf' ); ?>">&times;</button>
+					</div>
+
+					<div class="pledges-health" role="status">
+						<span class="pledges-health-num"><?php echo esc_html( number_format_i18n( $total_count ) ); ?></span>
+						<span class="pledges-health-text">
+							<?php
+							// $total_count is the static opt-in roster (active + inactive); the window
+							// scopes the rank line below, not this banner. Don't conflate the two.
+							echo wp_kses_data( sprintf(
+								/* translators: %s: team name */
+								__( 'contributors to %s.', 'wporg-5ftf' ),
+								'<strong>' . esc_html( $current_team->post_title ) . '</strong>'
+							) );
+							?>
+						</span>
+						<span class="pledges-health-split">
+							<span class="pledges-health-chip independent"><strong><?php echo esc_html( number_format_i18n( $independent_count ) ); ?></strong> <?php esc_html_e( 'independent', 'wporg-5ftf' ); ?></span>
+							<span class="pledges-health-chip sponsored"><strong><?php echo esc_html( number_format_i18n( $sponsored_count ) ); ?></strong> <?php esc_html_e( 'sponsored', 'wporg-5ftf' ); ?></span>
+						</span>
+					</div>
+
+					<div class="pledges-toolbar">
+						<div class="pledges-filters" role="group" aria-label="<?php esc_attr_e( 'Filter contributors', 'wporg-5ftf' ); ?>">
+							<div class="pledges-filter-group">
+								<span class="pledges-filter-label"><?php esc_html_e( 'Time window', 'wporg-5ftf' ); ?></span>
+								<a class="pledges-chip<?php echo 30 === $window_days ? ' is-on' : ''; ?>"<?php echo 30 === $window_days ? ' aria-current="true"' : ''; ?> data-filter="window" data-value="30" href="<?php echo esc_url( $build_pledges_url( 30, $sponsorship ) ); ?>"><?php esc_html_e( '30 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 90 === $window_days ? ' is-on' : ''; ?>"<?php echo 90 === $window_days ? ' aria-current="true"' : ''; ?> data-filter="window" data-value="90" href="<?php echo esc_url( $build_pledges_url( 90, $sponsorship ) ); ?>"><?php esc_html_e( '90 days', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 180 === $window_days ? ' is-on' : ''; ?>"<?php echo 180 === $window_days ? ' aria-current="true"' : ''; ?> data-filter="window" data-value="180" href="<?php echo esc_url( $build_pledges_url( 180, $sponsorship ) ); ?>"><?php esc_html_e( '6 months', 'wporg-5ftf' ); ?></a>
+							</div>
+							<div class="pledges-filter-group">
+								<span class="pledges-filter-label"><?php esc_html_e( 'Sponsorship', 'wporg-5ftf' ); ?></span>
+								<a class="pledges-chip<?php echo 'all' === $sponsorship ? ' is-on' : ''; ?>"<?php echo 'all' === $sponsorship ? ' aria-current="true"' : ''; ?> data-filter="sponsorship" data-value="all" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'All', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'independent' === $sponsorship ? ' is-on' : ''; ?>"<?php echo 'independent' === $sponsorship ? ' aria-current="true"' : ''; ?> data-filter="sponsorship" data-value="independent" href="<?php echo esc_url( $build_pledges_url( $window_days, 'independent' ) ); ?>"><?php esc_html_e( 'Independent', 'wporg-5ftf' ); ?></a>
+								<a class="pledges-chip<?php echo 'sponsored' === $sponsorship ? ' is-on' : ''; ?>"<?php echo 'sponsored' === $sponsorship ? ' aria-current="true"' : ''; ?> data-filter="sponsorship" data-value="sponsored" href="<?php echo esc_url( $build_pledges_url( $window_days, 'sponsored' ) ); ?>"><?php esc_html_e( 'Sponsored', 'wporg-5ftf' ); ?></a>
+							</div>
+						</div>
+					</div>
+
+					<p class="pledges-sort-label">
+						<strong>
+							<?php
+							echo esc_html( sprintf(
+								/* translators: %d: window in days */
+								_n( 'Ranked by impact, last %d day.', 'Ranked by impact, last %d days.', $window_days, 'wporg-5ftf' ),
+								$window_days
+							) );
+							?>
+						</strong>
+						<?php
+						// The result phrase is a JS-controlled template so the singular/plural
+						// form follows the visible-card count after client-side filtering, instead
+						// of being baked at render time and drifting (e.g. "1 active contributors").
+						?>
+						<span class="pledges-result-count" aria-live="polite">
+							<span id="pledges-result-count"><?php echo esc_html( $visible_active_count ); ?></span>
+							<span
+								id="pledges-result-phrase"
+								data-singular="<?php echo esc_attr__( 'active contributor (of %d total)', 'wporg-5ftf' ); ?>"
+								data-plural="<?php echo esc_attr__( 'active contributors (of %d total)', 'wporg-5ftf' ); ?>"
+								data-total="<?php echo esc_attr( $total_count ); ?>"
+							><?php
+								echo esc_html( sprintf(
+									/* translators: %d: total count */
+									_n( 'active contributor (of %d total)', 'active contributors (of %d total)', $visible_active_count, 'wporg-5ftf' ),
+									$total_count
+								) );
+								?></span>
+						</span>
+					</p>
+
+					<div class="pledges-grid" id="pledges-grid">
+						<?php
+						$rank = 0;
+						foreach ( $active_contributors as $uid => $contributor ) {
+							$rank++;
+							$contributor['_rank']   = $rank;
+							$contributor['_is_you'] = ( (int) $uid === (int) $current_user_id );
+							require __DIR__ . '/content-pledge.php';
+						}
+
+						if ( $show_inactive && $inactive_contributors ) :
+							// Label reflects the *visible* inactive count under the current
+							// sponsorship filter, otherwise "10 contributors with no tracked
+							// contributions" sits above 2 cards when the filter hides the rest.
+							$inactive_label = sprintf(
+								/* translators: 1: count, 2: window in days */
+								_n( '%1$d contributor with no tracked contributions in the last %2$d days', '%1$d contributors with no tracked contributions in the last %2$d days', $visible_inactive_count, 'wporg-5ftf' ),
+								$visible_inactive_count,
+								$window_days
+							);
+							// Hide the divider when the sponsorship filter has emptied its
+							// section so JS-disabled visitors don't see an orphan label above
+							// nothing. JS apply() will toggle this back on if the filter changes.
+							?>
+							<div class="pledges-inactive-divider"<?php echo 0 === $visible_inactive_count ? ' hidden' : ''; ?>>
+								<span><?php echo esc_html( $inactive_label ); ?></span>
+							</div>
+							<?php
+							foreach ( $inactive_contributors as $uid => $contributor ) {
+								$rank++;
+								$contributor['_rank']   = $rank;
+								$contributor['_is_you'] = ( (int) $uid === (int) $current_user_id );
+								require __DIR__ . '/content-pledge.php';
+							}
+						endif;
+						?>
+					</div>
+
+					<?php
+					// Pre-show the empty state when the sponsorship filter has hidden every
+					// card the server would have rendered. Otherwise a JS-disabled visitor
+					// with ?sponsorship=sponsored on an all-independent team would see a
+					// blank grid and no explanation. JS apply() will hide this again if a
+					// later filter change brings cards back.
+					$visible_inactive_for_empty = $show_inactive ? $visible_inactive_count : 0;
+					$empty_initially_visible    = 0 === ( $visible_active_count + $visible_inactive_for_empty );
+					?>
+					<div class="pledges-empty" id="pledges-empty"<?php echo $empty_initially_visible ? '' : ' hidden'; ?>>
+						<p><?php esc_html_e( 'No contributors match the selected filters.', 'wporg-5ftf' ); ?></p>
+						<a class="pledges-empty-reset" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></a>
+					</div>
+
+					<?php
+					// Empty-state companion CTA: only render when the empty state itself is
+					// showing (visible_active_count === 0 && !show_inactive). Without the
+					// visible_active_count gate this would also render alongside the
+					// standalone inactive toggle below when the grid has visible cards,
+					// producing two "Show inactive" CTAs on the same page.
+					$show_empty_extra = $inactive_contributors && ! $show_inactive && 0 === $visible_active_count;
+					?>
+					<?php if ( $show_empty_extra ) : ?>
+						<p class="pledges-empty-extra">
+							<a href="<?php echo esc_url( add_query_arg( 'show_inactive', '1' ) ); ?>">
+								<?php
+								echo esc_html( sprintf(
+									/* translators: 1: count, 2: window in days */
+									_n( 'Show %1$d contributor with no tracked contributions in the last %2$d days', 'Show %1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
+									$inactive_count,
+									$window_days
+								) );
+								?>
+							</a>
+						</p>
+					<?php endif; ?>
+
+					<?php
+					// Standalone inactive toggle: only renders when there's a visible active
+					// section to anchor it to (or when inactive is already shown, so the user
+					// can hide it). When the visible active count is 0 the empty state above
+					// already carries the "Show inactive" suggestion via pledges-empty-extra,
+					// so showing the standalone toggle below would just duplicate the CTA.
+					$show_standalone_toggle = $inactive_contributors && ( $visible_active_count > 0 || $show_inactive );
+					?>
+					<?php if ( $show_standalone_toggle ) : ?>
+						<p class="pledges-inactive-toggle">
+							<?php if ( $show_inactive ) : ?>
+								<a href="<?php echo esc_url( remove_query_arg( 'show_inactive' ) ); ?>">
+									<?php
+									echo esc_html( sprintf(
+										/* translators: %d: count */
+										_n( 'Hide %d inactive contributor', 'Hide %d inactive contributors', $inactive_count, 'wporg-5ftf' ),
+										$inactive_count
+									) );
+									?>
+								</a>
+							<?php else : ?>
+								<a href="<?php echo esc_url( add_query_arg( 'show_inactive', '1' ) ); ?>">
+									<?php
+									echo esc_html( sprintf(
+										/* translators: 1: count, 2: window in days */
+										_n( 'Show %1$d contributor with no tracked contributions in the last %2$d days', 'Show %1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
+										$inactive_count,
+										$window_days
+									) );
+									?>
+								</a>
+							<?php endif; ?>
+						</p>
+					<?php endif; ?>
+
+				<?php else : ?>
+
+					<p>
+						<?php
+						echo wp_kses_post( sprintf(
+							/* translators: %s: profile edit URL */
+							__( 'Nobody has indicated that they\'re sponsored to contribute to this team. If you are, please <a href="%s">update your profile</a> to indicate that.', 'wporg-5ftf' ),
+							'https://profiles.wordpress.org/me/profile/edit/group/5/'
+						) );
+						?>
+					</p>
+
+				<?php endif; ?>
+
+				<?php if ( 'ranked' === $standing_state || 'filtered-out' === $standing_state ) : ?>
+					<?php
+					// Floating jump-to pill. Server-side render is a real anchor link
+					// pointing at #pledges-card-you, so JS-disabled and middle-clicks
+					// still navigate correctly. JS upgrades to smooth-scroll + focus
+					// and hides the pill while the in-list card is in the viewport
+					// (Option-1 hide-on-overlap, see js/page-pledges.js).
+					//
+					// In 'filtered-out' state the pill is rendered with [hidden] so
+					// it stays in the DOM (JS un-hides on filter-toggle-to-matching)
+					// but doesn't briefly flash visible before JS runs.
+					/* translators: 1: rank number */
+					$pill_aria_template = __( 'Jump to your card, ranked #%d', 'wporg-5ftf' );
+					$pill_label         = sprintf( $pill_aria_template, $standing_rank );
+					$pill_hidden        = ( 'filtered-out' === $standing_state );
+					?>
+					<a class="pledges-jump-pill" href="#pledges-card-you" aria-label="<?php echo esc_attr( $pill_label ); ?>" data-aria-template="<?php echo esc_attr( $pill_aria_template ); ?>"<?php echo $pill_hidden ? ' hidden' : ''; ?>>
+						<span class="pledges-jump-avatar" aria-hidden="true">
+							<?php echo wp_kses_post( get_avatar( $standing_user['email'], 26 ) ); ?>
+						</span>
+						<span class="pledges-jump-label"><?php esc_html_e( 'Jump to your card', 'wporg-5ftf' ); ?></span>
+						<span class="pledges-jump-rank" aria-hidden="true">#<?php echo esc_html( $standing_rank ); ?></span>
+						<span class="pledges-jump-icon" aria-hidden="true">
+							<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M6 2v8M3 7l3 3 3-3"/></svg>
+						</span>
+					</a>
+				<?php endif; ?>
+
+			</div>
+		</article>
+
+	</div>
+</div>
+
+<!-- A fake o2 content area -->
+<div style="display: none;"><div id="content"></div></div>
+
+<?php
+
+get_sidebar();
+get_footer();

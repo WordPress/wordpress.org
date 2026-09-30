@@ -199,7 +199,7 @@ class WPOrg_WP_Activity_Notifier {
 			'url'       => get_permalink( $post->ID ),
 		);
 
-		Profiles\api( $args );
+		Profiles\queue( $args );
 	}
 
 	/**
@@ -263,6 +263,10 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
+		if ( 'comment' !== $comment->comment_type ) {
+			return;
+		}
+
 		if ( ! $comment->user_id ) {
 			return;
 		}
@@ -283,7 +287,7 @@ class WPOrg_WP_Activity_Notifier {
 			'url'        => get_comment_link( $comment ),
 		);
 
-		Profiles\api( $args );
+		Profiles\queue( $args );
 	}
 
 	/**
@@ -330,7 +334,11 @@ class WPOrg_WP_Activity_Notifier {
 			'site_url' => site_url(),
 		);
 
-		Profiles\api( $args );
+		if ( ! apply_filters( 'wporg_profiles_wp_activity-is_forum_notifiable', true, $args ) ) {
+			return;
+		}
+
+		Profiles\queue( $args );
 	}
 
 	/**
@@ -395,7 +403,11 @@ class WPOrg_WP_Activity_Notifier {
 			'site_url' => site_url(),
 		);
 
-		Profiles\api( $args );
+		if ( ! apply_filters( 'wporg_profiles_wp_activity-is_forum_notifiable', true, $args ) ) {
+			return;
+		}
+
+		Profiles\queue( $args );
 	}
 
 	/**

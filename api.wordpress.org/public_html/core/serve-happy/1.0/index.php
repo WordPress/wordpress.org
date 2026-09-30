@@ -37,15 +37,20 @@ function bail( $error_code, $error_text, $http_code = 400, $http_code_text = fal
 function output_response( $data ) {
 	$json_data = json_encode( $data );
 
+	header( 'Access-Control-Allow-Origin: *' );
+
 	if ( !empty( $_GET['callback'] ) ) {
 		call_headers( 'application/javascript' );
 
 		echo '/**/' .
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSONP callback name, restricted to [a-zA-Z0-9_.] inline.
 			preg_replace('/[^a-zA-Z0-9_.]/', '', $_GET['callback'] ) .
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSONP response body; json_encode() output, which an HTML escaper would corrupt.
 			'(' . $json_data . ')';
 	} else {
 		call_headers( 'application/json' );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON response body; json_encode() output, which an HTML escaper would corrupt.
 		echo $json_data;
 	}
 }

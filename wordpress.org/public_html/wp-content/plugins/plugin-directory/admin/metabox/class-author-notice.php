@@ -56,10 +56,14 @@ class Author_Notice {
 		if ( $notice['when'] ) {
 			$who = get_user_by( 'id', $notice['who'] );
 			printf(
-				'<span>' . __( 'Last edited by %s <time title="%s">%s ago</a>', 'wporg-plugins' ) . '</span>',
-				$who->display_name ?: $who->user_login,
-				gmdate( 'Y-m-d H:i:s', $notice['when'] ),
-				human_time_diff( $notice['when'] )
+				'<span>' . wp_kses(
+					/* translators: 1: display name; 2: datetime; 3: time-ago. */
+					__( 'Last edited by %1$s <time title="%2$s">%3$s ago</time>', 'wporg-plugins' ),
+					array( 'time' => array( 'title' => true ) )
+				) . '</span>',
+				esc_html( $who->display_name ?: $who->user_login ),
+				esc_attr( gmdate( 'Y-m-d H:i:s', $notice['when'] ) ),
+				esc_html( human_time_diff( $notice['when'] ) )
 			);
 		}
 		?>
@@ -105,8 +109,6 @@ class Author_Notice {
 	 */
 	static function save_post( $post ) {
 		$post          = get_post( $post );
-		$post_meta     = get_post_meta( $post->ID, self::POST_META_KEY, true );
-		$author_notice = $post_meta ?: [ 'type' => '', 'html' => '' ];
 
 		if (
 			$post &&
@@ -114,54 +116,66 @@ class Author_Notice {
 			is_array( $_REQUEST['author_notice'] ) &&
 			current_user_can( 'plugin_admin_edit', $post->ID )
 		) {
-			$new_author_notice         = wp_unslash( $_REQUEST['author_notice'] );
-			$new_author_notice['type'] = sanitize_key( $new_author_notice['type'] );
-			$new_author_notice['html'] = wp_kses( trim( $new_author_notice['html'] ), self::ALLOWED_TAGS );
+			$new_author_notice = wp_unslash( $_REQUEST['author_notice'] );
+			self::set( $post, $new_author_notice['html'], $new_author_notice['type'] );
+		}
+	}
 
-			// Check it's not empty with tags removed.
-			if (
-				$new_author_notice['html'] &&
-				! trim( wp_strip_all_tags( $new_author_notice['html'] ) )
-			) {
-				$new_author_notice['html'] = '';
-			}
+	/**
+	 * Set the Author notice.
+	 */
+	static function set( $post, $notice, $type = 'error' ) {
+		$post_meta         = get_post_meta( $post->ID, self::POST_META_KEY, true );
+		$author_notice     = $post_meta ?: [ 'type' => '', 'html' => '' ];
+		$new_author_notice = [
+			'type' => sanitize_key( $type ),
+			'html' => wp_kses( trim( $notice ), self::ALLOWED_TAGS ),
+		];
 
-			// Default or no text, remove the notice.
-			if ( empty( $new_author_notice['html'] ) || self::DEFAULT_TEXT === $new_author_notice['html'] ) {
-				$new_author_notice['type'] = '';
-				$new_author_notice['html'] = '';
-			}
+		// Check it's not empty with tags removed.
+		if (
+			$new_author_notice['html'] &&
+			! trim( wp_strip_all_tags( $new_author_notice['html'] ) )
+		) {
+			$new_author_notice['html'] = '';
+		}
 
-			// Remove it.
-			if ( $post_meta && ! $new_author_notice['type'] && ! $new_author_notice['html'] ) {
-				delete_post_meta( $post->ID, self::POST_META_KEY );
-				Tools::audit_log( 'Author notice removed.' );
-				return;
-			}
+		// Default or no text, remove the notice.
+		if ( empty( $new_author_notice['html'] ) || self::DEFAULT_TEXT === $new_author_notice['html'] ) {
+			$new_author_notice['type'] = '';
+			$new_author_notice['html'] = '';
+		}
 
-			// Value changed?
-			if (
-				$author_notice['html'] != $new_author_notice['html'] ||
-				$author_notice['type'] != $new_author_notice['type']
-			) {
-				$author_notice = [
-					'type' => $new_author_notice['type'],
-					'html' => $new_author_notice['html'],
-					'when' => time(),
-					'who'  => get_current_user_id(),
-				];
+		// Remove it.
+		if ( $post_meta && ! $new_author_notice['type'] && ! $new_author_notice['html'] ) {
+			delete_post_meta( $post->ID, self::POST_META_KEY );
+			Tools::audit_log( 'Author notice removed.' );
+			return;
+		}
 
-				update_post_meta( $post->ID, self::POST_META_KEY, $author_notice );
+		// Value changed?
+		if (
+			$author_notice['html'] != $new_author_notice['html'] ||
+			$author_notice['type'] != $new_author_notice['type']
+		) {
+			$author_notice = [
+				'type' => $new_author_notice['type'],
+				'html' => $new_author_notice['html'],
+				'when' => time(),
+				'who'  => get_current_user_id(),
+			];
 
-				$type_text = $author_notice['type'] ?: __( 'Do not show', 'wporg-plugins' );
-				Tools::audit_log(
-					sprintf(
-						'Author notice set to: [%s] %s',
-						$type_text,
-						wp_strip_all_tags( $author_notice['html'] )
-					)
-				);
-			}
+			update_post_meta( $post->ID, self::POST_META_KEY, $author_notice );
+
+			$type_text = $author_notice['type'] ?: __( 'Do not show', 'wporg-plugins' );
+			Tools::audit_log(
+				sprintf(
+					'Author notice set to: [%s] %s',
+					$type_text,
+					wp_strip_all_tags( $author_notice['html'] )
+				),
+				$post
+			);
 		}
 	}
 }

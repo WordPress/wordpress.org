@@ -1,9 +1,9 @@
 === PHPUnit Test Reporter ===
-Contributors: octalmage, danielbachhuber, wpamitkumar, mikeschroder, pfefferle
+Contributors: octalmage, danielbachhuber, wpamitkumar, kirasong, pfefferle, desrosj, crixu
 Tags: phpunit
 Requires at least: 4.7
 Tested up to: 5.5
-Stable tag: 0.1.3
+Stable tag: 0.2.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -44,3 +44,10 @@ Check out the [contribution guidelines](https://github.com/WordPress/phpunit-tes
 = 0.1.3 (September 23th, 2020) =
 * Include errors along with failures on the error report page ([PR](https://github.com/WordPress/phpunit-test-reporter/pull/84)).
 * Change to `integer` built-in type for `commit` field, following updates in WordPress 5.5.
+
+
+= 0.2.0 (September 17th, 2024) =
+* Prevent invalid HTML markup on test result pages.
+* Add a custom Post_List_Table for the results post type that lacks inline edit/quick edit.
+* Don't use _get_list_table() as that create the object and triggers some queries. Including the file directly works just as well.
+* Allow for multiple reports per commit for the same test bot.

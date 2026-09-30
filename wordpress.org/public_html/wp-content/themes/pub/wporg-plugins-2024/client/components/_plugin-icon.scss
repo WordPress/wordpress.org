@@ -1,0 +1,39 @@
+.entry-thumbnail {
+	display: none;
+	max-width: 80px;
+	margin-right: var( --wp--style--block-gap );
+	margin-bottom: var( --wp--style--block-gap );
+
+	.plugin-icon {
+		background-size: cover;
+		border-radius: var( --wp--custom--button--border--radius );
+		display: block;
+		height: 80px;
+		width: 80px;
+	}
+
+	@media screen and ( min-width: 21em ) {
+		display: inline-block;
+		vertical-align: top;
+		float: left;
+	}
+
+	.single & {
+		display: none;
+		float: left;
+		height: 96px;
+		margin-bottom: 0;
+		max-width: 96px;
+
+		@media screen and ( min-width: 26em ) {
+			display: block;
+		}
+
+		.plugin-icon {
+			background-size: contain !important;
+			height: 96px !important;
+			width: 96px !important;
+		}
+
+	}
+}

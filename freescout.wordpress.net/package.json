@@ -1,0 +1,12 @@
+{
+	"name": "freescout-wordpress-net",
+	"private": true,
+	"description": "FreeScout modules for the WordPress.org email helpdesk",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"lint:js": "wp-scripts lint-js Modules/*/Public/js"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "36.0.0"
+	}
+}

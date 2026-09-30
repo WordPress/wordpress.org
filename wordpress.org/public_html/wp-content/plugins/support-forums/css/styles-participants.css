@@ -3,3 +3,29 @@
 .bbp-topic-form.reviews #qt_bbp_topic_content_link {
 	display: none;
 }
+
+/*--------------------------------------------------------------
+# Topic reports
+--------------------------------------------------------------*/
+
+#bbpress-forums .type-reported_topics .topic-report-reply {
+	border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+	background-color: var(--wp--preset--color--white, #ffffff);
+	border-radius: 2px;
+	padding: var(--wp--preset--spacing--20, 20px);
+}
+
+#bbpress-forums .type-reported_topics .topic-report-reply .topic-report-reply-meta {
+	color: var(--wp--preset--color--charcoal-4, #656a71);
+	font-size: var(--wp--preset--font-size--extra-small, 12px);
+	text-align: right;
+}
+
+#bbpress-forums .type-reported_topics .topic-report-reply-form textarea {
+	min-height: 80px;
+	width: 100%;
+}
+
+#bbpress-forums .type-reported_topics .topic-report-reply-form .topic-report-reply-form-actions {
+	text-align: right;
+}
