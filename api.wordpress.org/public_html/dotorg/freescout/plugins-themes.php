@@ -43,16 +43,7 @@ function render_plugins_themes( object $request ): string {
 	foreach ( get_plugin_or_theme_from_email( $request ) as $type => $slugs ) {
 		switch_to_blog( $sites[ $type ] );
 
-		$post_ids = get_posts(
-			array(
-				'fields'        => 'ids',
-				'post_name__in' => $slugs,
-				'post_type'     => array_values( $repo_post_types ), // Cannot be 'all', as that only queries for known post_type.
-				'post_status'   => 'any',
-				'orderby'       => 'post_title',
-				'order'         => 'ASC',
-			)
-		);
+		$post_ids = get_items_by_slug( $slugs );
 
 		if ( $post_ids ) {
 			$html .= '<p><strong>' . esc_html( ucwords( $type ) ) . ' mentioned in this email:</strong></p>';
@@ -137,6 +128,35 @@ function get_user_items( \WP_User $user ): array {
 			)
 		);
 	}
+
+	return array_map( 'intval', $ids );
+}
+
+/**
+ * Gets the plugins or themes on the current site with the given slugs, in any status.
+ *
+ * Queried directly, as WP_Query's 'any' skips statuses this request doesn't register, like suspended themes.
+ *
+ * @param array $slugs Plugin or theme slugs.
+ * @return int[] Post IDs, ordered by title.
+ */
+function get_items_by_slug( array $slugs ): array {
+	global $wpdb;
+
+	if ( ! $slugs ) {
+		return array();
+	}
+
+	$ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT ID
+			FROM %i
+			WHERE post_type IN( 'plugin', 'repopackage' ) AND post_status NOT IN( 'trash', 'auto-draft' )
+				AND post_name IN( " . implode( ', ', array_fill( 0, count( $slugs ), '%s' ) ) . ' )
+			ORDER BY post_title',
+			array_merge( array( $wpdb->posts ), array_values( $slugs ) )
+		)
+	);
 
 	return array_map( 'intval', $ids );
 }

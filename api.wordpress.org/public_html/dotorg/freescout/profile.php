@@ -41,9 +41,9 @@ function render_profile( object $request ): string {
 				$html .= '<p>Account Email: ' . esc_html( $user->user_email ) . '</p>';
 			}
 
-			if ( in_array( 'bbp_blocked', $user->wporg_419_capabilities ?? array(), true ) ) {
+			if ( ! empty( $user->wporg_419_capabilities['bbp_blocked'] ) ) {
 				$html .= '<p><strong>Forums Status: BLOCKED</strong></p>';
-			} elseif ( in_array( 'bbp_spectator', $user->wporg_419_capabilities ?? array(), true ) ) {
+			} elseif ( ! empty( $user->wporg_419_capabilities['bbp_spectator'] ) ) {
 				$html .= '<p><strong>Forums Status: Spectator</strong></p>';
 			}
 		} else {

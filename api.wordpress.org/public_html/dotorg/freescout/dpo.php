@@ -37,7 +37,7 @@ function render_privacy_requests( object $request ): string {
 	$request_ids = get_posts(
 		array(
 			'post_type'      => 'user_request',
-			's'              => $email,
+			'title'          => $email,
 			'post_status'    => 'any',
 			'posts_per_page' => -1,
 			'fields'         => 'ids',
