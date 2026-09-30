@@ -33,15 +33,20 @@ FreeScout core is installed and updated by the systems team. This folder only ad
 2. After every deploy, and after every FreeScout core update, run `php artisan freescout:after-app-update` as the web server user. It clears FreeScout's caches, runs migrations, and restarts the queue worker.
 3. An admin switches new modules on under Manage » Modules. To remove a module, switch it off there first, and remove its code in a later deploy.
 
-Configuration, in FreeScout's `.env`:
+Configuration, in FreeScout's `.env`. Required:
 
 | Variable | Value |
 |---|---|
-| `WPORG_API_URL` | `https://api.wordpress.org/dotorg/freescout/` (the default) |
 | `WPORG_API_SECRET` | Shared secret; must match `FREESCOUT_SECRET` on api.wordpress.org. |
-| `WPORG_SSO_IDP_ENTITY_ID` | The identity provider's entity ID, from its settings page on login.wordpress.org. Default: `https://login.wordpress.org`. |
-| `WPORG_SSO_IDP_URL` | The identity provider's login URL, from the same page. Default: `https://login.wordpress.org/wp-login.php?action=idp`. |
 | `WPORG_SSO_IDP_CERT` | The identity provider's signing certificate, without the BEGIN/END lines. Until it and `WPORG_API_SECRET` are set, logins stay as they are, so users can be connected first. |
-| `WPORG_SSO_PASSWORD_LOGIN` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Off by default; every such login is logged. |
+
+Optional:
+
+| Variable | Default | Value |
+|---|---|---|
+| `WPORG_API_URL` | `https://api.wordpress.org/dotorg/freescout/` | Where the helpdesk endpoints are. |
+| `WPORG_SSO_IDP_ENTITY_ID` | `https://login.wordpress.org` | The identity provider's entity ID, from its settings page on login.wordpress.org. |
+| `WPORG_SSO_IDP_URL` | `https://login.wordpress.org/wp-login.php?action=idp` | The identity provider's login URL, from the same page. |
+| `WPORG_SSO_PASSWORD_LOGIN` | `false` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Every such login is logged. |
 
 FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events and `WPOrgSSO` updates avatars from the queue.
