@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Runs on every web request, after FreeScout's own middleware.
  *
- * - Logs out anyone who didn't log in through WordPress.org, however they got in.
+ * - Logs out anyone who logs in some other way once WordPress.org is enforced, however they got in.
  * - Replaces the login form, and closes password logins, resets, and invite setups.
  * - Fills in new users from their WordPress.org account, and connects the account.
  * - Keeps what comes from WordPress.org, and passwords, out of the profile form.
@@ -230,17 +230,28 @@ final class RequireWordPressOrgLogin {
 	 * @return bool
 	 */
 	private static function may_stay_logged_in( User $user, Request $request ): bool {
-		$username  = (string) $request->session()->get( WPOrgSSOServiceProvider::SESSION_USERNAME, '' );
-		$connected = Account::username_for( (int) $user->id );
+		$session  = $request->session();
+		$username = (string) $session->get( WPOrgSSOServiceProvider::SESSION_USERNAME, '' );
 
 		// Also ends sessions of users whose account was changed or disconnected since.
-		if ( '' !== $username && 0 === strcasecmp( $username, $connected ) ) {
-			return self::account_still_may_log_in( $username, $request );
+		if ( '' !== $username ) {
+			return 0 === strcasecmp( $username, Account::username_for( (int) $user->id ) ) && self::account_still_may_log_in( $username, $request );
 		}
 
-		return WPOrgSSOServiceProvider::password_login_enabled()
-			&& $user->isAdmin()
-			&& $request->session()->get( WPOrgSSOServiceProvider::SESSION_PASSWORD_LOGIN );
+		if ( $session->get( WPOrgSSOServiceProvider::SESSION_REFUSED ) ) {
+			return false;
+		}
+
+		// Break-glass sessions end with break-glass.
+		if ( $session->get( WPOrgSSOServiceProvider::SESSION_PASSWORD_LOGIN ) ) {
+			return WPOrgSSOServiceProvider::password_login_enabled() && $user->isAdmin();
+		}
+
+		/*
+		 * From before WordPress.org was enforced: going on keeps whoever switched it on logged in, so they can connect
+		 * the accounts. Manage » System » Tools logs everyone out, for a clean switch.
+		 */
+		return true;
 	}
 
 	/**

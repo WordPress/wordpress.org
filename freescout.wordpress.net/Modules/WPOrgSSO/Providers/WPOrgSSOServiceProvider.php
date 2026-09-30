@@ -72,6 +72,13 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 	public const SESSION_PASSWORD_LOGIN = 'wporgsso.password_login';
 
 	/**
+	 * Session key marking a login without WordPress.org that happened after it was enforced, which is ended.
+	 *
+	 * @var string
+	 */
+	public const SESSION_REFUSED = 'wporgsso.refused';
+
+	/**
 	 * Request attribute carrying the WordPress.org account a user form resolved.
 	 *
 	 * @var string
@@ -279,7 +286,8 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 
 		/*
 		 * Only an administrator's password login in break-glass mode may stay; the middleware ends the session of any
-		 * other login without WordPress.org, like one from a reset or invite link, on its next request.
+		 * other login without WordPress.org, like one from a reset link or a remember-me cookie, on its next request.
+		 * Sessions from before WordPress.org was enforced go on, so whoever switches it on isn't logged out.
 		 */
 		\Event::listen(
 			Login::class,
@@ -301,6 +309,10 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 					return;
 				}
 
+				// Without a session, like on the command line, there's nothing to end.
+				if ( request()->hasSession() ) {
+					request()->session()->put( self::SESSION_REFUSED, true );
+				}
 				\Log::warning( '[WPOrgSSO] Refused a login without WordPress.org by ' . $event->user->email . '.' );
 			}
 		);
