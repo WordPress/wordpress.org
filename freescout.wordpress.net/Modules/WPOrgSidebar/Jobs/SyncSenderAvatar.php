@@ -104,8 +104,10 @@ final class SyncSenderAvatar implements ShouldQueue {
 		$context = stream_context_create(
 			array(
 				'http' => array(
-					'method'  => 'HEAD',
-					'timeout' => 10,
+					'method'          => 'HEAD',
+					'timeout'         => 10,
+					// Stays on the Gravatar host is_avatar_url() allowed, and leaves one status line to check.
+					'follow_location' => 0,
 				),
 			)
 		);
