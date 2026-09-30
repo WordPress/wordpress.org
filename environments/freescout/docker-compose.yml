@@ -83,7 +83,7 @@ services:
     image: php:8.3-cli
     command: [ "php", "-S", "0.0.0.0:8080", "/srv/mock-api/index.php" ]
     ports:
-      - "${MOCK_IDP_PORT:-8892}:8080"
+      - "127.0.0.1:${MOCK_IDP_PORT:-8892}:8080"
     environment:
       WPORG_API_SECRET: local-secret
       IDP_ENTITY_ID: http://127.0.0.1:${MOCK_IDP_PORT:-8892}/idp

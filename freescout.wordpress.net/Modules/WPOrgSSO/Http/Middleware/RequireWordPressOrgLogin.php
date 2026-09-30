@@ -362,6 +362,10 @@ final class RequireWordPressOrgLogin {
 
 			// Otherwise core's unique email error asks for another address, which the next submit replaces again.
 			$existing = User::query()->where( 'email', $fields['email'] )->first();
+			if ( $existing && User::STATUS_DELETED === (int) $existing->status ) {
+				return __( 'That WordPress.org account\'s email address belongs to :name, a deleted user.', array( 'name' => $existing->getFullName() ) );
+			}
+
 			if ( $existing ) {
 				return __( 'That WordPress.org account\'s email address belongs to :name; connect them on their profile instead.', array( 'name' => $existing->getFullName() ) );
 			}

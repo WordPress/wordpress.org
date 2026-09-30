@@ -68,6 +68,20 @@ final class LoginTest extends SsoTestCase {
 	}
 
 	/**
+	 * A user who was invited before WordPress.org was enforced is active once they log in with it.
+	 *
+	 * @return void
+	 */
+	public function test_login_activates_invited_user(): void {
+		$this->user->invite_state = User::INVITE_STATE_SENT;
+		$this->user->save();
+
+		$this->complete( $this->post_to_acs( $this->start_login( 'rita' ) ) );
+
+		$this->assertEquals( User::INVITE_STATE_ACTIVATED, $this->user->fresh()->invite_state );
+	}
+
+	/**
 	 * The certificate may keep its BEGIN/END markers, as long as it's on one line.
 	 *
 	 * @return void

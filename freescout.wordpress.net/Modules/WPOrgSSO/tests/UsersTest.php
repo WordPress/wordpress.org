@@ -527,6 +527,23 @@ final class UsersTest extends SsoTestCase {
 	}
 
 	/**
+	 * A deleted user's email doesn't point to their profile, which is gone.
+	 *
+	 * @return void
+	 */
+	public function test_create_names_deleted_user_whose_email_is_taken(): void {
+		$deleted         = $this->create_user( User::ROLE_USER );
+		$deleted->email  = 'rita@example.org';
+		$deleted->status = User::STATUS_DELETED;
+		$deleted->save();
+
+		$this->create( 'rita' )->assertSessionHasErrors( 'wporg_username' );
+
+		$this->assertStringContainsString( 'a deleted user', (string) session( 'errors' )->first( 'wporg_username' ) );
+		$this->assertSame( 1, User::query()->where( 'email', 'rita@example.org' )->count() );
+	}
+
+	/**
 	 * A username sent as an array is refused like a missing one, not with an error page.
 	 *
 	 * @return void

@@ -133,6 +133,8 @@ final class SsoController extends Controller {
 			return self::fail( $error );
 		}
 
+		// Core only activates users through the invite setup, which is closed now; sync saves it.
+		$user->invite_state = User::INVITE_STATE_ACTIVATED;
 		UserSync::sync( $user, $wporg_user );
 
 		$request->session()->put( WPOrgSSOServiceProvider::SESSION_USERNAME, $username );
