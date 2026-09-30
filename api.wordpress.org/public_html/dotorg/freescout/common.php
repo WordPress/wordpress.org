@@ -2,7 +2,7 @@
 /**
  * Shared helpers for the FreeScout helpdesk endpoints.
  *
- * Requests come from the freescout.wordpress.net modules; see WPOrgSidebar and WPOrgEvents for the payloads.
+ * Requests come from the freescout.wordpress.net modules; see WPOrgSidebar and WPOrgWebhooks for the payloads.
  *
  * @package WordPressdotorg\API\FreeScout
  */

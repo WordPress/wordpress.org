@@ -10,11 +10,12 @@ Context for AI coding agents and developers working on the WordPress.org FreeSco
 
 - `Modules/<Name>/` — one directory per module (`module.json`, `Providers/`, `Http/`, `Resources/`, `Database/Migrations/`, `Public/`, `tests/`).
   - `WPOrgSidebar` — WordPress.org panels in the conversation sidebar, loaded over AJAX from `api.wordpress.org/dotorg/freescout/`.
+  - `WPOrgWebhooks` — queues conversation events to `api.wordpress.org/dotorg/freescout/webhook.php`, which records contributor stats.
 - `tests/` — shared PHPUnit bootstrap and base `TestCase`.
 
 Premium (paid) modules must never be committed here.
 
-The api.wordpress.org side lives in `api.wordpress.org/public_html/dotorg/freescout/`. Requests are JSON, signed with an HMAC-SHA256 of the body in `X-FreeScout-Signature` (shared secret: `WPORG_API_SECRET` here, `FREESCOUT_SECRET` there) and rejected after 15 minutes. `WPOrgSidebar/Services/ConversationPayload.php` defines what's sent; change it together with the endpoints that read it. The sidebar inserts the endpoints' HTML as-is, so they must escape everything they output.
+The api.wordpress.org side lives in `api.wordpress.org/public_html/dotorg/freescout/`. Requests are JSON, signed with an HMAC-SHA256 of the body in `X-FreeScout-Signature` (shared secret: `WPORG_API_SECRET` here, `FREESCOUT_SECRET` there) and rejected after 15 minutes. `WPOrgSidebar/Services/ConversationPayload.php` and `WPOrgWebhooks/Services/EventPayload.php` define what's sent; change them together with the endpoints that read them. The sidebar inserts the endpoints' HTML as-is, so they must escape everything they output.
 
 "Customer" is FreeScout's term (`App\Customer`); in our own names and text, use "sender".
 
