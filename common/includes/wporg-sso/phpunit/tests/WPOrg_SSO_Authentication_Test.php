@@ -293,10 +293,19 @@ class WPOrg_SSO_Authentication_Test extends WPOrg_SSO_TestCase {
 	/**
 	 * Creates an account whose password is known, so it can really log in.
 	 *
+	 * An account that already exists, like the test install's `admin`, gets the known password instead.
+	 *
 	 * @param string $login The login name to create.
 	 * @return WP_User
 	 */
 	protected function make_account( string $login ): WP_User {
+		$existing = get_user_by( 'login', $login );
+		if ( $existing ) {
+			wp_set_password( self::PASSWORD, $existing->ID );
+
+			return new WP_User( $existing->ID );
+		}
+
 		return new WP_User(
 			$this->factory->user->create(
 				array(

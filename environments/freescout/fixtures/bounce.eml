@@ -1,0 +1,16 @@
+From: Mail Delivery System <mailer-daemon@example.net>
+To: Themes <themes@wordpress.test>
+Subject: Undelivered Mail Returned to Sender
+Date: Mon, 28 Sep 2026 11:00:00 +0000
+Message-ID: <bounce@example.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+This is the mail system at host example.net.
+
+I'm sorry to have to inform you that your message could not
+be delivered to one or more recipients.
+
+Final-Recipient: rfc822; theme-author@example.org
+Action: failed
+Status: 5.1.1
