@@ -52,6 +52,9 @@ jobs:
       # The Actions cache spares the PHP extension build, and composer install until the FreeScout ref moves.
       - name: Build FreeScout
         uses: docker/bake-action@v7
+        env:
+          DOCKER_BUILD_SUMMARY: false
+          DOCKER_BUILD_RECORD_UPLOAD: false
         with:
           source: .
           files: environments/freescout/docker-compose.yml
