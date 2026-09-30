@@ -111,6 +111,16 @@ function render_badge( string $label, string $tone = 'neutral' ): string {
 }
 
 /**
+ * Renders how many items a sidebar section has.
+ *
+ * @param int $count Number of items.
+ * @return string
+ */
+function render_count( int $count ): string {
+	return sprintf( '<span class="wporg-sidebar-count">%d</span>', $count );
+}
+
+/**
  * Determines the mailbox slug, e.g. "Plugins" => plugins.
  *
  * @param object $request Request payload.
