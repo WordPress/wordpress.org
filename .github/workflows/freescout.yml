@@ -38,12 +38,35 @@ jobs:
         ref: [ dist, master ]
     env:
       FREESCOUT_REF: ${{ matrix.ref }}
-      COMPOSE: docker compose --file environments/freescout/docker-compose.yml
+      COMPOSE: docker compose --file environments/freescout/docker-compose.yml --file environments/freescout/docker-compose.ci.yml
     steps:
       - uses: actions/checkout@v7
 
+      # Pulls and starts the other services, and initializes the database, while the app image builds.
+      - name: Start services
+        run: |
+          ( $COMPOSE up --detach db greenmail mailpit mock-api > "$RUNNER_TEMP/services.log" 2>&1; echo $? > "$RUNNER_TEMP/services.exit" ) &
+
+      - uses: docker/setup-buildx-action@v4
+
+      # The Actions cache spares the PHP extension build, and composer install until the FreeScout ref moves.
+      - name: Build FreeScout
+        uses: docker/bake-action@v7
+        with:
+          source: .
+          files: environments/freescout/docker-compose.yml
+          targets: app
+          load: true
+          set: |
+            app.cache-from=type=gha,scope=freescout-${{ matrix.ref }}
+            app.cache-to=type=gha,mode=max,scope=freescout-${{ matrix.ref }}
+
       - name: Start FreeScout
-        run: $COMPOSE up --detach --build --wait
+        run: |
+          timeout 300 bash -c "until [ -f '$RUNNER_TEMP/services.exit' ]; do sleep 0.2; done"
+          cat "$RUNNER_TEMP/services.log"
+          [ "$( cat "$RUNNER_TEMP/services.exit" )" = 0 ]
+          $COMPOSE up --detach --no-build --wait
 
       - name: Set up FreeScout
         run: $COMPOSE exec -T --user www-data app bash /srv/env/bin/setup.sh
