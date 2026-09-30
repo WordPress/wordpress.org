@@ -1,7 +1,43 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Tools;
 
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+
 class Helpscout {
+
+	/**
+	 * The namespace a rejected plugin's slug is wrapped in.
+	 *
+	 * The trailing digits are the suffix `wp_update_post()` adds when the wrapped slug
+	 * is itself taken.
+	 */
+	const REJECTED_SLUG_REGEX = '/^rejected-(.+)-rejected(-\d+)?$/i';
+
+	/**
+	 * Fetch the slug a post's emails may also be recorded against.
+	 *
+	 * A rejected plugin's slug is wrapped to free up the original slug, so emails for
+	 * it may still be recorded against the unwrapped one. That's only true for as long
+	 * as no other plugin holds the unwrapped slug.
+	 *
+	 * @param string $post_name The post slug.
+	 * @param int    $post_id   The post ID.
+	 * @return string The unwrapped slug, or $post_name if it isn't this post's to claim.
+	 */
+	protected static function get_unwrapped_slug( $post_name, $post_id ) {
+		$unwrapped = preg_replace( self::REJECTED_SLUG_REGEX, '$1', $post_name );
+		if ( ! $unwrapped || $unwrapped === $post_name ) {
+			return $post_name;
+		}
+
+		$owner = Plugin_Directory::get_plugin_post( $unwrapped );
+		if ( $owner && (int) $owner->ID !== (int) $post_id ) {
+			return $post_name;
+		}
+
+		return $unwrapped;
+	}
+
 	/**
 	 * Fetch the list of known Helpscout emails for a given post.
 	 *
@@ -18,7 +54,7 @@ class Helpscout {
 		}
 
 		// Trim off the rejected prefix/suffix.
-		$slug   = preg_replace( '/(^rejected-|-rejected(-\d)?$)/i', '', $post->post_name );
+		$slug   = self::get_unwrapped_slug( $post->post_name, $post->ID );
 		$wheres = '';
 
 		foreach ( $filters as $key => $value ) { 
@@ -69,7 +105,7 @@ class Helpscout {
 		}
 
 		$new_slug = $post_after->post_name;
-		$old_slug = preg_replace( '/(^rejected-|-rejected(-\d)?$)/i', '', $post_before->post_name );
+		$old_slug = self::get_unwrapped_slug( $post_before->post_name, $post_id );
 
 		$wpdb->query( $wpdb->prepare(
 			"UPDATE %i meta

@@ -1,5 +1,6 @@
 <?php
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks(
 	sprintf( '
 		<!-- wp:wporg/link-wrapper {"className":"wp-block-wporg-link-wrapper is-layout-flow wp-block-wporg-link-wrapper-is-layout-flow %1$s"} -->

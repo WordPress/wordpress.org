@@ -32,9 +32,11 @@ function api_send_json( $data ) {
 
 	if ( $callback ) {
 		header( 'Content-Type:application/javascript; charset=' . get_option( 'blog_charset' ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body (JSONP or JSON); escaping would corrupt the format.
 		echo "$callback( $json );";
 	} else {
 		header( 'Content-Type: application/json; charset=' . get_option( 'blog_charset' ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body (JSONP or JSON); escaping would corrupt the format.
 		echo $json;
 	}
 	die();

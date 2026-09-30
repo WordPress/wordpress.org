@@ -378,9 +378,9 @@ class User_Notes {
 
 			$this->user_notes[ $user_id ]->html .= sprintf(
 				'<div class="bbp-template-notice warning">%s %s</div>' . "\n",
-				apply_filters( 'comment_text', esc_html( $note->text ), null, array() ),
+				wp_kses_post( apply_filters( 'comment_text', esc_html( $note->text ), null, array() ) ),
 				sprintf( '<p class="wporg-bbp-user-note-meta">%s</p>' . "\n",
-					implode( ' | ', $note_meta )
+					wp_kses_post( implode( ' | ', $note_meta ) )
 				)
 			);
 
@@ -522,7 +522,7 @@ class User_Notes {
 			<label for="wporg-bbp-user-note-text" class="screen-reader-text"><?php esc_html_e( 'Note text:', 'wporg-forums' ); ?></label>
 			<textarea name="note_text" id="wporg-bbp-user-note-text" cols="40" rows="5"><?php echo esc_textarea( $note_text ); ?></textarea>
 
-			<button type="submit" class="button"><?php echo $button_label; ?></button>
+			<button type="submit" class="button"><?php echo esc_html( $button_label ); ?></button>
 		</form>
 		<?php
 	}
@@ -594,7 +594,10 @@ class User_Notes {
 		}
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>" id="wporg-bbp-user-notes-<?php echo esc_attr( $post_id ); ?>">
-			<?php echo $this->get_user_notes_html( $user_id ); ?>
+			<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Note fragments and form fields are escaped in their renderers.
+			echo $this->get_user_notes_html( $user_id );
+			?>
 		</div>
 		<?php
 	}
@@ -622,7 +625,10 @@ class User_Notes {
 		<div class="wporg-bbp-user-notes">
 			<h2 id="user-notes" class="entry-title"><?php esc_html_e( 'User Notes', 'wporg-forums' ); ?></h2>
 			<div class="bbp-user-section">
-				<?php echo $this->get_user_notes_html( $user_id ); ?>
+				<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Note fragments and form fields are escaped in their renderers.
+				echo $this->get_user_notes_html( $user_id );
+				?>
 			</div>
 		</div>
 		<?php
@@ -652,7 +658,10 @@ class User_Notes {
 		<div class="wporg-bbp-user-notes">
 			<h2 id="user-notes" class="entry-title"><?php esc_html_e( 'User Notes', 'wporg-forums' ); ?></h2>
 			<div class="bbp-user-section">
-				<?php echo $this->get_user_notes_html( $user_id, false ); ?>
+				<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Note fragments and form fields are escaped in their renderers.
+				echo $this->get_user_notes_html( $user_id, false );
+				?>
 
 				<div class="wporg-bbp-add-user-note">
 					<?php wp_nonce_field( sprintf( 'wporg-bbp-add-user-note_%d', $user_id ), '_notenonce' ); ?>

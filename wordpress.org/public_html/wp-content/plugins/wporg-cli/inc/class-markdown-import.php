@@ -191,6 +191,7 @@ class Markdown_Import {
 
 		$response = self::update_post_from_markdown_source( $post_id );
 		if ( is_wp_error( $response ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI import error; the message is written to the console.
 			wp_die( $response->get_error_message() );
 		}
 

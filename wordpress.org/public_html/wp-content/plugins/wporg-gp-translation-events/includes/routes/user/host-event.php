@@ -4,7 +4,7 @@ namespace Wporg\TranslationEvents\Routes\User;
 
 use Wporg\TranslationEvents\Attendee\Attendee;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Urls;
@@ -15,7 +15,12 @@ use Wporg\TranslationEvents\Urls;
  * If the user is currently marked as host, they will be marked as not host.
  */
 class Host_Event_Route extends Route {
-	private Event_Repository_Interface $event_repository;
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
+	private Event_Repository $event_repository;
 	private Attendee_Repository $attendee_repository;
 
 	/**
@@ -38,29 +43,38 @@ class Host_Event_Route extends Route {
 		$current_user = wp_get_current_user();
 		if ( ! $current_user->exists() ) {
 			$this->die_with_error( esc_html__( "Only logged-in users can manage the event's hosts.", 'gp-translation-events' ), 403 );
-			return; // die_with_*() doesn't die under GP_Route::$fake_request.
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
 		$nonce_action = "toggle_translation_event_host_{$event_id}_{$user_id}";
 		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ), $nonce_action ) ) {
 			$this->die_with_error( esc_html__( 'Your link has expired or is invalid. Please reload the page and try again.', 'gp-translation-events' ), 403 );
-			return; // die_with_*() doesn't die under GP_Route::$fake_request.
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
-		if ( ! current_user_can( 'edit_translation_event', $event_id ) ) {
+		if ( ! current_user_can( 'edit_translation_event_attendees', $event_id ) ) {
 			$this->die_with_error( esc_html__( "You do not have permissions to manage the event's hosts.", 'gp-translation-events' ), 403 );
-			return; // die_with_*() doesn't die under GP_Route::$fake_request.
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
 		$event = $this->event_repository->get_event( $event_id );
 		if ( ! $event ) {
 			$this->die_with_404();
-			return; // die_with_*() doesn't die under GP_Route::$fake_request.
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
+		}
+
+		if ( $user_id === $event->author_id() && $user_id !== $current_user->ID && ! current_user_can( 'manage_translation_events' ) ) {
+			$this->die_with_error( esc_html__( 'Only administrators can change whether the event author is a host.', 'gp-translation-events' ), 403 );
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
 		$affected_attendee = $this->attendee_repository->get_attendee_for_event_for_user( $event_id, $user_id );
 		// The user is attending to the event, so if I don't find the attendee, I won't create it.
 		if ( $affected_attendee instanceof Attendee ) {
+			if ( $affected_attendee->is_host() && $user_id !== $current_user->ID && ! current_user_can( 'manage_translation_events' ) ) {
+				$this->die_with_error( esc_html__( 'Only administrators can remove another host.', 'gp-translation-events' ), 403 );
+				return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
+			}
 			if ( $affected_attendee->is_host() ) {
 				$affected_attendee->mark_as_non_host();
 			} else {

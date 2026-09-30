@@ -173,7 +173,7 @@ function save_theme( $theme ) {
 	}
 
 	// Rating meta consumed by the WPORG_Ratings stub
-	// (environments/mocks/mu-plugins/wporg-themes-ratings.php).
+	// (environments/mocks/mu-plugins/class-wporg-ratings.php).
 	update_post_meta( $theme_post_id, '_active_installs', (int) ( $theme->active_installs ?? 0 ) );
 	update_post_meta( $theme_post_id, 'rating', (float) ( $theme->rating ?? 0 ) / 20 );
 	update_post_meta( $theme_post_id, 'num_ratings', (int) ( $theme->num_ratings ?? 0 ) );

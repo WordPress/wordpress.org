@@ -109,6 +109,14 @@ function handle_meta_data( $post_id, $message ) {
 			$post_tags = array_unique( $post_tags );
 		}
 
+		// `post_tag` is public, so reuse existing terms only -- a new one publishes the private hashtag.
+		$post_tags = array_filter(
+			(array) $post_tags,
+			function ( $post_tag ) {
+				return (bool) term_exists( $post_tag, 'post_tag' );
+			}
+		);
+
 		if ( ! empty( $post_tags ) ) {
 			wp_set_post_tags( $post_id, $post_tags, true );
 		}

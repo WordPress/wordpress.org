@@ -74,6 +74,7 @@ if ( $deepl_key ) {
 			<?php
 			$sort_bys = wp_list_pluck( gp_get_sort_by_fields(), 'title' );
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes radio attributes and labels.
 			echo gp_radio_buttons( 'default_sort[by]', $sort_bys, gp_array_get( $gp_default_sort, 'by', 'priority' ) );
 			?>
 		</td>
@@ -82,6 +83,7 @@ if ( $deepl_key ) {
 		<th><label for="default_sort[how]"><?php esc_html_e( 'Default Sort Order:', 'glotpress' ); ?></label></th>
 		<td>
 			<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes radio attributes and labels.
 			echo gp_radio_buttons(
 				'default_sort[how]',
 				array(

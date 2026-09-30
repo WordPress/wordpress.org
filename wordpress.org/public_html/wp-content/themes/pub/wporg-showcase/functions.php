@@ -16,6 +16,18 @@ add_action( 'wp_head', function () {
 	}
 }, 1 );
 
+/**
+ * Returns the `domain` post meta of the current showcase entry.
+ *
+ * The return value is unescaped, so that callers can compose it into a URL
+ * before escaping for their own context. Every caller that prints it must
+ * escape it: `esc_url()` in an `href`, `esc_html()` in element content.
+ *
+ * @param bool $rep_slash       Percent-encode slashes, for the screenshot service.
+ * @param bool $echo            Print the value (escaped as element content) as well as returning it.
+ * @param bool $rem_trail_slash Drop a trailing slash.
+ * @return string The unescaped domain.
+ */
 function get_site_domain( $rep_slash = true, $echo = true, $rem_trail_slash = false ) {
 	global $post;
 
@@ -31,8 +43,11 @@ function get_site_domain( $rep_slash = true, $echo = true, $rem_trail_slash = fa
 	if ( $rep_slash )
 		$domain = str_replace('/', '%2F', $domain );
 
-	if ( $echo ) echo $domain;
-	else return $domain;
+	if ( $echo ) {
+		echo esc_html( $domain );
+	}
+
+	return $domain;
 }
 
 function site_screenshot_src( $width = '', $echo = true ) {
@@ -91,31 +106,39 @@ function site_screenshot_tag( $width = '', $classes='screenshot' ) {
 function wp_flavors() {
 	global $post;
 
-	echo '<h2 class="heading">' . __( 'Flavor', 'wporg-showcase' ). '</h2>';
+	echo '<h2 class="heading">' . esc_html__( 'Flavor', 'wporg-showcase' ) . '</h2>';
 	echo '<ul id="flavors">';
 
 	$flavors = array( 'WordPress.org', 'WordPress.com', 'WordPress.com VIP', 'WordPress MS' );
 
 	foreach ( $flavors as $flavor ) {
 		if ( in_category( $flavor ) ) {
-			echo '<li class="flavor-used"><img src="' . get_template_directory_uri() . '/images/flavor.png" /> ' . $flavor . '</li>';
+			echo '<li class="flavor-used"><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor.png" /> ' . esc_html( $flavor ) . '</li>';
 		} else {
-			echo '<li><img src="' . get_template_directory_uri() . '/images/flavor2.png" /> ' . $flavor . '</li>';
+			echo '<li><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor2.png" /> ' . esc_html( $flavor ) . '</li>';
 		}
 	}
 
 	if ( in_category( 'BuddyPress' ) ) {
-		echo '<li class="flavor-used"><img src="' . get_template_directory_uri() . '/images/flavor-bp.png" /> ' . __( 'BuddyPress', 'wporg-showcase' ). '</li>';
+		echo '<li class="flavor-used"><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor-bp.png" /> ' . esc_html__( 'BuddyPress', 'wporg-showcase' ) . '</li>';
 	} else {
-		echo '<li><img src="' . get_template_directory_uri() . '/images/flavor-bp2.png" /> ' . __( 'BuddyPress', 'wporg-showcase' ). '</li>';
+		echo '<li><img src="' . esc_url( get_template_directory_uri() ) . '/images/flavor-bp2.png" /> ' . esc_html__( 'BuddyPress', 'wporg-showcase' ) . '</li>';
 	}
 
 	echo '</ul>';
 }
 
 function blockquote_style( $content ) {
-	if ( is_single() )
-		$content = str_replace( '</blockquote>', '<cite>' . __( 'Source:', 'wporg-showcase' ). ' <a href="http://' . get_site_domain( false, false ) . '">' . get_site_domain( false, false, true ) . '</a></cite><div class="clear"></div></blockquote>', $content );
+	if ( is_single() ) {
+		$cite = sprintf(
+			'<cite>%1$s <a href="%2$s">%3$s</a></cite><div class="clear"></div></blockquote>',
+			esc_html__( 'Source:', 'wporg-showcase' ),
+			esc_url( 'http://' . get_site_domain( false, false ) ),
+			esc_html( get_site_domain( false, false, true ) )
+		);
+
+		$content = str_replace( '</blockquote>', $cite, $content );
+	}
 
 	return $content;
 }
@@ -128,12 +151,12 @@ function the_content_limit( $max_char, $more_link_text = '(more...)', $stripteas
 	$content = strip_tags( $content );
 
 	if ( ! empty( $_GET['p'] ) && strlen( $_GET['p'] ) > 0 ) {
-		echo "<p>" . $content . "</p>";
+		echo '<p>' . esc_html( $content ) . '</p>';
 	} else if ( ( strlen( $content ) > $max_char ) && ( $espacio = strpos( $content, " ", $max_char ) ) ) {
 		$content = substr( $content, 0, $espacio );
-		echo "<p>" . $content . "..." . "</p>";
+		echo '<p>' . esc_html( $content ) . '...</p>';
 	} else {
-		echo "<p>" . $content . "</p>";
+		echo '<p>' . esc_html( $content ) . '</p>';
 	}
 }
 
@@ -155,30 +178,31 @@ function popular_tags ($number = 10) {
 	}
 
 	$out .= '</ul>';
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup assembled in this file from already-escaped parts.
 	echo $out;
 }
 
 function breadcrumb() { ?>
 
-	<h2><a href="<?php echo home_url( '/' ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php _e( 'Showcase', 'wporg-showcase' ); ?></a>
+	<h2><a href="<?php echo esc_url( home_url( '/' ) ); ?>" title="<?php esc_attr_e( 'Showcase', 'wporg-showcase' ); ?>"><?php esc_html_e( 'Showcase', 'wporg-showcase' ); ?></a>
 
 		<?php if ( is_search() ) : ?>
 			<?php
 				/* translators: %s: search query */
-				printf( __( '&raquo; Search for: %s', 'wporg-showcase' ), get_search_query() );
+				printf( esc_html__( '&raquo; Search for: %s', 'wporg-showcase' ), get_search_query() );
 			?>
 		<?php elseif ( strstr( $_SERVER['REQUEST_URI'], '/showcase/archives' ) ) : ?>
-			<?php _e( '&raquo; Archives', 'wporg-showcase' ); ?>
+			<?php esc_html_e( '&raquo; Archives', 'wporg-showcase' ); ?>
 		<?php else : ?>
 			<?php if ( is_category() ) : ?>
-				<?php _e( '&raquo; Flavor', 'wporg-showcase' ); ?>
+				<?php esc_html_e( '&raquo; Flavor', 'wporg-showcase' ); ?>
 			<?php elseif ( is_tag() ) : ?>
-				<?php _e( '&raquo; Tag', 'wporg-showcase' ); ?>
+				<?php esc_html_e( '&raquo; Tag', 'wporg-showcase' ); ?>
 			<?php endif; // is_category ?>
 
 			<?php
 				/* translators: %s: document title */
-				printf( __( '&raquo; %s', 'wporg-showcase' ), wp_get_document_title() );
+				printf( esc_html__( '&raquo; %s', 'wporg-showcase' ), esc_html( wp_get_document_title() ) );
 			?>
 		<?php endif; // is_search ?>
 
@@ -221,7 +245,7 @@ function tags_with_count( $format = 'list', $before = '', $sep = '', $after = ''
 		return;
 	}
 
-	echo $before . join( $sep, $tag_links ) . $after;
+	echo wp_kses_post( $before . join( $sep, $tag_links ) . $after );
 }
 
 function extras_feed( $is_comments_feed = false ) {

@@ -132,6 +132,21 @@ class SVN {
 			$revision = (int) $m['revision'];
 			$result   = true;
 			$errors   = false;
+
+			// `svn export` materialises `svn:special` entries as real symlinks, which consumers would follow out of the export.
+			$scrub = self::shell_exec( "find $esc_destination ! -type d ! -type f -delete 2>&1" );
+
+			// A successful find is silent; consumers walk the export directly, so a partial scrub must not pass as success.
+			if ( trim( $scrub ) ) {
+				$result   = false;
+				$revision = false;
+				$errors   = array(
+					array(
+						'error_code'    => 'export_cleanup_failed',
+						'error_message' => 'Could not remove non-regular files from the export: ' . trim( $scrub ),
+					),
+				);
+			}
 		} else {
 			$result   = false;
 			$revision = false;

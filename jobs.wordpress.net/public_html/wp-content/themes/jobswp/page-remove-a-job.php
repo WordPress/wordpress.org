@@ -24,9 +24,10 @@ get_header(); ?>
 			<div class="entry-content">
 				<div class="notice notice-error">
 					<?php if ( is_string( $_POST['errors'] ) ) {
-						echo sprintf( __( '<strong>ERROR:</strong> %s', 'jobswp' ), esc_html( $_POST['errors'] ) );
+						/* translators: %s: Error message. */
+						printf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( wp_unslash( $_POST['errors'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display-only form redisplay; the value is escaped with esc_html() at output.
 					} else {
-						_e( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' );
+						echo wp_kses_post( __( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' ) );
 					} ?>
 					<?php do_action( 'jobswp_notice', 'error' ); ?>
 				</div>
@@ -34,7 +35,7 @@ get_header(); ?>
 			<?php elseif ( isset( $_GET['removedjob'] ) && '1' === $_GET['removedjob'] ) : ?>
 			<div class="entry-content">
 				<div class="notice notice-success">
-					<strong><?php _e( 'Your job posting has been successfully removed.', 'jobswp' ); ?></strong>
+					<strong><?php esc_html_e( 'Your job posting has been successfully removed.', 'jobswp' ); ?></strong>
 				</div>
 			</div>
 			<?php endif; ?>

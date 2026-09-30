@@ -10,7 +10,7 @@
 					<div class="col-5">
 						<div class="storycontent">
 								<?php breadcrumb(); ?>
-								<a href='http://<?php get_site_domain( false ); ?>'>
+								<a href="<?php echo esc_url( 'http://' . get_site_domain( false, false ) ); ?>">
 									<?php site_screenshot_tag( 518, 'screenshot site-screenshot'); ?>
 								</a>
 								<?php the_content(); ?>
@@ -53,6 +53,7 @@
 												<br style='clear: both;' />
 											</div>\n";
 
+										// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup assembled in this file from literal strings.
 										echo $output;
 									}
 								?>

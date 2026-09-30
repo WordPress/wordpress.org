@@ -330,7 +330,7 @@ function wporg_login_language_switcher( $display = true ) {
 			<?php endif; ?>
 			<label for="language-switcher-locales">
 				<span aria-hidden="true" class="dashicons dashicons-translation"></span>
-				<span class="screen-reader-text"><?php _e( 'Select the language:', 'wporg' ); ?></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Select the language:', 'wporg' ); ?></span>
 			</label>
 			<select id="language-switcher-locales" name="locale">
 				<?php
@@ -483,8 +483,7 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 			$message .= '<strong>' . sprintf( __( 'Register for %s', 'wporg' ), esc_html( $_REQUEST['wcname'] ) ) . '</strong>';
 			$message .=  __( 'Log in to your WordPress.org account. If you don\'t have one, you can <a href="/register">create an account</a>.', 'wporg' );
 		} else {
-			$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong>';
-			$message .= __( 'Log in to your WordPress.org account to contribute to WordCamps and meetups around the globe.', 'wporg' );
+			$message .= __( 'Log in to your WordPress.org account to participate in WordCamps and meetups around the world.', 'wporg' );
 		}
 	} elseif ( str_contains( $from, 'learn.wordpress.org' ) ) {
 		$message .= '<strong>' . __( 'Access all of Learn WordPress', 'wporg' ) . '</strong>';

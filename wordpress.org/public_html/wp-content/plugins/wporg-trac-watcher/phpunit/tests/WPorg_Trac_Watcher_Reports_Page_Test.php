@@ -1,4 +1,4 @@
-<?php // phpcs:disable WordPress.Files.FileName.NotHyphenatedLowercase -- PHPUnit only finds a test class in a file named after it.
+<?php
 /**
  * Tests for how the reports page renders request data into its own links.
  *

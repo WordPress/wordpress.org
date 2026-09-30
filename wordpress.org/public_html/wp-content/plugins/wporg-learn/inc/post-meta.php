@@ -291,6 +291,26 @@ function register_common_meta() {
 		);
 	}
 
+	/*
+	 * `register_post_meta()` scopes a `sanitize_callback` to one object subtype, so the callbacks
+	 * below only run for the post types they are registered against. These keys hold URLs that
+	 * the theme prints, so also register them without a subtype: `sanitize_meta()` then has a
+	 * callback to fall back on for post types with no registration of their own.
+	 */
+	$url_meta_keys = array( 'video_url', 'slides_view_url', 'slides_download_url' );
+	foreach ( $url_meta_keys as $url_meta_key ) {
+		register_meta(
+			'post',
+			$url_meta_key,
+			array(
+				'type'              => 'string',
+				'single'            => true,
+				'sanitize_callback' => 'esc_url_raw',
+				'show_in_rest'      => false,
+			)
+		);
+	}
+
 	// Video URL field.
 	$post_types = array( 'wporg_workshop', 'lesson' );
 	foreach ( $post_types as $post_type ) {
@@ -334,6 +354,32 @@ function sanitize_locale( $meta_value, $meta_key, $object_type, $object_subtype 
 	}
 
 	return $meta_value;
+}
+
+/**
+ * Sanitize an attachment ID, returning 0 when the attachment MIME type is not in the allowed list.
+ *
+ * Used as the sanitize_callback for activity kit attachment meta fields so that
+ * editors cannot save an arbitrary attachment ID that does not match the expected
+ * file type — even when bypassing the block-editor UI.
+ *
+ * @param mixed    $value         Raw meta value (expected integer attachment ID).
+ * @param string[] $allowed_mimes Allowed MIME types, e.g. array( 'application/pdf' ).
+ * @return int Validated attachment ID, or 0 if the ID is invalid or the MIME type is not allowed.
+ */
+function sanitize_attachment_id_by_mime( $value, array $allowed_mimes ) {
+	$id = absint( $value );
+	if ( ! $id ) {
+		return 0;
+	}
+
+	$mime = get_post_mime_type( $id );
+
+	if ( ! $mime || ! in_array( $mime, $allowed_mimes, true ) ) {
+		return 0;
+	}
+
+	return $id;
 }
 
 /**
@@ -676,7 +722,8 @@ function save_workshop_meta_fields( $post_id ) {
 		return;
 	}
 
-	$video_url = filter_input( INPUT_POST, 'video-url', FILTER_SANITIZE_URL );
+	// Use the same escaper the meta key is registered with.
+	$video_url = esc_url_raw( (string) filter_input( INPUT_POST, 'video-url' ) );
 	update_post_meta( $post_id, 'video_url', $video_url );
 
 	$duration = filter_input( INPUT_POST, 'duration', FILTER_SANITIZE_NUMBER_INT, FILTER_REQUIRE_ARRAY );
@@ -999,7 +1046,9 @@ function register_activity_kit_meta() {
 			'type'              => 'integer',
 			'single'            => true,
 			'default'           => 0,
-			'sanitize_callback' => 'absint',
+			'sanitize_callback' => function ( $value ) {
+				return sanitize_attachment_id_by_mime( $value, array( 'application/pdf' ) );
+			},
 			'show_in_rest'      => true,
 			'auth_callback'     => $auth_callback,
 		)
@@ -1013,7 +1062,9 @@ function register_activity_kit_meta() {
 			'type'              => 'integer',
 			'single'            => true,
 			'default'           => 0,
-			'sanitize_callback' => 'absint',
+			'sanitize_callback' => function ( $value ) {
+				return sanitize_attachment_id_by_mime( $value, array( 'application/pdf' ) );
+			},
 			'show_in_rest'      => true,
 			'auth_callback'     => $auth_callback,
 		)
@@ -1027,7 +1078,9 @@ function register_activity_kit_meta() {
 			'type'              => 'integer',
 			'single'            => true,
 			'default'           => 0,
-			'sanitize_callback' => 'absint',
+			'sanitize_callback' => function ( $value ) {
+				return sanitize_attachment_id_by_mime( $value, array( 'application/zip', 'application/x-zip', 'application/x-zip-compressed' ) );
+			},
 			'show_in_rest'      => true,
 			'auth_callback'     => $auth_callback,
 		)

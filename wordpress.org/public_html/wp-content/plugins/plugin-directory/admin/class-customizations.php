@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Admin;
 
 use \WordPressdotorg\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\API\Base;
 use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Tools\SVN;
 use \WordPressdotorg\Plugin_Directory\Tools\Helpscout;
@@ -134,7 +135,7 @@ class Customizations {
 	 * @return void.
 	 */
 	public function enqueue_assets( $hook_suffix ) {
-		global $post_type;
+		global $post, $post_type;
 
 		if ( 'plugin' === $post_type ) {
 			switch ( $hook_suffix ) {
@@ -147,6 +148,7 @@ class Customizations {
 						'rejectPluginAYS'      => __( 'Are you sure you want to reject this plugin?', 'wporg-plugins' ),
 						'removeCommitterAYS'   => __( 'Are you sure you want to remove this committer?', 'wporg-plugins' ),
 						'removeSupportRepAYS'  => __( 'Are you sure you want to remove this support rep?', 'wporg-plugins' ),
+						'uploadNonce'          => Base::action_nonce( 'upload', $post->ID ),
 					) );
 					break;
 
@@ -181,7 +183,7 @@ class Customizations {
 		global $submenu;
 		?>
 		<div class="wrap">
-			<h1><?php _e( 'Plugin Tools', 'wporg-plugins' ); ?></h1>
+			<h1><?php esc_html_e( 'Plugin Tools', 'wporg-plugins' ); ?></h1>
 			<ul>
 				<?php
 				foreach ( $submenu['plugin-tools'] ?? [] as $page ) {
@@ -439,6 +441,7 @@ class Customizations {
 	 */
 	public function show_permalink( $post ) {
 		if ( 'plugin' === $post->post_type && 'publish' === $post->post_status ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core assembles and escapes this markup itself.
 			echo get_sample_permalink_html( $post );
 		}
 	}
@@ -587,8 +590,8 @@ class Customizations {
 		if ( $existing_plugin && $existing_plugin->ID != $plugin->ID ) {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
-				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
-				$new_slug
+				esc_html__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
+				esc_html( $new_slug )
 			) );
 		}
 
@@ -605,7 +608,7 @@ class Customizations {
 			if ( $result['errors'] ) {
 				$error = 'Error renaming SVN repository: ' . var_export( $result['errors'], true );
 				Tools::audit_log( $error, $plugin->ID );
-				wp_die( $error ); // Abort before the post is altered.
+				wp_die( esc_html( $error ) ); // Abort before the post is altered.
 			} else {
 				Tools::audit_log(
 					sprintf(
@@ -667,8 +670,8 @@ class Customizations {
 		if ( $slug !== $original_slug ) {
 			wp_die( sprintf(
 				/* translators: %s: plugin slug */
-				__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
-				$original_slug
+				esc_html__( 'Error: The plugin %s already exists.', 'wporg-plugins' ),
+				esc_html( $original_slug )
 			) );
 		}
 
@@ -826,7 +829,7 @@ class Customizations {
 		if ( 'internal-note' === $comment->comment_type && isset( $_REQUEST['mode'] ) && 'single' === $_REQUEST['mode'] ) {
 			$allowed_actions = array( 'reply' => true );
 
-			if ( current_user_can( 'manage_comments' ) ) {
+			if ( current_user_can( 'moderate_comments' ) ) {
 				$allowed_actions['trash']     = true;
 				$allowed_actions['untrash']   = true;
 				$allowed_actions['quickedit'] = true;
@@ -889,7 +892,7 @@ class Customizations {
 
 		$user = wp_get_current_user();
 		if ( ! $user->exists() ) {
-			wp_die( __( 'Sorry, you must be logged in to reply to a comment.', 'wporg-plugins' ) );
+			wp_die( esc_html__( 'Sorry, you must be logged in to reply to a comment.', 'wporg-plugins' ) );
 		}
 
 		$user_ID              = $user->ID;
@@ -911,7 +914,7 @@ class Customizations {
 		}
 
 		if ( '' == $comment_content ) {
-			wp_die( __( 'ERROR: please type a comment.', 'wporg-plugins' ) );
+			wp_die( esc_html__( 'ERROR: please type a comment.', 'wporg-plugins' ) );
 		}
 
 		$comment_parent = 0;

@@ -58,6 +58,8 @@ function photoSubmitInit() {
 		} );
 	}
 
+	photoInitFilePreviewDialog();
+
 	// Disable jQuery Validation, if still in use.
 	if ( window.jQuery && window.jQuery.validator ) {
 		jQuery( photo_upload_form ).validate().settings.ignore = "*";
@@ -193,6 +195,103 @@ function photoShowFieldError( field ) {
 }
 
 /**
+ * Initializes the expandable photo preview dialog.
+ */
+function photoInitFilePreviewDialog() {
+	const previewButton = document.getElementById( 'ug_photo_preview_button' );
+	const dialog = document.getElementById( 'ug_photo_preview_dialog' );
+
+	if ( ! previewButton || ! dialog || typeof dialog.showModal !== 'function' ) {
+		return;
+	}
+
+	previewButton.addEventListener( 'click', () => {
+		const previewImg = document.getElementById( 'ug_photo_preview' );
+		const largeImg = document.getElementById( 'ug_photo_preview_large' );
+
+		if ( ! previewImg || ! previewImg.src || ! largeImg ) {
+			return;
+		}
+
+		largeImg.src = previewImg.src;
+		largeImg.alt = previewImg.alt;
+		dialog.showModal();
+	} );
+
+	const closeButton = dialog.querySelector( '.ugc-photo-preview-dialog__close' );
+	if ( closeButton ) {
+		closeButton.addEventListener( 'click', () => {
+			dialog.close();
+		} );
+	}
+
+	// Close when the backdrop (the dialog element itself) is clicked.
+	dialog.addEventListener( 'click', ( e ) => {
+		if ( e.target === dialog ) {
+			dialog.close();
+		}
+	} );
+}
+
+/**
+ * Shows a local thumbnail preview of the selected photo.
+ *
+ * @param {string} dataUrl - Data URL of the selected image.
+ * @param {string} fileName - Selected file name, used for the image alt text.
+ */
+function photoShowFilePreview( dataUrl, fileName ) {
+	const previewWrap = document.getElementById( 'ug_photo_preview_wrap' );
+	const previewImg = document.getElementById( 'ug_photo_preview' );
+	const largeImg = document.getElementById( 'ug_photo_preview_large' );
+
+	if ( ! previewWrap || ! previewImg ) {
+		return;
+	}
+
+	const alt = fileName
+		? PhotoDir.preview_alt + ': ' + fileName
+		: PhotoDir.preview_alt;
+
+	previewImg.src = dataUrl;
+	previewImg.alt = alt;
+
+	if ( largeImg ) {
+		largeImg.src = dataUrl;
+		largeImg.alt = alt;
+	}
+
+	previewWrap.hidden = false;
+}
+
+/**
+ * Clears and hides the local photo preview.
+ */
+function photoClearFilePreview() {
+	const previewWrap = document.getElementById( 'ug_photo_preview_wrap' );
+	const previewImg = document.getElementById( 'ug_photo_preview' );
+	const largeImg = document.getElementById( 'ug_photo_preview_large' );
+	const dialog = document.getElementById( 'ug_photo_preview_dialog' );
+
+	if ( ! previewWrap || ! previewImg ) {
+		return;
+	}
+
+	if ( dialog && dialog.open ) {
+		dialog.close();
+	}
+
+	previewImg.removeAttribute( 'src' );
+	previewImg.alt = PhotoDir.preview_alt;
+
+	if ( largeImg ) {
+		largeImg.removeAttribute( 'src' );
+		largeImg.alt = '';
+	}
+
+	previewWrap.hidden = true;
+}
+
+/**
  * Validates a file upload against multiple criteria.
  *
  * @param {HTMLElement} field - The HTML file input field element.
@@ -202,8 +301,9 @@ async function photoCheckFileValidations( field ) {
 	let error = false;
 
 	// Check if no file chosen.
-	if ( ! error ) {
-		error = field.validity.valueMissing;
+	if ( ! field.files.length ) {
+		photoClearFilePreview();
+		return field.validity.valueMissing;
 	}
 
 	// Check for duplicate file name.
@@ -219,44 +319,103 @@ async function photoCheckFileValidations( field ) {
 		error = photoCheckFileSize( field );
 	}
 
-	// Check for file dimension error.
-	if ( ! error ) {
+	// Always load the selected file for a local preview. Dimension checks run
+	// only when earlier validations passed.
+	const shouldCheckDimensions = ! error;
+	if ( shouldCheckDimensions ) {
 		// Hack: Wait for file dimensions check to complete before
 		// determining true validity. Once it has done so, it will
 		// potentially trigger submit if warranted.
 		field.setCustomValidity( PhotoDir.msg_validating_dimensions );
 		error = true;
-		photoCheckFileDimensions( field );
 	}
+
+	photoLoadSelectedFile( field, shouldCheckDimensions );
 
 	return error;
 }
 
 /**
- * Checks if the file selected via the file input field object is within an
- * acceptable file dimension range and sets custom validity message accordingly.
+ * Active FileReader for the photo preview / dimension check, if any.
+ *
+ * @type {FileReader|null}
+ */
+let photoFileReader = null;
+
+/**
+ * Handles failure to read or decode the selected photo.
+ *
+ * @param {HTMLElement} field - The HTML file input field element.
+ * @param {File} file - The file that was being processed.
+ * @param {Boolean} checkDimensions - Whether dimension validation was in progress.
+ */
+function photoHandleSelectedFileLoadFailure( field, file, checkDimensions ) {
+	if ( field.files.item( 0 ) !== file ) {
+		return;
+	}
+
+	photoClearFilePreview();
+
+	if ( ! checkDimensions ) {
+		return;
+	}
+
+	field.setCustomValidity( PhotoDir.err_file_unreadable );
+	photoShowFileError( field );
+}
+
+/**
+ * Loads the selected file via FileReader for preview and optional dimension checks.
  *
  * An appropriate error message is defined if the file is too long or too short.
  * If there is no file selected, or the file is of sufficient size, then any
  * existing custom validity message is cleared.
  *
  * @param {HTMLElement} field - The HTML file input field element.
- * @return {Promise} Promise where result is true if file dimensions are invalid, else false.
+ * @param {Boolean} checkDimensions - Whether to validate image dimensions after load.
+ * @return {Boolean} True if a file was loaded, else false.
  */
-function photoCheckFileDimensions( field ) {
+function photoLoadSelectedFile( field, checkDimensions ) {
 	const MIN_SIZE = PhotoDir.min_file_dimension; // In px.
 	const MAX_SIZE = PhotoDir.max_file_dimension; // In px.
+
+	// Abort any in-flight read from a previous selection.
+	if ( photoFileReader ) {
+		photoFileReader.abort();
+		photoFileReader = null;
+	}
 
 	const files = field.files;
 
 	if ( files.length > 0 ) {
 		const reader = new FileReader();
+		const file = files.item( 0 );
 
-		reader.addEventListener( 'load', async (e) => {
+		photoFileReader = reader;
+
+		reader.addEventListener( 'load', (e) => {
+			if ( photoFileReader === reader ) {
+				photoFileReader = null;
+			}
+
+			if ( field.files.item( 0 ) !== file ) {
+				return;
+			}
+
+			photoShowFilePreview( e.target.result, file.name );
+
+			if ( ! checkDimensions ) {
+				return;
+			}
+
 			const img = new Image();
 			img.src = e.target.result;
 
 			img.decode().then( () => {
+				if ( field.files.item( 0 ) !== file ) {
+					return;
+				}
+
 				let file_width = img.width;
 				let file_height = img.height;
 
@@ -270,17 +429,37 @@ function photoCheckFileDimensions( field ) {
 				}
 
 				photoShowFileError( field );
+			} ).catch( () => {
+				photoHandleSelectedFileLoadFailure( field, file, checkDimensions );
 			} );
-		}, false );
+		} );
 
-		reader.readAsDataURL( files.item( 0 ) );
+		reader.addEventListener( 'error', () => {
+			if ( photoFileReader === reader ) {
+				photoFileReader = null;
+			}
 
-		// Return true. This will be rectified once the actual image dimensions are checked.
+			photoHandleSelectedFileLoadFailure( field, file, checkDimensions );
+		} );
+
+		reader.addEventListener( 'abort', () => {
+			if ( photoFileReader === reader ) {
+				photoFileReader = null;
+			}
+		} );
+
+		reader.readAsDataURL( file );
+
 		return true;
 	}
 
-	// No custom constraint violation.
-	field.setCustomValidity( '' );
+	photoClearFilePreview();
+
+	if ( checkDimensions ) {
+		// No custom constraint violation.
+		field.setCustomValidity( '' );
+	}
+
 	return false;
 }
 
