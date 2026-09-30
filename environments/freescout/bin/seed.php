@@ -26,7 +26,8 @@ $app->make( Kernel::class )->bootstrap();
  * @return void
  */
 function seed_admin(): void {
-	if ( User::where( 'email', 'admin@wordpress.test' )->exists() ) {
+	// By role: logging in with WordPress.org syncs the admin's email.
+	if ( User::where( 'role', User::ROLE_ADMIN )->exists() ) {
 		return;
 	}
 

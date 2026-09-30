@@ -4,6 +4,7 @@
  *
  * Checks requests like the real endpoints (signature, JSON object, age), and answers sidebar requests with the data it received.
  * Webhook events are logged to the container output: `docker compose logs mock-api`.
+ * Also stands in for login.wordpress.org's identity provider at /idp; see idp.php.
  *
  * @package WordPressdotorg\FreeScout\Environment
  */
@@ -36,6 +37,14 @@ function esc( string $value ): string {
 	return htmlspecialchars( $value, ENT_QUOTES );
 }
 
+$endpoint = basename( (string) parse_url( (string) $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
+
+// Browsers come here, not FreeScout, so there's no signature.
+if ( 'idp' === $endpoint ) {
+	require __DIR__ . '/idp.php';
+	exit;
+}
+
 $body      = (string) file_get_contents( 'php://input' );
 $signature = (string) ( $_SERVER['HTTP_X_FREESCOUT_SIGNATURE'] ?? '' );
 $secret    = (string) getenv( 'WPORG_API_SECRET' );
@@ -51,7 +60,28 @@ if ( ! is_object( $request ) || abs( time() - (int) ( $request->sent_at ?? 0 ) )
 	respond( 403, array( 'error' => 'Not a fresh JSON object.' ) );
 }
 
-$endpoint = basename( (string) parse_url( (string) $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
+if ( 'account.php' === $endpoint ) {
+	$accounts = require __DIR__ . '/accounts.php';
+	$username = strtolower( (string) ( $request->username ?? '' ) );
+
+	if ( ! isset( $accounts[ $username ] ) ) {
+		respond( 200, array( 'user' => null ) );
+	}
+
+	respond(
+		200,
+		array(
+			'user' => array_merge(
+				$accounts[ $username ],
+				array(
+					'username'    => $username,
+					'profile_url' => 'https://profiles.wordpress.org/' . $username . '/',
+					'avatar_url'  => 'https://www.gravatar.com/avatar/' . md5( $accounts[ $username ]['email'] ) . '?s=256&d=mm',
+				)
+			),
+		)
+	);
+}
 
 if ( 'webhook.php' === $endpoint ) {
 	file_put_contents(

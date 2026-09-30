@@ -29,6 +29,11 @@ services:
       DB_TEST_PASSWORD: freescout
       WPORG_API_URL: ${WPORG_API_URL:-http://mock-api:8080/}
       WPORG_API_SECRET: ${WPORG_API_SECRET:-local-secret}
+      WPORG_USERNAME: ${WPORG_USERNAME:-}
+      # The mock identity provider in mock-api; its key is for local development only.
+      WPORG_SSO_IDP_ENTITY_ID: http://127.0.0.1:${MOCK_IDP_PORT:-8892}/idp
+      WPORG_SSO_IDP_URL: http://127.0.0.1:${MOCK_IDP_PORT:-8892}/idp
+      WPORG_SSO_IDP_CERT: MIIDKTCCAhGgAwIBAgIUKADZAyH5BGs3mhaZtu7/RIFcBlIwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UEAwwYTG9jYWwgRnJlZVNjb3V0IG1vY2sgSWRQMCAXDTI2MDkyOTE4MDMzNloYDzIxMjYwOTA1MTgwMzM2WjAjMSEwHwYDVQQDDBhMb2NhbCBGcmVlU2NvdXQgbW9jayBJZFAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDD2PBt0gkAg3B2NJsDzoCgEk/C1BINePm4GXs/zfWLVu2h3AWFz2GN6q6BAC8O83QQV10RSnzUKdzVANi8BzGePmqMZUWLUcoVdW626EtaoNYdBIKD74zZbqI57yjrcyeYUNBnfQsIMLSKrGs+SEHYrXRIHP/ZcFbI5tuwUBCUe5r1xtrTm8Wys2ndkzwETsgsC1ZY54OAsM1VFy+T0FNTSblWZFbdab5rfi/d/L6lY30nkUaf+OV3jTyA4Iub19UbRS55xF1vECM/3e6Fxh2yPbiBIfCoF8Tygm4fbJOTmAf6xl7Cm0vz4fB7ly0PR2DCoT9Gl166Y7XE7hN5+SFHAgMBAAGjUzBRMB0GA1UdDgQWBBQsGNSycUQaxIGOGJ2ZwRrQaBxpuzAfBgNVHSMEGDAWgBQsGNSycUQaxIGOGJ2ZwRrQaBxpuzAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQAV5yzkI1eLtSdyWmBTinNo/MS5WZsym/VUU+K1UA7YH0ldx8UP7xpXq3Dw5o+uSm1QMf7NyJtCLSIuYS72mwq1Yv0kNz64JpuKUrm2ww6VvFLPGAI+LYxQfIhIJN2PfRnoqi5ORr3cafEytw/hZuyeMButtoSvqNvEnnnlLG5PGtykobd9ylgp00SaJpGfc1HbUXaSPZJtzwn6DT41jjI9nMKbso2yAO2oh2sTK20dJW9C8Jl4z8TwCXcZrII8d4ekff4cTEt98iAOjz3fzXBKwebLUNj3H+Cv2T6wGAOEOV01wkxsKYbut+hxLcUty1bMh66v+u5KsLSiLU1HgMol
       MAILPIT_PORT: ${MAILPIT_PORT:-8891}
     volumes:
       - storage:/var/www/html/storage
@@ -39,6 +44,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      # Setup connects the admin to a mock WordPress.org account.
+      mock-api:
+        condition: service_started
 
   db:
     image: mariadb:11
@@ -70,14 +78,19 @@ services:
     ports:
       - "127.0.0.1:${MAILPIT_PORT:-8891}:8025"
 
-  # Stands in for the api.wordpress.org helpdesk endpoints.
+  # Stands in for the api.wordpress.org helpdesk endpoints, and login.wordpress.org's identity provider.
   mock-api:
     image: php:8.3-cli
     command: [ "php", "-S", "0.0.0.0:8080", "/srv/mock-api/index.php" ]
+    ports:
+      - "127.0.0.1:${MOCK_IDP_PORT:-8892}:8080"
     environment:
       WPORG_API_SECRET: local-secret
+      IDP_ENTITY_ID: http://127.0.0.1:${MOCK_IDP_PORT:-8892}/idp
     volumes:
       - ./mock-api:/srv/mock-api:ro
+      # Signs responses with WPOrgSSO's SAML library and test identity provider.
+      - ../../freescout.wordpress.net/Modules:/srv/modules:ro
 
 # One database and storage per FreeScout ref: trying master migrates its database forward, which dist can't run on.
 volumes:

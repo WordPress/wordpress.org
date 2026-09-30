@@ -281,7 +281,7 @@ A local [FreeScout](https://freescout.net/) with the modules from [`freescout.wo
 npm run freescout:start
 ```
 
-Then log in at http://127.0.0.1:8890 as `admin@wordpress.test` / `password`. Replies sent to senders land in Mailpit at http://127.0.0.1:8891.
+Then open http://127.0.0.1:8890 and log in with WordPress.org: a mock login page lets you pick an account, e.g. `admin`, which is connected to the FreeScout admin. Its other accounts cover new users (`reviewer`), no two-factor authentication (`no2fa`), and blocked accounts (`blocked`). Replies sent to senders land in Mailpit at http://127.0.0.1:8891.
 
 What's running:
 
@@ -291,7 +291,7 @@ What's running:
 | `db` | MariaDB, with a separate `freescout-test` database for the tests. |
 | `greenmail` | Mail server FreeScout fetches the **Plugins** and **Themes** mailboxes from, over IMAP. Two sample emails are delivered on first start. |
 | `mailpit` | Catches outgoing mail. |
-| `mock-api` | Stands in for `api.wordpress.org/dotorg/freescout/`: checks request signatures, answers sidebar panels with the data it received, and logs webhook events (`npm run freescout:logs`). |
+| `mock-api` | Stands in for `api.wordpress.org/dotorg/freescout/`: checks request signatures, answers sidebar panels with the data it received, and logs webhook events (`npm run freescout:logs`). Also stands in for login.wordpress.org's SAML identity provider at http://127.0.0.1:8892/idp, signing with a key that's only for local development. |
 
 `freescout.wordpress.net/Modules/` is mounted as FreeScout's `Modules/` folder, like production's checkout. Every start switches all modules on and runs `freescout:after-app-update`, as production does after a deploy. To try another module, like a premium one, copy it into `freescout.wordpress.net/Modules/` and restart; don't commit it. After switching branches, run `npm run freescout:setup`: FreeScout errors on every page while it still has a removed module cached.
 
@@ -310,10 +310,12 @@ security add-generic-password -a "$USER" -s wporg-freescout-api -w
 Then start FreeScout against api.wordpress.org:
 
 ```bash
-WPORG_API_URL=https://api.wordpress.org/dotorg/freescout/ WPORG_API_SECRET="$(security find-generic-password -s wporg-freescout-api -w)" npm run freescout:start
+WPORG_API_URL=https://api.wordpress.org/dotorg/freescout/ WPORG_API_SECRET="$(security find-generic-password -s wporg-freescout-api -w)" WPORG_USERNAME=<your username> npm run freescout:start
 ```
 
-This is production data, so WPOrgWebhooks stays off: local conversations would count toward production's contributor stats. Run `npm run freescout:start` without the variables to go back to the mock; the tests always use their own values.
+This is production data, so WPOrgWebhooks stays off: local conversations would count toward production's contributor stats. The mock's accounts don't exist there, so add `WPORG_USERNAME=<your username>` to connect the FreeScout admin to your own account, and type that username at the mock login. Logging in syncs the admin's name and email from WordPress.org. Run `npm run freescout:start` without the variables to go back to the mock; the tests always use their own values.
+
+If your hosts file points `api.wordpress.org` at a sandbox, FreeScout reaches it without your proxy and gets a 403; comment the entry out while testing.
 
 **Run tests:**
 
