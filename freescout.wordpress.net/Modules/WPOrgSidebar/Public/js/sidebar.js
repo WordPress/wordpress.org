@@ -2,11 +2,13 @@
  * Loads the WordPress.org sidebar panels.
  *
  * Panels are fetched after page load, so a slow or failing api.wordpress.org never blocks the conversation view.
+ *
+ * @param {jQuery} $ jQuery.
  */
 ( function ( $ ) {
 	$( function () {
 		$( '.wporg-sidebar-panel[data-url]' ).each( function () {
-			var $panel = $( this );
+			const $panel = $( this );
 
 			$.getJSON( $panel.data( 'url' ) )
 				.done( function ( response ) {
