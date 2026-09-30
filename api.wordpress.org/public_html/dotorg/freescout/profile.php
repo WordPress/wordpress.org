@@ -171,4 +171,37 @@ function render_slack_users( array $slack_users ): string {
 	return $html . '</ul>';
 }
 
-send_html( render_profile( get_request() ) );
+/**
+ * Gets the avatar of the sender's WordPress.org account, which WPOrgSidebar saves as the sender's photo.
+ *
+ * Only for an account found by one of the sender's own addresses: for bounces and Slack notifications, the account
+ * is someone else's.
+ *
+ * @param object $request Request payload.
+ * @return string Avatar URL, which answers 404 if the account has no avatar; empty if there's no account.
+ */
+function get_sender_avatar_url( object $request ): string {
+	$user = get_user_by( 'email', get_user_email_for_email( $request ) );
+	if ( ! $user ) {
+		return '';
+	}
+
+	$sender_emails = array_map(
+		'strtolower',
+		array_merge( array( (string) ( $request->sender->email ?? '' ) ), array_map( 'strval', (array) ( $request->sender->emails ?? array() ) ) )
+	);
+	if ( ! in_array( strtolower( $user->user_email ), $sender_emails, true ) ) {
+		return '';
+	}
+
+	return (string) get_avatar_url(
+		$user,
+		array(
+			'size'    => 256,
+			'default' => '404',
+		)
+	);
+}
+
+$request = get_request();
+send_html( render_profile( $request ), array( 'avatar_url' => get_sender_avatar_url( $request ) ) );
