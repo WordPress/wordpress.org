@@ -758,7 +758,11 @@ let wpTrac,
 
 					const $changesetLink = $comment.find( '> p > a.changeset' ).first().clone();
 					if ( $changesetLink.length ) {
-						$commit.append( document.createTextNode( '[' ), $changesetLink, document.createTextNode( '] ' ) );
+						$commit.append(
+							document.createTextNode( '[' ),
+							$changesetLink,
+							document.createTextNode( '] ' )
+						);
 					}
 
 					const rawMessage = $comment.find( '.message > p' ).text().trim();
@@ -1571,10 +1575,7 @@ let wpTrac,
 
 					if ( 'undefined' !== typeof settings.include ) {
 						$.each( settings.include, function ( k, username ) {
-							if (
-								! users.includes( username ) &&
-								! ticketParticipants.includes( username )
-							) {
+							if ( ! users.includes( username ) && ! ticketParticipants.includes( username ) ) {
 								users.push( username );
 							}
 						} );
@@ -2138,7 +2139,9 @@ let wpTrac,
 					const names = $( this ).hasClass( 'names' );
 					notifications.toggleClass( 'show-usernames', names );
 					document.cookie =
-						'wp_trac_ngrid=' + ( names ? 1 : 0 ) + ';max-age=31557600;domain=.wordpress.org;path=/;SameSite=Lax';
+						'wp_trac_ngrid=' +
+						( names ? 1 : 0 ) +
+						';max-age=31557600;domain=.wordpress.org;path=/;SameSite=Lax';
 					return false;
 				} );
 
