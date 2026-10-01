@@ -30,7 +30,7 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
 
 - It needs a HelpScout app: in HelpScout, **Your Profile » My Apps » Create My App**, with any redirect URL. Set its ID and secret in FreeScout's `.env` as `WPORG_HELPSCOUT_APP_ID` and `WPORG_HELPSCOUT_APP_SECRET`. The app can read everything its HelpScout user can see, so delete it after the last import.
 - FreeScout's queue worker must be running.
-- Conversation numbers: turn on **Custom conversation numbers** under Manage » Settings » General (`APP_CUSTOM_NUMBER=true`), or FreeScout shows and searches its internal IDs instead. Before the first live email, set **Next Conversation #** there well above HelpScout's numbers, like 2,000,000: HelpScout keeps numbering the mailboxes that haven't moved yet. Imports leave that setting alone.
+- Conversation numbers: under Manage » Settings » General, set **Conversation Number** to **Custom…** (`APP_CUSTOM_NUMBER=true`), or FreeScout shows and searches its internal IDs instead. Before the first live email, set the **Next Conversation #** that appears well above HelpScout's numbers, like 2,000,000: HelpScout keeps numbering the mailboxes that haven't moved yet. Imports leave that setting alone.
 - After the last mailbox has moved, switch the module off, and remove its code in a later deploy. Imported conversations keep HelpScout's numbers. Its tables map HelpScout's conversation IDs to FreeScout's: convert anything that still links to HelpScout before removing it.
 
 To try it locally, start the environment with `WPORG_HELPSCOUT_APP_ID` and `WPORG_HELPSCOUT_APP_SECRET` set. The import only reads from HelpScout.
