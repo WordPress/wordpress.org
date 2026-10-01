@@ -214,7 +214,8 @@ final class HelpScout {
 		$data = base64_decode( (string) ( $body['data'] ?? '' ), true );
 
 		if ( false === $data ) {
-			throw new ApiError( 'HelpScout returned no data for attachment ' . $attachment_id . '.' );
+			// HelpScout answered: unlike an outage, waiting won't fix this.
+			throw new ApiError( 'HelpScout returned no data for attachment ' . $attachment_id . '.', 200 );
 		}
 
 		return $data;
@@ -297,10 +298,11 @@ final class HelpScout {
 	 * @throws ApiError If the request failed, or the body isn't JSON.
 	 */
 	private function get( string $path, array $query = array() ): array {
-		$body = json_decode( (string) $this->request( $path, $query, 'application/json' )->getBody(), true );
+		$response = $this->request( $path, $query, 'application/json' );
+		$body     = json_decode( (string) $response->getBody(), true );
 
 		if ( ! is_array( $body ) ) {
-			throw new ApiError( 'HelpScout returned no JSON for ' . $path . '.' );
+			throw new ApiError( 'HelpScout returned no JSON for ' . $path . '.', $response->getStatusCode() );
 		}
 
 		return $body;

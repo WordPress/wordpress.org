@@ -64,7 +64,11 @@ final class ImportPage implements ShouldQueue {
 	}
 
 	/**
-	 * Imports the run's current page.
+	 * Imports the run's current page, and what moved onto the previous one since it was read.
+	 *
+	 * HelpScout's list moves when a conversation on an earlier page is deleted, or changed during an import of changes:
+	 * later ones move forward, onto pages already read. So the previous page is read again too, and what's new on it
+	 * is imported first. The run is done when a page comes back empty.
 	 *
 	 * Progress is saved after every conversation, so a page that's stopped part way goes on where it stopped.
 	 *
@@ -87,14 +91,33 @@ final class ImportPage implements ShouldQueue {
 			$helpscout = app( HelpScout::class );
 			$importer  = new Importer( $helpscout, new People() );
 			$page      = $helpscout->conversations( (int) $run->helpscout_mailbox_id, (int) $run->page, $run->since );
+			$listed    = $page['conversations'];
+
+			if ( $run->page > 1 ) {
+				$previous = $helpscout->conversations( (int) $run->helpscout_mailbox_id, (int) $run->page - 1, $run->since );
+				$known    = self::ids( (array) $run->previous_page );
+				$moved    = array_filter(
+					$previous['conversations'],
+					static function ( $conversation ) use ( $known ): bool {
+						return ! in_array( (int) ( $conversation['id'] ?? 0 ), $known, true );
+					}
+				);
+				$listed   = array_merge( array_values( $moved ), $listed );
+			}
 
 			$run->pages = $page['pages'];
 			$run->total = $page['total'];
+			$done       = self::ids( (array) $run->page_done );
 
-			foreach ( array_slice( $page['conversations'], (int) $run->position ) as $conversation ) {
-				$result = $this->import( $importer, (array) $conversation, $mailbox, $run );
+			foreach ( $listed as $conversation ) {
+				$id = (int) ( $conversation['id'] ?? 0 );
+				if ( in_array( $id, $done, true ) ) {
+					continue;
+				}
 
-				++$run->position;
+				$result         = $this->import( $importer, (array) $conversation, $mailbox, $run );
+				$done[]         = $id;
+				$run->page_done = $done;
 				if ( $result ) {
 					++$run->{$result};
 				}
@@ -130,16 +153,17 @@ final class ImportPage implements ShouldQueue {
 			$mailbox->updateFoldersCounters();
 		}
 
-		$run->position = 0;
-		++$run->page;
-
-		if ( $run->page > (int) $run->pages ) {
+		if ( ! $page['conversations'] ) {
 			$run->status      = Run::STATUS_DONE;
 			$run->finished_at = Carbon::now();
 			$this->save( $run );
 
 			return;
 		}
+
+		$run->previous_page = self::ids( $page['conversations'] );
+		$run->page_done     = null;
+		++$run->page;
 
 		if ( $this->save( $run ) ) {
 			$this->again( 0 );
@@ -176,6 +200,21 @@ final class ImportPage implements ShouldQueue {
 
 			return 'failed';
 		}
+	}
+
+	/**
+	 * HelpScout IDs of a list of conversations, or of a list of IDs.
+	 *
+	 * @param array $items Conversations or IDs.
+	 * @return int[]
+	 */
+	private static function ids( array $items ): array {
+		return array_map(
+			static function ( $item ): int {
+				return (int) ( is_array( $item ) ? ( $item['id'] ?? 0 ) : $item );
+			},
+			array_values( $items )
+		);
 	}
 
 	/**

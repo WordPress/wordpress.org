@@ -23,7 +23,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string           $status      One of the STATUS_ constants.
  * @property \Carbon\Carbon|null $since    Only conversations HelpScout changed since then.
  * @property int              $page        Next page of HelpScout's conversation list.
- * @property int              $position    Conversations done on that page.
+ * @property int[]|null       $page_done     HelpScout IDs done on that page.
+ * @property int[]|null       $previous_page HelpScout IDs the previous page listed.
  * @property int|null         $pages
  * @property int|null         $total
  * @property int              $imported
@@ -78,6 +79,16 @@ final class Run extends Model {
 	 * @var array
 	 */
 	protected $dates = array( 'since', 'started_at', 'finished_at' );
+
+	/**
+	 * Attribute casts.
+	 *
+	 * @var array
+	 */
+	protected $casts = array(
+		'page_done'     => 'array',
+		'previous_page' => 'array',
+	);
 
 	/**
 	 * The FreeScout mailbox it imports into.

@@ -17,7 +17,7 @@ use RuntimeException;
 class ApiError extends RuntimeException {
 
 	/**
-	 * HTTP status, or 0 if HelpScout couldn't be reached.
+	 * HTTP status, or 0 if HelpScout couldn't be reached; a 2xx status means what HelpScout sent couldn't be read.
 	 *
 	 * @var int
 	 */

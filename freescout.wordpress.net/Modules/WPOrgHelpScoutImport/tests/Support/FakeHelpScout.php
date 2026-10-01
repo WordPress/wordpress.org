@@ -77,6 +77,18 @@ final class FakeHelpScout {
 	}
 
 	/**
+	 * Replaces the answers for one page of a list; other pages get the path's answers.
+	 *
+	 * @param string         $path   Path.
+	 * @param int            $page   Page number.
+	 * @param array|Response $answer JSON body, or a whole response.
+	 * @return self
+	 */
+	public function only_page( string $path, int $page, $answer ): self {
+		return $this->only( 'GET', $path . '?page=' . $page, $answer );
+	}
+
+	/**
 	 * A JSON response.
 	 *
 	 * @param array $body    Body.
@@ -133,6 +145,11 @@ final class FakeHelpScout {
 	private function answer( RequestInterface $request ): Response {
 		$this->requests[] = $request;
 		$key              = $request->getMethod() . ' ' . ltrim( $request->getUri()->getPath(), '/' );
+
+		parse_str( $request->getUri()->getQuery(), $query );
+		if ( isset( $query['page'], $this->answers[ $key . '?page=' . $query['page'] ] ) ) {
+			$key .= '?page=' . $query['page'];
+		}
 
 		if ( empty( $this->answers[ $key ] ) ) {
 			return self::json( array( 'error' => 'Not found: ' . $key ), 404 );

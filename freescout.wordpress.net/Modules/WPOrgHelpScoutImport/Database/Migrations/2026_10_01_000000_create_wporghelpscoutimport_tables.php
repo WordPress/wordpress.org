@@ -36,8 +36,11 @@ class CreateWporghelpscoutimportTables extends Migration {
 					// Only conversations HelpScout changed since then; null for everything.
 					$table->timestamp( 'since' )->nullable();
 					$table->unsignedInteger( 'page' )->default( 1 );
-					// Conversations done on that page.
-					$table->unsignedInteger( 'position' )->default( 0 );
+					// HelpScout IDs done on that page, so a page that's tried again doesn't import them twice.
+					$table->text( 'page_done' )->nullable();
+
+					// HelpScout IDs the previous page listed; others found there since moved there from later pages.
+					$table->text( 'previous_page' )->nullable();
 					$table->unsignedInteger( 'pages' )->nullable();
 					$table->unsignedInteger( 'total' )->nullable();
 					$table->unsignedInteger( 'imported' )->default( 0 );

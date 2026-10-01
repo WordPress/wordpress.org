@@ -74,7 +74,8 @@ final class ImportPageTest extends ImportTestCase {
 
 		$run = $this->run->fresh();
 		$this->assertSame( 2, (int) $run->page );
-		$this->assertSame( 0, (int) $run->position );
+		$this->assertNull( $run->page_done );
+		$this->assertSame( array( 1001, 1002 ), $run->previous_page );
 		$this->assertSame( 1, (int) $run->imported );
 		$this->assertSame( 1, (int) $run->skipped );
 		$this->assertSame( 2, (int) $run->pages );
@@ -88,19 +89,80 @@ final class ImportPageTest extends ImportTestCase {
 	}
 
 	/**
-	 * The last page finishes the run.
+	 * An empty page finishes the run.
 	 *
 	 * @return void
 	 */
-	public function test_last_page_finishes_the_run(): void {
+	public function test_empty_page_finishes_the_run(): void {
 		$this->answer_page( array( $this->conversation() ), 1 );
+
+		$this->handle();
+		$this->assertSame( Run::STATUS_RUNNING, $this->run->fresh()->status );
 
 		$this->handle();
 
 		$run = $this->run->fresh();
 		$this->assertSame( Run::STATUS_DONE, $run->status );
 		$this->assertNotNull( $run->finished_at );
-		Queue::assertNotPushed( ImportPage::class );
+		$this->assertSame( 1, (int) $run->imported );
+		$this->assertSame( 0, (int) $run->updated );
+		Queue::assertPushed( ImportPage::class, 1 );
+	}
+
+	/**
+	 * Conversations that moved onto a page already read, because one before them was deleted, are imported too.
+	 *
+	 * @return void
+	 */
+	public function test_conversations_moved_onto_read_pages_are_imported(): void {
+		foreach ( array( 1002, 1003, 1004 ) as $index => $id ) {
+			$this->answer_threads( $id, $this->threads( 100 * ( $index + 1 ) ) );
+		}
+		$conversations = array_map(
+			function ( int $id ): array {
+				return $this->conversation( array( 'id' => $id ) );
+			},
+			array( 1001, 1002, 1003, 1004 )
+		);
+		$this->answer_list( 1, array_slice( $conversations, 0, 2 ), 2 );
+		$this->answer_list( 2, array_slice( $conversations, 2, 2 ), 2 );
+
+		$this->handle();
+
+		// 1001 is deleted in HelpScout: 1003 moves onto page 1.
+		$this->answer_list( 1, array_slice( $conversations, 1, 2 ), 2 );
+		$this->answer_list( 2, array_slice( $conversations, 3, 1 ), 2 );
+		$this->handle();
+
+		$this->answer_list( 3, array(), 2 );
+		$this->handle();
+
+		$run = $this->run->fresh();
+		$this->assertSame( 4, (int) $run->imported );
+		$this->assertSame( 0, (int) $run->updated );
+		$this->assertSame( Run::STATUS_DONE, $run->status );
+	}
+
+	/**
+	 * What HelpScout sends but can't be read fails that conversation; the page isn't tried again for it.
+	 *
+	 * @return void
+	 */
+	public function test_unreadable_content_fails_only_its_conversation(): void {
+		$this->answer_page( array( $this->conversation() ), 1 );
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/attachments/3001/data', array( 'data' => 'not base64!' ) );
+
+		$this->handle();
+
+		$run = $this->run->fresh();
+		$this->assertSame( 1, (int) $run->failed );
+		$this->assertSame( 2, (int) $run->page );
+		Queue::assertPushed(
+			ImportPage::class,
+			static function ( ImportPage $job ): bool {
+				return null === $job->delay;
+			}
+		);
 	}
 
 	/**
@@ -133,7 +195,7 @@ final class ImportPageTest extends ImportTestCase {
 
 		$run = $this->run->fresh();
 		$this->assertSame( 1, (int) $run->page );
-		$this->assertSame( 1, (int) $run->position );
+		$this->assertSame( array( 1001 ), $run->page_done );
 		$this->assertSame( 1, (int) $run->imported );
 		Queue::assertPushed(
 			ImportPage::class,
@@ -149,7 +211,7 @@ final class ImportPageTest extends ImportTestCase {
 		$run = $this->run->fresh();
 		$this->assertSame( 2, (int) $run->imported );
 		$this->assertSame( 0, (int) $run->updated );
-		$this->assertSame( Run::STATUS_DONE, $run->status );
+		$this->assertSame( 2, (int) $run->page );
 	}
 
 	/**
@@ -166,7 +228,7 @@ final class ImportPageTest extends ImportTestCase {
 		$this->assertSame( 1, (int) $run->failed );
 		$this->assertSame( 1, (int) $run->imported );
 		$this->assertStringContainsString( '1003', (string) $run->last_error );
-		$this->assertSame( Run::STATUS_DONE, $run->status );
+		$this->assertSame( 2, (int) $run->page );
 	}
 
 	/**
@@ -266,16 +328,36 @@ final class ImportPageTest extends ImportTestCase {
 	 * @return void
 	 */
 	private function answer_page( array $conversations, int $pages ): void {
-		$this->helpscout->only(
-			'GET',
-			'v2/conversations',
-			array(
-				'_embedded' => array( 'conversations' => $conversations ),
-				'page'      => array(
-					'totalPages'    => $pages,
-					'totalElements' => count( $conversations ) * $pages,
-				),
-			)
+		$this->helpscout->only( 'GET', 'v2/conversations', self::listing( array(), $pages ) );
+		$this->answer_list( 1, $conversations, $pages );
+	}
+
+	/**
+	 * Has HelpScout list one page of conversations.
+	 *
+	 * @param int     $page          Page number.
+	 * @param array[] $conversations Conversations on the page.
+	 * @param int     $pages         Number of pages.
+	 * @return void
+	 */
+	private function answer_list( int $page, array $conversations, int $pages ): void {
+		$this->helpscout->only_page( 'v2/conversations', $page, self::listing( $conversations, $pages ) );
+	}
+
+	/**
+	 * A page of HelpScout's conversation list.
+	 *
+	 * @param array[] $conversations Conversations on the page.
+	 * @param int     $pages         Number of pages.
+	 * @return array
+	 */
+	private static function listing( array $conversations, int $pages ): array {
+		return array(
+			'_embedded' => array( 'conversations' => $conversations ),
+			'page'      => array(
+				'totalPages'    => $pages,
+				'totalElements' => count( $conversations ) * $pages,
+			),
 		);
 	}
 }

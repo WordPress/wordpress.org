@@ -35,6 +35,13 @@ final class ImportController extends Controller {
 	private const CHANGES_OVERLAP_MINUTES = 15;
 
 	/**
+	 * Why a mailbox can't take another run.
+	 *
+	 * @var string
+	 */
+	private const BUSY = 'An import into this mailbox is still running or paused. Finish it first.';
+
+	/**
 	 * Shows HelpScout's mailboxes, the runs so far, and the forms to start more.
 	 *
 	 * @param Request $request Request; `agents` names a HelpScout mailbox whose users to check.
@@ -93,23 +100,32 @@ final class ImportController extends Controller {
 			return self::back_with_error( __( 'Choose a HelpScout mailbox and a FreeScout mailbox.' ) );
 		}
 
-		$error = self::busy( (int) $mailbox->id );
-		if ( $error ) {
-			return self::back_with_error( $error );
+		$run = \DB::transaction(
+			static function () use ( $source_id, $source, $mailbox ): ?Run {
+				if ( ! self::lock( (int) $mailbox->id ) ) {
+					return null;
+				}
+
+				$previous = Run::query()
+					->where( 'helpscout_mailbox_id', $source_id )
+					->where( 'mailbox_id', $mailbox->id )
+					->where( 'status', Run::STATUS_DONE )
+					->whereNotNull( 'started_at' )
+					->orderByDesc( 'started_at' )
+					->first();
+				$since    = $previous ? $previous->started_at->copy()->subMinutes( self::CHANGES_OVERLAP_MINUTES ) : null;
+
+				return self::begin( $source_id, (string) ( $source['name'] ?? '' ), (int) $mailbox->id, $since );
+			}
+		);
+
+		if ( ! $run ) {
+			return self::back_with_error( __( self::BUSY ) );
 		}
 
-		$previous = Run::query()
-			->where( 'helpscout_mailbox_id', $source_id )
-			->where( 'mailbox_id', $mailbox->id )
-			->where( 'status', Run::STATUS_DONE )
-			->whereNotNull( 'started_at' )
-			->orderByDesc( 'started_at' )
-			->first();
-		$since    = $previous ? $previous->started_at->copy()->subMinutes( self::CHANGES_OVERLAP_MINUTES ) : null;
+		ImportPage::dispatch( (int) $run->id, (string) $run->token );
 
-		self::begin( $source_id, (string) ( $source['name'] ?? '' ), (int) $mailbox->id, $since );
-
-		$message = $since
+		$message = $run->since
 			? __( 'Importing what changed in :name since its last import.', array( 'name' => $source['name'] ?? '' ) )
 			: __( 'Importing :name.', array( 'name' => $source['name'] ?? '' ) );
 
@@ -140,36 +156,50 @@ final class ImportController extends Controller {
 	 * @return RedirectResponse
 	 */
 	public function resume( int $id ): RedirectResponse {
-		$run = Run::find( $id );
-		if ( ! $run || ! in_array( $run->status, array( Run::STATUS_PAUSED, Run::STATUS_FAILED ), true ) ) {
-			return redirect()->route( 'wporghelpscoutimport.index' );
+		$mailbox_id = (int) Run::query()->whereKey( $id )->value( 'mailbox_id' );
+
+		$run = \DB::transaction(
+			static function () use ( $id, $mailbox_id ) {
+				if ( ! self::lock( $mailbox_id, $id ) ) {
+					return self::BUSY;
+				}
+
+				// Read again under the lock, in case it changed since.
+				$run = Run::find( $id );
+				if ( ! $run || ! in_array( $run->status, array( Run::STATUS_PAUSED, Run::STATUS_FAILED ), true ) ) {
+					return null;
+				}
+
+				$run->status      = Run::STATUS_RUNNING;
+				$run->finished_at = null;
+				$run->renew_token();
+				$run->save();
+
+				return $run;
+			}
+		);
+
+		if ( self::BUSY === $run ) {
+			return self::back_with_error( __( self::BUSY ) );
 		}
 
-		$error = self::busy( (int) $run->mailbox_id, (int) $run->id );
-		if ( $error ) {
-			return self::back_with_error( $error );
+		if ( $run instanceof Run ) {
+			ImportPage::dispatch( (int) $run->id, (string) $run->token );
 		}
-
-		$run->status      = Run::STATUS_RUNNING;
-		$run->finished_at = null;
-		$token            = $run->renew_token();
-		$run->save();
-
-		ImportPage::dispatch( (int) $run->id, $token );
 
 		return redirect()->route( 'wporghelpscoutimport.index' );
 	}
 
 	/**
-	 * Creates a run and queues its first page.
+	 * Creates a running run; its first page is queued once the transaction is committed.
 	 *
 	 * @param int         $source_id   HelpScout mailbox ID.
 	 * @param string      $source_name HelpScout mailbox name.
 	 * @param int         $mailbox_id  FreeScout mailbox ID.
 	 * @param Carbon|null $since       Only conversations changed since then.
-	 * @return void
+	 * @return Run
 	 */
-	private static function begin( int $source_id, string $source_name, int $mailbox_id, ?Carbon $since ): void {
+	private static function begin( int $source_id, string $source_name, int $mailbox_id, ?Carbon $since ): Run {
 		$run                         = new Run();
 		$run->helpscout_mailbox_id   = $source_id;
 		$run->helpscout_mailbox_name = $source_name;
@@ -178,29 +208,30 @@ final class ImportController extends Controller {
 		$run->status                 = Run::STATUS_RUNNING;
 		$run->since                  = $since;
 		$run->started_at             = Carbon::now();
-		$token                       = $run->renew_token();
+		$run->renew_token();
 		$run->save();
 
-		ImportPage::dispatch( (int) $run->id, $token );
+		return $run;
 	}
 
 	/**
-	 * Why a FreeScout mailbox can't take another run now, if it can't.
+	 * Locks a FreeScout mailbox's row until the transaction ends, and checks no other run is open for it.
 	 *
-	 * One run per mailbox at a time, so two can't import the same conversation at once.
+	 * One run per mailbox at a time, so two can't import the same conversation at once. The lock keeps two requests,
+	 * like a double click, from both finding none.
 	 *
 	 * @param int $mailbox_id FreeScout mailbox ID.
 	 * @param int $except     Run to leave out.
-	 * @return string Empty if it can.
+	 * @return bool Whether the mailbox can take the run.
 	 */
-	private static function busy( int $mailbox_id, int $except = 0 ): string {
-		$open = Run::query()
+	private static function lock( int $mailbox_id, int $except = 0 ): bool {
+		Mailbox::query()->whereKey( $mailbox_id )->lockForUpdate()->first();
+
+		return ! Run::query()
 			->where( 'mailbox_id', $mailbox_id )
 			->whereIn( 'status', array( Run::STATUS_RUNNING, Run::STATUS_PAUSED ) )
 			->where( 'id', '!=', $except )
 			->exists();
-
-		return $open ? __( 'An import into this mailbox is still running or paused. Finish it first.' ) : '';
 	}
 
 	/**
