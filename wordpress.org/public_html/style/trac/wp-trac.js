@@ -268,14 +268,30 @@ let wpTrac,
 	 *                            string, a DOM Node, or an array of either to insert as-is.
 	 */
 	function linkTextNodes( root, regex, replacer ) {
-		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_TEXT ),
-			textNodes = [];
+		if ( ! ( regex instanceof RegExp ) || ! regex.global ) {
+			return;
+		}
+
+		const walker = document.createTreeWalker(
+			root,
+			window.NodeFilter.SHOW_TEXT,
+			{
+				acceptNode( node ) {
+					if ( node.parentElement && node.parentElement.closest( 'a' ) ) {
+						return window.NodeFilter.FILTER_REJECT;
+					}
+					return node.nodeValue && node.nodeValue.trim()
+					? window.NodeFilter.FILTER_ACCEPT
+					: window.NodeFilter.FILTER_SKIP;
+				},
+			}
+		);
+
+		const textNodes = [];
 		let node;
 
 		while ( ( node = walker.nextNode() ) ) {
-			if ( ! $( node.parentNode ).closest( 'a' ).length ) {
-				textNodes.push( node );
-			}
+			textNodes.push( node );
 		}
 
 		textNodes.forEach( function ( textNode ) {
@@ -390,7 +406,7 @@ let wpTrac,
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
 				linkTextNodes( this, mentionsRegEx, function ( match, pre, username ) {
-					if ( -1 !== $.inArray( username, reservedTerms ) ) {
+					if ( reservedTerms.includes( username ) ) {
 						return match;
 					}
 
@@ -565,18 +581,32 @@ let wpTrac,
 				}
 
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
-				window.onbeforeunload = function () {
-					if ( wpTrac.isNewTicket() ) {
-						if ( ! $( '#field-description' ).val() && ! $( '#field-summary' ).val() ) {
-							return;
-						}
-					} else if ( ! $( '#comment' ).val() ) {
+				let isSubmitting = false;
+
+				window.addEventListener( 'beforeunload', function ( event ) {
+					if ( isSubmitting ) {
 						return;
 					}
-					return 'The changes you made will be lost if you navigate away from this page.';
-				};
-				$( '.buttons' ).on( 'click', 'input', function () {
-					window.onbeforeunload = null;
+
+					const hasUnsavedContent = wpTrac.isNewTicket()
+						? Boolean( $( '#field-description' ).val() || $( '#field-summary' ).val() )
+						: Boolean( $( '#comment' ).val() );
+
+					if ( ! hasUnsavedContent ) {
+						return;
+					}
+
+					event.preventDefault();
+					event.returnValue = '';
+				} );
+
+				$( '#propertyform' ).on( 'submit', function ( event ) {
+					isSubmitting = true;
+					setTimeout( function () {
+						if ( event.isDefaultPrevented() ) {
+							isSubmitting = false;
+						}
+					}, 0 );
 				} );
 			}
 
@@ -730,16 +760,14 @@ let wpTrac,
 						$comment = $el.find( '.comment' ),
 						$commit = $( '<li>' );
 
-					const commitNumber = $comment
-						.find( '> p ' )
-						.html()
-						.trim()
-						.replace( /^In /, '' )
-						.replace( /:<br>$/, '' );
-					$commit.append( '[' + commitNumber + '] ' );
+					const $changesetLink = $comment.find( '> p > a.changeset' ).first().clone();
+					if ( $changesetLink.length ) {
+						$commit.append( document.createTextNode( '[' ), $changesetLink, document.createTextNode( '] ' ) );
+					}
 
-					const firstLine = $comment.find( '.message > p' ).html().trim().replace( /<br>$/, '' );
-					$commit.append( firstLine + '&hellip;' );
+					const rawMessage = $comment.find( '.message > p' ).text().trim();
+					const firstLine = rawMessage.split( '\n' )[ 0 ].trim();
+					$commit.append( $( '<span />' ).text( firstLine + '…' ) );
 
 					const author = $el.find( '.username' ).data( 'username' );
 					if ( author ) {
@@ -751,8 +779,10 @@ let wpTrac,
 						);
 					}
 
-					const date = $el.find( '.time-ago' ).html();
-					$commit.append( ' ' + date );
+					const dateText = $el.find( '.time-ago' ).text().trim();
+					if ( dateText ) {
+						$commit.append( document.createTextNode( ' ' + dateText ) );
+					}
 
 					$commits.append( $commit );
 					commitCount += 1;
@@ -1498,8 +1528,8 @@ let wpTrac,
 
 						if (
 							typeof username !== 'undefined' &&
-							-1 === $.inArray( username, users ) &&
-							-1 === $.inArray( username, exclude )
+							! users.includes( username ) &&
+							! exclude.includes( username )
 						) {
 							users.push( username );
 						}
@@ -1518,15 +1548,13 @@ let wpTrac,
 						ticketReporter = ticketReporterNicename;
 					}
 
-					if ( ticketReporter && -1 === $.inArray( ticketReporter, users ) ) {
+					if ( ticketReporter && ! users.includes( ticketReporter ) ) {
 						users.push( ticketReporter );
 					}
 
 					// Exclude current user.
 					if ( wpTrac.currentUser ) {
-						users = $.grep( users, function ( user ) {
-							return user !== wpTrac.currentUser;
-						} );
+						users = users.filter( ( user ) => user !== wpTrac.currentUser );
 					}
 
 					ticketParticipants = users;
@@ -1537,8 +1565,8 @@ let wpTrac,
 				},
 
 				addTicketParticipant( ticketParticipant ) {
-					if ( -1 === $.inArray( ticketParticipant, ticketParticipants ) ) {
-						$.merge( ticketParticipants, [ ticketParticipant ] );
+					if ( ! ticketParticipants.includes( ticketParticipant ) ) {
+						ticketParticipants.push( ticketParticipant );
 					}
 				},
 
@@ -1548,8 +1576,8 @@ let wpTrac,
 					if ( 'undefined' !== typeof settings.include ) {
 						$.each( settings.include, function ( k, username ) {
 							if (
-								-1 === $.inArray( username, users ) &&
-								-1 === $.inArray( username, ticketParticipants )
+								! users.includes( username ) &&
+								! ticketParticipants.includes( username )
 							) {
 								users.push( username );
 							}
@@ -1558,9 +1586,7 @@ let wpTrac,
 
 					// Exclude current user.
 					if ( wpTrac.currentUser ) {
-						users = $.grep( users, function ( user ) {
-							return user !== wpTrac.currentUser;
-						} );
+						users = users.filter( ( user ) => user !== wpTrac.currentUser );
 					}
 
 					nonTicketParticipants = users;
@@ -1571,8 +1597,8 @@ let wpTrac,
 				},
 
 				addNonTicketParticipant( nonTicketParticipant ) {
-					if ( -1 === $.inArray( nonTicketParticipant, nonTicketParticipants ) ) {
-						$.merge( nonTicketParticipants, [ nonTicketParticipant ] );
+					if ( ! nonTicketParticipants.includes( nonTicketParticipant ) ) {
+						nonTicketParticipants.push( nonTicketParticipant );
 					}
 				},
 
@@ -1652,7 +1678,7 @@ let wpTrac,
 					wpTrac.workflow.populate();
 
 					// Save these for later.
-					originalKeywords = $.merge( [], keywords );
+					originalKeywords = [ ...keywords ];
 
 					// Catch the submit to see if keywords were simply reordered.
 					elements.hiddenEl.parents( 'form' ).on( 'submit', wpTrac.workflow.submit );
@@ -1776,16 +1802,16 @@ let wpTrac,
 
 					$.each( coreKeywordList, function ( k ) {
 						// Don't show special (permission-based) ones.
-						if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) ) {
+						if ( ! wpTrac.gardener && gardenerKeywordList.includes( k ) ) {
 							return;
 						}
 						// Don't show workflow keywords such as 'reporter-feedback' for new ticket.
-						if ( wpTrac.isNewTicket() && -1 !== $.inArray( k, hideFromNewTickets ) ) {
+						if ( wpTrac.isNewTicket() && hideFromNewTickets.includes( k ) ) {
 							return;
 						}
 						elements.add.append(
 							`<option value="${ k }${
-								-1 !== $.inArray( k, keywords ) ? '" disabled="disabled">* ' : '">'
+								keywords.includes( k ) ? '" disabled="disabled">* ' : '">'
 							}${ k }</option>`
 						);
 					} );
@@ -1800,7 +1826,7 @@ let wpTrac,
 					let title = '';
 
 					// Don't add it again.
-					if ( -1 !== $.inArray( keyword, keywords ) ) {
+					if ( keywords.includes( keyword ) ) {
 						return;
 					}
 					keywords.push( keyword );
@@ -1842,9 +1868,7 @@ let wpTrac,
 						keyword = object.text();
 					}
 
-					keywords = $.grep( keywords, function ( v ) {
-						return v !== keyword;
-					} );
+					keywords = keywords.filter( ( v ) => v !== keyword );
 
 					// Update the core keyword dropdown.
 					if ( keyword in coreKeywordList ) {
@@ -1864,9 +1888,7 @@ let wpTrac,
 						return;
 					}
 
-					const testKeywords = $.grep( keywords, function ( v ) {
-						return -1 === $.inArray( v, originalKeywords );
-					} );
+					const testKeywords = keywords.filter( ( v ) => ! originalKeywords.includes( v ) );
 
 					// If the difference has no length, then restore to the original keyword order.
 					if ( ! testKeywords.length ) {
@@ -1905,7 +1927,7 @@ let wpTrac,
 				} else {
 					focuses = focuses.split( ' ' );
 				}
-				originalFocuses = $.merge( [], focuses );
+				originalFocuses = [ ...focuses ];
 
 				container = $( '#focuses' );
 
@@ -1913,7 +1935,7 @@ let wpTrac,
 				$.each( coreFocusesList, function ( focus, description ) {
 					let ariaPressed = 'false';
 					classes = focus.replace( ' ', '-' );
-					if ( -1 !== $.inArray( focus, focuses ) ) {
+					if ( focuses.includes( focus ) ) {
 						classes += ' active';
 						ariaPressed = 'true';
 					}
@@ -1964,16 +1986,14 @@ let wpTrac,
 				focus.removeClass( 'active' );
 				focus.find( '.core-focuses-button' ).attr( 'aria-pressed', 'false' );
 				const removedFocus = focus.data( 'focus' );
-				focuses = $.grep( focuses, function ( value ) {
-					return value !== removedFocus;
-				} );
+				focuses = focuses.filter( ( value ) => value !== removedFocus );
 				updateField();
 			}
 
 			function updateField() {
 				const orderedFocuses = [];
 				$.each( coreFocusesList, function ( focus ) {
-					if ( -1 !== $.inArray( focus, focuses ) ) {
+					if ( focuses.includes( focus ) ) {
 						orderedFocuses.push( focus );
 					}
 				} );
@@ -1992,9 +2012,7 @@ let wpTrac,
 					return;
 				}
 
-				const testFocuses = $.grep( focuses, function ( v ) {
-					return -1 === $.inArray( v, originalFocuses );
-				} );
+				const testFocuses = focuses.filter( ( v ) => ! originalFocuses.includes( v ) );
 
 				// If the difference has no length, then restore to the original order.
 				if ( ! testFocuses.length ) {
@@ -2124,7 +2142,7 @@ let wpTrac,
 					const names = $( this ).hasClass( 'names' );
 					notifications.toggleClass( 'show-usernames', names );
 					document.cookie =
-						'wp_trac_ngrid=' + ( names ? 1 : 0 ) + ';max-age=31557600;domain=.wordpress.org;path=/';
+						'wp_trac_ngrid=' + ( names ? 1 : 0 ) + ';max-age=31557600;domain=.wordpress.org;path=/;SameSite=Lax';
 					return false;
 				} );
 
@@ -2233,7 +2251,7 @@ let wpTrac,
 
 					stars
 						.each( function () {
-							if ( -1 !== $.inArray( $( this ).data( 'ticket' ), data.data.tickets ) ) {
+							if ( data.data.tickets.includes( $( this ).data( 'ticket' ) ) ) {
 								$( this ).toggleClass( 'dashicons-star-empty dashicons-star-filled' );
 							}
 						} )
