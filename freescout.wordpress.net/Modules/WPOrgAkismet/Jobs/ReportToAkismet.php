@@ -75,7 +75,9 @@ final class ReportToAkismet implements ShouldQueue {
 	 */
 	public function handle(): void {
 		$conversation = Conversation::find( $this->conversation_id );
-		if ( ! $conversation ) {
+
+		// An agent may have changed it back while the report waited.
+		if ( ! $conversation || ( $conversation->isSpam() ? Akismet::SPAM : Akismet::HAM ) !== $this->verdict ) {
 			return;
 		}
 

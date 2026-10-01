@@ -276,6 +276,7 @@ final class SpamCheckTest extends TestCase {
 	 * @return void
 	 */
 	public function test_report_is_sent_and_recorded(): void {
+		$this->conversation->setStatus( Conversation::STATUS_SPAM );
 		$this->record( array( 'verdict' => Akismet::HAM ) );
 		$updated_at = (string) $this->conversation->fresh()->updated_at;
 		$this->answers->append( new Response( 200, array(), 'Thanks for making the web a better place.' ) );
@@ -291,11 +292,28 @@ final class SpamCheckTest extends TestCase {
 	}
 
 	/**
+	 * A report waiting in the queue isn't sent once an agent has changed the conversation back.
+	 *
+	 * @return void
+	 */
+	public function test_undone_mark_is_not_reported(): void {
+		$this->record( array( 'verdict' => Akismet::HAM ) );
+		$this->answers->append( new Response( 200, array(), 'Thanks for making the web a better place.' ) );
+
+		// Queued when the agent marked it as spam; they've taken it out of spam since.
+		( new ReportToAkismet( (int) $this->conversation->id, Akismet::SPAM ) )->handle();
+
+		$this->assertCount( 0, $this->requests );
+		$this->assertArrayNotHasKey( 'reported', $this->conversation->fresh()->getMeta( WPOrgAkismetServiceProvider::META ) );
+	}
+
+	/**
 	 * A report Akismet didn't accept, like one with an invalid key, isn't recorded, so it's tried again.
 	 *
 	 * @return void
 	 */
 	public function test_rejected_report_is_not_recorded(): void {
+		$this->conversation->setStatus( Conversation::STATUS_SPAM );
 		$this->record( array( 'verdict' => Akismet::HAM ) );
 		$this->answers->append( new Response( 200, array(), 'invalid' ) );
 

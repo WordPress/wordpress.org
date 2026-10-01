@@ -50,11 +50,11 @@ final class Message {
 	}
 
 	/**
-	 * Finds the address the email entered the mail system from, in its Received headers.
+	 * Finds the server that handed the email to WordPress.org, in its Received headers.
 	 *
-	 * Mail servers add a Received header at the top for each hop, so the oldest public address is the furthest from
-	 * WordPress.org's own servers. Addresses there are only as trustworthy as the servers that wrote them; Akismet
-	 * treats the IP as one signal among many.
+	 * Mail servers add a Received header at the top for each hop, so the newest ones are written by WordPress.org's
+	 * own servers, and older ones by whoever sent the email, who can write anything there. So the headers are read
+	 * from the top, past private addresses and WordPress.org's relays, and the first other server is the sender's.
 	 *
 	 * @param string $headers Raw email headers.
 	 * @return string|null Public IP address, or null if there's none.
@@ -65,21 +65,69 @@ final class Message {
 
 		preg_match_all( '/^Received:(.*)$/mi', $headers, $received );
 
-		foreach ( array_reverse( $received[1] ) as $hop ) {
-			// The address of the server that sent it is in the "from" part, before the receiving server's "by".
-			$from = preg_split( '/\sby\s/i', $hop, 2 )[0];
+		foreach ( $received[1] as $hop ) {
+			// The sending server is in the "from" part, before the receiving server's "by".
+			$sender = self::sending_server( preg_split( '/\sby\s/i', $hop, 2 )[0] );
+			if ( ! $sender ) {
+				continue;
+			}
 
-			preg_match_all( '/\[(?:IPv6:)?([0-9a-f:.]+)\]|\((\d{1,3}(?:\.\d{1,3}){3})\)/i', $from, $candidates, PREG_SET_ORDER );
+			list( $host, $ip ) = $sender;
 
-			foreach ( $candidates as $candidate ) {
-				$ip = '' !== $candidate[1] ? $candidate[1] : ( $candidate[2] ?? '' );
+			if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) || self::is_relay( $host ) ) {
+				continue;
+			}
 
-				if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
-					return $ip;
-				}
+			return $ip;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Reads the address the receiving server saw the sending server connect from, and its reverse DNS name.
+	 *
+	 * Only what the receiving server recorded counts, not the name the sender announced (HELO):
+	 * Postfix and Sendmail write "from HELO (rDNS [IP])", Exim "from rDNS ([IP] helo=HELO)" or "from [IP] (helo=HELO)".
+	 *
+	 * @param string $from The "from" part of a Received header.
+	 * @return array|null Reverse DNS name (or '') and IP address, or null if the hop has neither.
+	 */
+	private static function sending_server( string $from ): ?array {
+		$ip_pattern = '(?:IPv6:)?([0-9a-f:.]+)';
+
+		$patterns = array(
+			// Postfix and Sendmail.
+			'/\(\s*([^\s()\[\]=]+?)\.?\s+\[' . $ip_pattern . '\]/i' => array( 1, 2 ),
+			// Exim, with and without a reverse DNS name.
+			'/^\s*from\s+([^\s()\[\]]+?)\.?\s+\(\[' . $ip_pattern . '\]/i' => array( 1, 2 ),
+			'/^\s*from\s+\[' . $ip_pattern . '\]/i' => array( null, 1 ),
+			// Servers that only write the address, like "from example.org (93.184.216.34)".
+			'/\((\d{1,3}(?:\.\d{1,3}){3})\)/'       => array( null, 1 ),
+		);
+
+		foreach ( $patterns as $pattern => $groups ) {
+			if ( preg_match( $pattern, $from, $match ) && filter_var( $match[ $groups[1] ], FILTER_VALIDATE_IP ) ) {
+				return array( null === $groups[0] ? '' : strtolower( $match[ $groups[0] ] ), $match[ $groups[1] ] );
 			}
 		}
 
 		return null;
+	}
+
+	/**
+	 * Whether a reverse DNS name belongs to one of WordPress.org's own mail servers.
+	 *
+	 * @param string $host Reverse DNS name.
+	 * @return bool
+	 */
+	private static function is_relay( string $host ): bool {
+		foreach ( (array) config( 'wporgakismet.relays', array() ) as $domain ) {
+			if ( $host === $domain || str_ends_with( $host, '.' . $domain ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

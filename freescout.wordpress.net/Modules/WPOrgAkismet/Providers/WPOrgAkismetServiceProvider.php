@@ -93,7 +93,7 @@ final class WPOrgAkismetServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	private function register_hooks(): void {
-		// Runs before the conversation is saved, and before auto-replies and notifications, which skip spam.
+		// Runs while the conversation is created, before auto-replies and notifications, which skip spam.
 		\Eventy::addFilter(
 			'conversation.created_by_customer',
 			static function ( $conversation = null, $thread = null ) {
@@ -121,7 +121,7 @@ final class WPOrgAkismetServiceProvider extends ServiceProvider {
 	 * Never throws: mail fetching must go on whatever happens here. Without a verdict, the conversation comes in
 	 * as usual.
 	 *
-	 * @param mixed $conversation Conversation, not yet saved.
+	 * @param mixed $conversation Conversation; core saves it again after the filter.
 	 * @param mixed $thread       The sender's email that started it.
 	 * @return void
 	 */

@@ -4,7 +4,7 @@ Checks new conversations from senders with [Akismet](https://akismet.com/), like
 
 ## How it works
 
-- **Checking:** when an email starts a new conversation, its sender, subject, and text go to Akismet, with the IP address it entered the mail system from (from its `Received` headers). This happens before the conversation is saved, so spam never sends an auto-reply or notifies anyone. Replies to existing conversations, imported conversations, and email without a public IP address aren't checked.
+- **Checking:** when an email starts a new conversation, its sender, subject, and text go to Akismet, with the IP address of the server that handed it to WordPress.org (from its `Received` headers, which senders can't fake past WordPress.org's own servers). This happens while the conversation is created, before auto-replies and notifications, so spam never sends an auto-reply or notifies anyone. Replies to existing conversations, imported conversations, and email without a public IP address aren't checked.
 - **Marking:** spam goes straight to the mailbox's Spam folder, and Akismet's verdict is recorded on the conversation.
 - **Learning:** when an agent marks a checked conversation as spam that Akismet let through, or takes one out of spam that Akismet caught, Akismet is told, from FreeScout's queue.
 - **Checking on it:** `php artisan wporgakismet:report --days=14` counts the conversations agents took out of spam, and the spam they marked that Akismet let through.

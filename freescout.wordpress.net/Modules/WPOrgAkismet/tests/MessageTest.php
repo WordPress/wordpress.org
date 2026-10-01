@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgAkismet\Tests;
 
 use App\Thread;
+use Modules\WPOrgAkismet\Providers\WPOrgAkismetServiceProvider;
 use Modules\WPOrgAkismet\Services\Message;
 use WordPressdotorg\FreeScout\Tests\TestCase;
 
@@ -19,20 +20,51 @@ use WordPressdotorg\FreeScout\Tests\TestCase;
 final class MessageTest extends TestCase {
 
 	/**
-	 * The oldest public address of a sending server wins: newer hops are WordPress.org's own servers, and receiving servers don't count.
+	 * Registers the module, for its list of WordPress.org's relays.
 	 *
 	 * @return void
 	 */
-	public function test_sender_ip_is_the_oldest_public_address(): void {
-		$headers = "Received: from mx.wordpress.org (mx.wordpress.org [10.0.0.5])\r\n"
-			. "\tby imap.wordpress.org with ESMTP id 1; Wed, 1 Oct 2026 10:00:02 +0000\r\n"
+	protected function setUp(): void {
+		parent::setUp();
+
+		$this->app->register( WPOrgAkismetServiceProvider::class );
+	}
+
+	/**
+	 * The sender's server is the one that handed the email to WordPress.org's servers.
+	 *
+	 * Older hops are written by the sender, so they can't be trusted; newer ones are WordPress.org's own.
+	 *
+	 * @return void
+	 */
+	public function test_sender_ip_is_the_server_before_wordpress_org(): void {
+		$headers = "Received: from relay1.wordpress.org (relay1.wordpress.org [198.143.164.252])\r\n"
+			. "\tby imap.wordpress.org with ESMTP id 1; Wed, 1 Oct 2026 10:00:03 +0000\r\n"
+			. "Received: from mx.wordpress.org (mx.wordpress.org [10.0.0.5])\r\n"
+			. "\tby relay1.wordpress.org with ESMTP id 2; Wed, 1 Oct 2026 10:00:02 +0000\r\n"
 			. "Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])\r\n"
-			. "\tby mx.wordpress.org (93.184.216.34) with ESMTPS id 2; Wed, 1 Oct 2026 10:00:01 +0000\r\n"
-			. "Received: from localhost (localhost [127.0.0.1])\r\n"
-			. "\tby smtp.example.org (93.184.216.34) with ESMTP id 3; Wed, 1 Oct 2026 10:00:00 +0000\r\n"
+			. "\tby mx.wordpress.org (93.184.216.34) with ESMTPS id 3; Wed, 1 Oct 2026 10:00:01 +0000\r\n"
+			. "Received: from clean.example.org (clean.example.org [93.184.216.34])\r\n"
+			. "\tby mail-sor-f41.google.com with ESMTP id 4; Wed, 1 Oct 2026 10:00:00 +0000\r\n"
 			. "Subject: Hello\r\n";
 
 		$this->assertSame( '209.85.220.41', Message::sender_ip( $headers ) );
+	}
+
+	/**
+	 * Only what the receiving server recorded counts, not the name the sender announced.
+	 *
+	 * @return void
+	 */
+	public function test_sender_ip_ignores_what_the_sender_announced(): void {
+		// Postfix: the HELO comes first, the address it saw in parentheses.
+		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from [8.8.8.8] (unknown [93.184.216.34]) by mx.wordpress.org\r\n" ) );
+
+		// A HELO claiming to be WordPress.org doesn't make a server one of its relays.
+		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from mx.wordpress.org (unknown [93.184.216.34]) by mx.wordpress.org\r\n" ) );
+
+		// Exim: the HELO is inside the parentheses.
+		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from [93.184.216.34] (helo=[8.8.8.8]) by mx.wordpress.org\r\n" ) );
 	}
 
 	/**
@@ -42,6 +74,7 @@ final class MessageTest extends TestCase {
 	 */
 	public function test_sender_ip_formats(): void {
 		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from [93.184.216.34] (helo=example.org)\r\n\tby mx.wordpress.org\r\n" ) );
+		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from example.org ([93.184.216.34] helo=example.org) by mx.wordpress.org\r\n" ) );
 		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from example.org (93.184.216.34) by mx.wordpress.org\r\n" ) );
 		$this->assertSame( '2a00:1450:4864:20::22b', Message::sender_ip( "Received: from example.org (example.org [IPv6:2a00:1450:4864:20::22b]) by mx.wordpress.org\r\n" ) );
 	}
