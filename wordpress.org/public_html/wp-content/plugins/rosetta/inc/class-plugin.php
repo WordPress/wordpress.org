@@ -7,7 +7,6 @@
 
 namespace WordPressdotorg\Rosetta;
 
-use WP_Post;
 use WP_Site;
 
 /**
@@ -133,7 +132,7 @@ class Plugin {
 	 */
 	public function filter_timezone_string() {
 		/**
-		 * Translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
+		 * translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
 		 * or a valid timezone string (America/New_York). See https://www.php.net/manual/timezones.php
 		 * for all timezone strings supported by PHP.
 		 */
@@ -163,7 +162,7 @@ class Plugin {
 		}
 
 		/**
-		 * Translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
+		 * translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
 		 * or a valid timezone string (America/New_York). See https://www.php.net/manual/timezones.php
 		 * for all timezone strings supported by PHP.
 		 */
@@ -183,7 +182,7 @@ class Plugin {
 	 */
 	public function filter_date_format() {
 		/* translators: default date format, see https://www.php.net/date */
-		return _x( 'F j, Y', 'default date format', 'rosetta' );
+		return __( 'F j, Y', 'rosetta' );
 	}
 
 	/**
@@ -193,7 +192,7 @@ class Plugin {
 	 */
 	public function filter_time_format() {
 		/* translators: default time format, see https://www.php.net/date */
-		return _x( 'g:i a', 'default time format', 'rosetta' );
+		return __( 'g:i a', 'rosetta' );
 	}
 
 	/**
