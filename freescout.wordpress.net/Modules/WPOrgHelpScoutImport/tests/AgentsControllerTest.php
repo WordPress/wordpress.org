@@ -109,7 +109,6 @@ final class AgentsControllerTest extends ImportTestCase {
 		$this->assertMatchesRegularExpression( '#<tr id="agent-57"\s+class="warning"#', $page );
 		$this->assertStringContainsString( 'Suggested: Cy Namesake, with the same name.', $page );
 		$this->assertStringContainsString( 'Photos, Themes', $page );
-		$this->assertStringContainsString( 'name="agents[56][can_log_in]" value="1" checked', $page );
 		$this->assertStringNotContainsString( 'id="agent-90"', $page );
 		$this->assertStringContainsString( 'A8C Legal', $page );
 	}
@@ -217,6 +216,11 @@ final class AgentsControllerTest extends ImportTestCase {
 	public function test_can_log_in_and_connected_accounts(): void {
 		$this->use_wordpress_org();
 		Account::connect( (int) $this->admin->id, 'adminuser' );
+
+		$this->assertStringContainsString(
+			'name="agents[56][can_log_in]" value="1" checked',
+			$this->get( route( 'wporghelpscoutimport.agents' ) )->getContent()
+		);
 
 		$this->post(
 			route( 'wporghelpscoutimport.agents.save' ),
