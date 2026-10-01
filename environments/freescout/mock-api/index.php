@@ -2,7 +2,7 @@
 /**
  * Mock of the api.wordpress.org/dotorg/freescout/ endpoints.
  *
- * Checks requests like the real endpoints (signature, JSON object, age), and answers sidebar requests with sample panels that include some of the data it received.
+ * Checks requests like the real endpoints (signature, JSON object, age, endpoint; not nonces), and answers sidebar requests with sample panels that include some of the data it received.
  * Webhook events are logged to the container output: `docker compose logs mock-api`.
  * Also stands in for login.wordpress.org's identity provider at /idp; see idp.php.
  *
@@ -27,16 +27,6 @@ function respond( int $status, array|object $data ): void {
 	exit;
 }
 
-/**
- * Escapes a value for HTML output.
- *
- * @param string $value Value.
- * @return string
- */
-function esc( string $value ): string {
-	return htmlspecialchars( $value, ENT_QUOTES );
-}
-
 $endpoint = basename( (string) parse_url( (string) $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
 
 // Browsers come here, not FreeScout, so there's no signature.
@@ -55,9 +45,10 @@ if ( ! hash_equals( hash_hmac( 'sha256', $body, $secret ), $signature ) ) {
 
 $request = json_decode( $body );
 
-// The real endpoints refuse requests older or newer than 15 minutes.
-if ( ! is_object( $request ) || abs( time() - (int) ( $request->sent_at ?? 0 ) ) > 15 * 60 ) {
-	respond( 403, array( 'error' => 'Not a fresh JSON object.' ) );
+// Like the real endpoints, minus the nonce check.
+$age = time() - (int) ( $request->sent_at ?? 0 );
+if ( ! is_object( $request ) || $age < -10 || $age > 5 * 60 || ( $request->endpoint ?? '' ) !== $endpoint ) {
+	respond( 403, array( 'error' => 'Not a fresh JSON object for this endpoint.' ) );
 }
 
 if ( 'account.php' === $endpoint ) {
@@ -102,38 +93,179 @@ $mailbox = (string) ( $request->mailbox->name ?? '' );
 $threads = count( $request->threads ?? array() );
 
 /**
- * Renders a sample plugin, like plugins-themes.php does.
+ * A sample plugin, like plugins-themes.php sends.
  *
  * @param string $name   Plugin name.
  * @param string $status Badge text, empty for a published plugin.
  * @param string $tone   Badge tone.
- * @return string
+ * @return array
  */
-function item( string $name, string $status = '', string $tone = 'neutral' ): string {
+function item( string $name, string $status = '', string $tone = 'neutral' ): array {
 	$slug = strtolower( str_replace( ' ', '-', $name ) );
 
-	return sprintf(
-		'<li class="wporg-sidebar-item"><span class="wporg-sidebar-item-links"><a href="#" title="View on WordPress.org" aria-label="View on WordPress.org"><i class="glyphicon glyphicon-link"></i></a> <a href="#" title="Download" aria-label="Download"><i class="glyphicon glyphicon-download-alt"></i></a></span><a class="wporg-sidebar-item-title" href="#">%s</a> %s<div class="wporg-sidebar-item-meta">%s · <span title="2026-01-01">Updated 3 weeks ago</span></div></li>',
-		esc( $name ),
-		$status ? sprintf( '<span class="wporg-sidebar-badge is-%s">%s</span>', esc( $tone ), esc( $status ) ) : '',
-		esc( $slug )
+	return array(
+		'title'  => $name,
+		'url'    => 'https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=1',
+		'badges' => $status ? array( badge( $status, $tone ) ) : array(),
+		'meta'   => array(
+			array( 'text' => $slug ),
+			array(
+				'text'    => 'Updated 3 weeks ago',
+				'tooltip' => '2026-01-01',
+			),
+		),
+		'links'  => array(
+			array(
+				'text' => 'View on WordPress.org',
+				'url'  => 'https://wordpress.org/plugins/' . $slug . '/',
+				'icon' => 'link',
+			),
+			array(
+				'text' => 'Download',
+				'url'  => 'https://downloads.wordpress.org/plugin/' . $slug . '.latest-stable.zip',
+				'icon' => 'download-alt',
+			),
+		),
 	);
 }
 
-// Sample panels in the real endpoints' markup, so the sidebar's styles can be worked on locally.
-$html = match ( $endpoint ) {
-	'profile.php'        => sprintf(
-		'<p class="wporg-sidebar-lead"><a href="#">%s</a></p><p class="wporg-sidebar-meta">Mock: %d threads from %s</p><ul class="wporg-sidebar-links"><li><a href="#">Account &amp; Security</a></li><li><a href="#">Forum Profile</a></li><li><a href="#">Search pending signups</a></li></ul><h5 class="wporg-sidebar-heading">Slack</h5><ul class="wporg-sidebar-items"><li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="#">%1$s</a> <span class="wporg-sidebar-badge is-success">Active</span><div class="wporg-sidebar-item-meta">Updated 2026-01-01</div></li><li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="#">%1$s-old</a> <span class="wporg-sidebar-badge is-error">Deactivated</span><div class="wporg-sidebar-item-meta">Updated 2019-06-01</div></li></ul>',
-		esc( (string) strtok( $email, '@' ) ),
-		$threads,
-		esc( $mailbox )
+/**
+ * A badge.
+ *
+ * @param string $label Text.
+ * @param string $tone  Tone.
+ * @return array
+ */
+function badge( string $label, string $tone ): array {
+	return array(
+		'label' => $label,
+		'tone'  => $tone,
+	);
+}
+
+/**
+ * A list of items.
+ *
+ * @param array ...$items Items.
+ * @return array
+ */
+function items( array ...$items ): array {
+	return array(
+		'type'  => 'items',
+		'items' => $items,
+	);
+}
+
+$user = (string) strtok( $email, '@' );
+
+// Sample panels like the real endpoints send, so the sidebar's styles can be worked on locally.
+$blocks = match ( $endpoint ) {
+	'profile.php'        => array(
+		array(
+			'type' => 'lead',
+			'text' => $user,
+			'url'  => 'https://profiles.wordpress.org/' . rawurlencode( $user ) . '/',
+		),
+		array(
+			'type' => 'meta',
+			'text' => sprintf( 'Mock: %d threads from %s', $threads, $mailbox ),
+		),
+		array(
+			'type'  => 'links',
+			'links' => array(
+				array(
+					'text' => 'Account & Security',
+					'url'  => 'https://profiles.wordpress.org/',
+				),
+				array(
+					'text' => 'Forum Profile',
+					'url'  => 'https://wordpress.org/support/',
+				),
+				array(
+					'text' => 'Search pending signups',
+					'url'  => 'https://login.wordpress.org/',
+				),
+			),
+		),
+		array(
+			'type' => 'heading',
+			'text' => 'Slack',
+		),
+		items(
+			array(
+				'title'  => $user,
+				'url'    => 'https://wordpress.slack.com/',
+				'badges' => array( badge( 'Active', 'success' ) ),
+				'meta'   => array( array( 'text' => 'Updated 2026-01-01' ) ),
+			),
+			array(
+				'title'  => $user . '-old',
+				'url'    => 'https://wordpress.slack.com/',
+				'badges' => array( badge( 'Deactivated', 'error' ) ),
+				'meta'   => array( array( 'text' => 'Updated 2019-06-01' ) ),
+			)
+		),
 	),
-	'forums.php'         => '<ul class="wporg-sidebar-items"><li class="wporg-sidebar-item"><p class="wporg-sidebar-note">Mock note: asked to stop bumping their topics.</p><div class="wporg-sidebar-item-meta"><a href="#">January 1, 2026</a> · moderator</div></li></ul>',
-	'plugins-themes.php' => '<h5 class="wporg-sidebar-heading">Plugins mentioned <span class="wporg-sidebar-count">1</span></h5><ul class="wporg-sidebar-items">' . item( 'Mock Plugin', 'In Review', 'warning' ) . '</ul>'
-		. '<h5 class="wporg-sidebar-heading"><a href="#">Plugins owned</a> <span class="wporg-sidebar-count">7</span></h5><ul class="wporg-sidebar-items">' . item( 'Mock Plugin', 'In Review', 'warning' ) . item( 'Hello Mock' ) . item( 'Mock Blocks', 'Approved', 'success' ) . item( 'Old Mock', 'Closed: Author Request', 'error' ) . item( 'Mock Widgets' ) . item( 'Mock SEO', 'Rejected', 'error' ) . item( 'Mock Forms' ) . '</ul>'
-		. '<h5 class="wporg-sidebar-heading"><a href="#">Themes owned</a> <span class="wporg-sidebar-count">2</span></h5><ul class="wporg-sidebar-items">' . item( 'Mock Theme' ) . item( 'Twenty Mock', 'Suspended', 'error' ) . '</ul>',
-	'dpo.php'            => '<ul class="wporg-sidebar-links"><li><a href="#">Search erasures</a></li><li><a href="#">Search exports</a></li></ul><ul class="wporg-sidebar-items"><li class="wporg-sidebar-item"><span class="wporg-sidebar-item-title">Export</span> <span class="wporg-sidebar-badge is-success">Completed</span><div class="wporg-sidebar-item-meta">2026-01-01</div></li></ul>',
-	default              => '',
+	'forums.php'         => array(
+		items(
+			array(
+				'note' => 'Mock note: asked to stop bumping their topics.',
+				'meta' => array(
+					array(
+						'text' => 'January 1, 2026',
+						'url'  => 'https://wordpress.org/support/',
+					),
+					array( 'text' => 'moderator' ),
+				),
+			)
+		),
+	),
+	'plugins-themes.php' => array(
+		array(
+			'type'  => 'heading',
+			'text'  => 'Plugins mentioned',
+			'count' => 1,
+		),
+		items( item( 'Mock Plugin', 'In Review', 'warning' ) ),
+		array(
+			'type'  => 'heading',
+			'text'  => 'Plugins owned',
+			'url'   => 'https://wordpress.org/plugins/wp-admin/edit.php',
+			'count' => 7,
+		),
+		items( item( 'Mock Plugin', 'In Review', 'warning' ), item( 'Hello Mock' ), item( 'Mock Blocks', 'Approved', 'success' ), item( 'Old Mock', 'Closed: Author Request', 'error' ), item( 'Mock Widgets' ), item( 'Mock SEO', 'Rejected', 'error' ), item( 'Mock Forms' ) ),
+		array(
+			'type'  => 'heading',
+			'text'  => 'Themes owned',
+			'url'   => 'https://wordpress.org/themes/wp-admin/edit.php',
+			'count' => 2,
+		),
+		items( item( 'Mock Theme' ), item( 'Twenty Mock', 'Suspended', 'error' ) ),
+	),
+	'dpo.php'            => array(
+		array(
+			'type'  => 'links',
+			'links' => array(
+				array(
+					'text' => 'Search erasures',
+					'url'  => 'https://wordpress.org/wp-admin/erase-personal-data.php',
+				),
+				array(
+					'text' => 'Search exports',
+					'url'  => 'https://wordpress.org/wp-admin/export-personal-data.php',
+				),
+			),
+		),
+		items(
+			array(
+				'title'   => 'Export',
+				'tooltip' => 'Created: 2026-01-01 00:00:00',
+				'badges'  => array( badge( 'Completed', 'success' ) ),
+				'meta'    => array( array( 'text' => '2026-01-01' ) ),
+			)
+		),
+	),
+	default              => array(),
 };
 
-respond( 200, array( 'html' => $html ) );
+respond( 200, array( 'blocks' => $blocks ) );

@@ -17,6 +17,16 @@ use Modules\WPOrgSSO\Tests\Support\IdentityProvider;
 require '/srv/modules/WPOrgSSO/vendor/autoload.php';
 require '/srv/modules/WPOrgSSO/tests/Support/IdentityProvider.php';
 
+/**
+ * Escapes a value for HTML output.
+ *
+ * @param string $value Value.
+ * @return string
+ */
+function esc( string $value ): string {
+	return htmlspecialchars( $value, ENT_QUOTES );
+}
+
 $saml_request = (string) ( $_REQUEST['SAMLRequest'] ?? '' );
 $relay_state  = (string) ( $_REQUEST['RelayState'] ?? '' );
 $accounts     = require __DIR__ . '/accounts.php';

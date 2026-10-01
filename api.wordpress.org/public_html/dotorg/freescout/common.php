@@ -35,24 +35,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Retrieves the incoming payload, and verifies it was signed by FreeScout.
+ * How long a request stays valid after it was sent, in seconds.
  *
- * Ends the request with a 403 if the signature is missing, invalid, or stale.
+ * @var int
+ */
+const MAX_REQUEST_AGE = 300; // 5 minutes.
+
+/**
+ * How far ahead of this server's clock FreeScout's may be, in seconds.
  *
+ * @var int
+ */
+const MAX_CLOCK_SKEW = 10;
+
+/**
+ * Retrieves the incoming payload, and verifies FreeScout signed it for this endpoint.
+ *
+ * Ends the request with a 403 if it isn't a POST, or verify_request() refuses it.
+ *
+ * @param string $endpoint File name of the endpoint, e.g. profile.php.
  * @return object
  */
-function get_request(): object {
+function get_request( string $endpoint ): object {
 	static $request = null;
 
 	if ( null !== $request ) {
 		return $request;
 	}
 
+	$method    = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) );
 	$body      = (string) file_get_contents( 'php://input' );
 	$signature = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FREESCOUT_SIGNATURE'] ?? '' ) );
-	$payload   = json_decode( $body );
+	$payload   = 'POST' === $method ? verify_request( $body, $signature, $endpoint ) : null;
 
-	if ( ! is_object( $payload ) || ! is_valid_signature( $body, $signature ) || ! is_fresh( $payload ) ) {
+	if ( ! $payload ) {
 		status_header( 403 );
 		exit;
 	}
@@ -60,6 +76,34 @@ function get_request(): object {
 	$request = $payload;
 
 	return $request;
+}
+
+/**
+ * Decodes a request body, if FreeScout signed it for this endpoint, recently, and it wasn't used before.
+ *
+ * @param string $body      Raw request body.
+ * @param string $signature Hex-encoded HMAC-SHA256 of the body.
+ * @param string $endpoint  File name of the endpoint, e.g. profile.php.
+ * @return object|null The payload, or null if it's refused.
+ */
+function verify_request( string $body, string $signature, string $endpoint ): ?object {
+	$payload = json_decode( $body );
+
+	if ( ! is_object( $payload ) || ! is_valid_signature( $body, $signature ) || ! is_fresh( $payload ) ) {
+		return null;
+	}
+
+	// Signed with the body, so it can't be sent to another endpoint.
+	if ( ( $payload->endpoint ?? '' ) !== $endpoint ) {
+		return null;
+	}
+
+	// Last, so only signed requests reach the cache.
+	if ( ! is_unused_nonce( (string) ( $payload->nonce ?? '' ) ) ) {
+		return null;
+	}
+
+	return $payload;
 }
 
 /**
@@ -78,47 +122,86 @@ function is_valid_signature( string $body, string $signature ): bool {
 }
 
 /**
- * Whether a payload was sent recently, so a captured request can't be replayed later.
+ * Whether a payload was sent recently.
  *
  * @param object $payload Decoded request payload.
  * @return bool
  */
 function is_fresh( object $payload ): bool {
-	return abs( time() - (int) ( $payload->sent_at ?? 0 ) ) <= 15 * MINUTE_IN_SECONDS;
+	$age = time() - (int) ( $payload->sent_at ?? 0 );
+
+	// Any further ahead would outlive its nonce.
+	return $age >= -MAX_CLOCK_SKEW && $age <= MAX_REQUEST_AGE;
 }
 
 /**
- * Sends sidebar HTML to FreeScout and ends the request.
+ * Whether a request's nonce is well-formed and wasn't seen before; records it.
  *
- * @param string $html  Sidebar HTML.
- * @param array  $extra Other data for WPOrgSidebar, e.g. the sender's avatar.
+ * Without a persistent object cache, or while it's down, every nonce looks unused, and only the age check remains.
+ *
+ * @param string $nonce Hex-encoded random nonce.
+ * @return bool
+ */
+function is_unused_nonce( string $nonce ): bool {
+	if ( ! preg_match( '/^[0-9a-f]{32}$/', $nonce ) ) {
+		return false;
+	}
+
+	// Global, as endpoints load different sites.
+	wp_cache_add_global_groups( array( 'freescout-nonces' ) );
+
+	// As long as a request with it could be fresh.
+	if ( wp_cache_add( $nonce, 1, 'freescout-nonces', MAX_REQUEST_AGE + MAX_CLOCK_SKEW ) ) {
+		return true;
+	}
+
+	// add() also fails while the cache is down; only a stored nonce counts as used.
+	wp_cache_get( $nonce, 'freescout-nonces', false, $found );
+
+	return ! $found;
+}
+
+/**
+ * Sends a sidebar panel to FreeScout and ends the request.
+ *
+ * Content, not markup: WPOrgSidebar's sidebar.js builds the panel from these blocks.
+ *
+ * @param array $blocks Panel blocks.
+ * @param array $extra  Other data for WPOrgSidebar, e.g. the sender's avatar.
  * @return never
  */
-function send_html( string $html, array $extra = array() ): never {
+function send_panel( array $blocks, array $extra = array() ): never {
 	header( 'Content-Type: application/json; charset=utf-8' );
-	echo wp_json_encode( array_merge( $extra, array( 'html' => $html ) ) );
+	echo wp_json_encode( array_merge( $extra, array( 'blocks' => array_values( $blocks ) ) ) );
 	exit;
 }
 
 /**
- * Renders a status badge; WPOrgSidebar's stylesheet colors it by tone.
+ * A status badge; WPOrgSidebar's stylesheet colors it by tone.
  *
  * @param string $label Badge text.
  * @param string $tone  One of success, warning, error, or neutral.
- * @return string
+ * @return array
  */
-function render_badge( string $label, string $tone = 'neutral' ): string {
-	return sprintf( '<span class="wporg-sidebar-badge is-%s">%s</span>', esc_attr( $tone ), esc_html( $label ) );
+function badge( string $label, string $tone = 'neutral' ): array {
+	return array(
+		'label' => $label,
+		'tone'  => $tone,
+	);
 }
 
 /**
- * Renders how many items a sidebar section has.
+ * A link in a panel.
  *
- * @param int $count Number of items.
- * @return string
+ * @param string $text Link text.
+ * @param string $url  URL.
+ * @return array
  */
-function render_count( int $count ): string {
-	return sprintf( '<span class="wporg-sidebar-count">%d</span>', $count );
+function panel_link( string $text, string $url ): array {
+	return array(
+		'text' => $text,
+		'url'  => $url,
+	);
 }
 
 /**
@@ -539,46 +622,4 @@ function get_plugin_slugs_by_title( string $title ): array {
 	restore_current_blog();
 
 	return wp_list_pluck( $plugins, 'post_name' );
-}
-
-/**
- * Determines the WordPress.org user for a helpdesk agent's email addresses.
- *
- * @param array $emails The agent's email addresses.
- * @return \WP_User|false
- */
-function get_wporg_user_for_agent_emails( array $emails ): \WP_User|false {
-	$emails = array_unique( array_filter( array_map( 'strval', $emails ) ) );
-
-	// Also check plus-addresses without the sub-routing.
-	foreach ( $emails as $email ) {
-		$stripped = strip_plus_address( $email );
-		if ( $stripped !== $email ) {
-			$emails[] = $stripped;
-		}
-	}
-
-	// Longest first, so the most specific address wins.
-	usort(
-		$emails,
-		static function ( string $a, string $b ): int {
-			return strlen( $b ) <=> strlen( $a );
-		}
-	);
-
-	foreach ( $emails as $email ) {
-		if ( preg_match( '!^(?P<user>.+)@(chat|git).wordpress.org$!i', $email, $m ) ) {
-			$user = get_user_by( 'login', $m['user'] );
-			if ( $user ) {
-				return $user;
-			}
-		}
-
-		$user = get_user_by( 'email', $email );
-		if ( $user ) {
-			return $user;
-		}
-	}
-
-	return false;
 }

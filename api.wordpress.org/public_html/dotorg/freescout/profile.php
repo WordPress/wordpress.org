@@ -15,15 +15,15 @@ require __DIR__ . '/common.php';
 require_once WP_CONTENT_DIR . '/themes/pub/wporg-login/functions-registration.php';
 
 /**
- * Renders the profile panel.
+ * Gets the profile panel.
  *
  * @param object $request Request payload.
- * @return string
+ * @return array Panel blocks.
  */
-function render_profile( object $request ): string {
+function render_profile( object $request ): array {
 	global $wpdb;
 
-	$html         = '';
+	$blocks       = array();
 	$user         = false;
 	$sender_email = (string) ( $request->sender->email ?? '' );
 	$email        = get_user_email_for_email( $request );
@@ -36,40 +36,45 @@ function render_profile( object $request ): string {
 		$links = array();
 
 		if ( $user ) {
-			$forums_status = '';
+			$badges = array();
 			if ( ! empty( $user->wporg_419_capabilities['bbp_blocked'] ) ) {
-				$forums_status = render_badge( 'Forums: Blocked', 'error' );
+				$badges[] = badge( 'Forums: Blocked', 'error' );
 			} elseif ( ! empty( $user->wporg_419_capabilities['bbp_spectator'] ) ) {
-				$forums_status = render_badge( 'Forums: Spectator', 'warning' );
+				$badges[] = badge( 'Forums: Spectator', 'warning' );
 			}
 
-			$html .= sprintf(
-				'<p class="wporg-sidebar-lead"><a href="%s">%s</a> %s</p>',
-				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
-				esc_html( $user->user_nicename ),
-				$forums_status
+			$blocks[] = array(
+				'type'   => 'lead',
+				'text'   => $user->user_nicename,
+				'url'    => 'https://profiles.wordpress.org/' . $user->user_nicename . '/',
+				'badges' => $badges,
 			);
 
 			// When the account email doesn't match the sender's, show the account email too.
 			if ( $sender_email && strcasecmp( $sender_email, $user->user_email ) ) {
-				$html .= '<p class="wporg-sidebar-meta">Account email: ' . esc_html( $user->user_email ) . '</p>';
+				$blocks[] = array(
+					'type' => 'meta',
+					'text' => 'Account email: ' . $user->user_email,
+				);
 			}
 
-			$links['Account & Security'] = 'https://profiles.wordpress.org/' . $user->user_nicename . '/profile/edit/group/3/';
-			$links['Forum Profile']      = 'https://wordpress.org/support/users/' . $user->user_nicename . '/';
+			$links[] = panel_link( 'Account & Security', 'https://profiles.wordpress.org/' . $user->user_nicename . '/profile/edit/group/3/' );
+			$links[] = panel_link( 'Forum Profile', 'https://wordpress.org/support/users/' . $user->user_nicename . '/' );
 		} else {
-			$html .= '<p class="wporg-sidebar-empty">No profile found</p>';
+			$blocks[] = array(
+				'type' => 'empty',
+				'text' => 'No profile found',
+			);
 		}
 
-		$links['Search pending signups'] = add_query_arg( 's', rawurlencode( $sender_email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations' );
+		$links[] = panel_link( 'Search pending signups', add_query_arg( 's', rawurlencode( $sender_email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations' ) );
 
-		$html .= '<ul class="wporg-sidebar-links">';
-		foreach ( $links as $label => $url ) {
-			$html .= '<li><a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a></li>';
-		}
-		$html .= '</ul>';
+		$blocks[] = array(
+			'type'  => 'links',
+			'links' => $links,
+		);
 
-		$html .= render_pending_signups( $sender_email, $email );
+		$blocks = array_merge( $blocks, render_pending_signups( $sender_email, $email ) );
 	}
 
 	// If this is related to a slack user, include the details of the slack account; one the subject names only on request.
@@ -86,32 +91,45 @@ function render_profile( object $request ): string {
 			);
 		}
 
-		$html .= render_slack_users( $slack_users );
+		$blocks = array_merge( $blocks, render_slack_users( $slack_users ) );
 	}
 
 	// The sender wrote whatever names someone else, so an agent decides whether it's worth a look; WPOrgSidebar asks.
 	if ( $related ) {
-		$notice = '<p class="wporg-sidebar-meta">Showing the account this is about, not the sender’s. <a href="#" class="wporg-sidebar-show-sender">Show the sender</a></p>';
+		array_unshift(
+			$blocks,
+			array(
+				'type'        => 'notice',
+				'text'        => 'Showing the account this is about, not the sender’s.',
+				'action'      => 'sender',
+				'action_text' => 'Show the sender',
+			)
+		);
 	} elseif ( get_related_user( $request ) || ( ! $user && $slack_email ) ) {
-		$notice = '<p class="wporg-sidebar-meta">This may be about someone else’s account, like a bounce. <a href="#" class="wporg-sidebar-show-related">Show it</a></p>';
-	} else {
-		$notice = '';
+		array_unshift(
+			$blocks,
+			array(
+				'type'        => 'notice',
+				'text'        => 'This may be about someone else’s account, like a bounce.',
+				'action'      => 'related',
+				'action_text' => 'Show it',
+			)
+		);
 	}
 
-	return $notice . $html;
+	return $blocks;
 }
 
 /**
- * Renders pending signups for the sender and the matched user.
+ * Gets pending signups for the sender and the matched user.
  *
  * @param string $sender_email Sender's email address.
  * @param string $email        Email address of the matched user, or the sender's.
- * @return string
+ * @return array Panel blocks.
  */
-function render_pending_signups( string $sender_email, string $email ): string {
+function render_pending_signups( string $sender_email, string $email ): array {
 	global $wpdb;
 
-	$html    = '';
 	$records = $wpdb->get_results(
 		$wpdb->prepare(
 			'SELECT * FROM %i WHERE ( user_email = %s OR user_email_san = %s OR user_email = %s OR user_email_san = %s )',
@@ -123,63 +141,82 @@ function render_pending_signups( string $sender_email, string $email ): string {
 		)
 	);
 
-	if ( $records ) {
-		$html .= '<h5 class="wporg-sidebar-heading">Signups</h5>';
-		$html .= '<ul class="wporg-sidebar-items">';
-
-		foreach ( $records as $record ) {
-			$status = render_badge( 'Pending', 'warning' );
-			if ( $record->created ) {
-				$status = render_badge( 'Created', 'success' );
-			} elseif ( ! $record->cleared ) {
-				$status = render_badge( 'Caught in Spam', 'error' );
-			}
-
-			$html .= sprintf(
-				'<li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="%s">%s</a> %s%s</li>',
-				esc_url( add_query_arg( 's', rawurlencode( $record->user_email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations' ) ),
-				esc_html( $record->user_login ),
-				$status,
-				strcasecmp( $sender_email, $record->user_email ) ? '<div class="wporg-sidebar-item-meta">' . esc_html( $record->user_email ) . '</div>' : ''
-			);
-		}
-
-		$html .= '</ul>';
+	if ( ! $records ) {
+		return array();
 	}
 
-	return $html;
-}
-
-/**
- * Renders the status of someone's Slack accounts.
- *
- * @param object[] $slack_users Rows from the slack_users table.
- * @return string
- */
-function render_slack_users( array $slack_users ): string {
-	if ( ! $slack_users ) {
-		return '';
-	}
-
-	$html = '<h5 class="wporg-sidebar-heading">Slack</h5><ul class="wporg-sidebar-items">';
-
-	foreach ( $slack_users as $slack_user ) {
-		$slack_data = json_decode( (string) $slack_user->profiledata );
-		if ( ! is_object( $slack_data ) || ! isset( $slack_data->updated ) ) {
-			$html .= '<li class="wporg-sidebar-item wporg-sidebar-meta">Clicked a signup link, but likely didn’t finish signing up.</li>';
-			continue;
+	$items = array();
+	foreach ( $records as $record ) {
+		$status = badge( 'Pending', 'warning' );
+		if ( $record->created ) {
+			$status = badge( 'Created', 'success' );
+		} elseif ( ! $record->cleared ) {
+			$status = badge( 'Caught in Spam', 'error' );
 		}
 
-		$html .= sprintf(
-			'<li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="%s">%s</a> %s<div class="wporg-sidebar-item-meta">Updated %s</div></li>',
-			esc_url( 'https://wordpress.slack.com/archives/' . $slack_user->dm_id ),
-			esc_html( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ?? '' ),
-			! empty( $slack_data->deleted ) ? render_badge( 'Deactivated', 'error' ) : render_badge( 'Active', 'success' ),
-			esc_html( gmdate( 'Y-m-d', (int) $slack_data->updated ) )
+		$items[] = array(
+			'title'  => $record->user_login,
+			'url'    => add_query_arg( 's', rawurlencode( $record->user_email ), 'https://login.wordpress.org/wp-admin/admin.php?page=user-registrations' ),
+			'badges' => array( $status ),
+			'meta'   => strcasecmp( $sender_email, $record->user_email ) ? array( array( 'text' => $record->user_email ) ) : array(),
 		);
 	}
 
-	return $html . '</ul>';
+	return array(
+		array(
+			'type' => 'heading',
+			'text' => 'Signups',
+		),
+		array(
+			'type'  => 'items',
+			'items' => $items,
+		),
+	);
+}
+
+/**
+ * Gets the status of someone's Slack accounts.
+ *
+ * @param object[] $slack_users Rows from the slack_users table.
+ * @return array Panel blocks.
+ */
+function render_slack_users( array $slack_users ): array {
+	if ( ! $slack_users ) {
+		return array();
+	}
+
+	$items = array();
+	foreach ( $slack_users as $slack_user ) {
+		$slack_data = json_decode( (string) $slack_user->profiledata );
+		if ( ! is_object( $slack_data ) || ! isset( $slack_data->updated ) ) {
+			$items[] = array( 'meta' => array( array( 'text' => 'Clicked a signup link, but likely didn’t finish signing up.' ) ) );
+			continue;
+		}
+
+		// Slack sends empty strings for names a member never set; the username is always there.
+		$names = array_filter(
+			array_map( 'strval', array( $slack_data->profile->display_name_normalized ?? '', $slack_data->profile->display_name ?? '', $slack_data->profile->real_name ?? '', $slack_data->name ?? '' ) ),
+			'strlen'
+		);
+
+		$items[] = array(
+			'title'  => (string) reset( $names ),
+			'url'    => 'https://wordpress.slack.com/archives/' . $slack_user->dm_id,
+			'badges' => array( ! empty( $slack_data->deleted ) ? badge( 'Deactivated', 'error' ) : badge( 'Active', 'success' ) ),
+			'meta'   => array( array( 'text' => 'Updated ' . gmdate( 'Y-m-d', (int) $slack_data->updated ) ) ),
+		);
+	}
+
+	return array(
+		array(
+			'type' => 'heading',
+			'text' => 'Slack',
+		),
+		array(
+			'type'  => 'items',
+			'items' => $items,
+		),
+	);
 }
 
 /**
@@ -214,5 +251,5 @@ function get_sender_avatar_url( object $request ): string {
 	);
 }
 
-$request = get_request();
-send_html( render_profile( $request ), array( 'avatar_url' => get_sender_avatar_url( $request ) ) );
+$request = get_request( basename( __FILE__ ) );
+send_panel( render_profile( $request ), array( 'avatar_url' => get_sender_avatar_url( $request ) ) );
