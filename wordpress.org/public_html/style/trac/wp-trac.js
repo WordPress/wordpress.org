@@ -1177,11 +1177,13 @@ let wpTrac,
 					textarea.setRangeText( replacement, start, end, 'preserve' );
 					if ( selectedText ) {
 						textarea.setSelectionRange(
-							start + prefix.length, start + prefix.length + selectedText.length
+							start + prefix.length,
+							start + prefix.length + selectedText.length
 						);
 					} else {
 						textarea.setSelectionRange(
-							start + prefix.length, start + prefix.length
+							start + prefix.length,
+							start + prefix.length
 						);
 					}
 				} else {
