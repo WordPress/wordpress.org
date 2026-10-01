@@ -331,7 +331,7 @@ let wpTrac,
 
 	wpTrac = {
 		gardener: true === window.wpBugGardener,
-		currentUser: wpTracCurrentUser,
+		currentUser: window.wpTracCurrentUser || null,
 
 		init() {
 			// Gardener status as a body class, for rules that cannot see the flag.
@@ -2284,7 +2284,7 @@ let wpTrac,
 
 		githubPRs: ( function () {
 			const apiEndpoint = 'https://api.wordpress.org/dotorg/trac/pr/',
-				authenticated = !! ( wpTracCurrentUser && wpTracCurrentUser !== 'anonymous' );
+				authenticated = Boolean( window.wpTracCurrentUser && window.wpTracCurrentUser !== 'anonymous' );
 			let trac = false,
 				ticket = 0,
 				primaryGitRepo,
@@ -2414,7 +2414,7 @@ let wpTrac,
 			}
 
 			function renderReportLoadGitHubTickets( $warning ) {
-				let user = wpTracCurrentUser;
+				let user = window.wpTracCurrentUser || 'anonymous';
 				const match = document.location.search.match( /USER=([^&]+)/ );
 				if ( match ) {
 					user = match[ 1 ];
