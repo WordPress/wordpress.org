@@ -656,8 +656,8 @@ let wpTrac,
 			// Prevent marking a ticket as a duplicate of itself.
 			$( '#propertyform' ).on( 'submit', function () {
 				const action = $( 'input[name="action"]:checked' ).val(),
-					currentTicket = parseInt( $( '.trac-id' ).text().replace( '#', '' ) ),
-					duplicateTicket = parseInt( $( '#action_dupe' ).val() );
+					currentTicket = parseInt( $( '.trac-id' ).text().replace( '#', '' ), 10 ),
+					duplicateTicket = parseInt( $( '#action_dupe' ).val(), 10 );
 
 				if ( 'duplicate' === action && ( ! duplicateTicket || currentTicket === duplicateTicket ) ) {
 					$( '#action_dupe' ).val( '' );
@@ -1053,10 +1053,12 @@ let wpTrac,
 			let username = el.text();
 
 			if ( 0 === username.indexOf( 'logged in as' ) ) {
-				username = username.replace( 'logged in as ', '' );
+				username = username.replace( 'logged in as ', '' ).trim();
 				el.html(
 					$( '<a />', {
-						href: 'https://profiles.wordpress.org/' + username + '/',
+						href: 'https://profiles.wordpress.org/' +
+							encodeURIComponent( username ) +
+							'/',
 					} ).text( username )
 				).prepend( 'logged in as ' );
 			}
@@ -1608,6 +1610,7 @@ let wpTrac,
 					'has-dev-note': 'needs-dev-note',
 					'needs-dev-note': 'has-dev-note',
 					'dev-reviewed': 'dev-feedback',
+					'dev-feedback': 'dev-reviewed',
 					'has-privacy-review': 'needs-privacy-review',
 					'needs-privacy-review': 'has-privacy-review',
 					'has-copy-review': 'needs-copy-review',
@@ -2171,9 +2174,13 @@ let wpTrac,
 			}
 
 			function changeCount( delta ) {
-				const count = parseInt( notifications.find( '.count' ).text(), 10 ) + delta;
-				notifications.find( '.count' ).text( count );
-				notifications.toggleClass( 'count-0', count === 0 ).toggleClass( 'count-1', count === 1 );
+				let count = parseInt( notifications.find( '.count' ).text(), 10 );
+				if ( isNaN( count ) ) {
+					count = 0;
+				}
+				count += delta;
+				notifications.find( '.count' ).text( count > 0 ? count : '' );
+				notifications.toggleClass( 'count-0', count <= 0 ).toggleClass( 'count-1', count === 1 );
 			}
 
 			function block() {
@@ -2320,10 +2327,10 @@ let wpTrac,
 					const $this = $( this ),
 						$parent = $this.parent( 'a' );
 					$this.removeAttr( 'crossorigin' ); // We trust GitHub for these images.
-					$this.prop( 'src', $this.prop( 'src' ).replace( /i0\.wp\.com/, '' ) );
-					$this.prop( 'alt', $this.prop( 'alt' ).replace( /i0\.wp\.com/, '' ) );
-					$this.prop( 'title', $this.prop( 'title' ).replace( /i0\.wp\.com/, '' ) );
-					$parent.prop( 'href', $parent.prop( 'href' ).replace( /i0\.wp\.com/, '' ) );
+					$this.prop( 'src', $this.prop( 'src' ).replace( /i0\.wp\.com\//, '' ) );
+					$this.prop( 'alt', $this.prop( 'alt' ).replace( /i0\.wp\.com\//, '' ) );
+					$this.prop( 'title', $this.prop( 'title' ).replace( /i0\.wp\.com\//, '' ) );
+					$parent.prop( 'href', $parent.prop( 'href' ).replace( /i0\.wp\.com\//, '' ) );
 				} );
 			}
 
@@ -2402,8 +2409,8 @@ let wpTrac,
 					'<strong>Warning:</strong> Tickets with an attached GitHub PRs not included <button>Load PRs</button>'
 				);
 
-				$warning.on( 'click', function () {
-					$( this ).find( 'button' ).prop( 'disabled', 'disabled' ).text( 'Please wait..' );
+				$warning.on( 'click', 'button', function () {
+					$( this ).prop( 'disabled', true ).text( 'Please wait..' );
 
 					const params = new URLSearchParams( { trac, author: user } );
 					if ( authenticated ) {
