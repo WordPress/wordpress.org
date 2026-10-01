@@ -41,13 +41,13 @@ Configuration, in FreeScout's `.env`. Required:
 |---|---|
 | `WPORG_API_SECRET` | Shared secret; must match `FREESCOUT_SECRET` on api.wordpress.org. |
 | `WPORG_SSO_IDP_CERT` | The identity provider's signing certificate, on one line, with or without the BEGIN/END lines. Until it and `WPORG_API_SECRET` are set, logins stay as they are, so users can be connected first. Once they are, new logins go through WordPress.org, and sessions from before go on for a day; Manage » System » Tools » Logout Users ends them sooner. After that day, switching enforcement off and on again ends every session from while it was off, including a password login of whoever switches it back on: have break-glass or a connected account ready. |
+| `WPORG_AKISMET_KEY` | FreeScout's own Akismet API key. Without it, `WPOrgAkismet` checks nothing, and spam comes in like any other email. |
 
 Optional:
 
 | Variable | Default | Value |
 |---|---|---|
 | `WPORG_API_URL` | `https://api.wordpress.org/dotorg/freescout/` | Where the helpdesk endpoints are. |
-| `WPORG_AKISMET_KEY` | | FreeScout's Akismet API key. Without it, `WPOrgAkismet` checks nothing. |
 | `WPORG_SSO_IDP_ENTITY_ID` | `https://login.wordpress.org` | The identity provider's entity ID, from its settings page on login.wordpress.org. |
 | `WPORG_SSO_IDP_URL` | `https://login.wordpress.org/wp-login.php?action=idp` | The identity provider's login URL, from the same page. |
 | `WPORG_SSO_PASSWORD_LOGIN` | `false` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Every such login is logged. |
