@@ -29,7 +29,7 @@ final class BrandingTest extends TestCase {
 	}
 
 	/**
-	 * The favicon and header logo are the module's images, which exist.
+	 * The favicon, header logo, and login banner are the module's images, which exist.
 	 *
 	 * @return void
 	 */
@@ -37,6 +37,7 @@ final class BrandingTest extends TestCase {
 		$images = array(
 			'layout.favicon'     => 'favicon.svg',
 			'layout.header_logo' => 'wordpress-mark-white.svg',
+			'login.banner'       => 'freescout-logo.svg',
 		);
 
 		foreach ( $images as $filter => $image ) {
