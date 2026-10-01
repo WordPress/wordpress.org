@@ -24,5 +24,7 @@ Output goes to stderr because FreeScout middleware calls header(), which fails o
 		<env name="WPORG_API_URL" value="http://127.0.0.1:9/" force="true"/>
 		<env name="WPORG_API_SECRET" value="test-secret" force="true"/>
 		<env name="WPORG_AKISMET_KEY" value="" force="true"/>
+		<env name="WPORG_HELPSCOUT_APP_ID" value="" force="true"/>
+		<env name="WPORG_HELPSCOUT_APP_SECRET" value="" force="true"/>
 	</php>
 </phpunit>

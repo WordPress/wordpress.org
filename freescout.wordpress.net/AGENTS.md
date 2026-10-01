@@ -10,6 +10,7 @@ Context for AI coding agents and developers working on the WordPress.org FreeSco
 
 - `Modules/<Name>/` — one directory per module (`module.json`, `Providers/`, `Http/`, `Resources/`, `Database/Migrations/`, `Public/`, `tests/`).
   - `WPOrgAkismet` — checks new conversations from senders with Akismet (`rest.akismet.com`, its own key), and reports agents' corrections.
+  - `WPOrgHelpScoutImport` — imports HelpScout mailboxes' conversations from HelpScout's API, page by page on the queue, without the events live email fires. Administrators run it under Manage » HelpScout Import. Remove it once every mailbox has moved.
   - `WPOrgSidebar` — WordPress.org panels in the conversation sidebar, loaded over AJAX from `api.wordpress.org/dotorg/freescout/`.
   - `WPOrgSite` — tweaks for how WordPress.org runs FreeScout, rather than features; add new ones here instead of starting a module. So far, it refuses to update or delete modules from the Modules page, and lays its cards out in columns.
   - `WPOrgSSO` — logs agents in through login.wordpress.org's SAML identity provider (wp-saml-idp, in the private dotorg repository), and connects every user to a WordPress.org account. Its SAML library is committed in its `vendor/`: FreeScout doesn't install module dependencies. After changing its `composer.json`, run `composer install --no-dev` in the module and commit `vendor/` (`git add -f`: the root `.gitignore` ignores it).
@@ -76,7 +77,7 @@ Modules aren't active in the test database, so each test registers the provider 
 - **Name and icon:** `name` in `module.json` is what Manage » Modules shows (`WP.org Sidebar`), and what `module:enable` looks the module up by. `img` points at `Public/img/icon.svg`, a module-specific icon on the `#3858e9` tile. A module for another product, like `WPOrgAkismet`, uses that product's own mark and colors instead.
 - **`authorUrl` / `detailsUrl`:** never point these at `freescout.net`. Core treats such modules as official and requires a paid license activation.
 - **Activation state** lives in the `modules` DB table; the `active` field in `module.json` is ignored by core.
-- **Configuration** comes from the environment: `WPORG_API_URL` and `WPORG_API_SECRET`, and `WPORG_AKISMET_KEY` for `WPOrgAkismet`. Without them, modules stay quiet instead of failing.
+- **Configuration** comes from the environment: `WPORG_API_URL` and `WPORG_API_SECRET`, and `WPORG_AKISMET_KEY` for `WPOrgAkismet`, and `WPORG_HELPSCOUT_APP_ID` and `WPORG_HELPSCOUT_APP_SECRET` for `WPOrgHelpScoutImport`. Without them, modules stay quiet instead of failing.
 - **New module:** add its directory under `Modules/`. Once it's deployed, an admin switches it on under Manage » Modules.
 - **After changing module files:** run `php artisan freescout:clear-cache` (`npm run freescout:artisan -- freescout:clear-cache`).
 - **Routes:** register them in the provider with `loadRoutesFrom()`, and pass URLs to JavaScript through `data-` attributes rather than FreeScout's generated laroute files.
