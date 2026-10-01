@@ -17,7 +17,7 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
   - spam and drafts;
   - HelpScout's line items ("assigned to", "closed by", workflows that ran);
   - phone calls and forwards become notes, since FreeScout has no thread type for them.
-- **Agents:** HelpScout users are matched to FreeScout users by email. **Check agents** lists the ones without a FreeScout user; add them before importing to credit them. Their replies and notes are otherwise credited to "HelpScout Import", a disabled robot user, and the thread keeps their name.
+- **Agents:** **Check agents** lists a mailbox's HelpScout users, and who each is credited to: the FreeScout user chosen there, or else the one with the same email. Choose one for anyone whose emails differ, before importing: what's imported keeps its credit. Replies and notes of anyone without either are credited to "HelpScout Import", a disabled robot user, and the thread keeps their name.
 - **Nothing reacts to it:** conversations are marked as imported, and written without the events new email fires. Nothing is sent, nobody is notified, no workflow runs, and `WPOrgAkismet` and `WPOrgWebhooks` leave them alone.
 - **Importing again is safe:** only threads that weren't imported yet are added. A conversation deleted in FreeScout since stays deleted.
 - **HelpScout's rate limit:** the whole HelpScout account shares one limit, and wppluginsteam.org and the reviewers' tools use it too. The import leaves 100 requests a minute to them, and waits for the next minute when only those are left.

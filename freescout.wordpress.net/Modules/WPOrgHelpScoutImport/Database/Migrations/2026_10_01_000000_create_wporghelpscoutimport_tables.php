@@ -77,6 +77,18 @@ class CreateWporghelpscoutimportTables extends Migration {
 			);
 		}
 
+		if ( ! Schema::hasTable( 'wporghelpscoutimport_agents' ) ) {
+			Schema::create(
+				'wporghelpscoutimport_agents',
+				static function ( Blueprint $table ): void {
+					$table->increments( 'id' );
+					$table->unsignedBigInteger( 'helpscout_user_id' )->unique();
+					$table->unsignedInteger( 'user_id' );
+					$table->timestamps();
+				}
+			);
+		}
+
 		if ( ! Schema::hasTable( 'wporghelpscoutimport_threads' ) ) {
 			Schema::create(
 				'wporghelpscoutimport_threads',
@@ -96,6 +108,7 @@ class CreateWporghelpscoutimportTables extends Migration {
 	 */
 	public function down(): void {
 		Schema::dropIfExists( 'wporghelpscoutimport_threads' );
+		Schema::dropIfExists( 'wporghelpscoutimport_agents' );
 		Schema::dropIfExists( 'wporghelpscoutimport_conversations' );
 		Schema::dropIfExists( 'wporghelpscoutimport_runs' );
 	}

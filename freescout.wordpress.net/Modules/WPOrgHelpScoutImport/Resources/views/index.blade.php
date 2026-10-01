@@ -35,19 +35,42 @@
 				<button type="submit" class="btn btn-default">{{ __('Check agents') }}</button>
 			</form>
 
-			@if ( is_array( $missing ) )
-				@if ( $missing )
-					<div class="alert alert-warning">
-						{{ __('These HelpScout users have no FreeScout user with their email. Their replies and notes are credited to “HelpScout Import” unless they’re added first:') }}
-						<ul>
-							@foreach ( $missing as $person )
-								<li>{{ $person }}</li>
+			@if ( is_array( $people ) )
+				<form method="POST" action="{{ route( 'wporghelpscoutimport.agents' ) }}" class="margin-bottom">
+					{{ csrf_field() }}
+					<input type="hidden" name="helpscout_mailbox_id" value="{{ $agents }}">
+					<p>{{ __('Replies and notes are credited to the FreeScout user chosen here, or else to the one with the same email. Without either, they’re credited to “HelpScout Import”. Choose before importing: what’s imported keeps its credit.') }}</p>
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th>{{ __('HelpScout user') }}</th>
+								<th>{{ __('FreeScout user') }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach ( $people as $person )
+								<tr @if ( ! $person['chosen'] && ! $person['by_email'] ) class="warning" @endif>
+									<td><label for="wporghelpscoutimport-agent-{{ $person['id'] }}">{{ $person['name'] }} &lt;{{ $person['email'] }}&gt;</label></td>
+									<td>
+										<select name="agents[{{ $person['id'] }}]" id="wporghelpscoutimport-agent-{{ $person['id'] }}" class="form-control input-sm">
+											<option value="">
+												@if ( $person['by_email'] )
+													{{ __('Same email: :name', [ 'name' => $person['by_email']->getFullName() ]) }}
+												@else
+													{{ __('No match: HelpScout Import') }}
+												@endif
+											</option>
+											@foreach ( $users as $user )
+												<option value="{{ $user->id }}" @if ( $person['chosen'] === (int) $user->id ) selected @endif>{{ $user->getFullName() }} &lt;{{ $user->email }}&gt;</option>
+											@endforeach
+										</select>
+									</td>
+								</tr>
 							@endforeach
-						</ul>
-					</div>
-				@else
-					<div class="alert alert-success">{{ __('Every HelpScout user of this mailbox has a FreeScout user.') }}</div>
-				@endif
+						</tbody>
+					</table>
+					<button type="submit" class="btn btn-default">{{ __('Save') }}</button>
+				</form>
 			@endif
 
 			<form method="POST" action="{{ route( 'wporghelpscoutimport.start' ) }}" class="form-inline">

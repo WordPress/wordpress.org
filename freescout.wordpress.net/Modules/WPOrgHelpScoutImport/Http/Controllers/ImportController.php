@@ -11,10 +11,12 @@ namespace Modules\WPOrgHelpScoutImport\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Mailbox;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\Run;
 use Modules\WPOrgHelpScoutImport\Jobs\ImportPage;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
@@ -51,7 +53,7 @@ final class ImportController extends Controller {
 		$helpscout = app( HelpScout::class );
 		$sources   = array();
 		$error     = '';
-		$missing   = null;
+		$people    = null;
 
 		if ( $helpscout->is_configured() ) {
 			try {
@@ -59,7 +61,7 @@ final class ImportController extends Controller {
 
 				$agents = (int) $request->query( 'agents' );
 				if ( $agents ) {
-					$missing = ( new People() )->missing_users( $helpscout->users( $agents ) );
+					$people = ( new People() )->agents( $helpscout->users( $agents ) );
 				}
 			} catch ( \Throwable $e ) {
 				$error = $e->getMessage();
@@ -73,7 +75,8 @@ final class ImportController extends Controller {
 				'error'      => $error,
 				'sources'    => $sources,
 				'agents'     => (int) $request->query( 'agents' ),
-				'missing'    => $missing,
+				'people'     => $people,
+				'users'      => self::users(),
 				'mailboxes'  => Mailbox::query()->orderBy( 'name' )->get(),
 				'runs'       => Run::query()->with( 'mailbox' )->orderByDesc( 'id' )->limit( 100 )->get(),
 			)
@@ -130,6 +133,36 @@ final class ImportController extends Controller {
 			: __( 'Importing :name.', array( 'name' => $source['name'] ?? '' ) );
 
 		return redirect()->route( 'wporghelpscoutimport.index' )->with( 'flash_success', $message );
+	}
+
+	/**
+	 * Saves which FreeScout user each HelpScout user's replies and notes are credited to.
+	 *
+	 * Nothing chosen means the user with the same email, if there's one.
+	 *
+	 * @param Request $request Request; `agents` maps HelpScout user IDs to FreeScout user IDs.
+	 * @return RedirectResponse
+	 */
+	public function agents( Request $request ): RedirectResponse {
+		$users = self::users()->pluck( 'id' )->map( 'intval' )->all();
+
+		foreach ( (array) $request->input( 'agents', array() ) as $helpscout_user_id => $user_id ) {
+			$helpscout_user_id = (int) $helpscout_user_id;
+			$user_id           = (int) $user_id;
+			if ( $helpscout_user_id <= 0 ) {
+				continue;
+			}
+
+			if ( in_array( $user_id, $users, true ) ) {
+				Agent::query()->updateOrCreate( array( 'helpscout_user_id' => $helpscout_user_id ), array( 'user_id' => $user_id ) );
+			} else {
+				Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->delete();
+			}
+		}
+
+		return redirect()
+			->route( 'wporghelpscoutimport.index', array( 'agents' => (int) $request->input( 'helpscout_mailbox_id' ) ) )
+			->with( 'flash_success', __( 'Saved.' ) );
 	}
 
 	/**
@@ -212,6 +245,20 @@ final class ImportController extends Controller {
 		$run->save();
 
 		return $run;
+	}
+
+	/**
+	 * The FreeScout users HelpScout users can be credited to: people, not robots, and not deleted.
+	 *
+	 * @return \Illuminate\Support\Collection
+	 */
+	private static function users(): \Illuminate\Support\Collection {
+		return User::query()
+			->where( 'type', '!=', User::TYPE_ROBOT )
+			->where( 'status', '!=', User::STATUS_DELETED )
+			->orderBy( 'first_name' )
+			->orderBy( 'last_name' )
+			->get();
 	}
 
 	/**

@@ -12,6 +12,7 @@ namespace Modules\WPOrgHelpScoutImport\Tests;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Queue;
+use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\Run;
 use Modules\WPOrgHelpScoutImport\Jobs\ImportPage;
 
@@ -92,21 +93,58 @@ final class ImportControllerTest extends ImportTestCase {
 
 		$this->get( route( 'wporghelpscoutimport.index' ) )->assertStatus( 403 );
 		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() )->assertStatus( 403 );
+		$this->post( route( 'wporghelpscoutimport.agents' ), array( 'agents' => array( 56 => 1 ) ) )->assertStatus( 403 );
 		$this->assertSame( 0, Run::query()->count() );
+		$this->assertSame( 0, Agent::query()->count() );
 	}
 
 	/**
-	 * The page lists HelpScout's mailboxes, and which agents have no FreeScout user.
+	 * The page lists HelpScout's mailboxes, and who each HelpScout user is credited to.
 	 *
 	 * @return void
 	 */
-	public function test_page_lists_mailboxes_and_missing_agents(): void {
+	public function test_page_lists_mailboxes_and_agents(): void {
 		$response = $this->get( route( 'wporghelpscoutimport.index', array( 'agents' => 77 ) ) );
 
 		$response->assertStatus( 200 );
-		$this->assertStringContainsString( 'photos@wordpress.org', $response->getContent() );
-		$this->assertStringContainsString( 'Bo Gone &lt;bo@example.org&gt;', $response->getContent() );
-		$this->assertStringNotContainsString( 'Ada Agent &lt;agent@example.org&gt;', $response->getContent() );
+		$page = $response->getContent();
+		$this->assertStringContainsString( 'photos@wordpress.org', $page );
+		$this->assertStringContainsString( 'Ada Agent &lt;agent@example.org&gt;', $page );
+		$this->assertStringContainsString( 'Same email: Ada Agent', $page );
+		$this->assertMatchesRegularExpression( '#<tr\s+class="warning"\s*>\s*<td><label[^>]*>Bo Gone &lt;bo@example.org&gt;#', $page );
+		$this->assertStringContainsString( 'No match: HelpScout Import', $page );
+	}
+
+	/**
+	 * Choosing a FreeScout user for a HelpScout user is saved; choosing none goes back to the email.
+	 *
+	 * @return void
+	 */
+	public function test_chosen_users_are_saved_and_cleared(): void {
+		$robot       = $this->create_user();
+		$robot->type = User::TYPE_ROBOT;
+		$robot->save();
+
+		$this->post(
+			route( 'wporghelpscoutimport.agents' ),
+			array(
+				'helpscout_mailbox_id' => 77,
+				'agents'               => array(
+					56 => $this->admin->id,
+					55 => $robot->id,
+				),
+			)
+		)->assertRedirect( route( 'wporghelpscoutimport.index', array( 'agents' => 77 ) ) );
+
+		$this->assertSame( (int) $this->admin->id, (int) Agent::query()->where( 'helpscout_user_id', 56 )->value( 'user_id' ) );
+		$this->assertFalse( Agent::query()->where( 'helpscout_user_id', 55 )->exists() );
+		$this->assertMatchesRegularExpression(
+			'#value="' . $this->admin->id . '"\s+selected#',
+			$this->get( route( 'wporghelpscoutimport.index', array( 'agents' => 77 ) ) )->getContent()
+		);
+
+		$this->post( route( 'wporghelpscoutimport.agents' ), array( 'agents' => array( 56 => '' ) ) );
+		$this->assertFalse( Agent::query()->where( 'helpscout_user_id', 56 )->exists() );
 	}
 
 	/**

@@ -15,6 +15,7 @@ use App\Folder;
 use App\Thread;
 use App\User;
 use Illuminate\Support\Facades\Queue;
+use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
@@ -333,6 +334,27 @@ final class ImporterTest extends ImportTestCase {
 
 		$this->assertNotSame( 1126167, $this->stored_number() );
 		$this->assertSame( 1, Conversation::query()->where( 'number', 1126167 )->count() );
+	}
+
+	/**
+	 * A FreeScout user an administrator chose is credited, even over one with the same email.
+	 *
+	 * @return void
+	 */
+	public function test_chosen_user_is_credited(): void {
+		$chosen = factory( User::class )->create( array( 'email' => 'ada@wordpress.example' ) );
+		Agent::query()->create(
+			array(
+				'helpscout_user_id' => 55,
+				'user_id'           => $chosen->id,
+			)
+		);
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$reply = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_MESSAGE )->first();
+		$this->assertSame( (int) $chosen->id, (int) $reply->created_by_user_id );
+		$this->assertSame( (int) $chosen->id, (int) $this->imported_conversation()->closed_by_user_id );
 	}
 
 	/**

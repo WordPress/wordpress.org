@@ -11,9 +11,10 @@ namespace Modules\WPOrgHelpScoutImport\Services;
 
 use App\Customer;
 use App\User;
+use Modules\WPOrgHelpScoutImport\Entities\Agent;
 
 /**
- * HelpScout users become the FreeScout users with the same email; senders become FreeScout senders.
+ * HelpScout users become the FreeScout users administrators chose, or with the same email; senders become senders.
  */
 final class People {
 
@@ -34,45 +35,78 @@ final class People {
 	private $users = array();
 
 	/**
-	 * The FreeScout user for a HelpScout user, matched by email.
+	 * The FreeScout user for a HelpScout user: the one an administrator chose, or else the one with their email.
 	 *
 	 * @param mixed $person HelpScout person object, like a thread's `createdBy`.
-	 * @return User|null Null if it isn't a HelpScout user, or no FreeScout user has their email.
+	 * @return User|null Null if it isn't a HelpScout user, or there's no FreeScout user for them.
 	 */
 	public function user( $person ): ?User {
-		if ( ! is_array( $person ) || 'user' !== ( $person['type'] ?? '' ) || empty( $person['email'] ) ) {
+		if ( ! is_array( $person ) || 'user' !== ( $person['type'] ?? '' ) ) {
 			return null;
 		}
 
 		$id = (int) ( $person['id'] ?? 0 );
 		if ( ! array_key_exists( $id, $this->users ) ) {
-			$this->users[ $id ] = User::query()->where( 'email', mb_strtolower( (string) $person['email'] ) )->first();
+			$this->users[ $id ] = self::chosen( $id ) ?? self::by_email( (string) ( $person['email'] ?? '' ) );
 		}
 
 		return $this->users[ $id ];
 	}
 
 	/**
-	 * Lists a mailbox's HelpScout users who have no FreeScout user with their email.
+	 * Lists a mailbox's HelpScout users with the FreeScout user each would be credited to.
 	 *
 	 * @param array[] $helpscout_users HelpScout users, as HelpScout lists them.
-	 * @return string[] Their names and emails.
+	 * @return array[] By name, each with `id`, `name`, `email`, `chosen` (the chosen user's ID, or null), and `by_email`
+	 *                 (the user with their email, or null).
 	 */
-	public function missing_users( array $helpscout_users ): array {
-		$missing = array();
+	public function agents( array $helpscout_users ): array {
+		$agents = array();
 
 		foreach ( $helpscout_users as $helpscout_user ) {
-			$email = mb_strtolower( (string) ( $helpscout_user['email'] ?? '' ) );
-			if ( '' === $email || User::query()->where( 'email', $email )->exists() ) {
-				continue;
-			}
+			$id     = (int) ( $helpscout_user['id'] ?? 0 );
+			$chosen = self::chosen( $id );
+			$email  = (string) ( $helpscout_user['email'] ?? '' );
 
-			$missing[] = trim( ( $helpscout_user['firstName'] ?? '' ) . ' ' . ( $helpscout_user['lastName'] ?? '' ) ) . ' <' . $email . '>';
+			$agents[] = array(
+				'id'       => $id,
+				'name'     => trim( ( $helpscout_user['firstName'] ?? '' ) . ' ' . ( $helpscout_user['lastName'] ?? '' ) ),
+				'email'    => $email,
+				'chosen'   => $chosen ? (int) $chosen->id : null,
+				'by_email' => self::by_email( $email ),
+			);
 		}
 
-		sort( $missing );
+		usort(
+			$agents,
+			static function ( array $a, array $b ): int {
+				return strcasecmp( $a['name'], $b['name'] );
+			}
+		);
 
-		return $missing;
+		return $agents;
+	}
+
+	/**
+	 * The FreeScout user an administrator chose for a HelpScout user.
+	 *
+	 * @param int $helpscout_user_id HelpScout user ID.
+	 * @return User|null
+	 */
+	private static function chosen( int $helpscout_user_id ): ?User {
+		$user_id = $helpscout_user_id ? Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->value( 'user_id' ) : null;
+
+		return $user_id ? User::find( (int) $user_id ) : null;
+	}
+
+	/**
+	 * The FreeScout user with an email.
+	 *
+	 * @param string $email Email.
+	 * @return User|null
+	 */
+	private static function by_email( string $email ): ?User {
+		return '' !== $email ? User::query()->where( 'email', mb_strtolower( $email ) )->first() : null;
 	}
 
 	/**
