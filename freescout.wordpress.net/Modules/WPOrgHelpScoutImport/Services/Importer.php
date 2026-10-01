@@ -57,6 +57,13 @@ final class Importer {
 	public const META = 'wporghelpscoutimport';
 
 	/**
+	 * HelpScout's read-tracking image, which its emails carry, and replies quote.
+	 *
+	 * @var string
+	 */
+	private const TRACKER = '#<img\b[^>]*\bsrc\s*=\s*(["\'])https?://secure\.helpscout\.net/notification/[^"\']*\1[^>]*>#i';
+
+	/**
 	 * HelpScout conversation statuses, as FreeScout's.
 	 *
 	 * @var int[]
@@ -176,7 +183,7 @@ final class Importer {
 	 *
 	 * @param int     $conversation_id HelpScout conversation ID.
 	 * @param array[] $threads         The conversation's threads, oldest first.
-	 * @return array[] Threads, each with `type` set to FreeScout's, plus `message_id` and `files`.
+	 * @return array[] Threads, each with `fs_type` set to FreeScout's, plus `message_id`, `files`, and `images`.
 	 */
 	private function new_threads( int $conversation_id, array $threads ): array {
 		$ids  = array_map( 'intval', array_column( $threads, 'id' ) );
@@ -206,10 +213,53 @@ final class Importer {
 				);
 			}
 
+			$thread['images'] = $this->images( (string) ( $thread['body'] ?? '' ) );
+
 			$new[] = $thread;
 		}
 
 		return $new;
+	}
+
+	/**
+	 * Downloads the images in a body that HelpScout hosts, which would go with the account.
+	 *
+	 * An image that can't be downloaded keeps its link.
+	 *
+	 * @param string $body Thread body.
+	 * @return array[] Files by their `src` in the body, each with `name`, `mime`, and `data`.
+	 */
+	private function images( string $body ): array {
+		$hosts  = array_map( 'strtolower', (array) config( 'wporghelpscoutimport.image_hosts', array() ) );
+		$images = array();
+
+		preg_match_all( '/<img\b[^>]*?\bsrc\s*=\s*(["\'])(.*?)\1/i', $body, $matches );
+
+		foreach ( array_unique( $matches[2] ) as $src ) {
+			$url = html_entity_decode( $src, ENT_QUOTES | ENT_HTML5 );
+			if ( str_starts_with( $url, '//' ) ) {
+				$url = 'https:' . $url;
+			}
+
+			if ( ! in_array( strtolower( (string) parse_url( $url, PHP_URL_HOST ) ), $hosts, true ) ) {
+				continue;
+			}
+
+			$data = $this->helpscout->image( $url );
+			$mime = $data ? (string) finfo_buffer( finfo_open(), $data, FILEINFO_MIME_TYPE ) : '';
+			if ( ! str_starts_with( $mime, 'image/' ) ) {
+				continue;
+			}
+
+			$name           = basename( (string) parse_url( $url, PHP_URL_PATH ) );
+			$images[ $src ] = array(
+				'name' => '' !== $name ? $name : 'image',
+				'mime' => $mime,
+				'data' => $data,
+			);
+		}
+
+		return $images;
 	}
 
 	/**
@@ -275,7 +325,7 @@ final class Importer {
 		$thread->type            = $type;
 		$thread->status          = self::STATUSES[ $source['status'] ?? '' ] ?? $conversation->status;
 		$thread->state           = Thread::STATE_PUBLISHED;
-		$thread->body            = (string) ( $source['body'] ?? '' );
+		$thread->body            = (string) preg_replace( self::TRACKER, '', (string) ( $source['body'] ?? '' ) );
 		$thread->source_via      = $by_customer ? Thread::PERSON_CUSTOMER : Thread::PERSON_USER;
 		$thread->source_type     = self::source_type( (string) ( $source['source']['type'] ?? '' ) );
 		$thread->customer_id     = $author ? $author->id : $conversation->customer_id;
@@ -311,6 +361,18 @@ final class Importer {
 
 		foreach ( $source['files'] as $file ) {
 			Attachment::create( $file['name'], $file['mime'], null, $file['data'], null, false, $thread_id, $thread->created_by_user_id );
+		}
+
+		// Like an email's inline images when FreeScout fetches it: embedded, and linked from the body.
+		$body = (string) $thread->body;
+		foreach ( $source['images'] as $src => $image ) {
+			$attachment = Attachment::create( $image['name'], $image['mime'], null, $image['data'], null, true, $thread_id, $thread->created_by_user_id );
+			if ( $attachment ) {
+				$body = str_replace( $src, $attachment->url(), $body );
+			}
+		}
+		if ( $body !== $thread->body ) {
+			Thread::query()->whereKey( $thread_id )->update( array( 'body' => $body ) );
 		}
 
 		ImportedThread::query()->create(

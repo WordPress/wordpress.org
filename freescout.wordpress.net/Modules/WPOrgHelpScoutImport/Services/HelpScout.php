@@ -30,6 +30,13 @@ final class HelpScout {
 	private const TOKEN_CACHE_KEY = 'wporghelpscoutimport.token';
 
 	/**
+	 * Largest image copied from an email's body, in bytes.
+	 *
+	 * @var int
+	 */
+	private const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+
+	/**
 	 * App ID.
 	 *
 	 * @var string
@@ -238,6 +245,24 @@ final class HelpScout {
 		}
 
 		return (string) $response->getBody();
+	}
+
+	/**
+	 * Downloads an image HelpScout hosts for an email's body; it needs no access token.
+	 *
+	 * @param string $url Image URL.
+	 * @return string|null The image's bytes, or null if it couldn't be downloaded.
+	 */
+	public function image( string $url ): ?string {
+		try {
+			$response = $this->send( 'GET', $url, array() );
+		} catch ( ApiError $e ) {
+			return null;
+		}
+
+		$image = (string) $response->getBody();
+
+		return 200 === $response->getStatusCode() && '' !== $image && strlen( $image ) <= self::MAX_IMAGE_BYTES ? $image : null;
 	}
 
 	/**

@@ -137,6 +137,45 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * Images HelpScout hosts are copied and linked from the body; others keep their links, and its tracker goes.
+	 *
+	 * @return void
+	 */
+	public function test_images_helpscout_hosts_are_copied(): void {
+		$hosted  = 'https://d33v4339jhl8k0.cloudfront.net/inline/83653/abc/def/image.png';
+		$missing = 'https://d33v4339jhl8k0.cloudfront.net/inline/83653/abc/gone/lost.png';
+		$page    = 'https://d33v4339jhl8k0.cloudfront.net/inline/83653/abc/page/error.png';
+		$other   = 'https://s.w.org/images/core/emoji/14.0.0/72x72/1f389.png';
+		$tracker = 'https://secure.helpscout.net/notification/convo/1/2/3.png';
+
+		$threads            = $this->threads();
+		$threads[0]['body'] = '<p>Look:</p><img src="' . $hosted . '" alt="screenshot"><img src="' . $missing . '"><img src="' . $page . '"><img src="' . $other . '"><img src="' . $tracker . '" width="1">';
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+		$this->helpscout->on( 'GET', 'inline/83653/abc/def/image.png', new \GuzzleHttp\Psr7\Response( 200, array( 'Content-Type' => 'application/octet-stream' ), self::png() ) );
+		$this->helpscout->on( 'GET', 'inline/83653/abc/gone/lost.png', new \GuzzleHttp\Psr7\Response( 404, array(), self::png() ) );
+		$this->helpscout->on( 'GET', 'inline/83653/abc/page/error.png', new \GuzzleHttp\Psr7\Response( 200, array(), '<html>Not an image</html>' ) );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$email = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_CUSTOMER )->first();
+		$image = Attachment::query()->where( 'thread_id', $email->id )->where( 'embedded', true )->first();
+
+		$this->assertNotNull( $image );
+		$this->assertSame( 'image.png', $image->file_name );
+		$this->assertSame( 'image/png', $image->mime_type );
+		$this->assertSame( self::png(), $image->getFileContents() );
+		$this->assertStringContainsString( '<img src="' . $image->url() . '" alt="screenshot">', $email->body );
+		$this->assertStringNotContainsString( $hosted, $email->body );
+		$this->assertStringContainsString( $missing, $email->body );
+		$this->assertStringContainsString( $page, $email->body );
+		$this->assertSame( 1, Attachment::query()->where( 'thread_id', $email->id )->where( 'embedded', true )->count() );
+		$this->assertStringContainsString( $other, $email->body );
+		$this->assertStringNotContainsString( 'secure.helpscout.net', $email->body );
+		$this->assertCount( 0, $this->helpscout->requests_to( 'images/core/emoji/14.0.0/72x72/1f389.png' ) );
+		$this->assertSame( 1, Attachment::query()->where( 'thread_id', $email->id )->where( 'embedded', false )->count() );
+	}
+
+	/**
 	 * Nothing is sent, and nothing reacts as if the email were new.
 	 *
 	 * @return void
@@ -344,6 +383,15 @@ final class ImporterTest extends ImportTestCase {
 
 		$this->assertSame( 0, Conversation::query()->where( 'mailbox_id', $this->mailbox->id )->count() );
 		$this->assertSame( 0, ImportedConversation::query()->count() );
+	}
+
+	/**
+	 * A 1×1 PNG.
+	 *
+	 * @return string
+	 */
+	private static function png(): string {
+		return (string) base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAwS2OUAAAAABJRU5ErkJggg==' );
 	}
 
 	/**

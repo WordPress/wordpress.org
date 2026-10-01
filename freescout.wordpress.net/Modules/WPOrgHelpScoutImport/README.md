@@ -9,13 +9,13 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
 - **What comes across:**
   - conversations with their subject, status, assignee, who closed them, CC and BCC, and their original dates;
   - every email, reply, and note, with its own sender or agent, its recipients, and its attachments;
+  - images pasted into emails, which HelpScout keeps on its own image host: they're copied, so they don't go with the account. Images linked from elsewhere keep their links, and HelpScout's read-tracking image is removed;
   - each email's Message-ID, so a sender who replies to an old HelpScout email lands in its conversation;
   - HelpScout's conversation number, tags, and custom fields, kept in the module's own table until the Tags and Custom Fields modules can take them.
 - **What doesn't:**
   - spam and drafts;
   - HelpScout's line items ("assigned to", "closed by", workflows that ran);
-  - phone calls and forwards become notes, since FreeScout has no thread type for them;
-  - images in the body of an email still point at HelpScout, and stop showing once the account is closed.
+  - phone calls and forwards become notes, since FreeScout has no thread type for them.
 - **Agents:** HelpScout users are matched to FreeScout users by email. **Check agents** lists the ones without a FreeScout user; add them before importing to credit them. Their replies and notes are otherwise credited to "HelpScout Import", a disabled robot user, and the thread keeps their name.
 - **Nothing reacts to it:** conversations are marked as imported, and written without the events new email fires. Nothing is sent, nobody is notified, no workflow runs, and `WPOrgAkismet` and `WPOrgWebhooks` leave them alone.
 - **Importing again is safe:** only threads that weren't imported yet are added. A conversation deleted in FreeScout since stays deleted.
