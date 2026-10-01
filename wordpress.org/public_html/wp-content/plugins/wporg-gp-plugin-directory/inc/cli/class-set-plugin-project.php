@@ -295,7 +295,7 @@ class Set_Plugin_Project extends WP_CLI_Command {
 			)
 		);
 
-		if ( ! json_validate( $json ) ) {
+		if ( ! is_string( $json ) || '' === $json ) {
 			return null;
 		}
 
