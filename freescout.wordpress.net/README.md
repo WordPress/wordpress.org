@@ -6,7 +6,7 @@
 |---|---|
 | [WPOrgAkismet](Modules/WPOrgAkismet) | Checks new conversations from senders with Akismet, and teaches it from what agents mark as spam. |
 | [WPOrgSidebar](Modules/WPOrgSidebar) | Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests next to each conversation. |
-| [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: modules can't be updated or deleted from the Modules page, and its cards fill the width in columns. |
+| [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: WordPress.org branding, and the Modules page only lists installed modules, which can't be updated or deleted there. |
 | [WPOrgSSO](Modules/WPOrgSSO) | Agents log in with their WordPress.org account, through login.wordpress.org; there's no other way in. Every user is connected to a WordPress.org account, and new users are created from one. Name, email, and avatar are updated from it at every login. |
 | [WPOrgWebhooks](Modules/WPOrgWebhooks) | Sends conversation events to WordPress.org, which records them as contributor stats. |
 
