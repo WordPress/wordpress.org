@@ -386,7 +386,7 @@ function browsehappy_locale_notice() {
 			printf(
 				wp_kses_post(
 					/* translators: "English" should be translated directly and not to the name of your language. */
-				 	__( 'Browse Happy is also available in English. <a href="%s">Click here to change the language to English</a>.', 'browsehappy' )
+					__( 'Browse Happy is also available in English. <a href="%s">Click here to change the language to English</a>.', 'browsehappy' )
 				),
 				'/?locale=en'
 			);
