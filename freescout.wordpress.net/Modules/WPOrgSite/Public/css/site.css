@@ -1,0 +1,35 @@
+/**
+ * Adjusts FreeScout's own screens.
+ */
+
+/* Previous Conversations and other sidebar links: core's gray is 2.5:1, this meets WCAG AAA (7:1). */
+.conv-sidebar-block .help-link,
+.conv-sidebar-block .help-link:hover,
+.conv-sidebar-block .help-link:focus {
+	color: #4a5561 !important;
+}
+
+/*
+ * The Modules page's cards, in columns of up to 540px, as many as fit. Not in a collapsed panel, like the third-party
+ * modules, which would show otherwise.
+ */
+.row-container:has( > .module-card ):not( .collapse:not( .in ) ) {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( min( 100%, 440px ), 540px ) );
+	gap: 18px;
+
+	/* The cards' own bottom margin, which the grid's gap replaces. */
+	margin-bottom: 18px;
+}
+
+/* Like the Modules Directory's subscribe note. */
+.row-container:has( > .module-card ) > :not( .module-card ) {
+	grid-column: 1 / -1;
+	margin-bottom: 0;
+}
+
+.row-container > .module-card {
+	float: none;
+	width: auto;
+	margin: 0;
+}

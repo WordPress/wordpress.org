@@ -47,25 +47,38 @@ final class Client {
 	private $timeout;
 
 	/**
+	 * Guzzle handler, for tests to answer requests.
+	 *
+	 * @var callable|null
+	 */
+	private $handler;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param string $base_url Base URL of the endpoints.
-	 * @param string $secret   Shared signing secret.
-	 * @param int    $timeout  Request timeout in seconds.
+	 * @param string        $base_url Base URL of the endpoints.
+	 * @param string        $secret   Shared signing secret.
+	 * @param int           $timeout  Request timeout in seconds.
+	 * @param callable|null $handler  Guzzle handler; the default sends real requests.
 	 */
-	public function __construct( string $base_url, string $secret, int $timeout = 10 ) {
+	public function __construct( string $base_url, string $secret, int $timeout = 10, ?callable $handler = null ) {
 		$this->base_url = rtrim( $base_url, '/' ) . '/';
 		$this->secret   = $secret;
 		$this->timeout  = $timeout;
+		$this->handler  = $handler;
 	}
 
 	/**
-	 * Creates a client from the module configuration.
+	 * Creates a client from the module configuration, or returns the one tests bound.
 	 *
 	 * @param int $timeout Request timeout in seconds.
 	 * @return self
 	 */
 	public static function from_config( int $timeout = 10 ): self {
+		if ( app()->bound( self::class ) ) {
+			return app( self::class );
+		}
+
 		return new self(
 			(string) config( 'wporgsidebar.api_url' ),
 			(string) config( 'wporgsidebar.secret' ),
@@ -124,7 +137,12 @@ final class Client {
 		$body = self::encode( $payload );
 
 		try {
-			$http     = new \GuzzleHttp\Client( \Helper::setGuzzleDefaultOptions( array( 'timeout' => $this->timeout ) ) );
+			$options = array( 'timeout' => $this->timeout );
+			if ( $this->handler ) {
+				$options['handler'] = \GuzzleHttp\HandlerStack::create( $this->handler );
+			}
+
+			$http     = new \GuzzleHttp\Client( \Helper::setGuzzleDefaultOptions( $options ) );
 			$response = $http->post(
 				$this->base_url . ltrim( $endpoint, '/' ),
 				array(

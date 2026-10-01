@@ -52,7 +52,7 @@ function render_plugins_themes( object $request ): string {
 		$post_ids = get_items_by_slug( $mentioned[ $type ] );
 
 		if ( $post_ids ) {
-			$html .= '<h5 class="wporg-sidebar-heading">' . esc_html( ucwords( $type ) ) . ' mentioned in this email</h5>';
+			$html .= '<h5 class="wporg-sidebar-heading">' . esc_html( ucwords( $type ) ) . ' mentioned ' . render_count( count( $post_ids ) ) . '</h5>';
 			$html .= render_items( $post_ids, $mailbox_email );
 		}
 
@@ -73,7 +73,7 @@ function render_plugins_themes( object $request ): string {
 					admin_url( 'edit.php' )
 				);
 
-				$html .= '<h5 class="wporg-sidebar-heading"><a href="' . esc_url( $url ) . '">' . esc_html( ucwords( $type ) ) . ' owned</a></h5>';
+				$html .= '<h5 class="wporg-sidebar-heading"><a href="' . esc_url( $url ) . '">' . esc_html( ucwords( $type ) ) . ' owned</a> ' . render_count( count( $post_ids ) ) . '</h5>';
 				$html .= render_items( $post_ids, $mailbox_email );
 			}
 
@@ -164,6 +164,9 @@ function get_items_by_slug( array $slugs ): array {
 function render_items( array $post_ids, string $mailbox_email ): string {
 	$html = '<ul class="wporg-sidebar-items">';
 
+	// Reviews are the plugins team's; other mailboxes' conversations can name any plugin.
+	$show_review = str_starts_with( $mailbox_email, 'plugins' );
+
 	foreach ( $post_ids as $post_id ) {
 		$post          = get_post( (int) $post_id );
 		$type          = ( 'plugin' === $post->post_type ) ? 'plugin' : 'theme';
@@ -174,7 +177,8 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 		$download_link = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
 
 		if ( 'plugin' === $type ) {
-			if ( $post->assigned_reviewer ) {
+			// Only a review in progress has someone on it; the assignment stays after it's done.
+			if ( $show_review && $post->assigned_reviewer && in_array( $post->post_status, array( 'new', 'pending' ), true ) ) {
 				$reviewer_user = get_user_by( 'id', (int) $post->assigned_reviewer );
 				if ( $reviewer_user ) {
 					$reviewer = $reviewer_user->display_name ? $reviewer_user->display_name : $reviewer_user->user_login;
@@ -184,9 +188,9 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 			// Prefer the last_updated post meta.
 			$last_modified = $post->last_updated ? $post->last_updated : $last_modified;
 
-			// Get the ZIPs attached, link to the latest for pending/new.
+			// Get the ZIPs attached, link to the latest for pending/new. Unreleased, so only for reviews.
 			if ( in_array( $post->post_status, array( 'new', 'pending' ), true ) ) {
-				$attachments   = get_posts(
+				$attachments   = $show_review ? get_posts(
 					array(
 						'post_parent'    => $post->ID,
 						'post_type'      => 'attachment',
@@ -194,25 +198,21 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 						'order'          => 'DESC',
 						'posts_per_page' => 1,
 					)
-				);
+				) : array();
 				$download_link = $attachments ? (string) wp_get_attachment_url( $attachments[0]->ID ) : '';
 			}
 
 			// Append Info URL.
 			if (
 				$download_link &&
-				str_starts_with( $mailbox_email, 'plugins' ) &&
+				$show_review &&
 				class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' )
 			) {
 				$download_link = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $download_link, $post );
 			}
 		}
 
-		$short_last_updated = str_ireplace(
-			array( ' seconds', ' second', ' hours', ' hour', ' days', ' day', ' weeks', ' week', ' months', ' month', ' years', ' year' ),
-			array( 's', 's', 'h', 'h', 'd', 'd', 'w', 'w', 'm', 'm', 'y', 'y' ),
-			human_time_diff( (int) strtotime( $last_modified ), time() )
-		);
+		$last_updated = (int) strtotime( $last_modified );
 
 		switch ( $post->post_status ) {
 			// Plugins.
@@ -225,7 +225,7 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 			case 'disabled':
 				$status = ucwords( $post->post_status );
 				// This is not perfect, but close enough.
-				if ( $post->_close_reason ) {
+				if ( $show_review && $post->_close_reason ) {
 					$status .= ': ' . ucwords( str_replace( '-', ' ', $post->_close_reason ) );
 				}
 				$tone = 'error';
@@ -258,7 +258,11 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 
 		$meta = array(
 			esc_html( $post->post_name ),
-			'<span title="Last updated">' . esc_html( $short_last_updated ) . '</span>',
+			sprintf(
+				'<span title="%s">Updated %s ago</span>',
+				esc_attr( gmdate( 'Y-m-d', $last_updated ) ),
+				esc_html( human_time_diff( $last_updated, time() ) )
+			),
 		);
 
 		if ( $reviewer ) {
@@ -278,7 +282,7 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 		}
 
 		$html .= sprintf(
-			'<li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="%s">%s</a> %s<div class="wporg-sidebar-item-meta">%s <span class="wporg-sidebar-item-links">%s</span></div></li>',
+			'<li class="wporg-sidebar-item"><span class="wporg-sidebar-item-links">%5$s</span><a class="wporg-sidebar-item-title" href="%1$s">%2$s</a> %3$s<div class="wporg-sidebar-item-meta">%4$s</div></li>',
 			esc_url(
 				add_query_arg(
 					array(

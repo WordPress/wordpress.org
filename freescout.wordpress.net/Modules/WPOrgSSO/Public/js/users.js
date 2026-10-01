@@ -146,7 +146,8 @@
 					if ( user.blocked ) {
 						notes.push( strings.blocked );
 					}
-					if ( ! user.two_factor ) {
+					// Only administrators get the account's status, too.
+					if ( false === user.two_factor ) {
 						notes.push( strings.no_two_factor );
 					}
 

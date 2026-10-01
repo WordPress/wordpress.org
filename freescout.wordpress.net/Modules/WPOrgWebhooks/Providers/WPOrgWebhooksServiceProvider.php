@@ -84,17 +84,21 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	private function register_hooks(): void {
-		\Eventy::addAction(
-			'conversation.created_by_customer',
-			static function ( $conversation = null ): void {
-				self::forward(
-					'conversation.created_by_customer',
-					static function () use ( $conversation ): array {
-						return array( $conversation, null );
-					}
-				);
-			}
-		);
+		foreach ( array( 'conversation.created_by_customer', 'conversation.customer_replied' ) as $event ) {
+			\Eventy::addAction(
+				$event,
+				static function ( $conversation = null, $thread = null ) use ( $event ): void {
+					self::forward(
+						$event,
+						static function () use ( $conversation, $thread ): ?array {
+							return self::imported( $thread ) || $conversation->isSpam() ? null : array( $conversation, null );
+						}
+					);
+				},
+				20,
+				2
+			);
+		}
 
 		\Eventy::addAction(
 			'conversation.created_by_user',
@@ -102,7 +106,7 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 				self::forward(
 					'conversation.created_by_user',
 					static function () use ( $conversation, $thread ): ?array {
-						return self::sent( $thread ) ? array( $conversation, $thread->created_by_user ) : null;
+						return ! self::imported( $thread ) && self::sent( $thread ) ? array( $conversation, $thread->created_by_user ) : null;
 					}
 				);
 			},
@@ -111,24 +115,12 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 		);
 
 		\Eventy::addAction(
-			'conversation.customer_replied',
-			static function ( $conversation = null ): void {
-				self::forward(
-					'conversation.customer_replied',
-					static function () use ( $conversation ): array {
-						return array( $conversation, null );
-					}
-				);
-			}
-		);
-
-		\Eventy::addAction(
 			'conversation.user_replied',
 			static function ( $conversation = null, $thread = null ): void {
 				self::forward(
 					'conversation.user_replied',
 					static function () use ( $conversation, $thread ): ?array {
-						return self::sent( $thread ) ? array( $conversation, $thread->created_by_user ) : null;
+						return ! self::imported( $thread ) && self::sent( $thread ) ? array( $conversation, $thread->created_by_user ) : null;
 					}
 				);
 			},
@@ -180,6 +172,29 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 			20,
 			2
 		);
+	}
+
+	/**
+	 * Whether a thread was imported, rather than written in FreeScout.
+	 *
+	 * Importers create conversations through core, which fires the same hooks as new mail. The service the
+	 * conversations came from counted them already, when they happened.
+	 *
+	 * @param mixed $thread Thread.
+	 * @return bool
+	 */
+	private static function imported( $thread ): bool {
+		return $thread instanceof Thread && (bool) $thread->imported;
+	}
+
+	/**
+	 * Whether a user stands for an automation, like Workflows, rather than a person.
+	 *
+	 * @param User $user User.
+	 * @return bool
+	 */
+	private static function is_robot( User $user ): bool {
+		return defined( User::class . '::TYPE_ROBOT' ) && User::TYPE_ROBOT === (int) $user->type;
 	}
 
 	/**
@@ -235,7 +250,13 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 			}
 
 			list( $conversation, $agent ) = $args;
-			SendEvent::dispatch( EventPayload::build( $event, $conversation, $agent instanceof User ? $agent : null ) );
+
+			// Automations have no WordPress.org account to credit.
+			if ( ! $agent instanceof User || self::is_robot( $agent ) ) {
+				$agent = null;
+			}
+
+			SendEvent::dispatch( EventPayload::build( $event, $conversation, $agent ) );
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgWebhooks] Could not queue ' . $event . ': ' . $e->getMessage() );
 		}

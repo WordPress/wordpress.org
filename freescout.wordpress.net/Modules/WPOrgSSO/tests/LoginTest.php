@@ -302,8 +302,33 @@ final class LoginTest extends SsoTestCase {
 	 *
 	 * @return void
 	 */
-	public function test_logs_out_users_who_did_not_use_wordpress_org(): void {
+	public function test_keeps_sessions_from_before_wordpress_org_was_enforced(): void {
+		$this->actingAs( $this->user )->get( route( 'dashboard' ) )->assertStatus( 200 );
+		$this->assertAuthenticatedAs( $this->user );
+	}
+
+	/**
+	 * A day after WordPress.org was enforced, a session without its marks is from while the module was off, and ends.
+	 *
+	 * @return void
+	 */
+	public function test_logs_out_unmarked_sessions_after_the_cutover(): void {
+		\Option::set( WPOrgSSOServiceProvider::OPTION_ENFORCED_SINCE, time() - 86400 );
+
 		$this->actingAs( $this->user )->get( route( 'dashboard' ) )->assertRedirect( route( 'login' ) );
+		$this->assertGuest();
+	}
+
+	/**
+	 * A login without WordPress.org once it's enforced ends on the next request.
+	 *
+	 * @return void
+	 */
+	public function test_logs_out_logins_without_wordpress_org(): void {
+		$this->actingAs( $this->user )
+			->withSession( array( WPOrgSSOServiceProvider::SESSION_REFUSED => true ) )
+			->get( route( 'dashboard' ) )
+			->assertRedirect( route( 'login' ) );
 
 		$this->assertGuest();
 	}
@@ -465,6 +490,8 @@ final class LoginTest extends SsoTestCase {
 	public function test_other_logins_are_refused_in_break_glass(): void {
 		config( array( 'wporgsso.password_login' => true ) );
 
+		// Like a login in a request, which has a session.
+		$this->app['request']->setLaravelSession( $this->app['session.store'] );
 		\Auth::login( $this->create_user( User::ROLE_ADMIN ) );
 
 		$this->get( route( 'dashboard' ) )->assertRedirect( route( 'login' ) );
@@ -489,10 +516,14 @@ final class LoginTest extends SsoTestCase {
 	 * @return void
 	 */
 	public function test_app_session_restore_needs_a_new_login(): void {
-		$this->actingAs( $this->user )
-			->call( 'GET', route( 'dashboard' ), array( 'auth_token' => 'token' ), array( 'in_app' => '1' ) )
-			->assertRedirect( route( 'login' ) );
+		// Core's app token: base64 of "user ID:expiry:HMAC", keyed with the app key and the password hash.
+		$expiry = time() + 60;
+		$token  = base64_encode( $this->user->id . ':' . $expiry . ':' . hash_hmac( 'sha256', $this->user->id . ':' . $expiry, config( 'app.key' ) . $this->user->password ) );
+
+		$this->call( 'GET', route( 'dashboard' ), array( 'auth_token' => $token ), array( 'in_app' => '1' ) )->assertRedirect( route( 'login' ) );
+		$this->assertGuest();
 	}
+
 
 	/**
 	 * Sessions are checked against WordPress.org again after an hour.
@@ -558,9 +589,11 @@ final class LoginTest extends SsoTestCase {
 	 * @return void
 	 */
 	public function test_ended_session_keeps_the_page(): void {
-		$this->actingAs( $this->user )->getJson( route( 'dashboard' ) )->assertStatus( 401 );
+		$refused = array( WPOrgSSOServiceProvider::SESSION_REFUSED => true );
 
-		$this->actingAs( $this->user )->get( route( 'users.profile', array( 'id' => $this->user->id ) ) )->assertRedirect( route( 'login' ) );
+		$this->actingAs( $this->user )->withSession( $refused )->getJson( route( 'dashboard' ) )->assertStatus( 401 );
+
+		$this->actingAs( $this->user )->withSession( $refused )->get( route( 'users.profile', array( 'id' => $this->user->id ) ) )->assertRedirect( route( 'login' ) );
 		$this->assertSame( route( 'users.profile', array( 'id' => $this->user->id ) ), session( 'url.intended' ) );
 	}
 

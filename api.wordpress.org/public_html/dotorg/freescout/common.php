@@ -90,12 +90,13 @@ function is_fresh( object $payload ): bool {
 /**
  * Sends sidebar HTML to FreeScout and ends the request.
  *
- * @param string $html Sidebar HTML.
+ * @param string $html  Sidebar HTML.
+ * @param array  $extra Other data for WPOrgSidebar, e.g. the sender's avatar.
  * @return never
  */
-function send_html( string $html ): never {
+function send_html( string $html, array $extra = array() ): never {
 	header( 'Content-Type: application/json; charset=utf-8' );
-	echo wp_json_encode( array( 'html' => $html ) );
+	echo wp_json_encode( array_merge( $extra, array( 'html' => $html ) ) );
 	exit;
 }
 
@@ -108,6 +109,16 @@ function send_html( string $html ): never {
  */
 function render_badge( string $label, string $tone = 'neutral' ): string {
 	return sprintf( '<span class="wporg-sidebar-badge is-%s">%s</span>', esc_attr( $tone ), esc_html( $label ) );
+}
+
+/**
+ * Renders how many items a sidebar section has.
+ *
+ * @param int $count Number of items.
+ * @return string
+ */
+function render_count( int $count ): string {
+	return sprintf( '<span class="wporg-sidebar-count">%d</span>', $count );
 }
 
 /**
@@ -133,45 +144,74 @@ function get_thread_text( string $body ): string {
 /**
  * Gets the email address of the WordPress.org user a conversation is about.
  *
- * Usually that's the sender, but bounces and Slack notifications are about someone else.
+ * Usually that's the sender, but bounces and Slack notifications are about someone else. Who that is comes from what
+ * the sender wrote, so it's only used once an agent asks for it, with `related` in the payload.
  *
  * @param object $request Request payload.
  * @return string The user's email address, or the sender's if no user was found.
  */
 function get_user_email_for_email( object $request ): string {
-	$subject = (string) ( $request->conversation->subject ?? '' );
-	$sender  = $request->sender ?? null;
-	$email   = (string) ( $sender->email ?? '' );
-	$user    = $email ? get_user_by( 'email', $email ) : false;
+	$user = ! empty( $request->related ) ? get_related_user( $request ) : false;
+	if ( ! $user ) {
+		$user = get_sender_user( $request );
+	}
 
-	// If this is related to a slack user, fetch their details instead.
+	return $user ? $user->user_email : (string) ( $request->sender->email ?? '' );
+}
+
+/**
+ * Gets the sender's WordPress.org user, by any of their addresses.
+ *
+ * @param object $request Request payload.
+ * @return \WP_User|false
+ */
+function get_sender_user( object $request ): \WP_User|false {
+	$sender = $request->sender ?? null;
+	$email  = (string) ( $sender->email ?? '' );
+	$user   = $email ? get_user_by( 'email', $email ) : false;
+
+	if ( ! $user && ! empty( $sender->emails ) ) {
+		$user = get_user_from_emails( array_map( 'strval', (array) $sender->emails ) );
+	}
+
+	return $user;
+}
+
+/**
+ * Gets the WordPress.org user a bounce or Slack notification is about, if that's someone other than the sender.
+ *
+ * Goes by the sender's address, the subject, and the body, which the sender writes: it can name anyone.
+ *
+ * @param object $request Request payload.
+ * @return \WP_User|false
+ */
+function get_related_user( object $request ): \WP_User|false {
+	$subject = (string) ( $request->conversation->subject ?? '' );
+	$email   = (string) ( $request->sender->email ?? '' );
+	$sender  = get_sender_user( $request );
+	$user    = false;
+
+	// A Slack notification about a member.
 	if (
 		false !== stripos( $email, 'slack' ) &&
 		preg_match( '/(\S+)@chat.wordpress.org/i', $subject, $m )
 	) {
 		$user = get_user_by( 'slug', $m[1] );
-	}
-
-	// If the sender has alternative emails listed, check to see if they have a profile.
-	if ( ! $user && ! empty( $sender->emails ) ) {
-		$user = get_user_from_emails( array_map( 'strval', (array) $sender->emails ) );
-	}
-
-	// Ignore @wordpress.org "users", unless it's literally the only match.
-	if ( $user && str_ends_with( $user->user_email, '@wordpress.org' ) ) {
-		$user = false;
-	}
-
-	// Is this is a bounce for an email that we have included the username in the subject for?
-	if ( preg_match( '#Are your plugins ready, (.+?)[?]#i', $subject, $m ) ) {
-		$user = get_user_by( 'login', $m[1] ) ?: $user;
-	}
-
-	if ( ! $user && $email && is_bounce( $request ) ) {
+	} elseif (
+		// @wordpress.org "users" send notifications, which may bounce.
+		( ! $sender || str_ends_with( $sender->user_email, '@wordpress.org' ) ) &&
+		$email &&
+		is_bounce( $request )
+	) {
 		$user = get_user_from_bounce( $request );
 	}
 
-	return $user ? $user->user_email : $email;
+	// Neither someone at WordPress.org, nor the sender after all.
+	if ( ! $user || str_ends_with( $user->user_email, '@wordpress.org' ) || ( $sender && $sender->ID === $user->ID ) ) {
+		return false;
+	}
+
+	return $user;
 }
 
 /**

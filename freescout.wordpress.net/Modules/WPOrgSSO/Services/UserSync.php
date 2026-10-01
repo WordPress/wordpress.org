@@ -20,6 +20,13 @@ use RuntimeException;
 final class UserSync {
 
 	/**
+	 * Hosts avatars are downloaded from; account.php's avatars are Gravatar's.
+	 *
+	 * @var string[]
+	 */
+	private const AVATAR_HOSTS = array( 'gravatar.com', 'www.gravatar.com', 'secure.gravatar.com', '0.gravatar.com', '1.gravatar.com', '2.gravatar.com' );
+
+	/**
 	 * Updates a user from their WordPress.org account.
 	 *
 	 * Never fails: what can't be updated is logged and left as it was. The avatar follows on the queue.
@@ -61,12 +68,17 @@ final class UserSync {
 	 * @param Client $client     Client to download it with.
 	 * @return void
 	 *
-	 * @throws RuntimeException If the avatar can't be downloaded or saved.
+	 * @throws RuntimeException If the avatar isn't Gravatar's, or can't be downloaded or saved.
 	 */
 	public static function sync_avatar( User $user, string $avatar_url, Client $client ): void {
 		$account = Account::for_user( (int) $user->id );
 		if ( ! $account ) {
 			return;
+		}
+
+		// The app server fetches it, so it must not reach anything internal.
+		if ( 'https' !== parse_url( $avatar_url, PHP_URL_SCHEME ) || ! in_array( parse_url( $avatar_url, PHP_URL_HOST ), self::AVATAR_HOSTS, true ) ) {
+			throw new RuntimeException( 'Not a Gravatar URL: ' . $avatar_url );
 		}
 
 		$avatar = $client->download( $avatar_url );

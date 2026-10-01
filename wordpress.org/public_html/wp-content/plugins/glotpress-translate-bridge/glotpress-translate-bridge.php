@@ -2,7 +2,7 @@
 /*
  * Plugin Name: GlotPress Translate Bridge
  * Description: This plugin allows for a code to translate arbitrary strings from a GlotPress instance for the current locale.
- * Version: 0.1
+ * Version: 0.2
  * Plugin URI: https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/glotpress-translate-bridge/
  * Author: wordpressdotorg
  * Author URI: http://wordpress.org/
@@ -130,12 +130,13 @@ class GlotPress_Translate_Bridge {
 
 		$sql_locale = $wpdb->prepare( "s.locale = %s AND s.slug = %s", $locale['locale'], $locale['slug'] );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamic table prefix cannot be passed via placeholders.
 		$translation = $wpdb->get_row(
 			"SELECT t.translation_0, t.translation_1, t.translation_2, t.translation_3, t.translation_4, t.translation_5
 				FROM {$this->gp_prefix}projects p
-				LEFT JOIN {$this->gp_prefix}originals o ON p.id = o.project_id
-				LEFT JOIN {$this->gp_prefix}translation_sets s ON p.id = s.project_id
-				LEFT JOIN {$this->gp_prefix}translations t ON t.original_id = o.id AND t.translation_set_id = s.id
+				INNER JOIN {$this->gp_prefix}originals o ON p.id = o.project_id
+				INNER JOIN {$this->gp_prefix}translation_sets s ON p.id = s.project_id
+				INNER JOIN {$this->gp_prefix}translations t ON t.original_id = o.id AND t.translation_set_id = s.id
 
 			WHERE
 				$sql_project AND $sql_singular AND $sql_plural AND $sql_context AND $sql_locale
@@ -146,6 +147,7 @@ class GlotPress_Translate_Bridge {
 			LIMIT 1",
 			ARRAY_N
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( ! $translation ) {
 			$decoded_strings = array_map( 'wp_specialchars_decode', $strings );
@@ -218,7 +220,8 @@ class GlotPress_Translate_Bridge {
 	 *
 	 * @return string The cache key.
 	 */
-	private function cache_key( $strings, $project_path ) {
-		return strtolower( get_locale() ) . ':' . $project_path . ':' . serialize( array_filter( $strings ) );
+	private function cache_key( array $strings, $project_path ) {
+		$payload = serialize( array_filter( $strings ) );
+		return 'gp_tb:' . strtolower( get_locale() ) . ':' . md5( $project_path . ':' . $payload );
 	}
 }

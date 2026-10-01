@@ -138,11 +138,11 @@ final class UsersTest extends SsoTestCase {
 	}
 
 	/**
-	 * Agents who may manage users look up accounts too, but only administrators see the private email address.
+	 * Agents who may manage users look up accounts too, but only administrators see the email address and status.
 	 *
 	 * @return void
 	 */
-	public function test_lookup_hides_email_from_non_administrators(): void {
+	public function test_lookup_hides_email_and_status_from_non_administrators(): void {
 		$manager              = $this->create_user( User::ROLE_USER );
 		$manager->permissions = array( User::PERM_EDIT_USERS => true );
 		$manager->save();
@@ -152,6 +152,8 @@ final class UsersTest extends SsoTestCase {
 
 		$this->assertSame( 'rita', $data['user']['username'] );
 		$this->assertArrayNotHasKey( 'email', $data['user'] );
+		$this->assertArrayNotHasKey( 'two_factor', $data['user'] );
+		$this->assertArrayNotHasKey( 'blocked', $data['user'] );
 	}
 
 	/**
