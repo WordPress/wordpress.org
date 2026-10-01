@@ -109,6 +109,7 @@ add_filter( 'get_browsehappy_version', 'browsehappy_fetch_version' );
 
 /**
  * Echoes the current version of a browser.
+ *
  * Hooked to the 'browsehappy_version' action.
  *
  * @param string $browser Browser identifier.
@@ -234,10 +235,11 @@ function browsehappy_normalize_version( $browser, $version ) {
 	$normalize = browsehappy_get_browser_data( $browser )->normalized;
 	$version = explode( '.', $version );
 
-	if ( 1.5 == $normalize ) {
+	if ( 1.5 === $normalize ) {
 		$return = $version[0];
-		if ( '0' !== $version[1] )
+		if ( '0' !== $version[1] ) {
 			$return .= '.' . $version[1];
+		}
 		return $return;
 	}
 
@@ -252,6 +254,7 @@ add_action( 'init', 'browsehappy_schedule_version_check' );
 
 /**
  * Schedules a recurring event to clear browser version caches twice daily.
+ *
  * Hooked to the 'init' action.
  */
 function browsehappy_schedule_version_check() {
@@ -264,6 +267,7 @@ add_action( 'browsehappy_clear_version_cache', 'browsehappy_clear_version_cache'
 
 /**
  * Deletes transient caches for all browser versions.
+ *
  * Hooked to the 'browsehappy_clear_version_cache' cron event.
  */
 function browsehappy_clear_version_cache() {
@@ -278,10 +282,11 @@ add_action( 'init', 'browsehappy_init' );
 remove_action( 'template_redirect', 'wp_old_slug_redirect' );
 
 /**
- * Runs at the end of init to set default rewrite rules and supplant the global $wp object.
+ * Seeds an empty rewrite_rules option and replaces the global $wp with BrowseHappy_WP.
+ *
  * Hooked to the 'init' action.
  *
- * @global WP $wp Global WordPress environment object.
+ * @global WP|BrowseHappy_WP $wp Global WordPress environment object.
  */
 function browsehappy_init() {
 	if ( false === get_option( 'rewrite_rules' ) ) {
@@ -306,6 +311,7 @@ endif;
 
 /**
  * Loads the theme textdomain for internationalization and sets the text direction.
+ *
  * Hooked to the 'after_setup_theme' action.
  *
  * @global WP_Locale $wp_locale Global WordPress locale object.
@@ -325,13 +331,15 @@ if ( function_exists( 'browsehappy_parse_user_agent' ) ) {
 
 /**
  * Outputs an HTML warning notice if the visitor's browser is out of date or insecure.
+ *
  * Hooked to the 'browsehappy_browser_notice' action.
  */
 function browsehappy_browser_notice() {
 	$ua = $_SERVER['HTTP_USER_AGENT'];
 	$results = browsehappy_parse_user_agent( $ua );
-	if ( ! $results['upgrade'] )
+	if ( ! $results['upgrade'] ) {
 		return;
+	}
 	?>
 	<div id="browser-status" class="wrap">
 	<?php if ( $results['name'] == 'Internet Explorer' && strpos( $ua, 'Windows NT 5.' ) !== false ) : ?>
@@ -365,6 +373,7 @@ if ( class_exists( 'Browse_Happy_Locale' ) ) {
 
 /**
  * Outputs a notice offering to switch to English if the current locale is non-English.
+ *
  * Hooked to the 'browsehappy_locale_notice' action.
  */
 function browsehappy_locale_notice() {
