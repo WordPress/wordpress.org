@@ -72,6 +72,13 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 	public const SESSION_PASSWORD_LOGIN = 'wporgsso.password_login';
 
 	/**
+	 * Session key marking a login without WordPress.org that happened after it was enforced, which is ended.
+	 *
+	 * @var string
+	 */
+	public const SESSION_REFUSED = 'wporgsso.refused';
+
+	/**
 	 * Request attribute carrying the WordPress.org account a user form resolved.
 	 *
 	 * @var string
@@ -86,12 +93,28 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 	public const REQUEST_SSO_LOGIN = 'wporgsso.sso_login';
 
 	/**
+	 * Option of when WordPress.org was first enforced, as a Unix timestamp.
+	 *
+	 * @var string
+	 */
+	public const OPTION_ENFORCED_SINCE = 'wporgsso.enforced_since';
+
+	/**
 	 * Registers the module's dependencies.
 	 *
 	 * @return void
 	 */
 	public function register(): void {
-		require_once __DIR__ . '/../vendor/autoload.php';
+		$autoload = __DIR__ . '/../vendor/autoload.php';
+
+		// Core switches off a module with a missing file, and WordPress.org logins with it; this keeps them enforced.
+		if ( ! is_readable( $autoload ) ) {
+			\Log::critical( '[WPOrgSSO] vendor/autoload.php is missing; WordPress.org logins fail until it is restored.' );
+
+			return;
+		}
+
+		require_once $autoload;
 	}
 
 	/**
@@ -140,6 +163,30 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 		}
 
 		return true;
+	}
+
+	/**
+	 * When WordPress.org was first enforced; the first request that enforces it records it.
+	 *
+	 * It stays when enforcement is switched off, so sessions from while it was off end when it's back.
+	 *
+	 * @return int Unix timestamp.
+	 */
+	public static function enforced_since(): int {
+		// It never changes once set; a cleared cache costs one query, and the option keeps the time.
+		return (int) \Cache::rememberForever(
+			self::OPTION_ENFORCED_SINCE,
+			static function (): int {
+				// Not core's option cache, which outlives a request in tests: a stale default would move the cutover.
+				$since = (int) \Option::get( self::OPTION_ENFORCED_SINCE, 0, true, false );
+				if ( ! $since ) {
+					$since = time();
+					\Option::set( self::OPTION_ENFORCED_SINCE, $since );
+				}
+
+				return $since;
+			}
+		);
 	}
 
 	/**
@@ -279,7 +326,8 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 
 		/*
 		 * Only an administrator's password login in break-glass mode may stay; the middleware ends the session of any
-		 * other login without WordPress.org, like one from a reset or invite link, on its next request.
+		 * other login without WordPress.org, like one from a reset link or a remember-me cookie, on its next request.
+		 * Sessions from before WordPress.org was enforced go on for a day, so whoever switches it on isn't logged out.
 		 */
 		\Event::listen(
 			Login::class,
@@ -301,6 +349,10 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 					return;
 				}
 
+				// Without a session, like on the command line, there's nothing to end.
+				if ( request()->hasSession() ) {
+					request()->session()->put( self::SESSION_REFUSED, true );
+				}
 				\Log::warning( '[WPOrgSSO] Refused a login without WordPress.org by ' . $event->user->email . '.' );
 			}
 		);

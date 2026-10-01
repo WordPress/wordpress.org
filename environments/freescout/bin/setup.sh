@@ -33,6 +33,16 @@ for manifest in "$app"/Modules/*/module.json; do
 	# shellcheck disable=SC2016 # $argv is PHP, not shell.
 	IFS=$'\t' read -r name alias < <( php -r '$m = json_decode( file_get_contents( $argv[1] ) ); echo $m->name, "\t", $m->alias, "\n";' "$manifest" )
 
+	# Even a module that's switched off below needs its link, for its icon on the Modules page.
+	if [ ! -L "$app/public/modules/$alias" ]; then
+		php "$app/artisan" --no-interaction freescout:module-install "$alias"
+		# module-install reports a module it can't find, but still exits with 0.
+		if [ ! -L "$app/public/modules/$alias" ]; then
+			echo "Could not install $name ($alias)." >&2
+			exit 1
+		fi
+	fi
+
 	if [ "$alias" = wporgwebhooks ] && [[ "$WPORG_API_URL" != http://mock-api:* ]]; then
 		# webhook.php counts events from agents it doesn't know, so local ones would end up in production's stats.
 		php "$app/artisan" --no-interaction module:disable "$name" > /dev/null
@@ -44,15 +54,6 @@ for manifest in "$app"/Modules/*/module.json; do
 	fi
 
 	php "$app/artisan" --no-interaction module:enable "$name"
-
-	if [ ! -L "$app/public/modules/$alias" ]; then
-		php "$app/artisan" --no-interaction freescout:module-install "$alias"
-		# module-install reports a module it can't find, but still exits with 0.
-		if [ ! -L "$app/public/modules/$alias" ]; then
-			echo "Could not install $name ($alias)." >&2
-			exit 1
-		fi
-	fi
 done
 
 # What production runs after every deploy.

@@ -35,7 +35,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		\Eventy::addFilter(
 			'stylesheets',
 			static function ( array $styles ): array {
-				$styles[] = \Module::getPublicPath( self::ALIAS ) . '/css/modules.css';
+				$styles[] = \Module::getPublicPath( self::ALIAS ) . '/css/site.css';
 
 				return $styles;
 			}

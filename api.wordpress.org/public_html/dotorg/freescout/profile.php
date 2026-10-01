@@ -27,6 +27,8 @@ function render_profile( object $request ): string {
 	$user         = false;
 	$sender_email = (string) ( $request->sender->email ?? '' );
 	$email        = get_user_email_for_email( $request );
+	$related      = ! empty( $request->related );
+	$slack_email  = preg_match( '/(\S+@chat.wordpress.org)/i', (string) ( $request->conversation->subject ?? '' ), $m ) ? $m[1] : '';
 
 	if ( $email ) {
 		$user = get_user_by( 'email', $email );
@@ -54,7 +56,7 @@ function render_profile( object $request ): string {
 			}
 
 			$links['Account & Security'] = 'https://profiles.wordpress.org/' . $user->user_nicename . '/profile/edit/group/3/';
-			$links['Forum Profile']          = 'https://wordpress.org/support/users/' . $user->user_nicename . '/';
+			$links['Forum Profile']      = 'https://wordpress.org/support/users/' . $user->user_nicename . '/';
 		} else {
 			$html .= '<p class="wporg-sidebar-empty">No profile found</p>';
 		}
@@ -70,23 +72,33 @@ function render_profile( object $request ): string {
 		$html .= render_pending_signups( $sender_email, $email );
 	}
 
-	// If this is related to a slack user, include the details of the slack account.
-	if ( $user || preg_match( '/(\S+@chat.wordpress.org)/i', (string) ( $request->conversation->subject ?? '' ), $m ) ) {
+	// If this is related to a slack user, include the details of the slack account; one the subject names only on request.
+	if ( $user || ( $related && $slack_email ) ) {
+		// Someone can have several Slack accounts over the years; active ones first.
 		if ( $user ) {
-			$slack_user = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM slack_users WHERE user_id = %d', $user->ID ) );
+			$slack_users = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM slack_users WHERE user_id = %d ORDER BY deactivated ASC', $user->ID ) );
 		} else {
-			$slack_user = $wpdb->get_row(
+			$slack_users = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT * FROM slack_users WHERE profiledata LIKE %s',
-					'%' . $wpdb->esc_like( '"email":"' . $m[1] . '"' ) . '%'
+					'SELECT * FROM slack_users WHERE profiledata LIKE %s ORDER BY deactivated ASC',
+					'%' . $wpdb->esc_like( '"email":"' . $slack_email . '"' ) . '%'
 				)
 			);
 		}
 
-		$html .= render_slack_user( $slack_user );
+		$html .= render_slack_users( $slack_users );
 	}
 
-	return $html;
+	// The sender wrote whatever names someone else, so an agent decides whether it's worth a look; WPOrgSidebar asks.
+	if ( $related ) {
+		$notice = '<p class="wporg-sidebar-meta">Showing the account this is about, not the sender’s. <a href="#" class="wporg-sidebar-show-sender">Show the sender</a></p>';
+	} elseif ( get_related_user( $request ) || ( ! $user && $slack_email ) ) {
+		$notice = '<p class="wporg-sidebar-meta">This may be about someone else’s account, like a bounce. <a href="#" class="wporg-sidebar-show-related">Show it</a></p>';
+	} else {
+		$notice = '';
+	}
+
+	return $notice . $html;
 }
 
 /**
@@ -139,29 +151,68 @@ function render_pending_signups( string $sender_email, string $email ): string {
 }
 
 /**
- * Renders a Slack account's status.
+ * Renders the status of someone's Slack accounts.
  *
- * @param object|null $slack_user Row from the slack_users table, if any.
+ * @param object[] $slack_users Rows from the slack_users table.
  * @return string
  */
-function render_slack_user( ?object $slack_user ): string {
-	if ( ! $slack_user ) {
+function render_slack_users( array $slack_users ): string {
+	if ( ! $slack_users ) {
 		return '';
 	}
 
-	$html       = '<h5 class="wporg-sidebar-heading">Slack</h5>';
-	$slack_data = json_decode( (string) $slack_user->profiledata );
-	if ( ! $slack_data ) {
-		return $html . '<p class="wporg-sidebar-meta">Clicked the signup link, but likely didn’t finish signing up.</p>';
+	$html = '<h5 class="wporg-sidebar-heading">Slack</h5><ul class="wporg-sidebar-items">';
+
+	foreach ( $slack_users as $slack_user ) {
+		$slack_data = json_decode( (string) $slack_user->profiledata );
+		if ( ! is_object( $slack_data ) || ! isset( $slack_data->updated ) ) {
+			$html .= '<li class="wporg-sidebar-item wporg-sidebar-meta">Clicked a signup link, but likely didn’t finish signing up.</li>';
+			continue;
+		}
+
+		$html .= sprintf(
+			'<li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="%s">%s</a> %s<div class="wporg-sidebar-item-meta">Updated %s</div></li>',
+			esc_url( 'https://wordpress.slack.com/archives/' . $slack_user->dm_id ),
+			esc_html( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ?? '' ),
+			! empty( $slack_data->deleted ) ? render_badge( 'Deactivated', 'error' ) : render_badge( 'Active', 'success' ),
+			esc_html( gmdate( 'Y-m-d', (int) $slack_data->updated ) )
+		);
 	}
 
-	return $html . sprintf(
-		'<ul class="wporg-sidebar-items"><li class="wporg-sidebar-item"><a class="wporg-sidebar-item-title" href="%s">%s</a> %s<div class="wporg-sidebar-item-meta">Updated %s</div></li></ul>',
-		esc_url( 'https://wordpress.slack.com/archives/' . $slack_user->dm_id ),
-		esc_html( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ),
-		! empty( $slack_data->deleted ) ? render_badge( 'Deactivated', 'error' ) : render_badge( 'Active', 'success' ),
-		esc_html( gmdate( 'Y-m-d', (int) $slack_data->updated ) )
+	return $html . '</ul>';
+}
+
+/**
+ * Gets the avatar of the sender's WordPress.org account, which WPOrgSidebar saves as the sender's photo.
+ *
+ * Only for an account found by one of the sender's own addresses: for bounces and Slack notifications, the account
+ * is someone else's.
+ *
+ * @param object $request Request payload.
+ * @return string Avatar URL, which answers 404 if the account has no avatar; empty if there's no account.
+ */
+function get_sender_avatar_url( object $request ): string {
+	$user = get_user_by( 'email', get_user_email_for_email( $request ) );
+	if ( ! $user ) {
+		return '';
+	}
+
+	$sender_emails = array_map(
+		'strtolower',
+		array_merge( array( (string) ( $request->sender->email ?? '' ) ), array_map( 'strval', (array) ( $request->sender->emails ?? array() ) ) )
+	);
+	if ( ! in_array( strtolower( $user->user_email ), $sender_emails, true ) ) {
+		return '';
+	}
+
+	return (string) get_avatar_url(
+		$user,
+		array(
+			'size'    => 256,
+			'default' => '404',
+		)
 	);
 }
 
-send_html( render_profile( get_request() ) );
+$request = get_request();
+send_html( render_profile( $request ), array( 'avatar_url' => get_sender_avatar_url( $request ) ) );

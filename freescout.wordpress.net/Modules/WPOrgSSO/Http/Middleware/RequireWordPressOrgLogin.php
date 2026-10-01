@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Runs on every web request, after FreeScout's own middleware.
  *
- * - Logs out anyone who didn't log in through WordPress.org, however they got in.
+ * - Logs out anyone who logs in some other way once WordPress.org is enforced, however they got in.
  * - Replaces the login form, and closes password logins, resets, and invite setups.
  * - Fills in new users from their WordPress.org account, and connects the account.
  * - Keeps what comes from WordPress.org, and passwords, out of the profile form.
@@ -35,7 +35,14 @@ final class RequireWordPressOrgLogin {
 	 *
 	 * @var int
 	 */
-	private const RECHECK_SECONDS = 3600;
+	private const RECHECK_SECONDS = 3600; // 1 hour.
+
+	/**
+	 * How long sessions from before WordPress.org was enforced go on, in seconds.
+	 *
+	 * @var int
+	 */
+	private const CUTOVER_SECONDS = 86400; // 1 day.
 
 	/**
 	 * Core action that signs in with a FreeScout password; with the break-glass switch on, open to administrators.
@@ -170,7 +177,10 @@ final class RequireWordPressOrgLogin {
 	 * @return Response|null Response to send instead, or null to go on.
 	 */
 	private static function enforce_login( Request $request, ?User $user, string $action ): ?Response {
-		if ( $user instanceof User && ! self::may_stay_logged_in( $user, $request ) ) {
+		// On the first enforced request, before any session can be from while this module was off.
+		$enforced_since = WPOrgSSOServiceProvider::enforced_since();
+
+		if ( $user instanceof User && ! self::may_stay_logged_in( $user, $request, $enforced_since ) ) {
 			\Auth::logout();
 			$request->session()->invalidate();
 
@@ -225,22 +235,34 @@ final class RequireWordPressOrgLogin {
 	/**
 	 * Whether a logged-in user may stay logged in.
 	 *
-	 * @param User    $user    Logged-in user.
-	 * @param Request $request Request.
+	 * @param User    $user           Logged-in user.
+	 * @param Request $request        Request.
+	 * @param int     $enforced_since When WordPress.org was first enforced, as a Unix timestamp.
 	 * @return bool
 	 */
-	private static function may_stay_logged_in( User $user, Request $request ): bool {
-		$username  = (string) $request->session()->get( WPOrgSSOServiceProvider::SESSION_USERNAME, '' );
-		$connected = Account::username_for( (int) $user->id );
+	private static function may_stay_logged_in( User $user, Request $request, int $enforced_since ): bool {
+		$session  = $request->session();
+		$username = (string) $session->get( WPOrgSSOServiceProvider::SESSION_USERNAME, '' );
 
 		// Also ends sessions of users whose account was changed or disconnected since.
-		if ( '' !== $username && 0 === strcasecmp( $username, $connected ) ) {
-			return self::account_still_may_log_in( $username, $request );
+		if ( '' !== $username ) {
+			return 0 === strcasecmp( $username, Account::username_for( (int) $user->id ) ) && self::account_still_may_log_in( $username, $request );
 		}
 
-		return WPOrgSSOServiceProvider::password_login_enabled()
-			&& $user->isAdmin()
-			&& $request->session()->get( WPOrgSSOServiceProvider::SESSION_PASSWORD_LOGIN );
+		if ( $session->get( WPOrgSSOServiceProvider::SESSION_REFUSED ) ) {
+			return false;
+		}
+
+		// Break-glass sessions end with break-glass.
+		if ( $session->get( WPOrgSSOServiceProvider::SESSION_PASSWORD_LOGIN ) ) {
+			return WPOrgSSOServiceProvider::password_login_enabled() && $user->isAdmin();
+		}
+
+		/*
+		 * From before WordPress.org was enforced: going on for a day keeps whoever switched it on logged in, so they can
+		 * connect the accounts. Later, an unmarked session is from while this module was off, and can't be trusted.
+		 */
+		return time() - $enforced_since < self::CUTOVER_SECONDS;
 	}
 
 	/**

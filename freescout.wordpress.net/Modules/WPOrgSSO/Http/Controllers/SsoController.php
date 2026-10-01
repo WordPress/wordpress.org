@@ -182,9 +182,9 @@ final class SsoController extends Controller {
 		$user    = Account::user_for( $wporg_user->username );
 		$details = $wporg_user->to_array();
 
-		// Private on WordPress.org; the form fills it in when the user is created.
+		// Private on WordPress.org, and any account can be looked up; the form fills the email in when the user is created.
 		if ( ! $request->user()->isAdmin() ) {
-			unset( $details['email'] );
+			unset( $details['email'], $details['two_factor'], $details['blocked'] );
 		}
 
 		return response()->json(
