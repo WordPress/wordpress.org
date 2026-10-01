@@ -78,6 +78,7 @@ final class SpamCheckTest extends TestCase {
 		$this->conversation = $this->create_conversation( $this->create_mailbox( 'Themes' ), $this->create_sender( 'jane@example.org' ) );
 		$this->thread       = $this->create_thread( $this->conversation, Thread::TYPE_CUSTOMER, 'Hello', null, '2026-10-01 10:00:00' );
 
+		$this->thread->from    = 'jane@example.org';
 		$this->thread->headers = "Received: from example.org (example.org [93.184.216.34]) by mx.wordpress.org\r\n";
 		$this->thread->save();
 	}
@@ -94,7 +95,8 @@ final class SpamCheckTest extends TestCase {
 
 		$this->assertTrue( $conversation->isSpam() );
 		$this->assertSame( Folder::TYPE_SPAM, (int) Folder::find( $conversation->folder_id )->type );
-		$this->assertSame( array( 'verdict' => Akismet::SPAM ), $conversation->getMeta( WPOrgAkismetServiceProvider::META ) );
+		$this->assertSame( $this->conversation->subject, $conversation->getMeta( WPOrgAkismetServiceProvider::META )['subject'] );
+		$this->assertSame( Akismet::SPAM, $conversation->getMeta( WPOrgAkismetServiceProvider::META )['verdict'] );
 
 		$sent = $this->sent( 0 );
 		$this->assertStringEndsWith( '/comment-check', (string) $this->requests[0]['request']->getUri() );
@@ -114,7 +116,7 @@ final class SpamCheckTest extends TestCase {
 		$conversation = $this->filter();
 
 		$this->assertFalse( $conversation->isSpam() );
-		$this->assertSame( array( 'verdict' => Akismet::HAM ), $conversation->getMeta( WPOrgAkismetServiceProvider::META ) );
+		$this->assertSame( Akismet::HAM, $conversation->getMeta( WPOrgAkismetServiceProvider::META )['verdict'] );
 	}
 
 	/**
@@ -289,6 +291,50 @@ final class SpamCheckTest extends TestCase {
 		$conversation = $this->conversation->fresh();
 		$this->assertSame( Akismet::SPAM, $conversation->getMeta( WPOrgAkismetServiceProvider::META )['reported'] );
 		$this->assertSame( $updated_at, (string) $conversation->updated_at );
+	}
+
+	/**
+	 * A report describes the email Akismet checked, even after someone else replied and the subject was edited.
+	 *
+	 * @return void
+	 */
+	public function test_report_names_the_original_sender(): void {
+		$this->conversation->setStatus( Conversation::STATUS_SPAM );
+		$this->conversation->customer_email = 'cc@example.org';
+		$this->conversation->subject        = 'Edited by an agent';
+		$this->record(
+			array(
+				'verdict' => Akismet::HAM,
+				'subject' => 'My theme',
+			)
+		);
+		$this->answers->append( new Response( 200, array(), 'Thanks for making the web a better place.' ) );
+
+		( new ReportToAkismet( (int) $this->conversation->id, Akismet::SPAM ) )->handle();
+
+		$sent = $this->sent( 0 );
+		$this->assertSame( 'jane@example.org', $sent['comment_author_email'] );
+		$this->assertSame( 'My theme', $sent['contact_form_subject'] );
+	}
+
+	/**
+	 * A correction another job already sent isn't sent again.
+	 *
+	 * @return void
+	 */
+	public function test_correction_is_reported_once(): void {
+		$this->conversation->setStatus( Conversation::STATUS_SPAM );
+		$this->record(
+			array(
+				'verdict'  => Akismet::HAM,
+				'reported' => Akismet::SPAM,
+			)
+		);
+		$this->answers->append( new Response( 200, array(), 'Thanks for making the web a better place.' ) );
+
+		( new ReportToAkismet( (int) $this->conversation->id, Akismet::SPAM ) )->handle();
+
+		$this->assertCount( 0, $this->requests );
 	}
 
 	/**

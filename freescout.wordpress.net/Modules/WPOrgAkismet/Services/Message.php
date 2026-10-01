@@ -9,7 +9,6 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgAkismet\Services;
 
-use App\Conversation;
 use App\Thread;
 
 /**
@@ -20,17 +19,20 @@ final class Message {
 	/**
 	 * Builds the fields Akismet is sent, the same way for checking and for reporting.
 	 *
-	 * @param Conversation $conversation Conversation.
-	 * @param Thread       $thread       The sender's email that started it.
+	 * Everything comes from the email itself, not the conversation, whose sender changes with every reply, and whose
+	 * subject agents can edit.
+	 *
+	 * @param Thread $thread  The sender's email that started the conversation.
+	 * @param string $subject The conversation's subject when it was checked.
 	 * @return array|null Fields, or null without an IP address to send: Akismet requires one.
 	 */
-	public static function fields( Conversation $conversation, Thread $thread ): ?array {
+	public static function fields( Thread $thread, string $subject ): ?array {
 		$ip = self::sender_ip( (string) $thread->headers );
 		if ( ! $ip ) {
 			return null;
 		}
 
-		$sender = $conversation->customer;
+		$sender = $thread->created_by_customer;
 
 		$fields = array(
 			'blog'                 => (string) config( 'app.url' ),
@@ -38,10 +40,10 @@ final class Message {
 			'user_ip'              => $ip,
 			'comment_type'         => 'contact-form',
 			'comment_author'       => $sender ? (string) $sender->getFullName() : '',
-			'comment_author_email' => (string) $conversation->customer_email,
+			'comment_author_email' => (string) $thread->from,
 			'comment_content'      => trim( \Helper::htmlToText( (string) $thread->body ) ),
 			// Like WordPress.com's support contact form, which sends the subject apart from the message.
-			'contact_form_subject' => (string) $conversation->subject,
+			'contact_form_subject' => $subject,
 		);
 
 		if ( $thread->created_at ) {

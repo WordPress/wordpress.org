@@ -90,18 +90,20 @@ final class MessageTest extends TestCase {
 	}
 
 	/**
-	 * Akismet gets the sender, subject, and text of the email that started the conversation.
+	 * Akismet gets the sender and text of the email that started the conversation, whoever wrote last.
 	 *
 	 * @return void
 	 */
 	public function test_fields(): void {
-		$sender                = $this->create_sender( 'jane@example.org' );
-		$conversation          = $this->create_conversation( $this->create_mailbox( 'Themes' ), $sender );
-		$conversation->subject = 'My theme';
-		$thread                = $this->create_thread( $conversation, Thread::TYPE_CUSTOMER, '<p>Please <b>review</b> it.</p>', null, '2026-10-01 10:00:00' );
-		$thread->headers       = "Received: from example.org (example.org [93.184.216.34]) by mx.wordpress.org\r\n";
+		$conversation    = $this->create_conversation( $this->create_mailbox( 'Themes' ), $this->create_sender( 'jane@example.org' ) );
+		$thread          = $this->create_thread( $conversation, Thread::TYPE_CUSTOMER, '<p>Please <b>review</b> it.</p>', null, '2026-10-01 10:00:00' );
+		$thread->from    = 'jane@example.org';
+		$thread->headers = "Received: from example.org (example.org [93.184.216.34]) by mx.wordpress.org\r\n";
 
-		$fields = Message::fields( $conversation, $thread );
+		// FreeScout makes whoever replied last the conversation's sender.
+		$conversation->customer_email = 'cc@example.org';
+
+		$fields = Message::fields( $thread, 'My theme' );
 
 		$this->assertSame( '93.184.216.34', $fields['user_ip'] );
 		$this->assertSame( 'contact-form', $fields['comment_type'] );
@@ -122,6 +124,6 @@ final class MessageTest extends TestCase {
 		$conversation = $this->create_conversation( $this->create_mailbox( 'Themes' ), $this->create_sender() );
 		$thread       = $this->create_thread( $conversation, Thread::TYPE_CUSTOMER, 'Hi', null, '2026-10-01 10:00:00' );
 
-		$this->assertNull( Message::fields( $conversation, $thread ) );
+		$this->assertNull( Message::fields( $thread, 'Hi' ) );
 	}
 }

@@ -81,12 +81,18 @@ final class ReportToAkismet implements ShouldQueue {
 			return;
 		}
 
+		// Another job may have sent the same correction since.
+		$result = (array) $conversation->getMeta( WPOrgAkismetServiceProvider::META, array() );
+		if ( ( $result['reported'] ?? $result['verdict'] ?? '' ) === $this->verdict ) {
+			return;
+		}
+
 		$thread = $conversation->threads()
 			->where( 'type', Thread::TYPE_CUSTOMER )
 			->orderBy( 'id' )
 			->first();
 
-		$fields = $thread ? Message::fields( $conversation, $thread ) : null;
+		$fields = $thread ? Message::fields( $thread, (string) ( $result['subject'] ?? $conversation->subject ) ) : null;
 		if ( ! $fields ) {
 			return;
 		}
@@ -105,7 +111,6 @@ final class ReportToAkismet implements ShouldQueue {
 			return;
 		}
 
-		$result             = (array) $conversation->getMeta( WPOrgAkismetServiceProvider::META, array() );
 		$result['reported'] = $this->verdict;
 		$conversation->setMeta( WPOrgAkismetServiceProvider::META, $result );
 

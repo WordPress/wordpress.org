@@ -145,13 +145,20 @@ final class WPOrgAkismetServiceProvider extends ServiceProvider {
 				return;
 			}
 
-			$fields = Message::fields( $conversation, $thread );
+			$fields = Message::fields( $thread, (string) $conversation->subject );
 			if ( ! $fields ) {
 				return;
 			}
 
 			$verdict = $akismet->check( $fields );
-			$conversation->setMeta( self::META, array( 'verdict' => $verdict ) );
+			// The subject is kept for reports, since agents can edit it.
+			$conversation->setMeta(
+				self::META,
+				array(
+					'verdict' => $verdict,
+					'subject' => $fields['contact_form_subject'],
+				)
+			);
 
 			if ( Akismet::SPAM === $verdict ) {
 				$conversation->setStatus( Conversation::STATUS_SPAM );
