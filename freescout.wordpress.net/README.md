@@ -31,7 +31,7 @@ Contributions follow the usual Meta workflow: open a pull request on the GitHub 
 
 FreeScout core is installed and updated by the systems team. This folder only adds modules:
 
-1. Check out `freescout.wordpress.net/Modules/` as FreeScout's `Modules/` folder. Modules installed through FreeScout's UI, like premium ones, sit next to ours as unversioned folders.
+1. Check out `freescout.wordpress.net/Modules/` as FreeScout's `Modules/` folder. Premium modules come from the private `WordPress/freescout-paid-modules` repository and sit next to ours as unversioned folders.
 2. After every deploy, and after every FreeScout core update, run `php artisan freescout:after-app-update` as the web server user. It clears FreeScout's caches, runs migrations, and restarts the queue worker.
 3. An admin switches new modules on under Manage » Modules. To remove a module, switch it off there first, and remove its code in a later deploy.
 

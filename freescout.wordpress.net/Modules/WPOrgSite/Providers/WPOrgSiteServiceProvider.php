@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgSite\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\View;
 use Modules\WPOrgSite\Http\Middleware\LockModules;
 
 /**
@@ -31,6 +32,19 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	 */
 	public function boot(): void {
 		$this->app['router']->pushMiddlewareToGroup( 'web', LockModules::class );
+
+		// Modules come with deploys, so the Modules page only lists installed ones; site.css hides the empty directory.
+		\View::composer(
+			'modules/modules',
+			static function ( View $view ): void {
+				$view->with(
+					array(
+						'modules_directory'   => array(),
+						'third_party_modules' => array(),
+					)
+				);
+			}
+		);
 
 		\Eventy::addFilter(
 			'stylesheets',

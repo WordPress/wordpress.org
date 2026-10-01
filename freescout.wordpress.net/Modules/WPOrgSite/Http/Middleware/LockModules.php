@@ -16,8 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Refuses to update or delete modules from the Modules page.
  *
- * Modules' files are managed outside FreeScout, starting with ours, which deploys check out. Switching modules on
- * and off, and installing premium ones, stay.
+ * Modules' files are managed outside FreeScout, which deploys check out. Switching modules on and off stays.
  */
 final class LockModules {
 
