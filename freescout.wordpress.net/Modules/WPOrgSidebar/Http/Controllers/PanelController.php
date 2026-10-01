@@ -12,6 +12,7 @@ namespace Modules\WPOrgSidebar\Http\Controllers;
 use App\Conversation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Modules\WPOrgSidebar\Jobs\SyncSenderAvatar;
 use Modules\WPOrgSidebar\Services\Client;
 use Modules\WPOrgSidebar\Services\ConversationPayload;
 
@@ -26,6 +27,13 @@ final class PanelController extends Controller {
 	 * @var int
 	 */
 	private const TIMEOUT = 5;
+
+	/**
+	 * How often a sender's avatar is saved again, in minutes, in case it changed on WordPress.org.
+	 *
+	 * @var int
+	 */
+	private const AVATAR_MINUTES = 24 * 60;
 
 	/**
 	 * Returns the HTML for one panel.
@@ -56,6 +64,33 @@ final class PanelController extends Controller {
 			return response()->json( array( 'html' => '' ), 502 );
 		}
 
+		self::sync_sender_avatar( $conversation, (string) ( $response['avatar_url'] ?? '' ) );
+
 		return response()->json( array( 'html' => (string) ( $response['html'] ?? '' ) ) );
+	}
+
+	/**
+	 * Queues saving the avatar of the sender's WordPress.org account as their photo.
+	 *
+	 * Never throws: the panel is what the agent is waiting for.
+	 *
+	 * @param Conversation $conversation Conversation the panel is for.
+	 * @param string       $avatar_url   Avatar URL the profile panel sent, if any.
+	 * @return void
+	 */
+	private static function sync_sender_avatar( Conversation $conversation, string $avatar_url ): void {
+		try {
+			if (
+				! $conversation->customer_id ||
+				! SyncSenderAvatar::is_avatar_url( $avatar_url ) ||
+				! \Cache::add( 'wporgsidebar.avatar.' . $conversation->customer_id, true, self::AVATAR_MINUTES )
+			) {
+				return;
+			}
+
+			SyncSenderAvatar::dispatch( (int) $conversation->customer_id, $avatar_url );
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgSidebar] Could not queue the avatar of sender ' . $conversation->customer_id . ': ' . $e->getMessage() );
+		}
 	}
 }

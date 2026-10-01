@@ -90,12 +90,13 @@ function is_fresh( object $payload ): bool {
 /**
  * Sends sidebar HTML to FreeScout and ends the request.
  *
- * @param string $html Sidebar HTML.
+ * @param string $html  Sidebar HTML.
+ * @param array  $extra Other data for WPOrgSidebar, e.g. the sender's avatar.
  * @return never
  */
-function send_html( string $html ): never {
+function send_html( string $html, array $extra = array() ): never {
 	header( 'Content-Type: application/json; charset=utf-8' );
-	echo wp_json_encode( array( 'html' => $html ) );
+	echo wp_json_encode( array_merge( $extra, array( 'html' => $html ) ) );
 	exit;
 }
 
@@ -108,6 +109,16 @@ function send_html( string $html ): never {
  */
 function render_badge( string $label, string $tone = 'neutral' ): string {
 	return sprintf( '<span class="wporg-sidebar-badge is-%s">%s</span>', esc_attr( $tone ), esc_html( $label ) );
+}
+
+/**
+ * Renders how many items a sidebar section has.
+ *
+ * @param int $count Number of items.
+ * @return string
+ */
+function render_count( int $count ): string {
+	return sprintf( '<span class="wporg-sidebar-count">%d</span>', $count );
 }
 
 /**

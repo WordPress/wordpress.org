@@ -13,8 +13,25 @@
 	 */
 	const VISIBLE_ITEMS = 5;
 
+	/**
+	 * Lets the page grow with the sidebar, which core only measures once the page has loaded.
+	 *
+	 * The sidebar is positioned absolutely next to the conversation from 1100px up, so its height doesn't count.
+	 */
+	function fitLayout() {
+		if (
+			typeof window.adjustCustomerSidebarHeight === 'function' &&
+			$( '#conv-layout-customer' ).length &&
+			$( window ).outerWidth() >= 1100
+		) {
+			window.adjustCustomerSidebarHeight();
+		}
+	}
+
 	$( function () {
 		const strings = $( '.wporg-sidebar' ).data( 'strings' ) || {};
+
+		$( '.wporg-sidebar' ).on( 'shown.bs.collapse', fitLayout );
 
 		$( '.wporg-sidebar-panel[data-url]' ).each( function () {
 			const $panel = $( this );
@@ -25,6 +42,7 @@
 						// Trusted: rendered by the signed api.wordpress.org endpoints.
 						$panel.html( response.html );
 						shortenLists( $panel );
+						fitLayout();
 					} else {
 						$panel.closest( '.conv-sidebar-block' ).remove();
 					}
@@ -65,6 +83,7 @@
 						event.preventDefault();
 						$items.show();
 						$( this ).remove();
+						fitLayout();
 					} )
 					.insertAfter( this );
 			} );
