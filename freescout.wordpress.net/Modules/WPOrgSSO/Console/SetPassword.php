@@ -12,6 +12,7 @@ namespace Modules\WPOrgSSO\Console;
 use App\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use Modules\WPOrgSSO\Services\Passwords;
 
 /**
  * Password reset emails stay closed with WordPress.org enforced, so break-glass passwords are set on the server.
@@ -49,6 +50,9 @@ final class SetPassword extends Command {
 		$password = Str::random( 32 );
 		$user->setPassword( $password );
 		$user->save();
+
+		// Otherwise their next login through WordPress.org clears it.
+		Passwords::mark_break_glass( $user );
 
 		$this->line( $password );
 

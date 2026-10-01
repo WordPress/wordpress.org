@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgSSO\Http\Middleware;
 
+use App\Mailbox;
 use App\User;
 use Closure;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
  * - Replaces the login form, and closes password logins, resets, and invite setups.
  * - Fills in new users from their WordPress.org account, and connects the account.
  * - Keeps what comes from WordPress.org, and passwords, out of the profile form.
+ * - Deletes a mailbox only when its name was typed in to confirm, since users don't know a FreeScout password.
  */
 final class RequireWordPressOrgLogin {
 
@@ -132,6 +134,7 @@ final class RequireWordPressOrgLogin {
 			/*
 			 * Agents log in through WordPress.org, so they never need the password or the invite to set one. Not even in
 			 * break-glass mode, where invite setups stay closed and administrators get a password from the command line.
+			 * Core requires a password; the provider swaps it for core's "no password" marker after core hashed it.
 			 */
 			if ( WPOrgSSOServiceProvider::enforced() ) {
 				$request->merge( array( 'password' => User::generateRandomPassword() ) );
@@ -165,7 +168,43 @@ final class RequireWordPressOrgLogin {
 			);
 		}
 
+		if ( 'App\Http\Controllers\MailboxesController@ajax' === $action && 'delete_mailbox' === $request->input( 'action' ) ) {
+			$error = self::check_mailbox_name( $request, $user );
+			if ( $error ) {
+				// A 200, like core's own errors: the dialog only shows the message of those.
+				return response()->json(
+					array(
+						'status' => 'error',
+						'msg'    => $error,
+					)
+				);
+			}
+		}
+
 		return $next( $request );
+	}
+
+	/**
+	 * Checks that the name of the mailbox being deleted was typed in, exactly; it stands in for core's password check.
+	 *
+	 * @param Request   $request Request.
+	 * @param User|null $user    Logged-in user.
+	 * @return string Error message, empty to let core go on.
+	 */
+	private static function check_mailbox_name( Request $request, ?User $user ): string {
+		$mailbox = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
+
+		// Core answers everyone else, without revealing the mailbox's name.
+		if ( ! $mailbox instanceof Mailbox || ! $user instanceof User || ! $user->can( 'admin', $mailbox ) ) {
+			return '';
+		}
+
+		// Core trims input, so spaces around the name don't matter.
+		if ( $request->input( 'mailbox_name' ) === (string) $mailbox->name ) {
+			return '';
+		}
+
+		return __( 'Type the mailbox’s name, :name, to confirm.', array( 'name' => $mailbox->name ) );
 	}
 
 	/**

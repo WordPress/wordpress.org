@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgSSO\Providers;
 
+use App\Mailbox;
 use App\User;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiter;
@@ -20,6 +21,7 @@ use Modules\WPOrgSSO\Console\SetPassword;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Http\Middleware\RequireWordPressOrgLogin;
 use Modules\WPOrgSSO\Services\Client;
+use Modules\WPOrgSSO\Services\Passwords;
 use Modules\WPOrgSSO\Services\Saml;
 use Modules\WPOrgSSO\Services\UserSync;
 use Modules\WPOrgSSO\Services\WordPressOrgUser;
@@ -208,6 +210,7 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 			'javascripts',
 			static function ( array $javascripts ): array {
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/users.js';
+				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/mailboxes.js';
 
 				return $javascripts;
 			}
@@ -227,6 +230,16 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 				// Without the API, core's own form stays, rather than one that can't look anyone up.
 				if ( Client::from_config()->is_configured() ) {
 					self::render( 'create_user', array( 'passwords' => ! self::enforced() ) );
+				}
+			}
+		);
+
+		// The delete dialog is outside the form, so the script moves the field there.
+		\Eventy::addAction(
+			'mailbox.update.after_signature',
+			static function ( $mailbox ): void {
+				if ( $mailbox instanceof Mailbox && optional( auth()->user() )->isAdmin() ) {
+					self::render( 'delete_mailbox', array( 'name' => (string) $mailbox->name ) );
 				}
 			}
 		);
@@ -253,9 +266,10 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 			static function ( User $user, Request $request ): User {
 				$wporg_user = $request->attributes->get( self::REQUEST_ACCOUNT );
 				if ( $wporg_user instanceof WordPressOrgUser && $user->id ) {
-					// There's nothing to invite them to once they log in with WordPress.org.
+					// There's nothing to invite them to once they log in with WordPress.org, and no password to know.
 					if ( self::enforced() ) {
 						$user->invite_state = User::INVITE_STATE_ACTIVATED;
+						Passwords::clear( $user );
 					}
 
 					self::connect( $user, $wporg_user );
