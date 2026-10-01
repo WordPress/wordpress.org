@@ -68,10 +68,6 @@ class Plugin {
 	public function plugins_loaded() {
 		$current_site = get_site( get_current_blog_id() );
 
-		if ( ! $current_site instanceof WP_Site ) {
-			return;
-		}
-
 		// Determine and initialize site-specific customizations.
 		foreach ( $this->sites as $site ) {
 			if ( $site::test( $current_site ) ) {
