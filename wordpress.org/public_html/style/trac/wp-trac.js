@@ -2271,6 +2271,9 @@ let wpTrac,
 							count += delta;
 							clickedStar.prev().text( count ? count : '' );
 						} );
+				} )
+				.always( function () {
+					stars.removeClass( 'loading' );
 				} );
 			}
 
@@ -2360,26 +2363,30 @@ let wpTrac,
 						}
 					}
 				}
-				$.ajax( `${ apiEndpoint }?${ params }` ).done( function ( data ) {
-					// Update the number
-					container.find( 'h3 .trac-count' ).removeClass( 'hidden' ).find( 'span' ).text( data.length );
+				$.ajax( `${ apiEndpoint }?${ params }` )
+					.done( function ( data ) {
+						// Update the number
+						container.find( 'h3 .trac-count' ).removeClass( 'hidden' ).find( 'span' ).text( data.length );
 
-					const prContainer = container.find( '.pull-requests' );
-					if ( data.length ) {
-						// Remove the placeholder.
-						prContainer.find( '.loading' ).remove();
+						const prContainer = container.find( '.pull-requests' );
+						if ( data.length ) {
+							// Remove the placeholder.
+							prContainer.find( '.loading' ).remove();
 
-						// Render the PRs
-						data.forEach( ( pr ) => renderPR( prContainer, pr ) );
-					} else {
-						// Change the loading placeholder
-						prContainer.find( '.loading div' ).html(
-							`To link a Pull Request to this ticket, create a new Pull Request in the
-							<a href="https://github.com/${ primaryGitRepo }">${ primaryGitRepoDesc }</a>
-							and include this ticket’s URL in the description.`
-						);
-					}
-				} );
+							// Render the PRs
+							data.forEach( ( pr ) => renderPR( prContainer, pr ) );
+						} else {
+							// Change the loading placeholder
+							prContainer.find( '.loading div' ).html(
+								`To link a Pull Request to this ticket, create a new Pull Request in the
+								<a href="https://github.com/${ primaryGitRepo }">${ primaryGitRepoDesc }</a>
+								and include this ticket’s URL in the description.`
+							);
+						}
+					} )
+					.fail( function () {
+						container.find( '.pull-requests .loading div' ).text( 'Failed to load Pull Requests.' );
+					} );
 			}
 
 			function renderAddSection() {
@@ -2425,17 +2432,21 @@ let wpTrac,
 				);
 
 				$warning.on( 'click', 'button', function () {
-					$( this ).prop( 'disabled', true ).text( 'Please wait..' );
+					const $button = $( this ).prop( 'disabled', true ).text( 'Please wait…' );
 
 					const params = new URLSearchParams( { trac, author: user } );
 					if ( authenticated ) {
 						params.set( 'authenticated', '1' );
 					}
-					$.ajax( `${ apiEndpoint }?${ params }` ).done( function ( ticketList ) {
-						document.location = `${ document.location }${
-							document.location.search ? '&' : '?'
-						}GITHUBTICKETS=${ ticketList.join( ',' ) }`;
-					} );
+					$.ajax( `${ apiEndpoint }?${ params }` )
+						.done( function ( ticketList ) {
+							document.location = `${ document.location }${
+								document.location.search ? '&' : '?'
+							}GITHUBTICKETS=${ ticketList.join( ',' ) }`;
+						} )
+						.fail( function () {
+							$button.prop( 'disabled', false ).text( 'Retry loading PRs' );
+						} );
 				} );
 			}
 
