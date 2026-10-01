@@ -248,6 +248,52 @@ final class SpamCheckTest extends TestCase {
 	}
 
 	/**
+	 * Automations, like Workflows, aren't agents correcting Akismet.
+	 *
+	 * @return void
+	 */
+	public function test_automations_are_not_reported(): void {
+		Queue::fake();
+		$this->record( array( 'verdict' => Akismet::HAM ) );
+		$robot = $this->create_user();
+		User::where( 'id', $robot->id )->update( array( 'type' => User::TYPE_ROBOT ) );
+
+		$this->conversation->changeStatus( Conversation::STATUS_SPAM, $robot->fresh() );
+
+		Queue::assertNotPushed( ReportToAkismet::class );
+	}
+
+	/**
+	 * Changing a conversation back while its report is being sent queues the report back.
+	 *
+	 * @return void
+	 */
+	public function test_change_during_report_is_reported_back(): void {
+		Queue::fake();
+		$this->conversation->setStatus( Conversation::STATUS_SPAM );
+		$this->record( array( 'verdict' => Akismet::HAM ) );
+
+		$id = (int) $this->conversation->id;
+		$this->answers->append(
+			static function () use ( $id ): Response {
+				// The agent takes it out of spam while Akismet is answering.
+				Conversation::where( 'id', $id )->update( array( 'status' => Conversation::STATUS_ACTIVE ) );
+
+				return new Response( 200, array(), 'Thanks for making the web a better place.' );
+			}
+		);
+
+		( new ReportToAkismet( $id, Akismet::SPAM ) )->handle();
+
+		Queue::assertPushed(
+			ReportToAkismet::class,
+			static function ( ReportToAkismet $job ): bool {
+				return Akismet::HAM === $job->verdict;
+			}
+		);
+	}
+
+	/**
 	 * Undoing a correction reports the conversation back.
 	 *
 	 * @return void

@@ -121,5 +121,11 @@ final class ReportToAkismet implements ShouldQueue {
 		// Recording the report isn't activity on the conversation.
 		$conversation->timestamps = false;
 		$conversation->save();
+
+		// An agent changing it back while Akismet was being told saw the report as not sent yet, and queued nothing.
+		$now = Conversation::find( $this->conversation_id );
+		if ( $now && ( $now->isSpam() ? Akismet::SPAM : Akismet::HAM ) !== $this->verdict ) {
+			self::dispatch( $this->conversation_id, Akismet::SPAM === $this->verdict ? Akismet::HAM : Akismet::SPAM );
+		}
 	}
 }

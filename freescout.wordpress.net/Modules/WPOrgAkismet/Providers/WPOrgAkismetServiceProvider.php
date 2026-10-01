@@ -170,6 +170,16 @@ final class WPOrgAkismetServiceProvider extends ServiceProvider {
 	}
 
 	/**
+	 * Whether a user stands for an automation, like Workflows or Teams, rather than a person.
+	 *
+	 * @param User $user User.
+	 * @return bool
+	 */
+	private static function is_robot( User $user ): bool {
+		return defined( User::class . '::TYPE_ROBOT' ) && User::TYPE_ROBOT === (int) $user->type;
+	}
+
+	/**
 	 * Reports a checked conversation to Akismet when an agent marks it differently from what Akismet knows.
 	 *
 	 * @param mixed $conversation Conversation.
@@ -179,7 +189,8 @@ final class WPOrgAkismetServiceProvider extends ServiceProvider {
 	 */
 	private static function learn( $conversation, $user, $prev_status ): void {
 		try {
-			if ( ! $conversation instanceof Conversation || ! $user instanceof User || ! $user->id ) {
+			// Automations, like Workflows, aren't agents correcting Akismet.
+			if ( ! $conversation instanceof Conversation || ! $user instanceof User || ! $user->id || self::is_robot( $user ) ) {
 				return;
 			}
 
