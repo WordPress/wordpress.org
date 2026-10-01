@@ -2276,11 +2276,11 @@ let wpTrac,
 					.always( function () {
 						stars.removeClass( 'loading' );
 					} );
-				}
+			}
 
-				return {
-					init,
-				};
+			return {
+				init,
+			};
 		} )(),
 
 		githubPRs: ( function () {
