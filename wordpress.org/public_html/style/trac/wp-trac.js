@@ -31,7 +31,7 @@ let wpTrac,
 		'needs-unit-tests': 'Ticket has a particular need for unit tests.',
 		'has-dev-note': 'Ticket with a published post on the development blog.',
 		'needs-dev-note': 'Ticket needs a post on the development blog.',
-		'add-to-field-guide': 'Ticket dev-note should be included in the releasese field guide.',
+		'add-to-field-guide': 'Ticket dev-note should be included in the release field guide.',
 		'has-privacy-review':
 			'Input has been given from the core privacy team reviewing the privacy implications of the suggested changes.',
 		'needs-privacy-review':
