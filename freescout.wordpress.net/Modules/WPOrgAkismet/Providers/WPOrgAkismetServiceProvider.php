@@ -151,12 +151,13 @@ final class WPOrgAkismetServiceProvider extends ServiceProvider {
 			}
 
 			$verdict = $akismet->check( $fields );
-			// The subject is kept for reports, since agents can edit it.
+			// The subject and name are kept for reports, since agents can edit them.
 			$conversation->setMeta(
 				self::META,
 				array(
 					'verdict' => $verdict,
 					'subject' => $fields['contact_form_subject'],
+					'author'  => $fields['comment_author'],
 				)
 			);
 

@@ -97,6 +97,10 @@ final class ReportToAkismet implements ShouldQueue {
 			return;
 		}
 
+		if ( isset( $result['author'] ) ) {
+			$fields['comment_author'] = (string) $result['author'];
+		}
+
 		try {
 			app( Akismet::class )->submit( $this->verdict, $fields );
 		} catch ( \Throwable $e ) {

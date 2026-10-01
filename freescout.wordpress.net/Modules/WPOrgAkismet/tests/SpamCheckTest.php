@@ -96,6 +96,7 @@ final class SpamCheckTest extends TestCase {
 		$this->assertTrue( $conversation->isSpam() );
 		$this->assertSame( Folder::TYPE_SPAM, (int) Folder::find( $conversation->folder_id )->type );
 		$this->assertSame( $this->conversation->subject, $conversation->getMeta( WPOrgAkismetServiceProvider::META )['subject'] );
+		$this->assertSame( 'Jane Sender', $conversation->getMeta( WPOrgAkismetServiceProvider::META )['author'] );
 		$this->assertSame( Akismet::SPAM, $conversation->getMeta( WPOrgAkismetServiceProvider::META )['verdict'] );
 
 		$sent = $this->sent( 0 );
@@ -306,8 +307,11 @@ final class SpamCheckTest extends TestCase {
 			array(
 				'verdict' => Akismet::HAM,
 				'subject' => 'My theme',
+				'author'  => 'Jane Sender',
 			)
 		);
+		$this->thread->created_by_customer->first_name = 'Edited';
+		$this->thread->created_by_customer->save();
 		$this->answers->append( new Response( 200, array(), 'Thanks for making the web a better place.' ) );
 
 		( new ReportToAkismet( (int) $this->conversation->id, Akismet::SPAM ) )->handle();
@@ -315,6 +319,7 @@ final class SpamCheckTest extends TestCase {
 		$sent = $this->sent( 0 );
 		$this->assertSame( 'jane@example.org', $sent['comment_author_email'] );
 		$this->assertSame( 'My theme', $sent['contact_form_subject'] );
+		$this->assertSame( 'Jane Sender', $sent['comment_author'] );
 	}
 
 	/**

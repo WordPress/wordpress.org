@@ -71,6 +71,30 @@ final class MessageTest extends TestCase {
 	}
 
 	/**
+	 * A sending server that can't be read stops the search, since the sender may have written the headers below it.
+	 *
+	 * @return void
+	 */
+	public function test_unreadable_sending_server_stops_the_search(): void {
+		$headers = "Received: from mx.wordpress.org by imap.wordpress.org with SMTP id 1\r\n"
+			. "Received: from forged.example.org (forged.example.org [93.184.216.34]) by mx.wordpress.org\r\n";
+
+		$this->assertNull( Message::sender_ip( $headers ) );
+	}
+
+	/**
+	 * Local delivery names no sending server, and is skipped.
+	 *
+	 * @return void
+	 */
+	public function test_local_delivery_is_skipped(): void {
+		$headers = "Received: by imap.wordpress.org with LMTP id 1; Wed, 1 Oct 2026 10:00:01 +0000\r\n"
+			. "Received: from example.org (example.org [93.184.216.34]) by mx.wordpress.org\r\n";
+
+		$this->assertSame( '93.184.216.34', Message::sender_ip( $headers ) );
+	}
+
+	/**
 	 * Servers write the sending address in different ways.
 	 *
 	 * @return void

@@ -59,6 +59,7 @@ final class Message {
 	 * Mail servers add a Received header at the top for each hop, so the newest ones are written by WordPress.org's
 	 * own servers, and older ones by whoever sent the email, who can write anything there. So the headers are read
 	 * from the top, past private addresses and WordPress.org's relays, and the first other server is the sender's.
+	 * A header with a sending server that can't be read stops the search: below it, the sender may have written them.
 	 *
 	 * @param string $headers Raw email headers.
 	 * @return string|null Public IP address, or null if there's none.
@@ -71,9 +72,18 @@ final class Message {
 
 		foreach ( $received[1] as $hop ) {
 			// The sending server is in the "from" part, before the receiving server's "by".
-			$sender = self::sending_server( preg_split( '/\sby\s/i', $hop, 2 )[0] );
-			if ( ! $sender ) {
+			$from = preg_split( '/\sby\s/i', $hop, 2 )[0];
+
+			// Local delivery, like "by imap.wordpress.org with LMTP", names no sending server.
+			if ( ! preg_match( '/^\s*from\s/i', $from ) ) {
 				continue;
+			}
+
+			$sender = self::sending_server( $from );
+			if ( ! $sender ) {
+				\Log::warning( '[WPOrgAkismet] Could not read the sending server in a Received header: ' . trim( $hop ) );
+
+				return null;
 			}
 
 			list( $host, $ip ) = $sender;
