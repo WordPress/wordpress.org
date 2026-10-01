@@ -335,8 +335,9 @@ if ( function_exists( 'browsehappy_parse_user_agent' ) ) {
  * Hooked to the 'browsehappy_browser_notice' action.
  */
 function browsehappy_browser_notice() {
-	$ua = $_SERVER['HTTP_USER_AGENT'];
+	$ua      = $_SERVER['HTTP_USER_AGENT'];
 	$results = browsehappy_parse_user_agent( $ua );
+
 	if ( ! $results['upgrade'] ) {
 		return;
 	}
@@ -385,7 +386,7 @@ function browsehappy_locale_notice() {
 		<p><?php
 			printf(
 				wp_kses_post(
-					/* translators: "English" should be translated directly and not to the name of your language. */
+					/* translators: %s: URL to switch the language to English. "English" should be translated directly and not to the name of your language. */
 					__( 'Browse Happy is also available in English. <a href="%s">Click here to change the language to English</a>.', 'browsehappy' )
 				),
 				'/?locale=en'
