@@ -13,4 +13,4 @@ Panels load after the conversation, so a slow WordPress.org never holds it up. A
 
 ## Setup
 
-Needs `WPORG_API_SECRET`; see [configuration](../../README.md#deployment). The panels come from [`api.wordpress.org/dotorg/freescout/`](../../../api.wordpress.org/public_html/dotorg/freescout), which is sent the conversation (sender, subject, recent messages, and text attachments) and works out whose WordPress.org account it's about.
+Needs `WPORG_API_SECRET`; see [configuration](../../README.md#deployment). The panels come from [`api.wordpress.org/dotorg/freescout/`](../../../api.wordpress.org/public_html/dotorg/freescout), which is sent the conversation (sender, subject, and recent messages; internal notes only for Plugins & Themes, and text attachments only to find who a bounce is about) and works out whose WordPress.org account it's about.

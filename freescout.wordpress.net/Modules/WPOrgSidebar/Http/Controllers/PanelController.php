@@ -71,7 +71,11 @@ final class PanelController extends Controller {
 				$key,
 				self::CACHE_MINUTES,
 				static function () use ( $conversation, $panels, $panel, $related ): array {
-					$payload = ConversationPayload::build( $conversation );
+					$payload = ConversationPayload::build(
+						$conversation,
+						notes: ! empty( $panels[ $panel ]['notes'] ),
+						attachments: $related || ! empty( $panels[ $panel ]['attachments'] )
+					);
 					if ( $related ) {
 						$payload['related'] = true;
 					}

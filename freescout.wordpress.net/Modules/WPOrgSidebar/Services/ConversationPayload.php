@@ -61,12 +61,14 @@ final class ConversationPayload {
 	);
 
 	/**
-	 * Builds the payload for a conversation.
+	 * Builds the payload for a conversation; only what a panel asks for beyond messages.
 	 *
 	 * @param Conversation $conversation Conversation to serialize.
+	 * @param bool         $notes        Whether to include internal notes.
+	 * @param bool         $attachments  Whether to include the sender's text attachments, which bounces carry.
 	 * @return array
 	 */
-	public static function build( Conversation $conversation ): array {
+	public static function build( Conversation $conversation, bool $notes = false, bool $attachments = false ): array {
 		$mailbox = $conversation->mailbox;
 
 		return array(
@@ -83,7 +85,7 @@ final class ConversationPayload {
 				'email' => $mailbox ? (string) $mailbox->email : '',
 			),
 			'sender'       => self::sender( $conversation->customer, (string) $conversation->customer_email ),
-			'threads'      => self::threads( $conversation ),
+			'threads'      => self::threads( $conversation, $notes, $attachments ),
 		);
 	}
 
@@ -116,15 +118,22 @@ final class ConversationPayload {
 	 * Serializes the conversation's published threads, newest first.
 	 *
 	 * @param Conversation $conversation Conversation.
+	 * @param bool         $notes        Whether to include internal notes.
+	 * @param bool         $attachments  Whether to include the sender's text attachments.
 	 * @return array
 	 */
-	private static function threads( Conversation $conversation ): array {
+	private static function threads( Conversation $conversation, bool $notes, bool $attachments ): array {
+		$types = array_keys( self::THREAD_TYPES );
+		if ( ! $notes ) {
+			$types = array_values( array_diff( $types, array( Thread::TYPE_NOTE ) ) );
+		}
+
 		$threads = $conversation->threads()
 			->where( 'state', Thread::STATE_PUBLISHED )
-			->whereIn( 'type', array_keys( self::THREAD_TYPES ) )
+			->whereIn( 'type', $types )
 			->orderBy( 'created_at', 'desc' )
 			->limit( self::MAX_THREADS )
-			->with( array( 'attachments', 'created_by_user', 'created_by_customer' ) )
+			->with( $attachments ? array( 'attachments', 'created_by_user', 'created_by_customer' ) : array( 'created_by_user', 'created_by_customer' ) )
 			->get();
 
 		$items = array();
@@ -139,7 +148,7 @@ final class ConversationPayload {
 					? self::user( $thread->created_by_user )
 					: self::customer( $thread->created_by_customer ),
 				'created_at'  => self::date( (string) $thread->created_at ),
-				'attachments' => 'customer' === $type ? self::attachments( $thread ) : array(),
+				'attachments' => $attachments && 'customer' === $type ? self::attachments( $thread ) : array(),
 			);
 		}
 
