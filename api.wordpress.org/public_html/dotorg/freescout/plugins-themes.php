@@ -14,12 +14,12 @@ $wp_init_host = 'https://wordpress.org/plugins/';
 require __DIR__ . '/common.php';
 
 /**
- * Renders the plugins and themes panel.
+ * Gets the plugins and themes panel.
  *
  * @param object $request Request payload.
- * @return string
+ * @return array Panel blocks.
  */
-function render_plugins_themes( object $request ): string {
+function render_plugins_themes( object $request ): array {
 	$user          = get_user_by( 'email', get_user_email_for_email( $request ) );
 	$mailbox_email = (string) ( $request->mailbox->email ?? '' );
 
@@ -38,7 +38,7 @@ function render_plugins_themes( object $request ): string {
 		$repo_post_types = array_reverse( $repo_post_types );
 	}
 
-	$html = '';
+	$blocks = array();
 
 	$mentioned = get_plugin_or_theme_from_email( $request );
 
@@ -52,8 +52,12 @@ function render_plugins_themes( object $request ): string {
 		$post_ids = get_items_by_slug( $mentioned[ $type ] );
 
 		if ( $post_ids ) {
-			$html .= '<h5 class="wporg-sidebar-heading">' . esc_html( ucwords( $type ) ) . ' mentioned ' . render_count( count( $post_ids ) ) . '</h5>';
-			$html .= render_items( $post_ids, $mailbox_email );
+			$blocks[] = array(
+				'type'  => 'heading',
+				'text'  => ucwords( $type ) . ' mentioned',
+				'count' => count( $post_ids ),
+			);
+			$blocks[] = render_items( $post_ids, $mailbox_email );
 		}
 
 		restore_current_blog();
@@ -73,15 +77,20 @@ function render_plugins_themes( object $request ): string {
 					admin_url( 'edit.php' )
 				);
 
-				$html .= '<h5 class="wporg-sidebar-heading"><a href="' . esc_url( $url ) . '">' . esc_html( ucwords( $type ) ) . ' owned</a> ' . render_count( count( $post_ids ) ) . '</h5>';
-				$html .= render_items( $post_ids, $mailbox_email );
+				$blocks[] = array(
+					'type'  => 'heading',
+					'text'  => ucwords( $type ) . ' owned',
+					'url'   => $url,
+					'count' => count( $post_ids ),
+				);
+				$blocks[] = render_items( $post_ids, $mailbox_email );
 			}
 
 			restore_current_blog();
 		}
 	}
 
-	return $html;
+	return $blocks;
 }
 
 /**
@@ -155,14 +164,14 @@ function get_items_by_slug( array $slugs ): array {
 }
 
 /**
- * Renders a list of plugins or themes, with their status.
+ * Gets a list of plugins or themes, with their status.
  *
  * @param array  $post_ids      Post IDs on the current site.
  * @param string $mailbox_email Address of the mailbox the conversation is in.
- * @return string
+ * @return array Panel block.
  */
-function render_items( array $post_ids, string $mailbox_email ): string {
-	$html = '<ul class="wporg-sidebar-items">';
+function render_items( array $post_ids, string $mailbox_email ): array {
+	$items = array();
 
 	// Reviews are the plugins team's; other mailboxes' conversations can name any plugin.
 	$show_review = str_starts_with( $mailbox_email, 'plugins' );
@@ -257,49 +266,53 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 		}
 
 		$meta = array(
-			esc_html( $post->post_name ),
-			sprintf(
-				'<span title="%s">Updated %s ago</span>',
-				esc_attr( gmdate( 'Y-m-d', $last_updated ) ),
-				esc_html( human_time_diff( $last_updated, time() ) )
+			array( 'text' => $post->post_name ),
+			array(
+				'text'    => 'Updated ' . human_time_diff( $last_updated, time() ) . ' ago',
+				'tooltip' => gmdate( 'Y-m-d', $last_updated ),
 			),
 		);
 
 		if ( $reviewer ) {
-			$meta[] = 'Assigned to ' . esc_html( $reviewer );
+			$meta[] = array( 'text' => 'Assigned to ' . $reviewer );
 		}
 
 		// Edit and permalinks are built by hand, as the post types aren't registered on this site.
-		$links = sprintf(
-			'<a href="%s" title="View on WordPress.org" aria-label="View on WordPress.org"><i class="glyphicon glyphicon-link"></i></a>',
-			esc_url( home_url( "/{$post->post_name}/" ) )
+		$links = array(
+			array(
+				'text' => 'View on WordPress.org',
+				'url'  => home_url( "/{$post->post_name}/" ),
+				'icon' => 'link',
+			),
 		);
 		if ( $download_link ) {
-			$links .= sprintf(
-				' <a href="%s" title="Download" aria-label="Download"><i class="glyphicon glyphicon-download-alt"></i></a>',
-				esc_url( $download_link )
+			$links[] = array(
+				'text' => 'Download',
+				'url'  => $download_link,
+				'icon' => 'download-alt',
 			);
 		}
 
-		$html .= sprintf(
-			'<li class="wporg-sidebar-item"><span class="wporg-sidebar-item-links">%5$s</span><a class="wporg-sidebar-item-title" href="%1$s">%2$s</a> %3$s<div class="wporg-sidebar-item-meta">%4$s</div></li>',
-			esc_url(
-				add_query_arg(
-					array(
-						'action' => 'edit',
-						'post'   => $post->ID,
-					),
-					admin_url( 'post.php' )
-				)
+		$items[] = array(
+			// Stored escaped, and shown as text.
+			'title'  => html_entity_decode( $post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
+			'url'    => add_query_arg(
+				array(
+					'action' => 'edit',
+					'post'   => $post->ID,
+				),
+				admin_url( 'post.php' )
 			),
-			esc_html( $post->post_title ),
-			$status ? render_badge( $status, $tone ) : '',
-			implode( ' · ', $meta ),
-			$links
+			'badges' => $status ? array( badge( $status, $tone ) ) : array(),
+			'meta'   => $meta,
+			'links'  => $links,
 		);
 	}
 
-	return $html . '</ul>';
+	return array(
+		'type'  => 'items',
+		'items' => $items,
+	);
 }
 
-send_html( render_plugins_themes( get_request( basename( __FILE__ ) ) ) );
+send_panel( render_plugins_themes( get_request( basename( __FILE__ ) ) ) );

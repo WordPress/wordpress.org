@@ -36,7 +36,7 @@ final class PanelController extends Controller {
 	private const AVATAR_MINUTES = 24 * 60;
 
 	/**
-	 * Returns the HTML for one panel.
+	 * Returns the content of one panel, as blocks sidebar.js builds it from.
 	 *
 	 * @param int    $conversation_id Conversation ID.
 	 * @param string $panel           Panel ID.
@@ -65,12 +65,12 @@ final class PanelController extends Controller {
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSidebar] Could not load panel ' . $panel . ': ' . $e->getMessage() );
 
-			return response()->json( array( 'html' => '' ), 502 );
+			return response()->json( array( 'blocks' => array() ), 502 );
 		}
 
 		self::sync_sender_avatar( $conversation, (string) ( $response['avatar_url'] ?? '' ) );
 
-		return response()->json( array( 'html' => (string) ( $response['html'] ?? '' ) ) );
+		return response()->json( array( 'blocks' => array_values( (array) ( $response['blocks'] ?? array() ) ) ) );
 	}
 
 	/**

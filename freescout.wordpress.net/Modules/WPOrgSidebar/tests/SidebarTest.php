@@ -107,7 +107,7 @@ final class SidebarTest extends TestCase {
 		$this->actingAs( $this->create_user() )
 			->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )
 			->assertStatus( 502 )
-			->assertExactJson( array( 'html' => '' ) );
+			->assertExactJson( array( 'blocks' => array() ) );
 	}
 
 	/**
@@ -126,13 +126,24 @@ final class SidebarTest extends TestCase {
 				static function ( RequestInterface $request ) use ( &$payloads ): PromiseInterface {
 					$payloads[] = json_decode( (string) $request->getBody(), true );
 
-					return ( new MockHandler( array( new Response( 200, array(), '{"html":"<p>Panel</p>"}' ) ) ) )( $request, array() );
+					return ( new MockHandler( array( new Response( 200, array(), '{"blocks":[{"type":"meta","text":"Panel"}]}' ) ) ) )( $request, array() );
 				}
 			)
 		);
 		$user = $this->create_user();
 
-		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )->assertStatus( 200 );
+		$this->actingAs( $user )
+			->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )
+			->assertExactJson(
+				array(
+					'blocks' => array(
+						array(
+							'type' => 'meta',
+							'text' => 'Panel',
+						),
+					),
+				)
+			);
 		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile?related=1' )->assertStatus( 200 );
 
 		$this->assertArrayNotHasKey( 'related', $payloads[0] );

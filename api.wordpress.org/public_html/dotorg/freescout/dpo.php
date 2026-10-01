@@ -14,24 +14,33 @@ $wp_init_host = 'https://wordpress.org/';
 require __DIR__ . '/common.php';
 
 /**
- * Renders the privacy requests panel.
+ * Gets the privacy requests panel.
  *
  * @param object $request Request payload.
- * @return string
+ * @return array Panel blocks.
  */
-function render_privacy_requests( object $request ): string {
+function render_privacy_requests( object $request ): array {
 	if ( empty( $request->sender->email ) ) {
-		return '<p class="wporg-sidebar-empty">No email found</p>';
+		return array(
+			array(
+				'type' => 'empty',
+				'text' => 'No email found',
+			),
+		);
 	}
 
 	// This needs to run as a user.
 	wp_set_current_user( get_user_by( 'login', 'wordpressdotorg' )->ID );
 
-	$email = get_user_email_for_email( $request );
-	$html  = sprintf(
-		'<ul class="wporg-sidebar-links"><li><a href="%s">Search erasures</a></li><li><a href="%s">Search exports</a></li></ul>',
-		esc_url( add_query_arg( 's', rawurlencode( $email ), admin_url( 'erase-personal-data.php' ) ) ),
-		esc_url( add_query_arg( 's', rawurlencode( $email ), admin_url( 'export-personal-data.php' ) ) )
+	$email  = get_user_email_for_email( $request );
+	$blocks = array(
+		array(
+			'type'  => 'links',
+			'links' => array(
+				panel_link( 'Search erasures', add_query_arg( 's', rawurlencode( $email ), admin_url( 'erase-personal-data.php' ) ) ),
+				panel_link( 'Search exports', add_query_arg( 's', rawurlencode( $email ), admin_url( 'export-personal-data.php' ) ) ),
+			),
+		),
 	);
 
 	// The sender may have filed requests from their own address, not the account's.
@@ -58,11 +67,15 @@ function render_privacy_requests( object $request ): string {
 	rsort( $request_ids );
 
 	if ( ! $request_ids ) {
-		return $html . '<p class="wporg-sidebar-empty">No requests found.</p>';
+		$blocks[] = array(
+			'type' => 'empty',
+			'text' => 'No requests found.',
+		);
+
+		return $blocks;
 	}
 
-	$html .= '<ul class="wporg-sidebar-items">';
-
+	$items = array();
 	foreach ( $request_ids as $request_id ) {
 		$user_request = wp_get_user_request( $request_id );
 		$dates        = array();
@@ -88,16 +101,20 @@ function render_privacy_requests( object $request ): string {
 			default             => 'warning',
 		};
 
-		$html .= sprintf(
-			'<li class="wporg-sidebar-item" title="%s"><span class="wporg-sidebar-item-title">%s</span> %s<div class="wporg-sidebar-item-meta">%s</div></li>',
-			esc_attr( implode( ', ', $dates ) ),
-			esc_html( $type ),
-			render_badge( get_post_status_object( $user_request->status )->label, $tone ),
-			esc_html( gmdate( 'Y-m-d', (int) min( array_keys( $dates ) ) ) )
+		$items[] = array(
+			'title'   => $type,
+			'tooltip' => implode( ', ', $dates ),
+			'badges'  => array( badge( get_post_status_object( $user_request->status )->label, $tone ) ),
+			'meta'    => array( array( 'text' => gmdate( 'Y-m-d', (int) min( array_keys( $dates ) ) ) ) ),
 		);
 	}
 
-	return $html . '</ul>';
+	$blocks[] = array(
+		'type'  => 'items',
+		'items' => $items,
+	);
+
+	return $blocks;
 }
 
-send_html( render_privacy_requests( get_request( basename( __FILE__ ) ) ) );
+send_panel( render_privacy_requests( get_request( basename( __FILE__ ) ) ) );

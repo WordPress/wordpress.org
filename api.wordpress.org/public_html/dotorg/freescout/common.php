@@ -155,37 +155,46 @@ function is_unused_nonce( string $nonce ): bool {
 }
 
 /**
- * Sends sidebar HTML to FreeScout and ends the request.
+ * Sends a sidebar panel to FreeScout and ends the request.
  *
- * @param string $html  Sidebar HTML.
- * @param array  $extra Other data for WPOrgSidebar, e.g. the sender's avatar.
+ * Content, not markup: WPOrgSidebar's sidebar.js builds the panel from these blocks.
+ *
+ * @param array $blocks Panel blocks.
+ * @param array $extra  Other data for WPOrgSidebar, e.g. the sender's avatar.
  * @return never
  */
-function send_html( string $html, array $extra = array() ): never {
+function send_panel( array $blocks, array $extra = array() ): never {
 	header( 'Content-Type: application/json; charset=utf-8' );
-	echo wp_json_encode( array_merge( $extra, array( 'html' => $html ) ) );
+	echo wp_json_encode( array_merge( $extra, array( 'blocks' => array_values( $blocks ) ) ) );
 	exit;
 }
 
 /**
- * Renders a status badge; WPOrgSidebar's stylesheet colors it by tone.
+ * A status badge; WPOrgSidebar's stylesheet colors it by tone.
  *
  * @param string $label Badge text.
  * @param string $tone  One of success, warning, error, or neutral.
- * @return string
+ * @return array
  */
-function render_badge( string $label, string $tone = 'neutral' ): string {
-	return sprintf( '<span class="wporg-sidebar-badge is-%s">%s</span>', esc_attr( $tone ), esc_html( $label ) );
+function badge( string $label, string $tone = 'neutral' ): array {
+	return array(
+		'label' => $label,
+		'tone'  => $tone,
+	);
 }
 
 /**
- * Renders how many items a sidebar section has.
+ * A link in a panel.
  *
- * @param int $count Number of items.
- * @return string
+ * @param string $text Link text.
+ * @param string $url  URL.
+ * @return array
  */
-function render_count( int $count ): string {
-	return sprintf( '<span class="wporg-sidebar-count">%d</span>', $count );
+function panel_link( string $text, string $url ): array {
+	return array(
+		'text' => $text,
+		'url'  => $url,
+	);
 }
 
 /**
