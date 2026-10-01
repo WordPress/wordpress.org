@@ -16,6 +16,7 @@ require_once dirname( __DIR__, 5 ) . '/vendor/autoload.php';
 define( 'ABSPATH', __DIR__ . '/' );
 define( 'KB_IN_BYTES', 1024 );
 define( 'MINUTE_IN_SECONDS', 60 );
+define( 'FREESCOUT_SECRET', 'test-secret' );
 
 require_once __DIR__ . '/stubs/class-wp-user.php';
 
@@ -48,6 +49,43 @@ function get_user_by( string $field, string|int $value ): WP_User|false {
  */
 function wp_strip_all_tags( string $text ): string {
 	return trim( (string) preg_replace( '/<[^>]*>/', '', $text ) );
+}
+
+/**
+ * Encodes JSON, like WordPress's wp_json_encode().
+ *
+ * @param mixed $data Data.
+ * @return string|false
+ */
+function wp_json_encode( mixed $data ): string|false {
+	return json_encode( $data ); // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- This is the stand-in.
+}
+
+/**
+ * Registers global cache groups; nothing to do for the array cache.
+ *
+ * @param array $groups Group names.
+ * @return void
+ */
+function wp_cache_add_global_groups( array $groups ): void {}
+
+/**
+ * Adds to an in-memory cache, like WordPress's wp_cache_add(): false if the key exists.
+ *
+ * @param string $key    Cache key.
+ * @param mixed  $data   Value.
+ * @param string $group  Group.
+ * @param int    $expire Ignored.
+ * @return bool
+ */
+function wp_cache_add( string $key, mixed $data, string $group = '', int $expire = 0 ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- WordPress's signature.
+	if ( isset( $GLOBALS['freescout_test_cache'][ $group ][ $key ] ) ) {
+		return false;
+	}
+
+	$GLOBALS['freescout_test_cache'][ $group ][ $key ] = $data;
+
+	return true;
 }
 
 require_once dirname( __DIR__ ) . '/common.php';

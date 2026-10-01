@@ -35,24 +35,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Retrieves the incoming payload, and verifies it was signed by FreeScout.
+ * How long a request stays valid after it was sent, in seconds.
  *
- * Ends the request with a 403 if the signature is missing, invalid, or stale.
+ * @var int
+ */
+const MAX_REQUEST_AGE = 300; // 5 minutes.
+
+/**
+ * How far ahead of this server's clock FreeScout's may be, in seconds.
  *
+ * @var int
+ */
+const MAX_CLOCK_SKEW = 10;
+
+/**
+ * Retrieves the incoming payload, and verifies FreeScout signed it for this endpoint.
+ *
+ * Ends the request with a 403 if it isn't a POST, or verify_request() refuses it.
+ *
+ * @param string $endpoint File name of the endpoint, e.g. profile.php.
  * @return object
  */
-function get_request(): object {
+function get_request( string $endpoint ): object {
 	static $request = null;
 
 	if ( null !== $request ) {
 		return $request;
 	}
 
+	$method    = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) );
 	$body      = (string) file_get_contents( 'php://input' );
 	$signature = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FREESCOUT_SIGNATURE'] ?? '' ) );
-	$payload   = json_decode( $body );
+	$payload   = 'POST' === $method ? verify_request( $body, $signature, $endpoint ) : null;
 
-	if ( ! is_object( $payload ) || ! is_valid_signature( $body, $signature ) || ! is_fresh( $payload ) ) {
+	if ( ! $payload ) {
 		status_header( 403 );
 		exit;
 	}
@@ -60,6 +76,34 @@ function get_request(): object {
 	$request = $payload;
 
 	return $request;
+}
+
+/**
+ * Decodes a request body, if FreeScout signed it for this endpoint, recently, and it wasn't used before.
+ *
+ * @param string $body      Raw request body.
+ * @param string $signature Hex-encoded HMAC-SHA256 of the body.
+ * @param string $endpoint  File name of the endpoint, e.g. profile.php.
+ * @return object|null The payload, or null if it's refused.
+ */
+function verify_request( string $body, string $signature, string $endpoint ): ?object {
+	$payload = json_decode( $body );
+
+	if ( ! is_object( $payload ) || ! is_valid_signature( $body, $signature ) || ! is_fresh( $payload ) ) {
+		return null;
+	}
+
+	// Signed with the body, so it can't be sent to another endpoint.
+	if ( ( $payload->endpoint ?? '' ) !== $endpoint ) {
+		return null;
+	}
+
+	// Last, so only signed requests reach the cache.
+	if ( ! is_unused_nonce( (string) ( $payload->nonce ?? '' ) ) ) {
+		return null;
+	}
+
+	return $payload;
 }
 
 /**
@@ -78,13 +122,36 @@ function is_valid_signature( string $body, string $signature ): bool {
 }
 
 /**
- * Whether a payload was sent recently, so a captured request can't be replayed later.
+ * Whether a payload was sent recently.
  *
  * @param object $payload Decoded request payload.
  * @return bool
  */
 function is_fresh( object $payload ): bool {
-	return abs( time() - (int) ( $payload->sent_at ?? 0 ) ) <= 15 * MINUTE_IN_SECONDS;
+	$age = time() - (int) ( $payload->sent_at ?? 0 );
+
+	// Any further ahead would outlive its nonce.
+	return $age >= -MAX_CLOCK_SKEW && $age <= MAX_REQUEST_AGE;
+}
+
+/**
+ * Whether a request's nonce is well-formed and wasn't seen before; records it.
+ *
+ * Without a persistent object cache, every nonce looks unused, and only the age check remains.
+ *
+ * @param string $nonce Hex-encoded random nonce.
+ * @return bool
+ */
+function is_unused_nonce( string $nonce ): bool {
+	if ( ! preg_match( '/^[0-9a-f]{32}$/', $nonce ) ) {
+		return false;
+	}
+
+	// Global, as endpoints load different sites.
+	wp_cache_add_global_groups( array( 'freescout-nonces' ) );
+
+	// As long as a request with it could be fresh.
+	return wp_cache_add( $nonce, 1, 'freescout-nonces', MAX_REQUEST_AGE + MAX_CLOCK_SKEW );
 }
 
 /**

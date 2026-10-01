@@ -40,4 +40,4 @@ function render_forum_notes( object $request ): string {
 	return $html;
 }
 
-send_html( render_forum_notes( get_request() ) );
+send_html( render_forum_notes( get_request( basename( __FILE__ ) ) ) );

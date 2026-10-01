@@ -100,4 +100,4 @@ function render_privacy_requests( object $request ): string {
 	return $html . '</ul>';
 }
 
-send_html( render_privacy_requests( get_request() ) );
+send_html( render_privacy_requests( get_request( basename( __FILE__ ) ) ) );

@@ -2,7 +2,7 @@
 /**
  * Mock of the api.wordpress.org/dotorg/freescout/ endpoints.
  *
- * Checks requests like the real endpoints (signature, JSON object, age), and answers sidebar requests with sample panels that include some of the data it received.
+ * Checks requests like the real endpoints (signature, JSON object, age, endpoint; not nonces), and answers sidebar requests with sample panels that include some of the data it received.
  * Webhook events are logged to the container output: `docker compose logs mock-api`.
  * Also stands in for login.wordpress.org's identity provider at /idp; see idp.php.
  *
@@ -55,9 +55,10 @@ if ( ! hash_equals( hash_hmac( 'sha256', $body, $secret ), $signature ) ) {
 
 $request = json_decode( $body );
 
-// The real endpoints refuse requests older or newer than 15 minutes.
-if ( ! is_object( $request ) || abs( time() - (int) ( $request->sent_at ?? 0 ) ) > 15 * 60 ) {
-	respond( 403, array( 'error' => 'Not a fresh JSON object.' ) );
+// Like the real endpoints, minus the nonce check.
+$age = time() - (int) ( $request->sent_at ?? 0 );
+if ( ! is_object( $request ) || $age < -10 || $age > 5 * 60 || ( $request->endpoint ?? '' ) !== $endpoint ) {
+	respond( 403, array( 'error' => 'Not a fresh JSON object for this endpoint.' ) );
 }
 
 if ( 'account.php' === $endpoint ) {

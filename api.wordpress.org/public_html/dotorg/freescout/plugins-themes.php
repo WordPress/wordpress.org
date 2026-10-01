@@ -302,4 +302,4 @@ function render_items( array $post_ids, string $mailbox_email ): string {
 	return $html . '</ul>';
 }
 
-send_html( render_plugins_themes( get_request() ) );
+send_html( render_plugins_themes( get_request( basename( __FILE__ ) ) ) );

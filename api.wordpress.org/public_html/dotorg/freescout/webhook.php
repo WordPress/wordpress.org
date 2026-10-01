@@ -51,7 +51,7 @@ function contributor_stats( object $request ): void {
 	}
 }
 
-contributor_stats( get_request() );
+contributor_stats( get_request( basename( __FILE__ ) ) );
 
 header( 'Content-Type: application/json; charset=utf-8' );
 echo '{}';

@@ -214,5 +214,5 @@ function get_sender_avatar_url( object $request ): string {
 	);
 }
 
-$request = get_request();
+$request = get_request( basename( __FILE__ ) );
 send_html( render_profile( $request ), array( 'avatar_url' => get_sender_avatar_url( $request ) ) );

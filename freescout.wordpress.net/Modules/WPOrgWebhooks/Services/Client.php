@@ -101,13 +101,16 @@ final class Client {
 	}
 
 	/**
-	 * Encodes a payload, stamped with the time it was sent.
+	 * Encodes a payload, stamped with the time, endpoint, and a nonce, so it's good there, once.
 	 *
-	 * @param array $payload Request payload.
+	 * @param array  $payload  Request payload.
+	 * @param string $endpoint Endpoint path relative to the base URL.
 	 * @return string JSON body.
 	 */
-	public static function encode( array $payload ): string {
-		$payload['sent_at'] = time();
+	public static function encode( array $payload, string $endpoint ): string {
+		$payload['sent_at']  = time();
+		$payload['endpoint'] = ltrim( $endpoint, '/' );
+		$payload['nonce']    = bin2hex( random_bytes( 16 ) );
 
 		return (string) json_encode( $payload, JSON_INVALID_UTF8_SUBSTITUTE | JSON_UNESCAPED_SLASHES );
 	}
@@ -132,14 +135,16 @@ final class Client {
 			throw new RuntimeException( 'WPORG_API_SECRET is not configured.' );
 		}
 
-		$body = self::encode( $payload );
+		$body = self::encode( $payload, $endpoint );
 
 		try {
+			// Whatever APP_CURL_SSL_VERIFYPEER says.
 			$http     = new \GuzzleHttp\Client(
 				\Helper::setGuzzleDefaultOptions(
 					array(
 						'timeout'         => $this->timeout,
 						'allow_redirects' => false,
+						'verify'          => true,
 					)
 				)
 			);
