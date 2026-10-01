@@ -81,6 +81,45 @@ class WPorg_GP_Project_Stats {
 	}
 
 	/**
+	 * Commits buffered project translation statistics to the database.
+	 *
+	 * Performs a bulk insert or update query for the provided rows and empties
+	 * the buffer array afterwards.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 *
+	 * @param array $values Reference to the array of prepared SQL value strings. Will be emptied.
+	 */
+	private function commit_project_stats_values( array &$values ) {
+		if ( empty( $values ) ) {
+			return;
+		}
+
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- Each row in $values is individually escaped using $wpdb->prepare().
+		$wpdb->query(
+			"INSERT INTO {$wpdb->project_translation_status}
+				( `project_id`, `locale`, `locale_slug`,
+				  `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `has_pending`,
+				  `date_added`, `date_modified` )
+			 VALUES " . implode( ', ', $values ) . '
+			 ON DUPLICATE KEY UPDATE
+				`all`           = VALUES(`all`),
+				`current`       = VALUES(`current`),
+				`waiting`       = VALUES(`waiting`),
+				`fuzzy`         = VALUES(`fuzzy`),
+				`warnings`      = VALUES(`warnings`),
+				`untranslated`  = VALUES(`untranslated`),
+				`has_pending`   = VALUES(`has_pending`),
+				`date_modified` = VALUES(`date_modified`)'
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		$values = array();
+	}
+
+	/**
 	 * Cron task to cache the string counts for the wp-themes and wp-plugins parent categories.
 	 *
 	 * These don't have any translation sets, but we need to be able to query the waiting strings for them.
@@ -182,48 +221,13 @@ class WPorg_GP_Project_Stats {
 
 				// If we're processing a large batch, add them as we go to avoid query lengths & memory limits.
 				if ( count( $values ) > 50 ) {
-					$wpdb->query(
-						"INSERT INTO {$wpdb->project_translation_status}
-							( `project_id`, `locale`, `locale_slug`,
-							  `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `has_pending`,
-							  `date_added`, `date_modified` )
-						 VALUES " . implode( ', ', $values ) . "
-						 ON DUPLICATE KEY UPDATE
-							`all`           = VALUES(`all`),
-							`current`       = VALUES(`current`),
-							`waiting`       = VALUES(`waiting`),
-							`fuzzy`         = VALUES(`fuzzy`),
-							`warnings`      = VALUES(`warnings`),
-							`untranslated`  = VALUES(`untranslated`),
-							`has_pending`   = VALUES(`has_pending`),
-							`date_modified` = VALUES(`date_modified`)"
-					);
-					$values = array();
+					$this->commit_project_stats_values( $values );
 				}
 			}
 		}
 		$this->projects_to_update = array();
-
-		if ( $values ) {
-			$wpdb->query(
-				"INSERT INTO {$wpdb->project_translation_status}
-					( `project_id`, `locale`, `locale_slug`,
-					  `all`, `current`, `waiting`, `fuzzy`, `warnings`, `untranslated`, `has_pending`,
-					  `date_added`, `date_modified` )
-				 VALUES " . implode( ', ', $values ) . "
-				 ON DUPLICATE KEY UPDATE
-					`all`           = VALUES(`all`),
-					`current`       = VALUES(`current`),
-					`waiting`       = VALUES(`waiting`),
-					`fuzzy`         = VALUES(`fuzzy`),
-					`warnings`      = VALUES(`warnings`),
-					`untranslated`  = VALUES(`untranslated`),
-					`has_pending`   = VALUES(`has_pending`),
-					`date_modified` = VALUES(`date_modified`)"
-			);
-		}
+		$this->commit_project_stats_values( $values );
 	}
-
 }
 
 /*
