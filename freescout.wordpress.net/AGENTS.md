@@ -73,7 +73,7 @@ Modules aren't active in the test database, so each test registers the provider 
 ## Module Conventions
 
 - **Naming:** prefix modules with `WPOrg` (directory `WPOrgSidebar`, alias `wporgsidebar`). Aliases are lowercase, unique, and must never change — they key the module's DB state, options, views (`wporgsidebar::view`), and public asset path.
-- **Name and icon:** `name` in `module.json` is what Manage » Modules shows (`WP.org Sidebar`), and what `module:enable` looks the module up by. `img` points at `Public/img/icon.svg`, a module-specific icon on the `#3858e9` tile.
+- **Name and icon:** `name` in `module.json` is what Manage » Modules shows (`WP.org Sidebar`), and what `module:enable` looks the module up by. `img` points at `Public/img/icon.svg`, a module-specific icon on the `#3858e9` tile. A module for another product, like `WPOrgAkismet`, uses that product's own mark and colors instead.
 - **`authorUrl` / `detailsUrl`:** never point these at `freescout.net`. Core treats such modules as official and requires a paid license activation.
 - **Activation state** lives in the `modules` DB table; the `active` field in `module.json` is ignored by core.
 - **Configuration** comes from the environment: `WPORG_API_URL` and `WPORG_API_SECRET`, and `WPORG_AKISMET_KEY` for `WPOrgAkismet`. Without them, modules stay quiet instead of failing.
