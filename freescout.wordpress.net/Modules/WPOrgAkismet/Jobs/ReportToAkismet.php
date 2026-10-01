@@ -115,16 +115,22 @@ final class ReportToAkismet implements ShouldQueue {
 			return;
 		}
 
-		$result['reported'] = $this->verdict;
-		$conversation->setMeta( WPOrgAkismetServiceProvider::META, $result );
+		// Core and other modules may have changed the conversation's meta while Akismet was being told.
+		$now = Conversation::find( $this->conversation_id );
+		if ( ! $now ) {
+			return;
+		}
+
+		$latest             = (array) $now->getMeta( WPOrgAkismetServiceProvider::META, array() );
+		$latest['reported'] = $this->verdict;
+		$now->setMeta( WPOrgAkismetServiceProvider::META, $latest );
 
 		// Recording the report isn't activity on the conversation.
-		$conversation->timestamps = false;
-		$conversation->save();
+		$now->timestamps = false;
+		$now->save();
 
 		// An agent changing it back while Akismet was being told saw the report as not sent yet, and queued nothing.
-		$now = Conversation::find( $this->conversation_id );
-		if ( $now && ( $now->isSpam() ? Akismet::SPAM : Akismet::HAM ) !== $this->verdict ) {
+		if ( ( $now->isSpam() ? Akismet::SPAM : Akismet::HAM ) !== $this->verdict ) {
 			self::dispatch( $this->conversation_id, Akismet::SPAM === $this->verdict ? Akismet::HAM : Akismet::SPAM );
 		}
 	}

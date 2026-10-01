@@ -294,6 +294,34 @@ final class SpamCheckTest extends TestCase {
 	}
 
 	/**
+	 * Recording a report keeps what changed in the conversation's meta while it was being sent.
+	 *
+	 * @return void
+	 */
+	public function test_report_keeps_meta_changed_meanwhile(): void {
+		$this->conversation->setStatus( Conversation::STATUS_SPAM );
+		$this->record( array( 'verdict' => Akismet::HAM ) );
+
+		$id = (int) $this->conversation->id;
+		$this->answers->append(
+			static function () use ( $id ): Response {
+				// Moving the conversation to another mailbox records where it was, while Akismet is answering.
+				$moved = Conversation::find( $id );
+				$moved->setMeta( 'orig_mailbox_id', 7 );
+				$moved->save();
+
+				return new Response( 200, array(), 'Thanks for making the web a better place.' );
+			}
+		);
+
+		( new ReportToAkismet( $id, Akismet::SPAM ) )->handle();
+
+		$conversation = $this->conversation->fresh();
+		$this->assertSame( 7, $conversation->getMeta( 'orig_mailbox_id' ) );
+		$this->assertSame( Akismet::SPAM, $conversation->getMeta( WPOrgAkismetServiceProvider::META )['reported'] );
+	}
+
+	/**
 	 * Undoing a correction reports the conversation back.
 	 *
 	 * @return void
