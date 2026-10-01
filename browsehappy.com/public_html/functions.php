@@ -286,7 +286,7 @@ remove_action( 'template_redirect', 'wp_old_slug_redirect' );
  *
  * Hooked to the 'init' action.
  *
- * @global WP|BrowseHappy_WP $wp Global WordPress environment object.
+ * @global WP $wp Global WordPress environment object.
  */
 function browsehappy_init() {
 	if ( false === get_option( 'rewrite_rules' ) ) {
