@@ -1176,15 +1176,9 @@ let wpTrac,
 				if ( typeof textarea.setRangeText === 'function' ) {
 					textarea.setRangeText( replacement, start, end, 'preserve' );
 					if ( selectedText ) {
-						textarea.setSelectionRange(
-							start + prefix.length,
-							start + prefix.length + selectedText.length
-						);
+						textarea.setSelectionRange( start + prefix.length, start + prefix.length + selectedText.length );
 					} else {
-						textarea.setSelectionRange(
-							start + prefix.length,
-							start + prefix.length
-						);
+						textarea.setSelectionRange( start + prefix.length, start + prefix.length );
 					}
 				} else {
 					textarea.value = textarea.value.substring( 0, start ) +
@@ -1893,7 +1887,8 @@ let wpTrac,
 				// Check on submit that we're not just re-ordering keywords.
 				// Otherwise, Trac flips out and adds a useless 'Keywords changed from X to X' marker.
 				submit() {
-					if ( ! elements.hiddenEl?.length ||
+					if (
+						! elements.hiddenEl?.length ||
 						! Array.isArray( originalKeywords ) ||
 						! Array.isArray( keywords ) ) {
 						return;
