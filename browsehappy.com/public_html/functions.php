@@ -233,7 +233,7 @@ function browsehappy_fetch_version( $browser, $normalize = true, $rank = true ) 
 function browsehappy_normalize_version( $browser, $version ) {
 
 	$normalize = browsehappy_get_browser_data( $browser )->normalized;
-	$version = explode( '.', $version );
+	$version   = explode( '.', $version );
 
 	if ( 1.5 === $normalize ) {
 		$return = $version[0];
