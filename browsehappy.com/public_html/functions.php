@@ -335,7 +335,7 @@ if ( function_exists( 'browsehappy_parse_user_agent' ) ) {
  * Hooked to the 'browsehappy_browser_notice' action.
  */
 function browsehappy_browser_notice() {
-	$ua      = $_SERVER['HTTP_USER_AGENT'];
+	$ua      = sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
 	$results = browsehappy_parse_user_agent( $ua );
 
 	if ( ! $results['upgrade'] ) {
