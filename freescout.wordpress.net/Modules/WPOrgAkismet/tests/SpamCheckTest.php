@@ -83,16 +83,17 @@ final class SpamCheckTest extends TestCase {
 	}
 
 	/**
-	 * Without WPORG_AKISMET_MARK_SPAM, a spam verdict is only recorded.
+	 * Spam goes to the Spam folder before anyone is notified, and the verdict is recorded.
 	 *
 	 * @return void
 	 */
-	public function test_spam_verdict_is_only_recorded_by_default(): void {
+	public function test_spam_is_marked(): void {
 		$this->answers->append( new Response( 200, array(), 'true' ) );
 
 		$conversation = $this->filter();
 
-		$this->assertFalse( $conversation->isSpam() );
+		$this->assertTrue( $conversation->isSpam() );
+		$this->assertSame( Folder::TYPE_SPAM, (int) Folder::find( $conversation->folder_id )->type );
 		$this->assertSame( array( 'verdict' => Akismet::SPAM ), $conversation->getMeta( WPOrgAkismetServiceProvider::META ) );
 
 		$sent = $this->sent( 0 );
@@ -103,27 +104,11 @@ final class SpamCheckTest extends TestCase {
 	}
 
 	/**
-	 * With WPORG_AKISMET_MARK_SPAM, spam goes to the Spam folder before anyone is notified.
-	 *
-	 * @return void
-	 */
-	public function test_spam_is_marked_when_configured(): void {
-		config( array( 'wporgakismet.mark_spam' => true ) );
-		$this->answers->append( new Response( 200, array(), 'true' ) );
-
-		$conversation = $this->filter();
-
-		$this->assertTrue( $conversation->isSpam() );
-		$this->assertSame( Folder::TYPE_SPAM, (int) Folder::find( $conversation->folder_id )->type );
-	}
-
-	/**
 	 * Legitimate email comes in as usual.
 	 *
 	 * @return void
 	 */
 	public function test_ham_comes_in_as_usual(): void {
-		config( array( 'wporgakismet.mark_spam' => true ) );
 		$this->answers->append( new Response( 200, array(), 'false' ) );
 
 		$conversation = $this->filter();
@@ -186,7 +171,6 @@ final class SpamCheckTest extends TestCase {
 	 * @return void
 	 */
 	public function test_errors_let_email_through(): void {
-		config( array( 'wporgakismet.mark_spam' => true ) );
 		$this->answers->append( new Response( 200, array( 'X-akismet-debug-help' => 'Empty "blog" value' ), 'invalid' ) );
 		$this->answers->append( new Response( 500 ) );
 

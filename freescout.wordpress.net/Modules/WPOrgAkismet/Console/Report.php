@@ -15,7 +15,7 @@ use Modules\WPOrgAkismet\Providers\WPOrgAkismetServiceProvider;
 use Modules\WPOrgAkismet\Services\Akismet;
 
 /**
- * Shows how often Akismet and agents agree, to decide whether to let it mark spam (WPORG_AKISMET_MARK_SPAM).
+ * Shows how often agents corrected Akismet, to keep an eye on how well it does on email.
  */
 final class Report extends Command {
 

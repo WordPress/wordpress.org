@@ -116,7 +116,7 @@ final class WPOrgAkismetServiceProvider extends ServiceProvider {
 	}
 
 	/**
-	 * Asks Akismet about a new conversation, records the verdict, and marks it as spam if configured to.
+	 * Asks Akismet about a new conversation, records the verdict, and marks spam as such.
 	 *
 	 * Never throws: mail fetching must go on whatever happens here. Without a verdict, the conversation comes in
 	 * as usual.
@@ -153,7 +153,7 @@ final class WPOrgAkismetServiceProvider extends ServiceProvider {
 			$verdict = $akismet->check( $fields );
 			$conversation->setMeta( self::META, array( 'verdict' => $verdict ) );
 
-			if ( Akismet::SPAM === $verdict && config( 'wporgakismet.mark_spam' ) ) {
+			if ( Akismet::SPAM === $verdict ) {
 				$conversation->setStatus( Conversation::STATUS_SPAM );
 			}
 		} catch ( \Throwable $e ) {

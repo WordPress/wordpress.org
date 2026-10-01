@@ -48,7 +48,6 @@ Optional:
 |---|---|---|
 | `WPORG_API_URL` | `https://api.wordpress.org/dotorg/freescout/` | Where the helpdesk endpoints are. |
 | `WPORG_AKISMET_KEY` | | FreeScout's Akismet API key. Without it, `WPOrgAkismet` checks nothing. |
-| `WPORG_AKISMET_MARK_SPAM` | `false` | `true` moves what Akismet considers spam to the Spam folder; otherwise its verdicts are only recorded. See [rolling out](Modules/WPOrgAkismet/README.md#rolling-out). |
 | `WPORG_SSO_IDP_ENTITY_ID` | `https://login.wordpress.org` | The identity provider's entity ID, from its settings page on login.wordpress.org. |
 | `WPORG_SSO_IDP_URL` | `https://login.wordpress.org/wp-login.php?action=idp` | The identity provider's login URL, from the same page. |
 | `WPORG_SSO_PASSWORD_LOGIN` | `false` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Every such login is logged. |
