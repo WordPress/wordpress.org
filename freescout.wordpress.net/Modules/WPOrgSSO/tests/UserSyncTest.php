@@ -94,7 +94,7 @@ final class UserSyncTest extends SsoTestCase {
 		$this->sync();
 		$hash = Account::for_user( (int) $this->user->id )->avatar_hash;
 
-		$this->avatars['https://avatars.test/rita.png'] = self::image( 0, 0, 255 );
+		$this->avatars['https://secure.gravatar.com/avatar/rita?s=256&d=mm'] = self::image( 0, 0, 255 );
 		$this->sync();
 
 		$this->assertNotSame( $hash, Account::for_user( (int) $this->user->id )->avatar_hash );
@@ -138,7 +138,22 @@ final class UserSyncTest extends SsoTestCase {
 	 * @return void
 	 */
 	public function test_unreadable_avatar_is_logged_not_thrown(): void {
-		$this->avatars['https://avatars.test/rita.png'] = 'not an image';
+		$this->avatars['https://secure.gravatar.com/avatar/rita?s=256&d=mm'] = 'not an image';
+
+		$this->sync();
+
+		$this->assertSame( 'Rita', $this->user->refresh()->first_name );
+		$this->assertEmpty( $this->user->photo_url );
+	}
+
+	/**
+	 * Only Gravatar's avatars are downloaded, as the app server fetches them.
+	 *
+	 * @return void
+	 */
+	public function test_ignores_avatar_off_gravatar(): void {
+		$this->accounts['rita']['avatar_url']                 = 'https://169.254.169.254/avatar.png';
+		$this->avatars['https://169.254.169.254/avatar.png'] = self::image( 0, 255, 0 );
 
 		$this->sync();
 

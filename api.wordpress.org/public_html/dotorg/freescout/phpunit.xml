@@ -1,0 +1,13 @@
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	>
+	<testsuites>
+		<testsuite name="freescout">
+			<directory suffix=".php">tests/</directory>
+			<exclude>tests/bootstrap.php</exclude>
+			<exclude>tests/stubs/</exclude>
+		</testsuite>
+	</testsuites>
+</phpunit>

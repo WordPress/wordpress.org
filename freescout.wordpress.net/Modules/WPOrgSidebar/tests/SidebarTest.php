@@ -11,7 +11,12 @@ namespace Modules\WPOrgSidebar\Tests;
 
 use App\Conversation;
 use App\User;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Psr7\Response;
 use Modules\WPOrgSidebar\Providers\WPOrgSidebarServiceProvider;
+use Modules\WPOrgSidebar\Services\Client;
+use Psr\Http\Message\RequestInterface;
 use WordPressdotorg\FreeScout\Tests\TestCase;
 
 /**
@@ -103,5 +108,34 @@ final class SidebarTest extends TestCase {
 			->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )
 			->assertStatus( 502 )
 			->assertExactJson( array( 'html' => '' ) );
+	}
+
+	/**
+	 * The account a bounce or Slack notification names is only asked for when the agent asks for it.
+	 *
+	 * @return void
+	 */
+	public function test_asks_for_the_related_account_on_request(): void {
+		$payloads = array();
+		$this->app->instance(
+			Client::class,
+			new Client(
+				'https://api.wordpress.test/',
+				'test-secret',
+				5,
+				static function ( RequestInterface $request ) use ( &$payloads ): PromiseInterface {
+					$payloads[] = json_decode( (string) $request->getBody(), true );
+
+					return ( new MockHandler( array( new Response( 200, array(), '{"html":"<p>Panel</p>"}' ) ) ) )( $request, array() );
+				}
+			)
+		);
+		$user = $this->create_user();
+
+		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )->assertStatus( 200 );
+		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile?related=1' )->assertStatus( 200 );
+
+		$this->assertArrayNotHasKey( 'related', $payloads[0] );
+		$this->assertTrue( $payloads[1]['related'] );
 	}
 }
