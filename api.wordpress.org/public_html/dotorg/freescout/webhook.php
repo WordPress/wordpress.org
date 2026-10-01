@@ -33,7 +33,8 @@ function contributor_stats( object $request ): void {
 		return;
 	}
 
-	$wporg_user = get_wporg_user_for_agent_emails( array( (string) ( $request->agent->email ?? '' ) ) );
+	$username   = (string) ( $request->agent->wporg_username ?? '' );
+	$wporg_user = $username ? get_user_by( 'login', $username ) : false;
 	$stat_user  = $wporg_user ? $wporg_user->user_nicename : 'FS-' . (int) $request->agent->id;
 	$mailbox    = get_mailbox_slug( $request );
 	$fields     = array( 'total' );

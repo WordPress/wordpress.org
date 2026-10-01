@@ -11,6 +11,7 @@ namespace Modules\WPOrgWebhooks\Services;
 
 use App\Conversation;
 use App\User;
+use Modules\WPOrgSSO\Entities\Account;
 
 /**
  * Builds the webhook payload for a conversation event.
@@ -40,9 +41,25 @@ final class EventPayload {
 				'name' => $mailbox ? (string) $mailbox->name : '',
 			),
 			'agent'        => $agent ? array(
-				'id'    => (int) $agent->id,
-				'email' => (string) $agent->email,
+				'id'             => (int) $agent->id,
+				'email'          => (string) $agent->email,
+				'wporg_username' => self::wporg_username( $agent ),
 			) : null,
 		);
+	}
+
+	/**
+	 * The WordPress.org account WPOrgSSO connected an agent to, which contributor stats credit.
+	 *
+	 * @param User $agent Agent.
+	 * @return string Username, empty if they aren't connected, or WPOrgSSO isn't installed.
+	 */
+	private static function wporg_username( User $agent ): string {
+		try {
+			return class_exists( Account::class ) ? Account::username_for( (int) $agent->id ) : '';
+		} catch ( \Throwable $e ) {
+			// Its table may not be migrated; the event goes out anyway.
+			return '';
+		}
 	}
 }

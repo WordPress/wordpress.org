@@ -4,7 +4,7 @@ Sends conversation events to WordPress.org, which records them as contributor st
 
 ## What it sends
 
-An event, the conversation, its mailbox, and the agent, when:
+An event, the conversation, its mailbox, and the agent with the WordPress.org account WPOrgSSO connected them to, when:
 
 - a conversation comes in, or an agent starts one;
 - the sender or an agent replies (an undone reply isn't counted);
