@@ -418,6 +418,7 @@ function get_translation_contributors( GP_Locale $locale, int $active_days_thres
 	$dates_by_id = wp_list_pluck( $contributions, 'latest_date', 'user_id' );
 
 	$user_ids_list = implode( ',', array_map( 'intval', $user_ids ) );
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $user_ids_list is sanitized via array_map( 'intval', ... ).
 	$user_rows     = $wpdb->get_results( "SELECT ID, user_nicename, display_name FROM {$wpdb->users} WHERE ID IN ($user_ids_list)" );
 
 	$translators      = [];
