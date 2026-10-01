@@ -35,7 +35,14 @@ final class RequireWordPressOrgLogin {
 	 *
 	 * @var int
 	 */
-	private const RECHECK_SECONDS = 3600;
+	private const RECHECK_SECONDS = 3600; // 1 hour.
+
+	/**
+	 * How long sessions from before WordPress.org was enforced go on, in seconds.
+	 *
+	 * @var int
+	 */
+	private const CUTOVER_SECONDS = 86400; // 1 day.
 
 	/**
 	 * Core action that signs in with a FreeScout password; with the break-glass switch on, open to administrators.
@@ -170,7 +177,10 @@ final class RequireWordPressOrgLogin {
 	 * @return Response|null Response to send instead, or null to go on.
 	 */
 	private static function enforce_login( Request $request, ?User $user, string $action ): ?Response {
-		if ( $user instanceof User && ! self::may_stay_logged_in( $user, $request ) ) {
+		// On the first enforced request, before any session can be from while this module was off.
+		$enforced_since = WPOrgSSOServiceProvider::enforced_since();
+
+		if ( $user instanceof User && ! self::may_stay_logged_in( $user, $request, $enforced_since ) ) {
 			\Auth::logout();
 			$request->session()->invalidate();
 
@@ -225,11 +235,12 @@ final class RequireWordPressOrgLogin {
 	/**
 	 * Whether a logged-in user may stay logged in.
 	 *
-	 * @param User    $user    Logged-in user.
-	 * @param Request $request Request.
+	 * @param User    $user           Logged-in user.
+	 * @param Request $request        Request.
+	 * @param int     $enforced_since When WordPress.org was first enforced, as a Unix timestamp.
 	 * @return bool
 	 */
-	private static function may_stay_logged_in( User $user, Request $request ): bool {
+	private static function may_stay_logged_in( User $user, Request $request, int $enforced_since ): bool {
 		$session  = $request->session();
 		$username = (string) $session->get( WPOrgSSOServiceProvider::SESSION_USERNAME, '' );
 
@@ -248,10 +259,10 @@ final class RequireWordPressOrgLogin {
 		}
 
 		/*
-		 * From before WordPress.org was enforced: going on keeps whoever switched it on logged in, so they can connect
-		 * the accounts. Manage » System » Tools logs everyone out, for a clean switch.
+		 * From before WordPress.org was enforced: going on for a day keeps whoever switched it on logged in, so they can
+		 * connect the accounts. Later, an unmarked session is from while this module was off, and can't be trusted.
 		 */
-		return true;
+		return time() - $enforced_since < self::CUTOVER_SECONDS;
 	}
 
 	/**

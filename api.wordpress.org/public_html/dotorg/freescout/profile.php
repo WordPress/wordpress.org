@@ -27,6 +27,8 @@ function render_profile( object $request ): string {
 	$user         = false;
 	$sender_email = (string) ( $request->sender->email ?? '' );
 	$email        = get_user_email_for_email( $request );
+	$related      = ! empty( $request->related );
+	$slack_email  = preg_match( '/(\S+@chat.wordpress.org)/i', (string) ( $request->conversation->subject ?? '' ), $m ) ? $m[1] : '';
 
 	if ( $email ) {
 		$user = get_user_by( 'email', $email );
@@ -70,8 +72,8 @@ function render_profile( object $request ): string {
 		$html .= render_pending_signups( $sender_email, $email );
 	}
 
-	// If this is related to a slack user, include the details of the slack account.
-	if ( $user || preg_match( '/(\S+@chat.wordpress.org)/i', (string) ( $request->conversation->subject ?? '' ), $m ) ) {
+	// If this is related to a slack user, include the details of the slack account; one the subject names only on request.
+	if ( $user || ( $related && $slack_email ) ) {
 		// Someone can have several Slack accounts over the years; active ones first.
 		if ( $user ) {
 			$slack_users = $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM slack_users WHERE user_id = %d ORDER BY deactivated ASC', $user->ID ) );
@@ -79,7 +81,7 @@ function render_profile( object $request ): string {
 			$slack_users = $wpdb->get_results(
 				$wpdb->prepare(
 					'SELECT * FROM slack_users WHERE profiledata LIKE %s ORDER BY deactivated ASC',
-					'%' . $wpdb->esc_like( '"email":"' . $m[1] . '"' ) . '%'
+					'%' . $wpdb->esc_like( '"email":"' . $slack_email . '"' ) . '%'
 				)
 			);
 		}
@@ -87,7 +89,16 @@ function render_profile( object $request ): string {
 		$html .= render_slack_users( $slack_users );
 	}
 
-	return $html;
+	// The sender wrote whatever names someone else, so an agent decides whether it's worth a look; WPOrgSidebar asks.
+	if ( $related ) {
+		$notice = '<p class="wporg-sidebar-meta">Showing the account this is about, not the sender’s. <a href="#" class="wporg-sidebar-show-sender">Show the sender</a></p>';
+	} elseif ( get_related_user( $request ) || ( ! $user && $slack_email ) ) {
+		$notice = '<p class="wporg-sidebar-meta">This may be about someone else’s account, like a bounce. <a href="#" class="wporg-sidebar-show-related">Show it</a></p>';
+	} else {
+		$notice = '';
+	}
+
+	return $notice . $html;
 }
 
 /**

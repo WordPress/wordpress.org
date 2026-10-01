@@ -33,28 +33,75 @@
 
 		$( '.wporg-sidebar' ).on( 'shown.bs.collapse', fitLayout );
 
-		$( '.wporg-sidebar-panel[data-url]' ).each( function () {
-			const $panel = $( this );
+		const $panels = $( '.wporg-sidebar-panel[data-url]' );
 
-			$.getJSON( $panel.data( 'url' ) )
+		$panels.each( function () {
+			loadPanel( $( this ), false );
+		} );
+
+		// Bounces and Slack notifications name someone else's account, which the profile panel offers to switch to, and back.
+		$( '.wporg-sidebar' ).on(
+			'click',
+			'.wporg-sidebar-show-related, .wporg-sidebar-show-sender',
+			function ( event ) {
+				const related = $( this ).hasClass(
+					'wporg-sidebar-show-related'
+				);
+
+				event.preventDefault();
+				$panels.each( function () {
+					loadPanel( $( this ), related );
+				} );
+			}
+		);
+
+		/**
+		 * Loads a panel, hiding it if it has nothing to show.
+		 *
+		 * @param {jQuery}  $panel  Panel.
+		 * @param {boolean} related Whether it's about the account a bounce or Slack notification names, not the sender's.
+		 */
+		function loadPanel( $panel, related ) {
+			const $block = $panel.closest( '.conv-sidebar-block' );
+			const previous = $panel.data( 'request' );
+
+			// A late answer to an earlier load would show the other person.
+			if ( previous ) {
+				previous.abort();
+			}
+
+			const request = $.getJSON(
+				$panel.data( 'url' ),
+				related ? { related: 1 } : {}
+			);
+			$panel.data( 'request', request );
+
+			request
 				.done( function ( response ) {
 					if ( response && response.html ) {
 						// Trusted: rendered by the signed api.wordpress.org endpoints.
 						$panel.html( response.html );
 						shortenLists( $panel );
-						fitLayout();
+						$block.show();
 					} else {
-						$panel.closest( '.conv-sidebar-block' ).remove();
+						// Not removed: the other account may have something to show.
+						$block.hide();
 					}
+					fitLayout();
 				} )
-				.fail( function () {
+				.fail( function ( xhr, textStatus ) {
+					if ( 'abort' === textStatus ) {
+						return;
+					}
+
 					$panel.html(
 						$( '<p class="wporg-sidebar-empty">' ).text(
 							strings.failed
 						)
 					);
+					$block.show();
 				} );
-		} );
+		}
 
 		/**
 		 * Hides all but the first items of long lists, behind a "View all" link like core's.

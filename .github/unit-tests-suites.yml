@@ -61,6 +61,13 @@ suites:
     paths:
       - 'api.wordpress.org/public_html/dotorg/trac/pr/**'
 
+  freescout-api:
+    type: standalone
+    name: FreeScout API
+    working-directory: api.wordpress.org/public_html/dotorg/freescout
+    paths:
+      - 'api.wordpress.org/public_html/dotorg/freescout/**'
+
   slack-trac:
     type: standalone
     name: Slack Trac Bot

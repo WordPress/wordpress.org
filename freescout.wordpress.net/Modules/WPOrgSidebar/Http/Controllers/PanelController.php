@@ -53,11 +53,15 @@ final class PanelController extends Controller {
 			abort( 403 );
 		}
 
+		$payload = ConversationPayload::build( $conversation );
+
+		// The account a bounce or Slack notification names, instead of the sender's, once the agent asks for it.
+		if ( request()->query( 'related' ) ) {
+			$payload['related'] = true;
+		}
+
 		try {
-			$response = Client::from_config( self::TIMEOUT )->post(
-				(string) $panels[ $panel ]['endpoint'],
-				ConversationPayload::build( $conversation )
-			);
+			$response = Client::from_config( self::TIMEOUT )->post( (string) $panels[ $panel ]['endpoint'], $payload );
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSidebar] Could not load panel ' . $panel . ': ' . $e->getMessage() );
 

@@ -82,7 +82,7 @@ abstract class SsoTestCase extends TestCase {
 			)
 		);
 
-		$this->avatars = array( 'https://avatars.test/rita.png' => self::image( 255, 0, 0 ) );
+		$this->avatars = array( 'https://secure.gravatar.com/avatar/rita?s=256&d=mm' => self::image( 255, 0, 0 ) );
 
 		$this->accounts = array(
 			'rita' => array(
@@ -91,7 +91,7 @@ abstract class SsoTestCase extends TestCase {
 				'first_name'   => 'Rita',
 				'last_name'    => 'Reviewer',
 				'email'        => 'rita@example.org',
-				'avatar_url'   => 'https://avatars.test/rita.png',
+				'avatar_url'   => 'https://secure.gravatar.com/avatar/rita?s=256&d=mm',
 				'two_factor'   => true,
 				'blocked'      => false,
 			),
@@ -109,14 +109,14 @@ abstract class SsoTestCase extends TestCase {
 	}
 
 	/**
-	 * Answers requests to account.php and the avatar host.
+	 * Answers requests to account.php and for avatars.
 	 *
 	 * @param \Psr\Http\Message\RequestInterface $request Request.
 	 * @return \GuzzleHttp\Promise\PromiseInterface
 	 */
 	public function answer_api( \Psr\Http\Message\RequestInterface $request ): \GuzzleHttp\Promise\PromiseInterface {
-		if ( 'avatars.test' === $request->getUri()->getHost() ) {
-			$avatar   = $this->avatars[ (string) $request->getUri() ] ?? null;
+		$avatar = $this->avatars[ (string) $request->getUri() ] ?? null;
+		if ( $avatar || 'secure.gravatar.com' === $request->getUri()->getHost() ) {
 			$response = $avatar ? new Response( 200, array( 'Content-Type' => 'image/png' ), $avatar ) : new Response( 404 );
 
 			return ( new MockHandler( array( $response ) ) )( $request, array() );

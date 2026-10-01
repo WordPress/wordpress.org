@@ -308,6 +308,18 @@ final class LoginTest extends SsoTestCase {
 	}
 
 	/**
+	 * A day after WordPress.org was enforced, a session without its marks is from while the module was off, and ends.
+	 *
+	 * @return void
+	 */
+	public function test_logs_out_unmarked_sessions_after_the_cutover(): void {
+		\Option::set( WPOrgSSOServiceProvider::OPTION_ENFORCED_SINCE, time() - 86400 );
+
+		$this->actingAs( $this->user )->get( route( 'dashboard' ) )->assertRedirect( route( 'login' ) );
+		$this->assertGuest();
+	}
+
+	/**
 	 * A login without WordPress.org once it's enforced ends on the next request.
 	 *
 	 * @return void
