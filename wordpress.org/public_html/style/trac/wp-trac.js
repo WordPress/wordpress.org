@@ -2399,8 +2399,8 @@ let wpTrac,
 					'<strong>Warning:</strong> Tickets with an attached GitHub PRs not included <button>Load PRs</button>'
 				);
 
-				$warning.on( 'click', function () {
-					$( this ).find( 'button' ).prop( 'disabled', 'disabled' ).text( 'Please wait..' );
+				$warning.on( 'click', 'button', function () {
+					const $button = $( this ).prop( 'disabled', true ).text( 'Please wait…' );
 
 					const params = new URLSearchParams( { trac, author: user } );
 					if ( authenticated ) {
