@@ -111,7 +111,7 @@ final class SidebarTest extends TestCase {
 	}
 
 	/**
-	 * The account a bounce or Slack notification names is only asked for when the agent asks for it.
+	 * The account a bounce or Slack notification names is only asked for when the agent asks; each answer is reused briefly.
 	 *
 	 * @return void
 	 */
@@ -148,5 +148,10 @@ final class SidebarTest extends TestCase {
 
 		$this->assertArrayNotHasKey( 'related', $payloads[0] );
 		$this->assertTrue( $payloads[1]['related'] );
+
+		// Loaded again, both come from the cache.
+		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )->assertStatus( 200 );
+		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile?related=1' )->assertStatus( 200 );
+		$this->assertCount( 2, $payloads );
 	}
 }

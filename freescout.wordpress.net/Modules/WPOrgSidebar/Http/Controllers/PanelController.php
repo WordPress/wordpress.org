@@ -36,6 +36,13 @@ final class PanelController extends Controller {
 	private const AVATAR_MINUTES = 24 * 60;
 
 	/**
+	 * How long a panel's content is reused, in minutes.
+	 *
+	 * @var int
+	 */
+	private const CACHE_MINUTES = 1;
+
+	/**
 	 * Returns the content of one panel, as blocks sidebar.js builds it from.
 	 *
 	 * @param int    $conversation_id Conversation ID.
@@ -53,15 +60,25 @@ final class PanelController extends Controller {
 			abort( 403 );
 		}
 
-		$payload = ConversationPayload::build( $conversation );
-
 		// The account a bounce or Slack notification names, instead of the sender's, once the agent asks for it.
-		if ( request()->query( 'related' ) ) {
-			$payload['related'] = true;
-		}
+		$related = (bool) request()->query( 'related' );
+
+		// A new message changes updated_at, and so the key.
+		$key = implode( '.', array( 'wporgsidebar.panel', $conversation->id, $panel, (int) $related, strtotime( (string) $conversation->updated_at ) ) );
 
 		try {
-			$response = Client::from_config( self::TIMEOUT )->post( (string) $panels[ $panel ]['endpoint'], $payload );
+			$response = \Cache::remember(
+				$key,
+				self::CACHE_MINUTES,
+				static function () use ( $conversation, $panels, $panel, $related ): array {
+					$payload = ConversationPayload::build( $conversation );
+					if ( $related ) {
+						$payload['related'] = true;
+					}
+
+					return Client::from_config( self::TIMEOUT )->post( (string) $panels[ $panel ]['endpoint'], $payload );
+				}
+			);
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSidebar] Could not load panel ' . $panel . ': ' . $e->getMessage() );
 
