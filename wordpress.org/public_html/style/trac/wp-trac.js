@@ -1,4 +1,3 @@
-/* globals wpTracCurrentUser */
 let wpTrac,
 	coreKeywordList,
 	gardenerKeywordList,
@@ -248,7 +247,15 @@ let wpTrac,
 	 * @return {string} The escaped value.
 	 */
 	function escapeHtml( value ) {
-		return $( '<span />' ).text( value ).html();
+		if ( typeof value !== 'string' ) {
+			value = String( value ?? '' );
+		}
+		return value
+			.replace( /&/g, '&amp;' )
+			.replace( /</g, '&lt;' )
+			.replace( />/g, '&gt;' )
+			.replace( /"/g, '&quot;' )
+			.replace( /'/g, '&#39;' );
 	}
 
 	/**
@@ -397,7 +404,8 @@ let wpTrac,
 
 		linkMentions( selector ) {
 			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-			const mentionsRegEx = /(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,18}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)/g;
+			const mentionsRegEx =
+				/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,18}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)/g;
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
 				linkTextNodes( this, mentionsRegEx, function ( match, pre, username ) {
@@ -1879,17 +1887,20 @@ let wpTrac,
 				// Check on submit that we're not just re-ordering keywords.
 				// Otherwise, Trac flips out and adds a useless 'Keywords changed from X to X' marker.
 				submit() {
+					if ( ! elements.hiddenEl?.length || ! Array.isArray( originalKeywords ) || ! Array.isArray( keywords ) ) {
+						return;
+					}
 					if ( keywords.length !== originalKeywords.length ) {
 						return;
 					}
 
 					const testKeywords = keywords.filter( ( v ) => ! originalKeywords.includes( v ) );
 
-					// If the difference has no length, then restore to the original keyword order.
+					// If the difference has no length, restore original keyword order to prevent Trac change noise.
 					if ( ! testKeywords.length ) {
 						elements.hiddenEl.val( originalKeywords.join( ' ' ) );
 					}
-				},
+				}
 			};
 		} )(),
 
