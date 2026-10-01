@@ -153,6 +153,77 @@ final class EventForwardingTest extends TestCase {
 	}
 
 	/**
+	 * Imported email isn't counted again: the service it came from counted it when it happened.
+	 *
+	 * @return void
+	 */
+	public function test_imported_threads_are_not_forwarded(): void {
+		$sender = $this->create_thread( $this->conversation, Thread::TYPE_CUSTOMER, 'Question', null, '2026-01-01 10:00:00' );
+		$reply  = $this->create_thread( $this->conversation, Thread::TYPE_MESSAGE, 'Answer', $this->agent, '2026-01-01 11:00:00' );
+		Thread::whereIn( 'id', array( $sender->id, $reply->id ) )->update( array( 'imported' => true ) );
+		$sender->imported = true;
+		$reply->imported  = true;
+
+		\Eventy::action( 'conversation.created_by_customer', $this->conversation, $sender, null );
+		\Eventy::action( 'conversation.customer_replied', $this->conversation, $sender, null );
+		\Eventy::action( 'conversation.created_by_user', $this->conversation, $reply );
+		\Eventy::action( 'conversation.user_replied', $this->conversation, $reply );
+
+		Queue::assertNotPushed( SendEvent::class );
+	}
+
+	/**
+	 * What agents do with an imported conversation in FreeScout counts.
+	 *
+	 * @return void
+	 */
+	public function test_agent_actions_on_imported_conversations_are_forwarded(): void {
+		$this->conversation->imported = true;
+		$this->conversation->save();
+
+		\Eventy::action( 'conversation.status_changed', $this->conversation, $this->agent, false, Conversation::STATUS_ACTIVE );
+
+		$this->assert_queued( 'conversation.status_changed', (string) $this->agent->email );
+	}
+
+	/**
+	 * Automations, like Workflows, have no WordPress.org account to credit, so their events go out without an agent.
+	 *
+	 * @return void
+	 */
+	public function test_automations_are_not_credited(): void {
+		$robot = $this->create_user();
+		User::where( 'id', $robot->id )->update( array( 'type' => User::TYPE_ROBOT ) );
+		$robot = $robot->fresh();
+
+		\Eventy::action( 'conversation.status_changed', $this->conversation, $robot, false, Conversation::STATUS_ACTIVE );
+
+		$reply = $this->create_thread( $this->conversation, Thread::TYPE_MESSAGE, 'Automatic answer', $robot, '2026-09-01 11:00:00' );
+		\Eventy::action( 'conversation.user_replied', $this->conversation, $reply );
+
+		$this->assert_queued( 'conversation.status_changed', null );
+		$this->assert_queued( 'conversation.user_replied', null );
+	}
+
+	/**
+	 * Spam from senders isn't counted, but agents marking spam is.
+	 *
+	 * @return void
+	 */
+	public function test_spam_from_senders_is_not_forwarded(): void {
+		$this->conversation->status = Conversation::STATUS_SPAM;
+		$this->conversation->save();
+		$thread = $this->create_thread( $this->conversation, Thread::TYPE_CUSTOMER, 'Buy now', null, '2026-09-01 10:00:00' );
+
+		\Eventy::action( 'conversation.created_by_customer', $this->conversation, $thread, null );
+		\Eventy::action( 'conversation.customer_replied', $this->conversation, $thread, null );
+		Queue::assertNotPushed( SendEvent::class );
+
+		\Eventy::action( 'conversation.status_changed', $this->conversation, $this->agent, false, Conversation::STATUS_ACTIVE );
+		$this->assert_queued( 'conversation.status_changed', (string) $this->agent->email );
+	}
+
+	/**
 	 * Without a secret nothing is queued.
 	 *
 	 * @return void
