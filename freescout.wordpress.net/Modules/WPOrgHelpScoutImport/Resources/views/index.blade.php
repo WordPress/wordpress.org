@@ -36,7 +36,7 @@
 				@php $unmatched = session( 'wporghelpscoutimport_unmatched' ); @endphp
 				<div class="alert alert-danger">
 					<p><strong>{{ __(':count of :name’s HelpScout users have no FreeScout user.', [ 'count' => $unmatched['count'], 'name' => $unmatched['name'] ]) }}</strong></p>
-					<p>{{ __('Their replies and notes would be credited to “HelpScout Import”, and imported conversations keep that credit.') }}</p>
+					<p>{{ __('Their replies and notes would be credited to “HelpScout Import” until they’re matched on the Agents page.') }}</p>
 					<form method="POST" action="{{ route( 'wporghelpscoutimport.start' ) }}" class="form-inline">
 						{{ csrf_field() }}
 						<input type="hidden" name="helpscout_mailbox_id" value="{{ $unmatched['mailbox'] }}">

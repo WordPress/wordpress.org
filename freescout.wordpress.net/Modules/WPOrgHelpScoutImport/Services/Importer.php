@@ -388,10 +388,13 @@ final class Importer {
 			Thread::query()->whereKey( $thread_id )->update( array( 'body' => $body ) );
 		}
 
+		$author = $by_customer ? null : $this->people->remember( $source['createdBy'] ?? null );
+
 		ImportedThread::query()->create(
 			array(
-				'helpscout_id' => (int) $source['id'],
-				'thread_id'    => $thread_id,
+				'helpscout_id'      => (int) $source['id'],
+				'thread_id'         => $thread_id,
+				'helpscout_user_id' => $author,
 			)
 		);
 	}

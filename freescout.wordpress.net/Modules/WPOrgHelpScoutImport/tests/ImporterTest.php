@@ -17,6 +17,8 @@ use App\User;
 use Illuminate\Support\Facades\Queue;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
+use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
+use Modules\WPOrgHelpScoutImport\Entities\Person;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
@@ -355,6 +357,21 @@ final class ImporterTest extends ImportTestCase {
 		$reply = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_MESSAGE )->first();
 		$this->assertSame( (int) $chosen->id, (int) $reply->created_by_user_id );
 		$this->assertSame( (int) $chosen->id, (int) $this->imported_conversation()->closed_by_user_id );
+	}
+
+	/**
+	 * Who wrote each reply and note is kept, with who they are, for crediting them again later.
+	 *
+	 * @return void
+	 */
+	public function test_authors_are_remembered(): void {
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$this->assertSame( 55, (int) ImportedThread::query()->where( 'helpscout_id', 2002 )->value( 'helpscout_user_id' ) );
+		$this->assertNull( ImportedThread::query()->where( 'helpscout_id', 2001 )->value( 'helpscout_user_id' ) );
+
+		$person = Person::query()->where( 'helpscout_user_id', 55 )->firstOrFail();
+		$this->assertSame( array( 'Ada', 'Agent', 'agent@example.org' ), array( $person->first_name, $person->last_name, $person->email ) );
 	}
 
 	/**

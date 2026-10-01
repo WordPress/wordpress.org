@@ -19,7 +19,8 @@
 
 		<div class="alert alert-warning">
 			<p><strong>{{ __('FreeScout users are never created from HelpScout.') }}</strong></p>
-			<p>{{ __('Each HelpScout user’s replies and notes are credited to the FreeScout user chosen here, or else to the one with the same email. A HelpScout user without either gets no FreeScout user: their replies and notes are credited to “HelpScout Import”, and imported conversations keep that credit.') }}</p>
+			<p>{{ __('Each HelpScout user’s replies and notes are credited to the FreeScout user chosen here, or else to the one with the same email. A HelpScout user without either gets no FreeScout user: their replies and notes are credited to “HelpScout Import”. Matching someone later credits what’s already imported to them too.') }}</p>
+			<p>{{ __('HelpScout no longer lists users deleted from it. They show up here once an import has met them in a conversation, marked “No longer in HelpScout”.') }}</p>
 			@if ( $can_create )
 				<p>{{ __('For someone with no FreeScout user yet, enter their WordPress.org username: that creates one, connected to their account. Uncheck “Can log in” for former agents: they keep their credit, but their user is disabled.') }}</p>
 			@else
@@ -83,7 +84,11 @@
 								<td>
 									{{ $agent['name'] }}<br/>
 									<small>{{ $agent['email'] }}</small><br/>
-									<small class="text-help">{{ implode( ', ', $agent['mailboxes'] ) }}</small>
+									@if ( $agent['former'] )
+										<small class="text-help">{{ __('No longer in HelpScout') }}</small>
+									@else
+										<small class="text-help">{{ implode( ', ', $agent['mailboxes'] ) }}</small>
+									@endif
 								</td>
 								<td>
 									@if ( $agent['chosen'] )

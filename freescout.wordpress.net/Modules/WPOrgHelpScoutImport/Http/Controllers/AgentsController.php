@@ -43,14 +43,14 @@ final class AgentsController extends Controller {
 			}
 			asort( $mailboxes );
 
-			$agents = $people->agents(
-				array_filter(
-					$directory,
-					static function ( array $user ) use ( $mailbox_id ): bool {
-						return ! $mailbox_id || isset( $user['mailboxes'][ $mailbox_id ] );
-					}
-				)
+			// Users HelpScout no longer lists only show up in imported conversations, from any mailbox.
+			$listed = array_filter(
+				$directory,
+				static function ( array $user ) use ( $mailbox_id ): bool {
+					return ! $mailbox_id || isset( $user['mailboxes'][ $mailbox_id ] );
+				}
 			);
+			$agents = $people->agents( $mailbox_id ? $listed : array_merge( $listed, People::former( $directory ) ) );
 		} catch ( \Throwable $e ) {
 			$error = $e->getMessage();
 		}
@@ -81,7 +81,8 @@ final class AgentsController extends Controller {
 	 * Saves who HelpScout users are credited to, for every row of the list at once.
 	 *
 	 * A WordPress.org username creates a FreeScout user from that account, or finds the one connected to it, and
-	 * wins over a chosen user. No user chosen goes back to the user with the same email.
+	 * wins over a chosen user. No user chosen goes back to the user with the same email. Replies and notes already
+	 * imported are credited again.
 	 *
 	 * @param Request $request Request, with `agents`: rows by HelpScout user ID, each with `user_id`, `username`, and
 	 *                         `can_log_in`.
@@ -117,6 +118,8 @@ final class AgentsController extends Controller {
 			} else {
 				Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->delete();
 			}
+
+			People::recredit( $helpscout_user_id );
 		}
 
 		$redirect = redirect()

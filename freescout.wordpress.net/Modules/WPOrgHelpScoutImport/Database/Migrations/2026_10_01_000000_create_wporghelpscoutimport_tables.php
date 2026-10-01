@@ -96,6 +96,23 @@ class CreateWporghelpscoutimportTables extends Migration {
 					$table->increments( 'id' );
 					$table->unsignedBigInteger( 'helpscout_id' )->unique();
 					$table->unsignedInteger( 'thread_id' )->index();
+
+					// Who wrote a reply or note, so it can be credited to someone else later.
+					$table->unsignedBigInteger( 'helpscout_user_id' )->nullable()->index();
+				}
+			);
+		}
+
+		if ( ! Schema::hasTable( 'wporghelpscoutimport_people' ) ) {
+			Schema::create(
+				'wporghelpscoutimport_people',
+				static function ( Blueprint $table ): void {
+					$table->increments( 'id' );
+					$table->unsignedBigInteger( 'helpscout_user_id' )->unique();
+					$table->string( 'first_name', 100 );
+					$table->string( 'last_name', 100 );
+					$table->string( 'email', 191 )->nullable();
+					$table->timestamps();
 				}
 			);
 		}
@@ -107,6 +124,7 @@ class CreateWporghelpscoutimportTables extends Migration {
 	 * @return void
 	 */
 	public function down(): void {
+		Schema::dropIfExists( 'wporghelpscoutimport_people' );
 		Schema::dropIfExists( 'wporghelpscoutimport_threads' );
 		Schema::dropIfExists( 'wporghelpscoutimport_agents' );
 		Schema::dropIfExists( 'wporghelpscoutimport_conversations' );

@@ -12,6 +12,8 @@ namespace Modules\WPOrgHelpScoutImport\Services;
 use App\Customer;
 use App\User;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
+use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
+use Modules\WPOrgHelpScoutImport\Entities\Person;
 
 /**
  * HelpScout users become the FreeScout users administrators chose, or with the same email; senders become senders.
@@ -49,6 +51,13 @@ final class People {
 	private $users = array();
 
 	/**
+	 * HelpScout user IDs remember() kept so far.
+	 *
+	 * @var true[]
+	 */
+	private $remembered = array();
+
+	/**
 	 * The FreeScout user for a HelpScout user: the one an administrator chose, or else the one with their email.
 	 *
 	 * @param mixed $person HelpScout person object, like a thread's `createdBy`.
@@ -65,6 +74,92 @@ final class People {
 		}
 
 		return $this->users[ $id ];
+	}
+
+	/**
+	 * Keeps who a HelpScout user is, for users HelpScout no longer lists once they're deleted.
+	 *
+	 * @param mixed $person HelpScout person object, like a thread's `createdBy`.
+	 * @return int|null Their HelpScout user ID, or null if it isn't a HelpScout user.
+	 */
+	public function remember( $person ): ?int {
+		$id = is_array( $person ) && 'user' === ( $person['type'] ?? '' ) ? (int) ( $person['id'] ?? 0 ) : 0;
+		if ( ! $id ) {
+			return null;
+		}
+
+		if ( ! isset( $this->remembered[ $id ] ) ) {
+			Person::query()->updateOrCreate(
+				array( 'helpscout_user_id' => $id ),
+				array(
+					'first_name' => mb_substr( (string) ( $person['first'] ?? '' ), 0, 100 ),
+					'last_name'  => mb_substr( (string) ( $person['last'] ?? '' ), 0, 100 ),
+					'email'      => '' !== (string) ( $person['email'] ?? '' ) ? mb_substr( (string) $person['email'], 0, 191 ) : null,
+				)
+			);
+			$this->remembered[ $id ] = true;
+		}
+
+		return $id;
+	}
+
+	/**
+	 * Credits a HelpScout user's imported replies and notes to whoever they're credited to now.
+	 *
+	 * @param int $helpscout_user_id HelpScout user ID.
+	 * @return void
+	 */
+	public static function recredit( int $helpscout_user_id ): void {
+		$person = Person::query()->where( 'helpscout_user_id', $helpscout_user_id )->first();
+		if ( ! $person ) {
+			return;
+		}
+
+		$people = new self();
+		$user   = $people->user(
+			array(
+				'type'  => 'user',
+				'id'    => $helpscout_user_id,
+				'email' => (string) $person->email,
+			)
+		) ?? $people->robot();
+
+		// One query, without the events of changed threads: imported ones were written without them too.
+		\App\Thread::query()
+			->whereIn(
+				'id',
+				ImportedThread::query()->select( 'thread_id' )->where( 'helpscout_user_id', $helpscout_user_id )->getQuery()
+			)
+			->where( 'created_by_user_id', '!=', $user->id )
+			->update( array( 'created_by_user_id' => $user->id ) );
+	}
+
+	/**
+	 * HelpScout users the importer met who HelpScout no longer lists, shaped like directory()'s.
+	 *
+	 * @param array[] $directory HelpScout's users, from directory().
+	 * @return array[]
+	 */
+	public static function former( array $directory ): array {
+		$listed = array_map( 'intval', array_column( $directory, 'id' ) );
+
+		return Person::query()
+			->whereNotIn( 'helpscout_user_id', $listed ? $listed : array( 0 ) )
+			->get()
+			->map(
+				static function ( Person $person ): array {
+					return array(
+						'id'        => (int) $person->helpscout_user_id,
+						'type'      => 'user',
+						'firstName' => $person->first_name,
+						'lastName'  => $person->last_name,
+						'email'     => (string) $person->email,
+						'mailboxes' => array(),
+						'former'    => true,
+					);
+				}
+			)
+			->all();
 	}
 
 	/**
@@ -129,6 +224,7 @@ final class People {
 				'name'      => $name,
 				'email'     => (string) ( $helpscout_user['email'] ?? '' ),
 				'mailboxes' => (array) ( $helpscout_user['mailboxes'] ?? array() ),
+				'former'    => ! empty( $helpscout_user['former'] ),
 				'chosen'    => $chosen,
 				'by_email'  => $by_email,
 				'suggested' => $chosen || $by_email ? null : self::by_name( (string) ( $helpscout_user['firstName'] ?? '' ), (string) ( $helpscout_user['lastName'] ?? '' ) ),

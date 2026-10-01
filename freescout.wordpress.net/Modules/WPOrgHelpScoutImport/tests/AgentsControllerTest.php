@@ -14,7 +14,13 @@ use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Queue;
+use App\Thread;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
+use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
+use Modules\WPOrgHelpScoutImport\Entities\Person;
+use Modules\WPOrgHelpScoutImport\Services\HelpScout;
+use Modules\WPOrgHelpScoutImport\Services\Importer;
+use Modules\WPOrgHelpScoutImport\Services\People;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Services\Client;
 use Psr\Http\Message\RequestInterface;
@@ -111,6 +117,59 @@ final class AgentsControllerTest extends ImportTestCase {
 		$this->assertStringContainsString( 'Photos, Themes', $page );
 		$this->assertStringNotContainsString( 'id="agent-90"', $page );
 		$this->assertStringContainsString( 'A8C Legal', $page );
+	}
+
+	/**
+	 * Matching someone after an import credits their imported replies and notes to them; clearing it undoes that.
+	 *
+	 * @return void
+	 */
+	public function test_matching_later_credits_whats_imported(): void {
+		$this->agent->email = 'ada@wordpress.example';
+		$this->agent->save();
+		( new Importer( app( HelpScout::class ), new People() ) )->import( $this->conversation(), $this->mailbox );
+
+		$reply = static function (): Thread {
+			return Thread::query()->findOrFail( ImportedThread::query()->where( 'helpscout_id', 2002 )->value( 'thread_id' ) );
+		};
+		$robot = User::query()->where( 'email', People::ROBOT_EMAIL )->value( 'id' );
+		$this->assertSame( (int) $robot, (int) $reply()->created_by_user_id );
+
+		$this->post( route( 'wporghelpscoutimport.agents.save' ), array( 'agents' => array( 55 => array( 'user_id' => $this->agent->id ) ) ) );
+		$this->assertSame( (int) $this->agent->id, (int) $reply()->created_by_user_id );
+
+		$this->post( route( 'wporghelpscoutimport.agents.save' ), array( 'agents' => array( 55 => array( 'user_id' => '' ) ) ) );
+		$this->assertSame( (int) $robot, (int) $reply()->created_by_user_id );
+	}
+
+	/**
+	 * Users deleted from HelpScout that an import met are listed for the whole account, but not for a mailbox.
+	 *
+	 * @return void
+	 */
+	public function test_former_users_are_listed(): void {
+		Person::query()->create(
+			array(
+				'helpscout_user_id' => 70,
+				'first_name'        => 'Dee',
+				'last_name'         => 'Parted',
+				'email'             => 'dee@example.org',
+			)
+		);
+		Person::query()->create(
+			array(
+				'helpscout_user_id' => 55,
+				'first_name'        => 'Ada',
+				'last_name'         => 'Agent',
+				'email'             => 'agent@example.org',
+			)
+		);
+
+		$page = $this->get( route( 'wporghelpscoutimport.agents' ) )->getContent();
+		$this->assertMatchesRegularExpression( '#<tr id="agent-70"[^>]*>\s*<td>\s*Dee Parted<br/>\s*<small>dee@example.org</small><br/>\s*<small class="text-help">No longer in HelpScout</small>#', $page );
+		$this->assertSame( 1, substr_count( $page, 'id="agent-55"' ) );
+
+		$this->assertStringNotContainsString( 'id="agent-70"', $this->get( route( 'wporghelpscoutimport.agents', array( 'mailbox' => 77 ) ) )->getContent() );
 	}
 
 	/**
