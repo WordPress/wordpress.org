@@ -120,7 +120,7 @@ class Locale_Main implements Site {
 			'pre_option_sharing-services',
 			function () {
 				return [
-					'visible' => [ 'mastodon', 'twitter', 'facebook', 'linkedin', 'email' ],
+					'visible' => [ 'facebook', 'twitter', 'email' ],
 					'hidden'  => [],
 				];
 			}
