@@ -1172,18 +1172,16 @@ let wpTrac,
 				}
 
 				const replacement = prefix + selectedText + suffix;
+				const selStart = start + prefix.length;
+				const selEnd = selStart + ( selectedText ? selectedText.length : 0 );
 
 				if ( typeof textarea.setRangeText === 'function' ) {
 					textarea.setRangeText( replacement, start, end, 'preserve' );
-					if ( selectedText ) {
-						textarea.setSelectionRange( start + prefix.length, start + prefix.length + selectedText.length );
-					} else {
-						textarea.setSelectionRange( start + prefix.length, start + prefix.length );
-					}
+					textarea.setSelectionRange( selStart, selEnd );
 				} else {
-					textarea.value = textarea.value.substring( 0, start ) +
-						replacement +
-						textarea.value.substring( end );
+					const before = textarea.value.substring( 0, start );
+					const after = textarea.value.substring( end );
+					textarea.value = before + replacement + after;
 					const caretPos = start + ( selectedText ? replacement.length : prefix.length );
 					textarea.setSelectionRange( caretPos, caretPos );
 				}
@@ -1890,7 +1888,8 @@ let wpTrac,
 					if (
 						! elements.hiddenEl?.length ||
 						! Array.isArray( originalKeywords ) ||
-						! Array.isArray( keywords ) ) {
+						! Array.isArray( keywords )
+					) {
 						return;
 					}
 					if ( keywords.length !== originalKeywords.length ) {
