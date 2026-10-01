@@ -9,9 +9,11 @@
 	color: #4a5561 !important;
 }
 
-/* The Modules Directory's heading and subscribe note, which core shows even when it's empty. */
+/* The empty Modules Directory, which core shows anyway, and the sidebar links to it and the Marketplace. */
 #directory,
-#directory + .row-container {
+#directory + .row-container,
+.sidebar-menu li:has( > a[href="#directory"] ),
+.sidebar-menu li:has( > a[href="#third-party"] ) {
 	display: none;
 }
 

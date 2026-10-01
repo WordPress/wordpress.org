@@ -46,6 +46,16 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 			}
 		);
 
+		$images = array(
+			'layout.favicon'     => 'favicon.svg',
+			'layout.header_logo' => 'wordpress-mark-white.svg',
+			'login.banner'       => 'freescout-logo.svg',
+		);
+
+		foreach ( $images as $filter => $image ) {
+			\Eventy::addFilter( $filter, static fn(): string => asset( \Module::getPublicPath( self::ALIAS ) . '/img/' . $image ) );
+		}
+
 		\Eventy::addFilter(
 			'stylesheets',
 			static function ( array $styles ): array {
