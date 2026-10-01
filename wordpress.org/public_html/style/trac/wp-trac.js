@@ -397,8 +397,7 @@ let wpTrac,
 
 		linkMentions( selector ) {
 			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-			const mentionsRegEx =
-				/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_\-.]{1,20})(?:\b(?!@|＠)|$)/g;
+			const mentionsRegEx = /(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,18}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)/g;
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
 				linkTextNodes( this, mentionsRegEx, function ( match, pre, username ) {
@@ -635,7 +634,7 @@ let wpTrac,
 			// Allow action text inputs and select fields to be clicked directly.
 			$( '#action' )
 				.find( 'input[type=text], select' )
-				.enable()
+				.prop( 'disabled', false )
 				.on( 'focus', function () {
 					$( this ).siblings( 'input[type=radio]' ).trigger( 'click' );
 				} )
@@ -647,7 +646,7 @@ let wpTrac,
 				.has( 'select' )
 				.find( 'input[type=radio]' )
 				.on( 'change', function () {
-					$( this ).siblings( 'select' ).enable();
+					$( this ).siblings( 'select' ).prop( 'disabled', false );
 				} );
 
 			// Hide action text inputs and select fields from keyboard, unless the corresponding action is focused.
@@ -698,25 +697,24 @@ let wpTrac,
 					$comment = $( '#comment' ),
 					isNewTicket = wpTrac.isNewTicket();
 
-				// Simple replacement for ticket summary.
+				const fixP = function ( text ) {
+					if ( ! text ) {
+						return text;
+					}
+					return text.replace( /(^|[\s>(„"'\[\u2018\u201C]|&#8216;|&#8220;])Wordpress/g, '$1WordPress' );
+				};
+
 				if ( isNewTicket && $summary.length && $summary.val() ) {
-					$summary.val( $summary.val().replaceAll( 'Wordpress', 'WordPress' ) );
+					$summary.val( fixP( $summary.val() ) );
 				}
 
-				// Use the more judicious replacement for ticket description and comments.
-				$.each(
-					[ ' Wordpress', '&#8216;Wordpress', '&#8220;Wordpress', '>Wordpress', '(Wordpress' ],
-					function ( index, value ) {
-						const replacement = value.replaceAll( 'Wordpress', 'WordPress' );
+				if ( isNewTicket && $description.length && $description.val() ) {
+					$description.val( fixP( $description.val() ) );
+				}
 
-						if ( $description.length && isNewTicket ) {
-							$description.val( $description.val().replaceAll( value, replacement ) );
-						}
-						if ( $comment.length ) {
-							$comment.val( $comment.val().replaceAll( value, replacement ) );
-						}
-					}
-				);
+				if ( $comment.length && $comment.val() ) {
+					$comment.val( fixP( $comment.val() ) );
+				}
 			} );
 
 			// Add a 'Show only commits/attachments' view option to tickets.
@@ -2082,19 +2080,20 @@ let wpTrac,
 				$.ajax( {
 					url: endpoint + '?trac-notifications=' + ticket,
 					xhrFields: { withCredentials: true },
-				} ).done( function ( data ) {
-					if ( data.success ) {
-						render( data.data[ 'notifications-box' ] );
-						if ( data.data.maintainers ) {
-							maintainerLabels( data.data.maintainers );
-							//	wpTrac.autocomplete.addNonTicketParticipant( data.data.maintainers ); doesn't work yet, because ticketInit() runs before autocomplete.init()
-						}
+				} )
+					.done( function ( data ) {
+						if ( data.success ) {
+							render( data.data[ 'notifications-box' ] );
+							if ( data.data.maintainers ) {
+								maintainerLabels( data.data.maintainers );
+								//	wpTrac.autocomplete.addNonTicketParticipant( data.data.maintainers ); doesn't work yet, because ticketInit() runs before autocomplete.init()
+							}
 
-						if ( data.data.nonce ) {
-							_nonce = data.data.nonce;
+							if ( data.data.nonce ) {
+								_nonce = data.data.nonce;
+							}
 						}
-					}
-				} );
+					} );
 			}
 
 			function maintainerLabels( maintainers ) {
@@ -2323,9 +2322,8 @@ let wpTrac,
 				}
 
 				// This seems to be the easiest place to find the current Ticket ID..
-				ticket = $( 'link[rel="canonical"]' )
-					?.prop( 'href' )
-					?.match( /\/ticket\/(\d+)$/ )?.[ 1 ];
+				const canonicalHref = $( 'link[rel="canonical"]' ).prop( 'href' );
+				ticket = canonicalHref?.match( /\/ticket\/(\d+)(?:[?#]|$)/ )?.[ 1 ];
 				if ( ! ticket ) {
 					return;
 				}
@@ -2471,7 +2469,7 @@ let wpTrac,
 						// or Changes Requested
 						// or Unit Tests Failing.
 						if (
-							data.reviews.CHANGES_REQUESTED ||
+							data.reviews?.CHANGES_REQUESTED ||
 							( data.check_runs && Object.values( data.check_runs ).includes( 'failed' ) )
 						) {
 							// Let the unit tests / reviews section take care of it.
@@ -2794,7 +2792,7 @@ let wpTrac,
 		},
 	};
 
-	$( document ).ready( wpTrac.init );
+	$( wpTrac.init );
 
 	// Perform this as soon as this file loads.
 	wpTrac.disableTracAutoFocus();
