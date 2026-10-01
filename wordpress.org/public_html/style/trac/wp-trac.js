@@ -1056,9 +1056,7 @@ let wpTrac,
 				username = username.replace( 'logged in as ', '' ).trim();
 				el.html(
 					$( '<a />', {
-						href: 'https://profiles.wordpress.org/' +
-							encodeURIComponent( username ) +
-							'/',
+						href: 'https://profiles.wordpress.org/' + encodeURIComponent( username ) + '/',
 					} ).text( username )
 				).prepend( 'logged in as ' );
 			}
