@@ -43,30 +43,27 @@ class Locale_Main implements Site {
 	 */
 	public function register_events() {
 		if ( is_admin() ) {
-			$current_site = get_site();
 
-			if ( $current_site instanceof WP_Site ) {
-				// Get the team site.
-				$result = get_sites(
+			// Get the team site.
+			$result = get_sites(
+				[
+					'domain' => get_site()->domain,
+					'path'   => Locale_Team::$path,
+					'number' => 1,
+				]
+			);
+			$team_site = array_shift( $result );
+
+			if ( $team_site ) {
+				$user_sync = new User\Sync();
+				$user_sync->set_destination_site( $team_site );
+				$user_sync->set_roles_to_sync(
 					[
-						'domain' => $current_site->domain,
-						'path'   => Locale_Team::$path,
-						'number' => 1,
+						'editor'                        => 'editor',
+						Role\Locale_Manager::get_name() => 'editor',
 					]
 				);
-				$team_site = array_shift( $result );
-
-				if ( $team_site ) {
-					$user_sync = new User\Sync();
-					$user_sync->set_destination_site( $team_site );
-					$user_sync->set_roles_to_sync(
-						[
-							'editor'                        => 'editor',
-							Role\Locale_Manager::get_name() => 'editor',
-						]
-					);
-					$user_sync->setup();
-				}
+				$user_sync->setup();
 			}
 		}
 
