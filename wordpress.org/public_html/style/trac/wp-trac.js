@@ -280,7 +280,7 @@ let wpTrac,
 				return node.nodeValue && node.nodeValue.trim()
 					? window.NodeFilter.FILTER_ACCEPT
 					: window.NodeFilter.FILTER_SKIP;
-				},
+			},
 		} );
 
 		const textNodes = [];
