@@ -21,7 +21,7 @@
 			<p><strong>{{ __('FreeScout users are never created from HelpScout.') }}</strong></p>
 			<p>{{ __('Each HelpScout user’s replies and notes are credited to the FreeScout user chosen here, or else to the one with the same email. A HelpScout user without either gets no FreeScout user: their replies and notes are credited to “HelpScout Import”, and imported conversations keep that credit.') }}</p>
 			@if ( $can_create )
-				<p>{{ __('For someone with no FreeScout user yet, enter their WordPress.org username: that creates one, connected to their account. It’s disabled unless they’ll work in FreeScout, so former agents keep their credit without being able to log in.') }}</p>
+				<p>{{ __('For someone with no FreeScout user yet, enter their WordPress.org username: that creates one, connected to their account. Uncheck “Can log in” for former agents: they keep their credit, but their user is disabled.') }}</p>
 			@else
 				<p>{{ __('New FreeScout users can only be created from a WordPress.org username, which needs WP.org SSO to be on.') }}</p>
 			@endif
@@ -109,7 +109,7 @@
 									<td>
 										@if ( $unmatched_row )
 											<input type="text" name="agents[{{ $agent['id'] }}][username]" class="form-control input-sm" placeholder="{{ __('WordPress.org username') }}" aria-label="{{ __('WordPress.org username of :name', [ 'name' => $agent['name'] ]) }}">
-											<label class="checkbox-inline"><input type="checkbox" name="agents[{{ $agent['id'] }}][can_log_in]" value="1"> {{ __('Can log in') }}</label>
+											<label class="checkbox-inline"><input type="checkbox" name="agents[{{ $agent['id'] }}][can_log_in]" value="1" checked> {{ __('Can log in') }}</label>
 										@endif
 									</td>
 								@endif

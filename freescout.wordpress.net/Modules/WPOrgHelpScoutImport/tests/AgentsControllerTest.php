@@ -109,6 +109,7 @@ final class AgentsControllerTest extends ImportTestCase {
 		$this->assertMatchesRegularExpression( '#<tr id="agent-57"\s+class="warning"#', $page );
 		$this->assertStringContainsString( 'Suggested: Cy Namesake, with the same name.', $page );
 		$this->assertStringContainsString( 'Photos, Themes', $page );
+		$this->assertStringContainsString( 'name="agents[56][can_log_in]" value="1" checked', $page );
 		$this->assertStringNotContainsString( 'id="agent-90"', $page );
 		$this->assertStringContainsString( 'A8C Legal', $page );
 	}
@@ -179,11 +180,12 @@ final class AgentsControllerTest extends ImportTestCase {
 	}
 
 	/**
-	 * A WordPress.org username creates a disabled user from that account, connected to it, and credits it.
+	 * A WordPress.org username creates a user from that account, connected to it, and credits it; disabled when
+	 * "Can log in" is unchecked, which leaves it out of the form.
 	 *
 	 * @return void
 	 */
-	public function test_username_creates_a_disabled_user_from_wordpress_org(): void {
+	public function test_username_creates_a_user_from_wordpress_org(): void {
 		$this->use_wordpress_org();
 
 		$this->post(
