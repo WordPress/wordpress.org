@@ -11,12 +11,10 @@ namespace Modules\WPOrgHelpScoutImport\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Mailbox;
-use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\Run;
 use Modules\WPOrgHelpScoutImport\Jobs\ImportPage;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
@@ -46,23 +44,16 @@ final class ImportController extends Controller {
 	/**
 	 * Shows HelpScout's mailboxes, the runs so far, and the forms to start more.
 	 *
-	 * @param Request $request Request; `agents` names a HelpScout mailbox whose users to check.
 	 * @return View
 	 */
-	public function index( Request $request ): View {
+	public function index(): View {
 		$helpscout = app( HelpScout::class );
 		$sources   = array();
 		$error     = '';
-		$people    = null;
 
 		if ( $helpscout->is_configured() ) {
 			try {
 				$sources = $helpscout->mailboxes();
-
-				$agents = (int) $request->query( 'agents' );
-				if ( $agents ) {
-					$people = ( new People() )->agents( $helpscout->users( $agents ) );
-				}
 			} catch ( \Throwable $e ) {
 				$error = $e->getMessage();
 			}
@@ -74,9 +65,6 @@ final class ImportController extends Controller {
 				'configured' => $helpscout->is_configured(),
 				'error'      => $error,
 				'sources'    => $sources,
-				'agents'     => (int) $request->query( 'agents' ),
-				'people'     => $people,
-				'users'      => self::users(),
 				'mailboxes'  => Mailbox::query()->orderBy( 'name' )->get(),
 				'runs'       => Run::query()->with( 'mailbox' )->orderByDesc( 'id' )->limit( 100 )->get(),
 			)
@@ -101,6 +89,28 @@ final class ImportController extends Controller {
 
 		if ( ! $source || ! $mailbox ) {
 			return self::back_with_error( __( 'Choose a HelpScout mailbox and a FreeScout mailbox.' ) );
+		}
+
+		if ( ! filter_var( $request->input( 'unmatched_ok' ), FILTER_VALIDATE_BOOLEAN ) ) {
+			try {
+				$unmatched = self::unmatched( $source_id );
+			} catch ( \Throwable $e ) {
+				return self::back_with_error( $e->getMessage() );
+			}
+
+			if ( $unmatched ) {
+				return redirect()
+					->route( 'wporghelpscoutimport.index' )
+					->with(
+						'wporghelpscoutimport_unmatched',
+						array(
+							'count'      => $unmatched,
+							'mailbox'    => $source_id,
+							'mailbox_id' => (int) $mailbox->id,
+							'name'       => (string) ( $source['name'] ?? '' ),
+						)
+					);
+			}
 		}
 
 		$run = \DB::transaction(
@@ -133,36 +143,6 @@ final class ImportController extends Controller {
 			: __( 'Importing :name.', array( 'name' => $source['name'] ?? '' ) );
 
 		return redirect()->route( 'wporghelpscoutimport.index' )->with( 'flash_success', $message );
-	}
-
-	/**
-	 * Saves which FreeScout user each HelpScout user's replies and notes are credited to.
-	 *
-	 * Nothing chosen means the user with the same email, if there's one.
-	 *
-	 * @param Request $request Request; `agents` maps HelpScout user IDs to FreeScout user IDs.
-	 * @return RedirectResponse
-	 */
-	public function agents( Request $request ): RedirectResponse {
-		$users = self::users()->pluck( 'id' )->map( 'intval' )->all();
-
-		foreach ( (array) $request->input( 'agents', array() ) as $helpscout_user_id => $user_id ) {
-			$helpscout_user_id = (int) $helpscout_user_id;
-			$user_id           = (int) $user_id;
-			if ( $helpscout_user_id <= 0 ) {
-				continue;
-			}
-
-			if ( in_array( $user_id, $users, true ) ) {
-				Agent::query()->updateOrCreate( array( 'helpscout_user_id' => $helpscout_user_id ), array( 'user_id' => $user_id ) );
-			} else {
-				Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->delete();
-			}
-		}
-
-		return redirect()
-			->route( 'wporghelpscoutimport.index', array( 'agents' => (int) $request->input( 'helpscout_mailbox_id' ) ) )
-			->with( 'flash_success', __( 'Saved.' ) );
 	}
 
 	/**
@@ -248,17 +228,20 @@ final class ImportController extends Controller {
 	}
 
 	/**
-	 * The FreeScout users HelpScout users can be credited to: people, not robots, and not deleted.
+	 * How many of a HelpScout mailbox's users would be credited to the robot.
 	 *
-	 * @return \Illuminate\Support\Collection
+	 * @param int $source_id HelpScout mailbox ID.
+	 * @return int
 	 */
-	private static function users(): \Illuminate\Support\Collection {
-		return User::query()
-			->where( 'type', '!=', User::TYPE_ROBOT )
-			->where( 'status', '!=', User::STATUS_DELETED )
-			->orderBy( 'first_name' )
-			->orderBy( 'last_name' )
-			->get();
+	private static function unmatched( int $source_id ): int {
+		$users = array_filter(
+			People::directory( app( HelpScout::class ) ),
+			static function ( array $user ) use ( $source_id ): bool {
+				return isset( $user['mailboxes'][ $source_id ] );
+			}
+		);
+
+		return count( array_filter( ( new People() )->agents( $users ), array( People::class, 'is_unmatched' ) ) );
 	}
 
 	/**

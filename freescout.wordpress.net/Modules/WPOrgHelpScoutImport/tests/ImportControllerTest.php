@@ -93,58 +93,64 @@ final class ImportControllerTest extends ImportTestCase {
 
 		$this->get( route( 'wporghelpscoutimport.index' ) )->assertStatus( 403 );
 		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() )->assertStatus( 403 );
-		$this->post( route( 'wporghelpscoutimport.agents' ), array( 'agents' => array( 56 => 1 ) ) )->assertStatus( 403 );
+		$this->get( route( 'wporghelpscoutimport.agents' ) )->assertStatus( 403 );
+		$this->post( route( 'wporghelpscoutimport.agents.save' ), array( 'agents' => array( 56 => array( 'user_id' => 1 ) ) ) )->assertStatus( 403 );
 		$this->assertSame( 0, Run::query()->count() );
 		$this->assertSame( 0, Agent::query()->count() );
 	}
 
 	/**
-	 * The page lists HelpScout's mailboxes, and who each HelpScout user is credited to.
+	 * The page lists HelpScout's mailboxes, and says plainly that no users are created from HelpScout.
 	 *
 	 * @return void
 	 */
-	public function test_page_lists_mailboxes_and_agents(): void {
-		$response = $this->get( route( 'wporghelpscoutimport.index', array( 'agents' => 77 ) ) );
+	public function test_page_lists_mailboxes_and_warns_about_users(): void {
+		$response = $this->get( route( 'wporghelpscoutimport.index' ) );
 
 		$response->assertStatus( 200 );
-		$page = $response->getContent();
-		$this->assertStringContainsString( 'photos@wordpress.org', $page );
-		$this->assertStringContainsString( 'Ada Agent &lt;agent@example.org&gt;', $page );
-		$this->assertStringContainsString( 'Same email: Ada Agent', $page );
-		$this->assertMatchesRegularExpression( '#<tr\s+class="warning"\s*>\s*<td><label[^>]*>Bo Gone &lt;bo@example.org&gt;#', $page );
-		$this->assertStringContainsString( 'No match: HelpScout Import', $page );
+		$this->assertStringContainsString( 'Photos', $response->getContent() );
+		$this->assertStringContainsString( 'FreeScout users are never created from HelpScout.', $response->getContent() );
+		$this->assertStringContainsString( route( 'wporghelpscoutimport.agents' ), $response->getContent() );
 	}
 
 	/**
-	 * Choosing a FreeScout user for a HelpScout user is saved; choosing none goes back to the email.
+	 * An import with HelpScout users who'd be credited to the robot only starts once that's confirmed.
 	 *
 	 * @return void
 	 */
-	public function test_chosen_users_are_saved_and_cleared(): void {
-		$robot       = $this->create_user();
-		$robot->type = User::TYPE_ROBOT;
-		$robot->save();
+	public function test_unmatched_agents_need_confirming(): void {
+		$form = $this->start_form();
+		unset( $form['unmatched_ok'] );
 
-		$this->post(
-			route( 'wporghelpscoutimport.agents' ),
-			array(
-				'helpscout_mailbox_id' => 77,
-				'agents'               => array(
-					56 => $this->admin->id,
-					55 => $robot->id,
-				),
-			)
-		)->assertRedirect( route( 'wporghelpscoutimport.index', array( 'agents' => 77 ) ) );
-
-		$this->assertSame( (int) $this->admin->id, (int) Agent::query()->where( 'helpscout_user_id', 56 )->value( 'user_id' ) );
-		$this->assertFalse( Agent::query()->where( 'helpscout_user_id', 55 )->exists() );
-		$this->assertMatchesRegularExpression(
-			'#value="' . $this->admin->id . '"\s+selected#',
-			$this->get( route( 'wporghelpscoutimport.index', array( 'agents' => 77 ) ) )->getContent()
+		$this->post( route( 'wporghelpscoutimport.start' ), $form )->assertSessionHas( 'wporghelpscoutimport_unmatched' );
+		$this->assertSame( 0, Run::query()->count() );
+		$this->assertStringContainsString(
+			'1 of Photos’s HelpScout users have no FreeScout user.',
+			$this->get( route( 'wporghelpscoutimport.index' ) )->getContent()
 		);
 
-		$this->post( route( 'wporghelpscoutimport.agents' ), array( 'agents' => array( 56 => '' ) ) );
-		$this->assertFalse( Agent::query()->where( 'helpscout_user_id', 56 )->exists() );
+		$this->post( route( 'wporghelpscoutimport.start' ), $form + array( 'unmatched_ok' => 1 ) );
+		$this->assertSame( 1, Run::query()->count() );
+	}
+
+	/**
+	 * With every HelpScout user credited to a FreeScout user, the import starts right away.
+	 *
+	 * @return void
+	 */
+	public function test_matched_agents_start_right_away(): void {
+		Agent::query()->create(
+			array(
+				'helpscout_user_id' => 56,
+				'user_id'           => $this->admin->id,
+			)
+		);
+		$form = $this->start_form();
+		unset( $form['unmatched_ok'] );
+
+		$this->post( route( 'wporghelpscoutimport.start' ), $form );
+
+		$this->assertSame( 1, Run::query()->count() );
 	}
 
 	/**
@@ -281,6 +287,7 @@ final class ImportControllerTest extends ImportTestCase {
 		return array(
 			'helpscout_mailbox_id' => 77,
 			'mailbox_id'           => $this->mailbox->id,
+			'unmatched_ok'         => 1,
 		);
 	}
 }

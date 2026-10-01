@@ -26,58 +26,33 @@
 		@if ( $sources )
 			<p>{{ __('Imports copy a HelpScout mailbox’s conversations into a FreeScout mailbox, without sending anything. The first import copies everything; importing the same mailbox again copies only what changed since. Import before the mailbox’s email moves, and once more after.') }}</p>
 
-			<form method="GET" action="{{ route( 'wporghelpscoutimport.index' ) }}" class="form-inline margin-bottom">
-				<select name="agents" class="form-control">
-					@foreach ( $sources as $source )
-						<option value="{{ $source['id'] }}" @if ( $agents === (int) $source['id'] ) selected @endif>{{ $source['name'] }} &lt;{{ $source['email'] ?? '' }}&gt;</option>
-					@endforeach
-				</select>
-				<button type="submit" class="btn btn-default">{{ __('Check agents') }}</button>
-			</form>
+			<div class="alert alert-warning">
+				<p><strong>{{ __('FreeScout users are never created from HelpScout.') }}</strong></p>
+				<p>{{ __('Each HelpScout user’s replies and notes are credited to the FreeScout user chosen on the Agents page, or else to the one with the same email. A HelpScout user without either gets no FreeScout user: their replies and notes are credited to “HelpScout Import”. New FreeScout users can only be created from a WordPress.org username, on the Agents page.') }}</p>
+				<p><a href="{{ route( 'wporghelpscoutimport.agents' ) }}" class="btn btn-default">{{ __('Agents') }}</a></p>
+			</div>
 
-			@if ( is_array( $people ) )
-				<form method="POST" action="{{ route( 'wporghelpscoutimport.agents' ) }}" class="margin-bottom">
-					{{ csrf_field() }}
-					<input type="hidden" name="helpscout_mailbox_id" value="{{ $agents }}">
-					<p>{{ __('Replies and notes are credited to the FreeScout user chosen here, or else to the one with the same email. Without either, they’re credited to “HelpScout Import”. Choose before importing: what’s imported keeps its credit.') }}</p>
-					<table class="table table-condensed">
-						<thead>
-							<tr>
-								<th>{{ __('HelpScout user') }}</th>
-								<th>{{ __('FreeScout user') }}</th>
-							</tr>
-						</thead>
-						<tbody>
-							@foreach ( $people as $person )
-								<tr @if ( ! $person['chosen'] && ! $person['by_email'] ) class="warning" @endif>
-									<td><label for="wporghelpscoutimport-agent-{{ $person['id'] }}">{{ $person['name'] }} &lt;{{ $person['email'] }}&gt;</label></td>
-									<td>
-										<select name="agents[{{ $person['id'] }}]" id="wporghelpscoutimport-agent-{{ $person['id'] }}" class="form-control input-sm">
-											<option value="">
-												@if ( $person['by_email'] )
-													{{ __('Same email: :name', [ 'name' => $person['by_email']->getFullName() ]) }}
-												@else
-													{{ __('No match: HelpScout Import') }}
-												@endif
-											</option>
-											@foreach ( $users as $user )
-												<option value="{{ $user->id }}" @if ( $person['chosen'] === (int) $user->id ) selected @endif>{{ $user->getFullName() }} &lt;{{ $user->email }}&gt;</option>
-											@endforeach
-										</select>
-									</td>
-								</tr>
-							@endforeach
-						</tbody>
-					</table>
-					<button type="submit" class="btn btn-default">{{ __('Save') }}</button>
-				</form>
+			@if ( session( 'wporghelpscoutimport_unmatched' ) )
+				@php $unmatched = session( 'wporghelpscoutimport_unmatched' ); @endphp
+				<div class="alert alert-danger">
+					<p><strong>{{ __(':count of :name’s HelpScout users have no FreeScout user.', [ 'count' => $unmatched['count'], 'name' => $unmatched['name'] ]) }}</strong></p>
+					<p>{{ __('Their replies and notes would be credited to “HelpScout Import”, and imported conversations keep that credit.') }}</p>
+					<form method="POST" action="{{ route( 'wporghelpscoutimport.start' ) }}" class="form-inline">
+						{{ csrf_field() }}
+						<input type="hidden" name="helpscout_mailbox_id" value="{{ $unmatched['mailbox'] }}">
+						<input type="hidden" name="mailbox_id" value="{{ $unmatched['mailbox_id'] }}">
+						<input type="hidden" name="unmatched_ok" value="1">
+						<a href="{{ route( 'wporghelpscoutimport.agents', [ 'mailbox' => $unmatched['mailbox'] ] ) }}" class="btn btn-primary">{{ __('Match them first') }}</a>
+						<button type="submit" class="btn btn-default">{{ __('Import anyway') }}</button>
+					</form>
+				</div>
 			@endif
 
 			<form method="POST" action="{{ route( 'wporghelpscoutimport.start' ) }}" class="form-inline">
 				{{ csrf_field() }}
 				<select name="helpscout_mailbox_id" class="form-control" aria-label="{{ __('HelpScout mailbox') }}">
 					@foreach ( $sources as $source )
-						<option value="{{ $source['id'] }}" @if ( $agents === (int) $source['id'] ) selected @endif>{{ $source['name'] }}</option>
+						<option value="{{ $source['id'] }}">{{ $source['name'] }}</option>
 					@endforeach
 				</select>
 				&rarr;

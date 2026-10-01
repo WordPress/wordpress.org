@@ -77,6 +77,17 @@ final class FakeHelpScout {
 	}
 
 	/**
+	 * Replaces the answers for one mailbox's users; other requests get the path's answers.
+	 *
+	 * @param int            $mailbox HelpScout mailbox ID.
+	 * @param array|Response $answer  JSON body, or a whole response.
+	 * @return self
+	 */
+	public function only_mailbox_users( int $mailbox, $answer ): self {
+		return $this->only( 'GET', 'v2/users?mailbox=' . $mailbox, $answer );
+	}
+
+	/**
 	 * Replaces the answers for one page of a list; other pages get the path's answers.
 	 *
 	 * @param string         $path   Path.
@@ -147,8 +158,11 @@ final class FakeHelpScout {
 		$key              = $request->getMethod() . ' ' . ltrim( $request->getUri()->getPath(), '/' );
 
 		parse_str( $request->getUri()->getQuery(), $query );
-		if ( isset( $query['page'], $this->answers[ $key . '?page=' . $query['page'] ] ) ) {
-			$key .= '?page=' . $query['page'];
+		foreach ( array( 'page', 'mailbox' ) as $param ) {
+			if ( isset( $query[ $param ], $this->answers[ $key . '?' . $param . '=' . $query[ $param ] ] ) ) {
+				$key .= '?' . $param . '=' . $query[ $param ];
+				break;
+			}
 		}
 
 		if ( empty( $this->answers[ $key ] ) ) {

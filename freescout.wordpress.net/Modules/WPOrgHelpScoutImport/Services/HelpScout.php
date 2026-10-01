@@ -139,13 +139,13 @@ final class HelpScout {
 	}
 
 	/**
-	 * Lists the users who can see a mailbox.
+	 * Lists the account's users, or those who can see a mailbox.
 	 *
-	 * @param int $mailbox_id HelpScout mailbox ID.
+	 * @param int $mailbox_id HelpScout mailbox ID, or 0 for all users.
 	 * @return array[] Users, with `id`, `firstName`, `lastName` and `email`.
 	 */
-	public function users( int $mailbox_id ): array {
-		return $this->all( 'v2/users', array( 'mailbox' => $mailbox_id ), 'users' );
+	public function users( int $mailbox_id = 0 ): array {
+		return $this->all( 'v2/users', $mailbox_id ? array( 'mailbox' => $mailbox_id ) : array(), 'users' );
 	}
 
 	/**

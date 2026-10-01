@@ -93,12 +93,25 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 			}
 		);
 
-		// Highlights Manage while the page is open.
+		// The Agents page searches FreeScout's users with FreeScout's own select2.
+		\Eventy::addFilter(
+			'javascripts',
+			static function ( $javascripts = array() ) {
+				$route = \Route::current();
+				if ( is_array( $javascripts ) && $route && 'wporghelpscoutimport.agents' === $route->getName() ) {
+					$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/agents.js';
+				}
+
+				return $javascripts;
+			}
+		);
+
+		// Highlights Manage while the pages are open.
 		\Eventy::addFilter(
 			'menu.selected',
 			static function ( $menu = null ) {
 				if ( is_array( $menu ) && isset( $menu['manage'] ) && is_array( $menu['manage'] ) ) {
-					$menu['manage'][ self::ALIAS ] = 'wporghelpscoutimport.index';
+					$menu['manage'][ self::ALIAS ] = array( 'wporghelpscoutimport.index', 'wporghelpscoutimport.agents' );
 				}
 
 				return $menu;
