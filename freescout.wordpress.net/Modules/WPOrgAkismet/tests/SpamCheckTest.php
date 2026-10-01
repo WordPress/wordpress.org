@@ -172,9 +172,10 @@ final class SpamCheckTest extends TestCase {
 	 */
 	public function test_errors_let_email_through(): void {
 		$this->answers->append( new Response( 200, array( 'X-akismet-debug-help' => 'Empty "blog" value' ), 'invalid' ) );
+		$this->answers->append( new Response( 200, array(), 'invalid' ) );
 		$this->answers->append( new Response( 500 ) );
 
-		foreach ( array( 'invalid', 'server error' ) as $error ) {
+		foreach ( array( 'invalid with help', 'invalid key', 'server error' ) as $error ) {
 			$conversation = $this->filter();
 
 			$this->assertFalse( $conversation->isSpam(), $error );
@@ -287,6 +288,21 @@ final class SpamCheckTest extends TestCase {
 		$conversation = $this->conversation->fresh();
 		$this->assertSame( Akismet::SPAM, $conversation->getMeta( WPOrgAkismetServiceProvider::META )['reported'] );
 		$this->assertSame( $updated_at, (string) $conversation->updated_at );
+	}
+
+	/**
+	 * A report Akismet didn't accept, like one with an invalid key, isn't recorded, so it's tried again.
+	 *
+	 * @return void
+	 */
+	public function test_rejected_report_is_not_recorded(): void {
+		$this->record( array( 'verdict' => Akismet::HAM ) );
+		$this->answers->append( new Response( 200, array(), 'invalid' ) );
+
+		( new ReportToAkismet( (int) $this->conversation->id, Akismet::SPAM ) )->handle();
+
+		$this->assertCount( 1, $this->requests );
+		$this->assertArrayNotHasKey( 'reported', $this->conversation->fresh()->getMeta( WPOrgAkismetServiceProvider::META ) );
 	}
 
 	/**

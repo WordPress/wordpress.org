@@ -131,7 +131,13 @@ final class Akismet {
 	 * @throws RuntimeException If Akismet couldn't be told.
 	 */
 	public function submit( string $verdict, array $message ): void {
-		$this->post( self::SPAM === $verdict ? 'submit-spam' : 'submit-ham', $message );
+		$method = self::SPAM === $verdict ? 'submit-spam' : 'submit-ham';
+		$answer = $this->post( $method, $message );
+
+		// Akismet answers an invalid key with 200 and "invalid", like any other failure.
+		if ( 'Thanks for making the web a better place.' !== $answer ) {
+			throw new RuntimeException( 'Akismet ' . $method . ' failed: ' . $answer );
+		}
 	}
 
 	/**
