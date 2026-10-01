@@ -297,7 +297,20 @@ final class Importer {
 		$conversation->setCc( (array) ( $source['cc'] ?? array() ) );
 		$conversation->setBcc( (array) ( $source['bcc'] ?? array() ) );
 		$conversation->updateFolder( $mailbox );
+
+		// Core numbers new conversations, and uses up the next number an administrator set for live email doing so.
+		$next_number = \Option::get( 'next_ticket', 0, true, false );
 		$conversation->save();
+		if ( $next_number ) {
+			\Option::set( 'next_ticket', $next_number );
+		}
+
+		// HelpScout's number, which people quote, unless a FreeScout conversation has it already.
+		$number = (int) ( $source['number'] ?? 0 );
+		if ( $number > 0 && ! Conversation::query()->where( 'number', $number )->exists() ) {
+			$conversation->number = $number;
+			$conversation->save();
+		}
 
 		return $conversation;
 	}

@@ -306,6 +306,36 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * The conversation keeps HelpScout's number, and the next number set for live email stays set.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_keeps_helpscouts_number(): void {
+		\Option::set( 'next_ticket', 2000000 );
+
+		$this->importer->import( $this->conversation( array( 'number' => 1126167 ) ), $this->mailbox );
+
+		$this->assertSame( 1126167, $this->stored_number() );
+		$this->assertSame( 2000000, (int) \Option::get( 'next_ticket', 0, true, false ) );
+	}
+
+	/**
+	 * A number a FreeScout conversation already has isn't given out twice.
+	 *
+	 * @return void
+	 */
+	public function test_number_taken_in_freescout_is_not_reused(): void {
+		$live         = $this->create_conversation( $this->create_mailbox( 'Live' ), $this->create_sender() );
+		$live->number = 1126167;
+		$live->save();
+
+		$this->importer->import( $this->conversation( array( 'number' => 1126167 ) ), $this->mailbox );
+
+		$this->assertNotSame( 1126167, $this->stored_number() );
+		$this->assertSame( 1, Conversation::query()->where( 'number', 1126167 )->count() );
+	}
+
+	/**
 	 * HelpScout's number, tags, and custom fields are kept for later.
 	 *
 	 * @return void
@@ -383,6 +413,15 @@ final class ImporterTest extends ImportTestCase {
 
 		$this->assertSame( 0, Conversation::query()->where( 'mailbox_id', $this->mailbox->id )->count() );
 		$this->assertSame( 0, ImportedConversation::query()->count() );
+	}
+
+	/**
+	 * The imported conversation's number as stored; core shows its ID instead while custom numbers are off.
+	 *
+	 * @return int
+	 */
+	private function stored_number(): int {
+		return (int) Conversation::query()->whereKey( $this->imported_conversation()->id )->toBase()->value( 'number' );
 	}
 
 	/**
