@@ -743,8 +743,11 @@ let wpTrac,
 
 					const author = $el.find( '.username' ).data( 'username' );
 					if ( author ) {
-						$commit.append(
-							' by&nbsp;<a href="https://profiles.wordpress.org/' + encodeURIComponent( author ) + '/">@' + escapeHtml( author ) + '</a>'
+						$commit.append( ' by&nbsp;' ).append(
+							$( '<a />', {
+								href: `https://profiles.wordpress.org/${ encodeURIComponent( author ) }/`,
+								text: `@${ author }`,
+							} )
 						);
 					}
 
@@ -2346,7 +2349,6 @@ let wpTrac,
 
 						// Render the PRs
 						data.forEach( ( pr ) => renderPR( prContainer, pr ) );
-
 					} else {
 						// Change the loading placeholder
 						prContainer.find( '.loading div' ).html(
