@@ -1159,41 +1159,39 @@ let wpTrac,
 			}
 
 			function encloseSelection( textarea, prefix, suffix ) {
-				let start, end, sel, scrollPos;
 				// A DOM element, not a jQuery object: see the caller.
 				textarea.focus();
-				if ( 'undefined' !== typeof document.selection ) {
-					sel = document.selection.createRange().text;
-				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-					start = textarea.selectionStart;
-					end = textarea.selectionEnd;
-					scrollPos = textarea.scrollTop;
-					sel = textarea.value.substring( start, end );
+
+				const start = textarea.selectionStart;
+				const end = textarea.selectionEnd;
+				let selectedText = textarea.value.substring( start, end );
+
+				if ( selectedText.endsWith( ' ' ) ) {
+					selectedText = selectedText.slice( 0, -1 );
+					suffix += ' ';
 				}
-				if ( sel.match( / $/ ) ) {
-					// exclude ending space char, if any
-					sel = sel.substring( 0, sel.length - 1 );
-					suffix = suffix + ' ';
-				}
-				const subst = prefix + sel + suffix;
-				if ( 'undefined' !== typeof document.selection ) {
-					document.selection.createRange().text = subst;
-					textarea.caretPos -= suffix.length;
-				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-					textarea.value = textarea.value.substring( 0, start ) + subst + textarea.value.substring( end );
-					if ( sel ) {
-						textarea.setSelectionRange( start + subst.length, start + subst.length );
+
+				const replacement = prefix + selectedText + suffix;
+
+				if ( typeof textarea.setRangeText === 'function' ) {
+					textarea.setRangeText( replacement, start, end, 'preserve' );
+					if ( selectedText ) {
+						textarea.setSelectionRange( start + prefix.length, start + prefix.length + selectedText.length );
 					} else {
 						textarea.setSelectionRange( start + prefix.length, start + prefix.length );
 					}
-					textarea.scrollTop = scrollPos;
+				} else {
+					textarea.value = textarea.value.substring( 0, start ) + replacement + textarea.value.substring( end );
+					const caretPos = start + ( selectedText ? replacement.length : prefix.length );
+					textarea.setSelectionRange( caretPos, caretPos );
 				}
 			}
 
 			$( 'textarea.wikitext' ).each( function () {
-				const $textarea = $( this ),
-					textarea = $textarea[ 0 ];
-				if ( 'undefined' === typeof document.selection && 'undefined' === typeof textarea.setSelectionRange ) {
+				const $textarea = $( this );
+				const textarea = $textarea[ 0 ];
+
+				if ( ! textarea || typeof textarea.setSelectionRange !== 'function' ) {
 					return;
 				}
 
@@ -1887,7 +1885,9 @@ let wpTrac,
 				// Check on submit that we're not just re-ordering keywords.
 				// Otherwise, Trac flips out and adds a useless 'Keywords changed from X to X' marker.
 				submit() {
-					if ( ! elements.hiddenEl?.length || ! Array.isArray( originalKeywords ) || ! Array.isArray( keywords ) ) {
+					if ( ! elements.hiddenEl?.length ||
+						! Array.isArray( originalKeywords ) ||
+						! Array.isArray( keywords ) ) {
 						return;
 					}
 					if ( keywords.length !== originalKeywords.length ) {
@@ -1900,7 +1900,7 @@ let wpTrac,
 					if ( ! testKeywords.length ) {
 						elements.hiddenEl.val( originalKeywords.join( ' ' ) );
 					}
-				}
+				},
 			};
 		} )(),
 
@@ -2091,20 +2091,19 @@ let wpTrac,
 				$.ajax( {
 					url: endpoint + '?trac-notifications=' + ticket,
 					xhrFields: { withCredentials: true },
-				} )
-					.done( function ( data ) {
-						if ( data.success ) {
-							render( data.data[ 'notifications-box' ] );
-							if ( data.data.maintainers ) {
-								maintainerLabels( data.data.maintainers );
-								//	wpTrac.autocomplete.addNonTicketParticipant( data.data.maintainers ); doesn't work yet, because ticketInit() runs before autocomplete.init()
-							}
-
-							if ( data.data.nonce ) {
-								_nonce = data.data.nonce;
-							}
+				} ).done( function ( data ) {
+					if ( data.success ) {
+						render( data.data[ 'notifications-box' ] );
+						if ( data.data.maintainers ) {
+							maintainerLabels( data.data.maintainers );
+							//	wpTrac.autocomplete.addNonTicketParticipant( data.data.maintainers ); doesn't work yet, because ticketInit() runs before autocomplete.init()
 						}
-					} );
+
+						if ( data.data.nonce ) {
+							_nonce = data.data.nonce;
+						}
+					}
+				} );
 			}
 
 			function maintainerLabels( maintainers ) {
