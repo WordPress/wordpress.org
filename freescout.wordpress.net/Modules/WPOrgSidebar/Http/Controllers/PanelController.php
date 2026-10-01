@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgSidebar\Http\Controllers;
 
 use App\Conversation;
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Modules\WPOrgSidebar\Jobs\SyncSenderAvatar;
@@ -43,6 +44,13 @@ final class PanelController extends Controller {
 	private const CACHE_MINUTES = 1;
 
 	/**
+	 * How many panels an agent may load a minute; each holds a worker while api.wordpress.org answers.
+	 *
+	 * @var int
+	 */
+	public const MAX_PER_MINUTE = 120;
+
+	/**
 	 * Returns the content of one panel, as blocks sidebar.js builds it from.
 	 *
 	 * @param int    $conversation_id Conversation ID.
@@ -50,6 +58,14 @@ final class PanelController extends Controller {
 	 * @return JsonResponse
 	 */
 	public function show( int $conversation_id, string $panel ): JsonResponse {
+		// Not the throttle middleware: in this Laravel, it shares a counter with core's upload limit.
+		$limiter = app( RateLimiter::class );
+		$key     = 'wporgsidebar.panels.' . auth()->id();
+		if ( $limiter->tooManyAttempts( $key, self::MAX_PER_MINUTE ) ) {
+			abort( 429 );
+		}
+		$limiter->hit( $key );
+
 		$panels = (array) config( 'wporgsidebar.panels' );
 		if ( empty( $panels[ $panel ]['endpoint'] ) ) {
 			abort( 404 );

@@ -26,8 +26,11 @@ function render_forum_notes( object $request ): array {
 
 	$items = array();
 	foreach ( $user->_wporg_bbp_user_notes as $note ) {
+		// Not wp_trim_words(): it strips tags, cutting a note at "<3".
+		$words = preg_split( '/\s+/', trim( (string) $note->text ) );
+
 		$items[] = array(
-			'note' => wp_trim_words( (string) $note->text, 15, '…' ),
+			'note' => implode( ' ', array_slice( $words, 0, 15 ) ) . ( count( $words ) > 15 ? '…' : '' ),
 			'meta' => array(
 				array(
 					'text' => gmdate( 'F j, Y', (int) strtotime( $note->date ) ),

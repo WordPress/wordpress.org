@@ -24,7 +24,7 @@ class Verify_Request_Test extends TestCase {
 	 * @return void
 	 */
 	protected function tearDown(): void {
-		unset( $GLOBALS['freescout_test_cache'] );
+		unset( $GLOBALS['freescout_test_cache'], $GLOBALS['freescout_test_cache_down'] );
 
 		parent::tearDown();
 	}
@@ -83,6 +83,18 @@ class Verify_Request_Test extends TestCase {
 			'no nonce'         => array( array( 'nonce' => null ), 'account.php', true ),
 			'malformed nonce'  => array( array( 'nonce' => 'abc' ), 'account.php', true ),
 		);
+	}
+
+	/**
+	 * While the cache is down, requests still get through, on their signature and age.
+	 *
+	 * @return void
+	 */
+	public function test_accepts_requests_while_the_cache_is_down(): void {
+		$GLOBALS['freescout_test_cache_down'] = true;
+		$body                                 = self::body();
+
+		$this->assertNotNull( verify_request( $body, self::sign( $body ), 'account.php' ) );
 	}
 
 	/**

@@ -137,7 +137,7 @@ function is_fresh( object $payload ): bool {
 /**
  * Whether a request's nonce is well-formed and wasn't seen before; records it.
  *
- * Without a persistent object cache, every nonce looks unused, and only the age check remains.
+ * Without a persistent object cache, or while it's down, every nonce looks unused, and only the age check remains.
  *
  * @param string $nonce Hex-encoded random nonce.
  * @return bool
@@ -151,7 +151,14 @@ function is_unused_nonce( string $nonce ): bool {
 	wp_cache_add_global_groups( array( 'freescout-nonces' ) );
 
 	// As long as a request with it could be fresh.
-	return wp_cache_add( $nonce, 1, 'freescout-nonces', MAX_REQUEST_AGE + MAX_CLOCK_SKEW );
+	if ( wp_cache_add( $nonce, 1, 'freescout-nonces', MAX_REQUEST_AGE + MAX_CLOCK_SKEW ) ) {
+		return true;
+	}
+
+	// add() also fails while the cache is down; only a stored nonce counts as used.
+	wp_cache_get( $nonce, 'freescout-nonces', false, $found );
+
+	return ! $found;
 }
 
 /**

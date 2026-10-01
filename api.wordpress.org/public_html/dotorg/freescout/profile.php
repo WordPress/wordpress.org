@@ -193,8 +193,14 @@ function render_slack_users( array $slack_users ): array {
 			continue;
 		}
 
+		// Slack sends empty strings for names a member never set; the username is always there.
+		$names = array_filter(
+			array_map( 'strval', array( $slack_data->profile->display_name_normalized ?? '', $slack_data->profile->display_name ?? '', $slack_data->profile->real_name ?? '', $slack_data->name ?? '' ) ),
+			'strlen'
+		);
+
 		$items[] = array(
-			'title'  => (string) ( $slack_data->profile->display_name_normalized ?? $slack_data->profile->display_name ?? '' ),
+			'title'  => (string) reset( $names ),
 			'url'    => 'https://wordpress.slack.com/archives/' . $slack_user->dm_id,
 			'badges' => array( ! empty( $slack_data->deleted ) ? badge( 'Deactivated', 'error' ) : badge( 'Active', 'success' ) ),
 			'meta'   => array( array( 'text' => 'Updated ' . gmdate( 'Y-m-d', (int) $slack_data->updated ) ) ),

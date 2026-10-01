@@ -14,6 +14,8 @@ use App\User;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
+use Illuminate\Cache\RateLimiter;
+use Modules\WPOrgSidebar\Http\Controllers\PanelController;
 use Modules\WPOrgSidebar\Providers\WPOrgSidebarServiceProvider;
 use Modules\WPOrgSidebar\Services\Client;
 use Psr\Http\Message\RequestInterface;
@@ -153,5 +155,21 @@ final class SidebarTest extends TestCase {
 		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )->assertStatus( 200 );
 		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile?related=1' )->assertStatus( 200 );
 		$this->assertCount( 2, $payloads );
+	}
+
+	/**
+	 * Panels have a limit of their own, so loading many doesn't use up core's limit on uploads.
+	 *
+	 * @return void
+	 */
+	public function test_limits_panels_on_their_own_counter(): void {
+		$user    = $this->create_user();
+		$limiter = app( RateLimiter::class );
+		for ( $i = 0; $i < PanelController::MAX_PER_MINUTE; $i++ ) {
+			$limiter->hit( 'wporgsidebar.panels.' . $user->id );
+		}
+
+		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )->assertStatus( 429 );
+		$this->assertSame( 0, $limiter->attempts( sha1( (string) $user->id ) ) );
 	}
 }

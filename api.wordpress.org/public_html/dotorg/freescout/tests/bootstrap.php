@@ -79,13 +79,28 @@ function wp_cache_add_global_groups( array $groups ): void {}
  * @return bool
  */
 function wp_cache_add( string $key, mixed $data, string $group = '', int $expire = 0 ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- WordPress's signature.
-	if ( isset( $GLOBALS['freescout_test_cache'][ $group ][ $key ] ) ) {
+	if ( ! empty( $GLOBALS['freescout_test_cache_down'] ) || isset( $GLOBALS['freescout_test_cache'][ $group ][ $key ] ) ) {
 		return false;
 	}
 
 	$GLOBALS['freescout_test_cache'][ $group ][ $key ] = $data;
 
 	return true;
+}
+
+/**
+ * Reads from the in-memory cache, like WordPress's wp_cache_get().
+ *
+ * @param string    $key   Cache key.
+ * @param string    $group Group.
+ * @param bool      $force Ignored.
+ * @param bool|null $found Whether the key was found.
+ * @return mixed The value, or false.
+ */
+function wp_cache_get( string $key, string $group = '', bool $force = false, ?bool &$found = null ): mixed { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- WordPress's signature.
+	$found = empty( $GLOBALS['freescout_test_cache_down'] ) && isset( $GLOBALS['freescout_test_cache'][ $group ][ $key ] );
+
+	return $found ? $GLOBALS['freescout_test_cache'][ $group ][ $key ] : false;
 }
 
 require_once dirname( __DIR__ ) . '/common.php';
