@@ -107,7 +107,8 @@ final class MessageTest extends TestCase {
 		$this->assertSame( 'contact-form', $fields['comment_type'] );
 		$this->assertSame( 'Jane Sender', $fields['comment_author'] );
 		$this->assertSame( 'jane@example.org', $fields['comment_author_email'] );
-		$this->assertSame( "My theme\n\nPlease REVIEW it.", $fields['comment_content'] );
+		$this->assertSame( 'Please REVIEW it.', $fields['comment_content'] );
+		$this->assertSame( 'My theme', $fields['contact_form_subject'] );
 		$this->assertSame( '2026-10-01T10:00:00+00:00', $fields['comment_date_gmt'] );
 		$this->assertSame( (string) config( 'app.url' ), $fields['blog'] );
 	}

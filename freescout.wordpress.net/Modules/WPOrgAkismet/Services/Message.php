@@ -39,7 +39,9 @@ final class Message {
 			'comment_type'         => 'contact-form',
 			'comment_author'       => $sender ? (string) $sender->getFullName() : '',
 			'comment_author_email' => (string) $conversation->customer_email,
-			'comment_content'      => trim( $conversation->subject . "\n\n" . \Helper::htmlToText( (string) $thread->body ) ),
+			'comment_content'      => trim( \Helper::htmlToText( (string) $thread->body ) ),
+			// Like WordPress.com's support contact form, which sends the subject apart from the message.
+			'contact_form_subject' => (string) $conversation->subject,
 		);
 
 		if ( $thread->created_at ) {
