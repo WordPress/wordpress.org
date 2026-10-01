@@ -114,6 +114,7 @@ abstract class TestCase extends BaseTestCase {
 				'source_via'             => Conversation::PERSON_CUSTOMER,
 				'status'                 => Conversation::STATUS_ACTIVE,
 				'user_id'                => null,
+				'imported'               => false,
 			)
 		);
 	}
