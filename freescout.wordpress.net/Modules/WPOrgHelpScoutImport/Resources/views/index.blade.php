@@ -24,7 +24,7 @@
 		@endif
 
 		@if ( $sources )
-			<p>{{ __('Imports copy a HelpScout mailbox’s conversations into a FreeScout mailbox, without sending anything. Run one before the mailbox’s email moves, then import its changes once it has moved.') }}</p>
+			<p>{{ __('Imports copy a HelpScout mailbox’s conversations into a FreeScout mailbox, without sending anything. The first import copies everything; importing the same mailbox again copies only what changed since. Import before the mailbox’s email moves, and once more after.') }}</p>
 
 			<form method="GET" action="{{ route( 'wporghelpscoutimport.index' ) }}" class="form-inline margin-bottom">
 				<select name="agents" class="form-control">
@@ -63,7 +63,7 @@
 						<option value="{{ $mailbox->id }}">{{ $mailbox->name }}</option>
 					@endforeach
 				</select>
-				<button type="submit" class="btn btn-primary">{{ __('Import everything') }}</button>
+				<button type="submit" class="btn btn-primary">{{ __('Import') }}</button>
 			</form>
 		@endif
 
@@ -121,11 +121,6 @@
 									<form method="POST" action="{{ route( 'wporghelpscoutimport.resume', [ 'id' => $run->id ] ) }}">
 										{{ csrf_field() }}
 										<button type="submit" class="btn btn-default btn-xs">{{ __('Resume') }}</button>
-									</form>
-								@elseif ( 'done' === $run->status )
-									<form method="POST" action="{{ route( 'wporghelpscoutimport.changes', [ 'id' => $run->id ] ) }}">
-										{{ csrf_field() }}
-										<button type="submit" class="btn btn-default btn-xs">{{ __('Import changes since') }}</button>
 									</form>
 								@endif
 							</td>

@@ -18,7 +18,7 @@ use Modules\WPOrgHelpScoutImport\Jobs\ImportPage;
 require_once __DIR__ . '/ImportTestCase.php';
 
 /**
- * Covers who can use the page, starting, pausing, resuming, and importing changes.
+ * Covers who can use the page, starting, pausing, resuming, and importing again.
  */
 final class ImportControllerTest extends ImportTestCase {
 
@@ -171,27 +171,50 @@ final class ImportControllerTest extends ImportTestCase {
 	}
 
 	/**
-	 * A finished run can be followed by its changes, from a little before it started.
+	 * Importing a mailbox again imports what changed since its last finished import, from a little before it started.
 	 *
 	 * @return void
 	 */
-	public function test_changes_follow_a_finished_run(): void {
+	public function test_importing_again_imports_changes(): void {
 		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() );
-		$run = Run::query()->firstOrFail();
+		$first = Run::query()->firstOrFail();
 
-		$this->post( route( 'wporghelpscoutimport.changes', array( 'id' => $run->id ) ) )->assertSessionHas( 'flash_error' );
+		$first->status     = Run::STATUS_DONE;
+		$first->started_at = Carbon::parse( '2026-09-20 12:00:00' );
+		$first->save();
 
-		$run->status     = Run::STATUS_DONE;
-		$run->started_at = Carbon::parse( '2026-09-20 12:00:00' );
-		$run->save();
+		$older             = $first->replicate();
+		$older->started_at = Carbon::parse( '2026-09-10 12:00:00' );
+		$older->save();
 
-		$this->post( route( 'wporghelpscoutimport.changes', array( 'id' => $run->id ) ) );
+		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() );
 
 		$changes = Run::query()->orderByDesc( 'id' )->firstOrFail();
-		$this->assertNotSame( (int) $run->id, (int) $changes->id );
+		$this->assertSame( Run::STATUS_RUNNING, $changes->status );
 		$this->assertSame( '2026-09-20 11:45:00', $changes->since->format( 'Y-m-d H:i:s' ) );
-		$this->assertSame( (int) $run->mailbox_id, (int) $changes->mailbox_id );
-		$this->assertSame( 77, (int) $changes->helpscout_mailbox_id );
+	}
+
+	/**
+	 * Only a finished import into the same mailbox counts; anything else imports everything.
+	 *
+	 * @return void
+	 */
+	public function test_unfinished_or_other_imports_dont_count(): void {
+		$other = $this->create_mailbox( 'Elsewhere' );
+
+		foreach ( array( array( Run::STATUS_FAILED, $this->mailbox->id ), array( Run::STATUS_DONE, $other->id ) ) as $previous ) {
+			$run                         = new Run();
+			$run->helpscout_mailbox_id   = 77;
+			$run->helpscout_mailbox_name = 'Photos';
+			$run->mailbox_id             = $previous[1];
+			$run->status                 = $previous[0];
+			$run->started_at             = Carbon::parse( '2026-09-20 12:00:00' );
+			$run->save();
+		}
+
+		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() );
+
+		$this->assertNull( Run::query()->orderByDesc( 'id' )->firstOrFail()->since );
 	}
 
 	/**

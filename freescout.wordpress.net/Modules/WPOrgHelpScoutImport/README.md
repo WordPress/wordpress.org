@@ -4,8 +4,8 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
 
 ## How it works
 
-- **Importing everything:** pick a HelpScout mailbox and a FreeScout mailbox, and choose **Import everything**. The import runs on FreeScout's queue, 25 conversations at a time, and the page shows its progress. It can be paused and resumed; it goes on where it stopped.
-- **Importing changes:** once a mailbox's email has moved to FreeScout, **Import changes since** on a finished import brings over what HelpScout changed after it started: new replies, notes, status, and assignee. It looks 15 minutes further back, in case the clocks disagree.
+- **Importing:** pick a HelpScout mailbox and a FreeScout mailbox, and choose **Import**. The import runs on FreeScout's queue, 25 conversations at a time, and the page shows its progress. It can be paused and resumed; it goes on where it stopped.
+- **Importing again:** the first import of a mailbox copies everything. Importing it again copies only what HelpScout changed since the last finished import started: new conversations, replies, notes, status, and assignee. It looks 15 minutes further back, in case the clocks disagree. Import once while HelpScout is still live, and once more after the mailbox's email has moved.
 - **What comes across:**
   - conversations with their subject, status, assignee, who closed them, CC and BCC, and their original dates;
   - every email, reply, and note, with its own sender or agent, its recipients, and its attachments;

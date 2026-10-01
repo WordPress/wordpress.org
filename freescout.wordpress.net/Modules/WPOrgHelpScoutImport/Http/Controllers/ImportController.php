@@ -22,11 +22,13 @@ use Modules\WPOrgHelpScoutImport\Services\People;
 
 /**
  * Lists runs, starts them, and pauses and resumes them.
+ *
+ * Starting imports everything the first time, and what HelpScout changed since the last finished import after that.
  */
 final class ImportController extends Controller {
 
 	/**
-	 * How far before the last run started an import of changes looks, in minutes, for clocks that disagree.
+	 * How far before the last finished import started the next one looks, in minutes, for clocks that disagree.
 	 *
 	 * @var int
 	 */
@@ -72,7 +74,7 @@ final class ImportController extends Controller {
 	}
 
 	/**
-	 * Starts importing a HelpScout mailbox's whole history.
+	 * Starts importing a HelpScout mailbox: everything, or what changed since its last finished import into the mailbox.
 	 *
 	 * @param Request $request Request.
 	 * @return RedirectResponse
@@ -96,36 +98,22 @@ final class ImportController extends Controller {
 			return self::back_with_error( $error );
 		}
 
-		self::begin( $source_id, (string) ( $source['name'] ?? '' ), (int) $mailbox->id, null );
+		$previous = Run::query()
+			->where( 'helpscout_mailbox_id', $source_id )
+			->where( 'mailbox_id', $mailbox->id )
+			->where( 'status', Run::STATUS_DONE )
+			->whereNotNull( 'started_at' )
+			->orderByDesc( 'started_at' )
+			->first();
+		$since    = $previous ? $previous->started_at->copy()->subMinutes( self::CHANGES_OVERLAP_MINUTES ) : null;
 
-		return redirect()->route( 'wporghelpscoutimport.index' )->with( 'flash_success', __( 'Importing :name.', array( 'name' => $source['name'] ?? '' ) ) );
-	}
+		self::begin( $source_id, (string) ( $source['name'] ?? '' ), (int) $mailbox->id, $since );
 
-	/**
-	 * Imports what changed in HelpScout since a finished run started.
-	 *
-	 * @param int $id Finished run ID.
-	 * @return RedirectResponse
-	 */
-	public function changes( int $id ): RedirectResponse {
-		$previous = Run::find( $id );
-		if ( ! $previous || Run::STATUS_DONE !== $previous->status || ! $previous->started_at ) {
-			return self::back_with_error( __( 'Only a finished import can be followed by its changes.' ) );
-		}
+		$message = $since
+			? __( 'Importing what changed in :name since its last import.', array( 'name' => $source['name'] ?? '' ) )
+			: __( 'Importing :name.', array( 'name' => $source['name'] ?? '' ) );
 
-		$error = self::busy( (int) $previous->mailbox_id );
-		if ( $error ) {
-			return self::back_with_error( $error );
-		}
-
-		self::begin(
-			(int) $previous->helpscout_mailbox_id,
-			(string) $previous->helpscout_mailbox_name,
-			(int) $previous->mailbox_id,
-			$previous->started_at->copy()->subMinutes( self::CHANGES_OVERLAP_MINUTES )
-		);
-
-		return redirect()->route( 'wporghelpscoutimport.index' )->with( 'flash_success', __( 'Importing changes to :name.', array( 'name' => $previous->helpscout_mailbox_name ) ) );
+		return redirect()->route( 'wporghelpscoutimport.index' )->with( 'flash_success', $message );
 	}
 
 	/**
