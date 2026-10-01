@@ -115,22 +115,31 @@ final class ReportToAkismet implements ShouldQueue {
 			return;
 		}
 
-		// Core and other modules may have changed the conversation's meta while Akismet was being told.
-		$now = Conversation::find( $this->conversation_id );
-		if ( ! $now ) {
-			return;
-		}
+		/*
+		 * Recorded under a row lock, from the conversation as it is now: core and other modules may have changed its
+		 * meta meanwhile, and an agent's status change either waits for the record or is seen here.
+		 */
+		$changed_back = \DB::transaction(
+			function (): bool {
+				$now = Conversation::query()->whereKey( $this->conversation_id )->lockForUpdate()->first();
+				if ( ! $now ) {
+					return false;
+				}
 
-		$latest             = (array) $now->getMeta( WPOrgAkismetServiceProvider::META, array() );
-		$latest['reported'] = $this->verdict;
-		$now->setMeta( WPOrgAkismetServiceProvider::META, $latest );
+				$latest             = (array) $now->getMeta( WPOrgAkismetServiceProvider::META, array() );
+				$latest['reported'] = $this->verdict;
+				$now->setMeta( WPOrgAkismetServiceProvider::META, $latest );
 
-		// Recording the report isn't activity on the conversation.
-		$now->timestamps = false;
-		$now->save();
+				// Recording the report isn't activity on the conversation.
+				$now->timestamps = false;
+				$now->save();
+
+				return ( $now->isSpam() ? Akismet::SPAM : Akismet::HAM ) !== $this->verdict;
+			}
+		);
 
 		// An agent changing it back while Akismet was being told saw the report as not sent yet, and queued nothing.
-		if ( ( $now->isSpam() ? Akismet::SPAM : Akismet::HAM ) !== $this->verdict ) {
+		if ( $changed_back ) {
 			self::dispatch( $this->conversation_id, Akismet::SPAM === $this->verdict ? Akismet::HAM : Akismet::SPAM );
 		}
 	}

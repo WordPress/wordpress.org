@@ -200,7 +200,9 @@ final class WPOrgAkismetServiceProvider extends ServiceProvider {
 				return;
 			}
 
-			$result = $conversation->getMeta( self::META );
+			// From the database: a report sent since this request loaded the conversation is recorded there.
+			$stored = Conversation::query()->whereKey( $conversation->id )->first( array( 'id', 'meta' ) );
+			$result = $stored ? $stored->getMeta( self::META ) : null;
 			if ( ! is_array( $result ) || empty( $result['verdict'] ) || ! app( Akismet::class )->is_configured() ) {
 				return;
 			}

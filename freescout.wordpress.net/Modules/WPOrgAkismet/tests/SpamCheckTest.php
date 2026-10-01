@@ -322,6 +322,35 @@ final class SpamCheckTest extends TestCase {
 	}
 
 	/**
+	 * A report recorded since the agent's page loaded the conversation counts, not the copy the page has.
+	 *
+	 * @return void
+	 */
+	public function test_report_recorded_meanwhile_is_seen(): void {
+		Queue::fake();
+		$this->conversation->setStatus( Conversation::STATUS_SPAM );
+		$this->record( array( 'verdict' => Akismet::HAM ) );
+
+		// A report job records its report; this request's copy of the conversation doesn't have it.
+		$meta = array(
+			WPOrgAkismetServiceProvider::META => array(
+				'verdict'  => Akismet::HAM,
+				'reported' => Akismet::SPAM,
+			),
+		);
+		Conversation::where( 'id', $this->conversation->id )->update( array( 'meta' => json_encode( $meta ) ) );
+
+		$this->conversation->changeStatus( Conversation::STATUS_ACTIVE, $this->agent );
+
+		Queue::assertPushed(
+			ReportToAkismet::class,
+			static function ( ReportToAkismet $job ): bool {
+				return Akismet::HAM === $job->verdict;
+			}
+		);
+	}
+
+	/**
 	 * Undoing a correction reports the conversation back.
 	 *
 	 * @return void
