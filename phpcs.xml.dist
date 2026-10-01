@@ -24,7 +24,7 @@
 	<exclude-pattern>*/plugins/photo-directory/inc/google-cloud-storage-stream-metadata.php</exclude-pattern>
 
 	<!-- Exclude generated wp-scripts asset files. -->
-	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
+	<exclude-pattern>*/build/*.asset.php</exclude-pattern>
 
 	<!-- FreeScout is a Laravel app, not WordPress; it has its own standard in freescout.wordpress.net/phpcs.xml.dist. -->
 	<exclude-pattern>*/freescout.wordpress.net/*</exclude-pattern>
