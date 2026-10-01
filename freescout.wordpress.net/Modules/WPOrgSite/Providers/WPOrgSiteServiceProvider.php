@@ -47,7 +47,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		);
 
 		$images = array(
-			'layout.favicon'     => 'wordpress-mark.svg',
+			'layout.favicon'     => 'favicon.svg',
 			'layout.header_logo' => 'wordpress-mark-white.svg',
 			'login.banner'       => 'wordpress-logo.svg',
 		);
