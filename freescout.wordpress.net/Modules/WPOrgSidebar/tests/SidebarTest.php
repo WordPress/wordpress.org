@@ -14,6 +14,8 @@ use App\User;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
+use Illuminate\Cache\RateLimiter;
+use Modules\WPOrgSidebar\Http\Controllers\PanelController;
 use Modules\WPOrgSidebar\Providers\WPOrgSidebarServiceProvider;
 use Modules\WPOrgSidebar\Services\Client;
 use Psr\Http\Message\RequestInterface;
@@ -107,11 +109,11 @@ final class SidebarTest extends TestCase {
 		$this->actingAs( $this->create_user() )
 			->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )
 			->assertStatus( 502 )
-			->assertExactJson( array( 'html' => '' ) );
+			->assertExactJson( array( 'blocks' => array() ) );
 	}
 
 	/**
-	 * The account a bounce or Slack notification names is only asked for when the agent asks for it.
+	 * The account a bounce or Slack notification names is only asked for when the agent asks; each answer is reused briefly.
 	 *
 	 * @return void
 	 */
@@ -126,16 +128,48 @@ final class SidebarTest extends TestCase {
 				static function ( RequestInterface $request ) use ( &$payloads ): PromiseInterface {
 					$payloads[] = json_decode( (string) $request->getBody(), true );
 
-					return ( new MockHandler( array( new Response( 200, array(), '{"html":"<p>Panel</p>"}' ) ) ) )( $request, array() );
+					return ( new MockHandler( array( new Response( 200, array(), '{"blocks":[{"type":"meta","text":"Panel"}]}' ) ) ) )( $request, array() );
 				}
 			)
 		);
 		$user = $this->create_user();
 
-		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )->assertStatus( 200 );
+		$this->actingAs( $user )
+			->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )
+			->assertExactJson(
+				array(
+					'blocks' => array(
+						array(
+							'type' => 'meta',
+							'text' => 'Panel',
+						),
+					),
+				)
+			);
 		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile?related=1' )->assertStatus( 200 );
 
 		$this->assertArrayNotHasKey( 'related', $payloads[0] );
 		$this->assertTrue( $payloads[1]['related'] );
+
+		// Loaded again, both come from the cache.
+		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )->assertStatus( 200 );
+		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile?related=1' )->assertStatus( 200 );
+		$this->assertCount( 2, $payloads );
+	}
+
+	/**
+	 * Panels have a limit of their own, so loading many doesn't use up core's limit on uploads.
+	 *
+	 * @return void
+	 */
+	public function test_limits_panels_on_their_own_counter(): void {
+		$user    = $this->create_user();
+		$limiter = app( RateLimiter::class );
+		for ( $i = 0; $i < PanelController::MAX_PER_MINUTE; $i++ ) {
+			$limiter->hit( 'wporgsidebar.panels.' . $user->id );
+		}
+
+		$this->actingAs( $user )->get( '/wporgsidebar/' . $this->conversation->id . '/profile' )->assertStatus( 429 );
+		$this->assertSame( 0, $limiter->attempts( sha1( (string) $user->id ) ) );
 	}
 }

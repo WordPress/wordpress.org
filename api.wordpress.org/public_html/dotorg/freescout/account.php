@@ -76,7 +76,7 @@ function uses_two_factor( \WP_User $user ): bool {
 	return class_exists( 'Two_Factor_Core' ) && \Two_Factor_Core::is_user_using_two_factor( $user->ID );
 }
 
-$request = get_request();
+$request = get_request( basename( __FILE__ ) );
 $user    = get_account( trim( (string) ( $request->username ?? '' ) ) );
 
 if ( ! $user ) {

@@ -13,6 +13,7 @@ use App\Conversation;
 use App\Thread;
 use App\User;
 use Illuminate\Support\Facades\Queue;
+use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgWebhooks\Jobs\SendEvent;
 use Modules\WPOrgWebhooks\Providers\WPOrgWebhooksServiceProvider;
 use WordPressdotorg\FreeScout\Tests\TestCase;
@@ -62,6 +63,25 @@ final class EventForwardingTest extends TestCase {
 		\Eventy::action( 'conversation.user_replied', $this->conversation, $thread );
 
 		$this->assert_queued( 'conversation.user_replied', (string) $this->agent->email );
+	}
+
+	/**
+	 * An agent connected to a WordPress.org account is credited by its username, not by an address.
+	 *
+	 * @return void
+	 */
+	public function test_connected_agent_is_attributed_by_username(): void {
+		Account::connect( (int) $this->agent->id, 'rita' );
+		$thread = $this->create_thread( $this->conversation, Thread::TYPE_MESSAGE, 'Answer', $this->agent, '2026-09-01 11:00:00' );
+
+		\Eventy::action( 'conversation.user_replied', $this->conversation, $thread );
+
+		Queue::assertPushed(
+			SendEvent::class,
+			static function ( SendEvent $job ): bool {
+				return 'rita' === $job->payload['agent']['wporg_username'];
+			}
+		);
 	}
 
 	/**

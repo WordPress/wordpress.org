@@ -74,7 +74,7 @@ final class ConversationPayloadTest extends TestCase {
 		$this->create_thread( $this->conversation, Thread::TYPE_MESSAGE, 'Answer', $this->agent, '2026-09-01 11:00:00' );
 		$this->create_thread( $this->conversation, Thread::TYPE_NOTE, 'Note', $this->agent, '2026-09-01 12:00:00' );
 
-		$threads = ConversationPayload::build( $this->conversation )['threads'];
+		$threads = ConversationPayload::build( $this->conversation, notes: true )['threads'];
 
 		$this->assertSame( array( 'note', 'message', 'customer' ), array_column( $threads, 'type' ) );
 		$this->assertSame( 'user', $threads[1]['created_by']['type'] );
@@ -106,10 +106,26 @@ final class ConversationPayloadTest extends TestCase {
 		Attachment::create( 'details.txt', 'text/plain', Attachment::TYPE_TEXT, 'Final-Recipient: rfc822; author@example.org', null, false, $thread->id );
 		Attachment::create( 'logo.png', 'image/png', Attachment::TYPE_IMAGE, 'not really a png', null, false, $thread->id );
 
-		$attachments = ConversationPayload::build( $this->conversation )['threads'][0]['attachments'];
+		$attachments = ConversationPayload::build( $this->conversation, attachments: true )['threads'][0]['attachments'];
 		$by_name     = array_column( $attachments, 'content', 'file_name' );
 
 		$this->assertSame( 'Final-Recipient: rfc822; author@example.org', $by_name['details.txt'] );
 		$this->assertNull( $by_name['logo.png'] );
+	}
+
+	/**
+	 * Notes and attachments are only sent to panels that ask for them.
+	 *
+	 * @return void
+	 */
+	public function test_leaves_out_notes_and_attachments_unless_asked(): void {
+		$thread = $this->create_thread( $this->conversation, Thread::TYPE_CUSTOMER, 'Bounce', null, '2026-09-01 10:00:00' );
+		Attachment::create( 'details.txt', 'text/plain', Attachment::TYPE_TEXT, 'Final-Recipient: rfc822; author@example.org', null, false, $thread->id );
+		$this->create_thread( $this->conversation, Thread::TYPE_NOTE, 'Note', $this->agent, '2026-09-01 12:00:00' );
+
+		$threads = ConversationPayload::build( $this->conversation )['threads'];
+
+		$this->assertSame( array( 'customer' ), array_column( $threads, 'type' ) );
+		$this->assertSame( array(), $threads[0]['attachments'] );
 	}
 }

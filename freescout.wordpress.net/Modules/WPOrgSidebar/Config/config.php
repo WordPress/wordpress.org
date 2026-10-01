@@ -16,11 +16,13 @@ return array(
 	// Shared secret used to sign requests; must match FREESCOUT_SECRET on api.wordpress.org.
 	'secret'  => env( 'WPORG_API_SECRET', '' ),
 
-	// Customer sidebar panels, keyed by ID, rendered in this order.
+	// Customer sidebar panels, keyed by ID, rendered in this order; `notes` and `attachments` add those to the payload.
 	'panels'  => array(
 		'profile'        => array(
-			'title'    => 'WordPress.org',
-			'endpoint' => 'profile.php',
+			'title'       => 'WordPress.org',
+			'endpoint'    => 'profile.php',
+			// Offers the account a bounce names.
+			'attachments' => true,
 		),
 		'forums'         => array(
 			'title'    => 'Forum Notes',
@@ -29,6 +31,8 @@ return array(
 		'plugins-themes' => array(
 			'title'    => 'Plugins & Themes',
 			'endpoint' => 'plugins-themes.php',
+			// Reviewers link plugins in notes.
+			'notes'    => true,
 		),
 		'dpo'            => array(
 			'title'    => 'Privacy Requests',

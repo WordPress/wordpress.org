@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgSidebar\Http\Controllers;
 
 use App\Conversation;
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Modules\WPOrgSidebar\Jobs\SyncSenderAvatar;
@@ -36,13 +37,35 @@ final class PanelController extends Controller {
 	private const AVATAR_MINUTES = 24 * 60;
 
 	/**
-	 * Returns the HTML for one panel.
+	 * How long a panel's content is reused, in minutes.
+	 *
+	 * @var int
+	 */
+	private const CACHE_MINUTES = 1;
+
+	/**
+	 * How many panels an agent may load a minute; each holds a worker while api.wordpress.org answers.
+	 *
+	 * @var int
+	 */
+	public const MAX_PER_MINUTE = 120;
+
+	/**
+	 * Returns the content of one panel, as blocks sidebar.js builds it from.
 	 *
 	 * @param int    $conversation_id Conversation ID.
 	 * @param string $panel           Panel ID.
 	 * @return JsonResponse
 	 */
 	public function show( int $conversation_id, string $panel ): JsonResponse {
+		// Not the throttle middleware: in this Laravel, it shares a counter with core's upload limit.
+		$limiter = app( RateLimiter::class );
+		$key     = 'wporgsidebar.panels.' . auth()->id();
+		if ( $limiter->tooManyAttempts( $key, self::MAX_PER_MINUTE ) ) {
+			abort( 429 );
+		}
+		$limiter->hit( $key );
+
 		$panels = (array) config( 'wporgsidebar.panels' );
 		if ( empty( $panels[ $panel ]['endpoint'] ) ) {
 			abort( 404 );
@@ -53,24 +76,38 @@ final class PanelController extends Controller {
 			abort( 403 );
 		}
 
-		$payload = ConversationPayload::build( $conversation );
-
 		// The account a bounce or Slack notification names, instead of the sender's, once the agent asks for it.
-		if ( request()->query( 'related' ) ) {
-			$payload['related'] = true;
-		}
+		$related = (bool) request()->query( 'related' );
+
+		// A new message changes updated_at, and so the key.
+		$key = implode( '.', array( 'wporgsidebar.panel', $conversation->id, $panel, (int) $related, strtotime( (string) $conversation->updated_at ) ) );
 
 		try {
-			$response = Client::from_config( self::TIMEOUT )->post( (string) $panels[ $panel ]['endpoint'], $payload );
+			$response = \Cache::remember(
+				$key,
+				self::CACHE_MINUTES,
+				static function () use ( $conversation, $panels, $panel, $related ): array {
+					$payload = ConversationPayload::build(
+						$conversation,
+						notes: ! empty( $panels[ $panel ]['notes'] ),
+						attachments: $related || ! empty( $panels[ $panel ]['attachments'] )
+					);
+					if ( $related ) {
+						$payload['related'] = true;
+					}
+
+					return Client::from_config( self::TIMEOUT )->post( (string) $panels[ $panel ]['endpoint'], $payload );
+				}
+			);
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSidebar] Could not load panel ' . $panel . ': ' . $e->getMessage() );
 
-			return response()->json( array( 'html' => '' ), 502 );
+			return response()->json( array( 'blocks' => array() ), 502 );
 		}
 
 		self::sync_sender_avatar( $conversation, (string) ( $response['avatar_url'] ?? '' ) );
 
-		return response()->json( array( 'html' => (string) ( $response['html'] ?? '' ) ) );
+		return response()->json( array( 'blocks' => array_values( (array) ( $response['blocks'] ?? array() ) ) ) );
 	}
 
 	/**
