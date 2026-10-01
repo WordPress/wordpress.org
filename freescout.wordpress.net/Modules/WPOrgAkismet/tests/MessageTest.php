@@ -63,6 +63,9 @@ final class MessageTest extends TestCase {
 		// A HELO claiming to be WordPress.org doesn't make a server one of its relays.
 		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from mx.wordpress.org (unknown [93.184.216.34]) by mx.wordpress.org\r\n" ) );
 
+		// Sendmail without reverse DNS: the name is the HELO.
+		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from mx.wordpress.org ([93.184.216.34]) by mx.wordpress.org\r\n" ) );
+
 		// Exim: the HELO is inside the parentheses.
 		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from [93.184.216.34] (helo=[8.8.8.8]) by mx.wordpress.org\r\n" ) );
 	}
@@ -75,6 +78,9 @@ final class MessageTest extends TestCase {
 	public function test_sender_ip_formats(): void {
 		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from [93.184.216.34] (helo=example.org)\r\n\tby mx.wordpress.org\r\n" ) );
 		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from example.org ([93.184.216.34] helo=example.org) by mx.wordpress.org\r\n" ) );
+
+		// Exim's reverse DNS name identifies WordPress.org's relays.
+		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from relay1.wordpress.org ([198.143.164.252] helo=relay1) by imap.wordpress.org\r\nReceived: from example.org (example.org [93.184.216.34]) by relay1.wordpress.org\r\n" ) );
 		$this->assertSame( '93.184.216.34', Message::sender_ip( "Received: from example.org (93.184.216.34) by mx.wordpress.org\r\n" ) );
 		$this->assertSame( '2a00:1450:4864:20::22b', Message::sender_ip( "Received: from example.org (example.org [IPv6:2a00:1450:4864:20::22b]) by mx.wordpress.org\r\n" ) );
 	}

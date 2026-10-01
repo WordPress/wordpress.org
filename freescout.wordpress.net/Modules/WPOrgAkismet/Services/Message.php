@@ -93,6 +93,7 @@ final class Message {
 	 *
 	 * Only what the receiving server recorded counts, not the name the sender announced (HELO):
 	 * Postfix and Sendmail write "from HELO (rDNS [IP])", Exim "from rDNS ([IP] helo=HELO)" or "from [IP] (helo=HELO)".
+	 * Without reverse DNS, Sendmail writes "from HELO ([IP])": the address counts, the name doesn't.
 	 *
 	 * @param string $from The "from" part of a Received header.
 	 * @return array|null Reverse DNS name (or '') and IP address, or null if the hop has neither.
@@ -104,8 +105,10 @@ final class Message {
 			// Postfix and Sendmail.
 			'/\(\s*([^\s()\[\]=]+?)\.?\s+\[' . $ip_pattern . '\]/i' => array( 1, 2 ),
 			// Exim, with and without a reverse DNS name.
-			'/^\s*from\s+([^\s()\[\]]+?)\.?\s+\(\[' . $ip_pattern . '\]/i' => array( 1, 2 ),
+			'/^\s*from\s+([^\s()\[\]]+?)\.?\s+\(\[' . $ip_pattern . '\]\s+helo=/i' => array( 1, 2 ),
 			'/^\s*from\s+\[' . $ip_pattern . '\]/i' => array( null, 1 ),
+			// Sendmail without reverse DNS, whose name is the HELO.
+			'/\(\s*\[' . $ip_pattern . '\]/i'       => array( null, 1 ),
 			// Servers that only write the address, like "from example.org (93.184.216.34)".
 			'/\((\d{1,3}(?:\.\d{1,3}){3})\)/'       => array( null, 1 ),
 		);
