@@ -26,6 +26,10 @@
 	<!-- Exclude generated wp-scripts asset files. -->
 	<exclude-pattern>*/plugins/*/build/index.asset.php</exclude-pattern>
 
+	<!-- FreeScout is a Laravel app, not WordPress; it has its own standard in freescout.wordpress.net/phpcs.xml.dist. -->
+	<exclude-pattern>*/freescout.wordpress.net/*</exclude-pattern>
+	<exclude-pattern>*/environments/freescout/*</exclude-pattern>
+
 	<!-- Scan all (php) files in the current folder and subfolders -->
 	<file>.</file>
 	<arg name="extensions" value="php" />

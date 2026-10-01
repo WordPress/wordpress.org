@@ -99,11 +99,11 @@ function scripts() {
 	wp_scripts()->add_data( 'jquery-core', 'group', 1 );
 	wp_scripts()->add_data( 'jquery-migrate', 'group', 1 );
 
-	wp_enqueue_script( 'wporg-navigation', get_stylesheet_directory_uri() . '/js/navigation.js', array(), '20181209', true );
-	wp_enqueue_script( 'wporg-skip-link-focus-fix', get_stylesheet_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
+	wp_enqueue_script( 'wporg-navigation', get_stylesheet_directory_uri() . '/js/navigation.js', array(), filemtime( __DIR__ . '/js/navigation.js' ), true );
+	wp_enqueue_script( 'wporg-skip-link-focus-fix', get_stylesheet_directory_uri() . '/js/skip-link-focus-fix.js', array(), filemtime( __DIR__ . '/js/skip-link-focus-fix.js' ), true );
 
 	if ( is_singular( 'plugin' ) ) {
-		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), '20171002', true );
+		wp_enqueue_script( 'wporg-plugins-popover', get_stylesheet_directory_uri() . '/js/popover.js', array( 'jquery' ), filemtime( __DIR__ . '/js/popover.js' ), true );
 		wp_enqueue_script( 'wporg-plugins-faq', get_stylesheet_directory_uri() . '/js/section-faq.js', array( 'jquery' ), filemtime( __DIR__ . '/js/section-faq.js' ), true );
 
 		$post = get_post();
@@ -120,7 +120,7 @@ function scripts() {
 
 	if ( get_query_var( 'plugin_advanced' ) ) {
 		wp_enqueue_script( 'google-charts-loader', 'https://www.gstatic.com/charts/loader.js', array(), false, true );
-		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), '20220929', true );
+		wp_enqueue_script( 'wporg-plugins-stats', get_stylesheet_directory_uri() . '/js/stats.js', array( 'jquery', 'google-charts-loader' ), filemtime( __DIR__ . '/js/stats.js' ), true );
 
 		wp_localize_script( 'wporg-plugins-stats', 'pluginStats', array(
 			'slug' => is_singular( 'plugin' ) ? get_queried_object()->post_name : '',

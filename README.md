@@ -17,6 +17,7 @@ Here is a comprehensive directory map of the active services at the root of this
 | ⚙️ **[.github](.github)** | Custom CI workflows (Static analysis branch checks, Docker wp-env unit tests, Live API monitors, and Props bots) and helper scripts. | 📄 [GitHub Actions Docs](.github/README.md) |
 | 🗣️ **[browsehappy.com](browsehappy.com)** | Theme and settings for browsehappy.com, checking latest web browser versions to promote up-to-date web usage. | 📄 [Browse Happy Readme](browsehappy.com/public_html/README.md) |
 | 👥 **[buddypress.org](buddypress.org)** | Themes, plugins, and codices powering the bbPress.org and BuddyPress.org project sites. | — |
+| 📨 **[freescout.wordpress.net](freescout.wordpress.net)** | FreeScout modules for the WordPress.org email helpdesk. | 📄 [FreeScout Readme](freescout.wordpress.net/README.md) |
 | 💼 **[jobs.wordpress.net](jobs.wordpress.net)** | Directory plugins and themes powering the official WordPress job board (JobsWP plugin). | — |
 | 👤 **[profiles.wordpress.org](profiles.wordpress.org)** | Custom handlers for user profiles activity, profiles association, and profile management. | — |
 | 📥 **[svn.wordpress.org](svn.wordpress.org)** | Slack integration hooks triggered by Subversion commits or Trac tickets. | — |

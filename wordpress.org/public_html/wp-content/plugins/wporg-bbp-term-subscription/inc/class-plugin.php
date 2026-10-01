@@ -172,9 +172,9 @@ class Plugin {
 			return false;
 		}
 
-		// Determine the term the request is for, overwrite with ?term_id if specified.
+		// Determine the term the request is for, overwrite with ?term_id if specified. Tokens are signed for the current term.
 		$term = $this->get_current_term();
-		if ( ! empty( $_GET['term_id'] ) ) {
+		if ( ! empty( $_GET['term_id'] ) && ! isset( $_GET['token'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified below.
 			$term = get_term( intval( $_GET['term_id'] ), $this->taxonomy );
 		}
 		if ( ! $term ) {
@@ -190,7 +190,8 @@ class Plugin {
 			$auth    = 'token';
 			$user_id = $this->has_valid_unsubscription_token();
 
-			if ( ! $user_id ) {
+			// The token only authorizes unsubscribing.
+			if ( ! $user_id || 'wporg_bbp_unsubscribe_term' !== $action ) {
 				bbp_add_error( 'wporg_bbp_subscribe_invalid_token', __( '<strong>Error:</strong> Link expired!', 'wporg-forums' ) );
 				return false;
 			}

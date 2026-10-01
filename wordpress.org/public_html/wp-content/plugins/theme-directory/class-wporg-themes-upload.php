@@ -431,23 +431,12 @@ class WPORG_Themes_Upload {
 
 		// Check out from SVN.
 		$this->create_tmp_dirs( $slug . '.' . $version );
-		$esc_svn       = escapeshellarg( "https://themes.svn.wordpress.org/{$slug}/{$version}/" );
-		$esc_theme_dir = escapeshellarg( $this->theme_dir );
-		$this->exec_with_notify(
-			// --ignore-externals: never let a committer's svn:externals pull a remote tree into the export.
-			self::SVN . " export {$esc_svn} {$esc_theme_dir} --force --ignore-externals", // force as we've created the directory already.
-			$output,
-			$return_var
-		);
-		if ( $return_var ) {
-			return new WP_Error(
-				'svn_error',
-				implode( "\n", $output )
-			);
+		$svn_url  = "https://themes.svn.wordpress.org/{$slug}/{$version}/";
+		$exported = $this->svn_export( $svn_url, $this->theme_dir );
+		if ( is_wp_error( $exported ) ) {
+			return $exported;
 		}
-
-		// Remove any unexpected entries, we only need basic files and directories, anything else will cause problems when installed onto a site.
-		$this->exec_with_notify( "find {$esc_theme_dir} -not -type f -not -type d -delete" );
+		$esc_svn = escapeshellarg( $svn_url );
 
 		// Fetch data from SVN if not known.
 		if ( ! $changeset ) {
@@ -646,8 +635,22 @@ class WPORG_Themes_Upload {
 		// Do we have a readme.txt? Fetch extra data from there too.
 		$this->readme = $this->get_readme_data( $theme_files );
 
+		$stylesheet = basename( dirname( $style_css ) );
+		$theme_root = dirname( dirname( $style_css ) );
+		$template   = get_file_data( $style_css, array( 'Template' => 'Template' ), 'theme' )['Template'];
+
+		// A child theme is checked against the directory's copy of its parent, placed beside it.
+		$parent_id = false;
+		if ( $template && $template !== $stylesheet ) {
+			$parent_id = $this->export_parent_theme( $template, $theme_root );
+			if ( is_wp_error( $parent_id ) ) {
+				return $parent_id;
+			}
+		}
+
 		// We have a stylesheet, let's set up the theme, theme post, and author.
-		$this->theme = new WP_Theme( basename( dirname( $style_css ) ), dirname( dirname( $style_css ) ) );
+		$this->theme              = $this->load_theme( $stylesheet, $theme_root );
+		$this->theme->post_parent = $parent_id;
 
 		// The theme's files are unreviewed: nothing in its tree may load as a translation file.
 		add_filter( 'override_load_textdomain', array( $this, 'block_upload_textdomain' ), 10, 3 );
@@ -862,11 +865,11 @@ class WPORG_Themes_Upload {
 			);
 		}
 
-		// Check for child theme's parent in the directory (non-buddypress only)
+		// Check for child theme's parent in the directory (non-buddypress only).
 		if (
 			$this->theme->parent() &&
-			! in_array( 'buddypress', $this->theme->get( 'Tags' ) ) &&
-			! $this->is_parent_available()
+			! in_array( 'buddypress', $this->theme->get( 'Tags' ), true ) &&
+			empty( $this->theme->post_parent )
 		) {
 			$style_errors->add(
 				'invalid_parent',
@@ -1184,7 +1187,8 @@ class WPORG_Themes_Upload {
 		mkdir( $this->theme_dir );
 		chmod( $this->theme_dir, 0777 );
 		if ( $create_svn_tmp ) {
-			$this->tmp_svn_dir = "{$this->tmp_dir}/svn";
+			// Not a valid theme slug, so a parent theme exported beside the child can't land on it.
+			$this->tmp_svn_dir = "{$this->tmp_dir}/svn.checkout";
 			mkdir( $this->tmp_svn_dir );
 			chmod( $this->tmp_svn_dir, 0777 );
 		}
@@ -1359,22 +1363,115 @@ class WPORG_Themes_Upload {
 	}
 
 	/**
-	 * Whether the parent theme for this theme is available in the repository.
+	 * Exports a parent theme's live version from the directory next to the child theme.
 	 *
-	 * @return bool
+	 * Core resolves a child's parent in the child's theme root first, so Theme Check
+	 * and the parent validation then see the directory's copy.
+	 *
+	 * @param string $template   The child's `Template` header.
+	 * @param string $theme_root The theme root holding the child theme.
+	 * @return int|false|WP_Error The parent's post ID, false if the directory has no live
+	 *                            theme by that exact slug, or a WP_Error if the export failed.
 	 */
-	public function is_parent_available() {
-		$parent = get_posts( array(
-			'fields'           => 'ids',
-			'name'             => $this->theme->get_template(),
-			'posts_per_page'   => 1,
-			'post_type'        => 'repopackage',
-			'orderby'          => 'ID',
-			'suppress_filters' => false,
-		) );
-		$this->theme->post_parent = current( $parent );
+	protected function export_parent_theme( $template, $theme_root ) {
+		$parent = current(
+			get_posts(
+				array(
+					'name'             => $template,
+					'posts_per_page'   => 1,
+					'post_type'        => 'repopackage',
+					'orderby'          => 'ID',
+					'suppress_filters' => false,
+				)
+			)
+		);
 
-		return ! empty( $parent );
+		// The lookup sanitizes the name; only an exact match is the directory core looks in, and safe to write.
+		if ( ! $parent || $parent->post_name !== $template ) {
+			return false;
+		}
+
+		$live = array_map( 'strval', array_keys( (array) get_post_meta( $parent->ID, '_status', true ), 'live', true ) );
+		if ( ! $live ) {
+			return false;
+		}
+		usort( $live, 'version_compare' );
+		$version = end( $live );
+
+		// The upload may carry its own directory by that name; the directory's copy replaces it.
+		$destination = "{$theme_root}/{$template}";
+		if ( file_exists( $destination ) ) {
+			$this->exec_with_notify( self::RM . ' -rf ' . escapeshellarg( $destination ) );
+		}
+
+		// SVN's own output is logged by the export; the uploader gets a message, not raw paths.
+		if ( is_wp_error( $this->svn_export( "https://themes.svn.wordpress.org/{$template}/{$version}/", $destination ) ) ) {
+			return new WP_Error(
+				'parent_export_failed',
+				sprintf(
+					/* translators: %s: parent theme slug */
+					__( 'The parent theme %s could not be retrieved from the directory. Please try again later.', 'wporg-themes' ),
+					'<code>' . esc_html( $template ) . '</code>'
+				)
+			);
+		}
+
+		return $parent->ID;
+	}
+
+	/**
+	 * Exports a path from SVN, keeping only regular files and directories.
+	 *
+	 * @param string $url         The SVN URL to export.
+	 * @param string $destination The local directory to export into.
+	 * @return true|WP_Error True on success, WP_Error if the export failed.
+	 */
+	protected function svn_export( $url, $destination ) {
+		$esc_url         = escapeshellarg( $url );
+		$esc_destination = escapeshellarg( $destination );
+
+		$this->exec_with_notify(
+			// --ignore-externals: never let a committer's svn:externals pull a remote tree into the export.
+			self::SVN . " export {$esc_url} {$esc_destination} --force --ignore-externals", // force as the directory may exist already.
+			$output,
+			$return_var
+		);
+		if ( $return_var ) {
+			return new WP_Error(
+				'svn_error',
+				implode( "\n", $output )
+			);
+		}
+
+		// Remove any unexpected entries, we only need basic files and directories, anything else will cause problems when installed onto a site.
+		$this->exec_with_notify( "find {$esc_destination} -not -type f -not -type d -delete" );
+
+		return true;
+	}
+
+	/**
+	 * Loads the extracted theme, resolving its parent only from its own theme root.
+	 *
+	 * Core otherwise falls back to the site's installed themes when the parent isn't
+	 * beside the child, or when the parent is a block theme without an index.php.
+	 *
+	 * @param string $stylesheet The theme's directory name.
+	 * @param string $theme_root The directory holding the theme.
+	 * @return WP_Theme
+	 */
+	protected function load_theme( $stylesheet, $theme_root ) {
+		global $wp_theme_directories;
+
+		$theme_directories    = $wp_theme_directories;
+		$wp_theme_directories = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restored below.
+
+		try {
+			$theme = new WP_Theme( $stylesheet, $theme_root );
+		} finally {
+			$wp_theme_directories = $theme_directories; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the original.
+		}
+
+		return $theme;
 	}
 
 	/**
@@ -1471,6 +1568,12 @@ class WPORG_Themes_Upload {
 			return '';
 		}
 
+		// Inline formatting (`__()` would underline the text around it), skipping link targets, where a `!` would break the URL.
+		$value = preg_replace( '/(?<![-a-zA-Z0-9+.])[a-zA-Z][-a-zA-Z0-9+._]*:[\w\/?!#@](?<!_)(?:(?:\|(?=[^|\s])|[^|<>\s])*[\w\/=](?<!_))?(*SKIP)(*FAIL)|__|~~|,,|\^|`|\*\*/u', '!$0', $value );
+		if ( null === $value ) {
+			return '';
+		}
+
 		// A leading `=` opens a heading, and its anchor becomes the element's `id`.
 		return 0 === preg_match( '/^[\s\x1c-\x1f\p{Z}]*=/u', $value ) ? $value : '!' . $value;
 	}
@@ -1494,7 +1597,7 @@ class WPORG_Themes_Upload {
 				// A keyword is space-separated, so it takes the slug and the link the escape.
 				$this->trac_ticket->keywords[]  = 'child-theme';
 				$this->trac_ticket->keywords[]  = 'parent-' . sanitize_title( $parent );
-				$this->trac_ticket->parent_link = 'Parent Theme: https://wordpress.org/themes/' . self::escape_trac_wiki( $parent );
+				$this->trac_ticket->parent_link = 'Parent Theme: ' . self::escape_trac_wiki( 'https://wordpress.org/themes/' . $parent );
 			}
 		}
 
@@ -1604,6 +1707,9 @@ TICKET;
 			$part = str_replace( '<br>', ' ', $part );
 
 			if ( $i % 2 ) {
+				// Trac shows block content verbatim; decoded before the braces, so an encoded `}}}` is caught too.
+				$part = html_entity_decode( $part, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
 				// `!` does not escape inside a block, so any run of the code's own braces is broken up.
 				$part = preg_replace( '/([{}])(?=\1\1)/', '$1 ', $part );
 
@@ -1614,13 +1720,16 @@ TICKET;
 
 			$part = self::escape_trac_wiki( $part );
 
-			// Converted after the escape, so the checker's own links stay links.
-			$parts[ $i ] = preg_replace( '/<a\s?href\s?=\s?[\'|"]([^"|\']*)[\'|"]>([^<]*)<\/a>/i', '[$1 $2]', $part );
+			// Converted after the escape, so the checker's own links stay links, `target` and all.
+			$part = preg_replace( '/<a\s+href\s*=\s*[\'"]([^"\']*)[\'"][^>]*>([^<]*)<\/a>/i', '[$1 $2]', $part );
 
 			// A pass above that PCRE gave up on would drop this half of the message.
-			if ( ! is_string( $parts[ $i ] ) ) {
+			if ( ! is_string( $part ) ) {
 				return 'A Theme Check message could not be formatted for Trac.';
 			}
+
+			// Decoded last, so an encoded tag can't become a link.
+			$parts[ $i ] = str_replace( array( '&lt;', '&gt;' ), array( '<', '>' ), $part );
 		}
 
 		return implode( '', $parts );
@@ -1648,11 +1757,6 @@ TICKET;
 		if ( $tc_errors ) {
 			foreach ( $tc_errors as $e ) {
 				$e = self::format_themecheck_error_for_trac( $e );
-
-				// Decode some entities.
-				$e = preg_replace_callback( '!(&[lg]t;)!', function( $f ) {
-					return html_entity_decode( $f[0] );
-				}, $e );
 
 				if ( '' !== $e && 'INFO' !== substr( $e, 0, 4 ) ) {
 					$tc_results[] = '* ' . $e;
