@@ -417,16 +417,8 @@ function get_translation_contributors( GP_Locale $locale, int $active_days_thres
 	$user_ids    = wp_list_pluck( $contributions, 'user_id' );
 	$dates_by_id = wp_list_pluck( $contributions, 'latest_date', 'user_id' );
 
-	$user_ids_placeholders = implode( ', ', array_fill( 0, count( $user_ids ), '%d' ) );
-
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Dynamically generated placeholders.
-	$user_rows = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT ID, user_nicename, display_name FROM {$wpdb->users} WHERE ID IN ($user_ids_placeholders)",
-			$user_ids
-		)
-	);
-	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+	$user_ids_list = implode( ',', array_map( 'intval', $user_ids ) );
+	$user_rows     = $wpdb->get_results( "SELECT ID, user_nicename, display_name FROM {$wpdb->users} WHERE ID IN ($user_ids_list)" );
 
 	$translators      = [];
 	$translators_past = [];
