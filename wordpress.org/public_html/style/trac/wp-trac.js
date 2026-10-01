@@ -273,11 +273,11 @@ let wpTrac,
 		}
 
 		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_TEXT, {
-				acceptNode( node ) {
-					if ( node.parentElement && node.parentElement.closest( 'a' ) ) {
-						return window.NodeFilter.FILTER_REJECT;
-					}
-					return node.nodeValue && node.nodeValue.trim()
+			acceptNode( node ) {
+				if ( node.parentElement && node.parentElement.closest( 'a' ) ) {
+					return window.NodeFilter.FILTER_REJECT;
+				}
+				return node.nodeValue && node.nodeValue.trim()
 					? window.NodeFilter.FILTER_ACCEPT
 					: window.NodeFilter.FILTER_SKIP;
 				},
