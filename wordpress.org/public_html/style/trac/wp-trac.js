@@ -1176,14 +1176,13 @@ let wpTrac,
 				if ( typeof textarea.setRangeText === 'function' ) {
 					textarea.setRangeText( replacement, start, end, 'preserve' );
 					if ( selectedText ) {
-						textarea.setSelectionRange( start +
-							prefix.length, start +
-							prefix.length +
-							selectedText.length );
+						textarea.setSelectionRange(
+							start + prefix.length,
+							start + prefix.length + selectedText.length );
 					} else {
-						textarea.setSelectionRange( start +
-							prefix.length, start +
-							prefix.length );
+						textarea.setSelectionRange(
+							start + prefix.length,
+							start + prefix.length );
 					}
 				} else {
 					textarea.value = textarea.value.substring( 0, start ) +
