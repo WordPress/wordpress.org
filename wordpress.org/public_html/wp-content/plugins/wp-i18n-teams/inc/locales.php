@@ -367,39 +367,6 @@ function get_users_by_role( int $site_id, string $role ): array {
 }
 
 /**
- * Get the locale managers for the given locale.
- *
- * @param GP_Locale $locale The locale object.
- * @return array
- */
-function get_locale_managers( GP_Locale $locale ): array {
-	$site_id = get_locale_site_id( $locale );
-	return $site_id ? get_users_by_role( $site_id, 'locale_manager' ) : [];
-}
-
-/**
- * Get the general translation editors for the given locale.
- *
- * @param GP_Locale $locale The locale object.
- * @return array
- */
-function get_general_translation_editors( GP_Locale $locale ): array {
-	$site_id = get_locale_site_id( $locale );
-	return $site_id ? get_users_by_role( $site_id, 'general_translation_editor' ) : [];
-}
-
-/**
- * Get the project translation editors for the given locale.
- *
- * @param GP_Locale $locale The locale object.
- * @return array
- */
-function get_project_translation_editors( GP_Locale $locale ): array {
-	$site_id = get_locale_site_id( $locale );
-	return $site_id ? get_users_by_role( $site_id, 'translation_editor' ) : [];
-}
-
-/**
  * Prepares user objects for output.
  *
  * @param \WP_User $user The user.
