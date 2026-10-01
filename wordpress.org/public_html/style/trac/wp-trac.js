@@ -1080,10 +1080,10 @@ let wpTrac,
 		// Link the current user's name in the header to their profile.
 		linkHeaderUsername() {
 			const el = $( '#metanav' ).find( '.first' );
-			let username = el.text();
+			const usernameText = el.text().trim();
 
-			if ( 0 === username.indexOf( 'logged in as' ) ) {
-				username = username.replace( 'logged in as ', '' ).trim();
+			if ( usernameText.startsWith( 'logged in as ' ) ) {
+				const username = usernameText.replace( 'logged in as ', '' ).trim();
 				el.html(
 					$( '<a />', {
 						href: 'https://profiles.wordpress.org/' + encodeURIComponent( username ) + '/',
@@ -2239,47 +2239,48 @@ let wpTrac,
 						'trac-ticket-subs': true,
 						tickets,
 					},
-				} ).done( function ( data ) {
-					if ( ! data.success ) {
-						return;
-					}
-
-					if ( data.data.nonce ) {
-						_nonce = data.data.nonce;
-					}
-
-					stars
-						.each( function () {
-							if ( data.data.tickets.includes( $( this ).data( 'ticket' ) ) ) {
-								$( this ).toggleClass( 'dashicons-star-empty dashicons-star-filled' );
-							}
-						} )
-						.removeClass( 'loading' )
-						.on( 'click', function () {
-							const clickedStar = $( this );
-							clickedStar.toggleClass( 'dashicons-star-empty dashicons-star-filled' );
-							const action = clickedStar.hasClass( 'dashicons-star-filled' )
-								? 'subscribe'
-								: 'unsubscribe';
-							const delta = 'subscribe' === action ? 1 : -1;
-							save( action, clickedStar.data( 'ticket' ) );
-
-							let count = parseInt( clickedStar.prev().text(), 10 );
-							if ( isNaN( count ) ) {
-								count = 0;
-							}
-							count += delta;
-							clickedStar.prev().text( count ? count : '' );
-						} );
 				} )
-				.always( function () {
-					stars.removeClass( 'loading' );
-				} );
-			}
+					.done( function ( data ) {
+						if ( ! data.success ) {
+							return;
+						}
 
-			return {
-				init,
-			};
+						if ( data.data.nonce ) {
+							_nonce = data.data.nonce;
+						}
+
+						stars
+							.each( function () {
+								if ( data.data.tickets.includes( $( this ).data( 'ticket' ) ) ) {
+									$( this ).toggleClass( 'dashicons-star-empty dashicons-star-filled' );
+								}
+							} )
+							.removeClass( 'loading' )
+							.on( 'click', function () {
+								const clickedStar = $( this );
+								clickedStar.toggleClass( 'dashicons-star-empty dashicons-star-filled' );
+								const action = clickedStar.hasClass( 'dashicons-star-filled' )
+									? 'subscribe'
+									: 'unsubscribe';
+								const delta = 'subscribe' === action ? 1 : -1;
+								save( action, clickedStar.data( 'ticket' ) );
+
+								let count = parseInt( clickedStar.prev().text(), 10 );
+								if ( isNaN( count ) ) {
+									count = 0;
+								}
+								count += delta;
+								clickedStar.prev().text( count ? count : '' );
+							} );
+					} )
+					.always( function () {
+						stars.removeClass( 'loading' );
+					} );
+				}
+
+				return {
+					init,
+				};
 		} )(),
 
 		githubPRs: ( function () {
