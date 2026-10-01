@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Providers\WPOrgSSOServiceProvider;
 use Modules\WPOrgSSO\Services\Client;
+use Modules\WPOrgSSO\Services\Passwords;
 use Modules\WPOrgSSO\Services\Saml;
 use Modules\WPOrgSSO\Services\UserSync;
 use Modules\WPOrgSSO\Services\WordPressOrgUser;
@@ -135,6 +136,7 @@ final class SsoController extends Controller {
 
 		// Core only activates users through the invite setup, which is closed now; sync saves it.
 		$user->invite_state = User::INVITE_STATE_ACTIVATED;
+		Passwords::clear_unless_break_glass( $user );
 		UserSync::sync( $user, $wporg_user );
 
 		$request->session()->put( WPOrgSSOServiceProvider::SESSION_USERNAME, $username );
