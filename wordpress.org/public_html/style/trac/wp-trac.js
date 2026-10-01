@@ -2406,11 +2406,15 @@ let wpTrac,
 					if ( authenticated ) {
 						params.set( 'authenticated', '1' );
 					}
-					$.ajax( `${ apiEndpoint }?${ params }` ).done( function ( ticketList ) {
-						document.location = `${ document.location }${
-							document.location.search ? '&' : '?'
-						}GITHUBTICKETS=${ ticketList.join( ',' ) }`;
-					} );
+					$.ajax( `${ apiEndpoint }?${ params }` )
+						.done( function ( ticketList ) {
+							document.location = `${ document.location }${
+								document.location.search ? '&' : '?'
+							}GITHUBTICKETS=${ ticketList.join( ',' ) }`;
+						} )
+						.fail( function () {
+							$button.prop( 'disabled', false ).text( 'Retry loading PRs' );
+						} );
 				} );
 			}
 
