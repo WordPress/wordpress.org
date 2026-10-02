@@ -532,7 +532,7 @@ let wpTrac,
 
 				// Submit comment form on Cmd/Ctrl + Enter.
 				$( '#comment' ).on( 'keydown', function ( event ) {
-					if ( event.ctrlKey && ( event.keyCode === 10 || event.keyCode === 13 ) ) {
+					if ( ( event.ctrlKey || event.metaKey ) && event.key === 'Enter' ) {
 						$( 'input[name="submit"]' ).trigger( 'click' );
 					}
 				} );
