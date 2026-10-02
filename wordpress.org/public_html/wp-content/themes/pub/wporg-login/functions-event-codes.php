@@ -2,7 +2,7 @@
 /**
  * Event signup codes.
  *
- * Lets education events share a link like https://login.wordpress.org/register?event=K7P4M2
+ * Lets education events share a link like https://login.wordpress.org/register?event=K7P4M2QX
  * so a room of people on one network can register without tripping the per-IP registration limit.
  *
  * A valid code only resets the per-IP counter for the submitting IP. reCAPTCHA, heuristics,
@@ -30,7 +30,7 @@ const WPORG_EVENT_CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 /**
  * Length of a code.
  */
-const WPORG_EVENT_CODE_LENGTH = 6;
+const WPORG_EVENT_CODE_LENGTH = 8;
 
 /**
  * Hard cap on signups per code.
