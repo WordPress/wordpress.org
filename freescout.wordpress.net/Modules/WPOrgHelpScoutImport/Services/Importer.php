@@ -21,6 +21,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Schema;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
+use Modules\WPOrgHelpScoutImport\Exceptions\ApiError;
 
 /**
  * Creates the conversation, or adds what's new to it, and keeps its status, assignee, and dates as HelpScout has them.
@@ -59,7 +60,7 @@ final class Importer {
 	public const SKIPPED_UNPUBLISHED = 'unpublished';
 
 	/**
-	 * Left it out: its sender has no email.
+	 * Left it out: HelpScout names no sender for it.
 	 *
 	 * @var string
 	 */
@@ -80,11 +81,11 @@ final class Importer {
 	public const SKIPPED_EMPTY = 'empty';
 
 	/**
-	 * Left it out: it's in another FreeScout mailbox, where agents worked on it.
+	 * Left it out: retrying it, it's in another HelpScout mailbox now, imported with that one.
 	 *
 	 * @var string
 	 */
-	public const SKIPPED_ELSEWHERE = 'elsewhere';
+	public const SKIPPED_MOVED = 'moved';
 
 	/**
 	 * Left it out: HelpScout no longer has it, or merged it into another.
@@ -163,6 +164,13 @@ final class Importer {
 	private $downloads = array();
 
 	/**
+	 * Attachments created for the conversation being imported, whose files go if its transaction is rolled back.
+	 *
+	 * @var Attachment[]
+	 */
+	private $attachments = array();
+
+	/**
 	 * Bytes of images downloaded for the conversation being imported.
 	 *
 	 * @var int
@@ -203,26 +211,39 @@ final class Importer {
 	 * @param Mailbox $mailbox FreeScout mailbox to import into.
 	 * @return string IMPORTED, UPDATED, or one of the SKIPPED_ constants.
 	 *
-	 * @throws \Throwable If it couldn't be read or written; nothing of it is written then.
+	 * @throws ApiError   If HelpScout didn't give it; nothing of it is written then.
+	 * @throws \Throwable If it couldn't be read or written otherwise; nothing of it is written then either.
 	 */
 	public function import( array $source, Mailbox $mailbox ): string {
 		$helpscout_id = (int) ( $source['id'] ?? 0 );
-		$status       = self::STATUSES[ $source['status'] ?? '' ] ?? null;
-
-		if ( 'spam' === ( $source['status'] ?? '' ) ) {
-			return self::SKIPPED_SPAM;
-		}
-
-		if ( ! $helpscout_id || ! $status || 'published' !== ( $source['state'] ?? '' ) ) {
-			return self::SKIPPED_UNPUBLISHED;
-		}
-
-		$imported     = ImportedConversation::query()->where( 'helpscout_id', $helpscout_id )->first();
+		$imported     = $helpscout_id ? ImportedConversation::query()->where( 'helpscout_id', $helpscout_id )->first() : null;
 		$conversation = $imported ? Conversation::find( $imported->conversation_id ) : null;
+		$worked_on    = $conversation && $conversation->threads()->where( 'imported', false )->exists();
 
 		// Deleted in FreeScout since: it stays deleted.
 		if ( $imported && ! $conversation ) {
 			return self::SKIPPED_DELETED;
+		}
+
+		if ( 'spam' === ( $source['status'] ?? '' ) ) {
+			// Marked spam in HelpScout since it was imported: it's spam here too, unless agents worked on it.
+			if ( $conversation && ! $worked_on && ! $conversation->isSpam() ) {
+				$conversation->status     = Conversation::STATUS_SPAM;
+				$conversation->timestamps = false;
+				$conversation->updateFolder();
+				$conversation->save();
+				$conversation->timestamps = true;
+				$conversation->mailbox->updateFoldersCounters();
+
+				return self::UPDATED;
+			}
+
+			return self::SKIPPED_SPAM;
+		}
+
+		$status = self::STATUSES[ $source['status'] ?? '' ] ?? null;
+		if ( ! $helpscout_id || ! $status || 'published' !== ( $source['state'] ?? '' ) ) {
+			return self::SKIPPED_UNPUBLISHED;
 		}
 
 		$sender = $conversation ? $conversation->customer : $this->people->sender( $source['primaryCustomer'] ?? null );
@@ -230,18 +251,25 @@ final class Importer {
 			return self::SKIPPED_NO_SENDER;
 		}
 
-		// HelpScout moved it to another mailbox since: it moves too, unless agents worked on it in FreeScout.
-		$worked_on  = $conversation && $conversation->threads()->where( 'imported', false )->exists();
-		$moved_from = $conversation && (int) $conversation->mailbox_id !== (int) $mailbox->id ? $conversation->mailbox : null;
-		if ( $moved_from && $worked_on ) {
-			return self::SKIPPED_ELSEWHERE;
-		}
+		// HelpScout moved it to another mailbox since: it moves too. Once agents worked on it, it stays where it is,
+		// and only gets HelpScout's new threads.
+		$moved_from = $conversation && ! $worked_on && (int) $conversation->mailbox_id !== (int) $mailbox->id ? $conversation->mailbox : null;
 
 		$this->downloads      = array();
 		$this->download_bytes = 0;
+		$this->attachments    = array();
 
 		try {
 			$threads = $this->new_threads( $helpscout_id, $this->helpscout->threads( $helpscout_id ) );
+		} catch ( ApiError $e ) {
+			$this->close_downloads( array() );
+
+			// Merged into another, or deleted, since it was listed.
+			if ( 404 === $e->status ) {
+				return self::SKIPPED_GONE;
+			}
+
+			throw $e;
 		} catch ( \Throwable $e ) {
 			$this->close_downloads( array() );
 
@@ -257,22 +285,20 @@ final class Importer {
 		// Users are found or created before the transaction: they stay, even if this conversation fails.
 		$this->meet_people( $source, $threads );
 
-		$attachments = array();
-
 		try {
 			\DB::transaction(
-				function () use ( &$conversation, &$attachments, $source, $mailbox, $sender, $threads, $status, $worked_on ): void {
+				function () use ( &$conversation, $source, $mailbox, $sender, $threads, $status, $worked_on, $moved_from ): void {
 					if ( ! $conversation ) {
 						$conversation = $this->create_conversation( $source, $mailbox, $sender );
 					}
 
-					if ( (int) $conversation->mailbox_id !== (int) $mailbox->id ) {
+					if ( $moved_from ) {
 						$conversation->mailbox_id = $mailbox->id;
 						$conversation->setRelation( 'mailbox', $mailbox );
 					}
 
 					foreach ( $threads as $thread ) {
-						$attachments = array_merge( $attachments, $this->create_thread( $conversation, $thread, $sender ) );
+						$this->create_thread( $conversation, $thread, $sender );
 					}
 
 					$this->update_conversation( $conversation, $source, $status, ! $worked_on );
@@ -293,12 +319,13 @@ final class Importer {
 			);
 		} catch ( \Throwable $e ) {
 			// The attachments' rows are rolled back; their files aren't.
-			foreach ( $attachments as $attachment ) {
+			foreach ( $this->attachments as $attachment ) {
 				Attachment::getDisk()->delete( $attachment->getStorageFilePath() );
 			}
 
 			throw $e;
 		} finally {
+			$this->attachments = array();
 			$this->close_downloads( $threads );
 		}
 
@@ -483,11 +510,17 @@ final class Importer {
 	 * @param bool  $embedded  Whether it's an image in the body.
 	 * @return Attachment|null
 	 */
-	private static function attach( array $file, int $thread_id, int $user_id, bool $embedded ): ?Attachment {
+	private function attach( array $file, int $thread_id, int $user_id, bool $embedded ): ?Attachment {
 		$upload     = new UploadedFile( self::path( $file['data'] ), $file['name'], $file['mime'], null, null, true );
 		$attachment = Attachment::create( $file['name'], $file['mime'], null, null, $upload, $embedded, $thread_id, $user_id ? $user_id : null );
+		if ( ! $attachment ) {
+			return null;
+		}
 
-		return $attachment ? $attachment : null;
+		// Kept as soon as it's saved, so its file goes too if anything after it fails.
+		$this->attachments[] = $attachment;
+
+		return $attachment;
 	}
 
 	/**
@@ -516,7 +549,7 @@ final class Importer {
 		$conversation->subject        = (string) ( $source['subject'] ?? '' );
 		$conversation->mailbox_id     = $mailbox->id;
 		$conversation->customer_id    = $sender->id;
-		$conversation->customer_email = self::email( $source['primaryCustomer']['email'] ?? null ) ?? (string) $sender->getMainEmail();
+		$conversation->customer_email = self::email( $source['primaryCustomer']['email'] ?? null ) ?? self::email( $sender->getMainEmail() );
 		$conversation->source_via     = $by_user ? Conversation::PERSON_USER : Conversation::PERSON_CUSTOMER;
 		$conversation->source_type    = self::source_type( (string) ( $source['source']['type'] ?? '' ) );
 		$conversation->state          = Conversation::STATE_PUBLISHED;
@@ -565,9 +598,9 @@ final class Importer {
 	 * @param Conversation $conversation Conversation.
 	 * @param array        $source       HelpScout thread, from new_threads().
 	 * @param Customer     $sender       The conversation's sender.
-	 * @return Attachment[] Attachments created.
+	 * @return void
 	 */
-	private function create_thread( Conversation $conversation, array $source, Customer $sender ): array {
+	private function create_thread( Conversation $conversation, array $source, Customer $sender ): void {
 		$type        = (int) $source['fs_type'];
 		$by_customer = Thread::TYPE_CUSTOMER === $type;
 		$author      = $by_customer ? ( $this->people->sender( $source['customer'] ?? null ) ?? $this->people->sender( $source['createdBy'] ?? null ) ?? $sender ) : null;
@@ -581,7 +614,7 @@ final class Importer {
 				// FreeScout's own copy: it isn't credited to anyone from HelpScout.
 				$this->remember_thread( array( 'id' => $source['id'] ), (int) $existing->id, true );
 
-				return array();
+				return;
 			}
 
 			if ( $existing ) {
@@ -607,7 +640,7 @@ final class Importer {
 
 		if ( $by_customer ) {
 			$thread->created_by_customer_id = $author ? $author->id : $sender->id;
-			$thread->from                   = $author ? (string) $author->getMainEmail() : null;
+			$thread->from                   = $author ? self::email( $author->getMainEmail() ) : null;
 		} else {
 			$thread->created_by_user_id = $user ? $user->id : $this->people->robot()->id;
 		}
@@ -621,23 +654,18 @@ final class Importer {
 		$thread->setCc( (array) ( $source['cc'] ?? array() ) );
 		$thread->setBcc( (array) ( $source['bcc'] ?? array() ) );
 
-		$thread_id   = (int) Thread::query()->insertGetId( $thread->getAttributes() );
-		$attachments = array();
+		$thread_id = (int) Thread::query()->insertGetId( $thread->getAttributes() );
 
 		foreach ( $source['files'] as $file ) {
-			$attachment = self::attach( $file, $thread_id, (int) $thread->created_by_user_id, false );
-			if ( $attachment ) {
-				$attachments[] = $attachment;
-			}
+			$this->attach( $file, $thread_id, (int) $thread->created_by_user_id, false );
 		}
 
 		// Like an email's inline images when FreeScout fetches it: embedded, and linked from the body.
 		$body = (string) $thread->body;
 		foreach ( $source['images'] as $src => $image ) {
-			$attachment = self::attach( $image, $thread_id, (int) $thread->created_by_user_id, true );
+			$attachment = $this->attach( $image, $thread_id, (int) $thread->created_by_user_id, true );
 			if ( $attachment ) {
-				$attachments[] = $attachment;
-				$body          = str_replace( $src, $attachment->url(), $body );
+				$body = str_replace( $src, $attachment->url(), $body );
 			}
 		}
 		if ( $body !== $thread->body ) {
@@ -645,8 +673,6 @@ final class Importer {
 		}
 
 		$this->remember_thread( $source, $thread_id, $by_customer );
-
-		return $attachments;
 	}
 
 	/**

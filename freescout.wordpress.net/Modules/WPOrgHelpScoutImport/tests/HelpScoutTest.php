@@ -278,6 +278,44 @@ final class HelpScoutTest extends ImportTestCase {
 	}
 
 	/**
+	 * A patient client doesn't wait while something else needs FreeScout's queue.
+	 *
+	 * @return void
+	 */
+	public function test_patient_client_gives_way_to_the_queue(): void {
+		$this->helpscout->only( 'GET', 'v2/users', FakeHelpScout::json( array(), 429, array( 'X-RateLimit-Retry-After' => '7' ) ) );
+		$client = $this->helpscout->client();
+		$client->set_patient(
+			true,
+			static function (): bool {
+				return false;
+			}
+		);
+
+		$this->expectException( RateLimited::class );
+		try {
+			$client->users();
+		} finally {
+			$this->assertSame( array(), $this->helpscout->slept );
+		}
+	}
+
+	/**
+	 * A thread listed on two pages, because one was added in between, comes once.
+	 *
+	 * @return void
+	 */
+	public function test_threads_on_two_pages_come_once(): void {
+		$thread = array(
+			'id'        => 3,
+			'createdAt' => '2026-09-03T00:00:00Z',
+		);
+		$this->helpscout->only( 'GET', 'v2/conversations/5/threads', self::page( 'threads', array( $thread ), array(), 2 ) )->on( 'GET', 'v2/conversations/5/threads', self::page( 'threads', array( $thread ), array(), 2 ) );
+
+		$this->assertCount( 1, $this->helpscout->client()->threads( 5 ) );
+	}
+
+	/**
 	 * A conversation HelpScout no longer has, or merged into another, is none.
 	 *
 	 * @return void

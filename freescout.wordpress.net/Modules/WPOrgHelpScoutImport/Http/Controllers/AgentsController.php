@@ -68,6 +68,7 @@ final class AgentsController extends Controller {
 				'mailbox_id'      => $mailbox_id,
 				'users'           => People::creditable()->orderBy( 'first_name' )->orderBy( 'last_name' )->get(),
 				'freescout_teams' => People::freescout_teams()->orderBy( 'first_name' )->get(),
+				'teams_module'    => People::teams_module_active(),
 				'can_connect'     => WordPressOrgAccounts::available(),
 				'error'           => $error,
 			)
@@ -109,7 +110,11 @@ final class AgentsController extends Controller {
 	 * @return Response
 	 */
 	public function export(): Response {
-		$csv = ( new WordPressOrgAccounts( new People( app( HelpScout::class ) ) ) )->export();
+		try {
+			$csv = ( new WordPressOrgAccounts( new People( app( HelpScout::class ) ) ) )->export();
+		} catch ( \Throwable $e ) {
+			return redirect()->route( 'wporghelpscoutimport.agents' )->with( 'flash_error', __( 'HelpScout couldn’t be reached: :error', array( 'error' => $e->getMessage() ) ) );
+		}
 
 		return response(
 			$csv,
@@ -149,7 +154,12 @@ final class AgentsController extends Controller {
 		set_time_limit( 300 );
 
 		$accounts = new WordPressOrgAccounts( new People( app( HelpScout::class ) ) );
-		$plan     = $accounts->plan( $rows );
+
+		try {
+			$plan = $accounts->plan( $rows );
+		} catch ( \Throwable $e ) {
+			return redirect()->route( 'wporghelpscoutimport.agents' )->with( 'flash_error', __( 'HelpScout couldn’t be reached: :error', array( 'error' => $e->getMessage() ) ) );
+		}
 
 		if ( ! filter_var( $request->input( 'apply' ), FILTER_VALIDATE_BOOLEAN ) ) {
 			return view(
@@ -161,7 +171,7 @@ final class AgentsController extends Controller {
 			);
 		}
 
-		$result = $accounts->apply( $plan );
+		$result = $accounts->apply( $plan, array_map( 'intval', (array) $request->input( 'confirmed', array() ) ) );
 		$errors = count(
 			array_filter(
 				$plan,

@@ -10,7 +10,8 @@
 		'create'  => __('Create a FreeScout user, connected to it'),
 		'done'    => __('Connected already'),
 	];
-	$ready = count( array_filter( $plan, function ( $step ) { return $step['action'] && 'done' !== $step['action']; } ) );
+	$ready      = count( array_filter( $plan, function ( $step ) { return $step['action'] && 'done' !== $step['action']; } ) );
+	$mismatched = count( array_filter( $plan, function ( $step ) { return $step['action'] && 'done' !== $step['action'] && $step['mismatch']; } ) );
 @endphp
 <div class="container">
 	<div class="flexy-container">
@@ -25,6 +26,7 @@
 
 	<div class="margin-top">
 		<p>{{ __('Nothing is changed yet. Check that each WordPress.org account is the right person, then connect them. Rows with a problem are left out.') }}</p>
+		<p>{{ __('Connecting lets the account’s owner log in as the FreeScout user. Rows whose account has neither the HelpScout user’s name nor email are highlighted, and only connected if you tick them.') }}</p>
 
 		<table class="table">
 			<thead>
@@ -37,7 +39,7 @@
 			</thead>
 			<tbody>
 				@foreach ( $plan as $step )
-					<tr @if ( $step['error'] ) class="danger" @endif>
+					<tr @if ( $step['error'] ) class="danger" @elseif ( $step['mismatch'] ) class="warning" @endif>
 						<td>
 							@if ( $step['helpscout_user'] )
 								{{ trim( ( $step['helpscout_user']['firstName'] ?? '' ) . ' ' . ( $step['helpscout_user']['lastName'] ?? '' ) ) }}<br/>
@@ -67,6 +69,9 @@
 								<strong class="text-danger">{{ $step['error'] }}</strong>
 							@else
 								{{ $actions[ $step['action'] ] }}
+								@if ( $step['mismatch'] )
+									<br/><label class="checkbox-inline"><input type="checkbox" name="confirmed[]" value="{{ $step['helpscout_user']['id'] }}" form="wporghelpscoutimport-connect"> <strong>{{ __('Not their name or email: connect anyway') }}</strong></label>
+								@endif
 							@endif
 						</td>
 					</tr>
@@ -75,11 +80,14 @@
 		</table>
 
 		@if ( $ready )
-			<form method="POST" action="{{ route( 'wporghelpscoutimport.agents.connect' ) }}">
+			<form method="POST" action="{{ route( 'wporghelpscoutimport.agents.connect' ) }}" id="wporghelpscoutimport-connect">
 				{{ csrf_field() }}
 				<input type="hidden" name="csv" value="{{ $csv }}">
 				<input type="hidden" name="apply" value="1">
 				<button type="submit" class="btn btn-primary">{{ __('Connect :count users', [ 'count' => $ready ]) }}</button>
+				@if ( $mismatched )
+					<span class="text-help">{{ __(':count of them only if ticked.', [ 'count' => $mismatched ]) }}</span>
+				@endif
 				<a href="{{ route( 'wporghelpscoutimport.agents' ) }}" class="btn btn-link">{{ __('Cancel') }}</a>
 			</form>
 		@else

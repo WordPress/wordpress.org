@@ -38,6 +38,20 @@ final class People {
 	public const ROBOT_EMAIL = 'fs-helpscout-import@example.org';
 
 	/**
+	 * Alias of FreeScout's Teams module, whose teams are robot users.
+	 *
+	 * @var string
+	 */
+	public const TEAMS_MODULE = 'teams';
+
+	/**
+	 * Sender meta key for the HelpScout ID of a sender without an email.
+	 *
+	 * @var string
+	 */
+	private const SENDER_META = 'wporghelpscoutimport';
+
+	/**
 	 * Domain of the emails given to users whose HelpScout email can't be a FreeScout user's.
 	 *
 	 * @var string
@@ -78,6 +92,13 @@ final class People {
 	 * @var array
 	 */
 	private $teams = array();
+
+	/**
+	 * Senders without an email found or created so far, by HelpScout customer ID.
+	 *
+	 * @var Customer[]
+	 */
+	private $senders = array();
 
 	/**
 	 * HelpScout user IDs remember() kept so far.
@@ -137,7 +158,15 @@ final class People {
 		}
 
 		if ( ! array_key_exists( $id, $this->teams ) ) {
-			$this->teams[ $id ] = self::mapped( $id, true ) ?? self::team_by_name( self::name( $person ) );
+			$team = self::mapped( $id, true );
+			if ( ! $team ) {
+				// Kept once found by name, so choosing another team later moves its conversations.
+				$team = self::team_by_name( self::name( $person ) );
+				if ( $team ) {
+					Agent::query()->updateOrCreate( array( 'helpscout_user_id' => $id ), array( 'user_id' => $team->id ) );
+				}
+			}
+			$this->teams[ $id ] = $team;
 		}
 
 		return $this->teams[ $id ];
@@ -265,27 +294,35 @@ final class People {
 	 * Only what was imported for that HelpScout user or team moves, not what others credited to the same FreeScout user
 	 * did; and conversations agents worked on in FreeScout keep their assignee.
 	 *
-	 * @param int  $helpscout_user_id HelpScout user or team ID.
-	 * @param User $from              Who it's credited to now.
-	 * @param User $to                Who it's credited to from now on.
+	 * @param int       $helpscout_user_id HelpScout user or team ID.
+	 * @param User|null $from              Who it's credited to now; null for a team that had none, whose
+	 *                                     conversations were imported unassigned.
+	 * @param User      $to                Who it's credited to from now on.
 	 * @return void
 	 */
-	public static function recredit( int $helpscout_user_id, User $from, User $to ): void {
-		$threads   = static function ( string $column ) use ( $helpscout_user_id ): \Illuminate\Database\Query\Builder {
+	public static function recredit( int $helpscout_user_id, ?User $from, User $to ): void {
+		$threads  = static function ( string $column ) use ( $helpscout_user_id ): \Illuminate\Database\Query\Builder {
 			return ImportedThread::query()->select( 'thread_id' )->where( $column, $helpscout_user_id )->getQuery();
 		};
-		$imported  = static function ( string $column ) use ( $helpscout_user_id ): \Illuminate\Database\Query\Builder {
+		$imported = static function ( string $column ) use ( $helpscout_user_id ): \Illuminate\Database\Query\Builder {
 			return ImportedConversation::query()->select( 'conversation_id' )->where( $column, $helpscout_user_id )->getQuery();
 		};
-		$worked_on = Thread::query()->select( 'conversation_id' )->where( 'imported', false )->getQuery();
+		$is_from  = static function ( $query, string $column ) use ( $from ) {
+			return $from ? $query->where( $column, $from->id ) : $query->whereNull( $column );
+		};
 
 		// Without the events of changed threads and conversations: imported ones were written without them too.
-		Thread::query()->whereIn( 'id', $threads( 'helpscout_user_id' ) )->where( 'created_by_user_id', $from->id )->update( array( 'created_by_user_id' => $to->id ) );
-		Thread::query()->whereIn( 'id', $threads( 'helpscout_assignee_id' ) )->where( 'user_id', $from->id )->update( array( 'user_id' => $to->id ) );
-		Conversation::query()->whereIn( 'id', $imported( 'creator_id' ) )->where( 'created_by_user_id', $from->id )->update( array( 'created_by_user_id' => $to->id ) );
-		Conversation::query()->whereIn( 'id', $imported( 'closer_id' ) )->where( 'closed_by_user_id', $from->id )->update( array( 'closed_by_user_id' => $to->id ) );
+		if ( $from ) {
+			Thread::query()->whereIn( 'id', $threads( 'helpscout_user_id' ) )->where( 'created_by_user_id', $from->id )->update( array( 'created_by_user_id' => $to->id ) );
+			Conversation::query()->whereIn( 'id', $imported( 'creator_id' ) )->where( 'created_by_user_id', $from->id )->update( array( 'created_by_user_id' => $to->id ) );
+			Conversation::query()->whereIn( 'id', $imported( 'closer_id' ) )->where( 'closed_by_user_id', $from->id )->update( array( 'closed_by_user_id' => $to->id ) );
+		}
+		$is_from( Thread::query()->whereIn( 'id', $threads( 'helpscout_assignee_id' ) ), 'user_id' )->update( array( 'user_id' => $to->id ) );
 
-		$assigned  = Conversation::query()->whereIn( 'id', $imported( 'assignee_id' ) )->whereNotIn( 'id', $worked_on )->where( 'user_id', $from->id );
+		// Conversations agents worked on in FreeScout keep their assignee.
+		$assigned  = $is_from( Conversation::query()->whereIn( 'id', $imported( 'assignee_id' ) ), 'user_id' );
+		$worked_on = Thread::query()->select( 'conversation_id' )->whereIn( 'conversation_id', $imported( 'assignee_id' ) )->where( 'imported', false )->getQuery();
+		$assigned->whereNotIn( 'id', $worked_on );
 		$mailboxes = ( clone $assigned )->distinct()->pluck( 'mailbox_id' );
 		$assigned->update( array( 'user_id' => $to->id ) );
 
@@ -307,6 +344,12 @@ final class People {
 	 */
 	public static function choose( int $helpscout_user_id, User $user ): void {
 		$previous = Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->value( 'user_id' );
+		$from     = $previous ? User::find( (int) $previous ) : null;
+
+		// The same user again, like when they're connected to WordPress.org: whether an import created them stays.
+		if ( $from && (int) $from->id === (int) $user->id ) {
+			return;
+		}
 
 		Agent::query()->updateOrCreate(
 			array( 'helpscout_user_id' => $helpscout_user_id ),
@@ -316,8 +359,8 @@ final class People {
 			)
 		);
 
-		$from = $previous ? User::find( (int) $previous ) : null;
-		if ( $from && (int) $from->id !== (int) $user->id ) {
+		// A team without one imported its conversations unassigned: they're assigned to the team chosen now.
+		if ( $from || User::TYPE_ROBOT === (int) $user->type ) {
 			self::recredit( $helpscout_user_id, $from, $user );
 		}
 	}
@@ -526,10 +569,30 @@ final class People {
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public static function freescout_teams(): \Illuminate\Database\Eloquent\Builder {
-		return User::query()
+		$query = User::query();
+
+		// Other modules, like Workflows, have robot users too: they're only teams with the Teams module on.
+		if ( ! self::teams_module_active() ) {
+			return $query->whereRaw( '1 = 0' );
+		}
+
+		return $query
 			->where( 'type', User::TYPE_ROBOT )
 			->where( 'status', '!=', User::STATUS_DELETED )
 			->where( 'email', '!=', self::ROBOT_EMAIL );
+	}
+
+	/**
+	 * Whether FreeScout's Teams module is on.
+	 *
+	 * @return bool
+	 */
+	public static function teams_module_active(): bool {
+		try {
+			return (bool) \App\Module::isActive( self::TEAMS_MODULE );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
 	}
 
 	/**
@@ -561,23 +624,53 @@ final class People {
 	/**
 	 * The FreeScout sender for a HelpScout customer, created if there's none with their email yet.
 	 *
+	 * A customer without an email, like one who only called or chatted, is a sender without one, found again by their
+	 * HelpScout ID.
+	 *
 	 * @param mixed $person HelpScout person object, like a conversation's `primaryCustomer`.
-	 * @return Customer|null Null if it has no email.
+	 * @return Customer|null Null if it isn't a customer with an email or an ID.
 	 */
 	public function sender( $person ): ?Customer {
-		if ( ! is_array( $person ) || empty( $person['email'] ) ) {
+		if ( ! is_array( $person ) ) {
 			return null;
 		}
 
-		$customer = Customer::create(
-			(string) $person['email'],
-			array(
-				'first_name' => (string) ( $person['first'] ?? '' ),
-				'last_name'  => (string) ( $person['last'] ?? '' ),
-			)
+		$data = array(
+			'first_name' => (string) ( $person['first'] ?? '' ),
+			'last_name'  => (string) ( $person['last'] ?? '' ),
 		);
 
-		return $customer instanceof Customer ? $customer : null;
+		if ( ! empty( $person['email'] ) ) {
+			$customer = Customer::create( (string) $person['email'], $data );
+
+			return $customer instanceof Customer ? $customer : null;
+		}
+
+		$id = (int) ( $person['id'] ?? 0 );
+		if ( ! $id ) {
+			return null;
+		}
+
+		if ( ! isset( $this->senders[ $id ] ) ) {
+			$meta     = '"' . self::SENDER_META . '":' . $id;
+			$customer = Customer::query()
+				->where(
+					static function ( $query ) use ( $meta ): void {
+						$query->where( 'meta', 'like', '%' . $meta . ',%' )->orWhere( 'meta', 'like', '%' . $meta . '}%' );
+					}
+				)
+				->first();
+
+			if ( ! $customer ) {
+				$customer = Customer::createWithoutEmail( $data );
+				$customer->setMeta( self::SENDER_META, $id );
+				$customer->save();
+			}
+
+			$this->senders[ $id ] = $customer;
+		}
+
+		return $this->senders[ $id ];
 	}
 
 	/**

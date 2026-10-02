@@ -124,6 +124,9 @@
 			@if ( $teams )
 				<h3 class="margin-top">{{ __('HelpScout teams') }}</h3>
 				<p>{{ __('Conversations assigned to a HelpScout team are assigned to the FreeScout team chosen here, or else to the one with the same name; without either, they’re imported unassigned. FreeScout’s teams come from its Teams module: create them there first.') }}</p>
+				@if ( ! $teams_module )
+					<div class="alert alert-warning">{{ __('The Teams module is off, so there are no FreeScout teams: conversations assigned to teams are imported unassigned. Choosing teams once it’s on assigns them.') }}</div>
+				@endif
 				<table class="table">
 					<thead>
 						<tr>

@@ -264,6 +264,22 @@ final class ImportControllerTest extends ImportTestCase {
 	}
 
 	/**
+	 * An import doesn't start while new FreeScout conversations would take numbers HelpScout uses.
+	 *
+	 * @return void
+	 */
+	public function test_import_waits_for_the_next_number(): void {
+		$this->helpscout->only( 'GET', 'v2/conversations', self::list( 'conversations', array( array( 'number' => 1126167 ) ) ) );
+
+		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() )->assertSessionHas( 'flash_error' );
+		$this->assertSame( 0, Run::query()->count() );
+
+		\Option::set( 'next_ticket', 2000000 );
+		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() );
+		$this->assertSame( 1, Run::query()->count() );
+	}
+
+	/**
 	 * Cancelling stops a run for good, and lets its mailbox take another.
 	 *
 	 * @return void

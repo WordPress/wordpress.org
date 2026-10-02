@@ -14,11 +14,11 @@
 	$skip_reasons = [
 		'spam'        => __('spam'),
 		'unpublished' => __('drafts or deleted'),
-		'no_sender'   => __('no sender email'),
+		'no_sender'   => __('no sender'),
 		'deleted'     => __('deleted in FreeScout'),
 		'empty'       => __('nothing to import'),
 		'gone'        => __('no longer in HelpScout'),
-		'elsewhere'   => __('worked on in another FreeScout mailbox'),
+		'moved'       => __('in another HelpScout mailbox now'),
 	];
 @endphp
 {{-- Not while something on the page waits to be confirmed: refreshing would lose it. --}}

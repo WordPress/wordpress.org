@@ -135,7 +135,7 @@ final class WordPressOrgAccounts {
 	public static function parse( string $csv ): array {
 		// Read as CSV, not line by line: a quoted cell can hold a line break.
 		$file = fopen( 'php://temp', 'r+' );
-		fwrite( $file, $csv );
+		fwrite( $file, (string) preg_replace( '/^\xEF\xBB\xBF/', '', $csv ) );
 		rewind( $file );
 
 		$header = array_map( 'strtolower', array_map( array( self::class, 'uncell' ), (array) fgetcsv( $file, 0, ',', '"', '' ) ) );
@@ -174,18 +174,24 @@ final class WordPressOrgAccounts {
 	 *                 `error` (why nothing can be done, or '').
 	 */
 	public function plan( array $rows ): array {
-		$client  = Client::from_config();
-		$plan    = array();
-		$people  = array();
-		$targets = array();
+		$client    = Client::from_config();
+		$plan      = array();
+		$people    = array();
+		$targets   = array();
+		$usernames = array();
 
 		foreach ( $rows as $row ) {
 			$step = $this->plan_row( $row, $client );
 			$id   = (int) ( $step['helpscout_user']['id'] ?? 0 );
 			$user = $step['user'] ? (int) $step['user']->id : 0;
 
-			// One account per person: a CSV can't connect anyone twice, or one FreeScout user to two accounts.
-			if ( ! $step['error'] && isset( $people[ $id ] ) ) {
+			// One account per person: a CSV can't connect anyone twice, one account twice, or one FreeScout user to two.
+			if ( ! $step['error'] && isset( $usernames[ $step['wporg_user']->username ] ) ) {
+				$step = array(
+					'action' => null,
+					'error'  => __( 'Another row names this WordPress.org account already.' ),
+				) + $step;
+			} elseif ( ! $step['error'] && isset( $people[ $id ] ) ) {
 				$step = array(
 					'action' => null,
 					'error'  => __( 'Another row is for this HelpScout user already.' ),
@@ -198,7 +204,8 @@ final class WordPressOrgAccounts {
 			}
 
 			if ( ! $step['error'] ) {
-				$people[ $id ] = true;
+				$usernames[ $step['wporg_user']->username ] = true;
+				$people[ $id ]                              = true;
 				if ( $user ) {
 					$targets[ $user ] = $step['wporg_user']->username;
 				}
@@ -213,10 +220,11 @@ final class WordPressOrgAccounts {
 	/**
 	 * Connects what plan() says can be: creates users, connects them, and credits HelpScout users to them.
 	 *
-	 * @param array[] $plan From plan().
+	 * @param array[] $plan      From plan().
+	 * @param int[]   $confirmed HelpScout user IDs of rows whose account doesn't look like theirs, connected anyway.
 	 * @return array `done`: the users connected or credited, by HelpScout user ID; `skipped`: why the rest weren't.
 	 */
-	public function apply( array $plan ): array {
+	public function apply( array $plan, array $confirmed = array() ): array {
 		$done    = array();
 		$skipped = array();
 
@@ -227,6 +235,11 @@ final class WordPressOrgAccounts {
 
 			$username = $step['wporg_user']->username;
 			$id       = (int) $step['helpscout_user']['id'];
+
+			if ( $step['mismatch'] && ! in_array( $id, array_map( 'intval', $confirmed ), true ) ) {
+				$skipped[ $id ] = __( 'Its account doesn’t look like theirs, and wasn’t confirmed.' );
+				continue;
+			}
 
 			// Another row may have connected the account since: two HelpScout users of the same person.
 			$connected = Account::user_for( $username );
@@ -314,6 +327,7 @@ final class WordPressOrgAccounts {
 			'wporg_user'     => null,
 			'action'         => null,
 			'user'           => null,
+			'mismatch'       => false,
 			'error'          => '',
 		);
 
@@ -340,8 +354,9 @@ final class WordPressOrgAccounts {
 			$action = $existing && (int) $existing->id === (int) $connected->id ? self::DONE : self::USE;
 
 			return array(
-				'action' => $action,
-				'user'   => $connected,
+				'action'   => $action,
+				'user'     => $connected,
+				'mismatch' => self::USE === $action && self::mismatch( $step['helpscout_user'], $step['wporg_user'] ),
 			) + $step;
 		}
 
@@ -356,9 +371,29 @@ final class WordPressOrgAccounts {
 		}
 
 		return array(
-			'action' => $user ? self::CONNECT : self::CREATE,
-			'user'   => $user,
+			'action'   => $user ? self::CONNECT : self::CREATE,
+			'user'     => $user,
+			'mismatch' => self::mismatch( $step['helpscout_user'], $step['wporg_user'] ),
 		) + $step;
+	}
+
+	/**
+	 * Whether a WordPress.org account looks like someone else's than a HelpScout user's: neither name nor email match.
+	 *
+	 * Connecting it lets its owner log in as the user, so a username a CSV got wrong has to be confirmed.
+	 *
+	 * @param array            $helpscout_user HelpScout user.
+	 * @param WordPressOrgUser $wporg_user     WordPress.org account.
+	 * @return bool
+	 */
+	private static function mismatch( array $helpscout_user, WordPressOrgUser $wporg_user ): bool {
+		$email = (string) ( $helpscout_user['email'] ?? '' );
+		$name  = trim( ( $helpscout_user['firstName'] ?? '' ) . ' ' . ( $helpscout_user['lastName'] ?? '' ) );
+
+		$same_email = '' !== $email && 0 === strcasecmp( $email, $wporg_user->email );
+		$same_name  = '' !== $name && 0 === strcasecmp( $name, trim( $wporg_user->first_name . ' ' . $wporg_user->last_name ) );
+
+		return ! $same_email && ! $same_name;
 	}
 
 	/**

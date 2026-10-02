@@ -285,6 +285,9 @@ final class ImporterTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_team_assignments_go_to_freescout_teams(): void {
+		\App\Module::clearModulesCache();
+		\App\Module::setActive( People::TEAMS_MODULE, true );
+		\App\Module::clearModulesCache();
 		$team           = factory( User::class )->create(
 			array(
 				'first_name' => 'Photo',
@@ -459,7 +462,7 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
-	 * A conversation HelpScout moved to another mailbox moves too, unless agents worked on it in FreeScout.
+	 * A conversation HelpScout moved to another mailbox moves too; once agents worked on it, it only gets new threads.
 	 *
 	 * @return void
 	 */
@@ -472,8 +475,78 @@ final class ImporterTest extends ImportTestCase {
 		$this->assertSame( (int) $themes->id, (int) $this->imported_conversation()->folder->mailbox_id );
 
 		$this->create_thread( $this->imported_conversation(), Thread::TYPE_NOTE, 'On it.', $this->agent, '2026-09-10 08:00:00' );
-		$this->assertSame( Importer::SKIPPED_ELSEWHERE, $this->importer->import( $this->conversation(), $this->mailbox ) );
+		$threads   = $this->threads();
+		$threads[] = array_replace(
+			$threads[0],
+			array(
+				'id'        => 2012,
+				'body'      => 'Any news?',
+				'createdAt' => '2026-09-11T08:00:00Z',
+				'_embedded' => array(),
+			)
+		);
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+
+		$this->assertSame( Importer::UPDATED, $this->importer->import( $this->conversation(), $this->mailbox ) );
 		$this->assertSame( (int) $themes->id, (int) $this->imported_conversation()->mailbox_id );
+		$this->assertSame( 1, $this->imported_conversation()->threads()->where( 'body', 'Any news?' )->count() );
+	}
+
+	/**
+	 * A conversation marked spam in HelpScout after it was imported is spam in FreeScout too.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_marked_spam_since_is_spam(): void {
+		$this->importer->import( $this->conversation( array( 'status' => 'active' ) ), $this->mailbox );
+
+		$this->assertSame( Importer::UPDATED, $this->importer->import( $this->conversation( array( 'status' => 'spam' ) ), $this->mailbox ) );
+		$this->assertSame( Conversation::STATUS_SPAM, (int) $this->imported_conversation()->status );
+		$this->assertSame( Folder::TYPE_SPAM, (int) $this->imported_conversation()->folder->type );
+	}
+
+	/**
+	 * A sender without an email, like a caller, is imported without one, and found again by their HelpScout ID.
+	 *
+	 * @return void
+	 */
+	public function test_senders_without_email_are_imported(): void {
+		$caller = array(
+			'id'    => 4242,
+			'type'  => 'customer',
+			'first' => 'Cal',
+			'last'  => 'Ler',
+		);
+
+		$this->assertSame(
+			Importer::IMPORTED,
+			$this->importer->import(
+				$this->conversation(
+					array(
+						'type'            => 'phone',
+						'primaryCustomer' => $caller,
+						'createdBy'       => $caller,
+					)
+				),
+				$this->mailbox
+			)
+		);
+
+		$customer = $this->imported_conversation()->customer;
+		$this->assertSame( 'Cal', $customer->first_name );
+		$this->assertNull( $this->imported_conversation()->customer_email );
+		$this->assertSame( (int) $customer->id, (int) ( new People() )->sender( $caller )->id );
+	}
+
+	/**
+	 * A conversation merged or deleted in HelpScout between being listed and read is gone, not failed.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_gone_since_it_was_listed_is_skipped(): void {
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/threads', FakeHelpScout::json( array(), 404 ) );
+
+		$this->assertSame( Importer::SKIPPED_GONE, $this->importer->import( $this->conversation(), $this->mailbox ) );
 	}
 
 	/**
@@ -775,14 +848,10 @@ final class ImporterTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_failure_leaves_nothing_half_imported(): void {
-		$threads                 = $this->threads();
-		$threads[1]['_embedded'] = array(
-			'attachments' => array(
-				array(
-					'id'       => 3002,
-					'filename' => 'second.jpg',
-				),
-			),
+		$threads                                  = $this->threads();
+		$threads[0]['_embedded']['attachments'][] = array(
+			'id'       => 3002,
+			'filename' => 'second.jpg',
 		);
 		$this->answer_threads( self::CONVERSATION_ID, $threads );
 

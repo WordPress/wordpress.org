@@ -128,7 +128,7 @@ final class ImportPage implements ShouldQueue {
 				);
 				$page   = array( 'conversations' => array() );
 			} else {
-				$page   = $helpscout->conversations( (int) $run->helpscout_mailbox_id, (int) $run->page, $run->since );
+				$page   = $this->page( $helpscout, $run );
 				$listed = $page['conversations'];
 
 				if ( $run->page > 1 ) {
@@ -143,8 +143,8 @@ final class ImportPage implements ShouldQueue {
 					$listed   = array_merge( array_values( $moved ), $listed );
 				}
 
-				$run->pages = $page['pages'];
-				$run->total = $page['total'];
+				$run->pages = $page['pages'] ? $page['pages'] : $run->pages;
+				$run->total = $page['total'] ? $page['total'] : $run->total;
 			}
 
 			$done     = self::ids( (array) $run->page_done );
@@ -174,7 +174,7 @@ final class ImportPage implements ShouldQueue {
 					$run->add_failure( $current, 'Its import stopped ' . self::MAX_ATTEMPTS . ' times without finishing, like by running out of memory or time, or HelpScout failing for it.' );
 				} else {
 					// The rate limit cut this one off before: it needs more than a minute's share, so this time it waits.
-					$helpscout->set_patient( $current === (int) $run->waiting_on );
+					$helpscout->set_patient( $current === (int) $run->waiting_on, array( self::class, 'queue_is_free' ) );
 
 					$this->import( $importer, $helpscout, (array) $conversation, $mailbox, $run );
 				}
@@ -194,7 +194,7 @@ final class ImportPage implements ShouldQueue {
 		} catch ( RateLimited $e ) {
 			// Waiting for the rate limit isn't a failed attempt.
 			$run->waiting_on = $current ? $current : null;
-			$run->attempts   = max( 0, $run->attempts - 1 );
+			$run->attempts   = $current ? max( 0, $run->attempts - 1 ) : $run->attempts;
 			$this->save( $run );
 			$this->again( $e->retry_after );
 
@@ -202,16 +202,16 @@ final class ImportPage implements ShouldQueue {
 		} catch ( ApiError $e ) {
 			// Refused, or an answer to the list that waiting won't change.
 			if ( $e->is_denied() || ( $e->status >= 400 && $e->status < 500 ) ) {
-				$this->stop( $run, $e->getMessage() );
+				$this->stop( $run, Run::describe( $e ) );
 			} else {
-				$this->fail_page( $run, $e->getMessage() );
+				$this->fail_page( $run, Run::describe( $e ) );
 			}
 
 			return;
 		} catch ( \Throwable $e ) {
 			// FreeScout's worker doesn't retry jobs: without this, the run would wait for a job that's gone.
-			\Log::error( '[WPOrgHelpScoutImport] Could not import a page of ' . $run->helpscout_mailbox_name . ': ' . $e->getMessage() );
-			$this->fail_page( $run, $e->getMessage() );
+			\Log::error( '[WPOrgHelpScoutImport] Could not import a page of ' . $run->helpscout_mailbox_name . ': ' . Run::describe( $e ) );
+			$this->fail_page( $run, Run::describe( $e ) );
 
 			return;
 		} finally {
@@ -262,7 +262,14 @@ final class ImportPage implements ShouldQueue {
 				$conversation = $helpscout->conversation( $id );
 			}
 
-			$result = $conversation ? $importer->import( $conversation, $mailbox ) : Importer::SKIPPED_GONE;
+			if ( ! $conversation ) {
+				$result = Importer::SKIPPED_GONE;
+			} elseif ( isset( $conversation['mailboxId'] ) && (int) $conversation['mailboxId'] !== (int) $run->helpscout_mailbox_id ) {
+				// Moved to another HelpScout mailbox since it failed: it's imported with that one.
+				$result = Importer::SKIPPED_MOVED;
+			} else {
+				$result = $importer->import( $conversation, $mailbox );
+			}
 		} catch ( ApiError $e ) {
 			// The rate limit, rejected credentials, and outages hold for every conversation; a 403 may be this one's.
 			if ( $e instanceof RateLimited || 401 === $e->status || 0 === $e->status || $e->status >= 500 ) {
@@ -282,6 +289,73 @@ final class ImportPage implements ShouldQueue {
 			$run->add_skip( $result );
 		} else {
 			++$run->{$result};
+		}
+	}
+
+	/**
+	 * Goes on after the job itself failed, like when the worker ran out of memory or time on a conversation.
+	 *
+	 * FreeScout's worker tries a job only once; without this, the run would wait for a Resume. The conversation it
+	 * failed on is tried again, and counted as failed after a few tries.
+	 *
+	 * @param \Throwable|null $exception Why it failed.
+	 * @return void
+	 */
+	public function failed( $exception = null ): void {
+		$run = $this->current_run();
+		if ( ! $run ) {
+			return;
+		}
+
+		$run->last_error = $exception ? Run::describe( $exception ) : 'The import job stopped.';
+		$this->save( $run );
+		$this->again( self::RETRY_DELAY );
+	}
+
+	/**
+	 * The run's current page of HelpScout's list.
+	 *
+	 * Past the last page HelpScout gave so far, an answer it won't give counts as an empty page: the end of the list.
+	 *
+	 * @param HelpScout $helpscout HelpScout API client.
+	 * @param Run       $run       Run.
+	 * @return array See HelpScout::conversations().
+	 *
+	 * @throws ApiError If HelpScout didn't give the page.
+	 */
+	private function page( HelpScout $helpscout, Run $run ): array {
+		try {
+			return $helpscout->conversations( (int) $run->helpscout_mailbox_id, (int) $run->page, $run->since );
+		} catch ( ApiError $e ) {
+			if ( $run->pages && $run->page > $run->pages && $e->status >= 400 && $e->status < 500 && ! $e instanceof RateLimited && ! $e->is_denied() ) {
+				return array(
+					'conversations' => array(),
+					'pages'         => 0,
+					'total'         => 0,
+				);
+			}
+
+			throw $e;
+		}
+	}
+
+	/**
+	 * Whether FreeScout's queue has nothing waiting that a patient request would hold up, like outgoing email.
+	 *
+	 * @return bool
+	 */
+	public static function queue_is_free(): bool {
+		try {
+			if ( 'database' !== config( 'queue.default' ) ) {
+				return true;
+			}
+
+			return ! \DB::table( (string) config( 'queue.connections.database.table', 'jobs' ) )
+				->where( 'queue', 'emails' )
+				->where( 'available_at', '<=', time() )
+				->exists();
+		} catch ( \Throwable $e ) {
+			return false;
 		}
 	}
 
@@ -314,7 +388,7 @@ final class ImportPage implements ShouldQueue {
 	 * @return void
 	 */
 	private function fail( Run $run, int $id, \Throwable $e ): void {
-		$run->add_failure( $id, $e->getMessage() );
+		$run->add_failure( $id, Run::describe( $e ) );
 		\Log::error( '[WPOrgHelpScoutImport] Could not import ' . $run->last_error );
 	}
 

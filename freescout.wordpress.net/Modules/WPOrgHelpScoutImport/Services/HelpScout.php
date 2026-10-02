@@ -114,6 +114,13 @@ final class HelpScout {
 	private $sleep;
 
 	/**
+	 * Says whether a patient request may wait right now; always, if null.
+	 *
+	 * @var callable|null
+	 */
+	private $may_wait;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string          $app_id     App ID.
@@ -170,13 +177,15 @@ final class HelpScout {
 	 * Sets whether requests wait for the rate limit, rather than throw RateLimited.
 	 *
 	 * Waiting holds up FreeScout's queue, so it's only for what can't finish otherwise: a conversation that needs more
-	 * requests than one minute's share of the limit.
+	 * requests than one minute's share of the limit. Even then, it only waits while nothing else needs the queue.
 	 *
-	 * @param bool $patient Whether to wait.
+	 * @param bool          $patient  Whether to wait.
+	 * @param callable|null $may_wait Says whether waiting is fine right now; always, if null.
 	 * @return void
 	 */
-	public function set_patient( bool $patient ): void {
-		$this->patient = $patient;
+	public function set_patient( bool $patient, ?callable $may_wait = null ): void {
+		$this->patient  = $patient;
+		$this->may_wait = $may_wait;
 	}
 
 	/**
@@ -276,7 +285,8 @@ final class HelpScout {
 	 * @return array[] Threads.
 	 */
 	public function threads( int $conversation_id ): array {
-		$threads = $this->all( 'v2/conversations/' . $conversation_id . '/threads', array(), 'threads' );
+		// A thread added between pages shows up on two of them: once is enough.
+		$threads = array_values( array_column( $this->all( 'v2/conversations/' . $conversation_id . '/threads', array(), 'threads' ), null, 'id' ) );
 
 		usort(
 			$threads,
@@ -554,7 +564,7 @@ final class HelpScout {
 		}
 
 		// Waiting holds up FreeScout's queue: no longer than a minute's limit takes to reset.
-		if ( ! $this->patient || $waits >= self::MAX_WAITS || $seconds > self::MAX_WAIT_SECONDS ) {
+		if ( ! $this->patient || $waits >= self::MAX_WAITS || $seconds > self::MAX_WAIT_SECONDS || ( $this->may_wait && ! ( $this->may_wait )() ) ) {
 			throw new RateLimited( $seconds );
 		}
 

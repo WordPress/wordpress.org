@@ -160,6 +160,18 @@ final class Run extends Model {
 	}
 
 	/**
+	 * What went wrong, short, and without what a database error's SQL would show of imported data.
+	 *
+	 * @param \Throwable $e What went wrong.
+	 * @return string
+	 */
+	public static function describe( \Throwable $e ): string {
+		$message = $e instanceof \Illuminate\Database\QueryException && $e->getPrevious() ? $e->getPrevious()->getMessage() : $e->getMessage();
+
+		return mb_substr( $message, 0, 300 );
+	}
+
+	/**
 	 * Counts a conversation it left out.
 	 *
 	 * @param string $reason Why, one of Importer's SKIPPED_ constants.
@@ -186,7 +198,7 @@ final class Run extends Model {
 			$this->failures            = $failures;
 		}
 
-		$this->last_error = 'HelpScout conversation ' . $helpscout_id . ': ' . $error;
+		$this->last_error = mb_substr( 'HelpScout conversation ' . $helpscout_id . ': ' . $error, 0, 400 );
 		++$this->failed;
 	}
 

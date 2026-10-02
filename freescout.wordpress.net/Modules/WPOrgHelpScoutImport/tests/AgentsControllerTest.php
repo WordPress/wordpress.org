@@ -108,6 +108,9 @@ final class AgentsControllerTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_teams_are_matched_by_name_and_can_be_chosen(): void {
+		\App\Module::clearModulesCache();
+		\App\Module::setActive( People::TEAMS_MODULE, true );
+		\App\Module::clearModulesCache();
 		$moderators = $this->create_team( 'Photo Moderators' );
 		$other      = $this->create_team( 'Reviewers' );
 
@@ -135,6 +138,92 @@ final class AgentsControllerTest extends ImportTestCase {
 				)
 			)->id
 		);
+	}
+
+	/**
+	 * Choosing a team after an import moves its conversations: from the team found by name, or from none.
+	 *
+	 * @return void
+	 */
+	public function test_choosing_a_team_later_moves_its_conversations(): void {
+		\App\Module::clearModulesCache();
+		\App\Module::setActive( People::TEAMS_MODULE, true );
+		\App\Module::clearModulesCache();
+		$moderators = $this->create_team( 'Photo Moderators' );
+		$reviewers  = $this->create_team( 'Reviewers' );
+		$importer   = new Importer( app( HelpScout::class ), new People( app( HelpScout::class ) ) );
+		$assigned   = function ( int $team_id, string $name ): array {
+			return $this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => array(
+						'id'    => $team_id,
+						'type'  => 'team',
+						'first' => $name,
+					),
+				)
+			);
+		};
+
+		$importer->import( $assigned( 90, 'Photo Moderators' ), $this->mailbox );
+		$conversation = Conversation::query()->findOrFail( ImportedConversation::query()->value( 'conversation_id' ) );
+		$this->assertSame( (int) $moderators->id, (int) $conversation->user_id );
+
+		$this->post( route( 'wporghelpscoutimport.agents.save' ), array( 'teams' => array( 90 => $reviewers->id ) ) );
+		$this->assertSame( (int) $reviewers->id, (int) $conversation->fresh()->user_id );
+
+		// A team without a FreeScout team was imported unassigned; choosing one assigns its conversations.
+		$this->answer_threads( 1002, $this->threads( 100 ) );
+		$importer->import( array_replace( $assigned( 91, 'Legal' ), array( 'id' => 1002 ) ), $this->mailbox );
+		$legal = Conversation::query()->findOrFail( ImportedConversation::query()->where( 'helpscout_id', 1002 )->value( 'conversation_id' ) );
+		$this->assertNull( $legal->user_id );
+
+		$this->post( route( 'wporghelpscoutimport.agents.save' ), array( 'teams' => array( 91 => $moderators->id ) ) );
+		$this->assertSame( (int) $moderators->id, (int) $legal->fresh()->user_id );
+	}
+
+	/**
+	 * A row whose account has neither the HelpScout user's name nor email is only connected once it's ticked.
+	 *
+	 * @return void
+	 */
+	public function test_unlikely_accounts_are_connected_only_when_ticked(): void {
+		$this->use_wordpress_org();
+		$csv = "\xEF\xBB\xBFhelpscout_id,wporg_username\n56,adaagent\n";
+
+		$this->assertStringContainsString( 'Not their name or email: connect anyway', $this->post( route( 'wporghelpscoutimport.agents.connect' ), array( 'csv' => $csv ) )->getContent() );
+
+		$this->post(
+			route( 'wporghelpscoutimport.agents.connect' ),
+			array(
+				'csv'   => $csv,
+				'apply' => 1,
+			)
+		);
+		$this->assertFalse( Account::query()->where( 'username', 'adaagent' )->exists() );
+
+		$this->post(
+			route( 'wporghelpscoutimport.agents.connect' ),
+			array(
+				'csv'       => $csv,
+				'apply'     => 1,
+				'confirmed' => array( 56 ),
+			)
+		);
+		$this->assertTrue( Account::query()->where( 'username', 'adaagent' )->exists() );
+	}
+
+	/**
+	 * Two rows can't name the same WordPress.org account.
+	 *
+	 * @return void
+	 */
+	public function test_an_account_is_named_once(): void {
+		$this->use_wordpress_org();
+
+		$page = $this->post( route( 'wporghelpscoutimport.agents.connect' ), array( 'csv' => "helpscout_id,wporg_username\n56,bonew\n57,BoNew\n" ) )->getContent();
+
+		$this->assertStringContainsString( 'Another row names this WordPress.org account already.', $page );
 	}
 
 	/**
@@ -377,8 +466,9 @@ final class AgentsControllerTest extends ImportTestCase {
 		$this->post(
 			route( 'wporghelpscoutimport.agents.connect' ),
 			array(
-				'csv'   => "helpscout_id,wporg_username\n57,adminuser\n",
-				'apply' => 1,
+				'csv'       => "helpscout_id,wporg_username\n57,adminuser\n",
+				'apply'     => 1,
+				'confirmed' => array( 57 ),
 			)
 		);
 

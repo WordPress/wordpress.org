@@ -112,6 +112,12 @@ final class ImportController extends Controller {
 			return self::back_with_error( __( self::BUSY ) );
 		}
 
+		// Imported conversations take HelpScout's numbers: new ones in FreeScout mustn't take those first.
+		$numbering = self::numbering( $helpscout );
+		if ( $numbering && $numbering['next'] <= $numbering['highest'] ) {
+			return self::back_with_error( __( 'Set Next Conversation # above :highest under Manage » Settings » General first, so FreeScout doesn’t give away HelpScout’s numbers.', array( 'highest' => number_format( $numbering['highest'] ) ) ) );
+		}
+
 		try {
 			if ( ! filter_var( $request->input( 'confirmed' ), FILTER_VALIDATE_BOOLEAN ) ) {
 				$pending = $people->pending( $source_id );
@@ -136,31 +142,38 @@ final class ImportController extends Controller {
 						);
 				}
 			}
-
-			$created = $people->prepare( $source_id, $mailbox );
 		} catch ( \Throwable $e ) {
 			return self::back_with_error( $e->getMessage() );
 		}
 
-		$run = \DB::transaction(
-			static function () use ( $source_id, $source, $mailbox, $everything ): ?Run {
-				if ( ! self::lock( (int) $mailbox->id ) ) {
-					return null;
+		$created = array();
+
+		try {
+			$run = \DB::transaction(
+				static function () use ( $source_id, $source, $mailbox, $everything, $people, &$created ): ?Run {
+					// Users are created under the lock too, so a double click doesn't create them twice.
+					if ( ! self::lock( (int) $mailbox->id ) ) {
+						return null;
+					}
+
+					$created = $people->prepare( $source_id, $mailbox );
+
+					$previous = $everything ? null : Run::query()
+						->where( 'helpscout_mailbox_id', $source_id )
+						->where( 'mailbox_id', $mailbox->id )
+						->where( 'status', Run::STATUS_DONE )
+						->whereNull( 'retry_ids' )
+						->whereNotNull( 'started_at' )
+						->orderByDesc( 'started_at' )
+						->first();
+					$since    = $previous ? $previous->started_at->copy()->subMinutes( self::CHANGES_OVERLAP_MINUTES ) : null;
+
+					return self::begin( $source_id, (string) ( $source['name'] ?? '' ), (int) $mailbox->id, $since );
 				}
-
-				$previous = $everything ? null : Run::query()
-					->where( 'helpscout_mailbox_id', $source_id )
-					->where( 'mailbox_id', $mailbox->id )
-					->where( 'status', Run::STATUS_DONE )
-					->whereNull( 'retry_ids' )
-					->whereNotNull( 'started_at' )
-					->orderByDesc( 'started_at' )
-					->first();
-				$since    = $previous ? $previous->started_at->copy()->subMinutes( self::CHANGES_OVERLAP_MINUTES ) : null;
-
-				return self::begin( $source_id, (string) ( $source['name'] ?? '' ), (int) $mailbox->id, $since );
-			}
-		);
+			);
+		} catch ( \Throwable $e ) {
+			return self::back_with_error( $e->getMessage() );
+		}
 
 		if ( ! $run ) {
 			return self::back_with_error( __( self::BUSY ) );

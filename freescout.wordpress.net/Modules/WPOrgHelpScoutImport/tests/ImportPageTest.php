@@ -326,12 +326,50 @@ final class ImportPageTest extends ImportTestCase {
 	}
 
 	/**
+	 * Retrying a conversation that's in another HelpScout mailbox now leaves it to that mailbox's import.
+	 *
+	 * @return void
+	 */
+	public function test_retry_leaves_conversations_in_other_mailboxes(): void {
+		$this->run->retry_ids = array( 1001 );
+		$this->run->save();
+		$this->helpscout->only( 'GET', 'v2/conversations/1001', $this->conversation( array( 'mailboxId' => 78 ) ) );
+
+		$this->handle();
+
+		$this->assertSame( array( 'moved' => 1 ), $this->run->fresh()->skips );
+		$this->assertSame( 0, Conversation::query()->where( 'mailbox_id', $this->mailbox->id )->count() );
+	}
+
+	/**
+	 * A job that died, like out of memory, is followed by another, which counts the try.
+	 *
+	 * @return void
+	 */
+	public function test_job_that_died_goes_on(): void {
+		$this->run->attempting = 1001;
+		$this->run->attempts   = 1;
+		$this->run->save();
+
+		( new ImportPage( (int) $this->run->id, (string) $this->run->token ) )->failed( new \RuntimeException( 'Allowed memory size exhausted' ) );
+
+		$this->assertSame( 'Allowed memory size exhausted', $this->run->fresh()->last_error );
+		Queue::assertPushed( ImportPage::class );
+
+		// Waiting for the rate limit on the list doesn't take a try off the conversation.
+		$this->helpscout->only( 'GET', 'v2/conversations', FakeHelpScout::json( array(), 429, array( 'X-RateLimit-Retry-After' => '30' ) ) );
+		$this->handle();
+		$this->assertSame( 1, (int) $this->run->fresh()->attempts );
+	}
+
+	/**
 	 * A conversation that fails is counted and logged; the page goes on.
 	 *
 	 * @return void
 	 */
 	public function test_failed_conversation_is_counted_and_page_goes_on(): void {
 		$this->answer_page( array( $this->conversation( array( 'id' => 1003 ) ), $this->conversation() ), 1 );
+		$this->helpscout->only( 'GET', 'v2/conversations/1003/threads', FakeHelpScout::json( array(), 400 ) );
 
 		$this->handle();
 
@@ -339,7 +377,7 @@ final class ImportPageTest extends ImportTestCase {
 		$this->assertSame( 1, (int) $run->failed );
 		$this->assertSame( 1, (int) $run->imported );
 		$this->assertStringContainsString( '1003', (string) $run->last_error );
-		$this->assertStringContainsString( '404', (string) $run->failures[1003] );
+		$this->assertStringContainsString( '400', (string) $run->failures[1003] );
 		$this->assertSame( 2, (int) $run->page );
 	}
 
