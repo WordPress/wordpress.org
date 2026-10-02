@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Runs on every web request, after FreeScout's own middleware.
  *
  * - Logs out anyone who logs in some other way once WordPress.org is enforced, however they got in.
+ * - Logs out administrators outside the proxy, when that's required.
  * - Replaces the login form, and closes password logins, resets, and invite setups.
  * - Fills in new users from their WordPress.org account, and connects the account.
  * - Keeps what comes from WordPress.org, and passwords, out of the profile form.
@@ -107,6 +108,18 @@ final class RequireWordPressOrgLogin {
 	public function handle( Request $request, Closure $next ): Response {
 		$user   = $request->user();
 		$action = $request->route() ? (string) $request->route()->getActionName() : '';
+
+		// Whatever way they logged in, so a stolen session doesn't work from outside the proxy either.
+		if (
+			$user instanceof User &&
+			$user->isAdmin() &&
+			WPOrgSSOServiceProvider::proxy_required() &&
+			! WPOrgSSOServiceProvider::proxied( $request )
+		) {
+			\Log::warning( '[WPOrgSSO] Logged out ' . $user->email . ', an administrator, from outside the proxy at ' . $request->ip() . '.' );
+
+			return self::log_out( $request, __( 'Administrators can only use the helpdesk through the proxy.' ) );
+		}
 
 		// Logins stay as they are until the identity provider is configured, so administrators can be connected first.
 		if ( WPOrgSSOServiceProvider::enforced() ) {
@@ -220,15 +233,7 @@ final class RequireWordPressOrgLogin {
 		$enforced_since = WPOrgSSOServiceProvider::enforced_since();
 
 		if ( $user instanceof User && ! self::may_stay_logged_in( $user, $request, $enforced_since ) ) {
-			\Auth::logout();
-			$request->session()->invalidate();
-
-			// Like core's auth middleware: polls get a 401, pages come back after the login.
-			if ( $request->expectsJson() ) {
-				return response()->json( array( 'message' => 'Unauthenticated.' ), 401 );
-			}
-
-			return redirect()->guest( route( 'login' ) )->with( WPOrgSSOServiceProvider::SESSION_ERROR, __( 'Please log in with your WordPress.org account.' ) );
+			return self::log_out( $request, __( 'Please log in with your WordPress.org account.' ) );
 		}
 
 		// Logged-in users are sent on by core's guest middleware.
@@ -269,6 +274,25 @@ final class RequireWordPressOrgLogin {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Ends the session, and sends the user to the login page.
+	 *
+	 * @param Request $request Request.
+	 * @param string  $error   Error the login page shows.
+	 * @return Response
+	 */
+	private static function log_out( Request $request, string $error ): Response {
+		\Auth::logout();
+		$request->session()->invalidate();
+
+		// Like core's auth middleware: polls get a 401, pages come back after the login.
+		if ( $request->expectsJson() ) {
+			return response()->json( array( 'message' => 'Unauthenticated.' ), 401 );
+		}
+
+		return redirect()->guest( route( 'login' ) )->with( WPOrgSSOServiceProvider::SESSION_ERROR, $error );
 	}
 
 	/**
