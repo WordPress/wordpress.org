@@ -409,23 +409,26 @@ final class HelpScout {
 	 *
 	 * @param ResponseInterface $response Response.
 	 * @param int               $max      Most bytes it can have.
-	 * @return resource|null The file, at its start, deleted once closed; null if it's empty, larger, or couldn't be saved.
+	 * @return resource|null The file, at its start, deleted once closed; null if it's empty, larger, or couldn't be saved whole.
 	 */
 	private static function to_file( ResponseInterface $response, int $max ) {
-		$body = $response->getBody();
-		$file = tmpfile();
-		$size = 0;
+		$body    = $response->getBody();
+		$file    = tmpfile();
+		$size    = 0;
+		$written = true;
 
-		while ( $file && ! $body->eof() && $size <= $max ) {
+		while ( $file && $written && ! $body->eof() && $size <= $max ) {
 			$chunk = $body->read( 1024 * 1024 );
 			if ( '' === $chunk ) {
 				break;
 			}
-			$size += (int) fwrite( $file, $chunk );
+			// A short write, like on a full disk, would leave the file cut off.
+			$written = fwrite( $file, $chunk ) === strlen( $chunk );
+			$size   += strlen( $chunk );
 		}
 		$body->close();
 
-		if ( ! $file || 0 === $size || $size > $max ) {
+		if ( ! $file || ! $written || 0 === $size || $size > $max ) {
 			if ( $file ) {
 				fclose( $file );
 			}
