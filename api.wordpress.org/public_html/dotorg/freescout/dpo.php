@@ -104,7 +104,7 @@ function render_privacy_requests( object $request ): array {
 		$items[] = array(
 			'title'   => $type,
 			'tooltip' => implode( ', ', $dates ),
-			'badges'  => array( badge( get_post_status_object( $user_request->status )->label, $tone ) ),
+			'badges'  => array( badge( get_post_status_object( $user_request->status )?->label ?? $user_request->status, $tone ) ),
 			'meta'    => array( array( 'text' => gmdate( 'Y-m-d', (int) min( array_keys( $dates ) ) ) ) ),
 		);
 	}
