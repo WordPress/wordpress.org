@@ -291,19 +291,14 @@ function _merge_by_slug( ...$arrays ) {
 	$result   = [];
 
 	foreach ( $combined as $value ) {
-		if ( ! isset( $value['slug'] ) ) {
+		if ( ! is_array( $value ) || ! isset( $value['slug'] ) ) {
 			return [];
 		}
 
-		$found = array_search( $value['slug'], wp_list_pluck( $result, 'slug' ), true );
-		if ( false !== $found ) {
-			$result[ $found ] = $value;
-		} else {
-			$result[] = $value;
-		}
+		$result[ $value['slug'] ] = $value;
 	}
 
-	return $result;
+	return array_values( $result );
 }
 
 /**

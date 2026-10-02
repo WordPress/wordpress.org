@@ -155,19 +155,14 @@ function _merge_by_slug( ...$arrays ) {
 	$result   = [];
 
 	foreach ( $combined as $value ) {
-		if ( ! isset( $value['slug'] ) ) {
+		if ( ! is_array( $value ) || ! isset( $value['slug'] ) ) {
 			return [];
 		}
 
-		$found = array_search( $value['slug'], wp_list_pluck( $result, 'slug' ), true );
-		if ( false !== $found ) {
-			$result[ $found ] = $value;
-		} else {
-			$result[] = $value;
-		}
+		$result[ $value['slug'] ] = $value;
 	}
 
-	return $result;
+	return array_values( $result );
 }
 
 /**
@@ -366,7 +361,7 @@ add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 function welcome_box() {
 	$welcome      = get_page_by_path( 'welcome' );
 	$cookie       = 'welcome-' . get_current_blog_id();
-	$path         = get_blog_details()->path;
+	$path         = get_site()->path;
 	$hash         = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
 	$content_hash = $welcome ? md5( $welcome->post_content ) : '';
 
@@ -452,7 +447,7 @@ add_action( 'wp_footer', __NAMESPACE__ . '\javascript_notice' );
  * @return array Array of CSS classes.
  */
 function add_site_slug_to_body_class( $classes ) {
-	$current_site = get_site( get_current_blog_id() );
+	$current_site = get_site();
 
 	$classes[] = 'wporg-make';
 	if ( $current_site ) {
