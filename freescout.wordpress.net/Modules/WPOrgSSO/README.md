@@ -9,10 +9,27 @@ Agents log in with their WordPress.org account, through login.wordpress.org. Apa
 - **Existing users:** administrators connect them on their profile, or with `php artisan wporgsso:connect <email> <wporg-username>`.
 - **Passwords:** password logins (except break-glass), resets, and invites are closed. Users have no FreeScout password: new users get none, and logging in with WordPress.org clears the one they had. Only break-glass passwords stay.
 - **Deleting a mailbox:** instead of your password, you type the mailbox name to confirm, exactly as it's written. Administrators with a break-glass password are asked for both.
+- **Administrators and the proxy:** with `WPORG_SSO_REQUIRE_PROXY=true`, administrators are logged out of any request that doesn't come through the proxy, however they logged in, break-glass included. Agents aren't affected. See [the proxy](#the-proxy).
 
 ## Break-glass
 
 If login.wordpress.org is down, `WPORG_SSO_PASSWORD_LOGIN=true` lets administrators, and only them, log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one, which their logins with WordPress.org keep. Every such login is logged.
+
+## The proxy
+
+nginx tells FreeScout which requests are proxied, with the `WPORG_PROXIED_REQUEST` FastCGI param: `1` for the proxy's IP addresses, `0` for everyone else. For example:
+
+```nginx
+geo $wporg_proxied_request {
+	default 0;
+	include /path/to/proxy-ips.conf; # One "<address or range> 1;" line each, IPv4 and IPv6.
+}
+
+# In the PHP location:
+fastcgi_param WPORG_PROXIED_REQUEST $wporg_proxied_request;
+```
+
+Once nginx passes the param, set `WPORG_SSO_REQUIRE_PROXY=true`. If it doesn't, nobody counts as proxied, so administrators are logged out and an error is logged; set `WPORG_SSO_REQUIRE_PROXY=false` to let them back in.
 
 ## Setup
 
