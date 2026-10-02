@@ -284,8 +284,9 @@ final class Importer {
 			return self::SKIPPED_EMPTY;
 		}
 
-		// Users are found or created before the transaction: they stay, even if this conversation fails.
+		// Users and senders are found or created before the transaction: they stay, even if this conversation fails.
 		$this->meet_people( $source, $threads );
+		$this->meet_senders( $source, $sender, $threads );
 
 		try {
 			\DB::transaction(
@@ -376,6 +377,38 @@ final class Importer {
 		foreach ( $people as $person ) {
 			if ( $this->people->assignee( $person ) ) {
 				$this->people->remember( $person );
+			}
+		}
+	}
+
+	/**
+	 * Finds or creates the senders of a conversation's emails, and gives them their HelpScout profile.
+	 *
+	 * @param array    $source  HelpScout conversation.
+	 * @param Customer $sender  The conversation's sender.
+	 * @param array[]  $threads Threads to import, from new_threads().
+	 * @return void
+	 *
+	 * @throws ApiError If HelpScout is unavailable, refuses the app, or is rate limited.
+	 */
+	private function meet_senders( array $source, Customer $sender, array $threads ): void {
+		$this->people->complete( $sender, $source['primaryCustomer'] ?? null );
+
+		foreach ( $threads as $thread ) {
+			if ( Thread::TYPE_CUSTOMER !== (int) $thread['fs_type'] ) {
+				continue;
+			}
+
+			// Whom create_thread() credits it to.
+			$person = $thread['customer'] ?? null;
+			$author = $this->people->sender( $person, false );
+			if ( ! $author ) {
+				$person = $thread['createdBy'] ?? null;
+				$author = $this->people->sender( $person, false );
+			}
+
+			if ( $author ) {
+				$this->people->complete( $author, $person );
 			}
 		}
 	}

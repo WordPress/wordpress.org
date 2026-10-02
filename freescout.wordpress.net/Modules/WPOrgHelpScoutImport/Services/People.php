@@ -19,6 +19,8 @@ use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
 use Modules\WPOrgHelpScoutImport\Entities\Person;
+use Modules\WPOrgHelpScoutImport\Exceptions\ApiError;
+use Modules\WPOrgHelpScoutImport\Exceptions\RateLimited;
 
 /**
  * Every HelpScout user gets a FreeScout user: the one an administrator chose, the one with their email, or a new one.
@@ -50,6 +52,13 @@ final class People {
 	 * @var string
 	 */
 	private const SENDER_META = 'wporghelpscoutimport';
+
+	/**
+	 * Customer meta key for the HelpScout profile a sender was given, and what of it FreeScout has no field for.
+	 *
+	 * @var string
+	 */
+	public const PROFILE_META = 'wporghelpscoutimport_profile';
 
 	/**
 	 * Domain of the emails given to users whose HelpScout email can't be a FreeScout user's.
@@ -598,6 +607,171 @@ final class People {
 			return (bool) \App\Module::isActive( self::TEAMS_MODULE );
 		} catch ( \Throwable $e ) {
 			return false;
+		}
+	}
+
+	/**
+	 * Gives a sender their HelpScout profile, once: their other emails, organization, job title, phones, websites,
+	 * social profiles, address, background, and photo.
+	 *
+	 * Only empty fields are filled. What FreeScout has no field for, like chat handles and HelpScout's customer
+	 * properties, is kept in the sender's meta.
+	 *
+	 * @param Customer $customer FreeScout sender.
+	 * @param mixed    $person   HelpScout customer, as a conversation or thread names them.
+	 * @return void
+	 *
+	 * @throws ApiError If HelpScout is unavailable, refuses the app, or is rate limited.
+	 */
+	public function complete( Customer $customer, $person ): void {
+		$id = is_array( $person ) && 'user' !== ( $person['type'] ?? '' ) ? (int) ( $person['id'] ?? 0 ) : 0;
+		if ( ! $id || ! $this->helpscout || $customer->getMeta( self::PROFILE_META ) ) {
+			return;
+		}
+
+		try {
+			$profile = $this->helpscout->customer( $id );
+		} catch ( ApiError $e ) {
+			if ( $e instanceof RateLimited || 401 === $e->status || 0 === $e->status || $e->status >= 500 ) {
+				throw $e;
+			}
+
+			// Refused for this customer alone: the sender is imported without it.
+			$profile = null;
+		}
+
+		$embedded = (array) ( $profile['_embedded'] ?? array() );
+		$address  = (array) ( $embedded['address'] ?? array() );
+		// On one line: FreeScout keeps addresses without line breaks.
+		$lines    = implode( ', ', array_filter( array_map( 'trim', array_map( 'strval', (array) ( $address['lines'] ?? array() ) ) ) ) );
+		$location = trim( (string) ( $profile['location'] ?? '' ) );
+
+		if ( $profile ) {
+			$customer->setData(
+				array_filter(
+					array(
+						'company'         => (string) ( $profile['organization'] ?? '' ),
+						'job_title'       => (string) ( $profile['jobTitle'] ?? '' ),
+						'notes'           => (string) ( $profile['background'] ?? '' ),
+						// HelpScout's location is free text, like "Greater Dallas Area": an address of sorts.
+						'address'         => '' !== $lines ? $lines : $location,
+						'city'            => (string) ( $address['city'] ?? '' ),
+						'state'           => (string) ( $address['state'] ?? '' ),
+						'zip'             => mb_substr( (string) ( $address['postalCode'] ?? '' ), 0, 12 ),
+						'country'         => (string) ( $address['country'] ?? '' ),
+						'phones'          => self::typed( (array) ( $embedded['phones'] ?? array() ), Customer::$phone_types, Customer::PHONE_TYPE_OTHER ),
+						'websites'        => array_column( (array) ( $embedded['websites'] ?? array() ), 'value' ),
+						'social_profiles' => self::typed( (array) ( $embedded['social_profiles'] ?? array() ), Customer::$social_types, Customer::SOCIAL_TYPE_OTHER ),
+						'emails'          => self::new_emails( self::typed( (array) ( $embedded['emails'] ?? array() ), Email::$types, Email::TYPE_OTHER ) ),
+					)
+				),
+				false
+			);
+
+			$this->photo( $customer, (string) ( $profile['photoUrl'] ?? '' ) );
+		}
+
+		$customer->setMeta(
+			self::PROFILE_META,
+			array_filter(
+				array(
+					'id'         => $id,
+					'chats'      => array_values( array_filter( (array) ( $embedded['chats'] ?? array() ), 'is_array' ) ),
+					'properties' => array_values( array_filter( (array) ( $embedded['properties'] ?? array() ), 'is_array' ) ),
+					'age'        => (string) ( $profile['age'] ?? '' ),
+					'gender'     => (string) ( $profile['gender'] ?? '' ),
+				)
+			)
+		);
+		$customer->save();
+	}
+
+	/**
+	 * HelpScout's emails, phones, or social profiles, with FreeScout's types for them.
+	 *
+	 * @param array[] $items    HelpScout's, each with `value` and `type`.
+	 * @param array   $types    FreeScout's types, by ID.
+	 * @param int     $fallback FreeScout's type for those it has none for.
+	 * @return array[] Each with `value` and `type`.
+	 */
+	private static function typed( array $items, array $types, int $fallback ): array {
+		$typed = array();
+
+		foreach ( $items as $item ) {
+			$value = is_array( $item ) ? trim( (string) ( $item['value'] ?? '' ) ) : '';
+			if ( '' === $value ) {
+				continue;
+			}
+
+			$type    = array_search( strtolower( (string) ( $item['type'] ?? '' ) ), $types, true );
+			$typed[] = array(
+				'value' => $value,
+				'type'  => false !== $type ? (int) $type : $fallback,
+			);
+		}
+
+		return $typed;
+	}
+
+	/**
+	 * Emails no sender has yet, as valid emails; one can only be a single sender's.
+	 *
+	 * @param array[] $emails Emails, each with `value` and `type`.
+	 * @return array[]
+	 */
+	private static function new_emails( array $emails ): array {
+		$new = array();
+
+		foreach ( $emails as $email ) {
+			$address = Email::sanitizeEmail( $email['value'] );
+			if ( $address && ! Email::query()->where( 'email', $address )->exists() ) {
+				$new[] = array(
+					'value' => $address,
+					'type'  => $email['type'],
+				);
+			}
+		}
+
+		return $new;
+	}
+
+	/**
+	 * Copies a sender's photo, so it doesn't go with the HelpScout account; a photo that can't be copied is left out.
+	 *
+	 * @param Customer $customer FreeScout sender, saved.
+	 * @param string   $url      Photo URL.
+	 * @return void
+	 */
+	private function photo( Customer $customer, string $url ): void {
+		if ( '' === $url || $customer->photo_url || ! $customer->id ) {
+			return;
+		}
+
+		try {
+			// Like FreeScout's own photos from a URL: not from a private address.
+			\Helper::sanitizeRemoteUrl( $url, true );
+		} catch ( \Throwable $e ) {
+			return;
+		}
+
+		$file = $this->helpscout->image( $url );
+		if ( ! $file ) {
+			return;
+		}
+
+		try {
+			$path = (string) stream_get_meta_data( $file )['uri'];
+			$mime = (string) mime_content_type( $path );
+			if ( str_starts_with( $mime, 'image/' ) ) {
+				$photo = $customer->savePhoto( $path, $mime );
+				if ( $photo ) {
+					$customer->photo_url = $photo;
+				}
+			}
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgHelpScoutImport] Could not copy the photo of sender ' . $customer->id . ': ' . $e->getMessage() );
+		} finally {
+			fclose( $file );
 		}
 	}
 

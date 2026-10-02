@@ -261,6 +261,26 @@ final class HelpScout {
 	}
 
 	/**
+	 * Gets a customer's profile, with their emails, phones, chats, social profiles, websites, address, and properties.
+	 *
+	 * @param int $customer_id HelpScout customer ID.
+	 * @return array|null The customer, or null if HelpScout no longer has them, or merged them into another.
+	 *
+	 * @throws ApiError If the request failed otherwise.
+	 */
+	public function customer( int $customer_id ): ?array {
+		try {
+			return $this->get( 'v2/customers/' . $customer_id );
+		} catch ( ApiError $e ) {
+			if ( in_array( $e->status, array( 301, 404 ), true ) ) {
+				return null;
+			}
+
+			throw $e;
+		}
+	}
+
+	/**
 	 * The highest conversation number HelpScout has given out, in any mailbox.
 	 *
 	 * @return int
