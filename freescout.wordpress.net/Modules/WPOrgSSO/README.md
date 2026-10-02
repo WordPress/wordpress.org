@@ -29,7 +29,7 @@ geo $wporg_proxied_request {
 fastcgi_param WPORG_PROXIED_REQUEST $wporg_proxied_request;
 ```
 
-`geo` matches `$remote_addr`, so behind a load balancer, set it from the client's address with `set_real_ip_from` first. Once nginx passes the param, set `WPORG_SSO_REQUIRE_PROXY=true`. If it doesn't, nobody counts as proxied, so administrators are logged out and an error is logged; set `WPORG_SSO_REQUIRE_PROXY=false` to let them back in.
+Once nginx passes the param, set `WPORG_SSO_REQUIRE_PROXY=true`. If it doesn't, nobody counts as proxied, so administrators are logged out and an error is logged; set `WPORG_SSO_REQUIRE_PROXY=false` to let them back in.
 
 ## Setup
 
