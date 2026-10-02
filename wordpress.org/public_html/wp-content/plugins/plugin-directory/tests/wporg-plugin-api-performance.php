@@ -67,8 +67,10 @@ class Tests_Plugins_API_Performance extends WP_UnitTestCase {
 	static function tearDownAfterClass() {
 		global $wporg_plugin_api_performance;
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test harness console output, not HTML.
 		echo 'Performance summary for ' . get_called_class() . ":\n";
 		foreach ( $wporg_plugin_api_performance[ get_called_class() ] as $type => $deltas ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test harness console output, not HTML.
 			echo "$type: " . self::averages( $deltas ) . "\n";
 		}
 	}

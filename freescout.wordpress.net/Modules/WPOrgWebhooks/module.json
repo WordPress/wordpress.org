@@ -1,0 +1,21 @@
+{
+    "name": "WP.org Webhooks",
+    "alias": "wporgwebhooks",
+    "img": "/modules/wporgwebhooks/img/icon.svg",
+    "description": "Sends conversation events to WordPress.org, which records them as contributor stats.",
+    "version": "1.0.0",
+    "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgWebhooks",
+    "author": "WordPress.org",
+    "authorUrl": "https://wordpress.org/",
+    "requiredAppVersion": "1.8.243",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\WPOrgWebhooks\\Providers\\WPOrgWebhooksServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

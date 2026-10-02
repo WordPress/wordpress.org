@@ -8,9 +8,9 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		<div class="wrapper">
 			<div class="section">
 				<div class="col-12" role="main">
-					<h3>The <?php echo $rosetta->rosetta->get_glotpress_locale()->english_name; ?> translation of WordPress is inactive</h3>
+					<h3>The <?php echo esc_html( $rosetta->rosetta->get_glotpress_locale()->english_name ); ?> translation of WordPress is inactive</h3>
 					<p><a href="https://wordpress.org/download/">Download the English version instead</a>.</p>
-					<p>If you&#8217;re interested in translating WordPress to <?php echo $rosetta->rosetta->get_glotpress_locale()->english_name; ?>,
+					<p>If you&#8217;re interested in translating WordPress to <?php echo esc_html( $rosetta->rosetta->get_glotpress_locale()->english_name ); ?>,
 					join <a href="https://make.wordpress.org/polyglots/">the Polyglots team</a> and find out how.</p>
 				</div>
 			</div>
@@ -32,6 +32,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 					$hw = image_hwstring( HEADER_IMAGE_WIDTH, HEADER_IMAGE_HEIGHT );
 					printf(
 						'<img class="shot" %ssrc="%s" alt="" />',
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Image dimension attribute pair built above from the image size.
 						$hw,
 						esc_url( $header_image )
 					);
@@ -73,7 +74,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 	<div class="wrapper">
 		<div class="section">
 			<div class="col-12">
-				<h3><?php _e( 'Showcase', 'rosetta' ); ?></h3>
+				<h3><?php esc_html_e( 'Showcase', 'rosetta' ); ?></h3>
 				<ul id="showcase">
 <?php
 	foreach ( $showcase as $item ) :
@@ -93,7 +94,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		</a>
 		<?php echo esc_html( $item->post_title ); ?>
 		<br />
-		<a class="showcase-url" href="<?php echo esc_url( $url ); ?>" rel="nofollow"><?php _e( 'Visit the site &rarr;', 'rosetta' ); ?></a>
+		<a class="showcase-url" href="<?php echo esc_url( $url ); ?>" rel="nofollow"><?php esc_html_e( 'Visit the site &rarr;', 'rosetta' ); ?></a>
 	</li>
 <?php
 	endforeach;
@@ -108,8 +109,8 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		<div class="wrapper">
 			<div class="section">
 				<div class="col-12">
-					<h3><?php _e('Showcase', 'rosetta'); ?></h3>
-					<span id="showcase-front-slate">You can <a href="<?php echo admin_url('edit.php?post_type=showcase'); ?>">add notable sites</a> in your language and screenshot and description of random three of them will show here.</span>
+					<h3><?php esc_html_e( 'Showcase', 'rosetta' ); ?></h3>
+					<span id="showcase-front-slate">You can <a href="<?php echo esc_url( admin_url( 'edit.php?post_type=showcase' ) ); ?>">add notable sites</a> in your language and screenshot and description of random three of them will show here.</span>
 				</div>
 			</div>
 		</div>
@@ -134,7 +135,7 @@ if ( false === $latest_release && $rosetta->rosetta->get_latest_release() ) :
 		<div class="wrapper">
 			<div id="blog" class="section">
 				<div class="col-9">
-					<h3><?php _e('Blog', 'rosetta'); ?></h3>
+					<h3><?php esc_html_e( 'Blog', 'rosetta' ); ?></h3>
 <?php
 	query_posts( 'showposts=5' );
 	while (have_posts()) : the_post();

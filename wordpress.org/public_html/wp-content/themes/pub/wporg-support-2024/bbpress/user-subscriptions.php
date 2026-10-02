@@ -33,9 +33,9 @@ do_action( 'bbp_template_before_user_subscriptions' ); ?>
 
 				<?php else :
 					if ( bbp_get_user_id() == get_current_user_id() ) {
-						echo '<p>' . __( 'You are not currently subscribed to any topics.', 'wporg-forums' ) . '</p>';
+						echo '<p>' . esc_html__( 'You are not currently subscribed to any topics.', 'wporg-forums' ) . '</p>';
 					} else {
-						echo '<p>' . __( 'This user is not currently subscribed to any topics.', 'wporg-forums' ) . '</p>';
+						echo '<p>' . esc_html__( 'This user is not currently subscribed to any topics.', 'wporg-forums' ) . '</p>';
 					}
 				endif ?>
 

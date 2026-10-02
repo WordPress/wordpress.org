@@ -36,6 +36,14 @@ The repository implements a shared SSO mechanism under [common/includes/wporg-ss
 
 ---
 
+## Security Trust Model
+
+Roles on WordPress.org multisite blogs are assigned individually rather than granted on sign-up. Much of the estate leans on this: capability checks are often coarse, because on most sites there is no untrusted principal below the people who run them.
+
+This is not uniform — some sites register their own roles and appoint community members into them at scale — so confirm the trust model of the site you are working on before relying on it. The [HackerOne program policy](https://hackerone.com/wordpress) is the authority on which gaps count as in-scope vulnerabilities.
+
+---
+
 ## Coding Standards & Linting
 
 We enforce the **WordPress Coding Standards (WPCS)** with local adjustments configured in [phpcs.xml.dist](phpcs.xml.dist).
@@ -76,6 +84,7 @@ Because this Git repository is a read-only mirror of the `meta.svn.wordpress.org
 ### 2. HelpScout Sidebar Applications (`api.wordpress.org/public_html/dotorg/helpscout/`)
 *   Provides dynamic JSON endpoints integrated as custom sidebar apps in HelpScout.
 *   Retrieves database information about directories, plugins, themes, and user registration dates to provide customer service teams with immediate context when answering support/review tickets.
+*   Being replaced by FreeScout, whose endpoints live in `api.wordpress.org/public_html/dotorg/freescout/` and are called by the modules in `freescout.wordpress.net/`. Keep the two directories separate so `helpscout/` can be deleted once HelpScout is retired.
 
 ### 3. "Gandalf" Security Scanner (`wordpress.org/public_html/wp-content/plugins/plugin-directory/jobs/`)
 *   **Class `Plugin_Scan_Gandalf`:** Integrates with `https://gandalf.wordpress.org/scan` to automatically scan newly uploaded plugin zip archives.

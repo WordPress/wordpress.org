@@ -554,6 +554,7 @@ class HelpHub_Post_Types_Post_Type {
 			$html .= '</table>' . "\n";
 		} // End if().
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup assembled above from escaped parts.
 		echo $html;
 		/* @codingStandardsIgnoreLine */
 	} // End meta_box_content()

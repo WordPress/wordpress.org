@@ -241,12 +241,19 @@ class Comment_Handler {
 	function format_comment_for_slack() {
 		// Link 'Replying to [comment:1 user]:'
 		$ticket_url = $this->ticket_url;
-		$comment = preg_replace_callback( '/Replying to \[comment:(\d+) (.*)\]/m',
+
+		// Escape before the link below is built, so that one survives.
+		$comment = Trac::escape_for_slack( $this->comment );
+
+		$comment = preg_replace_callback(
+			'/Replying to \[comment:(\d+) (.*)\]/m',
 			function ( $matches ) use ( $ticket_url ) {
 				$comment_url = $ticket_url . '#comment:' . $matches[1];
 				$text = 'Replying to ' . $matches[2];
 				return "<$comment_url|$text>";
-			}, $this->comment );
+			},
+			$comment
+		);
 
 		$comment = Trac::format_for_slack( $comment );
 		return $comment;
@@ -257,9 +264,11 @@ class Comment_Handler {
 		$this->send->set_username( $this->trac->get_ticket_username() );
 
 		$comment         = $this->format_comment_for_slack();
-		$main_attachment = $this->changes ? implode( "\n", $this->changes ) : $comment;
+		$main_attachment = $this->changes ? Trac::escape_for_slack( implode( "\n", $this->changes ) ) : $comment;
 		$author          = $this->author ? $this->author : 'Someone';
-		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', $author, $this->comment_url, $this->ticket_id, htmlspecialchars( $this->title, ENT_NOQUOTES ) );
+		// A > would close the link early, so the label needs it escaped too.
+		$title           = htmlspecialchars( $this->title, ENT_NOQUOTES | ENT_SUBSTITUTE );
+		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', Trac::escape_for_slack( $author ), $this->comment_url, $this->ticket_id, $title );
 		$fallback        = trim( $pretext, '*' ) . "\n" . $main_attachment;
 
 		$attachment = array(

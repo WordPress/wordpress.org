@@ -152,7 +152,7 @@ class Plugin {
 
 		echo '<div class="notice notice-info notice-alt with-dashicon">';
 		echo '<span class="dashicons dashicons-email-alt"></span>';
-		echo "<p>{$message}</p>";
+		printf( '<p>%s</p>', wp_kses_post( $message ) );
 		echo '</div>';
 	}
 
@@ -172,9 +172,9 @@ class Plugin {
 			return false;
 		}
 
-		// Determine the term the request is for, overwrite with ?term_id if specified.
+		// Determine the term the request is for, overwrite with ?term_id if specified. Tokens are signed for the current term.
 		$term = $this->get_current_term();
-		if ( ! empty( $_GET['term_id'] ) ) {
+		if ( ! empty( $_GET['term_id'] ) && ! isset( $_GET['token'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified below.
 			$term = get_term( intval( $_GET['term_id'] ), $this->taxonomy );
 		}
 		if ( ! $term ) {
@@ -190,7 +190,8 @@ class Plugin {
 			$auth    = 'token';
 			$user_id = $this->has_valid_unsubscription_token();
 
-			if ( ! $user_id ) {
+			// The token only authorizes unsubscribing.
+			if ( ! $user_id || 'wporg_bbp_unsubscribe_term' !== $action ) {
 				bbp_add_error( 'wporg_bbp_subscribe_invalid_token', __( '<strong>Error:</strong> Link expired!', 'wporg-forums' ) );
 				return false;
 			}
@@ -206,11 +207,11 @@ class Plugin {
 							'<input type="submit" name="confirm" value="%5$s">' .
 							'&nbsp<a href="%6$s">%7$s</a>' .
 						'</form>',
-						get_bloginfo('name'),
+						esc_html( get_bloginfo( 'name' ) ),
 						sprintf(
 							/* translators: 1: Plugin, Theme, or Tag name. */
 							esc_html__( 'Do you wish to unsubscribe from future emails for %s?', 'wporg-forums' ),
-							$term->name
+							esc_html( $term->name )
 						),
 						esc_attr( $_SERVER['REQUEST_URI'] ),
 						esc_attr( wp_get_raw_referer() ),

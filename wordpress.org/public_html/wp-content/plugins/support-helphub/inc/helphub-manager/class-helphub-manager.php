@@ -202,7 +202,7 @@ class HelpHub_Manager {
 
 							<?php foreach ( $helphub_roles as $role => $label ) : ?>
 
-								<option <?php selected( $user_role, $role ); ?> value="<?php echo esc_attr( $role ); ?>"><?php echo $label; ?></option>
+								<option <?php selected( $user_role, $role ); ?> value="<?php echo esc_attr( $role ); ?>"><?php echo $label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Select markup with the escaped value assembled on the same line. ?></option>
 
 							<?php endforeach; ?>
 						</select>
