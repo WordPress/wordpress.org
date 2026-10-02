@@ -67,6 +67,9 @@ class Report_Topic {
 			return $content;
 		}
 
+		// Report reasons are plain text.
+		$content = esc_html( $content );
+
 		if ( isset( $this->report_inline_notices[ get_the_ID() ] ) && ! empty( $this->report_inline_notices[ get_the_ID() ] ) ) {
 			foreach ( $this->report_inline_notices[ get_the_ID() ] as $notice ) {
 				$message = sprintf(

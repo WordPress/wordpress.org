@@ -7,6 +7,7 @@
 
 require __DIR__ . '/functions-restapi.php';
 require __DIR__ . '/functions-registration.php';
+require __DIR__ . '/functions-event-codes.php';
 
 if ( is_admin() ) {
 	require __DIR__ . '/admin/ui.php';

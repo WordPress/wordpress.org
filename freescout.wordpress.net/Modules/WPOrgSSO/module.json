@@ -1,0 +1,21 @@
+{
+    "name": "WP.org SSO",
+    "alias": "wporgsso",
+    "img": "/modules/wporgsso/img/icon.svg",
+    "description": "Signs agents in with their WordPress.org account, and connects every FreeScout user to one.",
+    "version": "1.0.0",
+    "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgSSO",
+    "author": "WordPress.org",
+    "authorUrl": "https://wordpress.org/",
+    "requiredAppVersion": "1.8.243",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\WPOrgSSO\\Providers\\WPOrgSSOServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

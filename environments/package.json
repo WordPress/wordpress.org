@@ -40,7 +40,15 @@
 		"support:env": "wp-env --config support-forums/.wp-env.json",
 		"support:refresh": "npm run support:env -- run cli -- wp option delete wporg_support_env_seeded; bash support-forums/bin/after-start.sh",
 		"support:test:env": "wp-env --config support-forums/.wp-env.test.json",
-		"support:test": "npm run support:test:env -- start && npm run support:test:env -- run cli --env-cwd=wp-content/plugins/support-forums phpunit"
+		"support:test": "npm run support:test:env -- start && npm run support:test:env -- run cli --env-cwd=wp-content/plugins/support-forums phpunit",
+		"freescout:env": "docker compose --file freescout/docker-compose.yml",
+		"freescout:start": "npm run freescout:env -- up --detach --build --wait && npm run freescout:setup",
+		"freescout:setup": "npm run freescout:env -- exec -T --user www-data app bash /srv/env/bin/setup.sh",
+		"freescout:stop": "npm run freescout:env -- stop",
+		"freescout:destroy": "npm run freescout:env -- down --volumes",
+		"freescout:logs": "npm run freescout:env -- logs --follow",
+		"freescout:artisan": "npm run freescout:env -- exec --user www-data app php artisan",
+		"freescout:test": "npm run freescout:env -- exec -T --user www-data app bash /srv/env/bin/test.sh"
 	},
 	"devDependencies": {
 		"@wordpress/env": "^11"

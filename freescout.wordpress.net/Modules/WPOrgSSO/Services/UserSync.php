@@ -1,0 +1,126 @@
+<?php
+/**
+ * Keeps FreeScout users in step with their WordPress.org accounts.
+ *
+ * @package WordPressdotorg\FreeScout\WPOrgSSO
+ */
+
+declare( strict_types = 1 );
+
+namespace Modules\WPOrgSSO\Services;
+
+use App\User;
+use Modules\WPOrgSSO\Entities\Account;
+use Modules\WPOrgSSO\Jobs\SyncAvatar;
+use RuntimeException;
+
+/**
+ * Copies name, email, and avatar from WordPress.org, when a user is added, reconnected, or logs in.
+ */
+final class UserSync {
+
+	/**
+	 * Hosts avatars are downloaded from; account.php's avatars are Gravatar's.
+	 *
+	 * @var string[]
+	 */
+	private const AVATAR_HOSTS = array( 'gravatar.com', 'www.gravatar.com', 'secure.gravatar.com', '0.gravatar.com', '1.gravatar.com', '2.gravatar.com' );
+
+	/**
+	 * Updates a user from their WordPress.org account.
+	 *
+	 * Never fails: what can't be updated is logged and left as it was. The avatar follows on the queue.
+	 *
+	 * @param User             $user       FreeScout user.
+	 * @param WordPressOrgUser $wporg_user Their WordPress.org account.
+	 * @return void
+	 */
+	public static function sync( User $user, WordPressOrgUser $wporg_user ): void {
+		try {
+			$fields = $wporg_user->user_fields();
+
+			$user->first_name = $fields['first_name'];
+			$user->last_name  = $fields['last_name'];
+
+			if ( '' !== $fields['email'] && 0 !== strcasecmp( (string) $user->email, $fields['email'] ) ) {
+				if ( self::email_is_free( $fields['email'], (int) $user->id ) ) {
+					$user->email = $fields['email'];
+				} else {
+					\Log::warning( '[WPOrgSSO] Kept ' . $user->email . ': ' . $fields['email'] . ' belongs to another user or a mailbox.' );
+				}
+			}
+
+			$user->save();
+
+			if ( '' !== $wporg_user->avatar_url ) {
+				SyncAvatar::dispatch( (int) $user->id, $wporg_user->avatar_url );
+			}
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgSSO] Could not update user ' . $user->id . ': ' . $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Makes the user's photo their avatar; FreeScout doesn't let them upload another.
+	 *
+	 * @param User   $user       FreeScout user.
+	 * @param string $avatar_url Their avatar; Gravatar's silhouette if they have none.
+	 * @param Client $client     Client to download it with.
+	 * @return void
+	 *
+	 * @throws RuntimeException If the avatar isn't Gravatar's, or can't be downloaded or saved.
+	 */
+	public static function sync_avatar( User $user, string $avatar_url, Client $client ): void {
+		$account = Account::for_user( (int) $user->id );
+		if ( ! $account ) {
+			return;
+		}
+
+		// The app server fetches it, so it must not reach anything internal.
+		if ( 'https' !== parse_url( $avatar_url, PHP_URL_SCHEME ) || ! in_array( parse_url( $avatar_url, PHP_URL_HOST ), self::AVATAR_HOSTS, true ) ) {
+			throw new RuntimeException( 'Not a Gravatar URL: ' . $avatar_url );
+		}
+
+		$avatar = $client->download( $avatar_url );
+
+		$hash = hash( 'sha256', $avatar['body'] );
+		if ( $user->photo_url && $hash === $account->avatar_hash ) {
+			return;
+		}
+
+		$file = (string) tempnam( sys_get_temp_dir(), 'wporgsso' );
+		$size = (int) config( 'app.user_photo_size' );
+		try {
+			file_put_contents( $file, $avatar['body'] );
+
+			// Twice the size FreeScout shows photos at, so they're sharp on high-density screens.
+			config( array( 'app.user_photo_size' => $size * 2 ) );
+			$photo_url = $user->savePhoto( $file, $avatar['content_type'] );
+		} finally {
+			config( array( 'app.user_photo_size' => $size ) );
+			unlink( $file );
+		}
+
+		if ( ! $photo_url ) {
+			throw new RuntimeException( 'FreeScout could not read the avatar.' );
+		}
+
+		$user->photo_url = $photo_url;
+		$user->save();
+
+		$account->update( array( 'avatar_hash' => $hash ) );
+	}
+
+	/**
+	 * Whether no other user or mailbox has an email address.
+	 *
+	 * @param string $email   Email address.
+	 * @param int    $user_id User who wants it.
+	 * @return bool
+	 */
+	private static function email_is_free( string $email, int $user_id ): bool {
+		return '' !== $email
+			&& ! User::query()->where( 'email', $email )->where( 'id', '!=', $user_id )->exists()
+			&& ! User::mailboxEmailExists( $email );
+	}
+}

@@ -31,7 +31,7 @@ let wpTrac,
 		'needs-unit-tests': 'Ticket has a particular need for unit tests.',
 		'has-dev-note': 'Ticket with a published post on the development blog.',
 		'needs-dev-note': 'Ticket needs a post on the development blog.',
-		'add-to-field-guide': 'Ticket dev-note should be included in the releasese field guide.',
+		'add-to-field-guide': 'Ticket dev-note should be included in the release field guide.',
 		'has-privacy-review':
 			'Input has been given from the core privacy team reviewing the privacy implications of the suggested changes.',
 		'needs-privacy-review':
@@ -532,7 +532,7 @@ let wpTrac,
 
 				// Submit comment form on Cmd/Ctrl + Enter.
 				$( '#comment' ).on( 'keydown', function ( event ) {
-					if ( event.ctrlKey && ( event.keyCode === 10 || event.keyCode === 13 ) ) {
+					if ( ( event.ctrlKey || event.metaKey ) && event.key === 'Enter' ) {
 						$( 'input[name="submit"]' ).trigger( 'click' );
 					}
 				} );
@@ -1728,10 +1728,14 @@ let wpTrac,
 					// If the owner field exists, then we're on /newticket. Remove it.
 					$( '#field-owner' ).parents( 'tr' ).hide();
 
-					html = `<div><label id="keyword-label" for="keyword-add" style="width:${ labelWidth }px">Workflow Keywords:</label>`;
+					html = '<div>';
+					html += `<label id="keyword-label" for="keyword-add" style="width:${ labelWidth }px">Workflow Keywords:</label>`;
 					html += '<select id="keyword-add"><option value=""> - Add - </option></select>';
 					html +=
-						'<button type="button" id="edit-keywords" aria-label="Manual keyword" aria-expanded="false">Manual</button></div>';
+						'<button type="button" id="edit-keywords" aria-label="Manual keyword" aria-expanded="false">Manual</button>';
+					html +=
+						' <a href="https://make.wordpress.org/core/handbook/contribute/trac/keywords/" title="Keywords documentation">ℹ</a>';
+					html += '</div>';
 					html += '<div id="keyword-bin"></div>';
 					container.prepend( html );
 					elements.bin = $( '#keyword-bin' );
@@ -2326,11 +2330,13 @@ let wpTrac,
 				const params = new URLSearchParams( { trac, ticket } );
 				if ( authenticated ) {
 					params.set( 'authenticated', '1' );
-					if ( 'URL' in window ) {
-						params.set(
-							'_lastmod',
-							new URL( window.jQuery( 'a.timeline' ).last().prop( 'href' ) ).searchParams.get( 'from' )
-						);
+
+					const timelines = document.querySelectorAll( '#changelog a.timeline' );
+					if ( timelines.length ) {
+						const from = new URL( timelines[ timelines.length - 1 ].href ).searchParams.get( 'from' );
+						if ( from ) {
+							params.set( '_lastmod', from );
+						}
 					}
 				}
 				$.ajax( `${ apiEndpoint }?${ params }` ).done( function ( data ) {
