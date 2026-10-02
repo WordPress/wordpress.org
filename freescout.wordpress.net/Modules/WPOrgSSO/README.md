@@ -17,7 +17,7 @@ If login.wordpress.org is down, `WPORG_SSO_PASSWORD_LOGIN=true` lets administrat
 
 ## The proxy
 
-nginx tells FreeScout which requests are proxied, with the `WPORG_PROXIED_REQUEST` FastCGI param: `1` for the proxy's IP addresses, `0` for everyone else. It's a server variable rather than a header, so clients can't send it themselves. For example:
+nginx tells FreeScout which requests are proxied, with the `WPORG_PROXIED_REQUEST` FastCGI param: `1` for the proxy's IP addresses, `0` for everyone else. For example:
 
 ```nginx
 geo $wporg_proxied_request {
