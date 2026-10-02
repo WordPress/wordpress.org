@@ -99,6 +99,18 @@ abstract class Importer {
 		return array( $key, $data );
 	}
 
+
+	/**
+	 * Get the latest commit date for a given repo.
+	 *
+	 * @param string $url URL to the manifest.
+	 * @return string Date of latest commit.
+	 */
+	public function get_latest_commit_date( $url ) {
+		// Fetch information using the GitHub API
+		$latest_commit = wp_remote_get( $url );
+	}
+
 	/**
 	 * Import the manifest.
 	 *
@@ -129,6 +141,9 @@ abstract class Importer {
 			}
 			return new WP_Error( 'invalid-manifest', 'Manifest did not unfurl properly.' );
 		}
+
+		$latest_commit_date = $this->get_latest_commit_date($this->get_manifest_url());
+		$last_update_date = get_option('last_update_date');
 
 		// A numeric key suggests the manifest did not explicitly specify keys for each item, so define one.
 		// Note: not explicitly specifying a key means the slugs defined must be unique.
@@ -185,6 +200,10 @@ abstract class Importer {
 			}
 			if ( $this->process_manifest_doc( $doc, $manifest ) ) {
 				$created++;
+			}
+
+			if ( $latest_commit_date > $last_update_date && $updated > 0 ) {
+				update_option( 'last_update_date', $latest_commit_date );
 			}
 		}
 		if ( class_exists( 'WP_CLI' ) ) {
