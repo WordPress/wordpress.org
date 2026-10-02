@@ -382,6 +382,19 @@ final class AgentsControllerTest extends ImportTestCase {
 	}
 
 	/**
+	 * No URL of the module has a dot: FreeScout's nginx configuration serves those as files, without PHP.
+	 *
+	 * @return void
+	 */
+	public function test_urls_have_no_dots(): void {
+		foreach ( $this->app['router']->getRoutes() as $route ) {
+			if ( str_starts_with( (string) $route->getName(), 'wporghelpscoutimport.' ) ) {
+				$this->assertStringNotContainsString( '.', $route->uri(), $route->getName() );
+			}
+		}
+	}
+
+	/**
 	 * Checking a filled-in CSV shows what connecting would do, and changes nothing.
 	 *
 	 * @return void
