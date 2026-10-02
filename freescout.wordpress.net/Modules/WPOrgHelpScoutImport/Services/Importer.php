@@ -278,27 +278,25 @@ final class Importer {
 			throw $e;
 		}
 
-		try {
-			$threads = $this->new_threads( $helpscout_id, $listed );
-		} catch ( \Throwable $e ) {
-			$this->close_downloads( array() );
-
-			throw $e;
-		}
-
+		$threads = $this->new_threads( $listed );
 		if ( ! $conversation && ! $threads ) {
-			$this->close_downloads( $threads );
-
 			return self::SKIPPED_EMPTY;
 		}
 
-		// Users and senders are found or created before the transaction: they stay, even if this conversation fails.
+		/*
+		 * Users, senders, and the mailbox's custom fields are found or created before the transaction: they stay, even
+		 * if this conversation fails. Before the downloads, too: their requests can hit the rate limit, and the
+		 * downloads would be repeated on the next try.
+		 */
 		$this->meet_people( $source, $threads );
 		$this->meet_senders( $source, $sender, $threads );
 
-		// Like users, the mailbox's custom fields are created before the transaction.
-		$values = CustomFields::available() ? $this->custom_fields->values( $source, $mailbox ) : array();
-		$tags   = Tags::available() ? array_filter( (array) ( $source['tags'] ?? array() ), 'is_array' ) : array();
+		// One HelpScout moved, but agents worked on, stays in its mailbox: its values go in that mailbox's fields.
+		$fields_mailbox = $conversation && ! $moved_from ? $conversation->mailbox : $mailbox;
+		$values         = CustomFields::available() ? $this->custom_fields->values( $source, $fields_mailbox ) : array();
+		$tags           = Tags::available() ? array_filter( (array) ( $source['tags'] ?? array() ), 'is_array' ) : array();
+
+		$threads = $this->read_threads( $helpscout_id, $threads );
 
 		try {
 			\DB::transaction(
@@ -430,30 +428,72 @@ final class Importer {
 	}
 
 	/**
-	 * Picks the threads to import that weren't imported yet, and reads what they need from HelpScout.
+	 * Picks the threads to import that weren't imported yet.
 	 *
-	 * @param int     $conversation_id HelpScout conversation ID.
-	 * @param array[] $threads         The conversation's threads, oldest first.
-	 * @return array[] Threads, each with `fs_type` set to FreeScout's, plus `message_id`, `files`, and `images`.
-	 *
-	 * @throws ApiError If HelpScout didn't give an attachment it still has.
+	 * @param array[] $threads The conversation's threads, oldest first.
+	 * @return array[] Threads, each with `fs_type` set to FreeScout's.
 	 */
-	private function new_threads( int $conversation_id, array $threads ): array {
-		$ids      = array_map( 'intval', array_column( $threads, 'id' ) );
-		$done     = $ids ? ImportedThread::query()->whereIn( 'helpscout_id', $ids )->pluck( 'helpscout_id' )->map( 'intval' )->all() : array();
-		$original = Carbon::now()->subDays( self::ORIGINAL_KEPT_DAYS );
-		$new      = array();
+	private function new_threads( array $threads ): array {
+		$ids  = array_map( 'intval', array_column( $threads, 'id' ) );
+		$done = $ids ? ImportedThread::query()->whereIn( 'helpscout_id', $ids )->pluck( 'helpscout_id' )->map( 'intval' )->all() : array();
+		$new  = array();
 
 		foreach ( $threads as $thread ) {
 			$type = self::thread_type( $thread );
-			if ( ! $type || in_array( (int) ( $thread['id'] ?? 0 ), $done, true ) ) {
-				continue;
+			if ( $type && ! in_array( (int) ( $thread['id'] ?? 0 ), $done, true ) ) {
+				$thread['fs_type'] = $type;
+				$new[]             = $thread;
 			}
+		}
 
-			$thread['fs_type']    = $type;
-			$thread['message_id'] = null;
-			$thread['files']      = array();
+		return $new;
+	}
 
+	/**
+	 * Reads what threads need from HelpScout: their Message-ID, attachments, and images.
+	 *
+	 * @param int     $conversation_id HelpScout conversation ID.
+	 * @param array[] $threads         Threads, from new_threads().
+	 * @return array[] Threads, each with `message_id`, `files`, and `images` too.
+	 *
+	 * @throws \Throwable If HelpScout didn't give what a thread needs, like an attachment it still has; what was
+	 *                    downloaded is closed then.
+	 */
+	private function read_threads( int $conversation_id, array $threads ): array {
+		$original = Carbon::now()->subDays( self::ORIGINAL_KEPT_DAYS );
+		$read     = array();
+
+		try {
+			foreach ( $threads as $thread ) {
+				$read[] = $this->read_thread( $conversation_id, $thread, $original );
+			}
+		} catch ( \Throwable $e ) {
+			$this->close_downloads( $read );
+
+			throw $e;
+		}
+
+		return $read;
+	}
+
+	/**
+	 * Reads what a thread needs from HelpScout.
+	 *
+	 * @param int    $conversation_id HelpScout conversation ID.
+	 * @param array  $thread          Thread, from new_threads().
+	 * @param Carbon $original        Oldest date HelpScout keeps emails' original source from.
+	 * @return array The thread, with `message_id`, `files`, and `images`.
+	 *
+	 * @throws ApiError   If HelpScout didn't give an attachment it still has; the thread's files are closed then.
+	 * @throws \Throwable If anything else failed while reading it; its files are closed then too.
+	 */
+	private function read_thread( int $conversation_id, array $thread, Carbon $original ): array {
+		$type                 = (int) $thread['fs_type'];
+		$thread['message_id'] = null;
+		$thread['files']      = array();
+		$thread['images']     = array();
+
+		try {
 			// Replies to these emails find the conversation by their Message-ID; HelpScout keeps them for 2 years.
 			$created_at = self::date( $thread['createdAt'] ?? null );
 			if ( 'email' === ( $thread['source']['type'] ?? '' ) && in_array( $type, array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE ), true ) && $created_at && $created_at->greaterThan( $original ) ) {
@@ -485,11 +525,13 @@ final class Importer {
 			}
 
 			$thread['images'] = $this->images( (string) ( $thread['body'] ?? '' ) );
+		} catch ( \Throwable $e ) {
+			$this->close_downloads( array( $thread ) );
 
-			$new[] = $thread;
+			throw $e;
 		}
 
-		return $new;
+		return $thread;
 	}
 
 	/**

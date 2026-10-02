@@ -114,18 +114,75 @@ final class SenderProfileTest extends ImportTestCase {
 	}
 
 	/**
-	 * A sender HelpScout won't give the profile of is imported without it.
+	 * Someone who wrote an email in the conversation, other than its sender, gets their profile too.
 	 *
 	 * @return void
 	 */
-	public function test_sender_without_a_profile_is_imported(): void {
-		$this->helpscout->on( 'GET', 'v2/customers/' . $this->customer_id, FakeHelpScout::json( array(), 404 ) );
+	public function test_thread_author_gets_their_profile(): void {
+		$author                  = self::sender( 'bo@example.org', 'Bo', 'Brother' );
+		$threads                 = $this->threads();
+		$threads[0]['customer']  = $author;
+		$threads[0]['createdBy'] = $author;
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+		$this->helpscout->on(
+			'GET',
+			'v2/customers/' . $author['id'],
+			array(
+				'id'           => $author['id'],
+				'organization' => 'Bo & Co',
+			)
+		);
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$this->assertSame( 'Bo & Co', Email::query()->where( 'email', 'bo@example.org' )->firstOrFail()->customer->company );
+	}
+
+	/**
+	 * A profile that can't be saved is left out; the sender and their conversation are imported, and it isn't tried again.
+	 *
+	 * @return void
+	 */
+	public function test_profile_that_cannot_be_saved_is_left_out(): void {
+		$this->helpscout->on(
+			'GET',
+			'v2/customers/' . $this->customer_id,
+			array(
+				'id'           => $this->customer_id,
+				'organization' => 'Unsaveable',
+			)
+		);
+		Customer::saving(
+			static function ( Customer $customer ): void {
+				if ( 'Unsaveable' === $customer->company ) {
+					throw new \RuntimeException( 'Could not save.' );
+				}
+			}
+		);
 
 		$this->assertSame( Importer::IMPORTED, $this->importer->import( $this->conversation(), $this->mailbox ) );
 
 		$sender = $this->imported_sender();
 		$this->assertNull( $sender->company );
 		$this->assertSame( array( 'id' => $this->customer_id ), $sender->getMeta( People::PROFILE_META ) );
+	}
+
+	/**
+	 * A sender HelpScout won't give the profile of is imported without it.
+	 *
+	 * @return void
+	 */
+	public function test_sender_without_a_profile_is_imported(): void {
+		foreach ( array( 404, 403 ) as $status ) {
+			$this->helpscout->only( 'GET', 'v2/customers/' . $this->customer_id, FakeHelpScout::json( array(), $status ) );
+			Customer::query()->whereKey( Email::query()->where( 'email', 'sam@example.org' )->value( 'customer_id' ) )->update( array( 'meta' => null ) );
+
+			$this->assertContains( $this->importer->import( $this->conversation(), $this->mailbox ), array( Importer::IMPORTED, Importer::UPDATED ) );
+
+			$sender = $this->imported_sender();
+			$this->assertNull( $sender->company );
+			$this->assertSame( array( 'id' => $this->customer_id ), $sender->getMeta( People::PROFILE_META ), 'HTTP ' . $status );
+		}
 	}
 
 	/**
@@ -141,6 +198,8 @@ final class SenderProfileTest extends ImportTestCase {
 			$this->fail( 'The import should have waited for the rate limit.' );
 		} catch ( RateLimited $e ) {
 			$this->assertSame( 0, $this->mailbox->conversations()->count() );
+			// Nothing was downloaded yet, to be downloaded again on the next try.
+			$this->assertCount( 0, $this->helpscout->requests_to( 'v2/conversations/1001/attachments/3001/file' ) );
 		}
 	}
 

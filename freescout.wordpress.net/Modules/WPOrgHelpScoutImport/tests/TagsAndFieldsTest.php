@@ -258,6 +258,48 @@ final class TagsAndFieldsTest extends ImportTestCase {
 	}
 
 	/**
+	 * A conversation HelpScout moved, but agents worked on, keeps its values in the fields of the mailbox it stays in.
+	 *
+	 * @return void
+	 */
+	public function test_moved_conversation_agents_worked_on_keeps_its_mailbox_fields(): void {
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$this->create_thread( \App\Conversation::find( $this->conversation_id() ), \App\Thread::TYPE_NOTE, 'On it.', $this->agent, '2026-09-10 08:00:00' );
+		$themes = $this->create_mailbox( 'Themes' );
+
+		$this->importer->import( $this->conversation( array( 'customFields' => self::values() ) ), $themes );
+
+		$this->assertSame( 0, \DB::table( 'custom_fields' )->where( 'mailbox_id', $themes->id )->count() );
+		$this->assertSame( 3, \DB::table( 'custom_fields' )->where( 'mailbox_id', $this->mailbox->id )->count() );
+		$this->assertSame( 'Fuji X100', $this->values_by_name()['Camera'] );
+	}
+
+	/**
+	 * A multiselect dropdown FreeScout has by a field's name keeps HelpScout's value as one of its options.
+	 *
+	 * @return void
+	 */
+	public function test_value_in_a_multiselect_dropdown_is_an_option(): void {
+		\DB::table( 'custom_fields' )->insert(
+			array(
+				'mailbox_id' => $this->mailbox->id,
+				'name'       => 'Photo type',
+				'type'       => 8,
+				'options'    => json_encode(
+					array(
+						1 => 'Portrait',
+						2 => 'Other',
+					)
+				),
+			)
+		);
+
+		$this->importer->import( $this->conversation( array( 'customFields' => self::values() ) ), $this->mailbox );
+
+		$this->assertSame( '1', $this->values_by_name()['Photo type'] );
+	}
+
+	/**
 	 * Without HelpScout's field definitions, values are kept as text, in fields with HelpScout's names.
 	 *
 	 * @return void

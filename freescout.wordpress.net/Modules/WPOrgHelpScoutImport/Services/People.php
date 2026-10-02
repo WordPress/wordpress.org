@@ -647,28 +647,35 @@ final class People {
 		$location = trim( (string) ( $profile['location'] ?? '' ) );
 
 		if ( $profile ) {
-			$customer->setData(
-				array_filter(
-					array(
-						'company'         => (string) ( $profile['organization'] ?? '' ),
-						'job_title'       => (string) ( $profile['jobTitle'] ?? '' ),
-						'notes'           => (string) ( $profile['background'] ?? '' ),
-						// HelpScout's location is free text, like "Greater Dallas Area": an address of sorts.
-						'address'         => '' !== $lines ? $lines : $location,
-						'city'            => (string) ( $address['city'] ?? '' ),
-						'state'           => (string) ( $address['state'] ?? '' ),
-						'zip'             => mb_substr( (string) ( $address['postalCode'] ?? '' ), 0, 12 ),
-						'country'         => (string) ( $address['country'] ?? '' ),
-						'phones'          => self::typed( (array) ( $embedded['phones'] ?? array() ), Customer::$phone_types, Customer::PHONE_TYPE_OTHER ),
-						'websites'        => array_column( (array) ( $embedded['websites'] ?? array() ), 'value' ),
-						'social_profiles' => self::typed( (array) ( $embedded['social_profiles'] ?? array() ), Customer::$social_types, Customer::SOCIAL_TYPE_OTHER ),
-						'emails'          => self::new_emails( self::typed( (array) ( $embedded['emails'] ?? array() ), Email::$types, Email::TYPE_OTHER ) ),
-					)
-				),
-				false
-			);
+			// The profile is extra: a sender it can't be saved for is imported without it.
+			try {
+				$customer->setData(
+					array_filter(
+						array(
+							'company'         => (string) ( $profile['organization'] ?? '' ),
+							'job_title'       => (string) ( $profile['jobTitle'] ?? '' ),
+							'notes'           => (string) ( $profile['background'] ?? '' ),
+							// HelpScout's location is free text, like "Greater Dallas Area": an address of sorts.
+							'address'         => '' !== $lines ? $lines : $location,
+							'city'            => (string) ( $address['city'] ?? '' ),
+							'state'           => (string) ( $address['state'] ?? '' ),
+							'zip'             => mb_substr( (string) ( $address['postalCode'] ?? '' ), 0, 12 ),
+							'country'         => (string) ( $address['country'] ?? '' ),
+							'phones'          => self::typed( (array) ( $embedded['phones'] ?? array() ), Customer::$phone_types, Customer::PHONE_TYPE_OTHER ),
+							'websites'        => array_column( (array) ( $embedded['websites'] ?? array() ), 'value' ),
+							'social_profiles' => self::typed( (array) ( $embedded['social_profiles'] ?? array() ), Customer::$social_types, Customer::SOCIAL_TYPE_OTHER ),
+							'emails'          => self::new_emails( self::typed( (array) ( $embedded['emails'] ?? array() ), Email::$types, Email::TYPE_OTHER ) ),
+						)
+					),
+					false
+				);
 
-			$this->photo( $customer, (string) ( $profile['photoUrl'] ?? '' ) );
+				$this->photo( $customer, (string) ( $profile['photoUrl'] ?? '' ) );
+				$customer->save();
+			} catch ( \Throwable $e ) {
+				\Log::error( '[WPOrgHelpScoutImport] Could not save the HelpScout profile of sender ' . $customer->id . ': ' . $e->getMessage() );
+				$customer->refresh();
+			}
 		}
 
 		$customer->setMeta(
@@ -749,7 +756,8 @@ final class People {
 
 		try {
 			// Like FreeScout's own photos from a URL: not from a private address.
-			\Helper::sanitizeRemoteUrl( $url, true );
+			// Without following redirects, which would download it once more: image() doesn't follow them either.
+			\Helper::sanitizeRemoteUrl( $url, true, false );
 		} catch ( \Throwable $e ) {
 			return;
 		}

@@ -50,6 +50,13 @@ final class CustomFields {
 	private const TYPE_DROPDOWN = 1;
 
 	/**
+	 * The module's multiselect dropdown type, which keeps option numbers like a dropdown.
+	 *
+	 * @var int
+	 */
+	private const TYPE_DROPDOWN_MULTISELECT = 8;
+
+	/**
 	 * The module's date type.
 	 *
 	 * @var int
@@ -282,7 +289,8 @@ final class CustomFields {
 			}
 		}
 
-		if ( self::TYPE_DROPDOWN !== (int) $field->type ) {
+		// A field FreeScout had by the name may be a multiselect dropdown: HelpScout's value is one of its options.
+		if ( ! in_array( (int) $field->type, array( self::TYPE_DROPDOWN, self::TYPE_DROPDOWN_MULTISELECT ), true ) ) {
 			return $text;
 		}
 
