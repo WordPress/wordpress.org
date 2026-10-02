@@ -202,7 +202,8 @@ function render_slack_users( array $slack_users ): array {
 		$items[] = array(
 			'title'  => (string) reset( $names ),
 			'url'    => 'https://wordpress.slack.com/archives/' . $slack_user->dm_id,
-			'badges' => array( ! empty( $slack_data->deleted ) ? badge( 'Deactivated', 'error' ) : badge( 'Active', 'success' ) ),
+			// Accounts are expected to be active, so only a deactivated one is marked.
+			'badges' => ! empty( $slack_data->deleted ) ? array( badge( 'Deactivated', 'error' ) ) : array(),
 			'meta'   => array( array( 'text' => 'Updated ' . gmdate( 'Y-m-d', (int) $slack_data->updated ) ) ),
 		);
 	}

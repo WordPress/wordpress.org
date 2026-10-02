@@ -10,11 +10,13 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgSidebar\Providers;
 
 use App\Conversation;
+use App\Mailbox;
 use Illuminate\Support\ServiceProvider;
 use Modules\WPOrgSidebar\Services\Client;
+use Modules\WPOrgSidebar\Services\Panels;
 
 /**
- * Registers the WordPress.org panels in the conversation sidebar.
+ * Registers the WordPress.org panels in the conversation sidebar, and their settings.
  */
 final class WPOrgSidebarServiceProvider extends ServiceProvider {
 
@@ -96,6 +98,74 @@ final class WPOrgSidebarServiceProvider extends ServiceProvider {
 				self::render_panels( $conversation );
 			}
 		);
+
+		$this->register_settings();
+	}
+
+	/**
+	 * Adds a section under Manage » Settings for each panel with `per_mailbox`, to choose the mailboxes it shows in.
+	 *
+	 * @return void
+	 */
+	private function register_settings(): void {
+		\Eventy::addFilter(
+			'settings.sections',
+			static function ( array $sections ): array {
+				$order = 600;
+				foreach ( Panels::per_mailbox() as $panel_id => $panel ) {
+					$sections[ Panels::SECTION_PREFIX . $panel_id ] = array(
+						'title' => __( ':panel Panel', array( 'panel' => $panel['title'] ) ),
+						'icon'  => 'list-alt',
+						'order' => $order++,
+					);
+				}
+
+				return $sections;
+			}
+		);
+
+		\Eventy::addFilter(
+			'settings.section_settings',
+			static function ( array $settings, string $section ): array {
+				$panel_id = Panels::panel_for_section( $section );
+				if ( '' === $panel_id ) {
+					return $settings;
+				}
+
+				return array( Panels::option( $panel_id ) => Panels::mailbox_ids( $panel_id ) );
+			},
+			20,
+			2
+		);
+
+		\Eventy::addFilter(
+			'settings.section_params',
+			static function ( array $params, string $section ): array {
+				$panel_id = Panels::panel_for_section( $section );
+				if ( '' === $panel_id ) {
+					return $params;
+				}
+
+				$params['template_vars'] = array(
+					'panel'     => Panels::per_mailbox()[ $panel_id ],
+					'option'    => Panels::option( $panel_id ),
+					'mailboxes' => Mailbox::query()->orderBy( 'name' )->get(),
+				);
+
+				return $params;
+			},
+			20,
+			2
+		);
+
+		\Eventy::addFilter(
+			'settings.view',
+			static function ( string $view, string $section ): string {
+				return '' === Panels::panel_for_section( $section ) ? $view : self::ALIAS . '::settings';
+			},
+			20,
+			2
+		);
 	}
 
 	/**
@@ -113,7 +183,7 @@ final class WPOrgSidebarServiceProvider extends ServiceProvider {
 			echo \View::make(
 				self::ALIAS . '::sidebar',
 				array(
-					'panels'          => (array) config( self::ALIAS . '.panels' ),
+					'panels'          => Panels::for_mailbox( (int) $conversation->mailbox_id ),
 					'conversation_id' => (int) $conversation->id,
 				)
 			)->render();
