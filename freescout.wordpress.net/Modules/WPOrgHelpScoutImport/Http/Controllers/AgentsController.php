@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\People;
+use Modules\WPOrgHelpScoutImport\Services\WordPressOrgAccounts;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Lists HelpScout's users and teams, and saves who they're credited to.
@@ -66,6 +68,7 @@ final class AgentsController extends Controller {
 				'mailbox_id'      => $mailbox_id,
 				'users'           => People::creditable()->orderBy( 'first_name' )->orderBy( 'last_name' )->get(),
 				'freescout_teams' => People::freescout_teams()->orderBy( 'first_name' )->get(),
+				'can_connect'     => WordPressOrgAccounts::available(),
 				'error'           => $error,
 			)
 		);
@@ -98,6 +101,79 @@ final class AgentsController extends Controller {
 		return redirect()
 			->route( 'wporghelpscoutimport.agents', array_filter( array( 'mailbox' => (int) $request->input( 'mailbox' ) ) ) )
 			->with( 'flash_success', __( 'Saved.' ) );
+	}
+
+	/**
+	 * Downloads HelpScout's users as a CSV, to fill in their WordPress.org usernames.
+	 *
+	 * @return Response
+	 */
+	public function export(): Response {
+		$csv = ( new WordPressOrgAccounts( new People( app( HelpScout::class ) ) ) )->export();
+
+		return response(
+			$csv,
+			200,
+			array(
+				'Content-Type'        => 'text/csv; charset=UTF-8',
+				'Content-Disposition' => 'attachment; filename="helpscout-users.csv"',
+			)
+		);
+	}
+
+	/**
+	 * Checks a CSV of HelpScout users and their WordPress.org usernames, and connects them once that's confirmed.
+	 *
+	 * Checking shows what connecting would do, without doing it; connecting checks again, and does it.
+	 *
+	 * @param Request $request Request.
+	 * @return View|RedirectResponse
+	 */
+	public function connect( Request $request ): View|RedirectResponse {
+		if ( ! WordPressOrgAccounts::available() ) {
+			return redirect()->route( 'wporghelpscoutimport.agents' )->with( 'flash_error', __( 'Connecting users to WordPress.org accounts needs WP.org SSO to be on.' ) );
+		}
+
+		$csv  = (string) $request->input( 'csv', '' );
+		$file = $request->file( 'csv_file' );
+		if ( $file && $file->isValid() ) {
+			$csv = (string) file_get_contents( $file->getRealPath() );
+		}
+
+		$rows = WordPressOrgAccounts::parse( $csv );
+		if ( ! $rows ) {
+			return redirect()->route( 'wporghelpscoutimport.agents' )->with( 'flash_error', __( 'The CSV has no rows with a wporg_username.' ) );
+		}
+
+		// Each row is a request to api.wordpress.org, on the first check.
+		set_time_limit( 300 );
+
+		$accounts = new WordPressOrgAccounts( new People( app( HelpScout::class ) ) );
+		$plan     = $accounts->plan( $rows );
+
+		if ( ! filter_var( $request->input( 'apply' ), FILTER_VALIDATE_BOOLEAN ) ) {
+			return view(
+				'wporghelpscoutimport::connect',
+				array(
+					'plan' => $plan,
+					'csv'  => $csv,
+				)
+			);
+		}
+
+		$done   = $accounts->apply( $plan );
+		$errors = count(
+			array_filter(
+				$plan,
+				static function ( array $step ): bool {
+					return '' !== $step['error'];
+				}
+			)
+		);
+
+		$redirect = redirect()->route( 'wporghelpscoutimport.agents' )->with( 'flash_success', __( 'Connected :count HelpScout users to WordPress.org accounts.', array( 'count' => count( $done ) ) ) );
+
+		return $errors ? $redirect->with( 'flash_error', __( ':count rows couldn’t be connected; check the CSV again to see why.', array( 'count' => $errors ) ) ) : $redirect;
 	}
 
 	/**

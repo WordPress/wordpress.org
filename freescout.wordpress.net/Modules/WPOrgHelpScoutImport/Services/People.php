@@ -144,6 +144,52 @@ final class People {
 	}
 
 	/**
+	 * A HelpScout user, as HelpScout lists them, or as an import met them if HelpScout no longer does.
+	 *
+	 * @param int $helpscout_user_id HelpScout user ID.
+	 * @return array|null Shaped like directory()'s, with `former` set for users HelpScout no longer lists.
+	 */
+	public function helpscout_user( int $helpscout_user_id ): ?array {
+		$listed = $this->listed( $helpscout_user_id );
+		if ( $listed ) {
+			return self::is_team( $listed ) ? null : $listed;
+		}
+
+		foreach ( self::former( $this->directory() ) as $former ) {
+			if ( $former['id'] === $helpscout_user_id ) {
+				return $former;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * The FreeScout user a HelpScout user has already: the one chosen or created for them, or with their email.
+	 *
+	 * @param array $helpscout_user HelpScout user, as directory() lists them.
+	 * @return User|null Null if they have none yet.
+	 */
+	public static function existing( array $helpscout_user ): ?User {
+		return self::mapped( (int) ( $helpscout_user['id'] ?? 0 ) ) ?? self::by_email( (string) ( $helpscout_user['email'] ?? '' ) );
+	}
+
+	/**
+	 * The FreeScout user for a HelpScout user, created if there's none: it can log in while HelpScout lists them.
+	 *
+	 * @param array $helpscout_user HelpScout user, as directory() lists them.
+	 * @return User
+	 */
+	public function find_or_create( array $helpscout_user ): User {
+		$id = (int) $helpscout_user['id'];
+		if ( ! isset( $this->users[ $id ] ) ) {
+			$this->users[ $id ] = self::mapped( $id ) ?? $this->match_or_create( $helpscout_user, empty( $helpscout_user['former'] ) && null !== $this->listed( $id ) );
+		}
+
+		return $this->users[ $id ];
+	}
+
+	/**
 	 * Makes sure every HelpScout user of a mailbox has a FreeScout user with access to the mailbox imported into.
 	 *
 	 * @param int     $helpscout_mailbox_id HelpScout mailbox ID.
@@ -626,12 +672,12 @@ final class People {
 	}
 
 	/**
-	 * The FreeScout user with an email.
+	 * The FreeScout user with an email, who isn't a robot or deleted.
 	 *
 	 * @param string $email Email.
 	 * @return User|null
 	 */
-	private static function by_email( string $email ): ?User {
+	public static function by_email( string $email ): ?User {
 		return '' !== $email ? self::creditable()->where( 'email', mb_strtolower( $email ) )->first() : null;
 	}
 

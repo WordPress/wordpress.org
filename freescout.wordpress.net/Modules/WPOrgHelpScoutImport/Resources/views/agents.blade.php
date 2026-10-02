@@ -48,6 +48,30 @@
 			</form>
 		</div>
 
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<h4>{{ __('Connect to WordPress.org accounts') }}</h4>
+				<p>{{ __('Download HelpScout’s users, fill in the wporg_username column, and check it here. Each one’s FreeScout user is connected to that account, created if they have none yet: their name, email, and avatar come from WordPress.org, and they can log in with it. Someone whose account is connected to a FreeScout user already is credited to that user.') }}</p>
+				<p><a href="{{ route( 'wporghelpscoutimport.agents.export' ) }}" class="btn btn-default">{{ __('Download CSV') }}</a></p>
+				@if ( $can_connect )
+					<form method="POST" action="{{ route( 'wporghelpscoutimport.agents.connect' ) }}" enctype="multipart/form-data">
+						{{ csrf_field() }}
+						<div class="form-group">
+							<label for="wporghelpscoutimport-csv-file">{{ __('Filled-in CSV') }}</label>
+							<input type="file" id="wporghelpscoutimport-csv-file" name="csv_file" accept=".csv,text/csv">
+						</div>
+						<div class="form-group">
+							<label for="wporghelpscoutimport-csv">{{ __('Or paste it') }}</label>
+							<textarea id="wporghelpscoutimport-csv" name="csv" class="form-control" rows="4" placeholder="helpscout_id,…,wporg_username"></textarea>
+						</div>
+						<button type="submit" class="btn btn-default">{{ __('Check') }}</button>
+					</form>
+				@else
+					<p class="text-help">{{ __('Connecting needs WP.org SSO to be on.') }}</p>
+				@endif
+			</div>
+		</div>
+
 		<form method="POST" action="{{ route( 'wporghelpscoutimport.agents.save' ) }}">
 			{{ csrf_field() }}
 			<input type="hidden" name="mailbox" value="{{ $mailbox_id ?: '' }}">

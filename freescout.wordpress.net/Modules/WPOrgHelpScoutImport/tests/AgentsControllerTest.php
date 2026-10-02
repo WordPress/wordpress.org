@@ -20,6 +20,12 @@ use Modules\WPOrgHelpScoutImport\Entities\Person;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
+use Modules\WPOrgSSO\Entities\Account;
+use Modules\WPOrgSSO\Services\Client;
+use GuzzleHttp\Promise\FulfilledPromise;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\RequestInterface;
 
 require_once __DIR__ . '/ImportTestCase.php';
 
@@ -229,6 +235,157 @@ final class AgentsControllerTest extends ImportTestCase {
 		$this->assertFalse( Agent::query()->where( 'helpscout_user_id', 56 )->exists() );
 		$this->assertSame( (int) $this->agent->id, (int) Agent::query()->where( 'helpscout_user_id', 57 )->value( 'user_id' ) );
 		$this->assertFalse( Agent::query()->where( 'helpscout_user_id', 90 )->exists() );
+	}
+
+	/**
+	 * The CSV lists HelpScout's people, not teams, with their FreeScout users, and a column for WordPress.org usernames.
+	 *
+	 * @return void
+	 */
+	public function test_csv_lists_helpscout_users(): void {
+		$response = $this->get( route( 'wporghelpscoutimport.agents.export' ) );
+
+		$response->assertStatus( 200 );
+		$this->assertStringContainsString( 'attachment; filename="helpscout-users.csv"', (string) $response->headers->get( 'Content-Disposition' ) );
+
+		$lines = explode( "\n", trim( $response->getContent() ) );
+		$this->assertSame( 'helpscout_id,first_name,last_name,email,mailboxes,former,freescout_user,wporg_username', $lines[0] );
+		$this->assertContains( '55,Ada,Agent,agent@example.org,"Photos; Themes",no,agent@example.org,', $lines );
+		$this->assertContains( '56,Bo,Newcomer,bo@example.org,Photos,no,,', $lines );
+		$this->assertCount( 4, $lines );
+	}
+
+	/**
+	 * Checking a filled-in CSV shows what connecting would do, and changes nothing.
+	 *
+	 * @return void
+	 */
+	public function test_csv_is_checked_before_connecting(): void {
+		$this->use_wordpress_org();
+
+		$page = $this->post( route( 'wporghelpscoutimport.agents.connect' ), array( 'csv' => $this->filled_csv() ) )->getContent();
+
+		$this->assertStringContainsString( 'Connect this FreeScout user', $page );
+		$this->assertStringContainsString( 'Create a FreeScout user, connected to it', $page );
+		$this->assertStringContainsString( 'There is no WordPress.org account with that username.', $page );
+		$this->assertStringContainsString( 'Connect 2 users', $page );
+		$this->assertFalse( User::query()->where( 'email', 'bo@wordpress.example' )->exists() );
+		$this->assertSame( '', Account::username_for( (int) $this->agent->id ) );
+	}
+
+	/**
+	 * Connecting creates users without one, connects them, takes their WordPress.org details, and credits them.
+	 *
+	 * @return void
+	 */
+	public function test_csv_connects_users(): void {
+		$this->use_wordpress_org();
+
+		$this->post(
+			route( 'wporghelpscoutimport.agents.connect' ),
+			array(
+				'csv'   => $this->filled_csv(),
+				'apply' => 1,
+			)
+		)->assertSessionHas( 'flash_success', 'Connected 2 HelpScout users to WordPress.org accounts.' );
+
+		$bo = User::query()->where( 'email', 'bo@wordpress.example' )->firstOrFail();
+		$this->assertSame( 'bonew', Account::username_for( (int) $bo->id ) );
+		$this->assertSame( User::STATUS_ACTIVE, (int) $bo->status );
+		$this->assertSame( (int) $bo->id, (int) Agent::query()->where( 'helpscout_user_id', 56 )->value( 'user_id' ) );
+
+		$this->assertSame( 'adaagent', Account::username_for( (int) $this->agent->id ) );
+		$this->assertSame( 'ada@wordpress.example', $this->agent->fresh()->email );
+		$this->assertFalse( Agent::query()->where( 'helpscout_user_id', 57 )->exists() );
+	}
+
+	/**
+	 * Someone whose account is connected to a FreeScout user already is credited to that user.
+	 *
+	 * @return void
+	 */
+	public function test_connected_account_is_that_user(): void {
+		$this->use_wordpress_org();
+		Account::connect( (int) $this->admin->id, 'adminuser' );
+		$users = User::query()->count();
+
+		$this->post(
+			route( 'wporghelpscoutimport.agents.connect' ),
+			array(
+				'csv'   => "helpscout_id,wporg_username\n57,adminuser\n",
+				'apply' => 1,
+			)
+		);
+
+		$this->assertSame( (int) $this->admin->id, (int) Agent::query()->where( 'helpscout_user_id', 57 )->value( 'user_id' ) );
+		$this->assertSame( $users, User::query()->count() );
+	}
+
+	/**
+	 * Without WP.org SSO, nothing is connected.
+	 *
+	 * @return void
+	 */
+	public function test_connecting_needs_wporgsso(): void {
+		$this->post( route( 'wporghelpscoutimport.agents.connect' ), array( 'csv' => $this->filled_csv() ) )->assertSessionHas( 'flash_error' );
+
+		$this->assertFalse( User::query()->where( 'email', 'bo@example.org' )->exists() );
+	}
+
+	/**
+	 * The CSV, filled in: Ada and Bo have accounts, and Cy's username has none.
+	 *
+	 * @return string
+	 */
+	private function filled_csv(): string {
+		return "helpscout_id,first_name,last_name,email,mailboxes,former,freescout_user,wporg_username\n"
+			. "55,Ada,Agent,agent@example.org,Photos,no,agent@example.org,adaagent\n"
+			. "56,Bo,Newcomer,bo@example.org,Photos,no,,BoNew\n"
+			. "57,Cy,Elsewhere,cy@helpscout.example,Themes,no,,nobody\n";
+	}
+
+	/**
+	 * Turns WP.org SSO on, with a fake account.php.
+	 *
+	 * @return void
+	 */
+	private function use_wordpress_org(): void {
+		$this->app->register( \Modules\WPOrgSSO\Providers\WPOrgSSOServiceProvider::class );
+
+		$accounts = array(
+			'adaagent'  => array(
+				'username'   => 'adaagent',
+				'first_name' => 'Ada',
+				'last_name'  => 'Agent',
+				'email'      => 'ada@wordpress.example',
+			),
+			'bonew'     => array(
+				'username'   => 'bonew',
+				'first_name' => 'Bo',
+				'last_name'  => 'Newcomer',
+				'email'      => 'bo@wordpress.example',
+			),
+			'adminuser' => array(
+				'username'   => 'adminuser',
+				'first_name' => 'Admin',
+				'last_name'  => 'User',
+				'email'      => (string) $this->admin->email,
+			),
+		);
+
+		$this->app->instance(
+			Client::class,
+			new Client(
+				'https://api.wordpress.test/',
+				'test-secret',
+				10,
+				static function ( RequestInterface $request ) use ( $accounts ): PromiseInterface {
+					$username = strtolower( (string) ( json_decode( (string) $request->getBody(), true )['username'] ?? '' ) );
+
+					return new FulfilledPromise( new Response( 200, array(), (string) json_encode( array( 'user' => $accounts[ $username ] ?? null ) ) ) );
+				}
+			)
+		);
 	}
 
 	/**
