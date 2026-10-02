@@ -13,10 +13,13 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
   - images pasted into emails, which HelpScout keeps on its own image host: they're copied, so they don't go with the account, up to 100 MB per conversation. Images linked from elsewhere keep their links, and HelpScout's read-tracking image is removed;
   - each email's Message-ID, so a sender who replies to an old HelpScout email lands in its conversation. HelpScout keeps them for 2 years, so older emails have none. An email FreeScout has already, like one sent to two mailboxes, keeps its Message-ID where it is; if it's in the same conversation, it isn't added again;
   - HelpScout's conversation number, which people quote, unless a FreeScout conversation already has it;
-  - HelpScout's tags and custom fields, kept in the module's own table until the Tags and Custom Fields modules can take them.
+  - HelpScout's tags and custom fields, kept in the module's own table until the Tags and Custom Fields modules can take them;
+  - the mailbox's saved replies for email, once its conversations are done, with the Saved Replies module on. Their placeholders, like `{%customer.firstName,fallback=there%}`, work in FreeScout as they are, and their images are copied like those in emails. Importing again brings them up to date with HelpScout's, unless they were changed or deleted in FreeScout; a saved reply with the name of one FreeScout has already is left out. Those that fail are listed with the run's error, and tried again by importing the mailbox again.
 - **What doesn't:**
   - spam, drafts, and conversations HelpScout deleted. A conversation marked spam in HelpScout after it was imported becomes spam in FreeScout too, unless agents worked on it there;
   - HelpScout's line items ("assigned to", "closed by", workflows that ran);
+  - workflows: HelpScout's API gives only their names, not their conditions or actions. Set them up again in FreeScout's Workflows module;
+  - saved replies' categories, and those only for chat: HelpScout's API doesn't give the categories, so saved replies come across as one list, in HelpScout's order;
   - phone calls and forwards become notes, since FreeScout has no thread type for them. Senders without an email, like callers, are imported without one.
 - **Conversations agents worked on in FreeScout:** once a conversation has a reply, note, or change made in FreeScout, importing it again only adds HelpScout's new threads. Its status and assignee stay FreeScout's.
 - **Conversations HelpScout moved to another mailbox** move to the FreeScout mailbox that mailbox is imported into, unless agents worked on them in FreeScout: then they stay where they are, and only get HelpScout's new threads. Retrying a failed conversation that's in another HelpScout mailbox now leaves it to that mailbox's import.
@@ -47,6 +50,7 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
 - FreeScout's queue worker must be running.
 - Conversation numbers: under Manage » Settings » General, set **Conversation Number** to **Custom…** (`APP_CUSTOM_NUMBER=true`), or FreeScout shows and searches its internal IDs instead. Before the first import, set the **Next Conversation #** that appears well above HelpScout's numbers, like 2,000,000: HelpScout keeps numbering the mailboxes that haven't moved yet, and conversations whose number FreeScout has given away already keep a number of FreeScout's. The import page warns until both are set, and doesn't start an import before the Next Conversation # is. Imports leave that setting alone.
 - Teams: install the Teams module, and create the teams, before importing mailboxes with conversations assigned to teams.
+- Saved replies: switch on the Saved Replies module before the last import of each mailbox.
 - After the last mailbox has moved, switch the module off, and remove its code in a later deploy. Imported conversations keep HelpScout's numbers. Its tables map HelpScout's conversation IDs to FreeScout's: convert anything that still links to HelpScout before removing it.
 
 To try it locally, start the environment with `WPORG_HELPSCOUT_APP_ID` and `WPORG_HELPSCOUT_APP_SECRET` set. The import only reads from HelpScout.

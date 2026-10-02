@@ -405,6 +405,40 @@ final class HelpScout {
 	}
 
 	/**
+	 * Lists a mailbox's saved replies for email, without their text.
+	 *
+	 * @param int $mailbox_id HelpScout mailbox ID.
+	 * @return array[] Saved replies, with `id` and `name`.
+	 */
+	public function saved_replies( int $mailbox_id ): array {
+		$body    = $this->get( 'v2/mailboxes/' . $mailbox_id . '/saved-replies' );
+		$replies = array_is_list( $body ) ? $body : (array) ( $body['_embedded']['savedReplies'] ?? array() );
+
+		return array_values( array_filter( $replies, 'is_array' ) );
+	}
+
+	/**
+	 * Gets a saved reply, with its text.
+	 *
+	 * @param int $mailbox_id     HelpScout mailbox ID.
+	 * @param int $saved_reply_id HelpScout saved reply ID.
+	 * @return array|null With `id`, `name`, and `text`, its HTML; null if it was deleted since it was listed.
+	 *
+	 * @throws ApiError If HelpScout didn't give it otherwise.
+	 */
+	public function saved_reply( int $mailbox_id, int $saved_reply_id ): ?array {
+		try {
+			return $this->get( 'v2/mailboxes/' . $mailbox_id . '/saved-replies/' . $saved_reply_id );
+		} catch ( ApiError $e ) {
+			if ( 404 === $e->status ) {
+				return null;
+			}
+
+			throw $e;
+		}
+	}
+
+	/**
 	 * Saves a response's body into a temporary file, without holding it in memory.
 	 *
 	 * @param ResponseInterface $response Response.

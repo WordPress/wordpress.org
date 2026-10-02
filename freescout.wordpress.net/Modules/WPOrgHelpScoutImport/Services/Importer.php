@@ -429,6 +429,43 @@ final class Importer {
 	}
 
 	/**
+	 * Copies the images HelpScout hosts in a saved reply's text, like images pasted into the editor: as embedded
+	 * attachments of no thread.
+	 *
+	 * An image that can't be downloaded keeps its link.
+	 *
+	 * @param string $text    Saved reply's text.
+	 * @param int    $user_id FreeScout user who added them.
+	 * @return array The text, linking to the copies; and the copies, as a collection of attachments, whose files go
+	 *               with them if the text isn't kept.
+	 *
+	 * @throws \Throwable If a copy couldn't be saved; the others are deleted then.
+	 */
+	public function copy_images( string $text, int $user_id ): array {
+		$this->downloads      = array();
+		$this->download_bytes = 0;
+		$this->attachments    = array();
+
+		try {
+			foreach ( $this->images( $text ) as $src => $image ) {
+				$attachment = $this->attach( $image, null, $user_id, true );
+				if ( $attachment ) {
+					$text = str_replace( $src, $attachment->url(), $text );
+				}
+			}
+
+			return array( $text, collect( $this->attachments ) );
+		} catch ( \Throwable $e ) {
+			Attachment::deleteForever( collect( $this->attachments ) );
+
+			throw $e;
+		} finally {
+			$this->attachments = array();
+			$this->close_downloads( array() );
+		}
+	}
+
+	/**
 	 * Downloads the images in a body that HelpScout hosts, which would go with the account.
 	 *
 	 * An image that can't be downloaded keeps its link.
@@ -504,13 +541,13 @@ final class Importer {
 	 *
 	 * Core takes it as an uploaded file: it reads PDFs whole to check them for scripts, which a stream can't be.
 	 *
-	 * @param array $file      With `name`, `mime`, and `data`, the temporary file.
-	 * @param int   $thread_id FreeScout thread ID.
-	 * @param int   $user_id   FreeScout user who added it, or 0 for a sender.
-	 * @param bool  $embedded  Whether it's an image in the body.
+	 * @param array    $file      With `name`, `mime`, and `data`, the temporary file.
+	 * @param int|null $thread_id FreeScout thread ID, or null for an image in a saved reply.
+	 * @param int      $user_id   FreeScout user who added it, or 0 for a sender.
+	 * @param bool     $embedded  Whether it's an image in the body.
 	 * @return Attachment|null
 	 */
-	private function attach( array $file, int $thread_id, int $user_id, bool $embedded ): ?Attachment {
+	private function attach( array $file, ?int $thread_id, int $user_id, bool $embedded ): ?Attachment {
 		$upload     = new UploadedFile( self::path( $file['data'] ), $file['name'], $file['mime'], null, null, true );
 		$attachment = Attachment::create( $file['name'], $file['mime'], null, null, $upload, $embedded, $thread_id, $user_id ? $user_id : null );
 		if ( ! $attachment ) {

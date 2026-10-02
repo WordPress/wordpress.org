@@ -20,6 +20,7 @@ use Modules\WPOrgHelpScoutImport\Entities\Run;
 use Modules\WPOrgHelpScoutImport\Jobs\ImportPage;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\People;
+use Modules\WPOrgHelpScoutImport\Services\SavedReplies;
 
 /**
  * Lists runs, starts them, and pauses, resumes, cancels, and retries them.
@@ -79,6 +80,8 @@ final class ImportController extends Controller {
 				'runs'       => $runs,
 				'running'    => $runs->contains( 'status', Run::STATUS_RUNNING ),
 				'numbering'  => $sources ? self::numbering( $helpscout ) : null,
+				// Imports bring saved replies only while there's somewhere to put them.
+				'replies'    => SavedReplies::available(),
 			)
 		);
 	}

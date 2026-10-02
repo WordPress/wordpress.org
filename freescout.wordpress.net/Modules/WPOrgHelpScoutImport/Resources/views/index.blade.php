@@ -20,6 +20,13 @@
 		'gone'        => __('no longer in HelpScout'),
 		'moved'       => __('in another HelpScout mailbox now'),
 	];
+	$reply_results = [
+		'imported'  => __('imported'),
+		'updated'   => __('updated'),
+		'unchanged' => __('unchanged'),
+		'kept'      => __('kept as FreeScout has them'),
+		'failed'    => __('failed'),
+	];
 @endphp
 {{-- Not while something on the page waits to be confirmed: refreshing would lose it. --}}
 <div class="container" @if ( $running && ! session( 'wporghelpscoutimport_confirm' ) ) data-wporghelpscoutimport-refresh="30" @endif>
@@ -52,6 +59,13 @@
 
 		@if ( $sources )
 			<p>{{ __('Imports copy a HelpScout mailbox’s conversations into a FreeScout mailbox, without sending anything. The first import copies everything; importing the same mailbox again copies only what changed since. Import before the mailbox’s email moves, and once more after.') }}</p>
+			<p>
+				@if ( $replies )
+					{{ __('Once its conversations are done, an import copies the mailbox’s saved replies too, and brings those it copied before up to date, unless they were changed in FreeScout.') }}
+				@else
+					{{ __('Switch on the Saved Replies module to import the mailboxes’ saved replies too.') }}
+				@endif
+			</p>
 			<p>{{ __('Every HelpScout user who can see the mailbox gets a FreeScout user with access to it, unless they have one with the same email, or one is chosen on the Users page. Users HelpScout no longer has get a disabled one, when an import meets them. New users log in with WordPress.org once they’re connected to their account on their profile.') }}</p>
 
 			@if ( session( 'wporghelpscoutimport_confirm' ) )
@@ -143,6 +157,9 @@
 								@elseif ( $run->pages )
 									{{ __('Page :page of :pages', [ 'page' => min( $run->page, $run->pages ), 'pages' => $run->pages ]) }}
 									<br/><small>{{ __(':total conversations', [ 'total' => $run->total ]) }}</small>
+								@endif
+								@if ( $run->saved_replies )
+									<br/><small>{{ __('Saved replies:') }} {{ implode( ', ', array_map( function ( $result, $count ) use ( $reply_results ) { return ( is_array( $count ) ? count( $count ) : $count ) . ' ' . ( $reply_results[ $result ] ?? $result ); }, array_keys( $run->saved_replies ), $run->saved_replies ) ) }}</small>
 								@endif
 							</td>
 							<td>{{ $run->imported }}</td>

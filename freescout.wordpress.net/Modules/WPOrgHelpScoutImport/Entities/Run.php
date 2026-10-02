@@ -34,6 +34,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int[]|null       $skips       Skipped conversations, by why.
  * @property string[]|null    $failures    Failed conversations' errors, by HelpScout ID.
  * @property string|null      $last_error
+ * @property array|null       $saved_replies Saved replies counted by what happened to them, like `imported`, and failed ones' HelpScout IDs; null if none were read.
  * @property int[]|null       $retry_ids   HelpScout IDs to import again, for a run that retries another's failures.
  * @property int|null         $waiting_on  HelpScout ID of a conversation the rate limit cut off part way.
  * @property int|null         $attempting  HelpScout ID of the conversation being imported.
@@ -121,6 +122,7 @@ final class Run extends Model {
 		'skips'         => 'array',
 		'failures'      => 'array',
 		'retry_ids'     => 'array',
+		'saved_replies' => 'array',
 	);
 
 	/**

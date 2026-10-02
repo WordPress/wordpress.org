@@ -12,7 +12,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Runs, and HelpScout's IDs for imported conversations and threads, so a run can be repeated without duplicates.
+ * Runs, and HelpScout's IDs for imported conversations, threads, and saved replies, so a run can be repeated without duplicates.
  */
 class CreateWporghelpscoutimportTables extends Migration {
 
@@ -52,6 +52,9 @@ class CreateWporghelpscoutimportTables extends Migration {
 					$table->text( 'skips' )->nullable();
 					$table->longText( 'failures' )->nullable();
 					$table->text( 'last_error' )->nullable();
+
+					// Saved replies imported, updated, and kept as FreeScout has them, and failed ones' HelpScout IDs, as JSON.
+					$table->text( 'saved_replies' )->nullable();
 
 					// For a run that retries another's failures: the HelpScout IDs to import; null for a mailbox's list.
 					$table->longText( 'retry_ids' )->nullable();
@@ -145,6 +148,25 @@ class CreateWporghelpscoutimportTables extends Migration {
 				}
 			);
 		}
+
+		if ( ! Schema::hasTable( 'wporghelpscoutimport_saved_replies' ) ) {
+			Schema::create(
+				'wporghelpscoutimport_saved_replies',
+				static function ( Blueprint $table ): void {
+					$table->increments( 'id' );
+					$table->unsignedBigInteger( 'helpscout_id' )->unique();
+					$table->unsignedInteger( 'saved_reply_id' )->index();
+
+					// What HelpScout had and what FreeScout was given, so changes on either side are told apart.
+					$table->string( 'source_hash', 64 )->nullable();
+					$table->string( 'written_hash', 64 )->nullable();
+
+					// The run that last checked it, so a run that's tried again goes on where it stopped.
+					$table->unsignedInteger( 'run_id' )->nullable();
+					$table->timestamps();
+				}
+			);
+		}
 	}
 
 	/**
@@ -153,6 +175,7 @@ class CreateWporghelpscoutimportTables extends Migration {
 	 * @return void
 	 */
 	public function down(): void {
+		Schema::dropIfExists( 'wporghelpscoutimport_saved_replies' );
 		Schema::dropIfExists( 'wporghelpscoutimport_people' );
 		Schema::dropIfExists( 'wporghelpscoutimport_threads' );
 		Schema::dropIfExists( 'wporghelpscoutimport_agents' );

@@ -20,6 +20,7 @@ use Modules\WPOrgHelpScoutImport\Exceptions\RateLimited;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
+use Modules\WPOrgHelpScoutImport\Services\SavedReplies;
 
 /**
  * Imports a page of 25 conversations, then queues the next page; or 25 of the conversations a run retries.
@@ -124,7 +125,8 @@ final class ImportPage implements ShouldQueue {
 
 		try {
 			$helpscout = app( HelpScout::class );
-			$importer  = new Importer( $helpscout, new People( $helpscout ) );
+			$people    = new People( $helpscout );
+			$importer  = new Importer( $helpscout, $people );
 
 			if ( $run->is_retry() ) {
 				$listed = array_map(
@@ -205,6 +207,13 @@ final class ImportPage implements ShouldQueue {
 				if ( ! $this->save( $run ) ) {
 					return;
 				}
+			}
+
+			// Once the list is done: saved replies are few, and changes to them are only found by reading them all.
+			if ( ! $run->is_retry() && ! $page['conversations'] && SavedReplies::available() ) {
+				$current = 0;
+				$helpscout->set_patient( false );
+				( new SavedReplies( $helpscout, $importer, $people ) )->import( $run, $mailbox );
 			}
 
 			$run->page_failures = 0;
