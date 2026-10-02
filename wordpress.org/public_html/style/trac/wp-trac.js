@@ -2367,10 +2367,12 @@ let wpTrac,
 				const params = new URLSearchParams( { trac, ticket } );
 				if ( authenticated ) {
 					params.set( 'authenticated', '1' );
-					if ( 'URL' in window ) {
-						const timelineHref = $( 'a.timeline' ).last().prop( 'href' );
-						if ( timelineHref ) {
-							params.set( '_lastmod', new URL( timelineHref ).searchParams.get( 'from' ) );
+
+					const timelines = document.querySelectorAll( '#changelog a.timeline' );
+					if ( timelines.length ) {
+						const from = new URL( timelines[ timelines.length - 1 ].href ).searchParams.get( 'from' );
+						if ( from ) {
+							params.set( '_lastmod', from );
 						}
 					}
 				}

@@ -152,7 +152,7 @@ final class UserSyncTest extends SsoTestCase {
 	 * @return void
 	 */
 	public function test_ignores_avatar_off_gravatar(): void {
-		$this->accounts['rita']['avatar_url']                 = 'https://169.254.169.254/avatar.png';
+		$this->accounts['rita']['avatar_url']                = 'https://169.254.169.254/avatar.png';
 		$this->avatars['https://169.254.169.254/avatar.png'] = self::image( 0, 255, 0 );
 
 		$this->sync();

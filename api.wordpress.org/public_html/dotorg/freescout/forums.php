@@ -12,32 +12,41 @@ namespace WordPressdotorg\API\FreeScout;
 require __DIR__ . '/common.php';
 
 /**
- * Renders the forum notes panel.
+ * Gets the forum notes panel.
  *
  * @param object $request Request payload.
- * @return string
+ * @return array Panel blocks.
  */
-function render_forum_notes( object $request ): string {
-	$html = '';
+function render_forum_notes( object $request ): array {
 	$user = get_user_by( 'email', get_user_email_for_email( $request ) );
 
-	if ( $user && $user->_wporg_bbp_user_notes ) {
-		$html .= '<ul class="wporg-sidebar-items">';
-
-		foreach ( $user->_wporg_bbp_user_notes as $note ) {
-			$html .= sprintf(
-				'<li class="wporg-sidebar-item"><p class="wporg-sidebar-note">%s</p><div class="wporg-sidebar-item-meta"><a href="%s">%s</a> · %s</div></li>',
-				wp_trim_words( esc_html( $note->text ), 15 ),
-				esc_url( 'https://wordpress.org/support/users/' . $user->user_nicename . '/' ),
-				esc_html( gmdate( 'F j, Y', (int) strtotime( $note->date ) ) ),
-				esc_html( $note->moderator )
-			);
-		}
-
-		$html .= '</ul>';
+	if ( ! $user || ! $user->_wporg_bbp_user_notes ) {
+		return array();
 	}
 
-	return $html;
+	$items = array();
+	foreach ( $user->_wporg_bbp_user_notes as $note ) {
+		// Not wp_trim_words(): it strips tags, cutting a note at "<3".
+		$words = preg_split( '/\s+/', trim( (string) $note->text ) );
+
+		$items[] = array(
+			'note' => implode( ' ', array_slice( $words, 0, 15 ) ) . ( count( $words ) > 15 ? '…' : '' ),
+			'meta' => array(
+				array(
+					'text' => gmdate( 'F j, Y', (int) strtotime( $note->date ) ),
+					'url'  => 'https://wordpress.org/support/users/' . $user->user_nicename . '/',
+				),
+				array( 'text' => (string) $note->moderator ),
+			),
+		);
+	}
+
+	return array(
+		array(
+			'type'  => 'items',
+			'items' => $items,
+		),
+	);
 }
 
-send_html( render_forum_notes( get_request() ) );
+send_panel( render_forum_notes( get_request( basename( __FILE__ ) ) ) );

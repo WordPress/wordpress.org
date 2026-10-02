@@ -33,11 +33,25 @@ final class ClientTest extends TestCase {
 	 * @return void
 	 */
 	public function test_encode_stamps_time_and_tolerates_invalid_utf8(): void {
-		$decoded = json_decode( Client::encode( array( 'body' => "caf\xE9" ) ), true );
+		$decoded = json_decode( Client::encode( array( 'body' => "caf\xE9" ), '/profile.php' ), true );
 
 		$this->assertIsArray( $decoded );
 		$this->assertSame( "caf\u{FFFD}", $decoded['body'] );
 		$this->assertEqualsWithDelta( time(), $decoded['sent_at'], 5 );
+		$this->assertSame( 'profile.php', $decoded['endpoint'] );
+		$this->assertMatchesRegularExpression( '/^[0-9a-f]{32}$/', $decoded['nonce'] );
+	}
+
+	/**
+	 * Every request gets its own nonce, so none can be sent twice.
+	 *
+	 * @return void
+	 */
+	public function test_encode_uses_a_new_nonce_each_time(): void {
+		$first  = json_decode( Client::encode( array(), 'profile.php' ), true );
+		$second = json_decode( Client::encode( array(), 'profile.php' ), true );
+
+		$this->assertNotSame( $first['nonce'], $second['nonce'] );
 	}
 
 	/**

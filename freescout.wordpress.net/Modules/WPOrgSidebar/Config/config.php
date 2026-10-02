@@ -16,23 +16,40 @@ return array(
 	// Shared secret used to sign requests; must match FREESCOUT_SECRET on api.wordpress.org.
 	'secret'  => env( 'WPORG_API_SECRET', '' ),
 
-	// Customer sidebar panels, keyed by ID, rendered in this order.
+	/*
+	 * Customer sidebar panels, keyed by ID, rendered in this order; `notes` and `attachments` add those to the payload.
+	 * Panels with `per_mailbox` only show in the mailboxes chosen in their section under Manage » Settings.
+	 */
 	'panels'  => array(
 		'profile'        => array(
-			'title'    => 'WordPress.org',
-			'endpoint' => 'profile.php',
+			'title'       => 'WordPress.org',
+			'endpoint'    => 'profile.php',
+			// Offers the account a bounce names.
+			'attachments' => true,
 		),
 		'forums'         => array(
-			'title'    => 'Forum Notes',
-			'endpoint' => 'forums.php',
+			'title'       => 'Forum Notes',
+			'endpoint'    => 'forums.php',
+			'per_mailbox' => true,
 		),
 		'plugins-themes' => array(
-			'title'    => 'Plugins & Themes',
-			'endpoint' => 'plugins-themes.php',
+			'title'       => 'Plugins & Themes',
+			'endpoint'    => 'plugins-themes.php',
+			'per_mailbox' => true,
+			// Reviewers link plugins in notes.
+			'notes'       => true,
 		),
 		'dpo'            => array(
-			'title'    => 'Privacy Requests',
-			'endpoint' => 'dpo.php',
+			'title'       => 'Privacy Requests',
+			'endpoint'    => 'dpo.php',
+			'per_mailbox' => true,
 		),
+	),
+
+	// Defaults for the options FreeScout saves the module's settings in.
+	'options' => array(
+		'mailboxes_forums'         => array( 'default' => array() ),
+		'mailboxes_plugins-themes' => array( 'default' => array() ),
+		'mailboxes_dpo'            => array( 'default' => array() ),
 	),
 );
