@@ -12,7 +12,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Runs, and HelpScout's IDs for imported conversations, threads, and saved replies, so a run can be repeated without duplicates.
+ * Runs, and HelpScout's IDs for imported conversations, threads, custom fields, and saved replies, so a run can be repeated without duplicates.
  */
 class CreateWporghelpscoutimportTables extends Migration {
 
@@ -167,6 +167,22 @@ class CreateWporghelpscoutimportTables extends Migration {
 				}
 			);
 		}
+
+		if ( ! Schema::hasTable( 'wporghelpscoutimport_fields' ) ) {
+			Schema::create(
+				'wporghelpscoutimport_fields',
+				static function ( Blueprint $table ): void {
+					$table->increments( 'id' );
+					$table->unsignedBigInteger( 'helpscout_field_id' );
+					// Custom fields are a mailbox's: a HelpScout field gets one in each mailbox it's imported into.
+					$table->unsignedInteger( 'mailbox_id' );
+					$table->unsignedInteger( 'custom_field_id' );
+					$table->timestamps();
+
+					$table->unique( array( 'helpscout_field_id', 'mailbox_id' ) );
+				}
+			);
+		}
 	}
 
 	/**
@@ -175,6 +191,7 @@ class CreateWporghelpscoutimportTables extends Migration {
 	 * @return void
 	 */
 	public function down(): void {
+		Schema::dropIfExists( 'wporghelpscoutimport_fields' );
 		Schema::dropIfExists( 'wporghelpscoutimport_saved_replies' );
 		Schema::dropIfExists( 'wporghelpscoutimport_people' );
 		Schema::dropIfExists( 'wporghelpscoutimport_threads' );

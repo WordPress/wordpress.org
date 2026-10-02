@@ -425,6 +425,16 @@ final class HelpScout {
 	}
 
 	/**
+	 * Lists a mailbox's custom fields.
+	 *
+	 * @param int $mailbox_id HelpScout mailbox ID.
+	 * @return array[] Fields, with `id`, `name`, `type`, `order`, and for dropdowns, `options` with `id`, `label`, and `order`.
+	 */
+	public function fields( int $mailbox_id ): array {
+		return $this->all( 'v2/mailboxes/' . $mailbox_id . '/fields', array(), 'fields' );
+	}
+
+	/**
 	 * Lists a mailbox's saved replies for email, without their text.
 	 *
 	 * @param int $mailbox_id HelpScout mailbox ID.

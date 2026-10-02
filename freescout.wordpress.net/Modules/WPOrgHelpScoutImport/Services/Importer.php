@@ -157,6 +157,13 @@ final class Importer {
 	private $people;
 
 	/**
+	 * Custom fields, which conversations' values are kept in.
+	 *
+	 * @var CustomFields
+	 */
+	private $custom_fields;
+
+	/**
 	 * Images downloaded for the conversation being imported, by URL; null for those that weren't.
 	 *
 	 * @var array
@@ -184,8 +191,9 @@ final class Importer {
 	 * @param People    $people    Users and senders.
 	 */
 	public function __construct( HelpScout $helpscout, People $people ) {
-		$this->helpscout = $helpscout;
-		$this->people    = $people;
+		$this->helpscout     = $helpscout;
+		$this->people        = $people;
+		$this->custom_fields = new CustomFields( $helpscout );
 	}
 
 	/**
@@ -288,9 +296,13 @@ final class Importer {
 		$this->meet_people( $source, $threads );
 		$this->meet_senders( $source, $sender, $threads );
 
+		// Like users, the mailbox's custom fields are created before the transaction.
+		$values = CustomFields::available() ? $this->custom_fields->values( $source, $mailbox ) : array();
+		$tags   = Tags::available() ? array_filter( (array) ( $source['tags'] ?? array() ), 'is_array' ) : array();
+
 		try {
 			\DB::transaction(
-				function () use ( &$conversation, $source, $mailbox, $sender, $threads, $status, $worked_on, $moved_from ): void {
+				function () use ( &$conversation, $source, $mailbox, $sender, $threads, $status, $worked_on, $moved_from, $values, $tags ): void {
 					if ( ! $conversation ) {
 						$conversation = $this->create_conversation( $source, $mailbox, $sender );
 					}
@@ -318,6 +330,10 @@ final class Importer {
 							'custom_fields'    => self::json( (array) ( $source['customFields'] ?? array() ) ),
 						)
 					);
+
+					// Added to what agents gave it, without taking anything away.
+					Tags::attach( (int) $conversation->id, $tags );
+					CustomFields::write( (int) $conversation->id, $values );
 				}
 			);
 		} catch ( \Throwable $e ) {

@@ -12,17 +12,17 @@ namespace Modules\WPOrgHelpScoutImport\Tests;
 use App\Attachment;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7\Response;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\Schema;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedSavedReply;
 use Modules\WPOrgHelpScoutImport\Entities\Run;
 use Modules\WPOrgHelpScoutImport\Jobs\ImportPage;
 use Modules\WPOrgHelpScoutImport\Services\People;
 use Modules\WPOrgHelpScoutImport\Services\SavedReplies;
 use Modules\WPOrgHelpScoutImport\Tests\Support\FakeHelpScout;
+use Modules\WPOrgHelpScoutImport\Tests\Support\PaidModules;
 
 require_once __DIR__ . '/ImportTestCase.php';
+require_once __DIR__ . '/Support/PaidModules.php';
 
 /**
  * Covers SavedReplies, through the job that runs it once a mailbox's list is done.
@@ -37,33 +37,14 @@ final class SavedRepliesTest extends ImportTestCase {
 	private $run;
 
 	/**
-	 * Creates the Saved Replies module's table, as its migrations leave it, before the test's transaction starts.
-	 *
-	 * The module is a paid one, so it isn't installed here; creating a table inside the transaction would commit it.
-	 * It's dropped once the transaction is rolled back, so the test database doesn't keep it.
+	 * Creates the paid modules' tables before the test's transaction starts.
 	 *
 	 * @return void
 	 */
 	protected function refreshApplication(): void {
 		parent::refreshApplication();
 
-		Schema::dropIfExists( 'saved_replies' );
-		Schema::create(
-			'saved_replies',
-			static function ( Blueprint $table ): void {
-				$table->increments( 'id' );
-				$table->integer( 'mailbox_id' );
-				$table->string( 'name', 75 );
-				$table->longText( 'text' )->nullable();
-				$table->integer( 'user_id' );
-				$table->timestamps();
-				$table->integer( 'sort_order' )->default( 1 );
-				$table->unsignedInteger( 'parent_saved_reply_id' )->nullable();
-				$table->text( 'attachments' )->nullable();
-				$table->boolean( 'global' )->default( false );
-				$table->boolean( 'auto_load' )->default( false );
-			}
-		);
+		PaidModules::create();
 	}
 
 	/**
@@ -75,14 +56,10 @@ final class SavedRepliesTest extends ImportTestCase {
 		parent::setUp();
 
 		Queue::fake();
-		self::switch_module( true );
+		PaidModules::switch( SavedReplies::MODULE, true );
 
 		// After DatabaseTransactions' rollback, which was registered first.
-		$this->beforeApplicationDestroyed(
-			static function (): void {
-				Schema::dropIfExists( 'saved_replies' );
-			}
-		);
+		$this->beforeApplicationDestroyed( array( PaidModules::class, 'drop' ) );
 
 		$this->helpscout->only(
 			'GET',
@@ -358,25 +335,13 @@ final class SavedRepliesTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_nothing_is_read_without_the_module(): void {
-		self::switch_module( false );
+		PaidModules::switch( SavedReplies::MODULE, false );
 
 		$this->handle( $this->run );
 
 		$this->assertSame( Run::STATUS_DONE, $this->run->fresh()->status );
 		$this->assertNull( $this->run->fresh()->saved_replies );
 		$this->assertCount( 0, $this->helpscout->requests_to( 'v2/mailboxes/77/saved-replies' ) );
-	}
-
-	/**
-	 * Switches the Saved Replies module on or off.
-	 *
-	 * @param bool $active Whether it's on.
-	 * @return void
-	 */
-	private static function switch_module( bool $active ): void {
-		\App\Module::clearModulesCache();
-		\App\Module::setActive( SavedReplies::MODULE, $active );
-		\App\Module::clearModulesCache();
 	}
 
 	/**
