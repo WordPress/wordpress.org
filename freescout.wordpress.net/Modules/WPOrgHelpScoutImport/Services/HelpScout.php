@@ -314,7 +314,7 @@ final class HelpScout {
 			'*/*',
 			array( 'stream' => true )
 		);
-		$file     = self::to_file( $response, PHP_INT_MAX );
+		$file     = self::to_file( $response, PHP_INT_MAX, true );
 
 		if ( ! $file ) {
 			throw new \RuntimeException( 'Could not save attachment ' . $attachment_id . ' to a temporary file.' );
@@ -443,9 +443,11 @@ final class HelpScout {
 	 *
 	 * @param ResponseInterface $response Response.
 	 * @param int               $max      Most bytes it can have.
-	 * @return resource|null The file, at its start, deleted once closed; null if it's empty, larger, or couldn't be saved whole.
+	 * @param bool              $empty_ok Whether it can be empty, like an attachment can; an empty image is a broken one.
+	 * @return resource|null The file, at its start, deleted once closed; null if it's empty when it can't be, larger,
+	 *                       or couldn't be saved whole.
 	 */
-	private static function to_file( ResponseInterface $response, int $max ) {
+	private static function to_file( ResponseInterface $response, int $max, bool $empty_ok = false ) {
 		$body    = $response->getBody();
 		$file    = tmpfile();
 		$size    = 0;
@@ -462,7 +464,7 @@ final class HelpScout {
 		}
 		$body->close();
 
-		if ( ! $file || ! $written || 0 === $size || $size > $max ) {
+		if ( ! $file || ! $written || ( 0 === $size && ! $empty_ok ) || $size > $max ) {
 			if ( $file ) {
 				fclose( $file );
 			}

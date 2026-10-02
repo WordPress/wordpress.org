@@ -565,6 +565,39 @@ final class ImporterTest extends ImportTestCase {
 		$this->helpscout->only( 'GET', 'v2/conversations/1001/threads', FakeHelpScout::json( array(), 404 ) );
 
 		$this->assertSame( Importer::SKIPPED_GONE, $this->importer->import( $this->conversation(), $this->mailbox ) );
+
+		// Merged: HelpScout redirects to the conversation it was merged into.
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/threads', FakeHelpScout::json( array(), 301, array( 'Location' => 'https://api.helpscout.net/v2/conversations/2002/threads' ) ) );
+
+		$this->assertSame( Importer::SKIPPED_GONE, $this->importer->import( $this->conversation(), $this->mailbox ) );
+	}
+
+	/**
+	 * An attachment deleted from HelpScout since is left out; the rest of the conversation is imported.
+	 *
+	 * @return void
+	 */
+	public function test_deleted_attachment_is_left_out(): void {
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/attachments/3001/file', FakeHelpScout::json( array(), 404 ) );
+
+		$this->assertSame( Importer::IMPORTED, $this->importer->import( $this->conversation(), $this->mailbox ) );
+
+		$email = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_CUSTOMER )->first();
+		$this->assertSame( 0, Attachment::query()->where( 'thread_id', $email->id )->count() );
+	}
+
+	/**
+	 * An empty attachment is imported, empty.
+	 *
+	 * @return void
+	 */
+	public function test_empty_attachment_is_imported(): void {
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/attachments/3001/file', new \GuzzleHttp\Psr7\Response( 200, array(), '' ) );
+
+		$this->assertSame( Importer::IMPORTED, $this->importer->import( $this->conversation(), $this->mailbox ) );
+
+		$email = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_CUSTOMER )->first();
+		$this->assertSame( '', Attachment::query()->where( 'thread_id', $email->id )->firstOrFail()->getFileContents() );
 	}
 
 	/**

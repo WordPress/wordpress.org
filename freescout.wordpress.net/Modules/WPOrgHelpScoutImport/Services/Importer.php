@@ -260,16 +260,18 @@ final class Importer {
 		$this->attachments    = array();
 
 		try {
-			$threads = $this->new_threads( $helpscout_id, $this->helpscout->threads( $helpscout_id ) );
+			$listed = $this->helpscout->threads( $helpscout_id );
 		} catch ( ApiError $e ) {
-			$this->close_downloads( array() );
-
 			// Merged into another, or deleted, since it was listed.
-			if ( 404 === $e->status ) {
+			if ( in_array( $e->status, array( 301, 404 ), true ) ) {
 				return self::SKIPPED_GONE;
 			}
 
 			throw $e;
+		}
+
+		try {
+			$threads = $this->new_threads( $helpscout_id, $listed );
 		} catch ( \Throwable $e ) {
 			$this->close_downloads( array() );
 
@@ -384,6 +386,8 @@ final class Importer {
 	 * @param int     $conversation_id HelpScout conversation ID.
 	 * @param array[] $threads         The conversation's threads, oldest first.
 	 * @return array[] Threads, each with `fs_type` set to FreeScout's, plus `message_id`, `files`, and `images`.
+	 *
+	 * @throws ApiError If HelpScout didn't give an attachment it still has.
 	 */
 	private function new_threads( int $conversation_id, array $threads ): array {
 		$ids      = array_map( 'intval', array_column( $threads, 'id' ) );
@@ -413,10 +417,21 @@ final class Importer {
 					continue;
 				}
 
+				try {
+					$data = $this->helpscout->attachment( $conversation_id, (int) ( $attachment['id'] ?? 0 ) );
+				} catch ( ApiError $e ) {
+					// Deleted from HelpScout since: the rest of the thread is imported without it.
+					if ( 404 === $e->status ) {
+						continue;
+					}
+
+					throw $e;
+				}
+
 				$thread['files'][] = array(
 					'name' => (string) ( $attachment['filename'] ?? '' ),
 					'mime' => (string) ( $attachment['mimeType'] ?? 'application/octet-stream' ),
-					'data' => $this->helpscout->attachment( $conversation_id, (int) ( $attachment['id'] ?? 0 ) ),
+					'data' => $data,
 				);
 			}
 
