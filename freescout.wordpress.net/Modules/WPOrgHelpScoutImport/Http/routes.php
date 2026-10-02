@@ -17,10 +17,12 @@ Route::group(
 	static function (): void {
 		Route::get( '/helpscout-import', 'ImportController@index' )->name( 'wporghelpscoutimport.index' );
 		Route::post( '/helpscout-import', 'ImportController@start' )->name( 'wporghelpscoutimport.start' );
-		Route::get( '/helpscout-import/agents', 'AgentsController@index' )->name( 'wporghelpscoutimport.agents' );
-		Route::post( '/helpscout-import/agents', 'AgentsController@save' )->name( 'wporghelpscoutimport.agents.save' );
-		Route::post( '/helpscout-import/agents/refresh', 'AgentsController@refresh' )->name( 'wporghelpscoutimport.agents.refresh' );
+		Route::get( '/helpscout-import/users', 'AgentsController@index' )->name( 'wporghelpscoutimport.agents' );
+		Route::post( '/helpscout-import/users', 'AgentsController@save' )->name( 'wporghelpscoutimport.agents.save' );
+		Route::post( '/helpscout-import/users/refresh', 'AgentsController@refresh' )->name( 'wporghelpscoutimport.agents.refresh' );
 		Route::post( '/helpscout-import/{id}/pause', 'ImportController@pause' )->name( 'wporghelpscoutimport.pause' );
 		Route::post( '/helpscout-import/{id}/resume', 'ImportController@resume' )->name( 'wporghelpscoutimport.resume' );
+		Route::post( '/helpscout-import/{id}/cancel', 'ImportController@cancel' )->name( 'wporghelpscoutimport.cancel' );
+		Route::post( '/helpscout-import/{id}/retry', 'ImportController@retry' )->name( 'wporghelpscoutimport.retry' );
 	}
 );

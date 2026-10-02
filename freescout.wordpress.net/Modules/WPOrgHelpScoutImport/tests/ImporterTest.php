@@ -15,6 +15,7 @@ use App\Folder;
 use App\Thread;
 use App\User;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
@@ -22,6 +23,7 @@ use Modules\WPOrgHelpScoutImport\Entities\Person;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
+use Modules\WPOrgHelpScoutImport\Tests\Support\FakeHelpScout;
 
 require_once __DIR__ . '/ImportTestCase.php';
 
@@ -45,7 +47,7 @@ final class ImporterTest extends ImportTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->importer = new Importer( app( HelpScout::class ), new People() );
+		$this->importer = new Importer( app( HelpScout::class ), new People( app( HelpScout::class ) ) );
 	}
 
 	/**
@@ -202,13 +204,70 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
-	 * HelpScout users without a FreeScout user are credited to a disabled robot, and their name is kept.
+	 * A HelpScout user without a FreeScout user gets one, which can log in while HelpScout lists them.
 	 *
 	 * @return void
 	 */
-	public function test_unknown_agent_is_credited_to_the_robot(): void {
-		$this->agent->email = 'someone-else@example.org';
+	public function test_helpscout_user_without_freescout_user_gets_one(): void {
+		$this->agent->email = 'ada@wordpress.example';
 		$this->agent->save();
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$user = User::query()->where( 'email', 'agent@example.org' )->firstOrFail();
+		$this->assertSame( 'Ada Agent', $user->getFullName() );
+		$this->assertSame( User::STATUS_ACTIVE, (int) $user->status );
+		$this->assertSame( User::ROLE_USER, (int) $user->role );
+		$this->assertSame( 'Europe/Berlin', $user->timezone );
+
+		$reply = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_MESSAGE )->first();
+		$this->assertSame( (int) $user->id, (int) $reply->created_by_user_id );
+		$this->assertSame( (int) $user->id, (int) $this->imported_conversation()->closed_by_user_id );
+		$this->assertSame( (int) $user->id, (int) Agent::query()->where( 'helpscout_user_id', 55 )->value( 'user_id' ) );
+	}
+
+	/**
+	 * Someone HelpScout no longer lists gets a disabled user, and their email is never a mailbox's.
+	 *
+	 * @return void
+	 */
+	public function test_user_helpscout_no_longer_lists_gets_a_disabled_one(): void {
+		$shared        = $this->create_mailbox( 'Shared' );
+		$shared->email = 'shared@example.org';
+		$shared->save();
+		$former                  = array(
+			'id'    => 66,
+			'type'  => 'user',
+			'email' => 'shared@example.org',
+			'first' => 'Fay',
+			'last'  => 'Former',
+		);
+		$threads                 = $this->threads();
+		$threads[2]['createdBy'] = $former;
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$note = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_NOTE )->first();
+		$user = User::query()->findOrFail( $note->created_by_user_id );
+		$this->assertSame( 'Fay Former', $user->getFullName() );
+		$this->assertSame( User::STATUS_DISABLED, (int) $user->status );
+		$this->assertSame( 'helpscout-66@helpscout.invalid', $user->email );
+		$this->assertSame( 0, $user->mailboxes()->count() );
+	}
+
+	/**
+	 * What HelpScout itself did, without a user, is credited to a disabled robot.
+	 *
+	 * @return void
+	 */
+	public function test_helpscouts_own_notes_are_credited_to_the_robot(): void {
+		$threads                 = $this->threads();
+		$threads[2]['createdBy'] = array(
+			'id'   => 0,
+			'type' => 'user',
+		);
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
 
 		$this->importer->import( $this->conversation(), $this->mailbox );
 
@@ -216,10 +275,189 @@ final class ImporterTest extends ImportTestCase {
 		$this->assertSame( User::TYPE_ROBOT, (int) $robot->type );
 		$this->assertSame( User::STATUS_DISABLED, (int) $robot->status );
 
-		$reply = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_MESSAGE )->first();
-		$this->assertSame( (int) $robot->id, (int) $reply->created_by_user_id );
-		$this->assertSame( array( 'author' => 'Ada Agent' ), $reply->getMeta( Importer::META ) );
-		$this->assertNull( $this->imported_conversation()->closed_by_user_id );
+		$note = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_NOTE )->first();
+		$this->assertSame( (int) $robot->id, (int) $note->created_by_user_id );
+	}
+
+	/**
+	 * Conversations assigned to a HelpScout team are assigned to the FreeScout team with its name.
+	 *
+	 * @return void
+	 */
+	public function test_team_assignments_go_to_freescout_teams(): void {
+		$team           = factory( User::class )->create(
+			array(
+				'first_name' => 'Photo',
+				'last_name'  => 'Moderators',
+				'email'      => 'team-1@example.org',
+				'type'       => User::TYPE_ROBOT,
+			)
+		);
+		$helpscout_team = array(
+			'id'    => 90,
+			'type'  => 'team',
+			'first' => 'Photo Moderators',
+			'last'  => '',
+		);
+
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => $helpscout_team,
+				)
+			),
+			$this->mailbox
+		);
+
+		$this->assertSame( (int) $team->id, (int) $this->imported_conversation()->user_id );
+
+		// Without a team of that name, it's unassigned.
+		$this->assertNull(
+			( new People() )->assignee(
+				array(
+					'id'    => 91,
+					'type'  => 'team',
+					'first' => 'Legal',
+				)
+			)
+		);
+	}
+
+	/**
+	 * An email FreeScout has in another conversation keeps its Message-ID there; one it has in this one isn't added again.
+	 *
+	 * @return void
+	 */
+	public function test_emails_freescout_has_already_keep_their_message_id(): void {
+		$other = $this->create_conversation( $this->create_mailbox( 'Themes' ), $this->create_sender() );
+		$this->with_message_id( $this->create_thread( $other, Thread::TYPE_CUSTOMER, 'Hello', null, '2026-09-01 09:00:00' ), 'thread-2001@mail.example.org' );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$email = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_CUSTOMER )->first();
+		$this->assertNull( $email->message_id );
+		$this->assertSame( 1, Thread::query()->where( 'message_id', 'thread-2001@mail.example.org' )->count() );
+
+		// FreeScout fetched the next email itself, after the mailbox moved.
+		$conversation = $this->imported_conversation();
+		$fetched      = $this->with_message_id( $this->create_thread( $conversation, Thread::TYPE_CUSTOMER, 'Fetched', null, '2026-09-06 08:00:00' ), 'thread-2008@mail.example.org' );
+		$threads      = $this->threads();
+		$threads[]    = array_replace(
+			$threads[0],
+			array(
+				'id'        => 2008,
+				'createdAt' => '2026-09-06T08:00:00Z',
+				'_embedded' => array(),
+			)
+		);
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$this->assertSame( 1, Thread::query()->where( 'message_id', 'thread-2008@mail.example.org' )->count() );
+		$this->assertSame( (int) $fetched->id, (int) ImportedThread::query()->where( 'helpscout_id', 2008 )->value( 'thread_id' ) );
+	}
+
+	/**
+	 * Once agents worked on a conversation in FreeScout, importing it again adds HelpScout's new threads only.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_worked_on_in_freescout_keeps_its_status(): void {
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_NOTE, 'On it.', $this->agent, '2026-09-10 08:00:00' );
+
+		$threads   = $this->threads();
+		$threads[] = array_replace(
+			$threads[0],
+			array(
+				'id'        => 2009,
+				'body'      => 'Still there?',
+				'createdAt' => '2026-09-05T08:00:00Z',
+				'_embedded' => array(),
+			)
+		);
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+
+		$this->assertSame( Importer::UPDATED, $this->importer->import( $this->conversation( array( 'status' => 'active' ) ), $this->mailbox ) );
+
+		$conversation = $this->imported_conversation();
+		$this->assertSame( Conversation::STATUS_CLOSED, (int) $conversation->status );
+		$this->assertSame( 1, $conversation->threads()->where( 'body', 'Still there?' )->count() );
+	}
+
+	/**
+	 * Attachments HelpScout found a virus in aren't downloaded; the rest of the thread is imported.
+	 *
+	 * @return void
+	 */
+	public function test_infected_attachments_are_left_out(): void {
+		$threads = $this->threads();
+		$threads[0]['_embedded']['attachments'][0]['state'] = 'virus';
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+
+		$this->assertSame( Importer::IMPORTED, $this->importer->import( $this->conversation(), $this->mailbox ) );
+
+		$this->assertCount( 0, $this->helpscout->requests_to( 'v2/conversations/1001/attachments/3001/file' ) );
+		$this->assertSame( 3, $this->imported_conversation()->threads()->count() );
+	}
+
+	/**
+	 * A reply hidden from what the sender is sent stays visible to agents, as a note.
+	 *
+	 * @return void
+	 */
+	public function test_hidden_replies_become_notes(): void {
+		$threads             = $this->threads();
+		$threads[1]['state'] = 'hidden';
+		$threads[]           = array_replace(
+			$threads[1],
+			array(
+				'id'    => 2010,
+				'state' => 'draft',
+			)
+		);
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$types = $this->imported_conversation()->threads()->orderBy( 'created_at' )->orderBy( 'id' )->pluck( 'type' )->map( 'intval' )->all();
+		$this->assertSame( array( Thread::TYPE_CUSTOMER, Thread::TYPE_NOTE, Thread::TYPE_NOTE ), $types );
+		$this->assertNull( ImportedThread::query()->where( 'helpscout_id', 2010 )->first() );
+	}
+
+	/**
+	 * HelpScout keeps emails' originals for 2 years: older ones aren't asked for.
+	 *
+	 * @return void
+	 */
+	public function test_old_emails_arent_asked_for_their_message_id(): void {
+		$threads                 = $this->threads();
+		$threads[0]['createdAt'] = '2020-01-01T09:00:00Z';
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/threads/2002/original-source', FakeHelpScout::json( array(), 400 ) );
+
+		$this->assertSame( Importer::IMPORTED, $this->importer->import( $this->conversation(), $this->mailbox ) );
+
+		$this->assertCount( 0, $this->helpscout->requests_to( 'v2/conversations/1001/threads/2001/original-source' ) );
+		$this->assertNull( $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_MESSAGE )->value( 'message_id' ) );
+	}
+
+	/**
+	 * Replies go to the email the sender wrote from, even when FreeScout knows them by another.
+	 *
+	 * @return void
+	 */
+	public function test_replies_go_to_the_conversations_own_email(): void {
+		$customer = $this->create_sender();
+		$customer->syncEmails( array( 'sam@old.example', 'sam@example.org' ) );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$conversation = $this->imported_conversation();
+		$this->assertSame( (int) $customer->id, (int) $conversation->customer_id );
+		$this->assertSame( 'sam@example.org', $conversation->customer_email );
 	}
 
 	/**
@@ -402,9 +640,9 @@ final class ImporterTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_spam_drafts_and_senderless_are_skipped(): void {
-		$this->assertSame( Importer::SKIPPED, $this->importer->import( $this->conversation( array( 'status' => 'spam' ) ), $this->mailbox ) );
-		$this->assertSame( Importer::SKIPPED, $this->importer->import( $this->conversation( array( 'state' => 'draft' ) ), $this->mailbox ) );
-		$this->assertSame( Importer::SKIPPED, $this->importer->import( $this->conversation( array( 'primaryCustomer' => array( 'type' => 'customer' ) ) ), $this->mailbox ) );
+		$this->assertSame( Importer::SKIPPED_SPAM, $this->importer->import( $this->conversation( array( 'status' => 'spam' ) ), $this->mailbox ) );
+		$this->assertSame( Importer::SKIPPED_UNPUBLISHED, $this->importer->import( $this->conversation( array( 'state' => 'draft' ) ), $this->mailbox ) );
+		$this->assertSame( Importer::SKIPPED_NO_SENDER, $this->importer->import( $this->conversation( array( 'primaryCustomer' => array( 'type' => 'customer' ) ) ), $this->mailbox ) );
 
 		$this->assertSame( 0, Conversation::query()->where( 'mailbox_id', $this->mailbox->id )->count() );
 	}
@@ -428,30 +666,78 @@ final class ImporterTest extends ImportTestCase {
 		);
 		$this->answer_threads( self::CONVERSATION_ID, $threads );
 
-		$this->assertSame( Importer::SKIPPED, $this->importer->import( $this->conversation(), $this->mailbox ) );
+		$this->assertSame( Importer::SKIPPED_DELETED, $this->importer->import( $this->conversation(), $this->mailbox ) );
 		$this->assertSame( 0, Conversation::query()->where( 'mailbox_id', $this->mailbox->id )->count() );
 	}
 
 	/**
-	 * A failure while writing leaves nothing behind, so importing again starts clean.
+	 * A failure while writing leaves nothing behind, files included, so importing again starts clean.
 	 *
 	 * @return void
 	 */
 	public function test_failure_leaves_nothing_half_imported(): void {
 		$threads                 = $this->threads();
-		$threads[1]['_embedded'] = array( 'attachments' => array( array( 'id' => 3002 ) ) );
+		$threads[1]['_embedded'] = array(
+			'attachments' => array(
+				array(
+					'id'       => 3002,
+					'filename' => 'second.jpg',
+				),
+			),
+		);
 		$this->answer_threads( self::CONVERSATION_ID, $threads );
-		$this->helpscout->only( 'GET', 'v2/conversations/1001/attachments/3002/data', array( 'data' => 'not base64!' ) );
+
+		$attachments = 0;
+		\Eventy::addAction(
+			'attachment.created',
+			static function () use ( &$attachments ): void {
+				if ( 2 === ++$attachments ) {
+					throw new \RuntimeException( 'Disk full.' );
+				}
+			}
+		);
 
 		try {
 			$this->importer->import( $this->conversation(), $this->mailbox );
 			$this->fail( 'The import should have failed.' );
 		} catch ( \RuntimeException $e ) {
-			$this->assertStringContainsString( '3002', $e->getMessage() );
+			$this->assertSame( 'Disk full.', $e->getMessage() );
 		}
 
 		$this->assertSame( 0, Conversation::query()->where( 'mailbox_id', $this->mailbox->id )->count() );
 		$this->assertSame( 0, ImportedConversation::query()->count() );
+		$this->assertSame( array(), Storage::disk( 'local_app' )->allFiles( '' ) );
+	}
+
+	/**
+	 * A failure while reading writes nothing.
+	 *
+	 * @return void
+	 */
+	public function test_unreadable_attachment_writes_nothing(): void {
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/attachments/3001/file', FakeHelpScout::json( array(), 400 ) );
+
+		try {
+			$this->importer->import( $this->conversation(), $this->mailbox );
+			$this->fail( 'The import should have failed.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( '3001', $e->getMessage() );
+		}
+
+		$this->assertSame( 0, Conversation::query()->where( 'mailbox_id', $this->mailbox->id )->count() );
+	}
+
+	/**
+	 * Gives a thread a Message-ID, as FreeScout does for an email it fetched.
+	 *
+	 * @param Thread $thread     Thread.
+	 * @param string $message_id Message-ID.
+	 * @return Thread
+	 */
+	private function with_message_id( Thread $thread, string $message_id ): Thread {
+		Thread::query()->whereKey( $thread->id )->update( array( 'message_id' => $message_id ) );
+
+		return $thread->fresh();
 	}
 
 	/**

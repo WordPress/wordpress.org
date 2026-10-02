@@ -47,7 +47,17 @@ class CreateWporghelpscoutimportTables extends Migration {
 					$table->unsignedInteger( 'updated' )->default( 0 );
 					$table->unsignedInteger( 'skipped' )->default( 0 );
 					$table->unsignedInteger( 'failed' )->default( 0 );
+
+					// Skipped conversations by why, and failed ones' errors by HelpScout ID, as JSON.
+					$table->text( 'skips' )->nullable();
+					$table->longText( 'failures' )->nullable();
 					$table->text( 'last_error' )->nullable();
+
+					// For a run that retries another's failures: the HelpScout IDs to import; null for a mailbox's list.
+					$table->longText( 'retry_ids' )->nullable();
+
+					// A conversation the rate limit cut off part way: its next try waits for the limit instead.
+					$table->unsignedBigInteger( 'waiting_on' )->nullable();
 
 					// Changes when the run is paused or resumed, so a job queued before stops instead of running twice.
 					$table->string( 'token', 32 )->nullable();

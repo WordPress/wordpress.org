@@ -21,7 +21,7 @@ use WordPressdotorg\FreeScout\Tests\TestCase;
 require_once __DIR__ . '/Support/FakeHelpScout.php';
 
 /**
- * Registers the module against a fake HelpScout with one closed conversation of four threads.
+ * Registers the module against a fake HelpScout with one closed conversation of four threads, and its mailbox's user.
  */
 abstract class ImportTestCase extends TestCase {
 
@@ -77,7 +77,67 @@ abstract class ImportTestCase extends TestCase {
 		);
 		$this->mailbox = $this->create_mailbox( 'Photos' );
 
+		$this->answer_directory( array( self::helpscout_user( 55, 'Ada', 'Agent', 'agent@example.org' ) ) );
 		$this->answer_threads( self::CONVERSATION_ID, $this->threads() );
+	}
+
+	/**
+	 * Has HelpScout list its Photos mailbox (77), and users who can all see it.
+	 *
+	 * @param array[] $users HelpScout users, as HelpScout lists them.
+	 * @return void
+	 */
+	protected function answer_directory( array $users ): void {
+		$this->helpscout->only(
+			'GET',
+			'v2/mailboxes',
+			self::list(
+				'mailboxes',
+				array(
+					array(
+						'id'    => 77,
+						'name'  => 'Photos',
+						'email' => 'photos@wordpress.org',
+					),
+				)
+			)
+		);
+		$this->helpscout->only( 'GET', 'v2/users', self::list( 'users', $users ) );
+		$this->helpscout->only_mailbox_users( 77, self::list( 'users', $users ) );
+	}
+
+	/**
+	 * A HelpScout list's single page.
+	 *
+	 * @param string  $key   Key in `_embedded`.
+	 * @param array[] $items Items.
+	 * @return array
+	 */
+	protected static function list( string $key, array $items ): array {
+		return array(
+			'_embedded' => array( $key => $items ),
+			'page'      => array( 'totalPages' => 1 ),
+		);
+	}
+
+	/**
+	 * A HelpScout user, as HelpScout lists its users.
+	 *
+	 * @param int    $id    HelpScout user ID.
+	 * @param string $first First name.
+	 * @param string $last  Last name.
+	 * @param string $email Email.
+	 * @return array
+	 */
+	protected static function helpscout_user( int $id, string $first, string $last, string $email ): array {
+		return array(
+			'id'        => $id,
+			'type'      => 'user',
+			'firstName' => $first,
+			'lastName'  => $last,
+			'email'     => $email,
+			'timezone'  => 'Europe/Berlin',
+		);
 	}
 
 	/**
@@ -238,8 +298,8 @@ abstract class ImportTestCase extends TestCase {
 			foreach ( (array) ( $thread['_embedded']['attachments'] ?? array() ) as $attachment ) {
 				$this->helpscout->only(
 					'GET',
-					'v2/conversations/' . $conversation_id . '/attachments/' . $attachment['id'] . '/data',
-					array( 'data' => base64_encode( 'jpeg bytes' ) )
+					'v2/conversations/' . $conversation_id . '/attachments/' . $attachment['id'] . '/file',
+					new Response( 200, array( 'Content-Type' => 'image/jpeg' ), 'jpeg bytes' )
 				);
 			}
 		}

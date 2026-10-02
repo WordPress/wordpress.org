@@ -31,7 +31,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property int              $updated
  * @property int              $skipped
  * @property int              $failed
+ * @property int[]|null       $skips       Skipped conversations, by why.
+ * @property string[]|null    $failures    Failed conversations' errors, by HelpScout ID.
  * @property string|null      $last_error
+ * @property int[]|null       $retry_ids   HelpScout IDs to import again, for a run that retries another's failures.
+ * @property int|null         $waiting_on  HelpScout ID of a conversation the rate limit cut off part way.
  * @property string|null      $token       Identifies the run's current chain of jobs.
  * @property \Carbon\Carbon|null $started_at
  * @property \Carbon\Carbon|null $finished_at
@@ -67,6 +71,29 @@ final class Run extends Model {
 	public const STATUS_FAILED = 'failed';
 
 	/**
+	 * Stopped for good by an administrator.
+	 *
+	 * @var string
+	 */
+	public const STATUS_CANCELLED = 'cancelled';
+
+	/**
+	 * How long a running run can go without saving progress before it's considered stalled, in minutes.
+	 *
+	 * Its job can have died, like when the queue worker was killed: there's then no job left to go on.
+	 *
+	 * @var int
+	 */
+	public const STALLED_MINUTES = 15;
+
+	/**
+	 * Most failed conversations kept per run, with their errors.
+	 *
+	 * @var int
+	 */
+	public const MAX_FAILURES = 5000;
+
+	/**
 	 * Table name.
 	 *
 	 * @var string
@@ -88,6 +115,9 @@ final class Run extends Model {
 	protected $casts = array(
 		'page_done'     => 'array',
 		'previous_page' => 'array',
+		'skips'         => 'array',
+		'failures'      => 'array',
+		'retry_ids'     => 'array',
 	);
 
 	/**
@@ -106,6 +136,55 @@ final class Run extends Model {
 	 */
 	public function is_open(): bool {
 		return in_array( $this->status, array( self::STATUS_RUNNING, self::STATUS_PAUSED ), true );
+	}
+
+	/**
+	 * Whether the run is running, but hasn't saved progress for a while: its job may have died.
+	 *
+	 * @return bool
+	 */
+	public function is_stalled(): bool {
+		return self::STATUS_RUNNING === $this->status && $this->updated_at && $this->updated_at->lt( \Carbon\Carbon::now()->subMinutes( self::STALLED_MINUTES ) );
+	}
+
+	/**
+	 * Whether the run retries another's failed conversations, rather than importing a mailbox's list.
+	 *
+	 * @return bool
+	 */
+	public function is_retry(): bool {
+		return null !== $this->retry_ids;
+	}
+
+	/**
+	 * Counts a conversation it left out.
+	 *
+	 * @param string $reason Why, one of Importer's SKIPPED_ constants.
+	 * @return void
+	 */
+	public function add_skip( string $reason ): void {
+		$skips            = (array) $this->skips;
+		$skips[ $reason ] = (int) ( $skips[ $reason ] ?? 0 ) + 1;
+		$this->skips      = $skips;
+		++$this->skipped;
+	}
+
+	/**
+	 * Counts a conversation that failed, and keeps its error.
+	 *
+	 * @param int    $helpscout_id HelpScout conversation ID.
+	 * @param string $error        Error.
+	 * @return void
+	 */
+	public function add_failure( int $helpscout_id, string $error ): void {
+		$failures = (array) $this->failures;
+		if ( count( $failures ) < self::MAX_FAILURES || isset( $failures[ $helpscout_id ] ) ) {
+			$failures[ $helpscout_id ] = mb_substr( $error, 0, 300 );
+			$this->failures            = $failures;
+		}
+
+		$this->last_error = 'HelpScout conversation ' . $helpscout_id . ': ' . $error;
+		++$this->failed;
 	}
 
 	/**

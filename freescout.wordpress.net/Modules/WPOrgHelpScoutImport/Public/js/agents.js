@@ -1,5 +1,5 @@
 /**
- * Lets administrators search FreeScout's users on the HelpScout Agents page, with FreeScout's own select2.
+ * Lets administrators search FreeScout's users on the HelpScout Users page, with FreeScout's own select2.
  *
  * @param {jQuery} $ jQuery.
  */

@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgHelpScoutImport\Http\Controllers;
 
+use App\Conversation;
 use App\Http\Controllers\Controller;
 use App\Mailbox;
 use Carbon\Carbon;
@@ -21,7 +22,7 @@ use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\People;
 
 /**
- * Lists runs, starts them, and pauses and resumes them.
+ * Lists runs, starts them, and pauses, resumes, cancels, and retries them.
  *
  * Starting imports everything the first time, and what HelpScout changed since the last finished import after that.
  */
@@ -35,11 +36,18 @@ final class ImportController extends Controller {
 	private const CHANGES_OVERLAP_MINUTES = 15;
 
 	/**
+	 * Cache key for the highest conversation number HelpScout gave out.
+	 *
+	 * @var string
+	 */
+	private const HIGHEST_NUMBER_CACHE_KEY = 'wporghelpscoutimport.highest_number';
+
+	/**
 	 * Why a mailbox can't take another run.
 	 *
 	 * @var string
 	 */
-	private const BUSY = 'An import into this mailbox is still running or paused. Finish it first.';
+	private const BUSY = 'An import into this mailbox is still running or paused. Finish or cancel it first.';
 
 	/**
 	 * Shows HelpScout's mailboxes, the runs so far, and the forms to start more.
@@ -59,6 +67,8 @@ final class ImportController extends Controller {
 			}
 		}
 
+		$runs = Run::query()->with( 'mailbox' )->orderByDesc( 'id' )->limit( 100 )->get();
+
 		return view(
 			'wporghelpscoutimport::index',
 			array(
@@ -66,7 +76,9 @@ final class ImportController extends Controller {
 				'error'      => $error,
 				'sources'    => $sources,
 				'mailboxes'  => Mailbox::query()->orderBy( 'name' )->get(),
-				'runs'       => Run::query()->with( 'mailbox' )->orderByDesc( 'id' )->limit( 100 )->get(),
+				'runs'       => $runs,
+				'running'    => $runs->contains( 'status', Run::STATUS_RUNNING ),
+				'numbering'  => $sources ? self::numbering( $helpscout ) : null,
 			)
 		);
 	}
@@ -74,15 +86,20 @@ final class ImportController extends Controller {
 	/**
 	 * Starts importing a HelpScout mailbox: everything, or what changed since its last finished import into the mailbox.
 	 *
+	 * HelpScout users of the mailbox without a FreeScout user get one, with access to the mailbox; that's confirmed first.
+	 *
 	 * @param Request $request Request.
 	 * @return RedirectResponse
 	 */
 	public function start( Request $request ): RedirectResponse {
-		$source_id = (int) $request->input( 'helpscout_mailbox_id' );
-		$mailbox   = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
+		$source_id  = (int) $request->input( 'helpscout_mailbox_id' );
+		$mailbox    = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
+		$everything = filter_var( $request->input( 'everything' ), FILTER_VALIDATE_BOOLEAN );
+		$helpscout  = app( HelpScout::class );
+		$people     = new People( $helpscout );
 
 		try {
-			$source = collect( app( HelpScout::class )->mailboxes() )->firstWhere( 'id', $source_id );
+			$source = collect( $helpscout->mailboxes() )->firstWhere( 'id', $source_id );
 		} catch ( \Throwable $e ) {
 			return self::back_with_error( $e->getMessage() );
 		}
@@ -91,38 +108,51 @@ final class ImportController extends Controller {
 			return self::back_with_error( __( 'Choose a HelpScout mailbox and a FreeScout mailbox.' ) );
 		}
 
-		if ( ! filter_var( $request->input( 'unmatched_ok' ), FILTER_VALIDATE_BOOLEAN ) ) {
-			try {
-				$unmatched = self::unmatched( $source_id );
-			} catch ( \Throwable $e ) {
-				return self::back_with_error( $e->getMessage() );
+		if ( self::is_busy( (int) $mailbox->id ) ) {
+			return self::back_with_error( __( self::BUSY ) );
+		}
+
+		try {
+			if ( ! filter_var( $request->input( 'confirmed' ), FILTER_VALIDATE_BOOLEAN ) ) {
+				$pending = $people->pending( $source_id );
+				if ( $pending ) {
+					return redirect()
+						->route( 'wporghelpscoutimport.index' )
+						->with(
+							'wporghelpscoutimport_confirm',
+							array(
+								'helpscout_mailbox_id' => $source_id,
+								'mailbox_id'           => (int) $mailbox->id,
+								'mailbox'              => (string) $mailbox->name,
+								'name'                 => (string) ( $source['name'] ?? '' ),
+								'everything'           => $everything,
+								'users'                => array_map(
+									static function ( array $user ): string {
+										return trim( ( $user['firstName'] ?? '' ) . ' ' . ( $user['lastName'] ?? '' ) . ' <' . ( $user['email'] ?? '' ) . '>' );
+									},
+									$pending
+								),
+							)
+						);
+				}
 			}
 
-			if ( $unmatched ) {
-				return redirect()
-					->route( 'wporghelpscoutimport.index' )
-					->with(
-						'wporghelpscoutimport_unmatched',
-						array(
-							'count'      => $unmatched,
-							'mailbox'    => $source_id,
-							'mailbox_id' => (int) $mailbox->id,
-							'name'       => (string) ( $source['name'] ?? '' ),
-						)
-					);
-			}
+			$created = $people->prepare( $source_id, $mailbox );
+		} catch ( \Throwable $e ) {
+			return self::back_with_error( $e->getMessage() );
 		}
 
 		$run = \DB::transaction(
-			static function () use ( $source_id, $source, $mailbox ): ?Run {
+			static function () use ( $source_id, $source, $mailbox, $everything ): ?Run {
 				if ( ! self::lock( (int) $mailbox->id ) ) {
 					return null;
 				}
 
-				$previous = Run::query()
+				$previous = $everything ? null : Run::query()
 					->where( 'helpscout_mailbox_id', $source_id )
 					->where( 'mailbox_id', $mailbox->id )
 					->where( 'status', Run::STATUS_DONE )
+					->whereNull( 'retry_ids' )
 					->whereNotNull( 'started_at' )
 					->orderByDesc( 'started_at' )
 					->first();
@@ -141,6 +171,9 @@ final class ImportController extends Controller {
 		$message = $run->since
 			? __( 'Importing what changed in :name since its last import.', array( 'name' => $source['name'] ?? '' ) )
 			: __( 'Importing :name.', array( 'name' => $source['name'] ?? '' ) );
+		if ( $created ) {
+			$message .= ' ' . __( 'Created :count FreeScout users for its HelpScout users.', array( 'count' => count( $created ) ) );
+		}
 
 		return redirect()->route( 'wporghelpscoutimport.index' )->with( 'flash_success', $message );
 	}
@@ -163,7 +196,7 @@ final class ImportController extends Controller {
 	}
 
 	/**
-	 * Resumes a paused or failed run where it stopped.
+	 * Resumes a paused, failed, or stalled run where it stopped.
 	 *
 	 * @param int $id Run ID.
 	 * @return RedirectResponse
@@ -179,7 +212,7 @@ final class ImportController extends Controller {
 
 				// Read again under the lock, in case it changed since.
 				$run = Run::find( $id );
-				if ( ! $run || ! in_array( $run->status, array( Run::STATUS_PAUSED, Run::STATUS_FAILED ), true ) ) {
+				if ( ! $run || ! ( in_array( $run->status, array( Run::STATUS_PAUSED, Run::STATUS_FAILED ), true ) || $run->is_stalled() ) ) {
 					return null;
 				}
 
@@ -204,15 +237,70 @@ final class ImportController extends Controller {
 	}
 
 	/**
+	 * Stops a run for good, so its mailbox can take another.
+	 *
+	 * @param int $id Run ID.
+	 * @return RedirectResponse
+	 */
+	public function cancel( int $id ): RedirectResponse {
+		$run = Run::find( $id );
+		if ( $run && ( $run->is_open() || Run::STATUS_FAILED === $run->status ) ) {
+			$run->status      = Run::STATUS_CANCELLED;
+			$run->finished_at = Carbon::now();
+			$run->renew_token();
+			$run->save();
+		}
+
+		return redirect()->route( 'wporghelpscoutimport.index' );
+	}
+
+	/**
+	 * Imports a finished run's failed conversations again, in a run of their own.
+	 *
+	 * @param int $id Run ID.
+	 * @return RedirectResponse
+	 */
+	public function retry( int $id ): RedirectResponse {
+		$failed = Run::find( $id );
+		if ( ! $failed || $failed->is_open() || ! $failed->failures || ! $failed->mailbox ) {
+			return redirect()->route( 'wporghelpscoutimport.index' );
+		}
+
+		$run = \DB::transaction(
+			static function () use ( $failed ): ?Run {
+				if ( ! self::lock( (int) $failed->mailbox_id ) ) {
+					return null;
+				}
+
+				$run            = self::begin( (int) $failed->helpscout_mailbox_id, (string) $failed->helpscout_mailbox_name, (int) $failed->mailbox_id, null, false );
+				$run->retry_ids = array_map( 'intval', array_keys( (array) $failed->failures ) );
+				$run->total     = count( $run->retry_ids );
+				$run->save();
+
+				return $run;
+			}
+		);
+
+		if ( ! $run ) {
+			return self::back_with_error( __( self::BUSY ) );
+		}
+
+		ImportPage::dispatch( (int) $run->id, (string) $run->token );
+
+		return redirect()->route( 'wporghelpscoutimport.index' )->with( 'flash_success', __( 'Importing :count failed conversations again.', array( 'count' => $run->total ) ) );
+	}
+
+	/**
 	 * Creates a running run; its first page is queued once the transaction is committed.
 	 *
 	 * @param int         $source_id   HelpScout mailbox ID.
 	 * @param string      $source_name HelpScout mailbox name.
 	 * @param int         $mailbox_id  FreeScout mailbox ID.
 	 * @param Carbon|null $since       Only conversations changed since then.
+	 * @param bool        $save        Whether to save it.
 	 * @return Run
 	 */
-	private static function begin( int $source_id, string $source_name, int $mailbox_id, ?Carbon $since ): Run {
+	private static function begin( int $source_id, string $source_name, int $mailbox_id, ?Carbon $since, bool $save = true ): Run {
 		$run                         = new Run();
 		$run->helpscout_mailbox_id   = $source_id;
 		$run->helpscout_mailbox_name = $source_name;
@@ -222,26 +310,55 @@ final class ImportController extends Controller {
 		$run->since                  = $since;
 		$run->started_at             = Carbon::now();
 		$run->renew_token();
-		$run->save();
+
+		if ( $save ) {
+			$run->save();
+		}
 
 		return $run;
 	}
 
 	/**
-	 * How many of a HelpScout mailbox's users would be credited to the robot.
+	 * Whether conversation numbers are set up for HelpScout's, and what's wrong if they aren't.
 	 *
-	 * @param int $source_id HelpScout mailbox ID.
-	 * @return int
+	 * New FreeScout conversations take the next number after the highest; HelpScout goes on numbering the mailboxes
+	 * that haven't moved yet, so FreeScout's next number has to be above HelpScout's highest.
+	 *
+	 * @param HelpScout $helpscout HelpScout API client.
+	 * @return array|null `custom` (whether FreeScout shows numbers rather than IDs), `next` (FreeScout's next number),
+	 *                    and `highest` (HelpScout's highest); null if HelpScout's highest couldn't be read.
 	 */
-	private static function unmatched( int $source_id ): int {
-		$users = array_filter(
-			People::directory( app( HelpScout::class ) ),
-			static function ( array $user ) use ( $source_id ): bool {
-				return isset( $user['mailboxes'][ $source_id ] );
-			}
-		);
+	private static function numbering( HelpScout $helpscout ): ?array {
+		try {
+			$highest = (int) \Cache::remember(
+				self::HIGHEST_NUMBER_CACHE_KEY,
+				60,
+				static function () use ( $helpscout ): int {
+					return $helpscout->highest_number();
+				}
+			);
+		} catch ( \Throwable $e ) {
+			return null;
+		}
 
-		return count( array_filter( ( new People() )->agents( $users ), array( People::class, 'is_unmatched' ) ) );
+		return array(
+			'custom'  => (bool) config( 'app.custom_number' ),
+			'next'    => max( (int) \Option::get( 'next_ticket', 0, true, false ), (int) Conversation::query()->max( 'number' ) + 1 ),
+			'highest' => $highest,
+		);
+	}
+
+	/**
+	 * Whether a FreeScout mailbox has a run open already.
+	 *
+	 * @param int $mailbox_id FreeScout mailbox ID.
+	 * @return bool
+	 */
+	private static function is_busy( int $mailbox_id ): bool {
+		return Run::query()
+			->where( 'mailbox_id', $mailbox_id )
+			->whereIn( 'status', array( Run::STATUS_RUNNING, Run::STATUS_PAUSED ) )
+			->exists();
 	}
 
 	/**

@@ -1,12 +1,18 @@
 @extends('layouts.app')
 
-@section('title', __('HelpScout Agents'))
+@section('title', __('HelpScout Users'))
 
 @section('content')
+@php
+	$how = [
+		'chosen' => __('chosen'),
+		'email'  => __('same email'),
+	];
+@endphp
 <div class="container">
 	<div class="flexy-container">
 		<div class="flexy-item">
-			<span class="heading">{{ __('HelpScout Agents') }}</span>
+			<span class="heading">{{ __('HelpScout Users') }}</span>
 		</div>
 		<div class="flexy-block"></div>
 		<div class="flexy-item">
@@ -17,16 +23,8 @@
 	<div class="margin-top">
 		@include('partials/flash_messages')
 
-		<div class="alert alert-warning">
-			<p><strong>{{ __('FreeScout users are never created from HelpScout.') }}</strong></p>
-			<p>{{ __('Each HelpScout user’s replies and notes are credited to the FreeScout user chosen here, or else to the one with the same email. A HelpScout user without either gets no FreeScout user: their replies and notes are credited to “HelpScout Import”. Matching someone later credits what’s already imported to them too.') }}</p>
-			<p>{{ __('HelpScout no longer lists users deleted from it. They show up here once an import has met them in a conversation, marked “No longer in HelpScout”.') }}</p>
-			@if ( $can_create )
-				<p>{{ __('For someone with no FreeScout user yet, enter their WordPress.org username: that creates one, connected to their account. Uncheck “Can log in” for former agents: they keep their credit, but their user is disabled.') }}</p>
-			@else
-				<p>{{ __('New FreeScout users can only be created from a WordPress.org username, which needs WP.org SSO to be on.') }}</p>
-			@endif
-		</div>
+		<p>{{ __('Each HelpScout user’s replies, notes, and assignments are credited to a FreeScout user: the one chosen here, or else the one with the same email. Importing a mailbox creates a FreeScout user for each of its HelpScout users without either, with access to the mailbox; users HelpScout no longer has get a disabled one.') }}</p>
+		<p>{{ __('Choose a user here for someone who already has a FreeScout user under another email, before importing their mailboxes: FreeScout can’t merge users. Choosing someone after an import credits what’s imported to them too.') }}</p>
 
 		@if ( $error )
 			<div class="alert alert-danger">{{ __('HelpScout couldn’t be reached: :error', [ 'error' => $error ]) }}</div>
@@ -50,37 +48,22 @@
 			</form>
 		</div>
 
-		@if ( $agents )
-			<p>
-				@if ( $unmatched )
-					<strong class="text-danger">{{ __(':count of :total HelpScout users have no FreeScout user.', [ 'count' => $unmatched, 'total' => count( $agents ) ]) }}</strong>
-				@else
-					<strong class="text-success">{{ __('All :total HelpScout users have a FreeScout user.', [ 'total' => count( $agents ) ]) }}</strong>
-				@endif
-			</p>
+		<form method="POST" action="{{ route( 'wporghelpscoutimport.agents.save' ) }}">
+			{{ csrf_field() }}
+			<input type="hidden" name="mailbox" value="{{ $mailbox_id ?: '' }}">
 
-			<form method="POST" action="{{ route( 'wporghelpscoutimport.agents.save' ) }}">
-				{{ csrf_field() }}
-				<input type="hidden" name="mailbox" value="{{ $mailbox_id ?: '' }}">
-
+			@if ( $agents )
 				<table class="table">
 					<thead>
 						<tr>
 							<th>{{ __('HelpScout user') }}</th>
-							<th>{{ __('Credited to') }}</th>
-							<th>{{ __('Choose a FreeScout user') }}</th>
-							@if ( $can_create )
-								<th>{{ __('Or create one from WordPress.org') }}</th>
-							@endif
+							<th>{{ __('FreeScout user') }}</th>
+							<th>{{ __('Choose another') }}</th>
 						</tr>
 					</thead>
 					<tbody>
 						@foreach ( $agents as $agent )
-							@php
-								$unmatched_row = ! $agent['chosen'] && ! $agent['by_email'];
-								$selected      = $agent['chosen'] ?: $agent['suggested'];
-							@endphp
-							<tr id="agent-{{ $agent['id'] }}" @if ( $unmatched_row ) class="{{ $agent['suggested'] ? 'warning' : 'danger' }}" @endif>
+							<tr id="agent-{{ $agent['id'] }}">
 								<td>
 									{{ $agent['name'] }}<br/>
 									<small>{{ $agent['email'] }}</small><br/>
@@ -91,47 +74,71 @@
 									@endif
 								</td>
 								<td>
-									@if ( $agent['chosen'] )
-										{{ $agent['chosen']->getFullName() }} <small class="text-help">({{ __('chosen') }})</small>
-									@elseif ( $agent['by_email'] )
-										{{ $agent['by_email']->getFullName() }} <small class="text-help">({{ __('same email') }})</small>
-									@else
-										<strong>{{ __('HelpScout Import') }}</strong> <small>({{ __('no FreeScout user') }})</small>
-										@if ( $agent['suggested'] )
-											<br/><small>{{ __('Suggested: :name, with the same name. Save to use them.', [ 'name' => $agent['suggested']->getFullName() ]) }}</small>
+									@if ( $agent['user'] )
+										{{ $agent['user']->getFullName() }} <small class="text-help">&lt;{{ $agent['user']->email }}&gt; ({{ $how[ $agent['how'] ] }})</small>
+										@if ( App\User::STATUS_ACTIVE !== (int) $agent['user']->status )
+											<br/><small class="text-help">{{ __('Disabled') }}</small>
 										@endif
+									@else
+										<em>{{ __('Created when their mailbox is imported') }}</em>
 									@endif
 								</td>
 								<td>
-									<select name="agents[{{ $agent['id'] }}][user_id]" class="form-control input-sm wporghelpscoutimport-user" aria-label="{{ __('FreeScout user for :name', [ 'name' => $agent['name'] ]) }}">
-										<option value="">{{ $agent['by_email'] ? __('Same email: :name', [ 'name' => $agent['by_email']->getFullName() ]) : __('None: HelpScout Import') }}</option>
+									<select name="agents[{{ $agent['id'] }}]" class="form-control input-sm wporghelpscoutimport-user" aria-label="{{ __('FreeScout user for :name', [ 'name' => $agent['name'] ]) }}">
+										<option value="">{{ __('Keep') }}</option>
 										@foreach ( $users as $user )
-											<option value="{{ $user->id }}" @if ( $selected && (int) $selected->id === (int) $user->id ) selected @endif>{{ $user->getFullName() }} &lt;{{ $user->email }}&gt;</option>
+											<option value="{{ $user->id }}">{{ $user->getFullName() }} &lt;{{ $user->email }}&gt;</option>
 										@endforeach
 									</select>
 								</td>
-								@if ( $can_create )
-									<td>
-										@if ( $unmatched_row )
-											<input type="text" name="agents[{{ $agent['id'] }}][username]" class="form-control input-sm" placeholder="{{ __('WordPress.org username') }}" aria-label="{{ __('WordPress.org username of :name', [ 'name' => $agent['name'] ]) }}">
-											<label class="checkbox-inline"><input type="checkbox" name="agents[{{ $agent['id'] }}][can_log_in]" value="1" checked> {{ __('Can log in') }}</label>
-										@endif
-									</td>
-								@endif
 							</tr>
 						@endforeach
 					</tbody>
 				</table>
+			@endif
 
+			@if ( $teams )
+				<h3 class="margin-top">{{ __('HelpScout teams') }}</h3>
+				<p>{{ __('Conversations assigned to a HelpScout team are assigned to the FreeScout team chosen here, or else to the one with the same name; without either, they’re imported unassigned. FreeScout’s teams come from its Teams module: create them there first.') }}</p>
+				<table class="table">
+					<thead>
+						<tr>
+							<th>{{ __('HelpScout team') }}</th>
+							<th>{{ __('FreeScout team') }}</th>
+							<th>{{ __('Choose another') }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach ( $teams as $team )
+							<tr id="team-{{ $team['id'] }}">
+								<td>{{ $team['name'] }}</td>
+								<td>
+									@if ( $team['team'] )
+										{{ $team['team']->getFullName() }} <small class="text-help">({{ $team['chosen'] ? __('chosen') : __('same name') }})</small>
+									@else
+										<em>{{ __('None: imported unassigned') }}</em>
+									@endif
+								</td>
+								<td>
+									@if ( count( $freescout_teams ) )
+										<select name="teams[{{ $team['id'] }}]" class="form-control input-sm" aria-label="{{ __('FreeScout team for :name', [ 'name' => $team['name'] ]) }}">
+											<option value="">{{ __('Keep') }}</option>
+											@foreach ( $freescout_teams as $freescout_team )
+												<option value="{{ $freescout_team->id }}">{{ $freescout_team->getFullName() }}</option>
+											@endforeach
+										</select>
+									@endif
+								</td>
+							</tr>
+						@endforeach
+					</tbody>
+				</table>
+			@endif
+
+			@if ( $agents || $teams )
 				<button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
-			</form>
-		@endif
-
-		@if ( $teams )
-			<h3 class="margin-top">{{ __('HelpScout teams') }}</h3>
-			<p>{{ __('HelpScout lists its teams with its users, but they aren’t people and never write anything: conversations are assigned to them. Conversations assigned to a team are imported unassigned.') }}</p>
-			<p class="text-help">{{ implode( ', ', $teams ) }}</p>
-		@endif
+			@endif
+		</form>
 	</div>
 </div>
 @endsection

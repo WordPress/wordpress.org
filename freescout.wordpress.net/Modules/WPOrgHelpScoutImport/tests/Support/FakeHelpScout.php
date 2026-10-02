@@ -35,6 +35,13 @@ final class FakeHelpScout {
 	public $requests = array();
 
 	/**
+	 * Seconds the client waited for the rate limit, each time.
+	 *
+	 * @var int[]
+	 */
+	public $slept = array();
+
+	/**
 	 * Constructor: answers token requests.
 	 */
 	public function __construct() {
@@ -127,7 +134,16 @@ final class FakeHelpScout {
 			)
 		);
 
-		return new HelpScout( 'app-id', 'app-secret', 'https://helpscout.test/', $reserve, $http );
+		return new HelpScout(
+			'app-id',
+			'app-secret',
+			'https://helpscout.test/',
+			$reserve,
+			$http,
+			function ( int $seconds ): void {
+				$this->slept[] = $seconds;
+			}
+		);
 	}
 
 	/**

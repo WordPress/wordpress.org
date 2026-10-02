@@ -1,6 +1,6 @@
 <?php
 /**
- * The page where administrators choose who HelpScout users' replies and notes are credited to.
+ * The page where administrators see which FreeScout user each HelpScout user is credited to, and which team each team is.
  *
  * @package WordPressdotorg\FreeScout\WPOrgHelpScoutImport
  */
@@ -13,31 +13,32 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\People;
-use Modules\WPOrgHelpScoutImport\Services\WordPressOrgUsers;
 
 /**
- * Lists every HelpScout user once, for the whole account: a choice applies to every mailbox.
+ * Lists HelpScout's users and teams, and saves who they're credited to.
+ *
+ * Imports create FreeScout users for HelpScout users without one. This page is for those who already have one under
+ * another email, and for HelpScout's teams.
  */
 final class AgentsController extends Controller {
 
 	/**
-	 * Lists HelpScout's users, optionally only those of one mailbox, with who each is credited to.
+	 * Shows HelpScout's users, or one mailbox's, with their FreeScout users, and HelpScout's teams with their teams.
 	 *
-	 * @param Request $request Request; `mailbox` names a HelpScout mailbox to list the users of.
+	 * @param Request $request Request.
 	 * @return View
 	 */
 	public function index( Request $request ): View {
 		$mailbox_id = (int) $request->query( 'mailbox' );
-		$people     = new People();
 		$agents     = array();
+		$teams      = array();
 		$mailboxes  = array();
 		$error      = '';
 
 		try {
-			$directory = People::directory( app( HelpScout::class ) );
+			$directory = ( new People( app( HelpScout::class ) ) )->directory();
 			foreach ( $directory as $user ) {
 				$mailboxes += (array) $user['mailboxes'];
 			}
@@ -50,7 +51,8 @@ final class AgentsController extends Controller {
 					return ! $mailbox_id || isset( $user['mailboxes'][ $mailbox_id ] );
 				}
 			);
-			$agents = $people->agents( $mailbox_id ? $listed : array_merge( $listed, People::former( $directory ) ) );
+			$agents = People::agents( $mailbox_id ? $listed : array_merge( $listed, People::former( $directory ) ) );
+			$teams  = People::teams( $directory );
 		} catch ( \Throwable $e ) {
 			$error = $e->getMessage();
 		}
@@ -58,86 +60,55 @@ final class AgentsController extends Controller {
 		return view(
 			'wporghelpscoutimport::agents',
 			array(
-				'agents'     => $agents,
-				'unmatched'  => count( array_filter( $agents, array( People::class, 'is_unmatched' ) ) ),
-				'mailboxes'  => $mailboxes,
-				'mailbox_id' => $mailbox_id,
-				'users'      => People::creditable()->orderBy( 'first_name' )->orderBy( 'last_name' )->get(),
-				'teams'      => array_values(
-					array_map(
-						static function ( array $team ): string {
-							return trim( ( $team['firstName'] ?? '' ) . ' ' . ( $team['lastName'] ?? '' ) );
-						},
-						array_filter( $directory ?? array(), array( People::class, 'is_team' ) )
-					)
-				),
-				'can_create' => WordPressOrgUsers::available(),
-				'error'      => $error,
+				'agents'          => $agents,
+				'teams'           => $teams,
+				'mailboxes'       => $mailboxes,
+				'mailbox_id'      => $mailbox_id,
+				'users'           => People::creditable()->orderBy( 'first_name' )->orderBy( 'last_name' )->get(),
+				'freescout_teams' => People::freescout_teams()->orderBy( 'first_name' )->get(),
+				'error'           => $error,
 			)
 		);
 	}
 
 	/**
-	 * Saves who HelpScout users are credited to, for every row of the list at once.
+	 * Saves who HelpScout users and teams are credited to, and credits what's imported already to them.
 	 *
-	 * A WordPress.org username creates a FreeScout user from that account, or finds the one connected to it, and
-	 * wins over a chosen user. No user chosen goes back to the user with the same email. Replies and notes already
-	 * imported are credited again.
+	 * Rows left at their default are left alone: they get the user with their email, or a new one, when imported.
 	 *
-	 * @param Request $request Request, with `agents`: rows by HelpScout user ID, each with `user_id`, `username`, and
-	 *                         `can_log_in`.
+	 * @param Request $request Request.
 	 * @return RedirectResponse
 	 */
 	public function save( Request $request ): RedirectResponse {
-		$errors  = array();
-		$created = array();
-		$create  = WordPressOrgUsers::available();
+		// People can only be credited to people, and teams to teams.
+		$choices = array(
+			'agents' => People::creditable(),
+			'teams'  => People::freescout_teams(),
+		);
 
-		foreach ( (array) $request->input( 'agents', array() ) as $helpscout_user_id => $row ) {
-			$helpscout_user_id = (int) $helpscout_user_id;
-			$row               = is_array( $row ) ? $row : array();
-			$user_id           = (int) ( $row['user_id'] ?? 0 );
-			$username          = trim( (string) ( $row['username'] ?? '' ) );
-			if ( $helpscout_user_id <= 0 ) {
-				continue;
-			}
-
-			if ( '' !== $username && $create ) {
-				try {
-					$user      = WordPressOrgUsers::for_username( $username, filter_var( $row['can_log_in'] ?? false, FILTER_VALIDATE_BOOLEAN ) );
-					$user_id   = (int) $user->id;
-					$created[] = $username;
-				} catch ( \RuntimeException $e ) {
-					$errors[] = $username . ': ' . $e->getMessage();
-					continue;
+		foreach ( $choices as $field => $query ) {
+			foreach ( (array) $request->input( $field, array() ) as $helpscout_id => $user_id ) {
+				$user = (int) $helpscout_id > 0 && (int) $user_id > 0 ? ( clone $query )->whereKey( (int) $user_id )->first() : null;
+				if ( $user ) {
+					People::choose( (int) $helpscout_id, $user );
 				}
 			}
-
-			if ( $user_id && People::creditable()->whereKey( $user_id )->exists() ) {
-				Agent::query()->updateOrCreate( array( 'helpscout_user_id' => $helpscout_user_id ), array( 'user_id' => $user_id ) );
-			} else {
-				Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->delete();
-			}
-
-			People::recredit( $helpscout_user_id );
 		}
 
-		$redirect = redirect()
+		return redirect()
 			->route( 'wporghelpscoutimport.agents', array_filter( array( 'mailbox' => (int) $request->input( 'mailbox' ) ) ) )
-			->with( 'flash_success', $created ? __( 'Saved, with users from WordPress.org for :usernames.', array( 'usernames' => implode( ', ', $created ) ) ) : __( 'Saved.' ) );
-
-		return $errors ? $redirect->with( 'flash_error', implode( ' ', $errors ) ) : $redirect;
+			->with( 'flash_success', __( 'Saved.' ) );
 	}
 
 	/**
-	 * Asks HelpScout for its users again, for users or mailbox access added since.
+	 * Asks HelpScout for its users again.
 	 *
 	 * @param Request $request Request.
 	 * @return RedirectResponse
 	 */
 	public function refresh( Request $request ): RedirectResponse {
 		try {
-			People::directory( app( HelpScout::class ), true );
+			( new People( app( HelpScout::class ) ) )->directory( true );
 		} catch ( \Throwable $e ) {
 			return redirect()->route( 'wporghelpscoutimport.agents' )->with( 'flash_error', $e->getMessage() );
 		}

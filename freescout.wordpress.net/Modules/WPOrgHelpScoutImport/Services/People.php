@@ -1,6 +1,6 @@
 <?php
 /**
- * Finds the FreeScout users and senders for the people in HelpScout's data.
+ * Finds or creates the FreeScout users and senders for the people in HelpScout's data.
  *
  * @package WordPressdotorg\FreeScout\WPOrgHelpScoutImport
  */
@@ -9,25 +9,40 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgHelpScoutImport\Services;
 
+use App\Conversation;
 use App\Customer;
+use App\Email;
+use App\Mailbox;
+use App\Thread;
 use App\User;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
+use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
 use Modules\WPOrgHelpScoutImport\Entities\Person;
 
 /**
- * HelpScout users become the FreeScout users administrators chose, or with the same email; senders become senders.
+ * Every HelpScout user gets a FreeScout user: the one an administrator chose, the one with their email, or a new one.
+ *
+ * New users are active while HelpScout still lists them, and disabled once it doesn't. HelpScout's teams become the
+ * FreeScout teams (the Teams module's users) an administrator chose, or with the same name; senders become senders.
  */
 final class People {
 
 	/**
-	 * Email of the user that HelpScout users without a FreeScout user are credited to.
+	 * Email of the user that what nobody in particular wrote is credited to, like HelpScout's own actions.
 	 *
 	 * Core's own robot users have addresses like this.
 	 *
 	 * @var string
 	 */
 	public const ROBOT_EMAIL = 'fs-helpscout-import@example.org';
+
+	/**
+	 * Domain of the emails given to users whose HelpScout email can't be a FreeScout user's.
+	 *
+	 * @var string
+	 */
+	private const PLACEHOLDER_DOMAIN = 'helpscout.invalid';
 
 	/**
 	 * Cache key for HelpScout's users and their mailboxes.
@@ -44,11 +59,25 @@ final class People {
 	private const DIRECTORY_CACHE_MINUTES = 60;
 
 	/**
-	 * FreeScout users found so far, by HelpScout user ID; null if there's none.
+	 * HelpScout API client, to tell users HelpScout still lists from former ones.
+	 *
+	 * @var HelpScout|null
+	 */
+	private $helpscout;
+
+	/**
+	 * FreeScout users found or created so far, by HelpScout user ID.
+	 *
+	 * @var User[]
+	 */
+	private $users = array();
+
+	/**
+	 * FreeScout teams found so far, by HelpScout team ID; null if there's none.
 	 *
 	 * @var array
 	 */
-	private $users = array();
+	private $teams = array();
 
 	/**
 	 * HelpScout user IDs remember() kept so far.
@@ -58,22 +87,106 @@ final class People {
 	private $remembered = array();
 
 	/**
-	 * The FreeScout user for a HelpScout user: the one an administrator chose, or else the one with their email.
+	 * Constructor.
+	 *
+	 * @param HelpScout|null $helpscout HelpScout API client; without one, users created are disabled.
+	 */
+	public function __construct( ?HelpScout $helpscout = null ) {
+		$this->helpscout = $helpscout;
+	}
+
+	/**
+	 * The FreeScout user for a HelpScout user, created if there's none yet.
 	 *
 	 * @param mixed $person HelpScout person object, like a thread's `createdBy`.
-	 * @return User|null Null if it isn't a HelpScout user, or there's no FreeScout user for them.
+	 * @return User|null Null if it isn't a HelpScout user, like a sender, a team, or HelpScout itself.
 	 */
 	public function user( $person ): ?User {
-		if ( ! is_array( $person ) || 'user' !== ( $person['type'] ?? '' ) ) {
+		if ( ! self::is_user( $person ) ) {
 			return null;
 		}
 
-		$id = (int) ( $person['id'] ?? 0 );
-		if ( ! array_key_exists( $id, $this->users ) ) {
-			$this->users[ $id ] = self::chosen( $id ) ?? self::by_email( (string) ( $person['email'] ?? '' ) );
+		$id = (int) $person['id'];
+		if ( ! isset( $this->users[ $id ] ) ) {
+			$this->users[ $id ] = self::mapped( $id ) ?? $this->match_or_create( $person );
 		}
 
 		return $this->users[ $id ];
+	}
+
+	/**
+	 * The FreeScout user or team a conversation was assigned to.
+	 *
+	 * @param mixed $person HelpScout person object, like a conversation's `assignee`.
+	 * @return User|null Null if it's unassigned, or assigned to a team FreeScout doesn't have.
+	 */
+	public function assignee( $person ): ?User {
+		return is_array( $person ) && 'team' === ( $person['type'] ?? '' ) ? $this->team( $person ) : $this->user( $person );
+	}
+
+	/**
+	 * The FreeScout team for a HelpScout team: the one an administrator chose, or the only one with the same name.
+	 *
+	 * @param array $person HelpScout person object of a team.
+	 * @return User|null The Teams module's user for the team, or null if there's none.
+	 */
+	public function team( array $person ): ?User {
+		$id = (int) ( $person['id'] ?? 0 );
+		if ( ! $id ) {
+			return null;
+		}
+
+		if ( ! array_key_exists( $id, $this->teams ) ) {
+			$this->teams[ $id ] = self::mapped( $id, true ) ?? self::team_by_name( self::name( $person ) );
+		}
+
+		return $this->teams[ $id ];
+	}
+
+	/**
+	 * Makes sure every HelpScout user of a mailbox has a FreeScout user with access to the mailbox imported into.
+	 *
+	 * @param int     $helpscout_mailbox_id HelpScout mailbox ID.
+	 * @param Mailbox $mailbox              FreeScout mailbox.
+	 * @return User[] The users created.
+	 */
+	public function prepare( int $helpscout_mailbox_id, Mailbox $mailbox ): array {
+		$created = array();
+
+		foreach ( self::mailbox_users( $this->directory(), $helpscout_mailbox_id ) as $helpscout_user ) {
+			$id       = (int) $helpscout_user['id'];
+			$existing = self::mapped( $id ) ?? self::by_email( (string) ( $helpscout_user['email'] ?? '' ) );
+			$user     = $existing ?? $this->match_or_create( $helpscout_user, true );
+
+			$this->users[ $id ] = $user;
+			if ( ! $existing ) {
+				$created[] = $user;
+			}
+
+			if ( ! $user->isAdmin() && User::STATUS_ACTIVE === (int) $user->status ) {
+				$user->mailboxes()->syncWithoutDetaching( array( (int) $mailbox->id ) );
+				$user->syncPersonalFolders( null );
+			}
+		}
+
+		return $created;
+	}
+
+	/**
+	 * The HelpScout users of a mailbox that an import would create FreeScout users for.
+	 *
+	 * @param int $helpscout_mailbox_id HelpScout mailbox ID.
+	 * @return array[] HelpScout users, as directory() lists them.
+	 */
+	public function pending( int $helpscout_mailbox_id ): array {
+		return array_values(
+			array_filter(
+				self::mailbox_users( $this->directory(), $helpscout_mailbox_id ),
+				static function ( array $helpscout_user ): bool {
+					return ! self::mapped( (int) $helpscout_user['id'] ) && ! self::by_email( (string) ( $helpscout_user['email'] ?? '' ) );
+				}
+			)
+		);
 	}
 
 	/**
@@ -83,17 +196,17 @@ final class People {
 	 * @return int|null Their HelpScout user ID, or null if it isn't a HelpScout user.
 	 */
 	public function remember( $person ): ?int {
-		$id = is_array( $person ) && 'user' === ( $person['type'] ?? '' ) ? (int) ( $person['id'] ?? 0 ) : 0;
-		if ( ! $id ) {
+		if ( ! self::is_user( $person ) ) {
 			return null;
 		}
 
+		$id = (int) $person['id'];
 		if ( ! isset( $this->remembered[ $id ] ) ) {
 			Person::query()->updateOrCreate(
 				array( 'helpscout_user_id' => $id ),
 				array(
-					'first_name' => mb_substr( (string) ( $person['first'] ?? '' ), 0, 100 ),
-					'last_name'  => mb_substr( (string) ( $person['last'] ?? '' ), 0, 100 ),
+					'first_name' => mb_substr( self::first_name( $person ), 0, 100 ),
+					'last_name'  => mb_substr( self::last_name( $person ), 0, 100 ),
 					'email'      => '' !== (string) ( $person['email'] ?? '' ) ? mb_substr( (string) $person['email'], 0, 191 ) : null,
 				)
 			);
@@ -104,34 +217,41 @@ final class People {
 	}
 
 	/**
-	 * Credits a HelpScout user's imported replies and notes to whoever they're credited to now.
+	 * Credits what was imported for a HelpScout user or team to someone else: replies, notes, and assignments.
 	 *
-	 * @param int $helpscout_user_id HelpScout user ID.
+	 * @param User $from Who it's credited to now.
+	 * @param User $to   Who it's credited to from now on.
 	 * @return void
 	 */
-	public static function recredit( int $helpscout_user_id ): void {
-		$person = Person::query()->where( 'helpscout_user_id', $helpscout_user_id )->first();
-		if ( ! $person ) {
-			return;
+	public static function recredit( User $from, User $to ): void {
+		$threads       = ImportedThread::query()->select( 'thread_id' )->getQuery();
+		$conversations = ImportedConversation::query()->select( 'conversation_id' )->getQuery();
+
+		// Without the events of changed threads and conversations: imported ones were written without them too.
+		foreach ( array( 'created_by_user_id', 'user_id' ) as $column ) {
+			Thread::query()->whereIn( 'id', $threads )->where( $column, $from->id )->update( array( $column => $to->id ) );
 		}
+		foreach ( array( 'created_by_user_id', 'user_id', 'closed_by_user_id' ) as $column ) {
+			Conversation::query()->whereIn( 'id', $conversations )->where( $column, $from->id )->update( array( $column => $to->id ) );
+		}
+	}
 
-		$people = new self();
-		$user   = $people->user(
-			array(
-				'type'  => 'user',
-				'id'    => $helpscout_user_id,
-				'email' => (string) $person->email,
-			)
-		) ?? $people->robot();
+	/**
+	 * Credits a HelpScout user or team to a FreeScout user, and what's imported already with them.
+	 *
+	 * @param int  $helpscout_user_id HelpScout user or team ID.
+	 * @param User $user              FreeScout user, or team.
+	 * @return void
+	 */
+	public static function choose( int $helpscout_user_id, User $user ): void {
+		$previous = Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->value( 'user_id' );
 
-		// One query, without the events of changed threads: imported ones were written without them too.
-		\App\Thread::query()
-			->whereIn(
-				'id',
-				ImportedThread::query()->select( 'thread_id' )->where( 'helpscout_user_id', $helpscout_user_id )->getQuery()
-			)
-			->where( 'created_by_user_id', '!=', $user->id )
-			->update( array( 'created_by_user_id' => $user->id ) );
+		Agent::query()->updateOrCreate( array( 'helpscout_user_id' => $helpscout_user_id ), array( 'user_id' => $user->id ) );
+
+		$from = $previous ? User::find( (int) $previous ) : null;
+		if ( $from && (int) $from->id !== (int) $user->id ) {
+			self::recredit( $from, $user );
+		}
 	}
 
 	/**
@@ -163,16 +283,21 @@ final class People {
 	}
 
 	/**
-	 * Lists HelpScout's users with the mailboxes each can see; cached, since that takes a request per mailbox.
+	 * Lists HelpScout's users and teams with the mailboxes each can see; cached, since that takes a request per mailbox.
 	 *
-	 * @param HelpScout $helpscout HelpScout API client.
-	 * @param bool      $refresh   Whether to ask HelpScout again rather than use the cache.
-	 * @return array[] Users, as HelpScout lists them, each with `mailboxes`: names by HelpScout mailbox ID.
+	 * @param bool $refresh Whether to ask HelpScout again rather than use the cache.
+	 * @return array[] Users and teams, as HelpScout lists them, each with `mailboxes`: names by HelpScout mailbox ID.
 	 */
-	public static function directory( HelpScout $helpscout, bool $refresh = false ): array {
+	public function directory( bool $refresh = false ): array {
+		if ( ! $this->helpscout ) {
+			return array();
+		}
+
 		if ( $refresh ) {
 			\Cache::forget( self::DIRECTORY_CACHE_KEY );
 		}
+
+		$helpscout = $this->helpscout;
 
 		return (array) \Cache::remember(
 			self::DIRECTORY_CACHE_KEY,
@@ -197,16 +322,13 @@ final class People {
 	}
 
 	/**
-	 * Lists HelpScout users with the FreeScout user each is credited to, and one to suggest when there's none.
+	 * Lists HelpScout users with the FreeScout user each is credited to, or would get.
 	 *
-	 * HelpScout lists its teams as users too; they're left out, since they never write anything.
-	 *
-	 * @param array[] $helpscout_users HelpScout users, as directory() lists them.
-	 * @return array[] By name, each with `id`, `name`, `email`, `mailboxes`, `chosen` (the chosen user, or null),
-	 *                 `by_email` (the user with their email, or null), and `suggested` (the only user with their name,
-	 *                 if neither is set, or null).
+	 * @param array[] $helpscout_users HelpScout users, as directory() lists them; teams are left out.
+	 * @return array[] By name, each with `id`, `name`, `email`, `mailboxes`, `former`, `user` (their FreeScout user, or
+	 *                 null if one will be created), and `how` ('chosen', 'email', or 'new').
 	 */
-	public function agents( array $helpscout_users ): array {
+	public static function agents( array $helpscout_users ): array {
 		$agents = array();
 
 		foreach ( $helpscout_users as $helpscout_user ) {
@@ -215,19 +337,17 @@ final class People {
 			}
 
 			$id       = (int) ( $helpscout_user['id'] ?? 0 );
-			$name     = trim( ( $helpscout_user['firstName'] ?? '' ) . ' ' . ( $helpscout_user['lastName'] ?? '' ) );
-			$chosen   = self::chosen( $id );
-			$by_email = self::by_email( (string) ( $helpscout_user['email'] ?? '' ) );
+			$chosen   = self::mapped( $id );
+			$by_email = $chosen ? null : self::by_email( (string) ( $helpscout_user['email'] ?? '' ) );
 
 			$agents[] = array(
 				'id'        => $id,
-				'name'      => $name,
+				'name'      => self::name( $helpscout_user ),
 				'email'     => (string) ( $helpscout_user['email'] ?? '' ),
 				'mailboxes' => (array) ( $helpscout_user['mailboxes'] ?? array() ),
 				'former'    => ! empty( $helpscout_user['former'] ),
-				'chosen'    => $chosen,
-				'by_email'  => $by_email,
-				'suggested' => $chosen || $by_email ? null : self::by_name( (string) ( $helpscout_user['firstName'] ?? '' ), (string) ( $helpscout_user['lastName'] ?? '' ) ),
+				'user'      => $chosen ?? $by_email,
+				'how'       => $chosen ? 'chosen' : ( $by_email ? 'email' : 'new' ),
 			);
 		}
 
@@ -242,6 +362,37 @@ final class People {
 	}
 
 	/**
+	 * Lists HelpScout teams with the FreeScout team each is assigned to.
+	 *
+	 * @param array[] $directory HelpScout's users and teams, from directory().
+	 * @return array[] By name, each with `id`, `name`, `team` (the FreeScout team, or null), and `chosen`.
+	 */
+	public static function teams( array $directory ): array {
+		$teams = array();
+
+		foreach ( array_filter( $directory, array( self::class, 'is_team' ) ) as $helpscout_team ) {
+			$id     = (int) ( $helpscout_team['id'] ?? 0 );
+			$chosen = self::mapped( $id, true );
+
+			$teams[] = array(
+				'id'     => $id,
+				'name'   => self::name( $helpscout_team ),
+				'team'   => $chosen ?? self::team_by_name( self::name( $helpscout_team ) ),
+				'chosen' => (bool) $chosen,
+			);
+		}
+
+		usort(
+			$teams,
+			static function ( array $a, array $b ): int {
+				return strcasecmp( $a['name'], $b['name'] );
+			}
+		);
+
+		return $teams;
+	}
+
+	/**
 	 * Whether a HelpScout user is a team: conversations are assigned to teams, which have no email.
 	 *
 	 * @param array $helpscout_user HelpScout user, as HelpScout lists them.
@@ -249,16 +400,6 @@ final class People {
 	 */
 	public static function is_team( array $helpscout_user ): bool {
 		return 'team' === ( $helpscout_user['type'] ?? 'user' );
-	}
-
-	/**
-	 * Whether a listed HelpScout user would be credited to the robot.
-	 *
-	 * @param array $agent HelpScout user, as agents() lists them.
-	 * @return bool
-	 */
-	public static function is_unmatched( array $agent ): bool {
-		return ! $agent['chosen'] && ! $agent['by_email'];
 	}
 
 	/**
@@ -273,46 +414,19 @@ final class People {
 	}
 
 	/**
-	 * The only FreeScout user with a name, to suggest; null if there's none, or more than one.
+	 * FreeScout's teams: the Teams module's users, which are robots, apart from this module's own.
 	 *
-	 * @param string $first_name First name.
-	 * @param string $last_name  Last name.
-	 * @return User|null
+	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	private static function by_name( string $first_name, string $last_name ): ?User {
-		if ( '' === trim( $first_name ) || '' === trim( $last_name ) ) {
-			return null;
-		}
-
-		$users = self::creditable()->where( 'first_name', trim( $first_name ) )->where( 'last_name', trim( $last_name ) )->limit( 2 )->get();
-
-		return 1 === $users->count() ? $users->first() : null;
+	public static function freescout_teams(): \Illuminate\Database\Eloquent\Builder {
+		return User::query()
+			->where( 'type', User::TYPE_ROBOT )
+			->where( 'status', '!=', User::STATUS_DELETED )
+			->where( 'email', '!=', self::ROBOT_EMAIL );
 	}
 
 	/**
-	 * The FreeScout user an administrator chose for a HelpScout user.
-	 *
-	 * @param int $helpscout_user_id HelpScout user ID.
-	 * @return User|null
-	 */
-	private static function chosen( int $helpscout_user_id ): ?User {
-		$user_id = $helpscout_user_id ? Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->value( 'user_id' ) : null;
-
-		return $user_id ? User::find( (int) $user_id ) : null;
-	}
-
-	/**
-	 * The FreeScout user with an email.
-	 *
-	 * @param string $email Email.
-	 * @return User|null
-	 */
-	private static function by_email( string $email ): ?User {
-		return '' !== $email ? User::query()->where( 'email', mb_strtolower( $email ) )->first() : null;
-	}
-
-	/**
-	 * The user that HelpScout users without a FreeScout user are credited to, created when first needed.
+	 * The user that what nobody in particular wrote is credited to, created when first needed.
 	 *
 	 * A disabled robot: it can't log in, and isn't counted as an agent.
 	 *
@@ -357,5 +471,197 @@ final class People {
 		);
 
 		return $customer instanceof Customer ? $customer : null;
+	}
+
+	/**
+	 * A user as HelpScout lists them, if it still does; without a client, it lists nobody.
+	 *
+	 * @param int $helpscout_user_id HelpScout user ID.
+	 * @return array|null
+	 */
+	private function listed( int $helpscout_user_id ): ?array {
+		foreach ( $this->directory() as $helpscout_user ) {
+			if ( (int) ( $helpscout_user['id'] ?? 0 ) === $helpscout_user_id ) {
+				return $helpscout_user;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * The FreeScout user with a HelpScout user's email, or a new one, credited to them from now on.
+	 *
+	 * @param array     $person HelpScout person object, or user.
+	 * @param bool|null $active Whether a new user can log in; null for while HelpScout still lists them.
+	 * @return User
+	 */
+	private function match_or_create( array $person, ?bool $active = null ): User {
+		$user = self::by_email( (string) ( $person['email'] ?? '' ) );
+		if ( ! $user ) {
+			// What HelpScout lists about them, like their timezone, which conversations leave out.
+			$listed = $this->listed( (int) $person['id'] );
+			$user   = self::create( $person + (array) $listed, $active ?? null !== $listed );
+		}
+
+		Agent::query()->updateOrCreate( array( 'helpscout_user_id' => (int) $person['id'] ), array( 'user_id' => $user->id ) );
+
+		return $user;
+	}
+
+	/**
+	 * Creates a FreeScout user for a HelpScout user.
+	 *
+	 * They have no password: they log in with WordPress.org once an administrator connects them to their account.
+	 *
+	 * @param array $person HelpScout person object, or user.
+	 * @param bool  $active Whether they can log in, or are disabled.
+	 * @return User
+	 */
+	private static function create( array $person, bool $active ): User {
+		$email = Email::sanitizeEmail( (string) ( $person['email'] ?? '' ) );
+		if ( ! $email || strlen( $email ) > User::EMAIL_MAX_LENGTH || User::mailboxEmailExists( $email ) || User::query()->where( 'email', $email )->exists() ) {
+			$email = 'helpscout-' . (int) $person['id'] . '@' . self::PLACEHOLDER_DOMAIN;
+		}
+
+		$first_name = self::first_name( $person );
+		$last_name  = self::last_name( $person );
+		if ( '' === $first_name && '' === $last_name ) {
+			$first_name = strstr( $email, '@', true );
+		}
+
+		$user               = new User();
+		$user->first_name   = $first_name;
+		$user->last_name    = $last_name;
+		$user->email        = $email;
+		$user->password     = User::getDummyPassword();
+		$user->role         = User::ROLE_USER;
+		$user->type         = User::TYPE_USER;
+		$user->status       = $active ? User::STATUS_ACTIVE : User::STATUS_DISABLED;
+		$user->invite_state = User::INVITE_STATE_ACTIVATED;
+		$user->timezone     = self::timezone( (string) ( $person['timezone'] ?? '' ) );
+		$user->save();
+
+		return $user;
+	}
+
+	/**
+	 * A HelpScout user's timezone, if PHP knows it, or the app's.
+	 *
+	 * @param string $timezone IANA timezone.
+	 * @return string
+	 */
+	private static function timezone( string $timezone ): string {
+		if ( '' !== $timezone && in_array( $timezone, \DateTimeZone::listIdentifiers(), true ) ) {
+			return $timezone;
+		}
+
+		return (string) ( config( 'app.timezone' ) ? config( 'app.timezone' ) : User::DEFAULT_TIMEZONE );
+	}
+
+	/**
+	 * The HelpScout users, not teams, who can see a mailbox.
+	 *
+	 * @param array[] $directory            HelpScout's users, from directory().
+	 * @param int     $helpscout_mailbox_id HelpScout mailbox ID.
+	 * @return array[]
+	 */
+	private static function mailbox_users( array $directory, int $helpscout_mailbox_id ): array {
+		return array_values(
+			array_filter(
+				$directory,
+				static function ( array $helpscout_user ) use ( $helpscout_mailbox_id ): bool {
+					return ! self::is_team( $helpscout_user ) && isset( $helpscout_user['mailboxes'][ $helpscout_mailbox_id ] ) && (int) ( $helpscout_user['id'] ?? 0 ) > 0;
+				}
+			)
+		);
+	}
+
+	/**
+	 * Whether a HelpScout person object is one of HelpScout's users: not a sender, a team, or HelpScout itself.
+	 *
+	 * Its AI agents are users too: the API's version 2 calls them so.
+	 *
+	 * @param mixed $person HelpScout person object.
+	 * @return bool
+	 */
+	private static function is_user( $person ): bool {
+		return is_array( $person ) && in_array( $person['type'] ?? 'user', array( 'user', 'system_user' ), true ) && (int) ( $person['id'] ?? 0 ) > 0;
+	}
+
+	/**
+	 * The FreeScout user or team an administrator chose, or an import created or matched, for a HelpScout user or team.
+	 *
+	 * @param int  $helpscout_user_id HelpScout user or team ID.
+	 * @param bool $team              Whether it's a team.
+	 * @return User|null
+	 */
+	private static function mapped( int $helpscout_user_id, bool $team = false ): ?User {
+		$user_id = $helpscout_user_id ? Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->value( 'user_id' ) : null;
+		if ( ! $user_id ) {
+			return null;
+		}
+
+		return ( $team ? self::freescout_teams() : User::query()->where( 'status', '!=', User::STATUS_DELETED ) )->whereKey( (int) $user_id )->first();
+	}
+
+	/**
+	 * The only FreeScout team with a name.
+	 *
+	 * @param string $name Team name.
+	 * @return User|null
+	 */
+	private static function team_by_name( string $name ): ?User {
+		if ( '' === $name ) {
+			return null;
+		}
+
+		$teams = self::freescout_teams()->get()->filter(
+			static function ( User $team ) use ( $name ): bool {
+				return 0 === strcasecmp( $team->getFullName(), $name );
+			}
+		);
+
+		return 1 === $teams->count() ? $teams->first() : null;
+	}
+
+	/**
+	 * The FreeScout user with an email.
+	 *
+	 * @param string $email Email.
+	 * @return User|null
+	 */
+	private static function by_email( string $email ): ?User {
+		return '' !== $email ? self::creditable()->where( 'email', mb_strtolower( $email ) )->first() : null;
+	}
+
+	/**
+	 * A HelpScout person's first name: `first` in a person object, `firstName` in a user.
+	 *
+	 * @param array $person HelpScout person object, or user.
+	 * @return string
+	 */
+	private static function first_name( array $person ): string {
+		return trim( (string) ( $person['first'] ?? $person['firstName'] ?? '' ) );
+	}
+
+	/**
+	 * A HelpScout person's last name.
+	 *
+	 * @param array $person HelpScout person object, or user.
+	 * @return string
+	 */
+	private static function last_name( array $person ): string {
+		return trim( (string) ( $person['last'] ?? $person['lastName'] ?? '' ) );
+	}
+
+	/**
+	 * A HelpScout person's name.
+	 *
+	 * @param array $person HelpScout person object, or user.
+	 * @return string
+	 */
+	private static function name( array $person ): string {
+		return trim( self::first_name( $person ) . ' ' . self::last_name( $person ) );
 	}
 }

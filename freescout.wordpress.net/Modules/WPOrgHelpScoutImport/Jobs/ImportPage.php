@@ -22,7 +22,7 @@ use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
 
 /**
- * Imports a page of 25 conversations, then queues the next page.
+ * Imports a page of 25 conversations, then queues the next page; or 25 of the conversations a run retries.
  *
  * Small jobs keep the queue moving: FreeScout's single worker takes outgoing email before them.
  */
@@ -37,6 +37,13 @@ final class ImportPage implements ShouldQueue {
 	 * @var int
 	 */
 	private const RETRY_DELAY = 300;
+
+	/**
+	 * Conversations a job retries, like a page of HelpScout's list.
+	 *
+	 * @var int
+	 */
+	private const RETRY_BATCH = 25;
 
 	/**
 	 * Run ID.
@@ -64,13 +71,15 @@ final class ImportPage implements ShouldQueue {
 	}
 
 	/**
-	 * Imports the run's current page, and what moved onto the previous one since it was read.
+	 * Imports the run's current page, and what moved onto the previous one since it was read; or a retry's conversations.
 	 *
 	 * HelpScout's list moves when a conversation on an earlier page is deleted, or changed during an import of changes:
 	 * later ones move forward, onto pages already read. So the previous page is read again too, and what's new on it
 	 * is imported first. The run is done when a page comes back empty.
 	 *
 	 * Progress is saved after every conversation, so a page that's stopped part way goes on where it stopped.
+	 *
+	 * A run that retries another's failures has no pages: it gets its conversations one by one, 25 per job.
 	 *
 	 * @return void
 	 */
@@ -87,46 +96,73 @@ final class ImportPage implements ShouldQueue {
 			return;
 		}
 
+		$current = 0;
+
 		try {
 			$helpscout = app( HelpScout::class );
-			$importer  = new Importer( $helpscout, new People() );
-			$page      = $helpscout->conversations( (int) $run->helpscout_mailbox_id, (int) $run->page, $run->since );
-			$listed    = $page['conversations'];
+			$importer  = new Importer( $helpscout, new People( $helpscout ) );
 
-			if ( $run->page > 1 ) {
-				$previous = $helpscout->conversations( (int) $run->helpscout_mailbox_id, (int) $run->page - 1, $run->since );
-				$known    = self::ids( (array) $run->previous_page );
-				$moved    = array_filter(
-					$previous['conversations'],
-					static function ( $conversation ) use ( $known ): bool {
-						return ! in_array( (int) ( $conversation['id'] ?? 0 ), $known, true );
-					}
+			if ( $run->is_retry() ) {
+				$listed = array_map(
+					static function ( int $id ): array {
+						return array(
+							'id'    => $id,
+							'retry' => true,
+						);
+					},
+					self::ids( (array) $run->retry_ids )
 				);
-				$listed   = array_merge( array_values( $moved ), $listed );
+				$page   = array( 'conversations' => array() );
+			} else {
+				$page   = $helpscout->conversations( (int) $run->helpscout_mailbox_id, (int) $run->page, $run->since );
+				$listed = $page['conversations'];
+
+				if ( $run->page > 1 ) {
+					$previous = $helpscout->conversations( (int) $run->helpscout_mailbox_id, (int) $run->page - 1, $run->since );
+					$known    = self::ids( (array) $run->previous_page );
+					$moved    = array_filter(
+						$previous['conversations'],
+						static function ( $conversation ) use ( $known ): bool {
+							return ! in_array( (int) ( $conversation['id'] ?? 0 ), $known, true );
+						}
+					);
+					$listed   = array_merge( array_values( $moved ), $listed );
+				}
+
+				$run->pages = $page['pages'];
+				$run->total = $page['total'];
 			}
 
-			$run->pages = $page['pages'];
-			$run->total = $page['total'];
-			$done       = self::ids( (array) $run->page_done );
+			$done     = self::ids( (array) $run->page_done );
+			$imported = 0;
 
 			foreach ( $listed as $conversation ) {
-				$id = (int) ( $conversation['id'] ?? 0 );
-				if ( in_array( $id, $done, true ) ) {
+				$current = (int) ( $conversation['id'] ?? 0 );
+				if ( in_array( $current, $done, true ) ) {
 					continue;
 				}
 
-				$result         = $this->import( $importer, (array) $conversation, $mailbox, $run );
-				$done[]         = $id;
-				$run->page_done = $done;
-				if ( $result ) {
-					++$run->{$result};
+				// A retry goes on in another job after as many as a page has, to keep jobs short.
+				if ( $run->is_retry() && $imported >= self::RETRY_BATCH ) {
+					$current = 0;
+					break;
 				}
+				++$imported;
+
+				// The rate limit cut this one off before: it needs more than a minute's share, so this time it waits.
+				$helpscout->set_patient( $current === (int) $run->waiting_on );
+
+				$this->import( $importer, $helpscout, (array) $conversation, $mailbox, $run );
+				$done[]          = $current;
+				$run->page_done  = $done;
+				$run->waiting_on = null;
 
 				if ( ! $this->save( $run ) ) {
 					return;
 				}
 			}
 		} catch ( RateLimited $e ) {
+			$run->waiting_on = $current ? $current : null;
 			$this->save( $run );
 			$this->again( $e->retry_after );
 
@@ -153,7 +189,14 @@ final class ImportPage implements ShouldQueue {
 			$mailbox->updateFoldersCounters();
 		}
 
-		if ( ! $page['conversations'] ) {
+		if ( $run->is_retry() && array_diff( self::ids( (array) $run->retry_ids ), self::ids( (array) $run->page_done ) ) ) {
+			$this->again( 0 );
+
+			return;
+		}
+
+		// A retry is done once its conversations are; a mailbox's list once a page comes back empty.
+		if ( $run->is_retry() || ! $page['conversations'] ) {
 			$run->status      = Run::STATUS_DONE;
 			$run->finished_at = Carbon::now();
 			$this->save( $run );
@@ -174,32 +217,56 @@ final class ImportPage implements ShouldQueue {
 	 * Imports one conversation; a conversation that fails is counted and logged, and the page goes on.
 	 *
 	 * @param Importer     $importer     Importer.
-	 * @param array        $conversation HelpScout conversation.
+	 * @param HelpScout    $helpscout    HelpScout API client.
+	 * @param array        $conversation HelpScout conversation, or for a retry, `id` and `retry`.
 	 * @param \App\Mailbox $mailbox      FreeScout mailbox.
-	 * @param Run          $run          Run.
-	 * @return string|null The counter to add to, or null.
+	 * @param Run          $run          Run, whose counters are added to.
+	 * @return void
 	 *
 	 * @throws ApiError If HelpScout is unavailable or refuses the app, which stops the page.
 	 */
-	private function import( Importer $importer, array $conversation, \App\Mailbox $mailbox, Run $run ): ?string {
+	private function import( Importer $importer, HelpScout $helpscout, array $conversation, \App\Mailbox $mailbox, Run $run ): void {
+		$id = (int) ( $conversation['id'] ?? 0 );
+
 		try {
-			return $importer->import( $conversation, $mailbox );
+			if ( ! empty( $conversation['retry'] ) ) {
+				$conversation = $helpscout->conversation( $id );
+			}
+
+			$result = $conversation ? $importer->import( $conversation, $mailbox ) : Importer::SKIPPED_GONE;
 		} catch ( ApiError $e ) {
 			// The rate limit, rejected credentials, and outages hold for every conversation.
 			if ( $e instanceof RateLimited || $e->is_denied() || 0 === $e->status || $e->status >= 500 ) {
 				throw $e;
 			}
 
-			$run->last_error = 'HelpScout conversation ' . ( $conversation['id'] ?? '?' ) . ': ' . $e->getMessage();
-			\Log::error( '[WPOrgHelpScoutImport] Could not import ' . $run->last_error );
+			$this->fail( $run, $id, $e );
 
-			return 'failed';
+			return;
 		} catch ( \Throwable $e ) {
-			$run->last_error = 'HelpScout conversation ' . ( $conversation['id'] ?? '?' ) . ': ' . $e->getMessage();
-			\Log::error( '[WPOrgHelpScoutImport] Could not import ' . $run->last_error );
+			$this->fail( $run, $id, $e );
 
-			return 'failed';
+			return;
 		}
+
+		if ( Importer::is_skipped( $result ) ) {
+			$run->add_skip( $result );
+		} else {
+			++$run->{$result};
+		}
+	}
+
+	/**
+	 * Counts and logs a conversation that failed.
+	 *
+	 * @param Run        $run Run.
+	 * @param int        $id  HelpScout conversation ID.
+	 * @param \Throwable $e   What went wrong.
+	 * @return void
+	 */
+	private function fail( Run $run, int $id, \Throwable $e ): void {
+		$run->add_failure( $id, $e->getMessage() );
+		\Log::error( '[WPOrgHelpScoutImport] Could not import ' . $run->last_error );
 	}
 
 	/**

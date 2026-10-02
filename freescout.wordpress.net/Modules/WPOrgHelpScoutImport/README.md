@@ -4,38 +4,43 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
 
 ## How it works
 
-- **Importing:** pick a HelpScout mailbox and a FreeScout mailbox, and choose **Import**. The import runs on FreeScout's queue, 25 conversations at a time, and the page shows its progress. It can be paused and resumed; it goes on where it stopped.
-- **Importing again:** the first import of a mailbox copies everything. Importing it again copies only what HelpScout changed since the last finished import started: new conversations, replies, notes, status, and assignee. It looks 15 minutes further back, in case the clocks disagree. Import once while HelpScout is still live, and once more after the mailbox's email has moved.
+- **Importing:** pick a HelpScout mailbox and a FreeScout mailbox, and choose **Import**. The import runs on FreeScout's queue, 25 conversations at a time, and the page shows its progress, refreshing itself while it runs. It can be paused and resumed; it goes on where it stopped. **Cancel** stops it for good, so the mailbox can take another import.
+- **Importing again:** the first import of a mailbox copies everything. Importing it again copies only what HelpScout changed since the last finished import started: new conversations, replies, notes, status, and assignee. It looks 15 minutes further back, in case the clocks disagree. Import once while HelpScout is still live, and once more after the mailbox's email has moved. **Everything again, not only what changed** imports the whole mailbox again; what's imported already isn't duplicated.
 - **What comes across:**
-  - conversations with their subject, status, assignee, who closed them, CC and BCC, and their original dates;
-  - every email, reply, and note, with its own sender or agent, its recipients, and its attachments;
+  - conversations with their subject, status, assignee (a person or a team), who closed them, CC and BCC, and their original dates;
+  - every email, reply, and note, with its own sender or agent, its recipients, and its attachments, except those HelpScout found a virus in;
+  - replies HelpScout hid from what the sender is sent, as notes;
   - images pasted into emails, which HelpScout keeps on its own image host: they're copied, so they don't go with the account. Images linked from elsewhere keep their links, and HelpScout's read-tracking image is removed;
-  - each email's Message-ID, so a sender who replies to an old HelpScout email lands in its conversation;
+  - each email's Message-ID, so a sender who replies to an old HelpScout email lands in its conversation. HelpScout keeps them for 2 years, so older emails have none. An email FreeScout has already, like one sent to two mailboxes, keeps its Message-ID where it is; if it's in the same conversation, it isn't added again;
   - HelpScout's conversation number, which people quote, unless a FreeScout conversation already has it;
   - HelpScout's tags and custom fields, kept in the module's own table until the Tags and Custom Fields modules can take them.
 - **What doesn't:**
-  - spam and drafts;
+  - spam, drafts, and conversations HelpScout deleted;
   - HelpScout's line items ("assigned to", "closed by", workflows that ran);
   - phone calls and forwards become notes, since FreeScout has no thread type for them.
-- **FreeScout users are never created from HelpScout.** Each HelpScout user's replies and notes are credited to the FreeScout user chosen on **Manage » HelpScout Import » Agents**, or else to the one with the same email. A HelpScout user without either gets no FreeScout user: their replies and notes are credited to "HelpScout Import", a disabled robot user, and each thread keeps their name. Matching someone later credits their imported replies and notes to them too.
-- **Agents page:** one list of HelpScout's users for the whole account, since a choice applies to every mailbox; it can be narrowed to one mailbox's users. For each, it shows who they're credited to, suggests the only FreeScout user with the same name, and lets you search FreeScout's users. Everything on it is saved at once.
-  - **New users from WordPress.org:** with WP.org SSO on, entering someone's WordPress.org username creates a FreeScout user from that account, connected to it, the same way Manage » Users » New User does through WP.org SSO. They can log in; uncheck **Can log in** for former agents, who then keep their credit with a disabled user. An account already connected to a user is that user.
-  - **Users deleted from HelpScout:** HelpScout no longer lists them, but their threads still name them. Once an import has met them, they're listed too, marked "No longer in HelpScout", and can be matched like anyone else.
-  - **Teams:** HelpScout lists its teams among its users, but they never write anything. They're listed apart, and conversations assigned to a team are imported unassigned.
-  - **Before an import,** if any of the mailbox's HelpScout users would be credited to "HelpScout Import", the import page says how many, and starts only once that's confirmed.
+- **Conversations agents worked on in FreeScout:** once a conversation has a reply, note, or change made in FreeScout, importing it again only adds HelpScout's new threads. Its status and assignee stay FreeScout's.
+- **Users:** every HelpScout user's replies, notes, and assignments are credited to a FreeScout user:
+  - the one chosen on **Manage » HelpScout Import » Users**, or else the one with the same email;
+  - or else a new one. Before an import creates users for a mailbox's HelpScout users, the import page lists them, and starts once that's confirmed. They can log in, and get access to the mailbox imported into; so do HelpScout users with a FreeScout user already.
+  - HelpScout no longer lists users deleted from it, but their threads still name them. When an import meets them, they get a disabled user. Disable the others the same way once a mailbox has moved, if they won't use FreeScout.
+  - New users have no password, and their email is HelpScout's until they're connected to their WordPress.org account on their profile (or with `php artisan wporgsso:connect`). Connecting them takes their name, email, and avatar from WordPress.org, as for every user, and lets them log in. Users who won't log in, like former agents, don't need a WordPress.org account.
+  - Someone with a FreeScout user under another email gets a second one unless they're chosen on the Users page first: FreeScout can't merge users. Choosing someone after an import credits what's imported for them to the user chosen.
+  - What HelpScout did itself, without a user, is credited to "HelpScout Import", a disabled robot user.
+- **Teams:** conversations assigned to a HelpScout team are assigned to the FreeScout team chosen on the Users page, or else to the one with the same name. FreeScout's teams come from its Teams module: create them there first. Without either, they're imported unassigned.
 - **Nothing reacts to it:** conversations are marked as imported, and written without the events new email fires. Nothing is sent, nobody is notified, no workflow runs, and `WPOrgAkismet` and `WPOrgWebhooks` leave them alone.
-- **Importing again is safe:** only threads that weren't imported yet are added. A conversation deleted in FreeScout since stays deleted.
-- **HelpScout's rate limit:** the whole HelpScout account shares one limit, and wppluginsteam.org and the reviewers' tools use it too. The import leaves 100 requests a minute to them, and waits for the next minute when only those are left.
+- **HelpScout's rate limit:** the whole HelpScout account shares one limit, and wppluginsteam.org and the reviewers' tools use it too. The import leaves 100 requests a minute to them, and waits for the next minute when only those are left. A conversation too big to read in one minute's share waits for the limit on its next try, rather than starting over.
 - **Failures:**
-  - a conversation that can't be imported is counted, logged, and shown with the run; the rest of the page goes on;
+  - a conversation that can't be imported is counted, logged, and listed with its error under the run; the rest of the page goes on. Once the run is done, **Retry failed** imports them again;
   - when HelpScout is down, the page is tried again every 5 minutes;
-  - when HelpScout refuses the app's credentials, the import stops: fix them, then **Resume**.
+  - when HelpScout refuses the app's credentials, the import stops: fix them, then **Resume**;
+  - a run without progress for 15 minutes, like when the queue worker was killed, is marked stalled: **Resume** it.
 
 ## Setup
 
 - It needs a HelpScout app: in HelpScout, **Your Profile » My Apps » Create My App**, with any redirect URL. Set its ID and secret in FreeScout's `.env` as `WPORG_HELPSCOUT_APP_ID` and `WPORG_HELPSCOUT_APP_SECRET`. The app can read everything its HelpScout user can see, so delete it after the last import.
 - FreeScout's queue worker must be running.
-- Conversation numbers: under Manage » Settings » General, set **Conversation Number** to **Custom…** (`APP_CUSTOM_NUMBER=true`), or FreeScout shows and searches its internal IDs instead. Before the first live email, set the **Next Conversation #** that appears well above HelpScout's numbers, like 2,000,000: HelpScout keeps numbering the mailboxes that haven't moved yet. Imports leave that setting alone.
+- Conversation numbers: under Manage » Settings » General, set **Conversation Number** to **Custom…** (`APP_CUSTOM_NUMBER=true`), or FreeScout shows and searches its internal IDs instead. Before the first live email, set the **Next Conversation #** that appears well above HelpScout's numbers, like 2,000,000: HelpScout keeps numbering the mailboxes that haven't moved yet. The import page warns until both are set. Imports leave that setting alone.
+- Teams: install the Teams module, and create the teams, before importing mailboxes with conversations assigned to teams.
 - After the last mailbox has moved, switch the module off, and remove its code in a later deploy. Imported conversations keep HelpScout's numbers. Its tables map HelpScout's conversation IDs to FreeScout's: convert anything that still links to HelpScout before removing it.
 
 To try it locally, start the environment with `WPORG_HELPSCOUT_APP_ID` and `WPORG_HELPSCOUT_APP_SECRET` set. The import only reads from HelpScout.

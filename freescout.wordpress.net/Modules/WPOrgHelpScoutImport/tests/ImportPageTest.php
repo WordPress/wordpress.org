@@ -78,6 +78,7 @@ final class ImportPageTest extends ImportTestCase {
 		$this->assertSame( array( 1001, 1002 ), $run->previous_page );
 		$this->assertSame( 1, (int) $run->imported );
 		$this->assertSame( 1, (int) $run->skipped );
+		$this->assertSame( array( 'spam' => 1 ), $run->skips );
 		$this->assertSame( 2, (int) $run->pages );
 		$this->assertSame( Run::STATUS_RUNNING, $run->status );
 		Queue::assertPushed(
@@ -150,12 +151,13 @@ final class ImportPageTest extends ImportTestCase {
 	 */
 	public function test_unreadable_content_fails_only_its_conversation(): void {
 		$this->answer_page( array( $this->conversation() ), 1 );
-		$this->helpscout->only( 'GET', 'v2/conversations/1001/attachments/3001/data', array( 'data' => 'not base64!' ) );
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/attachments/3001/file', FakeHelpScout::json( array(), 400 ) );
 
 		$this->handle();
 
 		$run = $this->run->fresh();
 		$this->assertSame( 1, (int) $run->failed );
+		$this->assertSame( array( 1001 ), array_keys( (array) $run->failures ) );
 		$this->assertSame( 2, (int) $run->page );
 		Queue::assertPushed(
 			ImportPage::class,
@@ -215,6 +217,52 @@ final class ImportPageTest extends ImportTestCase {
 	}
 
 	/**
+	 * A conversation the rate limit cut off part way waits for the limit on its next try, so it can finish.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_cut_off_by_the_rate_limit_waits_next_time(): void {
+		$this->answer_page( array( $this->conversation() ), 1 );
+		$threads = array(
+			'_embedded' => array( 'threads' => array_reverse( $this->threads() ) ),
+			'page'      => array( 'totalPages' => 1 ),
+		);
+		$limited = FakeHelpScout::json( array(), 429, array( 'X-RateLimit-Retry-After' => '30' ) );
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/threads', $limited )->on( 'GET', 'v2/conversations/1001/threads', $limited )->on( 'GET', 'v2/conversations/1001/threads', $threads );
+
+		$this->handle();
+
+		$this->assertSame( 1001, (int) $this->run->fresh()->waiting_on );
+		$this->assertSame( array(), $this->helpscout->slept );
+
+		$this->handle();
+
+		$run = $this->run->fresh();
+		$this->assertSame( array( 30 ), $this->helpscout->slept );
+		$this->assertSame( 1, (int) $run->imported );
+		$this->assertNull( $run->waiting_on );
+	}
+
+	/**
+	 * A run that retries failed conversations gets each from HelpScout, and is done once they are.
+	 *
+	 * @return void
+	 */
+	public function test_retry_imports_its_conversations(): void {
+		$this->run->retry_ids = array( 1001, 1005 );
+		$this->run->save();
+		$this->helpscout->only( 'GET', 'v2/conversations/1001', $this->conversation() );
+
+		$this->handle();
+
+		$run = $this->run->fresh();
+		$this->assertSame( 1, (int) $run->imported );
+		$this->assertSame( array( 'gone' => 1 ), $run->skips );
+		$this->assertSame( Run::STATUS_DONE, $run->status );
+		$this->assertCount( 0, $this->helpscout->requests_to( 'v2/conversations' ) );
+	}
+
+	/**
 	 * A conversation that fails is counted and logged; the page goes on.
 	 *
 	 * @return void
@@ -228,6 +276,7 @@ final class ImportPageTest extends ImportTestCase {
 		$this->assertSame( 1, (int) $run->failed );
 		$this->assertSame( 1, (int) $run->imported );
 		$this->assertStringContainsString( '1003', (string) $run->last_error );
+		$this->assertStringContainsString( '404', (string) $run->failures[1003] );
 		$this->assertSame( 2, (int) $run->page );
 	}
 

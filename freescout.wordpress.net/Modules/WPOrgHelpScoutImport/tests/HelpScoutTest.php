@@ -29,7 +29,7 @@ final class HelpScoutTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_token_is_fetched_once(): void {
-		$this->helpscout->on( 'GET', 'v2/mailboxes', self::page( 'mailboxes', array( array( 'id' => 1 ) ) ) );
+		$this->helpscout->only( 'GET', 'v2/mailboxes', self::page( 'mailboxes', array( array( 'id' => 1 ) ) ) );
 		$client = $this->helpscout->client();
 
 		$client->mailboxes();
@@ -63,7 +63,7 @@ final class HelpScoutTest extends ImportTestCase {
 				'expires_in'   => 172800,
 			)
 		);
-		$this->helpscout->on( 'GET', 'v2/mailboxes', FakeHelpScout::json( array(), 401 ) )
+		$this->helpscout->only( 'GET', 'v2/mailboxes', FakeHelpScout::json( array(), 401 ) )
 			->on( 'GET', 'v2/mailboxes', self::page( 'mailboxes', array( array( 'id' => 1 ) ) ) );
 
 		$this->assertSame( array( array( 'id' => 1 ) ), $this->helpscout->client()->mailboxes() );
@@ -92,7 +92,7 @@ final class HelpScoutTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_rate_limit_says_how_long_to_wait(): void {
-		$this->helpscout->on( 'GET', 'v2/mailboxes', FakeHelpScout::json( array(), 429, array( 'X-RateLimit-Retry-After' => '17' ) ) );
+		$this->helpscout->only( 'GET', 'v2/mailboxes', FakeHelpScout::json( array(), 429, array( 'X-RateLimit-Retry-After' => '17' ) ) );
 
 		try {
 			$this->helpscout->client()->mailboxes();
@@ -108,7 +108,7 @@ final class HelpScoutTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_reserve_is_left_to_others(): void {
-		$this->helpscout->on( 'GET', 'v2/mailboxes', self::page( 'mailboxes', array(), array( 'X-RateLimit-Remaining-Minute' => '100' ) ) );
+		$this->helpscout->only( 'GET', 'v2/mailboxes', self::page( 'mailboxes', array(), array( 'X-RateLimit-Remaining-Minute' => '100' ) ) );
 		$client = $this->helpscout->client( 100 );
 
 		$client->mailboxes();
@@ -194,13 +194,69 @@ final class HelpScoutTest extends ImportTestCase {
 	}
 
 	/**
-	 * A thread without an original email has none, rather than failing.
+	 * While patient, the client waits for the rate limit instead of giving up: for the reserve, and for a 429.
 	 *
 	 * @return void
 	 */
-	public function test_missing_original_source_is_null(): void {
-		$this->assertNull( $this->helpscout->client()->original_source( 5, 6 ) );
+	public function test_patient_client_waits_for_the_rate_limit(): void {
+		$this->helpscout->only( 'GET', 'v2/mailboxes', self::page( 'mailboxes', array(), array( 'X-RateLimit-Remaining-Minute' => '100' ) ) );
+		$this->helpscout->only( 'GET', 'v2/users', FakeHelpScout::json( array(), 429, array( 'X-RateLimit-Retry-After' => '7' ) ) )->on( 'GET', 'v2/users', self::page( 'users', array() ) );
+		$client = $this->helpscout->client( 100 );
+		$client->set_patient( true );
+
+		$client->mailboxes();
+		$client->users();
+
+		$this->assertCount( 2, $this->helpscout->slept );
+		$this->assertGreaterThan( 0, $this->helpscout->slept[0] );
+		$this->assertSame( 7, $this->helpscout->slept[1] );
+		$this->assertCount( 2, $this->helpscout->requests_to( 'v2/users' ) );
+	}
+
+	/**
+	 * A conversation HelpScout no longer has, or merged into another, is none.
+	 *
+	 * @return void
+	 */
+	public function test_gone_conversation_is_null(): void {
+		$this->helpscout->only( 'GET', 'v2/conversations/7', FakeHelpScout::json( array(), 301, array( 'Location' => 'https://helpscout.test/v2/conversations/8' ) ) );
+
+		$this->assertNull( $this->helpscout->client()->conversation( 6 ) );
+		$this->assertNull( $this->helpscout->client()->conversation( 7 ) );
+	}
+
+	/**
+	 * Attachments are downloaded into a file, rather than kept in memory.
+	 *
+	 * @return void
+	 */
+	public function test_attachment_is_downloaded_into_a_file(): void {
+		$this->helpscout->only( 'GET', 'v2/conversations/5/attachments/9/file', new Response( 200, array(), 'file bytes' ) );
+
+		$file = $this->helpscout->client()->attachment( 5, 9 );
+
+		$this->assertIsResource( $file );
+		$this->assertSame( 'file bytes', stream_get_contents( $file ) );
+	}
+
+	/**
+	 * Only an email's headers are read; a thread without an original email, or one HelpScout won't give, has none.
+	 *
+	 * @return void
+	 */
+	public function test_only_original_headers_are_read(): void {
+		$this->helpscout->only( 'GET', 'v2/conversations/5/threads/7/original-source', new Response( 200, array(), "Message-ID: <a@b>\r\nSubject: Hi\r\n\r\nBody, and attachments." ) );
+		$this->helpscout->only( 'GET', 'v2/conversations/5/threads/8/original-source', FakeHelpScout::json( array(), 400 ) );
+		$this->helpscout->only( 'GET', 'v2/conversations/5/threads/9/original-source', FakeHelpScout::json( array(), 503 ) );
+		$client = $this->helpscout->client();
+
+		$this->assertSame( "Message-ID: <a@b>\r\nSubject: Hi", $client->original_headers( 5, 7 ) );
+		$this->assertNull( $client->original_headers( 5, 6 ) );
+		$this->assertNull( $client->original_headers( 5, 8 ) );
 		$this->assertSame( 'message/rfc822', $this->helpscout->requests_to( 'v2/conversations/5/threads/6/original-source' )[0]->getHeaderLine( 'Accept' ) );
+
+		$this->expectException( ApiError::class );
+		$client->original_headers( 5, 9 );
 	}
 
 	/**

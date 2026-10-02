@@ -93,13 +93,17 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 			}
 		);
 
-		// The Agents page searches FreeScout's users with FreeScout's own select2.
+		// The Users page searches FreeScout's users with FreeScout's own select2; the import page refreshes while running.
 		\Eventy::addFilter(
 			'javascripts',
 			static function ( $javascripts = array() ) {
-				$route = \Route::current();
-				if ( is_array( $javascripts ) && $route && 'wporghelpscoutimport.agents' === $route->getName() ) {
-					$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/agents.js';
+				$route   = \Route::current();
+				$scripts = array(
+					'wporghelpscoutimport.agents' => 'agents.js',
+					'wporghelpscoutimport.index'  => 'import.js',
+				);
+				if ( is_array( $javascripts ) && $route && isset( $scripts[ $route->getName() ] ) ) {
+					$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/' . $scripts[ $route->getName() ];
 				}
 
 				return $javascripts;

@@ -37,6 +37,20 @@ final class HelpScout {
 	private const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
 	/**
+	 * Most of an email read for its headers, in bytes; the rest is its body and attachments.
+	 *
+	 * @var int
+	 */
+	private const MAX_HEADER_BYTES = 256 * 1024;
+
+	/**
+	 * How many times a patient request waits for the rate limit before giving up.
+	 *
+	 * @var int
+	 */
+	private const MAX_WAITS = 5;
+
+	/**
 	 * App ID.
 	 *
 	 * @var string
@@ -79,6 +93,20 @@ final class HelpScout {
 	private $wait_until = 0;
 
 	/**
+	 * Whether to wait for the rate limit rather than throw RateLimited.
+	 *
+	 * @var bool
+	 */
+	private $patient = false;
+
+	/**
+	 * Waits a number of seconds.
+	 *
+	 * @var callable
+	 */
+	private $sleep;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string          $app_id     App ID.
@@ -86,13 +114,15 @@ final class HelpScout {
 	 * @param string          $api_url    Base URL of the API.
 	 * @param int             $reserve    Requests per minute left to HelpScout's other users.
 	 * @param ClientInterface $http       HTTP client.
+	 * @param callable|null   $sleep      Waits a number of seconds; sleep() if null.
 	 */
-	public function __construct( string $app_id, string $app_secret, string $api_url, int $reserve, ClientInterface $http ) {
+	public function __construct( string $app_id, string $app_secret, string $api_url, int $reserve, ClientInterface $http, ?callable $sleep = null ) {
 		$this->app_id     = $app_id;
 		$this->app_secret = $app_secret;
 		$this->api_url    = rtrim( $api_url, '/' ) . '/';
 		$this->reserve    = max( 0, $reserve );
 		$this->http       = $http;
+		$this->sleep      = $sleep ?? 'sleep';
 	}
 
 	/**
@@ -127,6 +157,19 @@ final class HelpScout {
 	 */
 	public function is_configured(): bool {
 		return '' !== $this->app_id && '' !== $this->app_secret;
+	}
+
+	/**
+	 * Sets whether requests wait for the rate limit, rather than throw RateLimited.
+	 *
+	 * Waiting holds up FreeScout's queue, so it's only for what can't finish otherwise: a conversation that needs more
+	 * requests than one minute's share of the limit.
+	 *
+	 * @param bool $patient Whether to wait.
+	 * @return void
+	 */
+	public function set_patient( bool $patient ): void {
+		$this->patient = $patient;
 	}
 
 	/**
@@ -182,6 +225,44 @@ final class HelpScout {
 	}
 
 	/**
+	 * Gets one conversation.
+	 *
+	 * @param int $conversation_id HelpScout conversation ID.
+	 * @return array|null The conversation, or null if HelpScout no longer has it, or merged it into another.
+	 *
+	 * @throws ApiError If the request failed otherwise.
+	 */
+	public function conversation( int $conversation_id ): ?array {
+		try {
+			return $this->get( 'v2/conversations/' . $conversation_id );
+		} catch ( ApiError $e ) {
+			if ( in_array( $e->status, array( 301, 404 ), true ) ) {
+				return null;
+			}
+
+			throw $e;
+		}
+	}
+
+	/**
+	 * The highest conversation number HelpScout has given out, in any mailbox.
+	 *
+	 * @return int
+	 */
+	public function highest_number(): int {
+		$body = $this->get(
+			'v2/conversations',
+			array(
+				'status'    => 'all',
+				'sortField' => 'number',
+				'sortOrder' => 'desc',
+			)
+		);
+
+		return (int) ( $body['_embedded']['conversations'][0]['number'] ?? 0 );
+	}
+
+	/**
 	 * Lists all of a conversation's threads, oldest first.
 	 *
 	 * @param int $conversation_id HelpScout conversation ID.
@@ -201,51 +282,85 @@ final class HelpScout {
 	}
 
 	/**
-	 * Gets an attachment's content.
+	 * Downloads an attachment into a temporary file, so large ones aren't held in memory.
 	 *
 	 * @param int $conversation_id HelpScout conversation ID.
 	 * @param int $attachment_id   HelpScout attachment ID.
-	 * @return string The file's bytes.
+	 * @return resource The file, at its start; it's deleted once closed.
 	 *
-	 * @throws ApiError If HelpScout didn't return it.
+	 * @throws \RuntimeException If HelpScout didn't return it (an ApiError), or there's no room for it.
 	 */
-	public function attachment( int $conversation_id, int $attachment_id ): string {
-		$body = $this->get( 'v2/conversations/' . $conversation_id . '/attachments/' . $attachment_id . '/data' );
-		$data = base64_decode( (string) ( $body['data'] ?? '' ), true );
+	public function attachment( int $conversation_id, int $attachment_id ) {
+		$response = $this->request(
+			'v2/conversations/' . $conversation_id . '/attachments/' . $attachment_id . '/file',
+			array(),
+			'*/*',
+			array( 'stream' => true )
+		);
+		$body     = $response->getBody();
+		$file     = tmpfile();
 
-		if ( false === $data ) {
-			// HelpScout answered: unlike an outage, waiting won't fix this.
-			throw new ApiError( 'HelpScout returned no data for attachment ' . $attachment_id . '.', 200 );
+		if ( false === $file ) {
+			throw new \RuntimeException( 'Could not create a temporary file for attachment ' . $attachment_id . '.' );
 		}
 
-		return $data;
+		while ( ! $body->eof() ) {
+			$chunk = $body->read( 1024 * 1024 );
+			if ( '' === $chunk ) {
+				break;
+			}
+			fwrite( $file, $chunk );
+		}
+		$body->close();
+		rewind( $file );
+
+		return $file;
 	}
 
 	/**
-	 * Gets the email a thread was made from, or that HelpScout sent for it.
+	 * Gets the headers of the email a thread was made from, or that HelpScout sent for it.
+	 *
+	 * Only the headers are read: the rest of the email can be large, and isn't needed.
 	 *
 	 * @param int $conversation_id HelpScout conversation ID.
 	 * @param int $thread_id       HelpScout thread ID.
-	 * @return string|null The raw email, or null if HelpScout has none.
+	 * @return string|null The email's headers, or null if HelpScout has none, or won't give them.
 	 *
-	 * @throws ApiError If the request failed otherwise.
+	 * @throws ApiError If HelpScout is unavailable, or refuses the app.
 	 */
-	public function original_source( int $conversation_id, int $thread_id ): ?string {
+	public function original_headers( int $conversation_id, int $thread_id ): ?string {
 		try {
 			$response = $this->request(
 				'v2/conversations/' . $conversation_id . '/threads/' . $thread_id . '/original-source',
 				array(),
-				'message/rfc822'
+				'message/rfc822',
+				array( 'stream' => true )
 			);
 		} catch ( ApiError $e ) {
-			if ( 404 === $e->status ) {
+			// Only the Message-ID is wanted from it: a thread without one is still imported.
+			if ( $e->status >= 400 && $e->status < 500 && ! $e instanceof RateLimited && ! $e->is_denied() ) {
 				return null;
 			}
 
 			throw $e;
 		}
 
-		return (string) $response->getBody();
+		$body    = $response->getBody();
+		$headers = '';
+		$read    = 0;
+
+		while ( ! $body->eof() && $read < self::MAX_HEADER_BYTES ) {
+			$chunk    = $body->read( 8192 );
+			$headers .= $chunk;
+			$read    += strlen( $chunk );
+			if ( '' === $chunk || preg_match( '/\r?\n\r?\n/', $headers, $match, PREG_OFFSET_CAPTURE ) ) {
+				$headers = isset( $match[0][1] ) ? substr( $headers, 0, $match[0][1] ) : $headers;
+				break;
+			}
+		}
+		$body->close();
+
+		return $headers;
 	}
 
 	/**
@@ -256,14 +371,29 @@ final class HelpScout {
 	 */
 	public function image( string $url ): ?string {
 		try {
-			$response = $this->send( 'GET', $url, array() );
+			$response = $this->send( 'GET', $url, array( 'stream' => true ) );
 		} catch ( ApiError $e ) {
 			return null;
 		}
 
-		$image = (string) $response->getBody();
+		if ( 200 !== $response->getStatusCode() ) {
+			return null;
+		}
 
-		return 200 === $response->getStatusCode() && '' !== $image && strlen( $image ) <= self::MAX_IMAGE_BYTES ? $image : null;
+		$body  = $response->getBody();
+		$image = '';
+		$size  = 0;
+		while ( ! $body->eof() && $size <= self::MAX_IMAGE_BYTES ) {
+			$chunk  = $body->read( 1024 * 1024 );
+			$image .= $chunk;
+			$size  += strlen( $chunk );
+			if ( '' === $chunk ) {
+				break;
+			}
+		}
+		$body->close();
+
+		return 0 < $size && $size <= self::MAX_IMAGE_BYTES ? $image : null;
 	}
 
 	/**
@@ -311,31 +441,39 @@ final class HelpScout {
 	/**
 	 * Sends a GET request with the access token, getting a new token once if HelpScout rejects it.
 	 *
-	 * @param string $path   API path.
-	 * @param array  $query  Query parameters.
-	 * @param string $accept Accept header.
+	 * @param string $path    API path.
+	 * @param array  $query   Query parameters.
+	 * @param string $accept  Accept header.
+	 * @param array  $options More Guzzle options.
 	 * @return ResponseInterface Successful response.
 	 *
 	 * @throws RateLimited If the import has to wait for the rate limit.
 	 * @throws ApiError    If the request failed.
 	 */
-	private function request( string $path, array $query, string $accept ): ResponseInterface {
+	private function request( string $path, array $query, string $accept, array $options = array() ): ResponseInterface {
 		if ( ! $this->is_configured() ) {
 			throw new ApiError( 'WPORG_HELPSCOUT_APP_ID and WPORG_HELPSCOUT_APP_SECRET are not configured.' );
 		}
 
-		foreach ( array( false, true ) as $new_token ) {
-			if ( $this->wait_until > time() ) {
-				throw new RateLimited( $this->wait_until - time() );
+		$renew   = false;
+		$renewed = false;
+		$waits   = 0;
+
+		while ( true ) {
+			if ( $this->wait_for_rate_limit( $waits ) ) {
+				++$waits;
 			}
+
+			$token = $this->token( $renew );
+			$renew = false;
 
 			$response = $this->send(
 				'GET',
 				$this->api_url . $path,
-				array(
+				$options + array(
 					'query'   => $query,
 					'headers' => array(
-						'Authorization' => 'Bearer ' . $this->token( $new_token ),
+						'Authorization' => 'Bearer ' . $token,
 						'Accept'        => $accept,
 					),
 				)
@@ -344,22 +482,53 @@ final class HelpScout {
 
 			$this->note_rate_limit( $response );
 
-			if ( 401 === $status && ! $new_token ) {
+			if ( 401 === $status && ! $renewed ) {
+				$renew   = true;
+				$renewed = true;
 				continue;
 			}
 
 			if ( 429 === $status ) {
-				throw new RateLimited( (int) $response->getHeaderLine( 'X-RateLimit-Retry-After' ) );
+				$retry_after = max( 1, (int) $response->getHeaderLine( 'X-RateLimit-Retry-After' ) );
+				if ( ! $this->patient ) {
+					throw new RateLimited( $retry_after );
+				}
+
+				$this->wait_until = time() + $retry_after;
+				continue;
 			}
 
 			if ( $status < 200 || $status >= 300 ) {
-				throw new ApiError( 'HelpScout answered ' . $status . ' for ' . $path . '.', $status );
+				// A 401 again, with a new token, means HelpScout refuses the app.
+				throw new ApiError( 401 === $status ? 'HelpScout rejected the access token for ' . $path . '.' : 'HelpScout answered ' . $status . ' for ' . $path . '.', $status );
 			}
 
 			return $response;
 		}
+	}
 
-		throw new ApiError( 'HelpScout rejected the access token for ' . $path . '.', 401 );
+	/**
+	 * Waits for the rate limit when only the reserve is left: throws, or sleeps while patient.
+	 *
+	 * @param int $waits How many times this request waited already.
+	 * @return bool Whether it waited.
+	 *
+	 * @throws RateLimited If the import has to wait, and isn't patient, or waited too often already.
+	 */
+	private function wait_for_rate_limit( int $waits ): bool {
+		$seconds = $this->wait_until - time();
+		if ( $seconds <= 0 ) {
+			return false;
+		}
+
+		if ( ! $this->patient || $waits >= self::MAX_WAITS ) {
+			throw new RateLimited( $seconds );
+		}
+
+		( $this->sleep )( $seconds );
+		$this->wait_until = 0;
+
+		return true;
 	}
 
 	/**
