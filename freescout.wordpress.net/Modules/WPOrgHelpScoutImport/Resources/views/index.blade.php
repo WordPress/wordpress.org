@@ -85,7 +85,8 @@
 					@endforeach
 				</select>
 				&rarr;
-				<select name="mailbox_id" class="form-control" aria-label="{{ __('FreeScout mailbox') }}">
+				<select name="mailbox_id" class="form-control" aria-label="{{ __('FreeScout mailbox') }}" required>
+					<option value="" disabled selected>{{ __('Choose a FreeScout mailbox…') }}</option>
 					@foreach ( $mailboxes as $mailbox )
 						<option value="{{ $mailbox->id }}">{{ $mailbox->name }}</option>
 					@endforeach
