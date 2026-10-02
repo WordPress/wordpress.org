@@ -52,7 +52,7 @@ class Consistency extends GP_Route {
 		}
 
 		if ( isset( $_REQUEST['set'] ) && is_string( $_REQUEST['set'] ) ) {
-			$raw_set = sanitize_text_field( wp_unslash( $_REQUEST['set'] ) );
+			$raw_set = wp_unslash( $_REQUEST['set'] );
 			if ( isset( $sets[ $raw_set ] ) ) {
 				$set = $raw_set;
 			}
@@ -96,7 +96,6 @@ class Consistency extends GP_Route {
 			);
 
 			$translations               = wp_list_pluck( $results, 'translation', 'translation_id' );
-			$translations               = array_map( 'strval', $translations );
 			$translations_unique        = array_values( array_unique( $translations ) );
 			$translations_unique_counts = array_count_values( $translations );
 
@@ -117,15 +116,13 @@ class Consistency extends GP_Route {
 	private function get_translation_sets() {
 		global $wpdb;
 
-		$sets = wp_cache_get( 'translation-sets', $this->cache_group );
+		$sets = wp_cache_get( 'translation-sets-v2', $this->cache_group );
 
 		if ( empty( $sets ) ) {
 			$_sets = $wpdb->get_results(
-				"SELECT MIN(ts.name) AS name, ts.locale, ts.slug
-				FROM {$wpdb->gp_translation_sets} ts
-				JOIN {$wpdb->gp_projects} p ON p.id = ts.project_id
-				WHERE p.active = 1
-				GROUP BY ts.locale, ts.slug
+				"SELECT name, locale, slug
+				FROM {$wpdb->gp_translation_sets}
+				GROUP BY locale, slug
 				ORDER BY name ASC"
 			);
 
@@ -148,7 +145,7 @@ class Consistency extends GP_Route {
 				}
 			}
 
-			wp_cache_set( 'translation-sets', $sets, $this->cache_group, DAY_IN_SECONDS );
+			wp_cache_set( 'translation-sets-v2', $sets, $this->cache_group, DAY_IN_SECONDS );
 		}
 
 		return $sets;
@@ -166,7 +163,7 @@ class Consistency extends GP_Route {
 	 *     @type bool   $case_sensitive Whether to perform a case-sensitive search.
 	 *     @type int    $project        Optional. Project ID to limit results to.
 	 * }
-	 * @return object Array of query result objects.
+	 * @return array Array of query result objects.
 	 */
 	private function query( $args ) {
 		global $wpdb;
@@ -178,8 +175,7 @@ class Consistency extends GP_Route {
 		if ( ! empty( $args['project'] ) ) {
 			$project = GP::$project->get( (int) $args['project'] );
 			if ( $project && ! empty( $project->path ) ) {
-				$project_where  = 'AND ( p.path = %s OR p.path LIKE %s )';
-				$query_params[] = $project->path;
+				$project_where  = 'AND p.path LIKE %s';
 				$query_params[] = $wpdb->esc_like( $project->path ) . '/%';
 			}
 		}
