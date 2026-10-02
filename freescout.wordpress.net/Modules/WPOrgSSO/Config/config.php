@@ -27,4 +27,7 @@ return array(
 
 	// Break-glass: lets administrators log in with their FreeScout password. Every such login is logged.
 	'password_login' => filter_var( env( 'WPORG_SSO_PASSWORD_LOGIN', false ), FILTER_VALIDATE_BOOLEAN ),
+
+	// Keeps administrators out unless nginx marks the request as proxied, with the WPORG_PROXIED_REQUEST FastCGI param.
+	'require_proxy'  => filter_var( env( 'WPORG_SSO_REQUIRE_PROXY', false ), FILTER_VALIDATE_BOOLEAN ),
 );
