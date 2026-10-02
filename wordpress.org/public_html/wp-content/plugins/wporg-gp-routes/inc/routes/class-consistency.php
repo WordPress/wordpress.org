@@ -52,6 +52,7 @@ class Consistency extends GP_Route {
 		}
 
 		if ( isset( $_REQUEST['set'] ) && is_string( $_REQUEST['set'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Validated against $sets allowlist below.
 			$raw_set = wp_unslash( $_REQUEST['set'] );
 			if ( isset( $sets[ $raw_set ] ) ) {
 				$set = $raw_set;
