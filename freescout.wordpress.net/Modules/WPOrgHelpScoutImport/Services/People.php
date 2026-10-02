@@ -615,7 +615,7 @@ final class People {
 	 * social profiles, address, background, and photo.
 	 *
 	 * Only empty fields are filled. What FreeScout has no field for, like chat handles and HelpScout's customer
-	 * properties, is kept in the sender's meta.
+	 * properties, is kept in the sender's meta, with HelpScout's photo type.
 	 *
 	 * @param Customer $customer FreeScout sender.
 	 * @param mixed    $person   HelpScout customer, as a conversation or thread names them.
@@ -670,7 +670,7 @@ final class People {
 					false
 				);
 
-				$this->photo( $customer, (string) ( $profile['photoUrl'] ?? '' ) );
+				$this->photo( $customer, (string) ( $profile['photoUrl'] ?? '' ), (string) ( $profile['photoType'] ?? '' ) );
 				$customer->save();
 			} catch ( \Throwable $e ) {
 				\Log::error( '[WPOrgHelpScoutImport] Could not save the HelpScout profile of sender ' . $customer->id . ': ' . $e->getMessage() );
@@ -684,9 +684,18 @@ final class People {
 				array(
 					'id'         => $id,
 					'chats'      => array_values( array_filter( (array) ( $embedded['chats'] ?? array() ), 'is_array' ) ),
-					'properties' => array_values( array_filter( (array) ( $embedded['properties'] ?? array() ), 'is_array' ) ),
+					// HelpScout lists every property, with a value or not.
+					'properties' => array_values(
+						array_filter(
+							(array) ( $embedded['properties'] ?? array() ),
+							static function ( $property ): bool {
+								return is_array( $property ) && '' !== trim( (string) ( $property['value'] ?? '' ) );
+							}
+						)
+					),
 					'age'        => (string) ( $profile['age'] ?? '' ),
 					'gender'     => (string) ( $profile['gender'] ?? '' ),
+					'photo_type' => (string) ( $profile['photoType'] ?? '' ),
 				)
 			)
 		);
@@ -743,13 +752,23 @@ final class People {
 	}
 
 	/**
-	 * Copies a sender's photo, so it doesn't go with the HelpScout account; a photo that can't be copied is left out.
+	 * Copies a sender's photo from a social profile, so it doesn't go with the HelpScout account; a photo that can't
+	 * be copied is left out.
+	 *
+	 * Gravatars are left to WPOrgSidebar, which gives senders their WordPress.org avatar, and keeps it up to date; a
+	 * photo copied here would keep it from doing so. HelpScout's own photos, of type `unknown`, are placeholders.
 	 *
 	 * @param Customer $customer FreeScout sender, saved.
 	 * @param string   $url      Photo URL.
+	 * @param string   $type     HelpScout's photo type, like `twitter`.
 	 * @return void
 	 */
-	private function photo( Customer $customer, string $url ): void {
+	private function photo( Customer $customer, string $url, string $type ): void {
+		$photo_type = array_search( strtolower( $type ), Customer::$photo_types, true );
+		if ( false === $photo_type || in_array( $photo_type, array( Customer::PHOTO_TYPE_UKNOWN, Customer::PHOTO_TYPE_GRAVATAR ), true ) ) {
+			return;
+		}
+
 		if ( '' === $url || $customer->photo_url || ! $customer->id ) {
 			return;
 		}
@@ -773,7 +792,8 @@ final class People {
 			if ( str_starts_with( $mime, 'image/' ) ) {
 				$photo = $customer->savePhoto( $path, $mime );
 				if ( $photo ) {
-					$customer->photo_url = $photo;
+					$customer->photo_url  = $photo;
+					$customer->photo_type = (int) $photo_type;
 				}
 			}
 		} catch ( \Throwable $e ) {

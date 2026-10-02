@@ -90,12 +90,33 @@ final class SenderProfileTest extends ImportTestCase {
 		$meta = $sender->getMeta( People::PROFILE_META );
 		$this->assertSame( $this->customer_id, $meta['id'] );
 		$this->assertSame( 'samchat', $meta['chats'][0]['value'] );
-		$this->assertSame( 'Tesla', $meta['properties'][0]['value'] );
+		$this->assertSame( array( 'Tesla' ), array_column( $meta['properties'], 'value' ) );
 		$this->assertSame( '30-35', $meta['age'] );
 
 		// The photo is copied, resized like FreeScout's own.
 		$this->assertNotEmpty( $sender->photo_url );
+		$this->assertSame( Customer::PHOTO_TYPE_TWITTER, (int) $sender->photo_type );
 		Storage::disk( 'local' )->assertExists( Customer::PHOTO_DIRECTORY . '/' . $sender->photo_url );
+	}
+
+	/**
+	 * Gravatars are left to WPOrgSidebar, and HelpScout's own placeholder photos aren't copied.
+	 *
+	 * @return void
+	 */
+	public function test_gravatars_and_placeholders_are_left_out(): void {
+		foreach ( array( 'gravatar', 'unknown' ) as $type ) {
+			$profile              = $this->profile();
+			$profile['photoType'] = $type;
+			$this->helpscout->only( 'GET', 'v2/customers/' . $this->customer_id, $profile );
+			Customer::query()->whereKey( Email::query()->where( 'email', 'sam@example.org' )->value( 'customer_id' ) )->update( array( 'meta' => null ) );
+
+			$this->importer->import( $this->conversation(), $this->mailbox );
+
+			$this->assertEmpty( $this->imported_sender()->photo_url, $type );
+		}
+
+		$this->assertCount( 0, $this->helpscout->requests_to( 'photos/sam.png' ) );
 	}
 
 	/**
@@ -229,8 +250,8 @@ final class SenderProfileTest extends ImportTestCase {
 			'background'   => 'Knows the photo guidelines well.',
 			'location'     => 'Central Europe',
 			'age'          => '30-35',
-			'photoType'    => 'gravatar',
-			'photoUrl'     => 'https://www.gravatar.com/photos/sam.png',
+			'photoType'    => 'twitter',
+			'photoUrl'     => 'https://pbs.twimg.com/photos/sam.png',
 			'_embedded'    => array(
 				'emails'          => array(
 					array(
@@ -282,6 +303,11 @@ final class SenderProfileTest extends ImportTestCase {
 						'slug'  => 'car',
 						'name'  => 'Car',
 						'value' => 'Tesla',
+					),
+					array(
+						'type' => 'dropdown',
+						'slug' => 'user-status',
+						'name' => 'User Status',
 					),
 				),
 				'address'         => array(
