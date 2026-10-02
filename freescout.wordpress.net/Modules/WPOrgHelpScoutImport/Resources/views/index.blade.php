@@ -78,7 +78,8 @@
 
 			<form method="POST" action="{{ route( 'wporghelpscoutimport.start' ) }}" class="form-inline">
 				{{ csrf_field() }}
-				<select name="helpscout_mailbox_id" class="form-control" aria-label="{{ __('HelpScout mailbox') }}">
+				<select name="helpscout_mailbox_id" class="form-control" aria-label="{{ __('HelpScout mailbox') }}" required>
+					<option value="" disabled selected>{{ __('Choose a HelpScout mailbox…') }}</option>
 					@foreach ( $sources as $source )
 						<option value="{{ $source['id'] }}">{{ $source['name'] }}</option>
 					@endforeach

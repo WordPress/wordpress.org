@@ -79,6 +79,7 @@ final class ImportControllerTest extends ImportTestCase {
 
 		$response->assertStatus( 200 );
 		$this->assertStringContainsString( 'Photos', $response->getContent() );
+		$this->assertStringContainsString( '<option value="" disabled selected>Choose a HelpScout mailbox…</option>', $response->getContent() );
 		$this->assertStringContainsString( 'Every HelpScout user who can see the mailbox gets a FreeScout user', $response->getContent() );
 		$this->assertStringContainsString( route( 'wporghelpscoutimport.agents' ), $response->getContent() );
 	}
