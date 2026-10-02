@@ -10,7 +10,6 @@
  * a code is tagged with it, so a leaked code can be revoked and its signups reviewed.
  *
  * Codes are managed in wp-admin by users with the `manage_event_codes` capability.
- * Signup behaviour is off until the `wporg_login_event_codes_enabled` option is truthy.
  *
  * @package wporg-login
  */
@@ -102,15 +101,6 @@ function wporg_login_event_code_caps( array $allcaps ): array {
 	return $allcaps;
 }
 add_filter( 'user_has_cap', 'wporg_login_event_code_caps' );
-
-/**
- * Whether signup handling for event codes is switched on.
- *
- * @return bool
- */
-function wporg_login_event_codes_enabled(): bool {
-	return (bool) get_option( 'wporg_login_event_codes_enabled', false );
-}
 
 /**
  * Normalise a user-supplied code. Returns an empty string if it can't be a valid code.
@@ -226,7 +216,7 @@ function wporg_login_get_valid_event_code( mixed $code ): ?WP_Post {
  */
 function wporg_login_has_valid_event_code(): bool {
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Validated against a strict pattern.
-	return wporg_login_event_codes_enabled() && (bool) wporg_login_get_valid_event_code( wp_unslash( $_REQUEST['event'] ?? '' ) );
+	return (bool) wporg_login_get_valid_event_code( wp_unslash( $_REQUEST['event'] ?? '' ) );
 }
 
 /**
@@ -235,10 +225,6 @@ function wporg_login_has_valid_event_code(): bool {
  * @return void
  */
 function wporg_login_event_code_register_form(): void {
-	if ( ! wporg_login_event_codes_enabled() ) {
-		return;
-	}
-
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Validated against a strict pattern.
 	$post = wporg_login_get_valid_event_code( wp_unslash( $_REQUEST['event'] ?? '' ) );
 	if ( ! $post ) {
@@ -286,7 +272,7 @@ function wporg_login_current_event_code( ?WP_Post $set = null ): ?WP_Post {
  */
 function wporg_login_event_code_pre_registration( mixed $pre ): mixed {
 	// The resend-confirmation endpoint runs this filter too, without reCAPTCHA.
-	if ( null !== $pre || wp_is_serving_rest_request() || empty( $_POST['event'] ) || ! wporg_login_event_codes_enabled() ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public signup form.
+	if ( null !== $pre || wp_is_serving_rest_request() || empty( $_POST['event'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public signup form.
 		return $pre;
 	}
 
