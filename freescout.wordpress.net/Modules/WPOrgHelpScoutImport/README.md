@@ -9,8 +9,8 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
 - **What comes across:**
   - conversations with their subject, status, assignee (a person or a team), who closed them, CC and BCC, and their original dates;
   - every email, reply, and note, with its own sender or agent, its recipients, and its attachments, except those HelpScout found a virus in;
-  - replies HelpScout hid from what the sender is sent, as notes;
-  - images pasted into emails, which HelpScout keeps on its own image host: they're copied, so they don't go with the account. Images linked from elsewhere keep their links, and HelpScout's read-tracking image is removed;
+  - replies HelpScout hid from what the sender is sent, or that bounced, as notes;
+  - images pasted into emails, which HelpScout keeps on its own image host: they're copied, so they don't go with the account, up to 100 MB per conversation. Images linked from elsewhere keep their links, and HelpScout's read-tracking image is removed;
   - each email's Message-ID, so a sender who replies to an old HelpScout email lands in its conversation. HelpScout keeps them for 2 years, so older emails have none. An email FreeScout has already, like one sent to two mailboxes, keeps its Message-ID where it is; if it's in the same conversation, it isn't added again;
   - HelpScout's conversation number, which people quote, unless a FreeScout conversation already has it;
   - HelpScout's tags and custom fields, kept in the module's own table until the Tags and Custom Fields modules can take them.
@@ -19,12 +19,15 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
   - HelpScout's line items ("assigned to", "closed by", workflows that ran);
   - phone calls and forwards become notes, since FreeScout has no thread type for them.
 - **Conversations agents worked on in FreeScout:** once a conversation has a reply, note, or change made in FreeScout, importing it again only adds HelpScout's new threads. Its status and assignee stay FreeScout's.
+- **Conversations HelpScout moved to another mailbox** move to the FreeScout mailbox that mailbox is imported into, unless agents worked on them in FreeScout; then they stay, and are counted as skipped.
 - **Users:** every HelpScout user's replies, notes, and assignments are credited to a FreeScout user:
   - the one chosen on **Manage » HelpScout Import » Users**, or else the one with the same email;
   - or else a new one. Before an import creates users for a mailbox's HelpScout users, the import page lists them, and starts once that's confirmed. They can log in, and get access to the mailbox imported into; so do HelpScout users with a FreeScout user already.
   - HelpScout no longer lists users deleted from it, but their threads still name them. When an import meets them, they get a disabled user. Disable the others the same way once a mailbox has moved, if they won't use FreeScout.
   - New users have no password, and their email is HelpScout's until they're connected to their WordPress.org account. Connecting them takes their name, email, and avatar from WordPress.org, as for every user, and lets them log in. Users who won't log in, like former agents, don't need a WordPress.org account.
-  - **Connecting in bulk:** on the Users page, **Download CSV** lists HelpScout's users with their FreeScout users. Fill in its `wporg_username` column, upload or paste it, and **Check** it: that shows, for each row, the WordPress.org account's name and email next to the HelpScout user's, and what connecting would do, without doing it. **Connect** then connects each one's FreeScout user to the account, creating it if they have none yet (before their mailbox is imported, too). Someone whose account is connected to a FreeScout user already is credited to that user instead, so they don't get a second one. One at a time, users can be connected on their profile, or with `php artisan wporgsso:connect`.
+  - **Connecting in bulk:** on the Users page, **Download CSV** lists HelpScout's users with their FreeScout users. Fill in its `wporg_username` column, upload or paste it, and **Check** it: that shows, for each row, the WordPress.org account's name and email next to the HelpScout user's, and what connecting would do, without doing it. **Connect** then connects each one's FreeScout user to the account, creating it if they have none yet (before their mailbox is imported, too). Someone whose account is connected to a FreeScout user already is credited to that user instead, so they don't get a second one.
+    - Connecting lets the account's owner log in as that user. So only users an import created, or whose email is the account's, are connected in bulk, and administrators only by their email; anyone else is connected on their profile.
+    - A CSV connects each HelpScout user once, and each FreeScout user to one account; the check flags rows that would do more. One at a time, users can be connected on their profile, or with `php artisan wporgsso:connect`.
   - Someone with a FreeScout user under another email gets a second one unless they're chosen on the Users page first: FreeScout can't merge users. Choosing someone after an import credits what's imported for them to the user chosen.
   - What HelpScout did itself, without a user, is credited to "HelpScout Import", a disabled robot user.
 - **Teams:** conversations assigned to a HelpScout team are assigned to the FreeScout team chosen on the Users page, or else to the one with the same name. FreeScout's teams come from its Teams module: create them there first. Without either, they're imported unassigned.
@@ -32,7 +35,8 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
 - **HelpScout's rate limit:** the whole HelpScout account shares one limit, and wppluginsteam.org and the reviewers' tools use it too. The import leaves 100 requests a minute to them, and waits for the next minute when only those are left. A conversation too big to read in one minute's share waits for the limit on its next try, rather than starting over.
 - **Failures:**
   - a conversation that can't be imported is counted, logged, and listed with its error under the run; the rest of the page goes on. Once the run is done, **Retry failed** imports them again;
-  - when HelpScout is down, the page is tried again every 5 minutes;
+  - a conversation whose import keeps stopping the job, like by running out of memory or HelpScout failing for it, is counted as failed after 5 tries, so the run goes on;
+  - when HelpScout is down, the page is tried again every 5 minutes; after an hour of that, the run stops, to be resumed;
   - when HelpScout refuses the app's credentials, the import stops: fix them, then **Resume**;
   - a run without progress for 15 minutes, like when the queue worker was killed, is marked stalled: **Resume** it.
 

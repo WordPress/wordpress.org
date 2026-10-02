@@ -51,6 +51,13 @@ final class HelpScout {
 	private const MAX_WAITS = 5;
 
 	/**
+	 * Longest a patient request waits for the rate limit at once, in seconds.
+	 *
+	 * @var int
+	 */
+	private const MAX_WAIT_SECONDS = 60;
+
+	/**
 	 * App ID.
 	 *
 	 * @var string
@@ -297,22 +304,11 @@ final class HelpScout {
 			'*/*',
 			array( 'stream' => true )
 		);
-		$body     = $response->getBody();
-		$file     = tmpfile();
+		$file     = self::to_file( $response, PHP_INT_MAX );
 
-		if ( false === $file ) {
-			throw new \RuntimeException( 'Could not create a temporary file for attachment ' . $attachment_id . '.' );
+		if ( ! $file ) {
+			throw new \RuntimeException( 'Could not save attachment ' . $attachment_id . ' to a temporary file.' );
 		}
-
-		while ( ! $body->eof() ) {
-			$chunk = $body->read( 1024 * 1024 );
-			if ( '' === $chunk ) {
-				break;
-			}
-			fwrite( $file, $chunk );
-		}
-		$body->close();
-		rewind( $file );
 
 		return $file;
 	}
@@ -367,33 +363,69 @@ final class HelpScout {
 	 * Downloads an image HelpScout hosts for an email's body; it needs no access token.
 	 *
 	 * @param string $url Image URL.
-	 * @return string|null The image's bytes, or null if it couldn't be downloaded.
+	 * @return resource|null The image in a temporary file, deleted once closed; null if it couldn't be downloaded.
 	 */
-	public function image( string $url ): ?string {
+	public function image( string $url ) {
 		try {
 			$response = $this->send( 'GET', $url, array( 'stream' => true ) );
 		} catch ( ApiError $e ) {
 			return null;
 		}
 
-		if ( 200 !== $response->getStatusCode() ) {
-			return null;
-		}
+		return 200 === $response->getStatusCode() ? self::to_file( $response, self::MAX_IMAGE_BYTES ) : null;
+	}
 
-		$body  = $response->getBody();
-		$image = '';
-		$size  = 0;
-		while ( ! $body->eof() && $size <= self::MAX_IMAGE_BYTES ) {
-			$chunk  = $body->read( 1024 * 1024 );
-			$image .= $chunk;
-			$size  += strlen( $chunk );
+	/**
+	 * Lists the account's teams, as users of type `team`; HelpScout may list them with its users too.
+	 *
+	 * @return array[] Teams, with `id`, `type`, and their name as `firstName`.
+	 */
+	public function teams(): array {
+		return array_map(
+			static function ( array $team ): array {
+				return array(
+					'id'        => (int) ( $team['id'] ?? 0 ),
+					'type'      => 'team',
+					'firstName' => (string) ( $team['name'] ?? '' ),
+					'lastName'  => '',
+				);
+			},
+			$this->all( 'v2/teams', array(), 'teams' )
+		);
+	}
+
+	/**
+	 * Saves a response's body into a temporary file, without holding it in memory.
+	 *
+	 * @param ResponseInterface $response Response.
+	 * @param int               $max      Most bytes it can have.
+	 * @return resource|null The file, at its start, deleted once closed; null if it's empty, larger, or couldn't be saved.
+	 */
+	private static function to_file( ResponseInterface $response, int $max ) {
+		$body = $response->getBody();
+		$file = tmpfile();
+		$size = 0;
+
+		while ( $file && ! $body->eof() && $size <= $max ) {
+			$chunk = $body->read( 1024 * 1024 );
 			if ( '' === $chunk ) {
 				break;
 			}
+			$size += (int) fwrite( $file, $chunk );
 		}
 		$body->close();
 
-		return 0 < $size && $size <= self::MAX_IMAGE_BYTES ? $image : null;
+		if ( ! $file || 0 === $size || $size > $max ) {
+			if ( $file ) {
+				fclose( $file );
+			}
+
+			return null;
+		}
+
+		rewind( $file );
+
+		return $file;
 	}
 
 	/**
@@ -521,7 +553,8 @@ final class HelpScout {
 			return false;
 		}
 
-		if ( ! $this->patient || $waits >= self::MAX_WAITS ) {
+		// Waiting holds up FreeScout's queue: no longer than a minute's limit takes to reset.
+		if ( ! $this->patient || $waits >= self::MAX_WAITS || $seconds > self::MAX_WAIT_SECONDS ) {
 			throw new RateLimited( $seconds );
 		}
 
@@ -551,7 +584,8 @@ final class HelpScout {
 	 * @param bool $renew Whether to get a new one, because HelpScout rejected the cached one.
 	 * @return string Access token.
 	 *
-	 * @throws ApiError If HelpScout gave none.
+	 * @throws RateLimited If HelpScout's rate limit was reached.
+	 * @throws ApiError    If HelpScout gave none.
 	 */
 	private function token( bool $renew ): string {
 		$token = $renew ? '' : (string) \Cache::get( self::TOKEN_CACHE_KEY, '' );
@@ -573,8 +607,18 @@ final class HelpScout {
 		$body     = json_decode( (string) $response->getBody(), true );
 		$token    = is_array( $body ) ? (string) ( $body['access_token'] ?? '' ) : '';
 
-		if ( 200 !== $response->getStatusCode() || '' === $token ) {
-			throw new ApiError( 'HelpScout gave no access token; check the app ID and secret.', 401 === $response->getStatusCode() ? 401 : 403 );
+		$status = $response->getStatusCode();
+		if ( 429 === $status ) {
+			throw new RateLimited( (int) $response->getHeaderLine( 'X-RateLimit-Retry-After' ) );
+		}
+
+		// HelpScout being down isn't refused credentials: that's retried, rather than stopping the import.
+		if ( 0 === $status || $status >= 500 ) {
+			throw new ApiError( 'HelpScout answered ' . $status . ' for an access token.', $status );
+		}
+
+		if ( 200 !== $status || '' === $token ) {
+			throw new ApiError( 'HelpScout gave no access token; check the app ID and secret.', 401 );
 		}
 
 		// Cache minutes, renewed a few minutes early.

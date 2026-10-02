@@ -240,6 +240,30 @@ final class ImportControllerTest extends ImportTestCase {
 	}
 
 	/**
+	 * The page refreshes while an import runs, but not while it asks to confirm creating users.
+	 *
+	 * @return void
+	 */
+	public function test_page_refreshes_while_running_unless_confirming(): void {
+		Agent::query()->create(
+			array(
+				'helpscout_user_id' => 56,
+				'user_id'           => $this->admin->id,
+			)
+		);
+		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() );
+		Agent::query()->where( 'helpscout_user_id', 56 )->delete();
+
+		$this->assertStringContainsString( 'data-wporghelpscoutimport-refresh="30"', $this->get( route( 'wporghelpscoutimport.index' ) )->getContent() );
+
+		$form = array( 'mailbox_id' => $this->create_mailbox( 'Themes' )->id ) + $this->start_form();
+		unset( $form['confirmed'] );
+		$this->post( route( 'wporghelpscoutimport.start' ), $form );
+
+		$this->assertStringNotContainsString( 'data-wporghelpscoutimport-refresh', $this->get( route( 'wporghelpscoutimport.index' ) )->getContent() );
+	}
+
+	/**
 	 * Cancelling stops a run for good, and lets its mailbox take another.
 	 *
 	 * @return void

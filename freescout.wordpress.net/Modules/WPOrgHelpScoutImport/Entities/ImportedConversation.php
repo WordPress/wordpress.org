@@ -18,6 +18,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property int         $helpscout_id
  * @property int         $helpscout_number Number HelpScout showed, which links and notes refer to.
  * @property int         $conversation_id
+ * @property int|null    $creator_id       HelpScout user who started it, if a user did.
+ * @property int|null    $assignee_id      HelpScout user or team it was assigned to.
+ * @property int|null    $closer_id        HelpScout user who closed it.
  * @property string|null $tags             JSON list of HelpScout's tag names.
  * @property string|null $custom_fields    JSON list of HelpScout's custom fields, with their names and values.
  */
@@ -35,5 +38,5 @@ final class ImportedConversation extends Model {
 	 *
 	 * @var array
 	 */
-	protected $fillable = array( 'helpscout_id', 'helpscout_number', 'conversation_id', 'tags', 'custom_fields' );
+	protected $fillable = array( 'helpscout_id', 'helpscout_number', 'conversation_id', 'creator_id', 'assignee_id', 'closer_id', 'tags', 'custom_fields' );
 }

@@ -46,12 +46,16 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function boot(): void {
-		$this->mergeConfigFrom( __DIR__ . '/../Config/config.php', self::ALIAS );
-		$this->loadViewsFrom( __DIR__ . '/../Resources/views', self::ALIAS );
-		$this->loadRoutesFrom( __DIR__ . '/../Http/routes.php' );
-		$this->loadMigrationsFrom( __DIR__ . '/../Database/Migrations' );
+		try {
+			$this->mergeConfigFrom( __DIR__ . '/../Config/config.php', self::ALIAS );
+			$this->loadViewsFrom( __DIR__ . '/../Resources/views', self::ALIAS );
+			$this->loadRoutesFrom( __DIR__ . '/../Http/routes.php' );
+			$this->loadMigrationsFrom( __DIR__ . '/../Database/Migrations' );
 
-		$this->register_hooks();
+			$this->register_hooks();
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgHelpScoutImport] Could not boot: ' . $e->getMessage() );
+		}
 	}
 
 	/**
@@ -97,13 +101,18 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 		\Eventy::addFilter(
 			'javascripts',
 			static function ( $javascripts = array() ) {
-				$route   = \Route::current();
 				$scripts = array(
 					'wporghelpscoutimport.agents' => 'agents.js',
 					'wporghelpscoutimport.index'  => 'import.js',
 				);
-				if ( is_array( $javascripts ) && $route && isset( $scripts[ $route->getName() ] ) ) {
-					$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/' . $scripts[ $route->getName() ];
+
+				try {
+					$route = \Route::current();
+					if ( is_array( $javascripts ) && $route && isset( $scripts[ $route->getName() ] ) ) {
+						$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/' . $scripts[ $route->getName() ];
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgHelpScoutImport] Could not add its scripts: ' . $e->getMessage() );
 				}
 
 				return $javascripts;

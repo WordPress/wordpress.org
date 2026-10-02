@@ -214,6 +214,70 @@ final class HelpScoutTest extends ImportTestCase {
 	}
 
 	/**
+	 * Waiting doesn't hold up FreeScout's queue for longer than a minute at a time.
+	 *
+	 * @return void
+	 */
+	public function test_patient_client_waits_a_minute_at_most(): void {
+		$this->helpscout->only( 'GET', 'v2/users', FakeHelpScout::json( array(), 429, array( 'X-RateLimit-Retry-After' => '120' ) ) );
+		$client = $this->helpscout->client();
+		$client->set_patient( true );
+
+		$this->expectException( RateLimited::class );
+		$client->users();
+	}
+
+	/**
+	 * HelpScout failing to give a token is an outage, retried later, not refused credentials.
+	 *
+	 * @return void
+	 */
+	public function test_token_outage_isnt_refused_credentials(): void {
+		$this->helpscout->only( 'POST', 'v2/oauth2/token', FakeHelpScout::json( array(), 503 ) );
+
+		try {
+			$this->helpscout->client()->mailboxes();
+			$this->fail( 'Expected an error.' );
+		} catch ( ApiError $e ) {
+			$this->assertFalse( $e->is_denied() );
+			$this->assertSame( 503, $e->status );
+		}
+	}
+
+	/**
+	 * Teams are listed like users of type team.
+	 *
+	 * @return void
+	 */
+	public function test_teams_are_listed_as_users(): void {
+		$this->helpscout->only(
+			'GET',
+			'v2/teams',
+			self::page(
+				'teams',
+				array(
+					array(
+						'id'   => 90,
+						'name' => 'Photo Moderators',
+					),
+				)
+			)
+		);
+
+		$this->assertSame(
+			array(
+				array(
+					'id'        => 90,
+					'type'      => 'team',
+					'firstName' => 'Photo Moderators',
+					'lastName'  => '',
+				),
+			),
+			$this->helpscout->client()->teams()
+		);
+	}
+
+	/**
 	 * A conversation HelpScout no longer has, or merged into another, is none.
 	 *
 	 * @return void

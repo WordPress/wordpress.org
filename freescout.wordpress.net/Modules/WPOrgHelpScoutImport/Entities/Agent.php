@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int $helpscout_user_id
  * @property int $user_id
+ * @property bool $created Whether an import created the user, rather than finding them in FreeScout.
  */
 final class Agent extends Model {
 
@@ -32,5 +33,5 @@ final class Agent extends Model {
 	 *
 	 * @var array
 	 */
-	protected $fillable = array( 'helpscout_user_id', 'user_id' );
+	protected $fillable = array( 'helpscout_user_id', 'user_id', 'created' );
 }

@@ -209,10 +209,7 @@ final class People {
 				$created[] = $user;
 			}
 
-			if ( ! $user->isAdmin() && User::STATUS_ACTIVE === (int) $user->status ) {
-				$user->mailboxes()->syncWithoutDetaching( array( (int) $mailbox->id ) );
-				$user->syncPersonalFolders( null );
-			}
+			self::grant( $user, $mailbox );
 		}
 
 		return $created;
@@ -265,20 +262,39 @@ final class People {
 	/**
 	 * Credits what was imported for a HelpScout user or team to someone else: replies, notes, and assignments.
 	 *
-	 * @param User $from Who it's credited to now.
-	 * @param User $to   Who it's credited to from now on.
+	 * Only what was imported for that HelpScout user or team moves, not what others credited to the same FreeScout user
+	 * did; and conversations agents worked on in FreeScout keep their assignee.
+	 *
+	 * @param int  $helpscout_user_id HelpScout user or team ID.
+	 * @param User $from              Who it's credited to now.
+	 * @param User $to                Who it's credited to from now on.
 	 * @return void
 	 */
-	public static function recredit( User $from, User $to ): void {
-		$threads       = ImportedThread::query()->select( 'thread_id' )->getQuery();
-		$conversations = ImportedConversation::query()->select( 'conversation_id' )->getQuery();
+	public static function recredit( int $helpscout_user_id, User $from, User $to ): void {
+		$threads   = static function ( string $column ) use ( $helpscout_user_id ): \Illuminate\Database\Query\Builder {
+			return ImportedThread::query()->select( 'thread_id' )->where( $column, $helpscout_user_id )->getQuery();
+		};
+		$imported  = static function ( string $column ) use ( $helpscout_user_id ): \Illuminate\Database\Query\Builder {
+			return ImportedConversation::query()->select( 'conversation_id' )->where( $column, $helpscout_user_id )->getQuery();
+		};
+		$worked_on = Thread::query()->select( 'conversation_id' )->where( 'imported', false )->getQuery();
 
 		// Without the events of changed threads and conversations: imported ones were written without them too.
-		foreach ( array( 'created_by_user_id', 'user_id' ) as $column ) {
-			Thread::query()->whereIn( 'id', $threads )->where( $column, $from->id )->update( array( $column => $to->id ) );
-		}
-		foreach ( array( 'created_by_user_id', 'user_id', 'closed_by_user_id' ) as $column ) {
-			Conversation::query()->whereIn( 'id', $conversations )->where( $column, $from->id )->update( array( $column => $to->id ) );
+		Thread::query()->whereIn( 'id', $threads( 'helpscout_user_id' ) )->where( 'created_by_user_id', $from->id )->update( array( 'created_by_user_id' => $to->id ) );
+		Thread::query()->whereIn( 'id', $threads( 'helpscout_assignee_id' ) )->where( 'user_id', $from->id )->update( array( 'user_id' => $to->id ) );
+		Conversation::query()->whereIn( 'id', $imported( 'creator_id' ) )->where( 'created_by_user_id', $from->id )->update( array( 'created_by_user_id' => $to->id ) );
+		Conversation::query()->whereIn( 'id', $imported( 'closer_id' ) )->where( 'closed_by_user_id', $from->id )->update( array( 'closed_by_user_id' => $to->id ) );
+
+		$assigned  = Conversation::query()->whereIn( 'id', $imported( 'assignee_id' ) )->whereNotIn( 'id', $worked_on )->where( 'user_id', $from->id );
+		$mailboxes = ( clone $assigned )->distinct()->pluck( 'mailbox_id' );
+		$assigned->update( array( 'user_id' => $to->id ) );
+
+		// Who sees them under Mine changed.
+		foreach ( Mailbox::query()->whereIn( 'id', $mailboxes )->get() as $mailbox ) {
+			if ( User::TYPE_USER === (int) $to->type ) {
+				self::grant( $to, $mailbox );
+			}
+			$mailbox->updateFoldersCounters();
 		}
 	}
 
@@ -292,12 +308,46 @@ final class People {
 	public static function choose( int $helpscout_user_id, User $user ): void {
 		$previous = Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->value( 'user_id' );
 
-		Agent::query()->updateOrCreate( array( 'helpscout_user_id' => $helpscout_user_id ), array( 'user_id' => $user->id ) );
+		Agent::query()->updateOrCreate(
+			array( 'helpscout_user_id' => $helpscout_user_id ),
+			array(
+				'user_id' => $user->id,
+				'created' => false,
+			)
+		);
 
 		$from = $previous ? User::find( (int) $previous ) : null;
 		if ( $from && (int) $from->id !== (int) $user->id ) {
-			self::recredit( $from, $user );
+			self::recredit( $helpscout_user_id, $from, $user );
 		}
+	}
+
+	/**
+	 * Whether an import created a user, rather than finding them in FreeScout.
+	 *
+	 * @param User $user FreeScout user.
+	 * @return bool
+	 */
+	public static function was_created( User $user ): bool {
+		return Agent::query()->where( 'user_id', $user->id )->where( 'created', true )->exists();
+	}
+
+	/**
+	 * Gives an active user, who isn't an administrator, access to a mailbox, with their own folders in it.
+	 *
+	 * Administrators see every mailbox already.
+	 *
+	 * @param User    $user    FreeScout user.
+	 * @param Mailbox $mailbox FreeScout mailbox.
+	 * @return void
+	 */
+	public static function grant( User $user, Mailbox $mailbox ): void {
+		if ( $user->isAdmin() || User::STATUS_ACTIVE !== (int) $user->status || User::TYPE_USER !== (int) $user->type ) {
+			return;
+		}
+
+		$user->mailboxes()->syncWithoutDetaching( array( (int) $mailbox->id ) );
+		$user->syncPersonalFolders( null );
 	}
 
 	/**
@@ -352,6 +402,17 @@ final class People {
 				$users = array();
 				foreach ( $helpscout->users() as $user ) {
 					$users[ (int) $user['id'] ] = $user + array( 'mailboxes' => array() );
+				}
+
+				// Teams have their own list too, which HelpScout's users may leave them out of.
+				try {
+					foreach ( $helpscout->teams() as $team ) {
+						$users[ $team['id'] ] = ( $users[ $team['id'] ] ?? $team ) + array( 'mailboxes' => array() );
+					}
+				} catch ( \Modules\WPOrgHelpScoutImport\Exceptions\ApiError $e ) {
+					if ( $e instanceof \Modules\WPOrgHelpScoutImport\Exceptions\RateLimited || 0 === $e->status || $e->status >= 500 ) {
+						throw $e;
+					}
 				}
 
 				foreach ( $helpscout->mailboxes() as $mailbox ) {
@@ -543,14 +604,21 @@ final class People {
 	 * @return User
 	 */
 	private function match_or_create( array $person, ?bool $active = null ): User {
-		$user = self::by_email( (string) ( $person['email'] ?? '' ) );
-		if ( ! $user ) {
+		$user    = self::by_email( (string) ( $person['email'] ?? '' ) );
+		$created = ! $user;
+		if ( $created ) {
 			// What HelpScout lists about them, like their timezone, which conversations leave out.
 			$listed = $this->listed( (int) $person['id'] );
 			$user   = self::create( $person + (array) $listed, $active ?? null !== $listed );
 		}
 
-		Agent::query()->updateOrCreate( array( 'helpscout_user_id' => (int) $person['id'] ), array( 'user_id' => $user->id ) );
+		Agent::query()->updateOrCreate(
+			array( 'helpscout_user_id' => (int) $person['id'] ),
+			array(
+				'user_id' => $user->id,
+				'created' => $created,
+			)
+		);
 
 		return $user;
 	}

@@ -265,10 +265,10 @@ final class AgentsControllerTest extends ImportTestCase {
 
 		$page = $this->post( route( 'wporghelpscoutimport.agents.connect' ), array( 'csv' => $this->filled_csv() ) )->getContent();
 
-		$this->assertStringContainsString( 'Connect this FreeScout user', $page );
+		$this->assertStringContainsString( 'Ada Agent was in FreeScout before the import, with another email than the account’s', $page );
 		$this->assertStringContainsString( 'Create a FreeScout user, connected to it', $page );
 		$this->assertStringContainsString( 'There is no WordPress.org account with that username.', $page );
-		$this->assertStringContainsString( 'Connect 2 users', $page );
+		$this->assertStringContainsString( 'Connect 1 users', $page );
 		$this->assertFalse( User::query()->where( 'email', 'bo@wordpress.example' )->exists() );
 		$this->assertSame( '', Account::username_for( (int) $this->agent->id ) );
 	}
@@ -287,16 +287,81 @@ final class AgentsControllerTest extends ImportTestCase {
 				'csv'   => $this->filled_csv(),
 				'apply' => 1,
 			)
-		)->assertSessionHas( 'flash_success', 'Connected 2 HelpScout users to WordPress.org accounts.' );
+		)->assertSessionHas( 'flash_success', 'Connected 1 HelpScout users to WordPress.org accounts.' );
 
 		$bo = User::query()->where( 'email', 'bo@wordpress.example' )->firstOrFail();
 		$this->assertSame( 'bonew', Account::username_for( (int) $bo->id ) );
 		$this->assertSame( User::STATUS_ACTIVE, (int) $bo->status );
 		$this->assertSame( (int) $bo->id, (int) Agent::query()->where( 'helpscout_user_id', 56 )->value( 'user_id' ) );
 
-		$this->assertSame( 'adaagent', Account::username_for( (int) $this->agent->id ) );
-		$this->assertSame( 'ada@wordpress.example', $this->agent->fresh()->email );
+		// Ada was in FreeScout before, with another email: she's connected on her profile, not in bulk.
+		$this->assertSame( '', Account::username_for( (int) $this->agent->id ) );
+		$this->assertSame( 'agent@example.org', $this->agent->fresh()->email );
 		$this->assertFalse( Agent::query()->where( 'helpscout_user_id', 57 )->exists() );
+	}
+
+	/**
+	 * A user an import created, or one with the account's email, is connected; their email becomes the account's.
+	 *
+	 * @return void
+	 */
+	public function test_created_users_and_users_with_the_accounts_email_are_connected(): void {
+		$this->use_wordpress_org();
+		$this->agent->email = 'ada@wordpress.example';
+		$this->agent->save();
+		$created = ( new People( app( HelpScout::class ) ) )->find_or_create( self::helpscout_user( 56, 'Bo', 'Newcomer', 'bo@example.org' ) );
+
+		$this->post(
+			route( 'wporghelpscoutimport.agents.connect' ),
+			array(
+				'csv'   => "helpscout_id,wporg_username\n55,adaagent\n56,bonew\n",
+				'apply' => 1,
+			)
+		)->assertSessionHas( 'flash_success', 'Connected 2 HelpScout users to WordPress.org accounts.' );
+
+		$this->assertSame( 'adaagent', Account::username_for( (int) $this->agent->id ) );
+		$this->assertSame( 'bonew', Account::username_for( (int) $created->id ) );
+		$this->assertSame( 'bo@wordpress.example', $created->fresh()->email );
+	}
+
+	/**
+	 * A CSV can't connect a HelpScout user twice, or one FreeScout user to two accounts.
+	 *
+	 * @return void
+	 */
+	public function test_nobody_is_connected_twice(): void {
+		$this->use_wordpress_org();
+		$people = new People( app( HelpScout::class ) );
+		$bo     = $people->find_or_create( self::helpscout_user( 56, 'Bo', 'Newcomer', 'bo@example.org' ) );
+		People::choose( 57, $bo );
+
+		$page = $this->post( route( 'wporghelpscoutimport.agents.connect' ), array( 'csv' => "helpscout_id,wporg_username\n56,bonew\n56,adaagent\n57,adaagent\n" ) )->getContent();
+
+		$this->assertStringContainsString( 'Another row is for this HelpScout user already.', $page );
+		$this->assertStringContainsString( 'Another row connects this FreeScout user to bonew.', $page );
+		$this->assertStringContainsString( 'Connect 1 users', $page );
+	}
+
+	/**
+	 * Line breaks in names don't make rows of their own when the CSV comes back.
+	 *
+	 * @return void
+	 */
+	public function test_line_breaks_in_names_dont_make_rows(): void {
+		$this->use_wordpress_org();
+		Person::query()->create(
+			array(
+				'helpscout_user_id' => 70,
+				'first_name'        => 'Dee',
+				'last_name'         => "Parted\n55,a,b,c,d,e,f,adaagent",
+				'email'             => 'dee@example.org',
+			)
+		);
+
+		$csv = $this->get( route( 'wporghelpscoutimport.agents.export' ) )->getContent();
+
+		$this->assertSame( array(), \Modules\WPOrgHelpScoutImport\Services\WordPressOrgAccounts::parse( $csv ) );
+		$this->assertStringContainsString( 'Parted 55', $csv );
 	}
 
 	/**

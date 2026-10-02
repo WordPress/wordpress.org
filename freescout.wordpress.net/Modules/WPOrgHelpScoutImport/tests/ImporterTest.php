@@ -404,11 +404,11 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
-	 * A reply hidden from what the sender is sent stays visible to agents, as a note.
+	 * A reply hidden from what the sender is sent, or that bounced, stays visible to agents, as a note; drafts don't.
 	 *
 	 * @return void
 	 */
-	public function test_hidden_replies_become_notes(): void {
+	public function test_hidden_and_bounced_replies_become_notes(): void {
 		$threads             = $this->threads();
 		$threads[1]['state'] = 'hidden';
 		$threads[]           = array_replace(
@@ -418,13 +418,112 @@ final class ImporterTest extends ImportTestCase {
 				'state' => 'draft',
 			)
 		);
+		$threads[]           = array_replace(
+			$threads[1],
+			array(
+				'id'        => 2011,
+				'state'     => 'bounced',
+				'createdAt' => '2026-09-03T10:00:00Z',
+			)
+		);
 		$this->answer_threads( self::CONVERSATION_ID, $threads );
 
 		$this->importer->import( $this->conversation(), $this->mailbox );
 
 		$types = $this->imported_conversation()->threads()->orderBy( 'created_at' )->orderBy( 'id' )->pluck( 'type' )->map( 'intval' )->all();
-		$this->assertSame( array( Thread::TYPE_CUSTOMER, Thread::TYPE_NOTE, Thread::TYPE_NOTE ), $types );
+		$this->assertSame( array( Thread::TYPE_CUSTOMER, Thread::TYPE_NOTE, Thread::TYPE_NOTE, Thread::TYPE_NOTE ), $types );
 		$this->assertNull( ImportedThread::query()->where( 'helpscout_id', 2010 )->first() );
+	}
+
+	/**
+	 * PDFs are attached too, and checked for scripts like core checks uploads.
+	 *
+	 * @return void
+	 */
+	public function test_pdf_attachments_are_imported(): void {
+		$threads                                   = $this->threads();
+		$threads[0]['_embedded']['attachments'][0] = array(
+			'id'       => 3001,
+			'filename' => 'report.pdf',
+			'mimeType' => 'application/pdf',
+		);
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/attachments/3001/file', new \GuzzleHttp\Psr7\Response( 200, array(), "%PDF-1.4\n/JavaScript (app.alert(1))" ) );
+
+		$this->assertSame( Importer::IMPORTED, $this->importer->import( $this->conversation(), $this->mailbox ) );
+
+		$email      = $this->imported_conversation()->threads()->where( 'type', Thread::TYPE_CUSTOMER )->first();
+		$attachment = Attachment::query()->where( 'thread_id', $email->id )->firstOrFail();
+		$this->assertSame( 'report.pdf_', $attachment->file_name );
+		$this->assertSame( "%PDF-1.4\n/JavaScript (app.alert(1))", $attachment->getFileContents() );
+	}
+
+	/**
+	 * A conversation HelpScout moved to another mailbox moves too, unless agents worked on it in FreeScout.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_helpscout_moved_moves_too(): void {
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$themes = $this->create_mailbox( 'Themes' );
+
+		$this->assertSame( Importer::UPDATED, $this->importer->import( $this->conversation(), $themes ) );
+		$this->assertSame( (int) $themes->id, (int) $this->imported_conversation()->mailbox_id );
+		$this->assertSame( (int) $themes->id, (int) $this->imported_conversation()->folder->mailbox_id );
+
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_NOTE, 'On it.', $this->agent, '2026-09-10 08:00:00' );
+		$this->assertSame( Importer::SKIPPED_ELSEWHERE, $this->importer->import( $this->conversation(), $this->mailbox ) );
+		$this->assertSame( (int) $themes->id, (int) $this->imported_conversation()->mailbox_id );
+	}
+
+	/**
+	 * Whoever a conversation is assigned to gets access to its mailbox, to see it.
+	 *
+	 * @return void
+	 */
+	public function test_assignee_gets_access_to_the_mailbox(): void {
+		$this->agent->role = User::ROLE_USER;
+		$this->agent->save();
+
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => self::agent_person(),
+				)
+			),
+			$this->mailbox
+		);
+
+		$this->assertSame( array( (int) $this->mailbox->id ), $this->agent->mailboxes()->pluck( 'mailboxes.id' )->map( 'intval' )->all() );
+		$this->assertTrue( Folder::query()->where( 'user_id', $this->agent->id )->where( 'type', Folder::TYPE_MINE )->exists() );
+	}
+
+	/**
+	 * Choosing someone else for a HelpScout user moves only what was imported for that HelpScout user.
+	 *
+	 * @return void
+	 */
+	public function test_choosing_someone_else_moves_only_that_helpscout_users_work(): void {
+		People::choose( 66, $this->agent );
+		$threads                 = $this->threads();
+		$threads[2]['createdBy'] = array(
+			'id'    => 66,
+			'type'  => 'user',
+			'email' => 'ada@old.example',
+			'first' => 'Ada',
+			'last'  => 'Agent',
+		);
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$other = factory( User::class )->create();
+		People::choose( 66, $other );
+
+		$conversation = $this->imported_conversation();
+		$this->assertSame( (int) $other->id, (int) $conversation->threads()->where( 'type', Thread::TYPE_NOTE )->value( 'created_by_user_id' ) );
+		$this->assertSame( (int) $this->agent->id, (int) $conversation->threads()->where( 'type', Thread::TYPE_MESSAGE )->value( 'created_by_user_id' ) );
+		$this->assertSame( (int) $this->agent->id, (int) $conversation->closed_by_user_id );
 	}
 
 	/**

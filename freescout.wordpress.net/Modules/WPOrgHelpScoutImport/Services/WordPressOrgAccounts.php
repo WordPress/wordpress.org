@@ -111,7 +111,7 @@ final class WordPressOrgAccounts {
 				implode( '; ', $agent['mailboxes'] ),
 				$agent['former'] ? 'yes' : 'no',
 				$agent['user'] ? (string) $agent['user']->email : '',
-				$agent['user'] ? Account::username_for( (int) $agent['user']->id ) : '',
+				$agent['user'] && self::available() ? Account::username_for( (int) $agent['user']->id ) : '',
 			);
 		}
 
@@ -133,16 +133,20 @@ final class WordPressOrgAccounts {
 	 * @return array[] Each with `helpscout_id` (0 if the row has none), `email`, and `username`.
 	 */
 	public static function parse( string $csv ): array {
-		$lines  = preg_split( '/\r\n|\r|\n/', trim( $csv ) );
-		$header = array_map( 'strtolower', array_map( 'trim', str_getcsv( (string) array_shift( $lines ), ',', '"', '' ) ) );
+		// Read as CSV, not line by line: a quoted cell can hold a line break.
+		$file = fopen( 'php://temp', 'r+' );
+		fwrite( $file, $csv );
+		rewind( $file );
+
+		$header = array_map( 'strtolower', array_map( array( self::class, 'uncell' ), (array) fgetcsv( $file, 0, ',', '"', '' ) ) );
 		$rows   = array();
 
-		foreach ( $lines as $line ) {
-			if ( '' === trim( $line ) ) {
+		for ( $cells = fgetcsv( $file, 0, ',', '"', '' ); false !== $cells; $cells = fgetcsv( $file, 0, ',', '"', '' ) ) {
+			if ( array( null ) === $cells ) {
 				continue;
 			}
 
-			$cells = array_map( 'trim', str_getcsv( $line, ',', '"', '' ) );
+			$cells = array_map( array( self::class, 'uncell' ), $cells );
 			$row   = array_combine( $header, array_pad( array_slice( $cells, 0, count( $header ) ), count( $header ), '' ) );
 
 			$username = (string) ( $row['wporg_username'] ?? '' );
@@ -156,6 +160,7 @@ final class WordPressOrgAccounts {
 				'username'     => $username,
 			);
 		}
+		fclose( $file );
 
 		return $rows;
 	}
@@ -169,11 +174,37 @@ final class WordPressOrgAccounts {
 	 *                 `error` (why nothing can be done, or '').
 	 */
 	public function plan( array $rows ): array {
-		$client = Client::from_config();
-		$plan   = array();
+		$client  = Client::from_config();
+		$plan    = array();
+		$people  = array();
+		$targets = array();
 
 		foreach ( $rows as $row ) {
-			$plan[] = $this->plan_row( $row, $client );
+			$step = $this->plan_row( $row, $client );
+			$id   = (int) ( $step['helpscout_user']['id'] ?? 0 );
+			$user = $step['user'] ? (int) $step['user']->id : 0;
+
+			// One account per person: a CSV can't connect anyone twice, or one FreeScout user to two accounts.
+			if ( ! $step['error'] && isset( $people[ $id ] ) ) {
+				$step = array(
+					'action' => null,
+					'error'  => __( 'Another row is for this HelpScout user already.' ),
+				) + $step;
+			} elseif ( ! $step['error'] && $user && isset( $targets[ $user ] ) && $targets[ $user ] !== $step['wporg_user']->username ) {
+				$step = array(
+					'action' => null,
+					'error'  => __( 'Another row connects this FreeScout user to :username.', array( 'username' => $targets[ $user ] ) ),
+				) + $step;
+			}
+
+			if ( ! $step['error'] ) {
+				$people[ $id ] = true;
+				if ( $user ) {
+					$targets[ $user ] = $step['wporg_user']->username;
+				}
+			}
+
+			$plan[] = $step;
 		}
 
 		return $plan;
@@ -183,42 +214,90 @@ final class WordPressOrgAccounts {
 	 * Connects what plan() says can be: creates users, connects them, and credits HelpScout users to them.
 	 *
 	 * @param array[] $plan From plan().
-	 * @return User[] The users connected or credited, by HelpScout user ID.
+	 * @return array `done`: the users connected or credited, by HelpScout user ID; `skipped`: why the rest weren't.
 	 */
 	public function apply( array $plan ): array {
-		$done = array();
+		$done    = array();
+		$skipped = array();
 
 		foreach ( $plan as $step ) {
 			if ( ! $step['action'] || self::DONE === $step['action'] ) {
 				continue;
 			}
 
+			$username = $step['wporg_user']->username;
+			$id       = (int) $step['helpscout_user']['id'];
+
 			// Another row may have connected the account since: two HelpScout users of the same person.
-			$connected = Account::user_for( $step['wporg_user']->username );
+			$connected = Account::user_for( $username );
 
-			$user = \DB::transaction(
-				function () use ( $step, $connected ): User {
-					$user = $connected ?? $step['user'] ?? $this->people->find_or_create( $step['helpscout_user'] );
+			try {
+				$user = \DB::transaction(
+					function () use ( $step, $connected, $username, $id ): User {
+						$user = $connected ?? $step['user'] ?? $this->people->find_or_create( $step['helpscout_user'] );
 
-					if ( ! $connected ) {
-						Account::connect( (int) $user->id, $step['wporg_user']->username );
+						// Checked again: what plan() saw may have changed, like another row connecting the same user.
+						if ( ! $connected ) {
+							$error = self::connect_error( $user, $step['wporg_user'] );
+							if ( '' !== $error ) {
+								throw new \RuntimeException( $error );
+							}
+
+							Account::connect( (int) $user->id, $username );
+						}
+
+						People::choose( $id, $user );
+
+						return $user;
 					}
-
-					People::choose( (int) $step['helpscout_user']['id'], $user );
-
-					return $user;
-				}
-			);
+				);
+			} catch ( \RuntimeException $e ) {
+				$skipped[ $id ] = $e->getMessage();
+				continue;
+			}
 
 			// Name, email, and avatar from WordPress.org, as WP.org SSO does when connecting a user on their profile.
 			if ( ! $connected ) {
 				UserSync::sync( $user, $step['wporg_user'] );
 			}
 
-			$done[ (int) $step['helpscout_user']['id'] ] = $user;
+			$done[ $id ] = $user;
 		}
 
-		return $done;
+		return array(
+			'done'    => $done,
+			'skipped' => $skipped,
+		);
+	}
+
+	/**
+	 * Why a FreeScout user can't be connected to a WordPress.org account in bulk, if they can't.
+	 *
+	 * Connecting someone lets the account's owner log in as them. Only users an import created, who aren't
+	 * administrators, or whose email is the account's, are connected in bulk; others are connected on their profile.
+	 *
+	 * @param User             $user       FreeScout user.
+	 * @param WordPressOrgUser $wporg_user WordPress.org account.
+	 * @return string Error, or '' if they can be.
+	 */
+	private static function connect_error( User $user, WordPressOrgUser $wporg_user ): string {
+		$connected = Account::username_for( (int) $user->id );
+		if ( '' !== $connected ) {
+			return __(
+				':name is connected to the WordPress.org account :username already.',
+				array(
+					'name'     => $user->getFullName(),
+					'username' => $connected,
+				)
+			);
+		}
+
+		$same_email = '' !== $wporg_user->email && 0 === strcasecmp( (string) $user->email, $wporg_user->email );
+		if ( ! $same_email && ( $user->isAdmin() || ! People::was_created( $user ) ) ) {
+			return __( ':name was in FreeScout before the import, with another email than the account’s: connect them on their profile.', array( 'name' => $user->getFullName() ) );
+		}
+
+		return '';
 	}
 
 	/**
@@ -267,17 +346,12 @@ final class WordPressOrgAccounts {
 		}
 
 		// Otherwise their FreeScout user, or the one with the account's email, is connected; or one is created.
-		$user = $existing ?? People::by_email( $step['wporg_user']->email );
-		if ( $user && '' !== Account::username_for( (int) $user->id ) ) {
+		$user  = $existing ?? People::by_email( $step['wporg_user']->email );
+		$error = $user ? self::connect_error( $user, $step['wporg_user'] ) : '';
+		if ( '' !== $error ) {
 			return array(
 				'user'  => $user,
-				'error' => __(
-					':name is connected to the WordPress.org account :username already.',
-					array(
-						'name'     => $user->getFullName(),
-						'username' => Account::username_for( (int) $user->id ),
-					)
-				),
+				'error' => $error,
 			) + $step;
 		}
 
@@ -333,14 +407,26 @@ final class WordPressOrgAccounts {
 	}
 
 	/**
-	 * A CSV cell that spreadsheets won't run as a formula.
+	 * A CSV cell that spreadsheets won't run as a formula, without control characters, like line breaks.
 	 *
 	 * @param mixed $value Value.
 	 * @return string
 	 */
 	private static function cell( $value ): string {
-		$value = (string) $value;
+		$value = (string) preg_replace( '/[\x00-\x1F\x7F]+/', ' ', (string) $value );
 
 		return '' !== $value && in_array( $value[0], array( '=', '+', '-', '@' ), true ) ? "'" . $value : $value;
+	}
+
+	/**
+	 * A cell's value, without what cell() added, and the spaces around it.
+	 *
+	 * @param mixed $value Cell.
+	 * @return string
+	 */
+	private static function uncell( $value ): string {
+		$value = trim( (string) $value );
+
+		return (string) preg_replace( "/^'(?=[=+\-@])/", '', $value );
 	}
 }

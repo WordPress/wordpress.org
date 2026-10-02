@@ -46,6 +46,20 @@ final class ImportPage implements ShouldQueue {
 	private const RETRY_BATCH = 25;
 
 	/**
+	 * How often a conversation's import can start before it's counted as failed.
+	 *
+	 * @var int
+	 */
+	private const MAX_ATTEMPTS = 5;
+
+	/**
+	 * Failures in a row before a run stops: an hour of tries.
+	 *
+	 * @var int
+	 */
+	private const MAX_PAGE_FAILURES = 12;
+
+	/**
 	 * Run ID.
 	 *
 	 * @var int
@@ -149,40 +163,55 @@ final class ImportPage implements ShouldQueue {
 				}
 				++$imported;
 
-				// The rate limit cut this one off before: it needs more than a minute's share, so this time it waits.
-				$helpscout->set_patient( $current === (int) $run->waiting_on );
+				// Kept before it's imported: a job that dies on it, like out of memory, leaves it behind for the next.
+				$run->attempts   = $current === (int) $run->attempting ? $run->attempts + 1 : 1;
+				$run->attempting = $current;
+				if ( ! $this->save( $run ) ) {
+					return;
+				}
 
-				$this->import( $importer, $helpscout, (array) $conversation, $mailbox, $run );
+				if ( $run->attempts > self::MAX_ATTEMPTS ) {
+					$run->add_failure( $current, 'Its import stopped ' . self::MAX_ATTEMPTS . ' times without finishing, like by running out of memory or time, or HelpScout failing for it.' );
+				} else {
+					// The rate limit cut this one off before: it needs more than a minute's share, so this time it waits.
+					$helpscout->set_patient( $current === (int) $run->waiting_on );
+
+					$this->import( $importer, $helpscout, (array) $conversation, $mailbox, $run );
+				}
+
 				$done[]          = $current;
 				$run->page_done  = $done;
 				$run->waiting_on = null;
+				$run->attempting = null;
+				$run->attempts   = 0;
 
 				if ( ! $this->save( $run ) ) {
 					return;
 				}
 			}
+
+			$run->page_failures = 0;
 		} catch ( RateLimited $e ) {
+			// Waiting for the rate limit isn't a failed attempt.
 			$run->waiting_on = $current ? $current : null;
+			$run->attempts   = max( 0, $run->attempts - 1 );
 			$this->save( $run );
 			$this->again( $e->retry_after );
 
 			return;
 		} catch ( ApiError $e ) {
-			if ( $e->is_denied() ) {
+			// Refused, or an answer to the list that waiting won't change.
+			if ( $e->is_denied() || ( $e->status >= 400 && $e->status < 500 ) ) {
 				$this->stop( $run, $e->getMessage() );
 			} else {
-				$run->last_error = $e->getMessage();
-				$this->save( $run );
-				$this->again( self::RETRY_DELAY );
+				$this->fail_page( $run, $e->getMessage() );
 			}
 
 			return;
 		} catch ( \Throwable $e ) {
 			// FreeScout's worker doesn't retry jobs: without this, the run would wait for a job that's gone.
-			$run->last_error = $e->getMessage();
 			\Log::error( '[WPOrgHelpScoutImport] Could not import a page of ' . $run->helpscout_mailbox_name . ': ' . $e->getMessage() );
-			$this->save( $run );
-			$this->again( self::RETRY_DELAY );
+			$this->fail_page( $run, $e->getMessage() );
 
 			return;
 		} finally {
@@ -235,8 +264,8 @@ final class ImportPage implements ShouldQueue {
 
 			$result = $conversation ? $importer->import( $conversation, $mailbox ) : Importer::SKIPPED_GONE;
 		} catch ( ApiError $e ) {
-			// The rate limit, rejected credentials, and outages hold for every conversation.
-			if ( $e instanceof RateLimited || $e->is_denied() || 0 === $e->status || $e->status >= 500 ) {
+			// The rate limit, rejected credentials, and outages hold for every conversation; a 403 may be this one's.
+			if ( $e instanceof RateLimited || 401 === $e->status || 0 === $e->status || $e->status >= 500 ) {
 				throw $e;
 			}
 
@@ -254,6 +283,26 @@ final class ImportPage implements ShouldQueue {
 		} else {
 			++$run->{$result};
 		}
+	}
+
+	/**
+	 * Tries the page again later, or stops the run once HelpScout failed too many pages in a row.
+	 *
+	 * @param Run    $run   Run.
+	 * @param string $error What went wrong.
+	 * @return void
+	 */
+	private function fail_page( Run $run, string $error ): void {
+		++$run->page_failures;
+		if ( $run->page_failures > self::MAX_PAGE_FAILURES ) {
+			$this->stop( $run, 'Stopped after ' . self::MAX_PAGE_FAILURES . ' failures in a row: ' . $error );
+
+			return;
+		}
+
+		$run->last_error = $error;
+		$this->save( $run );
+		$this->again( self::RETRY_DELAY );
 	}
 
 	/**

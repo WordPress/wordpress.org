@@ -36,6 +36,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null      $last_error
  * @property int[]|null       $retry_ids   HelpScout IDs to import again, for a run that retries another's failures.
  * @property int|null         $waiting_on  HelpScout ID of a conversation the rate limit cut off part way.
+ * @property int|null         $attempting  HelpScout ID of the conversation being imported.
+ * @property int              $attempts    How often its import started.
+ * @property int              $page_failures Pages HelpScout failed in a row.
  * @property string|null      $token       Identifies the run's current chain of jobs.
  * @property \Carbon\Carbon|null $started_at
  * @property \Carbon\Carbon|null $finished_at

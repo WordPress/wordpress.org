@@ -161,7 +161,7 @@ final class AgentsController extends Controller {
 			);
 		}
 
-		$done   = $accounts->apply( $plan );
+		$result = $accounts->apply( $plan );
 		$errors = count(
 			array_filter(
 				$plan,
@@ -169,9 +169,9 @@ final class AgentsController extends Controller {
 					return '' !== $step['error'];
 				}
 			)
-		);
+		) + count( $result['skipped'] );
 
-		$redirect = redirect()->route( 'wporghelpscoutimport.agents' )->with( 'flash_success', __( 'Connected :count HelpScout users to WordPress.org accounts.', array( 'count' => count( $done ) ) ) );
+		$redirect = redirect()->route( 'wporghelpscoutimport.agents' )->with( 'flash_success', __( 'Connected :count HelpScout users to WordPress.org accounts.', array( 'count' => count( $result['done'] ) ) ) );
 
 		return $errors ? $redirect->with( 'flash_error', __( ':count rows couldn’t be connected; check the CSV again to see why.', array( 'count' => $errors ) ) ) : $redirect;
 	}

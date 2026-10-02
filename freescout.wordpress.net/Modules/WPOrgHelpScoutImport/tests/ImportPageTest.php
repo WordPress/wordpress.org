@@ -263,6 +263,69 @@ final class ImportPageTest extends ImportTestCase {
 	}
 
 	/**
+	 * A conversation whose import keeps stopping the job, like by running out of memory, is counted as failed.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_that_keeps_stopping_the_job_is_failed(): void {
+		$this->answer_page( array( $this->conversation(), $this->conversation( array( 'id' => 1002 ) ) ), 1 );
+		$this->answer_threads( 1002, $this->threads( 100 ) );
+		$this->run->attempting = 1001;
+		$this->run->attempts   = 5;
+		$this->run->save();
+
+		$this->handle();
+
+		$run = $this->run->fresh();
+		$this->assertStringContainsString( 'stopped 5 times', (string) $run->failures[1001] );
+		$this->assertSame( 1, (int) $run->imported );
+		$this->assertCount( 0, $this->helpscout->requests_to( 'v2/conversations/1001/threads' ) );
+		$this->assertNull( $run->attempting );
+	}
+
+	/**
+	 * A 403 for one conversation fails that conversation, not the run.
+	 *
+	 * @return void
+	 */
+	public function test_forbidden_conversation_fails_alone(): void {
+		$this->answer_page( array( $this->conversation( array( 'id' => 1004 ) ), $this->conversation() ), 1 );
+		$this->helpscout->only( 'GET', 'v2/conversations/1004/threads', FakeHelpScout::json( array(), 403 ) );
+
+		$this->handle();
+
+		$run = $this->run->fresh();
+		$this->assertSame( Run::STATUS_RUNNING, $run->status );
+		$this->assertSame( array( 1004 ), array_keys( (array) $run->failures ) );
+		$this->assertSame( 1, (int) $run->imported );
+	}
+
+	/**
+	 * A list HelpScout won't give stops the run; one it keeps failing to give stops it after an hour of tries.
+	 *
+	 * @return void
+	 */
+	public function test_lists_that_keep_failing_stop_the_run(): void {
+		$this->helpscout->only( 'GET', 'v2/conversations', FakeHelpScout::json( array(), 503 ) );
+		$this->run->page_failures = 12;
+		$this->run->save();
+
+		$this->handle();
+
+		$this->assertSame( Run::STATUS_FAILED, $this->run->fresh()->status );
+		Queue::assertNotPushed( ImportPage::class );
+
+		$this->run->status        = Run::STATUS_RUNNING;
+		$this->run->page_failures = 0;
+		$this->run->save();
+		$this->helpscout->only( 'GET', 'v2/conversations', FakeHelpScout::json( array(), 400 ) );
+
+		$this->handle();
+
+		$this->assertSame( Run::STATUS_FAILED, $this->run->fresh()->status );
+	}
+
+	/**
 	 * A conversation that fails is counted and logged; the page goes on.
 	 *
 	 * @return void

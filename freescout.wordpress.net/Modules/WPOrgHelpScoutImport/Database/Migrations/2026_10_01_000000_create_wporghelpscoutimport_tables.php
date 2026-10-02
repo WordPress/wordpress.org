@@ -59,6 +59,14 @@ class CreateWporghelpscoutimportTables extends Migration {
 					// A conversation the rate limit cut off part way: its next try waits for the limit instead.
 					$table->unsignedBigInteger( 'waiting_on' )->nullable();
 
+					// The conversation being imported, and how often its import started: one that keeps stopping the job,
+					// like by running out of memory, is counted as failed so the run goes on.
+					$table->unsignedBigInteger( 'attempting' )->nullable();
+					$table->unsignedTinyInteger( 'attempts' )->default( 0 );
+
+					// Pages HelpScout failed in a row; the run stops after too many.
+					$table->unsignedSmallInteger( 'page_failures' )->default( 0 );
+
 					// Changes when the run is paused or resumed, so a job queued before stops instead of running twice.
 					$table->string( 'token', 32 )->nullable();
 					$table->timestamp( 'started_at' )->nullable();
@@ -79,6 +87,11 @@ class CreateWporghelpscoutimportTables extends Migration {
 					$table->unsignedBigInteger( 'helpscout_number' )->index();
 					$table->unsignedInteger( 'conversation_id' )->unique();
 
+					// HelpScout users it was started, assigned, and closed by, so they can be credited to someone else later.
+					$table->unsignedBigInteger( 'creator_id' )->nullable()->index();
+					$table->unsignedBigInteger( 'assignee_id' )->nullable()->index();
+					$table->unsignedBigInteger( 'closer_id' )->nullable()->index();
+
 					// Kept until the Tags and Custom Fields modules can take them.
 					$table->text( 'tags' )->nullable();
 					$table->text( 'custom_fields' )->nullable();
@@ -93,7 +106,10 @@ class CreateWporghelpscoutimportTables extends Migration {
 				static function ( Blueprint $table ): void {
 					$table->increments( 'id' );
 					$table->unsignedBigInteger( 'helpscout_user_id' )->unique();
-					$table->unsignedInteger( 'user_id' );
+					$table->unsignedInteger( 'user_id' )->index();
+
+					// Whether an import created the user, rather than finding them in FreeScout.
+					$table->boolean( 'created' )->default( false );
 					$table->timestamps();
 				}
 			);
@@ -109,6 +125,9 @@ class CreateWporghelpscoutimportTables extends Migration {
 
 					// Who wrote a reply or note, so it can be credited to someone else later.
 					$table->unsignedBigInteger( 'helpscout_user_id' )->nullable()->index();
+
+					// Whom the conversation was assigned to at the time, a HelpScout user or team.
+					$table->unsignedBigInteger( 'helpscout_assignee_id' )->nullable()->index();
 				}
 			);
 		}

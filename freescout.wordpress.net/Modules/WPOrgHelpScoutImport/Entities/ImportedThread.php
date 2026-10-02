@@ -17,7 +17,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property int      $id
  * @property int      $helpscout_id
  * @property int      $thread_id
- * @property int|null $helpscout_user_id HelpScout user who wrote it, for replies and notes.
+ * @property int|null $helpscout_user_id     HelpScout user who wrote it, for replies and notes.
+ * @property int|null $helpscout_assignee_id HelpScout user or team the conversation was assigned to then.
  */
 final class ImportedThread extends Model {
 
@@ -40,5 +41,5 @@ final class ImportedThread extends Model {
 	 *
 	 * @var array
 	 */
-	protected $fillable = array( 'helpscout_id', 'thread_id', 'helpscout_user_id' );
+	protected $fillable = array( 'helpscout_id', 'thread_id', 'helpscout_user_id', 'helpscout_assignee_id' );
 }

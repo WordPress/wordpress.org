@@ -216,8 +216,9 @@ final class ImportController extends Controller {
 					return null;
 				}
 
-				$run->status      = Run::STATUS_RUNNING;
-				$run->finished_at = null;
+				$run->status        = Run::STATUS_RUNNING;
+				$run->finished_at   = null;
+				$run->page_failures = 0;
 				$run->renew_token();
 				$run->save();
 

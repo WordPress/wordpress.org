@@ -18,9 +18,11 @@
 		'deleted'     => __('deleted in FreeScout'),
 		'empty'       => __('nothing to import'),
 		'gone'        => __('no longer in HelpScout'),
+		'elsewhere'   => __('worked on in another FreeScout mailbox'),
 	];
 @endphp
-<div class="container" @if ( $running ) data-wporghelpscoutimport-refresh="30" @endif>
+{{-- Not while something on the page waits to be confirmed: refreshing would lose it. --}}
+<div class="container" @if ( $running && ! session( 'wporghelpscoutimport_confirm' ) ) data-wporghelpscoutimport-refresh="30" @endif>
 	<div class="flexy-container">
 		<div class="flexy-item">
 			<span class="heading">{{ __('HelpScout Import') }}</span>

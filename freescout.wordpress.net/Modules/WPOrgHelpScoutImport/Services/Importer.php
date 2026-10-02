@@ -15,7 +15,9 @@ use App\Customer;
 use App\Email;
 use App\Mailbox;
 use App\Thread;
+use App\User;
 use Carbon\Carbon;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Schema;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
@@ -78,6 +80,13 @@ final class Importer {
 	public const SKIPPED_EMPTY = 'empty';
 
 	/**
+	 * Left it out: it's in another FreeScout mailbox, where agents worked on it.
+	 *
+	 * @var string
+	 */
+	public const SKIPPED_ELSEWHERE = 'elsewhere';
+
+	/**
 	 * Left it out: HelpScout no longer has it, or merged it into another.
 	 *
 	 * @var string
@@ -90,6 +99,13 @@ final class Importer {
 	 * @var int
 	 */
 	private const ORIGINAL_KEPT_DAYS = 730;
+
+	/**
+	 * Most bytes of images in emails' bodies copied per conversation; the rest keep their links.
+	 *
+	 * @var int
+	 */
+	private const MAX_IMAGE_BYTES_PER_CONVERSATION = 100 * 1024 * 1024;
 
 	/**
 	 * HelpScout's read-tracking image, which its emails carry, and replies quote.
@@ -138,6 +154,20 @@ final class Importer {
 	 * @var People
 	 */
 	private $people;
+
+	/**
+	 * Images downloaded for the conversation being imported, by URL; null for those that weren't.
+	 *
+	 * @var array
+	 */
+	private $downloads = array();
+
+	/**
+	 * Bytes of images downloaded for the conversation being imported.
+	 *
+	 * @var int
+	 */
+	private $download_bytes = 0;
 
 	/**
 	 * Constructor.
@@ -200,8 +230,27 @@ final class Importer {
 			return self::SKIPPED_NO_SENDER;
 		}
 
-		$threads = $this->new_threads( $helpscout_id, $this->helpscout->threads( $helpscout_id ) );
+		// HelpScout moved it to another mailbox since: it moves too, unless agents worked on it in FreeScout.
+		$worked_on  = $conversation && $conversation->threads()->where( 'imported', false )->exists();
+		$moved_from = $conversation && (int) $conversation->mailbox_id !== (int) $mailbox->id ? $conversation->mailbox : null;
+		if ( $moved_from && $worked_on ) {
+			return self::SKIPPED_ELSEWHERE;
+		}
+
+		$this->downloads      = array();
+		$this->download_bytes = 0;
+
+		try {
+			$threads = $this->new_threads( $helpscout_id, $this->helpscout->threads( $helpscout_id ) );
+		} catch ( \Throwable $e ) {
+			$this->close_downloads( array() );
+
+			throw $e;
+		}
+
 		if ( ! $conversation && ! $threads ) {
+			$this->close_downloads( $threads );
+
 			return self::SKIPPED_EMPTY;
 		}
 
@@ -212,11 +261,14 @@ final class Importer {
 
 		try {
 			\DB::transaction(
-				function () use ( &$conversation, &$attachments, $source, $mailbox, $sender, $threads, $status ): void {
-					$worked_on = $conversation && $conversation->threads()->where( 'imported', false )->exists();
-
+				function () use ( &$conversation, &$attachments, $source, $mailbox, $sender, $threads, $status, $worked_on ): void {
 					if ( ! $conversation ) {
 						$conversation = $this->create_conversation( $source, $mailbox, $sender );
+					}
+
+					if ( (int) $conversation->mailbox_id !== (int) $mailbox->id ) {
+						$conversation->mailbox_id = $mailbox->id;
+						$conversation->setRelation( 'mailbox', $mailbox );
 					}
 
 					foreach ( $threads as $thread ) {
@@ -230,6 +282,9 @@ final class Importer {
 						array(
 							'helpscout_number' => (int) ( $source['number'] ?? 0 ),
 							'conversation_id'  => (int) $conversation->id,
+							'creator_id'       => 'user' === ( $source['createdBy']['type'] ?? '' ) ? self::person_id( $source['createdBy'] ) : null,
+							'assignee_id'      => self::person_id( $source['assignee'] ?? null ),
+							'closer_id'        => self::person_id( $source['closedByUser'] ?? null ),
 							'tags'             => self::json( array_values( array_filter( array_map( array( self::class, 'tag_name' ), (array) ( $source['tags'] ?? array() ) ) ) ) ),
 							'custom_fields'    => self::json( (array) ( $source['customFields'] ?? array() ) ),
 						)
@@ -244,16 +299,35 @@ final class Importer {
 
 			throw $e;
 		} finally {
-			foreach ( $threads as $thread ) {
-				foreach ( $thread['files'] as $file ) {
-					if ( is_resource( $file['data'] ) ) {
-						fclose( $file['data'] );
-					}
-				}
-			}
+			$this->close_downloads( $threads );
+		}
+
+		if ( $moved_from ) {
+			$moved_from->updateFoldersCounters();
 		}
 
 		return $imported ? self::UPDATED : self::IMPORTED;
+	}
+
+	/**
+	 * Closes, and so deletes, the temporary files a conversation's attachments and images were downloaded into.
+	 *
+	 * @param array[] $threads Threads, from new_threads().
+	 * @return void
+	 */
+	private function close_downloads( array $threads ): void {
+		$files = array_column( array_filter( $this->downloads ), 'data' );
+		foreach ( $threads as $thread ) {
+			$files = array_merge( $files, array_column( $thread['files'], 'data' ) );
+		}
+
+		foreach ( $files as $file ) {
+			if ( is_resource( $file ) ) {
+				fclose( $file );
+			}
+		}
+
+		$this->downloads = array();
 	}
 
 	/**
@@ -351,21 +425,79 @@ final class Importer {
 				continue;
 			}
 
-			$data = $this->helpscout->image( $url );
-			$mime = $data ? (string) finfo_buffer( finfo_open(), $data, FILEINFO_MIME_TYPE ) : '';
-			if ( ! str_starts_with( $mime, 'image/' ) ) {
-				continue;
+			// Replies quote earlier emails' images: each is downloaded once per conversation, up to a total.
+			if ( ! array_key_exists( $url, $this->downloads ) ) {
+				$this->downloads[ $url ] = $this->download_image( $url );
 			}
 
-			$name           = basename( (string) parse_url( $url, PHP_URL_PATH ) );
-			$images[ $src ] = array(
-				'name' => '' !== $name ? $name : 'image',
-				'mime' => $mime,
-				'data' => $data,
-			);
+			if ( $this->downloads[ $url ] ) {
+				$images[ $src ] = $this->downloads[ $url ];
+			}
 		}
 
 		return $images;
+	}
+
+	/**
+	 * Downloads an image HelpScout hosts into a temporary file, unless the conversation's images are too large already.
+	 *
+	 * @param string $url Image URL.
+	 * @return array|null With `name`, `mime`, and `data`, the file; null if it isn't an image, or wasn't downloaded.
+	 */
+	private function download_image( string $url ): ?array {
+		if ( $this->download_bytes >= self::MAX_IMAGE_BYTES_PER_CONVERSATION ) {
+			return null;
+		}
+
+		$file = $this->helpscout->image( $url );
+		if ( ! $file ) {
+			return null;
+		}
+
+		$path                  = self::path( $file );
+		$this->download_bytes += (int) filesize( $path );
+		$mime                  = (string) mime_content_type( $path );
+		if ( ! str_starts_with( $mime, 'image/' ) ) {
+			fclose( $file );
+
+			return null;
+		}
+
+		$name = basename( (string) parse_url( $url, PHP_URL_PATH ) );
+
+		return array(
+			'name' => '' !== $name ? $name : 'image',
+			'mime' => $mime,
+			'data' => $file,
+		);
+	}
+
+	/**
+	 * Saves a downloaded file as an attachment.
+	 *
+	 * Core takes it as an uploaded file: it reads PDFs whole to check them for scripts, which a stream can't be.
+	 *
+	 * @param array $file      With `name`, `mime`, and `data`, the temporary file.
+	 * @param int   $thread_id FreeScout thread ID.
+	 * @param int   $user_id   FreeScout user who added it, or 0 for a sender.
+	 * @param bool  $embedded  Whether it's an image in the body.
+	 * @return Attachment|null
+	 */
+	private static function attach( array $file, int $thread_id, int $user_id, bool $embedded ): ?Attachment {
+		$upload     = new UploadedFile( self::path( $file['data'] ), $file['name'], $file['mime'], null, null, true );
+		$attachment = Attachment::create( $file['name'], $file['mime'], null, null, $upload, $embedded, $thread_id, $user_id ? $user_id : null );
+
+		return $attachment ? $attachment : null;
+	}
+
+	/**
+	 * A temporary file's path.
+	 *
+	 * @param resource $file Temporary file.
+	 * @return string
+	 */
+	private static function path( $file ): string {
+		return (string) stream_get_meta_data( $file )['uri'];
 	}
 
 	/**
@@ -446,7 +578,8 @@ final class Importer {
 		if ( $message_id ) {
 			$existing = Thread::query()->where( 'message_id', $message_id )->first( array( 'id', 'conversation_id' ) );
 			if ( $existing && (int) $existing->conversation_id === (int) $conversation->id ) {
-				$this->remember_thread( $source, (int) $existing->id, $by_customer );
+				// FreeScout's own copy: it isn't credited to anyone from HelpScout.
+				$this->remember_thread( array( 'id' => $source['id'] ), (int) $existing->id, true );
 
 				return array();
 			}
@@ -492,7 +625,7 @@ final class Importer {
 		$attachments = array();
 
 		foreach ( $source['files'] as $file ) {
-			$attachment = Attachment::create( $file['name'], $file['mime'], null, $file['data'], null, false, $thread_id, $thread->created_by_user_id );
+			$attachment = self::attach( $file, $thread_id, (int) $thread->created_by_user_id, false );
 			if ( $attachment ) {
 				$attachments[] = $attachment;
 			}
@@ -501,7 +634,7 @@ final class Importer {
 		// Like an email's inline images when FreeScout fetches it: embedded, and linked from the body.
 		$body = (string) $thread->body;
 		foreach ( $source['images'] as $src => $image ) {
-			$attachment = Attachment::create( $image['name'], $image['mime'], null, $image['data'], null, true, $thread_id, $thread->created_by_user_id );
+			$attachment = self::attach( $image, $thread_id, (int) $thread->created_by_user_id, true );
 			if ( $attachment ) {
 				$attachments[] = $attachment;
 				$body          = str_replace( $src, $attachment->url(), $body );
@@ -527,9 +660,10 @@ final class Importer {
 	private function remember_thread( array $source, int $thread_id, bool $by_customer ): void {
 		ImportedThread::query()->create(
 			array(
-				'helpscout_id'      => (int) $source['id'],
-				'thread_id'         => $thread_id,
-				'helpscout_user_id' => $by_customer ? null : $this->people->remember( $source['createdBy'] ?? null ),
+				'helpscout_id'          => (int) $source['id'],
+				'thread_id'             => $thread_id,
+				'helpscout_user_id'     => $by_customer ? null : $this->people->remember( $source['createdBy'] ?? null ),
+				'helpscout_assignee_id' => self::person_id( $source['assignedTo'] ?? null ),
 			)
 		);
 	}
@@ -570,6 +704,11 @@ final class Importer {
 			$assignee              = $this->people->assignee( $source['assignee'] ?? null );
 			$conversation->user_id = $assignee ? $assignee->id : null;
 
+			// Someone it's assigned to can see it.
+			if ( $assignee && User::TYPE_USER === (int) $assignee->type ) {
+				People::grant( $assignee, $conversation->mailbox );
+			}
+
 			$closer                          = $this->people->user( $source['closedByUser'] ?? null );
 			$conversation->closed_at         = Conversation::STATUS_CLOSED === $status ? self::date( $source['closedAt'] ?? null ) : null;
 			$conversation->closed_by_user_id = Conversation::STATUS_CLOSED === $status && $closer ? $closer->id : null;
@@ -580,7 +719,7 @@ final class Importer {
 		}
 
 		$conversation->timestamps = false;
-		$conversation->updateFolder();
+		$conversation->updateFolder( $conversation->mailbox );
 		$conversation->save();
 		$conversation->timestamps = true;
 	}
@@ -589,19 +728,19 @@ final class Importer {
 	 * FreeScout's thread type for a HelpScout thread.
 	 *
 	 * @param array $thread HelpScout thread.
-	 * @return int|null Null to leave it out: line items, and threads that weren't published or hidden.
+	 * @return int|null Null to leave it out: line items, drafts, and replies held back for review.
 	 */
 	private static function thread_type( array $thread ): ?int {
 		$type  = (string) ( $thread['type'] ?? '' );
 		$state = (string) ( $thread['state'] ?? '' );
 
 		// Drafts and replies held back for review were never sent.
-		if ( ! in_array( $state, array( 'published', 'hidden' ), true ) ) {
+		if ( ! in_array( $state, array( 'published', 'hidden', 'bounced' ), true ) ) {
 			return null;
 		}
 
-		// Hidden from what the sender is sent, not from agents: a hidden reply becomes a note, which isn't sent either.
-		if ( 'hidden' === $state && 'message' === $type ) {
+		// A reply hidden from what the sender is sent, or that never reached them, becomes a note: it isn't sent either.
+		if ( 'published' !== $state && 'message' === $type ) {
 			return Thread::TYPE_NOTE;
 		}
 
@@ -670,6 +809,18 @@ final class Importer {
 		} catch ( \Throwable $e ) {
 			return null;
 		}
+	}
+
+	/**
+	 * A HelpScout user's or team's ID, for crediting what's imported for them to someone else later.
+	 *
+	 * @param mixed $person HelpScout person object.
+	 * @return int|null Null if it isn't a user or team.
+	 */
+	private static function person_id( $person ): ?int {
+		$id = is_array( $person ) && in_array( $person['type'] ?? '', array( 'user', 'system_user', 'team' ), true ) ? (int) ( $person['id'] ?? 0 ) : 0;
+
+		return $id > 0 ? $id : null;
 	}
 
 	/**
