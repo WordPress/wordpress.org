@@ -16,11 +16,6 @@
  * and share what you've learned with others.
  */
 /* Sass is good */
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 /*--------------------------------------------------------------
 # Normalize
 --------------------------------------------------------------*/
@@ -532,7 +527,6 @@ body.reply-edit #bbpress-forums fieldset legend {
 	padding: 20px 0 0 0;
 }
 
-#bbpress-forums fieldset.bbp-form legend,
 #bbpress-forums fieldset.bbp-form legend {
 	font-weight: 700;
 	font-size: 15px;
@@ -907,16 +901,6 @@ div.bbp-template-notice.updated {
 /*--------------------------------------------------------------
 # Typography
 --------------------------------------------------------------*/
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 h1,
 h2,
 h3,
@@ -940,11 +924,6 @@ h2.comment-reply-title {
 h3.comment-reply-title {
 	font-size: 1.25rem;
 	font-weight: 700;
-}
-
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 p {
@@ -1092,11 +1071,6 @@ big {
 /*--------------------------------------------------------------
 # Elements
 --------------------------------------------------------------*/
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 html {
 	box-sizing: border-box;
 }
@@ -1213,11 +1187,6 @@ table {
 	text-align: center;
 }
 
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 .notice {
 	--notice-background-color: #fff;
 	--notice-border-color: #fff;
@@ -1288,11 +1257,6 @@ table {
 	padding-bottom: 8px;
 }
 
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 /* User badges */
 .author-badge {
 	position: absolute;
@@ -1349,14 +1313,6 @@ table {
 }
 .tag a {
 	color: var(--wp--preset--color--charcoal-1);
-}
-
-/*--------------------------------------------------------------
-# Forms
---------------------------------------------------------------*/
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /* --------------------------------------------------------------------------
@@ -1789,11 +1745,6 @@ button[type=submit].button.button-hero:active {
 	z-index: 1;
 }
 
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 /* Include margin and padding in the width calculation of input and textarea. */
 input,
 textarea,
@@ -1917,11 +1868,6 @@ fieldset label {
 /*--------------------------------------------------------------
 ## Menus
 --------------------------------------------------------------*/
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 .site-main .comment-navigation,
 .site-main .posts-navigation,
 .site-main .post-navigation {
@@ -2632,9 +2578,6 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums .bbp-topic-header .bbp-meta .bbp-topic-permalink,
 .bbpress #bbpress-forums .bbp-reply-header .bbp-meta .bbp-reply-permalink {
 	color: var(--wp--custom--link--color--text);
-}
-.bbpress #bbpress-forums .bbp-topics ul.sticky {
-	background-color: var(--wp--preset--color--lemon-3) !important;
 }
 .bbpress #bbpress-forums .bbp-forums,
 .bbpress #bbpress-forums .bbp-topics {
