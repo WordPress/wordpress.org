@@ -305,12 +305,21 @@ add_filter( 'wporg_login_pre_registration', 'wporg_login_event_code_pre_registra
  * @return array
  */
 function wporg_login_event_code_tag_pending_user( array $pending_user ): array {
+	global $wpdb;
+
 	$post = wporg_login_current_event_code();
 
 	if ( $post && empty( $pending_user['pending_id'] ) ) {
 		$pending_user['meta']['event_code'] = get_post_meta( $post->ID, '_event_code', true );
 
-		update_post_meta( $post->ID, '_uses', wporg_login_event_code_limits( $post )['uses'] + 1 );
+		// Atomic, so a room signing up at once doesn't lose counts.
+		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = CAST( meta_value AS UNSIGNED ) + 1 WHERE post_id = %d AND meta_key = '_uses'",
+				$post->ID
+			)
+		);
+		wp_cache_delete( $post->ID, 'post_meta' );
 	}
 
 	return $pending_user;
@@ -382,6 +391,7 @@ function wporg_login_event_code_save( int $post_id ): void {
 
 	if ( ! get_post_meta( $post_id, '_event_code', true ) ) {
 		update_post_meta( $post_id, '_event_code', wporg_login_generate_event_code() );
+		add_post_meta( $post_id, '_uses', 0, true );
 	}
 
 	if ( ! empty( $_POST['event_code_expires'] ) ) {
