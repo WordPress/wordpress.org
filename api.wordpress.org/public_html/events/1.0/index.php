@@ -194,19 +194,45 @@ function validate_request() {
 
 	foreach ( $must_be_strings as $field ) {
 		if ( isset( $_GET[ $field ] ) && ! is_scalar( $_GET[ $field ] ) ) {
-			header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400 );
-			die( '{"error":"Bad request.","reason":"' . $field . ' must be of type string."}' );
+			send_bad_request( $field . ' must be of type string.' );
 		}
 	}
 
 	if ( ! empty( $_POST['location_data'] ) ) {
-		foreach ( $_POST['location_data'] as $field => $value ) {
+		// phpcs:ignore WordPress.Security -- Public unauthenticated endpoint; the value is only type-checked here, never used or output.
+		foreach ( $_POST['location_data'] as $value ) {
 			if ( ! is_scalar( $value ) ) {
-				header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400 );
-				die( '{"error":"Bad request.","reason":"' . $field . ' must be of type string."}' );
+				// The key is omitted from the message because it is unsanitized request input.
+				send_bad_request( 'location_data values must be of type string.' );
 			}
 		}
 	}
+}
+
+/**
+ * Send a 400 Bad Request response and halt.
+ *
+ * The `Content-Type` is set explicitly, because the header that `send_response()` sets is only
+ * reached on the success path, and PHP would otherwise default this body to `text/html`.
+ *
+ * `wp_json_encode()` is intentionally not used here; it is loaded by `bootstrap()`, which runs
+ * after the request is validated.
+ *
+ * @param string $reason The reason the request was rejected. Must not contain any unescaped
+ *                       request input.
+ */
+function send_bad_request( $reason ) {
+	$body = array(
+		'error'  => 'Bad request.',
+		'reason' => $reason,
+	);
+
+	http_response_code( 400 );
+	header( 'Content-Type: application/json; charset=UTF-8' );
+	header( 'X-Content-Type-Options: nosniff' );
+
+	// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- No WP loaded.
+	die( json_encode( $body ) );
 }
 
 /**
@@ -1162,19 +1188,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Europe',
-				'url'        => 'https://europe.wordcamp.org/2026/',
+				'url'        => 'https://europe.wordcamp.org/2027/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'                 => '2026-06-04 00:00:00',
-				'end_date'             => '2026-06-06 00:00:00',
-				'start_unix_timestamp' => strtotime( '2026-06-04 00:00:00' ) - 2 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2026-06-06 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'date'                 => '2027-05-27 00:00:00',
+				'end_date'             => '2027-05-29 00:00:00',
+				'start_unix_timestamp' => strtotime( '2027-05-27 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2027-05-29 00:00:00' ) - 2 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Kraków',
-					'country'   => 'PL',
-					'latitude'  => 50.0646501,
-					'longitude' => 19.9449799,
+					'location'  => 'Málaga',
+					'country'   => 'ES',
+					'latitude'  => 36.720131,
+					'longitude' => -4.475438,
 				),
 			),
 		),
@@ -1229,8 +1255,8 @@ function get_iso_3166_2_country_codes( $continent = '' ) {
 		'africa' => array(
 			'AO', 'BF', 'BI', 'BJ', 'BW', 'CD', 'CF', 'CG', 'CI', 'CM', 'CV', 'DJ', 'DZ', 'EG', 'EH', 'ER', 'ET',
 			'GA', 'GH', 'GM', 'GN', 'GQ', 'GW', 'KE', 'KM', 'LR', 'LS', 'LY', 'MA', 'MG', 'ML', 'MR', 'MU', 'MW',
-			'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'ST', 'SZ', 'TD', 'TG', 'TN',
-			'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW',
+			'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'SS', 'ST', 'SZ', 'TD', 'TG',
+			'TN', 'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW',
 		),
 
 		'asia' => array(

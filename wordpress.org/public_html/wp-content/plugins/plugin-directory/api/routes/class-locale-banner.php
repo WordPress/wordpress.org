@@ -211,7 +211,7 @@ class Locale_Banner extends Base {
 
 			header( 'Content-Type: text/plain' );
 			if ( ! empty( $result['suggest_string'] ) ) {
-				echo '<p>' . $result['suggest_string'] . '</p>';
+				echo '<p>' . wp_kses_post( $result['suggest_string'] ) . '</p>';
 			}
 
 			return null;

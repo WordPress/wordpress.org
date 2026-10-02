@@ -166,6 +166,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		 * Validates the request, delegates to handle_association(), and dies with the result.
 		 */
 		public function ajax_handle_association() {
+			// Failure messages echo request data, so keep the response non-scriptable.
+			header( 'Content-Type: text/plain; charset=utf-8' );
+
 			if ( true !== apply_filters( 'wporg_is_valid_association_request', false ) ) {
 				status_header( 400 );
 				die( '-1 Not a valid association request.' );
@@ -176,6 +179,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 			if ( is_wp_error( $result ) ) {
 				$status = $result->get_error_data()['status'] ?? 500;
 				status_header( $status );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 				die( '-1 ' . $result->get_error_message() );
 			}
 

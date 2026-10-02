@@ -291,7 +291,7 @@ class Moderation {
 		}
 
 		// Bail if user isn't a moderator.
-		if ( ! user_can( $user->ID, 'photos_moderator' ) ) {
+		if ( ! user_can( $user->ID, 'edit_photos' ) ) {
 			return $caps;
 		}
 
@@ -365,7 +365,7 @@ class Moderation {
 				$output = self::format_flags( $flags );
 
 				if ( $echo ) {
-					echo $output;
+					echo wp_kses_post( $output );
 				}
 			}
 		}
@@ -375,6 +375,8 @@ class Moderation {
 
 	/**
 	 * Formats flags into a list for display.
+	 *
+	 * Flag names can originate from post meta, so no caller may pass markup through them.
 	 *
 	 * @param array $flags  Associative array of flags names (as keys) and
 	 *                      severity (as values). Severity can be one of
@@ -391,9 +393,13 @@ class Moderation {
 			$formatted .= sprintf(
 				'<li class="dashicons-before dashicons-flag %s" title="%s">%s</li>' . "\n",
 				esc_attr( $class ),
-				/* translators: 1: Moderation category, 2: Likelihood of the image being of the given moderation category */
-				sprintf( __( 'This image is flagged as potentially containing %1$s content: %2$s', 'wporg-photos' ), $flag, ucwords( str_replace( '_', ' ', $class ) ) ),
-				ucwords( $flag )
+				esc_attr( sprintf(
+					/* translators: 1: Moderation category, 2: Likelihood of the image being of the given moderation category */
+					__( 'This image is flagged as potentially containing %1$s content: %2$s', 'wporg-photos' ),
+					$flag,
+					ucwords( str_replace( '_', ' ', $class ) )
+				) ),
+				esc_html( ucwords( $flag ) )
 			);
 		}
 		$formatted .= "</ul>\n";
@@ -682,15 +688,15 @@ https://wordpress.org/photos/
 				else {
 					if ( $rejections_percentage >= self::FLAG_REJECTION_CRITICAL_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'very_likely';
-						$message = __( 'very high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+						$message = __( 'very high rejection rate (%d%%)', 'wporg-photos' );
 					}
 					elseif ( $rejections_percentage >= self::FLAG_REJECTION_ALERT_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'likely';
-						$message = __( 'high rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+						$message = __( 'high rejection rate (%d%%)', 'wporg-photos' );
 					}
 					elseif ( $rejections_percentage >= self::FLAG_REJECTION_WARNING_THRESHOLD_PERCENTAGE ) {
 						$rejections_level = 'possible';
-						$message = __( 'rejection rate (<strong>%d%%</strong>)', 'wporg-photos' );
+						$message = __( 'rejection rate (%d%%)', 'wporg-photos' );
 					}
 				}
 
@@ -710,7 +716,7 @@ https://wordpress.org/photos/
 			$flags[ 'new user account' ] = 'possible';
 		}
 
-		echo self::format_flags( $flags );
+		echo wp_kses_post( self::format_flags( $flags ) );
 	}
 
 	/**
@@ -753,8 +759,8 @@ https://wordpress.org/photos/
 		foreach ( $pending as $post ) {
 			$content .= sprintf(
 				"<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-				get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: __( "(unknown)", 'wporg-photos' ),
-				get_the_date( 'Y-m-d', $post ),
+				esc_html( get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: __( '(unknown)', 'wporg-photos' ) ),
+				esc_html( get_the_date( 'Y-m-d', $post ) ),
 				esc_html( get_the_content( null, false, $post ) ?: __( '(none provided)', 'wporg-photos' ) ),
 			);
 		}
@@ -862,10 +868,10 @@ CSS;
 
 		echo '<table id="dashboard-photo-moderators" class="wp-list-table widefat fixed striped table-view-list">';
 		echo '<thead><tr>';
-		echo '<th>' . __( 'Moderator', 'wporg-photos' ) . '</th>';
+		echo '<th>' . esc_html__( 'Moderator', 'wporg-photos' ) . '</th>';
 		echo '<th class="col-num-approved" title="' . esc_attr__( 'Number of photos approved', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-up"></span></th>';
 		echo '<th class="col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
-		echo '<th class="col-last-mod-date">' . __( 'Last Moderated', 'wporg-photos' ) . '</th>';
+		echo '<th class="col-last-mod-date">' . esc_html__( 'Last Moderated', 'wporg-photos' ) . '</th>';
 		echo '</tr></thead>';
 		echo '<tbody>';
 
@@ -892,12 +898,12 @@ CSS;
 			echo '<td>' . ( $count_approved ? sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( add_query_arg( [ 'post_status' => 'publish' ], $base_edit_url ) ),
-				number_format_i18n( $count_approved )
+				esc_html( number_format_i18n( $count_approved ) )
 			) : '0' ) . '</td>';
 			echo '<td>' . ( $count_rejected ? sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( add_query_arg( [ 'post_status' => Rejection::get_post_status() ], $base_edit_url ) ),
-				number_format_i18n( $count_rejected )
+				esc_html( number_format_i18n( $count_rejected ) )
 			) : '0' ) . '</td>';
 
 			echo '<td>';
@@ -906,9 +912,9 @@ CSS;
 				$edit_url = get_edit_post_link( $last_moderated->ID );
 				$last_mod_date = get_the_date( 'Y-m-d', $last_moderated->ID );
 				if ( $edit_url ) {
-					printf( '<a href="%s">%s</a>', esc_url( $edit_url ), $last_mod_date );
+					printf( '<a href="%s">%s</a>', esc_url( $edit_url ), esc_html( $last_mod_date ) );
 				} else {
-					echo $last_mod_date;
+					echo esc_html( $last_mod_date );
 				}
 			}
 			echo '</td>';

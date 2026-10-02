@@ -187,6 +187,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			if ( $missing ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 				die( '-1 Required argument(s) are missing: ' . implode( ', ', $missing ) );
 			}
 		}
@@ -197,6 +198,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Validates the request, delegates to handle_activity(), and dies with the result.
 		 */
 		public function ajax_handle_activity() {
+			// Failure messages echo request data, so keep the response non-scriptable.
+			header( 'Content-Type: text/plain; charset=utf-8' );
+
 			try {
 				do_action( 'wporg_profiles_before_handle_activity' );
 
@@ -210,14 +214,18 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				if ( is_wp_error( $result ) ) {
 					$status = $result->get_error_data()['status'] ?? 500;
 					status_header( $status );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 					trigger_error( $result->get_error_message(), E_USER_WARNING );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 					die( '-1 ' . $result->get_error_message() );
 				}
 
 				die( '1' );
 			} catch ( Exception $exception ) {
 				status_header( 500 );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 				trigger_error( $exception->getMessage(), E_USER_WARNING );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 				die( '-1 ' . $exception->getMessage() );
 			}
 		}
@@ -359,8 +367,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$activity = array_intersect_key( $activity, $defaults );
 			$activity = array_merge( $defaults, $activity );
 
+			// Escaping `content` keeps it from being reinterpreted as block markup after BuddyPress unslashes it on output.
 			$filters = array(
-				'wp_kses_data'        => array( 'action', 'content' ),
+				'wp_kses_data'        => array( 'action' ),
+				'esc_html'            => array( 'content' ),
 				'sanitize_text_field' => array( 'component', 'type' ),
 				'intval'              => array( 'user_id', 'item_id', 'secondary_item_id' ),
 				'sanitize_url'        => array( 'primary_link' ),
@@ -375,6 +385,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$user = self::get_user( $activity['user_id'] );
 
 			if ( ! $user ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Plain-text API response; the interpolated user ID is intval()'d above.
 				throw new Exception( '-1 Activity reported for unrecognized user ID: ' . $activity['user_id'] );
 			}
 
@@ -528,10 +539,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'action'            => sprintf(
 					'Released a new plugin, <a href="%s">%s</a>',
 					esc_url( $data['url'] ),
-					$data['title']
+					esc_html( $data['title'] )
 				),
 				'content'           => '',
-				'primary_link'      => $data['url'],
+				'primary_link'      => sanitize_url( $data['url'] ),
 				'component'         => 'plugins',
 				'type'              => 'plugin_create',
 				'item_id'           => intval( $data['plugin_id'] ),
@@ -560,10 +571,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'action'            => sprintf(
 					'Released a new theme, <a href="%s">%s</a>',
 					esc_url( $data['url'] ),
-					$data['title']
+					esc_html( $data['title'] )
 				),
 				'content'           => '',
-				'primary_link'      => $data['url'],
+				'primary_link'      => sanitize_url( $data['url'] ),
 				'component'         => 'themes',
 				'type'              => 'theme_create',
 				'item_id'           => intval( $data['theme_id'] ),
@@ -594,8 +605,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( 'Created a new ticket in %s Trac', $data['trac'] ),
-					'content'           => $data['title'],
+					'action'            => sprintf( 'Created a new ticket in %s Trac', esc_html( $data['trac'] ) ),
+					'content'           => esc_html( $data['title'] ),
 					'component'         => 'tracs',
 					'type'              => 'trac_ticket_create',
 					'item_id'           => intval( $data['id'] ),
@@ -609,8 +620,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( 'Posted a reply to <i>%s</i> in %s Trac', $data['title'], $data['trac'] ),
-					'content'           => $data['comment'],
+					'action'            => sprintf( 'Posted a reply to <i>%s</i> in %s Trac', esc_html( $data['title'] ), esc_html( $data['trac'] ) ),
+					'content'           => esc_html( $data['comment'] ),
 					'component'         => 'tracs',
 					'type'              => 'trac_comment_create',
 					'item_id'           => intval( $data['id'] ),
@@ -625,8 +636,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				// Record commit to committer's activity stream
 				$args = array(
 					'user_id'           => $user->ID,
-					'action'            => sprintf( 'Committed [%s] to %s Trac', $data['changeset'], $data['trac'] ),
-					'content'           => $data['message'],
+					'action'            => sprintf( 'Committed [%s] to %s Trac', esc_html( $data['changeset'] ), esc_html( $data['trac'] ) ),
+					'content'           => esc_html( $data['message'] ),
 					'component'         => 'tracs',
 					'type'              => 'trac_commit_create',
 					'item_id'           => intval( $data['changeset'] ),
@@ -649,8 +660,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					}
 					$args = array(
 						'user_id'           => $user->ID,
-						'action'            => sprintf( 'Received props in %s', $data['trac'] ),
-						'content'           => $data['message'],
+						'action'            => sprintf( 'Received props in %s', esc_html( $data['trac'] ) ),
+						'content'           => esc_html( $data['message'] ),
 						'component'         => 'tracs',
 						'type'              => 'trac_props_mention',
 						'item_id'           => intval( $data['changeset'] ),
@@ -682,7 +693,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$action = sprintf(
 					'Confirmed as a speaker for <a href="%s">%s</a>',
 					esc_url( $data['url'] ),
-					$data['wordcamp_name']
+					esc_html( $data['wordcamp_name'] )
 				);
 
 			} elseif ( isset( $data['organizer_id'] ) && ! empty( $data['organizer_id'] ) ) {
@@ -692,7 +703,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$action = sprintf(
 					'Joined the organizing team for <a href="%s">%s</a>',
 					esc_url( $data['url'] ),
-					$data['wordcamp_name']
+					esc_html( $data['wordcamp_name'] )
 				);
 
 			} elseif ( isset( $data['type'] ) && 'mentor_assign' === $data['type'] ) {
@@ -719,7 +730,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					$action = sprintf(
 						'Registered to attend <a href="%s">%s</a>',
 						esc_url( $data['url'] ),
-						$data['wordcamp_name']
+						esc_html( $data['wordcamp_name'] )
 					);
 
 				} elseif ( 'attendee_checked_in' == $data['activity_type'] ) {
@@ -730,7 +741,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						'Is the %s person to arrive at <a href="%s">%s</a>',
 						$this->append_ordinal_suffix( $order ),
 						esc_url( $data['url'] ),
-						$data['wordcamp_name']
+						esc_html( $data['wordcamp_name'] )
 					);
 				}
 			}
@@ -743,7 +754,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				'user_id'           => $user->ID,
 				'action'            => $action,
 				'content'           => '',
-				'primary_link'      => $data['url'] ?? '',
+				'primary_link'      => sanitize_url( $data['url'] ?? '' ),
 				'component'         => 'wordcamp',
 				'type'              => $type,
 				'item_id'           => intval( $item_id ),
@@ -788,7 +799,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 */
 		private function handle_wordpress_activity( array $data ) {
 			$user = self::get_user( $data['user'] );
-			$content      = $data['content'];
+			$content      = esc_html( $data['content'] );
 			$primary_link = sanitize_url( $data['url'] );
 
 			if ( ! $user ) {
@@ -801,8 +812,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$action  = sprintf(
 					'Wrote a <a href="%s">comment</a> on the post <i>%s</i>, on the site %s',
 					esc_url( $data['url'] ),
-					$data['title'],
-					$data['blog']
+					esc_html( $data['title'] ),
+					esc_html( $data['blog'] )
 				);
 			} elseif ( isset( $data['type'] ) && 'new' === $data['type'] ) {
 				$type    = 'blog_post_create';
@@ -834,8 +845,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					'Wrote a new %s, <i><a href="%s">%s</a></i>, on the site %s',
 					$post_type,
 					esc_url( $data['url'] ),
-					$data['title'],
-					$data['blog']
+					esc_html( $data['title'] ),
+					esc_html( $data['blog'] )
 				);
 			} elseif ( isset( $data['type'] ) && 'update' === $data['type'] ) {
 				// Handbooks are currently the only post type that send notifications of updates.
@@ -954,9 +965,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			);
 
 			$action_received = sprintf(
-				'<a href="%1$s">Received props</a> from <a href="https://profiles.wordpress.org/%2$s/">@%2$s</a> in <a href="https://make.wordpress.org/chat/">Slack</a>',
+				'<a href="%1$s">Received props</a> from <a href="%2$s">@%3$s</a> in <a href="https://make.wordpress.org/chat/">Slack</a>',
 				esc_url_raw( $url ),
-				$giver_username,
+				esc_url( 'https://profiles.wordpress.org/' . rawurlencode( $giver_username ) . '/' ),
+				esc_html( $giver_username ),
 			);
 
 			$user_case_args[] = array(

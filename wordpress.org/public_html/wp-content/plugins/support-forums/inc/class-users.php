@@ -407,7 +407,16 @@ class Users {
 	 * @return array Filtered query arguments.
 	 */
 	public function parse_user_replies_query_args( $args ) {
-		if ( get_query_var( 'wporg_single_user_reported_topics' ) ) {
+		/*
+		 * The marker is a public query var, so it can be set on any request. Gate the switch to
+		 * the private reported_topics type on the same check as the reports template: the profile
+		 * owner, or a user who may edit that profile.
+		 */
+		if (
+			get_query_var( 'wporg_single_user_reported_topics' )
+			&&
+			( bbp_is_user_home() || current_user_can( 'edit_user', bbp_get_displayed_user_id() ) )
+		) {
 			$args['post_type'] = 'reported_topics';
 			unset( $args['meta_key'] );
 			unset( $args['meta_type'] );

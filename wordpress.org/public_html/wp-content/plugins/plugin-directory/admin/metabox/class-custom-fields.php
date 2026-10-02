@@ -29,7 +29,7 @@ class Custom_Fields {
 			if ( ! $value = get_post_meta( $post->ID, $field, true ) ) {
 				continue;
 			}
-			printf( '<dt>%s</dt><dd>%s</dd>', esc_html( $text ), make_clickable( esc_html( $value ) ) );
+			printf( '<dt>%s</dt><dd>%s</dd>', esc_html( $text ), wp_kses_post( make_clickable( esc_html( $value ) ) ) );
 		}
 		echo '</dl>';
 	}

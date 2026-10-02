@@ -8,7 +8,7 @@
 get_header();
 ?>
 
-<p class="center"><?php _e( 'You are now logged out.', 'wporg' ); ?></p>
+<p class="center"><?php esc_html_e( 'You are now logged out.', 'wporg' ); ?></p>
 
 <?php
 	$redirect_to = wp_unslash( $_REQUEST['redirect_to'] ?? '' );
@@ -22,7 +22,7 @@ get_header();
 		echo '<p class="center">';
 		printf(
 			/* translators: 1: url, 2: Hostname, ie. wordcamp.org */
-			__( 'Return to <a href="%1$s">%2$s</a>.', 'wporg' ),
+			wp_kses_post( __( 'Return to <a href="%1$s">%2$s</a>.', 'wporg' ) ),
 			esc_url( $redirect_to ),
 			esc_html( $hostname )
 		);
@@ -31,8 +31,8 @@ get_header();
 ?>
 
 <p id="nav">
-	<a href="/"><?php _e( '&larr; Back to login', 'wporg' ); ?></a> &nbsp; • &nbsp;
-	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
+	<a href="/"><?php esc_html_e( '&larr; Back to login', 'wporg' ); ?></a> &nbsp; • &nbsp;
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer(); ?>

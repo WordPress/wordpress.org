@@ -35,7 +35,6 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\handle_list_table_views' );
 add_action( 'bulk_edit_custom_box', __NAMESPACE__ . '\add_language_bulk_edit_field', 10, 2 );
 add_action( 'save_post', __NAMESPACE__ . '\language_bulk_edit_save' );
 add_filter( 'sensei_course_custom_navigation_tabs', __NAMESPACE__ . '\add_sensei_course_custom_navigation_tabs' );
-add_filter( 'post_row_actions', __NAMESPACE__ . '\remove_duplicate_post_row_action', 10, 2 );
 
 /**
  * Show a notice on taxonomy term screens about terms being translatable.
@@ -158,7 +157,7 @@ function render_workshop_list_table_columns( $column_name, $post_id ) {
 			echo esc_html( implode(
 				', ',
 				array_map(
-					function( $caption_lang ) {
+					function ( $caption_lang ) {
 						return get_locale_name_from_code( $caption_lang, 'english' );
 					},
 					$captions
@@ -576,29 +575,42 @@ function add_sensei_course_custom_navigation_tabs( $tabs ) {
 	return $tabs;
 }
 
+// Activity Kit admin hooks.
+add_action( 'admin_menu', __NAMESPACE__ . '\add_activity_kit_stats_submenu' );
+add_action( 'admin_menu', __NAMESPACE__ . '\remove_activity_kit_taxonomy_submenus', 99 );
+
 /**
- * Remove duplicate post actions for courses and lessons.
- * Mitigates an issue with localized lesson content overwriting the original English lesson.
- * See https://github.com/WordPress/Learn/issues/2805
- *
- * @param array   $actions An array of row action links.
- * @param WP_Post $post    The post object.
- * @return array $actions The filtered actions.
+ * Remove shared taxonomy submenu items from under Activity Kits.
+ * Level and Topic are shared across post types; editing them from here is confusing.
  */
-function remove_duplicate_post_row_action( $actions, $post ) {
-	if ( ! is_admin() ) {
-		return $actions;
+function remove_activity_kit_taxonomy_submenus() {
+	global $submenu;
+
+	$parent = 'edit.php?post_type=activity_kit';
+	if ( ! isset( $submenu[ $parent ] ) ) {
+		return;
 	}
 
-	if ( 'lesson' === $post->post_type || 'course' === $post->post_type ) {
-		if ( isset( $actions['duplicate'] ) ) {
-			unset( $actions['duplicate'] );
-		}
-
-		if ( isset( $actions['duplicate_with_lessons'] ) ) {
-			unset( $actions['duplicate_with_lessons'] );
+	foreach ( $submenu[ $parent ] as $key => $item ) {
+		if ( isset( $item[2] ) && (
+			false !== strpos( $item[2], 'taxonomy=level' ) ||
+			false !== strpos( $item[2], 'taxonomy=topic' )
+		) ) {
+			unset( $submenu[ $parent ][ $key ] );
 		}
 	}
+}
 
-	return $actions;
+/**
+ * Add a Stats submenu page under the Activity Kits post type menu.
+ */
+function add_activity_kit_stats_submenu() {
+	add_submenu_page(
+		'edit.php?post_type=activity_kit',
+		__( 'Activity Kit Stats', 'wporg-learn' ),
+		__( 'Stats', 'wporg-learn' ),
+		'manage_options',
+		'activity-kit-stats',
+		'WPOrg_Learn\Activity_Kit_Stats\render_page'
+	);
 }

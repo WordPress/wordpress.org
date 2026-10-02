@@ -2,6 +2,7 @@
 /**
  * Template for My Events.
  */
+
 namespace Wporg\TranslationEvents\Templates;
 
 use Wporg\TranslationEvents\Attendee\Attendee;

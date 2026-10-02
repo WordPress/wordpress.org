@@ -22,7 +22,20 @@ if ( bbp_is_reply_edit() ) : ?>
 			<?php do_action( 'bbp_theme_before_reply_form' ); ?>
 
 			<fieldset class="bbp-form">
-				<legend><?php printf( esc_html__( 'Reply To: %s', 'wporg-forums' ), ( bbp_get_form_reply_to() ) ? sprintf( esc_html__( 'Reply #%1$s in %2$s', 'wporg-forums' ), bbp_get_form_reply_to(), bbp_get_topic_title() ) : bbp_get_topic_title() ); ?></legend>
+				<legend>
+					<?php
+					printf(
+						/* translators: %s: Topic title or reply description. */
+						esc_html__( 'Reply To: %s', 'wporg-forums' ),
+						bbp_get_form_reply_to() ? sprintf(
+							/* translators: 1: Reply ID, 2: Topic title. */
+							esc_html__( 'Reply #%1$s in %2$s', 'wporg-forums' ),
+							esc_html( bbp_get_form_reply_to() ),
+							wp_kses_post( bbp_get_topic_title() )
+						) : wp_kses_post( bbp_get_topic_title() )
+					);
+					?>
+				</legend>
 
 				<?php do_action( 'bbp_theme_before_reply_form_notices' ); ?>
 
@@ -41,7 +54,7 @@ if ( bbp_is_reply_edit() ) : ?>
 							printf(
 								/* translators: %s: forum title */
 								esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies, however your posting capabilities still allow you to post.', 'wporg-forums' ),
-								bbp_get_forum_title( bbp_get_topic_forum_id() )
+								esc_html( bbp_get_forum_title( bbp_get_topic_forum_id() ) )
 							);
 						?></p>
 					</div>
@@ -84,7 +97,7 @@ if ( bbp_is_reply_edit() ) : ?>
 
 						<?php if ( bbp_allow_topic_tags() ) : ?>
 						<p>
-							<label for="bbp_topic_tags"><?php _e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
+							<label for="bbp_topic_tags"><?php esc_html_e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
 							<input type="text" value="<?php bbp_form_topic_tags(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" aria-describedby="bbp_topic_tags_description" <?php disabled( bbp_is_topic_spam() ); ?> /><br />
 							<em id="bbp_topic_tags_description"><?php esc_html_e( 'Separate tags with commas', 'wporg-forums' ); ?></em>
 						</p>
@@ -195,7 +208,8 @@ if ( bbp_is_reply_edit() ) : ?>
 
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
-			<p><?php printf( esc_html__( 'The topic &#8216;%s&#8217; is closed to new replies.', 'wporg-forums' ), bbp_get_topic_title() ); ?></p>
+			<p><?php /* translators: %s: Topic title. */ ?>
+			<?php printf( esc_html__( 'The topic &#8216;%s&#8217; is closed to new replies.', 'wporg-forums' ), wp_kses_post( bbp_get_topic_title() ) ); ?></p>
 		</div>
 	</div>
 
@@ -203,7 +217,8 @@ if ( bbp_is_reply_edit() ) : ?>
 
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
-			<p><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'wporg-forums' ), bbp_get_forum_title( bbp_get_topic_forum_id() ) ); ?></p>
+			<p><?php /* translators: %s: Forum title. */ ?>
+			<?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'wporg-forums' ), esc_html( bbp_get_forum_title( bbp_get_topic_forum_id() ) ) ); ?></p>
 		</div>
 	</div>
 
@@ -216,26 +231,28 @@ if ( bbp_is_reply_edit() ) : ?>
 					if ( is_user_logged_in() ) {
 						esc_html_e( 'You cannot reply to this review.', 'wporg-forums' );
 					} else {
-						printf( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ), wp_login_url() );
+						/* translators: %s: URL of the log in page. */
+						printf( wp_kses_post( __( 'You must be <a href="%s">logged in</a> to reply to this review.', 'wporg-forums' ) ), esc_url( wp_login_url() ) );
 					}
 				} else {
 					if ( is_user_logged_in() ) {
 						esc_html_e( 'You cannot reply to this topic.', 'wporg-forums' );
 					} else {
-						printf( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ), wp_login_url() );
+						/* translators: %s: URL of the log in page. */
+						printf( wp_kses_post( __( 'You must be <a href="%s">logged in</a> to reply to this topic.', 'wporg-forums' ) ), esc_url( wp_login_url() ) );
 					}
 				}
 			?></p>
 			<?php if ( current_user_can( bbp_get_spectator_role() ) && ! bbp_is_topic_closed() && ! bbp_is_forum_closed( bbp_get_topic_forum_id() ) ) : ?>
 				<p><?php
 					printf(
-						__( 'This may be caused by your account being marked as a brand or shared company account.', 'wporg-forums' ) . '<br>' .
+						esc_html__( 'This may be caused by your account being marked as a brand or shared company account.', 'wporg-forums' ) . '<br>' .
 						/* translators: %s: Link to https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/ */
-						__( '<a href="%s">Please read this announcement</a> for more information.', 'wporg-forums' ) . '<br>' .
+						wp_kses_post( __( '<a href="%s">Please read this announcement</a> for more information.', 'wporg-forums' ) ) . '<br>' .
 						/* translators: %s: Email address. */
-						__( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ),
+						wp_kses_post( __( 'If you believe this to be in error, please contact the forum moderation team via <code>%s</code>.', 'wporg-forums' ) ),
 						'https://make.wordpress.org/support/2025/03/about-the-spectator-role-in-the-wordpress-support-forums/',
-						WordPressdotorg\Forums\MODERATION_EMAIL
+						esc_html( WordPressdotorg\Forums\MODERATION_EMAIL )
 					);
 				?></p>
 			<?php endif; ?>

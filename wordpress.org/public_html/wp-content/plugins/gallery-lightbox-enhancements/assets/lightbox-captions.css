@@ -1,14 +1,10 @@
 /**
  * Caption styling for the core image lightbox overlay.
  *
- * Polyfill for https://github.com/WordPress/gutenberg/pull/77477.
- *
- * Caption is mounted inside the visible `.lightbox-image-container`
- * (the JS picks the one whose <img> is on screen) so it pins to the
- * bottom edge of the picture frame, not the bottom of the viewport.
- * The visual treatment matches the PR #77477 reference exactly:
- * white text with a soft drop shadow on a barely-there bottom-up
- * scrim, anchored flush to the image.
+ * The gallery keeps the core lightbox animation and navigation but
+ * renders the caption as a dedicated bar beneath the active image.
+ * This avoids competing with text-heavy screenshots while still keeping
+ * short captions compact and visually centered.
  */
 
 /**
@@ -25,52 +21,72 @@
 }
 
 /*
- * Do NOT set `.lightbox-image-container` to `position: relative`. Core
- * stacks its two containers (zoom-thumbnail + full-res) as absolutely
- * positioned, overlapping siblings; forcing them into normal flow stacks
- * the images vertically and renders the picture twice once both hold a
- * real image (e.g. plugin screenshots). The absolute container is already
- * the caption's containing block — no override needed.
+ * The caption stays at the overlay level. Core already exposes the
+ * active image dimensions through CSS custom properties on the overlay,
+ * so the bar can align itself below the current image without changing
+ * the lightbox container flow.
  */
 
-.wp-lightbox-overlay .lightbox-image-container > figcaption.wp-lightbox-caption {
+.wp-lightbox-overlay > figcaption.wp-lightbox-caption {
 	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
+	top: var(--wporg-lightbox-caption-top, calc(50% + ( var(--wp--lightbox-container-height) / 2 ) + 0.5rem));
+	left: 50%;
+	transform: translateX(-50%);
 	z-index: 3000001;
+	box-sizing: border-box;
+	width: min(var(--wporg-lightbox-caption-width, var(--wp--lightbox-container-width)), calc(100% - 1rem));
+	max-width: calc(100% - 1rem);
 	margin: 0;
-	padding: 3.5em 1.25em 1em;
-	color: #fff;
-	text-align: start;
-	font-size: 0.95rem;
-	font-weight: 500;
-	line-height: 1.45;
-	letter-spacing: 0.005em;
-	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
-
-	/* Almost invisible scrim — present only to guarantee contrast on
-	   bright photos. The text-shadow does most of the legibility work. */
-	background: linear-gradient(to top, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 100%);
+	padding: 0.75rem 1rem;
+	color: #1e1e1e;
+	text-align: center;
+	font-size: 0.875rem;
+	font-weight: 400;
+	line-height: 1.4;
+	letter-spacing: 0;
+	text-shadow: none;
+	background: rgba(255, 255, 255, 0.98);
+	border: 0;
+	border-radius: 12px;
+	overflow-wrap: anywhere;
 	pointer-events: none;
 	opacity: 0;
-	transition: opacity 160ms ease-in;
+	transition: opacity 180ms ease-out;
 }
 
-.wp-lightbox-overlay.active .lightbox-image-container > figcaption.wp-lightbox-caption.has-caption {
+.wp-lightbox-overlay.active > figcaption.wp-lightbox-caption.has-caption.is-ready {
 	opacity: 1;
-	transition: opacity 220ms ease-out 200ms;
 }
 
 /* Hide the caption when there is no text to show. */
-.wp-lightbox-overlay .lightbox-image-container > figcaption.wp-lightbox-caption:not(.has-caption) {
+.wp-lightbox-overlay > figcaption.wp-lightbox-caption:not(.has-caption) {
 	visibility: hidden;
+}
+
+@media (min-width: 960px) {
+
+	.wp-lightbox-overlay > figcaption.wp-lightbox-caption {
+		top: var(--wporg-lightbox-caption-top, calc(50% + ( var(--wp--lightbox-container-height) / 2 ) + 0.75rem));
+		padding: 0.875rem 1.25rem;
+		font-size: 0.95rem;
+	}
+}
+
+@media (max-width: 480px), (max-height: 700px) {
+
+	.wp-lightbox-overlay > figcaption.wp-lightbox-caption {
+		top: var(--wporg-lightbox-caption-top, calc(50% + ( var(--wp--lightbox-container-height) / 2 ) + 0.375rem));
+		padding: 0.625rem 0.875rem;
+		font-size: 0.8125rem;
+		border-radius: 10px;
+	}
+
 }
 
 @media (prefers-reduced-motion: reduce) {
 
-	.wp-lightbox-overlay .lightbox-image-container > figcaption.wp-lightbox-caption,
-	.wp-lightbox-overlay.active .lightbox-image-container > figcaption.wp-lightbox-caption.has-caption {
+	.wp-lightbox-overlay > figcaption.wp-lightbox-caption,
+	.wp-lightbox-overlay.active > figcaption.wp-lightbox-caption.has-caption {
 		transition: none;
 	}
 }

@@ -760,6 +760,11 @@ class Upload_Handler {
 			'acf-gallery',
 		);
 
+		// Slugs in the namespace used internally for rejected plugins.
+		if ( preg_match( Helpscout::REJECTED_SLUG_REGEX, $this->plugin_slug ) ) {
+			return true;
+		}
+
 		return in_array( $this->plugin_slug, $reserved_slugs );
 	}
 
@@ -1048,6 +1053,7 @@ class Upload_Handler {
 		$success = ( 201 === $http_response_code );
 
 		if ( ! $success ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 			trigger_error( "Helpscout update failed: $http_response_code: " . var_export( $result, true ), E_USER_WARNING );
 		}
 

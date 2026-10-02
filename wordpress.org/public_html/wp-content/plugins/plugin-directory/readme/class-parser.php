@@ -373,7 +373,7 @@ class Parser {
 				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n()<>" );
 			}
 
-			$this->license = $headers['license'];
+			$this->license = $this->sanitize_text( $headers['license'] );
 		}
 		if ( ! empty( $headers['license_uri'] ) ) {
 			$this->license_uri = $headers['license_uri'];
@@ -657,12 +657,16 @@ class Parser {
 	}
 
 	/**
-	 * @access protected
+	 * Reduce readme text to the markup the directory accepts in a readme section.
+	 *
+	 * Public so that a value which stands in for a readme section (the plugin
+	 * file's Description header when there is no readme) can go through the same
+	 * list instead of carrying a copy of it.
 	 *
 	 * @param string $text
 	 * @return string
 	 */
-	protected function filter_text( $text ) {
+	public function filter_text( $text ) {
 		$text = trim( $text );
 
 		$allowed = array(
@@ -696,6 +700,10 @@ class Parser {
 		// TODO: make_clickable() will act inside shortcodes.
 		// $text = make_clickable( $text );
 		$text = wp_kses( $text, $allowed );
+
+		// Readme text has no use for HTML comments, and dropping them keeps
+		// comment syntax out of the fields that are later composed into markup.
+		$text = preg_replace( '#<!--.*?(?:-->|$)#s', '', $text );
 
 		// wpautop() will eventually replace all \n's with <br>s, and that isn't what we want (The text may be line-wrapped in the readme, we don't want that, we want paragraph-wrapped text)
 		// TODO: This incorrectly also applies within `<code>` tags which we don't want either.

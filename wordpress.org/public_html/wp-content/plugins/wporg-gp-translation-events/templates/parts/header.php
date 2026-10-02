@@ -24,15 +24,15 @@ add_action(
 		echo '<link rel="alternate" type="application/rss+xml" title="' . esc_html__( 'Translating Events &raquo; WordPress Feed', 'gp-translation-events' ) . '" href="' . esc_url( home_url( gp_url( '/events/feed' ) ) ) . '" />' . "\n";
 		echo '<meta name="twitter:card" content="summary" />' . "\n";
 		echo '<meta name="twitter:site" content="@WordPress" />' . "\n";
-		echo '<meta name="twitter:title" content="' . esc_attr( $html_title ) . '" />' . "\n";
-		echo '<meta name="twitter:description" content="' . esc_attr( $html_description ) . '" />' . "\n";
+		echo '<meta name="twitter:title" content="' . esc_attr( wp_strip_all_tags( $html_title ) ) . '" />' . "\n";
+		echo '<meta name="twitter:description" content="' . esc_attr( wp_strip_all_tags( $html_description ) ) . '" />' . "\n";
 		echo '<meta name="twitter:creator" content="@WordPress" />' . "\n";
 		echo '<meta name="twitter:image" content="' . esc_url( $image_url ) . '" />' . "\n";
 		echo '<meta name="twitter:image:alt" content="' . esc_attr( $html_title ) . '" />' . "\n";
 
 		echo '<meta property="og:url" content="' . esc_url( $url ) . '" />' . "\n";
-		echo '<meta property="og:title" content="' . esc_attr( $html_title ) . '" />' . "\n";
-		echo '<meta property="og:description" content="' . esc_attr( $html_description ) . '" />' . "\n";
+		echo '<meta property="og:title" content="' . esc_attr( wp_strip_all_tags( $html_title ) ) . '" />' . "\n";
+		echo '<meta property="og:description" content="' . esc_attr( wp_strip_all_tags( $html_description ) ) . '" />' . "\n";
 		echo '<meta property="og:site_name" content="' . esc_attr( get_bloginfo() ) . '" />' . "\n";
 		echo '<meta property="og:image:url" content="' . esc_url( $image_url ) . '" />' . "\n";
 		echo '<meta property="og:image:secure_url" content="' . esc_url( $image_url ) . '" />' . "\n";
@@ -40,6 +40,7 @@ add_action(
 		echo '<meta property="og:image:width" content="1200" />' . "\n";
 		echo '<meta property="og:image:height" content="675" />' . "\n";
 		echo '<meta property="og:image:alt" content="' . esc_attr( $html_title ) . '" />' . "\n";
+		echo '<meta property="og:type" content="event" />' . "\n";
 	}
 );
 gp_title( $html_title );
