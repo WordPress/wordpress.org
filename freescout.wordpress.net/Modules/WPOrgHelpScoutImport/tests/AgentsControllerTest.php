@@ -183,6 +183,43 @@ final class AgentsControllerTest extends ImportTestCase {
 	}
 
 	/**
+	 * Conversations imported unassigned while the Teams module was off are assigned once the same team is chosen.
+	 *
+	 * @return void
+	 */
+	public function test_choosing_the_same_team_again_assigns_its_conversations(): void {
+		\App\Module::clearModulesCache();
+		\App\Module::setActive( People::TEAMS_MODULE, true );
+		\App\Module::clearModulesCache();
+		$moderators = $this->create_team( 'Photo Moderators' );
+		People::choose( 90, $moderators );
+
+		\App\Module::setActive( People::TEAMS_MODULE, false );
+		\App\Module::clearModulesCache();
+		( new Importer( app( HelpScout::class ), new People( app( HelpScout::class ) ) ) )->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => array(
+						'id'    => 90,
+						'type'  => 'team',
+						'first' => 'Photo Moderators',
+					),
+				)
+			),
+			$this->mailbox
+		);
+		$conversation = Conversation::query()->findOrFail( ImportedConversation::query()->value( 'conversation_id' ) );
+		$this->assertNull( $conversation->user_id );
+
+		\App\Module::setActive( People::TEAMS_MODULE, true );
+		\App\Module::clearModulesCache();
+		$this->post( route( 'wporghelpscoutimport.agents.save' ), array( 'teams' => array( 90 => $moderators->id ) ) );
+
+		$this->assertSame( (int) $moderators->id, (int) $conversation->fresh()->user_id );
+	}
+
+	/**
 	 * A row whose account has neither the HelpScout user's name nor email is only connected once it's ticked.
 	 *
 	 * @return void

@@ -149,6 +149,9 @@ final class ImportController extends Controller {
 		$created = array();
 
 		try {
+			// HelpScout's users are read before the lock, rather than while holding it.
+			$people->directory();
+
 			$run = \DB::transaction(
 				static function () use ( $source_id, $source, $mailbox, $everything, $people, &$created ): ?Run {
 					// Users are created under the lock too, so a double click doesn't create them twice.

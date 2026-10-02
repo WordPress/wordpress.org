@@ -346,22 +346,28 @@ final class People {
 		$previous = Agent::query()->where( 'helpscout_user_id', $helpscout_user_id )->value( 'user_id' );
 		$from     = $previous ? User::find( (int) $previous ) : null;
 
+		$same    = $from && (int) $from->id === (int) $user->id;
+		$is_team = User::TYPE_ROBOT === (int) $user->type;
+
 		// The same user again, like when they're connected to WordPress.org: whether an import created them stays.
-		if ( $from && (int) $from->id === (int) $user->id ) {
-			return;
+		if ( ! $same ) {
+			Agent::query()->updateOrCreate(
+				array( 'helpscout_user_id' => $helpscout_user_id ),
+				array(
+					'user_id' => $user->id,
+					'created' => false,
+				)
+			);
 		}
 
-		Agent::query()->updateOrCreate(
-			array( 'helpscout_user_id' => $helpscout_user_id ),
-			array(
-				'user_id' => $user->id,
-				'created' => false,
-			)
-		);
-
-		// A team without one imported its conversations unassigned: they're assigned to the team chosen now.
-		if ( $from || User::TYPE_ROBOT === (int) $user->type ) {
+		if ( $from && ! $same ) {
 			self::recredit( $helpscout_user_id, $from, $user );
+		}
+
+		// Conversations imported unassigned, while the team had no FreeScout team, or the Teams module was off, are
+		// assigned to the team chosen now, even the same one again.
+		if ( $is_team ) {
+			self::recredit( $helpscout_user_id, null, $user );
 		}
 	}
 
@@ -627,10 +633,11 @@ final class People {
 	 * A customer without an email, like one who only called or chatted, is a sender without one, found again by their
 	 * HelpScout ID.
 	 *
-	 * @param mixed $person HelpScout person object, like a conversation's `primaryCustomer`.
-	 * @return Customer|null Null if it isn't a customer with an email or an ID.
+	 * @param mixed $person        HelpScout person object, like a conversation's `primaryCustomer`.
+	 * @param bool  $without_email Whether a customer without an email gets a sender too.
+	 * @return Customer|null Null if it isn't a customer with an email, or an ID if that's enough.
 	 */
-	public function sender( $person ): ?Customer {
+	public function sender( $person, bool $without_email = true ): ?Customer {
 		if ( ! is_array( $person ) ) {
 			return null;
 		}
@@ -642,12 +649,14 @@ final class People {
 
 		if ( ! empty( $person['email'] ) ) {
 			$customer = Customer::create( (string) $person['email'], $data );
-
-			return $customer instanceof Customer ? $customer : null;
+			if ( $customer instanceof Customer ) {
+				return $customer;
+			}
 		}
 
+		// Without an email, or one that isn't one.
 		$id = (int) ( $person['id'] ?? 0 );
-		if ( ! $id ) {
+		if ( ! $id || ! $without_email ) {
 			return null;
 		}
 

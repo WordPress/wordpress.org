@@ -60,6 +60,13 @@ final class ImportPage implements ShouldQueue {
 	private const MAX_PAGE_FAILURES = 12;
 
 	/**
+	 * Tries in which a conversation the rate limit cut off gives way to outgoing email, before it waits regardless.
+	 *
+	 * @var int
+	 */
+	private const GIVE_WAY_TRIES = 3;
+
+	/**
 	 * Run ID.
 	 *
 	 * @var int
@@ -98,6 +105,9 @@ final class ImportPage implements ShouldQueue {
 	 * @return void
 	 */
 	public function handle(): void {
+		// Whether modules, like Teams, are on can have changed since the worker started.
+		\App\Module::clearModulesCache();
+
 		$run = $this->current_run();
 		if ( ! $run ) {
 			return;
@@ -174,7 +184,14 @@ final class ImportPage implements ShouldQueue {
 					$run->add_failure( $current, 'Its import stopped ' . self::MAX_ATTEMPTS . ' times without finishing, like by running out of memory or time, or HelpScout failing for it.' );
 				} else {
 					// The rate limit cut this one off before: it needs more than a minute's share, so this time it waits.
-					$helpscout->set_patient( $current === (int) $run->waiting_on, array( self::class, 'queue_is_free' ) );
+					// It gives way to outgoing email in the queue, but not forever: after a few tries, it waits regardless.
+					$attempts = (int) $run->attempts;
+					$helpscout->set_patient(
+						$current === (int) $run->waiting_on,
+						static function () use ( $attempts ): bool {
+							return $attempts > self::GIVE_WAY_TRIES || self::queue_is_free();
+						}
+					);
 
 					$this->import( $importer, $helpscout, (array) $conversation, $mailbox, $run );
 				}
@@ -192,9 +209,10 @@ final class ImportPage implements ShouldQueue {
 
 			$run->page_failures = 0;
 		} catch ( RateLimited $e ) {
-			// Waiting for the rate limit isn't a failed attempt.
+			// Waiting for the rate limit isn't a failed try; giving way to email while patient is, so it ends.
+			$was_patient     = $current && $current === (int) $run->waiting_on;
 			$run->waiting_on = $current ? $current : null;
-			$run->attempts   = $current ? max( 0, $run->attempts - 1 ) : $run->attempts;
+			$run->attempts   = $current && ! $was_patient ? max( 0, $run->attempts - 1 ) : $run->attempts;
 			$this->save( $run );
 			$this->again( $e->retry_after );
 
@@ -215,7 +233,12 @@ final class ImportPage implements ShouldQueue {
 
 			return;
 		} finally {
-			$mailbox->updateFoldersCounters();
+			// Not thrown from here: the next job is queued already, and a failure would queue another, from failed().
+			try {
+				$mailbox->updateFoldersCounters();
+			} catch ( \Throwable $e ) {
+				\Log::error( '[WPOrgHelpScoutImport] Could not update the folder counters of ' . $mailbox->name . ': ' . Run::describe( $e ) );
+			}
 		}
 
 		if ( $run->is_retry() && array_diff( self::ids( (array) $run->retry_ids ), self::ids( (array) $run->page_done ) ) ) {
@@ -307,9 +330,8 @@ final class ImportPage implements ShouldQueue {
 			return;
 		}
 
-		$run->last_error = $exception ? Run::describe( $exception ) : 'The import job stopped.';
-		$this->save( $run );
-		$this->again( self::RETRY_DELAY );
+		// Counted like a page that failed, so a job that keeps dying outside a conversation stops the run.
+		$this->fail_page( $run, $exception ? Run::describe( $exception ) : 'The import job stopped.' );
 	}
 
 	/**

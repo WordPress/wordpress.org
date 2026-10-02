@@ -603,10 +603,11 @@ final class Importer {
 	private function create_thread( Conversation $conversation, array $source, Customer $sender ): void {
 		$type        = (int) $source['fs_type'];
 		$by_customer = Thread::TYPE_CUSTOMER === $type;
-		$author      = $by_customer ? ( $this->people->sender( $source['customer'] ?? null ) ?? $this->people->sender( $source['createdBy'] ?? null ) ?? $sender ) : null;
-		$user        = $by_customer ? null : $this->people->user( $source['createdBy'] ?? null );
-		$created_at  = self::date( $source['createdAt'] ?? null ) ?? Carbon::now();
-		$message_id  = $source['message_id'];
+		// Who wrote it, by their email; without one, it's the conversation's sender, who may have none either.
+		$author     = $by_customer ? ( $this->people->sender( $source['customer'] ?? null, false ) ?? $this->people->sender( $source['createdBy'] ?? null, false ) ?? $sender ) : null;
+		$user       = $by_customer ? null : $this->people->user( $source['createdBy'] ?? null );
+		$created_at = self::date( $source['createdAt'] ?? null ) ?? Carbon::now();
+		$message_id = $source['message_id'];
 
 		if ( $message_id ) {
 			$existing = Thread::query()->where( 'message_id', $message_id )->first( array( 'id', 'conversation_id' ) );

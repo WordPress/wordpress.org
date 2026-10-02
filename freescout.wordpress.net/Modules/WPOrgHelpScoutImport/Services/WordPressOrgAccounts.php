@@ -241,7 +241,7 @@ final class WordPressOrgAccounts {
 				continue;
 			}
 
-			// Another row may have connected the account since: two HelpScout users of the same person.
+			// Someone may have connected the account since it was checked, like on a user's profile.
 			$connected = Account::user_for( $username );
 
 			try {

@@ -354,12 +354,75 @@ final class ImportPageTest extends ImportTestCase {
 		( new ImportPage( (int) $this->run->id, (string) $this->run->token ) )->failed( new \RuntimeException( 'Allowed memory size exhausted' ) );
 
 		$this->assertSame( 'Allowed memory size exhausted', $this->run->fresh()->last_error );
+		$this->assertSame( 1, (int) $this->run->fresh()->page_failures );
 		Queue::assertPushed( ImportPage::class );
 
 		// Waiting for the rate limit on the list doesn't take a try off the conversation.
 		$this->helpscout->only( 'GET', 'v2/conversations', FakeHelpScout::json( array(), 429, array( 'X-RateLimit-Retry-After' => '30' ) ) );
 		$this->handle();
 		$this->assertSame( 1, (int) $this->run->fresh()->attempts );
+	}
+
+	/**
+	 * A conversation the rate limit cut off gives way to outgoing email, which counts as a try; then it waits regardless.
+	 *
+	 * @return void
+	 */
+	public function test_waiting_gives_way_to_email_a_few_times(): void {
+		config( array( 'queue.default' => 'database' ) );
+		\DB::table( 'jobs' )->insert(
+			array(
+				'queue'        => 'emails',
+				'payload'      => '{}',
+				'attempts'     => 0,
+				'reserved_at'  => null,
+				'available_at' => time() - 1,
+				'created_at'   => time() - 1,
+			)
+		);
+		$this->answer_page( array( $this->conversation() ), 1 );
+		$limited = FakeHelpScout::json( array(), 429, array( 'X-RateLimit-Retry-After' => '30' ) );
+		$threads = array(
+			'_embedded' => array( 'threads' => array_reverse( $this->threads() ) ),
+			'page'      => array( 'totalPages' => 1 ),
+		);
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/threads', $limited );
+		$this->run->waiting_on = 1001;
+		$this->run->save();
+
+		$this->handle();
+
+		$this->assertSame( array(), $this->helpscout->slept );
+		$this->assertSame( 1, (int) $this->run->fresh()->attempts );
+
+		$this->run->attempts = 3;
+		$this->run->save();
+
+		// Each job has a client of its own.
+		$this->app->instance( HelpScout::class, $this->helpscout->client() );
+		$this->helpscout->only( 'GET', 'v2/conversations/1001/threads', $limited )->on( 'GET', 'v2/conversations/1001/threads', $threads );
+
+		$this->handle();
+
+		$this->assertSame( array( 30 ), $this->helpscout->slept );
+		$this->assertSame( 1, (int) $this->run->fresh()->imported );
+	}
+
+	/**
+	 * A page past the last one HelpScout won't give ends the run, like an empty one.
+	 *
+	 * @return void
+	 */
+	public function test_page_past_the_last_ends_the_run(): void {
+		$this->run->page  = 2;
+		$this->run->pages = 1;
+		$this->run->save();
+		$this->helpscout->only( 'GET', 'v2/conversations', FakeHelpScout::json( array(), 400 ) );
+		$this->answer_list( 1, array(), 1 );
+
+		$this->handle();
+
+		$this->assertSame( Run::STATUS_DONE, $this->run->fresh()->status );
 	}
 
 	/**

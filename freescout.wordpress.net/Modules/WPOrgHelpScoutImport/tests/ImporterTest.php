@@ -539,6 +539,24 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * A sender whose email isn't one is imported like one without an email.
+	 *
+	 * @return void
+	 */
+	public function test_senders_with_a_broken_email_are_imported(): void {
+		$sender = array(
+			'id'    => 4243,
+			'type'  => 'customer',
+			'email' => 'not an email',
+			'first' => 'Bro',
+			'last'  => 'Ken',
+		);
+
+		$this->assertSame( Importer::IMPORTED, $this->importer->import( $this->conversation( array( 'primaryCustomer' => $sender ) ), $this->mailbox ) );
+		$this->assertSame( 'Bro', $this->imported_conversation()->customer->first_name );
+	}
+
+	/**
 	 * A conversation merged or deleted in HelpScout between being listed and read is gone, not failed.
 	 *
 	 * @return void
