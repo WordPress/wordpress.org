@@ -65,7 +65,7 @@
 					display: none;
 				}
 			}
-			  
+
 		}
 
 		.plugin-title {
@@ -284,7 +284,8 @@
 
 		a {
 			display: inline-block;
-			padding: 0.64rem 0 0.64rem 1.25rem;
+			padding: 0.64rem 1.25rem;
+			margin-right: -1.25rem;
 			font-size: var(--wp--preset--font-size--normal);
 		}
 
@@ -295,6 +296,7 @@
 
 			a {
 				padding-right: 1.25rem;
+				margin-right: 0; // mobile layout doesn't need the desktop alignment compensation.
 			}
 		}
 	}
