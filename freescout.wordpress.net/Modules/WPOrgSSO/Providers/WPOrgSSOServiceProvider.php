@@ -104,8 +104,6 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 	/**
 	 * Server variable nginx sets to 1 for requests from the proxy's IP addresses, and to 0 for all others.
 	 *
-	 * A FastCGI param, so a client can't send it: request headers only reach `$_SERVER` with an `HTTP_` prefix.
-	 *
 	 * @var string
 	 */
 	public const SERVER_PROXIED_REQUEST = 'WPORG_PROXIED_REQUEST';
