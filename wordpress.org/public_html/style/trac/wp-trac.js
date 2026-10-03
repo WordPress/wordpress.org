@@ -1532,6 +1532,7 @@ let wpTrac,
 				addTicketParticipant( ticketParticipant ) {
 					if ( ! ticketParticipants.includes( ticketParticipant ) ) {
 						ticketParticipants.push( ticketParticipant );
+					}
 				},
 
 				initNonTicketParticipants() {
