@@ -390,7 +390,7 @@ let wpTrac,
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
 				linkTextNodes( this, mentionsRegEx, function ( match, pre, username ) {
-					if ( -1 !== $.inArray( username, reservedTerms ) ) {
+					if ( reservedTerms.includes( username ) ) {
 						return match;
 					}
 
@@ -539,7 +539,7 @@ let wpTrac,
 
 				// Move all of the ticket actions text into the label.
 				// Trac markup is like this: `<label>close</label> as fixed`
-				window.jQuery( '#action div label' ).each( function () {
+				$( '#action div label' ).each( function () {
 					if ( this.nextSibling && window.Node.TEXT_NODE === this.nextSibling.nodeType ) {
 						this.textContent += this.nextSibling.nodeValue;
 						this.nextSibling.nodeValue = '';
@@ -609,7 +609,7 @@ let wpTrac,
 			// Allow action text inputs and select fields to be clicked directly.
 			$( '#action' )
 				.find( 'input[type=text], select' )
-				.enable()
+				.prop( 'disabled', false )
 				.on( 'focus', function () {
 					$( this ).siblings( 'input[type=radio]' ).trigger( 'click' );
 				} )
@@ -621,7 +621,7 @@ let wpTrac,
 				.has( 'select' )
 				.find( 'input[type=radio]' )
 				.on( 'change', function () {
-					$( this ).siblings( 'select' ).enable();
+					$( this ).siblings( 'select' ).prop( 'disabled', false );
 				} );
 
 			// Hide action text inputs and select fields from keyboard, unless the corresponding action is focused.
@@ -1471,12 +1471,8 @@ let wpTrac,
 				},
 
 				initTicketParticipants() {
-					let users = [],
-						exclude = [];
-
-					if ( 'undefined' !== typeof settings.exclude ) {
-						exclude = settings.exclude;
-					}
+					let users = [];
+					const exclude = Array.isArray( settings.exclude ) ? settings.exclude : [];
 
 					// Most recent should show up first.
 					$( $( '.change .username' ).get().reverse() ).each( function () {
@@ -1493,8 +1489,8 @@ let wpTrac,
 
 						if (
 							typeof username !== 'undefined' &&
-							-1 === $.inArray( username, users ) &&
-							-1 === $.inArray( username, exclude )
+							! users.includes( username ) &&
+							! exclude.includes( username )
 						) {
 							users.push( username );
 						}
@@ -1513,15 +1509,13 @@ let wpTrac,
 						ticketReporter = ticketReporterNicename;
 					}
 
-					if ( ticketReporter && -1 === $.inArray( ticketReporter, users ) ) {
+					if ( ticketReporter && ! users.includes( ticketReporter ) ) {
 						users.push( ticketReporter );
 					}
 
 					// Exclude current user.
 					if ( wpTrac.currentUser ) {
-						users = $.grep( users, function ( user ) {
-							return user !== wpTrac.currentUser;
-						} );
+						users = users.filter( ( user ) => user !== wpTrac.currentUser );
 					}
 
 					ticketParticipants = users;
@@ -1532,20 +1526,17 @@ let wpTrac,
 				},
 
 				addTicketParticipant( ticketParticipant ) {
-					if ( -1 === $.inArray( ticketParticipant, ticketParticipants ) ) {
-						$.merge( ticketParticipants, [ ticketParticipant ] );
+					if ( ! ticketParticipants.includes( ticketParticipant ) ) {
+						ticketParticipants.push( ticketParticipant );
 					}
 				},
 
 				initNonTicketParticipants() {
 					let users = [];
 
-					if ( 'undefined' !== typeof settings.include ) {
-						$.each( settings.include, function ( k, username ) {
-							if (
-								-1 === $.inArray( username, users ) &&
-								-1 === $.inArray( username, ticketParticipants )
-							) {
+					if ( Array.isArray( settings.include ) ) {
+						settings.include.forEach( ( username ) => {
+							if ( ! users.includes( username ) && ! ticketParticipants.includes( username ) ) {
 								users.push( username );
 							}
 						} );
@@ -1553,9 +1544,7 @@ let wpTrac,
 
 					// Exclude current user.
 					if ( wpTrac.currentUser ) {
-						users = $.grep( users, function ( user ) {
-							return user !== wpTrac.currentUser;
-						} );
+						users = users.filter( ( user ) => user !== wpTrac.currentUser );
 					}
 
 					nonTicketParticipants = users;
@@ -1566,8 +1555,8 @@ let wpTrac,
 				},
 
 				addNonTicketParticipant( nonTicketParticipant ) {
-					if ( -1 === $.inArray( nonTicketParticipant, nonTicketParticipants ) ) {
-						$.merge( nonTicketParticipants, [ nonTicketParticipant ] );
+					if ( ! nonTicketParticipants.includes( nonTicketParticipant ) ) {
+						nonTicketParticipants.push( nonTicketParticipant );
 					}
 				},
 
@@ -1611,17 +1600,26 @@ let wpTrac,
 					'needs-screenshots': 'has-screenshots',
 				};
 
-			// Build a keyword bin <span> with its remove button.
+			/**
+			 * Builds a keyword badge element with an associated remove button.
+			 *
+			 * Constructs a `<span>` DOM node configured with a `data-keyword` attribute,
+			 * containing a dismiss button for removal and a text node with the keyword label.
+			 *
+			 * @param {string} keyword Keyword name to display.
+			 * @return {HTMLSpanElement} The constructed span element.
+			 */
 			function keywordSpan( keyword ) {
-				return $( '<span />' )
-					.text( keyword )
-					.attr( 'data-keyword', keyword )
-					.prepend(
-						$( '<button type="button" class="keyword-button-remove dashicons dashicons-dismiss" />' ).attr(
-							'aria-label',
-							'Remove ' + keyword + ' keyword'
-						)
-					);
+				const span = document.createElement( 'span' );
+				span.dataset.keyword = keyword;
+
+				const button = document.createElement( 'button' );
+				button.type = 'button';
+				button.className = 'keyword-button-remove dashicons dashicons-dismiss';
+				button.setAttribute( 'aria-label', `Remove ${ keyword } keyword` );
+
+				span.append( button, document.createTextNode( keyword ) );
+				return span;
 			}
 
 			return {
@@ -1646,7 +1644,7 @@ let wpTrac,
 					wpTrac.workflow.populate();
 
 					// Save these for later.
-					originalKeywords = $.merge( [], keywords );
+					originalKeywords = [ ...keywords ];
 
 					// Catch the submit to see if keywords were simply reordered.
 					elements.hiddenEl.parents( 'form' ).on( 'submit', wpTrac.workflow.submit );
@@ -1666,7 +1664,7 @@ let wpTrac,
 					// Keyword adds.
 					$( '#keyword-add' ).on( 'change keypress', function ( e ) {
 						if ( e.type === 'keypress' ) {
-							if ( e.which === 13 ) {
+							if ( e.key === 'Enter' ) {
 								e.stopPropagation();
 								e.preventDefault();
 							} else {
@@ -1692,7 +1690,7 @@ let wpTrac,
 					// Handle keyboard interaction on the field-keywords field.
 					$( '#field-keywords' ).on( 'keydown', function ( event ) {
 						// When pressing Enter or Escape.
-						if ( event.which === 13 || event.which === 27 ) {
+						if ( event.key === 'Enter' || event.key === 'Escape' ) {
 							// Prevent form submission.
 							event.preventDefault();
 							// Hide the input field and populate the keywords.
@@ -1756,12 +1754,12 @@ let wpTrac,
 
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
 					if ( 1 !== keywords.length || keywords[ 0 ] !== '' ) {
-						$.each( keywords, function ( k, v ) {
-							const html = keywordSpan( v );
+						keywords.forEach( function ( v ) {
+							const span = keywordSpan( v );
 							if ( v in coreKeywordList ) {
-								html.attr( 'title', coreKeywordList[ v ] );
+								span.title = coreKeywordList[ v ];
 							}
-							html.appendTo( elements.bin );
+							elements.bin.append( span );
 						} );
 					}
 
@@ -1774,16 +1772,16 @@ let wpTrac,
 
 					$.each( coreKeywordList, function ( k ) {
 						// Don't show special (permission-based) ones.
-						if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) ) {
+						if ( ! wpTrac.gardener && gardenerKeywordList.includes( k ) ) {
 							return;
 						}
 						// Don't show workflow keywords such as 'reporter-feedback' for new ticket.
-						if ( wpTrac.isNewTicket() && -1 !== $.inArray( k, hideFromNewTickets ) ) {
+						if ( wpTrac.isNewTicket() && hideFromNewTickets.includes( k ) ) {
 							return;
 						}
 						elements.add.append(
 							`<option value="${ k }${
-								-1 !== $.inArray( k, keywords ) ? '" disabled="disabled">* ' : '">'
+								keywords.includes( k ) ? '" disabled="disabled">* ' : '">'
 							}${ k }</option>`
 						);
 					} );
@@ -1798,7 +1796,7 @@ let wpTrac,
 					let title = '';
 
 					// Don't add it again.
-					if ( -1 !== $.inArray( keyword, keywords ) ) {
+					if ( keywords.includes( keyword ) ) {
 						return;
 					}
 					keywords.push( keyword );
@@ -1818,11 +1816,11 @@ let wpTrac,
 					}
 
 					// Add it to the bin, and refresh the hidden input.
-					const html = keywordSpan( keyword );
+					const span = keywordSpan( keyword );
 					if ( title ) {
-						html.attr( 'title', title );
+						span.title = title;
 					}
-					html.appendTo( elements.bin );
+					elements.bin.append( span );
 					elements.hiddenEl.val( keywords.join( ' ' ) );
 				},
 
@@ -1837,12 +1835,10 @@ let wpTrac,
 							return;
 						}
 					} else {
-						keyword = object.text();
+						keyword = object.data( 'keyword' ) || object.attr( 'data-keyword' );
 					}
 
-					keywords = $.grep( keywords, function ( v ) {
-						return v !== keyword;
-					} );
+					keywords = keywords.filter( ( v ) => v !== keyword );
 
 					// Update the core keyword dropdown.
 					if ( keyword in coreKeywordList ) {
@@ -1862,9 +1858,7 @@ let wpTrac,
 						return;
 					}
 
-					const testKeywords = $.grep( keywords, function ( v ) {
-						return -1 === $.inArray( v, originalKeywords );
-					} );
+					const testKeywords = keywords.filter( ( v ) => ! originalKeywords.includes( v ) );
 
 					// If the difference has no length, then restore to the original keyword order.
 					if ( ! testKeywords.length ) {
@@ -1903,7 +1897,7 @@ let wpTrac,
 				} else {
 					focuses = focuses.split( ' ' );
 				}
-				originalFocuses = $.merge( [], focuses );
+				originalFocuses = [ ...focuses ];
 
 				container = $( '#focuses' );
 
@@ -1911,7 +1905,7 @@ let wpTrac,
 				$.each( coreFocusesList, function ( focus, description ) {
 					let ariaPressed = 'false';
 					classes = focus.replace( ' ', '-' );
-					if ( -1 !== $.inArray( focus, focuses ) ) {
+					if ( focuses.includes( focus ) ) {
 						classes += ' active';
 						ariaPressed = 'true';
 					}
@@ -1962,16 +1956,14 @@ let wpTrac,
 				focus.removeClass( 'active' );
 				focus.find( '.core-focuses-button' ).attr( 'aria-pressed', 'false' );
 				const removedFocus = focus.data( 'focus' );
-				focuses = $.grep( focuses, function ( value ) {
-					return value !== removedFocus;
-				} );
+				focuses = focuses.filter( ( value ) => value !== removedFocus );
 				updateField();
 			}
 
 			function updateField() {
 				const orderedFocuses = [];
 				$.each( coreFocusesList, function ( focus ) {
-					if ( -1 !== $.inArray( focus, focuses ) ) {
+					if ( focuses.includes( focus ) ) {
 						orderedFocuses.push( focus );
 					}
 				} );
@@ -1990,9 +1982,7 @@ let wpTrac,
 					return;
 				}
 
-				const testFocuses = $.grep( focuses, function ( v ) {
-					return -1 === $.inArray( v, originalFocuses );
-				} );
+				const testFocuses = focuses.filter( ( v ) => ! originalFocuses.includes( v ) );
 
 				// If the difference has no length, then restore to the original order.
 				if ( ! testFocuses.length ) {
@@ -2227,7 +2217,7 @@ let wpTrac,
 
 					stars
 						.each( function () {
-							if ( -1 !== $.inArray( $( this ).data( 'ticket' ), data.data.tickets ) ) {
+							if ( data.data.tickets?.includes( $( this ).data( 'ticket' ) ) ) {
 								$( this ).toggleClass( 'dashicons-star-empty dashicons-star-filled' );
 							}
 						} )
@@ -2577,8 +2567,7 @@ let wpTrac,
 				}
 
 				// Only if we have a 'General' option.
-				const components = window
-						.jQuery( '#field-component option' )
+				const components = $( '#field-component option' )
 						.get()
 						.map( ( opt ) => opt.value ),
 					hasDefaultCat = generalCategories.some( ( value ) => components.includes( value ) );
@@ -2763,7 +2752,7 @@ let wpTrac,
 		},
 	};
 
-	$( document ).ready( wpTrac.init );
+	$( wpTrac.init );
 
 	// Perform this as soon as this file loads.
 	wpTrac.disableTracAutoFocus();
