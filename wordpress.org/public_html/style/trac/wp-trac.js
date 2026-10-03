@@ -1541,8 +1541,7 @@ let wpTrac,
 					if ( 'undefined' !== typeof settings.include ) {
 						$.each( settings.include, function ( k, username ) {
 							if (
-								! users.includes( username ) &&
-								! ticketParticipants.includes( username )
+								! users.includes( username ) && ! ticketParticipants.includes( username )
 							) {
 								users.push( username );
 							}
