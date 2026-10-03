@@ -268,14 +268,26 @@ let wpTrac,
 	 *                            string, a DOM Node, or an array of either to insert as-is.
 	 */
 	function linkTextNodes( root, regex, replacer ) {
-		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_TEXT ),
-			textNodes = [];
+		if ( ! ( regex instanceof RegExp ) || ! regex.global ) {
+			return;
+		}
+
+		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_TEXT, {
+			acceptNode( node ) {
+				if ( node.parentElement && node.parentElement.closest( 'a' ) ) {
+					return window.NodeFilter.FILTER_REJECT;
+				}
+				return node.nodeValue && node.nodeValue.trim()
+					? window.NodeFilter.FILTER_ACCEPT
+					: window.NodeFilter.FILTER_SKIP;
+			},
+		} );
+
+		const textNodes = [];
 		let node;
 
 		while ( ( node = walker.nextNode() ) ) {
-			if ( ! $( node.parentNode ).closest( 'a' ).length ) {
-				textNodes.push( node );
-			}
+			textNodes.push( node );
 		}
 
 		textNodes.forEach( function ( textNode ) {
@@ -1117,42 +1129,38 @@ let wpTrac,
 				$wikitoolbar.find( after ).after( $button );
 			}
 
+			/**
+			 * Encloses the selected text in a textarea with the given prefix and suffix.
+			 *
+			 * @param {HTMLTextAreaElement} textarea DOM textarea element.
+			 * @param {string}              prefix   Text to prepend to selection.
+			 * @param {string}              suffix   Text to append to selection.
+			 */
 			function encloseSelection( textarea, prefix, suffix ) {
-				let start, end, sel, scrollPos;
-				// A DOM element, not a jQuery object: see the caller.
 				textarea.focus();
-				if ( 'undefined' !== typeof document.selection ) {
-					sel = document.selection.createRange().text;
-				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-					start = textarea.selectionStart;
-					end = textarea.selectionEnd;
-					scrollPos = textarea.scrollTop;
-					sel = textarea.value.substring( start, end );
+
+				const start = textarea.selectionStart;
+				const end = textarea.selectionEnd;
+				let selectedText = textarea.value.substring( start, end );
+
+				if ( selectedText.endsWith( ' ' ) ) {
+					selectedText = selectedText.slice( 0, -1 );
+					suffix += ' ';
 				}
-				if ( sel.match( / $/ ) ) {
-					// exclude ending space char, if any
-					sel = sel.substring( 0, sel.length - 1 );
-					suffix = suffix + ' ';
-				}
-				const subst = prefix + sel + suffix;
-				if ( 'undefined' !== typeof document.selection ) {
-					document.selection.createRange().text = subst;
-					textarea.caretPos -= suffix.length;
-				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-					textarea.value = textarea.value.substring( 0, start ) + subst + textarea.value.substring( end );
-					if ( sel ) {
-						textarea.setSelectionRange( start + subst.length, start + subst.length );
-					} else {
-						textarea.setSelectionRange( start + prefix.length, start + prefix.length );
-					}
-					textarea.scrollTop = scrollPos;
-				}
+
+				const replacement = prefix + selectedText + suffix;
+				const selStart = start + prefix.length;
+				const selEnd = selStart + ( selectedText ? selectedText.length : 0 );
+
+				textarea.setRangeText( replacement, start, end, 'preserve' );
+				textarea.setSelectionRange( selStart, selEnd );
 			}
 
 			$( 'textarea.wikitext' ).each( function () {
-				const $textarea = $( this ),
-					textarea = $textarea[ 0 ];
-				if ( 'undefined' === typeof document.selection && 'undefined' === typeof textarea.setSelectionRange ) {
+				const $textarea = $( this );
+				const textarea = $textarea[ 0 ];
+
+				if ( ! textarea || typeof textarea.setRangeText !== 'function' ) {
 					return;
 				}
 
@@ -2683,8 +2691,8 @@ let wpTrac,
 
 					// If it's a plural, add the non-plural form.
 					words.forEach( ( word ) => {
-						if ( 's' === word.substr( -1 ) ) {
-							words.push( word.substr( 0, word.length - 1 ) );
+						if ( 's' === word.slice( -1 ) ) {
+							words.push( word.slice( 0, -1 ) );
 						}
 					} );
 
