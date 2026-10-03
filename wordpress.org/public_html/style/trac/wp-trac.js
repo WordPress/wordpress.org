@@ -1170,8 +1170,14 @@ let wpTrac,
 				$wikitoolbar.find( after ).after( $button );
 			}
 
+			/**
+			 * Encloses the selected text in a textarea with the given prefix and suffix.
+			 *
+			 * @param {HTMLTextAreaElement} textarea DOM textarea element.
+			 * @param {string}              prefix   Text to prepend to selection.
+			 * @param {string}              suffix   Text to append to selection.
+			 */
 			function encloseSelection( textarea, prefix, suffix ) {
-				// A DOM element, not a jQuery object: see the caller.
 				textarea.focus();
 
 				const start = textarea.selectionStart;
@@ -1187,23 +1193,15 @@ let wpTrac,
 				const selStart = start + prefix.length;
 				const selEnd = selStart + ( selectedText ? selectedText.length : 0 );
 
-				if ( typeof textarea.setRangeText === 'function' ) {
-					textarea.setRangeText( replacement, start, end, 'preserve' );
-					textarea.setSelectionRange( selStart, selEnd );
-				} else {
-					const before = textarea.value.substring( 0, start );
-					const after = textarea.value.substring( end );
-					textarea.value = before + replacement + after;
-					const caretPos = start + ( selectedText ? replacement.length : prefix.length );
-					textarea.setSelectionRange( caretPos, caretPos );
-				}
+				textarea.setRangeText( replacement, start, end, 'preserve' );
+				textarea.setSelectionRange( selStart, selEnd );
 			}
 
 			$( 'textarea.wikitext' ).each( function () {
 				const $textarea = $( this );
 				const textarea = $textarea[ 0 ];
 
-				if ( ! textarea || typeof textarea.setSelectionRange !== 'function' ) {
+				if ( ! textarea || typeof textarea.setRangeText !== 'function' ) {
 					return;
 				}
 
