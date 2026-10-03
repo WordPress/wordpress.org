@@ -102,6 +102,8 @@ global $wptv, $originalcontent;
 						}
 
 						printf( '<a href="%s">Subtitle this video &rarr;</a>', esc_url( add_query_arg( 'video', $video->post_id, home_url( 'subtitle/' ) ) ) );
+						echo '<br />';
+						printf( '<a href="%s">Caption with DeltaScribe &rarr;</a>', esc_url( add_query_arg( 'video', $video->post_id, home_url( 'caption-with-deltascribe/' ) ) ) );
 					}
 				}
 
