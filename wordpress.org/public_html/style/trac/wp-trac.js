@@ -390,7 +390,7 @@ let wpTrac,
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
 				linkTextNodes( this, mentionsRegEx, function ( match, pre, username ) {
-					if ( reservedTerms.includes( username ) ) {
+					if ( Array.isArray( settings.exclude ) ) {
 						return match;
 					}
 
@@ -1540,9 +1540,7 @@ let wpTrac,
 
 					if ( 'undefined' !== typeof settings.include ) {
 						$.each( settings.include, function ( k, username ) {
-							if (
-								! users.includes( username ) && ! ticketParticipants.includes( username )
-							) {
+							if ( ! users.includes( username ) && ! ticketParticipants.includes( username ) ) {
 								users.push( username );
 							}
 						} );
