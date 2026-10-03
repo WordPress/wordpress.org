@@ -565,18 +565,32 @@ let wpTrac,
 				}
 
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
-				window.onbeforeunload = function () {
-					if ( wpTrac.isNewTicket() ) {
-						if ( ! $( '#field-description' ).val() && ! $( '#field-summary' ).val() ) {
-							return;
-						}
-					} else if ( ! $( '#comment' ).val() ) {
+				let isSubmitting = false;
+
+				window.addEventListener( 'beforeunload', function ( event ) {
+					if ( isSubmitting ) {
 						return;
 					}
-					return 'The changes you made will be lost if you navigate away from this page.';
-				};
-				$( '.buttons' ).on( 'click', 'input', function () {
-					window.onbeforeunload = null;
+
+					const hasUnsavedContent = wpTrac.isNewTicket()
+						? Boolean( $( '#field-description' ).val() || $( '#field-summary' ).val() )
+						: Boolean( $( '#comment' ).val() );
+
+					if ( ! hasUnsavedContent ) {
+						return;
+					}
+
+					event.preventDefault();
+					event.returnValue = '';
+				} );
+
+				$( '#propertyform' ).on( 'submit', function ( event ) {
+					isSubmitting = true;
+					setTimeout( function () {
+						if ( event.isDefaultPrevented() ) {
+							isSubmitting = false;
+						}
+					}, 0 );
 				} );
 			}
 
