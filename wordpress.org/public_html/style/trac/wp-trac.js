@@ -390,7 +390,7 @@ let wpTrac,
 
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
 				linkTextNodes( this, mentionsRegEx, function ( match, pre, username ) {
-					if ( Array.isArray( settings.exclude ) ) {
+					if ( reservedTerms.includes( username ) ) {
 						return match;
 					}
 
@@ -1471,10 +1471,8 @@ let wpTrac,
 				},
 
 				initTicketParticipants() {
-					let users = [],
-						exclude = [];
-
-					exclude = Array.isArray( settings.exclude ) ? settings.exclude : [];
+					let users = [];
+					const exclude = Array.isArray( settings.exclude ) ? settings.exclude : [];
 
 					// Most recent should show up first.
 					$( $( '.change .username' ).get().reverse() ).each( function () {
@@ -1536,8 +1534,8 @@ let wpTrac,
 				initNonTicketParticipants() {
 					let users = [];
 
-					if ( 'undefined' !== typeof settings.include ) {
-						$.each( settings.include, function ( k, username ) {
+					if ( Array.isArray( settings.include ) ) {
+						settings.include.forEach( ( username ) => {
 							if ( ! users.includes( username ) && ! ticketParticipants.includes( username ) ) {
 								users.push( username );
 							}
@@ -2210,7 +2208,7 @@ let wpTrac,
 
 					stars
 						.each( function () {
-							if ( data.data.tickets.includes( $( this ).data( 'ticket' ) ) ) {
+							if ( data.data.tickets?.includes( $( this ).data( 'ticket' ) ) ) {
 								$( this ).toggleClass( 'dashicons-star-empty dashicons-star-filled' );
 							}
 						} )
