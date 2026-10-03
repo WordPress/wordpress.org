@@ -326,7 +326,7 @@ function the_plugin_advanced_zone() {
 
 	echo '<hr>';
 
-	echo '<h2>' . esc_html__( 'Advanced Options', 'wporg-plugins' ) . '</h2>';
+	echo '<h2 id = "plugin-advanced-options">' . esc_html__( 'Advanced Options', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'This section is intended for advanced users and developers only. They are presented here for testing and educational purposes.', 'wporg-plugins' ) . '</p>';
 
