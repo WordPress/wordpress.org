@@ -1474,9 +1474,7 @@ let wpTrac,
 					let users = [],
 						exclude = [];
 
-					if ( 'undefined' !== typeof settings.exclude ) {
-						exclude = settings.exclude;
-					}
+					exclude = Array.isArray( settings.exclude ) ? settings.exclude : [];
 
 					// Most recent should show up first.
 					$( $( '.change .username' ).get().reverse() ).each( function () {
