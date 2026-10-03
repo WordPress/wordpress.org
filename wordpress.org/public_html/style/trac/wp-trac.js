@@ -586,14 +586,25 @@ let wpTrac,
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
 				let isSubmitting = false;
 
+				/**
+				 * Checks whether an input or textarea element has unsaved changes compared to its initial value.
+				 *
+				 * @param {string} selector CSS selector for the form element.
+				 * @return {boolean} True if the field exists and its value was modified, false otherwise.
+				 */
+				function isDirty( selector ) {
+					const el = document.querySelector( selector );
+					return Boolean( el && el.value.trim() !== el.defaultValue.trim() );
+				}
+
 				window.addEventListener( 'beforeunload', function ( event ) {
 					if ( isSubmitting ) {
 						return;
 					}
 
 					const hasUnsavedContent = wpTrac.isNewTicket()
-						? Boolean( $( '#field-description' ).val() || $( '#field-summary' ).val() )
-						: Boolean( $( '#comment' ).val() );
+						? isDirty( '#field-summary' ) || isDirty( '#field-description' )
+						: Boolean( $( '#comment' ).val()?.trim() ) || isDirty( '#field-summary' ) || isDirty( '#field-description' );
 
 					if ( ! hasUnsavedContent ) {
 						return;
