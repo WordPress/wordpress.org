@@ -1602,15 +1602,16 @@ let wpTrac,
 
 			// Build a keyword bin <span> with its remove button.
 			function keywordSpan( keyword ) {
-				return $( '<span />' )
-					.text( keyword )
-					.attr( 'data-keyword', keyword )
-					.prepend(
-						$( '<button type="button" class="keyword-button-remove dashicons dashicons-dismiss" />' ).attr(
-							'aria-label',
-							'Remove ' + keyword + ' keyword'
-						)
-					);
+				const span = document.createElement( 'span' );
+				span.dataset.keyword = keyword;
+
+				const button = document.createElement( 'button' );
+				button.type = 'button';
+				button.className = 'keyword-button-remove dashicons dashicons-dismiss';
+				button.setAttribute( 'aria-label', `Remove ${ keyword } keyword` );
+
+				span.append( button, document.createTextNode( keyword ) );
+				return span;
 			}
 
 			return {
@@ -1746,11 +1747,11 @@ let wpTrac,
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
 					if ( 1 !== keywords.length || keywords[ 0 ] !== '' ) {
 						keywords.forEach( function ( v ) {
-							const html = keywordSpan( v );
+							const span = keywordSpan( v );
 							if ( v in coreKeywordList ) {
-								html.attr( 'title', coreKeywordList[ v ] );
+								span.title = coreKeywordList[ v ];
 							}
-							html.appendTo( elements.bin );
+							elements.bin.append( span );
 						} );
 					}
 
@@ -1807,11 +1808,11 @@ let wpTrac,
 					}
 
 					// Add it to the bin, and refresh the hidden input.
-					const html = keywordSpan( keyword );
+					const span = keywordSpan( keyword );
 					if ( title ) {
-						html.attr( 'title', title );
+						span.title = title;
 					}
-					html.appendTo( elements.bin );
+					elements.bin.append( span );
 					elements.hiddenEl.val( keywords.join( ' ' ) );
 				},
 
@@ -1826,7 +1827,7 @@ let wpTrac,
 							return;
 						}
 					} else {
-						keyword = object.text();
+						keyword = object.data( 'keyword' ) || object.attr( 'data-keyword' );
 					}
 
 					keywords = keywords.filter( ( v ) => v !== keyword );
