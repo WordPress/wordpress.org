@@ -1600,7 +1600,15 @@ let wpTrac,
 					'needs-screenshots': 'has-screenshots',
 				};
 
-			// Build a keyword bin <span> with its remove button.
+			/**
+			 * Builds a keyword badge element with an associated remove button.
+			 *
+			 * Constructs a `<span>` DOM node configured with a `data-keyword` attribute,
+			 * containing a dismiss button for removal and a text node with the keyword label.
+			 *
+			 * @param {string} keyword Keyword name to display.
+			 * @return {HTMLSpanElement} The constructed span element.
+			 */
 			function keywordSpan( keyword ) {
 				const span = document.createElement( 'span' );
 				span.dataset.keyword = keyword;
