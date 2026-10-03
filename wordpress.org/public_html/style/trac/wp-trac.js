@@ -602,9 +602,10 @@ let wpTrac,
 						return;
 					}
 
+					const hasModifiedProperties = isDirty( '#field-summary' ) || isDirty( '#field-description' );
 					const hasUnsavedContent = wpTrac.isNewTicket()
-						? isDirty( '#field-summary' ) || isDirty( '#field-description' )
-						: Boolean( $( '#comment' ).val()?.trim() ) || isDirty( '#field-summary' ) || isDirty( '#field-description' );
+						? hasModifiedProperties
+						: Boolean( $( '#comment' ).val()?.trim() ) || hasModifiedProperties;
 
 					if ( ! hasUnsavedContent ) {
 						return;
