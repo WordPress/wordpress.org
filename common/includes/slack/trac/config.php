@@ -60,6 +60,14 @@ class Core extends Trac {
 	);
 
 	/**
+	 * Workflow keywords that cause ticket updates to be piped to particular channels.
+	 * These trigger when the keyword is added to a ticket.
+	 */
+	protected $ticket_keyword_filters = array(
+		'needs-testing' => '#core-test',
+	);
+
+	/**
 	 * Components or focuses that cause new tickets to be piped to particular channels.
 	 */
 	protected $ticket_component_filters = array(
