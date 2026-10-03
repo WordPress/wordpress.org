@@ -16,11 +16,6 @@
  * and share what you've learned with others.
  */
 /* Sass is good */
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 /*--------------------------------------------------------------
 # Normalize
 --------------------------------------------------------------*/
@@ -276,18 +271,6 @@ a:hover {
 	left: -999em;
 }
 
-.screen-reader-text {
-	position: absolute;
-	margin: -1px;
-	padding: 0;
-	height: 1px;
-	width: 1px;
-	overflow: hidden;
-	clip: rect(0 0 0 0);
-	border: 0;
-	word-wrap: normal !important;
-}
-
 /**
 * 3.0 Clearfix
 */
@@ -470,12 +453,6 @@ body.forum #bbpress-forums .bbp-topic-form {
 	border-top: 1px solid #eee;
 }
 
-body.reply-edit #bbpress-forums fieldset.bbp-form,
-body.topic-edit #bbpress-forums fieldset.bbp-form {
-	border-top: none;
-	padding: 0;
-}
-
 #bbpress-forums .bbp-reply-form fieldset,
 #bbpress-forums .bbp-topic-form fieldset {
 	border-width: 0;
@@ -532,7 +509,6 @@ body.reply-edit #bbpress-forums fieldset legend {
 	padding: 20px 0 0 0;
 }
 
-#bbpress-forums fieldset.bbp-form legend,
 #bbpress-forums fieldset.bbp-form legend {
 	font-weight: 700;
 	font-size: 15px;
@@ -558,15 +534,7 @@ body.reply-edit #bbpress-forums fieldset legend {
 	font-size: 12px;
 }
 
-#bbp-search-form {
-	right: 0;
-	margin-top: -40px;
-	position: absolute;
-}
-
-#bbp_search,
-.sidebar #ts,
-.sidebar #rs {
+#bbp_search {
 	width: 140px;
 	margin-top: -1px;
 	margin-right: 8px;
@@ -608,16 +576,6 @@ body.reply-edit #bbpress-forums fieldset legend {
 #bbpress-forums li.bbp-body div.bbp-topic-content li,
 #bbpress-forums li.bbp-body div.bbp-reply-content li {
 	margin-left: 10px;
-}
-
-#bbpress-forums ul.sticky li.bbp-topic-title a.bbp-topic-permalink::before,
-#bbpress-forums ul.super-sticky li.bbp-topic-title a.bbp-topic-permalink::before {
-	font: 400 16px/1 dashicons;
-	content: "\f450";
-	margin-right: 5px;
-	float: left;
-	padding-top: 3px;
-	color: #bb0;
 }
 
 #bbpress-forums ul.sticky.status-closed li.bbp-topic-title a.bbp-topic-permalink::before,
@@ -731,36 +689,11 @@ body.reply-edit #bbpress-forums fieldset legend {
 	border: 1px dotted #bbb;
 }
 
+/* Reply button */
 #bbpress-forums fieldset.bbp-form textarea,
 #bbpress-forums fieldset.bbp-form select,
 #bbpress-forums fieldset.bbp-form input {
 	border: 1px solid #ccc;
-	outline-color: rgb(131, 189, 102);
-}
-
-/* Notices */
-div.bbp-template-notice,
-div.indicator-hint {
-	background: #fff8e5;
-	border: 1px solid #ffb900;
-	border-radius: 0;
-}
-
-div.bbp-template-notice.error,
-div.bbp-template-notice.warning {
-	background: #fbeaea;
-	border: 1px solid #dc3232;
-}
-
-div.bbp-template-notice.updated {
-	background: #ecf7ed;
-}
-
-/* Reply button */
-/* Focus outline */
-#bbpress-forums fieldset.bbp-form textarea,
-#bbpress-forums fieldset.bbp-form select,
-#bbpress-forums fieldset.bbp-form input {
 	outline: 0;
 }
 
@@ -789,12 +722,17 @@ div.bbp-template-notice.updated {
 .sidebar #rs {
 	width: 90%;
 	margin: 0 0 5px;
+	padding: 3px;
 }
 
 /* Sticky topics */
 #bbpress-forums ul.sticky li.bbp-topic-title a.bbp-topic-permalink::before,
 #bbpress-forums ul.super-sticky li.bbp-topic-title a.bbp-topic-permalink::before {
+	font: 400 16px/1 dashicons;
 	content: "\f109";
+	margin-right: 5px;
+	float: left;
+	padding-top: 3px;
 	color: #ffb900;
 }
 
@@ -907,16 +845,6 @@ div.bbp-template-notice.updated {
 /*--------------------------------------------------------------
 # Typography
 --------------------------------------------------------------*/
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 h1,
 h2,
 h3,
@@ -940,11 +868,6 @@ h2.comment-reply-title {
 h3.comment-reply-title {
 	font-size: 1.25rem;
 	font-weight: 700;
-}
-
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 p {
@@ -1092,11 +1015,6 @@ big {
 /*--------------------------------------------------------------
 # Elements
 --------------------------------------------------------------*/
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 html {
 	box-sizing: border-box;
 }
@@ -1213,11 +1131,6 @@ table {
 	text-align: center;
 }
 
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 .notice {
 	--notice-background-color: #fff;
 	--notice-border-color: #fff;
@@ -1288,11 +1201,6 @@ table {
 	padding-bottom: 8px;
 }
 
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 /* User badges */
 .author-badge {
 	position: absolute;
@@ -1349,14 +1257,6 @@ table {
 }
 .tag a {
 	color: var(--wp--preset--color--charcoal-1);
-}
-
-/*--------------------------------------------------------------
-# Forms
---------------------------------------------------------------*/
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /* --------------------------------------------------------------------------
@@ -1789,11 +1689,6 @@ button[type=submit].button.button-hero:active {
 	z-index: 1;
 }
 
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 /* Include margin and padding in the width calculation of input and textarea. */
 input,
 textarea,
@@ -1917,11 +1812,6 @@ fieldset label {
 /*--------------------------------------------------------------
 ## Menus
 --------------------------------------------------------------*/
-:root, body {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
-	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
-}
-
 .site-main .comment-navigation,
 .site-main .posts-navigation,
 .site-main .post-navigation {
@@ -1945,13 +1835,16 @@ fieldset label {
 /*--------------------------------------------------------------
 # Accessibility
 --------------------------------------------------------------*/
-/* Text meant only for screen readers. */
 .screen-reader-text {
+	border: 0;
 	clip: rect(1px, 1px, 1px, 1px);
 	height: 1px;
+	margin: -1px;
 	overflow: hidden;
+	padding: 0;
 	position: absolute !important;
 	width: 1px;
+	word-wrap: normal !important;
 }
 .screen-reader-text:focus {
 	background-color: var(--wp--preset--color--light-grey-2);
@@ -2633,9 +2526,6 @@ body.category #main .archive-pagination {
 .bbpress #bbpress-forums .bbp-reply-header .bbp-meta .bbp-reply-permalink {
 	color: var(--wp--custom--link--color--text);
 }
-.bbpress #bbpress-forums .bbp-topics ul.sticky {
-	background-color: var(--wp--preset--color--lemon-3) !important;
-}
 .bbpress #bbpress-forums .bbp-forums,
 .bbpress #bbpress-forums .bbp-topics {
 	border: 1px solid var(--wp--custom--color--border);
@@ -3182,6 +3072,7 @@ body.single-forum #bbpress-forums .bbp-topic-form ul li,
 body.reply-edit #bbpress-forums fieldset.bbp-form,
 body.topic-edit #bbpress-forums fieldset.bbp-form {
 	border: none;
+	padding: 0;
 	margin: 0 0 var(--wp--style--block-gap);
 }
 
@@ -3684,9 +3575,6 @@ body.helphub-with-sidebar .left-sidebar a {
 		margin: 0;
 		width: 65%;
 	}
-}
-.helphub-page #main-content {
-	margin-top: 0;
 }
 .helphub-page .comment-respond {
 	padding-bottom: 2rem;
