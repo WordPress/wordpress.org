@@ -558,7 +558,7 @@ let wpTrac,
 
 				// Move all of the ticket actions text into the label.
 				// Trac markup is like this: `<label>close</label> as fixed`
-				window.jQuery( '#action div label' ).each( function () {
+				$( '#action div label' ).each( function () {
 					if ( this.nextSibling && window.Node.TEXT_NODE === this.nextSibling.nodeType ) {
 						this.textContent += this.nextSibling.nodeValue;
 						this.nextSibling.nodeValue = '';
@@ -1705,7 +1705,7 @@ let wpTrac,
 					// Keyword adds.
 					$( '#keyword-add' ).on( 'change keypress', function ( e ) {
 						if ( e.type === 'keypress' ) {
-							if ( e.which === 13 ) {
+							if ( e.key === 'Enter' ) {
 								e.stopPropagation();
 								e.preventDefault();
 							} else {
@@ -1731,7 +1731,7 @@ let wpTrac,
 					// Handle keyboard interaction on the field-keywords field.
 					$( '#field-keywords' ).on( 'keydown', function ( event ) {
 						// When pressing Enter or Escape.
-						if ( event.which === 13 || event.which === 27 ) {
+						if ( event.key === 'Enter' || event.key === 'Escape' ) {
 							// Prevent form submission.
 							event.preventDefault();
 							// Hide the input field and populate the keywords.
@@ -1792,7 +1792,7 @@ let wpTrac,
 
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
 					if ( 1 !== keywords.length || keywords[ 0 ] !== '' ) {
-						$.each( keywords, function ( k, v ) {
+						keywords.forEach( function ( v ) {
 							const html = keywordSpan( v );
 							if ( v in coreKeywordList ) {
 								html.attr( 'title', coreKeywordList[ v ] );
@@ -2627,8 +2627,7 @@ let wpTrac,
 				}
 
 				// Only if we have a 'General' option.
-				const components = window
-						.jQuery( '#field-component option' )
+				const components = $( '#field-component option' )
 						.get()
 						.map( ( opt ) => opt.value ),
 					hasDefaultCat = generalCategories.some( ( value ) => components.includes( value ) );
