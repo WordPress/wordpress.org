@@ -1510,8 +1510,8 @@ let wpTrac,
 				},
 
 				initTicketParticipants() {
-					let users = [],
-						exclude = [];
+					let users = [];
+					const exclude = Array.isArray( settings.exclude ) ? settings.exclude : [];
 
 					if ( 'undefined' !== typeof settings.exclude ) {
 						exclude = settings.exclude;
@@ -1577,8 +1577,8 @@ let wpTrac,
 				initNonTicketParticipants() {
 					let users = [];
 
-					if ( 'undefined' !== typeof settings.include ) {
-						$.each( settings.include, function ( k, username ) {
+					if ( Array.isArray( settings.include ) ) {
+						settings.include.forEach( ( username ) => {
 							if ( ! users.includes( username ) && ! ticketParticipants.includes( username ) ) {
 								users.push( username );
 							}
@@ -2263,7 +2263,7 @@ let wpTrac,
 
 						stars
 							.each( function () {
-								if ( data.data.tickets.includes( $( this ).data( 'ticket' ) ) ) {
+								if ( data.data.tickets?.includes( $( this ).data( 'ticket' ) ) ) {
 									$( this ).toggleClass( 'dashicons-star-empty dashicons-star-filled' );
 								}
 							} )
