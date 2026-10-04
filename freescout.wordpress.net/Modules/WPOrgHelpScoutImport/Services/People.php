@@ -40,11 +40,18 @@ final class People {
 	public const ROBOT_EMAIL = 'fs-helpscout-import@example.org';
 
 	/**
-	 * Alias of FreeScout's Teams module, whose teams are robot users.
+	 * Alias of FreeScout's Teams module, whose teams are users.
 	 *
 	 * @var string
 	 */
 	public const TEAMS_MODULE = 'teams';
+
+	/**
+	 * Teams module's service provider, which lists its teams.
+	 *
+	 * @var string
+	 */
+	public const TEAMS_PROVIDER = '\\Modules\\Teams\\Providers\\TeamsServiceProvider';
 
 	/**
 	 * Sender meta key for the HelpScout ID of a sender without an email.
@@ -579,22 +586,26 @@ final class People {
 	}
 
 	/**
-	 * FreeScout's teams: the Teams module's users, which are robots, apart from this module's own.
+	 * FreeScout's teams: the users the Teams module lists as its teams.
+	 *
+	 * The module keeps its teams as users that aren't like others, so it's asked which they are.
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
 	public static function freescout_teams(): \Illuminate\Database\Eloquent\Builder {
 		$query = User::query();
 
-		// Other modules, like Workflows, have robot users too: they're only teams with the Teams module on.
-		if ( ! self::teams_module_active() ) {
+		if ( ! self::teams_module_active() || ! class_exists( self::TEAMS_PROVIDER ) ) {
 			return $query->whereRaw( '1 = 0' );
 		}
 
-		return $query
-			->where( 'type', User::TYPE_ROBOT )
-			->where( 'status', '!=', User::STATUS_DELETED )
-			->where( 'email', '!=', self::ROBOT_EMAIL );
+		try {
+			$teams = call_user_func( array( self::TEAMS_PROVIDER, 'getTeams' ) );
+		} catch ( \Throwable $e ) {
+			$teams = null;
+		}
+
+		return $query->whereKey( $teams instanceof \Illuminate\Support\Collection ? $teams->pluck( 'id' )->map( 'intval' )->all() : array() );
 	}
 
 	/**
@@ -1064,9 +1075,10 @@ final class People {
 			return null;
 		}
 
+		// By its own name: the module shows teams' full names as "Name (Team)".
 		$teams = self::freescout_teams()->get()->filter(
 			static function ( User $team ) use ( $name ): bool {
-				return 0 === strcasecmp( $team->getFullName(), $name );
+				return 0 === strcasecmp( (string) $team->first_name, $name );
 			}
 		);
 

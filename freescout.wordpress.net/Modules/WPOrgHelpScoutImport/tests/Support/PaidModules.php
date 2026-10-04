@@ -9,8 +9,12 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgHelpScoutImport\Tests\Support;
 
+use App\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Modules\Teams\Providers\TeamsServiceProvider;
+
+require_once __DIR__ . '/TeamsServiceProvider.php';
 
 /**
  * Creates the tables of the Saved Replies, Tags, and Custom Fields modules as their migrations leave them, and drops
@@ -113,6 +117,37 @@ final class PaidModules {
 		foreach ( array_merge( ...array_values( self::TABLES ) ) as $table ) {
 			Schema::dropIfExists( $table );
 		}
+	}
+
+	/**
+	 * A team of the Teams module, which keeps them as deleted robot users named "Team".
+	 *
+	 * @param string $name Team name.
+	 * @return User
+	 */
+	public static function team( string $name ): User {
+		$team = factory( User::class )->create(
+			array(
+				'first_name' => $name,
+				'last_name'  => 'Team',
+				'email'      => uniqid( 'team-' ) . '@example.org',
+				'type'       => User::TYPE_ROBOT,
+				'status'     => User::STATUS_DELETED,
+			)
+		);
+
+		TeamsServiceProvider::$team_ids[] = (int) $team->id;
+
+		return $team;
+	}
+
+	/**
+	 * Forgets the teams tests made, which the database forgets with them.
+	 *
+	 * @return void
+	 */
+	public static function forget_teams(): void {
+		TeamsServiceProvider::$team_ids = array();
 	}
 
 	/**

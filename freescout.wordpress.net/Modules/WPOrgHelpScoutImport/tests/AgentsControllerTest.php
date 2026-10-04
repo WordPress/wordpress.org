@@ -20,6 +20,7 @@ use Modules\WPOrgHelpScoutImport\Entities\Person;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
+use Modules\WPOrgHelpScoutImport\Tests\Support\PaidModules;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Services\Client;
 use GuzzleHttp\Promise\FulfilledPromise;
@@ -111,8 +112,8 @@ final class AgentsControllerTest extends ImportTestCase {
 		\App\Module::clearModulesCache();
 		\App\Module::setActive( People::TEAMS_MODULE, true );
 		\App\Module::clearModulesCache();
-		$moderators = $this->create_team( 'Photo Moderators' );
-		$other      = $this->create_team( 'Reviewers' );
+		$moderators = PaidModules::team( 'Photo Moderators' );
+		$other      = PaidModules::team( 'Reviewers' );
 
 		$this->assertMatchesRegularExpression( '#<tr id="team-90">.*?Photo Moderators <small class="text-help">\(same name\)</small>#s', $this->get( route( 'wporghelpscoutimport.agents' ) )->getContent() );
 		$this->assertSame(
@@ -149,8 +150,8 @@ final class AgentsControllerTest extends ImportTestCase {
 		\App\Module::clearModulesCache();
 		\App\Module::setActive( People::TEAMS_MODULE, true );
 		\App\Module::clearModulesCache();
-		$moderators = $this->create_team( 'Photo Moderators' );
-		$reviewers  = $this->create_team( 'Reviewers' );
+		$moderators = PaidModules::team( 'Photo Moderators' );
+		$reviewers  = PaidModules::team( 'Reviewers' );
 		$importer   = new Importer( app( HelpScout::class ), new People( app( HelpScout::class ) ) );
 		$assigned   = function ( int $team_id, string $name ): array {
 			return $this->conversation(
@@ -191,7 +192,7 @@ final class AgentsControllerTest extends ImportTestCase {
 		\App\Module::clearModulesCache();
 		\App\Module::setActive( People::TEAMS_MODULE, true );
 		\App\Module::clearModulesCache();
-		$moderators = $this->create_team( 'Photo Moderators' );
+		$moderators = PaidModules::team( 'Photo Moderators' );
 		People::choose( 90, $moderators );
 
 		\App\Module::setActive( People::TEAMS_MODULE, false );
@@ -337,7 +338,7 @@ final class AgentsControllerTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_only_rows_changed_to_fitting_users_are_saved(): void {
-		$team = $this->create_team( 'Reviewers' );
+		$team = PaidModules::team( 'Reviewers' );
 		Agent::query()->create(
 			array(
 				'helpscout_user_id' => 55,
@@ -589,23 +590,6 @@ final class AgentsControllerTest extends ImportTestCase {
 
 					return new FulfilledPromise( new Response( 200, array(), (string) json_encode( array( 'user' => $accounts[ $username ] ?? null ) ) ) );
 				}
-			)
-		);
-	}
-
-	/**
-	 * A FreeScout team, as the Teams module makes them: a robot user.
-	 *
-	 * @param string $name Team name.
-	 * @return User
-	 */
-	private function create_team( string $name ): User {
-		return factory( User::class )->create(
-			array(
-				'first_name' => $name,
-				'last_name'  => '',
-				'email'      => uniqid( 'team-' ) . '@example.org',
-				'type'       => User::TYPE_ROBOT,
 			)
 		);
 	}
