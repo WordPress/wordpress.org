@@ -148,6 +148,7 @@ final class PaidModules {
 	 */
 	public static function forget_teams(): void {
 		TeamsServiceProvider::$team_ids = array();
+		TeamsServiceProvider::$fails    = false;
 	}
 
 	/**

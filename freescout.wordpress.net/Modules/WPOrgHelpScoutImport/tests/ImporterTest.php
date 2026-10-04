@@ -16,6 +16,7 @@ use App\Thread;
 use App\User;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Modules\Teams\Providers\TeamsServiceProvider;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
@@ -515,6 +516,34 @@ final class ImporterTest extends ImportTestCase {
 					'first' => 'Legal',
 				)
 			)
+		);
+	}
+
+	/**
+	 * When the Teams module can't list its teams, the conversation fails, to be imported again, instead of coming in
+	 * unassigned.
+	 *
+	 * @return void
+	 */
+	public function test_team_assignments_fail_while_the_teams_module_is_broken(): void {
+		PaidModules::switch( People::TEAMS_MODULE, true );
+		PaidModules::team( 'Photo Moderators' );
+		TeamsServiceProvider::$fails = true;
+
+		$this->expectException( \RuntimeException::class );
+
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => array(
+						'id'    => 90,
+						'type'  => 'team',
+						'first' => 'Photo Moderators',
+					),
+				)
+			),
+			$this->mailbox
 		);
 	}
 

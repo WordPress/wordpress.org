@@ -588,9 +588,11 @@ final class People {
 	/**
 	 * FreeScout's teams: the users the Teams module lists as its teams.
 	 *
-	 * The module keeps its teams as users that aren't like others, so it's asked which they are.
+	 * The module keeps its teams as users that aren't like others, so it's asked which they are. If it can't say, that
+	 * isn't taken for none: conversations would be imported unassigned instead of failing, to be imported again.
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
+	 * @throws \UnexpectedValueException If the module doesn't list its teams.
 	 */
 	public static function freescout_teams(): \Illuminate\Database\Eloquent\Builder {
 		$query = User::query();
@@ -599,13 +601,12 @@ final class People {
 			return $query->whereRaw( '1 = 0' );
 		}
 
-		try {
-			$teams = call_user_func( array( self::TEAMS_PROVIDER, 'getTeams' ) );
-		} catch ( \Throwable $e ) {
-			$teams = null;
+		$teams = call_user_func( array( self::TEAMS_PROVIDER, 'getTeams' ) );
+		if ( ! $teams instanceof \Illuminate\Support\Collection ) {
+			throw new \UnexpectedValueException( 'The Teams module did not list its teams.' );
 		}
 
-		return $query->whereKey( $teams instanceof \Illuminate\Support\Collection ? $teams->pluck( 'id' )->map( 'intval' )->all() : array() );
+		return $query->whereKey( $teams->pluck( 'id' )->map( 'intval' )->all() );
 	}
 
 	/**
