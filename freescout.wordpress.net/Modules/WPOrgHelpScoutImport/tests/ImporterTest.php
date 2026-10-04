@@ -204,6 +204,42 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * New senders, with an email or without, aren't announced, like to webhooks; senders FreeScout has are reused.
+	 *
+	 * @return void
+	 */
+	public function test_new_senders_arent_announced(): void {
+		$created = array();
+		\Eventy::addAction(
+			'customer.created',
+			static function ( $customer ) use ( &$created ): void {
+				$created[] = $customer->id;
+			}
+		);
+		$existing = $this->create_sender( 'friend@example.org' );
+		$people   = new People();
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$caller = $people->sender(
+			array(
+				'id'    => 4244,
+				'type'  => 'customer',
+				'first' => 'Cal',
+				'last'  => 'Ler',
+			)
+		);
+		$friend = $people->sender( self::sender( 'Friend@Example.org.', 'Fri', 'End' ) );
+
+		$this->assertSame( array(), $created );
+		$sender = $this->imported_conversation()->customer;
+		$this->assertSame( 'Sam', $sender->first_name );
+		$this->assertSame( (int) $sender->id, (int) \App\Email::query()->where( 'email', 'sam@example.org' )->value( 'customer_id' ) );
+		$this->assertSame( 'Cal', $caller->first_name );
+		$this->assertNotNull( $caller->id );
+		$this->assertSame( (int) $existing->id, (int) $friend->id );
+	}
+
+	/**
 	 * A HelpScout user without a FreeScout user gets one, which can log in while HelpScout lists them.
 	 *
 	 * @return void
