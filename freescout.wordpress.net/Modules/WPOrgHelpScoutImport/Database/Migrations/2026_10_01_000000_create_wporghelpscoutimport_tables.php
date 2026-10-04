@@ -98,6 +98,11 @@ class CreateWporghelpscoutimportTables extends Migration {
 					// Kept until the Tags and Custom Fields modules can take them.
 					$table->text( 'tags' )->nullable();
 					$table->text( 'custom_fields' )->nullable();
+
+					// What the last import gave the modules, as JSON, so changes on either side are told apart: HelpScout's
+					// tags, and whether the import added each; and the values, by custom field ID. Null until it gave any.
+					$table->text( 'written_tags' )->nullable();
+					$table->text( 'written_values' )->nullable();
 					$table->timestamps();
 				}
 			);
@@ -184,6 +189,8 @@ class CreateWporghelpscoutimportTables extends Migration {
 			);
 		}
 	}
+					// The dropdown options HelpScout had, as JSON, so options deleted in FreeScout aren't added again.
+					$table->text( 'options' )->nullable();
 
 	/**
 	 * Reverses the migration.
