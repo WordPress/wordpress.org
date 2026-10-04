@@ -2324,19 +2324,21 @@ let wpTrac,
 				container;
 
 			function init() {
-				if ( $body.hasClass( 'core' ) ) {
+				const classList = document.body.classList;
+
+				if ( classList.contains( 'core' ) ) {
 					trac = 'core';
 					primaryGitRepo = 'WordPress/wordpress-develop';
 					primaryGitRepoDesc = 'WordPress GitHub mirror';
-				} else if ( $body.hasClass( 'meta' ) ) {
+				} else if ( classList.contains( 'meta' ) ) {
 					trac = 'meta';
 					primaryGitRepo = 'WordPress/wordpress.org';
 					primaryGitRepoDesc = 'WordPress.org Meta GitHub mirror';
-				} else if ( $body.hasClass( 'bbpress' ) ) {
+				} else if ( classList.contains( 'bbpress' ) ) {
 					trac = 'bbpress';
 					primaryGitRepo = 'bbpress/bbPress';
 					primaryGitRepoDesc = 'bbPress GitHub mirror';
-				} else if ( $body.hasClass( 'buddypress' ) ) {
+				} else if ( classList.contains( 'buddypress' ) ) {
 					trac = 'buddypress';
 					primaryGitRepo = 'buddypress/buddypress';
 					primaryGitRepoDesc = 'BuddyPress GitHub mirror';
@@ -2625,8 +2627,10 @@ let wpTrac,
 					return;
 				}
 
+				const classList = document.body.classList;
+
 				// bbPress Trac.. has a set of components that I wish everyone had.
-				if ( $( 'body.bbpress' ).length ) {
+				if ( classList.contains( 'bbpress' ) ) {
 					skipWords.push( 'api' );
 					skipWords.push( 'component' );
 					skipWords.push( 'tools' );
@@ -2634,7 +2638,7 @@ let wpTrac,
 				}
 
 				// On Meta, WordPress.org site is a "generic" category that shouldn't be used if possible.
-				if ( $( 'body.meta' ).length ) {
+				if ( classList.contains( 'meta' ) ) {
 					generalCategories.push( 'WordPress.org Site' );
 					skipWords.push( 'wordpress.org' );
 				}
