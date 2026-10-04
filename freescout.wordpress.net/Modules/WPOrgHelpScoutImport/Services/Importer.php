@@ -26,8 +26,10 @@ use Modules\WPOrgHelpScoutImport\Exceptions\ApiError;
 /**
  * Creates the conversation, or adds what's new to it, and keeps its status, assignee, and dates as HelpScout has them.
  *
- * Everything is written as imported, without the events live email fires, so nothing is sent, no workflow runs,
- * and our other modules leave it alone.
+ * Everything is written as imported, without the events live email fires, so nothing is sent, workflows aren't
+ * triggered, and our other modules leave it alone. That doesn't keep it from automatic workflows that the Workflows
+ * module runs on a schedule, over conversations they apply to: those without the "Imported" condition act on imported
+ * conversations too, and the import can't stop them.
  */
 final class Importer {
 
