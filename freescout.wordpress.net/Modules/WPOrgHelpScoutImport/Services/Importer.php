@@ -127,7 +127,20 @@ final class Importer {
 	);
 
 	/**
-	 * HelpScout thread types, as FreeScout's; chats depend on who wrote them, and line items are left out.
+	 * HelpScout statuses, as FreeScout's thread statuses, for what a thread left the conversation in.
+	 *
+	 * @var int[]
+	 */
+	private const THREAD_STATUSES = array(
+		'active'  => Thread::STATUS_ACTIVE,
+		'pending' => Thread::STATUS_PENDING,
+		'closed'  => Thread::STATUS_CLOSED,
+		'spam'    => Thread::STATUS_SPAM,
+	);
+
+	/**
+	 * HelpScout thread types, as FreeScout's; chats depend on who wrote them, and line items that changed the status
+	 * are found by new_threads().
 	 *
 	 * Phone calls and forwards become notes: FreeScout has no thread type for them.
 	 *
@@ -279,7 +292,7 @@ final class Importer {
 		}
 
 		$threads = $this->new_threads( $listed );
-		if ( ! $conversation && ! $threads ) {
+		if ( ! $conversation && ! array_diff( array_column( $threads, 'fs_type' ), array( Thread::TYPE_LINEITEM ) ) ) {
 			return self::SKIPPED_EMPTY;
 		}
 
@@ -430,19 +443,35 @@ final class Importer {
 	/**
 	 * Picks the threads to import that weren't imported yet.
 	 *
+	 * Each thread gets the status the conversation had after it, which HelpScout gives as the thread's own. A thread
+	 * without a known one keeps the status the threads before it left: taking the conversation's current status
+	 * instead would mark it as closing a conversation closed later. A line item whose status isn't the one before it
+	 * changed the status, like closing it with the button or a workflow; it's kept as such, and the others are left out.
+	 *
 	 * @param array[] $threads The conversation's threads, oldest first.
-	 * @return array[] Threads, each with `fs_type` set to FreeScout's.
+	 * @return array[] Threads, each with `fs_type` and `fs_status` set to FreeScout's.
 	 */
 	private function new_threads( array $threads ): array {
-		$ids  = array_map( 'intval', array_column( $threads, 'id' ) );
-		$done = $ids ? ImportedThread::query()->whereIn( 'helpscout_id', $ids )->pluck( 'helpscout_id' )->map( 'intval' )->all() : array();
-		$new  = array();
+		$ids    = array_map( 'intval', array_column( $threads, 'id' ) );
+		$done   = $ids ? ImportedThread::query()->whereIn( 'helpscout_id', $ids )->pluck( 'helpscout_id' )->map( 'intval' )->all() : array();
+		$new    = array();
+		$status = Thread::STATUS_ACTIVE;
 
 		foreach ( $threads as $thread ) {
-			$type = self::thread_type( $thread );
+			$type        = self::thread_type( $thread );
+			$after       = self::THREAD_STATUSES[ $thread['status'] ?? '' ] ?? $status;
+			$changed     = $after !== $status;
+			$status      = $after;
+			$status_item = 'lineitem' === ( $thread['type'] ?? '' ) && 'published' === ( $thread['state'] ?? '' ) && $changed;
+
+			if ( $status_item ) {
+				$type = Thread::TYPE_LINEITEM;
+			}
+
 			if ( $type && ! in_array( (int) ( $thread['id'] ?? 0 ), $done, true ) ) {
-				$thread['fs_type'] = $type;
-				$new[]             = $thread;
+				$thread['fs_type']   = $type;
+				$thread['fs_status'] = $status;
+				$new[]               = $thread;
 			}
 		}
 
@@ -738,14 +767,18 @@ final class Importer {
 	 * An email FreeScout has already, like one sent to two mailboxes, or fetched by FreeScout too, keeps its Message-ID
 	 * where it is: it's unique. If it's in this conversation already, it isn't added again.
 	 *
+	 * A line item is one changing the status, like core adds, credited to the HelpScout user who changed it, or
+	 * else to the robot user.
+	 *
 	 * @param Conversation $conversation Conversation.
 	 * @param array        $source       HelpScout thread, from new_threads().
 	 * @param Customer     $sender       The conversation's sender.
 	 * @return void
 	 */
 	private function create_thread( Conversation $conversation, array $source, Customer $sender ): void {
-		$type        = (int) $source['fs_type'];
-		$by_customer = Thread::TYPE_CUSTOMER === $type;
+		$type         = (int) $source['fs_type'];
+		$by_customer  = Thread::TYPE_CUSTOMER === $type;
+		$is_line_item = Thread::TYPE_LINEITEM === $type;
 		// Who wrote it, by their email; without one, it's the conversation's sender, who may have none either.
 		$author     = $by_customer ? ( $this->people->sender( $source['customer'] ?? null, false ) ?? $this->people->sender( $source['createdBy'] ?? null, false ) ?? $sender ) : null;
 		$user       = $by_customer ? null : $this->people->user( $source['createdBy'] ?? null );
@@ -769,18 +802,22 @@ final class Importer {
 		$thread                  = new Thread();
 		$thread->conversation_id = $conversation->id;
 		$thread->type            = $type;
-		$thread->status          = self::STATUSES[ $source['status'] ?? '' ] ?? $conversation->status;
+		$thread->status          = (int) $source['fs_status'];
 		$thread->state           = Thread::STATE_PUBLISHED;
-		$thread->body            = (string) preg_replace( self::TRACKER, '', (string) ( $source['body'] ?? '' ) );
+		$thread->body            = $is_line_item ? null : (string) preg_replace( self::TRACKER, '', (string) ( $source['body'] ?? '' ) );
 		$thread->source_via      = $by_customer ? Thread::PERSON_CUSTOMER : Thread::PERSON_USER;
-		$thread->source_type     = self::source_type( (string) ( $source['source']['type'] ?? '' ) );
+		$thread->source_type     = $is_line_item ? Thread::SOURCE_TYPE_WEB : self::source_type( (string) ( $source['source']['type'] ?? '' ) );
 		$thread->customer_id     = $author ? $author->id : $conversation->customer_id;
 		$thread->imported        = true;
-		$thread->first           = ! $conversation->threads()->exists();
+		$thread->first           = ! $is_line_item && ! $conversation->threads()->where( 'type', '!=', Thread::TYPE_LINEITEM )->exists();
 		$thread->has_attachments = (bool) $source['files'];
 		$thread->message_id      = $message_id;
 		$thread->created_at      = $created_at;
 		$thread->updated_at      = $created_at;
+
+		if ( $is_line_item ) {
+			$thread->action_type = Thread::ACTION_TYPE_STATUS_CHANGED;
+		}
 
 		if ( $by_customer ) {
 			$thread->created_by_customer_id = $author ? $author->id : $sender->id;
@@ -812,7 +849,7 @@ final class Importer {
 				$body = str_replace( $src, $attachment->url(), $body );
 			}
 		}
-		if ( $body !== $thread->body ) {
+		if ( $body !== (string) $thread->body ) {
 			Thread::query()->whereKey( $thread_id )->update( array( 'body' => $body ) );
 		}
 

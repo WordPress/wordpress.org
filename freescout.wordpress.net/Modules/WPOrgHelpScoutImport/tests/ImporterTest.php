@@ -240,6 +240,62 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * Status changes, like closing with the button, become line items; other line items are left out, and threads
+	 * without a status keep the one before them.
+	 *
+	 * @return void
+	 */
+	public function test_status_changes_become_line_items(): void {
+		$this->answer_threads( self::CONVERSATION_ID, $this->status_threads() );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$conversation = $this->imported_conversation();
+		$line_items   = $conversation->threads()->where( 'type', Thread::TYPE_LINEITEM )->get();
+		$this->assertCount( 1, $line_items );
+
+		$closed = $line_items->first();
+		$this->assertSame( Thread::ACTION_TYPE_STATUS_CHANGED, (int) $closed->action_type );
+		$this->assertSame( Thread::STATUS_CLOSED, (int) $closed->status );
+		$this->assertSame( (int) $this->agent->id, (int) $closed->created_by_user_id );
+		$this->assertSame( Thread::PERSON_USER, (int) $closed->source_via );
+		$this->assertTrue( (bool) $closed->imported );
+		$this->assertFalse( (bool) $closed->first );
+		$this->assertSame( '2026-09-02 11:00:00', $closed->created_at->setTimezone( 'UTC' )->format( 'Y-m-d H:i:s' ) );
+		$this->assertNull( ImportedThread::query()->where( 'helpscout_id', 2024 )->first() );
+
+		$note = $conversation->threads()->where( 'type', Thread::TYPE_NOTE )->firstOrFail();
+		$this->assertSame( Thread::STATUS_ACTIVE, (int) $note->status );
+
+		// The line item isn't what the list shows.
+		$this->assertSame( 'Checked the original.', $conversation->preview );
+		$this->assertSame( '2026-09-02 10:00:00', $conversation->last_reply_at->setTimezone( 'UTC' )->format( 'Y-m-d H:i:s' ) );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$this->assertSame( 4, $this->imported_conversation()->threads()->count() );
+	}
+
+	/**
+	 * Importing again after HelpScout closed a conversation adds its closing, and threads without a status added to it
+	 * since don't count as closing it.
+	 *
+	 * @return void
+	 */
+	public function test_importing_again_adds_closing_without_crediting_others(): void {
+		$threads = $this->status_threads();
+		$this->answer_threads( self::CONVERSATION_ID, array_slice( $threads, 0, 2 ) );
+		$this->importer->import( $this->conversation( array( 'status' => 'active' ) ), $this->mailbox );
+
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$conversation = $this->imported_conversation();
+		$this->assertSame( Conversation::STATUS_CLOSED, (int) $conversation->status );
+		$this->assertSame( Thread::STATUS_ACTIVE, (int) $conversation->threads()->where( 'type', Thread::TYPE_NOTE )->value( 'status' ) );
+		$this->assertSame( 1, $conversation->threads()->where( 'type', Thread::TYPE_LINEITEM )->where( 'status', Thread::STATUS_CLOSED )->count() );
+	}
+
+	/**
 	 * On a phone conversation, notes count as replies for the last reply and preview, like core counts them.
 	 *
 	 * @return void
@@ -1041,6 +1097,43 @@ final class ImporterTest extends ImportTestCase {
 		}
 
 		$this->assertSame( 0, Conversation::query()->where( 'mailbox_id', $this->mailbox->id )->count() );
+	}
+
+	/**
+	 * Threads changing the status: the sender's email, a reply that leaves it active, a note without a status, a
+	 * line item that changes nothing, and the agent closing it.
+	 *
+	 * @return array[]
+	 */
+	private function status_threads(): array {
+		list( $email, $reply, $note, $line_item ) = $this->threads();
+
+		$email['_embedded'] = array();
+		$reply['status']    = 'active';
+		$note['createdAt']  = '2026-09-02T10:30:00Z';
+		unset( $note['status'] );
+
+		return array(
+			$email,
+			$reply,
+			$note,
+			array_replace(
+				$line_item,
+				array(
+					'id'        => 2024,
+					'status'    => 'active',
+					'action'    => array( 'text' => 'Assigned to Ada' ),
+					'createdAt' => '2026-09-02T10:31:00Z',
+				)
+			),
+			array_replace(
+				$line_item,
+				array(
+					'id'        => 2025,
+					'createdAt' => '2026-09-02T11:00:00Z',
+				)
+			),
+		);
 	}
 
 	/**

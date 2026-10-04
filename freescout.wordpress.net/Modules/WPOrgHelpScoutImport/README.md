@@ -11,6 +11,7 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
   - senders' HelpScout profiles, read once per sender: their other emails, organization, job title, phones, websites, social profiles, address, background (as notes), and photo from a social profile, which is copied. Gravatars are left to WPOrgSidebar, which keeps senders' WordPress.org avatars up to date, and HelpScout's generated placeholders are left out. HelpScout's location goes in the address when there's none. What FreeScout has no field for, like chat handles, age, gender, and HelpScout's customer properties that have a value, is kept in the sender's meta;
   - every email, reply, and note, with its own sender or agent, its recipients, and its attachments, except those HelpScout found a virus in;
   - replies HelpScout hid from what the sender is sent, or that bounced, as notes;
+  - status changes, like closing a conversation with the button, or a workflow closing it, as FreeScout's "marked as" line items, credited to who made them, so the Reports module counts those closes. Importing again adds those of conversations imported before;
   - images pasted into emails, which HelpScout keeps on its own image host: they're copied, so they don't go with the account, up to 100 MB per conversation. Images linked from elsewhere keep their links, and HelpScout's read-tracking image is removed;
   - each email's Message-ID, so a sender who replies to an old HelpScout email lands in its conversation. HelpScout keeps them for 2 years, so older emails have none. An email FreeScout has already, like one sent to two mailboxes, keeps its Message-ID where it is; if it's in the same conversation, it isn't added again;
   - HelpScout's conversation number, which people quote, unless a FreeScout conversation already has it;
@@ -20,7 +21,7 @@ Copies a HelpScout mailbox's conversations into a FreeScout mailbox, so a team's
   - the mailbox's saved replies for email, once its conversations are done, with the Saved Replies module on. Their placeholders, like `{%customer.firstName,fallback=there%}`, work in FreeScout as they are, and their images are copied like those in emails. Importing again brings them up to date with HelpScout's, unless they were changed or deleted in FreeScout; a saved reply with the name of one FreeScout has already is left out. Those that fail are listed with the run's error, and tried again by importing the mailbox again.
 - **What doesn't:**
   - spam, drafts, and conversations HelpScout deleted. A conversation marked spam in HelpScout after it was imported becomes spam in FreeScout too, unless agents worked on it there;
-  - HelpScout's line items ("assigned to", "closed by", workflows that ran);
+  - HelpScout's other line items ("assigned to", workflows that ran, and the like);
   - workflows: HelpScout's API gives only their names, not their conditions or actions. Set them up again in FreeScout's Workflows module;
   - saved replies' categories, and those only for chat: HelpScout's API doesn't give the categories, so saved replies come across as one list, in HelpScout's order;
   - phone calls and forwards become notes, since FreeScout has no thread type for them. Senders without an email, like callers, are imported without one.
