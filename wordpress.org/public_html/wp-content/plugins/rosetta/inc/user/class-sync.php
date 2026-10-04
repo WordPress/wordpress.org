@@ -31,7 +31,7 @@ class Sync {
 		}
 
 		if ( isset( $data->roles_to_sync ) ) {
-			$this->destination_site = $data->roles_to_sync;
+			$this->roles_to_sync = $data->roles_to_sync;
 		}
 	}
 
