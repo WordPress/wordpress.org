@@ -139,6 +139,13 @@ final class Importer {
 	);
 
 	/**
+	 * Folder type of the Custom Folders module's folders.
+	 *
+	 * @var int
+	 */
+	private const CUSTOM_FOLDER = 200;
+
+	/**
 	 * Core's conversation columns that newer versions, or modules, add, by whether they're there.
 	 *
 	 * @var bool[]
@@ -261,7 +268,7 @@ final class Importer {
 				$conversation->updateFolder();
 				$conversation->save();
 				$conversation->timestamps = true;
-				$conversation->mailbox->updateFoldersCounters();
+				self::update_counters( $conversation->mailbox );
 
 				return self::UPDATED;
 			}
@@ -366,11 +373,32 @@ final class Importer {
 			$this->close_downloads( $threads );
 		}
 
-		if ( $moved_from ) {
-			$moved_from->updateFoldersCounters();
+		// The mailbox it left, or, once agents worked on it, the one it stays in: the import refreshes only its own.
+		$other_mailbox = $moved_from ?? ( (int) $conversation->mailbox_id !== (int) $mailbox->id ? $conversation->mailbox : null );
+		if ( $other_mailbox ) {
+			self::update_counters( $other_mailbox );
 		}
 
 		return $imported ? self::UPDATED : self::IMPORTED;
+	}
+
+	/**
+	 * Counts a mailbox's conversations for its folders again.
+	 *
+	 * Like core does, except for the Custom Folders module's folders of each agent's own conversations: the module
+	 * counts those for whoever is logged in, and nobody is while importing, so their counts would be lost.
+	 *
+	 * @param Mailbox $mailbox Mailbox.
+	 * @return void
+	 */
+	public static function update_counters( Mailbox $mailbox ): void {
+		foreach ( $mailbox->folders()->get() as $folder ) {
+			if ( self::CUSTOM_FOLDER === (int) $folder->type && ! $folder->user_id && ! empty( $folder->meta['own_only'] ) ) {
+				continue;
+			}
+
+			$folder->updateCounters();
+		}
 	}
 
 	/**

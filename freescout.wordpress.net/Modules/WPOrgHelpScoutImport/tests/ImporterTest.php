@@ -357,6 +357,42 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * Counting a mailbox's folders again leaves the Custom Folders module's folders of agents' own conversations
+	 * alone: nobody is logged in to count them for.
+	 *
+	 * @return void
+	 */
+	public function test_counters_leave_own_custom_folders_alone(): void {
+		$this->importer->import( $this->conversation( array( 'status' => 'active' ) ), $this->mailbox );
+
+		$own   = $this->custom_folder( array( 'own_only' => true ) );
+		$other = $this->custom_folder( array() );
+
+		Importer::update_counters( $this->mailbox );
+
+		$this->assertSame( 7, (int) $own->fresh()->active_count );
+		$this->assertSame( 0, (int) $other->fresh()->active_count );
+		$this->assertSame( 1, (int) $this->mailbox->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->value( 'active_count' ) );
+	}
+
+	/**
+	 * A conversation HelpScout moved, but agents worked on, stays in its mailbox, whose counters are kept up to date.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_staying_in_its_mailbox_updates_its_counters(): void {
+		$themes = $this->create_mailbox( 'Themes' );
+		$this->importer->import( $this->conversation(), $themes );
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_NOTE, 'On it.', $this->agent, '2026-09-10 08:00:00' );
+		$themes->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->update( array( 'active_count' => 9 ) );
+
+		$this->importer->import( $this->conversation( array( 'status' => 'active' ) ), $this->mailbox );
+
+		$this->assertSame( (int) $themes->id, (int) $this->imported_conversation()->mailbox_id );
+		$this->assertSame( 0, (int) $themes->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->value( 'active_count' ) );
+	}
+
+	/**
 	 * A HelpScout user without a FreeScout user gets one, which can log in while HelpScout lists them.
 	 *
 	 * @return void
@@ -1134,6 +1170,24 @@ final class ImporterTest extends ImportTestCase {
 				)
 			),
 		);
+	}
+
+	/**
+	 * Creates one of the Custom Folders module's folders in the mailbox, whose counts are 7 so far.
+	 *
+	 * @param array $meta Folder's settings.
+	 * @return Folder
+	 */
+	private function custom_folder( array $meta ): Folder {
+		$folder               = new Folder();
+		$folder->mailbox_id   = $this->mailbox->id;
+		$folder->type         = 200;
+		$folder->meta         = $meta;
+		$folder->active_count = 7;
+		$folder->total_count  = 7;
+		$folder->save();
+
+		return $folder;
 	}
 
 	/**

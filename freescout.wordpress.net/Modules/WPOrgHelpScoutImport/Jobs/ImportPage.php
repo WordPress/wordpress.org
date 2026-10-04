@@ -244,7 +244,7 @@ final class ImportPage implements ShouldQueue {
 		} finally {
 			// Not thrown from here: the next job is queued already, and a failure would queue another, from failed().
 			try {
-				$mailbox->updateFoldersCounters();
+				Importer::update_counters( $mailbox );
 			} catch ( \Throwable $e ) {
 				\Log::error( '[WPOrgHelpScoutImport] Could not update the folder counters of ' . $mailbox->name . ': ' . Run::describe( $e ) );
 			}
