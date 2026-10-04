@@ -70,6 +70,15 @@ class Themes_API {
 		'external_repository_url' => false,
 		'external_support_url'    => false,
 		'upload_date'             => false,
+		'is_closed'               => false,
+		'closed'                  => false,
+		'closed_date'             => false,
+		'reason'                  => false,
+		'reason_text'             => false,
+		'status'                  => false,
+		'is_suspended'            => false,
+		'is_outdated'             => false,
+		'outdated_notice'         => false,
 	);
 
 	/**
@@ -207,7 +216,7 @@ class Themes_API {
 
 		// Back-compat behaviour for the 1.0/1.1 API's
 		if ( defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION < 1.2 ) {
-			if ( isset( $this->response->error ) && 'Theme not found' == $this->response->error ) {
+			if ( isset( $this->response->error ) && in_array( $this->response->error, array( 'Theme not found', 'closed' ), true ) ) {
 				$response = false;
 			}
 		}
@@ -231,7 +240,7 @@ class Themes_API {
 			status_header( 400 );
 		} elseif (
 			isset( $this->response->error ) &&
-			'Theme not found' == $this->response->error
+			in_array( $this->response->error, array( 'Theme not found', 'closed' ), true )
 		) {
 			status_header( 404 );
 		} else {
@@ -491,7 +500,16 @@ class Themes_API {
 			$defaults['is_commercial'] = true;
 			$defaults['is_community'] = true;
 			$defaults['external_repository_url'] = true;
-			$defaults['external_support_url'] = true;
+			$defaults['external_support_url']    = true;
+			$defaults['is_closed']               = true;
+			$defaults['closed']                  = true;
+			$defaults['closed_date']             = true;
+			$defaults['reason']                  = true;
+			$defaults['reason_text']             = true;
+			$defaults['status']                  = true;
+			$defaults['is_suspended']            = true;
+			$defaults['is_outdated']             = true;
+			$defaults['outdated_notice']         = true;
 		}
 
 		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
@@ -509,7 +527,41 @@ class Themes_API {
 			if ( $themes ) {
 				$this->response = $this->fill_theme( $themes[0] );
 			} else {
-				$this->response = (object) array( 'error' => 'Theme not found' ); // Check get_result() if changing this string.
+				// Check for suspended theme.
+				$suspended = get_posts( array(
+					'name'        => $this->request->slug,
+					'post_type'   => 'repopackage',
+					'post_status' => 'suspend',
+				) );
+
+				if ( $suspended ) {
+					$theme      = $suspended[0];
+					$reason     = (string) get_post_meta( $theme->ID, '_close_reason', true ) ?: 'security-issue';
+					$close_date = get_post_meta( $theme->ID, 'theme_closed_date', true );
+					if ( ! $close_date ) {
+						$close_date = get_post_modified_time( 'Y-m-d', true, $theme->ID, true );
+					} else {
+						$close_date = gmdate( 'Y-m-d', strtotime( $close_date ) );
+					}
+
+					$this->response = (object) array(
+						'error'           => 'closed',
+						'name'            => $theme->post_title,
+						'slug'            => $theme->post_name,
+						'description'     => __( 'This theme has been suspended and is not available for download.', 'wporg-themes' ),
+						'status'          => 'suspend',
+						'closed'          => true,
+						'is_closed'       => true,
+						'is_suspended'    => true,
+						'closed_date'     => $close_date,
+						'reason'          => $reason,
+						'reason_text'     => ( 'security-issue' === $reason ) ? __( 'Security Issue', 'wporg-themes' ) : __( 'Suspended', 'wporg-themes' ),
+						'is_outdated'     => false,
+						'outdated_notice' => '',
+					);
+				} else {
+					$this->response = (object) array( 'error' => 'Theme not found' ); // Check get_result() if changing this string.
+				}
 			}
 		}
 	}
@@ -921,6 +973,43 @@ class Themes_API {
 			} else {
 				$phil->external_repository_url = '';
 			}
+		}
+
+		$is_delisted        = ( 'delist' === $theme->post_status );
+		$last_modified_time = get_post_modified_time( 'U', true, $theme->ID, true );
+		$is_outdated        = ( $last_modified_time && ( time() - $last_modified_time ) > ( 2 * YEAR_IN_SECONDS ) );
+
+		if ( $this->fields['status'] ) {
+			$phil->status = $theme->post_status;
+		}
+
+		if ( $this->fields['closed'] || $this->fields['is_closed'] ) {
+			$phil->closed    = $is_delisted;
+			$phil->is_closed = $is_delisted;
+		}
+
+		if ( $this->fields['is_suspended'] ) {
+			$phil->is_suspended = false;
+		}
+
+		if ( $this->fields['is_outdated'] ) {
+			$phil->is_outdated = (bool) $is_outdated;
+		}
+
+		if ( $this->fields['outdated_notice'] ) {
+			$phil->outdated_notice = $is_outdated ? __( 'This theme has not been updated in over 2 years. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-themes' ) : '';
+		}
+
+		if ( $this->fields['closed_date'] ) {
+			$phil->closed_date = $is_delisted ? get_post_modified_time( 'Y-m-d', true, $theme->ID, true ) : false;
+		}
+
+		if ( $this->fields['reason'] ) {
+			$phil->reason = $is_delisted ? ( (string) get_post_meta( $theme->ID, '_close_reason', true ) ?: 'delisted' ) : false;
+		}
+
+		if ( $this->fields['reason_text'] ) {
+			$phil->reason_text = $is_delisted ? __( 'Delisted', 'wporg-themes' ) : false;
 		}
 
 		if ( class_exists( 'GlotPress_Translate_Bridge' ) ) {

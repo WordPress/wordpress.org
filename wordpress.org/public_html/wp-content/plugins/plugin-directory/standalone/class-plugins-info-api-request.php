@@ -46,6 +46,14 @@ class Plugins_Info_API_Request {
 		'repository_url'         => false,
 		'support_url'            => false,
 		'commercial_support_url' => false,
+		'closed'                 => false,
+		'closed_date'            => false,
+		'reason'                 => false,
+		'reason_text'            => false,
+		'status'                 => false,
+		'is_outdated'            => false,
+		'outdated_notice'        => false,
+		'is_security'            => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -67,6 +75,8 @@ class Plugins_Info_API_Request {
 		'tested'            => true,
 		'versions'          => true,
 		'screenshots'       => true,
+		'closed'            => true,
+		'is_outdated'       => true,
 	);
 
 	// Alterations made to default fields in the info/1.2 API.
@@ -85,6 +95,14 @@ class Plugins_Info_API_Request {
 		'repository_url'         => true,
 		'support_url'            => true,
 		'commercial_support_url' => true,
+		'closed'                 => true,
+		'closed_date'            => true,
+		'reason'                 => true,
+		'reason_text'            => true,
+		'status'                 => true,
+		'is_outdated'            => true,
+		'outdated_notice'        => true,
+		'is_security'            => true,
 	);
 
 	static $query_plugins_fields_defaults = array(
