@@ -841,6 +841,9 @@ final class Importer {
 	/**
 	 * Sets what depends on the threads, and what HelpScout may have changed since the last import.
 	 *
+	 * The last reply and preview follow core's thread observer: the last reply is the latest email or reply, or on
+	 * a phone conversation, note too; the preview is the latest of any of them, notes included, that isn't a forward.
+	 *
 	 * @param Conversation $conversation  Conversation.
 	 * @param array        $source        HelpScout conversation.
 	 * @param int          $status        Its status, as FreeScout's.
@@ -851,13 +854,23 @@ final class Importer {
 	private function update_conversation( Conversation $conversation, array $source, int $status, bool $from_source ): void {
 		$threads = $conversation->threads()->where( 'state', Thread::STATE_PUBLISHED )->orderBy( 'created_at' )->orderBy( 'id' )->get();
 		$replies = $threads->whereIn( 'type', array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE ) );
-		$last    = $replies->last() ?? $threads->last();
+		$notes   = $threads->where( 'type', Thread::TYPE_NOTE );
+		$dated   = $conversation->isPhone() ? $threads->whereIn( 'type', array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE, Thread::TYPE_NOTE ) ) : $replies;
+		$last    = $dated->last() ?? $notes->last();
+		$preview = $threads->whereIn( 'type', array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE, Thread::TYPE_NOTE ) )->reject(
+			static function ( Thread $thread ): bool {
+				return $thread->isForward();
+			}
+		)->last();
 
 		$conversation->threads_count   = $replies->count();
 		$conversation->has_attachments = $threads->contains( 'has_attachments', true );
 
+		if ( $preview ) {
+			$conversation->setPreview( (string) $preview->body );
+		}
+
 		if ( $last ) {
-			$conversation->setPreview( (string) $last->body );
 			$conversation->last_reply_at   = $last->created_at;
 			$conversation->last_reply_from = $last->source_via;
 		}

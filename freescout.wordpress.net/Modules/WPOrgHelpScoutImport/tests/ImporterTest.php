@@ -240,6 +240,67 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * On a phone conversation, notes count as replies for the last reply and preview, like core counts them.
+	 *
+	 * @return void
+	 */
+	public function test_phone_conversations_count_notes_as_replies(): void {
+		$caller  = self::sender( 'cal@example.org', 'Cal', 'Ler' );
+		$threads = array(
+			array(
+				'id'        => 2031,
+				'type'      => 'phone',
+				'status'    => 'active',
+				'state'     => 'published',
+				'body'      => 'Cal called about a photo.',
+				'source'    => array( 'type' => 'phone' ),
+				'customer'  => $caller,
+				'createdBy' => self::agent_person(),
+				'createdAt' => '2026-09-01T09:00:00Z',
+			),
+			array(
+				'id'        => 2032,
+				'type'      => 'customer',
+				'status'    => 'active',
+				'state'     => 'published',
+				'body'      => 'Here is the photo.',
+				'source'    => array( 'type' => 'email' ),
+				'customer'  => $caller,
+				'createdBy' => $caller,
+				'createdAt' => '2026-09-02T09:00:00Z',
+			),
+			array(
+				'id'        => 2033,
+				'type'      => 'note',
+				'status'    => 'active',
+				'state'     => 'published',
+				'body'      => 'Called back.',
+				'source'    => array( 'type' => 'web' ),
+				'createdBy' => self::agent_person(),
+				'createdAt' => '2026-09-03T12:00:00Z',
+			),
+		);
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'type'            => 'phone',
+					'status'          => 'active',
+					'primaryCustomer' => $caller,
+					'createdBy'       => self::agent_person(),
+				)
+			),
+			$this->mailbox
+		);
+
+		$conversation = $this->imported_conversation();
+		$this->assertSame( 'Called back.', $conversation->preview );
+		$this->assertSame( '2026-09-03 12:00:00', $conversation->last_reply_at->setTimezone( 'UTC' )->format( 'Y-m-d H:i:s' ) );
+		$this->assertSame( Conversation::PERSON_USER, (int) $conversation->last_reply_from );
+	}
+
+	/**
 	 * A HelpScout user without a FreeScout user gets one, which can log in while HelpScout lists them.
 	 *
 	 * @return void
