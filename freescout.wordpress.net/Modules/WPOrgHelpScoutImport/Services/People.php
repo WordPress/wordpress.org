@@ -12,9 +12,11 @@ namespace Modules\WPOrgHelpScoutImport\Services;
 use App\Conversation;
 use App\Customer;
 use App\Email;
+use App\Folder;
 use App\Mailbox;
 use App\Thread;
 use App\User;
+use Illuminate\Support\Facades\Schema;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
@@ -87,6 +89,20 @@ final class People {
 	 * @var int
 	 */
 	private const DIRECTORY_CACHE_MINUTES = 60;
+
+	/**
+	 * Column the Reports module adds to conversations, which it resets to have their metrics computed again.
+	 *
+	 * @var string
+	 */
+	private const REPORTS_COLUMN = 'rpt_ready';
+
+	/**
+	 * Whether conversations have the Reports module's column; null until it's checked.
+	 *
+	 * @var bool|null
+	 */
+	private static $reports = null;
 
 	/**
 	 * HelpScout API client, to tell users HelpScout still lists from former ones.
@@ -176,10 +192,14 @@ final class People {
 		if ( ! array_key_exists( $id, $this->teams ) ) {
 			$team = self::mapped( $id, true );
 			if ( ! $team ) {
-				// Kept once found by name, so choosing another team later moves its conversations.
+				/*
+				 * Kept once found by name, so choosing another team later moves its conversations. Those imported
+				 * unassigned before, while there was none, are assigned to it now.
+				 */
 				$team = self::team_by_name( self::name( $person ) );
 				if ( $team ) {
 					Agent::query()->updateOrCreate( array( 'helpscout_user_id' => $id ), array( 'user_id' => $team->id ) );
+					self::recredit( $id, null, $team );
 				}
 			}
 			$this->teams[ $id ] = $team;
@@ -308,7 +328,8 @@ final class People {
 	 * Credits what was imported for a HelpScout user or team to someone else: replies, notes, and assignments.
 	 *
 	 * Only what was imported for that HelpScout user or team moves, not what others credited to the same FreeScout user
-	 * did; and conversations agents worked on in FreeScout keep their assignee.
+	 * did; and conversations agents worked on in FreeScout keep their assignee. Conversations keep HelpScout's dates,
+	 * and with the Reports module, their metrics are computed again.
 	 *
 	 * @param int       $helpscout_user_id HelpScout user or team ID.
 	 * @param User|null $from              Who it's credited to now; null for a team that had none, whose
@@ -327,28 +348,83 @@ final class People {
 			return $from ? $query->where( $column, $from->id ) : $query->whereNull( $column );
 		};
 
-		// Without the events of changed threads and conversations: imported ones were written without them too.
+		/*
+		 * Without the events of changed threads and conversations: imported ones were written without them too. And
+		 * without touching updated_at, which is HelpScout's.
+		 */
+		$reports              = self::has_reports();
+		$update_conversations = static function ( $query, array $values ) use ( $reports ): void {
+			$query->toBase()->update( $reports ? $values + array( self::REPORTS_COLUMN => false ) : $values );
+		};
+		$update_threads       = static function ( $query, array $values ) use ( $reports ): void {
+			if ( $reports ) {
+				Conversation::query()
+					->whereIn( 'id', ( clone $query )->select( 'conversation_id' )->getQuery() )
+					->toBase()
+					->update( array( self::REPORTS_COLUMN => false ) );
+			}
+			$query->toBase()->update( $values );
+		};
+
 		if ( $from ) {
-			Thread::query()->whereIn( 'id', $threads( 'helpscout_user_id' ) )->where( 'created_by_user_id', $from->id )->update( array( 'created_by_user_id' => $to->id ) );
-			Conversation::query()->whereIn( 'id', $imported( 'creator_id' ) )->where( 'created_by_user_id', $from->id )->update( array( 'created_by_user_id' => $to->id ) );
-			Conversation::query()->whereIn( 'id', $imported( 'closer_id' ) )->where( 'closed_by_user_id', $from->id )->update( array( 'closed_by_user_id' => $to->id ) );
+			$update_threads( Thread::query()->whereIn( 'id', $threads( 'helpscout_user_id' ) )->where( 'created_by_user_id', $from->id ), array( 'created_by_user_id' => $to->id ) );
+			$update_conversations( Conversation::query()->whereIn( 'id', $imported( 'creator_id' ) )->where( 'created_by_user_id', $from->id ), array( 'created_by_user_id' => $to->id ) );
+			$update_conversations( Conversation::query()->whereIn( 'id', $imported( 'closer_id' ) )->where( 'closed_by_user_id', $from->id ), array( 'closed_by_user_id' => $to->id ) );
 		}
-		$is_from( Thread::query()->whereIn( 'id', $threads( 'helpscout_assignee_id' ) ), 'user_id' )->update( array( 'user_id' => $to->id ) );
+		$update_threads( $is_from( Thread::query()->whereIn( 'id', $threads( 'helpscout_assignee_id' ) ), 'user_id' ), array( 'user_id' => $to->id ) );
 
 		// Conversations agents worked on in FreeScout keep their assignee.
 		$assigned  = $is_from( Conversation::query()->whereIn( 'id', $imported( 'assignee_id' ) ), 'user_id' );
-		$worked_on = Thread::query()->select( 'conversation_id' )->whereIn( 'conversation_id', $imported( 'assignee_id' ) )->where( 'imported', false )->getQuery();
+		$worked_on = self::worked_on()->select( 'conversation_id' )->whereIn( 'conversation_id', $imported( 'assignee_id' ) )->getQuery();
 		$assigned->whereNotIn( 'id', $worked_on );
-		$mailboxes = ( clone $assigned )->distinct()->pluck( 'mailbox_id' );
-		$assigned->update( array( 'user_id' => $to->id ) );
+		$mailboxes = Mailbox::query()->whereIn( 'id', ( clone $assigned )->distinct()->pluck( 'mailbox_id' ) )->get();
 
-		// Who sees them under Mine changed.
-		foreach ( Mailbox::query()->whereIn( 'id', $mailboxes )->get() as $mailbox ) {
+		// Open ones that were unassigned move to the Assigned folder, as core moves them when they're assigned.
+		foreach ( $mailboxes as $mailbox ) {
+			$unassigned_folder = $mailbox->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->value( 'id' );
+			$assigned_folder   = $mailbox->folders()->where( 'type', Folder::TYPE_ASSIGNED )->value( 'id' );
+			if ( $unassigned_folder && $assigned_folder ) {
+				$update_conversations(
+					( clone $assigned )
+						->where( 'mailbox_id', $mailbox->id )
+						->where( 'folder_id', $unassigned_folder )
+						->whereIn( 'status', array( Conversation::STATUS_ACTIVE, Conversation::STATUS_PENDING ) )
+						->where( 'state', Conversation::STATE_PUBLISHED ),
+					array(
+						'user_id'   => $to->id,
+						'folder_id' => $assigned_folder,
+					)
+				);
+			}
+		}
+		$update_conversations( $assigned, array( 'user_id' => $to->id ) );
+
+		// Who sees them under Mine changed, and what's in Unassigned and Assigned.
+		foreach ( $mailboxes as $mailbox ) {
 			if ( User::TYPE_USER === (int) $to->type ) {
 				self::grant( $to, $mailbox );
 			}
 			$mailbox->updateFoldersCounters();
 		}
+	}
+
+	/**
+	 * Threads that show agents worked on a conversation in FreeScout: those not imported, but robots' line items.
+	 *
+	 * Automatic workflows add a line item by their robot user whenever they run, which nobody did.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 */
+	public static function worked_on(): \Illuminate\Database\Eloquent\Builder {
+		return Thread::query()
+			->where( 'imported', false )
+			->where(
+				static function ( $query ): void {
+					$query->where( 'type', '!=', Thread::TYPE_LINEITEM )
+						->orWhereNull( 'created_by_user_id' )
+						->orWhereNotIn( 'created_by_user_id', User::getRobotsCondition()->select( 'id' )->getQuery() );
+				}
+			);
 	}
 
 	/**
@@ -385,6 +461,19 @@ final class People {
 		if ( $is_team ) {
 			self::recredit( $helpscout_user_id, null, $user );
 		}
+	}
+
+	/**
+	 * Whether conversations have the Reports module's column, checked once.
+	 *
+	 * @return bool
+	 */
+	private static function has_reports(): bool {
+		if ( null === self::$reports ) {
+			self::$reports = Schema::hasColumn( 'conversations', self::REPORTS_COLUMN );
+		}
+
+		return self::$reports;
 	}
 
 	/**
@@ -537,7 +626,8 @@ final class People {
 	 * Lists HelpScout teams with the FreeScout team each is assigned to.
 	 *
 	 * @param array[] $directory HelpScout's users and teams, from directory().
-	 * @return array[] By name, each with `id`, `name`, `team` (the FreeScout team, or null), and `chosen`.
+	 * @return array[] By name, each with `id`, `name`, `team` (the FreeScout team, or null), `chosen`, and `missing`
+	 *                 (names of the mailboxes its conversations are in that the FreeScout team has no access to).
 	 */
 	public static function teams( array $directory ): array {
 		$teams = array();
@@ -545,12 +635,14 @@ final class People {
 		foreach ( array_filter( $directory, array( self::class, 'is_team' ) ) as $helpscout_team ) {
 			$id     = (int) ( $helpscout_team['id'] ?? 0 );
 			$chosen = self::mapped( $id, true );
+			$team   = $chosen ?? self::team_by_name( self::name( $helpscout_team ) );
 
 			$teams[] = array(
-				'id'     => $id,
-				'name'   => self::name( $helpscout_team ),
-				'team'   => $chosen ?? self::team_by_name( self::name( $helpscout_team ) ),
-				'chosen' => (bool) $chosen,
+				'id'      => $id,
+				'name'    => self::name( $helpscout_team ),
+				'team'    => $team,
+				'chosen'  => (bool) $chosen,
+				'missing' => $team ? self::missing_mailboxes( $id, $team ) : array(),
 			);
 		}
 
@@ -562,6 +654,26 @@ final class People {
 		);
 
 		return $teams;
+	}
+
+	/**
+	 * The mailboxes a HelpScout team's imported conversations are in that its FreeScout team has no access to.
+	 *
+	 * The Teams module gives a team a folder, and lets it be assigned, only in the mailboxes ticked on its page.
+	 *
+	 * @param int  $helpscout_team_id HelpScout team ID.
+	 * @param User $team              FreeScout team.
+	 * @return string[] Mailbox names, by ID.
+	 */
+	private static function missing_mailboxes( int $helpscout_team_id, User $team ): array {
+		$imported = ImportedConversation::query()->select( 'conversation_id' )->where( 'assignee_id', $helpscout_team_id )->getQuery();
+
+		return Mailbox::query()
+			->whereIn( 'id', Conversation::query()->select( 'mailbox_id' )->whereIn( 'id', $imported )->getQuery() )
+			->whereNotIn( 'id', $team->mailboxes()->pluck( 'mailboxes.id' )->all() )
+			->orderBy( 'name' )
+			->pluck( 'name', 'id' )
+			->all();
 	}
 
 	/**

@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgHelpScoutImport\Tests;
 
 use App\Conversation;
+use App\Folder;
 use App\Thread;
 use App\User;
 use Illuminate\Support\Facades\Queue;
@@ -43,7 +44,7 @@ final class AgentsControllerTest extends ImportTestCase {
 	private $admin;
 
 	/**
-	 * Has HelpScout list two mailboxes, three people, and a team, and logs an administrator in.
+	 * Has HelpScout list two mailboxes, three people, and two teams, and logs an administrator in.
 	 *
 	 * Ada matches by email; Bo and Cy have no FreeScout user yet.
 	 *
@@ -71,16 +72,22 @@ final class AgentsControllerTest extends ImportTestCase {
 			)
 		);
 
-		$ada  = self::helpscout_user( 55, 'Ada', 'Agent', 'agent@example.org' );
-		$bo   = self::helpscout_user( 56, 'Bo', 'Newcomer', 'bo@example.org' );
-		$cy   = self::helpscout_user( 57, 'Cy', 'Elsewhere', 'cy@helpscout.example' );
-		$team = array(
+		$ada   = self::helpscout_user( 55, 'Ada', 'Agent', 'agent@example.org' );
+		$bo    = self::helpscout_user( 56, 'Bo', 'Newcomer', 'bo@example.org' );
+		$cy    = self::helpscout_user( 57, 'Cy', 'Elsewhere', 'cy@helpscout.example' );
+		$team  = array(
 			'id'        => 90,
 			'type'      => 'team',
 			'firstName' => 'Photo Moderators',
 			'lastName'  => '',
 		);
-		$this->helpscout->only( 'GET', 'v2/users', self::list( 'users', array( $ada, $bo, $cy, $team ) ) );
+		$legal = array(
+			'id'        => 91,
+			'type'      => 'team',
+			'firstName' => 'Legal',
+			'lastName'  => '',
+		);
+		$this->helpscout->only( 'GET', 'v2/users', self::list( 'users', array( $ada, $bo, $cy, $team, $legal ) ) );
 		$this->helpscout->only_mailbox_users( 77, self::list( 'users', array( $ada, $bo, $team ) ) );
 		$this->helpscout->only_mailbox_users( 78, self::list( 'users', array( $ada, $cy ) ) );
 
@@ -142,7 +149,8 @@ final class AgentsControllerTest extends ImportTestCase {
 	}
 
 	/**
-	 * Choosing a team after an import moves its conversations: from the team found by name, or from none.
+	 * Choosing a team after an import moves its conversations: from the team found by name, or from none, out of
+	 * Unassigned, and without changing HelpScout's dates.
 	 *
 	 * @return void
 	 */
@@ -176,11 +184,103 @@ final class AgentsControllerTest extends ImportTestCase {
 		// A team without a FreeScout team was imported unassigned; choosing one assigns its conversations.
 		$this->answer_threads( 1002, $this->threads( 100 ) );
 		$importer->import( array_replace( $assigned( 91, 'Legal' ), array( 'id' => 1002 ) ), $this->mailbox );
-		$legal = Conversation::query()->findOrFail( ImportedConversation::query()->where( 'helpscout_id', 1002 )->value( 'conversation_id' ) );
+		$legal      = Conversation::query()->findOrFail( ImportedConversation::query()->where( 'helpscout_id', 1002 )->value( 'conversation_id' ) );
+		$updated_at = Conversation::query()->whereKey( $legal->id )->toBase()->value( 'updated_at' );
 		$this->assertNull( $legal->user_id );
+		$this->assertSame( Folder::TYPE_UNASSIGNED, (int) $legal->folder->type );
 
 		$this->post( route( 'wporghelpscoutimport.agents.save' ), array( 'teams' => array( 91 => $moderators->id ) ) );
 		$this->assertSame( (int) $moderators->id, (int) $legal->fresh()->user_id );
+		$this->assertSame( Folder::TYPE_ASSIGNED, (int) $legal->fresh()->folder->type );
+		$this->assertSame( $updated_at, Conversation::query()->whereKey( $legal->id )->toBase()->value( 'updated_at' ) );
+	}
+
+	/**
+	 * A team found by name once the Teams module has it gets the conversations imported unassigned before.
+	 *
+	 * @return void
+	 */
+	public function test_team_found_by_name_later_gets_its_conversations(): void {
+		$importer = new Importer( app( HelpScout::class ), new People( app( HelpScout::class ) ) );
+		$importer->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => array(
+						'id'    => 90,
+						'type'  => 'team',
+						'first' => 'Photo Moderators',
+					),
+				)
+			),
+			$this->mailbox
+		);
+		$conversation = Conversation::query()->findOrFail( ImportedConversation::query()->value( 'conversation_id' ) );
+		$this->assertNull( $conversation->user_id );
+
+		PaidModules::switch( People::TEAMS_MODULE, true );
+		$moderators = PaidModules::team( 'Photo Moderators' );
+		( new People() )->team(
+			array(
+				'id'    => 90,
+				'type'  => 'team',
+				'first' => 'Photo Moderators',
+			)
+		);
+
+		$this->assertSame( (int) $moderators->id, (int) $conversation->fresh()->user_id );
+		$this->assertSame( Folder::TYPE_ASSIGNED, (int) $conversation->fresh()->folder->type );
+	}
+
+	/**
+	 * A team without access to the mailbox its conversations are in is flagged, until it's given access.
+	 *
+	 * @return void
+	 */
+	public function test_teams_without_access_to_their_mailboxes_are_flagged(): void {
+		PaidModules::switch( People::TEAMS_MODULE, true );
+		$moderators = PaidModules::team( 'Photo Moderators' );
+		( new Importer( app( HelpScout::class ), new People( app( HelpScout::class ) ) ) )->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => array(
+						'id'    => 90,
+						'type'  => 'team',
+						'first' => 'Photo Moderators',
+					),
+				)
+			),
+			$this->mailbox
+		);
+
+		$this->assertMatchesRegularExpression( '#<tr id="team-90">.*?Has no access to “Photos”, where its conversations are#s', $this->get( route( 'wporghelpscoutimport.agents' ) )->getContent() );
+
+		$moderators->mailboxes()->attach( $this->mailbox->id );
+		$this->assertStringNotContainsString( 'Has no access to', $this->get( route( 'wporghelpscoutimport.agents' ) )->getContent() );
+	}
+
+	/**
+	 * Only HelpScout's teams can be given a FreeScout team, not its users.
+	 *
+	 * @return void
+	 */
+	public function test_only_helpscout_teams_get_teams(): void {
+		PaidModules::switch( People::TEAMS_MODULE, true );
+		$moderators = PaidModules::team( 'Photo Moderators' );
+
+		$this->post(
+			route( 'wporghelpscoutimport.agents.save' ),
+			array(
+				'teams' => array(
+					55 => $moderators->id,
+					90 => $moderators->id,
+				),
+			)
+		);
+
+		$this->assertFalse( Agent::query()->where( 'helpscout_user_id', 55 )->exists() );
+		$this->assertSame( (int) $moderators->id, (int) Agent::query()->where( 'helpscout_user_id', 90 )->value( 'user_id' ) );
 	}
 
 	/**
@@ -274,10 +374,11 @@ final class AgentsControllerTest extends ImportTestCase {
 		$this->agent->save();
 		( new Importer( app( HelpScout::class ), new People( app( HelpScout::class ) ) ) )->import( $this->conversation(), $this->mailbox );
 
-		$created = User::query()->where( 'email', 'agent@example.org' )->firstOrFail();
-		$reply   = static function (): Thread {
+		$created    = User::query()->where( 'email', 'agent@example.org' )->firstOrFail();
+		$reply      = static function (): Thread {
 			return Thread::query()->findOrFail( ImportedThread::query()->where( 'helpscout_id', 2002 )->value( 'thread_id' ) );
 		};
+		$updated_at = Thread::query()->whereKey( $reply()->id )->toBase()->value( 'updated_at' );
 		$this->assertSame( (int) $created->id, (int) $reply()->created_by_user_id );
 
 		$this->post( route( 'wporghelpscoutimport.agents.save' ), array( 'agents' => array( 55 => $this->agent->id ) ) );
@@ -285,6 +386,7 @@ final class AgentsControllerTest extends ImportTestCase {
 		$conversation = Conversation::query()->findOrFail( ImportedConversation::query()->value( 'conversation_id' ) );
 		$this->assertSame( (int) $this->agent->id, (int) $reply()->created_by_user_id );
 		$this->assertSame( (int) $this->agent->id, (int) $reply()->user_id );
+		$this->assertSame( $updated_at, Thread::query()->whereKey( $reply()->id )->toBase()->value( 'updated_at' ) );
 		$this->assertSame( (int) $this->agent->id, (int) $conversation->closed_by_user_id );
 		$this->assertSame( (int) $this->agent->id, (int) Agent::query()->where( 'helpscout_user_id', 55 )->value( 'user_id' ) );
 	}

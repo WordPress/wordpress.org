@@ -611,6 +611,42 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * Line items robots added, like automatic workflows' whenever they run, aren't agents working on a conversation.
+	 *
+	 * @return void
+	 */
+	public function test_robots_line_items_arent_work_in_freescout(): void {
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => self::agent_person(),
+				)
+			),
+			$this->mailbox
+		);
+		$robot = factory( User::class )->create(
+			array(
+				'email' => 'workflow@example.org',
+				'type'  => User::TYPE_ROBOT,
+			)
+		);
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_LINEITEM, '', $robot, '2026-09-10 08:00:00' );
+
+		$this->importer->import( $this->conversation( array( 'assignee' => self::agent_person() ) ), $this->mailbox );
+		$this->assertSame( Conversation::STATUS_CLOSED, (int) $this->imported_conversation()->status );
+
+		$other = factory( User::class )->create();
+		People::choose( 55, $other );
+		$this->assertSame( (int) $other->id, (int) $this->imported_conversation()->user_id );
+
+		// A line item by an agent, like when they assign it, is.
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_LINEITEM, '', $this->agent, '2026-09-10 09:00:00' );
+		People::choose( 55, $this->agent );
+		$this->assertSame( (int) $other->id, (int) $this->imported_conversation()->user_id );
+	}
+
+	/**
 	 * Attachments HelpScout found a virus in aren't downloaded; the rest of the thread is imported.
 	 *
 	 * @return void

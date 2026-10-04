@@ -142,6 +142,9 @@
 								<td>
 									@if ( $team['team'] )
 										{{ $team['team']->first_name }} <small class="text-help">({{ $team['chosen'] ? __('chosen') : __('same name') }})</small>
+										@if ( $team['missing'] )
+											<br/><small class="text-danger">{{ __('Has no access to :mailboxes, where its conversations are: tick them on the team’s page, or it has no folder there, and can’t be assigned again.', [ 'mailboxes' => '“' . implode( '”, “', $team['missing'] ) . '”' ]) }}</small>
+										@endif
 									@else
 										<em>{{ __('None: imported unassigned') }}</em>
 									@endif

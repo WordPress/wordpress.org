@@ -255,7 +255,7 @@ final class Importer {
 		$helpscout_id = (int) ( $source['id'] ?? 0 );
 		$imported     = $helpscout_id ? ImportedConversation::query()->where( 'helpscout_id', $helpscout_id )->first() : null;
 		$conversation = $imported ? Conversation::find( $imported->conversation_id ) : null;
-		$worked_on    = $conversation && $conversation->threads()->where( 'imported', false )->exists();
+		$worked_on    = $conversation && People::worked_on()->where( 'conversation_id', $conversation->id )->exists();
 
 		// Deleted in FreeScout since: it stays deleted.
 		if ( $imported && ! $conversation ) {

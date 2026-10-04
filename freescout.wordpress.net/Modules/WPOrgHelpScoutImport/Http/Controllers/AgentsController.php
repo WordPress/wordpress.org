@@ -90,8 +90,24 @@ final class AgentsController extends Controller {
 			'teams'  => People::freescout_teams(),
 		);
 
+		// Only HelpScout's teams get teams: a HelpScout user's work isn't credited to one.
+		$helpscout_teams = array();
+		$error           = '';
+		if ( array_filter( (array) $request->input( 'teams', array() ) ) ) {
+			try {
+				$directory       = ( new People( app( HelpScout::class ) ) )->directory();
+				$helpscout_teams = array_map( 'intval', array_column( array_filter( $directory, array( People::class, 'is_team' ) ), 'id' ) );
+			} catch ( \Throwable $e ) {
+				$error = $e->getMessage();
+			}
+		}
+
 		foreach ( $choices as $field => $query ) {
 			foreach ( (array) $request->input( $field, array() ) as $helpscout_id => $user_id ) {
+				if ( 'teams' === $field && ! in_array( (int) $helpscout_id, $helpscout_teams, true ) ) {
+					continue;
+				}
+
 				$user = (int) $helpscout_id > 0 && (int) $user_id > 0 ? ( clone $query )->whereKey( (int) $user_id )->first() : null;
 				if ( $user ) {
 					People::choose( (int) $helpscout_id, $user );
@@ -99,9 +115,13 @@ final class AgentsController extends Controller {
 			}
 		}
 
-		return redirect()
-			->route( 'wporghelpscoutimport.agents', array_filter( array( 'mailbox' => (int) $request->input( 'mailbox' ) ) ) )
-			->with( 'flash_success', __( 'Saved.' ) );
+		$redirect = redirect()->route( 'wporghelpscoutimport.agents', array_filter( array( 'mailbox' => (int) $request->input( 'mailbox' ) ) ) );
+
+		if ( '' !== $error ) {
+			return $redirect->with( 'flash_error', __( 'HelpScout couldn’t be reached, so teams weren’t saved: :error', array( 'error' => $error ) ) );
+		}
+
+		return $redirect->with( 'flash_success', __( 'Saved.' ) );
 	}
 
 	/**
