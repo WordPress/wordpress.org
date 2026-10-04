@@ -292,7 +292,7 @@ class Themes_API_Test extends TestCase {
 	 * Closure and outdated fields are preserved and properly cast in the fields array.
 	 */
 	public function test_closure_and_outdated_fields_cast_to_booleans() {
-		$api = $this->make_api( array(
+		$request = array(
 			'fields' => array(
 				'is_closed'       => 1,
 				'closed'          => 'true',
@@ -304,7 +304,8 @@ class Themes_API_Test extends TestCase {
 				'reason'          => 'true',
 				'reason_text'     => 1,
 			),
-		) );
+		);
+		$api     = $this->make_api( $request );
 
 		$this->assertSame(
 			array(
@@ -326,9 +327,10 @@ class Themes_API_Test extends TestCase {
 	 * When fields are passed as a list of strings, closure and outdated fields are mapped to true.
 	 */
 	public function test_closure_and_outdated_fields_in_list_mapped_to_true() {
-		$api = $this->make_api( array(
+		$request = array(
 			'fields' => array( 'closed', 'is_closed', 'is_outdated', 'status', 'reason' ),
-		) );
+		);
+		$api     = $this->make_api( $request );
 
 		$this->assertSame(
 			array(

@@ -528,11 +528,12 @@ class Themes_API {
 				$this->response = $this->fill_theme( $themes[0] );
 			} else {
 				// Check for suspended theme.
-				$suspended = get_posts( array(
+				$suspended_query = array(
 					'name'        => $this->request->slug,
 					'post_type'   => 'repopackage',
 					'post_status' => 'suspend',
-				) );
+				);
+				$suspended       = get_posts( $suspended_query );
 
 				if ( $suspended ) {
 					$theme      = $suspended[0];
