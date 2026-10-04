@@ -294,7 +294,7 @@ final class Importer {
 		// One HelpScout moved, but agents worked on, stays in its mailbox: its values go in that mailbox's fields.
 		$fields_mailbox = $conversation && ! $moved_from ? $conversation->mailbox : $mailbox;
 		$fields         = CustomFields::available();
-		$values         = $fields ? $this->custom_fields->values( $source, $fields_mailbox ) : array();
+		$values         = $fields ? $this->custom_fields->values( $source, $fields_mailbox, (int) $fields_mailbox->id === (int) $mailbox->id ) : array();
 
 		$threads = $this->read_threads( $helpscout_id, $threads );
 

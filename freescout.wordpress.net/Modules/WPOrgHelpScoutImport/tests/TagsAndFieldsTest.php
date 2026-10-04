@@ -488,6 +488,80 @@ final class TagsAndFieldsTest extends ImportTestCase {
 	}
 
 	/**
+	 * One HelpScout moved to another of its mailboxes, but agents worked on, brings only the fields it has values for
+	 * to the mailbox it stays in, not all of the other HelpScout mailbox's.
+	 *
+	 * @return void
+	 */
+	public function test_moved_conversation_agents_worked_on_brings_only_its_fields(): void {
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$this->create_thread( \App\Conversation::find( $this->conversation_id() ), \App\Thread::TYPE_NOTE, 'On it.', $this->agent, '2026-09-10 08:00:00' );
+		$this->helpscout->only(
+			'GET',
+			'v2/mailboxes/78/fields',
+			array(
+				'_embedded' => array(
+					'fields' => array(
+						array(
+							'id'    => 106,
+							'name'  => 'Camera',
+							'type'  => 'singleline',
+							'order' => 1,
+						),
+						array(
+							'id'       => 108,
+							'name'     => 'Lens',
+							'type'     => 'singleline',
+							'order'    => 2,
+							'required' => true,
+						),
+					),
+				),
+				'page'      => array( 'totalPages' => 1 ),
+			)
+		);
+
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'mailboxId'    => 78,
+					'customFields' => array(
+						array(
+							'id'   => 106,
+							'name' => 'Camera',
+							'text' => 'Fuji X100',
+						),
+					),
+				)
+			),
+			$this->create_mailbox( 'Themes' )
+		);
+
+		$this->assertNotContains( 'Lens', \DB::table( 'custom_fields' )->pluck( 'name' )->all() );
+		$this->assertSame( 'Fuji X100', $this->values_by_name()['Camera'] );
+	}
+
+	/**
+	 * Fields an import creates go after those the mailbox has, in HelpScout's order.
+	 *
+	 * @return void
+	 */
+	public function test_new_fields_go_after_the_mailboxs_own(): void {
+		\DB::table( 'custom_fields' )->insert(
+			array(
+				'mailbox_id' => $this->mailbox->id,
+				'name'       => 'Agent notes',
+				'type'       => 1,
+				'sort_order' => 2,
+			)
+		);
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$this->assertSame( array( 'Agent notes', 'Photo type', 'Taken on', 'Camera', 'Rolls' ), \DB::table( 'custom_fields' )->where( 'mailbox_id', $this->mailbox->id )->orderBy( 'sort_order' )->pluck( 'name' )->all() );
+	}
+
+	/**
 	 * A multiselect dropdown FreeScout has by a field's name keeps HelpScout's value as one of its options' labels.
 	 *
 	 * @return void

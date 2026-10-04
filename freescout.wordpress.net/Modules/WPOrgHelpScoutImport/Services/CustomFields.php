@@ -132,19 +132,23 @@ final class CustomFields {
 	 *
 	 * Read and created before the conversation's transaction: fields stay, even if the conversation fails. The first
 	 * time, all of the HelpScout mailbox's fields are created, in HelpScout's order, whether conversations have values
-	 * for them or not.
+	 * for them or not; but only in the mailbox it's imported into. A conversation that stays in another mailbox, as
+	 * agents worked on it there, only brings the fields it has values for.
 	 *
 	 * @param array   $source  HelpScout conversation.
-	 * @param Mailbox $mailbox FreeScout mailbox it's imported into.
+	 * @param Mailbox $mailbox FreeScout mailbox its fields are in.
+	 * @param bool    $map_all Whether that's the mailbox it's imported into, which gets all of HelpScout's fields.
 	 * @return string[] Values, by FreeScout custom field ID.
 	 *
 	 * @throws ApiError If HelpScout is unavailable, refuses the app, or is rate limited.
 	 */
-	public function values( array $source, Mailbox $mailbox ): array {
+	public function values( array $source, Mailbox $mailbox, bool $map_all = true ): array {
 		$helpscout_mailbox_id = (int) ( $source['mailboxId'] ?? 0 );
 		$values               = array();
 
-		$this->map( $helpscout_mailbox_id, $mailbox );
+		if ( $map_all ) {
+			$this->map( $helpscout_mailbox_id, $mailbox );
+		}
 
 		foreach ( (array) ( $source['customFields'] ?? array() ) as $value ) {
 			$field_id = is_array( $value ) ? (int) ( $value['id'] ?? 0 ) : 0;
@@ -298,7 +302,7 @@ final class CustomFields {
 	 * The mailbox's custom field for a HelpScout field: the one an import created, or one with its name, or a new one.
 	 *
 	 * A field with HelpScout's name gets the dropdown options of HelpScout's it doesn't have. A new one gets HelpScout's
-	 * type, options, whether it's required, and its place in HelpScout's order.
+	 * type, options, and whether it's required, and goes after the mailbox's fields.
 	 *
 	 * @param array   $definition HelpScout's field.
 	 * @param Mailbox $mailbox    FreeScout mailbox.
@@ -350,8 +354,8 @@ final class CustomFields {
 					// Like the module keeps a dropdown's options: by their number, from 1.
 					'options'    => self::TYPE_DROPDOWN === $type ? json_encode( $labels ? array_combine( range( 1, count( $labels ) ), $labels ) : array( 1 => '' ) ) : null,
 					'required'   => ! empty( $definition['required'] ),
-					// Without HelpScout's order, like when HelpScout won't list the fields, last.
-					'sort_order' => isset( $definition['order'] ) ? (int) $definition['order'] : (int) \DB::table( 'custom_fields' )->where( 'mailbox_id', $mailbox->id )->max( 'sort_order' ) + 1,
+					// Last, after the mailbox's own: map() creates them in HelpScout's order.
+					'sort_order' => (int) \DB::table( 'custom_fields' )->where( 'mailbox_id', $mailbox->id )->max( 'sort_order' ) + 1,
 					'created_at' => $now,
 					'updated_at' => $now,
 				)
