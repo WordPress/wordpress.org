@@ -593,7 +593,6 @@ let wpTrac,
 					}
 
 					event.preventDefault();
-					event.returnValue = '';
 				} );
 
 				$( '#propertyform' ).on( 'submit', function ( event ) {
