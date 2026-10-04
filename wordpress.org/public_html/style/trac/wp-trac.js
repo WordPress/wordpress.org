@@ -4,8 +4,7 @@ let wpTrac,
 	hideFromNewTickets,
 	reservedTerms,
 	coreFocusesList,
-	bugTrackerLocations,
-	$body;
+	bugTrackerLocations;
 
 ( function ( $ ) {
 	coreKeywordList = {
@@ -235,8 +234,6 @@ let wpTrac,
 		'wp',
 	];
 
-	$body = $( document.body );
-
 	/**
 	 * Escapes a value for insertion into an HTML string.
 	 *
@@ -342,7 +339,7 @@ let wpTrac,
 
 		init() {
 			// Gardener status as a body class, for rules that cannot see the flag.
-			$body.toggleClass( 'wp-bug-gardener', wpTrac.gardener );
+			document.body.classList.toggle( 'wp-bug-gardener', wpTrac.gardener );
 
 			// Markup rewrites first, so everything below sees the rewritten DOM (e.g. data-nicename on gravatar links).
 			wpTrac.updateAuthLinks();
@@ -367,9 +364,9 @@ let wpTrac,
 			wpTrac.githubPRs.init();
 			wpTrac.suggestNotGeneral.init();
 
-			if ( ! $body.hasClass( 'plugins' ) ) {
+			if ( ! document.body.classList.contains( 'plugins' ) ) {
 				wpTrac.workflow.init();
-				if ( $body.hasClass( 'core' ) ) {
+				if ( document.body.classList.contains( 'core' ) ) {
 					wpTrac.reports();
 					wpTrac.focuses.init();
 				}
@@ -486,7 +483,7 @@ let wpTrac,
 			const content = $( '#content' );
 
 			// Add deprecated notice for core's test repository.
-			if ( $body.hasClass( 'core' ) && content.hasClass( 'browser' ) ) {
+			if ( document.body.classList.contains( 'core' ) && content.hasClass( 'browser' ) ) {
 				$( '#repoindex tbody .odd .name a[href="/browser/tests"]' )
 					.parent()
 					.append(
@@ -503,7 +500,7 @@ let wpTrac,
 				}
 			}
 
-			if ( $body.hasClass( 'themes' ) ) {
+			if ( document.body.classList.contains( 'themes' ) ) {
 				$( '#h_reporter' ).text( 'Developer:' );
 				$( '#h_owner' ).text( 'Reviewer:' );
 
@@ -628,14 +625,22 @@ let wpTrac,
 			wpTrac.wikiToolbar();
 
 			// Force 'Attachments' and 'Modify Ticket' to be shown.
-			$( '#attachments' ).removeClass( 'collapsed' );
-			$( '#modify' ).parent().removeClass( 'collapsed' );
+			document.querySelector( '#attachments' )?.classList.remove( 'collapsed' );
+
+			const modifyParent = document.getElementById( 'modify' )?.parentElement;
+			modifyParent?.classList.remove( 'collapsed' );
 
 			// Move the Add-Comment before Ticket Modify dialogue.
-			$( '#trac-add-comment' ).insertBefore( $( '#modify' ).parent() );
+			const addComment = document.getElementById( 'trac-add-comment' );
+			if ( addComment && modifyParent ) {
+				modifyParent.before( addComment );
+			}
 
 			// Push live comment previews above 'Modify Ticket'.
-			$( '#ticketchange' ).insertAfter( '#trac-add-comment' );
+			const ticketChange = document.getElementById( 'ticketchange' );
+			if ( ticketChange && addComment ) {
+				addComment.after( ticketChange );
+			}
 
 			// Toggle the security notice on component change, if rendered.
 			if ( $( '#wp-security-notice' ).length ) {
@@ -1307,13 +1312,13 @@ let wpTrac,
 					} )
 						.done( function ( data ) {
 							$( data ).find( '.ticket-reports' ).appendTo( popup );
-							$body.addClass( 'ticket-reports-open' );
+							document.body.classList.add( 'ticket-reports-open' );
 						} )
 						.fail( function () {
 							failed = true;
 						} );
 				} else {
-					$body.toggleClass( 'ticket-reports-open' );
+					document.body.classList.toggle( 'ticket-reports-open' );
 					event.preventDefault();
 				}
 				if ( ! failed ) {
@@ -1321,7 +1326,7 @@ let wpTrac,
 				}
 			} );
 			popup.on( 'click', '.close', function () {
-				$body.removeClass( 'ticket-reports-open' );
+				document.body.classList.remove( 'ticket-reports-open' );
 				return false;
 			} );
 		},
