@@ -139,6 +139,13 @@ final class Importer {
 	);
 
 	/**
+	 * Core's conversation columns that newer versions, or modules, add, by whether they're there.
+	 *
+	 * @var bool[]
+	 */
+	private static $columns = array();
+
+	/**
 	 * HelpScout thread types, as FreeScout's; chats depend on who wrote them, and line items that changed the status
 	 * are found by new_threads().
 	 *
@@ -327,7 +334,7 @@ final class Importer {
 						$this->create_thread( $conversation, $thread, $sender );
 					}
 
-					$this->update_conversation( $conversation, $source, $status, ! $worked_on );
+					$this->update_conversation( $conversation, $source, $status, ! $worked_on, (bool) $threads );
 
 					ImportedConversation::query()->updateOrCreate(
 						array( 'helpscout_id' => (int) $source['id'] ),
@@ -886,9 +893,10 @@ final class Importer {
 	 * @param int          $status        Its status, as FreeScout's.
 	 * @param bool         $from_source   Whether to take HelpScout's status, assignee, and dates too; not once
 	 *                                    agents worked on it in FreeScout.
+	 * @param bool         $added         Whether threads were added.
 	 * @return void
 	 */
-	private function update_conversation( Conversation $conversation, array $source, int $status, bool $from_source ): void {
+	private function update_conversation( Conversation $conversation, array $source, int $status, bool $from_source, bool $added ): void {
 		$threads = $conversation->threads()->where( 'state', Thread::STATE_PUBLISHED )->orderBy( 'created_at' )->orderBy( 'id' )->get();
 		$replies = $threads->whereIn( 'type', array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE ) );
 		$notes   = $threads->where( 'type', Thread::TYPE_NOTE );
@@ -936,6 +944,11 @@ final class Importer {
 			$updated_at                    = self::date( $source['userUpdatedAt'] ?? null ) ?? ( $last ? $last->created_at : $conversation->created_at );
 			$conversation->user_updated_at = $updated_at;
 			$conversation->updated_at      = $updated_at;
+		}
+
+		// The Reports module works a conversation's metrics out again when live email adds a reply, closes, or reopens it.
+		if ( ( $added || $conversation->isDirty( array( 'status', 'closed_at' ) ) ) && self::has_column( 'rpt_ready' ) ) {
+			$conversation->rpt_ready = false;
 		}
 
 		$conversation->timestamps = false;
@@ -1076,18 +1089,16 @@ final class Importer {
 	}
 
 	/**
-	 * Whether core's conversations table has a column, which newer versions add.
+	 * Whether core's conversations table has a column, which newer versions, or modules, add.
 	 *
 	 * @param string $column Column name.
 	 * @return bool
 	 */
 	private static function has_column( string $column ): bool {
-		static $columns = array();
-
-		if ( ! isset( $columns[ $column ] ) ) {
-			$columns[ $column ] = Schema::hasColumn( 'conversations', $column );
+		if ( ! isset( self::$columns[ $column ] ) ) {
+			self::$columns[ $column ] = Schema::hasColumn( 'conversations', $column );
 		}
 
-		return $columns[ $column ];
+		return self::$columns[ $column ];
 	}
 }
