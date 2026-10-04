@@ -159,16 +159,23 @@ class CreateWporghelpscoutimportTables extends Migration {
 				'wporghelpscoutimport_saved_replies',
 				static function ( Blueprint $table ): void {
 					$table->increments( 'id' );
-					$table->unsignedBigInteger( 'helpscout_id' )->unique();
+					$table->unsignedBigInteger( 'helpscout_id' );
+					// Saved replies are a mailbox's: a HelpScout saved reply gets one in each mailbox it's imported into.
+					$table->unsignedInteger( 'mailbox_id' );
 					$table->unsignedInteger( 'saved_reply_id' )->index();
 
 					// What HelpScout had and what FreeScout was given, so changes on either side are told apart.
 					$table->string( 'source_hash', 64 )->nullable();
 					$table->string( 'written_hash', 64 )->nullable();
 
+					// Its images' copies, by their URL in HelpScout's text, as JSON, so they're copied once.
+					$table->text( 'images' )->nullable();
+
 					// The run that last checked it, so a run that's tried again goes on where it stopped.
 					$table->unsignedInteger( 'run_id' )->nullable();
 					$table->timestamps();
+
+					$table->unique( array( 'helpscout_id', 'mailbox_id' ) );
 				}
 			);
 		}
@@ -182,6 +189,8 @@ class CreateWporghelpscoutimportTables extends Migration {
 					// Custom fields are a mailbox's: a HelpScout field gets one in each mailbox it's imported into.
 					$table->unsignedInteger( 'mailbox_id' );
 					$table->unsignedInteger( 'custom_field_id' );
+					// The dropdown options HelpScout had, as JSON, so options deleted in FreeScout aren't added again.
+					$table->text( 'options' )->nullable();
 					$table->timestamps();
 
 					$table->unique( array( 'helpscout_field_id', 'mailbox_id' ) );
@@ -189,8 +198,6 @@ class CreateWporghelpscoutimportTables extends Migration {
 			);
 		}
 	}
-					// The dropdown options HelpScout had, as JSON, so options deleted in FreeScout aren't added again.
-					$table->text( 'options' )->nullable();
 
 	/**
 	 * Reverses the migration.

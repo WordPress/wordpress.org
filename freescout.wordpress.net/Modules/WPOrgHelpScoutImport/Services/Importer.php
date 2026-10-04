@@ -549,29 +549,42 @@ final class Importer {
 	 * Copies the images HelpScout hosts in a saved reply's text, like images pasted into the editor: as embedded
 	 * attachments of no thread.
 	 *
-	 * An image that can't be downloaded keeps its link.
+	 * An image that can't be downloaded keeps its link. One copied already, whose copy is still there, isn't copied
+	 * again.
 	 *
 	 * @param string $text    Saved reply's text.
 	 * @param int    $user_id FreeScout user who added them.
-	 * @return array The text, linking to the copies; and the copies, as a collection of attachments, whose files go
-	 *               with them if the text isn't kept.
+	 * @param int[]  $copies  Attachment IDs of copies made before, by the image's `src` in HelpScout's text.
+	 * @return array The text, linking to the copies; the new copies, as a collection of attachments, whose files go
+	 *               with them if the text isn't kept; and all copies' attachment IDs, by the image's `src`.
 	 *
-	 * @throws \Throwable If a copy couldn't be saved; the others are deleted then.
+	 * @throws \Throwable If a copy couldn't be saved; the new ones are deleted then.
 	 */
-	public function copy_images( string $text, int $user_id ): array {
+	public function copy_images( string $text, int $user_id, array $copies = array() ): array {
 		$this->downloads      = array();
 		$this->download_bytes = 0;
 		$this->attachments    = array();
+		$copied               = array();
 
 		try {
-			foreach ( $this->images( $text ) as $src => $image ) {
-				$attachment = $this->attach( $image, null, $user_id, true );
+			foreach ( $copies as $src => $attachment_id ) {
+				$src        = (string) $src;
+				$attachment = '' !== $src && str_contains( $text, $src ) ? Attachment::query()->where( 'id', (int) $attachment_id )->whereNull( 'thread_id' )->first() : null;
 				if ( $attachment ) {
-					$text = str_replace( $src, $attachment->url(), $text );
+					$text           = str_replace( $src, $attachment->url(), $text );
+					$copied[ $src ] = (int) $attachment->id;
 				}
 			}
 
-			return array( $text, collect( $this->attachments ) );
+			foreach ( $this->images( $text ) as $src => $image ) {
+				$attachment = $this->attach( $image, null, $user_id, true );
+				if ( $attachment ) {
+					$text           = str_replace( $src, $attachment->url(), $text );
+					$copied[ $src ] = (int) $attachment->id;
+				}
+			}
+
+			return array( $text, collect( $this->attachments ), $copied );
 		} catch ( \Throwable $e ) {
 			Attachment::deleteForever( collect( $this->attachments ) );
 
