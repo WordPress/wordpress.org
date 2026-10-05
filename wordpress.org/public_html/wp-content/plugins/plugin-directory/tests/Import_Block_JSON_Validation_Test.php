@@ -71,6 +71,21 @@ class Import_Block_JSON_Validation_Test extends TestCase {
 	}
 
 	/**
+	 * A missing required name is rejected even when a script is present.
+	 */
+	public function test_missing_name_rejects_block(): void {
+		$metadata = array(
+			'apiVersion' => 3,
+			'title'      => 'Example',
+			'script'     => 'file:./index.js',
+		);
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write a temporary test fixture.
+		file_put_contents( $this->block_file, wp_json_encode( $metadata ) );
+
+		$this->assertCount( 0, Import::find_blocks_in_file( $this->block_file ) );
+	}
+
+	/**
 	 * Cover the script requirement with and without a tolerated apiVersion error.
 	 *
 	 * @return array
