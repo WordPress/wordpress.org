@@ -16,6 +16,7 @@ use Illuminate\Routing\Controller;
 use Modules\WPOrgSidebar\Jobs\SyncSenderAvatar;
 use Modules\WPOrgSidebar\Services\Client;
 use Modules\WPOrgSidebar\Services\ConversationPayload;
+use Modules\WPOrgSidebar\Services\Panels;
 
 /**
  * Proxies sidebar panel requests to api.wordpress.org.
@@ -66,7 +67,7 @@ final class PanelController extends Controller {
 		}
 		$limiter->hit( $key );
 
-		$panels = (array) config( 'wporgsidebar.panels' );
+		$panels = Panels::all();
 		if ( empty( $panels[ $panel ]['endpoint'] ) ) {
 			abort( 404 );
 		}
@@ -74,6 +75,11 @@ final class PanelController extends Controller {
 		$conversation = Conversation::findOrFail( $conversation_id );
 		if ( ! auth()->user()->can( 'view', $conversation ) ) {
 			abort( 403 );
+		}
+
+		// A panel switched off for the mailbox isn't sent its conversations.
+		if ( ! Panels::shows( $panel, (int) $conversation->mailbox_id ) ) {
+			abort( 404 );
 		}
 
 		// The account a bounce or Slack notification names, instead of the sender's, once the agent asks for it.

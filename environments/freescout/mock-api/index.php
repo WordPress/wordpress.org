@@ -2,7 +2,7 @@
 /**
  * Mock of the api.wordpress.org/dotorg/freescout/ endpoints.
  *
- * Checks requests like the real endpoints (signature, JSON object, age, endpoint; not nonces), and answers sidebar requests with sample panels that include some of the data it received.
+ * Checks requests like the real endpoints (signature, JSON object, age, endpoint; not nonces), and answers sidebar requests with panels recorded from the real endpoints.
  * Webhook events are logged to the container output: `docker compose logs mock-api`.
  * Also stands in for login.wordpress.org's identity provider at /idp; see idp.php.
  *
@@ -88,184 +88,12 @@ if ( 'webhook.php' === $endpoint ) {
 	respond( 200, new \stdClass() );
 }
 
-$email   = (string) ( $request->sender->email ?? '' );
-$mailbox = (string) ( $request->mailbox->name ?? '' );
-$threads = count( $request->threads ?? array() );
-
-/**
- * A sample plugin, like plugins-themes.php sends.
- *
- * @param string $name   Plugin name.
- * @param string $status Badge text, empty for a published plugin.
- * @param string $tone   Badge tone.
- * @return array
+/*
+ * What the real endpoints sent for obenland's WordPress.org account, whatever the sender, though searches are for the
+ * sender's email, as they are there. Download links lose their review info, and the forum note and privacy request
+ * are samples, as the account has neither.
  */
-function item( string $name, string $status = '', string $tone = 'neutral' ): array {
-	$slug = strtolower( str_replace( ' ', '-', $name ) );
+$panel = __DIR__ . '/panels/' . basename( $endpoint, '.php' ) . '.json';
+$email = rawurlencode( (string) ( $request->sender->email ?? '' ) );
 
-	return array(
-		'title'  => $name,
-		'url'    => 'https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=1',
-		'badges' => $status ? array( badge( $status, $tone ) ) : array(),
-		'meta'   => array(
-			array( 'text' => $slug ),
-			array(
-				'text'    => 'Updated 3 weeks ago',
-				'tooltip' => '2026-01-01',
-			),
-		),
-		'links'  => array(
-			array(
-				'text' => 'View on WordPress.org',
-				'url'  => 'https://wordpress.org/plugins/' . $slug . '/',
-				'icon' => 'link',
-			),
-			array(
-				'text' => 'Download',
-				'url'  => 'https://downloads.wordpress.org/plugin/' . $slug . '.latest-stable.zip',
-				'icon' => 'download-alt',
-			),
-		),
-	);
-}
-
-/**
- * A badge.
- *
- * @param string $label Text.
- * @param string $tone  Tone.
- * @return array
- */
-function badge( string $label, string $tone ): array {
-	return array(
-		'label' => $label,
-		'tone'  => $tone,
-	);
-}
-
-/**
- * A list of items.
- *
- * @param array ...$items Items.
- * @return array
- */
-function items( array ...$items ): array {
-	return array(
-		'type'  => 'items',
-		'items' => $items,
-	);
-}
-
-$user = (string) strtok( $email, '@' );
-
-// Sample panels like the real endpoints send, so the sidebar's styles can be worked on locally.
-$blocks = match ( $endpoint ) {
-	'profile.php'        => array(
-		array(
-			'type' => 'lead',
-			'text' => $user,
-			'url'  => 'https://profiles.wordpress.org/' . rawurlencode( $user ) . '/',
-		),
-		array(
-			'type' => 'meta',
-			'text' => sprintf( 'Mock: %d threads from %s', $threads, $mailbox ),
-		),
-		array(
-			'type'  => 'links',
-			'links' => array(
-				array(
-					'text' => 'Account & Security',
-					'url'  => 'https://profiles.wordpress.org/',
-				),
-				array(
-					'text' => 'Forum Profile',
-					'url'  => 'https://wordpress.org/support/',
-				),
-				array(
-					'text' => 'Search pending signups',
-					'url'  => 'https://login.wordpress.org/',
-				),
-			),
-		),
-		array(
-			'type' => 'heading',
-			'text' => 'Slack',
-		),
-		items(
-			array(
-				'title'  => $user,
-				'url'    => 'https://wordpress.slack.com/',
-				'badges' => array( badge( 'Active', 'success' ) ),
-				'meta'   => array( array( 'text' => 'Updated 2026-01-01' ) ),
-			),
-			array(
-				'title'  => $user . '-old',
-				'url'    => 'https://wordpress.slack.com/',
-				'badges' => array( badge( 'Deactivated', 'error' ) ),
-				'meta'   => array( array( 'text' => 'Updated 2019-06-01' ) ),
-			)
-		),
-	),
-	'forums.php'         => array(
-		items(
-			array(
-				'note' => 'Mock note: asked to stop bumping their topics.',
-				'meta' => array(
-					array(
-						'text' => 'January 1, 2026',
-						'url'  => 'https://wordpress.org/support/',
-					),
-					array( 'text' => 'moderator' ),
-				),
-			)
-		),
-	),
-	'plugins-themes.php' => array(
-		array(
-			'type'  => 'heading',
-			'text'  => 'Plugins mentioned',
-			'count' => 1,
-		),
-		items( item( 'Mock Plugin', 'In Review', 'warning' ) ),
-		array(
-			'type'  => 'heading',
-			'text'  => 'Plugins owned',
-			'url'   => 'https://wordpress.org/plugins/wp-admin/edit.php',
-			'count' => 7,
-		),
-		items( item( 'Mock Plugin', 'In Review', 'warning' ), item( 'Hello Mock' ), item( 'Mock Blocks', 'Approved', 'success' ), item( 'Old Mock', 'Closed: Author Request', 'error' ), item( 'Mock Widgets' ), item( 'Mock SEO', 'Rejected', 'error' ), item( 'Mock Forms' ) ),
-		array(
-			'type'  => 'heading',
-			'text'  => 'Themes owned',
-			'url'   => 'https://wordpress.org/themes/wp-admin/edit.php',
-			'count' => 2,
-		),
-		items( item( 'Mock Theme' ), item( 'Twenty Mock', 'Suspended', 'error' ) ),
-	),
-	'dpo.php'            => array(
-		array(
-			'type'  => 'links',
-			'links' => array(
-				array(
-					'text' => 'Search erasures',
-					'url'  => 'https://wordpress.org/wp-admin/erase-personal-data.php',
-				),
-				array(
-					'text' => 'Search exports',
-					'url'  => 'https://wordpress.org/wp-admin/export-personal-data.php',
-				),
-			),
-		),
-		items(
-			array(
-				'title'   => 'Export',
-				'tooltip' => 'Created: 2026-01-01 00:00:00',
-				'badges'  => array( badge( 'Completed', 'success' ) ),
-				'meta'    => array( array( 'text' => '2026-01-01' ) ),
-			)
-		),
-	),
-	default              => array(),
-};
-
-respond( 200, array( 'blocks' => $blocks ) );
+respond( 200, is_file( $panel ) ? json_decode( str_replace( '{sender_email}', $email, (string) file_get_contents( $panel ) ) ) : array( 'blocks' => array() ) );

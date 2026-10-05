@@ -511,7 +511,7 @@ class User_Registrations_List_Table extends WP_List_Table {
 
 		echo '<hr>';
 
-		foreach ( [ 'url', 'from', 'occ', 'interests', 'source', 'bypass' ] as $field ) {
+		foreach ( [ 'url', 'from', 'occ', 'interests', 'source', 'bypass', 'event_code' ] as $field ) {
 			if ( !empty( $meta->$field ) ) {
 				printf( '%s: %s<br>', esc_html( $field ), wp_kses_post( $this->link_to_search( $meta->$field ) ) );
 			}
