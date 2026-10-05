@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgHelpScoutImport\Tests;
 
 use App\Conversation;
+use App\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
@@ -20,7 +21,7 @@ use Modules\WPOrgHelpScoutImport\Services\People;
 require_once __DIR__ . '/ImportTestCase.php';
 
 /**
- * Covers flagging conversations for the Reports module to work their metrics out again, through the importer.
+ * Covers flagging conversations for the Reports module to work their metrics out again, through the importer and People.
  */
 final class ReportsTest extends ImportTestCase {
 
@@ -65,7 +66,7 @@ final class ReportsTest extends ImportTestCase {
 	}
 
 	/**
-	 * Creates the importer, and has it look for the column again, before and after the test.
+	 * Creates the importer, and has it and People look for the column again, before and after the test.
 	 *
 	 * @return void
 	 */
@@ -123,7 +124,26 @@ final class ReportsTest extends ImportTestCase {
 	}
 
 	/**
-	 * Makes the importer look for core's columns again.
+	 * Conversations whose credited users change are flagged; HelpScout's dates stay.
+	 *
+	 * @return void
+	 */
+	public function test_recredited_conversations_are_flagged(): void {
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$imported   = $this->imported_conversation()->id;
+		$other      = $this->create_conversation( $this->mailbox, $this->create_sender() );
+		$updated_at = Conversation::query()->whereKey( $imported )->toBase()->value( 'updated_at' );
+		Conversation::query()->toBase()->update( array( self::COLUMN => true ) );
+
+		People::choose( 55, factory( User::class )->create() );
+
+		$this->assertFalse( (bool) Conversation::query()->whereKey( $imported )->toBase()->value( self::COLUMN ) );
+		$this->assertTrue( (bool) Conversation::query()->whereKey( $other->id )->toBase()->value( self::COLUMN ) );
+		$this->assertSame( $updated_at, Conversation::query()->whereKey( $imported )->toBase()->value( 'updated_at' ) );
+	}
+
+	/**
+	 * Makes the importer and People look for the column again.
 	 *
 	 * @return void
 	 */
@@ -131,6 +151,7 @@ final class ReportsTest extends ImportTestCase {
 		$columns = new \ReflectionProperty( Importer::class, 'columns' );
 		$columns->setAccessible( true );
 		$columns->setValue( null, array() );
+		( new \ReflectionProperty( People::class, 'reports' ) )->setValue( null, null );
 	}
 
 	/**

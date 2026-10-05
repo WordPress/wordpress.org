@@ -16,6 +16,7 @@ use App\Thread;
 use App\User;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Modules\Teams\Providers\TeamsServiceProvider;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
@@ -24,6 +25,7 @@ use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
 use Modules\WPOrgHelpScoutImport\Tests\Support\FakeHelpScout;
+use Modules\WPOrgHelpScoutImport\Tests\Support\PaidModules;
 
 require_once __DIR__ . '/ImportTestCase.php';
 
@@ -477,14 +479,7 @@ final class ImporterTest extends ImportTestCase {
 		\App\Module::clearModulesCache();
 		\App\Module::setActive( People::TEAMS_MODULE, true );
 		\App\Module::clearModulesCache();
-		$team           = factory( User::class )->create(
-			array(
-				'first_name' => 'Photo',
-				'last_name'  => 'Moderators',
-				'email'      => 'team-1@example.org',
-				'type'       => User::TYPE_ROBOT,
-			)
-		);
+		$team           = PaidModules::team( 'Photo Moderators' );
 		$helpscout_team = array(
 			'id'    => 90,
 			'type'  => 'team',
@@ -504,7 +499,15 @@ final class ImporterTest extends ImportTestCase {
 
 		$this->assertSame( (int) $team->id, (int) $this->imported_conversation()->user_id );
 
-		// Without a team of that name, it's unassigned.
+		// Without a team of that name, it's unassigned; other robot users aren't teams.
+		factory( User::class )->create(
+			array(
+				'first_name' => 'Legal',
+				'last_name'  => '',
+				'email'      => 'legal@example.org',
+				'type'       => User::TYPE_ROBOT,
+			)
+		);
 		$this->assertNull(
 			( new People() )->assignee(
 				array(
@@ -513,6 +516,34 @@ final class ImporterTest extends ImportTestCase {
 					'first' => 'Legal',
 				)
 			)
+		);
+	}
+
+	/**
+	 * When the Teams module can't list its teams, the conversation fails, to be imported again, instead of coming in
+	 * unassigned.
+	 *
+	 * @return void
+	 */
+	public function test_team_assignments_fail_while_the_teams_module_is_broken(): void {
+		PaidModules::switch( People::TEAMS_MODULE, true );
+		PaidModules::team( 'Photo Moderators' );
+		TeamsServiceProvider::$fails = true;
+
+		$this->expectException( \RuntimeException::class );
+
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => array(
+						'id'    => 90,
+						'type'  => 'team',
+						'first' => 'Photo Moderators',
+					),
+				)
+			),
+			$this->mailbox
 		);
 	}
 
@@ -577,6 +608,42 @@ final class ImporterTest extends ImportTestCase {
 		$conversation = $this->imported_conversation();
 		$this->assertSame( Conversation::STATUS_CLOSED, (int) $conversation->status );
 		$this->assertSame( 1, $conversation->threads()->where( 'body', 'Still there?' )->count() );
+	}
+
+	/**
+	 * Line items robots added, like automatic workflows' whenever they run, aren't agents working on a conversation.
+	 *
+	 * @return void
+	 */
+	public function test_robots_line_items_arent_work_in_freescout(): void {
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => self::agent_person(),
+				)
+			),
+			$this->mailbox
+		);
+		$robot = factory( User::class )->create(
+			array(
+				'email' => 'workflow@example.org',
+				'type'  => User::TYPE_ROBOT,
+			)
+		);
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_LINEITEM, '', $robot, '2026-09-10 08:00:00' );
+
+		$this->importer->import( $this->conversation( array( 'assignee' => self::agent_person() ) ), $this->mailbox );
+		$this->assertSame( Conversation::STATUS_CLOSED, (int) $this->imported_conversation()->status );
+
+		$other = factory( User::class )->create();
+		People::choose( 55, $other );
+		$this->assertSame( (int) $other->id, (int) $this->imported_conversation()->user_id );
+
+		// A line item by an agent, like when they assign it, is.
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_LINEITEM, '', $this->agent, '2026-09-10 09:00:00' );
+		People::choose( 55, $this->agent );
+		$this->assertSame( (int) $other->id, (int) $this->imported_conversation()->user_id );
 	}
 
 	/**
