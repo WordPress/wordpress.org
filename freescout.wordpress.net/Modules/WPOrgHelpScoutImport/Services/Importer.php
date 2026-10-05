@@ -293,14 +293,14 @@ final class Importer {
 
 		// One HelpScout moved, but agents worked on, stays in its mailbox: its values go in that mailbox's fields.
 		$fields_mailbox = $conversation && ! $moved_from ? $conversation->mailbox : $mailbox;
-		$values         = CustomFields::available() ? $this->custom_fields->values( $source, $fields_mailbox ) : array();
-		$tags           = Tags::available() ? array_filter( (array) ( $source['tags'] ?? array() ), 'is_array' ) : array();
+		$fields         = CustomFields::available();
+		$values         = $fields ? $this->custom_fields->values( $source, $fields_mailbox, (int) $fields_mailbox->id === (int) $mailbox->id ) : array();
 
 		$threads = $this->read_threads( $helpscout_id, $threads );
 
 		try {
 			\DB::transaction(
-				function () use ( &$conversation, $source, $mailbox, $sender, $threads, $status, $worked_on, $moved_from, $values, $tags ): void {
+				function () use ( &$conversation, $imported, $source, $mailbox, $sender, $threads, $status, $worked_on, $moved_from, $fields, $values ): void {
 					if ( ! $conversation ) {
 						$conversation = $this->create_conversation( $source, $mailbox, $sender );
 					}
@@ -316,22 +316,33 @@ final class Importer {
 
 					$this->update_conversation( $conversation, $source, $status, ! $worked_on );
 
-					ImportedConversation::query()->updateOrCreate(
-						array( 'helpscout_id' => (int) $source['id'] ),
-						array(
-							'helpscout_number' => (int) ( $source['number'] ?? 0 ),
-							'conversation_id'  => (int) $conversation->id,
-							'creator_id'       => 'user' === ( $source['createdBy']['type'] ?? '' ) ? self::person_id( $source['createdBy'] ) : null,
-							'assignee_id'      => self::person_id( $source['assignee'] ?? null ),
-							'closer_id'        => self::person_id( $source['closedByUser'] ?? null ),
-							'tags'             => self::json( array_values( array_filter( array_map( array( self::class, 'tag_name' ), (array) ( $source['tags'] ?? array() ) ) ) ) ),
-							'custom_fields'    => self::json( (array) ( $source['customFields'] ?? array() ) ),
-						)
+					$record = array(
+						'helpscout_number' => (int) ( $source['number'] ?? 0 ),
+						'conversation_id'  => (int) $conversation->id,
+						'creator_id'       => 'user' === ( $source['createdBy']['type'] ?? '' ) ? self::person_id( $source['createdBy'] ) : null,
+						'assignee_id'      => self::person_id( $source['assignee'] ?? null ),
+						'closer_id'        => self::person_id( $source['closedByUser'] ?? null ),
+						'tags'             => self::json( array_values( array_filter( array_map( array( Tags::class, 'name' ), (array) ( $source['tags'] ?? array() ) ) ) ) ),
+						'custom_fields'    => self::json( (array) ( $source['customFields'] ?? array() ) ),
 					);
 
-					// Added to what agents gave it, without taking anything away.
-					Tags::attach( (int) $conversation->id, $tags );
-					CustomFields::write( (int) $conversation->id, $values );
+					// What agents changed stays; what HelpScout changed since the last import comes across.
+					if ( Tags::available() ) {
+						$written_tags           = Tags::sync( (int) $conversation->id, (array) ( $source['tags'] ?? array() ), self::decode( $imported->written_tags ?? null ) );
+						$record['written_tags'] = (string) json_encode( (object) $written_tags, JSON_UNESCAPED_UNICODE );
+					}
+
+					if ( $fields ) {
+						// Its values in the fields of the mailbox it moved from would be left where nobody sees them.
+						if ( $moved_from ) {
+							CustomFields::forget( (int) $conversation->id, (int) $moved_from->id );
+						}
+
+						CustomFields::write( (int) $conversation->id, $values, self::decode( $imported->written_values ?? null ) );
+						$record['written_values'] = (string) json_encode( (object) $values, JSON_UNESCAPED_UNICODE );
+					}
+
+					ImportedConversation::query()->updateOrCreate( array( 'helpscout_id' => (int) $source['id'] ), $record );
 				}
 			);
 		} catch ( \Throwable $e ) {
@@ -538,29 +549,42 @@ final class Importer {
 	 * Copies the images HelpScout hosts in a saved reply's text, like images pasted into the editor: as embedded
 	 * attachments of no thread.
 	 *
-	 * An image that can't be downloaded keeps its link.
+	 * An image that can't be downloaded keeps its link. One copied already, whose copy is still there, isn't copied
+	 * again.
 	 *
 	 * @param string $text    Saved reply's text.
 	 * @param int    $user_id FreeScout user who added them.
-	 * @return array The text, linking to the copies; and the copies, as a collection of attachments, whose files go
-	 *               with them if the text isn't kept.
+	 * @param int[]  $copies  Attachment IDs of copies made before, by the image's `src` in HelpScout's text.
+	 * @return array The text, linking to the copies; the new copies, as a collection of attachments, whose files go
+	 *               with them if the text isn't kept; and all copies' attachment IDs, by the image's `src`.
 	 *
-	 * @throws \Throwable If a copy couldn't be saved; the others are deleted then.
+	 * @throws \Throwable If a copy couldn't be saved; the new ones are deleted then.
 	 */
-	public function copy_images( string $text, int $user_id ): array {
+	public function copy_images( string $text, int $user_id, array $copies = array() ): array {
 		$this->downloads      = array();
 		$this->download_bytes = 0;
 		$this->attachments    = array();
+		$copied               = array();
 
 		try {
-			foreach ( $this->images( $text ) as $src => $image ) {
-				$attachment = $this->attach( $image, null, $user_id, true );
+			foreach ( $copies as $src => $attachment_id ) {
+				$src        = (string) $src;
+				$attachment = '' !== $src && str_contains( $text, $src ) ? Attachment::query()->where( 'id', (int) $attachment_id )->whereNull( 'thread_id' )->first() : null;
 				if ( $attachment ) {
-					$text = str_replace( $src, $attachment->url(), $text );
+					$text           = str_replace( $src, $attachment->url(), $text );
+					$copied[ $src ] = (int) $attachment->id;
 				}
 			}
 
-			return array( $text, collect( $this->attachments ) );
+			foreach ( $this->images( $text ) as $src => $image ) {
+				$attachment = $this->attach( $image, null, $user_id, true );
+				if ( $attachment ) {
+					$text           = str_replace( $src, $attachment->url(), $text );
+					$copied[ $src ] = (int) $attachment->id;
+				}
+			}
+
+			return array( $text, collect( $this->attachments ), $copied );
 		} catch ( \Throwable $e ) {
 			Attachment::deleteForever( collect( $this->attachments ) );
 
@@ -1006,13 +1030,13 @@ final class Importer {
 	}
 
 	/**
-	 * A HelpScout tag's name.
+	 * Decodes what was stored as JSON.
 	 *
-	 * @param mixed $tag Tag object, or name.
-	 * @return string
+	 * @param string|null $json JSON.
+	 * @return array|null Null if nothing was stored.
 	 */
-	private static function tag_name( $tag ): string {
-		return is_array( $tag ) ? (string) ( $tag['tag'] ?? $tag['name'] ?? '' ) : (string) $tag;
+	private static function decode( ?string $json ): ?array {
+		return null === $json ? null : (array) json_decode( $json, true );
 	}
 
 	/**
