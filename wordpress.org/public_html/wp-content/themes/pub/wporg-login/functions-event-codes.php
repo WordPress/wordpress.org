@@ -103,6 +103,25 @@ function wporg_login_event_code_caps( array $allcaps ): array {
 add_filter( 'user_has_cap', 'wporg_login_event_code_caps' );
 
 /**
+ * Register a role that can manage event codes.
+ */
+function wporg_login_register_event_code_role(): void {
+	if ( get_role( 'event_code_manager' ) ) {
+		return;
+	}
+
+	add_role(
+		'event_code_manager',
+		'Event Code Manager',
+		array(
+			'read'               => true,
+			'manage_event_codes' => true,
+		)
+	);
+}
+add_action( 'admin_init', 'wporg_login_register_event_code_role' );
+
+/**
  * Normalise a user-supplied code. Returns an empty string if it can't be a valid code.
  *
  * @param mixed $code Raw code.
