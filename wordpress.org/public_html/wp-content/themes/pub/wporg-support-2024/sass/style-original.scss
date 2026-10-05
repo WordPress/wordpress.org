@@ -12,10 +12,6 @@ body {
 	text-align: left;
 }
 
-body:not(.trac):not(.home-page):not(.home) #main {
-	margin-top: 2rem;
-}
-
 #headline {
 	background: #f7f7f7;
 	border-bottom: 1px solid #dfdfdf;
@@ -565,15 +561,6 @@ body.reply-edit #bbpress-forums fieldset legend {
 /* Force widths for desktops */
 @media screen and ( min-width: 960px ) {
 
-	#header-inner,
-	#headline-inner,
-	#subnav-inner,
-	#showcase-inner,
-	#main,
-	#footer {
-		width: 960px;
-	}
-
 	div.content {
 		width: 692px;
 	}
@@ -634,9 +621,5 @@ body.reply-edit #bbpress-forums fieldset legend {
 		height: 140px;
 		margin: 0 auto;
 		padding: 0;
-	}
-
-	#main {
-		margin: 100px 10px 40px 10px;
 	}
 }
