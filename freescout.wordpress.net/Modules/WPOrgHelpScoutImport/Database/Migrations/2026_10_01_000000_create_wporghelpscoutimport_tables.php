@@ -175,7 +175,8 @@ class CreateWporghelpscoutimportTables extends Migration {
 					$table->unsignedInteger( 'run_id' )->nullable();
 					$table->timestamps();
 
-					$table->unique( array( 'helpscout_id', 'mailbox_id' ) );
+					// Named, as the name Laravel makes up is longer than MySQL's limit of 64 characters.
+					$table->unique( array( 'helpscout_id', 'mailbox_id' ), 'wporghelpscoutimport_saved_replies_unique' );
 				}
 			);
 		}
