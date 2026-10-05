@@ -835,6 +835,9 @@ final class People {
 	 * A customer without an email, like one who only called or chatted, is a sender without one, found again by their
 	 * HelpScout ID.
 	 *
+	 * Created like core's helpers create senders, but without announcing them: modules that react to a new sender,
+	 * like the API & Webhooks module's webhooks, would announce every sender of the mailbox's history.
+	 *
 	 * @param mixed $person        HelpScout person object, like a conversation's `primaryCustomer`.
 	 * @param bool  $without_email Whether a customer without an email gets a sender too.
 	 * @return Customer|null Null if it isn't a customer with an email, or an ID if that's enough.
@@ -849,11 +852,9 @@ final class People {
 			'last_name'  => (string) ( $person['last'] ?? '' ),
 		);
 
-		if ( ! empty( $person['email'] ) ) {
-			$customer = Customer::create( (string) $person['email'], $data );
-			if ( $customer instanceof Customer ) {
-				return $customer;
-			}
+		$email = ! empty( $person['email'] ) ? Email::sanitizeEmail( (string) $person['email'] ) : false;
+		if ( $email ) {
+			return self::sender_with_email( Email::sanitizeLength( $email ), $data );
 		}
 
 		// Without an email, or one that isn't one.
@@ -873,7 +874,8 @@ final class People {
 				->first();
 
 			if ( ! $customer ) {
-				$customer = Customer::createWithoutEmail( $data );
+				$customer = new Customer();
+				$customer->setData( $data );
 				$customer->setMeta( self::SENDER_META, $id );
 				$customer->save();
 			}
@@ -882,6 +884,34 @@ final class People {
 		}
 
 		return $this->senders[ $id ];
+	}
+
+	/**
+	 * The sender with an email, created if there's none yet; one there is gets the name if theirs is empty.
+	 *
+	 * @param string $email Email, as FreeScout stores it.
+	 * @param array  $data  The sender's `first_name` and `last_name`.
+	 * @return Customer
+	 */
+	private static function sender_with_email( string $email, array $data ): Customer {
+		$email_row = Email::query()->where( 'email', $email )->first();
+		$customer  = $email_row && $email_row->customer ? $email_row->customer : new Customer();
+
+		if ( $customer->setData( $data, false ) || ! $customer->id ) {
+			$customer->save();
+		}
+
+		if ( ! $email_row ) {
+			$email_row        = new Email();
+			$email_row->email = $email;
+		}
+
+		if ( (int) $email_row->customer_id !== (int) $customer->id ) {
+			$email_row->customer()->associate( $customer );
+			$email_row->save();
+		}
+
+		return $customer;
 	}
 
 	/**

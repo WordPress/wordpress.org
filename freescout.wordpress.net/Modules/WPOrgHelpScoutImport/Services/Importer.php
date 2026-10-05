@@ -26,8 +26,10 @@ use Modules\WPOrgHelpScoutImport\Exceptions\ApiError;
 /**
  * Creates the conversation, or adds what's new to it, and keeps its status, assignee, and dates as HelpScout has them.
  *
- * Everything is written as imported, without the events live email fires, so nothing is sent, no workflow runs,
- * and our other modules leave it alone.
+ * Everything is written as imported, without the events live email fires, so nothing is sent, workflows aren't
+ * triggered, and our other modules leave it alone. That doesn't keep it from automatic workflows that the Workflows
+ * module runs on a schedule, over conversations they apply to: those without the "Imported" condition act on imported
+ * conversations too, and the import can't stop them.
  */
 final class Importer {
 
@@ -127,7 +129,34 @@ final class Importer {
 	);
 
 	/**
-	 * HelpScout thread types, as FreeScout's; chats depend on who wrote them, and line items are left out.
+	 * HelpScout statuses, as FreeScout's thread statuses, for what a thread left the conversation in.
+	 *
+	 * @var int[]
+	 */
+	private const THREAD_STATUSES = array(
+		'active'  => Thread::STATUS_ACTIVE,
+		'pending' => Thread::STATUS_PENDING,
+		'closed'  => Thread::STATUS_CLOSED,
+		'spam'    => Thread::STATUS_SPAM,
+	);
+
+	/**
+	 * Folder type of the Custom Folders module's folders.
+	 *
+	 * @var int
+	 */
+	private const CUSTOM_FOLDER = 200;
+
+	/**
+	 * Core's conversation columns that newer versions, or modules, add, by whether they're there.
+	 *
+	 * @var bool[]
+	 */
+	private static $columns = array();
+
+	/**
+	 * HelpScout thread types, as FreeScout's; chats depend on who wrote them, and line items that changed the status
+	 * are found by new_threads().
 	 *
 	 * Phone calls and forwards become notes: FreeScout has no thread type for them.
 	 *
@@ -241,7 +270,7 @@ final class Importer {
 				$conversation->updateFolder();
 				$conversation->save();
 				$conversation->timestamps = true;
-				$conversation->mailbox->updateFoldersCounters();
+				self::update_counters( $conversation->mailbox );
 
 				return self::UPDATED;
 			}
@@ -279,7 +308,7 @@ final class Importer {
 		}
 
 		$threads = $this->new_threads( $listed );
-		if ( ! $conversation && ! $threads ) {
+		if ( ! $conversation && ! array_diff( array_column( $threads, 'fs_type' ), array( Thread::TYPE_LINEITEM ) ) ) {
 			return self::SKIPPED_EMPTY;
 		}
 
@@ -314,7 +343,7 @@ final class Importer {
 						$this->create_thread( $conversation, $thread, $sender );
 					}
 
-					$this->update_conversation( $conversation, $source, $status, ! $worked_on );
+					$this->update_conversation( $conversation, $source, $status, ! $worked_on, (bool) $threads );
 
 					$record = array(
 						'helpscout_number' => (int) ( $source['number'] ?? 0 ),
@@ -357,11 +386,32 @@ final class Importer {
 			$this->close_downloads( $threads );
 		}
 
-		if ( $moved_from ) {
-			$moved_from->updateFoldersCounters();
+		// The mailbox it left, or, once agents worked on it, the one it stays in: the import refreshes only its own.
+		$other_mailbox = $moved_from ?? ( (int) $conversation->mailbox_id !== (int) $mailbox->id ? $conversation->mailbox : null );
+		if ( $other_mailbox ) {
+			self::update_counters( $other_mailbox );
 		}
 
 		return $imported ? self::UPDATED : self::IMPORTED;
+	}
+
+	/**
+	 * Counts a mailbox's conversations for its folders again.
+	 *
+	 * Like core does, except for the Custom Folders module's folders of each agent's own conversations: the module
+	 * counts those for whoever is logged in, and nobody is while importing, so their counts would be lost.
+	 *
+	 * @param Mailbox $mailbox Mailbox.
+	 * @return void
+	 */
+	public static function update_counters( Mailbox $mailbox ): void {
+		foreach ( $mailbox->folders()->get() as $folder ) {
+			if ( self::CUSTOM_FOLDER === (int) $folder->type && ! $folder->user_id && ! empty( $folder->meta['own_only'] ) ) {
+				continue;
+			}
+
+			$folder->updateCounters();
+		}
 	}
 
 	/**
@@ -441,19 +491,35 @@ final class Importer {
 	/**
 	 * Picks the threads to import that weren't imported yet.
 	 *
+	 * Each thread gets the status the conversation had after it, which HelpScout gives as the thread's own. A thread
+	 * without a known one keeps the status the threads before it left: taking the conversation's current status
+	 * instead would mark it as closing a conversation closed later. A line item whose status isn't the one before it
+	 * changed the status, like closing it with the button or a workflow; it's kept as such, and the others are left out.
+	 *
 	 * @param array[] $threads The conversation's threads, oldest first.
-	 * @return array[] Threads, each with `fs_type` set to FreeScout's.
+	 * @return array[] Threads, each with `fs_type` and `fs_status` set to FreeScout's.
 	 */
 	private function new_threads( array $threads ): array {
-		$ids  = array_map( 'intval', array_column( $threads, 'id' ) );
-		$done = $ids ? ImportedThread::query()->whereIn( 'helpscout_id', $ids )->pluck( 'helpscout_id' )->map( 'intval' )->all() : array();
-		$new  = array();
+		$ids    = array_map( 'intval', array_column( $threads, 'id' ) );
+		$done   = $ids ? ImportedThread::query()->whereIn( 'helpscout_id', $ids )->pluck( 'helpscout_id' )->map( 'intval' )->all() : array();
+		$new    = array();
+		$status = Thread::STATUS_ACTIVE;
 
 		foreach ( $threads as $thread ) {
-			$type = self::thread_type( $thread );
+			$type        = self::thread_type( $thread );
+			$after       = self::THREAD_STATUSES[ $thread['status'] ?? '' ] ?? $status;
+			$changed     = $after !== $status;
+			$status      = $after;
+			$status_item = 'lineitem' === ( $thread['type'] ?? '' ) && 'published' === ( $thread['state'] ?? '' ) && $changed;
+
+			if ( $status_item ) {
+				$type = Thread::TYPE_LINEITEM;
+			}
+
 			if ( $type && ! in_array( (int) ( $thread['id'] ?? 0 ), $done, true ) ) {
-				$thread['fs_type'] = $type;
-				$new[]             = $thread;
+				$thread['fs_type']   = $type;
+				$thread['fs_status'] = $status;
+				$new[]               = $thread;
 			}
 		}
 
@@ -762,14 +828,18 @@ final class Importer {
 	 * An email FreeScout has already, like one sent to two mailboxes, or fetched by FreeScout too, keeps its Message-ID
 	 * where it is: it's unique. If it's in this conversation already, it isn't added again.
 	 *
+	 * A line item is one changing the status, like core adds, credited to the HelpScout user who changed it, or
+	 * else to the robot user.
+	 *
 	 * @param Conversation $conversation Conversation.
 	 * @param array        $source       HelpScout thread, from new_threads().
 	 * @param Customer     $sender       The conversation's sender.
 	 * @return void
 	 */
 	private function create_thread( Conversation $conversation, array $source, Customer $sender ): void {
-		$type        = (int) $source['fs_type'];
-		$by_customer = Thread::TYPE_CUSTOMER === $type;
+		$type         = (int) $source['fs_type'];
+		$by_customer  = Thread::TYPE_CUSTOMER === $type;
+		$is_line_item = Thread::TYPE_LINEITEM === $type;
 		// Who wrote it, by their email; without one, it's the conversation's sender, who may have none either.
 		$author     = $by_customer ? ( $this->people->sender( $source['customer'] ?? null, false ) ?? $this->people->sender( $source['createdBy'] ?? null, false ) ?? $sender ) : null;
 		$user       = $by_customer ? null : $this->people->user( $source['createdBy'] ?? null );
@@ -793,18 +863,22 @@ final class Importer {
 		$thread                  = new Thread();
 		$thread->conversation_id = $conversation->id;
 		$thread->type            = $type;
-		$thread->status          = self::STATUSES[ $source['status'] ?? '' ] ?? $conversation->status;
+		$thread->status          = (int) $source['fs_status'];
 		$thread->state           = Thread::STATE_PUBLISHED;
-		$thread->body            = (string) preg_replace( self::TRACKER, '', (string) ( $source['body'] ?? '' ) );
+		$thread->body            = $is_line_item ? null : (string) preg_replace( self::TRACKER, '', (string) ( $source['body'] ?? '' ) );
 		$thread->source_via      = $by_customer ? Thread::PERSON_CUSTOMER : Thread::PERSON_USER;
-		$thread->source_type     = self::source_type( (string) ( $source['source']['type'] ?? '' ) );
+		$thread->source_type     = $is_line_item ? Thread::SOURCE_TYPE_WEB : self::source_type( (string) ( $source['source']['type'] ?? '' ) );
 		$thread->customer_id     = $author ? $author->id : $conversation->customer_id;
 		$thread->imported        = true;
-		$thread->first           = ! $conversation->threads()->exists();
+		$thread->first           = ! $is_line_item && ! $conversation->threads()->where( 'type', '!=', Thread::TYPE_LINEITEM )->exists();
 		$thread->has_attachments = (bool) $source['files'];
 		$thread->message_id      = $message_id;
 		$thread->created_at      = $created_at;
 		$thread->updated_at      = $created_at;
+
+		if ( $is_line_item ) {
+			$thread->action_type = Thread::ACTION_TYPE_STATUS_CHANGED;
+		}
 
 		if ( $by_customer ) {
 			$thread->created_by_customer_id = $author ? $author->id : $sender->id;
@@ -836,7 +910,7 @@ final class Importer {
 				$body = str_replace( $src, $attachment->url(), $body );
 			}
 		}
-		if ( $body !== $thread->body ) {
+		if ( $body !== (string) $thread->body ) {
 			Thread::query()->whereKey( $thread_id )->update( array( 'body' => $body ) );
 		}
 
@@ -865,23 +939,37 @@ final class Importer {
 	/**
 	 * Sets what depends on the threads, and what HelpScout may have changed since the last import.
 	 *
+	 * The last reply and preview follow core's thread observer: the last reply is the latest email or reply, or on
+	 * a phone conversation, note too; the preview is the latest of any of them, notes included, that isn't a forward.
+	 *
 	 * @param Conversation $conversation  Conversation.
 	 * @param array        $source        HelpScout conversation.
 	 * @param int          $status        Its status, as FreeScout's.
 	 * @param bool         $from_source   Whether to take HelpScout's status, assignee, and dates too; not once
 	 *                                    agents worked on it in FreeScout.
+	 * @param bool         $added         Whether threads were added.
 	 * @return void
 	 */
-	private function update_conversation( Conversation $conversation, array $source, int $status, bool $from_source ): void {
+	private function update_conversation( Conversation $conversation, array $source, int $status, bool $from_source, bool $added ): void {
 		$threads = $conversation->threads()->where( 'state', Thread::STATE_PUBLISHED )->orderBy( 'created_at' )->orderBy( 'id' )->get();
 		$replies = $threads->whereIn( 'type', array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE ) );
-		$last    = $replies->last() ?? $threads->last();
+		$notes   = $threads->where( 'type', Thread::TYPE_NOTE );
+		$dated   = $conversation->isPhone() ? $threads->whereIn( 'type', array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE, Thread::TYPE_NOTE ) ) : $replies;
+		$last    = $dated->last() ?? $notes->last();
+		$preview = $threads->whereIn( 'type', array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE, Thread::TYPE_NOTE ) )->reject(
+			static function ( Thread $thread ): bool {
+				return $thread->isForward();
+			}
+		)->last();
 
 		$conversation->threads_count   = $replies->count();
 		$conversation->has_attachments = $threads->contains( 'has_attachments', true );
 
+		if ( $preview ) {
+			$conversation->setPreview( (string) $preview->body );
+		}
+
 		if ( $last ) {
-			$conversation->setPreview( (string) $last->body );
 			$conversation->last_reply_at   = $last->created_at;
 			$conversation->last_reply_from = $last->source_via;
 		}
@@ -910,6 +998,11 @@ final class Importer {
 			$updated_at                    = self::date( $source['userUpdatedAt'] ?? null ) ?? ( $last ? $last->created_at : $conversation->created_at );
 			$conversation->user_updated_at = $updated_at;
 			$conversation->updated_at      = $updated_at;
+		}
+
+		// The Reports module works a conversation's metrics out again when live email adds a reply, closes, or reopens it.
+		if ( ( $added || $conversation->isDirty( array( 'status', 'closed_at' ) ) ) && self::has_column( 'rpt_ready' ) ) {
+			$conversation->rpt_ready = false;
 		}
 
 		$conversation->timestamps = false;
@@ -1050,18 +1143,16 @@ final class Importer {
 	}
 
 	/**
-	 * Whether core's conversations table has a column, which newer versions add.
+	 * Whether core's conversations table has a column, which newer versions, or modules, add.
 	 *
 	 * @param string $column Column name.
 	 * @return bool
 	 */
 	private static function has_column( string $column ): bool {
-		static $columns = array();
-
-		if ( ! isset( $columns[ $column ] ) ) {
-			$columns[ $column ] = Schema::hasColumn( 'conversations', $column );
+		if ( ! isset( self::$columns[ $column ] ) ) {
+			self::$columns[ $column ] = Schema::hasColumn( 'conversations', $column );
 		}
 
-		return $columns[ $column ];
+		return self::$columns[ $column ];
 	}
 }
