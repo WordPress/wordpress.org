@@ -208,6 +208,32 @@ If you've gotten all the way down here and still think we should be hosting your
 		);
 	}
 
+	/**
+	 * Returns the rejection email content for scraping.
+	 *
+	 * @return string
+	 */
+	public function reason_scraping() {
+		return __(
+			'Your plugin has been rejected because it retrieves or extracts content from third-party websites by scraping them.
+
+<strong>Why this is not permitted</strong>
+
+Plugin developers are responsible for ensuring that their plugins comply with the terms of use and licensing requirements of every third-party service or website they use. Content that is publicly available is not necessarily available for automated collection or reuse.
+
+The Plugin Directory guidelines require developers to comply with the terms of use for all third-party services and APIs. When the applicable terms or licensing cannot be validated, that content or service cannot be used.
+
+https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#2-developers-are-responsible-for-the-contents-and-actions-of-their-plugins
+
+<strong>What to do next</strong>
+
+Please do not resubmit this plugin before corresponding with us. If you believe this decision was made in error, reply to this email with an explanation of how your plugin obtains and uses the content, along with documentation showing that the website owner permits that use.
+
+If the issue can be resolved, we will advise you on the appropriate next steps. Resubmitting without first communicating with us may result in further action against your account.',
+			'wporg-plugins'
+		);
+	}
+
 	public function reason_duplicate() {
 		return __(
 			"We have rejected this submission because we do not accept submissions that are new or renamed versions of existing plugins.
