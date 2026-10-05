@@ -47,8 +47,9 @@ class ZIP_Cleanup {
 
 		$i = 0;
 		foreach ( $attachments as $attachment_id => $plugin_id ) {
+			++$i;
 			// Most attachments are skipped, but each still loads its plugin and all of its meta into the runtime cache.
-			if ( 0 === ++$i % 100 ) {
+			if ( 0 === $i % 100 ) {
 				Manager::clear_memory_heavy_variables();
 			}
 
