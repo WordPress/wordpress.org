@@ -293,7 +293,36 @@ What's running:
 | `mailpit` | Catches outgoing mail. |
 | `mock-api` | Stands in for `api.wordpress.org/dotorg/freescout/`: checks request signatures, answers sidebar requests with panels recorded from the real endpoints for a real account (`obenland`'s), and logs webhook events (`npm run freescout:logs`). Also stands in for login.wordpress.org's SAML identity provider at http://127.0.0.1:8892/idp, signing with a key that's only for local development. |
 
-`freescout.wordpress.net/Modules/` is mounted as FreeScout's `Modules/` folder, like production's checkout. Every start switches all modules on and runs `freescout:after-app-update`, as production does after a deploy. To try another module, like a premium one, copy it into `freescout.wordpress.net/Modules/` and restart; don't commit it. After switching branches, run `npm run freescout:setup`: FreeScout errors on every page while it still has a removed module cached.
+`freescout.wordpress.net/Modules/` is mounted as FreeScout's `Modules/` folder, like production's checkout. Every start switches all modules on and runs `freescout:after-app-update`, as production does after a deploy. After switching branches, run `npm run freescout:setup`: FreeScout errors on every page while it still has a removed module cached.
+
+Setup also adds sample data, set up like the HelpScout helpdesk but with made-up people and conversations. It adds the **Learn WordPress** mailbox, without incoming email. It also adds four made-up agents and 34 made-up conversations in Plugins, Themes and Learn WordPress from the last eight weeks, with replies, notes, and closed, pending, and spam conversations. It only adds what's missing, and only to a FreeScout on 127.0.0.1 or localhost.
+
+**Premium modules:** to try them, copy them in from a clone of the private [freescout-paid-modules](https://github.com/WordPress/freescout-paid-modules) repository. They must never be committed here, so exclude each one first. From `environments/`:
+
+```bash
+paid=~/path/to/freescout-paid-modules
+exclude="$(git rev-parse --path-format=absolute --git-common-dir)/info/exclude"
+for module in "$paid"/Modules/*/; do
+	target="freescout.wordpress.net/Modules/$(basename "$module")"
+	grep -qxF "$target/" "$exclude" || echo "$target/" >> "$exclude"
+	rsync -a --delete "$module" "../$target/"
+done
+npm run freescout:setup
+```
+
+Setup switches them on, and adds sample data for each one that's there, with HelpScout's names:
+
+- **Tags:** some of HelpScout's tags and colors, on conversations.
+- **Custom Fields:** the Learn WordPress fields, with values. Plugins and Themes have none.
+- **Saved Replies:** some of HelpScout's saved replies in Plugins and Themes, with short made-up texts.
+- **Teams:** the Plugin, Themes and Learn teams, with conversations assigned to some. Names longer than FreeScout's 20 characters are shortened.
+- **Custom Folders:** "New WordPress" in Plugins, for replies to new WordPress version emails.
+- **Mentions:** a note in which one agent mentions another.
+- **Workflows:** some of HelpScout's workflows, with made-up rules. Automatic ones only run for new email with matching subjects, or a tag an agent adds; none run for the sample conversations.
+- **Reports:** response and resolution times, ready right away.
+- **API & Webhooks:** a read-only API key for the admin, and a webhook for new conversations to the mock API, which turns it away.
+
+Slack stays unconfigured: it needs a Slack app.
 
 To send more mail in:
 
