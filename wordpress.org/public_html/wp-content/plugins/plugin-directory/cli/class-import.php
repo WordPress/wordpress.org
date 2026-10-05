@@ -1575,16 +1575,17 @@ class Import {
 					'block.json[script]',
 					'block.json[style]',
 				);
-				$error = $result->get_error_message();
+				// A tolerated schema error must not hide errors for required properties.
+				$errors        = implode( "\n", $result->get_error_messages() );
 				$is_json_valid = array_reduce(
 					$required_valid_props,
-					function( $is_valid, $prop ) use ( $error ) {
+					function ( $is_valid, $prop ) use ( $errors ) {
 						$prop_field = substr( $prop, 11, -1 ); // 'name' in 'block.json[name]'
 						return (
 							$is_valid &&
-							( false === strpos( $error, $prop ) ) &&
+							( false === strpos( $errors, $prop ) ) &&
 							// String in rest_validate_object_value_from_schema()
-							( false === strpos( $error, "{$prop_field} is a required property of block.json." ) )
+							( false === strpos( $errors, "{$prop_field} is a required property of block.json." ) )
 						);
 					},
 					true
