@@ -300,10 +300,6 @@ form#search input {
 	margin-right: auto;
 }
 
-#content.report #prefs div {
-	float: right;
-}
-
 /* When blame displays a changeset inline, override the inline style set by blame.js */
 #main ~ .message[style] {
 	width: auto !important;
