@@ -380,7 +380,7 @@ class Plugin {
 		}
 
 		$already_logged[ $translation->id ] = true;
-		$source								= '';
+		$source                             = '';
 
 		if ( is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
