@@ -1569,26 +1569,23 @@ class Import {
 			if ( ! is_wp_error( $block ) && is_wp_error( $result ) ) {
 				// Only certain properties must be valid for our purposes here.
 				$required_valid_props = array(
-					'block.json[editorScript]',
-					'block.json[editorStyle]',
-					'block.json[name]',
-					'block.json[script]',
-					'block.json[style]',
+					'editorScript',
+					'editorStyle',
+					'name',
+					'script',
+					'style',
 				);
-				$error = $result->get_error_message();
-				$is_json_valid = array_reduce(
-					$required_valid_props,
-					function( $is_valid, $prop ) use ( $error ) {
-						$prop_field = substr( $prop, 11, -1 ); // 'name' in 'block.json[name]'
-						return (
-							$is_valid &&
-							( false === strpos( $error, $prop ) ) &&
-							// String in rest_validate_object_value_from_schema()
-							( false === strpos( $error, "{$prop_field} is a required property of block.json." ) )
-						);
-					},
-					true
-				);
+				// A tolerated schema error must not hide errors for required properties.
+				$is_json_valid = true;
+				foreach ( $result->get_error_messages() as $error ) {
+					foreach ( $required_valid_props as $prop ) {
+						// Match both property paths and missing-property messages from core.
+						if ( false !== strpos( $error, "block.json[{$prop}]" ) || false !== strpos( $error, "{$prop} is a required property of block.json." ) ) {
+							$is_json_valid = false;
+							break 2;
+						}
+					}
+				}
 				if ( $is_json_valid ) {
 					$blocks[] = $block;
 				}
