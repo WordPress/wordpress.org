@@ -1029,9 +1029,8 @@ function wptv_widont( $str = '' ) {
 	// We're dealing with whitespace from here out, let's not have any false positives. :)
 	$str = trim( $str );
 
-	$split = preg_split( '#\s+#', $str );
 	// If string contains three or fewer words, don't join.
-	if ( $split && count( $split ) <= 3 ) {
+	if ( count( preg_split( '#\s+#', $str ) ) <= 3 ) {
 		return $str;
 	}
 
