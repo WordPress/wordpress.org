@@ -265,22 +265,6 @@ class Posts {
 	/**
 	 * Renders a photo's content as the plain text it is.
 	 *
-	 * A photo's content is the alternative text submitted with it. The submit
-	 * form and its sanitization treat that as plain text, so the content must
-	 * not be interpreted as post markup on output either. It is escaped here,
-	 * ahead of every other 'the_content' callback, so that they only ever see
-	 * text. The photo's media carries the same text, so it is escaped too.
-	 *
-	 * Text is stored encoded by `store_text_as_html()`, which this leaves as it
-	 * is; this covers content stored before that, or written around it. It also
-	 * hides shortcode and embed syntax, which only 'the_content' acts on.
-	 *
-	 * Keys on the global post, like core's own content callbacks, so it applies
-	 * to whatever 'the_content' is run for while a photo is the current post.
-	 * The reverse also holds: a photo's content filtered while another post is
-	 * global, such as an excerpt built outside the loop, is not escaped here.
-	 * Nothing on the site does that.
-	 *
 	 * @param string $content Post content.
 	 * @return string
 	 */
