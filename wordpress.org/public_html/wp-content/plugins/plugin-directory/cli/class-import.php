@@ -811,7 +811,13 @@ class Import {
 		$trunk_files   = $trunk_listing ? wp_list_pluck( $trunk_listing, 'filename' ) : array();
 
 		// Mirror the Builder's check, and don't mistake a failed listing for an empty trunk.
-		$this->trunk_has_files = false === $trunk_listing || (bool) wp_list_filter( $trunk_listing, array( 'kind' => 'file' ) );
+		if ( false === $trunk_listing ) {
+			// Some deploy scripts delete /trunk/ and re-add it in a later commit, so it may be missing entirely.
+			$root_listing          = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/" );
+			$this->trunk_has_files = false === $root_listing || in_array( 'trunk', $root_listing, true );
+		} else {
+			$this->trunk_has_files = (bool) wp_list_filter( $trunk_listing, array( 'kind' => 'file' ) );
+		}
 
 		// Find the list of tagged versions of the plugin.
 		$tagged_versions    = [];
