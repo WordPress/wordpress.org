@@ -382,6 +382,7 @@ class Plugin {
 		$already_logged[ $translation->id ] = true;
 		$source                             = '';
 
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verification is handled upstream by GlotPress route handlers.
 		if ( is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
 				if ( isset( $_POST['source'] ) && 'translate-live' === $_POST['source'] ) {
@@ -408,6 +409,7 @@ class Plugin {
 				}
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( $source ) {
 			gp_update_meta( $translation->id, 'source', $source, 'translation' );
