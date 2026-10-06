@@ -398,7 +398,7 @@ class Plugin {
 					$source = 'frontend';
 
 					if ( ! empty( $_POST['externalTranslationSource'] ) ) {
-						$suggestion_source	   = sanitize_text_field( wp_unslash( $_POST['externalTranslationSource'] ) );
+						$suggestion_source     = sanitize_text_field( wp_unslash( $_POST['externalTranslationSource'] ) );
 						$suggested_translation = isset( $_POST['externalTranslationUsed'] )
 							? sanitize_text_field( wp_unslash( $_POST['externalTranslationUsed'] ) )
 							: '';
