@@ -272,7 +272,8 @@ class Posts {
 	 * text. The photo's media carries the same text, so it is escaped too.
 	 *
 	 * Text is stored encoded by `store_text_as_html()`, which this leaves as it
-	 * is; this covers content stored before that, or written around it.
+	 * is; this covers content stored before that, or written around it. It also
+	 * hides shortcode and embed syntax, which only 'the_content' acts on.
 	 *
 	 * Keys on the global post, like core's own content callbacks, so it applies
 	 * to whatever 'the_content' is run for while a photo is the current post.
@@ -289,7 +290,10 @@ class Posts {
 			return $content;
 		}
 
-		return self::text_to_html( $content );
+		$content = self::text_to_html( $content );
+
+		// Shortcode and URL syntax stay visible text: hide the characters shortcodes and embeds key on.
+		return str_replace( [ '[', '://' ], [ '&#91;', '&#58;//' ], $content );
 	}
 
 	/**
@@ -336,20 +340,18 @@ class Posts {
 	/**
 	 * Encodes plain text as the HTML that displays it.
 	 *
-	 * Quotes stay as they are: content is only ever output as text, where they
-	 * mean nothing, and site search matches the stored value.
+	 * Only `&`, `<` and `>` are encoded, as kses does for stray ones, so site
+	 * search and the editor see the text as before. Quotes stay as they are:
+	 * content is only ever output as text, where they mean nothing.
 	 *
-	 * Already encoded text passes through unchanged: existing entities are left
-	 * alone, and the numeric ones are in the form kses normalizes to.
+	 * Already encoded text passes through unchanged, since existing entities are
+	 * left alone.
 	 *
 	 * @param string $text Plain text.
 	 * @return string
 	 */
 	public static function text_to_html( $text ) {
-		$html = htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8', false );
-
-		// Shortcode and URL syntax stay visible text: hide the characters shortcodes and embeds key on.
-		return str_replace( [ '[', '://' ], [ '&#091;', '&#058;//' ], $html );
+		return htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false );
 	}
 
 	/**
