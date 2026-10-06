@@ -36,6 +36,8 @@ class Posts {
 		add_action( 'post_updated',       [ __CLASS__, 'sync_photo_post_to_photo_media_on_update' ], 5, 3 );
 
 		// Photo content is plain text (the alternative text), never post markup.
+		add_filter( 'wp_insert_post_data', [ __CLASS__, 'store_text_as_html' ], PHP_INT_MAX );
+		add_filter( 'wp_insert_attachment_data', [ __CLASS__, 'store_text_as_html' ], PHP_INT_MAX );
 		add_filter( 'the_content', [ __CLASS__, 'render_content_as_plain_text' ], PHP_INT_MIN );
 
 		// Offset subsequent paginations of front page by number of posts on front page.
@@ -205,8 +207,8 @@ class Posts {
 	 * Redirects attachment permalink pages to the associated photo post page.
 	 */
 	public static function redirect_attachment_page_to_photo() {
-		// Must be request for attachment.
-		if ( ! is_attachment() ) {
+		// Must be request for attachment. Not is_attachment(), which is false for `?post_type=attachment&p=` on attached media.
+		if ( ! is_singular( 'attachment' ) ) {
 			return;
 		}
 
@@ -267,7 +269,10 @@ class Posts {
 	 * form and its sanitization treat that as plain text, so the content must
 	 * not be interpreted as post markup on output either. It is escaped here,
 	 * ahead of every other 'the_content' callback, so that they only ever see
-	 * text.
+	 * text. The photo's media carries the same text, so it is escaped too.
+	 *
+	 * Text is stored encoded by `store_text_as_html()`, which this leaves as it
+	 * is; this covers content stored before that, or written around it.
 	 *
 	 * Keys on the global post, like core's own content callbacks, so it applies
 	 * to whatever 'the_content' is run for while a photo is the current post.
@@ -279,14 +284,72 @@ class Posts {
 	 * @return string
 	 */
 	public static function render_content_as_plain_text( $content ) {
-		if ( Registrations::get_post_type() !== get_post_type() ) {
+		$post = get_post();
+		if ( ! $post || ! self::holds_photo_text( $post->post_type, $post->post_parent ) ) {
 			return $content;
 		}
 
-		$content = esc_html( $content );
+		return self::text_to_html( $content );
+	}
+
+	/**
+	 * Stores a photo's text as the HTML that displays it.
+	 *
+	 * Core treats post titles, content and excerpts as HTML in every template, feed,
+	 * embed and REST response, so plain text stored there gets interpreted as
+	 * markup wherever it's output without our own escaping. Encoding it here,
+	 * after kses and right before the database write, makes the stored value
+	 * mean the text in all of them.
+	 *
+	 * @param array $data Slashed, sanitized post data.
+	 * @return array
+	 */
+	public static function store_text_as_html( $data ) {
+		if ( ! self::holds_photo_text( $data['post_type'], $data['post_parent'] ) ) {
+			return $data;
+		}
+
+		foreach ( [ 'post_title', 'post_content', 'post_excerpt' ] as $field ) {
+			$data[ $field ] = wp_slash( self::text_to_html( wp_unslash( $data[ $field ] ) ) );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Determines whether a post holds a photo's text: the photo itself, or its media.
+	 *
+	 * @param string $post_type   Post type.
+	 * @param int    $post_parent Post parent ID.
+	 * @return bool
+	 */
+	public static function holds_photo_text( $post_type, $post_parent ) {
+		$photo_post_type = Registrations::get_post_type();
+
+		if ( $photo_post_type === $post_type ) {
+			return true;
+		}
+
+		return 'attachment' === $post_type && $post_parent && get_post_type( $post_parent ) === $photo_post_type;
+	}
+
+	/**
+	 * Encodes plain text as the HTML that displays it.
+	 *
+	 * Quotes stay as they are: content is only ever output as text, where they
+	 * mean nothing, and site search matches the stored value.
+	 *
+	 * Already encoded text passes through unchanged: existing entities are left
+	 * alone, and the numeric ones are in the form kses normalizes to.
+	 *
+	 * @param string $text Plain text.
+	 * @return string
+	 */
+	public static function text_to_html( $text ) {
+		$html = htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8', false );
 
 		// Shortcode and URL syntax stay visible text: hide the characters shortcodes and embeds key on.
-		return str_replace( [ '[', '://' ], [ '&#91;', '&#58;//' ], $content );
+		return str_replace( [ '[', '://' ], [ '&#091;', '&#058;//' ], $html );
 	}
 
 	/**

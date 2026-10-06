@@ -109,6 +109,8 @@ class Uploads {
 
 		// Make photo the featured image for associated post.
 		add_action( 'fu_after_upload',                  [ __CLASS__, 'make_uploaded_photo_featured' ], 1, 3 );
+		// Give the photo media the photo's sanitized description instead of Frontend Uploader's own read of the request.
+		add_action( 'fu_after_upload', [ __CLASS__, 'set_photo_media_description' ], 1, 3 );
 		// Validate the photo.
 		add_action( 'fu_after_upload',                  [ __CLASS__, 'validate_uploaded_photo' ], 2, 3 );
 		// Delete the associated post if the image upload failed.
@@ -931,6 +933,32 @@ class Uploads {
 		}
 
 		set_post_thumbnail( $post_id, $media_ids[0] );
+	}
+
+	/**
+	 * Sets the photo media's content and caption to the photo's description.
+	 *
+	 * @param int[] $media_ids Media IDs for uploaded files.
+	 * @param bool  $success   Whether the upload was successful.
+	 * @param int   $post_id   The post ID.
+	 */
+	public static function set_photo_media_description( $media_ids, $success, $post_id ) {
+		if ( ! $media_ids || ! $success || ! $post_id ) {
+			return;
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return;
+		}
+
+		wp_update_post(
+			[
+				'ID'           => $media_ids[0],
+				'post_content' => wp_slash( $post->post_content ),
+				'post_excerpt' => wp_slash( $post->post_content ),
+			]
+		);
 	}
 
 	/**
