@@ -560,13 +560,14 @@ class WordPressTV_Theme {
 	 * @param bool $html_code
 	 */
 	function the_video_image( $h = 196, $w = 400, $arrow = true, $html_code = true ) {
+		global $post;
 		$ret = $this->get_the_video_image();
 
 		if ( $arrow ) {
 			?><a href="<?php the_permalink() ?>" class="showarrow arrow"><?php the_title(); ?></a><?php
 		}
 		if ( $html_code ) {
-			$ret = '<img src="' . $ret . '" alt="' . esc_attr( $post->post_title ?? '' ) . '" />';
+			$ret = '<img src="' . $ret . '" alt="' . esc_attr( $post->post_title ) . '" />';
 		}
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered markup: core link helpers, the_content/the_title filter output, and widget before/after wrappers.
 		echo $ret;
