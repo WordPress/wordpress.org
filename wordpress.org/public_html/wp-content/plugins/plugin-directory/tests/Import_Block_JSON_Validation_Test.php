@@ -26,7 +26,7 @@ class Import_Block_JSON_Validation_Test extends TestCase {
 	private $block_file;
 
 	/**
-	 * Create a temporary directory for block metadata.
+	 * Create a temporary directory for block metadata and mock schema requests.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
@@ -34,12 +34,16 @@ class Import_Block_JSON_Validation_Test extends TestCase {
 		$directory = sys_get_temp_dir() . '/import-block-json-' . wp_generate_uuid4();
 		wp_mkdir_p( $directory );
 		$this->block_file = $directory . '/block.json';
+
+		add_filter( 'pre_http_request', array( $this, 'mock_schema_request' ), 10, 3 );
 	}
 
 	/**
-	 * Remove temporary files.
+	 * Remove temporary files and the schema request mock.
 	 */
 	protected function tearDown(): void {
+		remove_filter( 'pre_http_request', array( $this, 'mock_schema_request' ), 10 );
+
 		if ( file_exists( $this->block_file ) ) {
 			wp_delete_file( $this->block_file );
 		}
@@ -47,6 +51,32 @@ class Import_Block_JSON_Validation_Test extends TestCase {
 		rmdir( dirname( $this->block_file ) );
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Serve a fixed copy of https://schemas.wp.org/trunk/block.json.
+	 *
+	 * @param false|array|WP_Error $preempt Existing short-circuit response.
+	 * @param array                $args    HTTP request arguments.
+	 * @param string               $url     HTTP request URL.
+	 * @return false|array|WP_Error
+	 */
+	public function mock_schema_request( $preempt, $args, $url ) {
+		if ( 'https://schemas.wp.org/trunk/block.json' !== $url ) {
+			return $preempt;
+		}
+
+		return array(
+			'headers'  => array(),
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Read the fixed test schema.
+			'body'     => file_get_contents( __DIR__ . '/fixtures/block-schema.json' ),
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'cookies'  => array(),
+			'filename' => null,
+		);
 	}
 
 	/**
