@@ -127,7 +127,7 @@ try {
 		if ( $skipped_message ) {
 			$fields[] = [
 				'title' => 'Skipped',
-				'value' => Slack::escape( $skipped_message ),
+				'value' => htmlspecialchars( $skipped_message, ENT_NOQUOTES | ENT_SUBSTITUTE ),
 				'short' => false,
 			];
 		}
@@ -136,7 +136,7 @@ try {
 			'value' => sprintf(
 				'<%1$s|%2$s> | <https://plugins.trac.wordpress.org/log/%3$s|Log> | <%4$s|SVN>',
 				get_permalink( $plugin ),
-				Slack::escape( $plugin->post_title ),
+				htmlspecialchars( $plugin->post_title, ENT_NOQUOTES | ENT_SUBSTITUTE ),
 				$plugin_slug,
 				$importer->get_plugin_svn_url( $tag )
 			),
@@ -161,7 +161,7 @@ try {
 	if ( $send_slack ) {
 		$fields[] = [
 			'title' => 'Status',
-			'value' => sprintf( '%s %s (%ss)', $slack_client->get_failure_emoji(), Slack::escape( $e->getMessage() ), $runtime ),
+			'value' => sprintf( '%s %s (%ss)', $slack_client->get_failure_emoji(), htmlspecialchars( $e->getMessage(), ENT_NOQUOTES | ENT_SUBSTITUTE ), $runtime ),
 			'short' => false,
 		];
 		$fields[] = [
@@ -169,7 +169,7 @@ try {
 			'value' => sprintf(
 				'<%1$s|%2$s> | <https://plugins.trac.wordpress.org/log/%3$s|Log> | <%4$s|SVN>',
 				get_permalink( $plugin ),
-				Slack::escape( $plugin->post_title ),
+				htmlspecialchars( $plugin->post_title, ENT_NOQUOTES | ENT_SUBSTITUTE ),
 				$plugin_slug,
 				$importer->get_plugin_svn_url( $tag )
 			),
