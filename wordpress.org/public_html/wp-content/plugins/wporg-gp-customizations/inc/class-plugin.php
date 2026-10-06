@@ -401,7 +401,8 @@ class Plugin {
 					if ( ! empty( $_POST['externalTranslationSource'] ) ) {
 						$suggestion_source     = sanitize_text_field( wp_unslash( $_POST['externalTranslationSource'] ) );
 						$suggested_translation = isset( $_POST['externalTranslationUsed'] )
-							? sanitize_text_field( wp_unslash( $_POST['externalTranslationUsed'] ) )
+							// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only used for in-memory comparison against the saved translation; sanitization would strip tags/newlines.
+							? (string) wp_unslash( $_POST['externalTranslationUsed'] )
 							: '';
 
 						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
