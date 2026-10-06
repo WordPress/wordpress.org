@@ -98,6 +98,25 @@ try {
 
 	$runtime = round( microtime( 1 ) - $start_time, 2 );
 
+	$skipped_message = '';
+	if ( 'code' === $type ) {
+		$skipped = $importer->get_non_utf8_entries();
+		if ( $skipped['count'] ) {
+			$files      = array_slice( $skipped['files'], 0, 5 );
+			$more_files = count( $skipped['files'] ) - count( $files );
+
+			// mb_scrub() keeps a non-UTF-8 file name from breaking the Slack payload's json_encode().
+			$skipped_message = mb_scrub(
+				sprintf(
+					'%d strings skipped, not valid UTF-8: %s%s',
+					$skipped['count'],
+					implode( ', ', $files ),
+					$more_files ? " and {$more_files} more" : ''
+				)
+			);
+		}
+	}
+
 	// Send Slack notification.
 	if ( $send_slack ) {
 		$fields[] = [
@@ -105,6 +124,13 @@ try {
 			'value' => sprintf( '%s Successfully imported! (%ss)', $slack_client->get_success_emoji(), $runtime ),
 			'short' => false,
 		];
+		if ( $skipped_message ) {
+			$fields[] = [
+				'title' => 'Skipped',
+				'value' => $skipped_message,
+				'short' => false,
+			];
+		}
 		$fields[] = [
 			'title' => 'Plugin',
 			'value' => sprintf(
@@ -117,8 +143,13 @@ try {
 			'short' => false,
 		];
 		$slack_client->add_attachment( 'fields', $fields );
-		$slack_client->set_status( 'success' );
+		$slack_client->set_status( $skipped_message ? 'warning' : 'success' );
 		$slack_client->send( '#meta-language-packs' );
+	}
+
+	if ( $skipped_message ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
+		echo "Warning: {$skipped_message}\n";
 	}
 
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.

@@ -17,6 +17,16 @@ use WordPressdotorg\Plugin_Directory\Tools\SVN;
 class Code_Import extends I18n_Import {
 
 	/**
+	 * POT entries removed from the last import because they weren't valid UTF-8.
+	 *
+	 * @var array
+	 */
+	private $non_utf8_entries = [
+		'count' => 0,
+		'files' => [],
+	];
+
+	/**
 	 * Imports the readme of a specific tag to GlotPress.
 	 *
 	 * @param string $tag SVN tag of the readme.
@@ -66,6 +76,18 @@ class Code_Import extends I18n_Import {
 			throw new Exception( "POT file couldn't be created." );
 		}
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local temp file.
+		$stripped = self::strip_non_utf8_entries( file_get_contents( $pot_file ) );
+		if ( $stripped['count'] ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Local temp file.
+			file_put_contents( $pot_file, $stripped['pot'] );
+
+			$this->non_utf8_entries = [
+				'count' => $stripped['count'],
+				'files' => $stripped['files'],
+			];
+		}
+
 		$result = $this->set_glotpress_for_plugin( $this->plugin, 'code' );
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
@@ -81,6 +103,60 @@ class Code_Import extends I18n_Import {
 
 			$this->import_translations_to_glotpress_project( $export_directory, $this->plugin, $branch, $plugin_owner_user_id );
 		}
+	}
+
+	/**
+	 * Returns the POT entries removed from the last import because they weren't valid UTF-8.
+	 *
+	 * @return array {
+	 *     @type int      $count Number of entries removed.
+	 *     @type string[] $files Source files the removed entries came from.
+	 * }
+	 */
+	public function get_non_utf8_entries(): array {
+		return $this->non_utf8_entries;
+	}
+
+	/**
+	 * Removes the entries that aren't valid UTF-8 from make-pot output.
+	 *
+	 * GlotPress can't parse them. They're not converted, because converted originals
+	 * wouldn't match the strings the plugin looks up at runtime. The header is always kept.
+	 *
+	 * @param string $pot POT file contents, with entries separated by blank lines.
+	 * @return array {
+	 *     @type string   $pot   POT file contents without the invalid entries.
+	 *     @type int      $count Number of entries removed.
+	 *     @type string[] $files Source files the removed entries came from.
+	 * }
+	 */
+	public static function strip_non_utf8_entries( string $pot ): array {
+		$entries = explode( "\n\n", rtrim( $pot, "\n" ) );
+		$kept    = [ array_shift( $entries ) ];
+		$count   = 0;
+		$files   = [];
+
+		foreach ( $entries as $entry ) {
+			if ( mb_check_encoding( $entry, 'UTF-8' ) ) {
+				$kept[] = $entry;
+				continue;
+			}
+
+			++$count;
+
+			preg_match_all( '/^#: (.+)$/m', $entry, $references );
+			foreach ( $references[1] as $line ) {
+				foreach ( explode( ' ', $line ) as $reference ) {
+					$files[] = preg_replace( '/:\d+$/', '', $reference );
+				}
+			}
+		}
+
+		return [
+			'pot'   => implode( "\n\n", $kept ) . "\n",
+			'count' => $count,
+			'files' => array_values( array_unique( $files ) ),
+		];
 	}
 
 	/**
