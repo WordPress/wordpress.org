@@ -54,13 +54,15 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * @param array $args An associative array of arguments.
 	 */
 	public function __construct( $args = array() ) {
-		$args = wp_parse_args( $args, array(
+		$defaults = array(
 			'screen'        => null,
 			'user_roles'    => array(),
 			'projects'      => array(),
 			'project_tree'  => array(),
 			'rosetta_roles' => null,
-		) );
+		);
+		
+		$args = wp_parse_args( $args, $defaults );
 
 		parent::__construct( array(
 			'singular' => 'translation-editor',
@@ -97,14 +99,17 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		);
 
 		if ( ! empty( $_REQUEST['orderby'] ) ) {
+			$orderby       = sanitize_key( wp_unslash( $_REQUEST['orderby'] ) );
 			$valid_orderby = array( 'login', 'name', 'email' );
-			if ( in_array( $_REQUEST['orderby'], $valid_orderby, true ) ) {
-				$args['orderby'] = $_REQUEST['orderby'];
+
+			if ( in_array( $orderby, $valid_orderby, true ) ) {
+				$args['orderby'] = $orderby;
 			}
 		}
 
 		if ( ! empty( $_REQUEST['order'] ) ) {
-			$args['order'] = strtoupper( $_REQUEST['order'] ) === 'ASC' ? 'ASC' : 'DESC';
+			$order         = sanitize_key( wp_unslash( $_REQUEST['order'] ) );
+			$args['order'] = 'ASC' === strtoupper( $order ) ? 'ASC' : 'DESC';
 		}
 
 		$user_query  = new WP_User_Query( $args );
