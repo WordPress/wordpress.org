@@ -69,7 +69,7 @@ if ( $send_slack ) {
 	$slack_client = new Slack( PLUGIN_IMPORTS_SLACK_WEBHOOK );
 
 	// Titles are stored entity-encoded; Slack wants only `&`, `<` and `>` escaped, once.
-	$plugin_title = htmlspecialchars( html_entity_decode( $plugin->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ), ENT_NOQUOTES | ENT_SUBSTITUTE );
+	$plugin_title = Slack::escape( html_entity_decode( $plugin->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 
 	$slack_client->add_attachment( 'ts', time() );
 	$slack_client->add_attachment( 'fallback', "{$plugin_title} has been imported." );
@@ -83,7 +83,7 @@ if ( $send_slack ) {
 		],
 		[
 			'title' => 'Version',
-			'value' => htmlspecialchars( $tag, ENT_NOQUOTES | ENT_SUBSTITUTE ),
+			'value' => Slack::escape( $tag ),
 			'short' => true,
 		],
 	];
@@ -110,8 +110,8 @@ try {
 			$more_files = count( $skipped['files'] ) - count( $files );
 
 			$skipped_message = sprintf(
-				'%d strings skipped, not valid UTF-8: %s%s',
-				$skipped['count'],
+				'%s skipped, not valid UTF-8: %s%s',
+				1 === $skipped['count'] ? '1 string' : "{$skipped['count']} strings",
 				implode( ', ', $files ),
 				$more_files ? " and {$more_files} more" : ''
 			);
@@ -128,7 +128,7 @@ try {
 		if ( $skipped_message ) {
 			$fields[] = [
 				'title' => 'Skipped',
-				'value' => htmlspecialchars( $skipped_message, ENT_NOQUOTES | ENT_SUBSTITUTE ),
+				'value' => Slack::escape( $skipped_message ),
 				'short' => false,
 			];
 		}
@@ -139,7 +139,7 @@ try {
 				get_permalink( $plugin ),
 				$plugin_title,
 				$plugin_slug,
-				htmlspecialchars( $importer->get_plugin_svn_url( $tag ), ENT_NOQUOTES | ENT_SUBSTITUTE )
+				Slack::escape( $importer->get_plugin_svn_url( $tag ) )
 			),
 			'short' => false,
 		];
@@ -162,7 +162,7 @@ try {
 	if ( $send_slack ) {
 		$fields[] = [
 			'title' => 'Status',
-			'value' => sprintf( '%s %s (%ss)', $slack_client->get_failure_emoji(), htmlspecialchars( $e->getMessage(), ENT_NOQUOTES | ENT_SUBSTITUTE ), $runtime ),
+			'value' => sprintf( '%s %s (%ss)', $slack_client->get_failure_emoji(), Slack::escape( $e->getMessage() ), $runtime ),
 			'short' => false,
 		];
 		$fields[] = [
@@ -172,7 +172,7 @@ try {
 				get_permalink( $plugin ),
 				$plugin_title,
 				$plugin_slug,
-				htmlspecialchars( $importer->get_plugin_svn_url( $tag ), ENT_NOQUOTES | ENT_SUBSTITUTE )
+				Slack::escape( $importer->get_plugin_svn_url( $tag ) )
 			),
 			'short' => false,
 		];

@@ -88,6 +88,8 @@ class Code_Import_Non_UTF8_Test extends TestCase {
 
 	/**
 	 * The header is kept even when it isn't valid UTF-8, and when it's the only entry left.
+	 *
+	 * Its msgstr always yields a translation, so PO::import_from_file() drops just the invalid header line.
 	 */
 	public function test_header_is_kept(): void {
 		$result = Code_Import::strip_non_utf8_entries(
