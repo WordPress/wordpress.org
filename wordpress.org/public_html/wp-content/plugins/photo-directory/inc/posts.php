@@ -300,17 +300,6 @@ class Posts {
 	/**
 	 * Stores a photo's text as the HTML that displays it.
 	 *
-	 * Core treats post titles, content and excerpts as HTML in every template, feed,
-	 * embed and REST response, so plain text stored there gets interpreted as
-	 * markup wherever it's output without our own escaping. Encoding it here,
-	 * after kses and right before the database write, makes the stored value
-	 * mean the text in all of them.
-	 *
-	 * Only `&`, `<` and `>` are encoded, as kses does for stray ones, so site
-	 * search and the editor see the text as before. Quotes stay as they are:
-	 * content is only ever output as text, where they mean nothing. Existing
-	 * entities are left alone, so re-saving leaves the value unchanged.
-	 *
 	 * @param array $data Slashed, sanitized post data.
 	 * @return array
 	 */
