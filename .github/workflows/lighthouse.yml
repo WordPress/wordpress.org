@@ -1,0 +1,90 @@
+name: Lighthouse
+
+on:
+  schedule:
+    # Twice daily at 00:19 and 12:19 UTC.
+    - cron: '19 0,12 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    name: Lighthouse (${{ matrix.name }})
+    if: github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Sharded so one failing page doesn't drop every result.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: main
+            urls: |
+              https://wordpress.org
+              https://wordpress.org/download/
+              https://wordpress.org/news/
+              https://wordpress.org/documentation/
+              https://wordpress.org/gutenberg/
+              https://wordpress.org/showcase/
+          - name: directories
+            urls: |
+              https://wordpress.org/plugins/
+              https://wordpress.org/themes/
+              https://wordpress.org/patterns/
+              https://wordpress.org/photos/
+          - name: learning
+            urls: |
+              https://learn.wordpress.org/
+              https://learn.wordpress.org/courses/
+              https://learn.wordpress.org/course/beginner-wordpress-user/
+              https://learn.wordpress.org/lessons/
+              https://developer.wordpress.org/
+              https://developer.wordpress.org/block-editor/
+              https://developer.wordpress.org/reference/classes/wp_query/
+          - name: community
+            urls: |
+              https://make.wordpress.org/
+              https://make.wordpress.org/core/
+              https://make.wordpress.org/core/handbook/
+              https://wordpress.org/support/forums/
+              https://profiles.wordpress.org/matt/
+              https://events.wordpress.org/
+              https://central.wordcamp.org/
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          filter: blob:none
+          sparse-checkout: .github/lighthouserc.json
+          sparse-checkout-cone-mode: false
+
+      - name: Run Lighthouse
+        id: lighthouse
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12.6.2
+        with:
+          urls: ${{ matrix.urls }}
+          configPath: .github/lighthouserc.json
+          uploadArtifacts: true
+          artifactName: lighthouse-${{ matrix.name }}
+
+      # No retry: a 5xx can follow a partial insert, and a retry would duplicate those rows.
+      - name: Report scores
+        if: steps.lighthouse.outputs.manifest != ''
+        shell: bash
+        env:
+          MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
+          TOKEN: ${{ secrets.SITE_QUALITY_STATS_TOKEN }}
+        run: |
+          jq -c '[.[] | select(.isRepresentativeRun) | {url, summary}]' <<< "$MANIFEST" |
+            curl --fail-with-body --silent --show-error --max-time 60 \
+              --header 'Content-Type: application/json' \
+              --header @<(printf 'Authorization: Bearer %s\n' "$TOKEN") \
+              --data-binary @- \
+              https://wordpress.org/wp-json/wporg-site-quality/v1/github
