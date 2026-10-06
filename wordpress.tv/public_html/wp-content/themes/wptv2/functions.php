@@ -231,12 +231,15 @@ class WordPressTV_Theme {
 				'width'            => $video->width ?? 940,
 			];
 
-			foreach ( get_the_terms( $post, 'speakers' ) as $speaker ) {
-				$video_data['actor'][] = [
-					'@type' => 'Person',
-					'name'  => $speaker->name,
-					'url'   => get_term_link( $speaker ),
-				];
+			$the_speakers = get_the_terms( $post, 'speakers' );
+			if ( is_array( $the_speakers ) ) {
+				foreach ( $the_speakers as $speaker ) {
+					$video_data['actor'][] = [
+						'@type' => 'Person',
+						'name'  => $speaker->name,
+						'url'   => get_term_link( $speaker ),
+					];
+				}
 			}
 
 			/*
@@ -287,7 +290,7 @@ class WordPressTV_Theme {
 			$query->set( 'posts_per_page', 8 );
 		} elseif ( $query->is_category ) { // category archives
 			$query->set( 'posts_per_page', 22 );
-		} elseif ( $query->is_tax && $queried_object->taxonomy == 'event' ) { // event taxonomy
+		} elseif ( $query->is_tax && ( $queried_object->taxonomy ?? null ) == 'event' ) { // event taxonomy
 			$query->set( 'posts_per_page', 22 );
 		} elseif ( $query->is_archive || $query->is_search ) {
 			$query->set( 'posts_per_page', 10 );
@@ -325,6 +328,8 @@ class WordPressTV_Theme {
 			'sort'     => true,
 			'args'     => array( 'orderby' => 'term_order' ),
 			'rewrite'  => array( 'slug' => 'speakers' ),
+			'show_in_rest' => true,
+			'rest_base'    => 'speakers',
 		) );
 
 		register_taxonomy( 'flavor', array( 'post' ), array(
@@ -343,6 +348,8 @@ class WordPressTV_Theme {
 			'sort'     => true,
 			'args'     => array( 'orderby' => 'term_order' ),
 			'rewrite'  => array( 'slug' => 'language' ),
+			'show_in_rest' => true,
+			'rest_base'    => 'language',
 		) );
 
 		register_taxonomy( 'event', array( 'post' ), array(
@@ -352,6 +359,8 @@ class WordPressTV_Theme {
 			'sort'     => true,
 			'args'     => array( 'orderby' => 'term_order' ),
 			'rewrite'  => array( 'slug' => 'event' ),
+			'show_in_rest' => true,
+			'rest_base'    => 'event',
 		) );
 	}
 
@@ -557,7 +566,7 @@ class WordPressTV_Theme {
 			?><a href="<?php the_permalink() ?>" class="showarrow arrow"><?php the_title(); ?></a><?php
 		}
 		if ( $html_code ) {
-			$ret = '<img src="' . $ret . '" alt="' . esc_attr( $post->post_title ) . '" />';
+			$ret = '<img src="' . $ret . '" alt="' . esc_attr( $post->post_title ?? '' ) . '" />';
 		}
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered markup: core link helpers, the_content/the_title filter output, and widget before/after wrappers.
 		echo $ret;
@@ -747,7 +756,7 @@ class WordPressTV_Theme {
 			$count   = $display_count ? ' <span class="tag-count">' . absint( $term->count ) . '</span>' : '';
 			$links[] = '<a href="' . esc_url( get_term_link( $term, $taxonomy ) ) . '">' . esc_html( $term->name ) . $count . '</a>';
 		}
-		echo wp_kses_post( $before . join( $sep, $links ) . $after );
+		echo wp_kses_post( $before . implode( $sep, $links ) . $after );
 	}
 
 	/**
@@ -1020,8 +1029,9 @@ function wptv_widont( $str = '' ) {
 	// We're dealing with whitespace from here out, let's not have any false positives. :)
 	$str = trim( $str );
 
+	$split = preg_split( '#\s+#', $str );
 	// If string contains three or fewer words, don't join.
-	if ( count( preg_split( '#\s+#', $str ) ) <= 3 ) {
+	if ( $split && count( $split ) <= 3 ) {
 		return $str;
 	}
 
@@ -1048,6 +1058,7 @@ function wptv_update_attachment_titles( $id, $post, $post_before ) {
 	}
 
 	// Get attachments - Should only be one?
+	/** @var array $attachments */
 	$attachments = get_posts( array(
 		'post_type'   => 'attachment',
 		'post_parent' => $id,

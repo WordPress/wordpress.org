@@ -57,6 +57,7 @@ class WordPressTV_REST_API {
 
 		$method   = $matches[1];
 		$format   = $matches[2];
+		$api_data = null;
 		$response = array();
 
 		switch ( $method ) {
@@ -176,7 +177,7 @@ class WordPressTV_REST_API {
 						}
 
 						// Expose the subtitles
-						$video['subtitles'] = (array) $api_data['subtitles'];
+						$video['subtitles'] = (array) ( $api_data['subtitles'] ?? [] );
 					}
 
 					$response['videos'][] = $video;

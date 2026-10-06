@@ -2,6 +2,7 @@
 /**
  * Pagination template part, use with get_template_part()
  *
+ * @global WP_Query $wp_query
  */
 
 the_posts_pagination( array(

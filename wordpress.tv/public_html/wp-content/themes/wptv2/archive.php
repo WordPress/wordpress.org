@@ -72,7 +72,7 @@ global $wp_query, $post, $wptv;
 					<?php
 						$wptv->the_terms( 'event', '<span class="video-events">', ', ', '</span>', false );
 						$speakers = get_the_terms( $post->ID, 'speakers' );
-						if ( $speakers ) {
+						if ( is_array( $speakers ) ) {
 							$label = _n( 'Speaker:', 'Speakers:', count( $speakers ), 'wptv' );
 							$wptv->the_terms( 'speakers', '<span class="video-speakers"><strong>' . $label . '</strong> ', ', ', '</span>', false );
 						}
