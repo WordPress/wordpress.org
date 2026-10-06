@@ -9,7 +9,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	/**
 	 * Holds the roles for translation editors.
 	 *
-	 * @var arrays
+	 * @var array
 	 */
 	public $user_roles;
 
@@ -93,7 +93,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			'offset'   => ( $paged - 1 ) * $per_page,
 			'role__in' => (array) $role__in,
 			'search'   => $search ? '*' . $search . '*' : '',
-			'fields'   => 'all'
+			'fields'   => 'all',
 		);
 
 		if ( ! empty( $_REQUEST['orderby'] ) ) {
@@ -130,13 +130,18 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 *               and the value is the description.
 	 */
 	public function get_columns() {
-		return array(
-			'cb'       => '<input type="checkbox">',
-			'username' => __( 'Username', 'rosetta' ),
-			'name'     => __( 'Name', 'rosetta' ),
-			'email'    => __( 'E-mail', 'rosetta' ),
-			'projects' => __( 'Projects', 'rosetta' ),
-		);
+		$columns = array();
+
+		if ( $this->user_can_promote ) {
+			$columns['cb'] = '<input type="checkbox">';
+		}
+
+		$columns['username'] = __( 'Username', 'rosetta' );
+		$columns['name']     = __( 'Name', 'rosetta' );
+		$columns['email']    = __( 'E-mail', 'rosetta' );
+		$columns['projects'] = __( 'Projects', 'rosetta' );
+
+		return $columns;
 	}
 
 	/**
@@ -164,8 +169,8 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 
 		$users_of_blog = count_users();
 
-		$count_translation_editors = isset( $users_of_blog['avail_roles'][ Rosetta_Roles::TRANSLATION_EDITOR_ROLE ] ) ? $users_of_blog['avail_roles'][ Rosetta_Roles::TRANSLATION_EDITOR_ROLE ] : 0 ;
-		$count_general_translation_editors = isset( $users_of_blog['avail_roles'][ Rosetta_Roles::GENERAL_TRANSLATION_EDITOR_ROLE ] ) ? $users_of_blog['avail_roles'][ Rosetta_Roles::GENERAL_TRANSLATION_EDITOR_ROLE ] : 0 ;
+		$count_translation_editors = isset( $users_of_blog['avail_roles'][ Rosetta_Roles::TRANSLATION_EDITOR_ROLE ] ) ? $users_of_blog['avail_roles'][ Rosetta_Roles::TRANSLATION_EDITOR_ROLE ] : 0;
+		$count_general_translation_editors = isset( $users_of_blog['avail_roles'][ Rosetta_Roles::GENERAL_TRANSLATION_EDITOR_ROLE ] ) ? $users_of_blog['avail_roles'][ Rosetta_Roles::GENERAL_TRANSLATION_EDITOR_ROLE ] : 0;
 		$total_translation_editors = $count_translation_editors + $count_general_translation_editors;
 
 		$all_inner_html = sprintf(
@@ -260,6 +265,10 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * @return array Array of bulk actions.
 	 */
 	protected function get_bulk_actions() {
+		if ( ! $this->user_can_promote ) {
+			return array();
+		}
+
 		return array(
 			'remove-translation-editors' => _x( 'Remove', 'translation editor', 'rosetta' ),
 		);
@@ -315,14 +324,25 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			);
 
 			$actions = array(
-				'edit'   => '<a href="' . $edit_link . '">' . esc_html__( 'Edit', 'rosetta' ) . '</a>',
-				'delete' => '<a href="' . esc_url( $delete_url ) . '">' . esc_html__( 'Remove', 'rosetta' ) . '</a>',
+				'edit'   => sprintf(
+					'<a href="%s">%s<span class="screen-reader-text"> &#8220;%s&#8221;</span></a>',
+					$edit_link,
+					esc_html__( 'Edit', 'rosetta' ),
+					$username
+				),
+				'delete' => sprintf(
+					'<a href="%s" class="submitdelete">%s<span class="screen-reader-text"> &#8220;%s&#8221;</span></a>',
+					esc_url( $delete_url ),
+					esc_html__( 'Remove', 'rosetta' ),
+					$username
+				),
 			);
 			$edit .= $this->row_actions( $actions );
 		} else {
 			$edit = '<strong>' . $username . '</strong>';
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Avatar and edit markup assembled above from escaped parts.
 		echo $avatar . ' ' . $edit;
 	}
 
@@ -370,7 +390,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 				}
 				$parent = $this->parent_cache[ $project_id ];
 				
-				if ( is_object( $parent ) && $parent->id != $project_id ) {
+				if ( is_object( $parent ) && (int) $parent->id !== (int) $project_id ) {
 					$name = sprintf(
 						/* translators: 1: Parent project name, 2: Child project name */
 						__( '%1$s &rarr;  %2$s', 'rosetta' ),
