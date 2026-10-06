@@ -12,10 +12,11 @@ if ( isset( $wporg_trac_notifications ) ) {
 
 	<div id="primary" class="content-area">
 		<div role="main">
-		<h1><?php printf( 'WordPress %s Components', $trac_name ); ?></h1>
+		<h1><?php printf( 'WordPress %s Components', esc_html( $trac_name ) ); ?></h1>
 
 <?php
 	if ( $cached = get_transient( 'trac_components_page' ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Component page content plus the table the component_table_row action renders.
 		echo $cached;
 	} else {
 		ob_start();
@@ -33,6 +34,7 @@ if ( isset( $wporg_trac_notifications ) ) {
 
 		$cache = ob_get_clean();
 		set_transient( 'trac_components_page', $cache, 300 );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Component page content plus the table the component_table_row action renders.
 		echo $cache;
 	}
 ?>

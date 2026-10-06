@@ -6,11 +6,14 @@ class Stickies_Compat {
 
 	const META = '_bbp_sticky_topics';
 
-	var $compat   = null;
-	var $slug     = null;
-	var $taxonomy = null;
-	var $object   = null;
-	var $term     = null;
+	var $compat       = null;
+	var $slug         = null;
+	var $taxonomy     = null;
+	var $object       = null;
+	var $term         = null;
+	var $authors      = array();
+	var $contributors = array();
+	var $support_reps = array();
 
 	public function __construct( $args ) {
 		$args = wp_parse_args( $args, array(
@@ -251,17 +254,17 @@ class Stickies_Compat {
 			}
 
 			// Compat authors.
-			if ( $this->authors && in_array( $user->user_nicename, $this->authors ) ) {
+			if ( $this->authors && in_array( $user->user_nicename, $this->authors, true ) ) {
 				$retval = true;
 			}
 
 			// Compat contributors.
-			if ( $this->contributors && in_array( $user->user_nicename, $this->contributors ) ) {
+			if ( $this->contributors && in_array( $user->user_nicename, $this->contributors, true ) ) {
 				$retval = true;
 			}
 
 			// Compat support reps.
-			if ( $this->support_reps && in_array( $user->user_nicename, $this->support_reps ) ) {
+			if ( $this->support_reps && in_array( $user->user_nicename, $this->support_reps, true ) ) {
 				$retval = true;
 			}
 		}

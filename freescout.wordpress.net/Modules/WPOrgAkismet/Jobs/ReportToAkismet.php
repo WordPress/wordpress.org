@@ -1,0 +1,146 @@
+<?php
+/**
+ * Queued report of a conversation Akismet got wrong.
+ *
+ * @package WordPressdotorg\FreeScout\WPOrgAkismet
+ */
+
+declare( strict_types = 1 );
+
+namespace Modules\WPOrgAkismet\Jobs;
+
+use App\Conversation;
+use App\Thread;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Modules\WPOrgAkismet\Providers\WPOrgAkismetServiceProvider;
+use Modules\WPOrgAkismet\Services\Akismet;
+use Modules\WPOrgAkismet\Services\Message;
+
+/**
+ * Tells Akismet what an agent marked a conversation as.
+ *
+ * Runs on the queue so agents never wait on Akismet.
+ */
+final class ReportToAkismet implements ShouldQueue {
+	use Dispatchable;
+	use InteractsWithQueue;
+	use Queueable;
+
+	/**
+	 * Seconds before a failed report is tried again, multiplied by the attempts so far.
+	 *
+	 * @var int
+	 */
+	private const RETRY_DELAY = 300;
+
+	/**
+	 * How many times the report is tried; FreeScout's worker tries a job only once unless the job says otherwise.
+	 *
+	 * @var int
+	 */
+	public $tries = 3;
+
+	/**
+	 * Conversation ID.
+	 *
+	 * @var int
+	 */
+	public $conversation_id;
+
+	/**
+	 * What the agent marked it as: Akismet::SPAM or Akismet::HAM.
+	 *
+	 * @var string
+	 */
+	public $verdict;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param int    $conversation_id Conversation ID.
+	 * @param string $verdict         What the agent marked it as.
+	 */
+	public function __construct( int $conversation_id, string $verdict ) {
+		$this->conversation_id = $conversation_id;
+		$this->verdict         = $verdict;
+	}
+
+	/**
+	 * Sends the report, and records it so the same correction isn't sent twice.
+	 *
+	 * @return void
+	 */
+	public function handle(): void {
+		$conversation = Conversation::find( $this->conversation_id );
+
+		// An agent may have changed it back while the report waited.
+		if ( ! $conversation || ( $conversation->isSpam() ? Akismet::SPAM : Akismet::HAM ) !== $this->verdict ) {
+			return;
+		}
+
+		// Another job may have sent the same correction since.
+		$result = (array) $conversation->getMeta( WPOrgAkismetServiceProvider::META, array() );
+		if ( ( $result['reported'] ?? $result['verdict'] ?? '' ) === $this->verdict ) {
+			return;
+		}
+
+		$thread = $conversation->threads()
+			->where( 'type', Thread::TYPE_CUSTOMER )
+			->orderBy( 'id' )
+			->first();
+
+		$fields = $thread ? Message::fields( $thread, (string) ( $result['subject'] ?? $conversation->subject ) ) : null;
+		if ( ! $fields ) {
+			return;
+		}
+
+		if ( isset( $result['author'] ) ) {
+			$fields['comment_author'] = (string) $result['author'];
+		}
+
+		try {
+			app( Akismet::class )->submit( $this->verdict, $fields );
+		} catch ( \Throwable $e ) {
+			if ( $this->attempts() < $this->tries ) {
+				$this->release( self::RETRY_DELAY * $this->attempts() );
+
+				return;
+			}
+
+			$this->fail( $e );
+
+			return;
+		}
+
+		/*
+		 * Recorded under a row lock, from the conversation as it is now: core and other modules may have changed its
+		 * meta meanwhile, and an agent's status change either waits for the record or is seen here.
+		 */
+		$changed_back = \DB::transaction(
+			function (): bool {
+				$now = Conversation::query()->whereKey( $this->conversation_id )->lockForUpdate()->first();
+				if ( ! $now ) {
+					return false;
+				}
+
+				$latest             = (array) $now->getMeta( WPOrgAkismetServiceProvider::META, array() );
+				$latest['reported'] = $this->verdict;
+				$now->setMeta( WPOrgAkismetServiceProvider::META, $latest );
+
+				// Recording the report isn't activity on the conversation.
+				$now->timestamps = false;
+				$now->save();
+
+				return ( $now->isSpam() ? Akismet::SPAM : Akismet::HAM ) !== $this->verdict;
+			}
+		);
+
+		// An agent changing it back while Akismet was being told saw the report as not sent yet, and queued nothing.
+		if ( $changed_back ) {
+			self::dispatch( $this->conversation_id, Akismet::SPAM === $this->verdict ? Akismet::HAM : Akismet::SPAM );
+		}
+	}
+}

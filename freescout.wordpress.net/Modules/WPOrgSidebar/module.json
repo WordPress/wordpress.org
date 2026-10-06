@@ -1,0 +1,21 @@
+{
+    "name": "WP.org Sidebar",
+    "alias": "wporgsidebar",
+    "img": "/modules/wporgsidebar/img/icon.svg",
+    "description": "Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests in the conversation sidebar.",
+    "version": "1.0.0",
+    "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgSidebar",
+    "author": "WordPress.org",
+    "authorUrl": "https://wordpress.org/",
+    "requiredAppVersion": "1.8.243",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\WPOrgSidebar\\Providers\\WPOrgSidebarServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

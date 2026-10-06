@@ -59,7 +59,7 @@ the_post();
 							printf(
 								/* translators: WordPress market share: 30 - Note: The following percent sign is '%%' for escaping purposes; */
 								esc_html___( 'Over %s%% of the web trusts WordPress to power its web presence including millions of blogs.', 'wporg' ),
-								number_format_i18n( WP_MARKET_SHARE )
+								esc_html( number_format_i18n( WP_MARKET_SHARE ) )
 							);
 							?>
 						</li>

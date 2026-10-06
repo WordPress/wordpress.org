@@ -1,0 +1,13 @@
+# WP.org Site
+
+Adapts FreeScout to how WordPress.org runs it. Small changes to FreeScout's own screens go here, rather than into a module each.
+
+## What it changes
+
+- **Modules page:** only installed modules are listed, without FreeScout's Modules Directory and Marketplace. They can't be updated or deleted there; that happens on the server. Switching them on and off still works.
+- **Modules page layout:** the module cards are laid out in columns, as many as the window fits.
+- **Branding:** the WordPress mark in the top left and, on a blue tile, as the favicon. The login page keeps FreeScout's logo, so it doesn't pass for a WordPress.org login, redrawn as an SVG so it's sharp on high-resolution screens.
+
+## Setup
+
+Nothing to configure.

@@ -1,0 +1,140 @@
+/**
+ * Styles the WordPress.org sidebar panels, whose HTML api.wordpress.org renders with these classes.
+ *
+ * Text colors meet WCAG AAA (7:1) on the panel background.
+ */
+
+.wporg-sidebar-panel {
+	padding-top: 4px;
+	font-size: 13px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.wporg-sidebar-panel > :last-child {
+	margin-bottom: 0;
+}
+
+.wporg-sidebar-lead {
+	margin: 0 0 4px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.wporg-sidebar-meta,
+.wporg-sidebar-item-meta,
+.wporg-sidebar-empty {
+	color: #4a5561;
+}
+
+.wporg-sidebar-meta,
+.wporg-sidebar-empty {
+	margin: 0 0 8px;
+}
+
+.wporg-sidebar-heading {
+	margin: 0 0 4px;
+	color: #2a3b47;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+/* Sets each section, like plugins and themes, apart from the one before. */
+.wporg-sidebar-panel > .wporg-sidebar-heading:not(:first-child) {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid #d6dde3;
+}
+
+.wporg-sidebar-heading a {
+	color: inherit;
+}
+
+.wporg-sidebar-count {
+	margin-left: 2px;
+	padding: 0 6px;
+	border-radius: 9px;
+	background-color: #e3e8eb;
+	font-size: 11px;
+	letter-spacing: 0;
+}
+
+.wporg-sidebar-links,
+.wporg-sidebar-items {
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+}
+
+.wporg-sidebar-links li {
+	margin: 0 0 2px;
+}
+
+.wporg-sidebar-item {
+	padding: 6px 0;
+	border-top: 1px solid #e3e8eb;
+}
+
+.wporg-sidebar-item:first-child {
+	border-top: 0;
+}
+
+.wporg-sidebar-item-title {
+	font-weight: 600;
+}
+
+.wporg-sidebar-item-meta {
+	margin-top: 1px;
+	font-size: 12px;
+}
+
+/* Next to the name, so the meta line below only wraps its text. */
+.wporg-sidebar-item-links {
+	float: right;
+	margin-left: 8px;
+}
+
+.wporg-sidebar-item-links a {
+	margin-left: 4px;
+	color: #4a5561;
+}
+
+.wporg-sidebar-item-links a:hover,
+.wporg-sidebar-item-links a:focus {
+	color: #0078d7;
+	text-decoration: none;
+}
+
+.wporg-sidebar-note {
+	margin: 0;
+}
+
+.wporg-sidebar-badge {
+	display: inline-block;
+	padding: 0 7px;
+	border-radius: 9px;
+	background-color: #eef1f4;
+	color: #3e4a55;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	white-space: nowrap;
+	vertical-align: 1px;
+}
+
+.wporg-sidebar-badge.is-success {
+	background-color: #e1f4e5;
+	color: #175a28;
+}
+
+.wporg-sidebar-badge.is-warning {
+	background-color: #fdf1d4;
+	color: #634200;
+}
+
+.wporg-sidebar-badge.is-error {
+	background-color: #fce4e4;
+	color: #8c1616;
+}

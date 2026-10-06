@@ -7,6 +7,7 @@
 
 require __DIR__ . '/functions-restapi.php';
 require __DIR__ . '/functions-registration.php';
+require __DIR__ . '/functions-event-codes.php';
 
 if ( is_admin() ) {
 	require __DIR__ . '/admin/ui.php';
@@ -39,6 +40,8 @@ function wporg_login_body_class( $classes ) {
 		$classes[] = 'route-' . WP_WPOrg_SSO::$matched_route;
 	}
 
+	$classes[] = 'admin-color-modern';
+
 	// Remove the 404 class..
 	if ( false !== ( $pos = array_search( 'error404', $classes ) ) ) {
 		unset( $classes[ $pos ] );
@@ -51,11 +54,6 @@ add_filter( 'body_class', 'wporg_login_body_class' );
  * Remove the toolbar.
  */
 add_filter( 'show_admin_bar', '__return_false', 101 );
-
-/**
- * Disable XML-RPC endpoints.
- */
-add_filter( 'xmlrpc_methods', '__return_empty_array' );
 
 /**
  * Replace cores login CSS with our own.
@@ -333,7 +331,7 @@ function wporg_login_language_switcher( $display = true ) {
 			<?php endif; ?>
 			<label for="language-switcher-locales">
 				<span aria-hidden="true" class="dashicons dashicons-translation"></span>
-				<span class="screen-reader-text"><?php _e( 'Select the language:', 'wporg' ); ?></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Select the language:', 'wporg' ); ?></span>
 			</label>
 			<select id="language-switcher-locales" name="locale">
 				<?php
@@ -465,12 +463,13 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 	$message = '';
 
 	$from = 'wordpress.org';
+	// Make sure value is a string since it is compared next.
 	if ( $redirect_to ) {
-		$from = $redirect_to;
+		$from = sanitize_text_field( $redirect_to );
 	} elseif ( !empty( $_REQUEST['from'] ) ) {
-		$from = $_REQUEST['from'];
+		$from = sanitize_text_field( $_REQUEST['from'] );
 	} elseif ( !empty( $_REQUEST['redirect_to'] ) ) {
-		$from = $_REQUEST['redirect_to'];
+		$from = sanitize_text_field( $_REQUEST['redirect_to'] );
 	}
 
 	if ( str_contains( $from, 'buddypress.org' ) ) {
@@ -485,8 +484,7 @@ function wporg_login_wporg_is_starpress( $redirect_to = '' ) {
 			$message .= '<strong>' . sprintf( __( 'Register for %s', 'wporg' ), esc_html( $_REQUEST['wcname'] ) ) . '</strong>';
 			$message .=  __( 'Log in to your WordPress.org account. If you don\'t have one, you can <a href="/register">create an account</a>.', 'wporg' );
 		} else {
-			$message .= '<strong>' . __( 'WordCamp is part of WordPress.org', 'wporg' ) . '</strong>';
-			$message .= __( 'Log in to your WordPress.org account to contribute to WordCamps and meetups around the globe.', 'wporg' );
+			$message .= __( 'Log in to your WordPress.org account to participate in WordCamps and meetups around the world.', 'wporg' );
 		}
 	} elseif ( str_contains( $from, 'learn.wordpress.org' ) ) {
 		$message .= '<strong>' . __( 'Access all of Learn WordPress', 'wporg' ) . '</strong>';
@@ -568,7 +566,8 @@ function wporg_remember_where_user_came_from() {
 		return;
 	}
 
-	$came_from = $_REQUEST['redirect_to'] ?? ( $_SERVER['HTTP_REFERER'] ?? '' );
+	// Make sure value is a string, since setcookie requires it to be.
+	$came_from = sanitize_text_field( $_REQUEST['redirect_to'] ?? ( $_SERVER['HTTP_REFERER'] ?? '' ) );
 	if ( ! $came_from ) {
 		return;
 	}
@@ -589,9 +588,9 @@ function wporg_remember_where_user_came_from_redirect( $redirect, $requested_red
 	}
 
 	// If the redirect is to a url that doesn't seem right, override it.
-	$redirect_host = parse_url( $redirect, PHP_URL_HOST );
-	$redirect_qv   = parse_url( $redirect, PHP_URL_QUERY );
-	$proper_host   = parse_url( $_COOKIE['wporg_came_from'], PHP_URL_HOST );
+	$redirect_host = parse_url( $redirect, PHP_URL_HOST ) ?? '';
+	$redirect_qv   = parse_url( $redirect, PHP_URL_QUERY ) ?? '';
+	$proper_host   = parse_url( $_COOKIE['wporg_came_from'], PHP_URL_HOST ) ?? '';
 	if (
 		$redirect_host != $proper_host &&
 		in_array(
@@ -605,6 +604,11 @@ function wporg_remember_where_user_came_from_redirect( $redirect, $requested_red
 		! (
 			'login.wordpress.org' == $redirect_host &&
 			str_contains( $redirect_qv, 'response_type=code' )
+		) &&
+		// Don't override if the redirect is back to an application password authorization.
+		! (
+			'login.wordpress.org' == $redirect_host &&
+			str_contains( $redirect_qv, 'action=authorize_application' )
 		)
 	) {
 		if ( wp_validate_redirect( $_COOKIE['wporg_came_from'] ) ) {

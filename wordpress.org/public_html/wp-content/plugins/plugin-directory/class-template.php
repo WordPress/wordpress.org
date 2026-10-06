@@ -1,6 +1,8 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory;
 
+use WordPressdotorg\Plugin_Directory\API\Base;
+
 // Explicitly require dependencies so this file can be sourced outside the Plugin Directory.
 require_once __DIR__ . '/class-plugin-geopattern.php';
 require_once __DIR__ . '/class-plugin-geopattern-svg.php';
@@ -48,8 +50,11 @@ class Template {
 		// Print the schema.
 		if ( $schema ) {
 			echo PHP_EOL, '<script type="application/ld+json">', PHP_EOL;
-			// Output URLs without escaping the slashes, and print it human readable.
-			echo wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT );
+			// Output URLs without escaping the slashes, and print it human readable. JSON_HEX_* keeps a stored '</script>' from closing the element.
+			echo wp_json_encode(
+				$schema,
+				JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+			);
 			echo PHP_EOL, '</script>', PHP_EOL;
 		}
 	}
@@ -172,6 +177,7 @@ class Template {
 			);
 		}
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Meta tags assembled above from esc_attr()-escaped values.
 		echo implode( "\n", $metas );
 	}
 
@@ -249,21 +255,68 @@ class Template {
 	 */
 	public static function active_installs( $full = true, $post = null ) {
 		$post  = get_post( $post );
-		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0;
+		$count = get_post_meta( $post->ID, 'active_installs', true ) ?: 0; // Already sanitized to a round number.
 
 		if ( 'closed' === $post->post_status ) {
 			$text = __( 'N/A', 'wporg-plugins' );
-		} elseif ( $count < 10 ) {
-			$text = __( 'Fewer than 10', 'wporg-plugins' );
-		} elseif ( $count >= 1000000 ) {
-			$million_count = intdiv( $count, 1000000 );
-			/* translators: %d: The integer number of million active installs */
-			$text = sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
 		} else {
-			$text = number_format_i18n( $count ) . '+';
+			$text = self::format_active_installs_for_display( $count );
 		}
 
 		return $full ? sprintf( __( '%s active installations', 'wporg-plugins' ), $text ) : $text;
+	}
+
+	/**
+	 * Formats the active installs count for display.
+	 *
+	 * @static
+	 *
+	 * @param int $count The active installs count.
+	 * @return string The formatted count.
+	 */
+	public static function format_active_installs_for_display( $count ) {
+		if ( $count < 10 ) {
+			return __( 'Fewer than 10', 'wporg-plugins' );
+		}
+
+		if ( $count >= 1000000 ) {
+			$million_count = intdiv( $count, 1000000 );
+
+			/* translators: %d: The integer number of million active installs */
+			return sprintf( _n( '%d+ million', '%d+ million', $million_count, 'wporg-plugins' ), $million_count );
+		}
+
+		return number_format_i18n( $count ) . '+';
+	}
+
+	/**
+	 * Sanitizes the Active Install count number to a rounded display value.
+	 *
+	 * @static
+	 *
+	 * @param int $active_installs The raw active install number.
+	 * @return int The sanitized version for display.
+	 */
+	public static function sanitize_active_installs( $active_installs ) {
+		if ( $active_installs > 10000000 ) {
+			// 10 million +
+			return 10000000;
+		} elseif ( $active_installs > 1000000 ) {
+			$round = 1000000;
+		} elseif ( $active_installs > 100000 ) {
+			$round = 100000;
+		} elseif ( $active_installs > 10000 ) {
+			$round = 10000;
+		} elseif ( $active_installs > 1000 ) {
+			$round = 1000;
+		} elseif ( $active_installs > 100 ) {
+			$round = 100;
+		} else {
+			// Rounded to ten, else 0
+			$round = 10;
+		}
+
+		return floor( $active_installs / $round ) * $round;
 	}
 
 	/**
@@ -401,9 +454,13 @@ class Template {
 			case 'html':
 
 				if ( $icon_2x && $icon_2x !== $icon ) {
-					return "<img class='plugin-icon' srcset='{$icon}, {$icon_2x} 2x' src='{$icon_2x}' alt=''>";
+					return sprintf(
+						'<img class="plugin-icon" srcset="%1$s, %2$s 2x" src="%2$s" alt="">',
+						esc_url( $icon ),
+						esc_url( $icon_2x )
+					);
 				} else {
-					return "<img class='plugin-icon' src='{$icon}' alt=''>";
+					return sprintf( '<img class="plugin-icon" src="%s" alt="">', esc_url( $icon ) );
 				}
 				break;
 
@@ -866,20 +923,6 @@ class Template {
 	}
 
 	/**
-	 * Properly encodes a string to UTF-8.
-	 *
-	 * @static
-	 *
-	 * @param string $string
-	 * @return string
-	 */
-	public static function encode( $string ) {
-		$string = mb_convert_encoding( $string, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
-
-		return ent2ncr( htmlspecialchars_decode( htmlentities( $string, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
-	}
-
-	/**
 	 * Generates a link to toggle a plugin favorites state.
 	 *
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
@@ -907,7 +950,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_close', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-close' )
 		);
 	}
@@ -922,7 +968,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_transfer', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-transfer' )
 		);
 	}
@@ -937,7 +986,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_toggle_preview', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-toggle-preview' )
 		);
 	}
@@ -952,7 +1004,11 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ), 'dismiss' => 1 ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'self_toggle_preview', $post->post_name ),
+				'dismiss'                => 1,
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/self-toggle-preview' )
 		);
 	}
@@ -967,7 +1023,10 @@ class Template {
 		$post = get_post( $post );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( 'enable_release_confirmation', $post->post_name ),
+			),
 			home_url( 'wp-json/plugins/v1/plugin/' . $post->post_name . '/release-confirmation' )
 		);
 	}
@@ -985,10 +1044,13 @@ class Template {
 
 		if ( 'approve' === $what ) {
 			$endpoint = 'plugin/%s/release-confirmation/%s';
+			$action   = 'confirm_release';
 		} elseif ( 'discard' === $what ) {
 			$endpoint = 'plugin/%s/release-confirmation/%s/discard';
+			$action   = 'discard_release';
 		} elseif ( 'undo-discard' === $what ) {
 			$endpoint = 'plugin/%s/release-confirmation/%s/undo-discard';
+			$action   = 'undo_discard_release';
 		} else {
 			return '';
 		}
@@ -996,7 +1058,10 @@ class Template {
 		$url = home_url( 'wp-json/plugins/v1/' . sprintf( $endpoint, urlencode( $post->post_name ), urlencode( $tag ) ) );
 
 		return add_query_arg(
-			array( '_wpnonce' => wp_create_nonce( 'wp_rest' ) ),
+			array(
+				'_wpnonce'               => wp_create_nonce( 'wp_rest' ),
+				Base::ACTION_NONCE_PARAM => Base::action_nonce( $action, $post->post_name . ':' . $tag ),
+			),
 			$url
 		);
 	}
@@ -1033,12 +1098,14 @@ class Template {
 			'wp-cli'               => 'WP-CLI Only Plugins',
 			'storefront'           => 'Storefront',
 			'not-owner'            => 'Not the submitters plugin',
+			'scraping'             => 'Scraping',
 			'script-insertion'     => 'Script Insertion Plugins are Dangerous',
 			'demo'                 => 'Test/Demo plugin (non functional)',
 			'translation'          => 'Translation of existing plugin',
 			'banned'               => 'Banned developer trying to sneak back in',
 			'author-request'       => 'Author requested not to continue',
 			'security'             => 'Security concerns',
+			'common-plugin'        => 'Common plugin',
 			'other'                => 'OTHER: See notes',
 		);
 	}
@@ -1086,7 +1153,11 @@ class Template {
 		}
 
 		if (
+			// Assume by-author-request is permanent.
 			'author-request' === $result['reason'] ||
+			// Likewise for when it's closed due to merged-to-core.
+			'merged-into-core' === $result['reason'] ||
+			// Or if it's closed without committers.
 			! Tools::get_plugin_committers( $post->post_name )
 		) {
 			$result['permanent'] = true;
@@ -1100,9 +1171,16 @@ class Template {
 			$result['label']  = _x( 'Unknown', 'unknown close reason', 'wporg-plugins' );
 		}
 
-		// If it's closed for more than 60 days, it's by author request, or we're unsure about the close date, it's publicly known.
+		// These reasons are never embargoed, and are shown immediately.
+		$unembargoed_closure_reasons = array(
+			'author-request',
+			'unused',
+			'merged-into-core',
+		);
+
+		// If it's closed for more than 60 days, it's not embargoed, or we're unsure about the close date, it's publicly known.
 		$days_closed = $result['date'] ? (int) ( ( time() - strtotime( $result['date'] ) ) / DAY_IN_SECONDS ) : false;
-		if ( ! $result['date'] || $days_closed >= 60 || 'author-request' === $result['reason'] ) {
+		if ( ! $result['date'] || $days_closed >= 60 || in_array( $result['reason'], $unembargoed_closure_reasons, true ) ) {
 			$result['public'] = true;
 		}
 
@@ -1368,5 +1446,23 @@ class Template {
 		}
 
 		return $sorted;
+	}
+
+	/**
+	 * Get the available rollout strategies for plugin updates.
+	 *
+	 * @return array
+	 */
+	static function get_rollout_strategies() {
+		return [
+			'' => [
+				'name' => __( 'Immediate (default)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites as soon as they check for updates.', 'wporg-plugins' ),
+			],
+			'manual-updates-24hr' => [
+				'name' => __( 'Manual updates only (24 hours)', 'wporg-plugins' ),
+				'description' => __( 'Plugin updates will be released to all sites, but automatic updates will be disabled for 24 hours. After that, sites will receive the update as normal.', 'wporg-plugins' ),
+			],
+		];
 	}
 }

@@ -1,0 +1,20 @@
+{
+	"name": "wporg-media-resource-checker",
+	"version": "1.0.0",
+	"description": "Displays warnings in the block editor when media resources are from domains other than the recommended ones.",
+	"author": "WordPress.org",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"start": "wp-scripts start",
+		"build": "wp-scripts build",
+		"format": "wp-scripts format src",
+		"packages-update": "wp-scripts packages-update"
+	},
+	"devDependencies": {
+		"@wordpress/icons": "^11.3.0",
+		"@wordpress/scripts": "^31.1.0"
+	},
+	"dependencies": {
+		"clsx": "^2.1.1"
+	}
+}

@@ -38,6 +38,7 @@ function main( string $case ) : void {
 
 	restore_current_blog();
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test script console output, not HTML.
 	echo "\nThere should be new activity on https://profiles.wordpress.org/$user->user_nicename/ \n";
 }
 

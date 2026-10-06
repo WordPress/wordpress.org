@@ -13,6 +13,8 @@ namespace WordPressdotorg\GlotPress\Bulk_Pretranslations;
 use GP;
 use GP_Locale;
 use GP_Translation_Set;
+use WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Client;
+use WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Messages;
 
 /**
  * OpenAI pre-translation class.
@@ -41,6 +43,12 @@ class OpenAI extends Pretranslation {
 		if ( ! $this->should_pretranslate( $original_id, $translation_set ) ) {
 			return false;
 		}
+
+		$client = new OpenAI_Client();
+		if ( ! $client->is_ready() ) {
+			return false;
+		}
+
 		$original = GP::$original->get( $original_id );
 
 		$current_set_slug = 'default';
@@ -48,81 +56,20 @@ class OpenAI extends Pretranslation {
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $current_set_slug, $locale->slug );
 		$locale_glossary                 = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
 
-		$openai_query    = '';
-		$glossary_query  = '';
-		$gp_default_sort = get_user_option( 'gp_default_sort' );
-		$openai_key      = gp_array_get( $gp_default_sort, 'openai_api_key' );
-		if ( empty( trim( $openai_key ) ) ) {
-			return false;
-		}
-		$openai_prompt      = gp_array_get( $gp_default_sort, 'openai_custom_prompt' );
-		$openai_temperature = gp_array_get( $gp_default_sort, 'openai_temperature', 0 );
-		if ( ! is_float( $openai_temperature ) || $openai_temperature < 0 || $openai_temperature > 2 ) {
-			$openai_temperature = 0;
-		}
-
-		$glossary_entries = array();
-		foreach ( $locale_glossary->get_entries() as $gp_glossary_entry ) {
-			if ( strpos( strtolower( $original->singular ), strtolower( $gp_glossary_entry->term ) ) !== false ) {
-				// Use the translation as key, because we could have multiple translations with the same term.
-				$glossary_entries[ $gp_glossary_entry->translation ] = $gp_glossary_entry->term;
-			}
-		}
-		if ( ! empty( $glossary_entries ) ) {
-			$glossary_query = ' The following terms are translated as follows: ';
-			foreach ( $glossary_entries as $translation => $term ) {
-				$glossary_query .= '"' . $term . '" is translated as "' . $translation . '"';
-				if ( array_key_last( $glossary_entries ) !== $translation ) {
-					$glossary_query .= ', ';
-				}
-			}
-			$glossary_query .= '.';
-		}
-
-		$openai_query .= ' Translate the following text to ' . $locale->english_name . ": \n";
-		$openai_query .= '"' . $original->singular . '"';
-		$openai_model  = gp_array_get( $gp_default_sort, 'openai_model', 'gpt-3.5-turbo' );
-
-		$messages        = array(
-			array(
-				'role'    => 'system',
-				'content' => $openai_prompt . $glossary_query,
-			),
-			array(
-				'role'    => 'user',
-				'content' => $openai_query,
-			),
+		$messages_builder = new OpenAI_Messages(
+			$original->singular,
+			$locale,
+			$locale_glossary->get_entries()
 		);
-		$openai_response = wp_remote_post(
-			'https://api.openai.com/v1/chat/completions',
-			array(
-				'timeout' => 20,
-				'headers' => array(
-					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . $openai_key,
-				),
-				'body'    => wp_json_encode(
-					array(
-						'model'       => $openai_model,
-						'max_tokens'  => 1000,
-						'n'           => 1,
-						'messages'    => $messages,
-						'temperature' => $openai_temperature,
-					)
-				),
-			)
-		);
-		if ( is_wp_error( $openai_response ) ) {
+		$messages = $messages_builder->build_translation_messages();
+
+		$result = $client->chat_completion( $messages );
+		if ( false === $result ) {
 			return false;
 		}
-		$response_status = wp_remote_retrieve_response_code( $openai_response );
-		if ( 200 !== $response_status ) {
-			return false;
-		}
-		$output             = json_decode( wp_remote_retrieve_body( $openai_response ), true );
-		$message            = $output['choices'][0]['message'];
-		$this->tokens_used  = $output['usage']['total_tokens'];
-		$this->suggestion_0 = trim( trim( $message['content'] ), '"' );
+
+		$this->tokens_used  = $result['usage']['total_tokens'] ?? 0;
+		$this->suggestion_0 = $result['content'];
 
 		return $this->suggestion_0;
 	}

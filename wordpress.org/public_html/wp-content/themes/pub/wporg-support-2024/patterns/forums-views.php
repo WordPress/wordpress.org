@@ -1,4 +1,10 @@
 <?php
+/**
+ * Title: Forums Views
+ * Slug: wporg-support/forums-views
+ * Inserter: no
+ */
+
 if ( function_exists( 'register_block_pattern' ) ) {
 	register_block_pattern(
 		'wporg-support/forums-views',

@@ -1,0 +1,21 @@
+{
+    "name": "WP.org Site",
+    "alias": "wporgsite",
+    "img": "/modules/wporgsite/img/icon.svg",
+    "description": "Adapts FreeScout to how WordPress.org runs it, e.g. modules come from deploys, not from updates here.",
+    "version": "1.0.0",
+    "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgSite",
+    "author": "WordPress.org",
+    "authorUrl": "https://wordpress.org/",
+    "requiredAppVersion": "1.8.243",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\WPOrgSite\\Providers\\WPOrgSiteServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

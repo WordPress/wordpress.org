@@ -5,35 +5,30 @@
 libxml_use_internal_errors( true );
 
 function fetch_url( $url ) {
+	global $http_response_header;
+
 	$context = stream_context_create( [
 		'http' => [
-			'header' => 'User-Agent: WordPRess.org Trac Template Updater',
+			'header' => 'User-Agent: WordPress.org Trac Template Updater',
 		]
 	] );
 
 	// Don't use the CDN here, just in case.
 	$url = str_replace( '/s.w.org/', '/wordpress.org/', $url );
 
-	return file_get_contents( $url, false, $context );
+	$result = file_get_contents( $url, false, $context );
+
+	if ( str_contains( $http_response_header[0], '429' ) ) {
+		echo "\tHit a rate limit, pausing.. retry.. \n";
+		sleep( 5 );
+		return fetch_url( $url );
+	}
+
+	return $result;
 }
 
 function domdocument_from_url( $url ) {
 	$html = fetch_url( $url );
-
-	/*
-	 * Escape HTML within Javascript strings.
-	 * DomDocument doesn't handle HTML tags within Javascript strings.
-	 * See https://stackoverflow.com/questions/40703313/php-domdocument-errors-while-parsing-unescaped-strings
-	 */
-	$html = preg_replace_callback(
-		'!<script([^>]+)>(.*?)</script>!ism',
-		function( $m ) {
-			$escaped = $m[2];
-			$escaped = str_replace( array( '<', '>' ), array( '\x3C',  '\x3E' ), $escaped );
-			return "<script{$m[1]}>{$escaped}</script>";
-		},
-		$html
-	);
 
 	// Ensure it's treated as UTF8, we'll assume if there's no <body> tag it's just a HTML blob.
 	if ( ! strpos( $html, '<body' ) ) {
@@ -60,8 +55,11 @@ function domdocument_for_trac() {
 	$doc = new DOMDocument();
 	$doc->formatOutput = true;
 
+	// A plain <html> shell is used only as a container to build the fragment in;
+	// save_domdocument() strips it back off so the output is a bare Jinja2 include
+	// (Trac 1.6 no longer uses the Genshi <html py:strip> wrapper).
 	$doc->loadHTML( '<!DOCTYPE html>
-	<html xmlns="http://www.w3.org/1999/xhtml" xmlns:py="http://genshi.edgewall.org/" py:strip=""></html>' );
+	<html xmlns="http://www.w3.org/1999/xhtml"></html>' );
 
 	// Set the encoding to UTF-8 to allow unicode characters in the output. This avoids them being escaped.
 	$doc->encoding = 'utf-8';
@@ -79,8 +77,22 @@ function save_domdocument( $file, $dom ) {
 
 	$html = $dom->saveXML();
 
+	// saveXML() self-closes empty raw-text/RCDATA tags, which is invalid in text/html and swallows following markup.
+	$html = preg_replace(
+		'#<(script|style|textarea|title|iframe|noscript)\b([^>]*?)\s*/>#i',
+		'<$1$2></$1>',
+		$html
+	);
+
 	// Remove the XML header
 	$html = preg_replace( "#^<\?xml.+>\n?#i",  '', $html );
+
+	// Remove the DOCTYPE and the <html> container. These files are Jinja2 fragment
+	// includes (site_head/site_header/site_footer pull them into the real document),
+	// not standalone documents.
+	$html = preg_replace( "#^\s*<!DOCTYPE[^>]*>\n?#i", '', $html );
+	$html = preg_replace( '#^\s*<html\b[^>]*>\n?#i', '', $html );
+	$html = preg_replace( '#\n?</html>\s*$#i', '', $html );
 
 	// Remove CDATA tags from <style>
 	$html = preg_replace( '#<style([^>]*)><!\[CDATA\[(.+?)\]\]></style>#ism', "<style$1>$2</style>", $html );
@@ -97,7 +109,7 @@ function save_domdocument( $file, $dom ) {
 			}
 
 			// For non-javascript, remove the CDATA tags.
-			if ( $type && in_array( strtolower( $type ), [ 'importmap', /* 'module' */ ] ) ) {
+			if ( $type && in_array( strtolower( $type ), [ 'importmap', 'speculationrules', 'application/json' /* 'module' */ ] ) ) {
 				return "<script{$attr}>{$code}</script>";
 			}
 
@@ -128,10 +140,13 @@ function save_domdocument( $file, $dom ) {
 	/*
 	 * Use CDN assets, to avoid CORS issues.
 	 * Until https://github.com/WordPress/wporg-mu-plugins/pull/430 is resolved.
+	 *
+	 * NOTE: Quote is included here to avoid matching in inlined CSS or JS.
 	 */
 	$html = preg_replace_callback(
-		'!(?P<url>https:[\\\/]+wordpress.org[\\\/]+wp-(includes|content)[\\\/]+[^\'"]+)!i',
+		'!(?P<quote>[\'"])(?P<url>https:[\\\/]+wordpress.org[\\\/]+wp-(includes|content)[\\\/]+[^\'"]+)\\1!i',
 		function( $m ) {
+			$quote   = $m['quote'];
 			$url     = $m['url'];
 			$escaped = false !== strpos( $url, '\/' );
 
@@ -152,7 +167,7 @@ function save_domdocument( $file, $dom ) {
 				$url = addcslashes( $url, '/' );
 			}
 
-			return $url;
+			return $quote . $url . $quote;
 		},
 		$html
 	);
@@ -186,6 +201,15 @@ foreach ( $header->getElementsByTagName( 'head' )[0]->childNodes as $node ) {
 		$node instanceOf DomElement &&
 		'meta' === $node->tagName &&
 		'generator' === $node->getAttribute( 'name' )
+	) {
+		continue;
+	}
+
+	// Skip <link rel="alternate">
+	if (
+		$node instanceOf DomElement &&
+		'link' === $node->tagName &&
+		'alternate' === $node->getAttribute( 'rel' )
 	) {
 		continue;
 	}

@@ -1,4 +1,4 @@
-jQuery(document).ready(function ($) {
+jQuery(function($) {
   var $enumtable = $('#enumtable');
   var $enumlist = $('#enumlist', $enumtable);
   var $apply_button = $('input[name="apply"]', $enumtable);
@@ -24,7 +24,7 @@ jQuery(document).ready(function ($) {
 
   $enumtable.submit(function () {
     if (button_pressed === 'apply' || button_pressed === 'revert') {
-      $(window).unbind('beforeunload');
+      $(window).off('beforeunload');
     }
     if (button_pressed === 'revert') {
       // Send GET request instead of POST

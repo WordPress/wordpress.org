@@ -33,6 +33,9 @@ class Trac {
 	function update( $id, $comment, $attr = [], $notify = false, $author = false, $when = false ) {
 		if ( empty( $attr['_ts'] ) ) {
 			$get = $this->get( $id );
+			if ( ! $get ) {
+				return false;
+			}
 			$attr['_ts'] = $get['_ts'];
 		}
 
@@ -49,6 +52,9 @@ class Trac {
 			// `_ts` may have been outdated, update and try again.
 			if ( isset( $get ) && $attr['_ts'] === $get['_ts'] ) {
 				$get = $this->get( $id ); // refetch the ticket.
+				if ( ! $get ) {
+					throw $e;
+				}
 				if ( $attr['_ts'] === $get['_ts'] ) {
 					// Didn't change, api already retried, throw it.
 					throw $e;
@@ -142,6 +148,7 @@ class Trac {
 			$json = $this->trac_json_deobjectify( $json );
 
 		} elseif ( $json && isset( $json->error ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Trac API client; the message is caught by the calling method, not rendered.
 			throw new \Exception( 'JSON Error: ' . $json->error->code . ' ' . $json->error->message );
 		} elseif ( ! $json ) {
 			throw new \Exception( 'Trac API Error: Trac Unavailable.' );

@@ -44,6 +44,11 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 
 				// Deprecated About / Testimonials page https://github.com/WordPress/wporg-main-2022/issues/196
 				'/about/testimonials' => '/news/category/community/',
+				// Deprecated About / Swag page https://github.com/WordPress/wporg-main-2022/issues/208
+				'/about/swag'         => 'https://mercantile.wordpress.org/',
+				'/shop'               => 'https://mercantile.wordpress.org/',
+				'/store'              => 'https://mercantile.wordpress.org/',
+				'/swag'               => 'https://mercantile.wordpress.org/',
 
 				// Hashtag alias for State of the Word
 				'/sotw' => 'https://wordpress.org/state-of-the-word/',
@@ -91,6 +96,10 @@ add_action( 'template_redirect', function() {
 		// Singular => Plural for plugin/theme directories
 		'/plugin/' => '/plugins/',
 		'/theme/'  => '/themes/',
+
+		// Legacy /extend/ directory URLs (pre-2013) https://meta.trac.wordpress.org/ticket/8268
+		'/extend/plugins/' => '/plugins/',
+		'/extend/themes/'  => '/themes/',
 
 		// The plugin directory was available at /plugins-wp/ during a beta-test, and is still linked to.
 		'/plugins-wp/' => '/plugins/',
@@ -203,6 +212,7 @@ function wporg_redirect_site_not_found() {
 		case 'wp15.wordpress.org':
 		case 'wp20.wordpress.org':
 		case 'jobs.wordpress.org':
+		case 'playground.wordpress.org':
 		// Default Theme Demo sites are on WordPress.net
 		case '2017.wordpress.org':
 		case '2019.wordpress.org':
@@ -212,6 +222,11 @@ function wporg_redirect_site_not_found() {
 		case '2023.wordpress.org':
 		case '2024.wordpress.org':
 		case '2025.wordpress.org':
+		case '2026.wordpress.org':
+		case '2027.wordpress.org':
+		case '2028.wordpress.org':
+		case '2029.wordpress.org':
+		case '2030.wordpress.org':
 			$location = 'https://' . explode( '.', $host )[0] . '.wordpress.net/';
 			break;
 
@@ -221,8 +236,18 @@ function wporg_redirect_site_not_found() {
 			break;
 
 		case 'community.wordpress.org':
-			$location    = 'https://make.wordpress.org/chat/matrix/';
-			$status_code = 302;
+			$location = 'https://events.wordpress.org/';
+			break;
+
+		case 'plugins.wordpress.org':
+		case 'themes.wordpress.org':
+			$location = 'https://wordpress.org/' . explode( '.', $host )[0] . '/';
+			break;
+
+		case 'shop.wordpress.org':
+		case 'store.wordpress.org':
+		case 'swag.wordpress.org':
+			$location = 'https://mercantile.wordpress.org/';
 			break;
 
 		// Plural => Singular
@@ -245,9 +270,13 @@ function wporg_redirect_site_not_found() {
 	if ( ! headers_sent() ) {
 		header( 'Location: ' . $location, true, $status_code );
 	} else {
-		// Headers should not have been sent at this point in time.
-		// On some pages, such as wp-cron.php the request has been terminated prior to WordPress loading, and so headers were "sent".
-		echo "<a href='$location'>$location</a>";
+		/*
+		 * Headers should not have been sent at this point in time.
+		 * On some pages, such as wp-cron.php the request has been terminated prior to WordPress loading, and so headers were "sent".
+		 *
+		 * sunrise.php runs before kses.php loads, so the esc_*() helpers are unavailable here.
+		 */
+		printf( '<a href="%1$s">%1$s</a>', htmlspecialchars( $location, ENT_QUOTES, 'UTF-8' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above.
 	}
 	exit;
 }
@@ -282,19 +311,6 @@ add_action( 'template_redirect', function() {
 
 	// If no specific course match, search for make-specific courses.
 	wp_safe_redirect( 'https://learn.wordpress.org/course-category/contributing-to-wordpress/', 301, 'Contributor Training to Learn' );
-	exit;
-} );
-
-/**
- * Redirect developer.wp.org/playground/ to github documentation.
- */
-add_action( 'template_redirect', function() {
-	$path = strtolower( $_SERVER['REQUEST_URI'] ?? '/' );
-	if ( 'developer.wordpress.org' !== $_SERVER['HTTP_HOST'] || ! str_starts_with( $path, '/playground' ) ) {
-		return;
-	}
-
-	wp_redirect( 'https://wordpress.github.io/wordpress-playground/', 301 );
 	exit;
 } );
 

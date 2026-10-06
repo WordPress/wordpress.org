@@ -8,8 +8,11 @@ defined( 'WPINC' ) || die();
  * Actions and filters.
  */
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_post_type_caps' );
+add_action( 'pre_get_posts', __NAMESPACE__ . '\scope_learn_content_list_to_author' );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_caps_for_internal_notes' );
 add_filter( 'map_meta_cap', __NAMESPACE__ . '\map_meta_caps', 20, 4 ); // Needs to fire after meta caps in wporg-internal-notes.
+add_filter( 'editable_roles', __NAMESPACE__ . '\restrict_editable_roles' );
+add_action( 'load-user-new.php', __NAMESPACE__ . '\restrict_invited_user_role' );
 add_action( 'init', __NAMESPACE__ . '\add_or_update_lesson_plan_editor_role' );
 add_action( 'init', __NAMESPACE__ . '\add_or_update_workshop_reviewer_role' );
 
@@ -19,6 +22,12 @@ add_action( 'init', __NAMESPACE__ . '\add_or_update_workshop_reviewer_role' );
  * Example: If a user has the `edit_others_posts` cap (from Editor role), this will also give them
  * the equivalent `edit_others_lesson_plans` and `edit_others_workshops` caps.
  *
+ * Below the Editor threshold only the authoring caps are mirrored. Learn content reaches the
+ * site through the submission form in `inc/form.php`, which files applications as
+ * `needs-vetting` for a reviewer to triage, so Contributors and Authors create and edit their
+ * own unpublished content while publishing and maintaining live content stays with the
+ * reviewer roles.
+ *
  * @param bool[] $user_caps A list of primitive caps (keys) and whether user has them (boolean values).
  *
  * @return array
@@ -27,7 +36,15 @@ function set_post_type_caps( $user_caps ) {
 	$capability_types = array(
 		array( 'lesson_plan', 'lesson_plans' ),
 		array( 'tutorial', 'tutorials' ),
+		array( 'activity_kit', 'activity_kits' ),
 	);
+
+	// `edit_others_posts` is the Editor threshold; the Lesson Plan Editor and Tutorial Reviewer
+	// roles and the administrator hold it, Contributor and Author do not.
+	$has_editor_caps = ! empty( $user_caps['edit_others_posts'] );
+
+	// Deliberately excludes `publish_posts`, `edit_published_posts` and `delete_published_posts`.
+	$authoring_caps = array( 'edit_posts', 'delete_posts' );
 
 	foreach ( $capability_types as $capability_type ) {
 		// Generate the caps for a capability type.
@@ -39,13 +56,50 @@ function set_post_type_caps( $user_caps ) {
 		$cap_map = (array) get_post_type_capabilities( (object) $cap_args );
 
 		foreach ( $user_caps as $cap_slug => $granted ) {
-			if ( $granted && isset( $cap_map[ $cap_slug ] ) ) {
-				$user_caps[ $cap_map[ $cap_slug ] ] = true;
+			if ( ! $granted || ! isset( $cap_map[ $cap_slug ] ) ) {
+				continue;
 			}
+
+			if ( ! $has_editor_caps && ! in_array( $cap_slug, $authoring_caps, true ) ) {
+				continue;
+			}
+
+			$user_caps[ $cap_map[ $cap_slug ] ] = true;
 		}
 	}
 
 	return $user_caps;
+}
+
+/**
+ * Restrict the Learn content list tables to the current user's own posts.
+ *
+ * `wp-admin/edit.php` does not author-scope its query for every post status, so scope it here
+ * for users who cannot edit other people's content.
+ *
+ * @param \WP_Query $query
+ *
+ * @return void
+ */
+function scope_learn_content_list_to_author( $query ) {
+	global $pagenow;
+
+	if ( ! is_admin() || 'edit.php' !== $pagenow || ! $query->is_main_query() ) {
+		return;
+	}
+
+	$learn_post_types = array( 'lesson-plan', 'wporg_workshop', 'activity_kit' );
+	$post_type        = $query->get( 'post_type' );
+
+	if ( ! in_array( $post_type, $learn_post_types, true ) ) {
+		return;
+	}
+
+	$post_type_object = get_post_type_object( $post_type );
+
+	if ( $post_type_object && ! current_user_can( $post_type_object->cap->edit_others_posts ) ) {
+		$query->set( 'author', get_current_user_id() );
+	}
 }
 
 /**
@@ -80,7 +134,7 @@ function map_meta_caps( $required_caps, $current_cap, $user_id, $args ) {
 	switch ( $current_cap ) {
 		case 'edit_any_learn_content':
 			$required_caps       = array();
-			$learn_content_types = array( 'lesson-plan', 'wporg_workshop', 'course', 'lesson' );
+			$learn_content_types = array( 'lesson-plan', 'wporg_workshop', 'course', 'lesson', 'activity_kit' );
 
 			// Grant `edit_any_learn_content` when the user has `edit_posts` for any of our custom post types.
 			foreach ( $learn_content_types as $post_type ) {
@@ -94,11 +148,21 @@ function map_meta_caps( $required_caps, $current_cap, $user_id, $args ) {
 			$required_caps[] = 'do_not_allow';
 			break;
 
-		case 'read-internal-notes':
-		case 'create-internal-note':
-		case 'delete-internal-note':
+		case 'read-notes':
+		case 'create-note':
+		case 'delete-note':
 			// Override the meta caps set up in the Internal Notes plugin, specifically for the workshop post type.
+			if ( in_array( 'do_not_allow', $required_caps, true ) ) {
+				break;
+			}
+
 			$parent = ! empty( $args[0] ) ? get_post( $args[0] ) : false;
+
+			// `delete-note` is checked against the note itself, not the post it belongs to.
+			if ( $parent && 'delete-note' === $current_cap ) {
+				$parent = get_post_parent( $parent );
+			}
+
 			if ( $parent && 'wporg_workshop' === get_post_type( $parent ) ) {
 				$required_caps = array( 'manage_workshop_internal_notes' );
 			}
@@ -106,6 +170,70 @@ function map_meta_caps( $required_caps, $current_cap, $user_id, $args ) {
 	}
 
 	return $required_caps;
+}
+
+/**
+ * Limit role assignment to capabilities the current user already holds.
+ *
+ * Compare primitive grants, including dynamically assigned capabilities. Checking mapped
+ * capabilities would exclude roles with grants such as `unfiltered_html` that multisite
+ * restricts independently of the role. Multisite super admins inherently hold all capabilities.
+ *
+ * @param array[] $roles Array of arrays containing role information.
+ *
+ * @return array[]
+ */
+function restrict_editable_roles( $roles ) {
+	$user           = wp_get_current_user();
+	$is_super_admin = is_multisite() && is_super_admin( $user->ID );
+
+	foreach ( $roles as $slug => $role ) {
+		foreach ( array_keys( array_filter( $role['capabilities'] ) ) as $capability ) {
+			if ( 'do_not_allow' === $capability ) {
+				unset( $roles[ $slug ] );
+				break;
+			}
+
+			if ( $is_super_admin || 'exist' === $capability ) {
+				continue;
+			}
+
+			/** This filter is documented in wp-includes/class-wp-user.php */
+			$user_caps = apply_filters(
+				'user_has_cap',
+				$user->allcaps,
+				array( $capability ),
+				array( $capability, $user->ID ),
+				$user
+			);
+
+			if ( empty( $user_caps[ $capability ] ) ) {
+				unset( $roles[ $slug ] );
+				break;
+			}
+		}
+	}
+
+	return $roles;
+}
+
+/**
+ * Enforce editable roles before multisite stores an existing-user invitation.
+ *
+ * Core's confirmation flow stores the requested role without validating it against editable roles.
+ *
+ * @return void
+ */
+function restrict_invited_user_role() {
+	if ( ! is_multisite() || ! isset( $_REQUEST['action'] ) || 'adduser' !== $_REQUEST['action'] ) {
+		return;
+	}
+
+	check_admin_referer( 'add-user', '_wpnonce_add-user' );
+
+	// Validate the exact value core persists; sanitizing it could validate a different role.
+	$role = isset( $_REQUEST['role'] ) && is_string( $_REQUEST['role'] ) ? $_REQUEST['role'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	wp_ensure_editable_role( $role );
 }
 
 /**
@@ -225,6 +353,7 @@ function add_or_update_workshop_reviewer_role() {
  *
  * The Workshop Reviewer should have all the same caps as the Editor role, with the addition of `promote_users`
  * (normally reserved for the Admin role), so that they can add workshop presenters as new users on the site.
+ * `restrict_editable_roles` limits role assignment to capabilities the current user already holds.
  *
  * This also gives them the cap to manage internal notes on workshop posts. (See `set_caps_for_internal_notes` above.)
  *

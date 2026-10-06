@@ -22,6 +22,7 @@ function handle_props_message( object $request ) : string {
 	// The 'Received props from @...' would be broken if the giver can't be found.
 	// Don't throw if a recipient lookup fails, since we still want other recipients to get props.
 	if ( empty( $giver_user ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Slack request handler; the message is returned to Slack as plain text, not rendered as HTML.
 		throw new Exception( 'w.org user lookup for slack ID '. $request->event->user .' failed' );
 	}
 
@@ -239,6 +240,7 @@ function add_activity_to_profile( array $request_args ) : bool {
 	} else {
 		$success = false;
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 		trigger_error( 'Adding activity failed with error: ' . $response_body, E_USER_WARNING );
 	}
 
