@@ -290,7 +290,8 @@ class Posts {
 			return $content;
 		}
 
-		$content = self::text_to_html( $content );
+		// Same flags as `store_text_as_html()`, so stored text passes through unchanged.
+		$content = htmlspecialchars( $content, ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false );
 
 		// Shortcode and URL syntax stay visible text: hide the characters shortcodes and embeds key on.
 		return str_replace( [ '[', '://' ], [ '&#91;', '&#58;//' ], $content );
@@ -305,6 +306,11 @@ class Posts {
 	 * after kses and right before the database write, makes the stored value
 	 * mean the text in all of them.
 	 *
+	 * Only `&`, `<` and `>` are encoded, as kses does for stray ones, so site
+	 * search and the editor see the text as before. Quotes stay as they are:
+	 * content is only ever output as text, where they mean nothing. Existing
+	 * entities are left alone, so re-saving leaves the value unchanged.
+	 *
 	 * @param array $data Slashed, sanitized post data.
 	 * @return array
 	 */
@@ -314,7 +320,8 @@ class Posts {
 		}
 
 		foreach ( [ 'post_title', 'post_content', 'post_excerpt' ] as $field ) {
-			$data[ $field ] = wp_slash( self::text_to_html( wp_unslash( $data[ $field ] ) ) );
+			$text           = wp_unslash( $data[ $field ] );
+			$data[ $field ] = wp_slash( htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false ) );
 		}
 
 		return $data;
@@ -335,23 +342,6 @@ class Posts {
 		}
 
 		return 'attachment' === $post_type && $post_parent && get_post_type( $post_parent ) === $photo_post_type;
-	}
-
-	/**
-	 * Encodes plain text as the HTML that displays it.
-	 *
-	 * Only `&`, `<` and `>` are encoded, as kses does for stray ones, so site
-	 * search and the editor see the text as before. Quotes stay as they are:
-	 * content is only ever output as text, where they mean nothing.
-	 *
-	 * Already encoded text passes through unchanged, since existing entities are
-	 * left alone.
-	 *
-	 * @param string $text Plain text.
-	 * @return string
-	 */
-	public static function text_to_html( $text ) {
-		return htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false );
 	}
 
 	/**
