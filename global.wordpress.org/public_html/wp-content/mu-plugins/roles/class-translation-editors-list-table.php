@@ -42,20 +42,35 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	public $project_tree;
 
 	/**
+	 * Cache for resolved parent projects.
+	 *
+	 * @var array
+	 */
+	private $parent_cache = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array $args An associative array of arguments.
 	 */
 	public function __construct( $args = array() ) {
+		$args = wp_parse_args( $args, array(
+			'screen'        => null,
+			'user_roles'    => array(),
+			'projects'      => array(),
+			'project_tree'  => array(),
+			'rosetta_roles' => null,
+		) );
+
 		parent::__construct( array(
 			'singular' => 'translation-editor',
 			'plural'   => 'translation-editors',
-			'screen'   => isset( $args['screen'] ) ? $args['screen'] : null,
+			'screen'   => $args['screen'],
 		) );
 
-		$this->user_roles       = $args['user_roles'];
-		$this->projects         = $args['projects'];
-		$this->project_tree     = $args['project_tree'];
+		$this->user_roles       = (array) $args['user_roles'];
+		$this->projects         = (array) $args['projects'];
+		$this->project_tree     = (array) $args['project_tree'];
 		$this->rosetta_roles    = $args['rosetta_roles'];
 		$this->user_can_promote = current_user_can( Rosetta_Roles::MANAGE_TRANSLATION_EDITORS_CAP );
 	}
@@ -64,36 +79,35 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 * Prepare the list for display.
 	 */
 	public function prepare_items() {
-		$search   = isset( $_REQUEST['s'] ) ? wp_unslash( trim( $_REQUEST['s'] ) ) : '';
+		$search   = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
 		$per_page = $this->get_items_per_page( 'translation_editors_per_page', 10 );
 		$paged    = $this->get_pagenum();
 
 		$role__in = $this->user_roles;
-		if ( isset( $_REQUEST['role'] ) ) {
-			$role__in = $_REQUEST['role'];
+		if ( ! empty( $_REQUEST['role'] ) && in_array( $_REQUEST['role'], $this->user_roles, true ) ) {
+			$role__in = array( sanitize_key( $_REQUEST['role'] ) );
 		}
 
 		$args = array(
 			'number'   => $per_page,
 			'offset'   => ( $paged - 1 ) * $per_page,
-			'role__in' => $role__in,
-			'search'   => $search,
-			'fields'   => 'all_with_meta',
+			'role__in' => (array) $role__in,
+			'search'   => $search ? '*' . $search . '*' : '',
+			'fields'   => 'all'
 		);
 
-		if ( '' !== $args['search'] ) {
-			$args['search'] = '*' . $args['search'] . '*';
+		if ( ! empty( $_REQUEST['orderby'] ) ) {
+			$valid_orderby = array( 'login', 'name', 'email' );
+			if ( in_array( $_REQUEST['orderby'], $valid_orderby, true ) ) {
+				$args['orderby'] = $_REQUEST['orderby'];
+			}
 		}
 
-		if ( isset( $_REQUEST['orderby'] ) ) {
-			$args['orderby'] = $_REQUEST['orderby'];
+		if ( ! empty( $_REQUEST['order'] ) ) {
+			$args['order'] = strtoupper( $_REQUEST['order'] ) === 'ASC' ? 'ASC' : 'DESC';
 		}
 
-		if ( isset( $_REQUEST['order'] ) ) {
-			$args['order'] = $_REQUEST['order'];
-		}
-
-		$user_query = new WP_User_Query( $args );
+		$user_query  = new WP_User_Query( $args );
 		$this->items = $user_query->get_results();
 
 		$this->set_pagination_args( array(
@@ -282,22 +296,34 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 */
 	public function column_username( $user ) {
 		$avatar = get_avatar( $user->ID, 32 );
+		$username = esc_html( $user->user_login );
 
 		if ( $this->user_can_promote ) {
-			$page_url = menu_page_url( 'translation-editors', false );
+			$page_url  = menu_page_url( 'translation-editors', false );
 			$edit_link = esc_url( add_query_arg( 'user_id', $user->ID, $page_url ) );
-			$edit = "<strong><a href=\"$edit_link\">$user->user_login</a></strong>";
+			$edit      = '<strong><a href="' . $edit_link . '">' . $username . '</a></strong>';
 
-			$actions = array();
-			$actions['edit'] = '<a href="' . $edit_link . '">' . __( 'Edit', 'rosetta' ) . '</a>';
-			$actions['delete'] = '<a href="' . wp_nonce_url( $page_url . "&amp;action=remove-translation-editor&amp;translation-editor=$user->ID", 'remove-translation-editor' ) . '">' . __( 'Remove', 'rosetta' ) . '</a>';
+			$delete_url = wp_nonce_url(
+				add_query_arg(
+					array(
+						'action'             => 'remove-translation-editor',
+						'translation-editor' => $user->ID,
+					),
+					$page_url
+				),
+				'remove-translation-editor'
+			);
+
+			$actions = array(
+				'edit'   => '<a href="' . $edit_link . '">' . esc_html__( 'Edit', 'rosetta' ) . '</a>',
+				'delete' => '<a href="' . esc_url( $delete_url ) . '">' . esc_html__( 'Remove', 'rosetta' ) . '</a>',
+			);
 			$edit .= $this->row_actions( $actions );
 		} else {
-			$edit = "<strong>$user->user_login</strong>";
+			$edit = '<strong>' . $username . '</strong>';
 		}
 
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Avatar and edit-link markup assembled above from escaped parts.
-		echo "$avatar $edit";
+		echo $avatar . ' ' . $edit;
 	}
 
 	/**
@@ -339,8 +365,12 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		$projects = array();
 		foreach ( $project_access_list as $project_id ) {
 			if ( isset( $this->projects[ $project_id ] ) ) {
-				$parent = $this->rosetta_roles->get_parent_project( $this->project_tree, $project_id );
-				if ( $parent->id != $project_id ) {
+				if ( ! array_key_exists( $project_id, $this->parent_cache ) ) {
+					$this->parent_cache[ $project_id ] = $this->rosetta_roles->get_parent_project( $this->project_tree, $project_id );
+				}
+				$parent = $this->parent_cache[ $project_id ];
+				
+				if ( is_object( $parent ) && $parent->id != $project_id ) {
 					$name = sprintf(
 						/* translators: 1: Parent project name, 2: Child project name */
 						__( '%1$s &rarr;  %2$s', 'rosetta' ),
