@@ -139,6 +139,14 @@ class Code_Import extends I18n_Import {
 	 * }
 	 */
 	public static function strip_non_utf8_entries( string $pot ): array {
+		if ( mb_check_encoding( $pot, 'UTF-8' ) ) {
+			return [
+				'pot'   => $pot,
+				'count' => 0,
+				'files' => [],
+			];
+		}
+
 		$entries = explode( "\n\n", rtrim( $pot, "\n" ) );
 		$kept    = [ array_shift( $entries ) ];
 		$count   = 0;
