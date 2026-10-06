@@ -70,12 +70,12 @@ global $wp_query, $post, $wptv;
 				<div class="video-description">
 					<h4 class="video-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
 					<?php
-						$wptv->the_terms( 'event', '<span class="video-events">', ', ', '</span>', false );
-						$speakers = get_the_terms( $post->ID, 'speakers' );
-						if ( is_array( $speakers ) ) {
-							$label = _n( 'Speaker:', 'Speakers:', count( $speakers ), 'wptv' );
-							$wptv->the_terms( 'speakers', '<span class="video-speakers"><strong>' . $label . '</strong> ', ', ', '</span>', false );
-						}
+					$wptv->the_terms( 'event', '<span class="video-events">', ', ', '</span>', false );
+					$speakers = get_the_terms( $post->ID, 'speakers' );
+					if ( is_array( $speakers ) ) {
+						$label = _n( 'Speaker:', 'Speakers:', count( $speakers ), 'wptv' );
+						$wptv->the_terms( 'speakers', '<span class="video-speakers"><strong>' . $label . '</strong> ', ', ', '</span>', false );
+					}
 					?>
 					<span class="video-excerpt">
 						<?php

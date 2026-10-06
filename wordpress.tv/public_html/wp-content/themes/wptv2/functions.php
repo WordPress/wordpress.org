@@ -290,7 +290,7 @@ class WordPressTV_Theme {
 			$query->set( 'posts_per_page', 8 );
 		} elseif ( $query->is_category ) { // category archives
 			$query->set( 'posts_per_page', 22 );
-		} elseif ( $query->is_tax && ( $queried_object->taxonomy ?? null ) == 'event' ) { // event taxonomy
+		} elseif ( $query->is_tax && ( $queried_object->taxonomy ?? null ) == 'event' ) { // Event taxonomy.
 			$query->set( 'posts_per_page', 22 );
 		} elseif ( $query->is_archive || $query->is_search ) {
 			$query->set( 'posts_per_page', 10 );
@@ -1058,7 +1058,6 @@ function wptv_update_attachment_titles( $id, $post, $post_before ) {
 	}
 
 	// Get attachments - Should only be one?
-	/** @var array $attachments */
 	$attachments = get_posts( array(
 		'post_type'   => 'attachment',
 		'post_parent' => $id,

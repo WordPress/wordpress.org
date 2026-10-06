@@ -24,86 +24,84 @@ global $wptv, $originalcontent;
 
 				if ( function_exists( 'find_all_videopress_shortcodes' ) ) {
 					$videos = array_keys( find_all_videopress_shortcodes( $originalcontent ) );
-					if ( ! empty( $videos ) ) {
-						$video     = video_get_info_by_guid( $videos[0] );
-						if ( $video ) {
-							$api_data  = video_get_single_response( $video );
-							$formats   = array( 'fmt_std' => 'Low', 'fmt_dvd' => 'Med', 'fmt_hd' => 'High', 'fmt1_ogg' => 'Low' );
-							$mp4_links = array();
-							$ogg_link  = false;
+					$video  = empty( $videos ) ? false : video_get_info_by_guid( $videos[0] );
+					if ( $video ) { // phpcs:ignore Generic.WhiteSpace.ScopeIndent.IncorrectExact
+						$api_data  = video_get_single_response( $video );
+						$formats   = array( 'fmt_std' => 'Low', 'fmt_dvd' => 'Med', 'fmt_hd' => 'High', 'fmt1_ogg' => 'Low' );
+						$mp4_links = array();
+						$ogg_link  = false;
 
-							foreach ( $formats as $format => $name ) {
-								if ( 'fmt1_ogg' == $format ) {
-									$link = video_highest_resolution_ogg( $video );
-								} else {
+						foreach ( $formats as $format => $name ) {
+							if ( 'fmt1_ogg' == $format ) {
+								$link = video_highest_resolution_ogg( $video );
+							} else {
 
-									// Check if HLS transcoded, no audio, no need to link to it.
-									if ( ! empty( $api_data['files'][ str_replace( 'fmt_', '', $format ) ]['hls'] ) ) {
-										continue;
-									}
-
-									$link = video_url_by_format( $video, $format );
-								}
-
-								if ( empty( $link ) ) {
+								// Check if HLS transcoded, no audio, no need to link to it.
+								if ( ! empty( $api_data['files'][ str_replace( 'fmt_', '', $format ) ]['hls'] ) ) {
 									continue;
 								}
 
-								if ( 'fmt1_ogg' == $format ) {
-									$ogg_link = "<a href='$link'>$name</a>";
-								} else {
-									$mp4_links[] = "<a href='$link'>$name</a>";
-								}
+								$link = video_url_by_format( $video, $format );
 							}
 
-							$attachment_url = $wptv->get_video_attachment_url();
-							if ( $attachment_url ) {
-								$mp4_links[] = "<a href='{$attachment_url}'>Original</a>";
-							} elseif ( ! empty( $api_data['original'] ) ) {
-								$mp4_links[] = "<a href='{$api_data['original']}'>Original</a>";
+							if ( empty( $link ) ) {
+								continue;
 							}
 
-							if ( ! empty( $mp4_links ) || ! empty( $ogg_link ) ) {
+							if ( 'fmt1_ogg' == $format ) {
+								$ogg_link = "<a href='$link'>$name</a>";
+							} else {
+								$mp4_links[] = "<a href='$link'>$name</a>";
+							}
+						}
+
+						$attachment_url = $wptv->get_video_attachment_url();
+						if ( $attachment_url ) {
+							$mp4_links[] = "<a href='{$attachment_url}'>Original</a>";
+						} elseif ( ! empty( $api_data['original'] ) ) {
+							$mp4_links[] = "<a href='{$api_data['original']}'>Original</a>";
+						}
+
+						if ( ! empty( $mp4_links ) || ! empty( $ogg_link ) ) {
 ?>
 			<h5>Download</h5>
 			<div class="video-downloads">
 <?php
-								if ( ! empty( $mp4_links ) ) {
-									echo 'MP4: ' . wp_kses_post( implode( ', ', $mp4_links ) ) . '<br/>';
-								}
-								if ( ! empty( $ogg_link ) ) {
-									echo 'OGG: ' . wp_kses_post( $ogg_link );
-								}
+							if ( ! empty( $mp4_links ) ) {
+								echo 'MP4: ' . wp_kses_post( implode( ', ', $mp4_links ) ) . '<br/>';
+							}
+							if ( ! empty( $ogg_link ) ) {
+								echo 'OGG: ' . wp_kses_post( $ogg_link );
+							}
 ?>
 			</div>
 <?php
-							}
-
-							echo '<h5>Subtitles</h5>';
-							$ttml_links = array();
-							$languages = VideoPress_Subtitles::get_languages();
-							$subtitles = (array) get_post_meta( $video->post_id, '_videopress_subtitles', true );
-
-							foreach ( $subtitles as $track ) {
-								if ( empty( $track['subtitles_post_id'] ) ) {
-									continue;
-								}
-
-								$tracks[ $track['language'] ] = new VideoPress_Subtitles_Track( array(
-									'guid'              => $video->guid,
-									'language'          => $track['language'],
-									'subtitles_post_id' => $track['subtitles_post_id'],
-								) );
-
-								$ttml_links[] = '<a href="'. $tracks[ $track['language'] ]->url() .'">'. $languages[ $track['language'] ]['localized_label'] .'</a>';
-							}
-
-							if ( ! empty( $ttml_links ) ) {
-								echo 'TTML: ' . wp_kses_post( implode( ', ', $ttml_links ) ) . '<br />';
-							}
-
-							printf( '<a href="%s">Subtitle this video &rarr;</a>', esc_url( add_query_arg( 'video', $video->post_id, home_url( 'subtitle/' ) ) ) );
 						}
+
+						echo '<h5>Subtitles</h5>';
+						$ttml_links = array();
+						$languages = VideoPress_Subtitles::get_languages();
+						$subtitles = (array) get_post_meta( $video->post_id, '_videopress_subtitles', true );
+
+						foreach ( $subtitles as $track ) {
+							if ( empty( $track['subtitles_post_id'] ) ) {
+								continue;
+							}
+
+							$tracks[ $track['language'] ] = new VideoPress_Subtitles_Track( array(
+								'guid'              => $video->guid,
+								'language'          => $track['language'],
+								'subtitles_post_id' => $track['subtitles_post_id'],
+							) );
+
+							$ttml_links[] = '<a href="'. $tracks[ $track['language'] ]->url() .'">'. $languages[ $track['language'] ]['localized_label'] .'</a>';
+						}
+
+						if ( ! empty( $ttml_links ) ) {
+							echo 'TTML: ' . wp_kses_post( implode( ', ', $ttml_links ) ) . '<br />';
+						}
+
+						printf( '<a href="%s">Subtitle this video &rarr;</a>', esc_url( add_query_arg( 'video', $video->post_id, home_url( 'subtitle/' ) ) ) );
 					}
 				}
 
