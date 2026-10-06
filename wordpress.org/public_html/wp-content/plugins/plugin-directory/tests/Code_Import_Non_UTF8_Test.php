@@ -74,6 +74,19 @@ class Code_Import_Non_UTF8_Test extends TestCase {
 	}
 
 	/**
+	 * A valid string keeps its entry; only the comment lines that aren't valid UTF-8 are removed.
+	 */
+	public function test_invalid_comments_are_removed_from_valid_strings(): void {
+		$result = Code_Import::strip_non_utf8_entries(
+			$this->pot( "#. translators: %s: n\xFAmero\n#: inc/caf\xE9.php:3\n#: plugin.php:7\nmsgid \"Number %s\"\nmsgstr \"\"" )
+		);
+
+		$this->assertSame( $this->pot( "#: plugin.php:7\nmsgid \"Number %s\"\nmsgstr \"\"" ), $result['pot'] );
+		$this->assertSame( 0, $result['count'] );
+		$this->assertSame( array(), $result['files'] );
+	}
+
+	/**
 	 * The header is kept even when it isn't valid UTF-8, and when it's the only entry left.
 	 */
 	public function test_header_is_kept(): void {

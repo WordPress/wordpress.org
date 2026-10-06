@@ -67,9 +67,13 @@ if ( ! $plugin ) {
 $send_slack = defined( 'PLUGIN_IMPORTS_SLACK_WEBHOOK' ) && ! isset( $opts['no-slack'] );
 if ( $send_slack ) {
 	$slack_client = new Slack( PLUGIN_IMPORTS_SLACK_WEBHOOK );
+
+	// Titles are stored entity-encoded; Slack wants only `&`, `<` and `>` escaped, once.
+	$plugin_title = htmlspecialchars( html_entity_decode( $plugin->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ), ENT_NOQUOTES | ENT_SUBSTITUTE );
+
 	$slack_client->add_attachment( 'ts', time() );
-	$slack_client->add_attachment( 'fallback', "{$plugin->post_title} has been imported." );
-	$slack_client->add_attachment( 'title', "{$plugin->post_title} has been imported" );
+	$slack_client->add_attachment( 'fallback', "{$plugin_title} has been imported." );
+	$slack_client->add_attachment( 'title', "{$plugin_title} has been imported" );
 	$slack_client->add_attachment( 'title_link', "https://translate.wordpress.org/projects/wp-plugins/{$plugin_slug}" );
 	$fields = [
 		[
@@ -79,7 +83,7 @@ if ( $send_slack ) {
 		],
 		[
 			'title' => 'Version',
-			'value' => $tag,
+			'value' => htmlspecialchars( $tag, ENT_NOQUOTES | ENT_SUBSTITUTE ),
 			'short' => true,
 		],
 	];
@@ -105,14 +109,11 @@ try {
 			$files      = array_slice( $skipped['files'], 0, 5 );
 			$more_files = count( $skipped['files'] ) - count( $files );
 
-			// mb_scrub() keeps a non-UTF-8 file name from breaking the Slack payload's json_encode().
-			$skipped_message = mb_scrub(
-				sprintf(
-					'%d strings skipped, not valid UTF-8: %s%s',
-					$skipped['count'],
-					implode( ', ', $files ),
-					$more_files ? " and {$more_files} more" : ''
-				)
+			$skipped_message = sprintf(
+				'%d strings skipped, not valid UTF-8: %s%s',
+				$skipped['count'],
+				implode( ', ', $files ),
+				$more_files ? " and {$more_files} more" : ''
 			);
 		}
 	}
@@ -136,9 +137,9 @@ try {
 			'value' => sprintf(
 				'<%1$s|%2$s> | <https://plugins.trac.wordpress.org/log/%3$s|Log> | <%4$s|SVN>',
 				get_permalink( $plugin ),
-				htmlspecialchars( $plugin->post_title, ENT_NOQUOTES | ENT_SUBSTITUTE ),
+				$plugin_title,
 				$plugin_slug,
-				$importer->get_plugin_svn_url( $tag )
+				htmlspecialchars( $importer->get_plugin_svn_url( $tag ), ENT_NOQUOTES | ENT_SUBSTITUTE )
 			),
 			'short' => false,
 		];
@@ -169,9 +170,9 @@ try {
 			'value' => sprintf(
 				'<%1$s|%2$s> | <https://plugins.trac.wordpress.org/log/%3$s|Log> | <%4$s|SVN>',
 				get_permalink( $plugin ),
-				htmlspecialchars( $plugin->post_title, ENT_NOQUOTES | ENT_SUBSTITUTE ),
+				$plugin_title,
 				$plugin_slug,
-				$importer->get_plugin_svn_url( $tag )
+				htmlspecialchars( $importer->get_plugin_svn_url( $tag ), ENT_NOQUOTES | ENT_SUBSTITUTE )
 			),
 			'short' => false,
 		];

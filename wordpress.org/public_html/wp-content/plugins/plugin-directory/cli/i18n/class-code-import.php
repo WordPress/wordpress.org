@@ -77,16 +77,24 @@ class Code_Import extends I18n_Import {
 		}
 
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local temp file.
-		$stripped = self::strip_non_utf8_entries( file_get_contents( $pot_file ) );
-		if ( $stripped['count'] ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Local temp file.
-			file_put_contents( $pot_file, $stripped['pot'] );
-
-			$this->non_utf8_entries = [
-				'count' => $stripped['count'],
-				'files' => $stripped['files'],
-			];
+		$pot = file_get_contents( $pot_file );
+		if ( false === $pot ) {
+			throw new Exception( "POT file couldn't be read." );
 		}
+
+		$stripped = self::strip_non_utf8_entries( $pot );
+		if ( $stripped['pot'] !== $pot ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Local temp file.
+			$written = file_put_contents( $pot_file, $stripped['pot'] );
+			if ( strlen( $stripped['pot'] ) !== $written ) {
+				throw new Exception( "POT file couldn't be written." );
+			}
+		}
+
+		$this->non_utf8_entries = [
+			'count' => $stripped['count'],
+			'files' => $stripped['files'],
+		];
 
 		$result = $this->set_glotpress_for_plugin( $this->plugin, 'code' );
 		if ( is_wp_error( $result ) ) {
@@ -118,14 +126,14 @@ class Code_Import extends I18n_Import {
 	}
 
 	/**
-	 * Removes the entries that aren't valid UTF-8 from make-pot output.
+	 * Removes the strings that aren't valid UTF-8 from make-pot output, and the comment lines that aren't.
 	 *
-	 * GlotPress can't parse them. They're not converted, because converted originals
+	 * GlotPress can't import either. Strings aren't converted, because converted originals
 	 * wouldn't match the strings the plugin looks up at runtime. The header is always kept.
 	 *
 	 * @param string $pot POT file contents, with entries separated by blank lines.
 	 * @return array {
-	 *     @type string   $pot   POT file contents without the invalid entries.
+	 *     @type string   $pot   POT file contents without the invalid entries and comment lines.
 	 *     @type int      $count Number of entries removed.
 	 *     @type string[] $files Source files the removed entries came from.
 	 * }
@@ -139,6 +147,15 @@ class Code_Import extends I18n_Import {
 		foreach ( $entries as $entry ) {
 			if ( mb_check_encoding( $entry, 'UTF-8' ) ) {
 				$kept[] = $entry;
+				continue;
+			}
+
+			$lines = explode( "\n", $entry );
+			$valid = array_filter( $lines, static fn( string $line ): bool => mb_check_encoding( $line, 'UTF-8' ) );
+
+			// Only comment lines are invalid: keep the string without them.
+			if ( ! preg_grep( '/^[^#]/', array_diff_key( $lines, $valid ) ) ) {
+				$kept[] = implode( "\n", $valid );
 				continue;
 			}
 
