@@ -127,7 +127,8 @@ try {
 		if ( $skipped_message ) {
 			$fields[] = [
 				'title' => 'Skipped',
-				'value' => $skipped_message,
+				// File names are plugin-controlled; Slack reads `<…>` as links and mentions.
+				'value' => htmlspecialchars( $skipped_message, ENT_NOQUOTES ),
 				'short' => false,
 			];
 		}
