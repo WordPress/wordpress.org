@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
-    # Sharded so one failing page doesn't drop every result.
+    # Sharded so a failing page only drops its own shard.
     strategy:
       fail-fast: false
       matrix:
@@ -76,13 +76,13 @@ jobs:
 
       # No retry: a 5xx can follow a partial insert, and a retry would duplicate those rows.
       - name: Report scores
-        if: steps.lighthouse.outputs.manifest != ''
         shell: bash
         env:
           MANIFEST: ${{ steps.lighthouse.outputs.manifest }}
           TOKEN: ${{ secrets.SITE_QUALITY_STATS_TOKEN }}
         run: |
-          jq -c '[.[] | select(.isRepresentativeRun) | {url, summary}]' <<< "$MANIFEST" |
+          # Errored categories have a null score, which the endpoint would store as 0.
+          jq -c '[.[] | select(.isRepresentativeRun) | {url, summary: (.summary | with_entries(select(.value != null)))}]' <<< "$MANIFEST" |
             curl --fail-with-body --silent --show-error --max-time 60 \
               --header 'Content-Type: application/json' \
               --header @<(printf 'Authorization: Bearer %s\n' "$TOKEN") \
