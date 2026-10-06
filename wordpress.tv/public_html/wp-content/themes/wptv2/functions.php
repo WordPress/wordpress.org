@@ -322,12 +322,12 @@ class WordPressTV_Theme {
 		) );
 
 		register_taxonomy( 'speakers', array( 'post' ), array(
-			'label'    => __( 'Speakers', 'wptv' ),
-			'template' => __( 'Speakers: %l.', 'wptv' ),
-			'helps'    => __( 'Separate speakers with commas.', 'wptv' ),
-			'sort'     => true,
-			'args'     => array( 'orderby' => 'term_order' ),
-			'rewrite'  => array( 'slug' => 'speakers' ),
+			'label'        => __( 'Speakers', 'wptv' ),
+			'template'     => __( 'Speakers: %l.', 'wptv' ),
+			'helps'        => __( 'Separate speakers with commas.', 'wptv' ),
+			'sort'         => true,
+			'args'         => array( 'orderby' => 'term_order' ),
+			'rewrite'      => array( 'slug' => 'speakers' ),
 			'show_in_rest' => true,
 			'rest_base'    => 'speakers',
 		) );
@@ -342,23 +342,23 @@ class WordPressTV_Theme {
 		) );
 
 		register_taxonomy( 'language', array( 'post' ), array(
-			'label'    => __( 'Language', 'wptv' ),
-			'template' => __( 'Language: %l.', 'wptv' ),
-			'helps'    => __( 'Separate languages with commas.', 'wptv' ),
-			'sort'     => true,
-			'args'     => array( 'orderby' => 'term_order' ),
-			'rewrite'  => array( 'slug' => 'language' ),
+			'label'        => __( 'Language', 'wptv' ),
+			'template'     => __( 'Language: %l.', 'wptv' ),
+			'helps'        => __( 'Separate languages with commas.', 'wptv' ),
+			'sort'         => true,
+			'args'         => array( 'orderby' => 'term_order' ),
+			'rewrite'      => array( 'slug' => 'language' ),
 			'show_in_rest' => true,
 			'rest_base'    => 'language',
 		) );
 
 		register_taxonomy( 'event', array( 'post' ), array(
-			'label'    => __( 'Event', 'wptv' ),
-			'template' => __( 'Event: %l.', 'wptv' ),
-			'helps'    => __( 'Enter event', 'wptv' ),
-			'sort'     => true,
-			'args'     => array( 'orderby' => 'term_order' ),
-			'rewrite'  => array( 'slug' => 'event' ),
+			'label'        => __( 'Event', 'wptv' ),
+			'template'     => __( 'Event: %l.', 'wptv' ),
+			'helps'        => __( 'Enter event', 'wptv' ),
+			'sort'         => true,
+			'args'         => array( 'orderby' => 'term_order' ),
+			'rewrite'      => array( 'slug' => 'event' ),
 			'show_in_rest' => true,
 			'rest_base'    => 'event',
 		) );
