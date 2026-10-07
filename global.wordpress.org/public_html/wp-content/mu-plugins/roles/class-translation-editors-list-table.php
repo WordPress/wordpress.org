@@ -61,7 +61,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			'project_tree'  => array(),
 			'rosetta_roles' => null,
 		);
-		
+
 		$args = wp_parse_args( $args, $defaults );
 
 		parent::__construct( array(
@@ -394,7 +394,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 					$this->parent_cache[ $project_id ] = $this->rosetta_roles->get_parent_project( $this->project_tree, $project_id );
 				}
 				$parent = $this->parent_cache[ $project_id ];
-				
+
 				if ( is_object( $parent ) && (int) $parent->id !== (int) $project_id ) {
 					$name = sprintf(
 						/* translators: 1: Parent project name, 2: Child project name */
