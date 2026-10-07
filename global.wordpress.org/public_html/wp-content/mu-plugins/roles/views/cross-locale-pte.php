@@ -53,7 +53,7 @@
 					<?php
 						endforeach;
 					else :
-					?>
+						?>
 			<tr>
 				<td colspan="4"><?php esc_html_e( 'No translation editors found.', 'rosetta' ); ?></td>
 			</tr>
