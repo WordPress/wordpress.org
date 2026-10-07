@@ -16,25 +16,67 @@ class Tools {
 	/**
 	 * Retrieve the average color of a specified image.
 	 *
-	 * This currently relies upon the Jetpack libraries.
+	 * Averages five sample points, placed on the rule of thirds and at the center of the
+	 * image. This is the method Jetpack's Tonesque library used, which is deprecated, so
+	 * existing plugins keep the same fallback color.
 	 *
 	 * @static
 	 *
-	 * @param $file_location string URL or filepath of image.
+	 * @param string $file_location URL or filepath of image.
 	 * @return string|bool Average color as a hex value, False on failure.
 	 */
 	public static function get_image_average_color( $file_location ) {
-		if ( ! class_exists( 'Tonesque' ) && defined( 'JETPACK__PLUGIN_DIR' ) ) {
-			include JETPACK__PLUGIN_DIR . '/_inc/lib/tonesque.php';
-		}
-
-		if ( ! class_exists( 'Tonesque' ) ) {
+		if ( ! function_exists( 'imagecreatefromstring' ) ) {
 			return false;
 		}
 
-		$tonesque = new \Tonesque( $file_location );
+		$data = false;
+		if ( preg_match( '#^https?://#i', $file_location ) ) {
+			$response      = wp_safe_remote_get( $file_location );
+			$response_code = wp_remote_retrieve_response_code( $response );
+			if ( $response_code >= 200 && $response_code < 300 ) {
+				$data = wp_remote_retrieve_body( $response );
+			}
+		} elseif ( is_readable( $file_location ) ) {
+			$data = file_get_contents( $file_location ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file.
+		}
 
-		return $tonesque->color();
+		if ( ! $data ) {
+			return false;
+		}
+
+		// imagecreatefromstring() warns when the data is not an image; that case returns false below.
+		$image = @imagecreatefromstring( $data ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( ! $image ) {
+			return false;
+		}
+
+		$width  = imagesx( $image );
+		$height = imagesy( $image );
+
+		$points = array(
+			array( $width / 3, $height / 3 ),
+			array( $width / 3 * 2, $height / 3 ),
+			array( $width / 3, $height / 3 * 2 ),
+			array( $width / 3 * 2, $height / 3 * 2 ),
+			array( $width / 2, $height / 2 ),
+		);
+
+		$red   = 0;
+		$green = 0;
+		$blue  = 0;
+		foreach ( $points as list( $x, $y ) ) {
+			// Keep the point inside the image, which matters for images only a pixel or two wide.
+			$x = min( (int) round( $x ), $width - 1 );
+			$y = min( (int) round( $y ), $height - 1 );
+
+			$color  = imagecolorsforindex( $image, imagecolorat( $image, $x, $y ) );
+			$red   += $color['red'];
+			$green += $color['green'];
+			$blue  += $color['blue'];
+		}
+
+		return sprintf( '%02x%02x%02x', round( $red / 5 ), round( $green / 5 ), round( $blue / 5 ) );
 	}
 
 	/**
