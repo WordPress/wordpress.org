@@ -395,7 +395,7 @@ class Cross_Locale_PTE {
 		}
 
 		static $current_translation_by_user;
-		$cache_key = $args['user']->ID . '_' . $translation->original_id;
+		$cache_key = $args['user']->ID . '_' . $translation->translation_set_id . '_' . $translation->original_id;
 
 		if ( isset( $current_translation_by_user[ $cache_key ] ) ) {
 			return $current_translation_by_user[ $cache_key ];
