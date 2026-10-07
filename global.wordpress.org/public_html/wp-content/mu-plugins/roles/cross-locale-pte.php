@@ -62,7 +62,6 @@ class Cross_Locale_PTE {
 		add_action( 'load-' . self::$admin_page, array( __CLASS__, 'handle_admin_post' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
 		add_action( 'admin_footer-' . self::$admin_page, array( 'Rosetta_Roles', 'print_js_templates' ) );
-		add_action( 'admin_print_styles-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_styles' ) );
 	}
 
 	/**
@@ -355,11 +354,10 @@ class Cross_Locale_PTE {
 		}
 
 		return $verdict;
-
 	}
 
 	/**
-	 * A GlotPress sub-filter for the permission 'cross-lte'.
+	 * A GlotPress sub-filter for the permission 'cross-pte'.
 	 *
 	 * @param string|bool $verdict The verdict from an earlier filter.
 	 * @param array       $args    Arguments that describe the object to judge for.
