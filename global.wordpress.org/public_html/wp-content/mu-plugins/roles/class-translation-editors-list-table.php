@@ -94,7 +94,7 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			'number'   => $per_page,
 			'offset'   => ( $paged - 1 ) * $per_page,
 			'role__in' => (array) $role__in,
-			'search'   => $search ? '*' . $search . '*' : '',
+			'search'   => '' !== $search ? '*' . $search . '*' : '',
 			'fields'   => 'all',
 		);
 
