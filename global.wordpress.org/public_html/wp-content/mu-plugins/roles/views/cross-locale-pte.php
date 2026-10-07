@@ -29,7 +29,7 @@
 		$url = menu_page_url( 'cross-locale-pte', false );
 		if ( ! empty( $cross_locale_pte_users ) && is_array( $cross_locale_pte_users ) ) :
 			foreach ( $cross_locale_pte_users as $user_id => $user ) :
-				?>
+					?>
 			<tr>
 				<td class="username column-username column-primary">
 					<?php echo get_avatar( $user_id, 32 ); ?>
@@ -50,10 +50,10 @@
 				?>
 				</td>
 			</tr>
-				<?php
-					endforeach;
-				else :
-				?>
+					<?php
+						endforeach;
+					else :
+					?>
 			<tr>
 				<td colspan="4"><?php esc_html_e( 'No translation editors found.', 'rosetta' ); ?></td>
 			</tr>
