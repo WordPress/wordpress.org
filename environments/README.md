@@ -271,6 +271,89 @@ npx wp-env start
 npm run handbook:test
 ```
 
+### FreeScout (helpdesk)
+
+A local [FreeScout](https://freescout.net/) with the modules from [`freescout.wordpress.net/`](../freescout.wordpress.net). FreeScout isn't WordPress, so this environment uses Docker Compose directly instead of `wp-env`.
+
+**Start:**
+
+```bash
+npm run freescout:start
+```
+
+Then open http://127.0.0.1:8890 and log in with WordPress.org: a mock login page lets you pick an account, e.g. `admin`, which is connected to the FreeScout admin. Its other accounts cover new users (`reviewer`), no two-factor authentication (`no2fa`), and blocked accounts (`blocked`). Replies sent to senders land in Mailpit at http://127.0.0.1:8891.
+
+What's running:
+
+| Service | Purpose |
+|---|---|
+| `app` | FreeScout's latest release on nginx and PHP-FPM 8.4, with the scheduler and queue worker production would run from cron. |
+| `db` | MariaDB 11.4, with a separate `freescout-test` database for the tests. |
+| `greenmail` | Mail server FreeScout fetches the **Plugins** and **Themes** mailboxes from, over IMAP. Two sample emails are delivered on first start. |
+| `mailpit` | Catches outgoing mail. |
+| `mock-api` | Stands in for `api.wordpress.org/dotorg/freescout/`: checks request signatures, answers sidebar requests with panels recorded from the real endpoints for a real account (`obenland`'s), and logs webhook events (`npm run freescout:logs`). Also stands in for login.wordpress.org's SAML identity provider at http://127.0.0.1:8892/idp, signing with a key that's only for local development. |
+
+`freescout.wordpress.net/Modules/` is mounted as FreeScout's `Modules/` folder, like production's checkout. Every start switches all modules on and runs `freescout:after-app-update`, as production does after a deploy. After switching branches, run `npm run freescout:setup`: FreeScout errors on every page while it still has a removed module cached.
+
+Setup also adds sample data, set up like the HelpScout helpdesk but with made-up people and conversations. It adds the **Learn WordPress** mailbox, without incoming email. It also adds four made-up agents and 34 made-up conversations in Plugins, Themes and Learn WordPress from the last eight weeks, with replies, notes, and closed, pending, and spam conversations. It only adds what's missing, and only to a FreeScout on 127.0.0.1 or localhost.
+
+**Premium modules:** to try them, copy them in from a clone of the private [freescout-paid-modules](https://github.com/WordPress/freescout-paid-modules) repository. They must never be committed here, so exclude each one first. From `environments/`:
+
+```bash
+paid=~/path/to/freescout-paid-modules
+exclude="$(git rev-parse --path-format=absolute --git-common-dir)/info/exclude"
+for module in "$paid"/Modules/*/; do
+	target="freescout.wordpress.net/Modules/$(basename "$module")"
+	grep -qxF "$target/" "$exclude" || echo "$target/" >> "$exclude"
+	rsync -a --delete "$module" "../$target/"
+done
+npm run freescout:setup
+```
+
+Setup switches them on, and adds sample data for each one that's there, with HelpScout's names:
+
+- **Tags:** some of HelpScout's tags and colors, on conversations.
+- **Custom Fields:** the Learn WordPress fields, with values. Plugins and Themes have none.
+- **Saved Replies:** some of HelpScout's saved replies in Plugins and Themes, with short made-up texts.
+- **Teams:** the Plugin, Themes and Learn teams, with conversations assigned to some. Names longer than FreeScout's 20 characters are shortened.
+- **Custom Folders:** "New WordPress" in Plugins, for replies to new WordPress version emails.
+- **Mentions:** a note in which one agent mentions another.
+- **Workflows:** some of HelpScout's workflows, with made-up rules. Automatic ones only run for new email with matching subjects, or a tag an agent adds; none run for the sample conversations.
+- **Reports:** response and resolution times, ready right away.
+- **API & Webhooks:** a read-only API key for the admin, and a webhook for new conversations to the mock API, which turns it away.
+
+Slack stays unconfigured: it needs a Slack app.
+
+To send more mail in:
+
+```bash
+npm run freescout:env -- exec app bash -c 'printf "Subject: Hi\r\n\r\nHello\r\n" | curl -s --url smtp://greenmail:3025 --mail-from someone@example.org --mail-rcpt plugins@wordpress.test --upload-file -'
+```
+
+**Real WordPress.org data:** with access to the helpdesk's API secret (`FREESCOUT_SECRET` on api.wordpress.org), the sidebar can show real WordPress.org data instead of the mock's. Store it in the macOS Keychain once: paste the secret when asked (twice). Pasting it there keeps it out of your shell history; add `-U` to replace a stored secret.
+
+```bash
+security add-generic-password -a "$USER" -s wporg-freescout-api -w
+```
+
+Then start FreeScout against api.wordpress.org:
+
+```bash
+WPORG_API_URL=https://api.wordpress.org/dotorg/freescout/ WPORG_API_SECRET="$(security find-generic-password -s wporg-freescout-api -w)" WPORG_USERNAME=<your username> npm run freescout:start
+```
+
+This is production data, so WPOrgWebhooks stays off: local conversations would count toward production's contributor stats. The mock's accounts don't exist there, so add `WPORG_USERNAME=<your username>` to connect the FreeScout admin to your own account, and type that username at the mock login. Logging in syncs the admin's name and email from WordPress.org. Run `npm run freescout:start` without the variables to go back to the mock; the tests always use their own values.
+
+If your hosts file points `api.wordpress.org` at a sandbox, FreeScout reaches it without your proxy and gets a 403; comment the entry out while testing.
+
+**Run tests:**
+
+```bash
+npm run freescout:test
+```
+
+**Other FreeScout versions:** `FREESCOUT_REF` takes any FreeScout branch or release tag, e.g. `FREESCOUT_REF=master npm run freescout:start`. Each gets its own database and storage; pass the same `FREESCOUT_REF` to stop or destroy it. **Artisan:** `npm run freescout:artisan -- <command>`. **Stop / destroy:** `npm run freescout:stop`, `npm run freescout:destroy`.
+
 ## Common Commands
 
 ```bash

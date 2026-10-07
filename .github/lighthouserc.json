@@ -1,0 +1,43 @@
+{
+  "ci": {
+    "collect": {
+      "settings": {
+        "onlyCategories": ["performance", "best-practices", "accessibility", "seo"],
+        "disableFullPageScreenshot": true,
+        "skipAudits": [
+          "bf-cache",
+          "cls-culprits-insight",
+          "document-latency-insight",
+          "dom-size-insight",
+          "final-screenshot",
+          "font-display",
+          "font-display-insight",
+          "forced-reflow-insight",
+          "image-delivery-insight",
+          "interaction-to-next-paint-insight",
+          "largest-contentful-paint-element",
+          "layout-shifts",
+          "lcp-discovery-insight",
+          "lcp-lazy-loaded",
+          "lcp-phases-insight",
+          "legacy-javascript",
+          "modern-image-formats",
+          "non-composited-animations",
+          "prioritize-lcp-image",
+          "render-blocking-insight",
+          "render-blocking-resources",
+          "screenshot-thumbnails",
+          "script-treemap-data",
+          "third-parties-insight",
+          "unminified-css",
+          "unused-css-rules",
+          "unused-javascript",
+          "uses-optimized-images",
+          "valid-source-maps",
+          "viewport-insight",
+          "work-during-interaction"
+        ]
+      }
+    }
+  }
+}

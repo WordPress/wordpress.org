@@ -18,6 +18,17 @@ var wporgUserMentionAutocomplete;
 					callbacks: {
 						filter: function( query ) {
 							return wporgUserMentionAutocomplete.filterUsers( threadParticipants, query );
+						},
+						tplEval: function( tpl, item, phase ) {
+							// The dropdown is markup, the inserted mention is plain text.
+							if ( 'onDisplay' === phase ) {
+								item = $.extend( {}, item );
+								$.each( item, function( key, value ) {
+									item[ key ] = $( '<span />' ).text( value ).html();
+								} );
+							}
+
+							return this.callDefault( 'tplEval', tpl, item, phase );
 						}
 					}
 				});
@@ -43,6 +54,10 @@ var wporgUserMentionAutocomplete;
 				return results;
 			},
 
+			isUsername: function( value ) {
+				return /^[a-z0-9 _.@-]{1,60}$/i.test( value );
+			},
+
 			initThreadParticipants: function() {
 				var users = [];
 
@@ -50,6 +65,7 @@ var wporgUserMentionAutocomplete;
 				$( $( 'p.bbp-user-nicename' ).get().reverse() ).each( function() {
 					var username = $(this).text().replace(/(^\(@|\)$)/g, '');
 					if (
+						wporgUserMentionAutocomplete.isUsername( username ) &&
 						-1 === $.inArray( username, users ) &&
 						username !== currentUser
 					) {
@@ -61,6 +77,7 @@ var wporgUserMentionAutocomplete;
 				$( 'a.mention' ).each( function() {
 					var username = $(this).text().replace(/^@/, '');
 					if (
+						wporgUserMentionAutocomplete.isUsername( username ) &&
 						-1 === $.inArray( username, users ) &&
 						username !== currentUser
 					) {
