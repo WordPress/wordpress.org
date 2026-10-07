@@ -33,11 +33,67 @@ class WordPressTV_Subtitles_Upload {
 	public function ajax_get_nonce() {
 		nocache_headers();
 
+		if ( $this->is_password_required() ) {
+			wp_send_json_error(
+				array(
+					'message' => 'Password required.',
+				),
+				403
+			);
+		}
+
 		wp_send_json_success(
 			array(
 				'nonce' => wp_create_nonce( 'wptv-upload-subtitles' ),
 			)
 		);
+	}
+
+	/**
+	 * Retrieves the Post object for the subtitles page.
+	 *
+	 * @return WP_Post|null
+	 */
+	private function get_subtitle_page() {
+		static $page = null;
+
+		if ( null !== $page ) {
+			return $page ?: null;
+		}
+
+		$page = get_page_by_path( 'subtitle' );
+		if ( $page instanceof WP_Post ) {
+			return $page;
+		}
+
+		$pages = get_posts(
+			array(
+				'post_type'      => 'page',
+				'meta_key'       => '_wp_page_template',
+				'meta_value'     => 'upload-subtitles-template.php',
+				'posts_per_page' => 1,
+				'post_status'    => array( 'publish', 'private' ),
+			)
+		);
+
+		$page = ! empty( $pages ) ? $pages[0] : false;
+
+		return $page ? $page : null;
+	}
+
+	/**
+	 * Checks whether the password for the subtitles page is still required.
+	 *
+	 * @return bool True if the password is missing or incorrect or if the page does not exist.
+	 */
+	private function is_password_required() {
+		$page = $this->get_subtitle_page();
+
+		if ( ! $page ) {
+			return true;
+		}
+
+		return post_password_required( $page );
 	}
 
 	/**
@@ -147,6 +203,10 @@ class WordPressTV_Subtitles_Upload {
 	 */
 	function post() {
 		$nonce = isset( $_POST['wptv-upload-subtitles-nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['wptv-upload-subtitles-nonce'] ) ) : '';
+
+		if ( $this->is_password_required() ) {
+			wp_die( 'Password required.' );
+		}
 
 		if ( ! wp_verify_nonce( $nonce, 'wptv-upload-subtitles' ) ) {
 			wp_die( 'Invalid form data. Please go back and try again.' );
