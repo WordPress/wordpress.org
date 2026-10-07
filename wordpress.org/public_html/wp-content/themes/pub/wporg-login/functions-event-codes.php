@@ -165,6 +165,9 @@ function wporg_login_generate_event_code(): string {
  * @return WP_Post|null
  */
 function wporg_login_find_event_code_post( string $code, string|array $status = 'publish' ): ?WP_Post {
+	// The theme short-circuits all front-end queries, see functions.php.
+	$short_circuited = remove_filter( 'posts_pre_query', '__return_empty_array' );
+
 	$posts = get_posts(
 		array(
 			'post_type'        => WPORG_EVENT_CODE_POST_TYPE,
@@ -176,6 +179,10 @@ function wporg_login_find_event_code_post( string $code, string|array $status = 
 			'suppress_filters' => true,
 		)
 	);
+
+	if ( $short_circuited ) {
+		add_filter( 'posts_pre_query', '__return_empty_array' );
+	}
 
 	return $posts[0] ?? null;
 }
