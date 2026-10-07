@@ -811,7 +811,13 @@ class Import {
 		$trunk_files   = $trunk_listing ? wp_list_pluck( $trunk_listing, 'filename' ) : array();
 
 		// Mirror the Builder's check, and don't mistake a failed listing for an empty trunk.
-		$this->trunk_has_files = false === $trunk_listing || (bool) wp_list_filter( $trunk_listing, array( 'kind' => 'file' ) );
+		if ( false === $trunk_listing ) {
+			// Some deploy scripts delete /trunk/ and re-add it in a later commit, so it may be missing entirely.
+			$root_listing          = SVN::ls( self::PLUGIN_SVN_BASE . "/{$plugin_slug}/" );
+			$this->trunk_has_files = false === $root_listing || in_array( 'trunk', $root_listing, true );
+		} else {
+			$this->trunk_has_files = (bool) wp_list_filter( $trunk_listing, array( 'kind' => 'file' ) );
+		}
 
 		// Find the list of tagged versions of the plugin.
 		$tagged_versions    = [];
@@ -1569,26 +1575,23 @@ class Import {
 			if ( ! is_wp_error( $block ) && is_wp_error( $result ) ) {
 				// Only certain properties must be valid for our purposes here.
 				$required_valid_props = array(
-					'block.json[editorScript]',
-					'block.json[editorStyle]',
-					'block.json[name]',
-					'block.json[script]',
-					'block.json[style]',
+					'editorScript',
+					'editorStyle',
+					'name',
+					'script',
+					'style',
 				);
-				$error = $result->get_error_message();
-				$is_json_valid = array_reduce(
-					$required_valid_props,
-					function( $is_valid, $prop ) use ( $error ) {
-						$prop_field = substr( $prop, 11, -1 ); // 'name' in 'block.json[name]'
-						return (
-							$is_valid &&
-							( false === strpos( $error, $prop ) ) &&
-							// String in rest_validate_object_value_from_schema()
-							( false === strpos( $error, "{$prop_field} is a required property of block.json." ) )
-						);
-					},
-					true
-				);
+				// A tolerated schema error must not hide errors for required properties.
+				$is_json_valid = true;
+				foreach ( $result->get_error_messages() as $error ) {
+					foreach ( $required_valid_props as $prop ) {
+						// Match both property paths and missing-property messages from core.
+						if ( false !== strpos( $error, "block.json[{$prop}]" ) || false !== strpos( $error, "{$prop} is a required property of block.json." ) ) {
+							$is_json_valid = false;
+							break 2;
+						}
+					}
+				}
 				if ( $is_json_valid ) {
 					$blocks[] = $block;
 				}
