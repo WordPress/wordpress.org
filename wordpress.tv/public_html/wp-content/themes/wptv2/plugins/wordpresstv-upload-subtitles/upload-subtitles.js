@@ -13,6 +13,8 @@
 
 	// WordPress nonces expire after 12–24 hours; refresh if older than 10 hours.
 	const NONCE_TTL_MS = 10 * 60 * 60 * 1000;
+	// Abort the AJAX refresh if the server takes longer than 5 seconds.
+	const NONCE_FETCH_TIMEOUT_MS = 5000;
 
 	let refreshPromise = null;
 	let lastRefreshedAt = 0;
@@ -45,11 +47,24 @@
 		requestUrl.searchParams.set( 'action', 'wptv_get_subtitles_nonce' );
 		requestUrl.searchParams.set( '_', Date.now().toString() );
 
-		refreshPromise = fetch( requestUrl.toString(), {
+		const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+		const timeoutId = controller
+			? setTimeout( function () {
+				controller.abort();
+			}, NONCE_FETCH_TIMEOUT_MS )
+			: null;
+
+		const fetchOptions = {
 			method: 'GET',
 			credentials: 'same-origin',
 			cache: 'no-store',
-		} )
+		};
+
+		if ( controller ) {
+			fetchOptions.signal = controller.signal;
+		}
+
+		refreshPromise = fetch( requestUrl.toString(), fetchOptions )
 			.then( function ( response ) {
 				if ( ! response.ok ) {
 					throw new Error( 'Network response was not ok' );
@@ -68,6 +83,9 @@
 				return null;
 			} )
 			.finally( function () {
+				if ( timeoutId ) {
+					clearTimeout( timeoutId );
+				}
 				refreshPromise = null;
 			} );
 
