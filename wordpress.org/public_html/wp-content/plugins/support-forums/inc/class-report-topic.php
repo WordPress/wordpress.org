@@ -67,6 +67,9 @@ class Report_Topic {
 			return $content;
 		}
 
+		// Report reasons are plain text.
+		$content = esc_html( $content );
+
 		if ( isset( $this->report_inline_notices[ get_the_ID() ] ) && ! empty( $this->report_inline_notices[ get_the_ID() ] ) ) {
 			foreach ( $this->report_inline_notices[ get_the_ID() ] as $notice ) {
 				$message = sprintf(
@@ -209,25 +212,26 @@ class Report_Topic {
 			return;
 		}
 
-		$prepared_post = wp_kses_post( $_POST['topic-report-reply'] );
+		$prepared_post = wp_kses_post( wp_unslash( $_POST['topic-report-reply'] ) );
 
 		wp_insert_comment(
 			array(
-				'comment_content' => $prepared_post,
+				'comment_content' => wp_slash( $prepared_post ),
 				'comment_post_ID' => $report->ID,
 				'user_id'         => get_current_user_id(),
 			)
 		);
 
 		$email_text = sprintf(
-			// translators: 1: The users displayname. 2: The title of the reported topic. 3: The message response from a moderator.
+			// translators: 1: The users displayname. 2: The title of the reported topic. 3: The URL to the topic. 4: The message response from a moderator.
 			__( '%1$s,
 
 You recently reported the topic "%2$s".
+<%3$s>
 
 A moderator has reviewed the report, taken appropriate action, and provided you the following feedback:
 
-%3$s
+%4$s
 
 Regards,
 The WordPress.org Team',
@@ -235,6 +239,7 @@ The WordPress.org Team',
 			),
 			get_the_author_meta( 'display_name', $report->post_author ),
 			bbp_get_topic_title(),
+			bbp_get_topic_permalink(),
 			$prepared_post
 		);
 
@@ -406,7 +411,7 @@ The WordPress.org Team',
 			'<p>%s</p>',
 			sprintf(
 			    // translators: 1: Title of reported topic as a link.
-				__( 'Reported topic: %s', 'wporg-forums' ),
+				esc_html__( 'Reported topic: %s', 'wporg-forums' ),
 				sprintf(
 					'<a href="%s">%s</a>',
 					esc_url( get_the_permalink( $topic ) ),
@@ -419,7 +424,7 @@ The WordPress.org Team',
 			'<p>%s</p>',
 			sprintf(
 			    // translators: 1: Number of posts in the topic.
-				__( 'Replies in this topic: %d', 'wporg-forums' ),
+				esc_html__( 'Replies in this topic: %d', 'wporg-forums' ),
 				esc_html( bbp_get_topic_reply_count( $topic ) )
 			)
 		);
@@ -428,7 +433,7 @@ The WordPress.org Team',
 			'<p>%s</p>',
 			sprintf(
 			    // translators: 1: Number of participants in the topic.
-				__( 'Participants in this topic: %d', 'wporg-forums' ),
+				esc_html__( 'Participants in this topic: %d', 'wporg-forums' ),
 				esc_html( bbp_get_topic_voice_count( $topic ) )
 			)
 		);
@@ -449,7 +454,7 @@ The WordPress.org Team',
 			'<p>%s</p>',
 			sprintf(
 			    // translators: 1: The display-name of the reporter, as a link to their user profile.
-				__( 'Reporter: %s', 'wporg-forums' ),
+				esc_html__( 'Reporter: %s', 'wporg-forums' ),
 				sprintf(
 					'<a href="%s">%s</a>',
 					esc_url( bbp_get_user_profile_url( $author_id ) ),
@@ -462,7 +467,7 @@ The WordPress.org Team',
 			'<p>%s</p>',
 			sprintf(
 			    // translators: 1: The IP address the report was submitted from.
-				__( 'IP Address: %s', 'wporg-forums' ),
+				esc_html__( 'IP Address: %s', 'wporg-forums' ),
 				esc_html( $reporter_ip )
 			)
 		);
@@ -588,7 +593,11 @@ The WordPress.org Team',
 			remove_action( 'set_object_terms', array( $this, 'detect_manual_modlook' ), 10 );
 			wp_add_object_terms( $_POST['wporg-support-report-topic'], 'modlook', 'topic-tag' );
 
-			$this->add_modlook_history( $_POST['wporg-support-report-topic'], $_POST['topic-report-reason-details'], (int) $_POST['topic-report-reason'] );
+			$this->add_modlook_history(
+				(int) $_POST['wporg-support-report-topic'],
+				wp_slash( sanitize_textarea_field( wp_unslash( $_POST['topic-report-reason-details'] ) ) ),
+				$validate_term->term_id
+			);
 
 			wp_safe_redirect( get_the_permalink( $_POST['wporg-support-report-topic'] ) );
 
@@ -644,7 +653,7 @@ The WordPress.org Team',
 		$is_reported      = has_term( 'modlook', 'topic-tag', $topic_id );
 
 		if ( $is_reported ) {
-			$report_text = __( 'This topic has been reported', 'wporg-forums' );
+			$report_text = esc_html__( 'This topic has been reported', 'wporg-forums' );
 		}
 		else {
 			$action = sprintf(
@@ -671,7 +680,7 @@ The WordPress.org Team',
 				<?php wp_nonce_field( $action ); ?>
 				<input type="hidden" name="wporg-support-report-topic" value="<?php echo esc_attr( bbp_get_topic_id() ); ?>">
 
-				<label for="topic-report-reason"><?php _e( 'Report this topic for:', 'wporg-forums' ); ?></label>
+				<label for="topic-report-reason"><?php esc_html_e( 'Report this topic for:', 'wporg-forums' ); ?></label>
 				<?php
 				wp_dropdown_categories(
 					array(
@@ -687,7 +696,7 @@ The WordPress.org Team',
 				?>
 
 				<p>
-					<label for="topic-report-reason-details"><?php _e( 'Why are you reporting this topic:', 'wporg-forums' ); ?></label>
+					<label for="topic-report-reason-details"><?php esc_html_e( 'Why are you reporting this topic:', 'wporg-forums' ); ?></label>
 					<textarea type="text" name="topic-report-reason-details" id="topic-report-reason-details" class="widefat" required="required"></textarea>
 				</p>
 
@@ -704,12 +713,13 @@ The WordPress.org Team',
 				'<br><a href="%s" class="button">%s</a>',
 				esc_url( $this->remove_topic_modlook_url() ),
 				// translators: `modlook` is the term used for posts tagged by users when they want a moderator to have a look.
-				__( 'Remove modlook', 'wporg-support' )
+				esc_html__( 'Remove modlook', 'wporg-support' )
 			);
 		}
 
 		printf(
 			'<li class="topic-report">%s</li>',
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Form fields are escaped above; preserve the report form.
 			$report_text
 		);
 
@@ -735,8 +745,8 @@ The WordPress.org Team',
 
 			printf(
 				'<li class="topic-previous-reports">%s<ul class="previous-reports">%s</ul></li>',
-				__( 'Previous reports:', 'wporg-support' ),
-				implode( ' ', $lines )
+				esc_html__( 'Previous reports:', 'wporg-support' ),
+				wp_kses_post( implode( ' ', $lines ) )
 			);
 		}
 	}

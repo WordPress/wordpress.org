@@ -1,0 +1,62 @@
+{
+	"avatar_url": "https://secure.gravatar.com/avatar/43e10bdac0c553eccd6b30644312cc245d1d4df3cb04dbc898f44cae8d7d68cf?s=256&d=404&r=g",
+	"blocks": [
+		{
+			"type": "lead",
+			"text": "obenland",
+			"url": "https://profiles.wordpress.org/obenland/",
+			"badges": []
+		},
+		{
+			"type": "links",
+			"links": [
+				{
+					"text": "Account & Security",
+					"url": "https://profiles.wordpress.org/obenland/profile/edit/group/3/"
+				},
+				{
+					"text": "Forum Profile",
+					"url": "https://wordpress.org/support/users/obenland/"
+				},
+				{
+					"text": "Search pending signups",
+					"url": "https://login.wordpress.org/wp-admin/admin.php?page=user-registrations&s={sender_email}"
+				}
+			]
+		},
+		{
+			"type": "heading",
+			"text": "Slack"
+		},
+		{
+			"type": "items",
+			"items": [
+				{
+					"title": "obenland",
+					"url": "https://wordpress.slack.com/archives/D07SV6PU4H5",
+					"badges": [],
+					"meta": [
+						{
+							"text": "Updated 2026-09-29"
+						}
+					]
+				},
+				{
+					"title": "obenland",
+					"url": "https://wordpress.slack.com/archives/D03F0NQUU",
+					"badges": [
+						{
+							"label": "Deactivated",
+							"tone": "error"
+						}
+					],
+					"meta": [
+						{
+							"text": "Updated 2026-04-12"
+						}
+					]
+				}
+			]
+		}
+	]
+}

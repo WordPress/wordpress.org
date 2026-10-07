@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
+use WordPressdotorg\Plugin_Directory\Jobs\API_Update_Updater;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
@@ -25,6 +26,11 @@ class Release_Confirmation {
 	 * @return string
 	 */
 	static function display() {
+		// In the rest-api, just return the shortcode tag, so it can be rendered properly in the app or other consumers.
+		if ( wp_is_serving_rest_request() ) {
+			return '[' . self::SHORTCODE . ']';
+		}
+
 		$plugins = Tools::get_users_write_access_plugins( wp_get_current_user() );
 
 		if ( ! $plugins ) {
@@ -63,27 +69,32 @@ class Release_Confirmation {
 		ob_start();
 
 		// If the user is not using 2FA, show a notice.
-		if ( ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) {
+		if (
+			class_exists( 'Two_Factor_Core' ) &&
+			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() )
+		) {
 			printf(
 				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
 				sprintf(
-					__( 'Your account has elevated privileges and requires extra security before you can manage plugin releases. Please <a href="%s">enable two-factor authentication now</a>.', 'wporg-plugins' ),
-					get_2fa_onboarding_url()
+					/* translators: %s: Two-factor authentication setup URL. */
+					wp_kses_post( __( 'Your account has elevated privileges and requires extra security before you can manage plugin releases. Please <a href="%s">enable two-factor authentication now</a>.', 'wporg-plugins' ) ),
+					esc_url( get_2fa_onboarding_url() )
 				)
 			);
 		}
 
-		echo '<p>' . __( 'This page is for authorized committers to view and manage releases of their plugins. Plugins with confirmations enabled require an extra action on this page to approve each new release.', 'wporg-plugins' ) . '</p>';
+		echo '<p>' . esc_html__( 'This page is for authorized committers to view and manage releases of their plugins. Plugins with confirmations enabled require an extra action on this page to approve each new release.', 'wporg-plugins' ) . '</p>';
 
 		/* translators: %s: plugins@wordpress.org */
-		echo '<p>' . sprintf( __( 'Release confirmations can be enabled on the Advanced view of plugin pages. If you need to disable release confirmations for a plugin, please contact %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
+		echo '<p>' . sprintf( esc_html__( 'Release confirmations can be enabled on the Advanced view of plugin pages. If you need to disable release confirmations for a plugin, please contact %s.', 'wporg-plugins' ), 'plugins@wordpress.org' ) . '</p>';
 
 		$not_enabled = [];
 		foreach ( $plugins as $plugin ) {
 			printf(
-				'<h2><a href="%s">%s</a></h2>',
-				get_permalink( $plugin ),
-				get_the_title( $plugin )
+				'<h2 id="releases-%s"><a href="%s">%s</a></h2>',
+				esc_attr( $plugin->post_name ),
+				esc_url( get_permalink( $plugin ) ),
+				esc_html( get_the_title( $plugin ) )
 			);
 
 			self::single_plugin( $plugin );
@@ -95,16 +106,27 @@ class Release_Confirmation {
 
 		if ( $not_enabled ) {
 			printf(
-				'<p><em>' . __( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins') . '</em></p>',
-				wp_sprintf_l( '%l', array_filter( array_map( function( $plugin ) {
-					if ( 'publish' == get_post_status( $plugin ) ) {
-						return sprintf(
-							'<a href="%s">%s</a>',
-							get_permalink( $plugin ),
-							get_the_title( $plugin )
-						);
-					}
-				}, $not_enabled ) ) )
+				/* translators: %s: List of plugin links. */
+				'<p><em>' . esc_html__( 'The following plugins do not have release confirmations enabled: %s', 'wporg-plugins' ) . '</em></p>',
+				wp_kses_post(
+					wp_sprintf_l(
+						'%l',
+						array_filter(
+							array_map(
+								function ( $plugin ) {
+									if ( 'publish' === get_post_status( $plugin ) ) {
+										return sprintf(
+											'<a href="%s">%s</a>',
+											esc_url( get_permalink( $plugin ) ),
+											esc_html( get_the_title( $plugin ) )
+										);
+									}
+								},
+								$not_enabled
+							)
+						)
+					)
+				)
 			);
 		}
 
@@ -114,19 +136,22 @@ class Release_Confirmation {
 	static function single_plugin( $plugin ) {
 		$releases = Plugin_Directory::get_releases( $plugin );
 
+		// Resolved once for the whole listing; each row's cooldown line compares against it.
+		$current_release = API_Update_Updater::get_current_release( $plugin );
+
 		echo '<div class="wp-block-table is-style-stripes">
 		<table class="plugin-releases-listing">
+		<colgroup>
+			<col width="25%">
+		</colgroup>
 		<thead>
 			<tr>
-				<th>Version</th>
-				<th>Date</th>
-				<th>Committer</th>
-				<th>Approval</th>
-				<th>Actions</th>
-		</thead></div>';
+				<th>' . esc_html_x( 'Release', 'Releases Table header', 'wporg-plugins' ) . '</th>
+				<th>&nbsp;</th>
+		</thead>';
 
 		if ( ! $releases ) {
-			echo '<tr class="no-items"><td colspan="5"><em>' . __( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
+			echo '<tr class="no-items"><td colspan="5"><em>' . esc_html__( 'No releases.', 'wporg-plugins' ) . '</em></td></tr>';
 		}
 
 		foreach ( $releases as $data ) {
@@ -136,58 +161,86 @@ class Release_Confirmation {
 			foreach ( $data['committer'] as $i => $login ) {
 				$data['committer'][ $i ] = sprintf(
 					'<a href="%s">%s</a>',
-					'https://profiles.wordpress.org/' . get_user_by( 'login', $login )->user_nicename . '/',
+					esc_url( 'https://profiles.wordpress.org/' . ( get_user_by( 'login', $login )->user_nicename ?? '' ) . '/' ),
 					esc_html( $login )
 				);
 			}
 
 			printf(
 				'<tr>
-					<td>%s</td>
-					<td title="%s">%s</td>
-					<td>%s</td>
-					<td>%s</td>
-					<td><div class="plugin-releases-listing-actions">%s</div></td>
+					<td>%s<br><small>%s</small></td>
+					<td>
+						<form method="POST">
+							<div class="plugin-releases-listing-actions">%s</div>
+							%s
+						</form>
+					</td>
 				</tr>',
 				sprintf(
-					'<a href="%s">%s</a>',
-					esc_url( sprintf(
-						'https://plugins.trac.wordpress.org/browser/%s/tags/%s/',
-						$plugin->post_name,
-						$data['tag']
-					) ),
-					esc_html( $data['version'] )
+					/* translators: %s: Version number, linked. */
+					esc_html__( 'Version %s', 'wporg-plugins' ),
+					sprintf(
+						'<a href="%s">%s</a>',
+						esc_url( sprintf(
+							'https://plugins.trac.wordpress.org/browser/%s/tags/%s/',
+							$plugin->post_name,
+							$data['tag']
+						) ),
+						esc_html( $data['version'] )
+					),
 				),
-				esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
-				esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
-				implode( ', ', $data['committer'] ),
-				self::get_approval_text( $plugin, $data ),
-				self::get_actions( $plugin, $data )
+				sprintf(
+					/* translators: 1: time eg. '3 hours ago', 2: the committer(s). */
+					esc_html__( 'Released %1$s by %2$s', 'wporg-plugins' ),
+					sprintf(
+						'<span title="%s">%s</span>',
+						esc_attr( gmdate( 'Y-m-d H:i:s', $data['date'] ) ),
+						esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( $data['date'] ) ) ),
+					),
+					implode( ', ', $data['committer'] ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Committer links are escaped when built above.
+				),
+				self::get_actions( $plugin, $data ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Button attributes and labels are escaped in get_actions().
+				self::get_approval_text( $plugin, $data, $current_release ) . // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped when built.
+					self::get_rollout_strategy( $plugin, $data ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped controls generated below include an intentional onchange handler.
 			);
 		}
 
 		echo '</table>';
 		echo '</div>';
+		echo '<style>
+			.plugin-releases-listing-actions {
+				float: right;
+			}
+		</style>';
 	}
 
-	static function get_approval_text( $plugin, $data ) {
+	/**
+	 * The confirmation/cooldown status text for a release row.
+	 *
+	 * @param \WP_Post   $plugin          The plugin post object.
+	 * @param array      $data            The release row from Plugin_Directory::get_releases().
+	 * @param array|null $current_release Optional. The already-resolved current release, to save re-resolving per row.
+	 * @return string The release approval text, filtered via `wporg_plugins_release_approval_text`.
+	 */
+	public static function get_approval_text( $plugin, $data, $current_release = null ) {
 		ob_start();
 
 		if ( ! $data['confirmations_required'] ) {
-			_e( 'Release did not require confirmation.', 'wporg-plugins' );
+			esc_html_e( 'Release did not require confirmation.', 'wporg-plugins' );
 		} else if ( ! empty( $data['discarded'] ) ) {
-			_e( 'Release discarded.', 'wporg-plugins' );
+			esc_html_e( 'Release discarded.', 'wporg-plugins' );
 		} elseif ( $data['confirmed'] && ! $data['zips_built'] ) {
-			_e( 'Release confirmed, waiting for processing.', 'wporg-plugins' );
+			esc_html_e( 'Release confirmed, waiting for processing.', 'wporg-plugins' );
 		} else if ( $data['confirmed'] ) {
-			_e( 'Release confirmed.', 'wporg-plugins' );
+			esc_html_e( 'Release confirmed.', 'wporg-plugins' );
 		} else if ( 1 == $data['confirmations_required'] ) {
-			_e( 'Waiting for confirmation.', 'wporg-plugins' );
+			esc_html_e( 'Waiting for confirmation.', 'wporg-plugins' );
 		} else {
 			printf(
-				__( '%s of %s required confirmations.', 'wporg-plugins' ),
-				number_format_i18n( count( $data['confirmations'] ) ),
-				number_format_i18n( $plugin->release_confirmation )
+				/* translators: 1: Number of confirmations, 2: Number of required confirmations. */
+				esc_html__( '%1$s of %2$s required confirmations.', 'wporg-plugins' ),
+				esc_html( number_format_i18n( count( $data['confirmations'] ) ) ),
+				esc_html( number_format_i18n( $plugin->release_confirmation ) )
 			);
 		}
 
@@ -213,7 +266,7 @@ class Release_Confirmation {
 			printf(
 				'<span title="%s">%s</span><br>',
 				esc_attr( gmdate( 'Y-m-d H:i:s', $time ) ),
-				$approved_text
+				esc_html( $approved_text )
 			);
 		}
 
@@ -223,9 +276,10 @@ class Release_Confirmation {
 				'<span title="%s">%s</span><br>',
 				esc_attr( gmdate( 'Y-m-d H:i:s', $data['discarded']['time'] ) ),
 				sprintf(
-					__( 'Discarded by %1$s, %2$s ago.', 'wporg-plugins' ),
-					$user->display_name ?: $user->user_login,
-					human_time_diff( $data['discarded']['time'] )
+					/* translators: 1: User name, 2: Time since the release was discarded. */
+					esc_html__( 'Discarded by %1$s, %2$s ago.', 'wporg-plugins' ),
+					esc_html( $user->display_name ?: $user->user_login ),
+					esc_html( human_time_diff( $data['discarded']['time'] ) )
 				)
 			);
 		}
@@ -234,9 +288,11 @@ class Release_Confirmation {
 		if ( $data['confirmed'] && ! $data['zips_built'] ) {
 			printf(
 				'<span>%s</span><br>',
-				__( 'The ZIP files for this release have not yet been built by WordPress.org.', 'wporg-plugins' )
+				esc_html__( 'The ZIP files for this release have not yet been built by WordPress.org.', 'wporg-plugins' )
 			);
 		}
+
+		self::render_cooldown_status( $plugin, $data, $current_release );
 
 		echo '</div>';
 
@@ -253,13 +309,64 @@ class Release_Confirmation {
 		return apply_filters( 'wporg_plugins_release_approval_text', $text, $plugin, $data );
 	}
 
+	/**
+	 * Render a single line describing the cooldown state of a release: pending serve time.
+	 * Skipped for releases without a cooldown delay (feature off at release creation, or
+	 * force-released), discarded releases, releases that haven't moved past
+	 * confirmation/processing, rows other than the current release (superseded rows are
+	 * never served), or where the cooldown window has elapsed.
+	 *
+	 * @param \WP_Post   $plugin          The plugin post object.
+	 * @param array      $data            The release row from Plugin_Directory::get_releases().
+	 * @param array|null $current_release The already-resolved current release, or null to resolve here.
+	 */
+	protected static function render_cooldown_status( $plugin, $data, $current_release = null ) {
+		$release_delay = (int) ( $data['release_delay'] ?? 0 );
+		if ( ! $release_delay ) {
+			return;
+		}
+
+		if ( ! empty( $data['discarded'] ) ) {
+			return;
+		}
+
+		// Skip when the release hasn't moved past the confirmation/processing stage yet.
+		if ( $data['confirmations_required'] && ( ! $data['confirmed'] || ! $data['zips_built'] ) ) {
+			return;
+		}
+
+		// Only the current release can be pending; superseded rows are never served.
+		$current_release = $current_release ?? API_Update_Updater::get_current_release( $plugin );
+		if ( ! $current_release || (string) ( $data['tag'] ?? '' ) !== (string) $current_release['tag'] ) {
+			return;
+		}
+
+		// Match the enforced window: compute_release_time() is what update_single_plugin() gates on.
+		$cooldown_until = API_Update_Updater::compute_release_time( $plugin, $data ) + $release_delay;
+
+		if ( $cooldown_until <= time() ) {
+			return;
+		}
+
+		$message = sprintf(
+			/* translators: %s: relative time until cooldown expires */
+			__( 'Will be served to sites in %s.', 'wporg-plugins' ),
+			human_time_diff( time(), $cooldown_until )
+		);
+		printf(
+			'<span title="%s">%s</span><br>',
+			esc_attr( gmdate( 'Y-m-d H:i:s', $cooldown_until ) ),
+			esc_html( $message )
+		);
+	}
+
 	static function get_actions( $plugin, $data ) {
 		$buttons = [];
 
 		if (
 			! is_user_logged_in() ||
-			! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ||
 			! current_user_can( 'plugin_manage_releases', $plugin  ) ||
+			( class_exists( 'Two_Factor_Core' ) && ! Two_Factor_Core::is_user_using_two_factor( get_current_user_id() ) ) ||
 
 			// No need to show actions if the release can't be confirmed, or is already confirmed
 			! $data['confirmations_required'] ||
@@ -279,8 +386,8 @@ class Release_Confirmation {
 				$discard_link = get_revalidation_js_url( $discard_link );
 
 				$buttons[] = sprintf(
-					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
-					$confirm_link,
+					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</button>',
+					esc_attr( $confirm_link ),
 					esc_attr(
 						sprintf(
 							/* translators: 1: Version number, 2: Plugin name. */
@@ -289,12 +396,12 @@ class Release_Confirmation {
 							$plugin->post_title
 						)
 					),
-					__( 'Confirm', 'wporg-plugins' )
+					esc_html__( 'Confirm', 'wporg-plugins' )
 				);
 
 				$buttons[] = sprintf(
-					'<a href="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</a>',
-					$discard_link,
+					'<button formaction="%s" class="wp-element-button button discard-release has-very-light-gray-background-color has-charcoal-1-color" data-2fa-required data-2fa-message="%s">%s</button>',
+					esc_attr( $discard_link ),
 					esc_attr(
 						sprintf(
 							/* translators: 1: Version number, 2: Plugin name. */
@@ -303,7 +410,7 @@ class Release_Confirmation {
 							$plugin->post_title
 						)
 					),
-					__( 'Discard', 'wporg-plugins' )
+					esc_html__( 'Discard', 'wporg-plugins' )
 				);
 
 			}
@@ -314,13 +421,62 @@ class Release_Confirmation {
 		) {
 			// Plugin reviewers can undo a discard within 48hrs.
 			$buttons[] = sprintf(
-				'<a href="%s" class="wp-element-button button undo-discard">%s</a>',
-				Template::get_release_confirmation_link( $data['tag'], $plugin, 'undo-discard' ),
-				__( 'Undo Discard', 'wporg-plugins' )
+				'<button formaction="%s" class="wp-element-button button undo-discard">%s</buttona>',
+				esc_url( Template::get_release_confirmation_link( $data['tag'], $plugin, 'undo-discard' ) ),
+				esc_html__( 'Undo Discard', 'wporg-plugins' )
 			);
 		}
 
 		return implode( ' ', $buttons );
+	}
+
+	/**
+	 * Display the Rollout Strategy options for a given plugin release.
+	 *
+	 * @param WP_Post $plugin The plugin post object.
+	 * @param array   $data   The release data.
+	 * @return string HTML for the rollout strategy options.
+	 */
+	static function get_rollout_strategy( $plugin, $data ) {
+		if ( ! current_user_can( 'plugin_manage_releases', $plugin ) ) {
+			return '';
+		}
+
+		if ( ! $data['confirmations_required'] || ! empty( $data['discarded'] ) ) {
+			return '';
+		}
+
+		$rollout = $data['rollout_strategy'] ?? '';
+		if ( $data['confirmed'] && ! $rollout ) {
+			// If the release is confirmed, but no rollout strategy was set for the release, don't display the UI.
+			return '';
+		}
+
+		ob_start();
+		echo '<div class="release-strategy">';
+		echo '<h3>' . esc_html__( 'Rollout Strategy', 'wporg-plugins' ) . '</h3>';
+
+		echo '<select
+			id="rollout_strategy"
+			name="rollout_strategy"
+			onchange="this.nextElementSibling.innerText = this.options[this.selectedIndex].dataset.description;"'
+			. disabled( $data['confirmed'], true, false ) .
+			'>';
+		foreach ( Template::get_rollout_strategies() as $slug => $set ) {
+			printf(
+				'<option value="%s" data-description="%s" %s>%s</option>',
+				esc_attr( $slug ),
+				esc_attr( $set['description'] ),
+				selected( $rollout, $slug, false ),
+				esc_html( $set['name'] )
+			);
+		}
+		echo '</select>';
+		echo '<div class="help">' . esc_html( Template::get_rollout_strategies()[ $rollout ]['description'] ?? '' ) . '</div>';
+
+		echo '</div>';
+
+		return ob_get_clean();
 	}
 
 	static function generate_access_url( $user = null ) {
@@ -344,6 +500,80 @@ class Release_Confirmation {
 
 		// A page with this shortcode has no need to be indexed.
 		add_filter( 'wporg_noindex_request', '__return_true' );
+	}
+
+	/**
+	 * Surfaces a release-hold notice to committers on the plugin's public page.
+	 *
+	 * A current release is held from the update API either by an automated security
+	 * review block, which has no expiry, or by the release cooldown while its window
+	 * runs. Bails when the viewer isn't a committer, when there's no current release,
+	 * or when it is neither blocked nor still in cooldown. A block takes precedence,
+	 * since it is the hold that actually withholds the version and it outlasts the
+	 * cooldown.
+	 *
+	 * @param WP_Post $post The currently displayed post.
+	 */
+	public static function frontend_cooldown_notice( $post = null ) {
+		$post = get_post( $post );
+
+		if ( ! $post || ! current_user_can( 'plugin_admin_edit', $post ) ) {
+			return;
+		}
+
+		// Resolved from the stable tag, so the notice shows even when the Version header is empty or disagrees.
+		$release = API_Update_Updater::get_current_release( $post );
+		if ( ! $release ) {
+			return;
+		}
+
+		$is_blocked = API_Update_Updater::is_release_blocked( $release );
+
+		// Match the enforced window: compute_release_time() is what update_single_plugin() gates on.
+		$release_delay  = (int) ( $release['release_delay'] ?? 0 );
+		$cooldown_until = $release_delay ? API_Update_Updater::compute_release_time( $post, $release ) + $release_delay : 0;
+		$in_cooldown    = $cooldown_until > time();
+
+		if ( ! $is_blocked && ! $in_cooldown ) {
+			return;
+		}
+
+		$allowed_html = array(
+			'code' => array(),
+			'a'    => array( 'href' => true ),
+		);
+
+		if ( $is_blocked ) {
+			printf(
+				'<div class="plugin-notice notice notice-error notice-alt"><p>%s</p></div>',
+				wp_kses(
+					sprintf(
+						/* translators: 1: plugin version, 2: URL to the automated security review documentation. */
+						__( 'Version %1$s is blocked by an automated security review and is not being served to sites, which keep receiving the previously distributed version. Review the findings in the email sent to the plugin committers, then address them and release a new version. Learn more in the <a href="%2$s">plugin developer handbook</a>.', 'wporg-plugins' ),
+						'<code>' . esc_html( $release['version'] ) . '</code>',
+						'https://developer.wordpress.org/plugins/wordpress-org/automated-security-review/'
+					),
+					$allowed_html
+				)
+			);
+
+			return;
+		}
+
+		printf(
+			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
+			wp_kses(
+				sprintf(
+					/* translators: 1: plugin version, 2: relative time until cooldown expires, 3: delay duration in hours, 4: plugins@wordpress.org link */
+					__( 'Version %1$s will be released to sites in about %2$s. WordPress.org currently delays plugin updates by %3$d hours so moderators and security scanners can review changes before they reach users. If this update fixes a security issue that needs to ship sooner, contact %4$s.', 'wporg-plugins' ),
+					'<code>' . esc_html( $release['version'] ) . '</code>',
+					esc_html( human_time_diff( time(), $cooldown_until ) ),
+					(int) ( $release_delay / HOUR_IN_SECONDS ),
+					'<a href="mailto:plugins@wordpress.org">plugins@wordpress.org</a>'
+				),
+				$allowed_html
+			)
+		);
 	}
 
 	/**
@@ -376,8 +606,9 @@ class Release_Confirmation {
 		printf(
 			'<div class="plugin-notice notice notice-info notice-alt"><p>%s</p></div>',
 			sprintf(
-				__( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ),
-				home_url( '/developers/releases/' ) // TODO: Hardcoded URL.
+				/* translators: %s: Releases page URL. */
+				wp_kses_post( __( 'This plugin has <a href="%s">a pending release that requires confirmation</a>.', 'wporg-plugins' ) ),
+				esc_url( home_url( '/developers/releases/' ) ) // TODO: Hardcoded URL.
 			)
 		);
 	}

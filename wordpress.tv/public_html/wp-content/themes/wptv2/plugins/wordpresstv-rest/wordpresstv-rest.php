@@ -173,10 +173,10 @@ class WordPressTV_REST_API {
 
 								$video['video']['mp4'][ $mp4_field ] = video_url_by_format( $post_video, $mp4_format );
 							}
-						}
 
-						// Expose the subtitles
-						$video['subtitles'] = (array) $api_data['subtitles'];
+							// Expose the subtitles.
+							$video['subtitles'] = (array) ( $api_data['subtitles'] ?? [] );
+						}
 					}
 
 					$response['videos'][] = $video;
@@ -264,7 +264,7 @@ class WordPressTV_REST_API {
 
 	function error( $message, $http_code = 404 ) {
 		status_header( $http_code );
-		exit( $message );
+		exit( esc_html( $message ) );
 	}
 }
 

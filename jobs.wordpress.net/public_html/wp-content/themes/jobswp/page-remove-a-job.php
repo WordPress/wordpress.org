@@ -7,10 +7,7 @@
 
 get_header(); ?>
 
-<?php get_sidebar(); ?>
-
-	<div id="primary" class="content-area grid_9">
-		<main id="main" class="site-main" role="main">
+	<main>
 
 	<?php if ( have_posts() ) : ?>
 		<?php /* Start the Loop */ ?>
@@ -27,9 +24,10 @@ get_header(); ?>
 			<div class="entry-content">
 				<div class="notice notice-error">
 					<?php if ( is_string( $_POST['errors'] ) ) {
-						echo sprintf( __( '<strong>ERROR:</strong> %s', 'jobswp' ), esc_html( $_POST['errors'] ) );
+						/* translators: %s: Error message. */
+						printf( wp_kses_post( __( '<strong>ERROR:</strong> %s', 'jobswp' ) ), esc_html( wp_unslash( $_POST['errors'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Display-only form redisplay; the value is escaped with esc_html() at output.
 					} else {
-						_e( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' );
+						echo wp_kses_post( __( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'jobswp' ) );
 					} ?>
 					<?php do_action( 'jobswp_notice', 'error' ); ?>
 				</div>
@@ -37,7 +35,7 @@ get_header(); ?>
 			<?php elseif ( isset( $_GET['removedjob'] ) && '1' === $_GET['removedjob'] ) : ?>
 			<div class="entry-content">
 				<div class="notice notice-success">
-					<strong><?php _e( 'Your job posting has been successfully removed.', 'jobswp' ); ?></strong>
+					<strong><?php esc_html_e( 'Your job posting has been successfully removed.', 'jobswp' ); ?></strong>
 				</div>
 			</div>
 			<?php endif; ?>
@@ -57,12 +55,12 @@ get_header(); ?>
 
 						<?php do_action( 'jobswp_remove_job_form' ); ?>
 
-						<input class="submit-job" type="submit" name="submitjob" value="<?php _e( 'Remove job', 'jobswp' ); ?>" />
+						<input class="btn btn-primary submit-job" type="submit" name="submitjob" value="<?php esc_attr_e( 'Remove job', 'jobswp' ); ?>" />
 
 					</form>
 				</div>
 
-				<?php edit_post_link( __( 'Edit', 'jobswp' ), '<footer class="entry-meta grid_9"><span class="edit-link">', '</span></footer>' ); ?>
+				<?php edit_post_link( __( 'Edit', 'jobswp' ), '<footer class="entry-meta"><span class="edit-link">', '</span></footer>' ); ?>
 			</div><!-- .entry-content -->
 		</article><!-- #post-## -->
 
@@ -76,7 +74,6 @@ get_header(); ?>
 
 	<?php endif; ?>
 
-		</main><!-- #main -->
-	</div><!-- #primary -->
+	</main>
 
 <?php get_footer(); ?>

@@ -16,8 +16,9 @@
  * and share what you've learned with others.
  */
 /* Sass is good */
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /*--------------------------------------------------------------
@@ -906,12 +907,14 @@ div.bbp-template-notice.updated {
 /*--------------------------------------------------------------
 # Typography
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 h1,
@@ -939,8 +942,9 @@ h3.comment-reply-title {
 	font-weight: 700;
 }
 
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 p {
@@ -1073,11 +1077,21 @@ big {
 	margin-right: 0;
 }
 
+/* https://github.com/WordPress/gutenberg/pull/65891 Remove with GB 20.9+ */
+.wp-block-code {
+	direction: ltr;
+	text-align: initial;
+}
+.wp-block-code code {
+	direction: ltr;
+	text-align: initial;
+}
 /*--------------------------------------------------------------
 # Elements
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 html {
@@ -1196,8 +1210,9 @@ table {
 	text-align: center;
 }
 
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 .notice {
@@ -1270,8 +1285,9 @@ table {
 	padding-bottom: 8px;
 }
 
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /* User badges */
@@ -1335,8 +1351,9 @@ table {
 /*--------------------------------------------------------------
 # Forms
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /* --------------------------------------------------------------------------
@@ -1769,8 +1786,9 @@ button[type=submit].button.button-hero:active {
 	z-index: 1;
 }
 
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /* Include margin and padding in the width calculation of input and textarea. */
@@ -1896,8 +1914,9 @@ fieldset label {
 /*--------------------------------------------------------------
 ## Menus
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 .site-main .comment-navigation,
@@ -2032,8 +2051,9 @@ fieldset label {
 /*--------------------------------------------------------------
 # Site
 --------------------------------------------------------------*/
-:root {
-	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1);
+:root, body {
+	--wp-admin-theme-color: var(--wp--preset--color--blueberry-1, #3858e9);
+	--wp-admin-theme-color-darker-10: color-mix(in oklab, var(--wp-admin-theme-color), #000 10%);
 }
 
 /*--------------------------------------------------------------

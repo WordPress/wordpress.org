@@ -172,7 +172,14 @@ final class HelpHub_Codex_Languages {
 		$i    = 0;
 		foreach ( $args as $key => $value ) {
 			if ( null != $value ) {
-				$str .= sprintf( ' &bull; <a class="external text" href="' . $lang_table[ $i ][3] . '">' . $lang_table[ $i ][1] . '</a>', $value );
+				// Encode the value for the URL path, keeping slashes and colons that Codex titles use.
+				$path = str_replace( array( '%2F', '%3A' ), array( '/', ':' ), rawurlencode( $value ) );
+				$url  = sprintf( $lang_table[ $i ][3], $path );
+				$str .= sprintf(
+					' &bull; <a class="external text" href="%1$s">%2$s</a>',
+					esc_url( $url ),
+					esc_html( $lang_table[ $i ][1] )
+				);
 			}
 			$i++;
 		}

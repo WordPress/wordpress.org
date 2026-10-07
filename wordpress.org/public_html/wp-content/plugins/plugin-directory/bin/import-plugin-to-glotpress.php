@@ -67,9 +67,13 @@ if ( ! $plugin ) {
 $send_slack = defined( 'PLUGIN_IMPORTS_SLACK_WEBHOOK' ) && ! isset( $opts['no-slack'] );
 if ( $send_slack ) {
 	$slack_client = new Slack( PLUGIN_IMPORTS_SLACK_WEBHOOK );
+
+	// Titles are stored entity-encoded; Slack wants only `&`, `<` and `>` escaped, once.
+	$plugin_title = Slack::escape( html_entity_decode( $plugin->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+
 	$slack_client->add_attachment( 'ts', time() );
-	$slack_client->add_attachment( 'fallback', "{$plugin->post_title} has been imported." );
-	$slack_client->add_attachment( 'title', "{$plugin->post_title} has been imported" );
+	$slack_client->add_attachment( 'fallback', "{$plugin_title} has been imported." );
+	$slack_client->add_attachment( 'title', "{$plugin_title} has been imported" );
 	$slack_client->add_attachment( 'title_link', "https://translate.wordpress.org/projects/wp-plugins/{$plugin_slug}" );
 	$fields = [
 		[
@@ -79,12 +83,13 @@ if ( $send_slack ) {
 		],
 		[
 			'title' => 'Version',
-			'value' => $tag,
+			'value' => Slack::escape( $tag ),
 			'short' => true,
 		],
 	];
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 echo "Processing I18N Import for $plugin_slug...\n";
 try {
 	if ( 'readme' === $type ) {
@@ -97,6 +102,22 @@ try {
 
 	$runtime = round( microtime( 1 ) - $start_time, 2 );
 
+	$skipped_message = '';
+	if ( 'code' === $type ) {
+		$skipped = $importer->get_non_utf8_entries();
+		if ( $skipped['count'] ) {
+			$files      = array_slice( $skipped['files'], 0, 5 );
+			$more_files = count( $skipped['files'] ) - count( $files );
+
+			$skipped_message = sprintf(
+				'%s skipped, not valid UTF-8: %s%s',
+				1 === $skipped['count'] ? '1 string' : "{$skipped['count']} strings",
+				implode( ', ', $files ),
+				$more_files ? " and {$more_files} more" : ''
+			);
+		}
+	}
+
 	// Send Slack notification.
 	if ( $send_slack ) {
 		$fields[] = [
@@ -104,22 +125,35 @@ try {
 			'value' => sprintf( '%s Successfully imported! (%ss)', $slack_client->get_success_emoji(), $runtime ),
 			'short' => false,
 		];
+		if ( $skipped_message ) {
+			$fields[] = [
+				'title' => 'Skipped',
+				'value' => Slack::escape( $skipped_message ),
+				'short' => false,
+			];
+		}
 		$fields[] = [
 			'title' => 'Plugin',
 			'value' => sprintf(
 				'<%1$s|%2$s> | <https://plugins.trac.wordpress.org/log/%3$s|Log> | <%4$s|SVN>',
 				get_permalink( $plugin ),
-				$plugin->post_title,
+				$plugin_title,
 				$plugin_slug,
-				$importer->get_plugin_svn_url( $tag )
+				Slack::escape( $importer->get_plugin_svn_url( $tag ) )
 			),
 			'short' => false,
 		];
 		$slack_client->add_attachment( 'fields', $fields );
-		$slack_client->set_status( 'success' );
+		$slack_client->set_status( $skipped_message ? 'warning' : 'success' );
 		$slack_client->send( '#meta-language-packs' );
 	}
 
+	if ( $skipped_message ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
+		echo "Warning: {$skipped_message}\n";
+	}
+
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo "OK. Took {$runtime}s\n";
 } catch ( Exception $e ) {
 	$runtime = round( microtime( 1 ) - $start_time, 2 );
@@ -128,7 +162,7 @@ try {
 	if ( $send_slack ) {
 		$fields[] = [
 			'title' => 'Status',
-			'value' => sprintf( '%s %s (%ss)', $slack_client->get_failure_emoji(), $e->getMessage(), $runtime ),
+			'value' => sprintf( '%s %s (%ss)', $slack_client->get_failure_emoji(), Slack::escape( $e->getMessage() ), $runtime ),
 			'short' => false,
 		];
 		$fields[] = [
@@ -136,9 +170,9 @@ try {
 			'value' => sprintf(
 				'<%1$s|%2$s> | <https://plugins.trac.wordpress.org/log/%3$s|Log> | <%4$s|SVN>',
 				get_permalink( $plugin ),
-				$plugin->post_title,
+				$plugin_title,
 				$plugin_slug,
-				$importer->get_plugin_svn_url( $tag )
+				Slack::escape( $importer->get_plugin_svn_url( $tag ) )
 			),
 			'short' => false,
 		];
@@ -147,6 +181,7 @@ try {
 		$slack_client->send( '#meta-language-packs' );
 	}
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo "Failed. Took {$runtime}s\n";
 
 	fwrite( STDERR, "[{$plugin_slug}] Plugin I18N Import Failed: " . $e->getMessage() . "\n" );

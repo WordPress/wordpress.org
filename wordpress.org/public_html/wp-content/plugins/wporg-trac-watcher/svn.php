@@ -58,8 +58,8 @@ function get_svns() {
 			'url'         => 'https://buddypress.svn.wordpress.org',
 			'trac'        => 'https://buddypress.trac.wordpress.org',
 			'trac_table'  => 'trac_buddypress',
-			'rev_table'   => false,
-			'props_table' => false,
+			'rev_table'   => 'trac_buddypress_revisions',
+			'props_table' => 'trac_buddypress_props',
 		],
 		'bbpress' => [
 			'slug'        => 'bbpress',
@@ -67,8 +67,8 @@ function get_svns() {
 			'url'         => 'https://bbpress.svn.wordpress.org',
 			'trac'        => 'https://bbpress.trac.wordpress.org',
 			'trac_table'  => 'trac_bbpress',
-			'rev_table'   => false,
-			'props_table' => false,
+			'rev_table'   => 'trac_bbpress_revisions',
+			'props_table' => 'trac_bbpress_props',
 		],
 	];
 }
@@ -88,19 +88,24 @@ function import_revisions( $svn ) {
 
 	$last_revision = $wpdb->get_var( "SELECT max(id) FROM {$db_table}" );
 	if ( ! is_numeric( $last_revision ) ) {
-		trigger_error( "Can't find max row for {$db_table} to import {$svn_url} revisions.", E_USER_WARNING );
+		$last_revision = 0;
+		// When setting up a new table, this needs to be commented out to force the import.
+		trigger_error( "Can't find max row for {$db_table} to import {$svn_url} revisions.", E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 		return false;
 	}
 
 	$command = sprintf(
 		'svn log %s -r %d:HEAD --limit %d --xml -v 2>/dev/null',
-		esc_url( $svn_url ),
+		escapeshellarg( $svn_url ),
 		(int) $last_revision,
 		(int) MAX_REVISIONS
 	);
 
+	// shell_exec() returns null when the command can't be run at all, which simplexml_load_string() won't accept.
+	$log = shell_exec( $command );
+
 	$xml_internal_errors = libxml_use_internal_errors( true );
-	$xml                 = simplexml_load_string( shell_exec( $command ) );
+	$xml                 = $log ? simplexml_load_string( $log ) : false;
 	libxml_use_internal_errors( $xml_internal_errors );
 
 	if ( ! $xml ) {
@@ -170,9 +175,19 @@ function import_revisions( $svn ) {
 
 				$wpdb->insert( $props_table, $data );
 
-				// Auto-assign Meta Contributor badge for matched meta contributions.
-				if ( $user_id && 'meta' === $slug && function_exists( 'WordPressdotorg\Profiles\assign_badge' ) ) {
-					assign_badge( 'meta-contributor', $user_id );
+				// Auto-assign some Contributor badges.
+				if ( $user_id && function_exists( 'WordPressdotorg\Profiles\assign_badge' ) ) {
+					switch ( $slug ) {
+						case 'meta':
+							assign_badge( 'meta-contributor', $user_id );
+							break;
+						case 'bbpress':
+							assign_badge( 'bbpress-contributor', $user_id );
+							break;
+						case 'buddypress':
+							assign_badge( 'buddypress-contributor', $user_id );
+							break;
+					}
 				}
 			}
 		}
@@ -218,7 +233,7 @@ function get_wp_version( $svn_url, $branch, $revision = 'HEAD' ) {
 		$url = "{$svn_url}/{$branch}/{$f}";
 		$output = shell_exec( sprintf(
 			'svn cat %s@%d 2>/dev/null',
-			esc_url( $url ),
+			escapeshellarg( $url ),
 			(int) $revision
 		) );
 

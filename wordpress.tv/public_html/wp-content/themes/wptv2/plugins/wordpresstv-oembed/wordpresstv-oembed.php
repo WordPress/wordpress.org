@@ -44,7 +44,7 @@ class WordCampTV_oEmbed {
 			return false;
 		}
 
-		if ( empty( $_GET['url'] ) ) {
+		if ( empty( $_GET['url'] ) || ! is_string( $_GET['url'] ) ) {
 			$this->fourohfour();
 		}
 
@@ -103,7 +103,7 @@ class WordCampTV_oEmbed {
 
 			list( $width, $height ) = wp_expand_dimensions( $info->width, $info->height, $maxwidth, $maxheight );
 
-			$data['title']  = $info->title;
+			$data['title']  = $info->title ?? null;
 			$data['width']  = $width;
 			$data['height'] = $height;
 			$data['html']   = videopress_2015_player_get_html( array(
@@ -134,6 +134,7 @@ class WordCampTV_oEmbed {
 				echo '<' . '?xml version="1.0" encoding="utf-8" standalone="yes"?>' . "\n";
 				echo "<oembed>\n";
 				foreach ( $data as $tag => $value ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- XML response element; the value is htmlspecialchars()'d and the tag name is an internal key.
 					echo "	<{$tag}>" . htmlspecialchars( $value ) . "</{$tag}>\n";
 				}
 				echo '</oembed>';

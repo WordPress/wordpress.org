@@ -42,6 +42,34 @@ wp_localize_script(
 );
 
 wp_register_style(
+	'wporg-translate-topbar',
+	plugins_url( 'css/topbar.css', __FILE__ ),
+	array( 'wporg-translate' ),
+	filemtime( __DIR__ . '/css/topbar.css' )
+);
+
+wp_register_script(
+	'wporg-translate-topbar',
+	plugins_url( 'js/topbar.js', __FILE__ ),
+	array( 'wporg-translate-editor' ), // Ensures load order: core editor.js → wporg editor.js → topbar.js.
+	filemtime( __DIR__ . '/js/topbar.js' )
+);
+
+wp_register_style(
+	'wporg-translate-inline-actions',
+	plugins_url( 'css/inline-actions.css', __FILE__ ),
+	array( 'wporg-translate' ),
+	filemtime( __DIR__ . '/css/inline-actions.css' )
+);
+
+wp_register_script(
+	'wporg-translate-inline-actions',
+	plugins_url( 'js/inline-actions.js', __FILE__ ),
+	array( 'wporg-translate-editor' ), // Ensures load order: core editor.js → wporg editor.js → inline-actions.js.
+	filemtime( __DIR__ . '/js/inline-actions.js' )
+);
+
+wp_register_style(
 	'chartist',
 	plugins_url( 'css/chartist.min.css', __FILE__ ),
 	[],
@@ -56,6 +84,16 @@ wp_register_script(
 
 if ( isset( $template ) && 'translations' === $template ) {
 	gp_enqueue_script( 'wporg-translate-editor' );
+
+	if ( wporg_translate_topbar_current_user_can_validate( $args ?? array() ) ) {
+		gp_enqueue_script( 'wporg-translate-topbar' );
+		gp_enqueue_style( 'wporg-translate-topbar' );
+	}
+
+	if ( wporg_translate_inline_actions_enabled_for_current_user( $args ?? array() ) ) {
+		gp_enqueue_script( 'wporg-translate-inline-actions' );
+		gp_enqueue_style( 'wporg-translate-inline-actions' );
+	}
 }
 
 // Remove Emoji fallback support
@@ -87,6 +125,16 @@ add_action( 'gp_footer', static function() use ( $template, $args ) {
 		wporg_translation_help_modal( $locale );
 	}
 } );
+
+add_action(
+	'gp_footer',
+	static function() use ( $template, $args ) {
+		if ( 'translations' === $template
+			&& wporg_translate_topbar_current_user_can_validate( $args ?? array() ) ) {
+			gp_tmpl_load( 'translation-editor-topbar', array() );
+		}
+	}
+);
 
 /**
  * Prints markup for the translation help dialog.
@@ -144,6 +192,135 @@ function wporg_translation_help_modal( $locale ) {
 	</div>
 	<?php
 }
+
+/**
+ * Returns true if the current user can approve translations on the translation set
+ * currently being viewed. Used to gate the editor top bar.
+ *
+ * @param array $args The args array from the GlotPress template / footer context.
+ *                    Expected to contain a `translation_set` key when on the
+ *                    `translations` template.
+ * @return bool
+ */
+function wporg_translate_topbar_current_user_can_validate( $args ) {
+	if ( empty( $args['translation_set'] ) ) {
+		return false;
+	}
+
+	// Per-user opt-out: validators can hide the top bar persistently from /settings/.
+	// Stored as `hide_validator_topbar => 'on'` inside the user's `gp_default_sort`
+	// option (piggybacks on the existing settings form — see settings-edit.php).
+	$default_sort = get_user_option( 'gp_default_sort' );
+	if ( 'on' === gp_array_get( $default_sort, 'hide_validator_topbar', 'off' ) ) {
+		return false;
+	}
+
+	return GP::$permission->current_user_can(
+		'approve',
+		'translation-set',
+		$args['translation_set']->id
+	);
+}
+
+/**
+ * Returns true if the current user should see the inline action buttons
+ * (Approve / Reject / Fuzzy) in the translation editor's row list. The
+ * inline buttons are a validator-only feature, opt-out per-user via
+ * /settings/.
+ *
+ * @param array $args The args array from the GlotPress template / footer context.
+ *                    Expected to contain a `translation_set` key when on the
+ *                    `translations` template.
+ * @return bool
+ */
+function wporg_translate_inline_actions_enabled_for_current_user( $args ) {
+	if ( empty( $args['translation_set'] ) ) {
+		return false;
+	}
+
+	// Per-user opt-out: validators can hide the inline action buttons from /settings/.
+	$default_sort = get_user_option( 'gp_default_sort' );
+	if ( 'on' === gp_array_get( $default_sort, 'hide_inline_actions', 'off' ) ) {
+		return false;
+	}
+
+	return GP::$permission->current_user_can(
+		'approve',
+		'translation-set',
+		$args['translation_set']->id
+	);
+}
+
+/**
+ * Returns true if the given user has the ability to approve translations on
+ * at least one translation set — i.e., is a global GlotPress admin, a GTE,
+ * a Locale Manager, or a PTE somewhere. 
+ *
+ * @param int $user_id The user ID to check. 0 or missing returns false.
+ * @return bool
+ */
+function wporg_translate_user_is_validator_anywhere( $user_id ) {
+	static $cache = array();
+
+	$user_id = (int) $user_id;
+	if ( $user_id <= 0 ) {
+		return false;
+	}
+
+	if ( array_key_exists( $user_id, $cache ) ) {
+		return $cache[ $user_id ];
+	}
+
+	$rosetta = \WordPressdotorg\GlotPress\Rosetta_Roles\Plugin::get_instance();
+	if ( $rosetta->is_global_administrator( $user_id ) ) {
+		$cache[ $user_id ] = true;
+		return true;
+	}
+
+	global $wpdb;
+
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- static-map cache is sufficient for this single-row existence check.
+	$has_editor_row = $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT 1 FROM {$wpdb->wporg_translation_editors}
+			 WHERE user_id = %d LIMIT 1",
+			$user_id
+		)
+	);
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+	if ( $has_editor_row ) {
+		$cache[ $user_id ] = true;
+		return true;
+	}
+
+	// "{$wpdb->base_prefix}{$blog_id}_capabilities" (serialized arrays).
+	$pattern = $wpdb->esc_like( $wpdb->base_prefix ) . '%\_capabilities';
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- static-map cache is sufficient for this gated existence check.
+	$meta_rows = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT meta_value FROM {$wpdb->usermeta}
+			 WHERE user_id = %d
+			   AND meta_key LIKE %s",
+			$user_id,
+			$pattern
+		)
+	);
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+	foreach ( $meta_rows as $serialized ) {
+		$caps = maybe_unserialize( $serialized );
+		if ( is_array( $caps ) && (
+			! empty( $caps['general_translation_editor'] ) ||
+			! empty( $caps['locale_manager'] ) ||
+			! empty( $caps['translation_editor'] )
+		) ) {
+			$cache[ $user_id ] = true;
+			return true;
+		}
+	}
+
+	$cache[ $user_id ] = false;
+	return false;
+	}
 
 /**
  * Adds descriptions to navigation items.
@@ -274,26 +451,25 @@ add_action( 'gp_footer', function() {
  */
 function wporg_gp_translate_textarea( $entry, $permissions, $index = 0 ) {
 	list( $can_edit, $can_approve ) = $permissions;
-	$disabled = $can_edit ? '' : 'disabled="disabled"';
 	?>
-	<div class="textareas<?php echo ( 0 === $index ) ? ' active' : ''; ?>" data-plural-index="<?php echo $index; ?>">
+	<div class="textareas<?php echo ( 0 === $index ) ? ' active' : ''; ?>" data-plural-index="<?php echo esc_attr( $index ); ?>">
 		<?php
 		if ( isset( $entry->warnings[ $index ] ) ) :
 			$warnings = $entry->warnings[ $index ];
 			foreach ( $warnings as $key => $value ) :
 				?>
 				<div class="warning secondary">
-					<strong><?php _e( 'Warning:', 'glotpress' ); ?></strong> <?php echo esc_html( $value ); ?>
+					<strong><?php esc_html_e( 'Warning:', 'glotpress' ); ?></strong> <?php echo esc_html( $value ); ?>
 
 					<?php if ( $can_approve ) : ?>
-						<a href="#" class="discard-warning" data-nonce="<?php echo esc_attr( wp_create_nonce( 'discard-warning_' . $index . $key ) ); ?>" data-key="<?php echo esc_attr( $key ); ?>" data-index="<?php echo esc_attr( $index ); ?>"><?php _e( 'Discard', 'glotpress' ); ?></a>
+						<a href="#" class="discard-warning" data-nonce="<?php echo esc_attr( wp_create_nonce( 'discard-warning_' . $index . $key ) ); ?>" data-key="<?php echo esc_attr( $key ); ?>" data-index="<?php echo esc_attr( $index ); ?>"><?php esc_html_e( 'Discard', 'glotpress' ); ?></a>
 					<?php endif; ?>
 				</div>
 				<?php
 			endforeach;
 		endif;
 		?>
-		<textarea placeholder="Enter translation here" class="foreign-text" name="translation[<?php echo esc_attr( $entry->original_id ); ?>][]" id="translation_<?php echo esc_attr( $entry->original_id ); ?>_<?php echo esc_attr( $index ); ?>" <?php echo $disabled; // WPCS: XSS ok. ?>><?php echo esc_translation( gp_array_get( $entry->translations, $index ) ); // WPCS: XSS ok. ?></textarea>
+		<textarea placeholder="Enter translation here" class="foreign-text" name="translation[<?php echo esc_attr( $entry->original_id ); ?>][]" id="translation_<?php echo esc_attr( $entry->original_id ); ?>_<?php echo esc_attr( $index ); ?>" <?php disabled( ! $can_edit ); ?>><?php echo esc_translation( gp_array_get( $entry->translations, $index ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></textarea>
 	</div>
 	<?php
 }
@@ -332,14 +508,14 @@ function wporg_references( $project, $entry ) {
 			list( $file, $line ) = array_pad( explode( ':', $reference ), 2, 0 );
 			if ( $source_url = $project->source_url( $file, $line ) ) :
 				?>
-				<li><a target="_blank" href="<?php echo $source_url; ?>"><?php echo $file.':'.$line ?></a></li>
+				<li><a target="_blank" href="<?php echo esc_url( $source_url ); ?>"><?php echo esc_html( $file . ':' . $line ); ?></a></li>
 			<?php
 			elseif ( wp_http_validate_url( $reference ) ) :
 				?>
 				<li><a target="_blank" href="<?php echo esc_url( $reference ); ?>"><?php echo esc_html( $reference ); ?></a></li>
 			<?php
 			else :
-				echo "<li>$file:$line</li>";
+				echo '<li>' . esc_html( "$file:$line" ) . '</li>';
 			endif;
 		endforeach;
 		?>
@@ -359,6 +535,7 @@ function wporg_references( $project, $entry ) {
  */
 function wporg_references_wordpress_org_github( $source_url, $project, $file, $line ) {
 	if ( 'meta/wordpress-org' === $project->path ) {
+
 		// wporg-mu-plugins is mu-plugins/ based, but NOT those in mu-plugins/pub
 		if ( str_starts_with( $file, 'mu-plugins/' ) && ! str_starts_with( $file, 'mu-plugins/pub/' ) ) {
 			$source_url = "https://github.com/WordPress/wporg-mu-plugins/blob/trunk/{$file}#L{$line}";
@@ -366,6 +543,12 @@ function wporg_references_wordpress_org_github( $source_url, $project, $file, $l
 		// wporg-gutenberg theme is pretty unique path..
 		} elseif ( str_contains( $file, '/themes/wporg-gutenberg/' ) ) {
 			$source_url = "https://github.com/WordPress/wporg-gutenberg/blob/trunk/{$file}#L{$line}";
+		} elseif ( str_contains( $file, 'wporg-main-2022' ) ) {
+			$source_url = "https://github.com/WordPress/wporg-main-2022/blob/trunk/{$file}#L{$line}";
+		} elseif ( str_contains( $file, 'wporg-parent-2021' ) ) {
+			$source_url = "https://github.com/WordPress/wporg-parent-2021/blob/trunk/{$file}#L{$line}";
+		} elseif ( str_contains( $file, 'wporg-make-2024' ) ) {
+			$source_url = "https://github.com/WordPress/wporg-make-2024/blob/trunk/{$file}#L{$line}";
 		}
 
 	} elseif ( 'meta/rosetta' === $project->path ) {
@@ -384,6 +567,11 @@ function wporg_references_wordpress_org_github( $source_url, $project, $file, $l
 			)
 		) {
 			$source_url = false;
+		}
+
+	} elseif ( 'meta/themes' === $project->path ) {
+		if ( str_contains( $file, 'wporg-themes-2024' ) ) {
+			$source_url = "https://github.com/WordPress/wporg-theme-directory/blob/trunk/{$file}#L{$line}";
 		}
 	}
 
@@ -418,4 +606,31 @@ function wporg_gp_should_display_original_context( $translation ) {
 	}
 
 	return true;
+}
+
+/**
+ * Filters a project description down to the markup a description may carry.
+ *
+ * @param string $description Project description.
+ * @return string The description, limited to the markup the importers compose into it.
+ */
+function wporg_kses_description( $description ) {
+	return wp_kses(
+		$description,
+		array(
+			'a'      => array(
+				'href'  => true,
+				'title' => true,
+				'rel'   => true,
+			),
+			'br'     => array(),
+			'code'   => array(),
+			'em'     => array(),
+			'li'     => array(),
+			'ol'     => array(),
+			'p'      => array(),
+			'strong' => array(),
+			'ul'     => array(),
+		)
+	);
 }

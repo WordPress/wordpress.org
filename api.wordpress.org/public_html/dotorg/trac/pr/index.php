@@ -4,9 +4,12 @@ namespace WordPressdotorg\API\Trac\GithubPRs;
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 require __DIR__ . '/functions.php';
 
-$trac          = preg_replace( '![^a-z]!', '', $_GET['trac'] ?? '' );
+$trac          = $_GET['trac'] ?? '';
+$trac          = is_string( $trac ) ? $trac : '';
+$trac          = preg_replace( '![^a-z]!', '', $trac );
 $ticket        = intval( $_GET['ticket'] ?? 0 );
 $author        = wp_unslash( $_GET['author'] ?? '' );
+$author        = is_string( $author ) ? $author : '';
 $authenticated = ! empty( $_GET['authenticated'] ); // Longer caches for logged out requests.
 
 header( 'Content-Type: application/json' );

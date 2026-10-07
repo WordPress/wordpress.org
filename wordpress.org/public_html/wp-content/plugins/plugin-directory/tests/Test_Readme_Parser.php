@@ -1,0 +1,207 @@
+<?php
+/**
+ * Tests for WordPress.org's plugin readme parser.
+ *
+ * @package WordPressdotorg\Plugin_Directory\Tests
+ */
+
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\TestCase;
+use WordPressdotorg\Plugin_Directory\Readme\Parser;
+
+/**
+ * Exercises Parser end-to-end against readmes built inline, asserting that the
+ * URL-bearing headers come out clean for both the bare and markdown autolink
+ * forms, and that the License header is stripped of markup.
+ *
+ * @group readme-parser
+ */
+#[Group( 'readme-parser' )]
+class Test_Readme_Parser extends TestCase {
+
+	/**
+	 * Build a minimal readme with the given header line inserted into the
+	 * field block. The fixture omits whichever URL-bearing header is under
+	 * test so the assertion isn't fighting an unrelated default.
+	 *
+	 * @param string $header_line A `Field: Value` line to insert.
+	 * @return string Complete readme contents.
+	 */
+	private static function readme_with( string $header_line ): string {
+		return implode(
+			"\n",
+			array(
+				'=== Test Plugin ===',
+				'Contributors: testuser',
+				'Tags: testing',
+				'Tested up to: 6.9',
+				'Stable tag: 1.0.0',
+				$header_line,
+				'',
+				'Short description.',
+				'',
+				'== Description ==',
+				'',
+				'Body.',
+				'',
+			)
+		);
+	}
+
+	/**
+	 * Data provider for {@see test_donate_link()}.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public static function donate_link_provider(): array {
+		$url = 'https://example.com/donate';
+		return array(
+			'bare URL'             => array( "Donate link: $url", $url ),
+			'autolink'             => array( "Donate link: <$url>", $url ),
+			'autolink with spaces' => array( "Donate link:   <$url>   ", $url ),
+		);
+	}
+
+	/**
+	 * `Donate link:` accepts the bare form and the markdown autolink form
+	 * (which `markdownlint --fix` produces against bare URLs).
+	 *
+	 * @param string $header   Full header line under test.
+	 * @param string $expected Expected `donate_link` value after parsing.
+	 */
+	#[DataProvider( 'donate_link_provider' )]
+	public function test_donate_link( string $header, string $expected ): void {
+		$parser = new Parser( self::readme_with( $header ) );
+		$this->assertSame( $expected, $parser->donate_link );
+	}
+
+	/**
+	 * Data provider for {@see test_license_uri()}.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public static function license_uri_provider(): array {
+		$url = 'https://www.gnu.org/licenses/gpl-2.0.html';
+		return array(
+			'bare URL'             => array( "License URI: $url", $url ),
+			'autolink'             => array( "License URI: <$url>", $url ),
+			'autolink with spaces' => array( "License URI:   <$url>   ", $url ),
+		);
+	}
+
+	/**
+	 * `License URI:` accepts the bare form and the markdown autolink form.
+	 *
+	 * @param string $header   Full header line under test.
+	 * @param string $expected Expected `license_uri` value after parsing.
+	 */
+	#[DataProvider( 'license_uri_provider' )]
+	public function test_license_uri( string $header, string $expected ): void {
+		$parser = new Parser( self::readme_with( $header ) );
+		$this->assertSame( $expected, $parser->license_uri );
+	}
+
+	/**
+	 * Data provider for {@see test_license_with_embedded_url()}.
+	 *
+	 * @return array<string, array{0: string, 1: string, 2: string}>
+	 */
+	public static function license_with_embedded_url_provider(): array {
+		$url = 'https://www.gnu.org/licenses/gpl-2.0.html';
+		return array(
+			'bare URL'      => array( "License: GPLv2 - $url", 'GPLv2', $url ),
+			'autolink URL'  => array( "License: GPLv2 - <$url>", 'GPLv2', $url ),
+			'parens around' => array( "License: GPLv2 - ($url)", 'GPLv2', $url ),
+		);
+	}
+
+	/**
+	 * `License: GPLv2 - http://...` and the wrapped forms `<http://...>` and
+	 * `(http://...)` should all extract the URL into `license_uri` and leave
+	 * only `GPLv2` in `license` — no leftover bracket or paren.
+	 *
+	 * @param string $header           Full header line under test.
+	 * @param string $expected_license Expected residual `license` value.
+	 * @param string $expected_uri     Expected `license_uri` extracted from the line.
+	 */
+	#[DataProvider( 'license_with_embedded_url_provider' )]
+	public function test_license_with_embedded_url( string $header, string $expected_license, string $expected_uri ): void {
+		$parser = new Parser( self::readme_with( $header ) );
+		$this->assertSame( $expected_license, $parser->license );
+		$this->assertSame( $expected_uri, $parser->license_uri );
+	}
+
+	/**
+	 * Data provider for {@see test_license_is_sanitized()}.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public static function license_markup_provider(): array {
+		return array(
+			'image payload'          => array( 'License: GPLv2 <img src=x onerror=alert(document.domain)>' ),
+			'script payload'         => array( 'License: GPLv2 <script>alert(1)</script>' ),
+			'payload containing url' => array( 'License: GPLv2 <img src=https://example.com/x onerror=alert(1)>' ),
+			'unclosed tag'           => array( 'License: GPLv2 <img src=x onerror=alert(1)' ),
+		);
+	}
+
+	/**
+	 * The `License:` value is echoed into reviewer-facing output, so Parser must
+	 * strip markup out of it before it is stored.
+	 *
+	 * @param string $header Full header line under test.
+	 */
+	#[DataProvider( 'license_markup_provider' )]
+	public function test_license_is_sanitized( string $header ): void {
+		$parser = new Parser( self::readme_with( $header ) );
+
+		$this->assertStringStartsWith( 'GPLv2', $parser->license );
+		$this->assertStringNotContainsString( '<', $parser->license );
+		$this->assertStringNotContainsString( 'onerror', $parser->license );
+	}
+
+	/**
+	 * Data provider for {@see test_filter_text_keeps_section_markup_only()}.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public static function filter_text_provider(): array {
+		return array(
+			'section tags and attributes kept'   => array(
+				'See <a href="https://example.com/" title="t" rel="nofollow">docs</a>, <strong>bold</strong> and <code>x</code>.',
+				'See <a href="https://example.com/" title="t" rel="nofollow">docs</a>, <strong>bold</strong> and <code>x</code>.',
+			),
+			'attributes outside the list dropped' => array(
+				'<a id="x" class="c" style="color:red" data-foo="bar" data-wp-bind--href="context.u" href="#top">Top</a>',
+				'<a href="#top">Top</a>',
+			),
+			'elements outside the list dropped'  => array(
+				'START <div data-foo="bar"><img src="x"><span>inner</span></div> END',
+				'START inner END',
+			),
+			'unbalanced tags balanced'           => array(
+				'<strong>open',
+				'<strong>open</strong>',
+			),
+			'comments dropped'                   => array(
+				'Before <!-- hidden --> after',
+				'Before  after',
+			),
+		);
+	}
+
+	/**
+	 * `filter_text()` is the one place that decides what markup a readme section may
+	 * carry. It is public so a value that stands in for a section can use it, so its
+	 * output is pinned here: the section allow-list survives, other markup is dropped.
+	 *
+	 * @param string $input    Text as found in a readme or a plugin file header.
+	 * @param string $expected Text as the directory stores it.
+	 */
+	#[DataProvider( 'filter_text_provider' )]
+	public function test_filter_text_keeps_section_markup_only( string $input, string $expected ): void {
+		$parser = new Parser( '' );
+		$this->assertSame( $expected, $parser->filter_text( $input ) );
+	}
+}

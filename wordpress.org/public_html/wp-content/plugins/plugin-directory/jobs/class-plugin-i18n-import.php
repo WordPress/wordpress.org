@@ -15,12 +15,13 @@ class Plugin_i18n_Import {
 	/**
 	 * Queue the job
 	 */
-	public static function queue( $plugin_slug, $plugin_data ) {
-		$when_to_run    = time() + 15 * MINUTE_IN_SECONDS;
+	public static function queue( $plugin_slug, $plugin_data, $delay = null ) {
+		$delay        ??= 15 * MINUTE_IN_SECONDS;
+		$when_to_run    = time() + $delay;
 		$next_scheduled = Manager::get_scheduled_time( "import_plugin_i18n:{$plugin_slug}", 'last' );
 
 		// Update a scheduled event if it doesn't run in the next minute.
-		if ( $next_scheduled && $next_scheduled > time() + 1 * MINUTE_IN_SECONDS ) {
+		if ( $next_scheduled && $next_scheduled > time() + 1 * MINUTE_IN_SECONDS && $delay > 1 * MINUTE_IN_SECONDS ) {
 			$next_scheduled_events = Manager::get_scheduled_events( "import_plugin_i18n:{$plugin_slug}", $next_scheduled );
 			if ( $next_scheduled_events ) {
 				$next_scheduled_event = array_shift( $next_scheduled_events );

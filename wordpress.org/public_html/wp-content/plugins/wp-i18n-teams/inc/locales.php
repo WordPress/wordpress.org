@@ -45,18 +45,20 @@ function render_wp_locales_shortcode(): string {
 	} else {
 		require_once GLOTPRESS_LOCALES_PATH;
 		$locale = GP_Locales::by_field( 'wp_locale', $_GET['locale'] );
-		if ( $locale ) {
+		if ( $locale && 'en_US' !== $locale->wp_locale ) {
 			$locale_data = get_extended_locale_data( $locale );
 			include PLUGIN_DIR . '/views/locale-details.php';
 		} else {
+			status_header( 404 );
 			printf(
 				'<div class="callout callout-warning"><p>%s</p><p><a href="%s">%s</a></p></div>',
 				sprintf(
-					__( 'Locale %s doesn&#8217;t exist.', 'wporg' ),
+					/* translators: %s: Locale slug. */
+					esc_html__( 'Locale %s doesn&#8217;t exist.', 'wporg' ),
 					'<code>' . esc_html( $_GET['locale'] ) . '</code>'
 				),
 				esc_url( get_permalink() ),
-				__( 'Return to All Locales', 'wporg' )
+				esc_html__( 'Return to All Locales', 'wporg' )
 			);
 		}
 	}
@@ -229,19 +231,26 @@ function get_contributors( GP_Locale $locale ): array {
 	}
 
 	// Editors are only assigned to the parent locale.
-	$parent_locale = null;
-	if ( isset( $locale->root_slug ) ) {
-		$parent_locale = GP_Locales::by_slug( $locale->root_slug );
+	$target_locale = $locale;
+	if ( ! empty( $locale->root_slug ) ) {
+		$parent = GP_Locales::by_slug( $locale->root_slug );
+		if ( $parent instanceof GP_Locale ) {
+			$target_locale = $parent;
+		}
 	}
 
-	$contributors                       = [];
-	$contributors['locale_managers']    = get_locale_managers( $parent_locale ?? $locale );
-	$contributors['validators']         = get_general_translation_editors( $parent_locale ?? $locale );
-	$contributors['project_validators'] = get_project_translation_editors( $parent_locale ?? $locale );
-	$contributors['translators']        = get_translation_contributors( $locale, 365 ); // Contributors from the past year
-	$contributors['translators_past']   = array_diff_key( get_translation_contributors( $locale ), $contributors['translators'] );
+	$site_id = get_locale_site_id( $target_locale );
 
-	wp_cache_set( 'contributors-data:' . $locale->wp_locale, $contributors, 'wp-i18n-teams', 2 * HOUR_IN_SECONDS );
+	$contributors                       = [];
+	$contributors['locale_managers']    = $site_id ? get_users_by_role( $site_id, 'locale_manager' ) : [];
+	$contributors['validators']         = $site_id ? get_users_by_role( $site_id, 'general_translation_editor' ) : [];
+	$contributors['project_validators'] = $site_id ? get_users_by_role( $site_id, 'translation_editor' ) : [];
+
+	$translators_data                   = get_translation_contributors( $locale, 365 );
+	$contributors['translators']        = $translators_data['translators'];
+	$contributors['translators_past']   = $translators_data['translators_past'];
+
+	wp_cache_set( 'contributors-data:' . $locale->wp_locale, $contributors, 'wp-i18n-teams', 6 * HOUR_IN_SECONDS );
 
 	return $contributors;
 }
@@ -303,14 +312,19 @@ function get_core_translation_data() {
 }
 
 /**
- * Get the locale managers for the given locale.
+ * Gets the main Rosetta site ID for a given locale.
  *
- * @return array
+ * @param GP_Locale $locale The locale object.
+ * @return int|null
  */
-function get_locale_managers( GP_Locale $locale ): array {
-	$locale_managers = [];
+function get_locale_site_id( GP_Locale $locale ): ?int {
+	static $site_ids = [];
 
-	$result  = get_sites(
+	if ( array_key_exists( $locale->wp_locale, $site_ids ) ) {
+		return $site_ids[ $locale->wp_locale ];
+	}
+
+	$result = get_sites(
 		[
 			'locale'     => $locale->wp_locale,
 			'network_id' => WPORG_GLOBAL_NETWORK_ID,
@@ -319,104 +333,37 @@ function get_locale_managers( GP_Locale $locale ): array {
 			'number'     => '1',
 		]
 	);
+
 	$site_id = array_shift( $result );
-	if ( ! $site_id ) {
-		return $locale_managers;
-	}
+	$site_ids[ $locale->wp_locale ] = $site_id ? (int) $site_id : null;
 
-	$users = get_users(
-		[
-			'blog_id'     => $site_id,
-			'role'        => 'locale_manager',
-			'count_total' => false,
-		]
-	);
-
-	foreach ( $users as $user ) {
-		$locale_managers[ $user->user_nicename ] = prepare_user( $user );
-	}
-
-	uasort( $locale_managers, fn( $a, $b ) => strnatcasecmp( $a['display_name'], $b['display_name'] ) );
-
-	return $locale_managers;
+	return $site_ids[ $locale->wp_locale ];
 }
 
 /**
- * Get the general translation editors for the given locale.
+ * Retrieves prepared users for a given site ID and role.
  *
+ * @param int    $site_id Site ID.
+ * @param string $role    User role slug.
  * @return array
  */
-function get_general_translation_editors( GP_Locale $locale ): array {
-	$editors = [];
-
-	$result  = get_sites(
-		[
-			'locale'     => $locale->wp_locale,
-			'network_id' => WPORG_GLOBAL_NETWORK_ID,
-			'path'       => '/',
-			'fields'     => 'ids',
-			'number'     => '1',
-		]
-	);
-	$site_id = array_shift( $result );
-	if ( ! $site_id ) {
-		return $editors;
-	}
-
+function get_users_by_role( int $site_id, string $role ): array {
 	$users = get_users(
 		[
 			'blog_id'     => $site_id,
-			'role'        => 'general_translation_editor',
+			'role'        => $role,
 			'count_total' => false,
 		]
 	);
 
+	$prepared_users = [];
 	foreach ( $users as $user ) {
-		$editors[ $user->user_nicename ] = prepare_user( $user );
+		$prepared_users[ $user->user_nicename ] = prepare_user( $user );
 	}
 
-	uasort( $editors, fn( $a, $b ) => strnatcasecmp( $a['display_name'], $b['display_name'] ) );
+	uasort( $prepared_users, fn( $a, $b ) => strnatcasecmp( $a['display_name'], $b['display_name'] ) );
 
-	return $editors;
-}
-
-/**
- * Get the general translation editors for the given locale.
- *
- * @return array
- */
-function get_project_translation_editors( GP_Locale $locale ): array {
-	$editors = [];
-
-	$result  = get_sites(
-		[
-			'locale'     => $locale->wp_locale,
-			'network_id' => WPORG_GLOBAL_NETWORK_ID,
-			'path'       => '/',
-			'fields'     => 'ids',
-			'number'     => '1',
-		]
-	);
-	$site_id = array_shift( $result );
-	if ( ! $site_id ) {
-		return $editors;
-	}
-
-	$users = get_users(
-		[
-			'blog_id'     => $site_id,
-			'role'        => 'translation_editor',
-			'count_total' => false,
-		]
-	);
-
-	foreach ( $users as $user ) {
-		$editors[ $user->user_nicename ] = prepare_user( $user );
-	}
-
-	uasort( $editors, fn( $a, $b ) => strnatcasecmp( $a['display_name'], $b['display_name'] ) );
-
-	return $editors;
+	return $prepared_users;
 }
 
 /**
@@ -426,70 +373,77 @@ function get_project_translation_editors( GP_Locale $locale ): array {
  * @return array List of user data.
  */
 function prepare_user( WP_User $user ): array {
-	if ( $user->display_name && $user->display_name !== $user->user_nicename ) {
-		return [
-			'display_name' => $user->display_name,
-			'email'        => $user->user_email,
-			'nice_name'    => $user->user_nicename,
-			'slack'        => get_slack_username( $user->ID ),
-		];
-	} else {
-		return [
-			'display_name' => $user->user_nicename,
-			'email'        => $user->user_email,
-			'nice_name'    => $user->user_nicename,
-			'slack'        => get_slack_username( $user->ID ),
-		];
-	}
+	return [
+		'display_name' => $user->display_name ?: $user->user_nicename,
+		'email'        => $user->user_email,
+		'nice_name'    => $user->user_nicename,
+		'slack'        => get_slack_username( $user->ID ),
+	];
 }
 
 /**
- * Gets the translation contributors for the given locale.
+ * Gets the current and past translation contributors for the given locale.
  *
- * @return array
+ * @param GP_Locale $locale                The locale object.
+ * @param int       $active_days_threshold Days to consider a contributor "active" (default: 365).
+ * @return array{translators: array, translators_past: array}
  */
-function get_translation_contributors( GP_Locale $locale, $max_age_days = null ): array {
+function get_translation_contributors( GP_Locale $locale, int $active_days_threshold = 365 ): array {
 	global $wpdb;
 
-	$contributors = [];
+	$empty_result = [
+		'translators'      => [],
+		'translators_past' => [],
+	];
 
-	$date_constraint = '';
-	if ( null !== $max_age_days ) {
-		$date_constraint = $wpdb->prepare( ' AND date_modified >= CURRENT_DATE - INTERVAL %d DAY', $max_age_days );
-	}
+	[ $locale_name, $locale_slug ] = array_merge( explode( '/', $locale->slug ), [ 'default' ] );
 
-	[ $locale, $locale_slug ] = array_merge( explode( '/', $locale->slug ), [ 'default' ] );
-
-	$users = $wpdb->get_col(
+	$contributions = $wpdb->get_results(
 		$wpdb->prepare(
-			'SELECT DISTINCT user_id FROM translate_user_translations_count WHERE accepted > 0 AND locale = %s AND locale_slug = %s',
-			$locale,
+			'SELECT user_id, MAX(date_modified) AS latest_date
+			 FROM translate_user_translations_count
+			 WHERE accepted > 0 AND locale = %s AND locale_slug = %s
+			 GROUP BY user_id',
+			$locale_name,
 			$locale_slug
-		) . $date_constraint
+		)
 	);
 
-	if ( ! $users ) {
-		return $contributors;
+	if ( empty( $contributions ) ) {
+		return $empty_result;
 	}
 
-	$user_data = $wpdb->get_results( "SELECT user_nicename, display_name, user_email FROM $wpdb->users WHERE ID IN (" . implode( ',', $users ) . ')' );
-	foreach ( $user_data as $user ) {
-		if ( $user->display_name && $user->display_name !== $user->user_nicename ) {
-			$contributors[ $user->user_nicename ] = [
-				'display_name' => $user->display_name,
-				'nice_name'    => $user->user_nicename,
-			];
+	$cutoff_date = gmdate( 'Y-m-d H:i:s', strtotime( "-{$active_days_threshold} days" ) );
+	$user_ids    = wp_list_pluck( $contributions, 'user_id' );
+	$dates_by_id = wp_list_pluck( $contributions, 'latest_date', 'user_id' );
+
+	$user_ids_list = implode( ',', array_map( 'intval', $user_ids ) );
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $user_ids_list is sanitized via array_map( 'intval', ... ).
+	$user_rows     = $wpdb->get_results( "SELECT ID, user_nicename, display_name FROM {$wpdb->users} WHERE ID IN ($user_ids_list)" );
+
+	$translators      = [];
+	$translators_past = [];
+
+	foreach ( $user_rows as $user ) {
+		$entry = [
+			'display_name' => $user->display_name ?: $user->user_nicename,
+			'nice_name'    => $user->user_nicename,
+		];
+
+		if ( ( $dates_by_id[ $user->ID ] ?? '' ) >= $cutoff_date ) {
+			$translators[ $user->user_nicename ] = $entry;
 		} else {
-			$contributors[ $user->user_nicename ] = [
-				'display_name' => $user->user_nicename,
-				'nice_name'    => $user->user_nicename,
-			];
+			$translators_past[ $user->user_nicename ] = $entry;
 		}
 	}
 
-	uasort( $contributors, fn( $a, $b ) => strnatcasecmp( $a['display_name'], $b['display_name'] ) );
+	uasort( $translators, fn( $a, $b ) => strnatcasecmp( $a['display_name'], $b['display_name'] ) );
+	uasort( $translators_past, fn( $a, $b ) => strnatcasecmp( $a['display_name'], $b['display_name'] ) );
 
-	return $contributors;
+	return [
+		'translators'      => $translators,
+		'translators_past' => $translators_past,
+	];
 }
 
 /**
@@ -536,22 +490,32 @@ function get_locale_translation_status( int $percent_translated ): string {
 
 /**
  * Gets the Slack username for a .org user.
+ *
+ * @param int $user_id User ID.
+ * @return string Slack username or empty string if not found.
  */
 function get_slack_username( int $user_id ): string {
+	static $slack_cache = [];
+
+	if ( array_key_exists( $user_id, $slack_cache ) ) {
+		return $slack_cache[ $user_id ];
+	}
+
 	global $wpdb;
 
-	$slack_username = '';
+	$slack_cache[ $user_id ] = '';
 
 	$data = $wpdb->get_var( $wpdb->prepare( 'SELECT profiledata FROM slack_users WHERE user_id = %d', $user_id ) );
-	if ( $data && ( $data = json_decode( $data, true ) ) ) {
-		if ( ! empty( $data['profile']['display_name'] ) && empty( $data['deleted'] ) ) {
-			// Optional Display Name field.
-			$slack_username = $data['profile']['display_name'];
-		} elseif ( ! empty( $data['profile']['real_name'] ) && empty( $data['deleted'] ) ) {
-			// Fall back to "Full Name" field.
-			$slack_username = $data['profile']['real_name'];
+	if ( $data ) {
+		$profile = json_decode( $data, true );
+
+		if ( is_array( $profile ) && empty( $profile['deleted'] ) ) {
+			$display_name = $profile['profile']['display_name'] ?? '';
+			$real_name    = $profile['profile']['real_name'] ?? '';
+
+			$slack_cache[ $user_id ] = $display_name ?: $real_name;
 		}
 	}
 
-	return $slack_username;
+	return $slack_cache[ $user_id ];
 }

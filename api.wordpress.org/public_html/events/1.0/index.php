@@ -6,7 +6,8 @@ use stdClass;
  * Main entry point
  */
 function main() {
-	global $cache_group, $cache_life;
+	// Note: $location and $response are included for use in wrapping APIs which utilise this.
+	global $cache_group, $cache_life, $location, $response;
 
 	validate_request();
 
@@ -193,19 +194,45 @@ function validate_request() {
 
 	foreach ( $must_be_strings as $field ) {
 		if ( isset( $_GET[ $field ] ) && ! is_scalar( $_GET[ $field ] ) ) {
-			header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400 );
-			die( '{"error":"Bad request.","reason":"' . $field . ' must be of type string."}' );
+			send_bad_request( $field . ' must be of type string.' );
 		}
 	}
 
 	if ( ! empty( $_POST['location_data'] ) ) {
-		foreach ( $_POST['location_data'] as $field => $value ) {
+		// phpcs:ignore WordPress.Security -- Public unauthenticated endpoint; the value is only type-checked here, never used or output.
+		foreach ( $_POST['location_data'] as $value ) {
 			if ( ! is_scalar( $value ) ) {
-				header( $_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request', true, 400 );
-				die( '{"error":"Bad request.","reason":"' . $field . ' must be of type string."}' );
+				// The key is omitted from the message because it is unsanitized request input.
+				send_bad_request( 'location_data values must be of type string.' );
 			}
 		}
 	}
+}
+
+/**
+ * Send a 400 Bad Request response and halt.
+ *
+ * The `Content-Type` is set explicitly, because the header that `send_response()` sets is only
+ * reached on the success path, and PHP would otherwise default this body to `text/html`.
+ *
+ * `wp_json_encode()` is intentionally not used here; it is loaded by `bootstrap()`, which runs
+ * after the request is validated.
+ *
+ * @param string $reason The reason the request was rejected. Must not contain any unescaped
+ *                       request input.
+ */
+function send_bad_request( $reason ) {
+	$body = array(
+		'error'  => 'Bad request.',
+		'reason' => $reason,
+	);
+
+	http_response_code( 400 );
+	header( 'Content-Type: application/json; charset=UTF-8' );
+	header( 'X-Content-Type-Options: nosniff' );
+
+	// phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode -- No WP loaded.
+	die( json_encode( $body ) );
 }
 
 /**
@@ -222,6 +249,9 @@ function build_response( $location, $location_args ) {
 	$events = array();
 	$error  = null;
 
+	// Define defaults if not set in the request.
+	$location_args += array( 'restrict_by_country' => false );
+
 	if ( 'temp-request-throttled' === $location ) {
 		$location = array();
 		$error    = 'temp-request-throttled';
@@ -229,7 +259,7 @@ function build_response( $location, $location_args ) {
 
 	if ( $location ) {
 		$event_args = array(
-			'is_client_core' => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
+			'is_client_core'      => is_client_core( $_SERVER['HTTP_USER_AGENT'] ),
 			'restrict_by_country' => $location_args['restrict_by_country'],
 		);
 
@@ -296,17 +326,12 @@ function build_response( $location, $location_args ) {
  * There isn't a good way to do that, though, so plugins will still get unexpected results.
  * They can set a custom user agent to get the raw data, though.
  *
- * @param string $user_agent
+ * @param string $user_agent Optional. The user agent to check. Defaults to the current request's user agent.
  *
  * @return bool
  */
-function is_client_core( $user_agent ) {
-	// This doesn't simply return the value of `strpos()` because `0` means `true` in this context
-	if ( false === strpos( $user_agent, 'WordPress/' ) ) {
-		return false;
-	}
-
-	return true;
+function is_client_core( $user_agent = null ) {
+	return str_starts_with( $user_agent ?? $_SERVER['HTTP_USER_AGENT'], 'WordPress/' );
 }
 
 /**
@@ -814,12 +839,18 @@ function get_country_from_name( $country_name ) {
 function get_events( $args = array() ) {
 	global $wpdb, $cache_life, $cache_group;
 
-	// Sort to ensure consistent cache keys.
-	ksort( $args );
+	// Define defaults if not set in the request.
+	$args += array(
+		'is_client_core'      => false,
+		'restrict_by_country' => false,
+		'number'              => 10,
+	);
 
 	// number should be between 0 and 100, with a default of 10.
-	$args['number'] = $args['number'] ?? 10;
 	$args['number'] = max( 0, min( $args['number'], 100 ) );
+
+	// Sort to ensure consistent cache keys.
+	ksort( $args );
 
 	// Distances in kilometers
 	$event_distances = array(
@@ -1103,19 +1134,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Asia',
-				'url'        => 'https://asia.wordcamp.org/2025/',
+				'url'        => 'https://asia.wordcamp.org/2027/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2025-02-20 00:00:00',
-				'end_date'   => '2025-02-22 00:00:00',
-				'start_unix_timestamp' => strtotime( '2025-02-20 00:00:00' ) - 8 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2025-02-22 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'date'       => '2027-04-09 00:00:00',
+				'end_date'   => '2027-04-11 00:00:00',
+				'start_unix_timestamp' => strtotime( '2027-04-09 00:00:00' ) - 8 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2027-04-11 00:00:00' ) - 8 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Manila, Philippines',
-					'country'   => 'PH',
-					'latitude'  => 14.5544983,
-					'longitude' => 120.9830332,
+					'location'  => 'Penang, Malaysia',
+					'country'   => 'MY',
+					'latitude'  => 5.4163568,
+					'longitude' => 100.3327612,
 				),
 			),
 		),
@@ -1157,19 +1188,19 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp Europe',
-				'url'        => 'https://europe.wordcamp.org/2025/',
+				'url'        => 'https://europe.wordcamp.org/2027/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'                 => '2025-06-05 00:00:00',
-				'end_date'             => '2025-06-07 00:00:00',
-				'start_unix_timestamp' => strtotime( '2025-06-05 00:00:00' ) - 2 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2025-06-07 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'date'                 => '2027-05-27 00:00:00',
+				'end_date'             => '2027-05-29 00:00:00',
+				'start_unix_timestamp' => strtotime( '2027-05-27 00:00:00' ) - 2 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2027-05-29 00:00:00' ) - 2 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Basel',
-					'country'   => 'CH',
-					'latitude'  => 47.5627438,
-					'longitude' => 7.5993872,
+					'location'  => 'Málaga',
+					'country'   => 'ES',
+					'latitude'  => 36.720131,
+					'longitude' => -4.475438,
 				),
 			),
 		),
@@ -1184,19 +1215,21 @@ function get_regional_wordcamp_data() {
 			'event' => array(
 				'type'       => 'wordcamp',
 				'title'      => 'WordCamp US',
-				'url'        => 'https://us.wordcamp.org/2025/',
+				'url'        => 'https://us.wordcamp.org/2026/',
 				'meetup'     => '',
 				'meetup_url' => '',
-				'date'       => '2025-08-26 00:00:00',
-				'end_date'   => '2025-08-29 00:00:00',
-				'start_unix_timestamp' => strtotime( '2025-08-26 00:00:00' ) - 5 * HOUR_IN_SECONDS,
-				'end_unix_timestamp'   => strtotime( '2025-08-29 00:00:00' ) - 5 * HOUR_IN_SECONDS,
+				// Local time
+				'date'       => '2026-08-16 09:00:00',
+				'end_date'   => '2026-08-19 17:00:00',
+				// GMT which due to local being GMT-7, GMT is ahead by 7h.
+				'start_unix_timestamp' => strtotime( '2026-08-16 09:00:00' ) + 7 * HOUR_IN_SECONDS,
+				'end_unix_timestamp'   => strtotime( '2026-08-19 17:00:00' ) + 7 * HOUR_IN_SECONDS,
 
 				'location' => array(
-					'location'  => 'Portland, Oregon',
+					'location'  => 'Phoenix, Arizona',
 					'country'   => 'US',
-					'latitude'  => 45.5283308,
-					'longitude' => -122.6634712,
+					'latitude'  => 33.4483771,
+					'longitude' => -112.0740373,
 				),
 			),
 		),
@@ -1222,8 +1255,8 @@ function get_iso_3166_2_country_codes( $continent = '' ) {
 		'africa' => array(
 			'AO', 'BF', 'BI', 'BJ', 'BW', 'CD', 'CF', 'CG', 'CI', 'CM', 'CV', 'DJ', 'DZ', 'EG', 'EH', 'ER', 'ET',
 			'GA', 'GH', 'GM', 'GN', 'GQ', 'GW', 'KE', 'KM', 'LR', 'LS', 'LY', 'MA', 'MG', 'ML', 'MR', 'MU', 'MW',
-			'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'ST', 'SZ', 'TD', 'TG', 'TN',
-			'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW',
+			'MZ', 'NA', 'NE', 'NG', 'RE', 'RW', 'SC', 'SD', 'SH', 'SL', 'SN', 'SO', 'SS', 'ST', 'SZ', 'TD', 'TG',
+			'TN', 'TZ', 'UG', 'YT', 'ZA', 'ZM', 'ZW',
 		),
 
 		'asia' => array(
@@ -1310,9 +1343,9 @@ function maybe_add_regional_wordcamps( $local_events, $region_data, $user_agent,
 			}
 		}
 
-		// Special case: Show WordCamp Asia to all of asia until it's over.
+		// Special case: Show WordCamp Europe to all of europe until it's over.
 		if (
-			'asia' === $region &&
+			'europe' === $region &&
 			! empty( $location['country'] ) &&
 			$current_time <= $data['event']['end_unix_timestamp'] &&
 			in_array( strtoupper( $location['country'] ), $data['regional_countries'], true )
@@ -1722,4 +1755,6 @@ function get_bounded_coordinates( $lat, $lon, $distance_in_km = 50 ) {
 	);
 }
 
-main();
+if ( ! defined( 'WPORG_RUNNING_TESTS' ) || ! WPORG_RUNNING_TESTS ) {
+	main();
+}

@@ -173,6 +173,10 @@ class Plugins_Info_API_Request {
 		unset( $this->args->{$field} );
 	}
 
+	public function __isset( $field ) {
+		return isset( $this->args->{$field} );
+	}
+
 	public function get_expected_fields( $method ) {
 		$fields = self::$fields;
 

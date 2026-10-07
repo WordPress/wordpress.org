@@ -35,6 +35,11 @@ class Posts {
 		// Sync photo post content to photo media on update.
 		add_action( 'post_updated',       [ __CLASS__, 'sync_photo_post_to_photo_media_on_update' ], 5, 3 );
 
+		// Photo content is plain text (the alternative text), never post markup.
+		add_filter( 'wp_insert_post_data', [ __CLASS__, 'store_text_as_html' ], PHP_INT_MAX );
+		add_filter( 'wp_insert_attachment_data', [ __CLASS__, 'store_text_as_html' ], PHP_INT_MAX );
+		add_filter( 'the_content', [ __CLASS__, 'render_content_as_plain_text' ], PHP_INT_MIN );
+
 		// Offset subsequent paginations of front page by number of posts on front page.
 		add_action( 'pre_get_posts',      [ __CLASS__, 'offset_front_page_paginations' ], 11 );
 		// Fix pages count for front page paginations.
@@ -202,8 +207,8 @@ class Posts {
 	 * Redirects attachment permalink pages to the associated photo post page.
 	 */
 	public static function redirect_attachment_page_to_photo() {
-		// Must be request for attachment.
-		if ( ! is_attachment() ) {
+		// Must be request for attachment. Not is_attachment(), which is false for `?post_type=attachment&p=` on attached media.
+		if ( ! is_singular( 'attachment' ) ) {
 			return;
 		}
 
@@ -230,6 +235,7 @@ class Posts {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Attachment URLs are served from the photo storage host, so the target is off-site.
 		wp_redirect( wp_get_attachment_url( $post->ID ) );
 		exit;
 	}
@@ -254,6 +260,61 @@ class Posts {
 		}
 
 		return wp_get_attachment_url( $post_id );
+	}
+
+	/**
+	 * Renders a photo's content as the plain text it is.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public static function render_content_as_plain_text( $content ) {
+		$post = get_post();
+		if ( ! $post || ! self::holds_photo_text( $post->post_type, $post->post_parent ) ) {
+			return $content;
+		}
+
+		// Same flags as `store_text_as_html()`, so stored text passes through unchanged.
+		$content = htmlspecialchars( $content, ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false );
+
+		// Shortcode and URL syntax stay visible text: hide the characters shortcodes and embeds key on.
+		return str_replace( [ '[', '://' ], [ '&#91;', '&#58;//' ], $content );
+	}
+
+	/**
+	 * Stores a photo's text as the HTML that displays it.
+	 *
+	 * @param array $data Slashed, sanitized post data.
+	 * @return array
+	 */
+	public static function store_text_as_html( $data ) {
+		if ( ! self::holds_photo_text( $data['post_type'], $data['post_parent'] ) ) {
+			return $data;
+		}
+
+		foreach ( [ 'post_title', 'post_content', 'post_excerpt' ] as $field ) {
+			$text           = wp_unslash( $data[ $field ] );
+			$data[ $field ] = wp_slash( htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false ) );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Determines whether a post holds a photo's text: the photo itself, or its media.
+	 *
+	 * @param string $post_type   Post type.
+	 * @param int    $post_parent Post parent ID.
+	 * @return bool
+	 */
+	public static function holds_photo_text( $post_type, $post_parent ) {
+		$photo_post_type = Registrations::get_post_type();
+
+		if ( $photo_post_type === $post_type ) {
+			return true;
+		}
+
+		return 'attachment' === $post_type && $post_parent && get_post_type( $post_parent ) === $photo_post_type;
 	}
 
 	/**

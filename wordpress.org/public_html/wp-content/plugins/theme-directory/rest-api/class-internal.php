@@ -73,6 +73,7 @@ class Internal {
 		echo "[/]\n";
 		echo "* = r\n";
 		foreach ( array_unique( $all_access_users ) as $u ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generates SVN authz config text, not HTML.
 			echo "{$u} = rw\n";
 		}
 		echo "\n";
@@ -86,7 +87,9 @@ class Internal {
 
 			printf(
 				"[%s]\n%s = rw\n\n",
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generates SVN authz config text, not HTML.
 				'/' . $r->slug,
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generates SVN authz config text, not HTML.
 				$r->user
 			);
 
@@ -129,14 +132,16 @@ class Internal {
 
 
 			foreach ( $stats as $stat_name => $value ) {
-				if ( 'active_installs' == $stat_name ) {
-					$value = $this->sanitize_active_installs( $value );
+				$stat_name = sanitize_key( (string) $stat_name );
+
+				if ( 'active_installs' === $stat_name ) {
+					$value    = $this->sanitize_active_installs( $value );
 					$meta_key = '_active_installs';
-				} elseif ( 'popularity' == $stat_name ) {
-					$value = (float) $value;
-					$meta_key = '_popularity';
+				} elseif ( $stat_name ) {
+					$value    = (float) $value;
+					$meta_key = '_' . $stat_name;
 				} else {
-					continue; // Unknown key
+					continue;
 				}
 
 				update_post_meta( $theme->ID, $meta_key, wp_slash( $value ) );

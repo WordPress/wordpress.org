@@ -1,8 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Widgets;
 
-use WordPressdotorg\Plugin_Directory\Template;
-
 /**
  * A Widget to display contributor information about a plugin.
  *
@@ -64,8 +62,10 @@ class Contributors extends \WP_Widget {
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Contributors', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['before_widget'];
-		echo $args['before_title'] . $title . $args['after_title'];
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $args['before_title'] . esc_html( $title ) . $args['after_title'];
 		?>
 
 		<ul id="contributors-list" class="contributors-list">
@@ -73,13 +73,14 @@ class Contributors extends \WP_Widget {
 			<li>
 				<?php echo get_avatar( $contributor->ID, 32 ); ?>
 				<a href="<?php echo esc_url( "https://profiles.wordpress.org/{$contributor->user_nicename}/" ); ?>">
-					<?php echo Template::encode( $contributor->display_name ?: $contributor->user_nicename ); ?>
+					<?php echo esc_html( $contributor->display_name ?: $contributor->user_nicename ); ?>
 				</a>
 			</li>
 			<?php endforeach; ?>
 		</ul>
 
 		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
 		echo $args['after_widget'];
 	}
 }
