@@ -11,9 +11,21 @@
 		return;
 	}
 
+	// WordPress nonces expire after 12–24 hours; refresh if older than 10 hours.
+	const NONCE_TTL_MS = 10 * 60 * 60 * 1000;
+
 	let refreshPromise = null;
-	let isRefreshed = false;
+	let lastRefreshedAt = 0;
 	let isSubmitting = false;
+
+	/**
+	 * Checks whether the current nonce is still fresh.
+	 *
+	 * @return {boolean}
+	 */
+	function isNonceFresh() {
+		return lastRefreshedAt > 0 && ( Date.now() - lastRefreshedAt < NONCE_TTL_MS );
+	}
 
 	/**
 	 * Requests a new nonce from the server via AJAX.
@@ -21,7 +33,7 @@
 	 * @return {Promise<string|null>} Resolves with the new nonce or null on failure.
 	 */
 	function refreshNonce() {
-		if ( isRefreshed ) {
+		if ( isNonceFresh() ) {
 			return Promise.resolve( nonceField.value );
 		}
 
@@ -47,7 +59,7 @@
 			.then( function ( data ) {
 				if ( data?.success && data?.data?.nonce ) {
 					nonceField.value = data.data.nonce;
-					isRefreshed = true;
+					lastRefreshedAt = Date.now();
 					return data.data.nonce;
 				}
 				return null;
@@ -67,7 +79,7 @@
 	}, { once: true } );
 
 	form.addEventListener( 'submit', function ( e ) {
-		if ( isRefreshed ) {
+		if ( isNonceFresh() ) {
 			return;
 		}
 
