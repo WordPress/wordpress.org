@@ -48,3 +48,7 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
 ### 4. [Props Bot](workflows/props-bot.yml) (`props-bot.yml`)
 - **Trigger:** Pull request lifecycle events (opened, reopened, ready for review, labeled with `props-bot`, or commented on).
 - **Purpose:** Automatically scans the pull request's author, commit messages, and review comments to compile a contributor "Props" credit line formatted in WordPress SVN style. Comments the list of credits back on the PR.
+
+### 5. [Lighthouse](workflows/lighthouse.yml) (`lighthouse.yml`)
+- **Trigger:** Runs twice daily (00:19 and 12:19 UTC) and on manual workflow dispatch.
+- **Purpose:** Audits one representative page per site template on the live network (performance, accessibility, best practices, SEO) and posts the category scores to the site-quality stats endpoint, so regressions show up as a trend. Settings live in [lighthouserc.json](lighthouserc.json).
