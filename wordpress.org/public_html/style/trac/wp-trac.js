@@ -484,7 +484,8 @@ let wpTrac,
 
 			// Add deprecated notice for core's test repository.
 			if ( document.body.classList.contains( 'core' ) && content?.classList.contains( 'browser' ) ) {
-				const testRepoLink = document.getElementById( 'repoindex' )?.querySelector( 'a[href="/browser/tests"]' );
+				const testRepoLink = document
+					.getElementById( 'repoindex' )?.querySelector( 'a[href="/browser/tests"]' );
 				testRepoLink?.parentElement?.insertAdjacentHTML(
 					'beforeend',
 					'<p style="display:inline">Deprecated. <a href="/browser/trunk/tests">Please see default repository</a>.</p>'
@@ -539,7 +540,7 @@ let wpTrac,
 				wpTrac.keepModifyTicketOpen();
 
 				// Open WikiFormatting links in a new window.
-				document.querySelector( '#content.ticket' )?.addEventListener( 'click', ( event ) => {
+				content.addEventListener( 'click', ( event ) => {
 					const link = event.target.closest( 'a[href$="wiki/WikiFormatting"]' );
 					if ( link ) {
 						event.preventDefault();
