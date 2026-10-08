@@ -554,8 +554,9 @@ class Meeting_Post_Type {
 		);
 
 	public function time_conversion_script() {
-		wp_print_inline_script_tag(
-			<<<'JS'
+		echo <<<EOF
+<script type="text/javascript">
+
 	var parse_date = function (text) {
 		var m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\+00:00$/.exec(text);
 		var d = new Date();
@@ -581,8 +582,8 @@ class Meeting_Post_Type {
 			}
 		}
 	}
-	JS
-		);
+</script>
+EOF;
 	}
 }
 
