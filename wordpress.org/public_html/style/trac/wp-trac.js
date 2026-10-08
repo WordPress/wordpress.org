@@ -541,7 +541,7 @@ let wpTrac,
 				// Trac markup is like this: `<label>close</label> as fixed`
 				document.querySelectorAll( '#action div label' ).forEach( ( label ) => {
 					const next = label.nextSibling;
-					if ( next && Node.TEXT_NODE === next.nodeType ) {
+					if ( next && 3 === next.nodeType ) {
 						label.textContent += next.nodeValue;
 						next.remove();
 					}
