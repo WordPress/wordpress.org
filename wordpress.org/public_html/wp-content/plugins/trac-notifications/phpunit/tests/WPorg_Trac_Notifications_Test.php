@@ -129,7 +129,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 
 		$this->assertStringContainsString( '<p class="ticket-note note-new-reporter">', $note );
 		$this->assertStringContainsString( "class='avatar", $note, 'The note carries the reporter\'s avatar.' );
-		$this->assertStringContainsString( '<strong>Make sure firsttimer receives a warm welcome.</strong><br />It&#8217;s their first ticket!', $note );
+		$this->assertStringContainsString( '<strong>Make sure firsttimer receives a warm welcome.</strong><br>It’s their first ticket!', $note );
 	}
 
 	/**
@@ -138,7 +138,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 	public function test_first_ticket_note_mentions_earlier_comments(): void {
 		$note = $this->render_note( self::REPORTER, 1, true );
 
-		$this->assertStringContainsString( 'They&#8217;ve commented before, but it&#8217;s their first ticket!', $note );
+		$this->assertStringContainsString( 'They’ve commented before, but it’s their first ticket!', $note );
 	}
 
 	/**
@@ -147,7 +147,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 	public function test_repeat_ticket_note_links_the_previous_tickets(): void {
 		$note = $this->render_note( self::REPORTER, 3 );
 
-		$this->assertStringContainsString( '<strong>This is only firsttimer&#8217;s third ticket!</strong><br />Previously:', $note );
+		$this->assertStringContainsString( '<strong>This is only firsttimer’s third ticket!</strong><br>Previously:', $note );
 		$this->assertStringContainsString( 'href="https://core.trac.wordpress.org/ticket/48"', $note );
 		$this->assertStringContainsString( 'href="https://core.trac.wordpress.org/ticket/49"', $note );
 		$this->assertStringNotContainsString( 'ticket/50"', $note, 'The ticket being viewed is not listed as a previous one.' );
@@ -175,7 +175,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 	public function test_repeat_ticket_note_prints_the_login_the_reporter_resolved_to( string $reporter ): void {
 		$note = $this->render_note( $reporter, 2 );
 
-		$this->assertStringContainsString( '<strong>This is only firsttimer&#8217;s second ticket!</strong>', $note );
+		$this->assertStringContainsString( '<strong>This is only firsttimer’s second ticket!</strong>', $note );
 		$this->assert_note_holds_only_the_login( $note );
 	}
 
