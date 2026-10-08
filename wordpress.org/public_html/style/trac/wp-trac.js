@@ -522,42 +522,49 @@ let wpTrac,
 				wpTrac.keepModifyTicketOpen();
 
 				// Open WikiFormatting links in a new window.
-				$( '#content.ticket' ).on( 'click', 'a[href$="wiki/WikiFormatting"]', function () {
-					window.open( $( this ).attr( 'href' ) );
-					return false;
+				document.querySelector( '#content.ticket' )?.addEventListener( 'click', ( event ) => {
+					const link = event.target.closest( 'a[href$="wiki/WikiFormatting"]' );
+					if ( link ) {
+						event.preventDefault();
+						window.open( link.getAttribute( 'href' ) );
+					}
 				} );
 
 				// Submit comment form on Cmd/Ctrl + Enter.
-				$( '#comment' ).on( 'keydown', function ( event ) {
+				document.getElementById( 'comment' )?.addEventListener( 'keydown', ( event ) => {
 					if ( ( event.ctrlKey || event.metaKey ) && event.key === 'Enter' ) {
-						$( 'input[name="submit"]' ).trigger( 'click' );
+						document.querySelector( 'input[name="submit"]' )?.click();
 					}
 				} );
 
 				// Move all of the ticket actions text into the label.
 				// Trac markup is like this: `<label>close</label> as fixed`
-				$( '#action div label' ).each( function () {
-					if ( this.nextSibling && window.Node.TEXT_NODE === this.nextSibling.nodeType ) {
-						this.textContent += this.nextSibling.nodeValue;
-						this.nextSibling.nodeValue = '';
+				document.querySelectorAll( '#action div label' ).forEach( ( label ) => {
+					const next = label.nextSibling;
+					if ( next && Node.TEXT_NODE === next.nodeType ) {
+						label.textContent += next.nodeValue;
+						next.remove();
 					}
 				} );
 
 				// Point users to open new tickets when they comment on old tickets.
-				if ( $( '#ticket' ).find( '.milestone' ).hasClass( 'closed' ) ) {
-					const component = $( '#field-component' ).val(),
-						ticketId = $( '.trac-id' ).text(),
+				if ( document.querySelector( '#ticket .milestone.closed' ) ) {
+					const component = document.getElementById( 'field-component' )?.value || '',
+						ticketId = document.querySelector( '.trac-id' )?.textContent?.trim() || '',
 						newticket = `/newticket?component=${ encodeURIComponent(
 							component
-						) }&description=${ encodeURIComponent( `This is a follow-up to ${ ticketId }.` ) }`;
-					$( '#trac-add-comment fieldset' ).prepend(
+						) }&description=${ encodeURIComponent( `This is a follow-up to \${ ticketId }.` ) }`;
+
+					document.querySelector( '#trac-add-comment fieldset' )?.insertAdjacentHTML(
+						'afterbegin',
 						`<p class="ticket-reopen-notice"><span class="dashicons dashicons-info"></span>
 						<strong>This ticket was closed on a completed milestone.</strong><br />
 						If you have a bug or enhancement to report, please <a href="${ newticket }">open a new ticket</a>.
 						Be sure to mention this ticket, ${ escapeHtml( ticketId ) }.</p>`
 					);
+
 					if ( ! wpTrac.gardener ) {
-						$( '#action_reopen' ).parent().remove();
+						document.getElementById( 'action_reopen' )?.parentElement?.remove();
 					}
 				}
 
