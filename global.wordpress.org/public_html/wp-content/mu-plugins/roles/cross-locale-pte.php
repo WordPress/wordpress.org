@@ -147,7 +147,7 @@ class Cross_Locale_PTE {
 		check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
 
 		$raw_projects     = isset( $_POST['projects'] ) ? sanitize_text_field( wp_unslash( $_POST['projects'] ) ) : '';
-		$projects         = array_filter( array_map( 'strval', explode( ',', $raw_projects ) ) );
+		$projects         = array_filter( array_map( 'absint', explode( ',', $raw_projects ) ) );
 		$current_projects = self::get_users_projects( self::$user->ID );
 
 		$projects_to_remove = array_diff( $current_projects, $projects );
