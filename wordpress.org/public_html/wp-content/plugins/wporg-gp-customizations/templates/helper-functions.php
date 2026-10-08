@@ -425,9 +425,8 @@ function wporg_gp_is_index() {
  * Prints JavaScript helper for menu toggle.
  */
 add_action( 'gp_footer', function() {
-	ob_start();
-	?>
-	<script>
+	wp_print_inline_script_tag(
+		<<<'JS'
 		( function( $ ) {
 			$( function() {
 				var $menu = $( '#site-navigation' );
@@ -439,9 +438,8 @@ add_action( 'gp_footer', function() {
 				}
 			} );
 		} )( jQuery );
-	</script>
-	<?php
-	wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) );
+		JS
+	);
 } );
 
 /**

@@ -482,8 +482,9 @@ if ( 'wp-plugins' === $project->path ) {
 	</div>
 </div>
 
-<?php ob_start(); ?>
-<script>
+<?php
+wp_print_inline_script_tag(
+	<<<'JS'
 	jQuery( document ).ready( function( $ ) {
 		$( '#variant-selector' ).on( 'change', function( event ) {
 			event.preventDefault();
@@ -500,7 +501,8 @@ if ( 'wp-plugins' === $project->path ) {
 			$( this ).parent( '.projects-dropdown' ).toggleClass( 'open' );
 		});
 	});
-</script>
-<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
+	JS
+);
+?>
 
 <?php gp_tmpl_footer();
