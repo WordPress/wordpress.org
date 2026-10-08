@@ -9,6 +9,7 @@ Author URI:  http://wordpress.org/
 Text Domain: wporg
 */
 
+// phpcs:disable Generic.WhiteSpace.ScopeIndent -- The class sits in an unindented class_exists() check.
 if ( !class_exists('Meeting_Post_Type') ):
 class Meeting_Post_Type {
 
@@ -554,9 +555,8 @@ class Meeting_Post_Type {
 		);
 
 	public function time_conversion_script() {
-		echo <<<EOF
-<script type="text/javascript">
-
+		wp_print_inline_script_tag(
+			<<<'JS'
 	var parse_date = function (text) {
 		var m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\+00:00$/.exec(text);
 		var d = new Date();
@@ -582,8 +582,8 @@ class Meeting_Post_Type {
 			}
 		}
 	}
-</script>
-EOF;
+	JS
+		);
 	}
 }
 
