@@ -709,6 +709,10 @@ class Jobs_Dot_WP {
 			$template = $this->success ? 'single' : 'post-job';
 			$this->success = false;
 			$content .= get_template_part( 'content', $template );
+
+			if ( 'single' === $template ) {
+				wp_reset_postdata();
+			}
 		}
 		return $content;
 	}
