@@ -27,9 +27,11 @@ if ( bbp_is_user_keymaster( get_current_user_id() ) ) {
 		 * Capabilities are handled server-side, but the UI isn't reflective of that.
 		 * This JS is a quick fix without filtering bbPress functions.
 		 */
+		ob_start();
 		?>
 		<script>
 			jQuery( '#bbp-forums-role').find( '[value="bbp_moderator"],[value="bbp_keymaster"]' ).remove();
 		</script>
+		<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
 	<?php } ?>
 </div>

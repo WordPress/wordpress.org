@@ -269,6 +269,7 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 }
 ?>
 
+<?php ob_start(); ?>
 <script>
 	jQuery( document ).ready( function( $ ) {
 		// Don't filter if there's an existing search term, or if we're paginated
@@ -310,5 +311,6 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 		});
 	});
 </script>
+<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
 
 <?php gp_tmpl_footer();
