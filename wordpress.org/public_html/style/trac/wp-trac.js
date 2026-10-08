@@ -879,7 +879,9 @@ let wpTrac,
 						.querySelector( 'form#query' )
 						?.insertAdjacentHTML(
 							'afterend',
-							'<h2 class="report-result">Results <span class="numresults">(' + numResults + ')</span></h2>'
+							'<h2 class="report-result">Results <span class="numresults">(' +
+								numResults +
+								')</span></h2>'
 						);
 				}
 			}
