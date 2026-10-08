@@ -126,7 +126,7 @@ class Cross_Locale_PTE {
 	 */
 	public static function render_admin_page() {
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
-			return self::render_edit_page( $_REQUEST['user_id'] );
+			return self::render_edit_page( (int) $_REQUEST['user_id'] );
 		}
 
 		$feedback_message = '';
@@ -147,7 +147,7 @@ class Cross_Locale_PTE {
 
 		check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
 
-		$raw_projects     = isset( $_POST['projects'] ) ? wp_unslash( $_POST['projects'] ) : '';
+		$raw_projects     = isset( $_POST['projects'] ) ? sanitize_text_field( wp_unslash( $_POST['projects'] ) ) : '';
 		$projects         = array_filter( array_map( 'strval', explode( ',', $raw_projects ) ) );
 		$current_projects = self::get_users_projects( self::$user->ID );
 
@@ -189,6 +189,8 @@ class Cross_Locale_PTE {
 
 	/**
 	 * Render the page to edit a single Cross-Locale PTE.
+	 *
+	 * @param int $user_id Optional. User ID. Default 0.
 	 */
 	public static function render_edit_page( $user_id = 0 ) {
 		if ( ! self::$user && $user_id ) {
