@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Runs after wp-env start. Sets up permalinks, creates pages, job categories, and sample jobs.
+# Runs after wp-env start. Sets up permalinks, creates the jobposter user, pages, job categories, and sample jobs.
 #
 
 CONFIG="--config jobs/.wp-env.json"

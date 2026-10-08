@@ -66,13 +66,16 @@ class Description_Syntax_Test extends TestCase {
 		parent::setUpBeforeClass();
 
 		if ( ! get_user_by( 'login', 'jobposter' ) ) {
-			self::$jobposter_id = (int) wp_insert_user(
+			$user_id = wp_insert_user(
 				array(
 					'user_login' => 'jobposter',
 					'user_pass'  => wp_generate_password(),
 					'role'       => 'subscriber',
 				)
 			);
+
+			self::assertIsInt( $user_id, 'The jobposter account could not be created.' );
+			self::$jobposter_id = $user_id;
 		}
 	}
 
@@ -120,6 +123,7 @@ class Description_Syntax_Test extends TestCase {
 		remove_filter( 'jobswp_require_captcha', '__return_false' );
 
 		self::restore_kses();
+		reset_phpmailer_instance();
 
 		$_POST    = array();
 		$_REQUEST = array();
@@ -141,7 +145,6 @@ class Description_Syntax_Test extends TestCase {
 	 */
 	private static function restore_kses(): void {
 		remove_filter( 'content_save_pre', 'wp_filter_kses' );
-		kses_remove_filters();
 		kses_init();
 	}
 
@@ -183,16 +186,7 @@ class Description_Syntax_Test extends TestCase {
 
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'jobswppostjob' );
 
-		$errors = false;
-		$record = static function ( $has_errors ) use ( &$errors ) {
-			$errors = $has_errors;
-			return $has_errors;
-		};
-
-		add_filter( 'jobswp_save_job_errors', $record, PHP_INT_MAX );
 		Jobs_Dot_WP::get_instance()->save_job();
-		remove_filter( 'jobswp_save_job_errors', $record, PHP_INT_MAX );
-
 		self::restore_kses();
 
 		$jobs = get_posts(
@@ -203,8 +197,14 @@ class Description_Syntax_Test extends TestCase {
 			)
 		);
 
+		foreach ( $jobs as $job ) {
+			$this->post_ids[] = $job->ID;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput -- save_job() records why it refused the submission here; only reported in the assertion message.
+		$errors = wp_unslash( $_POST['errors'] ?? false );
+
 		$this->assertCount( 1, $jobs, 'The submission should have created one draft job. Errors: ' . wp_json_encode( $errors ) );
-		$this->post_ids[] = $jobs[0]->ID;
 
 		return $jobs[0];
 	}
@@ -288,7 +288,7 @@ class Description_Syntax_Test extends TestCase {
 	public function test_resave_keeps_the_syntax_encoded_once( bool $unfiltered ): void {
 		$job = $this->submit_job( self::SUBMITTED );
 
-		$this->assertTrue( has_filter( 'content_save_pre', 'wp_filter_post_kses' ) !== false );
+		$this->assertNotFalse( has_filter( 'content_save_pre', 'wp_filter_post_kses' ) );
 		$this->assertFalse( has_filter( 'content_save_pre', 'wp_filter_kses' ) );
 
 		if ( $unfiltered ) {
