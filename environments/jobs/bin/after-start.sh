@@ -20,7 +20,11 @@ $WP wp theme activate jobswp
 if $WP wp user get jobposter --field=ID > /dev/null 2>&1; then
 	echo "User jobposter already exists, skipping..."
 else
-	$WP wp user create jobposter jobposter@example.org --role=subscriber --porcelain > /dev/null 2>&1 && echo "Created user: jobposter" || true
+	if $WP wp user create jobposter jobposter@example.org --role=subscriber --porcelain > /dev/null; then
+		echo "Created user: jobposter"
+	else
+		echo "Warning: could not create the jobposter user; the Post a Job form will not work without it."
+	fi
 fi
 
 # Remove default widgets to match production (sidebar only has the hardcoded Position Types list).

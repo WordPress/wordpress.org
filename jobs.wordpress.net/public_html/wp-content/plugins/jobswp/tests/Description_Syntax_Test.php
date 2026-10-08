@@ -12,6 +12,7 @@
 
 declare( strict_types = 1 );
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
@@ -45,6 +46,13 @@ class Description_Syntax_Test extends TestCase {
 	private array $post_ids = array();
 
 	/**
+	 * ID of the jobposter account when the test created it, deleted again on teardown.
+	 *
+	 * @var int
+	 */
+	private int $jobposter_id = 0;
+
+	/**
 	 * Registers a shortcode and a dynamic block whose output shows they ran.
 	 *
 	 * @return void
@@ -57,7 +65,7 @@ class Description_Syntax_Test extends TestCase {
 		add_filter( 'jobswp_require_captcha', '__return_false' );
 
 		if ( ! get_user_by( 'login', 'jobposter' ) ) {
-			wp_insert_user(
+			$this->jobposter_id = (int) wp_insert_user(
 				array(
 					'user_login' => 'jobposter',
 					'user_pass'  => wp_generate_password(),
@@ -78,15 +86,18 @@ class Description_Syntax_Test extends TestCase {
 		}
 		$this->post_ids = array();
 
+		if ( $this->jobposter_id ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+			wp_delete_user( $this->jobposter_id );
+			$this->jobposter_id = 0;
+		}
+
 		remove_shortcode( 'jobswp_test' );
 		unregister_block_type( 'jobswp-test/block' );
 		remove_filter( 'jobswp_require_captcha', '__return_false' );
 
-		// create_job() swaps the kses profile for the rest of the request.
-		remove_filter( 'content_save_pre', 'wp_filter_kses' );
-		if ( ! has_filter( 'content_save_pre', 'wp_filter_post_kses' ) ) {
-			add_filter( 'content_save_pre', 'wp_filter_post_kses' );
-		}
+		kses_remove_filters();
+		kses_init();
 
 		$_POST    = array();
 		$_REQUEST = array();
@@ -114,25 +125,39 @@ class Description_Syntax_Test extends TestCase {
 	private function submit_job( string $description ): WP_Post {
 		$title = 'Job ' . uniqid();
 
-		$_POST = array(
-			'postjob'           => '1',
-			'verify'            => '1',
-			'accept'            => '1',
-			'first_name'        => 'Rose',
-			'last_name'         => 'Carter',
-			'email'             => 'rose@example.org',
-			'company'           => 'Example Corp',
-			'howtoapply_method' => 'email',
-			'howtoapply'        => 'apply@example.org',
-			'job_title'         => $title,
-			'category'          => 'development',
-			'jobtype'           => 'ft',
-			'job_description'   => $description,
+		$_POST = wp_slash(
+			array(
+				'postjob'           => '1',
+				'verify'            => '1',
+				'accept'            => '1',
+				'first_name'        => 'Rose',
+				'last_name'         => 'Carter',
+				'email'             => 'rose@example.org',
+				'company'           => 'Example Corp',
+				'howtoapply_method' => 'email',
+				'howtoapply'        => 'apply@example.org',
+				'job_title'         => $title,
+				'category'          => 'development',
+				'jobtype'           => 'ft',
+				'job_description'   => $description,
+			)
 		);
 
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'jobswppostjob' );
 
+		$errors = false;
+		$record = static function ( $has_errors ) use ( &$errors ) {
+			$errors = $has_errors;
+			return $has_errors;
+		};
+
+		add_filter( 'jobswp_save_job_errors', $record, PHP_INT_MAX );
 		Jobs_Dot_WP::get_instance()->save_job();
+		remove_filter( 'jobswp_save_job_errors', $record, PHP_INT_MAX );
+
+		// create_job() leaves the comment kses profile in place for the rest of the request.
+		kses_remove_filters();
+		kses_init();
 
 		$jobs = get_posts(
 			array(
@@ -142,7 +167,7 @@ class Description_Syntax_Test extends TestCase {
 			)
 		);
 
-		$this->assertCount( 1, $jobs, 'The submission should have created one draft job.' );
+		$this->assertCount( 1, $jobs, 'The submission should have created one draft job. Errors: ' . wp_json_encode( $errors ) );
 		$this->post_ids[] = $jobs[0]->ID;
 
 		return $jobs[0];
@@ -158,16 +183,19 @@ class Description_Syntax_Test extends TestCase {
 		$store = array( Jobs_Dot_WP::get_instance(), 'store_job_content_escaped' );
 
 		remove_filter( 'wp_insert_post_data', $store, PHP_INT_MAX );
-		$job_id = wp_insert_post(
-			array(
-				'post_type'    => 'job',
-				'post_status'  => 'publish',
-				'post_title'   => 'Legacy job ' . uniqid(),
-				'post_content' => wp_slash( $content ),
-			),
-			true
-		);
-		add_filter( 'wp_insert_post_data', $store, PHP_INT_MAX );
+		try {
+			$job_id = wp_insert_post(
+				array(
+					'post_type'    => 'job',
+					'post_status'  => 'publish',
+					'post_title'   => 'Legacy job ' . uniqid(),
+					'post_content' => wp_slash( $content ),
+				),
+				true
+			);
+		} finally {
+			add_filter( 'wp_insert_post_data', $store, PHP_INT_MAX );
+		}
 
 		$this->assertIsInt( $job_id );
 		$this->post_ids[] = $job_id;
@@ -200,15 +228,33 @@ class Description_Syntax_Test extends TestCase {
 	}
 
 	/**
+	 * The ways a moderator's edit reaches the database.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public static function resave_paths(): array {
+		return array(
+			'through kses'    => array( false ),
+			'unfiltered_html' => array( true ),
+		);
+	}
+
+	/**
 	 * Saving a job again keeps the description encoded once.
 	 *
 	 * WordPress's kses decodes entities on every save, so the encoding has to be
 	 * applied after it and must not stack when the stored form comes back around.
 	 *
+	 * @param bool $unfiltered Whether the editor's account bypasses kses.
 	 * @return void
 	 */
-	public function test_resave_keeps_the_syntax_encoded_once(): void {
+	#[DataProvider( 'resave_paths' )]
+	public function test_resave_keeps_the_syntax_encoded_once( bool $unfiltered ): void {
 		$job = $this->submit_job( self::SUBMITTED );
+
+		if ( $unfiltered ) {
+			kses_remove_filters();
+		}
 
 		wp_update_post(
 			array(

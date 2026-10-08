@@ -28,12 +28,10 @@ if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
 	exit( 1 );
 }
 
-// Set polyfills path if available (required by WP test suite).
 if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) && file_exists( $_tests_dir . '/vendor/yoast/phpunit-polyfills' ) ) {
 	define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', $_tests_dir . '/vendor/yoast/phpunit-polyfills' );
 }
 
-// Give access to tests_add_filter() function.
 require_once $_tests_dir . '/includes/functions.php';
 
 /**
@@ -62,5 +60,4 @@ function wp_hash_password_options( array $options, string $algorithm ): array {
 }
 tests_add_filter( 'wp_hash_password_options', __NAMESPACE__ . '\wp_hash_password_options', 1, 2 );
 
-// Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
