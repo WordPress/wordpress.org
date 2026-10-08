@@ -16,6 +16,13 @@ $WP wp rewrite structure '/%postname%/' --hard
 # Activate the jobswp theme.
 $WP wp theme activate jobswp
 
+# The plugin files every submitted job under this account; the form errors without it.
+if $WP wp user get jobposter --field=ID > /dev/null 2>&1; then
+	echo "User jobposter already exists, skipping..."
+else
+	$WP wp user create jobposter jobposter@example.org --role=subscriber --porcelain > /dev/null 2>&1 && echo "Created user: jobposter" || true
+fi
+
 # Remove default widgets to match production (sidebar only has the hardcoded Position Types list).
 echo "Clearing default sidebar widgets..."
 $WP wp widget reset sidebar-1 > /dev/null 2>&1 || true

@@ -107,6 +107,12 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
+**Run tests** (the JobsWP plugin's PHPUnit suite, in a dedicated test environment):
+
+```bash
+npm run jobs:test
+```
+
 ### Browse Happy
 
 A local instance of [browsehappy.com](https://browsehappy.com) with the theme.
