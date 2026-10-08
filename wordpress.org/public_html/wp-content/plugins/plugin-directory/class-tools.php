@@ -32,7 +32,8 @@ class Tools {
 
 		$data = false;
 		if ( preg_match( '#^https?://#i', $file_location ) ) {
-			$response      = wp_safe_remote_get( $file_location );
+			// Banners are far smaller than this. A larger response is cut short and fails to decode below.
+			$response      = wp_safe_remote_get( $file_location, array( 'limit_response_size' => 10 * MB_IN_BYTES ) );
 			$response_code = wp_remote_retrieve_response_code( $response );
 			if ( $response_code >= 200 && $response_code < 300 ) {
 				$data = wp_remote_retrieve_body( $response );
