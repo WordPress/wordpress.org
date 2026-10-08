@@ -6,7 +6,8 @@ use Wporg\TranslationEvents\Templates;
 
 </div>
 <div class="clear"></div>
-<script type="text/javascript">
+<?php ob_start(); ?>
+<script>
 jQuery( function($) {
 	var hooks_installed = {};
 	var current_event_translations_table = false;
@@ -38,5 +39,6 @@ foreach ( $editor_options as $translation_set_id => $options ) {
 } );
 </script>
 <?php
+wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) );
 gp_enqueue_script( 'wporg-translate-editor' );
 Templates::footer();

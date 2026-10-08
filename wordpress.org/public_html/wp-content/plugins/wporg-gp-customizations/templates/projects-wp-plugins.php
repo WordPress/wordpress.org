@@ -127,7 +127,8 @@ gp_tmpl_header();
 	</table>
 </div>
 
-<script type="text/javascript">
+<?php ob_start(); ?>
+<script>
 jQuery( function( $ ) {
 	$( '#stats-table' ).tablesorter( {
 		theme: 'wporg-translate',
@@ -144,5 +145,6 @@ jQuery( function( $ ) {
 	});
 });
 </script>
+<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
 
 <?php gp_tmpl_footer();

@@ -51,7 +51,8 @@ if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] 
 	<a href="<?php echo esc_url( wp_registration_url() ); ?>" title="<?php esc_attr_e( 'Create an account', 'wporg' ); ?>"><?php esc_html_e( 'Create an account', 'wporg' ); ?></a>
 </p>
 
-<script type="text/javascript">
+<?php ob_start(); ?>
+<script>
 setTimeout( function() {
 	try {
 		var d = document.getElementById( 'user_login' );
@@ -77,6 +78,7 @@ setTimeout( function() {
 	} catch( e ){}
 }, 200 );
 </script>
+<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
 
 
 <?php get_footer(); ?>
