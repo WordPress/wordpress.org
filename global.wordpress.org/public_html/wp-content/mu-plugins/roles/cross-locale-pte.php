@@ -105,7 +105,7 @@ class Cross_Locale_PTE {
 		}
 
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
-			self::$user = get_user_by( 'id', $_REQUEST['user_id'] );
+			self::$user = get_user_by( 'id', (int) $_REQUEST['user_id'] );
 			if ( ! self::$user ) {
 				wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 				exit;
@@ -187,10 +187,18 @@ class Cross_Locale_PTE {
 	/**
 	 * Render the page to edit a single Cross-Locale PTE.
 	 */
-	public static function render_edit_page() {
+	public static function render_edit_page( $user_id = 0 ) {
+		if ( ! self::$user && $user_id ) {
+			self::$user = get_user_by( 'id', (int) $user_id );
+		}
+
 		$user = self::$user;
+		if ( ! $user ) {
+			return;
+		}
+
 		$project_access_list = self::get_users_projects( $user->ID );
-		$last_updated = get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' );
+		$last_updated        = get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' );
 
 		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
 			'l10n' => array(
