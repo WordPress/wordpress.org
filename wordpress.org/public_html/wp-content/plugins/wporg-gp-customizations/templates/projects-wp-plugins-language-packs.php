@@ -64,14 +64,16 @@ gp_tmpl_header();
 	?>
 </div>
 
-<?php ob_start(); ?>
-<script>
+<?php
+wp_print_inline_script_tag(
+	<<<'JS'
 jQuery( function( $ ) {
 	$( '.projects-dropdown > li' ).on( 'click', function() {
 		$( this ).parent( '.projects-dropdown' ).toggleClass( 'open' );
 	});
 });
-</script>
-<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
+JS
+);
+?>
 
 <?php gp_tmpl_footer();

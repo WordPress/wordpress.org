@@ -347,16 +347,16 @@ function wporg_login_language_switcher( $display = true ) {
 			</select>
 		</form>
 	</div>
-	<?php ob_start(); ?>
-	<script>
+	<?php
+	wp_print_inline_script_tag(
+		<<<'JS'
 		var switcherForm  = document.getElementById( 'language-switcher' );
 		var localesSelect = document.getElementById( 'language-switcher-locales' );
 		localesSelect.addEventListener( 'change', function() {
 			switcherForm.submit()
 		} );
-	</script>
-	<?php
-	wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) );
+		JS
+	);
 
 	return false; // For the login_display_language_dropdown filter.
 }
