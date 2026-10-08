@@ -115,7 +115,6 @@ class Cross_Locale_PTE {
 		if ( ! empty( $_REQUEST['action'] ) ) {
 			switch ( $_REQUEST['action'] ) {
 				case 'update-cross-locale-pte':
-					check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
 					return self::update_cross_locale_pte();
 			}
 		}
