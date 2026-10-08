@@ -633,7 +633,7 @@ class Jobs_Dot_WP {
 	 * @param string $content Job description.
 	 * @return string
 	 */
-	public static function escape_content_syntax( $content ) {
+	private static function escape_content_syntax( $content ) {
 		return str_replace( array( '[', '<!--', '://' ), array( '&#91;', '&lt;!--', '&#58;//' ), $content );
 	}
 
