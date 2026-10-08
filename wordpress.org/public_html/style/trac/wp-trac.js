@@ -461,22 +461,20 @@ let wpTrac,
 		},
 
 		hacks() {
-			const content = $( '#content' );
+			const content = document.getElementById( 'content' );
 
 			// Add deprecated notice for core's test repository.
-			if ( document.body.classList.contains( 'core' ) && content.hasClass( 'browser' ) ) {
-				$( '#repoindex tbody .odd .name a[href="/browser/tests"]' )
-					.parent()
-					.append(
-						'<p style="display:inline">Deprecated. <a href="/browser/trunk/tests">Please see default repository</a>.'
-					);
+			if ( document.body.classList.contains( 'core' ) && content?.classList.contains( 'browser' ) ) {
+				const testRepoLink = document.getElementById( 'repoindex' )?.querySelector( 'a[href="/browser/tests"]' );
+				testRepoLink?.parentElement?.insertAdjacentHTML(
+					'beforeend',
+					'<p style="display:inline">Deprecated. <a href="/browser/trunk/tests">Please see default repository</a>.</p>'
+				);
 
-				if ( window.location.pathname.substring( 0, 14 ) === '/browser/tests' ) {
-					content.before(
-						$( '<div />', {
-							class: 'system-message warning',
-							html: 'You are currently viewing the <strong>deprecated</strong> test repository. You may want to <a href="/browser/trunk/tests">view the tests in the default repository</a>.',
-						} )
+				if ( window.location.pathname.startsWith( '/browser/tests' ) ) {
+					content?.insertAdjacentHTML(
+						'beforebegin',
+						'<div class="system-message warning">You are currently viewing the <strong>deprecated</strong> test repository. You may want to <a href="/browser/trunk/tests">view the tests in the default repository</a>.</div>'
 					);
 				}
 			}
@@ -510,12 +508,12 @@ let wpTrac,
 			wpTrac.linkHeaderUsername();
 
 			// Ticket-only tweaks.
-			if ( content.hasClass( 'ticket' ) ) {
+			if ( content?.classList.contains( 'ticket' ) ) {
 				wpTrac.redirectTicketsToProperTracker.init();
 
 				// A collection of ticket hacks that must be run again after previews.
 				wpTrac.postPreviewHacks();
-				content.on( 'wpTracPostPreview', wpTrac.postPreviewHacks );
+				$( content ).on( 'wpTracPostPreview', wpTrac.postPreviewHacks );
 
 				// Allow 'Modify Ticket' to be shown even after a Trac preview tries to close it,
 				// but only if it was already open.
@@ -802,27 +800,27 @@ let wpTrac,
 				}
 			}
 
-			if ( content.hasClass( 'search' ) ) {
+			if ( content?.classList.contains( 'search' ) ) {
 				// Remove 'Wiki' and 'Milestone' from search.
 				$( '#fullsearch #milestone' ).next().remove().end().remove();
 				$( '#fullsearch #wiki' ).next().remove().end().remove();
-
+				
 				// Offer to create a new ticket.
-				content
-					.find( 'h1' )
-					.append(
-						`<span class="create-new-ticket button button-large button-primary"><a href="https://login.wordpress.org/?redirect_to=https://${ window.location.host }/newticket" rel="nofollow">Create a new ticket</a></span>`
-					);
+				content.querySelector( 'h1' )?.insertAdjacentHTML(
+					'beforeend',
+					`<span class="create-new-ticket button button-large button-primary"><a href="https://login.wordpress.org/?redirect_to=https://${ window.location.host }/newticket" rel="nofollow">Create a new ticket</a></span>`
+				);
 			}
 
 			// Batch Modify should require a comment.
 			$( '#batchmod_value_comment' ).prop( 'required', true );
 
 			// Show the number of query results even on a single page; Trac only renders a heading when they paginate.
-			if ( content.hasClass( 'query' ) && ! content.find( 'h2.report-result' ).length ) {
-				const numResults = content.find( 'table.listing tbody tr' ).length;
+			if ( content?.classList.contains( 'query' ) && ! content.querySelector( 'h2.report-result' ) ) {
+				const numResults = content.querySelectorAll( 'table.listing tbody tr' ).length;
 				if ( numResults ) {
-					$( 'form#query' ).after(
+					document.querySelector( 'form#query' )?.insertAdjacentHTML(
+						'afterend',
 						'<h2 class="report-result">Results <span class="numresults">(' + numResults + ')</span></h2>'
 					);
 				}
@@ -831,14 +829,13 @@ let wpTrac,
 			// Hide the "arguments are missing" warning on report views for users who cannot edit the report to fix it.
 			if (
 				/^\/report\/\d/.test( window.location.pathname ) &&
-				! content.find( '.buttons input[value="Edit report"]' ).length
+				! content?.querySelector( '.buttons input[value="Edit report"]' )
 			) {
-				content
-					.find( '#warning.system-message' )
-					.filter( function () {
-						return /arguments are missing/i.test( $( this ).text() );
-					} )
-					.hide();
+				content?.querySelectorAll( '#warning.system-message' ).forEach( ( warning ) => {
+					if ( /arguments are missing/i.test( warning.textContent ) ) {
+						warning.style.display = 'none';
+					}
+				} );
 			}
 
 			// Demote the nav "Preferences" link to the footer.
