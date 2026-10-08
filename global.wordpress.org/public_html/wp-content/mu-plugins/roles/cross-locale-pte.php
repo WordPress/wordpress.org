@@ -115,10 +115,6 @@ class Cross_Locale_PTE {
 		if ( ! empty( $_REQUEST['action'] ) ) {
 			switch ( $_REQUEST['action'] ) {
 				case 'update-cross-locale-pte':
-					if ( ! self::$user ) {
-						wp_safe_redirect( $redirect );
-						exit;
-					}
 					check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
 					return self::update_cross_locale_pte();
 			}
@@ -143,6 +139,13 @@ class Cross_Locale_PTE {
 	 */
 	public static function update_cross_locale_pte() {
 		global $wpdb;
+
+		if ( ! self::$user ) {
+			wp_safe_redirect( menu_page_url( 'cross-locale-pte', false ) );
+			exit;
+		}
+
+		check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
 
 		$raw_projects     = isset( $_POST['projects'] ) ? wp_unslash( $_POST['projects'] ) : '';
 		$projects         = array_filter( array_map( 'strval', explode( ',', $raw_projects ) ) );
