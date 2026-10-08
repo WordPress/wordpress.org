@@ -202,8 +202,8 @@ class Description_Syntax_Test extends TestCase {
 	/**
 	 * Saving a job again keeps the description encoded once.
 	 *
-	 * kses decodes entities on every save, so the encoding has to be applied after
-	 * it and must not stack when the stored form comes back around.
+	 * WordPress's kses decodes entities on every save, so the encoding has to be
+	 * applied after it and must not stack when the stored form comes back around.
 	 *
 	 * @return void
 	 */
