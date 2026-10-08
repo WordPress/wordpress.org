@@ -806,7 +806,7 @@ let wpTrac,
 				// Remove 'Wiki' and 'Milestone' from search.
 				$( '#fullsearch #milestone' ).next().remove().end().remove();
 				$( '#fullsearch #wiki' ).next().remove().end().remove();
-				
+
 				// Offer to create a new ticket.
 				content
 					.querySelector( 'h1' )
@@ -827,7 +827,9 @@ let wpTrac,
 						.querySelector( 'form#query' )
 						?.insertAdjacentHTML(
 							'afterend',
-							'<h2 class="report-result">Results <span class="numresults">(' + numResults + ')</span></h2>'
+							'<h2 class="report-result">Results <span class="numresults">(' +
+								numResults +
+								')</span></h2>'
 						);
 				}
 			}
