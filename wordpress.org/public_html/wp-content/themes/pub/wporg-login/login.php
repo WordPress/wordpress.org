@@ -51,8 +51,10 @@ if ( ! empty( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] 
 	<a href="<?php echo esc_url( wp_registration_url() ); ?>" title="<?php esc_attr_e( 'Create an account', 'wporg' ); ?>"><?php esc_html_e( 'Create an account', 'wporg' ); ?></a>
 </p>
 
-<?php ob_start(); ?>
-<script>
+<?php
+wp_print_inline_script_tag(
+	sprintf(
+		<<<'JS'
 setTimeout( function() {
 	try {
 		var d = document.getElementById( 'user_login' );
@@ -67,18 +69,22 @@ setTimeout( function() {
 			var p = document.getElementById( 'user_pass' );
 			if ( p.type === 'password' ) {
 				p.type = 'text';
-				h.ariaLabel = <?php echo json_encode( __( 'Hide password', 'wporg' ) ); ?>;
+				h.ariaLabel = %s;
 				h.children[0].className = 'dashicons dashicons-hidden';
 			} else {
 				p.type = 'password';
-				h.ariaLabel = <?php echo json_encode( __( 'Show password', 'wporg' ) ); ?>;
+				h.ariaLabel = %s;
 				h.children[0].className = 'dashicons dashicons-visibility';
 			}
 		}
 	} catch( e ){}
 }, 200 );
-</script>
-<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
+JS,
+		json_encode( __( 'Hide password', 'wporg' ) ),
+		json_encode( __( 'Show password', 'wporg' ) )
+	)
+);
+?>
 
 
 <?php get_footer(); ?>

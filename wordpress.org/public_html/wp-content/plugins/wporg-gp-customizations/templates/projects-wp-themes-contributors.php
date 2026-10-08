@@ -113,8 +113,10 @@ gp_tmpl_header();
 	?>
 </div>
 
-<?php ob_start(); ?>
-<script>
+<?php
+wp_print_inline_script_tag(
+	sprintf(
+		<<<'JS'
 jQuery( function( $ ) {
 	$( '.projects-dropdown > li' ).on( 'click', function() {
 		$( this ).parent( '.projects-dropdown' ).toggleClass( 'open' );
@@ -150,8 +152,8 @@ jQuery( function( $ ) {
 });
 
 new Chartist.Line('.ct-chart-contributors', {
-	labels: <?php echo json_encode( $chart_data['labels'] ); ?>,
-	series: <?php echo json_encode( $chart_data['series'] ); ?>
+	labels: %s,
+	series: %s
 }, {
 	lineSmooth: Chartist.Interpolation.simple({
 		divisor: 2
@@ -179,12 +181,16 @@ new Chartist.Line('.ct-chart-contributors', {
 	['screen and (max-width: 500px)', {
 		axisX: {
 			labelInterpolationFnc: function( value, index ) {
-				return index % 2 === 0 ? value : null;
+				return index %% 2 === 0 ? value : null;
 			}
 		}
 	}]
 ]);
-</script>
-<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
+JS,
+		json_encode( $chart_data['labels'] ),
+		json_encode( $chart_data['series'] )
+	)
+);
+?>
 
 <?php gp_tmpl_footer();
