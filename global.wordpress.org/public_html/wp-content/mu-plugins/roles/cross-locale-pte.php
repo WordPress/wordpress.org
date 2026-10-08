@@ -90,9 +90,10 @@ class Cross_Locale_PTE {
 		if ( ! empty( $_REQUEST['user'] ) ) {
 			check_admin_referer( 'cross-locale-pte', '_nonce_cross-locale-pte' );
 
-			self::$user = get_user_by( 'login', $_REQUEST['user'] );
+			$user_input = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
+			self::$user = get_user_by( 'login', $user_input );
 			if ( ! self::$user ) {
-				self::$user = get_user_by( 'email', $_REQUEST['user'] );
+				self::$user = get_user_by( 'email', $user_input );
 			}
 
 			if ( self::$user ) {
@@ -114,11 +115,13 @@ class Cross_Locale_PTE {
 		if ( ! empty( $_REQUEST['action'] ) ) {
 			switch ( $_REQUEST['action'] ) {
 				case 'update-cross-locale-pte':
+					if ( ! self::$user ) {
+						wp_safe_redirect( $redirect );
+						exit;
+					}
 					check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
 					return self::update_cross_locale_pte();
 			}
-
-			return self::render_edit_page();
 		}
 	}
 
@@ -268,7 +271,11 @@ class Cross_Locale_PTE {
 			$cache = array();
 		}
 
-		$user_id = intval( $user->ID );
+		if ( empty( $user->ID ) ) {
+			return false;
+		}
+
+		$user_id    = (int) $user->ID;
 		$project_id = intval( $project_id );
 
 		if ( isset( $cache[ $user_id ][ $project_id ] ) ) {
@@ -405,7 +412,7 @@ class Cross_Locale_PTE {
 			return $verdict;
 		}
 
-		static $current_translation_by_user;
+		static $current_translation_by_user = array();
 		$cache_key = $args['user']->ID . '_' . $translation->translation_set_id . '_' . $translation->original_id;
 
 		if ( isset( $current_translation_by_user[ $cache_key ] ) ) {
