@@ -485,7 +485,8 @@ let wpTrac,
 			// Add deprecated notice for core's test repository.
 			if ( document.body.classList.contains( 'core' ) && content?.classList.contains( 'browser' ) ) {
 				const testRepoLink = document
-					.getElementById( 'repoindex' )?.querySelector( 'a[href="/browser/tests"]' );
+					.getElementById( 'repoindex' )
+					?.querySelector( 'a[href="/browser/tests"]' );
 				testRepoLink?.parentElement?.insertAdjacentHTML(
 					'beforeend',
 					'<p style="display:inline">Deprecated. <a href="/browser/trunk/tests">Please see default repository</a>.</p>'
@@ -859,10 +860,12 @@ let wpTrac,
 				$( '#fullsearch #wiki' ).next().remove().end().remove();
 
 				// Offer to create a new ticket.
-				content.querySelector( 'h1' )?.insertAdjacentHTML(
-					'beforeend',
-					`<span class="create-new-ticket button button-large button-primary"><a href="https://login.wordpress.org/?redirect_to=https://${ window.location.host }/newticket" rel="nofollow">Create a new ticket</a></span>`
-				);
+				content
+					.querySelector( 'h1' )
+					?.insertAdjacentHTML(
+						'beforeend',
+						`<span class="create-new-ticket button button-large button-primary"><a href="https://login.wordpress.org/?redirect_to=https://${ window.location.host }/newticket" rel="nofollow">Create a new ticket</a></span>`
+					);
 			}
 
 			// Batch Modify should require a comment.
@@ -872,10 +875,12 @@ let wpTrac,
 			if ( content?.classList.contains( 'query' ) && ! content.querySelector( 'h2.report-result' ) ) {
 				const numResults = content.querySelectorAll( 'table.listing tbody tr' ).length;
 				if ( numResults ) {
-					document.querySelector( 'form#query' )?.insertAdjacentHTML(
-						'afterend',
-						'<h2 class="report-result">Results <span class="numresults">(' + numResults + ')</span></h2>'
-					);
+					document
+						.querySelector( 'form#query' )
+						?.insertAdjacentHTML(
+							'afterend',
+							'<h2 class="report-result">Results <span class="numresults">(' + numResults + ')</span></h2>'
+						);
 				}
 			}
 
