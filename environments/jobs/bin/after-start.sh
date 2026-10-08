@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Runs after wp-env start. Sets up permalinks, creates pages, job categories, and sample jobs.
+# Runs after wp-env start. Sets up permalinks, creates the jobposter user, pages, job categories, and sample jobs.
 #
 
 CONFIG="--config jobs/.wp-env.json"
@@ -15,6 +15,17 @@ $WP wp rewrite structure '/%postname%/' --hard
 
 # Activate the jobswp theme.
 $WP wp theme activate jobswp
+
+# The plugin files every submitted job under this account; the form errors without it.
+if $WP wp user get jobposter --field=ID > /dev/null 2>&1; then
+	echo "User jobposter already exists, skipping..."
+else
+	if $WP wp user create jobposter jobposter@example.org --role=subscriber --porcelain > /dev/null; then
+		echo "Created user: jobposter"
+	else
+		echo "Warning: could not create the jobposter user; the Post a Job form will not work without it."
+	fi
+fi
 
 # Remove default widgets to match production (sidebar only has the hardcoded Position Types list).
 echo "Clearing default sidebar widgets..."

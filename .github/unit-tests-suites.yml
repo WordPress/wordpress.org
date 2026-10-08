@@ -107,6 +107,13 @@ suites:
     paths:
       - 'environments/theme-directory/**'
 
+  jobs:
+    type: wordpress
+    name: Jobs
+    script: jobs:test
+    paths:
+      - 'environments/jobs/**'
+
   make:
     type: wordpress
     name: Make

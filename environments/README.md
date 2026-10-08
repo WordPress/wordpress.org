@@ -107,6 +107,12 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
+**Run tests** (the JobsWP plugin's PHPUnit suite, in a dedicated test environment):
+
+```bash
+npm run jobs:test
+```
+
 ### Browse Happy
 
 A local instance of [browsehappy.com](https://browsehappy.com) with the theme.
@@ -287,8 +293,8 @@ What's running:
 
 | Service | Purpose |
 |---|---|
-| `app` | FreeScout's latest release on nginx and PHP-FPM 8.3 (FreeScout's recommended nginx config), with the scheduler and queue worker production would run from cron. |
-| `db` | MariaDB, with a separate `freescout-test` database for the tests. |
+| `app` | FreeScout's latest release on nginx and PHP-FPM 8.4, with the scheduler and queue worker production would run from cron. |
+| `db` | MariaDB 11.4, with a separate `freescout-test` database for the tests. |
 | `greenmail` | Mail server FreeScout fetches the **Plugins** and **Themes** mailboxes from, over IMAP. Two sample emails are delivered on first start. |
 | `mailpit` | Catches outgoing mail. |
 | `mock-api` | Stands in for `api.wordpress.org/dotorg/freescout/`: checks request signatures, answers sidebar requests with panels recorded from the real endpoints for a real account (`obenland`'s), and logs webhook events (`npm run freescout:logs`). Also stands in for login.wordpress.org's SAML identity provider at http://127.0.0.1:8892/idp, signing with a key that's only for local development. |
