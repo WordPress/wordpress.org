@@ -329,9 +329,9 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts', 11 );
 
 function inline_scripts() {
 	$current_site = get_site();
-	ob_start();
-	?>
-	<script>
+	wp_print_inline_script_tag(
+		sprintf(
+			<<<'JS'
 		var el = document.getElementById( 'make-welcome-toggle' );
 		if ( el ) {
 			el.addEventListener( 'click', function( e ) {
@@ -350,13 +350,15 @@ function inline_scripts() {
 				document.cookie = $content.data( 'cookie' ) + '=' +
 					( isHide ? $content.data( 'hash' ) : '' ) +
 					'; expires=Fri, 31 Dec 9999 23:59:59 GMT' +
-					'; domain=<?php echo esc_js( $current_site->domain ); ?>' +
-					'; path=<?php echo esc_js( $current_site->path ); ?>';
+					'; domain=%s' +
+					'; path=%s';
 			} );
 		}
-	</script>
-	<?php
-	wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) );
+		JS,
+			esc_js( $current_site->domain ),
+			esc_js( $current_site->path )
+		)
+	);
 }
 add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 
@@ -396,13 +398,15 @@ function welcome_box() {
 			><span><?php esc_html_e( 'Hide welcome box', 'wporg' ); ?></span></button>
 		</div>
 		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo esc_attr( $cookie ); ?>" data-hash="<?php echo esc_attr( $content_hash ); ?>">
-			<?php ob_start(); ?>
-			<script>
+			<?php
+			wp_print_inline_script_tag(
+				sprintf(
+					<<<'JS'
 				const elContent = document.getElementById( 'make-welcome-content' );
 
 				if ( elContent ) {
 					const hasCookieSetToHidden = -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash );
-					const isHome = window.location.pathname === '<?php echo esc_js( $path ); ?>';
+					const isHome = window.location.pathname === '%s';
 
 					if ( hasCookieSetToHidden || ! isHome ) {
 						const elToggle = document.getElementById( 'make-welcome-toggle' );
@@ -421,8 +425,11 @@ function welcome_box() {
 						}
 					}
 				}
-			</script>
-			<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
+				JS,
+					esc_js( $path )
+				)
+			);
+			?>
 			<?php the_content(); ?>
 		</div>
 	</div>
