@@ -3,7 +3,7 @@
 	"private": true,
 	"description": "Local development environments for WordPress.org",
 	"engines": {
-		"node": ">=20"
+		"node": ">=24"
 	},
 	"scripts": {
 		"plugins:env": "wp-env --config plugin-directory/.wp-env.json",
@@ -53,6 +53,6 @@
 		"freescout:test": "npm run freescout:env -- exec -T --user www-data app bash /srv/env/bin/test.sh"
 	},
 	"devDependencies": {
-		"@wordpress/env": "^11"
+		"@wordpress/env": "^11.9.0"
 	}
 }
