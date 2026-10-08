@@ -74,8 +74,9 @@ function time_shortcode( $attr, $content = '' ) {
  * Prints script to convert time in the viewers local time zone.
  */
 function time_converter_script() {
+	ob_start();
 	?>
-	<script type="text/javascript">
+	<script>
 		( function( $ ) {
 			function convertTime() {
 				var parseDate, formatTime, formatDate, toLocaleTimeStringSupportsLocales;
@@ -141,6 +142,7 @@ function time_converter_script() {
 		})( jQuery );
 	</script>
 <?php
+	wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) );
 }
 
 /**

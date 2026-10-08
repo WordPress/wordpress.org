@@ -464,6 +464,7 @@ if ( 'wp-plugins' === $project->path ) {
 	</div>
 </div>
 
+<?php ob_start(); ?>
 <script>
 	jQuery( document ).ready( function( $ ) {
 		$( '#variant-selector' ).on( 'change', function( event ) {
@@ -482,5 +483,6 @@ if ( 'wp-plugins' === $project->path ) {
 		});
 	});
 </script>
+<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
 
 <?php gp_tmpl_footer();

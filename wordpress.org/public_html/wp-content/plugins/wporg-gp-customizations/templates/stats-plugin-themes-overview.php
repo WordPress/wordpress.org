@@ -85,7 +85,8 @@ $main_column_title = trim( ucwords( $view ), 's' );
 	</table>
 </div>
 
-<script type="text/javascript">
+<?php ob_start(); ?>
+<script>
 jQuery( document ).ready( function( $ ) {
 	$( '#stats-table' ).tablesorter( {
 		theme: 'wporg-translate',
@@ -99,4 +100,5 @@ jQuery( document ).ready( function( $ ) {
 });
 </script>
 <?php
+wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) );
 gp_tmpl_footer();

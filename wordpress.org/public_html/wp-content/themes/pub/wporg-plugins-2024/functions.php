@@ -231,7 +231,7 @@ add_filter( 'body_class', __NAMESPACE__ . '\custom_body_class' );
  * Swaps out the no-js for the js body class if the browser supports Javascript.
  */
 function nojs_body_tag() {
-	echo "<script>document.body.className = document.body.className.replace('no-js','js');</script>\n";
+	wp_print_inline_script_tag( "document.body.className = document.body.className.replace('no-js','js');" );
 }
 add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
 

@@ -329,8 +329,9 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts', 11 );
 
 function inline_scripts() {
 	$current_site = get_site();
+	ob_start();
 	?>
-	<script type="text/javascript">
+	<script>
 		var el = document.getElementById( 'make-welcome-toggle' );
 		if ( el ) {
 			el.addEventListener( 'click', function( e ) {
@@ -355,6 +356,7 @@ function inline_scripts() {
 		}
 	</script>
 	<?php
+	wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) );
 }
 add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 
@@ -394,7 +396,8 @@ function welcome_box() {
 			><span><?php esc_html_e( 'Hide welcome box', 'wporg' ); ?></span></button>
 		</div>
 		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo esc_attr( $cookie ); ?>" data-hash="<?php echo esc_attr( $content_hash ); ?>">
-			<script type="text/javascript">
+			<?php ob_start(); ?>
+			<script>
 				const elContent = document.getElementById( 'make-welcome-content' );
 
 				if ( elContent ) {
@@ -419,6 +422,7 @@ function welcome_box() {
 					}
 				}
 			</script>
+			<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
 			<?php the_content(); ?>
 		</div>
 	</div>

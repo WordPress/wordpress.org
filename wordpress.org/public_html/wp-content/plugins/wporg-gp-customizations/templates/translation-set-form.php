@@ -24,10 +24,12 @@
 	<dd><input type="text" name="set[project_id]" value="<?php echo esc_attr( $set->project_id ); ?>" id="set[project_id]">
 </dl>
 <?php echo gp_js_focus_on( 'set[locale]' ) . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes the element ID with esc_js(). ?>
-<script type="text/javascript">
+<?php ob_start(); ?>
+<script>
 	jQuery('#copy').click(function() {
 		var text = jQuery('#set\\[locale\\] option:selected').html().replace(/^\S+\s+\S+\s+/, '').replace(/&mdash|—/, '');
 		jQuery('#set\\[name\\]').val(text);
 		return false;
 	});
 </script>
+<?php wp_print_inline_script_tag( wp_remove_surrounding_empty_script_tags( ob_get_clean() ) ); ?>
