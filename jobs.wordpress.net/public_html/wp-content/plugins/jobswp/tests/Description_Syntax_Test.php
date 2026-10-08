@@ -18,8 +18,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for `Jobs_Dot_WP::store_job_content_escaped()` and `Jobs_Dot_WP::escape_job_content_syntax()`.
- *
- * @group jobswp
  */
 #[Group( 'jobswp' )]
 class Description_Syntax_Test extends TestCase {
@@ -39,6 +37,13 @@ class Description_Syntax_Test extends TestCase {
 	private const STORED = "Hiring.\n&lt;!-- wp:jobswp-test/block /-->\n&#91;jobswp_test]\nhttps&#58;//example.org/apply\nText with &#91;brackets] and <strong>bold</strong>.";
 
 	/**
+	 * Globals setup_postdata() fills in for the current post.
+	 *
+	 * @var string[]
+	 */
+	private const POSTDATA_GLOBALS = array( 'post', 'id', 'authordata', 'currentday', 'currentmonth', 'page', 'pages', 'multipage', 'more', 'numpages' );
+
+	/**
 	 * IDs of posts created during a test, deleted again on teardown.
 	 *
 	 * @var int[]
@@ -46,11 +51,45 @@ class Description_Syntax_Test extends TestCase {
 	private array $post_ids = array();
 
 	/**
-	 * ID of the jobposter account when the test created it, deleted again on teardown.
+	 * ID of the jobposter account when the class created it, deleted again afterwards.
 	 *
 	 * @var int
 	 */
-	private int $jobposter_id = 0;
+	private static int $jobposter_id = 0;
+
+	/**
+	 * Creates the account the plugin files submitted jobs under.
+	 *
+	 * @return void
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		if ( ! get_user_by( 'login', 'jobposter' ) ) {
+			self::$jobposter_id = (int) wp_insert_user(
+				array(
+					'user_login' => 'jobposter',
+					'user_pass'  => wp_generate_password(),
+					'role'       => 'subscriber',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Removes the jobposter account again.
+	 *
+	 * @return void
+	 */
+	public static function tearDownAfterClass(): void {
+		if ( self::$jobposter_id ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+			wp_delete_user( self::$jobposter_id );
+			self::$jobposter_id = 0;
+		}
+
+		parent::tearDownAfterClass();
+	}
 
 	/**
 	 * Registers a shortcode and a dynamic block whose output shows they ran.
@@ -63,16 +102,6 @@ class Description_Syntax_Test extends TestCase {
 		add_shortcode( 'jobswp_test', array( $this, 'render_marker' ) );
 		register_block_type( 'jobswp-test/block', array( 'render_callback' => array( $this, 'render_marker' ) ) );
 		add_filter( 'jobswp_require_captcha', '__return_false' );
-
-		if ( ! get_user_by( 'login', 'jobposter' ) ) {
-			$this->jobposter_id = (int) wp_insert_user(
-				array(
-					'user_login' => 'jobposter',
-					'user_pass'  => wp_generate_password(),
-					'role'       => 'subscriber',
-				)
-			);
-		}
 	}
 
 	/**
@@ -86,25 +115,34 @@ class Description_Syntax_Test extends TestCase {
 		}
 		$this->post_ids = array();
 
-		if ( $this->jobposter_id ) {
-			require_once ABSPATH . 'wp-admin/includes/user.php';
-			wp_delete_user( $this->jobposter_id );
-			$this->jobposter_id = 0;
-		}
-
 		remove_shortcode( 'jobswp_test' );
 		unregister_block_type( 'jobswp-test/block' );
 		remove_filter( 'jobswp_require_captcha', '__return_false' );
 
-		kses_remove_filters();
-		kses_init();
+		self::restore_kses();
 
 		$_POST    = array();
 		$_REQUEST = array();
 
-		$GLOBALS['post'] = null;
+		foreach ( self::POSTDATA_GLOBALS as $global ) {
+			unset( $GLOBALS[ $global ] );
+		}
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Puts the kses filters back the way a fresh request has them.
+	 *
+	 * The plugin's create_job() swaps the comment profile in for the rest of the
+	 * request, and kses_remove_filters() doesn't know about that one.
+	 *
+	 * @return void
+	 */
+	private static function restore_kses(): void {
+		remove_filter( 'content_save_pre', 'wp_filter_kses' );
+		kses_remove_filters();
+		kses_init();
 	}
 
 	/**
@@ -155,9 +193,7 @@ class Description_Syntax_Test extends TestCase {
 		Jobs_Dot_WP::get_instance()->save_job();
 		remove_filter( 'jobswp_save_job_errors', $record, PHP_INT_MAX );
 
-		// create_job() leaves the comment kses profile in place for the rest of the request.
-		kses_remove_filters();
-		kses_init();
+		self::restore_kses();
 
 		$jobs = get_posts(
 			array(
@@ -251,6 +287,9 @@ class Description_Syntax_Test extends TestCase {
 	#[DataProvider( 'resave_paths' )]
 	public function test_resave_keeps_the_syntax_encoded_once( bool $unfiltered ): void {
 		$job = $this->submit_job( self::SUBMITTED );
+
+		$this->assertTrue( has_filter( 'content_save_pre', 'wp_filter_post_kses' ) !== false );
+		$this->assertFalse( has_filter( 'content_save_pre', 'wp_filter_kses' ) );
 
 		if ( $unfiltered ) {
 			kses_remove_filters();

@@ -17,10 +17,11 @@ $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 // wp-env's test directory, else the temporary directory the core install script uses.
 if ( ! $_tests_dir && file_exists( '/wordpress-phpunit/includes/functions.php' ) ) {
-	$_tests_dir = '/wordpress-phpunit/';
+	$_tests_dir = '/wordpress-phpunit';
 } elseif ( ! $_tests_dir ) {
-	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib/tests/phpunit/';
+	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib/tests/phpunit';
 }
+$_tests_dir = rtrim( $_tests_dir, '/\\' );
 
 if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test harness console output, not HTML.
