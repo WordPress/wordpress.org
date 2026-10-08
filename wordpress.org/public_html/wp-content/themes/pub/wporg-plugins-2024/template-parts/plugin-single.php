@@ -52,7 +52,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 				<?php
 				$buttons = '<!-- wp:wporg/favorite-button /-->';
 
-				if ( 'publish' === get_post_status() || current_user_can( 'plugin_admin_view', $post ) ) {
+				if ( Template::is_download_available() ) {
 					$buttons .= sprintf(
 						'<!-- wp:button {"className":"is-small plugin-download download-button"} -->
 						<div class="wp-block-button is-small plugin-download download-button"><a class="wp-block-button__link wp-element-button" href="%1$s">%2$s</a></div>
