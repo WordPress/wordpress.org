@@ -634,7 +634,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			$project_list = [];
 
 			foreach ( $projects_added as $project_id ) {
-				if ( $projects[ $project_id ] ) {
+				if ( isset( $projects[ $project_id ] ) ) {
 					$parent = $this->get_parent_project( $project_tree, $project_id );
 					if ( $parent->id != $project_id ) {
 						$name = sprintf(

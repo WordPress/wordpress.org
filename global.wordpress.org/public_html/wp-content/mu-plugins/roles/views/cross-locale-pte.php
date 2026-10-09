@@ -17,15 +17,19 @@
 	<table class="wp-list-table widefat fixed striped translation-editors">
 		<thead>
 		<tr>
-			<th scope="col" id="username" class="column-username column-primary">Username</th>
-			<th scope="col" id="name" class="column-name">Name</th>
-			<th scope="col" id="email" class="column-email">E-mail</th>
-			<th scope="col" id="projects" class="column-projects">Projects</th></tr>
+			<th scope="col" id="username" class="column-username column-primary"><?php esc_html_e( 'Username', 'rosetta' ); ?></th>
+			<th scope="col" id="name" class="column-name"><?php esc_html_e( 'Name', 'rosetta' ); ?></th>
+			<th scope="col" id="email" class="column-email"><?php esc_html_e( 'E-mail', 'rosetta' ); ?></th>
+			<th scope="col" id="projects" class="column-projects"><?php esc_html_e( 'Projects', 'rosetta' ); ?></th>
+		</tr>
 		</thead>
 
 		<tbody id="the-list">
-		<?php $url = menu_page_url( 'cross-locale-pte', false );  ?>
-		<?php foreach ( $cross_locale_pte_users as $user_id => $user ) : ?>
+		<?php
+		$url = menu_page_url( 'cross-locale-pte', false );
+		if ( ! empty( $cross_locale_pte_users ) && is_array( $cross_locale_pte_users ) ) :
+			foreach ( $cross_locale_pte_users as $user_id => $user ) :
+				?>
 			<tr>
 				<td class="username column-username column-primary">
 					<?php echo get_avatar( $user_id, 32 ); ?>
@@ -38,16 +42,26 @@
 					<a href="mailto:<?php echo esc_attr( $user->email ); ?>"><?php echo esc_html( $user->email ); ?></a>
 				</td>
 				<td class="projects column-projects"><?php
-					asort( $user->projects );
-					echo implode( ', ', array_map( 'esc_html', $user->projects ) );
-					?>
+				if ( ! empty( $user->projects ) && is_array( $user->projects ) ) {
+					$projects = $user->projects;
+					asort( $projects );
+					echo implode( ', ', array_map( 'esc_html', $projects ) );
+				}
+				?>
 				</td>
 			</tr>
-		<?php endforeach; ?>
+					<?php
+						endforeach;
+					else :
+						?>
+			<tr>
+				<td colspan="4"><?php esc_html_e( 'No translation editors found.', 'rosetta' ); ?></td>
+			</tr>
+		<?php endif; ?>
 		</tbody>
 	</table>
 
-	<?php if ( current_user_can( Rosetta_Roles::MANAGE_TRANSLATION_EDITORS_CAP ) ) : ?>
+	<?php if ( current_user_can( Cross_Locale_PTE::MANAGE_CROSS_LOCALE_PTES_CAP ) ) : ?>
 		<h3><?php esc_html_e( 'Add Cross-Locale PTE', 'rosetta' ); ?></h3>
 		<p><?php esc_html_e( 'Enter the email address or username of an existing user on wordpress.org.', 'rosetta' ); ?></p>
 		<form action="" method="post">
@@ -58,7 +72,7 @@
 				</tr>
 			</table>
 			<input type="hidden" name="action" value="cross-locale-pte">
-			<?php wp_nonce_field( 'cross-locale-pte', '_nonce_cross-locale-pte' ) ?>
+			<?php wp_nonce_field( 'cross-locale-pte', '_nonce_cross-locale-pte' ); ?>
 			<?php submit_button( __( 'Add Cross-Locale PTE', 'rosetta' ) ); ?>
 		</form>
 	<?php endif; ?>

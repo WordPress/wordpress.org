@@ -33,7 +33,7 @@
 					<td><input type="text" class="regular-text" name="user" id="user"></td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="user"><?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?></label></th>
+					<th scope="row"><?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?></th>
 					<td>
 						<fieldset>
 							<legend class="screen-reader-text"><?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?></legend>
@@ -49,7 +49,7 @@
 				</tr>
 			</table>
 			<input type="hidden" name="action" value="add-translation-editor">
-			<?php wp_nonce_field( 'add-translation-editor', '_nonce_add-translation-editor' ) ?>
+			<?php wp_nonce_field( 'add-translation-editor', '_nonce_add-translation-editor' ); ?>
 			<?php submit_button( __( 'Add Translation Editor', 'rosetta' ) ); ?>
 		</form>
 	<?php endif; ?>
