@@ -39,14 +39,38 @@
 	};
 
 	/**
-	 * Parses a URL, if it's an absolute web address.
+	 * How long to wait before asking again whether the queue has saved the sender's photo, in milliseconds.
 	 *
-	 * @param {string} url URL.
+	 * Doubles after each check, up to PHOTO_MAX_INTERVAL.
+	 *
+	 * @type {number}
+	 */
+	const PHOTO_INTERVAL = 3000;
+
+	/**
+	 * Longest wait between checks, in milliseconds.
+	 *
+	 * @type {number}
+	 */
+	const PHOTO_MAX_INTERVAL = 30000;
+
+	/**
+	 * How many times to ask: over three minutes, since outgoing email goes ahead of the job in the queue.
+	 *
+	 * @type {number}
+	 */
+	const PHOTO_CHECKS = 10;
+
+	/**
+	 * Parses a URL, if it's a web address.
+	 *
+	 * @param {string} url  URL.
+	 * @param {string} base URL a relative one is relative to; none if it must be absolute.
 	 * @return {string} The URL, or an empty string.
 	 */
-	function webUrl( url ) {
+	function webUrl( url, base ) {
 		try {
-			const parsed = new URL( String( url ) );
+			const parsed = new URL( String( url ), base );
 
 			return [ 'http:', 'https:' ].includes( parsed.protocol )
 				? parsed.href
@@ -252,8 +276,74 @@
 		}
 	}
 
+	/**
+	 * Shows the sender's photo once the queue has saved their WordPress.org avatar, since the page was drawn without it.
+	 *
+	 * @param {string} url Address that answers with the photo, once there is one.
+	 */
+	function showSenderPhoto( url ) {
+		let checks = 0;
+		let interval = PHOTO_INTERVAL;
+
+		/**
+		 * Asks again later, unless that was the last time.
+		 */
+		function retry() {
+			if ( checks < PHOTO_CHECKS ) {
+				setTimeout( check, interval );
+				interval = Math.min( interval * 2, PHOTO_MAX_INTERVAL );
+			}
+		}
+
+		/**
+		 * Asks once; a request over the rate limit or that the server or network failed counts as a check.
+		 */
+		function check() {
+			checks++;
+			$.getJSON( url )
+				.fail( function ( xhr ) {
+					// Not a lost session or access, which asking again won't change.
+					if (
+						0 === xhr.status ||
+						429 === xhr.status ||
+						xhr.status >= 500
+					) {
+						retry();
+					}
+				} )
+				.done( function ( photo ) {
+					const src =
+						photo && photo.url
+							? webUrl( photo.url, window.location.href )
+							: '';
+
+					if ( ! src ) {
+						// Not once the job ran without saving one, like for an account without an avatar.
+						if ( photo && photo.pending ) {
+							retry();
+						}
+						return;
+					}
+
+					$( '.customer-photo' ).attr( 'src', src );
+
+					// The sender's messages, which link to their page; not those of others on the conversation.
+					$( '.thread-person a' )
+						.filter( function () {
+							return this.href === photo.sender;
+						} )
+						.closest( '.thread' )
+						.find( '.thread-photo .person-photo' )
+						.attr( 'src', src );
+				} );
+		}
+
+		check();
+	}
+
 	$( function () {
 		const strings = $( '.wporg-sidebar' ).data( 'strings' ) || {};
+		let watchingPhoto = false;
 
 		$( '.wporg-sidebar' ).on( 'shown.bs.collapse', fitLayout );
 
@@ -300,6 +390,15 @@
 
 			request
 				.done( function ( response ) {
+					if (
+						response &&
+						response.sender_photo &&
+						! watchingPhoto
+					) {
+						watchingPhoto = true;
+						showSenderPhoto( response.sender_photo );
+					}
+
 					const blocks =
 						response && Array.isArray( response.blocks )
 							? response.blocks
