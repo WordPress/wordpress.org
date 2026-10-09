@@ -15,7 +15,8 @@
 		"wp-content/mu-plugins": "./mocks/mu-plugins",
 		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
-		"wp-content/env-bin": "./plugin-directory/bin"
+		"wp-content/env-bin": "./plugin-directory/bin",
+		"style": "../wordpress.org/public_html/style"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash plugin-directory/bin/after-start.sh"
