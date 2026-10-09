@@ -68,7 +68,9 @@ class Readme_Validator {
 					<textarea class="screen-reader-text" rows="20" cols="100" name="readme_contents"><?php echo esc_textarea( $readme_contents ); ?></textarea>
 				<p><input type="submit" class="wp-element-button button" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" /></p>
 			</form>
-			<script>
+			<?php
+			wp_print_inline_script_tag(
+				<<<'JS'
 				document.getElementById( 'readme-data' ).addEventListener( 'submit', function() {
 					var readmeInputs = document.getElementsByTagName( 'textarea' );
 
@@ -80,7 +82,9 @@ class Readme_Validator {
 
 					return true;
 				} );
-			</script>
+				JS
+			);
+			?>
 		</div>
 		<?php
 		return ob_get_clean();

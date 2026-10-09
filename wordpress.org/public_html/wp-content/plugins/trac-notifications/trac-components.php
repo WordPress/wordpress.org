@@ -445,14 +445,16 @@ td.maintainers { padding-top: 4px; padding-bottom: 4px; height: 26px; }
 td.maintainers img.avatar { margin-right: 5px; }
 .component-info .create-new-ticket { float: right; margin-top: 25px; }
 </style>
-<script>
-jQuery( function( $ ) {
-	$( '#toggle-compact-components' ).on( 'change', 'input', function() {
-		$( '#main' ).toggleClass( 'compact-components' );
-	});
-});
-</script>
-<?php
+		<?php
+		wp_print_inline_script_tag(
+			<<<'JS'
+			jQuery( function( $ ) {
+				$( '#toggle-compact-components' ).on( 'change', 'input', function() {
+					$( '#main' ).toggleClass( 'compact-components' );
+				});
+			});
+			JS
+		);
 	}
 
 	function the_content( $content ) {

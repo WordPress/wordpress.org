@@ -212,7 +212,9 @@ if ( $performed_search && ! $results ) {
 }
 ?>
 
-<script>
+<?php
+wp_print_inline_script_tag(
+	<<<'JS'
 	jQuery( document ).ready( function( $ ) {
 		$( '#toggle-translations-unique' ).on( 'click', function( event ) {
 			event.preventDefault();
@@ -220,6 +222,8 @@ if ( $performed_search && ! $results ) {
 		});
 
 	});
-</script>
+	JS
+);
+?>
 
 <?php gp_tmpl_footer();

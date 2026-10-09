@@ -47,7 +47,9 @@ gp_tmpl_header();
 		<?php endforeach; ?>
 	</div>
 
-	<script>
+	<?php
+	wp_print_inline_script_tag(
+		<<<'JS'
 		jQuery( document ).ready( function( $ ) {
 			$rows = $( '#locales' ).find( '.locale' );
 			$( '#locales-filter' ).on( 'input keyup',function() {
@@ -69,6 +71,8 @@ gp_tmpl_header();
 				}
 			});
 		});
-	</script>
+		JS
+	);
+	?>
 
 <?php gp_tmpl_footer();
