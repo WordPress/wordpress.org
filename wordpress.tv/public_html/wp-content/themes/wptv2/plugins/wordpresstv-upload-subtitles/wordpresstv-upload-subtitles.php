@@ -62,7 +62,7 @@ class WordPressTV_Subtitles_Upload {
 		}
 
 		$path_page = get_page_by_path( 'subtitle' );
-		
+
 		if ( $path_page instanceof WP_Post ) {
 			$template = get_post_meta( $path_page->ID, '_wp_page_template', true );
 
@@ -252,18 +252,27 @@ class WordPressTV_Subtitles_Upload {
 			wp_die( 'You can not subtitle this video.' );
 		}
 
-		$upload = $_FILES['wptv_subtitles_file'] ?? array();
-
-		if ( empty( $upload['name'] ) || empty( $upload['tmp_name'] ) || ! is_uploaded_file( $upload['tmp_name'] ) ) {
+		if (
+			empty( $_FILES['wptv_subtitles_file']['name'] ) ||
+			empty( $_FILES['wptv_subtitles_file']['tmp_name'] )
+		) {
 			$this->error( 1 );
 		}
-		
-		if ( ! empty( $upload['size'] ) && $upload['size'] > 2 * MB_IN_BYTES ) {
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Validated via is_uploaded_file() below.
+		$tmp_file = $_FILES['wptv_subtitles_file']['tmp_name'];
+
+		if ( ! is_uploaded_file( $tmp_file ) ) {
+			$this->error( 1 );
+		}
+
+		$file_size = isset( $_FILES['wptv_subtitles_file']['size'] ) ? (int) $_FILES['wptv_subtitles_file']['size'] : 0;
+		if ( $file_size > 2 * MB_IN_BYTES ) {
 			$this->error( 2 );
 		}
 
-		$name_parts = pathinfo( $upload['name'] );
-		$extension  = isset( $name_parts['extension'] ) ? strtolower( $name_parts['extension'] ) : '';
+		$file_name = sanitize_file_name( wp_unslash( $_FILES['wptv_subtitles_file']['name'] ) );
+		$extension = strtolower( pathinfo( $file_name, PATHINFO_EXTENSION ) );
 
 		if ( ! in_array( $extension, array( 'ttml', 'dfxp' ), true ) ) {
 			$this->error( 2 );
@@ -272,7 +281,7 @@ class WordPressTV_Subtitles_Upload {
 		$dom = new DOMDocument();
 		libxml_use_internal_errors( true );
 
-		$is_valid_xml = $dom->load( $upload['tmp_name'], LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING );
+		$is_valid_xml = $dom->load( $tmp_file, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING );
 
 		if ( ! $is_valid_xml ) {
 			libxml_clear_errors();
@@ -284,7 +293,10 @@ class WordPressTV_Subtitles_Upload {
 			$this->error( 6 );
 		}
 
-		if ( 'tt' !== strtolower( $dom->documentElement->localName ?? '' ) ) {
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHP core DOMDocument / DOMElement properties.
+		$root_name = strtolower( $dom->documentElement->localName ?? '' );
+
+		if ( 'tt' !== $root_name ) {
 			libxml_clear_errors();
 			$this->error( 2 );
 		}
