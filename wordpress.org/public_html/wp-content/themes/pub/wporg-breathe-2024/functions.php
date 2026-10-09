@@ -365,8 +365,8 @@ function inline_scripts() {
 				document.cookie = $content.data( 'cookie' ) + '=' +
 					( isHide ? $content.data( 'hash' ) : '' ) +
 					'; expires=Fri, 31 Dec 9999 23:59:59 GMT' +
-					'; domain=%s' +
-					'; path=%s';
+					'; domain=' + %s +
+					'; path=' + %s;
 			} );
 		}
 
@@ -382,8 +382,8 @@ function inline_scripts() {
 			} );
 		}
 		JS,
-			esc_js( $current_site->domain ),
-			esc_js( $current_site->path )
+			wp_json_encode( $current_site->domain ),
+			wp_json_encode( $current_site->path )
 		)
 	);
 }
@@ -433,7 +433,7 @@ function welcome_box() {
 
 				if ( elContent ) {
 					const hasCookieSetToHidden = -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash );
-					const isHome = window.location.pathname === '%s';
+					const isHome = window.location.pathname === %s;
 
 					if ( hasCookieSetToHidden || ! isHome ) {
 						const elToggle = document.getElementById( 'make-welcome-toggle' );
@@ -453,7 +453,7 @@ function welcome_box() {
 					}
 				}
 				JS,
-					esc_js( $path )
+					wp_json_encode( $path )
 				)
 			);
 			?>
