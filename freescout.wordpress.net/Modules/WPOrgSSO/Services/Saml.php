@@ -149,7 +149,7 @@ final class Saml {
 			}
 
 			$username       = (string) $response->getNameId();
-			$in_response_to = (string) $response->getXMLDocument()->documentElement->getAttribute( 'InResponseTo' );
+			$in_response_to = self::in_response_to( $response->getXMLDocument() );
 		} catch ( RuntimeException $e ) {
 			throw $e;
 		} catch ( \Throwable $e ) {
@@ -166,6 +166,23 @@ final class Saml {
 			'username'       => $username,
 			'in_response_to' => $in_response_to,
 		);
+	}
+
+	/**
+	 * Gets the ID of the login request a response answers.
+	 *
+	 * WordPress.org's identity provider only names it in the assertion's bearer confirmation, not on the response
+	 * itself. The whole response is signed, so it's as trustworthy there.
+	 *
+	 * @param \DOMDocument $document Validated response.
+	 * @return string Login request ID, or empty.
+	 */
+	private static function in_response_to( \DOMDocument $document ): string {
+		$xpath = new \DOMXPath( $document );
+		$xpath->registerNamespace( 'samlp', Constants::NS_SAMLP );
+		$xpath->registerNamespace( 'saml', Constants::NS_SAML );
+
+		return (string) $xpath->evaluate( 'string(/samlp:Response/saml:Assertion/saml:Subject/saml:SubjectConfirmation[@Method="' . Constants::CM_BEARER . '"]/saml:SubjectConfirmationData/@InResponseTo)' );
 	}
 
 	/**
