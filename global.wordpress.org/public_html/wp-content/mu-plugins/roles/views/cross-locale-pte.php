@@ -61,7 +61,7 @@
 		</tbody>
 	</table>
 
-	<?php if ( current_user_can( Rosetta_Roles::MANAGE_TRANSLATION_EDITORS_CAP ) ) : ?>
+	<?php if ( current_user_can( Rosetta_Roles::MANAGE_CROSS_LOCALE_PTES_CAP ) ) : ?>
 		<h3><?php esc_html_e( 'Add Cross-Locale PTE', 'rosetta' ); ?></h3>
 		<p><?php esc_html_e( 'Enter the email address or username of an existing user on wordpress.org.', 'rosetta' ); ?></p>
 		<form action="" method="post">
