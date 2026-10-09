@@ -135,7 +135,7 @@ final class SavedRepliesTest extends ImportTestCase {
 				self::reply( 303, 'Refunds', '<p>No refunds.</p>' ),
 			)
 		);
-		$closing = ImportedSavedReply::query()->where( 'helpscout_id', 302 )->firstOrFail();
+		$closing = ImportedSavedReply::query()->where( 'helpscout_id', 302 )->where( 'mailbox_id', $this->mailbox->id )->firstOrFail();
 		\DB::table( 'saved_replies' )->where( 'id', $closing->saved_reply_id )->update( array( 'text' => '<p>Thanks, from FreeScout.</p>' ) );
 
 		$again = $this->create_run();
@@ -216,6 +216,61 @@ final class SavedRepliesTest extends ImportTestCase {
 		$this->assertNull( $image->thread_id );
 		$this->assertTrue( (bool) $image->embedded );
 		$this->assertSame( '<p><img src="' . $image->url() . '"></p>', $this->text_of( 301 ) );
+	}
+
+	/**
+	 * Importing again copies only images that changed; those copied already are kept.
+	 *
+	 * @return void
+	 */
+	public function test_import_again_copies_images_once(): void {
+		$src = 'https://d33v4339jhl8k0.cloudfront.net/inline/83653/abc/def/logo.png';
+		$this->answer_replies( array( self::reply( 301, 'Welcome', '<p><img src="' . $src . '"></p>' ) ) );
+		$this->helpscout->on( 'GET', 'inline/83653/abc/def/logo.png', new Response( 200, array(), (string) base64_decode( 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAwS2OUAAAAABJRU5ErkJggg==' ) ) );
+		$this->handle( $this->run );
+
+		$this->answer_replies( array( self::reply( 301, 'Welcome', '<p>Hello!</p><p><img src="' . $src . '"></p>' ) ) );
+		$again = $this->create_run();
+		$this->handle( $again );
+
+		$this->assertSame( array( SavedReplies::UPDATED => 1 ), $again->fresh()->saved_replies );
+		$images = Attachment::query()->where( 'file_name', 'logo.png' )->get();
+		$this->assertCount( 1, $images );
+		$image = $images->first();
+		$this->assertSame( '<p>Hello!</p><p><img src="' . $image->url() . '"></p>', $this->text_of( 301 ) );
+		$this->assertCount( 1, $this->helpscout->requests_to( 'inline/83653/abc/def/logo.png' ) );
+	}
+
+	/**
+	 * A mailbox's saved replies are imported into each FreeScout mailbox it's imported into; those deleted from one stay
+	 * deleted there.
+	 *
+	 * @return void
+	 */
+	public function test_saved_replies_are_imported_into_each_mailbox(): void {
+		$this->handle( $this->run );
+		\DB::table( 'saved_replies' )->where( 'mailbox_id', $this->mailbox->id )->where( 'name', 'Closing' )->delete();
+
+		$photos        = $this->mailbox;
+		$this->mailbox = $this->create_mailbox( 'Photos, too' );
+		$other         = $this->create_run();
+		$this->handle( $other );
+
+		$this->assertSame( array( SavedReplies::IMPORTED => 2 ), $other->fresh()->saved_replies );
+		$this->assertSame( array( 'Welcome', 'Closing' ), \DB::table( 'saved_replies' )->where( 'mailbox_id', $this->mailbox->id )->orderBy( 'sort_order' )->pluck( 'name' )->all() );
+
+		$this->mailbox = $photos;
+		$again         = $this->create_run();
+		$this->handle( $again );
+
+		$this->assertSame(
+			array(
+				SavedReplies::UNCHANGED => 1,
+				SavedReplies::KEPT      => 1,
+			),
+			$again->fresh()->saved_replies
+		);
+		$this->assertSame( array( 'Welcome' ), \DB::table( 'saved_replies' )->where( 'mailbox_id', $photos->id )->pluck( 'name' )->all() );
 	}
 
 	/**
@@ -420,7 +475,7 @@ final class SavedRepliesTest extends ImportTestCase {
 	 * @return string
 	 */
 	private function name_of( int $helpscout_id ): string {
-		$imported = ImportedSavedReply::query()->where( 'helpscout_id', $helpscout_id )->firstOrFail();
+		$imported = ImportedSavedReply::query()->where( 'helpscout_id', $helpscout_id )->where( 'mailbox_id', $this->mailbox->id )->firstOrFail();
 
 		return (string) \DB::table( 'saved_replies' )->where( 'id', $imported->saved_reply_id )->value( 'name' );
 	}
@@ -432,7 +487,7 @@ final class SavedRepliesTest extends ImportTestCase {
 	 * @return string
 	 */
 	private function text_of( int $helpscout_id ): string {
-		$imported = ImportedSavedReply::query()->where( 'helpscout_id', $helpscout_id )->firstOrFail();
+		$imported = ImportedSavedReply::query()->where( 'helpscout_id', $helpscout_id )->where( 'mailbox_id', $this->mailbox->id )->firstOrFail();
 
 		return (string) \DB::table( 'saved_replies' )->where( 'id', $imported->saved_reply_id )->value( 'text' );
 	}

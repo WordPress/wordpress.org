@@ -231,12 +231,15 @@ class WordPressTV_Theme {
 				'width'            => $video->width ?? 940,
 			];
 
-			foreach ( get_the_terms( $post, 'speakers' ) as $speaker ) {
-				$video_data['actor'][] = [
-					'@type' => 'Person',
-					'name'  => $speaker->name,
-					'url'   => get_term_link( $speaker ),
-				];
+			$the_speakers = get_the_terms( $post, 'speakers' );
+			if ( is_array( $the_speakers ) ) {
+				foreach ( $the_speakers as $speaker ) {
+					$video_data['actor'][] = [
+						'@type' => 'Person',
+						'name'  => $speaker->name,
+						'url'   => get_term_link( $speaker ),
+					];
+				}
 			}
 
 			/*
@@ -287,7 +290,7 @@ class WordPressTV_Theme {
 			$query->set( 'posts_per_page', 8 );
 		} elseif ( $query->is_category ) { // category archives
 			$query->set( 'posts_per_page', 22 );
-		} elseif ( $query->is_tax && $queried_object->taxonomy == 'event' ) { // event taxonomy
+		} elseif ( $query->is_tax && ( $queried_object->taxonomy ?? null ) == 'event' ) { // Event taxonomy.
 			$query->set( 'posts_per_page', 22 );
 		} elseif ( $query->is_archive || $query->is_search ) {
 			$query->set( 'posts_per_page', 10 );
@@ -319,12 +322,14 @@ class WordPressTV_Theme {
 		) );
 
 		register_taxonomy( 'speakers', array( 'post' ), array(
-			'label'    => __( 'Speakers', 'wptv' ),
-			'template' => __( 'Speakers: %l.', 'wptv' ),
-			'helps'    => __( 'Separate speakers with commas.', 'wptv' ),
-			'sort'     => true,
-			'args'     => array( 'orderby' => 'term_order' ),
-			'rewrite'  => array( 'slug' => 'speakers' ),
+			'label'        => __( 'Speakers', 'wptv' ),
+			'template'     => __( 'Speakers: %l.', 'wptv' ),
+			'helps'        => __( 'Separate speakers with commas.', 'wptv' ),
+			'sort'         => true,
+			'args'         => array( 'orderby' => 'term_order' ),
+			'rewrite'      => array( 'slug' => 'speakers' ),
+			'show_in_rest' => true,
+			'rest_base'    => 'speakers',
 		) );
 
 		register_taxonomy( 'flavor', array( 'post' ), array(
@@ -337,21 +342,25 @@ class WordPressTV_Theme {
 		) );
 
 		register_taxonomy( 'language', array( 'post' ), array(
-			'label'    => __( 'Language', 'wptv' ),
-			'template' => __( 'Language: %l.', 'wptv' ),
-			'helps'    => __( 'Separate languages with commas.', 'wptv' ),
-			'sort'     => true,
-			'args'     => array( 'orderby' => 'term_order' ),
-			'rewrite'  => array( 'slug' => 'language' ),
+			'label'        => __( 'Language', 'wptv' ),
+			'template'     => __( 'Language: %l.', 'wptv' ),
+			'helps'        => __( 'Separate languages with commas.', 'wptv' ),
+			'sort'         => true,
+			'args'         => array( 'orderby' => 'term_order' ),
+			'rewrite'      => array( 'slug' => 'language' ),
+			'show_in_rest' => true,
+			'rest_base'    => 'language',
 		) );
 
 		register_taxonomy( 'event', array( 'post' ), array(
-			'label'    => __( 'Event', 'wptv' ),
-			'template' => __( 'Event: %l.', 'wptv' ),
-			'helps'    => __( 'Enter event', 'wptv' ),
-			'sort'     => true,
-			'args'     => array( 'orderby' => 'term_order' ),
-			'rewrite'  => array( 'slug' => 'event' ),
+			'label'        => __( 'Event', 'wptv' ),
+			'template'     => __( 'Event: %l.', 'wptv' ),
+			'helps'        => __( 'Enter event', 'wptv' ),
+			'sort'         => true,
+			'args'         => array( 'orderby' => 'term_order' ),
+			'rewrite'      => array( 'slug' => 'event' ),
+			'show_in_rest' => true,
+			'rest_base'    => 'event',
 		) );
 	}
 
@@ -551,6 +560,7 @@ class WordPressTV_Theme {
 	 * @param bool $html_code
 	 */
 	function the_video_image( $h = 196, $w = 400, $arrow = true, $html_code = true ) {
+		global $post;
 		$ret = $this->get_the_video_image();
 
 		if ( $arrow ) {
@@ -747,7 +757,7 @@ class WordPressTV_Theme {
 			$count   = $display_count ? ' <span class="tag-count">' . absint( $term->count ) . '</span>' : '';
 			$links[] = '<a href="' . esc_url( get_term_link( $term, $taxonomy ) ) . '">' . esc_html( $term->name ) . $count . '</a>';
 		}
-		echo wp_kses_post( $before . join( $sep, $links ) . $after );
+		echo wp_kses_post( $before . implode( $sep, $links ) . $after );
 	}
 
 	/**
