@@ -39,14 +39,29 @@
 	};
 
 	/**
-	 * Parses a URL, if it's an absolute web address.
+	 * How often to ask whether the queue has saved the sender's photo, in milliseconds.
 	 *
-	 * @param {string} url URL.
+	 * @type {number}
+	 */
+	const PHOTO_INTERVAL = 3000;
+
+	/**
+	 * How many times to ask; FreeScout's queue worker looks for jobs every five seconds.
+	 *
+	 * @type {number}
+	 */
+	const PHOTO_CHECKS = 10;
+
+	/**
+	 * Parses a URL, if it's a web address.
+	 *
+	 * @param {string} url  URL.
+	 * @param {string} base URL a relative one is relative to; none if it must be absolute.
 	 * @return {string} The URL, or an empty string.
 	 */
-	function webUrl( url ) {
+	function webUrl( url, base ) {
 		try {
-			const parsed = new URL( String( url ) );
+			const parsed = new URL( String( url ), base );
 
 			return [ 'http:', 'https:' ].includes( parsed.protocol )
 				? parsed.href
@@ -252,8 +267,46 @@
 		}
 	}
 
+	/**
+	 * Shows the sender's photo once the queue has saved their WordPress.org avatar, since the page was drawn without it.
+	 *
+	 * @param {string} url Address that answers with the photo, once there is one.
+	 */
+	function showSenderPhoto( url ) {
+		let checks = 0;
+
+		( function check() {
+			checks++;
+			$.getJSON( url ).done( function ( photo ) {
+				const src =
+					photo && photo.url
+						? webUrl( photo.url, window.location.href )
+						: '';
+
+				if ( ! src ) {
+					if ( checks < PHOTO_CHECKS ) {
+						setTimeout( check, PHOTO_INTERVAL );
+					}
+					return;
+				}
+
+				$( '.customer-photo' ).attr( 'src', src );
+
+				// The sender's messages, which link to their page; not those of others on the conversation.
+				$( '.thread-person a' )
+					.filter( function () {
+						return this.href === photo.sender;
+					} )
+					.closest( '.thread' )
+					.find( '.thread-photo .person-photo' )
+					.attr( 'src', src );
+			} );
+		} )();
+	}
+
 	$( function () {
 		const strings = $( '.wporg-sidebar' ).data( 'strings' ) || {};
+		let watchingPhoto = false;
 
 		$( '.wporg-sidebar' ).on( 'shown.bs.collapse', fitLayout );
 
@@ -300,6 +353,15 @@
 
 			request
 				.done( function ( response ) {
+					if (
+						response &&
+						response.sender_photo &&
+						! watchingPhoto
+					) {
+						watchingPhoto = true;
+						showSenderPhoto( response.sender_photo );
+					}
+
 					const blocks =
 						response && Array.isArray( response.blocks )
 							? response.blocks

@@ -59,23 +59,14 @@ final class PanelController extends Controller {
 	 * @return JsonResponse
 	 */
 	public function show( int $conversation_id, string $panel ): JsonResponse {
-		// Not the throttle middleware: in this Laravel, it shares a counter with core's upload limit.
-		$limiter = app( RateLimiter::class );
-		$key     = 'wporgsidebar.panels.' . auth()->id();
-		if ( $limiter->tooManyAttempts( $key, self::MAX_PER_MINUTE ) ) {
-			abort( 429 );
-		}
-		$limiter->hit( $key );
+		self::throttle();
 
 		$panels = Panels::all();
 		if ( empty( $panels[ $panel ]['endpoint'] ) ) {
 			abort( 404 );
 		}
 
-		$conversation = Conversation::findOrFail( $conversation_id );
-		if ( ! auth()->user()->can( 'view', $conversation ) ) {
-			abort( 403 );
-		}
+		$conversation = self::conversation( $conversation_id );
 
 		// A panel switched off for the mailbox isn't sent its conversations.
 		if ( ! Panels::shows( $panel, (int) $conversation->mailbox_id ) ) {
@@ -111,9 +102,66 @@ final class PanelController extends Controller {
 			return response()->json( array( 'blocks' => array() ), 502 );
 		}
 
-		self::sync_sender_avatar( $conversation, (string) ( $response['avatar_url'] ?? '' ) );
+		$body = array( 'blocks' => array_values( (array) ( $response['blocks'] ?? array() ) ) );
+		if ( self::sync_sender_avatar( $conversation, (string) ( $response['avatar_url'] ?? '' ) ) ) {
+			// The page was drawn without a photo: it asks here until the queue has saved one.
+			$body['sender_photo'] = route( 'wporgsidebar.sender_photo', array( 'conversation_id' => $conversation->id ) );
+		}
 
-		return response()->json( array( 'blocks' => array_values( (array) ( $response['blocks'] ?? array() ) ) ) );
+		return response()->json( $body );
+	}
+
+	/**
+	 * Returns the sender's photo, once the queue has saved their WordPress.org avatar.
+	 *
+	 * @param int $conversation_id Conversation ID.
+	 * @return JsonResponse The photo's URL, null until there is one, and the sender's page, which their messages link to.
+	 */
+	public function sender_photo( int $conversation_id ): JsonResponse {
+		self::throttle();
+
+		$sender = self::conversation( $conversation_id )->customer;
+		if ( ! $sender ) {
+			abort( 404 );
+		}
+
+		return response()->json(
+			array(
+				'url'    => $sender->photo_url ? $sender->getPhotoUrl() : null,
+				'sender' => $sender->url(),
+			)
+		);
+	}
+
+	/**
+	 * Counts a request against the agent's limit, and refuses it once they're over.
+	 *
+	 * Not the throttle middleware: in this Laravel, it shares a counter with core's upload limit.
+	 *
+	 * @return void
+	 */
+	private static function throttle(): void {
+		$limiter = app( RateLimiter::class );
+		$key     = 'wporgsidebar.panels.' . auth()->id();
+		if ( $limiter->tooManyAttempts( $key, self::MAX_PER_MINUTE ) ) {
+			abort( 429 );
+		}
+		$limiter->hit( $key );
+	}
+
+	/**
+	 * Finds a conversation the agent may read.
+	 *
+	 * @param int $conversation_id Conversation ID.
+	 * @return Conversation
+	 */
+	private static function conversation( int $conversation_id ): Conversation {
+		$conversation = Conversation::findOrFail( $conversation_id );
+		if ( ! auth()->user()->can( 'view', $conversation ) ) {
+			abort( 403 );
+		}
+
+		return $conversation;
 	}
 
 	/**
@@ -123,21 +171,27 @@ final class PanelController extends Controller {
 	 *
 	 * @param Conversation $conversation Conversation the panel is for.
 	 * @param string       $avatar_url   Avatar URL the profile panel sent, if any.
-	 * @return void
+	 * @return bool Whether it was queued for a sender who has no photo yet.
 	 */
-	private static function sync_sender_avatar( Conversation $conversation, string $avatar_url ): void {
+	private static function sync_sender_avatar( Conversation $conversation, string $avatar_url ): bool {
 		try {
 			if (
-				! $conversation->customer_id ||
+				! $conversation->customer ||
 				! SyncSenderAvatar::is_avatar_url( $avatar_url ) ||
 				! \Cache::add( 'wporgsidebar.avatar.' . $conversation->customer_id, true, self::AVATAR_MINUTES )
 			) {
-				return;
+				return false;
 			}
 
+			// Before the job: a queue that runs jobs right away would already have saved it.
+			$had_photo = (bool) $conversation->customer->photo_url;
 			SyncSenderAvatar::dispatch( (int) $conversation->customer_id, $avatar_url );
+
+			return ! $had_photo;
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSidebar] Could not queue the avatar of sender ' . $conversation->customer_id . ': ' . $e->getMessage() );
+
+			return false;
 		}
 	}
 }
