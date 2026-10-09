@@ -129,7 +129,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 
 		$this->assertStringContainsString( '<p class="ticket-note note-new-reporter">', $note );
 		$this->assertStringContainsString( "class='avatar", $note, 'The note carries the reporter\'s avatar.' );
-		$this->assertStringContainsString( '<strong>Make sure firsttimer receives a warm welcome.</strong><br />It&#8217;s their first ticket!', $note );
+		$this->assert_note_text( '<strong>Make sure firsttimer receives a warm welcome.</strong><br />It&#8217;s their first ticket!', $note );
 	}
 
 	/**
@@ -138,7 +138,7 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 	public function test_first_ticket_note_mentions_earlier_comments(): void {
 		$note = $this->render_note( self::REPORTER, 1, true );
 
-		$this->assertStringContainsString( 'They&#8217;ve commented before, but it&#8217;s their first ticket!', $note );
+		$this->assert_note_text( '<strong>Make sure firsttimer receives a warm welcome.</strong><br />They&#8217;ve commented before, but it&#8217;s their first ticket!', $note );
 	}
 
 	/**
@@ -147,7 +147,12 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 	public function test_repeat_ticket_note_links_the_previous_tickets(): void {
 		$note = $this->render_note( self::REPORTER, 3 );
 
-		$this->assertStringContainsString( '<strong>This is only firsttimer&#8217;s third ticket!</strong><br />Previously:', $note );
+		$this->assert_note_text(
+			'<strong>This is only firsttimer&#8217;s third ticket!</strong><br />Previously: '
+			. '<a class="new ticket" href="https://core.trac.wordpress.org/ticket/48" title="defect: Ticket 1 (new)">#48</a> '
+			. '<a class="new ticket" href="https://core.trac.wordpress.org/ticket/49" title="defect: Ticket 2 (new)">#49</a>.',
+			$note
+		);
 		$this->assertStringContainsString( 'href="https://core.trac.wordpress.org/ticket/48"', $note );
 		$this->assertStringContainsString( 'href="https://core.trac.wordpress.org/ticket/49"', $note );
 		$this->assertStringNotContainsString( 'ticket/50"', $note, 'The ticket being viewed is not listed as a previous one.' );
@@ -175,8 +180,25 @@ class WPorg_Trac_Notifications_Test extends WPorg_Trac_Components_TestCase {
 	public function test_repeat_ticket_note_prints_the_login_the_reporter_resolved_to( string $reporter ): void {
 		$note = $this->render_note( $reporter, 2 );
 
-		$this->assertStringContainsString( '<strong>This is only firsttimer&#8217;s second ticket!</strong>', $note );
+		$this->assert_note_text(
+			'<strong>This is only firsttimer&#8217;s second ticket!</strong><br />Previously: '
+			. '<a class="new ticket" href="https://core.trac.wordpress.org/ticket/49" title="defect: Ticket 1 (new)">#49</a>.',
+			$note
+		);
 		$this->assert_note_holds_only_the_login( $note );
+	}
+
+	/**
+	 * Asserts the note's text as HTML, so the serialization kses picks does not matter.
+	 *
+	 * @param string $expected The inner HTML the note should hold.
+	 * @param string $note     The rendered note.
+	 */
+	protected function assert_note_text( string $expected, string $note ): void {
+		preg_match( '#<span class="note">(.*?)</span>#s', $note, $matches );
+
+		$this->assertNotEmpty( $matches, 'The note text is present.' );
+		$this->assertSame( build_visual_html_tree( $expected, '<body>' ), build_visual_html_tree( $matches[1], '<body>' ) );
 	}
 
 	/**

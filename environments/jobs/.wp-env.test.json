@@ -3,9 +3,9 @@
 	"phpVersion": "8.4",
 	"testsEnvironment": false,
 	"plugins": [
-		"../wordpress.org/public_html/wp-content/plugins/theme-directory"
+		"../jobs.wordpress.net/public_html/wp-content/plugins/jobswp"
 	],
 	"lifecycleScripts": {
-		"afterStart": "bash theme-directory/bin/after-start-test.sh"
+		"afterStart": "bash jobs/bin/after-start-test.sh"
 	}
 }

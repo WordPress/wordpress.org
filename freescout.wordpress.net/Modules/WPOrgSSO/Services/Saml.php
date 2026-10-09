@@ -61,7 +61,9 @@ final class Saml {
 		$this->app_url       = rtrim( $app_url, '/' );
 		$this->idp_entity_id = $idp_entity_id;
 		$this->idp_url       = $idp_url;
-		$this->idp_cert      = $idp_cert;
+
+		// .env values are one line: a certificate pasted with its line breaks written as \n still works.
+		$this->idp_cert = str_replace( array( '\r', '\n' ), '', $idp_cert );
 	}
 
 	/**
@@ -137,6 +139,10 @@ final class Saml {
 	 * @throws RuntimeException If the response is not valid.
 	 */
 	public function validate( string $saml_response ): array {
+		if ( ! $this->has_readable_cert() ) {
+			throw new RuntimeException( 'WPORG_SSO_IDP_CERT is not a readable X.509 certificate. Put it on one line, with or without its BEGIN/END lines.' );
+		}
+
 		// Compare the destination with the canonical URL, not whatever host and scheme the proxy passed on.
 		Utils::setBaseURL( $this->app_url );
 
@@ -149,7 +155,7 @@ final class Saml {
 			}
 
 			$username       = (string) $response->getNameId();
-			$in_response_to = (string) $response->getXMLDocument()->documentElement->getAttribute( 'InResponseTo' );
+			$in_response_to = self::in_response_to( $response->getXMLDocument() );
 		} catch ( RuntimeException $e ) {
 			throw $e;
 		} catch ( \Throwable $e ) {
@@ -166,6 +172,44 @@ final class Saml {
 			'username'       => $username,
 			'in_response_to' => $in_response_to,
 		);
+	}
+
+	/**
+	 * Whether the identity provider's certificate can be read.
+	 *
+	 * Otherwise every response fails its signature check, which hides that the setting is to blame.
+	 *
+	 * @return bool
+	 */
+	private function has_readable_cert(): bool {
+		$pem = (string) Utils::formatCert( $this->idp_cert );
+		if ( '' === $pem ) {
+			return false;
+		}
+
+		// FreeScout turns openssl's warning about an unreadable certificate into an exception.
+		try {
+			return false !== openssl_x509_read( $pem );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Gets the ID of the login request a response answers.
+	 *
+	 * WordPress.org's identity provider only names it in the assertion's bearer confirmation, not on the response
+	 * itself. The whole response is signed, so it's as trustworthy there.
+	 *
+	 * @param \DOMDocument $document Validated response.
+	 * @return string Login request ID, or empty.
+	 */
+	private static function in_response_to( \DOMDocument $document ): string {
+		$xpath = new \DOMXPath( $document );
+		$xpath->registerNamespace( 'samlp', Constants::NS_SAMLP );
+		$xpath->registerNamespace( 'saml', Constants::NS_SAML );
+
+		return (string) $xpath->evaluate( 'string(/samlp:Response/saml:Assertion/saml:Subject/saml:SubjectConfirmation[@Method="' . Constants::CM_BEARER . '"]/saml:SubjectConfirmationData/@InResponseTo)' );
 	}
 
 	/**

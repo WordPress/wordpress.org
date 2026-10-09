@@ -96,6 +96,38 @@ final class LoginTest extends SsoTestCase {
 	}
 
 	/**
+	 * A certificate pasted with its line breaks written as \n works, since .env values are one line.
+	 *
+	 * @return void
+	 */
+	public function test_accepts_certificate_with_escaped_line_breaks(): void {
+		config( array( 'wporgsso.idp.cert' => '-----BEGIN CERTIFICATE-----\n' . chunk_split( $this->idp->certificate_body(), 64, '\n' ) . '-----END CERTIFICATE-----' ) );
+
+		$location = $this->post_to_acs( $this->start_login( 'rita' ) );
+
+		$this->complete( $location )->assertRedirect( route( 'dashboard' ) );
+		$this->assertAuthenticatedAs( $this->user );
+	}
+
+	/**
+	 * An unreadable certificate, like the first line of one pasted over several, is logged as such.
+	 *
+	 * @return void
+	 */
+	public function test_logs_unreadable_certificate(): void {
+		\Log::spy();
+
+		foreach ( array( '-----BEGIN CERTIFICATE-----', '-----BEGIN PUBLIC KEY-----' . $this->idp->certificate_body(), substr( $this->idp->certificate_body(), 0, 64 ) ) as $cert ) {
+			config( array( 'wporgsso.idp.cert' => $cert ) );
+
+			$this->assertStringNotContainsString( 'key=', $this->post_to_acs( $this->start_login( 'rita' ) ) );
+		}
+
+		\Log::shouldHaveReceived( 'error' )->with( \Mockery::pattern( '/WPORG_SSO_IDP_CERT is not a readable/' ) )->times( 3 );
+		$this->assertGuest();
+	}
+
+	/**
 	 * Logged-in users are sent on from the login page, as before.
 	 *
 	 * @return void
