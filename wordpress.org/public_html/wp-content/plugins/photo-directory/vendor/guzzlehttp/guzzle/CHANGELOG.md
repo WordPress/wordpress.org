@@ -909,10 +909,10 @@ interfaces.
 * Changed `Guzzle\Common\Collection::__construct($data)` to no longer accepts a null value for `$data` but a
   default `array()`
 * Added `Guzzle\Stream\StreamInterface::isRepeatable`
-* Removed `Guzzle\Http\ClientInterface::setDefaultHeaders(). Use
+* Removed `Guzzle\Http\ClientInterface::setDefaultHeaders()`. Use
   $client->getConfig()->setPath('request.options/headers/{header_name}', 'value')`. or
   $client->getConfig()->setPath('request.options/headers', array('header_name' => 'value'))`.
-* Removed `Guzzle\Http\ClientInterface::getDefaultHeaders(). Use $client->getConfig()->getPath('request.options/headers')`.
+* Removed `Guzzle\Http\ClientInterface::getDefaultHeaders()`. Use `$client->getConfig()->getPath('request.options/headers')`.
 * Removed `Guzzle\Http\ClientInterface::expandTemplate()`
 * Removed `Guzzle\Http\ClientInterface::setRequestFactory()`
 * Removed `Guzzle\Http\ClientInterface::getCurlMulti()`
@@ -935,8 +935,8 @@ interfaces.
   These will work through Guzzle 4.0
 * Marked 'request.params' for `Guzzle\Http\Client` as deprecated. Use [request.options][params].
 * Marked `Guzzle\Service\Client::enableMagicMethods()` as deprecated. Magic methods can no longer be disabled on a Guzzle\Service\Client.
-* Marked `Guzzle\Service\Client::getDefaultHeaders()` as deprecated. Use $client->getConfig()->getPath('request.options/headers')`.
-* Marked `Guzzle\Service\Client::setDefaultHeaders()` as deprecated. Use $client->getConfig()->setPath('request.options/headers/{header_name}', 'value')`.
+* Marked `Guzzle\Service\Client::getDefaultHeaders()` as deprecated. Use `$client->getConfig()->getPath('request.options/headers')`.
+* Marked `Guzzle\Service\Client::setDefaultHeaders()` as deprecated. Use `$client->getConfig()->setPath('request.options/headers/{header_name}', 'value')`.
 * Marked `Guzzle\Parser\Url\UrlParser` as deprecated. Just use PHP's `parse_url()` and percent encode your UTF-8.
 * Marked `Guzzle\Common\Collection::inject()` as deprecated.
 * Marked `Guzzle\Plugin\CurlAuth\CurlAuthPlugin` as deprecated. Use `$client->getConfig()->setPath('request.options/auth', array('user', 'pass', 'Basic|Digest');`
