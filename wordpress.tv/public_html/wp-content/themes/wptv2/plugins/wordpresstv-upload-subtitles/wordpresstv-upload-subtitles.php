@@ -21,6 +21,99 @@ class WordPressTV_Subtitles_Upload {
 		add_filter( 'attachment_fields_to_save', array( $this, 'moderate' ) );
 		add_filter( 'views_upload', array( $this, 'views_links' ) );
 		add_filter( 'post_mime_types', array( $this, 'post_mime_types' ) );
+
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+		add_action( 'wp_ajax_wptv_get_subtitles_nonce', array( $this, 'ajax_get_nonce' ) );
+		add_action( 'wp_ajax_nopriv_wptv_get_subtitles_nonce', array( $this, 'ajax_get_nonce' ) );
+	}
+
+	/**
+	 * AJAX handler to provide a fresh nonce for the upload form.
+	 */
+	public function ajax_get_nonce() {
+		nocache_headers();
+
+		if ( $this->is_password_required() ) {
+			wp_send_json_error(
+				array(
+					'message' => 'Password required.',
+				),
+				403
+			);
+		}
+
+		wp_send_json_success(
+			array(
+				'nonce' => wp_create_nonce( 'wptv-upload-subtitles' ),
+			)
+		);
+	}
+
+	/**
+	 * Retrieves the Post object for the subtitles page.
+	 *
+	 * @return WP_Post|null
+	 */
+	private function get_subtitle_page() {
+		static $page = null;
+
+		if ( null !== $page ) {
+			return $page ?: null;
+		}
+
+		$path_page = get_page_by_path( 'subtitle' );
+
+		if ( $path_page instanceof WP_Post ) {
+			$template = get_post_meta( $path_page->ID, '_wp_page_template', true );
+
+			if ( 'upload-subtitles-template.php' === $template ) {
+				$page = $path_page;
+				return $page;
+			}
+		}
+
+		$page = false;
+		return null;
+	}
+
+	/**
+	 * Checks whether the password for the subtitles page is still required.
+	 *
+	 * @return bool True if the password is missing or incorrect or if the page does not exist.
+	 */
+	private function is_password_required() {
+		$page = $this->get_subtitle_page();
+
+		if ( ! $page ) {
+			return true;
+		}
+
+		return post_password_required( $page );
+	}
+
+	/**
+	 * Enqueue front-end scripts for the subtitle upload form.
+	 */
+	public function enqueue_scripts() {
+		if ( ! is_page_template( 'upload-subtitles-template.php' ) || $this->is_password_required() ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'wptv-upload-subtitles',
+			get_template_directory_uri() . '/plugins/wordpresstv-upload-subtitles/upload-subtitles.js',
+			array(),
+			'1.0.0',
+			true
+		);
+
+		wp_localize_script(
+			'wptv-upload-subtitles',
+			'wptvSubtitlesConfig',
+			array(
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			)
+		);
 	}
 
 	/**
@@ -35,6 +128,7 @@ class WordPressTV_Subtitles_Upload {
 			'mimes'     => array(
 				'ttml' => 'application/ttml+xml',
 				'dfxp' => 'application/ttml+xml', // .dfxp is changed to .ttml in $this->generate_filename()
+				'xml'  => 'text/xml',
 			),
 		);
 
@@ -55,15 +149,17 @@ class WordPressTV_Subtitles_Upload {
 
 		$filepath = $file['file'];
 
-		$attachment                   = array();
-		$attachment['post_title']     = $this->sanitize_text( $name );
-		$attachment['guid']           = $file['url'];
-		$attachment['post_mime_type'] = $file['type'];
-		$attachment['post_content']   = '';
-		$attachment['post_author']    = $this->drafts_author;
+		$attachment = array(
+			'post_title'     => sanitize_text_field( wp_unslash( $name ) ),
+			'guid'           => $file['url'],
+			'post_mime_type' => $file['type'],
+			'post_content'   => '',
+			'post_status'    => 'private',
+			'post_author'    => $this->drafts_author,
+		);
 
 		// expects slashed
-		$attachment_id = wp_insert_attachment( add_magic_quotes( $attachment ), $filepath );
+		$attachment_id = wp_insert_attachment( wp_slash( $attachment ), $filepath );
 
 		if ( ! is_wp_error( $attachment_id ) ) {
 			wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $filepath ) );
@@ -82,19 +178,19 @@ class WordPressTV_Subtitles_Upload {
 	function generate_filename( $file ) {
 		$name_parts = pathinfo( $file['name'] );
 
-		// this should never happen
 		if ( empty( $name_parts['extension'] ) ) {
-			die;
+			wp_die( esc_html__( 'Missing file extension.', 'wptv' ), '', array( 'response' => 400 ) );
 		}
+
+		$extension = strtolower( $name_parts['extension'] );
 
 		// Change .dfxp to .ttml
-		if ( 'dfxp' == strtolower( $name_parts['extension'] ) ) {
-			$name_parts['extension'] = 'ttml';
+		if ( 'dfxp' === $extension ) {
+			$extension = 'ttml';
 		}
 
-		// random file name
-		$str          = md5( time() . rand( 1, 1000000 ) );
-		$file['name'] = 'subtitles-' . substr( $str, rand( 5, 20 ), 10 ) . '.' . $name_parts['extension'];
+		$token        = bin2hex( random_bytes( 8 ) );
+		$file['name'] = 'subtitles-' . $token . '.' . $extension;
 
 		return $file;
 	}
@@ -103,7 +199,13 @@ class WordPressTV_Subtitles_Upload {
 	 * When the POST request is fired with the subtitles form and action.
 	 */
 	function post() {
-		if ( empty( $_POST['wptv-upload-subtitles-nonce'] ) || ! wp_verify_nonce( $_POST['wptv-upload-subtitles-nonce'], 'wptv-upload-subtitles' ) ) {
+		$nonce = isset( $_POST['wptv-upload-subtitles-nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['wptv-upload-subtitles-nonce'] ) ) : '';
+
+		if ( $this->is_password_required() ) {
+			wp_die( 'Password required.' );
+		}
+
+		if ( ! wp_verify_nonce( $nonce, 'wptv-upload-subtitles' ) ) {
 			wp_die( 'Invalid form data. Please go back and try again.' );
 		}
 
@@ -122,8 +224,8 @@ class WordPressTV_Subtitles_Upload {
 			$this->error( 4 );
 		}
 
-		$wporg_username = $this->sanitize_text( $_POST['wptv_wporg_username'] );
-		$author_email   = $this->sanitize_text( $_POST['wptv_author_email'] );
+		$wporg_username = sanitize_user( wp_unslash( $_POST['wptv_wporg_username'] ?? '' ) );
+		$author_email   = sanitize_email( wp_unslash( $_POST['wptv_author_email'] ?? '' ) );
 
 		if ( empty( $_POST['wptv_language'] ) ) {
 			$this->error( 7 );
@@ -150,20 +252,56 @@ class WordPressTV_Subtitles_Upload {
 			wp_die( 'You can not subtitle this video.' );
 		}
 
-		if ( empty( $_FILES['wptv_subtitles_file']['name'] ) ) {
+		if (
+			empty( $_FILES['wptv_subtitles_file']['name'] ) ||
+			empty( $_FILES['wptv_subtitles_file']['tmp_name'] )
+		) {
 			$this->error( 1 );
 		}
 
-		// quick file extension check
-		$name_parts = pathinfo( $_FILES['wptv_subtitles_file']['name'] );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Validated via is_uploaded_file() below.
+		$tmp_file = $_FILES['wptv_subtitles_file']['tmp_name'];
 
-		if ( ! empty( $name_parts['extension'] ) ) {
-			if ( ! in_array( strtolower( $name_parts['extension'] ), array( 'ttml', 'dfxp' ), true ) ) {
-				$this->error( 2 );
-			}
-		} else {
-			$this->error( 3 );
+		if ( ! is_uploaded_file( $tmp_file ) ) {
+			$this->error( 1 );
 		}
+
+		$file_size = isset( $_FILES['wptv_subtitles_file']['size'] ) ? (int) $_FILES['wptv_subtitles_file']['size'] : 0;
+		if ( $file_size > 2 * MB_IN_BYTES ) {
+			$this->error( 2 );
+		}
+
+		$file_name = sanitize_file_name( wp_unslash( $_FILES['wptv_subtitles_file']['name'] ) );
+		$extension = strtolower( pathinfo( $file_name, PATHINFO_EXTENSION ) );
+
+		if ( ! in_array( $extension, array( 'ttml', 'dfxp' ), true ) ) {
+			$this->error( 2 );
+		}
+
+		$dom = new DOMDocument();
+		libxml_use_internal_errors( true );
+
+		$is_valid_xml = $dom->load( $tmp_file, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING );
+
+		if ( ! $is_valid_xml ) {
+			libxml_clear_errors();
+			$this->error( 2 );
+		}
+
+		if ( $dom->doctype ) {
+			libxml_clear_errors();
+			$this->error( 6 );
+		}
+
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHP core DOMDocument / DOMElement properties.
+		$root_name = strtolower( $dom->documentElement->localName ?? '' );
+
+		if ( 'tt' !== $root_name ) {
+			libxml_clear_errors();
+			$this->error( 2 );
+		}
+
+		libxml_clear_errors();
 
 		// empty the globals just in case
 		$_POST = $_REQUEST = $_GET = array();
@@ -189,12 +327,16 @@ class WordPressTV_Subtitles_Upload {
 			$language['label']
 		);
 
-		wp_update_post( array(
-			'ID'           => $subs_attachment_id,
-			'post_content' => $post_content,
-			'post_title'   => sprintf( 'Subtitles: %s (%s)', $parent->post_title, $language['label'] ),
-		//	'post_parent'  => $parent->ID, // easier to look for unapproved subtitles attachment if they are "unattached"?
-		) );
+		// Subtitles remain unattached (post_parent = 0) until approved.
+		wp_update_post(
+			wp_slash(
+				array(
+					'ID'           => $subs_attachment_id,
+					'post_content' => $post_content,
+					'post_title'   => sprintf( 'Subtitles: %s (%s)', $parent->post_title, $language['label'] ),
+				)
+			)
+		);
 
 		$subs_attachment_meta = array(
 			'video_attachment_id' => $video_attachment->ID,
@@ -240,6 +382,10 @@ class WordPressTV_Subtitles_Upload {
 
 		$approve       = ! empty( $post_data['wptv-approve-subtitles'] );
 		$attachment_id = $post_data['ID'];
+
+		if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
+			return $post_data;
+		}
 
 		$attachment_meta = get_post_meta( $attachment_id, '_wptv_submitted_subtitles', true );
 		if ( empty( $attachment_meta ) ) {
@@ -503,25 +649,6 @@ class WordPressTV_Subtitles_Upload {
 			'success' => 1,
 		), home_url( 'subtitle' ) ) );
 		exit;
-	}
-
-	// expects slashed, returns unslashed
-	function sanitize_text( $str, $remove_line_breaks = true ) {
-		$str = str_replace( '\\', '', $str );
-
-		if ( $remove_line_breaks ) {
-			$str = sanitize_text_field( $str );
-		} else {
-			$str = wp_check_invalid_utf8( $str );
-			$str = wp_strip_all_tags( $str );
-
-			$match = array();
-			while ( preg_match( '/%[a-f0-9]{2}/i', $str, $match ) ) {
-				$str = str_replace( $match[0], '', $str );
-			}
-		}
-
-		return htmlspecialchars( $str, ENT_QUOTES, 'UTF-8' );
 	}
 }
 
