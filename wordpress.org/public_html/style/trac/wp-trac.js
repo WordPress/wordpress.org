@@ -565,18 +565,43 @@ let wpTrac,
 				}
 
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
-				window.onbeforeunload = function () {
-					if ( wpTrac.isNewTicket() ) {
-						if ( ! $( '#field-description' ).val() && ! $( '#field-summary' ).val() ) {
-							return;
-						}
-					} else if ( ! $( '#comment' ).val() ) {
+				let isSubmitting = false;
+
+				/**
+				 * Checks whether an input or textarea element has unsaved changes compared to its initial value.
+				 *
+				 * @param {string} selector CSS selector for the form element.
+				 * @return {boolean} True if the field exists and its value was modified, false otherwise.
+				 */
+				function isDirty( selector ) {
+					const el = document.querySelector( selector );
+					return Boolean( el && el.value.trim() !== el.defaultValue.trim() );
+				}
+
+				window.addEventListener( 'beforeunload', function ( event ) {
+					if ( isSubmitting ) {
 						return;
 					}
-					return 'The changes you made will be lost if you navigate away from this page.';
-				};
-				$( '.buttons' ).on( 'click', 'input', function () {
-					window.onbeforeunload = null;
+
+					const hasModifiedProperties = isDirty( '#field-summary' ) || isDirty( '#field-description' );
+					const hasUnsavedContent = wpTrac.isNewTicket()
+						? hasModifiedProperties
+						: Boolean( $( '#comment' ).val()?.trim() ) || hasModifiedProperties;
+
+					if ( ! hasUnsavedContent ) {
+						return;
+					}
+
+					event.preventDefault();
+				} );
+
+				$( '#propertyform' ).on( 'submit', function ( event ) {
+					isSubmitting = true;
+					setTimeout( function () {
+						if ( event.isDefaultPrevented() ) {
+							isSubmitting = false;
+						}
+					}, 0 );
 				} );
 			}
 
