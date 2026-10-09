@@ -188,8 +188,8 @@ new Chartist.Line('.ct-chart-contributors', {
 	}]
 ]);
 JS,
-		json_encode( $chart_data['labels'] ?? [] ),
-		json_encode( $chart_data['series'] ?? [] )
+		wp_json_encode( $chart_data['labels'] ?? [] ),
+		wp_json_encode( $chart_data['series'] ?? [] )
 	)
 );
 ?>
