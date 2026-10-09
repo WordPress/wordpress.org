@@ -33,7 +33,7 @@ foreach ( $editor_options as $translation_set_id => $options ) {
 		$gp_translation_helpers_editor = $gp_translation_helpers_editor_%1$s;
 		}
 	JS,
-		esc_html( $translation_set_id ),
+		absint( $translation_set_id ),
 		wp_json_encode( $options )
 	);
 }
