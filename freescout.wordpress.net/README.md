@@ -50,7 +50,7 @@ Optional:
 | Variable | Default | Value |
 |---|---|---|
 | `WPORG_API_URL` | `https://api.wordpress.org/dotorg/freescout/` | Where the helpdesk endpoints are. |
-| `WPORG_SSO_IDP_ENTITY_ID` | `https://login.wordpress.org` | The identity provider's entity ID, from its settings page on login.wordpress.org. |
+| `WPORG_SSO_IDP_ENTITY_ID` | `https://wordpress.org` | The identity provider's entity ID, from its settings page on login.wordpress.org. |
 | `WPORG_SSO_IDP_URL` | `https://login.wordpress.org/wp-login.php?action=idp` | The identity provider's login URL, from the same page. |
 | `WPORG_HELPSCOUT_APP_ID`, `WPORG_HELPSCOUT_APP_SECRET` | | A HelpScout app's credentials, for `WPOrgHelpScoutImport`. Only needed while mailboxes move; delete the app after the last import. |
 | `WPORG_SSO_PASSWORD_LOGIN` | `false` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Every such login is logged. |
