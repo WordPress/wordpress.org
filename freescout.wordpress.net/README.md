@@ -54,6 +54,7 @@ Optional:
 | `WPORG_SSO_IDP_URL` | `https://login.wordpress.org/wp-login.php?action=idp` | The identity provider's login URL, from the same page. |
 | `WPORG_HELPSCOUT_APP_ID`, `WPORG_HELPSCOUT_APP_SECRET` | | A HelpScout app's credentials, for `WPOrgHelpScoutImport`. Only needed while mailboxes move; delete the app after the last import. |
 | `WPORG_SSO_PASSWORD_LOGIN` | `false` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Every such login is logged. |
+| `WPORG_SSO_REQUIRE_PROXY` | `false` | `true` logs administrators out of requests that nginx doesn't mark as proxied with the `WPORG_PROXIED_REQUEST` FastCGI param. Set it up first; see [WPOrgSSO](Modules/WPOrgSSO/README.md#the-proxy). |
 
 FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events, `WPOrgSSO` updates avatars, `WPOrgAkismet` reports to Akismet, and `WPOrgHelpScoutImport` imports from the queue.
 
