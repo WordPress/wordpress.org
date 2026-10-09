@@ -13,7 +13,7 @@ module.exports = function(grunt) {
 					indentType: 'tab',
 					indentWidth: 1,
 					outputStyle: 'expanded',
-					sourceMap: true,
+					sourceMap: false,
 				},
 			},
 		},
