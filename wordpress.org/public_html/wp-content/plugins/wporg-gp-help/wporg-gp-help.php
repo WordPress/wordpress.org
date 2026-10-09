@@ -60,12 +60,12 @@ class WPorg_GP_Help_Page {
 			sprintf(
 				<<<'JS'
 			jQuery('#hide-help-notice').click(function() {
-				jQuery.ajax({url: '%s'});
+				jQuery.ajax({url: %s});
 				jQuery('#help-notice').fadeOut(1000);
 				return false;
 			});
 			JS,
-				esc_js( $hide_url )
+				wp_json_encode( $hide_url )
 			)
 		);
 	}
