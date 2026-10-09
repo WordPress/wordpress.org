@@ -296,12 +296,21 @@
 		}
 
 		/**
-		 * Asks once; a failed request, like one over the rate limit, counts as a check.
+		 * Asks once; a request over the rate limit or that the server or network failed counts as a check.
 		 */
 		function check() {
 			checks++;
 			$.getJSON( url )
-				.fail( retry )
+				.fail( function ( xhr ) {
+					// Not a lost session or access, which asking again won't change.
+					if (
+						0 === xhr.status ||
+						429 === xhr.status ||
+						xhr.status >= 500
+					) {
+						retry();
+					}
+				} )
 				.done( function ( photo ) {
 					const src =
 						photo && photo.url

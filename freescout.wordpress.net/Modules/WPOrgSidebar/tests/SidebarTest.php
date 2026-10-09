@@ -15,6 +15,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Cache\RateLimiter;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Modules\WPOrgSidebar\Http\Controllers\PanelController;
 use Modules\WPOrgSidebar\Jobs\SyncSenderAvatar;
 use Modules\WPOrgSidebar\Providers\WPOrgSidebarServiceProvider;
@@ -317,6 +318,65 @@ final class SidebarTest extends TestCase {
 		// The job is done, and the account had no avatar to save.
 		\Cache::forget( SyncSenderAvatar::pending_key( (int) $this->conversation->customer_id ) );
 		$this->assertArrayNotHasKey( 'sender_photo', $this->actingAs( $user )->get( $url )->decodeResponseJson() );
+	}
+
+	/**
+	 * When the job can't be queued, no page waits for it, and the next panel load tries again.
+	 *
+	 * @return void
+	 */
+	public function test_tries_again_when_the_avatar_cannot_be_queued(): void {
+		$this->fake_profile_panel( 'https://secure.gravatar.com/avatar/abc?d=404' );
+		$user = $this->create_user();
+		$url  = '/wporgsidebar/' . $this->conversation->id . '/profile';
+		$bus  = app( Dispatcher::class );
+
+		$this->app->instance(
+			Dispatcher::class,
+			new class() implements Dispatcher {
+				/**
+				 * Fails, like a queue that's down.
+				 *
+				 * @param mixed $command Job.
+				 * @return void
+				 * @throws \RuntimeException Always.
+				 */
+				public function dispatch( $command ) {
+					throw new \RuntimeException( 'The queue is down.' );
+				}
+
+				/**
+				 * Fails, like a queue that's down.
+				 *
+				 * @param mixed $command Job.
+				 * @param mixed $handler Handler.
+				 * @return void
+				 * @throws \RuntimeException Always.
+				 */
+				public function dispatchNow( $command, $handler = null ) {
+					throw new \RuntimeException( 'The queue is down.' );
+				}
+
+				/**
+				 * Ignores the pipes.
+				 *
+				 * @param array $pipes Pipes.
+				 * @return $this
+				 */
+				public function pipeThrough( array $pipes ) {
+					return $this;
+				}
+			}
+		);
+
+		$this->assertArrayNotHasKey( 'sender_photo', $this->actingAs( $user )->get( $url )->decodeResponseJson() );
+		$this->assertFalse( \Cache::has( SyncSenderAvatar::pending_key( (int) $this->conversation->customer_id ) ) );
+
+		$this->app->instance( Dispatcher::class, $bus );
+		\Queue::fake();
+
+		$this->assertArrayHasKey( 'sender_photo', $this->actingAs( $user )->get( $url )->decodeResponseJson() );
+		\Queue::assertPushed( SyncSenderAvatar::class, 1 );
 	}
 
 	/**

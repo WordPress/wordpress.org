@@ -178,6 +178,10 @@ final class PanelController extends Controller {
 	 * @return bool Whether a sender without a photo has one coming: queued now, or by an earlier request.
 	 */
 	private static function sync_sender_avatar( Conversation $conversation, string $avatar_url ): bool {
+		$key     = 'wporgsidebar.avatar.' . $conversation->customer_id;
+		$pending = SyncSenderAvatar::pending_key( (int) $conversation->customer_id );
+		$queued  = false;
+
 		try {
 			// The URL first: only the profile panel sends one, so the other panels don't load the sender.
 			if ( ! SyncSenderAvatar::is_avatar_url( $avatar_url ) || ! $conversation->customer ) {
@@ -187,14 +191,19 @@ final class PanelController extends Controller {
 			// Before the job: a queue that runs jobs right away would already have saved it.
 			$had_photo = (bool) $conversation->customer->photo_url;
 
-			$queued = \Cache::add( 'wporgsidebar.avatar.' . $conversation->customer_id, true, self::AVATAR_MINUTES );
+			$queued = \Cache::add( $key, true, self::AVATAR_MINUTES );
 			if ( $queued ) {
-				\Cache::put( SyncSenderAvatar::pending_key( (int) $conversation->customer_id ), true, SyncSenderAvatar::PENDING_MINUTES );
+				\Cache::put( $pending, true, SyncSenderAvatar::PENDING_MINUTES );
 				SyncSenderAvatar::dispatch( (int) $conversation->customer_id, $avatar_url );
 			}
 
-			return ! $had_photo && ( $queued || \Cache::has( SyncSenderAvatar::pending_key( (int) $conversation->customer_id ) ) );
+			return ! $had_photo && ( $queued || \Cache::has( $pending ) );
 		} catch ( \Throwable $e ) {
+			if ( $queued ) {
+				// Nothing was queued: no page waits for it, and the next panel load tries again.
+				\Cache::forget( $key );
+				\Cache::forget( $pending );
+			}
 			\Log::error( '[WPOrgSidebar] Could not queue the avatar of sender ' . $conversation->customer_id . ': ' . $e->getMessage() );
 
 			return false;
