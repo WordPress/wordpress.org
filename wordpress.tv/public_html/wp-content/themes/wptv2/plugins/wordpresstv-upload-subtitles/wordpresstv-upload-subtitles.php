@@ -61,12 +61,7 @@ class WordPressTV_Subtitles_Upload {
 			return $page ?: null;
 		}
 
-		$page = get_page_by_path( 'subtitle' );
-		if ( $page instanceof WP_Post ) {
-			return $page;
-		}
-
-		$pages = get_posts(
+		$template_pages = get_posts(
 			array(
 				'post_type'      => 'page',
 				'meta_key'       => '_wp_page_template',
@@ -76,9 +71,21 @@ class WordPressTV_Subtitles_Upload {
 			)
 		);
 
-		$page = ! empty( $pages ) ? $pages[0] : false;
+		$template_page = ! empty( $template_pages ) ? $template_pages[0] : null;
 
-		return $page ? $page : null;
+		$path_page = get_page_by_path( 'subtitle' );
+
+		if (
+			$template_page instanceof WP_Post &&
+			$path_page instanceof WP_Post &&
+			$template_page->ID === $path_page->ID
+		) {
+			$page = $template_page;
+			return $page;
+		}
+
+		$page = false;
+		return null;
 	}
 
 	/**
