@@ -39,14 +39,23 @@
 	};
 
 	/**
-	 * How often to ask whether the queue has saved the sender's photo, in milliseconds.
+	 * How long to wait before asking again whether the queue has saved the sender's photo, in milliseconds.
+	 *
+	 * Doubles after each check, up to PHOTO_MAX_INTERVAL.
 	 *
 	 * @type {number}
 	 */
 	const PHOTO_INTERVAL = 3000;
 
 	/**
-	 * How many times to ask; FreeScout's queue worker looks for jobs every five seconds.
+	 * Longest wait between checks, in milliseconds.
+	 *
+	 * @type {number}
+	 */
+	const PHOTO_MAX_INTERVAL = 30000;
+
+	/**
+	 * How many times to ask: over three minutes, since outgoing email goes ahead of the job in the queue.
 	 *
 	 * @type {number}
 	 */
@@ -274,34 +283,53 @@
 	 */
 	function showSenderPhoto( url ) {
 		let checks = 0;
+		let interval = PHOTO_INTERVAL;
 
-		( function check() {
+		/**
+		 * Asks again later, unless that was the last time.
+		 */
+		function retry() {
+			if ( checks < PHOTO_CHECKS ) {
+				setTimeout( check, interval );
+				interval = Math.min( interval * 2, PHOTO_MAX_INTERVAL );
+			}
+		}
+
+		/**
+		 * Asks once; a failed request, like one over the rate limit, counts as a check.
+		 */
+		function check() {
 			checks++;
-			$.getJSON( url ).done( function ( photo ) {
-				const src =
-					photo && photo.url
-						? webUrl( photo.url, window.location.href )
-						: '';
+			$.getJSON( url )
+				.fail( retry )
+				.done( function ( photo ) {
+					const src =
+						photo && photo.url
+							? webUrl( photo.url, window.location.href )
+							: '';
 
-				if ( ! src ) {
-					if ( checks < PHOTO_CHECKS ) {
-						setTimeout( check, PHOTO_INTERVAL );
+					if ( ! src ) {
+						// Not once the job ran without saving one, like for an account without an avatar.
+						if ( photo && photo.pending ) {
+							retry();
+						}
+						return;
 					}
-					return;
-				}
 
-				$( '.customer-photo' ).attr( 'src', src );
+					$( '.customer-photo' ).attr( 'src', src );
 
-				// The sender's messages, which link to their page; not those of others on the conversation.
-				$( '.thread-person a' )
-					.filter( function () {
-						return this.href === photo.sender;
-					} )
-					.closest( '.thread' )
-					.find( '.thread-photo .person-photo' )
-					.attr( 'src', src );
-			} );
-		} )();
+					// The sender's messages, which link to their page; not those of others on the conversation.
+					$( '.thread-person a' )
+						.filter( function () {
+							return this.href === photo.sender;
+						} )
+						.closest( '.thread' )
+						.find( '.thread-photo .person-photo' )
+						.attr( 'src', src );
+				} );
+		}
+
+		check();
 	}
 
 	$( function () {

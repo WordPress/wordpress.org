@@ -33,6 +33,13 @@ final class SyncSenderAvatar implements ShouldQueue {
 	private const HOSTS = array( 'gravatar.com', 'secure.gravatar.com', '0.gravatar.com', '1.gravatar.com', '2.gravatar.com' );
 
 	/**
+	 * How long a queued job counts as on its way, in minutes, in case the queue worker never gets to it.
+	 *
+	 * @var int
+	 */
+	public const PENDING_MINUTES = 10;
+
+	/**
 	 * Sender ID.
 	 *
 	 * @var int
@@ -68,11 +75,34 @@ final class SyncSenderAvatar implements ShouldQueue {
 	}
 
 	/**
-	 * Updates the photo; failures are logged, not retried, since the sidebar tries again later.
+	 * Gets the cache key that says a sender's job is queued, which pages without their photo wait for.
+	 *
+	 * @param int $customer_id Sender ID.
+	 * @return string
+	 */
+	public static function pending_key( int $customer_id ): string {
+		return 'wporgsidebar.avatar_pending.' . $customer_id;
+	}
+
+	/**
+	 * Updates the photo, then lets pages waiting for it stop asking.
 	 *
 	 * @return void
 	 */
 	public function handle(): void {
+		try {
+			$this->sync();
+		} finally {
+			\Cache::forget( self::pending_key( $this->customer_id ) );
+		}
+	}
+
+	/**
+	 * Updates the photo; failures are logged, not retried, since the sidebar tries again later.
+	 *
+	 * @return void
+	 */
+	private function sync(): void {
 		$customer = Customer::find( $this->customer_id );
 
 		// A photo an agent uploaded stays.

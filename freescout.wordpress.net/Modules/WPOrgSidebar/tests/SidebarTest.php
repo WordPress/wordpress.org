@@ -278,19 +278,45 @@ final class SidebarTest extends TestCase {
 
 		$this->actingAs( $user )->get( $url )->assertExactJson(
 			array(
-				'url'    => null,
-				'sender' => $sender->url(),
+				'url'     => null,
+				'pending' => true,
+				'sender'  => $sender->url(),
 			)
 		);
 
+		// What the job does once the queue gets to it.
 		$sender->photo_url = 'avatar.png';
 		$sender->save();
+		\Cache::forget( SyncSenderAvatar::pending_key( (int) $sender->id ) );
 		$this->actingAs( $user )->get( $url )->assertExactJson(
 			array(
-				'url'    => $sender->getPhotoUrl(),
-				'sender' => $sender->url(),
+				'url'     => $sender->getPhotoUrl(),
+				'pending' => false,
+				'sender'  => $sender->url(),
 			)
 		);
+	}
+
+	/**
+	 * A page loaded again before the queue gets to the avatar waits for the same job, and stops once it's done.
+	 *
+	 * @return void
+	 */
+	public function test_waits_for_a_pending_sender_photo_on_reload(): void {
+		\Queue::fake();
+		$this->fake_profile_panel( 'https://secure.gravatar.com/avatar/abc?d=404' );
+		$user = $this->create_user();
+		$url  = '/wporgsidebar/' . $this->conversation->id . '/profile';
+
+		$this->actingAs( $user )->get( $url );
+		$panel = $this->actingAs( $user )->get( $url )->decodeResponseJson();
+
+		$this->assertArrayHasKey( 'sender_photo', $panel );
+		\Queue::assertPushed( SyncSenderAvatar::class, 1 );
+
+		// The job is done, and the account had no avatar to save.
+		\Cache::forget( SyncSenderAvatar::pending_key( (int) $this->conversation->customer_id ) );
+		$this->assertArrayNotHasKey( 'sender_photo', $this->actingAs( $user )->get( $url )->decodeResponseJson() );
 	}
 
 	/**
@@ -320,6 +346,36 @@ final class SidebarTest extends TestCase {
 		$this->actingAs( $this->create_user( User::ROLE_USER ) )
 			->get( '/wporgsidebar/sender-photo/' . $this->conversation->id )
 			->assertStatus( 403 );
+	}
+
+	/**
+	 * A conversation without a sender has no photo to wait for.
+	 *
+	 * @return void
+	 */
+	public function test_sender_photo_needs_a_sender(): void {
+		$this->conversation->customer_id = null;
+		$this->conversation->save();
+
+		$this->actingAs( $this->create_user() )
+			->get( '/wporgsidebar/sender-photo/' . $this->conversation->id )
+			->assertStatus( 404 );
+	}
+
+	/**
+	 * Checking for photos has a limit of its own, so it doesn't use up the limit on panels.
+	 *
+	 * @return void
+	 */
+	public function test_limits_photo_checks_on_their_own_counter(): void {
+		$user    = $this->create_user();
+		$limiter = app( RateLimiter::class );
+		for ( $i = 0; $i < PanelController::MAX_PER_MINUTE; $i++ ) {
+			$limiter->hit( 'wporgsidebar.photos.' . $user->id );
+		}
+
+		$this->actingAs( $user )->get( '/wporgsidebar/sender-photo/' . $this->conversation->id )->assertStatus( 429 );
+		$this->assertSame( 0, $limiter->attempts( 'wporgsidebar.panels.' . $user->id ) );
 	}
 
 	/**
