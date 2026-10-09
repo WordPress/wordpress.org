@@ -61,27 +61,15 @@ class WordPressTV_Subtitles_Upload {
 			return $page ?: null;
 		}
 
-		$template_pages = get_posts(
-			array(
-				'post_type'      => 'page',
-				'meta_key'       => '_wp_page_template',
-				'meta_value'     => 'upload-subtitles-template.php',
-				'posts_per_page' => 1,
-				'post_status'    => array( 'publish', 'private' ),
-			)
-		);
-
-		$template_page = ! empty( $template_pages ) ? $template_pages[0] : null;
-
 		$path_page = get_page_by_path( 'subtitle' );
+		
+		if ( $path_page instanceof WP_Post ) {
+			$template = get_post_meta( $path_page->ID, '_wp_page_template', true );
 
-		if (
-			$template_page instanceof WP_Post &&
-			$path_page instanceof WP_Post &&
-			$template_page->ID === $path_page->ID
-		) {
-			$page = $template_page;
-			return $page;
+			if ( 'upload-subtitles-template.php' === $template ) {
+				$page = $path_page;
+				return $page;
+			}
 		}
 
 		$page = false;
@@ -107,7 +95,7 @@ class WordPressTV_Subtitles_Upload {
 	 * Enqueue front-end scripts for the subtitle upload form.
 	 */
 	public function enqueue_scripts() {
-		if ( ! is_page_template( 'upload-subtitles-template.php' ) ) {
+		if ( ! is_page_template( 'upload-subtitles-template.php' ) || $this->is_password_required() ) {
 			return;
 		}
 
@@ -140,6 +128,7 @@ class WordPressTV_Subtitles_Upload {
 			'mimes'     => array(
 				'ttml' => 'application/ttml+xml',
 				'dfxp' => 'application/ttml+xml', // .dfxp is changed to .ttml in $this->generate_filename()
+				'xml'  => 'text/xml',
 			),
 		);
 
@@ -165,6 +154,7 @@ class WordPressTV_Subtitles_Upload {
 			'guid'           => $file['url'],
 			'post_mime_type' => $file['type'],
 			'post_content'   => '',
+			'post_status'    => 'private',
 			'post_author'    => $this->drafts_author,
 		);
 
@@ -188,19 +178,19 @@ class WordPressTV_Subtitles_Upload {
 	function generate_filename( $file ) {
 		$name_parts = pathinfo( $file['name'] );
 
-		// this should never happen
 		if ( empty( $name_parts['extension'] ) ) {
-			die;
+			wp_die( esc_html__( 'Missing file extension.', 'wptv' ), '', array( 'response' => 400 ) );
 		}
+
+		$extension = strtolower( $name_parts['extension'] );
 
 		// Change .dfxp to .ttml
-		if ( 'dfxp' == strtolower( $name_parts['extension'] ) ) {
-			$name_parts['extension'] = 'ttml';
+		if ( 'dfxp' === $extension ) {
+			$extension = 'ttml';
 		}
 
-		// random file name
-		$str          = md5( time() . rand( 1, 1000000 ) );
-		$file['name'] = 'subtitles-' . substr( $str, rand( 5, 20 ), 10 ) . '.' . $name_parts['extension'];
+		$token        = bin2hex( random_bytes( 8 ) );
+		$file['name'] = 'subtitles-' . $token . '.' . $extension;
 
 		return $file;
 	}
@@ -262,20 +252,44 @@ class WordPressTV_Subtitles_Upload {
 			wp_die( 'You can not subtitle this video.' );
 		}
 
-		if ( empty( $_FILES['wptv_subtitles_file']['name'] ) ) {
+		$upload = $_FILES['wptv_subtitles_file'] ?? array();
+
+		if ( empty( $upload['name'] ) || empty( $upload['tmp_name'] ) || ! is_uploaded_file( $upload['tmp_name'] ) ) {
 			$this->error( 1 );
 		}
-
-		// quick file extension check
-		$name_parts = pathinfo( $_FILES['wptv_subtitles_file']['name'] );
-
-		if ( ! empty( $name_parts['extension'] ) ) {
-			if ( ! in_array( strtolower( $name_parts['extension'] ), array( 'ttml', 'dfxp' ), true ) ) {
-				$this->error( 2 );
-			}
-		} else {
-			$this->error( 3 );
+		
+		if ( ! empty( $upload['size'] ) && $upload['size'] > 2 * MB_IN_BYTES ) {
+			$this->error( 2 );
 		}
+
+		$name_parts = pathinfo( $upload['name'] );
+		$extension  = isset( $name_parts['extension'] ) ? strtolower( $name_parts['extension'] ) : '';
+
+		if ( ! in_array( $extension, array( 'ttml', 'dfxp' ), true ) ) {
+			$this->error( 2 );
+		}
+
+		$dom = new DOMDocument();
+		libxml_use_internal_errors( true );
+
+		$is_valid_xml = $dom->load( $upload['tmp_name'], LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING );
+
+		if ( ! $is_valid_xml ) {
+			libxml_clear_errors();
+			$this->error( 2 );
+		}
+
+		if ( $dom->doctype ) {
+			libxml_clear_errors();
+			$this->error( 6 );
+		}
+
+		if ( 'tt' !== strtolower( $dom->documentElement->localName ?? '' ) ) {
+			libxml_clear_errors();
+			$this->error( 2 );
+		}
+
+		libxml_clear_errors();
 
 		// empty the globals just in case
 		$_POST = $_REQUEST = $_GET = array();
