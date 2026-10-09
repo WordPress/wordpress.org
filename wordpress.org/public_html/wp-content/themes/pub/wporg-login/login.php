@@ -80,8 +80,8 @@ setTimeout( function() {
 	} catch( e ){}
 }, 200 );
 JS,
-		json_encode( __( 'Hide password', 'wporg' ) ),
-		json_encode( __( 'Show password', 'wporg' ) )
+		wp_json_encode( __( 'Hide password', 'wporg' ) ),
+		wp_json_encode( __( 'Show password', 'wporg' ) )
 	)
 );
 ?>
