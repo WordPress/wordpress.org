@@ -10,11 +10,12 @@ Context for AI coding agents and developers working on the WordPress.org FreeSco
 
 - `Modules/<Name>/` — one directory per module (`module.json`, `Providers/`, `Http/`, `Resources/`, `Database/Migrations/`, `Public/`, `tests/`).
   - `WPOrgAkismet` — checks new conversations from senders with Akismet (`rest.akismet.com`, its own key), and reports agents' corrections.
-  - `WPOrgHelpScoutImport` — imports HelpScout mailboxes' conversations, with their tags and custom fields, and their saved replies, from HelpScout's API, page by page on the queue, without the events live email fires. Administrators run it under Manage » HelpScout Import. Remove it once every mailbox has moved.
+  - `WPOrgHelpScoutImport` — imports HelpScout mailboxes' conversations, with their tags and custom fields, and their saved replies, from HelpScout's API, page by page on the queue, without the events live email fires, and points WordPress.org's copy of conversations at the imported ones as each mailbox switches. Administrators run it under Manage » HelpScout Import. Remove it once every mailbox has moved.
+  - `WPOrgPluginReview` — the latest plugin review of a conversation in its sidebar, for the plugins team: the details, flags, and issues of its review emails' Review ID lines. It indexes which replies are review emails, and of what type; `php artisan wporgpluginreview:index` indexes them again. Only in the plugins team's mailbox, and, with the Teams module, only for members of the teams whose names start with "Plugin". Issue names and replies to copy are in its `Services/IssueNames.php` and `Services/FlagReplies.php`.
   - `WPOrgSidebar` — WordPress.org panels in the conversation sidebar, loaded over AJAX from `api.wordpress.org/dotorg/freescout/`.
   - `WPOrgSite` — tweaks for how WordPress.org runs FreeScout, rather than features; add new ones here instead of starting a module. So far, it adds the WordPress mark, lists only installed modules on the Modules page, refuses to update or delete them there, and lays their cards out in columns.
   - `WPOrgSSO` — logs agents in through login.wordpress.org's SAML identity provider (wp-saml-idp, in the private dotorg repository), and connects every user to a WordPress.org account. Its SAML library is committed in its `vendor/`: FreeScout doesn't install module dependencies. After changing its `composer.json`, run `composer install --no-dev` in the module and commit `vendor/` (`git add -f`: the root `.gitignore` ignores it).
-  - `WPOrgWebhooks` — queues conversation events to `api.wordpress.org/dotorg/freescout/webhook.php`, which records contributor stats.
+  - `WPOrgWebhooks` — queues conversation events to `api.wordpress.org/dotorg/freescout/webhook.php`, which records contributor stats, and keeps the copy of conversations (`wporg_helpscout`) the plugin directory reads.
 - `tests/` — shared PHPUnit bootstrap and base `TestCase`.
 
 Premium (paid) modules must never be committed here.

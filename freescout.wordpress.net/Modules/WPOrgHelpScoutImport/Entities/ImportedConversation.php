@@ -42,5 +42,5 @@ final class ImportedConversation extends Model {
 	 *
 	 * @var array
 	 */
-	protected $fillable = array( 'helpscout_id', 'helpscout_number', 'conversation_id', 'creator_id', 'assignee_id', 'closer_id', 'tags', 'custom_fields', 'written_tags', 'written_values' );
+	protected $fillable = array( 'helpscout_id', 'helpscout_number', 'conversation_id', 'mailbox_id', 'creator_id', 'assignee_id', 'closer_id', 'tags', 'custom_fields', 'written_tags', 'written_values' );
 }
