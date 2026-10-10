@@ -52,17 +52,19 @@ if ( $event->is_past() ) :
 
 <!-- wp:wporg-translate-events-2024/event-description <?php echo serialize_block_attributes( array( 'id' => $event->id() ) ); ?> /-->
 <!-- wp:wporg-translate-events-2024/contributor-list <?php echo serialize_block_attributes( array( 'id' => $event->id() ) ); ?> /-->
+<?php if ( ! $event->is_past() ) : ?>
 <!-- wp:wporg-translate-events-2024/attendee-list
-<?php
-echo serialize_block_attributes(
-	array(
-		'id'        => $event->id(),
-		'view_type' => 'list',
-	)
-);
-?>
+	<?php
+	echo serialize_block_attributes(
+		array(
+			'id'        => $event->id(),
+			'view_type' => 'list',
+		)
+	);
+	?>
 
 /-->
+<?php endif; ?>
 <!-- wp:wporg-translate-events-2024/event-stats <?php echo serialize_block_attributes( array( 'id' => $event->id() ) ); ?> /-->
 <!-- wp:wporg-translate-events-2024/event-projects <?php echo serialize_block_attributes( array( 'id' => $event->id() ) ); ?> /-->
 <!-- wp:wporg-translate-events-2024/event-contribution-summary <?php echo serialize_block_attributes( array( 'id' => $event->id() ) ); ?> /-->
