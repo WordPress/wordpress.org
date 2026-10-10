@@ -81,10 +81,17 @@ final class TagsAndFieldsTest extends ImportTestCase {
 							),
 						),
 						array(
-							'id'    => 105,
-							'name'  => 'Taken on',
-							'type'  => 'date',
-							'order' => 2,
+							'id'       => 105,
+							'name'     => 'Taken on',
+							'type'     => 'date',
+							'order'    => 2,
+							'required' => true,
+						),
+						array(
+							'id'    => 107,
+							'name'  => 'Rolls',
+							'type'  => 'number',
+							'order' => 4,
 						),
 						array(
 							'id'    => 106,
@@ -197,6 +204,108 @@ final class TagsAndFieldsTest extends ImportTestCase {
 	}
 
 	/**
+	 * Importing again leaves away tags agents removed, or administrators deleted, rather than adding them again.
+	 *
+	 * @return void
+	 */
+	public function test_import_again_keeps_tags_agents_removed(): void {
+		$tags = array(
+			'tags' => array(
+				array(
+					'id'  => 1,
+					'tag' => 'photos',
+				),
+				array(
+					'id'  => 2,
+					'tag' => 'urgent',
+				),
+			),
+		);
+		$this->importer->import( $this->conversation( $tags ), $this->mailbox );
+		$urgent = (int) \DB::table( 'tags' )->where( 'name', 'urgent' )->value( 'id' );
+		\DB::table( 'conversation_tag' )->where( 'tag_id', $urgent )->delete();
+		\DB::table( 'tags' )->where( 'name', 'photos' )->delete();
+		\DB::table( 'conversation_tag' )->where( 'conversation_id', $this->conversation_id() )->delete();
+
+		$this->importer->import( $this->conversation( $tags ), $this->mailbox );
+
+		$this->assertSame( array(), $this->tag_names() );
+		$this->assertFalse( \DB::table( 'tags' )->where( 'name', 'photos' )->exists() );
+	}
+
+	/**
+	 * Importing again takes away tags HelpScout removed, if the import added them; those agents added stay.
+	 *
+	 * @return void
+	 */
+	public function test_import_again_removes_tags_helpscout_removed(): void {
+		$agents_tag = (int) \DB::table( 'tags' )->insertGetId(
+			array(
+				'name'    => 'escalated',
+				'counter' => 0,
+			)
+		);
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'tags' => array(
+						array(
+							'id'  => 1,
+							'tag' => 'photos',
+						),
+						array(
+							'id'  => 4,
+							'tag' => 'urgent',
+						),
+					),
+				)
+			),
+			$this->mailbox
+		);
+		\DB::table( 'conversation_tag' )->insert(
+			array(
+				'conversation_id' => $this->conversation_id(),
+				'tag_id'          => $agents_tag,
+			)
+		);
+
+		// HelpScout added the tag the agent had, then removed it, and the import's.
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'tags' => array(
+						array(
+							'id'  => 1,
+							'tag' => 'photos',
+						),
+						array(
+							'id'  => 5,
+							'tag' => 'escalated',
+						),
+					),
+				)
+			),
+			$this->mailbox
+		);
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$this->assertEqualsCanonicalizing( array( 'photos', 'escalated' ), $this->tag_names() );
+		$this->assertSame( 0, (int) \DB::table( 'tags' )->where( 'name', 'urgent' )->value( 'counter' ) );
+	}
+
+	/**
+	 * Tags given as names, rather than objects, are imported too.
+	 *
+	 * @return void
+	 */
+	public function test_tags_given_as_names_are_imported(): void {
+		$this->importer->import( $this->conversation( array( 'tags' => array( 'Photos', array( 'name' => 'Urgent' ) ) ) ), $this->mailbox );
+
+		$this->assertEqualsCanonicalizing( array( 'photos', 'urgent' ), $this->tag_names() );
+		$this->assertSame( '["Photos","Urgent"]', ImportedConversation::query()->where( 'helpscout_id', self::CONVERSATION_ID )->value( 'tags' ) );
+	}
+
+	/**
 	 * The mailbox gets HelpScout's fields, with dropdowns' options in HelpScout's order, and the conversation its values.
 	 *
 	 * @return void
@@ -205,8 +314,9 @@ final class TagsAndFieldsTest extends ImportTestCase {
 		$this->importer->import( $this->conversation( array( 'customFields' => self::values() ) ), $this->mailbox );
 
 		$fields = \DB::table( 'custom_fields' )->where( 'mailbox_id', $this->mailbox->id )->orderBy( 'sort_order' )->get();
-		$this->assertSame( array( 'Photo type', 'Taken on', 'Camera' ), $fields->pluck( 'name' )->all() );
-		$this->assertSame( array( 1, 5, 2 ), $fields->pluck( 'type' )->map( 'intval' )->all() );
+		$this->assertSame( array( 'Photo type', 'Taken on', 'Camera', 'Rolls' ), $fields->pluck( 'name' )->all() );
+		$this->assertSame( array( 1, 5, 2, 4 ), $fields->pluck( 'type' )->map( 'intval' )->all() );
+		$this->assertSame( array( false, true, false, false ), array_map( 'boolval', $fields->pluck( 'required' )->all() ) );
 		$this->assertSame(
 			array(
 				1 => 'Landscape',
@@ -226,7 +336,8 @@ final class TagsAndFieldsTest extends ImportTestCase {
 	}
 
 	/**
-	 * Importing again reuses the fields, adds dropdown options HelpScout added since, and keeps agents' values.
+	 * Importing again reuses the fields, adds dropdown options HelpScout added since, and brings values up to date,
+	 * except those agents changed.
 	 *
 	 * @return void
 	 */
@@ -238,6 +349,86 @@ final class TagsAndFieldsTest extends ImportTestCase {
 		$values            = self::values();
 		$values[0]['text'] = 'Macro';
 		$values[2]['text'] = 'Canon';
+		unset( $values[1] );
+		$this->importer->import( $this->conversation( array( 'customFields' => array_values( $values ) ) ), $this->mailbox );
+
+		$this->assertSame( 4, \DB::table( 'custom_fields' )->where( 'mailbox_id', $this->mailbox->id )->count() );
+		$this->assertSame( 'Macro', json_decode( (string) \DB::table( 'custom_fields' )->where( 'name', 'Photo type' )->value( 'options' ), true )[3] );
+		$this->assertSame(
+			array(
+				'Photo type' => '3',
+				'Camera'     => 'Leica',
+			),
+			$this->values_by_name()
+		);
+		$this->assertCount( 1, $this->helpscout->requests_to( 'v2/mailboxes/77/fields' ) );
+	}
+
+	/**
+	 * The mailbox gets all of HelpScout's fields, even those no conversation has a value for.
+	 *
+	 * @return void
+	 */
+	public function test_fields_without_values_are_created(): void {
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$this->assertSame( array( 'Photo type', 'Taken on', 'Camera', 'Rolls' ), \DB::table( 'custom_fields' )->orderBy( 'sort_order' )->pluck( 'name' )->all() );
+	}
+
+	/**
+	 * Importing again doesn't create fields, or add dropdown options, deleted in FreeScout.
+	 *
+	 * @return void
+	 */
+	public function test_import_again_keeps_fields_and_options_deleted(): void {
+		$this->importer->import( $this->conversation( array( 'customFields' => self::values() ) ), $this->mailbox );
+		$camera = (int) \DB::table( 'custom_fields' )->where( 'name', 'Camera' )->value( 'id' );
+		\DB::table( 'custom_fields' )->where( 'id', $camera )->delete();
+		\DB::table( 'conversation_custom_field' )->where( 'custom_field_id', $camera )->delete();
+
+		// Like the module does when an option is deleted.
+		$photo_type = \DB::table( 'custom_fields' )->where( 'name', 'Photo type' )->first();
+		\DB::table( 'custom_fields' )->where( 'id', $photo_type->id )->update( array( 'options' => json_encode( array( 1 => 'Landscape' ) ) ) );
+		\DB::table( 'conversation_custom_field' )->where( 'custom_field_id', $photo_type->id )->delete();
+
+		$this->answer_threads( 1002, $this->threads( 100 ) );
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'id'           => 1002,
+					'customFields' => self::values(),
+				)
+			),
+			$this->mailbox
+		);
+
+		$this->assertFalse( \DB::table( 'custom_fields' )->where( 'name', 'Camera' )->exists() );
+		$this->assertSame( array( 1 => 'Landscape' ), json_decode( (string) \DB::table( 'custom_fields' )->where( 'id', $photo_type->id )->value( 'options' ), true ) );
+		$this->assertSame( array( 'Taken on' => '2026-08-30' ), $this->values_by_name( 1002 ) );
+	}
+
+	/**
+	 * Numbers and dates that aren't ones are left out.
+	 *
+	 * @return void
+	 */
+	public function test_values_that_are_not_numbers_or_dates_are_left_out(): void {
+		$values = array(
+			array(
+				'id'   => 105,
+				'text' => 'next friday',
+			),
+			array(
+				'id'   => 107,
+				'text' => '12 rolls',
+			),
+		);
+		$this->importer->import( $this->conversation( array( 'customFields' => $values ) ), $this->mailbox );
+
+		$this->assertSame( array(), $this->values_by_name() );
+
+		$values[0]['text'] = '2026-08-30T10:00:00Z';
+		$values[1]['text'] = '12';
 		$this->answer_threads( 1002, $this->threads( 100 ) );
 		$this->importer->import(
 			$this->conversation(
@@ -248,13 +439,35 @@ final class TagsAndFieldsTest extends ImportTestCase {
 			),
 			$this->mailbox
 		);
-		$this->importer->import( $this->conversation( array( 'customFields' => $values ) ), $this->mailbox );
 
-		$this->assertSame( 3, \DB::table( 'custom_fields' )->where( 'mailbox_id', $this->mailbox->id )->count() );
-		$this->assertSame( 'Leica', $this->values_by_name()['Camera'] );
-		$this->assertSame( '2', $this->values_by_name()['Photo type'] );
-		$this->assertSame( 'Macro', json_decode( (string) \DB::table( 'custom_fields' )->where( 'name', 'Photo type' )->value( 'options' ), true )[3] );
-		$this->assertCount( 1, $this->helpscout->requests_to( 'v2/mailboxes/77/fields' ) );
+		$this->assertSame(
+			array(
+				'Taken on' => '2026-08-30',
+				'Rolls'    => '12',
+			),
+			$this->values_by_name( 1002 )
+		);
+	}
+
+	/**
+	 * A conversation HelpScout moved, which agents didn't work on, takes its values to the other mailbox's fields.
+	 *
+	 * @return void
+	 */
+	public function test_moved_conversation_leaves_no_values_behind(): void {
+		$this->importer->import( $this->conversation( array( 'customFields' => self::values() ) ), $this->mailbox );
+		$themes = $this->create_mailbox( 'Themes' );
+
+		$this->importer->import( $this->conversation( array( 'customFields' => self::values() ) ), $themes );
+
+		$fields = \DB::table( 'conversation_custom_field' )
+			->join( 'custom_fields', 'custom_fields.id', '=', 'conversation_custom_field.custom_field_id' )
+			->where( 'conversation_id', $this->conversation_id() )
+			->pluck( 'mailbox_id' )
+			->map( 'intval' )
+			->unique()
+			->all();
+		$this->assertSame( array( (int) $themes->id ), array_values( $fields ) );
 	}
 
 	/**
@@ -270,12 +483,86 @@ final class TagsAndFieldsTest extends ImportTestCase {
 		$this->importer->import( $this->conversation( array( 'customFields' => self::values() ) ), $themes );
 
 		$this->assertSame( 0, \DB::table( 'custom_fields' )->where( 'mailbox_id', $themes->id )->count() );
-		$this->assertSame( 3, \DB::table( 'custom_fields' )->where( 'mailbox_id', $this->mailbox->id )->count() );
+		$this->assertSame( 4, \DB::table( 'custom_fields' )->where( 'mailbox_id', $this->mailbox->id )->count() );
 		$this->assertSame( 'Fuji X100', $this->values_by_name()['Camera'] );
 	}
 
 	/**
-	 * A multiselect dropdown FreeScout has by a field's name keeps HelpScout's value as one of its options.
+	 * One HelpScout moved to another of its mailboxes, but agents worked on, brings only the fields it has values for
+	 * to the mailbox it stays in, not all of the other HelpScout mailbox's.
+	 *
+	 * @return void
+	 */
+	public function test_moved_conversation_agents_worked_on_brings_only_its_fields(): void {
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$this->create_thread( \App\Conversation::find( $this->conversation_id() ), \App\Thread::TYPE_NOTE, 'On it.', $this->agent, '2026-09-10 08:00:00' );
+		$this->helpscout->only(
+			'GET',
+			'v2/mailboxes/78/fields',
+			array(
+				'_embedded' => array(
+					'fields' => array(
+						array(
+							'id'    => 106,
+							'name'  => 'Camera',
+							'type'  => 'singleline',
+							'order' => 1,
+						),
+						array(
+							'id'       => 108,
+							'name'     => 'Lens',
+							'type'     => 'singleline',
+							'order'    => 2,
+							'required' => true,
+						),
+					),
+				),
+				'page'      => array( 'totalPages' => 1 ),
+			)
+		);
+
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'mailboxId'    => 78,
+					'customFields' => array(
+						array(
+							'id'   => 106,
+							'name' => 'Camera',
+							'text' => 'Fuji X100',
+						),
+					),
+				)
+			),
+			$this->create_mailbox( 'Themes' )
+		);
+
+		$this->assertNotContains( 'Lens', \DB::table( 'custom_fields' )->pluck( 'name' )->all() );
+		$this->assertSame( 'Fuji X100', $this->values_by_name()['Camera'] );
+	}
+
+	/**
+	 * Fields an import creates go after those the mailbox has, in HelpScout's order.
+	 *
+	 * @return void
+	 */
+	public function test_new_fields_go_after_the_mailboxs_own(): void {
+		\DB::table( 'custom_fields' )->insert(
+			array(
+				'mailbox_id' => $this->mailbox->id,
+				'name'       => 'Agent notes',
+				'type'       => 1,
+				'sort_order' => 2,
+			)
+		);
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$this->assertSame( array( 'Agent notes', 'Photo type', 'Taken on', 'Camera', 'Rolls' ), \DB::table( 'custom_fields' )->where( 'mailbox_id', $this->mailbox->id )->orderBy( 'sort_order' )->pluck( 'name' )->all() );
+	}
+
+	/**
+	 * A multiselect dropdown FreeScout has by a field's name keeps HelpScout's value as one of its options' labels.
 	 *
 	 * @return void
 	 */
@@ -296,7 +583,39 @@ final class TagsAndFieldsTest extends ImportTestCase {
 
 		$this->importer->import( $this->conversation( array( 'customFields' => self::values() ) ), $this->mailbox );
 
-		$this->assertSame( '1', $this->values_by_name()['Photo type'] );
+		$this->assertSame( 'Portrait', $this->values_by_name()['Photo type'] );
+		// HelpScout's other option is added.
+		$this->assertContains( 'Landscape', json_decode( (string) \DB::table( 'custom_fields' )->where( 'name', 'Photo type' )->value( 'options' ), true ) );
+	}
+
+	/**
+	 * Fields FreeScout has by the name, which split their values at commas, get HelpScout's values without them.
+	 *
+	 * @return void
+	 */
+	public function test_values_in_fields_split_at_commas_have_none(): void {
+		foreach ( array(
+			'Photo type' => 8,
+			'Camera'     => 7,
+		) as $name => $type ) {
+			\DB::table( 'custom_fields' )->insert(
+				array(
+					'mailbox_id' => $this->mailbox->id,
+					'name'       => $name,
+					'type'       => $type,
+					'options'    => 8 === $type ? json_encode( array( 1 => 'Portrait' ) ) : null,
+				)
+			);
+		}
+
+		$values            = self::values();
+		$values[0]['text'] = 'Square, cropped';
+		$values[2]['text'] = 'Fuji, X100';
+		$this->importer->import( $this->conversation( array( 'customFields' => $values ) ), $this->mailbox );
+
+		$this->assertSame( 'Square cropped', $this->values_by_name()['Photo type'] );
+		$this->assertSame( 'Fuji X100', $this->values_by_name()['Camera'] );
+		$this->assertContains( 'Square cropped', json_decode( (string) \DB::table( 'custom_fields' )->where( 'name', 'Photo type' )->value( 'options' ), true ) );
 	}
 
 	/**
@@ -381,14 +700,15 @@ final class TagsAndFieldsTest extends ImportTestCase {
 	}
 
 	/**
-	 * The imported conversation's values, by their field's name.
+	 * An imported conversation's values, by their field's name.
 	 *
+	 * @param int $helpscout_id HelpScout conversation ID.
 	 * @return string[]
 	 */
-	private function values_by_name(): array {
+	private function values_by_name( int $helpscout_id = self::CONVERSATION_ID ): array {
 		return \DB::table( 'conversation_custom_field' )
 			->join( 'custom_fields', 'custom_fields.id', '=', 'conversation_custom_field.custom_field_id' )
-			->where( 'conversation_id', $this->conversation_id() )
+			->where( 'conversation_id', (int) ImportedConversation::query()->where( 'helpscout_id', $helpscout_id )->value( 'conversation_id' ) )
 			->pluck( 'value', 'name' )
 			->all();
 	}

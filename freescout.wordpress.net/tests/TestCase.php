@@ -46,6 +46,19 @@ abstract class TestCase extends BaseTestCase {
 
 		$app->make( Kernel::class )->bootstrap();
 
+		// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- FreeScout's dev dependencies, like PHPUnit, predate PHP 8.4, and Laravel would turn their deprecations into exceptions.
+		$handler = set_error_handler( null );
+		set_error_handler(
+			static function ( int $level, string $message, string $file = '', int $line = 0 ) use ( $handler ): ?bool {
+				if ( E_DEPRECATED === $level && str_starts_with( $file, FREESCOUT_PATH . '/vendor/' ) ) {
+					return true;
+				}
+
+				return $handler( $level, $message, $file, $line );
+			}
+		);
+		// phpcs:enable
+
 		return $app;
 	}
 
