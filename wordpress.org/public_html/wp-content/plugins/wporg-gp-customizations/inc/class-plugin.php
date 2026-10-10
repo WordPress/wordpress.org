@@ -374,35 +374,46 @@ class Plugin {
 	 */
 	public function log_translation_source( GP_Translation $translation ) {
 		static $already_logged = array();
-		$key                   = ! $translation->translation_0 ? null : $translation->translation_0;
-		if ( isset( $already_logged[ $key ] ) ) {
+
+		if ( empty( $translation->id ) || isset( $already_logged[ $translation->id ] ) ) {
 			return;
 		}
-		$already_logged[ $key ] = true;
-		$source                 = '';
-		if ( $translation && is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name ) {
-			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
-				$this->imported_translation_ids[] = $translation->id;
 
-				if ( isset( $_POST['source'] ) && 'translate-live' == $_POST['source'] ) {
-					$this->imported_source = 'playground';
-				} elseif ( ! isset( $_POST['source'] ) && isset( $_POST['submit'] ) && 'Import' == $_POST['submit'] ) {
-					$this->imported_source = 'import';
-				} else {
-					return;
+		$already_logged[ $translation->id ] = true;
+		$source                             = '';
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verification is handled upstream by GlotPress route handlers.
+		if ( is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name ) {
+			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
+				if ( empty( $this->imported_source ) ) {
+					if ( isset( $_POST['source'] ) && 'translate-live' === $_POST['source'] ) {
+						$this->imported_source = 'playground';
+					} elseif ( ! isset( $_POST['source'] ) && isset( $_POST['submit'] ) && 'Import' === $_POST['submit'] ) {
+						$this->imported_source = 'import';
+					} else {
+						return;
+					}
 				}
-			}
-			if ( 'translations_post' === GP::$current_route->last_method_called ) {
-				if ( isset( $_POST['translation_source'] ) && 'frontend' == $_POST['translation_source'] ) {
+
+				$this->imported_translation_ids[] = $translation->id;
+			} elseif ( 'translations_post' === GP::$current_route->last_method_called ) {
+				if ( isset( $_POST['translation_source'] ) && 'frontend' === $_POST['translation_source'] ) {
 					$source = 'frontend';
-					if ( isset( $_POST['externalTranslationSource'] ) ) {
-						$suggestion_source     = sanitize_text_field( $_POST['externalTranslationSource'] );
-						$suggested_translation = sanitize_text_field( $_POST['externalTranslationUsed'] );
+
+					if ( ! empty( $_POST['externalTranslationSource'] ) ) {
+						$suggestion_source     = sanitize_text_field( wp_unslash( $_POST['externalTranslationSource'] ) );
+						$suggested_translation = isset( $_POST['externalTranslationUsed'] )
+							// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only used for in-memory comparison against the saved translation; sanitization would strip tags/newlines.
+							? (string) wp_unslash( $_POST['externalTranslationUsed'] )
+							: '';
+
 						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
 					}
 				}
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
 		if ( $source ) {
 			gp_update_meta( $translation->id, 'source', $source, 'translation' );
 		}
@@ -435,23 +446,35 @@ class Plugin {
 	 */
 	public function log_imported_translations() {
 		global $wpdb;
-		$source = $this->imported_source;
-		if ( ! $source && ! $this->imported_translation_ids ) {
+
+		$source          = $this->imported_source;
+		$translation_ids = $this->imported_translation_ids;
+
+		$this->imported_source          = '';
+		$this->imported_translation_ids = array();
+
+		if ( empty( $source ) || empty( $translation_ids ) ) {
 			return;
 		}
-		$sql        = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
-		$sql_vars   = array();
-		$sql_values = array_map(
-			function( $translation_id ) use ( $source, &$sql_vars ) {
-				$sql_vars[] = $translation_id;
-				$sql_vars[] = $source;
-				return '( "translation", %d, "source", %s )';
-			},
-			$this->imported_translation_ids
-		);
-		$sql       .= implode( ', ', $sql_values );
-		$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
 
+		$chunks = array_chunk( $translation_ids, 500 );
+
+		foreach ( $chunks as $chunk ) {
+			$sql_vars   = array();
+			$sql_values = array_map(
+				function ( $translation_id ) use ( $source, &$sql_vars ) {
+					$sql_vars[] = $translation_id;
+					$sql_vars[] = $source;
+					return '( "translation", %d, "source", %s )';
+				},
+				$chunk
+			);
+
+			$sql  = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
+			$sql .= implode( ', ', $sql_values );
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The query string is dynamically constructed using safe placeholders only.
+			$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
+		}
 	}
 
 	/**
