@@ -460,7 +460,7 @@ class Plugin {
 		foreach ( $chunks as $chunk ) {
 			$sql_vars   = array();
 			$sql_values = array_map(
-				function( $translation_id ) use ( $source, &$sql_vars ) {
+				function ( $translation_id ) use ( $source, &$sql_vars ) {
 					$sql_vars[] = $translation_id;
 					$sql_vars[] = $source;
 					return '( "translation", %d, "source", %s )';
@@ -470,6 +470,7 @@ class Plugin {
 
 			$sql  = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
 			$sql .= implode( ', ', $sql_values );
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The query string is dynamically constructed using safe placeholders only.
 			$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
 		}
 	}
