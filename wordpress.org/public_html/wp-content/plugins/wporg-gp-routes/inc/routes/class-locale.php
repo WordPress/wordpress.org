@@ -600,7 +600,7 @@ class Locale extends GP_Route {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$contributors = $wpdb->get_results( $contributors_sql );
 
-		return $contributors;
+		return (array) $contributors;
 	}
 
 	/**
