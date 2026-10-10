@@ -385,12 +385,14 @@ class Plugin {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verification is handled upstream by GlotPress route handlers.
 		if ( is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name ) {
 			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
-				if ( isset( $_POST['source'] ) && 'translate-live' === $_POST['source'] ) {
-					$this->imported_source = 'playground';
-				} elseif ( ! isset( $_POST['source'] ) && isset( $_POST['submit'] ) && 'Import' === $_POST['submit'] ) {
-					$this->imported_source = 'import';
-				} else {
-					return;
+				if ( empty( $this->imported_source ) ) {
+					if ( isset( $_POST['source'] ) && 'translate-live' === $_POST['source'] ) {
+						$this->imported_source = 'playground';
+					} elseif ( ! isset( $_POST['source'] ) && isset( $_POST['submit'] ) && 'Import' === $_POST['submit'] ) {
+						$this->imported_source = 'import';
+					} else {
+						return;
+					}
 				}
 
 				$this->imported_translation_ids[] = $translation->id;
