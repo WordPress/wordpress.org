@@ -396,6 +396,31 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * Each conversation imported, or updated, is announced with its HelpScout ID, as that happens without core's events.
+	 *
+	 * @return void
+	 */
+	public function test_imported_conversations_are_announced(): void {
+		$announced = array();
+		\Eventy::addAction(
+			'wporghelpscoutimport.conversation_imported',
+			static function ( $conversation, $helpscout_id ) use ( &$announced ): void {
+				$announced[] = array( (int) $conversation->id, $helpscout_id );
+			},
+			20,
+			2
+		);
+		$source = $this->conversation();
+
+		$this->importer->import( $source, $this->mailbox );
+		$source['status'] = 'spam';
+		$this->importer->import( $source, $this->mailbox );
+
+		$id = (int) $this->imported_conversation()->id;
+		$this->assertSame( array( array( $id, (int) $source['id'] ), array( $id, (int) $source['id'] ) ), $announced );
+	}
+
+	/**
 	 * An imported conversation's events name its HelpScout conversation, for WordPress.org's copy.
 	 *
 	 * @return void

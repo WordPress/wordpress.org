@@ -174,6 +174,91 @@ function send_panel( array $blocks, array $extra = array() ): never {
 }
 
 /**
+ * The ZIP of a plugin: the latest uploaded for review until it's released, and the latest release otherwise.
+ *
+ * A plugin in review, or approved but not yet committed to SVN, hasn't been released, so its uploads are only for
+ * reviewers; for them, the URL carries the plugin's review info, which the review tools read. Rejected plugins have
+ * none.
+ *
+ * @param \WP_Post $post   Plugin.
+ * @param bool     $review Whether it's for a reviewer.
+ * @return string Empty if there's no ZIP to download.
+ */
+function get_plugin_download_url( \WP_Post $post, bool $review ): string {
+	if ( 'rejected' === $post->post_status ) {
+		return '';
+	}
+
+	$url = "https://downloads.wordpress.org/plugin/{$post->post_name}.latest-stable.zip";
+
+	if ( in_array( $post->post_status, array( 'new', 'pending', 'approved' ), true ) ) {
+		$attachments = $review ? get_posts(
+			array(
+				'post_parent'    => $post->ID,
+				'post_type'      => 'attachment',
+				'orderby'        => 'post_date',
+				'order'          => 'DESC',
+				'posts_per_page' => 1,
+			)
+		) : array();
+		$url         = $attachments ? (string) wp_get_attachment_url( $attachments[0]->ID ) : '';
+	}
+
+	if ( $url && $review && class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' ) ) {
+		$url = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $url, $post );
+	}
+
+	return $url;
+}
+
+/**
+ * A plugin's status, as reviewers say it.
+ *
+ * @param \WP_Post $post   Plugin.
+ * @param bool     $review Whether it's for a reviewer, who also sees why a plugin was closed.
+ * @return string
+ */
+function get_plugin_status_label( \WP_Post $post, bool $review ): string {
+	switch ( $post->post_status ) {
+		case 'new':
+		case 'pending':
+			return 'In Review';
+		case 'closed':
+		case 'disabled':
+			$label = ucwords( $post->post_status );
+			// This is not perfect, but close enough.
+			if ( $review && $post->_close_reason ) {
+				$label .= ': ' . ucwords( str_replace( '-', ' ', $post->_close_reason ) );
+			}
+
+			return $label;
+		case 'publish':
+			return 'Published';
+		default:
+			return ucwords( $post->post_status );
+	}
+}
+
+/**
+ * Who's reviewing a plugin: only a review in progress has someone on it, as the assignment stays after it's done.
+ *
+ * @param \WP_Post $post Plugin.
+ * @return string Their name, empty if no one is.
+ */
+function get_assigned_reviewer( \WP_Post $post ): string {
+	if ( ! $post->assigned_reviewer || ! in_array( $post->post_status, array( 'new', 'pending' ), true ) ) {
+		return '';
+	}
+
+	$reviewer = get_user_by( 'id', (int) $post->assigned_reviewer );
+	if ( ! $reviewer ) {
+		return '';
+	}
+
+	return $reviewer->display_name ? $reviewer->display_name : $reviewer->user_login;
+}
+
+/**
  * A status badge; WPOrgSidebar's stylesheet colors it by tone.
  *
  * @param string $label Badge text.

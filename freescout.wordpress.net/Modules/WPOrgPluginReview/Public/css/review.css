@@ -1,0 +1,188 @@
+/**
+ * Styles the Plugin Review panel in the conversation sidebar.
+ *
+ * Text colors meet WCAG AAA (7:1) on the panel background.
+ */
+
+.wporg-review .panel-body {
+	font-size: 13px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.wporg-review-heading {
+	margin: 12px 0 4px;
+	padding-top: 12px;
+	border-top: 1px solid #d6dde3;
+	color: #2a3b47;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.wporg-review-details {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 2px 8px;
+	margin: 4px 0 0;
+}
+
+.wporg-review-details dt {
+	color: #4a5561;
+	font-weight: 400;
+}
+
+.wporg-review-details dd {
+	margin: 0;
+}
+
+.wporg-review-copy {
+	margin-left: 2px;
+	padding: 0 2px;
+	border: 0;
+	background: none;
+	color: #4a5561;
+	font-size: 11px;
+}
+
+.wporg-review-copy:hover,
+.wporg-review-copy:focus {
+	color: #0078d7;
+}
+
+.wporg-review-copied {
+	margin-left: 4px;
+	color: #175a28;
+	font-size: 11px;
+}
+
+.wporg-review-flags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.wporg-review-flag {
+	padding: 0 8px;
+	border-radius: 9px;
+	background-color: #eef1f4;
+	color: #3e4a55;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 20px;
+}
+
+.wporg-review-flag[data-flag="UPD"] {
+	background-color: #fce4e4;
+	color: #8c1616;
+}
+
+.wporg-review-flag[data-flag="TRM"] {
+	background-color: #fdf1d4;
+	color: #634200;
+}
+
+.wporg-review-flag[data-flag="OWN"] {
+	background-color: #f3eadb;
+	color: #5a4410;
+}
+
+.wporg-review-flag .wporg-review-copy {
+	color: inherit;
+}
+
+.wporg-review-badge {
+	margin-left: 4px;
+	padding: 0 6px;
+	border-radius: 9px;
+	background-color: #e1f4e5;
+	color: #175a28;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.wporg-review-issues {
+	margin: 0;
+	padding-left: 18px;
+}
+
+.wporg-review-issue {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #005ba3;
+	text-align: left;
+}
+
+.wporg-review-issue:hover,
+.wporg-review-issue:focus {
+	text-decoration: underline;
+}
+
+.wporg-review-issue.is-priority-2 {
+	font-weight: 700;
+}
+
+.wporg-review-issue.is-priority-0 {
+	color: #4a5561;
+}
+
+/* Where an issue the panel jumped to starts, for a moment. */
+.wporg-review-highlight {
+	background-color: #fff6bf;
+	transition: background-color 0.6s ease;
+}
+
+.wporg-review-action {
+	margin-left: 4px;
+	color: #4a5561;
+}
+
+/* The current name is the one the review suggested, or still the one it asked to change. */
+.wporg-review-names.is-suggested dd:last-child {
+	color: #175a28;
+	font-weight: 600;
+}
+
+.wporg-review-names.is-original dd:last-child {
+	color: #8c1616;
+	font-weight: 600;
+}
+
+.wporg-review-email {
+	color: #8a3a00;
+}
+
+.wporg-review-error {
+	color: #8c1616;
+}
+
+/* Switches the tab between its short and full title. */
+.wporg-review-title-toggle {
+	display: block;
+	margin-top: 12px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #4a5561;
+	font-size: 11px;
+}
+
+.wporg-review-title-toggle:hover,
+.wporg-review-title-toggle:focus {
+	color: #0078d7;
+	text-decoration: underline;
+}
+
+/* The warning above the reply editor, for a Review ID of another author. */
+.wporg-review-mismatch .btn {
+	margin-left: 4px;
+}
+
+.wporg-review-email.is-match {
+	color: #175a28;
+}
