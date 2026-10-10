@@ -427,26 +427,28 @@ class Locale extends GP_Route {
 		$editors['inherited'] = array_unique( array_map( 'intval', $editors['inherited'] ) );
 
 		// Collect project IDs: parent project and all active sub-projects.
-		$sub_project_ids = $wpdb->get_col( $wpdb->prepare( "
+		$sub_projects_sql = "
 			SELECT id
 			FROM {$wpdb->gp_projects}
 			WHERE
 				parent_project_id = %d
 				AND active = 1
-		", $project->id ) );
+		";
+		$sub_project_ids  = $wpdb->get_col( $wpdb->prepare( $sub_projects_sql, $project->id ) );
 
 		$all_project_ids = array_merge( [ (int) $project->id ], array_map( 'intval', $sub_project_ids ) );
 		$project_ids_sql = implode( ', ', $all_project_ids );
 
 		// Batch-fetch all matching translation set IDs in a single query.
-		$translation_set_ids = $wpdb->get_col( $wpdb->prepare( "
+		$translation_sets_sql = "
 			SELECT id
 			FROM {$wpdb->gp_translation_sets}
 			WHERE
 				project_id IN ( {$project_ids_sql} )
 				AND slug = %s
 				AND locale = %s
-		", $set_slug, $locale_slug ) );
+		";
+		$translation_set_ids = $wpdb->get_col( $wpdb->prepare( $translation_sets_sql, $set_slug, $locale_slug ) );
 
 		// Batch-fetch contributors across all translation sets.
 		$contributors = [];
