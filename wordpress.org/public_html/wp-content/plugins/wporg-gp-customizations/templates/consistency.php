@@ -119,14 +119,13 @@ if ( $performed_search && ! $results ) {
 			$prev_translation = $translations_unique[ $translation_index - 1 ] ?? false;
 			$next_translation = $translations_unique[ $translation_index + 1 ] ?? false;
 
-			if ( ! $prev_translation ) {
-				$next_arrow = '<a class="anchor-jumper with-tooltip" aria-label="Go to next translation" href="' . esc_attr( '#t-' . md5( $next_translation ) ) . '">&darr;</a>';
-			} elseif ( ! $next_translation ) {
-				$prev_arrow = '<a class="anchor-jumper with-tooltip" aria-label="Go to previous translation" href="' . esc_attr( '#t-' . md5( $prev_translation ) ) . '">&uarr;</a>';
-			} else {
-				$prev_arrow = '<a class="anchor-jumper with-tooltip" aria-label="Go to previous translation" href="' . esc_attr( '#t-' . md5( $prev_translation ) ) . '">&uarr;</a>';
-				$next_arrow = '<a class="anchor-jumper with-tooltip" aria-label="Go to next translation" href="' . esc_attr( '#t-' . md5( $next_translation ) ) . '">&darr;</a>';
-			}
+			$prev_arrow = $prev_translation
+				? '<a class="anchor-jumper with-tooltip" aria-label="Go to previous translation" href="' . esc_attr( '#t-' . md5( $prev_translation ) ) . '">&uarr;</a>'
+				: '';
+
+			$next_arrow = $next_translation
+				? '<a class="anchor-jumper with-tooltip" aria-label="Go to next translation" href="' . esc_attr( '#t-' . md5( $next_translation ) ) . '">&darr;</a>'
+				: '';
 
 			printf(
 				'<tr id="%s" class="new-translation"><th colspan="2"><strong>%s</strong> %s %s</th></tr>',
@@ -138,18 +137,24 @@ if ( $performed_search && ! $results ) {
 			);
 
 			foreach ( $results as $result ) {
-				if ( $result->translation != $translation ) {
+				if ( $result->translation !== $translation ) {
 					continue;
 				}
 
-				$project_name = $result->project_name;
+				$project_name      = $result->project_name;
 				$parent_project_id = $result->project_parent_id;
-				$is_active = true;
+				$parent_project    = null;
+				$is_active         = true;
+
 				while ( $parent_project_id ) {
 					$parent_project = GP::$project->get( $parent_project_id );
+					if ( ! $parent_project ) {
+						break;
+					}
+
 					$parent_project_id = $parent_project->parent_project_id;
-					$project_name = "{$parent_project->name} - {$project_name}";
-					$is_active = $is_active && $parent_project->active;
+					$project_name      = "{$parent_project->name} - {$project_name}";
+					$is_active         = $is_active && $parent_project->active;
 				}
 
 				$original_context = '';
@@ -160,7 +165,7 @@ if ( $performed_search && ! $results ) {
 					);
 				}
 
-				if( $is_active ) {
+				if ( $is_active ) {
 					$active_text = '';
 				} else {
 					$active_text = sprintf(
@@ -194,8 +199,8 @@ if ( $performed_search && ! $results ) {
 						esc_translation( $result->translation ),
 						esc_attr( $result->project_path ),
 						esc_attr( $set ),
-						intval( $result->original_id ),
-						intval( $result->translation_id ),
+						(int) $result->original_id,
+						(int) $result->translation_id,
 						esc_html( $result->translation_added )
 					)
 				);
