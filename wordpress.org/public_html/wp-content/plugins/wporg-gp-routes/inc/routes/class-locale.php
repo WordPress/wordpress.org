@@ -587,7 +587,7 @@ class Locale extends GP_Route {
 
 		$set_ids_sql = implode( ', ', $set_ids );
 
-		$contributors = $wpdb->get_results( "
+		$contributors_sql = "
 			SELECT
 				`t`.`user_id` as `user_id`,
 				`o`.`project_id` as `project_id`,
@@ -605,6 +605,8 @@ class Locale extends GP_Route {
 				AND `t`.`status` IN( 'current', 'waiting', 'fuzzy' )
 			GROUP BY `t`.`user_id`, `o`.`project_id`
 		" );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$contributors = $wpdb->get_results( $contributors_sql );
 
 		return $contributors;
 	}
