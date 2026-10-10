@@ -9,7 +9,6 @@ gp_tmpl_header();
 
 <p>Analyze translation consistency across projects. The result is limited to 500 translations.</p>
 
-
 <form action="/consistency" method="get" class="consistency-form">
 	<p class="consistency-fields">
 		<span class="consistency-field">
@@ -23,15 +22,15 @@ gp_tmpl_header();
 			$locale_options = [
 				'' => 'Select a locale',
 			];
-			$sets_to_hide = array(
+			$sets_to_hide   = array(
 				'ca/valencia',
 				'en/formal',
 				'en/default',
 				'fr/formal',
 				'sr/latin',
 			);
-			$sets = array_diff_key( $sets, array_flip( $sets_to_hide ) );
-			$locale_options = array_merge( $locale_options, $sets );
+			$sets           = array_diff_key( $sets, array_flip( $sets_to_hide ) );
+			$locale_options = $locale_options + $sets;
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- GlotPress escapes select attributes and option labels.
 			echo gp_select(
 				'set',
@@ -82,7 +81,7 @@ if ( $performed_search && ! $results ) {
 	echo '<div class="notice"><p>No results were found.</p></div>';
 
 } elseif ( $performed_search && $results ) {
-	$translations_unique_count = count( $translations_unique );
+	$translations_unique_count  = count( $translations_unique );
 	$has_different_translations = $translations_unique_count > 1;
 	if ( ! $has_different_translations ) {
 		echo '<div class="notice"><p>All originals have the same translations.</p></div>';
@@ -102,6 +101,12 @@ if ( $performed_search && ! $results ) {
 		echo '</div>';
 	}
 
+	$results_by_translation = [];
+	foreach ( $results as $row ) {
+		$results_by_translation[ $row->translation ][] = $row;
+	}
+
+	$project_cache = [];
 	?>
 	<table class="gp-table consistency-table">
 		<thead>
@@ -113,9 +118,6 @@ if ( $performed_search && ! $results ) {
 		<tbody>
 		<?php
 		foreach ( $translations_unique as $translation_index => $translation ) {
-			$prev_arrow = '';
-			$next_arrow = '';
-
 			$prev_translation = $translations_unique[ $translation_index - 1 ] ?? false;
 			$next_translation = $translations_unique[ $translation_index + 1 ] ?? false;
 
@@ -128,7 +130,7 @@ if ( $performed_search && ! $results ) {
 				: '';
 
 			printf(
-				'<tr id="%s" class="new-translation"><th colspan="2"><strong>%s</strong> %s %s</th></tr>',
+				'<tr id="%s" class="new-translation"><th colspan="2" scope="rowgroup"><strong>%s</strong> %s %s</th></tr>',
 				esc_attr( 't-' . md5( $translation ) ),
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 				esc_translation( $translation ),
@@ -136,26 +138,35 @@ if ( $performed_search && ! $results ) {
 				wp_kses_post( $prev_arrow )
 			);
 
-			foreach ( $results as $result ) {
-				if ( $result->translation !== $translation ) {
-					continue;
-				}
+			$matching_results = $results_by_translation[ $translation ] ?? [];
 
-				$project_name      = $result->project_name;
-				$parent_project_id = $result->project_parent_id;
-				$parent_project    = null;
-				$is_active         = true;
+			foreach ( $matching_results as $result ) {
+				if ( ! isset( $project_cache[ $result->project_id ] ) ) {
+					$p_name      = $result->project_name;
+					$p_parent_id = $result->project_parent_id;
+					$top_parent  = null;
+					$is_active   = true;
 
-				while ( $parent_project_id ) {
-					$parent_project = GP::$project->get( $parent_project_id );
-					if ( ! $parent_project ) {
-						break;
+					while ( $p_parent_id ) {
+						$parent_project = GP::$project->get( $p_parent_id );
+						if ( ! $parent_project ) {
+							break;
+						}
+
+						$top_parent     = $parent_project;
+						$p_parent_id    = $parent_project->parent_project_id;
+						$p_name         = "{$parent_project->name} - {$p_name}";
+						$is_active      = $is_active && $parent_project->active;
 					}
 
-					$parent_project_id = $parent_project->parent_project_id;
-					$project_name      = "{$parent_project->name} - {$project_name}";
-					$is_active         = $is_active && $parent_project->active;
+					$project_cache[ $result->project_id ] = [
+						'name'      => $p_name,
+						'is_active' => $is_active,
+						'css_class' => isset( $top_parent->name ) ? sanitize_title( 'project-' . $top_parent->name ) : '',
+					];
 				}
+
+				$cached_project = $project_cache[ $result->project_id ];
 
 				$original_context = '';
 				if ( $result->original_context ) {
@@ -165,7 +176,7 @@ if ( $performed_search && ! $results ) {
 					);
 				}
 
-				if ( $is_active ) {
+				if ( $cached_project['is_active'] ) {
 					$active_text = '';
 				} else {
 					$active_text = sprintf(
@@ -174,33 +185,38 @@ if ( $performed_search && ! $results ) {
 					);
 				}
 
+				$project_url = sprintf( '/projects/%s/%s/', $result->project_path, $set );
+				$source_url  = sprintf(
+					'/projects/%s/%s/?filters[status]=either&filters[original_id]=%d&filters[translation_id]=%d',
+					$result->project_path,
+					$set,
+					(int) $result->original_id,
+					(int) $result->translation_id
+				);
+
 				printf(
 					'<tr class="%s"><td>%s</td><td>%s</td></tr>',
-					isset( $parent_project->name ) ? esc_attr( sanitize_title( 'project-' . $parent_project->name ) ) : '',
+					esc_attr( $cached_project['css_class'] ),
 					sprintf(
 						'<div class="string">%s%s</div>
-						<div class="meta">Project: <a href="/projects/%s/%s/">%s</a>%s</div>',
+						<div class="meta">Project: <a href="%s">%s</a>%s</div>',
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						esc_translation( $result->original_singular ),
 						wp_kses_post( $original_context ),
-						esc_attr( $result->project_path ),
-						esc_attr( $set ),
-						esc_html( $project_name ),
+						esc_url( $project_url ),
+						esc_html( $cached_project['name'] ),
 						wp_kses_post( $active_text )
-				),
+					),
 					sprintf(
 						'<div class="string%s">%s</div>
 						<div class="meta">
-							<a href="/projects/%s/%s/?filters[status]=either&filters[original_id]=%d&filters[translation_id]=%d">Source</a> |
+							<a href="%s">Source</a> |
 							Added: %s
 						</div>',
 						$locale_is_rtl ? ' rtl' : '',
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
 						esc_translation( $result->translation ),
-						esc_attr( $result->project_path ),
-						esc_attr( $set ),
-						(int) $result->original_id,
-						(int) $result->translation_id,
+						esc_url( $source_url ),
 						esc_html( $result->translation_added )
 					)
 				);
