@@ -301,7 +301,7 @@ What's running:
 
 `freescout.wordpress.net/Modules/` is mounted as FreeScout's `Modules/` folder, like production's checkout. Every start switches all modules on and runs `freescout:after-app-update`, as production does after a deploy. After switching branches, run `npm run freescout:setup`: FreeScout errors on every page while it still has a removed module cached.
 
-Setup also adds sample data, set up like the HelpScout helpdesk but with made-up people and conversations. It adds the **Learn WordPress** mailbox, without incoming email. It also adds four made-up agents and 34 made-up conversations in Plugins, Themes and Learn WordPress from the last eight weeks, with replies, notes, and closed, pending, and spam conversations. It only adds what's missing, and only to a FreeScout on 127.0.0.1 or localhost.
+Setup also adds sample data, set up like the HelpScout helpdesk but with made-up people and conversations. It adds the **Learn WordPress** mailbox, without incoming email. It also adds four made-up agents and 39 made-up conversations in Plugins, Themes and Learn WordPress from the last eight weeks, with replies, notes, and closed, pending, and spam conversations. Five of the Plugins ones are plugin reviews, one for each state of the Plugin Review panel: issues waiting for an update, a rename, an ownership check, an update uploaded, and an approval. It only adds what's missing, and only to a FreeScout on 127.0.0.1 or localhost.
 
 **Premium modules:** to try them, copy them in from a clone of the private [freescout-paid-modules](https://github.com/WordPress/freescout-paid-modules) repository. They must never be committed here, so exclude each one first. From `environments/`:
 
@@ -321,7 +321,7 @@ Setup switches them on, and adds sample data for each one that's there, with Hel
 - **Tags:** some of HelpScout's tags and colors, on conversations.
 - **Custom Fields:** the Learn WordPress fields, with values. Plugins and Themes have none.
 - **Saved Replies:** some of HelpScout's saved replies in Plugins and Themes, with short made-up texts.
-- **Teams:** the Plugin, Themes and Learn teams, with conversations assigned to some. Names longer than FreeScout's 20 characters are shortened.
+- **Teams:** the Plugin, Themes and Learn teams, with conversations assigned to some. The admin is in Plugin Reviews, so they get the Plugin Review panel. Names longer than FreeScout's 20 characters are shortened.
 - **Custom Folders:** "New WordPress" in Plugins, for replies to new WordPress version emails.
 - **Mentions:** a note in which one agent mentions another.
 - **Workflows:** some of HelpScout's workflows, with made-up rules. Automatic ones only run for new email with matching subjects, or a tag an agent adds; none run for the sample conversations.
