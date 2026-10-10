@@ -426,16 +426,8 @@ class Locale extends GP_Route {
 		$editors['project']   = array_unique( array_map( 'intval', $editors['project'] ) );
 		$editors['inherited'] = array_unique( array_map( 'intval', $editors['inherited'] ) );
 
-		// Collect project IDs: parent project and all active sub-projects.
-		$sub_projects_sql = "
-			SELECT *
-			FROM {$wpdb->gp_projects}
-			WHERE
-				parent_project_id = %d
-				AND active = 1
-		";
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$sub_projects = $project->many( $sub_projects_sql, $project->id );
+		// Collect project IDs: parent project, active sub-projects, and sub-sub-projects (e.g. wp/dev/admin/network).
+		$sub_projects = $this->get_active_sub_projects( $project, true );
 		$projects     = [ (int) $project->id => $project ];
 
 		foreach ( $sub_projects as $sub_project ) {
