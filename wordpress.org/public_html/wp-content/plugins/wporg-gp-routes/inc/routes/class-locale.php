@@ -485,9 +485,12 @@ class Locale extends GP_Route {
 				$editor_ids[ (int) $editor_id ] = true;
 			}
 
-			uasort( $locale_contributors['editors'][ $editor_source ], function( $a, $b ) {
-				return strcasecmp( $a->display_name, $b->display_name );
-			} );
+			uasort(
+				$locale_contributors['editors'][ $editor_source ],
+				function ( $a, $b ) {
+					return strcasecmp( $a->display_name, $b->display_name );
+				}
+			);
 		}
 
 		unset( $editors );
