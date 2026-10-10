@@ -444,24 +444,34 @@ class Plugin {
 	 */
 	public function log_imported_translations() {
 		global $wpdb;
-		$source = $this->imported_source;
-		if ( empty( $source ) || empty( $this->imported_translation_ids ) ) {
+
+		$source          = $this->imported_source;
+		$translation_ids = $this->imported_translation_ids;
+
+		$this->imported_source          = '';
+		$this->imported_translation_ids = array();
+
+		if ( empty( $source ) || empty( $translation_ids ) ) {
 			return;
 		}
 
-		$sql        = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
-		$sql_vars   = array();
-		$sql_values = array_map(
-			function( $translation_id ) use ( $source, &$sql_vars ) {
-				$sql_vars[] = $translation_id;
-				$sql_vars[] = $source;
-				return '( "translation", %d, "source", %s )';
-			},
-			$this->imported_translation_ids
-		);
-		$sql       .= implode( ', ', $sql_values );
-		$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
+		$chunks = array_chunk( $translation_ids, 500 );
 
+		foreach ( $chunks as $chunk ) {
+			$sql_vars   = array();
+			$sql_values = array_map(
+				function( $translation_id ) use ( $source, &$sql_vars ) {
+					$sql_vars[] = $translation_id;
+					$sql_vars[] = $source;
+					return '( "translation", %d, "source", %s )';
+				},
+				$chunk
+			);
+
+			$sql  = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
+			$sql .= implode( ', ', $sql_values );
+			$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
+		}
 	}
 
 	/**
