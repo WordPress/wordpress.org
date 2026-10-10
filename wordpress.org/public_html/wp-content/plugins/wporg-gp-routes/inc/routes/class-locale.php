@@ -772,8 +772,19 @@ class Locale extends GP_Route {
 			'filter'          => false,
 			'without_editors' => false,
 		);
-		$r = wp_parse_args( $args, $defaults );
-		extract( $r, EXTR_SKIP );
+
+		[
+			'per_page'        => $per_page,
+			'page'            => $page,
+			'search'          => $search,
+			'set_slug'        => $set_slug,
+			'locale'          => $locale,
+			'filter'          => $filter,
+			'without_editors' => $without_editors,
+		] = wp_parse_args( $args, $defaults );
+
+		$page     = max( 1, (int) $page );
+		$per_page = (int) $per_page;
 
 		$limit_sql = '';
 		if ( $per_page ) {
@@ -1003,11 +1014,16 @@ class Locale extends GP_Route {
 			$projects[ $project->id ] = $project;
 		}
 
-		return array(
-			'pages' => compact( 'pages', 'page', 'per_page', 'results' ),
+		return [
+			'pages' => [
+				'pages'    => $pages,
+				'page'     => $page,
+				'per_page' => $per_page,
+				'results'  => $results,
+			],
 			'projects' => $projects,
-			'filter' => $filter,
-		);
+			'filter'   => $filter,
+		];
 	}
 
 	/**
