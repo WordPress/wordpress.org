@@ -396,7 +396,7 @@ class Locale extends GP_Route {
 					AND `locale` IN (%s, 'all-locales')
 				";
 
-			$inherited_editors_args = array_merge( $parent_ids, [$locale_slug ] );
+			$inherited_editors_args = array_merge( $parent_ids, [ $locale_slug ] );
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$inherited_editors = (array) $wpdb->get_col( $wpdb->prepare( $inherited_editors_sql, $inherited_editors_args ) );
 
