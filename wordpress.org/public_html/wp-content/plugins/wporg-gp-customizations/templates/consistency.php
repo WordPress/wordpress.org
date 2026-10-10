@@ -105,18 +105,19 @@ if ( $performed_search && ! $results ) {
 	?>
 	<table class="gp-table consistency-table">
 		<thead>
-			<th>Original</th>
-			<th>Translation</th>
+			<tr>
+				<th>Original</th>
+				<th>Translation</th>
+			</tr>
 		</thead>
 		<tbody>
 		<?php
-		$translations = array_keys( $translations_unique_counts );
-		foreach ( $translations as $translation_index => $translation ) {
+		foreach ( $translations_unique as $translation_index => $translation ) {
 			$prev_arrow = '';
 			$next_arrow = '';
 
-			$prev_translation = $translations[ $translation_index - 1 ] ?? false;
-			$next_translation = $translations[ $translation_index + 1 ] ?? false;
+			$prev_translation = $translations_unique[ $translation_index - 1 ] ?? false;
+			$next_translation = $translations_unique[ $translation_index + 1 ] ?? false;
 
 			if ( ! $prev_translation ) {
 				$next_arrow = '<a class="anchor-jumper with-tooltip" aria-label="Go to next translation" href="' . esc_attr( '#t-' . md5( $next_translation ) ) . '">&darr;</a>';
@@ -143,7 +144,7 @@ if ( $performed_search && ! $results ) {
 
 				$project_name = $result->project_name;
 				$parent_project_id = $result->project_parent_id;
-				$is_active = $result->active;
+				$is_active = true;
 				while ( $parent_project_id ) {
 					$parent_project = GP::$project->get( $parent_project_id );
 					$parent_project_id = $parent_project->parent_project_id;
@@ -211,7 +212,9 @@ if ( $performed_search && ! $results ) {
 	jQuery( document ).ready( function( $ ) {
 		$( '#toggle-translations-unique' ).on( 'click', function( event ) {
 			event.preventDefault();
-			$( '.translations-unique' ).toggleClass( 'hidden' );
+			var $list = $( '.translations-unique' );
+			$list.toggleClass( 'hidden' );
+			$( this ).text( $list.hasClass( 'hidden' ) ? 'View' : 'Hide' );
 		});
 
 	});
