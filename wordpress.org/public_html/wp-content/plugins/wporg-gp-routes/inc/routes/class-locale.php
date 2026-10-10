@@ -680,37 +680,67 @@ class Locale extends GP_Route {
 	private function get_active_sub_projects( $project, $with_sub_projects = false ) {
 		global $wpdb;
 
-		$_projects = $project->many( "
+		static $cache = [];
+
+		$cache_key = (int) $project->id . ':' . (int) $with_sub_projects;
+		if ( isset( $cache[ $cache_key ] ) ) {
+			return $cache[ $cache_key ];
+		}
+
+		$projects_sql = "
 			SELECT *
 			FROM {$wpdb->gp_projects}
 			WHERE
 				parent_project_id = %d
 				AND active = 1
 			ORDER BY id ASC
-		", $project->id );
+		";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$_projects = $project->many( $projects_sql, $project->id );
 
-		$projects = array();
-		foreach ( $_projects as $project ) {
-			$projects[ $project->id ] = $project;
+		$projects = [];
 
-			if ( $with_sub_projects ) {
-				// e.g. wp/dev/admin/network
-				$sub_projects = $project->many( "
-					SELECT *
-					FROM {$wpdb->gp_projects}
-					WHERE
-						parent_project_id = %d
-						AND active = 1
-					ORDER BY id ASC
-				", $project->id );
+		if ( $with_sub_projects && ! empty( $_projects ) ) {
+			$parent_ids     = wp_list_pluck( $_projects, 'id' );
+			$parent_ids_sql = implode( ', ', array_map( 'intval', $parent_ids ) );
 
-				foreach ( $sub_projects as $sub_project ) {
-					$projects[ $sub_project->id ] = $sub_project;
+			$sub_sub_projects_sql = "
+				SELECT *
+				FROM {$wpdb->gp_projects}
+				WHERE
+					parent_project_id IN ( {$parent_ids_sql} )
+					AND active = 1
+				ORDER BY id ASC
+			";
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$sub_sub_projects = $project->many( $sub_sub_projects_sql );
+
+			// Group child projects by parent.
+			$children_by_parent = [];
+			foreach ( $sub_sub_projects as $child ) {
+				$children_by_parent[ (int) $child->parent_project_id ][] = $child;
+			}
+			unset( $sub_sub_projects );
+
+			foreach ( $_projects as $sub_project ) {
+				$sub_id              = (int) $sub_project->id;
+				$projects[ $sub_id ] = $sub_project;
+
+				if ( isset( $children_by_parent[ $sub_id ] ) ) {
+					foreach ( $children_by_parent[ $sub_id ] as $child ) {
+						$projects[ (int) $child->id ] = $child;
+					}
 				}
-				unset( $sub_projects);
+			}
+			unset( $children_by_parent );
+		} else {
+			foreach ( $_projects as $sub_project ) {
+				$projects[ (int) $sub_project->id ] = $sub_project;
 			}
 		}
 		unset( $_projects );
+
+		$cache[ $cache_key ] = $projects;
 
 		return $projects;
 	}
