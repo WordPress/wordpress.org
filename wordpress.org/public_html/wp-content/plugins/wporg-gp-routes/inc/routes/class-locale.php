@@ -604,7 +604,7 @@ class Locale extends GP_Route {
 				AND `t`.`user_id` IS NOT NULL AND `t`.`user_id` != 0
 				AND `t`.`status` IN( 'current', 'waiting', 'fuzzy' )
 			GROUP BY `t`.`user_id`, `o`.`project_id`
-		" );
+		";
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$contributors = $wpdb->get_results( $contributors_sql );
 
