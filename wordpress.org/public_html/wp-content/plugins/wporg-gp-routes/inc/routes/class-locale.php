@@ -422,20 +422,12 @@ class Locale extends GP_Route {
 		// Get the translation editors of the project.
 		$editors = $this->get_translation_editors( $project, $locale_slug );
 
-		// Get the contributors of the project.
-		$contributors = [];
+		// Deduplicate editor IDs before processing to avoid redundant iterations.
+		$editors['project']   = array_unique( array_map( 'intval', $editors['project'] ) );
+		$editors['inherited'] = array_unique( array_map( 'intval', $editors['inherited'] ) );
 
-		// In case the project has a translation set, like /wp-themes/twentysixteen.
-		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $set_slug, $locale_slug );
-		if ( $translation_set ) {
-			$contributors = array_merge(
-				$contributors,
-				$this->get_locale_contributors_by_translation_set( $translation_set )
-			);
-		}
-
-		// Check if the project has sub-projects, like /wp-plugins/wordpress-importer.
-		$sub_projects = $wpdb->get_col( $wpdb->prepare( "
+		// Collect project IDs: parent project and all active sub-projects.
+		$sub_project_ids = $wpdb->get_col( $wpdb->prepare( "
 			SELECT id
 			FROM {$wpdb->gp_projects}
 			WHERE
@@ -443,18 +435,26 @@ class Locale extends GP_Route {
 				AND active = 1
 		", $project->id ) );
 
-		foreach ( $sub_projects as $sub_project ) {
-			$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $sub_project, $set_slug, $locale_slug );
-			if ( ! $translation_set ) {
-				continue;
-			}
+		$all_project_ids = array_merge( [ (int) $project->id ], array_map( 'intval', $sub_project_ids ) );
+		$project_ids_sql = implode( ', ', $all_project_ids );
 
-			$contributors = array_merge(
-				$contributors,
-				$this->get_locale_contributors_by_translation_set( $translation_set )
-			);
+		// Batch-fetch all matching translation set IDs in a single query.
+		$translation_set_ids = $wpdb->get_col( $wpdb->prepare( "
+			SELECT id
+			FROM {$wpdb->gp_translation_sets}
+			WHERE
+				project_id IN ( {$project_ids_sql} )
+				AND slug = %s
+				AND locale = %s
+		", $set_slug, $locale_slug ) );
+
+		// Batch-fetch contributors across all translation sets.
+		$contributors = [];
+		if ( ! empty( $translation_set_ids ) ) {
+			$contributors = $this->get_locale_contributors_by_translation_set( $translation_set_ids );
 		}
 
+		// Collect all user IDs and prime user caches in a single request.
 		$user_ids = array_merge(
 			$editors['project'],
 			$editors['inherited'],
@@ -495,71 +495,62 @@ class Locale extends GP_Route {
 
 		unset( $editors );
 
-		$projects = [];
+		// Seed the known parent project object to avoid redundant GP::$project->get() calls.
+		$projects = [
+			(int) $project->id => $project,
+		];
 
-		// Get the names of the contributors.
+		// Aggregate contributors and detailed counts.
 		foreach ( $contributors as $contributor ) {
-			if ( isset( $locale_contributors['contributors'][ $contributor->user_id ] ) ) {
-				// Update last updated and counts per status.
-				$locale_contributors['contributors'][ $contributor->user_id ]->last_update = max(
-					$locale_contributors['contributors'][ $contributor->user_id ]->last_update,
-					$contributor->last_update
-				);
+			$user_id    = (int) $contributor->user_id;
+			$project_id = (int) $contributor->project_id;
 
-				$locale_contributors['contributors'][ $contributor->user_id ]->total_count   += $contributor->total_count;
-				$locale_contributors['contributors'][ $contributor->user_id ]->current_count += $contributor->current_count;
-				$locale_contributors['contributors'][ $contributor->user_id ]->waiting_count += $contributor->waiting_count;
-				$locale_contributors['contributors'][ $contributor->user_id ]->fuzzy_count   += $contributor->fuzzy_count;
+			if ( ! isset( $projects[ $project_id ] ) ) {
+				$projects[ $project_id ] = GP::$project->get( $project_id );
+			}
 
-				if ( ! isset( $projects[ $contributor->project_id ] ) ) {
-					$projects[ $contributor->project_id ] = GP::$project->get( $contributor->project_id );
+			$detail = (object) [
+				'total_count'   => (int) $contributor->total_count,
+				'current_count' => (int) $contributor->current_count,
+				'waiting_count' => (int) $contributor->waiting_count,
+				'fuzzy_count'   => (int) $contributor->fuzzy_count,
+				'project'       => $projects[ $project_id ],
+			];
+
+			if ( ! isset( $locale_contributors['contributors'][ $user_id ] ) ) {
+				$user = get_user_by( 'id', $user_id );
+				if ( ! $user ) {
+					continue;
 				}
 
-				$locale_contributors['contributors'][ $contributor->user_id ]->detailed[ $contributor->project_id ] = (object) [
-					'total_count'   => $contributor->total_count,
-					'current_count' => $contributor->current_count,
-					'waiting_count' => $contributor->waiting_count,
-					'fuzzy_count'   => $contributor->fuzzy_count,
-					'project'       => $projects[ $contributor->project_id ],
-				];
-
-				continue;
-			}
-
-			$user = get_user_by( 'id', $contributor->user_id );
-			if ( ! $user ) {
-				continue;
-			}
-
-			if ( ! isset( $projects[ $contributor->project_id ] ) ) {
-				$projects[ $contributor->project_id ] = GP::$project->get( $contributor->project_id );
-			}
-
-			$locale_contributors['contributors'][ $contributor->user_id ] = (object) array(
-				'login'         => $user->user_login,
-				'nicename'      => $user->user_nicename,
-				'display_name'  => $user->display_name ?: $user->user_nicename,
-				'email'         => $user->user_email,
-				'last_update'   => $contributor->last_update,
-				'total_count'   => $contributor->total_count,
-				'current_count' => $contributor->current_count,
-				'waiting_count' => $contributor->waiting_count,
-				'fuzzy_count'   => $contributor->fuzzy_count,
-				'detailed'      => [
-					$contributor->project_id => (object) [
-						'total_count'   => $contributor->total_count,
-						'current_count' => $contributor->current_count,
-						'waiting_count' => $contributor->waiting_count,
-						'fuzzy_count'   => $contributor->fuzzy_count,
-						'project'       => $projects[ $contributor->project_id ],
+				$locale_contributors['contributors'][ $user_id ] = (object) array(
+					'login'         => $user->user_login,
+					'nicename'      => $user->user_nicename,
+					'display_name'  => $user->display_name ?: $user->user_nicename,
+					'email'         => $user->user_email,
+					'last_update'   => $contributor->last_update,
+					'total_count'   => (int) $contributor->total_count,
+					'current_count' => (int) $contributor->current_count,
+					'waiting_count' => (int) $contributor->waiting_count,
+					'fuzzy_count'   => (int) $contributor->fuzzy_count,
+					'detailed'      => [
+						$project_id => $detail,
 					],
-				],
-				'is_editor'     => isset( $editor_ids[ (int) $user->ID ] ),
-			);
+					'is_editor'     => isset( $editor_ids[ $user_id ] ),
+				);
+			} else {
+				$entry = $locale_contributors['contributors'][ $user_id ];
+				$entry->last_update   = max( $entry->last_update, $contributor->last_update );
+				$entry->total_count   += (int) $contributor->total_count;
+				$entry->current_count += (int) $contributor->current_count;
+				$entry->waiting_count += (int) $contributor->waiting_count;
+				$entry->fuzzy_count   += (int) $contributor->fuzzy_count;
+				$entry->detailed[ $project_id ] = $detail;
+			}
 		}
 		unset( $contributors, $editor_ids );
 
-		uasort( $locale_contributors['contributors'], function( $a, $b ) {
+		uasort( $locale_contributors['contributors'], function ( $a, $b ) {
 			return $b->total_count <=> $a->total_count;
 		} );
 
@@ -567,15 +558,29 @@ class Locale extends GP_Route {
 	}
 
 	/**
-	 * Retrieves contributors of a translation set.
+	 * Retrieves contributors of translation sets.
 	 *
-	 * @param GP_Translation_Set $translation_set A translation set.
-	 * @return array List of user IDs.
+	 * @param GP_Translation_Set|int|array $translation_sets Translation set object, ID, or list of IDs.
+	 * @return array List of contributor aggregated rows.
 	 */
-	private function get_locale_contributors_by_translation_set( $translation_set ) {
+	private function get_locale_contributors_by_translation_set( $translation_sets ) {
 		global $wpdb;
 
-		$contributors = $wpdb->get_results( $wpdb->prepare( "
+		if ( $translation_sets instanceof GP_Translation_Set ) {
+			$set_ids = [ (int) $translation_sets->id ];
+		} elseif ( is_array( $translation_sets ) ) {
+			$set_ids = array_filter( array_map( 'intval', $translation_sets ) );
+		} else {
+			$set_ids = [ (int) $translation_sets ];
+		}
+
+		if ( empty( $set_ids ) ) {
+			return [];
+		}
+
+		$set_ids_sql = implode( ', ', $set_ids );
+
+		$contributors = $wpdb->get_results( "
 			SELECT
 				`t`.`user_id` as `user_id`,
 				`o`.`project_id` as `project_id`,
@@ -588,11 +593,11 @@ class Locale extends GP_Route {
 			JOIN `{$wpdb->gp_originals}` as `o`
 				ON `t`.`original_id` = `o`.`id` AND `o`.`status` = '+active'
 			WHERE
-				`t`.`translation_set_id` = %d
+				`t`.`translation_set_id` IN ( {$set_ids_sql} )
 				AND `t`.`user_id` IS NOT NULL AND `t`.`user_id` != 0
 				AND `t`.`status` IN( 'current', 'waiting', 'fuzzy' )
-			GROUP BY `t`.`user_id`
-		", $translation_set->id ) );
+			GROUP BY `t`.`user_id`, `o`.`project_id`
+		" );
 
 		return $contributors;
 	}
