@@ -237,15 +237,8 @@ class Consistency extends GP_Route {
 	 * @param object $b Second object to compare.
 	 * @return int Less than 0 if $a is less than $b, 0 if equal, greater than 0 otherwise.
 	 */
-	public function _sort_callback( $a, $b ) {
-		$sort = strnatcmp( (string) $a->translation, (string) $b->translation );
-		if ( 0 === $sort ) {
-			$sort = strnatcmp( (string) $a->original_context, (string) $b->original_context );
-		}
-		if ( 0 === $sort ) {
-			$sort = strnatcmp( (string) $a->project_path, (string) $b->project_path );
-		}
-
-		return $sort;
+	public function _sort_callback( $a, $b ): int {
+		return strnatcmp( (string) $a->translation, (string) $b->translation )
+			?: strnatcmp( (string) $a->original_context, (string) $b->original_context )
+			?: strnatcmp( (string) $a->project_path, (string) $b->project_path );
 	}
-}
