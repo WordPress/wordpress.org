@@ -1,0 +1,21 @@
+{
+    "name": "WP.org Plugin Review",
+    "alias": "wporgpluginreview",
+    "img": "/modules/wporgpluginreview/img/icon.svg",
+    "description": "Shows the latest plugin review of a conversation in its sidebar: its details, flags, and issues, from the review emails' Review ID lines.",
+    "version": "1.0.0",
+    "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgPluginReview",
+    "author": "WordPress.org",
+    "authorUrl": "https://wordpress.org/",
+    "requiredAppVersion": "1.8.243",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\WPOrgPluginReview\\Providers\\WPOrgPluginReviewServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

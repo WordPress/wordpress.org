@@ -271,6 +271,7 @@ final class Importer {
 				$conversation->save();
 				$conversation->timestamps = true;
 				self::update_counters( $conversation->mailbox );
+				$this->announce( $conversation, $helpscout_id );
 
 				return self::UPDATED;
 			}
@@ -348,6 +349,7 @@ final class Importer {
 					$record = array(
 						'helpscout_number' => (int) ( $source['number'] ?? 0 ),
 						'conversation_id'  => (int) $conversation->id,
+						'mailbox_id'       => (int) $conversation->mailbox_id,
 						'creator_id'       => 'user' === ( $source['createdBy']['type'] ?? '' ) ? self::person_id( $source['createdBy'] ) : null,
 						'assignee_id'      => self::person_id( $source['assignee'] ?? null ),
 						'closer_id'        => self::person_id( $source['closedByUser'] ?? null ),
@@ -392,6 +394,8 @@ final class Importer {
 			self::update_counters( $other_mailbox );
 		}
 
+		$this->announce( $conversation, $helpscout_id );
+
 		return $imported ? self::UPDATED : self::IMPORTED;
 	}
 
@@ -411,6 +415,24 @@ final class Importer {
 			}
 
 			$folder->updateCounters();
+		}
+	}
+
+	/**
+	 * Tells other modules a conversation was imported or updated, as that happens without core's events: WPOrgPluginReview
+	 * indexes its review emails.
+	 *
+	 * Never throws: the conversation is imported by now.
+	 *
+	 * @param Conversation $conversation Conversation.
+	 * @param int          $helpscout_id HelpScout's ID for it.
+	 * @return void
+	 */
+	private function announce( Conversation $conversation, int $helpscout_id ): void {
+		try {
+			\Eventy::action( 'wporghelpscoutimport.conversation_imported', $conversation, $helpscout_id );
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgHelpScoutImport] Could not announce conversation ' . $conversation->id . ': ' . $e->getMessage() );
 		}
 	}
 

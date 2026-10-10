@@ -14,6 +14,20 @@ $wp_init_host = 'https://wordpress.org/plugins/';
 require __DIR__ . '/common.php';
 
 /**
+ * Badge tones of plugins' statuses.
+ *
+ * @var string[]
+ */
+const PLUGIN_STATUS_TONES = array(
+	'rejected' => 'error',
+	'closed'   => 'error',
+	'disabled' => 'error',
+	'pending'  => 'warning',
+	'new'      => 'warning',
+	'approved' => 'success',
+);
+
+/**
  * Gets the plugins and themes panel.
  *
  * @param object $request Request payload.
@@ -33,7 +47,7 @@ function render_plugins_themes( object $request ): array {
 	);
 
 	// Display plugins first in the plugins inbox.
-	if ( str_starts_with( $mailbox_email, 'plugins' ) ) {
+	if ( str_starts_with( strtolower( $mailbox_email ), 'plugins' ) ) {
 		$sites           = array_reverse( $sites );
 		$repo_post_types = array_reverse( $repo_post_types );
 	}
@@ -174,81 +188,33 @@ function render_items( array $post_ids, string $mailbox_email ): array {
 	$items = array();
 
 	// Reviews are the plugins team's; other mailboxes' conversations can name any plugin.
-	$show_review = str_starts_with( $mailbox_email, 'plugins' );
+	$show_review = str_starts_with( strtolower( $mailbox_email ), 'plugins' );
 
 	foreach ( $post_ids as $post_id ) {
 		$post          = get_post( (int) $post_id );
 		$type          = ( 'plugin' === $post->post_type ) ? 'plugin' : 'theme';
 		$status        = '';
 		$tone          = 'neutral';
-		$reviewer      = false;
+		$reviewer      = '';
 		$last_modified = $post->post_modified_gmt;
-		$download_link = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
+		$download_link = 'plugin' === $type ? get_plugin_download_url( $post, $show_review ) : "https://downloads.wordpress.org/theme/{$post->post_name}.latest-stable.zip";
 
 		if ( 'plugin' === $type ) {
-			// Only a review in progress has someone on it; the assignment stays after it's done.
-			if ( $show_review && $post->assigned_reviewer && in_array( $post->post_status, array( 'new', 'pending' ), true ) ) {
-				$reviewer_user = get_user_by( 'id', (int) $post->assigned_reviewer );
-				if ( $reviewer_user ) {
-					$reviewer = $reviewer_user->display_name ? $reviewer_user->display_name : $reviewer_user->user_login;
-				}
-			}
+			$reviewer = $show_review ? get_assigned_reviewer( $post ) : '';
 
 			// Prefer the last_updated post meta.
 			$last_modified = $post->last_updated ? $post->last_updated : $last_modified;
-
-			// Get the ZIPs attached, link to the latest for pending/new. Unreleased, so only for reviews.
-			if ( in_array( $post->post_status, array( 'new', 'pending' ), true ) ) {
-				$attachments   = $show_review ? get_posts(
-					array(
-						'post_parent'    => $post->ID,
-						'post_type'      => 'attachment',
-						'orderby'        => 'post_date',
-						'order'          => 'DESC',
-						'posts_per_page' => 1,
-					)
-				) : array();
-				$download_link = $attachments ? (string) wp_get_attachment_url( $attachments[0]->ID ) : '';
-			}
-
-			// Append Info URL.
-			if (
-				$download_link &&
-				$show_review &&
-				class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' )
-			) {
-				$download_link = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $download_link, $post );
-			}
 		}
 
 		$last_updated = (int) strtotime( $last_modified );
 
-		switch ( $post->post_status ) {
-			// Plugins.
-			case 'rejected':
-				$status        = 'Rejected';
-				$tone          = 'error';
-				$download_link = ''; // No zips exist for rejected plugins.
-				break;
-			case 'closed':
-			case 'disabled':
-				$status = ucwords( $post->post_status );
-				// This is not perfect, but close enough.
-				if ( $show_review && $post->_close_reason ) {
-					$status .= ': ' . ucwords( str_replace( '-', ' ', $post->_close_reason ) );
-				}
-				$tone = 'error';
-				break;
-			case 'pending':
-			case 'new':
-				$status = 'In Review';
-				$tone   = 'warning';
-				break;
-			case 'approved':
-				$status = 'Approved';
-				$tone   = 'success';
-				break;
+		// Published plugins and themes get no badge.
+		if ( 'plugin' === $type && isset( PLUGIN_STATUS_TONES[ $post->post_status ] ) ) {
+			$status = get_plugin_status_label( $post, $show_review );
+			$tone   = PLUGIN_STATUS_TONES[ $post->post_status ];
+		}
 
+		switch ( $post->post_status ) {
 			// Themes.
 			case 'draft':
 				$status        = 'In Review or Rejected';

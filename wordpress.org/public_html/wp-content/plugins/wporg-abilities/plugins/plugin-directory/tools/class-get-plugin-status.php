@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace WordPressdotorg\Abilities\Plugins\Plugin_Directory\Tools;
 
 use WordPressdotorg\Abilities\Plugins\Plugin_Directory\Ability_Base;
+use WordPressdotorg\Plugin_Directory\Clients\FreeScout as FreeScout_Client;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout as HelpScout_Client;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -232,14 +233,14 @@ class Get_Plugin_Status extends Ability_Base {
 	}
 
 	/**
-	 * Get review feedback from HelpScout conversation threads.
+	 * Get review feedback from the review conversation's threads, in FreeScout or HelpScout.
 	 *
 	 * @param \WP_Post $post         The plugin post.
 	 * @param bool     $full_history Whether to return the full conversation history.
 	 * @return array
 	 */
 	private static function get_feedback( \WP_Post $post, bool $full_history = false ): array {
-		if ( ! class_exists( Helpscout::class ) || ! class_exists( HelpScout_Client::class ) ) {
+		if ( ! class_exists( Helpscout::class ) || ! class_exists( HelpScout_Client::class ) || ! class_exists( FreeScout_Client::class ) ) {
 			return array();
 		}
 
@@ -263,7 +264,10 @@ class Get_Plugin_Status extends Ability_Base {
 				continue;
 			}
 
-			$threads = self::get_conversation_threads( (int) $email->id );
+			// The conversation is in the helpdesk it was written in: FreeScout, or HelpScout until it moved.
+			$threads = empty( $email->freescout )
+				? self::get_conversation_threads( (int) $email->id )
+				: self::get_freescout_threads( (int) $email->id );
 
 			if ( ! $threads ) {
 				continue;
@@ -389,6 +393,49 @@ class Get_Plugin_Status extends Ability_Base {
 		}
 
 		$threads = $response->_embedded->threads;
+
+		set_site_transient( $cache_key, $threads, 5 * MINUTE_IN_SECONDS );
+
+		return $threads;
+	}
+
+	/**
+	 * Fetch conversation threads from FreeScout, with short-lived caching, shaped like HelpScout's.
+	 *
+	 * FreeScout's API & Webhooks module embeds a conversation's threads under `_embedded.threads`, newest first, like
+	 * HelpScout's API, with the same `type`, `body`, and `createdAt` fields. Its types read the same too: `customer` is
+	 * the author, an agent's `message` is a reviewer's, and `note` and `lineitem` are left out by get_feedback(). The
+	 * module lists drafts as well, which the author hasn't been sent; only `published` threads are kept.
+	 *
+	 * @param int $conversation_id The FreeScout conversation ID.
+	 * @return array|null Array of thread objects or null on failure.
+	 */
+	private static function get_freescout_threads( int $conversation_id ): ?array {
+		$cache_key = 'freescout_threads_' . $conversation_id;
+		$cached    = get_site_transient( $cache_key );
+
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
+		$response = FreeScout_Client::api( 'conversations/' . $conversation_id, array( 'embed' => 'threads' ), 'GET', $response_code );
+
+		if ( 200 !== $response_code || empty( $response['_embedded']['threads'] ) || ! is_array( $response['_embedded']['threads'] ) ) {
+			return null;
+		}
+
+		$threads = array();
+		foreach ( $response['_embedded']['threads'] as $thread ) {
+			if ( ! is_array( $thread ) || 'published' !== ( $thread['state'] ?? '' ) ) {
+				continue;
+			}
+
+			$threads[] = (object) array(
+				'type'      => (string) ( $thread['type'] ?? '' ),
+				'body'      => (string) ( $thread['body'] ?? '' ),
+				'createdAt' => (string) ( $thread['createdAt'] ?? '' ),
+			);
+		}
 
 		set_site_transient( $cache_key, $threads, 5 * MINUTE_IN_SECONDS );
 

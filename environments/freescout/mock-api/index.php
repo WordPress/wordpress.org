@@ -88,6 +88,43 @@ if ( 'webhook.php' === $endpoint ) {
 	respond( 200, new \stdClass() );
 }
 
+if ( 'replace-copies.php' === $endpoint ) {
+	$copies = (array) ( $request->copies ?? array() );
+	file_put_contents( 'php://stderr', sprintf( "[replace-copies] %d conversations\n", count( $copies ) ) );
+	respond( 200, array( 'replaced' => count( $copies ) ) );
+}
+
+// Like plugin-review.php: any plugin ID is a plugin in review, in the plugins team's mailbox.
+if ( 'plugin-review.php' === $endpoint ) {
+	$plugin_id = (int) ( $request->plugin_id ?? 0 );
+	if ( ! $plugin_id || ! str_starts_with( (string) ( $request->mailbox->email ?? '' ), 'plugins' ) ) {
+		respond( 200, array( 'plugin' => null ) );
+	}
+
+	respond(
+		200,
+		array(
+			'plugin' => array(
+				'id'           => $plugin_id,
+				'name'         => 'Mock Plugin Renamed',
+				'slug'         => 'mock-plugin-renamed',
+				'status'       => 'pending',
+				'status_label' => 'In Review',
+				'released'     => false,
+				'scans_url'    => '',
+				'edit_url'     => 'https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=' . $plugin_id,
+				'page_url'     => 'https://wordpress.org/plugins/mock-plugin-renamed/',
+				'download_url' => 'https://wordpress.org/plugins/wp-content/uploads/mock-plugin.zip#wporgapi:https://wordpress.org/plugins/wp-json/plugins/v1/plugin-review/' . $plugin_id . '-0123456789abcdef0123456789abcdef/',
+				'submitter'    => array(
+					'username' => 'mockauthor',
+					'email'    => 'author@example.org',
+				),
+				'reviewer'     => 'Mock Reviewer',
+			),
+		)
+	);
+}
+
 /*
  * What the real endpoints sent for obenland's WordPress.org account, whatever the sender, though searches are for the
  * sender's email, as they are there. Download links lose their review info, and the forum note and privacy request

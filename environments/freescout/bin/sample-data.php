@@ -33,6 +33,7 @@ use Modules\SavedReplies\Entities\SavedReply;
 use Modules\Tags\Entities\Tag;
 use Modules\Teams\Providers\TeamsServiceProvider;
 use Modules\Workflows\Entities\Workflow;
+use Modules\WPOrgPluginReview\Services\Review;
 
 require '/var/www/html/vendor/autoload.php';
 
@@ -338,6 +339,71 @@ function conversation_data(): array {
 			'status'   => Conversation::STATUS_SPAM,
 			'threads'  => array(
 				array( 'customer', 'Buy 10,000 backlinks today and rank first on every search engine.', 0 ),
+			),
+		),
+		array(
+			'mailbox'  => 'Plugins',
+			'subject'  => '[WordPress Plugin Directory] Review in Progress: Simple Booking Forms',
+			'customer' => 'lucas@example.com',
+			'agent'    => 'priya@wordpress.test',
+			'days_ago' => 12,
+			'status'   => Conversation::STATUS_ACTIVE,
+			'tags'     => array( 'plugin-review', 'review' ),
+			'threads'  => array(
+				array( 'agent', '<p>Hi,</p><p>We found some issues in Simple Booking Forms.</p><h3>🔴 Data Must be Sanitized, Escaped, and Validated</h3><p>The booking form saves $_POST[\'date\'] as it comes.</p><h3>🔴 Trialware and license checks are not permitted</h3><p>Recurring bookings stay locked until a license key is entered.</p><h3>🟡 Use wp_enqueue commands</h3><p>The calendar’s script is printed in the footer.</p><h3>🟡 Allowing Direct File Access to plugin files</h3><p>includes/ajax.php runs without checking ABSPATH.</p><p>Review ID: R simple-booking-forms/lucasmoreau/26Sep26/T1 26Sep26/1.0.2 (P0TDX310001HGN)</p>', 0 ),
+				array( 'customer', 'Thanks, I’m working on these and will upload a new version this week.', 20 ),
+			),
+		),
+		array(
+			'mailbox'  => 'Plugins',
+			'subject'  => '[WordPress Plugin Directory] Review in Progress: WooCommerce Turbo Shipping',
+			'customer' => 'kenji@example.com',
+			'agent'    => 'lena@wordpress.test',
+			'days_ago' => 9,
+			'status'   => Conversation::STATUS_PENDING,
+			'tags'     => array( 'plugin-review', 'review' ),
+			'threads'  => array(
+				array( 'agent', '<p>Hi,</p><p>The name of your plugin starts with someone else’s trademark, so it needs a new one.</p><ul><li>Plugin Name: WooCommerce Turbo Shipping</li><li>Our suggested alternative name: <code>Turbo Shipping for WooCommerce</code></li><li>Our suggested alternative slug: <strong>turbo-shipping-for-woocommerce</strong></li></ul><p>Reply to let us know which name you’d like.</p><p>Review ID: TRM ❗TRM woocommerce-turbo-shipping/kenjiwatanabe/29Sep26/T1 29Sep26/2.1 (P0TDX310002HGN)</p>', 0 ),
+			),
+		),
+		array(
+			'mailbox'  => 'Plugins',
+			'subject'  => '[WordPress Plugin Directory] Review in Progress: Gallery Grid Pro',
+			'customer' => 'mei@example.com',
+			'agent'    => 'marco@wordpress.test',
+			'days_ago' => 6,
+			'status'   => Conversation::STATUS_ACTIVE,
+			'tags'     => array( 'plugin-review', 'review' ),
+			'threads'  => array(
+				array( 'agent', '<p>Hi,</p><p>Your plugin links to a site we can’t connect to your account, so we need to confirm you own it.</p><ul><li>Author URI: <a href="https://www.gallerygrid.example/about/">https://www.gallerygrid.example/about/</a></li><li>Plugin URI: <a href="https://gallerygrid.example/pro/">https://gallerygrid.example/pro/</a></li></ul><p>Add a TXT record <code>wordpressorg-meichen-verification</code> to the domain, or write to us from an address at it.</p><p>Review ID: OWN ❗OWN gallery-grid-pro/meichen/2Oct26/T1 2Oct26/3.0 (P0TDX310003HGN)</p>', 0 ),
+				array( 'customer', 'I’ve added the record. Can you check again?', 30 ),
+			),
+		),
+		array(
+			'mailbox'  => 'Plugins',
+			'subject'  => '[WordPress Plugin Directory] Review in Progress: Recipe Cards',
+			'customer' => 'hannah@example.com',
+			'agent'    => 'priya@wordpress.test',
+			'days_ago' => 16,
+			'status'   => Conversation::STATUS_ACTIVE,
+			'tags'     => array( 'plugin-review', 'review' ),
+			'threads'  => array(
+				array( 'agent', '<p>Hi,</p><p>We found an issue in Recipe Cards.</p><h3>🔴 Use Prefixes for declarations, globals and stored data</h3><p>Functions like save_recipe() can clash with other plugins.</p><p>Review ID: R recipe-cards/hannahbecker/22Sep26/T1 22Sep26/1.4 (P0TDX310004HGN)</p>', 0 ),
+				array( 'agent', '<p>This is an automated message to confirm that we have received your updated plugin file.</p><p>File updated by hannahbecker, version 1.5.</p>', 50 ),
+			),
+		),
+		array(
+			'mailbox'  => 'Plugins',
+			'subject'  => '[WordPress Plugin Directory] Review in Progress: Simple Changelog',
+			'customer' => 'diego@example.com',
+			'agent'    => 'lena@wordpress.test',
+			'days_ago' => 20,
+			'status'   => Conversation::STATUS_CLOSED,
+			'tags'     => array( 'plugin-review', 'review', 'approved' ),
+			'threads'  => array(
+				array( 'agent', '<p>Hi,</p><p>We found an issue in Simple Changelog.</p><h3>🟡 Internationalization: Text domain does not match plugin slug.</h3><p>Strings use the text domain "changelog".</p><p>Review ID: R simple-changelog/diegofernandez/18Sep26/T1 18Sep26/0.9 (P0TDX310005HGN)</p>', 0 ),
+				array( 'agent', '<p>This is an automated message to confirm that we have received your updated plugin file.</p><p>File updated by diegofernandez, version 1.0.</p>', 26 ),
+				array( 'agent', '<p>Hi,</p><p>Your plugin is approved. You’ll get an email with SVN access shortly.</p><p>Review ID: APPROVED simple-changelog/diegofernandez/18Sep26/T2 20Sep26/1.0 (P0TDX310005HGN)</p>', 40 ),
 			),
 		),
 		array(
@@ -1024,7 +1090,8 @@ function seed_saved_replies(): void {
 /**
  * Teams: HelpScout's teams, with sample agents and their mailbox, and a conversation assigned to some.
  *
- * Team names have at most 20 characters, so the longer HelpScout names are shortened.
+ * The admin is in Plugin Reviews, so they get the Plugin Review panel. Team names have at most 20 characters, so the
+ * longer HelpScout names are shortened.
  *
  * @return void
  */
@@ -1034,7 +1101,7 @@ function seed_teams(): void {
 	}
 
 	$teams = array(
-		'Plugin Reviews'  => array( 'Plugins', 'eye-open', array( 'priya@wordpress.test', 'marco@wordpress.test', 'lena@wordpress.test' ) ),
+		'Plugin Reviews'  => array( 'Plugins', 'eye-open', array( admin()->email, 'priya@wordpress.test', 'marco@wordpress.test', 'lena@wordpress.test' ) ),
 		'Plugin Security' => array( 'Plugins', 'lock', array( 'marco@wordpress.test' ) ),
 		'Plugin Admin'    => array( 'Plugins', 'cog', array( 'priya@wordpress.test' ) ),
 		'Plugin Reports'  => array( 'Plugins', 'flag', array( 'tomas@wordpress.test' ) ),
@@ -1311,6 +1378,24 @@ function seed_api_webhooks(): void {
 }
 
 /**
+ * Plugin Review: indexes the sample review emails for its panel, which they're added without the events of.
+ *
+ * @return void
+ */
+function seed_plugin_reviews(): void {
+	if ( ! class_exists( Review::class ) ) {
+		return;
+	}
+
+	foreach ( conversation_data() as $data ) {
+		$conversation = 'Plugins' === $data['mailbox'] ? find_conversation( $data ) : null;
+		if ( $conversation ) {
+			Review::reindex( $conversation );
+		}
+	}
+}
+
+/**
  * Adds everything.
  *
  * @return void
@@ -1339,6 +1424,7 @@ function main(): void {
 	seed_workflows();
 	seed_reports();
 	seed_api_webhooks();
+	seed_plugin_reviews();
 
 	foreach ( $mailboxes as $mailbox ) {
 		$mailbox->updateFoldersCounters();
