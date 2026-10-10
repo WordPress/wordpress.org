@@ -434,6 +434,7 @@ class Locale extends GP_Route {
 				parent_project_id = %d
 				AND active = 1
 		";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$sub_project_ids  = $wpdb->get_col( $wpdb->prepare( $sub_projects_sql, $project->id ) );
 
 		$all_project_ids = array_merge( [ (int) $project->id ], array_map( 'intval', $sub_project_ids ) );
@@ -448,6 +449,7 @@ class Locale extends GP_Route {
 				AND slug = %s
 				AND locale = %s
 		";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$translation_set_ids = $wpdb->get_col( $wpdb->prepare( $translation_sets_sql, $set_slug, $locale_slug ) );
 
 		// Batch-fetch contributors across all translation sets.
@@ -552,9 +554,12 @@ class Locale extends GP_Route {
 		}
 		unset( $contributors, $editor_ids );
 
-		uasort( $locale_contributors['contributors'], function ( $a, $b ) {
-			return $b->total_count <=> $a->total_count;
-		} );
+		uasort(
+			$locale_contributors['contributors'],
+			function ( $a, $b ) {
+				return $b->total_count <=> $a->total_count;
+			}
+		);
 
 		return $locale_contributors;
 	}
