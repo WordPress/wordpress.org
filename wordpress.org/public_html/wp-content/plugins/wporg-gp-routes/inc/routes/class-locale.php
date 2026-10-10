@@ -369,22 +369,38 @@ class Locale extends GP_Route {
 		", $project->id, $locale_slug ) );
 
 		// Get the translation editors of parent projects.
-		if ( $project->parent_project_id ) {
-			$parent_project_id = $project->parent_project_id;
-			$parent_project = GP::$project->get( $parent_project_id );
-			while ( $parent_project_id ) {
-				$editors['inherited'] = array_merge( $editors['inherited'], (array) $wpdb->get_col( $wpdb->prepare( "
-					SELECT
-						`user_id`
-					FROM {$wpdb->wporg_translation_editors}
-					WHERE
-						`project_id` = %d
-						AND `locale` IN (%s, 'all-locales')
-				", $parent_project->id, $locale_slug ) ) );
+		$parent_ids        = [];
+		$parent_project_id = (int) $project->parent_project_id;
 
-				$parent_project = GP::$project->get( $parent_project_id );
-				$parent_project_id = $parent_project->parent_project_id;
+		while ( $parent_project_id ) {
+			$parent_ids[]   = $parent_project_id;
+			$parent_project = GP::$project->get( $parent_project_id );
+
+			if ( ! $parent_project ) {
+				break;
 			}
+
+			$parent_project_id = (int) $parent_project->parent_project_id;
+		}
+
+		if ( ! empty( $parent_ids ) ) {
+			$parent_ids             = array_unique( $parent_ids );
+			$parent_id_placeholders = implode( ', ', array_fill( 0, count( $parent_ids ), '%d' ) );
+
+			$inherited_editors_sql = "
+				SELECT
+					`user_id`
+				FROM {$wpdb->wporg_translation_editors}
+				WHERE
+					`project_id` IN ( {$parent_id_placeholders} )
+					AND `locale` IN (%s, 'all-locales')
+				";
+
+			$inherited_editors_args = array_merge( $parent_ids, [$locale_slug ] );
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$inherited_editors = (array) $wpdb->get_col( $wpdb->prepare( $inherited_editors_sql, $inherited_editors_args ) );
+
+			$editors['inherited'] = array_merge( $editors['inherited'], $inherited_editors );
 		}
 
 		// Get the translation editors for all projects.
