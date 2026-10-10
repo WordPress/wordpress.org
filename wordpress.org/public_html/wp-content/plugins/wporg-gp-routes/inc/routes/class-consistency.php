@@ -100,7 +100,7 @@ class Consistency extends GP_Route {
 			$translations_unique_counts = array_count_values( $translations );
 
 			arsort( $translations_unique_counts );
-			$translations_unique        = array_map( 'strval', array_keys( $translations_unique_counts ) );
+			$translations_unique        = array_keys( $translations_unique_counts );
 		}
 
 		$projects = self::PROJECTS;
