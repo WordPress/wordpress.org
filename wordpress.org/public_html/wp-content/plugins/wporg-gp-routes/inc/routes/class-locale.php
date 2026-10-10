@@ -422,34 +422,8 @@ class Locale extends GP_Route {
 		// Get the translation editors of the project.
 		$editors = $this->get_translation_editors( $project, $locale_slug );
 
-		$editor_ids = [];
-
-		// Get the names of the translation editors.
-		foreach ( [ 'project', 'inherited'] as $editor_source ) {
-			foreach ( $editors[ $editor_source ] as $editor_id ) {
-				$user = get_user_by( 'id', $editor_id );
-				if ( ! $user ) {
-					continue;
-				}
-
-				$locale_contributors['editors'][ $editor_source ][ $editor_id ] = (object) array(
-					'nicename'     => $user->user_nicename,
-					'display_name' => $user->display_name ?: $user->user_nicename,
-					'email'        => $user->user_email,
-				);
-
-				$editor_ids[] = $editor_id;
-			}
-
-			uasort( $locale_contributors['editors'][ $editor_source ], function( $a, $b ) {
-				return strcasecmp( $a->display_name, $b->display_name );
-			} );
-		}
-
-		unset( $editors );
-
 		// Get the contributors of the project.
-		$contributors = array();
+		$contributors = [];
 
 		// In case the project has a translation set, like /wp-themes/twentysixteen.
 		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $set_slug, $locale_slug );
@@ -480,6 +454,43 @@ class Locale extends GP_Route {
 				$this->get_locale_contributors_by_translation_set( $translation_set )
 			);
 		}
+
+		$user_ids = array_merge(
+			$editors['project'],
+			$editors['inherited'],
+			wp_list_pluck( $contributors, 'user_id' )
+		);
+		$user_ids = array_unique( array_filter( array_map( 'intval', $user_ids ) ) );
+
+		if ( ! empty( $user_ids ) ) {
+			_prime_user_caches( $user_ids );
+		}
+
+		$editor_ids = [];
+
+		// Get the names of the translation editors.
+		foreach ( [ 'project', 'inherited' ] as $editor_source ) {
+			foreach ( $editors[ $editor_source ] as $editor_id ) {
+				$user = get_user_by( 'id', $editor_id );
+				if ( ! $user ) {
+					continue;
+				}
+
+				$locale_contributors['editors'][ $editor_source ][ $editor_id ] = (object) array(
+					'nicename'     => $user->user_nicename,
+					'display_name' => $user->display_name ?: $user->user_nicename,
+					'email'        => $user->user_email,
+				);
+
+				$editor_ids[ (int) $editor_id ] = true;
+			}
+
+			uasort( $locale_contributors['editors'][ $editor_source ], function( $a, $b ) {
+				return strcasecmp( $a->display_name, $b->display_name );
+			} );
+		}
+
+		unset( $editors );
 
 		$projects = [];
 
@@ -540,7 +551,7 @@ class Locale extends GP_Route {
 						'project'       => $projects[ $contributor->project_id ],
 					],
 				],
-				'is_editor'     => in_array( $user->ID, $editor_ids ),
+				'is_editor'     => isset( $editor_ids[ (int) $user->ID ] ),
 			);
 		}
 		unset( $contributors, $editor_ids );
