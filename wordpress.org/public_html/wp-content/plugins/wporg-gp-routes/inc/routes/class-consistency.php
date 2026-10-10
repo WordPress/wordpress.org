@@ -188,7 +188,7 @@ class Consistency extends GP_Route {
 				p.id AS project_id,
 				p.path AS project_path,
 				p.parent_project_id AS project_parent_id,
-				o.singular AS original_singular
+				o.singular AS original_singular,
 				o.plural AS original_plural,
 				o.context AS original_context,
 				o.id AS original_id,
