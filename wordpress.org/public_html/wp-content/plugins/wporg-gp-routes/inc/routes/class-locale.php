@@ -428,16 +428,21 @@ class Locale extends GP_Route {
 
 		// Collect project IDs: parent project and all active sub-projects.
 		$sub_projects_sql = "
-			SELECT id
+			SELECT *
 			FROM {$wpdb->gp_projects}
 			WHERE
 				parent_project_id = %d
 				AND active = 1
 		";
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$sub_project_ids  = $wpdb->get_col( $wpdb->prepare( $sub_projects_sql, $project->id ) );
+		$sub_projects = $project->many( $sub_projects_sql, $project->id );
+		$projects     = [ (int) $project->id => $project ];
 
-		$all_project_ids = array_merge( [ (int) $project->id ], array_map( 'intval', $sub_project_ids ) );
+		foreach ( $sub_projects as $sub_project ) {
+			$projects[ (int) $sub_project->id ] = $sub_project;
+		}
+
+		$all_project_ids = array_keys( $projects );
 		$project_ids_sql = implode( ', ', $all_project_ids );
 
 		// Batch-fetch all matching translation set IDs in a single query.
@@ -498,11 +503,6 @@ class Locale extends GP_Route {
 		}
 
 		unset( $editors );
-
-		// Seed the known parent project object to avoid redundant GP::$project->get() calls.
-		$projects = [
-			(int) $project->id => $project,
-		];
 
 		// Aggregate contributors and detailed counts.
 		foreach ( $contributors as $contributor ) {
