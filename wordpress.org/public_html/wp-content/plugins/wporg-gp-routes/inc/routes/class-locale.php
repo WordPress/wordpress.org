@@ -1061,7 +1061,7 @@ class Locale extends GP_Route {
 			}
 		}
 
-		$pages = (int) ceil( $results / $per_page );
+		$pages = $per_page > 0 ? (int) ceil( $results / $per_page ) : 1;
 
 		$projects = array();
 		foreach ( $_projects as $sub_project ) {
