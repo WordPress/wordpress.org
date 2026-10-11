@@ -952,6 +952,7 @@ class Locale extends GP_Route {
 				if ( ! empty( $user_fav_projects ) ) {
 					$favorite_path_placeholders = implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) );
 
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $favorite_path_placeholders contains only safe %s placeholders.
 					$fav_field_sql   = $wpdb->prepare( "FIELD( tp.path, {$favorite_path_placeholders} )", $user_fav_projects );
 					$filter_order_by = "{$fav_field_sql} > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC";
 				} else {
@@ -966,6 +967,7 @@ class Locale extends GP_Route {
 				if ( ! empty( $user_fav_projects ) ) {
 					$favorite_path_placeholders = implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) );
 
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $favorite_path_placeholders contains only safe %s placeholders.
 					$tp_where .= $wpdb->prepare( " AND tp.path IN( {$favorite_path_placeholders} )", $user_fav_projects );
 				} else {
 					$tp_where .= ' AND 0=1';
