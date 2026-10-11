@@ -818,6 +818,8 @@ class Locale extends GP_Route {
 			$limit_sql = $wpdb->prepare( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
 		}
 
+		$sql_params = array( $locale, $set_slug );
+
 		/*
 		 * Conditions are split by which table they reference. When $stats_where is
 		 * non-empty, the stats lookup is wrapped in a derived table so the join is
@@ -829,8 +831,10 @@ class Locale extends GP_Route {
 
 		$search_sql = '';
 		if ( $search ) {
-			$esc_search = '%%' . $wpdb->esc_like( $search ) . '%%';
-			$search_sql = $wpdb->prepare( ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )', $esc_search, $esc_search );
+			$search_sql = ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )';
+			$search_param = '%' . $wpdb->esc_like( $search ) . '%';
+			$sql_params[] = $search_param;
+			$sql_params[] = $search_param;
 		}
 
 		// Special Waiting Project Tab
@@ -911,7 +915,7 @@ class Locale extends GP_Route {
 			// Exclude projects which have an assigned editor.
 			if ( $without_editors ) {
 				$project_ids_with_editor = $wpdb->get_col( $wpdb->prepare(
-					"SELECT DISTINCT(project_id) FROM `translate_translation_editors` WHERE (locale = %s OR locale = 'all-locales') AND project_id != 0 AND user_id != %d",
+					"SELECT DISTINCT(project_id) FROM {$wpdb->wporg_translation_editors} WHERE (locale = %s OR locale = 'all-locales') AND project_id != 0 AND user_id != %d",
 					$locale,
 					$user_id
 				) );
@@ -983,7 +987,7 @@ class Locale extends GP_Route {
 
 			case 'percent-completed':
 				$stats_where    .= ' AND stats.untranslated > 0';
-				$filter_order_by = "( stats.current / stats.all ) $sort_order, tp.name ASC";
+				$filter_order_by = "( stats.current / NULLIF( stats.all, 0 ) ) $sort_order, tp.name ASC";
 				break;
 
 			case 'completed':
@@ -1031,14 +1035,14 @@ class Locale extends GP_Route {
 			";
 		}
 
-		$_projects = $project->many( $sql, $locale, $set_slug );
+		$_projects = $project->many( $sql, ...$sql_params );
 
 		$results = (int) $project->found_rows();
 		$pages = (int) ceil( $results / $per_page );
 
 		$projects = array();
-		foreach ( $_projects as $project ) {
-			$projects[ $project->id ] = $project;
+		foreach ( $_projects as $sub_project ) {
+			$projects[ $sub_project->id ] = $sub_project;
 		}
 
 		return [
