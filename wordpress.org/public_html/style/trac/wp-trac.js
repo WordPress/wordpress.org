@@ -572,7 +572,7 @@ let wpTrac,
 						ticketId = document.querySelector( '.trac-id' )?.textContent?.trim() || '',
 						newticket = `/newticket?component=${ encodeURIComponent(
 							component
-						) }&description=${ encodeURIComponent( `This is a follow-up to \${ ticketId }.` ) }`;
+						) }&description=${ encodeURIComponent( `This is a follow-up to ${ ticketId }.` ) }`;
 
 					document.querySelector( '#trac-add-comment fieldset' )?.insertAdjacentHTML(
 						'afterbegin',
