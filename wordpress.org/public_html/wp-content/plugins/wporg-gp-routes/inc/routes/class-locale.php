@@ -1153,15 +1153,24 @@ class Locale extends GP_Route {
 	 * @return array List of top level projects.
 	 */
 	public function get_active_top_level_projects() {
-		global $wpdb;
+		$cache_key = 'active_top_level_projects';
+		$projects  = wp_cache_get( $cache_key, $this->cache_group );
 
-		return GP::$project->many( "
-			SELECT *
-			FROM {$wpdb->gp_projects}
-			WHERE
-				parent_project_id IS NULL
-				AND active = 1
-			ORDER BY FIELD( slug, 'waiting', 'wp', 'wp-themes', 'wp-plugins', 'patterns', 'meta', 'apps' )
-		" );
+		if ( false === $projects ) {
+			global $wpdb;
+
+			$projects = GP::$project->many( "
+				SELECT *
+				FROM {$wpdb->gp_projects}
+				WHERE
+					parent_project_id IS NULL
+					AND active = 1
+				ORDER BY FIELD( slug, 'waiting', 'wp', 'wp-themes', 'wp-plugins', 'patterns', 'meta', 'apps' )
+			" );
+
+			wp_cache_set( $cache_key, $projects, $this->cache_group, DAY_IN_SECONDS );
+		}
+
+		return $projects;
 	}
 }
