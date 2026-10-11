@@ -1016,7 +1016,7 @@ class Locale extends GP_Route {
 		 */
 		if ( $stats_where ) {
 			$sql = "
-				SELECT SQL_CALC_FOUND_ROWS tp.*
+				SELECT tp.*
 				FROM (
 					SELECT project_id, `all`, `current`, waiting, fuzzy, untranslated, date_modified
 					FROM {$wpdb->project_translation_status} stats
@@ -1026,24 +1026,55 @@ class Locale extends GP_Route {
 				INNER JOIN {$wpdb->gp_projects} tp ON tp.id = stats.project_id
 				WHERE tp.active = 1
 					$tp_where
-				ORDER BY $filter_order_by
-				$limit_sql
+				ORDER BY $filter_order_by $limit_sql
+			";
+
+			$count_sql = "
+				SELECT COUNT(*)
+				FROM (
+					SELECT project_id
+					FROM {$wpdb->project_translation_status} stats
+					WHERE stats.locale = %s AND stats.locale_slug = %s
+						$stats_where
+				) stats
+				INNER JOIN {$wpdb->gp_projects} tp ON tp.id = stats.project_id
+				WHERE tp.active = 1
+					$tp_where
 			";
 		} else {
 			$sql = "
-				SELECT SQL_CALC_FOUND_ROWS tp.*
+				SELECT tp.*
 				FROM {$wpdb->gp_projects} tp
 					LEFT JOIN {$wpdb->project_translation_status} stats ON stats.project_id = tp.id AND stats.locale = %s AND stats.locale_slug = %s
 				WHERE tp.active = 1
 					$tp_where
-				ORDER BY $filter_order_by
-				$limit_sql
+				ORDER BY $filter_order_by $limit_sql
+			";
+
+			$count_sql = "
+				SELECT COUNT(*)
+				FROM {$wpdb->gp_projects} tp
+				WHERE tp.active = 1
+					$tp_where
 			";
 		}
 
 		$_projects = $project->many( $sql, ...$sql_params );
 
-		$results = (int) $project->found_rows();
+		if ( $stats_where ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$sql_params ) );
+		} else {
+			$count_params = array_slice( $sql_params, 2 );
+			if ( ! empty( $count_params ) ) {
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$count_params ) );
+			} else {
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$results = (int) $wpdb->get_var($count_sql );
+			}
+		}
+
 		$pages = (int) ceil( $results / $per_page );
 
 		$projects = array();
