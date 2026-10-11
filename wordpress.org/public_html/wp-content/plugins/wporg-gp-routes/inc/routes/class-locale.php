@@ -587,6 +587,9 @@ class Locale extends GP_Route {
 	/**
 	 * Retrieves contributors of translation sets.
 	 *
+	 * Supports batch fetching across multiple translation set IDs to aggregate
+	 * user contributions in a single query grouped by user and project.
+	 *
 	 * @param GP_Translation_Set|int|array $translation_sets Translation set object, ID, or list of IDs.
 	 * @return array List of contributor aggregated rows.
 	 */
