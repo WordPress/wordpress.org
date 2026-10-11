@@ -1063,8 +1063,6 @@ class Locale extends GP_Route {
 	 * @return array List of favorited items, eg [ 'wp-themes/twentyten', 'wp-themes/twentyeleven' ]
 	 */
 	function get_user_favorites( $project_slug = false ) {
-		global $wpdb;
-
 		if ( ! is_user_logged_in() ) {
 			return array();
 		}
@@ -1076,9 +1074,12 @@ class Locale extends GP_Route {
 				// Fall through to include both Themes and Plugins
 			case 'wp-themes':
 				// Theme favorites are stored as theme slugs, these map 1:1 to GlotPress projects.
-				$theme_favorites = array_map( function( $slug ) {
-					return "wp-themes/$slug";
-				}, (array) get_user_meta( $user_id, 'theme_favorites', true ) );
+				$raw_theme_favorites = get_user_meta( $user_id, 'theme_favorites', true );
+				$theme_favorites     = ! empty( $raw_theme_favorites ) && is_array( $raw_theme_favorites )
+					? array_map( static function( $slug ) {
+						return "wp-themes/$slug";
+					}, array_filter( $raw_theme_favorites ) )
+					: array();
 
 				if ( 'wp-themes' === $project_slug ) {
 					return $theme_favorites;
@@ -1086,9 +1087,12 @@ class Locale extends GP_Route {
 
 			case 'wp-plugins':
 				// Plugin favorites are stored as plugin slugs, these map 1:1 to GlotPress projects.
-				$plugin_favorites = array_map( function( $slug ) {
-					return "wp-plugins/$slug";
-				}, (array) get_user_meta( $user_id, 'plugin_favorites', true ) );
+				$raw_plugin_favorites = get_user_meta( $user_id, 'plugin_favorites', true );
+				$plugin_favorites     = ! empty( $raw_plugin_favorites ) && is_array( $raw_plugin_favorites )
+					? array_map( static function( $slug ) {
+						return "wp-plugins/$slug";
+					}, array_filter( $raw_plugin_favorites ) )
+					: array();
 
 				if ( 'wp-plugins' === $project_slug ) {
 					return $plugin_favorites;
