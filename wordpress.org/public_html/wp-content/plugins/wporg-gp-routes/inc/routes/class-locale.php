@@ -491,7 +491,7 @@ class Locale extends GP_Route {
 		$user_ids = array_unique( array_filter( array_map( 'intval', $user_ids ) ) );
 
 		if ( ! empty( $user_ids ) ) {
-			_prime_user_caches( $user_ids );
+			cache_users( $user_ids );
 		}
 
 		$editor_ids = [];
