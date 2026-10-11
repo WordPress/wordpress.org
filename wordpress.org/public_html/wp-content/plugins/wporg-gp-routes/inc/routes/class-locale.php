@@ -113,16 +113,16 @@ class Locale extends GP_Route {
 			)
 		);
 
+		if ( ! $paged_sub_projects ) {
+			return $this->die_with_404();
+		}
+
 		$data['project']                = $project;
 		$data['sub_projects']           = $paged_sub_projects['projects'];
 		$data['pages']                  = $paged_sub_projects['pages'];
 		$data                           = apply_filters( 'gp_subprojects', $data );
 		$paged_sub_projects['projects'] = $data['sub_projects'];
 		$paged_sub_projects['pages']    = $data['pages'];
-
-		if ( ! $paged_sub_projects ) {
-			return $this->die_with_404();
-		}
 
 		$sub_projects = $paged_sub_projects['projects'];
 		$pages        = $paged_sub_projects['pages'];
@@ -136,11 +136,19 @@ class Locale extends GP_Route {
 		}
 
 		$project_ids = array_keys( $project_status );
-		$project_ids[] = $project->id;
-		$project_ids = array_merge(
-			$project_ids,
-			$wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IN( " . implode( ', ', $project_ids ) . ')' )
-		);
+		$project_ids[] = (int) $project->id;
+		$project_ids   = array_unique( array_map( 'intval', $project_ids ) );
+
+		$sub_project_ids_sql = "
+			SELECT id
+			FROM {$wpdb->gp_projects}
+			WHERE parent_project_id IN ( " . implode( ', ', $project_ids ) . ' )
+		';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$child_project_ids = (array) $wpdb->get_col( $sub_project_ids_sql );
+
+		$project_ids = array_merge( $project_ids, $child_project_ids );
 
 		$contributors_count = Plugin::get_contributors_count();
 
@@ -150,9 +158,9 @@ class Locale extends GP_Route {
 			$variants[] = $set_slug;
 		}
 
-		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
+		$can_create_locale_glossary      = GP::$permission->current_user_can( 'admin' );
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
-		$locale_glossary = false;
+		$locale_glossary                 = false;
 		if ( $locale_glossary_translation_set ) {
 			$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
 		}
@@ -215,9 +223,12 @@ class Locale extends GP_Route {
 
 		$locale_contributors = $this->get_locale_contributors( $sub_project, $locale_slug, $set_slug );
 
-		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
+		$can_create_locale_glossary      = GP::$permission->current_user_can( 'admin' );
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
-		$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
+		$locale_glossary                 = false;
+		if ( $locale_glossary_translation_set ) {
+			$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
+		}
 
 		$this->tmpl( 'locale-project', get_defined_vars() );
 	}
