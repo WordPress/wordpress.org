@@ -1069,6 +1069,9 @@ class Locale extends GP_Route {
 
 		$user_id = get_current_user_id();
 
+		$theme_favorites  = [];
+		$plugin_favorites = [];
+
 		switch ( $project_slug ) {
 			default:
 				// Fall through to include both Themes and Plugins
@@ -1076,7 +1079,7 @@ class Locale extends GP_Route {
 				// Theme favorites are stored as theme slugs, these map 1:1 to GlotPress projects.
 				$raw_theme_favorites = get_user_meta( $user_id, 'theme_favorites', true );
 				$theme_favorites     = ! empty( $raw_theme_favorites ) && is_array( $raw_theme_favorites )
-					? array_map( static function( $slug ) {
+					? array_map( static function ( $slug ) {
 						return "wp-themes/$slug";
 					}, array_filter( $raw_theme_favorites ) )
 					: array();
@@ -1089,7 +1092,7 @@ class Locale extends GP_Route {
 				// Plugin favorites are stored as plugin slugs, these map 1:1 to GlotPress projects.
 				$raw_plugin_favorites = get_user_meta( $user_id, 'plugin_favorites', true );
 				$plugin_favorites     = ! empty( $raw_plugin_favorites ) && is_array( $raw_plugin_favorites )
-					? array_map( static function( $slug ) {
+					? array_map( static function ( $slug ) {
 						return "wp-plugins/$slug";
 					}, array_filter( $raw_plugin_favorites ) )
 					: array();
