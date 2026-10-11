@@ -1060,7 +1060,7 @@ class Locale extends GP_Route {
 	/**
 	 * Retrieves a list of projects which the current user has favorited.
 	 *
-	 * @param string|false $project_slug
+	 * @param string|false $project_slug Project slug to filter by, or false for all.
 	 * @return array List of favorited items, eg [ 'wp-themes/twentyten', 'wp-themes/twentyeleven' ]
 	 */
 	function get_user_favorites( $project_slug = false ) {
