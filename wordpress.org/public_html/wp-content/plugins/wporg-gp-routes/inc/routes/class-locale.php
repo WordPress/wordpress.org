@@ -829,7 +829,7 @@ class Locale extends GP_Route {
 
 			// Limit to only showing base-level projects.
 			$base_level_project_sql = '';
-			$base_level_project_ids = $wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL AND active = 1" );
+			$base_level_project_ids = wp_list_pluck( $this->get_active_top_level_projects(), 'id' );
 			if ( $base_level_project_ids ) {
 				$ids = implode( ', ', array_map( 'intval', $base_level_project_ids ) );
 				$base_level_project_sql = " AND tp.parent_project_id IN( $ids )";
