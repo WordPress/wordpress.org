@@ -487,7 +487,7 @@ class Locale extends GP_Route {
 
 			uasort(
 				$locale_contributors['editors'][ $editor_source ],
-				function ( $a, $b ) {
+				static function ( $a, $b ) {
 					return strcasecmp( $a->display_name, $b->display_name );
 				}
 			);
@@ -547,7 +547,7 @@ class Locale extends GP_Route {
 
 		uasort(
 			$locale_contributors['contributors'],
-			function ( $a, $b ) {
+			static function ( $a, $b ) {
 				return $b->total_count <=> $a->total_count;
 			}
 		);
