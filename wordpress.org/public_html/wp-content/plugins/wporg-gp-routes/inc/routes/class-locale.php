@@ -510,7 +510,7 @@ class Locale extends GP_Route {
 					'email'        => $user->user_email,
 				);
 
-				// Store editor IDs
+				// Store editor IDs.
 				$editor_ids[ (int) $editor_id ] = true;
 			}
 
