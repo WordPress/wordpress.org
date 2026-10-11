@@ -2489,7 +2489,7 @@ a.mention.me {
 @media (max-width: 960px) {
 
 	#main {
-		overflow-x: auto;
+		overflow-x: initial;
 	}
 }
 
