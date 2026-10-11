@@ -482,7 +482,7 @@ class Locale extends GP_Route {
 			$contributors = $this->get_locale_contributors_by_translation_set( $translation_set_ids );
 		}
 
-		// Collect all user IDs and prime user caches in a single request.
+		// Collect and deduplicate all user IDs to prime user caches in a single request.
 		$user_ids = array_merge(
 			$editors['project'],
 			$editors['inherited'],
@@ -510,6 +510,7 @@ class Locale extends GP_Route {
 					'email'        => $user->user_email,
 				);
 
+				// Store editor IDs
 				$editor_ids[ (int) $editor_id ] = true;
 			}
 
@@ -707,6 +708,7 @@ class Locale extends GP_Route {
 	private function get_active_sub_projects( $project, $with_sub_projects = false ) {
 		global $wpdb;
 
+		// Static in-memory cache to prevent redundant recursive DB queries.
 		static $cache = [];
 
 		$cache_key = (int) $project->id . ':' . (int) $with_sub_projects;
@@ -728,6 +730,7 @@ class Locale extends GP_Route {
 		$projects = [];
 
 		if ( $with_sub_projects && ! empty( $_projects ) ) {
+			// Batch fetch all nested child projects in a single query.
 			$parent_ids     = wp_list_pluck( $_projects, 'id' );
 			$parent_ids_sql = implode( ', ', array_map( 'intval', $parent_ids ) );
 
@@ -1006,6 +1009,11 @@ class Locale extends GP_Route {
 		/*
 		 * Find all child projects with translation sets that match the current locale/slug.
 		 *
+		 * Two dedicated queries are used instead of the deprecated SQL_CALC_FOUND_ROWS:
+		 * 1. Data query: Fetches current page records with ORDER BY and LIMIT.
+		 * 2. Count query: Fetches the total matching rows using COUNT(*) without ORDER BY
+		 *    or LIMIT, avoiding expensive filesorts and full table scans.
+		 *
 		 * When the filter requires a stats row (waiting/fuzzy/untranslated/etc.), the
 		 * stats lookup is wrapped in a derived table that pre-filters by locale +
 		 * condition. The optimizer then drives the join from that small set and
@@ -1051,6 +1059,7 @@ class Locale extends GP_Route {
 				ORDER BY $filter_order_by $limit_sql
 			";
 
+			// When no stats filter is set, counting projects directly avoids an unnecessary table join.
 			$count_sql = "
 				SELECT COUNT(*)
 				FROM {$wpdb->gp_projects} tp
@@ -1059,19 +1068,22 @@ class Locale extends GP_Route {
 			";
 		}
 
+		// Fetch records for the current page.
 		$_projects = $project->many( $sql, ...$sql_params );
 
+		// Fetch total count for pagination calculations.
 		if ( $stats_where ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$sql_params ) );
 		} else {
+			// Strip locale and set_slug parameters since stats table is omitted from $count_sql.
 			$count_params = array_slice( $sql_params, 2 );
 			if ( ! empty( $count_params ) ) {
 				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$count_params ) );
 			} else {
 				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				$results = (int) $wpdb->get_var($count_sql );
+				$results = (int) $wpdb->get_var( $count_sql );
 			}
 		}
 
