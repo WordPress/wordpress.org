@@ -1159,14 +1159,16 @@ class Locale extends GP_Route {
 		if ( false === $projects ) {
 			global $wpdb;
 
-			$projects = GP::$project->many( "
+			$projects_sql = "
 				SELECT *
 				FROM {$wpdb->gp_projects}
 				WHERE
 					parent_project_id IS NULL
 					AND active = 1
 				ORDER BY FIELD( slug, 'waiting', 'wp', 'wp-themes', 'wp-plugins', 'patterns', 'meta', 'apps' )
-			" );
+			";
+
+			$projects = GP::$project->many( $projects_sql );
 
 			wp_cache_set( $cache_key, $projects, $this->cache_group, DAY_IN_SECONDS );
 		}
