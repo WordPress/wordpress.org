@@ -1086,12 +1086,18 @@ class Locale extends GP_Route {
 	 * @param string|false $project_slug Project slug to filter by, or false for all.
 	 * @return array List of favorited items, eg [ 'wp-themes/twentyten', 'wp-themes/twentyeleven' ]
 	 */
-	function get_user_favorites( $project_slug = false ) {
+	private function get_user_favorites( $project_slug = false ) {
 		if ( ! is_user_logged_in() ) {
 			return array();
 		}
 
-		$user_id = get_current_user_id();
+		$user_id   = get_current_user_id();
+		$cache_key = (int) $user_id . ':' . (string) $project_slug;
+
+		static $cache = [];
+		if ( isset( $cache[ $cache_key ] ) ) {
+			return $cache[ $cache_key ];
+		}
 
 		$theme_favorites  = [];
 		$plugin_favorites = [];
@@ -1112,6 +1118,7 @@ class Locale extends GP_Route {
 				}
 
 				if ( 'wp-themes' === $project_slug ) {
+					$cache[ $cache_key ] = $theme_favorites;
 					return $theme_favorites;
 				}
 
@@ -1128,12 +1135,16 @@ class Locale extends GP_Route {
 				}
 
 				if ( 'wp-plugins' === $project_slug ) {
+					$cache[ $cache_key ] = $plugin_favorites;
 					return $plugin_favorites;
 				}
 		}
 
+		$all_favorites       = array_merge( $theme_favorites, $plugin_favorites );
+		$cache[ $cache_key ] = $all_favorites;
+
 		// Return all favorites, for uses in things like the Waiting tab
-		return array_merge( $theme_favorites, $plugin_favorites );
+		return $all_favorites;
 	}
 
 	/**
