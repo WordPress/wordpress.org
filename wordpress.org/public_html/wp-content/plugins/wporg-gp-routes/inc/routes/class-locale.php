@@ -946,12 +946,14 @@ class Locale extends GP_Route {
 					break;
 				}
 			case 'special':
-				// Float favorites to the start, but only if they have untranslated strings
-				$user_fav_projects = array_map( 'esc_sql', $this->get_user_favorites( $project->slug ) );
+				$user_fav_projects = $this->get_user_favorites( $project->slug );
 
 				// Float Favorites to the start, float fully translated to the bottom, order the rest by name
-				if ( $user_fav_projects ) {
-					$filter_order_by = 'FIELD( tp.path, "' . implode( '", "', $user_fav_projects ) . '" ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC';
+				if ( ! empty( $user_fav_projects ) ) {
+					$favorite_path_placeholders = implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) );
+
+					$fav_field_sql   = $wpdb->prepare( "FIELD( tp.path, {$favorite_path_placeholders} )", $user_fav_projects );
+					$filter_order_by = "{$fav_field_sql} > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC";
 				} else {
 					$filter_order_by = 'stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC';
 				}
@@ -959,10 +961,12 @@ class Locale extends GP_Route {
 
 			case 'favorites':
 				// Only list favorites
-				$user_fav_projects = array_map( 'esc_sql', $this->get_user_favorites( $project->slug ) );
+				$user_fav_projects = $this->get_user_favorites( $project->slug );
 
-				if ( $user_fav_projects ) {
-					$tp_where .= ' AND tp.path IN( "' . implode( '", "', $user_fav_projects ) . '" )';
+				if ( ! empty( $user_fav_projects ) ) {
+					$favorite_path_placeholders = implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) );
+
+					$tp_where .= $wpdb->prepare( " AND tp.path IN( {$favorite_path_placeholders} )", $user_fav_projects );
 				} else {
 					$tp_where .= ' AND 0=1';
 				}
