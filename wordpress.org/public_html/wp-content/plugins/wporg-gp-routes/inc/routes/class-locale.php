@@ -1032,6 +1032,7 @@ class Locale extends GP_Route {
 				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $count_sql is dynamically constructed for pagination and safely bound via $count_params.
 				$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$count_params ) );
 			} else {
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $count_sql contains only hardcoded clauses and sanitized constraints with no unbound user input.
 				$results = (int) $wpdb->get_var( $count_sql );
 			}
 		}
