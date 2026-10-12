@@ -254,7 +254,7 @@ class Cross_Locale_PTE {
 		}
 
 		$user_ids_to_prime = array_unique( wp_list_pluck( $rows, 'user_id' ) );
-		cache_users( $user_ids_to_prime );
+		self::prime_users_cache( $user_ids_to_prime );
 
 		$user_ids = array();
 		foreach ( $rows as $row ) {
@@ -274,6 +274,42 @@ class Cross_Locale_PTE {
 		}
 
 		return $user_ids;
+	}
+
+	/**
+	 * Prime user caches directly from wp_users without touching usermeta.
+	 *
+	 * @param array|int[] $user_ids Array of user IDs.
+	 */
+	private static function prime_users_cache( $user_ids ) {
+		global $wpdb;
+
+		$user_ids = wp_parse_id_list( $user_ids );
+		if ( empty( $user_ids ) ) {
+			return;
+		}
+
+		// Check which users are already in the object cache using the public Cache API.
+		$cached_users      = wp_cache_get_multiple( $user_ids, 'users' );
+		$uncached_user_ids = array();
+
+		foreach ( $user_ids as $id ) {
+			if ( empty( $cached_users[ $id ] ) ) {
+				$uncached_user_ids[] = $id;
+			}
+		}
+
+		// Batch-load only missing users directly from wp_users without touching usermeta.
+		if ( ! empty( $uncached_user_ids ) ) {
+			$user_ids_sql = implode( ', ', $uncached_user_ids );
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $user_ids_sql contains sanitized, integer-cast IDs from wp_parse_id_list().
+			$users = $wpdb->get_results( "SELECT * FROM {$wpdb->users} WHERE ID IN ( {$user_ids_sql} )" );
+
+			foreach ( (array) $users as $user ) {
+				update_user_caches( $user );
+			}
+		}
 	}
 
 	/**
