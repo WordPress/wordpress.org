@@ -180,9 +180,9 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 					// minus 30 minutes to account for currently ongoing meetings.
 					$now = new DateTime( $after_datetime );
 
-					$day_index = gmdate( 'w', strtotime( sprintf( '%s %s GMT', $post->start_date, $post->time ) ) );
-					$day_name  = $GLOBALS['wp_locale']->get_weekday( $day_index );
-					$numerals  = array( 'first', 'second', 'third', 'fourth' );
+					// Relative date formats only accept English weekday names, so don't use the translated ones.
+					$day_name = gmdate( 'l', strtotime( sprintf( '%s %s GMT', $post->start_date, $post->time ) ) );
+					$numerals = array( 'first', 'second', 'third', 'fourth' );
 
 					$next       = clone $now;
 					$occurrence = $post->ID ? get_post_meta( $post->ID, 'occurrence', true ) : $post->occurrence;
@@ -195,6 +195,11 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 					if ( reset( $sorted ) === -1 ) {
 						array_shift( $sorted );
 						$sorted[] = -1;
+					}
+
+					// Without any weeks there's no occurrence; the caller falls back to the start date.
+					if ( ! $sorted ) {
+						return false;
 					}
 
 					$limit = 12;
@@ -210,7 +215,8 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 								break 2;
 							}
 						}
-						$next->modify( '+1 month' );
+						// Not '+1 month': from the last weekday (up to the 31st) that skips shorter months.
+						$next->modify( 'first day of next month' );
 					} while ( --$limit > 0 );
 					$next_date = $next->format( 'Y-m-d' );
 				} catch ( Exception $e ) {
@@ -530,7 +536,10 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				$utc_time                = gmdate( 'H:i:s', strtotime( $post->time ) );
 				$next_meeting_iso        = $next_meeting_datestring . 'T' . $utc_time . '+00:00';
 				$next_meeting_timestamp  = strtotime( $next_meeting_datestring . ' ' . $utc_time );
-				$date_time               = new DateTime( '@' . $next_meeting_timestamp );
+				if ( false === $next_meeting_timestamp ) {
+					continue;
+				}
+				$date_time = new DateTime( '@' . $next_meeting_timestamp );
 				$date_time->setTimezone( new DateTimeZone( 'UTC' ) );
 				$next_meeting_display = $date_time->format( 'D M d H:i:s Y T' );
 
@@ -646,14 +655,10 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				<<<'JS'
 	var parse_date = function (text) {
 		var m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\+00:00$/.exec(text);
-		var d = new Date();
-		d.setUTCFullYear(+m[1]);
-		d.setUTCDate(+m[3]);
-		d.setUTCMonth(+m[2]-1);
-		d.setUTCHours(+m[4]);
-		d.setUTCMinutes(+m[5]);
-		d.setUTCSeconds(+m[6]);
-		return d;
+		if (!m) {
+			return null;
+		}
+		return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]));
 	}
 	var format_time = function (d) {
 		return d.toLocaleTimeString(navigator.language, {weekday: 'long', hour: '2-digit', minute: '2-digit', timeZoneName: 'short'});
