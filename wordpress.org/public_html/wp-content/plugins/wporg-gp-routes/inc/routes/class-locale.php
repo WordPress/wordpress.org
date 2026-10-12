@@ -558,22 +558,15 @@ class Locale extends GP_Route {
 	/**
 	 * Retrieves contributors of translation sets.
 	 *
-	 * Supports batch fetching across multiple translation set IDs to aggregate
-	 * user contributions in a single query grouped by user and project.
+	 * Aggregates user contributions across multiple translation sets in a single query.
 	 *
-	 * @param GP_Translation_Set|int|array $translation_sets Translation set object, ID, or list of IDs.
+	 * @param array $set_ids List of translation set IDs.
 	 * @return array List of contributor aggregated rows.
 	 */
-	private function get_locale_contributors_by_translation_set( $translation_sets ) {
+	private function get_locale_contributors_by_translation_set( array $set_ids ) {
 		global $wpdb;
 
-		if ( $translation_sets instanceof GP_Translation_Set ) {
-			$set_ids = [ (int) $translation_sets->id ];
-		} elseif ( is_array( $translation_sets ) ) {
-			$set_ids = array_filter( array_map( 'intval', $translation_sets ) );
-		} else {
-			$set_ids = [ (int) $translation_sets ];
-		}
+		$set_ids = array_filter( array_map( 'intval', $set_ids ) );
 
 		if ( empty( $set_ids ) ) {
 			return [];
