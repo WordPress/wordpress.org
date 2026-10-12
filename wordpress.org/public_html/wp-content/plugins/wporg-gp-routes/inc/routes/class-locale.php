@@ -136,21 +136,6 @@ class Locale extends GP_Route {
 			$project_icons[ $sub_project->id ] = $this->get_project_icon( $project, $sub_project );
 		}
 
-		$project_ids = array_keys( $project_status );
-		$project_ids[] = (int) $project->id;
-		$project_ids   = array_unique( array_map( 'intval', $project_ids ) );
-
-		$sub_project_ids_sql = "
-			SELECT id
-			FROM {$wpdb->gp_projects}
-			WHERE parent_project_id IN ( " . implode( ', ', $project_ids ) . ' )
-		';
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$child_project_ids = (array) $wpdb->get_col( $sub_project_ids_sql );
-
-		$project_ids = array_merge( $project_ids, $child_project_ids );
-
 		$contributors_count = Plugin::get_contributors_count();
 
 		$can_create_locale_glossary      = GP::$permission->current_user_can( 'admin' );
