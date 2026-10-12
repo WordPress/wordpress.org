@@ -14,3 +14,5 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once __DIR__ . '/class-meeting-post-type.php';
+
+Meeting_Post_Type::init();

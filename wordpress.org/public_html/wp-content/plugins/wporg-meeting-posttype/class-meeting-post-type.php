@@ -673,7 +673,4 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 			);
 		}
 	}
-
-	// fire it up.
-	Meeting_Post_Type::init();
 endif;
