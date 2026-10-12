@@ -159,7 +159,7 @@ final class SavedReplies {
 
 		foreach ( $list as $listed ) {
 			$id       = (int) ( $listed['id'] ?? 0 );
-			$imported = $id ? ImportedSavedReply::query()->where( 'helpscout_id', $id )->first() : null;
+			$imported = $id ? ImportedSavedReply::query()->where( 'helpscout_id', $id )->where( 'mailbox_id', $mailbox->id )->first() : null;
 			$failed   = array_map( 'intval', (array) ( $counts[ self::FAILED ] ?? array() ) );
 			if ( ! $id || ( $imported && (int) $imported->run_id === (int) $run->id ) || in_array( $id, $failed, true ) ) {
 				continue;
@@ -199,7 +199,7 @@ final class SavedReplies {
 	 * @param int                     $run_id               Run ID.
 	 * @return string|null One of the constants; null if HelpScout deleted it since it was listed.
 	 *
-	 * @throws \Throwable If HelpScout didn't give it (an ApiError), or it couldn't be written; its images are deleted then.
+	 * @throws \Throwable If HelpScout didn't give it (an ApiError), or it couldn't be written; the images it copied are deleted then.
 	 */
 	private function import_one( int $helpscout_mailbox_id, int $id, ?ImportedSavedReply $imported, Mailbox $mailbox, int $run_id ): ?string {
 		$source = $this->helpscout->saved_reply( $helpscout_mailbox_id, $id );
@@ -233,6 +233,7 @@ final class SavedReplies {
 				ImportedSavedReply::query()->create(
 					array(
 						'helpscout_id'   => $id,
+						'mailbox_id'     => $mailbox->id,
 						'saved_reply_id' => (int) $same_name,
 						'source_hash'    => $source_hash,
 						'run_id'         => $run_id,
@@ -243,14 +244,15 @@ final class SavedReplies {
 			}
 		}
 
-		$name                  = self::unique_name( $name, (int) $mailbox->id, $existing ? (int) $existing->id : 0 );
-		$robot_id              = (int) $this->people->robot()->id;
-		list( $text, $images ) = $this->importer->copy_images( \Helper::stripDangerousTags( $text ), $robot_id );
-		$now                   = Carbon::now();
+		$name                           = self::unique_name( $name, (int) $mailbox->id, $existing ? (int) $existing->id : 0 );
+		$robot_id                       = (int) $this->people->robot()->id;
+		$earlier                        = $imported ? (array) json_decode( (string) $imported->images, true ) : array();
+		list( $text, $images, $copies ) = $this->importer->copy_images( \Helper::stripDangerousTags( $text ), $robot_id, $earlier );
+		$now                            = Carbon::now();
 
 		try {
 			\DB::transaction(
-				function () use ( $existing, $id, $name, $text, $source_hash, $mailbox, $robot_id, $run_id, $now ): void {
+				function () use ( $existing, $id, $name, $text, $source_hash, $copies, $mailbox, $robot_id, $run_id, $now ): void {
 					if ( $existing ) {
 						\DB::table( self::TABLE )->where( 'id', $existing->id )->update(
 							array(
@@ -276,17 +278,22 @@ final class SavedReplies {
 					}
 
 					ImportedSavedReply::query()->updateOrCreate(
-						array( 'helpscout_id' => $id ),
+						array(
+							'helpscout_id' => $id,
+							'mailbox_id'   => $mailbox->id,
+						),
 						array(
 							'saved_reply_id' => $saved_reply_id,
 							'source_hash'    => $source_hash,
 							'written_hash'   => ImportedSavedReply::hash( $name, $text ),
+							'images'         => $copies ? json_encode( $copies, JSON_UNESCAPED_SLASHES ) : null,
 							'run_id'         => $run_id,
 						)
 					);
 				}
 			);
 		} catch ( \Throwable $e ) {
+			// Only the new copies: those made before are still the saved reply's.
 			\App\Attachment::deleteForever( $images );
 
 			throw $e;

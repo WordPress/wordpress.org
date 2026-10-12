@@ -10,7 +10,7 @@
 
 	<?php do_action( 'bbp_template_before_topics_index' ); ?>
 
-	<?php if ( bbp_has_topics() ) : ?>
+	<?php if ( bbp_has_topics( bbp_is_forum_archive() ? array( 'show_stickies' => true ) : array() ) ) : ?>
 
 		<?php bbp_get_template_part( 'loop',       'topics'    ); ?>
 

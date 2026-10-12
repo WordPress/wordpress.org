@@ -124,6 +124,9 @@ class Jobs_Dot_WP {
 			add_filter( $filter,                  array( $this, 'proper_project_names_dangit' ) );
 		}
 
+		add_filter( 'the_content', array( $this, 'escape_job_content_syntax' ), PHP_INT_MIN );
+		add_filter( 'wp_insert_post_data', array( $this, 'store_job_content_escaped' ), PHP_INT_MAX );
+
 		add_action( 'save_post_job',                  array( $this, 'email_job_poster' ), 10, 3 );
 		add_action( 'wp',                             array( $this, 'maybe_remove_job' ) );
 		$this->save_job();
@@ -621,6 +624,53 @@ class Jobs_Dot_WP {
 	}
 
 	/**
+	 * Keeps shortcode, block and embed syntax in a job description as visible text.
+	 *
+	 * Descriptions are plain text with a few allowed tags; shortcodes, block
+	 * delimiters and embeddable URLs are not part of that format, so the_content
+	 * must not interpret them.
+	 *
+	 * @param string $content Job description.
+	 * @return string
+	 */
+	private static function escape_content_syntax( $content ) {
+		return str_replace( array( '[', '<!--', '://' ), array( '&#91;', '&lt;!--', '&#58;//' ), $content );
+	}
+
+	/**
+	 * Escapes job content syntax on output, ahead of every other the_content filter.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public function escape_job_content_syntax( $content ) {
+		if ( 'job' !== get_post_type() ) {
+			return $content;
+		}
+
+		return self::escape_content_syntax( $content );
+	}
+
+	/**
+	 * Stores job descriptions with their syntax already escaped.
+	 *
+	 * Must run after kses, which decodes entities back to the characters they stand
+	 * for. No unslashing needed: neither side of the replacement has a quote or backslash.
+	 *
+	 * @param array $data Slashed, sanitized post data.
+	 * @return array
+	 */
+	public function store_job_content_escaped( $data ) {
+		if ( 'job' !== $data['post_type'] ) {
+			return $data;
+		}
+
+		$data['post_content'] = self::escape_content_syntax( $data['post_content'] );
+
+		return $data;
+	}
+
+	/**
 	 * Adds job postings to the feed.
 	 *
 	 * @param WP_Query $query The query object.
@@ -659,6 +709,10 @@ class Jobs_Dot_WP {
 			$template = $this->success ? 'single' : 'post-job';
 			$this->success = false;
 			$content .= get_template_part( 'content', $template );
+
+			if ( 'single' === $template ) {
+				wp_reset_postdata();
+			}
 		}
 		return $content;
 	}

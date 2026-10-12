@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # FreeScout for local development of the freescout.wordpress.net modules: nginx and PHP-FPM, as FreeScout recommends.
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends curl git libfreetype6-dev libicu-dev libjpeg62-turbo-dev libpng-dev libzip-dev nginx procps unzip \
@@ -11,8 +11,8 @@ RUN apt-get update \
 COPY nginx.conf /etc/nginx/sites-enabled/freescout.conf
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Attachments up to nginx's client_max_body_size.
-RUN printf 'upload_max_filesize = 20M\npost_max_size = 20M\n' > /usr/local/etc/php/conf.d/wporg-freescout.ini
+# Production's limits, which are PHP's defaults.
+RUN printf 'upload_max_filesize = 2M\npost_max_size = 8M\n' > /usr/local/etc/php/conf.d/wporg-freescout.ini
 
 # Accepts a branch or release tag. Unlike a `git clone` step, ADD checks the ref on every build, so a branch that moved
 # is fetched again instead of coming from the build cache.

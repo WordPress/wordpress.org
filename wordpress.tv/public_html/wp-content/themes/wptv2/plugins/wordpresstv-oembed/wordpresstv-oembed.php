@@ -44,7 +44,7 @@ class WordCampTV_oEmbed {
 			return false;
 		}
 
-		if ( empty( $_GET['url'] ) ) {
+		if ( empty( $_GET['url'] ) || ! is_string( $_GET['url'] ) ) {
 			$this->fourohfour();
 		}
 
@@ -103,7 +103,7 @@ class WordCampTV_oEmbed {
 
 			list( $width, $height ) = wp_expand_dimensions( $info->width, $info->height, $maxwidth, $maxheight );
 
-			$data['title']  = $info->title;
+			$data['title']  = $info->title ?? null;
 			$data['width']  = $width;
 			$data['height'] = $height;
 			$data['html']   = videopress_2015_player_get_html( array(
