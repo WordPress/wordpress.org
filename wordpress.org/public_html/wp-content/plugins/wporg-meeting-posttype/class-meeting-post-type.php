@@ -5,6 +5,8 @@
  * @package WordPressdotorg\Meeting_Calendar
  */
 
+declare( strict_types = 1 );
+
 if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 	/**
 	 * The meeting post type: registration, meta, occurrence logic, and the [meeting_time] shortcode.
@@ -23,7 +25,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 *
 		 * @return Meeting_Post_Type
 		 */
-		public static function getInstance() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName -- CamelCase name OK.
+		public static function getInstance(): self { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName -- CamelCase name OK.
 			if ( null === self::$instance ) {
 				self::$instance = new self();
 			}
@@ -33,15 +35,13 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		/**
 		 * Register the hooks for the meeting post type.
 		 */
-		public static function init() {
+		public static function init(): void {
 			$mpt = self::getInstance();
 			add_action( 'init', array( $mpt, 'register_meeting_post_type' ) );
 			add_action( 'init', array( $mpt, 'register_meta' ) );
 			add_filter( 'the_posts', array( $mpt, 'meeting_set_next_meeting' ) );
-			add_filter( 'the_posts', array( $mpt, 'meeting_sort_upcoming_meetings' ) );
+			add_filter( 'the_posts', array( $mpt, 'meeting_sort_upcoming_meetings' ), 10, 2 );
 			add_shortcode( 'meeting_time', array( $mpt, 'meeting_time_shortcode' ) );
-
-			// Process only the [meeting_time] shortcode in text widgets.
 			add_filter( 'widget_text', array( $mpt, 'process_widget_shortcode' ) );
 		}
 
@@ -51,34 +51,15 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 * @param WP_Post[] $posts Queried posts.
 		 * @return WP_Post[]
 		 */
-		public function meeting_set_next_meeting( $posts ) {
-			$is_meeting_list = array_reduce(
-				$posts,
-				static function ( $is_meeting, $post ) {
-					return $is_meeting && 'meeting' === $post->post_type;
-				},
-				true
-			);
-			if ( ! $is_meeting_list ) {
+		public function meeting_set_next_meeting( array $posts ): array {
+			if ( ! $this->is_meeting_list( $posts ) ) {
 				return $posts;
 			}
 
-			// for each entry, set a fake meta value to show the next date for recurring meetings.
-			array_walk(
-				$posts,
-				function ( &$post ) {
-					if ( 'meeting' !== $post->post_type ) {
-						return false;
-					}
-					$next = $this->get_next_occurrence( $post );
-					if ( $next ) {
-						$post->next_date = $next;
-					} else {
-						// if the datetime is invalid, then set the post->next_date to the start date instead.
-						$post->next_date = $post->start_date;
-					}
-				}
-			);
+			foreach ( $posts as $post ) {
+				$next            = $this->get_next_occurrence( $post );
+				$post->next_date = $next ? $next : $post->start_date;
+			}
 
 			return $posts;
 		}
@@ -86,27 +67,16 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		/**
 		 * Sort meetings by their next occurrence on the frontend.
 		 *
-		 * @param WP_Post[] $posts Queried posts.
+		 * @param WP_Post[]     $posts Queried posts.
+		 * @param WP_Query|null $query The query.
 		 * @return WP_Post[]
 		 */
-		public function meeting_sort_upcoming_meetings( $posts ) {
-			// Avoid reordering posts in the admin.
-			if ( is_admin() || ! is_array( $posts ) ) {
+		public function meeting_sort_upcoming_meetings( array $posts, ?WP_Query $query = null ): array {
+			// The admin and queries that ask for an order keep theirs.
+			if ( is_admin() || ( $query && $query->get( 'orderby' ) ) || ! $this->is_meeting_list( $posts ) ) {
 				return $posts;
 			}
 
-			$is_meeting_list = array_reduce(
-				$posts,
-				static function ( $is_meeting, $post ) {
-					return $is_meeting && 'meeting' === $post->post_type;
-				},
-				true
-			);
-			if ( ! $is_meeting_list ) {
-				return $posts;
-			}
-
-			// reorder the posts by next_date + time.
 			usort(
 				$posts,
 				static function ( $a, $b ) {
@@ -123,15 +93,31 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		}
 
 		/**
+		 * Whether every post in a list is a meeting.
+		 *
+		 * @param WP_Post[] $posts Posts.
+		 * @return bool
+		 */
+		private function is_meeting_list( array $posts ): bool {
+			foreach ( $posts as $post ) {
+				if ( 'meeting' !== $post->post_type ) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		/**
 		 * Returns the date of the next occurrence of the meeting.
 		 *
-		 * @param object $post A meeting post object.
-		 * @param string $after_datetime Find the next occurrence after this date.
+		 * @param object $post           A meeting post object.
+		 * @param string $after_datetime Find the next occurrence after this date. Defaults to 30 minutes ago, so an ongoing meeting still counts.
 		 *
-		 * @return string|bool A date string representing the date of the next occurrence; false if there is no next meeting.
+		 * @return string|false A date string representing the date of the next occurrence; false if there is no next meeting.
 		 */
-		public function get_next_occurrence( $post, $after_datetime = '-30 minutes' ) {
-			if ( ! is_object( $post ) || 'meeting' !== $post->post_type ) {
+		public function get_next_occurrence( object $post, string $after_datetime = '-30 minutes' ): string|false {
+			if ( 'meeting' !== $post->post_type ) {
 				return false;
 			}
 
@@ -139,11 +125,9 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 
 			if ( 'weekly' === $post->recurring || '1' === $post->recurring ) {
 				try {
-					// from the start date, advance the week until it's past now.
 					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
-					// minus 30 minutes to account for currently ongoing meetings.
-					$now = new DateTime( $after_datetime );
+					$now   = new DateTime( $after_datetime );
 
 					if ( $next <= $now ) {
 						$interval = $start->diff( $now );
@@ -158,11 +142,9 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				}
 			} elseif ( 'biweekly' === $post->recurring ) {
 				try {
-					// advance the start date 2 weeks at a time until it's past now.
 					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
-					// minus 30 minutes to account for currently ongoing meetings.
-					$now = new DateTime( $after_datetime );
+					$now   = new DateTime( $after_datetime );
 
 					while ( $next <= $now ) {
 						$next->modify( '+2 weeks' );
@@ -174,14 +156,11 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				}
 			} elseif ( 'occurrence' === $post->recurring ) {
 				try {
-					// advance the occurrence day in the current month until it's past now.
 					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
-					$next  = $start;
-					// minus 30 minutes to account for currently ongoing meetings.
-					$now = new DateTime( $after_datetime );
+					$now   = new DateTime( $after_datetime );
 
 					// Relative date formats only accept English weekday names, so don't use the translated ones.
-					$day_name = gmdate( 'l', strtotime( sprintf( '%s %s GMT', $post->start_date, $post->time ) ) );
+					$day_name = $start->format( 'l' );
 					$numerals = array( 'first', 'second', 'third', 'fourth' );
 
 					// Don't return occurrences before the meeting's first date.
@@ -195,9 +174,8 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 					$occurrence = $occurrence ? $occurrence : array();
 
 					// Sort so numbered weeks (1-4) come first, -1 (last) comes last.
-					$sorted = $occurrence;
+					$sorted = array_intersect( array_map( 'intval', (array) $occurrence ), array( -1, 1, 2, 3, 4 ) );
 					sort( $sorted );
-					// Move -1 from the front to the end.
 					if ( reset( $sorted ) === -1 ) {
 						array_shift( $sorted );
 						$sorted[] = -1;
@@ -230,11 +208,9 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				}
 			} elseif ( 'monthly' === $post->recurring ) {
 				try {
-					// advance the start date 1 month at a time until it's past now.
 					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
 					$next  = $start;
-					// minus 30 minutes to account for currently ongoing meetings.
-					$now = new DateTime( $after_datetime );
+					$now   = new DateTime( $after_datetime );
 
 					while ( $next <= $now ) {
 						$next->modify( '+1 month' );
@@ -254,7 +230,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		/**
 		 * Register the meeting post type.
 		 */
-		public function register_meeting_post_type() {
+		public function register_meeting_post_type(): void {
 			$labels = array(
 				'name'               => _x( 'Meetings', 'Post Type General Name', 'wporg-meeting-calendar' ),
 				'singular_name'      => _x( 'Meeting', 'Post Type Singular Name', 'wporg-meeting-calendar' ),
@@ -300,8 +276,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		/**
 		 * Register the meeting meta fields.
 		 */
-		public function register_meta() {
-			// Text fields.
+		public function register_meta(): void {
 			$text_keys = array( 'team', 'start_date', 'end_date', 'time', 'location' );
 			foreach ( $text_keys as $key ) {
 				register_meta(
@@ -317,7 +292,6 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				);
 			}
 
-			// URL fields.
 			$url_keys = array( 'link', 'wptv_url' );
 			foreach ( $url_keys as $key ) {
 				register_meta(
@@ -333,7 +307,6 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				);
 			}
 
-			// Recurring field.
 			register_meta(
 				'post',
 				'recurring',
@@ -350,7 +323,6 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				)
 			);
 
-			// 'occurrence' is an array of integers (1-4, representing week numbers in a month)
 			register_meta(
 				'post',
 				'occurrence',
@@ -378,7 +350,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 * @param string $date       Occurrence date, Y-m-d.
 		 * @return bool
 		 */
-		public function is_meeting_cancelled( $meeting_id, $date ) {
+		public function is_meeting_cancelled( int $meeting_id, string $date ): bool {
 			// Note: this assumes the meeting does occur on $date.
 			$cancellations = get_post_meta( $meeting_id, 'meeting_cancelled', false );
 			return in_array( $date, $cancellations, true );
@@ -390,7 +362,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 * @param mixed $value The parameter value.
 		 * @return bool
 		 */
-		public function is_valid_date( $value ) {
+		public function is_valid_date( mixed $value ): bool {
 			if ( ! is_string( $value ) ) {
 				return false;
 			}
@@ -407,23 +379,23 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 * @param string $date       Date, Y-m-d.
 		 * @return bool
 		 */
-		public function is_valid_occurrence( $meeting_id, $date ) {
+		public function is_valid_occurrence( int $meeting_id, string $date ): bool {
 			$meeting = get_post( $meeting_id );
 			if ( ! $meeting || 'meeting' !== $meeting->post_type ) {
 				return false;
 			}
 
-			// Non-recurring meetings only occur on their start date.
 			if ( empty( $meeting->recurring ) ) {
 				return $date === $meeting->start_date;
 			}
 
-			// Check if the date is a valid occurrence by finding the next occurrence
-			// from just before the target date and seeing if it matches.
-			$before = gmdate( 'Y-m-d H:i:s P', strtotime( $date . ' ' . $meeting->time . ' -1 minute' ) );
-			$next   = $this->get_next_occurrence( $meeting, $before );
+			// The meeting occurs on the date if that's its next occurrence from just before it.
+			$before = strtotime( $date . ' ' . $meeting->time . ' -1 minute' );
+			if ( false === $before ) {
+				return false;
+			}
 
-			return $next === $date;
+			return $this->get_next_occurrence( $meeting, gmdate( 'Y-m-d H:i:s P', $before ) ) === $date;
 		}
 
 		/**
@@ -431,35 +403,40 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 *
 		 * Also the `future_occurrences` REST field callback.
 		 *
-		 * @param WP_Post|array        $meeting     Meeting, or its prepared REST data.
-		 * @param string|null          $attr        REST field name.
-		 * @param WP_REST_Request|null $request     Request, whose `month` sets the start of the period.
+		 * @param WP_Post|array              $meeting Meeting, or its prepared REST data.
+		 * @param string|null                $attr    REST field name.
+		 * @param WP_REST_Request|array|null $request Request, whose `month` sets the start of the period.
 		 * @return string[] Occurrence dates, Y-m-d.
 		 */
-		public function get_future_occurrences( $meeting, $attr = null, $request = null ) {
+		public function get_future_occurrences( WP_Post|array $meeting, ?string $attr = null, WP_REST_Request|array|null $request = null ): array {
 			if ( is_array( $meeting ) && ! empty( $meeting['id'] ) ) {
 				// The register_rest_field callback passes a prepared array but we need the post object.
 				$meeting = get_post( $meeting['id'] );
 			}
 
-			// The month the occurrences should be within.
-			// Passed to the API endpoint as /meetings?month=2020-09-01.
+			// A `month` param, as in /meetings?month=2020-09-01, starts the period there.
 			$now = time();
 			if ( isset( $request['month'] ) && $this->is_valid_date( $request['month'] ) ) {
 				$now = strtotime( $request['month'] );
 			}
 
-			$from = DateTime::createFromFormat( 'U', strtotime( '-30 minutes', $now ) );
-			$end  = DateTime::createFromFormat( 'U', strtotime( '+2 month', $now ) );
+			$from = DateTime::createFromFormat( 'U', (string) strtotime( '-30 minutes', $now ) );
+			$end  = DateTime::createFromFormat( 'U', (string) strtotime( '+2 month', $now ) );
 			if ( $meeting->end_date ) {
-				$end = DateTime::createFromFormat( 'Y-m-d', $meeting->end_date );
+				$end = DateTime::createFromFormat( '!Y-m-d', $meeting->end_date );
+				// An unparseable end date ends the meeting, as it does in meeting_meta_query().
+				if ( ! $end ) {
+					return array();
+				}
+				// The meeting still occurs on its end date.
+				$end->setTime( 23, 59, 59 );
 			}
 			$max         = 12;
 			$occurrences = array();
 			do {
 				$next = $this->get_next_occurrence( $meeting, $from->format( 'Y-m-d H:i:s P' ) );
 				if ( $next ) {
-					$from = new DateTime( "{$next} {$meeting->time}" );
+					$from = new DateTime( "{$next} {$meeting->time} GMT" );
 					if ( $from <= $end ) {
 						$occurrences[] = $next;
 					}
@@ -475,7 +452,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 * @param string $text Widget text.
 		 * @return string
 		 */
-		public function process_widget_shortcode( $text ) {
+		public function process_widget_shortcode( string $text ): string {
 			if ( has_shortcode( $text, 'meeting_time' ) ) {
 				$pattern = get_shortcode_regex( array( 'meeting_time' ) );
 				$text    = preg_replace_callback( "/$pattern/", 'do_shortcode_tag', $text );
@@ -489,7 +466,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 * @param array|string $attr Shortcode attributes.
 		 * @return string
 		 */
-		public function meeting_time_shortcode( $attr ) {
+		public function meeting_time_shortcode( array|string $attr ): string {
 			$attr = shortcode_atts(
 				array(
 					'team'     => null,
@@ -546,12 +523,15 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 
 			$out = '';
 			foreach ( array_slice( $query->posts, 0, $limit ) as $post ) {
-				$next_meeting_datestring = $post->next_date;
-				$utc_time                = gmdate( 'H:i:s', strtotime( $post->time ) );
-				$next_meeting_iso        = $next_meeting_datestring . 'T' . $utc_time . '+00:00';
-				$next_meeting_timestamp  = strtotime( $next_meeting_datestring . ' ' . $utc_time );
-				// Skip meetings without a usable date; strtotime() reads a bare time as today.
-				if ( empty( $next_meeting_datestring ) || false === $next_meeting_timestamp ) {
+				// Skip meetings without a usable date or time; strtotime() reads a bare time as today.
+				$time = strtotime( $post->time );
+				if ( empty( $post->next_date ) || false === $time ) {
+					continue;
+				}
+				$utc_time               = gmdate( 'H:i:s', $time );
+				$next_meeting_iso       = $post->next_date . 'T' . $utc_time . '+00:00';
+				$next_meeting_timestamp = strtotime( $post->next_date . ' ' . $utc_time );
+				if ( false === $next_meeting_timestamp ) {
 					continue;
 				}
 				$date_time = new DateTime( '@' . $next_meeting_timestamp );
@@ -573,7 +553,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				$display_more = $query->found_posts - intval( $limit );
 				if ( $display_more > 0 ) {
 					/* translators: %s: Number of additional meetings. */
-					$out .= ' <a title="Click to view all meetings for this team" href="/meetings/#' . esc_attr( strtolower( $attr['team'] ) ) . '">' . sprintf( __( '(+%s more)', 'wporg-meeting-calendar' ), $display_more ) . '</a>';
+					$out .= ' <a title="Click to view all meetings for this team" href="' . esc_url( home_url( '/meetings/#' . strtolower( $attr['team'] ) ) ) . '">' . sprintf( __( '(+%s more)', 'wporg-meeting-calendar' ), $display_more ) . '</a>';
 				}
 				$out .= '<br/>';
 				$out .= '<time class="date" datetime="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . $next_meeting_display . '</time> ';
@@ -618,7 +598,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 *
 		 * @return array
 		 */
-		public function meeting_meta_query() {
+		public function meeting_meta_query(): array {
 			return array(
 				'relation' => 'OR',
 				// not recurring  AND start_date >= CURDATE() = one-time meeting today or still in future.
