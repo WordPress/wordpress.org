@@ -556,7 +556,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 					$out .= ' <a title="Click to view all meetings for this team" href="' . esc_url( home_url( '/meetings/#' . strtolower( $attr['team'] ) ) ) . '">' . sprintf( esc_html__( '(+%s more)', 'wporg-meeting-calendar' ), $display_more ) . '</a>';
 				}
 				$out .= '<br/>';
-				$out .= '<time class="date" datetime="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . $next_meeting_display . '</time> ';
+				$out .= '<time class="date" datetime="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . esc_html( $next_meeting_display ) . '</time> ';
 				/* translators: %s: Time until the meeting, e.g. "2 hours". */
 				$out .= sprintf( esc_html__( '(%s from now)', 'wporg-meeting-calendar' ), human_time_diff( $next_meeting_timestamp, time() ) );
 				if ( $post->location && $slack_channel ) {
@@ -578,7 +578,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 					}
 					if ( $next_meeting ) {
 						/* translators: %s: Date of the next meeting. */
-						$out .= '<i>' . sprintf( esc_html__( 'This event is cancelled. The next meeting is scheduled for %s.', 'wporg-meeting-calendar' ), $next_meeting ) . '</i>';
+						$out .= '<i>' . sprintf( esc_html__( 'This event is cancelled. The next meeting is scheduled for %s.', 'wporg-meeting-calendar' ), esc_html( $next_meeting ) ) . '</i>';
 					} else {
 						$out .= '<i>' . esc_html__( 'This event is cancelled.', 'wporg-meeting-calendar' ) . '</i>';
 					}
