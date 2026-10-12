@@ -159,9 +159,18 @@
 		},
 
 		uncheckall: function() {
+			var self = this;
+
 			this.each( function( project ) {
 				project.set( 'checked', false );
 			});
+
+			if ( self.project && self.project._subProjects ) {
+				_.each( self.project._subProjects, function( sub ) {
+					projects.selection.remove( sub.id );
+				} );
+				self.project.checkForCheckedSubProjects();
+			}
 		},
 
 		doSearch: function( value ) {
@@ -606,6 +615,7 @@
 		var $projectAllCheckbox = $projectAll.find( 'input' );
 
 		if ( projects.selection.get( 'all' ) ) {
+			projects.selection.reset( [ { id: 'all' } ] );
 			$projectAllCheckbox.prop( 'checked', true );
 			$projectAll.addClass( 'active' );
 		}
@@ -625,7 +635,7 @@
 			var checked = $( this ).prop( 'checked' );
 
 			if ( checked ) {
-				projects.selection.add( { id: 'all' } );
+				projects.selection.reset( [ { id: 'all' } ] );
 				$window.trigger( 'uncheck-other-projects.rosetta' );
 			} else {
 				projects.selection.remove( 'all' );
