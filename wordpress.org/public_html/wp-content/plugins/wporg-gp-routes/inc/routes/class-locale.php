@@ -1119,8 +1119,9 @@ class Locale extends GP_Route {
 	 * @return array List of top level projects.
 	 */
 	public function get_active_top_level_projects() {
-		$cache_key = 'active_top_level_projects';
-		$projects  = wp_cache_get( $cache_key, $this->cache_group );
+		$last_updated = get_option( 'wporg_projects_last_updated', 0 );
+		$cache_key    = 'active_top_level_projects:' . $last_updated;
+		$projects     = wp_cache_get( $cache_key, $this->cache_group );
 
 		if ( false === $projects ) {
 			global $wpdb;
