@@ -241,7 +241,7 @@ class Locale extends GP_Route {
 			if ( $parent ) {
 				$project = $parent;
 
-				// In the case of Plugins, we may need to go up another level yet
+				// In the case of Plugins, we may need to go up another level yet.
 				if ( ! empty( $parent->parent_project_id ) ) {
 					$grand_parent = GP::$project->get( $parent->parent_project_id );
 					if ( $grand_parent ) {
