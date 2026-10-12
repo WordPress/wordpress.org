@@ -114,7 +114,7 @@ class Locale extends GP_Route {
 			)
 		);
 
-		if ( ! $paged_sub_projects ) {
+		if ( $page > 1 && empty( $paged_sub_projects['projects'] ) ) {
 			return $this->die_with_404();
 		}
 
