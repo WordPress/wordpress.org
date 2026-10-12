@@ -485,7 +485,7 @@ class Locale extends GP_Route {
 			// Batch-load only missing users directly from wp_users without touching usermeta.
 			if ( ! empty( $uncached_user_ids ) ) {
 				$user_ids_sql = implode( ', ', $uncached_user_ids );
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $user_ids_sql contains integer-cast IDs.
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $user_ids_sql contains sanitized, integer-cast IDs.
 				$users = $wpdb->get_results( "SELECT * FROM {$wpdb->users} WHERE ID IN ( {$user_ids_sql} )" );
 				foreach ( $users as $user ) {
 					update_user_caches( $user );
