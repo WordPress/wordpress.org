@@ -573,7 +573,7 @@
 				new Uint8Array( buffer )
 					.reduce( ( data, byte ) => data + String.fromCharCode( byte ), '' )
 			);
-		} );		
+		} );
 	};
 
 	projects.decompress = async function( data ) {
