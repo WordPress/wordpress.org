@@ -676,7 +676,7 @@ class Locale extends GP_Route {
 				AND active = 1
 			ORDER BY id ASC
 		";
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query uses %d placeholder handled internally by GlotPress GP_Project::many().
 		$_projects = $project->many( $projects_sql, $project->id );
 
 		$projects = [];
@@ -694,7 +694,6 @@ class Locale extends GP_Route {
 					AND active = 1
 				ORDER BY id ASC
 			";
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$sub_sub_projects = $project->many( $sub_sub_projects_sql );
 
 			// Group child projects by parent.
@@ -1025,16 +1024,16 @@ class Locale extends GP_Route {
 
 		// Fetch total count for pagination calculations.
 		if ( $stats_where ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $count_sql is dynamically constructed for pagination and safely bound via $sql_params.
 			$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$sql_params ) );
 		} else {
 			// Strip locale and set_slug parameters since stats table is omitted from $count_sql.
 			$count_params = array_slice( $sql_params, 2 );
 			if ( ! empty( $count_params ) ) {
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $count_sql is dynamically constructed for pagination and safely bound via $count_params.
 				$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$count_params ) );
 			} else {
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $count_sql contains only hardcoded clauses and sanitized constraints with no unbound user input.
 				$results = (int) $wpdb->get_var( $count_sql );
 			}
 		}
