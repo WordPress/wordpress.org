@@ -472,7 +472,25 @@ class Locale extends GP_Route {
 		$user_ids = array_unique( array_filter( array_map( 'intval', $user_ids ) ) );
 
 		if ( ! empty( $user_ids ) ) {
-			cache_users( $user_ids );
+			// Check which users are already in the object cache using the public Cache API.
+			$cached_users      = wp_cache_get_multiple( $user_ids, 'users' );
+			$uncached_user_ids = [];
+
+			foreach ( $user_ids as $id ) {
+				if ( empty( $cached_users[ $id ] ) ) {
+					$uncached_user_ids[] = $id;
+				}
+			}
+
+			// Batch-load only missing users directly from wp_users without touching usermeta.
+			if ( ! empty( $uncached_user_ids ) ) {
+				$user_ids_sql = implode( ', ', $uncached_user_ids );
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $user_ids_sql contains integer-cast IDs.
+				$users = $wpdb->get_results( "SELECT * FROM {$wpdb->users} WHERE ID IN ( {$user_ids_sql} )" );
+				foreach ( $users as $user ) {
+					update_user_caches( $user );
+				}
+			}
 		}
 
 		$editor_ids = [];
