@@ -204,11 +204,12 @@
 			results = this.filter( function( project ) {
 				var haystack = _.compact( [ project.get( 'name' ), project.get( 'slug' ) ] );
 				if ( match.test( haystack.join( ' ' ) ) ) {
-					project.set( 'matchScore', 0, { silent: true } );
+					var maxScore = 0;
 					_.each( haystack, function( word ) {
-						var score = word.score( term, .5 );
-						project.set( 'matchScore', Math.max( score, project.get( 'matchScore' ) ) );
+						maxScore = Math.max( maxScore, String( word ).score( term, 0.5 ) );
 					});
+					project.set( 'matchScore', maxScore, { silent: true } );
+
 					return true;
 				}
 				return false;
@@ -512,7 +513,7 @@
 		var cachedTime = Number( lastUpdated );
 		var serverTime = Number( projects.settings.lastUpdated );
 
-		if ( isNaN( cachedTime ) || cachedTime < serverTime ) {
+		if ( isNaN( serverTime ) || isNaN( cachedTime ) || cachedTime < serverTime ) {
 			return Promise.reject();
 		}
 
@@ -552,10 +553,10 @@
 		var stream = new CompressionStream( 'gzip' ),
 			streamWriter = stream.writable.getWriter();
 
-		streamWriter.write(
+		await streamWriter.write(
 			new TextEncoder().encode( data )
 		);
-		streamWriter.close();
+		await streamWriter.close();
 
 		return new Response( stream.readable ).arrayBuffer().then( function( buffer ) {
 			// Base64 encode it, so it can be stored in localStorage
@@ -576,8 +577,8 @@
 			stream = new DecompressionStream( 'gzip' ),
 			streamWriter = stream.writable.getWriter();
 
-		streamWriter.write( buffer );
-		streamWriter.close();
+		await streamWriter.write( buffer );
+		await streamWriter.close();
 
 		return new Response( stream.readable ).arrayBuffer().then( function( arrayBuffer ) {
 			return new TextDecoder().decode( arrayBuffer );
@@ -603,6 +604,11 @@
 
 		var $projectAll = $( '#project-all' );
 		var $projectAllCheckbox = $projectAll.find( 'input' );
+
+		if ( projects.selection.get( 'all' ) ) {
+			$projectAllCheckbox.prop( 'checked', true );
+			$projectAll.addClass( 'active' );
+		}
 
 		$projectAll.on( 'click', function() {
 			var $el = $( this );
@@ -640,8 +646,10 @@
 		});
 
 		// Confirm removal of CLPTE status.
+		var hadTranslatorStatus = projects.settings.accessList && projects.settings.accessList.length > 0;
+
 		$( '#project-access-list' ).closest( 'form' ).on( 'submit', function( e ) {
-			if ( ! $( '#project-access-list' ).val() ) {
+			if ( hadTranslatorStatus && ! $( '#project-access-list' ).val() ) {
 				if ( ! confirm( l10n.removeTranslator ) ) {
 					e.preventDefault();
 				}
