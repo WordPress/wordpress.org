@@ -104,6 +104,17 @@ class Locale extends GP_Route {
 					break;
 				}
 			}
+
+			if ( 'waiting' === $project_path ) {
+				$redirect_url = gp_url( sprintf( '/locale/%s/%s/%s', $locale_slug, $set_slug, $default_project_tab ) );
+
+				if ( ! empty( $_GET ) ) {
+					$redirect_url = add_query_arg( wp_unslash( $_GET ), $redirect_url );
+				}
+
+				wp_safe_redirect( $redirect_url );
+				exit;
+			}
 		}
 
 		$project_path = $project_path ?: $default_project_tab;
@@ -150,12 +161,11 @@ class Locale extends GP_Route {
 
 		$contributors_count = Plugin::get_contributors_count();
 
-		$can_create_locale_glossary      = GP::$permission->current_user_can( 'admin' );
-		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
-		$locale_glossary                 = false;
-		if ( $locale_glossary_translation_set ) {
-			$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
-		}
+		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
+		[
+			'translation_set' => $locale_glossary_translation_set,
+			'glossary'        => $locale_glossary,
+		] = $this->get_locale_glossary_details( $locale_slug, $set_slug );
 
 		$this->tmpl( 'locale-projects', get_defined_vars() );
 	}
@@ -214,12 +224,11 @@ class Locale extends GP_Route {
 
 		$locale_contributors = $this->get_locale_contributors( $sub_project, $locale_slug, $set_slug );
 
-		$can_create_locale_glossary      = GP::$permission->current_user_can( 'admin' );
-		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
-		$locale_glossary                 = false;
-		if ( $locale_glossary_translation_set ) {
-			$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
-		}
+		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
+		[
+			'translation_set' => $locale_glossary_translation_set,
+			'glossary'        => $locale_glossary,
+		] = $this->get_locale_glossary_details( $locale_slug, $set_slug );
 
 		$this->tmpl( 'locale-project', get_defined_vars() );
 	}
@@ -329,6 +338,30 @@ class Locale extends GP_Route {
 			$locale,
 			2 // wp/dev
 		) );
+	}
+
+	/**
+	 * Retrieves the locale glossary and its translation set for a given locale and set.
+	 *
+	 * @param string $locale_slug Slug of the locale.
+	 * @param string $set_slug    Slug of the translation set.
+	 * @return array {
+	 *     @type GP_Translation_Set|false $translation_set The root translation set, if found.
+	 *     @type GP_Glossary|false        $glossary        The glossary instance, if found.
+	 * }
+	 */
+	private function get_locale_glossary_details( $locale_slug, $set_slug ) {
+		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
+		$glossary        = false;
+
+		if ( $translation_set ) {
+			$glossary = GP::$glossary->by_set_id( $translation_set->id );
+		}
+
+		return [
+			'translation_set' => $translation_set,
+			'glossary'        => $glossary,
+		];
 	}
 
 	/**
@@ -860,7 +893,7 @@ class Locale extends GP_Route {
 				$allowed_projects = array_diff( $allowed_projects, $base_level_project_ids );
 
 				// Check to see if they can approve for all projects in this locale.
-				if ( Rosetta_Roles::LOCALE_MANAGER_ROLE === $role || in_array( 'all', $allowed_projects ) ) {
+				if ( Rosetta_Roles::LOCALE_MANAGER_ROLE === $role || in_array( 'all', $allowed_projects, true ) ) {
 					$can_approve_for_all = true;
 					$allowed_projects = array();
 				}
