@@ -503,9 +503,16 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				$attr['team'] = 'Docs';
 			}
 
-			if ( ! has_action( 'wp_footer', array( $this, 'time_conversion_script' ) ) ) {
-				add_action( 'wp_footer', array( $this, 'time_conversion_script' ), 999 );
-			}
+			wp_enqueue_script(
+				'wporg-meeting-time-conversion',
+				plugins_url( 'time-conversion.js', __FILE__ ),
+				array(),
+				(string) filemtime( __DIR__ . '/time-conversion.js' ),
+				array(
+					'in_footer' => true,
+					'strategy'  => 'defer',
+				)
+			);
 
 			// If we're on a network, assume the calendar exists on the main site.
 			if ( function_exists( 'switch_to_blog' ) ) {
@@ -645,37 +652,6 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 						),
 					),
 				),
-			);
-		}
-
-		/**
-		 * Print the script that converts meeting times to the visitor's time zone.
-		 */
-		public function time_conversion_script() {
-			wp_print_inline_script_tag(
-				<<<'JS'
-	var parse_date = function (text) {
-		var m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})\+00:00$/.exec(text);
-		if (!m) {
-			return null;
-		}
-		return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]));
-	}
-	var format_time = function (d) {
-		return d.toLocaleTimeString(navigator.language, {weekday: 'long', hour: '2-digit', minute: '2-digit', timeZoneName: 'short'});
-	}
-
-	var nodes = document.getElementsByTagName('time');
-	for (var i=0; i<nodes.length; ++i) {
-		var node = nodes[i];
-		if (node.className === 'date') {
-			var d = parse_date(node.getAttribute('datetime'));
-			if (d) {
-				node.textContent = format_time(d);
-			}
-		}
-	}
-	JS
 			);
 		}
 	}
