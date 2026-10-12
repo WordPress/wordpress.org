@@ -240,14 +240,14 @@ class Locale extends GP_Route {
 			$parent = GP::$project->get( $sub_project->parent_project_id );
 			if ( $parent ) {
 				$project = $parent;
-			}
 
-			// In the case of Plugins, we may need to go up another level yet
-			if ( ! empty( $parent->parent_project_id ) ) {
-				$grand_parent = GP::$project->get( $parent->parent_project_id );
-				if ( $grand_parent ) {
-					$sub_project = $parent;
-					$project     = $grand_parent;
+				// In the case of Plugins, we may need to go up another level yet
+				if ( ! empty( $parent->parent_project_id ) ) {
+					$grand_parent = GP::$project->get( $parent->parent_project_id );
+					if ( $grand_parent ) {
+						$sub_project = $parent;
+						$project     = $grand_parent;
+					}
 				}
 			}
 		}
@@ -1070,6 +1070,7 @@ class Locale extends GP_Route {
 				// Fall through to include both Themes and Plugins
 			case 'wp-themes':
 				// Theme favorites are stored as theme slugs, these map 1:1 to GlotPress projects.
+				// Cast to array and filter to support both arrays and legacy/scalar string values.
 				$raw_theme_favorites = array_filter( (array) get_user_meta( $user_id, 'theme_favorites', true ) );
 				if ( ! empty( $raw_theme_favorites ) ) {
 					$theme_favorites = array_map(
@@ -1087,6 +1088,7 @@ class Locale extends GP_Route {
 
 			case 'wp-plugins':
 				// Plugin favorites are stored as plugin slugs, these map 1:1 to GlotPress projects.
+				// Cast to array and filter to support both arrays and legacy/scalar string values.
 				$raw_plugin_favorites = array_filter( (array) get_user_meta( $user_id, 'plugin_favorites', true ) );
 				if ( ! empty( $raw_plugin_favorites ) ) {
 					$plugin_favorites = array_map(
