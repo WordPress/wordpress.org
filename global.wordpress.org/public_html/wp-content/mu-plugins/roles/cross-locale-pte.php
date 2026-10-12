@@ -175,11 +175,21 @@ class Cross_Locale_PTE {
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-			$wpdb->query( $wpdb->prepare( "
-				DELETE FROM {$wpdb->wporg_translation_editors}
+			$placeholders = implode( ', ', array_fill( 0, count( $values_to_remove ), '%d' ) );
+			
+			$query = $wpdb->prepare(
+				"DELETE FROM {$wpdb->wporg_translation_editors}
 				WHERE `user_id` = %d AND `locale` = %s
-				AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
-			self::$user->ID, self::ALL_LOCALES ) );
+				AND project_id IN ($placeholders)",
+				array_merge(
+					array(
+						self::$user->ID,
+						self::ALL_LOCALES
+						 ),
+					$values_to_remove
+				)
+			);
+			$wpdb->query( $query );
 		}
 
 		wp_safe_redirect( add_query_arg( array( 'user_id' => self::$user->ID ), menu_page_url( 'cross-locale-pte', false ) ) );
@@ -248,6 +258,13 @@ class Cross_Locale_PTE {
 			JOIN translate_projects p ON te.project_id = p.id
 			WHERE te.locale = %s
 		", self::ALL_LOCALES ) );
+
+		if ( empty( $rows ) ) {
+			return array();
+		}
+
+		$user_ids_to_prime = array_unique( wp_list_pluck( $rows, 'user_id' ) );
+		cache_users( $user_ids_to_prime );
 
 		$user_ids = array();
 		foreach ( $rows as $row ) {
