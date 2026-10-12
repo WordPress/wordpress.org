@@ -67,32 +67,62 @@ final class Tags {
 	}
 
 	/**
-	 * Tags a conversation with HelpScout's tags it doesn't have yet; tags it has stay, so agents' changes are kept.
+	 * A HelpScout tag's name, as HelpScout gives it.
 	 *
-	 * @param int     $conversation_id FreeScout conversation ID.
-	 * @param array[] $tags            HelpScout's tags, each with `tag` and `color`.
-	 * @return void
+	 * @param mixed $tag Tag, with `tag` or `name`; or its name.
+	 * @return string
 	 */
-	public static function attach( int $conversation_id, array $tags ): void {
+	public static function name( $tag ): string {
+		if ( is_array( $tag ) ) {
+			return (string) ( $tag['tag'] ?? $tag['name'] ?? '' );
+		}
+
+		return is_scalar( $tag ) ? (string) $tag : '';
+	}
+
+	/**
+	 * Brings a conversation's tags up to date with HelpScout's, keeping agents' changes.
+	 *
+	 * Only tags HelpScout added since the last import are added, so those agents removed, or administrators deleted,
+	 * stay away. Tags HelpScout removed since are taken away, if the import added them.
+	 *
+	 * @param int         $conversation_id FreeScout conversation ID.
+	 * @param array       $tags            HelpScout's tags, each with `tag` and `color`.
+	 * @param bool[]|null $written         What the last import returned; null if none gave the conversation tags.
+	 * @return bool[] HelpScout's tags by their name, and whether the import added each, to give the next import.
+	 */
+	public static function sync( int $conversation_id, array $tags, ?array $written ): array {
+		$colors = array();
 		foreach ( $tags as $tag ) {
-			$name = is_array( $tag ) ? self::normalize( (string) ( $tag['tag'] ?? '' ) ) : '';
-			if ( '' === $name ) {
+			$name = self::normalize( self::name( $tag ) );
+			if ( '' !== $name && ! isset( $colors[ $name ] ) ) {
+				$colors[ $name ] = is_array( $tag ) ? (string) ( $tag['color'] ?? '' ) : '';
+			}
+		}
+
+		$written = (array) $written;
+		$added   = array();
+		foreach ( $colors as $name => $color ) {
+			$tag_id = (int) \DB::table( 'tags' )->where( 'name', $name )->value( 'id' );
+
+			// HelpScout had it last time already: it's added only once.
+			if ( array_key_exists( $name, $written ) ) {
+				$added[ $name ] = ! empty( $written[ $name ] ) && $tag_id && self::tagged( $conversation_id, $tag_id );
 				continue;
 			}
 
-			$tag_id = (int) \DB::table( 'tags' )->where( 'name', $name )->value( 'id' );
 			if ( ! $tag_id ) {
 				$tag_id = (int) \DB::table( 'tags' )->insertGetId(
 					array(
 						'name'    => $name,
-						'color'   => self::color( (string) ( $tag['color'] ?? '' ) ),
+						'color'   => self::color( $color ),
 						'counter' => 0,
 					)
 				);
 			}
 
-			$tagged = \DB::table( 'conversation_tag' )->where( 'conversation_id', $conversation_id )->where( 'tag_id', $tag_id )->exists();
-			if ( ! $tagged ) {
+			$added[ $name ] = ! self::tagged( $conversation_id, $tag_id );
+			if ( $added[ $name ] ) {
 				\DB::table( 'conversation_tag' )->insert(
 					array(
 						'conversation_id' => $conversation_id,
@@ -102,6 +132,27 @@ final class Tags {
 				\DB::table( 'tags' )->where( 'id', $tag_id )->increment( 'counter' );
 			}
 		}
+
+		foreach ( $written as $name => $was_added ) {
+			$tag_id = $was_added && ! isset( $colors[ $name ] ) ? (int) \DB::table( 'tags' )->where( 'name', (string) $name )->value( 'id' ) : 0;
+			if ( $tag_id && self::tagged( $conversation_id, $tag_id ) ) {
+				\DB::table( 'conversation_tag' )->where( 'conversation_id', $conversation_id )->where( 'tag_id', $tag_id )->delete();
+				\DB::table( 'tags' )->where( 'id', $tag_id )->where( 'counter', '>', 0 )->decrement( 'counter' );
+			}
+		}
+
+		return $added;
+	}
+
+	/**
+	 * Whether a conversation has a tag.
+	 *
+	 * @param int $conversation_id FreeScout conversation ID.
+	 * @param int $tag_id          Tag ID.
+	 * @return bool
+	 */
+	private static function tagged( int $conversation_id, int $tag_id ): bool {
+		return \DB::table( 'conversation_tag' )->where( 'conversation_id', $conversation_id )->where( 'tag_id', $tag_id )->exists();
 	}
 
 	/**

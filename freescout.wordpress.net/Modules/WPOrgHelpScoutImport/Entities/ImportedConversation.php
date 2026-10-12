@@ -23,6 +23,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null    $closer_id        HelpScout user who closed it.
  * @property string|null $tags             JSON list of HelpScout's tag names.
  * @property string|null $custom_fields    JSON list of HelpScout's custom fields, with their names and values.
+ * @property string|null $written_tags     JSON object of HelpScout's tags the last import gave the Tags module, and
+ *                                         whether it added each; null until one did.
+ * @property string|null $written_values   JSON object of the values the last import gave the Custom Fields module, by
+ *                                         custom field ID; null until one did.
  */
 final class ImportedConversation extends Model {
 
@@ -38,5 +42,5 @@ final class ImportedConversation extends Model {
 	 *
 	 * @var array
 	 */
-	protected $fillable = array( 'helpscout_id', 'helpscout_number', 'conversation_id', 'creator_id', 'assignee_id', 'closer_id', 'tags', 'custom_fields' );
+	protected $fillable = array( 'helpscout_id', 'helpscout_number', 'conversation_id', 'creator_id', 'assignee_id', 'closer_id', 'tags', 'custom_fields', 'written_tags', 'written_values' );
 }
