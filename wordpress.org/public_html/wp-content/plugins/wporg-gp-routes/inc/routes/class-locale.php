@@ -97,9 +97,9 @@ class Locale extends GP_Route {
 		}
 
 		// Filter out the Waiting Tab if the current user cannot validate strings
-		if ( 'waiting' != $default_project_tab ) {
-			foreach ( $top_level_projects as $i => $project ) {
-				if ( 'waiting' == $project->slug ) {
+		if ( 'waiting' !== $default_project_tab ) {
+			foreach ( $top_level_projects as $i => $tl_project ) {
+				if ( 'waiting' === $tl_project->slug ) {
 					unset( $top_level_projects[ $i ] );
 					break;
 				}
@@ -298,7 +298,7 @@ class Locale extends GP_Route {
 			case 'wp-plugins':
 				$icon = '';
 
-				if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) ) {
+				if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
 					$directory_post_id = gp_get_meta( 'wp-plugins', $sub_project->id, 'directory-post-id' );
 					if ( $directory_post_id ) {
 						switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
@@ -864,7 +864,7 @@ class Locale extends GP_Route {
 
 		// Special Waiting Project Tab
 		// This removes the parent_project_id restriction and replaces it with all-translation-editor-projects
-		if ( 'waiting' == $project->slug && is_user_logged_in() && $this->roles_adapter ) {
+		if ( 'waiting' === $project->slug && is_user_logged_in() && $this->roles_adapter ) {
 
 			if ( ! $filter ) {
 				$filter = 'strings-waiting-and-fuzzy';
@@ -956,7 +956,7 @@ class Locale extends GP_Route {
 		$filter_order_by = '';
 		$sort_order = 'DESC';
 		$filter_name = $filter;
-		if ( $filter && '-asc' == substr( $filter, -4 ) ) {
+		if ( $filter && '-asc' === substr( $filter, -4 ) ) {
 			$sort_order = 'ASC';
 			$filter_name = substr( $filter, 0, -4 );
 		}
@@ -991,14 +991,13 @@ class Locale extends GP_Route {
 
 				if ( ! empty( $user_fav_projects ) ) {
 					$favorite_path_placeholders = implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) );
-
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $favorite_path_placeholders contains only safe %s placeholders.
-					$tp_where .= $wpdb->prepare( " AND tp.path IN( {$favorite_path_placeholders} )", $user_fav_projects );
+					$tp_where                  .= " AND tp.path IN( {$favorite_path_placeholders} )";
+					$sql_params                 = array_merge( $sql_params, $user_fav_projects );
 				} else {
 					$tp_where .= ' AND 0=1';
 				}
-				$filter_order_by = 'stats.untranslated > 0 DESC, tp.name ASC';
 
+				$filter_order_by = 'stats.untranslated > 0 DESC, tp.name ASC';
 				break;
 
 			case 'strings-remaining':
