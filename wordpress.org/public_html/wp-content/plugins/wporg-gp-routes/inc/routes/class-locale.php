@@ -55,8 +55,6 @@ class Locale extends GP_Route {
 	 * @param bool|string $project_path Path of a project.
 	 */
 	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = false ) {
-		global $wpdb;
-
 		$per_page = 24;
 		$page = (int) gp_get( 'page', 1 );
 		$search = gp_get( 's', '' );
