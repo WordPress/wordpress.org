@@ -636,7 +636,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			foreach ( $projects_added as $project_id ) {
 				if ( isset( $projects[ $project_id ] ) ) {
 					$parent = $this->get_parent_project( $project_tree, $project_id );
-					if ( $parent->id != $project_id ) {
+					if ( is_object( $parent ) && (int) $parent->id !== (int) $project_id ) {
 						$name = sprintf(
 							/* translators: 1: Parent project name, 2: Child project name */
 							__( '%1$s &rarr; %2$s', 'rosetta' ),
