@@ -184,6 +184,12 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 					$day_name = gmdate( 'l', strtotime( sprintf( '%s %s GMT', $post->start_date, $post->time ) ) );
 					$numerals = array( 'first', 'second', 'third', 'fourth' );
 
+					// Don't return occurrences before the meeting's first date.
+					$earliest = ( clone $start )->modify( '-1 second' );
+					if ( $earliest > $now ) {
+						$now = $earliest;
+					}
+
 					$next       = clone $now;
 					$occurrence = $post->ID ? get_post_meta( $post->ID, 'occurrence', true ) : $post->occurrence;
 					$occurrence = $occurrence ? $occurrence : array();
@@ -535,7 +541,8 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				)
 			);
 
-			$limit = $attr['limit'] > 0 ? $attr['limit'] : count( $query->posts );
+			$limit = (int) $attr['limit'];
+			$limit = $limit > 0 ? $limit : count( $query->posts );
 
 			$out = '';
 			foreach ( array_slice( $query->posts, 0, $limit ) as $post ) {
