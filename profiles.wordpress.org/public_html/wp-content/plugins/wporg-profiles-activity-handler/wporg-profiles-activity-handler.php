@@ -172,10 +172,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		/**
 		 * Checks that required arguments are defined and have a value.
 		 *
-		 * Ends request and reports on any missing arguments, if necessary.
-		 *
 		 * @param array $args The array of required argument names.
 		 * @param array $data The request data to check against.
+		 * @return true|WP_Error True if all arguments are present, WP_Error listing the missing ones otherwise.
 		 */
 		protected function require_args( $args, array $data ) {
 			$missing = array();
@@ -187,9 +186,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			if ( $missing ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
-				die( '-1 Required argument(s) are missing: ' . implode( ', ', $missing ) );
+				return new WP_Error( 'missing_args', 'Required argument(s) are missing: ' . implode( ', ', $missing ), array( 'status' => 400 ) );
 			}
+
+			return true;
 		}
 
 		/**
@@ -429,16 +429,17 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			// Check for required args.
 			$required_args = array( 'forum_id' );
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
-				$required_args[] = 'message';
-				$required_args[] = 'url';
-				$required_args   = array_merge( $required_args, array( 'title', 'site', 'message', 'url' ) );
+				$required_args = array_merge( $required_args, array( 'title', 'site', 'message', 'url' ) );
 			}
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ) {
 				$required_args[] = 'topic_id';
 			} else {
 				$required_args[] = 'post_id';
 			}
-			$this->require_args( $required_args, $data );
+			$has_required_args = $this->require_args( $required_args, $data );
+			if ( is_wp_error( $has_required_args ) ) {
+				return $has_required_args;
+			}
 
 			// Determine 'item_id' value based on context.
 			$item_id = in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ?
