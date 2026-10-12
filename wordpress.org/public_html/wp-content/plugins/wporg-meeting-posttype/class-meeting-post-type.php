@@ -553,7 +553,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				$display_more = $query->found_posts - intval( $limit );
 				if ( $display_more > 0 ) {
 					/* translators: %s: Number of additional meetings. */
-					$out .= ' <a title="Click to view all meetings for this team" href="' . esc_url( home_url( '/meetings/#' . strtolower( $attr['team'] ) ) ) . '">' . sprintf( __( '(+%s more)', 'wporg-meeting-calendar' ), $display_more ) . '</a>';
+					$out .= ' <a title="Click to view all meetings for this team" href="' . esc_url( home_url( '/meetings/#' . strtolower( $attr['team'] ) ) ) . '">' . sprintf( esc_html__( '(+%s more)', 'wporg-meeting-calendar' ), $display_more ) . '</a>';
 				}
 				$out .= '<br/>';
 				$out .= '<time class="date" datetime="' . esc_attr( $next_meeting_iso ) . '" title="' . esc_attr( $next_meeting_iso ) . '">' . $next_meeting_display . '</time> ';
