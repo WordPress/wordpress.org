@@ -16,9 +16,11 @@ use Illuminate\Support\Facades\Storage;
 use Modules\WPOrgHelpScoutImport\Providers\WPOrgHelpScoutImportServiceProvider;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Tests\Support\FakeHelpScout;
+use Modules\WPOrgHelpScoutImport\Tests\Support\PaidModules;
 use WordPressdotorg\FreeScout\Tests\TestCase;
 
 require_once __DIR__ . '/Support/FakeHelpScout.php';
+require_once __DIR__ . '/Support/PaidModules.php';
 
 /**
  * Registers the module against a fake HelpScout with one closed conversation of four threads, and its mailbox's user.
@@ -79,6 +81,17 @@ abstract class ImportTestCase extends TestCase {
 
 		$this->answer_directory( array( self::helpscout_user( 55, 'Ada', 'Agent', 'agent@example.org' ) ) );
 		$this->answer_threads( self::CONVERSATION_ID, $this->threads() );
+	}
+
+	/**
+	 * Forgets the teams the test made, which the database forgets with them.
+	 *
+	 * @return void
+	 */
+	protected function tearDown(): void {
+		PaidModules::forget_teams();
+
+		parent::tearDown();
 	}
 
 	/**

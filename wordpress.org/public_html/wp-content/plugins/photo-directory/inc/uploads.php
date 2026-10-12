@@ -883,13 +883,14 @@ class Uploads {
 				'post_title' => $name,
 			] );
 
-			// Change the same fields in the attachment to obfuscate the original
-			// filename.
+			// Obfuscate the original filename, and use the photo's description over Frontend Uploader's copy of the request.
 			$photo_name = wp_unique_post_slug( $name . '-photo', $photo->ID, $photo->post_status, $photo->post_type, $post->ID );
 			wp_update_post( [
-				'ID'         => $photo->ID,
-				'post_name'  => $photo_name,
-				'post_title' => $photo_name,
+				'ID'           => $photo->ID,
+				'post_name'    => $photo_name,
+				'post_title'   => $photo_name,
+				'post_content' => wp_slash( $post->post_content ),
+				'post_excerpt' => wp_slash( $post->post_content ),
 			] );
 		}
 	}

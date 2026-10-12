@@ -244,15 +244,17 @@ class Theme_Description_Shortcodes_Test extends TestCase {
 	}
 
 	/**
-	 * Creates a published repopackage to stand in for a listed theme.
+	 * Creates a repopackage to stand in for a listed theme.
+	 *
+	 * @param string $status The post status, published unless the test says otherwise.
 	 *
 	 * @return int The post ID.
 	 */
-	protected function create_theme_post(): int {
+	protected function create_theme_post( string $status = 'publish' ): int {
 		$post_id = wp_insert_post(
 			array(
 				'post_type'    => 'repopackage',
-				'post_status'  => 'publish',
+				'post_status'  => $status,
 				'post_title'   => 'Fixture Theme',
 				'post_name'    => 'fixture-theme',
 				'post_content' => 'The description that is already stored.',
@@ -363,5 +365,47 @@ class Theme_Description_Shortcodes_Test extends TestCase {
 		wporg_themes_approve_version( $post_id, '1.0', 'old' );
 
 		$this->assertSame( 'A tidy little theme', get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * A first approval publishes the post without undoing the encoding.
+	 *
+	 * @return void
+	 */
+	public function test_first_approval_keeps_the_description_inert(): void {
+		$post_id = $this->create_theme_post( 'draft' );
+
+		$this->serve_style_css( self::DIRECT );
+		wporg_themes_approve_version( $post_id, '1.0', 'new' );
+
+		$post = get_post( $post_id );
+
+		$this->assertSame( 'publish', $post->post_status );
+		$this->assertStringNotContainsString( '[', $post->post_content );
+		$this->assertSame( self::DIRECT, html_entity_decode( $post->post_content ) );
+	}
+
+	/**
+	 * A later save of the post, such as a status change, keeps the encoding.
+	 *
+	 * @return void
+	 */
+	public function test_later_save_keeps_the_description_inert(): void {
+		$post_id = $this->create_theme_post();
+
+		$this->serve_style_css( self::DIRECT );
+		wporg_themes_approve_version( $post_id, '1.0', 'old' );
+
+		wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		$stored = get_post( $post_id )->post_content;
+
+		$this->assertStringNotContainsString( '[', $stored );
+		$this->assertSame( self::DIRECT, html_entity_decode( $stored ) );
 	}
 }

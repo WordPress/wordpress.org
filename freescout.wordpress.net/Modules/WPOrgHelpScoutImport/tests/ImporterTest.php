@@ -16,6 +16,7 @@ use App\Thread;
 use App\User;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Modules\Teams\Providers\TeamsServiceProvider;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
@@ -24,6 +25,7 @@ use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
 use Modules\WPOrgHelpScoutImport\Tests\Support\FakeHelpScout;
+use Modules\WPOrgHelpScoutImport\Tests\Support\PaidModules;
 
 require_once __DIR__ . '/ImportTestCase.php';
 
@@ -204,6 +206,195 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
+	 * New senders, with an email or without, aren't announced, like to webhooks; senders FreeScout has are reused.
+	 *
+	 * @return void
+	 */
+	public function test_new_senders_arent_announced(): void {
+		$created = array();
+		\Eventy::addAction(
+			'customer.created',
+			static function ( $customer ) use ( &$created ): void {
+				$created[] = $customer->id;
+			}
+		);
+		$existing = $this->create_sender( 'friend@example.org' );
+		$people   = new People();
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$caller = $people->sender(
+			array(
+				'id'    => 4244,
+				'type'  => 'customer',
+				'first' => 'Cal',
+				'last'  => 'Ler',
+			)
+		);
+		$friend = $people->sender( self::sender( 'Friend@Example.org.', 'Fri', 'End' ) );
+
+		$this->assertSame( array(), $created );
+		$sender = $this->imported_conversation()->customer;
+		$this->assertSame( 'Sam', $sender->first_name );
+		$this->assertSame( (int) $sender->id, (int) \App\Email::query()->where( 'email', 'sam@example.org' )->value( 'customer_id' ) );
+		$this->assertSame( 'Cal', $caller->first_name );
+		$this->assertNotNull( $caller->id );
+		$this->assertSame( (int) $existing->id, (int) $friend->id );
+	}
+
+	/**
+	 * Status changes, like closing with the button, become line items; other line items are left out, and threads
+	 * without a status keep the one before them.
+	 *
+	 * @return void
+	 */
+	public function test_status_changes_become_line_items(): void {
+		$this->answer_threads( self::CONVERSATION_ID, $this->status_threads() );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$conversation = $this->imported_conversation();
+		$line_items   = $conversation->threads()->where( 'type', Thread::TYPE_LINEITEM )->get();
+		$this->assertCount( 1, $line_items );
+
+		$closed = $line_items->first();
+		$this->assertSame( Thread::ACTION_TYPE_STATUS_CHANGED, (int) $closed->action_type );
+		$this->assertSame( Thread::STATUS_CLOSED, (int) $closed->status );
+		$this->assertSame( (int) $this->agent->id, (int) $closed->created_by_user_id );
+		$this->assertSame( Thread::PERSON_USER, (int) $closed->source_via );
+		$this->assertTrue( (bool) $closed->imported );
+		$this->assertFalse( (bool) $closed->first );
+		$this->assertSame( '2026-09-02 11:00:00', $closed->created_at->setTimezone( 'UTC' )->format( 'Y-m-d H:i:s' ) );
+		$this->assertNull( ImportedThread::query()->where( 'helpscout_id', 2024 )->first() );
+
+		$note = $conversation->threads()->where( 'type', Thread::TYPE_NOTE )->firstOrFail();
+		$this->assertSame( Thread::STATUS_ACTIVE, (int) $note->status );
+
+		// The line item isn't what the list shows.
+		$this->assertSame( 'Checked the original.', $conversation->preview );
+		$this->assertSame( '2026-09-02 10:00:00', $conversation->last_reply_at->setTimezone( 'UTC' )->format( 'Y-m-d H:i:s' ) );
+
+		$this->importer->import( $this->conversation(), $this->mailbox );
+		$this->assertSame( 4, $this->imported_conversation()->threads()->count() );
+	}
+
+	/**
+	 * Importing again after HelpScout closed a conversation adds its closing, and threads without a status added to it
+	 * since don't count as closing it.
+	 *
+	 * @return void
+	 */
+	public function test_importing_again_adds_closing_without_crediting_others(): void {
+		$threads = $this->status_threads();
+		$this->answer_threads( self::CONVERSATION_ID, array_slice( $threads, 0, 2 ) );
+		$this->importer->import( $this->conversation( array( 'status' => 'active' ) ), $this->mailbox );
+
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+		$this->importer->import( $this->conversation(), $this->mailbox );
+
+		$conversation = $this->imported_conversation();
+		$this->assertSame( Conversation::STATUS_CLOSED, (int) $conversation->status );
+		$this->assertSame( Thread::STATUS_ACTIVE, (int) $conversation->threads()->where( 'type', Thread::TYPE_NOTE )->value( 'status' ) );
+		$this->assertSame( 1, $conversation->threads()->where( 'type', Thread::TYPE_LINEITEM )->where( 'status', Thread::STATUS_CLOSED )->count() );
+	}
+
+	/**
+	 * On a phone conversation, notes count as replies for the last reply and preview, like core counts them.
+	 *
+	 * @return void
+	 */
+	public function test_phone_conversations_count_notes_as_replies(): void {
+		$caller  = self::sender( 'cal@example.org', 'Cal', 'Ler' );
+		$threads = array(
+			array(
+				'id'        => 2031,
+				'type'      => 'phone',
+				'status'    => 'active',
+				'state'     => 'published',
+				'body'      => 'Cal called about a photo.',
+				'source'    => array( 'type' => 'phone' ),
+				'customer'  => $caller,
+				'createdBy' => self::agent_person(),
+				'createdAt' => '2026-09-01T09:00:00Z',
+			),
+			array(
+				'id'        => 2032,
+				'type'      => 'customer',
+				'status'    => 'active',
+				'state'     => 'published',
+				'body'      => 'Here is the photo.',
+				'source'    => array( 'type' => 'email' ),
+				'customer'  => $caller,
+				'createdBy' => $caller,
+				'createdAt' => '2026-09-02T09:00:00Z',
+			),
+			array(
+				'id'        => 2033,
+				'type'      => 'note',
+				'status'    => 'active',
+				'state'     => 'published',
+				'body'      => 'Called back.',
+				'source'    => array( 'type' => 'web' ),
+				'createdBy' => self::agent_person(),
+				'createdAt' => '2026-09-03T12:00:00Z',
+			),
+		);
+		$this->answer_threads( self::CONVERSATION_ID, $threads );
+
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'type'            => 'phone',
+					'status'          => 'active',
+					'primaryCustomer' => $caller,
+					'createdBy'       => self::agent_person(),
+				)
+			),
+			$this->mailbox
+		);
+
+		$conversation = $this->imported_conversation();
+		$this->assertSame( 'Called back.', $conversation->preview );
+		$this->assertSame( '2026-09-03 12:00:00', $conversation->last_reply_at->setTimezone( 'UTC' )->format( 'Y-m-d H:i:s' ) );
+		$this->assertSame( Conversation::PERSON_USER, (int) $conversation->last_reply_from );
+	}
+
+	/**
+	 * Counting a mailbox's folders again leaves the Custom Folders module's folders of agents' own conversations
+	 * alone: nobody is logged in to count them for.
+	 *
+	 * @return void
+	 */
+	public function test_counters_leave_own_custom_folders_alone(): void {
+		$this->importer->import( $this->conversation( array( 'status' => 'active' ) ), $this->mailbox );
+
+		$own   = $this->custom_folder( array( 'own_only' => true ) );
+		$other = $this->custom_folder( array() );
+
+		Importer::update_counters( $this->mailbox );
+
+		$this->assertSame( 7, (int) $own->fresh()->active_count );
+		$this->assertSame( 0, (int) $other->fresh()->active_count );
+		$this->assertSame( 1, (int) $this->mailbox->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->value( 'active_count' ) );
+	}
+
+	/**
+	 * A conversation HelpScout moved, but agents worked on, stays in its mailbox, whose counters are kept up to date.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_staying_in_its_mailbox_updates_its_counters(): void {
+		$themes = $this->create_mailbox( 'Themes' );
+		$this->importer->import( $this->conversation(), $themes );
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_NOTE, 'On it.', $this->agent, '2026-09-10 08:00:00' );
+		$themes->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->update( array( 'active_count' => 9 ) );
+
+		$this->importer->import( $this->conversation( array( 'status' => 'active' ) ), $this->mailbox );
+
+		$this->assertSame( (int) $themes->id, (int) $this->imported_conversation()->mailbox_id );
+		$this->assertSame( 0, (int) $themes->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->value( 'active_count' ) );
+	}
+
+	/**
 	 * A HelpScout user without a FreeScout user gets one, which can log in while HelpScout lists them.
 	 *
 	 * @return void
@@ -288,14 +479,7 @@ final class ImporterTest extends ImportTestCase {
 		\App\Module::clearModulesCache();
 		\App\Module::setActive( People::TEAMS_MODULE, true );
 		\App\Module::clearModulesCache();
-		$team           = factory( User::class )->create(
-			array(
-				'first_name' => 'Photo',
-				'last_name'  => 'Moderators',
-				'email'      => 'team-1@example.org',
-				'type'       => User::TYPE_ROBOT,
-			)
-		);
+		$team           = PaidModules::team( 'Photo Moderators' );
 		$helpscout_team = array(
 			'id'    => 90,
 			'type'  => 'team',
@@ -315,7 +499,15 @@ final class ImporterTest extends ImportTestCase {
 
 		$this->assertSame( (int) $team->id, (int) $this->imported_conversation()->user_id );
 
-		// Without a team of that name, it's unassigned.
+		// Without a team of that name, it's unassigned; other robot users aren't teams.
+		factory( User::class )->create(
+			array(
+				'first_name' => 'Legal',
+				'last_name'  => '',
+				'email'      => 'legal@example.org',
+				'type'       => User::TYPE_ROBOT,
+			)
+		);
 		$this->assertNull(
 			( new People() )->assignee(
 				array(
@@ -324,6 +516,34 @@ final class ImporterTest extends ImportTestCase {
 					'first' => 'Legal',
 				)
 			)
+		);
+	}
+
+	/**
+	 * When the Teams module can't list its teams, the conversation fails, to be imported again, instead of coming in
+	 * unassigned.
+	 *
+	 * @return void
+	 */
+	public function test_team_assignments_fail_while_the_teams_module_is_broken(): void {
+		PaidModules::switch( People::TEAMS_MODULE, true );
+		PaidModules::team( 'Photo Moderators' );
+		TeamsServiceProvider::$fails = true;
+
+		$this->expectException( \RuntimeException::class );
+
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => array(
+						'id'    => 90,
+						'type'  => 'team',
+						'first' => 'Photo Moderators',
+					),
+				)
+			),
+			$this->mailbox
 		);
 	}
 
@@ -388,6 +608,42 @@ final class ImporterTest extends ImportTestCase {
 		$conversation = $this->imported_conversation();
 		$this->assertSame( Conversation::STATUS_CLOSED, (int) $conversation->status );
 		$this->assertSame( 1, $conversation->threads()->where( 'body', 'Still there?' )->count() );
+	}
+
+	/**
+	 * Line items robots added, like automatic workflows' whenever they run, aren't agents working on a conversation.
+	 *
+	 * @return void
+	 */
+	public function test_robots_line_items_arent_work_in_freescout(): void {
+		$this->importer->import(
+			$this->conversation(
+				array(
+					'status'   => 'active',
+					'assignee' => self::agent_person(),
+				)
+			),
+			$this->mailbox
+		);
+		$robot = factory( User::class )->create(
+			array(
+				'email' => 'workflow@example.org',
+				'type'  => User::TYPE_ROBOT,
+			)
+		);
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_LINEITEM, '', $robot, '2026-09-10 08:00:00' );
+
+		$this->importer->import( $this->conversation( array( 'assignee' => self::agent_person() ) ), $this->mailbox );
+		$this->assertSame( Conversation::STATUS_CLOSED, (int) $this->imported_conversation()->status );
+
+		$other = factory( User::class )->create();
+		People::choose( 55, $other );
+		$this->assertSame( (int) $other->id, (int) $this->imported_conversation()->user_id );
+
+		// A line item by an agent, like when they assign it, is.
+		$this->create_thread( $this->imported_conversation(), Thread::TYPE_LINEITEM, '', $this->agent, '2026-09-10 09:00:00' );
+		People::choose( 55, $this->agent );
+		$this->assertSame( (int) $other->id, (int) $this->imported_conversation()->user_id );
 	}
 
 	/**
@@ -944,6 +1200,61 @@ final class ImporterTest extends ImportTestCase {
 		}
 
 		$this->assertSame( 0, Conversation::query()->where( 'mailbox_id', $this->mailbox->id )->count() );
+	}
+
+	/**
+	 * Threads changing the status: the sender's email, a reply that leaves it active, a note without a status, a
+	 * line item that changes nothing, and the agent closing it.
+	 *
+	 * @return array[]
+	 */
+	private function status_threads(): array {
+		list( $email, $reply, $note, $line_item ) = $this->threads();
+
+		$email['_embedded'] = array();
+		$reply['status']    = 'active';
+		$note['createdAt']  = '2026-09-02T10:30:00Z';
+		unset( $note['status'] );
+
+		return array(
+			$email,
+			$reply,
+			$note,
+			array_replace(
+				$line_item,
+				array(
+					'id'        => 2024,
+					'status'    => 'active',
+					'action'    => array( 'text' => 'Assigned to Ada' ),
+					'createdAt' => '2026-09-02T10:31:00Z',
+				)
+			),
+			array_replace(
+				$line_item,
+				array(
+					'id'        => 2025,
+					'createdAt' => '2026-09-02T11:00:00Z',
+				)
+			),
+		);
+	}
+
+	/**
+	 * Creates one of the Custom Folders module's folders in the mailbox, whose counts are 7 so far.
+	 *
+	 * @param array $meta Folder's settings.
+	 * @return Folder
+	 */
+	private function custom_folder( array $meta ): Folder {
+		$folder               = new Folder();
+		$folder->mailbox_id   = $this->mailbox->id;
+		$folder->type         = 200;
+		$folder->meta         = $meta;
+		$folder->active_count = 7;
+		$folder->total_count  = 7;
+		$folder->save();
+
+		return $folder;
 	}
 
 	/**
