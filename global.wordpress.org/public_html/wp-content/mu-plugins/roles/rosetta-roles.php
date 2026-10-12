@@ -945,7 +945,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param int   $max_depth Optional. Max depth to avoid endless recursion. Default 5.
 	 * @return array The project tree.
 	 */
-	public function get_project_tree( $projects, $parent_id = 0, $max_depth = 5 ) {
+	public function get_project_tree( array $projects, int $parent_id = 0, int $max_depth = 5 ): array {
 		if ( $max_depth < 0 ) { // Avoid an endless recursion.
 			return array();
 		}
