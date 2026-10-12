@@ -676,7 +676,6 @@ class Locale extends GP_Route {
 				AND active = 1
 			ORDER BY id ASC
 		";
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query uses %d placeholder handled internally by GlotPress GP_Project::many().
 		$_projects = $project->many( $projects_sql, $project->id );
 
 		$projects = [];
