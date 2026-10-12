@@ -25,6 +25,20 @@ class Locale extends GP_Route {
 	 */
 	private $roles_adapter = null;
 
+	/**
+	 * In-memory cache for active sub projects per instance.
+	 *
+	 * @var array
+	 */
+	private $sub_projects_cache = [];
+
+	/**
+	 * In-memory cache for user favorites per instance.
+	 *
+	 * @var array
+	 */
+	private $user_favorites_cache = [];
+
 	public function __construct() {
 		parent::__construct();
 
@@ -223,12 +237,23 @@ class Locale extends GP_Route {
 	private function get_project_icon( $project, $sub_project, $size = 128 ) {
 		// The Waiting tab will have $sub_project's which are not sub-projects of $project
 		if ( $sub_project->parent_project_id && $sub_project->parent_project_id !== $project->id ) {
-			$project = GP::$project->get( $sub_project->parent_project_id );
-			// In the case of Plugins, we may need to go up another level yet
-			if ( $project->parent_project_id ) {
-				$sub_project = $project;
-				$project = GP::$project->get( $sub_project->parent_project_id );
+			$parent = GP::$project->get( $sub_project->parent_project_id );
+			if ( $parent ) {
+				$project = $parent;
 			}
+
+			// In the case of Plugins, we may need to go up another level yet
+			if ( ! empty( $parent->parent_project_id ) ) {
+				$grand_parent = GP::$project->get( $parent->parent_project_id );
+				if ( $grand_parent ) {
+					$sub_project = $parent;
+					$project     = $grand_parent;
+				}
+			}
+		}
+
+		if ( ! $project ) {
+			return '<div class="default-icon"><span class="dashicons dashicons-translation"></span></div>';
 		}
 
 		switch ( $project->slug ) {
@@ -339,7 +364,7 @@ class Locale extends GP_Route {
 		$parent_ids        = [];
 		$parent_project_id = (int) $project->parent_project_id;
 
-		while ( $parent_project_id ) {
+		while ( $parent_project_id && ! in_array( $parent_project_id, $parent_ids, true ) ) {
 			$parent_project = GP::$project->get( $parent_project_id );
 
 			if ( ! $parent_project ) {
@@ -660,12 +685,9 @@ class Locale extends GP_Route {
 	private function get_active_sub_projects( $project, $with_sub_projects = false ) {
 		global $wpdb;
 
-		// Static in-memory cache to prevent redundant recursive DB queries.
-		static $cache = [];
-
 		$cache_key = (int) $project->id . ':' . (int) $with_sub_projects;
-		if ( isset( $cache[ $cache_key ] ) ) {
-			return $cache[ $cache_key ];
+		if ( isset( $this->sub_projects_cache[ $cache_key ] ) ) {
+			return $this->sub_projects_cache[ $cache_key ];
 		}
 
 		$projects_sql = "
@@ -720,7 +742,7 @@ class Locale extends GP_Route {
 		}
 		unset( $_projects );
 
-		$cache[ $cache_key ] = $projects;
+		$this->sub_projects_cache[ $cache_key ] = $projects;
 
 		return $projects;
 	}
@@ -1036,9 +1058,8 @@ class Locale extends GP_Route {
 		$user_id   = get_current_user_id();
 		$cache_key = (int) $user_id . ':' . (string) $project_slug;
 
-		static $cache = [];
-		if ( isset( $cache[ $cache_key ] ) ) {
-			return $cache[ $cache_key ];
+		if ( isset( $this->user_favorites_cache[ $cache_key ] ) ) {
+			return $this->user_favorites_cache[ $cache_key ];
 		}
 
 		$theme_favorites  = [];
@@ -1060,7 +1081,7 @@ class Locale extends GP_Route {
 				}
 
 				if ( 'wp-themes' === $project_slug ) {
-					$cache[ $cache_key ] = $theme_favorites;
+					$this->user_favorites_cache[ $cache_key ] = $theme_favorites;
 					return $theme_favorites;
 				}
 
@@ -1077,13 +1098,13 @@ class Locale extends GP_Route {
 				}
 
 				if ( 'wp-plugins' === $project_slug ) {
-					$cache[ $cache_key ] = $plugin_favorites;
+					$this->user_favorites_cache[ $cache_key ] = $plugin_favorites;
 					return $plugin_favorites;
 				}
 		}
 
 		$all_favorites       = array_merge( $theme_favorites, $plugin_favorites );
-		$cache[ $cache_key ] = $all_favorites;
+		$this->user_favorites_cache[ $cache_key ] = $all_favorites;
 
 		// Return all favorites, for uses in things like the Waiting tab
 		return $all_favorites;
