@@ -38,10 +38,7 @@
 
 			this.listenTo( this.get( 'subProjects' ), 'change:checked', this.updateChecked );
 
-			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
-
 			this.on( 'change:checked', this.updateSelection );
-
 			this.checkForCheckedSubProjects();
 		},
 
@@ -62,17 +59,16 @@
 				projects.selection.add( { id: this.get( 'id' ) } );
 				$window.trigger( 'uncheck-all-projects.rosetta' );
 			} else {
-				projects.selection.remove( { id: this.get( 'id' ) } );
+				projects.selection.remove( this.get( 'id' ) );
 			}
 		},
 
 		checkForCheckedSubProjects: function() {
-			var checked = this.get( 'subProjects' ).findWhere({ 'checked': true });
-			if ( checked ) {
-				this.set( 'checkedSubProjects', true );
-			} else {
-				this.set( 'checkedSubProjects', false );
-			}
+			var self = this;
+			var hasChecked = _.some( self._subProjects, function( sub ) {
+				return projects.selection.get( sub.id );
+			} );
+			self.set( 'checkedSubProjects', hasChecked );
 		}
 	});
 
@@ -80,11 +76,19 @@
 		model: projects.model.Project,
 
 		initialize: function() {
-			_.bindAll( this, 'disableActiveStates' );
+			_.bindAll( this, 'disableActiveStates', 'uncheckAllProjects' );
 
 			this.on( 'change:isActive', this.toggleActiveStates );
 
 			$window.on( 'deactivate-other-projects.rosetta', this.disableActiveStates );
+			$window.on( 'uncheck-other-projects.rosetta', this.uncheckAllProjects );
+		},
+
+		uncheckAllProjects: function() {
+			this.each( function( project ) {
+				project.uncheck();
+				project.get( 'subProjects' ).uncheckall();
+			} );
 		},
 
 		toggleActiveStates: function( model ) {
@@ -124,8 +128,6 @@
 				this.set( 'checked', true );
 			}
 
-			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
-
 			this.on( 'change:checked', this.updateSelection );
 		},
 
@@ -138,7 +140,7 @@
 				projects.selection.add( { id: this.get( 'id' ) } );
 				$window.trigger( 'uncheck-all-projects.rosetta' );
 			} else {
-				projects.selection.remove( { id: this.get( 'id' ) } );
+				projects.selection.remove( this.get( 'id' ) );
 			}
 		}
 	});
@@ -149,10 +151,10 @@
 		// Search terms
 		terms: '',
 
-		_sortBy: 'checked',
-
 		initialize: function( models, options ) {
 			this.project = options.project;
+			_.bindAll( this, 'uncheckall' );
+
 			this.on( 'uncheckall', this.uncheckall );
 		},
 
@@ -200,8 +202,9 @@
 			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
 
 			results = this.filter( function( project ) {
-				var haystack = _.union( [ project.get( 'name' ), project.get( 'slug' ) ] );
-				if ( match.test( haystack ) ) {
+				var haystack = _.compact( [ project.get( 'name' ), project.get( 'slug' ) ] );
+				if ( match.test( haystack.join( ' ' ) ) ) {
+					project.set( 'matchScore', 0, { silent: true } );
 					_.each( haystack, function( word ) {
 						var score = word.score( term, .5 );
 						project.set( 'matchScore', Math.max( score, project.get( 'matchScore' ) ) );
@@ -211,13 +214,14 @@
 				return false;
 			});
 
-			this._sortBy = 'matchScore';
 			this.reset( results );
-			this._sortBy = 'checked';
 		},
 
 		comparator: function( project ) {
-			return - project.get( this._sortBy );
+			if ( this.terms && this.terms.length > 0 ) {
+				return - project.get( 'matchScore' );
+			}
+			return - project.get( 'checked' );
 		}
 	});
 
@@ -229,7 +233,7 @@
 		},
 
 		updateInputField: function() {
-			this.$field.val( _.pluck( this.toJSON(), 'id' ).join() );
+			this.$field.val( this.map( model => model.get( 'id' ) ).join( ',' ) );
 		}
 	});
 
@@ -279,8 +283,8 @@
 		},
 
 		events: {
-			'click .input-checkbox': 'updateChecked',
-			'click .input-radio': 'setChecked'
+			'change .input-checkbox': 'updateChecked',
+			'change .input-radio': 'setChecked'
 		},
 
 		prepare: function() {
@@ -355,8 +359,7 @@
 			this.views.add( new projects.view.SubProjectsList({
 				collection: collection
 			}) );
-		},
-
+		}
 	});
 
 	projects.view.SubProjectsList = wp.Backbone.View.extend({
@@ -367,19 +370,24 @@
 		limit: 100,
 
 		initialize: function( options ) {
-			var self = this;
+			this._subViews = [];
+			this.listenTo( this.collection, 'projects:update', this.render );
+		},
 
-			this.listenTo( self.collection, 'projects:update', function() {
-				self.render( this );
+		clearSubViews: function() {
+			_.each( this._subViews, function( view ) {
+				view.remove();
 			} );
+			this._subViews = [];
 		},
 
 		render: function() {
-			var self = this, subProjects;
+			var self = this;
 
+			self.clearSubViews();
 			self.$el.empty();
 
-			subProjects = self.collection.first( self.limit );
+			var subProjects = self.collection.first( self.limit );
 			_.each( subProjects, function( model ) {
 				var subProjectView = new projects.view.SubProject({
 					model: model
@@ -387,7 +395,10 @@
 
 				subProjectView.render();
 				self.$el.append( subProjectView.el );
+				self._subViews.push( subProjectView );
 			});
+
+			return this;
 		}
 	});
 
@@ -416,25 +427,30 @@
 			'keydown': 'search'
 		},
 
+		initialize: function() {
+			this.doSearch = _.debounce( this.doSearch.bind( this ), 500 );
+		},
+
 		search: function( event ) {
-			// Prevent form submit
-			if ( event.type === 'keydown' && event.which === 13 ) {
+			if ( event.type === 'keydown' && event.key === 'Enter' ) {
 				event.preventDefault();
-			} else if ( event.type === 'keydown' ) {
 				return;
 			}
 
-			// Clear on escape.
-			if ( event.type === 'keyup' && event.which === 27 ) {
+			if ( event.type === 'keyup' && event.key === 'Escape' ) {
 				event.target.value = '';
+				this.doSearch( event );
+				return;
 			}
 
-			this.doSearch( event );
+			if ( event.type === 'input' ) {
+				this.doSearch( event );
+			}
 		},
 
-		doSearch: _.debounce( function( event ) {
+		doSearch: function( event ) {
 			this.collection.doSearch( event.target.value );
-		}, 500 )
+		}
 	});
 
 	/**
@@ -493,7 +509,10 @@
 			return Promise.reject();
 		}
 
-		if ( lastUpdated < projects.settings.lastUpdated ) {
+		var cachedTime = Number( lastUpdated );
+		var serverTime = Number( projects.settings.lastUpdated );
+
+		if ( isNaN( cachedTime ) || cachedTime < serverTime ) {
 			return Promise.reject();
 		}
 
@@ -503,7 +522,11 @@
 		}
 
 		if ( '[' === json.substring( 0, 1 ) ) {
-			return Promise.resolve( JSON.parse( json ) );
+			try {
+				return Promise.resolve( JSON.parse( json ) );
+			} catch ( e ) {
+				return Promise.reject();
+			}
 		}
 
 		// decompress
@@ -513,10 +536,9 @@
 	};
 
 	projects.storeLocalProjects = function( data ) {
-		window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
-
-		projects.compress( JSON.stringify( data ) ).then( function( data ) {
-			window.localStorage.setItem( 'projects', data );
+		projects.compress( JSON.stringify( data ) ).then( function( compressedData ) {
+			window.localStorage.setItem( 'projects', compressedData );
+			window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
 		} ).catch( function() {
 			console.log( "Caching projects locally failed." );
 		} );
@@ -568,9 +590,9 @@
 		}).render();
 	};
 
-	projects.selection = new projects.model.Selection();
-
 	projects.init = function() {
+		projects.selection = new projects.model.Selection();
+
 		_.each( projects.settings.accessList, function( projectID ) {
 			projects.selection.add( { id: projectID } );
 		});
@@ -578,54 +600,55 @@
 		projects.getProjects().then( function( response ) {
 			projects.initFrame( response );
 		} );
+
+		var $projectAll = $( '#project-all' );
+		var $projectAllCheckbox = $projectAll.find( 'input' );
+
+		$projectAll.on( 'click', function() {
+			var $el = $( this );
+
+			if ( $el.hasClass( 'active' ) ) {
+				return;
+			}
+
+			$el.addClass( 'active' );
+			$window.trigger( 'deactivate-other-projects.rosetta' );
+		});
+
+		$projectAllCheckbox.on( 'change', function() {
+			var checked = $( this ).prop( 'checked' );
+
+			if ( checked ) {
+				projects.selection.add( { id: 'all' } );
+				$window.trigger( 'uncheck-other-projects.rosetta' );
+			} else {
+				projects.selection.remove( 'all' );
+			}
+		});
+
+		$window.on( 'deactivate-all-projects.rosetta', function() {
+			$projectAll.removeClass( 'active' );
+		});
+
+		$window.on( 'uncheck-all-projects.rosetta', function() {
+			var checked = $projectAllCheckbox.prop( 'checked' );
+
+			if ( checked ) {
+				projects.selection.remove( 'all' );
+				$projectAllCheckbox.prop( 'checked', false );
+			}
+		});
+
+		// Confirm removal of CLPTE status.
+		$( '#project-access-list' ).closest( 'form' ).on( 'submit', function( e ) {
+			if ( ! $( '#project-access-list' ).val() ) {
+				if ( ! confirm( l10n.removeTranslator ) ) {
+					e.preventDefault();
+				}
+			}
+		});
 	};
 
 	$( projects.init );
-
-	var $projectAll = $( '#project-all' ), $projectAllCheckbox = $projectAll.find( 'input' );
-
-	$projectAll.on( 'click', function() {
-		var $el = $( this );
-
-		if ( $el.hasClass( 'active' ) ) {
-			return;
-		}
-
-		$el.addClass( 'active' );
-		$window.trigger( 'deactivate-other-projects.rosetta' );
-	});
-
-	$projectAll.find( 'input' ).on( 'change', function() {
-		var checked = $( this ).prop( 'checked' );
-
-		if ( checked ) {
-			projects.selection.add( { id: 'all' } );
-			$window.trigger( 'uncheck-other-projects.rosetta' );
-		} else {
-			projects.selection.remove( { id: 'all' } );
-		}
-	});
-
-	$window.on( 'deactivate-all-projects.rosetta', function() {
-		$projectAll.removeClass( 'active' );
-	} );
-
-	$window.on( 'uncheck-all-projects.rosetta', function() {
-		var checked = $projectAllCheckbox.prop( 'checked' );
-
-		if ( checked ) {
-			projects.selection.remove( { id: 'all' } );
-			$projectAllCheckbox.prop( 'checked', false );
-		}
-	} );
-
-	// Confirm removal of CLPTE status.
-	$( '#project-access-list' ).parents( 'form' ).on( 'submit', function( e ) {
-		if ( ! $( '#project-access-list' ).val() ) {
-			if ( ! confirm( l10n.removeTranslator ) ) {
-				e.preventDefault();
-			}
-		}
-	} );
 
 } )( jQuery );
