@@ -340,13 +340,13 @@ class Locale extends GP_Route {
 		$parent_project_id = (int) $project->parent_project_id;
 
 		while ( $parent_project_id ) {
-			$parent_ids[]   = $parent_project_id;
 			$parent_project = GP::$project->get( $parent_project_id );
 
 			if ( ! $parent_project ) {
 				break;
 			}
 
+			$parent_ids[]      = $parent_project_id;
 			$parent_project_id = (int) $parent_project->parent_project_id;
 		}
 
