@@ -128,7 +128,6 @@ class WordPressTV_Subtitles_Upload {
 			'mimes'     => array(
 				'ttml' => 'application/ttml+xml',
 				'dfxp' => 'application/ttml+xml', // .dfxp is changed to .ttml in $this->generate_filename()
-				'xml'  => 'text/xml',
 			),
 		);
 
@@ -154,7 +153,6 @@ class WordPressTV_Subtitles_Upload {
 			'guid'           => $file['url'],
 			'post_mime_type' => $file['type'],
 			'post_content'   => '',
-			'post_status'    => 'private',
 			'post_author'    => $this->drafts_author,
 		);
 
