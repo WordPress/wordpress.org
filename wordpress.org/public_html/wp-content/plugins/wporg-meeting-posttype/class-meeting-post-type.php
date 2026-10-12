@@ -536,7 +536,8 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 				$utc_time                = gmdate( 'H:i:s', strtotime( $post->time ) );
 				$next_meeting_iso        = $next_meeting_datestring . 'T' . $utc_time . '+00:00';
 				$next_meeting_timestamp  = strtotime( $next_meeting_datestring . ' ' . $utc_time );
-				if ( false === $next_meeting_timestamp ) {
+				// Skip meetings without a usable date; strtotime() reads a bare time as today.
+				if ( empty( $next_meeting_datestring ) || false === $next_meeting_timestamp ) {
 					continue;
 				}
 				$date_time = new DateTime( '@' . $next_meeting_timestamp );
