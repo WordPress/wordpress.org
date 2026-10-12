@@ -68,7 +68,7 @@
 			<table class="form-table">
 				<tr>
 					<th scope="row"><label for="user"><?php esc_html_e( 'E-mail or Username', 'rosetta' ); ?></label></th>
-					<td><input type="text" class="regular-text" name="user" id="user"></td>
+					<td><input type="text" class="regular-text" name="user" id="user" autocomplete="off" spellcheck="false" required></td>
 				</tr>
 			</table>
 			<input type="hidden" name="action" value="cross-locale-pte">
