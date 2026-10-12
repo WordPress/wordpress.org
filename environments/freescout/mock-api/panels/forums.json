@@ -1,0 +1,21 @@
+{
+	"blocks": [
+		{
+			"type": "items",
+			"items": [
+				{
+					"note": "Mock note: asked to stop bumping their topics.",
+					"meta": [
+						{
+							"text": "January 1, 2026",
+							"url": "https://wordpress.org/support/"
+						},
+						{
+							"text": "moderator"
+						}
+					]
+				}
+			]
+		}
+	]
+}

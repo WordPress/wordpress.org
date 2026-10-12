@@ -173,10 +173,10 @@ class WordPressTV_REST_API {
 
 								$video['video']['mp4'][ $mp4_field ] = video_url_by_format( $post_video, $mp4_format );
 							}
-						}
 
-						// Expose the subtitles
-						$video['subtitles'] = (array) $api_data['subtitles'];
+							// Expose the subtitles.
+							$video['subtitles'] = (array) ( $api_data['subtitles'] ?? [] );
+						}
 					}
 
 					$response['videos'][] = $video;

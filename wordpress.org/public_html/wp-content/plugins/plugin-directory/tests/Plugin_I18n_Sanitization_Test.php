@@ -48,7 +48,7 @@ class Plugin_I18n_Sanitization_Test extends TestCase {
 			'script in a section'               => array(
 				'description',
 				'Bonjour <script>alert(1)</script>',
-				'Bonjour alert(1)',
+				'Bonjour',
 			),
 			'directives in a section'           => array(
 				'faq',

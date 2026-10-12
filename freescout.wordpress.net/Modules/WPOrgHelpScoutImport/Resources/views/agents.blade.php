@@ -141,7 +141,10 @@
 								<td>{{ $team['name'] }}</td>
 								<td>
 									@if ( $team['team'] )
-										{{ $team['team']->getFullName() }} <small class="text-help">({{ $team['chosen'] ? __('chosen') : __('same name') }})</small>
+										{{ $team['team']->first_name }} <small class="text-help">({{ $team['chosen'] ? __('chosen') : __('same name') }})</small>
+										@if ( $team['missing'] )
+											<br/><small class="text-danger">{{ __('Has no access to :mailboxes, where its conversations are: tick them on the team’s page, or it has no folder there, and can’t be assigned again.', [ 'mailboxes' => '“' . implode( '”, “', $team['missing'] ) . '”' ]) }}</small>
+										@endif
 									@else
 										<em>{{ __('None: imported unassigned') }}</em>
 									@endif
@@ -151,7 +154,7 @@
 										<select name="teams[{{ $team['id'] }}]" class="form-control input-sm" aria-label="{{ __('FreeScout team for :name', [ 'name' => $team['name'] ]) }}">
 											<option value="">{{ __('Keep') }}</option>
 											@foreach ( $freescout_teams as $freescout_team )
-												<option value="{{ $freescout_team->id }}">{{ $freescout_team->getFullName() }}</option>
+												<option value="{{ $freescout_team->id }}">{{ $freescout_team->first_name }}</option>
 											@endforeach
 										</select>
 									@endif

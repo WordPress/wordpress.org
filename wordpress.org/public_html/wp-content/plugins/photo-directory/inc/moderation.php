@@ -486,7 +486,7 @@ https://wordpress.org/photos/
 			get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: "(unknown)",
 			get_permalink( $post ),
 			get_the_date( 'Y-m-d', $post ),
-			get_the_content( null, false, $post ) ?: __( '(none provided)', 'wporg-photos' ),
+			html_entity_decode( get_the_content( null, false, $post ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ?: __( '(none provided)', 'wporg-photos' ),
 			$mod_note
 		);
 
@@ -568,7 +568,7 @@ https://wordpress.org/photos/
 			$rejection_message,
 			get_the_date( 'Y-m-d', $post ),
 			get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: "(unknown)",
-			get_the_content( null, false, $post ) ?: __( '(none provided)', 'wporg-photos' ),
+			html_entity_decode( get_the_content( null, false, $post ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ?: __( '(none provided)', 'wporg-photos' ),
 			'https://wordpress.org/photos/guidelines/'
 		);
 
@@ -638,7 +638,7 @@ https://wordpress.org/photos/
 			get_the_author_meta( 'display_name', $user->ID ),
 			$rejection_message,
 			get_the_date( 'Y-m-d', $post ),
-			get_the_content( null, false, $post ) ?: __( '(none provided)', 'wporg-photos' )
+			html_entity_decode( get_the_content( null, false, $post ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ?: __( '(none provided)', 'wporg-photos' )
 		);
 
 		wp_mail( $user->user_email, $subject, $content, 'From: ' . self::WPORG_PHOTO_DIRECTORY_ADMIN_EMAIL );

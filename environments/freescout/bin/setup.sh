@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Prepares the local FreeScout: app key, database, admin, mailboxes, modules, and sample email.
+# Prepares the local FreeScout: app key, database, admin, mailboxes, modules, sample data, and sample email.
 # Idempotent; runs inside the app container as www-data on every `npm run freescout:start`.
 
 set -euo pipefail
@@ -58,6 +58,9 @@ done
 
 # What production runs after every deploy.
 php "$app/artisan" --no-interaction freescout:after-app-update
+
+# After the modules: it adds sample data for premium modules that are copied in. Without it, FreeScout still works.
+php /srv/env/bin/sample-data.php || echo "Could not add all sample data; run setup again to retry." >&2
 
 # The admin logs in as $WPORG_USERNAME at the mock WordPress.org login; against the mock API, as its "admin".
 username="${WPORG_USERNAME:-}"
