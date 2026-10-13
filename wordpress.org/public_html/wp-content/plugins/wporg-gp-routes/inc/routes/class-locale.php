@@ -137,6 +137,7 @@ class Locale extends GP_Route {
 		if ( ! $project ) {
 			return $this->die_with_404();
 		}
+		$this->projects_cache[ (int) $project->id ] = $project;
 
 		$paged_sub_projects = $this->get_paged_active_sub_projects(
 			$project,
@@ -207,11 +208,13 @@ class Locale extends GP_Route {
 		if ( ! $project ) {
 			return $this->die_with_404();
 		}
+		$this->projects_cache[ (int) $project->id ] = $project;
 
 		$sub_project = GP::$project->by_path( $project_path . '/' . $sub_project_path );
 		if ( ! $sub_project ) {
 			return $this->die_with_404();
 		}
+		$this->projects_cache[ (int) $sub_project->id ] = $sub_project;
 
 		$project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug );
 		$sub_project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug, false );
@@ -1028,11 +1031,10 @@ class Locale extends GP_Route {
 
 				// Float Favorites to the start, float fully translated to the bottom, order the rest by name
 				if ( ! empty( $user_fav_projects ) ) {
-					$favorite_path_placeholders = implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) );
-
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $favorite_path_placeholders contains only safe %s placeholders.
-					$fav_field_sql   = $wpdb->prepare( "FIELD( tp.path, {$favorite_path_placeholders} )", $user_fav_projects );
-					$filter_order_by = "{$fav_field_sql} > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC";
+					//  Safely quote and escape values for SQL
+					$escaped_favs    = array_map( 'esc_sql', $user_fav_projects );
+					$quoted_favs     = "'" . implode( "', '", $escaped_favs ) . "'";
+					$filter_order_by = "FIELD( tp.path, {$quoted_favs} ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC";
 				} else {
 					$filter_order_by = 'stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC';
 				}
@@ -1239,6 +1241,10 @@ class Locale extends GP_Route {
 			$projects = GP::$project->many( $projects_sql );
 
 			wp_cache_set( $cache_key, $projects, $this->cache_group, DAY_IN_SECONDS );
+		}
+
+		foreach ( $projects as $project ) {
+			$this->projects_cache[ (int) $project->id ] = $project;
 		}
 
 		return $projects;
