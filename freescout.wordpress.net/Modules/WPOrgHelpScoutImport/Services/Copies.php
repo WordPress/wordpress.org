@@ -321,26 +321,6 @@ final class Copies {
 	}
 
 	/**
-	 * Notes the mailboxes of imported conversations about to be deleted for good, so a switch still sends their deletion.
-	 *
-	 * @param int[] $conversation_ids Conversation IDs.
-	 * @return void
-	 */
-	public static function remember_mailboxes( array $conversation_ids ): void {
-		foreach ( array_chunk( array_map( 'intval', $conversation_ids ), 500 ) as $ids ) {
-			$by_mailbox = Conversation::query()->whereIn( 'id', $ids )->get( array( 'id', 'mailbox_id' ) )->groupBy( 'mailbox_id' );
-
-			foreach ( $by_mailbox as $mailbox_id => $conversations ) {
-				// toBase() leaves updated_at alone, which marks updates.
-				ImportedConversation::query()
-					->toBase()
-					->whereIn( 'conversation_id', $conversations->pluck( 'id' )->all() )
-					->update( array( 'mailbox_id' => (int) $mailbox_id ) );
-			}
-		}
-	}
-
-	/**
 	 * Marks an imported conversation as updated, for catch_up().
 	 *
 	 * @param Conversation $conversation Conversation.
@@ -367,8 +347,7 @@ final class Copies {
 	 * @param int         $after_id   ID of the last one sent.
 	 * @param int         $limit      How many.
 	 * @param string|null $since      Only those imported or updated since then.
-	 * @return Collection With helpscout_id, conversation_id, and their conversation's found_id (null if deleted for
-	 *                    good), number, state, and status.
+	 * @return Collection With helpscout_id, conversation_id, and their conversation's number, state, and status.
 	 */
 	public static function batch( int $mailbox_id, int $after_id, int $limit, ?string $since = null ): Collection {
 		$table = ( new ImportedConversation() )->getTable();
@@ -388,7 +367,6 @@ final class Copies {
 					$table . '.id',
 					$table . '.helpscout_id',
 					$table . '.conversation_id',
-					'conversations.id as found_id',
 					'conversations.number',
 					'conversations.state',
 					'conversations.status',
@@ -411,11 +389,11 @@ final class Copies {
 			'helpscout_id' => (int) $imported->helpscout_id,
 			'id'           => (int) $imported->conversation_id,
 			'number'       => (int) $imported->number,
-			'delete'       => ! $imported->found_id || self::gone( (int) $imported->state, (int) $imported->status ),
+			'delete'       => self::gone( (int) $imported->state, (int) $imported->status ),
 			'merged'       => false,
 		);
 
-		$into = $imported->found_id && Conversation::STATE_DELETED === (int) $imported->state ? self::merged_into( (int) $imported->conversation_id ) : null;
+		$into = Conversation::STATE_DELETED === (int) $imported->state ? self::merged_into( (int) $imported->conversation_id ) : null;
 		if ( $into ) {
 			$request = array(
 				'id'     => (int) $into->id,
@@ -481,7 +459,7 @@ final class Copies {
 	}
 
 	/**
-	 * The conversations imported into a mailbox: those in it, and those deleted for good from it.
+	 * The imported conversations in a mailbox.
 	 *
 	 * @param int $mailbox_id FreeScout mailbox ID.
 	 * @return Builder
@@ -490,17 +468,8 @@ final class Copies {
 		$table = ( new ImportedConversation() )->getTable();
 
 		return ImportedConversation::query()
-			->leftJoin( 'conversations', 'conversations.id', '=', $table . '.conversation_id' )
-			->where(
-				static function ( Builder $query ) use ( $table, $mailbox_id ): void {
-					$query->where( 'conversations.mailbox_id', $mailbox_id )
-						->orWhere(
-							static function ( Builder $gone ) use ( $table, $mailbox_id ): void {
-								$gone->whereNull( 'conversations.id' )->where( $table . '.mailbox_id', $mailbox_id );
-							}
-						);
-				}
-			);
+			->join( 'conversations', 'conversations.id', '=', $table . '.conversation_id' )
+			->where( 'conversations.mailbox_id', $mailbox_id );
 	}
 
 	/**

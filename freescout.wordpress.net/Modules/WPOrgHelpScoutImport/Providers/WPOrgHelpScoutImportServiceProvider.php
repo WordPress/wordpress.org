@@ -176,18 +176,6 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 			4
 		);
 
-		// Deleting for good loses the conversation's mailbox, which switching needs.
-		\Eventy::addAction(
-			'conversations.before_delete_forever',
-			static function ( mixed $conversation_ids = array() ): void {
-				try {
-					Copies::remember_mailboxes( (array) $conversation_ids );
-				} catch ( \Throwable $e ) {
-					\Log::error( '[WPOrgHelpScoutImport] Could not note the mailboxes of conversations deleted for good: ' . $e->getMessage() );
-				}
-			}
-		);
-
 		// Highlights Manage while the pages are open.
 		\Eventy::addFilter(
 			'menu.selected',

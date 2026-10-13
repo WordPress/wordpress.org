@@ -349,7 +349,6 @@ final class Importer {
 					$record = array(
 						'helpscout_number' => (int) ( $source['number'] ?? 0 ),
 						'conversation_id'  => (int) $conversation->id,
-						'mailbox_id'       => (int) $conversation->mailbox_id,
 						'creator_id'       => 'user' === ( $source['createdBy']['type'] ?? '' ) ? self::person_id( $source['createdBy'] ) : null,
 						'assignee_id'      => self::person_id( $source['assignee'] ?? null ),
 						'closer_id'        => self::person_id( $source['closedByUser'] ?? null ),

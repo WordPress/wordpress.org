@@ -243,8 +243,7 @@ final class CopiesTest extends TestCase {
 	}
 
 	/**
-	 * Copies of conversations deleted or spam go, HelpScout's too; others are pointed at. Those deleted for good from
-	 * another mailbox are left to its switch.
+	 * Copies of conversations deleted or spam go, HelpScout's too; others are pointed at.
 	 *
 	 * @return void
 	 */
@@ -253,15 +252,11 @@ final class CopiesTest extends TestCase {
 		$kept    = $this->import( 1000000025 );
 		$trashed = $this->import( 1000000026 );
 		$spam    = $this->import( 1000000027 );
-		$gone    = $this->import( 1000000028 );
-		$other   = $this->create_conversation( $this->create_mailbox( 'Themes' ), $this->create_sender() );
-		$this->import( 1000000029, $other );
 
 		$trashed->state = Conversation::STATE_DELETED;
 		$trashed->save();
 		$spam->status = Conversation::STATUS_SPAM;
 		$spam->save();
-		Conversation::deleteConversationsForever( array( (int) $gone->id, (int) $other->id ) );
 
 		Copies::start( (int) $this->mailbox->id );
 		$this->run_batches();
@@ -271,11 +266,9 @@ final class CopiesTest extends TestCase {
 				(int) $kept->id    => false,
 				(int) $trashed->id => true,
 				(int) $spam->id    => true,
-				(int) $gone->id    => true,
 			),
 			array_column( $sent[0]['copies'], 'delete', 'id' )
 		);
-		$this->assertSame( 1000000028, array_column( $sent[0]['copies'], 'helpscout_id', 'id' )[ (int) $gone->id ] );
 	}
 
 	/**
@@ -392,20 +385,18 @@ final class CopiesTest extends TestCase {
 	}
 
 	/**
-	 * A conversation imported from HelpScout, into the mailbox unless it's given one.
+	 * A conversation imported from HelpScout into the mailbox.
 	 *
-	 * @param int               $helpscout_id HelpScout's ID for it.
-	 * @param Conversation|null $conversation The conversation it was imported as; a new one in the mailbox if null.
+	 * @param int $helpscout_id HelpScout's ID for it.
 	 * @return Conversation
 	 */
-	private function import( int $helpscout_id, ?Conversation $conversation = null ): Conversation {
-		$conversation = $conversation ?? $this->create_conversation( $this->mailbox, $this->create_sender() );
+	private function import( int $helpscout_id ): Conversation {
+		$conversation = $this->create_conversation( $this->mailbox, $this->create_sender() );
 		ImportedConversation::query()->create(
 			array(
 				'helpscout_id'     => $helpscout_id,
 				'helpscout_number' => (int) $conversation->number,
 				'conversation_id'  => (int) $conversation->id,
-				'mailbox_id'       => (int) $conversation->mailbox_id,
 			)
 		);
 

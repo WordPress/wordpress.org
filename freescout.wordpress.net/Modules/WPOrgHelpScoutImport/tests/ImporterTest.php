@@ -433,17 +433,6 @@ final class ImporterTest extends ImportTestCase {
 		$this->assertSame( (int) $source['id'], \Eventy::filter( 'wporgwebhooks.helpscout_id', 0, $this->imported_conversation() ) );
 	}
 
-	/**
-	 * What was imported keeps the mailbox it went into, for switching once the conversation is deleted for good.
-	 *
-	 * @return void
-	 */
-	public function test_keeps_the_mailbox_of_imported_ones(): void {
-		$source = $this->conversation();
-		$this->importer->import( $source, $this->mailbox );
-
-		$this->assertSame( (int) $this->mailbox->id, (int) ImportedConversation::query()->where( 'helpscout_id', (int) $source['id'] )->value( 'mailbox_id' ) );
-	}
 
 	/**
 	 * A HelpScout user without a FreeScout user gets one, which can log in while HelpScout lists them.
