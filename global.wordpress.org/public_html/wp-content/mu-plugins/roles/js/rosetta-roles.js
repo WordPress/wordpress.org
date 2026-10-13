@@ -531,14 +531,6 @@
 			return Promise.reject();
 		}
 
-		if ( '[' === json.substring( 0, 1 ) ) {
-			try {
-				return Promise.resolve( JSON.parse( json ) );
-			} catch ( e ) {
-				return Promise.reject();
-			}
-		}
-
 		// decompress
 		return projects.decompress( json ).then( function( data ) {
 			return JSON.parse( data );
