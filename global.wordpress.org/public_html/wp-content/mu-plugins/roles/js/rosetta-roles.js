@@ -83,8 +83,8 @@
 	projects.model.Projects = Backbone.Collection.extend({
 		model: projects.model.Project,
 
-		// Global event bus coordinating project selection and active state
-		// between project collections and the standalone '#project-all' toggle.
+		// Listens on the global $window event bus to coordinate active tabs and selection 
+		// state between individual category models and the standalone '#project-all' (GTE) toggle.
 		initialize: function() {
 			_.bindAll( this, 'disableActiveStates', 'uncheckAllProjects' );
 
@@ -215,8 +215,8 @@
 			// Escape the term string for RegExp meta characters
 			escapedTerm = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
 
-			// Retain spaces untrimmed so live multi-word typing is not interrupted.
-			// Positive lookahead pattern allowing terms to appear in any order.
+			// Step 1 (Filter): Fast regex pre-filter. Positive lookaheads match all query terms 
+			// in any order across 'name' and 'slug' without breaking on live space keystrokes.
 			escapedTerm = escapedTerm.replace( / /g, ')(?=.*' );
 			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
 
@@ -225,8 +225,7 @@
 				if ( match.test( haystack.join( ' ' ) ) ) {
 					var maxScore = 0;
 					_.each( haystack, function( word ) {
-						// Subsequent fuzzy scoring via string_score.
-						// Evaluates characters sequentially, favoring left-to-right term ordering.
+						// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
 						maxScore = Math.max( maxScore, String( word ).score( term, 0.5 ) );
 					});
 					project.set( 'matchScore', maxScore, { silent: true } );
@@ -243,7 +242,8 @@
 			if ( this.terms && this.terms.length > 0 ) {
 				return - project.get( 'matchScore' );
 			}
-			// Negates boolean (-true = -1, -false = 0) to sort checked items to the top (descending).
+			// Default view: Floats assigned permissions to the top
+			// Search view: Overridden to prioritize search relevance over assignment state.
 			return - project.get( 'checked' );
 		}
 	});
@@ -256,7 +256,7 @@
 		},
 
 		updateInputField: function() {
-			this.$field.val( this.map( model => model.get( 'id' ) ).join( ',' ) );
+			this.$field.val( this.pluck( 'id' ).join( ',' ) );
 		}
 	});
 
@@ -281,7 +281,7 @@
 
 			$( '#project-loading' ).remove();
 
-			// Only visually marks the first item active. The first item represents all projects.
+			// Only visually marks the first item (#project-all) in the template active on initial load.
 			var $firstActive = view.$el.find( 'li.active' );
 			if ( ! $firstActive.length ) {
 				$firstActive = view.$el.find( 'li input[type=radio]' );
@@ -320,7 +320,7 @@
 			this.model.set( 'checked', this.$el.find( 'input' ).prop( 'checked' ) );
 		},
 
-		// When active, the category toggle renders as a radio button representing the category.
+		// When active, the category toggle renders as a radio button representing "all items in this category".
 		setChecked: function() {
 			this.model.set( 'checked', true );
 		}
@@ -466,8 +466,8 @@
 			}
 
 			if ( event.type === 'keyup' && event.key === 'Escape' ) {
-				event.target.value = '';
-				this.doSearch( event );
+				this.el.value = '';
+				this.collection.doSearch( '' );
 				return;
 			}
 
@@ -591,11 +591,16 @@
 		await streamWriter.close();
 
 		return bufferPromise.then( function( buffer ) {
-			// Base64 encode it, so it can be stored in localStorage
-			return btoa(
-				new Uint8Array( buffer )
-					.reduce( ( data, byte ) => data + String.fromCharCode( byte ), '' )
-			);
+			// Base64 encode it in chunks so it can be stored in localStorage without blocking the main thread.
+			var binary = '';
+			var bytes = new Uint8Array( buffer );
+			var chunkSize = 8192;
+
+			for ( var i = 0; i < bytes.length; i += chunkSize ) {
+				binary += String.fromCharCode.apply( null, bytes.subarray( i, i + chunkSize ) );
+			}
+
+			return btoa( binary );
 		} );
 	};
 
@@ -633,6 +638,8 @@
 
 		projects.getProjects().then( function( response ) {
 			projects.initFrame( response );
+		} ).catch( function() {
+			$( '#project-loading' ).text( l10n.loadingError || 'Error loading projects.' );
 		} );
 
 		// '#project-all' grants access to all projects (GTE role) outside the individual PTE project hierarchy,
