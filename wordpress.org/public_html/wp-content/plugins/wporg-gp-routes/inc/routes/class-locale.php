@@ -277,10 +277,6 @@ class Locale extends GP_Route {
 			}
 		}
 
-		if ( ! $project ) {
-			return '<div class="default-icon"><span class="dashicons dashicons-translation"></span></div>';
-		}
-
 		switch ( $project->slug ) {
 			case 'wp':
 				return '<div class="wordpress-icon"><span class="dashicons dashicons-wordpress-alt"></span></div>';
@@ -846,14 +842,14 @@ class Locale extends GP_Route {
 	 * Retrieves active sub projects with paging.
 	 *
 	 * @param GP_Project $project           The parent project
-	 * @param array $args {
-	 *	@type int    $per_page Number of items per page. Default 20
-	 *	@type int    $page     The page of results to view. Default 1.
-	 *	@type string $orderby  The field to order by, id or name. Default id.
-	 *	@type string $order    The sorting order, ASC or DESC. Default ASC.
-	 *	@type string $search   The search string
-	 *	@type string $set_slug The translation set to view.
-	 *	@type string $locale   The locale of the translation set to view.
+	 * @param array      $args {
+	 *     @type int         $per_page        Number of items per page. Default 20.
+	 *     @type int         $page            The page of results to view. Default 1.
+	 *     @type string      $search          The search string.
+	 *     @type string      $set_slug        The translation set to view.
+	 *     @type string      $locale          The locale of the translation set to view.
+	 *     @type string|bool $filter          The filter to apply, or false. Default false.
+	 *     @type bool        $without_editors Whether to exclude projects with editors. Default false.
 	 * }
 	 * @return array List of sub projects.
 	 */
