@@ -376,24 +376,35 @@ final class UsersTest extends SsoTestCase {
 		$user = $this->create_user( User::ROLE_USER );
 		Account::connect( (int) $user->id, 'rita' );
 
-		$this->assertStringContainsString( '<a href="https://profiles.wordpress.org/rita/" target="_blank" rel="noopener">rita</a>', $this->profile_page( $user ) );
+		// The page escapes this, and PHP 8 deprecates escaping null, which tests turn into an exception.
+		$user->emails = '';
+		$user->save();
+
+		$this->assertStringContainsString(
+			'<a href="https://profiles.wordpress.org/rita/" target="_blank" rel="noopener">rita</a>',
+			(string) $this->get( route( 'users.profile', array( 'id' => $user->id ) ) )->assertStatus( 200 )->getContent()
+		);
 	}
 
 	/**
-	 * The users list tells administrators, who alone can delete and disable users, to disable them instead.
+	 * Users can't be deleted, even by administrators; they're disabled instead.
 	 *
 	 * @return void
 	 */
-	public function test_users_list_tells_admins_to_disable_not_delete(): void {
-		$this->assertStringContainsString( 'wporgsso-users-notice', (string) $this->get( route( 'users' ) )->assertStatus( 200 )->getContent() );
-		$this->assertStringNotContainsString( 'wporgsso-users-notice', $this->profile_page( $this->admin ) );
+	public function test_users_cannot_be_deleted(): void {
+		$user = $this->create_user( User::ROLE_USER );
 
-		$manager              = $this->create_user( User::ROLE_USER );
-		$manager->permissions = array( User::PERM_EDIT_USERS => true );
-		$manager->save();
-		$this->log_in( $manager, 'manager' );
+		$response = $this->post(
+			route( 'users.ajax' ),
+			array(
+				'_token'  => csrf_token(),
+				'action'  => 'delete_user',
+				'user_id' => $user->id,
+			)
+		)->assertStatus( 200 );
 
-		$this->assertStringNotContainsString( 'wporgsso-users-notice', (string) $this->get( route( 'users' ) )->assertStatus( 200 )->getContent() );
+		$this->assertSame( 'error', json_decode( (string) $response->getContent(), true )['status'] );
+		$this->assertSame( User::STATUS_ACTIVE, (int) $user->refresh()->status );
 	}
 
 	/**
@@ -642,20 +653,6 @@ final class UsersTest extends SsoTestCase {
 				WPOrgSSOServiceProvider::SESSION_CHECKED_AT => time(),
 			)
 		);
-	}
-
-	/**
-	 * Renders a user's profile page.
-	 *
-	 * @param User $user User.
-	 * @return string HTML.
-	 */
-	private function profile_page( User $user ): string {
-		// The page escapes this, and PHP 8 deprecates escaping null, which tests turn into an exception.
-		$user->emails = '';
-		$user->save();
-
-		return (string) $this->get( route( 'users.profile', array( 'id' => $user->id ) ) )->assertStatus( 200 )->getContent();
 	}
 
 	/**

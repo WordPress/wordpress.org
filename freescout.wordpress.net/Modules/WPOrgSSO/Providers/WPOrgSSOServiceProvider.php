@@ -261,17 +261,6 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 			}
 		);
 
-		// Core's users list has no hook of its own; the script moves this to the top of the page.
-		\Eventy::addAction(
-			'layout.body_bottom',
-			static function (): void {
-				$route = request()->route();
-				if ( $route && 'users' === $route->getName() && optional( auth()->user() )->isAdmin() ) {
-					self::render( 'users_notice', array() );
-				}
-			}
-		);
-
 		\Eventy::addFilter(
 			'user.create_save',
 			static function ( User $user, Request $request ): User {
