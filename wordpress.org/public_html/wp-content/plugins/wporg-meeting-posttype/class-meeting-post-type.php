@@ -616,7 +616,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 						'value'   => gmdate( 'Y-m-d' ),
 					),
 				),
-				// recurring = 1 AND ( end_date = '' OR end_date > CURDATE() ) = recurring meeting that has no end or has not ended yet.
+				// recurring = 1 AND ( end_date = '' OR end_date >= CURDATE() ) = recurring meeting that has no end or has not ended yet.
 				array(
 					'relation' => 'AND',
 					array(
@@ -634,7 +634,7 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 						array(
 							'key'     => 'end_date',
 							'type'    => 'DATE',
-							'compare' => '>',
+							'compare' => '>=',
 							'value'   => gmdate( 'Y-m-d' ),
 						),
 					),
