@@ -26,6 +26,13 @@ class Locale extends GP_Route {
 	private $roles_adapter = null;
 
 	/**
+	 * In-memory cache for projects by ID per instance.
+	 *
+	 * @var array
+	 */
+	private $projects_cache = [];
+
+	/**
 	 * In-memory cache for active sub projects per instance.
 	 *
 	 * @var array
@@ -250,13 +257,13 @@ class Locale extends GP_Route {
 	private function get_project_icon( $project, $sub_project, $size = 128 ) {
 		// The Waiting tab will have $sub_project's which are not sub-projects of $project
 		if ( $sub_project->parent_project_id && $sub_project->parent_project_id !== $project->id ) {
-			$parent = GP::$project->get( $sub_project->parent_project_id );
+			$parent = $this->get_project_by_id( $sub_project->parent_project_id );
 			if ( $parent ) {
 				$project = $parent;
 
 				// In the case of Plugins, we may need to go up another level yet.
 				if ( ! empty( $parent->parent_project_id ) ) {
-					$grand_parent = GP::$project->get( $parent->parent_project_id );
+					$grand_parent = $this->get_project_by_id( $parent->parent_project_id );
 					if ( $grand_parent ) {
 						$sub_project = $parent;
 						$project     = $grand_parent;
@@ -288,9 +295,9 @@ class Locale extends GP_Route {
 					case 'pattern-directory':
 						return '<div class="default-icon"><span class="dashicons dashicons-art"></span></div>';
 					case 'browsehappy':
-						return '<div class="icon"><img src="' . plugins_url( 'templates/images/browsehappy.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
+						return '<div class="icon"><img src="' . esc_url( plugins_url( 'templates/images/browsehappy.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) ) . '" width="' . (int) $size . '" height="' . (int) $size . '"></div>';
 					case 'openverse':
-						return '<div class="icon"><img src="' . plugins_url( 'templates/images/openverse.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
+						return '<div class="icon"><img src="' . esc_url( plugins_url( 'templates/images/openverse.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) ) . '" width="' . (int) $size . '" height="' . (int) $size . '"></div>';
 					default:
 						return '<div class="default-icon"><span class="dashicons dashicons-networking"></span></div>';
 				}
@@ -402,7 +409,7 @@ class Locale extends GP_Route {
 		$parent_project_id = (int) $project->parent_project_id;
 
 		while ( $parent_project_id && ! in_array( $parent_project_id, $parent_ids, true ) ) {
-			$parent_project = GP::$project->get( $parent_project_id );
+			$parent_project = $this->get_project_by_id( $parent_project_id );
 
 			if ( ! $parent_project ) {
 				break;
@@ -566,7 +573,7 @@ class Locale extends GP_Route {
 			$project_id = (int) $contributor->project_id;
 
 			if ( ! isset( $projects[ $project_id ] ) ) {
-				$projects[ $project_id ] = GP::$project->get( $project_id );
+				$projects[ $project_id ] = $this->get_project_by_id( $project_id );
 			}
 
 			$detail = (object) [
@@ -748,6 +755,25 @@ class Locale extends GP_Route {
 		}
 
 		return $status;
+	}
+
+	/**
+	 * Retrieves a project by ID with in-memory caching.
+	 *
+	 * @param int $project_id The project ID.
+	 * @return GP_Project|false The project object, or false if not found.
+	 */
+	private function get_project_by_id( $project_id ) {
+		$project_id = (int) $project_id;
+		if ( ! $project_id ) {
+			return false;
+		}
+
+		if ( ! array_key_exists( $project_id, $this->projects_cache ) ) {
+			$this->projects_cache[ $project_id ] = GP::$project->get( $project_id );
+		}
+
+		return $this->projects_cache[ $project_id ];
 	}
 
 	/**
@@ -996,6 +1022,7 @@ class Locale extends GP_Route {
 					}
 					break;
 				}
+			// Fall through.
 			case 'special':
 				$user_fav_projects = $this->get_user_favorites( $project->slug );
 
