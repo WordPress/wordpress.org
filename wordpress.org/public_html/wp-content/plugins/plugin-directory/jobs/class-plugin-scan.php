@@ -452,14 +452,14 @@ class Plugin_Scan {
 			$env_vars
 		);
 		if ( ! $plugin_check_process ) {
-			// If we can't run plugin-check, we'll just return a pass.
+			// If we can't run plugin-check, we'll just return a pass, with a return code that marks it as not run.
 			return [
 				'verdict'         => true,
 				'results'         => [],
 				'results_by_type' => [],
 				'files'           => [],
 				'totals'          => [ 'errors' => 0, 'warnings' => 0 ],
-				'return_code'     => 0,
+				'return_code'     => 1,
 				'output'          => [],
 				'stderr'          => '',
 				'total_time'      => 0,
