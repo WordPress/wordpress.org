@@ -195,6 +195,13 @@ function photoShowFieldError( field ) {
 }
 
 /**
+ * Scroll position to restore after the photo preview dialog closes.
+ *
+ * @type {{ x: number, y: number }|null}
+ */
+let photoPreviewScrollPosition = null;
+
+/**
  * Initializes the expandable photo preview dialog.
  */
 function photoInitFilePreviewDialog() {
@@ -215,7 +222,28 @@ function photoInitFilePreviewDialog() {
 
 		largeImg.src = previewImg.src;
 		largeImg.alt = previewImg.alt;
+
+		// Native dialog focus restoration can jump the page; remember scroll to put it back.
+		photoPreviewScrollPosition = {
+			x: window.scrollX,
+			y: window.scrollY,
+		};
+
 		dialog.showModal();
+	} );
+
+	dialog.addEventListener( 'close', () => {
+		if ( ! photoPreviewScrollPosition ) {
+			return;
+		}
+
+		const { x, y } = photoPreviewScrollPosition;
+		photoPreviewScrollPosition = null;
+
+		// Restore after the browser finishes its own focus/scroll handling.
+		requestAnimationFrame( () => {
+			window.scrollTo( x, y );
+		} );
 	} );
 
 	const closeButton = dialog.querySelector( '.ugc-photo-preview-dialog__close' );
