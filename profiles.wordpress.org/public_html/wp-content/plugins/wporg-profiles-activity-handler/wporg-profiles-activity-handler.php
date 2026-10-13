@@ -180,7 +180,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$missing = array();
 
 			foreach ( $args as $arg ) {
-				// Not empty(), so that values like a forum ID of 0 count as present.
+				// Not empty(): a forum ID of 0 is valid.
 				if ( ! isset( $data[ $arg ] ) || '' === $data[ $arg ] ) {
 					$missing[] = $arg;
 				}
@@ -303,7 +303,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			if ( is_wp_error( $activity_id ) ) {
-				// Keep the handler's status, so a malformed request isn't reported as a server error.
+				// Keep the handler's status, so client errors aren't reported as 500s.
 				return new WP_Error(
 					'activity_failed',
 					'Unable to save activity: ' . $activity_id->get_error_message(),
@@ -432,7 +432,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				return new WP_Error( 'unknown_activity', 'Unrecognized forum activity.', array( 'status' => 400 ) );
 			}
 
-			// Check for the args that identify the activity.
+			// Check for required args.
 			$required_args = array( 'forum_id' );
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ) {
 				$required_args[] = 'topic_id';
@@ -473,10 +473,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					return true;
 				}
 
-				/*
-				 * `message` may be empty, for example when a reply only quotes another post,
-				 * so it isn't required.
-				 */
+				// Not `message`: it's empty when a reply only quotes another post.
 				$has_required_args = $this->require_args( array( 'title', 'site', 'url' ), $data );
 				if ( is_wp_error( $has_required_args ) ) {
 					return $has_required_args;
