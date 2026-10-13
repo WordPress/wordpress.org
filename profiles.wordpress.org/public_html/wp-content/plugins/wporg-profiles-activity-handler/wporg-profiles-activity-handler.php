@@ -472,7 +472,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					return true;
 				}
 
-				// Not `message`: it's empty when a reply only quotes another post.
+				// Replies without an excerpt, such as quote-only ones, have never been recorded.
+				if ( empty( $data['message'] ) ) {
+					return true;
+				}
+
 				$has_required_args = $this->require_args( array( 'title', 'site', 'url' ), $data );
 				if ( is_wp_error( $has_required_args ) ) {
 					return $has_required_args;
@@ -500,7 +504,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$args = array(
 					'user_id'           => $user->ID,
 					'action'            => $action,
-					'content'           => esc_html( $data['message'] ?? '' ),
+					'content'           => esc_html( $data['message'] ),
 					'primary_link'      => esc_url( $data['url'] ),
 					'component'         => 'forums',
 					'type'              => $type,
