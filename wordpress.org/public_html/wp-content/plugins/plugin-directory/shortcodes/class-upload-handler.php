@@ -11,6 +11,7 @@ use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WordPressdotorg\Plugin_Directory\Trademarks;
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
 use WordPressdotorg\Plugin_Directory\Clients\Helpscout as Helpscout_Client;
 use WordPressdotorg\Plugin_Directory\Clients\FreeScout as FreeScout_Client;
@@ -654,7 +655,7 @@ class Upload_Handler {
 
 		if ( $updating_existing ) {
 
-			// Update HelpScout, if in review.
+			// Confirm the upload in the review conversation, if in review.
 			$this->update_review_email( $plugin_post, $attachment );
 
 			$message = sprintf(
@@ -762,7 +763,7 @@ class Upload_Handler {
 		);
 
 		// Slugs in the namespace used internally for rejected plugins.
-		if ( preg_match( Helpscout::REJECTED_SLUG_REGEX, $this->plugin_slug ) ) {
+		if ( preg_match( Status_Transitions::REJECTED_SLUG_REGEX, $this->plugin_slug ) ) {
 			return true;
 		}
 
@@ -1088,6 +1089,15 @@ class Upload_Handler {
 			return false;
 		}
 
+		// A new thread sets the conversation's CC to its own, so the reply copies whoever the conversation does.
+		$conversation = FreeScout_Client::api( 'conversations/' . $conversation_id, array(), 'GET', $response_code );
+		if ( 200 !== $response_code || ! isset( $conversation['cc'] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update; not rendered.
+			trigger_error( "FreeScout update failed: couldn't read the conversation's CC: $response_code: " . var_export( $conversation, true ), E_USER_WARNING );
+
+			return false;
+		}
+
 		$result = FreeScout_Client::api(
 			'conversations/' . $conversation_id . '/threads',
 			array(
@@ -1095,6 +1105,7 @@ class Upload_Handler {
 				'text'   => nl2br( make_clickable( esc_html( $text ) ) ),
 				'user'   => $user_id,
 				'to'     => array( $author->user_email ),
+				'cc'     => array_values( (array) $conversation['cc'] ),
 				'status' => 'active',
 			),
 			'POST',

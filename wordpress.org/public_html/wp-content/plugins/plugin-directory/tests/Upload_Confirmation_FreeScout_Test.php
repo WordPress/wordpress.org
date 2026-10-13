@@ -102,24 +102,39 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	}
 
 	/**
-	 * The author's upload is confirmed by a reply from the configured agent, which makes the conversation active again.
+	 * The author's upload is confirmed by a reply from the configured agent, which makes the conversation active again,
+	 * and keeps who it copies: a thread sets the conversation's CC to its own.
 	 *
 	 * @return void
 	 */
 	public function test_replies_in_the_review_conversation(): void {
-		$this->answer();
+		$this->answer( array( 'committer@example.org' ) );
 		list( $plugin, $attachment, $author ) = $this->upload( true );
 
 		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
 
-		$this->assertCount( 1, $this->requests );
-		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[0]['url'] );
-		$this->assertSame( 'test-key', $this->requests[0]['args']['headers']['X-FreeScout-API-Key'] );
+		$this->assertCount( 2, $this->requests );
+		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[1]['url'] );
+		$this->assertSame( 'test-key', $this->requests[1]['args']['headers']['X-FreeScout-API-Key'] );
 
-		$body = json_decode( (string) $this->requests[0]['args']['body'], true );
-		$this->assertSame( array( 'message', 12, array( $author->user_email ), 'active' ), array( $body['type'], $body['user'], $body['to'], $body['status'] ) );
+		$body = json_decode( (string) $this->requests[1]['args']['body'], true );
+		$this->assertSame( array( 'message', 12, array( $author->user_email ), array( 'committer@example.org' ), 'active' ), array( $body['type'], $body['user'], $body['to'], $body['cc'], $body['status'] ) );
 		$this->assertStringContainsString( 'This is an automated message to confirm that we have received your updated plugin file.', $body['text'] );
 		$this->assertStringContainsString( 'version 1.2', $body['text'] );
+	}
+
+	/**
+	 * Without the conversation's CC, a reply would clear it, so there's none.
+	 *
+	 * @return void
+	 */
+	public function test_does_not_reply_without_the_conversations_cc(): void {
+		$this->answer( null );
+		list( $plugin, $attachment ) = $this->upload( true );
+
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
+		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
 	}
 
 	/**
@@ -186,7 +201,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		$this->assertSame( array( self::CONVERSATION_ID, self::HELPSCOUT_ID ), array_map( 'intval', wp_list_pluck( $emails, 'id' ) ) );
 
 		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
-		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[0]['url'] );
+		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[1]['url'] );
 	}
 
 	/**
@@ -231,18 +246,36 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	}
 
 	/**
-	 * Answers FreeScout's API: that a thread was created.
+	 * Answers FreeScout's API, in place of the API & Webhooks module: the review conversation, and that a thread was
+	 * created.
 	 *
+	 * @param string[]|null $cc Who the conversation copies; null if FreeScout can't be reached.
 	 * @return void
 	 */
-	protected function answer(): void {
+	protected function answer( ?array $cc = array() ): void {
 		$this->filter(
 			'pre_http_request',
-			function ( mixed $preempt, array $args, string $url ): mixed {
+			function ( mixed $preempt, array $args, string $url ) use ( $cc ): mixed {
 				if ( ! str_starts_with( $url, 'https://freescout.wordpress.net/api/' ) ) {
 					return $preempt;
 				}
 				$this->requests[] = compact( 'url', 'args' );
+
+				if ( 'GET' === $args['method'] ) {
+					if ( null === $cc ) {
+						return new WP_Error( 'http_request_failed', 'Connection timed out' );
+					}
+
+					$conversation = array(
+						'id'     => self::CONVERSATION_ID,
+						'number' => 1234,
+						'status' => 'closed',
+						'cc'     => $cc,
+						'bcc'    => array(),
+					);
+
+					return array( 'response' => array( 'code' => 200 ), 'body' => wp_json_encode( $conversation ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- A short HTTP response.
+				}
 
 				return array( 'response' => array( 'code' => 201 ), 'body' => '{"id":99}' ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- A short HTTP response.
 			}
