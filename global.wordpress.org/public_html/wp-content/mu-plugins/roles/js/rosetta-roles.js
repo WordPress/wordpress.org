@@ -4,6 +4,12 @@
 
 	projects = { model: {}, view: {}, controller: {} };
 
+	/**
+	 * @typedef {Object} RosettaSettings
+	 * @property {Array<number|string>} accessList  - IDs of currently assigned projects.
+	 * @property {number}               lastUpdated - Timestamp used for localStorage cache invalidation.
+	 * @property {Object}               l10n        - Localized UI strings.
+	 */
 	projects.settings = window._rosettaProjectsSettings || {};
 	l10n = projects.settings.l10n || {};
 	delete projects.settings.l10n;
@@ -63,6 +69,8 @@
 			}
 		},
 
+		// Check the raw data array rather than the collection so active selections
+		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
 			var self = this;
 			var hasChecked = _.some( self._subProjects, function( sub ) {
@@ -75,6 +83,8 @@
 	projects.model.Projects = Backbone.Collection.extend({
 		model: projects.model.Project,
 
+		// Global event bus coordinating project selection and active state
+		// between project collections and the standalone '#project-all' toggle.
 		initialize: function() {
 			_.bindAll( this, 'disableActiveStates', 'uncheckAllProjects' );
 
@@ -231,6 +241,7 @@
 			if ( this.terms && this.terms.length > 0 ) {
 				return - project.get( 'matchScore' );
 			}
+			// Negates boolean (-true = -1, -false = 0) to sort checked items to the top (descending).
 			return - project.get( 'checked' );
 		}
 	});
@@ -548,6 +559,7 @@
 	};
 
 	projects.compress = async function( data ) {
+		// Reject if Compression Streams API is unavailable; gracefully falls back to direct remote fetching.
 		if ( 'undefined' === typeof CompressionStream ) {
 			return Promise.reject();
 		}
@@ -604,6 +616,8 @@
 			projects.initFrame( response );
 		} );
 
+		// '#project-all' acts as a global wildcard override outside the Backbone model hierarchy,
+		// syncing directly with the shared projects.selection collection.
 		var $projectAll = $( '#project-all' );
 		var $projectAllCheckbox = $projectAll.find( 'input' );
 
