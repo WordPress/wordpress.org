@@ -9,7 +9,6 @@ declare( strict_types = 1 );
 
 namespace WordPressdotorg\Plugin_Directory\Plugin_Check;
 
-use WordPress\Plugin_Check\Checker\AJAX_Runner;
 use WordPress\Plugin_Check\Checker\Check_Result;
 use WordPress\Plugin_Check\Checker\Checks\Abstract_PHP_CodeSniffer_Check;
 use WordPress\Plugin_Check\Checker\CLI_Runner;
@@ -107,10 +106,8 @@ class Batched_Check implements Static_Check {
 	 */
 	private static function run_groups( Check_Result $result ): array {
 		$runner = Plugin_Request_Utility::get_runner();
-		if ( ! $runner && defined( 'WP_CLI' ) && WP_CLI && array( 'plugin', 'check' ) === array_slice( \WP_CLI::get_runner()->arguments, 0, 2 ) ) {
+		if ( ! $runner && array( 'plugin', 'check' ) === array_slice( \WP_CLI::get_runner()->arguments, 0, 2 ) ) {
 			$runner = new CLI_Runner();
-		} elseif ( ! $runner && AJAX_Runner::is_plugin_check() ) {
-			$runner = new AJAX_Runner();
 		}
 
 		if ( ! $runner ) {

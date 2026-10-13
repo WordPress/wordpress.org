@@ -66,9 +66,6 @@ class Plugin_Directory {
 		// Cron tasks.
 		new Jobs\Manager();
 
-		// Share PHPCS runs between Plugin Check checks.
-		add_filter( 'wp_plugin_check_checks', array( Plugin_Check\Batched_Check::class, 'wrap_checks' ), 1000 );
-
 		// Search
 		Plugin_Search::instance();
 
