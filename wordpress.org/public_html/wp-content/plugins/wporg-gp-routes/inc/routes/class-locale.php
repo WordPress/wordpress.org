@@ -33,6 +33,13 @@ class Locale extends GP_Route {
 	private $sub_projects_cache = [];
 
 	/**
+	 * In-memory cache for single-project statuses per instance.
+	 *
+	 * @var array
+	 */
+	private $project_status_cache = [];
+
+	/**
 	 * In-memory cache for user favorites per instance.
 	 *
 	 * @var array
@@ -670,53 +677,87 @@ class Locale extends GP_Route {
 	 * @return object The status of a project.
 	 */
 	private function get_project_status( $project, $locale, $set_slug, $status = null, $calc_sub_projects = true ) {
-		if ( null === $status ) {
-			$status = new stdClass;
-			$status->sub_projects_count     = 0;
-			$status->waiting_count          = 0;
-			$status->current_count          = 0;
-			$status->fuzzy_count            = 0;
-			$status->untranslated_count     = 0;
-			$status->changesrequested_count = 0;
-			$status->all_count              = 0;
-			$status->percent_complete       = 0;
+		$cache_key = (int) $project->id . ':' . $locale . ':' . $set_slug;
+
+		if ( null === $status && isset( $this->project_status_cache[ $cache_key ] ) ) {
+			$single_status = clone $this->project_status_cache[ $cache_key ];
+		} else {
+			if ( null === $status ) {
+				$single_status = new stdClass;
+				$single_status->sub_projects_count     = 0;
+				$single_status->waiting_count          = 0;
+				$single_status->current_count          = 0;
+				$single_status->fuzzy_count            = 0;
+				$single_status->untranslated_count     = 0;
+				$single_status->changesrequested_count = 0;
+				$single_status->all_count              = 0;
+				$single_status->percent_complete       = 0;
+			} else {
+				$single_status = $status;
+			}
+
+			$single_status = apply_filters( 'gp_get_project_status', $single_status, $project, $locale, $set_slug );
+			if ( isset( $single_status->is_pattern ) && $single_status->is_pattern ) {
+				if ( null === $status ) {
+					$this->project_status_cache[ $cache_key ] = clone $single_status;
+				}
+				return $single_status;
+			}
+
+			$set = GP::$translation_set->by_project_id_slug_and_locale(
+				$project->id,
+				$set_slug,
+				$locale
+			);
+
+			if ( $set ) {
+				$single_status->sub_projects_count     += 1;
+				$single_status->waiting_count          += (int) $set->waiting_count();
+				$single_status->current_count          += (int) $set->current_count();
+				$single_status->fuzzy_count            += (int) $set->fuzzy_count();
+				$single_status->untranslated_count     += (int) $set->untranslated_count();
+				$single_status->changesrequested_count += (int) $set->changesrequested_count();
+				$single_status->all_count              += (int) $set->all_count();
+
+				if ( $single_status->all_count ) {
+					/*
+					 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
+					 * < 50% round up, so that a project with just a few strings shows 1%, instead of 0%.
+					 */
+					$percent_complete                = ( $single_status->current_count / $single_status->all_count * 100 );
+					$single_status->percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
+				}
+			}
+
+			if ( null === $status ) {
+				$this->project_status_cache[ $cache_key ] = clone $single_status;
+			}
 		}
 
-		$status = apply_filters( 'gp_get_project_status', $status, $project, $locale, $set_slug );
+		$status = $single_status;
+
 		if ( isset( $status->is_pattern ) && $status->is_pattern ) {
 			return $status;
-		}
-
-		$set = GP::$translation_set->by_project_id_slug_and_locale(
-			$project->id,
-			$set_slug,
-			$locale
-		);
-
-		if ( $set ) {
-			$status->sub_projects_count += 1;
-			$status->waiting_count          += (int) $set->waiting_count();
-			$status->current_count          += (int) $set->current_count();
-			$status->fuzzy_count            += (int) $set->fuzzy_count();
-			$status->untranslated_count     += (int) $set->untranslated_count();
-			$status->changesrequested_count += (int) $set->changesrequested_count();
-			$status->all_count              += (int) $set->all_count();
-
-			if ( $status->all_count ) {
-				/*
-				 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
-				 * < 50% round up, so that a project with just a few strings shows 1%, instead of 0%.
-				 */
-				$percent_complete = ( $status->current_count / $status->all_count * 100 );
-				$status->percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
-			}
 		}
 
 		if ( $calc_sub_projects ) {
 			$sub_projects = $this->get_active_sub_projects( $project, true );
 			if ( $sub_projects ) {
 				foreach ( $sub_projects as $sub_project ) {
-					$this->get_project_status( $sub_project, $locale, $set_slug, $status, false );
+					$sub_status = $this->get_project_status( $sub_project, $locale, $set_slug, null, false );
+
+					$status->sub_projects_count     += $sub_status->sub_projects_count;
+					$status->waiting_count          += $sub_status->waiting_count;
+					$status->current_count          += $sub_status->current_count;
+					$status->fuzzy_count            += $sub_status->fuzzy_count;
+					$status->untranslated_count     += $sub_status->untranslated_count;
+					$status->changesrequested_count += $sub_status->changesrequested_count;
+					$status->all_count              += $sub_status->all_count;
+				}
+
+				if ( $status->all_count ) {
+					$percent_complete         = ( $status->current_count / $status->all_count * 100 );
+					$status->percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
 				}
 			}
 		}
