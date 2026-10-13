@@ -676,25 +676,25 @@ Welcome to the WordPress Polyglots team and happy translating.',
 					'items_wrap'     => '%3$s',
 					// Custom walker that returns plain text links.
 					'walker'         => new class() extends Walker_Nav_Menu {
-						public function start_lvl( &$output, $depth = 0, $args = array() ) {
+						public function start_lvl( &$output, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
-						public function end_lvl( &$output, $depth = 0, $args = array() ) {
+						public function end_lvl( &$output, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
-						public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
-							$href  = ! empty( $item->url ) ? $item->url : '';
-							$title = apply_filters( 'the_title', $item->title, $item->ID );
-							$title = apply_filters( 'nav_menu_item_title', $title, $item, $args, $depth );
+						public function start_el( &$output, $data_object, $depth = 0, $args = null, $current_object_id = 0 ) {
+							$href  = ! empty( $data_object->url ) ? $data_object->url : '';
+							$title = apply_filters( 'the_title', $data_object->title, $data_object->ID );
+							$title = apply_filters( 'nav_menu_item_title', $title, $data_object, $args, $depth );
 
 							$item_output = $title;
 							if ( $href ) {
 								$item_output .= ': ' . esc_url( $href );
 							}
 
-							$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
+							$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $data_object, $depth, $args );
 						}
-						public function end_el( &$output, $item, $depth = 0, $args = array() ) {
+						public function end_el( &$output, $data_object, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
 					},
