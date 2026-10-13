@@ -574,7 +574,7 @@
 		}
 
 		var stream = new CompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter();
+			streamWriter = stream.writable.getWriter(),
 			bufferPromise = new Response( stream.readable ).arrayBuffer();
 
 		await streamWriter.write(
