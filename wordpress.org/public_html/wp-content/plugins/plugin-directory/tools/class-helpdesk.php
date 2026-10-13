@@ -103,7 +103,8 @@ class Helpdesk {
 	/**
 	 * The form for a new conversation with a plugin's author, from the Plugins mailbox.
 	 *
-	 * FreeScout's form can't be given a name, or copies, so there the committers are recipients like the author.
+	 * FreeScout's form can't be given a name, or copies, so there the committers are recipients after the author, whom
+	 * FreeScout copies on the conversation.
 	 *
 	 * @param WP_User  $author    The author.
 	 * @param string[] $cc_emails The other committers' email addresses.
