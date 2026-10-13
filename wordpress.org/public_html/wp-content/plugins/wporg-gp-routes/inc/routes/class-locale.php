@@ -1031,7 +1031,7 @@ class Locale extends GP_Route {
 
 				// Float Favorites to the start, float fully translated to the bottom, order the rest by name
 				if ( ! empty( $user_fav_projects ) ) {
-					//  Safely quote and escape values for SQL
+					//  Safely quote and escape values for SQL.
 					$escaped_favs    = array_map( 'esc_sql', $user_fav_projects );
 					$quoted_favs     = "'" . implode( "', '", $escaped_favs ) . "'";
 					$filter_order_by = "FIELD( tp.path, {$quoted_favs} ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC";
