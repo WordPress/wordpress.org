@@ -892,7 +892,7 @@ class Locale extends GP_Route {
 
 		$limit_sql = '';
 		if ( $per_page ) {
-			$limit_sql = $wpdb->prepare( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
+			$limit_sql = sprintf( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
 		}
 
 		$sql_params = array( $locale, $set_slug );
