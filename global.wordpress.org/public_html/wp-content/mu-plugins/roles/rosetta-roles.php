@@ -113,7 +113,7 @@ class Rosetta_Roles {
 			'translation-editors',
 			array( $this, 'render_translation_editors_page' ),
 			'dashicons-translation',
-			71.1 // After Users
+			71.1 // After Users.
 		);
 
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'load_translation_editors_page' ) );
