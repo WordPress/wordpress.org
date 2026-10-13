@@ -27,6 +27,20 @@ final class SignedRequest {
 	public const SIGNATURE_HEADER = 'X-WPOrg-Signature';
 
 	/**
+	 * How long a request is good for after it was sent, in seconds.
+	 *
+	 * @var int
+	 */
+	private const MAX_AGE = 300;
+
+	/**
+	 * How far ahead of FreeScout's clock WordPress.org's may be, in seconds.
+	 *
+	 * @var int
+	 */
+	private const MAX_CLOCK_SKEW = 10;
+
+	/**
 	 * Signs a body.
 	 *
 	 * @param string $body   Request body.
@@ -58,7 +72,7 @@ final class SignedRequest {
 		}
 
 		$age = time() - (int) ( $payload['sent_at'] ?? 0 );
-		if ( $age < -10 || $age > (int) config( 'wporgapi.max_age' ) ) {
+		if ( $age < -self::MAX_CLOCK_SKEW || $age > self::MAX_AGE ) {
 			return null;
 		}
 
