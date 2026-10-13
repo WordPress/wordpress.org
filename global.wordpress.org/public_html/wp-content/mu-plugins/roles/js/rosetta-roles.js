@@ -575,13 +575,14 @@
 
 		var stream = new CompressionStream( 'gzip' ),
 			streamWriter = stream.writable.getWriter();
+			bufferPromise = new Response( stream.readable ).arrayBuffer();
 
 		await streamWriter.write(
 			new TextEncoder().encode( data )
 		);
 		await streamWriter.close();
 
-		return new Response( stream.readable ).arrayBuffer().then( function( buffer ) {
+		return bufferPromise.then( function( buffer ) {
 			// Base64 encode it, so it can be stored in localStorage
 			return btoa(
 				new Uint8Array( buffer )
@@ -598,12 +599,13 @@
 		// Base64 decode
 		var buffer = Uint8Array.from( atob( data ), c => c.charCodeAt(0) ),
 			stream = new DecompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter();
+			streamWriter = stream.writable.getWriter(),
+			arrayBufferPromise = new Response( stream.readable ).arrayBuffer();
 
 		await streamWriter.write( buffer );
 		await streamWriter.close();
 
-		return new Response( stream.readable ).arrayBuffer().then( function( arrayBuffer ) {
+		return arrayBufferPromise.then( function( arrayBuffer ) {
 			return new TextDecoder().decode( arrayBuffer );
 		} );
 	};
