@@ -34,21 +34,21 @@ class PHPCS_Group_Check extends Abstract_PHP_CodeSniffer_Check {
 	 *
 	 * @var Abstract_PHP_CodeSniffer_Check[]
 	 */
-	protected $checks;
+	protected array $checks;
 
 	/**
 	 * The combined PHPCS arguments of the grouped checks.
 	 *
 	 * @var array
 	 */
-	protected $args;
+	protected array $args;
 
 	/**
 	 * Lowercase sniff codes mapped to the slugs of the checks that select them.
 	 *
 	 * @var array
 	 */
-	protected $sniff_owners = array();
+	protected array $sniff_owners = array();
 
 	/**
 	 * Constructor.
@@ -144,7 +144,7 @@ class PHPCS_Group_Check extends Abstract_PHP_CodeSniffer_Check {
 	 * @param Check_Result $result The check result to amend, including the plugin context to check.
 	 * @return array An associative array of PHPCS CLI arguments.
 	 */
-	protected function get_args( Check_Result $result ) {
+	protected function get_args( Check_Result $result ): array {
 		return $this->args;
 	}
 
@@ -163,7 +163,7 @@ class PHPCS_Group_Check extends Abstract_PHP_CodeSniffer_Check {
 	 * @param string       $docs     URL for further information about the message.
 	 * @param int          $severity Severity level. Default is 5.
 	 */
-	protected function add_result_message_for_file( Check_Result $result, $error, $message, $code, $file, $line = 0, $column = 0, string $docs = '', $severity = 5 ) {
+	protected function add_result_message_for_file( Check_Result $result, $error, $message, $code, $file, $line = 0, $column = 0, string $docs = '', $severity = 5 ): void {
 		$sniff  = strtolower( implode( '.', array_slice( explode( '.', $code ), 0, 3 ) ) );
 		$owners = $this->sniff_owners[ $sniff ] ?? array( array_key_first( $this->checks ) );
 
@@ -179,7 +179,7 @@ class PHPCS_Group_Check extends Abstract_PHP_CodeSniffer_Check {
 	 *
 	 * @return array The categories for the check.
 	 */
-	public function get_categories() {
+	public function get_categories(): array {
 		return array();
 	}
 

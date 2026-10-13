@@ -29,28 +29,28 @@ class Batched_Check implements Static_Check {
 	 *
 	 * @var string
 	 */
-	protected $slug;
+	protected string $slug;
 
 	/**
 	 * The check this stands in for.
 	 *
 	 * @var Abstract_PHP_CodeSniffer_Check
 	 */
-	protected $check;
+	protected Abstract_PHP_CodeSniffer_Check $check;
 
 	/**
 	 * The check result the grouped checks last ran for.
 	 *
 	 * @var Check_Result|null
 	 */
-	private static $result;
+	private static ?Check_Result $result = null;
 
 	/**
 	 * The slugs of the checks that ran in a group for that result.
 	 *
 	 * @var string[]
 	 */
-	private static $grouped = array();
+	private static array $grouped = array();
 
 	/**
 	 * Constructor.
@@ -69,7 +69,7 @@ class Batched_Check implements Static_Check {
 	 * @param array $checks An array map of check slugs to Check instances.
 	 * @return array The filtered checks.
 	 */
-	public static function wrap_checks( $checks ) {
+	public static function wrap_checks( array $checks ): array {
 		foreach ( $checks as $slug => $check ) {
 			if ( $check instanceof Abstract_PHP_CodeSniffer_Check && ! $check instanceof Preparation ) {
 				$checks[ $slug ] = new self( (string) $slug, $check );
@@ -84,7 +84,7 @@ class Batched_Check implements Static_Check {
 	 *
 	 * @param Check_Result $result The check result to amend, including the plugin context to check.
 	 */
-	public function run( Check_Result $result ) {
+	public function run( Check_Result $result ): void {
 		if ( self::$result !== $result ) {
 			self::$result  = $result;
 			self::$grouped = self::run_groups( $result );
@@ -135,7 +135,7 @@ class Batched_Check implements Static_Check {
 	 *
 	 * @return string The stability of the check this stands in for.
 	 */
-	public function get_stability() {
+	public function get_stability(): string {
 		return $this->check->get_stability();
 	}
 
@@ -144,7 +144,7 @@ class Batched_Check implements Static_Check {
 	 *
 	 * @return array The categories of the check this stands in for.
 	 */
-	public function get_categories() {
+	public function get_categories(): array {
 		return $this->check->get_categories();
 	}
 
