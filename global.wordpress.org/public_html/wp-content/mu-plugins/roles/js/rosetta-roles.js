@@ -215,6 +215,7 @@
 			// Escape the term string for RegExp meta characters
 			escapedTerm = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
 
+			// Retain spaces untrimmed so live multi-word typing is not interrupted.
 			// Positive lookahead pattern allowing terms to appear in any order.
 			escapedTerm = escapedTerm.replace( / /g, ')(?=.*' );
 			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
