@@ -33,7 +33,11 @@ function wporg_wordpress_credits_shortcode( $attrs ) {
 
 	require_once __DIR__ . '/wp-credits.php';
 
-	$version = preg_replace( '/^([.0-9]+).*/', '$1', $attrs[0] );
+	if ( ! preg_match( '/^\d+\.\d+[.0-9]*/', $attrs[0], $match ) || version_compare( $match[0], '3.2', '<' ) ) {
+		return '';
+	}
+
+	$version = $match[0];
 	$class = WP_Credits::factory( $version, false );
 	$results = $class->get_results();
 
@@ -54,7 +58,7 @@ function wporg_wordpress_credits_shortcode( $attrs ) {
 	asort( $props, SORT_FLAG_CASE | SORT_STRING );
 	$output = array();
 	foreach ( $props as $username => $name ) {
-		$output[] = '<a href="' . sprintf( $results['data']['profiles'], $username ) . '">' . $name . '</a>';
+		$output[] = '<a href="' . esc_url( sprintf( $results['data']['profiles'], $username ) ) . '">' . esc_html( $name ) . '</a>';
 	}
 
 	$container_atts = '';

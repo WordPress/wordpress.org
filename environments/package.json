@@ -3,7 +3,7 @@
 	"private": true,
 	"description": "Local development environments for WordPress.org",
 	"engines": {
-		"node": ">=20"
+		"node": ">=24"
 	},
 	"scripts": {
 		"plugins:env": "wp-env --config plugin-directory/.wp-env.json",
@@ -26,6 +26,8 @@
 		"make:test:cli": "npm run make:test:env -- run cli --env-cwd=wp-content/plugins/wporg-cli phpunit",
 		"make:test": "npm run make:test:env -- start && npm run make:test:posting-access && npm run make:test:badge-management && npm run make:test:trac-watcher && npm run make:test:trac-notifications && npm run make:test:cli",
 		"jobs:env": "wp-env --config jobs/.wp-env.json",
+		"jobs:test:env": "wp-env --config jobs/.wp-env.test.json",
+		"jobs:test": "npm run jobs:test:env -- start && npm run jobs:test:env -- run cli --env-cwd=wp-content/plugins/jobswp phpunit",
 		"browsehappy:env": "wp-env --config browsehappy/.wp-env.json",
 		"openverse:test:env": "wp-env --config openverse/.wp-env.test.json",
 		"openverse:test": "npm run openverse:test:env -- start && npm run openverse:test:env -- run cli --env-cwd=wp-content/themes/wporg-openverse phpunit",
@@ -51,6 +53,6 @@
 		"freescout:test": "npm run freescout:env -- exec -T --user www-data app bash /srv/env/bin/test.sh"
 	},
 	"devDependencies": {
-		"@wordpress/env": "^11"
+		"@wordpress/env": "^11.9.0"
 	}
 }

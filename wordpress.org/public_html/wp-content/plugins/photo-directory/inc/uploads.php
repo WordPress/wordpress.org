@@ -883,13 +883,14 @@ class Uploads {
 				'post_title' => $name,
 			] );
 
-			// Change the same fields in the attachment to obfuscate the original
-			// filename.
+			// Obfuscate the original filename, and use the photo's description over Frontend Uploader's copy of the request.
 			$photo_name = wp_unique_post_slug( $name . '-photo', $photo->ID, $photo->post_status, $photo->post_type, $post->ID );
 			wp_update_post( [
-				'ID'         => $photo->ID,
-				'post_name'  => $photo_name,
-				'post_title' => $photo_name,
+				'ID'           => $photo->ID,
+				'post_name'    => $photo_name,
+				'post_title'   => $photo_name,
+				'post_content' => wp_slash( $post->post_content ),
+				'post_excerpt' => wp_slash( $post->post_content ),
 			] );
 		}
 	}
@@ -1040,7 +1041,11 @@ class Uploads {
 					esc_attr__( 'Photo preview', 'wporg-photos' )
 				)
 				. sprintf(
-					'<button type="button" class="ugc-photo-preview-dialog__close" aria-label="%s">&times;</button>' . "\n",
+					'<button type="button" class="ugc-photo-preview-dialog__close" aria-label="%s">'
+					. '<svg class="ugc-photo-preview-dialog__close-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false">'
+					. '<path d="M1 1l10 10M11 1L1 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />'
+					. '</svg>'
+					. '</button>' . "\n",
 					esc_attr__( 'Close preview', 'wporg-photos' )
 				)
 				. '<img id="ug_photo_preview_large" alt="" />' . "\n"
