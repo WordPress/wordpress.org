@@ -241,8 +241,13 @@ class Rosetta_Roles {
 						exit;
 					}
 
+					if ( empty( $_REQUEST['user'] ) ) {
+						wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
+						exit;
+					}
+
 					$user_details = null;
-					$user = isset( $_REQUEST['user'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['user'] ) ) : '';
+					$user         = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
 					if ( false !== strpos( $user, '@' ) ) {
 						$user_details = get_user_by( 'email', $user );
 					} elseif ( is_numeric( $user ) ) {
@@ -276,7 +281,7 @@ class Rosetta_Roles {
 						exit;
 					}
 
-					$projects = empty( $_REQUEST['projects'] ) ? '' : $_REQUEST['projects'];
+					$projects = ! empty( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
 					if ( 'custom' === $projects ) {
 						$this->update_translation_editor( $user_details );
 
@@ -382,7 +387,8 @@ class Rosetta_Roles {
 				$all_projects = wp_list_pluck( $all_projects, 'id' );
 				$all_projects = array_map( 'intval', $all_projects );
 
-				$projects = explode( ',', $_REQUEST['projects'] );
+				$raw_projects = isset( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
+				$projects     = explode( ',', $raw_projects );
 				if ( in_array( 'all', $projects, true ) ) {
 					$this->update_translation_editor( $user_details, array( 'all' ) );
 				} else {
