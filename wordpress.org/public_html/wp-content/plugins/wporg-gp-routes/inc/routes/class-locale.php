@@ -207,7 +207,7 @@ class Locale extends GP_Route {
 		}
 
 		$project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug );
-		$sub_project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug, null, false );
+		$sub_project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug, false );
 
 		$project_icon = $this->get_project_icon( $project, $sub_project, 64 );
 
@@ -221,7 +221,6 @@ class Locale extends GP_Route {
 					$_sub_project,
 					$locale_slug,
 					$set_slug,
-					null,
 					false
 				);
 			}
