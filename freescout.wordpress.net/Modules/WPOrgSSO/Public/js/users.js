@@ -3,12 +3,22 @@
  *
  * - "Create a New User" asks for a WordPress.org username; name and email come from the account.
  * - The profile doesn't offer to change what WordPress.org keeps up to date, or passwords.
+ * - The users list opens with the notice to disable users rather than delete them.
  *
  * The server enforces all of this; these only keep the forms from offering it.
  *
  * @param {jQuery} $ jQuery.
  */
 ( function ( $ ) {
+	$( function () {
+		const $notice = $( '#wporgsso-users-notice' );
+		const $list = $( '#users-list' );
+
+		if ( $notice.length && $list.length ) {
+			$list.closest( '.container' ).prepend( $notice );
+		}
+	} );
+
 	$( function () {
 		const $account = $( '#wporgsso-account' );
 
