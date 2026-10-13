@@ -48,16 +48,16 @@ final class WPOrgApiServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	private function hide_secret_from_debug_pages(): void {
-		$blacklist = (array) config( 'app.debug_blacklist', array() );
+		$hidden = (array) config( 'app.debug_blacklist', array() );
 
 		foreach ( array( '_ENV', '_SERVER' ) as $key ) {
-			$blacklist[ $key ] = (array) ( $blacklist[ $key ] ?? array() );
+			$hidden[ $key ] = (array) ( $hidden[ $key ] ?? array() );
 
-			if ( ! in_array( 'WPORG_API_SECRET', $blacklist[ $key ], true ) ) {
-				$blacklist[ $key ][] = 'WPORG_API_SECRET';
+			if ( ! in_array( 'WPORG_API_SECRET', $hidden[ $key ], true ) ) {
+				$hidden[ $key ][] = 'WPORG_API_SECRET';
 			}
 		}
 
-		config( array( 'app.debug_blacklist' => $blacklist ) );
+		config( array( 'app.debug_blacklist' => $hidden ) );
 	}
 }
