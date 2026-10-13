@@ -117,7 +117,8 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 		 * @return string|false A date string representing the date of the next occurrence; false if there is no next meeting.
 		 */
 		public function get_next_occurrence( object $post, string $after_datetime = '-30 minutes' ): string|false {
-			if ( 'meeting' !== $post->post_type ) {
+			// PHP reads a missing date as today, so a meeting without a start date has no occurrences.
+			if ( 'meeting' !== $post->post_type || ! $this->is_valid_date( $post->start_date ) ) {
 				return false;
 			}
 
