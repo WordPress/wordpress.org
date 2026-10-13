@@ -78,9 +78,9 @@ if ( 'live' == OPERATION_MODE ) {
 // Set a user to run as.
 wp_set_current_user( get_user_by( 'slug', 'wordpressdotorg' )->ID );
 
-// The FreeScout agent the emails come from, by default the one the plugin directory writes as. See their profile's URL.
+// FreeScout agent the emails come from; FREESCOUT_USER_ID by default.
 define( __NAMESPACE__ . '\ATTRIBUTE_TO_USER', (int) ( $opts['from'] ?? FreeScout::user_id() ) );
-// Who to assign replies to, like the plugin security team; its ID is in its page's URL. Unassigned by default.
+// FreeScout user or team to assign the conversations to; unassigned by default.
 define( __NAMESPACE__ . '\ASSIGN_TO_USER', (int) ( $opts['assign'] ?? 0 ) );
 const WARN_THRESHOLD = 10000;  // active installs to go from instant close => warn w/ 30days.
 
@@ -164,7 +164,7 @@ function send_email( $args ) {
 			'lastName'  => explode( ' ', $args['name'] ?? '', 2 )[1] ?? '',
 		] ),
 		'subject'   => $args['subject'] ?? '',
-		// Newest first.
+		// The API takes threads newest first.
 		'threads'   => [
 			[
 				'type' => 'note',
