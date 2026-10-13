@@ -138,6 +138,21 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	}
 
 	/**
+	 * A conversation a sender started, which can name any plugin, and copy anyone, isn't the review conversation, so the
+	 * author's upload isn't confirmed there.
+	 *
+	 * @return void
+	 */
+	public function test_does_not_reply_in_a_conversation_a_sender_started(): void {
+		$this->answer( array( 'outsider@example.net' ), 'customer' );
+		list( $plugin, $attachment ) = $this->upload( true );
+
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
+		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
+	}
+
+	/**
 	 * Without an agent to reply as, nothing is sent.
 	 *
 	 * @return void
@@ -249,13 +264,14 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	 * Answers FreeScout's API, in place of the API & Webhooks module: the review conversation, and that a thread was
 	 * created.
 	 *
-	 * @param string[]|null $cc Who the conversation copies; null if FreeScout can't be reached.
+	 * @param string[]|null $cc         Who the conversation copies; null if FreeScout can't be reached.
+	 * @param string        $created_by Who started the conversation: `user`, an agent, or `customer`, a sender.
 	 * @return void
 	 */
-	protected function answer( ?array $cc = array() ): void {
+	protected function answer( ?array $cc = array(), string $created_by = 'user' ): void {
 		$this->filter(
 			'pre_http_request',
-			function ( mixed $preempt, array $args, string $url ) use ( $cc ): mixed {
+			function ( mixed $preempt, array $args, string $url ) use ( $cc, $created_by ): mixed {
 				if ( ! str_starts_with( $url, 'https://freescout.wordpress.net/api/' ) ) {
 					return $preempt;
 				}
@@ -267,11 +283,15 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 					}
 
 					$conversation = array(
-						'id'     => self::CONVERSATION_ID,
-						'number' => 1234,
-						'status' => 'closed',
-						'cc'     => $cc,
-						'bcc'    => array(),
+						'id'        => self::CONVERSATION_ID,
+						'number'    => 1234,
+						'status'    => 'closed',
+						'createdBy' => array(
+							'id'   => 7,
+							'type' => $created_by,
+						),
+						'cc'        => $cc,
+						'bcc'       => array(),
 					);
 
 					return array( 'response' => array( 'code' => 200 ), 'body' => wp_json_encode( $conversation ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- A short HTTP response.

@@ -1098,6 +1098,13 @@ class Upload_Handler {
 			return false;
 		}
 
+		// The plugins team starts review conversations; one a sender started can name any plugin, and copy anyone.
+		if ( 'user' !== ( $conversation['createdBy']['type'] ?? '' ) ) {
+			trigger_error( "FreeScout update skipped: conversation $conversation_id wasn't started by the plugins team.", E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
+
+			return false;
+		}
+
 		$result = FreeScout_Client::api(
 			'conversations/' . $conversation_id . '/threads',
 			array(
