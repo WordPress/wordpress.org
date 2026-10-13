@@ -304,6 +304,8 @@
 			this.listenTo( this.model, 'change', this.render );
 		},
 
+		// Listen to 'change' instead of 'click' for keyboard accessibility
+		// and to ensure DOM state is committed before re-rendering.
 		events: {
 			'change .input-checkbox': 'updateChecked',
 			'change .input-radio': 'setChecked'
@@ -317,6 +319,7 @@
 			this.model.set( 'checked', this.$el.find( 'input' ).prop( 'checked' ) );
 		},
 
+		// When active, the category toggle renders as a radio button representing the category.
 		setChecked: function() {
 			this.model.set( 'checked', true );
 		}
@@ -346,6 +349,8 @@
 			this.views.ready();
 		},
 
+		// Selecting the entire category grants access to all its items,
+		// making individual sub-project selections redundant.
 		propagateChange: function() {
 			if ( this.model.get( 'checked' ) ) {
 				this.model.get( 'subProjects' ).trigger( 'uncheckall' );
@@ -534,6 +539,7 @@
 		var cachedTime = Number( lastUpdated );
 		var serverTime = Number( projects.settings.lastUpdated );
 
+		// Ensure timestamps are finite numbers; avoids accepting stale caches if 'Infinity' is stored.
 		if ( ! Number.isFinite( serverTime ) || ! Number.isFinite( cachedTime ) || cachedTime < serverTime ) {
 			return Promise.reject();
 		}
@@ -674,7 +680,7 @@
 			}
 		});
 
-		// Confirm removal of translator permissions.
+		// Warn before saving if all project assignments are removed.
 		var hadTranslatorStatus = projects.settings.accessList && projects.settings.accessList.length > 0;
 
 		$( '#project-access-list' ).closest( 'form' ).on( 'submit', function( e ) {
