@@ -2,7 +2,7 @@
 /**
  * Locales used on WordPress.org.
  *
- * - Copy of https://github.com/GlotPress/GlotPress/blob/e6b0c7d6d82ee55c4246311f37b6eac39502e9fa/locales/locales.php
+ * - Copy of https://github.com/GlotPress/GlotPress/blob/a339c56f38eccac13c92379971bb403d6ad3a472/locales/locales.php
  * - With support for custom locale variants.
  * - Without https://github.com/GlotPress/GlotPress-WP/pull/1012 and https://github.com/GlotPress/GlotPress-WP/pull/1017.
  */
