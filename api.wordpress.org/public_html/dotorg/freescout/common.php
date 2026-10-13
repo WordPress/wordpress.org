@@ -49,6 +49,23 @@ const MAX_REQUEST_AGE = 300; // 5 minutes.
 const MAX_CLOCK_SKEW = 10;
 
 /**
+ * Meta key naming the helpdesk a copied conversation is in, `freescout`; HelpScout's copies have none.
+ *
+ * @var string
+ */
+const HELPDESK_META_KEY = 'helpdesk';
+
+/**
+ * Meta key of a FreeScout conversation's copy naming a HelpScout conversation whose copy it replaced.
+ *
+ * HelpScout's webhook leaves alone a HelpScout conversation a copy names, so work done there since doesn't bring its
+ * copy back. It goes with the copy that names it.
+ *
+ * @var string
+ */
+const REPLACED_HELPSCOUT_META_KEY = 'helpscout_conversation';
+
+/**
  * Retrieves the incoming payload, and verifies FreeScout signed it for this endpoint.
  *
  * Ends the request with a 403 if it isn't a POST, or verify_request() refuses it.
@@ -671,87 +688,6 @@ function get_plugin_slugs_by_title( string $title ): array {
 	restore_current_blog();
 
 	return wp_list_pluck( $plugins, 'post_name' );
-}
-
-/**
- * Meta key naming the helpdesk a copied conversation is in, `freescout`; HelpScout's copies have none.
- *
- * @var string
- */
-const HELPDESK_META_KEY = 'helpdesk';
-
-/**
- * Meta key of a FreeScout conversation's copy naming a HelpScout conversation whose copy it replaced.
- *
- * HelpScout's webhook leaves alone a HelpScout conversation a copy names, so work done there since doesn't bring its
- * copy back. It goes with the copy that names it.
- *
- * @var string
- */
-const REPLACED_HELPSCOUT_META_KEY = 'helpscout_conversation';
-
-/**
- * What WordPress.org's copy does with a conversation's event: it's written, or deleted.
- *
- * @var string
- */
-const COPY_DONE = 'done';
-
-/**
- * What WordPress.org's copy does with a conversation's event: nothing yet, as another write held the conversation up,
- * or the write failed; FreeScout sends the event again.
- *
- * @var string
- */
-const COPY_RETRY = 'retry';
-
-/**
- * What WordPress.org's copy does with a conversation's event: nothing yet, as it has no copy of the conversation, and
- * the event only carries its newest threads; FreeScout sends it again with all of them.
- *
- * @var string
- */
-const COPY_ALL_THREADS = 'all_threads';
-
-/**
- * How long a write to WordPress.org's copy of a conversation waits for another to finish, in seconds.
- *
- * Well under FreeScout's 10-second timeout for an event, so a held-up event is answered, and sent again, rather than
- * written after FreeScout gave up on it, and sent again anyway.
- *
- * @var int
- */
-const LOCK_TIMEOUT = 3;
-
-/**
- * Takes the lock on WordPress.org's copy of a conversation, which writes to it hold, one at a time.
- *
- * The copy's meta table has no unique key to keep a pair from being added twice. The lock, and what's read while holding
- * it, come from the primary database, not a replica.
- *
- * @param int $id Conversation ID.
- * @return bool False if another write held it for too long.
- */
-function lock_email( int $id ): bool {
-	global $wpdb;
-
-	if ( is_callable( array( $wpdb, 'send_reads_to_masters' ) ) ) {
-		$wpdb->send_reads_to_masters();
-	}
-
-	return (bool) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK( %s, %d )', 'wporg_helpscout_' . $id, LOCK_TIMEOUT ) );
-}
-
-/**
- * Releases the lock on WordPress.org's copy of a conversation.
- *
- * @param int $id Conversation ID.
- * @return void
- */
-function unlock_email( int $id ): void {
-	global $wpdb;
-
-	$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK( %s )', 'wporg_helpscout_' . $id ) );
 }
 
 /**

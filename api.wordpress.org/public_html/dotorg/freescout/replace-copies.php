@@ -12,13 +12,6 @@ namespace WordPressdotorg\API\FreeScout;
 require __DIR__ . '/common.php';
 
 /**
- * Most copies a request may replace; FreeScout's WPOrgHelpScoutImport sends a thousand at a time.
- *
- * @var int
- */
-const MAX_COPIES = 1000;
-
-/**
  * Swaps the copies of HelpScout's conversations for those of the FreeScout conversations imported from them.
  *
  * A copy keeps its plugins and themes, is marked as FreeScout's, and names the HelpScout conversation it replaces, which
@@ -29,8 +22,7 @@ const MAX_COPIES = 1000;
  *
  * @param array $copies Each a HelpScout ID, the FreeScout conversation's ID and number, whether its copy goes, and
  *                      whether it was merged into that conversation.
- * @return int|null How many were swapped, or deleted; null if another write held one up, or one failed, so the batch
- *                  should be sent again.
+ * @return int|null How many were swapped, or deleted; null if one failed, so the batch should be sent again.
  */
 function replace_copies( array $copies ): ?int {
 	global $wpdb;
@@ -39,16 +31,17 @@ function replace_copies( array $copies ): ?int {
 	$meta_table   = "{$wpdb->base_prefix}helpscout_meta";
 	$replaced     = 0;
 
-	foreach ( array_slice( $copies, 0, MAX_COPIES ) as $copy ) {
+	// What the swaps read comes from the primary database, not a replica.
+	if ( is_callable( array( $wpdb, 'send_reads_to_masters' ) ) ) {
+		$wpdb->send_reads_to_masters();
+	}
+
+	foreach ( $copies as $copy ) {
 		$copy         = (object) $copy;
 		$helpscout_id = (int) ( $copy->helpscout_id ?? 0 );
 		$id           = (int) ( $copy->id ?? 0 );
 		if ( $helpscout_id <= 0 || $id <= 0 || $helpscout_id === $id ) {
 			continue;
-		}
-
-		if ( ! lock_email( $id ) ) {
-			return null;
 		}
 
 		try {
@@ -132,8 +125,6 @@ function replace_copies( array $copies ): ?int {
 			trigger_error( 'FreeScout copy of conversation ' . $id . ' failed: ' . $e->getMessage(), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
 
 			return null;
-		} finally {
-			unlock_email( $id );
 		}
 	}
 
@@ -145,7 +136,6 @@ $replaced = replace_copies( (array) ( $request->copies ?? array() ) );
 
 if ( null === $replaced ) {
 	status_header( 503 );
-	header( 'Retry-After: ' . LOCK_TIMEOUT );
 	exit;
 }
 

@@ -17,13 +17,16 @@ CREATE TABLE IF NOT EXISTS `wp_helpscout` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- As on production.
 CREATE TABLE IF NOT EXISTS `wp_helpscout_meta` (
-  `helpscout_id` bigint(20) unsigned NOT NULL,
-  `meta_key` varchar(255) NOT NULL DEFAULT '',
-  `meta_value` varchar(255) NOT NULL DEFAULT '',
-  UNIQUE KEY `helpscout_id` (`helpscout_id`,`meta_key`(191),`meta_value`(191)),
-  KEY `meta_key` (`meta_key`(191),`meta_value`(191))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `helpscout_id` bigint(20) NOT NULL,
+  `meta_key` varchar(32) NOT NULL,
+  `meta_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `helpscout_id` (`helpscout_id`,`meta_key`,`meta_value`),
+  KEY `meta_key` (`meta_key`,`meta_value`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `wp_svn_access` (
   `path` varchar(255) NOT NULL DEFAULT '',

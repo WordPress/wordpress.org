@@ -32,7 +32,7 @@ const UNCREDITED_EVENTS = array( 'conversation.restored', 'conversation.note_add
  *
  * @var int[]
  */
-const AUTOMATION_USER_IDS = array( 5911429 );
+const AUTOMATION_USER_IDS = array( 5911429 ); // wordpressdotorg.
 
 /**
  * Records contributor stats for an event.
@@ -79,57 +79,51 @@ function contributor_stats( object $request ): void {
  * and of the HelpScout conversations it, or that one, was imported from, taking over their plugins and themes: slug
  * changes update those, and the emails still name the old slug.
  *
+ * Each event carries the conversation as it was when it was sent, so the copy ends up as the last one written says.
+ *
  * @param object $request Request payload.
- * @return string COPY_DONE; COPY_RETRY if another event for the conversation held it up, or the write failed; or
- *                COPY_ALL_THREADS if it needs all of the conversation's threads. FreeScout sends it again for both.
+ * @return bool Whether it needs all of the conversation's threads, which FreeScout sends it again with.
+ *
+ * @throws \Throwable If the write failed, and was rolled back.
  */
-function log_email( object $request ): string {
+function log_email( object $request ): bool {
+	global $wpdb;
+
 	$id    = (int) ( $request->conversation->id ?? 0 );
 	$email = $request->email ?? null;
 	if ( ! $id || ! is_object( $email ) ) {
-		return COPY_DONE;
+		return false;
 	}
 
-	/*
-	 * Events for the conversation are written one at a time, see lock_email(). Each carries the conversation as it was
-	 * when it was sent, so the copy ends up as the last one written says, which is current unless events crossed.
-	 */
-	if ( ! lock_email( $id ) ) {
-		return COPY_RETRY;
+	// What the write reads comes from the primary database, not a replica.
+	if ( is_callable( array( $wpdb, 'send_reads_to_masters' ) ) ) {
+		$wpdb->send_reads_to_masters();
 	}
 
-	try {
-		// Deleted conversations and spam aren't kept; a deletion undone since is sent as published.
-		$deleted = isset( $email->state ) ? 'deleted' === $email->state : 'conversation.deleted' === ( $request->event ?? '' );
-		if ( $deleted || 'spam' === ( $email->status ?? '' ) ) {
-			in_transaction(
-				static function () use ( $request, $id ): void {
-					delete_emails( array_merge( array( $id ), ...array_values( get_replaced_ids( $request ) ) ) );
-				}
-			);
+	// Deleted conversations and spam aren't kept; a deletion undone since is sent as published.
+	$deleted = isset( $email->state ) ? 'deleted' === $email->state : 'conversation.deleted' === ( $request->event ?? '' );
+	if ( $deleted || 'spam' === ( $email->status ?? '' ) ) {
+		in_transaction(
+			static function () use ( $request, $id ): void {
+				delete_emails( array_merge( array( $id ), ...array_values( get_replaced_ids( $request ) ) ) );
+			}
+		);
 
-			return COPY_DONE;
-		}
-
-		return write_email( $request, $id );
-	} catch ( \Throwable $e ) {
-		trigger_error( 'FreeScout copy of conversation ' . $id . ' failed: ' . $e->getMessage(), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
-
-		return COPY_RETRY;
-	} finally {
-		unlock_email( $id );
+		return false;
 	}
+
+	return write_email( $request, $id );
 }
 
 /**
- * Writes WordPress.org's copy of a conversation, while holding its lock; see log_email().
+ * Writes WordPress.org's copy of a conversation; see log_email().
  *
  * @param object $request Request payload.
  * @param int    $id      Conversation ID.
- * @return string COPY_DONE, or COPY_ALL_THREADS if the copy has nothing of the conversation yet, and the event doesn't
- *                carry all of its threads.
+ * @return bool Whether it needs all of the conversation's threads: the copy has nothing of the conversation yet, and the
+ *              event doesn't carry all of them.
  */
-function write_email( object $request, int $id ): string {
+function write_email( object $request, int $id ): bool {
 	global $wpdb;
 
 	$email        = $request->email;
@@ -141,7 +135,7 @@ function write_email( object $request, int $id ): string {
 	$row           = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $emails_table, $id ) );
 	$has_helpscout = ! $row && $helpscout_id && $wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i WHERE id = %d', $emails_table, $helpscout_id ) );
 	if ( needs_all_threads( $request, $row, (bool) $has_helpscout ) ) {
-		return COPY_ALL_THREADS;
+		return true;
 	}
 
 	$ids      = array_merge( array( $id ), ...array_values( $replaced ) );
@@ -181,18 +175,9 @@ function write_email( object $request, int $id ): string {
 
 	in_transaction(
 		static function () use ( $wpdb, $emails_table, $meta_table, $id, $data, $columns, $plan ): void {
-			// Its meta first, which names its helpdesk, and the HelpScout conversations it replaces.
+			// Its meta first, which names its helpdesk, and the HelpScout conversations it replaces; pairs are unique.
 			foreach ( $plan['meta'] as list( $meta_key, $meta_value ) ) {
-				check_write(
-					$wpdb->insert(
-						$meta_table,
-						array(
-							'helpscout_id' => $id,
-							'meta_key'     => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery -- Not a query.
-							'meta_value'   => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery -- Not a query.
-						)
-					)
-				);
+				check_write( $wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i ( helpscout_id, meta_key, meta_value ) VALUES ( %d, %s, %s )', $meta_table, $id, $meta_key, $meta_value ) ) );
 			}
 
 			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The placeholders are added for each column; one statement, so two events for a new conversation at once don't both insert it.
@@ -221,7 +206,7 @@ function write_email( object $request, int $id ): string {
 		}
 	);
 
-	return COPY_DONE;
+	return false;
 }
 
 /**
@@ -267,18 +252,19 @@ function get_existing_slugs( array $mentioned ): array {
 
 $request = get_request( basename( __FILE__ ) );
 
-// Before the stats, which an event sent again would count twice.
-$copied = log_email( $request );
-if ( COPY_RETRY === $copied ) {
+// Before the stats, which an event sent again would count twice. FreeScout sends it again after a 503.
+try {
+	$needs_all_threads = log_email( $request );
+} catch ( \Throwable $e ) {
+	trigger_error( 'FreeScout copy of conversation ' . (int) ( $request->conversation->id ?? 0 ) . ' failed: ' . $e->getMessage(), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
 	status_header( 503 );
-	header( 'Retry-After: ' . LOCK_TIMEOUT );
 	exit;
 }
 
 header( 'Content-Type: application/json; charset=utf-8' );
 
 // FreeScout sends the event again at once, with all of the conversation's threads; that one counts.
-if ( COPY_ALL_THREADS === $copied ) {
+if ( $needs_all_threads ) {
 	echo '{"threads":"all"}';
 	exit;
 }
