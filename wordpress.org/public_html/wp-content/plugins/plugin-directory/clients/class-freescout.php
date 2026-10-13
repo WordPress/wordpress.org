@@ -94,4 +94,55 @@ class FreeScout {
 
 		return is_array( $data ) ? $data : null;
 	}
+
+	/**
+	 * A saved reply of the Plugins mailbox, by name, from the WPOrgApi module.
+	 *
+	 * The Saved Replies module has no API of its own; WPOrgApi reads it for requests signed with `FREESCOUT_SECRET`.
+	 *
+	 * @param string $name The saved reply's name.
+	 * @return string|null Its HTML; null if there's no such reply, or it couldn't be read.
+	 */
+	public static function saved_reply( string $name ): ?string {
+		$secret = defined( 'FREESCOUT_SECRET' ) ? (string) FREESCOUT_SECRET : '';
+
+		/**
+		 * Filters the secret the plugin directory signs its requests to FreeScout's WPOrgApi module with.
+		 *
+		 * @param string $secret Shared secret.
+		 */
+		$secret = (string) apply_filters( 'wporg_plugins_freescout_secret', $secret );
+		if ( '' === $secret ) {
+			return null;
+		}
+
+		$body = (string) wp_json_encode(
+			array(
+				'mailbox_id' => Helpdesk::freescout_mailbox_id(),
+				'name'       => $name,
+				'endpoint'   => 'saved-reply',
+				'sent_at'    => time(),
+			)
+		);
+
+		$response = wp_remote_post(
+			Helpdesk::freescout_url() . 'wporgapi/saved-reply',
+			array(
+				'timeout' => self::TIMEOUT,
+				'headers' => array(
+					'Accept'            => 'application/json',
+					'Content-Type'      => 'application/json',
+					'X-WPOrg-Signature' => hash_hmac( 'sha256', $body, $secret ),
+				),
+				'body'    => $body,
+			)
+		);
+
+		$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+		if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) || ! isset( $data['text'] ) ) {
+			return null;
+		}
+
+		return (string) $data['text'];
+	}
 }
