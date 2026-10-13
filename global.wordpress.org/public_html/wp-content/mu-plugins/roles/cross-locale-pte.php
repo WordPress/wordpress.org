@@ -128,7 +128,7 @@ class Cross_Locale_PTE {
 			return self::render_edit_page( (int) $_REQUEST['user_id'] );
 		}
 
-		$feedback_message = '';
+		$feedback_message = self::get_feedback_message();
 		$cross_locale_pte_users = self::get_all_users();
 		require __DIR__ . '/views/cross-locale-pte.php';
 	}
@@ -182,7 +182,15 @@ class Cross_Locale_PTE {
 			self::$user->ID, self::ALL_LOCALES ) );
 		}
 
-		wp_safe_redirect( add_query_arg( array( 'user_id' => self::$user->ID ), menu_page_url( 'cross-locale-pte', false ) ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'user_id' => self::$user->ID,
+					'update'  => 'user-updated',
+				),
+				menu_page_url( 'cross-locale-pte', false )
+			)
+		);
 		exit;
 	}
 
@@ -213,8 +221,45 @@ class Cross_Locale_PTE {
 			'accessList' => $project_access_list,
 		) );
 
-		$feedback_message = '';
+		$feedback_message = self::get_feedback_message();
 		require __DIR__ . '/views/edit-cross-locale-pte.php';
+	}
+
+	/**
+	 * Returns a feedback message based on the current request.
+	 *
+	 * @return string HTML formatted message.
+	 */
+	private static function get_feedback_message() {
+		$message = '';
+
+		if ( ! empty( $_REQUEST['update'] ) && ! empty( $_REQUEST['error'] ) ) {
+			return $message;
+		}
+
+		$messages = array(
+			'update' => array(
+				'user-updated' => __( 'Translation editor updated.', 'rosetta' ),
+				'user-added'   => __( 'New translation editor added.', 'rosetta' ),
+			),
+			'error'  => array(
+				'no-user-found' => __( 'The user couldn&#8217;t be found.', 'rosetta' ),
+			),
+		);
+
+		if ( isset( $_REQUEST['error'], $messages['error'][ $_REQUEST['error'] ] ) ) {
+			$message = sprintf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				$messages['error'][ $_REQUEST['error'] ]
+			);
+		} elseif ( isset( $_REQUEST['update'], $messages['update'][ $_REQUEST['update'] ] ) ) {
+			$message = sprintf(
+				'<div class="notice notice-success"><p>%s</p></div>',
+				$messages['update'][ $_REQUEST['update'] ]
+			);
+		}
+
+		return $message;
 	}
 
 	/**
