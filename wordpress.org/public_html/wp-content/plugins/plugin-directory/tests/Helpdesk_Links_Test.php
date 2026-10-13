@@ -2,8 +2,6 @@
 /**
  * Tests the links to the helpdesk the plugins team emails authors from.
  *
- * Links go to Help Scout until FreeScout's Plugins mailbox is configured, so the switch is a configuration change.
- *
  * @package plugin-directory
  */
 

@@ -654,8 +654,6 @@ class Upload_Handler {
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
 		if ( $updating_existing ) {
-
-			// Confirm the upload in the review conversation, if in review.
 			$this->update_review_email( $plugin_post, $attachment );
 
 			$message = sprintf(
@@ -1089,7 +1087,7 @@ class Upload_Handler {
 			return false;
 		}
 
-		// A new thread sets the conversation's CC to its own, so the reply copies whoever the conversation does.
+		// A new thread replaces the conversation's CC with its own, so pass the current CC on.
 		$conversation = FreeScout_Client::api( 'conversations/' . $conversation_id, array(), 'GET', $response_code );
 		if ( 200 !== $response_code || ! isset( $conversation['cc'] ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update; not rendered.
@@ -1098,7 +1096,7 @@ class Upload_Handler {
 			return false;
 		}
 
-		// The plugins team starts review conversations; one a sender started can name any plugin, and copy anyone.
+		// Review conversations are agent-started; a sender's could name any plugin and CC anyone.
 		if ( 'user' !== ( $conversation['createdBy']['type'] ?? '' ) ) {
 			trigger_error( "FreeScout update skipped: conversation $conversation_id wasn't started by the plugins team.", E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
 

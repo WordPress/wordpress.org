@@ -2,9 +2,6 @@
 /**
  * Tests the confirmation of an uploaded update, in the review conversation in FreeScout.
  *
- * When an author uploads an update to a plugin in review, the upload handler replies in its review conversation, which
- * tells the author it arrived, and the plugins team that there's something new to review.
- *
  * @package plugin-directory
  */
 
@@ -138,8 +135,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	}
 
 	/**
-	 * A conversation a sender started, which can name any plugin, and copy anyone, isn't the review conversation, so the
-	 * author's upload isn't confirmed there.
+	 * No confirmation goes into a conversation a sender started, which can name any plugin and CC anyone.
 	 *
 	 * @return void
 	 */

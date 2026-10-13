@@ -260,7 +260,7 @@ class Stats_Report {
 		$conversations = FreeScout::api( 'reports/conversations', $query );
 		$productivity  = FreeScout::api( 'reports/productivity', $query );
 
-		// Zeros for everything make it obvious that a request failed.
+		// All zeros, so a failed request is obvious.
 		if ( ! isset( $conversations['metrics'], $productivity['metrics'] ) ) {
 			$conversations = array();
 			$productivity  = array();

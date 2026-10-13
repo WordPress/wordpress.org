@@ -55,9 +55,8 @@ class Helpscout {
 		}
 
 		/*
-		 * Newest first. A conversation imported into FreeScout keeps HelpScout's dates, so while HelpScout's copy of it
-		 * lingers, both share `created`: FreeScout's comes first, then the higher ID, so the order doesn't change between
-		 * requests.
+		 * Newest first. An imported conversation shares `created` with its lingering HelpScout copy, so FreeScout's comes
+		 * first, then the higher ID.
 		 */
 		$emails = $wpdb->get_results( $wpdb->prepare(
 			"SELECT emails.*,
