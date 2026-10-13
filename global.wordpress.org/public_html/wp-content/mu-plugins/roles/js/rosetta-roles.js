@@ -205,8 +205,7 @@
 			// Escape the term string for RegExp meta characters
 			escapedTerm = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
 
-			// Consider spaces as word delimiters and match the whole string
-			// so matching terms can be combined
+			// Lookahead pattern for order-independent and matching across space-separated terms.
 			escapedTerm = escapedTerm.replace( / /g, ')(?=.*' );
 			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
 
@@ -215,6 +214,7 @@
 				if ( match.test( haystack.join( ' ' ) ) ) {
 					var maxScore = 0;
 					_.each( haystack, function( word ) {
+						// .score() is provided by string_score.min.js via String.prototype monkey-patching.
 						maxScore = Math.max( maxScore, String( word ).score( term, 0.5 ) );
 					});
 					project.set( 'matchScore', maxScore, { silent: true } );
@@ -268,7 +268,7 @@
 
 			$( '#project-loading' ).remove();
 
-			// Mark the first item as active.
+			// Only visually marks the first item active. The first item represents all projects.
 			var $firstActive = view.$el.find( 'li.active' );
 			if ( ! $firstActive.length ) {
 				$firstActive = view.$el.find( 'li input[type=radio]' );
@@ -547,6 +547,7 @@
 
 	projects.storeLocalProjects = function( data ) {
 		projects.compress( JSON.stringify( data ) ).then( function( compressedData ) {
+			// Stores only compressed data to prevent exceeding the 5 MB localStorage quota.
 			window.localStorage.setItem( 'projects', compressedData );
 			window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
 		} ).catch( function() {
