@@ -6,6 +6,7 @@ require_once dirname( dirname( __DIR__ ) ) . '/class-tools.php';
 
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
 /**
  * The Author Card admin metabox.
@@ -124,9 +125,11 @@ class Author_Card {
 						esc_attr__( 'Click to search Pluginrepo P2 for mentions of this author', 'wporg-plugins' )
 					),
 					sprintf(
-						'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%%20%s" title="%s">HS</a>',
-						urlencode( esc_attr( $author->user_nicename ) ),
-						esc_attr__( 'Click to search Help Scout for mentions of this author', 'wporg-plugins' )
+						'<a href="%s" title="%s">%s</a>',
+						esc_url( Helpdesk::search_url( $author->user_nicename ) ),
+						/* translators: %s: Helpdesk name, like FreeScout. */
+						esc_attr( sprintf( __( 'Click to search %s for mentions of this author', 'wporg-plugins' ), Helpdesk::name() ) ),
+						esc_html( Helpdesk::short_name() )
 					),
 				);
 				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', array_map( 'wp_kses_post', $author_links ) );
@@ -142,9 +145,11 @@ class Author_Card {
 					<?php
 					$author_email_links = array(
 						sprintf(
-							'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%%20%s" title="%s">HS</a>',
-							urlencode( $author->user_email ),
-							esc_attr__( 'Click to search Help Scout for emails sent to/from this email address', 'wporg-plugins' )
+							'<a href="%s" title="%s">%s</a>',
+							esc_url( Helpdesk::search_url( $author->user_email ) ),
+							/* translators: %s: Helpdesk name, like FreeScout. */
+							esc_attr( sprintf( __( 'Click to search %s for emails sent to/from this email address', 'wporg-plugins' ), Helpdesk::name() ) ),
+							esc_html( Helpdesk::short_name() )
 						),
 					);
 					vprintf( '<span class="profile-sp-link">[ %s ]</span>', array_map( 'wp_kses_post', $author_email_links ) );
@@ -523,9 +528,11 @@ class Author_Card {
 					esc_attr__( 'Click to search Plugin Team P2 for mentions of this plugin', 'wporg-plugins' )
 				),
 				sprintf(
-					'<a href="https://secure.helpscout.net/search/?query=mailbox:Plugins%%20%s" title="%s">HS</a>',
-					rawurlencode( esc_attr( $plugin_name ) ),
-					esc_attr__( 'Click to search Help Scout for mentions of this plugin', 'wporg-plugins' )
+					'<a href="%s" title="%s">%s</a>',
+					esc_url( Helpdesk::search_url( $plugin_name ) ),
+					/* translators: %s: Helpdesk name, like FreeScout. */
+					esc_attr( sprintf( __( 'Click to search %s for mentions of this plugin', 'wporg-plugins' ), Helpdesk::name() ) ),
+					esc_html( Helpdesk::short_name() )
 				),
 			] );
 
