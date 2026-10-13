@@ -1,9 +1,6 @@
 <?php
 /**
- * Tests for WordPress.org's copy of FreeScout's conversations.
- *
- * The plugin directory reads the copy, which began with HelpScout's emails, so FreeScout's conversations have to fill
- * its columns the way HelpScout's did.
+ * Tests for the rows FreeScout's conversations write to WordPress.org's copy, which must match HelpScout's.
  *
  * @package WordPressdotorg\API\FreeScout
  */

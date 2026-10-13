@@ -33,7 +33,7 @@ final class Client {
 	private const NOT_DELIVERED_STATUSES = array( 502, 503 );
 
 	/**
-	 * Status the web server sends for a request bigger than it takes, which it answers without passing it on.
+	 * Status the web server refuses an oversized request with, before webhook.php sees it.
 	 *
 	 * @var int
 	 */

@@ -18,32 +18,28 @@ use Modules\WPOrgSSO\Entities\Account;
 /**
  * Builds the webhook payload for a conversation event.
  *
- * Read by api.wordpress.org/dotorg/freescout/webhook.php; keep the two in sync. Besides the event, which contributor
- * stats count, it carries the conversation as WordPress.org keeps a copy of it, which the plugin directory reads.
+ * Read by api.wordpress.org/dotorg/freescout/webhook.php; keep the two in sync. Carries the event, for contributor
+ * stats, and the conversation, for WordPress.org's copy of it.
  */
 final class EventPayload {
 
 	/**
-	 * Most threads sent, newest first; WordPress.org reads them for the plugins and themes they mention.
+	 * Most threads an event carries.
 	 *
 	 * @var int
 	 */
 	private const MAX_THREADS = 50;
 
 	/**
-	 * Most bytes of thread text sent with an event; the oldest threads are cut short, or left out, past it.
-	 *
-	 * WordPress.org only looks for the plugins and themes threads mention, so they're sent as text, which keeps most
-	 * events far below it; this bounds the rest, like a long conversation moved to another mailbox.
+	 * Most bytes of thread text an event carries; past it, the oldest threads are cut short or left out.
 	 *
 	 * @var int
 	 */
 	private const MAX_TEXT_BYTES = 256 * 1024;
 
 	/**
-	 * Events after which WordPress.org reads all of the conversation's threads: it's new to the copy, or in another
-	 * mailbox, which changes what it mentions. So do status changes out of spam, which the copy doesn't keep, and
-	 * events WordPress.org asked to have all of them for, as it had no copy yet.
+	 * Events that carry all of a conversation's threads: the copy has none of it yet, or it moved to another mailbox,
+	 * which changes what it mentions. See reads_all() for the rest.
 	 *
 	 * @var string[]
 	 */
@@ -55,9 +51,8 @@ final class EventPayload {
 	);
 
 	/**
-	 * Events after which WordPress.org reads the threads since the previous reply: the reply, and notes before it.
-	 *
-	 * Others change nothing the threads mention, so none are sent; the copy keeps what earlier ones mentioned.
+	 * Events that carry the threads since the previous reply: the reply, and the notes before it. Events not listed carry
+	 * none.
 	 *
 	 * @var string[]
 	 */
@@ -67,7 +62,7 @@ final class EventPayload {
 	);
 
 	/**
-	 * Events after which WordPress.org reads only the thread they're about: a note.
+	 * Events that carry only the thread they're about.
 	 *
 	 * @var string[]
 	 */
@@ -99,12 +94,12 @@ final class EventPayload {
 	/**
 	 * Builds the payload.
 	 *
-	 * The conversation, as WordPress.org keeps a copy of it, is added when the event is sent; see refresh().
+	 * The conversation is added when the event is sent; see refresh().
 	 *
 	 * @param string       $event        Event name: the FreeScout hook that fired.
 	 * @param Conversation $conversation Conversation the event happened on.
 	 * @param User|null    $agent        Agent who caused the event, if any.
-	 * @param array        $extra        More about the event, like the conversation merged into this one.
+	 * @param array        $extra        Event details, like the ID of a conversation merged into this one.
 	 * @return array
 	 */
 	public static function build( string $event, Conversation $conversation, ?User $agent, array $extra = array() ): array {
@@ -123,13 +118,10 @@ final class EventPayload {
 	}
 
 	/**
-	 * The payload with the conversation as it is now, for sending it.
+	 * Adds the conversation as it is now: events can be sent late or out of order, and the copy takes what the latest
+	 * says. The event's own mailbox stays, for stats.
 	 *
-	 * Events can be sent late, and out of order, when one is retried: WordPress.org's copy takes whatever the latest
-	 * says, so each says what's current, and a conversation deleted since says so. The event's own mailbox stays, for
-	 * the stats; the copy takes the conversation's mailbox now.
-	 *
-	 * @param array $payload The payload, as built, and `all_threads` when WordPress.org asked for all of them.
+	 * @param array $payload The payload; `all_threads` if WordPress.org asked for them.
 	 * @return array
 	 */
 	public static function refresh( array $payload ): array {
@@ -138,8 +130,7 @@ final class EventPayload {
 		$mailbox_id   = $conversation ? (int) $conversation->mailbox_id : (int) ( $payload['mailbox']['id'] ?? 0 );
 
 		/**
-		 * Filters whether an event carries the conversation for WordPress.org's copy, like an imported one's doesn't
-		 * while WordPress.org still points at its HelpScout conversation; it still counts for stats.
+		 * Filters whether an event carries the conversation for WordPress.org's copy; it counts for stats either way.
 		 *
 		 * @param bool              $copy            Whether it does.
 		 * @param Conversation|null $conversation    Conversation; null if it was deleted for good since the event.
@@ -157,7 +148,7 @@ final class EventPayload {
 			$payload['helpscout_id'] = $helpscout_id;
 		}
 
-		// A conversation merged into this one may have been imported, and its HelpScout conversation copied too.
+		// The conversation merged into this one may have a HelpScout copy too.
 		$merged_id = (int) ( $payload['merged_id'] ?? 0 );
 		if ( $merged_id && empty( $payload['merged_helpscout_id'] ) ) {
 			$merged_helpscout_id = self::helpscout_id( Conversation::find( $merged_id ), $merged_id );
@@ -180,7 +171,7 @@ final class EventPayload {
 	 */
 	private static function helpscout_id( ?Conversation $conversation, int $conversation_id ): int {
 		/**
-		 * Filters the ID of the HelpScout conversation a conversation was imported from, whose copy its own replaces.
+		 * Filters the ID of the HelpScout conversation a conversation was imported from.
 		 *
 		 * @param int               $helpscout_id    HelpScout's ID; 0 if it wasn't imported.
 		 * @param Conversation|null $conversation    Conversation; null if it was deleted for good.
@@ -268,7 +259,7 @@ final class EventPayload {
 			->where( 'state', Thread::STATE_PUBLISHED )
 			->whereIn( 'type', array_keys( self::THREAD_TYPES ) );
 
-		// A reply's threads end with it, however many came after it before the event was sent.
+		// A reply's threads end at it, even if more came before the event was sent.
 		if ( $own ) {
 			$query->where( 'id', $thread_id );
 		} elseif ( ! $all && $thread_id ) {
@@ -298,10 +289,10 @@ final class EventPayload {
 	}
 
 	/**
-	 * A thread's HTML as text, for finding the plugins and themes it mentions: a line for each block, and the links'
-	 * addresses on lines of their own after it.
+	 * A thread's HTML as text, for finding the plugins and themes it mentions: a line per block, and link addresses on
+	 * lines of their own.
 	 *
-	 * Angle brackets go too, so WordPress.org stripping tags from it can't take text along.
+	 * Angle brackets are removed, so stripping tags on WordPress.org can't swallow text.
 	 *
 	 * @param string $html The thread's body.
 	 * @return string

@@ -1,7 +1,6 @@
 <?php
 /**
- * Tests for how WordPress.org's copy of conversations is kept: what an event writes and deletes, and what pointing the
- * copy at imported conversations does.
+ * Tests for planning writes to WordPress.org's copy of conversations.
  *
  * @package WordPressdotorg\API\FreeScout
  */

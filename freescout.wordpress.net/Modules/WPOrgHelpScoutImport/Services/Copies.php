@@ -21,18 +21,14 @@ use Modules\WPOrgHelpScoutImport\Jobs\ReplaceCopies;
 use Modules\WPOrgWebhooks\Services\Client;
 
 /**
- * WordPress.org keeps a copy of conversations, which the plugin directory links to, and replies to uploads in. Until a
- * mailbox switches to FreeScout, the copies of its conversations are HelpScout's; switching sends WordPress.org which
- * FreeScout conversation each was imported as, in batches, on the queue, and which were deleted or are spam since, whose
- * copies go.
+ * Switches a mailbox's conversations in WordPress.org's copy from HelpScout to FreeScout, in batches on the queue.
  *
- * Until then, imported conversations' events don't carry them for the copy, so WordPress.org goes on pointing at
- * HelpScout; after, they do, with the HelpScout ID whose copy they replace, as do conversations imported later.
+ * Until a mailbox switches, its imported conversations' events leave the copy alone, so it keeps pointing at HelpScout.
  */
 final class Copies {
 
 	/**
-	 * Option keeping a mailbox's switch, followed by its ID: status, how far it got, and when.
+	 * Option name of a mailbox's switch, before the mailbox ID.
 	 *
 	 * @var string
 	 */
@@ -53,7 +49,7 @@ final class Copies {
 	public const STATUS_DONE = 'done';
 
 	/**
-	 * Status of a switch WordPress.org didn't take, which can carry on where it stopped.
+	 * Status of a switch WordPress.org refused; start() resumes it.
 	 *
 	 * @var string
 	 */
@@ -63,12 +59,11 @@ final class Copies {
 	 * A mailbox's switch.
 	 *
 	 * @param int $mailbox_id FreeScout mailbox ID.
-	 * @return array|null Status, after_id (the last imported conversation sent), sent, since (only conversations imported
-	 *                    since then; null for all), started_at, finished_at, error, and pending, when imports asked for a
-	 *                    send while one ran: the since of the send after it. Null if it hasn't switched.
+	 * @return array|null Null if it hasn't switched. Keys: status, after_id (last sent), sent, since (null for all),
+	 *                    started_at, finished_at, error, and pending (the since of a send queued behind this one).
 	 */
 	public static function get( int $mailbox_id ): ?array {
-		// Not from the cache, which saving doesn't update, and the queue's jobs change.
+		// Bypasses the cache, which other processes' saves don't update.
 		$state = Option::get( self::OPTION . $mailbox_id, null, true, false );
 
 		return is_array( $state ) ? $state : null;
@@ -86,7 +81,7 @@ final class Copies {
 	}
 
 	/**
-	 * Whether WordPress.org can be sent copies at all: WPOrgWebhooks signs the requests.
+	 * Whether requests to WordPress.org can be signed, which WPOrgWebhooks does.
 	 *
 	 * @return bool
 	 */
@@ -95,9 +90,7 @@ final class Copies {
 	}
 
 	/**
-	 * Starts sending a mailbox's imported conversations to WordPress.org, or carries on where a failed send stopped.
-	 *
-	 * Under a lock on its state, so a press of the button and an import finishing at once don't both start sending.
+	 * Starts sending a mailbox's imported conversations to WordPress.org, or resumes a failed send.
 	 *
 	 * @param int $mailbox_id FreeScout mailbox ID.
 	 * @return bool False if it's already running.
@@ -130,12 +123,10 @@ final class Copies {
 	}
 
 	/**
-	 * Sends what an import added, or imported again, since a mailbox switched, if it has. Never throws: it runs as an
-	 * import finishes.
+	 * Sends what an import added or updated, if the mailbox switched. Never throws: it runs as an import finishes.
 	 *
-	 * Imported again, a conversation's copy may be HelpScout's again: HelpScout's webhook writes it while anyone works on
-	 * it there. While a send runs, the conversations are sent after it, from the start, as they may be behind it; a
-	 * send that failed is started again, from the start, with them, so neither its conversations nor these are left out.
+	 * Updated conversations are sent again, as HelpScout's webhook may have rewritten their copies. A running send gets
+	 * them queued behind it; a failed one restarts with them.
 	 *
 	 * @param int    $mailbox_id FreeScout mailbox ID.
 	 * @param string $since      When the import started.
@@ -161,7 +152,7 @@ final class Copies {
 						return $state;
 					}
 
-					// A failed send hadn't sent everything since its own start; done, it had.
+					// A failed send still owes its own range; a finished one doesn't.
 					$wider = self::STATUS_FAILED === $state['status'] ? self::wider( $state['since'] ?? null, $since ) : $since;
 					if ( array_key_exists( 'pending', $state ) ) {
 						$wider = self::wider( $state['pending'], $wider );
@@ -206,10 +197,10 @@ final class Copies {
 	}
 
 	/**
-	 * Ends a send that has nothing left, or starts the one imports asked for while it ran.
+	 * Ends a finished send, or starts the one queued behind it.
 	 *
 	 * @param int $mailbox_id FreeScout mailbox ID.
-	 * @return bool Whether another send started, whose batches are to be queued.
+	 * @return bool Whether a queued send started.
 	 */
 	public static function finish( int $mailbox_id ): bool {
 		$state = self::change(
@@ -234,7 +225,7 @@ final class Copies {
 	}
 
 	/**
-	 * Stops a send WordPress.org didn't take, which can carry on where it stopped.
+	 * Marks a send WordPress.org refused as failed; start() resumes it.
 	 *
 	 * @param int    $mailbox_id FreeScout mailbox ID.
 	 * @param string $error      What went wrong.
@@ -260,7 +251,7 @@ final class Copies {
 	 * A send started again from the first imported conversation.
 	 *
 	 * @param array       $state The switch.
-	 * @param string|null $since Send the conversations imported, or imported again, since then; null for all.
+	 * @param string|null $since Only conversations imported or updated since then; null for all.
 	 * @return array
 	 */
 	private static function restart( array $state, ?string $since ): array {
@@ -277,7 +268,7 @@ final class Copies {
 	}
 
 	/**
-	 * The earlier of two times, which takes in more imported conversations; null, for all of them, takes in any.
+	 * The wider of two since values: the earlier time, or null for all.
 	 *
 	 * @param string|null $one   A time; null for all.
 	 * @param string|null $other Another.
@@ -292,11 +283,10 @@ final class Copies {
 	}
 
 	/**
-	 * Changes a mailbox's switch under a lock on it, so the queue's jobs, imports, and the button don't undo each other.
+	 * Changes a mailbox's switch under a row lock, so jobs, imports, and the button don't undo each other.
 	 *
 	 * @param int      $mailbox_id FreeScout mailbox ID.
-	 * @param callable $change     Takes the switch, null if it hasn't switched, and returns it changed, or null to leave
-	 *                             it.
+	 * @param callable $change     Takes the switch, or null, and returns it changed, or null to leave it.
 	 * @return array|null The switch as changed; null if it wasn't.
 	 */
 	private static function change( int $mailbox_id, callable $change ): ?array {
@@ -305,7 +295,7 @@ final class Copies {
 		try {
 			Option::query()->firstOrCreate( array( 'name' => $name ), array( 'value' => '' ) );
 		} catch ( QueryException $e ) {
-			// Created at the same time by another.
+			// Another process created it first.
 			unset( $e );
 		}
 
@@ -331,8 +321,7 @@ final class Copies {
 	}
 
 	/**
-	 * Notes the mailboxes of imported conversations about to be deleted for good, so a switch of their mailbox sends
-	 * WordPress.org their deletion.
+	 * Notes the mailboxes of imported conversations about to be deleted for good, so a switch still sends their deletion.
 	 *
 	 * @param int[] $conversation_ids Conversation IDs.
 	 * @return void
@@ -342,7 +331,7 @@ final class Copies {
 			$by_mailbox = Conversation::query()->whereIn( 'id', $ids )->get( array( 'id', 'mailbox_id' ) )->groupBy( 'mailbox_id' );
 
 			foreach ( $by_mailbox as $mailbox_id => $conversations ) {
-				// Not as imported again, which its updated_at says.
+				// toBase() leaves updated_at alone, which marks updates.
 				ImportedConversation::query()
 					->toBase()
 					->whereIn( 'conversation_id', $conversations->pluck( 'id' )->all() )
@@ -352,7 +341,7 @@ final class Copies {
 	}
 
 	/**
-	 * Marks a conversation as imported again, for catch_up().
+	 * Marks an imported conversation as updated, for catch_up().
 	 *
 	 * @param Conversation $conversation Conversation.
 	 * @return void
@@ -377,9 +366,9 @@ final class Copies {
 	 * @param int         $mailbox_id FreeScout mailbox ID.
 	 * @param int         $after_id   ID of the last one sent.
 	 * @param int         $limit      How many.
-	 * @param string|null $since      Only those imported, or imported again, since then.
-	 * @return Collection Imported conversations, with their ID, helpscout_id, conversation_id, and their conversation's
-	 *                    found_id (null if it was deleted for good), number, state, and status; see request().
+	 * @param string|null $since      Only those imported or updated since then.
+	 * @return Collection With helpscout_id, conversation_id, and their conversation's found_id (null if deleted for
+	 *                    good), number, state, and status.
 	 */
 	public static function batch( int $mailbox_id, int $after_id, int $limit, ?string $since = null ): Collection {
 		$table = ( new ImportedConversation() )->getTable();
@@ -408,11 +397,10 @@ final class Copies {
 	}
 
 	/**
-	 * What WordPress.org is told about an imported conversation: which FreeScout conversation replaces the copy of its
-	 * HelpScout one, or that the copy goes, as the conversation was deleted, for good or not, or is spam.
+	 * What WordPress.org is told about an imported conversation: the FreeScout conversation that replaces its HelpScout
+	 * copy, or that the copy goes, as it's deleted or spam.
 	 *
-	 * One merged into another, which deletes it, has its HelpScout one's copy merged into the other's instead, which
-	 * takes over the plugins and themes it mentions, like a merge after the switch.
+	 * One merged away is sent as the conversation it went into, which takes over its copy's plugins and themes.
 	 *
 	 * @param ImportedConversation $imported An imported conversation, as batch() reads it.
 	 * @return array HelpScout's ID, FreeScout's ID and number, whether to delete the copy, and whether it's merged into
@@ -452,9 +440,7 @@ final class Copies {
 	}
 
 	/**
-	 * The conversation one deleted by a merge was merged into, following it on if that one was merged away too.
-	 *
-	 * Core notes the merge on the conversation merged away, in a line item's `META_MERGED_INTO_CONV` meta.
+	 * The conversation one was merged into, following further merges.
 	 *
 	 * @param int $conversation_id Conversation ID.
 	 * @return Conversation|null Null if it wasn't merged away, or the one it went into was deleted for good.
@@ -462,7 +448,7 @@ final class Copies {
 	private static function merged_into( int $conversation_id ): ?Conversation {
 		$into = null;
 
-		// Few hops: conversations are merged by hand.
+		// Merges are manual, so chains are short.
 		for ( $hops = 0; $hops < 10; $hops++ ) {
 			$merges = Thread::query()
 				->where( 'conversation_id', $conversation_id )
@@ -518,7 +504,7 @@ final class Copies {
 	}
 
 	/**
-	 * Whether a conversation's events carry it for WordPress.org's copy: an imported one's only once its mailbox switched.
+	 * Whether a conversation's events carry it for WordPress.org's copy: an imported one's only once its mailbox switches.
 	 *
 	 * @param int $conversation_id Conversation ID.
 	 * @param int $mailbox_id      Its mailbox's ID.

@@ -13,8 +13,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Which mailbox each imported conversation is in, so pointing WordPress.org at a mailbox's conversations still finds
- * those deleted for good, whose copies go.
+ * Records each imported conversation's mailbox, so switching a mailbox still finds those deleted for good.
  */
 class AddMailboxToWporghelpscoutimportConversations extends Migration {
 
@@ -42,7 +41,7 @@ class AddMailboxToWporghelpscoutimportConversations extends Migration {
 			}
 		);
 
-		// Those imported already; those deleted for good since can't be told anymore.
+		// Backfills earlier imports; those deleted for good since are lost.
 		foreach ( \DB::table( 'conversations' )->distinct()->pluck( 'mailbox_id' ) as $mailbox_id ) {
 			\DB::table( self::TABLE )
 				->whereIn(

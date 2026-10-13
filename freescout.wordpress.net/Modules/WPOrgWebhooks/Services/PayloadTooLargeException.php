@@ -12,8 +12,7 @@ namespace Modules\WPOrgWebhooks\Services;
 use RuntimeException;
 
 /**
- * Thrown when api.wordpress.org's web server refused a request for its size: webhook.php never saw it, so a smaller
- * one can be sent instead.
+ * Thrown when api.wordpress.org's web server refused a request for its size, before webhook.php saw it.
  */
 final class PayloadTooLargeException extends RuntimeException {
 }

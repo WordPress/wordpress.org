@@ -434,8 +434,7 @@ final class ImporterTest extends ImportTestCase {
 	}
 
 	/**
-	 * What was imported keeps the mailbox it went into, which pointing WordPress.org at the mailbox reads once the
-	 * conversation is deleted for good.
+	 * What was imported keeps the mailbox it went into, for switching once the conversation is deleted for good.
 	 *
 	 * @return void
 	 */

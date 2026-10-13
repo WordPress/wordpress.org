@@ -262,7 +262,7 @@ final class ImportPage implements ShouldQueue {
 			$run->status      = Run::STATUS_DONE;
 			$run->finished_at = Carbon::now();
 			if ( $this->save( $run ) ) {
-				// Once WordPress.org points at the mailbox, it points at what this imported too.
+				// Send what this run imported, if the mailbox switched.
 				Copies::catch_up( (int) $run->mailbox_id, (string) $run->started_at );
 			}
 

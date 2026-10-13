@@ -114,7 +114,7 @@ final class CopiesTest extends TestCase {
 	}
 
 	/**
-	 * A batch WordPress.org doesn't take, after its last try, stops the switch, which can carry on where it stopped.
+	 * A batch WordPress.org refuses on its last try fails the switch, which can resume.
 	 *
 	 * @return void
 	 */
@@ -137,8 +137,7 @@ final class CopiesTest extends TestCase {
 	}
 
 	/**
-	 * Imports that finish after the switch send what they brought, new or imported again, from the start; before it,
-	 * nothing is sent.
+	 * Imports finishing after the switch send what they added or updated; before it, nothing is sent.
 	 *
 	 * @return void
 	 */
@@ -190,8 +189,7 @@ final class CopiesTest extends TestCase {
 	}
 
 	/**
-	 * An import that finishes while a send runs has what it brought sent after it, from the start, as the conversations
-	 * it imported again may be behind it; a second one widens that.
+	 * An import finishing during a send queues its conversations behind it, from the start; a second one widens that.
 	 *
 	 * @return void
 	 */
@@ -208,7 +206,7 @@ final class CopiesTest extends TestCase {
 		Queue::assertPushed( ReplaceCopies::class, 1 );
 		$this->assertSame( '2026-10-02 10:00:00', Copies::get( (int) $this->mailbox->id )['pending'] );
 
-		// Imported again after the send went past it.
+		// Updated after the send passed it.
 		$this->run_batches();
 		ImportedConversation::query()->where( 'conversation_id', $again->id )->update( array( 'updated_at' => '2026-10-02 11:00:00' ) );
 		$this->run_batches();
@@ -225,8 +223,7 @@ final class CopiesTest extends TestCase {
 	}
 
 	/**
-	 * Catching up on a send that failed starts it again from the start, with the wider of the two, so what it hadn't
-	 * sent yet isn't left out.
+	 * Catching up on a failed send restarts it with the wider range, so nothing it hadn't sent is left out.
 	 *
 	 * @return void
 	 */
@@ -246,8 +243,8 @@ final class CopiesTest extends TestCase {
 	}
 
 	/**
-	 * Conversations deleted, for good or not, or spam, have their copies deleted, HelpScout's too; the others are
-	 * pointed at. Those deleted for good from another mailbox are left to its switch.
+	 * Copies of conversations deleted or spam go, HelpScout's too; others are pointed at. Those deleted for good from
+	 * another mailbox are left to its switch.
 	 *
 	 * @return void
 	 */
@@ -282,9 +279,8 @@ final class CopiesTest extends TestCase {
 	}
 
 	/**
-	 * A conversation merged into another before the switch is sent as the one it went into, followed on if that was
-	 * merged away too, so its HelpScout copy is merged into that one's rather than deleted; one merged into a
-	 * conversation deleted since goes.
+	 * A conversation merged away before the switch is sent as the one it went into, following further merges; one
+	 * merged into a conversation deleted since goes.
 	 *
 	 * @return void
 	 */
@@ -324,7 +320,7 @@ final class CopiesTest extends TestCase {
 
 	/**
 	 * Events of an imported conversation deleted for good before they went out leave the copy alone until its mailbox
-	 * switched, as for any imported conversation.
+	 * switches.
 	 *
 	 * @return void
 	 */

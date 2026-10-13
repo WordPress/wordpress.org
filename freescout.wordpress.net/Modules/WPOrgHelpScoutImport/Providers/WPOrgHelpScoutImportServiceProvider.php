@@ -122,11 +122,11 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 			}
 		);
 
-		// WordPress.org's copy of an imported conversation replaces the copy of its HelpScout conversation.
+		// Names the HelpScout conversation whose copy an imported one's replaces.
 		\Eventy::addFilter(
 			'wporgwebhooks.helpscout_id',
 			static function ( mixed $helpscout_id = 0, mixed $conversation = null, mixed $conversation_id = 0 ): mixed {
-				// Deleted for good, the conversation is gone, but its ID still names what was imported.
+				// Deleted for good, the conversation is null, but its ID still finds the import.
 				$id = $conversation instanceof Conversation ? (int) $conversation->id : (int) $conversation_id;
 
 				try {
@@ -143,7 +143,7 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 			3
 		);
 
-		// For pointing WordPress.org at what an import brought, once it points at the mailbox.
+		// Marks updated conversations for Copies::catch_up().
 		\Eventy::addAction(
 			'wporghelpscoutimport.conversation_imported',
 			static function ( mixed $conversation = null ): void {
@@ -157,7 +157,7 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 			}
 		);
 
-		// Imported conversations' events leave WordPress.org's copy alone until it points at their mailbox.
+		// Imported conversations' events leave the copy alone until their mailbox switches.
 		\Eventy::addFilter(
 			'wporgwebhooks.copy',
 			static function ( mixed $copy = true, mixed $conversation = null, mixed $conversation_id = 0, mixed $mailbox_id = 0 ): mixed {
@@ -176,7 +176,7 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 			4
 		);
 
-		// Deleted for good, an imported conversation's mailbox is gone with it; pointing WordPress.org at it needs it.
+		// Deleting for good loses the conversation's mailbox, which switching needs.
 		\Eventy::addAction(
 			'conversations.before_delete_forever',
 			static function ( mixed $conversation_ids = array() ): void {

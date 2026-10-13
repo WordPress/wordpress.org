@@ -12,13 +12,8 @@ namespace WordPressdotorg\API\FreeScout;
 require __DIR__ . '/common.php';
 
 /**
- * Swaps the copies of HelpScout's conversations for those of the FreeScout conversations imported from them.
- *
- * A copy keeps its plugins and themes, is marked as FreeScout's, and names the HelpScout conversation it replaces, which
- * keeps HelpScout's webhook from bringing it back; one FreeScout's webhook added already takes over the HelpScout copy's
- * plugins and themes instead, as does the copy of a conversation another was merged into, which is sent for that one.
- * Copies of conversations deleted since, or spam, go. Each is swapped in a transaction, and copies already swapped are
- * left alone, so a batch can be sent again.
+ * Swaps the copies of HelpScout's conversations for those of the FreeScout conversations imported from them; see
+ * plan_copy_replacement(). Each swap is a transaction, and swapped copies are skipped, so a batch can be sent again.
  *
  * @param array $copies Each a HelpScout ID, the FreeScout conversation's ID and number, whether its copy goes, and
  *                      whether it was merged into that conversation.
@@ -31,7 +26,7 @@ function replace_copies( array $copies ): ?int {
 	$meta_table   = "{$wpdb->base_prefix}helpscout_meta";
 	$replaced     = 0;
 
-	// What the swaps read comes from the primary database, not a replica.
+	// Read from the primary database, not a lagging replica.
 	if ( is_callable( array( $wpdb, 'send_reads_to_masters' ) ) ) {
 		$wpdb->send_reads_to_masters();
 	}
@@ -61,10 +56,7 @@ function replace_copies( array $copies ): ?int {
 						return;
 					}
 
-					/*
-					 * The FreeScout copy's marks first: its helpdesk, and the HelpScout conversation it replaces. A meta row is
-					 * unique, so nothing it has already is written again.
-					 */
+					// Mark the FreeScout copy: its helpdesk, and the HelpScout conversation it replaces.
 					$marks = array( REPLACED_HELPSCOUT_META_KEY => (string) $helpscout_id );
 					if ( 'rename' === $action ) {
 						$marks[ HELPDESK_META_KEY ] = 'freescout';
@@ -93,7 +85,7 @@ function replace_copies( array $copies ): ?int {
 						return;
 					}
 
-					// It takes the plugins and themes it doesn't have yet, like those of a conversation merged into it.
+					// Take over the HelpScout copy's plugins and themes.
 					check_write(
 						$wpdb->query(
 							$wpdb->prepare(

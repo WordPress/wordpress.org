@@ -19,16 +19,15 @@ require __DIR__ . '/common.php';
 const REPLY_EVENTS = array( 'conversation.user_replied', 'conversation.created_by_user' );
 
 /**
- * Events counted, but not credited to the agent: restoring a conversation undoes its deletion, which was credited, and
- * notes are only sent for the plugins and themes they mention.
+ * Events counted, but not credited to the agent: a restore undoes a credited deletion, and notes are only sent for the
+ * copy.
  *
  * @var string[]
  */
 const UNCREDITED_EVENTS = array( 'conversation.restored', 'conversation.note_added' );
 
 /**
- * WordPress.org accounts that write to FreeScout for automations, like the plugin directory's upload confirmations,
- * rather than for a person; their events aren't credited to anyone.
+ * WordPress.org accounts automations write to FreeScout as, like upload confirmations; their events aren't credited.
  *
  * @var int[]
  */
@@ -75,11 +74,8 @@ function contributor_stats( object $request ): void {
 /**
  * Keeps WordPress.org's copy of a conversation, and the plugins and themes it mentions, as HelpScout's webhook did.
  *
- * The plugin directory reads the copy for a plugin's emails. A conversation replaces the copies of one merged into it,
- * and of the HelpScout conversations it, or that one, was imported from, taking over their plugins and themes: slug
- * changes update those, and the emails still name the old slug.
- *
- * Each event carries the conversation as it was when it was sent, so the copy ends up as the last one written says.
+ * A conversation replaces the copies of one merged into it, and of the HelpScout conversations they were imported from,
+ * taking over their plugins and themes, which slug changes kept up to date.
  *
  * @param object $request Request payload.
  * @return bool Whether it needs all of the conversation's threads, which FreeScout sends it again with.
@@ -95,12 +91,12 @@ function log_email( object $request ): bool {
 		return false;
 	}
 
-	// What the write reads comes from the primary database, not a replica.
+	// Read from the primary database, not a lagging replica.
 	if ( is_callable( array( $wpdb, 'send_reads_to_masters' ) ) ) {
 		$wpdb->send_reads_to_masters();
 	}
 
-	// Deleted conversations and spam aren't kept; a deletion undone since is sent as published.
+	// Spam and deleted conversations aren't kept; the current state wins over the event, as a deletion may be undone.
 	$deleted = isset( $email->state ) ? 'deleted' === $email->state : 'conversation.deleted' === ( $request->event ?? '' );
 	if ( $deleted || 'spam' === ( $email->status ?? '' ) ) {
 		in_transaction(
@@ -120,8 +116,7 @@ function log_email( object $request ): bool {
  *
  * @param object $request Request payload.
  * @param int    $id      Conversation ID.
- * @return bool Whether it needs all of the conversation's threads: the copy has nothing of the conversation yet, and the
- *              event doesn't carry all of them.
+ * @return bool Whether it needs all of the conversation's threads; see needs_all_threads().
  */
 function write_email( object $request, int $id ): bool {
 	global $wpdb;
@@ -147,7 +142,7 @@ function write_email( object $request, int $id ): bool {
 		ARRAY_A
 	);
 
-	// What the subject mentions was added when the copy got it; looking it up again takes queries for every event.
+	// The subject's mentions were added with the copy; the lookup costs queries, so only redo it when it changed.
 	$mailbox   = $request->email->mailbox ?? ( $request->mailbox ?? null );
 	$subject   = (string) ( $email->subject ?? '' );
 	$threads   = (array) ( $email->threads ?? array() );
@@ -175,7 +170,7 @@ function write_email( object $request, int $id ): bool {
 
 	in_transaction(
 		static function () use ( $wpdb, $emails_table, $meta_table, $id, $data, $columns, $plan ): void {
-			// Its meta first, which names its helpdesk, and the HelpScout conversations it replaces; pairs are unique.
+			// Pairs are unique; one an overlapping event added is skipped.
 			foreach ( $plan['meta'] as list( $meta_key, $meta_value ) ) {
 				check_write( $wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i ( helpscout_id, meta_key, meta_value ) VALUES ( %d, %s, %s )', $meta_table, $id, $meta_key, $meta_value ) ) );
 			}

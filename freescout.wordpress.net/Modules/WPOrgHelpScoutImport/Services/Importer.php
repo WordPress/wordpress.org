@@ -419,10 +419,8 @@ final class Importer {
 	}
 
 	/**
-	 * Tells other modules a conversation was imported or updated, as that happens without core's events: pointing
-	 * WordPress.org at its mailbox sends it again.
-	 *
-	 * Never throws: the conversation is imported by now.
+	 * Tells other modules a conversation was imported or updated, which happens without core's events. Never throws: the
+	 * conversation is imported by now.
 	 *
 	 * @param Conversation $conversation Conversation.
 	 * @param int          $helpscout_id HelpScout's ID for it.

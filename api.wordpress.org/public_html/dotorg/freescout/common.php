@@ -49,17 +49,14 @@ const MAX_REQUEST_AGE = 300; // 5 minutes.
 const MAX_CLOCK_SKEW = 10;
 
 /**
- * Meta key naming the helpdesk a copied conversation is in, `freescout`; HelpScout's copies have none.
+ * Meta key marking a copy as FreeScout's; HelpScout's copies have none.
  *
  * @var string
  */
 const HELPDESK_META_KEY = 'helpdesk';
 
 /**
- * Meta key of a FreeScout conversation's copy naming a HelpScout conversation whose copy it replaced.
- *
- * HelpScout's webhook leaves alone a HelpScout conversation a copy names, so work done there since doesn't bring its
- * copy back. It goes with the copy that names it.
+ * Meta key naming the HelpScout conversation a FreeScout copy replaced, which HelpScout's webhook then leaves alone.
  *
  * @var string
  */
@@ -194,13 +191,10 @@ function send_panel( array $blocks, array $extra = array() ): never {
 }
 
 /**
- * A conversation's row in WordPress.org's copy of helpdesk emails, which the plugin directory reads.
- *
- * The copy began with HelpScout's emails, so its columns, and the table's name, are HelpScout's; the values are the
- * same for FreeScout's conversations, but for the ID.
+ * A conversation's row in WordPress.org's copy, whose columns and table name are HelpScout's.
  *
  * @param object      $request Webhook payload, with the conversation in `email`; see WPOrgWebhooks' EventPayload.
- * @param object|null $row     The conversation's row so far, if it has one.
+ * @param object|null $row     Its current row, if any.
  * @param int         $user_id The sender's WordPress.org user ID, 0 if unknown.
  * @return array
  */
@@ -270,8 +264,7 @@ function get_mailbox_slug( object $request ): string {
 }
 
 /**
- * The slug of the mailbox WordPress.org's copy keeps a conversation in: the one it's in now, which the event carries in
- * `email`, rather than the one the event happened in, which stats count.
+ * The slug of the conversation's current mailbox, which the copy keeps, rather than the event's, which stats count.
  *
  * @param object $request Webhook payload.
  * @return string
@@ -691,7 +684,7 @@ function get_plugin_slugs_by_title( string $title ): array {
 }
 
 /**
- * Deletes conversations from WordPress.org's copy, with their meta, and so the HelpScout conversations they name.
+ * Deletes conversations from WordPress.org's copy, with their meta.
  *
  * @param int[] $ids Conversation IDs; HelpScout's for the copies of its conversations.
  * @return void
@@ -735,9 +728,8 @@ function get_replaced_ids( object $request ): array {
 }
 
 /**
- * Whether WordPress.org needs all of a conversation's threads before it copies it: it has no copy of it yet, nor of
- * the HelpScout conversation it was imported from, which would have what the threads mention, and the event carries
- * only the newest.
+ * Whether copying a conversation needs all of its threads: the copy has neither it nor its HelpScout conversation, and
+ * the event carries only the newest.
  *
  * @param object      $request       Webhook payload.
  * @param object|null $row           The conversation's row in the copy, if it has one.
@@ -751,8 +743,8 @@ function needs_all_threads( object $request, ?object $row, bool $has_helpscout )
 /**
  * What writing a conversation's copy adds to its meta, and which copies it deletes.
  *
- * It takes over what the copies it replaces mention, names the HelpScout conversations it replaces, and adds what its
- * threads mention. A HelpScout conversation it names already was replaced by an earlier event, so it isn't again.
+ * It takes over the replaced copies' meta, names the HelpScout conversations it replaces, and adds what its threads
+ * mention. HelpScout conversations it names already aren't replaced again.
  *
  * @param int     $id        Conversation ID.
  * @param array[] $replaced  The copies it replaces, see get_replaced_ids().
@@ -777,7 +769,6 @@ function plan_email_write( int $id, array $replaced, array $all_meta, array $men
 		}
 	}
 
-	// A HelpScout conversation the copy names was replaced already.
 	$helpscout = array_values(
 		array_filter(
 			$replaced['helpscout'],
@@ -813,18 +804,17 @@ function plan_email_write( int $id, array $replaced, array $all_meta, array $men
 }
 
 /**
- * What pointing WordPress.org at an imported conversation does to its copy.
+ * What switching an imported conversation does to its copy.
  *
- * A conversation merged into another before the switch is sent as the one it went into, `merged`: its HelpScout one's
- * copy is merged into that one's, whose own HelpScout copy may not be renamed yet, so it takes over what that copy
- * mentions, as a merge after the switch does, rather than standing in for it.
+ * One merged away before the switch arrives as the conversation it went into, flagged `merged`: its HelpScout copy is
+ * merged into that one's rather than renamed, as that one's own HelpScout copy may still need renaming.
  *
  * @param object $copy          The imported conversation: helpscout_id, id, number, delete, and merged.
  * @param bool   $has_helpscout Whether the copy has the HelpScout conversation.
  * @param bool   $has_freescout Whether it has the FreeScout one.
  * @param bool   $names_it      Whether the FreeScout one's copy names the HelpScout one, as it replaced it already.
- * @return string `skip`; `delete` both, as the conversation was deleted, or is spam; `rename` the HelpScout one's copy
- *                into the FreeScout one's; `merge` it into the FreeScout one's copy; or `name` it in that copy.
+ * @return string `skip`; `delete` both copies (deleted or spam); `rename` the HelpScout copy to the FreeScout ID;
+ *                `merge` it into the FreeScout copy; or `name` it in that copy.
  */
 function plan_copy_replacement( object $copy, bool $has_helpscout, bool $has_freescout, bool $names_it ): string {
 	$helpscout_id = (int) ( $copy->helpscout_id ?? 0 );
@@ -841,12 +831,12 @@ function plan_copy_replacement( object $copy, bool $has_helpscout, bool $has_fre
 		return $has_freescout || ! empty( $copy->merged ) ? 'merge' : 'rename';
 	}
 
-	// Its own events wrote the FreeScout one's copy, while HelpScout's was gone: it still keeps HelpScout's webhook out.
+	// The FreeScout copy exists without the HelpScout one; naming it still keeps HelpScout's webhook out.
 	return $has_freescout && ! $names_it ? 'name' : 'skip';
 }
 
 /**
- * Runs writes to WordPress.org's copy in a transaction, so none of them are seen, or kept, without the others.
+ * Runs writes to WordPress.org's copy in a transaction.
  *
  * @param callable $write Writes; throws if one fails, see check_write().
  * @return void

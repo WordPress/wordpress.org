@@ -128,7 +128,7 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 			2
 		);
 
-		// Out of spam, the conversation is new to WordPress.org's copy again, which took it out.
+		// Leaving spam, the conversation is copied in full again.
 		\Eventy::addAction(
 			'conversation.status_changed',
 			static function ( $conversation = null, $user = null, $changed_on_reply = false, $prev_status = null ): void {
@@ -145,7 +145,7 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 			4
 		);
 
-		// For the plugins and themes it mentions; WordPress.org doesn't credit it.
+		// For the plugins and themes it mentions; not credited.
 		\Eventy::addAction(
 			'conversation.note_added',
 			static function ( $conversation = null, $thread = null ): void {
@@ -182,7 +182,7 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 				self::forward(
 					'conversation.merged',
 					static function () use ( $conversation, $second, $user ): array {
-						// The other conversation's threads are in this one now; WordPress.org drops its copy of it.
+						// WordPress.org folds the merged conversation's copy into this one.
 						return array( $conversation, $user, array( 'merged_id' => $second instanceof Conversation ? (int) $second->id : 0 ) );
 					}
 				);
@@ -191,7 +191,7 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 			3
 		);
 
-		// Restoring from Deleted: WordPress.org's copy took the conversation out when it was deleted.
+		// The copy dropped the conversation when it was deleted.
 		\Eventy::addAction(
 			'conversation.state_changed',
 			static function ( $conversation = null, $user = null, $previous_state = null ): void {
@@ -295,8 +295,8 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 	 * Never throws: a failure here must not interrupt the core action that fired the event.
 	 *
 	 * @param string   $event   Event name.
-	 * @param callable $resolve Returns the conversation, the agent who caused the event (or null), and optionally more about
-	 *                          the event for the payload; or null to skip it.
+	 * @param callable $resolve Returns the conversation, the agent who caused the event (or null), and optionally event
+	 *                          details; or null to skip it.
 	 * @return void
 	 */
 	private static function forward( string $event, callable $resolve ): void {

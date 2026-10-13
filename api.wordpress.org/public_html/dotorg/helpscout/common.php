@@ -544,14 +544,9 @@ function get_mailbox_name( $mailbox_id_or_request ) {
 }
 
 /**
- * Whether a HelpScout conversation moved to FreeScout, whose copy replaced HelpScout's.
+ * Whether FreeScout's copy replaced a HelpScout conversation's, naming it under `helpscout_conversation`.
  *
- * FreeScout's copy of a conversation imported from HelpScout records the HelpScout conversation it replaced, under the
- * `helpscout_conversation` meta key; see api.wordpress.org/public_html/dotorg/freescout/. Anything still done to the
- * conversation in HelpScout, like an agent or a workflow closing it, would otherwise add HelpScout's copy back, next
- * to FreeScout's, and the plugin directory could reply to an upload in HelpScout, where no one looks any more.
- *
- * One lookup by meta key and value, like the plugin directory's lookup of a plugin's emails by slug.
+ * Work still done on it in HelpScout must not bring HelpScout's copy back.
  *
  * @param int $helpscout_id HelpScout conversation ID.
  * @return bool
@@ -571,8 +566,6 @@ function is_moved_to_freescout( $helpscout_id ) {
 
 /**
  * Keep a cached copy of the received emails in the database for querying.
- *
- * Conversations that moved to FreeScout are left alone, see is_moved_to_freescout().
  *
  * @param string $event   Event name.
  * @param object $request Helpscout request object / Conversation object.

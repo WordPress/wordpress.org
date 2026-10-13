@@ -172,7 +172,6 @@ final class EventForwardingTest extends TestCase {
 		$this->assert_queued( 'conversation.merged', (string) $this->agent->email );
 		Queue::assertPushed( SendEvent::class, 1 );
 
-		// WordPress.org drops its copy of the merged conversation.
 		$this->assertSame( (int) $second->id, $this->payload()['merged_id'] );
 	}
 
@@ -275,8 +274,7 @@ final class EventForwardingTest extends TestCase {
 	}
 
 	/**
-	 * Events the filter keeps out of WordPress.org's copy, like an imported conversation's before WordPress.org points at
-	 * it, still go out for stats, without the conversation.
+	 * Events the filter keeps out of the copy still go out for stats, without the conversation.
 	 *
 	 * @return void
 	 */
@@ -329,8 +327,8 @@ final class EventForwardingTest extends TestCase {
 	}
 
 	/**
-	 * A conversation deleted for good before its event went out is deleted from the copy, with the HelpScout
-	 * conversation it was imported from, which the filter is asked about by ID.
+	 * A conversation deleted for good before its event went out is deleted from the copy, with its HelpScout one, which
+	 * the filter is asked about by ID.
 	 *
 	 * @return void
 	 */
@@ -390,8 +388,7 @@ final class EventForwardingTest extends TestCase {
 	}
 
 	/**
-	 * Threads go as text, with a line for each block, and the addresses of their links, which is what WordPress.org
-	 * looks for plugins and themes in.
+	 * Threads go as text: a line per block, and their links' addresses, where WordPress.org looks for plugins and themes.
 	 *
 	 * @return void
 	 */
@@ -513,7 +510,7 @@ final class EventForwardingTest extends TestCase {
 		$jobs = Queue::pushed( SendEvent::class );
 		$this->assertCount( 1, $jobs );
 
-		// As it's sent.
+		// As SendEvent sends it.
 		return EventPayload::refresh( $jobs->first()->payload );
 	}
 

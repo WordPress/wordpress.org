@@ -89,8 +89,7 @@ final class ImportController extends Controller {
 	}
 
 	/**
-	 * Points WordPress.org's copies of a mailbox's HelpScout conversations at the FreeScout conversations imported from
-	 * them, when the mailbox switches to FreeScout; or carries on where that stopped.
+	 * Switches a mailbox's conversations in WordPress.org's copy to FreeScout, or resumes a failed switch.
 	 *
 	 * @param Request $request Request.
 	 * @return RedirectResponse
@@ -115,7 +114,7 @@ final class ImportController extends Controller {
 	}
 
 	/**
-	 * The mailboxes conversations were imported into, and whether WordPress.org points at them.
+	 * The mailboxes conversations were imported into, and their switch.
 	 *
 	 * @return array[] Mailbox, total imported, and the switch, see Copies::get().
 	 */

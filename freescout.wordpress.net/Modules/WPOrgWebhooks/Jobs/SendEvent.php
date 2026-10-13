@@ -61,9 +61,9 @@ final class SendEvent implements ShouldQueue {
 	/**
 	 * Sends the event, and tries again later if api.wordpress.org didn't get it.
 	 *
-	 * When WordPress.org has no copy of the conversation yet, it takes nothing, and asks for all of its threads, which
-	 * the event then carries. Other failures aren't retried, since webhook.php may have counted the event already. They
-	 * fail the job rather than throw: the worker would retry anything thrown until the job runs out of tries.
+	 * If WordPress.org asks for all of the conversation's threads, it's sent again with them. Other failures aren't
+	 * retried, since webhook.php may have counted the event already. They fail the job rather than throw: the worker
+	 * would retry anything thrown until the job runs out of tries.
 	 *
 	 * @return void
 	 */
@@ -89,8 +89,7 @@ final class SendEvent implements ShouldQueue {
 	}
 
 	/**
-	 * Posts an event; one too large for api.wordpress.org's web server goes again without its threads, so it still
-	 * counts, and the copy still gets what else it says.
+	 * Posts an event; one too large for the web server goes again without its threads.
 	 *
 	 * @param Client $client  Client.
 	 * @param array  $payload Event payload, as it's sent.

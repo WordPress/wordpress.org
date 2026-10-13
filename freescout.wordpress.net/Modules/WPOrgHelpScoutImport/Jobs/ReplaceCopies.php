@@ -17,10 +17,8 @@ use Modules\WPOrgHelpScoutImport\Services\Copies;
 use Modules\WPOrgWebhooks\Services\Client;
 
 /**
- * Tells WordPress.org which FreeScout conversation each of a batch of HelpScout's was imported as, or that its copy goes,
- * and queues the next batch.
- *
- * WordPress.org swaps the IDs in its copy, so running a batch again does nothing more.
+ * Sends WordPress.org a batch of imported conversations for its copy, and queues the next. Sending a batch again
+ * changes nothing.
  */
 final class ReplaceCopies implements ShouldQueue {
 	use Dispatchable;
@@ -88,7 +86,7 @@ final class ReplaceCopies implements ShouldQueue {
 			$batch = Copies::batch( $this->mailbox_id, (int) $state['after_id'], self::BATCH, $state['since'] ?? null );
 
 			if ( $batch->isEmpty() ) {
-				// Imports that finished while it ran may want another.
+				// finish() starts the send that imports queued meanwhile, if any.
 				if ( Copies::finish( $this->mailbox_id ) ) {
 					self::dispatch( $this->mailbox_id );
 				}
