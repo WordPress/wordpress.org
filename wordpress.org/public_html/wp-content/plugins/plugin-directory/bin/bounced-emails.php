@@ -75,7 +75,6 @@ if ( ! Helpdesk::is_freescout() || ! FreeScout::api_key() || ! FreeScout::user_i
 	die();
 }
 
-// Load the helpdesk's bounce helpers.
 require_once API_WPORGPATH . '/dotorg/freescout/common.php';
 
 // Set a user to run as.
@@ -116,7 +115,7 @@ function get_bounces() {
 }
 
 /**
- * Describe a bounce the way FreeScout's sidebar sends a conversation, which the bounce helpers read.
+ * Shape a bounce like FreeScout's sidebar payload, which the bounce helpers read.
  *
  * Attachments that may hold the bounced email are downloaded, as the API only links them.
  *
@@ -410,7 +409,6 @@ foreach ( $actions_to_take as $post_id => $data ) {
 		$stats['revoked-commit']++;
 	}
 
-	// Close those conversations.
 	if ( 'live' == OPERATION_MODE ) {
 		foreach ( $data['id'] as $conversation_id ) {
 			close_conversation( $conversation_id );
@@ -489,7 +487,6 @@ foreach ( $actions_to_take as $post_id => $data ) {
 		'post_status' => 'closed',
 	] );
 
-	// Close those conversations.
 	foreach ( $data['id'] as $conversation_id ) {
 		close_conversation( $conversation_id );
 	}
@@ -499,7 +496,6 @@ foreach ( $actions_to_take as $post_id => $data ) {
 	echo "\n";
 }
 
-// Close those conversations.
 foreach ( $just_close_it as $conversation_id ) {
 	$stats['conversations-closed']++;
 

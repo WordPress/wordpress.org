@@ -14,9 +14,8 @@ use Illuminate\Http\Request;
 /**
  * Reads a request's JSON body once its signature, freshness, and endpoint check out.
  *
- * WordPress.org signs the body with HMAC-SHA256 and the secret it shares with the modules, stamps it with when it was
- * sent, and names the endpoint, so a request is only good there, and not for long. Like the modules' requests to
- * api.wordpress.org, the other way around.
+ * WordPress.org signs the body with HMAC-SHA256 and the shared secret, and stamps it with the endpoint and when it was
+ * sent.
  */
 final class SignedRequest {
 

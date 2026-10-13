@@ -16,8 +16,7 @@ use Illuminate\Support\Facades\Schema;
 use Modules\WPOrgApi\Services\SignedRequest;
 
 /**
- * A mailbox's saved reply, by name, from the Saved Replies module, so WordPress.org's scripts write what agents keep
- * up to date there.
+ * Serves a mailbox's saved replies by name, from the Saved Replies module.
  */
 final class SavedReplyController extends Controller {
 
