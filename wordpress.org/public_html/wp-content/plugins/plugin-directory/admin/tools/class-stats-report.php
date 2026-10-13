@@ -695,14 +695,14 @@ class Stats_Report {
 			?>
 			</li>
 			<?php if ( isset( $stats['email_queue_emails_created'] ) ) : ?>
-			<li>
-			<?php
-				printf(
-					'Emails Created: %d',
-					esc_html( $stats['email_queue_emails_created'] )
-				);
-			?>
-			</li>
+				<li>
+				<?php
+					printf(
+						'Emails Created: %d',
+						esc_html( $stats['email_queue_emails_created'] )
+					);
+				?>
+				</li>
 			<?php endif; ?>
 		</ul>
 		<?php endif; ?>
