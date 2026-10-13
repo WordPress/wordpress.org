@@ -180,8 +180,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$missing = array();
 
 			foreach ( $args as $arg ) {
-				// Not empty(): a forum ID of 0 is valid.
-				if ( ! isset( $data[ $arg ] ) || '' === $data[ $arg ] ) {
+				if ( empty( $data[ $arg ] ) ) {
 					$missing[] = $arg;
 				}
 			}
