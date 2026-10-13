@@ -8,31 +8,135 @@
  */
 if ( ! class_exists( 'GP_Locale' ) ) :
 
+/**
+ * Represents a single locale and its properties.
+ */
 class GP_Locale {
+	/**
+	 * Name of the locale in English.
+	 *
+	 * @var string
+	 */
 	public $english_name;
-	public $native_name;
-	public $text_direction = 'ltr';
-	public $lang_code_iso_639_1 = null;
-	public $lang_code_iso_639_2 = null;
-	public $lang_code_iso_639_3 = null;
-	public $country_code;
-	public $wp_locale; // This should only be set for locales that are officially supported on translate.wordpress.org.
-	public $slug;
-	public $root_slug; // This is for locale variants parent locale, see 'wp-i18n-teams' plugin.
-	public $nplurals = 2;
-	public $plural_expression = 'n != 1';
-	public $google_code = null;
-	public $preferred_sans_serif_font_family = null;
-	public $facebook_locale = null;
-	public $alphabet = 'latin';
-	public $word_count_type = 'words';
 
 	/**
+	 * Name of the locale in its own language.
 	 *
-	 * @since 3.0.0
-	 *
-	 * @var array
+	 * @var string
 	 */
+	public $native_name;
+
+	/**
+	 * Text direction of the locale, either 'ltr' or 'rtl'.
+	 *
+	 * @var string
+	 */
+	public $text_direction = 'ltr';
+
+	/**
+	 * ISO 639-1 language code (two letters).
+	 *
+	 * @var string|null
+	 */
+	public $lang_code_iso_639_1 = null;
+
+	/**
+	 * ISO 639-2 language code (three letters).
+	 *
+	 * @var string|null
+	 */
+	public $lang_code_iso_639_2 = null;
+
+	/**
+	 * ISO 639-3 language code (three letters).
+	 *
+	 * @var string|null
+	 */
+	public $lang_code_iso_639_3 = null;
+
+	/**
+	 * ISO 3166-1 country code (two letters).
+	 *
+	 * @var string|null
+	 */
+	public $country_code = null;
+
+	/**
+	 * WordPress locale code.
+	 *
+	 * This should only be set for locales that are officially supported on translate.wordpress.org.
+	 *
+	 * @var string|null
+	 */
+	public $wp_locale = null;
+
+	/**
+	 * Slug of the locale, used in URLs.
+	 *
+	 * @var string
+	 */
+	public $slug;
+
+	/**
+	 * This is for locale variants parent locale, see 'wp-i18n-teams' plugin.
+	 *
+	 * @var string|null
+	 */
+	public $root_slug;
+
+	/**
+	 * Number of plural forms of the locale.
+	 *
+	 * @var int
+	 */
+	public $nplurals = 2;
+
+	/**
+	 * Gettext plural expression of the locale.
+	 *
+	 * @var string
+	 */
+	public $plural_expression = 'n != 1';
+
+	/**
+	 * Language code used by Google Translate.
+	 *
+	 * @var string|null
+	 */
+	public $google_code = null;
+
+	/**
+	 * Preferred sans serif font family for the locale.
+	 *
+	 * @var string|null
+	 */
+	public $preferred_sans_serif_font_family = null;
+
+	/**
+	 * Locale code used by Facebook.
+	 *
+	 * @var string|null
+	 */
+	public $facebook_locale = null;
+
+	/**
+	 * Alphabet (script) of the locale.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @var string
+	 */
+	public $alphabet = 'latin';
+
+	/**
+	 * Type used for counting words, either 'words', 'characters_excluding_spaces'
+	 * or 'characters_including_spaces'.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @var string
+	 */
+	public $word_count_type = 'words';
 
 	// TODO: days, months, decimals, quotes
 
