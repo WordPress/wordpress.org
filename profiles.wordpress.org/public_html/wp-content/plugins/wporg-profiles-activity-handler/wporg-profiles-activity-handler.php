@@ -180,7 +180,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$missing = array();
 
 			foreach ( $args as $arg ) {
-				if ( empty( $data[ $arg ] ) ) {
+				// Not empty(), so that values like a forum ID of 0 count as present.
+				if ( ! isset( $data[ $arg ] ) || '' === $data[ $arg ] ) {
 					$missing[] = $arg;
 				}
 			}
@@ -302,7 +303,12 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			if ( is_wp_error( $activity_id ) ) {
-				return new WP_Error( 'activity_failed', 'Unable to save activity: ' . $activity_id->get_error_message(), [ 'status' => 500 ] );
+				// Keep the handler's status, so a malformed request isn't reported as a server error.
+				return new WP_Error(
+					'activity_failed',
+					'Unable to save activity: ' . $activity_id->get_error_message(),
+					[ 'status' => $activity_id->get_error_data()['status'] ?? 500 ]
+				);
 			} elseif ( is_string( $activity_id ) && str_starts_with( $activity_id, '-1' ) ) {
 				return new WP_Error( 'activity_failed', $activity_id, [ 'status' => 500 ] );
 			} elseif ( false === $activity_id || intval( $activity_id ) <= 0 ) {
@@ -410,7 +416,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			// Check for valid user.
 			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] );
+				return new WP_Error( 'unknown_user', 'Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] ), array( 'status' => 400 ) );
 			}
 
 			// Check for valid forum activities.
@@ -423,14 +429,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			if ( ! empty( $data['activity'] ) && ! empty( $activities[ $data['activity'] ] ) ) {
 				$type = $activities[ $data['activity'] ];
 			} else {
-				return '-1 Unrecognized forum activity.';
+				return new WP_Error( 'unknown_activity', 'Unrecognized forum activity.', array( 'status' => 400 ) );
 			}
 
-			// Check for required args.
+			// Check for the args that identify the activity.
 			$required_args = array( 'forum_id' );
-			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
-				$required_args = array_merge( $required_args, array( 'title', 'site', 'message', 'url' ) );
-			}
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ) {
 				$required_args[] = 'topic_id';
 			} else {
@@ -470,6 +473,15 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					return true;
 				}
 
+				/*
+				 * `message` may be empty, for example when a reply only quotes another post,
+				 * so it isn't required.
+				 */
+				$has_required_args = $this->require_args( array( 'title', 'site', 'url' ), $data );
+				if ( is_wp_error( $has_required_args ) ) {
+					return $has_required_args;
+				}
+
 				// Action message for topic creation.
 				if ( 'forum_topic_create' === $type ) {
 					$action = sprintf(
@@ -492,7 +504,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$args = array(
 					'user_id'           => $user->ID,
 					'action'            => $action,
-					'content'           => esc_html( $data['message'] ),
+					'content'           => esc_html( $data['message'] ?? '' ),
 					'primary_link'      => esc_url( $data['url'] ),
 					'component'         => 'forums',
 					'type'              => $type,
@@ -508,7 +520,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				if ( ! $activity_obj ) {
 					// Verbose error on development environments.
 					if ( 'production' != wp_get_environment_type() ) {
-						return '-1 Activity not previously reported.';
+						return new WP_Error( 'unknown_activity_item', 'Activity not previously reported.', array( 'status' => 404 ) );
 					}
 
 					// Don't need to worry about this on production.
