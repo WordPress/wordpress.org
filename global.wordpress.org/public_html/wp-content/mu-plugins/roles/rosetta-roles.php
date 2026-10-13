@@ -676,12 +676,37 @@ Welcome to the WordPress Polyglots team and happy translating.',
 					'items_wrap'     => '%3$s',
 					// Custom walker that returns plain text links.
 					'walker'         => new class() extends Walker_Nav_Menu {
+						/**
+						 * Starts the list before the elements are added.
+						 *
+						 * @param string   $output Used to append additional content (passed by reference).
+						 * @param int      $depth  Depth of menu item. Used for padding.
+						 * @param stdClass $args   An object of wp_nav_menu() arguments.
+						 */
 						public function start_lvl( &$output, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
+
+						/**
+						 * Ends the list after the elements are added.
+						 *
+						 * @param string   $output Used to append additional content (passed by reference).
+						 * @param int      $depth  Depth of menu item. Used for padding.
+						 * @param stdClass $args   An object of wp_nav_menu() arguments.
+						 */
 						public function end_lvl( &$output, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
+
+						/**
+						 * Starts the element output.
+						 *
+						 * @param string   $output            Used to append additional content (passed by reference).
+						 * @param WP_Post  $data_object       Menu item data object.
+						 * @param int      $depth             Depth of menu item. Used for padding.
+						 * @param stdClass $args              An object of wp_nav_menu() arguments.
+						 * @param int      $current_object_id Optional. ID of the current menu item. Default 0.
+						 */
 						public function start_el( &$output, $data_object, $depth = 0, $args = null, $current_object_id = 0 ) {
 							$href  = ! empty( $data_object->url ) ? $data_object->url : '';
 							$title = apply_filters( 'the_title', $data_object->title, $data_object->ID );
@@ -694,6 +719,15 @@ Welcome to the WordPress Polyglots team and happy translating.',
 
 							$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $data_object, $depth, $args );
 						}
+
+						/**
+						 * Ends the element output, if needed.
+						 *
+						 * @param string   $output      Used to append additional content (passed by reference).
+						 * @param WP_Post  $data_object Menu item data object. Not used.
+						 * @param int      $depth       Depth of page. Not used.
+						 * @param stdClass $args        An object of wp_nav_menu() arguments.
+						 */
 						public function end_el( &$output, $data_object, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
