@@ -1022,7 +1022,7 @@ class Locale extends GP_Route {
 					}
 					break;
 				}
-			// Fall through.
+				// Fall through.
 			case 'special':
 				$user_fav_projects = $this->get_user_favorites( $project->slug );
 
