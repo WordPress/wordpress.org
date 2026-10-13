@@ -103,18 +103,17 @@ class Cross_Locale_PTE {
 		}
 
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
-			self::$user = get_user_by( 'id', (int) $_REQUEST['user_id'] );
+			$user_id    = absint( wp_unslash( $_REQUEST['user_id'] ) );
+			self::$user = get_user_by( 'id', $user_id );
 			if ( ! self::$user ) {
 				wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 				exit;
 			}
 		}
 
-		if ( ! empty( $_REQUEST['action'] ) ) {
-			switch ( $_REQUEST['action'] ) {
-				case 'update-cross-locale-pte':
-					return self::update_cross_locale_pte();
-			}
+		$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
+		if ( 'update-cross-locale-pte' === $action ) {
+			return self::update_cross_locale_pte();
 		}
 	}
 
