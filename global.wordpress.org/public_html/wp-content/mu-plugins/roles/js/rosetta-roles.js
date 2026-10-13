@@ -628,7 +628,7 @@
 			projects.initFrame( response );
 		} );
 
-		// '#project-all' acts as a global wildcard override outside the Backbone model hierarchy,
+		// '#project-all' grants access to all projects (GTE role) outside the individual PTE project hierarchy,
 		// syncing directly with the shared projects.selection collection.
 		var $projectAll = $( '#project-all' );
 		var $projectAllCheckbox = $projectAll.find( 'input' );
