@@ -151,7 +151,8 @@ class PHPCS_Group_Check extends Abstract_PHP_CodeSniffer_Check {
 	/**
 	 * Hands a finding to the checks that select its sniff.
 	 *
-	 * Findings that no check selects, such as most PHPCS internal messages, go to the first check.
+	 * Findings that no check selects, such as most PHPCS internal messages, are added as they are, since a check's
+	 * message changes could otherwise misreport them, e.g. raise a failed sniff to an error.
 	 *
 	 * @param Check_Result $result   The check result to amend, including the plugin context to check.
 	 * @param bool         $error    Whether it is an error or notice.
@@ -164,10 +165,13 @@ class PHPCS_Group_Check extends Abstract_PHP_CodeSniffer_Check {
 	 * @param int          $severity Severity level. Default is 5.
 	 */
 	protected function add_result_message_for_file( Check_Result $result, $error, $message, $code, $file, $line = 0, $column = 0, string $docs = '', $severity = 5 ): void {
-		$sniff  = strtolower( implode( '.', array_slice( explode( '.', $code ), 0, 3 ) ) );
-		$owners = $this->sniff_owners[ $sniff ] ?? array( array_key_first( $this->checks ) );
+		$sniff = strtolower( implode( '.', array_slice( explode( '.', $code ), 0, 3 ) ) );
+		if ( ! isset( $this->sniff_owners[ $sniff ] ) ) {
+			parent::add_result_message_for_file( $result, $error, $message, $code, $file, $line, $column, $docs, $severity );
+			return;
+		}
 
-		foreach ( $owners as $slug ) {
+		foreach ( $this->sniff_owners[ $sniff ] as $slug ) {
 			$this->checks[ $slug ]->add_result_message_for_file( $result, $error, $message, $code, $file, $line, $column, $docs, $severity );
 		}
 	}
