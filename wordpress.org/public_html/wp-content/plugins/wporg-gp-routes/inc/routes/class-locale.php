@@ -1006,12 +1006,12 @@ class Locale extends GP_Route {
 				break;
 
 			case 'strings-waiting-and-fuzzy':
-				$stats_where    .= ' AND stats.has_pending = 1';
+				$stats_where     = ' AND stats.has_pending = 1';
 				$filter_order_by = "tp.path LIKE 'wp/%%' DESC, (stats.fuzzy + stats.waiting) $sort_order, tp.name ASC";
 				break;
 
 			case 'strings-waiting-and-fuzzy-by-modified-date':
-				$stats_where    .= ' AND stats.has_pending = 1 AND stats.date_modified > "0000-00-00 00:00:00"';
+				$stats_where     = ' AND stats.has_pending = 1 AND stats.date_modified > "0000-00-00 00:00:00"';
 				$filter_order_by = "stats.date_modified $sort_order, tp.name ASC";
 				break;
 
@@ -1099,7 +1099,7 @@ class Locale extends GP_Route {
 	 * @param string|false $project_slug Project slug to filter by, or false for all.
 	 * @return array List of favorited items, eg [ 'wp-themes/twentyten', 'wp-themes/twentyeleven' ]
 	 */
-	private function get_user_favorites( $project_slug = false ) {
+	public function get_user_favorites( $project_slug = false ) {
 		if ( ! is_user_logged_in() ) {
 			return array();
 		}
