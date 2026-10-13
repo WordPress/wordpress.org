@@ -534,7 +534,8 @@
 		const line = text
 			.split( '\n' )
 			.map( ( piece ) => piece.replace( /[\s\u00A0]+/g, ' ' ).trim() )
-			.filter( ( piece ) => /^Review ID:/i.test( piece ) )
+			// FreeScout's minifier misreads a regex literal right after `=>`.
+			.filter( ( piece ) => piece.match( /^Review ID:/i ) )
 			.pop();
 		if ( ! line ) {
 			return '';
