@@ -33,6 +33,13 @@ final class Client {
 	private const NOT_DELIVERED_STATUSES = array( 502, 503 );
 
 	/**
+	 * Status the web server sends for a request bigger than it takes, which it answers without passing it on.
+	 *
+	 * @var int
+	 */
+	private const PAYLOAD_TOO_LARGE = 413;
+
+	/**
 	 * Base URL of the endpoints, with a trailing slash.
 	 *
 	 * @var string
@@ -54,25 +61,38 @@ final class Client {
 	private $timeout;
 
 	/**
+	 * Guzzle handler, for tests to answer requests.
+	 *
+	 * @var callable|null
+	 */
+	private $handler;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param string $base_url Base URL of the endpoints.
-	 * @param string $secret   Shared signing secret.
-	 * @param int    $timeout  Request timeout in seconds.
+	 * @param string        $base_url Base URL of the endpoints.
+	 * @param string        $secret   Shared signing secret.
+	 * @param int           $timeout  Request timeout in seconds.
+	 * @param callable|null $handler  Guzzle handler; the default sends real requests.
 	 */
-	public function __construct( string $base_url, string $secret, int $timeout = 10 ) {
+	public function __construct( string $base_url, string $secret, int $timeout = 10, ?callable $handler = null ) {
 		$this->base_url = rtrim( $base_url, '/' ) . '/';
 		$this->secret   = $secret;
 		$this->timeout  = $timeout;
+		$this->handler  = $handler;
 	}
 
 	/**
-	 * Creates a client from the module configuration.
+	 * Creates a client from the module configuration, or returns the one tests bound.
 	 *
 	 * @param int $timeout Request timeout in seconds.
 	 * @return self
 	 */
 	public static function from_config( int $timeout = 10 ): self {
+		if ( app()->bound( self::class ) ) {
+			return app( self::class );
+		}
+
 		return new self(
 			(string) config( 'wporgwebhooks.api_url' ),
 			(string) config( 'wporgwebhooks.secret' ),
@@ -118,19 +138,19 @@ final class Client {
 	/**
 	 * Posts a signed payload to an endpoint.
 	 *
-	 * Only a 2xx response counts as delivered, whatever its body. Redirects aren't followed, since they'd turn the
-	 * request into a GET.
+	 * Only a 2xx response counts as delivered. Redirects aren't followed, since they'd turn the request into a GET.
 	 *
 	 * @param string $endpoint Endpoint path relative to the base URL.
 	 * @param array  $payload  Request payload.
-	 * @return void
+	 * @return array The response's JSON object; empty if it has none.
 	 *
-	 * @throws NotDeliveredException If api.wordpress.org certainly didn't get the request: it couldn't be reached, or
-	 *                               its web server answered for it.
-	 * @throws RuntimeException      If the client is not configured, or the request failed in a way that may have
-	 *                               reached webhook.php, like timing out after it was sent.
+	 * @throws NotDeliveredException      If api.wordpress.org certainly didn't get the request: it couldn't be reached,
+	 *                                    or its web server answered for it.
+	 * @throws PayloadTooLargeException   If its web server refused the request for its size, without passing it on.
+	 * @throws RuntimeException           If the client is not configured, or the request failed in a way that may have
+	 *                                    reached webhook.php, like timing out after it was sent.
 	 */
-	public function post( string $endpoint, array $payload ): void {
+	public function post( string $endpoint, array $payload ): array {
 		if ( ! $this->is_configured() ) {
 			throw new RuntimeException( 'WPORG_API_SECRET is not configured.' );
 		}
@@ -139,15 +159,16 @@ final class Client {
 
 		try {
 			// Whatever APP_CURL_SSL_VERIFYPEER says.
-			$http     = new \GuzzleHttp\Client(
-				\Helper::setGuzzleDefaultOptions(
-					array(
-						'timeout'         => $this->timeout,
-						'allow_redirects' => false,
-						'verify'          => true,
-					)
-				)
+			$options = array(
+				'timeout'         => $this->timeout,
+				'allow_redirects' => false,
+				'verify'          => true,
 			);
+			if ( $this->handler ) {
+				$options['handler'] = \GuzzleHttp\HandlerStack::create( $this->handler );
+			}
+
+			$http     = new \GuzzleHttp\Client( \Helper::setGuzzleDefaultOptions( $options ) );
 			$response = $http->post(
 				$this->base_url . ltrim( $endpoint, '/' ),
 				array(
@@ -172,8 +193,16 @@ final class Client {
 			throw new NotDeliveredException( 'Request to ' . $endpoint . ' got a ' . $status . ' response.' );
 		}
 
+		if ( self::PAYLOAD_TOO_LARGE === $status ) {
+			throw new PayloadTooLargeException( 'Request to ' . $endpoint . ' was too large: ' . strlen( $body ) . ' bytes.' );
+		}
+
 		if ( $status < 200 || $status > 299 ) {
 			throw new RuntimeException( 'Request to ' . $endpoint . ' got a ' . $status . ' response.' );
 		}
+
+		$data = json_decode( trim( (string) $response->getBody() ), true );
+
+		return is_array( $data ) ? $data : array();
 	}
 }

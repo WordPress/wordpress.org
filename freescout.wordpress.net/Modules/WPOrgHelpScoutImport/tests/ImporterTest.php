@@ -21,6 +21,7 @@ use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
 use Modules\WPOrgHelpScoutImport\Entities\Person;
+use Modules\WPOrgHelpScoutImport\Providers\WPOrgHelpScoutImportServiceProvider;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
@@ -392,6 +393,57 @@ final class ImporterTest extends ImportTestCase {
 
 		$this->assertSame( (int) $themes->id, (int) $this->imported_conversation()->mailbox_id );
 		$this->assertSame( 0, (int) $themes->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->value( 'active_count' ) );
+	}
+
+	/**
+	 * Each conversation imported, or updated, is announced with its HelpScout ID, as that happens without core's events.
+	 *
+	 * @return void
+	 */
+	public function test_imported_conversations_are_announced(): void {
+		$announced = array();
+		\Eventy::addAction(
+			'wporghelpscoutimport.conversation_imported',
+			static function ( $conversation, $helpscout_id ) use ( &$announced ): void {
+				$announced[] = array( (int) $conversation->id, $helpscout_id );
+			},
+			20,
+			2
+		);
+		$source = $this->conversation();
+
+		$this->importer->import( $source, $this->mailbox );
+		$source['status'] = 'spam';
+		$this->importer->import( $source, $this->mailbox );
+
+		$id = (int) $this->imported_conversation()->id;
+		$this->assertSame( array( array( $id, (int) $source['id'] ), array( $id, (int) $source['id'] ) ), $announced );
+	}
+
+	/**
+	 * An imported conversation's events name its HelpScout conversation, for WordPress.org's copy.
+	 *
+	 * @return void
+	 */
+	public function test_names_the_helpscout_conversation_of_imported_ones(): void {
+		$this->app->register( WPOrgHelpScoutImportServiceProvider::class );
+		$source = $this->conversation();
+		$this->importer->import( $source, $this->mailbox );
+
+		$this->assertSame( (int) $source['id'], \Eventy::filter( 'wporgwebhooks.helpscout_id', 0, $this->imported_conversation() ) );
+	}
+
+	/**
+	 * What was imported keeps the mailbox it went into, which pointing WordPress.org at the mailbox reads once the
+	 * conversation is deleted for good.
+	 *
+	 * @return void
+	 */
+	public function test_keeps_the_mailbox_of_imported_ones(): void {
+		$source = $this->conversation();
+		$this->importer->import( $source, $this->mailbox );
+
+		$this->assertSame( (int) $this->mailbox->id, (int) ImportedConversation::query()->where( 'helpscout_id', (int) $source['id'] )->value( 'mailbox_id' ) );
 	}
 
 	/**

@@ -52,6 +52,16 @@ function wp_strip_all_tags( string $text ): string {
 }
 
 /**
+ * Makes a slug, like WordPress's sanitize_title(), for the plain titles the tests use.
+ *
+ * @param string $title Title.
+ * @return string
+ */
+function sanitize_title( string $title ): string {
+	return trim( (string) preg_replace( '/[^a-z0-9]+/', '-', strtolower( $title ) ), '-' );
+}
+
+/**
  * Encodes JSON, like WordPress's wp_json_encode().
  *
  * @param mixed $data Data.

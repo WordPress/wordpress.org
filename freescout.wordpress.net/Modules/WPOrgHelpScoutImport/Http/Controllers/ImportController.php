@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\WPOrgHelpScoutImport\Entities\Run;
 use Modules\WPOrgHelpScoutImport\Jobs\ImportPage;
+use Modules\WPOrgHelpScoutImport\Services\Copies;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\People;
 use Modules\WPOrgHelpScoutImport\Services\SavedReplies;
@@ -82,8 +83,55 @@ final class ImportController extends Controller {
 				'numbering'  => $sources ? self::numbering( $helpscout ) : null,
 				// Imports bring saved replies only while there's somewhere to put them.
 				'replies'    => SavedReplies::available(),
+				'copies'     => self::copies(),
 			)
 		);
+	}
+
+	/**
+	 * Points WordPress.org's copies of a mailbox's HelpScout conversations at the FreeScout conversations imported from
+	 * them, when the mailbox switches to FreeScout; or carries on where that stopped.
+	 *
+	 * @param Request $request Request.
+	 * @return RedirectResponse
+	 */
+	public function point( Request $request ): RedirectResponse {
+		$mailbox = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
+		if ( ! $mailbox ) {
+			return self::back_with_error( __( 'Choose a FreeScout mailbox.' ) );
+		}
+
+		if ( ! Copies::available() ) {
+			return self::back_with_error( __( 'Pointing WordPress.org at FreeScout needs the WP.org Webhooks module, set up with WPORG_API_SECRET.' ) );
+		}
+
+		if ( ! Copies::start( (int) $mailbox->id ) ) {
+			return self::back_with_error( __( 'WordPress.org is already being pointed at :name.', array( 'name' => $mailbox->name ) ) );
+		}
+
+		return redirect()
+			->route( 'wporghelpscoutimport.index' )
+			->with( 'flash_success', __( 'Pointing WordPress.org at :name’s imported conversations.', array( 'name' => $mailbox->name ) ) );
+	}
+
+	/**
+	 * The mailboxes conversations were imported into, and whether WordPress.org points at them.
+	 *
+	 * @return array[] Mailbox, total imported, and the switch, see Copies::get().
+	 */
+	private static function copies(): array {
+		$copies = array();
+		$ids    = Run::query()->distinct()->pluck( 'mailbox_id' )->map( 'intval' )->all();
+
+		foreach ( Mailbox::query()->whereIn( 'id', $ids ? $ids : array( 0 ) )->orderBy( 'name' )->get() as $mailbox ) {
+			$copies[] = array(
+				'mailbox' => $mailbox,
+				'total'   => Copies::total( (int) $mailbox->id ),
+				'state'   => Copies::get( (int) $mailbox->id ),
+			);
+		}
+
+		return $copies;
 	}
 
 	/**

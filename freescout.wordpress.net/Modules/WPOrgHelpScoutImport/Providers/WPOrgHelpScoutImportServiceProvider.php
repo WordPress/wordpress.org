@@ -9,7 +9,10 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgHelpScoutImport\Providers;
 
+use App\Conversation;
 use Illuminate\Support\ServiceProvider;
+use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
+use Modules\WPOrgHelpScoutImport\Services\Copies;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 
 /**
@@ -116,6 +119,72 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 				}
 
 				return $javascripts;
+			}
+		);
+
+		// WordPress.org's copy of an imported conversation replaces the copy of its HelpScout conversation.
+		\Eventy::addFilter(
+			'wporgwebhooks.helpscout_id',
+			static function ( mixed $helpscout_id = 0, mixed $conversation = null, mixed $conversation_id = 0 ): mixed {
+				// Deleted for good, the conversation is gone, but its ID still names what was imported.
+				$id = $conversation instanceof Conversation ? (int) $conversation->id : (int) $conversation_id;
+
+				try {
+					if ( ! $helpscout_id && $id ) {
+						$helpscout_id = (int) ImportedConversation::query()->where( 'conversation_id', $id )->value( 'helpscout_id' );
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgHelpScoutImport] Could not find the HelpScout conversation of ' . $id . ': ' . $e->getMessage() );
+				}
+
+				return $helpscout_id;
+			},
+			10,
+			3
+		);
+
+		// For pointing WordPress.org at what an import brought, once it points at the mailbox.
+		\Eventy::addAction(
+			'wporghelpscoutimport.conversation_imported',
+			static function ( mixed $conversation = null ): void {
+				try {
+					if ( $conversation instanceof Conversation ) {
+						Copies::touch( $conversation );
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgHelpScoutImport] Could not mark conversation ' . $conversation->id . ' as imported again: ' . $e->getMessage() );
+				}
+			}
+		);
+
+		// Imported conversations' events leave WordPress.org's copy alone until it points at their mailbox.
+		\Eventy::addFilter(
+			'wporgwebhooks.copy',
+			static function ( mixed $copy = true, mixed $conversation = null, mixed $conversation_id = 0, mixed $mailbox_id = 0 ): mixed {
+				$id      = $conversation instanceof Conversation ? (int) $conversation->id : (int) $conversation_id;
+				$mailbox = $conversation instanceof Conversation ? (int) $conversation->mailbox_id : (int) $mailbox_id;
+
+				try {
+					return $copy && ( ! $id || Copies::sends( $id, $mailbox ) );
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgHelpScoutImport] Could not tell whether to copy conversation ' . $id . ': ' . $e->getMessage() );
+
+					return $copy;
+				}
+			},
+			10,
+			4
+		);
+
+		// Deleted for good, an imported conversation's mailbox is gone with it; pointing WordPress.org at it needs it.
+		\Eventy::addAction(
+			'conversations.before_delete_forever',
+			static function ( mixed $conversation_ids = array() ): void {
+				try {
+					Copies::remember_mailboxes( (array) $conversation_ids );
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgHelpScoutImport] Could not note the mailboxes of conversations deleted for good: ' . $e->getMessage() );
+				}
 			}
 		);
 

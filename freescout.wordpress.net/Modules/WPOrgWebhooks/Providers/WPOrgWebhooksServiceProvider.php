@@ -91,7 +91,7 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 					self::forward(
 						$event,
 						static function () use ( $conversation, $thread ): ?array {
-							return self::imported( $thread ) || $conversation->isSpam() ? null : array( $conversation, null );
+							return self::imported( $thread ) || $conversation->isSpam() ? null : array( $conversation, null, self::thread( $thread ) );
 						}
 					);
 				},
@@ -106,7 +106,7 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 				self::forward(
 					'conversation.created_by_user',
 					static function () use ( $conversation, $thread ): ?array {
-						return ! self::imported( $thread ) && self::sent( $thread ) ? array( $conversation, $thread->created_by_user ) : null;
+						return ! self::imported( $thread ) && self::sent( $thread ) ? array( $conversation, $thread->created_by_user, self::thread( $thread ) ) : null;
 					}
 				);
 			},
@@ -120,7 +120,7 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 				self::forward(
 					'conversation.user_replied',
 					static function () use ( $conversation, $thread ): ?array {
-						return ! self::imported( $thread ) && self::sent( $thread ) ? array( $conversation, $thread->created_by_user ) : null;
+						return ! self::imported( $thread ) && self::sent( $thread ) ? array( $conversation, $thread->created_by_user, self::thread( $thread ) ) : null;
 					}
 				);
 			},
@@ -128,7 +128,39 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 			2
 		);
 
-		foreach ( array( 'conversation.user_changed', 'conversation.status_changed', 'conversation.moved' ) as $event ) {
+		// Out of spam, the conversation is new to WordPress.org's copy again, which took it out.
+		\Eventy::addAction(
+			'conversation.status_changed',
+			static function ( $conversation = null, $user = null, $changed_on_reply = false, $prev_status = null ): void {
+				self::forward(
+					'conversation.status_changed',
+					static function () use ( $conversation, $user, $prev_status ): array {
+						$unspammed = Conversation::STATUS_SPAM === (int) $prev_status && $conversation instanceof Conversation && ! $conversation->isSpam();
+
+						return array( $conversation, $user, $unspammed ? array( 'unspammed' => true ) : array() );
+					}
+				);
+			},
+			20,
+			4
+		);
+
+		// For the plugins and themes it mentions; WordPress.org doesn't credit it.
+		\Eventy::addAction(
+			'conversation.note_added',
+			static function ( $conversation = null, $thread = null ): void {
+				self::forward(
+					'conversation.note_added',
+					static function () use ( $conversation, $thread ): ?array {
+						return self::imported( $thread ) ? null : array( $conversation, $thread->created_by_user ?? null, self::thread( $thread ) );
+					}
+				);
+			},
+			20,
+			2
+		);
+
+		foreach ( array( 'conversation.user_changed', 'conversation.moved' ) as $event ) {
 			\Eventy::addAction(
 				$event,
 				static function ( $conversation = null, $user = null ) use ( $event ): void {
@@ -149,8 +181,26 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 			static function ( $conversation = null, $second = null, $user = null ): void {
 				self::forward(
 					'conversation.merged',
-					static function () use ( $conversation, $user ): array {
-						return array( $conversation, $user );
+					static function () use ( $conversation, $second, $user ): array {
+						// The other conversation's threads are in this one now; WordPress.org drops its copy of it.
+						return array( $conversation, $user, array( 'merged_id' => $second instanceof Conversation ? (int) $second->id : 0 ) );
+					}
+				);
+			},
+			20,
+			3
+		);
+
+		// Restoring from Deleted: WordPress.org's copy took the conversation out when it was deleted.
+		\Eventy::addAction(
+			'conversation.state_changed',
+			static function ( $conversation = null, $user = null, $previous_state = null ): void {
+				self::forward(
+					'conversation.restored',
+					static function () use ( $conversation, $user, $previous_state ): ?array {
+						$restored = Conversation::STATE_DELETED === (int) $previous_state && Conversation::STATE_PUBLISHED === (int) $conversation->state;
+
+						return $restored ? array( $conversation, $user ) : null;
 					}
 				);
 			},
@@ -198,6 +248,16 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 	}
 
 	/**
+	 * The reply an event is about, so WordPress.org reads the threads up to it, however late the event is sent.
+	 *
+	 * @param Thread|null $thread Reply.
+	 * @return array Empty without one.
+	 */
+	private static function thread( ?Thread $thread ): array {
+		return $thread ? array( 'thread_id' => (int) $thread->id ) : array();
+	}
+
+	/**
 	 * Whether a reply was sent and hasn't been counted yet.
 	 *
 	 * Core fires the reply hooks after the undo window whether or not the reply was undone; undoing turns it back
@@ -235,7 +295,8 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 	 * Never throws: a failure here must not interrupt the core action that fired the event.
 	 *
 	 * @param string   $event   Event name.
-	 * @param callable $resolve Returns the conversation and the agent who caused the event (or null), or null to skip it.
+	 * @param callable $resolve Returns the conversation, the agent who caused the event (or null), and optionally more about
+	 *                          the event for the payload; or null to skip it.
 	 * @return void
 	 */
 	private static function forward( string $event, callable $resolve ): void {
@@ -250,13 +311,14 @@ final class WPOrgWebhooksServiceProvider extends ServiceProvider {
 			}
 
 			list( $conversation, $agent ) = $args;
+			$extra                        = (array) ( $args[2] ?? array() );
 
 			// Automations have no WordPress.org account to credit.
 			if ( ! $agent instanceof User || self::is_robot( $agent ) ) {
 				$agent = null;
 			}
 
-			SendEvent::dispatch( EventPayload::build( $event, $conversation, $agent ) );
+			SendEvent::dispatch( EventPayload::build( $event, $conversation, $agent, $extra ) );
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgWebhooks] Could not queue ' . $event . ': ' . $e->getMessage() );
 		}
