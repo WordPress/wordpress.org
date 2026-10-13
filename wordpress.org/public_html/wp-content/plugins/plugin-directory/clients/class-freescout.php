@@ -24,10 +24,14 @@ class FreeScout {
 	const TIMEOUT = 30;
 
 	/**
-	 * The API key.
+	 * The FreeScout agent the plugin directory writes as: wordpressdotorg's, which contributor stats don't credit.
 	 *
-	 * Either the module's global key, or the personal key (API & Webhooks » My API Keys) of the agent in
-	 * `FREESCOUT_USER_ID`, who needs access to the Plugins mailbox.
+	 * @var int
+	 */
+	const USER_ID = 81;
+
+	/**
+	 * The API & Webhooks module's global key.
 	 *
 	 * @return string Empty if none is configured.
 	 */
@@ -89,23 +93,5 @@ class FreeScout {
 		$data          = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		return is_array( $data ) ? $data : null;
-	}
-
-	/**
-	 * The ID of the FreeScout agent the plugin directory writes as.
-	 *
-	 * Its WordPress.org account should be the automation account, which contributor stats don't credit.
-	 *
-	 * @return int 0 if none is configured.
-	 */
-	public static function user_id(): int {
-		$user_id = defined( 'FREESCOUT_USER_ID' ) ? (int) FREESCOUT_USER_ID : 0;
-
-		/**
-		 * Filters the ID of the FreeScout agent the plugin directory writes as.
-		 *
-		 * @param int $user_id Agent ID.
-		 */
-		return max( 0, (int) apply_filters( 'wporg_plugins_freescout_user_id', $user_id ) );
 	}
 }
