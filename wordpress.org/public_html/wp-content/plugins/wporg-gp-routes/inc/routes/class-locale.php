@@ -767,7 +767,7 @@ class Locale extends GP_Route {
 	/**
 	 * Retrieves active sub projects.
 	 *
-	 * @param  GP_Project $project           The parent project
+	 * @param  GP_Project $project           The parent project.
 	 * @param  bool       $with_sub_projects Whether sub projects should be fetched too.
 	 *                                       Default false.
 	 * @return array List of sub projects.
@@ -841,7 +841,7 @@ class Locale extends GP_Route {
 	/**
 	 * Retrieves active sub projects with paging.
 	 *
-	 * @param GP_Project $project           The parent project
+	 * @param GP_Project $project           The parent project.
 	 * @param array      $args {
 	 *     @type int         $per_page        Number of items per page. Default 20.
 	 *     @type int         $page            The page of results to view. Default 1.
