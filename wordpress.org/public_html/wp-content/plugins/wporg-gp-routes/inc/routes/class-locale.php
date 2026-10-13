@@ -8,6 +8,7 @@ use GP_Route;
 use stdClass;
 use WordPressdotorg\GlotPress\Rosetta_Roles\Plugin as Rosetta_Roles;
 use WordPressdotorg\GlotPress\Routes\Plugin;
+use WP_User;
 
 /**
  * Locale Route Class.
@@ -397,7 +398,6 @@ class Locale extends GP_Route {
 			'inherited' => [],
 		];
 
-		// Get the translation editors of parent projects.
 		$project_id        = (int) $project->id;
 		$project_ids       = [ $project_id ];
 		$parent_project_id = (int) $project->parent_project_id;
@@ -531,7 +531,7 @@ class Locale extends GP_Route {
 		// Get the names of the translation editors.
 		foreach ( [ 'project', 'inherited' ] as $editor_source ) {
 			foreach ( $editors[ $editor_source ] as $editor_id ) {
-				$user = get_user_by( 'id', $editor_id );
+				$user = WP_User::get_data_by( 'id', $editor_id );
 				if ( ! $user ) {
 					continue;
 				}
@@ -574,7 +574,7 @@ class Locale extends GP_Route {
 			];
 
 			if ( ! isset( $locale_contributors['contributors'][ $user_id ] ) ) {
-				$user = get_user_by( 'id', $user_id );
+				$user = WP_User::get_data_by( 'id', $user_id );
 				if ( ! $user ) {
 					continue;
 				}
