@@ -302,7 +302,12 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			if ( is_wp_error( $activity_id ) ) {
-				return new WP_Error( 'activity_failed', 'Unable to save activity: ' . $activity_id->get_error_message(), [ 'status' => 500 ] );
+				// Keep the handler's status, so client errors aren't reported as 500s.
+				return new WP_Error(
+					'activity_failed',
+					'Unable to save activity: ' . $activity_id->get_error_message(),
+					[ 'status' => $activity_id->get_error_data()['status'] ?? 500 ]
+				);
 			} elseif ( is_string( $activity_id ) && str_starts_with( $activity_id, '-1' ) ) {
 				return new WP_Error( 'activity_failed', $activity_id, [ 'status' => 500 ] );
 			} elseif ( false === $activity_id || intval( $activity_id ) <= 0 ) {
@@ -410,7 +415,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			// Check for valid user.
 			if ( ! $user ) {
-				return '-1 Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] );
+				return new WP_Error( 'unknown_user', 'Activity reported for unrecognized user : ' . sanitize_text_field( $data['user'] ), array( 'status' => 400 ) );
 			}
 
 			// Check for valid forum activities.
@@ -423,19 +428,20 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			if ( ! empty( $data['activity'] ) && ! empty( $activities[ $data['activity'] ] ) ) {
 				$type = $activities[ $data['activity'] ];
 			} else {
-				return '-1 Unrecognized forum activity.';
+				return new WP_Error( 'unknown_activity', 'Unrecognized forum activity.', array( 'status' => 400 ) );
 			}
 
 			// Check for required args.
 			$required_args = array( 'forum_id' );
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
-				$required_args = array_merge( $required_args, array( 'title', 'site', 'message', 'url' ) );
+				$required_args = array_merge( $required_args, array( 'title', 'site', 'url' ) );
 			}
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ) {
 				$required_args[] = 'topic_id';
 			} else {
 				$required_args[] = 'post_id';
 			}
+
 			$has_required_args = $this->require_args( $required_args, $data );
 			if ( is_wp_error( $has_required_args ) ) {
 				return $has_required_args;
@@ -467,6 +473,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					bp_activity_mark_as_ham( $activity_obj, 'by_source' );
 					$activity_obj->save();
 
+					return true;
+				}
+
+				// Topics and replies without an excerpt, such as quote-only ones, are not recorded.
+				if ( empty( $data['message'] ) ) {
 					return true;
 				}
 
@@ -508,7 +519,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				if ( ! $activity_obj ) {
 					// Verbose error on development environments.
 					if ( 'production' != wp_get_environment_type() ) {
-						return '-1 Activity not previously reported.';
+						return new WP_Error( 'unknown_activity_item', 'Activity not previously reported.', array( 'status' => 404 ) );
 					}
 
 					// Don't need to worry about this on production.
