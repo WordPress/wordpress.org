@@ -215,7 +215,7 @@
 			// Escape the term string for RegExp meta characters
 			escapedTerm = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
 
-			// Lookahead pattern for order-independent and matching across space-separated terms.
+			// Positive lookahead pattern allowing terms to appear in any order.
 			escapedTerm = escapedTerm.replace( / /g, ')(?=.*' );
 			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
 
@@ -224,7 +224,8 @@
 				if ( match.test( haystack.join( ' ' ) ) ) {
 					var maxScore = 0;
 					_.each( haystack, function( word ) {
-						// .score() is provided by string_score.min.js via String.prototype monkey-patching.
+						// Subsequent fuzzy scoring via string_score.
+						// Evaluates characters sequentially, favoring left-to-right term ordering.
 						maxScore = Math.max( maxScore, String( word ).score( term, 0.5 ) );
 					});
 					project.set( 'matchScore', maxScore, { silent: true } );
@@ -387,7 +388,7 @@
 		tagName: 'ul',
 		className: 'sub-projects-list',
 
-		// Number of projects which should be rendered.
+		// Number of projects which should be rendered to reduce bloat. Unrendered items remain searchable.
 		limit: 100,
 
 		initialize: function( options ) {
@@ -533,7 +534,7 @@
 		var cachedTime = Number( lastUpdated );
 		var serverTime = Number( projects.settings.lastUpdated );
 
-		if ( isNaN( serverTime ) || isNaN( cachedTime ) || cachedTime < serverTime ) {
+		if ( ! Number.isFinite( serverTime ) || ! Number.isFinite( cachedTime ) || cachedTime < serverTime ) {
 			return Promise.reject();
 		}
 
@@ -673,7 +674,7 @@
 			}
 		});
 
-		// Confirm removal of CLPTE status.
+		// Confirm removal of translator permissions.
 		var hadTranslatorStatus = projects.settings.accessList && projects.settings.accessList.length > 0;
 
 		$( '#project-access-list' ).closest( 'form' ).on( 'submit', function( e ) {
