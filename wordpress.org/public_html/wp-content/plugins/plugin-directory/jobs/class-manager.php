@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
+use WordPressdotorg\Plugin_Directory\Plugin_Check\Batched_Check;
 use WordPressdotorg\Plugin_Directory\Tools;
 use const \WP_CLI;
 
@@ -43,8 +44,11 @@ class Manager {
 		add_action( 'plugin_directory_zip_cleanup', array( __NAMESPACE__ . '\Zip_Cleanup', 'cron_trigger' ) );
 		add_action( 'plugin_directory_daily_post_checks', array( __NAMESPACE__ . '\Daily_Post_Checks', 'cron_trigger' ) );
 
-		// Hook into the plugin import process to queue a job.
+		// Hook into the plugin import process to queue a scan job, and share PHPCS runs between the scan's Plugin Check checks.
 		add_action( 'wporg_plugins_imported', array( __NAMESPACE__ . '\Plugin_Scan', 'wporg_plugins_imported' ), 10, 6 );
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			add_filter( 'wp_plugin_check_checks', array( Batched_Check::class, 'wrap_checks' ), 1000 );
+		}
 
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
