@@ -413,18 +413,21 @@
 			var self = this;
 
 			self.clearSubViews();
-			self.$el.empty();
 
+			var fragment = document.createDocumentFragment();
 			var subProjects = self.collection.first( self.limit );
+
 			_.each( subProjects, function( model ) {
 				var subProjectView = new projects.view.SubProject({
 					model: model
 				});
 
 				subProjectView.render();
-				self.$el.append( subProjectView.el );
+				fragment.appendChild( subProjectView.el );
 				self._subViews.push( subProjectView );
 			});
+
+			self.$el.empty().append( fragment );
 
 			return this;
 		}
