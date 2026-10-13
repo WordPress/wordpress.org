@@ -39,7 +39,7 @@ class Release_Confirmation {
 			}
 
 			// Redirect via JS too, as technically the page output should've already started.
-			echo '<script>document.location=' . json_encode( home_url( '/developers/' ) ) . '</script>';
+			wp_print_inline_script_tag( 'document.location=' . wp_json_encode( home_url( '/developers/' ) ) . ';' );
 			exit;
 		}
 

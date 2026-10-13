@@ -55,14 +55,19 @@ class WPorg_GP_Help_Page {
 				<a id="hide-help-notice" class="secondary" style="float: right;" href="<?php echo esc_url( $hide_url ); ?>">Hide</a>
 			</p>
 		</div>
-		<script type="text/javascript">
+		<?php
+		wp_print_inline_script_tag(
+			sprintf(
+				<<<'JS'
 			jQuery('#hide-help-notice').click(function() {
-				jQuery.ajax({url: '<?php echo esc_js( $hide_url ); ?>'});
+				jQuery.ajax({url: %s});
 				jQuery('#help-notice').fadeOut(1000);
 				return false;
 			});
-		</script>
-<?php
+			JS,
+				wp_json_encode( $hide_url )
+			)
+		);
 	}
 
 }
