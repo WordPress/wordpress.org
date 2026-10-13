@@ -78,15 +78,11 @@ if ( 'live' == OPERATION_MODE ) {
 // Set a user to run as.
 wp_set_current_user( get_user_by( 'slug', 'wordpressdotorg' )->ID );
 
-// FreeScout agent the emails come from; FREESCOUT_USER_ID by default.
-define( __NAMESPACE__ . '\ATTRIBUTE_TO_USER', (int) ( $opts['from'] ?? FreeScout::user_id() ) );
+// FreeScout agent the emails come from; wordpressdotorg's by default.
+define( __NAMESPACE__ . '\ATTRIBUTE_TO_USER', (int) ( $opts['from'] ?? FreeScout::USER_ID ) );
 // FreeScout user or team to assign the conversations to; unassigned by default.
 define( __NAMESPACE__ . '\ASSIGN_TO_USER', (int) ( $opts['assign'] ?? 0 ) );
 const WARN_THRESHOLD = 10000;  // active installs to go from instant close => warn w/ 30days.
-
-if ( ! ATTRIBUTE_TO_USER ) {
-	die( "Need a --from param, or FREESCOUT_USER_ID.\n" );
-}
 
 /**
  * Fetch the email template, a saved reply of FreeScout's Plugins mailbox.

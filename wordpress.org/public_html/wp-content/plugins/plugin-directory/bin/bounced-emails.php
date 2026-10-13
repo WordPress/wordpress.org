@@ -24,7 +24,7 @@ use function WordPressdotorg\API\FreeScout\{ get_user_email_for_email };
  *  - In both cases, an Audit log entry is added referencing this script.
  *  - In the case of revoke, the audit log entry contains the bounce message.
  *  - In the case of a plugin closure, the Author notice is set to the next steps for the user AND a copy of the bounce is included.
- *  - If an action is taken, the conversation is closed, by the agent in FREESCOUT_USER_ID.
+ *  - If an action is taken, the conversation is closed, as wordpressdotorg.
  */
 
 // This script should only be called in a CLI environment.
@@ -70,8 +70,8 @@ if ( 'live' == OPERATION_MODE ) {
 }
 
 
-if ( ! Helpdesk::is_freescout() || ! FreeScout::api_key() || ! FreeScout::user_id() ) {
-	fwrite( STDERR, "Error! Define FREESCOUT_PLUGINS_MAILBOX_ID, FREESCOUT_API_KEY, and FREESCOUT_USER_ID first.\n" );
+if ( ! Helpdesk::is_freescout() || ! FreeScout::api_key() ) {
+	fwrite( STDERR, "Error! Define FREESCOUT_PLUGINS_MAILBOX_ID and FREESCOUT_API_KEY first.\n" );
 	die();
 }
 
@@ -173,7 +173,7 @@ function close_conversation( $conversation_id ) {
 		'conversations/' . $conversation_id,
 		[
 			'status' => 'closed',
-			'byUser' => FreeScout::user_id(),
+			'byUser' => FreeScout::USER_ID,
 		],
 		'PUT',
 		$response_code
