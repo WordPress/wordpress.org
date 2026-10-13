@@ -72,15 +72,6 @@ class Helpdesk {
 	}
 
 	/**
-	 * The helpdesk's short name, for links that need little room.
-	 *
-	 * @return string
-	 */
-	public static function short_name(): string {
-		return self::is_freescout() ? 'FS' : 'HS';
-	}
-
-	/**
 	 * A search of the Plugins mailbox.
 	 *
 	 * @param string $term What to search for.
