@@ -5,13 +5,14 @@
 | Module | What it does |
 |---|---|
 | [WPOrgAkismet](Modules/WPOrgAkismet) | Checks new conversations from senders with Akismet, and teaches it from what agents mark as spam. |
+| [WPOrgApi](Modules/WPOrgApi) | Answers WordPress.org's signed requests for what only FreeScout has, like a mailbox's saved replies, which the plugin directory's scripts write their emails from. |
 | [WPOrgHelpScoutImport](Modules/WPOrgHelpScoutImport) | Imports HelpScout mailboxes' conversations, so their history moves to FreeScout. Administrators run it under Manage » HelpScout Import. |
 | [WPOrgSidebar](Modules/WPOrgSidebar) | Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests next to each conversation. |
 | [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: WordPress.org branding, and the Modules page only lists installed modules, which can't be updated or deleted there. |
 | [WPOrgSSO](Modules/WPOrgSSO) | Agents log in with their WordPress.org account, through login.wordpress.org; there's no other way in. Every user is connected to a WordPress.org account, and new users are created from one. Name, email, and avatar are updated from it at every login. |
 | [WPOrgWebhooks](Modules/WPOrgWebhooks) | Sends conversation events to WordPress.org, which records them as contributor stats. |
 
-WPOrgSidebar, WPOrgWebhooks, and WPOrgSSO talk to [`api.wordpress.org/dotorg/freescout/`](../api.wordpress.org/public_html/dotorg/freescout), which does the WordPress.org lookups.
+WPOrgSidebar, WPOrgWebhooks, and WPOrgSSO talk to [`api.wordpress.org/dotorg/freescout/`](../api.wordpress.org/public_html/dotorg/freescout), which does the WordPress.org lookups. WPOrgApi is the other way around: WordPress.org talks to it.
 
 ## Development
 
@@ -40,7 +41,7 @@ Configuration, in FreeScout's `.env`. Required:
 
 | Variable | Value |
 |---|---|
-| `WPORG_API_SECRET` | Shared secret; must match `FREESCOUT_SECRET` on api.wordpress.org. |
+| `WPORG_API_SECRET` | Shared secret; must match `FREESCOUT_SECRET` on api.wordpress.org, and on WordPress.org, which signs its requests to `WPOrgApi` with it. |
 | `WPORG_SSO_IDP_CERT` | The identity provider's signing certificate, on one line, with or without the BEGIN/END lines; line breaks written as `\n` work too. Until it and `WPORG_API_SECRET` are set, logins stay as they are, so users can be connected first. Once they are, new logins go through WordPress.org, and sessions from before go on for a day; Manage » System » Tools » Logout Users ends them sooner. After that day, switching enforcement off and on again ends every session from while it was off, including a password login of whoever switches it back on: have break-glass or a connected account ready. |
 | `WPORG_AKISMET_KEY` | FreeScout's own Akismet API key. Without it, `WPOrgAkismet` checks nothing, and spam comes in like any other email. |
 | `APP_CUSTOM_NUMBER` | `true`. FreeScout's own setting (Manage » Settings » General » Conversation Number » Custom), which saves it here. Conversations imported from HelpScout keep HelpScout's numbers, which people quote; without it, FreeScout shows and searches its internal IDs instead. Before the first live email, also set the **Next Conversation #** there well above HelpScout's numbers, like 2,000,000. |
