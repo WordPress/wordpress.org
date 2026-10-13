@@ -547,8 +547,12 @@
 		var cachedTime = Number( lastUpdated );
 		var serverTime = Number( projects.settings.lastUpdated );
 
-		// Ensure timestamps are finite numbers; avoids accepting stale caches if 'Infinity' is stored.
-		if ( ! Number.isFinite( serverTime ) || ! Number.isFinite( cachedTime ) || cachedTime < serverTime ) {
+		// Ensure timestamps are valid, positive, and finite numbers; rejects missing (0) or invalid cache timestamps.
+		if (
+			! Number.isFinite( serverTime ) || serverTime <= 0 ||
+			! Number.isFinite( cachedTime ) || cachedTime <= 0 ||
+			cachedTime < serverTime
+		) {
 			return Promise.reject();
 		}
 
