@@ -20,6 +20,7 @@
 	<?php $list_table->views(); ?>
 
 	<form method="post">
+		<?php wp_nonce_field( 'bulk-translation-editors' ); ?>
 		<?php $list_table->display(); ?>
 	</form>
 
