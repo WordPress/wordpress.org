@@ -242,7 +242,7 @@ class Rosetta_Roles {
 					}
 
 					$user_details = null;
-					$user = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
+					$user = isset( $_REQUEST['user'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['user'] ) ) : '';
 					if ( false !== strpos( $user, '@' ) ) {
 						$user_details = get_user_by( 'email', $user );
 					} elseif ( is_numeric( $user ) ) {
