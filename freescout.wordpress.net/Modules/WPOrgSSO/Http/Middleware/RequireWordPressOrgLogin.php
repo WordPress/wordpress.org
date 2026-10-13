@@ -174,7 +174,7 @@ final class RequireWordPressOrgLogin {
 			return response()->json(
 				array(
 					'status' => 'error',
-					'msg'    => __( 'Users can’t be deleted. Disable them instead, and remove their mailbox permissions.' ),
+					'msg'    => __( 'Users can’t be deleted. Please disable them instead and remove their mailbox permissions.' ),
 				)
 			);
 		}
