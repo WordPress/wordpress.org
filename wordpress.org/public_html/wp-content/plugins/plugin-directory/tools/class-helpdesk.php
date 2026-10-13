@@ -12,8 +12,7 @@ namespace WordPressdotorg\Plugin_Directory\Tools;
 use WP_User;
 
 /**
- * Links to FreeScout once its Plugins mailbox is configured, with `FREESCOUT_PLUGINS_MAILBOX_ID`, and to Help Scout until
- * then, so the switch is a configuration change.
+ * Links to FreeScout once `FREESCOUT_PLUGINS_MAILBOX_ID` is defined, and to Help Scout until then.
  */
 class Helpdesk {
 
@@ -133,10 +132,7 @@ class Helpdesk {
 	}
 
 	/**
-	 * A conversation of WordPress.org's copy of helpdesk emails, in its helpdesk.
-	 *
-	 * The copy holds both helpdesks' conversations while the plugins team moves: FreeScout's webhook marks its own, and
-	 * its import replaces the copies of HelpScout's.
+	 * A conversation from WordPress.org's copy, in the helpdesk it's in.
 	 *
 	 * @param int  $id        Conversation ID.
 	 * @param int  $number    Conversation number, which HelpScout's links carry.

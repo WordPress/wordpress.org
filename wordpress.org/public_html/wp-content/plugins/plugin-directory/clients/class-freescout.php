@@ -13,8 +13,6 @@ use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
 /**
  * Talks to FreeScout's API, from its API & Webhooks module, with the key in `FREESCOUT_API_KEY`.
- *
- * What the plugin directory writes, it writes as the agent in `FREESCOUT_USER_ID`.
  */
 class FreeScout {
 
@@ -96,9 +94,7 @@ class FreeScout {
 	/**
 	 * The ID of the FreeScout agent the plugin directory writes as.
 	 *
-	 * Configured rather than looked up, so writing needs no other request. The agent's WordPress.org account, connected
-	 * through WPOrgSSO, should be the automation account that FreeScout's webhook on api.wordpress.org doesn't credit in
-	 * contributor stats.
+	 * Its WordPress.org account should be the automation account, which contributor stats don't credit.
 	 *
 	 * @return int 0 if none is configured.
 	 */

@@ -264,7 +264,6 @@ class Get_Plugin_Status extends Ability_Base {
 				continue;
 			}
 
-			// The conversation is in the helpdesk it was written in: FreeScout, or HelpScout until it moved.
 			$threads = empty( $email->freescout )
 				? self::get_conversation_threads( (int) $email->id )
 				: self::get_freescout_threads( (int) $email->id );
@@ -402,10 +401,7 @@ class Get_Plugin_Status extends Ability_Base {
 	/**
 	 * Fetch conversation threads from FreeScout, with short-lived caching, shaped like HelpScout's.
 	 *
-	 * FreeScout's API & Webhooks module embeds a conversation's threads under `_embedded.threads`, newest first, like
-	 * HelpScout's API, with the same `type`, `body`, and `createdAt` fields. Its types read the same too: `customer` is
-	 * the author, an agent's `message` is a reviewer's, and `note` and `lineitem` are left out by get_feedback(). The
-	 * module lists drafts as well, which the author hasn't been sent; only `published` threads are kept.
+	 * The API lists drafts too, which the author hasn't been sent, so only `published` threads are kept.
 	 *
 	 * @param int $conversation_id The FreeScout conversation ID.
 	 * @return array|null Array of thread objects or null on failure.
