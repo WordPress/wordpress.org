@@ -37,6 +37,13 @@ class Cross_Locale_PTE {
 	private static $user;
 
 	/**
+	 * Init Admin hooks.
+	 */
+	public static function init_admin() {
+		add_action( 'admin_menu', array( __CLASS__, 'register_admin_page' ) );
+	}
+
+	/**
 	 * Register the Cross-Locale PTE Admin page in wp-admin.
 	 */
 	public static function register_admin_page() {
