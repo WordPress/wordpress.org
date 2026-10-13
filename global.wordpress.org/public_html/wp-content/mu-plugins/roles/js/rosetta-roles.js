@@ -469,6 +469,10 @@
 			}
 
 			if ( event.type === 'keyup' && event.key === 'Escape' ) {
+				if ( this.doSearch.cancel ) {
+					this.doSearch.cancel();
+				}
+
 				this.el.value = '';
 				this.collection.doSearch( '' );
 				return;
