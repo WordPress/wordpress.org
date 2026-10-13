@@ -28,6 +28,7 @@ class Locale extends GP_Route {
 
 	/**
 	 * In-memory cache for projects by ID per instance.
+	 * Sub-projects are omitted as they are not re-fetched via get_project_by_id().
 	 *
 	 * @var array
 	 */
@@ -515,7 +516,8 @@ class Locale extends GP_Route {
 				}
 			}
 
-			// Batch-load only missing users directly from wp_users without touching usermeta.
+			// Batch-load missing users from wp_users without touching usermeta.
+			// Deleted wp.org accounts are anonymized (not removed), so all IDs exist.
 			if ( ! empty( $uncached_user_ids ) ) {
 				$user_ids_sql = implode( ', ', $uncached_user_ids );
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $user_ids_sql contains sanitized, integer-cast IDs.
@@ -529,6 +531,7 @@ class Locale extends GP_Route {
 		$editor_ids = [];
 
 		// Get the names of the translation editors.
+		// Use WP_User::get_data_by() instead of get_user_by() to avoid retrieving wp_usermeta.
 		foreach ( [ 'project', 'inherited' ] as $editor_source ) {
 			foreach ( $editors[ $editor_source ] as $editor_id ) {
 				$user = WP_User::get_data_by( 'id', $editor_id );
@@ -833,6 +836,7 @@ class Locale extends GP_Route {
 		}
 		unset( $_projects );
 
+		// Skip $projects_cache as child projects are not re-fetched via get_project_by_id().
 		$this->sub_projects_cache[ $cache_key ] = $projects;
 
 		return $projects;
@@ -1117,6 +1121,7 @@ class Locale extends GP_Route {
 
 		$pages = $per_page > 0 ? (int) ceil( $results / $per_page ) : 1;
 
+		// Skip $projects_cache as get_project_icon() only looks up top-level parent projects.
 		$projects = array();
 		foreach ( $_projects as $sub_project ) {
 			$projects[ $sub_project->id ] = $sub_project;
