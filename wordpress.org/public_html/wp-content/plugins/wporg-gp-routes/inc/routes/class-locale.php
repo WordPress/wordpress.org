@@ -683,7 +683,7 @@ class Locale extends GP_Route {
 			$single_status = clone $this->project_status_cache[ $cache_key ];
 		} else {
 			if ( null === $status ) {
-				$single_status = new stdClass;
+				$single_status = new stdClass();
 				$single_status->sub_projects_count     = 0;
 				$single_status->waiting_count          = 0;
 				$single_status->current_count          = 0;
