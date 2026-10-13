@@ -70,6 +70,7 @@ class Plugin {
 		add_action( 'gp_project_created', array( $this, 'update_projects_last_updated' ) );
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
+		add_filter( 'request', array( $this, 'drop_wp_query_vars' ) );
 		add_action( 'init', array( $this, 'bump_assets_versions' ), 20 );
 		add_action( 'init', array( $this, 'add_cors_header' ) );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
@@ -683,6 +684,28 @@ class Plugin {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Drops WordPress' own query vars from GlotPress requests.
+	 *
+	 * GlotPress routes on the request URI and aborts the main query, and
+	 * short_circuit_handle_404() keeps WordPress from resetting the query flags
+	 * afterwards. A stray `?pagename=` would otherwise leave is_page() true with
+	 * no queried object, and get_body_class() warns reading its post_parent.
+	 *
+	 * `robots` is kept because the robots.txt rewrite rule in wporg-gp-routes sets it
+	 * so is_robots() stops redirect_canonical().
+	 *
+	 * @param array $query_vars The requested query variables.
+	 * @return array Filtered query variables.
+	 */
+	public function drop_wp_query_vars( $query_vars ) {
+		if ( is_glotpress() ) {
+			return array_intersect_key( $query_vars, array_flip( array( 'gp_route', 'robots' ) ) );
+		}
+
+		return $query_vars;
 	}
 
 	/**
