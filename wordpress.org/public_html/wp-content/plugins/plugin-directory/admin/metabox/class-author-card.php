@@ -130,7 +130,7 @@ class Author_Card {
 						esc_url( Helpdesk::search_url( $author->user_nicename ) ),
 						/* translators: %s: Helpdesk name, like FreeScout. */
 						esc_attr( sprintf( __( 'Click to search %s for mentions of this author', 'wporg-plugins' ), Helpdesk::name() ) ),
-						esc_html( Helpdesk::short_name() )
+						esc_html( Helpdesk::name() )
 					),
 				);
 				vprintf( '<span class="profile-sp-link">[ %s | %s ]</span>', array_map( 'wp_kses_post', $author_links ) );
@@ -150,7 +150,7 @@ class Author_Card {
 							esc_url( Helpdesk::search_url( $author->user_email ) ),
 							/* translators: %s: Helpdesk name, like FreeScout. */
 							esc_attr( sprintf( __( 'Click to search %s for emails sent to/from this email address', 'wporg-plugins' ), Helpdesk::name() ) ),
-							esc_html( Helpdesk::short_name() )
+							esc_html( Helpdesk::name() )
 						),
 					);
 					vprintf( '<span class="profile-sp-link">[ %s ]</span>', array_map( 'wp_kses_post', $author_email_links ) );
@@ -536,7 +536,7 @@ class Author_Card {
 					esc_url( Helpdesk::search_url( $plugin_name ) ),
 					/* translators: %s: Helpdesk name, like FreeScout. */
 					esc_attr( sprintf( __( 'Click to search %s for mentions of this plugin', 'wporg-plugins' ), Helpdesk::name() ) ),
-					esc_html( Helpdesk::short_name() )
+					esc_html( Helpdesk::name() )
 				),
 			] );
 
