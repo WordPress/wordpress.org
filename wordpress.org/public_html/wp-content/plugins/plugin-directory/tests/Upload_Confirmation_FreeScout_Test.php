@@ -69,7 +69,6 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 
 		$this->filter( 'wporg_plugins_freescout_mailbox_id', static fn(): int => 3 );
 		$this->filter( 'wporg_plugins_freescout_api_key', static fn(): string => 'test-key' );
-		$this->filter( 'wporg_plugins_freescout_user_id', static fn(): int => 12 );
 	}
 
 	/**
@@ -115,7 +114,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		$this->assertSame( 'test-key', $this->requests[1]['args']['headers']['X-FreeScout-API-Key'] );
 
 		$body = json_decode( (string) $this->requests[1]['args']['body'], true );
-		$this->assertSame( array( 'message', 12, array( $author->user_email ), array( 'committer@example.org' ), 'active' ), array( $body['type'], $body['user'], $body['to'], $body['cc'], $body['status'] ) );
+		$this->assertSame( array( 'message', 81, array( $author->user_email ), array( 'committer@example.org' ), 'active' ), array( $body['type'], $body['user'], $body['to'], $body['cc'], $body['status'] ) );
 		$this->assertStringContainsString( 'This is an automated message to confirm that we have received your updated plugin file.', $body['text'] );
 		$this->assertStringContainsString( 'version 1.2', $body['text'] );
 	}
@@ -148,20 +147,6 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
 	}
 
-	/**
-	 * Without an agent to reply as, nothing is sent.
-	 *
-	 * @return void
-	 */
-	public function test_needs_the_agent(): void {
-		$this->answer();
-		$this->filter( 'wporg_plugins_freescout_user_id', static fn(): int => 0 );
-		list( $plugin, $attachment ) = $this->upload( true );
-
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
-		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
-		$this->assertSame( array(), $this->requests );
-	}
 
 	/**
 	 * Without a key, there's nothing to ask FreeScout with.

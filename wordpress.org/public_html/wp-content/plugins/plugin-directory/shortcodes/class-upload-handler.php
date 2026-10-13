@@ -1065,8 +1065,8 @@ class Upload_Handler {
 	}
 
 	/**
-	 * Replies to the author in the review conversation in FreeScout, as the agent in FREESCOUT_USER_ID, and makes it
-	 * active again, so the plugins team sees there's something new to review.
+	 * Replies to the author in the review conversation in FreeScout, as wordpressdotorg, and makes it active again, so the
+	 * plugins team sees there's something new to review.
 	 *
 	 * @param int      $conversation_id The review conversation's ID in FreeScout.
 	 * @param string   $text            The reply, as text.
@@ -1076,13 +1076,6 @@ class Upload_Handler {
 	protected static function reply_in_freescout( int $conversation_id, string $text, \WP_User $author ): bool {
 		if ( '' === FreeScout_Client::api_key() ) {
 			trigger_error( 'FreeScout update failed: FREESCOUT_API_KEY isn\'t configured.', E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update.
-
-			return false;
-		}
-
-		$user_id = FreeScout_Client::user_id();
-		if ( ! $user_id ) {
-			trigger_error( 'FreeScout update failed: FREESCOUT_USER_ID isn\'t configured.', E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update.
 
 			return false;
 		}
@@ -1108,7 +1101,7 @@ class Upload_Handler {
 			array(
 				'type'   => 'message',
 				'text'   => nl2br( make_clickable( esc_html( $text ) ) ),
-				'user'   => $user_id,
+				'user'   => FreeScout_Client::USER_ID,
 				'to'     => array( $author->user_email ),
 				'cc'     => array_values( (array) $conversation['cc'] ),
 				'status' => 'active',
