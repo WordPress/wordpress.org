@@ -37,15 +37,6 @@ class Cross_Locale_PTE {
 	private static $user;
 
 	/**
-	 * Init Admin hooks.
-	 */
-	public static function init_admin() {
-		if ( current_user_can( self::MANAGE_CROSS_LOCALE_PTES_CAP ) ) {
-			add_action( 'admin_menu', array( __CLASS__, 'register_admin_page' ) );
-		}
-	}
-
-	/**
 	 * Register the Cross-Locale PTE Admin page in wp-admin.
 	 */
 	public static function register_admin_page() {
@@ -56,7 +47,7 @@ class Cross_Locale_PTE {
 			'cross-locale-pte',
 			array( __CLASS__, 'render_admin_page' ),
 			'dashicons-translation',
-			71 // After Users.
+			71.2 // After Users.
 		);
 
 		add_action( 'load-' . self::$admin_page, array( __CLASS__, 'handle_admin_post' ) );
