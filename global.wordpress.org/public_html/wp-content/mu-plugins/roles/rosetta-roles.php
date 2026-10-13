@@ -47,11 +47,11 @@ class Rosetta_Roles {
 	private $gp_locale = null;
 
 	/**
-     * Holds the hook suffix of the translation editors admin page.
-     *
-     * @var string
-     */
-    private $translation_editors_page;
+	 * Holds the hook suffix of the translation editors admin page.
+	 *
+	 * @var string
+	 */
+	private $translation_editors_page;
 
 	/**
 	 * Constructor.
