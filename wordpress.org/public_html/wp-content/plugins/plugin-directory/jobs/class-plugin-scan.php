@@ -117,6 +117,13 @@ class Plugin_Scan {
 			if ( ! $plugin_check_result ) {
 				continue;
 			}
+
+			// A scan that timed out or failed has incomplete results, don't treat it as a pass.
+			if ( $plugin_check_result['return_code'] ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
+				echo "Plugin Check did not complete for {$plugin->post_name} tag {$tag}, return code {$plugin_check_result['return_code']}.\n";
+				continue;
+			}
 			$hash = $plugin_check_result['hash'];
 
 			// Check to see if the plugin authors have been notified about this result yet.
@@ -460,19 +467,29 @@ class Plugin_Scan {
 			];
 		}
 
-		// Wait for it to finish, checking every 0.5s.
+		// Read the output while it runs, the process blocks once the pipe buffer is full.
+		stream_set_blocking( $pipes[1], false );
+		stream_set_blocking( $pipes[2], false );
+
+		$output = '';
+		$stderr = '';
+
+		// Wait for it to finish, checking every 0.05s.
 		do {
-			usleep( 50000 ); // 0.5s
+			usleep( 50000 ); // 0.05s
 
 			$total_time  = round( microtime(1) - $start_time, 1 );
 
+			// Check the status before reading, so that everything written before exiting is read.
 			$proc_status = proc_get_status( $plugin_check_process );
 			$return_code = $proc_status['exitcode'] ?? 1;
 
+			$output .= stream_get_contents( $pipes[1] );
+			$stderr .= stream_get_contents( $pipes[2] );
+
 		} while ( $proc_status['running'] && $total_time <= 65 ); // max, just in case
 
-		$output = stream_get_contents( $pipes[1] );
-		$stderr = rtrim( stream_get_contents( $pipes[2] ), "\n" );
+		$stderr = rtrim( $stderr, "\n" );
 
 		// Remove ABSPATH from the output if present.
 		$output = str_replace( ABSPATH, '/', $output );
