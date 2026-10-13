@@ -670,7 +670,6 @@ class Locale extends GP_Route {
 	 * @param GP_Project $project           The GlotPress project.
 	 * @param string     $locale            Slug of GlotPress locale.
 	 * @param string     $set_slug          Slug of the translation set.
-	 * @param object     $status            The status object.
 	 * @param bool       $calc_sub_projects Whether sub projects should be calculated too.
 	 *                                      Default true.
 	 * @return object The status of a project.
