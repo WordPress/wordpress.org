@@ -434,17 +434,12 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			// Check for required args.
 			$required_args = array( 'forum_id' );
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
-				$required_args = array_merge( $required_args, array( 'title', 'site', 'message', 'url' ) );
+				$required_args = array_merge( $required_args, array( 'title', 'site', 'url' ) );
 			}
 			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ) {
 				$required_args[] = 'topic_id';
 			} else {
 				$required_args[] = 'post_id';
-			}
-
-			// Replies without an excerpt, such as quote-only ones, have never been recorded.
-			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ), true ) && empty( $data['message'] ) ) {
-				return true;
 			}
 
 			$has_required_args = $this->require_args( $required_args, $data );
@@ -478,6 +473,11 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					bp_activity_mark_as_ham( $activity_obj, 'by_source' );
 					$activity_obj->save();
 
+					return true;
+				}
+
+				// Topics and replies without an excerpt, such as quote-only ones, are not recorded.
+				if ( empty( $data['message'] ) ) {
 					return true;
 				}
 
