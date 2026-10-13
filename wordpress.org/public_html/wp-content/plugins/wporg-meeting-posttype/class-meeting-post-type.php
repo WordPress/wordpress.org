@@ -221,7 +221,14 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 					$next_date = false;
 				}
 			} else {
-				$next_date = $post->start_date;
+				try {
+					$start = new DateTime( sprintf( '%s %s GMT', $post->start_date, $post->time ) );
+					$now   = new DateTime( $after_datetime );
+
+					$next_date = $start > $now ? $start->format( 'Y-m-d' ) : false;
+				} catch ( Exception $e ) {
+					$next_date = false;
+				}
 			}
 
 			return $next_date;
@@ -422,6 +429,20 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 
 			$from = DateTime::createFromFormat( 'U', (string) strtotime( '-30 minutes', $now ) );
 			$end  = DateTime::createFromFormat( 'U', (string) strtotime( '+2 month', $now ) );
+
+			return $this->get_occurrences( $meeting, $from, $end );
+		}
+
+		/**
+		 * Get a meeting's occurrences in a period.
+		 *
+		 * @param object   $meeting Meeting post, or an object with a meeting's fields.
+		 * @param DateTime $from    Start of the period.
+		 * @param DateTime $end     End of the period. The meeting's end date wins when it's earlier.
+		 * @param int      $limit   Most occurrences to return.
+		 * @return string[] Occurrence dates, Y-m-d.
+		 */
+		public function get_occurrences( object $meeting, DateTime $from, DateTime $end, int $limit = 12 ): array {
 			if ( $meeting->end_date ) {
 				$end = DateTime::createFromFormat( '!Y-m-d', $meeting->end_date );
 				// An unparseable end date ends the meeting, as it does in meeting_meta_query().
@@ -439,9 +460,10 @@ if ( ! class_exists( 'Meeting_Post_Type' ) ) :
 					$from = new DateTime( "{$next} {$meeting->time} GMT" );
 					if ( $from <= $end ) {
 						$occurrences[] = $next;
+						--$limit;
 					}
 				}
-			} while ( --$max > 0 && $next && $from && $from < $end && $meeting->recurring );
+			} while ( --$max > 0 && $limit > 0 && $next && $from < $end && $meeting->recurring );
 
 			return $occurrences;
 		}
