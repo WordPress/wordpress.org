@@ -233,7 +233,10 @@ class Cross_Locale_PTE {
 	private static function get_feedback_message() {
 		$message = '';
 
-		if ( ! empty( $_REQUEST['update'] ) && ! empty( $_REQUEST['error'] ) ) {
+		$error  = isset( $_REQUEST['error'] ) ? sanitize_key( wp_unslash( $_REQUEST['error'] ) ) : '';
+		$update = isset( $_REQUEST['update'] ) ? sanitize_key( wp_unslash( $_REQUEST['update'] ) ) : '';
+
+		if ( $error && $update ) {
 			return $message;
 		}
 
@@ -247,15 +250,15 @@ class Cross_Locale_PTE {
 			),
 		);
 
-		if ( isset( $_REQUEST['error'], $messages['error'][ $_REQUEST['error'] ] ) ) {
+		if ( $error && isset( $messages['error'][ $error ] ) ) {
 			$message = sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				$messages['error'][ $_REQUEST['error'] ]
+				$messages['error'][ $error ]
 			);
-		} elseif ( isset( $_REQUEST['update'], $messages['update'][ $_REQUEST['update'] ] ) ) {
+		} elseif ( $update && isset( $messages['update'][ $update ] ) ) {
 			$message = sprintf(
 				'<div class="notice notice-success"><p>%s</p></div>',
-				$messages['update'][ $_REQUEST['update'] ]
+				$messages['update'][ $update ]
 			);
 		}
 
