@@ -617,8 +617,15 @@
 		}
 
 		// Base64 decode
-		var buffer = Uint8Array.from( atob( data ), c => c.charCodeAt(0) ),
-			stream = new DecompressionStream( 'gzip' ),
+		var binary = atob( data ),
+			len = binary.length,
+			buffer = new Uint8Array( len );
+
+		for ( var i = 0; i < len; i++ ) {
+			buffer[ i ] = binary.charCodeAt( i );
+		}
+
+		var stream = new DecompressionStream( 'gzip' ),
 			streamWriter = stream.writable.getWriter(),
 			arrayBufferPromise = new Response( stream.readable ).arrayBuffer();
 
