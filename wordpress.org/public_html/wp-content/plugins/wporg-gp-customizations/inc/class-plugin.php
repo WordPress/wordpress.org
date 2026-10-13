@@ -694,12 +694,15 @@ class Plugin {
 	 * afterwards. A stray `?pagename=` would otherwise leave is_page() true with
 	 * no queried object, and get_body_class() warns reading its post_parent.
 	 *
+	 * `robots` is kept because the robots.txt rewrite rule in wporg-gp-routes sets it
+	 * so is_robots() stops redirect_canonical().
+	 *
 	 * @param array $query_vars The requested query variables.
 	 * @return array Filtered query variables.
 	 */
 	public function drop_wp_query_vars( $query_vars ) {
 		if ( is_glotpress() ) {
-			return array( 'gp_route' => $query_vars['gp_route'] );
+			return array_intersect_key( $query_vars, array_flip( array( 'gp_route', 'robots' ) ) );
 		}
 
 		return $query_vars;
