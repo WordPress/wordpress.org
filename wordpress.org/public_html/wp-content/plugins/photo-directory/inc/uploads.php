@@ -1041,7 +1041,11 @@ class Uploads {
 					esc_attr__( 'Photo preview', 'wporg-photos' )
 				)
 				. sprintf(
-					'<button type="button" class="ugc-photo-preview-dialog__close" aria-label="%s">&times;</button>' . "\n",
+					'<button type="button" class="ugc-photo-preview-dialog__close" aria-label="%s">'
+					. '<svg class="ugc-photo-preview-dialog__close-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false">'
+					. '<path d="M1 1l10 10M11 1L1 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />'
+					. '</svg>'
+					. '</button>' . "\n",
 					esc_attr__( 'Close preview', 'wporg-photos' )
 				)
 				. '<img id="ug_photo_preview_large" alt="" />' . "\n"
