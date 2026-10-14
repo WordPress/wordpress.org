@@ -471,7 +471,7 @@ class Plugin {
 				function ( $translation_id ) use ( $source, &$sql_vars ) {
 					$sql_vars[] = $translation_id;
 					$sql_vars[] = $source;
-					return '( "translation", %d, "source", %s )';
+					return "( 'translation', %d, 'source', %s )";
 				},
 				$chunk
 			);
@@ -480,6 +480,8 @@ class Plugin {
 			$sql .= implode( ', ', $sql_values );
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The query string is dynamically constructed using safe placeholders only.
 			$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
+
+			wp_cache_delete_multiple( $chunk, 'translation_meta' );
 		}
 	}
 
