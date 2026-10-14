@@ -1,6 +1,7 @@
 /**
  * Makes the Plugin Review panel work: copying, jumping to issues, loading the plugin as it is now, flagging and
- * shortening the tab's title, and warning about a reply with another author's Review ID.
+ * shortening the tab's title, and warning about a reply with another author's Review ID. Also shows the reviewer
+ * chosen in the My Reviews folder.
  *
  * @param {jQuery} $ jQuery.
  */
@@ -667,6 +668,11 @@
 
 		return check;
 	}
+
+	// The My Reviews folder shows a reviewer's conversations as soon as they're chosen.
+	$( document ).on( 'change', '.wporg-my-reviews-user', function () {
+		this.form.submit();
+	} );
 
 	$( function () {
 		const $panel = $( '.wporg-review' );

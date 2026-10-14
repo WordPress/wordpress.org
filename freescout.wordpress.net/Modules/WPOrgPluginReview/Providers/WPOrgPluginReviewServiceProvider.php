@@ -10,16 +10,20 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgPluginReview\Providers;
 
 use App\Conversation;
+use App\Mailbox;
 use App\Thread;
+use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 use Modules\WPOrgPluginReview\Console\IndexReviews;
 use Modules\WPOrgPluginReview\Services\FlagReplies;
+use Modules\WPOrgPluginReview\Services\MyReviews;
 use Modules\WPOrgPluginReview\Services\Review;
 use Modules\WPOrgPluginReview\Services\Reviewers;
 use Modules\WPOrgPluginReview\Services\Subject;
 
 /**
- * Shows a conversation's latest plugin review in its sidebar, and keeps the index of review emails as threads change.
+ * Shows a conversation's latest plugin review in its sidebar, and keeps the index of review emails as threads change;
+ * adds the My Reviews folder to the plugins team's mailbox.
  */
 final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 
@@ -36,6 +40,13 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 	 * @var int
 	 */
 	private const PANEL_PRIORITY = 15;
+
+	/**
+	 * Priority of the My Reviews folder's hooks: after the Teams and Custom Folders modules', which sort their folders.
+	 *
+	 * @var int
+	 */
+	private const FOLDERS_PRIORITY = 30;
 
 	/**
 	 * Boots the module.
@@ -157,6 +168,72 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 				}
 			},
 			self::PANEL_PRIORITY
+		);
+
+		self::register_folder_hooks();
+	}
+
+	/**
+	 * Adds the My Reviews folder to the plugins team's mailbox, for reviewers.
+	 *
+	 * It isn't stored: it's added to the mailbox's folders as they're listed, after the Teams and Custom Folders
+	 * modules have sorted theirs, and links to its own page.
+	 *
+	 * @return void
+	 */
+	private static function register_folder_hooks(): void {
+		\Eventy::addFilter(
+			'mailbox.folders',
+			static function ( mixed $folders = null, mixed $mailbox = null ): mixed {
+				if ( ! $folders instanceof Collection || ! $mailbox instanceof Mailbox ) {
+					return $folders;
+				}
+
+				try {
+					if ( ! Review::is_plugins_mailbox( $mailbox ) || ! app( Reviewers::class )->includes( auth()->user() ) ) {
+						return $folders;
+					}
+
+					return MyReviews::add_folder( $folders, $mailbox );
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgPluginReview] Could not add the My Reviews folder to mailbox ' . $mailbox->id . ': ' . $e->getMessage() );
+
+					return $folders;
+				}
+			},
+			self::FOLDERS_PRIORITY,
+			2
+		);
+
+		\Eventy::addFilter(
+			'folder.type_name',
+			static function ( mixed $name = '', mixed $folder = null ): mixed {
+				return MyReviews::is_folder( $folder ) ? __( 'My Reviews' ) : $name;
+			},
+			self::FOLDERS_PRIORITY,
+			2
+		);
+
+		\Eventy::addFilter(
+			'folder.type_icon',
+			static function ( mixed $icon = '', mixed $folder = null ): mixed {
+				return MyReviews::is_folder( $folder ) ? 'tasks' : $icon;
+			},
+			self::FOLDERS_PRIORITY,
+			2
+		);
+
+		\Eventy::addFilter(
+			'folder.url',
+			static function ( mixed $url = '', mixed $mailbox_id = null, mixed $folder = null ): mixed {
+				if ( ! MyReviews::is_folder( $folder ) || ! is_numeric( $mailbox_id ) ) {
+					return $url;
+				}
+
+				return route( 'wporgpluginreview.my_reviews', array( 'mailbox_id' => (int) $mailbox_id ) );
+			},
+			self::FOLDERS_PRIORITY,
+			3
 		);
 	}
 

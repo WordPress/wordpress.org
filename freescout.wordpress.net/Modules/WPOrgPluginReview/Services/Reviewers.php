@@ -12,7 +12,7 @@ namespace Modules\WPOrgPluginReview\Services;
 use App\User;
 
 /**
- * Tells members of the plugins team's teams apart, with the Teams module.
+ * Tells members of the plugins team's teams apart, and which team reviews are assigned to, with the Teams module.
  *
  * Teams is a premium module, which most contributors don't have; without it, everyone who can see the plugins team's
  * mailbox is taken for a reviewer. Not final, so tests can answer for Teams.
@@ -25,6 +25,20 @@ class Reviewers {
 	 * @var string
 	 */
 	private const TEAM_PREFIX = 'Plugin';
+
+	/**
+	 * The name of the team that plugin reviews are assigned to.
+	 *
+	 * @var string
+	 */
+	public const REVIEW_TEAM = 'Plugin Reviews';
+
+	/**
+	 * The Teams module's folder type: one folder per team in each of its mailboxes, of the conversations assigned to it.
+	 *
+	 * @var int
+	 */
+	public const TEAM_FOLDER_TYPE = 185;
 
 	/**
 	 * The Teams module's alias.
@@ -69,6 +83,28 @@ class Reviewers {
 	}
 
 	/**
+	 * The Plugin Reviews team's ID: the Teams module assigns conversations to a team as if it were a user.
+	 *
+	 * @return int|null Null without the Teams module; 0 when Teams has no such team, or can't tell, which no
+	 *                  conversation is assigned to.
+	 */
+	public function review_team_id(): ?int {
+		if ( ! \App\Module::isActive( self::TEAMS_MODULE ) ) {
+			return null;
+		}
+
+		try {
+			$id = array_search( self::REVIEW_TEAM, $this->teams(), true );
+
+			return false === $id ? 0 : (int) $id;
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgPluginReview] Could not find the ' . self::REVIEW_TEAM . ' team: ' . $e->getMessage() );
+
+			return 0;
+		}
+	}
+
+	/**
 	 * The names of the teams a user is a member of, as the Teams module tells them.
 	 *
 	 * @param User $user User.
@@ -81,11 +117,24 @@ class Reviewers {
 		}
 
 		$team_ids = array_map( 'intval', (array) $teams::getUserTeamIds( (int) $user->id ) );
-		$names    = array();
+
+		return array_values( array_intersect_key( $this->teams(), array_flip( $team_ids ) ) );
+	}
+
+	/**
+	 * The Teams module's teams.
+	 *
+	 * @return string[] Names, by team ID.
+	 */
+	protected function teams(): array {
+		$teams = self::TEAMS;
+		if ( ! class_exists( $teams ) ) {
+			return array();
+		}
+
+		$names = array();
 		foreach ( $teams::getTeams( true ) as $team ) {
-			if ( in_array( (int) $team->id, $team_ids, true ) ) {
-				$names[] = (string) $team->first_name;
-			}
+			$names[ (int) $team->id ] = (string) $team->first_name;
 		}
 
 		return $names;

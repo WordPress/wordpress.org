@@ -1,6 +1,6 @@
 # WP.org Plugin Review
 
-Shows the latest plugin review of a conversation in its sidebar, for the plugins team, read from the review emails in FreeScout's database.
+Shows the latest plugin review of a conversation in its sidebar, for the plugins team, read from the review emails in FreeScout's database. Adds a [My Reviews](#my-reviews) folder of the reviews each reviewer is working on.
 
 ## Who sees it
 
@@ -24,6 +24,20 @@ Quoted text is left out, so an author's reply that quotes a review isn't read as
 The tab's title also shortens the plugin directory's subjects, like "R: My Plugin" for "[WordPress Plugin Directory] Review in Progress: My Plugin"; a link at the bottom of the panel switches back to the full title, which the browser remembers.
 
 While an agent writes a reply, a warning shows above it when the reply has a Review ID for a username other than the latest review's and the plugin's submitter's, until they say it's the right one: it would send one author's review to another.
+
+## My Reviews
+
+The plugins team's mailbox gets a **My Reviews** folder, after the Plugin Reviews team's, for the same agents as the panel. It lists the open and pending conversations assigned to the Plugin Reviews team, in three sections:
+
+- **Conversations I'm participating in**: ones the agent sent a reply to. Notes and drafts don't count.
+- **Conversations I'm mentioned in**: ones with a note that mentions the agent, with the Mentions module's `@` mentions. Mentions of a team the agent is in don't count.
+- **Conversations that need a reviewer**: ones with `PRTRN` in a note.
+
+Each conversation shows only in the first section it belongs to, open ones first, then by their latest reply. The reviewer at the top switches to another member of the plugins team's teams, to see theirs. Agents who may only see the conversations assigned to them see only those here too.
+
+Without the Teams module, the sections are of the mailbox's open and pending conversations, whoever they're assigned to. With it, but without a team named Plugin Reviews, they're empty.
+
+The folder isn't stored: it's added to the mailbox's folders as they're listed, and shows no count, which would take a query on every page. Its page takes one query for which sections every conversation belongs to, and one to load the ones that do; with a thousand open conversations, that's a few tens of milliseconds.
 
 ## WordPress.org
 
