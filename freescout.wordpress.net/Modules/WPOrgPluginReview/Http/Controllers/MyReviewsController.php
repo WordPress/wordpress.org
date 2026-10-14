@@ -48,18 +48,12 @@ final class MyReviewsController extends Controller {
 		$user      = $reviewers->firstWhere( 'id', (int) $request->query( 'user', $viewer->id ) ) ?? $viewer;
 		$sections  = MyReviews::sections( $mailbox, $user, $viewer );
 		$folders   = $mailbox->getAssesibleFolders();
+		$folder    = $folders->first( array( MyReviews::class, 'is_folder' ) ) ?? MyReviews::folder( $mailbox );
 
-		// The folder list shows the folder without a count, which would take these queries on every page.
-		$folder = clone ( $folders->first( array( MyReviews::class, 'is_folder' ) ) ?? MyReviews::folder( $mailbox ) );
-
-		$folder->active_count = count(
-			array_filter(
-				array_merge( ...array_values( $sections ) ),
-				static function ( $conversation ): bool {
-					return $conversation->isActive();
-				}
-			)
-		);
+		// The folder list counts the agent's own reviews, which may have changed since they were counted.
+		if ( (int) $user->id === (int) $viewer->id ) {
+			$folder->active_count = count( $sections['participating'] );
+		}
 
 		return view(
 			'wporgpluginreview::my-reviews',

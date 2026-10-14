@@ -20,7 +20,8 @@ use Illuminate\Support\Collection;
 
 /**
  * Sorts the open and pending conversations of the Plugin Reviews team into the ones a reviewer replied to, the ones
- * they're mentioned in, and the ones that need a reviewer, for the mailbox's My Reviews folder.
+ * they're mentioned in, and the ones that need a reviewer, for the mailbox's My Reviews folder, and counts the ones
+ * each reviewer replied to for the folder list.
  *
  * Each conversation is only in the first section it belongs to. One query tells, for every conversation, which
  * sections it belongs to, through the threads' index on conversation and type.
@@ -36,7 +37,8 @@ final class MyReviews {
 	public const FOLDER_TYPE = 229;
 
 	/**
-	 * The folder's ID, which no stored folder has, so the folder list highlights it on its own page only.
+	 * The folder's ID, which no stored folder has, so the folder list highlights it on its own page only; review.css
+	 * finds it in the list by it.
 	 *
 	 * @var int
 	 */
@@ -57,6 +59,13 @@ final class MyReviews {
 	public const SECTIONS = array( 'participating', 'mentioned', 'needs_reviewer' );
 
 	/**
+	 * How long the reviewers' counts are kept at most, in minutes; changes to conversations forget them before that.
+	 *
+	 * @var int
+	 */
+	private const COUNTS_MINUTES = 10;
+
+	/**
 	 * The folder, as the mailbox's folder list shows it.
 	 *
 	 * @param Mailbox $mailbox Mailbox.
@@ -74,32 +83,109 @@ final class MyReviews {
 	}
 
 	/**
-	 * Adds the folder to a mailbox's folder list, after the Plugin Reviews team's folder.
+	 * Adds the folder to a mailbox's folder list, after Unassigned and before Mine, with how many reviews the agent is
+	 * participating in.
 	 *
 	 * @param Collection $folders The mailbox's folders.
 	 * @param Mailbox    $mailbox Mailbox.
+	 * @param User       $user    The agent.
 	 * @return Collection
 	 */
-	public static function add_folder( Collection $folders, Mailbox $mailbox ): Collection {
-		$team_id = app( Reviewers::class )->review_team_id();
-		$folder  = self::folder( $mailbox );
-		$list    = array();
-		$added   = false;
+	public static function add_folder( Collection $folders, Mailbox $mailbox, User $user ): Collection {
+		$folder = self::folder( $mailbox );
+		try {
+			$folder->active_count = self::participating_count( $mailbox, $user );
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgPluginReview] Could not count the My Reviews of user ' . $user->id . ': ' . $e->getMessage() );
+		}
 
+		$list  = array();
+		$added = false;
 		foreach ( $folders as $item ) {
+			if ( ! $added && Folder::TYPE_MINE === (int) $item->type ) {
+				$list[] = $folder;
+				$added  = true;
+			}
+
 			$list[] = $item;
 
-			if ( ! $added && $team_id && Reviewers::TEAM_FOLDER_TYPE === (int) $item->type && $team_id === (int) $item->user_id ) {
+			if ( ! $added && Folder::TYPE_UNASSIGNED === (int) $item->type ) {
 				$list[] = $folder;
 				$added  = true;
 			}
 		}
 
 		if ( ! $added ) {
-			$list[] = $folder;
+			array_unshift( $list, $folder );
 		}
 
 		return $folders->make( $list );
+	}
+
+	/**
+	 * How many reviews an agent is participating in, as the folder list shows it.
+	 *
+	 * Every reviewer's count comes from one query, kept until something changes them; agents who may only see what's
+	 * assigned to them get theirs counted on its own.
+	 *
+	 * @param Mailbox $mailbox Mailbox.
+	 * @param User    $user    The agent.
+	 * @return int
+	 */
+	public static function participating_count( Mailbox $mailbox, User $user ): int {
+		if ( $user->canSeeOnlyAssignedConversations() ) {
+			return self::conversations( $mailbox, $user )
+				->addWhereExistsQuery( self::threads( Thread::TYPE_MESSAGE )->where( 'threads.created_by_user_id', $user->id ) )
+				->count();
+		}
+
+		$counts = \Cache::remember(
+			self::counts_key( (int) $mailbox->id ),
+			now()->addMinutes( self::COUNTS_MINUTES ),
+			static function () use ( $mailbox ): array {
+				return self::conversations( $mailbox )
+					->join( 'threads', 'threads.conversation_id', '=', 'conversations.id' )
+					->where( 'threads.type', Thread::TYPE_MESSAGE )
+					->where( 'threads.state', Thread::STATE_PUBLISHED )
+					->whereNotNull( 'threads.created_by_user_id' )
+					->groupBy( 'threads.created_by_user_id' )
+					->toBase()
+					->selectRaw( 'threads.created_by_user_id as user_id, count(distinct conversations.id) as total' )
+					->pluck( 'total', 'user_id' )
+					->map(
+						static function ( mixed $total ): int {
+							return (int) $total;
+						}
+					)
+					->all();
+			}
+		);
+
+		return (int) ( $counts[ (int) $user->id ] ?? 0 );
+	}
+
+	/**
+	 * Forgets the reviewers' counts of a mailbox, after something that may change them.
+	 *
+	 * @param int $mailbox_id Mailbox ID.
+	 * @return void
+	 */
+	public static function forget_counts( int $mailbox_id ): void {
+		try {
+			\Cache::forget( self::counts_key( $mailbox_id ) );
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgPluginReview] Could not forget the My Reviews counts of mailbox ' . $mailbox_id . ': ' . $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Where the reviewers' counts of a mailbox are kept.
+	 *
+	 * @param int $mailbox_id Mailbox ID.
+	 * @return string
+	 */
+	private static function counts_key( int $mailbox_id ): string {
+		return 'wporgpluginreview.my_reviews.counts.' . $mailbox_id;
 	}
 
 	/**
@@ -137,7 +223,7 @@ final class MyReviews {
 	 * @param Mailbox $mailbox Mailbox.
 	 * @param User    $user    The reviewer.
 	 * @param User    $viewer  Who's looking: they only see the conversations they may.
-	 * @return array<string, Conversation[]> Conversations by section, open ones first, then by their latest reply.
+	 * @return array<string, Conversation[]> Conversations by section, the longest waiting first.
 	 */
 	public static function sections( Mailbox $mailbox, User $user, User $viewer ): array {
 		$rows = self::conversations( $mailbox, $viewer )
@@ -145,9 +231,8 @@ final class MyReviews {
 			->selectSub( self::threads( Thread::TYPE_MESSAGE )->where( 'threads.created_by_user_id', $user->id ), 'participating' )
 			->selectSub( self::threads( Thread::TYPE_NOTE )->where( 'threads.body', 'like', '%' . self::mention( $user ) . '%' ), 'mentioned' )
 			->selectSub( self::threads( Thread::TYPE_NOTE )->where( 'threads.body', 'like', '%' . self::NEEDS_REVIEWER . '%' ), 'needs_reviewer' )
-			->orderBy( 'conversations.status' )
-			->orderBy( 'conversations.last_reply_at', 'desc' )
-			->orderBy( 'conversations.id', 'desc' )
+			->orderBy( 'conversations.last_reply_at' )
+			->orderBy( 'conversations.id' )
 			->toBase()
 			->get();
 
@@ -166,7 +251,7 @@ final class MyReviews {
 			return $ids;
 		}
 
-		$conversations = Conversation::whereIn( 'id', $all )->with( 'customer' )->get()->keyBy( 'id' );
+		$conversations = self::preload( Conversation::whereIn( 'id', $all )->with( 'customer' )->get() )->keyBy( 'id' );
 
 		return array_map(
 			static function ( array $section ) use ( $conversations ): array {
@@ -177,14 +262,33 @@ final class MyReviews {
 	}
 
 	/**
+	 * Lets modules load what they show in conversation lists for all the conversations at once, like the Tags module
+	 * their tags, as core's lists do.
+	 *
+	 * @param Collection $conversations Conversations.
+	 * @return Collection
+	 */
+	private static function preload( Collection $conversations ): Collection {
+		try {
+			$preloaded = \Eventy::filter( 'conversations_table.preload_table_data', $conversations );
+
+			return $preloaded instanceof Collection ? $preloaded : $conversations;
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgPluginReview] Could not preload the My Reviews conversations: ' . $e->getMessage() );
+
+			return $conversations;
+		}
+	}
+
+	/**
 	 * The Plugin Reviews team's open and pending conversations in the mailbox, or, without the Teams module, the
 	 * mailbox's.
 	 *
-	 * @param Mailbox $mailbox Mailbox.
-	 * @param User    $viewer  Who's looking.
+	 * @param Mailbox   $mailbox Mailbox.
+	 * @param User|null $viewer  Who's looking, if they only see the conversations they may.
 	 * @return Builder
 	 */
-	private static function conversations( Mailbox $mailbox, User $viewer ): Builder {
+	private static function conversations( Mailbox $mailbox, ?User $viewer = null ): Builder {
 		$query = Conversation::query()
 			->where( 'conversations.mailbox_id', $mailbox->id )
 			->where( 'conversations.state', Conversation::STATE_PUBLISHED )
@@ -196,7 +300,7 @@ final class MyReviews {
 		}
 
 		// Like core's folders, for users who may only see what's assigned to them; Teams adds their teams' conversations.
-		if ( $viewer->canSeeOnlyAssignedConversations() && ! \Eventy::filter( 'folder.only_assigned_condition', false, $query, (int) $viewer->id ) ) {
+		if ( $viewer && $viewer->canSeeOnlyAssignedConversations() && ! \Eventy::filter( 'folder.only_assigned_condition', false, $query, (int) $viewer->id ) ) {
 			$query->where( 'conversations.user_id', $viewer->id );
 		}
 
