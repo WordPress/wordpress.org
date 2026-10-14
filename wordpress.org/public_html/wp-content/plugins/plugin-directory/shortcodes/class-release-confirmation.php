@@ -293,6 +293,7 @@ class Release_Confirmation {
 		}
 
 		self::render_cooldown_status( $plugin, $data, $current_release );
+		self::render_not_stable_status( $plugin, $data );
 
 		echo '</div>';
 
@@ -307,6 +308,41 @@ class Release_Confirmation {
 		 * @return string
 		 */
 		return apply_filters( 'wporg_plugins_release_approval_text', $text, $plugin, $data );
+	}
+
+	/**
+	 * Render a line explaining why a confirmed release newer than the stable tag isn't
+	 * being released: only the tag named by the trunk readme's Stable tag is released.
+	 *
+	 * @param \WP_Post $plugin The plugin post object.
+	 * @param array    $data   The release row from Plugin_Directory::get_releases().
+	 */
+	protected static function render_not_stable_status( $plugin, $data ) {
+		if ( ! $data['confirmations_required'] || ! $data['confirmed'] || ! empty( $data['discarded'] ) ) {
+			return;
+		}
+
+		$stable_tag = (string) get_post_meta( $plugin->ID, 'stable_tag', true );
+		$tag        = (string) ( $data['tag'] ?? '' );
+
+		// Older confirmed releases were superseded, not forgotten.
+		if ( ! $stable_tag || 'trunk' === $stable_tag || ! version_compare( $tag, $stable_tag, '>' ) ) {
+			return;
+		}
+
+		printf(
+			'<span>%s</span><br>',
+			wp_kses(
+				sprintf(
+					/* translators: 1: 'Stable tag', 2: The current stable tag, 3: This release's tag. */
+					__( 'Not released yet: the %1$s in trunk/readme.txt is %2$s. Change it to %3$s to release this version.', 'wporg-plugins' ),
+					'<code>Stable tag</code>',
+					'<code>' . esc_html( $stable_tag ) . '</code>',
+					'<code>' . esc_html( $tag ) . '</code>'
+				),
+				array( 'code' => array() )
+			)
+		);
 	}
 
 	/**
