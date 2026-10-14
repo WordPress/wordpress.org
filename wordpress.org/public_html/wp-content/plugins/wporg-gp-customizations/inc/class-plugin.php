@@ -386,7 +386,7 @@ class Plugin {
 
 		$source = '';
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verification is handled upstream by GlotPress route handlers.
-		if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
+		if ( 'import_translations_post' === GP::$current_route->last_method_called && 'rejected' !== $translation->status ) {
 			if ( empty( $this->imported_source ) ) {
 				if ( isset( $_POST['source'] ) && 'translate-live' === $_POST['source'] ) {
 					$this->imported_source = 'playground';
