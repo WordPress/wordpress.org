@@ -1409,7 +1409,7 @@ function bb_base_plugin_search_form() {
 
 function bb_base_topic_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['ts'] ) ) {
+	if ( empty( $_GET['ts'] ) || ! is_string( $_GET['ts'] ) ) {
 		return false;
 	}
 
@@ -1423,7 +1423,7 @@ function bb_base_topic_search_query( $escaped = true ) {
 
 function bb_base_reply_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['rs'] ) ) {
+	if ( empty( $_GET['rs'] ) || ! is_string( $_GET['rs'] ) ) {
 		return false;
 	}
 
@@ -1437,7 +1437,7 @@ function bb_base_reply_search_query( $escaped = true ) {
 
 function bb_base_plugin_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['ps'] ) ) {
+	if ( empty( $_GET['ps'] ) || ! is_string( $_GET['ps'] ) ) {
 		return false;
 	}
 
