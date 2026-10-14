@@ -27,7 +27,8 @@ use Modules\WPOrgPluginReview\Services\Worklist;
 /**
  * Shows a conversation's latest plugin review in its sidebar, and keeps the index of review emails as threads change;
  * adds the My Reviews and My Cases folders to the plugins team's mailbox, and to its members' profiles how many
- * conversations those open at a time.
+ * conversations those open at a time; and to their header, a button that copies the download URLs of the plugins in
+ * review they have open.
  */
 final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 
@@ -93,6 +94,7 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 			static function ( mixed $javascripts = array() ): mixed {
 				if ( is_array( $javascripts ) ) {
 					$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/review.js';
+					$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/downloads.js';
 				}
 
 				return $javascripts;
@@ -176,6 +178,20 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 
 		self::register_folder_hooks();
 		self::register_profile_hooks();
+
+		// The page's script shows it once there are URLs.
+		\Eventy::addAction(
+			'menu.append',
+			static function (): void {
+				try {
+					if ( app( Reviewers::class )->includes( auth()->user() ) ) {
+						echo \View::make( self::ALIAS . '::downloads' )->render();
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgPluginReview] Could not add the download URLs button to the header: ' . $e->getMessage() );
+				}
+			}
+		);
 	}
 
 	/**
