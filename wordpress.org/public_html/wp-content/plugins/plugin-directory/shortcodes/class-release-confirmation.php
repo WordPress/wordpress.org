@@ -318,7 +318,8 @@ class Release_Confirmation {
 	 * @param array    $data   The release row from Plugin_Directory::get_releases().
 	 */
 	protected static function render_not_stable_status( $plugin, $data ) {
-		if ( ! $data['confirmations_required'] || ! $data['confirmed'] || ! empty( $data['discarded'] ) ) {
+		// Until the import has processed the release, the stored stable tag may predate the readme.
+		if ( ! $data['confirmations_required'] || ! $data['confirmed'] || ! $data['zips_built'] || ! empty( $data['discarded'] ) ) {
 			return;
 		}
 
