@@ -14,7 +14,6 @@ class Hooks {
 		add_filter( 'bbp_get_forum_pagination_count',  '__return_empty_string' );
 		add_filter( 'bbp_get_form_topic_subscribed',   array( $this, 'check_topic_subscription_checkbox' ) );
 		add_action( 'pre_get_posts',                   array( $this, 'hide_non_public_forums' ) );
-		add_action( 'parse_query',                     array( $this, 'reset_singular_flags_on_user_pages' ), 20 );
 		add_filter( 'pre_option__bbp_edit_lock',       array( $this, 'increase_edit_lock_time' ) );
 		add_filter( 'pre_option__bbp_topics_per_page', array( $this, 'increase_topics_per_page' ) );
 		add_filter( 'bbp_map_meta_caps',               array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
@@ -29,6 +28,8 @@ class Hooks {
 		add_filter( 'bbp_show_user_profile',           array( $this, 'allow_mods_to_view_inactive_users' ), 10, 2 );
 		add_action( 'init',                            array( $this, 'add_rewrite_rules' ) );
 
+		// Run after bbp_parse_query() (priority 2) has flagged user pages.
+		add_action( 'parse_query', array( $this, 'reset_singular_flags_on_user_pages' ), 20 );
 
 		// Add bbPress support to the WordPress.org SEO plugin.
 		add_filter( 'wporg_canonical_base_url', array( $this, 'wporg_canonical_base_url' ) );
