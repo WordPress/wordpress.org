@@ -55,7 +55,7 @@
 					else :
 						?>
 			<tr>
-				<td colspan="4"><?php esc_html_e( 'No translation editors found.', 'rosetta' ); ?></td>
+				<td colspan="4"><?php esc_html_e( 'No Cross-Locale PTEs found.', 'rosetta' ); ?></td>
 			</tr>
 		<?php endif; ?>
 		</tbody>

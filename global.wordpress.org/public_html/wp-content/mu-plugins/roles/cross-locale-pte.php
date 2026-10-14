@@ -250,12 +250,12 @@ class Cross_Locale_PTE {
 		if ( $error && isset( $messages['error'][ $error ] ) ) {
 			$message = sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
-				$messages['error'][ $error ]
+				esc_html( $messages['error'][ $error ] )
 			);
 		} elseif ( $update && isset( $messages['update'][ $update ] ) ) {
 			$message = sprintf(
 				'<div class="notice notice-success"><p>%s</p></div>',
-				$messages['update'][ $update ]
+				esc_html( $messages['update'][ $update ] )
 			);
 		}
 
