@@ -310,12 +310,11 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	 */
 	public function column_username( $user ) {
 		$avatar = get_avatar( $user->ID, 32 );
-		$username = esc_html( $user->user_login );
 
 		if ( $this->user_can_promote ) {
 			$page_url  = menu_page_url( 'translation-editors', false );
-			$edit_link = esc_url( add_query_arg( 'user_id', $user->ID, $page_url ) );
-			$edit      = '<strong><a href="' . $edit_link . '">' . $username . '</a></strong>';
+			$edit_link = add_query_arg( 'user_id', $user->ID, $page_url );
+			$edit      = '<strong><a href="' . esc_url( $edit_link ) . '">' . esc_html( $user->user_login ) . '</a></strong>';
 
 			$delete_url = wp_nonce_url(
 				add_query_arg(
@@ -331,20 +330,20 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 			$actions = array(
 				'edit'   => sprintf(
 					'<a href="%s">%s<span class="screen-reader-text"> &#8220;%s&#8221;</span></a>',
-					$edit_link,
+					esc_url( $edit_link ),
 					esc_html__( 'Edit', 'rosetta' ),
-					$username
+					esc_html( $user->user_login )
 				),
 				'delete' => sprintf(
 					'<a href="%s" class="submitdelete">%s<span class="screen-reader-text"> &#8220;%s&#8221;</span></a>',
 					esc_url( $delete_url ),
 					esc_html__( 'Remove', 'rosetta' ),
-					$username
+					esc_html( $user->user_login )
 				),
 			);
 			$edit .= $this->row_actions( $actions );
 		} else {
-			$edit = '<strong>' . $username . '</strong>';
+			$edit = '<strong>' . esc_html( $user->user_login ) . '</strong>';
 		}
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Avatar and edit markup assembled above from escaped parts.
