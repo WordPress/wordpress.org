@@ -2,7 +2,7 @@
     "name": "WP.org Plugin Review",
     "alias": "wporgpluginreview",
     "img": "/modules/wporgpluginreview/img/icon.svg",
-    "description": "Shows the latest plugin review of a conversation in its sidebar: its details, flags, and issues, from the review emails' Review ID lines.",
+    "description": "Shows the latest plugin review of a conversation in its sidebar: its details, flags, and issues, from the review emails' Review ID lines. Adds a My Reviews folder of the reviews an agent replied to, is mentioned in, or that need a reviewer.",
     "version": "1.0.0",
     "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgPluginReview",
     "author": "WordPress.org",

@@ -17,5 +17,9 @@ Route::group(
 		Route::get( '/wporgpluginreview/{conversation_id}/plugin', 'PluginController@show' )
 			->where( 'conversation_id', '[0-9]+' )
 			->name( 'wporgpluginreview.plugin' );
+
+		Route::get( '/wporgpluginreview/mailbox/{mailbox_id}/my-reviews', 'MyReviewsController@show' )
+			->where( 'mailbox_id', '[0-9]+' )
+			->name( 'wporgpluginreview.my_reviews' );
 	}
 );
