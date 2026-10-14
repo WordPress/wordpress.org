@@ -1337,11 +1337,14 @@ class Hooks {
 	/**
 	 * Escape shortcodes in topics and replies rendered by Core feeds.
 	 *
-	 * bbPress never runs shortcodes in user content, but Core feeds such as
-	 * /support/topic-tag/foo/feed/ pass it through `the_content`, which does.
-	 * Encoding the brackets shows the shortcode as typed instead.
+	 * Core feeds such as /support/topic-tag/foo/feed/ pass user content through
+	 * `the_content`, which runs shortcodes, though bbPress never does. Encoding
+	 * the brackets shows the shortcode as typed instead.
+	 *
+	 * @param string $content Post content.
+	 * @return string
 	 */
-	function escape_shortcodes_in_feeds( $content ) {
+	public function escape_shortcodes_in_feeds( $content ) {
 		if (
 			is_feed() &&
 			in_array( get_post_type(), array( bbp_get_topic_post_type(), bbp_get_reply_post_type() ), true )
