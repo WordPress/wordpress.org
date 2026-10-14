@@ -479,12 +479,12 @@
 			}
 
 			if ( event.type === 'input' ) {
-				this.doSearch( event );
+				this.doSearch();
 			}
 		},
 
-		doSearch: function( event ) {
-			this.collection.doSearch( event.target.value );
+		doSearch: function() {
+			this.collection.doSearch( this.el.value );
 		}
 	});
 
