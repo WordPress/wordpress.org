@@ -12,7 +12,7 @@ namespace Modules\WPOrgPluginReview\Services;
 use App\User;
 
 /**
- * Tells members of the plugins team's teams apart, and which team reviews are assigned to, with the Teams module.
+ * Tells members of the plugins team's teams apart, and finds its teams, with the Teams module.
  *
  * Teams is a premium module, which most contributors don't have; without it, everyone who can see the plugins team's
  * mailbox is taken for a reviewer. Not final, so tests can answer for Teams.
@@ -34,11 +34,12 @@ class Reviewers {
 	public const REVIEW_TEAM = 'Plugin Reviews';
 
 	/**
-	 * The Teams module's folder type: one folder per team in each of its mailboxes, of the conversations assigned to it.
+	 * The name of the team that cases are assigned to: questions, guideline reports, replies to rejections, and the
+	 * like.
 	 *
-	 * @var int
+	 * @var string
 	 */
-	public const TEAM_FOLDER_TYPE = 185;
+	public const ADMIN_TEAM = 'Plugin Admin';
 
 	/**
 	 * The Teams module's alias.
@@ -83,22 +84,23 @@ class Reviewers {
 	}
 
 	/**
-	 * The Plugin Reviews team's ID: the Teams module assigns conversations to a team as if it were a user.
+	 * A team's ID: the Teams module assigns conversations to a team as if it were a user.
 	 *
+	 * @param string $name The team's name, like REVIEW_TEAM.
 	 * @return int|null Null without the Teams module; 0 when Teams has no such team, or can't tell, which no
 	 *                  conversation is assigned to.
 	 */
-	public function review_team_id(): ?int {
+	public function team_id( string $name ): ?int {
 		if ( ! \App\Module::isActive( self::TEAMS_MODULE ) ) {
 			return null;
 		}
 
 		try {
-			$id = array_search( self::REVIEW_TEAM, $this->teams(), true );
+			$id = array_search( $name, $this->teams(), true );
 
 			return false === $id ? 0 : (int) $id;
 		} catch ( \Throwable $e ) {
-			\Log::error( '[WPOrgPluginReview] Could not find the ' . self::REVIEW_TEAM . ' team: ' . $e->getMessage() );
+			\Log::error( '[WPOrgPluginReview] Could not find the ' . $name . ' team: ' . $e->getMessage() );
 
 			return 0;
 		}
