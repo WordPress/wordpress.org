@@ -154,10 +154,6 @@ class Locale extends GP_Route {
 			)
 		);
 
-		if ( $page > 1 && empty( $paged_sub_projects['projects'] ) ) {
-			return $this->die_with_404();
-		}
-
 		$data = apply_filters(
 			'gp_subprojects',
 			array(
@@ -171,6 +167,10 @@ class Locale extends GP_Route {
 		$pages        = $data['pages'];
 		$filter       = $paged_sub_projects['filter'];
 		unset( $paged_sub_projects );
+
+		if ( $page > 1 && empty( $paged_sub_projects['projects'] ) ) {
+			return $this->die_with_404();
+		}
 
 		$project_status = $project_icons = array();
 		foreach ( $sub_projects as $key => $sub_project ) {
