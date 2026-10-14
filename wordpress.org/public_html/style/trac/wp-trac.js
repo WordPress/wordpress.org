@@ -1898,7 +1898,7 @@ let wpTrac,
 							return;
 						}
 					} else {
-						keyword = object.data( 'keyword' ) || object.attr( 'data-keyword' );
+						keyword = object.attr( 'data-keyword' );
 					}
 
 					keywords = keywords.filter( ( v ) => v !== keyword );
