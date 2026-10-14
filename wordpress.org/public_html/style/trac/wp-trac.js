@@ -272,10 +272,6 @@ let wpTrac,
 	 *                            string, a DOM Node, or an array of either to insert as-is.
 	 */
 	function linkTextNodes( root, regex, replacer ) {
-		if ( ! ( regex instanceof RegExp ) || ! regex.global ) {
-			return;
-		}
-
 		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_TEXT, {
 			acceptNode( node ) {
 				if ( node.parentElement && node.parentElement.closest( 'a' ) ) {
@@ -1206,18 +1202,17 @@ let wpTrac,
 				}
 
 				const replacement = prefix + selectedText + suffix;
-				const selStart = start + prefix.length;
-				const selEnd = selStart + ( selectedText ? selectedText.length : 0 );
+				const caret = selectedText ? start + replacement.length : start + prefix.length;
 
 				textarea.setRangeText( replacement, start, end, 'preserve' );
-				textarea.setSelectionRange( selStart, selEnd );
+				textarea.setSelectionRange( caret, caret );
 			}
 
 			$( 'textarea.wikitext' ).each( function () {
 				const $textarea = $( this );
 				const textarea = $textarea[ 0 ];
 
-				if ( ! textarea || typeof textarea.setRangeText !== 'function' ) {
+				if ( ! textarea || 'function' !== typeof textarea.setRangeText ) {
 					return;
 				}
 
