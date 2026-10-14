@@ -14,6 +14,7 @@ class Hooks {
 		add_filter( 'bbp_get_forum_pagination_count',  '__return_empty_string' );
 		add_filter( 'bbp_get_form_topic_subscribed',   array( $this, 'check_topic_subscription_checkbox' ) );
 		add_action( 'pre_get_posts',                   array( $this, 'hide_non_public_forums' ) );
+		add_action( 'parse_query',                     array( $this, 'reset_singular_flags_on_user_pages' ), 20 );
 		add_filter( 'pre_option__bbp_edit_lock',       array( $this, 'increase_edit_lock_time' ) );
 		add_filter( 'pre_option__bbp_topics_per_page', array( $this, 'increase_topics_per_page' ) );
 		add_filter( 'bbp_map_meta_caps',               array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
@@ -190,6 +191,23 @@ class Hooks {
 	public function hide_non_public_forums( $query ) {
 		if ( ! is_admin() && 'forum' === $query->get( 'post_type' ) ) {
 			$query->set( 'post_status', 'publish' );
+		}
+	}
+
+	/**
+	 * Clear the singular flags on bbPress user pages.
+	 *
+	 * A stray `?page_id=` or `?pagename=` makes WP_Query flag the request as a page,
+	 * and bbPress keeps those flags when it takes over the query for a user page.
+	 * With no post to back them, get_body_class() then reads a null queried object.
+	 *
+	 * @param WP_Query $query Current query object.
+	 */
+	public function reset_singular_flags_on_user_pages( $query ) {
+		if ( $query->is_main_query() && ! empty( $query->bbp_is_single_user ) ) {
+			$query->is_page     = false;
+			$query->is_singular = false;
+			$query->is_single   = false;
 		}
 	}
 
