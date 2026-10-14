@@ -31,7 +31,7 @@ final class PluginController extends Controller {
 	 *
 	 * @var int
 	 */
-	public const MAX_PER_MINUTE = 60;
+	public const MAX_PER_MINUTE = 120;
 
 	/**
 	 * Returns the plugin of the conversation's latest review, and the ownership check.

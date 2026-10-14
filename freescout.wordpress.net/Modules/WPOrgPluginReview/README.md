@@ -50,7 +50,15 @@ Next to the participating section's heading, two buttons open its active convers
 - **Open Oldest First**: the longest waiting first.
 - **Open Progress Based**: the longest waiting first, after each has waited as long as the team's replies to it make it: the more replies, the worse the review went, and the longer the others go first. The team's emails count, its first one included when the team wrote it, and notes don't. 1 or 2 replies wait at least a day, 3 or 4 two days, 5 or 6 four, 7 or 8 five, 9 or 10 six, and more, eight. The `sockpuppet` and `sockpuppeting` tags add four days. A conversation that has waited that long is ahead of one that waited longer but has to wait more: they go by how long they've waited beyond it.
 
-The waits are `OpenOrder::WAIT_DAYS` and `OpenOrder::TAG_WAIT_DAYS`, in `Services/OpenOrder.php`. Browsers open the first tab and block the rest unless the site may open pop-ups; the page says how many were blocked, so the agent can allow them once.
+The waits are `OpenOrder::WAIT_DAYS` and `OpenOrder::TAG_WAIT_DAYS`, in `Services/OpenOrder.php`. Browsers open the first tab and block the rest unless the site may open pop-ups; the page says how many were blocked, so the agent can allow them once. Each conversation opens with `wporg_open_batch`, when the button was clicked, and `wporg_open_order`, its position, which keep their download URLs in that order.
+
+## Copying download URLs
+
+For reviewing plugins in bulk with a local tool, the header has a **Copy X URLs** button, for the same agents as the panel, once they have open conversations whose panel knows the plugin's download URL. It copies them as `"<URL1>|<URL2>|…"`: in quotes, separated by pipes, each once, in the order the agent opened them. The ones the Open buttons opened go by their batch and position, whichever tab loaded first; the others by when they loaded. The trash bin next to it forgets them all.
+
+The URLs are only in the agent's browser: each conversation's page keeps its own, in `localStorage`, as soon as WordPress.org tells the panel the plugin, and removes it as it closes. It also holds a [Web Lock](https://developer.mozilla.org/docs/Web/API/Web_Locks_API) of the same name while it's open, which the browser lets go of however the page ends, even when it crashes or closes without saying so; the URLs of pages that don't hold theirs anymore are left out, and removed. A reload keeps the page's place.
+
+So that many tabs opening at once don't lose their URLs to the 60 plugins an agent may ask WordPress.org for in a minute, the panel asks again for those it was refused, up to three times, after 20 seconds or more, and longer each time.
 
 ## WordPress.org
 

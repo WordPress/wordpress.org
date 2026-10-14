@@ -67,6 +67,30 @@
 	const FLAG_MARK = '\u2757';
 
 	/**
+	 * How many times the plugin is asked for again when the agent asked for too many in a minute, as when many tabs
+	 * open at once, and how long to wait before each, in milliseconds: longer every time, and a little more at random,
+	 * so the tabs don't all ask again at once.
+	 *
+	 * @type {Object<string, number>}
+	 */
+	const RETRY = {
+		times: 3,
+		after: 20000,
+		jitter: 10000,
+	};
+
+	/**
+	 * The parameters the worklists' Open buttons add to the conversations they open: when they were opened, and in
+	 * which position, so their plugins' download URLs keep that order.
+	 *
+	 * @type {Object<string, string>}
+	 */
+	const OPEN_PARAMS = {
+		batch: 'wporg_open_batch',
+		order: 'wporg_open_order',
+	};
+
+	/**
 	 * Copies text, and HTML if there is any, to the clipboard.
 	 *
 	 * @param {string} text Text.
@@ -389,8 +413,9 @@
 	 * @param {jQuery}                 $panel   Panel.
 	 * @param {Object}                 strings  Labels.
 	 * @param {function(Object): void} onPlugin Called with the plugin, once it's known.
+	 * @param {number}                 attempt  How many times it was asked for already.
 	 */
-	function loadPlugin( $panel, strings, onPlugin ) {
+	function loadPlugin( $panel, strings, onPlugin, attempt = 0 ) {
 		$.getJSON( String( $panel.data( 'url' ) ) )
 			.done( ( result ) => {
 				const plugin = result && result.plugin ? result.plugin : null;
@@ -409,6 +434,17 @@
 				}
 			} )
 			.fail( ( xhr ) => {
+				if ( 429 === xhr.status && attempt < RETRY.times ) {
+					const next = attempt + 1;
+					const wait =
+						next * RETRY.after + Math.random() * RETRY.jitter;
+
+					setTimeout( () => {
+						loadPlugin( $panel, strings, onPlugin, next );
+					}, wait );
+					return;
+				}
+
 				addRow( $panel.find( '.wporg-review-plugin' ), strings.status, [
 					$( '<span class="wporg-review-error">' ).text(
 						429 === xhr.status ? strings.throttled : strings.failed
@@ -723,14 +759,25 @@
 		unmarkRowsToOpen
 	);
 
-	// And open them in new tabs, in that order; browsers block all but the first, unless the site may open pop-ups.
+	/*
+	 * And open them in new tabs, in that order, telling each when and in which position it was opened; browsers block
+	 * all but the first, unless the site may open pop-ups.
+	 */
 	$( document ).on( 'click', '.wporg-worklist-open-button', function () {
 		const $button = $( this );
+		const batch = String( Date.now() );
 		let blocked = 0;
 
-		rowsToOpen( $button ).forEach( ( $row ) => {
-			const url = $row.find( 'a[href]' ).first().attr( 'href' );
-			if ( url && ! window.open( url, '_blank' ) ) {
+		rowsToOpen( $button ).forEach( ( $row, index ) => {
+			const href = $row.find( 'a[href]' ).first().attr( 'href' );
+			if ( ! href ) {
+				return;
+			}
+
+			const url = new URL( href, window.location.href );
+			url.searchParams.set( OPEN_PARAMS.batch, batch );
+			url.searchParams.set( OPEN_PARAMS.order, String( index + 1 ) );
+			if ( ! window.open( url.href, '_blank' ) ) {
 				blocked++;
 			}
 		} );
@@ -797,6 +844,9 @@
 		checkReply();
 
 		loadPlugin( $panel, strings, ( plugin ) => {
+			// For the header's Copy button, which collects the download URLs of the plugins open.
+			$( document ).trigger( 'wporgpluginreview:plugin', [ plugin ] );
+
 			if ( plugin.submitter && plugin.submitter.username ) {
 				authors.add(
 					String( plugin.submitter.username ).toLowerCase()
