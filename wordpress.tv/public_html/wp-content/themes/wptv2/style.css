@@ -1581,6 +1581,10 @@ div.sharedaddy.sd-rating-enabled .sd-like .post-likes-widget, div.sharedaddy.sd-
 	margin-bottom: 5px;
 }
 
+#commentform .comment-form__verbum .verbum-subscriptions .verbum-form .verbum-form__content .verbum__label input {
+	padding-left: 48px;
+}
+
 .commentlist li {
 	list-style: none;
 	padding: 10px 2px;
