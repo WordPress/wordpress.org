@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Str;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Jobs\ReplaceCopies;
 use Modules\WPOrgWebhooks\Services\Client;
@@ -35,49 +36,17 @@ final class Copies {
 	private const OPTION = 'wporghelpscoutimport_copies_';
 
 	/**
-	 * Status of a switch being sent.
-	 *
-	 * @var string
-	 */
-	public const STATUS_RUNNING = 'running';
-
-	/**
-	 * Status of a switch sent in full.
-	 *
-	 * @var string
-	 */
-	public const STATUS_DONE = 'done';
-
-	/**
-	 * Status of a switch WordPress.org refused; start() resumes it.
-	 *
-	 * @var string
-	 */
-	public const STATUS_FAILED = 'failed';
-
-	/**
 	 * A mailbox's switch.
 	 *
 	 * @param int $mailbox_id FreeScout mailbox ID.
-	 * @return array|null Null if it hasn't switched. Keys: status, after_id (last sent), sent, since (null for all),
-	 *                    started_at, finished_at, error, and pending (the since of a send queued behind this one).
+	 * @return array|null Null if it hasn't switched. Keys: switched_at; and of the latest send, run (its token), sent,
+	 *                    finished_at (null until it's done), and error (why WordPress.org refused a batch, which ends it).
 	 */
 	public static function get( int $mailbox_id ): ?array {
 		// Bypasses the cache, which other processes' saves don't update.
 		$state = Option::get( self::OPTION . $mailbox_id, null, true, false );
 
 		return is_array( $state ) ? $state : null;
-	}
-
-	/**
-	 * Saves a mailbox's switch.
-	 *
-	 * @param int   $mailbox_id FreeScout mailbox ID.
-	 * @param array $state      Its state, see get().
-	 * @return void
-	 */
-	public static function save( int $mailbox_id, array $state ): void {
-		Option::set( self::OPTION . $mailbox_id, $state );
 	}
 
 	/**
@@ -90,82 +59,41 @@ final class Copies {
 	}
 
 	/**
-	 * Starts sending a mailbox's imported conversations to WordPress.org, or resumes a failed send.
+	 * Switches a mailbox, and sends all of its imported conversations to WordPress.org; again if it switched already,
+	 * which stops the send before.
 	 *
 	 * @param int $mailbox_id FreeScout mailbox ID.
-	 * @return bool False if it's already running.
+	 * @return void
 	 */
-	public static function start( int $mailbox_id ): bool {
-		$started = self::change(
+	public static function start( int $mailbox_id ): void {
+		$run = Str::random( 16 );
+		self::change(
 			$mailbox_id,
-			static function ( ?array $state ): ?array {
-				if ( $state && self::STATUS_RUNNING === $state['status'] ) {
-					return null;
-				}
-
+			static function ( ?array $state ) use ( $run ): array {
 				return array(
-					'status'      => self::STATUS_RUNNING,
-					'after_id'    => (int) ( $state['after_id'] ?? 0 ),
-					'sent'        => (int) ( $state['sent'] ?? 0 ),
-					'since'       => $state['since'] ?? null,
-					'started_at'  => (string) ( $state['started_at'] ?? Carbon::now()->toDateTimeString() ),
+					'switched_at' => (string) ( $state['switched_at'] ?? Carbon::now()->toDateTimeString() ),
+					'run'         => $run,
+					'sent'        => 0,
 					'finished_at' => null,
 					'error'       => '',
-				) + array_intersect_key( (array) $state, array( 'pending' => true ) );
+				);
 			}
 		);
 
-		if ( $started ) {
-			ReplaceCopies::dispatch( $mailbox_id );
-		}
-
-		return (bool) $started;
+		ReplaceCopies::dispatch( $mailbox_id, $run );
 	}
 
 	/**
-	 * Sends what an import added or updated, if the mailbox switched. Never throws: it runs as an import finishes.
+	 * Sends a switched mailbox's imported conversations again, for what an import added or updated. Never throws: it
+	 * runs as an import finishes.
 	 *
-	 * Updated conversations are sent again, as HelpScout's webhook may have rewritten their copies. A running send gets
-	 * them queued behind it; a failed one restarts with them.
-	 *
-	 * @param int    $mailbox_id FreeScout mailbox ID.
-	 * @param string $since      When the import started.
+	 * @param int $mailbox_id FreeScout mailbox ID.
 	 * @return void
 	 */
-	public static function catch_up( int $mailbox_id, string $since ): void {
+	public static function send_again( int $mailbox_id ): void {
 		try {
-			if ( ! self::get( $mailbox_id ) || ! self::available() ) {
-				return;
-			}
-
-			$restarted = false;
-			self::change(
-				$mailbox_id,
-				static function ( ?array $state ) use ( $since, &$restarted ): ?array {
-					if ( ! $state ) {
-						return null;
-					}
-
-					if ( self::STATUS_RUNNING === $state['status'] ) {
-						$state['pending'] = array_key_exists( 'pending', $state ) ? self::wider( $state['pending'], $since ) : $since;
-
-						return $state;
-					}
-
-					// A failed send still owes its own range; a finished one doesn't.
-					$wider = self::STATUS_FAILED === $state['status'] ? self::wider( $state['since'] ?? null, $since ) : $since;
-					if ( array_key_exists( 'pending', $state ) ) {
-						$wider = self::wider( $state['pending'], $wider );
-					}
-
-					$restarted = true;
-
-					return self::restart( $state, $wider );
-				}
-			);
-
-			if ( $restarted ) {
-				ReplaceCopies::dispatch( $mailbox_id );
+			if ( self::get( $mailbox_id ) && self::available() ) {
+				self::start( $mailbox_id );
 			}
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgHelpScoutImport] Could not point WordPress.org at mailbox ' . $mailbox_id . '\'s new conversations: ' . $e->getMessage() );
@@ -173,117 +101,24 @@ final class Copies {
 	}
 
 	/**
-	 * Notes how far a send got.
-	 *
-	 * @param int $mailbox_id FreeScout mailbox ID.
-	 * @param int $after_id   The last imported conversation sent.
-	 * @param int $count      How many the batch sent.
-	 * @return void
-	 */
-	public static function advance( int $mailbox_id, int $after_id, int $count ): void {
-		self::change(
-			$mailbox_id,
-			static function ( ?array $state ) use ( $after_id, $count ): ?array {
-				if ( ! $state || self::STATUS_RUNNING !== $state['status'] ) {
-					return null;
-				}
-
-				$state['after_id'] = $after_id;
-				$state['sent']     = (int) $state['sent'] + $count;
-
-				return $state;
-			}
-		);
-	}
-
-	/**
-	 * Ends a finished send, or starts the one queued behind it.
-	 *
-	 * @param int $mailbox_id FreeScout mailbox ID.
-	 * @return bool Whether a queued send started.
-	 */
-	public static function finish( int $mailbox_id ): bool {
-		$state = self::change(
-			$mailbox_id,
-			static function ( ?array $state ): ?array {
-				if ( ! $state || self::STATUS_RUNNING !== $state['status'] ) {
-					return null;
-				}
-
-				if ( array_key_exists( 'pending', $state ) ) {
-					return self::restart( $state, $state['pending'] );
-				}
-
-				$state['status']      = self::STATUS_DONE;
-				$state['finished_at'] = Carbon::now()->toDateTimeString();
-
-				return $state;
-			}
-		);
-
-		return $state && self::STATUS_RUNNING === $state['status'];
-	}
-
-	/**
-	 * Marks a send WordPress.org refused as failed; start() resumes it.
+	 * Notes how far a send got, or that it's done, or failed.
 	 *
 	 * @param int    $mailbox_id FreeScout mailbox ID.
-	 * @param string $error      What went wrong.
-	 * @return void
+	 * @param string $run        The send's token.
+	 * @param array  $changes    Keys of the switch to change: sent, finished_at, or error.
+	 * @return bool False if a later send took over.
 	 */
-	public static function fail( int $mailbox_id, string $error ): void {
-		self::change(
+	public static function note( int $mailbox_id, string $run, array $changes ): bool {
+		return null !== self::change(
 			$mailbox_id,
-			static function ( ?array $state ) use ( $error ): ?array {
-				if ( ! $state || self::STATUS_RUNNING !== $state['status'] ) {
-					return null;
-				}
-
-				$state['status'] = self::STATUS_FAILED;
-				$state['error']  = $error;
-
-				return $state;
+			static function ( ?array $state ) use ( $run, $changes ): ?array {
+				return $state && ( $state['run'] ?? '' ) === $run ? $changes + $state : null;
 			}
 		);
 	}
 
 	/**
-	 * A send started again from the first imported conversation.
-	 *
-	 * @param array       $state The switch.
-	 * @param string|null $since Only conversations imported or updated since then; null for all.
-	 * @return array
-	 */
-	private static function restart( array $state, ?string $since ): array {
-		unset( $state['pending'] );
-
-		return array(
-			'status'      => self::STATUS_RUNNING,
-			'after_id'    => 0,
-			'sent'        => 0,
-			'since'       => $since,
-			'finished_at' => null,
-			'error'       => '',
-		) + $state;
-	}
-
-	/**
-	 * The wider of two since values: the earlier time, or null for all.
-	 *
-	 * @param string|null $one   A time; null for all.
-	 * @param string|null $other Another.
-	 * @return string|null
-	 */
-	private static function wider( ?string $one, ?string $other ): ?string {
-		if ( null === $one || null === $other ) {
-			return null;
-		}
-
-		return Carbon::parse( $one )->lessThan( Carbon::parse( $other ) ) ? $one : $other;
-	}
-
-	/**
-	 * Changes a mailbox's switch under a row lock, so jobs, imports, and the button don't undo each other.
+	 * Changes a mailbox's switch under a row lock, so a send and the next one's start don't undo each other.
 	 *
 	 * @param int      $mailbox_id FreeScout mailbox ID.
 	 * @param callable $change     Takes the switch, or null, and returns it changed, or null to leave it.
@@ -321,16 +156,6 @@ final class Copies {
 	}
 
 	/**
-	 * Marks an imported conversation as updated, for catch_up().
-	 *
-	 * @param Conversation $conversation Conversation.
-	 * @return void
-	 */
-	public static function touch( Conversation $conversation ): void {
-		ImportedConversation::query()->where( 'conversation_id', $conversation->id )->update( array( 'updated_at' => Carbon::now() ) );
-	}
-
-	/**
 	 * How many conversations were imported into a mailbox.
 	 *
 	 * @param int $mailbox_id FreeScout mailbox ID.
@@ -343,23 +168,16 @@ final class Copies {
 	/**
 	 * The next conversations imported into a mailbox to send, in the order they were imported.
 	 *
-	 * @param int         $mailbox_id FreeScout mailbox ID.
-	 * @param int         $after_id   ID of the last one sent.
-	 * @param int         $limit      How many.
-	 * @param string|null $since      Only those imported or updated since then.
+	 * @param int $mailbox_id FreeScout mailbox ID.
+	 * @param int $after_id   ID of the last one sent.
+	 * @param int $limit      How many.
 	 * @return Collection With helpscout_id, conversation_id, and their conversation's number, state, and status.
 	 */
-	public static function batch( int $mailbox_id, int $after_id, int $limit, ?string $since = null ): Collection {
+	public static function batch( int $mailbox_id, int $after_id, int $limit ): Collection {
 		$table = ( new ImportedConversation() )->getTable();
 
 		return self::imported( $mailbox_id )
 			->where( $table . '.id', '>', $after_id )
-			->when(
-				null !== $since,
-				static function ( Builder $query ) use ( $table, $since ): Builder {
-					return $query->where( $table . '.updated_at', '>=', $since );
-				}
-			)
 			->orderBy( $table . '.id' )
 			->limit( $limit )
 			->get(
@@ -381,8 +199,7 @@ final class Copies {
 	 * One merged away is sent as the conversation it went into, which takes over its copy's plugins and themes.
 	 *
 	 * @param ImportedConversation $imported An imported conversation, as batch() reads it.
-	 * @return array HelpScout's ID, FreeScout's ID and number, whether to delete the copy, and whether it's merged into
-	 *               the conversation that ID names.
+	 * @return array HelpScout's ID, FreeScout's ID and number, and whether to delete the copy.
 	 */
 	public static function request( ImportedConversation $imported ): array {
 		$request = array(
@@ -390,7 +207,6 @@ final class Copies {
 			'id'           => (int) $imported->conversation_id,
 			'number'       => (int) $imported->number,
 			'delete'       => self::gone( (int) $imported->state, (int) $imported->status ),
-			'merged'       => false,
 		);
 
 		$into = Conversation::STATE_DELETED === (int) $imported->state ? self::merged_into( (int) $imported->conversation_id ) : null;
@@ -399,7 +215,6 @@ final class Copies {
 				'id'     => (int) $into->id,
 				'number' => (int) $into->number,
 				'delete' => self::gone( (int) $into->state, (int) $into->status ),
-				'merged' => true,
 			) + $request;
 		}
 

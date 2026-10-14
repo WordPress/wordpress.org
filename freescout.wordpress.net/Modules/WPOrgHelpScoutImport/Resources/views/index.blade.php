@@ -216,7 +216,7 @@
 
 		@if ( count( $copies ) )
 			<h3 class="margin-top">{{ __('WordPress.org') }}</h3>
-			<p class="text-help">{{ __('WordPress.org keeps a copy of conversations, which the plugin directory links to, and replies to uploads in. It points at HelpScout until a mailbox switches to FreeScout: once HelpScout’s webhook leaves the mailbox alone, and after its last import, point WordPress.org at the conversations imported from HelpScout, together with moving the mailbox’s email. Until then, what happens to imported conversations in FreeScout isn’t sent to WordPress.org; after, it is, and later imports are pointed at as they finish. See the module’s README for every step.') }}</p>
+			<p class="text-help">{{ __('WordPress.org keeps a copy of conversations, which the plugin directory links to, and replies to uploads in. It points at HelpScout until a mailbox switches to FreeScout: once HelpScout’s webhook leaves the mailbox alone, and after its last import, point WordPress.org at the conversations imported from HelpScout, together with moving the mailbox’s email. Until then, what happens to imported conversations in FreeScout isn’t sent to WordPress.org; after, it is, and every import that finishes sends them all again. Sending them again changes nothing. See the module’s README for every step.') }}</p>
 			<table class="table table-striped">
 				<thead>
 					<tr>
@@ -235,23 +235,26 @@
 							<td>
 								@if ( ! $state )
 									{{ __('HelpScout') }}
-								@elseif ( Modules\WPOrgHelpScoutImport\Services\Copies::STATUS_RUNNING === $state['status'] )
-									{{ __('FreeScout, :sent of :total so far', [ 'sent' => number_format( $state['sent'] ), 'total' => number_format( $copy['total'] ) ]) }}
-								@elseif ( Modules\WPOrgHelpScoutImport\Services\Copies::STATUS_FAILED === $state['status'] )
-									{{ __('FreeScout, :sent of :total so far', [ 'sent' => number_format( $state['sent'] ), 'total' => number_format( $copy['total'] ) ]) }}
-									<br/><small class="text-danger">{{ $state['error'] }}</small>
 								@else
-									{{ __('FreeScout, since :date', [ 'date' => App\User::dateFormat( $state['started_at'], 'M j, Y H:i' ) ]) }}
+									{{ __('FreeScout, since :date', [ 'date' => App\User::dateFormat( $state['switched_at'], 'M j, Y H:i' ) ]) }}
+									<br/><small>
+										@if ( $state['finished_at'] )
+											{{ __(':sent sent, done :date', [ 'sent' => number_format( $state['sent'] ), 'date' => App\User::dateFormat( $state['finished_at'], 'M j, Y H:i' ) ]) }}
+										@else
+											{{ __(':sent of :total sent so far', [ 'sent' => number_format( $state['sent'] ), 'total' => number_format( $copy['total'] ) ]) }}
+										@endif
+									</small>
+									@if ( '' !== $state['error'] )
+										<br/><small class="text-danger">{{ $state['error'] }}</small>
+									@endif
 								@endif
 							</td>
 							<td>
-								@if ( ! $state || Modules\WPOrgHelpScoutImport\Services\Copies::STATUS_FAILED === $state['status'] )
-									<form method="POST" action="{{ route( 'wporghelpscoutimport.copies' ) }}">
-										{{ csrf_field() }}
-										<input type="hidden" name="mailbox_id" value="{{ $copy['mailbox']->id }}">
-										<button type="submit" class="btn btn-default btn-xs">{{ $state ? __('Carry on') : __('Point WordPress.org at FreeScout') }}</button>
-									</form>
-								@endif
+								<form method="POST" action="{{ route( 'wporghelpscoutimport.copies' ) }}">
+									{{ csrf_field() }}
+									<input type="hidden" name="mailbox_id" value="{{ $copy['mailbox']->id }}">
+									<button type="submit" class="btn btn-default btn-xs">{{ $state ? __('Send again') : __('Point WordPress.org at FreeScout') }}</button>
+								</form>
 							</td>
 						</tr>
 					@endforeach

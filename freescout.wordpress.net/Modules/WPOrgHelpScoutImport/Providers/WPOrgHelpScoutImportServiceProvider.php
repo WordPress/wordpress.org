@@ -143,20 +143,6 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 			3
 		);
 
-		// Marks updated conversations for Copies::catch_up().
-		\Eventy::addAction(
-			'wporghelpscoutimport.conversation_imported',
-			static function ( mixed $conversation = null ): void {
-				try {
-					if ( $conversation instanceof Conversation ) {
-						Copies::touch( $conversation );
-					}
-				} catch ( \Throwable $e ) {
-					\Log::error( '[WPOrgHelpScoutImport] Could not mark conversation ' . $conversation->id . ' as imported again: ' . $e->getMessage() );
-				}
-			}
-		);
-
 		// Imported conversations' events leave the copy alone until their mailbox switches.
 		\Eventy::addFilter(
 			'wporgwebhooks.copy',

@@ -263,7 +263,7 @@ final class ImportPage implements ShouldQueue {
 			$run->finished_at = Carbon::now();
 			if ( $this->save( $run ) ) {
 				// Send what this run imported, if the mailbox switched.
-				Copies::catch_up( (int) $run->mailbox_id, (string) $run->started_at );
+				Copies::send_again( (int) $run->mailbox_id );
 			}
 
 			return;

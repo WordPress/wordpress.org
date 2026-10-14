@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgHelpScoutImport\Jobs;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -26,11 +27,11 @@ final class ReplaceCopies implements ShouldQueue {
 	use Queueable;
 
 	/**
-	 * How many conversations go in a request.
+	 * How many conversations go in a request; each takes WordPress.org a handful of queries.
 	 *
 	 * @var int
 	 */
-	public const BATCH = 1000;
+	public const BATCH = 250;
 
 	/**
 	 * The endpoint on api.wordpress.org.
@@ -61,35 +62,49 @@ final class ReplaceCopies implements ShouldQueue {
 	public $mailbox_id;
 
 	/**
+	 * Token of the send it's part of; a later send stops it.
+	 *
+	 * @var string
+	 */
+	public $run;
+
+	/**
+	 * ID of the last imported conversation sent.
+	 *
+	 * @var int
+	 */
+	public $after_id;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param int $mailbox_id FreeScout mailbox ID.
+	 * @param int    $mailbox_id FreeScout mailbox ID.
+	 * @param string $run        Token of the send it's part of.
+	 * @param int    $after_id   ID of the last imported conversation sent.
 	 */
-	public function __construct( int $mailbox_id ) {
+	public function __construct( int $mailbox_id, string $run, int $after_id = 0 ) {
 		$this->mailbox_id = $mailbox_id;
+		$this->run        = $run;
+		$this->after_id   = $after_id;
 	}
 
 	/**
 	 * Sends the next batch, and queues the one after.
 	 *
-	 * Failures don't throw: the worker would retry anything thrown, and the switch would be left running.
+	 * Failures don't throw, but are noted for the import page, which can send everything again.
 	 *
 	 * @return void
 	 */
 	public function handle(): void {
 		$state = Copies::get( $this->mailbox_id );
-		if ( ! $state || Copies::STATUS_RUNNING !== $state['status'] ) {
+		if ( ! $state || ( $state['run'] ?? '' ) !== $this->run ) {
 			return;
 		}
 
 		try {
-			$batch = Copies::batch( $this->mailbox_id, (int) $state['after_id'], self::BATCH, $state['since'] ?? null );
-
+			$batch = Copies::batch( $this->mailbox_id, $this->after_id, self::BATCH );
 			if ( $batch->isEmpty() ) {
-				// finish() starts the send that imports queued meanwhile, if any.
-				if ( Copies::finish( $this->mailbox_id ) ) {
-					self::dispatch( $this->mailbox_id );
-				}
+				Copies::note( $this->mailbox_id, $this->run, array( 'finished_at' => Carbon::now()->toDateTimeString() ) );
 
 				return;
 			}
@@ -106,13 +121,13 @@ final class ReplaceCopies implements ShouldQueue {
 			}
 
 			\Log::error( '[WPOrgHelpScoutImport] Could not point WordPress.org at mailbox ' . $this->mailbox_id . '\'s conversations: ' . $e->getMessage() );
-			Copies::fail( $this->mailbox_id, $e->getMessage() );
+			Copies::note( $this->mailbox_id, $this->run, array( 'error' => $e->getMessage() ) );
 
 			return;
 		}
 
-		Copies::advance( $this->mailbox_id, (int) $batch->last()->id, $batch->count() );
-
-		self::dispatch( $this->mailbox_id );
+		if ( Copies::note( $this->mailbox_id, $this->run, array( 'sent' => (int) $state['sent'] + $batch->count() ) ) ) {
+			self::dispatch( $this->mailbox_id, $this->run, (int) $batch->last()->id );
+		}
 	}
 }

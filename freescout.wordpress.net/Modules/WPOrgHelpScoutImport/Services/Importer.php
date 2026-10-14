@@ -271,7 +271,6 @@ final class Importer {
 				$conversation->save();
 				$conversation->timestamps = true;
 				self::update_counters( $conversation->mailbox );
-				$this->announce( $conversation, $helpscout_id );
 
 				return self::UPDATED;
 			}
@@ -393,8 +392,6 @@ final class Importer {
 			self::update_counters( $other_mailbox );
 		}
 
-		$this->announce( $conversation, $helpscout_id );
-
 		return $imported ? self::UPDATED : self::IMPORTED;
 	}
 
@@ -414,22 +411,6 @@ final class Importer {
 			}
 
 			$folder->updateCounters();
-		}
-	}
-
-	/**
-	 * Tells other modules a conversation was imported or updated, which happens without core's events. Never throws: the
-	 * conversation is imported by now.
-	 *
-	 * @param Conversation $conversation Conversation.
-	 * @param int          $helpscout_id HelpScout's ID for it.
-	 * @return void
-	 */
-	private function announce( Conversation $conversation, int $helpscout_id ): void {
-		try {
-			\Eventy::action( 'wporghelpscoutimport.conversation_imported', $conversation, $helpscout_id );
-		} catch ( \Throwable $e ) {
-			\Log::error( '[WPOrgHelpScoutImport] Could not announce conversation ' . $conversation->id . ': ' . $e->getMessage() );
 		}
 	}
 

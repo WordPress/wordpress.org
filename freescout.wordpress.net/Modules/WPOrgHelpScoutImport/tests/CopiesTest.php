@@ -87,7 +87,7 @@ final class CopiesTest extends TestCase {
 
 	/**
 	 * Each batch is sent, signed, to api.wordpress.org, which the local environment's mock answers, and the next is
-	 * queued until none are left.
+	 * queued after it until none are left, counting what was sent.
 	 *
 	 * @return void
 	 */
@@ -101,143 +101,71 @@ final class CopiesTest extends TestCase {
 		$this->import( 1000000028 );
 		$this->import( 1000000029 );
 		Copies::start( (int) $this->mailbox->id );
+		$run  = $this->send_token();
+		$last = (int) ImportedConversation::query()->max( 'id' );
 
-		( new ReplaceCopies( (int) $this->mailbox->id ) )->handle();
+		( new ReplaceCopies( (int) $this->mailbox->id, $run ) )->handle();
 
-		$state = Copies::get( (int) $this->mailbox->id );
-		$this->assertSame( array( Copies::STATUS_RUNNING, 2 ), array( $state['status'], $state['sent'] ) );
+		Queue::assertPushed(
+			ReplaceCopies::class,
+			static function ( ReplaceCopies $job ) use ( $run, $last ): bool {
+				return $run === $job->run && $last === $job->after_id;
+			}
+		);
+		$this->assertSame( array( 2, null ), array( $this->state()['sent'], $this->state()['finished_at'] ) );
+
+		( new ReplaceCopies( (int) $this->mailbox->id, $run, $last ) )->handle();
+
 		Queue::assertPushed( ReplaceCopies::class, 2 );
-
-		( new ReplaceCopies( (int) $this->mailbox->id ) )->handle();
-
-		$this->assertSame( Copies::STATUS_DONE, Copies::get( (int) $this->mailbox->id )['status'] );
+		$this->assertNotNull( $this->state()['finished_at'] );
 	}
 
 	/**
-	 * A batch WordPress.org refuses on its last try fails the switch, which can resume.
+	 * A batch WordPress.org refuses on its last try ends the send, noting why until it's sent again.
 	 *
 	 * @return void
 	 */
-	public function test_failed_batches_stop_the_switch_until_carried_on(): void {
+	public function test_failed_batches_are_noted_until_sent_again(): void {
 		$this->import( 1000000028 );
 		Copies::start( (int) $this->mailbox->id );
 
 		$queue_job = $this->createMock( DatabaseJob::class );
 		$queue_job->method( 'attempts' )->willReturn( 3 );
-		$job = new ReplaceCopies( (int) $this->mailbox->id );
+		$job = new ReplaceCopies( (int) $this->mailbox->id, $this->send_token() );
 		$job->setJob( $queue_job );
 		$job->handle();
 
-		$state = Copies::get( (int) $this->mailbox->id );
-		$this->assertSame( array( Copies::STATUS_FAILED, 0 ), array( $state['status'], $state['after_id'] ) );
-		$this->assertNotSame( '', $state['error'] );
-
-		$this->assertTrue( Copies::start( (int) $this->mailbox->id ) );
-		$this->assertFalse( Copies::start( (int) $this->mailbox->id ) );
-	}
-
-	/**
-	 * Imports finishing after the switch send what they added or updated; before it, nothing is sent.
-	 *
-	 * @return void
-	 */
-	public function test_catches_up_on_imports_after_the_switch(): void {
-		$this->import( 1000000027 );
-		$again = $this->import( 1000000028 );
-		ImportedConversation::query()->update( array( 'updated_at' => '2026-10-01 09:00:00' ) );
-
-		Copies::catch_up( (int) $this->mailbox->id, '2026-10-02 10:00:00' );
-		Queue::assertNotPushed( ReplaceCopies::class );
-
-		Copies::save(
-			(int) $this->mailbox->id,
-			array(
-				'status'      => Copies::STATUS_DONE,
-				'after_id'    => 99,
-				'sent'        => 2,
-				'since'       => null,
-				'started_at'  => '2026-10-01 10:00:00',
-				'finished_at' => '2026-10-01 10:05:00',
-				'error'       => '',
-			)
-		);
-		$since = (string) now();
-		\Eventy::action( 'wporghelpscoutimport.conversation_imported', $again, 1000000028 );
-		$new = $this->import( 1000000029 );
-
-		Copies::catch_up( (int) $this->mailbox->id, $since );
-
+		$this->assertNotSame( '', $this->state()['error'] );
 		Queue::assertPushed( ReplaceCopies::class, 1 );
-		$state = Copies::get( (int) $this->mailbox->id );
-		$this->assertSame( array( Copies::STATUS_RUNNING, 0, $since ), array( $state['status'], $state['after_id'], $state['since'] ) );
-		$this->assertSame(
-			array( (int) $again->id, (int) $new->id ),
-			Copies::batch( (int) $this->mailbox->id, 0, 10, $since )->pluck( 'conversation_id' )->map( 'intval' )->all()
-		);
-	}
 
-	/**
-	 * Starting while it's running starts nothing more, as two chains of batches would send everything twice.
-	 *
-	 * @return void
-	 */
-	public function test_starts_once(): void {
-		$this->assertTrue( Copies::start( (int) $this->mailbox->id ) );
-		$this->assertFalse( Copies::start( (int) $this->mailbox->id ) );
-
-		Queue::assertPushed( ReplaceCopies::class, 1 );
-	}
-
-	/**
-	 * An import finishing during a send queues its conversations behind it, from the start; a second one widens that.
-	 *
-	 * @return void
-	 */
-	public function test_catching_up_while_sending_sends_after_it(): void {
-		$sent  = $this->answer();
-		$first = $this->import( 1000000027 );
-		$again = $this->import( 1000000028 );
-		ImportedConversation::query()->update( array( 'updated_at' => '2026-10-01 09:00:00' ) );
 		Copies::start( (int) $this->mailbox->id );
 
-		Copies::catch_up( (int) $this->mailbox->id, '2026-10-03 10:00:00' );
-		Copies::catch_up( (int) $this->mailbox->id, '2026-10-02 10:00:00' );
-
-		Queue::assertPushed( ReplaceCopies::class, 1 );
-		$this->assertSame( '2026-10-02 10:00:00', Copies::get( (int) $this->mailbox->id )['pending'] );
-
-		// Updated after the send passed it.
-		$this->run_batches();
-		ImportedConversation::query()->where( 'conversation_id', $again->id )->update( array( 'updated_at' => '2026-10-02 11:00:00' ) );
-		$this->run_batches();
-		$this->run_batches();
-		$this->run_batches();
-
-		$this->assertCount( 2, $sent );
-		$this->assertSame( array( (int) $first->id, (int) $again->id ), array_column( $sent[0]['copies'], 'id' ) );
-		$this->assertSame( array( (int) $again->id ), array_column( $sent[1]['copies'], 'id' ) );
-
-		$state = Copies::get( (int) $this->mailbox->id );
-		$this->assertSame( array( Copies::STATUS_DONE, '2026-10-02 10:00:00' ), array( $state['status'], $state['since'] ) );
-		$this->assertArrayNotHasKey( 'pending', $state );
+		$this->assertSame( '', $this->state()['error'] );
+		Queue::assertPushed( ReplaceCopies::class, 2 );
 	}
 
 	/**
-	 * Catching up on a failed send restarts it with the wider range, so nothing it hadn't sent is left out.
+	 * Imports finishing after the switch send everything again, which stops the send before and keeps the switch's
+	 * date; before it, nothing is sent.
 	 *
 	 * @return void
 	 */
-	public function test_catching_up_after_a_failure_sends_everything_it_had_not(): void {
-		$this->answer();
+	public function test_imports_after_the_switch_send_everything_again(): void {
+		config( array( 'wporgwebhooks.secret' => 'test-secret' ) );
 		$this->import( 1000000028 );
-		foreach ( array( null, '2026-10-01 10:00:00' ) as $failed_since ) {
-			$this->save_state( Copies::STATUS_FAILED, $failed_since );
 
-			Copies::catch_up( (int) $this->mailbox->id, '2026-10-02 10:00:00' );
+		Copies::send_again( (int) $this->mailbox->id );
+		Queue::assertNotPushed( ReplaceCopies::class );
 
-			$state = Copies::get( (int) $this->mailbox->id );
-			$this->assertSame( array( Copies::STATUS_RUNNING, 0, 0, $failed_since ), array( $state['status'], $state['after_id'], $state['sent'], $state['since'] ) );
-		}
+		Copies::start( (int) $this->mailbox->id );
+		$before = $this->state();
+		Copies::send_again( (int) $this->mailbox->id );
+
+		$this->assertNotSame( $before['run'], $this->send_token() );
+		$this->assertSame( $before['switched_at'], $this->state()['switched_at'] );
+		Queue::assertPushed( ReplaceCopies::class, 2 );
+
+		( new ReplaceCopies( (int) $this->mailbox->id, $before['run'] ) )->handle();
 
 		Queue::assertPushed( ReplaceCopies::class, 2 );
 	}
@@ -302,13 +230,12 @@ final class CopiesTest extends TestCase {
 					'id'     => (int) $kept->id,
 					'number' => (int) $kept->number,
 					'delete' => false,
-					'merged' => true,
 				),
-				array_intersect_key( $copies[ $helpscout_id ], array_flip( array( 'id', 'number', 'delete', 'merged' ) ) )
+				array_intersect_key( $copies[ $helpscout_id ], array_flip( array( 'id', 'number', 'delete' ) ) )
 			);
 		}
-		$this->assertSame( array( (int) $kept->id, false, false ), array( $copies[1000000025]['id'], $copies[1000000025]['delete'], $copies[1000000025]['merged'] ) );
-		$this->assertSame( array( (int) $trashed->id, true, true ), array( $copies[1000000029]['id'], $copies[1000000029]['delete'], $copies[1000000029]['merged'] ) );
+		$this->assertSame( array( (int) $kept->id, false ), array( $copies[1000000025]['id'], $copies[1000000025]['delete'] ) );
+		$this->assertSame( array( (int) $trashed->id, true ), array( $copies[1000000029]['id'], $copies[1000000029]['delete'] ) );
 	}
 
 	/**
@@ -325,7 +252,7 @@ final class CopiesTest extends TestCase {
 		$this->assertFalse( \Eventy::filter( 'wporgwebhooks.copy', true, null, $id, (int) $this->mailbox->id ) );
 		$this->assertSame( 1000000028, \Eventy::filter( 'wporgwebhooks.helpscout_id', 0, null, $id ) );
 
-		$this->save_state( Copies::STATUS_DONE, null );
+		Copies::start( (int) $this->mailbox->id );
 		$this->assertTrue( \Eventy::filter( 'wporgwebhooks.copy', true, null, $id, (int) $this->mailbox->id ) );
 	}
 
@@ -335,29 +262,25 @@ final class CopiesTest extends TestCase {
 	 * @return void
 	 */
 	private function run_batches(): void {
-		( new ReplaceCopies( (int) $this->mailbox->id ) )->handle();
+		( new ReplaceCopies( (int) $this->mailbox->id, $this->send_token() ) )->handle();
 	}
 
 	/**
-	 * Saves the mailbox's switch.
+	 * The mailbox's switch.
 	 *
-	 * @param string      $status Status.
-	 * @param string|null $since  Only conversations imported since then; null for all.
-	 * @return void
+	 * @return array
 	 */
-	private function save_state( string $status, ?string $since ): void {
-		Copies::save(
-			(int) $this->mailbox->id,
-			array(
-				'status'      => $status,
-				'after_id'    => 5,
-				'sent'        => 5,
-				'since'       => $since,
-				'started_at'  => '2026-10-01 10:00:00',
-				'finished_at' => null,
-				'error'       => Copies::STATUS_FAILED === $status ? 'Request to replace-copies.php got a 500 response.' : '',
-			)
-		);
+	private function state(): array {
+		return (array) Copies::get( (int) $this->mailbox->id );
+	}
+
+	/**
+	 * The token of the mailbox's latest send.
+	 *
+	 * @return string
+	 */
+	private function send_token(): string {
+		return (string) ( $this->state()['run'] ?? '' );
 	}
 
 	/**

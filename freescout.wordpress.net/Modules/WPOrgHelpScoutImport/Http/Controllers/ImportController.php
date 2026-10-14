@@ -89,7 +89,7 @@ final class ImportController extends Controller {
 	}
 
 	/**
-	 * Switches a mailbox's conversations in WordPress.org's copy to FreeScout, or resumes a failed switch.
+	 * Switches a mailbox's conversations in WordPress.org's copy to FreeScout, or sends them again.
 	 *
 	 * @param Request $request Request.
 	 * @return RedirectResponse
@@ -104,9 +104,7 @@ final class ImportController extends Controller {
 			return self::back_with_error( __( 'Pointing WordPress.org at FreeScout needs the WP.org Webhooks module, set up with WPORG_API_SECRET.' ) );
 		}
 
-		if ( ! Copies::start( (int) $mailbox->id ) ) {
-			return self::back_with_error( __( 'WordPress.org is already being pointed at :name.', array( 'name' => $mailbox->name ) ) );
-		}
+		Copies::start( (int) $mailbox->id );
 
 		return redirect()
 			->route( 'wporghelpscoutimport.index' )
