@@ -256,8 +256,12 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 			);
 		}
 
-		// And with conversations that open, close, change hands, or are deleted, merged, or imported.
+		/*
+		 * And with conversations that open, close, change hands, or are deleted, merged, or imported. An author's reply
+		 * makes a conversation active without core's status_changed.
+		 */
 		$hooks = array(
+			'conversation.customer_replied',
 			'conversation.status_changed',
 			'conversation.user_changed',
 			'conversation.state_changed',

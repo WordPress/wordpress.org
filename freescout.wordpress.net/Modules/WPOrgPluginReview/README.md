@@ -31,7 +31,7 @@ The plugins team's mailbox gets a **My Reviews** folder, right after Unassigned 
 
 - **Reviews I'm participating in**: ones the agent sent a reply to. Notes and drafts don't count.
 - **Reviews I'm mentioned in**: ones with a note that mentions the agent, with the Mentions module's `@` mentions. Mentions of a team the agent is in don't count.
-- **Reviews that need a reviewer**: ones with `PRTRN` in a note.
+- **Reviews that need a reviewer**: ones with `PRTRN` in a note, and ones no reviewer replied to yet: no member of the plugins team's teams, as they are now, so replies from other agents, workflows, and former members don't count. Without the Teams module, any agent's reply does.
 
 Each conversation shows only in the first section it belongs to, the longest waiting first, with its tags and how many threads it has, as FreeScout counts them: emails, not notes. Every one shows, without pages. The reviewer at the top switches to another member of the plugins team's teams, to see theirs. Agents who may only see the conversations assigned to them see only those here too.
 
@@ -39,7 +39,7 @@ Reviews someone is participating in can be selected, and changed together with F
 
 Without the Teams module, the sections are of the mailbox's open and pending conversations, whoever they're assigned to. With it, but without a team named Plugin Reviews, they're empty.
 
-The folder isn't stored: it's added to the mailbox's folders as they're listed. Its count is how many reviews the agent is participating in. Every reviewer's count comes from one query, kept in FreeScout's cache for up to ten minutes, and forgotten sooner when an agent's reply is published or removed, or a conversation in the mailbox changes status, assignee, or mailbox, or is deleted, merged, or imported. Agents who may only see the conversations assigned to them have theirs counted on every page. The page takes one query for which sections every conversation belongs to, and a few to load the ones that do and their tags; with a thousand open conversations, that's a few tens of milliseconds.
+The folder isn't stored: it's added to the mailbox's folders as they're listed. Its count is how many active reviews the agent is participating in: the ones whose author wrote last, like core's folders count. Every reviewer's count comes from one query, kept in FreeScout's cache for up to ten minutes, and forgotten sooner when an agent's reply is published or removed, an author replies, or a conversation in the mailbox changes status, assignee, or mailbox, or is deleted, merged, or imported. Agents who may only see the conversations assigned to them have theirs counted on every page. The page takes one query for which sections every conversation belongs to, and a few to load the ones that do and their tags; with a thousand open conversations, that's a few tens of milliseconds.
 
 ## WordPress.org
 

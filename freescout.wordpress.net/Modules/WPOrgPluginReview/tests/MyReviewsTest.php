@@ -118,17 +118,19 @@ final class MyReviewsTest extends TestCase {
 
 	/**
 	 * What doesn't count: notes as replies, drafts, mentions and PRTRN in replies, mentions of someone else, and
-	 * conversations that are closed, spam, or deleted.
+	 * conversations that are closed, spam, or deleted. All have a reviewer's reply, so they don't need a reviewer.
 	 *
 	 * @return void
 	 */
 	public function test_sections_leave_out_what_doesnt_count(): void {
-		$this->conversation( array( array( Thread::TYPE_NOTE, $this->reviewer, 'Looked at it.' ) ) );
+		$reviewed = array( Thread::TYPE_MESSAGE, $this->colleague, 'Review sent.' );
+		$this->conversation( array( $reviewed, array( Thread::TYPE_NOTE, $this->reviewer, 'Looked at it.' ) ) );
 		$this->conversation( array( array( Thread::TYPE_MESSAGE, $this->colleague, $this->mention( $this->reviewer ) . ' PRTRN' ) ) );
-		$this->conversation( array( array( Thread::TYPE_NOTE, $this->colleague, $this->mention( $this->colleague ) . ' <b data-mentioned-id="' . $this->reviewer->id . '0">@Someone</b>' ) ) );
+		$this->conversation( array( $reviewed, array( Thread::TYPE_NOTE, $this->colleague, $this->mention( $this->colleague ) . ' <b data-mentioned-id="' . $this->reviewer->id . '0">@Someone</b>' ) ) );
 
-		$draft = $this->conversation( array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Not sent. PRTRN' ) ) );
-		Thread::where( 'conversation_id', $draft->id )->update( array( 'state' => Thread::STATE_DRAFT ) );
+		$draft  = $this->conversation( array( $reviewed ) );
+		$unsent = $this->create_thread( $draft, Thread::TYPE_MESSAGE, 'Not sent. PRTRN', $this->reviewer, '2026-07-31 11:00:00' );
+		Thread::where( 'id', $unsent->id )->update( array( 'state' => Thread::STATE_DRAFT ) );
 
 		foreach ( array( Conversation::STATUS_CLOSED, Conversation::STATUS_SPAM ) as $status ) {
 			$this->conversation( array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Approved.' ) ), $status );
@@ -139,6 +141,27 @@ final class MyReviewsTest extends TestCase {
 		$deleted->save();
 
 		$this->assertSections( array(), $this->sections() );
+	}
+
+	/**
+	 * Conversations without a reply from any reviewer need one too: whether nobody replied, or only agents who aren't,
+	 * or aren't anymore, members of the plugins team's teams.
+	 *
+	 * @return void
+	 */
+	public function test_sections_need_a_reviewer_without_a_reviewers_reply(): void {
+		$outsider       = $this->create_user();
+		$former         = $this->create_user();
+		$former->status = User::STATUS_DISABLED;
+		$former->save();
+		$this->answer_teams( array( (int) $this->team->id => 'Plugin Reviews' ), array( (int) $outsider->id => array( 'Themes' ) ) );
+
+		$unreplied = $this->conversation( array() );
+		$outsiders = $this->conversation( array( array( Thread::TYPE_MESSAGE, $outsider, 'We got your plugin.' ) ) );
+		$formers   = $this->conversation( array( array( Thread::TYPE_MESSAGE, $former, 'Review sent.' ) ) );
+		$this->conversation( array( array( Thread::TYPE_MESSAGE, $this->colleague, 'Review sent.' ) ) );
+
+		$this->assertSections( array( 'needs_reviewer' => array( $unreplied, $outsiders, $formers ) ), $this->sections() );
 	}
 
 	/**
@@ -221,7 +244,7 @@ final class MyReviewsTest extends TestCase {
 		$assigned = $this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00', $viewer );
 
 		$this->assertSections( array( 'participating' => array( $assigned ) ), MyReviews::sections( $this->mailbox, $this->reviewer, $viewer ) );
-		$this->assertSame( 1, MyReviews::participating_count( $this->mailbox, $viewer ) );
+		$this->assertSame( 1, MyReviews::active_count( $this->mailbox, $viewer ) );
 	}
 
 	/**
@@ -256,18 +279,20 @@ final class MyReviewsTest extends TestCase {
 	}
 
 	/**
-	 * The folder's counts are every reviewer's, kept until a reply, or a change to a conversation, may change them.
+	 * The folder counts the active reviews each reviewer is participating in, kept until a reply, or a change to a
+	 * conversation, may change them.
 	 *
 	 * @return void
 	 */
-	public function test_folder_counts_are_kept_until_they_change(): void {
-		$reply = array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ) );
-		$first = $this->conversation( $reply );
+	public function test_folder_counts_active_reviews_until_they_change(): void {
+		$reply   = array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ) );
+		$first   = $this->conversation( $reply );
+		$pending = $this->conversation( $reply, Conversation::STATUS_PENDING );
 		$this->conversation( array( array( Thread::TYPE_MESSAGE, $this->colleague, 'Review sent.' ) ) );
 
-		$this->assertSame( 1, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
-		$this->assertSame( 1, MyReviews::participating_count( $this->mailbox, $this->colleague ) );
-		$this->assertSame( 0, MyReviews::participating_count( $this->mailbox, $this->team ) );
+		$this->assertSame( 1, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 1, MyReviews::active_count( $this->mailbox, $this->colleague ) );
+		$this->assertSame( 0, MyReviews::active_count( $this->mailbox, $this->team ) );
 
 		// A reply written without the hooks isn't counted until the counts are forgotten.
 		$second = $this->conversation( array() );
@@ -282,18 +307,25 @@ final class MyReviewsTest extends TestCase {
 				'body'               => 'Review sent.',
 			)
 		);
-		$this->assertSame( 1, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 1, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
 
 		MyReviews::forget_counts( (int) $this->mailbox->id );
-		$this->assertSame( 2, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 2, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
 
 		// An agent's reply forgets them.
 		$this->conversation( $reply );
-		$this->assertSame( 3, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 3, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
 
-		// So does closing a conversation.
+		// So does an author's reply, which makes a conversation active without core's status_changed.
+		$pending->status = Conversation::STATUS_ACTIVE;
+		$pending->save();
+		$this->assertSame( 3, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
+		\Eventy::action( 'conversation.customer_replied', $pending, null, null );
+		$this->assertSame( 4, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
+
+		// And closing a conversation.
 		$first->changeStatus( Conversation::STATUS_CLOSED, $this->colleague );
-		$this->assertSame( 2, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 3, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
 	}
 
 	/**
