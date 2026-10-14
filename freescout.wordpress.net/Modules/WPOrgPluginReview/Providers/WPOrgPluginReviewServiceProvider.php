@@ -12,10 +12,13 @@ namespace Modules\WPOrgPluginReview\Providers;
 use App\Conversation;
 use App\Mailbox;
 use App\Thread;
+use App\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 use Modules\WPOrgPluginReview\Console\IndexReviews;
 use Modules\WPOrgPluginReview\Services\FlagReplies;
+use Modules\WPOrgPluginReview\Services\OpenOrder;
 use Modules\WPOrgPluginReview\Services\Review;
 use Modules\WPOrgPluginReview\Services\Reviewers;
 use Modules\WPOrgPluginReview\Services\Subject;
@@ -23,7 +26,8 @@ use Modules\WPOrgPluginReview\Services\Worklist;
 
 /**
  * Shows a conversation's latest plugin review in its sidebar, and keeps the index of review emails as threads change;
- * adds the My Reviews and My Cases folders to the plugins team's mailbox.
+ * adds the My Reviews and My Cases folders to the plugins team's mailbox, and to its members' profiles how many
+ * conversations those open at a time.
  */
 final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 
@@ -171,6 +175,64 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 		);
 
 		self::register_folder_hooks();
+		self::register_profile_hooks();
+	}
+
+	/**
+	 * Lets members of the plugins team's teams choose in their profile how many conversations the worklists' Open
+	 * buttons open at a time.
+	 *
+	 * @return void
+	 */
+	private static function register_profile_hooks(): void {
+		\Eventy::addAction(
+			'user.edit.before_photo',
+			static function ( mixed $user = null ): void {
+				try {
+					if ( $user instanceof User && app( Reviewers::class )->includes( $user ) ) {
+						echo \View::make(
+							self::ALIAS . '::profile',
+							array(
+								'limit' => OpenOrder::limit( $user ),
+								'max'   => OpenOrder::MAX_LIMIT,
+							)
+						)->render();
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgPluginReview] Could not show how many conversations to open in a profile: ' . $e->getMessage() );
+				}
+			}
+		);
+
+		\Eventy::addFilter(
+			'user.save_profile',
+			static function ( mixed $user = null, mixed $request = null ): mixed {
+				try {
+					if ( $user instanceof User && $request instanceof Request && $request->has( 'wporgpluginreview_open_limit' ) && app( Reviewers::class )->includes( $user ) ) {
+						OpenOrder::set_limit( $user, $request->input( 'wporgpluginreview_open_limit' ) );
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgPluginReview] Could not save how many conversations to open in a profile: ' . $e->getMessage() );
+				}
+
+				return $user;
+			},
+			20,
+			2
+		);
+
+		\Eventy::addAction(
+			'user.deleted',
+			static function ( mixed $user = null ): void {
+				try {
+					if ( $user instanceof User ) {
+						OpenOrder::forget_limit( (int) $user->id );
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgPluginReview] Could not forget how many conversations a deleted user opens: ' . $e->getMessage() );
+				}
+			}
+		);
 	}
 
 	/**

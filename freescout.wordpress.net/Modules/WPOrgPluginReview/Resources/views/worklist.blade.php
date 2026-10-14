@@ -44,10 +44,24 @@
 			$selectable = 'participating' === $section && $conversations;
 		@endphp
 		<section class="wporg-worklist-section" data-section="{{ $section }}" aria-labelledby="wporg-worklist-{{ $section }}">
-			<h2 class="wporg-worklist-heading" id="wporg-worklist-{{ $section }}">
-				{{ $headings[ $section ] }}
-				<span class="wporg-worklist-count">{{ count( $conversations ) }}</span>
-			</h2>
+			<div class="wporg-worklist-section-header">
+				<h2 class="wporg-worklist-heading" id="wporg-worklist-{{ $section }}">
+					{{ $headings[ $section ] }}
+					<span class="wporg-worklist-count">{{ count( $conversations ) }}</span>
+				</h2>
+				@if ( 'participating' === $section && $conversations )
+					{{-- Opens the active ones in new tabs; hovering or focusing a button marks which, in order. --}}
+					<div class="wporg-worklist-open" data-strings="{{ json_encode( array( 'blocked' => __( 'Your browser blocked :count of the tabs. Allow pop-ups for this site, then try again.' ) ) ) }}">
+						<button type="button" class="btn btn-default btn-sm wporg-worklist-open-button" data-conversations="{{ implode( ',', $open['oldest'] ) }}" title="{{ __( 'Opens the active ones that waited :hours hours or more in new tabs, the longest waiting first.', array( 'hours' => \Modules\WPOrgPluginReview\Services\OpenOrder::MIN_AGE_HOURS ) ) }}" @if ( ! $open['oldest'] ) disabled @endif>
+							{{ __( 'Open Oldest First' ) }} <span class="wporg-worklist-open-count">{{ count( $open['oldest'] ) }}</span>
+						</button>
+						<button type="button" class="btn btn-default btn-sm wporg-worklist-open-button" data-conversations="{{ implode( ',', $open['progress'] ) }}" title="{{ __( 'Opens the active ones in new tabs, the longest waiting first, after waiting longer the more the team replied to them.' ) }}" @if ( ! $open['progress'] ) disabled @endif>
+							{{ __( 'Open Progress Based' ) }} <span class="wporg-worklist-open-count">{{ count( $open['progress'] ) }}</span>
+						</button>
+						<a class="wporg-worklist-open-limit" href="{{ route( 'users.profile', array( 'id' => auth()->id() ) ) }}" title="{{ __( 'Change it in your profile' ) }}">{{ __( 'Up to :limit at a time', array( 'limit' => $limit ) ) }}</a>
+					</div>
+				@endif
+			</div>
 			<p class="wporg-worklist-description text-help">{{ $descriptions[ $section ] }}</p>
 
 			@if ( $conversations )
