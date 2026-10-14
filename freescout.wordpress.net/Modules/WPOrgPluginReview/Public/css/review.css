@@ -226,9 +226,17 @@
 	border-top: 1px solid #d6dde3;
 }
 
+.wporg-worklist-section-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px 12px;
+	padding: 18px 14px 2px;
+}
+
 .wporg-worklist-heading {
 	margin: 0;
-	padding: 18px 14px 2px;
 	color: #2a3b47;
 	font-size: 16px;
 	font-weight: 700;
@@ -306,6 +314,51 @@
 .wporg-worklist-table tr.is-active td {
 	background-color: #f4f8fd;
 	font-weight: 700;
+}
+
+/* The Open buttons, and the conversations one would open while it's hovered or focused, numbered in order. */
+.wporg-worklist-open {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+
+.wporg-worklist-open-count {
+	margin-left: 2px;
+	padding: 0 6px;
+	border-radius: 9px;
+	background-color: #eef1f4;
+	color: #3e4a55;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.wporg-worklist-open-limit {
+	color: #4a5561;
+	font-size: 12px;
+}
+
+.wporg-worklist-table tr.is-to-open td {
+	background-color: #fff6bf;
+}
+
+.wporg-worklist-table tr.is-to-open td:first-child {
+	box-shadow: inset 4px 0 0 #b38a00;
+}
+
+.wporg-worklist-open-order {
+	display: inline-block;
+	min-width: 20px;
+	margin-right: 6px;
+	padding: 0 6px;
+	border-radius: 10px;
+	background-color: #2a3b47;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 18px;
+	text-align: center;
 }
 
 .wporg-worklist-sender {
@@ -396,4 +449,9 @@
 	.wporg-worklist-date {
 		width: 90px;
 	}
+}
+
+/* In the profile: how many conversations the Open buttons open at a time. */
+.wporg-open-limit {
+	max-width: 100px;
 }

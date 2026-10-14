@@ -13,6 +13,7 @@ use App\Mailbox;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
+use Modules\WPOrgPluginReview\Services\OpenOrder;
 use Modules\WPOrgPluginReview\Services\Review;
 use Modules\WPOrgPluginReview\Services\Reviewers;
 use Modules\WPOrgPluginReview\Services\Worklist;
@@ -20,7 +21,8 @@ use Modules\WPOrgPluginReview\Services\Worklist;
 /**
  * Shows the plugins team's mailbox's My Reviews and My Cases folders: a team's open and pending conversations that a
  * member replied to, that they're mentioned in, and that need someone. They're the agent's own unless they choose
- * another member; My Cases can also be filtered by tag.
+ * another member; My Cases can also be filtered by tag. The active ones they're participating in can be opened in new
+ * tabs, the longest waiting first or by progress.
  */
 final class WorklistController extends Controller {
 
@@ -66,6 +68,11 @@ final class WorklistController extends Controller {
 		}
 
 		$sections = Worklist::load( $ids );
+		$limit    = OpenOrder::limit( $viewer );
+		$open     = array(
+			'oldest'   => OpenOrder::oldest_first( $sections['participating'], $limit ),
+			'progress' => OpenOrder::progress_based( $sections['participating'], $limit ),
+		);
 		$folders  = $mailbox->getAssesibleFolders();
 		$folder   = $folders->first( array( $list, 'is_folder' ) ) ?? $list->folder( $mailbox );
 
@@ -94,6 +101,8 @@ final class WorklistController extends Controller {
 				'sections'  => $sections,
 				'tags'      => $tags,
 				'tag'       => $tag,
+				'open'      => $open,
+				'limit'     => $limit,
 			)
 		);
 	}

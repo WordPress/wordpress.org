@@ -43,6 +43,15 @@ The folders aren't stored: they're added to the mailbox's folders as they're lis
 
 Their definitions, like the team and what the sections are called, are in `Services/Worklist.php`.
 
+### Opening conversations
+
+Next to the participating section's heading, two buttons open its active conversations in new tabs: up to 25 at a time, or as many as the agent chooses under **Conversations to open** in their profile, up to 100. Neither opens a conversation whose sender has waited less than 12 hours, since its latest reply, as Waiting Since shows. Hovering or focusing a button marks the conversations it would open, numbered in order.
+
+- **Open Oldest First**: the longest waiting first.
+- **Open Progress Based**: the longest waiting first, after each has waited as long as the team's replies to it make it: the more replies, the worse the review went, and the longer the others go first. The team's emails count, its first one included when the team wrote it, and notes don't. 1 or 2 replies wait at least a day, 3 or 4 two days, 5 or 6 four, 7 or 8 five, 9 or 10 six, and more, eight. The `sockpuppet` and `sockpuppeting` tags add four days. A conversation that has waited that long is ahead of one that waited longer but has to wait more: they go by how long they've waited beyond it.
+
+The waits are `OpenOrder::WAIT_DAYS` and `OpenOrder::TAG_WAIT_DAYS`, in `Services/OpenOrder.php`. Browsers open the first tab and block the rest unless the site may open pop-ups; the page says how many were blocked, so the agent can allow them once.
+
 ## WordPress.org
 
 The plugin comes from `api.wordpress.org/dotorg/freescout/plugin-review.php`, which only answers for the plugins team's mailbox (its address starts with `plugins`). Requests are signed with `WPORG_API_URL` and `WPORG_API_SECRET`, like the sidebar's panels, through WPOrgSidebar's client. Without them, the panel shows what the review emails say.

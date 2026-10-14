@@ -1,7 +1,7 @@
 /**
  * Makes the Plugin Review panel work: copying, jumping to issues, loading the plugin as it is now, flagging and
  * shortening the tab's title, and warning about a reply with another author's Review ID. Also shows the member
- * and tag chosen in the My Reviews and My Cases folders.
+ * and tag chosen in the My Reviews and My Cases folders, and opens their conversations in new tabs.
  *
  * @param {jQuery} $ jQuery.
  */
@@ -669,9 +669,87 @@
 		return check;
 	}
 
+	/**
+	 * The rows of the conversations a worklist's Open button opens, in the order it opens them.
+	 *
+	 * @param {jQuery} $button The button.
+	 * @return {jQuery[]} Rows.
+	 */
+	function rowsToOpen( $button ) {
+		return String( $button.attr( 'data-conversations' ) || '' )
+			.split( ',' )
+			.filter( Boolean )
+			.map( ( id ) =>
+				$button
+					.closest( '.wporg-worklist-section' )
+					.find( 'tr[data-conversation_id="' + id + '"]' )
+			)
+			.filter( ( $row ) => $row.length );
+	}
+
+	/**
+	 * Unmarks the conversations an Open button would open.
+	 */
+	function unmarkRowsToOpen() {
+		$( '.wporg-worklist tr.is-to-open' ).removeClass( 'is-to-open' );
+		$( '.wporg-worklist-open-order' ).remove();
+	}
+
 	// The My Reviews and My Cases folders show a member's conversations, or a tag's, as soon as they're chosen.
 	$( document ).on( 'change', '.wporg-worklist-filter', function () {
 		this.form.submit();
+	} );
+
+	// Their Open buttons mark which conversations they'd open, and in what order.
+	$( document ).on(
+		'mouseenter focus',
+		'.wporg-worklist-open-button',
+		function () {
+			unmarkRowsToOpen();
+			rowsToOpen( $( this ) ).forEach( ( $row, index ) => {
+				$row.addClass( 'is-to-open' )
+					.find( '.wporg-worklist-name' )
+					.prepend(
+						$( '<span class="wporg-worklist-open-order">' ).text(
+							index + 1
+						)
+					);
+			} );
+		}
+	);
+	$( document ).on(
+		'mouseleave blur',
+		'.wporg-worklist-open-button',
+		unmarkRowsToOpen
+	);
+
+	// And open them in new tabs, in that order; browsers block all but the first, unless the site may open pop-ups.
+	$( document ).on( 'click', '.wporg-worklist-open-button', function () {
+		const $button = $( this );
+		let blocked = 0;
+
+		rowsToOpen( $button ).forEach( ( $row ) => {
+			const url = $row.find( 'a[href]' ).first().attr( 'href' );
+			if ( url && ! window.open( url, '_blank' ) ) {
+				blocked++;
+			}
+		} );
+
+		if ( blocked ) {
+			const strings =
+				$button.closest( '.wporg-worklist-open' ).data( 'strings' ) ||
+				{};
+			const message = String( strings.blocked || '' ).replace(
+				':count',
+				blocked
+			);
+
+			if ( 'function' === typeof window.showFloatingAlert ) {
+				window.showFloatingAlert( 'error', message );
+			} else {
+				window.alert( message ); // eslint-disable-line no-alert
+			}
+		}
 	} );
 
 	// Their conversations someone is participating in get FreeScout's own bulk actions, which modules like Tags add to.

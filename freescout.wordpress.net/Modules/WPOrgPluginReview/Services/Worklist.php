@@ -590,7 +590,7 @@ final class Worklist {
 	 *
 	 * @return bool
 	 */
-	private static function has_tags(): bool {
+	public static function has_tags(): bool {
 		try {
 			return \App\Module::isActive( 'tags' ) && \Schema::hasTable( 'tags' ) && \Schema::hasTable( 'conversation_tag' );
 		} catch ( \Throwable $e ) {
