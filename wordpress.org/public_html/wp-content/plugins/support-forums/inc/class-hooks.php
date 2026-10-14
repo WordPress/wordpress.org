@@ -28,6 +28,8 @@ class Hooks {
 		add_filter( 'bbp_show_user_profile',           array( $this, 'allow_mods_to_view_inactive_users' ), 10, 2 );
 		add_action( 'init',                            array( $this, 'add_rewrite_rules' ) );
 
+		// Run after bbp_parse_query() (priority 2) has flagged user pages.
+		add_action( 'parse_query', array( $this, 'reset_singular_flags_on_user_pages' ), 20 );
 
 		// Add bbPress support to the WordPress.org SEO plugin.
 		add_filter( 'wporg_canonical_base_url', array( $this, 'wporg_canonical_base_url' ) );
@@ -190,6 +192,23 @@ class Hooks {
 	public function hide_non_public_forums( $query ) {
 		if ( ! is_admin() && 'forum' === $query->get( 'post_type' ) ) {
 			$query->set( 'post_status', 'publish' );
+		}
+	}
+
+	/**
+	 * Clear the singular flags on bbPress user pages.
+	 *
+	 * A stray `?page_id=` or `?pagename=` makes WP_Query flag the request as a page,
+	 * and bbPress keeps those flags when it takes over the query for a user page.
+	 * With no post to back them, get_body_class() then reads a null queried object.
+	 *
+	 * @param WP_Query $query Current query object.
+	 */
+	public function reset_singular_flags_on_user_pages( $query ) {
+		if ( $query->is_main_query() && ! empty( $query->bbp_is_single_user ) ) {
+			$query->is_page     = false;
+			$query->is_singular = false;
+			$query->is_single   = false;
 		}
 	}
 
