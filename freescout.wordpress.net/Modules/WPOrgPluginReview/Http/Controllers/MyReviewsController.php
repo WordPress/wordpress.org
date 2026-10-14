@@ -50,9 +50,16 @@ final class MyReviewsController extends Controller {
 		$folders   = $mailbox->getAssesibleFolders();
 		$folder    = $folders->first( array( MyReviews::class, 'is_folder' ) ) ?? MyReviews::folder( $mailbox );
 
-		// The folder list counts the agent's own reviews, which may have changed since they were counted.
+		// The folder list counts the agent's own active reviews, which may have changed since they were counted.
 		if ( (int) $user->id === (int) $viewer->id ) {
-			$folder->active_count = count( $sections['participating'] );
+			$folder->active_count = count(
+				array_filter(
+					$sections['participating'],
+					static function ( $conversation ): bool {
+						return $conversation->isActive();
+					}
+				)
+			);
 		}
 
 		return view(

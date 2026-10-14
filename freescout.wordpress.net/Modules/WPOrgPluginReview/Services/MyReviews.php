@@ -20,8 +20,8 @@ use Illuminate\Support\Collection;
 
 /**
  * Sorts the open and pending conversations of the Plugin Reviews team into the ones a reviewer replied to, the ones
- * they're mentioned in, and the ones that need a reviewer, for the mailbox's My Reviews folder, and counts the ones
- * each reviewer replied to for the folder list.
+ * they're mentioned in, and the ones that need a reviewer, for the mailbox's My Reviews folder, and counts the active
+ * ones each reviewer replied to for the folder list.
  *
  * Each conversation is only in the first section it belongs to. One query tells, for every conversation, which
  * sections it belongs to, through the threads' index on conversation and type.
@@ -83,8 +83,8 @@ final class MyReviews {
 	}
 
 	/**
-	 * Adds the folder to a mailbox's folder list, after Unassigned and before Mine, with how many reviews the agent is
-	 * participating in.
+	 * Adds the folder to a mailbox's folder list, after Unassigned and before Mine, with how many active reviews the
+	 * agent is participating in.
 	 *
 	 * @param Collection $folders The mailbox's folders.
 	 * @param Mailbox    $mailbox Mailbox.
@@ -94,7 +94,7 @@ final class MyReviews {
 	public static function add_folder( Collection $folders, Mailbox $mailbox, User $user ): Collection {
 		$folder = self::folder( $mailbox );
 		try {
-			$folder->active_count = self::participating_count( $mailbox, $user );
+			$folder->active_count = self::active_count( $mailbox, $user );
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgPluginReview] Could not count the My Reviews of user ' . $user->id . ': ' . $e->getMessage() );
 		}
@@ -123,7 +123,8 @@ final class MyReviews {
 	}
 
 	/**
-	 * How many reviews an agent is participating in, as the folder list shows it.
+	 * How many active reviews an agent is participating in, as the folder list shows it: the ones whose author wrote
+	 * last, like core's folders count.
 	 *
 	 * Every reviewer's count comes from one query, kept until something changes them; agents who may only see what's
 	 * assigned to them get theirs counted on its own.
@@ -132,9 +133,10 @@ final class MyReviews {
 	 * @param User    $user    The agent.
 	 * @return int
 	 */
-	public static function participating_count( Mailbox $mailbox, User $user ): int {
+	public static function active_count( Mailbox $mailbox, User $user ): int {
 		if ( $user->canSeeOnlyAssignedConversations() ) {
 			return self::conversations( $mailbox, $user )
+				->where( 'conversations.status', Conversation::STATUS_ACTIVE )
 				->addWhereExistsQuery( self::threads( Thread::TYPE_MESSAGE )->where( 'threads.created_by_user_id', $user->id ) )
 				->count();
 		}
@@ -144,6 +146,7 @@ final class MyReviews {
 			now()->addMinutes( self::COUNTS_MINUTES ),
 			static function () use ( $mailbox ): array {
 				return self::conversations( $mailbox )
+					->where( 'conversations.status', Conversation::STATUS_ACTIVE )
 					->join( 'threads', 'threads.conversation_id', '=', 'conversations.id' )
 					->where( 'threads.type', Thread::TYPE_MESSAGE )
 					->where( 'threads.state', Thread::STATE_PUBLISHED )
@@ -185,7 +188,7 @@ final class MyReviews {
 	 * @return string
 	 */
 	private static function counts_key( int $mailbox_id ): string {
-		return 'wporgpluginreview.my_reviews.counts.' . $mailbox_id;
+		return 'wporgpluginreview.my_reviews.active_counts.' . $mailbox_id;
 	}
 
 	/**
@@ -220,17 +223,23 @@ final class MyReviews {
 	/**
 	 * A reviewer's conversations, by section.
 	 *
+	 * A conversation needs a reviewer when a note says so, or when no reviewer replied to it yet: none of the mailbox's
+	 * users who are members of the plugins team's teams, as they are now.
+	 *
 	 * @param Mailbox $mailbox Mailbox.
 	 * @param User    $user    The reviewer.
 	 * @param User    $viewer  Who's looking: they only see the conversations they may.
 	 * @return array<string, Conversation[]> Conversations by section, the longest waiting first.
 	 */
 	public static function sections( Mailbox $mailbox, User $user, User $viewer ): array {
+		$reviewer_ids = self::reviewers( $mailbox )->pluck( 'id' )->all();
+
 		$rows = self::conversations( $mailbox, $viewer )
 			->select( 'conversations.id' )
 			->selectSub( self::threads( Thread::TYPE_MESSAGE )->where( 'threads.created_by_user_id', $user->id ), 'participating' )
 			->selectSub( self::threads( Thread::TYPE_NOTE )->where( 'threads.body', 'like', '%' . self::mention( $user ) . '%' ), 'mentioned' )
 			->selectSub( self::threads( Thread::TYPE_NOTE )->where( 'threads.body', 'like', '%' . self::NEEDS_REVIEWER . '%' ), 'needs_reviewer' )
+			->selectSub( self::threads( Thread::TYPE_MESSAGE )->whereIn( 'threads.created_by_user_id', $reviewer_ids ), 'reviewed' )
 			->orderBy( 'conversations.last_reply_at' )
 			->orderBy( 'conversations.id' )
 			->toBase()
@@ -238,6 +247,8 @@ final class MyReviews {
 
 		$ids = array_fill_keys( self::SECTIONS, array() );
 		foreach ( $rows as $row ) {
+			$row->needs_reviewer = $row->needs_reviewer || ! $row->reviewed;
+
 			foreach ( self::SECTIONS as $section ) {
 				if ( $row->$section ) {
 					$ids[ $section ][] = (int) $row->id;

@@ -16,7 +16,7 @@
 	$descriptions = array(
 		'participating'  => __( 'With a reply from :name.', array( 'name' => $name ) ),
 		'mentioned'      => __( 'With a note that mentions :name.', array( 'name' => $name ) ),
-		'needs_reviewer' => __( 'With :marker in a note.', array( 'marker' => \Modules\WPOrgPluginReview\Services\MyReviews::NEEDS_REVIEWER ) ),
+		'needs_reviewer' => __( 'With :marker in a note, or without a reply from a reviewer yet.', array( 'marker' => \Modules\WPOrgPluginReview\Services\MyReviews::NEEDS_REVIEWER ) ),
 	);
 	$title = $folder->getTypeName() . ' - ' . $mailbox->name;
 @endphp
