@@ -114,3 +114,4 @@ function wp_cache_get( string $key, string $group = '', bool $force = false, ?bo
 }
 
 require_once dirname( __DIR__ ) . '/common.php';
+require_once dirname( __DIR__ ) . '/copies.php';

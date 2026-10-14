@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace WordPressdotorg\API\FreeScout;
 
 require __DIR__ . '/common.php';
+require __DIR__ . '/copies.php';
 
 /**
  * Swaps the copies of HelpScout's conversations for those of the FreeScout conversations imported from them; see
