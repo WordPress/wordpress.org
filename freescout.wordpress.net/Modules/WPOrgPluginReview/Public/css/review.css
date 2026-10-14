@@ -1,5 +1,5 @@
 /**
- * Styles the Plugin Review panel in the conversation sidebar, and the My Reviews folder.
+ * Styles the Plugin Review panel in the conversation sidebar, and the My Reviews and My Cases folders.
  *
  * Text colors meet WCAG AAA (7:1) on the panel background.
  */
@@ -188,18 +188,19 @@
 }
 
 /*
- * The My Reviews folder: its own table, like the conversation lists, rather than theirs, which core's scripts reload
- * with a folder's conversations.
+ * The My Reviews and My Cases folders: their own table, like the conversation lists, rather than theirs, which core's
+ * scripts reload with a folder's conversations.
  */
 
-/* In the folder list, it's with Unassigned and Mine, apart from the rest. */
-#folders > li[data-folder_id="-229"] + li {
+/* In the folder list, they're with Unassigned and Mine, apart from the rest: Mine comes right after them. */
+#folders > li[data-folder_id="-229"] + li:not([data-folder_id="-230"]),
+#folders > li[data-folder_id="-230"] + li {
 	margin-bottom: 6px;
 	padding-bottom: 6px;
 	border-bottom: 1px solid #e3e8eb;
 }
 
-.wporg-my-reviews-toolbar {
+.wporg-worklist-toolbar {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -208,24 +209,24 @@
 	border-bottom: 1px solid #e3e8eb;
 }
 
-.wporg-my-reviews-toolbar label {
+.wporg-worklist-toolbar label {
 	margin: 0;
 }
 
-.wporg-my-reviews-toolbar .wporg-my-reviews-user {
+.wporg-worklist-toolbar .wporg-worklist-filter {
 	width: auto;
 	max-width: 100%;
 }
 
-.wporg-my-reviews-scope {
+.wporg-worklist-scope {
 	font-size: 13px;
 }
 
-.wporg-my-reviews-section + .wporg-my-reviews-section {
+.wporg-worklist-section + .wporg-worklist-section {
 	border-top: 1px solid #d6dde3;
 }
 
-.wporg-my-reviews-heading {
+.wporg-worklist-heading {
 	margin: 0;
 	padding: 18px 14px 2px;
 	color: #2a3b47;
@@ -233,7 +234,7 @@
 	font-weight: 700;
 }
 
-.wporg-my-reviews-count {
+.wporg-worklist-count {
 	margin-left: 4px;
 	padding: 1px 7px;
 	border-radius: 9999px;
@@ -243,94 +244,94 @@
 	vertical-align: 2px;
 }
 
-.wporg-my-reviews-description {
+.wporg-worklist-description {
 	margin: 0;
 	padding: 0 14px 10px;
 	font-size: 13px;
 }
 
-.wporg-my-reviews-empty {
+.wporg-worklist-empty {
 	margin: 0;
 	padding: 0 14px 18px;
 	color: #4a5561;
 }
 
-.table.wporg-my-reviews-table {
+.table.wporg-worklist-table {
 	margin: 0;
 	table-layout: fixed;
 }
 
-.wporg-my-reviews-table thead {
+.wporg-worklist-table thead {
 	background-color: #deecf9;
 }
 
-.table.wporg-my-reviews-table th {
+.table.wporg-worklist-table th {
 	padding: 4px 14px 1px;
 	border-bottom: 1px solid #e3e8eb;
 	color: #2a3b47;
 	white-space: nowrap;
 }
 
-.table.wporg-my-reviews-table td {
+.table.wporg-worklist-table td {
 	padding: 0;
 	border-top: 0;
 	border-bottom: 1px solid #e3e8eb;
 	vertical-align: middle;
 }
 
-.wporg-my-reviews-table td a {
+.wporg-worklist-table td a {
 	display: block;
 	padding: 12px 14px;
 	color: #2a3b47;
 	font-size: 14px;
 }
 
-.wporg-my-reviews-table td a:hover,
-.wporg-my-reviews-table td a:focus {
+.wporg-worklist-table td a:hover,
+.wporg-worklist-table td a:focus {
 	text-decoration: none;
 }
 
-.wporg-my-reviews-table tr:hover td {
+.wporg-worklist-table tr:hover td {
 	background-color: #fbfcfd;
 }
 
 /* conv-subject is for the Tags module's scripts; core's lists move it around on phones. */
-.wporg-my-reviews .wporg-my-reviews-table .conv-subject {
+.wporg-worklist .wporg-worklist-table .conv-subject {
 	position: static !important;
 	padding-right: 0 !important;
 	padding-left: 0 !important;
 }
 
 /* Active conversations stand out, like in core's lists. */
-.wporg-my-reviews-table tr.is-active td {
+.wporg-worklist-table tr.is-active td {
 	background-color: #f4f8fd;
 	font-weight: 700;
 }
 
-.wporg-my-reviews-sender {
+.wporg-worklist-sender {
 	width: 190px;
 }
 
-.wporg-my-reviews-cb {
+.wporg-worklist-cb {
 	width: 40px;
 	text-align: center;
 }
 
-.table.wporg-my-reviews-table .wporg-my-reviews-cb {
+.table.wporg-worklist-table .wporg-worklist-cb {
 	padding: 4px 0;
 }
 
 /* Core's checkboxes draw their box at the left of their label, which its own lists move into place. */
-.wporg-my-reviews-table .conv-cb label {
+.wporg-worklist-table .conv-cb label {
 	left: 10px;
 }
 
-.wporg-my-reviews-threads {
+.wporg-worklist-threads {
 	width: 84px;
 	text-align: center;
 }
 
-.wporg-my-reviews-threads-count {
+.wporg-worklist-threads-count {
 	padding: 0.1em 0.5em;
 	border: 1px solid #d6dde3;
 	border-radius: 4px;
@@ -340,14 +341,14 @@
 	font-weight: 400;
 }
 
-.wporg-my-reviews-date {
+.wporg-worklist-date {
 	width: 138px;
 }
 
-.wporg-my-reviews-name,
-.wporg-my-reviews-email,
-.wporg-my-reviews-title,
-.wporg-my-reviews-preview {
+.wporg-worklist-name,
+.wporg-worklist-email,
+.wporg-worklist-title,
+.wporg-worklist-preview {
 	display: block;
 	margin: 0;
 	overflow: hidden;
@@ -355,19 +356,19 @@
 	white-space: nowrap;
 }
 
-.wporg-my-reviews-email,
-.wporg-my-reviews-preview {
+.wporg-worklist-email,
+.wporg-worklist-preview {
 	color: #4a5561;
 	font-size: 12px;
 	font-weight: 400;
 }
 
-.wporg-my-reviews-preview {
+.wporg-worklist-preview {
 	margin-top: 2px;
 	font-size: 13px;
 }
 
-.wporg-my-reviews-status {
+.wporg-worklist-status {
 	margin-right: 4px;
 	padding: 0 6px;
 	border-radius: 9px;
@@ -378,21 +379,21 @@
 }
 
 @media (max-width: 767px) {
-	.wporg-my-reviews-table thead,
-	.wporg-my-reviews-table .wporg-my-reviews-threads {
+	.wporg-worklist-table thead,
+	.wporg-worklist-table .wporg-worklist-threads {
 		display: none;
 	}
 
 	/* Core hides the checkboxes of its lists on phones, which select by a long press instead. */
-	.wporg-my-reviews .wporg-my-reviews-table .wporg-my-reviews-cb {
+	.wporg-worklist .wporg-worklist-table .wporg-worklist-cb {
 		display: table-cell !important;
 	}
 
-	.wporg-my-reviews-sender {
+	.wporg-worklist-sender {
 		width: 35%;
 	}
 
-	.wporg-my-reviews-date {
+	.wporg-worklist-date {
 		width: 90px;
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the My Reviews folder.
+ * Tests for the My Reviews and My Cases folders.
  *
  * @package WordPressdotorg\FreeScout\WPOrgPluginReview
  */
@@ -15,14 +15,15 @@ use App\Mailbox;
 use App\Thread;
 use App\User;
 use Modules\WPOrgPluginReview\Providers\WPOrgPluginReviewServiceProvider;
-use Modules\WPOrgPluginReview\Services\MyReviews;
 use Modules\WPOrgPluginReview\Services\Reviewers;
+use Modules\WPOrgPluginReview\Services\Worklist;
 use WordPressdotorg\FreeScout\Tests\TestCase;
 
 /**
- * Covers which conversations each section shows, the folder in the mailbox's list, and its page.
+ * Covers which conversations each section shows, the folders in the mailbox's list, and their pages. Most of it is
+ * My Reviews', which My Cases shares.
  */
-final class MyReviewsTest extends TestCase {
+final class WorklistTest extends TestCase {
 
 	/**
 	 * The plugins team's mailbox.
@@ -108,9 +109,9 @@ final class MyReviewsTest extends TestCase {
 		// Their latest replies are at the same time, so the oldest conversation comes first.
 		$this->assertSections(
 			array(
-				'participating'  => array( $replied, $replied_mentioned ),
-				'mentioned'      => array( $mentioned, $mentioned_needs ),
-				'needs_reviewer' => array( $needs ),
+				'participating' => array( $replied, $replied_mentioned ),
+				'mentioned'     => array( $mentioned, $mentioned_needs ),
+				'needs'         => array( $needs ),
 			),
 			$this->sections()
 		);
@@ -161,7 +162,7 @@ final class MyReviewsTest extends TestCase {
 		$formers   = $this->conversation( array( array( Thread::TYPE_MESSAGE, $former, 'Review sent.' ) ) );
 		$this->conversation( array( array( Thread::TYPE_MESSAGE, $this->colleague, 'Review sent.' ) ) );
 
-		$this->assertSections( array( 'needs_reviewer' => array( $unreplied, $outsiders, $formers ) ), $this->sections() );
+		$this->assertSections( array( 'needs' => array( $unreplied, $outsiders, $formers ) ), $this->sections() );
 	}
 
 	/**
@@ -194,7 +195,7 @@ final class MyReviewsTest extends TestCase {
 
 		$this->assertSections(
 			array( 'participating' => array( $theirs ) ),
-			MyReviews::sections( $this->mailbox, $this->colleague, $this->reviewer )
+			Worklist::reviews()->sections( $this->mailbox, $this->colleague, $this->reviewer )
 		);
 		$this->assertSections(
 			array(
@@ -243,36 +244,49 @@ final class MyReviewsTest extends TestCase {
 		$this->conversation( $reply );
 		$assigned = $this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00', $viewer );
 
-		$this->assertSections( array( 'participating' => array( $assigned ) ), MyReviews::sections( $this->mailbox, $this->reviewer, $viewer ) );
-		$this->assertSame( 1, MyReviews::active_count( $this->mailbox, $viewer ) );
+		$this->assertSections( array( 'participating' => array( $assigned ) ), Worklist::reviews()->sections( $this->mailbox, $this->reviewer, $viewer ) );
+		$this->assertSame( 1, Worklist::reviews()->active_count( $this->mailbox, $viewer ) );
 	}
 
 	/**
-	 * Reviewers get the folder in the plugins team's mailbox, after Unassigned and before Mine, with how many reviews
-	 * they're participating in, linked to its page; nobody gets it in other mailboxes.
+	 * Members get the folders in the plugins team's mailbox, My Reviews then My Cases, after Unassigned and before
+	 * Mine, with how many active conversations they're participating in, linked to their pages; nobody gets them in
+	 * other mailboxes.
 	 *
 	 * @return void
 	 */
-	public function test_folder_is_added_after_unassigned(): void {
+	public function test_folders_are_added_after_unassigned(): void {
 		$this->conversation( array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ) ) );
 		$unassigned = $this->folder( Folder::TYPE_UNASSIGNED );
 		$mine       = $this->folder( Folder::TYPE_MINE );
 		$closed     = $this->folder( Folder::TYPE_CLOSED );
+		$reviews    = Worklist::reviews();
+		$cases      = Worklist::cases();
 
 		$this->actingAs( $this->reviewer );
 		$folders = \Eventy::filter( 'mailbox.folders', collect( array( $unassigned, $mine, $closed ) ), $this->mailbox );
 
-		$this->assertSame( array( Folder::TYPE_UNASSIGNED, MyReviews::FOLDER_TYPE, Folder::TYPE_MINE, Folder::TYPE_CLOSED ), $this->types( $folders ) );
+		$this->assertSame( array( Folder::TYPE_UNASSIGNED, $reviews->folder_type, $cases->folder_type, Folder::TYPE_MINE, Folder::TYPE_CLOSED ), $this->types( $folders ) );
 
-		$folder = $folders->get( 1 );
-		$this->assertSame( 'My Reviews', $folder->getTypeName() );
-		$this->assertSame( 'tasks', $folder->getTypeIcon() );
-		$this->assertSame( 1, (int) $folder->getCount( $folders ) );
-		$this->assertSame( route( 'wporgpluginreview.my_reviews', array( 'mailbox_id' => $this->mailbox->id ) ), $folder->url( $this->mailbox->id ) );
+		// Worklist, name, and icon, by position.
+		$expected = array(
+			1 => array( $reviews, 'My Reviews', 'tasks' ),
+			2 => array( $cases, 'My Cases', 'briefcase' ),
+		);
+		foreach ( $expected as $position => list( $worklist, $name, $icon ) ) {
+			$folder = $folders->get( $position );
+			$this->assertSame( $name, $folder->getTypeName() );
+			$this->assertSame( $icon, $folder->getTypeIcon() );
+			$this->assertSame( $worklist->folder_id(), (int) $folder->id );
+			$this->assertSame( $worklist->url( (int) $this->mailbox->id ), $folder->url( $this->mailbox->id ) );
 
-		// Without Unassigned, it's before Mine; without either, first.
-		$this->assertSame( array( MyReviews::FOLDER_TYPE, Folder::TYPE_MINE, Folder::TYPE_CLOSED ), $this->types( \Eventy::filter( 'mailbox.folders', collect( array( $mine, $closed ) ), $this->mailbox ) ) );
-		$this->assertSame( array( MyReviews::FOLDER_TYPE, Folder::TYPE_CLOSED ), $this->types( \Eventy::filter( 'mailbox.folders', collect( array( $closed ) ), $this->mailbox ) ) );
+			// Without the Teams module, both are of the whole mailbox.
+			$this->assertSame( 1, (int) $folder->getCount( $folders ) );
+		}
+
+		// Without Unassigned, they're before Mine; without either, first.
+		$this->assertSame( array( $reviews->folder_type, $cases->folder_type, Folder::TYPE_MINE, Folder::TYPE_CLOSED ), $this->types( \Eventy::filter( 'mailbox.folders', collect( array( $mine, $closed ) ), $this->mailbox ) ) );
+		$this->assertSame( array( $reviews->folder_type, $cases->folder_type, Folder::TYPE_CLOSED ), $this->types( \Eventy::filter( 'mailbox.folders', collect( array( $closed ) ), $this->mailbox ) ) );
 
 		$themes = $this->create_mailbox( 'Themes', 'themes@wordpress.test' );
 		$this->assertSame( array( Folder::TYPE_CLOSED ), $this->types( \Eventy::filter( 'mailbox.folders', collect( array( $closed ) ), $themes ) ) );
@@ -290,9 +304,9 @@ final class MyReviewsTest extends TestCase {
 		$pending = $this->conversation( $reply, Conversation::STATUS_PENDING );
 		$this->conversation( array( array( Thread::TYPE_MESSAGE, $this->colleague, 'Review sent.' ) ) );
 
-		$this->assertSame( 1, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
-		$this->assertSame( 1, MyReviews::active_count( $this->mailbox, $this->colleague ) );
-		$this->assertSame( 0, MyReviews::active_count( $this->mailbox, $this->team ) );
+		$this->assertSame( 1, Worklist::reviews()->active_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 1, Worklist::reviews()->active_count( $this->mailbox, $this->colleague ) );
+		$this->assertSame( 0, Worklist::reviews()->active_count( $this->mailbox, $this->team ) );
 
 		// A reply written without the hooks isn't counted until the counts are forgotten.
 		$second = $this->conversation( array() );
@@ -307,25 +321,25 @@ final class MyReviewsTest extends TestCase {
 				'body'               => 'Review sent.',
 			)
 		);
-		$this->assertSame( 1, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 1, Worklist::reviews()->active_count( $this->mailbox, $this->reviewer ) );
 
-		MyReviews::forget_counts( (int) $this->mailbox->id );
-		$this->assertSame( 2, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
+		Worklist::forget_counts( (int) $this->mailbox->id );
+		$this->assertSame( 2, Worklist::reviews()->active_count( $this->mailbox, $this->reviewer ) );
 
 		// An agent's reply forgets them.
 		$this->conversation( $reply );
-		$this->assertSame( 3, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 3, Worklist::reviews()->active_count( $this->mailbox, $this->reviewer ) );
 
 		// So does an author's reply, which makes a conversation active without core's status_changed.
 		$pending->status = Conversation::STATUS_ACTIVE;
 		$pending->save();
-		$this->assertSame( 3, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 3, Worklist::reviews()->active_count( $this->mailbox, $this->reviewer ) );
 		\Eventy::action( 'conversation.customer_replied', $pending, null, null );
-		$this->assertSame( 4, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 4, Worklist::reviews()->active_count( $this->mailbox, $this->reviewer ) );
 
 		// And closing a conversation.
 		$first->changeStatus( Conversation::STATUS_CLOSED, $this->colleague );
-		$this->assertSame( 3, MyReviews::active_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 3, Worklist::reviews()->active_count( $this->mailbox, $this->reviewer ) );
 	}
 
 	/**
@@ -359,7 +373,7 @@ final class MyReviewsTest extends TestCase {
 		$this->assertStringContainsString( 'Review of &lt;My Plugin&gt;', $html );
 		$this->assertStringContainsString( $mine->url(), $html );
 		$this->assertStringNotContainsString( 'Review of Their Plugin', $html );
-		$this->assertStringContainsString( 'data-folder_id="' . MyReviews::FOLDER_ID . '"', $html );
+		$this->assertStringContainsString( 'data-folder_id="' . Worklist::reviews()->folder_id() . '"', $html );
 		$this->assertStringContainsString( '<title>(1) My Reviews - Plugins', $html );
 		$this->assertStringContainsString( '>Threads</th>', $html );
 		$this->assertStringNotContainsString( '>Number</th>', $html );
@@ -414,8 +428,98 @@ final class MyReviewsTest extends TestCase {
 		$themes = $this->create_mailbox( 'Themes', 'themes@wordpress.test' );
 
 		$this->actingAs( $this->reviewer )
-			->get( route( 'wporgpluginreview.my_reviews', array( 'mailbox_id' => $themes->id ) ) )
+			->get( Worklist::reviews()->url( (int) $themes->id ) )
 			->assertStatus( 404 );
+	}
+
+	/**
+	 * My Cases lists the Plugin Admin team's conversations, in the same sections as My Reviews the Plugin Reviews
+	 * team's, and counts them on its own.
+	 *
+	 * @return void
+	 */
+	public function test_cases_are_the_plugin_admin_teams(): void {
+		$admin = $this->create_user();
+		$this->answer_teams(
+			array(
+				(int) $this->team->id => Reviewers::REVIEW_TEAM,
+				(int) $admin->id      => Reviewers::ADMIN_TEAM,
+			)
+		);
+
+		$review     = $this->conversation( array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ) ) );
+		$replied    = $this->conversation( array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'We closed the plugin.' ) ), Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00', $admin );
+		$mentioned  = $this->conversation(
+			array(
+				array( Thread::TYPE_MESSAGE, $this->colleague, 'Thanks for the report.' ),
+				array( Thread::TYPE_NOTE, $this->colleague, $this->mention( $this->reviewer ) . ' could you check the accounts?' ),
+			),
+			Conversation::STATUS_ACTIVE,
+			'2026-08-01 10:00:00',
+			$admin
+		);
+		$unanswered = $this->conversation( array(), Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00', $admin );
+
+		$this->assertSections( array( 'participating' => array( $review ) ), $this->sections() );
+		$this->assertSections(
+			array(
+				'participating' => array( $replied ),
+				'mentioned'     => array( $mentioned ),
+				'needs'         => array( $unanswered ),
+			),
+			Worklist::cases()->sections( $this->mailbox, $this->reviewer, $this->reviewer )
+		);
+		$this->assertSame( 1, Worklist::reviews()->active_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 1, Worklist::cases()->active_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 1, Worklist::cases()->active_count( $this->mailbox, $this->colleague ) );
+	}
+
+	/**
+	 * My Cases' page reads as cases, and can be filtered by tag, with the Tags module; My Reviews' can't.
+	 *
+	 * @return void
+	 */
+	public function test_cases_page_can_be_filtered_by_tag(): void {
+		$reply = array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Thanks for the report.' ) );
+		$guide = $this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00', null, null, 'Report: fake reviews on Quick Cache' );
+		$sock  = $this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00', null, null, 'Sockpuppets reviewing Smart Slider' );
+		$this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00', null, null, 'How do I transfer my plugin?' );
+
+		$guidelines = $this->tag( 'guidelines', array( $guide ) );
+		$this->tag( 'sockpuppet', array( $sock ) );
+		$adoption = $this->tag( 'adoption', array() );
+
+		\App\Module::clearModulesCache();
+		\App\Module::setActive( 'tags', true );
+		\App\Module::clearModulesCache();
+
+		$url  = Worklist::cases()->url( (int) $this->mailbox->id );
+		$html = $this->actingAs( $this->reviewer )->get( $url )->getContent();
+
+		$this->assertStringContainsString( 'Cases I’m participating in', $html );
+		$this->assertStringContainsString( 'Cases that need a volunteer', $html );
+		$this->assertStringContainsString( '>Volunteer</label>', $html );
+		$this->assertStringContainsString( '<title>(3) My Cases - Plugins', $html );
+		$this->assertStringContainsString( '>guidelines (1)</option>', $html );
+		$this->assertStringContainsString( '>sockpuppet (1)</option>', $html );
+		$this->assertStringNotContainsString( '>adoption', $html );
+		$this->assertStringContainsString( 'How do I transfer my plugin?', $html );
+
+		$html = $this->actingAs( $this->reviewer )->get( $url . '?tag=' . $guidelines )->getContent();
+
+		$this->assertStringContainsString( 'Report: fake reviews on Quick Cache', $html );
+		$this->assertStringNotContainsString( 'Sockpuppets reviewing Smart Slider', $html );
+		$this->assertStringNotContainsString( 'How do I transfer my plugin?', $html );
+		$this->assertMatchesRegularExpression( '#<option value="' . $guidelines . '"\s+selected\s*>guidelines \(1\)</option>#', $html );
+
+		// A tag that none of them has stays chosen, with nothing to show.
+		$html = $this->actingAs( $this->reviewer )->get( $url . '?tag=' . $adoption )->getContent();
+
+		$this->assertMatchesRegularExpression( '#<option value="' . $adoption . '"\s+selected\s*>adoption \(0\)</option>#', $html );
+		$this->assertStringNotContainsString( 'Report: fake reviews on Quick Cache', $html );
+		$this->assertStringContainsString( 'No cases.', $html );
+
+		$this->assertStringNotContainsString( 'name="tag"', $this->actingAs( $this->reviewer )->get( $this->url() )->getContent() );
 	}
 
 	/**
@@ -476,6 +580,27 @@ final class MyReviewsTest extends TestCase {
 	}
 
 	/**
+	 * Creates a tag, the way the Tags module stores them, on conversations.
+	 *
+	 * @param string         $name          Tag name.
+	 * @param Conversation[] $conversations Conversations with the tag.
+	 * @return int Tag ID.
+	 */
+	private function tag( string $name, array $conversations ): int {
+		$id = (int) \DB::table( 'tags' )->insertGetId( array( 'name' => $name ) );
+		foreach ( $conversations as $conversation ) {
+			\DB::table( 'conversation_tag' )->insert(
+				array(
+					'conversation_id' => $conversation->id,
+					'tag_id'          => $id,
+				)
+			);
+		}
+
+		return $id;
+	}
+
+	/**
 	 * How the Mentions module mentions a user in a note.
 	 *
 	 * @param User $user User.
@@ -491,7 +616,7 @@ final class MyReviewsTest extends TestCase {
 	 * @return array
 	 */
 	private function sections(): array {
-		return MyReviews::sections( $this->mailbox, $this->reviewer, $this->reviewer );
+		return Worklist::reviews()->sections( $this->mailbox, $this->reviewer, $this->reviewer );
 	}
 
 	/**
@@ -500,14 +625,14 @@ final class MyReviewsTest extends TestCase {
 	 * @return string
 	 */
 	private function url(): string {
-		return route( 'wporgpluginreview.my_reviews', array( 'mailbox_id' => $this->mailbox->id ) );
+		return Worklist::reviews()->url( (int) $this->mailbox->id );
 	}
 
 	/**
 	 * Asserts which conversations each section has, in order.
 	 *
 	 * @param array $expected Conversations by section; sections left out are empty.
-	 * @param array $sections Sections, from MyReviews::sections().
+	 * @param array $sections Sections, from Worklist::sections().
 	 * @return void
 	 */
 	private function assertSections( array $expected, array $sections ): void { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Like PHPUnit's own assertions.
@@ -520,8 +645,8 @@ final class MyReviewsTest extends TestCase {
 			);
 		};
 
-		$this->assertSame( MyReviews::SECTIONS, array_keys( $sections ) );
-		foreach ( MyReviews::SECTIONS as $section ) {
+		$this->assertSame( Worklist::SECTIONS, array_keys( $sections ) );
+		foreach ( Worklist::SECTIONS as $section ) {
 			$this->assertSame( $ids( $expected[ $section ] ?? array() ), $ids( $sections[ $section ] ), $section );
 		}
 	}

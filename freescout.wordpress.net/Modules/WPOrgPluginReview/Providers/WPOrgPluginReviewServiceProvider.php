@@ -16,14 +16,14 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 use Modules\WPOrgPluginReview\Console\IndexReviews;
 use Modules\WPOrgPluginReview\Services\FlagReplies;
-use Modules\WPOrgPluginReview\Services\MyReviews;
 use Modules\WPOrgPluginReview\Services\Review;
 use Modules\WPOrgPluginReview\Services\Reviewers;
 use Modules\WPOrgPluginReview\Services\Subject;
+use Modules\WPOrgPluginReview\Services\Worklist;
 
 /**
  * Shows a conversation's latest plugin review in its sidebar, and keeps the index of review emails as threads change;
- * adds the My Reviews folder to the plugins team's mailbox.
+ * adds the My Reviews and My Cases folders to the plugins team's mailbox.
  */
 final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 
@@ -42,7 +42,7 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 	private const PANEL_PRIORITY = 15;
 
 	/**
-	 * Priority of the My Reviews folder's hooks: after the Teams and Custom Folders modules', which sort their folders.
+	 * Priority of the worklist folders' hooks: after the Teams and Custom Folders modules', which sort their folders.
 	 *
 	 * @var int
 	 */
@@ -174,10 +174,11 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 	}
 
 	/**
-	 * Adds the My Reviews folder to the plugins team's mailbox, for reviewers.
+	 * Adds the My Reviews and My Cases folders to the plugins team's mailbox, for its members.
 	 *
-	 * It isn't stored: it's added to the mailbox's folders as they're listed, after the Teams and Custom Folders
-	 * modules have sorted theirs, and links to its own page. Its count is kept in the cache until a change may affect it.
+	 * They aren't stored: they're added to the mailbox's folders as they're listed, after the Teams and Custom Folders
+	 * modules have sorted theirs, and link to their own pages. Their counts are kept in the cache until a change may
+	 * affect them.
 	 *
 	 * @return void
 	 */
@@ -195,9 +196,9 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 						return $folders;
 					}
 
-					return MyReviews::add_folder( $folders, $mailbox, $user );
+					return Worklist::add_folders( $folders, $mailbox, $user );
 				} catch ( \Throwable $e ) {
-					\Log::error( '[WPOrgPluginReview] Could not add the My Reviews folder to mailbox ' . $mailbox->id . ': ' . $e->getMessage() );
+					\Log::error( '[WPOrgPluginReview] Could not add the worklist folders to mailbox ' . $mailbox->id . ': ' . $e->getMessage() );
 
 					return $folders;
 				}
@@ -209,7 +210,9 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 		\Eventy::addFilter(
 			'folder.type_name',
 			static function ( mixed $name = '', mixed $folder = null ): mixed {
-				return MyReviews::is_folder( $folder ) ? __( 'My Reviews' ) : $name;
+				$worklist = Worklist::of_folder( $folder );
+
+				return $worklist ? $worklist->name() : $name;
 			},
 			self::FOLDERS_PRIORITY,
 			2
@@ -218,7 +221,9 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 		\Eventy::addFilter(
 			'folder.type_icon',
 			static function ( mixed $icon = '', mixed $folder = null ): mixed {
-				return MyReviews::is_folder( $folder ) ? 'tasks' : $icon;
+				$worklist = Worklist::of_folder( $folder );
+
+				return $worklist ? $worklist->icon : $icon;
 			},
 			self::FOLDERS_PRIORITY,
 			2
@@ -227,17 +232,15 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 		\Eventy::addFilter(
 			'folder.url',
 			static function ( mixed $url = '', mixed $mailbox_id = null, mixed $folder = null ): mixed {
-				if ( ! MyReviews::is_folder( $folder ) || ! is_numeric( $mailbox_id ) ) {
-					return $url;
-				}
+				$worklist = Worklist::of_folder( $folder );
 
-				return route( 'wporgpluginreview.my_reviews', array( 'mailbox_id' => (int) $mailbox_id ) );
+				return $worklist && is_numeric( $mailbox_id ) ? $worklist->url( (int) $mailbox_id ) : $url;
 			},
 			self::FOLDERS_PRIORITY,
 			3
 		);
 
-		// The folder's counts change with agents' replies; only those published, removed, or moved.
+		// The folders' counts change with agents' replies; only those published, removed, or moved.
 		foreach ( array( 'thread.created', 'thread.updated', 'thread.deleting' ) as $hook ) {
 			\Eventy::addAction(
 				$hook,
@@ -284,7 +287,7 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 				self::forget_counts( $conversation );
 
 				if ( $prev_mailbox instanceof Mailbox ) {
-					MyReviews::forget_counts( (int) $prev_mailbox->id );
+					Worklist::forget_counts( (int) $prev_mailbox->id );
 				}
 			},
 			20,
@@ -293,14 +296,14 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 	}
 
 	/**
-	 * Forgets the My Reviews counts of a conversation's mailbox.
+	 * Forgets the worklists' counts of a conversation's mailbox.
 	 *
 	 * @param mixed $conversation Conversation.
 	 * @return void
 	 */
 	private static function forget_counts( mixed $conversation ): void {
 		if ( $conversation instanceof Conversation && $conversation->mailbox_id ) {
-			MyReviews::forget_counts( (int) $conversation->mailbox_id );
+			Worklist::forget_counts( (int) $conversation->mailbox_id );
 		}
 	}
 

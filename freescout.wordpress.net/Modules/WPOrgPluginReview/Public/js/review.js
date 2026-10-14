@@ -1,7 +1,7 @@
 /**
  * Makes the Plugin Review panel work: copying, jumping to issues, loading the plugin as it is now, flagging and
- * shortening the tab's title, and warning about a reply with another author's Review ID. Also shows the reviewer
- * chosen in the My Reviews folder.
+ * shortening the tab's title, and warning about a reply with another author's Review ID. Also shows the member
+ * and tag chosen in the My Reviews and My Cases folders.
  *
  * @param {jQuery} $ jQuery.
  */
@@ -669,15 +669,15 @@
 		return check;
 	}
 
-	// The My Reviews folder shows a reviewer's conversations as soon as they're chosen.
-	$( document ).on( 'change', '.wporg-my-reviews-user', function () {
+	// The My Reviews and My Cases folders show a member's conversations, or a tag's, as soon as they're chosen.
+	$( document ).on( 'change', '.wporg-worklist-filter', function () {
 		this.form.submit();
 	} );
 
-	// Its reviews someone is participating in get FreeScout's own bulk actions, which modules like Tags add to.
+	// Their conversations someone is participating in get FreeScout's own bulk actions, which modules like Tags add to.
 	$( function () {
 		if (
-			$( '.wporg-my-reviews .conv-checkbox' ).length &&
+			$( '.wporg-worklist .conv-checkbox' ).length &&
 			'function' === typeof window.converstationBulkActionsInit
 		) {
 			window.converstationBulkActionsInit();

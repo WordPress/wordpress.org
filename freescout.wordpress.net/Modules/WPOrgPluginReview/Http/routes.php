@@ -18,8 +18,13 @@ Route::group(
 			->where( 'conversation_id', '[0-9]+' )
 			->name( 'wporgpluginreview.plugin' );
 
-		Route::get( '/wporgpluginreview/mailbox/{mailbox_id}/my-reviews', 'MyReviewsController@show' )
-			->where( 'mailbox_id', '[0-9]+' )
-			->name( 'wporgpluginreview.my_reviews' );
+		Route::get( '/wporgpluginreview/mailbox/{mailbox_id}/{worklist}', 'WorklistController@show' )
+			->where(
+				array(
+					'mailbox_id' => '[0-9]+',
+					'worklist'   => implode( '|', \Modules\WPOrgPluginReview\Services\Worklist::slugs() ),
+				)
+			)
+			->name( 'wporgpluginreview.worklist' );
 	}
 );
