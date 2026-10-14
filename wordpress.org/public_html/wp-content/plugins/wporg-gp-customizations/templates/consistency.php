@@ -121,11 +121,11 @@ if ( $performed_search && ! $results ) {
 			$prev_translation = $translations_unique[ $translation_index - 1 ] ?? false;
 			$next_translation = $translations_unique[ $translation_index + 1 ] ?? false;
 
-			$prev_arrow = $prev_translation
+			$prev_arrow = false !== $prev_translation
 				? '<a class="anchor-jumper with-tooltip" aria-label="Go to previous translation" href="' . esc_attr( '#t-' . md5( $prev_translation ) ) . '">&uarr;</a>'
 				: '';
 
-			$next_arrow = $next_translation
+			$next_arrow = false !== $next_translation
 				? '<a class="anchor-jumper with-tooltip" aria-label="Go to next translation" href="' . esc_attr( '#t-' . md5( $next_translation ) ) . '">&darr;</a>'
 				: '';
 
