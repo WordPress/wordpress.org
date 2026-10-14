@@ -334,9 +334,10 @@ class Release_Confirmation {
 			'<span>%s</span><br>',
 			wp_kses(
 				sprintf(
-					/* translators: 1: 'Stable tag', 2: The current stable tag, 3: This release's tag. */
-					__( 'Not released yet: the %1$s in trunk/readme.txt is %2$s. Change it to %3$s to release this version.', 'wporg-plugins' ),
+					/* translators: 1: 'Stable tag', 2: 'trunk/readme.txt', 3: The current stable tag, 4: This release's tag. */
+					__( 'Not released yet: the %1$s in %2$s is %3$s. Change it to %4$s to release this version.', 'wporg-plugins' ),
 					'<code>Stable tag</code>',
+					'<code>trunk/readme.txt</code>',
 					'<code>' . esc_html( $stable_tag ) . '</code>',
 					'<code>' . esc_html( $tag ) . '</code>'
 				),
