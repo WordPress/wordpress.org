@@ -98,7 +98,7 @@ function write_email( object $request, int $id ): bool {
 
 	// In an order that the event, sent again after a failed write, finishes.
 	$replaced_ids = array_merge( ...array_values( $replaced ) );
-	take_over_meta( $id, $replaced_ids );
+	take_over_meta( array_fill_keys( $replaced_ids, $id ) );
 	add_copy_meta( $id, $replaced['helpscout'], $mentioned );
 
 	// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The placeholders are added for each column; one statement, so two events for a new conversation at once don't both insert it.
@@ -251,24 +251,29 @@ function needs_all_threads( object $request, ?object $row, bool $has_helpscout )
 }
 
 /**
- * Moves the plugins and themes of copies to the copy that replaces them. Pairs it has already stay behind, and go with
- * their copy.
+ * Moves the plugins and themes of copies to the copies that replace them. Pairs a copy has already stay behind, and go
+ * with the copy it replaces.
  *
- * @param int   $id  ID of the copy that replaces them.
- * @param int[] $ids IDs of the copies it replaces.
+ * @param int[] $into ID of the copy that replaces each, by the ID of the copy it replaces.
  * @return void
  *
  * @throws \RuntimeException If the write failed.
  */
-function take_over_meta( int $id, array $ids ): void {
+function take_over_meta( array $into ): void {
 	global $wpdb;
 
-	if ( ! $ids ) {
+	if ( ! $into ) {
 		return;
 	}
 
-	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholders are added for each ID.
-	check_write( $wpdb->query( $wpdb->prepare( 'UPDATE IGNORE %i SET helpscout_id = %d WHERE helpscout_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', array_merge( array( "{$wpdb->base_prefix}helpscout_meta", $id ), $ids ) ) ) );
+	$args = array( "{$wpdb->base_prefix}helpscout_meta" );
+	foreach ( $into as $replaced_id => $id ) {
+		array_push( $args, $replaced_id, $id );
+	}
+	array_push( $args, ...array_keys( $into ) );
+
+	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The placeholders are added for each ID.
+	check_write( $wpdb->query( $wpdb->prepare( 'UPDATE IGNORE %i SET helpscout_id = CASE helpscout_id ' . implode( ' ', array_fill( 0, count( $into ), 'WHEN %d THEN %d' ) ) . ' END WHERE helpscout_id IN (' . implode( ',', array_fill( 0, count( $into ), '%d' ) ) . ')', $args ) ) );
 }
 
 /**
@@ -295,13 +300,33 @@ function add_copy_meta( int $id, array $helpscout_ids, array $mentioned ): void 
 		}
 	}
 
-	$args = array( "{$wpdb->base_prefix}helpscout_meta" );
-	foreach ( $pairs as list( $meta_key, $meta_value ) ) {
-		array_push( $args, $id, $meta_key, $meta_value );
+	insert_meta(
+		array_map(
+			static function ( array $pair ) use ( $id ): array {
+				return array( $id, $pair[0], $pair[1] );
+			},
+			$pairs
+		)
+	);
+}
+
+/**
+ * Adds meta to copies, skipping pairs they have.
+ *
+ * @param array[] $rows Each a copy's ID, a meta key, and its value.
+ * @return void
+ *
+ * @throws \RuntimeException If the write failed.
+ */
+function insert_meta( array $rows ): void {
+	global $wpdb;
+
+	if ( ! $rows ) {
+		return;
 	}
 
-	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The placeholders are added for each pair.
-	check_write( $wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i ( helpscout_id, meta_key, meta_value ) VALUES ' . implode( ', ', array_fill( 0, count( $pairs ), '( %d, %s, %s )' ) ), $args ) ) );
+	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The placeholders are added for each row.
+	check_write( $wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i ( helpscout_id, meta_key, meta_value ) VALUES ' . implode( ', ', array_fill( 0, count( $rows ), '( %d, %s, %s )' ) ), array_merge( array( "{$wpdb->base_prefix}helpscout_meta" ), ...$rows ) ) ) );
 }
 
 /**

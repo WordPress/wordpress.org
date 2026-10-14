@@ -14,7 +14,8 @@ require __DIR__ . '/copies.php';
 
 /**
  * Swaps the copies of HelpScout's conversations for those of the FreeScout conversations imported from them; see
- * plan_copy_replacement(). Writes go in an order that the batch, sent again after one failed, finishes.
+ * plan_copy_replacement(). Writes go a statement for the whole batch at a time, in an order that the batch, sent again
+ * after one failed, finishes.
  *
  * @param array $copies Each a HelpScout ID, the FreeScout conversation's ID, number, and status, and whether its copy
  *                      goes.
@@ -45,6 +46,10 @@ function replace_copies( array $copies ): int {
 	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholders are added for each ID.
 	$existing = array_fill_keys( array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', array_merge( array( $emails_table ), $ids ) ) ) ), true );
 	$replaced = 0;
+	$into     = array();
+	$meta     = array();
+	$renames  = array();
+	$gone     = array();
 
 	foreach ( $copies as $copy ) {
 		$helpscout_id = (int) ( $copy->helpscout_id ?? 0 );
@@ -55,28 +60,50 @@ function replace_copies( array $copies ): int {
 		}
 
 		++$replaced;
+		unset( $existing[ $helpscout_id ] );
+		$gone[] = $helpscout_id;
 		if ( 'delete' === $action ) {
-			delete_emails( array( $helpscout_id, $id ) );
-			unset( $existing[ $helpscout_id ], $existing[ $id ] );
+			unset( $existing[ $id ] );
+			$gone[] = $id;
 			continue;
 		}
 
-		take_over_meta( $id, array( $helpscout_id ) );
-		add_copy_meta( $id, array( $helpscout_id ), array() );
+		$into[ $helpscout_id ] = $id;
+		array_push( $meta, array( $id, 'helpdesk', 'freescout' ), array( $id, 'helpscout_conversation', (string) $helpscout_id ) );
 		if ( 'rename' === $action ) {
 			// What HelpScout's webhook last wrote may be out of date, as it no longer runs for the mailbox.
-			$columns = array(
+			$renames[ $helpscout_id ] = array(
 				'id'     => $id,
 				'number' => (int) ( $copy->number ?? 0 ),
 				'status' => (string) ( $copy->status ?? '' ),
 			);
-			check_write( $wpdb->update( $emails_table, $columns, array( 'id' => $helpscout_id ) ) );
-			$existing[ $id ] = true;
+			$existing[ $id ]          = true;
 		}
-
-		delete_emails( array( $helpscout_id ) );
-		unset( $existing[ $helpscout_id ] );
 	}
+
+	take_over_meta( $into );
+	insert_meta( $meta );
+	if ( $renames ) {
+		$args = array( $emails_table );
+		$sets = array();
+		// The ID goes last: later assignments see the row's new values.
+		$formats = array(
+			'number' => '%d',
+			'status' => '%s',
+			'id'     => '%d',
+		);
+		foreach ( $formats as $column => $format ) {
+			$sets[] = "{$column} = CASE id " . implode( ' ', array_fill( 0, count( $renames ), "WHEN %d THEN {$format}" ) ) . ' END';
+			foreach ( $renames as $helpscout_id => $columns ) {
+				array_push( $args, $helpscout_id, $columns[ $column ] );
+			}
+		}
+		array_push( $args, ...array_keys( $renames ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The placeholders are added for each copy; $sets holds placeholders and column names.
+		check_write( $wpdb->query( $wpdb->prepare( 'UPDATE %i SET ' . implode( ', ', $sets ) . ' WHERE id IN (' . implode( ',', array_fill( 0, count( $renames ), '%d' ) ) . ')', $args ) ) );
+	}
+	delete_emails( $gone );
 
 	return $replaced;
 }
