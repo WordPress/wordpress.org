@@ -842,7 +842,7 @@ class Locale extends GP_Route {
 	 * Retrieves active sub projects with paging.
 	 *
 	 * @param GP_Project $project           The parent project.
-	 * @param array      $args {
+	 * @param array $args {
 	 *     @type int         $per_page        Number of items per page. Default 20.
 	 *     @type int         $page            The page of results to view. Default 1.
 	 *     @type string      $search          The search string.
