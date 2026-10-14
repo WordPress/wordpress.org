@@ -177,7 +177,7 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 	 * Adds the My Reviews folder to the plugins team's mailbox, for reviewers.
 	 *
 	 * It isn't stored: it's added to the mailbox's folders as they're listed, after the Teams and Custom Folders
-	 * modules have sorted theirs, and links to its own page.
+	 * modules have sorted theirs, and links to its own page. Its count is kept in the cache until a change may affect it.
 	 *
 	 * @return void
 	 */
@@ -190,11 +190,12 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 				}
 
 				try {
-					if ( ! Review::is_plugins_mailbox( $mailbox ) || ! app( Reviewers::class )->includes( auth()->user() ) ) {
+					$user = auth()->user();
+					if ( ! Review::is_plugins_mailbox( $mailbox ) || ! app( Reviewers::class )->includes( $user ) ) {
 						return $folders;
 					}
 
-					return MyReviews::add_folder( $folders, $mailbox );
+					return MyReviews::add_folder( $folders, $mailbox, $user );
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgPluginReview] Could not add the My Reviews folder to mailbox ' . $mailbox->id . ': ' . $e->getMessage() );
 
@@ -235,6 +236,68 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 			self::FOLDERS_PRIORITY,
 			3
 		);
+
+		// The folder's counts change with agents' replies; only those published, removed, or moved.
+		foreach ( array( 'thread.created', 'thread.updated', 'thread.deleting' ) as $hook ) {
+			\Eventy::addAction(
+				$hook,
+				static function ( mixed $thread = null ) use ( $hook ): void {
+					if ( ! $thread instanceof Thread || Thread::TYPE_MESSAGE !== (int) $thread->type || ! $thread->created_by_user_id ) {
+						return;
+					}
+
+					// Core fires it before the model takes its changes in, while they're still dirty.
+					if ( 'thread.updated' === $hook && ! $thread->isDirty( array( 'state', 'type', 'conversation_id' ) ) ) {
+						return;
+					}
+
+					self::forget_counts( $thread->conversation );
+				}
+			);
+		}
+
+		// And with conversations that open, close, change hands, or are deleted, merged, or imported.
+		$hooks = array(
+			'conversation.status_changed',
+			'conversation.user_changed',
+			'conversation.state_changed',
+			'conversation.merged',
+			'conversation.deleting',
+			'wporghelpscoutimport.conversation_imported',
+		);
+		foreach ( $hooks as $hook ) {
+			\Eventy::addAction(
+				$hook,
+				static function ( mixed $conversation = null ): void {
+					self::forget_counts( $conversation );
+				}
+			);
+		}
+
+		\Eventy::addAction(
+			'conversation.moved',
+			static function ( mixed $conversation = null, mixed $user = null, mixed $prev_mailbox = null ): void {
+				self::forget_counts( $conversation );
+
+				if ( $prev_mailbox instanceof Mailbox ) {
+					MyReviews::forget_counts( (int) $prev_mailbox->id );
+				}
+			},
+			20,
+			3
+		);
+	}
+
+	/**
+	 * Forgets the My Reviews counts of a conversation's mailbox.
+	 *
+	 * @param mixed $conversation Conversation.
+	 * @return void
+	 */
+	private static function forget_counts( mixed $conversation ): void {
+		if ( $conversation instanceof Conversation && $conversation->mailbox_id ) {
+			MyReviews::forget_counts( (int) $conversation->mailbox_id );
+		}
 	}
 
 	/**

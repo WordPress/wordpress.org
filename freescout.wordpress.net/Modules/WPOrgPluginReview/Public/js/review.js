@@ -674,6 +674,16 @@
 		this.form.submit();
 	} );
 
+	// Its reviews someone is participating in get FreeScout's own bulk actions, which modules like Tags add to.
+	$( function () {
+		if (
+			$( '.wporg-my-reviews .conv-checkbox' ).length &&
+			'function' === typeof window.converstationBulkActionsInit
+		) {
+			window.converstationBulkActionsInit();
+		}
+	} );
+
 	$( function () {
 		const $panel = $( '.wporg-review' );
 		if ( ! $panel.length ) {

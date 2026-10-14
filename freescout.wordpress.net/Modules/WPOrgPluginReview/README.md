@@ -27,17 +27,19 @@ While an agent writes a reply, a warning shows above it when the reply has a Rev
 
 ## My Reviews
 
-The plugins team's mailbox gets a **My Reviews** folder, after the Plugin Reviews team's, for the same agents as the panel. It lists the open and pending conversations assigned to the Plugin Reviews team, in three sections:
+The plugins team's mailbox gets a **My Reviews** folder, right after Unassigned and before Mine, set apart from the folders after them, for the same agents as the panel. It lists the open and pending conversations assigned to the Plugin Reviews team, in three sections:
 
-- **Conversations I'm participating in**: ones the agent sent a reply to. Notes and drafts don't count.
-- **Conversations I'm mentioned in**: ones with a note that mentions the agent, with the Mentions module's `@` mentions. Mentions of a team the agent is in don't count.
-- **Conversations that need a reviewer**: ones with `PRTRN` in a note.
+- **Reviews I'm participating in**: ones the agent sent a reply to. Notes and drafts don't count.
+- **Reviews I'm mentioned in**: ones with a note that mentions the agent, with the Mentions module's `@` mentions. Mentions of a team the agent is in don't count.
+- **Reviews that need a reviewer**: ones with `PRTRN` in a note.
 
-Each conversation shows only in the first section it belongs to, open ones first, then by their latest reply. The reviewer at the top switches to another member of the plugins team's teams, to see theirs. Agents who may only see the conversations assigned to them see only those here too.
+Each conversation shows only in the first section it belongs to, the longest waiting first, with its tags and how many threads it has, as FreeScout counts them: emails, not notes. Every one shows, without pages. The reviewer at the top switches to another member of the plugins team's teams, to see theirs. Agents who may only see the conversations assigned to them see only those here too.
+
+Reviews someone is participating in can be selected, and changed together with FreeScout's bulk actions: status, assignee, and deleting, and the Tags and Workflows modules' tags and manual workflows.
 
 Without the Teams module, the sections are of the mailbox's open and pending conversations, whoever they're assigned to. With it, but without a team named Plugin Reviews, they're empty.
 
-The folder isn't stored: it's added to the mailbox's folders as they're listed, and shows no count, which would take a query on every page. Its page takes one query for which sections every conversation belongs to, and one to load the ones that do; with a thousand open conversations, that's a few tens of milliseconds.
+The folder isn't stored: it's added to the mailbox's folders as they're listed. Its count is how many reviews the agent is participating in. Every reviewer's count comes from one query, kept in FreeScout's cache for up to ten minutes, and forgotten sooner when an agent's reply is published or removed, or a conversation in the mailbox changes status, assignee, or mailbox, or is deleted, merged, or imported. Agents who may only see the conversations assigned to them have theirs counted on every page. The page takes one query for which sections every conversation belongs to, and a few to load the ones that do and their tags; with a thousand open conversations, that's a few tens of milliseconds.
 
 ## WordPress.org
 

@@ -105,11 +105,11 @@ final class MyReviewsTest extends TestCase {
 		);
 		$needs             = $this->conversation( array( array( Thread::TYPE_NOTE, $this->colleague, '<p>PRTRN, someone please take over.</p>' ) ) );
 
-		// Their latest replies are at the same time, so the newest conversation comes first.
+		// Their latest replies are at the same time, so the oldest conversation comes first.
 		$this->assertSections(
 			array(
-				'participating'  => array( $replied_mentioned, $replied ),
-				'mentioned'      => array( $mentioned_needs, $mentioned ),
+				'participating'  => array( $replied, $replied_mentioned ),
+				'mentioned'      => array( $mentioned, $mentioned_needs ),
 				'needs_reviewer' => array( $needs ),
 			),
 			$this->sections()
@@ -142,17 +142,17 @@ final class MyReviewsTest extends TestCase {
 	}
 
 	/**
-	 * Open conversations come first, then by their latest reply; pending ones are shown too.
+	 * The conversations waiting the longest come first, open or pending.
 	 *
 	 * @return void
 	 */
-	public function test_sections_list_open_conversations_first(): void {
+	public function test_sections_list_the_longest_waiting_first(): void {
 		$reply   = array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ) );
-		$pending = $this->conversation( $reply, Conversation::STATUS_PENDING, '2026-08-09 10:00:00' );
-		$older   = $this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00' );
+		$pending = $this->conversation( $reply, Conversation::STATUS_PENDING, '2026-08-03 10:00:00' );
 		$newer   = $this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-05 10:00:00' );
+		$older   = $this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00' );
 
-		$this->assertSections( array( 'participating' => array( $newer, $older, $pending ) ), $this->sections() );
+		$this->assertSections( array( 'participating' => array( $older, $pending, $newer ) ), $this->sections() );
 	}
 
 	/**
@@ -203,7 +203,7 @@ final class MyReviewsTest extends TestCase {
 		\App\Module::clearModulesCache();
 		\App\Module::setActive( Reviewers::TEAMS_MODULE, false );
 		\App\Module::clearModulesCache();
-		$this->assertSections( array( 'participating' => array( $teams, $colleagues ) ), $this->sections() );
+		$this->assertSections( array( 'participating' => array( $colleagues, $teams ) ), $this->sections() );
 	}
 
 	/**
@@ -216,40 +216,84 @@ final class MyReviewsTest extends TestCase {
 		$viewer->permissions = array( User::PERM_ONLY_ASSIGNED_TICKETS => true );
 		$viewer->save();
 
-		$reply = array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ) );
+		$reply = array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ), array( Thread::TYPE_MESSAGE, $viewer, 'Review sent.' ) );
 		$this->conversation( $reply );
 		$assigned = $this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00', $viewer );
 
 		$this->assertSections( array( 'participating' => array( $assigned ) ), MyReviews::sections( $this->mailbox, $this->reviewer, $viewer ) );
+		$this->assertSame( 1, MyReviews::participating_count( $this->mailbox, $viewer ) );
 	}
 
 	/**
-	 * Reviewers get the folder in the plugins team's mailbox, after the Plugin Reviews team's folder, linked to its
-	 * page; nobody gets it in other mailboxes.
+	 * Reviewers get the folder in the plugins team's mailbox, after Unassigned and before Mine, with how many reviews
+	 * they're participating in, linked to its page; nobody gets it in other mailboxes.
 	 *
 	 * @return void
 	 */
-	public function test_folder_is_added_after_the_teams_folder(): void {
-		$this->answer_teams( array( (int) $this->team->id => 'Plugin Reviews' ) );
-		$team_folder          = new Folder();
-		$team_folder->id      = 999999;
-		$team_folder->type    = Reviewers::TEAM_FOLDER_TYPE;
-		$team_folder->user_id = $this->team->id;
-		$other_folder         = new Folder();
-		$other_folder->type   = Folder::TYPE_CLOSED;
+	public function test_folder_is_added_after_unassigned(): void {
+		$this->conversation( array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ) ) );
+		$unassigned = $this->folder( Folder::TYPE_UNASSIGNED );
+		$mine       = $this->folder( Folder::TYPE_MINE );
+		$closed     = $this->folder( Folder::TYPE_CLOSED );
 
 		$this->actingAs( $this->reviewer );
-		$folders = \Eventy::filter( 'mailbox.folders', collect( array( $team_folder, $other_folder ) ), $this->mailbox );
+		$folders = \Eventy::filter( 'mailbox.folders', collect( array( $unassigned, $mine, $closed ) ), $this->mailbox );
 
-		$this->assertSame( array( Reviewers::TEAM_FOLDER_TYPE, MyReviews::FOLDER_TYPE, Folder::TYPE_CLOSED ), $folders->pluck( 'type' )->map( 'intval' )->all() );
+		$this->assertSame( array( Folder::TYPE_UNASSIGNED, MyReviews::FOLDER_TYPE, Folder::TYPE_MINE, Folder::TYPE_CLOSED ), $this->types( $folders ) );
 
 		$folder = $folders->get( 1 );
 		$this->assertSame( 'My Reviews', $folder->getTypeName() );
 		$this->assertSame( 'tasks', $folder->getTypeIcon() );
+		$this->assertSame( 1, (int) $folder->getCount( $folders ) );
 		$this->assertSame( route( 'wporgpluginreview.my_reviews', array( 'mailbox_id' => $this->mailbox->id ) ), $folder->url( $this->mailbox->id ) );
 
+		// Without Unassigned, it's before Mine; without either, first.
+		$this->assertSame( array( MyReviews::FOLDER_TYPE, Folder::TYPE_MINE, Folder::TYPE_CLOSED ), $this->types( \Eventy::filter( 'mailbox.folders', collect( array( $mine, $closed ) ), $this->mailbox ) ) );
+		$this->assertSame( array( MyReviews::FOLDER_TYPE, Folder::TYPE_CLOSED ), $this->types( \Eventy::filter( 'mailbox.folders', collect( array( $closed ) ), $this->mailbox ) ) );
+
 		$themes = $this->create_mailbox( 'Themes', 'themes@wordpress.test' );
-		$this->assertCount( 1, \Eventy::filter( 'mailbox.folders', collect( array( $other_folder ) ), $themes ) );
+		$this->assertSame( array( Folder::TYPE_CLOSED ), $this->types( \Eventy::filter( 'mailbox.folders', collect( array( $closed ) ), $themes ) ) );
+	}
+
+	/**
+	 * The folder's counts are every reviewer's, kept until a reply, or a change to a conversation, may change them.
+	 *
+	 * @return void
+	 */
+	public function test_folder_counts_are_kept_until_they_change(): void {
+		$reply = array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ) );
+		$first = $this->conversation( $reply );
+		$this->conversation( array( array( Thread::TYPE_MESSAGE, $this->colleague, 'Review sent.' ) ) );
+
+		$this->assertSame( 1, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
+		$this->assertSame( 1, MyReviews::participating_count( $this->mailbox, $this->colleague ) );
+		$this->assertSame( 0, MyReviews::participating_count( $this->mailbox, $this->team ) );
+
+		// A reply written without the hooks isn't counted until the counts are forgotten.
+		$second = $this->conversation( array() );
+		Thread::query()->insert(
+			array(
+				'conversation_id'    => $second->id,
+				'type'               => Thread::TYPE_MESSAGE,
+				'state'              => Thread::STATE_PUBLISHED,
+				'source_via'         => Thread::PERSON_USER,
+				'source_type'        => Thread::SOURCE_TYPE_WEB,
+				'created_by_user_id' => $this->reviewer->id,
+				'body'               => 'Review sent.',
+			)
+		);
+		$this->assertSame( 1, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
+
+		MyReviews::forget_counts( (int) $this->mailbox->id );
+		$this->assertSame( 2, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
+
+		// An agent's reply forgets them.
+		$this->conversation( $reply );
+		$this->assertSame( 3, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
+
+		// So does closing a conversation.
+		$first->changeStatus( Conversation::STATUS_CLOSED, $this->colleague );
+		$this->assertSame( 2, MyReviews::participating_count( $this->mailbox, $this->reviewer ) );
 	}
 
 	/**
@@ -279,11 +323,31 @@ final class MyReviewsTest extends TestCase {
 		$response->assertStatus( 200 );
 		$html = $response->getContent();
 
-		$this->assertStringContainsString( 'Conversations I’m participating in', $html );
+		$this->assertStringContainsString( 'Reviews I’m participating in', $html );
 		$this->assertStringContainsString( 'Review of &lt;My Plugin&gt;', $html );
 		$this->assertStringContainsString( $mine->url(), $html );
 		$this->assertStringNotContainsString( 'Review of Their Plugin', $html );
 		$this->assertStringContainsString( 'data-folder_id="' . MyReviews::FOLDER_ID . '"', $html );
+		$this->assertStringContainsString( '<title>(1) My Reviews - Plugins', $html );
+		$this->assertStringContainsString( '>Threads</th>', $html );
+		$this->assertStringNotContainsString( '>Number</th>', $html );
+	}
+
+	/**
+	 * Reviews someone is participating in can be selected, for FreeScout's bulk actions; the others can't.
+	 *
+	 * @return void
+	 */
+	public function test_page_lets_participating_reviews_be_changed_together(): void {
+		$mine      = $this->conversation( array( array( Thread::TYPE_MESSAGE, $this->reviewer, 'Review sent.' ) ) );
+		$mentioned = $this->conversation( array( array( Thread::TYPE_NOTE, $this->colleague, $this->mention( $this->reviewer ) ) ) );
+
+		$html = $this->actingAs( $this->reviewer )->get( $this->url() )->getContent();
+
+		$this->assertStringContainsString( 'id="conversations-bulk-actions"', $html );
+		$this->assertStringContainsString( 'id="cb-' . $mine->id . '"', $html );
+		$this->assertStringNotContainsString( 'id="cb-' . $mentioned->id . '"', $html );
+		$this->assertSame( 1, substr_count( $html, 'class="toggle-all' ) );
 	}
 
 	/**
@@ -300,12 +364,12 @@ final class MyReviewsTest extends TestCase {
 		$response->assertStatus( 200 );
 		$html = $response->getContent();
 
-		$this->assertStringContainsString( e( 'Conversations ' . $this->colleague->getFullName() . ' is participating in' ), $html );
+		$this->assertStringContainsString( e( 'Reviews ' . $this->colleague->getFullName() . ' is participating in' ), $html );
 		$this->assertStringContainsString( 'Review of Their Plugin', $html );
 
 		$html = $this->actingAs( $this->reviewer )->get( $this->url() . '?user=' . $outsider->id )->getContent();
 
-		$this->assertStringContainsString( 'Conversations I’m participating in', $html );
+		$this->assertStringContainsString( 'Reviews I’m participating in', $html );
 		$this->assertStringNotContainsString( 'Review of Their Plugin', $html );
 	}
 
@@ -349,6 +413,34 @@ final class MyReviewsTest extends TestCase {
 		$conversation->save();
 
 		return $conversation;
+	}
+
+	/**
+	 * A folder of a type, as the mailbox's folder list has them.
+	 *
+	 * @param int $type Folder type.
+	 * @return Folder
+	 */
+	private function folder( int $type ): Folder {
+		$folder       = new Folder();
+		$folder->type = $type;
+
+		return $folder;
+	}
+
+	/**
+	 * The types of folders, in order.
+	 *
+	 * @param mixed $folders Folders.
+	 * @return int[]
+	 */
+	private function types( mixed $folders ): array {
+		return array_map(
+			static function ( Folder $folder ): int {
+				return (int) $folder->type;
+			},
+			array_values( $folders->all() )
+		);
 	}
 
 	/**
