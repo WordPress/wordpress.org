@@ -481,7 +481,7 @@ class Plugin {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The query string is dynamically constructed using safe placeholders only.
 			$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
 
-			wp_cache_delete_multiple( $chunk, 'translation_meta' );
+			wp_cache_delete_multiple( $chunk, 'translation' );
 		}
 	}
 
