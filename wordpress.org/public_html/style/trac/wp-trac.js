@@ -1149,11 +1149,10 @@ let wpTrac,
 				}
 
 				const replacement = prefix + selectedText + suffix;
-				const selStart = start + prefix.length;
-				const selEnd = selStart + ( selectedText ? selectedText.length : 0 );
+				const caret = selectedText ? start + replacement.length : start + prefix.length;
 
 				textarea.setRangeText( replacement, start, end, 'preserve' );
-				textarea.setSelectionRange( selStart, selEnd );
+				textarea.setSelectionRange( caret, caret );
 			}
 
 			$( 'textarea.wikitext' ).each( function () {
