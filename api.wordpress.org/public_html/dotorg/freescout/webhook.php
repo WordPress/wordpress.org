@@ -80,7 +80,7 @@ function contributor_stats( object $request ): void {
  * @param object $request Request payload.
  * @return bool Whether it needs all of the conversation's threads, which FreeScout sends it again with.
  *
- * @throws \Throwable If the write failed, and was rolled back.
+ * @throws \RuntimeException If a write failed; the event sent again finishes it.
  */
 function log_email( object $request ): bool {
 	global $wpdb;
@@ -99,11 +99,7 @@ function log_email( object $request ): bool {
 	// Spam and deleted conversations aren't kept; the current state wins over the event, as a deletion may be undone.
 	$deleted = isset( $email->state ) ? 'deleted' === $email->state : 'conversation.deleted' === ( $request->event ?? '' );
 	if ( $deleted || 'spam' === ( $email->status ?? '' ) ) {
-		in_transaction(
-			static function () use ( $request, $id ): void {
-				delete_emails( array_merge( array( $id ), ...array_values( get_replaced_ids( $request ) ) ) );
-			}
-		);
+		delete_emails( array_merge( array( $id ), ...array_values( get_replaced_ids( $request ) ) ) );
 
 		return false;
 	}
@@ -117,13 +113,14 @@ function log_email( object $request ): bool {
  * @param object $request Request payload.
  * @param int    $id      Conversation ID.
  * @return bool Whether it needs all of the conversation's threads; see needs_all_threads().
+ *
+ * @throws \RuntimeException If a write failed.
  */
 function write_email( object $request, int $id ): bool {
 	global $wpdb;
 
 	$email        = $request->email;
 	$emails_table = "{$wpdb->base_prefix}helpscout";
-	$meta_table   = "{$wpdb->base_prefix}helpscout_meta";
 	$replaced     = get_replaced_ids( $request );
 	$helpscout_id = (int) ( $request->helpscout_id ?? 0 );
 
@@ -132,15 +129,6 @@ function write_email( object $request, int $id ): bool {
 	if ( needs_all_threads( $request, $row, (bool) $has_helpscout ) ) {
 		return true;
 	}
-
-	$ids      = array_merge( array( $id ), ...array_values( $replaced ) );
-	$all_meta = $wpdb->get_results(
-		$wpdb->prepare(
-			'SELECT helpscout_id, meta_key, meta_value FROM %i WHERE helpscout_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholders are added for each ID.
-			array_merge( array( $meta_table ), $ids )
-		),
-		ARRAY_A
-	);
 
 	// The subject's mentions were added with the copy; the lookup costs queries, so only redo it when it changed.
 	$mailbox   = $request->email->mailbox ?? ( $request->mailbox ?? null );
@@ -157,8 +145,6 @@ function write_email( object $request, int $id ): bool {
 		)
 	);
 
-	$plan = plan_email_write( $id, $replaced, (array) $all_meta, $mentioned );
-
 	$user_id = (int) ( $row->user_id ?? 0 );
 	if ( ! $user_id ) {
 		$user    = get_sender_user( (object) array( 'sender' => $email->sender ?? null ) );
@@ -168,38 +154,34 @@ function write_email( object $request, int $id ): bool {
 	$data    = get_email_row( $request, $row, $user_id );
 	$columns = array_keys( $data );
 
-	in_transaction(
-		static function () use ( $wpdb, $emails_table, $meta_table, $id, $data, $columns, $plan ): void {
-			// Pairs are unique; one an overlapping event added is skipped.
-			foreach ( $plan['meta'] as list( $meta_key, $meta_value ) ) {
-				check_write( $wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i ( helpscout_id, meta_key, meta_value ) VALUES ( %d, %s, %s )', $meta_table, $id, $meta_key, $meta_value ) ) );
-			}
+	// In an order that the event, sent again after a failed write, finishes.
+	$replaced_ids = array_merge( ...array_values( $replaced ) );
+	take_over_meta( $id, $replaced_ids );
+	add_copy_meta( $id, $replaced['helpscout'], $mentioned );
 
-			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The placeholders are added for each column; one statement, so two events for a new conversation at once don't both insert it.
-			check_write(
-				$wpdb->query(
-					$wpdb->prepare(
-						'INSERT INTO %i (' . implode( ', ', array_fill( 0, count( $columns ), '%i' ) ) . ') VALUES (' . implode( ', ', array_fill( 0, count( $data ), '%s' ) ) . ') ON DUPLICATE KEY UPDATE ' . implode( ', ', array_fill( 0, count( $columns ) - 1, '%i = VALUES( %i )' ) ),
-						array_merge(
-							array( $emails_table ),
-							$columns,
-							array_values( $data ),
-							// Every column but the ID, twice: name, and name again for VALUES().
-							...array_map(
-								static function ( string $column ): array {
-									return array( $column, $column );
-								},
-								array_values( array_diff( $columns, array( 'id' ) ) )
-							)
-						)
+	// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The placeholders are added for each column; one statement, so two events for a new conversation at once don't both insert it.
+	check_write(
+		$wpdb->query(
+			$wpdb->prepare(
+				'INSERT INTO %i (' . implode( ', ', array_fill( 0, count( $columns ), '%i' ) ) . ') VALUES (' . implode( ', ', array_fill( 0, count( $data ), '%s' ) ) . ') ON DUPLICATE KEY UPDATE ' . implode( ', ', array_fill( 0, count( $columns ) - 1, '%i = VALUES( %i )' ) ),
+				array_merge(
+					array( $emails_table ),
+					$columns,
+					array_values( $data ),
+					// Every column but the ID, twice: name, and name again for VALUES().
+					...array_map(
+						static function ( string $column ): array {
+							return array( $column, $column );
+						},
+						array_values( array_diff( $columns, array( 'id' ) ) )
 					)
 				)
-			);
-			// phpcs:enable
-
-			delete_emails( $plan['delete'] );
-		}
+			)
+		)
 	);
+	// phpcs:enable
+
+	delete_emails( $replaced_ids );
 
 	return false;
 }

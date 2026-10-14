@@ -13,120 +13,72 @@ require __DIR__ . '/common.php';
 
 /**
  * Swaps the copies of HelpScout's conversations for those of the FreeScout conversations imported from them; see
- * plan_copy_replacement(). Each swap is a transaction, and swapped copies are skipped, so a batch can be sent again.
+ * plan_copy_replacement(). Writes go in an order that the batch, sent again after one failed, finishes.
  *
- * @param array $copies Each a HelpScout ID, the FreeScout conversation's ID and number, whether its copy goes, and
- *                      whether it was merged into that conversation.
- * @return int|null How many were swapped, or deleted; null if one failed, so the batch should be sent again.
+ * @param array $copies Each a HelpScout ID, the FreeScout conversation's ID and number, and whether its copy goes.
+ * @return int How many were swapped, or deleted.
+ *
+ * @throws \RuntimeException If a write failed.
  */
-function replace_copies( array $copies ): ?int {
+function replace_copies( array $copies ): int {
 	global $wpdb;
 
-	$emails_table = "{$wpdb->base_prefix}helpscout";
-	$meta_table   = "{$wpdb->base_prefix}helpscout_meta";
-	$replaced     = 0;
+	$copies = array_map(
+		static function ( mixed $copy ): object {
+			return (object) $copy;
+		},
+		$copies
+	);
+	$ids    = array_values( array_filter( array_map( 'intval', array_merge( array_column( $copies, 'helpscout_id' ), array_column( $copies, 'id' ) ) ) ) );
+	if ( ! $ids ) {
+		return 0;
+	}
 
 	// Read from the primary database, not a lagging replica.
 	if ( is_callable( array( $wpdb, 'send_reads_to_masters' ) ) ) {
 		$wpdb->send_reads_to_masters();
 	}
 
+	$emails_table = "{$wpdb->base_prefix}helpscout";
+	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholders are added for each ID.
+	$existing = array_fill_keys( array_map( 'intval', $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', array_merge( array( $emails_table ), $ids ) ) ) ), true );
+	$replaced = 0;
+
 	foreach ( $copies as $copy ) {
-		$copy         = (object) $copy;
 		$helpscout_id = (int) ( $copy->helpscout_id ?? 0 );
 		$id           = (int) ( $copy->id ?? 0 );
-		if ( $helpscout_id <= 0 || $id <= 0 || $helpscout_id === $id ) {
+		$action       = plan_copy_replacement( $copy, isset( $existing[ $helpscout_id ] ), isset( $existing[ $id ] ) );
+		if ( 'skip' === $action ) {
 			continue;
 		}
 
-		try {
-			$has_helpscout = (bool) $wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i WHERE id = %d', $emails_table, $helpscout_id ) );
-			$has_freescout = (bool) $wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i WHERE id = %d', $emails_table, $id ) );
-			$names_it      = (bool) $wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i WHERE helpscout_id = %d AND meta_key = %s AND meta_value = %s', $meta_table, $id, REPLACED_HELPSCOUT_META_KEY, (string) $helpscout_id ) );
-			$action        = plan_copy_replacement( $copy, $has_helpscout, $has_freescout, $names_it );
-			if ( 'skip' === $action ) {
-				continue;
-			}
-
-			in_transaction(
-				static function () use ( $wpdb, $emails_table, $meta_table, $action, $copy, $helpscout_id, $id, $names_it ): void {
-					if ( 'delete' === $action ) {
-						delete_emails( array( $helpscout_id, $id ) );
-
-						return;
-					}
-
-					// Mark the FreeScout copy: its helpdesk, and the HelpScout conversation it replaces.
-					$marks = array( REPLACED_HELPSCOUT_META_KEY => (string) $helpscout_id );
-					if ( 'rename' === $action ) {
-						$marks[ HELPDESK_META_KEY ] = 'freescout';
-					}
-					foreach ( $marks as $meta_key => $meta_value ) {
-						check_write(
-							$wpdb->query(
-								$wpdb->prepare(
-									'INSERT INTO %i ( helpscout_id, meta_key, meta_value )
-										SELECT %d, %s, %s FROM DUAL
-										WHERE NOT EXISTS ( SELECT 1 FROM %i WHERE helpscout_id = %d AND meta_key = %s AND meta_value = %s )',
-									$meta_table,
-									$id,
-									$meta_key,
-									$meta_value,
-									$meta_table,
-									$id,
-									$meta_key,
-									$meta_value
-								)
-							)
-						);
-					}
-
-					if ( 'name' === $action ) {
-						return;
-					}
-
-					// Take over the HelpScout copy's plugins and themes.
-					check_write(
-						$wpdb->query(
-							$wpdb->prepare(
-								'INSERT INTO %i ( helpscout_id, meta_key, meta_value )
-									SELECT %d, hs.meta_key, hs.meta_value FROM %i hs
-									WHERE hs.helpscout_id = %d
-										AND NOT EXISTS ( SELECT 1 FROM %i fs WHERE fs.helpscout_id = %d AND fs.meta_key = hs.meta_key AND fs.meta_value = hs.meta_value )',
-								$meta_table,
-								$id,
-								$meta_table,
-								$helpscout_id,
-								$meta_table,
-								$id
-							)
-						)
-					);
-
-					if ( 'rename' === $action ) {
-						check_write( $wpdb->delete( $meta_table, array( 'helpscout_id' => $helpscout_id ) ) );
-						check_write( $wpdb->update( $emails_table, array( 'id' => $id, 'number' => (int) ( $copy->number ?? 0 ) ), array( 'id' => $helpscout_id ) ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- Two columns.
-					} else {
-						delete_emails( array( $helpscout_id ) );
-					}
-				}
-			);
-
-			++$replaced;
-		} catch ( \Throwable $e ) {
-			trigger_error( 'FreeScout copy of conversation ' . $id . ' failed: ' . $e->getMessage(), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
-
-			return null;
+		++$replaced;
+		if ( 'delete' === $action ) {
+			delete_emails( array( $helpscout_id, $id ) );
+			unset( $existing[ $helpscout_id ], $existing[ $id ] );
+			continue;
 		}
+
+		take_over_meta( $id, array( $helpscout_id ) );
+		add_copy_meta( $id, array( $helpscout_id ), array() );
+		if ( 'rename' === $action ) {
+			check_write( $wpdb->update( $emails_table, array( 'id' => $id, 'number' => (int) ( $copy->number ?? 0 ) ), array( 'id' => $helpscout_id ) ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- Two columns.
+			$existing[ $id ] = true;
+		}
+
+		delete_emails( array( $helpscout_id ) );
+		unset( $existing[ $helpscout_id ] );
 	}
 
 	return $replaced;
 }
 
-$request  = get_request( basename( __FILE__ ) );
-$replaced = replace_copies( (array) ( $request->copies ?? array() ) );
+$request = get_request( basename( __FILE__ ) );
 
-if ( null === $replaced ) {
+try {
+	$replaced = replace_copies( (array) ( $request->copies ?? array() ) );
+} catch ( \Throwable $e ) {
+	trigger_error( 'FreeScout copies failed: ' . $e->getMessage(), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
 	status_header( 503 );
 	exit;
 }

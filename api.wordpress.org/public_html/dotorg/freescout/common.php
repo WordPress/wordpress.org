@@ -741,82 +741,69 @@ function needs_all_threads( object $request, ?object $row, bool $has_helpscout )
 }
 
 /**
- * What writing a conversation's copy adds to its meta, and which copies it deletes.
+ * Moves the plugins and themes of copies to the copy that replaces them. Pairs it has already stay behind, and go with
+ * their copy.
  *
- * It takes over the replaced copies' meta, names the HelpScout conversations it replaces, and adds what its threads
- * mention. HelpScout conversations it names already aren't replaced again.
+ * @param int   $id  ID of the copy that replaces them.
+ * @param int[] $ids IDs of the copies it replaces.
+ * @return void
  *
- * @param int     $id        Conversation ID.
- * @param array[] $replaced  The copies it replaces, see get_replaced_ids().
- * @param array[] $all_meta  The meta of it and of the copies it replaces: helpscout_id, meta_key, and meta_value.
- * @param array[] $mentioned The plugins' and themes' slugs its threads and subject mention, by type.
- * @return array Meta to add, as meta_key and meta_value pairs, under `meta`; IDs of the copies to delete, under `delete`.
+ * @throws \RuntimeException If the write failed.
  */
-function plan_email_write( int $id, array $replaced, array $all_meta, array $mentioned ): array {
-	$own      = array();
-	$by_copy  = array();
-	$replaces = array();
-	foreach ( $all_meta as $pair ) {
-		$key = $pair['meta_key'] . '|' . $pair['meta_value'];
-		if ( (int) $pair['helpscout_id'] === $id ) {
-			$own[ $key ] = true;
-		} else {
-			$by_copy[ (int) $pair['helpscout_id'] ][ $key ] = $pair;
-		}
+function take_over_meta( int $id, array $ids ): void {
+	global $wpdb;
 
-		if ( REPLACED_HELPSCOUT_META_KEY === $pair['meta_key'] && (int) $pair['helpscout_id'] === $id ) {
-			$replaces[ (int) $pair['meta_value'] ] = true;
-		}
+	if ( ! $ids ) {
+		return;
 	}
 
-	$helpscout = array_values(
-		array_filter(
-			$replaced['helpscout'],
-			static function ( int $helpscout_id ) use ( $replaces ): bool {
-				return ! isset( $replaces[ $helpscout_id ] );
-			}
-		)
-	);
-	$delete    = array_merge( $replaced['freescout'], $helpscout );
+	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholders are added for each ID.
+	check_write( $wpdb->query( $wpdb->prepare( 'UPDATE IGNORE %i SET helpscout_id = %d WHERE helpscout_id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')', array_merge( array( "{$wpdb->base_prefix}helpscout_meta", $id ), $ids ) ) ) );
+}
 
-	$meta = array();
-	foreach ( $delete as $copy_id ) {
-		foreach ( $by_copy[ $copy_id ] ?? array() as $key => $pair ) {
-			$meta[ $key ] = array( $pair['meta_key'], $pair['meta_value'] );
-		}
+/**
+ * Adds a FreeScout copy's meta, skipping pairs it has: its helpdesk, the HelpScout conversations it replaces, and the
+ * plugins and themes it mentions.
+ *
+ * @param int     $id            Conversation ID.
+ * @param int[]   $helpscout_ids HelpScout conversations it replaces.
+ * @param array[] $mentioned     Plugins' and themes' slugs, by type.
+ * @return void
+ *
+ * @throws \RuntimeException If the write failed.
+ */
+function add_copy_meta( int $id, array $helpscout_ids, array $mentioned ): void {
+	global $wpdb;
+
+	$pairs = array( array( HELPDESK_META_KEY, 'freescout' ) );
+	foreach ( $helpscout_ids as $helpscout_id ) {
+		$pairs[] = array( REPLACED_HELPSCOUT_META_KEY, (string) $helpscout_id );
 	}
-
-	$meta[ HELPDESK_META_KEY . '|freescout' ] = array( HELPDESK_META_KEY, 'freescout' );
-	foreach ( $replaced['helpscout'] as $helpscout_id ) {
-		$meta[ REPLACED_HELPSCOUT_META_KEY . '|' . $helpscout_id ] = array( REPLACED_HELPSCOUT_META_KEY, (string) $helpscout_id );
-	}
-
 	foreach ( $mentioned as $type => $slugs ) {
 		foreach ( $slugs as $slug ) {
-			$meta[ $type . '|' . $slug ] = array( (string) $type, (string) $slug );
+			$pairs[] = array( (string) $type, (string) $slug );
 		}
 	}
 
-	return array(
-		'meta'   => array_values( array_diff_key( $meta, $own ) ),
-		'delete' => $delete,
-	);
+	$args = array( "{$wpdb->base_prefix}helpscout_meta" );
+	foreach ( $pairs as list( $meta_key, $meta_value ) ) {
+		array_push( $args, $id, $meta_key, $meta_value );
+	}
+
+	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- The placeholders are added for each pair.
+	check_write( $wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i ( helpscout_id, meta_key, meta_value ) VALUES ' . implode( ', ', array_fill( 0, count( $pairs ), '( %d, %s, %s )' ) ), $args ) ) );
 }
 
 /**
  * What switching an imported conversation does to its copy.
  *
- * One merged away before the switch arrives as the conversation it went into, flagged `merged`: its HelpScout copy is
- * merged into that one's rather than renamed, as that one's own HelpScout copy may still need renaming.
- *
- * @param object $copy          The imported conversation: helpscout_id, id, number, delete, and merged.
+ * @param object $copy          The imported conversation: helpscout_id, id, number, status, and delete.
  * @param bool   $has_helpscout Whether the copy has the HelpScout conversation.
  * @param bool   $has_freescout Whether it has the FreeScout one.
- * @param bool   $names_it      Whether the FreeScout one's copy names the HelpScout one, as it replaced it already.
- * @return string `skip`; `delete` both copies (deleted or spam); `rename` the HelpScout copy to the FreeScout ID;
- *                `merge` it into the FreeScout copy; or `name` it in that copy.
+ * @return string `skip`; `delete` both copies (deleted or spam); `rename` the HelpScout copy to the FreeScout ID; or
+ *                `merge` it into the FreeScout copy.
  */
-function plan_copy_replacement( object $copy, bool $has_helpscout, bool $has_freescout, bool $names_it ): string {
+function plan_copy_replacement( object $copy, bool $has_helpscout, bool $has_freescout ): string {
 	$helpscout_id = (int) ( $copy->helpscout_id ?? 0 );
 	$id           = (int) ( $copy->id ?? 0 );
 	if ( $helpscout_id <= 0 || $id <= 0 || $helpscout_id === $id ) {
@@ -827,36 +814,11 @@ function plan_copy_replacement( object $copy, bool $has_helpscout, bool $has_fre
 		return $has_helpscout || $has_freescout ? 'delete' : 'skip';
 	}
 
-	if ( $has_helpscout ) {
-		return $has_freescout || ! empty( $copy->merged ) ? 'merge' : 'rename';
+	if ( ! $has_helpscout ) {
+		return 'skip';
 	}
 
-	// The FreeScout copy exists without the HelpScout one; naming it still keeps HelpScout's webhook out.
-	return $has_freescout && ! $names_it ? 'name' : 'skip';
-}
-
-/**
- * Runs writes to WordPress.org's copy in a transaction.
- *
- * @param callable $write Writes; throws if one fails, see check_write().
- * @return void
- *
- * @throws \Throwable What the writes threw, once they're rolled back.
- */
-function in_transaction( callable $write ): void {
-	global $wpdb;
-
-	check_write( $wpdb->query( 'START TRANSACTION' ) );
-
-	try {
-		$write();
-	} catch ( \Throwable $e ) {
-		$wpdb->query( 'ROLLBACK' );
-
-		throw $e;
-	}
-
-	check_write( $wpdb->query( 'COMMIT' ) );
+	return $has_freescout ? 'merge' : 'rename';
 }
 
 /**
