@@ -24,6 +24,7 @@ gp_tmpl_header();
 			];
 			$sets_to_hide   = array(
 				'ca/valencia',
+				'de/informal',
 				'en/formal',
 				'en/default',
 				'fr/formal',
