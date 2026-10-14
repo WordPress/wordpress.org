@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Jobs\ReplaceCopies;
 use Modules\WPOrgWebhooks\Services\Client;
+use Modules\WPOrgWebhooks\Services\EventPayload;
 
 /**
  * Switches a mailbox's conversations in WordPress.org's copy from HelpScout to FreeScout, in batches on the queue.
@@ -199,13 +200,14 @@ final class Copies {
 	 * One merged away is sent as the conversation it went into, which takes over its copy's plugins and themes.
 	 *
 	 * @param ImportedConversation $imported An imported conversation, as batch() reads it.
-	 * @return array HelpScout's ID, FreeScout's ID and number, and whether to delete the copy.
+	 * @return array HelpScout's ID, FreeScout's ID, number, and status, and whether to delete the copy.
 	 */
 	public static function request( ImportedConversation $imported ): array {
 		$request = array(
 			'helpscout_id' => (int) $imported->helpscout_id,
 			'id'           => (int) $imported->conversation_id,
 			'number'       => (int) $imported->number,
+			'status'       => EventPayload::STATUSES[ (int) $imported->status ] ?? 'active',
 			'delete'       => self::gone( (int) $imported->state, (int) $imported->status ),
 		);
 
@@ -214,6 +216,7 @@ final class Copies {
 			$request = array(
 				'id'     => (int) $into->id,
 				'number' => (int) $into->number,
+				'status' => EventPayload::STATUSES[ (int) $into->status ] ?? 'active',
 				'delete' => self::gone( (int) $into->state, (int) $into->status ),
 			) + $request;
 		}

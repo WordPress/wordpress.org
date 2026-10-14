@@ -15,7 +15,8 @@ require __DIR__ . '/common.php';
  * Swaps the copies of HelpScout's conversations for those of the FreeScout conversations imported from them; see
  * plan_copy_replacement(). Writes go in an order that the batch, sent again after one failed, finishes.
  *
- * @param array $copies Each a HelpScout ID, the FreeScout conversation's ID and number, and whether its copy goes.
+ * @param array $copies Each a HelpScout ID, the FreeScout conversation's ID, number, and status, and whether its copy
+ *                      goes.
  * @return int How many were swapped, or deleted.
  *
  * @throws \RuntimeException If a write failed.
@@ -62,7 +63,13 @@ function replace_copies( array $copies ): int {
 		take_over_meta( $id, array( $helpscout_id ) );
 		add_copy_meta( $id, array( $helpscout_id ), array() );
 		if ( 'rename' === $action ) {
-			check_write( $wpdb->update( $emails_table, array( 'id' => $id, 'number' => (int) ( $copy->number ?? 0 ) ), array( 'id' => $helpscout_id ) ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- Two columns.
+			// What HelpScout's webhook last wrote may be out of date, as it no longer runs for the mailbox.
+			$columns = array(
+				'id'     => $id,
+				'number' => (int) ( $copy->number ?? 0 ),
+				'status' => (string) ( $copy->status ?? '' ),
+			);
+			check_write( $wpdb->update( $emails_table, $columns, array( 'id' => $helpscout_id ) ) );
 			$existing[ $id ] = true;
 		}
 

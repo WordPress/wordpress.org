@@ -130,11 +130,14 @@ function write_email( object $request, int $id ): bool {
 		return true;
 	}
 
-	// The subject's mentions were added with the copy; the lookup costs queries, so only redo it when it changed.
+	/*
+	 * The subject's mentions were added with the copy; the lookup costs queries, so only redo it when it changed. The
+	 * column keeps 255 characters.
+	 */
 	$mailbox   = $request->email->mailbox ?? ( $request->mailbox ?? null );
 	$subject   = (string) ( $email->subject ?? '' );
 	$threads   = (array) ( $email->threads ?? array() );
-	$seen      = $row && $subject === (string) $row->subject && get_copy_mailbox_slug( $request ) === (string) $row->mailbox;
+	$seen      = $row && mb_substr( $subject, 0, 255 ) === (string) $row->subject && get_copy_mailbox_slug( $request ) === (string) $row->mailbox;
 	$mentioned = $seen && ! $threads ? array() : get_existing_slugs(
 		get_plugin_or_theme_from_email(
 			(object) array(

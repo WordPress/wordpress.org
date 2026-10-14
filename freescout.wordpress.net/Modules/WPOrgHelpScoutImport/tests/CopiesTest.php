@@ -229,9 +229,10 @@ final class CopiesTest extends TestCase {
 				array(
 					'id'     => (int) $kept->id,
 					'number' => (int) $kept->number,
+					'status' => 'active',
 					'delete' => false,
 				),
-				array_intersect_key( $copies[ $helpscout_id ], array_flip( array( 'id', 'number', 'delete' ) ) )
+				array_intersect_key( $copies[ $helpscout_id ], array_flip( array( 'id', 'number', 'status', 'delete' ) ) )
 			);
 		}
 		$this->assertSame( array( (int) $kept->id, false ), array( $copies[1000000025]['id'], $copies[1000000025]['delete'] ) );

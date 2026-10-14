@@ -73,7 +73,7 @@ final class EventPayload {
 	 *
 	 * @var string[]
 	 */
-	private const STATUSES = array(
+	public const STATUSES = array(
 		Conversation::STATUS_ACTIVE  => 'active',
 		Conversation::STATUS_PENDING => 'pending',
 		Conversation::STATUS_CLOSED  => 'closed',
