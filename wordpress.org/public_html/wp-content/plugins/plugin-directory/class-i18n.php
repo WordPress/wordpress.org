@@ -106,7 +106,7 @@ class I18n {
 		// Business model terms.
 		_x( 'Community', 'Plugin Business Model', 'wporg-plugins' );
 		_x( 'Commercial', 'Plugin Business Model', 'wporg-plugins' );
-
+		
 		// Business model descriptions.
 		__( 'These plugins are developed and supported by a community.', 'wporg-plugins' );
 		__( 'These plugins are free, but also have paid versions available.', 'wporg-plugins' );
