@@ -28,6 +28,7 @@ class Trac implements User {
 
 	protected $commit_path_filters = array();
 	protected $ticket_component_filters = array();
+	protected $ticket_keyword_filters = array();
 
 	protected $color = '#0073aa';
 	protected $icon  = ':wordpress:';
@@ -287,6 +288,14 @@ class Trac implements User {
 
 	function get_firehose_channel() {
 		return $this->firehose_channel;
+	}
+
+	function get_keyword_channels( $keyword ) {
+		if ( isset( $this->ticket_keyword_filters[ $keyword ] ) ) {
+			$channel = $this->ticket_keyword_filters[ $keyword ];
+			return is_array( $channel ) ? array_keys( array_filter( $channel ) ) : array( $channel );
+		}
+		return array();
 	}
 
 	function get_ticket_format( $channel ) {
