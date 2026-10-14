@@ -89,7 +89,7 @@ class Sync {
 
 		// Prevent execution if triggered directly on the destination site.
 		$source_id = $blog_id ? (int) $blog_id : get_current_blog_id();
-		if ( (int) $source_id === (int) $this->destination_site->blog_id ) {
+		if ( $source_id === $this->destination_site->id ) {
 			return;
 		}
 
@@ -97,12 +97,12 @@ class Sync {
 			return;
 		}
 
-		if ( is_user_member_of_blog( $user_id, $this->destination_site->blog_id ) ) {
+		if ( is_user_member_of_blog( $user_id, $this->destination_site->id ) ) {
 			return;
 		}
 
 		$this->is_syncing = true;
-		add_user_to_blog( $this->destination_site->blog_id, $user_id, $this->roles_to_sync[ $role ] );
+		add_user_to_blog( $this->destination_site->id, $user_id, $this->roles_to_sync[ $role ] );
 		$this->is_syncing = false;
 	}
 }
