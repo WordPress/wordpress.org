@@ -44,7 +44,7 @@ class Consistency extends GP_Route {
 
 		$search                = '';
 		$set                   = '';
-		$project               = 0;
+		$project               = '';
 		$search_case_sensitive = false;
 
 		if ( isset( $_REQUEST['search'] ) && is_string( $_REQUEST['search'] ) && '' !== $_REQUEST['search'] ) {
@@ -100,7 +100,7 @@ class Consistency extends GP_Route {
 			$translations_unique_counts = array_count_values( $translations );
 
 			arsort( $translations_unique_counts );
-			$translations_unique        = array_keys( $translations_unique_counts );
+			$translations_unique = array_keys( $translations_unique_counts );
 		}
 
 		$projects = self::PROJECTS;
@@ -129,7 +129,6 @@ class Consistency extends GP_Route {
 			$sets = array();
 			if ( $_sets ) {
 				foreach ( $_sets as $set ) {
-					// Compare locales with our mu-plugin.
 					if ( ! GP_Locales::exists( $set->locale ) ) {
 						continue;
 					}

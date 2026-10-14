@@ -153,10 +153,10 @@ if ( $performed_search && ! $results ) {
 							break;
 						}
 
-						$top_parent     = $parent_project;
-						$p_parent_id    = $parent_project->parent_project_id;
-						$p_name         = "{$parent_project->name} - {$p_name}";
-						$is_active      = $is_active && $parent_project->active;
+						$top_parent  = $parent_project;
+						$p_parent_id = $parent_project->parent_project_id;
+						$p_name      = "{$parent_project->name} - {$p_name}";
+						$is_active   = $is_active && $parent_project->active;
 					}
 
 					$project_cache[ $result->project_id ] = [
