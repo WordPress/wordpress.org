@@ -615,16 +615,24 @@ let wpTrac,
 					return Boolean( el && el.value.trim() !== el.defaultValue.trim() );
 				}
 
+				/**
+				 * Checks whether an input or textarea element has a non-empty value.
+				 *
+				 * @param {string} selector CSS selector for the form element.
+				 * @return {boolean} True if the field exists and contains non-whitespace text, false otherwise.
+				 */
+				function hasValue( selector ) {
+					return Boolean( document.querySelector( selector )?.value.trim() );
+				}
+
 				window.addEventListener( 'beforeunload', function ( event ) {
 					if ( isSubmitting ) {
 						return;
 					}
 
-					const hasModifiedProperties = isDirty( '#field-summary' ) || isDirty( '#field-description' );
-					const commentEl = document.getElementById( 'comment' );
 					const hasUnsavedContent = wpTrac.isNewTicket()
-						? hasModifiedProperties
-						: Boolean( commentEl?.value?.trim() ) || hasModifiedProperties;
+						? hasValue( '#field-summary' ) || hasValue( '#field-description' )
+						: hasValue( '#comment' ) || isDirty( '#field-summary' ) || isDirty( '#field-description' );
 
 					if ( ! hasUnsavedContent ) {
 						return;
@@ -640,6 +648,12 @@ let wpTrac,
 							isSubmitting = false;
 						}
 					}, 0 );
+				} );
+
+				document.getElementById( 'propertyform' )?.addEventListener( 'click', function ( event ) {
+					if ( event.target.closest( '#new-tracker-ticket' ) ) {
+						isSubmitting = true;
+					}
 				} );
 			}
 
