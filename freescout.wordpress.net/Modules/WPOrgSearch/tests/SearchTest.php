@@ -71,7 +71,7 @@ final class SearchTest extends TestCase {
 		}
 
 		$this->assertSame( $expected, $this->filters( $filters, $input ) );
-		$this->assertSame( $defaulted, str_contains( $this->filters_note(), 'need an After date' ) );
+		$this->assertSame( $defaulted, str_contains( $this->filters_note(), 'started in the past year' ) );
 	}
 
 	/**

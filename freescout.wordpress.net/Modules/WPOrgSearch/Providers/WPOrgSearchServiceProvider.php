@@ -101,7 +101,7 @@ final class WPOrgSearchServiceProvider extends ServiceProvider {
 				}
 
 				if ( app( Search::class )->was_defaulted() ) {
-					echo '<div class="col-sm-12 text-help">' . e( 'Searches without other filters need an After date, so they don’t time out. It’s set to a year ago. To search older conversations, pick an earlier date or add another filter.' ) . '</div>';
+					echo '<div class="col-sm-12 text-help">' . e( 'Searches without other filters only cover conversations started in the past year, so they don’t time out. To search older ones, pick an earlier After date or add another filter.' ) . '</div>';
 				}
 			},
 			20,
