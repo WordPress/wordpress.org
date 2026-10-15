@@ -158,7 +158,7 @@ final class Search {
 	}
 
 	/**
-	 * Fetches a page of results with their total, in one query.
+	 * Fetches a page of results with their total, in one query, stopped by MariaDB if it runs past the time limit.
 	 *
 	 * Core's paginator counts with a second, grouped query that sends every match's row back, as slow as the search.
 	 *
@@ -167,11 +167,9 @@ final class Search {
 	 */
 	private function paginate( EloquentBuilder $query ): LengthAwarePaginator {
 		$query->addSelect( \DB::raw( 'COUNT(*) OVER() AS ' . self::TOTAL ) )->forPage( Paginator::resolveCurrentPage(), Conversation::DEFAULT_LIST_SIZE );
-		$rows = $this->with_time_limit(
-			static function () use ( $query ): Collection {
-				return $query->get();
-			}
-		);
+
+		$sql  = 'SET STATEMENT max_statement_time = ' . $this->time_limit . ' FOR ' . $query->toSql();
+		$rows = $query->getModel()->hydrate( $query->getQuery()->getConnection()->select( $sql, $query->getBindings() ) );
 
 		// A page past the last one has no rows to carry the total.
 		$total = $rows->isEmpty() ? 0 : (int) $rows->first()->{ self::TOTAL };
@@ -180,29 +178,6 @@ final class Search {
 		}
 
 		return $this->page( $rows, $total );
-	}
-
-	/**
-	 * Runs a query under the time limit, on MariaDB, through its `max_statement_time`.
-	 *
-	 * @param callable $run Runs the query.
-	 * @return mixed What the query returns.
-	 */
-	private function with_time_limit( callable $run ) {
-		$connection = \DB::connection();
-		$version    = (string) $connection->getPdo()->getAttribute( \PDO::ATTR_SERVER_VERSION );
-		if ( 'mysql' !== $connection->getDriverName() || false === stripos( $version, 'MariaDB' ) ) {
-			return $run();
-		}
-
-		$previous = (float) $connection->selectOne( 'SELECT @@max_statement_time AS `limit`' )->limit;
-		$connection->statement( 'SET SESSION max_statement_time = ' . $this->time_limit );
-
-		try {
-			return $run();
-		} finally {
-			$connection->statement( 'SET SESSION max_statement_time = ' . $previous );
-		}
 	}
 
 	/**

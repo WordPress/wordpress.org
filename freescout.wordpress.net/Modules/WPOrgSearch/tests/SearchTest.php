@@ -165,7 +165,6 @@ final class SearchTest extends TestCase {
 	public function test_search_that_takes_too_long_is_stopped(): void {
 		$this->conversation( 'Plugin review', 'obenland', '2026-10-01 10:00:00' );
 		$this->app->instance( Search::class, new Search( 0.1 ) );
-		$limit = \DB::selectOne( 'SELECT @@max_statement_time AS `limit`' )->limit;
 
 		$slow = static function ( $query ) {
 			return $query->whereRaw( 'SLEEP(1) = 0' );
@@ -177,7 +176,6 @@ final class SearchTest extends TestCase {
 		$this->assertSame( 0, $results->total() );
 		$this->assertTrue( app( Search::class )->timed_out() );
 		$this->assertStringContainsString( 'took too long', $this->filters_note() );
-		$this->assertSame( $limit, \DB::selectOne( 'SELECT @@max_statement_time AS `limit`' )->limit );
 	}
 
 	/**
