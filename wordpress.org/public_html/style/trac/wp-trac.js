@@ -1399,10 +1399,7 @@ let wpTrac,
 		},
 
 		reports() {
-			const popup = document.getElementById( 'report-popup' ),
-				headline = document.getElementById( 'headline' );
-			let failed = false;
-
+			const popup = document.getElementById( 'report-popup' );
 			if ( ! popup ) {
 				return;
 			}
@@ -1420,6 +1417,9 @@ let wpTrac,
 			} );
 
 			document.getElementById( 'main' )?.append( popup );
+
+			const headline = document.getElementById( 'headline' );
+			let failed = false;
 
 			document.querySelectorAll( '.open-ticket-report' ).forEach( ( trigger ) => {
 				trigger.addEventListener( 'click', function ( event ) {
@@ -2044,7 +2044,9 @@ let wpTrac,
 
 					// Update the dropdown. Core keywords also get a title attribute with their description.
 					if ( keyword in coreKeywordList ) {
-						const opt = elements.add.querySelector( `option[value="${ CSS.escape( keyword ) }"]` );
+						const opt = elements.add.querySelector(
+							`option[value="${ window.CSS.escape( keyword ) }"]`
+						);
 						if ( opt ) {
 							opt.disabled = true;
 							opt.textContent = '* ' + keyword;
@@ -2072,7 +2074,9 @@ let wpTrac,
 
 					if ( typeof object === 'string' ) {
 						keyword = object;
-						el = elements.bin.querySelector( `span[data-keyword="${ CSS.escape( keyword ) }"]` );
+						el = elements.bin.querySelector(
+							`span[data-keyword="${ window.CSS.escape( keyword ) }"]`
+						);
 						if ( ! el ) {
 							return;
 						}
@@ -2088,7 +2092,9 @@ let wpTrac,
 
 					// Update the core keyword dropdown.
 					if ( keyword in coreKeywordList ) {
-						const opt = elements.add.querySelector( `option[value="${ CSS.escape( keyword ) }"]` );
+						const opt = elements.add.querySelector(
+							`option[value="${ window.CSS.escape( keyword ) }"]`
+						);
 						if ( opt ) {
 							opt.disabled = false;
 							opt.textContent = keyword;
@@ -2349,7 +2355,9 @@ let wpTrac,
 
 			function maintainerLabels( maintainers ) {
 				const labels = {};
-				const componentName = ( document.querySelector( 'td[headers="h_component"]' )?.textContent || '' ).trim();
+				const componentName = (
+					document.querySelector( 'td[headers="h_component"]' )?.textContent || ''
+				).trim();
 				for ( let i = 0, len = maintainers.length; i < len; i++ ) {
 					labels[ maintainers[ i ] ] = {
 						text: 'Component Maintainer',
