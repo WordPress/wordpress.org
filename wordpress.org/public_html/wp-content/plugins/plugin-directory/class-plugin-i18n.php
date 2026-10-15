@@ -2,7 +2,6 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use GP_Locales;
-use WP_Http;
 
 /**
  * Translation for plugin content.
@@ -519,50 +518,51 @@ class Plugin_I18n {
 	 * @return array Locale objects with wp_locale and percent_translated properties.
 	 */
 	public function get_locales( $post = null, $branch = 'stable', $min_percent = 95 ) {
+		global $wpdb;
+
 		$post = get_post( $post );
 
-		$cache_suffix = 'translation_sets';
-
-		// Cached as wp_locale => percent_translated; the full API objects run to ~80KB per plugin.
-		$percent_translated = $this->cache_get( $post->post_name, $branch, $cache_suffix );
-
-		// Entries still holding the full API objects are refetched.
-		if ( false === $percent_translated || is_object( reset( $percent_translated ) ) ) {
-			$api_url  = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch . '/', [ 'https' ] );
-			$response = wp_remote_get( $api_url );
-
-			if ( is_wp_error( $response ) || WP_Http::OK !== wp_remote_retrieve_response_code( $response ) ) {
-				$translation_sets = [];
-			} else {
-				$result           = json_decode( wp_remote_retrieve_body( $response ) );
-				$translation_sets = isset( $result->translation_sets ) ? $result->translation_sets : [];
-			}
-
-			$percent_translated = [];
-			foreach ( $translation_sets as $set ) {
-				// GlotPress locales that WordPress doesn't use come back without a wp_locale.
-				if ( empty( $set->wp_locale ) ) {
-					continue;
-				}
-
-				// Several sets can share a wp_locale, e.g. ca-val and ca/valencia.
-				$percent_translated[ $set->wp_locale ] = max( $set->percent_translated, $percent_translated[ $set->wp_locale ] ?? 0 );
-			}
-
-			$this->cache_set( $post->post_name, $branch, $percent_translated, $cache_suffix );
+		$project_id = $this->get_gp_branch_id( $post->post_name, $branch );
+		if ( ! $project_id ) {
+			return [];
 		}
+
+		// translate.wordpress.org keeps these counts current on every translation edit and originals import.
+		$translation_sets = $wpdb->get_results( $wpdb->prepare(
+			'SELECT locale, locale_slug, `current`, `all` FROM ' . GLOTPRESS_TABLE_PREFIX . 'project_translation_status WHERE project_id = %d',
+			$project_id
+		) );
+
+		require_once GLOTPRESS_LOCALES_PATH;
 
 		$locales = [];
-		foreach ( $percent_translated as $wp_locale => $percent ) {
-			if ( $percent >= $min_percent ) {
-				$locales[] = (object) [
-					'wp_locale'          => $wp_locale,
-					'percent_translated' => $percent,
-				];
+		foreach ( $translation_sets as $set ) {
+			$gp_locale = GP_Locales::by_slug( $set->locale );
+			if ( empty( $gp_locale->wp_locale ) ) {
+				continue;
 			}
+
+			// Variants are named the way translate.wordpress.org names them, e.g. de_DE_formal.
+			$wp_locale = $gp_locale->wp_locale;
+			if ( 'default' !== $set->locale_slug && ! str_contains( $wp_locale, $set->locale_slug ) ) {
+				$wp_locale .= '_' . $set->locale_slug;
+			}
+
+			// Rounded down, like GlotPress.
+			$percent_translated = $set->all ? (int) floor( $set->current / $set->all * 100 ) : 0;
+
+			// Several sets can share a wp_locale, e.g. ca-val and ca/valencia.
+			if ( $percent_translated < $min_percent || $percent_translated <= ( $locales[ $wp_locale ]->percent_translated ?? -1 ) ) {
+				continue;
+			}
+
+			$locales[ $wp_locale ] = (object) [
+				'wp_locale'          => $wp_locale,
+				'percent_translated' => $percent_translated,
+			];
 		}
 
-		return $locales;
+		return array_values( $locales );
 	}
 
 	/**
