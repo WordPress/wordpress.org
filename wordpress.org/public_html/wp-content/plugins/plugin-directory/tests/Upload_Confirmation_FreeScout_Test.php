@@ -40,21 +40,21 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	 *
 	 * @var array[]
 	 */
-	protected $filters = array();
+	protected array $filters = array();
 
 	/**
 	 * Requests sent to FreeScout: URL, and arguments.
 	 *
 	 * @var array[]
 	 */
-	protected $requests = array();
+	protected array $requests = array();
 
 	/**
 	 * IDs of posts and users created during a test.
 	 *
 	 * @var int[][]
 	 */
-	protected $created = array(
+	protected array $created = array(
 		'posts' => array(),
 		'users' => array(),
 	);

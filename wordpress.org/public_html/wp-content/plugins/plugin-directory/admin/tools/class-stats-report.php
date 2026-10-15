@@ -155,8 +155,7 @@ class Stats_Report {
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` = 'pending'"
 		);
 
-		// # Break down the plugins in the queue, based on if we're still waiting on a reply.
-		// Requires the helpscout tables to exist, which either helpdesk fills.
+		// Break down the plugins in the queue by whom we're waiting on; needs the helpscout tables, which either helpdesk fills.
 		if ( Helpdesk::is_freescout() || defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) {
 			$stats['in_queue_pending_why'] = $wpdb->get_row( $wpdb->prepare(
 				'SELECT
