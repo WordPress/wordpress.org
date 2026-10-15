@@ -527,11 +527,19 @@ class Plugin_I18n {
 			return [];
 		}
 
-		// translate.wordpress.org keeps these counts current on every translation edit and originals import.
+		/*
+		 * translate.wordpress.org keeps these counts current on every translation edit and originals import,
+		 * but never removes a row, so the join drops sets that have since been deleted.
+		 */
 		$translation_sets = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT locale, locale_slug, `current`, `all` FROM %i WHERE project_id = %d',
+				'SELECT stats.locale, stats.locale_slug, stats.current, stats.all
+				FROM %i stats
+				INNER JOIN %i sets ON sets.project_id = stats.project_id AND sets.locale = stats.locale AND sets.slug = stats.locale_slug
+				WHERE stats.project_id = %d
+				ORDER BY stats.locale, stats.locale_slug',
 				GLOTPRESS_TABLE_PREFIX . 'project_translation_status',
+				GLOTPRESS_TABLE_PREFIX . 'translation_sets',
 				$project_id
 			)
 		);
