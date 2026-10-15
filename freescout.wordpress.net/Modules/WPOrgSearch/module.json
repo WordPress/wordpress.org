@@ -2,7 +2,7 @@
     "name": "WP.org Search",
     "alias": "wporgsearch",
     "img": "/modules/wporgsearch/img/icon.svg",
-    "description": "Speeds up conversation search: one query instead of two, and a full-text index on messages once it exists.",
+    "description": "Speeds up conversation search: an After date for searches without other filters, and one query instead of two.",
     "version": "1.0.0",
     "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgSearch",
     "author": "WordPress.org",

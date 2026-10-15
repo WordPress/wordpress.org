@@ -22,7 +22,7 @@ use Modules\WPOrgSearch\Services\Search;
 use WordPressdotorg\FreeScout\Tests\TestCase;
 
 /**
- * Covers the default date, the search with and without the full-text index, and its pages.
+ * Covers the default date and the search’s pages.
  */
 final class SearchTest extends TestCase {
 
@@ -41,23 +41,21 @@ final class SearchTest extends TestCase {
 	private $admin;
 
 	/**
-	 * Registers the module, as if the database had no full-text index.
+	 * Registers the module.
 	 *
 	 * @return void
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->add_index();
 		$this->app->register( WPOrgSearchServiceProvider::class );
-		$this->use_index( false );
 
 		$this->admin   = $this->create_user();
 		$this->mailbox = $this->create_mailbox();
 	}
 
 	/**
-	 * Covers a search without filters only going back a year.
+	 * Covers a search without other filters only going back a year.
 	 *
 	 * @return void
 	 */
@@ -67,53 +65,43 @@ final class SearchTest extends TestCase {
 		$this->assertSame( array( 'after' => $expected ), $this->filters( array(), array( 'q' => 'obenland' ) ) );
 		$this->assertTrue( app( Search::class )->was_defaulted() );
 
-		// Filters the agent switched on but left empty don't count.
+		// Filters the agent switched on but left empty don’t count.
 		$this->assertSame( $expected, $this->filters( array( 'following' => '' ), array( 'q' => 'obenland' ) )['after'] );
 
 		// AJAX pages send the query along with the filters.
 		$this->assertSame( $expected, $this->filters( array(), array( 'filter' => array( 'q' => 'obenland' ) ) )['after'] );
 
-		$this->assertStringContainsString( 'clear the After date', $this->filters_note() );
+		$this->assertStringContainsString( 'need an After date', $this->filters_note() );
 	}
 
 	/**
-	 * Covers filters, a cleared date, and browsing without a query keeping the whole history.
+	 * Covers a cleared date coming back, since searching everything is what times out.
 	 *
 	 * @return void
 	 */
-	public function test_filters_or_a_cleared_date_search_everything(): void {
+	public function test_cleared_date_is_set_again(): void {
+		$expected = now()->modify( Search::DEFAULT_AFTER )->format( 'Y-m-d' );
+
+		$this->assertSame( array( 'after' => $expected ), $this->filters( array( 'after' => '' ), array( 'q' => 'obenland' ) ) );
+		$this->assertTrue( app( Search::class )->was_defaulted() );
+	}
+
+	/**
+	 * Covers a date the agent picked, other filters, and browsing without a query staying as they are.
+	 *
+	 * @return void
+	 */
+	public function test_chosen_date_or_other_filters_are_kept(): void {
+		$this->assertSame( array( 'after' => '2020-01-01' ), $this->filters( array( 'after' => '2020-01-01' ), array( 'q' => 'obenland' ) ) );
 		$this->assertSame( array( 'status' => array( '1' ) ), $this->filters( array( 'status' => array( '1' ) ), array( 'q' => 'obenland' ) ) );
-		$this->assertSame( array( 'after' => '' ), $this->filters( array( 'after' => '' ), array( 'q' => 'obenland' ) ) );
+		$cleared = array(
+			'mailbox' => '17',
+			'after'   => '',
+		);
+		$this->assertSame( array( 'mailbox' => '17' ), $this->filters( $cleared, array( 'q' => 'obenland' ) ) );
 		$this->assertSame( array(), $this->filters( array(), array( 'q' => '' ) ) );
 		$this->assertFalse( app( Search::class )->was_defaulted() );
 		$this->assertSame( '', $this->filters_note() );
-	}
-
-	/**
-	 * Covers the index making the default date unnecessary, unless no word can be looked up in it.
-	 *
-	 * @return void
-	 */
-	public function test_index_searches_everything(): void {
-		$this->use_index( true );
-
-		$this->assertSame( array(), $this->filters( array(), array( 'q' => 'obenland' ) ) );
-		$this->assertArrayHasKey( 'after', $this->filters( array(), array( 'q' => 'wp' ) ) );
-	}
-
-	/**
-	 * Covers what the full-text query requires.
-	 *
-	 * @return void
-	 */
-	public function test_boolean_query(): void {
-		$search = app( Search::class );
-
-		$this->assertSame( '+obenland*', $search->boolean_query( 'Obenland' ) );
-		$this->assertSame( '+jane* +example* +org*', $search->boolean_query( 'jane@example.org' ) );
-		$this->assertSame( '+"how to install" +plugin*', $search->boolean_query( 'plugin "How to install" wp' ) );
-		$this->assertSame( '+plugin* +theme*', $search->boolean_query( '+plugin* -(theme) "a b"' ) );
-		$this->assertSame( '', $search->boolean_query( 'wp' ) );
 	}
 
 	/**
@@ -170,51 +158,26 @@ final class SearchTest extends TestCase {
 	}
 
 	/**
-	 * Covers the search with the index: subjects, senders, and numbers match, and threads aren't joined.
-	 *
-	 * The index only holds committed rows, and every test runs in a transaction, so messages can't match here; the
-	 * full-text query still has to run.
+	 * Covers a search that runs past the time limit coming back empty, with a note, instead of timing out the page.
 	 *
 	 * @return void
 	 */
-	public function test_search_with_index(): void {
-		$this->use_index( true );
+	public function test_search_that_takes_too_long_is_stopped(): void {
+		$this->conversation( 'Plugin review', 'obenland', '2026-10-01 10:00:00' );
+		$this->app->instance( Search::class, new Search( 0.1 ) );
+		$limit = \DB::selectOne( 'SELECT @@max_statement_time AS `limit`' )->limit;
 
-		$subject  = $this->conversation( 'Obenland plugin review', 'Hello', '2026-09-01 10:00:00' );
-		$numbered = $this->conversation( 'Theme review', 'Hello', '2026-09-02 10:00:00' );
-		$this->conversation( 'Unrelated', 'Hello', '2026-09-03 10:00:00' );
-
-		$sender             = $this->create_sender( 'konstantin@example.org' );
-		$sender->first_name = 'Konstantin';
-		$sender->last_name  = 'Obenland';
-		$sender->save();
-		$named = $this->conversation( 'Question', 'Hello', '2026-09-04 10:00:00', null, $sender );
-
-		\DB::enableQueryLog();
+		$slow = static function ( $query ) {
+			return $query->whereRaw( 'SLEEP(1) = 0' );
+		};
+		\Eventy::addFilter( 'search.conversations.apply_filters', $slow, 20, 1 );
 		$results = $this->search( 'obenland' );
-		$queries = implode( "\n", array_column( \DB::getQueryLog(), 'query' ) );
+		\Eventy::removeFilter( 'search.conversations.apply_filters', $slow );
 
-		$this->assertSame( array( $named->id, $subject->id ), $results->pluck( 'id' )->all() );
-		$this->assertSame( 2, $results->total() );
-		$this->assertStringContainsString( 'MATCH(', $queries );
-		$this->assertStringNotContainsString( 'join `threads`', $queries );
-
-		$this->assertSame( array( $named->id ), $this->search( 'Konstantin Obenland' )->pluck( 'id' )->all() );
-		$this->assertSame( array( $numbered->id ), $this->search( (string) $numbered->number )->pluck( 'id' )->all() );
-	}
-
-	/**
-	 * Covers filters that need threads keeping them joined, with the index.
-	 *
-	 * @return void
-	 */
-	public function test_search_with_index_keeps_filters(): void {
-		$this->use_index( true );
-
-		$match = $this->conversation( 'Obenland plugin review', 'Hello there', '2026-09-01 10:00:00' );
-		$this->conversation( 'Obenland theme review', 'Goodbye', '2026-09-02 10:00:00' );
-
-		$this->assertSame( array( $match->id ), $this->search( 'obenland', array( 'body' => 'hello' ) )->pluck( 'id' )->all() );
+		$this->assertSame( 0, $results->total() );
+		$this->assertTrue( app( Search::class )->timed_out() );
+		$this->assertStringContainsString( 'took too long', $this->filters_note() );
+		$this->assertSame( $limit, \DB::selectOne( 'SELECT @@max_statement_time AS `limit`' )->limit );
 	}
 
 	/**
@@ -224,48 +187,6 @@ final class SearchTest extends TestCase {
 	 */
 	public function test_search_without_agent_is_left_to_core(): void {
 		$this->assertSame( '', \Eventy::filter( 'search.conversations.perform', '', 'obenland', array(), null ) );
-	}
-
-	/**
-	 * Says whether the database has the full-text index, as if it had been looked up.
-	 *
-	 * @param bool $index Whether it has.
-	 * @return void
-	 */
-	private function use_index( bool $index ): void {
-		\Cache::put(
-			'wporgsearch_fulltext',
-			array(
-				'index'          => $index,
-				'min_token_size' => 3,
-			),
-			60
-		);
-	}
-
-	/**
-	 * Adds the full-text index to the test database, unless it's there.
-	 *
-	 * Through its own connection, since adding it commits, which would end the test's transaction. Before the
-	 * transaction reads anything: its snapshot would predate the index, and MariaDB refuses to search it then.
-	 *
-	 * @return void
-	 */
-	private function add_index(): void {
-		config( array( 'database.connections.wporgsearch_ddl' => config( 'database.connections.' . config( 'database.default' ) ) ) );
-		$connection = \DB::connection( 'wporgsearch_ddl' );
-
-		$table  = $connection->getTablePrefix() . 'threads';
-		$exists = $connection->selectOne(
-			'SELECT COUNT(*) AS `count` FROM `information_schema`.`STATISTICS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = ? AND `INDEX_NAME` = ?',
-			array( $table, Search::INDEX )
-		);
-
-		if ( ! $exists->count ) {
-			$connection->statement( 'ALTER TABLE `' . $table . '` ADD FULLTEXT `' . Search::INDEX . '` (`body`, `from`, `to`, `cc`, `bcc`)' );
-		}
-
-		\DB::disconnect( 'wporgsearch_ddl' );
 	}
 
 	/**

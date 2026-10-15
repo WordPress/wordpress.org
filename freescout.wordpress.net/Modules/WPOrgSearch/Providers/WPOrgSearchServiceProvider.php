@@ -96,8 +96,12 @@ final class WPOrgSearchServiceProvider extends ServiceProvider {
 		\Eventy::addAction(
 			'search.display_filters',
 			static function (): void {
+				if ( app( Search::class )->timed_out() ) {
+					echo '<div class="col-sm-12 text-danger">' . e( 'This search took too long and was stopped. Pick a later After date or add another filter.' ) . '</div>';
+				}
+
 				if ( app( Search::class )->was_defaulted() ) {
-					echo '<div class="col-sm-12 text-help">' . e( 'Searches without filters only cover conversations started in the past year. To search them all, clear the After date.' ) . '</div>';
+					echo '<div class="col-sm-12 text-help">' . e( 'Searches without other filters need an After date, so they don’t time out. It’s set to a year ago. To search older conversations, pick an earlier date or add another filter.' ) . '</div>';
 				}
 			},
 			20,
