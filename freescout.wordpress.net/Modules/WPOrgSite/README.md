@@ -20,7 +20,7 @@ Adapts FreeScout to how WordPress.org runs it. Small changes to FreeScout's own 
 In a conversation, while the agent isn't typing in a field or the editor, and no modal is open:
 
 | Key | Does |
-|---|---|
+| --- | --- |
 | `r` | Opens the reply form, and scrolls to it when it's out of view. |
 | `n` | Opens the note form, the same way. |
 | `t` | Opens the Tags module's tag field. |
@@ -67,6 +67,7 @@ Notes keep the context of a conversation, but core shows the newest threads firs
 - **The note itself** stays where it is, dimmed, labeled **Pinned to the top**, which goes back up to the copy. It's at full strength while the pointer or the keyboard is on it, or the copy's link went to it.
 
 The choice is kept with core's options, as `wporgsite_pin_note_{user ID}`, and forgotten when the user is deleted. It's in `Services/PinnedNote.php`, through core's `conversation.before_threads` and `thread.info.prepend` hooks, with the views in `Resources/views/`. Print views are left as they are.
+
 ## Pinned header
 
 A pushpin button at the end of a conversation's toolbar pins its header, the toolbar, the subject, and the reply and note forms, to the top of the window, so it stays in view while the agent scrolls through the emails below it. The same button unpins it. Unpinned, the default, the header scrolls away as in core. The browser remembers it, in `localStorage` (`wporgsite.header`), so it's per browser, not per agent.
