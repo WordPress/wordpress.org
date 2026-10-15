@@ -9,7 +9,10 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgHelpScoutImport\Providers;
 
+use App\Conversation;
 use Illuminate\Support\ServiceProvider;
+use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
+use Modules\WPOrgHelpScoutImport\Services\Copies;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 
 /**
@@ -117,6 +120,46 @@ final class WPOrgHelpScoutImportServiceProvider extends ServiceProvider {
 
 				return $javascripts;
 			}
+		);
+
+		// Names the HelpScout conversation whose copy an imported one's replaces.
+		\Eventy::addFilter(
+			'wporgwebhooks.helpscout_id',
+			static function ( mixed $helpscout_id = 0, mixed $conversation = null, mixed $conversation_id = 0 ): mixed {
+				// Deleted for good, the conversation is null, but its ID still finds the import.
+				$id = $conversation instanceof Conversation ? (int) $conversation->id : (int) $conversation_id;
+
+				try {
+					if ( ! $helpscout_id && $id ) {
+						$helpscout_id = (int) ImportedConversation::query()->where( 'conversation_id', $id )->value( 'helpscout_id' );
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgHelpScoutImport] Could not find the HelpScout conversation of ' . $id . ': ' . $e->getMessage() );
+				}
+
+				return $helpscout_id;
+			},
+			10,
+			3
+		);
+
+		// Imported conversations' events leave the copy alone until their mailbox switches.
+		\Eventy::addFilter(
+			'wporgwebhooks.copy',
+			static function ( mixed $copy = true, mixed $conversation = null, mixed $conversation_id = 0, mixed $mailbox_id = 0 ): mixed {
+				$id      = $conversation instanceof Conversation ? (int) $conversation->id : (int) $conversation_id;
+				$mailbox = $conversation instanceof Conversation ? (int) $conversation->mailbox_id : (int) $mailbox_id;
+
+				try {
+					return $copy && ( ! $id || Copies::sends( $id, $mailbox ) );
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgHelpScoutImport] Could not tell whether to copy conversation ' . $id . ': ' . $e->getMessage() );
+
+					return $copy;
+				}
+			},
+			10,
+			4
 		);
 
 		// Highlights Manage while the pages are open.
