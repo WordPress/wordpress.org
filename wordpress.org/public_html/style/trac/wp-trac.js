@@ -234,6 +234,11 @@ let wpTrac,
 		'wp',
 	];
 
+		// Pre-compiled regular expressions for text-node linkers.
+		// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
+			const mentionsRegEx =
+				/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,18}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)/g;
+			const gutenbergIssueRegEx = /\bGB[-]?(\d+)\b/gi;
 	/**
 	 * Runs a callback when the DOM is ready.
 	 *
@@ -398,10 +403,6 @@ let wpTrac,
 		},
 
 		linkMentions( selector ) {
-			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-			const mentionsRegEx =
-				/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,18}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)/g;
-
 			document.querySelectorAll( selector || 'div.change .comment, #ticket .description' ).forEach( ( el ) => {
 				linkTextNodes( el, mentionsRegEx, function ( match, pre, username ) {
 					if ( reservedTerms.includes( username ) ) {
@@ -420,8 +421,6 @@ let wpTrac,
 		},
 
 		linkGutenbergIssues( selector ) {
-			const gutenbergIssueRegEx = /\bGB[-]?(\d+)\b/gi;
-
 			document.querySelectorAll( selector || 'div.change .comment, #ticket .description' ).forEach( ( el ) => {
 				linkTextNodes( el, gutenbergIssueRegEx, function ( match, issueNumber ) {
 					const link = document.createElement( 'a' );
@@ -954,7 +953,10 @@ let wpTrac,
 			// Demote the nav "Preferences" link to the footer.
 			document
 				.getElementById( 'altlinks' )
-				?.insertAdjacentHTML( 'afterbegin', '<a class="preferences-link" href="/prefs">Trac UI Preferences</a> ' );
+				?.insertAdjacentHTML(
+					'afterbegin',
+					'<a class="preferences-link" href="/prefs">Trac UI Preferences</a> '
+				);
 
 			// Prevent emoji in ticket text from being replaced with <img> tags.
 			document
@@ -1982,13 +1984,15 @@ let wpTrac,
 
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
 					if ( 1 !== keywords.length || keywords[ 0 ] !== '' ) {
+						const binFragment = document.createDocumentFragment();
 						keywords.forEach( function ( v ) {
 							const span = keywordSpan( v );
 							if ( v in coreKeywordList ) {
 								span.title = coreKeywordList[ v ];
 							}
-							elements.bin.append( span );
+							binFragment.append( span );
 						} );
+						elements.bin.append( binFragment );
 					} else {
 						keywords = [];
 					}
@@ -2004,6 +2008,7 @@ let wpTrac,
 						elements.add = document.getElementById( 'keyword-add' );
 					}
 
+					const optionsFragment = document.createDocumentFragment();
 					Object.keys( coreKeywordList ).forEach( ( k ) => {
 						// Don't show special (permission-based) ones.
 						if ( ! wpTrac.gardener && gardenerKeywordList.includes( k ) ) {
@@ -2022,8 +2027,9 @@ let wpTrac,
 						} else {
 							option.textContent = k;
 						}
-						elements.add.append( option );
+						optionsFragment.append( option );
 					} );
+					elements.add.append( optionsFragment );
 				},
 
 				// Add a keyword. Takes a sanitized string.
@@ -2543,22 +2549,30 @@ let wpTrac,
 							_nonce = data.data.nonce;
 						}
 
+						const subscribedSet = new Set( data.data.tickets || [] );
+
 						stars.forEach( ( reportStar ) => {
 							const ticketId = parseInt( reportStar.dataset.ticket, 10 );
-							if ( data.data.tickets?.includes( ticketId ) ) {
+							if ( subscribedSet.has( ticketId ) ) {
 								toggleStarClasses( reportStar );
 							}
 							reportStar.classList.remove( 'loading' );
+						} );
 
-							reportStar.addEventListener( 'click', function () {
-								toggleStarClasses( this );
-								const action = this.classList.contains( 'dashicons-star-filled' )
+						document.querySelectorAll( 'table.listing' ).forEach( ( table ) => {
+							table.addEventListener( 'click', function ( event ) {
+								const clickedStar = event.target.closest( '.trac-report-star' );
+								if ( ! clickedStar || ! table.contains( clickedStar ) ) {
+									return;
+								}
+								toggleStarClasses( clickedStar );
+								const action = clickedStar.classList.contains( 'dashicons-star-filled' )
 									? 'subscribe'
 									: 'unsubscribe';
 								const delta = 'subscribe' === action ? 1 : -1;
-								save( action, parseInt( this.dataset.ticket, 10 ) );
+								save( action, parseInt( clickedStar.dataset.ticket, 10 ) );
 
-								const prev = this.previousElementSibling;
+								const prev = clickedStar.previousElementSibling;
 								if ( prev ) {
 									let count = parseInt( prev.textContent, 10 );
 									if ( isNaN( count ) ) {
