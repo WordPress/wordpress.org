@@ -234,11 +234,12 @@ let wpTrac,
 		'wp',
 	];
 
-		// Pre-compiled regular expressions for text-node linkers.
-		// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-			const mentionsRegEx =
-				/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,18}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)/g;
-			const gutenbergIssueRegEx = /\bGB[-]?(\d+)\b/gi;
+	// Pre-compiled regular expressions for text-node linkers.
+	// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
+	const mentionsRegEx =
+		/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,18}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)/g;
+	const gutenbergIssueRegEx = /\bGB[-]?(\d+)\b/gi;
+
 	/**
 	 * Runs a callback when the DOM is ready.
 	 *
