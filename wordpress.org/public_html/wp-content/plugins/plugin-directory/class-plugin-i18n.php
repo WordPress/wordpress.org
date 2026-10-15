@@ -516,15 +516,18 @@ class Plugin_I18n {
 	 * @param string            $branch      Optional. Branch - 'stable-readme' for example. Default: 'stable'.
 	 * @param int               $min_percent Optional. Only return locales where percent_translated is >= this value.
 	 *                                       Default: 95.
-	 * @return array
+	 * @return array Locale objects with wp_locale and percent_translated properties.
 	 */
 	public function get_locales( $post = null, $branch = 'stable', $min_percent = 95 ) {
 		$post = get_post( $post );
 
 		$cache_suffix = 'translation_sets';
 
-		$translation_sets = $this->cache_get( $post->post_name, $branch, $cache_suffix );
-		if ( false === $translation_sets ) {
+		// Cached as wp_locale => percent_translated; the full API objects run to ~80KB per plugin.
+		$percent_translated = $this->cache_get( $post->post_name, $branch, $cache_suffix );
+
+		// Entries still holding the full API objects are refetched.
+		if ( false === $percent_translated || is_object( reset( $percent_translated ) ) ) {
 			$api_url  = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch . '/', [ 'https' ] );
 			$response = wp_remote_get( $api_url );
 
@@ -535,12 +538,29 @@ class Plugin_I18n {
 				$translation_sets = isset( $result->translation_sets ) ? $result->translation_sets : [];
 			}
 
-			$this->cache_set( $post->post_name, $branch, $translation_sets, $cache_suffix );
+			$percent_translated = [];
+			foreach ( $translation_sets as $set ) {
+				// GlotPress locales that WordPress doesn't use come back without a wp_locale.
+				if ( empty( $set->wp_locale ) ) {
+					continue;
+				}
+
+				// Several sets can share a wp_locale, e.g. ca-val and ca/valencia.
+				$percent_translated[ $set->wp_locale ] = max( $set->percent_translated, $percent_translated[ $set->wp_locale ] ?? 0 );
+			}
+
+			$this->cache_set( $post->post_name, $branch, $percent_translated, $cache_suffix );
 		}
 
-		$locales = array_filter( $translation_sets, function( $locale ) use ( $min_percent ) {
-			return $locale->percent_translated >= $min_percent;
-		} );
+		$locales = [];
+		foreach ( $percent_translated as $wp_locale => $percent ) {
+			if ( $percent >= $min_percent ) {
+				$locales[] = (object) [
+					'wp_locale'          => $wp_locale,
+					'percent_translated' => $percent,
+				];
+			}
+		}
 
 		return $locales;
 	}
