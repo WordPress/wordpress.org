@@ -327,11 +327,28 @@ abstract class Importer {
 					$success++;
 				}
 			}
+
+			// Each update loads and caches every revision of the post, so drop the
+			// runtime cache to keep memory flat across a large handbook.
+			$this->clear_memory_heavy_variables();
 		}
 		if ( class_exists( 'WP_CLI' ) ) {
 			$total = count( $ids );
 			WP_CLI::success( "Successfully updated {$success} of {$total} pages." );
 		}
+	}
+
+	/**
+	 * Clears in-memory caches that grow with each imported post.
+	 *
+	 * @global \wpdb $wpdb
+	 */
+	protected function clear_memory_heavy_variables() {
+		global $wpdb;
+
+		$wpdb->queries = [];
+
+		wp_cache_flush_runtime();
 	}
 
 	/**
