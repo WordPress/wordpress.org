@@ -1,0 +1,21 @@
+{
+    "name": "WP.org Search",
+    "alias": "wporgsearch",
+    "img": "/modules/wporgsearch/img/icon.svg",
+    "description": "Speeds up conversation search: one query instead of two, and a full-text index on messages once it exists.",
+    "version": "1.0.0",
+    "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgSearch",
+    "author": "WordPress.org",
+    "authorUrl": "https://wordpress.org/",
+    "requiredAppVersion": "1.8.243",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\WPOrgSearch\\Providers\\WPOrgSearchServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
