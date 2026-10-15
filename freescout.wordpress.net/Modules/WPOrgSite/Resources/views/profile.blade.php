@@ -8,7 +8,7 @@
 				{{-- Unchecked boxes aren't sent; this says the form had it. --}}
 				<input type="hidden" name="{{ $choice['field'] }}" value="0">
 				<label for="{{ $choice['field'] }}" class="checkbox inline plain">
-					<input type="checkbox" name="{{ $choice['field'] }}" value="1" id="{{ $choice['field'] }}" @if ( $choice['enabled'] ) checked="checked" @endif> <span class="text-help">{{ $choice['text'] }}</span>
+					<input type="checkbox" name="{{ $choice['field'] }}" value="1" id="{{ $choice['field'] }}" @if ( old( $choice['field'], $choice['enabled'] ) ) checked="checked" @endif> <span class="text-help">{{ $choice['text'] }}</span>
 				</label>
 			</div>
 			<p class="block-help">{{ $choice['help'] }}</p>

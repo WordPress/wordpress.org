@@ -211,6 +211,26 @@ final class PinnedNoteTest extends TestCase {
 	}
 
 	/**
+	 * The profile shows the choice as it was submitted when core turns the form away, like a job title too long.
+	 *
+	 * @return void
+	 */
+	public function test_profile_keeps_unsaved_choice(): void {
+		$user = $this->create_user();
+		// Outside a request, old() has no session to read until the request is given one.
+		$this->session( array( '_old_input' => array( PinnedNote::FIELD => '1' ) ) );
+		$this->app['request']->setLaravelSession( $this->app['session.store'] );
+
+		ob_start();
+		\Eventy::action( 'user.edit.before_photo', $user );
+		$field = (string) ob_get_clean();
+
+		$this->assertFalse( UserChoice::get( $user, PinnedNote::OPTION ) );
+		$this->assertMatchesRegularExpression( '/id="' . PinnedNote::FIELD . '"\s+checked="checked"/', $field );
+		$this->assertSame( 1, substr_count( $field, 'checked="checked"' ) );
+	}
+
+	/**
 	 * A deleted agent's choice is forgotten.
 	 *
 	 * @return void

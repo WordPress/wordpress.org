@@ -292,12 +292,8 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	 */
 	public static function render_pinned_note( Thread $note, Conversation $conversation ): string {
 		$body = (string) \Eventy::filter( 'thread.body_output', $note->getBodyWithFormatedLinks(), $note, $conversation, $conversation->mailbox );
-		// As core does in the thread; without safe_raw_html(), HTMLPurifier cleans it, given the body, not the note's own.
-		if ( function_exists( 'safe_raw_html' ) ) {
-			$body = (string) safe_raw_html( $body );
-		} elseif ( '' !== $body ) {
-			$body = (string) $note->getCleanBody( $body );
-		}
+		// As core does in the thread.
+		$body = (string) safe_raw_html( $body );
 
 		$attachments = array();
 		foreach ( $note->attachments as $attachment ) {
