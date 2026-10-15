@@ -649,12 +649,6 @@ let wpTrac,
 						}
 					}, 0 );
 				} );
-
-				document.getElementById( 'propertyform' )?.addEventListener( 'click', function ( event ) {
-					if ( event.target.closest( '#new-tracker-ticket' ) ) {
-						isSubmitting = true;
-					}
-				} );
 			}
 
 			// Add custom buttons to the formatting toolbar.
