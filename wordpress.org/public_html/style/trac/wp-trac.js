@@ -2044,9 +2044,7 @@ let wpTrac,
 
 					// Update the dropdown. Core keywords also get a title attribute with their description.
 					if ( keyword in coreKeywordList ) {
-						const opt = elements.add.querySelector(
-							`option[value="${ window.CSS.escape( keyword ) }"]`
-						);
+						const opt = elements.add.querySelector( `option[value="${ window.CSS.escape( keyword ) }"]` );
 						if ( opt ) {
 							opt.disabled = true;
 							opt.textContent = '* ' + keyword;
@@ -2074,9 +2072,7 @@ let wpTrac,
 
 					if ( typeof object === 'string' ) {
 						keyword = object;
-						el = elements.bin.querySelector(
-							`span[data-keyword="${ window.CSS.escape( keyword ) }"]`
-						);
+						el = elements.bin.querySelector( `span[data-keyword="${ window.CSS.escape( keyword ) }"]` );
 						if ( ! el ) {
 							return;
 						}
@@ -2092,9 +2088,7 @@ let wpTrac,
 
 					// Update the core keyword dropdown.
 					if ( keyword in coreKeywordList ) {
-						const opt = elements.add.querySelector(
-							`option[value="${ window.CSS.escape( keyword ) }"]`
-						);
+						const opt = elements.add.querySelector( `option[value="${ window.CSS.escape( keyword ) }"]` );
 						if ( opt ) {
 							opt.disabled = false;
 							opt.textContent = keyword;
