@@ -25,8 +25,7 @@ final class UserChoice {
 	 * @return bool Whether they did.
 	 */
 	public static function get( User $user, string $option ): bool {
-		// Not from Option's cache, which setting and removing options leave as it was.
-		return (bool) \Option::get( $option . $user->id, false, true, false );
+		return (bool) \Option::get( $option . $user->id, false );
 	}
 
 	/**
@@ -40,13 +39,15 @@ final class UserChoice {
 	public static function set( User $user, string $option, bool $enabled ): void {
 		if ( $enabled ) {
 			\Option::set( $option . $user->id, 1 );
+			// Core's per-request cache, which setting and removing options leave as it was.
+			unset( \Option::$cache[ $option . $user->id ] );
 		} else {
-			\Option::remove( $option . $user->id );
+			self::forget( (int) $user->id, $option );
 		}
 	}
 
 	/**
-	 * Forgets a choice of a deleted agent.
+	 * Forgets a choice: off, or of a deleted agent.
 	 *
 	 * @param int    $user_id User ID.
 	 * @param string $option  Option's name, without the user ID.
@@ -54,5 +55,6 @@ final class UserChoice {
 	 */
 	public static function forget( int $user_id, string $option ): void {
 		\Option::remove( $option . $user_id );
+		unset( \Option::$cache[ $option . $user_id ] );
 	}
 }

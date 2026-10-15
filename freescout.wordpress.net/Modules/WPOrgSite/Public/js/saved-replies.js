@@ -67,6 +67,22 @@
 	const PLACEHOLDER = [ 'Type ', '/', ' for saved replies' ];
 
 	/**
+	 * Keys that type nothing on their own, like the Shift or AltGr that / takes on some keyboards.
+	 *
+	 * @type {Set<string>}
+	 */
+	const MODIFIERS = new Set( [
+		'Alt',
+		'AltGraph',
+		'CapsLock',
+		'Control',
+		'Dead',
+		'Fn',
+		'Meta',
+		'Shift',
+	] );
+
+	/**
 	 * Whether the next / types a /: the agent closed the menu the last one opened, with Escape.
 	 *
 	 * @type {boolean}
@@ -381,7 +397,7 @@
 		}
 
 		if ( '/' !== event.key ) {
-			literalSlash = false;
+			literalSlash = literalSlash && MODIFIERS.has( event.key );
 			return;
 		}
 
@@ -488,8 +504,7 @@
 		literalSlash = false;
 	} );
 
-	// However the menu opened, its search gets the focus, so the agent can type straight away, and starts empty: the
-	// module keeps the last one, which would hide most replies.
+	// However the menu opened, its search gets the focus and starts empty: the module keeps the last search.
 	$( document ).on( 'shown.bs.dropdown', '.note-btn-group', function () {
 		const $search = $( this ).children( MENU ).find( SEARCH ).first();
 		if ( $search.val() ) {

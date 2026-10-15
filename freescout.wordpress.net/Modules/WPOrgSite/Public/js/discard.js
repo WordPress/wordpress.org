@@ -93,9 +93,9 @@
 
 	/**
 	 * Escape discards the open reply or note, clicking its discard button: at once when it's empty, and otherwise
-	 * asking, with Yes focused, so Enter confirms, and Escape again cancels, back to where the caret was. From the form,
-	 * or with nothing in particular focused; not from other fields, nor while something else takes Escape, like a
-	 * dialog, a menu, or a recipient field's list.
+	 * asking, with Yes focused, so Enter confirms, and Escape again cancels, back to where the caret was. From the
+	 * editor, or with nothing in particular focused; not from the form's other fields, like the recipients', nor while
+	 * something else takes Escape, like a dialog or a menu.
 	 *
 	 * @param {KeyboardEvent} event Event.
 	 */
@@ -124,12 +124,11 @@
 		const nowhere =
 			target === document.body ||
 			target.classList.contains( 'wporgsite-alt-column' );
+		const editor = target.closest( '.note-editor' );
 		if (
-			( ! nowhere && ! block.contains( target ) ) ||
+			( ! nowhere && ! ( editor && block.contains( editor ) ) ) ||
 			document.body.classList.contains( 'modal-open' ) ||
-			document.querySelector(
-				'.modal.in, .open > .dropdown-menu, .select2-container--open'
-			)
+			document.querySelector( '.modal.in, .open > .dropdown-menu' )
 		) {
 			return;
 		}
@@ -191,11 +190,15 @@
 				$( this ).tooltip( 'hide' );
 			}
 
-			// Hidden until core closes it: a reply's draft is discarded on the server first.
+			// Hidden until core closes it, after discarding a reply's draft on the server; if that fails, it shows.
+			const show = () => {
+				document.documentElement.classList.remove( SILENT );
+				$modal.off( 'hidden.bs.modal', show );
+				$( document ).off( 'ajaxError', show );
+			};
 			document.documentElement.classList.add( SILENT );
-			$modal.one( 'hidden.bs.modal', () =>
-				document.documentElement.classList.remove( SILENT )
-			);
+			$modal.one( 'hidden.bs.modal', show );
+			$( document ).one( 'ajaxError', show );
 			$modal.find( '.discard-draft-confirm' ).first().trigger( 'click' );
 			return;
 		}

@@ -15,7 +15,8 @@ use App\User;
 
 /**
  * Agents who choose so in their profile see a copy of a conversation's latest note above its threads, so the context
- * it gives stays in sight once newer emails have pushed it down; the note itself stays where it is, dimmed.
+ * it gives stays in sight once newer emails have pushed it down; the note itself stays where it is, dimmed. The choice
+ * is a UserChoice.
  */
 final class PinnedNote {
 
@@ -34,42 +35,11 @@ final class PinnedNote {
 	public const FIELD = 'wporgsite_pin_note';
 
 	/**
-	 * The notes pinned on this request, by their conversation's ID, so their threads are dimmed.
+	 * Where the request keeps the notes pinned on it, by their conversation's ID, so their threads are dimmed.
 	 *
-	 * @var array<int, int>
+	 * @var string
 	 */
-	private static array $pinned = array();
-
-	/**
-	 * Whether an agent pins the latest note.
-	 *
-	 * @param User $user Agent.
-	 * @return bool Whether they do.
-	 */
-	public static function is_enabled( User $user ): bool {
-		return UserChoice::get( $user, self::OPTION );
-	}
-
-	/**
-	 * Sets whether an agent pins the latest note.
-	 *
-	 * @param User $user    Agent.
-	 * @param bool $enabled Whether they do.
-	 * @return void
-	 */
-	public static function set_enabled( User $user, bool $enabled ): void {
-		UserChoice::set( $user, self::OPTION, $enabled );
-	}
-
-	/**
-	 * Forgets an agent's choice, when they're deleted.
-	 *
-	 * @param int $user_id User ID.
-	 * @return void
-	 */
-	public static function forget( int $user_id ): void {
-		UserChoice::forget( $user_id, self::OPTION );
-	}
+	private const PINNED = 'wporgsite_pinned_notes';
 
 	/**
 	 * A conversation's latest note, if an email came after it: core shows the newest threads first, so emails push it
@@ -90,10 +60,20 @@ final class PinnedNote {
 			return null;
 		}
 
+		// Threads are timed to the second: an email of the same second came after the note if it came later in the table.
 		$pushed_down = $conversation->threads()
 			->whereIn( 'type', array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE ) )
 			->where( 'state', Thread::STATE_PUBLISHED )
-			->where( 'created_at', '>', $note->created_at )
+			->where(
+				static function ( $query ) use ( $note ): void {
+					$query->where( 'created_at', '>', $note->created_at )
+						->orWhere(
+							static function ( $query ) use ( $note ): void {
+								$query->where( 'created_at', $note->created_at )->where( 'id', '>', $note->id );
+							}
+						);
+				}
+			)
 			->exists();
 
 		return $pushed_down ? $note : null;
@@ -107,13 +87,15 @@ final class PinnedNote {
 	 * @return Thread|null Note.
 	 */
 	public static function pin( Conversation $conversation, User $user ): ?Thread {
-		if ( ! self::is_enabled( $user ) ) {
+		if ( ! UserChoice::get( $user, self::OPTION ) ) {
 			return null;
 		}
 
 		$note = self::find( $conversation );
 		if ( $note ) {
-			self::$pinned[ (int) $conversation->id ] = (int) $note->id;
+			$pinned                            = self::pinned();
+			$pinned[ (int) $conversation->id ] = (int) $note->id;
+			request()->attributes->set( self::PINNED, $pinned );
 		}
 
 		return $note;
@@ -126,15 +108,15 @@ final class PinnedNote {
 	 * @return bool Whether it is.
 	 */
 	public static function is_pinned( Thread $thread ): bool {
-		return ( self::$pinned[ (int) $thread->conversation_id ] ?? null ) === (int) $thread->id;
+		return ( self::pinned()[ (int) $thread->conversation_id ] ?? null ) === (int) $thread->id;
 	}
 
 	/**
-	 * Forgets the notes pinned on this request; for tests, which make several.
+	 * The notes pinned on this request, by their conversation's ID.
 	 *
-	 * @return void
+	 * @return array<int, int> Note IDs.
 	 */
-	public static function reset(): void {
-		self::$pinned = array();
+	private static function pinned(): array {
+		return (array) request()->attributes->get( self::PINNED, array() );
 	}
 }

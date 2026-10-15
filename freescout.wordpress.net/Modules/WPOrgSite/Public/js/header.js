@@ -1,7 +1,8 @@
 /**
  * Pins a conversation's header, its toolbar, subject, and reply and note forms, to the top of the window, so it stays
- * in view while the agent reads the emails below; from a button in its toolbar, which the browser remembers. Off, the
- * default, the header scrolls away, as in core.
+ * in view while the agent reads the emails below; from a button in its toolbar, which the browser remembers, and the
+ * module's script in the page's head applies before the page shows. Off, the default, the header scrolls away, as in
+ * core.
  *
  * Pinned, the header takes at most 55% of the window, so a good part of the emails still shows: the editor scrolls
  * within what's left of it, rather than growing. A button next to Save Draft gives the editor the whole window, for
@@ -18,7 +19,7 @@
  */
 ( function ( $ ) {
 	/**
-	 * Where the browser remembers it.
+	 * Where the browser remembers it, as WPOrgSiteServiceProvider::HEADER_KEY.
 	 *
 	 * @type {string}
 	 */
@@ -279,7 +280,7 @@
 		} );
 	}
 
-	// As early as possible, so it's pinned from the start; the alternate design has its own.
+	// In case the head's script couldn't; the alternate design has its own.
 	try {
 		const local = storage();
 		if ( ! isAlt() && local && 'pinned' === local.getItem( KEY ) ) {

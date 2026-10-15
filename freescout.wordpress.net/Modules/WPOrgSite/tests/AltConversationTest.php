@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Modules\WPOrgSite\Providers\WPOrgSiteServiceProvider;
 use Modules\WPOrgSite\Services\AltConversation;
 use Modules\WPOrgSite\Services\PinnedNote;
+use Modules\WPOrgSite\Services\UserChoice;
 use WordPressdotorg\FreeScout\Tests\TestCase;
 
 /**
@@ -30,18 +31,6 @@ final class AltConversationTest extends TestCase {
 		parent::setUp();
 
 		$this->app->register( WPOrgSiteServiceProvider::class );
-		PinnedNote::reset();
-	}
-
-	/**
-	 * Forgets the notes pinned, which outlive the test's database.
-	 *
-	 * @return void
-	 */
-	protected function tearDown(): void {
-		PinnedNote::reset();
-
-		parent::tearDown();
 	}
 
 	/**
@@ -52,7 +41,7 @@ final class AltConversationTest extends TestCase {
 	public function test_profile_saves_choice(): void {
 		$user = $this->create_user();
 
-		$this->assertFalse( AltConversation::is_enabled( $user ) );
+		$this->assertFalse( UserChoice::get( $user, AltConversation::OPTION ) );
 
 		ob_start();
 		\Eventy::action( 'user.edit.before_photo', $user );
@@ -63,11 +52,11 @@ final class AltConversationTest extends TestCase {
 		$this->assertStringContainsString( 'Alternate conversation design', $profile );
 
 		\Eventy::filter( 'user.save_profile', $user, new Request( array( AltConversation::FIELD => '1' ) ) );
-		$this->assertTrue( AltConversation::is_enabled( $user ) );
-		$this->assertFalse( PinnedNote::is_enabled( $user ) );
+		$this->assertTrue( UserChoice::get( $user, AltConversation::OPTION ) );
+		$this->assertFalse( UserChoice::get( $user, PinnedNote::OPTION ) );
 
 		\Eventy::filter( 'user.save_profile', $user, new Request( array( AltConversation::FIELD => '0' ) ) );
-		$this->assertFalse( AltConversation::is_enabled( $user ) );
+		$this->assertFalse( UserChoice::get( $user, AltConversation::OPTION ) );
 	}
 
 	/**
@@ -81,7 +70,7 @@ final class AltConversationTest extends TestCase {
 
 		$this->assertStringNotContainsString( AltConversation::BODY_CLASS, $this->body_class() );
 
-		AltConversation::set_enabled( $user, true );
+		UserChoice::set( $user, AltConversation::OPTION, true );
 		$this->assertStringContainsString( ' ' . AltConversation::BODY_CLASS, $this->body_class() );
 
 		// Others' choice is theirs.
@@ -97,7 +86,7 @@ final class AltConversationTest extends TestCase {
 	public function test_pinned_note_is_at_the_bottom(): void {
 		$agent = $this->create_user();
 		$this->actingAs( $agent );
-		PinnedNote::set_enabled( $agent, true );
+		UserChoice::set( $agent, PinnedNote::OPTION, true );
 
 		$conversation = $this->create_conversation( $this->create_mailbox(), $this->create_sender() );
 		$this->create_thread( $conversation, Thread::TYPE_CUSTOMER, 'Question', null, '2026-10-01 10:00:00' );
@@ -109,7 +98,7 @@ final class AltConversationTest extends TestCase {
 		\Eventy::action( 'thread.info.prepend', $note );
 		$this->assertStringContainsString( 'Pinned to the top', (string) ob_get_clean() );
 
-		AltConversation::set_enabled( $agent, true );
+		UserChoice::set( $agent, AltConversation::OPTION, true );
 		ob_start();
 		\Eventy::action( 'thread.info.prepend', $note );
 		$this->assertStringContainsString( 'Pinned to the bottom', (string) ob_get_clean() );
@@ -122,11 +111,11 @@ final class AltConversationTest extends TestCase {
 	 */
 	public function test_forgets_deleted_users(): void {
 		$user = $this->create_user();
-		AltConversation::set_enabled( $user, true );
+		UserChoice::set( $user, AltConversation::OPTION, true );
 
 		\Eventy::action( 'user.deleted', $user );
 
-		$this->assertFalse( AltConversation::is_enabled( $user ) );
+		$this->assertFalse( UserChoice::get( $user, AltConversation::OPTION ) );
 	}
 
 	/**

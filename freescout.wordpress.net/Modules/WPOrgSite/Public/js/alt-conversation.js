@@ -165,9 +165,13 @@
 		);
 		top.append( copy );
 
+		// The links only: their list item would be one without a list.
 		const nav = info.querySelector( '.conv-next-prev' );
 		if ( nav ) {
-			top.append( nav );
+			const links = element( 'div', nav.className );
+			links.append( ...nav.children );
+			nav.remove();
+			top.append( links );
 		}
 
 		section.append( top, info );
@@ -341,9 +345,7 @@
 		)
 	);
 
-	// At the end, the conversation stays there as the bottom grows, a form opening or the reply getting longer, so it
-	// doesn't cover the newest threads; elsewhere, it stays where the agent is reading. Scrolled from its top, the
-	// navigation slides away.
+	// Scrolled to the end, the conversation stays there as the bottom grows; scrolled from its top, the navigation hides.
 	let atEnd = true;
 	const onScroll = () => {
 		atEnd =

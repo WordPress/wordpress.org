@@ -273,8 +273,12 @@
 			return false;
 		}
 
-		$( document ).one( 'shown.bs.modal', ( event ) =>
-			focusFirstField( event.target )
+		const onShown = ( event ) => focusFirstField( event.target );
+		$( document ).one( 'shown.bs.modal', onShown );
+		// Core fades the modal in over 300ms; a button that opens none, like Workflows without any, leaves nothing armed.
+		window.setTimeout(
+			() => $( document ).off( 'shown.bs.modal', onShown ),
+			1000
 		);
 
 		return press( selector );

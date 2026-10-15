@@ -18,6 +18,7 @@ use Illuminate\View\View;
 use Modules\WPOrgSite\Http\Middleware\LockModules;
 use Modules\WPOrgSite\Services\AltConversation;
 use Modules\WPOrgSite\Services\PinnedNote;
+use Modules\WPOrgSite\Services\UserChoice;
 
 /**
  * Adapts FreeScout to how WordPress.org runs it.
@@ -37,6 +38,23 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	 * @var string
 	 */
 	public const SIDEBAR_KEY = 'wporgsite.sidebar';
+
+	/**
+	 * Where the browser remembers whether a conversation's header is pinned, as header.js's KEY.
+	 *
+	 * @var string
+	 */
+	public const HEADER_KEY = 'wporgsite.header';
+
+	/**
+	 * The choices in an agent's profile: each field, and the option it's kept in.
+	 *
+	 * @var array<string, string>
+	 */
+	private const CHOICES = array(
+		PinnedNote::FIELD      => PinnedNote::OPTION,
+		AltConversation::FIELD => AltConversation::OPTION,
+	);
 
 	/**
 	 * Boots the module.
@@ -95,11 +113,11 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 			}
 		);
 
-		// Core loads scripts at the end of the page, which would show the sidebar expanded first.
+		// Core loads scripts at the end of the page, which would show the sidebar expanded, and the header unpinned, first.
 		\Eventy::addAction(
 			'layout.head',
 			static function (): void {
-				echo self::sidebar_script();
+				echo self::head_script( self::uses_alt_design() );
 			}
 		);
 
@@ -110,16 +128,28 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		\Eventy::addAction(
 			'body.class',
 			static function (): void {
-				try {
-					$user = auth()->user();
-					if ( $user instanceof User && ! self::is_print() && AltConversation::is_enabled( $user ) ) {
-						echo ' ' . AltConversation::BODY_CLASS;
-					}
-				} catch ( \Throwable $e ) {
-					\Log::error( '[WPOrgSite] Could not tell whether to use the alternate conversation design: ' . $e->getMessage() );
+				if ( ! self::is_print() && self::uses_alt_design() ) {
+					echo ' ' . AltConversation::BODY_CLASS;
 				}
 			}
 		);
+	}
+
+	/**
+	 * Whether the agent viewing the page chose the alternate conversation design.
+	 *
+	 * @return bool Whether they did.
+	 */
+	private static function uses_alt_design(): bool {
+		try {
+			$user = auth()->user();
+
+			return $user instanceof User && UserChoice::get( $user, AltConversation::OPTION );
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgSite] Could not tell whether to use the alternate conversation design: ' . $e->getMessage() );
+
+			return false;
+		}
 	}
 
 	/**
@@ -135,14 +165,14 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				'label'   => __( 'Latest note' ),
 				'text'    => __( 'Pin it to the top of the conversation' ),
 				'help'    => __( 'Once newer emails push a conversation\'s latest note down, a copy of it shows above them, so its context stays in sight. The note itself is dimmed where it is.' ),
-				'enabled' => PinnedNote::is_enabled( $user ),
+				'enabled' => UserChoice::get( $user, PinnedNote::OPTION ),
 			),
 			array(
 				'field'   => AltConversation::FIELD,
 				'label'   => __( 'Conversation design' ),
 				'text'    => __( 'Alternate conversation design' ),
 				'help'    => __( 'The subject, tags, and actions stay in view at the top; the number, assignee, and status are at the top of the sidebar, which scrolls on its own; the emails go oldest first, opening at the newest; and Reply and Note buttons wait at the bottom, where the forms open.' ),
-				'enabled' => AltConversation::is_enabled( $user ),
+				'enabled' => UserChoice::get( $user, AltConversation::OPTION ),
 			),
 		);
 	}
@@ -173,16 +203,11 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 					return $user;
 				}
 
-				$setters = array(
-					PinnedNote::FIELD      => array( PinnedNote::class, 'set_enabled' ),
-					AltConversation::FIELD => array( AltConversation::class, 'set_enabled' ),
-				);
-
-				foreach ( $setters as $field => $setter ) {
+				foreach ( self::CHOICES as $field => $option ) {
 					try {
 						// Saved elsewhere, the form doesn't have it. Laravel 5.5's requests have no boolean().
 						if ( $request->has( $field ) ) {
-							$setter( $user, '1' === (string) $request->input( $field ) );
+							UserChoice::set( $user, $option, '1' === (string) $request->input( $field ) );
 						}
 					} catch ( \Throwable $e ) {
 						\Log::error( '[WPOrgSite] Could not save ' . $field . ' in a profile: ' . $e->getMessage() );
@@ -200,8 +225,9 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 			static function ( mixed $user = null ): void {
 				try {
 					if ( $user instanceof User ) {
-						PinnedNote::forget( (int) $user->id );
-						AltConversation::forget( (int) $user->id );
+						foreach ( self::CHOICES as $option ) {
+							UserChoice::forget( (int) $user->id, $option );
+						}
 					}
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgSite] Could not forget the conversation choices of a deleted user: ' . $e->getMessage() );
@@ -243,11 +269,10 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 			static function ( mixed $thread = null ): void {
 				try {
 					if ( $thread instanceof Thread && PinnedNote::is_pinned( $thread ) ) {
-						$user = auth()->user();
 						echo \View::make(
 							self::ALIAS . '::pinned_label',
 							// The alternate design shows the threads oldest first, so the copy is at the bottom.
-							array( 'bottom' => $user instanceof User && AltConversation::is_enabled( $user ) )
+							array( 'bottom' => self::uses_alt_design() )
 						)->render();
 					}
 				} catch ( \Throwable $e ) {
@@ -267,8 +292,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	 */
 	public static function render_pinned_note( Thread $note, Conversation $conversation ): string {
 		$body = (string) \Eventy::filter( 'thread.body_output', $note->getBodyWithFormatedLinks(), $note, $conversation, $conversation->mailbox );
-		// As core does in the thread. Without safe_raw_html(), HTMLPurifier cleans the filtered body instead; given
-		// nothing, getCleanBody() would clean the note's own.
+		// As core does in the thread; without safe_raw_html(), HTMLPurifier cleans it, given the body, not the note's own.
 		if ( function_exists( 'safe_raw_html' ) ) {
 			$body = (string) safe_raw_html( $body );
 		} elseif ( '' !== $body ) {
@@ -308,12 +332,13 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	}
 
 	/**
-	 * The script in the page's head that collapses the sidebar, if the agent's browser remembers it collapsed, before it
-	 * shows; with core's nonce, which its Content Security Policy may ask for.
+	 * The script in the page's head that collapses the sidebar, and pins a conversation's header, if the agent's browser
+	 * remembers them so, before the page shows; with core's nonce, which its Content Security Policy may ask for.
 	 *
+	 * @param bool $alt_design Whether the agent uses the alternate conversation design, which has no header to pin.
 	 * @return string Script.
 	 */
-	public static function sidebar_script(): string {
+	public static function head_script( bool $alt_design = false ): string {
 		$nonce = '';
 		try {
 			if ( method_exists( \Helper::class, 'cspNonceAttr' ) ) {
@@ -323,6 +348,16 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 			\Log::error( '[WPOrgSite] Could not get the CSP nonce: ' . $e->getMessage() );
 		}
 
-		return '<script' . $nonce . '>try{if(localStorage.getItem(' . json_encode( self::SIDEBAR_KEY ) . ')==="collapsed"){document.documentElement.classList.add("wporgsite-sidebar-collapsed")}}catch(e){}</script>';
+		$classes = array( self::SIDEBAR_KEY => array( 'collapsed', 'wporgsite-sidebar-collapsed' ) );
+		if ( ! $alt_design ) {
+			$classes[ self::HEADER_KEY ] = array( 'pinned', 'wporgsite-header-pinned' );
+		}
+
+		$script = '';
+		foreach ( $classes as $key => [ $value, $class ] ) {
+			$script .= 'if(localStorage.getItem(' . json_encode( $key ) . ')===' . json_encode( $value ) . '){document.documentElement.classList.add(' . json_encode( $class ) . ')}';
+		}
+
+		return '<script' . $nonce . '>try{' . $script . '}catch(e){}</script>';
 	}
 }

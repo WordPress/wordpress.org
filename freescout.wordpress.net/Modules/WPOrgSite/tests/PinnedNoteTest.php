@@ -15,6 +15,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Modules\WPOrgSite\Providers\WPOrgSiteServiceProvider;
 use Modules\WPOrgSite\Services\PinnedNote;
+use Modules\WPOrgSite\Services\UserChoice;
 use WordPressdotorg\FreeScout\Tests\TestCase;
 
 /**
@@ -31,18 +32,6 @@ final class PinnedNoteTest extends TestCase {
 		parent::setUp();
 
 		$this->app->register( WPOrgSiteServiceProvider::class );
-		PinnedNote::reset();
-	}
-
-	/**
-	 * Forgets the notes pinned, which outlive the test's database.
-	 *
-	 * @return void
-	 */
-	protected function tearDown(): void {
-		PinnedNote::reset();
-
-		parent::tearDown();
 	}
 
 	/**
@@ -54,14 +43,14 @@ final class PinnedNoteTest extends TestCase {
 		$user  = $this->create_user();
 		$other = $this->create_user();
 
-		$this->assertFalse( PinnedNote::is_enabled( $user ) );
+		$this->assertFalse( UserChoice::get( $user, PinnedNote::OPTION ) );
 
-		PinnedNote::set_enabled( $user, true );
-		$this->assertTrue( PinnedNote::is_enabled( $user ) );
-		$this->assertFalse( PinnedNote::is_enabled( $other ) );
+		UserChoice::set( $user, PinnedNote::OPTION, true );
+		$this->assertTrue( UserChoice::get( $user, PinnedNote::OPTION ) );
+		$this->assertFalse( UserChoice::get( $other, PinnedNote::OPTION ) );
 
-		PinnedNote::set_enabled( $user, false );
-		$this->assertFalse( PinnedNote::is_enabled( $user ) );
+		UserChoice::set( $user, PinnedNote::OPTION, false );
+		$this->assertFalse( UserChoice::get( $user, PinnedNote::OPTION ) );
 		$this->assertNull( \Option::get( PinnedNote::OPTION . $user->id, null, true, false ) );
 	}
 
@@ -81,6 +70,25 @@ final class PinnedNoteTest extends TestCase {
 		$this->create_thread( $conversation, Thread::TYPE_CUSTOMER, 'Follow-up', null, '2026-10-02 10:00:00' );
 
 		$this->assertSame( $latest->id, PinnedNote::find( $conversation )->id );
+	}
+
+	/**
+	 * Threads are timed to the second: an email of the same second as the note pushes it down if it came after it.
+	 *
+	 * @return void
+	 */
+	public function test_same_second_email_counts_by_order(): void {
+		$agent        = $this->create_user();
+		$conversation = $this->conversation();
+
+		$this->create_thread( $conversation, Thread::TYPE_CUSTOMER, 'Question', null, '2026-10-01 11:00:00' );
+		$note = $this->create_thread( $conversation, Thread::TYPE_NOTE, 'Note', $agent, '2026-10-01 11:00:00' );
+
+		$this->assertNull( PinnedNote::find( $conversation ) );
+
+		$this->create_thread( $conversation, Thread::TYPE_CUSTOMER, 'Follow-up', null, '2026-10-01 11:00:00' );
+
+		$this->assertSame( $note->id, PinnedNote::find( $conversation )->id );
 	}
 
 	/**
@@ -138,7 +146,7 @@ final class PinnedNoteTest extends TestCase {
 		$this->assertSame( '', $this->before_threads( $conversation ) );
 		$this->assertSame( '', $this->info( $note ) );
 
-		PinnedNote::set_enabled( $agent, true );
+		UserChoice::set( $agent, PinnedNote::OPTION, true );
 		$html = $this->before_threads( $conversation );
 
 		$this->assertStringContainsString( 'id="wporgsite-pinned-note"', $html );
@@ -158,7 +166,7 @@ final class PinnedNoteTest extends TestCase {
 	public function test_copy_keeps_modules_changes_safely(): void {
 		$agent = $this->create_user();
 		$this->actingAs( $agent );
-		PinnedNote::set_enabled( $agent, true );
+		UserChoice::set( $agent, PinnedNote::OPTION, true );
 
 		$conversation = $this->conversation();
 		$this->create_thread( $conversation, Thread::TYPE_CUSTOMER, 'Question', null, '2026-10-01 10:00:00' );
@@ -192,14 +200,14 @@ final class PinnedNoteTest extends TestCase {
 		$this->assertStringNotContainsString( 'checked', $field );
 
 		\Eventy::filter( 'user.save_profile', $user, new Request( array( PinnedNote::FIELD => '1' ) ) );
-		$this->assertTrue( PinnedNote::is_enabled( $user ) );
+		$this->assertTrue( UserChoice::get( $user, PinnedNote::OPTION ) );
 
 		// Saved elsewhere, without the field, it stays as it was.
 		\Eventy::filter( 'user.save_profile', $user, new Request() );
-		$this->assertTrue( PinnedNote::is_enabled( $user ) );
+		$this->assertTrue( UserChoice::get( $user, PinnedNote::OPTION ) );
 
 		\Eventy::filter( 'user.save_profile', $user, new Request( array( PinnedNote::FIELD => '0' ) ) );
-		$this->assertFalse( PinnedNote::is_enabled( $user ) );
+		$this->assertFalse( UserChoice::get( $user, PinnedNote::OPTION ) );
 	}
 
 	/**
@@ -209,11 +217,11 @@ final class PinnedNoteTest extends TestCase {
 	 */
 	public function test_forgets_deleted_users(): void {
 		$user = $this->create_user();
-		PinnedNote::set_enabled( $user, true );
+		UserChoice::set( $user, PinnedNote::OPTION, true );
 
 		\Eventy::action( 'user.deleted', $user );
 
-		$this->assertFalse( PinnedNote::is_enabled( $user ) );
+		$this->assertFalse( UserChoice::get( $user, PinnedNote::OPTION ) );
 	}
 
 	/**

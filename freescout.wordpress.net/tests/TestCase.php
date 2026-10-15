@@ -65,12 +65,11 @@ abstract class TestCase extends BaseTestCase {
 	/**
 	 * Creates an agent.
 	 *
-	 * @param int|null $role User role; an administrator by default, set here rather than in the signature, as editors
-	 *                       without core can't tell User::ROLE_ADMIN is an int.
+	 * @param int $role User role.
 	 * @return User
 	 */
-	protected function create_user( ?int $role = null ): User {
-		return factory( User::class )->create( array( 'role' => $role ?? User::ROLE_ADMIN ) );
+	protected function create_user( int $role = User::ROLE_ADMIN ): User {
+		return factory( User::class )->create( array( 'role' => $role ) );
 	}
 
 	/**
