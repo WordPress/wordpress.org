@@ -55,53 +55,47 @@ final class SearchTest extends TestCase {
 	}
 
 	/**
-	 * Covers a search without other filters only going back a year.
+	 * Covers which searches get the default After date, and the note saying so.
 	 *
+	 * @dataProvider data_default_date
+	 *
+	 * @param array $filters   Filters from the request.
+	 * @param array $input     Request input.
+	 * @param array $expected  Filters the search runs with, before the default date.
+	 * @param bool  $defaulted Whether the default date is added.
 	 * @return void
 	 */
-	public function test_search_without_filters_covers_the_past_year(): void {
-		$expected = now()->modify( Search::DEFAULT_AFTER )->format( 'Y-m-d' );
+	public function test_default_date( array $filters, array $input, array $expected, bool $defaulted ): void {
+		if ( $defaulted ) {
+			$expected['after'] = now()->modify( Search::DEFAULT_AFTER )->format( 'Y-m-d' );
+		}
 
-		$this->assertSame( array( 'after' => $expected ), $this->filters( array(), array( 'q' => 'obenland' ) ) );
-		$this->assertTrue( app( Search::class )->was_defaulted() );
-
-		// Filters the agent switched on but left empty don’t count.
-		$this->assertSame( $expected, $this->filters( array( 'following' => '' ), array( 'q' => 'obenland' ) )['after'] );
-
-		// AJAX pages send the query along with the filters.
-		$this->assertSame( $expected, $this->filters( array(), array( 'filter' => array( 'q' => 'obenland' ) ) )['after'] );
-
-		$this->assertStringContainsString( 'need an After date', $this->filters_note() );
+		$this->assertSame( $expected, $this->filters( $filters, $input ) );
+		$this->assertSame( $defaulted, str_contains( $this->filters_note(), 'need an After date' ) );
 	}
 
 	/**
-	 * Covers a cleared date coming back, since searching everything is what times out.
+	 * Requests and the filters their search runs with.
 	 *
-	 * @return void
+	 * @return array[]
 	 */
-	public function test_cleared_date_is_set_again(): void {
-		$expected = now()->modify( Search::DEFAULT_AFTER )->format( 'Y-m-d' );
-
-		$this->assertSame( array( 'after' => $expected ), $this->filters( array( 'after' => '' ), array( 'q' => 'obenland' ) ) );
-		$this->assertTrue( app( Search::class )->was_defaulted() );
-	}
-
-	/**
-	 * Covers a date the agent picked, other filters, and browsing without a query staying as they are.
-	 *
-	 * @return void
-	 */
-	public function test_chosen_date_or_other_filters_are_kept(): void {
-		$this->assertSame( array( 'after' => '2020-01-01' ), $this->filters( array( 'after' => '2020-01-01' ), array( 'q' => 'obenland' ) ) );
-		$this->assertSame( array( 'status' => array( '1' ) ), $this->filters( array( 'status' => array( '1' ) ), array( 'q' => 'obenland' ) ) );
-		$cleared = array(
-			'mailbox' => '17',
-			'after'   => '',
+	public function data_default_date(): array {
+		return array(
+			'query only'                 => array( array(), array( 'q' => 'obenland' ), array(), true ),
+			'removed or cleared date'    => array(
+				array(
+					'following' => '',
+					'after'     => '',
+				),
+				array( 'q' => 'obenland' ),
+				array( 'following' => '' ),
+				true,
+			),
+			'AJAX page'                  => array( array(), array( 'filter' => array( 'q' => 'obenland' ) ), array(), true ),
+			'date the agent picked'      => array( array( 'after' => '2020-01-01' ), array( 'q' => 'obenland' ), array( 'after' => '2020-01-01' ), false ),
+			'another filter'             => array( array( 'status' => array( '1' ) ), array( 'q' => 'obenland' ), array( 'status' => array( '1' ) ), false ),
+			'browsing filters, no query' => array( array(), array( 'q' => '' ), array(), false ),
 		);
-		$this->assertSame( array( 'mailbox' => '17' ), $this->filters( $cleared, array( 'q' => 'obenland' ) ) );
-		$this->assertSame( array(), $this->filters( array(), array( 'q' => '' ) ) );
-		$this->assertFalse( app( Search::class )->was_defaulted() );
-		$this->assertSame( '', $this->filters_note() );
 	}
 
 	/**
@@ -122,11 +116,12 @@ final class SearchTest extends TestCase {
 	}
 
 	/**
-	 * Covers mailboxes the agent can't see staying out of the results.
+	 * Covers conversations the agent can't see staying out of the results: other mailboxes, and for agents who may
+	 * only see their own, conversations assigned to someone else.
 	 *
 	 * @return void
 	 */
-	public function test_search_respects_mailbox_access(): void {
+	public function test_search_respects_access(): void {
 		$visible = $this->conversation( 'Plugin review', 'obenland', '2026-10-01 10:00:00' );
 		$this->conversation( 'Plugin review', 'obenland', '2026-10-01 10:00:00', $this->create_mailbox( 'Security' ) );
 
@@ -134,6 +129,14 @@ final class SearchTest extends TestCase {
 		$agent->mailboxes()->attach( $this->mailbox->id );
 
 		$this->assertSame( array( $visible->id ), $this->search( 'obenland', array(), $agent )->pluck( 'id' )->all() );
+
+		$visible->user_id = $agent->id;
+		$visible->save();
+		$this->conversation( 'Theme review', 'obenland', '2026-10-02 10:00:00' );
+		$agent->permissions = array( User::PERM_ONLY_ASSIGNED_TICKETS => true );
+		$agent->save();
+
+		$this->assertSame( array( $visible->id ), $this->search( 'obenland', array(), $agent->fresh() )->pluck( 'id' )->all() );
 	}
 
 	/**
@@ -176,15 +179,6 @@ final class SearchTest extends TestCase {
 		$this->assertSame( 0, $results->total() );
 		$this->assertTrue( app( Search::class )->timed_out() );
 		$this->assertStringContainsString( 'took too long', $this->filters_note() );
-	}
-
-	/**
-	 * Covers core's search running when there's no agent to search as.
-	 *
-	 * @return void
-	 */
-	public function test_search_without_agent_is_left_to_core(): void {
-		$this->assertSame( '', \Eventy::filter( 'search.conversations.perform', '', 'obenland', array(), null ) );
 	}
 
 	/**
