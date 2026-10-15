@@ -17,6 +17,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
 use Modules\WPOrgSite\Http\Middleware\LockModules;
 use Modules\WPOrgSite\Services\AltConversation;
+use Modules\WPOrgSite\Services\EnvSettings;
 use Modules\WPOrgSite\Services\PinnedNote;
 use Modules\WPOrgSite\Services\UserChoice;
 
@@ -108,6 +109,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/sidebar.js';
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/header.js';
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/discard.js';
+				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/settings.js';
 
 				return $javascripts;
 			}
@@ -122,6 +124,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		);
 
 		self::register_profile_hooks();
+		self::register_settings_hooks();
 		self::register_pinned_note_hooks();
 
 		// For alt-conversation.js, which lays the conversation out.
@@ -233,6 +236,65 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 					\Log::error( '[WPOrgSite] Could not forget the conversation choices of a deleted user: ' . $e->getMessage() );
 				}
 			}
+		);
+	}
+
+	/**
+	 * Registers the hooks that keep Manage » Settings from writing `.env`, which is read-only on the server.
+	 *
+	 * Saving a setting FreeScout keeps there fails, and with it the rest of its section. They're left out when a section
+	 * is saved, and settings.js shows them read-only.
+	 *
+	 * @return void
+	 */
+	private static function register_settings_hooks(): void {
+		\Eventy::addFilter(
+			'settings.alter_section_settings',
+			static function ( mixed $settings = array(), mixed $section = '' ): mixed {
+				try {
+					$route = request()->route();
+					if ( ! is_array( $settings ) || ! $route || 'App\Http\Controllers\SettingsController@save' !== $route->getActionName() ) {
+						return $settings;
+					}
+
+					return array_diff_key( $settings, array_flip( EnvSettings::keys( (string) $section ) ) );
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not leave the .env settings out of saving settings: ' . $e->getMessage() );
+
+					return $settings;
+				}
+			},
+			20,
+			2
+		);
+
+		// Late, to wrap the view another module may have chosen for its section.
+		\Eventy::addFilter(
+			'settings.view',
+			static function ( mixed $view = '', mixed $section = '' ): mixed {
+				try {
+					$keys = is_string( $view ) ? EnvSettings::keys( (string) $section ) : array();
+					if ( ! $keys ) {
+						return $view;
+					}
+
+					\View::share(
+						'wporgsite_env_settings',
+						array(
+							'view' => $view,
+							'keys' => $keys,
+						)
+					);
+
+					return self::ALIAS . '::settings';
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not mark the .env settings read-only: ' . $e->getMessage() );
+
+					return $view;
+				}
+			},
+			100,
+			2
 		);
 	}
 
