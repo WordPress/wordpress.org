@@ -528,10 +528,13 @@ class Plugin_I18n {
 		}
 
 		// translate.wordpress.org keeps these counts current on every translation edit and originals import.
-		$translation_sets = $wpdb->get_results( $wpdb->prepare(
-			'SELECT locale, locale_slug, `current`, `all` FROM ' . GLOTPRESS_TABLE_PREFIX . 'project_translation_status WHERE project_id = %d',
-			$project_id
-		) );
+		$translation_sets = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT locale, locale_slug, `current`, `all` FROM %i WHERE project_id = %d',
+				GLOTPRESS_TABLE_PREFIX . 'project_translation_status',
+				$project_id
+			)
+		);
 
 		require_once GLOTPRESS_LOCALES_PATH;
 
