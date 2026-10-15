@@ -11,6 +11,8 @@ Shows what WordPress.org knows about the person a conversation is about, next to
 
 The other three only show in the mailboxes checked in their section under Manage » Settings (**Forum Notes Panel**, **Plugins & Themes Panel**, **Privacy Requests Panel**), like HelpScout's apps. They start off everywhere. A panel that's off isn't sent the mailbox's conversations.
 
+The sender's social profiles, which core shows with the same icon for each, get their network's icon: X (Twitter), Facebook, Telegram, LinkedIn, Google, Foursquare, YouTube, Flickr, and VK from the Social Icons block, About.me and Quora drawn in its style, and a link for Other. Tungle.me, long gone, keeps core's. It's in `Public/css/sidebar.css` and `Public/img/social/`.
+
 Panels load after the conversation, so a slow WordPress.org never holds it up. A panel with nothing to show is left out, and each one collapses from its heading, like FreeScout's own.
 
 ## Setup
