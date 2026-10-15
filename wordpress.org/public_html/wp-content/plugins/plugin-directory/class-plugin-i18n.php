@@ -553,7 +553,7 @@ class Plugin_I18n {
 				continue;
 			}
 
-			// Variants are named the way translate.wordpress.org names them, e.g. de_DE_formal.
+			// Variants are named the way translate.wordpress.org names them, e.g. de_DE_formal. See https://meta.trac.wordpress.org/ticket/4367.
 			$wp_locale = $gp_locale->wp_locale;
 			if ( 'default' !== $set->locale_slug && ! str_contains( $wp_locale, $set->locale_slug ) ) {
 				$wp_locale .= '_' . $set->locale_slug;
