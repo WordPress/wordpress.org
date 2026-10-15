@@ -368,6 +368,46 @@ final class UsersTest extends SsoTestCase {
 	}
 
 	/**
+	 * The profile links the username to the WordPress.org profile.
+	 *
+	 * @return void
+	 */
+	public function test_profile_links_username_to_wordpress_org_profile(): void {
+		$user = $this->create_user( User::ROLE_USER );
+		Account::connect( (int) $user->id, 'rita' );
+
+		// The page escapes this, and PHP 8 deprecates escaping null, which tests turn into an exception.
+		$user->emails = '';
+		$user->save();
+
+		$this->assertStringContainsString(
+			'<a href="https://profiles.wordpress.org/rita/" target="_blank" rel="noopener">rita</a>',
+			(string) $this->get( route( 'users.profile', array( 'id' => $user->id ) ) )->assertStatus( 200 )->getContent()
+		);
+	}
+
+	/**
+	 * Users can't be deleted, even by administrators; they're disabled instead.
+	 *
+	 * @return void
+	 */
+	public function test_users_cannot_be_deleted(): void {
+		$user = $this->create_user( User::ROLE_USER );
+
+		$response = $this->post(
+			route( 'users.ajax' ),
+			array(
+				'_token'  => csrf_token(),
+				'action'  => 'delete_user',
+				'user_id' => $user->id,
+			)
+		)->assertStatus( 200 );
+
+		$this->assertSame( 'error', json_decode( (string) $response->getContent(), true )['status'] );
+		$this->assertSame( User::STATUS_ACTIVE, (int) $user->refresh()->status );
+	}
+
+	/**
 	 * Passwords can't be changed.
 	 *
 	 * @return void
