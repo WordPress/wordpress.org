@@ -18,9 +18,6 @@ namespace WordPressdotorg\API\FreeScout;
  * @return void
  */
 function load_wordpress( string $wp_init_host = '' ): void {
-	// Set by the config this loads, and read by account.php; without this it would stay local to this function.
-	global $nologin_accounts;
-
 	if ( ! $wp_init_host ) {
 		$wp_init_host = 'https://api.wordpress.org/';
 	}

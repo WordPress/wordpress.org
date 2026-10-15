@@ -38,20 +38,14 @@ function get_account( string $username ): \WP_User|false {
 /**
  * Whether an account has been blocked from logging in.
  *
- * Reports true when that can't be determined, so FreeScout refuses the login.
+ * Reports true when that can't be determined, so FreeScout refuses the login. Not for accounts in
+ * `$nologin_accounts`, so bot accounts can use the helpdesk.
  *
  * @param \WP_User $user Account.
  * @return bool
  */
 function is_blocked( \WP_User $user ): bool {
-	global $nologin_accounts;
-
 	if ( str_starts_with( $user->user_pass, 'BLOCKED' ) ) {
-		return true;
-	}
-
-	// Accounts wporg-sso refuses a login.
-	if ( ! empty( $nologin_accounts ) && in_array( $user->user_login, (array) $nologin_accounts, true ) ) {
 		return true;
 	}
 
