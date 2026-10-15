@@ -38,9 +38,6 @@ function get_account( string $username ): \WP_User|false {
 /**
  * Whether an account has been blocked from logging in.
  *
- * Reports true when that can't be determined, so FreeScout refuses the login. Not for accounts in
- * `$nologin_accounts`, so bot accounts can use the helpdesk.
- *
  * @param \WP_User $user Account.
  * @return bool
  */
