@@ -24,7 +24,7 @@ class Helpdesk_Links_Test extends TestCase {
 	 *
 	 * @var Closure|null
 	 */
-	protected $mailbox_filter = null;
+	protected ?Closure $mailbox_filter = null;
 
 	/**
 	 * Removes the mailbox filter.
@@ -46,6 +46,11 @@ class Helpdesk_Links_Test extends TestCase {
 	 * @return void
 	 */
 	public function test_links_to_help_scout_until_freescout_is_configured(): void {
+		$this->mailbox_filter = static function (): int {
+			return 0;
+		};
+		add_filter( 'wporg_plugins_freescout_mailbox_id', $this->mailbox_filter );
+
 		$this->assertFalse( Helpdesk::is_freescout() );
 		$this->assertSame( 'Help Scout', Helpdesk::name() );
 		$this->assertSame( 'https://secure.helpscout.net/search/?query=mailbox:Plugins%20My%20Plugin', Helpdesk::search_url( 'My Plugin' ) );

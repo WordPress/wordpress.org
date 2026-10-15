@@ -372,7 +372,7 @@ class Status_Transitions {
 	 */
 	public function restore_rejected_plugin( $post ) {
 		$slug = $post->post_name;
-		$slug = preg_replace( '!^rejected-(.+)-rejected$!i', '$1', $slug );
+		$slug = preg_replace( self::REJECTED_SLUG_REGEX, '$1', $slug );
 
 		// Change slug back to 'plugin-name'.
 		wp_update_post( array(
