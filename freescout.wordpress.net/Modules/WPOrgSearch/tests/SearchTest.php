@@ -93,9 +93,36 @@ final class SearchTest extends TestCase {
 			),
 			'AJAX page'                  => array( array(), array( 'filter' => array( 'q' => 'obenland' ) ), array(), true ),
 			'date the agent picked'      => array( array( 'after' => '2020-01-01' ), array( 'q' => 'obenland' ), array( 'after' => '2020-01-01' ), false ),
-			'another filter'             => array( array( 'status' => array( '1' ) ), array( 'q' => 'obenland' ), array( 'status' => array( '1' ) ), false ),
+			'another filter'             => array(
+				array(
+					'status' => array( '1' ),
+					'after'  => '',
+				),
+				array( 'q' => 'obenland' ),
+				array(
+					'status' => array( '1' ),
+					'after'  => '',
+				),
+				false,
+			),
 			'browsing filters, no query' => array( array(), array( 'q' => '' ), array(), false ),
 		);
+	}
+
+	/**
+	 * Covers searching an existing `#number` opening that conversation, which core only does without filters.
+	 *
+	 * @return void
+	 */
+	public function test_conversation_number_opens_it(): void {
+		$conversation = $this->conversation( 'Plugin review', 'obenland', '2026-10-01 10:00:00' );
+
+		$this->actingAs( $this->admin )
+			->get( route( 'conversations.search', array( 'q' => '#' . $conversation->number ) ) )
+			->assertRedirect( $conversation->url( $conversation->folder_id ) );
+
+		// A number that doesn't exist is searched as text, so it gets the date.
+		$this->assertArrayHasKey( 'after', $this->filters( array(), array( 'q' => '#' . ( $conversation->number + 1 ) ) ) );
 	}
 
 	/**

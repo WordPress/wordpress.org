@@ -87,19 +87,19 @@ final class Search {
 	/**
 	 * Gives a search without other filters an After date, a year ago unless the agent picked one.
 	 *
-	 * Removing or clearing the date doesn't search everything: that's what times out.
+	 * Removing or clearing the date doesn't search everything: that's what times out. Searching an existing `#number`
+	 * gets no date, since core only jumps to that conversation without filters, and fails with them.
 	 *
 	 * @param array  $filters Search filters from the request.
 	 * @param string $q       Search query.
 	 * @return array
 	 */
 	public function default_filters( array $filters, string $q ): array {
-		if ( '' === $q || ! empty( $filters['after'] ) ) {
+		if ( '' === $q || ! empty( $filters['after'] ) || array_filter( array_diff_key( $filters, array( 'after' => true ) ) ) ) {
 			return $filters;
 		}
 
-		unset( $filters['after'] );
-		if ( array_filter( $filters ) ) {
+		if ( preg_match( '/^#(\d+)$/', $q, $number ) && Conversation::where( Conversation::numberFieldName(), $number[1] )->exists() ) {
 			return $filters;
 		}
 
@@ -169,7 +169,8 @@ final class Search {
 		$query->addSelect( \DB::raw( 'COUNT(*) OVER() AS ' . self::TOTAL ) )->forPage( Paginator::resolveCurrentPage(), Conversation::DEFAULT_LIST_SIZE );
 
 		$sql  = 'SET STATEMENT max_statement_time = ' . $this->time_limit . ' FOR ' . $query->toSql();
-		$rows = $query->getModel()->hydrate( $query->getQuery()->getConnection()->select( $sql, $query->getBindings() ) );
+		$rows = $query->hydrate( $query->getQuery()->getConnection()->select( $sql, $query->getBindings() ) );
+		$rows = $query->getModel()->newCollection( $query->eagerLoadRelations( $rows->all() ) );
 
 		// A page past the last one has no rows to carry the total.
 		$total = $rows->isEmpty() ? 0 : (int) $rows->first()->{ self::TOTAL };
