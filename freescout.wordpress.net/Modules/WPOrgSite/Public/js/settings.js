@@ -26,11 +26,13 @@
 				}
 
 				// Under the fields, once per row: Logs Monitoring's frequency is in the same row as its switch.
-				const $place = $fields
-					.first()
-					.closest( '.form-group' )
-					.children()
-					.has( $fields.first() );
+				const $group = $fields.first().closest( '.form-group' );
+				const $column = $group.children().has( $fields.first() );
+				// A field without a column, or outside a row, still gets its note.
+				let $place = $column.length ? $column : $group;
+				if ( ! $place.length ) {
+					$place = $fields.last().parent();
+				}
 
 				if ( $place.children( '.wporgsite-env-note' ).length ) {
 					return;
