@@ -1851,11 +1851,6 @@ let wpTrac,
 					// Attach change event handler on the field-keywords input.
 					elements.hiddenEl.addEventListener( 'change', wpTrac.workflow.populate );
 
-					// Designed so the list could have come from another file.
-					if ( typeof coreKeywordList === 'undefined' ) {
-						return;
-					}
-
 					// Generate the workflow template.
 					wpTrac.workflow.template();
 
@@ -2122,10 +2117,6 @@ let wpTrac,
 			let field, container, focuses, originalFocuses;
 
 			function init() {
-				if ( typeof coreFocusesList === 'undefined' ) {
-					return;
-				}
-
 				field = document.getElementById( 'field-focuses' );
 				if ( ! field ) {
 					return;
@@ -2209,8 +2200,7 @@ let wpTrac,
 				updateField();
 			}
 
-			function remove( focus ) {
-				const focusLi = typeof focus === 'string' ? container.querySelector( 'li.' + focus ) : focus;
+			function remove( focusLi ) {
 				if ( ! focusLi ) {
 					return;
 				}
@@ -2462,7 +2452,6 @@ let wpTrac,
 					notifications.classList.add( 'block' );
 				}
 				changeCount( 1 );
-				return false;
 			}
 
 			function unsubscribe() {
@@ -2473,7 +2462,6 @@ let wpTrac,
 					notifications.classList.add( 'block' );
 				}
 				changeCount( -1 );
-				return false;
 			}
 
 			function changeCount( delta ) {
@@ -2494,14 +2482,12 @@ let wpTrac,
 				save( 'block' );
 				notifications.classList.remove( 'block' );
 				notifications.classList.add( 'blocked' );
-				return false;
 			}
 
 			function unblock() {
 				save( 'unblock' );
 				notifications.classList.remove( 'blocked' );
 				notifications.classList.add( 'block' );
-				return false;
 			}
 
 			function reportInit() {
@@ -3110,8 +3096,6 @@ let wpTrac,
 						componentWords[ word ].push( component );
 					} );
 				} );
-
-				return componentWords;
 			}
 
 			return {
