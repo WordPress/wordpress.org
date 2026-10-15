@@ -151,6 +151,31 @@ final class PinnedNoteTest extends TestCase {
 	}
 
 	/**
+	 * The copy has modules' changes to the note's body, without what's unsafe in them.
+	 *
+	 * @return void
+	 */
+	public function test_copy_keeps_modules_changes_safely(): void {
+		$agent = $this->create_user();
+		$this->actingAs( $agent );
+		PinnedNote::set_enabled( $agent, true );
+
+		$conversation = $this->conversation();
+		$this->create_thread( $conversation, Thread::TYPE_CUSTOMER, 'Question', null, '2026-10-01 10:00:00' );
+		$this->create_thread( $conversation, Thread::TYPE_NOTE, '<p>Note</p>', $agent, '2026-10-01 11:00:00' );
+		$this->create_thread( $conversation, Thread::TYPE_CUSTOMER, 'Follow-up', null, '2026-10-02 10:00:00' );
+
+		$filter = static fn( mixed $body = '' ): string => $body . '<p>Changed by a module</p><script>alert(1)</script>';
+		\Eventy::addFilter( 'thread.body_output', $filter );
+
+		$html = $this->before_threads( $conversation );
+		\Eventy::removeFilter( 'thread.body_output', $filter );
+
+		$this->assertStringContainsString( '<p>Changed by a module</p>', $html );
+		$this->assertStringNotContainsString( 'alert(1)', $html );
+	}
+
+	/**
 	 * The profile shows the choice, and saves it when the form has it.
 	 *
 	 * @return void
