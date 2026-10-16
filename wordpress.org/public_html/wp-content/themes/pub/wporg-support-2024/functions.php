@@ -1163,35 +1163,6 @@ function wporg_support_current_user_can_stick( $topic_id ) {
 }
 
 /**
- * Correct reply URLs for pending posts.
- *
- * bbPress appends '/edit/' even to ugly permalinks, which pending posts will
- * always have.
- *
- * @see https://meta.trac.wordpress.org/ticket/2478
- * @see https://bbpress.trac.wordpress.org/ticket/3054
- *
- * @param string $url     URL to edit the post.
- * @param int    $post_id Post ID.
- * @return string
- */
-function wporg_support_fix_pending_posts_reply_url( $url, $post_id ) {
-	if ( false !== strpos( $url, '?' ) ) {
-		if ( false !== strpos( $url, '/edit/' ) ) {
-			$url = str_replace( '/edit/', '', $url );
-			$url = add_query_arg( 'edit', '1', $url );
-		} elseif ( false !== strpos( $url, '%2Fedit%2F' ) ) {
-			$url = str_replace( '%2Fedit%2F', '', $url );
-			$url = add_query_arg( 'edit', '1', $url );
-		}
-	}
-
-	return $url;
-}
-add_filter( 'bbp_get_topic_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
-add_filter( 'bbp_get_reply_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
-
-/**
  * Prevent standalone <li> tags from breaking the theme layout.
  *
  * If a <li> tag is not preceded by <ul> or <ol>, prepend it with <ul>
