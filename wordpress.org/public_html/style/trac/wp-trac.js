@@ -607,6 +607,8 @@ let wpTrac,
 					}
 				}
 
+				const normalize = ( str ) => ( str || '' ).replace( /\r\n/g, '\n' ).trim();
+
 				/**
 				 * Checks whether an input or textarea element has unsaved changes compared to its initial value.
 				 *
@@ -618,7 +620,6 @@ let wpTrac,
 					if ( ! el ) {
 						return false;
 					}
-					const normalize = ( str ) => ( str || '' ).replace( /\r\n/g, '\n' ).trim();
 
 					return normalize( el.value ) !== normalize( el.defaultValue );
 				}
