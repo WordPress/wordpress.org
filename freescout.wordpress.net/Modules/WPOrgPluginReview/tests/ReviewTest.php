@@ -286,17 +286,18 @@ final class ReviewTest extends TestCase {
 	}
 
 	/**
-	 * The HelpScout import's conversations are indexed as they're imported, as their threads are written without hooks.
+	 * A conversation whose replies were all written without their hooks, like the HelpScout import's, is indexed as its
+	 * review is shown.
 	 *
 	 * @return void
 	 */
-	public function test_indexes_imported_conversations(): void {
-		$this->reply( '<p>Review ID: R my-plugin/jane 1Aug26/4.2 (P0TDX42HGN)</p>', '2026-08-01 10:00:00' );
-		$imported = $this->insert_thread( '<p>Review ID: TRM my-plugin/jane 8Aug26/4.3 (P0TDX42HGN)</p>' );
-
-		\Eventy::action( 'wporghelpscoutimport.conversation_imported', $this->conversation, 1000000028 );
+	public function test_showing_the_review_indexes_a_conversation_written_without_hooks(): void {
+		$this->insert_thread( '<p>Review ID: R my-plugin/jane 1Aug26/4.2 (P0TDX42HGN)</p>', '2026-08-01 10:00:00' );
+		$imported = $this->insert_thread( '<p>Review ID: TRM my-plugin/jane 8Aug26/4.3 (P0TDX42HGN)</p>', '2026-08-08 10:00:00' );
+		$this->assertSame( 0, \DB::table( Review::TABLE )->count() );
 
 		$this->assertSame( $imported, Review::latest( $this->conversation )['thread_id'] );
+		$this->assertSame( 2, \DB::table( Review::TABLE )->count() );
 	}
 
 	/**
