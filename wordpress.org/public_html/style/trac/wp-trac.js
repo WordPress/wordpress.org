@@ -2476,8 +2476,7 @@ let wpTrac,
 
 			function changeCount( delta ) {
 				const countEl = notifications.querySelector( '.count' );
-				const count = Number.parseInt( countEl?.textContent || '', 10 ) || 0;
-				count += delta;
+				const count = ( Number.parseInt( countEl?.textContent || '', 10 ) || 0 ) + delta;
 				if ( countEl ) {
 					countEl.textContent = count > 0 ? String( count ) : '';
 				}
@@ -2570,8 +2569,7 @@ let wpTrac,
 
 								const prev = clickedStar.previousElementSibling;
 								if ( prev ) {
-									const count = Number.parseInt( prev.textContent, 10 ) || 0;
-									count += delta;
+									const count = ( Number.parseInt( prev.textContent, 10 ) || 0 ) + delta;
 									prev.textContent = count ? String( count ) : '';
 								}
 							} );
