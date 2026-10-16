@@ -423,7 +423,7 @@ $response = $client->send($request);
 ### Messages
 
 Messages no longer have references to their counterparts (i.e., a request no
-longer has a reference to it's response, and a response no loger has a
+longer has a reference to its response, and a response no longer has a
 reference to its request). This association is now managed through a
 `GuzzleHttp\Adapter\TransactionInterface` object. You can get references to
 these transaction objects using request events that are emitted over the
@@ -786,12 +786,12 @@ Additions and changes (you will need to update any implementations or subclasses
 The following methods were removed from interfaces. All of these methods are still available in the concrete classes
 that implement them, but you should update your code to use alternative methods:
 
-- Removed `Guzzle\Http\ClientInterface::setDefaultHeaders(). Use
+- Removed `Guzzle\Http\ClientInterface::setDefaultHeaders()`. Use
   `$client->getConfig()->setPath('request.options/headers/{header_name}', 'value')`. or
   `$client->getConfig()->setPath('request.options/headers', array('header_name' => 'value'))` or
   `$client->setDefaultOption('headers/{header_name}', 'value')`. or
   `$client->setDefaultOption('headers', array('header_name' => 'value'))`.
-- Removed `Guzzle\Http\ClientInterface::getDefaultHeaders(). Use `$client->getConfig()->getPath('request.options/headers')`.
+- Removed `Guzzle\Http\ClientInterface::getDefaultHeaders()`. Use `$client->getConfig()->getPath('request.options/headers')`.
 - Removed `Guzzle\Http\ClientInterface::expandTemplate()`. This is an implementation detail.
 - Removed `Guzzle\Http\ClientInterface::setRequestFactory()`. This is an implementation detail.
 - Removed `Guzzle\Http\ClientInterface::getCurlMulti()`. This is a very specific implementation detail.
