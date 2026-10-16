@@ -445,7 +445,7 @@ let wpTrac,
 		postPreviewHacks() {
 			// Automatically preview images.
 			document.querySelectorAll( 'li.trac-field-attachment' ).forEach( ( li ) => {
-				const appendTo = li.parentElement?.parentElement; // div.change
+				const appendTo = li.closest( 'div.change' );
 				if ( ! appendTo || appendTo.querySelector( '.trac-image-preview' ) ) {
 					return;
 				}
@@ -900,7 +900,7 @@ let wpTrac,
 
 			// See $.fn.enableFolding().
 			document.getElementById( 'no0' )?.addEventListener( 'click', function ( event ) {
-				const div = this.parentNode.parentNode;
+				const div = this.closest( '#commits' );
 				div.classList.toggle( 'collapsed' );
 				if ( div.classList.contains( 'collapsed' ) ) {
 					event.preventDefault();
@@ -1508,11 +1508,7 @@ let wpTrac,
 								continue;
 							}
 							if ( component.value !== c ) {
-								Array.from( component.options ).forEach( ( opt ) => {
-									if ( opt.value === c ) {
-										opt.remove();
-									}
-								} );
+								component.querySelector( `option[value="${ window.CSS.escape( c ) }"]` )?.remove();
 							}
 						}
 					}
@@ -1990,13 +1986,13 @@ let wpTrac,
 					}
 
 					// Replace commas, collapse spaces, trim, then split by space.
-					keywords = elements.hiddenEl.value.replace( /,/g, ' ' ).replace( / +/g, ' ' ).trim().split( ' ' );
-
+					const rawKeywords = elements.hiddenEl.value.replace( /,/g, ' ' ).replace( /\s+/g, ' ' ).trim();
+					keywords = rawKeywords ? rawKeywords.split( ' ' ) : [];
 					// Put our cleaned up version back into the hidden field.
 					elements.hiddenEl.value = keywords.join( ' ' );
 
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
-					if ( 1 !== keywords.length || keywords[ 0 ] !== '' ) {
+					if ( keywords.length ) {
 						const binFragment = document.createDocumentFragment();
 						keywords.forEach( function ( v ) {
 							const span = keywordSpan( v );
@@ -2006,8 +2002,6 @@ let wpTrac,
 							binFragment.append( span );
 						} );
 						elements.bin.append( binFragment );
-					} else {
-						keywords = [];
 					}
 
 					// Populate the dropdown.
@@ -2354,10 +2348,10 @@ let wpTrac,
 				const componentName = (
 					document.querySelector( 'td[headers="h_component"]' )?.textContent || ''
 				).trim();
-				for ( let i = 0, len = maintainers.length; i < len; i++ ) {
-					labels[ maintainers[ i ] ] = {
+				maintainers.forEach( ( maintainer ) => {
+					labels[ maintainer ] = {
 						text: 'Component Maintainer',
-						title: `@${ maintainers[ i ] } maintains the ${ componentName } component`,
+						title: `@${ maintainer } maintains the ${ componentName } component`,
 					};
 				}
 				wpTrac.showContributorLabels( labels );
@@ -2510,6 +2504,7 @@ let wpTrac,
 
 			function reportInit() {
 				const tickets = [],
+					stars = [],
 					cells = document.querySelectorAll( 'table.listing td.Stars' );
 
 				if ( cells.length === 0 ) {
@@ -2523,18 +2518,17 @@ let wpTrac,
 						countSpan.append( cell.firstChild );
 					}
 					cell.append( countSpan );
-					cell.insertAdjacentHTML(
-						'beforeend',
-						' <div class="dashicons dashicons-star-empty loading trac-report-star"></div>'
-					);
-				} );
 
-				const stars = document.querySelectorAll( '.trac-report-star' );
-				stars.forEach( ( reportStar ) => {
-					const ticketLink = reportStar.parentElement?.parentElement?.querySelector( 'td.ticket a' );
+					const ticketLink = cell.closest( 'tr' )?.querySelector( 'td.ticket a' );
 					const ticket = parseInt( ( ticketLink?.textContent || '' ).replace( '#', '' ), 10 );
 					tickets.push( ticket );
+
+					const reportStar = document.createElement( 'div' );
+					reportStar.className = 'dashicons dashicons-star-empty loading trac-report-star';
 					reportStar.dataset.ticket = String( ticket );
+
+					cell.append( document.createTextNode( ' ' ), reportStar );
+					stars.push( reportStar );
 				} );
 
 				const body = new URLSearchParams();
