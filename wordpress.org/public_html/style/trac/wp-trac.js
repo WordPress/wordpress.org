@@ -541,10 +541,10 @@ let wpTrac,
 			}
 
 			// Change 'Comments' and 'Stars' columns to dashicons glyphs to save space.
-			document.querySelectorAll( 'th a[href*="sort=Comments"]' ).forEach( ( a ) => {
+			document.querySelectorAll( 'thead a[href*="sort=Comments"]' ).forEach( ( a ) => {
 				a.innerHTML = '<div class="dashicons dashicons-admin-comments"></div>';
 			} );
-			document.querySelectorAll( 'th a[href*="sort=Stars"]' ).forEach( ( a ) => {
+			document.querySelectorAll( 'thead a[href*="sort=Stars"]' ).forEach( ( a ) => {
 				a.innerHTML = '<div class="dashicons dashicons-star-empty"></div>';
 			} );
 
@@ -926,10 +926,9 @@ let wpTrac,
 
 			if ( content?.classList.contains( 'search' ) ) {
 				// Remove 'Wiki' and 'Milestone' from search.
-				[ '#fullsearch #milestone', '#fullsearch #wiki' ].forEach( ( sel ) => {
-					const input = document.querySelector( sel );
-					input?.nextElementSibling?.remove();
-					input?.remove();
+				document.querySelectorAll( '#fullsearch #milestone, #fullsearch #wiki' ).forEach( ( input ) => {
+					input.nextElementSibling?.remove();
+					input.remove();
 				} );
 
 				// Offer to create a new ticket.
