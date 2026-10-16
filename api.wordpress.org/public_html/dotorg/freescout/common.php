@@ -287,6 +287,35 @@ function panel_link( string $text, string $url ): array {
 }
 
 /**
+ * Gets the time between two timestamps as a number and a unit letter, e.g. 3d, for the narrow sidebar.
+ *
+ * Rounded to the largest unit that fits, like human_time_diff().
+ *
+ * @param int $from Unix timestamp.
+ * @param int $to   Unix timestamp.
+ * @return string
+ */
+function short_time_diff( int $from, int $to ): string {
+	$diff  = abs( $to - $from );
+	$units = array(
+		'y'  => YEAR_IN_SECONDS,
+		'mo' => MONTH_IN_SECONDS,
+		'w'  => WEEK_IN_SECONDS,
+		'd'  => DAY_IN_SECONDS,
+		'h'  => HOUR_IN_SECONDS,
+		'm'  => MINUTE_IN_SECONDS,
+	);
+
+	foreach ( $units as $unit => $seconds ) {
+		if ( $diff >= $seconds ) {
+			return (int) round( $diff / $seconds ) . $unit;
+		}
+	}
+
+	return max( 1, $diff ) . 's';
+}
+
+/**
  * Determines the mailbox slug, e.g. "Plugins" => plugins.
  *
  * @param object $request Request payload.

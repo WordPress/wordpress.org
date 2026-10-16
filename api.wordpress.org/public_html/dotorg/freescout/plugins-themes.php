@@ -234,8 +234,8 @@ function render_items( array $post_ids, string $mailbox_email ): array {
 		$meta = array(
 			array( 'text' => $post->post_name ),
 			array(
-				'text'    => 'Updated ' . human_time_diff( $last_updated, time() ) . ' ago',
-				'tooltip' => gmdate( 'Y-m-d', $last_updated ),
+				'text'    => '(' . short_time_diff( $last_updated, time() ) . ')',
+				'tooltip' => 'Updated ' . gmdate( 'Y-m-d', $last_updated ),
 			),
 		);
 
