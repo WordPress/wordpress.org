@@ -749,10 +749,16 @@ let wpTrac,
 			const milestone = document.getElementById( 'field-milestone' );
 
 			if ( propertyForm ) {
+				const summaryInput     = document.getElementById( 'field-summary' );
+				const descriptionInput = document.getElementById( 'field-description' );
+				const commentInput     = document.getElementById( 'comment' );
+				const dupeInput        = document.getElementById( 'action_dupe' );
+				const milestoneSelect  = document.getElementById( 'field-milestone' );
+
 				// Clear the milestone on wontfix, duplicate, worksforme, invalid.
 				if ( milestone && ! milestone.disabled ) {
 					propertyForm.addEventListener( 'submit', function () {
-						const action = document.querySelector( 'input[name="action"]:checked' )?.value;
+						const action = propertyForm.querySelector( 'input[name="action"]:checked' )?.value;
 						const resolution = document.getElementById( 'action_resolve_resolve_resolution' )?.value;
 						if ( 'duplicate' === action || ( 'resolve' === action && 'fixed' !== resolution ) ) {
 							milestone.value = '';
@@ -762,13 +768,12 @@ let wpTrac,
 
 				// Prevent marking a ticket as a duplicate of itself.
 				propertyForm.addEventListener( 'submit', function ( event ) {
-					const action = document.querySelector( 'input[name="action"]:checked' )?.value,
-						currentTicket = parseInt(
+					const action = propertyForm.querySelector( 'input[name="action"]:checked' )?.value;
+					const currentTicket = parseInt(
 							( document.querySelector( '.trac-id' )?.textContent || '' ).replace( '#', '' ),
 							10
-						),
-						dupeInput = document.getElementById( 'action_dupe' ),
-						duplicateTicket = parseInt( dupeInput?.value || '', 10 );
+						);
+					const duplicateTicket = parseInt( dupeInput?.value || '', 10 );
 
 					if ( 'duplicate' === action && ( ! duplicateTicket || currentTicket === duplicateTicket ) ) {
 						if ( dupeInput ) {
