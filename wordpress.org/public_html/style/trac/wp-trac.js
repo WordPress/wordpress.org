@@ -649,15 +649,6 @@ let wpTrac,
 
 					event.preventDefault();
 				} );
-
-				document.getElementById( 'propertyform' )?.addEventListener( 'submit', function ( event ) {
-					wpTrac.isSubmitting = true;
-					setTimeout( function () {
-						if ( event.defaultPrevented ) {
-							wpTrac.isSubmitting = false;
-						}
-					}, 0 );
-				} );
 			}
 
 			// Add custom buttons to the formatting toolbar.
@@ -746,7 +737,6 @@ let wpTrac,
 			}
 
 			const propertyForm = document.getElementById( 'propertyform' );
-			const milestone = document.getElementById( 'field-milestone' );
 
 			if ( propertyForm ) {
 				const summaryInput     = document.getElementById( 'field-summary' );
@@ -755,59 +745,49 @@ let wpTrac,
 				const dupeInput        = document.getElementById( 'action_dupe' );
 				const milestoneSelect  = document.getElementById( 'field-milestone' );
 
-				// Clear the milestone on wontfix, duplicate, worksforme, invalid.
-				if ( milestone && ! milestone.disabled ) {
-					propertyForm.addEventListener( 'submit', function () {
-						const action = propertyForm.querySelector( 'input[name="action"]:checked' )?.value;
-						const resolution = document.getElementById( 'action_resolve_resolve_resolution' )?.value;
-						if ( 'duplicate' === action || ( 'resolve' === action && 'fixed' !== resolution ) ) {
-							milestone.value = '';
-						}
-					} );
-				}
-
-				// Prevent marking a ticket as a duplicate of itself.
 				propertyForm.addEventListener( 'submit', function ( event ) {
-					const action = propertyForm.querySelector( 'input[name="action"]:checked' )?.value;
-					const currentTicket = parseInt(
-							( document.querySelector( '.trac-id' )?.textContent || '' ).replace( '#', '' ),
-							10
-						);
-					const duplicateTicket = parseInt( dupeInput?.value || '', 10 );
-
-					if ( 'duplicate' === action && ( ! duplicateTicket || currentTicket === duplicateTicket ) ) {
-						if ( dupeInput ) {
-							dupeInput.value = '';
+					wpTrac.isSubmitting = true;
+					setTimeout( () => {
+						if ( event.defaultPrevented ) {
+							wpTrac.isSubmitting = false;
 						}
-						event.preventDefault();
-						event.stopImmediatePropagation();
-					}
-				} );
+					}, 0 );
 
-				// capital_P_dangit()
-				propertyForm.addEventListener( 'submit', function () {
-					const summary = document.getElementById( 'field-summary' ),
-						description = document.getElementById( 'field-description' ),
-						comment = document.getElementById( 'comment' ),
-						isNewTicket = wpTrac.isNewTicket();
+					const selectedAction = propertyForm.querySelector( 'input[name="action"]:checked' )?.value;
 
-					const fixP = function ( text ) {
-						if ( ! text ) {
-							return text;
+					// Prevent marking a ticket as a duplicate of itself.
+					if ( 'duplicate' === selectedAction ) {
+						const currentTicket = parseInt( ( document.querySelector( '.trac-id' )?.textContent || '' ).replace( '#', '' ), 10 );
+						const duplicateTicket = parseInt( dupeInput?.value || '', 10 );
+
+						if ( ! duplicateTicket || currentTicket === duplicateTicket ) {
+							if ( dupeInput ) {
+								dupeInput.value = '';
+							}
+							event.preventDefault();
+							event.stopImmediatePropagation();
+							wpTrac.isSubmitting = false;
+							return;
 						}
-						return text.replace( /(^|[\s>(„"'\[\u2018\u201C]|&#8216;|&#8220;])Wordpress/g, '$1WordPress' );
-					};
-
-					if ( isNewTicket && summary?.value ) {
-						summary.value = fixP( summary.value );
 					}
 
-					if ( isNewTicket && description?.value ) {
-						description.value = fixP( description.value );
+					// Clear the milestone on wontfix, duplicate, worksforme, invalid.
+					if ( milestoneSelect && ! milestoneSelect.disabled ) {
+						const resolution = document.getElementById( 'action_resolve_resolve_resolution' )?.value;
+						if ( 'duplicate' === selectedAction || ( 'resolve' === selectedAction && 'fixed' !== resolution ) ) {
+							milestoneSelect.value = '';
+						}
 					}
 
-					if ( comment?.value ) {
-						comment.value = fixP( comment.value );
+					// capital_P_dangit()
+					const fixP = ( text ) => text ? text.replace( /(^|[\s>(„"'\[\u2018\u201C]|&#8216;|&#8220;])Wordpress/g, '$1WordPress' ) : text;
+
+					if ( wpTrac.isNewTicket() ) {
+						if ( summaryInput?.value )     summaryInput.value     = fixP( summaryInput.value );
+						if ( descriptionInput?.value ) descriptionInput.value = fixP( descriptionInput.value );
+					}
+					if ( commentInput?.value ) {
+						commentInput.value = fixP( commentInput.value );
 					}
 				} );
 			}
@@ -3119,11 +3099,13 @@ let wpTrac,
 					}
 
 					// If it's a plural, add the non-plural form.
+					const singularWords = [];
 					words.forEach( ( word ) => {
-						if ( 's' === word.slice( -1 ) ) {
-							words.push( word.slice( 0, -1 ) );
+						if ( word.endsWith( 's' ) && word.length > 2 ) {
+							singularWords.push( word.slice( 0, -1 ) );
 						}
 					} );
+					words.push( ...singularWords );
 
 					words.forEach( ( word ) => {
 						if ( ! word ) {
@@ -3140,7 +3122,9 @@ let wpTrac,
 							componentWords[ word ] = [];
 						}
 
-						componentWords[ word ].push( component );
+						if ( ! componentWords[ word ].includes( component ) ) {
+							componentWords[ word ].push( component );
+						}
 					} );
 				} );
 			}
