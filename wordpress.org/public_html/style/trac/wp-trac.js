@@ -458,6 +458,10 @@ let wpTrac,
 					const image = new window.Image();
 					image.src = href;
 					image.onload = function () {
+						if ( ! appendTo.isConnected || appendTo.querySelector( '.trac-image-preview' ) ) {
+							return;
+						}
+
 						const link = document.createElement( 'a' );
 						link.href = href.replace( '/raw-attachment/', '/attachment/' );
 
@@ -2419,7 +2423,7 @@ let wpTrac,
 						document.cookie =
 							'wp_trac_ngrid=' +
 							( names ? 1 : 0 ) +
-							';max-age=31557600;domain=.wordpress.org;path=/;SameSite=Lax';
+							';max-age=31557600;domain=.wordpress.org;path=/;SameSite=Lax;Secure';
 					} );
 				} );
 
