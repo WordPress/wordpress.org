@@ -2434,7 +2434,7 @@ let wpTrac,
 					} );
 			}
 
-			function save( action, ticket, nonce ) {
+			function save( action, ticket, nonce, isRetry = false ) {
 				ticket = ticket || _ticket;
 				nonce = nonce || _nonce || '';
 				const body = new URLSearchParams( {
@@ -2447,7 +2447,13 @@ let wpTrac,
 					method: 'POST',
 					credentials: 'include',
 					body,
-				} ).catch( () => {} );
+				} ).catch( () => {
+					if ( ! isRetry ) {
+						setTimeout( () => {
+							save( action, ticket, nonce, true );
+						}, 1000 );
+					}
+				} );
 			}
 
 			function toggleStarClasses( el ) {
