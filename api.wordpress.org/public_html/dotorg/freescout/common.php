@@ -174,6 +174,82 @@ function send_panel( array $blocks, array $extra = array() ): never {
 }
 
 /**
+ * A plugin's or theme's security scans; %1$s is plugin or theme, and %2$s its slug.
+ *
+ * @var string
+ */
+const SCANS_URL = 'https://gandalf.wordpress.org/admin/subjects/%1$s/%2$s?tab=runs';
+
+/**
+ * Whether a plugin has been released: its code is in SVN, so it can be checked out and scanned.
+ *
+ * An approved plugin isn't in SVN until its author commits it.
+ *
+ * @param \WP_Post $post Plugin.
+ * @return bool
+ */
+function is_plugin_released( \WP_Post $post ): bool {
+	return ! in_array( $post->post_status, array( 'new', 'pending', 'approved', 'rejected' ), true );
+}
+
+/**
+ * The ZIP of a plugin: the latest uploaded for review until it's released, and the latest release otherwise.
+ *
+ * A plugin in review, or approved but not yet committed to SVN, hasn't been released, so its uploads are only for
+ * reviewers; for them, the URL carries the plugin's review info, which the review tools read. Rejected plugins have
+ * none.
+ *
+ * @param \WP_Post $post   Plugin.
+ * @param bool     $review Whether it's for a reviewer.
+ * @return string Empty if there's no ZIP to download.
+ */
+function get_plugin_download_url( \WP_Post $post, bool $review ): string {
+	if ( 'rejected' === $post->post_status ) {
+		return '';
+	}
+
+	$url = "https://downloads.wordpress.org/plugin/{$post->post_name}.latest-stable.zip";
+
+	if ( in_array( $post->post_status, array( 'new', 'pending', 'approved' ), true ) ) {
+		$attachments = $review ? get_posts(
+			array(
+				'post_parent'    => $post->ID,
+				'post_type'      => 'attachment',
+				'orderby'        => 'post_date',
+				'order'          => 'DESC',
+				'posts_per_page' => 1,
+			)
+		) : array();
+		$url         = $attachments ? (string) wp_get_attachment_url( $attachments[0]->ID ) : '';
+	}
+
+	if ( $url && $review && class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' ) ) {
+		$url = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $url, $post );
+	}
+
+	return $url;
+}
+
+/**
+ * Who's reviewing a plugin: only a review in progress has someone on it, as the assignment stays after it's done.
+ *
+ * @param \WP_Post $post Plugin.
+ * @return string Their name, empty if no one is.
+ */
+function get_assigned_reviewer( \WP_Post $post ): string {
+	if ( ! $post->assigned_reviewer || ! in_array( $post->post_status, array( 'new', 'pending' ), true ) ) {
+		return '';
+	}
+
+	$reviewer = get_user_by( 'id', (int) $post->assigned_reviewer );
+	if ( ! $reviewer ) {
+		return '';
+	}
+
+	return $reviewer->display_name ? $reviewer->display_name : $reviewer->user_login;
+}
+
+/**
  * A status badge; WPOrgSidebar's stylesheet colors it by tone.
  *
  * @param string $label Badge text.
@@ -198,6 +274,152 @@ function panel_link( string $text, string $url ): array {
 	return array(
 		'text' => $text,
 		'url'  => $url,
+	);
+}
+
+/**
+ * Gets the time between two timestamps as a number and a unit letter, e.g. 3d, for the narrow sidebar.
+ *
+ * Rounded in the largest unit that fits, like human_time_diff(), or up to the next one when it rounds to a whole one.
+ *
+ * @param int $from Unix timestamp.
+ * @param int $to   Unix timestamp.
+ * @return string
+ */
+function short_time_diff( int $from, int $to ): string {
+	$diff  = abs( $to - $from );
+	$units = array(
+		'y'  => YEAR_IN_SECONDS,
+		'mo' => MONTH_IN_SECONDS,
+		'w'  => WEEK_IN_SECONDS,
+		'd'  => DAY_IN_SECONDS,
+		'h'  => HOUR_IN_SECONDS,
+		'm'  => MINUTE_IN_SECONDS,
+	);
+
+	$larger = null;
+	foreach ( $units as $unit => $seconds ) {
+		if ( $diff >= $seconds ) {
+			$count = (int) round( $diff / $seconds );
+			if ( $larger && $count >= round( $units[ $larger ] / $seconds ) ) {
+				return '1' . $larger;
+			}
+
+			return $count . $unit;
+		}
+
+		$larger = $unit;
+	}
+
+	return max( 1, $diff ) . 's';
+}
+
+/**
+ * Icons of the reasons plugins are closed or disabled for, by reason; the plugin directory names them.
+ *
+ * @var string[]
+ */
+const CLOSE_REASON_ICONS = array(
+	'security-issue'                => '🛡️',
+	'author-request'                => '👤',
+	'guideline-violation'           => '📜',
+	'licensing-trademark-violation' => '™️',
+	'merged-into-core'              => '🧩',
+	'unused'                        => '💤',
+);
+
+/**
+ * Icons, text, and tones of the statuses of plugins and themes in the sidebar, by status; published ones have none.
+ *
+ * @var array[]
+ */
+const ITEM_STATUSES = array(
+	// Plugins.
+	'new'       => array( '⏳', 'Pending initial review', 'warning' ),
+	'pending'   => array( '🔍', 'In review', 'warning' ),
+	'approved'  => array( '✅', 'Approved', 'warning' ),
+	'closed'    => array( '🔒', 'Closed', 'error' ),
+	'disabled'  => array( '🔒', 'Disabled', 'error' ),
+	'rejected'  => array( '🚫', 'Rejected', 'muted' ),
+
+	// Themes.
+	'draft'     => array( '⏳', 'In review or rejected', 'warning' ),
+	'suspend'   => array( '⛔', 'Suspended', 'error' ),
+	'suspended' => array( '⛔', 'Suspended', 'error' ),
+	'delist'    => array( '', 'Delisted', 'muted' ),
+	'delisted'  => array( '', 'Delisted', 'muted' ),
+);
+
+/**
+ * Gets a reason a plugin was closed, disabled, or rejected for, in the plugin directory's words.
+ *
+ * @param string $reasons_method The plugin directory's method that lists them: get_close_reasons or get_rejection_reasons.
+ * @param string $reason         Reason, e.g. security-issue.
+ * @return string
+ */
+function get_plugin_reason( string $reasons_method, string $reason ): string {
+	$template = '\WordPressdotorg\Plugin_Directory\Template';
+	$reasons  = class_exists( $template ) ? $template::$reasons_method() : array();
+
+	return $reasons[ $reason ] ?? ucfirst( str_replace( '-', ' ', $reason ) );
+}
+
+/**
+ * Gets the status of a plugin or theme in words.
+ *
+ * @param string $post_status  Post status.
+ * @param string $close_reason Why a plugin was closed or disabled, e.g. security-issue.
+ * @return string
+ */
+function get_item_status_label( string $post_status, string $close_reason = '' ): string {
+	if ( ! isset( ITEM_STATUSES[ $post_status ] ) ) {
+		return 'publish' === $post_status ? 'Published' : ucfirst( $post_status );
+	}
+
+	$label = ITEM_STATUSES[ $post_status ][1];
+	if ( $close_reason && in_array( $post_status, array( 'closed', 'disabled' ), true ) ) {
+		$label .= ': ' . get_plugin_reason( 'get_close_reasons', $close_reason );
+	}
+
+	return $label;
+}
+
+/**
+ * Gets the status line of a plugin or theme in the sidebar, which published ones don't have.
+ *
+ * Reasons and reviewers are the plugins team's, so only reviews pass them.
+ *
+ * @param string $post_status  Post status.
+ * @param string $reviewer     Reviewer assigned to a plugin in review, see get_assigned_reviewer().
+ * @param string $close_reason Why a plugin was closed or disabled, e.g. security-issue.
+ * @param string $rejection    Why a plugin was rejected, in words.
+ * @return array The item's tone, and its status: icon, text, and tooltip. Empty if published.
+ */
+function get_item_status( string $post_status, string $reviewer = '', string $close_reason = '', string $rejection = '' ): array {
+	if ( ! isset( ITEM_STATUSES[ $post_status ] ) ) {
+		return array();
+	}
+
+	list( $icon, , $tone ) = ITEM_STATUSES[ $post_status ];
+	if ( in_array( $post_status, array( 'closed', 'disabled' ), true ) ) {
+		$icon = CLOSE_REASON_ICONS[ $close_reason ] ?? $icon;
+	}
+
+	$text = get_item_status_label( $post_status, $close_reason );
+	if ( $reviewer ) {
+		$text .= ' · Assigned to ' . $reviewer;
+	}
+
+	return array(
+		'tone'   => $tone,
+		// Without an icon or tooltip where there's none.
+		'status' => array_filter(
+			array(
+				'icon'    => $icon,
+				'text'    => $text,
+				'tooltip' => 'rejected' === $post_status ? $rejection : '',
+			)
+		),
 	);
 }
 

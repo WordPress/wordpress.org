@@ -61,14 +61,21 @@ class Helpscout {
 			$wheres .= $wpdb->prepare( 'AND emails.%i LIKE %s ', $key, '%' . $value . '%' );
 		}
 
+		/*
+		 * Newest first. A conversation imported into FreeScout keeps HelpScout's dates, so while HelpScout's copy of it
+		 * lingers, both share `created`: FreeScout's comes first, then the higher ID, so the order doesn't change between
+		 * requests.
+		 */
 		$emails = $wpdb->get_results( $wpdb->prepare(
-			"SELECT emails.*
+			"SELECT emails.*,
+					EXISTS( SELECT 1 FROM %i helpdesk WHERE helpdesk.helpscout_id = emails.id AND helpdesk.meta_key = 'helpdesk' AND helpdesk.meta_value = 'freescout' ) AS freescout
 				FROM %i emails
 					JOIN %i meta ON emails.id = meta.helpscout_id
 				WHERE meta.meta_key = 'plugins' AND meta.meta_value IN( %s, %s )
 					$wheres
-				ORDER BY `created` DESC
+				ORDER BY emails.`created` DESC, `freescout` DESC, emails.`id` DESC
 				LIMIT %d",
+			"{$wpdb->base_prefix}helpscout_meta",
 			"{$wpdb->base_prefix}helpscout",
 			"{$wpdb->base_prefix}helpscout_meta",
 			$slug,
@@ -77,7 +84,8 @@ class Helpscout {
 		) );
 
 		foreach ( $emails as &$email ) {
-			$email->url = 'https://secure.helpscout.net/conversation/' . $email->id . '/' . $email->number;
+			$email->freescout = (bool) $email->freescout;
+			$email->url       = Helpdesk::conversation_url( (int) $email->id, (int) $email->number, $email->freescout );
 		}
 
 		if ( 1 === $limit ) {
