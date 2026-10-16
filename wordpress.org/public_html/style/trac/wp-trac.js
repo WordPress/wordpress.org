@@ -405,6 +405,8 @@ let wpTrac,
 		},
 
 		linkTicketText( selector ) {
+			const reservedTermsSet = new Set( reservedTerms );
+
 			document.querySelectorAll( selector || 'div.change .comment, #ticket .description' ).forEach( ( el ) => {
 				linkTextNodes( el, combinedRegEx, function ( match, pre, username, gbNumber ) {
 					// Gutenberg Issue (GB1234 or GB-1234)
@@ -423,7 +425,7 @@ let wpTrac,
 
 					// User-Mention (@username)
 					if ( username ) {
-						if ( reservedTerms.includes( username.toLowerCase() ) ) {
+						if ( reservedTermsSet.has( username.toLowerCase() ) ) {
 							return match;
 						}
 
@@ -443,6 +445,8 @@ let wpTrac,
 
 		// These ticket hacks need to be re-run after ticket previews.
 		postPreviewHacks() {
+			const imageExtRegex = /\.(jpg|jpeg|png|gif|svg|webp)(\?.*)?$/i;
+			const videoExtRegex = /\.(mp4|mov|webm)(\?.*)?$/i;
 			// Automatically preview images.
 			document.querySelectorAll( 'li.trac-field-attachment' ).forEach( ( li ) => {
 				const appendTo = li.closest( 'div.change' );
@@ -456,7 +460,7 @@ let wpTrac,
 					return;
 				}
 
-				if ( /\.(jpg|jpeg|png|gif|svg|webp)(\?.*)?$/i.test( href ) ) {
+				if ( imageExtRegex.test( href ) ) {
 					const image = new window.Image();
 					image.src = href;
 					image.onload = function () {
@@ -476,7 +480,7 @@ let wpTrac,
 						link.append( img );
 						appendTo.append( link );
 					};
-				} else if ( /\.(mp4|mov|webm)(\?.*)?$/i.test( href ) ) {
+				} else if ( videoExtRegex.test( href ) ) {
 					const video = document.createElement( 'video' );
 					video.src = href;
 					video.className = 'trac-image-preview';
@@ -1192,6 +1196,7 @@ let wpTrac,
 		 * destinations outside the WordPress.org network.
 		 */
 		markUgcLinks() {
+			const wporgUrlRegex = /^([^>]*href=")?https?:\/\/([a-z0-9.-]+\.)?(wordpress\.(org|net)|buddypress\.org|bbpress\.org|wordcamp\.org)\//i;
 			/**
 			 * Whether a URL points at a WordPress.org-family domain.
 			 *
@@ -1199,9 +1204,7 @@ let wpTrac,
 			 * @return {boolean} True for wordpress.org/.net, bbpress.org, buddypress.org, and wordcamp.org URLs.
 			 */
 			function isWporgUrl( url ) {
-				return /^([^>]*href=")?https?:\/\/([a-z0-9.-]+\.)?(wordpress\.(org|net)|buddypress\.org|bbpress\.org|wordcamp\.org)\//i.test(
-					url
-				);
+				return wporgUrlRegex.test( url );
 			}
 
 			document
@@ -1707,25 +1710,25 @@ let wpTrac,
 
 					// Most recent should show up first.
 					Array.from( document.querySelectorAll( '.change .username' ) )
-						.reverse()
-						.forEach( ( el ) => {
-							let username = el.dataset.username;
-							const nicename = el.dataset.nicename;
+					.reverse()
+					.forEach( ( el ) => {
+						let username = el.dataset.username;
+						const nicename = el.dataset.nicename;
 
-							// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
-							if (
-								username &&
-								nicename &&
-								username.toLowerCase() !== nicename.toLowerCase() &&
-								wpTrac.currentUser !== username
-							) {
-								username = nicename;
-							}
+						// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
+						if (
+							username &&
+							nicename &&
+							username.toLowerCase() !== nicename.toLowerCase() &&
+							wpTrac.currentUser !== username
+						) {
+							username = nicename;
+						}
 
-							if ( username && ! excludeSet.has( username ) ) {
-								users.add( username );
-							}
-						} );
+						if ( username && ! excludeSet.has( username ) ) {
+							users.add( username );
+						}
+					} );
 
 					// Add ticket reporter.
 					const reporterTd = document.querySelector( '#ticket td[headers="h_reporter"]' );
@@ -2506,10 +2509,7 @@ let wpTrac,
 				cells.forEach( ( cell ) => {
 					const countSpan = document.createElement( 'span' );
 					countSpan.className = 'count';
-					while ( cell.firstChild ) {
-						countSpan.append( cell.firstChild );
-					}
-					cell.append( countSpan );
+					countSpan.append( ...cell.childNodes );
 
 					const ticketLink = cell.closest( 'tr' )?.querySelector( 'td.ticket a' );
 					const ticket = Number.parseInt( ( ticketLink?.textContent || '' ).replace( '#', '' ), 10 );
@@ -2519,13 +2519,14 @@ let wpTrac,
 					reportStar.className = 'dashicons dashicons-star-empty loading trac-report-star';
 					reportStar.dataset.ticket = String( ticket );
 
-					cell.append( document.createTextNode( ' ' ), reportStar );
+					cell.append( countSpan, ' ', reportStar );
 					stars.push( reportStar );
 				} );
 
-				const body = new URLSearchParams();
-				body.set( 'trac-ticket-subs', 'true' );
-				tickets.forEach( ( t ) => body.append( 'tickets[]', String( t ) ) );
+				const body = new URLSearchParams( [
+					[ 'trac-ticket-subs', 'true' ],
+					...tickets.map( ( t ) => [ 'tickets[]', String( t ) ] ),
+				] );
 
 				fetch( endpoint, {
 					method: 'POST',
