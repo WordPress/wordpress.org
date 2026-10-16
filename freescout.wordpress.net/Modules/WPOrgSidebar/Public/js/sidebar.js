@@ -22,11 +22,18 @@
 	const TONES = [ 'success', 'warning', 'error', 'neutral' ];
 
 	/**
-	 * Glyphicons an item's links may use.
+	 * Item tones the stylesheet colors titles and status lines in.
 	 *
 	 * @type {string[]}
 	 */
-	const ICONS = [ 'link', 'download-alt' ];
+	const ITEM_TONES = [ 'warning', 'error', 'muted' ];
+
+	/**
+	 * Icons an item's links may use: glyphicons, and a shield the stylesheet draws, as there's no glyphicon for one.
+	 *
+	 * @type {string[]}
+	 */
+	const ICONS = [ 'link', 'download-alt', 'shield' ];
 
 	/**
 	 * Profile panel actions, by the class of the link that does them.
@@ -119,9 +126,120 @@
 	}
 
 	/**
+	 * Builds a link's icon.
+	 *
+	 * @param {string} icon One of ICONS.
+	 * @return {jQuery} Element.
+	 */
+	function renderIcon( icon ) {
+		return 'shield' === icon
+			? $( '<i class="wporg-sidebar-icon-shield">' )
+			: $( '<i class="glyphicon">' ).addClass( 'glyphicon-' + icon );
+	}
+
+	/**
+	 * Builds an item's status line: an icon, and the status in words.
+	 *
+	 * @param {Object} status Status: icon, text, and tooltip; text required.
+	 * @return {jQuery|null} Element, or null without text.
+	 */
+	function renderStatus( status ) {
+		if ( ! status || ! status.text ) {
+			return null;
+		}
+
+		const $status = $( '<div class="wporg-sidebar-item-status">' );
+
+		if ( status.icon ) {
+			$status.append(
+				$(
+					'<span class="wporg-sidebar-item-status-icon" aria-hidden="true">'
+				).text( String( status.icon ) )
+			);
+		}
+
+		if ( status.tooltip ) {
+			$status.attr( 'title', String( status.tooltip ) );
+		}
+
+		return $status.append(
+			document.createTextNode( String( status.text ) )
+		);
+	}
+
+	/**
+	 * Builds an item's meta line, its parts separated by dots.
+	 *
+	 * @param {Array} meta Parts: text, url, and tooltip.
+	 * @return {jQuery|null} Element, or null without parts.
+	 */
+	function renderMeta( meta ) {
+		if ( ! meta || ! meta.length ) {
+			return null;
+		}
+
+		const $meta = $( '<div class="wporg-sidebar-item-meta">' );
+
+		meta.forEach( function ( part, index ) {
+			const $part = textLink( part.text, part.url );
+
+			if ( part.tooltip ) {
+				$part.attr( 'title', String( part.tooltip ) );
+			}
+			$meta.append( index ? ' · ' : '', $part );
+		} );
+
+		return $meta;
+	}
+
+	/**
+	 * Builds the age and links that end an item's meta line.
+	 *
+	 * @param {Object} item Item: age, and links; both optional.
+	 * @return {jQuery|null} Element, or null with neither.
+	 */
+	function renderActions( item ) {
+		const $actions = $( '<span class="wporg-sidebar-item-actions">' );
+
+		if ( item.age && item.age.text ) {
+			const $age = $( '<span class="wporg-sidebar-item-age">' ).text(
+				String( item.age.text )
+			);
+
+			if ( item.age.tooltip ) {
+				$age.attr( 'title', String( item.age.tooltip ) );
+			}
+			$actions.append( $age );
+		}
+
+		( item.links || [] ).forEach( function ( link ) {
+			const href = webUrl( link.url );
+			const icon = ICONS.includes( link.icon ) ? link.icon : 'link';
+
+			if ( ! href ) {
+				return;
+			}
+
+			$actions.append(
+				$( '<a>' )
+					.attr( {
+						href,
+						title: String( link.text ),
+						'aria-label': String( link.text ),
+					} )
+					.append( renderIcon( icon ) )
+			);
+		} );
+
+		return $actions.children().length ? $actions : null;
+	}
+
+	/**
 	 * Builds a list item: a plugin, a signup, a note, and the like.
 	 *
-	 * @param {Object} item Item: title, url, tooltip, badges, note, meta, and links; all optional.
+	 * The title takes the full width; the age and links end the meta line, so they line up down the list.
+	 *
+	 * @param {Object} item Item: title, url, tooltip, tone, badges, status, note, meta, age, and links; all optional.
 	 * @return {jQuery} Element.
 	 */
 	function renderItem( item ) {
@@ -131,33 +249,8 @@
 			$item.attr( 'title', String( item.tooltip ) );
 		}
 
-		if ( item.links && item.links.length ) {
-			const $links = $( '<span class="wporg-sidebar-item-links">' );
-
-			item.links.forEach( function ( link, index ) {
-				const href = webUrl( link.url );
-				const icon = ICONS.includes( link.icon ) ? link.icon : 'link';
-
-				if ( ! href ) {
-					return;
-				}
-
-				$links.append(
-					index ? ' ' : '',
-					$( '<a>' )
-						.attr( {
-							href,
-							title: String( link.text ),
-							'aria-label': String( link.text ),
-						} )
-						.append(
-							$( '<i class="glyphicon">' ).addClass(
-								'glyphicon-' + icon
-							)
-						)
-				);
-			} );
-			$item.append( $links );
+		if ( ITEM_TONES.includes( item.tone ) ) {
+			$item.addClass( 'is-' + item.tone );
 		}
 
 		if ( item.title ) {
@@ -167,6 +260,8 @@
 			);
 		}
 
+		$item.append( renderStatus( item.status ) );
+
 		if ( item.note ) {
 			$item.append(
 				$( '<p class="wporg-sidebar-note">' ).text(
@@ -175,17 +270,17 @@
 			);
 		}
 
-		if ( item.meta && item.meta.length ) {
-			const $meta = $( '<div class="wporg-sidebar-item-meta">' );
+		const $meta = renderMeta( item.meta );
+		const $actions = renderActions( item );
 
-			item.meta.forEach( function ( part, index ) {
-				const $part = textLink( part.text, part.url );
-
-				if ( part.tooltip ) {
-					$part.attr( 'title', String( part.tooltip ) );
-				}
-				$meta.append( index ? ' · ' : '', $part );
-			} );
+		if ( $actions ) {
+			$item.append(
+				$( '<div class="wporg-sidebar-item-footer">' ).append(
+					$meta || $( '<div class="wporg-sidebar-item-meta">' ),
+					$actions
+				)
+			);
+		} else {
 			$item.append( $meta );
 		}
 

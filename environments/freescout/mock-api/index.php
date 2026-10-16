@@ -127,8 +127,9 @@ if ( 'plugin-review.php' === $endpoint ) {
 
 /*
  * What the real endpoints sent for obenland's WordPress.org account, whatever the sender, though searches are for the
- * sender's email, as they are there. Download links lose their review info, and the forum note and privacy request
- * are samples, as the account has neither.
+ * sender's email, as they are there. Download links lose their review info, and the forum note, the privacy request,
+ * and the plugins mentioned besides The Events Calendar, one in each review status, are samples, as the account has
+ * none of them.
  */
 $panel = __DIR__ . '/panels/' . basename( $endpoint, '.php' ) . '.json';
 $email = rawurlencode( (string) ( $request->sender->email ?? '' ) );

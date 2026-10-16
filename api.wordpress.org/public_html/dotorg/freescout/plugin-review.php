@@ -14,13 +14,6 @@ $wp_init_host = 'https://wordpress.org/plugins/';
 require __DIR__ . '/common.php';
 
 /**
- * A plugin's security scans; %s is its slug.
- *
- * @var string
- */
-const SCANS_URL = 'https://gandalf.wordpress.org/admin/subjects/plugin/%s?tab=runs';
-
-/**
  * Gets a plugin as the Plugin Review panel shows it: its current name, slug, and status, its ZIP, and who submitted it.
  *
  * Reviews are the plugins team's, so it only answers for their mailbox. A review email's plugin ID is in its Review ID
@@ -39,8 +32,7 @@ function render_plugin_review( object $request ): array {
 		return array( 'plugin' => null );
 	}
 
-	// An approved plugin isn't in SVN until its author commits it.
-	$released  = ! in_array( $post->post_status, array( 'new', 'pending', 'approved', 'rejected' ), true );
+	$released  = is_plugin_released( $post );
 	$submitter = get_user_by( 'id', (int) $post->post_author );
 
 	return array(
@@ -64,7 +56,7 @@ function render_plugin_review( object $request ): array {
 			'page_url'     => home_url( "/{$post->post_name}/" ),
 			'download_url' => get_plugin_download_url( $post, true ),
 			// Only releases are scanned.
-			'scans_url'    => $released ? sprintf( SCANS_URL, rawurlencode( $post->post_name ) ) : '',
+			'scans_url'    => $released ? sprintf( SCANS_URL, 'plugin', rawurlencode( $post->post_name ) ) : '',
 			'submitter'    => $submitter ? array(
 				'username' => $submitter->user_login,
 				'email'    => $submitter->user_email,

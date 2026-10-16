@@ -174,6 +174,25 @@ function send_panel( array $blocks, array $extra = array() ): never {
 }
 
 /**
+ * A plugin's or theme's security scans; %1$s is plugin or theme, and %2$s its slug.
+ *
+ * @var string
+ */
+const SCANS_URL = 'https://gandalf.wordpress.org/admin/subjects/%1$s/%2$s?tab=runs';
+
+/**
+ * Whether a plugin has been released: its code is in SVN, so it can be checked out and scanned.
+ *
+ * An approved plugin isn't in SVN until its author commits it.
+ *
+ * @param \WP_Post $post Plugin.
+ * @return bool
+ */
+function is_plugin_released( \WP_Post $post ): bool {
+	return ! in_array( $post->post_status, array( 'new', 'pending', 'approved', 'rejected' ), true );
+}
+
+/**
  * The ZIP of a plugin: the latest uploaded for review until it's released, and the latest release otherwise.
  *
  * A plugin in review, or approved but not yet committed to SVN, hasn't been released, so its uploads are only for
@@ -313,6 +332,92 @@ function short_time_diff( int $from, int $to ): string {
 	}
 
 	return max( 1, $diff ) . 's';
+}
+
+/**
+ * Icons and labels of the reasons plugins are closed or disabled for, by reason.
+ *
+ * @var array[]
+ */
+const CLOSE_REASONS = array(
+	'security-issue'                => array( '🛡️', 'Security issue' ),
+	'author-request'                => array( '👤', 'Author request' ),
+	'guideline-violation'           => array( '📜', 'Guideline violation' ),
+	'licensing-trademark-violation' => array( '™️', 'Trademark or licensing' ),
+	'merged-into-core'              => array( '🧩', 'Merged into core' ),
+	'unused'                        => array( '💤', 'Unused' ),
+);
+
+/**
+ * Gets the status line of a plugin or theme in the sidebar, which published ones don't have.
+ *
+ * Reasons and reviewers are the plugins team's, so only reviews pass them.
+ *
+ * @param string $post_status  Post status.
+ * @param string $reviewer     Reviewer assigned to a plugin in review.
+ * @param string $close_reason Why a plugin was closed or disabled, e.g. security-issue.
+ * @param string $rejection    Why a plugin was rejected, in words.
+ * @return array The item's tone, and its status: icon, text, and tooltip. Empty if published.
+ */
+function get_item_status( string $post_status, string $reviewer = '', string $close_reason = '', string $rejection = '' ): array {
+	switch ( $post_status ) {
+		// Plugins.
+		case 'new':
+			$status = array( '⏳', 'Pending initial review', 'warning' );
+			break;
+		case 'pending':
+			$status = array( '🔍', 'In review', 'warning' );
+			break;
+		case 'approved':
+			$status = array( '✅', 'Approved', 'warning' );
+			break;
+		case 'closed':
+		case 'disabled':
+			$text = ucfirst( $post_status );
+			if ( isset( CLOSE_REASONS[ $close_reason ] ) ) {
+				$status = array( CLOSE_REASONS[ $close_reason ][0], $text . ': ' . CLOSE_REASONS[ $close_reason ][1], 'error' );
+			} else {
+				$status = array( '🔒', $close_reason ? $text . ': ' . ucfirst( str_replace( '-', ' ', $close_reason ) ) : $text, 'error' );
+			}
+			break;
+		case 'rejected':
+			$status = array( '🚫', 'Rejected', 'muted' );
+			break;
+
+		// Themes.
+		case 'draft':
+			$status = array( '⏳', 'In review or rejected', 'warning' );
+			break;
+		case 'suspend':
+		case 'suspended':
+			$status = array( '⛔', 'Suspended', 'error' );
+			break;
+		case 'delist':
+		case 'delisted':
+			$status = array( '', 'Delisted', 'muted' );
+			break;
+
+		default:
+			return array();
+	}
+
+	list( $icon, $text, $tone ) = $status;
+
+	if ( $reviewer && in_array( $post_status, array( 'new', 'pending' ), true ) ) {
+		$text .= ' · Assigned to ' . $reviewer;
+	}
+
+	return array(
+		'tone'   => $tone,
+		// Without an icon or tooltip where there's none.
+		'status' => array_filter(
+			array(
+				'icon'    => $icon,
+				'text'    => $text,
+				'tooltip' => 'rejected' === $post_status ? $rejection : '',
+			)
+		),
+	);
 }
 
 /**
