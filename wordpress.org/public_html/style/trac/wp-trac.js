@@ -767,7 +767,7 @@ let wpTrac,
 							dupeInput.value = '';
 						}
 						event.preventDefault();
-						event.stopPropagation();
+						event.stopImmediatePropagation();
 					}
 				} );
 
