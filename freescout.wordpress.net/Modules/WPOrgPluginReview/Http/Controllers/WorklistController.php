@@ -68,17 +68,18 @@ final class WorklistController extends Controller {
 			}
 		}
 
-		$sections = Worklist::load( $ids );
-		$limit    = OpenOrder::limit( $viewer );
-		$open     = array(
+		$sections  = Worklist::load( $ids );
+		$limit     = OpenOrder::limit( $viewer );
+		$open      = array(
 			'oldest'   => OpenOrder::oldest_first( $sections['participating'], $limit ),
 			'progress' => OpenOrder::progress_based( $sections['participating'], $limit ),
 		);
-		$folders  = $mailbox->getAssesibleFolders();
-		$folder   = $folders->first( array( $list, 'is_folder' ) ) ?? $list->folder( $mailbox );
+		$folders   = $mailbox->getAssesibleFolders();
+		$folder    = $folders->first( array( $list, 'is_folder' ) ) ?? $list->folder( $mailbox );
+		$is_viewer = (int) $user->id === (int) $viewer->id;
 
 		// The folder list counts the agent's own active conversations, which may have changed since they were counted.
-		if ( (int) $user->id === (int) $viewer->id && ! $tag ) {
+		if ( $is_viewer && ! $tag ) {
 			$folder->active_count = count(
 				array_filter(
 					$sections['participating'],
@@ -97,7 +98,7 @@ final class WorklistController extends Controller {
 				'folders'   => $folders,
 				'folder'    => $folder,
 				'user'      => $user,
-				'is_viewer' => (int) $user->id === (int) $viewer->id,
+				'is_viewer' => $is_viewer,
 				'reviewers' => $reviewers->contains( 'id', $viewer->id ) ? $reviewers : $reviewers->prepend( $viewer ),
 				'sections'  => $sections,
 				'tags'      => $tags,
