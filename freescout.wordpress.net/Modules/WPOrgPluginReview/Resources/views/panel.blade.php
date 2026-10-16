@@ -12,28 +12,32 @@
 	);
 @endphp
 {{-- FreeScout's own sidebar block, like Previous Conversations. --}}
-<div class="conv-sidebar-block wporg-review" data-flags="{{ implode( ' ', $review['flags'] ) }}" data-username="{{ $review_id['username'] }}" data-subject="{{ $subject }}" data-short-subject="{{ $short_subject }}" data-url="{{ route( 'wporgpluginreview.plugin', array( 'conversation_id' => $conversation_id ) ) }}" data-strings="{{ json_encode(
+<div class="conv-sidebar-block wporg-review" data-flags="{{ implode( ' ', $review['flags'] ) }}" data-username="{{ $review_id['username'] }}" data-url="{{ route( 'wporgpluginreview.plugin', array( 'conversation_id' => $conversation_id ) ) }}" data-strings="{{ json_encode(
 	array(
-		'copied'      => __( 'Copied' ),
-		'verified'    => __( 'DNS verified' ),
-		'status'      => __( 'Status' ),
-		'assigned'    => __( 'Assigned to' ),
-		'current'     => __( 'Current' ),
-		'submitter'   => __( 'Submitter' ),
-		'download'    => __( 'Copy the download URL' ),
-		'page'        => __( 'Open the plugin’s page' ),
-		'scans'       => __( 'Open the plugin’s security scans' ),
-		'slug'        => __( 'Slug' ),
-		'copy_slug'   => __( 'Copy the slug' ),
-		'email_match' => __( 'At one of the plugin’s domains' ),
-		'email_other' => __( 'Not at the plugin’s domains' ),
-		'edit'        => __( 'Edit the plugin on WordPress.org' ),
-		'failed'      => __( 'Couldn’t load the plugin from WordPress.org.' ),
-		'throttled'   => __( 'Couldn’t load the plugin from WordPress.org: too many requests. Reload the page in a minute.' ),
-		'short_title' => __( 'Shorten the tab’s title' ),
-		'full_title'  => __( 'Show the tab’s full title' ),
-		'mismatch'    => __( 'The Review ID in this reply is for :username, who isn’t the author of the plugin this conversation is about. Check that it’s the right review before you send it.' ),
-		'acknowledge' => __( 'It’s the right one' ),
+		'copied'          => __( 'Copied' ),
+		'verified'        => __( 'DNS verified' ),
+		'status'          => __( 'Status' ),
+		'assigned'        => __( 'Assigned to' ),
+		'current'         => __( 'Current' ),
+		'submitter'       => __( 'Submitter' ),
+		'download'        => __( 'Copy the download URL' ),
+		'page'            => __( 'Open the plugin’s page' ),
+		'scans'           => __( 'Open the plugin’s security scans' ),
+		'slug'            => __( 'Slug' ),
+		'copy_slug'       => __( 'Copy the slug' ),
+		'email_match'     => __( 'At one of the plugin’s domains' ),
+		'email_other'     => __( 'Not at the plugin’s domains' ),
+		'edit'            => __( 'Edit the plugin on WordPress.org' ),
+		'failed'          => __( 'Couldn’t load the plugin from WordPress.org.' ),
+		'throttled'       => __( 'Couldn’t load the plugin from WordPress.org: too many requests. Reload the page in a minute.' ),
+		'short_title'     => __( 'Shorten the tab’s title' ),
+		'full_title'      => __( 'Show the tab’s full title' ),
+		'mismatch'        => __( 'The Review ID in this reply is for :username, who isn’t the author of the plugin this conversation is about. Check that it’s the right review before you send it.' ),
+		'acknowledge'     => __( 'It’s the right one' ),
+		'names_followed'  => __( 'The plugin has the suggested name.' ),
+		'names_ignored'   => __( 'The plugin still has its original name.' ),
+		'names_to-review' => __( 'The plugin has another name: check it.' ),
+		'owner_ignored'   => __( 'Neither the plugin’s domains nor the submitter’s email address show they own it.' ),
 	)
 ) }}">
 	<div class="panel-group accordion accordion-empty">
@@ -88,32 +92,45 @@
 					@endif
 
 					@if ( $review['names'] )
-						<h5 class="wporg-review-heading">{{ __( 'Names' ) }}</h5>
-						<dl class="wporg-review-details wporg-review-names" data-original="{{ $review['names']['original'] }}" data-suggested="{{ $review['names']['suggested'] }}">
-							<dt>{{ __( 'Original' ) }}</dt>
-							<dd>{{ '' !== $review['names']['original'] ? $review['names']['original'] : '—' }}</dd>
-							<dt>{{ __( 'Suggested' ) }}</dt>
-							<dd>{{ '' !== $review['names']['suggested'] ? $review['names']['suggested'] : '—' }}</dd>
-							@if ( '' !== $review['names']['suggested_slug'] )
-								<dt>{{ __( 'Suggested slug' ) }}</dt>
-								<dd>
-									<code>{{ $review['names']['suggested_slug'] }}</code>
-									<button type="button" class="wporg-review-copy" data-copy="{{ $review['names']['suggested_slug'] }}" title="{{ __( 'Copy the slug' ) }}" aria-label="{{ __( 'Copy the slug' ) }}"><i class="glyphicon glyphicon-copy"></i></button>
-								</dd>
-							@endif
-						</dl>
+						@php
+							$names = $review['names'];
+						@endphp
+						{{-- The script colors it once it knows the plugin's current name. --}}
+						<div class="wporg-review-check wporg-review-names" data-original="{{ $names['original'] }}" data-suggested="{{ $names['suggested'] }}" data-suggested-slug="{{ $names['suggested_slug'] }}">
+							<h5 class="wporg-review-heading">{{ __( 'Names' ) }}</h5>
+							<dl class="wporg-review-details">
+								<dt>{{ __( 'Original' ) }}</dt>
+								<dd>{{ '' !== $names['original'] ? $names['original'] : '—' }}</dd>
+								@if ( '' !== $names['suggested'] || '' !== $names['suggested_slug'] )
+									<dt>{{ __( 'Suggested' ) }}</dt>
+									<dd>
+										{{ $names['suggested'] }}
+										@if ( '' !== $names['suggested_slug'] )
+											@if ( '' !== $names['suggested'] )
+												<br>
+											@endif
+											<code>{{ $names['suggested_slug'] }}</code>
+											<button type="button" class="wporg-review-copy" data-copy="{{ $names['suggested_slug'] }}" title="{{ __( 'Copy the slug' ) }}" aria-label="{{ __( 'Copy the slug' ) }}"><i class="glyphicon glyphicon-copy"></i></button>
+										@endif
+									</dd>
+								@endif
+							</dl>
+						</div>
 					@endif
 
 					@if ( $review['owner'] )
-						<h5 class="wporg-review-heading">{{ __( 'Owner' ) }}</h5>
-						<dl class="wporg-review-details wporg-review-owner">
-							@foreach ( array( 'author' => __( 'Author host' ), 'plugin' => __( 'Plugin host' ) ) as $key => $label )
-								@if ( '' !== $review['owner'][ $key . '_host' ] )
-									<dt>{{ $label }}</dt>
-									<dd data-host="{{ $key }}">{{ $review['owner'][ $key . '_host' ] }}</dd>
-								@endif
-							@endforeach
-						</dl>
+						{{-- The script colors it once it knows whether the author proved they own the plugin. --}}
+						<div class="wporg-review-check wporg-review-owner">
+							<h5 class="wporg-review-heading">{{ __( 'Owner' ) }}</h5>
+							<dl class="wporg-review-details">
+								@foreach ( array( 'author' => __( 'Author host' ), 'plugin' => __( 'Plugin host' ) ) as $key => $label )
+									@if ( '' !== $review['owner'][ $key . '_host' ] )
+										<dt>{{ $label }}</dt>
+										<dd data-host="{{ $key }}">{{ $review['owner'][ $key . '_host' ] }}</dd>
+									@endif
+								@endforeach
+							</dl>
+						</div>
 					@endif
 
 					@if ( $review['issues'] )
@@ -127,10 +144,8 @@
 						</ul>
 					@endif
 
-					@if ( '' !== $short_subject )
-						{{-- Its label says what a click does, once the script knows which title the tab has. --}}
-						<button type="button" class="wporg-review-title-toggle"></button>
-					@endif
+					{{-- The script shows it, labeled with what a click does, when it changes the tab's title. --}}
+					<button type="button" class="wporg-review-title-toggle" hidden></button>
 				</div>
 			</div>
 		</div>

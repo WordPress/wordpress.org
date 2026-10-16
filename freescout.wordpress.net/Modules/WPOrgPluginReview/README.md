@@ -14,14 +14,25 @@ A conversation gets the **Plugin Review** panel once the team has sent it a revi
 
 - **Details** from the latest Review ID: the slug, linked to the plugin's edit page on WordPress.org, the submitter's profile, and how many reviews there were and when.
 - **Flags**: the review's own (like `TRM` for naming, and `OWN` for ownership), and `UPD` while the author owes an update: a review asked for one, none approved the plugin, and since the latest review email, WordPress.org hasn't confirmed an upload, or the team wrote to the author again after the latest confirmation. The browser tab's title starts with 🔴 for `UPD`, 🟠 for `TRM`, and 🟤 for `OWN`, in that order.
-- **Names**, for `TRM`: the name the plugin was submitted with, and the name and slug the review suggests.
-- **Owner**, for `OWN`: the domains of the plugin's Author URI and Plugin URI, marked "DNS verified" when they carry the `wordpressorg-{username}-verification` TXT record the ownership emails ask for. The username is the Review ID's, or the submitter's when it doesn't name one.
-- **The plugin as it is now**, from WordPress.org by the Review ID's plugin ID, or by its slug for reviews that don't carry the ID: its status, who's assigned to it, a button that copies its ZIP's URL (with the review info the review tools read, while it's in review), and, once it's released, links to its page and its security scans. A naming review also shows its current name and slug, in green when it's the suggested name and in red when it's still the original; an ownership review shows the submitter, with their email address in green when it's at one of the plugin's domains.
+- **Names**, for `TRM`: the name the plugin was submitted with, and the name and slug the review suggests, if it suggests any. Once the plugin's current name is known, the section is green when it's the suggested name (or slug, when the review suggests no name), red when it's still the original, and orange when it's another name that needs a look.
+- **Owner**, for `OWN`: the domains of the plugin's Author URI and Plugin URI, marked "DNS verified" when they carry the `wordpressorg-{username}-verification` TXT record the ownership emails ask for. The username is the Review ID's, or the submitter's when it doesn't name one. The section is red when neither domain is verified and the submitter's email address isn't at either.
+- **The plugin as it is now**, from WordPress.org by the Review ID's plugin ID, or by its slug for reviews that don't carry the ID: its status, who's assigned to it, a button that copies its ZIP's URL (with the review info the review tools read, while it's in review), and, once it's released, links to its page and its security scans. A naming review also shows its current name and slug; an ownership review shows the submitter, with their email address in green when it's at one of the plugin's domains.
 - **Issues** the review lists, under their headings' 🔴 (or the older `##`); warnings, under 🟡, aren't listed. Clicking one scrolls to it in the email.
 
 Quoted text is left out, so an author's reply that quotes a review isn't read as one. What WordPress.org and DNS say is loaded after the page, so neither holds it up.
 
-The tab's title also shortens the plugin directory's subjects, like "R: My Plugin" for "[WordPress Plugin Directory] Review in Progress: My Plugin"; a link at the bottom of the panel switches back to the full title, which the browser remembers.
+The plugin directory's most common subjects show with a mark in place of everything before the plugin's name, replies and forwards included: in the conversation, its tab's title, the sender's previous conversations, and lists of conversations. The full subject shows on hover and in the subject's editor, and is what gets copied.
+
+| Subject | Shows as |
+| --- | --- |
+| [WordPress Plugin Directory] Review in Progress: My Plugin | 🔌 My Plugin |
+| [WordPress Plugin Directory] Closure Notice - Licensing/Trademark Violation: My Plugin | 🔌™️ My Plugin |
+| [WordPress Plugin Directory] Closure Notice - Guideline Violation: My Plugin | 🔌📜 My Plugin |
+| [WordPress Plugin Directory] Notice: My Plugin | 🔌ℹ️ My Plugin |
+| [WordPress Plugin Directory] Security Notice: My Plugin | 🔌🛡️ My Plugin |
+| [WordPress Plugin Directory] Rejection Explanation: My Plugin | 🔌🚫 My Plugin |
+
+The tab's title leaves out the conversation's number, and shortens the plugin directory's other subjects too, like "Closed (Author Request): My Plugin"; a link at the bottom of the panel switches back to the full title, which the browser remembers. Marks are in `Services/Subject.php`.
 
 While an agent writes a reply, a warning shows above it when the reply has a Review ID for a username other than the latest review's and the plugin's submitter's, until they say it's the right one: it would send one author's review to another.
 

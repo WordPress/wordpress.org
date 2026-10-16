@@ -1,7 +1,8 @@
 /**
  * Makes the Plugin Review panel work: copying, jumping to issues, loading the plugin as it is now, flagging and
- * shortening the tab's title, and warning about a reply with another author's Review ID. Also shows the member
- * and tag chosen in the My Reviews and My Cases folders, and opens their conversations in new tabs.
+ * shortening the tab's title, and warning about a reply with another author's Review ID. Marks the plugin directory's
+ * subjects, and copies the subjects themselves. Also shows the member and tag chosen in the My Reviews and My Cases
+ * folders, and opens their conversations in new tabs.
  *
  * @param {jQuery} $ jQuery.
  */
@@ -269,7 +270,8 @@
 	}
 
 	/**
-	 * Shows the plugin as it is now: its status, ZIP, and page, its current name, and who submitted it.
+	 * Shows the plugin as it is now: its status, ZIP, and page, and its current name, colored by whether it's the one the
+	 * review suggested.
 	 *
 	 * @param {jQuery} $panel  Panel.
 	 * @param {Object} plugin  The plugin.
@@ -349,18 +351,24 @@
 		const $names = $panel.find( '.wporg-review-names' );
 		if ( $names.length && plugin.name ) {
 			const current = normalizeName( plugin.name );
-			// The suggested name wins, should it be the original too.
-			const suggested =
-				current === normalizeName( $names.attr( 'data-suggested' ) );
-			$names
-				.toggleClass( 'is-suggested', suggested )
-				.toggleClass(
-					'is-original',
-					! suggested &&
-						current ===
-							normalizeName( $names.attr( 'data-original' ) )
-				);
-			addRow( $names, strings.current, [
+			const suggested = normalizeName( $names.attr( 'data-suggested' ) );
+			const slug = String( $names.attr( 'data-suggested-slug' ) || '' );
+
+			// The suggested name, or slug when there's no name, wins should it be the original too.
+			const followed = suggested
+				? current === suggested
+				: '' !== slug && slug === String( plugin.slug );
+			let state = 'to-review';
+			if ( followed ) {
+				state = 'followed';
+			} else if (
+				current === normalizeName( $names.attr( 'data-original' ) )
+			) {
+				state = 'ignored';
+			}
+			markCheck( $names, state, strings[ 'names_' + state ] );
+
+			addRow( $names.find( '.wporg-review-details' ), strings.current, [
 				String( plugin.name ),
 				$( '<br>' ),
 				$( '<code>' ).text( String( plugin.slug ) ),
@@ -370,14 +378,35 @@
 	}
 
 	/**
-	 * Shows whether the plugin's domains carry the author's record, and whether the submitter's address is at one.
+	 * Colors a check in the panel by whether the author followed the review.
 	 *
-	 * @param {jQuery}      $owner  The owner details.
+	 * @param {jQuery} $check Check.
+	 * @param {string} state  followed, ignored, or to-review.
+	 * @param {string} label  What it means.
+	 */
+	function markCheck( $check, state, label ) {
+		$check.addClass( 'is-' + state ).attr( 'title', label );
+	}
+
+	/**
+	 * Shows whether the plugin's domains carry the author's record, and whether the submitter's address is at one, and
+	 * marks the check when neither proves they own it.
+	 *
+	 * @param {jQuery}      $owner  The owner check.
 	 * @param {Object}      owner   The check.
 	 * @param {Object|null} plugin  The plugin, if known.
 	 * @param {Object}      strings Labels.
 	 */
 	function showOwner( $owner, owner, plugin, strings ) {
+		// Either is how the review asks them to prove it.
+		if (
+			! [ 'author', 'plugin', 'email' ].some(
+				( key ) => true === owner[ key ]
+			)
+		) {
+			markCheck( $owner, 'ignored', strings.owner_ignored );
+		}
+
 		[ 'author', 'plugin' ].forEach( ( key ) => {
 			if ( true === owner[ key ] ) {
 				$owner
@@ -391,7 +420,7 @@
 		} );
 
 		if ( plugin && plugin.submitter ) {
-			addRow( $owner, strings.submitter, [
+			addRow( $owner.find( '.wporg-review-details' ), strings.submitter, [
 				String( plugin.submitter.username ),
 				$( '<br>' ),
 				$( '<span class="wporg-review-email">' )
@@ -484,31 +513,31 @@
 	}
 
 	/**
-	 * Puts the marks of the review's flags before the tab's title, shortens the subject in it, and keeps it that way as
-	 * FreeScout changes it, like when it counts new replies.
+	 * Puts the marks of the review's flags before the tab's title, its subject's short version in it without the
+	 * conversation's number, and keeps it that way as FreeScout changes it, like when it counts new replies.
 	 *
-	 * @param {jQuery}   $panel  Panel.
+	 * @param {jQuery}   $data   What the page says about the conversation's subject.
 	 * @param {string[]} flags   Flags.
 	 * @param {Object}   strings Labels.
 	 */
-	function manageTitle( $panel, flags, strings ) {
+	function manageTitle( $data, flags, strings ) {
+		const subject = String( $data.attr( 'data-subject' ) || '' );
+		const number = String( $data.attr( 'data-number' ) || '' );
+		if ( ! subject || ! number ) {
+			return;
+		}
+
 		const marks = Object.keys( TITLE_MARKS )
 			.filter( ( flag ) => flags.includes( flag ) )
 			.map( ( flag ) => TITLE_MARKS[ flag ] )
 			.join( '' );
-		const subject = String( $panel.attr( 'data-subject' ) || '' );
-		let shortSubject = String( $panel.attr( 'data-short-subject' ) || '' );
 
-		// Shortening only goes one way: a short subject that holds the full one could never be told from it.
-		if ( ! subject || shortSubject.includes( subject ) ) {
-			shortSubject = '';
-		}
+		// FreeScout's title starts with the number and the subject; the short one, with the short subject alone.
+		const long = '#' + number + ' ' + subject;
+		const short =
+			String( $data.attr( 'data-short-subject' ) || '' ) || subject;
 
-		if ( ! marks && ! shortSubject ) {
-			return;
-		}
-
-		const $toggle = $panel.find( '.wporg-review-title-toggle' );
+		const $toggle = $( '.wporg-review-title-toggle' );
 		let full = prefersFullTitle();
 
 		// FreeScout's count of new replies goes first, then the marks.
@@ -522,14 +551,15 @@
 			const match = document.title.match( prefix );
 			let rest = document.title.slice( match[ 0 ].length );
 
-			/*
-			 * Each way only replaces what the other way leaves, so another pass changes nothing: the short subject may be
-			 * part of the full one, but not the other way around.
-			 */
-			if ( shortSubject && full && ! rest.includes( subject ) ) {
-				rest = rest.replace( shortSubject, subject );
-			} else if ( shortSubject && ! full ) {
-				rest = rest.replace( subject, shortSubject );
+			// Each way only replaces what the other way leaves, so another pass changes nothing.
+			if ( ! full && rest.startsWith( long ) ) {
+				rest = short + rest.slice( long.length );
+			} else if (
+				full &&
+				! rest.startsWith( long ) &&
+				rest.startsWith( short )
+			) {
+				rest = long + rest.slice( short.length );
 			}
 
 			const title =
@@ -543,6 +573,7 @@
 
 		update();
 		label();
+		$toggle.removeAttr( 'hidden' );
 
 		$toggle.on( 'click', () => {
 			full = ! full;
@@ -559,6 +590,81 @@
 				subtree: true,
 			} );
 		}
+	}
+
+	/**
+	 * Shows a marked subject in an element, which keeps the subject itself for hovering and copying.
+	 *
+	 * @param {jQuery} $element Element.
+	 * @param {Object} subjects Subject, and marked subject.
+	 */
+	function markSubject( $element, subjects ) {
+		$element
+			.addClass( 'wporg-subject' )
+			.attr( {
+				title: subjects.subject,
+				'data-wporg-subject': subjects.subject,
+			} )
+			.text( subjects.marked );
+	}
+
+	/**
+	 * Marks the subjects of the conversation and of its sender's previous conversations, as the page says; lists of
+	 * conversations come marked already.
+	 *
+	 * @param {jQuery} $data What the page says about the conversation's subject.
+	 */
+	function markSubjects( $data ) {
+		let subjects;
+		try {
+			subjects = JSON.parse( String( $data.attr( 'data-subjects' ) ) );
+		} catch {
+			return;
+		}
+
+		$( '.sidebar-block-list a.help-link' ).each( function () {
+			const id = String( $( this ).attr( 'href' ) || '' ).match(
+				/\/conversation\/(\d+)/
+			);
+			const item = id && subjects[ id[ 1 ] ];
+			const node = item && this.lastChild;
+			if (
+				node &&
+				window.Node.TEXT_NODE === node.nodeType &&
+				node.nodeValue.trim() === item.subject
+			) {
+				const $subject = $( '<span>' );
+				markSubject( $subject, item );
+				$( node ).replaceWith( $subject );
+			}
+		} );
+
+		const current =
+			subjects[ String( $data.attr( 'data-conversation-id' ) ) ];
+		const $heading = $( '.conv-subjtext > span' ).first();
+		if ( ! current || ! $heading.length ) {
+			return;
+		}
+
+		/*
+		 * FreeScout's editor keeps the subject itself, and puts what the agent saves in the heading, which shows as it is
+		 * until the page loads again.
+		 */
+		const update = () => {
+			const text = $heading.text();
+			if ( text === current.subject ) {
+				markSubject( $heading, current );
+			} else if ( text !== current.marked ) {
+				$heading.removeAttr( 'title data-wporg-subject' );
+			}
+		};
+
+		update();
+		new window.MutationObserver( update ).observe( $heading[ 0 ], {
+			childList: true,
+			characterData: true,
+			subtree: true,
+		} );
 	}
 
 	/**
@@ -854,13 +960,50 @@
 				checkReply();
 			}
 		} );
+	} );
 
+	// The plugin directory's subjects, for the plugins team, with or without a review to show.
+	$( function () {
+		const $data = $( '.wporg-subjects' ).first();
+		if ( ! $data.length ) {
+			return;
+		}
+
+		const $panel = $( '.wporg-review' );
+		markSubjects( $data );
 		manageTitle(
-			$panel,
+			$data,
 			String( $panel.attr( 'data-flags' ) || '' )
 				.split( ' ' )
 				.filter( Boolean ),
-			strings
+			$panel.data( 'strings' ) || {}
 		);
+	} );
+
+	// Copying a marked subject copies the subject itself.
+	$( document ).on( 'copy', ( event ) => {
+		const view = ( event.target.ownerDocument || document ).defaultView;
+		const selection = view && view.getSelection();
+		const clipboard =
+			event.originalEvent && event.originalEvent.clipboardData;
+		if ( ! selection || selection.isCollapsed || ! clipboard ) {
+			return;
+		}
+
+		const copied = selection.toString();
+		let text = copied;
+		$( '[data-wporg-subject]' ).each( function () {
+			if ( selection.containsNode( this, true ) ) {
+				text = text.replace(
+					$( this ).text(),
+					String( $( this ).attr( 'data-wporg-subject' ) )
+				);
+			}
+		} );
+
+		if ( text !== copied ) {
+			clipboard.setData( 'text/plain', text );
+			event.preventDefault();
+		}
 	} );
 } )( jQuery );

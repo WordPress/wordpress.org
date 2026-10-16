@@ -26,7 +26,7 @@ use Modules\WPOrgPluginReview\Services\Worklist;
 
 /**
  * Shows a conversation's latest plugin review in its sidebar, and keeps the index of review emails as threads change;
- * adds the My Reviews and My Cases folders to the plugins team's mailbox, and to its members' profiles how many
+ * marks the plugin directory's subjects; adds the My Reviews and My Cases folders to the plugins team's mailbox, and to its members' profiles how many
  * conversations those open at a time; and to their header, a button that copies the download URLs of the plugins in
  * review they have open.
  */
@@ -52,6 +52,13 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 	 * @var int
 	 */
 	private const FOLDERS_PRIORITY = 30;
+
+	/**
+	 * How many of the sender's other conversations get their subjects marked in the sidebar: core shows the latest five.
+	 *
+	 * @var int
+	 */
+	private const PREVIOUS_LIMIT = 40;
 
 	/**
 	 * Boots the module.
@@ -176,6 +183,7 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 			self::PANEL_PRIORITY
 		);
 
+		self::register_subject_hooks();
 		self::register_folder_hooks();
 		self::register_profile_hooks();
 
@@ -192,6 +200,112 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Shows the plugin directory's subjects marked, like "🔌 My Plugin", for the same agents as the panel: in the
+	 * conversation, its tab's title, the sender's previous conversations, and lists of conversations. The subject itself
+	 * shows on hover, in the subject's editor, and when copied.
+	 *
+	 * @return void
+	 */
+	private static function register_subject_hooks(): void {
+		// Lists ask for each row, and the answer doesn't change within a request.
+		$mailbox_ids = null;
+		$marks       = static function ( mixed $conversation ) use ( &$mailbox_ids ): bool {
+			if ( ! $conversation instanceof Conversation ) {
+				return false;
+			}
+
+			if ( null === $mailbox_ids ) {
+				$mailbox_ids = app( Reviewers::class )->includes( auth()->user() ) ? Review::plugins_mailbox_ids() : array();
+			}
+
+			return in_array( (int) $conversation->mailbox_id, $mailbox_ids, true );
+		};
+
+		\Eventy::addAction(
+			'conversation.after_subject',
+			static function ( mixed $conversation = null ) use ( $marks ): void {
+				try {
+					if ( $marks( $conversation ) ) {
+						echo \View::make(
+							self::ALIAS . '::subjects',
+							array(
+								'conversation_id' => (int) $conversation->id,
+								'number'          => (int) $conversation->number,
+								'subject'         => (string) $conversation->getSubject(),
+								'short_subject'   => Subject::short( (string) $conversation->subject ),
+								'subjects'        => self::marked_subjects( $conversation ),
+							)
+						)->render();
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgPluginReview] Could not mark the subjects of conversation ' . ( $conversation->id ?? '' ) . ': ' . $e->getMessage() );
+				}
+			}
+		);
+
+		// The subject goes in between, hidden: it's what the row is read as, and what FreeScout's scripts find there.
+		\Eventy::addAction(
+			'conversations_table.before_subject',
+			static function ( mixed $conversation = null ) use ( $marks ): void {
+				try {
+					$marked = $marks( $conversation ) ? Subject::marked( (string) $conversation->subject ) : '';
+					if ( '' !== $marked ) {
+						$subject = e( $conversation->getSubject() );
+						echo '<span class="wporg-subject" data-wporg-subject="' . $subject . '" title="' . $subject . '">' . e( $marked ) . '</span><span hidden>';
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgPluginReview] Could not mark the subject of conversation ' . ( $conversation->id ?? '' ) . ': ' . $e->getMessage() );
+				}
+			}
+		);
+
+		\Eventy::addAction(
+			'conversations_table.after_subject',
+			static function ( mixed $conversation = null ) use ( $marks ): void {
+				try {
+					if ( $marks( $conversation ) && '' !== Subject::marked( (string) $conversation->subject ) ) {
+						echo '</span>';
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgPluginReview] Could not mark the subject of conversation ' . ( $conversation->id ?? '' ) . ': ' . $e->getMessage() );
+				}
+			}
+		);
+	}
+
+	/**
+	 * The marked subjects of a conversation and of its sender's latest others in its mailbox, which its sidebar lists.
+	 *
+	 * @param Conversation $conversation Conversation.
+	 * @return array[] Subject, and marked subject, by conversation ID; only those with a mark.
+	 */
+	private static function marked_subjects( Conversation $conversation ): array {
+		$conversations = array( $conversation );
+		if ( $conversation->customer_id ) {
+			$previous      = Conversation::where( 'mailbox_id', $conversation->mailbox_id )
+				->where( 'customer_id', $conversation->customer_id )
+				->where( 'id', '<>', $conversation->id )
+				->orderBy( 'created_at', 'desc' )
+				->limit( self::PREVIOUS_LIMIT )
+				->get();
+			$conversations = array_merge( $conversations, $previous->all() );
+		}
+
+		$subjects = array();
+		foreach ( $conversations as $item ) {
+			$marked = Subject::marked( (string) $item->subject );
+			if ( '' !== $marked ) {
+				$subjects[ (int) $item->id ] = array(
+					'subject' => (string) $item->getSubject(),
+					'marked'  => $marked,
+				);
+			}
+		}
+
+		return $subjects;
 	}
 
 	/**
@@ -409,8 +523,6 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 					'review'          => $review,
 					'replies'         => FlagReplies::REPLIES,
 					'conversation_id' => (int) $conversation->id,
-					'subject'         => (string) $conversation->getSubject(),
-					'short_subject'   => Subject::short( (string) $conversation->subject ),
 				)
 			)->render();
 		} catch ( \Throwable $e ) {

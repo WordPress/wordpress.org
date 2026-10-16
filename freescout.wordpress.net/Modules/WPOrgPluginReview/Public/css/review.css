@@ -66,29 +66,56 @@
 	list-style: none;
 }
 
+/* Flags without a color of their own are orange. */
 .wporg-review-flag {
 	padding: 0 8px;
 	border-radius: 9px;
-	background-color: #eef1f4;
-	color: #3e4a55;
+	background-color: #ff8918;
+	color: #fff;
 	font-size: 11px;
 	font-weight: 600;
 	line-height: 20px;
 }
 
 .wporg-review-flag[data-flag="UPD"] {
-	background-color: #fce4e4;
-	color: #8c1616;
+	background-color: #dc2626;
 }
 
 .wporg-review-flag[data-flag="TRM"] {
-	background-color: #fdf1d4;
-	color: #634200;
+	background-color: #f59e0b;
 }
 
 .wporg-review-flag[data-flag="OWN"] {
-	background-color: #f3eadb;
-	color: #5a4410;
+	background-color: #8c6e1e;
+}
+
+.wporg-review-flag[data-flag="DESC"] {
+	background-color: #4f3d0c;
+}
+
+.wporg-review-flag[data-flag="LIC"] {
+	background-color: #a72e9e;
+}
+
+.wporg-review-flag[data-flag="COM"] {
+	background-color: #0c4f4d;
+}
+
+.wporg-review-flag[data-flag="FUN"] {
+	background-color: #1d4ed8;
+}
+
+.wporg-review-flag[data-flag="ACT"] {
+	background-color: #1d4ed8;
+}
+
+.wporg-review-flag[data-flag="RMT"] {
+	background-color: #b91c1c;
+}
+
+.wporg-review-flag[data-flag="SOCK"] {
+	background-color: #ffcafe;
+	color: #444;
 }
 
 .wporg-review-flag .wporg-review-copy {
@@ -114,7 +141,8 @@
 	padding: 0;
 	border: 0;
 	background: none;
-	color: #005ba3;
+	color: #4a5561;
+	font-weight: 400;
 	text-align: left;
 }
 
@@ -128,7 +156,7 @@
 }
 
 .wporg-review-issue.is-priority-0 {
-	color: #4a5561;
+	opacity: 0.6;
 }
 
 /* Where an issue the panel jumped to starts, for a moment. */
@@ -143,14 +171,41 @@
 }
 
 /* The current name is the one the review suggested, or still the one it asked to change. */
-.wporg-review-names.is-suggested dd:last-child {
-	color: #175a28;
-	font-weight: 600;
+/* Names and Owner: a section of their own, colored by whether the author followed the review. */
+.wporg-review-check {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid #d6dde3;
 }
 
-.wporg-review-names.is-original dd:last-child {
-	color: #8c1616;
-	font-weight: 600;
+.wporg-review-check .wporg-review-heading {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: 0;
+}
+
+.wporg-review-check.is-followed,
+.wporg-review-check.is-ignored,
+.wporg-review-check.is-to-review {
+	padding: 8px 10px;
+	border: 1px solid;
+	border-left-width: 4px;
+	border-radius: 4px;
+}
+
+.wporg-review-check.is-followed {
+	border-color: #00a32a;
+	background-color: #edfaef;
+}
+
+.wporg-review-check.is-ignored {
+	border-color: #d63638;
+	background-color: #fcf0f1;
+}
+
+.wporg-review-check.is-to-review {
+	border-color: #dba617;
+	background-color: #fcf9e8;
 }
 
 .wporg-review-email {
