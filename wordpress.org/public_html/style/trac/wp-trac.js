@@ -726,8 +726,13 @@ let wpTrac,
 						}
 
 						if ( target.matches( 'input' ) ) {
-							parent?.querySelectorAll( 'input[type="text"], select' )
-								.forEach( ( el ) => ( isFocus ? el.removeAttribute( 'tabindex' ) : el.setAttribute( 'tabindex', '-1' ) ) );
+							parent?.querySelectorAll( 'input[type="text"], select' ).forEach( ( el ) => {
+								if ( isFocus ) {
+									el.removeAttribute( 'tabindex' );
+								} else {
+									el.setAttribute( 'tabindex', '-1' );
+								}
+							} );
 						}
 					} );
 				} );
