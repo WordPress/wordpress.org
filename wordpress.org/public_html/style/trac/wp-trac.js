@@ -1971,12 +1971,13 @@ let wpTrac,
 						ownerRow.style.display = 'none';
 					}
 
-					let html = '<div>';
-					html += `<label id="keyword-label" for="keyword-add" style="width:${ labelWidth }px">Workflow Keywords:</label>`;
-					html += '<select id="keyword-add"><option value=""> - Add - </option></select>';
-					html += `<button type="button" id="edit-keywords" aria-label="Manual keyword" aria-expanded="false">Manual</button>`;
-					html += ` <a href="https://make.wordpress.org/core/handbook/contribute/trac/keywords/" target="_blank" rel="noopener noreferrer" aria-label="Keywords documentation" title="Keywords documentation">ℹ</a></div>`;
-					html += '<div id="keyword-bin"></div>';
+					const html =
+						'<div>' +
+						`<label id="keyword-label" for="keyword-add" style="width:${ labelWidth }px">Workflow Keywords:</label>` +
+						'<select id="keyword-add"><option value=""> - Add - </option></select>' +
+						'<button type="button" id="edit-keywords" aria-label="Manual keyword" aria-expanded="false">Manual</button> ' +
+						'<a href="https://make.wordpress.org/core/handbook/contribute/trac/keywords/" target="_blank" rel="noopener noreferrer" aria-label="Keywords documentation" title="Keywords documentation">ℹ</a>' +
+						'</div><div id="keyword-bin"></div>';
 
 					container.insertAdjacentHTML( 'afterbegin', html );
 					elements.bin = document.getElementById( 'keyword-bin' );
@@ -3034,22 +3035,14 @@ let wpTrac,
 					return;
 				}
 
-				for ( const word of Object.keys( componentWords ) ) {
-					if ( matchText.includes( word ) ) {
-						matchingWords.push( word );
-					}
-				}
-
 				// Longest match first.
-				matchingWords.sort( ( a, b ) => b.length - a.length );
+				const matchingWords = Object.keys( componentWords )
+					.filter( ( word ) => matchText.includes( word ) )
+					.sort( ( a, b ) => b.length - a.length );
 
-				matchingWords.forEach( ( word ) => {
-					componentWords[ word ].forEach( ( component ) => {
-						if ( ! matchingComponents.includes( component ) ) {
-							matchingComponents.push( component );
-						}
-					} );
-				} );
+				const matchingComponents = [
+					...new Set( matchingWords.flatMap( ( word ) => componentWords[ word ] ) ),
+				];
 
 				if ( ! noticeDiv ) {
 					noticeDiv = document.createElement( 'div' );
