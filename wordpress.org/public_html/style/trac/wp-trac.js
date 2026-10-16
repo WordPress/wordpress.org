@@ -2353,7 +2353,7 @@ let wpTrac,
 						text: 'Component Maintainer',
 						title: `@${ maintainer } maintains the ${ componentName } component`,
 					};
-				}
+				} );
 				wpTrac.showContributorLabels( labels );
 			}
 
