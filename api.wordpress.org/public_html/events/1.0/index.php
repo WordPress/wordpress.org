@@ -142,8 +142,10 @@ function parse_request() {
 		isset( $_GET['latitude'], $_GET['longitude'] ) &&
 		is_numeric( $_GET['latitude'] ) && is_numeric( $_GET['longitude'] )
 	) {
-		$location_args['latitude']  = floatval( $_GET['latitude'] );
-		$location_args['longitude'] = floatval( $_GET['longitude'] );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- is_numeric()-checked above; kept as strings because core compares the echoed values with ===.
+		$location_args['latitude']  = $_GET['latitude'];
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- is_numeric()-checked above; kept as strings because core compares the echoed values with ===.
+		$location_args['longitude'] = $_GET['longitude'];
 	}
 
 	if ( isset( $_GET['country'] ) && '' !== $_GET['country'] ) {

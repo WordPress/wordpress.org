@@ -11,6 +11,8 @@
  * @package WordPressdotorg\API\Events\Tests
  */
 
+declare( strict_types = 1 );
+
 namespace Dotorg\API\Events\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -91,18 +93,19 @@ class Test_Parse_Request extends TestCase {
 	}
 
 	/**
-	 * Numeric coordinates should be cast to floats.
+	 * Numeric coordinates should be passed through unchanged. Core compares the
+	 * echoed values to the ones it sent with a strict type check.
 	 *
 	 * @covers ::parse_request
 	 */
-	public function test_valid_coordinates_are_cast_to_floats(): void {
+	public function test_valid_coordinates_are_preserved_as_strings(): void {
 		$_GET['latitude']  = '52.52';
 		$_GET['longitude'] = '13.4';
 
 		$args = parse_request();
 
-		$this->assertSame( 52.52, $args['latitude'] );
-		$this->assertSame( 13.4, $args['longitude'] );
+		$this->assertSame( '52.52', $args['latitude'] );
+		$this->assertSame( '13.4', $args['longitude'] );
 	}
 
 	/**
@@ -115,7 +118,7 @@ class Test_Parse_Request extends TestCase {
 	 * @param string $latitude  The latitude request value.
 	 * @param string $longitude The longitude request value.
 	 */
-	public function test_invalid_coordinates_are_ignored( $latitude, $longitude ): void {
+	public function test_invalid_coordinates_are_ignored( string $latitude, string $longitude ): void {
 		$_GET['latitude']  = $latitude;
 		$_GET['longitude'] = $longitude;
 
@@ -147,7 +150,7 @@ class Test_Parse_Request extends TestCase {
 	 *
 	 * @param string $country The country request value.
 	 */
-	public function test_valid_country_is_accepted( $country ): void {
+	public function test_valid_country_is_accepted( string $country ): void {
 		$_GET['country'] = $country;
 
 		$args = parse_request();
@@ -206,7 +209,7 @@ class Test_Parse_Request extends TestCase {
 	 * @param string $timezone The timezone request value.
 	 * @param string $expected The expected parsed value.
 	 */
-	public function test_timezone_validation( $timezone, $expected ): void {
+	public function test_timezone_validation( string $timezone, string $expected ): void {
 		$_REQUEST['timezone'] = $timezone;
 
 		$args = parse_request();
@@ -238,7 +241,7 @@ class Test_Parse_Request extends TestCase {
 	 * @param string $locale   The locale request value.
 	 * @param string $expected The expected parsed value.
 	 */
-	public function test_locale_validation( $locale, $expected ): void {
+	public function test_locale_validation( string $locale, string $expected ): void {
 		$_REQUEST['locale'] = $locale;
 
 		$args = parse_request();
