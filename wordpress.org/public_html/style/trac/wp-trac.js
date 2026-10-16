@@ -580,7 +580,7 @@ let wpTrac,
 				// Trac markup is like this: `<label>close</label> as fixed`
 				document.querySelectorAll( '#action div label' ).forEach( ( label ) => {
 					const next = label.nextSibling;
-					if ( next && 3 === next.nodeType ) {
+					if ( next && next.nodeType === window.Node.TEXT_NODE ) {
 						label.textContent += next.nodeValue;
 						next.remove();
 					}
@@ -2039,7 +2039,7 @@ let wpTrac,
 					}
 
 					// Remove the mutually-exclusive counterpart, if any.
-					if ( Object.prototype.hasOwnProperty.call( exclusiveKeywords, keyword ) ) {
+					if ( Object.hasOwn( exclusiveKeywords, keyword ) ) {
 						wpTrac.workflow.removeKeyword( exclusiveKeywords[ keyword ] );
 					}
 
@@ -3092,7 +3092,7 @@ let wpTrac,
 						return;
 					}
 
-					const words = component.split( /[^A-Za-z0-9\.']+/ );
+					const words = component.split( /[^A-Za-z0-9.']+/ );
 
 					if ( words.length > 1 ) {
 						words.push( component );
