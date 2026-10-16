@@ -1,0 +1,52 @@
+name: Documentation Theme (JS/CSS)
+
+on:
+  pull_request:
+    paths:
+    - 'wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022/**'
+    - .github/workflows/documentation-theme.yml
+  push:
+    branches: [trunk]
+    paths:
+    - 'wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022/**'
+    - .github/workflows/documentation-theme.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint and build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version-file: wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022/.nvmrc
+        cache: npm
+        cache-dependency-path: wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Lint JavaScript
+      run: npm run lint:js
+
+    - name: Lint CSS
+      run: npm run lint:css
+
+    # The build output is committed, so a source edit without a rebuild ships
+    # stale output. Rebuild and fail on drift.
+    - name: Check the build is up to date
+      run: |
+        npm run build
+        git diff --exit-code -- build
+        test -z "$( git status --porcelain -- build )"
