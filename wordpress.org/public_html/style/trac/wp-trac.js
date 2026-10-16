@@ -757,11 +757,11 @@ let wpTrac,
 
 					// Prevent marking a ticket as a duplicate of itself.
 					if ( 'duplicate' === selectedAction ) {
-						const currentTicket = parseInt(
+						const currentTicket = Number.parseInt(
 							( document.querySelector( '.trac-id' )?.textContent || '' ).replace( '#', '' ),
 							10
 						);
-						const duplicateTicket = parseInt( dupeInput?.value || '', 10 );
+						const duplicateTicket = Number.parseInt( dupeInput?.value || '', 10 );
 
 						if ( ! duplicateTicket || currentTicket === duplicateTicket ) {
 							if ( dupeInput ) {
@@ -1369,7 +1369,7 @@ let wpTrac,
 
 			const typeSelect = document.getElementById( 'field-type' );
 			const versionSelect = document.getElementById( 'field-version' );
-			const version = versionSelect ? parseFloat( versionSelect.value ) : NaN;
+			const version = versionSelect ? Number.parseFloat( versionSelect.value ) : Number.NaN;
 
 			// Remove task, or make a task ticket read only. This supports the ticket type being 'task' or 'task (blessed)'
 			if ( typeSelect ) {
@@ -1393,7 +1393,7 @@ let wpTrac,
 			// Once a Version is set, remove newer versions.
 			if ( version && versionSelect ) {
 				versionSelect.querySelectorAll( 'option' ).forEach( ( opt ) => {
-					const value = parseFloat( opt.value );
+					const value = Number.parseFloat( opt.value );
 					if ( ! value || value > version ) {
 						opt.remove();
 					}
@@ -2512,7 +2512,7 @@ let wpTrac,
 					cell.append( countSpan );
 
 					const ticketLink = cell.closest( 'tr' )?.querySelector( 'td.ticket a' );
-					const ticket = parseInt( ( ticketLink?.textContent || '' ).replace( '#', '' ), 10 );
+					const ticket = Number.parseInt( ( ticketLink?.textContent || '' ).replace( '#', '' ), 10 );
 					tickets.push( ticket );
 
 					const reportStar = document.createElement( 'div' );
@@ -2545,7 +2545,7 @@ let wpTrac,
 						const subscribedSet = new Set( data.data.tickets || [] );
 
 						stars.forEach( ( reportStar ) => {
-							const ticketId = parseInt( reportStar.dataset.ticket, 10 );
+							const ticketId = Number.parseInt( reportStar.dataset.ticket, 10 );
 							if ( subscribedSet.has( ticketId ) ) {
 								toggleStarClasses( reportStar );
 							}
@@ -2563,7 +2563,7 @@ let wpTrac,
 									? 'subscribe'
 									: 'unsubscribe';
 								const delta = 'subscribe' === action ? 1 : -1;
-								save( action, parseInt( clickedStar.dataset.ticket, 10 ) );
+								save( action, Number.parseInt( clickedStar.dataset.ticket, 10 ) );
 
 								const prev = clickedStar.previousElementSibling;
 								if ( prev ) {
