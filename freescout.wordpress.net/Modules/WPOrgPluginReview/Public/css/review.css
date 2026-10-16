@@ -216,23 +216,6 @@
 	color: #8c1616;
 }
 
-/* Switches the tab between its short and full title. */
-.wporg-review-title-toggle {
-	display: block;
-	margin-top: 12px;
-	padding: 0;
-	border: 0;
-	background: none;
-	color: #4a5561;
-	font-size: 11px;
-}
-
-.wporg-review-title-toggle:hover,
-.wporg-review-title-toggle:focus {
-	color: #0078d7;
-	text-decoration: underline;
-}
-
 /* The warning above the reply editor, for a Review ID of another author. */
 .wporg-review-mismatch .btn {
 	margin-left: 4px;

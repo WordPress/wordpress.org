@@ -26,13 +26,6 @@
 	const COPIED_FOR = 1200;
 
 	/**
-	 * Where the browser keeps whether the agent prefers the tab's full title.
-	 *
-	 * @type {string}
-	 */
-	const FULL_TITLE_KEY = 'wporgpluginreview.fullTitle';
-
-	/**
 	 * A date, as Review IDs write them, like 29Jul26.
 	 *
 	 * @type {RegExp}
@@ -483,44 +476,13 @@
 	}
 
 	/**
-	 * Reads the agent's preference for the tab's title.
-	 *
-	 * @return {boolean} Whether they want the full title.
-	 */
-	function prefersFullTitle() {
-		try {
-			return '1' === window.localStorage.getItem( FULL_TITLE_KEY );
-		} catch {
-			return false;
-		}
-	}
-
-	/**
-	 * Keeps the agent's preference for the tab's title.
-	 *
-	 * @param {boolean} full Whether they want the full title.
-	 */
-	function preferFullTitle( full ) {
-		try {
-			if ( full ) {
-				window.localStorage.setItem( FULL_TITLE_KEY, '1' );
-			} else {
-				window.localStorage.removeItem( FULL_TITLE_KEY );
-			}
-		} catch {
-			// Then it's only for this page.
-		}
-	}
-
-	/**
 	 * Puts the marks of the review's flags before the tab's title, its subject's short version in it without the
 	 * conversation's number, and keeps it that way as FreeScout changes it, like when it counts new replies.
 	 *
-	 * @param {jQuery}   $data   What the page says about the conversation's subject.
-	 * @param {string[]} flags   Flags.
-	 * @param {Object}   strings Labels.
+	 * @param {jQuery}   $data What the page says about the conversation's subject.
+	 * @param {string[]} flags Flags.
 	 */
-	function manageTitle( $data, flags, strings ) {
+	function manageTitle( $data, flags ) {
 		const subject = String( $data.attr( 'data-subject' ) || '' );
 		const number = String( $data.attr( 'data-number' ) || '' );
 		if ( ! subject || ! number ) {
@@ -537,9 +499,6 @@
 		const short =
 			String( $data.attr( 'data-short-subject' ) || '' ) || subject;
 
-		const $toggle = $( '.wporg-review-title-toggle' );
-		let full = prefersFullTitle();
-
 		// FreeScout's count of new replies goes first, then the marks.
 		const prefix = new RegExp(
 			'^(\\(\\d+\\) )?(?:[' +
@@ -551,15 +510,8 @@
 			const match = document.title.match( prefix );
 			let rest = document.title.slice( match[ 0 ].length );
 
-			// Each way only replaces what the other way leaves, so another pass changes nothing.
-			if ( ! full && rest.startsWith( long ) ) {
+			if ( rest.startsWith( long ) ) {
 				rest = short + rest.slice( long.length );
-			} else if (
-				full &&
-				! rest.startsWith( long ) &&
-				rest.startsWith( short )
-			) {
-				rest = long + rest.slice( short.length );
 			}
 
 			const title =
@@ -568,19 +520,8 @@
 				document.title = title;
 			}
 		};
-		const label = () =>
-			$toggle.text( full ? strings.short_title : strings.full_title );
 
 		update();
-		label();
-		$toggle.removeAttr( 'hidden' );
-
-		$toggle.on( 'click', () => {
-			full = ! full;
-			preferFullTitle( full );
-			update();
-			label();
-		} );
 
 		const element = document.querySelector( 'title' );
 		if ( element ) {
@@ -969,14 +910,12 @@
 			return;
 		}
 
-		const $panel = $( '.wporg-review' );
 		markSubjects( $data );
 		manageTitle(
 			$data,
-			String( $panel.attr( 'data-flags' ) || '' )
+			String( $( '.wporg-review' ).attr( 'data-flags' ) || '' )
 				.split( ' ' )
-				.filter( Boolean ),
-			$panel.data( 'strings' ) || {}
+				.filter( Boolean )
 		);
 	} );
 

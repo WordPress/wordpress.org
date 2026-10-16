@@ -32,7 +32,7 @@ The plugin directory's most common subjects show with a mark in place of everyth
 | [WordPress Plugin Directory] Security Notice: My Plugin | 🔌🛡️ My Plugin |
 | [WordPress Plugin Directory] Rejection Explanation: My Plugin | 🔌🚫 My Plugin |
 
-The tab's title leaves out the conversation's number, and shortens the plugin directory's other subjects too, like "Closed (Author Request): My Plugin"; a link at the bottom of the panel switches back to the full title, which the browser remembers. Marks are in `Services/Subject.php`.
+The tab's title leaves out the conversation's number, and shortens the plugin directory's other subjects too, like "Closed (Author Request): My Plugin". Marks are in `Services/Subject.php`.
 
 While an agent writes a reply, a warning shows above it when the reply has a Review ID for a username other than the latest review's and the plugin's submitter's, until they say it's the right one: it would send one author's review to another.
 
