@@ -40,6 +40,31 @@ class AsyncBatchAnnotateImagesRequest extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string parent = 4;</code>
      */
     private $parent = '';
+    /**
+     * Optional. The labels with user-defined metadata for the request.
+     * Label keys and values can be no longer than 63 characters
+     * (Unicode codepoints), can only contain lowercase letters, numeric
+     * characters, underscores and dashes. International characters are allowed.
+     * Label values are optional. Label keys must start with a letter.
+     *
+     * Generated from protobuf field <code>map<string, string> labels = 5 [(.google.api.field_behavior) = OPTIONAL];</code>
+     */
+    private $labels;
+
+    /**
+     * @param \Google\Cloud\Vision\V1\AnnotateImageRequest[] $requests     Required. Individual image annotation requests for this batch.
+     * @param \Google\Cloud\Vision\V1\OutputConfig           $outputConfig Required. The desired output location and metadata (e.g. format).
+     *
+     * @return \Google\Cloud\Vision\V1\AsyncBatchAnnotateImagesRequest
+     *
+     * @experimental
+     */
+    public static function build(array $requests, \Google\Cloud\Vision\V1\OutputConfig $outputConfig): self
+    {
+        return (new self())
+            ->setRequests($requests)
+            ->setOutputConfig($outputConfig);
+    }
 
     /**
      * Constructor.
@@ -47,7 +72,7 @@ class AsyncBatchAnnotateImagesRequest extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
-     *     @type \Google\Cloud\Vision\V1\AnnotateImageRequest[]|\Google\Protobuf\Internal\RepeatedField $requests
+     *     @type array<\Google\Cloud\Vision\V1\AnnotateImageRequest>|\Google\Protobuf\Internal\RepeatedField $requests
      *           Required. Individual image annotation requests for this batch.
      *     @type \Google\Cloud\Vision\V1\OutputConfig $output_config
      *           Required. The desired output location and metadata (e.g. format).
@@ -60,6 +85,12 @@ class AsyncBatchAnnotateImagesRequest extends \Google\Protobuf\Internal\Message
      *               `asia`: East asia areas, like Japan, Taiwan,
      *               `eu`: The European Union.
      *           Example: `projects/project-A/locations/eu`.
+     *     @type array|\Google\Protobuf\Internal\MapField $labels
+     *           Optional. The labels with user-defined metadata for the request.
+     *           Label keys and values can be no longer than 63 characters
+     *           (Unicode codepoints), can only contain lowercase letters, numeric
+     *           characters, underscores and dashes. International characters are allowed.
+     *           Label values are optional. Label keys must start with a letter.
      * }
      */
     public function __construct($data = NULL) {
@@ -82,7 +113,7 @@ class AsyncBatchAnnotateImagesRequest extends \Google\Protobuf\Internal\Message
      * Required. Individual image annotation requests for this batch.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.AnnotateImageRequest requests = 1 [(.google.api.field_behavior) = REQUIRED];</code>
-     * @param \Google\Cloud\Vision\V1\AnnotateImageRequest[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param array<\Google\Cloud\Vision\V1\AnnotateImageRequest>|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
     public function setRequests($var)
@@ -165,6 +196,40 @@ class AsyncBatchAnnotateImagesRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->parent = $var;
+
+        return $this;
+    }
+
+    /**
+     * Optional. The labels with user-defined metadata for the request.
+     * Label keys and values can be no longer than 63 characters
+     * (Unicode codepoints), can only contain lowercase letters, numeric
+     * characters, underscores and dashes. International characters are allowed.
+     * Label values are optional. Label keys must start with a letter.
+     *
+     * Generated from protobuf field <code>map<string, string> labels = 5 [(.google.api.field_behavior) = OPTIONAL];</code>
+     * @return \Google\Protobuf\Internal\MapField
+     */
+    public function getLabels()
+    {
+        return $this->labels;
+    }
+
+    /**
+     * Optional. The labels with user-defined metadata for the request.
+     * Label keys and values can be no longer than 63 characters
+     * (Unicode codepoints), can only contain lowercase letters, numeric
+     * characters, underscores and dashes. International characters are allowed.
+     * Label values are optional. Label keys must start with a letter.
+     *
+     * Generated from protobuf field <code>map<string, string> labels = 5 [(.google.api.field_behavior) = OPTIONAL];</code>
+     * @param array|\Google\Protobuf\Internal\MapField $var
+     * @return $this
+     */
+    public function setLabels($var)
+    {
+        $arr = GPBUtil::checkMapField($var, \Google\Protobuf\Internal\GPBType::STRING, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->labels = $arr;
 
         return $this;
     }

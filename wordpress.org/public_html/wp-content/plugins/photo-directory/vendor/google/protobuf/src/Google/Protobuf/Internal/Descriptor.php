@@ -2,33 +2,10 @@
 
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// https://developers.google.com/protocol-buffers/
 //
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-//     * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-//     * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file or at
+// https://developers.google.com/open-source/licenses/bsd
 
 namespace Google\Protobuf\Internal;
 
@@ -45,6 +22,7 @@ class Descriptor
     private $enum_type = [];
     private $klass;
     private $legacy_klass;
+    private $previous_klass;
     private $options;
     private $oneof_decl = [];
 
@@ -76,7 +54,7 @@ class Descriptor
     public function addField($field)
     {
         $this->field[$field->getNumber()] = $field;
-        $this->json_to_field[$field->getJsonName()] = $field;
+        $this->json_to_field[$field->getJsonName() ?? ''] = $field;
         $this->name_to_field[$field->getName()] = $field;
         $this->index_to_field[] = $field;
     }
@@ -162,6 +140,16 @@ class Descriptor
         return $this->legacy_klass;
     }
 
+    public function setPreviouslyUnreservedClass($klass)
+    {
+        $this->previous_klass = $klass;
+    }
+
+    public function getPreviouslyUnreservedClass()
+    {
+        return $this->previous_klass;
+    }
+
     public function setOptions($options)
     {
         $this->options = $options;
@@ -172,13 +160,14 @@ class Descriptor
         return $this->options;
     }
 
-    public static function buildFromProto($proto, $file_proto, $containing)
+    public static function buildFromProto($proto, $file_proto, $containing, $custom_json_names = [])
     {
         $desc = new Descriptor();
 
         $message_name_without_package  = "";
         $classname = "";
         $legacy_classname = "";
+        $previous_classname = "";
         $fullname = "";
         GPBUtil::getFullClassName(
             $proto,
@@ -187,10 +176,12 @@ class Descriptor
             $message_name_without_package,
             $classname,
             $legacy_classname,
-            $fullname);
+            $fullname,
+            $previous_classname);
         $desc->setFullName($fullname);
         $desc->setClass($classname);
         $desc->setLegacyClass($legacy_classname);
+        $desc->setPreviouslyUnreservedClass($previous_classname);
         $desc->setOptions($proto->getOptions());
 
         foreach ($proto->getField() as $field_proto) {
@@ -200,13 +191,13 @@ class Descriptor
         // Handle nested types.
         foreach ($proto->getNestedType() as $nested_proto) {
             $desc->addNestedType(Descriptor::buildFromProto(
-              $nested_proto, $file_proto, $message_name_without_package));
+              $nested_proto, $file_proto, $message_name_without_package, $custom_json_names));
         }
 
         // Handle nested enum.
         foreach ($proto->getEnumType() as $enum_proto) {
             $desc->addEnumType(EnumDescriptor::buildFromProto(
-              $enum_proto, $file_proto, $message_name_without_package));
+              $enum_proto, $file_proto, $message_name_without_package, $custom_json_names));
         }
 
         // Handle oneof fields.

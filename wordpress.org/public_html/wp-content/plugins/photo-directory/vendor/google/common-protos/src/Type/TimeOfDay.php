@@ -5,44 +5,49 @@
 namespace Google\Type;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Represents a time of day. The date and time zone are either not significant
  * or are specified elsewhere. An API may choose to allow leap seconds. Related
- * types are [google.type.Date][google.type.Date] and `google.protobuf.Timestamp`.
+ * types are [google.type.Date][google.type.Date] and
+ * `google.protobuf.Timestamp`.
  *
  * Generated from protobuf message <code>google.type.TimeOfDay</code>
  */
 class TimeOfDay extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Hours of day in 24 hour format. Should be from 0 to 23. An API may choose
-     * to allow the value "24:00:00" for scenarios like business closing time.
+     * Hours of a day in 24 hour format. Must be greater than or equal to 0 and
+     * typically must be less than or equal to 23. An API may choose to allow the
+     * value "24:00:00" for scenarios like business closing time.
      *
      * Generated from protobuf field <code>int32 hours = 1;</code>
      */
-    private $hours = 0;
+    protected $hours = 0;
     /**
-     * Minutes of hour of day. Must be from 0 to 59.
+     * Minutes of an hour. Must be greater than or equal to 0 and less than or
+     * equal to 59.
      *
      * Generated from protobuf field <code>int32 minutes = 2;</code>
      */
-    private $minutes = 0;
+    protected $minutes = 0;
     /**
-     * Seconds of minutes of the time. Must normally be from 0 to 59. An API may
-     * allow the value 60 if it allows leap-seconds.
+     * Seconds of a minute. Must be greater than or equal to 0 and typically must
+     * be less than or equal to 59. An API may allow the value 60 if it allows
+     * leap-seconds.
      *
      * Generated from protobuf field <code>int32 seconds = 3;</code>
      */
-    private $seconds = 0;
+    protected $seconds = 0;
     /**
-     * Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+     * Fractions of seconds, in nanoseconds. Must be greater than or equal to 0
+     * and less than or equal to 999,999,999.
      *
      * Generated from protobuf field <code>int32 nanos = 4;</code>
      */
-    private $nanos = 0;
+    protected $nanos = 0;
 
     /**
      * Constructor.
@@ -51,15 +56,19 @@ class TimeOfDay extends \Google\Protobuf\Internal\Message
      *     Optional. Data for populating the Message object.
      *
      *     @type int $hours
-     *           Hours of day in 24 hour format. Should be from 0 to 23. An API may choose
-     *           to allow the value "24:00:00" for scenarios like business closing time.
+     *           Hours of a day in 24 hour format. Must be greater than or equal to 0 and
+     *           typically must be less than or equal to 23. An API may choose to allow the
+     *           value "24:00:00" for scenarios like business closing time.
      *     @type int $minutes
-     *           Minutes of hour of day. Must be from 0 to 59.
+     *           Minutes of an hour. Must be greater than or equal to 0 and less than or
+     *           equal to 59.
      *     @type int $seconds
-     *           Seconds of minutes of the time. Must normally be from 0 to 59. An API may
-     *           allow the value 60 if it allows leap-seconds.
+     *           Seconds of a minute. Must be greater than or equal to 0 and typically must
+     *           be less than or equal to 59. An API may allow the value 60 if it allows
+     *           leap-seconds.
      *     @type int $nanos
-     *           Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+     *           Fractions of seconds, in nanoseconds. Must be greater than or equal to 0
+     *           and less than or equal to 999,999,999.
      * }
      */
     public function __construct($data = NULL) {
@@ -68,8 +77,9 @@ class TimeOfDay extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Hours of day in 24 hour format. Should be from 0 to 23. An API may choose
-     * to allow the value "24:00:00" for scenarios like business closing time.
+     * Hours of a day in 24 hour format. Must be greater than or equal to 0 and
+     * typically must be less than or equal to 23. An API may choose to allow the
+     * value "24:00:00" for scenarios like business closing time.
      *
      * Generated from protobuf field <code>int32 hours = 1;</code>
      * @return int
@@ -80,8 +90,9 @@ class TimeOfDay extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Hours of day in 24 hour format. Should be from 0 to 23. An API may choose
-     * to allow the value "24:00:00" for scenarios like business closing time.
+     * Hours of a day in 24 hour format. Must be greater than or equal to 0 and
+     * typically must be less than or equal to 23. An API may choose to allow the
+     * value "24:00:00" for scenarios like business closing time.
      *
      * Generated from protobuf field <code>int32 hours = 1;</code>
      * @param int $var
@@ -96,7 +107,8 @@ class TimeOfDay extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Minutes of hour of day. Must be from 0 to 59.
+     * Minutes of an hour. Must be greater than or equal to 0 and less than or
+     * equal to 59.
      *
      * Generated from protobuf field <code>int32 minutes = 2;</code>
      * @return int
@@ -107,7 +119,8 @@ class TimeOfDay extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Minutes of hour of day. Must be from 0 to 59.
+     * Minutes of an hour. Must be greater than or equal to 0 and less than or
+     * equal to 59.
      *
      * Generated from protobuf field <code>int32 minutes = 2;</code>
      * @param int $var
@@ -122,8 +135,9 @@ class TimeOfDay extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Seconds of minutes of the time. Must normally be from 0 to 59. An API may
-     * allow the value 60 if it allows leap-seconds.
+     * Seconds of a minute. Must be greater than or equal to 0 and typically must
+     * be less than or equal to 59. An API may allow the value 60 if it allows
+     * leap-seconds.
      *
      * Generated from protobuf field <code>int32 seconds = 3;</code>
      * @return int
@@ -134,8 +148,9 @@ class TimeOfDay extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Seconds of minutes of the time. Must normally be from 0 to 59. An API may
-     * allow the value 60 if it allows leap-seconds.
+     * Seconds of a minute. Must be greater than or equal to 0 and typically must
+     * be less than or equal to 59. An API may allow the value 60 if it allows
+     * leap-seconds.
      *
      * Generated from protobuf field <code>int32 seconds = 3;</code>
      * @param int $var
@@ -150,7 +165,8 @@ class TimeOfDay extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+     * Fractions of seconds, in nanoseconds. Must be greater than or equal to 0
+     * and less than or equal to 999,999,999.
      *
      * Generated from protobuf field <code>int32 nanos = 4;</code>
      * @return int
@@ -161,7 +177,8 @@ class TimeOfDay extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+     * Fractions of seconds, in nanoseconds. Must be greater than or equal to 0
+     * and less than or equal to 999,999,999.
      *
      * Generated from protobuf field <code>int32 nanos = 4;</code>
      * @param int $var

@@ -14,31 +14,9 @@ class Auth
         if (static::$is_initialized == true) {
           return;
         }
-        \GPBMetadata\Google\Api\Annotations::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0a88050a15676f6f676c652f6170692f617574682e70726f746f120a676f" .
-            "6f676c652e617069226c0a0e41757468656e7469636174696f6e122d0a05" .
-            "72756c657318032003280b321e2e676f6f676c652e6170692e4175746865" .
-            "6e7469636174696f6e52756c65122b0a0970726f76696465727318042003" .
-            "280b32182e676f6f676c652e6170692e4175746850726f766964657222a9" .
-            "010a1241757468656e7469636174696f6e52756c6512100a0873656c6563" .
-            "746f72180120012809122c0a056f6175746818022001280b321d2e676f6f" .
-            "676c652e6170692e4f41757468526571756972656d656e747312200a1861" .
-            "6c6c6f775f776974686f75745f63726564656e7469616c18052001280812" .
-            "310a0c726571756972656d656e747318072003280b321b2e676f6f676c65" .
-            "2e6170692e41757468526571756972656d656e74226a0a0c417574685072" .
-            "6f7669646572120a0a026964180120012809120e0a066973737565721802" .
-            "2001280912100a086a776b735f75726918032001280912110a0961756469" .
-            "656e63657318042001280912190a11617574686f72697a6174696f6e5f75" .
-            "726c180520012809222d0a114f41757468526571756972656d656e747312" .
-            "180a1063616e6f6e6963616c5f73636f70657318012001280922390a0f41" .
-            "757468526571756972656d656e7412130a0b70726f76696465725f696418" .
-            "012001280912110a0961756469656e636573180220012809426b0a0e636f" .
-            "6d2e676f6f676c652e61706942094175746850726f746f50015a45676f6f" .
-            "676c652e676f6c616e672e6f72672f67656e70726f746f2f676f6f676c65" .
-            "617069732f6170692f73657276696365636f6e6669673b73657276696365" .
-            "636f6e666967a2020447415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\x99\x06\x0A\x15google/api/auth.proto\x12\x0Agoogle.api\"l\x0A\x0EAuthentication\x12-\x0A\x05rules\x18\x03 \x03(\x0B2\x1E.google.api.AuthenticationRule\x12+\x0A\x09providers\x18\x04 \x03(\x0B2\x18.google.api.AuthProvider\"\xA9\x01\x0A\x12AuthenticationRule\x12\x10\x0A\x08selector\x18\x01 \x01(\x09\x12,\x0A\x05oauth\x18\x02 \x01(\x0B2\x1D.google.api.OAuthRequirements\x12 \x0A\x18allow_without_credential\x18\x05 \x01(\x08\x121\x0A\x0Crequirements\x18\x07 \x03(\x0B2\x1B.google.api.AuthRequirement\"^\x0A\x0BJwtLocation\x12\x10\x0A\x06header\x18\x01 \x01(\x09H\x00\x12\x0F\x0A\x05query\x18\x02 \x01(\x09H\x00\x12\x10\x0A\x06cookie\x18\x04 \x01(\x09H\x00\x12\x14\x0A\x0Cvalue_prefix\x18\x03 \x01(\x09B\x04\x0A\x02in\"\x9A\x01\x0A\x0CAuthProvider\x12\x0A\x0A\x02id\x18\x01 \x01(\x09\x12\x0E\x0A\x06issuer\x18\x02 \x01(\x09\x12\x10\x0A\x08jwks_uri\x18\x03 \x01(\x09\x12\x11\x0A\x09audiences\x18\x04 \x01(\x09\x12\x19\x0A\x11authorization_url\x18\x05 \x01(\x09\x12.\x0A\x0Djwt_locations\x18\x06 \x03(\x0B2\x17.google.api.JwtLocation\"-\x0A\x11OAuthRequirements\x12\x18\x0A\x10canonical_scopes\x18\x01 \x01(\x09\"9\x0A\x0FAuthRequirement\x12\x13\x0A\x0Bprovider_id\x18\x01 \x01(\x09\x12\x11\x0A\x09audiences\x18\x02 \x01(\x09Bk\x0A\x0Ecom.google.apiB\x09AuthProtoP\x01ZEgoogle.golang.org/genproto/googleapis/api/serviceconfig;serviceconfig\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }
