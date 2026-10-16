@@ -1103,7 +1103,7 @@ function seed_teams(): void {
 	$teams = array(
 		'Plugin Reviews'  => array( 'Plugins', 'eye-open', array( admin()->email, 'priya@wordpress.test', 'marco@wordpress.test', 'lena@wordpress.test' ) ),
 		'Plugin Security' => array( 'Plugins', 'lock', array( 'marco@wordpress.test' ) ),
-		'Plugin Admin'    => array( 'Plugins', 'cog', array( 'priya@wordpress.test' ) ),
+		'Plugin Admins'   => array( 'Plugins', 'cog', array( 'priya@wordpress.test' ) ),
 		'Plugin Reports'  => array( 'Plugins', 'flag', array( 'tomas@wordpress.test' ) ),
 		'Themes'          => array( 'Themes', 'picture', array( 'lena@wordpress.test', 'tomas@wordpress.test' ) ),
 		'Learn'           => array( 'Learn WordPress', 'education', array( 'tomas@wordpress.test' ) ),

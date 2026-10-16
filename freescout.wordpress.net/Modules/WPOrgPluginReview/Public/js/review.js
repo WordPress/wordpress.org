@@ -61,6 +61,13 @@
 	const FLAG_MARK = '\u2757';
 
 	/**
+	 * Types of the emails that follow up on a review, which write `Review:` instead of `Review ID:`.
+	 *
+	 * @type {string[]}
+	 */
+	const FOLLOW_UP_TYPES = [ 'CHANGESNOTMADE', 'WRONGFORMAT' ];
+
+	/**
 	 * How many times the plugin is asked for again when the agent asked for too many in a minute, as when many tabs
 	 * open at once, and how long to wait before each, in milliseconds: longer every time, and a little more at random,
 	 * so the tabs don't all ask again at once.
@@ -610,17 +617,27 @@
 	function reviewIdUsername( text ) {
 		const line = text
 			.split( '\n' )
-			.map( ( piece ) => piece.replace( /[\s\u00A0]+/g, ' ' ).trim() )
+			.map( ( piece ) =>
+				piece
+					.replace( /\uFE0F/g, '' )
+					.replace( /[\s\u00A0]+/g, ' ' )
+					.trim()
+			)
 			// FreeScout's minifier misreads a regex literal right after `=>`.
-			.filter( ( piece ) => piece.match( /^Review ID:/i ) )
+			.filter( ( piece ) => {
+				const match = piece.match( /^Review( ID)?:\s*(\S*)/i );
+				return (
+					match &&
+					( match[ 1 ] || FOLLOW_UP_TYPES.includes( match[ 2 ] ) )
+				);
+			} )
 			.pop();
 		if ( ! line ) {
 			return '';
 		}
 
 		let tokens = line
-			.replace( /^Review ID:/i, '' )
-			.replace( /\uFE0F/g, '' )
+			.replace( /^Review( ID)?:/i, '' )
 			.split( ' ' )
 			.filter( Boolean );
 
