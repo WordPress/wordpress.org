@@ -67,6 +67,8 @@ The waits are `OpenOrder::WAIT_DAYS` and `OpenOrder::TAG_WAIT_DAYS`, in `Service
 
 For reviewing plugins in bulk with a local tool, the header has a **Copy X URLs** button, for the same agents as the panel, once they have open conversations whose panel knows the plugin's download URL. It copies them as `"<URL1>|<URL2>|…"`: in quotes, separated by pipes, each once, in the order the agent opened them. The ones the Open buttons opened go by their batch and position, whichever tab loaded first; the others by when they loaded. The trash bin next to it forgets them all.
 
+In the sidebar's **Plugins & Themes** panel, each plugin's download link has a button after it: **+** adds its URL to them, after the others, and **−**, once it's there, removes it, however it got there. URLs added this way stay until they're removed, as no page holds them. WPOrgSidebar triggers `wporgsidebar:panel` on a panel once it's loaded, which is when the buttons are added.
+
 The URLs are only in the agent's browser: each conversation's page keeps its own, in `localStorage`, as soon as WordPress.org tells the panel the plugin, and removes it as it closes. It also holds a [Web Lock](https://developer.mozilla.org/docs/Web/API/Web_Locks_API) of the same name while it's open, which the browser lets go of however the page ends, even when it crashes or closes without saying so; the URLs of pages that don't hold theirs anymore are left out, and removed. A reload keeps the page's place.
 
 So that many tabs opening at once don't lose their URLs to the 60 plugins an agent may ask WordPress.org for in a minute, the panel asks again for those it was refused, up to three times, after 20 seconds or more, and longer each time.

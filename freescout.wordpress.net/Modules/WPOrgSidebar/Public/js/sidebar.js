@@ -505,6 +505,9 @@
 						$panel.empty().append( blocks );
 						shortenLists( $panel );
 						$block.show();
+
+						// For other modules to add to, like WPOrgPluginReview's buttons for its download URLs.
+						$panel.trigger( 'wporgsidebar:panel' );
 					} else {
 						// Not removed: the other account may have something to show.
 						$block.hide();
