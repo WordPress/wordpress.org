@@ -1900,7 +1900,7 @@ let wpTrac,
 					// Keyword adds.
 					const keywordAdd = document.getElementById( 'keyword-add' );
 					const handleKeywordAdd = function ( e ) {
-						if ( e.type === 'keypress' ) {
+						if ( e.type === 'keydown' ) {
 							if ( e.key === 'Enter' ) {
 								e.stopPropagation();
 								e.preventDefault();
@@ -1912,7 +1912,7 @@ let wpTrac,
 						this.value = '';
 					};
 					keywordAdd?.addEventListener( 'change', handleKeywordAdd );
-					keywordAdd?.addEventListener( 'keypress', handleKeywordAdd );
+					keywordAdd?.addEventListener( 'keydown', handleKeywordAdd );
 
 					// Manual keyword button.
 					editKeywordsBtn?.addEventListener( 'click', function () {
