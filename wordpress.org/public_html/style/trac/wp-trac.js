@@ -234,11 +234,10 @@ let wpTrac,
 		'wp',
 	];
 
-	// Pre-compiled regular expressions for text-node linkers.
+	// Pre-compiled regular expressions for text-node linkers for Gutenberg and mentions.
 	// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-	const mentionsRegEx =
-		/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,18}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)/g;
-	const gutenbergIssueRegEx = /\bGB[-]?(\d+)\b/gi;
+	const combinedRegEx =
+		/(?:(^|[^a-zA-Z0-9_＠!@#$%&*])(?:@|＠)(?!\/)([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,18}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$))|(?:\bGB-?(\d+)\b)/gi;
 
 	/**
 	 * Runs a callback when the DOM is ready.
@@ -363,8 +362,7 @@ let wpTrac,
 			}
 
 			wpTrac.autocomplete.init();
-			wpTrac.linkMentions();
-			wpTrac.linkGutenbergIssues();
+			wpTrac.linkTicketText();
 			wpTrac.githubPRs.init();
 			wpTrac.suggestNotGeneral.init();
 
@@ -404,37 +402,39 @@ let wpTrac,
 			} );
 		},
 
-		linkMentions( selector ) {
+		linkTicketText( selector ) {
 			document.querySelectorAll( selector || 'div.change .comment, #ticket .description' ).forEach( ( el ) => {
-				linkTextNodes( el, mentionsRegEx, function ( match, pre, username ) {
-					if ( reservedTerms.includes( username ) ) {
-						return match;
+				linkTextNodes( el, combinedRegEx, function ( match, pre, username, gbNumber ) {
+					// Gutenberg Issue (GB1234 or GB-1234)
+					if ( gbNumber ) {
+						const link = document.createElement( 'a' );
+						link.className = 'gutenberg-issue github ext-link';
+						link.href = `https://github.com/WordPress/Gutenberg/issues/${ gbNumber }`;
+
+						const icon = document.createElement( 'span' );
+						icon.className = 'icon';
+						icon.textContent = '\u200B';
+
+						link.append( icon, document.createTextNode( match ) );
+						return link;
 					}
 
-					const meClass = username === wpTrac.currentUser ? ' me' : '';
-					const link = document.createElement( 'a' );
-					link.className = `mention${ meClass }`;
-					link.href = `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`;
-					link.textContent = `@${ username }`;
+					// User-Mention (@username)
+					if ( username ) {
+						if ( reservedTerms.includes( username ) ) {
+							return match;
+						}
 
-					return [ pre, link ];
-				} );
-			} );
-		},
+						const meClass = username === wpTrac.currentUser ? ' me' : '';
+						const link = document.createElement( 'a' );
+						link.className = `mention${ meClass }`;
+						link.href = `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`;
+						link.textContent = `@${ username }`;
 
-		linkGutenbergIssues( selector ) {
-			document.querySelectorAll( selector || 'div.change .comment, #ticket .description' ).forEach( ( el ) => {
-				linkTextNodes( el, gutenbergIssueRegEx, function ( match, issueNumber ) {
-					const link = document.createElement( 'a' );
-					link.className = 'gutenberg-issue github ext-link';
-					link.href = `https://github.com/WordPress/Gutenberg/issues/${ issueNumber }`;
+						return [ pre, link ];
+					}
 
-					const icon = document.createElement( 'span' );
-					icon.className = 'icon';
-					icon.textContent = '\u200B';
-
-					link.append( icon, document.createTextNode( match ) );
-					return link;
+					return match;
 				} );
 			} );
 		},
@@ -480,8 +480,7 @@ let wpTrac,
 				}
 			} );
 
-			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );
-			wpTrac.linkMentions( '.ticketdraft .comment' );
+			wpTrac.linkTicketText( '.ticketdraft .comment' );
 		},
 
 		hacks() {
