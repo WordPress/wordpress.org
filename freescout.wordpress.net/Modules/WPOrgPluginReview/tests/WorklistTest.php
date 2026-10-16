@@ -17,7 +17,10 @@ use App\User;
 use Modules\WPOrgPluginReview\Providers\WPOrgPluginReviewServiceProvider;
 use Modules\WPOrgPluginReview\Services\Reviewers;
 use Modules\WPOrgPluginReview\Services\Worklist;
+use Modules\WPOrgPluginReview\Tests\Support\Tags;
 use WordPressdotorg\FreeScout\Tests\TestCase;
+
+require_once __DIR__ . '/Support/Tags.php';
 
 /**
  * Covers which conversations each section shows, the folders in the mailbox's list, and their pages. Most of it is
@@ -54,6 +57,17 @@ final class WorklistTest extends TestCase {
 	private $team;
 
 	/**
+	 * Creates the Tags module's tables before the test's transaction starts.
+	 *
+	 * @return void
+	 */
+	protected function refreshApplication(): void {
+		parent::refreshApplication();
+
+		Tags::create();
+	}
+
+	/**
 	 * Registers the module and creates the mailbox and its reviewers.
 	 *
 	 * @return void
@@ -65,6 +79,7 @@ final class WorklistTest extends TestCase {
 
 		// Routes registered after boot aren't in the name index yet.
 		$this->app['router']->getRoutes()->refreshNameLookups();
+		$this->beforeApplicationDestroyed( array( Tags::class, 'drop' ) );
 
 		$this->mailbox   = $this->create_mailbox( 'Plugins', 'plugins@wordpress.test' );
 		$this->reviewer  = $this->create_user();
