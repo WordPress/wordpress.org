@@ -246,6 +246,10 @@ final class WorklistTest extends TestCase {
 
 		$this->assertSections( array( 'participating' => array( $assigned ) ), Worklist::reviews()->sections( $this->mailbox, $this->reviewer, $viewer ) );
 		$this->assertSame( 1, Worklist::reviews()->active_count( $this->mailbox, $viewer ) );
+
+		// Their count is kept, and forgotten with everyone's.
+		$this->conversation( $reply, Conversation::STATUS_ACTIVE, '2026-08-01 10:00:00', $viewer );
+		$this->assertSame( 2, Worklist::reviews()->active_count( $this->mailbox, $viewer ) );
 	}
 
 	/**
@@ -433,7 +437,7 @@ final class WorklistTest extends TestCase {
 	}
 
 	/**
-	 * My Cases lists the Plugin Admin team's conversations, in the same sections as My Reviews the Plugin Reviews
+	 * My Cases lists the Plugin Admins team's conversations, in the same sections as My Reviews the Plugin Reviews
 	 * team's, and counts them on its own.
 	 *
 	 * @return void

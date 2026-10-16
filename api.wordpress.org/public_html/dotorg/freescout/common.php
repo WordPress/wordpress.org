@@ -231,34 +231,6 @@ function get_plugin_download_url( \WP_Post $post, bool $review ): string {
 }
 
 /**
- * A plugin's status, as reviewers say it.
- *
- * @param \WP_Post $post   Plugin.
- * @param bool     $review Whether it's for a reviewer, who also sees why a plugin was closed.
- * @return string
- */
-function get_plugin_status_label( \WP_Post $post, bool $review ): string {
-	switch ( $post->post_status ) {
-		case 'new':
-		case 'pending':
-			return 'In Review';
-		case 'closed':
-		case 'disabled':
-			$label = ucwords( $post->post_status );
-			// This is not perfect, but close enough.
-			if ( $review && $post->_close_reason ) {
-				$label .= ': ' . ucwords( str_replace( '-', ' ', $post->_close_reason ) );
-			}
-
-			return $label;
-		case 'publish':
-			return 'Published';
-		default:
-			return ucwords( $post->post_status );
-	}
-}
-
-/**
  * Who's reviewing a plugin: only a review in progress has someone on it, as the assignment stays after it's done.
  *
  * @param \WP_Post $post Plugin.
@@ -308,7 +280,7 @@ function panel_link( string $text, string $url ): array {
 /**
  * Gets the time between two timestamps as a number and a unit letter, e.g. 3d, for the narrow sidebar.
  *
- * Rounded to the largest unit that fits, like human_time_diff().
+ * Rounded in the largest unit that fits, like human_time_diff(), or up to the next one when it rounds to a whole one.
  *
  * @param int $from Unix timestamp.
  * @param int $to   Unix timestamp.
@@ -325,27 +297,35 @@ function short_time_diff( int $from, int $to ): string {
 		'm'  => MINUTE_IN_SECONDS,
 	);
 
+	$larger = null;
 	foreach ( $units as $unit => $seconds ) {
 		if ( $diff >= $seconds ) {
-			return (int) round( $diff / $seconds ) . $unit;
+			$count = (int) round( $diff / $seconds );
+			if ( $larger && $count >= round( $units[ $larger ] / $seconds ) ) {
+				return '1' . $larger;
+			}
+
+			return $count . $unit;
 		}
+
+		$larger = $unit;
 	}
 
 	return max( 1, $diff ) . 's';
 }
 
 /**
- * Icons and labels of the reasons plugins are closed or disabled for, by reason.
+ * Icons of the reasons plugins are closed or disabled for, by reason; the plugin directory names them.
  *
- * @var array[]
+ * @var string[]
  */
-const CLOSE_REASONS = array(
-	'security-issue'                => array( '🛡️', 'Security issue' ),
-	'author-request'                => array( '👤', 'Author request' ),
-	'guideline-violation'           => array( '📜', 'Guideline violation' ),
-	'licensing-trademark-violation' => array( '™️', 'Trademark or licensing' ),
-	'merged-into-core'              => array( '🧩', 'Merged into core' ),
-	'unused'                        => array( '💤', 'Unused' ),
+const CLOSE_REASON_ICONS = array(
+	'security-issue'                => '🛡️',
+	'author-request'                => '👤',
+	'guideline-violation'           => '📜',
+	'licensing-trademark-violation' => '™️',
+	'merged-into-core'              => '🧩',
+	'unused'                        => '💤',
 );
 
 /**
@@ -354,7 +334,7 @@ const CLOSE_REASONS = array(
  * Reasons and reviewers are the plugins team's, so only reviews pass them.
  *
  * @param string $post_status  Post status.
- * @param string $reviewer     Reviewer assigned to a plugin in review.
+ * @param string $reviewer     Reviewer assigned to a plugin in review, see get_assigned_reviewer().
  * @param string $close_reason Why a plugin was closed or disabled, e.g. security-issue.
  * @param string $rejection    Why a plugin was rejected, in words.
  * @return array The item's tone, and its status: icon, text, and tooltip. Empty if published.
@@ -374,11 +354,11 @@ function get_item_status( string $post_status, string $reviewer = '', string $cl
 		case 'closed':
 		case 'disabled':
 			$text = ucfirst( $post_status );
-			if ( isset( CLOSE_REASONS[ $close_reason ] ) ) {
-				$status = array( CLOSE_REASONS[ $close_reason ][0], $text . ': ' . CLOSE_REASONS[ $close_reason ][1], 'error' );
-			} else {
-				$status = array( '🔒', $close_reason ? $text . ': ' . ucfirst( str_replace( '-', ' ', $close_reason ) ) : $text, 'error' );
+			if ( $close_reason ) {
+				$reasons = class_exists( '\WordPressdotorg\Plugin_Directory\Template' ) ? \WordPressdotorg\Plugin_Directory\Template::get_close_reasons() : array();
+				$text   .= ': ' . ( $reasons[ $close_reason ] ?? ucfirst( str_replace( '-', ' ', $close_reason ) ) );
 			}
+			$status = array( CLOSE_REASON_ICONS[ $close_reason ] ?? '🔒', $text, 'error' );
 			break;
 		case 'rejected':
 			$status = array( '🚫', 'Rejected', 'muted' );
@@ -403,7 +383,7 @@ function get_item_status( string $post_status, string $reviewer = '', string $cl
 
 	list( $icon, $text, $tone ) = $status;
 
-	if ( $reviewer && in_array( $post_status, array( 'new', 'pending' ), true ) ) {
+	if ( $reviewer ) {
 		$text .= ' · Assigned to ' . $reviewer;
 	}
 

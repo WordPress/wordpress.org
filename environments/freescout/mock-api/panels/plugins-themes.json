@@ -150,7 +150,7 @@
 					"tone": "error",
 					"status": {
 						"icon": "🛡️",
-						"text": "Closed: Security issue"
+						"text": "Closed: Security Issue"
 					}
 				},
 				{
@@ -185,7 +185,7 @@
 					"tone": "error",
 					"status": {
 						"icon": "📜",
-						"text": "Closed: Guideline violation"
+						"text": "Closed: Guideline Violation"
 					}
 				},
 				{
@@ -220,7 +220,7 @@
 					"tone": "error",
 					"status": {
 						"icon": "™️",
-						"text": "Disabled: Trademark or licensing"
+						"text": "Disabled: Licensing/Trademark Violation"
 					}
 				},
 				{
@@ -741,7 +741,7 @@
 					"tone": "error",
 					"status": {
 						"icon": "👤",
-						"text": "Closed: Author request"
+						"text": "Closed: Author Request"
 					}
 				},
 				{

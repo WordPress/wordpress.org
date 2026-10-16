@@ -190,7 +190,8 @@ final class PanelTest extends TestCase {
 	}
 
 	/**
-	 * Without an answer from WordPress.org, the ownership check still runs, with the Review ID's username.
+	 * Without an answer from WordPress.org, the ownership check still runs, with the Review ID's username; without that
+	 * either, nothing can be checked.
 	 *
 	 * @return void
 	 */
@@ -208,6 +209,22 @@ final class PanelTest extends TestCase {
 					'owner'  => array(
 						'author' => false,
 						'plugin' => true,
+						'email'  => null,
+					),
+				)
+			);
+
+		$this->review( '<ul><li>Plugin URI: <a href="https://plugin.example">p</a></li></ul><p>Review ID: R ❗OWN my-plugin 9Aug26/4.3 (P0TDX42HGN)</p>', '2026-08-09 10:00:00' );
+
+		$this->actingAs( $this->reviewer )
+			->get( '/wporgpluginreview/' . $this->conversation->id . '/plugin' )
+			->assertStatus( 200 )
+			->assertExactJson(
+				array(
+					'plugin' => null,
+					'owner'  => array(
+						'author' => null,
+						'plugin' => null,
 						'email'  => null,
 					),
 				)

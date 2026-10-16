@@ -38,7 +38,7 @@ While an agent writes a reply, a warning shows above it when the reply has a Rev
 
 ## My Reviews and My Cases
 
-The plugins team's mailbox gets two folders, right after Unassigned and before Mine, set apart from the folders after them, for the same agents as the panel: **My Reviews**, of the open and pending conversations assigned to the Plugin Reviews team, and **My Cases**, of the Plugin Admin team's: questions, guideline reports, replies to rejections, sockpuppets, adoptions, and the like. Each has three sections:
+The plugins team's mailbox gets two folders, right after Unassigned and before Mine, set apart from the folders after them, for the same agents as the panel: **My Reviews**, of the open and pending conversations assigned to the Plugin Reviews team, and **My Cases**, of the Plugin Admins team's: questions, guideline reports, replies to rejections, sockpuppets, adoptions, and the like. Each has three sections:
 
 - **Reviews (or Cases) I'm participating in**: ones the agent sent a reply to. Notes and drafts don't count.
 - **Reviews (or Cases) I'm mentioned in**: ones with a note that mentions the agent, with the Mentions module's `@` mentions. Mentions of a team the agent is in don't count.
@@ -50,7 +50,7 @@ Conversations someone is participating in can be selected, and changed together 
 
 Without the Teams module, both folders are of the mailbox's open and pending conversations, whoever they're assigned to. With it, but without a team of that name, they're empty.
 
-The folders aren't stored: they're added to the mailbox's folders as they're listed. Their counts are how many active conversations the agent is participating in: the ones whose sender wrote last, like core's folders count. Every member's count comes from one query per folder, kept in FreeScout's cache for up to ten minutes, and forgotten sooner when an agent's reply is published or removed, a sender replies, or a conversation in the mailbox changes status, assignee, or mailbox, or is deleted, merged, or imported. Agents who may only see the conversations assigned to them have theirs counted on every page. A page takes one query for which sections every conversation belongs to, and a few to load the ones that do and their tags; with a thousand open conversations, that's a few tens of milliseconds.
+The folders aren't stored: they're added to the mailbox's folders as they're listed. Their counts are how many active conversations the agent is participating in: the ones whose sender wrote last, like core's folders count. Every member's count comes from one query per folder, kept in FreeScout's cache for up to ten minutes, and forgotten sooner when an agent's reply is published or removed, a sender replies, or a conversation in the mailbox changes status, assignee, or mailbox, or is deleted, merged, or imported. Agents who may only see the conversations assigned to them have theirs counted on their own, and kept the same way. A page takes one query for which sections every conversation belongs to, and a few to load the ones that do and their tags; with a thousand open conversations, that's a few tens of milliseconds.
 
 Their definitions, like the team and what the sections are called, are in `Services/Worklist.php`.
 
@@ -71,7 +71,7 @@ In the sidebar's **Plugins & Themes** panel, each plugin's download link has a b
 
 The URLs are only in the agent's browser: each conversation's page keeps its own, in `localStorage`, as soon as WordPress.org tells the panel the plugin, and removes it as it closes. It also holds a [Web Lock](https://developer.mozilla.org/docs/Web/API/Web_Locks_API) of the same name while it's open, which the browser lets go of however the page ends, even when it crashes or closes without saying so; the URLs of pages that don't hold theirs anymore are left out, and removed. A reload keeps the page's place.
 
-So that many tabs opening at once don't lose their URLs to the 60 plugins an agent may ask WordPress.org for in a minute, the panel asks again for those it was refused, up to three times, after 20 seconds or more, and longer each time.
+So that many tabs opening at once don't lose their URLs to the 120 plugins an agent may ask WordPress.org for in a minute, the panel asks again for those it was refused, up to three times, after 20 seconds or more, and longer each time.
 
 ## WordPress.org
 

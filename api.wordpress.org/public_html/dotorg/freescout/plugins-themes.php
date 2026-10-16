@@ -14,7 +14,8 @@ $wp_init_host = 'https://wordpress.org/plugins/';
 require __DIR__ . '/common.php';
 
 /**
- * Orders plugins and themes by status, those in review first and rejected ones last, then by name.
+ * Orders plugins and themes by status, then by name: in review or approved first, with theme drafts, which can also be
+ * rejected; then published, then the others, and rejected plugins last.
  *
  * @var string
  */
@@ -230,8 +231,7 @@ function render_items( array $post_ids, string $mailbox_email ): array {
 
 		$last_updated = (int) strtotime( $last_modified );
 
-		// Edit and permalinks are built by hand, as the post types aren't registered on this site.
-		// Rarest first, so the download link, which most have, lines up at the end.
+		// Built by hand, as the post types aren't registered on this site; rarest first, so Download lines up at the end.
 		$links = array();
 		if ( 'plugin' === $type ? is_plugin_released( $post ) : 'publish' === $post->post_status ) {
 			$links[] = array(
@@ -240,8 +240,7 @@ function render_items( array $post_ids, string $mailbox_email ): array {
 				'icon' => 'shield',
 			);
 		}
-		// Plugins and themes have no public page until they're approved.
-		if ( ! in_array( $post->post_status, array( 'new', 'pending', 'rejected', 'draft' ), true ) ) {
+		if ( 'plugin' === $type ? is_plugin_released( $post ) : in_array( $post->post_status, array( 'publish', 'delist' ), true ) ) {
 			$links[] = array(
 				'text' => 'View on WordPress.org',
 				'url'  => home_url( "/{$post->post_name}/" ),

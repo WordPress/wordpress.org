@@ -23,7 +23,7 @@ use Illuminate\Support\Collection;
  * member replied to, that they're mentioned in, and that need someone, and how many active ones each member replied
  * to, for the folder list.
  *
- * My Reviews is the Plugin Reviews team's, and My Cases the Plugin Admin team's, which can also be filtered by tag.
+ * My Reviews is the Plugin Reviews team's, and My Cases the Plugin Admins team's, which can also be filtered by tag.
  * Each conversation is only in the first section it belongs to. One query tells, for every conversation, which
  * sections it belongs to, through the threads' index on conversation and type.
  */
@@ -105,7 +105,7 @@ final class Worklist {
 	}
 
 	/**
-	 * My Cases: the Plugin Admin team's.
+	 * My Cases: the Plugin Admins team's.
 	 *
 	 * @return self
 	 */
@@ -329,7 +329,7 @@ final class Worklist {
 	 * wrote last, like core's folders count.
 	 *
 	 * Every member's count comes from one query, kept until something changes them; agents who may only see what's
-	 * assigned to them get theirs counted on its own.
+	 * assigned to them get theirs counted, and kept, on its own.
 	 *
 	 * @param Mailbox $mailbox Mailbox.
 	 * @param User    $user    The agent.
@@ -337,10 +337,16 @@ final class Worklist {
 	 */
 	public function active_count( Mailbox $mailbox, User $user ): int {
 		if ( $user->canSeeOnlyAssignedConversations() ) {
-			return $this->conversations( $mailbox, $user )
-				->where( 'conversations.status', Conversation::STATUS_ACTIVE )
-				->addWhereExistsQuery( self::threads( Thread::TYPE_MESSAGE )->where( 'threads.created_by_user_id', $user->id ) )
-				->count();
+			return (int) \Cache::remember(
+				$this->counts_key( (int) $mailbox->id, (int) $user->id ),
+				now()->addMinutes( self::COUNTS_MINUTES ),
+				function () use ( $mailbox, $user ): int {
+					return $this->conversations( $mailbox, $user )
+						->where( 'conversations.status', Conversation::STATUS_ACTIVE )
+						->addWhereExistsQuery( self::threads( Thread::TYPE_MESSAGE )->where( 'threads.created_by_user_id', $user->id ) )
+						->count();
+				}
+			);
 		}
 
 		$counts = \Cache::remember(
@@ -377,22 +383,33 @@ final class Worklist {
 	 */
 	public static function forget_counts( int $mailbox_id ): void {
 		try {
-			foreach ( self::all() as $worklist ) {
-				\Cache::forget( $worklist->counts_key( $mailbox_id ) );
-			}
+			\Cache::forever( self::version_key( $mailbox_id ), uniqid( '', true ) );
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgPluginReview] Could not forget the worklists\' counts of mailbox ' . $mailbox_id . ': ' . $e->getMessage() );
 		}
 	}
 
 	/**
-	 * Where the members' counts of a mailbox are kept.
+	 * Where the members' counts of a mailbox are kept, or an agent's own; forgetting them moves them to new keys.
+	 *
+	 * @param int      $mailbox_id Mailbox ID.
+	 * @param int|null $user_id    The agent, if they're counted on their own.
+	 * @return string
+	 */
+	private function counts_key( int $mailbox_id, ?int $user_id = null ): string {
+		$key = 'wporgpluginreview.worklist.' . $this->key . '.active_counts.' . $mailbox_id . '.' . \Cache::get( self::version_key( $mailbox_id ), '' );
+
+		return null === $user_id ? $key : $key . '.' . $user_id;
+	}
+
+	/**
+	 * Where the version of a mailbox's counts is kept.
 	 *
 	 * @param int $mailbox_id Mailbox ID.
 	 * @return string
 	 */
-	private function counts_key( int $mailbox_id ): string {
-		return 'wporgpluginreview.worklist.' . $this->key . '.active_counts.' . $mailbox_id;
+	private static function version_key( int $mailbox_id ): string {
+		return 'wporgpluginreview.worklist.counts_version.' . $mailbox_id;
 	}
 
 	/**
@@ -423,7 +440,7 @@ final class Worklist {
 	 * @return array<string, Conversation[]> Conversations by section, the longest waiting first.
 	 */
 	public function sections( Mailbox $mailbox, User $user, User $viewer ): array {
-		return self::load( $this->section_ids( $mailbox, $user, $viewer ) );
+		return self::load( $this->section_ids( $mailbox, $user, $viewer, self::reviewers( $mailbox ) ) );
 	}
 
 	/**
@@ -432,13 +449,14 @@ final class Worklist {
 	 * A conversation needs someone when a note says so, or when no member replied to it yet: none of the mailbox's
 	 * users who are members of the plugins team's teams, as they are now.
 	 *
-	 * @param Mailbox $mailbox Mailbox.
-	 * @param User    $user    The member.
-	 * @param User    $viewer  Who's looking: they only see the conversations they may.
+	 * @param Mailbox    $mailbox   Mailbox.
+	 * @param User       $user      The member.
+	 * @param User       $viewer    Who's looking: they only see the conversations they may.
+	 * @param Collection $reviewers The members, as reviewers() tells them.
 	 * @return array<string, int[]> Conversation IDs by section, the longest waiting first.
 	 */
-	public function section_ids( Mailbox $mailbox, User $user, User $viewer ): array {
-		$member_ids = self::reviewers( $mailbox )->pluck( 'id' )->all();
+	public function section_ids( Mailbox $mailbox, User $user, User $viewer, Collection $reviewers ): array {
+		$member_ids = $reviewers->pluck( 'id' )->all();
 
 		$rows = $this->conversations( $mailbox, $viewer )
 			->select( 'conversations.id' )

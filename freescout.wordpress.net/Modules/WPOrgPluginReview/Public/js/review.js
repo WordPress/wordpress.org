@@ -383,7 +383,7 @@
 
 	/**
 	 * Shows whether the plugin's domains carry the author's record, and whether the submitter's address is at one, and
-	 * marks the check when neither proves they own it.
+	 * marks the check when all were checked and none proves they own it.
 	 *
 	 * @param {jQuery}      $owner  The owner check.
 	 * @param {Object}      owner   The check.
@@ -391,10 +391,10 @@
 	 * @param {Object}      strings Labels.
 	 */
 	function showOwner( $owner, owner, plugin, strings ) {
-		// Either is how the review asks them to prove it.
+		// Any of them proves it; unknown ones, null, weren't checked.
 		if (
-			! [ 'author', 'plugin', 'email' ].some(
-				( key ) => true === owner[ key ]
+			[ 'author', 'plugin', 'email' ].every(
+				( key ) => false === owner[ key ]
 			)
 		) {
 			markCheck( $owner, 'ignored', strings.owner_ignored );
@@ -929,16 +929,45 @@
 			return;
 		}
 
+		const marked = $( '[data-wporg-subject]' )
+			.filter( function () {
+				return selection.containsNode( this );
+			} )
+			.get();
+		if ( ! marked.length ) {
+			return;
+		}
+
 		const copied = selection.toString();
+		const ranges = [];
+		for ( let i = 0; i < selection.rangeCount; i++ ) {
+			ranges.push( selection.getRangeAt( i ).cloneRange() );
+		}
+
+		// Each is found after the text selected before it, as the selection reads it, last first so the others stay put.
 		let text = copied;
-		$( '[data-wporg-subject]' ).each( function () {
-			if ( selection.containsNode( this, true ) ) {
-				text = text.replace(
-					$( this ).text(),
-					String( $( this ).attr( 'data-wporg-subject' ) )
-				);
+		marked.reverse().forEach( ( element ) => {
+			const before = element.ownerDocument.createRange();
+			before.setStart(
+				ranges[ 0 ].startContainer,
+				ranges[ 0 ].startOffset
+			);
+			before.setEndBefore( element );
+			selection.removeAllRanges();
+			selection.addRange( before );
+
+			const shown = $( element ).text();
+			const at = text.indexOf( shown, selection.toString().length );
+			if ( -1 !== at ) {
+				text =
+					text.slice( 0, at ) +
+					String( $( element ).attr( 'data-wporg-subject' ) ) +
+					text.slice( at + shown.length );
 			}
 		} );
+
+		selection.removeAllRanges();
+		ranges.forEach( ( range ) => selection.addRange( range ) );
 
 		if ( text !== copied ) {
 			clipboard.setData( 'text/plain', text );

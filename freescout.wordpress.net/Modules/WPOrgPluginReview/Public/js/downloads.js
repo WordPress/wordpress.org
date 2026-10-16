@@ -61,6 +61,14 @@
 	const CHECK_EVERY = 5000;
 
 	/**
+	 * How long a page waits for other pages' changes to settle before it shows them, in milliseconds, so that many
+	 * pages opening at once don't each refresh for every other.
+	 *
+	 * @type {number}
+	 */
+	const SETTLE_FOR = 250;
+
+	/**
 	 * This page's key, different for every page that opens, even of the same conversation.
 	 *
 	 * @type {string}
@@ -97,6 +105,13 @@
 	 * @type {number}
 	 */
 	let copiedUntil = 0;
+
+	/**
+	 * The refresh waiting for other pages' changes to settle.
+	 *
+	 * @type {number}
+	 */
+	let settling = 0;
 
 	/**
 	 * One of the browser's storages, if the page may use it.
@@ -209,7 +224,7 @@
 				const local = storage( 'localStorage' );
 
 				return found.filter( ( item ) => {
-					if ( item.added || held.has( item.key ) ) {
+					if ( item.added || item.unlocked || held.has( item.key ) ) {
 						return true;
 					}
 					if ( local ) {
@@ -360,14 +375,19 @@
 	}
 
 	/**
-	 * Keeps this page's URL, while it holds its lock.
+	 * Keeps this page's URL, while it holds its lock, or, if it can't get one, until it closes.
 	 */
 	function keep() {
 		const local = storage( 'localStorage' );
-		const store = () => {
+		const store = ( held ) => {
 			if ( entry && local ) {
 				try {
-					local.setItem( PAGE_KEY, JSON.stringify( entry ) );
+					local.setItem(
+						PAGE_KEY,
+						JSON.stringify(
+							held ? entry : { ...entry, unlocked: true }
+						)
+					);
 				} catch {
 					// Then it isn't in the list.
 				}
@@ -377,7 +397,7 @@
 		const manager = locks();
 
 		if ( ! manager || locked ) {
-			store();
+			store( locked );
 			return;
 		}
 
@@ -385,10 +405,10 @@
 		manager
 			.request( PAGE_KEY, () => {
 				locked = true;
-				store();
+				store( true );
 				return new Promise( () => {} );
 			} )
-			.catch( store );
+			.catch( () => store( false ) );
 	}
 
 	/**
@@ -426,7 +446,8 @@
 	// Other tabs' changes.
 	window.addEventListener( 'storage', ( event ) => {
 		if ( null === event.key || String( event.key ).startsWith( PREFIX ) ) {
-			refresh();
+			clearTimeout( settling );
+			settling = setTimeout( refresh, SETTLE_FOR );
 		}
 	} );
 

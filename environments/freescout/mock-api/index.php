@@ -109,7 +109,7 @@ if ( 'plugin-review.php' === $endpoint ) {
 				'name'         => 'Mock Plugin Renamed',
 				'slug'         => 'mock-plugin-renamed',
 				'status'       => 'pending',
-				'status_label' => 'In Review',
+				'status_label' => 'In review',
 				'released'     => false,
 				'scans_url'    => '',
 				'edit_url'     => 'https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=' . $plugin_id,
