@@ -2835,12 +2835,12 @@ let wpTrac,
 
 			// Logic to determine what the PRs status is
 			function prStatusNode( data ) {
-				const container = document.createElement( 'div' );
+				const statusContainer = document.createElement( 'div' );
 
 				// Closed? Skip everything else.
 				if ( data.closed_at ) {
-					container.textContent = '✅ Closed';
-					return container;
+					statusContainer.textContent = '✅ Closed';
+					return statusContainer;
 				}
 
 				let emojiState = '';
@@ -2923,17 +2923,17 @@ let wpTrac,
 					}
 				}
 				if ( emojiState ) {
-					container.append( document.createTextNode( emojiState + ' ' ) );
+					statusContainer.append( document.createTextNode( emojiState + ' ' ) );
 				}
 
 				items.forEach( ( item, index ) => {
 					if ( index > 0 ) {
-						container.append( document.createTextNode( ', ' ) );
+						statusContainer.append( document.createTextNode( ', ' ) );
 					}
-					container.append( item );
+					statusContainer.append( item );
 				} );
 
-				return container;
+				return statusContainer;
 			}
 
 			function renderPR( prContainer, data ) {
