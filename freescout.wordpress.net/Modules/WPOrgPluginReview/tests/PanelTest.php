@@ -85,7 +85,6 @@ final class PanelTest extends TestCase {
 		$this->assertStringContainsString( 'https://profiles.wordpress.org/jane/', $html );
 		$this->assertStringContainsString( 'data-flags="UPD OWN"', $html );
 		$this->assertStringContainsString( 'data-username="jane"', $html );
-		$this->assertStringContainsString( '<button type="button" class="wporg-review-title-toggle" hidden>', $html );
 		$this->assertStringContainsString( 'data-title="Use wp_enqueue &lt;script&gt; commands"', $html );
 		$this->assertStringNotContainsString( '<script>', $html );
 		$this->assertStringContainsString( '/wporgpluginreview/' . $this->conversation->id . '/plugin', $html );

@@ -30,8 +30,6 @@
 		'edit'            => __( 'Edit the plugin on WordPress.org' ),
 		'failed'          => __( 'Couldn’t load the plugin from WordPress.org.' ),
 		'throttled'       => __( 'Couldn’t load the plugin from WordPress.org: too many requests. Reload the page in a minute.' ),
-		'short_title'     => __( 'Shorten the tab’s title' ),
-		'full_title'      => __( 'Show the tab’s full title' ),
 		'mismatch'        => __( 'The Review ID in this reply is for :username, who isn’t the author of the plugin this conversation is about. Check that it’s the right review before you send it.' ),
 		'acknowledge'     => __( 'It’s the right one' ),
 		'names_followed'  => __( 'The plugin has the suggested name.' ),
@@ -143,9 +141,6 @@
 							@endforeach
 						</ul>
 					@endif
-
-					{{-- The script shows it, labeled with what a click does, when it changes the tab's title. --}}
-					<button type="button" class="wporg-review-title-toggle" hidden></button>
 				</div>
 			</div>
 		</div>
