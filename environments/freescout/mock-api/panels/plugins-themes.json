@@ -17,8 +17,8 @@
 							"text": "the-events-calendar"
 						},
 						{
-							"text": "Updated 5 days ago",
-							"tooltip": "2026-09-30"
+							"text": "(5d)",
+							"tooltip": "Updated 2026-09-30"
 						}
 					],
 					"links": [
@@ -54,8 +54,8 @@
 							"text": "block-for-strava"
 						},
 						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
+							"text": "(2mo)",
+							"tooltip": "Updated 2026-08-21"
 						}
 					],
 					"links": [
@@ -80,8 +80,8 @@
 							"text": "change-from-address"
 						},
 						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
+							"text": "(2mo)",
+							"tooltip": "Updated 2026-08-21"
 						}
 					],
 					"links": [
@@ -106,8 +106,8 @@
 							"text": "clicky-popular-posts-widget"
 						},
 						{
-							"text": "Updated 12 years ago",
-							"tooltip": "2014-09-04"
+							"text": "(12y)",
+							"tooltip": "Updated 2014-09-04"
 						}
 					],
 					"links": [
@@ -132,8 +132,8 @@
 							"text": "jetpack-twitter-via"
 						},
 						{
-							"text": "Updated 14 years ago",
-							"tooltip": "2012-11-26"
+							"text": "(14y)",
+							"tooltip": "Updated 2012-11-26"
 						}
 					],
 					"links": [
@@ -158,8 +158,8 @@
 							"text": "shiny-updates"
 						},
 						{
-							"text": "Updated 10 years ago",
-							"tooltip": "2016-09-27"
+							"text": "(10y)",
+							"tooltip": "Updated 2016-09-27"
 						}
 					],
 					"links": [
@@ -184,8 +184,8 @@
 							"text": "twenty-eleven-showcase-slider"
 						},
 						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
+							"text": "(2mo)",
+							"tooltip": "Updated 2026-08-21"
 						}
 					],
 					"links": [
@@ -210,8 +210,8 @@
 							"text": "uploads-unleashed"
 						},
 						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
+							"text": "(2mo)",
+							"tooltip": "Updated 2026-08-21"
 						}
 					],
 					"links": [
@@ -236,8 +236,8 @@
 							"text": "wp-approve-user"
 						},
 						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
+							"text": "(2mo)",
+							"tooltip": "Updated 2026-08-21"
 						}
 					],
 					"links": [
@@ -262,8 +262,8 @@
 							"text": "wp-author-slug"
 						},
 						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
+							"text": "(2mo)",
+							"tooltip": "Updated 2026-08-21"
 						}
 					],
 					"links": [
@@ -288,8 +288,8 @@
 							"text": "wp-display-header"
 						},
 						{
-							"text": "Updated 1 month ago",
-							"tooltip": "2026-09-02"
+							"text": "(1mo)",
+							"tooltip": "Updated 2026-09-02"
 						}
 					],
 					"links": [
@@ -314,8 +314,8 @@
 							"text": "wp-last-login"
 						},
 						{
-							"text": "Updated 3 weeks ago",
-							"tooltip": "2026-09-16"
+							"text": "(3w)",
+							"tooltip": "Updated 2026-09-16"
 						}
 					],
 					"links": [
@@ -340,8 +340,8 @@
 							"text": "wp-search-suggest"
 						},
 						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
+							"text": "(2mo)",
+							"tooltip": "Updated 2026-08-21"
 						}
 					],
 					"links": [
@@ -366,8 +366,8 @@
 							"text": "wpmu-author-description"
 						},
 						{
-							"text": "Updated 14 years ago",
-							"tooltip": "2012-07-12"
+							"text": "(14y)",
+							"tooltip": "Updated 2012-07-12"
 						}
 					],
 					"links": [
@@ -392,8 +392,8 @@
 							"text": "wpmu-network-site-users-dropdown"
 						},
 						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
+							"text": "(2mo)",
+							"tooltip": "Updated 2026-08-21"
 						}
 					],
 					"links": [
@@ -423,8 +423,8 @@
 							"text": "arya-stark"
 						},
 						{
-							"text": "Updated 10 years ago",
-							"tooltip": "2016-04-27"
+							"text": "(10y)",
+							"tooltip": "Updated 2016-04-27"
 						}
 					],
 					"links": [
@@ -454,8 +454,8 @@
 							"text": "wp-google-suggest"
 						},
 						{
-							"text": "Updated 6 years ago",
-							"tooltip": "2020-11-23"
+							"text": "(6y)",
+							"tooltip": "Updated 2020-11-23"
 						}
 					],
 					"links": [
@@ -485,8 +485,8 @@
 							"text": "wp-save-custom-header"
 						},
 						{
-							"text": "Updated 15 years ago",
-							"tooltip": "2011-05-11"
+							"text": "(15y)",
+							"tooltip": "Updated 2011-05-11"
 						}
 					],
 					"links": [
@@ -516,8 +516,8 @@
 							"text": "wp-time-background-color"
 						},
 						{
-							"text": "Updated 12 years ago",
-							"tooltip": "2014-12-15"
+							"text": "(12y)",
+							"tooltip": "Updated 2014-12-15"
 						}
 					],
 					"links": [
@@ -547,8 +547,8 @@
 							"text": "wporg-site-icon"
 						},
 						{
-							"text": "Updated 11 years ago",
-							"tooltip": "2015-06-29"
+							"text": "(11y)",
+							"tooltip": "Updated 2015-06-29"
 						}
 					],
 					"links": [
@@ -578,8 +578,8 @@
 							"text": "rejected-hello-world-greeting-rejected-2"
 						},
 						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-07-30"
+							"text": "(2mo)",
+							"tooltip": "Updated 2026-07-30"
 						}
 					],
 					"links": [
@@ -604,8 +604,8 @@
 							"text": "rejected-hello-world-greeting-rejected"
 						},
 						{
-							"text": "Updated 4 months ago",
-							"tooltip": "2026-06-01"
+							"text": "(4mo)",
+							"tooltip": "Updated 2026-06-01"
 						}
 					],
 					"links": [
@@ -636,8 +636,8 @@
 							"text": "testr-2__trashed"
 						},
 						{
-							"text": "Updated 6 years ago",
-							"tooltip": "2020-07-07"
+							"text": "(6y)",
+							"tooltip": "Updated 2020-07-07"
 						}
 					],
 					"links": [
@@ -662,8 +662,8 @@
 							"text": "testr-3__trashed"
 						},
 						{
-							"text": "Updated 6 years ago",
-							"tooltip": "2020-07-07"
+							"text": "(6y)",
+							"tooltip": "Updated 2020-07-07"
 						}
 					],
 					"links": [
@@ -688,8 +688,8 @@
 							"text": "the-bootstrap"
 						},
 						{
-							"text": "Updated 1 year ago",
-							"tooltip": "2025-07-24"
+							"text": "(1y)",
+							"tooltip": "Updated 2025-07-24"
 						}
 					],
 					"links": [
@@ -719,8 +719,8 @@
 							"text": "testr"
 						},
 						{
-							"text": "Updated 6 years ago",
-							"tooltip": "2020-07-07"
+							"text": "(6y)",
+							"tooltip": "Updated 2020-07-07"
 						}
 					],
 					"links": [
@@ -750,8 +750,8 @@
 							"text": "arya-stark-testing"
 						},
 						{
-							"text": "Updated 6 months ago",
-							"tooltip": "2026-03-28"
+							"text": "(6mo)",
+							"tooltip": "Updated 2026-03-28"
 						}
 					],
 					"links": [
@@ -776,8 +776,8 @@
 							"text": "canary-build"
 						},
 						{
-							"text": "Updated 3 months ago",
-							"tooltip": "2026-07-02"
+							"text": "(3mo)",
+							"tooltip": "Updated 2026-07-02"
 						}
 					],
 					"links": [
