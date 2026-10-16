@@ -96,7 +96,8 @@ final class PluginController extends Controller {
 	 *
 	 * @param array      $owner  What the review says about the owner, see Review::latest().
 	 * @param array|null $plugin The plugin as it is now.
-	 * @return array Author, plugin, and email: whether each matches; email is null without a submitter.
+	 * @return array Author, plugin, and email: whether each matches; null when it can't be checked, the domains without a
+	 *               username, and email without a submitter.
 	 */
 	private static function owner( array $owner, ?array $plugin ): array {
 		$submitter = is_array( $plugin['submitter'] ?? null ) ? $plugin['submitter'] : null;
@@ -112,8 +113,8 @@ final class PluginController extends Controller {
 		}
 
 		return array(
-			'author' => $dns->verifies( $owner['author_host'], $username ),
-			'plugin' => $dns->verifies( $owner['plugin_host'], $username ),
+			'author' => '' !== $username ? $dns->verifies( $owner['author_host'], $username ) : null,
+			'plugin' => '' !== $username ? $dns->verifies( $owner['plugin_host'], $username ) : null,
 			'email'  => $email,
 		);
 	}

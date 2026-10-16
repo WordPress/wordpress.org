@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgPluginReview\Http\Controllers;
 
+use App\Conversation;
 use App\Mailbox;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -54,7 +55,7 @@ final class WorklistController extends Controller {
 
 		$reviewers = Worklist::reviewers( $mailbox );
 		$user      = $reviewers->firstWhere( 'id', (int) $request->query( 'user', $viewer->id ) ) ?? $viewer;
-		$ids       = $list->section_ids( $mailbox, $user, $viewer );
+		$ids       = $list->section_ids( $mailbox, $user, $viewer, $reviewers );
 
 		$tags = array();
 		$tag  = 0;
@@ -81,7 +82,7 @@ final class WorklistController extends Controller {
 			$folder->active_count = count(
 				array_filter(
 					$sections['participating'],
-					static function ( $conversation ): bool {
+					static function ( Conversation $conversation ): bool {
 						return $conversation->isActive();
 					}
 				)

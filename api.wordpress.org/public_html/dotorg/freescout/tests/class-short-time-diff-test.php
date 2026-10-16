@@ -47,6 +47,8 @@ class Short_Time_Diff_Test extends TestCase {
 			'weeks'         => array( 2 * WEEK_IN_SECONDS, '2w' ),
 			'months'        => array( 2 * MONTH_IN_SECONDS + DAY_IN_SECONDS, '2mo' ),
 			'years'         => array( 12 * YEAR_IN_SECONDS, '12y' ),
+			'up to a week'  => array( 6 * DAY_IN_SECONDS + 15 * HOUR_IN_SECONDS, '1w' ),
+			'up to a year'  => array( 350 * DAY_IN_SECONDS, '1y' ),
 			'in the future' => array( -2 * DAY_IN_SECONDS, '2d' ),
 		);
 	}

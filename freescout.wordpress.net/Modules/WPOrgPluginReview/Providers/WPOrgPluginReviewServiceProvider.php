@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgPluginReview\Providers;
 
 use App\Conversation;
+use App\Http\Controllers\ConversationsController;
 use App\Mailbox;
 use App\Thread;
 use App\User;
@@ -52,13 +53,6 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 	 * @var int
 	 */
 	private const FOLDERS_PRIORITY = 30;
-
-	/**
-	 * How many of the sender's other conversations get their subjects marked in the sidebar: core shows the latest five.
-	 *
-	 * @var int
-	 */
-	private const PREVIOUS_LIMIT = 40;
 
 	/**
 	 * Boots the module.
@@ -246,7 +240,7 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 			}
 		);
 
-		// The subject goes in between, hidden: it's what the row is read as, and what FreeScout's scripts find there.
+		// The subject goes in between, hidden, for the row and FreeScout's scripts; last, so other modules' tags stay out of it.
 		\Eventy::addAction(
 			'conversations_table.before_subject',
 			static function ( mixed $conversation = null ) use ( $marks ): void {
@@ -259,7 +253,8 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgPluginReview] Could not mark the subject of conversation ' . ( $conversation->id ?? '' ) . ': ' . $e->getMessage() );
 				}
-			}
+			},
+			PHP_INT_MAX
 		);
 
 		\Eventy::addAction(
@@ -272,7 +267,8 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgPluginReview] Could not mark the subject of conversation ' . ( $conversation->id ?? '' ) . ': ' . $e->getMessage() );
 				}
-			}
+			},
+			PHP_INT_MIN
 		);
 	}
 
@@ -288,8 +284,10 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 			$previous      = Conversation::where( 'mailbox_id', $conversation->mailbox_id )
 				->where( 'customer_id', $conversation->customer_id )
 				->where( 'id', '<>', $conversation->id )
+				->where( 'status', '!=', Conversation::STATUS_SPAM )
+				->where( 'state', Conversation::STATE_PUBLISHED )
 				->orderBy( 'created_at', 'desc' )
-				->limit( self::PREVIOUS_LIMIT )
+				->limit( ConversationsController::PREV_CONVERSATIONS_LIMIT )
 				->get();
 			$conversations = array_merge( $conversations, $previous->all() );
 		}

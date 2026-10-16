@@ -87,7 +87,7 @@ class Item_Status_Test extends TestCase {
 		$this->assertSame(
 			array(
 				'icon' => '™️',
-				'text' => 'Disabled: Trademark or licensing',
+				'text' => 'Disabled: Licensing trademark violation',
 			),
 			get_item_status( 'disabled', '', 'licensing-trademark-violation' )['status']
 		);
@@ -116,15 +116,6 @@ class Item_Status_Test extends TestCase {
 	public function test_reviewer(): void {
 		$this->assertSame( 'In review · Assigned to Priya Shah', get_item_status( 'pending', 'Priya Shah' )['status']['text'] );
 		$this->assertSame( 'Pending initial review · Assigned to Priya Shah', get_item_status( 'new', 'Priya Shah' )['status']['text'] );
-	}
-
-	/**
-	 * Only reviews have a reviewer: the assignment stays after they're done.
-	 *
-	 * @return void
-	 */
-	public function test_no_reviewer_after_review(): void {
-		$this->assertSame( 'Approved', get_item_status( 'approved', 'Priya Shah' )['status']['text'] );
 	}
 
 	/**

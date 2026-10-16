@@ -39,7 +39,7 @@ class Reviewers {
 	 *
 	 * @var string
 	 */
-	public const ADMIN_TEAM = 'Plugin Admin';
+	public const ADMIN_TEAM = 'Plugin Admins';
 
 	/**
 	 * The Teams module's alias.
@@ -97,8 +97,13 @@ class Reviewers {
 
 		try {
 			$id = array_search( $name, $this->teams(), true );
+			if ( false === $id ) {
+				\Log::error( '[WPOrgPluginReview] There is no ' . $name . ' team.' );
 
-			return false === $id ? 0 : (int) $id;
+				return 0;
+			}
+
+			return (int) $id;
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgPluginReview] Could not find the ' . $name . ' team: ' . $e->getMessage() );
 
