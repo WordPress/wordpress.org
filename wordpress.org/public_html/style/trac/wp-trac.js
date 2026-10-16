@@ -1257,8 +1257,8 @@ let wpTrac,
 				}
 				hadClass = modify?.classList.contains( 'collapsed' );
 				// Prevent re-rendering of image previews and other changes from causing "jumps" while writing a comment.
-				const changelog = document.getElementById( 'changelog' );
-				const changelogHeight = changelog ? changelog.offsetHeight : 0;
+				const changelogHeight = document.getElementById( 'changelog' )?.offsetHeight || 0;
+				document.getElementById( 'changelog-height' )?.remove();
 				document.head.insertAdjacentHTML(
 					'beforeend',
 					`<style id="changelog-height"> #changelog { height: ${ changelogHeight }px !important; } </style>`
@@ -2006,14 +2006,11 @@ let wpTrac,
 					}
 
 					// Populate the dropdown.
-					if ( elements.add ) {
-						Array.from( elements.add.children ).forEach( ( opt ) => {
-							if ( opt.getAttribute( 'value' ) !== '' ) {
-								opt.remove();
-							}
-						} );
-					} else {
+					if ( ! elements.add ) {
 						elements.add = document.getElementById( 'keyword-add' );
+					}
+					if ( elements.add ) {
+						elements.add.length = 1;
 					}
 
 					const optionsFragment = document.createDocumentFragment();
@@ -2088,7 +2085,7 @@ let wpTrac,
 						if ( ! el ) {
 							return;
 						}
-						keyword = el.getAttribute( 'data-keyword' );
+						keyword = el.dataset.keyword;
 					}
 
 					keywords = keywords.filter( ( v ) => v !== keyword );
@@ -2479,10 +2476,7 @@ let wpTrac,
 
 			function changeCount( delta ) {
 				const countEl = notifications.querySelector( '.count' );
-				let count = parseInt( countEl?.textContent || '', 10 );
-				if ( isNaN( count ) ) {
-					count = 0;
-				}
+				const count = Number.parseInt( countEl?.textContent || '', 10 ) || 0;
 				count += delta;
 				if ( countEl ) {
 					countEl.textContent = count > 0 ? String( count ) : '';
@@ -2576,10 +2570,7 @@ let wpTrac,
 
 								const prev = clickedStar.previousElementSibling;
 								if ( prev ) {
-									let count = parseInt( prev.textContent, 10 );
-									if ( isNaN( count ) ) {
-										count = 0;
-									}
+									const count = Number.parseInt( prev.textContent, 10 ) || 0;
 									count += delta;
 									prev.textContent = count ? String( count ) : '';
 								}
