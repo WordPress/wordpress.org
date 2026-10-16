@@ -1052,7 +1052,7 @@ let wpTrac,
 				const nice = sanitizeNicename( user );
 				td.insertAdjacentHTML(
 					'afterbegin',
-					`<a href="https://profiles.wordpress.org/${ nice }/" data-nicename="${ nice }"><img class="avatar" src="https://wordpress.org/grav-redirect.php?user=${ nice }&s=48" srcset="https://wordpress.org/grav-redirect.php?user=${ nice }&s=96 2x" height="48" width="48" alt="${ nice }'s profile" /></a> `
+					`<a href="https://profiles.wordpress.org/${ nice }/" data-nicename="${ nice }"><img class="avatar" src="https://wordpress.org/grav-redirect.php?user=${ nice }&s=48" srcset="https://wordpress.org/grav-redirect.php?user=${ nice }&s=96 2x" height="48" width="48" alt="${ nice }'s profile" decoding="async" /></a> `
 				);
 			} );
 		},
@@ -1704,8 +1704,8 @@ let wpTrac,
 				},
 
 				initTicketParticipants() {
-					let users = [];
-					const exclude = Array.isArray( settings.exclude ) ? settings.exclude : [];
+					const users = new Set();
+					const excludeSet = new Set( Array.isArray( settings.exclude ) ? settings.exclude : [] );
 
 					// Most recent should show up first.
 					Array.from( document.querySelectorAll( '.change .username' ) )
@@ -1726,10 +1726,9 @@ let wpTrac,
 
 							if (
 								typeof username !== 'undefined' &&
-								! users.includes( username ) &&
-								! exclude.includes( username )
+								! excludeSet.has( username )
 							) {
-								users.push( username );
+								users.add( username );
 							}
 						} );
 
@@ -1748,16 +1747,16 @@ let wpTrac,
 						ticketReporter = ticketReporterNicename;
 					}
 
-					if ( ticketReporter && ! users.includes( ticketReporter ) ) {
-						users.push( ticketReporter );
+					if ( ticketReporter && ! excludeSet.has( ticketReporter ) ) {
+						users.add( ticketReporter );
 					}
 
 					// Exclude current user.
 					if ( wpTrac.currentUser ) {
-						users = users.filter( ( user ) => user !== wpTrac.currentUser );
+						users.delete( wpTrac.currentUser );
 					}
 
-					ticketParticipants = users;
+					ticketParticipants = Array.from( users );
 				},
 
 				getTicketParticipants() {
