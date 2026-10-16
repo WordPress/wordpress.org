@@ -101,6 +101,13 @@ final class IssueNames {
 		array( 'Phoning Home / Collecting User Data Without Opt-In Consent', 'Phoning Home / Collecting User Data', self::PRIORITY_HIGH ),
 		array( 'The main file of the plugin has a name that does not follow the convention', 'Main plugin file naming', self::PRIORITY_NORMAL ),
 		array( 'Arbitrary input in sensitive function parameters or calls', 'Arbitrary input in sensitive parameters/calls', self::PRIORITY_HIGH ),
+		array( 'The plugin has problems when it is activated', 'Activation issues', self::PRIORITY_NORMAL ),
+		array( 'Writing data to disallowed or incorrect locations, and/or asking users to edit plugin files', 'Writing data out of recommended directories', self::PRIORITY_LOW ),
+		array( 'There are unusual users in the "Contributors" list for this plugin', 'Unusual "Contributors"', self::PRIORITY_NORMAL ),
+		array( 'High position for your admin dashboard menu item', 'High position dashboard menu', self::PRIORITY_LOW ),
+		array( 'Improper handling of authentication cookies, keys, and salts.', 'Improper handling of authentication cookies, keys, and salts', self::PRIORITY_HIGH ),
+		array( 'Direct integration with a third-party AI provider detected.', 'Direct AI integration', self::PRIORITY_LOW ),
+		array( 'The functionality described is not in the plugin', 'Functionality not in the plugin', self::PRIORITY_HIGH ),
 	);
 
 	/**

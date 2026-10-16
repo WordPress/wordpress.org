@@ -76,7 +76,6 @@ final class PanelTest extends TestCase {
 	 * @return void
 	 */
 	public function test_panel_shows_the_latest_review(): void {
-		$this->conversation->update( array( 'subject' => '[WordPress Plugin Directory] Review in Progress: My <Plugin>' ) );
 		$this->review( '<ul><li>Plugin URI: https://example.org/p</li></ul><h3>🔴 Use wp_enqueue &lt;script&gt; commands</h3><p>Review ID: R ❗OWN my-plugin/jane/1Aug26/T2 8Aug26/4.3 (P0TDX42HGN)</p>' );
 
 		$html = $this->panel();
@@ -86,8 +85,7 @@ final class PanelTest extends TestCase {
 		$this->assertStringContainsString( 'https://profiles.wordpress.org/jane/', $html );
 		$this->assertStringContainsString( 'data-flags="UPD OWN"', $html );
 		$this->assertStringContainsString( 'data-username="jane"', $html );
-		$this->assertStringContainsString( 'data-short-subject="R: My &lt;Plugin&gt;"', $html );
-		$this->assertStringContainsString( 'wporg-review-title-toggle', $html );
+		$this->assertStringContainsString( '<button type="button" class="wporg-review-title-toggle" hidden>', $html );
 		$this->assertStringContainsString( 'data-title="Use wp_enqueue &lt;script&gt; commands"', $html );
 		$this->assertStringNotContainsString( '<script>', $html );
 		$this->assertStringContainsString( '/wporgpluginreview/' . $this->conversation->id . '/plugin', $html );
@@ -95,20 +93,40 @@ final class PanelTest extends TestCase {
 	}
 
 	/**
-	 * Without a plugin ID, the slug waits for WordPress.org to link it; a subject that isn't the plugin directory's isn't
-	 * shortened.
+	 * Without a plugin ID, the slug waits for WordPress.org to link it.
 	 *
 	 * @return void
 	 */
 	public function test_panel_links_the_slug_once_the_plugin_is_found(): void {
-		$this->conversation->update( array( 'subject' => 'Question about my plugin' ) );
 		$this->review( '<p>Review ID: R my-plugin/jane 8Aug26/4.3</p>' );
 
 		$html = $this->panel();
 
 		$this->assertStringContainsString( '<span class="wporg-review-slug-name">my-plugin</span>', $html );
-		$this->assertStringContainsString( 'data-short-subject=""', $html );
-		$this->assertStringNotContainsString( 'wporg-review-title-toggle', $html );
+	}
+
+	/**
+	 * A naming review shows the name and slug it suggests together, for the script to compare with the plugin's; and no
+	 * suggestion when it makes none.
+	 *
+	 * @return void
+	 */
+	public function test_panel_shows_the_suggestions_together(): void {
+		$this->conversation->update( array( 'subject' => '[WordPress Plugin Directory] Review in Progress: My Plugin' ) );
+		$this->review( '<ul><li>Suggested alternative name: <code>Example Kit</code></li><li>Suggested alternative slug: <code>example-kit</code></li></ul><p>Review ID: R ❗TRM my-plugin/jane 8Aug26/4.3</p>' );
+
+		$html = $this->panel();
+
+		$this->assertStringContainsString( 'data-original="My Plugin" data-suggested="Example Kit" data-suggested-slug="example-kit"', $html );
+		$this->assertMatchesRegularExpression( '#<dt>Suggested</dt>\s*<dd>\s*Example Kit\s*<br>\s*<code>example-kit</code>#', $html );
+		$this->assertStringNotContainsString( 'Suggested slug', $html );
+
+		$this->review( '<p>Review ID: R ❗TRM my-plugin/jane 9Aug26/4.4</p>', '2026-08-09 10:00:00' );
+
+		$html = $this->panel();
+
+		$this->assertStringContainsString( 'wporg-review-names', $html );
+		$this->assertStringNotContainsString( '<dt>Suggested</dt>', $html );
 	}
 
 	/**
