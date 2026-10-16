@@ -305,9 +305,6 @@ let wpTrac,
 			regex.lastIndex = 0;
 
 			const matches = [ ...value.matchAll( regex ) ];
-			if ( ! matches.length ) {
-				return;
-			}
 
 			const fragment = document.createDocumentFragment();
 			let lastIndex = 0;
@@ -2116,7 +2113,7 @@ let wpTrac,
 				// Check on submit that we're not just re-ordering keywords.
 				// Otherwise, Trac flips out and adds a useless 'Keywords changed from X to X' marker.
 				submit() {
-					if ( ! elements.hiddenEl || ! Array.isArray( originalKeywords ) || ! Array.isArray( keywords ) ) {
+					if ( ! elements.hiddenEl || keywords.length !== originalKeywords.length ) {
 						return;
 					}
 					if ( keywords.length !== originalKeywords.length ) {
@@ -2146,11 +2143,9 @@ let wpTrac,
 				}
 
 				container = field.parentElement;
-				if ( container.getAttribute( 'colspan' ) === '3' ) {
-					container.id = 'focuses';
-				} else {
-					container.setAttribute( 'colspan', '2' );
-					container.id = 'focuses';
+				container.id = 'focuses';
+				if ( container.getAttribute( 'colspan' ) !== '3' ) {
+				    container.setAttribute( 'colspan', '2' );
 				}
 				field.style.display = 'none';
 
