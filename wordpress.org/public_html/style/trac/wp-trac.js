@@ -385,7 +385,7 @@ let wpTrac,
 			document.querySelectorAll( 'h3.change .username' ).forEach( ( el ) => {
 				const username = el.dataset.username;
 
-				if ( username && username in labels ) {
+				if ( username && Object.hasOwn( labels, username ) ) {
 					const span = document.createElement( 'span' );
 					span.className = 'contributor-label';
 
@@ -1504,11 +1504,8 @@ let wpTrac,
 
 					// Prevent changing to the component if need be.
 					if ( ! wpTrac.isNewTicket() ) {
-						for ( const c in bugTrackerLocations ) {
-							if ( ! bugTrackerLocations[ c ].prevent_changing_to ) {
-								continue;
-							}
-							if ( component.value !== c ) {
+						for ( const [ c, tracker ] of Object.entries( bugTrackerLocations ) ) {
+							if ( tracker.prevent_changing_to && component.value !== c ) {
 								component.querySelector( `option[value="${ window.CSS.escape( c ) }"]` )?.remove();
 							}
 						}
@@ -2138,7 +2135,7 @@ let wpTrac,
 				}
 				field.style.display = 'none';
 
-				const rawFocuses = field.value.replace( /,/g, ' ' ).replace( / +/g, ' ' ).trim();
+				const rawFocuses = field.value.replace( /,/g, ' ' ).replace( /\s+/g, ' ' ).trim();
 				focuses = rawFocuses.length === 0 ? [] : rawFocuses.split( ' ' );
 				originalFocuses = [ ...focuses ];
 
