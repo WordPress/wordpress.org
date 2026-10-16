@@ -610,7 +610,12 @@ let wpTrac,
 				 */
 				function isDirty( selector ) {
 					const el = document.querySelector( selector );
-					return Boolean( el && el.value.trim() !== el.defaultValue.trim() );
+					if ( ! el ) {
+						return false;
+					}
+					const normalize = ( str ) => ( str || '' ).replace( /\r\n/g, '\n' ).trim();
+
+					return normalize( el.value ) !== normalize( el.defaultValue );
 				}
 
 				/**
