@@ -1196,7 +1196,9 @@ let wpTrac,
 		 * destinations outside the WordPress.org network.
 		 */
 		markUgcLinks() {
-			const wporgUrlRegex = /^([^>]*href=")?https?:\/\/([a-z0-9.-]+\.)?(wordpress\.(org|net)|buddypress\.org|bbpress\.org|wordcamp\.org)\//i;
+			const wporgUrlRegex =
+				/^([^>]*href=")?https?:\/\/([a-z0-9.-]+\.)?(wordpress\.(org|net)|buddypress\.org|bbpress\.org|wordcamp\.org)\//i;
+
 			/**
 			 * Whether a URL points at a WordPress.org-family domain.
 			 *
@@ -1710,20 +1712,20 @@ let wpTrac,
 
 					// Most recent should show up first.
 					Array.from( document.querySelectorAll( '.change .username' ) )
-					.reverse()
-					.forEach( ( el ) => {
-						let username = el.dataset.username;
-						const nicename = el.dataset.nicename;
+						.reverse()
+						.forEach( ( el ) => {
+							let username = el.dataset.username;
+							const nicename = el.dataset.nicename;
 
-						// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
-						if (
-							username &&
-							nicename &&
-							username.toLowerCase() !== nicename.toLowerCase() &&
-							wpTrac.currentUser !== username
-						) {
-							username = nicename;
-						}
+							// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
+							if (
+								username &&
+								nicename &&
+								username.toLowerCase() !== nicename.toLowerCase() &&
+								wpTrac.currentUser !== username
+							) {
+								username = nicename;
+							}
 
 						if ( username && ! excludeSet.has( username ) ) {
 							users.add( username );
@@ -1987,10 +1989,7 @@ let wpTrac,
 						elements.bin.replaceChildren();
 					}
 
-					// Replace commas, collapse spaces, trim, then split by space.
-					const rawKeywords = elements.hiddenEl.value.replace( /,/g, ' ' ).replace( /\s+/g, ' ' ).trim();
-					keywords = rawKeywords ? rawKeywords.split( ' ' ) : [];
-					// Put our cleaned up version back into the hidden field.
+					keywords = elements.hiddenEl.value.trim().split( /[\s,]+/ ).filter( Boolean );
 					elements.hiddenEl.value = keywords.join( ' ' );
 
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
@@ -2139,8 +2138,7 @@ let wpTrac,
 				}
 				field.style.display = 'none';
 
-				const rawFocuses = field.value.replace( /,/g, ' ' ).replace( /\s+/g, ' ' ).trim();
-				focuses = rawFocuses.length === 0 ? [] : rawFocuses.split( ' ' );
+				focuses = field.value.trim().split( /[\s,]+/ ).filter( Boolean );
 				originalFocuses = [ ...focuses ];
 
 				const fieldset = document.createElement( 'fieldset' );
@@ -2621,7 +2619,7 @@ let wpTrac,
 
 				// Add ability to include GitHub tickets into a 'my-patches' report.
 				// "Just" include a variable called '$GITHUBTICKETS' in the Query.
-				const warning = Array.from( document.querySelectorAll( '#warning.system-message' ) ).find( ( el ) =>
+				const warning = [ ...document.querySelectorAll( '#warning.system-message' ) ].find( ( el ) =>
 					el.textContent.includes( 'GITHUBTICKETS' )
 				);
 				if ( warning ) {
@@ -2811,13 +2809,7 @@ let wpTrac,
 					}
 				} );
 
-				children.flat().forEach( ( child ) => {
-					if ( child instanceof window.Node ) {
-						el.append( child );
-					} else if ( child !== null && child !== undefined ) {
-						el.append( document.createTextNode( String( child ) ) );
-					}
-				} );
+				el.append( ...children.flat().filter( ( child ) => child != null ) );
 
 				return el;
 			}
