@@ -2816,7 +2816,7 @@ let wpTrac,
 					}
 				} );
 
-				el.append( ...children.flat().filter( ( child ) => child !== null ) );
+				el.append( ...children.flat().filter( ( child ) => child !== null && child !== undefined ) );
 
 				return el;
 			}
@@ -3028,8 +3028,6 @@ let wpTrac,
 				const summaryVal = document.getElementById( 'field-summary' )?.value || '';
 				const descVal = document.getElementById( 'field-description' )?.value || '';
 				const matchText = ( summaryVal + ' ' + descVal ).toLowerCase();
-				const matchingWords = [],
-					matchingComponents = [];
 
 				if ( ! enabled || ! matchText.trim().length ) {
 					return;
