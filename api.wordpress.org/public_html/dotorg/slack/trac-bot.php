@@ -30,10 +30,6 @@ namespace Dotorg\Slack\Trac {
 		return;
 	}
 
-	/*
-	 * The Slack channel name, user name, and message timestamp are interpolated into the Trac
-	 * comment and the message permalink below.
-	 */
 	$channel_name  = sanitize_text_field( wp_unslash( $_POST['channel_name'] ?? '' ) );
 	$user_name     = sanitize_text_field( wp_unslash( $_POST['user_name'] ?? '' ) );
 	$msg_timestamp = sanitize_text_field( wp_unslash( $_POST['timestamp'] ?? '' ) );

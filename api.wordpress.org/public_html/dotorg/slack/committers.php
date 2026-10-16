@@ -20,7 +20,7 @@ if ( ! isset( $_POST['token'] ) || ! is_string( $_POST['token'] ) || '' === $_PO
 	return;
 }
 
-if ( ! is_string( $_POST['token'] ?? null ) || ! hash_equals( WEBHOOK_TOKEN, $_POST['token'] ) ) {
+if ( ! hash_equals( WEBHOOK_TOKEN, $_POST['token'] ) ) {
 	return;
 }
 
