@@ -248,31 +248,8 @@
 # Override original styles
 --------------------------------------------------------------*/
 
-body:not(.trac):not(.home-page):not(.home) #main {
-	margin-top: 0;
-}
-
 body:not(.trac):not(.home-page) #main {
 	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
-}
-
-@media screen and (max-width: 460px) {
-
-	#main {
-		margin: unset;
-	}
-}
-
-@media screen and (min-width: 960px) {
-
-	#header-inner,
-	#headline-inner,
-	#subnav-inner,
-	#showcase-inner,
-	#main,
-	#footer {
-		width: unset;
-	}
 }
 
 
