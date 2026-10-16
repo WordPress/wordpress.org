@@ -716,28 +716,20 @@ let wpTrac,
 				} );
 
 				// Hide action text inputs and select fields from keyboard, unless the corresponding action is focused.
-				actionContainer.addEventListener( 'focusin', function ( event ) {
-					const target = event.target;
-					const parent = target.parentElement;
+				[ 'focusin', 'focusout' ].forEach( ( type ) => {
+					actionContainer.addEventListener( type, ( { target } ) => {
+						const isFocus = 'focusin' === type;
+						const parent = target.parentElement;
 
-					if ( target.matches( 'input[type="text"], select' ) ) {
-						parent?.querySelector( 'input[type="radio"]' )?.click();
-					}
+						if ( isFocus && target.matches( 'input[type="text"], select' ) ) {
+							parent?.querySelector( 'input[type="radio"]' )?.click();
+						}
 
-					if ( target.matches( 'input' ) ) {
-						parent?.querySelectorAll( 'input[type="text"], select' )
-							.forEach( ( el ) => el.removeAttribute( 'tabindex' ) );
-					}
-				} );
-
-				actionContainer.addEventListener( 'focusout', function ( event ) {
-					const target = event.target;
-					const parent = target.parentElement;
-
-					if ( target.matches( 'input' ) ) {
-						parent?.querySelectorAll( 'input[type="text"], select' )
-							.forEach( ( el ) => el.setAttribute( 'tabindex', '-1' ) );
-					}
+						if ( target.matches( 'input' ) ) {
+							parent?.querySelectorAll( 'input[type="text"], select' )
+								.forEach( ( el ) => ( isFocus ? el.removeAttribute( 'tabindex' ) : el.setAttribute( 'tabindex', '-1' ) ) );
+						}
+					} );
 				} );
 
 				actionContainer.addEventListener( 'change', function ( event ) {
