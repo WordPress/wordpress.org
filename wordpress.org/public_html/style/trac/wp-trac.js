@@ -713,35 +713,40 @@ let wpTrac,
 				actionContainer.querySelectorAll( 'input[type="text"], select' ).forEach( ( field ) => {
 					field.disabled = false;
 					field.setAttribute( 'tabindex', '-1' );
-
-					field.addEventListener( 'focus', function () {
-						const radio = this.parentElement?.querySelector( 'input[type="radio"]' );
-						radio?.click();
-					} );
-				} );
-
-				actionContainer.querySelectorAll( 'div' ).forEach( ( div ) => {
-					const select = div.querySelector( 'select' );
-					const radio = div.querySelector( 'input[type="radio"]' );
-					if ( select && radio ) {
-						radio.addEventListener( 'change', function () {
-							select.disabled = false;
-						} );
-					}
 				} );
 
 				// Hide action text inputs and select fields from keyboard, unless the corresponding action is focused.
-				actionContainer.querySelectorAll( 'input' ).forEach( ( input ) => {
-					input.addEventListener( 'blur', function () {
-						this.parentElement
-							?.querySelectorAll( 'input[type="text"], select' )
-							.forEach( ( el ) => el.setAttribute( 'tabindex', '-1' ) );
-					} );
-					input.addEventListener( 'focus', function () {
-						this.parentElement
-							?.querySelectorAll( 'input[type="text"], select' )
+				actionContainer.addEventListener( 'focusin', function ( event ) {
+					const target = event.target;
+					const parent = target.parentElement;
+
+					if ( target.matches( 'input[type="text"], select' ) ) {
+						parent?.querySelector( 'input[type="radio"]' )?.click();
+					}
+
+					if ( target.matches( 'input' ) ) {
+						parent?.querySelectorAll( 'input[type="text"], select' )
 							.forEach( ( el ) => el.removeAttribute( 'tabindex' ) );
-					} );
+					}
+				} );
+
+				actionContainer.addEventListener( 'focusout', function ( event ) {
+					const target = event.target;
+					const parent = target.parentElement;
+
+					if ( target.matches( 'input' ) ) {
+						parent?.querySelectorAll( 'input[type="text"], select' )
+							.forEach( ( el ) => el.setAttribute( 'tabindex', '-1' ) );
+					}
+				} );
+
+				actionContainer.addEventListener( 'change', function ( event ) {
+					if ( event.target.matches( 'input[type="radio"]' ) ) {
+						const select = event.target.parentElement?.querySelector( 'select' );
+						if ( select ) {
+							select.disabled = false;
+						}
+					}
 				} );
 			}
 
