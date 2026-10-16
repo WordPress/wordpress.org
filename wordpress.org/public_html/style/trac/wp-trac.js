@@ -1531,8 +1531,11 @@ let wpTrac,
 							descriptionField = 'body';
 						}
 
+						const rawSummary = document.getElementById( 'field-summary' )?.value || '';
+						const safeSummary = rawSummary.length > 255 ? rawSummary.slice( 0, 252 ) + '...' : rawSummary;
+
 						const params = new URLSearchParams();
-						params.set( summaryField, document.getElementById( 'field-summary' )?.value || '' );
+						params.set( summaryField, safeSummary );
 						params.set( descriptionField, document.getElementById( 'field-description' )?.value || '' );
 
 						const separator = href.includes( '?' ) ? '&' : '?';
