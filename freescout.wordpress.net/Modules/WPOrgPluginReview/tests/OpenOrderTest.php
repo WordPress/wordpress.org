@@ -18,7 +18,10 @@ use Illuminate\Http\Request;
 use Modules\WPOrgPluginReview\Providers\WPOrgPluginReviewServiceProvider;
 use Modules\WPOrgPluginReview\Services\OpenOrder;
 use Modules\WPOrgPluginReview\Services\Worklist;
+use Modules\WPOrgPluginReview\Tests\Support\Tags;
 use WordPressdotorg\FreeScout\Tests\TestCase;
+
+require_once __DIR__ . '/Support/Tags.php';
 
 /**
  * Covers which conversations the buttons open and in what order, how many, and the profile field that sets it.
@@ -40,6 +43,17 @@ final class OpenOrderTest extends TestCase {
 	private $reviewer;
 
 	/**
+	 * Creates the Tags module's tables before the test's transaction starts.
+	 *
+	 * @return void
+	 */
+	protected function refreshApplication(): void {
+		parent::refreshApplication();
+
+		Tags::create();
+	}
+
+	/**
 	 * Registers the module.
 	 *
 	 * Times are from now: FreeScout's Carbon can't stop the clock. The time a test takes only makes conversations wait
@@ -52,6 +66,7 @@ final class OpenOrderTest extends TestCase {
 
 		$this->app->register( WPOrgPluginReviewServiceProvider::class );
 		$this->app['router']->getRoutes()->refreshNameLookups();
+		$this->beforeApplicationDestroyed( array( Tags::class, 'drop' ) );
 
 		$this->mailbox  = $this->create_mailbox( 'Plugins', 'plugins@wordpress.test' );
 		$this->reviewer = $this->create_user();
