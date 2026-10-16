@@ -66,18 +66,15 @@ class GoogleCloudStorage {
 		// handles `stream_metadata()` to avoid PHP warnings.
 		WPORG_StreamWrapper::register( self::$gs_client );
 
-		add_filter( 'upload_dir',                      [ __CLASS__, 'filter_upload_dir' ] );
-		add_filter( 'wp_get_attachment_url',           [ __CLASS__, 'filter_wp_get_attachment_url' ], 10, 2 );
+		add_filter( 'upload_dir', [ __CLASS__, 'filter_upload_dir' ] );
+		add_filter( 'wp_get_attachment_url', [ __CLASS__, 'filter_wp_get_attachment_url' ], 10, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ __CLASS__, 'append_attachment_metadata' ], 10, 3 );
-		add_filter( 'pre_recurse_dirsize',             [ __CLASS__, 'filter_pre_recurse_dirsize' ], 10, 2 );
+		add_filter( 'pre_recurse_dirsize', [ __CLASS__, 'filter_pre_recurse_dirsize' ], 10, 2 );
+		add_filter( 'pre_get_space_used', [ __CLASS__, 'filter_pre_get_space_used' ] );
 	}
 
 	/**
 	 * Short-circuits directory size calculations for Google Cloud Storage paths.
-	 *
-	 * Sizing a `gs://` directory stats every object under it through the stream
-	 * wrapper, several API requests each, so callers like the Jetpack heartbeat
-	 * would otherwise crawl the entire bucket.
 	 *
 	 * @param int|false $size      The directory size in bytes, or false to calculate it.
 	 * @param string    $directory Full path of the directory.
@@ -89,6 +86,16 @@ class GoogleCloudStorage {
 		}
 
 		return $size;
+	}
+
+	/**
+	 * Short-circuits the multisite space-used lookup when uploads live in Google Cloud Storage.
+	 *
+	 * @param int|false $space_used The space used in megabytes, or false to calculate it.
+	 * @return int|false
+	 */
+	public static function filter_pre_get_space_used( $space_used ) {
+		return self::filter_pre_recurse_dirsize( $space_used, wp_get_upload_dir()['basedir'] );
 	}
 
 	/**
