@@ -2116,9 +2116,6 @@ let wpTrac,
 					if ( ! elements.hiddenEl || keywords.length !== originalKeywords.length ) {
 						return;
 					}
-					if ( keywords.length !== originalKeywords.length ) {
-						return;
-					}
 
 					const testKeywords = keywords.filter( ( v ) => ! originalKeywords.includes( v ) );
 
