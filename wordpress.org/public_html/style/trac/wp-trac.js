@@ -454,7 +454,7 @@ let wpTrac,
 					return;
 				}
 
-				if ( /\.(jpg|jpeg|png|gif|svg|webp)$/i.test( href ) ) {
+				if ( /\.(jpg|jpeg|png|gif|svg|webp)(\?.*)?$/i.test( href ) ) {
 					const image = new window.Image();
 					image.src = href;
 					image.onload = function () {
@@ -470,7 +470,7 @@ let wpTrac,
 						link.append( img );
 						appendTo.append( link );
 					};
-				} else if ( /\.(mp4|mov|webm)$/i.test( href ) ) {
+				} else if ( /\.(mp4|mov|webm)(\?.*)?$/i.test( href ) ) {
 					const video = document.createElement( 'video' );
 					video.src = href;
 					video.className = 'trac-image-preview';
