@@ -2142,7 +2142,7 @@ let wpTrac,
 				container = field.parentElement;
 				container.id = 'focuses';
 				if ( container.getAttribute( 'colspan' ) !== '3' ) {
-				    container.setAttribute( 'colspan', '2' );
+					container.setAttribute( 'colspan', '2' );
 				}
 				field.style.display = 'none';
 
