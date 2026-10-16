@@ -5,8 +5,8 @@
 namespace Google\Api\MetricDescriptor;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Additional annotations that can be used to guide the usage of a metric.
@@ -16,12 +16,14 @@ use Google\Protobuf\Internal\GPBUtil;
 class MetricDescriptorMetadata extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Deprecated. Please use the MetricDescriptor.launch_stage instead.
-     * The launch stage of the metric definition.
+     * Deprecated. Must use the
+     * [MetricDescriptor.launch_stage][google.api.MetricDescriptor.launch_stage]
+     * instead.
      *
      * Generated from protobuf field <code>.google.api.LaunchStage launch_stage = 1 [deprecated = true];</code>
+     * @deprecated
      */
-    private $launch_stage = 0;
+    protected $launch_stage = 0;
     /**
      * The sampling period of metric data points. For metrics which are written
      * periodically, consecutive data points are stored at this time interval,
@@ -30,7 +32,7 @@ class MetricDescriptorMetadata extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.protobuf.Duration sample_period = 2;</code>
      */
-    private $sample_period = null;
+    protected $sample_period = null;
     /**
      * The delay of data points caused by ingestion. Data points older than this
      * age are guaranteed to be ingested and available to be read, excluding
@@ -38,7 +40,13 @@ class MetricDescriptorMetadata extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.protobuf.Duration ingest_delay = 3;</code>
      */
-    private $ingest_delay = null;
+    protected $ingest_delay = null;
+    /**
+     * The scope of the timeseries data of the metric.
+     *
+     * Generated from protobuf field <code>repeated .google.api.MetricDescriptor.MetricDescriptorMetadata.TimeSeriesResourceHierarchyLevel time_series_resource_hierarchy_level = 4;</code>
+     */
+    private $time_series_resource_hierarchy_level;
 
     /**
      * Constructor.
@@ -47,8 +55,9 @@ class MetricDescriptorMetadata extends \Google\Protobuf\Internal\Message
      *     Optional. Data for populating the Message object.
      *
      *     @type int $launch_stage
-     *           Deprecated. Please use the MetricDescriptor.launch_stage instead.
-     *           The launch stage of the metric definition.
+     *           Deprecated. Must use the
+     *           [MetricDescriptor.launch_stage][google.api.MetricDescriptor.launch_stage]
+     *           instead.
      *     @type \Google\Protobuf\Duration $sample_period
      *           The sampling period of metric data points. For metrics which are written
      *           periodically, consecutive data points are stored at this time interval,
@@ -58,6 +67,8 @@ class MetricDescriptorMetadata extends \Google\Protobuf\Internal\Message
      *           The delay of data points caused by ingestion. Data points older than this
      *           age are guaranteed to be ingested and available to be read, excluding
      *           data loss due to errors.
+     *     @type int[] $time_series_resource_hierarchy_level
+     *           The scope of the timeseries data of the metric.
      * }
      */
     public function __construct($data = NULL) {
@@ -66,27 +77,35 @@ class MetricDescriptorMetadata extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Deprecated. Please use the MetricDescriptor.launch_stage instead.
-     * The launch stage of the metric definition.
+     * Deprecated. Must use the
+     * [MetricDescriptor.launch_stage][google.api.MetricDescriptor.launch_stage]
+     * instead.
      *
      * Generated from protobuf field <code>.google.api.LaunchStage launch_stage = 1 [deprecated = true];</code>
      * @return int
+     * @deprecated
      */
     public function getLaunchStage()
     {
+        if ($this->launch_stage !== 0) {
+            @trigger_error('launch_stage is deprecated.', E_USER_DEPRECATED);
+        }
         return $this->launch_stage;
     }
 
     /**
-     * Deprecated. Please use the MetricDescriptor.launch_stage instead.
-     * The launch stage of the metric definition.
+     * Deprecated. Must use the
+     * [MetricDescriptor.launch_stage][google.api.MetricDescriptor.launch_stage]
+     * instead.
      *
      * Generated from protobuf field <code>.google.api.LaunchStage launch_stage = 1 [deprecated = true];</code>
      * @param int $var
      * @return $this
+     * @deprecated
      */
     public function setLaunchStage($var)
     {
+        @trigger_error('launch_stage is deprecated.', E_USER_DEPRECATED);
         GPBUtil::checkEnum($var, \Google\Api\LaunchStage::class);
         $this->launch_stage = $var;
 
@@ -100,11 +119,21 @@ class MetricDescriptorMetadata extends \Google\Protobuf\Internal\Message
      * a smaller sampling period.
      *
      * Generated from protobuf field <code>.google.protobuf.Duration sample_period = 2;</code>
-     * @return \Google\Protobuf\Duration
+     * @return \Google\Protobuf\Duration|null
      */
     public function getSamplePeriod()
     {
         return $this->sample_period;
+    }
+
+    public function hasSamplePeriod()
+    {
+        return isset($this->sample_period);
+    }
+
+    public function clearSamplePeriod()
+    {
+        unset($this->sample_period);
     }
 
     /**
@@ -131,11 +160,21 @@ class MetricDescriptorMetadata extends \Google\Protobuf\Internal\Message
      * data loss due to errors.
      *
      * Generated from protobuf field <code>.google.protobuf.Duration ingest_delay = 3;</code>
-     * @return \Google\Protobuf\Duration
+     * @return \Google\Protobuf\Duration|null
      */
     public function getIngestDelay()
     {
         return $this->ingest_delay;
+    }
+
+    public function hasIngestDelay()
+    {
+        return isset($this->ingest_delay);
+    }
+
+    public function clearIngestDelay()
+    {
+        unset($this->ingest_delay);
     }
 
     /**
@@ -155,8 +194,31 @@ class MetricDescriptorMetadata extends \Google\Protobuf\Internal\Message
         return $this;
     }
 
-}
+    /**
+     * The scope of the timeseries data of the metric.
+     *
+     * Generated from protobuf field <code>repeated .google.api.MetricDescriptor.MetricDescriptorMetadata.TimeSeriesResourceHierarchyLevel time_series_resource_hierarchy_level = 4;</code>
+     * @return RepeatedField<int>
+     */
+    public function getTimeSeriesResourceHierarchyLevel()
+    {
+        return $this->time_series_resource_hierarchy_level;
+    }
 
-// Adding a class alias for backwards compatibility with the previous class name.
-class_alias(MetricDescriptorMetadata::class, \Google\Api\MetricDescriptor_MetricDescriptorMetadata::class);
+    /**
+     * The scope of the timeseries data of the metric.
+     *
+     * Generated from protobuf field <code>repeated .google.api.MetricDescriptor.MetricDescriptorMetadata.TimeSeriesResourceHierarchyLevel time_series_resource_hierarchy_level = 4;</code>
+     * @param int[] $var
+     * @return $this
+     */
+    public function setTimeSeriesResourceHierarchyLevel($var)
+    {
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::ENUM, \Google\Api\MetricDescriptor\MetricDescriptorMetadata\TimeSeriesResourceHierarchyLevel::class);
+        $this->time_series_resource_hierarchy_level = $arr;
+
+        return $this;
+    }
+
+}
 

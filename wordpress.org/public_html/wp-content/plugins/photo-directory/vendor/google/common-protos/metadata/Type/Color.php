@@ -15,17 +15,9 @@ class Color
           return;
         }
         \GPBMetadata\Google\Protobuf\Wrappers::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0aef010a17676f6f676c652f747970652f636f6c6f722e70726f746f120b" .
-            "676f6f676c652e74797065225d0a05436f6c6f72120b0a03726564180120" .
-            "012802120d0a05677265656e180220012802120c0a04626c756518032001" .
-            "2802122a0a05616c70686118042001280b321b2e676f6f676c652e70726f" .
-            "746f6275662e466c6f617456616c756542600a0f636f6d2e676f6f676c65" .
-            "2e74797065420a436f6c6f7250726f746f50015a36676f6f676c652e676f" .
-            "6c616e672e6f72672f67656e70726f746f2f676f6f676c65617069732f74" .
-            "7970652f636f6c6f723b636f6c6f72f80101a20203475450620670726f74" .
-            "6f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xEC\x01\x0A\x17google/type/color.proto\x12\x0Bgoogle.type\"]\x0A\x05Color\x12\x0B\x0A\x03red\x18\x01 \x01(\x02\x12\x0D\x0A\x05green\x18\x02 \x01(\x02\x12\x0C\x0A\x04blue\x18\x03 \x01(\x02\x12*\x0A\x05alpha\x18\x04 \x01(\x0B2\x1B.google.protobuf.FloatValueB]\x0A\x0Fcom.google.typeB\x0AColorProtoP\x01Z6google.golang.org/genproto/googleapis/type/color;color\xA2\x02\x03GTPb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

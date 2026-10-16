@@ -11,26 +11,33 @@
 
 namespace Monolog\Handler;
 
-use Monolog\Formatter\LineFormatter;
 use Monolog\Formatter\FormatterInterface;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Utils;
+use Monolog\LogRecord;
+use Monolog\Level;
+
+use function headers_list;
+use function stripos;
 
 /**
  * Handler sending logs to browser's javascript console with no browser extension required
  *
  * @author Olivier Poitrey <rs@dailymotion.com>
- *
- * @phpstan-import-type FormattedRecord from AbstractProcessingHandler
  */
 class BrowserConsoleHandler extends AbstractProcessingHandler
 {
-    /** @var bool */
-    protected static $initialized = false;
-    /** @var FormattedRecord[] */
-    protected static $records = [];
+    protected static bool $initialized = false;
+
+    /** @var LogRecord[] */
+    protected static array $records = [];
+
+    protected const FORMAT_HTML = 'html';
+    protected const FORMAT_JS = 'js';
+    protected const FORMAT_UNKNOWN = 'unknown';
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      *
      * Formatted output may contain some formatting markers to be transferred to `console.log` using the %c format.
      *
@@ -44,9 +51,9 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    protected function write(array $record): void
+    protected function write(LogRecord $record): void
     {
         // Accumulate records
         static::$records[] = $record;
@@ -65,15 +72,15 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
     public static function send(): void
     {
         $format = static::getResponseFormat();
-        if ($format === 'unknown') {
+        if ($format === self::FORMAT_UNKNOWN) {
             return;
         }
 
-        if (count(static::$records)) {
-            if ($format === 'html') {
-                static::writeOutput('<script>' . static::generateScript() . '</script>');
-            } elseif ($format === 'js') {
-                static::writeOutput(static::generateScript());
+        if (\count(static::$records) > 0) {
+            if ($format === self::FORMAT_HTML) {
+                static::writeOutput('<script>' . self::generateScript() . '</script>');
+            } else { // js format
+                static::writeOutput(self::generateScript());
             }
             static::resetStatic();
         }
@@ -84,7 +91,7 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
         self::resetStatic();
     }
 
-    public function reset()
+    public function reset(): void
     {
         parent::reset();
 
@@ -125,48 +132,70 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
      * If Content-Type is anything else -> unknown
      *
      * @return string One of 'js', 'html' or 'unknown'
+     * @phpstan-return self::FORMAT_*
      */
     protected static function getResponseFormat(): string
     {
         // Check content type
         foreach (headers_list() as $header) {
             if (stripos($header, 'content-type:') === 0) {
-                // This handler only works with HTML and javascript outputs
-                // text/javascript is obsolete in favour of application/javascript, but still used
-                if (stripos($header, 'application/javascript') !== false || stripos($header, 'text/javascript') !== false) {
-                    return 'js';
-                }
-                if (stripos($header, 'text/html') === false) {
-                    return 'unknown';
-                }
-                break;
+                return static::getResponseFormatFromContentType($header);
             }
         }
 
-        return 'html';
+        return self::FORMAT_HTML;
+    }
+
+    /**
+     * @return string One of 'js', 'html' or 'unknown'
+     * @phpstan-return self::FORMAT_*
+     */
+    protected static function getResponseFormatFromContentType(string $contentType): string
+    {
+        // This handler only works with HTML and javascript outputs
+        // text/javascript is obsolete in favour of application/javascript, but still used
+        if (stripos($contentType, 'application/javascript') !== false || stripos($contentType, 'text/javascript') !== false) {
+            return self::FORMAT_JS;
+        }
+
+        if (stripos($contentType, 'text/html') !== false) {
+            return self::FORMAT_HTML;
+        }
+
+        return self::FORMAT_UNKNOWN;
     }
 
     private static function generateScript(): string
     {
         $script = [];
         foreach (static::$records as $record) {
-            $context = static::dump('Context', $record['context']);
-            $extra = static::dump('Extra', $record['extra']);
+            $context = self::dump('Context', $record->context);
+            $extra = self::dump('Extra', $record->extra);
 
-            if (empty($context) && empty($extra)) {
-                $script[] = static::call_array('log', static::handleStyles($record['formatted']));
+            if (\count($context) === 0 && \count($extra) === 0) {
+                $script[] = self::call_array(self::getConsoleMethodForLevel($record->level), self::handleStyles($record->formatted));
             } else {
                 $script = array_merge(
                     $script,
-                    [static::call_array('groupCollapsed', static::handleStyles($record['formatted']))],
+                    [self::call_array('groupCollapsed', self::handleStyles($record->formatted))],
                     $context,
                     $extra,
-                    [static::call('groupEnd')]
+                    [self::call('groupEnd')]
                 );
             }
         }
 
         return "(function (c) {if (c && c.groupCollapsed) {\n" . implode("\n", $script) . "\n}})(console);";
+    }
+
+    private static function getConsoleMethodForLevel(Level $level): string
+    {
+        return match ($level) {
+            Level::Debug => 'debug',
+            Level::Info, Level::Notice => 'info',
+            Level::Warning => 'warn',
+            Level::Error, Level::Critical, Level::Alert, Level::Emergency => 'error',
+        };
     }
 
     /**
@@ -180,14 +209,14 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
 
         foreach (array_reverse($matches) as $match) {
             $args[] = '"font-weight: normal"';
-            $args[] = static::quote(static::handleCustomStyles($match[2][0], $match[1][0]));
+            $args[] = self::quote(self::handleCustomStyles($match[2][0], $match[1][0]));
 
             $pos = $match[0][1];
-            $format = Utils::substr($format, 0, $pos) . '%c' . $match[1][0] . '%c' . Utils::substr($format, $pos + strlen($match[0][0]));
+            $format = Utils::substr($format, 0, $pos) . '%c' . $match[1][0] . '%c' . Utils::substr($format, $pos + \strlen($match[0][0]));
         }
 
-        $args[] = static::quote('font-weight: normal');
-        $args[] = static::quote($format);
+        $args[] = self::quote('font-weight: normal');
+        $args[] = self::quote($format);
 
         return array_reverse($args);
     }
@@ -201,7 +230,7 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
             if (trim($m[1]) === 'autolabel') {
                 // Format the string as a label with consistent auto assigned background color
                 if (!isset($labels[$string])) {
-                    $labels[$string] = $colors[count($labels) % count($colors)];
+                    $labels[$string] = $colors[\count($labels) % \count($colors)];
                 }
                 $color = $labels[$string];
 
@@ -213,7 +242,8 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
 
         if (null === $style) {
             $pcreErrorCode = preg_last_error();
-            throw new \RuntimeException('Failed to run preg_replace_callback: ' . $pcreErrorCode . ' / ' . Utils::pcreLastErrorMessage($pcreErrorCode));
+
+            throw new \RuntimeException('Failed to run preg_replace_callback: ' . $pcreErrorCode . ' / ' . preg_last_error_msg());
         }
 
         return $style;
@@ -226,17 +256,14 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
     private static function dump(string $title, array $dict): array
     {
         $script = [];
-        $dict = array_filter($dict);
-        if (empty($dict)) {
+        $dict = array_filter($dict, fn ($value) => $value !== null);
+        if (\count($dict) === 0) {
             return $script;
         }
-        $script[] = static::call('log', static::quote('%c%s'), static::quote('font-weight: bold'), static::quote($title));
+        $script[] = self::call('log', self::quote('%c%s'), self::quote('font-weight: bold'), self::quote($title));
         foreach ($dict as $key => $value) {
-            $value = json_encode($value);
-            if (empty($value)) {
-                $value = static::quote('');
-            }
-            $script[] = static::call('log', static::quote('%s: %o'), static::quote((string) $key), $value);
+            $value = Utils::jsonEncode($value, Utils::DEFAULT_JSON_FLAGS | JSON_HEX_TAG);
+            $script[] = self::call('log', self::quote('%s: %o'), self::quote((string) $key), $value);
         }
 
         return $script;
@@ -244,7 +271,10 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
 
     private static function quote(string $arg): string
     {
-        return '"' . addcslashes($arg, "\"\n\\") . '"';
+        // JSON_HEX_TAG keeps a literal < out of the output, so that a log message cannot break out
+        // of the surrounding <script> element via </script> or <!--<script>. json_encode also
+        // escapes \r and U+2028/U+2029, which would otherwise terminate the JS string literal.
+        return Utils::jsonEncode($arg, Utils::DEFAULT_JSON_FLAGS | JSON_HEX_TAG);
     }
 
     /**
@@ -253,11 +283,11 @@ class BrowserConsoleHandler extends AbstractProcessingHandler
     private static function call(...$args): string
     {
         $method = array_shift($args);
-        if (!is_string($method)) {
+        if (!\is_string($method)) {
             throw new \UnexpectedValueException('Expected the first arg to be a string, got: '.var_export($method, true));
         }
 
-        return static::call_array($method, $args);
+        return self::call_array($method, $args);
     }
 
     /**

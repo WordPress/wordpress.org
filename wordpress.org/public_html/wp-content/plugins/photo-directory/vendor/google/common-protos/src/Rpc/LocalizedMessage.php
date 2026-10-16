@@ -5,8 +5,8 @@
 namespace Google\Rpc;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Provides a localized error message that is safe to return to the user
@@ -18,7 +18,7 @@ class LocalizedMessage extends \Google\Protobuf\Internal\Message
 {
     /**
      * The locale used following the specification defined at
-     * http://www.rfc-editor.org/rfc/bcp/bcp47.txt.
+     * https://www.rfc-editor.org/rfc/bcp/bcp47.txt.
      * Examples are: "en-US", "fr-CH", "es-MX"
      *
      * Generated from protobuf field <code>string locale = 1;</code>
@@ -39,7 +39,7 @@ class LocalizedMessage extends \Google\Protobuf\Internal\Message
      *
      *     @type string $locale
      *           The locale used following the specification defined at
-     *           http://www.rfc-editor.org/rfc/bcp/bcp47.txt.
+     *           https://www.rfc-editor.org/rfc/bcp/bcp47.txt.
      *           Examples are: "en-US", "fr-CH", "es-MX"
      *     @type string $message
      *           The localized error message in the above locale.
@@ -52,7 +52,7 @@ class LocalizedMessage extends \Google\Protobuf\Internal\Message
 
     /**
      * The locale used following the specification defined at
-     * http://www.rfc-editor.org/rfc/bcp/bcp47.txt.
+     * https://www.rfc-editor.org/rfc/bcp/bcp47.txt.
      * Examples are: "en-US", "fr-CH", "es-MX"
      *
      * Generated from protobuf field <code>string locale = 1;</code>
@@ -65,7 +65,7 @@ class LocalizedMessage extends \Google\Protobuf\Internal\Message
 
     /**
      * The locale used following the specification defined at
-     * http://www.rfc-editor.org/rfc/bcp/bcp47.txt.
+     * https://www.rfc-editor.org/rfc/bcp/bcp47.txt.
      * Examples are: "en-US", "fr-CH", "es-MX"
      *
      * Generated from protobuf field <code>string locale = 1;</code>

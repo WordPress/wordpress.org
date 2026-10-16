@@ -48,7 +48,7 @@ trait SerializableClientTrait
      *           responsible for serializing closures used in the
      *           `$clientConfig`. This is especially important when using the
      *           batch daemon. **Defaults to**
-     *           {@see Google\Cloud\Core\Batch\OpisClosureSerializer} if the
+     *           {@see \Google\Cloud\Core\Batch\OpisClosureSerializer} if the
      *           `opis/closure` library is installed.
      *     @type array $clientConfig A config used to construct the client upon
      *           which requests will be made.
@@ -60,9 +60,8 @@ trait SerializableClientTrait
             'closureSerializer' => null,
             'clientConfig' => []
         ];
-        $this->closureSerializer = isset($options['closureSerializer'])
-            ? $options['closureSerializer']
-            : $this->getDefaultClosureSerializer();
+        $this->closureSerializer = $options['closureSerializer']
+            ?? $this->getDefaultClosureSerializer();
         $this->setWrappedClientConfig($options);
     }
 
@@ -71,9 +70,7 @@ trait SerializableClientTrait
      */
     private function setWrappedClientConfig(array $options)
     {
-        $config = isset($options['clientConfig'])
-            ? $options['clientConfig']
-            : [];
+        $config = $options['clientConfig'] ?? [];
 
         if ($config && $this->closureSerializer) {
             $this->closureSerializer->wrapClosures($config);
@@ -99,6 +96,9 @@ trait SerializableClientTrait
      */
     private function getDefaultClosureSerializer()
     {
+        if (function_exists('Opis\Closure\serialize')) {
+            return new OpisClosureSerializerV4();
+        }
         if (class_exists(SerializableClosure::class)) {
             return new OpisClosureSerializer();
         }

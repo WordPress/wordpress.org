@@ -32,15 +32,16 @@ trait InterruptTrait
     private function setupSignalHandlers()
     {
         // setup signal handlers
-        pcntl_signal(SIGTERM, [$this, "sigHandler"]);
-        pcntl_signal(SIGINT, [$this, "sigHandler"]);
-        pcntl_signal(SIGHUP, [$this, "sigHandler"]);
-        pcntl_signal(SIGALRM, [$this, "sigHandler"]);
+        pcntl_signal(SIGTERM, [$this, 'sigHandler']);
+        pcntl_signal(SIGINT, [$this, 'sigHandler']);
+        pcntl_signal(SIGHUP, [$this, 'sigHandler']);
+        pcntl_signal(SIGALRM, [$this, 'sigHandler']);
     }
 
     /**
      * A signal handler for setting the terminate switch.
-     * {@see http://php.net/manual/en/function.pcntl-signal.php}
+     *
+     * @see http://php.net/manual/en/function.pcntl-signal.php
      *
      * @param int $signo The received signal.
      * @param mixed $siginfo [optional] An array representing the signal

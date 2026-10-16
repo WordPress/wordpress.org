@@ -11,8 +11,10 @@ use Google\Protobuf\Internal\GPBUtil;
 /**
  * Response message for the `ImportProductSets` method.
  * This message is returned by the
- * [google.longrunning.Operations.GetOperation][google.longrunning.Operations.GetOperation] method in the returned
- * [google.longrunning.Operation.response][google.longrunning.Operation.response] field.
+ * [google.longrunning.Operations.GetOperation][google.longrunning.Operations.GetOperation]
+ * method in the returned
+ * [google.longrunning.Operation.response][google.longrunning.Operation.response]
+ * field.
  *
  * Generated from protobuf message <code>google.cloud.vision.v1.ImportProductSetsResponse</code>
  */
@@ -41,9 +43,9 @@ class ImportProductSetsResponse extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
-     *     @type \Google\Cloud\Vision\V1\ReferenceImage[]|\Google\Protobuf\Internal\RepeatedField $reference_images
+     *     @type array<\Google\Cloud\Vision\V1\ReferenceImage>|\Google\Protobuf\Internal\RepeatedField $reference_images
      *           The list of reference_images that are imported successfully.
-     *     @type \Google\Rpc\Status[]|\Google\Protobuf\Internal\RepeatedField $statuses
+     *     @type array<\Google\Rpc\Status>|\Google\Protobuf\Internal\RepeatedField $statuses
      *           The rpc status for each ImportProductSet request, including both successes
      *           and errors.
      *           The number of statuses here matches the number of lines in the csv file,
@@ -71,7 +73,7 @@ class ImportProductSetsResponse extends \Google\Protobuf\Internal\Message
      * The list of reference_images that are imported successfully.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.ReferenceImage reference_images = 1;</code>
-     * @param \Google\Cloud\Vision\V1\ReferenceImage[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param array<\Google\Cloud\Vision\V1\ReferenceImage>|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
     public function setReferenceImages($var)
@@ -105,7 +107,7 @@ class ImportProductSetsResponse extends \Google\Protobuf\Internal\Message
      * line of the csv, starting from line 0.
      *
      * Generated from protobuf field <code>repeated .google.rpc.Status statuses = 2;</code>
-     * @param \Google\Rpc\Status[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param array<\Google\Rpc\Status>|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
     public function setStatuses($var)

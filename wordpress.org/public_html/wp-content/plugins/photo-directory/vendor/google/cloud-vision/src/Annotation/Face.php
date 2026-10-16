@@ -42,7 +42,7 @@ use Google\Cloud\Vision\Annotation\Face\Landmarks;
  *
  *     Example:
  *     ```
- *     print_R($face->boundingPoly());
+ *     print_r($face->boundingPoly());
  *     ```
  *
  *     @return array
@@ -54,7 +54,7 @@ use Google\Cloud\Vision\Annotation\Face\Landmarks;
  *
  *     Example:
  *     ```
- *     print_R($face->fdBoundingPoly());
+ *     print_r($face->fdBoundingPoly());
  *     ```
  *
  *     @return array
@@ -67,7 +67,7 @@ use Google\Cloud\Vision\Annotation\Face\Landmarks;
  *
  *     Example:
  *     ```
- *     print_R($face->rollAngle());
+ *     print_r($face->rollAngle());
  *     ```
  *
  *     @return float
@@ -80,7 +80,7 @@ use Google\Cloud\Vision\Annotation\Face\Landmarks;
  *
  *     Example:
  *     ```
- *     print_R($face->panAngle());
+ *     print_r($face->panAngle());
  *     ```
  *
  *     @return float
@@ -93,7 +93,7 @@ use Google\Cloud\Vision\Annotation\Face\Landmarks;
  *
  *     Example:
  *     ```
- *     print_R($face->tiltAngle());
+ *     print_r($face->tiltAngle());
  *     ```
  *
  *     @return float
@@ -105,7 +105,7 @@ use Google\Cloud\Vision\Annotation\Face\Landmarks;
  *
  *     Example:
  *     ```
- *     print_R($face->detectionConfidence());
+ *     print_r($face->detectionConfidence());
  *     ```
  *
  *     @return float
@@ -117,7 +117,7 @@ use Google\Cloud\Vision\Annotation\Face\Landmarks;
  *
  *     Example:
  *     ```
- *     print_R($face->landmarkingConfidence());
+ *     print_r($face->landmarkingConfidence());
  *     ```
  *
  *     @return float
@@ -223,8 +223,8 @@ class Face extends AbstractFeature
     /**
      * Create an Face result.
      *
-     * This class is created internally by {@see Google\Cloud\Vision\Annotation}.
-     * See {@see Google\Cloud\Vision\Annotation::faces()} for full usage details.
+     * This class is created internally by {@see Annotation}.
+     * See {@see Annotation::faces()} for full usage details.
      * This class should not be instantiated outside the externally.
      *
      * @param array $info The face annotation result
