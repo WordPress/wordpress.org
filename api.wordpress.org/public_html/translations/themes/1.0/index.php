@@ -32,7 +32,7 @@ $version = isset( $_REQUEST['version'] ) ? filter_var(
 	FILTER_VALIDATE_REGEXP,
 	array(
 		'options' => array(
-			'regexp' => '/^[a-z0-9._-]{1,100}\z/i',
+			'regexp' => '/^[\x21-\x7e]{0,100}\z/',
 		),
 	)
 ) : null;
