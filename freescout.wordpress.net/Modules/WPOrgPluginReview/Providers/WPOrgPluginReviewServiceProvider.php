@@ -120,20 +120,15 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 			}
 		);
 
-		/*
-		 * The HelpScout import writes threads without their hooks, and moving a conversation to another mailbox makes its
-		 * reviews count, or not, without changing them.
-		 */
-		foreach ( array( 'conversation.moved', 'wporghelpscoutimport.conversation_imported' ) as $hook ) {
-			\Eventy::addAction(
-				$hook,
-				static function ( mixed $conversation = null ): void {
-					if ( $conversation instanceof Conversation ) {
-						Review::reindex( $conversation );
-					}
+		// Moving a conversation to another mailbox makes its reviews count, or not, without changing them.
+		\Eventy::addAction(
+			'conversation.moved',
+			static function ( mixed $conversation = null ): void {
+				if ( $conversation instanceof Conversation ) {
+					Review::reindex( $conversation );
 				}
-			);
-		}
+			}
+		);
 
 		// Core deletes conversations' threads with a query, which their hooks don't see.
 		\Eventy::addAction(
