@@ -1724,10 +1724,7 @@ let wpTrac,
 								username = nicename;
 							}
 
-							if (
-								typeof username !== 'undefined' &&
-								! excludeSet.has( username )
-							) {
+							if ( typeof username !== 'undefined' && ! excludeSet.has( username ) ) {
 								users.add( username );
 							}
 						} );
