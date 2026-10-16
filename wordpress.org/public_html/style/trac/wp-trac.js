@@ -757,7 +757,10 @@ let wpTrac,
 
 					// Prevent marking a ticket as a duplicate of itself.
 					if ( 'duplicate' === selectedAction ) {
-						const currentTicket = parseInt( ( document.querySelector( '.trac-id' )?.textContent || '' ).replace( '#', '' ), 10 );
+						const currentTicket = parseInt(
+							( document.querySelector( '.trac-id' )?.textContent || '' ).replace( '#', '' ),
+							10
+						);
 						const duplicateTicket = parseInt( dupeInput?.value || '', 10 );
 
 						if ( ! duplicateTicket || currentTicket === duplicateTicket ) {
@@ -774,18 +777,31 @@ let wpTrac,
 					// Clear the milestone on wontfix, duplicate, worksforme, invalid.
 					if ( milestoneSelect && ! milestoneSelect.disabled ) {
 						const resolution = document.getElementById( 'action_resolve_resolve_resolution' )?.value;
-						if ( 'duplicate' === selectedAction || ( 'resolve' === selectedAction && 'fixed' !== resolution ) ) {
+						if (
+							'duplicate' === selectedAction ||
+							( 'resolve' === selectedAction && 'fixed' !== resolution )
+						) {
 							milestoneSelect.value = '';
 						}
 					}
 
 					// capital_P_dangit()
-					const fixP = ( text ) => text ? text.replace( /(^|[\s>(„"'\[\u2018\u201C]|&#8216;|&#8220;])Wordpress/g, '$1WordPress' ) : text;
+					const fixP = function ( text ) {
+						if ( ! text ) {
+							return text;
+						}
+						return text.replace( /(^|[\s>(„"'\[\u2018\u201C]|&#8216;|&#8220;])Wordpress/g, '$1WordPress' );
+					};
 
 					if ( wpTrac.isNewTicket() ) {
-						if ( summaryInput?.value )     summaryInput.value     = fixP( summaryInput.value );
-						if ( descriptionInput?.value ) descriptionInput.value = fixP( descriptionInput.value );
+						if ( summaryInput?.value ) {
+							summaryInput.value = fixP( summaryInput.value );
+						}
+						if ( descriptionInput?.value ) {
+							descriptionInput.value = fixP( descriptionInput.value );
+						}
 					}
+
 					if ( commentInput?.value ) {
 						commentInput.value = fixP( commentInput.value );
 					}
