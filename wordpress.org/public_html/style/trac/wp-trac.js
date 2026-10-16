@@ -297,9 +297,14 @@ let wpTrac,
 		}
 
 		textNodes.forEach( function ( textNode ) {
-			const value = textNode.nodeValue,
-				matches = [ ...value.matchAll( regex ) ];
+			const value = textNode.nodeValue;
 
+			if ( ! regex.test( value ) ) {
+				return;
+			}
+			regex.lastIndex = 0;
+
+			const matches = [ ...value.matchAll( regex ) ];
 			if ( ! matches.length ) {
 				return;
 			}
