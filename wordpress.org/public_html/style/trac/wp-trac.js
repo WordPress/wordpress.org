@@ -2811,20 +2811,45 @@ let wpTrac,
 				} );
 			}
 
+			function createElement( tagName, attributes = {}, ...children ) {
+				const el = document.createElement( tagName );
+
+				Object.entries( attributes ).forEach( ( [ key, val ] ) => {
+					if ( key === 'className' || key === 'class' ) {
+						el.className = val;
+					} else {
+						el.setAttribute( key, val );
+					}
+				} );
+
+				children.flat().forEach( ( child ) => {
+					if ( child instanceof window.Node ) {
+						el.append( child );
+					} else if ( child !== null && child !== undefined ) {
+						el.append( document.createTextNode( String( child ) ) );
+					}
+				} );
+
+				return el;
+			}
+
 			// Logic to determine what the PRs status is
-			function prStatus( data ) {
-				const stack = [];
-				let emojiState = '';
+			function prStatusNode( data ) {
+				const container = document.createElement( 'div' );
 
 				// Closed? Skip everything else.
 				if ( data.closed_at ) {
-					return '✅ Closed';
+					container.textContent = '✅ Closed';
+					return container;
 				}
+
+				let emojiState = '';
+				const items = [];
 
 				// Merge State then
 				switch ( data.mergeable_state ) {
 					case 'draft':
-						stack.push( 'Draft' );
+						items.push( 'Draft' );
 						break;
 					case 'blocked':
 						// All Good (but blocked due to Branch protection rules, or Merge requirements)
@@ -2839,99 +2864,114 @@ let wpTrac,
 						} // else fall through.
 					case 'clean':
 						emojiState = '✅';
-						stack.push( 'All checks pass' );
+						items.push( 'All checks pass' );
 						break;
 					case 'dirty':
 						emojiState = '❌';
-						stack.push( 'Merge conflicts' );
+						items.push( 'Merge conflicts' );
 						break;
 					case 'unstable':
 						emojiState = '❌';
-						stack.push( 'Failing tests' );
+						items.push( 'Failing tests' );
 						break;
 					case 'unknown':
-						stack.push( 'Unknown' );
+						items.push( 'Unknown' );
 						break;
 				}
 
 				// Unit Tests?
 				if ( data.check_runs ) {
-					for ( const provider in data.check_runs ) {
-						const providerText = escapeHtml( provider );
-						const checkStatus = escapeHtml( data.check_runs[ provider ] );
-
-						switch ( data.check_runs[ provider ] ) {
+					for ( const [ provider, status ] of Object.entries( data.check_runs ) ) {
+						switch ( status ) {
 							case 'in_progress':
-								stack.push( providerText + ' running' );
+								items.push( `${ provider } running` );
 								break;
 							case 'failed':
 								emojiState = '❌';
-								stack.push( providerText );
+								items.push( provider );
 								break;
 							case 'success':
 								continue;
 							default:
-								stack.push( providerText + ' ' + checkStatus );
+								items.push( `${ provider } ${ status }` );
 								break;
 						}
 					}
 				}
 
-				// Changes requested?
+				// Reviews
 				if ( data.reviews ) {
-					if ( data.reviews.APPROVED ) {
+					if ( data.reviews.APPROVED?.length ) {
 						emojiState = '✅';
-						const span = document.createElement( 'span' );
-						span.textContent = 'Approved';
-						span.title = 'Changes approved by: ' + data.reviews.APPROVED.join( ', ' );
-						stack.push( span.outerHTML );
+						items.push(
+							createElement(
+								'span',
+								{ title: 'Changes approved by: ' + data.reviews.APPROVED.join( ', ' ) },
+								'Approved'
+							)
+						);
 					}
-					if ( data.reviews.CHANGES_REQUESTED ) {
+					if ( data.reviews.CHANGES_REQUESTED?.length ) {
 						emojiState = '❌';
-						const span = document.createElement( 'span' );
-						span.textContent = 'Changes Requested';
-						span.title = 'Changes requested by: ' + data.reviews.CHANGES_REQUESTED.join( ', ' );
-						stack.push( span.outerHTML );
+						items.push(
+							createElement(
+								'span',
+								{ title: 'Changes requested by: ' + data.reviews.CHANGES_REQUESTED.join( ', ' ) },
+								'Changes Requested'
+							)
+						);
 					}
 				}
+				if ( emojiState ) {
+					container.append( document.createTextNode( emojiState + ' ' ) );
+				}
 
-				return emojiState + ' ' + stack.join( ', ' );
+				items.forEach( ( item, index ) => {
+					if ( index > 0 ) {
+						container.append( document.createTextNode( ', ' ) );
+					}
+					container.append( item );
+				} );
+
+				return container;
 			}
 
 			function renderPR( prContainer, data ) {
-				const htmlElement = function ( tagName, attributes, text = '' ) {
-					const el = document.createElement( tagName );
-					Object.entries( attributes ).forEach( ( [ key, val ] ) => {
-						el.setAttribute( key, val );
-					} );
-					el.textContent = text;
-					return el.outerHTML;
-				};
-
 				// Strip off any ticket numbers from the start of the PR title for display.
-				data.title = data.title.replace( /^#\d+\s*/, '' );
+				const displayTitle = data.title.replace( /^#\d+\s*/, '' );
 
-				prContainer.insertAdjacentHTML(
-					'beforeend',
-					`<li>
-					<div>${ htmlElement(
-						'a',
-						{ href: data.changes.html_url, title: data.title },
-						'#' + data.number + ' ' + data.title
-					) } by&nbsp;${ htmlElement( 'a', { href: data.user.url }, '@' + data.user.name ) }</div>
-					<div>${ prStatus( data ) }</div>
-					<div>${ htmlElement( 'ins', {}, '+' + data.changes.additions ) }&nbsp;${ htmlElement(
-						'del',
+				const li = createElement(
+					'li',
+					{},
+					createElement(
+						'div',
 						{},
-						'-' + data.changes.deletions
-					) }</div>
-					<div>${ htmlElement( 'a', { href: data.changes.patch_url, class: 'button' }, 'View patch' ) }&nbsp;${ htmlElement(
-						'a',
-						{ href: data.changes.html_url, class: 'button' },
-						'View PR'
-					) }</div>
-					</li>`
+						createElement(
+							'a',
+							{ href: data.changes.html_url, title: displayTitle },
+							`#${ data.number } ${ displayTitle }`
+						),
+						' by\u00A0',
+						createElement( 'a', { href: data.user.url }, `@${ data.user.name }` )
+					),
+					prStatusNode( data ),
+					createElement(
+						'div',
+						{},
+						createElement( 'ins', {}, `+${ data.changes.additions }` ),
+						'\u00A0',
+						createElement( 'del', {}, `-${ data.changes.deletions }` )
+					),
+					createElement(
+						'div',
+						{},
+						createElement( 'a', { href: data.changes.patch_url, class: 'button' }, 'View patch' ),
+						'\u00A0',
+						createElement( 'a', { href: data.changes.html_url, class: 'button' }, 'View PR' )
+					)
 				);
+
+				prContainer.append( li );
 			}
 
 			return {
