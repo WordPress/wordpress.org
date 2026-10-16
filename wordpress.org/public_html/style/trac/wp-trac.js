@@ -1252,7 +1252,7 @@ let wpTrac,
 
 			// Uses jQuery's global ajax events because Trac's internal live-preview runs via jQuery.ajax.
 			$( document ).ajaxSend( function ( event, XMLHttpRequest, ajaxOptions ) {
-				if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
+				if ( ! action.startsWith( ajaxOptions.url ) ) {
 					return;
 				}
 				hadClass = modify?.classList.contains( 'collapsed' );
@@ -1265,7 +1265,7 @@ let wpTrac,
 				);
 			} );
 			$( document ).ajaxComplete( function ( event, XMLHttpRequest, ajaxOptions ) {
-				if ( 0 !== action.indexOf( ajaxOptions.url ) ) {
+				if ( ! action.startsWith( ajaxOptions.url ) ) {
 					return;
 				}
 				if ( ! hadClass ) {
@@ -2741,7 +2741,10 @@ let wpTrac,
 
 				// Make the section collapse.
 				container.querySelector( '#section-pr' )?.addEventListener( 'click', function ( event ) {
-					const div = this.parentNode.parentNode;
+					const div = this.closest( '#github-prs' );
+					if ( ! div ) {
+						return;
+					}
 					div.classList.toggle( 'collapsed' );
 					if ( div.classList.contains( 'collapsed' ) ) {
 						event.preventDefault();
@@ -3041,7 +3044,7 @@ let wpTrac,
 				}
 
 				// Longest match first.
-				matchingWords.sort( ( a, b ) => ( a.length > b.length ? -1 : 1 ) );
+				matchingWords.sort( ( a, b ) => b.length - a.length );
 
 				matchingWords.forEach( ( word ) => {
 					componentWords[ word ].forEach( ( component ) => {
