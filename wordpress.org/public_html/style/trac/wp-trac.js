@@ -1989,7 +1989,10 @@ let wpTrac,
 						elements.bin.replaceChildren();
 					}
 
-					keywords = elements.hiddenEl.value.trim().split( /[\s,]+/ ).filter( Boolean );
+					keywords = elements.hiddenEl.value
+						.trim()
+						.split( /[\s,]+/ )
+						.filter( Boolean );
 					elements.hiddenEl.value = keywords.join( ' ' );
 
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
@@ -2138,7 +2141,10 @@ let wpTrac,
 				}
 				field.style.display = 'none';
 
-				focuses = field.value.trim().split( /[\s,]+/ ).filter( Boolean );
+				focuses = field.value
+					.trim()
+					.split( /[\s,]+/ )
+					.filter( Boolean );
 				originalFocuses = [ ...focuses ];
 
 				const fieldset = document.createElement( 'fieldset' );
@@ -2809,7 +2815,7 @@ let wpTrac,
 					}
 				} );
 
-				el.append( ...children.flat().filter( ( child ) => child != null ) );
+				el.append( ...children.flat().filter( ( child ) => child !== null ) );
 
 				return el;
 			}
