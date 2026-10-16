@@ -8,6 +8,9 @@
  * whose page doesn't hold its lock anymore are left out, and removed. Pages the worklists' Open buttons opened go in
  * the order they were opened, which their URL tells; the others in the order they loaded.
  *
+ * The sidebar's Plugins & Themes panel gets a button next to each plugin's download link, which adds its URL, or
+ * removes it when it's there. Added URLs stay, after the others, until they're removed: no page holds them.
+ *
  * @param {jQuery} $ jQuery.
  */
 ( function ( $ ) {
@@ -17,6 +20,13 @@
 	 * @type {string}
 	 */
 	const PREFIX = 'wporgpluginreview.download.';
+
+	/**
+	 * What the keys of the URLs added from the sidebar start with, followed by the URL, so each is there once.
+	 *
+	 * @type {string}
+	 */
+	const ADDED = PREFIX + 'added.';
 
 	/**
 	 * What the keys of the conversations' places in the order start with, in the tab's storage, followed by their path,
@@ -199,7 +209,7 @@
 				const local = storage( 'localStorage' );
 
 				return found.filter( ( item ) => {
-					if ( held.has( item.key ) ) {
+					if ( item.added || held.has( item.key ) ) {
 						return true;
 					}
 					if ( local ) {
@@ -239,7 +249,114 @@
 
 			$items.toggleClass( 'hidden', ! shown.length );
 			$items.find( '.wporg-downloads-label' ).text( label );
+			updateToggles();
 		} );
+	}
+
+	/**
+	 * A URL as the browser writes it, to compare it with others.
+	 *
+	 * @param {string} url URL.
+	 * @return {string} URL.
+	 */
+	function normalize( url ) {
+		try {
+			return new URL( String( url ) ).href;
+		} catch {
+			return String( url );
+		}
+	}
+
+	/**
+	 * Whether a URL is a plugin's ZIP: a release, or an upload for review.
+	 *
+	 * @param {string} url URL.
+	 * @return {boolean} Whether it is.
+	 */
+	function isPluginZip( url ) {
+		try {
+			const parsed = new URL( String( url ) );
+
+			return (
+				( 'downloads.wordpress.org' === parsed.hostname &&
+					parsed.pathname.startsWith( '/plugin/' ) ) ||
+				( 'wordpress.org' === parsed.hostname &&
+					parsed.pathname.startsWith( '/plugins/' ) )
+			);
+		} catch {
+			return false;
+		}
+	}
+
+	/**
+	 * Shows on each of the sidebar's buttons whether its URL is in the list: a minus to remove it, or a plus to add it.
+	 */
+	function updateToggles() {
+		const strings = $( '.wporg-downloads' ).first().data( 'strings' ) || {};
+		const listed = new Set( shown.map( normalize ) );
+
+		$( '.wporg-downloads-toggle' ).each( function () {
+			const $toggle = $( this );
+			const there = listed.has( normalize( $toggle.attr( 'data-url' ) ) );
+			const label = String(
+				( there ? strings.remove : strings.add ) || ''
+			);
+
+			$toggle
+				.attr( {
+					'aria-pressed': String( there ),
+					title: label,
+					'aria-label': label,
+				} )
+				.find( '.glyphicon' )
+				.toggleClass( 'glyphicon-minus', there )
+				.toggleClass( 'glyphicon-plus', ! there );
+		} );
+	}
+
+	/**
+	 * Adds a URL from the sidebar, after the others.
+	 *
+	 * @param {string} url URL.
+	 */
+	function add( url ) {
+		const local = storage( 'localStorage' );
+		if ( ! local ) {
+			return;
+		}
+
+		try {
+			local.setItem(
+				ADDED + url,
+				JSON.stringify( {
+					url,
+					batch: Date.now(),
+					order: 0,
+					at: Date.now(),
+					added: true,
+				} )
+			);
+		} catch {
+			// Then it isn't in the list.
+		}
+	}
+
+	/**
+	 * Removes a URL, however it got in the list: added, or kept by a page, this one's or another's, which won't put it
+	 * back until it loads again.
+	 *
+	 * @param {string} url URL.
+	 */
+	function remove( url ) {
+		const local = storage( 'localStorage' );
+		if ( ! local ) {
+			return;
+		}
+
+		const removing = normalize( url );
+		entries()
+			.filter( ( item ) => normalize( item.url ) === removing )
+			.forEach( ( item ) => local.removeItem( item.key ) );
 	}
 
 	/**
@@ -330,6 +447,44 @@
 				setTimeout( refresh, COPIED_FOR );
 			} )
 			.catch( () => {} );
+	} );
+
+	// The sidebar's Plugins & Themes panel: a button after each plugin's download link, for the agents with the header's.
+	$( document ).on( 'wporgsidebar:panel', ( event ) => {
+		if ( ! $( '.wporg-downloads' ).length ) {
+			return;
+		}
+
+		$( event.target )
+			.find( '.wporg-sidebar-item-actions a' )
+			.filter( function () {
+				return (
+					$( this ).find( '.glyphicon-download-alt' ).length > 0 &&
+					isPluginZip( this.href )
+				);
+			} )
+			.after( function () {
+				return $(
+					'<button type="button" class="wporg-downloads-toggle">'
+				)
+					.attr( 'data-url', this.href )
+					.append( '<i class="glyphicon glyphicon-plus"></i>' );
+			} );
+
+		updateToggles();
+	} );
+
+	// Adds the plugin's URL, or removes it if it's there.
+	$( document ).on( 'click', '.wporg-downloads-toggle', function ( event ) {
+		event.preventDefault();
+
+		const url = String( $( this ).attr( 'data-url' ) );
+		if ( 'true' === $( this ).attr( 'aria-pressed' ) ) {
+			remove( url );
+		} else {
+			add( url );
+		}
+		refresh();
 	} );
 
 	// Forgets them all, the open pages' too.

@@ -1,5 +1,6 @@
 /**
- * Styles the Plugin Review panel in the conversation sidebar, and the My Reviews and My Cases folders.
+ * Styles the Plugin Review panel in the conversation sidebar, the buttons it adds to the Plugins & Themes panel, and the
+ * My Reviews and My Cases folders.
  *
  * Text colors meet WCAG AAA (7:1) on the panel background.
  */
@@ -487,6 +488,22 @@
 	.wporg-worklist-date {
 		width: 90px;
 	}
+}
+
+/* In the sidebar's Plugins & Themes panel, after a plugin's download link: adds its URL to the ones the header copies, or removes it. */
+.wporg-downloads-toggle {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #4a5561;
+	font-size: inherit;
+	line-height: 1;
+}
+
+.wporg-downloads-toggle[aria-pressed="true"],
+.wporg-downloads-toggle:hover,
+.wporg-downloads-toggle:focus {
+	color: #0078d7;
 }
 
 /* In the profile: how many conversations the Open buttons open at a time. */
