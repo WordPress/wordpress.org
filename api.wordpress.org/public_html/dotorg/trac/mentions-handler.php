@@ -1,4 +1,14 @@
 <?php
+/**
+ * Trac comment mentions handler: creates notifications for mentioned users.
+ *
+ * This endpoint is called by Trac, not by a browser: requests are authenticated by the
+ * shared URL_SECRET__MENTIONS secret posted alongside the payload, not by a user session.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Trac
+ */
 
 define( 'BLOCKED',    0 );
 define( 'SUBSCRIBED', 1 );
@@ -7,11 +17,20 @@ define( 'MENTIONED',  2 );
 require dirname( dirname( __DIR__ ) ) . '/wp-init.php';
 require dirname( dirname( __DIR__ ) ) . '/includes/slack-config.php';
 
-if ( ! isset( $_POST['secret'] ) || $_POST['secret'] !== \Dotorg\Slack\Trac\URL_SECRET__MENTIONS ) {
+if ( ! is_string( $_POST['secret'] ?? null ) || ! hash_equals( \Dotorg\Slack\Trac\URL_SECRET__MENTIONS, wp_unslash( $_POST['secret'] ) ) ) {
 	exit;
 }
 
+if ( ! isset( $_POST['payload'] ) || ! is_string( $_POST['payload'] ) ) {
+	exit;
+}
+
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON document parsed by json_decode() below; text sanitization would corrupt it.
 $payload = json_decode( wp_unslash( $_POST['payload'] ) );
+
+if ( ! is_object( $payload ) ) {
+	exit;
+}
 
 require_once WP_PLUGIN_DIR . '/wporg-notifications.php';
 $notif = WPOrg_Notifications::get_instance();
