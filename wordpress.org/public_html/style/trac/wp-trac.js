@@ -2542,7 +2542,7 @@ let wpTrac,
 							_nonce = data.data.nonce;
 						}
 
-						const subscribedSet = new Set( data.data.tickets || [] );
+						const subscribedSet = new Set( ( data.data.tickets || [] ).map( Number ) );
 
 						stars.forEach( ( reportStar ) => {
 							const ticketId = Number.parseInt( reportStar.dataset.ticket, 10 );
