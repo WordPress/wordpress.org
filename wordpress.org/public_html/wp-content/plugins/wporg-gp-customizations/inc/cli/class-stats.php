@@ -390,6 +390,10 @@ class Stats {
 		}
 		$stats_diff = new \stdClass();
 		foreach ( $current_date_data as $key => $value ) {
+			// The date column isn't numeric, subtracting it triggers a PHP warning.
+			if ( 'date' === $key ) {
+				continue;
+			}
 			$stats_diff->$key = $value - $old_date_data->$key;
 		}
 		$all_locales_data = get_locales_data();
