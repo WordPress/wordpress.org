@@ -152,11 +152,9 @@ final class Worklist {
 	 * @return self|null Null if it isn't one of theirs.
 	 */
 	public static function of_folder( mixed $folder ): ?self {
-		if ( $folder instanceof Folder ) {
-			foreach ( self::all() as $worklist ) {
-				if ( $worklist->folder_type === (int) $folder->type ) {
-					return $worklist;
-				}
+		foreach ( self::all() as $worklist ) {
+			if ( $worklist->is_folder( $folder ) ) {
+				return $worklist;
 			}
 		}
 

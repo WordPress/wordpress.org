@@ -42,7 +42,7 @@ function render_plugin_review( object $request ): array {
 			'name'         => html_entity_decode( $post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
 			'slug'         => $post->post_name,
 			'status'       => $post->post_status,
-			'status_label' => get_item_status( $post->post_status, '', (string) $post->_close_reason )['status']['text'] ?? 'Published',
+			'status_label' => get_item_status_label( $post->post_status, (string) $post->_close_reason ),
 			// Its code is in SVN, so it can be checked out and scanned.
 			'released'     => $released,
 			// Edit and permalinks are built by hand, as the post types aren't registered on this site.

@@ -177,22 +177,6 @@ function get_items_by_slug( array $slugs ): array {
 }
 
 /**
- * Gets why a plugin was rejected, in the words reviewers chose it from.
- *
- * @param string $reason Rejection reason, e.g. duplicate-copy.
- * @return string
- */
-function get_rejection_reason( string $reason ): string {
-	if ( ! $reason ) {
-		return '';
-	}
-
-	$reasons = class_exists( '\WordPressdotorg\Plugin_Directory\Template' ) ? \WordPressdotorg\Plugin_Directory\Template::get_rejection_reasons() : array();
-
-	return $reasons[ $reason ] ?? ucfirst( str_replace( '-', ' ', $reason ) );
-}
-
-/**
  * Gets a list of plugins or themes, with their status.
  *
  * @param array  $post_ids      Post IDs on the current site.
@@ -223,24 +207,25 @@ function render_items( array $post_ids, string $mailbox_email ): array {
 			// Why a plugin was closed or rejected is the plugins team's, like reviews.
 			if ( $show_review ) {
 				$close_reason = (string) $post->_close_reason;
-				$rejection    = get_rejection_reason( (string) $post->_rejection_reason );
+				$rejection    = $post->_rejection_reason ? get_plugin_reason( 'get_rejection_reasons', (string) $post->_rejection_reason ) : '';
 			}
 		} elseif ( 'draft' === $post->post_status ) {
 			$download_link = ''; // No zips exist for themes in review.
 		}
 
 		$last_updated = (int) strtotime( $last_modified );
+		$released     = 'plugin' === $type && is_plugin_released( $post );
 
 		// Built by hand, as the post types aren't registered on this site; rarest first, so Download lines up at the end.
 		$links = array();
-		if ( 'plugin' === $type ? is_plugin_released( $post ) : 'publish' === $post->post_status ) {
+		if ( $released || ( 'theme' === $type && 'publish' === $post->post_status ) ) {
 			$links[] = array(
 				'text' => 'Scans in Gandalf',
 				'url'  => sprintf( SCANS_URL, $type, rawurlencode( $post->post_name ) ),
 				'icon' => 'shield',
 			);
 		}
-		if ( 'plugin' === $type ? is_plugin_released( $post ) : in_array( $post->post_status, array( 'publish', 'delist' ), true ) ) {
+		if ( $released || ( 'theme' === $type && in_array( $post->post_status, array( 'publish', 'delist' ), true ) ) ) {
 			$links[] = array(
 				'text' => 'View on WordPress.org',
 				'url'  => home_url( "/{$post->post_name}/" ),

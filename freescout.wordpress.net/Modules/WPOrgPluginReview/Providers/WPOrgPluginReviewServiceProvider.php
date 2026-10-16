@@ -241,14 +241,16 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 		);
 
 		// The subject goes in between, hidden, for the row and FreeScout's scripts; last, so other modules' tags stay out of it.
+		$hidden = false;
 		\Eventy::addAction(
 			'conversations_table.before_subject',
-			static function ( mixed $conversation = null ) use ( $marks ): void {
+			static function ( mixed $conversation = null ) use ( $marks, &$hidden ): void {
 				try {
 					$marked = $marks( $conversation ) ? Subject::marked( (string) $conversation->subject ) : '';
 					if ( '' !== $marked ) {
 						$subject = e( $conversation->getSubject() );
 						echo '<span class="wporg-subject" data-wporg-subject="' . $subject . '" title="' . $subject . '">' . e( $marked ) . '</span><span hidden>';
+						$hidden = true;
 					}
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgPluginReview] Could not mark the subject of conversation ' . ( $conversation->id ?? '' ) . ': ' . $e->getMessage() );
@@ -259,13 +261,10 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 
 		\Eventy::addAction(
 			'conversations_table.after_subject',
-			static function ( mixed $conversation = null ) use ( $marks ): void {
-				try {
-					if ( $marks( $conversation ) && '' !== Subject::marked( (string) $conversation->subject ) ) {
-						echo '</span>';
-					}
-				} catch ( \Throwable $e ) {
-					\Log::error( '[WPOrgPluginReview] Could not mark the subject of conversation ' . ( $conversation->id ?? '' ) . ': ' . $e->getMessage() );
+			static function () use ( &$hidden ): void {
+				if ( $hidden ) {
+					echo '</span>';
+					$hidden = false;
 				}
 			},
 			PHP_INT_MIN

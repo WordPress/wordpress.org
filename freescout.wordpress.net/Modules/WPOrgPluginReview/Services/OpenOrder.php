@@ -183,7 +183,7 @@ final class OpenOrder {
 	 * @return void
 	 */
 	public static function set_limit( User $user, mixed $limit ): void {
-		if ( null === $limit || '' === $limit || ! is_numeric( $limit ) || self::DEFAULT_LIMIT === (int) $limit ) {
+		if ( ! is_numeric( $limit ) || self::DEFAULT_LIMIT === (int) $limit ) {
 			\Option::remove( self::LIMIT_OPTION . $user->id );
 
 			return;

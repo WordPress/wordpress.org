@@ -359,7 +359,9 @@
 			) {
 				state = 'ignored';
 			}
-			markCheck( $names, state, strings[ 'names_' + state ] );
+			$names
+				.addClass( 'is-' + state )
+				.attr( 'title', strings[ 'names_' + state ] );
 
 			addRow( $names.find( '.wporg-review-details' ), strings.current, [
 				String( plugin.name ),
@@ -368,17 +370,6 @@
 				copyButton( String( plugin.slug ), strings.copy_slug ),
 			] );
 		}
-	}
-
-	/**
-	 * Colors a check in the panel by whether the author followed the review.
-	 *
-	 * @param {jQuery} $check Check.
-	 * @param {string} state  followed, ignored, or to-review.
-	 * @param {string} label  What it means.
-	 */
-	function markCheck( $check, state, label ) {
-		$check.addClass( 'is-' + state ).attr( 'title', label );
 	}
 
 	/**
@@ -397,7 +388,9 @@
 				( key ) => false === owner[ key ]
 			)
 		) {
-			markCheck( $owner, 'ignored', strings.owner_ignored );
+			$owner
+				.addClass( 'is-ignored' )
+				.attr( 'title', strings.owner_ignored );
 		}
 
 		[ 'author', 'plugin' ].forEach( ( key ) => {

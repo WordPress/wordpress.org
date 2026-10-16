@@ -329,6 +329,62 @@ const CLOSE_REASON_ICONS = array(
 );
 
 /**
+ * Icons, text, and tones of the statuses of plugins and themes in the sidebar, by status; published ones have none.
+ *
+ * @var array[]
+ */
+const ITEM_STATUSES = array(
+	// Plugins.
+	'new'       => array( '⏳', 'Pending initial review', 'warning' ),
+	'pending'   => array( '🔍', 'In review', 'warning' ),
+	'approved'  => array( '✅', 'Approved', 'warning' ),
+	'closed'    => array( '🔒', 'Closed', 'error' ),
+	'disabled'  => array( '🔒', 'Disabled', 'error' ),
+	'rejected'  => array( '🚫', 'Rejected', 'muted' ),
+
+	// Themes.
+	'draft'     => array( '⏳', 'In review or rejected', 'warning' ),
+	'suspend'   => array( '⛔', 'Suspended', 'error' ),
+	'suspended' => array( '⛔', 'Suspended', 'error' ),
+	'delist'    => array( '', 'Delisted', 'muted' ),
+	'delisted'  => array( '', 'Delisted', 'muted' ),
+);
+
+/**
+ * Gets a reason a plugin was closed, disabled, or rejected for, in the plugin directory's words.
+ *
+ * @param string $reasons_method The plugin directory's method that lists them: get_close_reasons or get_rejection_reasons.
+ * @param string $reason         Reason, e.g. security-issue.
+ * @return string
+ */
+function get_plugin_reason( string $reasons_method, string $reason ): string {
+	$template = '\WordPressdotorg\Plugin_Directory\Template';
+	$reasons  = class_exists( $template ) ? $template::$reasons_method() : array();
+
+	return $reasons[ $reason ] ?? ucfirst( str_replace( '-', ' ', $reason ) );
+}
+
+/**
+ * Gets the status of a plugin or theme in words.
+ *
+ * @param string $post_status  Post status.
+ * @param string $close_reason Why a plugin was closed or disabled, e.g. security-issue.
+ * @return string
+ */
+function get_item_status_label( string $post_status, string $close_reason = '' ): string {
+	if ( ! isset( ITEM_STATUSES[ $post_status ] ) ) {
+		return 'publish' === $post_status ? 'Published' : ucfirst( $post_status );
+	}
+
+	$label = ITEM_STATUSES[ $post_status ][1];
+	if ( $close_reason && in_array( $post_status, array( 'closed', 'disabled' ), true ) ) {
+		$label .= ': ' . get_plugin_reason( 'get_close_reasons', $close_reason );
+	}
+
+	return $label;
+}
+
+/**
  * Gets the status line of a plugin or theme in the sidebar, which published ones don't have.
  *
  * Reasons and reviewers are the plugins team's, so only reviews pass them.
@@ -340,49 +396,16 @@ const CLOSE_REASON_ICONS = array(
  * @return array The item's tone, and its status: icon, text, and tooltip. Empty if published.
  */
 function get_item_status( string $post_status, string $reviewer = '', string $close_reason = '', string $rejection = '' ): array {
-	switch ( $post_status ) {
-		// Plugins.
-		case 'new':
-			$status = array( '⏳', 'Pending initial review', 'warning' );
-			break;
-		case 'pending':
-			$status = array( '🔍', 'In review', 'warning' );
-			break;
-		case 'approved':
-			$status = array( '✅', 'Approved', 'warning' );
-			break;
-		case 'closed':
-		case 'disabled':
-			$text = ucfirst( $post_status );
-			if ( $close_reason ) {
-				$reasons = class_exists( '\WordPressdotorg\Plugin_Directory\Template' ) ? \WordPressdotorg\Plugin_Directory\Template::get_close_reasons() : array();
-				$text   .= ': ' . ( $reasons[ $close_reason ] ?? ucfirst( str_replace( '-', ' ', $close_reason ) ) );
-			}
-			$status = array( CLOSE_REASON_ICONS[ $close_reason ] ?? '🔒', $text, 'error' );
-			break;
-		case 'rejected':
-			$status = array( '🚫', 'Rejected', 'muted' );
-			break;
-
-		// Themes.
-		case 'draft':
-			$status = array( '⏳', 'In review or rejected', 'warning' );
-			break;
-		case 'suspend':
-		case 'suspended':
-			$status = array( '⛔', 'Suspended', 'error' );
-			break;
-		case 'delist':
-		case 'delisted':
-			$status = array( '', 'Delisted', 'muted' );
-			break;
-
-		default:
-			return array();
+	if ( ! isset( ITEM_STATUSES[ $post_status ] ) ) {
+		return array();
 	}
 
-	list( $icon, $text, $tone ) = $status;
+	list( $icon, , $tone ) = ITEM_STATUSES[ $post_status ];
+	if ( in_array( $post_status, array( 'closed', 'disabled' ), true ) ) {
+		$icon = CLOSE_REASON_ICONS[ $close_reason ] ?? $icon;
+	}
 
+	$text = get_item_status_label( $post_status, $close_reason );
 	if ( $reviewer ) {
 		$text .= ' · Assigned to ' . $reviewer;
 	}

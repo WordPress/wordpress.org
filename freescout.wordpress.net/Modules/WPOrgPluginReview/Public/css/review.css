@@ -102,10 +102,7 @@
 	background-color: #0c4f4d;
 }
 
-.wporg-review-flag[data-flag="FUN"] {
-	background-color: #1d4ed8;
-}
-
+.wporg-review-flag[data-flag="FUN"],
 .wporg-review-flag[data-flag="ACT"] {
 	background-color: #1d4ed8;
 }
@@ -171,7 +168,6 @@
 	color: #4a5561;
 }
 
-/* The current name is the one the review suggested, or still the one it asked to change. */
 /* Names and Owner: a section of their own, colored by whether the author followed the review. */
 .wporg-review-check {
 	margin-top: 12px;
@@ -363,14 +359,18 @@
 	gap: 6px;
 }
 
-.wporg-worklist-open-count {
-	margin-left: 2px;
+.wporg-worklist-open-count,
+.wporg-worklist-status {
 	padding: 0 6px;
 	border-radius: 9px;
 	background-color: #eef1f4;
 	color: #3e4a55;
 	font-size: 11px;
 	font-weight: 600;
+}
+
+.wporg-worklist-open-count {
+	margin-left: 2px;
 }
 
 .wporg-worklist-open-limit {
@@ -462,12 +462,6 @@
 
 .wporg-worklist-status {
 	margin-right: 4px;
-	padding: 0 6px;
-	border-radius: 9px;
-	background-color: #eef1f4;
-	color: #3e4a55;
-	font-size: 11px;
-	font-weight: 600;
 }
 
 @media (max-width: 767px) {
