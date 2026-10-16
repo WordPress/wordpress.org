@@ -739,11 +739,11 @@ let wpTrac,
 			const propertyForm = document.getElementById( 'propertyform' );
 
 			if ( propertyForm ) {
-				const summaryInput     = document.getElementById( 'field-summary' );
+				const summaryInput = document.getElementById( 'field-summary' );
 				const descriptionInput = document.getElementById( 'field-description' );
-				const commentInput     = document.getElementById( 'comment' );
-				const dupeInput        = document.getElementById( 'action_dupe' );
-				const milestoneSelect  = document.getElementById( 'field-milestone' );
+				const commentInput = document.getElementById( 'comment' );
+				const dupeInput = document.getElementById( 'action_dupe' );
+				const milestoneSelect = document.getElementById( 'field-milestone' );
 
 				propertyForm.addEventListener( 'submit', function ( event ) {
 					wpTrac.isSubmitting = true;
