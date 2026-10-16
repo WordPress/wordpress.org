@@ -5,14 +5,15 @@ use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Admin\Metabox\Author_Notice;
 use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 
-use WordPressdotorg\MU_Plugins\Utilities\HelpScout; // NOTE: NOT the same as the HelpScout class in this plugin.
+use WordPressdotorg\Plugin_Directory\Clients\FreeScout;
+use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
-use function WordPressdotorg\API\HelpScout\{ get_user_email_for_email };
+use function WordPressdotorg\API\FreeScout\{ get_user_email_for_email };
 
 // phpcs:disable WordPress.Security.EscapeOutput
 
 /**
- * This script will process all the bounced emails in HelpScout and take the appropriate action.
+ * This script will process all the bounced emails in FreeScout's Plugins mailbox and take the appropriate action.
  *
  * It will:
  *  - Fetch plugins tagged 'auto-bounce'
@@ -23,7 +24,7 @@ use function WordPressdotorg\API\HelpScout\{ get_user_email_for_email };
  *  - In both cases, an Audit log entry is added referencing this script.
  *  - In the case of revoke, the audit log entry contains the bounce message.
  *  - In the case of a plugin closure, the Author notice is set to the next steps for the user AND a copy of the bounce is included.
- *  - If an action is taken, the HS ticket is closed. (This action will show as 'Systems').
+ *  - If an action is taken, the conversation is closed, as wordpressdotorg.
  */
 
 // This script should only be called in a CLI environment.
@@ -69,27 +70,118 @@ if ( 'live' == OPERATION_MODE ) {
 }
 
 
-// Load the HelpScout API helper methods.
-require_once API_WPORGPATH . '/dotorg/helpscout/common.php';
+if ( ! Helpdesk::is_freescout() || ! FreeScout::api_key() ) {
+	fwrite( STDERR, "Error! Define FREESCOUT_PLUGINS_MAILBOX_ID and FREESCOUT_API_KEY first.\n" );
+	die();
+}
+
+require_once API_WPORGPATH . '/dotorg/freescout/common.php';
 
 // Set a user to run as.
 wp_set_current_user( get_user_by( 'slug', 'wordpressdotorg' )->ID );
 
 /**
- * Fetch the bounce email threads.
+ * Fetch the bounce conversations, with their threads, from every page.
+ *
+ * @return array[]
  */
 function get_bounces() {
-	$api = HelpScout::instance();
+	$bounces = [];
+	$page    = 1;
 
-	return $api->get_paged(
-		'/v2/conversations',
+	do {
+		$response = FreeScout::api(
+			'conversations',
+			[
+				'mailboxId' => Helpdesk::freescout_mailbox_id(),
+				'embed'     => 'threads',
+				'status'    => 'pending',
+				'tag'       => 'auto-bounce',
+				'page'      => $page,
+			],
+			'GET',
+			$response_code
+		);
+
+		if ( 200 !== $response_code ) {
+			fwrite( STDERR, "Error! Couldn't list the bounces: $response_code\n" );
+			die();
+		}
+
+		$bounces = array_merge( $bounces, $response['_embedded']['conversations'] ?? [] );
+	} while ( $page++ < (int) ( $response['page']['totalPages'] ?? 0 ) );
+
+	return $bounces;
+}
+
+/**
+ * Shape a bounce like FreeScout's sidebar payload, which the bounce helpers read.
+ *
+ * Attachments that may hold the bounced email are downloaded, as the API only links them.
+ *
+ * @param array $bounce A conversation, with its threads.
+ * @return object
+ */
+function get_bounce_request( $bounce ) {
+	$threads = [];
+	foreach ( $bounce['_embedded']['threads'] ?? [] as $thread ) {
+		$attachments = [];
+		foreach ( $thread['_embedded']['attachments'] ?? [] as $attachment ) {
+			$mime_type = (string) ( $attachment['mimeType'] ?? '' );
+			$size      = (int) ( $attachment['size'] ?? 0 );
+			$content   = null;
+
+			if ( $size <= 100 * KB_IN_BYTES && preg_match( '/message|text|rfc/', $mime_type ) ) {
+				$response = wp_remote_get( (string) ( $attachment['fileUrl'] ?? '' ), [ 'timeout' => FreeScout::TIMEOUT ] );
+				$content  = 200 === wp_remote_retrieve_response_code( $response ) ? wp_remote_retrieve_body( $response ) : null;
+			}
+
+			$attachments[] = (object) [
+				'mime_type' => $mime_type,
+				'size'      => $size,
+				'content'   => $content,
+			];
+		}
+
+		$threads[] = (object) [
+			'type'        => (string) ( $thread['type'] ?? '' ),
+			'body'        => (string) ( $thread['body'] ?? '' ),
+			'attachments' => $attachments,
+		];
+	}
+
+	return (object) [
+		'conversation' => (object) [ 'subject' => (string) ( $bounce['subject'] ?? '' ) ],
+		'sender'       => (object) [
+			'email'      => (string) ( $bounce['customer']['email'] ?? '' ),
+			'first_name' => (string) ( $bounce['customer']['firstName'] ?? '' ),
+			'last_name'  => (string) ( $bounce['customer']['lastName'] ?? '' ),
+		],
+		'threads'      => $threads,
+		// A bounce is about whoever the email bounced for, not its sender.
+		'related'      => true,
+	];
+}
+
+/**
+ * Close a bounce's conversation.
+ *
+ * @param int $conversation_id Conversation ID.
+ */
+function close_conversation( $conversation_id ) {
+	FreeScout::api(
+		'conversations/' . $conversation_id,
 		[
-			'mailbox' => $api->get_mailbox_id( 'plugins' ),
-			'embed'   => 'threads',
-			'status'  => 'pending',
-			'tag'     => 'auto-bounce',
-		]
+			'status' => 'closed',
+			'byUser' => FreeScout::USER_ID,
+		],
+		'PUT',
+		$response_code
 	);
+
+	if ( $response_code < 200 || $response_code >= 300 ) {
+		echo "\tCouldn't close " . Helpdesk::conversation_url( $conversation_id, 0, true ) . ": $response_code\n";
+	}
 }
 
 /**
@@ -102,12 +194,12 @@ function extract_bounce_message( $email ) {
 	$body    = '';
 	$message = '';
 
-	foreach ( $email->_embedded->threads as $reply ) {
-		if ( 'customer' != $reply->type ) {
+	foreach ( $email['_embedded']['threads'] ?? [] as $reply ) {
+		if ( 'customer' != $reply['type'] ) {
 			continue;
 		}
 
-		$body = $reply->body;
+		$body = $reply['body'];
 		break;
 	}
 
@@ -160,11 +252,11 @@ function extract_bounce_message( $email ) {
 }
 
 $stats = [
-	'processed'      => 0,
-	'error'          => 0,
-	'closed'         => 0,
-	'revoked-commit' => 0,
-	'hs-closed'      => 0,
+	'processed'            => 0,
+	'error'                => 0,
+	'closed'               => 0,
+	'revoked-commit'       => 0,
+	'conversations-closed' => 0,
 ];
 
 $actions_to_take = [
@@ -178,16 +270,16 @@ $actions_to_take = [
 	],
 */
 ];
-$just_close_it = []; // The HS tickets to just close.
+$just_close_it = []; // The conversations to just close.
 
-foreach ( get_bounces()->_embedded->conversations as $bounce ) {
-	$helpscout_url = "https://secure.helpscout.net/conversation/{$bounce->id}/{$bounce->number}";
+foreach ( get_bounces() as $bounce ) {
+	$conversation_url = Helpdesk::conversation_url( (int) $bounce['id'], (int) $bounce['number'], true );
 
 	$stats['processed']++;
 
-	echo "Processing {$helpscout_url}\n";
+	echo "Processing {$conversation_url}\n";
 
-	$email = get_user_email_for_email( $bounce );
+	$email = get_user_email_for_email( get_bounce_request( $bounce ) );
 	$user  = get_user_by( 'email', $email );
 
 	$slugs = Tools::get_users_write_access_plugins( $user ) ?: [];
@@ -250,12 +342,12 @@ foreach ( get_bounces()->_embedded->conversations as $bounce ) {
 	foreach ( $plugins as $plugin ) {
 		$actions_to_take[ $plugin->ID ] ??= [ 'id' => [], 'users' => [], 'action' => '' ];
 
-		$actions_to_take[ $plugin->ID ]['id'][]  = $bounce->id;
+		$actions_to_take[ $plugin->ID ]['id'][]  = (int) $bounce['id'];
 		$actions_to_take[ $plugin->ID ]['users'][ $user->ID ] = $bounce_message;
 	}
 
 	if ( ! $plugins && $closed_plugins ) {
-		$just_close_it[] = $bounce->id;
+		$just_close_it[] = (int) $bounce['id'];
 	}
 
 	echo "\n";
@@ -284,11 +376,15 @@ foreach ( $actions_to_take as $post_id => $data ) {
 
 	$plugin = get_post( $post_id );
 
-	$helpscout_url = '';
-	foreach ( $data['id'] as $hs_id ) {
-		$helpscout_url .= " https://secure.helpscout.net/conversation/{$hs_id}";
-	}
-	$helpscout_url = trim( $helpscout_url );
+	$conversation_urls = implode(
+		' ',
+		array_map(
+			function ( $conversation_id ) {
+				return Helpdesk::conversation_url( $conversation_id, 0, true );
+			},
+			$data['id']
+		)
+	);
 
 	echo "Plugin: {$plugin->post_name}\n";
 	echo "\t" . get_permalink( $plugin ) . "\n";
@@ -305,7 +401,7 @@ foreach ( $actions_to_take as $post_id => $data ) {
 		}
 
 		Tools::audit_log(
-			"Removing {$user->user_login} as a committer due to Email bounce. See {$helpscout_url}.\n{$bounce_message}<em>Automated by <code>bin/bounced-emails.php</code></em>",
+			"Removing {$user->user_login} as a committer due to Email bounce. See {$conversation_urls}.\n{$bounce_message}<em>Automated by <code>bin/bounced-emails.php</code></em>",
 			$plugin
 		);
 		Tools::revoke_plugin_committer( $plugin, $user );
@@ -313,18 +409,9 @@ foreach ( $actions_to_take as $post_id => $data ) {
 		$stats['revoked-commit']++;
 	}
 
-	// Close those HS tickets.
 	if ( 'live' == OPERATION_MODE ) {
-		foreach ( $data['id'] as $hs_id ) {
-			HelpScout::instance()->api(
-				'/v2/conversations/' . $hs_id,
-				[
-					'op'    => 'replace',
-					'path'  => '/status',
-					'value' => 'closed',
-				],
-				'PATCH'
-			);
+		foreach ( $data['id'] as $conversation_id ) {
+			close_conversation( $conversation_id );
 		}
 	}
 
@@ -339,11 +426,15 @@ foreach ( $actions_to_take as $post_id => $data ) {
 
 	$plugin = get_post( $post_id );
 
-	$helpscout_url = '';
-	foreach ( $data['id'] as $hs_id ) {
-		$helpscout_url .= " https://secure.helpscout.net/conversation/{$hs_id}";
-	}
-	$helpscout_url = trim( $helpscout_url );
+	$conversation_urls = implode(
+		' ',
+		array_map(
+			function ( $conversation_id ) {
+				return Helpdesk::conversation_url( $conversation_id, 0, true );
+			},
+			$data['id']
+		)
+	);
 
 	echo "Plugin: {$plugin->post_name}\n";
 	echo "\t" . get_permalink( $plugin ) . "\n";
@@ -358,7 +449,7 @@ foreach ( $actions_to_take as $post_id => $data ) {
 	}
 
 	Tools::audit_log(
-		"Closing due to Email bounce. See {$helpscout_url}.\n{$bounce_message}<em>Automated by <code>bin/bounced-emails.php</code></em>",
+		"Closing due to Email bounce. See {$conversation_urls}.\n{$bounce_message}<em>Automated by <code>bin/bounced-emails.php</code></em>",
 		$plugin
 	);
 
@@ -396,17 +487,8 @@ foreach ( $actions_to_take as $post_id => $data ) {
 		'post_status' => 'closed',
 	] );
 
-	// Close those HS tickets.
-	foreach ( $data['id'] as $hs_id ) {
-		HelpScout::instance()->api(
-			'/v2/conversations/' . $hs_id,
-			[
-				'op'    => 'replace',
-				'path'  => '/status',
-				'value' => 'closed',
-			],
-			'PATCH'
-		);
+	foreach ( $data['id'] as $conversation_id ) {
+		close_conversation( $conversation_id );
 	}
 
 	$stats['closed']++;
@@ -414,22 +496,13 @@ foreach ( $actions_to_take as $post_id => $data ) {
 	echo "\n";
 }
 
-// Close those HS tickets.
-foreach ( $just_close_it as $hs_id ) {
-	$stats['hs-closed']++;
+foreach ( $just_close_it as $conversation_id ) {
+	$stats['conversations-closed']++;
 
-	echo "Marking https://secure.helpscout.net/conversation/{$hs_id} as closed as all plugins are closed.\n";
+	echo 'Marking ' . Helpdesk::conversation_url( $conversation_id, 0, true ) . " as closed as all plugins are closed.\n";
 
 	if ( 'live' == OPERATION_MODE ) {
-		HelpScout::instance()->api(
-			'/v2/conversations/' . $hs_id,
-			[
-				'op'    => 'replace',
-				'path'  => '/status',
-				'value' => 'closed',
-			],
-			'PATCH'
-		);
+		close_conversation( $conversation_id );
 	}
 }
 

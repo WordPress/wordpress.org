@@ -10,6 +10,7 @@ Context for AI coding agents and developers working on the WordPress.org FreeSco
 
 - `Modules/<Name>/` — one directory per module (`module.json`, `Providers/`, `Http/`, `Resources/`, `Database/Migrations/`, `Public/`, `tests/`).
   - `WPOrgAkismet` — checks new conversations from senders with Akismet (`rest.akismet.com`, its own key), and reports agents' corrections.
+  - `WPOrgApi` — endpoints WordPress.org calls, signed with the same secret the other way around (`X-WPOrg-Signature`, see `Services/SignedRequest.php`), outside the `web` middleware. So far, a mailbox's saved reply by name, for the plugin directory's scripts.
   - `WPOrgHelpScoutImport` — imports HelpScout mailboxes' conversations, with their tags and custom fields, and their saved replies, from HelpScout's API, page by page on the queue, without the events live email fires, and points WordPress.org's copy of conversations at the imported ones as each mailbox switches. Administrators run it under Manage » HelpScout Import. Remove it once every mailbox has moved.
   - `WPOrgSearch` — gives searches without other filters core's After filter, a year ago unless the agent picks a date, and runs core's conversation search through its `search.conversations.perform` hook in one query with `COUNT(*) OVER()`, stopped after 20 seconds on MariaDB.
   - `WPOrgSidebar` — WordPress.org panels in the conversation sidebar, loaded over AJAX from `api.wordpress.org/dotorg/freescout/`.

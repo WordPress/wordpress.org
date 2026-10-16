@@ -1,7 +1,9 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Tools;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Clients\FreeScout;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
+use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
 /**
  * All functionality related to Stats_Report Tool.
@@ -80,14 +82,14 @@ class Stats_Report {
 	 *     @type array $in_queue_pending_why                  The number of pending plugins currently in the queue, broken down by whom we're waiting on.
 	 *     @type int   $in_queue_from_time_window             The number of plugins currently in the queue submitted during the specified time window.
 	 *     @type int   $in_queue_old                          The number of plugins currently in the queue that are older than "recently".
-	 *     @type int   $helpscout_queue_total_conversations   The number of ongoing Help Scout conversations.
-	 *     @type int   $helpscout_queue_new_conversations     The number of new Help Scout conversations.
-	 *     @type int   $helpscout_queue_customers             The number of unique Plugin authors contacted.
-	 *     @type int   $helpscout_queue_conversations_per_day The number of Help Scout conversations per day.
-	 *     @type int   $helpscout_queue_busiest_day           The busiest day in the Help Scout queue.
-	 *     @type int   $helpscout_queue_messages_received     The number of emails received in HelpScout.
-	 *     @type int   $helpscout_queue_replies_sent          The number of replies sent to emails.
-	 *     @type int   $helpscout_queue_emails_created        The number of new outgoing conversations created.
+	 *     @type int    $email_queue_total_conversations   The number of ongoing conversations in the helpdesk.
+	 *     @type int    $email_queue_new_conversations     The number of new conversations in the helpdesk.
+	 *     @type int    $email_queue_customers             The number of unique Plugin authors contacted.
+	 *     @type int    $email_queue_conversations_per_day The number of conversations per day.
+	 *     @type string $email_queue_busiest_day           The busiest day in the helpdesk's queue.
+	 *     @type int    $email_queue_messages_received     The number of emails received.
+	 *     @type int    $email_queue_replies_sent          The number of replies sent to emails.
+	 *     @type int    $email_queue_emails_created        The number of new outgoing conversations created; Help Scout only.
 	 * }
 	 */
 	public function get_stats( $args = array() ) {
@@ -154,8 +156,8 @@ class Stats_Report {
 		);
 
 		// # Break down the plugins in the queue, based on if we're still waiting on a reply.
-		// Requires the helpscout tables to exist.
-		if ( defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) {
+		// Requires the helpscout tables to exist, which either helpdesk fills.
+		if ( Helpdesk::is_freescout() || defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) {
 			$stats['in_queue_pending_why'] = $wpdb->get_row( $wpdb->prepare(
 				'SELECT
 					SUM( IF( active = 0 AND closed > 0, 1, 0 ) ) AS `author`,
@@ -199,10 +201,12 @@ class Stats_Report {
 		) );
 
 		// --------------
-		// Help Scout Queue
+		// Email Queue
 		// --------------
 
-		if ( defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) {
+		if ( Helpdesk::is_freescout() ) {
+			$stats = array_merge( $stats, $this->get_freescout_queue_stats( $args ) );
+		} elseif ( defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) {
 			$start_datetime = gmdate( 'Y-m-d\T00:00:00\Z', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) );
 			$end_datetime   = gmdate( 'Y-m-d\T23:59:59\Z', strtotime( $args['date'] ) );
 
@@ -221,17 +225,58 @@ class Stats_Report {
 				$company_report = $mailbox_overall = $email_report = false;
 			}
 
-			$stats['helpscout_queue_total_conversations']     = $mailbox_overall->current->totalConversations ?? 0;
-			$stats['helpscout_queue_new_conversations']       = $mailbox_overall->current->newConversations ?? 0;
-			$stats['helpscout_queue_customers']               = $mailbox_overall->current->customers ?? 0;
-			$stats['helpscout_queue_conversations_per_day']   = $mailbox_overall->current->conversationsPerDay ?? 0;
-			$stats['helpscout_queue_busiest_day']             = gmdate( 'l', strtotime( 'Sunday +' . ( $mailbox_overall->busiestDay->day ?? 0 ) . ' days' ) ); // Hacky? but works
-			$stats['helpscout_queue_messages_received']       = $mailbox_overall->current->messagesReceived ?? 0;
-			$stats['helpscout_queue_replies_sent']            = $company_report->current->totalReplies;
-			$stats['helpscout_queue_emails_created']          = $email_report->current->volume->emailsCreated ?? 0;
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Help Scout's API.
+			$stats['email_queue_total_conversations']   = $mailbox_overall->current->totalConversations ?? 0;
+			$stats['email_queue_new_conversations']     = $mailbox_overall->current->newConversations ?? 0;
+			$stats['email_queue_customers']             = $mailbox_overall->current->customers ?? 0;
+			$stats['email_queue_conversations_per_day'] = $mailbox_overall->current->conversationsPerDay ?? 0;
+			$stats['email_queue_busiest_day']           = gmdate( 'l', strtotime( 'Sunday +' . ( $mailbox_overall->busiestDay->day ?? 0 ) . ' days' ) ); // Hacky? but works.
+			$stats['email_queue_messages_received']     = $mailbox_overall->current->messagesReceived ?? 0;
+			$stats['email_queue_replies_sent']          = $company_report->current->totalReplies;
+			$stats['email_queue_emails_created']        = $email_report->current->volume->emailsCreated ?? 0;
+			// phpcs:enable
 		}
 
 		return $stats;
+	}
+
+	/**
+	 * Gets the Plugins mailbox's queue stats from FreeScout's Reports module, through its API.
+	 *
+	 * FreeScout has no count of outgoing conversations, so there's no `email_queue_emails_created`.
+	 *
+	 * @param array $args The stats' date, and number of days before it.
+	 * @return array The queue stats, see get_stats(); zeros if FreeScout's reports couldn't be fetched.
+	 */
+	protected function get_freescout_queue_stats( $args ) {
+		$query = array(
+			'filters' => array(
+				'from'    => gmdate( 'Y-m-d', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) ),
+				'to'      => gmdate( 'Y-m-d', strtotime( $args['date'] ) ),
+				'mailbox' => Helpdesk::freescout_mailbox_id(),
+			),
+		);
+
+		$conversations = FreeScout::api( 'reports/conversations', $query );
+		$productivity  = FreeScout::api( 'reports/productivity', $query );
+
+		// All zeros, so a failed request is obvious.
+		if ( ! isset( $conversations['metrics'], $productivity['metrics'] ) ) {
+			$conversations = array();
+			$productivity  = array();
+		}
+
+		$metrics = $conversations['metrics'] ?? array();
+
+		return array(
+			'email_queue_total_conversations'   => (int) ( $metrics['total']['value'] ?? 0 ),
+			'email_queue_new_conversations'     => (int) ( $metrics['new']['value'] ?? 0 ),
+			'email_queue_customers'             => (int) ( $metrics['customers']['value'] ?? 0 ),
+			'email_queue_conversations_per_day' => (int) ( $metrics['conv_day']['value'] ?? 0 ),
+			'email_queue_busiest_day'           => (string) ( $metrics['busy_day']['value'] ?? '' ),
+			'email_queue_messages_received'     => (int) ( $metrics['messages']['value'] ?? 0 ),
+			'email_queue_replies_sent'          => (int) ( $productivity['metrics']['replies']['value'] ?? 0 ),
+		);
 	}
 
 	public function get_user_stats( $args = array() ) {
@@ -581,15 +626,23 @@ class Stats_Report {
 			<?php endif; ?>
 		</ul>
 
-		<?php if ( defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) : ?>
-		<h3><?php esc_html_e( 'Help Scout Queue Stats', 'wporg-plugins' ); ?></h3>
+		<?php if ( isset( $stats['email_queue_total_conversations'] ) ) : ?>
+		<h3>
+			<?php
+				printf(
+					/* translators: %s: Helpdesk name, like FreeScout. */
+					esc_html__( '%s Queue Stats', 'wporg-plugins' ),
+					esc_html( Helpdesk::name() )
+				);
+			?>
+		</h3>
 
 		<ul style="font-family:Courier New;">
 			<li>
 			<?php
 				printf(
 					'Total Conversations: %d',
-					esc_html( $stats['helpscout_queue_total_conversations'] )
+					esc_html( $stats['email_queue_total_conversations'] )
 				);
 			?>
 			</li>
@@ -597,7 +650,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'New Conversations: %d',
-					esc_html( $stats['helpscout_queue_new_conversations'] )
+					esc_html( $stats['email_queue_new_conversations'] )
 				);
 			?>
 			</li>
@@ -605,7 +658,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'Customers: %d',
-					esc_html( $stats['helpscout_queue_customers'] )
+					esc_html( $stats['email_queue_customers'] )
 				);
 			?>
 			</li>
@@ -613,7 +666,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'Conversations per Day: %d',
-					esc_html( $stats['helpscout_queue_conversations_per_day'] )
+					esc_html( $stats['email_queue_conversations_per_day'] )
 				);
 			?>
 			</li>
@@ -621,7 +674,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'Busiest Day: %s',
-					esc_html( $stats['helpscout_queue_busiest_day'] )
+					esc_html( $stats['email_queue_busiest_day'] )
 				);
 			?>
 			</li>
@@ -629,7 +682,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'Messages Received: %d',
-					esc_html( $stats['helpscout_queue_messages_received'] )
+					esc_html( $stats['email_queue_messages_received'] )
 				);
 			?>
 			</li>
@@ -637,18 +690,20 @@ class Stats_Report {
 			<?php
 				printf(
 					'Replies Sent: %d',
-					esc_html( $stats['helpscout_queue_replies_sent'] )
+					esc_html( $stats['email_queue_replies_sent'] )
 				);
 			?>
 			</li>
-			<li>
-			<?php
-				printf(
-					'Emails Created: %d',
-					esc_html( $stats['helpscout_queue_emails_created'] )
-				);
-			?>
-			</li>
+			<?php if ( isset( $stats['email_queue_emails_created'] ) ) : ?>
+				<li>
+				<?php
+					printf(
+						'Emails Created: %d',
+						esc_html( $stats['email_queue_emails_created'] )
+					);
+				?>
+				</li>
+			<?php endif; ?>
 		</ul>
 		<?php endif; ?>
 
@@ -761,9 +816,9 @@ class Stats_Report {
 			?>
 			<ul style="font-style:italic;">
 				<?php if ( isset( $user_stats['all-hs-warning'] ) ) : ?>
-					<li><code>^</code> : This is of all Helpscout mailboxes, not Plugins specific, as plugins-only data is only available after <a href="https://meta.trac.wordpress.org/changeset/13010">2023-12-05</a>.</li>
+					<li><code>^</code> : This is of all Help Scout and FreeScout mailboxes, not Plugins specific, as plugins-only data is only available after <a href="https://meta.trac.wordpress.org/changeset/13010">2023-12-05</a>.</li>
 				<?php endif; ?>
-				<li><code>^</code> : Requires your Helpscout email to be the same as your WordPress.org email, or as one of your profiles alternate emails.</li>
+				<li><code>^</code> : Requires your Help Scout email to be the same as your WordPress.org email, or as one of your profiles alternate emails, and that you log in to FreeScout with your WordPress.org account.</li>
 				<li><code>^</code> : Email "Actions" include sending emails, replying to emails, marking as spam, moving to different inbox, etc.</li>
 			</ul>
 
