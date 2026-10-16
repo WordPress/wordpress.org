@@ -69,6 +69,26 @@ class GoogleCloudStorage {
 		add_filter( 'upload_dir',                      [ __CLASS__, 'filter_upload_dir' ] );
 		add_filter( 'wp_get_attachment_url',           [ __CLASS__, 'filter_wp_get_attachment_url' ], 10, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ __CLASS__, 'append_attachment_metadata' ], 10, 3 );
+		add_filter( 'pre_recurse_dirsize',             [ __CLASS__, 'filter_pre_recurse_dirsize' ], 10, 2 );
+	}
+
+	/**
+	 * Short-circuits directory size calculations for Google Cloud Storage paths.
+	 *
+	 * Sizing a `gs://` directory stats every object under it through the stream
+	 * wrapper, several API requests each, so callers like the Jetpack heartbeat
+	 * would otherwise crawl the entire bucket.
+	 *
+	 * @param int|false $size      The directory size in bytes, or false to calculate it.
+	 * @param string    $directory Full path of the directory.
+	 * @return int|false
+	 */
+	public static function filter_pre_recurse_dirsize( $size, $directory ) {
+		if ( str_starts_with( $directory, 'gs://' ) ) {
+			return 0;
+		}
+
+		return $size;
 	}
 
 	/**
