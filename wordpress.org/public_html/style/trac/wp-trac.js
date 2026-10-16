@@ -339,6 +339,7 @@ let wpTrac,
 	wpTrac = {
 		gardener: true === window.wpBugGardener,
 		currentUser: window.wpTracCurrentUser || null,
+		isSubmitting: false,
 
 		init() {
 			// Gardener status as a body class, for rules that cannot see the flag.
@@ -601,9 +602,6 @@ let wpTrac,
 					}
 				}
 
-				// Rudimentary save alerts for new tickets (summary/description) and comments.
-				let isSubmitting = false;
-
 				/**
 				 * Checks whether an input or textarea element has unsaved changes compared to its initial value.
 				 *
@@ -626,7 +624,7 @@ let wpTrac,
 				}
 
 				window.addEventListener( 'beforeunload', function ( event ) {
-					if ( isSubmitting ) {
+					if ( wpTrac.isSubmitting ) {
 						return;
 					}
 
@@ -642,10 +640,10 @@ let wpTrac,
 				} );
 
 				document.getElementById( 'propertyform' )?.addEventListener( 'submit', function ( event ) {
-					isSubmitting = true;
+					wpTrac.isSubmitting = true;
 					setTimeout( function () {
 						if ( event.defaultPrevented ) {
-							isSubmitting = false;
+							wpTrac.isSubmitting = false;
 						}
 					}, 0 );
 				} );
@@ -1548,6 +1546,7 @@ let wpTrac,
 							url = href + separator + params.toString();
 							window.open( url );
 						} else {
+							wpTrac.isSubmitting = true;
 							window.location.href = url;
 						}
 					} );
