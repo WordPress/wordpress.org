@@ -1727,10 +1727,10 @@ let wpTrac,
 								username = nicename;
 							}
 
-						if ( username && ! excludeSet.has( username ) ) {
-							users.add( username );
-						}
-					} );
+							if ( username && ! excludeSet.has( username ) ) {
+								users.add( username );
+							}
+						} );
 
 					// Add ticket reporter.
 					const reporterTd = document.querySelector( '#ticket td[headers="h_reporter"]' );
