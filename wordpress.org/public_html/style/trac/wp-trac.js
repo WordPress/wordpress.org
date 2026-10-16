@@ -325,7 +325,7 @@ let wpTrac,
 
 	// Project slug: from the body class site_header.html sets (make-<slug>), else the host.
 	const projectSlug =
-		( document.body.className.match( /\bmake-([a-z0-9-]+)/ ) || [] )[ 1 ] ||
+		( document.body?.className.match( /\bmake-([a-z0-9-]+)/ ) || [] )[ 1 ] ||
 		window.location.hostname.split( '.' )[ 0 ];
 
 	// Project display name from the page title, e.g. "WordPress" or "bbPress". HTML-escaped.
@@ -423,7 +423,7 @@ let wpTrac,
 
 					// User-Mention (@username)
 					if ( username ) {
-						if ( reservedTerms.includes( username ) ) {
+						if ( reservedTerms.includes( username.toLowerCase() ) ) {
 							return match;
 						}
 
@@ -524,7 +524,7 @@ let wpTrac,
 				// See https://meta.trac.wordpress.org/ticket/3904
 				document.querySelectorAll( '#attachment input[type="file"]' ).forEach( ( fileInput ) => {
 					fileInput.addEventListener( 'change', function () {
-						const ext = this.value.split( '.' ).pop();
+						const ext = this.value.split( '.' ).pop()?.toLowerCase();
 						document.getElementById( 'wp-block-zip-upload' )?.remove();
 						if ( 'zip' === ext ) {
 							this.value = '';
@@ -761,7 +761,7 @@ let wpTrac,
 							( document.querySelector( '.trac-id' )?.textContent || '' ).replace( '#', '' ),
 							10
 						);
-						const duplicateTicket = Number.parseInt( dupeInput?.value || '', 10 );
+						const duplicateTicket = Number.parseInt( ( dupeInput?.value || '' ).replace( '#', '' ), 10 );
 
 						if ( ! duplicateTicket || currentTicket === duplicateTicket ) {
 							if ( dupeInput ) {
