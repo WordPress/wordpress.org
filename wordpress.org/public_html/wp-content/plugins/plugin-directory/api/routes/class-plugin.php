@@ -56,14 +56,18 @@ class Plugin extends Base {
 			}
 
 			return [
-				'error'       => 'closed',
-				'name'        => get_the_title(),
-				'slug'        => $post->post_name,
-				'description' => $close_text,
-				'closed'      => true,
-				'closed_date' => $close_data['date'] ? gmdate( 'Y-m-d', strtotime( $close_data['date'] ) ) : false,
-				'reason'      => $close_data['public'] ? $close_data['reason'] : false,
-				'reason_text' => $close_data['public'] ? $close_data['label'] : false,
+				'error'           => 'closed',
+				'name'            => get_the_title(),
+				'slug'            => $post->post_name,
+				'description'     => $close_text,
+				'status'          => $post->post_status,
+				'closed'          => true,
+				'closed_date'     => $close_data['date'] ? gmdate( 'Y-m-d', strtotime( $close_data['date'] ) ) : false,
+				'reason'          => $close_data['public'] ? $close_data['reason'] : false,
+				'reason_text'     => $close_data['public'] ? $close_data['label'] : false,
+				'is_outdated'     => Template::is_plugin_outdated( $post ),
+				'outdated_notice' => Template::is_plugin_outdated( $post ) ? __( 'This plugin hasn&#146;t been tested with the latest 3 major releases of WordPress. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' ) : '',
+				'is_security'     => ( $close_data['public'] && 'security-issue' === $close_data['reason'] ),
 			];
 
 		} elseif ( ! $post || 'publish' != $post->post_status ) {
@@ -179,6 +183,15 @@ class Plugin extends Base {
 		$result['downloaded']               = intval( get_post_meta( $post_id, 'downloads', true ) );
 		$result['last_updated']             = gmdate( 'Y-m-d g:ia \G\M\T', strtotime( $last_updated ) );
 		$result['added']                    = gmdate( 'Y-m-d', strtotime( $post->post_date_gmt ) );
+		$is_outdated                        = Template::is_plugin_outdated( $post );
+		$result['status']                   = $post->post_status;
+		$result['closed']                   = false;
+		$result['closed_date']              = false;
+		$result['reason']                   = false;
+		$result['reason_text']              = false;
+		$result['is_outdated']              = (bool) $is_outdated;
+		$result['outdated_notice']          = $is_outdated ? __( 'This plugin hasn&#146;t been tested with the latest 3 major releases of WordPress. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' ) : '';
+		$result['is_security']              = false;
 		$result['homepage']                 = get_post_meta( $post_id, 'header_plugin_uri', true );
 		$result['sections']                 = array();
 
