@@ -1576,7 +1576,7 @@ let wpTrac,
 					document.querySelectorAll( '.wp-notice.component' ).forEach( ( el ) => el.remove() );
 
 					const toggleElements = [
-						...Array.from( document.querySelectorAll( 'input[name="attachment"]' ) ( el ) => el.parentElement ).filter(
+						...Array.from( document.querySelectorAll( 'input[name="attachment"]' ), ( el ) => el.parentElement ).filter(
 							Boolean
 						),
 						...document.querySelectorAll( '.ticketdraft, .wp-notice, div.buttons' ),
