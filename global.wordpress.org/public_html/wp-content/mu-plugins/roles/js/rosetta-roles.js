@@ -235,17 +235,17 @@
 		}
 	});
 
-	projects.model.Selection = Backbone.Collection.extend({
-
+	projects.model.Selection = Backbone.Collection.extend( {
 		initialize: function() {
 			this.$field = $( '#project-access-list' );
 			this.on( 'add remove reset', this.updateInputField );
+			this.updateInputField();
 		},
 
 		updateInputField: function() {
 			this.$field.val( this.pluck( 'id' ).join( ',' ) );
 		}
-	});
+	} );
 
 	/**
 	 * VIEWS
@@ -616,11 +616,11 @@
 	};
 
 	projects.init = function() {
-		projects.selection = new projects.model.Selection();
+		var initialSelection = _.map( projects.settings.accessList || [], function( projectID ) {
+			return { id: projectID };
+		} );
 
-		_.each( projects.settings.accessList, function( projectID ) {
-			projects.selection.add( { id: projectID } );
-		});
+		projects.selection = new projects.model.Selection( initialSelection );
 
 		projects.getProjects().then( function( response ) {
 			projects.initFrame( response );
