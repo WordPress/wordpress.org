@@ -17,6 +17,27 @@
 	/**
 	 * MODELS
 	 */
+	projects.model.SelectableMixin = {
+		uncheck: function() {
+			this.set( 'checked', false );
+		},
+
+		syncInitialSelection: function() {
+			if ( projects.selection.get( this.get( 'id' ) ) ) {
+				this.set( 'checked', true );
+			}
+		},
+
+		updateSelection: function( model, checked ) {
+			if ( checked ) {
+				projects.selection.add( { id: this.get( 'id' ) } );
+				$window.trigger( 'uncheck-all-projects.rosetta' );
+			} else {
+				projects.selection.remove( this.get( 'id' ) );
+			}
+		}
+	};
+
 	projects.model.Project = Backbone.Model.extend({
 		defaults: {
 			id: 0,
@@ -37,19 +58,11 @@
 				project: this,
 			} ) );
 
-			var isChecked = projects.selection.get( this.get( 'id' ) );
-			if ( isChecked ) {
-				this.set( 'checked', true );
-			}
+			this.syncInitialSelection();
 
 			this.listenTo( this.get( 'subProjects' ), 'change:checked', this.updateChecked );
-
 			this.on( 'change:checked', this.updateSelection );
 			this.checkForCheckedSubProjects();
-		},
-
-		uncheck: function() {
-			this.set( 'checked', false );
 		},
 
 		updateChecked: function( model ) {
@@ -58,15 +71,6 @@
 			}
 
 			this.checkForCheckedSubProjects();
-		},
-
-		updateSelection: function( model, checked ) {
-			if ( checked ) {
-				projects.selection.add( { id: this.get( 'id' ) } );
-				$window.trigger( 'uncheck-all-projects.rosetta' );
-			} else {
-				projects.selection.remove( this.get( 'id' ) );
-			}
 		},
 
 		// Check the raw data array rather than the collection so active selections
@@ -79,7 +83,8 @@
 			self.set( 'checkedSubProjects', hasChecked );
 		}
 	});
-
+	_.extend( projects.model.Project.prototype, projects.model.SelectableMixin );
+	
 	projects.model.Projects = Backbone.Collection.extend({
 		model: projects.model.Project,
 
@@ -133,27 +138,11 @@
 		initialize: function() {
 			_.bindAll( this, 'uncheck' );
 
-			var isChecked = projects.selection.get( this.get( 'id' ) );
-			if ( isChecked ) {
-				this.set( 'checked', true );
-			}
-
+			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
-		},
-
-		uncheck: function() {
-			this.set( 'checked', false );
-		},
-
-		updateSelection: function( model, checked ) {
-			if ( checked ) {
-				projects.selection.add( { id: this.get( 'id' ) } );
-				$window.trigger( 'uncheck-all-projects.rosetta' );
-			} else {
-				projects.selection.remove( this.get( 'id' ) );
-			}
 		}
 	});
+	_.extend( projects.model.subProject.prototype, projects.model.SelectableMixin );
 
 	projects.model.subProjects = Backbone.Collection.extend({
 		model: projects.model.subProject,
@@ -446,34 +435,24 @@
 
 		events: {
 			'input': 'search',
-			'keyup': 'search',
 			'keydown': 'search'
 		},
 
-		initialize: function() {
-			this.doSearch = _.debounce( this.doSearch.bind( this ), 500 );
+		onInput: function() {
+			this.doSearch();
 		},
 
-		search: function( event ) {
-			if ( event.type === 'keydown' && event.key === 'Enter' ) {
+		onKeydown: function( event ) {
+			if ( event.key === 'Enter' ) {
 				event.preventDefault();
-				return;
-			}
-
-			if ( event.type === 'keyup' && event.key === 'Escape' ) {
+			} else if ( event.key === 'Escape' ) {
 				if ( this.doSearch.cancel ) {
 					this.doSearch.cancel();
 				}
-
 				this.el.value = '';
 				this.collection.doSearch( '' );
-				return;
 			}
-
-			if ( event.type === 'input' ) {
-				this.doSearch();
-			}
-		},
+		}
 
 		doSearch: function() {
 			this.collection.doSearch( this.el.value );
@@ -622,9 +601,8 @@
 		await streamWriter.write( buffer );
 		await streamWriter.close();
 
-		return arrayBufferPromise.then( function( arrayBuffer ) {
-			return new TextDecoder().decode( arrayBuffer );
-		} );
+		var arrayBuffer = await arrayBufferPromise;
+		return new TextDecoder().decode( arrayBuffer );
 	};
 
 	projects.initFrame = function( projectData ) {
