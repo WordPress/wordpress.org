@@ -95,9 +95,7 @@
 		// Check the raw data array rather than the collection so active selections
 		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
-			var hasChecked = _.some( this._subProjects, function( sub ) {
-				return projects.selection.get( sub.id );
-			} );
+			const hasChecked = this._subProjects.some( sub => projects.selection.get( sub.id ) );
 			this.set( 'checkedSubProjects', hasChecked );
 		}
 	});
@@ -186,10 +184,8 @@
 				project.uncheck();
 			} );
 
-			if ( this.project && this.project._subProjects ) {
-				_.each( this.project._subProjects, function( sub ) {
-					projects.selection.remove( sub.id );
-				} );
+			if ( this.project?._subProjects ) {
+				this.project._subProjects.forEach( sub => projects.selection.remove( sub.id ) );
 				this.project.checkForCheckedSubProjects();
 			}
 		},
@@ -259,12 +255,14 @@
 
 	projects.model.Selection = Backbone.Collection.extend( {
 		initialize: function() {
-			this.$field = $( '#project-access-list' );
+			this.field = document.getElementById( 'project-access-list' );
 			this.on( 'add remove reset', this.updateInputField );
 		},
 
 		updateInputField: function() {
-			this.$field.val( this.pluck( 'id' ).join( ',' ) );
+			if ( this.field ) {
+				this.field.value = this.pluck( 'id' ).join( ',' );
+			}
 		}
 	} );
 
@@ -287,7 +285,7 @@
 				view.$el.append( projectView.el );
 			});
 
-			$( '#project-loading' ).remove();
+			document.getElementById( 'project-loading' )?.remove();
 
 			// Only visually marks the first item (#project-all) in the template active on initial load.
 			var $firstActive = view.$el.find( 'li.active' );
@@ -321,7 +319,8 @@
 		},
 
 		prepare: function() {
-			return _.pick( this.model.toJSON(), 'name', 'slug', 'checked', 'checkedSubProjects' );
+			const { name, slug, checked, checkedSubProjects } = this.model.toJSON();
+			return { name, slug, checked, checkedSubProjects };
 		},
 
 		updateChecked: function() {
