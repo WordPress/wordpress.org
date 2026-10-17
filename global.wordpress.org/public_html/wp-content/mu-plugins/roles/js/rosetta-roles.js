@@ -2,7 +2,7 @@
 
 	var projects, l10n, $window = $(window);
 
-	projects = { model: {}, view: {}, controller: {} };
+	projects = { model: {}, view: {} };
 
 	/**
 	 * @typedef {Object} RosettaSettings
@@ -186,7 +186,7 @@
 			var self = this;
 
 			this.each( function( project ) {
-				project.set( 'checked', false );
+				project.uncheck()
 			});
 
 			if ( self.project && self.project._subProjects ) {
@@ -358,8 +358,6 @@
 			}) );
 
 			this.toggleActiveState();
-
-			this.views.ready();
 		},
 
 		// Selecting the entire category grants access to all its items,
@@ -645,7 +643,7 @@
 	projects.compress = async function( data ) {
 		// Reject if Compression Streams API is unavailable; gracefully falls back to direct remote fetching.
 		if ( 'undefined' === typeof CompressionStream ) {
-			return Promise.reject();
+			throw new Error( 'CompressionStream API not supported' );
 		}
 
 		var stream = new CompressionStream( 'gzip' ),
@@ -673,7 +671,7 @@
 
 	projects.decompress = async function( data ) {
 		if ( 'undefined' === typeof DecompressionStream ) {
-			return Promise.reject();
+			throw new Error( 'DecompressionStream API not supported' );
 		}
 
 		// Base64 decode
