@@ -186,7 +186,7 @@
 			var self = this;
 
 			this.each( function( project ) {
-				project.uncheck()
+				project.uncheck();
 			});
 
 			if ( self.project && self.project._subProjects ) {
