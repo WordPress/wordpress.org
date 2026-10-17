@@ -261,7 +261,6 @@
 		initialize: function() {
 			this.$field = $( '#project-access-list' );
 			this.on( 'add remove reset', this.updateInputField );
-			this.updateInputField();
 		},
 
 		updateInputField: function() {
@@ -651,18 +650,17 @@
 		);
 		await streamWriter.close();
 
-		return bufferPromise.then( function( buffer ) {
-			// Base64 encode it in chunks so it can be stored in localStorage without blocking the main thread.
-			var binary = '';
-			var bytes = new Uint8Array( buffer );
-			var chunkSize = 8192;
+		var buffer = await bufferPromise;
+		// Base64 encode it in chunks so it can be stored in localStorage without blocking the main thread.
+		var binary = '';
+		var bytes = new Uint8Array( buffer );
+		var chunkSize = 8192;
 
-			for ( var i = 0; i < bytes.length; i += chunkSize ) {
-				binary += String.fromCharCode.apply( null, bytes.subarray( i, i + chunkSize ) );
-			}
+		for ( var i = 0; i < bytes.length; i += chunkSize ) {
+			binary += String.fromCharCode.apply( null, bytes.subarray( i, i + chunkSize ) );
+		}
 
-			return btoa( binary );
-		} );
+		return btoa( binary );
 	};
 
 	projects.decompress = async function( data ) {
@@ -699,6 +697,7 @@
 		} );
 
 		projects.selection = new projects.model.Selection( initialSelection );
+		projects.selection.updateInputField();
 
 		projects.getProjects().then( function( response ) {
 			projects.initFrame( response );
