@@ -662,6 +662,26 @@ class Locale extends GP_Route {
 	}
 
 	/**
+	 * Calculates the completion percentage with asymmetric rounding.
+	 *
+	 * > 50% rounds down so that a project with all strings except 1 translated shows 99% instead of 100%.
+	 * < 50% rounds up so that a project with just a few strings shows 1% instead of 0%.
+	 *
+	 * @param int $current Translated strings count.
+	 * @param int $all     Total strings count.
+	 * @return int Percentage complete (0–100).
+	 */
+	private function calculate_percent_complete( $current, $all ) {
+		if ( ! $all ) {
+			return 0;
+		}
+
+		$percent = ( $current / $all ) * 100;
+
+		return (int) ( ( $percent > 50 ) ? floor( $percent ) : ceil( $percent ) );
+	}
+
+	/**
 	 * Calculates the status of a project.
 	 *
 	 * @param GP_Project $project           The GlotPress project.
@@ -702,14 +722,10 @@ class Locale extends GP_Route {
 					$single_status->changesrequested_count += (int) $set->changesrequested_count();
 					$single_status->all_count              += (int) $set->all_count();
 
-					if ( $single_status->all_count ) {
-						/*
-						 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
-						 * < 50% round up, so that a project with just a few strings shows 1%, instead of 0%.
-						 */
-						$percent_complete                = ( $single_status->current_count / $single_status->all_count * 100 );
-						$single_status->percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
-					}
+					$single_status->percent_complete = $this->calculate_percent_complete(
+						$single_status->current_count,
+						$single_status->all_count
+					);
 				}
 			}
 
@@ -737,10 +753,10 @@ class Locale extends GP_Route {
 					$status->all_count              += $sub_status->all_count;
 				}
 
-				if ( $status->all_count ) {
-					$percent_complete         = ( $status->current_count / $status->all_count * 100 );
-					$status->percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
-				}
+				$status->percent_complete = $this->calculate_percent_complete(
+					$status->current_count,
+					$status->all_count
+				);
 			}
 		}
 
