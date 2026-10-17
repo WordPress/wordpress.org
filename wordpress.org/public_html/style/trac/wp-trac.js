@@ -1576,9 +1576,10 @@ let wpTrac,
 					document.querySelectorAll( '.wp-notice.component' ).forEach( ( el ) => el.remove() );
 
 					const toggleElements = [
-						...Array.from( document.querySelectorAll( 'input[name="attachment"]' ), ( el ) => el.parentElement ).filter(
-							Boolean
-						),
+						...Array.from(
+							document.querySelectorAll( 'input[name="attachment"]' ),
+							( el ) => el.parentElement
+						).filter( Boolean ),
 						...document.querySelectorAll( '.ticketdraft, .wp-notice, div.buttons' ),
 					];
 
@@ -2232,7 +2233,10 @@ let wpTrac,
 			}
 
 			function submit() {
-				if ( focuses.length === originalFocuses.length && focuses.every( ( v ) => originalFocuses.includes( v ) ) ) {
+				if (
+					focuses.length === originalFocuses.length &&
+					focuses.every( ( v ) => originalFocuses.includes( v ) )
+				) {
 					field.value = originalFocuses.join( ', ' );
 				}
 			}
