@@ -2367,6 +2367,10 @@ table.listing th.desc a::after {
 	width: 100%;
 	padding: 0 12px 2px;
 }
+.create-new-ticket a:hover,
+.create-new-ticket a:focus {
+	box-shadow: none;
+}
 
 .create-new-ticket .ext-link .icon {
 	display: none;
