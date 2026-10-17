@@ -47,6 +47,13 @@ class Rosetta_Roles {
 	private $gp_locale = null;
 
 	/**
+	 * Holds the hook suffix of the translation editors admin page.
+	 *
+	 * @var string
+	 */
+	private $translation_editors_page;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -106,7 +113,7 @@ class Rosetta_Roles {
 			'translation-editors',
 			array( $this, 'render_translation_editors_page' ),
 			'dashicons-translation',
-			71 // After Users
+			71.1 // After Users.
 		);
 
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'load_translation_editors_page' ) );
@@ -234,8 +241,13 @@ class Rosetta_Roles {
 						exit;
 					}
 
+					if ( empty( $_REQUEST['user'] ) ) {
+						wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
+						exit;
+					}
+
 					$user_details = null;
-					$user = wp_unslash( $_REQUEST['user'] );
+					$user         = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
 					if ( false !== strpos( $user, '@' ) ) {
 						$user_details = get_user_by( 'email', $user );
 					} elseif ( is_numeric( $user ) ) {
@@ -269,7 +281,7 @@ class Rosetta_Roles {
 						exit;
 					}
 
-					$projects = empty( $_REQUEST['projects'] ) ? '' : $_REQUEST['projects'];
+					$projects = ! empty( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
 					if ( 'custom' === $projects ) {
 						$this->update_translation_editor( $user_details );
 
@@ -375,7 +387,8 @@ class Rosetta_Roles {
 				$all_projects = wp_list_pluck( $all_projects, 'id' );
 				$all_projects = array_map( 'intval', $all_projects );
 
-				$projects = explode( ',', $_REQUEST['projects'] );
+				$raw_projects = isset( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
+				$projects     = explode( ',', $raw_projects );
 				if ( in_array( 'all', $projects, true ) ) {
 					$this->update_translation_editor( $user_details, array( 'all' ) );
 				} else {
@@ -634,9 +647,9 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			$project_list = [];
 
 			foreach ( $projects_added as $project_id ) {
-				if ( $projects[ $project_id ] ) {
+				if ( isset( $projects[ $project_id ] ) ) {
 					$parent = $this->get_parent_project( $project_tree, $project_id );
-					if ( $parent->id != $project_id ) {
+					if ( is_object( $parent ) && (int) $parent->id !== (int) $project_id ) {
 						$name = sprintf(
 							/* translators: 1: Parent project name, 2: Child project name */
 							__( '%1$s &rarr; %2$s', 'rosetta' ),
@@ -669,25 +682,59 @@ Welcome to the WordPress Polyglots team and happy translating.',
 					'items_wrap'     => '%3$s',
 					// Custom walker that returns plain text links.
 					'walker'         => new class() extends Walker_Nav_Menu {
-						public function start_lvl( &$output, $depth = 0, $args = array() ) {
+						/**
+						 * Starts the list before the elements are added.
+						 *
+						 * @param string   $output Used to append additional content (passed by reference).
+						 * @param int      $depth  Depth of menu item. Used for padding.
+						 * @param stdClass $args   An object of wp_nav_menu() arguments.
+						 */
+						public function start_lvl( &$output, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
-						public function end_lvl( &$output, $depth = 0, $args = array() ) {
+
+						/**
+						 * Ends the list after the elements are added.
+						 *
+						 * @param string   $output Used to append additional content (passed by reference).
+						 * @param int      $depth  Depth of menu item. Used for padding.
+						 * @param stdClass $args   An object of wp_nav_menu() arguments.
+						 */
+						public function end_lvl( &$output, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
-						public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
-							$href  = ! empty( $item->url ) ? $item->url : '';
-							$title = apply_filters( 'the_title', $item->title, $item->ID );
-							$title = apply_filters( 'nav_menu_item_title', $title, $item, $args, $depth );
+
+						/**
+						 * Starts the element output.
+						 *
+						 * @param string   $output            Used to append additional content (passed by reference).
+						 * @param WP_Post  $data_object       Menu item data object.
+						 * @param int      $depth             Depth of menu item. Used for padding.
+						 * @param stdClass $args              An object of wp_nav_menu() arguments.
+						 * @param int      $current_object_id Optional. ID of the current menu item. Default 0.
+						 */
+						public function start_el( &$output, $data_object, $depth = 0, $args = null, $current_object_id = 0 ) {
+							$href  = ! empty( $data_object->url ) ? $data_object->url : '';
+							$title = apply_filters( 'the_title', $data_object->title, $data_object->ID );
+							$title = apply_filters( 'nav_menu_item_title', $title, $data_object, $args, $depth );
 
 							$item_output = $title;
 							if ( $href ) {
 								$item_output .= ': ' . esc_url( $href );
 							}
 
-							$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
+							$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $data_object, $depth, $args );
 						}
-						public function end_el( &$output, $item, $depth = 0, $args = array() ) {
+
+						/**
+						 * Ends the element output, if needed.
+						 *
+						 * @param string   $output      Used to append additional content (passed by reference).
+						 * @param WP_Post  $data_object Menu item data object. Not used.
+						 * @param int      $depth       Depth of page. Not used.
+						 * @param stdClass $args        An object of wp_nav_menu() arguments.
+						 */
+						public function end_el( &$output, $data_object, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
 					},
@@ -945,9 +992,9 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param int   $max_depth Optional. Max depth to avoid endless recursion. Default 5.
 	 * @return array The project tree.
 	 */
-	public function get_project_tree( $projects, $parent_id = 0, $max_depth = 5 ) {
+	public function get_project_tree( array $projects, int $parent_id = 0, int $max_depth = 5 ): array {
 		if ( $max_depth < 0 ) { // Avoid an endless recursion.
-			return;
+			return array();
 		}
 
 		$tree = array();

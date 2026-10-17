@@ -169,8 +169,8 @@ class Test_Readme_Parser extends TestCase {
 	public static function filter_text_provider(): array {
 		return array(
 			'section tags and attributes kept'   => array(
-				'See <a href="https://example.com/" title="t" rel="nofollow">docs</a>, <strong>bold</strong> and <code>x</code>.',
-				'See <a href="https://example.com/" title="t" rel="nofollow">docs</a>, <strong>bold</strong> and <code>x</code>.',
+				'See <a href="https://example.com/" rel="nofollow" title="t">docs</a>, <strong>bold</strong> and <code>x</code>.',
+				'See <a href="https://example.com/" rel="nofollow" title="t">docs</a>, <strong>bold</strong> and <code>x</code>.',
 			),
 			'attributes outside the list dropped' => array(
 				'<a id="x" class="c" style="color:red" data-foo="bar" data-wp-bind--href="context.u" href="#top">Top</a>',

@@ -88,6 +88,12 @@ if ( 'webhook.php' === $endpoint ) {
 	respond( 200, new \stdClass() );
 }
 
+if ( 'replace-copies.php' === $endpoint ) {
+	$copies = (array) ( $request->copies ?? array() );
+	file_put_contents( 'php://stderr', sprintf( "[replace-copies] %d conversations\n", count( $copies ) ) );
+	respond( 200, array( 'replaced' => count( $copies ) ) );
+}
+
 /*
  * What the real endpoints sent for obenland's WordPress.org account, whatever the sender, though searches are for the
  * sender's email, as they are there. Download links lose their review info, and the forum note and privacy request

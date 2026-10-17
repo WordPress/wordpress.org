@@ -18,20 +18,27 @@ class Sync {
 	 *
 	 * @var array
 	 */
-	private $roles_to_sync;
+	private $roles_to_sync = [];
+
+	/**
+	 * Flag to prevent recursion.
+	 *
+	 * @var bool
+	 */
+	private $is_syncing = false;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param \stdClass $data
+	 * @param object|null $data Configuration object.
 	 */
 	public function __construct( $data = null ) {
-		if ( isset( $data->destination_site ) ) {
+		if ( isset( $data->destination_site ) && $data->destination_site instanceof WP_Site ) {
 			$this->destination_site = $data->destination_site;
 		}
 
-		if ( isset( $data->roles_to_sync ) ) {
-			$this->destination_site = $data->roles_to_sync;
+		if ( isset( $data->roles_to_sync ) && is_array( $data->roles_to_sync ) ) {
+			$this->roles_to_sync = $data->roles_to_sync;
 		}
 	}
 
@@ -58,28 +65,35 @@ class Sync {
 	 * Registers the actions.
 	 */
 	public function setup() {
-		if ( ! $this->destination_site || ! $this->roles_to_sync ) {
+		if ( ! $this->destination_site instanceof WP_Site || empty( $this->roles_to_sync ) ) {
 			return;
 		}
 
-		add_action( 'add_user_to_blog', [ $this, 'add_user_to_site' ], 10, 2 );
+		add_action( 'add_user_to_blog', [ $this, 'add_user_to_site' ], 10, 3 );
 		add_action( 'add_user_role',    [ $this, 'add_user_to_site' ], 10, 2 );
 		add_action( 'set_user_role',    [ $this, 'add_user_to_site' ], 10, 2 );
 	}
 
 	/**
-	 * Adds an user to another site with the same role.
+	 * Adds a user to another site with the same role if they are not already a member.
 	 *
-	 * @param int    $user_id User ID.
-	 * @param string $role    User role.
+	 * @param int      $user_id User ID.
+	 * @param string   $role    User role.
+	 * @param int|null $blog_id Blog ID (passed by add_user_to_blog).
 	 */
-	public function add_user_to_site( $user_id, $role ) {
+	public function add_user_to_site( $user_id, $role, $blog_id = null ) {
 		// Avoid recursion.
-		remove_action( 'add_user_to_blog', [ $this, 'add_user_to_site' ], 10 );
-		remove_action( 'add_user_role',    [ $this, 'add_user_to_site' ], 10 );
-		remove_action( 'set_user_role',    [ $this, 'add_user_to_site' ], 10 );
+		if ( $this->is_syncing ) {
+			return;
+		}
 
-		if ( ! in_array( $role, array_keys( $this->roles_to_sync ), true ) ) {
+		// Prevent execution if triggered directly on the destination site.
+		$source_id = $blog_id ? (int) $blog_id : get_current_blog_id();
+		if ( $source_id === $this->destination_site->id ) {
+			return;
+		}
+
+		if ( ! isset( $this->roles_to_sync[ $role ] ) ) {
 			return;
 		}
 
@@ -87,6 +101,8 @@ class Sync {
 			return;
 		}
 
+		$this->is_syncing = true;
 		add_user_to_blog( $this->destination_site->id, $user_id, $this->roles_to_sync[ $role ] );
+		$this->is_syncing = false;
 	}
 }

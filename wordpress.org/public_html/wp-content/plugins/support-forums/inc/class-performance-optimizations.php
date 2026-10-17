@@ -64,8 +64,6 @@ class Performance_Optimizations {
 		// ..and don't do expensive orderbys & counting for user queries that don't need it.
 		add_action( 'pre_get_users', array( $this, 'pre_get_users' ) );
 
-		// Disable feeds for non-existent views. See https://bbpress.trac.wordpress.org/ticket/3544
-		add_action( 'bbp_request', array( $this, 'bbp_request_disable_missing_view_feeds' ), 9 ); // Before bbp_request_feed_trap().
 	}
 
 	/**
@@ -645,28 +643,4 @@ class Performance_Optimizations {
 		}
 	}
 
-	/**
-	 * Disable feeds for missing bbPress views.
-	 *
-	 * @see https://bbpress.trac.wordpress.org/ticket/3544
-	 *
-	 * @param array $query_vars
-	 * @return array
-	 */
-	public function bbp_request_disable_missing_view_feeds( $query_vars ) {
-		$view_id = bbp_get_view_rewrite_id();
-
-		if (
-			isset( $query_vars['feed'] ) &&
-			isset( $query_vars[ $view_id ] ) &&
-			! bbp_get_view_query_args( $query_vars[ $view_id ] )
-		) {
-			unset( $query_vars[ $view_id ] );
-
-			// Set a 404 status, without this bbPress is unsure of what to do.
-			$query_vars['error'] = 404;
-		}
-
-		return $query_vars;
-	}
 }

@@ -52,9 +52,60 @@ class Dropin {
 		add_action( 'bbp_new_reply',     array( $this, 'bbp_update_reply' ), 10, 7 );
 		add_action( 'bbp_edit_reply',    array( $this, 'bbp_update_reply' ), 10, 7 );
 
+		// Avoid loading every topic ID of a forum when a topic edit moves it to another forum.
+		add_action( 'bbp_edit_topic', array( $this, 'start_limiting_forum_topic_ids' ), 1 );
+		add_action( 'bbp_edit_topic_post_extras', array( $this, 'stop_limiting_forum_topic_ids' ), 1 );
+
 		if ( is_admin() ) {
 			remove_filter( 'the_title', 'bbp_get_reply_title_fallback', 2 );
 		}
+	}
+
+	/**
+	 * Start limiting forum topic ID queries for the rest of a topic edit.
+	 *
+	 * When an edit changes the topic's forum, bbp_edit_topic_handler() calls
+	 * bbp_move_topic_handler(), which runs bbp_update_forum() on the old and new
+	 * forums. That fetches every public topic ID in each forum via
+	 * bbp_forum_query_topic_ids() to find the forum's last reply and last active
+	 * IDs, which exhausts memory on large forums.
+	 */
+	public function start_limiting_forum_topic_ids() {
+		add_action( 'pre_get_posts', array( $this, 'limit_forum_topic_ids_query' ) );
+	}
+
+	/**
+	 * Stop limiting forum topic ID queries once the topic edit is saved.
+	 */
+	public function stop_limiting_forum_topic_ids() {
+		remove_action( 'pre_get_posts', array( $this, 'limit_forum_topic_ids_query' ) );
+	}
+
+	/**
+	 * Limit the unbounded query in bbp_get_public_child_ids() for topics to the
+	 * most recently active topics in the forum.
+	 *
+	 * The callers only need the most recent topic ID and the most recent reply
+	 * within those topics, both of which belong to the most recently active topics.
+	 *
+	 * @param \WP_Query $query The query.
+	 */
+	public function limit_forum_topic_ids_query( $query ) {
+		if (
+			'ids' !== $query->get( 'fields' ) ||
+			bbp_get_topic_post_type() !== $query->get( 'post_type' ) ||
+			! $query->get( 'post_parent' ) ||
+			! $query->get( 'nopaging' )
+		) {
+			return;
+		}
+
+		$query->set( 'nopaging', false );
+		$query->set( 'posts_per_page', 50 );
+		$query->set( 'meta_key', '_bbp_last_active_time' );
+		$query->set( 'meta_type', 'DATETIME' );
+		$query->set( 'orderby', 'meta_value' );
+		$query->set( 'order', 'DESC' );
 	}
 
 	/**

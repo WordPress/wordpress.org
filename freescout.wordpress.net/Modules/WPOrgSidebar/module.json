@@ -3,7 +3,7 @@
     "alias": "wporgsidebar",
     "img": "/modules/wporgsidebar/img/icon.svg",
     "description": "Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests in the conversation sidebar.",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgSidebar",
     "author": "WordPress.org",
     "authorUrl": "https://wordpress.org/",

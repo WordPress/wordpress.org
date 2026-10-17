@@ -1163,35 +1163,6 @@ function wporg_support_current_user_can_stick( $topic_id ) {
 }
 
 /**
- * Correct reply URLs for pending posts.
- *
- * bbPress appends '/edit/' even to ugly permalinks, which pending posts will
- * always have.
- *
- * @see https://meta.trac.wordpress.org/ticket/2478
- * @see https://bbpress.trac.wordpress.org/ticket/3054
- *
- * @param string $url     URL to edit the post.
- * @param int    $post_id Post ID.
- * @return string
- */
-function wporg_support_fix_pending_posts_reply_url( $url, $post_id ) {
-	if ( false !== strpos( $url, '?' ) ) {
-		if ( false !== strpos( $url, '/edit/' ) ) {
-			$url = str_replace( '/edit/', '', $url );
-			$url = add_query_arg( 'edit', '1', $url );
-		} elseif ( false !== strpos( $url, '%2Fedit%2F' ) ) {
-			$url = str_replace( '%2Fedit%2F', '', $url );
-			$url = add_query_arg( 'edit', '1', $url );
-		}
-	}
-
-	return $url;
-}
-add_filter( 'bbp_get_topic_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
-add_filter( 'bbp_get_reply_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
-
-/**
  * Prevent standalone <li> tags from breaking the theme layout.
  *
  * If a <li> tag is not preceded by <ul> or <ol>, prepend it with <ul>
@@ -1273,24 +1244,6 @@ function wporg_support_maybe_wrap_standalone_li_tags_in_ul( $content ) {
 }
 add_filter( 'bbp_get_topic_content', 'wporg_support_maybe_wrap_standalone_li_tags_in_ul', 1 );
 add_filter( 'bbp_get_reply_content', 'wporg_support_maybe_wrap_standalone_li_tags_in_ul', 1 );
-
-/**
- * Set 'is_single' query var to true on single replies.
- *
- * @see https://meta.trac.wordpress.org/ticket/2551
- * @see https://bbpress.trac.wordpress.org/ticket/3055
- *
- * @param array $args Theme compat query vars.
- * @return array
- */
-function wporg_support_set_is_single_on_single_replies( $args ) {
-	if ( bbp_is_single_reply() ) {
-		$args['is_single'] = true;
-	}
-
-	return $args;
-}
-add_filter( 'bbp_after_theme_compat_reset_post_parse_args', 'wporg_support_set_is_single_on_single_replies' );
 
 /**
  * Add query vars
@@ -1409,7 +1362,7 @@ function bb_base_plugin_search_form() {
 
 function bb_base_topic_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['ts'] ) ) {
+	if ( empty( $_GET['ts'] ) || ! is_string( $_GET['ts'] ) ) {
 		return false;
 	}
 
@@ -1423,7 +1376,7 @@ function bb_base_topic_search_query( $escaped = true ) {
 
 function bb_base_reply_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['rs'] ) ) {
+	if ( empty( $_GET['rs'] ) || ! is_string( $_GET['rs'] ) ) {
 		return false;
 	}
 
@@ -1437,7 +1390,7 @@ function bb_base_reply_search_query( $escaped = true ) {
 
 function bb_base_plugin_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['ps'] ) ) {
+	if ( empty( $_GET['ps'] ) || ! is_string( $_GET['ps'] ) ) {
 		return false;
 	}
 

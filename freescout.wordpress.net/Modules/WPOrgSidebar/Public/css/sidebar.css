@@ -138,3 +138,81 @@
 	background-color: #fce4e4;
 	color: #8c1616;
 }
+
+/*
+ * Social profiles: core shows the same icon for each network. Its links only name the network, in their title, which
+ * Bootstrap's tooltip moves to data-original-title. Paths start at the root, since production combines stylesheets
+ * into /css/builds/. The icons come from the Social Icons block; About.me's and Quora's are drawn in its style.
+ */
+.customer-social-profiles a:is([title="Twitter"], [data-original-title="Twitter"])::before,
+.customer-social-profiles a:is([title="Facebook"], [data-original-title="Facebook"])::before,
+.customer-social-profiles a:is([title="Telegram"], [data-original-title="Telegram"])::before,
+.customer-social-profiles a:is([title="Linkedin"], [data-original-title="Linkedin"])::before,
+.customer-social-profiles a:is([title="Google"], [data-original-title="Google"])::before,
+.customer-social-profiles a:is([title="Google+"], [data-original-title="Google+"])::before,
+.customer-social-profiles a:is([title="Foursquare"], [data-original-title="Foursquare"])::before,
+.customer-social-profiles a:is([title="YouTube"], [data-original-title="YouTube"])::before,
+.customer-social-profiles a:is([title="Flickr"], [data-original-title="Flickr"])::before,
+.customer-social-profiles a:is([title="VK"], [data-original-title="VK"])::before,
+.customer-social-profiles a:is([title="About.me"], [data-original-title="About.me"])::before,
+.customer-social-profiles a:is([title="Quora"], [data-original-title="Quora"])::before,
+.customer-social-profiles a:is([title="Other"], [data-original-title="Other"])::before {
+	content: "";
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	background-color: currentColor;
+	mask: no-repeat center / contain;
+}
+
+.customer-social-profiles a:is([title="Twitter"], [data-original-title="Twitter"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/x.svg);
+}
+
+.customer-social-profiles a:is([title="Facebook"], [data-original-title="Facebook"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/facebook.svg);
+}
+
+.customer-social-profiles a:is([title="Telegram"], [data-original-title="Telegram"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/telegram.svg);
+}
+
+.customer-social-profiles a:is([title="Linkedin"], [data-original-title="Linkedin"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/linkedin.svg);
+}
+
+.customer-social-profiles a:is([title="Google"], [data-original-title="Google"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/google.svg);
+}
+
+.customer-social-profiles a:is([title="Google+"], [data-original-title="Google+"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/google.svg);
+}
+
+.customer-social-profiles a:is([title="Foursquare"], [data-original-title="Foursquare"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/foursquare.svg);
+}
+
+.customer-social-profiles a:is([title="YouTube"], [data-original-title="YouTube"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/youtube.svg);
+}
+
+.customer-social-profiles a:is([title="Flickr"], [data-original-title="Flickr"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/flickr.svg);
+}
+
+.customer-social-profiles a:is([title="VK"], [data-original-title="VK"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/vk.svg);
+}
+
+.customer-social-profiles a:is([title="About.me"], [data-original-title="About.me"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/aboutme.svg);
+}
+
+.customer-social-profiles a:is([title="Quora"], [data-original-title="Quora"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/quora.svg);
+}
+
+.customer-social-profiles a:is([title="Other"], [data-original-title="Other"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/chain.svg);
+}
