@@ -2,8 +2,14 @@
 
 	var projects, l10n, $window = $(window);
 
-	projects = { model: {}, view: {}, controller: {} };
+	projects = { model: {}, view: {} };
 
+	/**
+	 * @typedef {Object} RosettaSettings
+	 * @property {Array<number|string>} accessList  - IDs of currently assigned projects.
+	 * @property {number}               lastUpdated - Timestamp used for localStorage cache invalidation.
+	 * @property {Object}               l10n        - Localized UI strings.
+	 */
 	projects.settings = window._rosettaProjectsSettings || {};
 	l10n = projects.settings.l10n || {};
 	delete projects.settings.l10n;
@@ -11,6 +17,46 @@
 	/**
 	 * MODELS
 	 */
+
+	/**
+	 * Mixin providing shared selection and synchronization logic across project models.
+	 * Applied via _.extend to Project.prototype and subProject.prototype.
+	 */
+	projects.model.SelectableMixin = {
+		/**
+		 * Unchecks the model.
+		 */
+		uncheck: function() {
+			this.set( 'checked', false );
+		},
+
+		/**
+		 * Checks if the model ID is already present in projects.selection upon initialization
+		 * and pre-sets the 'checked' attribute silently.
+		 */
+		syncInitialSelection: function() {
+			if ( projects.selection.get( this.get( 'id' ) ) ) {
+				this.set( 'checked', true );
+			}
+		},
+
+		/**
+		 * Change listener for 'change:checked'.
+		 * Keeps the global projects.selection synchronized and triggers global uncheck events.
+		 *
+		 * @param {Backbone.Model} model   - The modified model instance.
+		 * @param {boolean}        checked - The updated selection state.
+		 */
+		updateSelection: function( model, checked ) {
+			if ( checked ) {
+				projects.selection.add( { id: this.get( 'id' ) } );
+				$window.trigger( 'uncheck-all-projects.rosetta' );
+			} else {
+				projects.selection.remove( this.get( 'id' ) );
+			}
+		}
+	};
+
 	projects.model.Project = Backbone.Model.extend({
 		defaults: {
 			id: 0,
@@ -31,22 +77,11 @@
 				project: this,
 			} ) );
 
-			var isChecked = projects.selection.get( this.get( 'id' ) );
-			if ( isChecked ) {
-				this.set( 'checked', true );
-			}
+			this.syncInitialSelection();
 
 			this.listenTo( this.get( 'subProjects' ), 'change:checked', this.updateChecked );
-
-			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
-
 			this.on( 'change:checked', this.updateSelection );
-
 			this.checkForCheckedSubProjects();
-		},
-
-		uncheck: function() {
-			this.set( 'checked', false );
 		},
 
 		updateChecked: function( model ) {
@@ -57,34 +92,34 @@
 			this.checkForCheckedSubProjects();
 		},
 
-		updateSelection: function( model, checked ) {
-			if ( checked ) {
-				projects.selection.add( { id: this.get( 'id' ) } );
-				$window.trigger( 'uncheck-all-projects.rosetta' );
-			} else {
-				projects.selection.remove( { id: this.get( 'id' ) } );
-			}
-		},
-
+		// Check the raw data array rather than the collection so active selections
+		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
-			var checked = this.get( 'subProjects' ).findWhere({ 'checked': true });
-			if ( checked ) {
-				this.set( 'checkedSubProjects', true );
-			} else {
-				this.set( 'checkedSubProjects', false );
-			}
+			const hasChecked = this._subProjects.some( sub => projects.selection.get( sub.id ) );
+			this.set( 'checkedSubProjects', hasChecked );
 		}
 	});
-
+	_.extend( projects.model.Project.prototype, projects.model.SelectableMixin );
+	
 	projects.model.Projects = Backbone.Collection.extend({
 		model: projects.model.Project,
 
+		// Listens on the global $window event bus to coordinate active tabs and selection 
+		// state between individual category models and the standalone '#project-all' (GTE) toggle.
 		initialize: function() {
-			_.bindAll( this, 'disableActiveStates' );
+			_.bindAll( this, 'disableActiveStates', 'uncheckAllProjects' );
 
 			this.on( 'change:isActive', this.toggleActiveStates );
 
 			$window.on( 'deactivate-other-projects.rosetta', this.disableActiveStates );
+			$window.on( 'uncheck-other-projects.rosetta', this.uncheckAllProjects );
+		},
+
+		uncheckAllProjects: function() {
+			this.each( function( project ) {
+				project.uncheck();
+				project.get( 'subProjects' ).uncheckAll();
+			} );
 		},
 
 		toggleActiveStates: function( model ) {
@@ -93,7 +128,7 @@
 			}
 
 			this.each( function( project ) {
-				if ( project.get( 'id' ) != model.get( 'id' ) ) {
+				if ( project.get( 'id' ) !== model.get( 'id' ) ) {
 					project.set( 'isActive', false );
 				}
 			});
@@ -119,47 +154,40 @@
 		initialize: function() {
 			_.bindAll( this, 'uncheck' );
 
-			var isChecked = projects.selection.get( this.get( 'id' ) );
-			if ( isChecked ) {
-				this.set( 'checked', true );
-			}
-
-			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
-
+			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
-		},
-
-		uncheck: function() {
-			this.set( 'checked', false );
-		},
-
-		updateSelection: function( model, checked ) {
-			if ( checked ) {
-				projects.selection.add( { id: this.get( 'id' ) } );
-				$window.trigger( 'uncheck-all-projects.rosetta' );
-			} else {
-				projects.selection.remove( { id: this.get( 'id' ) } );
-			}
 		}
 	});
+	_.extend( projects.model.subProject.prototype, projects.model.SelectableMixin );
 
+	/**
+	 * Collection representing sub-projects with integrated relevance-based filtering.
+	 *
+	 * @property {string} terms - Most recently executed search query.
+	 * @property {Backbone.Model} project - Reference to the owning parent Project model.
+	 */
 	projects.model.subProjects = Backbone.Collection.extend({
 		model: projects.model.subProject,
 
 		// Search terms
 		terms: '',
 
-		_sortBy: 'checked',
-
 		initialize: function( models, options ) {
 			this.project = options.project;
-			this.on( 'uncheckall', this.uncheckall );
+			_.bindAll( this, 'uncheckAll' );
+
+			this.on( 'uncheckAll', this.uncheckAll );
 		},
 
-		uncheckall: function() {
+		uncheckAll: function() {
 			this.each( function( project ) {
-				project.set( 'checked', false );
-			});
+				project.uncheck();
+			} );
+
+			if ( this.project?._subProjects ) {
+				this.project._subProjects.forEach( sub => projects.selection.remove( sub.id ) );
+				this.project.checkForCheckedSubProjects();
+			}
 		},
 
 		doSearch: function( value ) {
@@ -172,10 +200,8 @@
 
 			if ( this.terms.length > 0 ) {
 				this.search( this.terms );
-			}
-
-			// If search is blank, show all projects.
-			if ( '' === this.terms ) {
+			} else {
+				// If search is blank, show all projects.
 				this.reset( this.project._subProjects );
 			}
 
@@ -194,44 +220,51 @@
 			// Escape the term string for RegExp meta characters
 			escapedTerm = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
 
-			// Consider spaces as word delimiters and match the whole string
-			// so matching terms can be combined
+			// Step 1 (Filter): Fast regex pre-filter. Positive lookaheads match all query terms 
+			// in any order across 'name' and 'slug' without breaking on live space keystrokes.
 			escapedTerm = escapedTerm.replace( / /g, ')(?=.*' );
 			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
 
 			results = this.filter( function( project ) {
-				var haystack = _.union( [ project.get( 'name' ), project.get( 'slug' ) ] );
-				if ( match.test( haystack ) ) {
+				var haystack = _.compact( [ project.get( 'name' ), project.get( 'slug' ) ] );
+				if ( match.test( haystack.join( ' ' ) ) ) {
+					var maxScore = 0;
 					_.each( haystack, function( word ) {
-						var score = word.score( term, .5 );
-						project.set( 'matchScore', Math.max( score, project.get( 'matchScore' ) ) );
+						// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
+						maxScore = Math.max( maxScore, String( word ).score( term, 0.5 ) );
 					});
+					project.set( 'matchScore', maxScore, { silent: true } );
+
 					return true;
 				}
 				return false;
 			});
 
-			this._sortBy = 'matchScore';
 			this.reset( results );
-			this._sortBy = 'checked';
 		},
 
 		comparator: function( project ) {
-			return - project.get( this._sortBy );
+			if ( this.terms && this.terms.length > 0 ) {
+				return - project.get( 'matchScore' );
+			}
+			// Default view: Floats assigned permissions to the top
+			// Search view: Overridden to prioritize search relevance over assignment state.
+			return - project.get( 'checked' );
 		}
 	});
 
-	projects.model.Selection = Backbone.Collection.extend({
-
+	projects.model.Selection = Backbone.Collection.extend( {
 		initialize: function() {
-			this.$field = $( '#project-access-list' );
+			this.field = document.getElementById( 'project-access-list' );
 			this.on( 'add remove reset', this.updateInputField );
 		},
 
 		updateInputField: function() {
-			this.$field.val( _.pluck( this.toJSON(), 'id' ).join() );
+			if ( this.field ) {
+				this.field.value = this.pluck( 'id' ).join( ',' );
+			}
 		}
-	});
+	} );
 
 	/**
 	 * VIEWS
@@ -252,9 +285,9 @@
 				view.$el.append( projectView.el );
 			});
 
-			$( '#project-loading' ).remove();
+			document.getElementById( 'project-loading' )?.remove();
 
-			// Mark the first item as active.
+			// Only visually marks the first item (#project-all) in the template active on initial load.
 			var $firstActive = view.$el.find( 'li.active' );
 			if ( ! $firstActive.length ) {
 				$firstActive = view.$el.find( 'li input[type=radio]' );
@@ -278,19 +311,23 @@
 			this.listenTo( this.model, 'change', this.render );
 		},
 
+		// Listen to 'change' instead of 'click' for keyboard accessibility
+		// and to ensure DOM state is committed before re-rendering.
 		events: {
-			'click .input-checkbox': 'updateChecked',
-			'click .input-radio': 'setChecked'
+			'change .input-checkbox': 'updateChecked',
+			'change .input-radio': 'setChecked'
 		},
 
 		prepare: function() {
-			return _.pick( this.model.toJSON(), 'name', 'slug', 'checked', 'checkedSubProjects' );
+			const { name, slug, checked, checkedSubProjects } = this.model.toJSON();
+			return { name, slug, checked, checkedSubProjects };
 		},
 
 		updateChecked: function() {
 			this.model.set( 'checked', this.$el.find( 'input' ).prop( 'checked' ) );
 		},
 
+		// When active, the category toggle renders as a radio button representing "all items in this category".
 		setChecked: function() {
 			this.model.set( 'checked', true );
 		}
@@ -316,13 +353,13 @@
 			}) );
 
 			this.toggleActiveState();
-
-			this.views.ready();
 		},
 
+		// Selecting the entire category grants access to all its items,
+		// making individual sub-project selections redundant.
 		propagateChange: function() {
 			if ( this.model.get( 'checked' ) ) {
-				this.model.get( 'subProjects' ).trigger( 'uncheckall' );
+				this.model.get( 'subProjects' ).trigger( 'uncheckAll' );
 			}
 		},
 
@@ -355,41 +392,45 @@
 			this.views.add( new projects.view.SubProjectsList({
 				collection: collection
 			}) );
-		},
-
+		}
 	});
 
 	projects.view.SubProjectsList = wp.Backbone.View.extend({
 		tagName: 'ul',
 		className: 'sub-projects-list',
 
-		// Number of projects which should be rendered.
+		// Number of projects which should be rendered to reduce bloat. Unrendered items remain searchable.
 		limit: 100,
 
-		initialize: function( options ) {
-			var self = this;
+		initialize: function() {
+			this._subViews = [];
+			this.listenTo( this.collection, 'projects:update', this.render );
+		},
 
-			this.listenTo( self.collection, 'projects:update', function() {
-				self.render( this );
+		clearSubViews: function() {
+			_.each( this._subViews, function( view ) {
+				view.remove();
 			} );
+			this._subViews = [];
 		},
 
 		render: function() {
-			var self = this, subProjects;
+			this.clearSubViews();
 
-			self.$el.empty();
+			var fragment = document.createDocumentFragment();
+			var subProjects = this.collection.first( this.limit );
 
-			subProjects = self.collection.first( self.limit );
-			_.each( subProjects, function( model ) {
-				var subProjectView = new projects.view.SubProject({
-					model: model
-				});
+			this._subViews = _.map( subProjects, function( model ) {
+				var view = new projects.view.SubProject( { model: model } );
+				fragment.appendChild( view.render().el );
+				return view;
+			} );
 
-				subProjectView.render();
-				self.$el.append( subProjectView.el );
-			});
+			this.$el.empty().append( fragment );
+
+			return this;
 		}
-	});
+	} );
 
 	projects.view.SubProject = wp.Backbone.View.extend({
 		tagName: 'li',
@@ -411,31 +452,91 @@
 		},
 
 		events: {
-			'input': 'search',
-			'keyup': 'search',
-			'keydown': 'search'
+			'input': 'onInput',
+			'keydown': 'onKeydown'
 		},
 
-		search: function( event ) {
-			// Prevent form submit
-			if ( event.type === 'keydown' && event.which === 13 ) {
+		initialize: function() {
+			this.doSearch = _.debounce( this.doSearch.bind( this ), 500 );
+		},
+
+		onInput: function() {
+			this.doSearch();
+		},
+
+		onKeydown: function( event ) {
+			if ( event.key === 'Enter' ) {
 				event.preventDefault();
-			} else if ( event.type === 'keydown' ) {
+			} else if ( event.key === 'Escape' ) {
+				if ( this.doSearch.cancel ) {
+					this.doSearch.cancel();
+				}
+				this.el.value = '';
+				this.collection.doSearch( '' );
+			}
+		},
+
+		doSearch: function() {
+			this.collection.doSearch( this.el.value );
+		}
+	});
+
+	/**
+	 * View handling the standalone global permission toggle (#project-all).
+	 * Coordinates radio and checkbox toggles and synchronizes with
+	 * $window events ('deactivate-all-projects.rosetta', 'uncheck-all-projects.rosetta').
+	 */
+	projects.view.AllProjects = wp.Backbone.View.extend( {
+		el: '#project-all',
+
+		events: {
+			'click': 'onActivate',
+			'change input': 'onToggle'
+		},
+
+		initialize: function() {
+			this.$checkbox = this.$el.find( 'input' );
+
+			if ( projects.selection.get( 'all' ) ) {
+				projects.selection.reset( [ { id: 'all' } ] );
+				this.$checkbox.prop( 'checked', true );
+				this.$el.addClass( 'active' );
+			}
+
+			_.bindAll( this, 'onDeactivate', 'onUncheck' );
+			$window.on( 'deactivate-all-projects.rosetta', this.onDeactivate );
+			$window.on( 'uncheck-all-projects.rosetta', this.onUncheck );
+		},
+
+		onActivate: function() {
+			if ( this.$el.hasClass( 'active' ) ) {
 				return;
 			}
 
-			// Clear on escape.
-			if ( event.type === 'keyup' && event.which === 27 ) {
-				event.target.value = '';
-			}
-
-			this.doSearch( event );
+			this.$el.addClass( 'active' );
+			$window.trigger( 'deactivate-other-projects.rosetta' );
 		},
 
-		doSearch: _.debounce( function( event ) {
-			this.collection.doSearch( event.target.value );
-		}, 500 )
-	});
+		onToggle: function() {
+			if ( this.$checkbox.prop( 'checked' ) ) {
+				projects.selection.reset( [ { id: 'all' } ] );
+				$window.trigger( 'uncheck-other-projects.rosetta' );
+			} else {
+				projects.selection.remove( 'all' );
+			}
+		},
+
+		onDeactivate: function() {
+			this.$el.removeClass( 'active' );
+		},
+
+		onUncheck: function() {
+			if ( this.$checkbox.prop( 'checked' ) ) {
+				projects.selection.remove( 'all' );
+				this.$checkbox.prop( 'checked', false );
+			}
+		}
+	} );
 
 	/**
 	 * UTILS
@@ -449,117 +550,138 @@
 			return projects._hasStorage;
 		}
 
-		var result = false;
-
 		try {
 			window.localStorage.setItem( 'test', 'rosetta' );
-			result = window.localStorage.getItem( 'test' ) === 'rosetta';
 			window.localStorage.removeItem( 'test' );
-		} catch( e ) {}
-
-		projects._hasStorage = result;
+			projects._hasStorage = true;
+		} catch( e ) {
+			projects._hasStorage = false;
+		}
 
 		return projects._hasStorage;
 	};
 
-	projects.getProjects = function() {
-		return projects.getLocalProjects().then(
-			function( localProjects ) {
-				return localProjects;
-			},
-			function() {
-				return projects.getRemoteProjects().then( function( remoteProjects ) {
-					if ( projects.hasStorage() ) {
-						projects.storeLocalProjects( remoteProjects );
-					}
+	projects.getProjects = async function() {
+		try {
+			return await projects.getLocalProjects();
+		} catch ( e ) {
+			var remoteProjects = await projects.getRemoteProjects();
 
-					return remoteProjects;
-				} );
+			if ( projects.hasStorage() ) {
+				projects.storeLocalProjects( remoteProjects );
 			}
-		);
+
+			return remoteProjects;
+		}
 	};
 
 	projects.getRemoteProjects = function() {
 		return wp.ajax.post( 'rosetta-get-projects' );
 	};
 
-	projects.getLocalProjects = function() {
+	/**
+	 * Retrieves and decompresses cached project data from localStorage.
+	 *
+	 * @async
+	 * @throws {Error} Throws when storage is unavailable, timestamps are invalid/expired,
+	 *                 or data is corrupt, delegating fallback to projects.getRemoteProjects().
+	 * @return {Promise<ProjectData[]>} Parsed project data array.
+	 */
+	projects.getLocalProjects = async function() {
 		if ( ! projects.hasStorage() ) {
-			return Promise.reject();
+			throw new Error( 'No storage' );
 		}
 
 		var lastUpdated = window.localStorage.getItem( 'projectsLastUpdated' );
 		if ( ! lastUpdated || 'undefined' === lastUpdated ) {
-			return Promise.reject();
+			throw new Error( 'Invalid cache timestamp' );
 		}
 
-		if ( lastUpdated < projects.settings.lastUpdated ) {
-			return Promise.reject();
+		var cachedTime = Number( lastUpdated );
+		var serverTime = Number( projects.settings.lastUpdated );
+
+		// Ensure timestamps are valid, positive, and finite numbers; rejects missing (0) or invalid cache timestamps.
+		var isValidTime = function( time ) {
+			return Number.isFinite( time ) && time > 0;
+		};
+
+		if ( ! isValidTime( serverTime ) || ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
+			throw new Error( 'Cache expired' );
 		}
 
 		var json = window.localStorage.getItem( 'projects' );
 		if ( ! json ) {
-			return Promise.reject();
+			throw new Error( 'No cached data' );
 		}
 
+		// Plain-JSON fallback for caches written by earlier versions.
 		if ( '[' === json.substring( 0, 1 ) ) {
-			return Promise.resolve( JSON.parse( json ) );
+			return JSON.parse( json );
 		}
 
 		// decompress
-		return projects.decompress( json ).then( function( data ) {
-			return JSON.parse( data );
-		} );
+		var decompressed = await projects.decompress( json );
+		return JSON.parse( decompressed );
 	};
 
 	projects.storeLocalProjects = function( data ) {
-		window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
-
-		projects.compress( JSON.stringify( data ) ).then( function( data ) {
-			window.localStorage.setItem( 'projects', data );
-		} ).catch( function() {
-			console.log( "Caching projects locally failed." );
+		projects.compress( JSON.stringify( data ) ).then( function( compressedData ) {
+			// Stores only compressed data to prevent exceeding the 5 MB localStorage quota.
+			window.localStorage.setItem( 'projects', compressedData );
+			window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
+		} ).catch( function( error ) {
+			console.warn( "Caching projects locally failed.", error );
 		} );
 	};
 
 	projects.compress = async function( data ) {
+		// Reject if Compression Streams API is unavailable; gracefully falls back to direct remote fetching.
 		if ( 'undefined' === typeof CompressionStream ) {
-			return Promise.reject();
+			throw new Error( 'CompressionStream API not supported' );
 		}
 
 		var stream = new CompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter();
+			streamWriter = stream.writable.getWriter(),
+			bufferPromise = new Response( stream.readable ).arrayBuffer();
 
-		streamWriter.write(
+		await streamWriter.write(
 			new TextEncoder().encode( data )
 		);
-		streamWriter.close();
+		await streamWriter.close();
 
-		return new Response( stream.readable ).arrayBuffer().then( function( buffer ) {
-			// Base64 encode it, so it can be stored in localStorage
-			return btoa(
-				new Uint8Array( buffer )
-					.reduce( ( data, byte ) => data + String.fromCharCode( byte ), '' )
-			);
-		} );		
+		var buffer = await bufferPromise;
+		// Base64 encode it in chunks so it can be stored in localStorage without blocking the main thread.
+		var binary = '';
+		var bytes = new Uint8Array( buffer );
+		var chunkSize = 8192;
+
+		for ( var i = 0; i < bytes.length; i += chunkSize ) {
+			binary += String.fromCharCode.apply( null, bytes.subarray( i, i + chunkSize ) );
+		}
+
+		return btoa( binary );
 	};
 
 	projects.decompress = async function( data ) {
 		if ( 'undefined' === typeof DecompressionStream ) {
-			return Promise.reject();
+			throw new Error( 'DecompressionStream API not supported' );
 		}
 
 		// Base64 decode
-		var buffer = Uint8Array.from( atob( data ), c => c.charCodeAt(0) ),
-			stream = new DecompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter();
-
-		streamWriter.write( buffer );
-		streamWriter.close();
-
-		return new Response( stream.readable ).arrayBuffer().then( function( arrayBuffer ) {
-			return new TextDecoder().decode( arrayBuffer );
+		var binary = atob( data );
+		var buffer = Uint8Array.from( binary, function( char ) {
+			return char.charCodeAt( 0 );
 		} );
+
+		var stream = new DecompressionStream( 'gzip' ),
+			streamWriter = stream.writable.getWriter(),
+			arrayBufferPromise = new Response( stream.readable ).arrayBuffer();
+
+		await streamWriter.write( buffer );
+		await streamWriter.close();
+
+		var arrayBuffer = await arrayBufferPromise;
+		return new TextDecoder().decode( arrayBuffer );
 	};
 
 	projects.initFrame = function( projectData ) {
@@ -568,64 +690,34 @@
 		}).render();
 	};
 
-	projects.selection = new projects.model.Selection();
-
 	projects.init = function() {
-		_.each( projects.settings.accessList, function( projectID ) {
-			projects.selection.add( { id: projectID } );
-		});
+		var initialSelection = _.map( projects.settings.accessList || [], function( projectID ) {
+			return { id: projectID };
+		} );
+
+		projects.selection = new projects.model.Selection( initialSelection );
+		projects.selection.updateInputField();
 
 		projects.getProjects().then( function( response ) {
 			projects.initFrame( response );
+		} ).catch( function() {
+			$( '#project-loading' ).text( l10n.loadingError || 'Error loading projects.' );
 		} );
+
+		new projects.view.AllProjects();
+
+		// Warn before saving if all project assignments are removed.
+		var hadTranslatorStatus = Boolean( projects.settings.accessList && projects.settings.accessList.length );
+
+		$( '#project-access-list' ).closest( 'form' ).on( 'submit', function( e ) {
+			if ( hadTranslatorStatus && ! $( '#project-access-list' ).val() ) {
+				if ( ! confirm( l10n.removeTranslator ) ) {
+					e.preventDefault();
+				}
+			}
+		});
 	};
 
 	$( projects.init );
-
-	var $projectAll = $( '#project-all' ), $projectAllCheckbox = $projectAll.find( 'input' );
-
-	$projectAll.on( 'click', function() {
-		var $el = $( this );
-
-		if ( $el.hasClass( 'active' ) ) {
-			return;
-		}
-
-		$el.addClass( 'active' );
-		$window.trigger( 'deactivate-other-projects.rosetta' );
-	});
-
-	$projectAll.find( 'input' ).on( 'change', function() {
-		var checked = $( this ).prop( 'checked' );
-
-		if ( checked ) {
-			projects.selection.add( { id: 'all' } );
-			$window.trigger( 'uncheck-other-projects.rosetta' );
-		} else {
-			projects.selection.remove( { id: 'all' } );
-		}
-	});
-
-	$window.on( 'deactivate-all-projects.rosetta', function() {
-		$projectAll.removeClass( 'active' );
-	} );
-
-	$window.on( 'uncheck-all-projects.rosetta', function() {
-		var checked = $projectAllCheckbox.prop( 'checked' );
-
-		if ( checked ) {
-			projects.selection.remove( { id: 'all' } );
-			$projectAllCheckbox.prop( 'checked', false );
-		}
-	} );
-
-	// Confirm removal of CLPTE status.
-	$( '#project-access-list' ).parents( 'form' ).on( 'submit', function( e ) {
-		if ( ! $( '#project-access-list' ).val() ) {
-			if ( ! confirm( l10n.removeTranslator ) ) {
-				e.preventDefault();
-			}
-		}
-	} );
 
 } )( jQuery );
