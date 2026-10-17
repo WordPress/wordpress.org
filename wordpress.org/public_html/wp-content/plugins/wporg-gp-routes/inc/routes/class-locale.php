@@ -413,7 +413,7 @@ class Locale extends GP_Route {
 			$parent_project_id = (int) $parent_project->parent_project_id;
 		}
 
-		$id_placeholders = implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) );
+		$id_placeholders = $this->prepare_in_placeholders( count( $project_ids ), '%d' );
 
 		$editors_sql = "
 			SELECT
@@ -474,8 +474,7 @@ class Locale extends GP_Route {
 			$projects[ (int) $sub_project->id ] = $sub_project;
 		}
 
-		$all_project_ids = array_keys( $projects );
-		$project_ids_sql = implode( ', ', $all_project_ids );
+		$project_ids_sql = $this->prepare_in_int_list( array_keys( $projects ) );
 
 		// Batch-fetch all matching translation set IDs in a single query.
 		$translation_sets_sql = "
@@ -517,7 +516,7 @@ class Locale extends GP_Route {
 			// Batch-load missing users from wp_users without touching usermeta.
 			// Deleted wp.org accounts are anonymized (not removed), so all IDs exist.
 			if ( ! empty( $uncached_user_ids ) ) {
-				$user_ids_sql = implode( ', ', $uncached_user_ids );
+				$user_ids_sql = $this->prepare_in_int_list( $uncached_user_ids );
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $user_ids_sql contains sanitized, integer-cast IDs.
 				$users = $wpdb->get_results( "SELECT * FROM {$wpdb->users} WHERE ID IN ( {$user_ids_sql} )" );
 				foreach ( (array) $users as $user ) {
@@ -628,13 +627,11 @@ class Locale extends GP_Route {
 	private function get_locale_contributors_by_translation_set( array $set_ids ) {
 		global $wpdb;
 
-		$set_ids = array_filter( array_map( 'intval', $set_ids ) );
+		$set_ids_sql = $this->prepare_in_int_list( $set_ids );
 
-		if ( empty( $set_ids ) ) {
+		if ( empty( $set_ids_sql ) ) {
 			return [];
 		}
-
-		$set_ids_sql = implode( ', ', $set_ids );
 
 		$contributors_sql = "
 			SELECT
@@ -659,6 +656,34 @@ class Locale extends GP_Route {
 		$contributors = $wpdb->get_results( $contributors_sql );
 
 		return (array) $contributors;
+	}
+
+	/**
+	 * Generates comma-separated placeholders for prepared SQL statements.
+	 *
+	 * @param int    $count Number of placeholders needed.
+	 * @param string $type  Placeholder type ('%d', '%s', '%f'). Default '%d'.
+	 * @return string Comma-separated placeholder string (e.g. "%d, %d, %d").
+	 */
+	private function prepare_in_placeholders( $count, $type = '%d' ) {
+		$count = (int) $count;
+		if ( $count <= 0 ) {
+			return '';
+		}
+
+		return implode( ', ', array_fill( 0, $count, $type ) );
+	}
+
+	/**
+	 * Sanitizes an array of values into a comma-separated list of integers for direct SQL interpolation.
+	 *
+	 * @param array $ids List of numeric IDs.
+	 * @return string Comma-separated string of sanitized integers.
+	 */
+	private function prepare_in_int_list( array $ids ) {
+		$sanitized = array_filter( array_map( 'intval', $ids ) );
+
+		return implode( ', ', $sanitized );
 	}
 
 	/**
@@ -813,7 +838,7 @@ class Locale extends GP_Route {
 		if ( $with_sub_projects && ! empty( $_projects ) ) {
 			// Batch fetch all nested child projects in a single query.
 			$parent_ids     = wp_list_pluck( $_projects, 'id' );
-			$parent_ids_sql = implode( ', ', array_map( 'intval', $parent_ids ) );
+			$parent_ids_sql = $this->prepare_in_int_list( $parent_ids );
 
 			$sub_sub_projects_sql = "
 				SELECT *
@@ -938,7 +963,7 @@ class Locale extends GP_Route {
 			$base_level_project_sql = '';
 			$base_level_project_ids = wp_list_pluck( $this->get_active_top_level_projects(), 'id' );
 			if ( $base_level_project_ids ) {
-				$ids = implode( ', ', array_map( 'intval', $base_level_project_ids ) );
+				$ids = $this->prepare_in_int_list( $base_level_project_ids );
 				$base_level_project_sql = " AND tp.parent_project_id IN( $ids )";
 			}
 
@@ -971,7 +996,7 @@ class Locale extends GP_Route {
 					 * The current user can approve for a small set of projects.
 					 * We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check.
 					 */
-					$ids = implode( ', ', array_map( 'intval', $allowed_projects ) );
+					$ids       = $this->prepare_in_int_list( $allowed_projects );
 					$tp_where .= "tp.id IN( $ids )" . $base_level_project_sql;
 				} else {
 					$tp_where .= '0=1';
@@ -983,7 +1008,7 @@ class Locale extends GP_Route {
 					/*
 					 * The current user can approve all sub-projects of a base level project.
 					 */
-					$ids = implode( ', ', array_map( 'intval', $allowed_base_level_projects ) );
+					$ids       = $this->prepare_in_int_list( $allowed_base_level_projects );
 					$tp_where .= "tp.parent_project_id IN( $ids )";
 				} else {
 					$tp_where .= '0=1';
@@ -1004,8 +1029,8 @@ class Locale extends GP_Route {
 					$user_id
 				) );
 				if ( $project_ids_with_editor ) {
-					$project_ids_with_editor = implode( ', ', array_map( 'intval', $project_ids_with_editor ) );
-					$tp_where .= " AND tp.id NOT IN( $project_ids_with_editor )";
+					$ids       = $this->prepare_in_int_list( $project_ids_with_editor );
+					$tp_where .= " AND tp.id NOT IN( $ids )";
 				}
 			}
 		}
@@ -1049,7 +1074,7 @@ class Locale extends GP_Route {
 				$user_fav_projects = $this->get_user_favorites( $project->slug );
 
 				if ( ! empty( $user_fav_projects ) ) {
-					$favorite_path_placeholders = implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) );
+					$favorite_path_placeholders = $this->prepare_in_placeholders( count( $user_fav_projects ), '%s' );
 					$tp_where                  .= " AND tp.path IN( {$favorite_path_placeholders} )";
 					$sql_params                 = array_merge( $sql_params, $user_fav_projects );
 				} else {
