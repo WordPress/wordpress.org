@@ -135,11 +135,11 @@ class Locale extends GP_Route {
 
 		$project_path = $project_path ?: $default_project_tab;
 
-		$project = GP::$project->by_path( $project_path );
+		// Project not found; render 404.
+		$project = $this->get_project_by_path( $project_path );
 		if ( ! $project ) {
-			return $this->die_with_404();
+			return;
 		}
-		$this->projects_cache[ (int) $project->id ] = $project;
 
 		$paged_sub_projects = $this->get_paged_active_sub_projects(
 			$project,
@@ -208,17 +208,16 @@ class Locale extends GP_Route {
 			return $this->die_with_404();
 		}
 
-		$project = GP::$project->by_path( $project_path );
+		// Project not found; render 404.
+		$project = $this->get_project_by_path( $project_path );
 		if ( ! $project ) {
-			return $this->die_with_404();
+			return;
 		}
-		$this->projects_cache[ (int) $project->id ] = $project;
 
-		$sub_project = GP::$project->by_path( $project_path . '/' . $sub_project_path );
+		$sub_project = $this->get_project_by_path( $project_path . '/' . $sub_project_path );
 		if ( ! $sub_project ) {
-			return $this->die_with_404();
+			return;
 		}
-		$this->projects_cache[ (int) $sub_project->id ] = $sub_project;
 
 		$project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug );
 		$sub_project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug, false );
@@ -254,6 +253,21 @@ class Locale extends GP_Route {
 	}
 
 	/**
+	 * Generates HTML markup for a Dashicon inside a wrapper.
+	 *
+	 * @param string $dashicon      The Dashicon name (without the 'dashicons-' prefix).
+	 * @param string $wrapper_class Optional. CSS class for the wrapper div. Default 'default-icon'.
+	 * @return string HTML markup of the icon.
+	 */
+	private function render_dashicon( $dashicon, $wrapper_class = 'default-icon' ) {
+		return sprintf(
+			'<div class="%s"><span class="dashicons dashicons-%s"></span></div>',
+			esc_attr( $wrapper_class ),
+			esc_attr( $dashicon )
+		);
+	}
+
+	/**
 	 * Returns markup for project icons.
 	 *
 	 * @param GP_Project $project     A GlotPress project.
@@ -279,62 +293,81 @@ class Locale extends GP_Route {
 			}
 		}
 
-		switch ( $project->slug ) {
-			case 'wp':
-				return '<div class="wordpress-icon"><span class="dashicons dashicons-wordpress-alt"></span></div>';
-			case 'meta':
-				switch ( $sub_project->slug ) {
-					case 'forums':
-						return '<div class="default-icon"><span class="dashicons dashicons-format-chat"></span></div>';
-					case 'rosetta':
-						return '<div class="default-icon"><span class="dashicons dashicons-admin-site"></span></div>';
-					case 'plugins':
-					case 'plugins-v3':
-						return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
-					case 'themes':
-						return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
-					case 'wordcamp':
-						return '<div class="default-icon"><span class="dashicons dashicons-tickets"></span></div>';
-					case 'pattern-directory':
-						return '<div class="default-icon"><span class="dashicons dashicons-art"></span></div>';
-					case 'browsehappy':
-						return '<div class="icon"><img src="' . esc_url( plugins_url( 'templates/images/browsehappy.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) ) . '" width="' . (int) $size . '" height="' . (int) $size . '"></div>';
-					case 'openverse':
-						return '<div class="icon"><img src="' . esc_url( plugins_url( 'templates/images/openverse.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) ) . '" width="' . (int) $size . '" height="' . (int) $size . '"></div>';
-					default:
-						return '<div class="default-icon"><span class="dashicons dashicons-networking"></span></div>';
-				}
-			case 'wp-themes':
-				$screenshot = gp_get_meta( 'wp-themes', $sub_project->id, 'screenshot' );
-				if ( $screenshot ) {
-					return '<div class="theme icon"><img src="' . esc_url( 'https://i0.wp.com/' . $screenshot . '?w=' . ( $size * 2 ) . '&strip=all' ) . '" width="' . $size . '" height="' . $size . '"></div>';
-				} else {
-					return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
-				}
-			case 'wp-plugins':
-				$icon = '';
+		if ( 'wp' === $project->slug ) {
+			return $this->render_dashicon( 'wordpress-alt', 'wordpress-icon' );
+		}
 
-				if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
-					$directory_post_id = gp_get_meta( 'wp-plugins', $sub_project->id, 'directory-post-id' );
-					if ( $directory_post_id ) {
-						switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
-						$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
-						restore_current_blog();
+		if ( 'meta' === $project->slug ) {
+			$meta_dashicons = [
+				'forums'            => 'format-chat',
+				'rosetta'           => 'admin-site',
+				'plugins'           => 'admin-plugins',
+				'plugins-v3'        => 'admin-plugins',
+				'themes'            => 'admin-appearance',
+				'wordcamp'          => 'tickets',
+				'pattern-directory' => 'art',
+			];
+
+			if ( isset( $meta_dashicons[ $sub_project->slug ] ) ) {
+				return $this->render_dashicon( $meta_dashicons[ $sub_project->slug ] );
+			}
+
+			if ( in_array( $sub_project->slug, [ 'browsehappy', 'openverse' ], true ) ) {
+				$image_file = sprintf( 'templates/images/%s.png', $sub_project->slug );
+				$image_url  = plugins_url( $image_file, 'wporg-gp-customizations/wporg-gp-customizations.php' );
+
+				return sprintf(
+					'<div class="icon"><img src="%s" width="%d" height="%d" decoding="async"></div>',
+					esc_url( $image_url ),
+					(int) $size,
+					(int) $size
+				);
+			}
+
+			return $this->render_dashicon( 'networking' );
+		}
+
+		if ( 'wp-themes' === $project->slug ) {
+			$screenshot = gp_get_meta( 'wp-themes', $sub_project->id, 'screenshot' );
+			if ( $screenshot ) {
+				return sprintf(
+					'<div class="theme icon"><img src="%s" width="%d" height="%d" decoding="async"></div>',
+					esc_url( 'https://i0.wp.com/' . $screenshot . '?w=' . ( $size * 2 ) . '&strip=all' ),
+					(int) $size,
+					(int) $size
+				);
+			}
+
+			return $this->render_dashicon( 'admin-appearance' );
+		}
+
+		if ( 'wp-plugins' === $project->slug ) {
+			if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
+				$directory_post_id = gp_get_meta( 'wp-plugins', $sub_project->id, 'directory-post-id' );
+				if ( $directory_post_id ) {
+					switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
+					$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
+					restore_current_blog();
+
+					if ( $icon ) {
+						return $icon;
 					}
 				}
+			}
 
-				if ( $icon ) {
-					return $icon;
-				}
-
-				return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
-			case 'apps':
-				return '<div class="default-icon"><span class="dashicons dashicons-smartphone"></span></div>';
-			case 'patterns':
-				return '<div class="default-icon"><span class="dashicons dashicons-art"></span></div>';
-			default:
-				return '<div class="default-icon"><span class="dashicons dashicons-translation"></span></div>';
+			return $this->render_dashicon( 'admin-plugins' );
 		}
+
+		$project_dashicons = [
+			'apps'     => 'smartphone',
+			'patterns' => 'art',
+		];
+
+		if ( isset( $project_dashicons[ $project->slug ] ) ) {
+			return $this->render_dashicon( $project_dashicons[ $project->slug ] );
+		}
+
+		return $this->render_dashicon( 'translation' );
 	}
 
 	/**
@@ -786,6 +819,24 @@ class Locale extends GP_Route {
 		}
 
 		return $status;
+	}
+
+	/**
+	 * Retrieves a project by path with 404 handling and in-memory caching.
+	 *
+	 * @param string $path Project path.
+	 * @return GP_Project|false The project object, or false on 404.
+	 */
+	private function get_project_by_path( $path ) {
+		$project = GP::$project->by_path( $path );
+		if ( ! $project ) {
+			$this->die_with_404();
+			return false;
+		}
+
+		$this->projects_cache[ (int) $project->id ] = $project;
+
+		return $project;
 	}
 
 	/**
