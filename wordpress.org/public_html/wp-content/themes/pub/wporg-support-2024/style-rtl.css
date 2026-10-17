@@ -2383,6 +2383,9 @@ body.single .sidebar {
 .forums-homepage-footer .wp-block-heading a {
 	text-decoration: none;
 }
+.forums-homepage-footer .wp-block-heading a:hover {
+	text-decoration-line: underline;
+}
 
 .forums-homepage-topics .wp-block-group-is-layout-grid.is-style-cards-grid .wp-block-wporg-link-wrapper h3 {
 	margin-bottom: unset;
