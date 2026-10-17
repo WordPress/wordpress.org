@@ -95,11 +95,10 @@
 		// Check the raw data array rather than the collection so active selections
 		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
-			var self = this;
-			var hasChecked = _.some( self._subProjects, function( sub ) {
+			var hasChecked = _.some( this._subProjects, function( sub ) {
 				return projects.selection.get( sub.id );
 			} );
-			self.set( 'checkedSubProjects', hasChecked );
+			this.set( 'checkedSubProjects', hasChecked );
 		}
 	});
 	_.extend( projects.model.Project.prototype, projects.model.SelectableMixin );
@@ -183,17 +182,15 @@
 		},
 
 		uncheckAll: function() {
-			var self = this;
-
 			this.each( function( project ) {
 				project.uncheck();
-			});
+			} );
 
-			if ( self.project && self.project._subProjects ) {
-				_.each( self.project._subProjects, function( sub ) {
+			if ( this.project && this.project._subProjects ) {
+				_.each( this.project._subProjects, function( sub ) {
 					projects.selection.remove( sub.id );
 				} );
-				self.project.checkForCheckedSubProjects();
+				this.project.checkForCheckedSubProjects();
 			}
 		},
 
@@ -508,8 +505,9 @@
 				this.$el.addClass( 'active' );
 			}
 
-			$window.on( 'deactivate-all-projects.rosetta', _.bind( this.onDeactivate, this ) );
-			$window.on( 'uncheck-all-projects.rosetta', _.bind( this.onUncheck, this ) );
+			_.bindAll( this, 'onDeactivate', 'onUncheck' );
+			$window.on( 'deactivate-all-projects.rosetta', this.onDeactivate );
+			$window.on( 'uncheck-all-projects.rosetta', this.onUncheck );
 		},
 
 		onActivate: function() {
@@ -554,15 +552,13 @@
 			return projects._hasStorage;
 		}
 
-		var result = false;
-
 		try {
 			window.localStorage.setItem( 'test', 'rosetta' );
-			result = window.localStorage.getItem( 'test' ) === 'rosetta';
 			window.localStorage.removeItem( 'test' );
-		} catch( e ) {}
-
-		projects._hasStorage = result;
+			projects._hasStorage = true;
+		} catch( e ) {
+			projects._hasStorage = false;
+		}
 
 		return projects._hasStorage;
 	};
@@ -713,7 +709,7 @@
 		new projects.view.AllProjects();
 
 		// Warn before saving if all project assignments are removed.
-		var hadTranslatorStatus = projects.settings.accessList && projects.settings.accessList.length > 0;
+		var hadTranslatorStatus = Boolean( projects.settings.accessList && projects.settings.accessList.length );
 
 		$( '#project-access-list' ).closest( 'form' ).on( 'submit', function( e ) {
 			if ( hadTranslatorStatus && ! $( '#project-access-list' ).val() ) {
