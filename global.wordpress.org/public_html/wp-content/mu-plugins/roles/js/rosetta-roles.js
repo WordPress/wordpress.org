@@ -434,8 +434,12 @@
 		},
 
 		events: {
-			'input': 'search',
-			'keydown': 'search'
+			'input': 'onInput',
+			'keydown': 'onKeydown'
+		},
+
+		initialize: function() {
+			this.doSearch = _.debounce( this.doSearch.bind( this ), 500 );
 		},
 
 		onInput: function() {
@@ -452,7 +456,7 @@
 				this.el.value = '';
 				this.collection.doSearch( '' );
 			}
-		}
+		},
 
 		doSearch: function() {
 			this.collection.doSearch( this.el.value );
