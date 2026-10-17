@@ -408,28 +408,22 @@
 		},
 
 		render: function() {
-			var self = this;
-
-			self.clearSubViews();
+			this.clearSubViews();
 
 			var fragment = document.createDocumentFragment();
-			var subProjects = self.collection.first( self.limit );
+			var subProjects = this.collection.first( this.limit );
 
-			_.each( subProjects, function( model ) {
-				var subProjectView = new projects.view.SubProject({
-					model: model
-				});
+			this._subViews = _.map( subProjects, function( model ) {
+				var view = new projects.view.SubProject( { model: model } );
+				fragment.appendChild( view.render().el );
+				return view;
+			} );
 
-				subProjectView.render();
-				fragment.appendChild( subProjectView.el );
-				self._subViews.push( subProjectView );
-			});
-
-			self.$el.empty().append( fragment );
+			this.$el.empty().append( fragment );
 
 			return this;
 		}
-	});
+	} );
 
 	projects.view.SubProject = wp.Backbone.View.extend({
 		tagName: 'li',
@@ -543,11 +537,11 @@
 		var serverTime = Number( projects.settings.lastUpdated );
 
 		// Ensure timestamps are valid, positive, and finite numbers; rejects missing (0) or invalid cache timestamps.
-		if (
-			! Number.isFinite( serverTime ) || serverTime <= 0 ||
-			! Number.isFinite( cachedTime ) || cachedTime <= 0 ||
-			cachedTime < serverTime
-		) {
+		var isValidTime = function( time ) {
+			return Number.isFinite( time ) && time > 0;
+		};
+
+		if ( ! isValidTime( serverTime ) || ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
 			return Promise.reject();
 		}
 
