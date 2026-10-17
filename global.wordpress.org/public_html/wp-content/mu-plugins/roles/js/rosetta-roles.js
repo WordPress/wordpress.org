@@ -97,7 +97,7 @@
 		uncheckAllProjects: function() {
 			this.each( function( project ) {
 				project.uncheck();
-				project.get( 'subProjects' ).uncheckall();
+				project.get( 'subProjects' ).uncheckAll();
 			} );
 		},
 
@@ -107,7 +107,7 @@
 			}
 
 			this.each( function( project ) {
-				if ( project.get( 'id' ) != model.get( 'id' ) ) {
+				if ( project.get( 'id' ) !== model.get( 'id' ) ) {
 					project.set( 'isActive', false );
 				}
 			});
@@ -163,12 +163,12 @@
 
 		initialize: function( models, options ) {
 			this.project = options.project;
-			_.bindAll( this, 'uncheckall' );
+			_.bindAll( this, 'uncheckAll' );
 
-			this.on( 'uncheckall', this.uncheckall );
+			this.on( 'uncheckAll', this.uncheckAll );
 		},
 
-		uncheckall: function() {
+		uncheckAll: function() {
 			var self = this;
 
 			this.each( function( project ) {
@@ -193,10 +193,8 @@
 
 			if ( this.terms.length > 0 ) {
 				this.search( this.terms );
-			}
-
-			// If search is blank, show all projects.
-			if ( '' === this.terms ) {
+			} else {
+				// If search is blank, show all projects.
 				this.reset( this.project._subProjects );
 			}
 
@@ -354,7 +352,7 @@
 		// making individual sub-project selections redundant.
 		propagateChange: function() {
 			if ( this.model.get( 'checked' ) ) {
-				this.model.get( 'subProjects' ).trigger( 'uncheckall' );
+				this.model.get( 'subProjects' ).trigger( 'uncheckAll' );
 			}
 		},
 
@@ -397,7 +395,7 @@
 		// Number of projects which should be rendered to reduce bloat. Unrendered items remain searchable.
 		limit: 100,
 
-		initialize: function( options ) {
+		initialize: function() {
 			this._subViews = [];
 			this.listenTo( this.collection, 'projects:update', this.render );
 		},
@@ -513,21 +511,18 @@
 		return projects._hasStorage;
 	};
 
-	projects.getProjects = function() {
-		return projects.getLocalProjects().then(
-			function( localProjects ) {
-				return localProjects;
-			},
-			function() {
-				return projects.getRemoteProjects().then( function( remoteProjects ) {
-					if ( projects.hasStorage() ) {
-						projects.storeLocalProjects( remoteProjects );
-					}
+	projects.getProjects = async function() {
+		try {
+			return await projects.getLocalProjects();
+		} catch ( e ) {
+			var remoteProjects = await projects.getRemoteProjects();
 
-					return remoteProjects;
-				} );
+			if ( projects.hasStorage() ) {
+				projects.storeLocalProjects( remoteProjects );
 			}
-		);
+
+			return remoteProjects;
+		}
 	};
 
 	projects.getRemoteProjects = function() {
@@ -581,8 +576,8 @@
 			// Stores only compressed data to prevent exceeding the 5 MB localStorage quota.
 			window.localStorage.setItem( 'projects', compressedData );
 			window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
-		} ).catch( function() {
-			console.log( "Caching projects locally failed." );
+		} ).catch( function( error ) {
+			console.warn( "Caching projects locally failed.", error );
 		} );
 	};
 
@@ -621,13 +616,10 @@
 		}
 
 		// Base64 decode
-		var binary = atob( data ),
-			len = binary.length,
-			buffer = new Uint8Array( len );
-
-		for ( var i = 0; i < len; i++ ) {
-			buffer[ i ] = binary.charCodeAt( i );
-		}
+		var binary = atob( data );
+		var buffer = Uint8Array.from( binary, function( char ) {
+			return char.charCodeAt( 0 );
+		} );
 
 		var stream = new DecompressionStream( 'gzip' ),
 			streamWriter = stream.writable.getWriter(),
