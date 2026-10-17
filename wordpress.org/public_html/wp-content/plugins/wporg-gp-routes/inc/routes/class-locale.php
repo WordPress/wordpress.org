@@ -214,6 +214,7 @@ class Locale extends GP_Route {
 			return;
 		}
 
+		// Load and cache sub-project; render 404 if not found.
 		$sub_project = $this->get_project_by_path( $project_path . '/' . $sub_project_path );
 		if ( ! $sub_project ) {
 			return;
