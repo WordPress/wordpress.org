@@ -104,6 +104,8 @@ class I18n {
 		_x( 'Block Plugins as used in the Block Directory.', 'Plugin Section Description', 'wporg-plugins' );
 
 		// Business model descriptions.
+		_x( 'Community', 'Plugin Business Model', 'wporg-plugins' );
+		_x( 'Commercial', 'Plugin Business Model', 'wporg-plugins' );
 		__( 'These plugins are developed and supported by a community.', 'wporg-plugins' );
 		__( 'These plugins are free, but also have paid versions available.', 'wporg-plugins' );
 	}
