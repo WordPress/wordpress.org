@@ -17,17 +17,36 @@
 	/**
 	 * MODELS
 	 */
+
+	/**
+	 * Mixin providing shared selection and synchronization logic across project models.
+	 * Applied via _.extend to Project.prototype and subProject.prototype.
+	 */
 	projects.model.SelectableMixin = {
+		/**
+		 * Unchecks the model.
+		 */
 		uncheck: function() {
 			this.set( 'checked', false );
 		},
 
+		/**
+		 * Checks if the model ID is already present in projects.selection upon initialization
+		 * and pre-sets the 'checked' attribute silently.
+		 */
 		syncInitialSelection: function() {
 			if ( projects.selection.get( this.get( 'id' ) ) ) {
 				this.set( 'checked', true );
 			}
 		},
 
+		/**
+		 * Change listener for 'change:checked'.
+		 * Keeps the global projects.selection synchronized and triggers global uncheck events.
+		 *
+		 * @param {Backbone.Model} model   - The modified model instance.
+		 * @param {boolean}        checked - The updated selection state.
+		 */
 		updateSelection: function( model, checked ) {
 			if ( checked ) {
 				projects.selection.add( { id: this.get( 'id' ) } );
@@ -144,6 +163,12 @@
 	});
 	_.extend( projects.model.subProject.prototype, projects.model.SelectableMixin );
 
+	/**
+	 * Collection representing sub-projects with integrated relevance-based filtering.
+	 *
+	 * @property {string} terms - Most recently executed search query.
+	 * @property {Backbone.Model} project - Reference to the owning parent Project model.
+	 */
 	projects.model.subProjects = Backbone.Collection.extend({
 		model: projects.model.subProject,
 
@@ -464,6 +489,62 @@
 	});
 
 	/**
+	 * View handling the standalone global permission toggle (#project-all).
+	 * Coordinates radio and checkbox toggles and synchronizes with
+	 * $window events ('deactivate-all-projects.rosetta', 'uncheck-all-projects.rosetta').
+	 */
+	projects.view.AllProjects = wp.Backbone.View.extend( {
+		el: '#project-all',
+
+		events: {
+			'click': 'onActivate',
+			'change input': 'onToggle'
+		},
+
+		initialize: function() {
+			this.$checkbox = this.$el.find( 'input' );
+
+			if ( projects.selection.get( 'all' ) ) {
+				projects.selection.reset( [ { id: 'all' } ] );
+				this.$checkbox.prop( 'checked', true );
+				this.$el.addClass( 'active' );
+			}
+
+			$window.on( 'deactivate-all-projects.rosetta', _.bind( this.onDeactivate, this ) );
+			$window.on( 'uncheck-all-projects.rosetta', _.bind( this.onUncheck, this ) );
+		},
+
+		onActivate: function() {
+			if ( this.$el.hasClass( 'active' ) ) {
+				return;
+			}
+
+			this.$el.addClass( 'active' );
+			$window.trigger( 'deactivate-other-projects.rosetta' );
+		},
+
+		onToggle: function() {
+			if ( this.$checkbox.prop( 'checked' ) ) {
+				projects.selection.reset( [ { id: 'all' } ] );
+				$window.trigger( 'uncheck-other-projects.rosetta' );
+			} else {
+				projects.selection.remove( 'all' );
+			}
+		},
+
+		onDeactivate: function() {
+			this.$el.removeClass( 'active' );
+		},
+
+		onUncheck: function() {
+			if ( this.$checkbox.prop( 'checked' ) ) {
+				projects.selection.remove( 'all' );
+				this.$checkbox.prop( 'checked', false );
+			}
+		}
+	} );
+
+	/**
 	 * UTILS
 	 */
 
@@ -506,14 +587,22 @@
 		return wp.ajax.post( 'rosetta-get-projects' );
 	};
 
-	projects.getLocalProjects = function() {
+	/**
+	 * Retrieves and decompresses cached project data from localStorage.
+	 *
+	 * @async
+	 * @throws {Error} Throws when storage is unavailable, timestamps are invalid/expired,
+	 *                 or data is corrupt, delegating fallback to projects.getRemoteProjects().
+	 * @return {Promise<ProjectData[]>} Parsed project data array.
+	 */
+	projects.getLocalProjects = async function() {
 		if ( ! projects.hasStorage() ) {
-			return Promise.reject();
+			throw new Error( 'No storage' );
 		}
 
 		var lastUpdated = window.localStorage.getItem( 'projectsLastUpdated' );
 		if ( ! lastUpdated || 'undefined' === lastUpdated ) {
-			return Promise.reject();
+			throw new Error( 'Invalid cache timestamp' );
 		}
 
 		var cachedTime = Number( lastUpdated );
@@ -525,27 +614,22 @@
 		};
 
 		if ( ! isValidTime( serverTime ) || ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
-			return Promise.reject();
+			throw new Error( 'Cache expired' );
 		}
 
 		var json = window.localStorage.getItem( 'projects' );
 		if ( ! json ) {
-			return Promise.reject();
+			throw new Error( 'No cached data' );
 		}
 
 		// Plain-JSON fallback for caches written by earlier versions.
 		if ( '[' === json.substring( 0, 1 ) ) {
-			try {
-				return Promise.resolve( JSON.parse( json ) );
-			} catch ( e ) {
-				return Promise.reject();
-			}
+			return JSON.parse( json );
 		}
 
 		// decompress
-		return projects.decompress( json ).then( function( data ) {
-			return JSON.parse( data );
-		} );
+		var decompressed = await projects.decompress( json );
+		return JSON.parse( decompressed );
 	};
 
 	projects.storeLocalProjects = function( data ) {
@@ -628,51 +712,7 @@
 			$( '#project-loading' ).text( l10n.loadingError || 'Error loading projects.' );
 		} );
 
-		// '#project-all' grants access to all projects (GTE role) outside the individual PTE project hierarchy,
-		// syncing directly with the shared projects.selection collection.
-		var $projectAll = $( '#project-all' );
-		var $projectAllCheckbox = $projectAll.find( 'input' );
-
-		if ( projects.selection.get( 'all' ) ) {
-			projects.selection.reset( [ { id: 'all' } ] );
-			$projectAllCheckbox.prop( 'checked', true );
-			$projectAll.addClass( 'active' );
-		}
-
-		$projectAll.on( 'click', function() {
-			var $el = $( this );
-
-			if ( $el.hasClass( 'active' ) ) {
-				return;
-			}
-
-			$el.addClass( 'active' );
-			$window.trigger( 'deactivate-other-projects.rosetta' );
-		});
-
-		$projectAllCheckbox.on( 'change', function() {
-			var checked = $( this ).prop( 'checked' );
-
-			if ( checked ) {
-				projects.selection.reset( [ { id: 'all' } ] );
-				$window.trigger( 'uncheck-other-projects.rosetta' );
-			} else {
-				projects.selection.remove( 'all' );
-			}
-		});
-
-		$window.on( 'deactivate-all-projects.rosetta', function() {
-			$projectAll.removeClass( 'active' );
-		});
-
-		$window.on( 'uncheck-all-projects.rosetta', function() {
-			var checked = $projectAllCheckbox.prop( 'checked' );
-
-			if ( checked ) {
-				projects.selection.remove( 'all' );
-				$projectAllCheckbox.prop( 'checked', false );
-			}
-		});
+		new projects.view.AllProjects();
 
 		// Warn before saving if all project assignments are removed.
 		var hadTranslatorStatus = projects.settings.accessList && projects.settings.accessList.length > 0;
