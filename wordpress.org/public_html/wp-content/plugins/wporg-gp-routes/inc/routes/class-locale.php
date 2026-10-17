@@ -1138,6 +1138,25 @@ class Locale extends GP_Route {
 	}
 
 	/**
+	 * Helper to fetch and format user favorites by meta key and prefix.
+	 *
+	 * @param int    $user_id  The user ID.
+	 * @param string $meta_key Usermeta key name.
+	 * @param string $prefix   GlotPress path prefix (e.g. 'wp-themes').
+	 * @return array Formatted favorite slugs.
+	 */
+	private function get_favorites_for_meta( $user_id, $meta_key, $prefix ) {
+		$raw = array_filter( (array) get_user_meta( $user_id, $meta_key, true ) );
+
+		return array_map(
+			static function ( $slug ) use ( $prefix ) {
+				return "{$prefix}/{$slug}";
+			},
+			$raw
+		);
+	}
+
+	/**
 	 * Retrieves a list of projects which the current user has favorited.
 	 *
 	 * @param string|false $project_slug Project slug to filter by, or false for all.
@@ -1155,54 +1174,18 @@ class Locale extends GP_Route {
 			return $this->user_favorites_cache[ $cache_key ];
 		}
 
-		$theme_favorites  = [];
-		$plugin_favorites = [];
+		$favorites = match ( $project_slug ) {
+			'wp-themes'  => $this->get_favorites_for_meta( $user_id, 'theme_favorites', 'wp-themes' ),
+			'wp-plugins' => $this->get_favorites_for_meta( $user_id, 'plugin_favorites', 'wp-plugins' ),
+			default      => array_merge(
+				$this->get_favorites_for_meta( $user_id, 'theme_favorites', 'wp-themes' ),
+				$this->get_favorites_for_meta( $user_id, 'plugin_favorites', 'wp-plugins' )
+			),
+		};
 
-		switch ( $project_slug ) {
-			default:
-				// Fall through to include both Themes and Plugins
-			case 'wp-themes':
-				// Theme favorites are stored as theme slugs, these map 1:1 to GlotPress projects.
-				// Cast to array and filter to support both arrays and legacy/scalar string values.
-				$raw_theme_favorites = array_filter( (array) get_user_meta( $user_id, 'theme_favorites', true ) );
-				if ( ! empty( $raw_theme_favorites ) ) {
-					$theme_favorites = array_map(
-						static function ( $slug ) {
-							return "wp-themes/$slug";
-						},
-						$raw_theme_favorites
-					);
-				}
+		$this->user_favorites_cache[ $cache_key ] = $favorites;
 
-				if ( 'wp-themes' === $project_slug ) {
-					$this->user_favorites_cache[ $cache_key ] = $theme_favorites;
-					return $theme_favorites;
-				}
-
-			case 'wp-plugins':
-				// Plugin favorites are stored as plugin slugs, these map 1:1 to GlotPress projects.
-				// Cast to array and filter to support both arrays and legacy/scalar string values.
-				$raw_plugin_favorites = array_filter( (array) get_user_meta( $user_id, 'plugin_favorites', true ) );
-				if ( ! empty( $raw_plugin_favorites ) ) {
-					$plugin_favorites = array_map(
-						static function ( $slug ) {
-							return "wp-plugins/$slug";
-						},
-						$raw_plugin_favorites
-					);
-				}
-
-				if ( 'wp-plugins' === $project_slug ) {
-					$this->user_favorites_cache[ $cache_key ] = $plugin_favorites;
-					return $plugin_favorites;
-				}
-		}
-
-		$all_favorites       = array_merge( $theme_favorites, $plugin_favorites );
-		$this->user_favorites_cache[ $cache_key ] = $all_favorites;
-
-		// Return all favorites, for uses in things like the Waiting tab
-		return $all_favorites;
+		return $favorites;
 	}
 
 	/**
