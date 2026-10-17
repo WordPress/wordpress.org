@@ -135,7 +135,7 @@ class Locale extends GP_Route {
 
 		$project_path = $project_path ?: $default_project_tab;
 
-		// Project not found; render 404.
+		// Load and cache project; render 404 if not found.
 		$project = $this->get_project_by_path( $project_path );
 		if ( ! $project ) {
 			return;
@@ -208,7 +208,7 @@ class Locale extends GP_Route {
 			return $this->die_with_404();
 		}
 
-		// Project not found; render 404.
+		// Load and cache project; render 404 if not found.
 		$project = $this->get_project_by_path( $project_path );
 		if ( ! $project ) {
 			return;
