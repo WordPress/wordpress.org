@@ -96,7 +96,7 @@
 		// Check the raw data array rather than the collection so active selections
 		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
-			const hasChecked = this._subProjects.some( sub => projects.selection.get( sub.id ) );
+			const hasChecked = Boolean( this._subProjects?.some( sub => projects.selection.get( sub.id ) ) );
 			this.set( 'checkedSubProjects', hasChecked );
 		}
 	});
@@ -281,7 +281,7 @@
 			for ( const project of this.collection.models ) {
 				const projectView = new projects.view.Project( { model: project } );
 				fragment.appendChild( projectView.render().el );
-			};
+			}
 
 			view.el.append( fragment );
 
