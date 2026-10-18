@@ -767,7 +767,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 
 		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
 			'l10n' => array(
-				'removeTranslator'  => esc_attr__( 'Are you sure you wish to completely remove translation editor status for this user?', 'rosetta' ),
+				'removeTranslator'  => __( 'Are you sure you wish to completely remove translation editor status for this user?', 'rosetta' ),
 				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' ),
 			),
 			'lastUpdated' => $last_updated,
