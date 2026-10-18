@@ -378,7 +378,7 @@
 		// and to ensure DOM state is committed before re-rendering.
 		events: {
 			'change .input-checkbox': 'updateChecked',
-			'change .input-radio': 'setChecked'
+			'click .input-radio': 'setChecked'
 		},
 
 		prepare: function() {
