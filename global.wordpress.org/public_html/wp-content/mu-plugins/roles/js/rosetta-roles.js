@@ -89,6 +89,9 @@
 			this.set( 'subProjects', subProjectsCollection, { silent: true } );
 
 			this.syncInitialSelection();
+			if ( this.get( 'checked' ) ) {
+				subProjectsCollection.uncheckAll();
+			}
 
 			this.listenTo( subProjectsCollection, 'change:checked', this.updateChecked );
 			this.on( 'change:checked', this.onCheckedChange );
@@ -466,6 +469,11 @@
 			this._subViews = [];
 		},
 
+		remove: function() {
+			this.clearSubViews();
+			return wp.Backbone.View.prototype.remove.apply( this, arguments );
+		},
+
 		render: function() {
 			this.clearSubViews();
 
@@ -706,9 +714,10 @@
 	};
 
 	projects.init = function() {
-		const initialSelection = ( projects.settings.accessList || [] ).map( id => ( {
-			id: normalizeId( id )
-		} ) );
+		const rawList = ( projects.settings.accessList || [] ).map( normalizeId );
+		const initialSelection = rawList.includes( 'all' )
+			? [ { id: 'all' } ]
+			: rawList.map( id => ( { id } ) );
 
 		projects.selection = new projects.model.Selection( initialSelection );
 		projects.selection.updateInputField();
