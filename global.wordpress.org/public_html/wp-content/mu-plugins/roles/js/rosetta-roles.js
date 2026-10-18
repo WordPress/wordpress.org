@@ -115,7 +115,7 @@
 			this.models.forEach( project => {
 				project.uncheck();
 				project.get( 'subProjects' ).uncheckAll();
-			}
+			} );
 		},
 
 		toggleActiveStates: function( model ) {
@@ -127,7 +127,7 @@
 				if ( project !== model ) {
 					project.set( 'isActive', false );
 				}
-			}
+			} );
 
 			window.dispatchEvent( new CustomEvent( 'rosetta:deactivate-all-projects' ) );
 		},
