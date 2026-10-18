@@ -4,7 +4,7 @@
 	/**
 	 * @typedef {Object} RosettaSettings
 	 * @property {Array<number|string>} accessList  - IDs of currently assigned projects.
-	 * @property {number}               lastUpdated - Timestamp used for localStorage cache invalidation.
+	 * @property {number}               lastUpdated - Timestamp used for IndexedDB cache invalidation.
 	 * @property {Object}               l10n        - Localized UI strings.
 	 */
 	const settings = window._rosettaProjectsSettings || {};
@@ -18,8 +18,8 @@
 	 */
 
 	/**
-	 * Mixin providing shared selection and synchronization logic across project models.
-	 * Applied via _.extend to Project.prototype and subProject.prototype.
+	 * Base model providing shared selection and synchronization logic across project models.
+	 * Extended by Project and subProject.
 	 */
 	projects.model.SelectableModel = Backbone.Model.extend( {
 		/**
@@ -100,7 +100,7 @@
 	projects.model.Projects = Backbone.Collection.extend({
 		model: projects.model.Project,
 
-		// Listens on the global $window event bus to coordinate active tabs and selection 
+		// Listens on the global window event bus to coordinate active tabs and selection
 		// state between individual category models and the standalone '#project-all' (GTE) toggle.
 		initialize: function() {
 			this.on( 'change:isActive', this.toggleActiveStates );
@@ -165,7 +165,6 @@
 
 		initialize: function( models, options ) {
 			this.project = options.project;
-			this.on( 'uncheckAll', () => this.uncheckAll() );
 		},
 
 		uncheckAll: function() {
@@ -341,7 +340,7 @@
 		// making individual sub-project selections redundant.
 		propagateChange: function() {
 			if ( this.model.get( 'checked' ) ) {
-				this.model.get( 'subProjects' ).trigger( 'uncheckAll' );
+				this.model.get( 'subProjects' ).uncheckAll();
 			}
 		},
 
@@ -359,7 +358,7 @@
 		className: 'sub-projects-wrapper',
 
 		initialize: function() {
-			var collection = this.model.get( 'subProjects' );
+			const collection = this.model.get( 'subProjects' );
 
 			if ( collection.length > 5 ) {
 				this.views.add( new projects.view.Search({
@@ -456,7 +455,7 @@
 	/**
 	 * View handling the standalone global permission toggle (#project-all).
 	 * Coordinates radio and checkbox toggles and synchronizes with
-	 * $window events ('deactivate-all-projects.rosetta', 'uncheck-all-projects.rosetta').
+	 * window events ('rosetta:deactivate-all-projects', 'rosetta:uncheck-all-projects').
 	 */
 	projects.view.AllProjects = wp.Backbone.View.extend( {
 		el: '#project-all',
@@ -515,20 +514,14 @@
 	 * UTILS
 	 */
 
-	// Check if the browser supports localStorage.
-	projects.hasStorage = () => {
-		try {
-			return typeof window.localStorage !== 'undefined' && window.localStorage !== null;
-		} catch {
-			return false;
-		}
-	};
+	// Check if the browser supports IndexedDB.
+	projects.hasStorage = () => typeof indexedDB !== 'undefined';
 
 	projects.getProjects = async function() {
 		try {
 			return await projects.getLocalProjects();
 		} catch ( e ) {
-			var remoteProjects = await projects.getRemoteProjects();
+			const remoteProjects = await projects.getRemoteProjects();
 
 			if ( projects.hasStorage() ) {
 				projects.storeLocalProjects( remoteProjects );
@@ -542,8 +535,25 @@
 		return wp.ajax.post( 'rosetta-get-projects' );
 	};
 
+	const DB_NAME = 'rosetta_cache';
+	const STORE_NAME = 'projects';
+
 	/**
-	 * Retrieves and decompresses cached project data from localStorage.
+	 * Opens or initializes the IndexedDB projects cache database.
+	 *
+	 * @return {Promise<IDBDatabase>} Promise resolving to the open IDB database instance.
+	 */
+	function openProjectsDB() {
+		return new Promise( ( resolve, reject ) => {
+			const request = indexedDB.open( DB_NAME, 1 );
+			request.onupgradeneeded = () => request.result.createObjectStore( STORE_NAME );
+			request.onsuccess = () => resolve( request.result );
+			request.onerror = () => reject( request.error );
+		} );
+	}
+
+	/**
+	 * Retrieves and decompresses cached project data from IndexedDB.
 	 *
 	 * @async
 	 * @throws {Error} Throws when storage is unavailable, timestamps are invalid/expired,
@@ -552,97 +562,67 @@
 	 */
 	projects.getLocalProjects = async function() {
 		if ( ! projects.hasStorage() ) {
-			throw new Error( 'No storage' );
+			throw new Error( 'No IndexedDB support' );
 		}
 
-		var lastUpdated = window.localStorage.getItem( 'projectsLastUpdated' );
-		if ( ! lastUpdated || 'undefined' === lastUpdated ) {
-			throw new Error( 'Invalid cache timestamp' );
-		}
+		const db = await openProjectsDB();
 
-		const cachedTime = Number( lastUpdated );
+		// Check timestamp
+		const cachedTime = await new Promise( ( resolve, reject ) => {
+			const tx = db.transaction( STORE_NAME, 'readonly' );
+			const req = tx.objectStore( STORE_NAME ).get( 'projects_last_updated' );
+			req.onsuccess = event => resolve( Number( event.target.result ) );
+			req.onerror = () => reject( req.error );
+		} );
+
 		const serverTime = Number( projects.settings.lastUpdated );
-
-		// Ensure timestamps are valid, positive, and finite numbers; rejects missing (0) or invalid cache timestamps.
 		const isValidTime = time => Number.isFinite( time ) && time > 0;
 
 		if ( ! isValidTime( serverTime ) || ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
 			throw new Error( 'Cache expired' );
 		}
 
-		var json = window.localStorage.getItem( 'projects' );
-		if ( ! json ) {
+		const blob = await new Promise( ( resolve, reject ) => {
+			const tx = db.transaction( STORE_NAME, 'readonly' );
+			const req = tx.objectStore( STORE_NAME ).get( 'projects_data' );
+			req.onsuccess = event => resolve( event.target.result );
+			req.onerror = () => reject( req.error );
+		} );
+
+		if ( ! blob ) {
 			throw new Error( 'No cached data' );
 		}
 
-		// Plain-JSON fallback for caches written by earlier versions.
-		if ( '[' === json.substring( 0, 1 ) ) {
-			return JSON.parse( json );
-		}
-
 		// decompress
-		var decompressed = await projects.decompress( json );
-		return JSON.parse( decompressed );
+		const decompressedStream = blob.stream().pipeThrough( new DecompressionStream( 'gzip' ) );
+		const jsonText = await new Response( decompressedStream ).text();
+
+		return JSON.parse( jsonText );
 	};
 
+	/**
+	 * Compresses and caches remote project data into IndexedDB as a binary gzip Blob.
+	 *
+	 * @async
+	 * @param {ProjectData[]} data - Array of project objects to serialize and cache.
+	 * @return {Promise<void>}
+	 */
 	projects.storeLocalProjects = async function( data ) {
 		try {
-			const compressedData = await projects.compress( JSON.stringify( data ) );
-			window.localStorage.setItem( 'projects', compressedData );
-			window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
+			const stream = new Blob( [ JSON.stringify( data ) ] )
+				.stream()
+				.pipeThrough( new CompressionStream( 'gzip' ) );
+			const blob = await new Response( stream ).blob();
+
+			const db = await openProjectsDB();
+			const tx = db.transaction( STORE_NAME, 'readwrite' );
+			const store = tx.objectStore( STORE_NAME );
+
+			store.put( blob, 'projects_data' );
+			store.put( projects.settings.lastUpdated, 'projects_last_updated' );
 		} catch ( error ) {
-			console.warn( 'Caching projects locally failed.', error );
+			console.warn( 'Caching projects in IndexedDB failed.', error );
 		}
-	};
-
-	projects.compress = async function( data ) {
-		// Reject if Compression Streams API is unavailable; gracefully falls back to direct remote fetching.
-		if ( 'undefined' === typeof CompressionStream ) {
-			throw new Error( 'CompressionStream API not supported' );
-		}
-
-		var stream = new CompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter(),
-			bufferPromise = new Response( stream.readable ).arrayBuffer();
-
-		await streamWriter.write(
-			new TextEncoder().encode( data )
-		);
-		await streamWriter.close();
-
-		var buffer = await bufferPromise;
-		// Base64 encode it in chunks so it can be stored in localStorage without blocking the main thread.
-		var binary = '';
-		var bytes = new Uint8Array( buffer );
-		var chunkSize = 8192;
-
-		for ( var i = 0; i < bytes.length; i += chunkSize ) {
-			binary += String.fromCharCode.apply( null, bytes.subarray( i, i + chunkSize ) );
-		}
-
-		return btoa( binary );
-	};
-
-	projects.decompress = async function( data ) {
-		if ( 'undefined' === typeof DecompressionStream ) {
-			throw new Error( 'DecompressionStream API not supported' );
-		}
-
-		// Base64 decode
-		var binary = atob( data );
-		var buffer = Uint8Array.from( binary, function( char ) {
-			return char.charCodeAt( 0 );
-		} );
-
-		var stream = new DecompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter(),
-			arrayBufferPromise = new Response( stream.readable ).arrayBuffer();
-
-		await streamWriter.write( buffer );
-		await streamWriter.close();
-
-		var arrayBuffer = await arrayBufferPromise;
-		return new TextDecoder().decode( arrayBuffer );
 	};
 
 	projects.initFrame = function( projectData ) {
