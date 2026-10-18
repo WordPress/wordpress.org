@@ -1,4 +1,5 @@
-( function( $ ) {
+( function() {
+	'use strict';
 
 	var projects, l10n;
 
@@ -67,7 +68,7 @@
 		},
 
 		initialize: function() {
-			_.bindAll( this, 'uncheck' );
+			this.uncheck = this.uncheck.bind( this );
 
 			// Store the original sub-projects data, it's used to reset the collection on searches.
 			this._subProjects = this.get( 'sub_projects' );
@@ -107,8 +108,8 @@
 		// Listens on the global $window event bus to coordinate active tabs and selection 
 		// state between individual category models and the standalone '#project-all' (GTE) toggle.
 		initialize: function() {
-			_.bindAll( this, 'disableActiveStates', 'uncheckAllProjects' );
-
+			this.disableActiveStates = this.disableActiveStates.bind( this );
+			this.uncheckAllProjects = this.uncheckAllProjects.bind( this );
 			this.on( 'change:isActive', this.toggleActiveStates );
 
 			window.addEventListener( 'rosetta:deactivate-other-projects', this.disableActiveStates );
@@ -152,7 +153,7 @@
 		},
 
 		initialize: function() {
-			_.bindAll( this, 'uncheck' );
+			this.uncheck = this.uncheck.bind( this );
 
 			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
@@ -174,8 +175,7 @@
 
 		initialize: function( models, options ) {
 			this.project = options.project;
-			_.bindAll( this, 'uncheckAll' );
-
+			this.uncheckAll = this.uncheckAll.bind( this );
 			this.on( 'uncheckAll', this.uncheckAll );
 		},
 
@@ -276,32 +276,32 @@
 			var view = this;
 			wp.Backbone.View.prototype.render.apply( this, arguments );
 
-			this.collection.each( function( project ) {
-				var projectView = new projects.view.Project({
-					model: project
-				});
+			const fragment = document.createDocumentFragment();
 
-				projectView.render();
-				view.$el.append( projectView.el );
-			});
+			this.collection.each( function( project ) {
+				var projectView = new projects.view.Project( {
+					model: project
+				} );
+
+				fragment.appendChild( projectView.render().el );
+			} );
+
+			view.el.append( fragment );
 
 			document.getElementById( 'project-loading' )?.remove();
 
 			// Only visually marks the first item (#project-all) in the template active on initial load.
-			var $firstActive = view.$el.find( 'li.active' );
-			if ( ! $firstActive.length ) {
-				$firstActive = view.$el.find( 'li input[type=radio]' );
-			}
-			if ( ! $firstActive.length ) {
-				$firstActive = view.$el.find( 'li:first-child' );
-			}
-			$firstActive.closest( 'li' ).addClass( 'active' );
+			const firstActive = view.el.querySelector( 'li.active' )
+				|| view.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
+				|| view.el.querySelector( 'li:first-child' );
+
+			firstActive?.classList.add( 'active' );
 
 			this.views.ready();
 
 			return this;
 		}
-	});
+	} );
 
 	projects.view.Checkbox = wp.Backbone.View.extend({
 		className: 'project-checkbox',
@@ -501,7 +501,8 @@
 				this.el.classList.add( 'active' );
 			}
 
-			_.bindAll( this, 'onDeactivate', 'onUncheck' );
+			this.onDeactivate = this.onDeactivate.bind( this );
+			this.onUncheck = this.onUncheck.bind( this );
 			window.addEventListener( 'rosetta:deactivate-all-projects', this.onDeactivate );
 			window.addEventListener( 'rosetta:uncheck-all-projects', this.onUncheck );
 		},
@@ -726,4 +727,4 @@
 		projects.init();
 	}
 
-} )( jQuery );
+} )();
