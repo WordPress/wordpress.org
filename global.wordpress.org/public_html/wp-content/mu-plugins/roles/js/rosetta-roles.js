@@ -359,7 +359,19 @@
 		template: wp.template( 'project-checkbox' ),
 
 		initialize: function() {
-			this.listenTo( this.model, 'change:checked change:checkedSubProjects', this.render );
+			this.listenTo( this.model, 'change:checked change:checkedSubProjects', this.syncInput );
+		},
+
+		syncInput: function() {
+			const input = this.el.querySelector( 'input' );
+			if ( ! input ) {
+				return;
+			}
+
+			const hasCheckedSubProjects = Boolean( this.model.get( 'checkedSubProjects' ) );
+			input.type = hasCheckedSubProjects ? 'radio' : 'checkbox';
+			input.className = hasCheckedSubProjects ? 'input-radio' : 'input-checkbox';
+			input.checked = hasCheckedSubProjects || Boolean( this.model.get( 'checked' ) );
 		},
 
 		// Listen to 'change' instead of 'click' for keyboard accessibility
