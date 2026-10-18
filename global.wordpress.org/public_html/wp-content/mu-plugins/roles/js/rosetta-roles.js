@@ -638,15 +638,19 @@
 		try {
 			const store = db.transaction( STORE_NAME, 'readonly' ).objectStore( STORE_NAME );
 
+			const [ cachedTimeRaw, blob ] = await Promise.all( [
+				promisifyReq( store.get( 'projects_last_updated' ) ),
+				promisifyReq( store.get( 'projects_data' ) )
+			] );
+
 			// Check timestamp
-			const cachedTime = Number( await promisifyReq( store.get( 'projects_last_updated' ) ) );
+			const cachedTime = Number( cachedTimeRaw );
 			const serverTime = Number( projects.settings.lastUpdated );
 
 			if ( ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
 				throw new Error( 'Cache expired' );
 			}
 
-			const blob = await promisifyReq( store.get( 'projects_data' ) );
 			if ( ! blob ) {
 				throw new Error( 'No cached data' );
 			}
