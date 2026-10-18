@@ -528,7 +528,9 @@
 	 */
 
 	// Check if the browser supports IndexedDB.
-	projects.hasStorage = () => typeof indexedDB !== 'undefined';
+	projects.hasStorage = () => typeof indexedDB !== 'undefined'
+		&& typeof CompressionStream !== 'undefined'
+		&& typeof DecompressionStream !== 'undefined';
 
 	projects.getProjects = async function() {
 		try {
