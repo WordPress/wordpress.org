@@ -334,19 +334,16 @@
 			document.getElementById( 'project-loading' )?.remove();
 			this.el.append( fragment );
 
-			// If '#project-all' is not active, activate the first category with assigned sub-projects
-			// or fall back to visually marking the first item (#project-all) active.
-			if ( ! this.el.querySelector( 'li.active' ) ) {
-				const firstWithSubProjects = this.collection.find(
-					project => project.get( 'checkedSubProjects' )
-				);
+			// Only visually marks the first item (#project-all) in the template active on initial load.
+			const firstActive = this.el.querySelector( 'li.active' )
+				|| this.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
+				|| this.el.querySelector( 'li:first-child' );
 
-				if ( firstWithSubProjects ) {
-					firstWithSubProjects.set( 'isActive', true );
-				} else {
-					this.el.querySelector( 'li:first-child' )?.classList.add( 'active' );
-				}
+			if ( ! this._allProjectsView && document.getElementById( 'project-all' ) ) {
+				this._allProjectsView = new projects.view.AllProjects();
 			}
+
+			firstActive?.classList.add( 'active' );
 
 			return this;
 		}
@@ -713,8 +710,6 @@
 					loadingEl.textContent = l10n.loadingError || 'Error loading projects.';
 				}
 			} );
-
-		new projects.view.AllProjects();
 
 		const hadTranslatorStatus = Boolean( projects.settings.accessList?.length );
 		const accessField = projects.selection.field;
