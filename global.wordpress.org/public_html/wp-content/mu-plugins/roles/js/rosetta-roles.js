@@ -110,7 +110,7 @@
 		},
 
 		uncheckAllProjects: function() {
-			for ( const project of this.models ) {
+			this.models.forEach( project => {
 				project.uncheck();
 				project.get( 'subProjects' ).uncheckAll();
 			}
@@ -121,8 +121,8 @@
 				return;
 			}
 
-			for ( const project of this.models ) {
-				if ( project.get( 'id' ) !== model.get( 'id' ) ) {
+			this.models.forEach( project => {
+				if ( project !== model ) {
 					project.set( 'isActive', false );
 				}
 			}
@@ -131,9 +131,7 @@
 		},
 
 		disableActiveStates: function() {
-			for ( const project of this.models ) {
-				project.set( 'isActive', false );
-			}
+			this.models.forEach( project => project.set( 'isActive', false ) );
 		}
 	} );
 
@@ -148,6 +146,7 @@
 		initialize: function() {
 			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
+			this._searchHaystack = `${ this.get( 'name' ) || '' } ${ this.get( 'slug' ) || '' }`.toLowerCase();
 		}
 	} );
 
@@ -165,6 +164,7 @@
 
 		initialize: function( models, options ) {
 			this.project = options.project;
+			this._allModels = this.models.slice();
 		},
 
 		uncheckAll: function() {
@@ -173,7 +173,8 @@
 			}
 
 			if ( this.project?._subProjects ) {
-				this.project._subProjects.forEach( sub => projects.selection.remove( sub.id ) );
+				const ids = this.project._subProjects.map( sub => sub.id );
+				projects.selection.remove( ids );
 				this.project.checkForCheckedSubProjects();
 			}
 		},
@@ -190,7 +191,7 @@
 				this.search( this.terms );
 			} else {
 				// If search is blank, show all projects.
-				this.reset( this.project._subProjects );
+				this.reset( this._allModels );
 			}
 
 			// Trigger a 'projects:update' event
@@ -200,25 +201,19 @@
 		// Performs a search within the collection
 		// @uses RegExp
 		search: function( term ) {
-			// Start with a full collection
-			this.reset( this.project._subProjects, { silent: true } );
-
 			// Split into tokens; ignore empty tokens.
 			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
 
 			// Step 1 (Filter): Token-based pre-filter. Ensures all search terms
 			// are present in either 'name' or 'slug' regardless of word order.
-			const results = this.filter( project => {
-				const fields = [ project.get( 'name' ), project.get( 'slug' ) ].filter( Boolean );
-				const haystack = fields.join( ' ' ).toLowerCase();
-
-				if ( tokens.every( token => haystack.includes( token ) ) ) {
-					const maxScore = fields.reduce(
-						// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
-						( max, word ) => Math.max( max, String( word ).score( term, 0.5 ) ),
-						0
-					);
-					project.set( 'matchScore', maxScore, { silent: true } );
+			const results = this._allModels.filter( project => {
+				if ( tokens.every( token => project._searchHaystack.includes( token ) ) ) {
+					// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
+					const name = project.attributes.name;
+					const nameScore = name ? String( name ).score( term, 0.5 ) : 0;
+					const slug = project.attributes.slug;
+					const slugScore = slug ? String( slug ).score( term, 0.5 ) : 0;
+					project.set( 'matchScore', Math.max( nameScore, slugScore ), { silent: true } );
 					return true;
 				}
 				return false;
