@@ -257,19 +257,32 @@
 	projects.view.Frame = wp.Backbone.View.extend( {
 		el: '#projects-list',
 
+		initialize: function() {
+			this._subViews = [];
+		},
+
+		clearSubViews: function() {
+			for ( const view of this._subViews ) {
+				view.remove();
+			}
+			this._subViews = [];
+		},
+
 		render: function() {
 			wp.Backbone.View.prototype.render.apply( this, arguments );
 
+			this.clearSubViews();
+
 			const fragment = document.createDocumentFragment();
 
-			for ( const project of this.collection.models ) {
+			this._subViews = this.collection.models.map( project => {
 				const projectView = new projects.view.Project( { model: project } );
 				fragment.appendChild( projectView.render().el );
-			}
-
-			this.el.append( fragment );
+				return projectView;
+			} );
 
 			document.getElementById( 'project-loading' )?.remove();
+			this.el.append( fragment );
 
 			// Only visually marks the first item (#project-all) in the template active on initial load.
 			const firstActive = this.el.querySelector( 'li.active' )
@@ -620,6 +633,12 @@
 
 			store.put( blob, 'projects_data' );
 			store.put( projects.settings.lastUpdated, 'projects_last_updated' );
+			
+			await new Promise( ( resolve, reject ) => {
+				tx.oncomplete = () => resolve();
+				tx.onerror = () => reject( tx.error );
+				tx.onabort = () => reject( tx.error );
+			} );
 		} catch ( error ) {
 			console.warn( 'Caching projects in IndexedDB failed.', error );
 		}
