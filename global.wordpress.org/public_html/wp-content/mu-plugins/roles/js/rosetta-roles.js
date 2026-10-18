@@ -345,6 +345,8 @@
 					this.el.querySelector( 'li:first-child' )?.classList.add( 'active' );
 				}
 			}
+
+			return this;
 		}
 	} );
 
