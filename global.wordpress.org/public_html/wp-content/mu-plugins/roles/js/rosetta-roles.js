@@ -231,6 +231,8 @@
 		},
 
 		doSearch: function( value ) {
+			value = value.trim();
+
 			// Don't do anything if we've already done this search
 			if ( this.terms === value ) {
 				return;
@@ -252,7 +254,7 @@
 		// Performs a search within the collection
 		search: function( term ) {
 			// Split into tokens; ignore empty tokens.
-			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
+			const tokens = term.toLowerCase().split( /\s+/ ).filter( Boolean );
 			const hasScoreFn = typeof String.prototype.score === 'function';
 
 			// Step 1 (Filter): Token-based pre-filter. Ensures all search terms
