@@ -70,6 +70,8 @@
 			this._subProjects = this.get( 'sub_projects' );
 			this.unset( 'sub_projects' );
 
+			this._subProjectIds = new Set( ( this._subProjects || [] ).map( sub => sub.id ) );
+
 			this.set( 'subProjects', new projects.model.subProjects( this._subProjects, {
 				project: this,
 			} ) );
@@ -92,12 +94,12 @@
 		// Check the raw data array rather than the collection so active selections
 		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
-			const hasChecked = Boolean( this._subProjects?.some( sub => projects.selection.get( sub.id ) ) );
+			const hasChecked = projects.selection.models.some( model => this._subProjectIds.has( model.id ) );
 			this.set( 'checkedSubProjects', hasChecked );
 		}
 	} );
 	
-	projects.model.Projects = Backbone.Collection.extend({
+	projects.model.Projects = Backbone.Collection.extend( {
 		model: projects.model.Project,
 
 		// Listens on the global window event bus to coordinate active tabs and selection
@@ -156,7 +158,7 @@
 	 * @property {string} terms - Most recently executed search query.
 	 * @property {Backbone.Model} project - Reference to the owning parent Project model.
 	 */
-	projects.model.subProjects = Backbone.Collection.extend({
+	projects.model.subProjects = Backbone.Collection.extend( {
 		model: projects.model.subProject,
 
 		// Search terms
@@ -291,7 +293,7 @@
 		}
 	} );
 
-	projects.view.Checkbox = wp.Backbone.View.extend({
+	projects.view.Checkbox = wp.Backbone.View.extend( {
 		className: 'project-checkbox',
 		template: wp.template( 'project-checkbox' ),
 
@@ -319,9 +321,9 @@
 		setChecked: function() {
 			this.model.set( 'checked', true );
 		}
-	});
+	} );
 
-	projects.view.Project = wp.Backbone.View.extend({
+	projects.view.Project = wp.Backbone.View.extend( {
 		tagName: 'li',
 
 		events: {
@@ -332,13 +334,13 @@
 			this.listenTo( this.model, 'change:checked', this.propagateChange );
 			this.listenTo( this.model, 'change:isActive', this.toggleActiveState );
 
-			this.views.add( new projects.view.Checkbox({
+			this.views.add( new projects.view.Checkbox( {
 				model: this.model
-			}) );
+			} ) );
 
-			this.views.add( new projects.view.SubProjects({
+			this.views.add( new projects.view.SubProjects( {
 				model: this.model
-			}) );
+			} ) );
 
 			this.toggleActiveState();
 		},
@@ -358,9 +360,9 @@
 		updateIsActive: function() {
 			this.model.set( 'isActive', true );
 		}
-	});
+	} );
 
-	projects.view.SubProjects = wp.Backbone.View.extend({
+	projects.view.SubProjects = wp.Backbone.View.extend( {
 		tagName: 'div',
 		className: 'sub-projects-wrapper',
 
@@ -375,9 +377,9 @@
 
 			this.views.add( new projects.view.SubProjectsList({
 				collection: collection
-			}) );
+			} ) );
 		}
-	});
+	} );
 
 	projects.view.SubProjectsList = wp.Backbone.View.extend( {
 		tagName: 'ul',
@@ -416,7 +418,7 @@
 		}
 	} );
 
-	projects.view.Search = wp.Backbone.View.extend({
+	projects.view.Search = wp.Backbone.View.extend( {
 		tagName: 'input',
 		className: 'sub-projects-search',
 
