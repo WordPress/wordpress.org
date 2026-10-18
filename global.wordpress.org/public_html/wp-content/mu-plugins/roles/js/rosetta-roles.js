@@ -334,11 +334,12 @@
 			document.getElementById( 'project-loading' )?.remove();
 			this.el.append( fragment );
 
-			// Only visually marks the first item (#project-all) in the template active on initial load.
+			// Ensures a category tab is active on initial load (falls back to the first item if none is set).
 			const firstActive = this.el.querySelector( 'li.active' )
 				|| this.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
 				|| this.el.querySelector( 'li:first-child' );
 
+			// Initialize the global #project-all view once it is rendered in the DOM.
 			if ( ! this._allProjectsView && document.getElementById( 'project-all' ) ) {
 				this._allProjectsView = new projects.view.AllProjects();
 			}
