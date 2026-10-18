@@ -170,7 +170,7 @@
 		},
 
 		uncheckAll: function() {
-			for ( const project of this.models ) {
+			for ( const project of this._allModels ) {
 				project.uncheck();
 			}
 
@@ -298,7 +298,7 @@
 		template: wp.template( 'project-checkbox' ),
 
 		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
+			this.listenTo( this.model, 'change:checked change:checkedSubProjects', this.render );
 		},
 
 		// Listen to 'change' instead of 'click' for keyboard accessibility
