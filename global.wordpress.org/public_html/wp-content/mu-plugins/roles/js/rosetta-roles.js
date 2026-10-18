@@ -107,12 +107,10 @@
 		// Listens on the global $window event bus to coordinate active tabs and selection 
 		// state between individual category models and the standalone '#project-all' (GTE) toggle.
 		initialize: function() {
-			this.disableActiveStates = this.disableActiveStates.bind( this );
-			this.uncheckAllProjects = this.uncheckAllProjects.bind( this );
 			this.on( 'change:isActive', this.toggleActiveStates );
 
-			window.addEventListener( 'rosetta:deactivate-other-projects', this.disableActiveStates );
-			window.addEventListener( 'rosetta:uncheck-other-projects', this.uncheckAllProjects );
+			window.addEventListener( 'rosetta:deactivate-other-projects', () => this.disableActiveStates() );
+			window.addEventListener( 'rosetta:uncheck-other-projects', () => this.uncheckAllProjects() );
 		},
 
 		uncheckAllProjects: function() {
@@ -173,8 +171,7 @@
 
 		initialize: function( models, options ) {
 			this.project = options.project;
-			this.uncheckAll = this.uncheckAll.bind( this );
-			this.on( 'uncheckAll', this.uncheckAll );
+			this.on( 'uncheckAll', () => this.uncheckAll() );
 		},
 
 		uncheckAll: function() {
@@ -210,29 +207,26 @@
 		// Performs a search within the collection
 		// @uses RegExp
 		search: function( term ) {
-			var match, results, escapedTerm;
-
 			// Start with a full collection
 			this.reset( this.project._subProjects, { silent: true } );
 
 			// Escape the term string for RegExp meta characters
-			escapedTerm = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
+			const escapedTerm = term.replace( /[-\/\\^\$*+?.()|[\]{}]/g, '\\$&' ).replace( / /g, ')(?=.*' );
 
 			// Step 1 (Filter): Fast regex pre-filter. Positive lookaheads match all query terms 
 			// in any order across 'name' and 'slug' without breaking on live space keystrokes.
-			escapedTerm = escapedTerm.replace( / /g, ')(?=.*' );
-			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
+			const match = new RegExp( `^(?=.*${ escapedTerm }).+`, 'i' );
 
-			results = this.filter( function( project ) {
+			const results = this.filter( project => {
 				const haystack = [ project.get( 'name' ), project.get( 'slug' ) ].filter( Boolean );
-				if ( match.test( haystack.join( ' ' ) ) ) {
-					let maxScore = 0;
-					haystack.forEach( function( word ) {
-						// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
-						maxScore = Math.max( maxScore, String( word ).score( term, 0.5 ) );
-					} );
-					project.set( 'matchScore', maxScore, { silent: true } );
 
+				if ( match.test( haystack.join( ' ' ) ) ) {
+					const maxScore = haystack.reduce(
+						// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
+						( max, word ) => Math.max( max, String( word ).score( term, 0.5 ) ),
+						0
+					);
+					project.set( 'matchScore', maxScore, { silent: true } );
 					return true;
 				}
 				return false;
@@ -495,10 +489,8 @@
 				this.el.classList.add( 'active' );
 			}
 
-			this.onDeactivate = this.onDeactivate.bind( this );
-			this.onUncheck = this.onUncheck.bind( this );
-			window.addEventListener( 'rosetta:deactivate-all-projects', this.onDeactivate );
-			window.addEventListener( 'rosetta:uncheck-all-projects', this.onUncheck );
+			window.addEventListener( 'rosetta:deactivate-all-projects', () => this.onDeactivate() );
+			window.addEventListener( 'rosetta:uncheck-all-projects', () => this.onUncheck() );
 		},
 
 		onActivate: function() {
@@ -535,23 +527,13 @@
 	 * UTILS
 	 */
 
-	projects._hasStorage = null;
-
 	// Check if the browser supports localStorage.
-	projects.hasStorage = function() {
-		if ( null !== projects._hasStorage ) {
-			return projects._hasStorage;
-		}
-
+	projects.hasStorage = () => {
 		try {
-			window.localStorage.setItem( 'test', 'rosetta' );
-			window.localStorage.removeItem( 'test' );
-			projects._hasStorage = true;
-		} catch( e ) {
-			projects._hasStorage = false;
+			return typeof window.localStorage !== 'undefined' && window.localStorage !== null;
+		} catch {
+			return false;
 		}
-
-		return projects._hasStorage;
 	};
 
 	projects.getProjects = async function() {
