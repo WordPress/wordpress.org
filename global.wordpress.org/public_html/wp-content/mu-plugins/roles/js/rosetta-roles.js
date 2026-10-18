@@ -19,7 +19,13 @@
 	 * @param {number|string} id - Raw project ID.
 	 * @return {number|string} Normalized ID.
 	 */
-	const normalizeId = id => ( id === 'all' || Number.isNaN( Number( id ) ) ) ? String( id ) : Number( id );
+	const normalizeId = id => {
+		if ( id === 'all' || id === null || typeof id === 'boolean' || String( id ).trim() === '' ) {
+			return String( id );
+		}
+		const num = Number( id );
+		return Number.isNaN( num ) ? String( id ) : num;
+	};
 
 	/**
 	 * MODELS
@@ -95,8 +101,18 @@
 			this.syncInitialSelection();
 
 			this.listenTo( subProjectsCollection, 'change:checked', this.updateChecked );
-			this.on( 'change:checked', this.updateSelection );
+			this.on( 'change:checked', this.onCheckedChange );
 			this.checkForCheckedSubProjects();
+		},
+
+		onCheckedChange: function( model, checked ) {
+			this.updateSelection( model, checked );
+
+			// Selecting the entire category grants access to all its items,
+			// making individual sub-project selections redundant.
+			if ( checked ) {
+				this.get( 'subProjects' ).uncheckAll();
+			}
 		},
 
 		updateChecked: function( model ) {
@@ -342,13 +358,17 @@
 			this.el.append( fragment );
 
 			// Only visually marks the first item (#project-all) in the template active on initial load.
-			const firstActive = this.el.querySelector( 'li.active' )
-				|| this.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
-				|| this.el.querySelector( 'li:first-child' );
+			if ( ! this.el.querySelector( 'li.active' ) ) {
+				const firstWithSubProjects = this.collection.find(
+					project => project.get( 'checkedSubProjects' )
+				);
 
-			firstActive?.classList.add( 'active' );
-
-			this.views.ready();
+				if ( firstWithSubProjects ) {
+					firstWithSubProjects.set( 'isActive', true );
+				} else {
+					this.el.querySelector( 'li:first-child' )?.classList.add( 'active' );
+				}
+			}
 
 			return this;
 		}
@@ -404,7 +424,6 @@
 		},
 
 		initialize: function() {
-			this.listenTo( this.model, 'change:checked', this.propagateChange );
 			this.listenTo( this.model, 'change:isActive', this.toggleActiveState );
 
 			this.views.add( new projects.view.Checkbox( {
@@ -416,14 +435,6 @@
 			} ) );
 
 			this.toggleActiveState();
-		},
-
-		// Selecting the entire category grants access to all its items,
-		// making individual sub-project selections redundant.
-		propagateChange: function() {
-			if ( this.model.get( 'checked' ) ) {
-				this.model.get( 'subProjects' ).uncheckAll();
-			}
 		},
 
 		toggleActiveState: function() {
@@ -506,17 +517,26 @@
 		},
 
 		initialize: function() {
-			this.onInput = _.debounce( () => this.collection.doSearch( this.el.value ), 300 );
+			this.debouncedSearch = _.debounce( () => this.collection.doSearch( this.el.value ), 300 );
+		},
+
+		onInput: function() {
+			this.debouncedSearch();
 		},
 
 		onKeydown: function( event ) {
 			if ( event.key === 'Enter' ) {
 				event.preventDefault();
 			} else if ( event.key === 'Escape' ) {
-				this.onInput.cancel?.();
+				this.debouncedSearch.cancel?.();
 				this.el.value = '';
 				this.collection.doSearch( '' );
 			}
+		},
+
+		remove: function() {
+			this.debouncedSearch?.cancel?.();
+			return wp.Backbone.View.prototype.remove.apply( this, arguments );
 		}
 	} );
 
@@ -582,10 +602,13 @@
 	 * UTILS
 	 */
 
-	// Check if the browser supports IndexedDB.
+	const isValidTime = time => Number.isFinite( time ) && time > 0;
+
+	// Check if the browser supports IndexedDB, Compression Streams, and has a valid cache timestamp.
 	projects.hasStorage = () => typeof indexedDB !== 'undefined'
 		&& typeof CompressionStream !== 'undefined'
-		&& typeof DecompressionStream !== 'undefined';
+		&& typeof DecompressionStream !== 'undefined'
+		&& isValidTime( Number( projects.settings.lastUpdated ) );
 
 	projects.getProjects = async function() {
 		try {
@@ -645,9 +668,8 @@
 			// Check timestamp
 			const cachedTime = Number( await promisifyReq( store.get( 'projects_last_updated' ) ) );
 			const serverTime = Number( projects.settings.lastUpdated );
-			const isValidTime = time => Number.isFinite( time ) && time > 0;
 
-			if ( ! isValidTime( serverTime ) || ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
+			if ( ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
 				throw new Error( 'Cache expired' );
 			}
 
