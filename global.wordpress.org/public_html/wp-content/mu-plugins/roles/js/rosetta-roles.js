@@ -1,19 +1,17 @@
 ( function() {
 	'use strict';
 
-	var projects, l10n;
-
-	projects = { model: {}, view: {} };
-
 	/**
 	 * @typedef {Object} RosettaSettings
 	 * @property {Array<number|string>} accessList  - IDs of currently assigned projects.
 	 * @property {number}               lastUpdated - Timestamp used for localStorage cache invalidation.
 	 * @property {Object}               l10n        - Localized UI strings.
 	 */
-	projects.settings = window._rosettaProjectsSettings || {};
-	l10n = projects.settings.l10n || {};
-	delete projects.settings.l10n;
+	const settings = window._rosettaProjectsSettings || {};
+	const l10n = settings.l10n || {};
+	delete settings.l10n;
+
+	const projects = { settings, model: {}, view: {} };
 
 	/**
 	 * MODELS
@@ -437,7 +435,7 @@
 		},
 
 		initialize: function() {
-			this.doSearch = _.debounce( this.doSearch.bind( this ), 300 );
+			this.doSearch = _.debounce( () => this.collection.doSearch( this.el.value ), 300 );
 		},
 
 		onInput: function() {
@@ -453,11 +451,7 @@
 				this.collection.doSearch( '' );
 			}
 		},
-
-		doSearch: function() {
-			this.collection.doSearch( this.el.value );
-		}
-	});
+	} );
 
 	/**
 	 * View handling the standalone global permission toggle (#project-all).
