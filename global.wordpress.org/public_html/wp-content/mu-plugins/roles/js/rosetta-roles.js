@@ -334,14 +334,22 @@
 			document.getElementById( 'project-loading' )?.remove();
 			this.el.append( fragment );
 
-			// Ensures a category tab is active on initial load (falls back to the first item if none is set).
-			const firstActive = this.el.querySelector( 'li.active' )
-				|| this.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
-				|| this.el.querySelector( 'li:first-child' );
-
 			// Initialize the global #project-all view once it is rendered in the DOM.
 			if ( ! this._allProjectsView && document.getElementById( 'project-all' ) ) {
 				this._allProjectsView = new projects.view.AllProjects();
+			}
+
+			// Ensures a category tab is active on initial load (falls back to the first item if none is set).
+			if ( ! this.el.querySelector( 'li.active' ) ) {
+				const firstSelectedProject = this.collection.find(
+					project => project.get( 'checked' ) || project.get( 'checkedSubProjects' )
+				);
+
+				if ( firstSelectedProject ) {
+					firstSelectedProject.set( 'isActive', true );
+				} else {
+					this.el.querySelector( 'li:first-child' )?.classList.add( 'active' );
+				}
 			}
 
 			firstActive?.classList.add( 'active' );
