@@ -23,7 +23,7 @@
 	 * Mixin providing shared selection and synchronization logic across project models.
 	 * Applied via _.extend to Project.prototype and subProject.prototype.
 	 */
-	projects.model.SelectableMixin = {
+	projects.model.SelectableModel = Backbone.Model.extend( {
 		/**
 		 * Unchecks the model.
 		 */
@@ -56,9 +56,9 @@
 				projects.selection.remove( this.get( 'id' ) );
 			}
 		}
-	};
+	} );
 
-	projects.model.Project = Backbone.Model.extend({
+	projects.model.Project = projects.model.SelectableModel.extend( {
 		defaults: {
 			id: 0,
 			name: '',
@@ -99,8 +99,7 @@
 			const hasChecked = Boolean( this._subProjects?.some( sub => projects.selection.get( sub.id ) ) );
 			this.set( 'checkedSubProjects', hasChecked );
 		}
-	});
-	Object.assign( projects.model.Project.prototype, projects.model.SelectableMixin );
+	} );
 	
 	projects.model.Projects = Backbone.Collection.extend({
 		model: projects.model.Project,
@@ -144,7 +143,7 @@
 		}
 	} );
 
-	projects.model.subProject = Backbone.Model.extend({
+	projects.model.subProject = projects.model.SelectableModel.extend( {
 		defaults: {
 			id: 0,
 			name: '',
@@ -158,8 +157,7 @@
 			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
 		}
-	});
-	Object.assign( projects.model.subProject.prototype, projects.model.SelectableMixin );
+	} );
 
 	/**
 	 * Collection representing sub-projects with integrated relevance-based filtering.
@@ -273,7 +271,6 @@
 		el: '#projects-list',
 
 		render: function() {
-			var view = this;
 			wp.Backbone.View.prototype.render.apply( this, arguments );
 
 			const fragment = document.createDocumentFragment();
@@ -283,14 +280,14 @@
 				fragment.appendChild( projectView.render().el );
 			}
 
-			view.el.append( fragment );
+			this.el.append( fragment );
 
 			document.getElementById( 'project-loading' )?.remove();
 
 			// Only visually marks the first item (#project-all) in the template active on initial load.
-			const firstActive = view.el.querySelector( 'li.active' )
-				|| view.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
-				|| view.el.querySelector( 'li:first-child' );
+			const firstActive = this.el.querySelector( 'li.active' )
+				|| this.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
+				|| this.el.querySelector( 'li:first-child' );
 
 			firstActive?.classList.add( 'active' );
 
