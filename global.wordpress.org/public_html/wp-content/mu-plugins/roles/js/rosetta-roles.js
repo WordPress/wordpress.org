@@ -68,8 +68,6 @@
 		},
 
 		initialize: function() {
-			this.uncheck = this.uncheck.bind( this );
-
 			// Store the original sub-projects data, it's used to reset the collection on searches.
 			this._subProjects = this.get( 'sub_projects' );
 			this.unset( 'sub_projects' );
@@ -150,8 +148,6 @@
 		},
 
 		initialize: function() {
-			this.uncheck = this.uncheck.bind( this );
-
 			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
 		}
@@ -392,9 +388,9 @@
 		},
 
 		clearSubViews: function() {
-			this._subViews.forEach( function( view ) {
+			for ( const view of this._subViews ) {
 				view.remove();
-			} );
+			}
 			this._subViews = [];
 		},
 
@@ -404,8 +400,8 @@
 			const fragment = document.createDocumentFragment();
 			const subProjects = this.collection.first( this.limit );
 
-			this._subViews = subProjects.map( function( model ) {
-				const view = new projects.view.SubProject( { model: model } );
+			this._subViews = subProjects.map( model => {
+				const view = new projects.view.SubProject( { model } );
 				fragment.appendChild( view.render().el );
 				return view;
 			} );
@@ -452,9 +448,7 @@
 			if ( event.key === 'Enter' ) {
 				event.preventDefault();
 			} else if ( event.key === 'Escape' ) {
-				if ( this.doSearch.cancel ) {
-					this.doSearch.cancel();
-				}
+				this.doSearch.cancel?.();
 				this.el.value = '';
 				this.collection.doSearch( '' );
 			}
@@ -572,13 +566,11 @@
 			throw new Error( 'Invalid cache timestamp' );
 		}
 
-		var cachedTime = Number( lastUpdated );
-		var serverTime = Number( projects.settings.lastUpdated );
+		const cachedTime = Number( lastUpdated );
+		const serverTime = Number( projects.settings.lastUpdated );
 
 		// Ensure timestamps are valid, positive, and finite numbers; rejects missing (0) or invalid cache timestamps.
-		var isValidTime = function( time ) {
-			return Number.isFinite( time ) && time > 0;
-		};
+		const isValidTime = time => Number.isFinite( time ) && time > 0;
 
 		if ( ! isValidTime( serverTime ) || ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
 			throw new Error( 'Cache expired' );
@@ -599,14 +591,14 @@
 		return JSON.parse( decompressed );
 	};
 
-	projects.storeLocalProjects = function( data ) {
-		projects.compress( JSON.stringify( data ) ).then( function( compressedData ) {
-			// Stores only compressed data to prevent exceeding the 5 MB localStorage quota.
+	projects.storeLocalProjects = async function( data ) {
+		try {
+			const compressedData = await projects.compress( JSON.stringify( data ) );
 			window.localStorage.setItem( 'projects', compressedData );
 			window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
-		} ).catch( function( error ) {
-			console.warn( "Caching projects locally failed.", error );
-		} );
+		} catch ( error ) {
+			console.warn( 'Caching projects locally failed.', error );
+		}
 	};
 
 	projects.compress = async function( data ) {
@@ -666,35 +658,30 @@
 	};
 
 	projects.init = function() {
-		const initialSelection = ( projects.settings.accessList || [] ).map( function( projectID ) {
-			return { id: projectID };
-		} );
+		const initialSelection = ( projects.settings.accessList || [] ).map( id => ( { id } ) );
 
 		projects.selection = new projects.model.Selection( initialSelection );
 		projects.selection.updateInputField();
 
-		projects.getProjects().then( function( response ) {
-			projects.initFrame( response );
-		} ).catch( function() {
-			const loadingEl = document.getElementById( 'project-loading' );
-			if ( loadingEl ) {
-				loadingEl.textContent = l10n.loadingError || 'Error loading projects.';
-			}
-		} );
+		projects.getProjects()
+			.then( response => projects.initFrame( response ) )
+			.catch( () => {
+				const loadingEl = document.getElementById( 'project-loading' );
+				if ( loadingEl ) {
+					loadingEl.textContent = l10n.loadingError || 'Error loading projects.';
+				}
+			} );
 
 		new projects.view.AllProjects();
 
-		// Warn before saving if all project assignments are removed.
-		const hadTranslatorStatus = Boolean( projects.settings.accessList && projects.settings.accessList.length );
+		const hadTranslatorStatus = Boolean( projects.settings.accessList?.length );
 		const accessField = document.getElementById( 'project-access-list' );
 
-		accessField?.closest( 'form' )?.addEventListener( 'submit', function( e ) {
-			if ( hadTranslatorStatus && ! accessField.value ) {
-				if ( ! confirm( l10n.removeTranslator ) ) {
-					e.preventDefault();
-				}
+		accessField?.closest( 'form' )?.addEventListener( 'submit', event => {
+			if ( hadTranslatorStatus && ! accessField.value && ! confirm( l10n.removeTranslator ) ) {
+				event.preventDefault();
 			}
-		});
+		} );
 	};
 
 	if ( document.readyState === 'loading' ) {
