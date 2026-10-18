@@ -334,13 +334,17 @@
 
 			// If '#project-all' is not active, activate the first category with assigned sub-projects
 			// or fall back to visually marking the first item (#project-all) active.
-			const firstActive = this.el.querySelector( 'li.active' )
-				|| this.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
-				|| this.el.querySelector( 'li:first-child' );
+			if ( ! this.el.querySelector( 'li.active' ) ) {
+				const firstWithSubProjects = this.collection.find(
+					project => project.get( 'checkedSubProjects' )
+				);
 
-			firstActive?.classList.add( 'active' );
-
-			return this;
+				if ( firstWithSubProjects ) {
+					firstWithSubProjects.set( 'isActive', true );
+				} else {
+					this.el.querySelector( 'li:first-child' )?.classList.add( 'active' );
+				}
+			}
 		}
 	} );
 
