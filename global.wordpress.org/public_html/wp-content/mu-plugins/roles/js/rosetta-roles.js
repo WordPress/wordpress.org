@@ -203,18 +203,17 @@
 			// Start with a full collection
 			this.reset( this.project._subProjects, { silent: true } );
 
-			// Escape the term string for RegExp meta characters
-			const escapedTerm = term.replace( /[-\/\\^\$*+?.()|[\]{}]/g, '\\$&' ).replace( / /g, ')(?=.*' );
+			// Split into tokens; ignore empty tokens.
+			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
 
-			// Step 1 (Filter): Fast regex pre-filter. Positive lookaheads match all query terms 
-			// in any order across 'name' and 'slug' without breaking on live space keystrokes.
-			const match = new RegExp( `^(?=.*${ escapedTerm }).+`, 'i' );
-
+			// Step 1 (Filter): Token-based pre-filter. Ensures all search terms
+			// are present in either 'name' or 'slug' regardless of word order.
 			const results = this.filter( project => {
-				const haystack = [ project.get( 'name' ), project.get( 'slug' ) ].filter( Boolean );
+				const fields = [ project.get( 'name' ), project.get( 'slug' ) ].filter( Boolean );
+				const haystack = fields.join( ' ' ).toLowerCase();
 
-				if ( match.test( haystack.join( ' ' ) ) ) {
-					const maxScore = haystack.reduce(
+				if ( tokens.every( token => haystack.includes( token ) ) ) {
+					const maxScore = fields.reduce(
 						// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
 						( max, word ) => Math.max( max, String( word ).score( term, 0.5 ) ),
 						0
@@ -313,7 +312,7 @@
 		},
 
 		prepare: function() {
-			const { name, slug, checked, checkedSubProjects } = this.model.toJSON();
+			const { name, slug, checked, checkedSubProjects } = this.model.attributes;
 			return { name, slug, checked, checkedSubProjects };
 		},
 
@@ -447,18 +446,14 @@
 		},
 
 		initialize: function() {
-			this.doSearch = _.debounce( () => this.collection.doSearch( this.el.value ), 300 );
-		},
-
-		onInput: function() {
-			this.doSearch();
+			this.onInput = _.debounce( () => this.collection.doSearch( this.el.value ), 300 );
 		},
 
 		onKeydown: function( event ) {
 			if ( event.key === 'Enter' ) {
 				event.preventDefault();
 			} else if ( event.key === 'Escape' ) {
-				this.doSearch.cancel?.();
+				this.onInput.cancel?.();
 				this.el.value = '';
 				this.collection.doSearch( '' );
 			}
@@ -670,7 +665,7 @@
 		new projects.view.AllProjects();
 
 		const hadTranslatorStatus = Boolean( projects.settings.accessList?.length );
-		const accessField = document.getElementById( 'project-access-list' );
+		const accessField = projects.selection.field;
 
 		accessField?.closest( 'form' )?.addEventListener( 'submit', event => {
 			if ( hadTranslatorStatus && ! accessField.value && ! confirm( l10n.removeTranslator ) ) {
