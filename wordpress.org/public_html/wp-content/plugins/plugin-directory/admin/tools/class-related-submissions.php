@@ -11,7 +11,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Tools;
  * Finds plugins by different authors that were submitted from the same or similar IPs, or that share a domain.
  *
  * Authors may only have one plugin in review at a time, so the plugins in the review queue
- * are compared with each other and with recently published plugins.
+ * are compared with each other and with recently published, closed, and rejected plugins.
  *
  * @package WordPressdotorg\Plugin_Directory\Admin\Tools
  */
@@ -23,9 +23,11 @@ class Related_Submissions {
 	const CACHE_KEY = 'plugin_related_submissions';
 
 	/**
-	 * Published plugins are compared when they went live within this period.
+	 * Published, closed, and rejected plugins are compared when their post date is within this period.
+	 *
+	 * That's when they went live, or when they were submitted if they never did.
 	 */
-	const PUBLISHED_WITHIN = '-4 months';
+	const RECENT_WITHIN = '-4 months';
 
 	/**
 	 * Prefix lengths, in bits, of the IPv4 and IPv6 ranges whose addresses are considered similar.
@@ -211,21 +213,24 @@ class Related_Submissions {
 			return $matches;
 		}
 
-		// Newest first, so that the groups are ordered by their newest plugin.
+		/*
+		 * WP_Query would load each plugin's whole row, readme included, for thousands of plugins,
+		 * so only the needed columns are read. Newest first, so that the groups are ordered by their newest plugin.
+		 */
 		$plugins = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT p.ID, p.post_author, p.post_name, p.post_status, p.post_date_gmt, u.user_login, u.user_email, u.user_url
 				FROM {$wpdb->posts} p
 					LEFT JOIN {$wpdb->users} u ON u.ID = p.post_author
 				WHERE p.post_type = 'plugin'
-					AND ( p.post_status IN ( 'new', 'pending', 'approved' ) OR ( p.post_status = 'publish' AND p.post_date >= %s ) )
+					AND ( p.post_status IN ( 'new', 'pending', 'approved' ) OR ( p.post_status IN ( 'publish', 'closed', 'rejected' ) AND p.post_date >= %s ) )
 				ORDER BY p.post_date DESC",
-				wp_date( 'Y-m-d H:i:s', strtotime( self::PUBLISHED_WITHIN ) )
+				wp_date( 'Y-m-d H:i:s', strtotime( self::RECENT_WITHIN ) )
 			),
 			OBJECT_K
 		);
 
-		// One pass over the meta, as a join per key is several times slower.
+		// The meta API would load every meta row of each plugin, so only these keys are read, in one pass, as a join per key is several times slower.
 		$meta = array();
 		if ( $plugins ) {
 			$post_ids = implode( ',', array_keys( $plugins ) );
@@ -272,8 +277,8 @@ class Related_Submissions {
 				foreach ( array_keys( $matched ) as $id ) {
 					$authors[ $plugins[ $id ]->post_author ] = true;
 
-					// Published plugins are only listed alongside a plugin in the queue.
-					$in_queue = $in_queue || 'publish' !== $plugins[ $id ]->post_status;
+					// Plugins outside the queue are only listed alongside one in it.
+					$in_queue = $in_queue || in_array( $plugins[ $id ]->post_status, array( 'new', 'pending', 'approved' ), true );
 				}
 
 				// A range with a single IP in it is already listed as the same IP.
@@ -462,7 +467,7 @@ class Related_Submissions {
 		echo '<h1>' . esc_html__( 'Related Submissions', 'wporg-plugins' ) . '</h1>';
 		$description = sprintf(
 			/* translators: 1: IPv4 prefix length, 2: IPv6 prefix length. */
-			__( 'Plugins in the review queue that share an IP, a similar IP (in the same /%1$d IPv4 or /%2$d IPv6 range), or a domain (of the email, profile URL, Author URI, or Plugin URI) with plugins by other authors. Plugins published in the last 4 months are compared too.', 'wporg-plugins' ),
+			__( 'Plugins in the review queue that share an IP, a similar IP (in the same /%1$d IPv4 or /%2$d IPv6 range), or a domain (of the email, profile URL, Author URI, or Plugin URI) with plugins by other authors. Published, closed, and rejected plugins from the last 4 months are compared too.', 'wporg-plugins' ),
 			self::IPV4_RANGE,
 			self::IPV6_RANGE
 		);
