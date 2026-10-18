@@ -117,10 +117,10 @@
 		},
 
 		uncheckAllProjects: function() {
-			this.each( function( project ) {
+			for ( const project of this.models ) {
 				project.uncheck();
 				project.get( 'subProjects' ).uncheckAll();
-			} );
+			}
 		},
 
 		toggleActiveStates: function( model ) {
@@ -128,21 +128,21 @@
 				return;
 			}
 
-			this.each( function( project ) {
+			for ( const project of this.models ) {
 				if ( project.get( 'id' ) !== model.get( 'id' ) ) {
 					project.set( 'isActive', false );
 				}
-			});
+			}
 
 			window.dispatchEvent( new CustomEvent( 'rosetta:deactivate-all-projects' ) );
 		},
 
 		disableActiveStates: function() {
-			this.each( function( project ) {
+			for ( const project of this.models ) {
 				project.set( 'isActive', false );
-			});
+			}
 		}
-	});
+	} );
 
 	projects.model.subProject = Backbone.Model.extend({
 		defaults: {
@@ -180,9 +180,9 @@
 		},
 
 		uncheckAll: function() {
-			this.each( function( project ) {
+			for ( const project of this.models ) {
 				project.uncheck();
-			} );
+			}
 
 			if ( this.project?._subProjects ) {
 				this.project._subProjects.forEach( sub => projects.selection.remove( sub.id ) );
@@ -269,7 +269,7 @@
 	/**
 	 * VIEWS
 	 */
-	projects.view.Frame = wp.Backbone.View.extend({
+	projects.view.Frame = wp.Backbone.View.extend( {
 		el: '#projects-list',
 
 		render: function() {
@@ -278,13 +278,10 @@
 
 			const fragment = document.createDocumentFragment();
 
-			this.collection.each( function( project ) {
-				var projectView = new projects.view.Project( {
-					model: project
-				} );
-
+			for ( const project of this.collection.models ) {
+				const projectView = new projects.view.Project( { model: project } );
 				fragment.appendChild( projectView.render().el );
-			} );
+			};
 
 			view.el.append( fragment );
 
@@ -453,7 +450,7 @@
 		},
 
 		initialize: function() {
-			this.doSearch = _.debounce( this.doSearch.bind( this ), 500 );
+			this.doSearch = _.debounce( this.doSearch.bind( this ), 300 );
 		},
 
 		onInput: function() {
