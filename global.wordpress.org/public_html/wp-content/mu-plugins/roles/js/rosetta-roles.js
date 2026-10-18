@@ -379,7 +379,7 @@
 		}
 	});
 
-	projects.view.SubProjectsList = wp.Backbone.View.extend({
+	projects.view.SubProjectsList = wp.Backbone.View.extend( {
 		tagName: 'ul',
 		className: 'sub-projects-list',
 
@@ -405,7 +405,7 @@
 			const subProjects = this.collection.first( this.limit );
 
 			this._subViews = subProjects.map( model => {
-				const view = new projects.view.SubProject( { model } );
+				const view = new projects.view.Checkbox( { model, tagName: 'li' } );
 				fragment.appendChild( view.render().el );
 				return view;
 			} );
@@ -415,16 +415,6 @@
 			return this;
 		}
 	} );
-
-	projects.view.SubProject = wp.Backbone.View.extend({
-		tagName: 'li',
-
-		initialize: function() {
-			this.views.add( new projects.view.Checkbox({
-				model: this.model
-			}) );
-		}
-	});
 
 	projects.view.Search = wp.Backbone.View.extend({
 		tagName: 'input',
