@@ -559,9 +559,9 @@
 	 * @return {Promise<IDBDatabase>} Promise resolving to the open IDB database instance.
 	 */
 	function openProjectsDB() {
-			const request = indexedDB.open( DB_NAME, 1 );
-			request.onupgradeneeded = () => request.result.createObjectStore( STORE_NAME );
-			return promisifyReq( request );
+		const request = indexedDB.open( DB_NAME, 1 );
+		request.onupgradeneeded = () => request.result.createObjectStore( STORE_NAME );
+		return promisifyReq( request );
 	}
 
 	/**
