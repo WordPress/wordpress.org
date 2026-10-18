@@ -14,6 +14,14 @@
 	const projects = { settings, model: {}, view: {} };
 
 	/**
+	 * Normalizes project IDs to ensure consistent type matching across sets and collections.
+	 *
+	 * @param {number|string} id - Raw project ID.
+	 * @return {number|string} Normalized ID.
+	 */
+	const normalizeId = id => ( id === 'all' || Number.isNaN( Number( id ) ) ) ? String( id ) : Number( id );
+
+	/**
 	 * MODELS
 	 */
 
@@ -34,7 +42,10 @@
 		 * and pre-sets the 'checked' attribute silently.
 		 */
 		syncInitialSelection: function() {
-			if ( projects.selection.get( this.get( 'id' ) ) ) {
+			const id = normalizeId( this.get( 'id' ) );
+			this.set( 'id', id, { silent: true } );
+
+			if ( projects.selection.get( id ) ) {
 				this.set( 'checked', true );
 			}
 		},
@@ -67,14 +78,19 @@
 
 		initialize: function() {
 			// Store the original sub-projects data, it's used to reset the collection on searches.
-			this._subProjects = this.get( 'sub_projects' );
+			this._subProjects = this.get( 'sub_projects' ) || [];
 			this.unset( 'sub_projects' );
 
-			this._subProjectIds = new Set( ( this._subProjects || [] ).map( sub => sub.id ) );
+			this._subProjectIds = new Set( this._subProjects.map( sub => normalizeId( sub.id ) ) );
 
-			this.set( 'subProjects', new projects.model.subProjects( this._subProjects, {
+			const subProjectsCollection = new projects.model.subProjects( this._subProjects, {
 				project: this,
-			} ) );
+			} );
+
+			// Store full model list after Backbone.Collection has finished its initial reset.
+			subProjectsCollection._allModels = subProjectsCollection.models.slice();
+
+			this.set( 'subProjects', subProjectsCollection );
 
 			this.syncInitialSelection();
 
@@ -94,11 +110,11 @@
 		// Check the raw data array rather than the collection so active selections
 		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
-			const hasChecked = projects.selection.models.some( model => this._subProjectIds.has( model.id ) );
+			const hasChecked = projects.selection.models.some( model => this._subProjectIds.has( normalizeId( model.id ) ) );
 			this.set( 'checkedSubProjects', hasChecked );
 		}
 	} );
-	
+
 	projects.model.Projects = Backbone.Collection.extend( {
 		model: projects.model.Project,
 
@@ -165,17 +181,24 @@
 		terms: '',
 
 		initialize: function( models, options ) {
-			this.project = options.project;
-			this._allModels = this.models.slice();
+			this.project = options?.project;
+			this._allModels = null;
+		},
+
+		getAllModels: function() {
+			if ( ! this._allModels || ( this._allModels.length === 0 && this.models.length > 0 ) ) {
+				this._allModels = this.models.slice();
+			}
+			return this._allModels;
 		},
 
 		uncheckAll: function() {
-			for ( const project of this._allModels ) {
+			for ( const project of this.getAllModels() ) {
 				project.uncheck();
 			}
 
 			if ( this.project?._subProjects ) {
-				const ids = this.project._subProjects.map( sub => sub.id );
+				const ids = this.project._subProjects.map( sub => normalizeId( sub.id ) );
 				projects.selection.remove( ids );
 				this.project.checkForCheckedSubProjects();
 			}
@@ -193,7 +216,7 @@
 				this.search( this.terms );
 			} else {
 				// If search is blank, show all projects.
-				this.reset( this._allModels );
+				this.reset( this.getAllModels() );
 			}
 
 			// Trigger a 'projects:update' event
@@ -205,16 +228,17 @@
 		search: function( term ) {
 			// Split into tokens; ignore empty tokens.
 			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
+			const hasScoreFn = typeof String.prototype.score === 'function';
 
 			// Step 1 (Filter): Token-based pre-filter. Ensures all search terms
 			// are present in either 'name' or 'slug' regardless of word order.
-			const results = this._allModels.filter( project => {
+			const results = this.getAllModels().filter( project => {
 				if ( tokens.every( token => project._searchHaystack.includes( token ) ) ) {
 					// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
 					const name = project.attributes.name;
-					const nameScore = name ? String( name ).score( term, 0.5 ) : 0;
+					const nameScore = ( name && hasScoreFn ) ? String( name ).score( term, 0.5 ) : 0;
 					const slug = project.attributes.slug;
-					const slugScore = slug ? String( slug ).score( term, 0.5 ) : 0;
+					const slugScore = ( slug && hasScoreFn ) ? String( slug ).score( term, 0.5 ) : 0;
 					project.set( 'matchScore', Math.max( nameScore, slugScore ), { silent: true } );
 					return true;
 				}
@@ -370,12 +394,12 @@
 			const collection = this.model.get( 'subProjects' );
 
 			if ( collection.length > 5 ) {
-				this.views.add( new projects.view.Search({
+				this.views.add( new projects.view.Search( {
 					collection: collection
-				}) );
+				} ) );
 			}
 
-			this.views.add( new projects.view.SubProjectsList({
+			this.views.add( new projects.view.SubProjectsList( {
 				collection: collection
 			} ) );
 		}
@@ -444,7 +468,7 @@
 				this.el.value = '';
 				this.collection.doSearch( '' );
 			}
-		},
+		}
 	} );
 
 	/**
@@ -565,27 +589,32 @@
 		}
 
 		const db = await openProjectsDB();
-		const store = db.transaction( STORE_NAME, 'readonly' ).objectStore( STORE_NAME );
 
-		// Check timestamp
-		const cachedTime = Number( await promisifyReq( store.get( 'projects_last_updated' ) ) );
-		const serverTime = Number( projects.settings.lastUpdated );
-		const isValidTime = time => Number.isFinite( time ) && time > 0;
+		try {
+			const store = db.transaction( STORE_NAME, 'readonly' ).objectStore( STORE_NAME );
 
-		if ( ! isValidTime( serverTime ) || ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
-			throw new Error( 'Cache expired' );
+			// Check timestamp
+			const cachedTime = Number( await promisifyReq( store.get( 'projects_last_updated' ) ) );
+			const serverTime = Number( projects.settings.lastUpdated );
+			const isValidTime = time => Number.isFinite( time ) && time > 0;
+
+			if ( ! isValidTime( serverTime ) || ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
+				throw new Error( 'Cache expired' );
+			}
+
+			const blob = await promisifyReq( store.get( 'projects_data' ) );
+			if ( ! blob ) {
+				throw new Error( 'No cached data' );
+			}
+
+			// decompress
+			const decompressedStream = blob.stream().pipeThrough( new DecompressionStream( 'gzip' ) );
+			const jsonText = await new Response( decompressedStream ).text();
+
+			return JSON.parse( jsonText );
+		} finally {
+			db.close();
 		}
-
-		const blob = await promisifyReq( store.get( 'projects_data' ) );
-		if ( ! blob ) {
-			throw new Error( 'No cached data' );
-		}
-
-		// decompress
-		const decompressedStream = blob.stream().pipeThrough( new DecompressionStream( 'gzip' ) );
-		const jsonText = await new Response( decompressedStream ).text();
-
-		return JSON.parse( jsonText );
 	};
 
 	/**
@@ -596,19 +625,20 @@
 	 * @return {Promise<void>}
 	 */
 	projects.storeLocalProjects = async function( data ) {
+		let db;
 		try {
 			const stream = new Blob( [ JSON.stringify( data ) ] )
 				.stream()
 				.pipeThrough( new CompressionStream( 'gzip' ) );
 			const blob = await new Response( stream ).blob();
 
-			const db = await openProjectsDB();
+			db = await openProjectsDB();
 			const tx = db.transaction( STORE_NAME, 'readwrite' );
 			const store = tx.objectStore( STORE_NAME );
 
 			store.put( blob, 'projects_data' );
 			store.put( projects.settings.lastUpdated, 'projects_last_updated' );
-			
+
 			await new Promise( ( resolve, reject ) => {
 				tx.oncomplete = () => resolve();
 				tx.onerror = () => reject( tx.error );
@@ -616,17 +646,21 @@
 			} );
 		} catch ( error ) {
 			console.warn( 'Caching projects in IndexedDB failed.', error );
+		} finally {
+			db?.close();
 		}
 	};
 
 	projects.initFrame = function( projectData ) {
-		projects.view.frame = new projects.view.Frame({
+		projects.view.frame = new projects.view.Frame( {
 			collection: new projects.model.Projects( projectData )
-		}).render();
+		} ).render();
 	};
 
 	projects.init = function() {
-		const initialSelection = ( projects.settings.accessList || [] ).map( id => ( { id } ) );
+		const initialSelection = ( projects.settings.accessList || [] ).map( id => ( {
+			id: normalizeId( id )
+		} ) );
 
 		projects.selection = new projects.model.Selection( initialSelection );
 		projects.selection.updateInputField();
