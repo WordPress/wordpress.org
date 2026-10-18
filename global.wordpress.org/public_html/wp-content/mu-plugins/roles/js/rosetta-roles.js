@@ -352,8 +352,6 @@
 				}
 			}
 
-			firstActive?.classList.add( 'active' );
-
 			return this;
 		}
 	} );
