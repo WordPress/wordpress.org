@@ -46,7 +46,7 @@
 			this.set( 'id', id, { silent: true } );
 
 			if ( projects.selection.get( id ) ) {
-				this.set( 'checked', true );
+				this.set( 'checked', true, { silent: true } );
 			}
 		},
 
@@ -79,7 +79,7 @@
 		initialize: function() {
 			// Store the original sub-projects data, it's used to reset the collection on searches.
 			this._subProjects = this.get( 'sub_projects' ) || [];
-			this.unset( 'sub_projects' );
+			this.unset( 'sub_projects', { silent: true } );
 
 			this._subProjectIds = new Set( this._subProjects.map( sub => normalizeId( sub.id ) ) );
 
@@ -90,16 +90,20 @@
 			// Store full model list after Backbone.Collection has finished its initial reset.
 			subProjectsCollection._allModels = subProjectsCollection.models.slice();
 
-			this.set( 'subProjects', subProjectsCollection );
+			this.set( 'subProjects', subProjectsCollection, { silent: true } );
 
 			this.syncInitialSelection();
 
-			this.listenTo( this.get( 'subProjects' ), 'change:checked', this.updateChecked );
+			this.listenTo( subProjectsCollection, 'change:checked', this.updateChecked );
 			this.on( 'change:checked', this.updateSelection );
 			this.checkForCheckedSubProjects();
 		},
 
 		updateChecked: function( model ) {
+			if ( this._isUncheckingAll ) {
+				return;
+			}
+
 			if ( model.get( 'checked' ) ) {
 				this.set( 'checked', false );
 			}
@@ -110,7 +114,7 @@
 		// Check the raw data array rather than the collection so active selections
 		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
-			const hasChecked = projects.selection.models.some( model => this._subProjectIds.has( normalizeId( model.id ) ) );
+			const hasChecked = projects.selection.models.some( model => this._subProjectIds.has( model.id ) );
 			this.set( 'checkedSubProjects', hasChecked );
 		}
 	} );
@@ -157,14 +161,28 @@
 		defaults: {
 			id: 0,
 			name: '',
-			checked: false,
-			matchScore: 0
+			checked: false
 		},
+
+		// Stored as direct instance property instead of Backbone attribute to avoid .set() overhead during search.
+		matchScore: 0,
+		_searchHaystack: null,
 
 		initialize: function() {
 			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
-			this._searchHaystack = `${ this.get( 'name' ) || '' } ${ this.get( 'slug' ) || '' }`.toLowerCase();
+		},
+
+		/**
+		 * Lazily builds and caches the lowercase search haystack on first search.
+		 *
+		 * @return {string} Lowercase combination of name and slug.
+		 */
+		getSearchHaystack: function() {
+			if ( this._searchHaystack === null ) {
+				this._searchHaystack = `${ this.attributes.name || '' } ${ this.attributes.slug || '' }`.toLowerCase();
+			}
+			return this._searchHaystack;
 		}
 	} );
 
@@ -193,14 +211,30 @@
 		},
 
 		uncheckAll: function() {
-			for ( const project of this.getAllModels() ) {
-				project.uncheck();
+			if ( this.project ) {
+				this.project._isUncheckingAll = true;
 			}
 
-			if ( this.project?._subProjects ) {
-				const ids = this.project._subProjects.map( sub => normalizeId( sub.id ) );
-				projects.selection.remove( ids );
-				this.project.checkForCheckedSubProjects();
+			const allModels = this.getAllModels();
+			for ( let i = 0; i < allModels.length; i++ ) {
+				if ( allModels[ i ].attributes.checked ) {
+					allModels[ i ].uncheck();
+				}
+			}
+
+			if ( this.project ) {
+				this.project._isUncheckingAll = false;
+
+				if ( this.project._subProjectIds ) {
+					const toRemove = projects.selection.models.filter(
+						model => this.project._subProjectIds.has( model.id )
+					);
+					if ( toRemove.length > 0 ) {
+						projects.selection.remove( toRemove );
+					}
+				}
+
+				this.project.set( 'checkedSubProjects', false );
 			}
 		},
 
@@ -233,13 +267,15 @@
 			// Step 1 (Filter): Token-based pre-filter. Ensures all search terms
 			// are present in either 'name' or 'slug' regardless of word order.
 			const results = this.getAllModels().filter( project => {
-				if ( tokens.every( token => project._searchHaystack.includes( token ) ) ) {
+				const haystack = project.getSearchHaystack();
+
+				if ( tokens.every( token => haystack.includes( token ) ) ) {
 					// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
 					const name = project.attributes.name;
 					const nameScore = ( name && hasScoreFn ) ? String( name ).score( term, 0.5 ) : 0;
 					const slug = project.attributes.slug;
 					const slugScore = ( slug && hasScoreFn ) ? String( slug ).score( term, 0.5 ) : 0;
-					project.set( 'matchScore', Math.max( nameScore, slugScore ), { silent: true } );
+					project.matchScore = Math.max( nameScore, slugScore );
 					return true;
 				}
 				return false;
@@ -250,7 +286,7 @@
 
 		comparator: function( project ) {
 			if ( this.terms && this.terms.length > 0 ) {
-				return - project.get( 'matchScore' );
+				return - project.matchScore;
 			}
 			// Default view: Floats assigned permissions to the top
 			// Search view: Overridden to prioritize search relevance over assignment state.
@@ -261,7 +297,8 @@
 	projects.model.Selection = Backbone.Collection.extend( {
 		initialize: function() {
 			this.field = document.getElementById( 'project-access-list' );
-			this.on( 'add remove reset', this.updateInputField );
+			// Listen to 'update' instead of 'add remove' so batch operations update the DOM only once.
+			this.on( 'update reset', this.updateInputField );
 		},
 
 		updateInputField: function() {
