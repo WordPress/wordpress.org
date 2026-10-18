@@ -19,13 +19,7 @@
 	 * @param {number|string} id - Raw project ID.
 	 * @return {number|string} Normalized ID.
 	 */
-	const normalizeId = id => {
-		if ( id === 'all' || id === null || typeof id === 'boolean' || String( id ).trim() === '' ) {
-			return String( id );
-		}
-		const num = Number( id );
-		return Number.isNaN( num ) ? String( id ) : num;
-	};
+	const normalizeId = id => ( id === 'all' || id === '' || id === null || Number.isNaN( Number( id ) ) ) ? String( id ) : Number( id );
 
 	/**
 	 * MODELS
@@ -83,18 +77,14 @@
 		},
 
 		initialize: function() {
-			// Store the original sub-projects data, it's used to reset the collection on searches.
-			this._subProjects = this.get( 'sub_projects' ) || [];
+			const subProjects = this.get( 'sub_projects' ) || [];
 			this.unset( 'sub_projects', { silent: true } );
 
-			this._subProjectIds = new Set( this._subProjects.map( sub => normalizeId( sub.id ) ) );
+			this._subProjectIds = new Set( subProjects.map( sub => normalizeId( sub.id ) ) );
 
-			const subProjectsCollection = new projects.model.subProjects( this._subProjects, {
+			const subProjectsCollection = new projects.model.subProjects( subProjects, {
 				project: this,
 			} );
-
-			// Store full model list after Backbone.Collection has finished its initial reset.
-			subProjectsCollection._allModels = subProjectsCollection.models.slice();
 
 			this.set( 'subProjects', subProjectsCollection, { silent: true } );
 
@@ -127,7 +117,7 @@
 			this.checkForCheckedSubProjects();
 		},
 
-		// Check the raw data array rather than the collection so active selections
+		// Check against the ID set rather than the collection so active selections
 		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
 			const hasChecked = projects.selection.models.some( model => this._subProjectIds.has( model.id ) );
@@ -216,14 +206,10 @@
 
 		initialize: function( models, options ) {
 			this.project = options?.project;
-			this._allModels = null;
 		},
 
 		getAllModels: function() {
-			if ( ! this._allModels || ( this._allModels.length === 0 && this.models.length > 0 ) ) {
-				this._allModels = this.models.slice();
-			}
-			return this._allModels;
+			return ( this._allModels ||= this.models.slice() );
 		},
 
 		uncheckAll: function() {
@@ -240,16 +226,6 @@
 
 			if ( this.project ) {
 				this.project._isUncheckingAll = false;
-
-				if ( this.project._subProjectIds ) {
-					const toRemove = projects.selection.models.filter(
-						model => this.project._subProjectIds.has( model.id )
-					);
-					if ( toRemove.length > 0 ) {
-						projects.selection.remove( toRemove );
-					}
-				}
-
 				this.project.set( 'checkedSubProjects', false );
 			}
 		},
@@ -274,7 +250,6 @@
 		},
 
 		// Performs a search within the collection
-		// @uses RegExp
 		search: function( term ) {
 			// Split into tokens; ignore empty tokens.
 			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
@@ -357,18 +332,13 @@
 			document.getElementById( 'project-loading' )?.remove();
 			this.el.append( fragment );
 
-			// Only visually marks the first item (#project-all) in the template active on initial load.
-			if ( ! this.el.querySelector( 'li.active' ) ) {
-				const firstWithSubProjects = this.collection.find(
-					project => project.get( 'checkedSubProjects' )
-				);
+			// If '#project-all' is not active, activate the first category with assigned sub-projects
+			// or fall back to visually marking the first item (#project-all) active.
+			const firstActive = this.el.querySelector( 'li.active' )
+				|| this.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
+				|| this.el.querySelector( 'li:first-child' );
 
-				if ( firstWithSubProjects ) {
-					firstWithSubProjects.set( 'isActive', true );
-				} else {
-					this.el.querySelector( 'li:first-child' )?.classList.add( 'active' );
-				}
-			}
+			firstActive?.classList.add( 'active' );
 
 			return this;
 		}
@@ -517,26 +487,17 @@
 		},
 
 		initialize: function() {
-			this.debouncedSearch = _.debounce( () => this.collection.doSearch( this.el.value ), 300 );
-		},
-
-		onInput: function() {
-			this.debouncedSearch();
+			this.onInput = _.debounce( () => this.collection.doSearch( this.el.value ), 300 );
 		},
 
 		onKeydown: function( event ) {
 			if ( event.key === 'Enter' ) {
 				event.preventDefault();
 			} else if ( event.key === 'Escape' ) {
-				this.debouncedSearch.cancel?.();
+				this.onInput.cancel?.();
 				this.el.value = '';
 				this.collection.doSearch( '' );
 			}
-		},
-
-		remove: function() {
-			this.debouncedSearch?.cancel?.();
-			return wp.Backbone.View.prototype.remove.apply( this, arguments );
 		}
 	} );
 
