@@ -548,18 +548,20 @@
 	const DB_NAME = 'rosetta_cache';
 	const STORE_NAME = 'projects';
 
+	const promisifyReq = req => new Promise( ( resolve, reject ) => {
+		req.onsuccess = () => resolve( req.result );
+		req.onerror = () => reject( req.error );
+	} );
+
 	/**
 	 * Opens or initializes the IndexedDB projects cache database.
 	 *
 	 * @return {Promise<IDBDatabase>} Promise resolving to the open IDB database instance.
 	 */
 	function openProjectsDB() {
-		return new Promise( ( resolve, reject ) => {
 			const request = indexedDB.open( DB_NAME, 1 );
 			request.onupgradeneeded = () => request.result.createObjectStore( STORE_NAME );
-			request.onsuccess = () => resolve( request.result );
-			request.onerror = () => reject( request.error );
-		} );
+			return promisifyReq( request );
 	}
 
 	/**
@@ -576,15 +578,10 @@
 		}
 
 		const db = await openProjectsDB();
+		const store = db.transaction( STORE_NAME, 'readonly' ).objectStore( STORE_NAME );
 
 		// Check timestamp
-		const cachedTime = await new Promise( ( resolve, reject ) => {
-			const tx = db.transaction( STORE_NAME, 'readonly' );
-			const req = tx.objectStore( STORE_NAME ).get( 'projects_last_updated' );
-			req.onsuccess = event => resolve( Number( event.target.result ) );
-			req.onerror = () => reject( req.error );
-		} );
-
+		const cachedTime = Number( await promisifyReq( store.get( 'projects_last_updated' ) ) );
 		const serverTime = Number( projects.settings.lastUpdated );
 		const isValidTime = time => Number.isFinite( time ) && time > 0;
 
@@ -592,13 +589,7 @@
 			throw new Error( 'Cache expired' );
 		}
 
-		const blob = await new Promise( ( resolve, reject ) => {
-			const tx = db.transaction( STORE_NAME, 'readonly' );
-			const req = tx.objectStore( STORE_NAME ).get( 'projects_data' );
-			req.onsuccess = event => resolve( event.target.result );
-			req.onerror = () => reject( req.error );
-		} );
-
+		const blob = await promisifyReq( store.get( 'projects_data' ) );
 		if ( ! blob ) {
 			throw new Error( 'No cached data' );
 		}
