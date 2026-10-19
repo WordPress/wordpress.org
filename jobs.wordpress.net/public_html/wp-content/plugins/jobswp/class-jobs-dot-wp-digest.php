@@ -100,6 +100,12 @@ class Jobs_Dot_WP_Digest {
 			}
 		}
 
+		// Jetpack only loads the helper in its settings endpoints.
+		$helper = defined( 'JETPACK__PLUGIN_DIR' ) ? JETPACK__PLUGIN_DIR . '_inc/lib/class-jetpack-newsletter-category-helper.php' : '';
+		if ( ! class_exists( 'Jetpack_Newsletter_Category_Helper' ) && $helper && file_exists( $helper ) ) {
+			require_once $helper;
+		}
+
 		if ( class_exists( 'Jetpack_Newsletter_Category_Helper' ) ) {
 			$ids     = Jetpack_Newsletter_Category_Helper::get_category_ids();
 			$updated = array_values( array_unique( array_merge( $ids, array( $parent_category->term_id ), wp_list_pluck( $digest_categories, 'term_id' ) ) ) );
