@@ -342,18 +342,18 @@
 				this._allProjectsView = new projects.view.AllProjects();
 			}
 
-			// Ensures a category tab is active on initial load (falls back to the first item if none is set).
-			if ( ! this.el.querySelector( 'li.active' ) ) {
-				const firstSelectedProject = this.collection.find(
-					project => project.get( 'checked' ) || project.get( 'checkedSubProjects' )
-				);
-
-				if ( firstSelectedProject ) {
-					firstSelectedProject.set( 'isActive', true );
-				} else {
-					this.el.querySelector( 'li:first-child' )?.classList.add( 'active' );
+			// Mark the first item (#project-all) as active.
+			let firstActive = this.el.querySelector( 'li.active' );
+			if ( ! firstActive ) {
+				const radioInput = this.el.querySelector( 'li input[type="radio"]' );
+				if ( radioInput ) {
+					firstActive = radioInput.closest( 'li' );
 				}
 			}
+			if ( ! firstActive ) {
+				firstActive = this.el.querySelector( 'li:first-child' );
+			}
+			firstActive?.classList.add( 'active' );
 
 			return this;
 		}
