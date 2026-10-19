@@ -17,11 +17,8 @@ class Index extends GP_Route {
 	 * Prints all exisiting locales as cards.
 	 */
 	public function get_locales() {
-		$existing_locales = Plugin::get_existing_locales();
-
 		$locales = array_filter( array_map( array( 'GP_Locales', 'by_slug' ), Plugin::get_existing_locales() ) );
 		usort( $locales, array( $this, '_sort_english_name_callback' ) );
-		unset( $existing_locales );
 
 		$contributors_count = Plugin::get_contributors_count();
 		$translation_status = Plugin::get_translation_status();
