@@ -80,7 +80,7 @@ $is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $activ
 	<span class="pledges-card-rank" aria-hidden="true"><?php echo esc_html( str_pad( (string) $contributor['_rank'], 2, '0', STR_PAD_LEFT ) ); ?></span>
 
 	<div class="pledges-card-avatar">
-		<?php echo wp_kses_post( get_avatar( $contributor['email'], 56 ) ); ?>
+		<?php echo get_avatar( $contributor['email'], 56 ); ?>
 	</div>
 
 	<div class="pledges-card-body">
