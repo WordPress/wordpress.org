@@ -97,7 +97,7 @@ class Event_Form_Handler {
 				$response_message = esc_html__( 'Event moved to the trash.', 'gp-translation-events' );
 				$event_status     = 'trashed';
 				$this->notifications_schedule->delete_scheduled_emails( $event_id );
-				gp_notice_set( $response_message );
+				gp_notice_set( $response_message, 'success' );
 			}
 		} else {
 			// Create or update event.

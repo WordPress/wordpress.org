@@ -55,7 +55,7 @@ class Trash_Route extends Route {
 			if ( false === $this->event_repository->trash_event( $event ) ) {
 				gp_notice_set( __( 'Failed to delete event.', 'gp-translation-events' ), 'error' );
 			} else {
-				gp_notice_set( __( 'Event moved to the trash.', 'gp-translation-events' ) );
+				gp_notice_set( __( 'Event moved to the trash.', 'gp-translation-events' ), 'success' );
 			}
 			wp_safe_redirect( Urls::events_home() );
 		} else {
@@ -64,7 +64,7 @@ class Trash_Route extends Route {
 			if ( is_wp_error( $this->event_repository->update_event( $event ) ) ) {
 				gp_notice_set( __( 'Failed to restore event.', 'gp-translation-events' ), 'error' );
 			} else {
-				gp_notice_set( __( 'Event restored.', 'gp-translation-events' ) );
+				gp_notice_set( __( 'Event restored.', 'gp-translation-events' ), 'success' );
 			}
 			wp_safe_redirect( Urls::event_edit( $event->id() ) );
 		}

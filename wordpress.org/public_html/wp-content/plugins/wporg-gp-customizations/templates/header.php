@@ -40,16 +40,24 @@ gp_enqueue_scripts( array( 'gp-tour' ) );
 	<?php
 	if ( gp_notice( 'error' ) ) :
 		?>
-		<div class="error">
-			<?php echo wp_kses_post( gp_notice( 'error' ) ); ?>
+		<div class="notice notice-error notice-alt">
+			<p><?php echo wp_kses_post( gp_notice( 'error' ) ); ?></p>
+		</div>
+		<?php
+	endif;
+
+	if ( gp_notice( 'success' ) ) :
+		?>
+		<div class="notice notice-success notice-alt">
+			<p><?php echo wp_kses_post( gp_notice( 'success' ) ); ?></p>
 		</div>
 		<?php
 	endif;
 
 	if ( gp_notice() ) :
 		?>
-		<div class="notice">
-			<?php echo wp_kses_post( gp_notice() ); ?>
+		<div class="notice notice-info notice-alt">
+			<p><?php echo wp_kses_post( gp_notice() ); ?></p>
 		</div>
 		<?php
 	endif;

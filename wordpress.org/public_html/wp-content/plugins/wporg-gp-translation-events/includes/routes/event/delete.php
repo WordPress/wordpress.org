@@ -56,7 +56,7 @@ class Delete_Route extends Route {
 		if ( false === $this->event_repository->delete_event( $event ) ) {
 			gp_notice_set( __( 'Failed to permanently delete event.', 'gp-translation-events' ), 'error' );
 		} else {
-			gp_notice_set( __( 'Event permanently deleted.', 'gp-translation-events' ) );
+			gp_notice_set( __( 'Event permanently deleted.', 'gp-translation-events' ), 'success' );
 		}
 		wp_safe_redirect( Urls::events_home() );
 		$this->exit_();
