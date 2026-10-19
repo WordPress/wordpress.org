@@ -508,19 +508,21 @@ class Locale extends GP_Route {
 			$projects[ (int) $sub_project->id ] = $sub_project;
 		}
 
+		// Batch-fetch all matching translation set IDs in a single query.
 		$project_ids_sql = $this->prepare_in_int_list( array_keys( $projects ) );
 
-		// Batch-fetch all matching translation set IDs in a single query.
-		$translation_sets_sql = "
-			SELECT id
-			FROM {$wpdb->gp_translation_sets}
-			WHERE
-				project_id IN ( {$project_ids_sql} )
-				AND slug = %s
-				AND locale = %s
-		";
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $translation_sets_sql contains an IN clause with sanitized project IDs.
-		$translation_set_ids = $wpdb->get_col( $wpdb->prepare( $translation_sets_sql, $set_slug, $locale_slug ) );
+		if ( ! empty( $project_ids_sql ) ) {
+			$translation_sets_sql = "
+				SELECT id
+				FROM {$wpdb->gp_translation_sets}
+				WHERE
+					project_id IN ( {$project_ids_sql} )
+					AND slug = %s
+					AND locale = %s
+			";
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $translation_sets_sql contains an IN clause with sanitized project IDs.
+			$translation_set_ids = $wpdb->get_col( $wpdb->prepare( $translation_sets_sql, $set_slug, $locale_slug ) );
+		}
 
 		// Batch-fetch contributors across all translation sets.
 		$contributors = [];
@@ -892,15 +894,17 @@ class Locale extends GP_Route {
 			$parent_ids     = wp_list_pluck( $_projects, 'id' );
 			$parent_ids_sql = $this->prepare_in_int_list( $parent_ids );
 
-			$sub_sub_projects_sql = "
-				SELECT *
-				FROM {$wpdb->gp_projects}
-				WHERE
-					parent_project_id IN ( {$parent_ids_sql} )
-					AND active = 1
-				ORDER BY id ASC
-			";
-			$sub_sub_projects = $project->many( $sub_sub_projects_sql );
+			if ( ! empty( $parent_ids_sql ) ) {
+				$sub_sub_projects_sql = "
+					SELECT *
+					FROM {$wpdb->gp_projects}
+					WHERE
+						parent_project_id IN ( {$parent_ids_sql} )
+						AND active = 1
+					ORDER BY id ASC
+				";
+				$sub_sub_projects = $project->many( $sub_sub_projects_sql );
+			}
 
 			// Group child projects by parent.
 			$children_by_parent = [];
