@@ -161,6 +161,18 @@ $remote_pct = $total_jobs > 0 ? round( ( $remote_count / $total_jobs ) * 100 ) :
 	</div>
 </section>
 
+<?php $subscribe_form = Jobs_Dot_WP_Digest::get_subscribe_form(); ?>
+<?php if ( $subscribe_form ) : ?>
+<!-- Job Alerts Section -->
+<section class="job-alerts-section">
+	<div class="job-alerts-section__inner">
+		<h2><?php esc_html_e( 'Get new jobs by email', 'jobswp' ); ?></h2>
+		<p><?php esc_html_e( 'Subscribe to a daily email with the jobs posted that day, grouped by category.', 'jobswp' ); ?></p>
+		<?php echo $subscribe_form; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered Jetpack block. ?>
+	</div>
+</section>
+<?php endif; ?>
+
 <?php
 // "Open to Work" candidates section.
 	$candidates_per_page = 10;
