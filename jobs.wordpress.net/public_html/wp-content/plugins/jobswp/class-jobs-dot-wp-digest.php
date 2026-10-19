@@ -37,11 +37,11 @@ class Jobs_Dot_WP_Digest {
 	const CATEGORY = 'job-alerts';
 
 	/**
-	 * Post meta flagging a published job that has not been in a digest yet.
+	 * Option holding the Unix timestamp the last digest covered jobs up to.
 	 *
 	 * @var string
 	 */
-	const PENDING_META = '_jobswp_digest_pending';
+	const LAST_RUN_OPTION = 'jobswp_digest_last_run';
 
 	/**
 	 * Term meta on a digest category, holding the ID of the job category it mirrors.
@@ -58,7 +58,6 @@ class Jobs_Dot_WP_Digest {
 	public static function init(): void {
 		add_action( 'init', array( __CLASS__, 'schedule' ) );
 		add_action( self::CRON_HOOK, array( __CLASS__, 'publish_digests' ) );
-		add_action( 'transition_post_status', array( __CLASS__, 'mark_pending' ), 10, 3 );
 		add_action( 'created_job_category', array( __CLASS__, 'set_up_categories' ), 10, 0 );
 
 		add_action( 'pre_get_posts', array( __CLASS__, 'exclude_digests' ) );
@@ -127,23 +126,6 @@ class Jobs_Dot_WP_Digest {
 	}
 
 	/**
-	 * Flags a job for the next digest when it gets published.
-	 *
-	 * Jobs are published by moderators some time after submission, so the flag
-	 * is set on publication rather than inferred from the post date.
-	 *
-	 * @param string  $new_status New post status.
-	 * @param string  $old_status Old post status.
-	 * @param WP_Post $post       Post object.
-	 * @return void
-	 */
-	public static function mark_pending( string $new_status, string $old_status, WP_Post $post ): void {
-		if ( 'job' === $post->post_type && 'publish' === $new_status && 'publish' !== $old_status ) {
-			update_post_meta( $post->ID, self::PENDING_META, 1 );
-		}
-	}
-
-	/**
 	 * Whether subscribers can choose Jetpack newsletter categories.
 	 *
 	 * Without them every subscriber gets every post, so only the digest of all
@@ -158,6 +140,9 @@ class Jobs_Dot_WP_Digest {
 	/**
 	 * Publishes the digests of the jobs published since the last run.
 	 *
+	 * Jobs are submitted as drafts without a fixed date, so publishing one sets
+	 * its post date to the time it went live.
+	 *
 	 * @return void
 	 */
 	public static function publish_digests(): void {
@@ -167,11 +152,25 @@ class Jobs_Dot_WP_Digest {
 		}
 		list( $parent_category, $digest_categories ) = $categories;
 
+		// Cron runs late without traffic, so the window starts where the last digest ended.
+		$now   = time();
+		$since = (int) get_option( self::LAST_RUN_OPTION, $now - DAY_IN_SECONDS );
+
 		$jobs = get_posts(
 			array(
 				'post_type'      => 'job',
 				'post_status'    => 'publish',
-				'meta_key'       => self::PENDING_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Daily cron, few rows carry the key.
+				'date_query'     => array(
+					array(
+						'column' => 'post_date_gmt',
+						'after'  => gmdate( 'Y-m-d H:i:s', $since ),
+					),
+					array(
+						'column'    => 'post_date_gmt',
+						'before'    => gmdate( 'Y-m-d H:i:s', $now ),
+						'inclusive' => true,
+					),
+				),
 				'orderby'        => 'date',
 				'order'          => 'ASC',
 				'posts_per_page' => -1,
@@ -179,6 +178,7 @@ class Jobs_Dot_WP_Digest {
 		);
 
 		if ( ! $jobs ) {
+			update_option( self::LAST_RUN_OPTION, $now, false );
 			return;
 		}
 
@@ -245,9 +245,7 @@ class Jobs_Dot_WP_Digest {
 		kses_init();
 
 		if ( $published ) {
-			foreach ( $jobs as $job ) {
-				delete_post_meta( $job->ID, self::PENDING_META );
-			}
+			update_option( self::LAST_RUN_OPTION, $now, false );
 		}
 	}
 
