@@ -79,6 +79,7 @@ class Digest_Test extends TestCase {
 		wp_delete_term( $this->job_category->term_id, 'job_category' );
 		remove_shortcode( 'jobswp_test' );
 		delete_option( 'wpcom_newsletter_categories_enabled' );
+		delete_option( Jobs_Dot_WP_Digest::LAST_RUN_OPTION );
 
 		parent::tearDown();
 	}
@@ -103,7 +104,12 @@ class Digest_Test extends TestCase {
 
 		wp_set_object_terms( $job_id, array( $this->job_category->term_id ), 'job_category' );
 		add_post_meta( $job_id, 'company', 'Acme' );
-		wp_publish_post( $job_id );
+		wp_update_post(
+			array(
+				'ID'          => $job_id,
+				'post_status' => 'publish',
+			)
+		);
 
 		return $job_id;
 	}
@@ -127,8 +133,8 @@ class Digest_Test extends TestCase {
 	/**
 	 * A published job goes into exactly one digest, listed under its category.
 	 *
-	 * Catches the pending flag no longer being cleared, which would email the
-	 * same jobs to subscribers every day until they are pruned.
+	 * Catches the window no longer starting where the last digest ended, which
+	 * would email the same jobs to subscribers again.
 	 *
 	 * @return void
 	 */
