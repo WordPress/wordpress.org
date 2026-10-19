@@ -29,6 +29,8 @@
 		"jobs:test:env": "wp-env --config jobs/.wp-env.test.json",
 		"jobs:test": "npm run jobs:test:env -- start && npm run jobs:test:env -- run cli --env-cwd=wp-content/plugins/jobswp phpunit",
 		"browsehappy:env": "wp-env --config browsehappy/.wp-env.json",
+		"documentation:env": "wp-env --config documentation/.wp-env.json",
+		"documentation:refresh": "npm run documentation:env -- run cli -- wp option delete wporg_docs_env_imported && npm run documentation:env -- run cli -- wp eval-file wp-content/env-bin/import-content.php --user=admin",
 		"openverse:test:env": "wp-env --config openverse/.wp-env.test.json",
 		"openverse:test": "npm run openverse:test:env -- start && npm run openverse:test:env -- run cli --env-cwd=wp-content/themes/wporg-openverse phpunit",
 		"translate:env": "wp-env --config translate/.wp-env.json",
