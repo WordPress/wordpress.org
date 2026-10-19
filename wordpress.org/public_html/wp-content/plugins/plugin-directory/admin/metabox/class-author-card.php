@@ -6,6 +6,7 @@ require_once dirname( dirname( __DIR__ ) ) . '/class-tools.php';
 
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Admin\Tools\Related_Submissions;
 
 /**
  * The Author Card admin metabox.
@@ -243,6 +244,9 @@ class Author_Card {
 					wp_kses_post( implode( ', ', array_map( array( __NAMESPACE__ . '\Author_Card', 'link_ip' ), $user_ips ) ) )
 				);
 			}
+
+			// Plugins by other authors submitted from similar IPs, or sharing a domain.
+			Related_Submissions::display_author_matches( $author->ID );
 
 			// Include any user notes.
 			if ( ! empty( $user_notes ) ) {
