@@ -11,7 +11,8 @@
 	],
 	"mappings": {
 		"wp-content/mu-plugins/wporg-dev-login.php": "./mocks/mu-plugins/wporg-dev-login.php",
-		"wp-content/mu-plugins/jetpack-offline-subscriptions.php": "./mocks/jetpack-offline-subscriptions.php"
+		"wp-content/mu-plugins/jetpack-offline-subscriptions.php": "./mocks/jetpack-offline-subscriptions.php",
+		"wp-content/mu-plugins/jobs-open-to-work.php": "./mocks/jobs-open-to-work.php"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash jobs/bin/after-start.sh"
