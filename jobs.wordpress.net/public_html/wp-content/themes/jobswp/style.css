@@ -1453,8 +1453,9 @@ input[type="submit"].submit-job {
 	margin-top: var(--space-20);
 }
 
-.widget-job-alerts p {
+.widget-job-alerts__description {
 	font-size: var(--font-size-sm);
+	margin-bottom: 10px; /* Jetpack's gap between the field and the button. */
 }
 
 
