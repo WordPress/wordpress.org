@@ -1141,7 +1141,7 @@ class Locale extends GP_Route {
 					$top_fav_projects = array_slice( $user_fav_projects, 0, 100 );
 
 					// Safely quote and escape values for SQL.
-					$escaped_favs    = array_map( 'esc_sql', $user_fav_projects );
+					$escaped_favs    = array_map( 'esc_sql', $top_fav_projects );
 					$quoted_favs     = "'" . implode( "', '", $escaped_favs ) . "'";
 					$filter_order_by = "FIELD( tp.path, {$quoted_favs} ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC";
 				} else {
