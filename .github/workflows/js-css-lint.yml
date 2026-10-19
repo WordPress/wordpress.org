@@ -15,8 +15,9 @@ on:
     - 'wordpress.org/public_html/wp-content/themes/pub/wporg-support-2024/**'
     - .github/workflows/js-css-lint.yml
 
+# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -26,6 +27,7 @@ jobs:
   lint:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     strategy:
       fail-fast: false
@@ -44,12 +46,12 @@ jobs:
         working-directory: ${{ matrix.dir }}
 
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
     - name: Set up Node.js
-      uses: actions/setup-node@v7
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version-file: environments/.nvmrc
         cache: npm
@@ -66,7 +68,7 @@ jobs:
 
     - name: Check formatting
       if: matrix.prettier
-      run: npx prettier --check .
+      run: npx --no prettier --check .
 
     # Build output is committed, so a source edit without a rebuild ships stale assets.
     - name: Check build output is up to date
