@@ -17,7 +17,7 @@
 				</ul>
 			</aside>
 
-		<?php $subscribe_form = Jobs_Dot_WP_Digest::get_subscribe_form( is_tax( 'job_category' ) ? get_queried_object() : null ); ?>
+		<?php $subscribe_form = Jobs_Dot_WP_Digest::get_subscribe_form( is_tax( 'job_category' ) ? get_queried_object() : null, true ); ?>
 		<?php if ( $subscribe_form ) : ?>
 			<aside class="widget widget-job-alerts">
 				<h3 class="widget-title"><?php esc_html_e( 'Job Alerts', 'jobswp' ); ?></h3>

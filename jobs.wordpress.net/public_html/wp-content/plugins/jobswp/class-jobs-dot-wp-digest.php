@@ -501,9 +501,10 @@ class Jobs_Dot_WP_Digest {
 	 * category's digest, or else to the digest of all new jobs, so nobody gets both.
 	 *
 	 * @param WP_Term|null $job_category Optional. Job category to subscribe to.
+	 * @param bool         $stacked      Optional. Whether to put the button below the email field, for narrow spaces. Default false.
 	 * @return string Form markup, or an empty string when Jetpack Subscriptions is unavailable.
 	 */
-	public static function get_subscribe_form( ?WP_Term $job_category = null ): string {
+	public static function get_subscribe_form( ?WP_Term $job_category = null, bool $stacked = false ): string {
 		if ( ! WP_Block_Type_Registry::get_instance()->is_registered( 'jetpack/subscriptions' ) ) {
 			return '';
 		}
@@ -512,6 +513,7 @@ class Jobs_Dot_WP_Digest {
 			'submitButtonText'     => __( 'Get job alerts', 'jobswp' ),
 			'subscribePlaceholder' => __( 'Your email address', 'jobswp' ),
 			'showSubscribersTotal' => false,
+			'buttonOnNewLine'      => $stacked,
 		);
 
 		$category = $job_category ? self::get_digest_category( $job_category ) : self::get_category();

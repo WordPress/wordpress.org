@@ -9,9 +9,9 @@ Description: Functionality for jobs.wordpress.net
 
 defined( 'ABSPATH' ) or die();
 
+require_once __DIR__ . '/class-jobs-dot-wp-digest.php';
 require_once( dirname( __FILE__ ) . '/jobswp-captcha.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-contact-form.php' );
-require_once __DIR__ . '/class-jobs-dot-wp-digest.php';
 require_once( dirname( __FILE__ ) . '/jobswp-moderation.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-template.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-walker.php' );
