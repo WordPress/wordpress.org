@@ -1016,7 +1016,9 @@ class Locale extends GP_Route {
 			$base_level_project_ids = wp_list_pluck( $this->get_active_top_level_projects(), 'id' );
 			if ( $base_level_project_ids ) {
 				$ids = $this->prepare_in_int_list( $base_level_project_ids );
-				$base_level_project_sql = " AND tp.parent_project_id IN( $ids )";
+				if ( ! empty( $ids ) ) {
+					$base_level_project_sql = " AND tp.parent_project_id IN( $ids )";
+				}
 			}
 
 			// Check to see if they have any special approval permissions.
@@ -1043,12 +1045,16 @@ class Locale extends GP_Route {
 				$stats_where = ' AND stats.has_pending = 1';
 				$tp_where    = ' AND ( (';
 
+				/*
+				 * The current user can approve for a small set of projects.
+				 * We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check.
+				 */
+				$ids = '';
 				if ( $allowed_projects ) {
-					/*
-					 * The current user can approve for a small set of projects.
-					 * We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check.
-					 */
-					$ids       = $this->prepare_in_int_list( $allowed_projects );
+					$ids = $this->prepare_in_int_list( $allowed_projects );
+				}
+
+				if ( $ids ) {
 					$tp_where .= "tp.id IN( $ids )" . $base_level_project_sql;
 				} else {
 					$tp_where .= '0=1';
@@ -1056,11 +1062,15 @@ class Locale extends GP_Route {
 
 				$tp_where .= ') OR (';
 
+				/*
+				 * The current user can approve all sub-projects of a base level project.
+				 */
+				$ids = '';
 				if ( $allowed_base_level_projects ) {
-					/*
-					 * The current user can approve all sub-projects of a base level project.
-					 */
-					$ids       = $this->prepare_in_int_list( $allowed_base_level_projects );
+					$ids = $this->prepare_in_int_list( $allowed_base_level_projects );
+				}
+
+				if ( $ids ) {
 					$tp_where .= "tp.parent_project_id IN( $ids )";
 				} else {
 					$tp_where .= '0=1';
@@ -1082,7 +1092,9 @@ class Locale extends GP_Route {
 				) );
 				if ( $project_ids_with_editor ) {
 					$ids       = $this->prepare_in_int_list( $project_ids_with_editor );
-					$tp_where .= " AND tp.id NOT IN( $ids )";
+					if ( ! empty( $ids ) ) {
+						$tp_where .= " AND tp.id NOT IN( $ids )";
+					}
 				}
 			}
 		}
