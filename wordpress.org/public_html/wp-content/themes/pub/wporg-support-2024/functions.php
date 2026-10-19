@@ -176,7 +176,7 @@ function wporg_support_scripts() {
 		filemtime( get_theme_root() . '/wporg-parent-2021/build/block-styles.css' )
 	);
 
-	wp_enqueue_style( 'support-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
+	wp_enqueue_style( 'support-style', get_theme_file_uri( '/build/style.css' ), [ 'dashicons' ], filemtime( __DIR__ . '/build/style.css' ) );
 	wp_style_add_data( 'support-style', 'rtl', 'replace' );
 
 	// Preload the heading font(s).
