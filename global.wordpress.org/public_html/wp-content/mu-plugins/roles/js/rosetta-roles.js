@@ -342,17 +342,11 @@
 				this._allProjectsView = new projects.view.AllProjects();
 			}
 
-			// Mark the first item (#project-all) as active.
-			let firstActive = this.el.querySelector( 'li.active' );
-			if ( ! firstActive ) {
-				const radioInput = this.el.querySelector( 'li input[type="radio"]' );
-				if ( radioInput ) {
-					firstActive = radioInput.closest( 'li' );
-				}
-			}
-			if ( ! firstActive ) {
-				firstActive = this.el.querySelector( 'li:first-child' );
-			}
+			// Ensures a category tab is active on initial load (falls back to the first item if none is set).
+			const firstActive = this.el.querySelector( 'li.active' )
+				|| this.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
+				|| this.el.querySelector( 'li:first-child' );
+
 			firstActive?.classList.add( 'active' );
 
 			return this;
