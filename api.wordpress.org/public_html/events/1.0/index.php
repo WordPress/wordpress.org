@@ -343,7 +343,7 @@ function build_response( $location, $location_args ) {
 
 		$events = get_events( $event_args );
 
-		// $events = maybe_add_wp15_promo( $events, $user_agent, time() );
+		//$events = maybe_add_wp15_promo( $events, $_SERVER['HTTP_USER_AGENT'], time() );
 
 		$events = maybe_add_regional_wordcamps(
 			$events,
