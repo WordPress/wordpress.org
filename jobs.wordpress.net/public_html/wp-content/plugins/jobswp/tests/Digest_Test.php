@@ -78,7 +78,6 @@ class Digest_Test extends TestCase {
 
 		wp_delete_term( $this->job_category->term_id, 'job_category' );
 		remove_shortcode( 'jobswp_test' );
-		delete_option( 'wpcom_newsletter_categories_enabled' );
 		delete_option( Jobs_Dot_WP_Digest::LAST_RUN_OPTION );
 
 		parent::tearDown();
@@ -86,6 +85,8 @@ class Digest_Test extends TestCase {
 
 	/**
 	 * Creates a job the way moderation does: submitted as a draft, then published.
+	 *
+	 * Published two minutes ago, since a digest window stops a minute short of the run.
 	 *
 	 * @param string $title Job title.
 	 * @return int Job ID.
@@ -104,10 +105,14 @@ class Digest_Test extends TestCase {
 
 		wp_set_object_terms( $job_id, array( $this->job_category->term_id ), 'job_category' );
 		add_post_meta( $job_id, 'company', 'Acme' );
+		$published = time() - 2 * MINUTE_IN_SECONDS;
 		wp_update_post(
 			array(
-				'ID'          => $job_id,
-				'post_status' => 'publish',
+				'ID'            => $job_id,
+				'post_status'   => 'publish',
+				'post_date'     => wp_date( 'Y-m-d H:i:s', $published ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $published ),
+				'edit_date'     => true,
 			)
 		);
 
@@ -154,40 +159,31 @@ class Digest_Test extends TestCase {
 	}
 
 	/**
-	 * With newsletter categories on, a job category's digest is filed only under its mirror.
+	 * The digest is filed under Job Alerts and under the mirror of each job category it lists.
 	 *
-	 * Catches the per-category digest landing in the Job Alerts category, which
-	 * would email subscribers of all jobs a second copy of every job.
+	 * Catches the digest missing a job category's mirror, which would never
+	 * email that category's subscribers.
 	 *
 	 * @return void
 	 */
-	public function test_publishes_category_digest_under_its_mirror(): void {
-		update_option( 'wpcom_newsletter_categories_enabled', true );
+	public function test_files_digest_under_job_category_mirrors(): void {
 		$this->publish_job( 'WordPress Developer' );
 
 		Jobs_Dot_WP_Digest::publish_digests();
 
-		$filed_under = array();
-		foreach ( $this->get_digests() as $digest ) {
-			$filed_under[ $digest->post_title ] = wp_list_pluck( get_the_category( $digest->ID ), 'slug' );
-		}
-		ksort( $filed_under );
+		$digests = $this->get_digests();
+		$this->assertCount( 1, $digests );
 
-		$date = wp_date( get_option( 'date_format' ) );
-		$this->assertSame(
-			array(
-				"1 new Development job, $date" => array( 'job-alerts-digest-test-development' ),
-				"1 new job, $date"             => array( 'job-alerts' ),
-			),
-			$filed_under
-		);
+		$slugs = wp_list_pluck( get_the_category( $digests[0]->ID ), 'slug' );
+		sort( $slugs );
+		$this->assertSame( array( 'job-alerts', 'job-alerts-digest-test-development' ), $slugs );
 	}
 
 	/**
 	 * Job titles come from anonymous visitors and must stay text in the digest.
 	 *
-	 * Catches the store-time bracket encoding being dropped or moved ahead of
-	 * kses, which would run shortcodes from a job title on the site and in the email.
+	 * Catches the bracket encoding being dropped, which would run shortcodes
+	 * from a job title on the site and in the email.
 	 *
 	 * @return void
 	 */
