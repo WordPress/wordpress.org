@@ -1222,7 +1222,7 @@ class Locale extends GP_Route {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $count_sql is dynamically constructed for pagination and safely bound via $sql_params.
 		$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$sql_params ) );
 
-		$pages = $per_page > 0 ? (int) ceil( $results / $per_page ) : 1;
+		$pages = $per_page > 0 ? max( 1, (int) ceil( $results / $per_page ) ) : 1;
 
 		// Skip $projects_cache as get_project_icon() only looks up top-level parent projects.
 		$projects = array();
