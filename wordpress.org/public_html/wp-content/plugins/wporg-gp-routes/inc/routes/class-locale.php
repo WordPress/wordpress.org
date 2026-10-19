@@ -2,6 +2,7 @@
 
 namespace WordPressdotorg\GlotPress\Routes\Routes;
 
+use Collator;
 use GP;
 use GP_Locales;
 use GP_Route;
@@ -583,7 +584,7 @@ class Locale extends GP_Route {
 				$editor_ids[ (int) $editor_id ] = true;
 			}
 
-			// Also sorts special characters
+			// Also sorts special characters.
 			$collator = class_exists( 'Collator' ) ? new Collator( $locale_slug ) : null;
 
 			uasort(
