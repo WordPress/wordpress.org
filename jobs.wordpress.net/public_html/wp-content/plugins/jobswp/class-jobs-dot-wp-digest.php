@@ -3,12 +3,12 @@
  * Daily job digests, emailed to subscribers through Jetpack Subscriptions.
  *
  * Jetpack only emails posts of the `post` type, so each day the newly published
- * jobs are gathered into digest posts: one listing every new job, filed under
- * the Job Alerts category, and one per job category, filed under a child
- * category that mirrors it. These categories are offered as Jetpack newsletter
- * categories, so subscribers get either the one daily email or the categories
- * they picked. Digest posts exist to be emailed; on the site they redirect to
- * the job listings.
+ * jobs are gathered into one digest post. It is filed under the Job Alerts
+ * category and under a child category mirroring each job category it lists.
+ * These categories are offered as Jetpack newsletter categories: subscribers
+ * to all jobs get every digest, and subscribers to a job category get the
+ * digests with jobs in it. With a single post a day, nobody gets a job twice.
+ * Digest posts exist to be emailed; on the site they redirect to the job listings.
  *
  * @package JobsWP
  */
@@ -30,7 +30,7 @@ class Jobs_Dot_WP_Digest {
 	const CRON_HOOK = 'jobswp_publish_digests';
 
 	/**
-	 * Slug of the core category for the digest of all new jobs, and parent of the per-category ones.
+	 * Slug of the core category every digest is filed under, and parent of the job category mirrors.
 	 *
 	 * @var string
 	 */
@@ -42,6 +42,13 @@ class Jobs_Dot_WP_Digest {
 	 * @var string
 	 */
 	const LAST_RUN_OPTION = 'jobswp_digest_last_run';
+
+	/**
+	 * Name of the lock held while a digest run is in progress.
+	 *
+	 * @var string
+	 */
+	const LOCK = 'jobswp_digest';
 
 	/**
 	 * Term meta on a digest category, holding the ID of the job category it mirrors.
@@ -134,33 +141,50 @@ class Jobs_Dot_WP_Digest {
 	/**
 	 * Whether subscribers can choose Jetpack newsletter categories.
 	 *
-	 * Without them every subscriber gets every post, so only the digest of all
-	 * new jobs is published, or subscribers would get each job twice.
-	 *
 	 * @return bool
 	 */
-	private static function has_newsletter_categories(): bool {
+	public static function has_newsletter_categories(): bool {
 		return (bool) get_option( 'wpcom_newsletter_categories_enabled' );
 	}
 
 	/**
-	 * Publishes the digests of the jobs published since the last run.
+	 * Publishes the digest of the jobs published since the last run.
+	 *
+	 * @return void
+	 */
+	public static function publish_digests(): void {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+
+		// Overlapping runs would read the same window and email it twice.
+		if ( ! WP_Upgrader::create_lock( self::LOCK, HOUR_IN_SECONDS ) ) {
+			return;
+		}
+
+		try {
+			self::publish_window();
+		} finally {
+			WP_Upgrader::release_lock( self::LOCK );
+		}
+	}
+
+	/**
+	 * Publishes the digest of the jobs published since the window the last digest covered.
 	 *
 	 * Jobs are submitted as drafts without a fixed date, so publishing one sets
 	 * its post date to the time it went live.
 	 *
 	 * @return void
 	 */
-	public static function publish_digests(): void {
+	private static function publish_window(): void {
 		$categories = self::set_up_categories();
 		if ( ! $categories ) {
 			return;
 		}
 		list( $parent_category, $digest_categories ) = $categories;
 
-		// Cron runs late without traffic, so the window starts where the last digest ended.
-		$now   = time();
-		$since = (int) get_option( self::LAST_RUN_OPTION, $now - DAY_IN_SECONDS );
+		// The window stops a minute short, so a job whose publish request is still in flight lands in the next one.
+		$until = time() - MINUTE_IN_SECONDS;
+		$since = (int) get_option( self::LAST_RUN_OPTION, $until - DAY_IN_SECONDS );
 
 		$jobs = get_posts(
 			array(
@@ -173,7 +197,7 @@ class Jobs_Dot_WP_Digest {
 					),
 					array(
 						'column'    => 'post_date_gmt',
-						'before'    => gmdate( 'Y-m-d H:i:s', $now ),
+						'before'    => gmdate( 'Y-m-d H:i:s', $until ),
 						'inclusive' => true,
 					),
 				),
@@ -184,7 +208,7 @@ class Jobs_Dot_WP_Digest {
 		);
 
 		if ( ! $jobs ) {
-			update_option( self::LAST_RUN_OPTION, $now, false );
+			update_option( self::LAST_RUN_OPTION, $until, false );
 			return;
 		}
 
@@ -203,79 +227,42 @@ class Jobs_Dot_WP_Digest {
 			$groups[0] = $uncategorized;
 		}
 
+		$content      = '';
+		$category_ids = array( $parent_category->term_id );
+		foreach ( $groups as $key => $group ) {
+			$content .= '<h2>' . esc_html( $group['term'] ? $group['term']->name : __( 'Other', 'jobswp' ) ) . "</h2>\n";
+			$content .= self::job_list( $group['jobs'] );
+
+			if ( isset( $digest_categories[ $key ] ) ) {
+				$category_ids[] = $digest_categories[ $key ]->term_id;
+			}
+		}
+		$content .= sprintf( '<p><a href="%1$s">%2$s</a></p>', esc_url( home_url( '/' ) ), esc_html__( 'See all open jobs', 'jobswp' ) );
+
 		// Digest markup is built from escaped values only, and kses would strip its links on this site.
 		kses_remove_filters();
 
-		$content = '';
-		foreach ( $groups as $group ) {
-			$content .= '<h2>' . esc_html( $group['term'] ? $group['term']->name : __( 'Other', 'jobswp' ) ) . "</h2>\n";
-			$content .= self::job_list( $group['jobs'] );
-		}
-
-		$published = self::insert_digest(
-			sprintf(
-				/* translators: 1: Number of jobs, 2: Date. */
-				_n( '%1$d new job, %2$s', '%1$d new jobs, %2$s', count( $jobs ), 'jobswp' ),
-				count( $jobs ),
-				wp_date( get_option( 'date_format' ) )
-			),
-			$content . self::footer_link( home_url( '/' ), __( 'See all open jobs', 'jobswp' ) ),
-			$parent_category
-		);
-
-		if ( $published && self::has_newsletter_categories() ) {
-			foreach ( $groups as $key => $group ) {
-				if ( ! isset( $digest_categories[ $key ] ) ) {
-					continue;
-				}
-
-				$job_category = $group['term'];
-				self::insert_digest(
-					sprintf(
-						/* translators: 1: Number of jobs, 2: Job category name, 3: Date. */
-						_n( '%1$d new %2$s job, %3$s', '%1$d new %2$s jobs, %3$s', count( $group['jobs'] ), 'jobswp' ),
-						count( $group['jobs'] ),
-						$job_category->name,
-						wp_date( get_option( 'date_format' ) )
-					),
-					self::job_list( $group['jobs'] ) . self::footer_link(
-						get_term_link( $job_category ),
-						/* translators: %s: Job category name. */
-						sprintf( __( 'See all open %s jobs', 'jobswp' ), $job_category->name )
-					),
-					$digest_categories[ $key ]
-				);
-			}
-		}
-
-		kses_init();
-
-		if ( $published ) {
-			update_option( self::LAST_RUN_OPTION, $now, false );
-		}
-	}
-
-	/**
-	 * Inserts a digest post.
-	 *
-	 * @param string  $title    Post title.
-	 * @param string  $content  Post content.
-	 * @param WP_Term $category Category to file it under.
-	 * @return bool Whether the digest was published.
-	 */
-	private static function insert_digest( string $title, string $content, WP_Term $category ): bool {
 		$post_id = wp_insert_post(
 			array(
 				'post_type'     => 'post',
 				'post_status'   => 'publish',
-				'post_title'    => $title,
+				'post_title'    => sprintf(
+					/* translators: 1: Number of jobs, 2: Date. */
+					_n( '%1$d new job, %2$s', '%1$d new jobs, %2$s', count( $jobs ), 'jobswp' ),
+					count( $jobs ),
+					wp_date( get_option( 'date_format' ) )
+				),
 				'post_content'  => $content,
-				'post_category' => array( $category->term_id ),
+				'post_category' => $category_ids,
 			),
 			true
 		);
 
-		return ! is_wp_error( $post_id );
+		kses_init();
+
+		if ( ! is_wp_error( $post_id ) ) {
+			update_option( self::LAST_RUN_OPTION, $until, false );
+		}
 	}
 
 	/**
@@ -305,17 +292,6 @@ class Jobs_Dot_WP_Digest {
 		}
 
 		return $list . "</ul>\n";
-	}
-
-	/**
-	 * Returns the closing link of a digest.
-	 *
-	 * @param string $url  Link URL.
-	 * @param string $text Link text.
-	 * @return string
-	 */
-	private static function footer_link( string $url, string $text ): string {
-		return sprintf( '<p><a href="%1$s">%2$s</a></p>', esc_url( $url ), esc_html( $text ) );
 	}
 
 	/**
@@ -458,7 +434,7 @@ class Jobs_Dot_WP_Digest {
 	}
 
 	/**
-	 * Sends digest posts and digest category archives to the job listings they summarize.
+	 * Sends digest posts to the job listings, and digest category archives to the job category they mirror.
 	 *
 	 * @return void
 	 */
@@ -468,14 +444,12 @@ class Jobs_Dot_WP_Digest {
 			return;
 		}
 
-		$category = null;
-		if ( is_singular( 'post' ) ) {
-			$terms    = get_the_terms( get_queried_object_id(), 'category' );
-			$category = $terms && ! is_wp_error( $terms ) ? $terms[0] : null;
-		} elseif ( is_category() ) {
-			$category = get_queried_object();
+		if ( is_singular( 'post' ) && has_category( $parent_category->term_id, get_queried_object_id() ) ) {
+			wp_safe_redirect( home_url( '/' ) );
+			exit;
 		}
 
+		$category = is_category() ? get_queried_object() : null;
 		if ( ! $category instanceof WP_Term ) {
 			return;
 		}
@@ -497,8 +471,8 @@ class Jobs_Dot_WP_Digest {
 	/**
 	 * Returns the Jetpack subscription form.
 	 *
-	 * With newsletter categories on, the form subscribes to the given job
-	 * category's digest, or else to the digest of all new jobs, so nobody gets both.
+	 * With newsletter categories on, the form subscribes to the digests with jobs
+	 * in the given job category, or else to every digest.
 	 *
 	 * @param WP_Term|null $job_category Optional. Job category to subscribe to.
 	 * @param bool         $compact      Optional. Whether to fit a narrow space: the button goes below the

@@ -21,7 +21,7 @@
 		<?php if ( $subscribe_form ) : ?>
 			<aside class="widget widget-job-alerts">
 				<h3 class="widget-title"><?php esc_html_e( 'Job Alerts', 'jobswp' ); ?></h3>
-				<p class="widget-job-alerts__description"><?php echo esc_html( is_tax( 'job_category' ) ? __( 'Get a daily email with new jobs in this category.', 'jobswp' ) : __( 'Get a daily email with new jobs.', 'jobswp' ) ); ?></p>
+				<p class="widget-job-alerts__description"><?php echo esc_html( is_tax( 'job_category' ) && Jobs_Dot_WP_Digest::has_newsletter_categories() ? __( 'Get a daily email when new jobs are posted in this category.', 'jobswp' ) : __( 'Get a daily email with new jobs.', 'jobswp' ) ); ?></p>
 				<?php echo $subscribe_form; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered Jetpack block. ?>
 			</aside>
 		<?php endif; ?>
