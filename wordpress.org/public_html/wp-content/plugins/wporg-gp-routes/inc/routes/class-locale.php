@@ -511,6 +511,7 @@ class Locale extends GP_Route {
 		// Batch-fetch all matching translation set IDs in a single query.
 		$project_ids_sql = $this->prepare_in_int_list( array_keys( $projects ) );
 
+		$translation_set_ids = [];
 		if ( ! empty( $project_ids_sql ) ) {
 			$translation_sets_sql = "
 				SELECT id
@@ -894,6 +895,7 @@ class Locale extends GP_Route {
 			$parent_ids     = wp_list_pluck( $_projects, 'id' );
 			$parent_ids_sql = $this->prepare_in_int_list( $parent_ids );
 
+			$sub_sub_projects = [];
 			if ( ! empty( $parent_ids_sql ) ) {
 				$sub_sub_projects_sql = "
 					SELECT *
