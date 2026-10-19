@@ -88,25 +88,17 @@ class Event_Form_Handler {
 				wp_send_json_error( esc_html__( 'Event has stats so it cannot be deleted.', 'gp-translation-events' ), 422 );
 			}
 
-			$trashed = false !== $this->event_repository->trash_event( $event );
-			if ( $trashed ) {
+			// The client redirects to My Events either way, so the result is shown there.
+			if ( false === $this->event_repository->trash_event( $event ) ) {
+				$response_message = esc_html__( 'Failed to delete event.', 'gp-translation-events' );
+				$event_status     = $event->status();
+				gp_notice_set( $response_message, 'error' );
+			} else {
 				$response_message = esc_html__( 'Event moved to the trash.', 'gp-translation-events' );
 				$event_status     = 'trashed';
 				$this->notifications_schedule->delete_scheduled_emails( $event_id );
-			} else {
-				$response_message = esc_html__( 'Failed to delete event.', 'gp-translation-events' );
-				$event_status     = $event->status();
+				gp_notice_set( $response_message );
 			}
-
-			// The client redirects to My Events regardless of the outcome, so
-			// surface the result there as a GlotPress notice instead of losing
-			// it in the redirect.
-			gp_notice_set(
-				$trashed
-					? __( 'Event moved to the trash.', 'gp-translation-events' )
-					: __( 'Failed to delete event.', 'gp-translation-events' ),
-				$trashed ? 'notice' : 'error'
-			);
 		} else {
 			// Create or update event.
 
