@@ -291,7 +291,7 @@ class Jobs_Dot_WP_Digest {
 				array(
 					get_post_meta( $job->ID, 'company', true ),
 					get_post_meta( $job->ID, 'location', true ),
-					get_post_meta( $job->ID, 'jobtype', true ),
+					jobswp_get_job_meta( $job->ID, 'jobtype' ),
 				),
 				static fn ( $detail ): bool => $detail && 'N/A' !== $detail
 			);
