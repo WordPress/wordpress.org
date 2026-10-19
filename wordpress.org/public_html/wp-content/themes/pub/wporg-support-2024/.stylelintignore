@@ -1,0 +1,4 @@
+# Third-party code, excluded since the Grunt build.
+sass/_normalize.scss
+sass/mixins/_breakpoint.scss
+sass/mixins/_modular-scale.scss
