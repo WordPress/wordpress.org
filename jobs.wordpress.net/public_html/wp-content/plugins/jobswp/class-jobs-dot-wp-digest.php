@@ -69,6 +69,7 @@ class Jobs_Dot_WP_Digest {
 
 		add_action( 'pre_get_posts', array( __CLASS__, 'exclude_digests' ) );
 		add_filter( 'wp_sitemaps_posts_query_args', array( __CLASS__, 'exclude_digests_from_sitemap' ), 10, 2 );
+		add_filter( 'wp_sitemaps_taxonomies_query_args', array( __CLASS__, 'exclude_categories_from_sitemap' ), 10, 2 );
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_digests' ) );
 	}
 
@@ -429,6 +430,22 @@ class Jobs_Dot_WP_Digest {
 
 		$args['tax_query']   = isset( $args['tax_query'] ) && is_array( $args['tax_query'] ) ? $args['tax_query'] : array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Sitemap query.
 		$args['tax_query'][] = $clause;
+
+		return $args;
+	}
+
+	/**
+	 * Leaves the digest categories out of the categories sitemap.
+	 *
+	 * @param array  $args     WP_Term_Query arguments.
+	 * @param string $taxonomy Taxonomy.
+	 * @return array
+	 */
+	public static function exclude_categories_from_sitemap( array $args, string $taxonomy ): array {
+		$category = 'category' === $taxonomy ? self::get_category() : null;
+		if ( $category ) {
+			$args['exclude_tree'] = array( $category->term_id );
+		}
 
 		return $args;
 	}
