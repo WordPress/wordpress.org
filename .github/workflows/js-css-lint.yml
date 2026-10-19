@@ -1,0 +1,79 @@
+name: Static Analysis (JS/CSS)
+
+on:
+  pull_request:
+    paths:
+    - 'wordpress.org/public_html/style/**'
+    - 'wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024/**'
+    - 'wordpress.org/public_html/wp-content/themes/pub/wporg-support-2024/**'
+    - .github/workflows/js-css-lint.yml
+  push:
+    branches: [trunk]
+    paths:
+    - 'wordpress.org/public_html/style/**'
+    - 'wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024/**'
+    - 'wordpress.org/public_html/wp-content/themes/pub/wporg-support-2024/**'
+    - .github/workflows/js-css-lint.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - name: Style
+          dir: wordpress.org/public_html/style
+          prettier: true
+        - name: Plugin Directory Theme
+          dir: wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024
+        - name: Support Theme
+          dir: wordpress.org/public_html/wp-content/themes/pub/wporg-support-2024
+
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version-file: environments/.nvmrc
+        cache: npm
+        cache-dependency-path: ${{ matrix.dir }}/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci --ignore-scripts
+
+    - name: Lint JavaScript
+      run: npm run lint:js --if-present
+
+    - name: Lint CSS
+      run: npm run lint:css --if-present
+
+    - name: Check formatting
+      if: matrix.prettier
+      run: npx prettier --check .
+
+    # Build output is committed, so a source edit without a rebuild ships stale assets.
+    - name: Check build output is up to date
+      run: |
+        npm run build
+        if [ -n "$( git status --porcelain -- . )" ]; then
+          git status --short -- .
+          echo "::error::Build output is out of date. Run 'npm run build' in ${{ matrix.dir }} and commit the result."
+          exit 1
+        fi
