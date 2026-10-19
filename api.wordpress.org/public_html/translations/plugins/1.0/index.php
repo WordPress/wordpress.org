@@ -23,7 +23,7 @@ $slug    = isset( $_REQUEST['slug'] ) ? filter_var(
 	FILTER_VALIDATE_REGEXP,
 	array(
 		'options' => array(
-			'regexp' => '/^[a-z0-9._-]{1,100}\z/i',
+			'regexp' => '/^[a-z0-9._-]{1,200}\z/i',
 		),
 	)
 ) : '';
