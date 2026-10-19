@@ -7,6 +7,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 
+use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Template;
 
 /**
@@ -421,16 +422,35 @@ class Screenshots {
 		);
 		$figure .= '</a>';
 
+		$caption = self::escape_block_delimiters( self::filter_caption( $caption ) );
+
 		if ( '' !== $caption ) {
-			$figure .= sprintf(
-				'<figcaption class="wp-element-caption">%s</figcaption>',
-				self::escape_block_delimiters( wp_kses_post( $caption ) )
-			);
+			$figure .= sprintf( '<figcaption class="wp-element-caption">%s</figcaption>', $caption );
 		}
 
 		$figure .= '</figure>';
 
 		return "<!-- wp:image {$attrs} -->\n{$figure}\n<!-- /wp:image -->\n";
+	}
+
+	/**
+	 * Reduces a caption to the markup a readme caption may carry.
+	 *
+	 * `wp_kses_post()` keeps every `data-*` attribute, and the lightbox loads the
+	 * Interactivity runtime on the page, where a `data-wp-` attribute rewrites its
+	 * own tag after every server filter has run. The readme's list admits no `data-*`.
+	 *
+	 * @param string $caption Caption HTML.
+	 * @return string Caption HTML carrying only readme markup.
+	 */
+	protected static function filter_caption( $caption ) {
+		static $parser = null;
+
+		if ( ! $parser ) {
+			$parser = new Parser( '' );
+		}
+
+		return $parser->filter_text( $caption );
 	}
 
 	/**

@@ -373,19 +373,19 @@ function wporg_themes_author_metabox_override( $post_type, $post ) {
 function wporg_themes_post_author_meta_box( $post ) {
 	global $user_ID;
 ?>
-<label class="screen-reader-text" for="post_author_override"><?php _e('Author'); ?></label>
+<label class="screen-reader-text" for="post_author_override"><?php esc_html_e( 'Author' ); ?></label>
 <?php
 	$value = empty($post->ID) ? $user_ID : $post->post_author;
 
 	$user = new WP_User($value);
 
-	echo "<input type='text' id='post_author_username' value='{$user->user_login}' />";
-	echo "<input type='hidden' id='post_author_override' name='post_author_override' value='{$value}' />";
+	printf( '<input type="text" id="post_author_username" value="%s" />', esc_attr( $user->user_login ) );
+	printf( '<input type="hidden" id="post_author_override" name="post_author_override" value="%s" />', esc_attr( $value ) );
 ?>
 	<script>
 	jQuery( document ).ready( function( $ ) {
 		$( "#post_author_username" ).autocomplete( {
-			source: ajaxurl + '?action=author-lookup&_ajax_nonce=<?php echo wp_create_nonce( 'wporg_themes_author_lookup' ); ?>',
+			source: ajaxurl + '?action=author-lookup&_ajax_nonce=<?php echo esc_js( wp_create_nonce( 'wporg_themes_author_lookup' ) ); ?>',
 			minLength: 2,
 			delay: 700,
 			autoFocus: true,
@@ -590,10 +590,6 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 			) )
 		);
 
-		// SVN commits skip the upload's shortcode check, so make the delimiters inert here.
-		$theme_post_name           = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_post_name );
-		$theme_data['Description'] = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_data['Description'] );
-
 		wp_update_post( array(
 			'ID'           => $post_id,
 			'post_title'   => $theme_post_name,
@@ -671,6 +667,25 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 	update_user_meta( $post->post_author, 'has_themes', time() );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_approve_version', 10, 3 );
+
+/**
+ * Stores a theme's name and description with their square brackets encoded.
+ *
+ * @param array $data Slashed, sanitized post data.
+ * @return array
+ */
+function wporg_themes_encode_header_delimiters( $data ) {
+	if ( 'repopackage' !== $data['post_type'] ) {
+		return $data;
+	}
+
+	foreach ( array( 'post_title', 'post_content' ) as $field ) {
+		$data[ $field ] = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $data[ $field ] );
+	}
+
+	return $data;
+}
+add_filter( 'wp_insert_post_data', 'wporg_themes_encode_header_delimiters', PHP_INT_MAX );
 
 /**
  * Closes a theme.

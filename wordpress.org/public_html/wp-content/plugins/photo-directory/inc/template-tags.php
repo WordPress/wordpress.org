@@ -45,7 +45,7 @@ function show_colors( $post = 0, $echo = true ) {
 	$output .= '</div>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -90,7 +90,7 @@ function show_categories( $post = 0, $echo = true ) {
 	$output .= '</div>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -135,7 +135,7 @@ function show_tags( $post = 0, $echo = true ) {
 	$output .= '</div>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -173,7 +173,7 @@ function show_moderation_flags( $post = 0, $echo = true ) {
 	$output .= '</div>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -215,7 +215,7 @@ function show_exif( $post = 0, $echo = true ) {
 	$output .= '</ul>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -251,7 +251,7 @@ function show_orientation( $post = 0, $echo = true ) {
 	);
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -286,7 +286,7 @@ function show_dimensions( $post = 0, $echo = true ) {
 	);
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -321,7 +321,7 @@ function show_publish_date( $post = 0, $echo = true ) {
 	$output .= "</div>\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;

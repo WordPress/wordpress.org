@@ -255,6 +255,7 @@ class Plugin {
 		}
 
 		if ( $output ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Badge markup assembled by format_badge() from escaped parts.
 			echo $this->format_badge( $output['type'], $output['label'], $output['help'] );
 		}
 	}

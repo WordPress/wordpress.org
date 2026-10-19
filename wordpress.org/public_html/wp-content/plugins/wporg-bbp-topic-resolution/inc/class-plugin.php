@@ -117,7 +117,7 @@ class Plugin {
 			return;
 		}
 
-		echo '<span class="topic-resolved-indicator">' . __( 'Resolved', 'wporg-forums' ) . '</span>';
+		echo '<span class="topic-resolved-indicator">' . esc_html__( 'Resolved', 'wporg-forums' ) . '</span>';
 	}
 
 	/**
@@ -232,7 +232,8 @@ class Plugin {
 		// Display the current topic resolution if the user can't update it.
 		$user_id = get_current_user_id();
 		if ( bbp_is_topic_edit() || ! $this->user_can_resolve( $user_id, $topic_id ) ) {
-			printf( esc_html__( 'Status: %s', 'wporg-forums' ), $resolutions[ $resolution ] );
+			/* translators: %s: Resolution status. */
+			printf( esc_html__( 'Status: %s', 'wporg-forums' ), esc_html( $resolutions[ $resolution ] ) );
 
 		// Display the form to update the topic resolution.
 		} else {

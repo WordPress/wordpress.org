@@ -574,4 +574,128 @@ class Trac_Ticket_Wiki_Escaping_Test extends TestCase {
 		$this->assertStringContainsString( '* REQUIRED: See [https://example.org/doc the docs]', $results );
 		$this->assertStringContainsString( 'Line 1: <?php eval( $x ); ?>', $results );
 	}
+
+	/**
+	 * A link with attributes after its `href` still converts, as the copyright check writes it.
+	 *
+	 * @return void
+	 */
+	public function test_link_with_extra_attributes_converts() {
+		$this->register_themecheck(
+			array( '<span class="tc-lead tc-warning">WARNING</span>: Could not find a copyright notice for the theme. <a href="https://www.gnu.org/licenses/gpl-howto.html" target="_blank">Learn how to add a copyright notice (opens in a new window).</a>' )
+		);
+
+		$results = ( new WPORG_Themes_Upload() )->generate_themecheck_results_for_trac();
+
+		$this->assertStringContainsString( '[https://www.gnu.org/licenses/gpl-howto.html Learn how to add a copyright notice (opens in a new window).]', $results );
+		$this->assertStringNotContainsString( '<a ', $results );
+	}
+
+	/**
+	 * A function name made of underscores is shown, not read as underline markup.
+	 *
+	 * @return void
+	 */
+	public function test_underscore_function_name_is_not_underline_markup() {
+		$this->register_themecheck(
+			array( "<span class='tc-lead tc-warning'>WARNING</span>: Found a translation function that is missing a text-domain in the file inc/customizer/wp-customize-fonts.php. Function <strong>__</strong>, with the arguments <strong>'https://wordpress.com/support/custom-fonts/'</strong>." )
+		);
+
+		$results = ( new WPORG_Themes_Upload() )->generate_themecheck_results_for_trac();
+
+		$this->assertStringContainsString( "Function '''!__''', with the arguments", $results );
+	}
+
+	/**
+	 * Other inline formatting in a message is escaped as well.
+	 *
+	 * @return void
+	 */
+	public function test_inline_formatting_in_a_message_is_escaped() {
+		$this->register_themecheck(
+			array( "<span class='tc-lead tc-warning'>WARNING</span>: Found <strong>~~a~~ ,,b,, ^c^ `d` **e**</strong> in style.css." )
+		);
+
+		$results = ( new WPORG_Themes_Upload() )->generate_themecheck_results_for_trac();
+
+		$this->assertStringContainsString( "'''!~~a!~~ !,,b!,, !^c!^ !`d!` !**e!**'''", $results );
+	}
+
+	/**
+	 * Inline formatting can't start inside a link target, so URL headers are left intact.
+	 *
+	 * @return void
+	 */
+	public function test_inline_formatting_in_url_headers_is_left_alone() {
+		$description = $this->compose_description(
+			array(
+				'Theme URI'  => 'https://example.org/my__theme/x**y',
+				'Author URI' => 'https://example.net/a,,b~~c',
+			)
+		);
+
+		$this->assertStringContainsString( 'Theme URL - https://example.org/my__theme/x**y', $description );
+		$this->assertStringContainsString( 'Author URL - https://example.net/a,,b~~c', $description );
+	}
+
+	/**
+	 * The parent link is escaped as a URL, so a slug with underscores still links to the theme.
+	 *
+	 * @return void
+	 */
+	public function test_parent_link_keeps_underscores() {
+		$description = $this->compose_description( array( 'Template' => 'my__parent' ) );
+
+		$this->assertStringContainsString( 'Parent Theme: https://wordpress.org/themes/my__parent', $description );
+	}
+
+	/**
+	 * A Theme Check link keeps its target, and formatting after a URL ends is still escaped.
+	 *
+	 * @return void
+	 */
+	public function test_link_targets_in_a_message_are_left_alone() {
+		$this->register_themecheck(
+			array( "<span class='tc-lead tc-warning'>WARNING</span>: See <a href='https://developer.wordpress.org/reference/functions/__/'>the docs</a> or https://example.org/x__ for <strong>__</strong>." )
+		);
+
+		$results = ( new WPORG_Themes_Upload() )->generate_themecheck_results_for_trac();
+
+		$this->assertStringContainsString( '[https://developer.wordpress.org/reference/functions/__/ the docs]', $results );
+
+		// Trac ends a link before a trailing `_`, so the underline there is live and escaped.
+		$this->assertStringContainsString( "https://example.org/x!__ for '''!__'''", $results );
+	}
+
+	/**
+	 * Quoted code shows the characters Theme Check encoded, not their entities.
+	 *
+	 * @return void
+	 */
+	public function test_entities_in_quoted_code_are_decoded() {
+		$this->register_themecheck(
+			array( "<span class='tc-lead tc-warning'>WARNING</span>: Missing text-domain.<pre class='tc-grep'>Line 14: __( &#039;https://wordpress.com/support/custom-fonts/&#039; ) &quot;x&quot; &amp;lt;</pre>" )
+		);
+
+		$results = ( new WPORG_Themes_Upload() )->generate_themecheck_results_for_trac();
+
+		// Decoded once: code that quotes an entity keeps it.
+		$this->assertStringContainsString( "Line 14: __( 'https://wordpress.com/support/custom-fonts/' ) \"x\" &lt;", $results );
+	}
+
+	/**
+	 * An encoded block delimiter is broken up like a literal one.
+	 *
+	 * @return void
+	 */
+	public function test_encoded_braces_cannot_close_the_block() {
+		$this->register_themecheck(
+			array( "<span class='tc-lead tc-required'>REQUIRED</span>: bad<pre class='tc-grep'>Line 1: \r&#125;&#125;&#125;\r&#x7b;&#x7b;&#x7b;\r#!html\r&lt;img src=zzz&gt;</pre> in style.css" )
+		);
+
+		$results = ( new WPORG_Themes_Upload() )->generate_themecheck_results_for_trac();
+
+		$this->assertSame( 1, substr_count( $results, '{{{' ) );
+		$this->assertSame( 1, substr_count( $results, '}}}' ) );
+	}
 }

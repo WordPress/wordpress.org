@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Theme\Plugins_2024\SearchPage;
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( <<<BLOCKS
 	<!-- wp:template-part {"slug":"grid-controls"} /-->
 	<!-- wp:query-title {"type":"search","fontFamily":"inter","className":"section-heading"} /-->

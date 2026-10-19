@@ -137,6 +137,15 @@ class Current_Release_Resolution_Test extends TestCase {
 	}
 
 	/**
+	 * The stable tag currently in the plugin's update_source row.
+	 *
+	 * @return string The served stable tag.
+	 */
+	private function served_stable_tag(): string {
+		return (string) ( API_Update_Updater::get_served_release( $this->plugin->post_name )->stable_tag ?? '' );
+	}
+
+	/**
 	 * A renamed Version header inside a tag under cooldown keeps the hold.
 	 */
 	public function test_renamed_header_keeps_cooldown_hold(): void {
@@ -145,6 +154,130 @@ class Current_Release_Resolution_Test extends TestCase {
 		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
 
 		$this->assertSame( self::SERVED_VERSION, $this->served_version() );
+		$this->assertNotFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
+	 * A new tag whose header keeps the served version is still a new release:
+	 * the cooldown gate keys on the release's identity, not the header proxy.
+	 */
+	public function test_new_tag_with_served_header_keeps_cooldown_hold(): void {
+		update_post_meta( $this->plugin->ID, 'version', self::SERVED_VERSION );
+		$this->add_release( self::HELD_TAG, self::SERVED_VERSION );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+
+		$this->assertSame( self::SERVED_VERSION, $this->served_stable_tag() );
+		$this->assertNotFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
+	 * The full evasion: a new tag keeps the served header, so the importer bumps
+	 * neither the version nor its version_date. The hold must survive the stale
+	 * plugin-wide anchor and measure the cooldown from the release itself.
+	 */
+	public function test_new_tag_with_served_header_and_stale_version_date_keeps_cooldown_hold(): void {
+		update_post_meta( $this->plugin->ID, 'version', self::SERVED_VERSION );
+		update_post_meta( $this->plugin->ID, 'version_date', gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS ) );
+		$this->add_release( self::HELD_TAG, self::SERVED_VERSION );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+
+		$this->assertSame( self::SERVED_VERSION, $this->served_stable_tag() );
+		$this->assertNotFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
+	 * Switching a trunk-stable plugin to a tag at an unchanged version is a new
+	 * release: the trunk row's identity is trunk@{version}, which no tag matches.
+	 */
+	public function test_tag_switch_from_served_trunk_keeps_cooldown_hold(): void {
+		global $wpdb;
+
+		$wpdb->update(
+			$wpdb->prefix . 'update_source',
+			array( 'stable_tag' => 'trunk' ),
+			array( 'plugin_slug' => $this->plugin->post_name )
+		);
+		update_post_meta( $this->plugin->ID, 'version', self::SERVED_VERSION );
+		$this->add_release( self::HELD_TAG, self::SERVED_VERSION );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+
+		$this->assertSame( 'trunk', $this->served_stable_tag() );
+		$this->assertNotFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
+	 * A tag-to-trunk flip at an unchanged version creates no trunk release, so
+	 * the current version resolves to the old tag's record. Once the row serves
+	 * trunk, that fallback is the served release and a block is refused.
+	 */
+	public function test_block_refused_for_served_trunk_fallback_release(): void {
+		$this->serve_trunk_fallback();
+
+		$this->assertFalse( API_Update_Updater::block_release( $this->plugin->post_name, array( 'risk_score' => 9.8 ) ) );
+		$this->assertFalse( API_Update_Updater::is_release_blocked( Plugin_Directory::get_release( get_post( $this->plugin->ID ), self::SERVED_VERSION ) ) );
+	}
+
+	/**
+	 * The served trunk fallback is not a new release: the row is rewritten
+	 * without a cooldown hold.
+	 */
+	public function test_served_trunk_fallback_release_schedules_no_cooldown(): void {
+		$this->serve_trunk_fallback();
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+
+		$this->assertSame( 'trunk', $this->served_stable_tag() );
+		$this->assertFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
+	}
+
+	/**
+	 * Serve trunk at the served version with only the old tag's release record,
+	 * so the current version resolves through the version-named fallback.
+	 */
+	private function serve_trunk_fallback(): void {
+		global $wpdb;
+
+		$wpdb->update(
+			$wpdb->prefix . 'update_source',
+			array( 'stable_tag' => 'trunk' ),
+			array( 'plugin_slug' => $this->plugin->post_name )
+		);
+		update_post_meta( $this->plugin->ID, 'version', self::SERVED_VERSION );
+		update_post_meta( $this->plugin->ID, 'stable_tag', 'trunk' );
+		$this->add_release( self::SERVED_VERSION, self::SERVED_VERSION );
+
+		$this->assertSame( self::SERVED_VERSION, API_Update_Updater::get_current_release( get_post( $this->plugin->ID ) )['tag'] );
+	}
+
+	/**
+	 * Trunk versions are compared on the full 128 bytes the row stores: the
+	 * `trunk@` prefix must not eat into the allowance, or two long versions
+	 * differing past byte 122 read as the same release.
+	 */
+	public function test_long_trunk_versions_differing_past_prefix_allowance_are_distinct(): void {
+		global $wpdb;
+
+		$served_version = str_repeat( '1', 130 );
+		$new_version    = substr_replace( $served_version, '2', 124, 1 );
+
+		$wpdb->update(
+			$wpdb->prefix . 'update_source',
+			array(
+				'stable_tag' => 'trunk',
+				'version'    => substr( $served_version, 0, 128 ),
+			),
+			array( 'plugin_slug' => $this->plugin->post_name )
+		);
+		update_post_meta( $this->plugin->ID, 'stable_tag', 'trunk' );
+		update_post_meta( $this->plugin->ID, 'version', $new_version );
+		$this->add_release( 'trunk@' . $new_version, $new_version );
+
+		$this->assertTrue( API_Update_Updater::update_single_plugin( $this->plugin->post_name ) );
+
+		$this->assertSame( substr( $served_version, 0, 128 ), $this->served_version() );
 		$this->assertNotFalse( wp_next_scheduled( "release_to_update_api:{$this->plugin->post_name}" ) );
 	}
 
@@ -437,6 +570,23 @@ class Current_Release_Resolution_Test extends TestCase {
 		);
 
 		$this->assertSame( $version_time, API_Update_Updater::compute_release_time( get_post( $this->plugin->ID ), $release ) );
+	}
+
+	/**
+	 * A release row newer than the plugin's version_date anchors the clock: a
+	 * new tag at an unchanged version, or a re-commit that re-opens a release,
+	 * bumps only the release date.
+	 */
+	public function test_release_time_prefers_newer_release_date_over_version_date(): void {
+		update_post_meta( $this->plugin->ID, 'version_date', gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS ) );
+
+		$release = array(
+			'date'                   => time() - DAY_IN_SECONDS,
+			'confirmations_required' => 0,
+			'confirmations'          => array(),
+		);
+
+		$this->assertSame( $release['date'], API_Update_Updater::compute_release_time( get_post( $this->plugin->ID ), $release ) );
 	}
 
 	/**

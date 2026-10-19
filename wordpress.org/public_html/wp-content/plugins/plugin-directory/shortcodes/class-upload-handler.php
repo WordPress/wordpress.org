@@ -760,6 +760,11 @@ class Upload_Handler {
 			'acf-gallery',
 		);
 
+		// Slugs in the namespace used internally for rejected plugins.
+		if ( preg_match( Helpscout::REJECTED_SLUG_REGEX, $this->plugin_slug ) ) {
+			return true;
+		}
+
 		return in_array( $this->plugin_slug, $reserved_slugs );
 	}
 
@@ -799,7 +804,7 @@ class Upload_Handler {
 		if ( $results ) {
 			$html .= '<ul class="pc-result" style="list-style: disc">';
 			// Display errors, and then warnings.
-			foreach ( [ 'ERROR', 'ERRORS_LOW_SEVERITY', 'WARNING', 'WARNING_LOW_SEVERITY' ] as $result_type ) {
+			foreach ( [ 'ERROR', 'ERROR_LOW_SEVERITY', 'WARNING', 'WARNING_LOW_SEVERITY' ] as $result_type ) {
 				$result_set = $results_by_type[ $result_type ] ?? [];
 				if ( empty( $result_set ) ) {
 					continue;
@@ -1030,8 +1035,8 @@ class Upload_Handler {
 		$name = wp_get_current_user()->display_name ?: wp_get_current_user()->user_login;
 		$payload = [
 			'customer' => array_filter( [
-				'firstName' => substr( explode( ' ', $name, 2 )[0], 0, 39 ),
-				'lastName'  => trim( substr( explode( ' ', "{$name} ", 2 )[1], 0, 39 ) ),
+				'firstName' => mb_substr( explode( ' ', $name, 2 )[0], 0, 39 ),
+				'lastName'  => trim( mb_substr( explode( ' ', "{$name} ", 2 )[1], 0, 39 ) ),
 				'email'     => wp_get_current_user()->user_email,
 			] ),
 			'text'   => $text,
@@ -1048,6 +1053,7 @@ class Upload_Handler {
 		$success = ( 201 === $http_response_code );
 
 		if ( ! $success ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 			trigger_error( "Helpscout update failed: $http_response_code: " . var_export( $result, true ), E_USER_WARNING );
 		}
 

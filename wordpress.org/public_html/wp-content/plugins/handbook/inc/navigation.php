@@ -378,7 +378,7 @@ class WPorg_Handbook_Navigation {
 		?>
 
 		<nav class="handbook-navigation" role="navigation">
-			<h1 class="screen-reader-text"><?php _e( 'Handbook navigation', 'wporg' ); ?></h1>
+			<h1 class="screen-reader-text"><?php esc_html_e( 'Handbook navigation', 'wporg' ); ?></h1>
 			<div class="nav-links">
 
 			<?php

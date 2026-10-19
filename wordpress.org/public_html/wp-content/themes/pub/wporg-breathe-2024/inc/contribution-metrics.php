@@ -91,8 +91,29 @@ function team_to_trac( string $slug ): string {
  */
 function team_to_github_repos( string $slug ): array {
 	$map = array(
-		'core' => array( 'WordPress/wordpress-develop', 'WordPress/gutenberg' ),
-		'meta' => array( 'WordPress/wporg-main', 'WordPress/wporg-mu-plugins' ),
+		'core' => array( 'WordPress/gutenberg', 'WordPress/wordpress-develop' ),
+		'meta' => array(
+			'WordPress/five-for-the-future',
+			'WordPress/meeting-calendar',
+			'WordPress/pattern-directory',
+			'WordPress/props-bot-action',
+			'WordPress/wordcamp.org',
+			'WordPress/wordpress.org',
+			'WordPress/wporg-developer',
+			'WordPress/wporg-developer-blog',
+			'WordPress/wporg-documentation-2022',
+			'WordPress/wporg-gutenberg',
+			'WordPress/wporg-main-2022',
+			'WordPress/wporg-make',
+			'WordPress/wporg-mu-plugins',
+			'WordPress/wporg-news-2021',
+			'WordPress/wporg-parent-2021',
+			'WordPress/wporg-photo-directory',
+			'WordPress/wporg-repo-tools',
+			'WordPress/wporg-showcase-2022',
+			'WordPress/wporg-theme-directory',
+			'WordPress/wporg-two-factor',
+		),
 	);
 	return isset( $map[ $slug ] ) ? $map[ $slug ] : array();
 }

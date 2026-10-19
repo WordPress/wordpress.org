@@ -1,9 +1,8 @@
 <?php
-
 /**
  * User Profile
  *
- * @package bbPress
+ * @package bb-base
  * @subpackage Theme
  */
 

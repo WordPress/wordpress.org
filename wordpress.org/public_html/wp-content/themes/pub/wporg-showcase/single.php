@@ -53,6 +53,7 @@
 												<br style='clear: both;' />
 											</div>\n";
 
+										// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup assembled in this file from literal strings.
 										echo $output;
 									}
 								?>

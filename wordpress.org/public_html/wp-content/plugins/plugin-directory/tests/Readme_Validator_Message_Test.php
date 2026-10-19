@@ -7,6 +7,8 @@
 
 declare( strict_types = 1 );
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Readme\Validator;
 
@@ -18,6 +20,7 @@ use WordPressdotorg\Plugin_Directory\Readme\Validator;
  *
  * @group readme
  */
+#[Group( 'readme' )]
 class Readme_Validator_Message_Test extends TestCase {
 
 	/**
@@ -29,6 +32,7 @@ class Readme_Validator_Message_Test extends TestCase {
 	 * @param string $expected The value the message is expected to quote.
 	 * @return void
 	 */
+	#[DataProvider( 'trademark_context_provider' )]
 	public function test_trademark_message_escapes_the_plugin_name( string $context, string $expected ): void {
 		$message = Validator::instance()->translate_code_to_message(
 			'trademarked_name',

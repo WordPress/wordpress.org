@@ -1,0 +1,21 @@
+{
+    "name": "WP.org Akismet",
+    "alias": "wporgakismet",
+    "img": "/modules/wporgakismet/img/icon.svg",
+    "description": "Checks new conversations with Akismet, and reports what agents mark as spam or not spam.",
+    "version": "1.0.0",
+    "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgAkismet",
+    "author": "WordPress.org",
+    "authorUrl": "https://wordpress.org/",
+    "requiredAppVersion": "1.8.243",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\WPOrgAkismet\\Providers\\WPOrgAkismetServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}

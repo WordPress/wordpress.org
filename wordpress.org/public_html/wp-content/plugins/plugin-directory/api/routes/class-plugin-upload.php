@@ -59,7 +59,7 @@ class Plugin_Upload extends Base {
 			return false;
 		}
 
-		return true;
+		return $this->verify_action_nonce( $request, 'upload', $post->ID );
 	}
 
 	public function upload( $request ) {

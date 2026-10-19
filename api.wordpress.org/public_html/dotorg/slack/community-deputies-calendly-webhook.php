@@ -40,6 +40,7 @@ function api_request( $url ) {
 		trigger_error(
 			'The Calendly token has probably been revoked, the password was probably changed.' .
 			'Please update the COMMUNITY_CALENDLY_TOKEN secrets constant with a new PAT created on https://calendly.com/integrations/api_webhooks from the WordCamp Calendly account.' .
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 			wp_remote_retrieve_body( $req ),
 			E_USER_WARNING
 		);

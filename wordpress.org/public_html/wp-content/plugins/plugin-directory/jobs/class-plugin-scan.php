@@ -108,12 +108,20 @@ class Plugin_Scan {
 			// Fetch the plugin to scan.
 			$local_path = self::export_plugin_locally( $plugin->post_name, $tag );
 			if ( ! $local_path ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 				echo "Failed to export plugin {$plugin->post_name} tag {$tag} for scanning.\n";
 				continue;
 			}
 
 			$plugin_check_result = self::run_plugin_check( $plugin_slug, $local_path, $tag, 'update' );
 			if ( ! $plugin_check_result ) {
+				continue;
+			}
+
+			// A scan that timed out or failed has incomplete results, don't treat it as a pass.
+			if ( $plugin_check_result['return_code'] ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
+				echo "Plugin Check did not complete for {$plugin->post_name} tag {$tag}, return code {$plugin_check_result['return_code']}.\n";
 				continue;
 			}
 			$hash = $plugin_check_result['hash'];
@@ -151,6 +159,8 @@ class Plugin_Scan {
 	 */
 	public static function notify_plugin_authors( $plugin, $results, $tag ) {
 		ob_start();
+
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text email body composed in an output buffer; escaping would corrupt it.
 
 		printf(
 			"Found %d errors in %d files.\n\n",
@@ -195,6 +205,8 @@ class Plugin_Scan {
 			}
 		}
 
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+
 		$body = ob_get_clean();
 
 		if ( ! $body ) {
@@ -203,7 +215,8 @@ class Plugin_Scan {
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
-			echo "\n==== Plugin Check Results for {$plugin->post_name} EMAIL ====\n";
+			echo "\n==== Plugin Check Results for {$plugin->post_name} EMAIL ====\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			echo $body;
 		}
 
@@ -353,7 +366,7 @@ class Plugin_Scan {
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
-			echo "\n==== Plugin Check Results for {$plugin->post_name} {$tag} SLACK LOG ====\n";
+			echo "\n==== Plugin Check Results for {$plugin->post_name} {$tag} SLACK LOG ====\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			echo $fallback . "\n" . $table;
 		}
@@ -439,14 +452,14 @@ class Plugin_Scan {
 			$env_vars
 		);
 		if ( ! $plugin_check_process ) {
-			// If we can't run plugin-check, we'll just return a pass.
+			// If we can't run plugin-check, we'll just return a pass, with a return code that marks it as not run.
 			return [
 				'verdict'         => true,
 				'results'         => [],
 				'results_by_type' => [],
 				'files'           => [],
 				'totals'          => [ 'errors' => 0, 'warnings' => 0 ],
-				'return_code'     => 0,
+				'return_code'     => 1,
 				'output'          => [],
 				'stderr'          => '',
 				'total_time'      => 0,
@@ -454,19 +467,29 @@ class Plugin_Scan {
 			];
 		}
 
-		// Wait for it to finish, checking every 0.5s.
+		// Read the output while it runs, the process blocks once the pipe buffer is full.
+		stream_set_blocking( $pipes[1], false );
+		stream_set_blocking( $pipes[2], false );
+
+		$output = '';
+		$stderr = '';
+
+		// Wait for it to finish, checking every 0.05s.
 		do {
-			usleep( 50000 ); // 0.5s
+			usleep( 50000 ); // 0.05s
 
 			$total_time  = round( microtime(1) - $start_time, 1 );
 
+			// Check the status before reading, so that everything written before exiting is read.
 			$proc_status = proc_get_status( $plugin_check_process );
 			$return_code = $proc_status['exitcode'] ?? 1;
 
+			$output .= stream_get_contents( $pipes[1] );
+			$stderr .= stream_get_contents( $pipes[2] );
+
 		} while ( $proc_status['running'] && $total_time <= 65 ); // max, just in case
 
-		$output = stream_get_contents( $pipes[1] );
-		$stderr = rtrim( stream_get_contents( $pipes[2] ), "\n" );
+		$stderr = rtrim( $stderr, "\n" );
 
 		// Remove ABSPATH from the output if present.
 		$output = str_replace( ABSPATH, '/', $output );
@@ -475,9 +498,12 @@ class Plugin_Scan {
 
 		if ( wp_doing_cron() ) {
 			// During cron, output the body to the log.
-			echo "\n==== Plugin Check Results for {$plugin_slug} ====\n";
+			echo "\n==== Plugin Check Results for {$plugin_slug} ====\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			echo "Total Time: {$total_time}s\nReturn Code:{$return_code}.\n";
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			if ( $stderr ) echo "STDERR: {$stderr}\n";
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI cron log output, not HTML.
 			if ( $output ) echo "OUTPUT: {$output}\n";
 		}
 

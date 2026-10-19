@@ -9,6 +9,8 @@ use WordPressdotorg\MU_Plugins\Utilities\HelpScout; // NOTE: NOT the same as the
 
 use function WordPressdotorg\API\HelpScout\{ get_user_email_for_email };
 
+// phpcs:disable WordPress.Security.EscapeOutput
+
 /**
  * This script will process all the bounced emails in HelpScout and take the appropriate action.
  *

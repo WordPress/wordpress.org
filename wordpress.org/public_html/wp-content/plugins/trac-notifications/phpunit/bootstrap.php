@@ -30,13 +30,16 @@ if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) && file_exists( $_tests_dir 
 require_once $_tests_dir . '/includes/functions.php';
 
 /**
- * Loads the component pages class as it runs on make.wordpress.org/core.
+ * Loads the plugin's classes as they run on make.wordpress.org/core.
  *
- * The plugin's main file needs a Trac API key and only does anything on the
- * Make network, so the class under test is loaded on its own and told which
- * site it is on for the duration of its constructor.
+ * Both files need a Make `home_url` and a Trac API key and only do anything on
+ * the Make network. The main file's load-time `new wporg_trac_notifications`
+ * is inert because it runs before the `home_url` filter below, so it must stay
+ * ahead of that filter; the component pages class is then built for the Make
+ * network for tests to use. Tests that need a plugin instance build their own.
  */
 function wporg_trac_components_manually_load_plugin() {
+	require_once dirname( __DIR__ ) . '/trac-notifications.php';
 	require_once dirname( __DIR__ ) . '/trac-components.php';
 
 	$make_core = function () {
@@ -54,6 +57,28 @@ require $_tests_dir . '/includes/bootstrap.php';
 
 // The save path under test is wp-admin's edit_post().
 require_once ABSPATH . 'wp-admin/includes/admin.php';
+
+if ( ! function_exists( 'switch_to_blog' ) ) {
+	/**
+	 * No-op stand-in for the multisite blog switch when the suite runs single-site.
+	 *
+	 * @param int   $new_blog_id The blog to switch to.
+	 * @param mixed $deprecated  Unused.
+	 * @return bool
+	 */
+	function switch_to_blog( $new_blog_id, $deprecated = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- Mirrors the core signature.
+		return true;
+	}
+
+	/**
+	 * No-op stand-in for restoring the current blog when the suite runs single-site.
+	 *
+	 * @return bool
+	 */
+	function restore_current_blog() {
+		return true;
+	}
+}
 
 // Include the base test case.
 require __DIR__ . '/includes/testcase.php';

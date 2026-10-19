@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Elasticsearch_Status, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Elasticsearch_Status, Related_Submissions, Stats_Report, Upload_Token };
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 
 /**
@@ -112,6 +112,7 @@ class Plugin_Directory {
 			Customizations::instance();
 			Author_Cards::instance();
 			Elasticsearch_Status::instance();
+			Related_Submissions::instance();
 			Stats_Report::instance();
 			Upload_Token::instance();
 
@@ -1351,6 +1352,7 @@ class Plugin_Directory {
 			if ( 'readme.txt' === $path_base ) {
 				status_header( 200 );
 				header( 'Content-type: text/plain' );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generated markup: a text/plain readme and GeoPattern SVG, neither of which survives escaping.
 				echo file_get_contents( __DIR__ . '/readme/readme.txt' );
 				die();
 			}
@@ -1465,7 +1467,7 @@ class Plugin_Directory {
 		}
 
 		if ( is_comment_feed() ) {
-			wp_redirect( 'https://wordpress.org/plugins/', 301 );
+			wp_safe_redirect( 'https://wordpress.org/plugins/', 301 );
 			die();
 		}
 
@@ -1505,6 +1507,7 @@ class Plugin_Directory {
 		header( 'Cache-Control: public, max-age=' . YEAR_IN_SECONDS );
 		header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + YEAR_IN_SECONDS ) );
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Generated markup: a text/plain readme and GeoPattern SVG, neither of which survives escaping.
 		echo $icon->toSVG();
 		die();
 	}

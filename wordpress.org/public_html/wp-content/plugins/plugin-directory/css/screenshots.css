@@ -217,6 +217,7 @@
 
 #screenshots .wp-block-gallery.is-style-screenshots figure.wp-block-image button.lightbox-trigger {
 	cursor: zoom-in;
+	z-index: 5;
 }
 
 /**

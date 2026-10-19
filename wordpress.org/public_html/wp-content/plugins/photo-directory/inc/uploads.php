@@ -245,13 +245,29 @@ class Uploads {
 	 */
 	public static function wp_enqueue_scripts() {
 		if ( is_page( self::SUBMIT_PAGE_SLUG ) ) {
-			wp_enqueue_script( 'wporg-photos-submit', plugins_url( 'assets/js/submit.js', dirname( __FILE__ ) ), [], '1', true );
+			wp_enqueue_style(
+				'wporg-photos-submit',
+				plugins_url( 'assets/css/submit.css', WPORG_PHOTO_DIRECTORY_MAIN_FILE ),
+				[],
+				filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/css/submit.css' )
+			);
+
+			wp_enqueue_script(
+				'wporg-photos-submit',
+				plugins_url( 'assets/js/submit.js', WPORG_PHOTO_DIRECTORY_MAIN_FILE ),
+				[],
+				filemtime( WPORG_PHOTO_DIRECTORY_DIRECTORY . '/assets/js/submit.js' ),
+				true
+			);
 
 			wp_localize_script(
 				'wporg-photos-submit',
 				'PhotoDir',
 				[
 					'error_class'           => 'error',
+
+					// File preview.
+					'preview_alt'           => __( 'Selected photo preview', 'wporg-photos' ),
 
 					// Field required.
 					'err_field_required'    => __( 'This field is required.', 'wporg-photos' ),
@@ -272,6 +288,7 @@ class Uploads {
 					'min_file_size' => self::get_minimum_photo_file_size(),
 
 					// File dimensions.
+					'err_file_unreadable'   => __( 'The selected photo could not be loaded. Please try a different JPEG image.', 'wporg-photos' ),
 					'err_file_too_long'     => sprintf(
 						/** translators: %d: The maximum number of pixels. */
 						__( 'The selected file cannot be longer in either length or width than %dpx.', 'wporg-photos' ),
@@ -866,13 +883,14 @@ class Uploads {
 				'post_title' => $name,
 			] );
 
-			// Change the same fields in the attachment to obfuscate the original
-			// filename.
+			// Obfuscate the original filename, and use the photo's description over Frontend Uploader's copy of the request.
 			$photo_name = wp_unique_post_slug( $name . '-photo', $photo->ID, $photo->post_status, $photo->post_type, $post->ID );
 			wp_update_post( [
-				'ID'         => $photo->ID,
-				'post_name'  => $photo_name,
-				'post_title' => $photo_name,
+				'ID'           => $photo->ID,
+				'post_name'    => $photo_name,
+				'post_title'   => $photo_name,
+				'post_content' => wp_slash( $post->post_content ),
+				'post_excerpt' => wp_slash( $post->post_content ),
 			] );
 		}
 	}
@@ -1007,6 +1025,31 @@ class Uploads {
 					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" accept="%s">' . "\n",
 					esc_attr( $valid_upload_mimetypes )
 				)
+				. '<div id="ug_photo_preview_wrap" class="ugc-photo-preview" hidden>' . "\n"
+				. sprintf(
+					'<button type="button" id="ug_photo_preview_button" class="ugc-photo-preview__button" aria-haspopup="dialog" aria-controls="ug_photo_preview_dialog" title="%1$s" aria-label="%1$s">' . "\n",
+					esc_attr__( 'View larger preview', 'wporg-photos' )
+				)
+				. sprintf(
+					'<img id="ug_photo_preview" alt="%s" />' . "\n",
+					esc_attr__( 'Selected photo preview', 'wporg-photos' )
+				)
+				. "</button>\n"
+				. "</div>\n"
+				. sprintf(
+					'<dialog id="ug_photo_preview_dialog" class="ugc-photo-preview-dialog" aria-label="%s">' . "\n",
+					esc_attr__( 'Photo preview', 'wporg-photos' )
+				)
+				. sprintf(
+					'<button type="button" class="ugc-photo-preview-dialog__close" aria-label="%s">'
+					. '<svg class="ugc-photo-preview-dialog__close-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" focusable="false">'
+					. '<path d="M1 1l10 10M11 1L1 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />'
+					. '</svg>'
+					. '</button>' . "\n",
+					esc_attr__( 'Close preview', 'wporg-photos' )
+				)
+				. '<img id="ug_photo_preview_large" alt="" />' . "\n"
+				. "</dialog>\n"
 				. "</div>\n"
 				. sprintf(
 					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d"]' . "\n",

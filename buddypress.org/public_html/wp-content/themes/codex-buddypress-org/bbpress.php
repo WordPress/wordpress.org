@@ -6,7 +6,7 @@
 			<h2>Codex Discussion Forums</h2>
 
 			<p class="description">
-				<?php echo wp_filter_post_kses( get_post_meta( get_the_ID(), 'page_excerpt', true ) ); ?>
+				<?php echo wp_kses_post( get_post_meta( get_the_ID(), 'page_excerpt', true ) ); ?>
 			</p>
 		</div>
 

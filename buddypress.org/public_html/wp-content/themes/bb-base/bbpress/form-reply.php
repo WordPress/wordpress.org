@@ -24,7 +24,20 @@ if ( bbp_is_reply_edit() ) : ?>
 			<?php do_action( 'bbp_theme_before_reply_form' ); ?>
 
 			<fieldset class="bbp-form">
-				<legend><?php printf( esc_html__( 'Reply To: %s', 'bbpress' ), ( bbp_get_form_reply_to() ) ? sprintf( esc_html__( 'Reply #%1$s in %2$s', 'bbpress' ), bbp_get_form_reply_to(), bbp_get_topic_title() ) : bbp_get_topic_title() ); ?></legend>
+				<legend>
+					<?php
+					printf(
+						/* translators: %s: Topic title or reply description. */
+						esc_html__( 'Reply To: %s', 'bbpress' ),
+						bbp_get_form_reply_to() ? sprintf(
+							/* translators: 1: Reply ID, 2: Topic title. */
+							esc_html__( 'Reply #%1$s in %2$s', 'bbpress' ),
+							esc_html( bbp_get_form_reply_to() ),
+							wp_kses_post( bbp_get_topic_title() )
+						) : wp_kses_post( bbp_get_topic_title() )
+					);
+					?>
+				</legend>
 
 				<?php do_action( 'bbp_theme_before_reply_form_notices' ); ?>
 
@@ -151,7 +164,7 @@ if ( bbp_is_reply_edit() ) : ?>
 								</legend>
 
 								<div>
-									<label for="bbp_reply_edit_reason"><?php printf( esc_html__( 'Optional reason for editing:', 'bbpress' ), bbp_get_current_user_name() ); ?></label><br />
+									<label for="bbp_reply_edit_reason"><?php printf( esc_html__( 'Optional reason for editing:', 'bbpress' ), esc_html( bbp_get_current_user_name() ) ); ?></label><br />
 									<input type="text" value="<?php bbp_form_reply_edit_reason(); ?>" size="40" name="bbp_reply_edit_reason" id="bbp_reply_edit_reason" />
 								</div>
 							</fieldset>
@@ -194,7 +207,8 @@ if ( bbp_is_reply_edit() ) : ?>
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
 			<ul>
-				<li><?php printf( esc_html__( 'The topic &#8216;%s&#8217; is closed to new replies.', 'bbpress' ), bbp_get_topic_title() ); ?></li>
+				<li><?php /* translators: %s: Topic title. */ ?>
+				<?php printf( esc_html__( 'The topic &#8216;%s&#8217; is closed to new replies.', 'bbpress' ), wp_kses_post( bbp_get_topic_title() ) ); ?></li>
 			</ul>
 		</div>
 	</div>
@@ -204,7 +218,8 @@ if ( bbp_is_reply_edit() ) : ?>
 	<div id="no-reply-<?php bbp_topic_id(); ?>" class="bbp-no-reply">
 		<div class="bbp-template-notice">
 			<ul>
-				<li><?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'bbpress' ), bbp_get_forum_title( bbp_get_topic_forum_id() ) ); ?></li>
+				<li><?php /* translators: %s: Forum title. */ ?>
+				<?php printf( esc_html__( 'The forum &#8216;%s&#8217; is closed to new topics and replies.', 'bbpress' ), esc_html( bbp_get_forum_title( bbp_get_topic_forum_id() ) ) ); ?></li>
 			</ul>
 		</div>
 	</div>

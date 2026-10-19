@@ -50,15 +50,15 @@ get_header();
 
 <p><?php
 	printf(
-		__u( 'Welcome back %s, Some of our policies have been updated, please review the items below before continuing.', 'wporg' ),
-		$user->display_name ?: $user->user_login
+		esc_html( __u( 'Welcome back %s, Some of our policies have been updated, please review the items below before continuing.', 'wporg' ) ),
+		esc_html( $user->display_name ?: $user->user_login )
 	);
 ?></p>
 
 <p>&nbsp;</p>
 
 <p>
-	<a href="https://<?php echo $localised_domain; ?>/about/privacy/"><?php _e( 'Privacy Policy', 'wporg' ); ?></a>
+	<a href="<?php echo esc_url( 'https://' . $localised_domain . '/about/privacy/' ); ?>"><?php esc_html_e( 'Privacy Policy', 'wporg' ); ?></a>
 </p>
 <?php /* ?>
 <p>
@@ -84,8 +84,8 @@ get_header();
 </p>
 
 <p id="nav">
-	<a href="/"><?php _e( '&larr; Back to login', 'wporg' ); ?></a> &nbsp; • &nbsp;
-	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
+	<a href="/"><?php esc_html_e( '&larr; Back to login', 'wporg' ); ?></a> &nbsp; • &nbsp;
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer(); ?>
@@ -96,7 +96,7 @@ wp_set_current_user( 0 );
 
 // This is just for during development until strings are finalised.
 function _eu( $s ) {
-	echo $s;
+	echo esc_html( $s );
 }
 function __u( $s ) {
 	return $s;
