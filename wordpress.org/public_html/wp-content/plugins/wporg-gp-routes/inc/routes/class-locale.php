@@ -583,9 +583,16 @@ class Locale extends GP_Route {
 				$editor_ids[ (int) $editor_id ] = true;
 			}
 
+			// Also sorts special characters
+			$collator = class_exists( 'Collator' ) ? new Collator( $locale_slug ) : null;
+
 			uasort(
 				$locale_contributors['editors'][ $editor_source ],
-				static function ( $a, $b ) {
+				static function ( $a, $b ) use ( $collator ) {
+					if ( $collator ) {
+						return $collator->compare( $a->display_name, $b->display_name );
+					}
+
 					return strcasecmp( $a->display_name, $b->display_name );
 				}
 			);
