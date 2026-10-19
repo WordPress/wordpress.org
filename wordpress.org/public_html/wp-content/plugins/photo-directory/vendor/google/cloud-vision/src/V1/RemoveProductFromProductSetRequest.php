@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Request message for the `RemoveProductFromProductSet` method.
@@ -22,7 +22,7 @@ class RemoveProductFromProductSetRequest extends \Google\Protobuf\Internal\Messa
      *
      * Generated from protobuf field <code>string name = 1 [(.google.api.field_behavior) = REQUIRED, (.google.api.resource_reference) = {</code>
      */
-    private $name = '';
+    protected $name = '';
     /**
      * Required. The resource name for the Product to be removed from this
      * ProductSet.
@@ -31,7 +31,7 @@ class RemoveProductFromProductSetRequest extends \Google\Protobuf\Internal\Messa
      *
      * Generated from protobuf field <code>string product = 2 [(.google.api.field_behavior) = REQUIRED, (.google.api.resource_reference) = {</code>
      */
-    private $product = '';
+    protected $product = '';
 
     /**
      * @param string $name    Required. The resource name for the ProductSet to modify.

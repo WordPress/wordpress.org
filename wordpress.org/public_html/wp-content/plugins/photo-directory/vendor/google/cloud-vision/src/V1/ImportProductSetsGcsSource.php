@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * The Google Cloud Storage location for a csv file which preserves a list of
@@ -69,7 +69,7 @@ class ImportProductSetsGcsSource extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string csv_file_uri = 1;</code>
      */
-    private $csv_file_uri = '';
+    protected $csv_file_uri = '';
 
     /**
      * Constructor.

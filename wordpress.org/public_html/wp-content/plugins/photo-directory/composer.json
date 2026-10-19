@@ -4,7 +4,7 @@
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "require": {
-        "google/cloud-vision": "^1.5",
+        "google/cloud-vision": "^2.0",
         "google/cloud-storage": "^1.26"
     }
 }

@@ -347,39 +347,39 @@
         },
         {
             "name": "google/cloud-vision",
-            "version": "v1.10.3",
-            "version_normalized": "1.10.3.0",
+            "version": "v2.3.3",
+            "version_normalized": "2.3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-cloud-php-vision.git",
-                "reference": "8d01d61c04571e2cf85f6823af45f9fcbe693b9f"
+                "reference": "768a489001010cb3cfcf4401689576bc0e506b5d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-cloud-php-vision/zipball/8d01d61c04571e2cf85f6823af45f9fcbe693b9f",
-                "reference": "8d01d61c04571e2cf85f6823af45f9fcbe693b9f",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-vision/zipball/768a489001010cb3cfcf4401689576bc0e506b5d",
+                "reference": "768a489001010cb3cfcf4401689576bc0e506b5d",
                 "shasum": ""
             },
             "require": {
                 "google/cloud-core": "^1.57",
-                "google/gax": "^1.36.0",
-                "php": "^8.0"
+                "google/gax": "^1.38.0",
+                "php": "^8.2"
             },
             "require-dev": {
                 "erusev/parsedown": "^1.6",
-                "google/cloud-storage": "^1.12",
+                "google/cloud-storage": "^2.0",
                 "phpdocumentor/reflection": "^5.3.3||^6.0",
-                "phpdocumentor/reflection-docblock": "^5.3",
+                "phpdocumentor/reflection-docblock": "^5.3.3||^6.0",
                 "phpspec/prophecy-phpunit": "^2.0",
                 "phpunit/phpunit": "^9.0",
-                "squizlabs/php_codesniffer": "2.*"
+                "squizlabs/php_codesniffer": "3.*"
             },
             "suggest": {
                 "ext-grpc": "The gRPC extension enables use of the performant gRPC transport",
                 "ext-protobuf": "Provides a significant increase in throughput over the pure PHP protobuf implementation. See https://cloud.google.com/php/grpc for installation instructions.",
                 "google/cloud-storage": "Annotate images stored in Google Cloud Storage"
             },
-            "time": "2025-01-24T21:24:06+00:00",
+            "time": "2026-09-28T17:51:46+00:00",
             "type": "library",
             "extra": {
                 "component": {
@@ -402,7 +402,7 @@
             ],
             "description": "Cloud Vision Client for PHP",
             "support": {
-                "source": "https://github.com/googleapis/google-cloud-php-vision/tree/v1.10.3"
+                "source": "https://github.com/googleapis/google-cloud-php-vision/tree/v2.3.3"
             },
             "install-path": "../google/cloud-vision"
         },

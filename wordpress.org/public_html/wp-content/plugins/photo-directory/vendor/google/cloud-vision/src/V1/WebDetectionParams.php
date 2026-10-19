@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Parameters for web detection request.
@@ -47,7 +47,9 @@ class WebDetectionParams extends \Google\Protobuf\Internal\Message
      */
     public function getIncludeGeoResults()
     {
-        @trigger_error('include_geo_results is deprecated.', E_USER_DEPRECATED);
+        if ($this->include_geo_results !== false) {
+            @trigger_error('include_geo_results is deprecated.', E_USER_DEPRECATED);
+        }
         return $this->include_geo_results;
     }
 

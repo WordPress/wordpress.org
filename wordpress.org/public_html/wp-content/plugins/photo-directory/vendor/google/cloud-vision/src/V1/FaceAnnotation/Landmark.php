@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1\FaceAnnotation;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * A face-specific landmark (for example, a face feature).
@@ -20,13 +20,13 @@ class Landmark extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.FaceAnnotation.Landmark.Type type = 3;</code>
      */
-    private $type = 0;
+    protected $type = 0;
     /**
      * Face landmark position.
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.Position position = 4;</code>
      */
-    private $position = null;
+    protected $position = null;
 
     /**
      * Constructor.
@@ -108,7 +108,4 @@ class Landmark extends \Google\Protobuf\Internal\Message
     }
 
 }
-
-// Adding a class alias for backwards compatibility with the previous class name.
-class_alias(Landmark::class, \Google\Cloud\Vision\V1\FaceAnnotation_Landmark::class);
 

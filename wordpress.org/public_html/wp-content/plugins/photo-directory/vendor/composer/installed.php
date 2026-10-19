@@ -56,9 +56,9 @@
             'dev_requirement' => false,
         ),
         'google/cloud-vision' => array(
-            'pretty_version' => 'v1.10.3',
-            'version' => '1.10.3.0',
-            'reference' => '8d01d61c04571e2cf85f6823af45f9fcbe693b9f',
+            'pretty_version' => 'v2.3.3',
+            'version' => '2.3.3.0',
+            'reference' => '768a489001010cb3cfcf4401689576bc0e506b5d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../google/cloud-vision',
             'aliases' => array(),

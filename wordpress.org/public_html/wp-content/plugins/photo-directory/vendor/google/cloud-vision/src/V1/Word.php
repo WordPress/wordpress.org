@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * A word representation.
@@ -20,7 +20,7 @@ class Word extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.TextAnnotation.TextProperty property = 1;</code>
      */
-    private $property = null;
+    protected $property = null;
     /**
      * The bounding box for the word.
      * The vertices are in the order of top-left, top-right, bottom-right,
@@ -40,7 +40,7 @@ class Word extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.BoundingPoly bounding_box = 2;</code>
      */
-    private $bounding_box = null;
+    protected $bounding_box = null;
     /**
      * List of symbols in the word.
      * The order of the symbols follows the natural reading order.
@@ -53,7 +53,7 @@ class Word extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>float confidence = 4;</code>
      */
-    private $confidence = 0.0;
+    protected $confidence = 0.0;
 
     /**
      * Constructor.
@@ -79,7 +79,7 @@ class Word extends \Google\Protobuf\Internal\Message
      *                |    |
      *                1----0
      *             and the vertex order will still be (0, 1, 2, 3).
-     *     @type array<\Google\Cloud\Vision\V1\Symbol>|\Google\Protobuf\Internal\RepeatedField $symbols
+     *     @type \Google\Cloud\Vision\V1\Symbol[] $symbols
      *           List of symbols in the word.
      *           The order of the symbols follows the natural reading order.
      *     @type float $confidence
@@ -196,7 +196,7 @@ class Word extends \Google\Protobuf\Internal\Message
      * The order of the symbols follows the natural reading order.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.Symbol symbols = 3;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Cloud\Vision\V1\Symbol>
      */
     public function getSymbols()
     {
@@ -208,7 +208,7 @@ class Word extends \Google\Protobuf\Internal\Message
      * The order of the symbols follows the natural reading order.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.Symbol symbols = 3;</code>
-     * @param array<\Google\Cloud\Vision\V1\Symbol>|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Cloud\Vision\V1\Symbol[] $var
      * @return $this
      */
     public function setSymbols($var)

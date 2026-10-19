@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Structural unit of text representing a number of words in certain order.
@@ -20,7 +20,7 @@ class Paragraph extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.TextAnnotation.TextProperty property = 1;</code>
      */
-    private $property = null;
+    protected $property = null;
     /**
      * The bounding box for the paragraph.
      * The vertices are in the order of top-left, top-right, bottom-right,
@@ -40,7 +40,7 @@ class Paragraph extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.BoundingPoly bounding_box = 2;</code>
      */
-    private $bounding_box = null;
+    protected $bounding_box = null;
     /**
      * List of all words in this paragraph.
      *
@@ -52,7 +52,7 @@ class Paragraph extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>float confidence = 4;</code>
      */
-    private $confidence = 0.0;
+    protected $confidence = 0.0;
 
     /**
      * Constructor.
@@ -78,7 +78,7 @@ class Paragraph extends \Google\Protobuf\Internal\Message
      *                |    |
      *                1----0
      *             and the vertex order will still be (0, 1, 2, 3).
-     *     @type array<\Google\Cloud\Vision\V1\Word>|\Google\Protobuf\Internal\RepeatedField $words
+     *     @type \Google\Cloud\Vision\V1\Word[] $words
      *           List of all words in this paragraph.
      *     @type float $confidence
      *           Confidence of the OCR results for the paragraph. Range [0, 1].
@@ -193,7 +193,7 @@ class Paragraph extends \Google\Protobuf\Internal\Message
      * List of all words in this paragraph.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.Word words = 3;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Cloud\Vision\V1\Word>
      */
     public function getWords()
     {
@@ -204,7 +204,7 @@ class Paragraph extends \Google\Protobuf\Internal\Message
      * List of all words in this paragraph.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.Word words = 3;</code>
-     * @param array<\Google\Cloud\Vision\V1\Word>|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Cloud\Vision\V1\Word[] $var
      * @return $this
      */
     public function setWords($var)

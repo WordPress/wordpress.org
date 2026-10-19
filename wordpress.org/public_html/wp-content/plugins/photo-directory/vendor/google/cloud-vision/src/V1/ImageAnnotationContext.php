@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * If an image was produced from a file (e.g. a PDF), this message gives
@@ -21,14 +21,14 @@ class ImageAnnotationContext extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string uri = 1;</code>
      */
-    private $uri = '';
+    protected $uri = '';
     /**
      * If the file was a PDF or TIFF, this field gives the page number within
      * the file used to produce the image.
      *
      * Generated from protobuf field <code>int32 page_number = 2;</code>
      */
-    private $page_number = 0;
+    protected $page_number = 0;
 
     /**
      * Constructor.

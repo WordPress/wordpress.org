@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Config to control which ProductSet contains the Products to be deleted.
@@ -22,7 +22,7 @@ class ProductSetPurgeConfig extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string product_set_id = 1;</code>
      */
-    private $product_set_id = '';
+    protected $product_set_id = '';
 
     /**
      * Constructor.

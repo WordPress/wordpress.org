@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Request message for the `UpdateProduct` method.
@@ -21,7 +21,7 @@ class UpdateProductRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.Product product = 1 [(.google.api.field_behavior) = REQUIRED];</code>
      */
-    private $product = null;
+    protected $product = null;
     /**
      * The [FieldMask][google.protobuf.FieldMask] that specifies which fields
      * to update.
@@ -31,7 +31,7 @@ class UpdateProductRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.protobuf.FieldMask update_mask = 2;</code>
      */
-    private $update_mask = null;
+    protected $update_mask = null;
 
     /**
      * @param \Google\Cloud\Vision\V1\Product $product    Required. The Product resource which replaces the one on the server.

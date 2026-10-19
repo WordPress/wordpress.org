@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Request message for the `PurgeProducts` method.
@@ -21,14 +21,14 @@ class PurgeProductsRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string parent = 1 [(.google.api.field_behavior) = REQUIRED, (.google.api.resource_reference) = {</code>
      */
-    private $parent = '';
+    protected $parent = '';
     /**
      * The default value is false. Override this value to true to actually perform
      * the purge.
      *
      * Generated from protobuf field <code>bool force = 4;</code>
      */
-    private $force = false;
+    protected $force = false;
     protected $target;
 
     /**
