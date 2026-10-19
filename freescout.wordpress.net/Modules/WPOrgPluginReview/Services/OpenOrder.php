@@ -236,7 +236,7 @@ final class OpenOrder {
 
 	/**
 	 * How many replies the team sent to conversations: their published emails written by agents, the first one
-	 * included, and not notes.
+	 * included, and not notes or the plugin directory's upload confirmations.
 	 *
 	 * @param int[] $ids Conversation IDs.
 	 * @return array<int, int> By conversation ID.
@@ -250,6 +250,7 @@ final class OpenOrder {
 			->whereIn( 'conversation_id', $ids )
 			->where( 'type', Thread::TYPE_MESSAGE )
 			->where( 'state', Thread::STATE_PUBLISHED )
+			->where( 'body', 'not like', '%' . Review::UPLOAD_CONFIRMATION . '%' )
 			->groupBy( 'conversation_id' )
 			->selectRaw( 'conversation_id, count(*) as total' )
 			->pluck( 'total', 'conversation_id' )

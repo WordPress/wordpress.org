@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Modules\WPOrgPluginReview\Providers\WPOrgPluginReviewServiceProvider;
 use Modules\WPOrgPluginReview\Services\OpenOrder;
+use Modules\WPOrgPluginReview\Services\Review;
 use Modules\WPOrgPluginReview\Services\Worklist;
 use Modules\WPOrgPluginReview\Tests\Support\Tags;
 use WordPressdotorg\FreeScout\Tests\TestCase;
@@ -167,6 +168,24 @@ final class OpenOrderTest extends TestCase {
 
 		// Three replies wait 2 days, 12 hours beyond; two wait a day, 35 hours beyond.
 		$this->assertSame( $this->ids( $answered, $started ), OpenOrder::progress_based( array( $started, $answered ), 25 ) );
+	}
+
+	/**
+	 * The plugin directory's upload confirmations aren't the team's replies, though an agent posts them.
+	 *
+	 * @return void
+	 */
+	public function test_progress_based_ignores_upload_confirmations(): void {
+		$uploaded = $this->conversation( 1, 30 );
+		$other    = $this->conversation( 1, 26 );
+
+		$wporg = $this->create_user();
+		for ( $n = 0; $n < 3; $n++ ) {
+			$this->create_thread( $uploaded, Thread::TYPE_MESSAGE, '<p>' . Review::UPLOAD_CONFIRMATION . '</p>', $wporg, '2026-01-01 10:00:00' );
+		}
+
+		// One reply each waits a day: 6 hours beyond, and 2.
+		$this->assertSame( $this->ids( $uploaded, $other ), OpenOrder::progress_based( array( $uploaded, $other ), 25 ) );
 	}
 
 	/**
