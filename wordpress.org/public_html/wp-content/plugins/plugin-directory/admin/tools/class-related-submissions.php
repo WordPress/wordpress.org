@@ -398,7 +398,7 @@ class Related_Submissions {
 			'<a href="%1$s">%2$s</a> (%3$s, %4$s, %5$s)%6$s',
 			esc_url( get_edit_post_link( $plugin->ID, '' ) ),
 			esc_html( $plugin->post_name ),
-			esc_html( get_post_status_object( $plugin->post_status )->label ),
+			esc_html( get_post_status_object( $plugin->post_status )->label ?? $plugin->post_status ),
 			esc_html( $plugin->user_login ),
 			/* translators: %s: Time since the plugin was submitted or published. */
 			esc_html( sprintf( __( '%s ago', 'wporg-plugins' ), human_time_diff( strtotime( $plugin->post_date_gmt ) ) ) ),
