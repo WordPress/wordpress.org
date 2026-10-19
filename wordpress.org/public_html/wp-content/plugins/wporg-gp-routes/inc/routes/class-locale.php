@@ -563,6 +563,8 @@ class Locale extends GP_Route {
 			}
 		}
 
+		// Sorts special characters as well.
+		$collator   = class_exists( 'Collator' ) ? new Collator( $locale_slug ) : null;
 		$editor_ids = [];
 
 		// Get the names of the translation editors.
@@ -583,9 +585,6 @@ class Locale extends GP_Route {
 				// Store editor IDs.
 				$editor_ids[ (int) $editor_id ] = true;
 			}
-
-			// Also sorts special characters.
-			$collator = class_exists( 'Collator' ) ? new Collator( $locale_slug ) : null;
 
 			uasort(
 				$locale_contributors['editors'][ $editor_source ],
@@ -1138,6 +1137,9 @@ class Locale extends GP_Route {
 
 				// Float Favorites to the start, float fully translated to the bottom, order the rest by name
 				if ( ! empty( $user_fav_projects ) ) {
+					// Cap favorites to avoid building an oversized FIELD() clause in ORDER BY.
+					$top_fav_projects = array_slice( $user_fav_projects, 0, 100 );
+
 					// Safely quote and escape values for SQL.
 					$escaped_favs    = array_map( 'esc_sql', $user_fav_projects );
 					$quoted_favs     = "'" . implode( "', '", $escaped_favs ) . "'";
