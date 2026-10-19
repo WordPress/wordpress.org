@@ -21,7 +21,8 @@ Templates::header(
 );
 ?>
 <div class="event-page-wrapper">
-	<div class="notice" style="padding: .5rem">
+	<div class="notice notice-info notice-alt">
+		<p>
 		<?php
 		echo wp_kses(
 			sprintf(
@@ -32,6 +33,7 @@ Templates::header(
 			array( 'a' => array( 'href' => array() ) )
 		);
 		?>
+		</p>
 	</div>
 <div class="event-left-col">
 <?php
