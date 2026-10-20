@@ -16,12 +16,10 @@ brew install colima docker docker-compose
 colima start --cpu 4 --memory 4
 ```
 
-Homebrew installs Compose as a Docker CLI plugin outside the CLI's search path. On Apple Silicon, point the CLI at it in `~/.docker/config.json`:
+Homebrew installs Compose as a Docker CLI plugin outside the CLI's search path. On Apple Silicon, point the CLI at it by adding this property to `~/.docker/config.json`, keeping whatever else is already in the file:
 
 ```json
-{
-	"cliPluginsExtraDirs": [ "/opt/homebrew/lib/docker/cli-plugins" ]
-}
+"cliPluginsExtraDirs": [ "/opt/homebrew/lib/docker/cli-plugins" ]
 ```
 
 Colima remembers the CPU and memory settings, so later starts are just `colima start`. To start it at login instead, run `brew services start colima`.
