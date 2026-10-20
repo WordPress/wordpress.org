@@ -347,12 +347,17 @@ class Locale extends GP_Route {
 			if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
 				$directory_post_id = gp_get_meta( 'wp-plugins', $sub_project->id, 'directory-post-id' );
 				if ( $directory_post_id ) {
-					switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
-					$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
-					restore_current_blog();
-
-					if ( $icon ) {
-						return $icon;
+					$switched = switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
+					if ( $switched ) {
+						$icon = null;
+						try {
+							$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
+						} finally {
+							restore_current_blog();
+						}
+						if ( $icon ) {
+							return $icon;
+						}
 					}
 				}
 			}
