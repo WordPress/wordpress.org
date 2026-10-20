@@ -423,7 +423,11 @@
 
 	// The Plugin Review panel tells the plugin once WordPress.org did, which may take a while.
 	$( document ).on( 'wporgpluginreview:plugin', ( event, plugin ) => {
-		if ( ! plugin || ! plugin.download_url || plugin.released ) {
+		if (
+			! plugin ||
+			! plugin.download_url ||
+			! [ 'new', 'pending' ].includes( plugin.status )
+		) {
 			return;
 		}
 
