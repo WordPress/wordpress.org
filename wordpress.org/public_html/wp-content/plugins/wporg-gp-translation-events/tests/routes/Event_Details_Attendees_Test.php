@@ -14,10 +14,10 @@ use Wporg\TranslationEvents\Tests\Event_Factory;
 
 /**
  * The event details page lists attendees who pledged to help but did not end
- * up contributing. Once an event is over, that list should no longer be
- * shown, as the original issue asks, since by then it only names people who
- * pledged to help and did not contribute. This change hides the list in both
- * the template renderer and the 2024 block theme renderer.
+ * up contributing. Once an event is over, that list is hidden, since listing
+ * those people after the event can be perceived as negative. This change
+ * hides the list in both the template renderer and the 2024 block theme
+ * renderer.
  *
  * These tests render the details route for an event that is still active and
  * for one that has ended, and assert the attendees section is present only
