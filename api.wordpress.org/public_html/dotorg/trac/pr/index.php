@@ -85,12 +85,7 @@ foreach ( select_prs_to_refresh( $prs, $authenticated ) as $data ) {
 }
 
 // PRs that have never been fetched have nothing to show yet.
-$prs = array_filter(
-	$prs,
-	function ( $data ) {
-		return $data->data;
-	}
-);
+$prs = array_filter( $prs, fn( $pr ) => $pr->data );
 
 // Expiry is an hour for everyone..
 // ..unless authenticated and a linked PR has changed within the last week, then 5 min.
