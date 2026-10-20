@@ -6,7 +6,8 @@
 		"../wordpress.org/public_html/wp-content/plugins/plugin-directory"
 	],
 	"mappings": {
-		"wp-content/env-bin": "./plugin-directory/bin"
+		"wp-content/env-bin": "./plugin-directory/bin",
+		"wp-content/plugins/wporg-abilities": "../wordpress.org/public_html/wp-content/plugins/wporg-abilities"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash plugin-directory/bin/after-start-test.sh"
