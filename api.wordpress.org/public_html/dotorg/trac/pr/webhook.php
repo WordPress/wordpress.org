@@ -49,11 +49,11 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 
 		// API call to get the latest PR details, not all actions that trigger this include the full PR details.
 		// Partial details still link a new PR, which may not see another event.
-		$pr_data = fetch_pr_data( $pr_repo, $pr_number, true );
+		$pr_data = fetch_partial_pr_data( $pr_repo, $pr_number );
 		if ( ! $pr_data || $pr_data->partial ) {
 			// One retry..
 			sleep( 2 );
-			$pr_data = fetch_pr_data( $pr_repo, $pr_number, true ) ?: $pr_data;
+			$pr_data = fetch_partial_pr_data( $pr_repo, $pr_number ) ?: $pr_data;
 		}
 		if ( ! $pr_data ) {
 			// Failed, we need the PR data to be able to process the request.

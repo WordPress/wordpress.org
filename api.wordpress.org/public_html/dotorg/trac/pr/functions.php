@@ -4,13 +4,31 @@ namespace WordPressdotorg\API\Trac\GithubPRs;
 /**
  * Fetches and reformats the Github PR API response to the details we need.
  *
- * @param string $repo          The repository, as `owner/name`.
- * @param int    $pr            The PR number.
- * @param bool   $allow_partial Whether to return the details when only the PR itself could be fetched.
- *                              The lists that failed are then empty, and `partial` is set.
- * @return object|false The PR's details, or false if they could not be fetched.
+ * @param string $repo The repository, as `owner/name`.
+ * @param int    $pr   The PR number.
+ * @return object|false The PR's details, or false if any of them could not be fetched.
  */
-function fetch_pr_data( $repo, $pr, $allow_partial = false ) {
+function fetch_pr_data( $repo, $pr ) {
+	$details = fetch_partial_pr_data( $repo, $pr );
+	if ( ! $details || $details->partial ) {
+		return false;
+	}
+
+	unset( $details->partial );
+
+	return $details;
+}
+
+/**
+ * Fetches a PR's details, even if only the PR itself could be fetched.
+ *
+ * The lists that failed are then empty and `partial` is set, so the details must not replace stored ones.
+ *
+ * @param string $repo The repository, as `owner/name`.
+ * @param int    $pr   The PR number.
+ * @return object|false The PR's details, or false if the PR could not be fetched.
+ */
+function fetch_partial_pr_data( $repo, $pr ) {
 	$url = '/repos/' . $repo . '/pulls/' . intval( $pr );
 	$data = api_request( $url );
 
@@ -37,12 +55,6 @@ function fetch_pr_data( $repo, $pr, $allow_partial = false ) {
 		null,
 		[ 'Accept: application/vnd.github.antiope-preview+json' ]
 	);
-
-	// A failed request returns GitHub's error object instead of a list, leaving the details incomplete.
-	$partial = ! is_array( $_check_runs ) || ! is_array( $_reviews ) || ! is_array( $_files );
-	if ( $partial && ! $allow_partial ) {
-		return false;
-	}
 
 	// Get Travis CI State.
 	$check_runs = [];
@@ -85,7 +97,7 @@ function fetch_pr_data( $repo, $pr, $allow_partial = false ) {
 		}
 	}
 
-	$details = (object) [
+	return (object) [
 		'repo'            => $data->base->repo->full_name,
 		'number'          => $data->number,
 		'html_url'        => $data->html_url,
@@ -110,13 +122,9 @@ function fetch_pr_data( $repo, $pr, $allow_partial = false ) {
 			'html_url'  => $data->html_url,
 		],
 		'trac_ticket'    => determine_trac_ticket( $data ),
+		// A failed request returns GitHub's error object instead of a list.
+		'partial'         => ! is_array( $_check_runs ) || ! is_array( $_reviews ) || ! is_array( $_files ),
 	];
-
-	if ( $allow_partial ) {
-		$details->partial = $partial;
-	}
-
-	return $details;
 }
 
 /**

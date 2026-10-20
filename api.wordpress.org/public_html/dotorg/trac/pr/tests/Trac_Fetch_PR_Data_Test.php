@@ -143,14 +143,14 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	}
 
 	/**
-	 * A caller allowing partial details is told when they are complete.
+	 * Partial details that are complete say so.
 	 *
 	 * @return void
 	 */
 	public function test_complete_details_are_not_partial() {
 		$this->respond();
 
-		$pr = fetch_pr_data( 'WordPress/wordpress-develop', 1, true );
+		$pr = fetch_partial_pr_data( 'WordPress/wordpress-develop', 1 );
 
 		$this->assertIsObject( $pr );
 		$this->assertFalse( $pr->partial );
@@ -213,7 +213,7 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	}
 
 	/**
-	 * A caller allowing partial details gets the PR, with the failed list left empty.
+	 * Partial details still have the PR, with the failed list left empty.
 	 *
 	 * @dataProvider data_failed_lists
 	 *
@@ -225,7 +225,7 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	public function test_a_failed_list_leaves_partial_details( string $request, string $property, $empty ) {
 		$this->respond( array( $request => self::RATE_LIMITED ) );
 
-		$pr = fetch_pr_data( 'WordPress/wordpress-develop', 1, true );
+		$pr = fetch_partial_pr_data( 'WordPress/wordpress-develop', 1 );
 
 		$this->assertIsObject( $pr );
 		$this->assertTrue( $pr->partial );
@@ -254,6 +254,6 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	public function test_a_missing_pr_has_no_partial_details() {
 		$this->respond( array( 'pr' => self::NOT_FOUND ) );
 
-		$this->assertFalse( fetch_pr_data( 'WordPress/wordpress-develop', 1, true ) );
+		$this->assertFalse( fetch_partial_pr_data( 'WordPress/wordpress-develop', 1 ) );
 	}
 }
