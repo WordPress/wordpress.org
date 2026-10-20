@@ -54,63 +54,43 @@ array_walk( $prs, function( $data ) {
 	return $data;
 } );
 
-// Refresh any data that's needed
-// Rules:
-//  - 5 minutes for logged in requests, 60 mins for unauthenticated.
-//  - If PR created/updated in last half hour, every two minutes
-array_walk( $prs, function( $data ) use ( $authenticated ) {
-	global $wpdb;
+// Refresh any data that's needed.
+foreach ( select_prs_to_refresh( $prs, $authenticated ) as $data ) {
+	$pr_data = fetch_pr_data( $data->repo, $data->pr );
 
-	if (
-		// If no data..
-		! $data->data ||
-		// or it's out of date..
-		strtotime( $data->last_checked ) <= time() - ($authenticated ? 5*60 : 60*60) ||
-		// or the PR was created/updated within the last 30 minutes AND is more than 2 minutes out of date
-		(
-			strtotime( $data->data->updated_at ) > time() - 30*60
-			&&
-			strtotime( $data->last_checked ) <= time() - 2*60
-		) ||
-		// or unit tests are running, then 2min.
-		(
-			$data->data->check_runs
-			&&
-			in_array( 'in_progress', (array) $data->data->check_runs )
-			&&
-			strtotime( $data->last_checked ) <= time() - 2*60
-		)
-	) {
-		$pr_data = fetch_pr_data( $data->repo, $data->pr );
+	if ( $pr_data ) {
+		$data->data = $pr_data;
 
-		if ( $pr_data ) {
-			$data->data = $pr_data;
+		// TODO: catch the trac ticket changing and update the database.
+		unset( $data->data->trac_ticket );
 
-			// TODO: catch the trac ticket changing and update the database.
-			unset( $data->data->trac_ticket );
-
-			// Check if we now have an author for this PR, the author may link their account after creating the PR.
-			if ( ! $data->author ) {
-				$data->author = (int) find_wporg_user_by_github( $pr_data->user->name, 'ID' );
-			}
-
-			$wpdb->update(
-				'trac_github_prs',
-				[
-					'data'         => json_encode( $pr_data ),
-					'last_checked' => gmdate( 'Y-m-d H:i:s' ),
-					'author'       => $data->author,
-				],
-				[
-					'repo' => $data->repo,
-					'pr'   => $data->pr
-				]
-			);
+		// Check if we now have an author for this PR, the author may link their account after creating the PR.
+		if ( ! $data->author ) {
+			$data->author = (int) find_wporg_user_by_github( $pr_data->user->name, 'ID' );
 		}
-	}
 
-	return $data;
-} );
+		$wpdb->update(
+			'trac_github_prs',
+			[
+				'data'         => json_encode( $pr_data ),
+				'last_checked' => gmdate( 'Y-m-d H:i:s' ),
+				'author'       => $data->author,
+			],
+			[
+				'repo' => $data->repo,
+				'pr'   => $data->pr,
+			]
+		);
+	}
+}
+
+// PRs that have never been fetched have nothing to show yet.
+$prs = array_filter(
+	$prs,
+	function ( $data ) {
+		return $data->data;
+	}
+);
 
 // Expiry is an hour for everyone..
 // ..unless authenticated and a linked PR has changed within the last week, then 5 min.
