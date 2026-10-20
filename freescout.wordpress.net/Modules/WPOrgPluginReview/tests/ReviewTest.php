@@ -239,9 +239,9 @@ final class ReviewTest extends TestCase {
 		);
 
 		// Once the review is no longer in progress, the slug isn't offered.
-		$this->conversation->update( array( 'subject' => '[WordPress Plugin Directory] Closure Notice - Trademarks: My Plugin' ) );
+		$this->conversation->update( array( 'subject' => '[WordPress Plugin Directory] Closure Notice - Trademarks: Acme: Forms' ) );
 		$this->assertSame( '', Review::latest( $this->conversation )['names']['suggested_slug'] );
-		$this->assertSame( 'My Plugin', Review::latest( $this->conversation )['names']['original'] );
+		$this->assertSame( 'Acme: Forms', Review::latest( $this->conversation )['names']['original'] );
 	}
 
 	/**

@@ -562,8 +562,11 @@ final class Review {
 		if ( preg_match( '/Review in Progress:\s*(.+)$/i', $subject, $matches ) ) {
 			$original = trim( $matches[1] );
 		} else {
-			$colon    = mb_strrpos( $subject, ':' );
-			$original = false === $colon ? $subject : trim( mb_substr( $subject, $colon + 1 ) );
+			$original = Subject::name( $subject );
+			if ( '' === $original ) {
+				$colon    = mb_strrpos( $subject, ':' );
+				$original = false === $colon ? $subject : trim( mb_substr( $subject, $colon + 1 ) );
+			}
 		}
 
 		return array(

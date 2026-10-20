@@ -105,6 +105,19 @@ final class Subject {
 	}
 
 	/**
+	 * The plugin's name in a subject: everything after its kind, colons included.
+	 *
+	 * @param string $subject Subject.
+	 * @return string Empty if it isn't one of the plugin directory's, or names no plugin.
+	 */
+	public static function name( string $subject ): string {
+		$subject = self::without_prefix( $subject );
+		$colon   = null === $subject ? false : strpos( $subject, ': ' );
+
+		return false === $colon ? '' : trim( substr( $subject, $colon + 2 ) );
+	}
+
+	/**
 	 * A plugin directory's subject without its prefix, nor those of replies and forwards.
 	 *
 	 * @param string $subject Subject.
