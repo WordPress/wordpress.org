@@ -25,6 +25,13 @@ use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submissio
 class Upload_Handler {
 
 	/**
+	 * How the reply confirming an author's upload starts, in the review conversation.
+	 *
+	 * @var string
+	 */
+	const UPLOAD_CONFIRMATION = 'This is an automated message to confirm that we have received your updated plugin file.';
+
+	/**
 	 * Path to temporary plugin folder.
 	 *
 	 * @var string
@@ -1017,7 +1024,7 @@ class Upload_Handler {
 			return false;
 		}
 
-		$text = "This is an automated message to confirm that we have received your updated plugin file.\n\n";
+		$text = self::UPLOAD_CONFIRMATION . "\n\n";
 		$text .= sprintf(
 			"File updated by %s, version %s.\n",
 			wp_get_current_user()->user_login,
