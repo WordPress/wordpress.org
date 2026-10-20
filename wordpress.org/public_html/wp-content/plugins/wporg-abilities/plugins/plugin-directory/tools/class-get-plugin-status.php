@@ -13,6 +13,7 @@ use WordPressdotorg\Abilities\Plugins\Plugin_Directory\Ability_Base;
 use WordPressdotorg\Plugin_Directory\Clients\FreeScout as FreeScout_Client;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout as HelpScout_Client;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 
@@ -275,7 +276,7 @@ class Get_Plugin_Status extends Ability_Base {
 			// When only the latest reviewer message is needed, find it directly.
 			if ( ! $full_history ) {
 				foreach ( $threads as $thread ) {
-					if ( in_array( $thread->type ?? '', array( 'reply', 'message' ), true ) ) {
+					if ( 'reviewer' === self::get_sender( $thread ) ) {
 						$body = $thread->body ?? '';
 						if ( $body ) {
 							$body = self::html_to_text( $body );
@@ -301,7 +302,8 @@ class Get_Plugin_Status extends Ability_Base {
 			// Full history: process all threads.
 			foreach ( $threads as $thread ) {
 				// Skip internal notes and system events — only include customer and agent messages.
-				if ( ! in_array( $thread->type ?? '', array( 'customer', 'reply', 'message' ), true ) ) {
+				$from = self::get_sender( $thread );
+				if ( ! $from ) {
 					continue;
 				}
 
@@ -313,7 +315,7 @@ class Get_Plugin_Status extends Ability_Base {
 				}
 
 				$feedback[] = array(
-					'from' => 'customer' === $thread->type ? 'author' : 'reviewer',
+					'from' => $from,
 					// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout API property.
 					'date' => $thread->createdAt ?? '',
 					'body' => $body,
@@ -323,6 +325,29 @@ class Get_Plugin_Status extends Ability_Base {
 
 		// Return in chronological order (oldest first) so it reads as a conversation.
 		return array_reverse( $feedback );
+	}
+
+	/**
+	 * Who a thread is from.
+	 *
+	 * The plugin directory confirms an author's upload with a reply of its own, in either helpdesk, which is the
+	 * author's doing rather than the reviewer's feedback.
+	 *
+	 * @param object $thread A thread, shaped like HelpScout's.
+	 * @return string `author` or `reviewer`; empty for notes and system events.
+	 */
+	private static function get_sender( object $thread ): string {
+		$type = $thread->type ?? '';
+
+		if ( 'customer' === $type ) {
+			return 'author';
+		}
+
+		if ( ! in_array( $type, array( 'reply', 'message' ), true ) ) {
+			return '';
+		}
+
+		return str_contains( (string) ( $thread->body ?? '' ), Upload_Handler::UPLOAD_CONFIRMATION ) ? 'author' : 'reviewer';
 	}
 
 	/**
@@ -426,15 +451,8 @@ class Get_Plugin_Status extends Ability_Base {
 				continue;
 			}
 
-			$type = (string) ( $thread['type'] ?? '' );
-
-			// The plugin directory confirms an author's upload as its own agent; HelpScout records it as the author's.
-			if ( 'user' === ( $thread['createdBy']['type'] ?? '' ) && FreeScout_Client::USER_ID === (int) ( $thread['createdBy']['id'] ?? 0 ) ) {
-				$type = 'customer';
-			}
-
 			$threads[] = (object) array(
-				'type'      => $type,
+				'type'      => (string) ( $thread['type'] ?? '' ),
 				'body'      => (string) ( $thread['body'] ?? '' ),
 				'createdAt' => (string) ( $thread['createdAt'] ?? '' ),
 			);
