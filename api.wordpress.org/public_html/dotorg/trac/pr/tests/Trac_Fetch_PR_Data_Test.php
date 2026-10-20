@@ -63,7 +63,7 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	 * @param array $overrides Bodies replacing the successful ones, keyed by request.
 	 * @return void
 	 */
-	private function respond( array $overrides = array() ) {
+	private function respond( array $overrides = array() ): void {
 		$bodies = array_merge(
 			array(
 				'pr'         => array(
@@ -113,7 +113,7 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 			$overrides
 		);
 
-		$encode = function ( $body ) {
+		$encode = function ( mixed $body ): string {
 			return is_string( $body ) ? $body : json_encode( $body, JSON_THROW_ON_ERROR );
 		};
 
@@ -130,7 +130,7 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_a_pr_is_fetched() {
+	public function test_a_pr_is_fetched(): void {
 		$this->respond();
 
 		$pr = fetch_pr_data( 'WordPress/wordpress-develop', 1 );
@@ -147,7 +147,7 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_complete_details_are_not_partial() {
+	public function test_complete_details_are_not_partial(): void {
 		$this->respond();
 
 		$pr = fetch_partial_pr_data( 'WordPress/wordpress-develop', 1 );
@@ -161,7 +161,7 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_a_pr_with_empty_lists_is_fetched() {
+	public function test_a_pr_with_empty_lists_is_fetched(): void {
 		$this->respond(
 			array(
 				'check_runs' => array(
@@ -190,7 +190,7 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	 * @param string $body    What GitHub answers it with.
 	 * @return void
 	 */
-	public function test_a_failed_request_fails_the_fetch( string $request, string $body ) {
+	public function test_a_failed_request_fails_the_fetch( string $request, string $body ): void {
 		$this->respond( array( $request => $body ) );
 
 		$this->assertFalse( fetch_pr_data( 'WordPress/wordpress-develop', 1 ) );
@@ -219,17 +219,17 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	 *
 	 * @param string $request  The request that fails.
 	 * @param string $property The detail it leaves empty.
-	 * @param mixed  $empty    The empty value of that detail.
+	 * @param mixed  $expected The empty value of that detail.
 	 * @return void
 	 */
-	public function test_a_failed_list_leaves_partial_details( string $request, string $property, $empty ) {
+	public function test_a_failed_list_leaves_partial_details( string $request, string $property, mixed $expected ): void {
 		$this->respond( array( $request => self::RATE_LIMITED ) );
 
 		$pr = fetch_partial_pr_data( 'WordPress/wordpress-develop', 1 );
 
 		$this->assertIsObject( $pr );
 		$this->assertTrue( $pr->partial );
-		$this->assertSame( $empty, $pr->$property );
+		$this->assertSame( $expected, $pr->$property );
 		$this->assertSame( 'Tests: Add coverage', $pr->title );
 	}
 
@@ -251,7 +251,7 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_a_missing_pr_has_no_partial_details() {
+	public function test_a_missing_pr_has_no_partial_details(): void {
 		$this->respond( array( 'pr' => self::NOT_FOUND ) );
 
 		$this->assertFalse( fetch_partial_pr_data( 'WordPress/wordpress-develop', 1 ) );

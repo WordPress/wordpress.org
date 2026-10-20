@@ -47,8 +47,10 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 		$pr_repo   = $payload->pull_request->base->repo->full_name;
 		$pr_number = $payload->number;
 
-		// API call to get the latest PR details, not all actions that trigger this include the full PR details.
-		// Partial details still link a new PR, which may not see another event.
+		/*
+		 * API call to get the latest PR details, not all actions that trigger this include the full PR details.
+		 * Partial details still link a new PR, which may not see another event.
+		 */
 		$pr_data = fetch_partial_pr_data( $pr_repo, $pr_number );
 		if ( ! $pr_data || $pr_data->partial ) {
 			// One retry..
@@ -168,8 +170,10 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			}
 		}
 
-		// Step 4. Update all the instances of this PR with the new data, it may be linked to multiple tickets/tracs.
-		// Partial details would replace the stored reviews and tests with empty ones, so those wait for the next refresh.
+		/*
+		 * Step 4. Update all the instances of this PR with the new data, it may be linked to multiple tickets/tracs.
+		 * Partial details would replace the stored reviews and tests with empty ones, so those wait for the next refresh.
+		 */
 		if ( ! $pr_data->partial ) {
 			$wpdb->update(
 				'trac_github_prs',

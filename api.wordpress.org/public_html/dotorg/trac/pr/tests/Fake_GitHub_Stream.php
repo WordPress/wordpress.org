@@ -19,35 +19,35 @@ class Fake_GitHub_Stream {
 	 *
 	 * @var array<string, string>
 	 */
-	public static $responses = array();
+	public static array $responses = array();
 
 	/**
 	 * The stream context, set by PHP.
 	 *
 	 * @var resource|null
 	 */
-	public $context;
+	public mixed $context = null;
 
 	/**
 	 * The body of the open request.
 	 *
 	 * @var string
 	 */
-	private $body = '';
+	private string $body = '';
 
 	/**
 	 * How much of the body has been read.
 	 *
 	 * @var int
 	 */
-	private $position = 0;
+	private int $position = 0;
 
 	/**
 	 * Routes every `https` request to this class.
 	 *
 	 * @return void
 	 */
-	public static function register() {
+	public static function register(): void {
 		stream_wrapper_unregister( 'https' );
 		stream_wrapper_register( 'https', self::class );
 	}
@@ -57,7 +57,7 @@ class Fake_GitHub_Stream {
 	 *
 	 * @return void
 	 */
-	public static function unregister() {
+	public static function unregister(): void {
 		stream_wrapper_restore( 'https' );
 		self::$responses = array();
 	}

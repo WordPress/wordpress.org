@@ -24,7 +24,7 @@ class Trac_Refresh_Selection_Test extends TestCase {
 	 *
 	 * @var string
 	 */
-	private $timezone;
+	private string $timezone;
 
 	/**
 	 * Reads stored times as UTC, as the API does.
@@ -55,7 +55,7 @@ class Trac_Refresh_Selection_Test extends TestCase {
 	 * @param array  $data        PR data replacing the defaults.
 	 * @return object The linked PR.
 	 */
-	private function pr( int $checked_ago, string $state = 'open', array $data = array() ) {
+	private function pr( int $checked_ago, string $state = 'open', array $data = array() ): object {
 		static $number = 0;
 
 		return (object) array(
@@ -84,7 +84,7 @@ class Trac_Refresh_Selection_Test extends TestCase {
 	 * @param bool $expected      Whether it is refreshed.
 	 * @return void
 	 */
-	public function test_an_open_pr_is_refreshed_after_its_window( bool $authenticated, int $checked_ago, bool $expected ) {
+	public function test_an_open_pr_is_refreshed_after_its_window( bool $authenticated, int $checked_ago, bool $expected ): void {
 		$pr = $this->pr( $checked_ago );
 
 		$this->assertSame( $expected ? array( $pr ) : array(), select_prs_to_refresh( array( $pr ), $authenticated ) );
@@ -109,7 +109,7 @@ class Trac_Refresh_Selection_Test extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_a_recently_updated_pr_is_refreshed_every_two_minutes() {
+	public function test_a_recently_updated_pr_is_refreshed_every_two_minutes(): void {
 		$pr = $this->pr( 3 * 60, 'open', array( 'updated_at' => gmdate( 'Y-m-d\TH:i:s\Z', time() - 10 * 60 ) ) );
 
 		$this->assertSame( array( $pr ), select_prs_to_refresh( array( $pr ), false ) );
@@ -120,7 +120,7 @@ class Trac_Refresh_Selection_Test extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_a_pr_with_running_checks_is_refreshed_every_two_minutes() {
+	public function test_a_pr_with_running_checks_is_refreshed_every_two_minutes(): void {
 		$pr = $this->pr( 3 * 60, 'open', array( 'check_runs' => (object) array( 'GitHub Actions' => 'in_progress' ) ) );
 
 		$this->assertSame( array( $pr ), select_prs_to_refresh( array( $pr ), false ) );
@@ -131,7 +131,7 @@ class Trac_Refresh_Selection_Test extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_a_closed_pr_is_refreshed_once_a_day() {
+	public function test_a_closed_pr_is_refreshed_once_a_day(): void {
 		$recent = array(
 			'updated_at' => gmdate( 'Y-m-d\TH:i:s\Z', time() - 10 * 60 ),
 			'check_runs' => (object) array( 'GitHub Actions' => 'in_progress' ),
@@ -147,7 +147,7 @@ class Trac_Refresh_Selection_Test extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_only_the_stalest_prs_are_refreshed() {
+	public function test_only_the_stalest_prs_are_refreshed(): void {
 		$prs = array();
 		for ( $minutes = 10; $minutes <= 24; $minutes++ ) {
 			$prs[] = $this->pr( $minutes * 60 );
