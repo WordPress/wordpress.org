@@ -124,9 +124,6 @@ class Hooks {
 		// Deindex Support Forum Feeds. bbPress hooks in way earlier than most Core feed functions..
 		add_filter( 'request', array( $this, 'deindex_forum_feeds' ), 5 );
 
-		// Don't run shortcodes in topics and replies rendered by Core feeds. Runs before shortcode_unautop() at 10, so wpautop() still wraps them.
-		add_filter( 'the_content', array( $this, 'escape_shortcodes_in_feeds' ), 9 );
-
 		add_filter( 'request', array( $this, 'ignore_empty_query_vars' ) );
 
 		// Support ```...``` and {{{...}}} for code blocks.
@@ -1202,27 +1199,6 @@ class Hooks {
 		}
 
 		return $query_vars;
-	}
-
-	/**
-	 * Escape shortcodes in topics and replies rendered by Core feeds.
-	 *
-	 * Core feeds such as /support/topic-tag/foo/feed/ pass user content through
-	 * `the_content`, which runs shortcodes, though bbPress never does. Encoding
-	 * the brackets shows the shortcode as typed instead.
-	 *
-	 * @param string $content Post content.
-	 * @return string
-	 */
-	public function escape_shortcodes_in_feeds( $content ) {
-		if (
-			is_feed() &&
-			in_array( get_post_type(), array( bbp_get_topic_post_type(), bbp_get_reply_post_type() ), true )
-		) {
-			$content = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $content );
-		}
-
-		return $content;
 	}
 
 	/**
