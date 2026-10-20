@@ -426,8 +426,15 @@ class Get_Plugin_Status extends Ability_Base {
 				continue;
 			}
 
+			$type = (string) ( $thread['type'] ?? '' );
+
+			// The plugin directory confirms an author's upload as its own agent; HelpScout records it as the author's.
+			if ( 'user' === ( $thread['createdBy']['type'] ?? '' ) && FreeScout_Client::USER_ID === (int) ( $thread['createdBy']['id'] ?? 0 ) ) {
+				$type = 'customer';
+			}
+
 			$threads[] = (object) array(
-				'type'      => (string) ( $thread['type'] ?? '' ),
+				'type'      => $type,
 				'body'      => (string) ( $thread['body'] ?? '' ),
 				'createdAt' => (string) ( $thread['createdAt'] ?? '' ),
 			);
