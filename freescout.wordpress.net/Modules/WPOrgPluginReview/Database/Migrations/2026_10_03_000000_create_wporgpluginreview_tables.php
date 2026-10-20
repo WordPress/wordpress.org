@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Schema;
 use Modules\WPOrgPluginReview\Jobs\IndexReviews;
 
 /**
- * Which threads are review emails, and of what type, from their Review ID lines.
+ * Which threads are review emails, of what type, and about which plugin, from their Review ID lines.
  */
 class CreateWporgpluginreviewTables extends Migration {
 
@@ -35,6 +35,8 @@ class CreateWporgpluginreviewTables extends Migration {
 				$table->unsignedInteger( 'conversation_id' )->index();
 				$table->string( 'type', 50 );
 				$table->timestamp( 'reviewed_at' )->nullable();
+				$table->unsignedInteger( 'plugin_id' )->default( 0 );
+				$table->index( array( 'plugin_id', 'conversation_id' ) );
 			}
 		);
 

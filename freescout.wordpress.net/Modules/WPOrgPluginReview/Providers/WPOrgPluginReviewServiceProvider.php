@@ -20,6 +20,7 @@ use Illuminate\Support\ServiceProvider;
 use Modules\WPOrgPluginReview\Console\IndexReviews;
 use Modules\WPOrgPluginReview\Services\FlagReplies;
 use Modules\WPOrgPluginReview\Services\OpenOrder;
+use Modules\WPOrgPluginReview\Services\PluginConversations;
 use Modules\WPOrgPluginReview\Services\Review;
 use Modules\WPOrgPluginReview\Services\Reviewers;
 use Modules\WPOrgPluginReview\Services\Subject;
@@ -176,6 +177,8 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 			},
 			self::PANEL_PRIORITY
 		);
+
+		\Eventy::addFilter( 'api.conversations.query', array( PluginConversations::class, 'filter' ), 20, 2 );
 
 		self::register_subject_hooks();
 		self::register_folder_hooks();

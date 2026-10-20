@@ -416,6 +416,7 @@ final class Review {
 			'conversation_id' => (int) $thread->conversation_id,
 			'type'            => mb_substr( $review_id['type'], 0, 50 ),
 			'reviewed_at'     => $thread->created_at ? (string) $thread->created_at : null,
+			'plugin_id'       => max( 0, (int) ( $review_id['plugin_id'] ?? 0 ) ),
 		);
 	}
 
