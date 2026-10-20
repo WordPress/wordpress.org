@@ -14,6 +14,19 @@ $wp_init_host = 'https://wordpress.org/plugins/';
 require __DIR__ . '/common.php';
 
 /**
+ * Orders plugins and themes by status, then by name: in review or approved first, with theme drafts, which can also be
+ * rejected; then published, then the others, and rejected plugins last.
+ *
+ * @var string
+ */
+const ITEM_ORDER = "CASE
+	WHEN post_status IN( 'new', 'pending', 'approved', 'draft' ) THEN 1
+	WHEN post_status = 'publish' THEN 2
+	WHEN post_status = 'rejected' THEN 4
+	ELSE 3
+END, post_title";
+
+/**
  * Gets the plugins and themes panel.
  *
  * @param object $request Request payload.
@@ -33,7 +46,7 @@ function render_plugins_themes( object $request ): array {
 	);
 
 	// Display plugins first in the plugins inbox.
-	if ( str_starts_with( $mailbox_email, 'plugins' ) ) {
+	if ( str_starts_with( strtolower( $mailbox_email ), 'plugins' ) ) {
 		$sites           = array_reverse( $sites );
 		$repo_post_types = array_reverse( $repo_post_types );
 	}
@@ -124,8 +137,8 @@ function get_user_items( \WP_User $user ): array {
 		$wpdb->prepare(
 			"SELECT ID
 			FROM %i
-			WHERE post_type IN( 'plugin', 'repopackage' ) AND ( post_author = %d" . ( $slugs ? ' OR post_name IN( ' . implode( ', ', array_fill( 0, count( $slugs ), '%s' ) ) . ' )' : '' ) . " )
-			ORDER BY FIELD( post_status, 'new', 'pending', 'publish', 'disabled', 'delisted', 'delist', 'closed', 'approved', 'suspended', 'suspend', 'rejected', 'draft' ), post_title",
+			WHERE post_type IN( 'plugin', 'repopackage' ) AND ( post_author = %d" . ( $slugs ? ' OR post_name IN( ' . implode( ', ', array_fill( 0, count( $slugs ), '%s' ) ) . ' )' : '' ) . ' )
+			ORDER BY ' . ITEM_ORDER,
 			array_merge( array( $wpdb->posts, $user->ID ), $slugs )
 		)
 	);
@@ -140,7 +153,7 @@ function get_user_items( \WP_User $user ): array {
  * Queried directly, as WP_Query's 'any' skips statuses this request doesn't register, like suspended themes.
  *
  * @param array $slugs Plugin or theme slugs.
- * @return int[] Post IDs, ordered by title.
+ * @return int[] Post IDs, ordered by status, then title.
  */
 function get_items_by_slug( array $slugs ): array {
 	global $wpdb;
@@ -155,7 +168,7 @@ function get_items_by_slug( array $slugs ): array {
 			FROM %i
 			WHERE post_type IN( 'plugin', 'repopackage' ) AND post_status NOT IN( 'trash', 'auto-draft' )
 				AND post_name IN( " . implode( ', ', array_fill( 0, count( $slugs ), '%s' ) ) . ' )
-			ORDER BY post_title',
+			ORDER BY ' . ITEM_ORDER, // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- A constant, with no input.
 			array_merge( array( $wpdb->posts ), array_values( $slugs ) )
 		)
 	);
@@ -174,117 +187,51 @@ function render_items( array $post_ids, string $mailbox_email ): array {
 	$items = array();
 
 	// Reviews are the plugins team's; other mailboxes' conversations can name any plugin.
-	$show_review = str_starts_with( $mailbox_email, 'plugins' );
+	$show_review = str_starts_with( strtolower( $mailbox_email ), 'plugins' );
 
 	foreach ( $post_ids as $post_id ) {
 		$post          = get_post( (int) $post_id );
 		$type          = ( 'plugin' === $post->post_type ) ? 'plugin' : 'theme';
-		$status        = '';
-		$tone          = 'neutral';
-		$reviewer      = false;
+		$reviewer      = '';
+		$close_reason  = '';
+		$rejection     = '';
 		$last_modified = $post->post_modified_gmt;
-		$download_link = "https://downloads.wordpress.org/{$type}/{$post->post_name}.latest-stable.zip";
+		$download_link = 'plugin' === $type ? get_plugin_download_url( $post, $show_review ) : "https://downloads.wordpress.org/theme/{$post->post_name}.latest-stable.zip";
 
 		if ( 'plugin' === $type ) {
-			// Only a review in progress has someone on it; the assignment stays after it's done.
-			if ( $show_review && $post->assigned_reviewer && in_array( $post->post_status, array( 'new', 'pending' ), true ) ) {
-				$reviewer_user = get_user_by( 'id', (int) $post->assigned_reviewer );
-				if ( $reviewer_user ) {
-					$reviewer = $reviewer_user->display_name ? $reviewer_user->display_name : $reviewer_user->user_login;
-				}
-			}
+			$reviewer = $show_review ? get_assigned_reviewer( $post ) : '';
 
 			// Prefer the last_updated post meta.
 			$last_modified = $post->last_updated ? $post->last_updated : $last_modified;
 
-			// Get the ZIPs attached, link to the latest for pending/new. Unreleased, so only for reviews.
-			if ( in_array( $post->post_status, array( 'new', 'pending' ), true ) ) {
-				$attachments   = $show_review ? get_posts(
-					array(
-						'post_parent'    => $post->ID,
-						'post_type'      => 'attachment',
-						'orderby'        => 'post_date',
-						'order'          => 'DESC',
-						'posts_per_page' => 1,
-					)
-				) : array();
-				$download_link = $attachments ? (string) wp_get_attachment_url( $attachments[0]->ID ) : '';
+			// Why a plugin was closed or rejected is the plugins team's, like reviews.
+			if ( $show_review ) {
+				$close_reason = (string) $post->_close_reason;
+				$rejection    = $post->_rejection_reason ? get_plugin_reason( 'get_rejection_reasons', (string) $post->_rejection_reason ) : '';
 			}
-
-			// Append Info URL.
-			if (
-				$download_link &&
-				$show_review &&
-				class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' )
-			) {
-				$download_link = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $download_link, $post );
-			}
+		} elseif ( 'draft' === $post->post_status ) {
+			$download_link = ''; // No zips exist for themes in review.
 		}
 
 		$last_updated = (int) strtotime( $last_modified );
+		$released     = 'plugin' === $type && is_plugin_released( $post );
 
-		switch ( $post->post_status ) {
-			// Plugins.
-			case 'rejected':
-				$status        = 'Rejected';
-				$tone          = 'error';
-				$download_link = ''; // No zips exist for rejected plugins.
-				break;
-			case 'closed':
-			case 'disabled':
-				$status = ucwords( $post->post_status );
-				// This is not perfect, but close enough.
-				if ( $show_review && $post->_close_reason ) {
-					$status .= ': ' . ucwords( str_replace( '-', ' ', $post->_close_reason ) );
-				}
-				$tone = 'error';
-				break;
-			case 'pending':
-			case 'new':
-				$status = 'In Review';
-				$tone   = 'warning';
-				break;
-			case 'approved':
-				$status = 'Approved';
-				$tone   = 'success';
-				break;
-
-			// Themes.
-			case 'draft':
-				$status        = 'In Review or Rejected';
-				$tone          = 'warning';
-				$download_link = ''; // No zips exist for drafts.
-				break;
-			case 'suspend':
-				$status = 'Suspended';
-				$tone   = 'error';
-				break;
-			case 'delist':
-				$status = 'Delisted';
-				$tone   = 'error';
-				break;
+		// Built by hand, as the post types aren't registered on this site; rarest first, so Download lines up at the end.
+		$links = array();
+		if ( $released || ( 'theme' === $type && 'publish' === $post->post_status ) ) {
+			$links[] = array(
+				'text' => 'Scans in Gandalf',
+				'url'  => sprintf( SCANS_URL, $type, rawurlencode( $post->post_name ) ),
+				'icon' => 'shield',
+			);
 		}
-
-		$meta = array(
-			array( 'text' => $post->post_name ),
-			array(
-				'text'    => 'Updated ' . human_time_diff( $last_updated, time() ) . ' ago',
-				'tooltip' => gmdate( 'Y-m-d', $last_updated ),
-			),
-		);
-
-		if ( $reviewer ) {
-			$meta[] = array( 'text' => 'Assigned to ' . $reviewer );
-		}
-
-		// Edit and permalinks are built by hand, as the post types aren't registered on this site.
-		$links = array(
-			array(
+		if ( $released || ( 'theme' === $type && in_array( $post->post_status, array( 'publish', 'delist' ), true ) ) ) {
+			$links[] = array(
 				'text' => 'View on WordPress.org',
 				'url'  => home_url( "/{$post->post_name}/" ),
 				'icon' => 'link',
-			),
-		);
+			);
+		}
 		if ( $download_link ) {
 			$links[] = array(
 				'text' => 'Download',
@@ -293,19 +240,25 @@ function render_items( array $post_ids, string $mailbox_email ): array {
 			);
 		}
 
-		$items[] = array(
-			// Stored escaped, and shown as text.
-			'title'  => html_entity_decode( $post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
-			'url'    => add_query_arg(
-				array(
-					'action' => 'edit',
-					'post'   => $post->ID,
+		$items[] = array_merge(
+			array(
+				// Stored escaped, and shown as text.
+				'title' => html_entity_decode( $post->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
+				'url'   => add_query_arg(
+					array(
+						'action' => 'edit',
+						'post'   => $post->ID,
+					),
+					admin_url( 'post.php' )
 				),
-				admin_url( 'post.php' )
+				'meta'  => array( array( 'text' => $post->post_name ) ),
+				'age'   => array(
+					'text'    => short_time_diff( $last_updated, time() ),
+					'tooltip' => 'Updated ' . gmdate( 'Y-m-d', $last_updated ),
+				),
+				'links' => $links,
 			),
-			'badges' => $status ? array( badge( $status, $tone ) ) : array(),
-			'meta'   => $meta,
-			'links'  => $links,
+			get_item_status( $post->post_status, $reviewer, $close_reason, $rejection )
 		);
 	}
 
