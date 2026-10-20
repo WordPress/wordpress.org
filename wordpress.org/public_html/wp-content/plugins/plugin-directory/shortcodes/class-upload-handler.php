@@ -11,8 +11,10 @@ use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WordPressdotorg\Plugin_Directory\Trademarks;
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
 use WordPressdotorg\Plugin_Directory\Clients\Helpscout as Helpscout_Client;
+use WordPressdotorg\Plugin_Directory\Clients\FreeScout as FreeScout_Client;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submission_Email;
 
 /**
@@ -652,8 +654,6 @@ class Upload_Handler {
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
 		if ( $updating_existing ) {
-
-			// Update HelpScout, if in review.
 			$this->update_review_email( $plugin_post, $attachment );
 
 			$message = sprintf(
@@ -761,7 +761,7 @@ class Upload_Handler {
 		);
 
 		// Slugs in the namespace used internally for rejected plugins.
-		if ( preg_match( Helpscout::REJECTED_SLUG_REGEX, $this->plugin_slug ) ) {
+		if ( preg_match( Status_Transitions::REJECTED_SLUG_REGEX, $this->plugin_slug ) ) {
 			return true;
 		}
 
@@ -999,7 +999,7 @@ class Upload_Handler {
 	}
 
 	/**
-	 * Update the HelpScout review email.
+	 * Update the review email, in its helpdesk.
 	 *
 	 * @param WP_Post $post       The plugin post.
 	 * @param WP_Post $attachment The uploaded attachment post.
@@ -1032,6 +1032,10 @@ class Upload_Handler {
 		// Append the ZIP URL.
 		$text .= "\n" . wp_get_attachment_url( $attachment->ID );
 
+		if ( $review_email->freescout ) {
+			return self::reply_in_freescout( (int) $review_email->id, $text, wp_get_current_user() );
+		}
+
 		$name = wp_get_current_user()->display_name ?: wp_get_current_user()->user_login;
 		$payload = [
 			'customer' => array_filter( [
@@ -1058,5 +1062,61 @@ class Upload_Handler {
 		}
 
 		return $success;
+	}
+
+	/**
+	 * Replies to the author in the review conversation in FreeScout, as wordpressdotorg, and makes it active again, so the
+	 * plugins team sees there's something new to review.
+	 *
+	 * @param int      $conversation_id The review conversation's ID in FreeScout.
+	 * @param string   $text            The reply, as text.
+	 * @param \WP_User $author          The author who uploaded the update.
+	 * @return bool Whether it was sent.
+	 */
+	protected static function reply_in_freescout( int $conversation_id, string $text, \WP_User $author ): bool {
+		if ( '' === FreeScout_Client::api_key() ) {
+			trigger_error( 'FreeScout update failed: FREESCOUT_API_KEY isn\'t configured.', E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update.
+
+			return false;
+		}
+
+		// A new thread replaces the conversation's CC with its own, so pass the current CC on.
+		$conversation = FreeScout_Client::api( 'conversations/' . $conversation_id, array(), 'GET', $response_code );
+		if ( 200 !== $response_code || ! isset( $conversation['cc'] ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update; not rendered.
+			trigger_error( "FreeScout update failed: couldn't read the conversation's CC: $response_code: " . var_export( $conversation, true ), E_USER_WARNING );
+
+			return false;
+		}
+
+		// Review conversations are agent-started; a sender's could name any plugin and CC anyone.
+		if ( 'user' !== ( $conversation['createdBy']['type'] ?? '' ) ) {
+			trigger_error( "FreeScout update skipped: conversation $conversation_id wasn't started by the plugins team.", E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
+
+			return false;
+		}
+
+		$result = FreeScout_Client::api(
+			'conversations/' . $conversation_id . '/threads',
+			array(
+				'type'   => 'message',
+				'text'   => nl2br( make_clickable( esc_html( $text ) ) ),
+				'user'   => FreeScout_Client::USER_ID,
+				'to'     => array( $author->user_email ),
+				'cc'     => array_values( (array) $conversation['cc'] ),
+				'status' => 'active',
+			),
+			'POST',
+			$response_code
+		);
+
+		if ( 201 !== $response_code ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update; not rendered.
+			trigger_error( "FreeScout update failed: $response_code: " . var_export( $result, true ), E_USER_WARNING );
+
+			return false;
+		}
+
+		return true;
 	}
 }
