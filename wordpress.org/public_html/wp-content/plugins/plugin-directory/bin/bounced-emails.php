@@ -203,7 +203,7 @@ function extract_bounce_message( $email ) {
 		break;
 	}
 
-	$body = preg_replace( '#<br/?>#i', "\n", $body );
+	$body = preg_replace( '#<br\s*/?>#i', "\n", $body );
 	$body = str_replace( "\r", '', $body );
 
 	// Trim the body to header-like lines.
