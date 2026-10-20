@@ -347,7 +347,10 @@ class Get_Plugin_Status extends Ability_Base {
 			return '';
 		}
 
-		return str_contains( (string) ( $thread->body ?? '' ), Upload_Handler::UPLOAD_CONFIRMATION ) ? 'author' : 'reviewer';
+		// At the start only, so a reviewer quoting it is still the reviewer.
+		$text = trim( wp_strip_all_tags( (string) ( $thread->body ?? '' ) ) );
+
+		return str_starts_with( $text, Upload_Handler::UPLOAD_CONFIRMATION ) ? 'author' : 'reviewer';
 	}
 
 	/**
