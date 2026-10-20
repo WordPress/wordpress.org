@@ -48,10 +48,7 @@ class Ability_Base {
 			return;
 		}
 
-		// A single site, like the tests', is the plugin directory already.
-		if ( is_multisite() ) {
-			switch_to_blog( self::PLUGINS_BLOG_ID );
-		}
+		switch_to_blog( self::PLUGINS_BLOG_ID );
 
 		require_once WP_PLUGIN_DIR . '/plugin-directory/plugin-directory.php';
 
