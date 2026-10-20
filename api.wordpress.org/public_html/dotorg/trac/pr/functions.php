@@ -3,8 +3,14 @@ namespace WordPressdotorg\API\Trac\GithubPRs;
 
 /**
  * Fetches and reformats the Github PR API response to the details we need.
+ *
+ * @param string $repo          The repository, as `owner/name`.
+ * @param int    $pr            The PR number.
+ * @param bool   $allow_partial Whether to return the details when only the PR itself could be fetched.
+ *                              The lists that failed are then empty, and `partial` is set.
+ * @return object|false The PR's details, or false if they could not be fetched.
  */
-function fetch_pr_data( $repo, $pr ) {
+function fetch_pr_data( $repo, $pr, $allow_partial = false ) {
 	$url = '/repos/' . $repo . '/pulls/' . intval( $pr );
 	$data = api_request( $url );
 
@@ -13,18 +19,34 @@ function fetch_pr_data( $repo, $pr ) {
 		return false;
 	}
 
-	// Get Travis CI State.
-	$check_runs = [];
 	$raw_check_runs = api_request(
 		'/repos/' . $repo . '/commits/' . $data->head->sha . '/check-runs',
 		null,
 		[ 'Accept: application/vnd.github.antiope-preview+json' ]
 	);
-	// A failed request returns GitHub's error object. Failing here keeps the PR's stored data intact.
-	if ( ! isset( $raw_check_runs->check_runs ) || ! is_array( $raw_check_runs->check_runs ) ) {
+	$_check_runs = $raw_check_runs->check_runs ?? null;
+
+	$_reviews = api_request(
+		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/reviews',
+		null,
+		[ 'Accept: application/vnd.github.antiope-preview+json' ]
+	);
+
+	$_files = api_request(
+		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/files?per_page=100',
+		null,
+		[ 'Accept: application/vnd.github.antiope-preview+json' ]
+	);
+
+	// A failed request returns GitHub's error object instead of a list, leaving the details incomplete.
+	$partial = ! is_array( $_check_runs ) || ! is_array( $_reviews ) || ! is_array( $_files );
+	if ( $partial && ! $allow_partial ) {
 		return false;
 	}
-	foreach ( $raw_check_runs->check_runs as $check ) {
+
+	// Get Travis CI State.
+	$check_runs = [];
+	foreach ( is_array( $_check_runs ) ? $_check_runs : [] as $check ) {
 		switch ( $check->status ) {
 			case 'queued':
 			case 'in_progress':
@@ -45,16 +67,8 @@ function fetch_pr_data( $repo, $pr ) {
 		}
 	}
 
-	$_reviews = api_request(
-		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/reviews',
-		null,
-		[ 'Accept: application/vnd.github.antiope-preview+json' ]
-	);
-	if ( ! is_array( $_reviews ) ) {
-		return false;
-	}
 	$reviews = [];
-	foreach ( $_reviews as $r ) {
+	foreach ( is_array( $_reviews ) ? $_reviews : [] as $r ) {
 		if (
 			in_array( $r->state, [ 'CHANGES_REQUESTED', 'APPROVED' ] ) &&
 			! in_array( $r->user->login, $reviews[ $r->state ] ?? [], true )
@@ -64,22 +78,14 @@ function fetch_pr_data( $repo, $pr ) {
 	}
 
 	$touches_tests = false;
-	$_files = api_request(
-		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/files?per_page=100',
-		null,
-		[ 'Accept: application/vnd.github.antiope-preview+json' ]
-	);
-	if ( ! is_array( $_files ) ) {
-		return false;
-	}
-	foreach ( $_files as $f ) {
+	foreach ( is_array( $_files ) ? $_files : [] as $f ) {
 		if ( preg_match( '!(^tests/|/tests/)!', $f->filename ) ) {
 			$touches_tests = true;
 			break;
 		}
 	}
 
-	return (object) [
+	$details = (object) [
 		'repo'            => $data->base->repo->full_name,
 		'number'          => $data->number,
 		'html_url'        => $data->html_url,
@@ -105,6 +111,12 @@ function fetch_pr_data( $repo, $pr ) {
 		],
 		'trac_ticket'    => determine_trac_ticket( $data ),
 	];
+
+	if ( $allow_partial ) {
+		$details->partial = $partial;
+	}
+
+	return $details;
 }
 
 /**

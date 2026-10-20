@@ -48,11 +48,12 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 		$pr_number = $payload->number;
 
 		// API call to get the latest PR details, not all actions that trigger this include the full PR details.
-		$pr_data = fetch_pr_data( $pr_repo, $pr_number );
-		if ( ! $pr_data ) {
+		// Partial details still link a new PR, which may not see another event.
+		$pr_data = fetch_pr_data( $pr_repo, $pr_number, true );
+		if ( ! $pr_data || $pr_data->partial ) {
 			// One retry..
 			sleep( 2 );
-			$pr_data = fetch_pr_data( $pr_repo, $pr_number );
+			$pr_data = fetch_pr_data( $pr_repo, $pr_number, true ) ?: $pr_data;
 		}
 		if ( ! $pr_data ) {
 			// Failed, we need the PR data to be able to process the request.
@@ -80,9 +81,9 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			}
 		}
 
-		// Remove the specific Trac Ticket and PR Body from the DB version.
+		// Remove the specific Trac Ticket, PR Body, and partial flag from the DB version.
 		$_pr_data_no_ticket = clone $pr_data;
-		unset( $_pr_data_no_ticket->trac_ticket, $_pr_data_no_ticket->body );
+		unset( $_pr_data_no_ticket->trac_ticket, $_pr_data_no_ticket->body, $_pr_data_no_ticket->partial );
 
 		// Step 3. If not in DB, or $pr_data->trac_ticket isn't yet in the DB, add a new row of it.
 		$user_id = 0;
@@ -168,17 +169,20 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 		}
 
 		// Step 4. Update all the instances of this PR with the new data, it may be linked to multiple tickets/tracs.
-		$wpdb->update(
-			'trac_github_prs',
-			[
-				'last_checked' => gmdate( 'Y-m-d H:i:s' ),
-				'data'         => json_encode( $_pr_data_no_ticket ),
-			],
-			[
-				'repo' => $pr_repo,
-				'pr'   => $pr_number,
-			]
-		);
+		// Partial details would replace the stored reviews and tests with empty ones, so those wait for the next refresh.
+		if ( ! $pr_data->partial ) {
+			$wpdb->update(
+				'trac_github_prs',
+				[
+					'last_checked' => gmdate( 'Y-m-d H:i:s' ),
+					'data'         => json_encode( $_pr_data_no_ticket ),
+				],
+				[
+					'repo' => $pr_repo,
+					'pr'   => $pr_number,
+				]
+			);
+		}
 
 		die( 'OK' );
 		break;

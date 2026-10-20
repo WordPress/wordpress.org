@@ -23,6 +23,21 @@ use PHPUnit\Framework\TestCase;
 class Trac_Fetch_PR_Data_Test extends TestCase {
 
 	/**
+	 * GitHub's answer to a request over the rate limit.
+	 */
+	const RATE_LIMITED = '{"message":"API rate limit exceeded for installation.","documentation_url":"https://docs.github.com/rest/overview/rate-limits-for-the-rest-api","status":"403"}';
+
+	/**
+	 * GitHub's answer to a request for a PR that does not exist.
+	 */
+	const NOT_FOUND = '{"message":"Not Found","status":"404"}';
+
+	/**
+	 * A gateway's answer when GitHub is down.
+	 */
+	const SERVER_ERROR = '<html><body>502 Bad Gateway</body></html>';
+
+	/**
 	 * Serves GitHub requests from the fake.
 	 *
 	 * @return void
@@ -124,6 +139,21 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 		$this->assertSame( array( 'GitHub Actions' => 'success' ), $pr->check_runs );
 		$this->assertSame( array( 'APPROVED' => array( 'reviewer' ) ), $pr->reviews );
 		$this->assertTrue( $pr->touches_tests );
+		$this->assertFalse( property_exists( $pr, 'partial' ) );
+	}
+
+	/**
+	 * A caller allowing partial details is told when they are complete.
+	 *
+	 * @return void
+	 */
+	public function test_complete_details_are_not_partial() {
+		$this->respond();
+
+		$pr = fetch_pr_data( 'WordPress/wordpress-develop', 1, true );
+
+		$this->assertIsObject( $pr );
+		$this->assertFalse( $pr->partial );
 	}
 
 	/**
@@ -172,15 +202,58 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	 * @return array Requests and the bodies they fail with.
 	 */
 	public static function data_failed_requests(): array {
-		$rate_limited = '{"message":"API rate limit exceeded for installation.","documentation_url":"https://docs.github.com/rest/overview/rate-limits-for-the-rest-api","status":"403"}';
-
 		return array(
-			'pr not found'            => array( 'pr', '{"message":"Not Found","status":"404"}' ),
-			'check runs rate limited' => array( 'check_runs', $rate_limited ),
-			'reviews rate limited'    => array( 'reviews', $rate_limited ),
-			'files rate limited'      => array( 'files', $rate_limited ),
-			'reviews server error'    => array( 'reviews', '<html><body>502 Bad Gateway</body></html>' ),
-			'files server error'      => array( 'files', '<html><body>502 Bad Gateway</body></html>' ),
+			'pr not found'            => array( 'pr', self::NOT_FOUND ),
+			'check runs rate limited' => array( 'check_runs', self::RATE_LIMITED ),
+			'reviews rate limited'    => array( 'reviews', self::RATE_LIMITED ),
+			'files rate limited'      => array( 'files', self::RATE_LIMITED ),
+			'reviews server error'    => array( 'reviews', self::SERVER_ERROR ),
+			'files server error'      => array( 'files', self::SERVER_ERROR ),
 		);
+	}
+
+	/**
+	 * A caller allowing partial details gets the PR, with the failed list left empty.
+	 *
+	 * @dataProvider data_failed_lists
+	 *
+	 * @param string $request  The request that fails.
+	 * @param string $property The detail it leaves empty.
+	 * @param mixed  $empty    The empty value of that detail.
+	 * @return void
+	 */
+	public function test_a_failed_list_leaves_partial_details( string $request, string $property, $empty ) {
+		$this->respond( array( $request => self::RATE_LIMITED ) );
+
+		$pr = fetch_pr_data( 'WordPress/wordpress-develop', 1, true );
+
+		$this->assertIsObject( $pr );
+		$this->assertTrue( $pr->partial );
+		$this->assertSame( $empty, $pr->$property );
+		$this->assertSame( 'Tests: Add coverage', $pr->title );
+	}
+
+	/**
+	 * Supplies each list a fetch requests, with the detail it fills.
+	 *
+	 * @return array Requests, details, and their empty values.
+	 */
+	public static function data_failed_lists(): array {
+		return array(
+			'check runs' => array( 'check_runs', 'check_runs', array() ),
+			'reviews'    => array( 'reviews', 'reviews', array() ),
+			'files'      => array( 'files', 'touches_tests', false ),
+		);
+	}
+
+	/**
+	 * Without the PR itself there are no details, partial or not.
+	 *
+	 * @return void
+	 */
+	public function test_a_missing_pr_has_no_partial_details() {
+		$this->respond( array( 'pr' => self::NOT_FOUND ) );
+
+		$this->assertFalse( fetch_pr_data( 'WordPress/wordpress-develop', 1, true ) );
 	}
 }
