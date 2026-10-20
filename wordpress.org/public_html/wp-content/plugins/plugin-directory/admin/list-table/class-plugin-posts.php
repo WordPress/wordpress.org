@@ -211,7 +211,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$classes[] = 'level-0';
 		}
 		?>
-		<tr id="post-<?php echo $post->ID; ?>" class="<?php echo implode( ' ', get_post_class( $classes, $post->ID ) ); ?>">
+		<tr id="post-<?php echo esc_attr( $post->ID ); ?>" class="<?php echo esc_attr( implode( ' ', get_post_class( $classes, $post->ID ) ) ); ?>">
 			<?php $this->single_row_columns( $post ); ?>
 		</tr>
 		<?php
@@ -329,15 +329,15 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	<form method="get"><table style="display: none"><tbody id="inlineedit">
 
 		<tr id="inline-edit"
-			class="inline-edit-row inline-edit-row-post inline-edit-<?php echo $screen->post_type; ?> quick-edit-row quick-edit-row-post"
-			style="display: none"><td colspan="<?php echo $this->get_column_count(); ?>" class="colspanchange">
+			class="inline-edit-row inline-edit-row-post inline-edit-<?php echo esc_attr( $screen->post_type ); ?> quick-edit-row quick-edit-row-post"
+			style="display: none"><td colspan="<?php echo esc_attr( $this->get_column_count() ); ?>" class="colspanchange">
 
 		<fieldset class="inline-edit-col-left">
-			<legend class="inline-edit-legend"><?php _e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
+			<legend class="inline-edit-legend"><?php esc_html_e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
 			<div class="inline-edit-col">
 
 			<label>
-				<span class="title"><?php _e( 'Slug', 'wporg-plugins' ); ?></span>
+				<span class="title"><?php esc_html_e( 'Slug', 'wporg-plugins' ); ?></span>
 				<span class="input-text-wrap"><input type="text" name="post_name" value="" /></span>
 			</label>
 
@@ -362,9 +362,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	<?php endif; // count( $hierarchical_taxonomies ) ?>
 
 		<p class="submit inline-edit-save">
-			<button type="button" class="button cancel alignleft"><?php _e( 'Cancel', 'wporg-plugins' ); ?></button>
+			<button type="button" class="button cancel alignleft"><?php esc_html_e( 'Cancel', 'wporg-plugins' ); ?></button>
 			<?php wp_nonce_field( 'inlineeditnonce', '_inline_edit', false ); ?>
-			<button type="button" class="button button-primary save alignright"><?php _e( 'Update', 'wporg-plugins' ); ?></button>
+			<button type="button" class="button button-primary save alignright"><?php esc_html_e( 'Update', 'wporg-plugins' ); ?></button>
 			<span class="spinner"></span>
 			<input type="hidden" name="post_author" value="" />
 			<input type="hidden" name="post_view" value="<?php echo esc_attr( $m ); ?>" />
@@ -626,7 +626,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			?>
 		</fieldset>
 		<fieldset class="alignleft actions hide-if-js bulk-plugin_close bulk-plugin_disable" disabled="disabled">
-			<select name="close_reason" id="close_reason<?php echo $maybe_dash_two; ?>">
+			<select name="close_reason" id="close_reason<?php echo esc_attr( $maybe_dash_two ); ?>">
 				<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></option>
 				<?php foreach ( Template::get_close_reasons() as $key => $label ) : ?>
 					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
@@ -685,15 +685,20 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$reviewer_time = (int) ( $post->assigned_reviewer_time ?? 0 );
 
 		if ( $reviewer ) {
+			$args = [
+				'post_type' => $post->post_type,
+				'reviewer'  => $reviewer_id,
+			];
+
 			printf(
-				"<a href='%s'>%s</a><br><span>%s</span>",
-				add_query_arg( [ 'reviewer' => $reviewer_id ] ),
-				$reviewer->display_name ?: $reviewer->user_login,
-				sprintf(
+				'%s<br><span>%s</span>',
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_edit_link() runs the URL through esc_url(), and the link text is escaped here.
+				$this->get_edit_link( $args, esc_html( $reviewer->display_name ?: $reviewer->user_login ) ),
+				esc_html( sprintf(
 					/* translators: %s The time/date different, '1 hour' */
 					__( '%s ago', 'wporg-plugins' ),
 					human_time_diff( $reviewer_time )
-				)
+				) )
 			);
 		} else {
 			echo '-';
@@ -739,10 +744,10 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			return;
 		}
 
-		echo number_format_i18n( (int) $post->_submitted_zip_loc ) ?: '-';
+		echo esc_html( number_format_i18n( (int) $post->_submitted_zip_loc ) ) ?: '-';
 	}
 
 	public function column_submitted_date( $post ) {
-		echo gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 );
+		echo esc_html( gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 ) );
 	}
 }

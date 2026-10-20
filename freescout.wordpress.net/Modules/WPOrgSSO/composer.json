@@ -1,0 +1,14 @@
+{
+	"name": "wordpressdotorg/freescout-wporgsso",
+	"description": "Dependencies of the WPOrgSSO FreeScout module. vendor/ is committed: FreeScout doesn't install module dependencies.",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"onelogin/php-saml": "^4.3"
+	},
+	"config": {
+		"platform": {
+			"php": "8.3"
+		},
+		"optimize-autoloader": true
+	}
+}

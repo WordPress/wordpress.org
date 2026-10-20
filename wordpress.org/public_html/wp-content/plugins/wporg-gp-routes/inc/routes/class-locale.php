@@ -292,7 +292,7 @@ class Locale extends GP_Route {
 			case 'wp-themes':
 				$screenshot = gp_get_meta( 'wp-themes', $sub_project->id, 'screenshot' );
 				if ( $screenshot ) {
-					return '<div class="theme icon"><img src="https://i0.wp.com/' . $screenshot . '?w=' . ( $size * 2 ) . '&amp;strip=all" width="' . $size . '" height="' . $size . '"></div>';
+					return '<div class="theme icon"><img src="' . esc_url( 'https://i0.wp.com/' . $screenshot . '?w=' . ( $size * 2 ) . '&strip=all' ) . '" width="' . $size . '" height="' . $size . '"></div>';
 				} else {
 					return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
 				}

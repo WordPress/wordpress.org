@@ -6,8 +6,5 @@
   ],
   "mappings": {
     "wp-content/mu-plugins": "./mu-plugins"
-  },
-  "config": {
-    "FEATURE_2021_GLOBAL_HEADER_FOOTER": true
   }
 }

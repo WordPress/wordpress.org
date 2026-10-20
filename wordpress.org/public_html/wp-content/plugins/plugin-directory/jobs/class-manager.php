@@ -1,5 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
+use WordPressdotorg\Plugin_Directory\Admin\Tools\Related_Submissions;
+use WordPressdotorg\Plugin_Directory\Plugin_Check\Batched_Check;
 use WordPressdotorg\Plugin_Directory\Tools;
 use const \WP_CLI;
 
@@ -18,11 +20,12 @@ class Manager {
 	 * @var array
 	 */
 	public static $wildcard_cron_tasks = array(
-		'import_plugin'      => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
-		'import_plugin_i18n' => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
-		'import_zip'         => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
-		'scan_plugin'        => array( __NAMESPACE__ . '\Plugin_Scan', 'cron_trigger' ),
-		'create_svn_repo'    => array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ),
+		'import_plugin'         => array( __NAMESPACE__ . '\Plugin_Import', 'cron_trigger' ),
+		'import_plugin_i18n'    => array( __NAMESPACE__ . '\Plugin_i18n_Import', 'cron_trigger' ),
+		'import_zip'            => array( __NAMESPACE__ . '\Plugin_ZIP_Import', 'cron_trigger' ),
+		'scan_plugin'           => array( __NAMESPACE__ . '\Plugin_Scan', 'cron_trigger' ),
+		'create_svn_repo'       => array( __NAMESPACE__ . '\SVN_Repo_Creation', 'cron_trigger' ),
+		'release_to_update_api' => array( __NAMESPACE__ . '\API_Update_Updater', 'cron_trigger_release' ),
 	);
 
 	/**
@@ -41,9 +44,13 @@ class Manager {
 		add_action( 'plugin_directory_translation_sync', array( __NAMESPACE__ . '\Translation_Sync', 'cron_trigger' ) );
 		add_action( 'plugin_directory_zip_cleanup', array( __NAMESPACE__ . '\Zip_Cleanup', 'cron_trigger' ) );
 		add_action( 'plugin_directory_daily_post_checks', array( __NAMESPACE__ . '\Daily_Post_Checks', 'cron_trigger' ) );
+		add_action( 'plugin_directory_related_submissions', array( Related_Submissions::class, 'cron_trigger' ) );
 
-		// Hook into the plugin import process to queue a job.
+		// Hook into the plugin import process to queue a scan job, and share PHPCS runs between the scan's Plugin Check checks.
 		add_action( 'wporg_plugins_imported', array( __NAMESPACE__ . '\Plugin_Scan', 'wporg_plugins_imported' ), 10, 6 );
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			add_filter( 'wp_plugin_check_checks', array( Batched_Check::class, 'wrap_checks' ), 1000 );
+		}
 
 		// A cronjob to check cronjobs
 		add_action( 'plugin_directory_check_cronjobs', array( $this, 'register_cron_tasks' ) );
@@ -289,6 +296,9 @@ class Manager {
 		}
 		if ( ! wp_next_scheduled ( 'plugin_directory_daily_post_checks' ) ) {
 			wp_schedule_event( time() + 60, 'daily', 'plugin_directory_daily_post_checks' );
+		}
+		if ( ! wp_next_scheduled( 'plugin_directory_related_submissions' ) ) {
+			wp_schedule_event( time() + 60, 'half_hourly', 'plugin_directory_related_submissions' );
 		}
 
 		// Check to see if `WP_CORE_LATEST_RELEASE` has changed since we last ran.

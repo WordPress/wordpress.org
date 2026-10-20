@@ -3,6 +3,7 @@
 namespace WordPressdotorg\Theme_Preview\Style_Variations\API_Endpoint;
 
 use function WordPressdotorg\Theme_Preview\Style_Variations\get_style_variations;
+use function WordPressdotorg\Theme_Preview\Style_Variations\get_variation_query_value;
 
 function endpoint_handler() {
 	$variations    = get_style_variations();
@@ -28,7 +29,7 @@ function endpoint_handler() {
 		 */
 		foreach ( $variations as $variation ) {
 			$title = strtolower( $variation['title'] );
-			$link  = add_query_arg( 'style_variation', urlencode( $title ), $base );
+			$link  = add_query_arg( 'style_variation', get_variation_query_value( $variation ), $base );
 
 			$styles[] = array(
 				'title'        => $title,

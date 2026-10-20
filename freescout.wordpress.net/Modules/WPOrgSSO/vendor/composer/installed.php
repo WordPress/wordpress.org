@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'wordpressdotorg/freescout-wporgsso',
+        'pretty_version' => 'dev-trunk',
+        'version' => 'dev-trunk',
+        'reference' => '4534f918052ebbec600735bec5b65f460c929e36',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => false,
+    ),
+    'versions' => array(
+        'onelogin/php-saml' => array(
+            'pretty_version' => '4.3.2',
+            'version' => '4.3.2.0',
+            'reference' => '26b3a47349415e5b7aa300ba4ab7fc316c65f19e',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../onelogin/php-saml',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'robrichards/xmlseclibs' => array(
+            'pretty_version' => '3.1.5',
+            'version' => '3.1.5.0',
+            'reference' => '03062be78178cbb5e8f605cd255dc32a14981f92',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../robrichards/xmlseclibs',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'wordpressdotorg/freescout-wporgsso' => array(
+            'pretty_version' => 'dev-trunk',
+            'version' => 'dev-trunk',
+            'reference' => '4534f918052ebbec600735bec5b65f460c929e36',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

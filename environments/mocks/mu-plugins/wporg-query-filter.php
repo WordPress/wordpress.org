@@ -59,9 +59,13 @@ add_filter( 'query', function ( $query ) use ( $table_extractor ) {
 		return $no_op_query;
 	}
 
-	// Also block queries that reference missing tables in JOINs (get_table_from_query only returns the primary table).
+	/*
+	 * Also block queries that reference missing tables in JOINs (get_table_from_query only returns
+	 * the primary table). Match table references only: column names can share a prefix, like the
+	 * translate_event_* primary keys of the Translation Events tables.
+	 */
 	foreach ( $blocked_prefixes as $prefix ) {
-		if ( str_contains( $query, $prefix ) ) {
+		if ( preg_match( '/\b(?:from|join|into|update|table)\s+`?' . preg_quote( $prefix, '/' ) . '/i', $query ) ) {
 			return $no_op_query;
 		}
 	}

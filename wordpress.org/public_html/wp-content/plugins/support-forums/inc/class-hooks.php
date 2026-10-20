@@ -23,11 +23,12 @@ class Hooks {
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ), 5 );
 		add_action( 'template_redirect',               array( $this, 'redirect_ask_question_plugin_forum' ) );
-		add_filter( 'wp_insert_post_data',             array( $this, 'set_post_date_gmt_for_pending_posts' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
 		add_filter( 'bbp_show_user_profile',           array( $this, 'allow_mods_to_view_inactive_users' ), 10, 2 );
 		add_action( 'init',                            array( $this, 'add_rewrite_rules' ) );
 
+		// Run after bbp_parse_query() (priority 2) has flagged user pages.
+		add_action( 'parse_query', array( $this, 'reset_singular_flags_on_user_pages' ), 20 );
 
 		// Add bbPress support to the WordPress.org SEO plugin.
 		add_filter( 'wporg_canonical_base_url', array( $this, 'wporg_canonical_base_url' ) );
@@ -55,7 +56,16 @@ class Hooks {
 		remove_filter( 'bbp_get_topic_author_link', 'bbp_rel_nofollow' );
 		remove_filter( 'bbp_get_reply_author_link', 'bbp_rel_nofollow' );
 
-		// add ugc to links in topics and replies. These already have nofollow, this adds ugc as well
+		/*
+		 * Remove the nofollow filter from topic and reply content. It parses attributes with
+		 * shortcode_parse_atts(), which runs stripcslashes() over every value, and then re-emits
+		 * them without escaping. add_rel_ugc() below adds nofollow via wp_rel_callback(), which
+		 * escapes, so dropping this loses no behaviour.
+		 */
+		remove_filter( 'bbp_get_reply_content', 'bbp_rel_nofollow', 60 );
+		remove_filter( 'bbp_get_topic_content', 'bbp_rel_nofollow', 60 );
+
+		// add nofollow and ugc to links in topics and replies
 		add_filter( 'bbp_get_reply_content', array( $this, 'add_rel_ugc' ), 80 );
 		add_filter( 'bbp_get_topic_content', array( $this, 'add_rel_ugc' ), 80 );
 
@@ -67,9 +77,8 @@ class Hooks {
 		// Disable inline terms and mentions.
 		add_action( 'plugins_loaded', array( $this, 'disable_inline_terms' ) );
 
-		// Replace bbp_make_mentions_clickable() to add `class="mention"`.
-		remove_filter( 'bbp_make_clickable', 'bbp_make_mentions_clickable', 8 );
-		add_filter( 'bbp_make_clickable', array( $this, 'make_mentions_clickable' ), 8 );
+		// Preserve the legacy styling class on bbPress mention links.
+		add_filter( 'bbp_make_mentions_clickable_classes', array( $this, 'make_mentions_clickable_classes' ) );
 
 		// Fix login url links
 		add_filter( 'login_url', array( $this, 'fix_login_url' ), 10, 3 );
@@ -103,9 +112,6 @@ class Hooks {
 		add_action( 'bbp_new_reply',  array( $this, 'handle_extra_reply_actions' ), 10, 2 );
 		add_action( 'bbp_edit_reply', array( $this, 'handle_extra_reply_actions' ), 10, 2 );
 
-		// Update topic replies count if the reply status changes on editing.
-		add_filter( 'bbp_edit_reply_pre_insert', array( $this, 'update_replies_count_on_editing_reply' ), 20 );
-
 		// Honor i18n number formatting.
 		add_filter( 'bbp_number_format', array( $this, 'number_format_i18n' ), 10, 5 );
 
@@ -118,11 +124,11 @@ class Hooks {
 		// Remove the redundant prefixes in the bbPress <title>.
 		add_filter( 'bbp_raw_title_array', array( $this, 'bbp_raw_title_array' ) );
 
-		// Don't 404 user profile pages. Fixed in bbPress 2.6: https://bbpress.trac.wordpress.org/ticket/3047
-		add_filter( 'bbp_template_redirect', array( $this, 'disable_404_for_user_profile' ) );
-
 		// Deindex Support Forum Feeds. bbPress hooks in way earlier than most Core feed functions..
 		add_filter( 'request', array( $this, 'deindex_forum_feeds' ), 5 );
+
+		// Don't run shortcodes in topics and replies rendered by Core feeds. Runs before shortcode_unautop() at 10, so wpautop() still wraps them.
+		add_filter( 'the_content', array( $this, 'escape_shortcodes_in_feeds' ), 9 );
 
 		add_filter( 'request', array( $this, 'ignore_empty_query_vars' ) );
 
@@ -181,6 +187,23 @@ class Hooks {
 	public function hide_non_public_forums( $query ) {
 		if ( ! is_admin() && 'forum' === $query->get( 'post_type' ) ) {
 			$query->set( 'post_status', 'publish' );
+		}
+	}
+
+	/**
+	 * Clear the singular flags on bbPress user pages.
+	 *
+	 * A stray `?page_id=` or `?pagename=` makes WP_Query flag the request as a page,
+	 * and bbPress keeps those flags when it takes over the query for a user page.
+	 * With no post to back them, get_body_class() then reads a null queried object.
+	 *
+	 * @param WP_Query $query Current query object.
+	 */
+	public function reset_singular_flags_on_user_pages( $query ) {
+		if ( $query->is_main_query() && ! empty( $query->bbp_is_single_user ) ) {
+			$query->is_page     = false;
+			$query->is_singular = false;
+			$query->is_single   = false;
 		}
 	}
 
@@ -350,7 +373,7 @@ class Hooks {
 	 */
 	public function redirect_update_php_page() {
 		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
-			wp_redirect( home_url( '/update-php/' ), 301 );
+			wp_safe_redirect( home_url( '/update-php/' ), 301 );
 			exit;
 		}
 	}
@@ -430,31 +453,6 @@ class Hooks {
 			wp_safe_redirect( home_url( '/forum/wp-advanced/' ) );
 			exit;
 		}
-	}
-
-	/**
-	 * Keep the original post date when approving a pending post.
-	 *
-	 * Sets a non-empty 'post_date_gmt' for pending posts to prevent wp_update_post()
-	 * from overwriting the post date on approving.
-	 *
-	 * @see https://bbpress.trac.wordpress.org/ticket/3133
-	 *
-	 * @param array $data An array of post data.
-	 * @return array Filtered post data.
-	 */
-	public function set_post_date_gmt_for_pending_posts( $data ) {
-		if (
-			in_array( $data['post_type'], array( 'topic', 'reply' ) )
-		&&
-			'pending' === $data['post_status']
-		&&
-			'0000-00-00 00:00:00' === $data['post_date_gmt']
-		) {
-			$data['post_date_gmt'] = get_gmt_from_date( $data['post_date'] );
-		}
-
-		return $data;
 	}
 
 	/**
@@ -748,13 +746,15 @@ class Hooks {
 
 					// Output create button alongside search form except for reviews, which already have the button in a section rendered above this one.
 					if( $is_reviews ) {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress renders and escapes the search form.
 						echo $searchform;
 					} else {
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WordPress renders and escapes the search form.
 						echo $searchform;
-						echo $btn;
+						echo wp_kses_post( $btn );
 					}
 				} else {
-					echo $btn;
+					echo wp_kses_post( $btn );
 				}
 				echo "</div>\n";
 			}
@@ -833,41 +833,15 @@ class Hooks {
 	}
 
 	/**
-	 * Make mentions clickable in content areas.
+	 * Add the legacy styling class to bbPress mention links.
 	 *
-	 * @param string $text Topic or reply content.
-	 * @return string Filtered content.
+	 * @param array $classes Mention link classes.
+	 * @return array Filtered mention link classes.
 	 */
-	public function make_mentions_clickable( $text = '' ) {
-		return preg_replace_callback( '#([\s>])@([0-9a-zA-Z-_]+)#i', array( $this, 'make_mentions_clickable_callback' ), $text );
-	}
+	public function make_mentions_clickable_classes( $classes ) {
+		$classes[] = 'mention';
 
-	/**
-	 * Callback to convert mention matches to HTML A tag.
-	 *
-	 * Replaces bbp_make_mentions_clickable_callback() to add `class="mention"`
-	 * for styling purposes.
-	 *
-	 * @see https://meta.trac.wordpress.org/ticket/2542
-	 * @see https://bbpress.trac.wordpress.org/ticket/3074
-	 *
-	 * @param array $matches Single Regex Match.
-	 * @return string HTML A tag with link to user profile.
-	 */
-	public function make_mentions_clickable_callback( $matches = array() ) {
-
-		// Get user; bail if not found
-		$user = get_user_by( 'slug', $matches[2] );
-		if ( empty( $user ) || bbp_is_user_inactive( $user->ID ) ) {
-			return $matches[0];
-		}
-
-		// Create the link to the user's profile
-		$url    = bbp_get_user_profile_url( $user->ID );
-		$anchor = '<a href="%1$s" class="mention" rel="nofollow">@%2$s</a>';
-		$link   = sprintf( $anchor, esc_url( $url ), esc_html( $user->user_nicename ) );
-
-		return $matches[1] . $link;
+		return array_unique( $classes );
 	}
 
 	/**
@@ -1019,13 +993,14 @@ class Hooks {
 				// Display site URL for logged-in users only.
 				if ( is_user_logged_in() ) {
 					printf( '<p class="wporg-bbp-topic-site-url">%1$s <a href="%2$s" rel="nofollow ugc">%2$s</a></p>',
-						__( 'The page I need help with:', 'wporg-forums' ),
+						esc_html__( 'The page I need help with:', 'wporg-forums' ),
 						esc_url( $site_url )
 					);
 				} else {
 					printf( '<p class="wporg-bbp-topic-site-url">%1$s <em>%2$s</em></p>',
-						__( 'The page I need help with:', 'wporg-forums' ),
-						sprintf( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ), wp_login_url() )
+						esc_html__( 'The page I need help with:', 'wporg-forums' ),
+						/* translators: %s: URL of the log in page. */
+						sprintf( wp_kses_post( __( '[<a href="%s">log in</a> to see the link]', 'wporg-forums' ) ), esc_url( wp_login_url() ) )
 					);
 				}
 			}
@@ -1046,9 +1021,9 @@ class Hooks {
 			$site_url = ( bbp_is_topic_edit() ) ? get_post_meta( $topic_id, self::SITE_URL_META, true ) : '';
 			?>
 			<p>
-				<label for="site_url"><?php _e( 'Link to the page you need help with:', 'wporg-forums' ) ?></label><br />
+				<label for="site_url"><?php esc_html_e( 'Link to the page you need help with:', 'wporg-forums' ); ?></label><br />
 				<input type="text" id="site_url" value="<?php echo esc_attr( $site_url ); ?>" size="40" name="site_url" maxlength="400" aria-describedby="site_url_description" /><br />
-				<em id="site_url_description"><?php _e( 'This link will only be shown to logged-in users.', 'wporg-forums' ); ?></em>
+				<em id="site_url_description"><?php esc_html_e( 'This link will only be shown to logged-in users.', 'wporg-forums' ); ?></em>
 			</p>
 			<?php
 		endif;
@@ -1147,41 +1122,6 @@ class Hooks {
 	}
 
 	/**
-	 * Update topic replies count if the reply status changes on editing.
-	 *
-	 * This is neccesary to properly account for the status change as a result of
-	 * Akismet check or user flagging rather than an explicit moderator action.
-	 *
-	 * @see https://bbpress.trac.wordpress.org/ticket/3132
-	 *
-	 * @param array $data Reply post data.
-	 * @return array Filtered reply data.
-	 */
-	public function update_replies_count_on_editing_reply( $data ) {
-		// Bail if the reply is not published.
-		if ( 'publish' !== get_post_status( $data['ID'] ) ) {
-			return $data;
-		}
-
-		// Bail if the new status is not pending or spam.
-		if ( ! in_array( $data['post_status'], array( 'pending', 'spam' ) ) ) {
-			return $data;
-		}
-
-		$topic_id = bbp_get_reply_topic_id( $data['ID'] );
-
-		bbp_update_topic_last_reply_id( $topic_id );
-		bbp_update_topic_last_active_id( $topic_id );
-		bbp_update_topic_last_active_time( $topic_id );
-		bbp_update_topic_voice_count( $topic_id );
-
-		bbp_decrease_topic_reply_count( $topic_id );
-		bbp_increase_topic_reply_count_hidden( $topic_id );
-
-		return $data;
-	}
-
-	/**
 	 * Override `bbp_number_format()` to behave like `bbp_number_format_i18n()` under default conditions.
 	 *
 	 * bbPress uses `bbp_number_format()` in lots of places for display.
@@ -1272,17 +1212,6 @@ class Hooks {
 	}
 
 	/**
-	 * Don't 404 for user profile pages.
-	 *
-	 * @see https://bbpress.trac.wordpress.org/ticket/3047
-	 */
-	function disable_404_for_user_profile() {
-		if ( bbpress()->displayed_user && bbpress()->displayed_user->exists() ) {
-			status_header( 200 );
-		}
-	}
-
-	/**
 	 * Deindex Forum feeds.
 	 *
 	 * bbPress hooks in way earlier than most Core feed functions, so this is hooked to 'request' at priority 5.
@@ -1293,6 +1222,27 @@ class Hooks {
 		}
 
 		return $query_vars;
+	}
+
+	/**
+	 * Escape shortcodes in topics and replies rendered by Core feeds.
+	 *
+	 * Core feeds such as /support/topic-tag/foo/feed/ pass user content through
+	 * `the_content`, which runs shortcodes, though bbPress never does. Encoding
+	 * the brackets shows the shortcode as typed instead.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public function escape_shortcodes_in_feeds( $content ) {
+		if (
+			is_feed() &&
+			in_array( get_post_type(), array( bbp_get_topic_post_type(), bbp_get_reply_post_type() ), true )
+		) {
+			$content = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $content );
+		}
+
+		return $content;
 	}
 
 	/**
@@ -1377,6 +1327,11 @@ class Hooks {
 		$reply_author_name = bbp_get_reply_author_display_name( $reply_id );
 
 		remove_all_filters( 'bbp_get_reply_content' );
+
+		// The content is fetched again as the message is assembled, so keep it to the supported blocks.
+		if ( Plugin::get_instance()->blocks ) {
+			add_filter( 'bbp_get_reply_content', array( Plugin::get_instance()->blocks, 'limit_blocks' ), 7 );
+		}
 
 		// Strip tags from text and set up message body.
 		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );

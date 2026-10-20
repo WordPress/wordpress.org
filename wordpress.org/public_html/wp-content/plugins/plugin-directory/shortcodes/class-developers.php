@@ -4,6 +4,9 @@ namespace WordPressdotorg\Plugin_Directory\Shortcodes;
 use WordPressdotorg\Plugin_Directory\Plugin_I18n;
 use WordPressdotorg\Plugin_Directory\Tools;
 
+use const WordPressdotorg\Plugin_Directory\PLUGIN_DIR;
+use const WordPressdotorg\Plugin_Directory\PLUGIN_FILE;
+
 /**
  * The [wporg-plugins-developers] shortcode handler to display developer information.
  *
@@ -24,7 +27,7 @@ class Developers {
 		$output .= '<p>' . sprintf(
 			/* translators: %s: plugin name */
 			__( '&#8220;%s&#8221; is open source software. The following people have contributed to this plugin.', 'wporg-plugins' ),
-			$title
+			esc_html( $title )
 		) . '</p>';
 
 		ob_start();
@@ -63,7 +66,7 @@ class Developers {
 						$locales_count,
 						'wporg-plugins'
 					),
-					$title,
+					esc_html( $title ),
 					number_format_i18n( $locales_count )
 				) . ' ';
 
@@ -82,7 +85,7 @@ class Developers {
 			sprintf(
 				/* translators: %s: plugin name */
 				__( 'Translate &#8220;%s&#8221; into your language.', 'wporg-plugins' ),
-				$title
+				esc_html( $title )
 			)
 		) . '</p>';
 
@@ -111,14 +114,23 @@ class Developers {
 					$email_url
 				) . '</p></div>';
 			} else {
+				wp_enqueue_script(
+					'wporg-plugins-commit-subscription',
+					plugins_url( 'js/commit-subscription.js', PLUGIN_FILE ),
+					array(),
+					(string) filemtime( PLUGIN_DIR . '/js/commit-subscription.js' ),
+					true
+				);
+
 				$output .= '<p>' . sprintf(
 					/* translators: 1: email subscription URL, 2: Confirm of subscribe-by-email */
-					__( 'You can also subscribe to emails for each plugin commit by <a href="%1$s" onclick="confirm(%2$s)">clicking here</a>.', 'wporg-plugins' ),
+					__( 'You can also subscribe to emails for each plugin commit by <a href="%1$s" class="plugin-commit-subscribe" data-confirm="%2$s">clicking here</a>.', 'wporg-plugins' ),
 					$email_url,
-					esc_attr( wp_json_encode( sprintf(
+					esc_attr( sprintf(
+						/* translators: %s: plugin name */
 						__( 'Are you sure you want to subscribe to email notifications for each commit to %s?', 'wporg-plugins' ),
 						$title
-					) ) )
+					) )
 				) . '</p>';
 			}
 		}

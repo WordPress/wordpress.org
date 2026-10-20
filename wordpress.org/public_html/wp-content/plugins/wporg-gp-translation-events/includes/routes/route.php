@@ -3,6 +3,7 @@
 namespace Wporg\TranslationEvents\Routes;
 
 use GP_Route;
+use WP_User;
 use Wporg\TranslationEvents\Templates;
 use Wporg\TranslationEvents\Theme_Loader;
 
@@ -25,7 +26,14 @@ abstract class Route extends GP_Route {
 			return;
 		}
 
-		$json = wp_json_encode( $args );
+		// The user record includes the password hash.
+		$args = array_filter(
+			$args,
+			static function ( $arg ): bool {
+				return ! $arg instanceof WP_User;
+			}
+		);
+		$json = serialize_block_attributes( $args );
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo do_blocks( "<!-- wp:wporg-translate-events-2024/page-events-$template $json /-->" );
 	}

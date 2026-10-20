@@ -30,7 +30,13 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 		<li>
 			<?php
 			/* translators: URL to licence list. */
-			printf( wp_kses_post( __( 'Your plugin must be compatible with the <a href="%s">GNU General Public License v2</a>, or any later version. We strongly recommend using the same license as WordPress — &#8220;GPLv2 or later.&#8221;', 'wporg-plugins' ) ), esc_url( 'https://www.gnu.org/licenses/license-list.html#GPLCompatibleLicenses' ) );
+			printf( wp_kses_post( __( 'Your plugin must be compatible with the <a href="%s">GNU General Public License v2</a>, or any later version. The plugin should either include its human-readable source code or provide a clear, accessible link to it. We strongly recommend using the same license as WordPress — &#8220;GPLv2 or later.&#8221;', 'wporg-plugins' ) ), esc_url( 'https://www.gnu.org/licenses/license-list.html#GPLCompatibleLicenses' ) );
+			?>
+		</li>
+		<li>
+			<?php
+			/* translators: URL to guidelines. */
+			printf( wp_kses_post( __( 'The plugin <a href="%s" target="_blank">must not impose artificial restrictions on its built-in functionality</a>. This includes license gates, paywalls, time-limited trials, usage quotas, or any other mechanism that limits features included in the plugin code and/or that the plugin code can do.', 'wporg-plugins' ) ), esc_url( 'https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#5-trialware-is-not-permitted' ) );
 			?>
 		</li>
 		<li><?php esc_html_e( 'The plugin must not do anything illegal or be morally offensive (that&#8217;s subjective, we know).', 'wporg-plugins' ); ?></li>

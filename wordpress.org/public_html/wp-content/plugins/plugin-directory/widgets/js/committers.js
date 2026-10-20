@@ -37,7 +37,8 @@ document.addEventListener( 'DOMContentLoaded' , function() {
 	
 					$this.addClass( 'spinner' );
 	
-					url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/committers/' + user_id + '/?_wpnonce=' + pluginDir.restNonce;
+					url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/committers/' + user_id + '/?_wpnonce=' + pluginDir.restNonce
+					+ '&_wporg_action=' + pluginDir.removeNonce;
 	
 					$.post( {
 						url: url,
@@ -56,7 +57,8 @@ document.addEventListener( 'DOMContentLoaded' , function() {
 					var $row = $( this ).parents( 'li' ),
 						$newUserInput = $row.find( 'input[name="committer"]' ),
 						$button = $row.find( '.button-small' ).addClass( 'spinner' ),
-						url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/committers/?_wpnonce=' + pluginDir.restNonce;
+						url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/committers/?_wpnonce=' + pluginDir.restNonce
+						+ '&_wporg_action=' + pluginDir.addNonce;
 	
 					$.post( {
 						url: url,

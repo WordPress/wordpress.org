@@ -72,7 +72,7 @@ class WP_49_Credits extends WP_Credits {
 				'data'    => array(
 					'bpayton'          => 'Brandon Payton',
 					'presskopp'        => array( 'Christian Herrmann', '669d8950273d9a2d82e39e0ddc679ce2' ),
-					'jbpaul17'         => 'Jeffrey Paul',
+					'jeffpaul'         => 'Jeffrey Paul',
 					'JoshuaWold'       => 'Joshua Wold',
 					'zoonini'          => 'Kathryn Presner',
 					'wraithkenny'      => array( 'Ken Newman', 'f47c834c0b47b607df5e75394287b316' ),

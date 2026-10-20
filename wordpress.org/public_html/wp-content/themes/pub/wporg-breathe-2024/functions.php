@@ -155,19 +155,14 @@ function _merge_by_slug( ...$arrays ) {
 	$result   = [];
 
 	foreach ( $combined as $value ) {
-		if ( ! isset( $value['slug'] ) ) {
+		if ( ! is_array( $value ) || ! isset( $value['slug'] ) ) {
 			return [];
 		}
 
-		$found = array_search( $value['slug'], wp_list_pluck( $result, 'slug' ), true );
-		if ( false !== $found ) {
-			$result[ $found ] = $value;
-		} else {
-			$result[] = $value;
-		}
+		$result[ $value['slug'] ] = $value;
 	}
 
-	return $result;
+	return array_values( $result );
 }
 
 /**
@@ -229,7 +224,7 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 			$people_url        = home_url( '/pledges/' );
 			$is_pledges_active = trailingslashit( $people_url ) === trailingslashit( home_url( $wp->request ) );
 			$people_item       = array(
-				'label'     => esc_html__( 'People', 'wporg-5ftf' ),
+				'label'     => esc_html__( 'People', 'wporg' ),
 				'url'       => esc_url( $people_url ),
 				'className' => $is_pledges_active ? 'current-menu-item' : '',
 			);
@@ -366,7 +361,7 @@ add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 function welcome_box() {
 	$welcome      = get_page_by_path( 'welcome' );
 	$cookie       = 'welcome-' . get_current_blog_id();
-	$path         = get_blog_details()->path;
+	$path         = get_site()->path;
 	$hash         = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
 	$content_hash = $welcome ? md5( $welcome->post_content ) : '';
 
@@ -388,7 +383,7 @@ function welcome_box() {
 	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
-		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php _e( 'Menu' ); ?></strong></a>
+		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu', 'wporg' ); ?></strong></a>
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
 			<button
@@ -396,9 +391,9 @@ function welcome_box() {
 				id="make-welcome-toggle"
 				data-show="<?php esc_attr_e( 'Show welcome box', 'wporg' ); ?>"
 				data-hide="<?php esc_attr_e( 'Hide welcome box', 'wporg' ); ?>"
-			><span><?php _e( 'Hide welcome box', 'wporg' ); ?></span></button>
+			><span><?php esc_html_e( 'Hide welcome box', 'wporg' ); ?></span></button>
 		</div>
-		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo $cookie; ?>" data-hash="<?php echo $content_hash; ?>">
+		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo esc_attr( $cookie ); ?>" data-hash="<?php echo esc_attr( $content_hash ); ?>">
 			<script type="text/javascript">
 				const elContent = document.getElementById( 'make-welcome-content' );
 
@@ -439,7 +434,7 @@ add_action( 'wporg_breathe_after_header', __NAMESPACE__ . '\welcome_box' );
 function javascript_notice() {
 	?>
 	<noscript class="js-disabled-notice">
-		<?php _e( 'Please enable JavaScript to view this page properly.', 'wporg' ); ?>
+		<?php esc_html_e( 'Please enable JavaScript to view this page properly.', 'wporg' ); ?>
 	</noscript>
 	<?php
 }
@@ -452,7 +447,7 @@ add_action( 'wp_footer', __NAMESPACE__ . '\javascript_notice' );
  * @return array Array of CSS classes.
  */
 function add_site_slug_to_body_class( $classes ) {
-	$current_site = get_site( get_current_blog_id() );
+	$current_site = get_site();
 
 	$classes[] = 'wporg-make';
 	if ( $current_site ) {
@@ -683,20 +678,12 @@ function __translations_in_private_functions() {
  */
 function modify_handbook_search_block_action( $block_content, $block ) {
 	if ( function_exists( 'wporg_is_handbook' ) && wporg_is_handbook() ) {
-		$html = wp_html_split( $block_content );
+		$tags = new \WP_HTML_Tag_Processor( $block_content );
 		
-		foreach ( $html as &$token ) {
-			if ( 0 === strpos( $token, '<form' ) ) {
-				$token = preg_replace(
-					'/action="[^"]*"/',
-					'action="' . esc_url( home_url( '/handbook/' ) ) . '"',
-					$token
-				);
-				break;
-			}
+		if ( $tags->next_tag( 'form' ) ) {
+			 $tags->set_attribute( 'action', esc_url( home_url( '/handbook/' ) ) );
+			 $block_content = $tags->get_updated_html();
 		}
-		
-		$block_content = implode( '', $html );
 	}
 	return $block_content;
 }
@@ -725,8 +712,8 @@ function breathe_content_nav( $nav_id ) {
 	$nav_class = ( is_single() ) ? 'navigation-post' : 'navigation-paging';
 
 	?>
-	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo $nav_class; ?>">
-		<h2 class="screen-reader-text"><?php _e( 'Post navigation', 'wporg' ); ?></h2>
+	<nav role="navigation" id="<?php echo esc_attr( $nav_id ); ?>" class="<?php echo esc_attr( $nav_class ); ?>">
+		<h2 class="screen-reader-text"><?php esc_html_e( 'Post navigation', 'wporg' ); ?></h2>
 
 	<?php if ( is_single() ) : // navigation links for single posts ?>
 
@@ -772,12 +759,12 @@ function modify_site_title_block( $block_content, $block ) {
 	// On the project and updates sites replace the link with a Make home page link
 	if ( '/project/' === $site->path || '/updates/' === $site->path ) {
 		$make_home_url = 'https://' . $site->domain;
-		$block_content = preg_replace( 
+		$block_content = preg_replace(
 			'/<a\b[^>]*>(.*?)<\/a>/',
 			'<a target="_self" rel="home" href="' . esc_url( $make_home_url ) . '">' . 
 			esc_html__( 'Make WordPress', 'wporg' ) . 
-			'</a>', 
-			$block_content 
+			'</a>',
+			$block_content
 		);
 	}
 
@@ -797,7 +784,6 @@ add_action(
 				"ready.o2",
 				function () {
 					setTimeout( () => Prism.highlightAll(), 10 );
-					console.log( "test" );
 				}
 			);',
 			'after'

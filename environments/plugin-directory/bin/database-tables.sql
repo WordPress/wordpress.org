@@ -1,6 +1,33 @@
 -- Stub tables for local development.
 -- These tables exist outside WordPress on production but are needed locally.
 
+-- WordPress.org's copy of helpdesk conversations, which api.wordpress.org's webhooks fill.
+CREATE TABLE IF NOT EXISTS `wp_helpscout` (
+  `id` bigint(20) unsigned NOT NULL,
+  `number` int(10) unsigned NOT NULL DEFAULT 0,
+  `user_id` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `mailbox` varchar(50) NOT NULL DEFAULT '',
+  `status` varchar(20) NOT NULL DEFAULT '',
+  `email` varchar(255) NOT NULL DEFAULT '',
+  `subject` varchar(255) NOT NULL DEFAULT '',
+  `preview` text,
+  `created` varchar(19) NOT NULL DEFAULT '',
+  `closed` varchar(19) NOT NULL DEFAULT '',
+  `modified` varchar(19) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- As on production.
+CREATE TABLE IF NOT EXISTS `wp_helpscout_meta` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `helpscout_id` bigint(20) NOT NULL,
+  `meta_key` varchar(32) NOT NULL,
+  `meta_value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `helpscout_id` (`helpscout_id`,`meta_key`,`meta_value`),
+  KEY `meta_key` (`meta_key`,`meta_value`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE TABLE IF NOT EXISTS `wp_svn_access` (
   `path` varchar(255) NOT NULL DEFAULT '',
   `user` varchar(200) NOT NULL DEFAULT '0',

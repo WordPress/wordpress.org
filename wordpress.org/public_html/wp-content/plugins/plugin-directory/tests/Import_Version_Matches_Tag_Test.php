@@ -5,17 +5,21 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
 
 /**
  * @group import
  */
+#[Group( 'import' )]
 class Import_Version_Matches_Tag_Test extends TestCase {
 
 	/**
 	 * @dataProvider matches_provider
 	 */
+	#[DataProvider( 'matches_provider' )]
 	public function test_matches( $version, $tag ) {
 		$this->assertTrue(
 			Import::version_matches_tag( $version, $tag ),
@@ -26,6 +30,7 @@ class Import_Version_Matches_Tag_Test extends TestCase {
 	/**
 	 * @dataProvider mismatches_provider
 	 */
+	#[DataProvider( 'mismatches_provider' )]
 	public function test_mismatches( $version, $tag ) {
 		$this->assertFalse(
 			Import::version_matches_tag( $version, $tag ),

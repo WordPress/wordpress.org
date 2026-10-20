@@ -14,6 +14,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 
 	class WPOrg_Profiles_Association_Handler {
 
+		const USER_BADGES_CACHE_GROUP      = 'user_meta';
+		const USER_BADGES_CACHE_KEY_PREFIX = 'wporg-profiles-user-badges:';
+
 		/**
 		 * @var WPOrg_Profiles_Association_Handler|null
 		 */
@@ -163,6 +166,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 		 * Validates the request, delegates to handle_association(), and dies with the result.
 		 */
 		public function ajax_handle_association() {
+			// Failure messages echo request data, so keep the response non-scriptable.
+			header( 'Content-Type: text/plain; charset=utf-8' );
+
 			if ( true !== apply_filters( 'wporg_is_valid_association_request', false ) ) {
 				status_header( 400 );
 				die( '-1 Not a valid association request.' );
@@ -173,6 +179,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 			if ( is_wp_error( $result ) ) {
 				$status = $result->get_error_data()['status'] ?? 500;
 				status_header( $status );
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text API response, or written to the error log.
 				die( '-1 ' . $result->get_error_message() );
 			}
 
@@ -266,11 +273,13 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 				if ( 'add' == $command ) {
 					if ( ! groups_is_user_member( $user_id, $group_id ) ) {
 						groups_join_group( $group_id, $user_id );
+						$this->clear_user_badges_cache( $user_id );
 						$users_altered++;
 					}
 				} elseif ( 'remove' == $command ) {
 					if ( groups_is_user_member( $user_id, $group_id ) ) {
 						groups_leave_group( $group_id, $user_id );
+						$this->clear_user_badges_cache( $user_id );
 						$users_altered++;
 					}
 				}
@@ -288,6 +297,15 @@ if ( ! class_exists( 'WPOrg_Profiles_Association_Handler' ) ) {
 			}
 
 			return true;
+		}
+
+		/**
+		 * Clears cached badge data for a user after their badge group membership changes.
+		 *
+		 * @param int $user_id User ID.
+		 */
+		private function clear_user_badges_cache( $user_id ) {
+			wp_cache_delete( self::USER_BADGES_CACHE_KEY_PREFIX . (int) $user_id, self::USER_BADGES_CACHE_GROUP );
 		}
 
 	} /* /class WPOrg_Profiles_Association_Handler */

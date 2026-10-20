@@ -45,7 +45,14 @@ class ZIP_Cleanup {
 			'update_post_term_cache' => false,
 		] );
 
+		$i = 0;
 		foreach ( $attachments as $attachment_id => $plugin_id ) {
+			++$i;
+			// Most attachments are skipped, but each still loads its plugin and all of its meta into the runtime cache.
+			if ( 0 === $i % 100 ) {
+				Manager::clear_memory_heavy_variables();
+			}
+
 			$plugin = get_post( $plugin_id );
 
 			// If not a plugin upload, or something drastically is wrong..

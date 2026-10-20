@@ -384,10 +384,11 @@ class Official_WordPress_Events {
 							break;
 
 						case 'URL':
-							if ( empty( $value ) ) {
+							$url = esc_url_raw( $value );
+							if ( empty( $url ) ) {
 								continue 3;
 							} else {
-								$event['url'] = $value;
+								$event['url'] = $url;
 							}
 							break;
 
@@ -549,6 +550,7 @@ class Official_WordPress_Events {
 
 		if ( ! $successful_response || ! $body_is_valid ) {
 			trigger_error(
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log, not rendered.
 				"This function had to abort because the request failed. If it didn't, it would mark scheduled events as postponed. Failed response: " . var_export( $response, true ),
 				E_USER_WARNING
 			);
@@ -695,7 +697,7 @@ class Official_WordPress_Events {
 				'source_id'       => $meetup['id'],
 				'status'          => 'upcoming' === $meetup['status'] ? 'scheduled' : 'cancelled',
 				'title'           => $meetup['name'],
-				'url'             => $meetup['link'],
+				'url'             => esc_url_raw( $meetup['link'] ),
 				'meetup_name'     => $meetup['group']['name'],
 				'meetup_url'      => sprintf( 'https://www.meetup.com/%s/', $meetup['group']['urlname'] ),
 				'description'     => $meetup['description'] ?? '',
@@ -886,7 +888,8 @@ class Official_WordPress_Events {
 			trigger_error( sprintf(
 				'%s error for %s: %s',
 				__METHOD__,
-				parse_url( site_url(), PHP_URL_HOST ),
+				esc_html( parse_url( site_url(), PHP_URL_HOST ) ),
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log, not rendered.
 				sanitize_text_field( $error )
 			), E_USER_WARNING );
 
@@ -919,9 +922,10 @@ class Official_WordPress_Events {
 	 */
 	protected function log( $message, $write_to_disk = false ) {
 		$limit = 500;
-		$api_keys = array( MEETUP_API_KEY, OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
+		$api_keys = array( OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY );
 
 		if ( 'cli' === php_sapi_name() ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI console output; the guard above restricts this to php_sapi_name() === 'cli'.
 			echo "\n" . $message;
 		}
 

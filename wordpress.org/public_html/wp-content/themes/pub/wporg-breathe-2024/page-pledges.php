@@ -372,7 +372,7 @@ if ( ! $current_user_id ) {
 							<?php elseif ( 'not-ranked' === $standing_state ) : ?>
 								<div class="pledges-standing-card pledges-standing-card-not-ranked">
 									<span class="pledges-standing-avatar">
-										<?php echo wp_kses_post( get_avatar( $standing_user['email'], 56 ) ); ?>
+										<?php echo get_avatar( $standing_user['email'], 56 ); ?>
 									</span>
 									<div class="pledges-standing-body">
 										<strong class="pledges-standing-title"><?php esc_html_e( 'You are not ranked in this team.', 'wporg-5ftf' ); ?></strong>
@@ -414,7 +414,7 @@ if ( ! $current_user_id ) {
 								</div>
 								<div class="pledges-standing-card pledges-standing-card-filtered"<?php echo $is_filtered ? '' : ' hidden'; ?>>
 									<span class="pledges-standing-avatar">
-										<?php echo wp_kses_post( get_avatar( $standing_user['email'], 56 ) ); ?>
+										<?php echo get_avatar( $standing_user['email'], 56 ); ?>
 									</span>
 									<div class="pledges-standing-body">
 										<strong class="pledges-standing-title"><?php esc_html_e( 'You\'re hidden by current filters.', 'wporg-5ftf' ); ?></strong>
@@ -657,7 +657,7 @@ if ( ! $current_user_id ) {
 					?>
 					<a class="pledges-jump-pill" href="#pledges-card-you" aria-label="<?php echo esc_attr( $pill_label ); ?>" data-aria-template="<?php echo esc_attr( $pill_aria_template ); ?>"<?php echo $pill_hidden ? ' hidden' : ''; ?>>
 						<span class="pledges-jump-avatar" aria-hidden="true">
-							<?php echo wp_kses_post( get_avatar( $standing_user['email'], 26 ) ); ?>
+							<?php echo get_avatar( $standing_user['email'], 26 ); ?>
 						</span>
 						<span class="pledges-jump-label"><?php esc_html_e( 'Jump to your card', 'wporg-5ftf' ); ?></span>
 						<span class="pledges-jump-rank" aria-hidden="true">#<?php echo esc_html( $standing_rank ); ?></span>

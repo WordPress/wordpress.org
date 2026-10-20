@@ -13,6 +13,7 @@ foreach ( glob( 'wporg-*' ) as $theme ) {
 		continue;
 	}
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI build progress written to the console, not HTML.
 	echo "Building $theme...";
 
 	$grunt = shell_exec( 'grunt build' );

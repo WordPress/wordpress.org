@@ -6,16 +6,16 @@
 		foreach ( $posts as $post ) {
 
 			$evenodd = abs( $evenodd - 1 );
-			echo '<div class="row row-'. $evenodd . '">';
+			echo '<div class="row row-' . esc_attr( $evenodd ) . '">';
 
 			echo '<div class="job-date">' . get_the_date( 'M j' ) . '</div>';
 			echo '<div class="job-title">';
 			echo '<a href="'; the_permalink(); echo '" rel="bookmark">'; the_title(); echo '</a></div>';
 			echo '<div class="job-type">';
-			echo jobswp_get_job_meta( get_the_ID(), 'jobtype' );
+			echo esc_html( jobswp_get_job_meta( get_the_ID(), 'jobtype' ) );
 			echo '</div>';
 			echo '<div class="job-location">';
-			echo jobswp_get_job_meta( get_the_ID(), 'location' );
+			echo esc_html( jobswp_get_job_meta( get_the_ID(), 'location' ) );
 			echo '</div>';
 
 			echo '<div class="clear"></div>';
@@ -27,7 +27,8 @@
 		echo '<div class="row row-1">';
 		echo "<div class='no-job'>";
 		echo sprintf(
-			__( 'There are no jobs in this category. If you\'re hiring, you can <a href="%s">post a new job</a>.', 'jobswp' ),
+			/* translators: %s: Post a job URL. */
+			wp_kses( __( 'There are no jobs in this category. If you&#8217;re hiring, you can <a href="%s">post a new job</a>.', 'jobswp' ), 'jobswp-ui' ),
 			'/post-a-job'
 		);
 		echo '</div>';
@@ -49,7 +50,7 @@
 			$link .= 'title="'. esc_attr( sprintf( __( 'View all jobs filed under %s', 'jobswp' ), $category->name ) ) . '"';
 			$link .= '>';
 			$link .= 'Show all '.apply_filters( 'list_terms', $category->name, $category ) . ' jobs &raquo;</a>';		
-			echo $link;
+			echo wp_kses( $link, 'jobswp-ui' );
 			echo '</p>';
 		} else {
 			jobswp_content_nav( 'all-job-categories' );

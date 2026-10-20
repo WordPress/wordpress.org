@@ -5,6 +5,7 @@ on:
     paths:
     - '**.php'
     - phpcs.xml.dist
+    - freescout.wordpress.net/phpcs.xml.dist
     - composer.json
     - .github/workflows/phpcs.yml
     - .github/bin/phpcs-branch.php
@@ -12,10 +13,15 @@ on:
     branches: [trunk]
     paths:
     - '**.php'
+    - freescout.wordpress.net/phpcs.xml.dist
 
+# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   phpcs:
@@ -23,21 +29,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         fetch-depth: 0
+        persist-credentials: false
 
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.4'
         coverage: none
-        tools: composer:v2
+        tools: composer:v2, cs2pr
       env:
         COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v6
+      with:
+        path: vendor
+        key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
 
     - name: Install Composer dependencies
       run: composer install --no-interaction --prefer-dist
 
     - name: Lint PHP
-      run: BASE_REF=${{ github.base_ref }} php .github/bin/phpcs-branch.php
+      run: php .github/bin/phpcs-branch.php
+      env:
+        BASE_REF: ${{ github.base_ref }}
+
+    # Excluded from the root ruleset; FreeScout code has its own standard.
+    - name: Lint FreeScout PHP
+      if: ${{ !cancelled() }}
+      # The checkstyle report becomes inline annotations on the PR.
+      run: |
+        STATUS=0
+        vendor/bin/phpcs --standard=freescout.wordpress.net/phpcs.xml.dist --report-full --report-checkstyle=phpcs-freescout.xml || STATUS=$?
+        cs2pr phpcs-freescout.xml || true
+        exit $STATUS

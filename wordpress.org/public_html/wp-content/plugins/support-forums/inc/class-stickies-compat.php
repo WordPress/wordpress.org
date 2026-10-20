@@ -254,17 +254,17 @@ class Stickies_Compat {
 			}
 
 			// Compat authors.
-			if ( $this->authors && in_array( $user->user_nicename, $this->authors ) ) {
+			if ( $this->authors && in_array( $user->user_nicename, $this->authors, true ) ) {
 				$retval = true;
 			}
 
 			// Compat contributors.
-			if ( $this->contributors && in_array( $user->user_nicename, $this->contributors ) ) {
+			if ( $this->contributors && in_array( $user->user_nicename, $this->contributors, true ) ) {
 				$retval = true;
 			}
 
 			// Compat support reps.
-			if ( $this->support_reps && in_array( $user->user_nicename, $this->support_reps ) ) {
+			if ( $this->support_reps && in_array( $user->user_nicename, $this->support_reps, true ) ) {
 				$retval = true;
 			}
 		}

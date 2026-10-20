@@ -273,7 +273,6 @@ class WP_50_Credits extends WP_Credits {
 			'janalwin',
 			'jaswrks',
 			'jblz',
-			'jbpaul17',
 			'jd55',
 			'jdembowski',
 			'jdgrimes',

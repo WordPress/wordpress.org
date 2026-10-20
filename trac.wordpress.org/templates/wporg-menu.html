@@ -1,0 +1,8 @@
+{# Shared default headline used when an environment does not ship its own
+   wporg-menu.html. Replaces the old Genshi <xi:fallback> in site.html. #}
+# set project_name = project.name.replace('Trac', '').strip()
+<div id="headline" class="no-menu">
+	<div class="wrapper">
+		<h2><a href="/">${project_name}</a></h2>
+	</div>
+</div>

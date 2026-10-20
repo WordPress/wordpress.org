@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:py="http://genshi.edgewall.org/"
-      py:strip="">
-
+{# bbpress.trac — <head> additions, included by the shared site_head.html. #}
 	<link rel="dns-prefetch" href="https://fonts.googleapis.com"/>
 	<link rel="dns-prefetch" href="https://www.googletagmanager.com"/>
 
@@ -18,10 +14,3 @@
 	<link type="text/css" media="screen" rel="stylesheet" href="https://bbpress.org/wp-content/themes/bb-base/style.css?v=29" />
 	<link type="text/css" media="screen" rel="stylesheet" href="https://bbpress.org/wp-content/themes/bb-base/style-trac.css?v=29" />
 	<link type="text/css" media="screen" rel="stylesheet" href="https://bbpress.org/wp-content/themes/bb-base/style-bbpress.css?v=29" />
-
-	<body py:match="body" py:attrs="select('@*')">
-		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P24PF4B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-
-		${select('*|comment()|text()')}
-	</body>
-</html>

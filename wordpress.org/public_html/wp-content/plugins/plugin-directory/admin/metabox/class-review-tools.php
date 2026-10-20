@@ -159,7 +159,7 @@ class Review_Tools {
 		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
 			echo '<label>
 				<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
-				<button class="button button-secondary plugin-upload-zip">' . __( 'Upload', 'wporg-plugins' ) . '</button>
+				<button class="button button-secondary plugin-upload-zip">' . esc_html__( 'Upload', 'wporg-plugins' ) . '</button>
 				</label>';
 		}
 
@@ -351,7 +351,7 @@ class Review_Tools {
 					<li>API Endpoints:
 						<ul class="ul-disc">
 						<li><a href="<?php echo esc_url( 'https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&slug=' . $post->post_name ); ?>">Info</a></li>
-						<li><a href="<?php echo rest_url('/plugins/v1/plugin/' . $post->post_name ); ?>" title="Source-data for info endpoint">wp-json Info</a></li>
+						<li><a href="<?php echo esc_url( rest_url( '/plugins/v1/plugin/' . $post->post_name ) ); ?>" title="Source-data for info endpoint">wp-json Info</a></li>
 						<?php
 							$update_check_payload = [
 								// This is a placeholder filename, it'll work for our purposes.
@@ -476,7 +476,7 @@ class Review_Tools {
 			)
 		);
 
-		die( "Queued SVN import for {$plugin_slug}." );
+		die( esc_html( "Queued SVN import for {$plugin_slug}." ) );
 	}
 
 	/**
@@ -508,6 +508,6 @@ class Review_Tools {
 			0
 		);
 
-		die( "Queued i18n import for {$plugin_slug}." );
+		die( esc_html( "Queued i18n import for {$plugin_slug}." ) );
 	}
 }

@@ -1,0 +1,892 @@
+/**
+ * Adjusts FreeScout's own screens.
+ */
+
+/* Previous Conversations and other sidebar links: core's gray is 2.5:1, this meets WCAG AAA (7:1). */
+.conv-sidebar-block .help-link,
+.conv-sidebar-block .help-link:hover,
+.conv-sidebar-block .help-link:focus {
+	color: #4a5561 !important;
+}
+
+/* The empty Modules Directory, which core shows anyway, and the sidebar links to it and the Marketplace. */
+#directory,
+#directory + .row-container,
+.sidebar-menu li:has( > a[href="#directory"] ),
+.sidebar-menu li:has( > a[href="#third-party"] ) {
+	display: none;
+}
+
+/* The Modules page's cards, in columns of up to 540px, as many as fit. */
+.row-container:has( > .module-card ) {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( min( 100%, 440px ), 540px ) );
+	gap: 18px;
+
+	/* The cards' own bottom margin, which the grid's gap replaces. */
+	margin-bottom: 18px;
+}
+
+.row-container > .module-card {
+	float: none;
+	width: auto;
+	margin: 0;
+}
+
+/* A conversation's number, which copies it. */
+.wporgsite-number {
+	cursor: pointer;
+}
+
+.wporgsite-number:hover,
+.wporgsite-number:focus {
+	color: #0078d7 !important;
+}
+
+/* Keyboard keys, as a key: in the editor's placeholder, and at the right of the menu items they're for, like statuses and Merge. */
+.wporgsite-key,
+.dropdown-menu > li > a[data-wporgsite-key]::after {
+	display: inline-block;
+	min-width: 20px;
+	padding: 0 5px;
+	border: 1px solid currentcolor;
+	border-bottom-width: 2px;
+	border-radius: 3px;
+	background: none;
+	box-shadow: none;
+	color: inherit;
+	font: 11px/15px Menlo, Consolas, monospace;
+	text-align: center;
+}
+
+.dropdown-menu > li > a[data-wporgsite-key] {
+	position: relative;
+	padding-right: 56px;
+}
+
+.dropdown-menu > li > a[data-wporgsite-key]::after {
+	content: attr( data-wporgsite-key );
+	position: absolute;
+	top: 50%;
+	right: 14px;
+	opacity: 0.6;
+	transform: translateY( -50% );
+}
+
+/* The editor's placeholder, about typing / for saved replies; the script matches its padding and font to the editor's. */
+.wporgsite-editor-placeholder {
+	position: absolute;
+	top: 0;
+	left: 0;
+	color: #6b7782;
+	pointer-events: none;
+}
+
+/* A conversation's subject, and its threads' authors, smaller than core's 23px and 18px, so more of the conversation fits. */
+.conv-subjtext {
+	font-size: 18px;
+	line-height: 24px;
+}
+
+.thread-person strong {
+	font-size: 16px;
+}
+
+/*
+ * The conversation's latest note, pinned above its threads for agents who choose so in their profile: a copy, in a
+ * note's colors. See PinnedNote.
+ */
+.wporgsite-pinned-note {
+	padding: 14px 20px 16px 25px;
+	border-bottom: 1px solid #e3e8eb;
+	background-color: #fffbf1;
+	box-shadow: inset 5px 0 0 0 #ffc646;
+}
+
+.wporgsite-pinned-note-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 12px;
+	margin-bottom: 8px;
+	color: #6b7782;
+	font-size: 13px;
+}
+
+.wporgsite-pinned-note-title,
+.wporgsite-pinned-label {
+	color: #8a5a00;
+	font-weight: 600;
+}
+
+.wporgsite-pinned-note-author {
+	color: #253540;
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.wporgsite-pinned-note-link {
+	margin-left: auto;
+}
+
+.wporgsite-pinned-note-body > :last-child {
+	margin-bottom: 0;
+}
+
+.wporgsite-pinned-note-attachments {
+	margin: 10px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* The note itself, dimmed where it is, unless the agent is on it, or got there from the copy's link. */
+.thread:has( .wporgsite-pinned-label ) > .thread-photo,
+.thread:has( .wporgsite-pinned-label ) > .thread-message {
+	opacity: 0.5;
+	transition: opacity 0.15s ease;
+}
+
+.thread:has( .wporgsite-pinned-label ):is( :hover, :focus-within, :target ) > .thread-photo,
+.thread:has( .wporgsite-pinned-label ):is( :hover, :focus-within, :target ) > .thread-message {
+	opacity: 1;
+}
+
+/* A conversation's status or assignee selector, pinned while its menu is open and its toolbar scrolled out of view; the script sets how far from the left it is. */
+#conv-status.wporgsite-pinned,
+#conv-assignee.wporgsite-pinned {
+	position: fixed;
+	top: 8px;
+	z-index: 1000;
+	border-radius: 4px;
+	box-shadow: 0 2px 8px rgba( 0, 0, 0, 0.2 );
+}
+
+@media print {
+
+	#conv-status.wporgsite-pinned,
+	#conv-assignee.wporgsite-pinned {
+		position: static;
+		box-shadow: none;
+	}
+}
+
+/*
+ * The sidebar, which collapses to its icons from the button on its edge, and opens over the page while the agent's
+ * pointer or keyboard is in it, or one of its menus is open; see sidebar.js. Only side by side with the page, as on
+ * desktops: below 992px, core folds it into a menu.
+ */
+.wporgsite-sidebar-toggle {
+	display: none;
+}
+
+@media ( min-width: 992px ) {
+
+	/*
+	 * Core's overflow-y: auto clips it on the sides too, where the button sits on the line; it scrolls nothing, as the
+	 * sidebar is always as tall as the page.
+	 */
+	.sidebar-2col {
+		--wporgsite-sidebar-width: 260px;
+		--wporgsite-sidebar-collapsed: 56px;
+		position: relative;
+		overflow: visible;
+	}
+
+	/* On the line between the sidebar and the page, while the sidebar has the pointer, or the button the keyboard. */
+	.wporgsite-sidebar-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: absolute;
+		top: 20px;
+		right: -12px;
+		z-index: 10;
+		width: 24px;
+		height: 24px;
+		padding: 0;
+		border: 1px solid #d6dde3;
+		border-radius: 50%;
+		background-color: #fff;
+		box-shadow: 0 1px 3px rgba( 0, 0, 0, 0.12 );
+		color: #4f5d6b;
+		font-size: 10px;
+		opacity: 0;
+		transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+	}
+
+	.wporgsite-sidebar-toggle .glyphicon {
+		top: 0;
+	}
+
+	.sidebar-2col:hover .wporgsite-sidebar-toggle,
+	.wporgsite-sidebar-toggle:focus-visible {
+		opacity: 1;
+	}
+
+	.wporgsite-sidebar-toggle:hover,
+	.wporgsite-sidebar-toggle:focus-visible {
+		border-color: #3858e9;
+		background-color: #3858e9;
+		color: #fff;
+	}
+
+	.wporgsite-sidebar-toggle:focus-visible {
+		outline: 2px solid #3858e9;
+		outline-offset: 2px;
+	}
+
+	/*
+	 * Collapsed: the sidebar keeps its width and layout, so nothing in it moves, but takes the space of its icons only,
+	 * and shows only them. Its own background covers the page while it's open over it.
+	 */
+	.wporgsite-sidebar-collapsed .sidebar-2col {
+		z-index: 3;
+		margin-right: calc( var( --wporgsite-sidebar-collapsed ) - var( --wporgsite-sidebar-width ) );
+		background-color: #fff;
+		clip-path: inset( 0 calc( var( --wporgsite-sidebar-width ) - var( --wporgsite-sidebar-collapsed ) ) 0 0 );
+	}
+
+	.wporgsite-sidebar-animate .sidebar-2col {
+		transition: margin-right 0.25s ease, clip-path 0.25s ease, box-shadow 0.25s ease;
+	}
+
+	/* Open over the page; after a moment, so passing over it on the way elsewhere doesn't. */
+	.wporgsite-sidebar-collapsed .sidebar-2col:is( :hover, :has( :focus-visible ), :has( .open ) ) {
+		box-shadow: 4px 0 16px rgba( 0, 0, 0, 0.12 );
+		clip-path: inset( 0 -40px 0 0 );
+		transition-delay: 0s, 0.15s, 0.15s;
+	}
+
+	.wporgsite-sidebar-animate.wporgsite-sidebar-collapsed .sidebar-2col :is( .sidebar-menu > li > a, .sidebar-buttons, .btn-sidebar ) {
+		transition: color 0.2s ease 0.15s, opacity 0.2s ease 0.15s;
+	}
+
+	/*
+	 * The title's text shows and hides at once, under its initial, which zooms in over it as the sidebar closes, and out
+	 * as it opens: as it opens over the page, rather than as the pointer gets there.
+	 */
+	.wporgsite-sidebar-animate.wporgsite-sidebar-collapsed .sidebar-2col:is( :hover, :has( :focus-visible ), :has( .open ) ) :is( .sidebar-title, .sidebar-title > * ) {
+		transition: color 0s linear 0.15s, opacity 0s linear 0.15s;
+	}
+
+	.wporgsite-sidebar-animate.wporgsite-sidebar-collapsed .sidebar-title[data-wporgsite-initial]::before {
+		transition: transform 0.2s ease;
+	}
+
+	.wporgsite-sidebar-animate.wporgsite-sidebar-collapsed .sidebar-2col:is( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-title[data-wporgsite-initial]::before {
+		transition-delay: 0.15s;
+	}
+
+	/* The title's initial, on its color, centered over the icons, and over the title's text. */
+	.wporgsite-sidebar-collapsed .sidebar-title {
+		position: relative;
+	}
+
+	.wporgsite-sidebar-collapsed .sidebar-title[data-wporgsite-initial]::before {
+		content: attr( data-wporgsite-initial );
+		position: absolute;
+		top: -2px;
+		left: calc( ( var( --wporgsite-sidebar-collapsed ) - 28px ) / 2 - 20px );
+		width: 28px;
+		height: 28px;
+		border-radius: 6px;
+		background-color: var( --wporgsite-initial-color, #3858e9 );
+		color: #fff;
+		font-size: 15px;
+		font-weight: 600;
+		line-height: 28px;
+		text-align: center;
+		pointer-events: none;
+		z-index: 1;
+		transform: scale( 0 );
+	}
+
+	/* Collapsed and closed: only the icons, and the title's initial. Hidden things keep their space, so nothing moves as it opens. */
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-menu > li > a,
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-title {
+		color: transparent !important;
+	}
+
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-title > *,
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .btn-sidebar:not( :has( .glyphicon ) ) {
+		opacity: 0;
+	}
+
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-title[data-wporgsite-initial]::before {
+		transform: scale( 1 );
+	}
+
+	/* The mailbox's buttons, settings and new conversation, one above the other. */
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-buttons {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		padding: 0 8px;
+	}
+
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-buttons > .btn,
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-buttons > .btn-group,
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-buttons .btn {
+		width: 40px;
+		border-radius: 14px;
+	}
+
+	/*
+	 * Their icons centered, each with its whole border: side by side, core leaves out the settings button's right one,
+	 * and Bootstrap overlaps the next button's left one on it.
+	 */
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-buttons .btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 36px;
+		margin-left: 0;
+		padding: 0;
+		border: 1px solid #d3dae0;
+	}
+
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-buttons .btn .glyphicon {
+		top: 0;
+	}
+
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .sidebar-buttons .caret {
+		display: none;
+	}
+
+	/* Buttons with an icon, like Open Mailbox, show only it. */
+	.wporgsite-sidebar-collapsed .sidebar-2col:not( :hover, :has( :focus-visible ), :has( .open ) ) .btn-sidebar {
+		max-width: 40px;
+		margin-left: 8px;
+		overflow: hidden;
+		padding-right: 12px;
+		padding-left: 12px;
+		white-space: nowrap;
+	}
+}
+
+@media ( prefers-reduced-motion: reduce ) {
+
+	.wporgsite-sidebar-animate .sidebar-2col,
+	.wporgsite-sidebar-animate .sidebar-2col *,
+	.wporgsite-sidebar-toggle {
+		transition: none !important;
+	}
+}
+
+/*
+ * A conversation's header, pinned to the top of the window from the button in its toolbar; see header.js. The script
+ * keeps the editor within 55% of the window, or all of it, and it scrolls within that.
+ */
+.wporgsite-header-pin {
+	display: inline-block;
+	padding: 16px 16px 9px;
+	border: 0;
+	background: none;
+	color: #005a9e;
+	font-size: 19px;
+	line-height: 1;
+	vertical-align: top;
+	cursor: pointer;
+}
+
+.wporgsite-header-pin:hover,
+.wporgsite-header-pin:focus-visible {
+	color: #0078d7;
+}
+
+.wporgsite-header-pin[aria-pressed="true"] {
+	box-shadow: inset 0 -3px 0 #005a9e;
+}
+
+/* Core's overflow: hidden would be what the header sticks to, which never scrolls; clip clips the same without that. */
+.wporgsite-header-pinned #app {
+	overflow: clip;
+}
+
+/*
+ * Over the emails as they scroll under it. Its right padding, the customer sidebar's column at 1100px and up, is
+ * empty: the pointer goes through to the sidebar.
+ */
+.wporgsite-header-pinned #conv-layout-header {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	pointer-events: none;
+}
+
+.wporgsite-header-pinned #conv-layout-header > * {
+	pointer-events: auto;
+}
+
+.wporgsite-header-pinned #conv-subject {
+	background-color: #fff;
+	box-shadow: 0 2px 6px rgba( 0, 0, 0, 0.08 );
+}
+
+.wporgsite-header-pinned .conv-reply-block .note-editable {
+	overflow-y: auto;
+}
+
+/* Only while it's pinned, as only then is the editor's room limited. */
+.wporgsite-editor-expand {
+	display: none;
+}
+
+.wporgsite-header-pinned .wporgsite-editor-expand {
+	display: inline-block;
+}
+
+@media print {
+
+	.wporgsite-header-pinned #conv-layout-header {
+		position: static;
+	}
+
+	.wporgsite-header-pin,
+	.wporgsite-editor-expand {
+		display: none !important;
+	}
+}
+
+/*
+ * The alternate conversation design, for agents who choose it in their profile; alt-conversation.js gives the page
+ * this class once it laid the conversation out.
+ *
+ * The page is as tall as the window, and doesn't scroll itself: the conversation does, with its scrollbar by its side,
+ * and each sidebar on its own. The navigation slides away while the conversation is scrolled from its top, as it went
+ * with the page, and the mark at its left stays, at the top of the left sidebar. The script sets the variables.
+ */
+.wporgsite-alt-layout #app {
+	overflow: clip;
+}
+
+/* The page's footer, under the window's edge. */
+.wporgsite-alt-layout .footer {
+	display: none;
+}
+
+.wporgsite-alt-layout .layout-2col {
+	height: calc( 100vh - var( --wporgsite-navbar-height, 51px ) );
+	min-height: 0;
+}
+
+.wporgsite-alt-scrolled .layout-2col {
+	height: 100vh;
+}
+
+.wporgsite-alt-scrolled .navbar {
+	margin-top: calc( -1 * var( --wporgsite-navbar-height, 51px ) );
+}
+
+/* Not as the page opens, scrolled to the newest thread already. */
+.wporgsite-alt-ready .layout-2col {
+	transition: height 0.2s ease;
+}
+
+.wporgsite-alt-ready .navbar {
+	transition: margin-top 0.2s ease;
+}
+
+.wporgsite-alt-layout #conv-layout {
+	display: flex;
+	height: 100%;
+
+	/* Core makes it as tall as the sidebar, which scrolls on its own here. */
+	min-height: 0 !important;
+}
+
+/* All but the sidebar: the conversation, which scrolls, with its pre-header and buttons at its top and bottom. */
+.wporgsite-alt-column {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scroll-padding-top: var( --wporgsite-preheader-height, 52px );
+	outline: 0;
+}
+
+.wporgsite-alt-column > * {
+	flex-shrink: 0;
+}
+
+/* The left sidebar scrolls on its own too, without a scrollbar: rarely is there more than fits. */
+.wporgsite-alt-layout .sidebar-2col {
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scrollbar-width: none;
+}
+
+.wporgsite-alt-layout .sidebar-2col::-webkit-scrollbar {
+	display: none;
+}
+
+/* Within it, as it scrolls, rather than half outside it. */
+.wporgsite-alt-layout .wporgsite-sidebar-toggle {
+	right: 4px;
+}
+
+/* The navigation's mark, at the sidebar's top while the navigation is away, where it was. */
+.wporgsite-sidebar-brand {
+	display: none;
+}
+
+.wporgsite-alt-layout .wporgsite-sidebar-brand {
+	display: block;
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	height: 0;
+	overflow: hidden;
+	background-color: var( --wporgsite-navbar-background, #0078d7 );
+}
+
+.wporgsite-alt-scrolled .wporgsite-sidebar-brand {
+	height: var( --wporgsite-navbar-height, 51px );
+}
+
+.wporgsite-alt-ready .wporgsite-sidebar-brand {
+	transition: height 0.2s ease;
+}
+
+.wporgsite-sidebar-brand .navbar-brand {
+	display: block;
+	float: none;
+}
+
+.wporgsite-alt-layout #conv-layout-header,
+.wporgsite-alt-layout #conv-layout-main {
+	float: none;
+	width: auto;
+	padding-right: 0;
+}
+
+/* The threads oldest first, as core lists them newest first; from the top, when there's room left. */
+.wporgsite-alt-layout #conv-layout-main {
+	display: flex;
+	flex: 1;
+	flex-direction: column-reverse;
+	justify-content: flex-end;
+}
+
+/* The pre-header, always in view: the subject, the tags, and the actions but Reply and Note, which are at the bottom. */
+.wporgsite-alt-layout #conv-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	position: sticky;
+	top: 0;
+	z-index: 11;
+	padding: 0 9px 0 20px;
+	box-shadow: 0 1px 0 #d6dde3;
+}
+
+.wporgsite-alt-subject {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	color: #2a3b47;
+	font-size: 16px;
+	font-weight: 600;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.wporgsite-alt-layout #conv-toolbar #conv_tags {
+	flex: none;
+	max-width: 30%;
+	margin: 0;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.wporgsite-alt-layout #conv-toolbar .conv-actions {
+	flex: none;
+}
+
+/* The actions are at the pre-header's end, so their menus, like Tag's and More Actions', open to the left. */
+.wporgsite-alt-layout #conv-toolbar .conv-actions .dropdown-menu {
+	right: 0;
+	left: auto;
+}
+
+.wporgsite-alt-layout #conv-toolbar .conv-reply,
+.wporgsite-alt-layout #conv-toolbar .conv-add-note,
+.wporgsite-alt-layout #conv-toolbar > .clearfix {
+	display: none !important;
+}
+
+/* The sidebar, which scrolls on its own. */
+.wporgsite-alt-layout #conv-layout-customer {
+	flex: none;
+	position: relative;
+	right: auto;
+	width: 280px;
+	height: auto;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+/*
+ * Its top, which stays there as the sidebar scrolls: the number, which copies itself, the previous and next
+ * conversations, and the selectors, whose menus s and a open.
+ */
+.wporgsite-alt-info {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	padding: 12px 15px 14px;
+	border-bottom: 1px solid #d6dde3;
+	background-color: #deecf9;
+}
+
+.wporgsite-alt-info-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 10px;
+}
+
+.wporgsite-alt-number {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #2a3b47;
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.wporgsite-alt-number .glyphicon {
+	margin-left: 4px;
+	color: #4f5d6b;
+	font-size: 13px;
+}
+
+.wporgsite-alt-info .conv-next-prev {
+	display: flex;
+	gap: 12px;
+}
+
+.wporgsite-alt-info .conv-info {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	float: none;
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	white-space: normal;
+}
+
+.wporgsite-alt-info .conv-info > li {
+	display: block;
+	margin: 0;
+}
+
+.wporgsite-alt-info .conv-info .btn-group {
+	display: flex;
+	width: 100%;
+}
+
+.wporgsite-alt-info .conv-info .btn-group button.conv-info-val {
+	flex: 1;
+	max-width: none;
+	text-align: left;
+}
+
+/*
+ * At the bottom, floating over the threads as they scroll, without a background of their own: Reply and Note, which
+ * the form they open takes the place of. At the end of the conversation, the space they take is under the threads.
+ */
+.wporgsite-alt-dock {
+	position: sticky;
+	bottom: 0;
+	z-index: 11;
+}
+
+.wporgsite-alt-buttons {
+	display: flex;
+	justify-content: center;
+	gap: 16px;
+	padding: 15px 20px;
+}
+
+/* 10px taller than core's 36px buttons. */
+.wporgsite-alt-buttons .btn {
+	min-width: 160px;
+	height: 46px;
+	padding-top: 0;
+	padding-bottom: 0;
+	line-height: 44px;
+	box-shadow: 0 2px 10px rgba( 0, 0, 0, 0.18 );
+}
+
+.wporgsite-alt-buttons .wporgsite-key {
+	margin-left: 4px;
+}
+
+.wporgsite-alt-note,
+.wporgsite-alt-note:focus {
+	border-color: #ffc646;
+	background-color: #fffbf1;
+	color: #8a5a00;
+}
+
+.wporgsite-alt-note:hover {
+	border-color: #f7b126;
+	background-color: #fff3cd;
+	color: #6b4600;
+}
+
+.wporgsite-alt-dock:has( .conv-action-block:not( .hidden ) ) .wporgsite-alt-buttons {
+	display: none;
+}
+
+/*
+ * The form, one floating box with the recipients and attachments in it, as the editor is. Its column's padding is
+ * margin enough at its sides.
+ */
+.wporgsite-alt-dock .conv-reply-block {
+	margin-right: 0;
+	margin-bottom: 15px;
+	margin-left: 0;
+}
+
+.wporgsite-alt-dock .conv-reply-block .form-reply {
+	border: 1px solid #c3cbd3;
+	border-radius: 6px;
+	background-color: #fff;
+	box-shadow: 0 4px 16px rgba( 0, 0, 0, 0.18 );
+}
+
+.wporgsite-alt-dock .conv-reply-block .note-editor.note-frame {
+	margin-bottom: 0;
+	border: 0;
+	border-radius: 6px;
+}
+
+/* With recipients, like Cc and Bcc, open above the editor; core hides them in notes. */
+.wporgsite-alt-dock .conv-reply-block:not( .conv-note-block ) .form-reply:has( .conv-recipient:not( .hidden ) ) {
+	padding-top: 8px;
+}
+
+.wporgsite-alt-dock .conv-reply-block:not( .conv-note-block ) .form-reply:has( .conv-recipient:not( .hidden ) ) .note-editor.note-frame {
+	border-top: 1px solid #e3e8eb;
+	border-radius: 0 0 6px 6px;
+}
+
+/*
+ * Cc/Bcc is a button at the start of the editor's toolbar, until its fields are open; only for replies, as notes have
+ * no recipients.
+ */
+.wporgsite-alt-dock .conv-reply-block .cc-toggler,
+.wporgsite-alt-dock .conv-reply-block:not( :has( #toggle-cc ) ) .wporgsite-cc-toggle,
+.wporgsite-alt-dock .conv-note-block .wporgsite-cc-toggle {
+	display: none;
+}
+
+.wporgsite-cc-toggle {
+	font-weight: 700;
+}
+
+/*
+ * The editor's errors take room only when there are any: the server's, or Parsley's, whose wrapper stays once an error
+ * is gone, without its "filled" class.
+ */
+.wporgsite-alt-dock .conv-reply-body .help-block {
+	margin: 0;
+}
+
+.wporgsite-alt-dock .conv-reply-body > .help-block:has( strong, .filled ) {
+	margin: 5px 12px 10px;
+}
+
+/* The editor is at the top of the box, without core's space above it. */
+.wporgsite-alt-dock .conv-reply-block .conv-reply-body {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+/* Bootstrap's rows reach past the form by the padding the box hasn't here; Cc/Bcc and the recipients keep off its edges. */
+.wporgsite-alt-dock .conv-reply-block .form-reply .form-group {
+	margin-right: 0;
+	margin-left: 0;
+}
+
+.wporgsite-alt-dock .conv-reply-block .form-reply > .form-group:not( .conv-reply-body ) {
+	padding-right: 12px;
+	padding-left: 12px;
+}
+
+/* The forms' menus open up, into the threads: down, they'd go under the window's edge, where the forms stay. */
+.wporgsite-alt-dock .dropdown-menu {
+	top: auto;
+	bottom: 100%;
+	margin: 0 0 2px;
+}
+
+/* The editor scrolls within what header.js gives it, as when the header is pinned; and can have the whole window. */
+.wporgsite-alt-layout .conv-reply-block .note-editable {
+	overflow-y: auto;
+}
+
+.wporgsite-alt-layout .wporgsite-editor-expand {
+	display: inline-block;
+}
+
+/* The pinned note is at the bottom, by the newest threads, and its link goes up, to the note. */
+.wporgsite-alt-layout .wporgsite-pinned-note {
+	border-top: 1px solid #e3e8eb;
+	border-bottom: 0;
+}
+
+.wporgsite-alt-layout .wporgsite-pinned-note-link .glyphicon {
+	transform: rotate( 180deg );
+}
+
+/* Without room for the sidebar next to the conversation, as in core, it goes above it, taking a part of the height. */
+@media ( max-width: 1100px ) {
+
+	.wporgsite-alt-layout #conv-layout {
+		flex-direction: column;
+	}
+
+	.wporgsite-alt-layout #conv-layout-customer {
+		order: -1;
+		width: auto;
+		max-height: 35%;
+	}
+
+	.wporgsite-alt-column {
+		min-height: 0;
+	}
+}
+
+/* Where core folds the left sidebar into a bar with a menu, the page is the bar and the rest. */
+@media ( max-width: 991px ) {
+
+	.wporgsite-alt-layout .layout-2col {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.wporgsite-alt-layout .content-2col {
+		flex: 1;
+		min-height: 0;
+	}
+
+	.wporgsite-alt-layout .sidebar-2col {
+		overflow: visible;
+	}
+
+	.wporgsite-alt-layout .wporgsite-sidebar-brand {
+		display: none;
+	}
+}
+
+/* The "Discard this draft?" dialog discard.js answers itself, for an empty reply or note: never seen. */
+.wporgsite-discarding .modal,
+.wporgsite-discarding .modal-backdrop {
+	visibility: hidden !important;
+}

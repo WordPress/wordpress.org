@@ -6,6 +6,9 @@
 	<!-- Exclude development files & folders. -->
 	<exclude-pattern>/node_modules/*</exclude-pattern>
 
+	<!-- Exclude generated asset manifests from the build. -->
+	<exclude-pattern>*/build/*.asset.php</exclude-pattern>
+
 	<!-- Exclude JS/CSS files. -->
 	<exclude-pattern>*.js[x]?</exclude-pattern>
 	<exclude-pattern>*.[s]?css</exclude-pattern>

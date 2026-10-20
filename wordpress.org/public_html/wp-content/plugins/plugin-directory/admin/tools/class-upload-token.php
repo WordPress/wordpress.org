@@ -118,20 +118,20 @@ class Upload_Token {
 		}
 
 		echo '<div class="wrap author-cards">';
-		echo '<h1>' . __( 'Upload Token', 'wporg-plugins' ) . '</h1>';
-		echo '<p>' . __( 'This tool allows the generation of a one-time-use token to allow a plugin author to upload a plugin bypassing certain checks.', 'wporg-plugins' ) . '</p>';
+		echo '<h1>' . esc_html__( 'Upload Token', 'wporg-plugins' ) . '</h1>';
+		echo '<p>' . esc_html__( 'This tool allows the generation of a one-time-use token to allow a plugin author to upload a plugin bypassing certain checks.', 'wporg-plugins' ) . '</p>';
 		echo '<ol>';
-		echo '<li>' . __( 'Trademarked terms', 'wporg-plugins' ) . '</li>';
-		echo '<li>' . __( 'Active Installs', 'wporg-plugins' ) . '</li>';
-		echo '<li>' . __( 'Plugin Check', 'wporg-plugins' ) . '</li>';
+		echo '<li>' . esc_html__( 'Trademarked terms', 'wporg-plugins' ) . '</li>';
+		echo '<li>' . esc_html__( 'Active Installs', 'wporg-plugins' ) . '</li>';
+		echo '<li>' . esc_html__( 'Plugin Check', 'wporg-plugins' ) . '</li>';
 		echo '</ol>';
 
 		echo '<form method="post">';
 		echo '<table class="form-table"><tbody>';
-		echo '<tr><th scope="row"><label for="users">' . __( 'User', 'wporg-plugins' ) . '</label></th><td>';
+		echo '<tr><th scope="row"><label for="users">' . esc_html__( 'User', 'wporg-plugins' ) . '</label></th><td>';
 		echo '<input name="user" type="text" id="user" value="' . esc_attr( $username ) . '" class="regular-text">';
 		echo '</td></tr>';
-		echo '<tr><th scope="row"><label for="expiration">' . __( 'Expiration', 'wporg-plugins' ) . '</label></th><td>';
+		echo '<tr><th scope="row"><label for="expiration">' . esc_html__( 'Expiration', 'wporg-plugins' ) . '</label></th><td>';
 		echo '<input name="expiration" type="datetime-local" id="expiration" value="' . esc_attr( $expiration ) . '" class="regular-text">';
 		echo '</td></tr>';
 		echo '</tbody></table>';
@@ -153,7 +153,7 @@ class Upload_Token {
 		if ( ! $user ) {
 			printf(
 				'<div class="notice inline notice-error"><p>%s</p></div>',
-				__( 'User not found.', 'wporg-plugins' )
+				esc_html__( 'User not found.', 'wporg-plugins' )
 			);
 			return;
 		}
@@ -162,7 +162,7 @@ class Upload_Token {
 		if ( $user_token && $user_token['expiration'] > time() ) {
 			printf(
 				'<div class="notice inline notice-error"><p>%s</p></div>',
-				__( 'User already had a valid token, replacing it.', 'wporg-plugins' )
+				esc_html__( 'User already had a valid token, replacing it.', 'wporg-plugins' )
 			);
 		}
 
@@ -171,7 +171,8 @@ class Upload_Token {
 		printf(
 			'<div class="notice inline notice-success"><p>%s</p></div>',
 			sprintf(
-				__( 'Token created. Please provide the author with the following URL: <a href="%1$s">%1$s</a>', 'wporg-plugins' ),
+				/* translators: %1$s: Upload URL. */
+				wp_kses_post( __( 'Token created. Please provide the author with the following URL: <a href="%1$s">%1$s</a>', 'wporg-plugins' ) ),
 				esc_url(
 					add_query_arg(
 						'upload_token',
