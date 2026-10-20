@@ -733,7 +733,7 @@ class Template {
 		$title_template = __( '%s out of 5 stars', 'wporg-plugins' );
 		$title          = sprintf( $title_template, $rating );
 
-		$output  = '<div class="wporg-ratings" aria-label="' . esc_attr( $title ) . '" data-title-template="' . esc_attr( $title_template ) . '" data-rating="' . esc_attr( $rating ) . '" style="color:#ffb900;">';
+		$output  = '<div class="wporg-ratings" role="img" aria-label="' . esc_attr( $title ) . '" data-title-template="' . esc_attr( $title_template ) . '" data-rating="' . esc_attr( $rating ) . '" style="color:#ffb900;">';
 		$counter = round( $rating * 2 );
 		for ( $i = 1; $i <= 5; $i++ ) {
 			switch ( $counter ) {
