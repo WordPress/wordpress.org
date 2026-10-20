@@ -22,6 +22,9 @@ class Plugins_Info_API {
 			$this->jsonp = preg_replace( '/[^a-zA-Z0-9_]/', '', $format[1] );
 			$format      = 'jsonp';
 		}
+		if ( ! is_string( $format ) || ! isset( $this->formats[ $format ] ) ) {
+			$format = 'json';
+		}
 		$this->format = $format;
 	}
 
