@@ -3,7 +3,7 @@
     "alias": "wporgsite",
     "img": "/modules/wporgsite/img/icon.svg",
     "description": "Adapts FreeScout to how WordPress.org runs it, e.g. modules come from deploys, not from updates here.",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgSite",
     "author": "WordPress.org",
     "authorUrl": "https://wordpress.org/",
