@@ -9,7 +9,7 @@ Local development environments for WordPress.org projects, powered by [`wp-env`]
 
 ### Docker runtime
 
-On macOS, use [Colima](https://github.com/abiosoft/colima). It's free and open source, needs no account, and runs every environment here as is, Xdebug included.
+On macOS, use [Colima](https://github.com/abiosoft/colima). It's free and open source and needs no account.
 
 ```bash
 brew install colima docker docker-compose
@@ -26,9 +26,7 @@ Homebrew installs Compose as a Docker CLI plugin outside the CLI's search path. 
 
 Colima remembers the CPU and memory settings, so later starts are just `colima start`. To start it at login instead, run `brew services start colima`.
 
-Coming from Docker Desktop? Images and volumes don't carry over, so the first start of each environment rebuilds it and seeds a fresh database. Each runtime also keeps its own copy of every image, so once you've switched, clear Docker Desktop's data (Troubleshoot → Clean / Purge data) to get that disk space back.
-
-[Docker Desktop](https://www.docker.com/products/docker-desktop/) works too, and is the option on Windows along with [Rancher Desktop](https://rancherdesktop.io/). On Linux, use Docker Engine.
+[Docker Desktop](https://www.docker.com/products/docker-desktop/) works too, and is the option on Windows along with [Rancher Desktop](https://rancherdesktop.io/). On Linux, use [Docker Engine](https://docs.docker.com/engine/install/).
 
 ## Setup
 
