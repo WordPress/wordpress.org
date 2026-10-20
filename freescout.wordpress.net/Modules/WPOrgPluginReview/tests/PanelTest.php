@@ -344,14 +344,15 @@ final class PanelTest extends TestCase {
 	}
 
 	/**
-	 * Without the Teams module, everyone who can see the conversation is a reviewer.
+	 * Without the Teams module, whoever can see the plugins team's mailbox is a reviewer.
 	 *
 	 * @return void
 	 */
-	public function test_without_teams_everyone_is_a_reviewer(): void {
+	public function test_without_teams_reviewers_are_who_can_see_the_mailbox(): void {
 		$this->answer_teams( array() );
 
 		$this->assertTrue( app( Reviewers::class )->includes( $this->create_user() ) );
+		$this->assertFalse( app( Reviewers::class )->includes( $this->create_user( User::ROLE_USER ) ) );
 		$this->assertFalse( app( Reviewers::class )->includes( null ) );
 	}
 

@@ -83,7 +83,7 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 		\Eventy::addFilter(
 			'stylesheets',
 			static function ( mixed $styles = array() ): mixed {
-				if ( is_array( $styles ) ) {
+				if ( is_array( $styles ) && app( Reviewers::class )->includes( auth()->user() ) ) {
 					$styles[] = \Module::getPublicPath( self::ALIAS ) . '/css/review.css';
 				}
 
@@ -94,7 +94,7 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 		\Eventy::addFilter(
 			'javascripts',
 			static function ( mixed $javascripts = array() ): mixed {
-				if ( is_array( $javascripts ) ) {
+				if ( is_array( $javascripts ) && app( Reviewers::class )->includes( auth()->user() ) ) {
 					$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/review.js';
 					$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/downloads.js';
 				}

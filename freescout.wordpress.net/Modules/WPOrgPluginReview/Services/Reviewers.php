@@ -56,7 +56,7 @@ class Reviewers {
 	private const TEAMS = '\Modules\Teams\Providers\TeamsServiceProvider';
 
 	/**
-	 * Whether a user is a member of one of the plugins team's teams, or anyone is, without the Teams module.
+	 * Whether a user is a member of one of the plugins team's teams, or, without the Teams module, can see its mailbox.
 	 *
 	 * @param User|null $user User.
 	 * @return bool False if Teams can't tell.
@@ -67,7 +67,7 @@ class Reviewers {
 		}
 
 		if ( ! \App\Module::isActive( self::TEAMS_MODULE ) ) {
-			return true;
+			return (bool) array_intersect( array_map( 'intval', $user->mailboxesIdsCanView() ), Review::plugins_mailbox_ids() );
 		}
 
 		try {

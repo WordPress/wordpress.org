@@ -47,6 +47,7 @@ final class DownloadsTest extends TestCase {
 	 * @return void
 	 */
 	public function test_reviewers_get_the_button(): void {
+		$this->create_mailbox( 'Plugins', 'plugins@wordpress.test' );
 		$this->actingAs( $this->create_user() );
 
 		$html = $this->header();
@@ -87,6 +88,7 @@ final class DownloadsTest extends TestCase {
 		);
 
 		$this->assertSame( '', $this->header() );
+		$this->assertStringNotContainsString( 'wporgpluginreview', implode( ' ', (array) \Eventy::filter( 'javascripts', array() ) ) );
 	}
 
 	/**
