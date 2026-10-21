@@ -53,13 +53,14 @@ final class AssetsTest extends TestCase {
 	}
 
 	/**
-	 * A file that isn't there is left out, rather than Minify throwing, which would leave the page without any scripts.
+	 * A module's file that isn't there is left out, rather than Minify throwing, which would leave the page without any
+	 * scripts; core's are kept, so core regenerates a missing vars.js.
 	 *
 	 * @return void
 	 */
 	public function test_leaves_out_missing_files(): void {
-		$scripts = (array) \Eventy::filter( 'javascripts', array( '/js/main.js', '/modules/wporgsite/js/missing.js', 'https://example.org/script.js' ) );
+		$scripts = (array) \Eventy::filter( 'javascripts', array( '/js/main.js', '/modules/wporgsite/js/missing.js', '/js/builds/missing.js', 'https://example.org/script.js' ) );
 
-		$this->assertSame( array( '/js/main.js', 'https://example.org/script.js' ), array_slice( $scripts, 0, 2 ) );
+		$this->assertSame( array( '/js/main.js', '/js/builds/missing.js', 'https://example.org/script.js' ), array_slice( $scripts, 0, 3 ) );
 	}
 }
