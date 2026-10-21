@@ -26,6 +26,7 @@
 	var resultCount = document.getElementById( 'pledges-result-count' );
 	var emptyState = document.getElementById( 'pledges-empty' );
 	var divider = grid.querySelector( '.pledges-inactive-divider' );
+	var dividerLabel = divider && divider.querySelector( 'span' );
 	var hiwBanner = document.getElementById( 'pledges-howitworks' );
 	var hiwDismiss = hiwBanner && hiwBanner.querySelector( '.pledges-howitworks-dismiss' );
 	var hiwKey = 'wporg-pledges-hiw-dismissed';
@@ -105,6 +106,9 @@
 		// so users don't see an orphan "N contributors with no verified..." label.
 		if ( divider ) {
 			divider.hidden = inactiveVisible === 0;
+			if ( dividerLabel && dividerLabel.dataset[ state.sponsorship ] ) {
+				dividerLabel.textContent = dividerLabel.dataset[ state.sponsorship ];
+			}
 		}
 
 		// Empty state shows only when nothing is visible at all.

@@ -253,13 +253,15 @@ foreach ( $active_counts as $sponsorship_value => $active_count ) {
 	);
 }
 
-$visible_inactive_count = 0;
+$inactive_counts = array(
+	'all'         => $inactive_count,
+	'independent' => 0,
+	'sponsored'   => 0,
+);
 foreach ( $inactive_contributors as $c ) {
-	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
-	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
-		$visible_inactive_count++;
-	}
+	$inactive_counts[ empty( $c['sponsored'] ) ? 'independent' : 'sponsored' ]++;
 }
+$visible_inactive_count = $inactive_counts[ $sponsorship ];
 
 // Chip URL builder. home_url('/pledges/') already includes the team site path,
 // so no REQUEST_URI concat needed. Each filter group's links carry the *other*
@@ -384,7 +386,7 @@ if ( ! $current_user_id ) {
 										<strong class="pledges-standing-title"><?php esc_html_e( 'Sign in to see where you stand.', 'wporg-5ftf' ); ?></strong>
 										<p class="pledges-standing-sub"><?php esc_html_e( 'Your rank, recent impact, and a jump-to-card link will appear here.', 'wporg-5ftf' ); ?></p>
 									</div>
-									<a class="pledges-standing-action" href="<?php echo esc_url( $login_url ); ?>"><?php esc_html_e( 'Sign in', 'wporg-5ftf' ); ?> &rarr;</a>
+									<a class="pledges-standing-action" href="<?php echo esc_url( $login_url ); ?>"><?php esc_html_e( 'Sign in', 'wporg-5ftf' ); ?></a>
 								</div>
 
 							<?php elseif ( 'not-ranked' === $standing_state ) : ?>
@@ -444,7 +446,7 @@ if ( ! $current_user_id ) {
 											<?php echo wp_kses_data( sprintf( $filtered_message, esc_html( $standing_user['name'] ) ) ); ?>
 										</p>
 									</div>
-									<a class="pledges-standing-action" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?> &rarr;</a>
+									<a class="pledges-standing-action" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?></a>
 								</div>
 							<?php endif; ?>
 						</section>
@@ -557,17 +559,25 @@ if ( ! $current_user_id ) {
 							// Label reflects the *visible* inactive count under the current
 							// sponsorship filter, otherwise "10 contributors with no tracked
 							// contributions" sits above 2 cards when the filter hides the rest.
-							$inactive_label = sprintf(
-								/* translators: %s: number of contributors */
-								_n( '%s contributor with no tracked contributions in this period', '%s contributors with no tracked contributions in this period', $visible_inactive_count, 'wporg-5ftf' ),
-								number_format_i18n( $visible_inactive_count )
-							);
+							// One label per filter so JS can swap it after client-side filtering.
+							$inactive_labels = array();
+							foreach ( $inactive_counts as $sponsorship_value => $count ) {
+								$inactive_labels[ $sponsorship_value ] = sprintf(
+									/* translators: %s: number of contributors */
+									_n( '%s contributor with no tracked contributions in this period', '%s contributors with no tracked contributions in this period', $count, 'wporg-5ftf' ),
+									number_format_i18n( $count )
+								);
+							}
 							// Hide the divider when the sponsorship filter has emptied its
 							// section so JS-disabled visitors don't see an orphan label above
 							// nothing. JS apply() will toggle this back on if the filter changes.
 							?>
 							<div class="pledges-inactive-divider"<?php echo 0 === $visible_inactive_count ? ' hidden' : ''; ?>>
-								<span><?php echo esc_html( $inactive_label ); ?></span>
+								<span
+									data-all="<?php echo esc_attr( $inactive_labels['all'] ); ?>"
+									data-independent="<?php echo esc_attr( $inactive_labels['independent'] ); ?>"
+									data-sponsored="<?php echo esc_attr( $inactive_labels['sponsored'] ); ?>"
+								><?php echo esc_html( $inactive_labels[ $sponsorship ] ); ?></span>
 							</div>
 							<?php
 							foreach ( $inactive_contributors as $uid => $contributor ) {
