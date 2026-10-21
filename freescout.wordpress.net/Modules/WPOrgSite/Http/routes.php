@@ -14,7 +14,7 @@ Route::group(
 		'namespace'  => 'Modules\WPOrgSite\Http\Controllers',
 	),
 	static function (): void {
-		// HelpScout's links, with FreeScout's address; `/conversation/{ID}` alone is core's route.
+		// `/conversation/{ID}` alone is core's route, handled by the RedirectHelpScoutLinks middleware.
 		Route::get( '/conversation/{helpscout_id}/{number}', 'HelpScoutLinksController@show' )
 			->where(
 				array(

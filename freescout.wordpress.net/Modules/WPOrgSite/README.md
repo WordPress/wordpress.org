@@ -19,12 +19,12 @@ Adapts FreeScout to how WordPress.org runs it. Small changes to FreeScout's own 
 
 ## HelpScout's links
 
-HelpScout's links to conversations, `https://secure.helpscout.net/conversation/{ID}/{number}/`, are in Slack, Trac, and docs. Imported conversations keep HelpScout's number, but not its ID, which is HelpScout's own. With FreeScout's address in front, `https://freescout.wordpress.net/conversation/{ID}/{number}/`, or `/conversation/{ID}` without the number, the link redirects to the conversation the HelpScout one was imported as.
+HelpScout's links, `https://secure.helpscout.net/conversation/{ID}/{number}/`, are all over Slack, Trac, and docs. Imported conversations keep HelpScout's number, but not its ID. With FreeScout's address in front, with or without the number, such a link redirects to the conversation it was imported as.
 
-- **The IDs** are kept in the `wporgsite_helpscout_conversations` table, because the importer's own goes with it. Its migration copies the importer's, and the conversations the importer imports from then on are added as it saves them, through the `eloquent.saved` event of its model, named rather than used, so nothing breaks once it's gone. It's in `Services/HelpScoutLinks.php`.
-- **`/conversation/{ID}/{number}`** is this module's route, in `Http/Controllers/HelpScoutLinksController.php`. The ID says which conversation it is, so the number is ignored.
-- **`/conversation/{ID}`** is core's route, which answers with a 404 when there's no FreeScout conversation with that ID. `Http/Middleware/RedirectHelpScoutLinks.php` turns that 404 into the redirect. It only looks once core has answered, so viewing a FreeScout conversation costs nothing extra.
-- **Agents** are redirected once they're logged in, and only to a conversation they may see; otherwise, it's a 404.
+- **The IDs** are in the `wporgsite_helpscout_conversations` table, so they outlive the importer. Its migration copies the importer's table, and later imports are added through the `eloquent.saved` event of the importer's model. It's in `Services/HelpScoutLinks.php`.
+- **`/conversation/{ID}/{number}`** is this module's route, in `Http/Controllers/HelpScoutLinksController.php`; the number is ignored.
+- **`/conversation/{ID}`** is core's route. Where core answers with a 404, `Http/Middleware/RedirectHelpScoutLinks.php` redirects instead, so FreeScout's own conversations are untouched.
+- **Agents** are redirected once logged in, and only to a conversation they may see; otherwise, it's a 404.
 
 ## Keyboard shortcuts
 

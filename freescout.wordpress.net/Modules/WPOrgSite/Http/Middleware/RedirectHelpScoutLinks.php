@@ -1,6 +1,6 @@
 <?php
 /**
- * Opens HelpScout's conversation IDs in FreeScout's conversation links.
+ * Redirects HelpScout's conversation IDs in core's conversation links.
  *
  * @package WordPressdotorg\FreeScout\WPOrgSite
  */
@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Redirects `/conversation/{HelpScout ID}`, which core answers with a 404, to the conversation it was imported as.
  *
- * It only looks once core has answered, so viewing a FreeScout conversation costs nothing extra.
+ * It acts only on core's 404, so viewing a FreeScout conversation costs nothing extra.
  */
 final class RedirectHelpScoutLinks {
 
@@ -34,7 +34,6 @@ final class RedirectHelpScoutLinks {
 		$route    = $request->route();
 		$user     = $request->user();
 
-		// Guests get the login redirect rather than a 404, and come back here once logged in.
 		if ( 404 !== $response->getStatusCode() || ! $route || 'conversations.view' !== $route->getName() || ! $user instanceof User ) {
 			return $response;
 		}

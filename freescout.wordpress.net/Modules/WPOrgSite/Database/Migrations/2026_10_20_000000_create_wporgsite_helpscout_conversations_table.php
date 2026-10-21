@@ -35,7 +35,7 @@ class CreateWporgsiteHelpscoutConversationsTable extends Migration {
 			}
 		);
 
-		// The importer adds the ones it imports from now on.
+		// Later imports are recorded as the importer saves them.
 		HelpScoutLinks::copy_imported();
 	}
 

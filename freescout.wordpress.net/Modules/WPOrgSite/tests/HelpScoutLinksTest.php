@@ -90,7 +90,7 @@ final class HelpScoutLinksTest extends TestCase {
 		$response = $this->get( $this->conversation->url() );
 		$queries  = implode( "\n", array_column( \DB::getQueryLog(), 'query' ) );
 
-		// Core's template hits PHP 8.4 deprecations under test, so only the redirect is checked, not the page.
+		// Core's template fails on PHP 8.4 deprecations under test, so only the redirect is checked.
 		$this->assertFalse( $response->isRedirect() );
 		$this->assertStringNotContainsString( HelpScoutLinks::TABLE, $queries );
 	}

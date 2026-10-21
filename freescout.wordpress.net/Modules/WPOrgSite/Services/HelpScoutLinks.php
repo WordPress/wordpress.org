@@ -16,8 +16,7 @@ use Illuminate\Support\Facades\Schema;
 /**
  * Finds the FreeScout conversation a HelpScout conversation was imported as, from the HelpScout ID in its links.
  *
- * HelpScout's links, `https://secure.helpscout.net/conversation/{ID}/{number}/`, keep working with FreeScout's address
- * in front. The importer's own table of IDs goes with it, so this keeps a copy.
+ * The importer's table of IDs goes with the importer, so this keeps a copy.
  */
 final class HelpScoutLinks {
 
@@ -46,7 +45,7 @@ final class HelpScoutLinks {
 	 * Records the conversation a HelpScout conversation was imported as.
 	 *
 	 * @param int $helpscout_id    HelpScout's conversation ID.
-	 * @param int $conversation_id FreeScout's.
+	 * @param int $conversation_id FreeScout's conversation ID.
 	 * @return void
 	 */
 	public static function record( int $helpscout_id, int $conversation_id ): void {
@@ -54,7 +53,7 @@ final class HelpScoutLinks {
 	}
 
 	/**
-	 * Copies the importer's IDs, of the conversations it imported so far, into the new, empty table.
+	 * Copies the IDs the importer has recorded so far into the new table.
 	 *
 	 * @return void
 	 */
