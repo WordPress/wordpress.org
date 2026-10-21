@@ -494,7 +494,7 @@
 				return view;
 			} );
 
-			this.el.replaceChildren( fragment );
+			this.el.append( fragment );
 
 			return this;
 		}
