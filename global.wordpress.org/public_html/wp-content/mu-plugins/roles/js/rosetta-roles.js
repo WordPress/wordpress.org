@@ -538,7 +538,7 @@
 
 	/**
 	 * View handling the standalone global permission toggle (#project-all).
-	 * Coordinates radio and checkbox toggles and synchronizes with
+	 * Coordinates checkbox toggles and synchronizes with
 	 * internal events ('deactivate:all-projects', 'uncheck:all-projects').
 	 */
 	projects.view.AllProjects = wp.Backbone.View.extend( {
