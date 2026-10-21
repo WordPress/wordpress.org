@@ -399,16 +399,19 @@
 }
 
 .entry-content .pledges-card-stats {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 2px 16px;
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
 .entry-content .pledges-card-stats li {
+	display: inline;
 	margin: 0;
+}
+
+.entry-content .pledges-card-stats li + li::before {
+	content: " \00b7  ";
+	content: " \00b7  " / "";
 }
 
 .pledges-card-repos {
