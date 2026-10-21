@@ -7,6 +7,7 @@ Adapts FreeScout to how WordPress.org runs it. Small changes to FreeScout's own 
 - **Modules page:** only installed modules are listed, without FreeScout's Modules Directory and Marketplace. They can't be updated or deleted there; that happens on the server. Switching them on and off still works.
 - **Modules page layout:** the module cards are laid out in columns, as many as the window fits.
 - **Settings kept in `.env`:** FreeScout saves some of Manage » Settings to `.env`, like the time zone, the language, conversation numbers, and the fetching interval, and so do modules for some of theirs. The server's `.env` is read-only, so saving one failed, and with it the rest of its section. They show read-only, with their value and a note to ask the systems team, and saving a section leaves them out, so the rest of it saves. It's in `Services/EnvSettings.php` and `Public/js/settings.js`.
+- **HelpScout's links:** [a HelpScout link with FreeScout's address opens the conversation it was imported as](#helpscouts-links).
 - **Branding:** the WordPress mark in the top left and, on a blue tile, as the favicon. The login page keeps FreeScout's logo, so it doesn't pass for a WordPress.org login, redrawn as an SVG so it's sharp on high-resolution screens.
 - **Saved replies:** [chosen from the keyboard](#saved-replies-from-the-keyboard), with `/` in the editor.
 - **Discarding a reply or note:** an empty one, without text, images, or attachments, is discarded at once, without asking. Otherwise, core's "Discard this draft?" dialog opens next to the discard button, rather than at the top of the window, a long way from it; so it does for the drafts' Discard links. For an empty one, the dialog is answered without showing, so core discards it as it would. **Escape** discards it too, as its button does, from the editor or with nothing in particular focused, not from the form's other fields, like the recipients': in the dialog, Yes has the focus, so Enter confirms, and Escape again cancels, back to where the caret was. Escape that closes something first, like the Saved Replies menu, only closes that. It's in `Public/js/discard.js`.
@@ -15,6 +16,15 @@ Adapts FreeScout to how WordPress.org runs it. Small changes to FreeScout's own 
 - **Pinned header:** [a conversation's header can stay in view](#pinned-header) while the agent reads the emails below it.
 - **Alternate conversation design:** agents who choose so in their profile get [conversations laid out otherwise](#alternate-conversation-design), oldest email first, with Reply and Note at the bottom.
 - **Conversations:** [keyboard shortcuts](#keyboard-shortcuts); the status and assignee selectors pinned to the top of the window while their menu is open, further down long conversations where the toolbar has scrolled out of view, so they can be chosen there, like after pressing `s` or `a`; the subject at 18px and the threads' authors at 16px, rather than core's 23px and 18px, so more of the conversation fits; and clicking the number next to the subject copies it, without the `#`. Its tooltip says when it's copied; where the browser doesn't let the page write to the clipboard, it copies through a selected field instead. It's all in `Public/js/conversation.js`.
+
+## HelpScout's links
+
+HelpScout's links, `https://secure.helpscout.net/conversation/{ID}/{number}/`, are all over Slack, Trac, and docs. Imported conversations keep HelpScout's number, but not its ID. With FreeScout's address in front, with or without the number, such a link redirects to the conversation it was imported as.
+
+- **The IDs** are in the `wporgsite_helpscout_conversations` table, so they outlive the importer. Its migration copies the importer's table, and later imports are added through the `eloquent.saved` event of the importer's model. It's in `Services/HelpScoutLinks.php`.
+- **`/conversation/{ID}/{number}`** is this module's route, in `Http/Controllers/HelpScoutLinksController.php`; the number is ignored.
+- **`/conversation/{ID}`** is core's route. Where core answers with a 404, `Http/Middleware/RedirectHelpScoutLinks.php` redirects instead, so FreeScout's own conversations are untouched.
+- **Agents** are redirected once logged in, and only to a conversation they may see; otherwise, it's a 404.
 
 ## Keyboard shortcuts
 

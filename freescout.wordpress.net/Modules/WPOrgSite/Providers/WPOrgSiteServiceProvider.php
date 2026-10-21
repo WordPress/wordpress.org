@@ -12,12 +12,15 @@ namespace Modules\WPOrgSite\Providers;
 use App\Conversation;
 use App\Thread;
 use App\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
 use Modules\WPOrgSite\Http\Middleware\LockModules;
+use Modules\WPOrgSite\Http\Middleware\RedirectHelpScoutLinks;
 use Modules\WPOrgSite\Services\AltConversation;
 use Modules\WPOrgSite\Services\EnvSettings;
+use Modules\WPOrgSite\Services\HelpScoutLinks;
 use Modules\WPOrgSite\Services\PinnedNote;
 use Modules\WPOrgSite\Services\UserChoice;
 
@@ -64,7 +67,10 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	 */
 	public function boot(): void {
 		$this->app['router']->pushMiddlewareToGroup( 'web', LockModules::class );
+		$this->app['router']->pushMiddlewareToGroup( 'web', RedirectHelpScoutLinks::class );
 		$this->loadViewsFrom( __DIR__ . '/../Resources/views', self::ALIAS );
+		$this->loadRoutesFrom( __DIR__ . '/../Http/routes.php' );
+		$this->loadMigrationsFrom( __DIR__ . '/../Database/Migrations' );
 
 		// Modules come with deploys, so the Modules page only lists installed ones; site.css hides the empty directory.
 		\View::composer(
@@ -126,6 +132,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		self::register_profile_hooks();
 		self::register_settings_hooks();
 		self::register_pinned_note_hooks();
+		self::register_helpscout_link_hooks();
 
 		// For alt-conversation.js, which lays the conversation out.
 		\Eventy::addAction(
@@ -339,6 +346,28 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 					}
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgSite] Could not label a pinned note: ' . $e->getMessage() );
+				}
+			}
+		);
+	}
+
+	/**
+	 * Records the HelpScout ID of each conversation the importer imports, for HelpScout's links.
+	 *
+	 * The importer's model is named rather than used: the importer goes once every mailbox has moved.
+	 *
+	 * @return void
+	 */
+	private static function register_helpscout_link_hooks(): void {
+		\Event::listen(
+			'eloquent.saved: ' . HelpScoutLinks::IMPORTER_MODEL,
+			static function ( mixed $imported = null ): void {
+				try {
+					if ( $imported instanceof Model ) {
+						HelpScoutLinks::record( (int) $imported->getAttribute( 'helpscout_id' ), (int) $imported->getAttribute( 'conversation_id' ) );
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not record the HelpScout ID of an imported conversation: ' . $e->getMessage() );
 				}
 			}
 		);
