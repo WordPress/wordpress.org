@@ -9,7 +9,6 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgSite\Http\Middleware;
 
-use App\Conversation;
 use App\User;
 use Closure;
 use Illuminate\Http\Request;
@@ -17,9 +16,9 @@ use Modules\WPOrgSite\Services\HelpScoutLinks;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Redirects `/conversation/{HelpScout ID}`, which core would answer with a 404, to the conversation it was imported as.
+ * Redirects `/conversation/{HelpScout ID}`, which core answers with a 404, to the conversation it was imported as.
  *
- * HelpScout's IDs are 9 or 10 digits, far beyond FreeScout's, so they don't stand for a FreeScout conversation too.
+ * It only looks once core has answered, so viewing a FreeScout conversation costs nothing extra.
  */
 final class RedirectHelpScoutLinks {
 
@@ -31,22 +30,23 @@ final class RedirectHelpScoutLinks {
 	 * @return Response
 	 */
 	public function handle( Request $request, Closure $next ): Response {
-		$route = $request->route();
-		$user  = $request->user();
+		$response = $next( $request );
+		$route    = $request->route();
+		$user     = $request->user();
 
-		// Guests are left to the route's auth middleware, which brings them back here after logging in.
-		if ( ! $route || 'conversations.view' !== $route->getName() || ! $user instanceof User ) {
-			return $next( $request );
+		// Guests get the login redirect rather than a 404, and come back here once logged in.
+		if ( 404 !== $response->getStatusCode() || ! $route || 'conversations.view' !== $route->getName() || ! $user instanceof User ) {
+			return $response;
 		}
 
 		try {
 			$id           = (int) $route->parameter( 'id' );
-			$conversation = $id && ! Conversation::whereKey( $id )->exists() ? HelpScoutLinks::conversation( $id, $user ) : null;
+			$conversation = $id ? HelpScoutLinks::conversation( $id, $user ) : null;
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSite] Could not look up a HelpScout conversation: ' . $e->getMessage() );
 			$conversation = null;
 		}
 
-		return $conversation ? redirect()->away( $conversation->url() ) : $next( $request );
+		return $conversation ? redirect()->away( $conversation->url() ) : $response;
 	}
 }

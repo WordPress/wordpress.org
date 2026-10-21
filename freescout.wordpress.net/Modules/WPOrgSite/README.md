@@ -23,7 +23,7 @@ HelpScout's links to conversations, `https://secure.helpscout.net/conversation/{
 
 - **The IDs** are kept in the `wporgsite_helpscout_conversations` table, because the importer's own goes with it. Its migration copies the importer's, and the conversations the importer imports from then on are added as it saves them, through the `eloquent.saved` event of its model, named rather than used, so nothing breaks once it's gone. It's in `Services/HelpScoutLinks.php`.
 - **`/conversation/{ID}/{number}`** is this module's route, in `Http/Controllers/HelpScoutLinksController.php`. The ID says which conversation it is, so the number is ignored.
-- **`/conversation/{ID}`** is core's route, which would answer with a 404. `Http/Middleware/RedirectHelpScoutLinks.php` redirects it first, when there's no FreeScout conversation with that ID. HelpScout's IDs are 9 or 10 digits, far beyond FreeScout's, so they don't stand for one.
+- **`/conversation/{ID}`** is core's route, which answers with a 404 when there's no FreeScout conversation with that ID. `Http/Middleware/RedirectHelpScoutLinks.php` turns that 404 into the redirect. It only looks once core has answered, so viewing a FreeScout conversation costs nothing extra.
 - **Agents** are redirected once they're logged in, and only to a conversation they may see; otherwise, it's a 404.
 
 ## Keyboard shortcuts

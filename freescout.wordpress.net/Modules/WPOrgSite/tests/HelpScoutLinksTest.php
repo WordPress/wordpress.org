@@ -77,6 +77,25 @@ final class HelpScoutLinksTest extends TestCase {
 	}
 
 	/**
+	 * A FreeScout conversation isn't redirected, even when its ID is also a recorded HelpScout ID.
+	 *
+	 * @return void
+	 */
+	public function test_leaves_freescout_conversations_alone(): void {
+		$other = $this->create_conversation( $this->create_mailbox( 'Data' ), $this->create_sender() );
+		HelpScoutLinks::record( (int) $this->conversation->id, (int) $other->id );
+		$this->actingAs( $this->create_user() );
+
+		\DB::enableQueryLog();
+		$response = $this->get( $this->conversation->url() );
+		$queries  = implode( "\n", array_column( \DB::getQueryLog(), 'query' ) );
+
+		// Core's template hits PHP 8.4 deprecations under test, so only the redirect is checked, not the page.
+		$this->assertFalse( $response->isRedirect() );
+		$this->assertStringNotContainsString( HelpScoutLinks::TABLE, $queries );
+	}
+
+	/**
 	 * An agent without access to the conversation's mailbox isn't told where it is.
 	 *
 	 * @return void
