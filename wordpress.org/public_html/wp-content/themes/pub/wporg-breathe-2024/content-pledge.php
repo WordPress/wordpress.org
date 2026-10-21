@@ -113,22 +113,26 @@ $is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $activ
 					<?php if ( $high > 0 ) : ?>
 						<li>
 							<?php
-							echo wp_kses_data( sprintf(
-								/* translators: %s: number of high-impact contributions */
-								_n( '<strong>%s high-impact</strong> contribution', '<strong>%s high-impact</strong> contributions', $high, 'wporg-5ftf' ),
-								number_format_i18n( $high )
-							) );
+							echo wp_kses_data(
+								sprintf(
+									/* translators: %s: number of high-impact contributions */
+									_n( '<strong>%s high-impact</strong> contribution', '<strong>%s high-impact</strong> contributions', $high, 'wporg-5ftf' ),
+									number_format_i18n( $high )
+								)
+							);
 							?>
 						</li>
 					<?php endif; ?>
 					<?php if ( $medium > 0 ) : ?>
 						<li>
 							<?php
-							echo wp_kses_data( sprintf(
-								/* translators: %s: number of medium-impact contributions */
-								_n( '<strong>%s medium-impact</strong> contribution', '<strong>%s medium-impact</strong> contributions', $medium, 'wporg-5ftf' ),
-								number_format_i18n( $medium )
-							) );
+							echo wp_kses_data(
+								sprintf(
+									/* translators: %s: number of medium-impact contributions */
+									_n( '<strong>%s medium-impact</strong> contribution', '<strong>%s medium-impact</strong> contributions', $medium, 'wporg-5ftf' ),
+									number_format_i18n( $medium )
+								)
+							);
 							?>
 						</li>
 					<?php endif; ?>
@@ -151,29 +155,35 @@ $is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $activ
 						);
 						$more_repos = count( $top_repos ) - count( $repo_items );
 						if ( $more_repos > 0 ) {
-							$repo_items[] = esc_html( sprintf(
-								/* translators: %s: number of additional repositories */
-								_n( '+%s more', '+%s more', $more_repos, 'wporg-5ftf' ),
-								number_format_i18n( $more_repos )
-							) );
+							$repo_items[] = esc_html(
+								sprintf(
+									/* translators: %s: number of additional repositories */
+									_n( '+%s more', '+%s more', $more_repos, 'wporg-5ftf' ),
+									number_format_i18n( $more_repos )
+								)
+							);
 						}
 
-						echo wp_kses_data( sprintf(
-							/* translators: %s: list of GitHub repository names */
-							_n( 'Repository: %s', 'Repositories: %s', count( $top_repos ), 'wporg-5ftf' ),
-							implode( wp_get_list_item_separator(), $repo_items )
-						) );
+						echo wp_kses_data(
+							sprintf(
+								/* translators: %s: list of GitHub repository names */
+								_n( 'Repository: %s', 'Repositories: %s', count( $top_repos ), 'wporg-5ftf' ),
+								implode( wp_get_list_item_separator(), $repo_items )
+							)
+						);
 						?>
 					</p>
 				<?php endif; ?>
 			<?php else : ?>
 				<p>
 					<?php
-					echo esc_html( sprintf(
-						/* translators: %d: window in days */
-						_n( 'No tracked contributions in the last %d day.', 'No tracked contributions in the last %d days.', $window_days, 'wporg-5ftf' ),
-						$window_days
-					) );
+					echo esc_html(
+						sprintf(
+							/* translators: %d: window in days */
+							_n( 'No tracked contributions in the last %d day.', 'No tracked contributions in the last %d days.', $window_days, 'wporg-5ftf' ),
+							$window_days
+						)
+					);
 					?>
 				</p>
 			<?php endif; ?>
