@@ -16,7 +16,6 @@ class Hooks {
 		add_action( 'pre_get_posts',                   array( $this, 'hide_non_public_forums' ) );
 		add_filter( 'pre_option__bbp_edit_lock',       array( $this, 'increase_edit_lock_time' ) );
 		add_filter( 'pre_option__bbp_topics_per_page', array( $this, 'increase_topics_per_page' ) );
-		add_filter( 'bbp_map_meta_caps',               array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
 		add_filter( 'redirect_canonical',              array( $this, 'disable_update_php_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ), 5 );
@@ -196,45 +195,6 @@ class Hooks {
 	 */
 	public function increase_topics_per_page() {
 		return 30;
-	}
-
-	/**
-	 * Disallow editing topics or replies past edit lock time for non-moderators.
-	 *
-	 * @see https://bbpress.trac.wordpress.org/ticket/3164
-	 *
-	 * @param array  $caps    User's actual capabilities.
-	 * @param string $cap     Capability name.
-	 * @param int    $user_id Current user ID.
-	 * @param array  $args    Capability context, typically the object ID.
-	 * @return array Filtered capabilities.
-	 */
-	function disallow_editing_past_lock_time( $caps, $cap, $user_id, $args ) {
-		switch ( $cap ) {
-			case 'edit_topic':
-			case 'edit_reply':
-				$post = get_post( $args[0] );
-				if ( ! $post ) {
-					break;
-				}
-
-				// Reviews can be edited at any time.
-				if ( 'topic' === $post->post_type && Plugin::REVIEWS_FORUM_ID == $post->post_parent ) {
-					break;
-				}
-
-				if (
-					bbp_past_edit_lock( $post->post_date_gmt )
-				&&
-					! user_can( $user_id, 'moderate', $post->ID )
-				) {
-					$caps = array( 'do_not_allow' );
-				}
-
-				break;
-		}
-
-		return $caps;
 	}
 
 	/**
