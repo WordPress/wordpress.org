@@ -239,7 +239,7 @@ $active_counts = array(
 	'sponsored'   => 0,
 );
 foreach ( $active_contributors as $c ) {
-	$active_counts[ empty( $c['sponsored'] ) ? 'independent' : 'sponsored' ]++;
+	++$active_counts[ empty( $c['sponsored'] ) ? 'independent' : 'sponsored' ];
 }
 $visible_active_count = $active_counts[ $sponsorship ];
 
@@ -259,7 +259,7 @@ $inactive_counts = array(
 	'sponsored'   => 0,
 );
 foreach ( $inactive_contributors as $c ) {
-	$inactive_counts[ empty( $c['sponsored'] ) ? 'independent' : 'sponsored' ]++;
+	++$inactive_counts[ empty( $c['sponsored'] ) ? 'independent' : 'sponsored' ];
 }
 $visible_inactive_count = $inactive_counts[ $sponsorship ];
 
@@ -485,20 +485,24 @@ if ( ! $current_user_id ) {
 						<span class="pledges-health-split">
 							<span class="pledges-health-chip independent">
 								<?php
-								echo wp_kses_data( sprintf(
-									/* translators: %s: number of independent contributors */
-									_n( '%s independent', '%s independent', $independent_count, 'wporg-5ftf' ),
-									'<strong>' . esc_html( number_format_i18n( $independent_count ) ) . '</strong>'
-								) );
+								echo wp_kses_data(
+									sprintf(
+										/* translators: %s: number of independent contributors */
+										_n( '%s independent', '%s independent', $independent_count, 'wporg-5ftf' ),
+										'<strong>' . esc_html( number_format_i18n( $independent_count ) ) . '</strong>'
+									)
+								);
 								?>
 							</span>
 							<span class="pledges-health-chip sponsored">
 								<?php
-								echo wp_kses_data( sprintf(
-									/* translators: %s: number of sponsored contributors */
-									_n( '%s sponsored', '%s sponsored', $sponsored_count, 'wporg-5ftf' ),
-									'<strong>' . esc_html( number_format_i18n( $sponsored_count ) ) . '</strong>'
-								) );
+								echo wp_kses_data(
+									sprintf(
+										/* translators: %s: number of sponsored contributors */
+										_n( '%s sponsored', '%s sponsored', $sponsored_count, 'wporg-5ftf' ),
+										'<strong>' . esc_html( number_format_i18n( $sponsored_count ) ) . '</strong>'
+									)
+								);
 								?>
 							</span>
 						</span>

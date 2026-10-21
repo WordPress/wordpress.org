@@ -133,9 +133,6 @@
 	font-size: 14px;
 	line-height: 1.4;
 	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 }
 
 .pledges-health-split {
