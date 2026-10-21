@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory;
 
 use RedeyeVentures\GeoPattern\GeoPattern;
 
-require __DIR__ . '/libs/geopattern-1.1.0/geopattern_loader.php';
+require __DIR__ . '/libs/geopattern-1.1.2/geopattern_loader.php';
 
 /**
  * Generates Geopattern icons for Plugins.

@@ -12,4 +12,4 @@ include $o2->templates->template_dir . 'comment.php';
 $comment_template = ob_get_clean();
 
 // Remove `rel` attributes on comment urls.
-echo str_replace( 'rel="external nofollow" ', '', $comment_template );
+echo str_replace( 'rel="external nofollow" ', '', $comment_template ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- o2 comment template markup with the rel attribute stripped.

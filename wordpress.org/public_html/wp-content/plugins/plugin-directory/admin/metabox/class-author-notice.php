@@ -56,10 +56,14 @@ class Author_Notice {
 		if ( $notice['when'] ) {
 			$who = get_user_by( 'id', $notice['who'] );
 			printf(
-				'<span>' . __( 'Last edited by %s <time title="%s">%s ago</a>', 'wporg-plugins' ) . '</span>',
-				$who->display_name ?: $who->user_login,
-				gmdate( 'Y-m-d H:i:s', $notice['when'] ),
-				human_time_diff( $notice['when'] )
+				'<span>' . wp_kses(
+					/* translators: 1: display name; 2: datetime; 3: time-ago. */
+					__( 'Last edited by %1$s <time title="%2$s">%3$s ago</time>', 'wporg-plugins' ),
+					array( 'time' => array( 'title' => true ) )
+				) . '</span>',
+				esc_html( $who->display_name ?: $who->user_login ),
+				esc_attr( gmdate( 'Y-m-d H:i:s', $notice['when'] ) ),
+				esc_html( human_time_diff( $notice['when'] ) )
 			);
 		}
 		?>

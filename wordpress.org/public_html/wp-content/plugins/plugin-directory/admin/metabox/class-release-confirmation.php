@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
 use WP_REST_Request;
+use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Release_Confirmation as Release_Confirmation_Shortcode;
 
@@ -22,9 +23,9 @@ class Release_Confirmation {
 		] as $num => $text ) {
 			printf(
 				'<option value="%s" %s>%s</option>',
-				$num,
+				esc_attr( $num ),
 				selected( $post->release_confirmation, $num, false ),
-				$text
+				esc_html( $text )
 			);
 		}
 		echo "</select><span class='hidden'>&nbsp;Don't forget to save the changes!</span></p>";
@@ -65,6 +66,10 @@ class Release_Confirmation {
 				$request->set_param(
 					'confirmations_required',
 					$new
+				);
+				$request->set_param(
+					Base::ACTION_NONCE_PARAM,
+					Base::action_nonce( 'enable_release_confirmation', $post->post_name )
 				);
 
 				// For some reason, this is causing a 502 bad gateway - upstream sent too big header

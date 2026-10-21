@@ -9,7 +9,9 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
+use WordPressdotorg\Plugin_Directory\Jobs\Plugin_i18n_Import;
 
 /**
  * The Plugin Review metabox.
@@ -123,7 +125,7 @@ class Review_Tools {
 
 		if ( $zip_files ) {
 			uksort( $zip_files, function ( $a, $b ) {
-				return strtotime( $a ) < strtotime( $b );
+				return strtotime( $b ) <=> strtotime( $a );
 			} );
 
 			echo '<p><strong>Zip files:</strong></p>';
@@ -158,7 +160,7 @@ class Review_Tools {
 		if ( in_array( $post->post_status, [ 'draft', 'pending', 'new' ], true ) ) {
 			echo '<label>
 				<input type="file" class="plugin-file" name="zip_file" size="25" accept=".zip"/>
-				<button class="button button-secondary plugin-upload-zip">' . __( 'Upload', 'wporg-plugins' ) . '</button>
+				<button class="button button-secondary plugin-upload-zip">' . esc_html__( 'Upload', 'wporg-plugins' ) . '</button>
 				</label>';
 		}
 
@@ -323,14 +325,14 @@ class Review_Tools {
 								'options'       => [
 									'activate' => false,
 								],
-								'pluginZipFile' => [
+								'pluginData' => [
 									'resource' => 'wordpress.org/plugins',
 									'slug'     => $post->post_name,
 								],
 							],
 							[
 								'step'          => 'installPlugin',
-								'pluginZipFile' => [
+								'pluginData' => [
 									'resource' => 'wordpress.org/plugins',
 									'slug'     => 'plugin-check',
 								],
@@ -350,7 +352,7 @@ class Review_Tools {
 					<li>API Endpoints:
 						<ul class="ul-disc">
 						<li><a href="<?php echo esc_url( 'https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&slug=' . $post->post_name ); ?>">Info</a></li>
-						<li><a href="<?php echo rest_url('/plugins/v1/plugin/' . $post->post_name ); ?>" title="Source-data for info endpoint">wp-json Info</a></li>
+						<li><a href="<?php echo esc_url( rest_url( '/plugins/v1/plugin/' . $post->post_name ) ); ?>" title="Source-data for info endpoint">wp-json Info</a></li>
 						<?php
 							$update_check_payload = [
 								// This is a placeholder filename, it'll work for our purposes.
@@ -378,9 +380,20 @@ class Review_Tools {
 				);
 				?>
 				<a id="svn-sync" class="button button-secondary" href="<?php echo esc_url( $svn_sync_url ); ?>">Trigger svn sync</a>
+				<?php
+				$i18n_import_url = add_query_arg(
+					array(
+						'action'      => 'plugin-i18n-import',
+						'slug'        => $post->post_name,
+						'_ajax_nonce' => wp_create_nonce( 'wporg_plugins_i18n_import-' . $post->post_name ),
+					),
+					admin_url( 'admin-ajax.php' )
+				);
+				?>
+				<a id="i18n-import" class="button button-secondary" href="<?php echo esc_url( $i18n_import_url ); ?>">Trigger i18n import</a>
 				<script>
 				jQuery( function( $ ) {
-					$( '#svn-sync' ).click( function( e ) {
+					$( '#svn-sync, #i18n-import' ).click( function( e ) {
 						e.preventDefault();
 
 						var $this = $(this),
@@ -408,7 +421,7 @@ class Review_Tools {
 			}, $committers );
 
 			$cc_emails = wp_list_pluck( $committers, 'user_email' );
-			$cc_emails = implode( ', ', array_diff( $cc_emails, array( $author->user_email ) ) );
+			$cc_emails = array_values( array_diff( $cc_emails, array( $author->user_email ) ) );
 
 			if ( 'new' === $post->post_status || 'pending' === $post->post_status ) {
 				/* translators: %s: Plugin Title */
@@ -436,8 +449,7 @@ class Review_Tools {
 				$subject = sprintf( __( '[WordPress Plugin Directory] Notice: %s', 'wporg-plugins' ), $post->post_title );
 			}
 
-			// HelpScout requires urlencode() because it wants spaces as + signs.
-			$contact_author = 'https://secure.helpscout.net/mailbox/ad3e85554c5bd064/new-ticket/?name=' . $author->display_name . '&email=' . urlencode( $author->user_email ) . '&cc=' . urlencode( $cc_emails ) . '&subject=' . urlencode( $subject );
+			$contact_author = Helpdesk::new_conversation_url( $author, $cc_emails, $subject );
 			?>
 			<a id="contact-author" class="button button-primary" href="<?php echo esc_url( $contact_author ); ?>">Contact plugin committer(s)</a>
 			<?php
@@ -464,6 +476,38 @@ class Review_Tools {
 			)
 		);
 
-		die( "Queued SVN import for {$plugin_slug}." );
+		die( esc_html( "Queued SVN import for {$plugin_slug}." ) );
+	}
+
+	/**
+	 * admin-ajax.php handler for queueing a plugin i18n import.
+	 */
+	static function i18n_import() {
+		$plugin_slug = sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) );
+
+		check_ajax_referer( 'wporg_plugins_i18n_import-' . $plugin_slug );
+
+		$plugin     = \WordPressdotorg\Plugin_Directory\Plugin_Directory::get_plugin_post( $plugin_slug );
+		$stable_tag = $plugin ? $plugin->stable_tag : '';
+
+		$tags_touched = [ 'trunk' ];
+		if ( $stable_tag && 'trunk' !== $stable_tag ) {
+			$tags_touched[] = $stable_tag;
+		}
+
+		Plugin_i18n_Import::queue(
+			$plugin_slug,
+			array(
+				'tags_touched'   => $tags_touched,
+				'code_touched'   => true,
+				'readme_touched' => true,
+				'assets_touched' => true,
+				'revisions'      => [],
+				'source'         => 'wp-admin i18n-import button',
+			),
+			0
+		);
+
+		die( esc_html( "Queued i18n import for {$plugin_slug}." ) );
 	}
 }

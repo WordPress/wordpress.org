@@ -2,11 +2,12 @@
 namespace WordPressdotorg\Plugin_Directory\CLI\I18N;
 
 use Exception;
+use WP_Error;
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
 use WordPressdotorg\Plugin_Directory\Readme\Parser;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
-use WP_Error;
 
 /**
  * Class to handle plugin code imports GlotPress.
@@ -14,6 +15,16 @@ use WP_Error;
  * @package WordPressdotorg\Plugin_Directory\CLI\I18N
  */
 class Code_Import extends I18n_Import {
+
+	/**
+	 * POT entries removed from the last import because they weren't valid UTF-8.
+	 *
+	 * @var array
+	 */
+	private $non_utf8_entries = [
+		'count' => 0,
+		'files' => [],
+	];
 
 	/**
 	 * Imports the readme of a specific tag to GlotPress.
@@ -31,6 +42,7 @@ class Code_Import extends I18n_Import {
 
 		$files = SVN::ls( $svn_url );
 		if ( ! $files ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( "Plugin has no files in {$tag}." );
 		}
 
@@ -44,6 +56,7 @@ class Code_Import extends I18n_Import {
 
 		$valid = $this->is_plugin_valid( $export_directory );
 		if ( is_wp_error( $valid ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( 'Plugin is not compatible with language packs: ' . $valid->get_error_message() );
 		}
 
@@ -63,8 +76,29 @@ class Code_Import extends I18n_Import {
 			throw new Exception( "POT file couldn't be created." );
 		}
 
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local temp file.
+		$pot = file_get_contents( $pot_file );
+		if ( false === $pot ) {
+			throw new Exception( "POT file couldn't be read." );
+		}
+
+		$stripped = self::strip_non_utf8_entries( $pot );
+		if ( $stripped['pot'] !== $pot ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Local temp file.
+			$written = file_put_contents( $pot_file, $stripped['pot'] );
+			if ( strlen( $stripped['pot'] ) !== $written ) {
+				throw new Exception( "POT file couldn't be written." );
+			}
+		}
+
+		$this->non_utf8_entries = [
+			'count' => $stripped['count'],
+			'files' => $stripped['files'],
+		];
+
 		$result = $this->set_glotpress_for_plugin( $this->plugin, 'code' );
 		if ( is_wp_error( $result ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( $result->get_error_message() );
 		}
 
@@ -73,8 +107,81 @@ class Code_Import extends I18n_Import {
 
 		// Import translations on initial import.
 		if ( 'created' === $result ) {
-			$this->import_translations_to_glotpress_project( $export_directory, $this->plugin, $branch );
+			$plugin_owner_user_id = Plugin_Directory::get_plugin_post( $this->plugin )->post_author ?? 0;
+
+			$this->import_translations_to_glotpress_project( $export_directory, $this->plugin, $branch, $plugin_owner_user_id );
 		}
+	}
+
+	/**
+	 * Returns the POT entries removed from the last import because they weren't valid UTF-8.
+	 *
+	 * @return array {
+	 *     @type int      $count Number of entries removed.
+	 *     @type string[] $files Source files the removed entries came from.
+	 * }
+	 */
+	public function get_non_utf8_entries(): array {
+		return $this->non_utf8_entries;
+	}
+
+	/**
+	 * Removes the strings that aren't valid UTF-8 from make-pot output, and the comment lines that aren't.
+	 *
+	 * GlotPress can't import either. Strings aren't converted, because converted originals
+	 * wouldn't match the strings the plugin looks up at runtime. The header is always kept.
+	 *
+	 * @param string $pot POT file contents, with entries separated by blank lines.
+	 * @return array {
+	 *     @type string   $pot   POT file contents without the invalid entries and comment lines.
+	 *     @type int      $count Number of entries removed.
+	 *     @type string[] $files Source files the removed entries came from.
+	 * }
+	 */
+	public static function strip_non_utf8_entries( string $pot ): array {
+		if ( mb_check_encoding( $pot, 'UTF-8' ) ) {
+			return [
+				'pot'   => $pot,
+				'count' => 0,
+				'files' => [],
+			];
+		}
+
+		$entries = explode( "\n\n", rtrim( $pot, "\n" ) );
+		$kept    = [ array_shift( $entries ) ];
+		$count   = 0;
+		$files   = [];
+
+		foreach ( $entries as $entry ) {
+			if ( mb_check_encoding( $entry, 'UTF-8' ) ) {
+				$kept[] = $entry;
+				continue;
+			}
+
+			$lines = explode( "\n", $entry );
+			$valid = array_filter( $lines, static fn( string $line ): bool => mb_check_encoding( $line, 'UTF-8' ) );
+
+			// Only comment lines are invalid: keep the string without them.
+			if ( ! preg_grep( '/^[^#]/', array_diff_key( $lines, $valid ) ) ) {
+				$kept[] = implode( "\n", $valid );
+				continue;
+			}
+
+			++$count;
+
+			preg_match_all( '/^#: (.+)$/m', $entry, $references );
+			foreach ( $references[1] as $line ) {
+				foreach ( explode( ' ', $line ) as $reference ) {
+					$files[] = preg_replace( '/:\d+$/', '', $reference );
+				}
+			}
+		}
+
+		return [
+			'pot'   => implode( "\n\n", $kept ) . "\n",
+			'count' => $count,
+			'files' => array_values( array_unique( $files ) ),
+		];
 	}
 
 	/**

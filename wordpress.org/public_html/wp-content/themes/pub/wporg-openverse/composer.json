@@ -8,7 +8,7 @@
   },
   "config": {
     "platform": {
-      "php": "7.4"
+      "php": "8.4"
     },
     "allow-plugins": {
       "composer/installers": true

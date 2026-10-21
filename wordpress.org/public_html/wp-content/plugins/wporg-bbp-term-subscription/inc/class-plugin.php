@@ -8,9 +8,9 @@ class Plugin {
 	 * @todo AJAXify subscription action.
 	 */
 
-	public $taxonomy  = false;
-	public $labels    = array();
-	public $directory = false;
+	public $taxonomy   = false;
+	public $labels_cb  = false;
+	public $directory  = false;
 
 	protected $term        = false;
 	protected $subscribers = array();
@@ -36,17 +36,12 @@ class Plugin {
 		$r = wp_parse_args( $args, array(
 			'taxonomy'  => 'topic-tag',
 			'directory' => false,
-			'labels'    => array(
-				'subscribed_header'      => __( 'Subscribed Topic Tags', 'wporg-forums' ),
-				'subscribed_user_notice' => __( 'You are not currently subscribed to any topic tags.', 'wporg-forums' ),
-				'subscribed_anon_notice' => __( 'This user is not currently subscribed to any topic tags.', 'wporg-forums' ),
-				'receipt'                => __( "You are receiving this email because you are subscribed to the %s tag.", 'wporg-forums'),
-			),
+			'labels'    => false,
 		) );
 
-		$this->taxonomy  = $r['taxonomy'];
-		$this->labels    = $r['labels'];
-		$this->directory = $r['directory'];
+		$this->taxonomy   = $r['taxonomy'];
+		$this->labels_cb  = $r['labels'];
+		$this->directory  = $r['directory'];
 
 		// If no taxonomy was provided, there's nothing we can do.
 		if ( ! $this->taxonomy ) {
@@ -54,6 +49,31 @@ class Plugin {
 		}
 
 		add_action( 'bbp_init', array( $this, 'bbp_init' ) );
+	}
+
+	/**
+	 * Get the default translated labels.
+	 *
+	 * @return array
+	 */
+	public function get_default_labels() {
+		return array(
+			'subscribed_header'      => __( 'Subscribed Topic Tags', 'wporg-forums' ),
+			'subscribed_user_notice' => __( 'You are not currently subscribed to any topic tags.', 'wporg-forums' ),
+			'subscribed_anon_notice' => __( 'This user is not currently subscribed to any topic tags.', 'wporg-forums' ),
+			'receipt'                => __( "You are receiving this email because you are subscribed to the %s tag.", 'wporg-forums' ),
+		);
+	}
+
+	/**
+	 * Get labels, merging any custom labels with the defaults.
+	 *
+	 * @return array
+	 */
+	public function get_labels() {
+		$labels = $this->labels_cb ? call_user_func( $this->labels_cb ) : array();
+
+		return wp_parse_args( $labels, $this->get_default_labels() );
 	}
 
 	/**
@@ -132,7 +152,7 @@ class Plugin {
 
 		echo '<div class="notice notice-info notice-alt with-dashicon">';
 		echo '<span class="dashicons dashicons-email-alt"></span>';
-		echo "<p>{$message}</p>";
+		printf( '<p>%s</p>', wp_kses_post( $message ) );
 		echo '</div>';
 	}
 
@@ -152,9 +172,9 @@ class Plugin {
 			return false;
 		}
 
-		// Determine the term the request is for, overwrite with ?term_id if specified.
+		// Determine the term the request is for, overwrite with ?term_id if specified. Tokens are signed for the current term.
 		$term = $this->get_current_term();
-		if ( ! empty( $_GET['term_id'] ) ) {
+		if ( ! empty( $_GET['term_id'] ) && ! isset( $_GET['token'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified below.
 			$term = get_term( intval( $_GET['term_id'] ), $this->taxonomy );
 		}
 		if ( ! $term ) {
@@ -170,7 +190,8 @@ class Plugin {
 			$auth    = 'token';
 			$user_id = $this->has_valid_unsubscription_token();
 
-			if ( ! $user_id ) {
+			// The token only authorizes unsubscribing.
+			if ( ! $user_id || 'wporg_bbp_unsubscribe_term' !== $action ) {
 				bbp_add_error( 'wporg_bbp_subscribe_invalid_token', __( '<strong>Error:</strong> Link expired!', 'wporg-forums' ) );
 				return false;
 			}
@@ -186,11 +207,11 @@ class Plugin {
 							'<input type="submit" name="confirm" value="%5$s">' .
 							'&nbsp<a href="%6$s">%7$s</a>' .
 						'</form>',
-						get_bloginfo('name'),
+						esc_html( get_bloginfo( 'name' ) ),
 						sprintf(
 							/* translators: 1: Plugin, Theme, or Tag name. */
 							esc_html__( 'Do you wish to unsubscribe from future emails for %s?', 'wporg-forums' ),
-							$term->name
+							esc_html( $term->name )
 						),
 						esc_attr( $_SERVER['REQUEST_URI'] ),
 						esc_attr( wp_get_raw_referer() ),
@@ -369,7 +390,7 @@ To unsubscribe from future emails, click here:
 			$topic_content,
 			$topic_url,
 			sprintf(
-				$this->labels['receipt'],
+				$this->get_labels()['receipt'],
 				$this->get_current_term()->name
 			)
 		);
@@ -509,7 +530,7 @@ To unsubscribe from future emails, click here:
 			$reply_content,
 			$reply_url,
 			sprintf(
-				$this->labels['receipt'],
+				$this->get_labels()['receipt'],
 				$this->get_current_term()->name
 			)
 		);
@@ -619,7 +640,7 @@ To unsubscribe from future emails, click here:
 		?>
 
 		<div class="bbp-user-subscriptions">
-			<h2 class="entry-title"><?php echo esc_html( $this->labels['subscribed_header'] ); ?></h2>
+			<h2 class="entry-title"><?php echo esc_html( $this->get_labels()['subscribed_header'] ); ?></h2>
 			<div class="bbp-user-section">
 			<?php
 			if ( $terms ) {
@@ -633,9 +654,9 @@ To unsubscribe from future emails, click here:
 				echo "</p>\n";
 			} else {
 				if ( bbp_get_user_id() == get_current_user_id() ) {
-					echo '<p>' . esc_html( $this->labels['subscribed_user_notice'] ) . '</p>';
+					echo '<p>' . esc_html( $this->get_labels()['subscribed_user_notice'] ) . '</p>';
 				} else {
-					echo '<p>' . esc_html( $this->labels['subscribed_anon_notice'] ) . '</p>';
+					echo '<p>' . esc_html( $this->get_labels()['subscribed_anon_notice'] ) . '</p>';
 				}
 			}
 			?>

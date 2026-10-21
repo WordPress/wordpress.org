@@ -28,6 +28,7 @@ require_once __DIR__ . '/inc/registrations.php';
 require_once __DIR__ . '/inc/rejection.php';
 require_once __DIR__ . '/inc/search.php';
 require_once __DIR__ . '/inc/settings.php';
+require_once __DIR__ . '/inc/tags.php';
 require_once __DIR__ . '/inc/template-tags.php';
 require_once __DIR__ . '/inc/uploads.php';
 require_once __DIR__ . '/inc/user.php';

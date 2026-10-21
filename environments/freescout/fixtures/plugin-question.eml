@@ -1,0 +1,15 @@
+From: Jane Developer <jane@example.com>
+To: Plugins <plugins@wordpress.test>
+Subject: Question about my plugin review
+Date: Mon, 28 Sep 2026 10:00:00 +0000
+Message-ID: <plugin-question@example.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Hi Plugins Team,
+
+I submitted https://wordpress.org/plugins/example-plugin/ last week. Is there
+anything else you need from me before the review can continue?
+
+Thanks,
+Jane

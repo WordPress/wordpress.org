@@ -102,7 +102,14 @@ class Plugin extends GP_Route {
 
 		$current_user_id       = get_current_user_id();
 		$pretranslations_added = 0;
-		foreach ( $bulk['row-ids'] as $original_id ) {
+		foreach ( $bulk['row-ids'] as $_original_id ) {
+			$original_id = (int) $_original_id;
+
+			// If the row_id is not an integer, it must have a translation, ie. "{$original_id}-{$translation_id}".
+			if ( $original_id != $_original_id ) {
+				continue;
+			}
+
 			$translation_0 = null;
 			if ( 'bulk-pretranslation-tm' === $bulk['action'] ) {
 				$tm            = new Translation_Memory();
@@ -171,8 +178,8 @@ class Plugin extends GP_Route {
 			$notice .= '<br>';
 			$notice .= wp_kses(
 				sprintf(
-				_n( "You can see it in <a href=\"%s\">waiting</a> status.",
-					"You can see them in <a href=\"%s\">waiting</a> status.",
+				_n( 'You can see it in <a href="%s">waiting</a> status.',
+					'You can see them in <a href="%s">waiting</a> status.',
 					$pretranslations_added,
 					'wporg-gp-bulk-pretranslations' ),
 				$waiting_url,

@@ -163,7 +163,7 @@ class Stats {
 	 *
 	 * @return void
 	 */
-	public function __invoke( bool $echo_the_values = false, string $old_date = null ): void {
+	public function __invoke( bool $echo_the_values = false, ?string $old_date = null ): void {
 		global $wpdb;
 
 		// This value is only set in the production site (translate.wordpress.org).
@@ -390,6 +390,10 @@ class Stats {
 		}
 		$stats_diff = new \stdClass();
 		foreach ( $current_date_data as $key => $value ) {
+			// The date column isn't numeric, subtracting it triggers a PHP warning.
+			if ( 'date' === $key ) {
+				continue;
+			}
 			$stats_diff->$key = $value - $old_date_data->$key;
 		}
 		$all_locales_data = get_locales_data();
@@ -702,12 +706,6 @@ class Stats {
 		$first_id   = 0;
 
 		for ( $year = $last_year; $year > $first_year; $year -- ) {
-			if ( gmdate( 'Y' ) == $year ) {
-				$last_id = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->gp_translations}" );
-			} else {
-				$last_id = $first_id - 1;
-			}
-
 			$first_id = $wpdb->get_var(
 				$wpdb->prepare(
 					"SELECT MIN(id) FROM {$wpdb->gp_translations} WHERE date_added BETWEEN %s AND %s",
@@ -715,6 +713,12 @@ class Stats {
 					$year . '-01-02 00:00:00',
 				)
 			);
+
+			if ( gmdate( 'Y' ) == $year ) {
+				$last_id = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->gp_translations}" );
+			} else {
+				$last_id = $first_id - 1;
+			}
 
 			$row = $wpdb->get_row(
 				$wpdb->prepare(
@@ -744,16 +748,16 @@ class Stats {
 			);
 
 			if ( gmdate( 'Y' ) == $year ) {
-				$strings_added       = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $row['strings_added'] ) ), 10, ' ', STR_PAD_LEFT );
-				$contributors        = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $row['contributors'] ) ), 6, ' ', STR_PAD_LEFT );
-				$repeat_contributors = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $repeat_contributors_val ) ), 8, ' ', STR_PAD_LEFT );
+				$strings_added       = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $row['strings_added'] ?? 0 ) ), 10, ' ', STR_PAD_LEFT );
+				$contributors        = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $row['contributors'] ?? 0 ) ), 6, ' ', STR_PAD_LEFT );
+				$repeat_contributors = str_pad( number_format_i18n( $this->estimate_value_for_full_year( $repeat_contributors_val ?? 0 ) ), 8, ' ', STR_PAD_LEFT );
 				$code               .= "{$year} (*) \t {$strings_added} \t\t\t {$contributors} \t {$repeat_contributors}" . PHP_EOL;
 			}
-			$strings_added       = number_format_i18n( $row['strings_added'] );
-			$contributors        = number_format_i18n( $row['contributors'] );
+			$strings_added       = number_format_i18n( $row['strings_added'] ?? 0 );
+			$contributors        = number_format_i18n( $row['contributors'] ?? 0 );
 			$strings_added       = str_pad( $strings_added, 10, ' ', STR_PAD_LEFT );
 			$contributors        = str_pad( $contributors, 6, ' ', STR_PAD_LEFT );
-			$repeat_contributors = str_pad( number_format_i18n( $repeat_contributors_val ), 8, ' ', STR_PAD_LEFT );
+			$repeat_contributors = str_pad( number_format_i18n( $repeat_contributors_val ?? 0 ), 8, ' ', STR_PAD_LEFT );
 			$code               .= "{$year} \t\t {$strings_added} \t\t\t {$contributors} \t {$repeat_contributors}" . PHP_EOL;
 		}
 
@@ -1628,7 +1632,7 @@ class Stats {
 	 * @param  int|null $year Year fot the stats.
 	 * @return array
 	 */
-	private function get_forums_stats( string $type, int $year = null ): array {
+	private function get_forums_stats( string $type, ?int $year = null ): array {
 		global $wpdb;
 
 		$date_constraint = '';

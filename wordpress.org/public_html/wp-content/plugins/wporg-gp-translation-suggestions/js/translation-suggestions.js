@@ -186,7 +186,7 @@
 		}
 	}
 
-	add_amount_to_others_tab = function ( sidebarTab, data, originalId ) {
+	const add_amount_to_others_tab = function ( sidebarTab, data, originalId ) {
 		let elements = 0;
 		if ( data?.['helper-history-' + originalId] ) {
 			elements += data['helper-history-' + originalId].count;
@@ -275,7 +275,7 @@
 			return;
 		}
 
-		if ( !editor.find('translation-suggestion.with-tooltip.translation').first() ) {
+		if ( editor.find( '.translation-suggestion.with-tooltip.translation' ).length ) {
 			return;
 		}
 
@@ -307,6 +307,10 @@
 	 * @return {void}
 	 **/
 	function maybeFetchDeeplSuggestions( editor ) {
+		// If the locale is not supported, do not fetch suggestions.
+		if ( "" === gpTranslationSuggestions.get_external_translations.get_deepl_locale ) {
+			return;
+		}
 		maybeFetchExternalSuggestions( editor, 'DeepL', gpTranslationSuggestions.get_external_translations.get_deepl_translations, window.WPORG_TRANSLATION_MEMORY_DEEPL_API_URL );
 	}
 
@@ -435,22 +439,16 @@
 	function isThisTypeOfSuggestionInTheContainer( container, type ) {
 		switch ( type ) {
 			case 'TM':
-				if ( container.find( '.translation-suggestion.with-tooltip.translation' ).length > 0 ) {
-					return true;
-				}
-				break;
+				return container.find( '.translation-suggestion.with-tooltip.translation' ).length > 0;
 			case 'OpenAI':
-				if ( container.find( '.translation-suggestion.with-tooltip.openai' ).length > 0 ) {
-					return true;
-				}
-				break;
+				return container.find( '.translation-suggestion.with-tooltip.openai' ).length > 0;
 			case 'DeepL':
-				if ( container.find( '.translation-suggestion.with-tooltip.deepl' ).length > 0 ) {
-					return true;
-				}
-				break;
+				return container.find( '.translation-suggestion.with-tooltip.deepl' ).length > 0;
+			case 'OL':
+				return container.find( '.translation-suggestion.with-tooltip' ).length > 0;
+			default:
+				return false;
 		}
-		return false;
 	}
 
 	$gp.editor.show = ( function( original ) {
@@ -495,7 +493,7 @@
 	 */
 	function addSuggestion() {
 		var $row = $( this );
-		if ( ! $row ) {
+		if ( ! $row.length ) {
 			return;
 		}
 		externalSuggestion.suggestion_source = $row.data( 'suggestion-source' ) == 'translation' ? 'tm' : $row.data( 'suggestion-source' );

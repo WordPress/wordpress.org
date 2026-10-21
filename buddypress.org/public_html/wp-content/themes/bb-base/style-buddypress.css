@@ -1,122 +1,36 @@
-/* =Site Style
+/* =Variables
 -------------------------------------------------------------- */
 
-#header,
-#wporg-header {
-	background-color: #be3631;
-	border-bottom: 1px solid #9e1611;
-}
+:root {
 
-#header h1 a,
-#header h1 :link,
-#header h1 :link:hover,
-#wporg-header h1 :link,
-#wporg-header h1 :link:hover {
-	width: 265px;
-	background: url('../buddypress-org/images/buddypress-logo.png') no-repeat 0 0;
-	position: relative;
-}
+	/* Header */
+	--bbbase-header-background-color: rgb(221, 130, 59, 1);
+	--bbbase-header-image-url: none;
+	--bbbase-header-image-url-2x: none;
+	--bbbase-header-image-size: 0 0;
+	--bbbase-header-image-position: 0 0;
+	--bbbase-header-image-small-screen-position: 0 0;
 
-/* =Site Style
--------------------------------------------------------------- */
+	/* Logo */
+	--bbbase-logo-image-url: url('../buddypress-org/images/buddypress-logo.png');
+	--bbbase-logo-image-url-2x: url('../buddypress-org/images/buddypress-logo-2x.png');
+	--bbbase-logo-image-size: 269px 65px;
+	--bbbase-logo-image-height: 65px;
+	--bbbase-logo-image-width: 269px;
 
-a:hover img,
-#main a:hover img {
-	border: 1px solid #dd823b;
-}
+	/* Buttons */
+	--bbbase-button-background-color: rgba(221, 130, 59, 1);
+	--bbbase-button-background-color-hover: rgba(221, 130, 59, 0.8);
+	--bbbase-button-color: rgba(255, 235, 235, 0.9);
+	--bbbase-button-color-hover: rgba(255, 235, 235, 0.9);
 
-div.standard {
-	border: #990000 solid 2px;
-	background: #EBF5FA;
-}
+	/* Links */
+	--bbbase-link-color: rgba(199, 66, 0, 1);
+	--bbbase-link-color-hover: rgba(213, 78, 33, 1);
 
-div.free-page div.standard {
-	border: #990000 solid 2px;
-}
+	/* Subnav */
+	--bbbase-subnav-color-hover: rgb(216, 72, 0, 1);
 
-/* =Buttons
--------------------------------------------------------------- */
-
-.button {
-	background-color: #dd823b;
-	border: 1px solid #9d4200;
-}
-
-.button:hover,
-.button:active {
-	background-color: #dd823b;
-	color: rgba(255,255,255,0.9);
-}
-
-/* =Navigation
--------------------------------------------------------------- */
-
-#nav li a:hover,
-#header #nav li :link:hover,
-#wporg-header #wporg-header-menu li :link:hover {
-	background-color: #cf4944;
-	color: rgba(255,255,255,0.9);
-}
-
-#nav li.current-menu-item a,
-#nav li.current a,
-#nav li a:active {
-	background-color: #dd823b;
-}
-
-#subnav-inner ul li a:hover {
-	color: #d84800;
-}
-
-/* =Links
--------------------------------------------------------------- */
-
-a {
-	color: #be3631;
-}
-a:hover {
-	color: #dd823b;
-}
-
-/* =Text
--------------------------------------------------------------- */
-
-blockquote {
-	background-color: #eee;
-}
-div.action a {
-	color: #990000;
-}
-
-/* =Input
--------------------------------------------------------------- */
-
-input.submit {
-	background: #3399cc;
-	color: #fff;
-}
-input.submit:hover {
-	background: #990000;
-}
-
-/* =HiDPI Overrides
--------------------------------------------------------------- */
-
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5) {
-
-	#header h1 a,
-	#header h1 :link,
-	#header h1 :link:hover,
-	#wporg-header h1 :link,
-	#wporg-header h1 :link:hover {
-		background-image: url('../buddypress-org/images/buddypress-logo-2x.png');
-		background-size: 269px 65px;
-	}
-}
-
-/* =Forum Overrides
--------------------------------------------------------------- */
-
-#bbpress-forums p.bbp-topic-meta .bbp-topic-started-in a {
-	background-color: #be3631;
+	/* Lists */
+	--bbbase-list-hover-helper-background: rgba(255, 235, 235, 1);
 }

@@ -1,0 +1,276 @@
+/**
+ * Styles the WordPress.org sidebar panels, whose HTML api.wordpress.org renders with these classes.
+ *
+ * Text colors meet WCAG AAA (7:1) on the panel background.
+ */
+
+.wporg-sidebar-panel {
+	padding-top: 4px;
+	font-size: 13px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.wporg-sidebar-panel > :last-child {
+	margin-bottom: 0;
+}
+
+.wporg-sidebar-lead {
+	margin: 0 0 4px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.wporg-sidebar-meta,
+.wporg-sidebar-item-meta,
+.wporg-sidebar-empty {
+	color: #4a5561;
+}
+
+.wporg-sidebar-meta,
+.wporg-sidebar-empty {
+	margin: 0 0 8px;
+}
+
+.wporg-sidebar-heading {
+	margin: 0 0 4px;
+	color: #2a3b47;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+/* Sets each section, like plugins and themes, apart from the one before. */
+.wporg-sidebar-panel > .wporg-sidebar-heading:not(:first-child) {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid #d6dde3;
+}
+
+.wporg-sidebar-heading a {
+	color: inherit;
+}
+
+.wporg-sidebar-count {
+	margin-left: 2px;
+	padding: 0 6px;
+	border-radius: 9px;
+	background-color: #e3e8eb;
+	font-size: 11px;
+	letter-spacing: 0;
+}
+
+.wporg-sidebar-links,
+.wporg-sidebar-items {
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+}
+
+.wporg-sidebar-links li {
+	margin: 0 0 2px;
+}
+
+.wporg-sidebar-item {
+	padding: 6px 0;
+	border-top: 1px solid #e3e8eb;
+}
+
+.wporg-sidebar-item:first-child {
+	border-top: 0;
+}
+
+.wporg-sidebar-item-title {
+	font-weight: 600;
+}
+
+.wporg-sidebar-item-meta {
+	margin-top: 1px;
+	font-size: 12px;
+}
+
+/* Statuses and their names: in progress, closed, and rejected or delisted. */
+.wporg-sidebar-item-status {
+	margin-top: 1px;
+	font-size: 11.5px;
+}
+
+.wporg-sidebar-item-status-icon {
+	margin-right: 4px;
+}
+
+.wporg-sidebar-item.is-warning :is(.wporg-sidebar-item-title, .wporg-sidebar-item-status) {
+	color: #634200;
+}
+
+.wporg-sidebar-item.is-error :is(.wporg-sidebar-item-title, .wporg-sidebar-item-status) {
+	color: #8c1616;
+}
+
+.wporg-sidebar-item.is-muted :is(.wporg-sidebar-item-title, .wporg-sidebar-item-status) {
+	color: #4a5561;
+}
+
+.wporg-sidebar-item.is-muted .wporg-sidebar-item-title {
+	font-weight: 400;
+}
+
+/* The age and links end the meta line, which wraps beside them, so they line up down the list. */
+.wporg-sidebar-item-footer {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin-top: 1px;
+}
+
+.wporg-sidebar-item-footer > .wporg-sidebar-item-meta {
+	flex: 1;
+	min-width: 0;
+	margin-top: 0;
+}
+
+.wporg-sidebar-item-actions {
+	display: flex;
+	flex: none;
+	align-items: center;
+	gap: 6px;
+	color: #4a5561;
+	font-size: 12px;
+}
+
+.wporg-sidebar-item-age {
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.wporg-sidebar-item-actions a {
+	color: #4a5561;
+}
+
+.wporg-sidebar-item-actions a:hover,
+.wporg-sidebar-item-actions a:focus {
+	color: #0078d7;
+	text-decoration: none;
+}
+
+/* Like a glyphicon, which has no shield. The path starts at the root, since production combines stylesheets into /css/builds/. */
+.wporg-sidebar-icon-shield {
+	position: relative;
+	top: 1px;
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	background-color: currentColor;
+	mask: url(/modules/wporgsidebar/img/shield.svg) no-repeat center / contain;
+}
+
+.wporg-sidebar-note {
+	margin: 0;
+}
+
+.wporg-sidebar-badge {
+	display: inline-block;
+	padding: 0 7px;
+	border-radius: 9px;
+	background-color: #eef1f4;
+	color: #3e4a55;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	white-space: nowrap;
+	vertical-align: 1px;
+}
+
+.wporg-sidebar-badge.is-success {
+	background-color: #e1f4e5;
+	color: #175a28;
+}
+
+.wporg-sidebar-badge.is-warning {
+	background-color: #fdf1d4;
+	color: #634200;
+}
+
+.wporg-sidebar-badge.is-error {
+	background-color: #fce4e4;
+	color: #8c1616;
+}
+
+/*
+ * Social profiles: core shows the same icon for each network. Its links only name the network, in their title, which
+ * Bootstrap's tooltip moves to data-original-title. Paths start at the root, since production combines stylesheets
+ * into /css/builds/. The icons come from the Social Icons block; About.me's and Quora's are drawn in its style.
+ */
+.customer-social-profiles a:is([title="Twitter"], [data-original-title="Twitter"])::before,
+.customer-social-profiles a:is([title="Facebook"], [data-original-title="Facebook"])::before,
+.customer-social-profiles a:is([title="Telegram"], [data-original-title="Telegram"])::before,
+.customer-social-profiles a:is([title="Linkedin"], [data-original-title="Linkedin"])::before,
+.customer-social-profiles a:is([title="Google"], [data-original-title="Google"])::before,
+.customer-social-profiles a:is([title="Google+"], [data-original-title="Google+"])::before,
+.customer-social-profiles a:is([title="Foursquare"], [data-original-title="Foursquare"])::before,
+.customer-social-profiles a:is([title="YouTube"], [data-original-title="YouTube"])::before,
+.customer-social-profiles a:is([title="Flickr"], [data-original-title="Flickr"])::before,
+.customer-social-profiles a:is([title="VK"], [data-original-title="VK"])::before,
+.customer-social-profiles a:is([title="About.me"], [data-original-title="About.me"])::before,
+.customer-social-profiles a:is([title="Quora"], [data-original-title="Quora"])::before,
+.customer-social-profiles a:is([title="Other"], [data-original-title="Other"])::before {
+	content: "";
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	background-color: currentColor;
+	mask: no-repeat center / contain;
+}
+
+.customer-social-profiles a:is([title="Twitter"], [data-original-title="Twitter"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/x.svg);
+}
+
+.customer-social-profiles a:is([title="Facebook"], [data-original-title="Facebook"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/facebook.svg);
+}
+
+.customer-social-profiles a:is([title="Telegram"], [data-original-title="Telegram"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/telegram.svg);
+}
+
+.customer-social-profiles a:is([title="Linkedin"], [data-original-title="Linkedin"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/linkedin.svg);
+}
+
+.customer-social-profiles a:is([title="Google"], [data-original-title="Google"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/google.svg);
+}
+
+.customer-social-profiles a:is([title="Google+"], [data-original-title="Google+"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/google.svg);
+}
+
+.customer-social-profiles a:is([title="Foursquare"], [data-original-title="Foursquare"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/foursquare.svg);
+}
+
+.customer-social-profiles a:is([title="YouTube"], [data-original-title="YouTube"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/youtube.svg);
+}
+
+.customer-social-profiles a:is([title="Flickr"], [data-original-title="Flickr"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/flickr.svg);
+}
+
+.customer-social-profiles a:is([title="VK"], [data-original-title="VK"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/vk.svg);
+}
+
+.customer-social-profiles a:is([title="About.me"], [data-original-title="About.me"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/aboutme.svg);
+}
+
+.customer-social-profiles a:is([title="Quora"], [data-original-title="Quora"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/quora.svg);
+}
+
+.customer-social-profiles a:is([title="Other"], [data-original-title="Other"])::before {
+	mask-image: url(/modules/wporgsidebar/img/social/chain.svg);
+}

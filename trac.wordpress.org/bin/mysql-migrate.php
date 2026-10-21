@@ -54,6 +54,7 @@ foreach ( $tables as $table ) {
 	}
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI migration progress written to the console, not HTML.
 echo "Done. " . ( microtime( true ) - $start ) . " seconds.\n";
 
 if ( $mysql->errors ) {

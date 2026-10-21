@@ -120,7 +120,7 @@ if ( ! headers_sent() ) {
 
 		<p class="wp-embed-heading">
 			<a href="<?php the_permalink(); ?>" target="_top">
-				<?php echo Template::get_plugin_icon( $post, 'html' ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?>
+				<?php echo Template::get_plugin_icon( $post, 'html' ); /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */ ?>
 				<?php the_title(); ?>
 			</a>
 			<span class="byline"><?php the_author_byline(); ?></span>
@@ -129,7 +129,7 @@ if ( ! headers_sent() ) {
 		</p>
 
 		<div class="wp-embed-excerpt">
-			<?php the_excerpt(); ?>
+			<p><?php echo esc_html( get_plugin_excerpt_text() ); ?></p>
 		</div>
 
 		<?php

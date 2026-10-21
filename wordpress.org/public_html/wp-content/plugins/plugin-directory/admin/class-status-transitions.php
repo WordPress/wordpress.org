@@ -18,12 +18,35 @@ use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
  */
 class Status_Transitions {
 	/**
+	 * The namespace a rejected plugin's slug is wrapped in.
+	 *
+	 * The trailing digits are the suffix `wp_update_post()` adds when the wrapped slug
+	 * is itself taken.
+	 */
+	const REJECTED_SLUG_REGEX = '/^rejected-(.+)-rejected(-\d+)?$/i';
+
+	/**
 	 * Fetch the instance of the Status_Transitions class.
 	 */
 	public static function instance() {
 		static $instance = null;
 
 		return ! is_null( $instance ) ? $instance : $instance = new Status_Transitions();
+	}
+
+	/**
+	 * Hooks the status transition actions for the current request.
+	 *
+	 * The admin hooks `instance()` itself, which defers the work until a status
+	 * actually changes. Callers here are about to make a change they know about, so
+	 * the actions are attached directly — the constructor only runs the first time
+	 * the class is instantiated, which may already have happened.
+	 */
+	public static function init() {
+		$instance = self::instance();
+
+		add_action( 'transition_post_status', array( $instance, 'transition_post_status' ), 11, 3 );
+		add_action( 'post_updated', array( $instance, 'record_owner_change' ), 11, 3 );
 	}
 
 	/**
@@ -117,9 +140,13 @@ class Status_Transitions {
 		}
 
 		// ...DIE!!!!!
-		wp_die( __( 'You do not have permission to assign this post status to a plugin.', 'wporg-plugins' ), '', array(
-			'back_link' => true,
-		) );
+		wp_die(
+			esc_html__( 'You do not have permission to assign this post status to a plugin.', 'wporg-plugins' ),
+			'',
+			array(
+				'back_link' => true,
+			)
+		);
 	}
 
 	/**
@@ -244,9 +271,10 @@ class Status_Transitions {
 	 *
 	 * @param \WP_Post $post          Post object.
 	 * @param \WP_User $plugin_author Plugin author. Optional.
+	 * @param int      $retry         Retry number. Do not manually set. Optional.
 	 * @return bool
 	 */
-	public function approved_create_svn_repo( $post, $plugin_author = null ) {
+	public function approved_create_svn_repo( $post, $plugin_author = null, $retry = 0 ) {
 		$post            = get_post( $post );
 		$plugin_author ??= get_user_by( 'id', $post->post_author );
 
@@ -275,6 +303,7 @@ class Status_Transitions {
 			$dir,
 			'http://plugins.svn.wordpress.org/' . $post->post_name,
 			sprintf(
+				// WARNING: When changing this, please update the regex in SVN_Watcher::get_plugin_changes_between().
 				'Adding %1$s by %2$s.',
 				html_entity_decode( $post->post_title ),
 				$plugin_author->user_login
@@ -282,11 +311,18 @@ class Status_Transitions {
 		);
 
 		// Record the last failure attempt.
-		if ( $result['errors'] ) {
-			Tools::audit_log( 'Error creating SVN repository: ' . var_export( $result['errors'], true ), $post->ID );
+		if ( ! $result['result'] ) {
+			Tools::audit_log( 'Error creating SVN repository: ' . var_export( $result['errors'] ?: $result, true ), $post->ID );
 
-			// Retry in a minute.
-			wp_schedule_single_event( time() + MINUTE_IN_SECONDS, 'plugin_directory_create_svn_repo', [ $post->ID, $plugin_author->ID ] );
+			// If we're running in a cron task, log the errors.
+			if ( wp_doing_cron() ) {
+				fwrite( STDERR, 'Error creating SVN repository for plugin ID ' . $post->ID . ': ' . var_export( $result, true ) );
+			}
+
+			// Retry in a minute, with increasing 5 minute backoffs.
+			$retry_delay = max( $retry * 5, 1 ) * MINUTE_IN_SECONDS;
+			$retry++;
+			wp_schedule_single_event( time() + $retry_delay, 'create_svn_repo:' . $post->post_name, [ $post->ID, $plugin_author->ID, $retry ] );
 
 			return false;
 		}
@@ -336,7 +372,7 @@ class Status_Transitions {
 	 */
 	public function restore_rejected_plugin( $post ) {
 		$slug = $post->post_name;
-		$slug = preg_replace( '!^rejected-(.+)-rejected$!i', '$1', $slug );
+		$slug = preg_replace( self::REJECTED_SLUG_REGEX, '$1', $slug );
 
 		// Change slug back to 'plugin-name'.
 		wp_update_post( array(
@@ -344,8 +380,10 @@ class Status_Transitions {
 			'post_name' => $slug,
 		) );
 
-		delete_post_meta( $post_id, '_rejection_reason' );
-		delete_post_meta( $post_id, 'plugin_rejected_date' );
+		delete_post_meta( $post->ID, '_rejection_reason' );
+		delete_post_meta( $post->ID, 'plugin_rejected_date' );
+
+		Tools::audit_log( 'Plugin rejection reverted.', $post->ID );
 	}
 
 	/**
@@ -471,7 +509,7 @@ class Status_Transitions {
 	 * Flush the caches for the plugin.
 	 */
 	protected function flush_caches( $post ) {
-		// Update the API endpoints with the new data
+		// Update the API endpoints with the new data.
 		API_Update_Updater::update_single_plugin( $post->post_name );
 		Plugins_Info_API::flush_plugin_information_cache( $post->post_name );
 	}

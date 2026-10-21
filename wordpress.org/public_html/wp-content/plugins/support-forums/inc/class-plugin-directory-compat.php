@@ -165,18 +165,18 @@ class Plugin_Directory_Compat extends Directory_Compat {
 		<div>
 			<ul>
 				<?php if ( $icon ) : ?>
-				<li class="plugin-meta-icon"><?php echo $icon; ?></li>
+				<li class="plugin-meta-icon"><?php echo $icon; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Icon producers escape their markup; preserve responsive image attributes. ?></li>
 				<?php endif; ?>
-				<li><?php echo $plugin; ?></li>
+				<li><?php echo wp_kses_post( $plugin ); ?></li>
 				<?php if ( ! empty( $this->plugin->post_content ) && false !== strpos( $this->plugin->post_content, '<!--section=faq-->' ) ) : ?>
-				<li><?php echo $faq; ?></li>
+				<li><?php echo wp_kses_post( $faq ); ?></li>
 				<?php endif; ?>
-				<li><?php echo $support; ?></li>
-				<li><?php echo $active; ?></li>
-				<li><?php echo $unresolved; ?></li>
-				<li><?php echo $reviews; ?></li>
+				<li><?php echo wp_kses_post( $support ); ?></li>
+				<li><?php echo wp_kses_post( $active ); ?></li>
+				<li><?php echo wp_kses_post( $unresolved ); ?></li>
+				<li><?php echo wp_kses_post( $reviews ); ?></li>
 				<?php if ( $create ) : ?>
-				<li class="create-topic"><?php echo $create; ?></li>
+				<li class="create-topic"><?php echo wp_kses_post( $create ); ?></li>
 				<?php endif; ?>
 			</ul>
 		</div>

@@ -146,11 +146,13 @@ class Plugins_Info_API_Request {
 		$args = (object) $args;
 
 		if ( ! empty( $args->locale ) ) {
-			$this->locale = $args->locale; // TODO: sanitize?
+			$this->locale = $args->locale;
 		}
+
 		if ( ! empty( $args->fields ) ) {
 			$this->requested_fields = $this->parse_requested_fields( $args->fields );
 		}
+		
 		unset( $args->locale, $args->fields );
 
 		$this->args = $args;
@@ -169,6 +171,10 @@ class Plugins_Info_API_Request {
 
 	public function __unset( $field ) {
 		unset( $this->args->{$field} );
+	}
+
+	public function __isset( $field ) {
+		return isset( $this->args->{$field} );
 	}
 
 	public function get_expected_fields( $method ) {
@@ -316,10 +322,6 @@ class Plugins_Info_API_Request {
 				return false;
 			}
 
-			if ( ! is_string( $this->locale ) ) {
-				return false;
-			}
-
 		} else if ( 'plugin_information' === $method ) {
 			if ( empty( $this->args->slug ) && empty( $this->args->slugs ) ) {
 				return false;
@@ -329,9 +331,18 @@ class Plugins_Info_API_Request {
 				return false;
 			}
 
-			if ( ! is_string( $this->locale ) ) {
-				return false;
-			}
+		}
+
+		/*
+		 * Validate the locale is in an expected supported format, for all endpoints.
+		 *
+		 * Note: Do not validate the locale is valid, as this will cause the endpoints to not
+		 *       fail for WordPress sites with malformed WPLOCALE constants on their site.
+		 *       By only validating it's a string, we're ensuring that only non-WordPress clients
+		 *       should ever hit a block due to invalid passed data.
+		 */
+		if ( ! is_string( $this->locale ) ) {
+			return false;
 		}
 
 		return true;

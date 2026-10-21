@@ -9,7 +9,7 @@
 
 <div id="bbp-your-profile">
 	<h2 class="entry-title">
-		<?php esc_html_e( 'Account', 'bbpress' ); ?>
+		<?php esc_html_e( 'Account', 'wporg-forums' ); ?>
 	</h2>
 
 	<?php do_action( 'bbp_user_edit_account' ); ?>

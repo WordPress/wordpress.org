@@ -11,8 +11,8 @@ $lesson_id         = Sensei()->quiz->get_lesson_id();
 $course_id         = Sensei()->lesson->get_course_id( $lesson_id );
 $is_learning_mode  = Sensei_Course_Theme_Option::has_learning_mode_enabled( $course_id );
 $is_awaiting_grade = Sensei_Quiz::is_quiz_awaiting_grade_for_user( $lesson_id, get_current_user_id() );
-$is_pending_grade = $is_learning_mode && $is_awaiting_grade;
-$is_from_lesson = strpos( $_SERVER['HTTP_REFERER'], '/lesson/' ) !== false;
+$is_pending_grade  = $is_learning_mode && $is_awaiting_grade;
+$is_from_lesson    = strpos( $_SERVER['HTTP_REFERER'] ?? '', '/lesson/' ) !== false;
 
 ?>
 
