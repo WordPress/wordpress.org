@@ -452,8 +452,8 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 		}
 
 		/*
-		 * And with conversations that open, close, change hands, or are deleted, merged, or imported. An author's reply
-		 * makes a conversation active without core's status_changed.
+		 * And with conversations that open, close, change hands, or are deleted or merged. An author's reply makes a
+		 * conversation active without core's status_changed.
 		 */
 		$hooks = array(
 			'conversation.customer_replied',
@@ -462,7 +462,6 @@ final class WPOrgPluginReviewServiceProvider extends ServiceProvider {
 			'conversation.state_changed',
 			'conversation.merged',
 			'conversation.deleting',
-			'wporghelpscoutimport.conversation_imported',
 		);
 		foreach ( $hooks as $hook ) {
 			\Eventy::addAction(
