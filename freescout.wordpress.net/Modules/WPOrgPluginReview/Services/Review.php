@@ -141,7 +141,7 @@ final class Review {
 	 * Makes the index match a conversation's review emails, reading all of its replies.
 	 *
 	 * For conversations whose threads changed without their hooks: imported, moved to another mailbox, or changed
-	 * directly in the database. Never throws: it runs while conversations are moved, or imported.
+	 * directly in the database. Never throws: it runs while conversations are moved, or their review is shown.
 	 *
 	 * @param Conversation $conversation Conversation.
 	 * @return void
@@ -423,7 +423,7 @@ final class Review {
 	/**
 	 * Makes the index match a conversation's review emails, which merging and moving threads can change.
 	 *
-	 * Never throws: it runs while conversations are moved, or imported.
+	 * Never throws: it runs while conversations are moved, or their review is shown.
 	 *
 	 * @param int     $conversation_id Conversation ID.
 	 * @param array[] $reviews         Its review emails: thread, and Review ID.
