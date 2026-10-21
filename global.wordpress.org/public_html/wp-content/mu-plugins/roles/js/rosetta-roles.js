@@ -220,16 +220,18 @@
 				this.project._isUncheckingAll = true;
 			}
 
-			const allModels = this.getAllModels();
-			for ( let i = 0; i < allModels.length; i++ ) {
-				if ( allModels[ i ].attributes.checked ) {
-					allModels[ i ].uncheck();
+			try {
+				const allModels = this.getAllModels();
+				for ( let i = 0; i < allModels.length; i++ ) {
+					if ( allModels[ i ].get( 'checked' ) ) {
+						allModels[ i ].uncheck();
+					}
 				}
-			}
-
-			if ( this.project ) {
-				this.project._isUncheckingAll = false;
-				this.project.set( 'checkedSubProjects', false );
+			} finally {
+				if ( this.project ) {
+					this.project._isUncheckingAll = false;
+					this.project.set( 'checkedSubProjects', false );
+				}
 			}
 		},
 
