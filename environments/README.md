@@ -12,11 +12,11 @@ Local development environments for WordPress.org projects, powered by [`wp-env`]
 On macOS, use [Colima](https://github.com/abiosoft/colima). It's free and open source and needs no account.
 
 ```bash
-brew install colima docker docker-compose
+brew install colima docker docker-buildx docker-compose
 colima start --cpu 4 --memory 4
 ```
 
-Homebrew installs Compose as a Docker CLI plugin outside the CLI's search path. On Apple Silicon, point the CLI at it by adding this property to `~/.docker/config.json`, keeping whatever else is already in the file:
+Homebrew installs Buildx and Compose as Docker CLI plugins outside the CLI's search path. On Apple Silicon, point the CLI at them by adding this property to `~/.docker/config.json`, keeping whatever else is already in the file:
 
 ```json
 "cliPluginsExtraDirs": [ "/opt/homebrew/lib/docker/cli-plugins" ]
