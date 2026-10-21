@@ -190,16 +190,16 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		return array(
 			array(
 				'field'   => PinnedNote::FIELD,
-				'label'   => __( 'Latest note' ),
-				'text'    => __( 'Pin it to the top of the conversation' ),
-				'help'    => __( 'Once newer emails push a conversation\'s latest note down, a copy of it shows above them, so its context stays in sight. The note itself is dimmed where it is.' ),
+				'label'   => __( 'Pinned note' ),
+				'text'    => __( 'Keep the latest note at the top of conversations' ),
+				'help'    => __( 'When emails come in after a note, a copy of the note shows at the top of the conversation, so you don’t have to scroll to find it.' ),
 				'enabled' => UserChoice::get( $user, PinnedNote::OPTION ),
 			),
 			array(
 				'field'   => AltConversation::FIELD,
-				'label'   => __( 'Conversation design' ),
-				'text'    => __( 'Alternate conversation design' ),
-				'help'    => __( 'The subject, tags, and actions stay in view at the top; the number, assignee, and status are at the top of the sidebar, which scrolls on its own; the emails go oldest first, opening at the newest; and Reply and Note buttons wait at the bottom, where the forms open.' ),
+				'label'   => __( 'Conversation layout' ),
+				'text'    => __( 'Oldest email first, with Reply at the bottom' ),
+				'help'    => __( 'Read conversations like a chat: the oldest email at the top, the newest at the bottom, with the Reply and Note buttons below it. The subject and actions stay at the top as you scroll, and the assignee and status are in the sidebar.' ),
 				'enabled' => UserChoice::get( $user, AltConversation::OPTION ),
 			),
 		);
