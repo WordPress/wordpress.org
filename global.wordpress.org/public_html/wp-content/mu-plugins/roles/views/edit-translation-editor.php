@@ -38,7 +38,7 @@ if ( ! $user ) {
 							<legend class="screen-reader-text"><span><?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?></span></legend>
 
 							<ul id="projects-list" class="projects-list">
-								<li id="project-all" class="active">
+								<li id="project-all"<?php echo in_array( 'all', (array) $project_access_list, true ) ? ' class="active"' : ''; ?>>
 									<label>
 										<input type="checkbox"<?php checked( in_array( 'all', (array) $project_access_list, true ) ); ?>> <?php esc_html_e( 'All projects', 'rosetta' ); ?>
 									</label>
