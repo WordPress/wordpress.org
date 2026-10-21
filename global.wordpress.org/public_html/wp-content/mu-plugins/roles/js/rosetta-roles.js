@@ -554,7 +554,6 @@
 			this.checkbox = this.el.querySelector( 'input' );
 
 			if ( projects.selection.get( 'all' ) ) {
-				projects.selection.reset( [ { id: 'all' } ] );
 				if ( this.checkbox ) {
 					this.checkbox.checked = true;
 				}
@@ -724,7 +723,7 @@
 	};
 
 	projects.initFrame = function( projectData ) {
-		projects.view.frame = new projects.view.Frame( {
+		new projects.view.Frame( {
 			collection: new projects.model.Projects( projectData )
 		} ).render();
 	};
