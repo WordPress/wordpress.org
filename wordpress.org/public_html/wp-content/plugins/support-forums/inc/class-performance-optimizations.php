@@ -61,6 +61,10 @@ class Performance_Optimizations {
 		// ..and don't do expensive orderbys & counting for user queries that don't need it.
 		add_action( 'pre_get_users', array( $this, 'pre_get_users' ) );
 
+		// The Dashboard glance widget does not need an expensive forum user count.
+		add_filter( 'bbp_after_get_statistics_parse_args', array( $this, 'skip_dashboard_forum_user_count' ) );
+		add_filter( 'bbp_get_statistics', array( $this, 'remove_dashboard_forum_user_count' ) );
+
 	}
 
 	/**
@@ -587,6 +591,34 @@ class Performance_Optimizations {
 		restore_current_blog();
 
 		return $result;
+	}
+
+	/**
+	 * Avoid counting every forum-role holder for the Dashboard glance widget.
+	 *
+	 * @param array $args Parsed bbPress statistics arguments.
+	 * @return array Statistics arguments.
+	 */
+	public function skip_dashboard_forum_user_count( $args ) {
+		if ( doing_filter( 'dashboard_glance_items' ) ) {
+			$args['count_users'] = false;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Hide the zero user count produced when Dashboard counting is disabled.
+	 *
+	 * @param array $statistics Formatted bbPress statistics.
+	 * @return array Statistics without the Dashboard user count.
+	 */
+	public function remove_dashboard_forum_user_count( $statistics ) {
+		if ( doing_filter( 'dashboard_glance_items' ) ) {
+			unset( $statistics['user_count'], $statistics['user_count_int'] );
+		}
+
+		return $statistics;
 	}
 
 	/**
