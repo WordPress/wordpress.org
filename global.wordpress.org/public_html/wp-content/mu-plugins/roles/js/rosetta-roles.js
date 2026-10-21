@@ -327,7 +327,6 @@
 			this.clearSubViews();
 
 			const fragment = document.createDocumentFragment();
-
 			this._subViews = this.collection.models.map( project => {
 				const projectView = new projects.view.Project( { model: project } );
 				fragment.appendChild( projectView.render().el );
@@ -335,7 +334,7 @@
 			} );
 
 			document.getElementById( 'project-loading' )?.remove();
-			this.el.append( fragment );
+			this.el.replaceChildren( fragment );
 
 			// Initialize the global #project-all view once it is rendered in the DOM.
 			if ( ! this._allProjectsView && document.getElementById( 'project-all' ) ) {
@@ -361,16 +360,31 @@
 			this.listenTo( this.model, 'change:checked change:checkedSubProjects', this.syncInput );
 		},
 
+		render: function() {
+			wp.Backbone.View.prototype.render.apply( this, arguments );
+
+			this.inputEl = this.el.querySelector( 'input' );
+
+			this.syncInput();
+			return this;
+		},
+
 		syncInput: function() {
-			const input = this.el.querySelector( 'input' );
-			if ( ! input ) {
+			if ( ! this.inputEl ) {
 				return;
 			}
 
 			const hasCheckedSubProjects = Boolean( this.model.get( 'checkedSubProjects' ) );
-			input.type = hasCheckedSubProjects ? 'radio' : 'checkbox';
-			input.className = hasCheckedSubProjects ? 'input-radio' : 'input-checkbox';
-			input.checked = hasCheckedSubProjects || Boolean( this.model.get( 'checked' ) );
+			const isChecked = hasCheckedSubProjects || Boolean( this.model.get( 'checked' ) );
+			const targetType = hasCheckedSubProjects ? 'radio' : 'checkbox';
+			if ( this.inputEl.type !== targetType ) {
+				this.inputEl.type = targetType;
+				this.inputEl.className = hasCheckedSubProjects ? 'input-radio' : 'input-checkbox';
+			}
+
+			if ( this.inputEl.checked !== isChecked ) {
+				this.inputEl.checked = isChecked;
+			}
 		},
 
 		// Listen to 'change' instead of 'click' for keyboard accessibility
@@ -385,8 +399,8 @@
 			return { name, slug, checked, checkedSubProjects };
 		},
 
-		updateChecked: function() {
-			this.model.set( 'checked', Boolean( this.el.querySelector( 'input' )?.checked ) );
+		updateChecked: function( event ) {
+			this.model.set( 'checked', Boolean( event.target.checked ) );
 		},
 
 		// When active, the category toggle renders as a radio button representing "all items in this category".
@@ -501,14 +515,20 @@
 		},
 
 		initialize: function() {
-			this.onInput = _.debounce( () => this.collection.doSearch( this.el.value ), 300 );
+			this._debouncedSearch = _.debounce( () => {
+				this.collection.doSearch( this.el.value );
+			}, 300 );
+		},
+
+		onInput: function() {
+			this._debouncedSearch();
 		},
 
 		onKeydown: function( event ) {
 			if ( event.key === 'Enter' ) {
 				event.preventDefault();
 			} else if ( event.key === 'Escape' ) {
-				this.onInput.cancel?.();
+				this._debouncedSearch?.cancel();
 				this.el.value = '';
 				this.collection.doSearch( '' );
 			}
