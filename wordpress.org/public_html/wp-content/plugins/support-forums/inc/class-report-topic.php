@@ -297,7 +297,7 @@ The WordPress.org Team',
 		 * check if the query is done from within a topic loop, so instead we have to approach it in
 		 * the opposite way and explicitly exclude known conflicts.
 		 */
-		if ( ! current_user_can( 'moderate' ) || ( function_exists( 'bbp_is_single_user_replies' ) && bbp_is_single_user_replies() ) ) {
+		if ( ! current_user_can( 'moderate' ) || bbp_is_single_user_replies() ) {
 			return $args;
 		}
 

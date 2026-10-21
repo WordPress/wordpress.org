@@ -206,10 +206,6 @@ class Hooks {
 	 * the `template` / `stylesheet` callbacks above.
 	 */
 	function add_rewrite_rules() {
-		if ( ! function_exists( 'bbp_get_user_slug' ) ) {
-			return;
-		}
-
 		// e.g., https://wordpress.org/support/users/foo/edit/account/
 		add_rewrite_rule(
 			bbp_get_user_slug() . '/([^/]+)/' . bbp_get_edit_slug() . '/account/?$',
