@@ -73,7 +73,7 @@ The browser remembers it, in `localStorage` (`wporgsite.sidebar`), so it's per b
 
 ## Pinned note
 
-Notes keep the context of a conversation, but core shows the newest threads first, so newer emails push them down, out of sight. An agent who checks **Latest note: Pin it to the top of the conversation** in their profile, off by default, sees a copy of a conversation's latest note above its threads, once an email came after it. Only status changes or drafts after it leave it near enough to the top, and nothing is pinned.
+Notes keep the context of a conversation, but core shows the newest threads first, so newer emails push them down, out of sight. An agent who checks **Pinned note: Keep the latest note at the top of conversations** in their profile, off by default, sees a copy of a conversation's latest note above its threads, once an email came after it. Only status changes or drafts after it leave it near enough to the top, and nothing is pinned.
 
 - **The copy** shows the note as its thread does, with its author, when, links to its attachments, and **Go to the note**, which goes to it.
 - **The note itself** stays where it is, dimmed, labeled **Pinned to the top**, which goes back up to the copy. It's at full strength while the pointer or the keyboard is on it, or the copy's link went to it.
@@ -93,7 +93,7 @@ Core's `#app` has `overflow: hidden`, which the header would stick to, and which
 
 ## Alternate conversation design
 
-An agent who checks **Conversation design: Alternate conversation design** in their profile, off by default, gets conversations laid out otherwise:
+An agent who checks **Conversation layout: Oldest email first, with Reply at the bottom** in their profile, off by default, gets conversations laid out otherwise:
 
 - **A pre-header**, always in view at the top: the subject on one line, the tags, and the actions, Reply and Note aside, whose menus, like Tag's and More Actions', open to the left, as they're at its end.
 - **The subject block** below it, as in core, scrolling away with the threads; its tags are in the pre-header.

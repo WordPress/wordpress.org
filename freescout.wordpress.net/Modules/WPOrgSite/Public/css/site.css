@@ -33,6 +33,12 @@
 	margin: 0;
 }
 
+/* The info icon after a choice in the profile, level with its text, as core's are with their fields. */
+.wporgsite-choice-info {
+	top: 6px;
+	margin-left: 0;
+}
+
 /* A conversation's number, which copies it. */
 .wporgsite-number {
 	cursor: pointer;

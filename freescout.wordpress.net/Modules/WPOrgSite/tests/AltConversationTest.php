@@ -49,7 +49,7 @@ final class AltConversationTest extends TestCase {
 
 		$this->assertStringContainsString( 'id="' . AltConversation::FIELD . '"', $profile );
 		$this->assertStringContainsString( 'id="' . PinnedNote::FIELD . '"', $profile );
-		$this->assertStringContainsString( 'Alternate conversation design', $profile );
+		$this->assertStringContainsString( 'Oldest email first, with Reply at the bottom', $profile );
 
 		\Eventy::filter( 'user.save_profile', $user, new Request( array( AltConversation::FIELD => '1' ) ) );
 		$this->assertTrue( UserChoice::get( $user, AltConversation::OPTION ) );
