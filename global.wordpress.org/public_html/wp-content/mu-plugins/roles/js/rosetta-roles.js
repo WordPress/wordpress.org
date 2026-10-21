@@ -11,7 +11,12 @@
 	const l10n = settings.l10n || {};
 	delete settings.l10n;
 
-	const projects = { settings, model: {}, view: {} };
+	const projects = {
+		settings,
+		model: {},
+		view: {},
+		events: _.extend( {}, Backbone.Events )
+	};
 
 	/**
 	 * Normalizes project IDs to ensure consistent type matching across sets and collections.
@@ -60,7 +65,7 @@
 		updateSelection: function( model, checked ) {
 			if ( checked ) {
 				projects.selection.add( { id: this.get( 'id' ) } );
-				window.dispatchEvent( new CustomEvent( 'rosetta:uncheck-all-projects' ) );
+				projects.events.trigger( 'uncheck:all-projects' );
 			} else {
 				projects.selection.remove( this.get( 'id' ) );
 			}
@@ -136,8 +141,8 @@
 		initialize: function() {
 			this.on( 'change:isActive', this.toggleActiveStates );
 
-			window.addEventListener( 'rosetta:deactivate-other-projects', () => this.disableActiveStates() );
-			window.addEventListener( 'rosetta:uncheck-other-projects', () => this.uncheckAllProjects() );
+			this.listenTo( projects.events, 'deactivate:other-projects', this.disableActiveStates );
+			this.listenTo( projects.events, 'uncheck:other-projects', this.uncheckAllProjects );
 		},
 
 		uncheckAllProjects: function() {
@@ -158,7 +163,7 @@
 				}
 			} );
 
-			window.dispatchEvent( new CustomEvent( 'rosetta:deactivate-all-projects' ) );
+			projects.events.trigger( 'deactivate:all-projects' );
 		},
 
 		disableActiveStates: function() {
@@ -540,7 +545,7 @@
 	/**
 	 * View handling the standalone global permission toggle (#project-all).
 	 * Coordinates radio and checkbox toggles and synchronizes with
-	 * window events ('rosetta:deactivate-all-projects', 'rosetta:uncheck-all-projects').
+	 * window events ('deactivate:all-projects', 'uncheck:all-projects').
 	 */
 	projects.view.AllProjects = wp.Backbone.View.extend( {
 		el: '#project-all',
@@ -560,8 +565,8 @@
 				this.el.classList.add( 'active' );
 			}
 
-			window.addEventListener( 'rosetta:deactivate-all-projects', () => this.onDeactivate() );
-			window.addEventListener( 'rosetta:uncheck-all-projects', () => this.onUncheck() );
+			this.listenTo( projects.events, 'deactivate:all-projects', this.onDeactivate );
+			this.listenTo( projects.events, 'uncheck:all-projects', this.onUncheck );
 		},
 
 		onActivate: function() {
@@ -570,13 +575,13 @@
 			}
 
 			this.el.classList.add( 'active' );
-			window.dispatchEvent( new CustomEvent( 'rosetta:deactivate-other-projects' ) );
+			projects.events.trigger( 'deactivate:other-projects' );
 		},
 
 		onToggle: function() {
 			if ( this.checkbox?.checked ) {
 				projects.selection.reset( [ { id: 'all' } ] );
-				window.dispatchEvent( new CustomEvent( 'rosetta:uncheck-other-projects' ) );
+				projects.events.trigger( 'uncheck:other-projects' );
 			} else {
 				projects.selection.remove( 'all' );
 			}
