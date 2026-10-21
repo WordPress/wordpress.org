@@ -293,7 +293,6 @@ function get_team_contribution_metrics( array $user_ids, string $team_slug, int 
 	foreach ( $metrics as $uid => &$m ) {
 		$m['weighted_volume'] = ( 3 * $m['high_count'] ) + ( 1 * $m['medium_count'] );
 		arsort( $m['top_repos'] );
-		$m['top_repos'] = array_slice( $m['top_repos'], 0, 2, true );
 	}
 	unset( $m );
 

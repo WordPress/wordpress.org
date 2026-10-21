@@ -394,6 +394,27 @@
 	font-weight: 600;
 }
 
+.entry-content .pledges-card-summary p {
+	margin: 0;
+}
+
+.entry-content .pledges-card-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px 16px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.entry-content .pledges-card-stats li {
+	margin: 0;
+}
+
+.pledges-card-repos {
+	font-size: 14px;
+}
+
 .pledges-card-meta {
 	display: flex;
 	align-items: center;
