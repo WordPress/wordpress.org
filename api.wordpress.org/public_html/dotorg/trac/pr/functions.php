@@ -3,8 +3,32 @@ namespace WordPressdotorg\API\Trac\GithubPRs;
 
 /**
  * Fetches and reformats the Github PR API response to the details we need.
+ *
+ * @param string $repo The repository, as `owner/name`.
+ * @param int    $pr   The PR number.
+ * @return object|false The PR's details, or false if any of them could not be fetched.
  */
 function fetch_pr_data( $repo, $pr ) {
+	$details = fetch_partial_pr_data( $repo, $pr );
+	if ( ! $details || $details->partial ) {
+		return false;
+	}
+
+	unset( $details->partial );
+
+	return $details;
+}
+
+/**
+ * Fetches a PR's details, even if only the PR itself could be fetched.
+ *
+ * The lists that failed are then empty and `partial` is set, so the details must not replace stored ones.
+ *
+ * @param string $repo The repository, as `owner/name`.
+ * @param int    $pr   The PR number.
+ * @return object|false The PR's details, or false if the PR could not be fetched.
+ */
+function fetch_partial_pr_data( $repo, $pr ) {
 	$url = '/repos/' . $repo . '/pulls/' . intval( $pr );
 	$data = api_request( $url );
 
@@ -13,65 +37,63 @@ function fetch_pr_data( $repo, $pr ) {
 		return false;
 	}
 
-	// Get Travis CI State.
-	$check_runs = [];
 	$raw_check_runs = api_request(
 		'/repos/' . $repo . '/commits/' . $data->head->sha . '/check-runs',
 		null,
 		[ 'Accept: application/vnd.github.antiope-preview+json' ]
 	);
-	if ( ! empty( $raw_check_runs->check_runs ) ) {
-		foreach ( $raw_check_runs->check_runs as $check ) {
-			switch ( $check->status ) {
-				case 'queued':
-				case 'in_progress':
-					$check_runs[ $check->app->name ] = 'in_progress';
-					break;
-				case 'completed':
-					switch( $check->conclusion ) {
-						case 'success':
-							$check_runs[ $check->app->name ] = 'success';
-							break;
-						case 'failure':
-							$check_runs[ $check->app->name ] = 'failed';
-							break;
-						case 'action_required':
-							$check_runs[ $check->app->name ] = $check->output->title;
-							break;
-					}
-			}
-		}
-	}
+	$_check_runs = $raw_check_runs->check_runs ?? null;
 
 	$_reviews = api_request(
 		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/reviews',
 		null,
 		[ 'Accept: application/vnd.github.antiope-preview+json' ]
 	);
+
+	$_files = api_request(
+		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/files?per_page=100',
+		null,
+		[ 'Accept: application/vnd.github.antiope-preview+json' ]
+	);
+
+	// Get Travis CI State.
+	$check_runs = [];
+	foreach ( is_array( $_check_runs ) ? $_check_runs : [] as $check ) {
+		switch ( $check->status ) {
+			case 'queued':
+			case 'in_progress':
+				$check_runs[ $check->app->name ] = 'in_progress';
+				break;
+			case 'completed':
+				switch ( $check->conclusion ) {
+					case 'success':
+						$check_runs[ $check->app->name ] = 'success';
+						break;
+					case 'failure':
+						$check_runs[ $check->app->name ] = 'failed';
+						break;
+					case 'action_required':
+						$check_runs[ $check->app->name ] = $check->output->title;
+						break;
+				}
+		}
+	}
+
 	$reviews = [];
-	if ( $_reviews ) {
-		foreach ( $_reviews as $r ) {
-			if (
-				in_array( $r->state, [ 'CHANGES_REQUESTED', 'APPROVED' ] ) &&
-				! in_array( $r->user->login, $reviews[ $r->state ] ?? [], true )
-			) {
-				$reviews[ $r->state ][] = $r->user->login;
-			}
+	foreach ( is_array( $_reviews ) ? $_reviews : [] as $r ) {
+		if (
+			in_array( $r->state, [ 'CHANGES_REQUESTED', 'APPROVED' ] ) &&
+			! in_array( $r->user->login, $reviews[ $r->state ] ?? [], true )
+		) {
+			$reviews[ $r->state ][] = $r->user->login;
 		}
 	}
 
 	$touches_tests = false;
-	$_files = api_request(
-		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/files?per_page=999',
-		null,
-		[ 'Accept: application/vnd.github.antiope-preview+json' ]
-	);
-	if ( $_files ) {
-		foreach ( $_files as $f ) {
-			if ( preg_match( '!(^tests/|/tests/)!', $f->filename ) ) {
-				$touches_tests = true;
-				break;
-			}
+	foreach ( is_array( $_files ) ? $_files : [] as $f ) {
+		if ( preg_match( '!(^tests/|/tests/)!', $f->filename ) ) {
+			$touches_tests = true;
+			break;
 		}
 	}
 
@@ -100,7 +122,57 @@ function fetch_pr_data( $repo, $pr ) {
 			'html_url'  => $data->html_url,
 		],
 		'trac_ticket'    => determine_trac_ticket( $data ),
+		// A failed request returns GitHub's error object instead of a list.
+		'partial'         => ! is_array( $_check_runs ) || ! is_array( $_reviews ) || ! is_array( $_files ),
 	];
+}
+
+/**
+ * Picks the linked PRs whose data is due a refresh from GitHub.
+ *
+ * Each refresh is four GitHub API requests, so a ticket with many PRs refreshes only the stalest few per request.
+ *
+ * @param array $prs           Rows of `trac_github_prs`, with `data` decoded.
+ * @param bool  $authenticated Whether the request is from a logged in user.
+ * @param int   $limit         The most PRs to pick.
+ * @return array The PRs to refresh, never fetched ones first, then the stalest.
+ */
+function select_prs_to_refresh( $prs, $authenticated, $limit = 10 ) {
+	$stale = array_filter(
+		$prs,
+		function ( $data ) use ( $authenticated ) {
+			if ( ! $data->data ) {
+				return true;
+			}
+
+			$checked_ago = time() - strtotime( $data->last_checked );
+
+			// Once a day, the webhook refreshes them when they're reopened.
+			if ( 'closed' === $data->data->state ) {
+				return $checked_ago >= 24 * 60 * 60;
+			}
+
+			// 5 minutes for logged in requests, 60 mins for unauthenticated.
+			if ( $checked_ago >= ( $authenticated ? 5 * 60 : 60 * 60 ) ) {
+				return true;
+			}
+
+			// Every two minutes while the PR was created/updated in the last half hour, or its unit tests are running.
+			$recently_updated = strtotime( $data->data->updated_at ) > time() - 30 * 60;
+			$tests_running    = in_array( 'in_progress', (array) $data->data->check_runs, true );
+
+			return $checked_ago >= 2 * 60 && ( $recently_updated || $tests_running );
+		}
+	);
+
+	usort(
+		$stale,
+		function ( $a, $b ) {
+			return ( $a->data ? strtotime( $a->last_checked ) : 0 ) <=> ( $b->data ? strtotime( $b->last_checked ) : 0 );
+		}
+	);
+
+	return array_slice( $stale, 0, $limit );
 }
 
 /**

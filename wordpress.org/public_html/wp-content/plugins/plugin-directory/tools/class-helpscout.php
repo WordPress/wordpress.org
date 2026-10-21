@@ -1,17 +1,10 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Tools;
 
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 class Helpscout {
-
-	/**
-	 * The namespace a rejected plugin's slug is wrapped in.
-	 *
-	 * The trailing digits are the suffix `wp_update_post()` adds when the wrapped slug
-	 * is itself taken.
-	 */
-	const REJECTED_SLUG_REGEX = '/^rejected-(.+)-rejected(-\d+)?$/i';
 
 	/**
 	 * Fetch the slug a post's emails may also be recorded against.
@@ -25,7 +18,7 @@ class Helpscout {
 	 * @return string The unwrapped slug, or $post_name if it isn't this post's to claim.
 	 */
 	protected static function get_unwrapped_slug( $post_name, $post_id ) {
-		$unwrapped = preg_replace( self::REJECTED_SLUG_REGEX, '$1', $post_name );
+		$unwrapped = preg_replace( Status_Transitions::REJECTED_SLUG_REGEX, '$1', $post_name );
 		if ( ! $unwrapped || $unwrapped === $post_name ) {
 			return $post_name;
 		}
@@ -61,14 +54,20 @@ class Helpscout {
 			$wheres .= $wpdb->prepare( 'AND emails.%i LIKE %s ', $key, '%' . $value . '%' );
 		}
 
+		/*
+		 * Newest first. An imported conversation shares `created` with its lingering HelpScout copy, so FreeScout's comes
+		 * first, then the higher ID.
+		 */
 		$emails = $wpdb->get_results( $wpdb->prepare(
-			"SELECT emails.*
+			"SELECT emails.*,
+					EXISTS( SELECT 1 FROM %i helpdesk WHERE helpdesk.helpscout_id = emails.id AND helpdesk.meta_key = 'helpdesk' AND helpdesk.meta_value = 'freescout' ) AS freescout
 				FROM %i emails
 					JOIN %i meta ON emails.id = meta.helpscout_id
 				WHERE meta.meta_key = 'plugins' AND meta.meta_value IN( %s, %s )
 					$wheres
-				ORDER BY `created` DESC
+				ORDER BY emails.`created` DESC, `freescout` DESC, emails.`id` DESC
 				LIMIT %d",
+			"{$wpdb->base_prefix}helpscout_meta",
 			"{$wpdb->base_prefix}helpscout",
 			"{$wpdb->base_prefix}helpscout_meta",
 			$slug,
@@ -77,7 +76,8 @@ class Helpscout {
 		) );
 
 		foreach ( $emails as &$email ) {
-			$email->url = 'https://secure.helpscout.net/conversation/' . $email->id . '/' . $email->number;
+			$email->freescout = (bool) $email->freescout;
+			$email->url       = Helpdesk::conversation_url( (int) $email->id, (int) $email->number, $email->freescout );
 		}
 
 		if ( 1 === $limit ) {

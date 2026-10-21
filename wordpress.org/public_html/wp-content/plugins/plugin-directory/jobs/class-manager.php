@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
+use WordPressdotorg\Plugin_Directory\Admin\Tools\Related_Submissions;
 use WordPressdotorg\Plugin_Directory\Plugin_Check\Batched_Check;
 use WordPressdotorg\Plugin_Directory\Tools;
 use const \WP_CLI;
@@ -43,6 +44,7 @@ class Manager {
 		add_action( 'plugin_directory_translation_sync', array( __NAMESPACE__ . '\Translation_Sync', 'cron_trigger' ) );
 		add_action( 'plugin_directory_zip_cleanup', array( __NAMESPACE__ . '\Zip_Cleanup', 'cron_trigger' ) );
 		add_action( 'plugin_directory_daily_post_checks', array( __NAMESPACE__ . '\Daily_Post_Checks', 'cron_trigger' ) );
+		add_action( 'plugin_directory_related_submissions', array( Related_Submissions::class, 'cron_trigger' ) );
 
 		// Hook into the plugin import process to queue a scan job, and share PHPCS runs between the scan's Plugin Check checks.
 		add_action( 'wporg_plugins_imported', array( __NAMESPACE__ . '\Plugin_Scan', 'wporg_plugins_imported' ), 10, 6 );
@@ -294,6 +296,9 @@ class Manager {
 		}
 		if ( ! wp_next_scheduled ( 'plugin_directory_daily_post_checks' ) ) {
 			wp_schedule_event( time() + 60, 'daily', 'plugin_directory_daily_post_checks' );
+		}
+		if ( ! wp_next_scheduled( 'plugin_directory_related_submissions' ) ) {
+			wp_schedule_event( time() + 60, 'half_hourly', 'plugin_directory_related_submissions' );
 		}
 
 		// Check to see if `WP_CORE_LATEST_RELEASE` has changed since we last ran.

@@ -6,8 +6,10 @@
 |---|---|
 | [WPOrgAkismet](Modules/WPOrgAkismet) | Checks new conversations from senders with Akismet, and teaches it from what agents mark as spam. |
 | [WPOrgHelpScoutImport](Modules/WPOrgHelpScoutImport) | Imports HelpScout mailboxes' conversations, so their history moves to FreeScout. Administrators run it under Manage » HelpScout Import. |
+| [WPOrgPluginReview](Modules/WPOrgPluginReview) | Shows the plugins team a conversation's latest plugin review in its sidebar: its details, flags, issues, and the plugin as it is now on WordPress.org. |
+| [WPOrgSearch](Modules/WPOrgSearch) | Speeds up conversation search: an After date for searches without other filters, and one query instead of two. |
 | [WPOrgSidebar](Modules/WPOrgSidebar) | Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests next to each conversation. |
-| [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: WordPress.org branding, and the Modules page only lists installed modules, which can't be updated or deleted there. |
+| [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: WordPress.org branding, a Modules page that only lists installed modules, and conversation UX for agents, like keyboard shortcuts, `/` for saved replies, a collapsible sidebar, and pinned notes and headers. |
 | [WPOrgSSO](Modules/WPOrgSSO) | Agents log in with their WordPress.org account, through login.wordpress.org; there's no other way in. Every user is connected to a WordPress.org account, and new users are created from one. Name, email, and avatar are updated from it at every login. |
 | [WPOrgWebhooks](Modules/WPOrgWebhooks) | Sends conversation events to WordPress.org, which records them as contributor stats. |
 
