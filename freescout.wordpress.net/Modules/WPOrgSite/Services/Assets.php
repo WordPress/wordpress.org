@@ -18,15 +18,16 @@ namespace Modules\WPOrgSite\Services;
 final class Assets {
 
 	/**
-	 * The files that exist, of the paths in a bundle; external URLs are kept, as Minify fetches them.
+	 * The files that exist, of the paths in a bundle; only modules' files are checked, so core still regenerates a
+	 * missing vars.js when Minify throws on it.
 	 *
 	 * @param array<int, mixed> $files Paths under public/, or URLs.
-	 * @return array<int, mixed> The files Minify can find.
+	 * @return array<int, mixed> The files, without modules' files that don't exist.
 	 */
 	public static function existing( array $files ): array {
 		$existing = array();
 		foreach ( $files as $file ) {
-			if ( ! is_string( $file ) || preg_match( '#^(https?:)?//#', $file ) || file_exists( public_path() . $file ) ) {
+			if ( ! is_string( $file ) || ! str_starts_with( $file, '/modules/' ) || file_exists( public_path() . $file ) ) {
 				$existing[] = $file;
 				continue;
 			}
