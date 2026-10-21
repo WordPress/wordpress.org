@@ -288,7 +288,7 @@
 		},
 
 		comparator: function( project ) {
-			if ( this.terms && this.terms.length > 0 ) {
+			if ( this.terms ) {
 				return - project.matchScore;
 			}
 			// Default view: Floats assigned permissions to the top
@@ -545,7 +545,7 @@
 	/**
 	 * View handling the standalone global permission toggle (#project-all).
 	 * Coordinates radio and checkbox toggles and synchronizes with
-	 * window events ('deactivate:all-projects', 'uncheck:all-projects').
+	 * internal events ('deactivate:all-projects', 'uncheck:all-projects').
 	 */
 	projects.view.AllProjects = wp.Backbone.View.extend( {
 		el: '#project-all',
