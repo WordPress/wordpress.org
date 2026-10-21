@@ -334,7 +334,7 @@
 			} );
 
 			document.getElementById( 'project-loading' )?.remove();
-			this.el.replaceChildren( fragment );
+			this.el.append( fragment );
 
 			// Initialize the global #project-all view once it is rendered in the DOM.
 			if ( ! this._allProjectsView && document.getElementById( 'project-all' ) ) {
@@ -494,7 +494,7 @@
 				return view;
 			} );
 
-			this.el.append( fragment );
+			this.el.replaceChildren( fragment );
 
 			return this;
 		}
