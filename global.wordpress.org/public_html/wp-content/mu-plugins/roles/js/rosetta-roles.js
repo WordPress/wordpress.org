@@ -348,12 +348,13 @@
 				this._allProjectsView = new projects.view.AllProjects();
 			}
 
-			// Ensures a category tab is active on initial load (falls back to the first item if none is set).
-			const firstActive = this.el.querySelector( 'li.active' )
-				|| this.el.querySelector( 'li input[type="radio"]' )?.closest( 'li' )
-				|| this.el.querySelector( 'li:first-child' );
+			// Activate the first relevant category tab if #project-all is not active.
+			if ( ! projects.selection.get( 'all' ) ) {
+				const activeProject = this.collection.find( p => p.get( 'isActive' ) || p.get( 'checkedSubProjects' ) || p.get( 'checked' ) )
+					|| this.collection.first();
 
-			firstActive?.classList.add( 'active' );
+				activeProject?.set( 'isActive', true );
+			}
 
 			return this;
 		}
@@ -362,6 +363,10 @@
 	projects.view.Checkbox = wp.Backbone.View.extend( {
 		className: 'project-checkbox',
 		template: wp.template( 'project-checkbox' ),
+
+		events: {
+			'change input': 'updateChecked'
+		},
 
 		initialize: function() {
 			this.listenTo( this.model, 'change:checked change:checkedSubProjects', this.syncInput );
@@ -381,24 +386,18 @@
 				return;
 			}
 
+			const isChecked = Boolean( this.model.get( 'checked' ) );
 			const hasCheckedSubProjects = Boolean( this.model.get( 'checkedSubProjects' ) );
-			const isChecked = hasCheckedSubProjects || Boolean( this.model.get( 'checked' ) );
-			const targetType = hasCheckedSubProjects ? 'radio' : 'checkbox';
-			if ( this.inputEl.type !== targetType ) {
-				this.inputEl.type = targetType;
-				this.inputEl.className = hasCheckedSubProjects ? 'input-radio' : 'input-checkbox';
-			}
+			const isIndeterminate = ! isChecked && hasCheckedSubProjects;
 
-			if ( this.inputEl.checked !== isChecked ) {
-				this.inputEl.checked = isChecked;
-			}
-		},
+			this.inputEl.checked = isChecked;
+			this.inputEl.indeterminate = isIndeterminate;
 
-		// Listen to 'change' instead of 'click' for keyboard accessibility
-		// and to ensure DOM state is committed before re-rendering.
-		events: {
-			'change .input-checkbox': 'updateChecked',
-			'click .input-radio': 'setChecked'
+			if ( isIndeterminate ) {
+				this.inputEl.setAttribute( 'aria-checked', 'mixed' );
+			} else {
+				this.inputEl.removeAttribute( 'aria-checked' );
+			}
 		},
 
 		prepare: function() {
@@ -408,11 +407,6 @@
 
 		updateChecked: function( event ) {
 			this.model.set( 'checked', Boolean( event.target.checked ) );
-		},
-
-		// When active, the category toggle renders as a radio button representing "all items in this category".
-		setChecked: function() {
-			this.model.set( 'checked', true );
 		}
 	} );
 
