@@ -9,7 +9,6 @@
 	 */
 	const settings = window._rosettaProjectsSettings || {};
 	const l10n = settings.l10n || {};
-	delete settings.l10n;
 
 	const projects = {
 		settings,
@@ -632,6 +631,7 @@
 
 	const DB_NAME = 'rosetta_cache';
 	const STORE_NAME = 'projects';
+	const DB_VERSION = 1;
 
 	const promisifyReq = req => new Promise( ( resolve, reject ) => {
 		req.onsuccess = () => resolve( req.result );
@@ -639,14 +639,63 @@
 	} );
 
 	/**
-	 * Opens or initializes the IndexedDB projects cache database.
+	 * Opens IndexedDB with protection against schema conflicts and blocked upgrades.
 	 *
 	 * @return {Promise<IDBDatabase>} Promise resolving to the open IDB database instance.
 	 */
 	function openProjectsDB() {
-		const request = indexedDB.open( DB_NAME, 1 );
-		request.onupgradeneeded = () => request.result.createObjectStore( STORE_NAME );
-		return promisifyReq( request );
+		return new Promise( ( resolve, reject ) => {
+		   const request = indexedDB.open( DB_NAME, DB_VERSION );
+
+			request.onupgradeneeded = event => {
+				const db = event.target.result;
+
+				// Before creating a store, always check whether it already exists.
+				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
+					db.createObjectStore( STORE_NAME );
+				}
+			};
+
+			// Prevent open tabs from freezing the upgrade process.
+			request.onblocked = () => {
+				console.warn( 'IndexedDB upgrade blocked: Please close other Rosetta tabs.' );
+			};
+
+			request.onsuccess = () => {
+				const db = request.result;
+
+				// Consistency Check: Does the store actually exist?
+				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
+					db.close();
+					// If the db exists without the store, delete the db and reinitialize it.
+					recoverCorruptDB().then( resolve ).catch( reject );
+					return;
+				}
+
+				// Close the connection when another tab requests an upgrade.
+				db.onversionchange = () => {
+					db.close();
+				};
+
+				resolve( db );
+			};
+
+			request.onerror = () => reject( request.error );
+		} );
+	}
+
+	/**
+	 * Fixes an inconsistent db state by completely deleting and rebuilding it.
+	 */
+	async function recoverCorruptDB() {
+		await new Promise( ( resolve, reject ) => {
+			const deleteReq = indexedDB.deleteDatabase( DB_NAME );
+			deleteReq.onsuccess = () => resolve();
+			deleteReq.onerror = () => reject( deleteReq.error );
+			deleteReq.onblocked = () => resolve();
+		} );
+
+		return openProjectsDB();
 	}
 
 	/**
@@ -665,6 +714,10 @@
 		const db = await openProjectsDB();
 
 		try {
+			if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
+				throw new Error( `Store ${ STORE_NAME } not found in database.` );
+			}
+
 			const store = db.transaction( STORE_NAME, 'readonly' ).objectStore( STORE_NAME );
 
 			const [ cachedTimeRaw, blob ] = await Promise.all( [
