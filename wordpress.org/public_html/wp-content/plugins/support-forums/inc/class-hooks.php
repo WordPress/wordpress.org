@@ -18,7 +18,6 @@ class Hooks {
 		add_filter( 'pre_option__bbp_topics_per_page', array( $this, 'increase_topics_per_page' ) );
 		add_filter( 'bbp_map_meta_caps',               array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
 		add_filter( 'redirect_canonical',              array( $this, 'disable_update_php_old_slug_redirect' ) );
-		add_filter( 'redirect_canonical',              array( $this, 'handle_bbpress_root_pages' ), 10, 2 );
 		add_filter( 'old_slug_redirect_post_id',       array( $this, 'disable_wp_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ), 5 );
@@ -281,19 +280,6 @@ class Hooks {
 	 */
 	public function disable_update_php_old_slug_redirect( $redirect_url ) {
 		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
-			$redirect_url = false;
-		}
-
-		return $redirect_url;
-	}
-
-	/**
-	 * Prevent a redirect for some base bbPress pages to random topics.
-	 */
-	public function handle_bbpress_root_pages( $redirect_url, $requested_url ) {
-		$url = str_replace( home_url('/'), '', $requested_url );
-
-		if ( $url && preg_match( '!^(topic|topic-[^/]+|reply|users|view)(/[?]|/?$)!i', $url ) ) {
 			$redirect_url = false;
 		}
 
