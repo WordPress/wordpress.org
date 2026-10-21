@@ -34,7 +34,7 @@ Here is a comprehensive directory map of the active services at the root of this
 
 For most subprojects, you can spin up a local development instance with Node.js and Docker via `wp-env` under the `environments/` directory:
 
-1. Ensure **Docker Desktop** is running.
+1. Ensure a [Docker runtime](environments/README.md#docker-runtime) is running.
 2. Navigate to [environments/](environments).
 3. Run `npm install` to install dependencies.
 4. Launch the environment of your choice:

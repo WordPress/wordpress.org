@@ -4,8 +4,27 @@ Local development environments for WordPress.org projects, powered by [`wp-env`]
 
 ## Prerequisites
 
-- [Docker](https://www.docker.com/products/docker-desktop/) installed and running
+- A Docker runtime, installed and running (see below)
 - [Node.js](https://nodejs.org/) — the version in [.nvmrc](.nvmrc) (`nvm use`)
+
+### Docker runtime
+
+On macOS, use [Colima](https://github.com/abiosoft/colima). It's free and open source and needs no account.
+
+```bash
+brew install colima docker docker-compose
+colima start --cpu 4 --memory 4
+```
+
+Homebrew installs Compose as a Docker CLI plugin outside the CLI's search path. On Apple Silicon, point the CLI at it by adding this property to `~/.docker/config.json`, keeping whatever else is already in the file:
+
+```json
+"cliPluginsExtraDirs": [ "/opt/homebrew/lib/docker/cli-plugins" ]
+```
+
+Colima remembers the CPU and memory settings, so later starts are just `colima start`. To start it at login instead, run `brew services start colima`.
+
+On Windows, consider using [Rancher Desktop](https://rancherdesktop.io/) with its dockerd (moby) engine, or [Docker Desktop](https://www.docker.com/products/docker-desktop/). On Linux, use [Docker Engine](https://docs.docker.com/engine/install/).
 
 ## Setup
 
