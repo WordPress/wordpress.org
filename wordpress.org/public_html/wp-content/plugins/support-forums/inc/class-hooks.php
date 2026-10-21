@@ -17,7 +17,7 @@ class Hooks {
 		add_filter( 'pre_option__bbp_edit_lock',       array( $this, 'increase_edit_lock_time' ) );
 		add_filter( 'pre_option__bbp_topics_per_page', array( $this, 'increase_topics_per_page' ) );
 		add_filter( 'bbp_map_meta_caps',               array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
-		add_filter( 'redirect_canonical',              array( $this, 'disable_redirect_guess_404_permalink' ) );
+		add_filter( 'redirect_canonical',              array( $this, 'disable_update_php_old_slug_redirect' ) );
 		add_filter( 'redirect_canonical',              array( $this, 'handle_bbpress_root_pages' ), 10, 2 );
 		add_filter( 'old_slug_redirect_post_id',       array( $this, 'disable_wp_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
@@ -274,29 +274,12 @@ class Hooks {
 	}
 
 	/**
-	 * Disable redirect_guess_404_permalink() for hidden topics.
-	 *
-	 * Prevents Spam, Pending, or Archived topics that the current user cannot view
-	 * from performing a redirect to other unrelated topics.
+	 * Avoid redirecting the old slug of the "Update PHP" page to a forum topic.
 	 *
 	 * @param string $redirect_url The redirect URL.
 	 * @return string Filtered redirect URL.
 	 */
-	public function disable_redirect_guess_404_permalink( $redirect_url ) {
-		if ( is_404() && 'topic' === get_query_var( 'post_type' ) && get_query_var( 'name' ) ) {
-			$hidden_topic = get_posts( array(
-				'name'        => get_query_var( 'name' ),
-				'post_type'   => 'topic',
-				'post_status' => array( 'spam', 'pending', 'archived' ),
-			) );
-			$hidden_topic = reset( $hidden_topic );
-
-			if ( $hidden_topic && ! current_user_can( 'read_topic', $hidden_topic->ID ) ) {
-				$redirect_url = false;
-			}
-		}
-
-		// Avoid redirecting the old slug of "Update PHP" page to a forum topic.
+	public function disable_update_php_old_slug_redirect( $redirect_url ) {
 		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
 			$redirect_url = false;
 		}
