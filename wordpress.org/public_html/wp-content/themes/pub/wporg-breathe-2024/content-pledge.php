@@ -17,7 +17,7 @@ $status_class = $is_sponsored ? 'sponsored' : 'independent';
 $status_label = $is_sponsored ? __( 'Sponsored', 'wporg-5ftf' ) : __( 'Independent', 'wporg-5ftf' );
 
 $active_class  = $contributor['_metrics_active_class'] ?? 'active-stale';
-$active_bucket = $contributor['_metrics_active_bucket'] ?? __( 'over 6 months ago', 'wporg-5ftf' );
+$active_bucket = $contributor['_metrics_active_bucket'] ?? __( 'active over 6 months ago', 'wporg-5ftf' );
 
 $weighted    = (int) ( $contributor['_metrics_weighted'] ?? 0 );
 $high        = (int) ( $contributor['_metrics_high'] ?? 0 );
@@ -103,78 +103,91 @@ $is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $activ
 				?>
 			</span>
 			<span class="pledges-card-active pledges-card-active-<?php echo esc_attr( $active_class ); ?>">
-				<?php
-				echo esc_html( sprintf(
-					/* translators: %s: relative time bucket, e.g. "3 days ago" */
-					__( 'active %s', 'wporg-5ftf' ),
-					$active_bucket
-				) );
-				?>
+				<?php echo esc_html( $active_bucket ); ?>
 			</span>
 		</div>
 
-		<p class="pledges-card-summary">
-			<?php
-			if ( $weighted > 0 ) {
-				// Build summary from real signals: count breakdown + top repos.
-				$parts = array();
-				if ( $high > 0 ) {
-					$parts[] = sprintf(
-						/* translators: 1: <strong> tag, 2: number of high-impact contributions, 3: </strong> tag */
-						_n( '%1$s%2$d high-impact%3$s contribution', '%1$s%2$d high-impact%3$s contributions', $high, 'wporg-5ftf' ),
-						'<strong>',
-						$high,
-						'</strong>'
-					);
-				}
-				if ( $medium > 0 ) {
-					$parts[] = sprintf(
-						/* translators: 1: <strong> tag, 2: number of medium-impact contributions, 3: </strong> tag */
-						_n( '%1$s%2$d medium-impact%3$s contribution', '%1$s%2$d medium-impact%3$s contributions', $medium, 'wporg-5ftf' ),
-						'<strong>',
-						$medium,
-						'</strong>'
-					);
-				}
-				$summary = implode( ' &middot; ', $parts );
+		<div class="pledges-card-summary">
+			<?php if ( $weighted > 0 ) : ?>
+				<ul class="pledges-card-stats">
+					<?php if ( $high > 0 ) : ?>
+						<li>
+							<?php
+							echo wp_kses_data(
+								sprintf(
+									/* translators: %s: number of high-impact contributions */
+									_n( '<strong>%s high-impact</strong> contribution', '<strong>%s high-impact</strong> contributions', $high, 'wporg-5ftf' ),
+									number_format_i18n( $high )
+								)
+							);
+							?>
+						</li>
+					<?php endif; ?>
+					<?php if ( $medium > 0 ) : ?>
+						<li>
+							<?php
+							echo wp_kses_data(
+								sprintf(
+									/* translators: %s: number of medium-impact contributions */
+									_n( '<strong>%s medium-impact</strong> contribution', '<strong>%s medium-impact</strong> contributions', $medium, 'wporg-5ftf' ),
+									number_format_i18n( $medium )
+								)
+							);
+							?>
+						</li>
+					<?php endif; ?>
+				</ul>
 
-				if ( ! empty( $top_repos ) ) {
-					$repo_short = array_map(
-						function ( $r ) {
-							$slash = strrpos( $r, '/' );
-							return false !== $slash ? substr( $r, $slash + 1 ) : $r;
-						},
-						array_slice( $top_repos, 0, 2 )
-					);
-					$repo_html  = array_map(
-						function ( $r ) {
-							return '<strong>' . esc_html( $r ) . '</strong>';
-						},
-						$repo_short
-					);
-					$summary   .= ' &middot; ' . sprintf(
-						/* translators: %s: comma-separated list of GitHub repo short names */
-						__( 'in %s', 'wporg-5ftf' ),
-						implode( ', ', $repo_html )
-					);
-				}
+				<?php if ( $top_repos ) : ?>
+					<p class="pledges-card-repos">
+						<?php
+						// Name the two most active repos, count the rest.
+						$repo_items = array_map(
+							function ( $repo ) {
+								$slash = strrpos( $repo, '/' );
+								return sprintf(
+									'<a href="%s">%s</a>',
+									esc_url( 'https://github.com/' . $repo ),
+									esc_html( false !== $slash ? substr( $repo, $slash + 1 ) : $repo )
+								);
+							},
+							array_slice( $top_repos, 0, 2 )
+						);
+						$more_repos = count( $top_repos ) - count( $repo_items );
+						if ( $more_repos > 0 ) {
+							$repo_items[] = esc_html(
+								sprintf(
+									/* translators: %s: number of additional repositories */
+									_n( '+%s more', '+%s more', $more_repos, 'wporg-5ftf' ),
+									number_format_i18n( $more_repos )
+								)
+							);
+						}
 
-				$summary .= ' ' . sprintf(
-					/* translators: %d: window in days */
-					esc_html__( 'in the last %d days.', 'wporg-5ftf' ),
-					$window_days
-				);
-
-				echo wp_kses_data( $summary );
-			} else {
-				echo esc_html( sprintf(
-					/* translators: %d: window in days */
-					__( 'No tracked contributions in the last %d days.', 'wporg-5ftf' ),
-					$window_days
-				) );
-			}
-			?>
-		</p>
+						echo wp_kses_data(
+							sprintf(
+								/* translators: %s: list of GitHub repository names */
+								_n( 'Repository: %s', 'Repositories: %s', count( $top_repos ), 'wporg-5ftf' ),
+								implode( wp_get_list_item_separator(), $repo_items )
+							)
+						);
+						?>
+					</p>
+				<?php endif; ?>
+			<?php else : ?>
+				<p>
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: %d: window in days */
+							_n( 'No tracked contributions in the last %d day.', 'No tracked contributions in the last %d days.', $window_days, 'wporg-5ftf' ),
+							$window_days
+						)
+					);
+					?>
+				</p>
+			<?php endif; ?>
+		</div>
 	</div>
 
 	<aside class="pledges-card-meta">

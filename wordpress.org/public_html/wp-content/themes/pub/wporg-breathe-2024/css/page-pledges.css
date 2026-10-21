@@ -133,9 +133,6 @@
 	font-size: 14px;
 	line-height: 1.4;
 	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
 }
 
 .pledges-health-split {
@@ -392,6 +389,30 @@
 .pledges-card-summary strong {
 	color: var(--wp--preset--color--charcoal-1, #1d2327);
 	font-weight: 600;
+}
+
+.entry-content .pledges-card-summary p {
+	margin: 0;
+}
+
+.entry-content .pledges-card-stats {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.entry-content .pledges-card-stats li {
+	display: inline;
+	margin: 0;
+}
+
+.entry-content .pledges-card-stats li + li::before {
+	content: " \00b7  ";
+	content: " \00b7  " / "";
+}
+
+.pledges-card-repos {
+	font-size: 14px;
 }
 
 .pledges-card-meta {
@@ -690,6 +711,18 @@
 	padding: 10px 16px;
 	border-radius: 999px;
 	white-space: nowrap;
+}
+
+/* Decorative, so it stays out of the translated label and the accessibility tree. */
+.entry-content .pledges-standing-action::after {
+	content: "\2192";
+	content: "\2192" / "";
+	margin-inline-start: .3em;
+}
+
+.entry-content .pledges-standing-action:dir(rtl)::after {
+	content: "\2190";
+	content: "\2190" / "";
 }
 
 .entry-content .pledges-standing-action:hover,
