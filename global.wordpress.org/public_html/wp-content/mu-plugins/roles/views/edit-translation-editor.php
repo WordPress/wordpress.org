@@ -57,7 +57,7 @@ if ( ! $user ) {
 			</tbody>
 		</table>
 
-		<input type="hidden" id="project-access-list" name="projects" value="<?php echo esc_attr( implode( ',', $project_access_list ) ); ?>">
+		<input type="hidden" id="project-access-list" name="projects" value="<?php echo esc_attr( implode( ',', (array) $project_access_list ) ); ?>">
 		<input type="hidden" name="action" value="update-translation-editor">
 		<input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
 		<?php
