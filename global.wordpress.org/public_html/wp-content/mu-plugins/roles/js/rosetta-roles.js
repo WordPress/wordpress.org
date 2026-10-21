@@ -63,11 +63,12 @@
 		 * @param {boolean}        checked - The updated selection state.
 		 */
 		updateSelection: function( model, checked ) {
+			const id = model.get( 'id' );
 			if ( checked ) {
-				projects.selection.add( { id: this.get( 'id' ) } );
+				projects.selection.add( { id } );
 				projects.events.trigger( 'uncheck:all-projects' );
 			} else {
-				projects.selection.remove( this.get( 'id' ) );
+				projects.selection.remove( id );
 			}
 		}
 	} );
