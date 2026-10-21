@@ -114,11 +114,9 @@ $is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $activ
 						<li>
 							<?php
 							echo wp_kses_data( sprintf(
-								/* translators: 1: <strong> tag, 2: number of high-impact contributions, 3: </strong> tag */
-								_n( '%1$s%2$d high-impact%3$s contribution', '%1$s%2$d high-impact%3$s contributions', $high, 'wporg-5ftf' ),
-								'<strong>',
-								$high,
-								'</strong>'
+								/* translators: %s: number of high-impact contributions */
+								_n( '<strong>%s high-impact</strong> contribution', '<strong>%s high-impact</strong> contributions', $high, 'wporg-5ftf' ),
+								number_format_i18n( $high )
 							) );
 							?>
 						</li>
@@ -127,11 +125,9 @@ $is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $activ
 						<li>
 							<?php
 							echo wp_kses_data( sprintf(
-								/* translators: 1: <strong> tag, 2: number of medium-impact contributions, 3: </strong> tag */
-								_n( '%1$s%2$d medium-impact%3$s contribution', '%1$s%2$d medium-impact%3$s contributions', $medium, 'wporg-5ftf' ),
-								'<strong>',
-								$medium,
-								'</strong>'
+								/* translators: %s: number of medium-impact contributions */
+								_n( '<strong>%s medium-impact</strong> contribution', '<strong>%s medium-impact</strong> contributions', $medium, 'wporg-5ftf' ),
+								number_format_i18n( $medium )
 							) );
 							?>
 						</li>
