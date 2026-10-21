@@ -15,6 +15,7 @@ class Hooks {
 		add_filter( 'bbp_get_form_topic_subscribed',   array( $this, 'check_topic_subscription_checkbox' ) );
 		add_action( 'pre_get_posts',                   array( $this, 'hide_non_public_forums' ) );
 		add_filter( 'pre_option__bbp_edit_lock',       array( $this, 'increase_edit_lock_time' ) );
+		add_filter( 'bbp_past_edit_lock', array( $this, 'allow_review_topic_edits' ), 10, 2 );
 		add_filter( 'pre_option__bbp_topics_per_page', array( $this, 'increase_topics_per_page' ) );
 		add_filter( 'redirect_canonical',              array( $this, 'disable_update_php_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
@@ -173,6 +174,64 @@ class Hooks {
 	 */
 	public function increase_edit_lock_time() {
 		return 60;
+	}
+
+	/**
+	 * Keep review topics editable by their authors after the normal edit window.
+	 *
+	 * The review form submits from a directory view, where bbPress now checks
+	 * the edit window again in the topic handler. Only the review topic being
+	 * edited is exempt; replies and other forum topics keep the one-hour limit.
+	 *
+	 * @param bool   $past_edit_lock Whether the edit window has expired.
+	 * @param string $datetime       Post date in GMT.
+	 * @return bool Whether the edit window has expired.
+	 */
+	public function allow_review_topic_edits( $past_edit_lock, $datetime ) {
+		if (
+			! $past_edit_lock
+			|| ! bbp_allow_content_edit()
+			|| ! get_current_user_id()
+			|| ! defined( 'WPORG_SUPPORT_FORUMS_BLOGID' )
+			|| (int) WPORG_SUPPORT_FORUMS_BLOGID !== get_current_blog_id()
+		) {
+			return $past_edit_lock;
+		}
+
+		// Directory submissions identify the topic by POST; edit URLs use the query.
+		if ( bbp_is_post_request() ) {
+			// phpcs:disable WordPress.Security.NonceVerification.Missing -- Read request context only; bbPress verifies the nonce before saving.
+			if (
+				empty( $_POST['action'] )
+				|| ! is_string( $_POST['action'] )
+				|| 'bbp-edit-topic' !== sanitize_key( $_POST['action'] )
+				|| empty( $_POST['bbp_topic_id'] )
+				|| ! is_numeric( $_POST['bbp_topic_id'] )
+			) {
+				return $past_edit_lock;
+			}
+
+			$topic_id = (int) $_POST['bbp_topic_id'];
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		} elseif ( bbp_is_topic_edit() ) {
+			$topic_id = bbp_get_topic_id();
+		} else {
+			return $past_edit_lock;
+		}
+
+		$topic = bbp_get_topic( $topic_id );
+		if (
+			! $topic
+			|| bbp_get_topic_post_type() !== $topic->post_type
+			|| Plugin::REVIEWS_FORUM_ID !== (int) bbp_get_topic_forum_id( $topic_id )
+			|| get_current_user_id() !== (int) $topic->post_author
+			|| $datetime !== $topic->post_date_gmt
+		) {
+			return $past_edit_lock;
+		}
+
+		return false;
 	}
 
 	/**
