@@ -558,10 +558,9 @@ if ( ! $current_user_id ) {
 							// sponsorship filter, otherwise "10 contributors with no tracked
 							// contributions" sits above 2 cards when the filter hides the rest.
 							$inactive_label = sprintf(
-								/* translators: 1: count, 2: window in days */
-								_n( '%1$d contributor with no tracked contributions in the last %2$d days', '%1$d contributors with no tracked contributions in the last %2$d days', $visible_inactive_count, 'wporg-5ftf' ),
-								$visible_inactive_count,
-								$window_days
+								/* translators: %s: number of contributors */
+								_n( '%s contributor with no tracked contributions in this period', '%s contributors with no tracked contributions in this period', $visible_inactive_count, 'wporg-5ftf' ),
+								number_format_i18n( $visible_inactive_count )
 							);
 							// Hide the divider when the sponsorship filter has emptied its
 							// section so JS-disabled visitors don't see an orphan label above
@@ -608,10 +607,9 @@ if ( ! $current_user_id ) {
 							<a href="<?php echo esc_url( add_query_arg( 'show_inactive', '1' ) ); ?>">
 								<?php
 								echo esc_html( sprintf(
-									/* translators: 1: count, 2: window in days */
-									_n( 'Show %1$d contributor with no tracked contributions in the last %2$d days', 'Show %1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
-									$inactive_count,
-									$window_days
+									/* translators: %s: number of contributors */
+									_n( 'Show %s inactive contributor', 'Show %s inactive contributors', $inactive_count, 'wporg-5ftf' ),
+									number_format_i18n( $inactive_count )
 								) );
 								?>
 							</a>
@@ -642,10 +640,9 @@ if ( ! $current_user_id ) {
 								<a href="<?php echo esc_url( add_query_arg( 'show_inactive', '1' ) ); ?>">
 									<?php
 									echo esc_html( sprintf(
-										/* translators: 1: count, 2: window in days */
-										_n( 'Show %1$d contributor with no tracked contributions in the last %2$d days', 'Show %1$d contributors with no tracked contributions in the last %2$d days', $inactive_count, 'wporg-5ftf' ),
-										$inactive_count,
-										$window_days
+										/* translators: %s: number of contributors */
+										_n( 'Show %s inactive contributor', 'Show %s inactive contributors', $inactive_count, 'wporg-5ftf' ),
+										number_format_i18n( $inactive_count )
 									) );
 									?>
 								</a>
