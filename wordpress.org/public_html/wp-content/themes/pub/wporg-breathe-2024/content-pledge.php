@@ -17,7 +17,7 @@ $status_class = $is_sponsored ? 'sponsored' : 'independent';
 $status_label = $is_sponsored ? __( 'Sponsored', 'wporg-5ftf' ) : __( 'Independent', 'wporg-5ftf' );
 
 $active_class  = $contributor['_metrics_active_class'] ?? 'active-stale';
-$active_bucket = $contributor['_metrics_active_bucket'] ?? __( 'over 6 months ago', 'wporg-5ftf' );
+$active_bucket = $contributor['_metrics_active_bucket'] ?? __( 'active over 6 months ago', 'wporg-5ftf' );
 
 $weighted    = (int) ( $contributor['_metrics_weighted'] ?? 0 );
 $high        = (int) ( $contributor['_metrics_high'] ?? 0 );
@@ -103,13 +103,7 @@ $is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $activ
 				?>
 			</span>
 			<span class="pledges-card-active pledges-card-active-<?php echo esc_attr( $active_class ); ?>">
-				<?php
-				echo esc_html( sprintf(
-					/* translators: %s: relative time bucket, e.g. "3 days ago" */
-					__( 'active %s', 'wporg-5ftf' ),
-					$active_bucket
-				) );
-				?>
+				<?php echo esc_html( $active_bucket ); ?>
 			</span>
 		</div>
 
@@ -153,23 +147,24 @@ $is_initially_hidden = ! $is_standing && 'all' !== $active_sponsorship && $activ
 						$repo_short
 					);
 					$summary   .= ' &middot; ' . sprintf(
-						/* translators: %s: comma-separated list of GitHub repo short names */
-						__( 'in %s', 'wporg-5ftf' ),
-						implode( ', ', $repo_html )
+						/* translators: 1: list of GitHub repo short names, 2: window in days */
+						_n( 'in %1$s in the last %2$d day.', 'in %1$s in the last %2$d days.', $window_days, 'wporg-5ftf' ),
+						implode( wp_get_list_item_separator(), $repo_html ),
+						$window_days
+					);
+				} else {
+					$summary .= ' ' . sprintf(
+						/* translators: %d: window in days */
+						_n( 'in the last %d day.', 'in the last %d days.', $window_days, 'wporg-5ftf' ),
+						$window_days
 					);
 				}
-
-				$summary .= ' ' . sprintf(
-					/* translators: %d: window in days */
-					esc_html__( 'in the last %d days.', 'wporg-5ftf' ),
-					$window_days
-				);
 
 				echo wp_kses_data( $summary );
 			} else {
 				echo esc_html( sprintf(
 					/* translators: %d: window in days */
-					__( 'No tracked contributions in the last %d days.', 'wporg-5ftf' ),
+					_n( 'No tracked contributions in the last %d day.', 'No tracked contributions in the last %d days.', $window_days, 'wporg-5ftf' ),
 					$window_days
 				) );
 			}

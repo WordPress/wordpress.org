@@ -24,7 +24,6 @@
 		grid.querySelectorAll( '.pledges-card' )
 	);
 	var resultCount = document.getElementById( 'pledges-result-count' );
-	var resultPhrase = document.getElementById( 'pledges-result-phrase' );
 	var emptyState = document.getElementById( 'pledges-empty' );
 	var divider = grid.querySelector( '.pledges-inactive-divider' );
 	var hiwBanner = document.getElementById( 'pledges-howitworks' );
@@ -114,22 +113,9 @@
 		}
 
 		// Result count is "active contributors" — inactive cards don't belong here.
-		if ( resultCount ) {
-			resultCount.textContent = activeVisible;
-		}
-
-		// Rebuild the phrase so the singular/plural form follows the live visible
-		// count instead of being frozen at the server-rendered $active_count.
-		// (Two-form approximation; for fully plural-aware locales we'd swap this
-		// for wp.i18n._n once the script depends on @wordpress/i18n.)
-		if ( resultPhrase ) {
-			var total = parseInt( resultPhrase.dataset.total || '0', 10 );
-			var template = activeVisible === 1
-				? resultPhrase.dataset.singular
-				: resultPhrase.dataset.plural;
-			if ( template ) {
-				resultPhrase.textContent = template.replace( '%d', String( total ) );
-			}
+		// The server pre-renders the translated phrase for each sponsorship filter.
+		if ( resultCount && resultCount.dataset[ state.sponsorship ] ) {
+			resultCount.textContent = resultCount.dataset[ state.sponsorship ];
 		}
 
 		// Propagate the user's visible-relative rank to the standing card and

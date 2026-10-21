@@ -58,7 +58,10 @@ if ( ! ContributionMetrics\team_has_tracking_data( $current_team->post_name ) ) 
 
 			<header class="page-header pledges-hero">
 				<h1 class="page-title">
-					<?php echo esc_html( sprintf( __( 'People contributing to %s', 'wporg-5ftf' ), $current_team->post_title ) ); ?>
+					<?php
+					/* translators: %s: team name */
+					echo esc_html( sprintf( __( 'People contributing to %s', 'wporg-5ftf' ), $current_team->post_title ) );
+					?>
 				</h1>
 				<p class="pledges-subtitle">
 					<?php esc_html_e( 'Help bring contribution tracking to this team.', 'wporg-5ftf' ); ?>
@@ -228,17 +231,29 @@ foreach ( $contributors as $c ) {
 	}
 }
 
-// Visible active count under the current sponsorship filter, so the initial
-// render's "N active contributors" matches what the user actually sees and
-// doesn't twitch when the JS recomputes after hydration.
-$visible_active_count   = 0;
-$visible_inactive_count = 0;
+// Active count per sponsorship filter, so the "N active contributors" phrase
+// can be pre-translated for every filter state and JS only has to swap it.
+$active_counts = array(
+	'all'         => count( $active_contributors ),
+	'independent' => 0,
+	'sponsored'   => 0,
+);
 foreach ( $active_contributors as $c ) {
-	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
-	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
-		$visible_active_count++;
-	}
+	$active_counts[ empty( $c['sponsored'] ) ? 'independent' : 'sponsored' ]++;
 }
+$visible_active_count = $active_counts[ $sponsorship ];
+
+$result_phrases = array();
+foreach ( $active_counts as $sponsorship_value => $active_count ) {
+	$result_phrases[ $sponsorship_value ] = sprintf(
+		/* translators: 1: number of active contributors shown, 2: total number of contributors */
+		_n( '%1$s active contributor (of %2$s total)', '%1$s active contributors (of %2$s total)', $active_count, 'wporg-5ftf' ),
+		number_format_i18n( $active_count ),
+		number_format_i18n( $total_count )
+	);
+}
+
+$visible_inactive_count = 0;
 foreach ( $inactive_contributors as $c ) {
 	$row_sponsorship = empty( $c['sponsored'] ) ? 'independent' : 'sponsored';
 	if ( 'all' === $sponsorship || $row_sponsorship === $sponsorship ) {
@@ -315,7 +330,10 @@ if ( ! $current_user_id ) {
 
 		<header class="page-header pledges-hero">
 			<h1 class="page-title">
-				<?php echo esc_html( sprintf( __( 'People contributing to %s', 'wporg-5ftf' ), $current_team->post_title ) ); ?>
+				<?php
+				/* translators: %s: team name */
+				echo esc_html( sprintf( __( 'People contributing to %s', 'wporg-5ftf' ), $current_team->post_title ) );
+				?>
 			</h1>
 			<p class="pledges-subtitle">
 				<?php esc_html_e( 'Ranked by recent shipped work, not by pledged hours.', 'wporg-5ftf' ); ?>
@@ -380,7 +398,7 @@ if ( ! $current_user_id ) {
 											<?php
 											echo esc_html( sprintf(
 												/* translators: 1: team name, 2: window in days */
-												__( 'Land a high- or medium-impact contribution to %1$s in the last %2$d days to appear here.', 'wporg-5ftf' ),
+												_n( 'Land a high- or medium-impact contribution to %1$s in the last %2$d day to appear here.', 'Land a high- or medium-impact contribution to %1$s in the last %2$d days to appear here.', $window_days, 'wporg-5ftf' ),
 												$current_team->post_title,
 												$window_days
 											) );
@@ -402,12 +420,16 @@ if ( ! $current_user_id ) {
 								$contributor['_is_you']      = true;
 								$contributor['_is_standing'] = true;
 								// The only chip that can exclude the user is the one opposite
-								// their sponsorship — so the label is deterministic regardless
+								// their sponsorship — so the message is deterministic regardless
 								// of which twin is initially visible.
-								$exclusion_label = empty( $standing_user['sponsored'] )
-									? __( 'Sponsored', 'wporg-5ftf' )
-									: __( 'Independent', 'wporg-5ftf' );
-								$is_filtered    = ( 'filtered-out' === $standing_state );
+								if ( empty( $standing_user['sponsored'] ) ) {
+									/* translators: %s: contributor name. "Sponsored" is the filter chip label. */
+									$filtered_message = __( '%s &mdash; independent contributor. The <strong>Sponsored</strong> filter is excluding you.', 'wporg-5ftf' );
+								} else {
+									/* translators: %s: contributor name. "Independent" is the filter chip label. */
+									$filtered_message = __( '%s &mdash; sponsored contributor. The <strong>Independent</strong> filter is excluding you.', 'wporg-5ftf' );
+								}
+								$is_filtered = ( 'filtered-out' === $standing_state );
 								?>
 								<div class="pledges-standing-card pledges-standing-card-ranked"<?php echo $is_filtered ? ' hidden' : ''; ?>>
 									<?php require __DIR__ . '/content-pledge.php'; ?>
@@ -419,15 +441,7 @@ if ( ! $current_user_id ) {
 									<div class="pledges-standing-body">
 										<strong class="pledges-standing-title"><?php esc_html_e( 'You\'re hidden by current filters.', 'wporg-5ftf' ); ?></strong>
 										<p class="pledges-standing-sub">
-											<?php
-											echo wp_kses_data( sprintf(
-												/* translators: 1: contributor name, 2: sponsorship status word (independent/sponsored), 3: name of the chip currently excluding the user */
-												__( '%1$s &mdash; %2$s contributor. The <strong>%3$s</strong> filter is excluding you.', 'wporg-5ftf' ),
-												esc_html( $standing_user['name'] ),
-												empty( $standing_user['sponsored'] ) ? esc_html__( 'independent', 'wporg-5ftf' ) : esc_html__( 'sponsored', 'wporg-5ftf' ),
-												esc_html( $exclusion_label )
-											) );
-											?>
+											<?php echo wp_kses_data( sprintf( $filtered_message, esc_html( $standing_user['name'] ) ) ); ?>
 										</p>
 									</div>
 									<a class="pledges-standing-action" href="<?php echo esc_url( $build_pledges_url( $window_days, 'all' ) ); ?>"><?php esc_html_e( 'Clear filters', 'wporg-5ftf' ); ?> &rarr;</a>
@@ -448,21 +462,43 @@ if ( ! $current_user_id ) {
 					</div>
 
 					<div class="pledges-health" role="status">
-						<span class="pledges-health-num"><?php echo esc_html( number_format_i18n( $total_count ) ); ?></span>
 						<span class="pledges-health-text">
 							<?php
 							// $total_count is the static opt-in roster (active + inactive); the window
 							// scopes the rank line below, not this banner. Don't conflate the two.
-							echo wp_kses_data( sprintf(
-								/* translators: %s: team name */
-								__( 'contributors to %s.', 'wporg-5ftf' ),
-								'<strong>' . esc_html( $current_team->post_title ) . '</strong>'
-							) );
+							echo wp_kses(
+								sprintf(
+									/* translators: 1: number of contributors, 2: team name */
+									_n( '%1$s contributor to %2$s.', '%1$s contributors to %2$s.', $total_count, 'wporg-5ftf' ),
+									'<span class="pledges-health-num">' . esc_html( number_format_i18n( $total_count ) ) . '</span>',
+									'<strong>' . esc_html( $current_team->post_title ) . '</strong>'
+								),
+								array(
+									'span'   => array( 'class' => true ),
+									'strong' => array(),
+								)
+							);
 							?>
 						</span>
 						<span class="pledges-health-split">
-							<span class="pledges-health-chip independent"><strong><?php echo esc_html( number_format_i18n( $independent_count ) ); ?></strong> <?php esc_html_e( 'independent', 'wporg-5ftf' ); ?></span>
-							<span class="pledges-health-chip sponsored"><strong><?php echo esc_html( number_format_i18n( $sponsored_count ) ); ?></strong> <?php esc_html_e( 'sponsored', 'wporg-5ftf' ); ?></span>
+							<span class="pledges-health-chip independent">
+								<?php
+								echo wp_kses_data( sprintf(
+									/* translators: %s: number of independent contributors */
+									_n( '%s independent', '%s independent', $independent_count, 'wporg-5ftf' ),
+									'<strong>' . esc_html( number_format_i18n( $independent_count ) ) . '</strong>'
+								) );
+								?>
+							</span>
+							<span class="pledges-health-chip sponsored">
+								<?php
+								echo wp_kses_data( sprintf(
+									/* translators: %s: number of sponsored contributors */
+									_n( '%s sponsored', '%s sponsored', $sponsored_count, 'wporg-5ftf' ),
+									'<strong>' . esc_html( number_format_i18n( $sponsored_count ) ) . '</strong>'
+								) );
+								?>
+							</span>
 						</span>
 					</div>
 
@@ -494,25 +530,17 @@ if ( ! $current_user_id ) {
 							?>
 						</strong>
 						<?php
-						// The result phrase is a JS-controlled template so the singular/plural
-						// form follows the visible-card count after client-side filtering, instead
-						// of being baked at render time and drifting (e.g. "1 active contributors").
+						// One fully translated phrase per sponsorship filter, so JS can swap
+						// in the right plural form for any locale after client-side filtering.
 						?>
-						<span class="pledges-result-count" aria-live="polite">
-							<span id="pledges-result-count"><?php echo esc_html( $visible_active_count ); ?></span>
-							<span
-								id="pledges-result-phrase"
-								data-singular="<?php echo esc_attr__( 'active contributor (of %d total)', 'wporg-5ftf' ); ?>"
-								data-plural="<?php echo esc_attr__( 'active contributors (of %d total)', 'wporg-5ftf' ); ?>"
-								data-total="<?php echo esc_attr( $total_count ); ?>"
-							><?php
-								echo esc_html( sprintf(
-									/* translators: %d: total count */
-									_n( 'active contributor (of %d total)', 'active contributors (of %d total)', $visible_active_count, 'wporg-5ftf' ),
-									$total_count
-								) );
-								?></span>
-						</span>
+						<span
+							id="pledges-result-count"
+							class="pledges-result-count"
+							aria-live="polite"
+							data-all="<?php echo esc_attr( $result_phrases['all'] ); ?>"
+							data-independent="<?php echo esc_attr( $result_phrases['independent'] ); ?>"
+							data-sponsored="<?php echo esc_attr( $result_phrases['sponsored'] ); ?>"
+						><?php echo esc_html( $result_phrases[ $sponsorship ] ); ?></span>
 					</p>
 
 					<div class="pledges-grid" id="pledges-grid">
