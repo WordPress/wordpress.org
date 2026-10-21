@@ -19,6 +19,7 @@ use Illuminate\View\View;
 use Modules\WPOrgSite\Http\Middleware\LockModules;
 use Modules\WPOrgSite\Http\Middleware\RedirectHelpScoutLinks;
 use Modules\WPOrgSite\Services\AltConversation;
+use Modules\WPOrgSite\Services\Assets;
 use Modules\WPOrgSite\Services\EnvSettings;
 use Modules\WPOrgSite\Services\HelpScoutLinks;
 use Modules\WPOrgSite\Services\PinnedNote;
@@ -120,6 +121,23 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				return $javascripts;
 			}
 		);
+
+		// Last, after every module has added its files.
+		foreach ( array( 'stylesheets', 'javascripts' ) as $bundle ) {
+			\Eventy::addFilter(
+				$bundle,
+				static function ( mixed $files = array() ) use ( $bundle ): mixed {
+					try {
+						return is_array( $files ) ? Assets::existing( $files ) : $files;
+					} catch ( \Throwable $e ) {
+						\Log::error( '[WPOrgSite] Could not check the files of the ' . $bundle . ' bundle: ' . $e->getMessage() );
+
+						return $files;
+					}
+				},
+				PHP_INT_MAX
+			);
+		}
 
 		// Core loads scripts at the end of the page, which would show the sidebar expanded, and the header unpinned, first.
 		\Eventy::addAction(

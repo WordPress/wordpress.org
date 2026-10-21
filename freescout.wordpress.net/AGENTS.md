@@ -82,6 +82,7 @@ Modules aren't active in the test database, so each test registers the provider 
 - **Configuration** comes from the environment: `WPORG_API_URL` and `WPORG_API_SECRET`, and `WPORG_AKISMET_KEY` for `WPOrgAkismet`, and `WPORG_HELPSCOUT_APP_ID` and `WPORG_HELPSCOUT_APP_SECRET` for `WPOrgHelpScoutImport`. Without them, modules stay quiet instead of failing.
 - **New module:** add its directory under `Modules/`. Once it's deployed, an admin switches it on under Manage » Modules.
 - **After changing module files:** run `php artisan freescout:clear-cache` (`npm run freescout:artisan -- freescout:clear-cache`).
+- **Public files:** FreeScout serves a module's `Public/` from `public/modules/<alias>`, a symlink that `php artisan freescout:module-install <alias>` creates, as activating the module does. A copy instead of the symlink goes out of date: files added later are missing, and core leaves out every script on the page when one is (WPOrgSite now leaves out only the missing one).
 - **Routes:** register them in the provider with `loadRoutesFrom()`, and pass URLs to JavaScript through `data-` attributes rather than FreeScout's generated laroute files.
 
 ---
