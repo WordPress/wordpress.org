@@ -88,7 +88,7 @@
 			this._subProjectIds = new Set( subProjects.map( sub => normalizeId( sub.id ) ) );
 
 			const subProjectsCollection = new projects.model.subProjects( subProjects, {
-				project: this,
+				project: this
 			} );
 
 			this.set( 'subProjects', subProjectsCollection, { silent: true } );
@@ -136,7 +136,7 @@
 	projects.model.Projects = Backbone.Collection.extend( {
 		model: projects.model.Project,
 
-		// Listens on the global window event bus to coordinate active tabs and selection
+		// Listens on the global event bus to coordinate active tabs and selection
 		// state between individual category models and the standalone '#project-all' (GTE) toggle.
 		initialize: function() {
 			this.on( 'change:isActive', this.toggleActiveStates );
@@ -645,7 +645,7 @@
 	 */
 	function openProjectsDB() {
 		return new Promise( ( resolve, reject ) => {
-		   const request = indexedDB.open( DB_NAME, DB_VERSION );
+			const request = indexedDB.open( DB_NAME, DB_VERSION );
 
 			request.onupgradeneeded = event => {
 				const db = event.target.result;
@@ -667,7 +667,6 @@
 				// Consistency Check: Does the store actually exist?
 				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
 					db.close();
-					// If the db exists without the store, delete the db and reinitialize it.
 					recoverCorruptDB().then( resolve ).catch( reject );
 					return;
 				}
