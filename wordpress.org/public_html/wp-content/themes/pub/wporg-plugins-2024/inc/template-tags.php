@@ -326,7 +326,7 @@ function the_plugin_advanced_zone() {
 
 	echo '<hr>';
 
-	echo '<h2>' . esc_html__( 'Advanced Options', 'wporg-plugins' ) . '</h2>';
+	echo '<h2 id="plugin-advanced-options">' . esc_html__( 'Advanced Options', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'This section is intended for advanced users and developers only. They are presented here for testing and educational purposes.', 'wporg-plugins' ) . '</p>';
 
@@ -420,7 +420,7 @@ function the_plugin_community_zone() {
 
 	echo '<hr>';
 
-	echo '<h2>' . esc_html__( 'Community Options', 'wporg-plugins' ) . '</h2>';
+	echo '<h2 id="plugin-community-options">' . esc_html__( 'Community Options', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'This plugin is developed and supported by a community.', 'wporg-plugins' ) . '</p>';
 
@@ -466,7 +466,7 @@ function the_plugin_commercial_zone() {
 
 	echo '<hr>';
 
-	echo '<h2>' . esc_html__( 'Commercial Options', 'wporg-plugins' ) . '</h2>';
+	echo '<h2 id="plugin-commercial-options">' . esc_html__( 'Commercial Options', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'This plugin is free but offers paid upgrades, support, and/or add-ons.', 'wporg-plugins' ) . '</p>';
 
@@ -504,7 +504,7 @@ function the_plugin_danger_zone() {
 
 	echo '<div class="plugin-danger-zone">';
 
-	echo '<h2>' . esc_html__( 'The Danger Zone', 'wporg-plugins' ) . '</h2>';
+	echo '<h2 id="plugin-danger-zone">' . esc_html__( 'The Danger Zone', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'The following features are restricted to plugin committers only. They exist to allow plugin developers more control over their work.', 'wporg-plugins' ) . '</p>';
 

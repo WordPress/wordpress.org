@@ -18,7 +18,7 @@ global $post;
 	<?php the_closed_plugin_notice(); ?>
 	<?php the_no_self_management_notice(); ?>
 
-	<h2><?php esc_html_e( 'Statistics', 'wporg-plugins' ); ?></h2>
+	<h2 id="plugin-statistics"><?php esc_html_e( 'Statistics', 'wporg-plugins' ); ?></h2>
 
 	<h4><?php esc_html_e( 'Active versions', 'wporg-plugins' ); ?></h4>
 	<div id="plugin-version-stats" class="chart version-stats"></div>
