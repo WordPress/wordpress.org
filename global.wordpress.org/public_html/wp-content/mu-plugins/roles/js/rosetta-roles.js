@@ -23,7 +23,12 @@
 	 * @param {number|string} id - Raw project ID.
 	 * @return {number|string} Normalized ID.
 	 */
-	const normalizeId = id => ( id === 'all' || id === '' || id === null || Number.isNaN( Number( id ) ) ) ? String( id ) : Number( id );
+	const normalizeId = id => {
+		if ( id === null || id === undefined || id === '' ) {
+			return '';
+		}
+		return ( id === 'all' || Number.isNaN( Number( id ) ) ) ? String( id ) : Number( id );
+	};
 
 	/**
 	 * MODELS
@@ -523,6 +528,11 @@
 			}, 300 );
 		},
 
+		remove: function() {
+			this._debouncedSearch?.cancel();
+			return wp.Backbone.View.prototype.remove.apply( this, arguments );
+		},
+
 		onInput: function() {
 			this._debouncedSearch();
 		},
@@ -681,7 +691,10 @@
 				resolve( db );
 			};
 
-			request.onerror = () => reject( request.error );
+			request.onerror = () => {
+				projects._storageDisabled = true;
+				reject( request.error );
+			};
 		} );
 	}
 
@@ -789,7 +802,7 @@
 	};
 
 	projects.init = function() {
-		const rawList = ( projects.settings.accessList || [] ).map( normalizeId );
+		const rawList = ( projects.settings.accessList || [] ).map( normalizeId ).filter( Boolean );
 		const initialSelection = rawList.includes( 'all' )
 			? [ { id: 'all' } ]
 			: rawList.map( id => ( { id } ) );
