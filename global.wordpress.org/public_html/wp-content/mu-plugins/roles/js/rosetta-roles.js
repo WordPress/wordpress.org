@@ -602,7 +602,8 @@
 	const isValidTime = time => Number.isFinite( time ) && time > 0;
 
 	// Check if the browser supports IndexedDB, Compression Streams, and has a valid cache timestamp.
-	projects.hasStorage = () => typeof indexedDB !== 'undefined'
+	projects.hasStorage = () => ! projects._storageDisabled
+		&& typeof indexedDB !== 'undefined'
 		&& typeof CompressionStream !== 'undefined'
 		&& typeof DecompressionStream !== 'undefined'
 		&& isValidTime( Number( projects.settings.lastUpdated ) );
@@ -639,7 +640,7 @@
 	 *
 	 * @return {Promise<IDBDatabase>} Promise resolving to the open IDB database instance.
 	 */
-	function openProjectsDB() {
+	function openProjectsDB( attempt = 1 ) {
 		return new Promise( ( resolve, reject ) => {
 			const request = indexedDB.open( DB_NAME, DB_VERSION );
 
@@ -663,7 +664,12 @@
 				// Consistency Check: Does the store actually exist?
 				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
 					db.close();
-					recoverCorruptDB().then( resolve ).catch( reject );
+					if ( attempt > 2 ) {
+						projects._storageDisabled = true;
+						reject( new Error( `Store ${ STORE_NAME } could not be created.` ) );
+						return;
+					}
+					recoverCorruptDB( attempt ).then( resolve ).catch( reject );
 					return;
 				}
 
@@ -682,7 +688,7 @@
 	/**
 	 * Fixes an inconsistent db state by completely deleting and rebuilding it.
 	 */
-	async function recoverCorruptDB() {
+	async function recoverCorruptDB( attempt ) {
 		await new Promise( ( resolve, reject ) => {
 			const deleteReq = indexedDB.deleteDatabase( DB_NAME );
 			deleteReq.onsuccess = () => resolve();
@@ -690,7 +696,7 @@
 			deleteReq.onblocked = () => resolve();
 		} );
 
-		return openProjectsDB();
+		return openProjectsDB( attempt + 1 );
 	}
 
 	/**
