@@ -27,6 +27,15 @@ function alter_update( $plugin_info, $plugin_details, $installed_version, $wp_ve
 	// Apply the Phased Rollout / Staged Rollout / Gradual Rollout strategy to the plugin update.
 	$plugin_info = phased_rollout( $plugin_info, $plugin_details, $installed_version );
 
+	// Attach closure metadata if the plugin has been closed or disabled.
+	if ( ! empty( $plugin_details->meta->closed_at ) ) {
+		$plugin_info->closed      = true;
+		$plugin_info->closed_date = $plugin_details->meta->closed_at;
+		if ( ! empty( $plugin_details->meta->closed_reason ) ) {
+			$plugin_info->closed_reason = $plugin_details->meta->closed_reason;
+		}
+	}
+
 	return $plugin_info;
 }
 
