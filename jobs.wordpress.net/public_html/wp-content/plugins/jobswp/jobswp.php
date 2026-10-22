@@ -871,6 +871,9 @@ EMAIL;
 				if ( ! is_email( $_POST['email'] ) ) {
 					$has_errors = __( 'The provided "Email Address" is not a proper email address.', 'jobswp' );
 					unset( $_POST['email'] );
+				} elseif ( ! in_array( $_POST['howtoapply_method'] ?? '', array( 'email', 'web' ), true ) ) {
+					$has_errors = __( 'The selected "How to Apply" method is not supported.', 'jobswp' );
+					unset( $_POST['howtoapply_method'] );
 				} elseif ( 'email' == $_POST['howtoapply_method'] && ! is_email( $_POST['howtoapply'] ) ) {
 					$has_errors = __( 'The provided "How to Apply" email address is not a proper email address.', 'jobswp' );
 					unset( $_POST['howtoapply'] );

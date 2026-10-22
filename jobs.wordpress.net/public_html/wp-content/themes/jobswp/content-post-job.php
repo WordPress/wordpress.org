@@ -61,7 +61,6 @@
 			<select name="howtoapply_method" id="howtoapply_method" class="<?php echo esc_attr( jobswp_required_field_classes( 'howtoapply_method' ) ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
 				<option value="email" <?php echo jobswp_field_value( 'howtoapply_method', 'email' ); ?>><?php esc_html_e( 'Email Address', 'jobswp' ); ?></option>
-				<option value="phone" <?php echo jobswp_field_value( 'howtoapply_method', 'phone' ); ?>><?php esc_html_e( 'Phone Number', 'jobswp' ); ?></option>
 				<option value="web" <?php echo jobswp_field_value( 'howtoapply_method', 'web' ); ?>><?php esc_html_e( 'Online Form', 'jobswp' ); ?></option>
 			</select> :
 			<input type="text" name="howtoapply" id="howtoapply" class="<?php echo esc_attr( jobswp_required_field_classes( 'howtoapply' ) ); ?>" <?php echo jobswp_field_value( 'howtoapply' ); ?> />
