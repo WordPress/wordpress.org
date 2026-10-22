@@ -37,7 +37,7 @@ const CACHE_PREFIX        = '5ftf_contrib_metrics_v1_';
  *   2. Wire the data source into get_team_contribution_metrics().
  *   3. Add the team's post_name slug to this list.
  */
-const TEAMS_WITH_DATA = array( 'core', 'meta', 'test' );
+const TEAMS_WITH_DATA = array( 'core', 'meta', 'flow' /* test */ );
 
 /**
  * Whether the given team has wired-up contribution tracking.
@@ -114,7 +114,7 @@ function team_to_github_repos( string $slug ): array {
 			'WordPress/wporg-theme-directory',
 			'WordPress/wporg-two-factor',
 		),
-		'test' => array( 'WordPress/test-handbook' ),
+		'flow' => array( 'WordPress/test-handbook' ), // Test team, formerly Flow.
 	);
 	return isset( $map[ $slug ] ) ? $map[ $slug ] : array();
 }
