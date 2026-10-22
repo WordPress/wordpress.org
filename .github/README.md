@@ -56,3 +56,7 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
 ### 6. [Static Analysis (JS/CSS)](workflows/js-css-lint.yml) (`js-css-lint.yml`)
 - **Trigger:** Runs on pull requests and pushes to `trunk` that touch `wordpress.org/public_html/style/`, the Plugin Directory theme (`wporg-plugins-2024`), or the Support theme (`wporg-support-2024`). Any of them runs the job for all three.
 - **Actions:** Installs each package from its committed `package-lock.json`, runs its `lint:js` and `lint:css` scripts (and Prettier for `style/`), then rebuilds and fails if the committed build output differs. To cover another package with a committed build, commit its lockfile, add it to the matrix, and add its path to both triggers.
+
+### 7. [Patterns API (live) Checks](workflows/patterns-api-live.yml) (`patterns-api-live.yml`)
+- **Trigger:** Runs daily at 14:30 UTC and on manual workflow dispatch.
+- **Purpose:** Executes the E2E checks against the live `api.wordpress.org/patterns/1.0/` endpoint, asserting that every pattern in a response has the shape Core clients expect. Runs in isolation from the PR checks for the same reason as the Events API checks.
