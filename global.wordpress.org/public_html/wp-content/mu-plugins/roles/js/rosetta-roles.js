@@ -322,35 +322,21 @@
 	projects.view.Frame = wp.Backbone.View.extend( {
 		el: '#projects-list',
 
-		initialize: function() {
-			this._subViews = [];
-		},
-
-		clearSubViews: function() {
-			for ( const view of this._subViews ) {
-				view.remove();
-			}
-			this._subViews = [];
-		},
-
 		render: function() {
 			wp.Backbone.View.prototype.render.apply( this, arguments );
 
-			this.clearSubViews();
-
 			const fragment = document.createDocumentFragment();
-			this._subViews = this.collection.models.map( project => {
+			this.collection.models.forEach( project => {
 				const projectView = new projects.view.Project( { model: project } );
 				fragment.appendChild( projectView.render().el );
-				return projectView;
 			} );
 
 			document.getElementById( 'project-loading' )?.remove();
 			this.el.append( fragment );
 
 			// Initialize the global #project-all view once it is rendered in the DOM.
-			if ( ! this._allProjectsView && document.getElementById( 'project-all' ) ) {
-				this._allProjectsView = new projects.view.AllProjects();
+			if ( document.getElementById( 'project-all' ) ) {
+				new projects.view.AllProjects();
 			}
 
 			// Activate the first relevant category tab if #project-all is not active.
@@ -735,10 +721,6 @@
 		const db = await openProjectsDB();
 
 		try {
-			if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
-				throw new Error( `Store ${ STORE_NAME } not found in database.` );
-			}
-
 			const store = db.transaction( STORE_NAME, 'readonly' ).objectStore( STORE_NAME );
 
 			const [ cachedTimeRaw, blob ] = await Promise.all( [
