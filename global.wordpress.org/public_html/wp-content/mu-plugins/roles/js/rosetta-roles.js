@@ -92,7 +92,7 @@
 
 			this._subProjectIds = new Set( subProjects.map( sub => normalizeId( sub.id ) ) );
 
-			const subProjectsCollection = new projects.model.subProjects( subProjects, {
+			const subProjectsCollection = new projects.model.SubProjects( subProjects, {
 				project: this
 			} );
 
@@ -176,7 +176,7 @@
 		}
 	} );
 
-	projects.model.subProject = projects.model.SelectableModel.extend( {
+	projects.model.SubProject = projects.model.SelectableModel.extend( {
 		defaults: {
 			id: 0,
 			name: '',
@@ -211,8 +211,8 @@
 	 * @property {string} terms - Most recently executed search query.
 	 * @property {Backbone.Model} project - Reference to the owning parent Project model.
 	 */
-	projects.model.subProjects = Backbone.Collection.extend( {
-		model: projects.model.subProject,
+	projects.model.SubProjects = Backbone.Collection.extend( {
+		model: projects.model.SubProject,
 
 		// Search terms
 		terms: '',
@@ -334,9 +334,9 @@
 			document.getElementById( 'project-loading' )?.remove();
 			this.el.append( fragment );
 
-			// Initialize the global #project-all view once it is rendered in the DOM.
-			if ( document.getElementById( 'project-all' ) ) {
-				new projects.view.AllProjects();
+			// Initialize the global #project-all view once it is rendered in the DOM and ensure it is only initialized once.
+			if ( document.getElementById( 'project-all' ) && ! projects.view.allProjectsInstance ) {
+				projects.view.allProjectsInstance = new projects.view.AllProjects();
 			}
 
 			// Activate the first relevant category tab if #project-all is not active.
