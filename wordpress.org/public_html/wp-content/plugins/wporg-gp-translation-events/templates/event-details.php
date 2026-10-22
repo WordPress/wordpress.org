@@ -268,11 +268,11 @@ Templates::header(
 				</span>
 				<?php $event->start()->print_time_html(); ?>
 				<?php $end = $event->end(); ?>
-				<?php if ( $end->is_in_the_past() || ! $end->is_more_than_one_year_in_the_future() ) : ?>
-				<span class="event-details-date-label">
-					<?php echo esc_html( $end->is_in_the_past() ? __( 'Ended', 'gp-translation-events' ) : __( 'Ends', 'gp-translation-events' ) ); ?>:
-					<?php $end->print_relative_time_html(); ?>
-				</span>
+				<?php if ( ! $end->is_open_ended() ) : ?>
+					<span class="event-details-date-label">
+						<?php echo esc_html( $end->is_in_the_past() ? __( 'Ended', 'gp-translation-events' ) : __( 'Ends', 'gp-translation-events' ) ); ?>:
+						<?php $end->print_relative_time_html(); ?>
+					</span>
 					<?php $end->print_time_html(); ?>
 				<?php endif; ?>
 			</p>

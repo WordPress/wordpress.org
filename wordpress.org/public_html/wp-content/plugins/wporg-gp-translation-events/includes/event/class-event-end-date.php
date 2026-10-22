@@ -14,6 +14,15 @@ use Wporg\TranslationEvents\Translation_Events;
  */
 class Event_End_Date extends Event_Date {
 	/**
+	 * Whether the end date is a placeholder for an ongoing event rather than a real end.
+	 *
+	 * @return bool True if the end date is more than a year in the future.
+	 */
+	public function is_open_ended(): bool {
+		return $this->utc() > Translation_Events::now()->modify( '+1 year' );
+	}
+
+	/**
 	 * Prefix a formatted date with a translated "ends" phrase.
 	 *
 	 * @param string $date A formatted date.
