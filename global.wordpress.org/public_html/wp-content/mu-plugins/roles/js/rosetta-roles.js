@@ -706,7 +706,11 @@
 			const deleteReq = indexedDB.deleteDatabase( DB_NAME );
 			deleteReq.onsuccess = () => resolve();
 			deleteReq.onerror = () => reject( deleteReq.error );
-			deleteReq.onblocked = () => resolve();
+			deleteReq.onblocked = () => {
+				console.warn( 'IndexedDB deletion blocked: The cache will be disabled for this session.' );
+				projects._storageDisabled = true;
+				reject( new Error( 'Database deletion blocked' ) );
+			};
 		} );
 
 		return openProjectsDB( attempt + 1 );
@@ -802,7 +806,9 @@
 	};
 
 	projects.init = function() {
-		const rawList = ( projects.settings.accessList || [] ).map( normalizeId ).filter( Boolean );
+		const rawList = ( projects.settings.accessList || [] )
+			.map( normalizeId )
+			.filter( id => id !== '' );
 		const initialSelection = rawList.includes( 'all' )
 			? [ { id: 'all' } ]
 			: rawList.map( id => ( { id } ) );
