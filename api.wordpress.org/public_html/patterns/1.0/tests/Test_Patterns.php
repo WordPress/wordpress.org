@@ -2,7 +2,6 @@
 
 namespace WordPressdotorg\API\Patterns\Tests;
 use PHPUnit\Framework\TestCase;
-use Requests_Response;
 
 /**
  * @group patterns
@@ -11,7 +10,7 @@ class Test_Patterns extends TestCase {
 	/**
 	 * Asserts that an HTTP response is valid and contains items matching the pattern format.
 	 *
-	 * @param Requests_Response $response
+	 * @param object $response Response from `send_request()`.
 	 */
 	public function assertResponseHasPattern( $response ) {
 		$this->assertSame( 200, $response->status_code );
@@ -21,7 +20,8 @@ class Test_Patterns extends TestCase {
 		$this->assertGreaterThan( 0, count( $patterns ) );
 		foreach ( $patterns as $pattern ) {
 			$this->assertIsString( $pattern->title->rendered );
-			$this->assertIsInt( $pattern->meta->wpop_viewport_width );
+			// REST returns null for a stored width outside the schema's range; Core casts it to 0.
+			$this->assertThat( $pattern->meta->wpop_viewport_width, $this->logicalOr( $this->isType( 'int' ), $this->isNull() ) );
 			$this->assertIsArray( $pattern->category_slugs );
 			$this->assertIsArray( $pattern->keyword_slugs );
 		}
@@ -83,12 +83,19 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_browse_all_patterns() : void {
-		$response = send_request( '/patterns/1.0/?per_page=20' );
+		$response = send_request( '/patterns/1.0/?per_page=100' );
 		$this->assertResponseHasPattern( $response );
 
-		// When all locales and keywords are included, there should be at least 20 patterns.
+		// When all locales and keywords are included, there should be at least 100 patterns.
 		$patterns = json_decode( $response->body );
-		$this->assertSame( 20, count( $patterns ) );
+		$this->assertSame( 100, count( $patterns ) );
+
+		/*
+		 * The exact number of unique categories will vary based on which cohort of pattens happen to be returned,
+		 * but `3` seems like a safe minimum in practice.
+		 */
+		$term_slugs = $this->get_term_slugs( $patterns );
+		$this->assertGreaterThan( 3, count( $term_slugs ) );
 	}
 
 	/**
@@ -103,12 +110,48 @@ class Test_Patterns extends TestCase {
 		 * This can't include a `pattern-keyword` param because of the workaround in
 		 * `WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_rest_fields()`.
 		 */
-		$response = send_request( '/patterns/1.0/?per_page=20&pattern-categories=' . $button_term_id . '&locale=en_US' );
+		$response = send_request( '/patterns/1.0/?pattern-categories=' . $button_term_id . '&locale=en_US' );
 		$this->assertResponseHasPattern( $response );
 
 		$patterns   = json_decode( $response->body );
 		$term_slugs = $this->get_term_slugs( $patterns );
 		$this->assertContains( 'buttons', $term_slugs );
+	}
+
+	/**
+	 * Featured patterns are requested by every Core install, with the same query as `_load_remote_featured_patterns()`.
+	 *
+	 * @covers ::main()
+	 *
+	 * @group e2e
+	 */
+	public function test_browse_featured_patterns(): void {
+		$featured_term_id = 26;
+
+		$response = send_request( '/patterns/1.0/?pattern-categories=' . $featured_term_id . '&locale=en_US' );
+		$this->assertResponseHasPattern( $response );
+
+		// The directory strips `featured` from `category_slugs`, which once left them keyed as a JSON object.
+		$patterns   = json_decode( $response->body );
+		$term_slugs = $this->get_term_slugs( $patterns );
+		$this->assertNotContains( 'featured', $term_slugs );
+	}
+
+	/**
+	 * Patterns whose data has broken Core clients before.
+	 *
+	 * @covers ::main()
+	 *
+	 * @group e2e
+	 */
+	public function test_known_problem_patterns(): void {
+		$pattern_ids = array( 199 );
+
+		$response = send_request( '/patterns/1.0/?include=' . implode( ',', $pattern_ids ) );
+		$this->assertResponseHasPattern( $response );
+
+		$patterns = json_decode( $response->body );
+		$this->assertEqualsCanonicalizing( $pattern_ids, array_column( $patterns, 'id' ) );
 	}
 
 	/**
@@ -183,7 +226,7 @@ class Test_Patterns extends TestCase {
 	 * @param string $search_query
 	 */
 	public function test_search_patterns( $search_term, $locale, $match_expected, $expected_post_ids ) : void {
-		$response = send_request( "/patterns/1.0/?search=$search_term&pattern-keywords=11&locale=$locale" );
+		$response = send_request( '/patterns/1.0/?search=' . rawurlencode( $search_term ) . "&pattern-keywords=11&locale=$locale" );
 
 		if ( $match_expected ) {
 			if ( empty( $expected_post_ids ) ) {
@@ -292,7 +335,7 @@ class Test_Patterns extends TestCase {
 	 * @group e2e
 	 */
 	public function test_search_title_match_boosted_above_description_match() : void {
-		$search_term = 'heading';
+		$search_term = 'image';
 		$locale      = 'en_US';
 
 		$response = send_request( "/patterns/1.0/?search=$search_term&pattern-keywords=11&locale=$locale" );
@@ -309,8 +352,8 @@ class Test_Patterns extends TestCase {
 
 		usort( $expectedPatterns, function( $a, $b ) use ( $search_term ) {
 			$adjustment       = 0;
-			$found_in_title_a = false !== stripos( $search_term, $a->title->rendered );
-			$found_in_title_b = false !== stripos( $search_term, $b->title->rendered );
+			$found_in_title_a = false !== stripos( $a->title->rendered, $search_term );
+			$found_in_title_b = false !== stripos( $b->title->rendered, $search_term );
 
 			if ( $found_in_title_a && ! $found_in_title_b ) {
 				$adjustment = -1;
@@ -343,8 +386,7 @@ class Test_Patterns extends TestCase {
 		$this->assertAllPatternsMatchSearchTerm( $patterns, $search_term );
 
 		// The following test works, but `WordPressdotorg\Pattern_Directory\Search\modify_es_query_args` isn't boosting the primary locale yet.
-		// See https://github.com/WordPress/pattern-directory/issues/347
-		$this->markTestIncomplete();
+		$this->markTestIncomplete( 'See https://github.com/WordPress/pattern-directory/issues/347' );
 
 		$actualOrder = array_column( array_column( $patterns, 'meta' ), 'wpop_locale'  );
 
