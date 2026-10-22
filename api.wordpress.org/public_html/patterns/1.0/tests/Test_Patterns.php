@@ -119,7 +119,7 @@ class Test_Patterns extends TestCase {
 	}
 
 	/**
-	 * Featured patterns are requested by every Core install, with the same query as `_load_remote_featured_patterns()`.
+	 * Featured patterns are requested by every Core install, through `_load_remote_featured_patterns()`.
 	 *
 	 * @covers ::main()
 	 *
