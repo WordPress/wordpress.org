@@ -51,7 +51,7 @@
 }
 
 .projects-list > li.loading:hover {
-	cursor: default;
+	background: #f5f5f5;
 }
 
 .projects-list > li.active {
