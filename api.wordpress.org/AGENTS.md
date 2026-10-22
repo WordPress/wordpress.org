@@ -2,7 +2,7 @@
 
 Everything under `public_html/` is served from `https://api.wordpress.org/`, and PHP there executes when requested, including test files and bootstraps. Keep those inert on a direct request: no reading request input, no side effects at include time.
 
-`public_html/init.php` and `public_html/wp-init.php` live in the private dotorg repository. Code and tests here must work without them: include them only behind a `file_exists()` check.
+`public_html/init.php`, `wp-init.php` and `wp-init-ondemand.php` live in the private dotorg repository. Endpoints require them unconditionally; tests must run without them, so test bootstraps include them only behind a `file_exists()` check.
 
 ## Patterns API tests
 
