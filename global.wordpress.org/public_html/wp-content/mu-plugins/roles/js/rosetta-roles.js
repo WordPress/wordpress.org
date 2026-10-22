@@ -635,32 +635,59 @@
 	} );
 
 	/**
-	 * Opens IndexedDB with protection against schema conflicts and blocked upgrades.
+	 * Opens IndexedDB with protection against schema conflicts, blocked upgrades,
+	 * and cross-tab lock deadlocks.
 	 *
+	 * @param {number} attempt - Current recovery attempt count.
 	 * @return {Promise<IDBDatabase>} Promise resolving to the open IDB database instance.
 	 */
 	function openProjectsDB( attempt = 1 ) {
 		return new Promise( ( resolve, reject ) => {
+			let settled = false;
+
+			// Fall back to remote data if IndexedDB stalls or deadlocks across tabs.
+			const timeoutId = setTimeout( () => {
+				if ( settled ) {
+					return;
+				}
+				settled = true;
+				projects._storageDisabled = true;
+				reject( new Error( 'IndexedDB open timed out' ) );
+			}, 2500 );
+
 			const request = indexedDB.open( DB_NAME, DB_VERSION );
 
 			request.onupgradeneeded = event => {
 				const db = event.target.result;
 
-				// Before creating a store, always check whether it already exists.
 				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
 					db.createObjectStore( STORE_NAME );
 				}
 			};
 
-			// Prevent open tabs from freezing the upgrade process.
+			// Reject and bypass cache if another tab blocks database access or schema changes.
 			request.onblocked = () => {
-				console.warn( 'IndexedDB upgrade blocked: Please close other Rosetta tabs.' );
+				if ( settled ) {
+					return;
+				}
+				settled = true;
+				clearTimeout( timeoutId );
+				projects._storageDisabled = true;
+				console.warn( 'IndexedDB upgrade blocked: Falling back to remote data.' );
+				reject( new Error( 'IndexedDB upgrade blocked by another tab' ) );
 			};
 
 			request.onsuccess = () => {
+				if ( settled ) {
+					// Close stale connection if opened after timeout/rejection.
+					request.result?.close();
+					return;
+				}
+				settled = true;
+				clearTimeout( timeoutId );
+
 				const db = request.result;
 
-				// Consistency Check: Does the store actually exist?
 				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
 					db.close();
 					if ( attempt > 2 ) {
@@ -672,7 +699,7 @@
 					return;
 				}
 
-				// Close the connection when another tab requests an upgrade.
+				// Yield connection when another tab initiates an upgrade.
 				db.onversionchange = () => {
 					db.close();
 				};
@@ -681,6 +708,11 @@
 			};
 
 			request.onerror = () => {
+				if ( settled ) {
+					return;
+				}
+				settled = true;
+				clearTimeout( timeoutId );
 				projects._storageDisabled = true;
 				reject( request.error );
 			};
