@@ -24,7 +24,7 @@
 	 * @return {number|string} Normalized ID.
 	 */
 	const normalizeId = id => {
-		if ( id === null || id === undefined || id === '' ) {
+		if ( id === null || id === undefined || id === '' || typeof id === 'boolean' ) {
 			return '';
 		}
 		return ( id === 'all' || Number.isNaN( Number( id ) ) ) ? String( id ) : Number( id );
@@ -305,8 +305,8 @@
 	projects.model.Selection = Backbone.Collection.extend( {
 		initialize: function() {
 			this.field = document.getElementById( 'project-access-list' );
-			// Listen to 'update' instead of 'add remove' so batch operations update the DOM only once.
-			this.on( 'update reset', this.updateInputField );
+			this._debouncedUpdate = _.debounce( this.updateInputField.bind( this ), 10 );
+			this.on( 'update reset', this._debouncedUpdate );
 		},
 
 		updateInputField: function() {
@@ -419,7 +419,8 @@
 		tagName: 'li',
 
 		events: {
-			'click': 'updateIsActive'
+			'click': 'updateIsActive',
+			'focusin': 'updateIsActive'
 		},
 
 		initialize: function() {
@@ -540,6 +541,8 @@
 		onKeydown: function( event ) {
 			if ( event.key === 'Enter' ) {
 				event.preventDefault();
+				this._debouncedSearch?.cancel();
+				this.collection.doSearch( this.el.value );
 			} else if ( event.key === 'Escape' ) {
 				this._debouncedSearch?.cancel();
 				this.el.value = '';
@@ -825,10 +828,13 @@
 				}
 			} );
 
-		const hadTranslatorStatus = Boolean( projects.settings.accessList?.length );
+		const hadTranslatorStatus = Boolean( rawList.length );
 		const accessField = projects.selection.field;
 
 		accessField?.closest( 'form' )?.addEventListener( 'submit', event => {
+			projects.selection._debouncedUpdate?.cancel();
+			projects.selection.updateInputField();
+
 			if ( hadTranslatorStatus && ! accessField.value && ! confirm( l10n.removeTranslator ) ) {
 				event.preventDefault();
 			}
