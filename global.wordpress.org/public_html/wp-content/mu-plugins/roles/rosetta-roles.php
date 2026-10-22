@@ -814,11 +814,13 @@ Welcome to the WordPress Polyglots team and happy translating.',
 
 		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
 			'l10n' => array(
+				'loadingError'      => __( 'Error loading projects.', 'rosetta' ),
 				'removeTranslator'  => __( 'Are you sure you wish to completely remove translation editor status for this user?', 'rosetta' ),
-				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' ),
+				'searchLabel'       => __( 'Search subprojects by name or slug', 'rosetta' ),
+				'searchPlaceholder' => __( 'Search…', 'rosetta' ),
 			),
-			'lastUpdated' => $last_updated,
-			'accessList' => $project_access_list,
+			'lastUpdated' => absint( $last_updated ),
+			'accessList'  => array_values( (array) $project_access_list ),
 		) );
 
 		$feedback_message = $this->get_feedback_message();
