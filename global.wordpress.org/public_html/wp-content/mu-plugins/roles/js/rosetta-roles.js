@@ -507,7 +507,9 @@
 
 		attributes: {
 			placeholder: l10n.searchPlaceholder,
-			type: 'search'
+			type: 'search',
+			'aria-label': l10n.searchLabel,
+			autocomplete: 'off'
 		},
 
 		events: {
