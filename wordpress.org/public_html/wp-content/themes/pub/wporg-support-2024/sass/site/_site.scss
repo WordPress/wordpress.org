@@ -365,8 +365,9 @@ body:not(.trac):not(.home-page) #main {
 .forums-homepage-footer .wp-block-heading a {
 	text-decoration: none;
 
-	&:hover {
-		text-decoration-line: underline;
+	&:hover,
+	&:focus {
+		text-decoration: underline;
 	}
 }
 
