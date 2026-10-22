@@ -87,6 +87,14 @@ class Audit_Log {
 	function bbp_set_user_role( $new_role, $user_id, WP_User $user ) {
 		$previous_role = $this->last_role_change[ $user_id ][ 'remove_user_role' ] ?? false;
 
+		// Don't let this change leak into a later bbp_set_user_role() call in the same request.
+		unset( $this->last_role_change[ $user_id ] );
+
+		// bbPress passes false when the role wasn't changed.
+		if ( ! $new_role ) {
+			return $new_role; // We're on a filter.
+		}
+
 		// For the purposes of this function, a previous participant role is irrelevant.
 		if ( bbp_get_participant_role() == $previous_role ) {
 			$previous_role = false;
@@ -117,8 +125,8 @@ class Audit_Log {
 		// Add a user note about this action.
 		$note_text = sprintf(
 			'Forum role changed to %s%s%s.',
-			get_role( $new_role )->name,
-			$previous_role ? sprintf( ' from %s', get_role( $previous_role )->name ) : '',
+			$new_role,
+			$previous_role ? sprintf( ' from %s', $previous_role ) : '',
 			$where_from ?    sprintf( ' via %s', $where_from ) : ''
 		);
 
