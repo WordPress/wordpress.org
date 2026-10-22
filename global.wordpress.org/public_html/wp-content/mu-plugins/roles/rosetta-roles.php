@@ -128,7 +128,7 @@ class Rosetta_Roles {
 	 */
 	public static function enqueue_scripts() {
 		wp_enqueue_script( 'string_score', plugins_url( '/js/string_score.min.js', __FILE__ ), array(), '0.1.22', true );
-		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone', 'string_score' ), 12, true );
+		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone', 'string_score' ), 13, true );
 	}
 
 	/**
@@ -136,7 +136,7 @@ class Rosetta_Roles {
 	 */
 	public static function enqueue_styles() {
 		$suffix = is_rtl() ? '-rtl' : '';
-		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '4' );
+		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '5' );
 	}
 
 	/**
@@ -145,25 +145,11 @@ class Rosetta_Roles {
 	public static function print_js_templates() {
 		?>
 		<script id="tmpl-project-checkbox" type="text/html">
-			<# if ( ! data.checkedSubProjects ) {
-				#>
-				<label>
-					<input type="checkbox" class="input-checkbox"
-					<#
-					if ( data.checked ) {
-						#> checked="checked"<#
-					}
-					#>
-					/>
-					{{data.name}}
-					<span class="project-slug">({{data.slug}})</span>
-				</label>
-			<# } else { #>
-				<label>
-					<input type="radio" class="input-radio" checked="checked" /> {{data.name}}
-					<span class="project-slug">({{data.slug}})</span>
-				</label>
-			<# } #>
+			<label>
+				<input type="checkbox" class="input-checkbox"<# if ( data.checked ) { #> checked="checked"<# } #> />
+				{{data.name}}
+				<span class="project-slug">({{data.slug}})</span>
+			</label>
 		</script>
 		<?php
 	}
