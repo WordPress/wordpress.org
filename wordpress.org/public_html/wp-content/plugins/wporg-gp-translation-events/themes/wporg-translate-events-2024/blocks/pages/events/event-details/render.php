@@ -46,7 +46,9 @@ if ( $event->is_past() ) :
 <!-- wp:wporg-translate-events-2024/event-host-list <?php echo serialize_block_attributes( array( 'id' => $event->id() ) ); ?> /-->
 
 <span> Start Date: <strong><?php $event->start()->print_time_html(); ?></strong></span>
+<?php if ( ! $event->end()->is_open_ended() ) : ?>
 <span> End Date: <strong><?php $event->end()->print_time_html(); ?></strong></span>
+<?php endif; ?>
 </p>
 <!-- /wp:paragraph -->
 
