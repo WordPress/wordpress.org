@@ -796,7 +796,7 @@
 			.catch( () => {
 				const loadingEl = document.getElementById( 'project-loading' );
 				if ( loadingEl ) {
-					loadingEl.textContent = l10n.loadingError || 'Error loading projects.';
+					loadingEl.textContent = l10n.loadingError;
 				}
 			} );
 
