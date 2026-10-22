@@ -2,15 +2,26 @@
 	<?php foreach ( $events as $date => $day_events ) : ?>
 
 		<h3>
-			<?php echo date( 'F j', strtotime( $date ) ); ?>
-			<span class="owe-day-of-week"><?php echo date( '(l)', strtotime( $date ) ); ?></span>
+			<?php
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Match the timezone used by group_events_by_date().
+			echo esc_html( date( 'F j', strtotime( $date ) ) );
+			?>
+			<span class="owe-day-of-week">
+				<?php
+				// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Match the timezone used by group_events_by_date().
+				echo esc_html( date( '(l)', strtotime( $date ) ) );
+				?>
+			</span>
 		</h3>
 
 		<ul class="ofe-event-list">
 			<?php foreach ( $day_events as $event ) : ?>
 				<li>
 					<?php if ( $event->start_timestamp ) : ?>
-						<?php echo date( 'g:i a', $event->start_timestamp ); ?>
+						<?php
+						// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- Match the timezone used by group_events_by_date().
+						echo esc_html( date( 'g:i a', $event->start_timestamp ) );
+						?>
 						<br>
 					<?php endif; ?>
 

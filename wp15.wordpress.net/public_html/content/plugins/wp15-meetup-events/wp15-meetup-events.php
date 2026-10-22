@@ -45,6 +45,7 @@ function prime_events_cache() {
 	$potential_events = get_potential_events( $start_date, $end_date );
 
 	if ( is_wp_error( $potential_events ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Written to the error log by trigger_error(), not rendered.
 		trigger_error( $potential_events->get_error_message() );
 		return;
 	}

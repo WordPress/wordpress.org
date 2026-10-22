@@ -122,7 +122,7 @@ class Registrations {
 	}
 
 	/**
-	 * Reggisters taxonomies.
+	 * Registers taxonomies.
 	 */
 	public static function register_taxonomies() {
 		register_taxonomy( self::get_taxonomy( 'categories' ), self::get_post_type(), [
@@ -258,9 +258,9 @@ class Registrations {
 			'rest_base'             => 'photo-tags',
 			'rewrite'               => [ 'slug' => 't' ],
 			'capabilities'          => [
-				'manage_terms' => 'manage_options',
-				'edit_terms'   => 'manage_options',
-				'delete_terms' => 'manage_options',
+				'manage_terms' => 'manage_photo_tags',
+				'edit_terms'   => 'manage_photo_tags',
+				'delete_terms' => 'manage_photo_tags',
 				'assign_terms' => 'edit_photos',
 			]
 		] );

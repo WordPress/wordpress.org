@@ -137,7 +137,7 @@ function get_user_email_for_email( $request ) {
 	// Determine if this is a bounce, and if so, find out who for.
 	if ( ! $user && $email && $email_id ) {
 		$from          = strtolower( implode( ' ', array_filter( [ $email, ( $customer->fname ?? false ), ( $customer->first ?? false ), ( $customer->lname ?? false ), ( $customer->last ?? false ) ] ) ) );
-		$subject_lower = strtolower( $subject );
+		$subject_lower = strtolower( $subject ?? '' );
 
 		if (
 			str_contains( $from, 'mail delivery' ) ||
@@ -544,6 +544,27 @@ function get_mailbox_name( $mailbox_id_or_request ) {
 }
 
 /**
+ * Whether FreeScout's copy replaced a HelpScout conversation's, naming it under `helpscout_conversation`.
+ *
+ * Work still done on it in HelpScout must not bring HelpScout's copy back.
+ *
+ * @param int $helpscout_id HelpScout conversation ID.
+ * @return bool
+ */
+function is_moved_to_freescout( $helpscout_id ) {
+	global $wpdb;
+
+	return (bool) $wpdb->get_var(
+		$wpdb->prepare(
+			'SELECT 1 FROM %i WHERE meta_key = %s AND meta_value = %s LIMIT 1',
+			"{$wpdb->base_prefix}helpscout_meta",
+			'helpscout_conversation',
+			(string) $helpscout_id
+		)
+	);
+}
+
+/**
  * Keep a cached copy of the received emails in the database for querying.
  *
  * @param string $event   Event name.
@@ -557,6 +578,10 @@ function log_email( $event, $request ) {
 	}
 
 	if ( empty( $request->id ) ) {
+		return;
+	}
+
+	if ( is_moved_to_freescout( $request->id ) ) {
 		return;
 	}
 

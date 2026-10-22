@@ -1,7 +1,6 @@
 <?php
 namespace WordPressdotorg\Rosetta\Site;
 
-use WordPressdotorg\Rosetta\Filter;
 use WordPressdotorg\Rosetta\Jetpack;
 use WordPressdotorg\Rosetta\User;
 use WordPressdotorg\Rosetta\User\Role;
@@ -44,21 +43,26 @@ class Locale_Main implements Site {
 	 */
 	public function register_events() {
 		if ( is_admin() ) {
+
 			// Get the team site.
-			$result = get_sites( [
-				'domain' => get_site()->domain,
-				'path'   => Locale_Team::$path,
-				'number' => 1,
-			] );
+			$result = get_sites(
+				[
+					'domain' => get_site()->domain,
+					'path'   => Locale_Team::$path,
+					'number' => 1,
+				]
+			);
 			$team_site = array_shift( $result );
 
 			if ( $team_site ) {
 				$user_sync = new User\Sync();
 				$user_sync->set_destination_site( $team_site );
-				$user_sync->set_roles_to_sync( [
-					'editor' => 'editor',
-					Role\Locale_Manager::get_name() => 'editor',
-				] );
+				$user_sync->set_roles_to_sync(
+					[
+						'editor'                        => 'editor',
+						Role\Locale_Manager::get_name() => 'editor',
+					]
+				);
 				$user_sync->setup();
 			}
 		}
@@ -80,59 +84,60 @@ class Locale_Main implements Site {
 	 * Initializes customizations for Jetpack.
 	 */
 	private function initialize_jetpack_customizations() {
-		$jetpack_module_manager = new Jetpack\Module_Manager( [
-			'stats',
-			'videopress',
-			'contact-form',
-			'sharedaddy',
-			'shortcodes',
-			'subscriptions',
-		] );
+		$jetpack_module_manager = new Jetpack\Module_Manager(
+			[
+				'stats',
+				'videopress',
+				'contact-form',
+				'sharedaddy',
+				'shortcodes',
+				'subscriptions',
+			]
+		);
+
 		$jetpack_module_manager->setup();
 
 		// Options for Jetpack's sharing module.
-		$options = new Filter\Options();
-		$options->add_option(
-			( new Filter\Option() )
-				->set_name( 'sharing-options' )
-				->set_callback( function() {
-					return [
-						'global' => [
-							'button_style'  => 'icon-text',
-							'sharing_label' => __( 'Share this:', 'rosetta' ),
-							'open_links'    => 'same',
-							'show'          => [ 'post' ],
-							'custom'        => [],
-						],
-					];
-				} )
-		);
-		$options->add_option(
-			( new Filter\Option() )
-				->set_name( 'sharing-services' )
-				->set_callback( function() {
-					return [
-						'visible' => [ 'facebook', 'twitter', 'email' ],
-						'hidden'  => [],
-					];
-				} )
-		);
-		$options->add_filter_option(
-			( new Filter\Option() )
-				->set_name( 'stats_options' )
-				->set_callback( function( $options ) {
-					$options['roles'] = [
-						'administrator',
-						'editor',
-						'author',
-						Role\Locale_Manager::get_name(),
-					];
-					return $options;
-				} )
-				->set_num_args( 1 )
+		add_filter(
+			'pre_option_sharing-options',
+			function () {
+				return [
+					'global' => [
+						'button_style'  => 'icon-text',
+						'sharing_label' => __( 'Share this:', 'rosetta' ),
+						'open_links'    => 'same',
+						'show'          => [ 'post' ],
+						'custom'        => [],
+					],
+				];
+			}
 		);
 
-		$options->setup();
+		add_filter(
+			'pre_option_sharing-services',
+			function () {
+				return [
+					'visible' => [ 'facebook', 'twitter', 'email' ],
+					'hidden'  => [],
+				];
+			}
+		);
+
+		add_filter(
+			'option_stats_options',
+			function ( $options ) {
+				$options          = is_array( $options ) ? $options : [];
+				$options['roles'] = [
+					'administrator',
+					'editor',
+					'author',
+					Role\Locale_Manager::get_name(),
+				];
+				return $options;
+			},
+			10,
+			1
+		);
 
 		// Options for Jetpack's subscription module.
 		add_filter( 'pre_option_stb_enabled', '__return_zero' );
@@ -162,16 +167,16 @@ class Locale_Main implements Site {
 	 */
 	public function restore_translation_editor_role( $user_id, $role, $old_roles ) {
 		if (
-			Role\General_Translation_Editor::get_name() !== $role &&
-			in_array( Role\Translation_Editor::get_name(), $old_roles, true )
+			Role\General_Translation_Editor::get_name() !== $role
+			&& in_array( Role\Translation_Editor::get_name(), (array) $old_roles, true )
 		) {
 			$user = new WP_User( $user_id );
 			$user->add_role( Role\Translation_Editor::get_name() );
 		}
 
 		if (
-			Role\Translation_Editor::get_name() !== $role &&
-			in_array( Role\General_Translation_Editor::get_name(), $old_roles, true )
+			Role\Translation_Editor::get_name() !== $role
+			&& in_array( Role\General_Translation_Editor::get_name(), (array) $old_roles, true )
 		) {
 			$user = new WP_User( $user_id );
 			$user->add_role( Role\General_Translation_Editor::get_name() );

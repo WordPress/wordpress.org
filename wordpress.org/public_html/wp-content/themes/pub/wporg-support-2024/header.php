@@ -13,6 +13,7 @@ namespace WordPressdotorg\Forums;
 
 \WordPressdotorg\skip_to( '#content' );
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( '<!-- wp:wporg/global-header {"style":{"border":{"bottom":{"color":"var:preset|color|white-opacity-15","style":"solid","width":"1px"}}}} /-->' );
 
 $is_forums_home = function_exists( 'bbp_is_forum_archive' ) && bbp_is_forum_archive();
@@ -25,6 +26,23 @@ $is_reviews = $view_id === 'reviews';
 $is_plugin = $view_id === 'plugin';
 $is_theme = $view_id === 'theme';
 
+/* Show the WordCamp US 2026 banner on the general (non-Rosetta) home page through August 19, 2026. */
+if ( ( $is_forums_home || is_front_page() || $is_homepage )
+	&& ( ! defined( 'IS_ROSETTA_NETWORK' ) || ! IS_ROSETTA_NETWORK )
+	&& current_datetime() < new \DateTimeImmutable( '2026-08-20 00:00:00', wp_timezone() )
+) {
+	echo do_blocks( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static, trusted block markup.
+		'<!-- wp:group {"metadata":{"name":"3 min-height columns"},"align":"full","style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"backgroundColor":"light-grey-2","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"center"},"blockVisibility":{"controlSets":[{"id":1,"enable":true,"controls":[]}]}} -->
+		<div class="wp-block-group alignfull has-light-grey-2-background-color has-background"><!-- wp:group {"style":{"layout":{"selfStretch":"fill","flexSize":null},"dimensions":{"minHeight":"0px"},"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}},"background":{"backgroundImage":{"url":"https://wordpress.org/files/2026/06/wcus_map.png","id":52120,"source":"file","title":"wcus_map"},"backgroundSize":"cover","backgroundAttachment":"scroll","backgroundPosition":"74% 95%"},"color":{"background":"#47002c"}},"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"center"}} -->
+		<div class="wp-block-group has-background" style="background-color:#47002c;min-height:0px;padding-top:var(--wp--preset--spacing--20);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--20);padding-left:var(--wp--preset--spacing--20)"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|white"}}}},"textColor":"white","fontSize":"normal"} -->
+		<p class="has-white-color has-text-color has-link-color has-normal-font-size">Need help with WordPress? Join the community at WordCamp US 2026. <a href="https://us.wordcamp.org/2026/" data-type="link" data-id="https://us.wordcamp.org/2026/" style="color:var(--wp--preset--color--white)">Get your tickets↗</a></p>
+		<!-- /wp:paragraph --></div>
+		<!-- /wp:group --></div>
+		<!-- /wp:group -->'
+	);
+}
+
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	? '<!-- wp:pattern {"slug":"wporg-support/local-nav-home"} /-->'
 	: '<!-- wp:pattern {"slug":"wporg-support/local-nav"} /-->'
@@ -39,6 +57,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 	<div id="content" class="site-content">
 		<?php if ( is_front_page() || $is_homepage ) :
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 			echo do_blocks(
 				sprintf(
 					'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
@@ -80,6 +99,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 
 		elseif ( $is_forums_home ) :
 
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 			echo do_blocks(
 				sprintf(
 					'<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"right":"var:preset|spacing|edge-space","left":"var:preset|spacing|edge-space"}}},"backgroundColor":"charcoal-2","className":"has-white-color has-charcoal-2-background-color has-text-color has-background has-link-color","layout":{"type":"constrained"}} -->
@@ -121,6 +141,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 		else :
 
 			if ( ! $is_user_profile && ! is_404() ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 				echo do_blocks(
 					sprintf(
 						'<!-- wp:group {"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
@@ -142,6 +163,7 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 			}
 
 			if ( ! ( $is_user_profile || $is_reviews || $is_plugin || $is_theme || $is_single_forum ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
 				echo do_blocks(
 					'<!-- wp:group {"style":{"spacing":{padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
 					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">

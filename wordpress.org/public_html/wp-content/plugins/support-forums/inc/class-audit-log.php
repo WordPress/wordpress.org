@@ -87,6 +87,14 @@ class Audit_Log {
 	function bbp_set_user_role( $new_role, $user_id, WP_User $user ) {
 		$previous_role = $this->last_role_change[ $user_id ][ 'remove_user_role' ] ?? false;
 
+		// Don't let this change leak into a later bbp_set_user_role() call in the same request.
+		unset( $this->last_role_change[ $user_id ] );
+
+		// bbPress passes false when the role wasn't changed.
+		if ( ! $new_role ) {
+			return $new_role; // We're on a filter.
+		}
+
 		// For the purposes of this function, a previous participant role is irrelevant.
 		if ( bbp_get_participant_role() == $previous_role ) {
 			$previous_role = false;
@@ -112,17 +120,17 @@ class Audit_Log {
 		// Determine what triggered this change.
 		$where_from = ! ms_is_switched() ? home_url( '/' ) : $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 		$where_from = explode( '?', $where_from )[0];
-		$where_from = preg_replace( '!^(?:https?://)?(.+?)/?[^/]*$!i', '$1', $where_from );
+		$where_from = wp_parse_url( $where_from, PHP_URL_HOST ) ?: $where_from;
 
 		// Add a user note about this action.
 		$note_text = sprintf(
 			'Forum role changed to %s%s%s.',
-			get_role( $new_role )->name,
-			$previous_role ? sprintf( ' from %s', get_role( $previous_role )->name ) : '',
+			$new_role,
+			$previous_role ? sprintf( ' from %s', $previous_role ) : '',
 			$where_from ?    sprintf( ' via %s', $where_from ) : ''
 		);
 
-		// Used in wporg-login to add context.
+		// Used in wporg-login & user-helpers to add context.
 		$note_text = apply_filters( 'wporg_bbp_forum_role_changed_note_text', $note_text, $user );
 
 		// Add a user note about this action.
@@ -204,10 +212,11 @@ class Audit_Log {
 				$action_text = 'Note added';
 			}
 
-			$user_edit_url = bbp_get_user_profile_edit_url( $user_id );
-
-			// On login.wordpress.org, the link should direct to the global forums.
-			if ( defined( 'WPORG_LOGIN_REGISTER_BLOGID' ) && WPORG_LOGIN_REGISTER_BLOGID == get_current_blog_id() ) {
+			// If we're on a Rosetta network, and bbPress is active, link to the local profile edit page.
+			if ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK && function_exists( 'bbp_get_user_profile_edit_url' ) ) {
+				$user_edit_url = bbp_get_user_profile_edit_url( $user_id );
+			} else {
+				// Link to the global WordPress.org profile edit page.
 				$user_edit_url = sprintf( 'https://wordpress.org/support/users/%s/edit/', get_userdata( $user_id )->user_nicename );
 			}
 
@@ -224,7 +233,9 @@ class Audit_Log {
 				'> ' . str_replace(
 					"\n",
 					"\n> ",
-					$note_text
+					htmlspecialchars_decode(
+						$note_text
+					)
 				)
 			);
 

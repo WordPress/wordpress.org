@@ -64,6 +64,7 @@ foreach ( $tables as $table ) {
 	$sql = "INSERT INTO $table ($fields) VALUES ($placeholders)";
 	$query = $sqlite->prepare( $sql );
 	$results = $mysql->get_results( "SELECT * FROM $table" );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI migration progress written to the console, not HTML.
 	printf( "Processing $table with %d results.\n", count( $results ) );
 
 	foreach ( $results as $row ) {
@@ -82,6 +83,7 @@ foreach ( $tables as $table ) {
 	$sqlite->query( "END TRANSACTION" );
 }
 
+// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI migration progress written to the console, not HTML.
 echo "Done.. " . ( microtime( true ) - $start ) . " seconds.\n";
 
 if ( $errors ) {

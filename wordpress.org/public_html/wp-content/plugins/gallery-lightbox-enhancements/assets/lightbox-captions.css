@@ -1,0 +1,92 @@
+/**
+ * Caption styling for the core image lightbox overlay.
+ *
+ * The gallery keeps the core lightbox animation and navigation but
+ * renders the caption as a dedicated bar beneath the active image.
+ * This avoids competing with text-heavy screenshots while still keeping
+ * short captions compact and visually centered.
+ */
+
+/**
+ * Defensive pin for the core zoom-mode `.scrim` (white, 0.9 opacity).
+ * Core leaves it `position: absolute` with no `top`/`left`, relying on
+ * its two `.lightbox-image-container` siblings being out of normal flow
+ * so the scrim's static position resolves to the overlay's top-left.
+ * We keep those containers on core's own positioning (see note below),
+ * so this is belt-and-braces — harmless if core already covers the page.
+ */
+.wp-lightbox-overlay .scrim {
+	top: 0 !important;
+	left: 0 !important;
+}
+
+/*
+ * The caption stays at the overlay level. Core already exposes the
+ * active image dimensions through CSS custom properties on the overlay,
+ * so the bar can align itself below the current image without changing
+ * the lightbox container flow.
+ */
+
+.wp-lightbox-overlay > figcaption.wp-lightbox-caption {
+	position: absolute;
+	top: var(--wporg-lightbox-caption-top, calc(50% + ( var(--wp--lightbox-container-height) / 2 ) + 0.5rem));
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 3000001;
+	box-sizing: border-box;
+	width: min(var(--wporg-lightbox-caption-width, var(--wp--lightbox-container-width)), calc(100% - 1rem));
+	max-width: calc(100% - 1rem);
+	margin: 0;
+	padding: 0.75rem 1rem;
+	color: #1e1e1e;
+	text-align: center;
+	font-size: 0.875rem;
+	font-weight: 400;
+	line-height: 1.4;
+	letter-spacing: 0;
+	text-shadow: none;
+	background: rgba(255, 255, 255, 0.98);
+	border: 0;
+	border-radius: 12px;
+	overflow-wrap: anywhere;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 180ms ease-out;
+}
+
+.wp-lightbox-overlay.active > figcaption.wp-lightbox-caption.has-caption.is-ready {
+	opacity: 1;
+}
+
+/* Hide the caption when there is no text to show. */
+.wp-lightbox-overlay > figcaption.wp-lightbox-caption:not(.has-caption) {
+	visibility: hidden;
+}
+
+@media (min-width: 960px) {
+
+	.wp-lightbox-overlay > figcaption.wp-lightbox-caption {
+		top: var(--wporg-lightbox-caption-top, calc(50% + ( var(--wp--lightbox-container-height) / 2 ) + 0.75rem));
+		padding: 0.875rem 1.25rem;
+		font-size: 0.95rem;
+	}
+}
+
+@media (max-width: 480px), (max-height: 700px) {
+
+	.wp-lightbox-overlay > figcaption.wp-lightbox-caption {
+		top: var(--wporg-lightbox-caption-top, calc(50% + ( var(--wp--lightbox-container-height) / 2 ) + 0.375rem));
+		padding: 0.625rem 0.875rem;
+		font-size: 0.8125rem;
+		border-radius: 10px;
+	}
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.wp-lightbox-overlay > figcaption.wp-lightbox-caption,
+	.wp-lightbox-overlay.active > figcaption.wp-lightbox-caption.has-caption {
+		transition: none;
+	}
+}

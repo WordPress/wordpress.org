@@ -5,6 +5,8 @@
  * @package wporg-breathe
  */
 
+use function WordPressdotorg\Make\Breathe_2024\{ breathe_content_nav };
+
 get_header(); ?>
 
 <?php $is_handbook = function_exists( 'wporg_is_handbook' ) && wporg_is_handbook(); ?>
@@ -19,9 +21,11 @@ get_header(); ?>
 			<header class="page-header">
 				<h1 class="page-title">
 					<?php if ( $is_handbook ) {
-						printf( __( 'Handbook Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
+						/* translators: %s: Search query. */
+						printf( esc_html__( 'Handbook Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
 					} else {
-						printf( __( 'Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
+						/* translators: %s: Search query. */
+						printf( esc_html__( 'Search Results for: %s', 'wporg' ), '<span>' . get_search_query() . '</span>' );
 					} ?>
 
 					<span class="controls">

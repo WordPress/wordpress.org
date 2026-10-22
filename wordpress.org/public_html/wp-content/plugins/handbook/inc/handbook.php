@@ -136,7 +136,7 @@ class WPorg_Handbook {
 			if ( is_multisite() ) {
 				$name = trim( get_blog_details()->path, '/' );
 			} else {
-				$name = trim( parse_url( get_option( 'home' ), PHP_URL_PATH ), '/' );
+				$name = trim( (string) parse_url( get_option( 'home' ), PHP_URL_PATH ), '/' );
 			}
 
 			// If no name defined yet, try handbook post type if not standard.
@@ -224,7 +224,7 @@ class WPorg_Handbook {
 			}
 		} elseif ( is_admin() && ( $config['manifest'] ?: false ) ) {
 			add_action( 'admin_notices', function () {
-				echo '<div class="notice notice-error"><p>' . __( 'Error: The <strong>WPORG Markdown Importer</strong> plugin needs to be activated in order to allow importing of handbooks.', 'wporg' ) . '</p></div>';
+				echo '<div class="notice notice-error"><p>' . wp_kses_post( __( 'Error: The <strong>WPORG Markdown Importer</strong> plugin needs to be activated in order to allow importing of handbooks.', 'wporg' ) ) . '</p></div>';
 			} );
 		}
 	}

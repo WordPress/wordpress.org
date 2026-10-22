@@ -3,14 +3,9 @@
 /* Layout
 --------------------------------------------------------------------*/
 
-body.home-page.home #main {
-  margin-top: 120px;
-}
-
 #subnav {
   background: transparent;
   border-bottom: none;
-  margin-top: 135px;
 }
 
 #footer {
@@ -125,7 +120,7 @@ body.home-page.home #main {
   float: left;
   width: 50%;
 }
-.footer-meta-wrap .footer-meta h3.title {
+.footer-meta-wrap .footer-meta h2.title {
   font-size: 16px;
   font-weight: 400;
   color: #999;

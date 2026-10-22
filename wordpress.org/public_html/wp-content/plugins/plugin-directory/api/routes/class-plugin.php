@@ -61,7 +61,7 @@ class Plugin extends Base {
 				'slug'        => $post->post_name,
 				'description' => $close_text,
 				'closed'      => true,
-				'closed_date' => $close_data['date'] ?: false,
+				'closed_date' => $close_data['date'] ? gmdate( 'Y-m-d', strtotime( $close_data['date'] ) ) : false,
 				'reason'      => $close_data['public'] ? $close_data['reason'] : false,
 				'reason_text' => $close_data['public'] ? $close_data['label'] : false,
 			];
@@ -103,13 +103,17 @@ class Plugin extends Base {
 		$result['slug']    = $post->post_name;
 		$result['version'] = get_post_meta( $post_id, 'version', true ) ?: '0.0';
 
-		$result['author'] = strip_tags( get_post_meta( $post_id, 'header_author', true ) ) ?: get_user_by( 'id', $post->post_author )->display_name;
-		if ( false != ( $author_url = get_post_meta( $post_id, 'header_author_uri', true ) ) ) {
-			$result['author'] = sprintf( '<a href="%s">%s</a>', esc_url_raw( $author_url ), $result['author'] );
-		}
+		$author = get_user_by( 'id', $post->post_author );
+
+		$profile_url = $this->get_user_profile_link( $author );
+		$result['author'] = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url_raw( $profile_url ),
+			$author->display_name
+		);
 
 		// Profile of the original plugin submitter
-		$result['author_profile'] = $this->get_user_profile_link( $post->post_author );
+		$result['author_profile'] = $profile_url;
 		$result['contributors']   = array();
 
 		$contributors = get_terms( array(
@@ -124,10 +128,7 @@ class Plugin extends Base {
 		}
 
 		if ( ! $contributors ) {
-			$contributors = array();
-			if ( $author = get_user_by( 'id', $post->post_author ) ) {
-				$contributors[] = $author->user_nicename;
-			}
+			$contributors = [ $author->user_nicename ];
 		}
 
 		foreach ( $contributors as $contributor ) {
@@ -164,13 +165,19 @@ class Plugin extends Base {
 		$result['ratings'] = array_map( 'intval', $result['ratings'] );
 		krsort( $result['ratings'] );
 
+		// Determine the last_updated date.
+		$last_updated = $post->last_updated ?: $post->post_modified_gmt; // Prefer the post_meta unless not set.
+		if ( '0000-00-00 00:00:00' === $last_updated ) {
+			$last_updated = $post->post_date_gmt;
+		}
+
 		$result['num_ratings']              = array_sum( $result['ratings'] );
 		$result['support_url']              = 'https://wordpress.org/support/plugin/' . urlencode( $plugin_slug ) . '/';
 		$result['support_threads']          = intval( get_post_meta( $post_id, 'support_threads', true ) );
 		$result['support_threads_resolved'] = intval( get_post_meta( $post_id, 'support_threads_resolved', true ) );
 		$result['active_installs']          = intval( get_post_meta( $post_id, 'active_installs', true ) );
 		$result['downloaded']               = intval( get_post_meta( $post_id, 'downloads', true ) );
-		$result['last_updated']             = gmdate( 'Y-m-d g:ia \G\M\T', strtotime( $post->post_modified_gmt ) );
+		$result['last_updated']             = gmdate( 'Y-m-d g:ia \G\M\T', strtotime( $last_updated ) );
 		$result['added']                    = gmdate( 'Y-m-d', strtotime( $post->post_date_gmt ) );
 		$result['homepage']                 = get_post_meta( $post_id, 'header_plugin_uri', true );
 		$result['sections']                 = array();
@@ -365,9 +372,12 @@ class Plugin extends Base {
 	 * @return string HTML blob of data.
 	 */
 	protected function get_plugin_reviews_markup( $plugin_slug ) {
-		$output = '';
-		foreach ( Tools::get_plugin_reviews( $plugin_slug, 10 ) as $review ) {
-			$output .= $this->get_plugin_reviews_markup_singular( $review );
+		$output         = '';
+		$plugin_reviews = Tools::get_plugin_reviews( $plugin_slug, 10 );
+		if ( ! empty( $plugin_reviews ) ) {
+			foreach ( $plugin_reviews as $review ) {
+				$output .= $this->get_plugin_reviews_markup_singular( $review );
+			}
 		}
 		return $output;
 	}
@@ -389,11 +399,13 @@ class Plugin extends Base {
 				<h4 class="review-title"><?php echo esc_html( $review->post_title ); ?></h4>
 				<div class="star-rating">
 				<?php
-					/* Core has .star-rating .star colour styling, which is why we use a custom wrapper and template */
-					echo Template::dashicons_stars( array(
-						'rating'   => $review->post_rating,
-						'template' => '<span class="star %1$s"></span>',
-					) );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core has .star-rating .star colour styling, so this uses a custom wrapper and template; dashicons_stars() returns that markup.
+					echo Template::dashicons_stars(
+						array(
+							'rating'   => (int) $review->post_rating,
+							'template' => '<span class="star %1$s"></span>',
+						)
+					);
 				?>
 				</div>
 			</div>
@@ -403,22 +415,25 @@ class Plugin extends Base {
 				$review_author_markup         = '<a href="' . $review_author_markup_profile . '">';
 				$review_author_markup        .= get_avatar( $reviewer->ID, 16, 'monsterid' ) . '</a>';
 				$review_author_markup        .= '<a href="' . $review_author_markup_profile . '" class="reviewer-name">';
-				$review_author_markup        .= $reviewer->display_name;
+				$review_author_markup        .= esc_html( $reviewer->display_name );
 				if ( $reviewer->display_name != $reviewer->user_login ) {
-					$review_author_markup .= " <small>({$reviewer->user_login})</small>";
+					$review_author_markup .= ' <small>(' . esc_html( $reviewer->user_login ) . ')</small>';
 				}
 				$review_author_markup .= '</a>';
 
 				printf(
-					__( 'By %1$s on %2$s', 'wporg-plugins' ),
+					/* translators: 1: Review author, 2: Review date. */
+					esc_html__( 'By %1$s on %2$s', 'wporg-plugins' ),
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Star and byline markup built by Template helpers from escaped values.
 					$review_author_markup,
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Star and byline markup built by Template helpers from escaped values.
 					'<span class="review-date">' . date_i18n( get_option( 'date_format' ), strtotime( $review->post_modified ) ) . '</span>'
 				);
 				?>
 			</p>
 		</div>
 	</div>
-	<div class="review-body"><?php echo $review->post_content; ?></div>
+	<div class="review-body"><?php echo wp_kses_post( $review->post_content ); ?></div>
 </div>
 <?php
 		return ob_get_clean();

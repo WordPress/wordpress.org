@@ -15,7 +15,7 @@ class Release_Confirmation extends Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( 'Pending release for %s', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -31,6 +31,8 @@ Action is required before the new version will be released.
 Follow the link below to login and confirm the release.
 
 <%5$s>
+
+Once confirmed, the new version is released when the Stable tag in trunk/readme.txt points to it.
 
 This notice has been sent to all plugin committers.', 'wporg-plugins' ),
 			$this->user_text( $this->user ),

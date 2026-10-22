@@ -9,6 +9,7 @@ namespace WordPressdotorg\Photo_Directory;
 
 class Admin {
 
+	const COL_NAME_AUTHOR = 'wporg-photo-author';
 	const COL_NAME_FLAG  = 'wporg-flags';
 	const COL_NAME_PHOTO = 'wporg-photo';
 	const COL_NAME_CONTRIBUTOR_IP = 'wporg-contributor-ip';
@@ -26,13 +27,14 @@ class Admin {
 		add_action( "add_meta_boxes_{$post_type}",             [ __CLASS__, 'remove_metaboxes' ], 15 );
 		add_action( 'load-edit.php',                           [ __CLASS__, 'add_admin_css' ] );
 		add_action( 'load-post.php',                           [ __CLASS__, 'add_admin_css' ] );
+		add_filter( "manage_{$post_type}_posts_columns",       [ __CLASS__, 'add_author_column' ] );
+		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'handle_author_column_data' ], 10, 2 );
 		add_filter( "manage_{$post_type}_posts_columns",       [ __CLASS__, 'add_photo_column' ] );
 		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'handle_photo_column_data' ], 10, 2 );
 		add_filter( "manage_{$post_type}_posts_columns",       [ __CLASS__, 'add_flags_column' ] );
 		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'handle_flags_column_data' ], 10, 2 );
 		add_filter( "manage_edit-{$post_type}_columns",        [ __CLASS__, 'remove_columns_from_pending_photos' ] );
 		add_filter( 'post_row_actions',                        [ __CLASS__, 'add_post_action_photo_links' ], 10, 2 );
-		add_filter( 'the_author',                              [ __CLASS__, 'add_published_photos_count_to_author' ] );
 		add_filter( 'use_block_editor_for_post_type',          [ __CLASS__, 'disable_block_editor' ], 10, 2 );
 		add_action( 'admin_notices',                           [ __CLASS__, 'add_notice_to_photo_media_if_pending' ] );
 		add_filter( 'add_menu_classes',                        [ __CLASS__, 'add_admin_menu_pending_indicator' ] );
@@ -104,7 +106,8 @@ class Admin {
 			'<div id="message" class="notice notice-warning"><p>%s</p></div>' . "\n",
 			/* translators: %s: URL to settings page for enabling/disabling photo uploads. */
 			sprintf(
-				__( '<strong>Photo uploads are currently disabled for all users!</strong> Uncheck <a href="%s">the setting</a> to re-enable uploading.', 'wporg-photos' ),
+				/* translators: %s: Media settings URL. */
+				wp_kses_post( __( '<strong>Photo uploads are currently disabled for all users!</strong> Uncheck <a href="%s">the setting</a> to re-enable uploading.', 'wporg-photos' ) ),
 				esc_url( admin_url( 'options-media.php' ) . '#' . Settings::KILLSWITCH_OPTION_NAME )
 			)
 		);
@@ -163,9 +166,9 @@ class Admin {
 			'<div id="message" class="notice notice-%s"><p>%s</p></div>' . "\n",
 			esc_attr( $notice_type ),
 			sprintf(
-				$notice,
-				'https://profiles.wordpress.org/' . $user->user_nicename . '/',
-				sanitize_text_field( $user->display_name )
+				wp_kses_post( $notice ),
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				esc_html( $user->display_name )
 			)
 		);
 	}
@@ -185,8 +188,9 @@ class Admin {
 			if ( $missing_taxonomies ) {
 				echo '<div class="notice notice-error is-dismissible notice-missing-taxonomies"><p>';
 				printf(
-					__( '<strong>Error:</strong> Photo was not published because the following taxonomies are missing terms: %s', 'wporg-photos' ),
-					'<strong>' . implode( '</strong>, <strong>', $missing_taxonomies ) . '</strong>'
+					/* translators: %s: Missing taxonomy names. */
+					wp_kses_post( __( '<strong>Error:</strong> Photo was not published because the following taxonomies are missing terms: %s', 'wporg-photos' ) ),
+					'<strong>' . implode( '</strong>, <strong>', array_map( 'esc_html', $missing_taxonomies ) ) . '</strong>'
 				);
 
 				echo '</p></div>' . "\n";
@@ -216,6 +220,7 @@ class Admin {
 	 * - Custom Fields
 	 * - Likes (from Jetpack)
 	 * - Slug
+	 * - Featured Image
 	 */
 	public static function remove_metaboxes() {
 		$post_type = Registrations::get_post_type();
@@ -223,6 +228,7 @@ class Admin {
 		$hide = [
 			'likes_meta' => 'side',
 			'postcustom' => 'normal',
+			'postimagediv' => 'side',
 			'slugdiv'    => 'normal',
 		];
 
@@ -294,9 +300,10 @@ class Admin {
 	/**
 	 * Determines if the 'Photo' column should be added to a post listing table.
 	 *
+	 * @param bool $include_rejected Optional. Include the 'reject' post status? Default false.
 	 * @return bool True if the 'Photo' column should be added; else false.
 	 */
-	public static function should_include_photo_column() {
+	public static function should_include_photo_column( $include_rejected = false ) {
 		$screen = get_current_screen();
 		$post_type = Registrations::get_post_type();
 
@@ -307,6 +314,9 @@ class Admin {
 		];
 
 		$post_statuses = Photo::get_post_statuses_with_photo();
+		if ( $include_rejected ) {
+			$post_statuses[] = Rejection::get_post_status();
+		}
 
 		return (
 			// Screen is known.
@@ -318,6 +328,87 @@ class Admin {
 			// No post status is explicitly requested OR the post status is one that supports photos.
 			( empty( $_GET['post_status'] ) || in_array( $_GET['post_status'], $post_statuses ) )
 		);
+	}
+
+	/**
+	 * Replaces default 'Author' column with a custom 'Author' column that shows
+	 * typical author column data as well as additional data.
+	 *
+	 * As of WP 6.8, it no longer easy to modify the existing 'Author' column to
+	 * add more data, so this adds a custom column to replace the 'Author' column.
+	 *
+	 * @param  array $posts_columns Array of post column titles.
+	 * @return array The $posts_columns array with the photo author column added.
+	 */
+	public static function add_author_column( $posts_columns ) {
+		if ( ! self::should_include_photo_column() ) {
+			return $posts_columns;
+		}
+
+		// Position after existing 'Author' column.
+		$pos = array_search( 'author', array_keys( $posts_columns ) );
+
+		if ( ! $pos ) {
+			// Else, position the column after the 'Title' column (where 'Author' is normally located).
+			$pos = array_search( 'title', array_keys( $posts_columns ) );
+		}
+
+		if ( $pos ) {
+			$pos++;
+			$posts_columns = array_slice( $posts_columns, 0, $pos, true )
+				+ [ self::COL_NAME_AUTHOR => __( 'Author', 'wporg-photos' ) ]
+				+ array_slice( $posts_columns, $pos, count( $posts_columns ) - 1, true );
+		} else {
+			$posts_columns[ self::COL_NAME_AUTHOR ] = __( 'Author', 'wporg-photos' );
+		}
+
+		// Remove the existing 'Author' column.
+		unset( $posts_columns['author'] );
+
+		return $posts_columns;
+	}
+
+	/**
+	 * Outputs the photo author column content for the post.
+	 *
+	 * @param string $column_name The name of the column.
+	 * @param int    $post_id     The id of the post being displayed.
+	 */
+	public static function handle_author_column_data( $column_name, $post_id ) {
+		if ( self::COL_NAME_AUTHOR !== $column_name ) {
+			return;
+		}
+
+		$post = get_post( $post_id );
+
+		// Get the same 'Author' column content as generated by core.
+		$list_table = _get_list_table( 'WP_Posts_List_Table' );
+
+		/**
+		 * Fires before any photo author column content is output.
+		 *
+		 * @param WP_Post The post object.
+		 */
+		do_action( 'photo_author_column_data_start', $post );
+
+		$list_table->column_author( $post );
+
+		/**
+		 * Fires after the default author column content is output.
+		 *
+		 * @param WP_Post The post object.
+		 */
+		do_action( 'photo_author_column_data_after_author', $post );
+
+		// Output author submission counts.
+		echo wp_kses_post( self::get_author_submission_stats( (int) get_post_field( 'post_author', $post_id ) ) );
+
+		/**
+		 * Fires at the end of the photo author column content.
+		 *
+		 * @param WP_Post The post object.
+		 */
+		do_action( 'photo_author_column_data_end', $post );
 	}
 
 	/**
@@ -376,25 +467,24 @@ class Admin {
 		if ( Photo::is_controversial( $post ) ) {
 			$classes .= ' blurred';
 		}
-		$image = wp_get_attachment_image( $image_id, 'thumbnail', false, [ 'class' => trim( $classes ) ] );
 
 		$can_edit_post = current_user_can( 'edit_post', $post->ID );
 
 		if ( $can_edit_post && 'trash' !== $post->post_status ) {
 			printf(
-				$prefixed_format,
+				wp_kses_post( $prefixed_format ),
 				sprintf(
 					'<div><a class="photos-photo-link row-title" href="%s" aria-label="%s">%s</a></div>',
-					get_edit_post_link( $post_id ),
+					esc_url( (string) get_edit_post_link( $post_id ) ),
 					/* translators: %s: Post title. */
 					esc_attr( sprintf( __( 'Edit photo associated with post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title ) ),
-					$image
+					wp_get_attachment_image( $image_id, 'thumbnail', false, [ 'class' => trim( $classes ) ] )
 				)
 			);
 		} else {
 			printf(
-					'<div>%s</div>',
-					sprintf( $prefixed_format, $image )
+				'<div>%s</div>',
+				sprintf( wp_kses_post( $prefixed_format ), wp_get_attachment_image( $image_id, 'thumbnail', false, [ 'class' => trim( $classes ) ] ) )
 			);
 		}
 
@@ -562,8 +652,8 @@ class Admin {
 
 		echo '<dl class="photos-flagged">';
 		foreach ( $flags as $flag => $class ) {
-			echo '<dt>' . ucfirst( $flag ) . ':</dt>';
-			echo '<dd>' . ucwords( str_replace( '_', ' ', $class ) ) . '</dd>';
+			echo '<dt>' . esc_html( ucfirst( $flag ) ) . ':</dt>';
+			echo '<dd>' . esc_html( ucwords( str_replace( '_', ' ', $class ) ) ) . '</dd>';
 		}
 		echo "</dl>\n";
 
@@ -592,8 +682,8 @@ class Admin {
 
 		echo '<dl>';
 		foreach ( $exif as $key => $data ) {
-			echo "<dt>{$data['label']}</dt>\n";
-			echo "<dd>{$data['value']}</dd>\n";
+			echo '<dt>' . esc_html( $data['label'] ) . "</dt>\n";
+			echo '<dd>' . esc_html( $data['value'] ) . "</dd>\n";
 		}
 		echo "</dl>\n";
 
@@ -713,8 +803,8 @@ class Admin {
 
 		echo '<dl>';
 		foreach ( $info as $key => $data ) {
-			echo "<dt>{$data['label']}</dt>\n";
-			echo "<dd>{$data['value']}</dd>\n";
+			echo '<dt>' . esc_html( $data['label'] ) . '</dt>' . "\n";
+			echo '<dd>' . wp_kses_post( $data['value'] ) . '</dd>' . "\n";
 		}
 		echo "</dl>\n";
 	}
@@ -726,7 +816,7 @@ class Admin {
 	 * @param array   $args Associative array of additional data.
 	 */
 	public static function meta_box_photo( $post, $args ) {
-		echo Template_Tags\get_photo_as_grid_item( $post, [ 900, 450 ], 'image' );
+		echo wp_kses_post( Template_Tags\get_photo_as_grid_item( $post, [ 900, 450 ], 'image' ) );
 	}
 
 	/**
@@ -774,9 +864,13 @@ class Admin {
 			}
 
 			// Show the photo.
-			echo Template_Tags\get_photo_as_grid_item( $photo, 'medium', 'edit' );
+			echo wp_kses_post( Template_Tags\get_photo_as_grid_item( $photo, 'medium', 'edit' ) );
 
 			$shown_photos++;
+		}
+
+		if ( ! $shown_photos ) {
+			echo '<p>' . esc_html__( 'This contributor does not have any other submitted photos.', 'wporg-photos' ) . "</p>\n";
 		}
 
 		echo '</div>' . "\n";
@@ -790,36 +884,31 @@ class Admin {
 			printf(
 				'<a href="%s">%s</a>',
 				esc_url( $link ),
-				__( "View all photos from this contributor &rarr;", 'wporg-photos' )
+				esc_html__( 'View all photos from this contributor &rarr;', 'wporg-photos' )
 			);
 			echo '</div>' . "\n";
 		}
 	}
 
 	/**
-	 * Appends the count of the published photos to author names in photo post
-	 * listings.
+	 * Returns hyperlinked statistics on the author's submission counts (published,
+	 * pending, rejected, etc) intended to be shown to moderators.
 	 *
-	 * @param string $display_name The author's display name.
+	 * @param int $author_id Author ID.
 	 * @return string
 	 */
-	public static function add_published_photos_count_to_author( $display_name ) {
-		global $authordata;
-
-		if ( ! is_admin() || ! self::should_include_photo_column() ) {
-			return $display_name;
-		}
-
-		// Close link to contributor's listing of photos.
-		$display_name .= '</a>';
+	public static function get_author_submission_stats( $author_id ) {
+		$post_type     = Registrations::get_post_type();
+		$reject_status = Rejection::get_post_status();
+		$stats_display = '';
 
 		// Show number of approved photos.
 		$approved_link = add_query_arg( [
-			'post_type'   => Registrations::get_post_type(),
+			'post_type'   => $post_type,
 			'post_status' => 'publish',
-			'author'      => $authordata->ID,
+			'author'      => $author_id,
 		], 'edit.php' );
-		$display_name .= '<div class="user-approved-count">'
+		$stats_display .= '<div class="user-approved-count">'
 		. sprintf(
 			__( 'Approved: <strong>%s</strong>', 'wporg-photos' ),
 			sprintf( '<a href="%s">%d</a>', $approved_link, User::count_published_photos() )
@@ -827,14 +916,14 @@ class Admin {
 		. "</div>\n";
 
 		// Show number of photos approved on this calendar day.
-		$approved_today_count = User::count_published_photos_for_today();
+		$approved_today_count = User::count_photos_for_today( 'publish' );
 		if ( $approved_today_count ) {
 			$approved_today_link = add_query_arg( [
-				'post_type'   => Registrations::get_post_type(),
+				'post_type'   => $post_type,
 				'post_status' => 'publish',
-				'author'      => $authordata->ID,
+				'author'      => $author_id,
 			], 'edit.php' );
-			$display_name .= '<div class="user-approved-today-count">'
+			$stats_display .= '<div class="user-approved-today-count">'
 				. sprintf(
 					__( '&#x21AA; (today): %s', 'wporg-photos' ),
 					sprintf( '<strong><a href="%s">%d</a></strong>', $approved_today_link, $approved_today_count )
@@ -846,12 +935,12 @@ class Admin {
 		$pending_count = User::count_pending_photos();
 		if ( $pending_count ) {
 			$pending_link = add_query_arg( [
-				'post_type'   => Registrations::get_post_type(),
+				'post_type'   => $post_type,
 				'post_status' => 'pending',
-				'author'      => $authordata->ID,
+				'author'      => $author_id,
 			], 'edit.php' );
 
-			$display_name .= '<div class="user-pending-count">'
+			$stats_display .= '<div class="user-pending-count">'
 				. sprintf(
 					__( 'Pending: <strong>%s</strong>', 'wporg-photos' ),
 					sprintf( '<a href="%s">%d</a>', $pending_link, $pending_count )
@@ -860,14 +949,14 @@ class Admin {
 		}
 
 		// Show number of rejected photos.
-		$rejection_count = User::count_rejected_photos( $authordata->ID );
+		$rejection_count = User::count_rejected_photos( $author_id );
 		if ( $rejection_count ) {
 			$rejected_link = add_query_arg( [
-				'post_type'   => Registrations::get_post_type(),
-				'post_status' => Rejection::get_post_status(),
-				'author'      => $authordata->ID,
+				'post_type'   => $post_type,
+				'post_status' => $reject_status,
+				'author'      => $author_id,
 			], 'edit.php' );
-			$display_name .= '<div class="user-rejected-count">'
+			$stats_display .= '<div class="user-rejected-count">'
 				. sprintf(
 					/* translators: %s: Count of user rejections linked to listing of their rejections. */
 					_n( 'Rejected: <strong>%s</strong>', 'Rejected: <strong>%s</strong>', $rejection_count, 'wporg-photos' ),
@@ -876,10 +965,23 @@ class Admin {
 				. "</div>\n";
 		}
 
-		// Prevent unbalanced tag.
-		$display_name .= '<a>';
+		// Show number of photos rejected on this calendar day.
+		$rejected_today_count = User::count_photos_for_today( $reject_status );
+		if ( $rejected_today_count ) {
+			$rejected_today_link = add_query_arg( [
+				'post_type'   => $post_type,
+				'post_status' => $reject_status,
+				'author'      => $author_id,
+			], 'edit.php' );
+			$stats_display .= '<div class="user-rejected-today-count">'
+				. sprintf(
+					__( '&#x21AA; (today): %s', 'wporg-photos' ),
+					sprintf( '<strong><a href="%s">%d</a></strong>', $rejected_today_link, $rejected_today_count )
+				)
+				. "</div>\n";
+		}
 
-		return $display_name;
+		return $stats_display;
 	}
 
 	/**
@@ -938,7 +1040,7 @@ class Admin {
 		}
 
 		if ( $msg ) {
-			printf( '<div id="message" class="notice notice-%s"><p>%s</p></div>' . "\n", esc_attr( $notice_type ), $msg );
+			printf( '<div id="message" class="notice notice-%s"><p>%s</p></div>' . "\n", esc_attr( $notice_type ), wp_kses_post( $msg ) );
 		}
 	}
 
@@ -1022,7 +1124,8 @@ class Admin {
 		$moderator_link = Photo::get_moderator_link( $post );
 		if ( $moderator_link ) {
 			echo '<div class="misc-pub-section curtime misc-pub-curtime">';
-			printf( __( 'Moderated by: %s', 'wporg-photos' ), $moderator_link );
+			/* translators: %s: Link to the moderator's profile. */
+			echo wp_kses_post( sprintf( __( 'Moderated by: %s', 'wporg-photos' ), $moderator_link ) );
 			echo '</div>';
 		}
 	}
@@ -1071,7 +1174,7 @@ class Admin {
 		}
 
 		$author = get_user_by( 'id', $post->post_author );
-		$photos_count = User::count_published_photos( $author->ID );
+		$published_count = User::count_published_photos( $author->ID );
 		$account_created = explode( ' ', $author->user_registered )[0];
 		?>
 		<style>
@@ -1094,18 +1197,19 @@ class Admin {
 			<div class="photo-contributor-info">
 				<strong>
 					<?php if ( $author->user_url ) { ?><a class="photo-contributor-url" rel="noopener noreferrer" href="<?php echo esc_url( $author->user_url ); ?>"><?php } ?>
-					<?php echo $author->display_name; ?>
+					<?php echo esc_html( $author->display_name ); ?>
 					<?php if ( $author->user_url ) { ?></a><?php } ?>
-					<div class="photo-contributor-profile"><a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $author->user_nicename . '/' ); ?>">@<?php echo $author->user_nicename; ?></a></div>
+					<div class="photo-contributor-profile"><a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $author->user_nicename . '/' ); ?>">@<?php echo esc_html( $author->user_nicename ); ?></a></div>
 				</strong>
 				<ul>
 					<li><?php
 						/* translators: %s: Linked number of photos submitted by user. */
 						printf(
-							__( 'Published photos: <strong>%s</strong>', 'wporg-photos' ),
-							( 0 === $photos_count )
-								? $photos_count
-								: sprintf( '<a href="%s">%s</a>', get_author_posts_url( $author->ID ), $photos_count )
+							/* translators: %s: Number of published photos, possibly linked. */
+							wp_kses_post( __( 'Published photos: <strong>%s</strong>', 'wporg-photos' ) ),
+							( 0 === $published_count )
+								? (int) $published_count
+								: sprintf( '<a href="%s">%s</a>', esc_url( get_author_posts_url( $author->ID ) ), (int) $published_count )
 						);
 					?></li>
 					<li><?php
@@ -1117,10 +1221,11 @@ class Admin {
 						];
 						/* translators: %s: Linked number of photos submitted by user that have been rejected. */
 						printf(
-							__( 'Rejected photos: <strong>%s</strong>', 'wporg-photos' ),
+							/* translators: %s: Number of rejected photos, possibly linked. */
+							wp_kses_post( __( 'Rejected photos: <strong>%s</strong>', 'wporg-photos' ) ),
 							( 0 === $rejected_count )
-								? $rejected_count
-								: sprintf( '<a href="%s">%d</a>', add_query_arg( $link_args, 'edit.php' ), $rejected_count )
+								? (int) $rejected_count
+								: sprintf( '<a href="%s">%d</a>', esc_url( add_query_arg( $link_args, 'edit.php' ) ), (int) $rejected_count )
 						);
 					?></li>
 					<li><?php
@@ -1136,8 +1241,8 @@ class Admin {
 						}
 						printf(
 							/* translators: %s: Count of user's flagged photos possibly linked to listing of their flagged photos. */
-							_n( 'Flagged photos: <strong>%s</strong>', 'Flagged photos: <strong>%s</strong>', $flagged_count, 'wporg-photos' ),
-							$flagged_link ? sprintf( '<a href="%s">%d</a>', $flagged_link, $flagged_count ) : $flagged_count
+							wp_kses_post( _n( 'Flagged photos: <strong>%s</strong>', 'Flagged photos: <strong>%s</strong>', $flagged_count, 'wporg-photos' ) ),
+							$flagged_link ? sprintf( '<a href="%s">%d</a>', esc_url( $flagged_link ), (int) $flagged_count ) : (int) $flagged_count
 						);
 					?></li>
 					<li><?php
@@ -1147,25 +1252,33 @@ class Admin {
 							'post_status' => 'pending',
 							'author'      => $author->ID,
 						];
-						/* translators: %s: Linked number of photos submitted by user that have been rejected. */
 						printf(
-							__( 'Pending photos: <strong>%s</strong>', 'wporg-photos' ),
+							/* translators: %s: Number of pending photos, possibly linked. */
+							wp_kses_post( __( 'Pending photos: <strong>%s</strong>', 'wporg-photos' ) ),
 							( 0 === $pending_count )
-								? $pending_count
-								: sprintf( '<a href="%s">%d</a>', add_query_arg( $link_args, 'edit.php' ), $pending_count )
+								? (int) $pending_count
+								: sprintf( '<a href="%s">%d</a>', esc_url( add_query_arg( $link_args, 'edit.php' ) ), (int) $pending_count )
 						);
 					?></li>
 					<li><?php
 						/* translators: %s: Date user account was created. */
-						printf( __( 'Created: <strong>%s</strong>', 'wporg-photos' ), $account_created ); ?></li>
+						printf( wp_kses_post( __( 'Created: <strong>%s</strong>', 'wporg-photos' ) ), esc_html( $account_created ) );
+					?>
+						</li>
 				</ul>
 			</div>
 			<div class="photo-contributor-more-info">
 			<?php
 				// Output photo contributor IP address.
 				if ( $contrib_ip = Photo::get_contributor_ip( $post->ID ) ) {
-					/* translators: %s: IP address for contributor. */
-					printf( __( 'Contributor IP address: <strong>%s</strong>', 'wporg-photos' ), sanitize_text_field( $contrib_ip ) );
+					// Set a class based on the IP address type.
+					$ip_class = strpos( $contrib_ip, ':' ) === false ? 'ipv4' : 'ipv6';
+					printf(
+						/* translators: 1: Class for IP address type, 2: IP address for contributor. */
+						wp_kses_post( __( 'Contributor IP address: <strong class="%1$s">%2$s</strong>', 'wporg-photos' ) ),
+						esc_attr( $ip_class ),
+						esc_html( $contrib_ip )
+					);
 				}
 			?>
 			</div>
@@ -1189,13 +1302,13 @@ class Admin {
 
 					if ( $rejection_reasons ) {
 						echo '<table>';
-						echo '<tr><th>' . __( 'Reason', 'wporg-photos' ) . '</th><th>' . __( 'Total', 'wporg-photos' ) . '</th><th>%</th></tr>';
+						echo '<tr><th>' . esc_html__( 'Reason', 'wporg-photos' ) . '</th><th>' . esc_html__( 'Total', 'wporg-photos' ) . '</th><th>%</th></tr>';
 					}
 					foreach ( $rejection_reasons as $reason => $count ) {
 						echo '<tr>';
 						echo '<td title="' . esc_attr( $all_reasons[ $reason ]['label'] ?? '' ) . '">' . esc_html( $reason ) . '</td>';
-						echo '<td>' . number_format_i18n( $count ) . '</td>';
-						echo '<td>' . number_format_i18n( ( $count / $total_rejections ) * 100, 2 ) . '%</td>';
+						echo '<td>' . esc_html( number_format_i18n( $count ) ) . '</td>';
+						echo '<td>' . esc_html( number_format_i18n( ( $count / $total_rejections ) * 100, 2 ) ) . '%</td>';
 						echo "</tr>\n";
 					}
 					if ( $rejection_reasons ) {
@@ -1203,14 +1316,22 @@ class Admin {
 					}
 
 					echo '<p>';
-					/* translators: %s: Rejection rate as a percentage. */
-					printf( __( 'Total rejection rate: %s', 'wporg-photos'), '<strong>' . round( ( $total_rejections / ( $photos_count + $total_rejections ) ) * 100, 2 ) .'%</strong>' );
+					$total_count = $published_count + $total_rejections;
+					$rejection_rate = $total_count
+						? round( ( $total_rejections / $total_count ) * 100, 2 )
+						: 0;
+
+					printf(
+						/* translators: %s: Rejection rate as a percentage. */
+						esc_html__( 'Total rejection rate: %s', 'wporg-photos' ),
+						'<strong>' . esc_html( $rejection_rate ) . '%</strong>'
+					);
 					echo "</p>\n";
 
 					if ( $submission_errors_count ) {
 						echo '<p>';
 						/* translators: %s: The number of submission errors. */
-						printf( __( 'Submission errors (which are\'t counted as submissions): %s', 'wporg-photos' ), $submission_errors_count );
+						printf( esc_html__( 'Submission errors (which aren&#8217;t counted as submissions): %s', 'wporg-photos' ), (int) $submission_errors_count );
 						echo "</p>\n";
 					}
 				?>
@@ -1238,17 +1359,17 @@ class Admin {
 
 		// Output file hash.
 		if ( $file_hash = get_post_meta( $post_id, Registrations::get_meta_key( 'file_hash' ), true ) ) {
-			printf( $format, 'file-hash', __( 'File hash', 'wporg-photos' ), $file_hash );
+			echo wp_kses_post( sprintf( $format, 'file-hash', esc_html__( 'File hash', 'wporg-photos' ), esc_html( $file_hash ) ) );
 		}
 
 		// Output original filename.
 		if ( $orig_filename = get_post_meta( $post_id, Registrations::get_meta_key( 'original_filename' ), true ) ) {
-			printf( $format, 'original-filename', __( 'Original file name', 'wporg-photos' ), $orig_filename );
+			echo wp_kses_post( sprintf( $format, 'original-filename', esc_html__( 'Original file name', 'wporg-photos' ), esc_html( $orig_filename ) ) );
 		}
 
 		// Output moderator.
 		if ( $mod_link = Photo::get_moderator_link( $post_id ) ) {
-			printf( $format, 'moderator', __( 'Moderator', 'wporg-photos' ), $mod_link );
+			echo wp_kses_post( sprintf( $format, 'moderator', __( 'Moderator', 'wporg-photos' ), $mod_link ) );
 		}
 	}
 
@@ -1286,13 +1407,13 @@ class Admin {
 	 * @return array
 	 */
 	public static function add_contributor_ip_column( $posts_columns ) {
-		$pos = array_search( 'author', array_keys( $posts_columns ) );
+		$pos = array_search( self::COL_NAME_AUTHOR, array_keys( $posts_columns ) );
 
 		if ( $pos ) {
 			$pos++;
 			$posts_columns = array_slice( $posts_columns, 0, $pos, true )
 				+ [ self::COL_NAME_CONTRIBUTOR_IP => __( 'Contributor IP', 'wporg-photos' ) ]
-				+ array_slice( $posts_columns, 3, count( $posts_columns ) - 1, true );
+				+ array_slice( $posts_columns, $pos, count( $posts_columns ) - 1, true );
 		} else {
 			$posts_columns[ self::COL_NAME_CONTRIBUTOR_IP ] = __( 'Contributor IP', 'wporg-photos' );
 		}
@@ -1314,7 +1435,7 @@ class Admin {
 		$photo_contrib_ip = Photo::get_contributor_ip( $post_id );
 
 		if ( $photo_contrib_ip ) {
-			echo '<span>' . sanitize_text_field( $photo_contrib_ip ) . '</span>';
+			echo '<span>' . esc_html( sanitize_text_field( $photo_contrib_ip ) ) . '</span>';
 		}
 	}
 
@@ -1328,7 +1449,7 @@ class Admin {
 		&&
 			! current_user_can( get_post_type_object( 'post' )->cap->create_posts )
 		) {
-			wp_die( __( 'Sorry, you are not allowed to access the media library.', 'wporg-photos' ) );
+			wp_die( esc_html__( 'Sorry, you are not allowed to access the media library.', 'wporg-photos' ) );
 		}
 	}
 
@@ -1428,7 +1549,7 @@ class Admin {
 		if ( $message ) {
 			printf(
 				'<div id="message" class="updated notice notice-success is-dismissible"><p>%s</p></div>',
-				$message
+				wp_kses_post( $message )
 			);
 		}
 	}
@@ -1564,7 +1685,7 @@ class Admin {
 			'<a href="%s" id="photo-dir-skip-photo" class="page-title-action" title="%s">%s</a>',
 			esc_url( add_query_arg( 'skipphoto', '1' ) ),
 			esc_attr__( 'Skip this photo and load another.', 'wporg-photos' ),
-			__( 'Skip Photo', 'wporg-photos')
+			esc_html__( 'Skip Photo', 'wporg-photos' )
 		);
 	}
 
@@ -1587,7 +1708,7 @@ class Admin {
 			$next_photo = Posts::get_next_post_in_queue( 'rand', '', $exclude_photos );
 
 			if ( $next_photo ) {
-				wp_redirect( get_edit_post_link( $next_photo->ID, 'url' ), 302 );
+				wp_safe_redirect( get_edit_post_link( $next_photo->ID, 'url' ), 302 );
 				exit;
 			}
 		}
@@ -1658,7 +1779,7 @@ class Admin {
 		global $post_type;
 
 		if ( Registrations::get_post_type() === $post_type ) {
-			$settings['editor_height'] = '80px';
+			$settings['editor_height'] = '80';
 		}
 
 		return $settings;

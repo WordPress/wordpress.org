@@ -141,6 +141,16 @@ class Slack {
 	}
 
 	/**
+	 * Escapes text for Slack mrkdwn, which reads `<…>` as links and mentions.
+	 *
+	 * @param string $text The text to escape.
+	 * @return string The escaped text.
+	 */
+	public static function escape( string $text ): string {
+		return htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE );
+	}
+
+	/**
 	 * Publishes a Slack notifcation to a channel.
 	 *
 	 * @param string $channel The channel to publish the notification to.

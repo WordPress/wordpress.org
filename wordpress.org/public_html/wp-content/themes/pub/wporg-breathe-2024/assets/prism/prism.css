@@ -1,161 +1,208 @@
 /**
- * VS theme by Andrew Lock (https://andrewlock.net)
- * Inspired by Visual Studio syntax coloring
- */
+* Custom theme for developer.wordpress.org.
+* Forked from a11y-dark theme by ericwbailey, which was based on the okaidia theme.
+*
+* https://github.com/PrismJS/prism-themes/blob/master/themes/prism-a11y-dark.css
+* https://github.com/PrismJS/prism/blob/gh-pages/themes/prism-okaidia.css
+*/
 
 code[class*="language-"],
 pre[class*="language-"] {
-    color: #393A34;
-    font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
-    direction: ltr;
-    text-align: left;
-    white-space: pre;
-    word-spacing: normal;
-    word-break: normal;
-    font-size: 0.95em;
-    line-height: 1.2em;
+	color: #101517;
+	background: none;
+	font-family: var(--wp--preset--font-family--monospace);
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
 
-    -moz-tab-size: 4;
-    -o-tab-size: 4;
-    tab-size: 4;
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
 
-    -webkit-hyphens: none;
-    -moz-hyphens: none;
-    -ms-hyphens: none;
-    hyphens: none;
-}
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
 
-pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
-code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
-    background: #C1DEF1;
-}
-
-pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
-code[class*="language-"]::selection, code[class*="language-"] ::selection {
-    background: #C1DEF1;
+	transition: height 500ms;
 }
 
 /* Code blocks */
 pre[class*="language-"] {
-    padding: 1em;
-    margin: .5em 0;
-    overflow: auto;
-    border: 1px solid #dddddd;
-    background-color: white;
+	padding: 1em;
+	overflow: auto;
+	direction: ltr;
+	border: 1px solid #d9d9d9;
+	border-radius: 2px;
 }
 
-pre[class*="language-"] > code {
-	background-color: white;
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #fff;
 }
 
 /* Inline code */
 :not(pre) > code[class*="language-"] {
-    padding: .2em;
-    padding-top: 1px; padding-bottom: 1px;
-    background: #f8f8f8;
-    border: 1px solid #dddddd;
+	padding: 0.1em;
+	border-radius: 0.3em;
+	white-space: normal;
 }
 
 .token.comment,
 .token.prolog,
 .token.doctype,
 .token.cdata {
-    color: #008000; font-style: italic;
+	color: #007017;
 }
 
-.token.namespace {
-    opacity: .7;
+.token.punctuation {
+	color: #50575e;
 }
 
-.token.string {
-    color: #A31515;
-}
-
-.token.punctuation,
-.token.operator {
-    color: #393A34; /* no highlight */
-}
-
-.token.url,
-.token.symbol,
-.token.number,
-.token.boolean,
-.token.variable,
+.token.property,
+.token.tag,
 .token.constant,
-.token.inserted {
-    color: #36acaa;
+.token.symbol,
+.token.deleted {
+	color: #043959;
 }
 
-.token.atrule,
-.token.keyword,
-.token.attr-value,
-.language-autohotkey .token.selector,
-.language-json .token.boolean,
-.language-json .token.number,
-code[class*="language-css"]{
-    color: #0000ff;
-}
-
-.token.function {
-    color: #393A34;
-}
-.token.deleted,
-.language-autohotkey .token.tag {
-    color: #9a050f;
+.token.boolean,
+.token.number {
+	color: #101517;
 }
 
 .token.selector,
-.language-autohotkey .token.keyword {
-    color: #00009f;
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #2271b1;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+	color: #a85f00;
+}
+
+.token.function {
+	color: #b8236d;
+}
+
+.token.keyword {
+	color: #135e96;
+	font-weight: 600;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function-definition {
+	color: #101517;
 }
 
 .token.important,
 .token.bold {
-    font-weight: bold;
+	font-weight: 700;
 }
 
 .token.italic {
-    font-style: italic;
+	font-style: italic;
 }
 
-.token.class-name,
-.language-json .token.property {
-    color: #2B91AF;
-}
-
-.token.tag,
-.token.selector {
-    color: #800000;
-}
-
-.token.attr-name,
-.token.property,
-.token.regex,
 .token.entity {
-    color: #ff0000;
+	cursor: help;
 }
 
-.token.directive.tag  .tag {
-    background: #ffff00;
-    color: #393A34;
+@media screen and (-ms-high-contrast: active) {
+	code[class*="language-"],
+	pre[class*="language-"] {
+		color: windowText;
+		background: window;
+	}
+
+	:not(pre) > code[class*="language-"],
+	pre[class*="language-"] {
+		background: window;
+	}
+
+	.token.important {
+		background: highlight;
+		color: window;
+		font-weight: 700;
+	}
+
+	.token.atrule,
+	.token.attr-value,
+	.token.function,
+	.token.keyword,
+	.token.operator,
+	.token.selector {
+		font-weight: 700;
+	}
+
+	.token.attr-value,
+	.token.comment,
+	.token.doctype,
+	.token.function,
+	.token.keyword,
+	.token.operator,
+	.token.property,
+	.token.string {
+		color: highlight;
+	}
+
+	.token.attr-value,
+	.token.url {
+		font-weight: 700;
+	}
 }
 
-/* overrides color-values for the Line Numbers plugin
- * http://prismjs.com/plugins/line-numbers/
- */
+/* Line Numbers */
+pre.line-numbers {
+	position: relative;
+	padding-left: 4.5rem;
+	counter-reset: linenumber;
+}
+
+pre.line-numbers > code {
+	position: relative;
+}
+
 .line-numbers .line-numbers-rows {
-  border-right-color: #a5a5a5;
+	position: absolute;
+	pointer-events: none;
+	top: 0;
+	font-size: 100%;
+	left: -4.5rem;
+	width: 4rem; /* works for line-numbers below 10000 lines */
+	letter-spacing: -1px;
+	border-right: 0;
+
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+
 }
 
-.line-numbers-rows > span:before {
-  color: #2B91AF;
+.line-numbers-rows > span {
+	pointer-events: none;
+	display: block;
+	counter-increment: linenumber;
 }
 
-/* overrides color-values for the Line Highlight plugin
-* http://prismjs.com/plugins/line-highlight/
-*/
-.line-highlight {
-  background: rgba(193, 222, 241, 0.2);
-  background: -webkit-linear-gradient(left, rgba(193, 222, 241, 0.2) 70%, rgba(221, 222, 241, 0));
-  background: linear-gradient(to right, rgba(193, 222, 241, 0.2) 70%, rgba(221, 222, 241, 0));
+.line-numbers-rows > span::before {
+	content: counter(linenumber);
+	color: #5c6370;
+	display: block;
+	padding-right: 0.8em;
+	text-align: right;
 }

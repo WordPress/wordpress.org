@@ -33,6 +33,7 @@ function render( $attributes, $content, $block ) {
 		array(
 			'taxonomy'   => 'learning-pathway',
 			'hide_empty' => true,
+			'order'      => 'DESC',
 		)
 	);
 	$is_mini           = isset( $attributes['isMini'] ) && $attributes['isMini'];

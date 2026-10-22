@@ -34,7 +34,7 @@ class Plugin_Geopattern_SVG extends SVG {
 	 */
 	protected function getSvgHeader() {
 		if ( $this->viewbox ) {
-			return "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$this->width}\" height=\"{$this->height}\" viewbox=\"{$this->viewbox}\" preserveAspectRatio=\"none\">";
+			return "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$this->width}\" height=\"{$this->height}\" viewBox=\"{$this->viewbox}\" preserveAspectRatio=\"none\">";
 		} else {
 			return "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{$this->width}\" height=\"{$this->height}\">";
 		}

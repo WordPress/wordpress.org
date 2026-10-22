@@ -70,6 +70,7 @@ class Plugin {
 		add_action( 'gp_project_created', array( $this, 'update_projects_last_updated' ) );
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
+		add_filter( 'request', array( $this, 'drop_wp_query_vars' ) );
 		add_action( 'init', array( $this, 'bump_assets_versions' ), 20 );
 		add_action( 'init', array( $this, 'add_cors_header' ) );
 		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
@@ -314,6 +315,7 @@ class Plugin {
 			! $translation->id &&
 			! empty( $args['user_id'] ) &&
 			'waiting' === $args['status'] &&
+			! empty( GP::$current_route ) &&
 			GP::$current_route->class_name === 'GP_Route_Translation' &&
 			GP::$current_route->last_method_called === 'translations_post'
 		) {
@@ -373,35 +375,51 @@ class Plugin {
 	 */
 	public function log_translation_source( GP_Translation $translation ) {
 		static $already_logged = array();
-		$key                   = ! $translation->translation_0 ? null : $translation->translation_0;
-		if ( isset( $already_logged[ $key ] ) ) {
+
+		if ( empty( $translation->id ) || isset( $already_logged[ $translation->id ] ) ) {
 			return;
 		}
-		$already_logged[ $key ] = true;
-		$source                 = '';
-		if ( $translation && is_object( GP::$current_route ) && 'GP_Route_Translation' === GP::$current_route->class_name ) {
-			if ( 'import_translations_post' === GP::$current_route->last_method_called ) {
-				$this->imported_translation_ids[] = $translation->id;
 
-				if ( isset( $_POST['source'] ) && 'translate-live' == $_POST['source'] ) {
+		if ( ! is_object( GP::$current_route ) || 'GP_Route_Translation' !== GP::$current_route->class_name ) {
+			return;
+		}
+
+		$source = '';
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verification is handled upstream by GlotPress route handlers.
+		if ( 'import_translations_post' === GP::$current_route->last_method_called && 'rejected' !== $translation->status ) {
+			if ( empty( $this->imported_source ) ) {
+				if ( isset( $_POST['source'] ) && 'translate-live' === $_POST['source'] ) {
 					$this->imported_source = 'playground';
-				} elseif ( ! isset( $_POST['source'] ) && 'Import' == $_POST['submit'] ) {
+				} elseif ( ! isset( $_POST['source'] ) && isset( $_POST['submit'] ) && 'Import' === $_POST['submit'] ) {
 					$this->imported_source = 'import';
 				} else {
 					return;
 				}
 			}
-			if ( 'translations_post' === GP::$current_route->last_method_called ) {
-				if ( isset( $_POST['translation_source'] ) && 'frontend' == $_POST['translation_source'] ) {
-					$source = 'frontend';
-					if ( isset( $_POST['externalTranslationSource'] ) ) {
-						$suggestion_source     = sanitize_text_field( $_POST['externalTranslationSource'] );
-						$suggested_translation = sanitize_text_field( $_POST['externalTranslationUsed'] );
-						$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
-					}
+
+			$already_logged[ $translation->id ] = true;
+			$this->imported_translation_ids[]   = $translation->id;
+		} elseif (
+			'translations_post' === GP::$current_route->last_method_called && 'gp_translation_created' === current_action()
+		) {
+			$already_logged[ $translation->id ] = true;
+
+			if ( isset( $_POST['translation_source'] ) && 'frontend' === $_POST['translation_source'] ) {
+				$source = 'frontend';
+
+				if ( ! empty( $_POST['externalTranslationSource'] ) ) {
+					$suggestion_source     = sanitize_text_field( wp_unslash( $_POST['externalTranslationSource'] ) );
+					$suggested_translation = isset( $_POST['externalTranslationUsed'] )
+						// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Only used for in-memory comparison against the saved translation; sanitization would strip tags/newlines.
+						? (string) wp_unslash( $_POST['externalTranslationUsed'] )
+						: '';
+
+					$this->save_translation_suggestion_source( $translation, $suggested_translation, $suggestion_source );
 				}
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
 		if ( $source ) {
 			gp_update_meta( $translation->id, 'source', $source, 'translation' );
 		}
@@ -434,23 +452,37 @@ class Plugin {
 	 */
 	public function log_imported_translations() {
 		global $wpdb;
-		$source = $this->imported_source;
-		if ( ! $source && ! $this->imported_translation_ids ) {
+
+		$source          = $this->imported_source;
+		$translation_ids = $this->imported_translation_ids;
+
+		$this->imported_source          = '';
+		$this->imported_translation_ids = array();
+
+		if ( empty( $source ) || empty( $translation_ids ) ) {
 			return;
 		}
-		$sql        = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
-		$sql_vars   = array();
-		$sql_values = array_map(
-			function( $translation_id ) use ( $source, &$sql_vars ) {
-				$sql_vars[] = $translation_id;
-				$sql_vars[] = $source;
-				return '( "translation", %d, "source", %s )';
-			},
-			$this->imported_translation_ids
-		);
-		$sql       .= implode( ', ', $sql_values );
-		$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
 
+		$chunks = array_chunk( $translation_ids, 500 );
+
+		foreach ( $chunks as $chunk ) {
+			$sql_vars   = array();
+			$sql_values = array_map(
+				function ( $translation_id ) use ( $source, &$sql_vars ) {
+					$sql_vars[] = $translation_id;
+					$sql_vars[] = $source;
+					return "( 'translation', %d, 'source', %s )";
+				},
+				$chunk
+			);
+
+			$sql  = 'INSERT INTO ' . $wpdb->gp_meta . ' (object_type, object_id, meta_key, meta_value) VALUES ';
+			$sql .= implode( ', ', $sql_values );
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The query string is dynamically constructed using safe placeholders only.
+			$wpdb->query( $wpdb->prepare( $sql, $sql_vars ) );
+
+			wp_cache_delete_multiple( $chunk, 'translation' );
+		}
 	}
 
 	/**
@@ -547,7 +579,7 @@ class Plugin {
 	 */
 	public function show_admin_bar() {
 		add_action( 'gp_head', 'wp_enqueue_admin_bar_header_styles' );
-		add_action( 'gp_head', '_admin_bar_bump_cb' );
+		add_action( 'gp_head', 'wp_enqueue_admin_bar_bump_styles' );
 
 		gp_enqueue_script( 'admin-bar' );
 		gp_enqueue_style( 'admin-bar' );
@@ -630,6 +662,8 @@ class Plugin {
 		WP_CLI::add_command( 'wporg-translate export', __NAMESPACE__ . '\CLI\Export' );
 		WP_CLI::add_command( 'wporg-translate export-json', __NAMESPACE__ . '\CLI\Export_Json' );
 		WP_CLI::add_command( 'wporg-translate show-stats', __NAMESPACE__ . '\CLI\Stats_Print' );
+		WP_CLI::add_command( 'wporg-translate update-project-stats', __NAMESPACE__ . '\CLI\Update_Project_Stats' );
+		WP_CLI::add_command( 'wporg-translate check-percentage-translated-above-100-percent', __NAMESPACE__ . '\CLI\Check_Percentage_Translated_Above_100_Percent' );
 
 	}
 
@@ -680,6 +714,28 @@ class Plugin {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Drops WordPress' own query vars from GlotPress requests.
+	 *
+	 * GlotPress routes on the request URI and aborts the main query, and
+	 * short_circuit_handle_404() keeps WordPress from resetting the query flags
+	 * afterwards. A stray `?pagename=` would otherwise leave is_page() true with
+	 * no queried object, and get_body_class() warns reading its post_parent.
+	 *
+	 * `robots` is kept because the robots.txt rewrite rule in wporg-gp-routes sets it
+	 * so is_robots() stops redirect_canonical().
+	 *
+	 * @param array $query_vars The requested query variables.
+	 * @return array Filtered query variables.
+	 */
+	public function drop_wp_query_vars( $query_vars ) {
+		if ( is_glotpress() ) {
+			return array_intersect_key( $query_vars, array_flip( array( 'gp_route', 'robots' ) ) );
+		}
+
+		return $query_vars;
 	}
 
 	/**
@@ -860,7 +916,7 @@ class Plugin {
 			wp_cache_set( self::GTE_EMAIL_ADDRESSES, $gte_email_addresses, self::CACHE_GROUP, 12 * HOUR_IN_SECONDS );
 		}
 
-		if ( in_array( $user->user_email, $gte_email_addresses ) ) {
+		if ( in_array( $user->user_email, $gte_email_addresses, true ) ) {
 			return true;
 		}
 

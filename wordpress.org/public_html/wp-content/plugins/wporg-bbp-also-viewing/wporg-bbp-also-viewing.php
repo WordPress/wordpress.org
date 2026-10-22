@@ -200,7 +200,8 @@ function bbp_user_edit_after() {
 		</p>',
 		checked( enabled( $user_id ), true, false ),
 		sprintf(
-			__( 'Enable the <a href="%s">Also Viewing</a> feature.', 'wporg-forums' ),
+			/* translators: %s: Handbook URL. */
+			wp_kses_post( __( 'Enable the <a href="%s">Also Viewing</a> feature.', 'wporg-forums' ) ),
 			'https://make.wordpress.org/support/handbook/appendix/helpful-tools/#avoiding-overlapping-replies'
 		)
 	);
@@ -295,20 +296,14 @@ function get_others_currently_viewing( $page ) {
 		return array_values( $users );
 	}
 
-	// Anonymize mods for other users.
-	foreach ( $users as &$u ) {
-		if ( user_can( $u['user_id'], 'moderate' ) ) {
-			$u['who']     = '';
-			$u['user_id'] = 0;
-		}
-	}
-
-	// Anonymize users unless they've got similar caps.
+	// Anonymize mods, and users unless they've got similar caps.
 	// Plugin support reps can see other reps and committers -for their own plugins-.
 	$current_user_objects = get_user_object_slugs( get_current_user_id() );
 	foreach ( $users as &$u ) {
-		$user_objects = get_user_object_slugs( $u['user_id'] );
-		if ( ! array_intersect( $current_user_objects, $user_objects ) ) {
+		if (
+			user_can( $u['user_id'], 'moderate' ) ||
+			! array_intersect( $current_user_objects, get_user_object_slugs( $u['user_id'] ) )
+		) {
 			$u['who']     = '';
 			$u['user_id'] = 0;
 		}

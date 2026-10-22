@@ -1,6 +1,6 @@
 <?php
 /**
- * Post handling customizations.
+ * Flagged photo (aka potentially sensitive content) functionality.
  *
  * @package WordPressdotorg\Photo_Directory
  */
@@ -47,9 +47,8 @@ class Flagged {
 		// Add post state indicator.
 		add_filter( 'display_post_states',                   [ __CLASS__, 'display_post_states' ], 10, 2 );
 
-		// Add count of user's flagged photos in author column.
-		//     Note: Priority after Admin::add_published_photos_count_to_author()
-		add_filter( 'the_author',                            [ __CLASS__, 'add_flagged_photos_count_to_author' ], 11 );
+		// Output count of user's flagged photos in author column.
+		add_filter( 'photo_author_column_data_end',          [ __CLASS__, 'output_flagged_photos_count_to_author' ] );
 
 		// Add support to the post edit page.
 		add_action( 'admin_footer-post.php',                 [ __CLASS__, 'output_js_for_post_edit_support' ] );
@@ -224,7 +223,7 @@ class Flagged {
 				// User can't manage flagged photos.
 				! current_user_can( self::get_capability() )
 			) {
-				wp_die( __( 'Sorry, you are not allowed to edit this post.', 'wporg-photos' ) );
+				wp_die( esc_html__( 'Sorry, you are not allowed to edit this post.', 'wporg-photos' ) );
 			}
 		}
 	}
@@ -239,7 +238,7 @@ class Flagged {
 		$count_indicator = $flagged_count
 			? "<span class=\"update-plugins count-{$flagged_count}\"><span class=\"plugin-count\">{$flagged_count}</span></span>"
 			: '';
- 
+
 		// Add 'Flagged' link if user can read flagged photos.
 		add_submenu_page(
 			$path,
@@ -264,46 +263,37 @@ class Flagged {
 	}
 
 	/**
-	 * Appends the count of the published photos to author names in photo post
-	 * listings.
+	 * Outputs the count of the flagged photos for the post's author.
 	 *
-	 * @param string $display_name The author's display name.
-	 * @return string
+	 * @param WP_Post $post Post object.
 	 */
-	public static function add_flagged_photos_count_to_author( $display_name ) {
-		global $authordata;
-
-		if ( ! is_admin() || ! Admin::should_include_photo_column() ) {
-			return $display_name;
-		}
-
-		// Close link to contributor's listing of photos.
-		$display_name .= '</a>';
+	public static function output_flagged_photos_count_to_author( $post ) {
+		$author_id = (int) get_post_field( 'post_author', $post );
+		$output = '';
 
 		// Show number of flagged photos.
-		$flagged_count = User::count_flagged_photos( $authordata->ID );
+		$flagged_count = User::count_flagged_photos( $author_id );
 		$flagged_link = '';
 		if ( $flagged_count ) {
 			if ( current_user_can( self::get_capability() ) ) {
 				$flagged_link = add_query_arg( [
 					'post_type'   => Registrations::get_post_type(),
 					'post_status' => self::get_post_status(),
-					'author'      => $authordata->ID,
+					'author'      => $author_id,
 				], 'edit.php' );
 			}
-			$display_name .= '<div class="user-flagged-count">'
+			$output .= '<div class="user-flagged-count">'
 				. sprintf(
 					/* translators: %s: Count of user's flagged photos possibly linked to listing of their flagged photos. */
 					_n( 'Flagged: <strong>%s</strong>', 'Flagged: <strong>%s</strong>', $flagged_count, 'wporg-photos' ),
-					$flagged_link ? sprintf( '<a href="%s">%d</a>', $flagged_link, $flagged_count ) : $flagged_count
+					$flagged_link ? sprintf( '<a href="%s">%d</a>', esc_url( $flagged_link ), $flagged_count ) : $flagged_count
 				)
 				. "</div>\n";
 		}
 
-		// Prevent unbalanced tag.
-		$display_name .= '<a>';
-
-		return $display_name;
+		if ( $output ) {
+			echo wp_kses_post( $output );
+		}
 	}
 
 	/**
@@ -316,29 +306,29 @@ class Flagged {
 		if ( Registrations::get_post_type() === get_post_type( $post ) ) {
 			$post_status = self::get_post_status();
 			$is_flagged = get_post_status( $post ) === $post_status;
-			$selected = $is_flagged ? 'selected' : '';
 			$label_text = __( 'Flagged', 'wporg-photos' );
-			$label = $is_flagged ? "<span id=\"post-status-display\">{$label_text}</span>" : '';
-	
-			echo "
+			?>
 			<script>
 			document.addEventListener('DOMContentLoaded', function() {
 				const select = document.querySelector('select#post_status');
 				const option = document.createElement('option');
-				option.value = '{$post_status}';
-				option.innerHTML = '{$label_text}';
-				option.selected = '{$selected}' === 'selected';
+				const labelText = <?php echo wp_json_encode( $label_text, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
+				option.value = <?php echo wp_json_encode( $post_status, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
+				option.textContent = labelText;
+				option.selected = <?php echo wp_json_encode( $is_flagged ); ?>;
 				select.appendChild(option);
-	
-				const label = document.querySelector('.misc-pub-section label');
-				label.innerHTML += '{$label}';
 
 				if (option.selected) {
-					document.getElementById('post-status-display').innerHTML = '{$label_text}';
+					const label = document.querySelector('.misc-pub-section label');
+					const status = document.createElement('span');
+					status.id = 'post-status-display';
+					status.textContent = labelText;
+					label.appendChild(status);
+					document.getElementById('post-status-display').textContent = labelText;
 				}
 			});
 			</script>
-			";
+			<?php
 		}
 	}
 
@@ -399,12 +389,12 @@ class Flagged {
 				// Function to add the new status
 				function addNewStatus(target) {
 					const select = target.querySelector('select[name="_status"]');
-					const post_status = '<?php echo self::get_post_status(); ?>';
+					const post_status = <?php echo wp_json_encode( self::get_post_status(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 
 					if (select) {
 						const optionExists = Array.from(select.options).some(opt => opt.value === post_status);
 						if (!optionExists) {
-							const newOption = new Option( "<?php _e( 'Flagged', 'wporg-photos' ); ?>", post_status);
+							const newOption = new Option( <?php echo wp_json_encode( __( 'Flagged', 'wporg-photos' ) ); ?>, post_status);
 							select.add(newOption);
 						}
 					}
@@ -412,7 +402,7 @@ class Flagged {
 
 				// Function to check if a new node is the Quick Edit or Bulk Edit form
 				function checkNewNode(target) {
-					if (target instanceof HTMLElement && (target.classList.contains('inline-edit-<?php echo Registrations::get_post_type(); ?>') || target.id === 'bulk-edit')) {
+					if (target instanceof HTMLElement && (target.classList.contains(<?php echo wp_json_encode( 'inline-edit-' . Registrations::get_post_type(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>) || target.id === 'bulk-edit')) {
 						addNewStatus(target);
 					}
 				}

@@ -17,7 +17,9 @@ $widget_args = array(
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Categorization', array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Adopt_Me', array(), $widget_args );
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Meta', array(), $widget_args );
-the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Ratings', array(), $widget_args );
+
+echo do_blocks( '<!-- wp:pattern {"slug":"wporg-plugins-2024/sidebar"} /-->' ); // phpcs:ignore
+
 the_widget( 'WordPressdotorg\Plugin_Directory\Widgets\Contributors', array(), array(
 	'before_title'  => '<h2 class="widget-title">',
 	'after_title'   => '</h2>',

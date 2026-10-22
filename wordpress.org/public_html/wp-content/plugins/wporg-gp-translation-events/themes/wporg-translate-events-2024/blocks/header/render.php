@@ -1,7 +1,18 @@
-<?php namespace Wporg\TranslationEvents\Theme_2024;
+<?php
+/**
+ * Outputs the opening HTML document for a page, including the head, the rendered site header, and the wp-site-blocks wrapper.
+ *
+ * @package wporg-translate-events-2024
+ */
 
-/** @var string $site_header */
-/** @var array $attributes */
+namespace Wporg\TranslationEvents\Theme_2024;
+
+/**
+ * Template inputs.
+ *
+ * @var string $site_header The rendered site header markup.
+ * @var array  $attributes  Attributes passed through to the page header.
+ */
 
 $html_title = implode( ' | ', array( $attributes['title'], __( 'Translation Events', 'wporg-translate-events-2024' ) ) );
 

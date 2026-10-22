@@ -1,0 +1,37 @@
+{
+	"blocks": [
+		{
+			"type": "links",
+			"links": [
+				{
+					"text": "Search erasures",
+					"url": "https://wordpress.org/wp-admin/erase-personal-data.php?s={sender_email}"
+				},
+				{
+					"text": "Search exports",
+					"url": "https://wordpress.org/wp-admin/export-personal-data.php?s={sender_email}"
+				}
+			]
+		},
+		{
+			"type": "items",
+			"items": [
+				{
+					"title": "Export",
+					"tooltip": "Created: 2026-01-01 00:00:00",
+					"badges": [
+						{
+							"label": "Completed",
+							"tone": "success"
+						}
+					],
+					"meta": [
+						{
+							"text": "2026-01-01"
+						}
+					]
+				}
+			]
+		}
+	]
+}

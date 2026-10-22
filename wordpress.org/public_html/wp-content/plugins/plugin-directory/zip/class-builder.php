@@ -22,6 +22,7 @@ class Builder {
 
 	protected $slug       = '';
 	protected $version    = '';
+	protected $versions   = [];
 	protected $context    = '';
 	protected $stable_tag = '';
 
@@ -29,11 +30,20 @@ class Builder {
 	protected $plugin_version_svn_url = '';
 
 	/**
+	 * The revision of the plugin that was just packaged.
+	 *
+	 * @var int
+	 */
+	protected $plugins_revision = 0;
+
+	/**
 	 * Generate a ZIP for a provided Plugin tags.
 	 *
-	 * @param string $slug     The plugin slug.
-	 * @param array  $versions The versions of the plugin to build ZIPs for.
-	 * @param string $context  The context of this Builder instance (commit #, etc)
+	 * @param string $slug       The plugin slug.
+	 * @param array  $versions   The versions of the plugin to build ZIPs for.
+	 * @param string $context    Optional. The context of this Builder instance (commit #, etc). Default empty string.
+	 * @param string $stable_tag Optional. The stable tag of the plugin, used to determine whether checksums are generated. Default empty string.
+	 * @return array|false Map of successfully-built version (as requested) => SVN revision it was built from, false in unconfigured environments.
 	 */
 	public function build( $slug, $versions, $context = '', $stable_tag = '' ) {
 		// Bail when in an unconfigured environment.
@@ -82,19 +92,27 @@ class Builder {
 				$res = SVN::add( $plugin_folder );
 			}
 			if ( ! $res['result'] ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 				throw new Exception( __METHOD__ . ": Failed to create {$plugin_folder}." );
 			}
 		} else {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( __METHOD__ . ': Failed to create checkout of ' . PLUGIN_ZIP_SVN_URL . '.' );
 		}
 
 		// Build the requested ZIPs
-		foreach ( $versions as $version ) {
+		$built_versions = [];
+		foreach ( $versions as $requested_version ) {
 			// Incase .1 was passed, treat it as 0.1
+			$version = $requested_version;
 			if ( '.' == substr( $version, 0, 1 ) ) {
 				$version = "0{$version}";
 			}
 			$this->version = $version;
+
+			// Reset the per-version output files, so error handling only acts on files from this iteration.
+			$this->checksum_file  = '';
+			$this->signature_file = '';
 
 			if ( 'trunk' == $version ) {
 				$this->zip_file = "{$this->tmp_dir}/{$this->slug}/{$this->slug}.zip";
@@ -124,6 +142,11 @@ class Builder {
 
 			} catch ( Exception $e ) {
 				// In event of error, skip this file this time.
+				$error = preg_replace( '/[\r\n\t]+/', ' ', $e->getMessage() );
+
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Routed to the error log via E_USER_WARNING; raw is fine.
+				trigger_error( sprintf( 'ZIP build failed for %s %s: %s', $this->slug, $version, $error ), E_USER_WARNING );
+
 				$this->cleanup_plugin_tmp();
 
 				// Perform an SVN up to revert any changes made.
@@ -145,6 +168,15 @@ class Builder {
 			if ( $this->signature_file ) {
 				SVN::add( $this->signature_file );
 			}
+
+			// Key by the requested version, as release records store the raw tag name.
+			$built_versions[ $requested_version ] = $this->plugins_revision;
+		}
+
+		// If no versions could be built, an empty commit would incorrectly report success.
+		if ( ! $built_versions ) {
+			$this->cleanup();
+			throw new Exception( __METHOD__ . ': Failed to build any of the requested ZIPs.' );
 		}
 
 		$res = SVN::commit(
@@ -160,15 +192,17 @@ class Builder {
 
 		$this->cleanup();
 
-		if ( ! $res['result'] ) {
-			if ( $res['errors'] ) {
-				throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . $res['errors'][0]['error_message'] );
-			} else {
-				throw new Exception( __METHOD__ . ': Commit failed without error, maybe there were no modified files?' );
-			}
+		if ( ! $res['result'] && $res['errors'] ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
+			throw new Exception( __METHOD__ . ': Failed to commit the new ZIPs: ' . $res['errors'][0]['error_message'] );
 		}
 
-		return true;
+		/*
+		 * A failed commit without any SVN errors means there were no modified files,
+		 * ie. the ZIPs on disk were already up to date. That's a successful build.
+		 */
+
+		return $built_versions;
 	}
 
 	/**
@@ -370,6 +404,21 @@ class Builder {
 			$svn_params[] = 'ignore-externals';
 		}
 
+		/*
+		 * Before we check out the plugin, ensure that it has *files* in the folder.
+		 *
+		 * Some plugins accidentally copy their entire SVN repo into the tagged folder, which
+		 * causes a recursive checkout many multiple gigabytes in size, causing issues for WordPress.org.
+		 */
+		$remote_files = SVN::ls( $this->plugin_version_svn_url, true );
+		if (
+			is_array( $remote_files ) &&
+			! wp_list_filter( $remote_files, [ 'kind' => 'file' ] )
+		) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
+			throw new Exception( __METHOD__ . ": Could not create SVN export of {$this->plugin_version_svn_url}: Path appears not to have any files." );
+		}
+
 		$res = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		// Handle tags which we store as 0.blah but are in /tags/.blah
 		if ( ! $res['result'] && '0.' == substr( $this->version, 0, 2 ) ) {
@@ -378,12 +427,16 @@ class Builder {
 			$res                          = SVN::export( $this->plugin_version_svn_url, $build_dir, $svn_params );
 		}
 		if ( ! $res['result'] ) {
-			throw new Exception( __METHOD__ . ': ' . $res['errors'][0]['error_message'], 404 );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
+			throw new Exception( __METHOD__ . ': ' . ( $res['errors'][0]['error_message'] ?? 'unknown error' ), 404 );
 		}
 
+		// Store the SVN revision that's been used for the ZIP in a property for later.
+		$this->plugins_revision = $res['revision'];
+
 		// Verify that the specified plugin zip will contain files.
-		if ( ! array_diff( scandir( $this->tmp_build_dir ), array( '.', '..' ) ) ) {
-			throw new Exception( ___METHOD__ . ': No files exist in the plugin directory', 404 );
+		if ( ! array_diff( scandir( $build_dir ), array( '.', '..' ) ) ) {
+			throw new Exception( __METHOD__ . ': No files exist in the plugin directory', 404 );
 		}
 
 		// Cleanup any symlinks that shouldn't be there
@@ -440,6 +493,7 @@ class Builder {
 		), $zip_build_output, $return_value );
 
 		if ( $return_value ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- CLI context, callers write the message to STDERR.
 			throw new Exception( __METHOD__ . ': ZIP generation failed, return code: ' . $return_value, 503 );
 		}
 	}

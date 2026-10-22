@@ -2,7 +2,6 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use GP_Locales;
-use WP_Http;
 
 /**
  * Translation for plugin content.
@@ -43,6 +42,13 @@ class Plugin_I18n {
 	 * @var bool
 	 */
 	public static $set_cache = true;
+
+	/**
+	 * Readme parser, held only for its field sanitizer.
+	 *
+	 * @var Readme\Parser|null
+	 */
+	private $readme_parser = null;
 
 	/**
 	 * Fetch the instance of the Plugin_I18n class.
@@ -366,6 +372,11 @@ class Plugin_I18n {
 			return $a_len == $b_len ? 0 : ($a_len > $b_len ? -1 : 1);
 		} );
 
+		$stored = $content;
+
+		// Markers are ours; one arriving in stored content would pick its own substitution site.
+		$content = self::remove_translation_markers( $content );
+
 		// Mark each original for translation
 		foreach ( $originals as $original_id => $original ) {
 			if ( isset( $translations[ $original_id ] ) ) {
@@ -374,9 +385,57 @@ class Plugin_I18n {
 		}
 
 		// Translate the marked originals.
-		$content = $this->translate_marked_gp_originals( $content, $translations, $originals );
+		$translated = $this->translate_marked_gp_originals( $content, $translations, $originals );
 
-		return $content;
+		// Nothing was marked, so the stored value stands as it was.
+		if ( $translated === $content ) {
+			return $stored;
+		}
+
+		return $this->sanitize_translation( $key, $translated );
+	}
+
+	/**
+	 * Strips this class's substitution markers from a value it did not mark.
+	 *
+	 * Leaves a space where each one was. Deleting them instead would close the gap,
+	 * and the text on either side could meet as a marker of its own; a space cannot
+	 * appear in one, so nothing can form across it and a single pass is enough.
+	 *
+	 * @param string $content The content to be searched.
+	 * @return string The content, with no marker syntax of its own left in it.
+	 */
+	public static function remove_translation_markers( $content ) {
+		return preg_replace( '/___TRANSLATION_\d+___/', ' ', $content );
+	}
+
+	/**
+	 * Reduces a translated field to the markup it accepts.
+	 *
+	 * Runs on the assembled field, not on each substituted translation: a
+	 * translation that is harmless alone can still land somewhere its own
+	 * sanitizer cannot see, such as inside an attribute.
+	 *
+	 * @param string $key         The translation key, as passed to {@see Plugin_I18n::translate()}.
+	 * @param string $translation The assembled field, or a single translation.
+	 * @return string The value, reduced to the field's own allow-list.
+	 */
+	public function sanitize_translation( $key, $translation ) {
+		// A block title is stored as the block declared it, so markup is all there is to drop.
+		if ( str_starts_with( $key, 'block_title:' ) ) {
+			return wp_strip_all_tags( $translation );
+		}
+
+		// Encoded because the readme path stores these encoded, and quotes reach attributes.
+		if ( 'title' === $key || 'excerpt' === $key ) {
+			return esc_html( wp_strip_all_tags( $translation ) );
+		}
+
+		if ( ! $this->readme_parser ) {
+			$this->readme_parser = new Readme\Parser( '' );
+		}
+
+		return $this->readme_parser->filter_text( $translation );
 	}
 
 	/**
@@ -393,12 +452,17 @@ class Plugin_I18n {
 		if ( $original === $content ) {
 			$content = $marker;
 		} else {
-			$original = preg_quote( $original, '/' );
+			$original = preg_quote( trim( $original ), '/' );
 
-			if ( false === strpos( $content, '<' ) ) {
+			if ( ! str_contains( $content, '<' ) ) {
 				$content = preg_replace( "/\b{$original}\b/", $marker, $content );
 			} else {
-				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>){$original}(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
+				$content = preg_replace( "/(<([a-z0-9]*)\b[^>]*>)\s*{$original}\s*(<\/\\2>)/m", "\${1}{$marker}\${3}", $content );
+
+				// Nested lists: match <li>STRING<ul> or <li>STRING<ol>.
+				if ( ! str_contains( $content, $marker ) ) {
+					$content = preg_replace( "/(<li\b[^>]*>)\s*{$original}\s*(<[uo]l\b[^>]*>)/m", "\${1}{$marker}\${2}", $content );
+				}
 			}
 		}
 
@@ -451,33 +515,65 @@ class Plugin_I18n {
 	 * @param string            $branch      Optional. Branch - 'stable-readme' for example. Default: 'stable'.
 	 * @param int               $min_percent Optional. Only return locales where percent_translated is >= this value.
 	 *                                       Default: 95.
-	 * @return array
+	 * @return array Locale objects with wp_locale and percent_translated properties.
 	 */
 	public function get_locales( $post = null, $branch = 'stable', $min_percent = 95 ) {
+		global $wpdb;
+
 		$post = get_post( $post );
 
-		$cache_suffix = 'translation_sets';
-
-		$translation_sets = $this->cache_get( $post->post_name, $branch, $cache_suffix );
-		if ( false === $translation_sets ) {
-			$api_url  = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch . '/', [ 'https' ] );
-			$response = wp_remote_get( $api_url );
-
-			if ( is_wp_error( $response ) || WP_Http::OK !== wp_remote_retrieve_response_code( $response ) ) {
-				$translation_sets = [];
-			} else {
-				$result           = json_decode( wp_remote_retrieve_body( $response ) );
-				$translation_sets = isset( $result->translation_sets ) ? $result->translation_sets : [];
-			}
-
-			$this->cache_set( $post->post_name, $branch, $translation_sets, $cache_suffix );
+		$project_id = $this->get_gp_branch_id( $post->post_name, $branch );
+		if ( ! $project_id ) {
+			return [];
 		}
 
-		$locales = array_filter( $translation_sets, function( $locale ) use ( $min_percent ) {
-			return $locale->percent_translated >= $min_percent;
-		} );
+		/*
+		 * translate.wordpress.org keeps these counts current on every translation edit and originals import,
+		 * but never removes a row, so the join drops sets that have since been deleted.
+		 */
+		$translation_sets = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT stats.locale, stats.locale_slug, stats.current, stats.all
+				FROM %i stats
+				INNER JOIN %i sets ON sets.project_id = stats.project_id AND sets.locale = stats.locale AND sets.slug = stats.locale_slug
+				WHERE stats.project_id = %d
+				ORDER BY stats.locale, stats.locale_slug',
+				GLOTPRESS_TABLE_PREFIX . 'project_translation_status',
+				GLOTPRESS_TABLE_PREFIX . 'translation_sets',
+				$project_id
+			)
+		);
 
-		return $locales;
+		require_once GLOTPRESS_LOCALES_PATH;
+
+		$locales = [];
+		foreach ( $translation_sets as $set ) {
+			$gp_locale = GP_Locales::by_slug( $set->locale );
+			if ( empty( $gp_locale->wp_locale ) ) {
+				continue;
+			}
+
+			// Variants are named the way translate.wordpress.org names them, e.g. de_DE_formal. See https://meta.trac.wordpress.org/ticket/4367.
+			$wp_locale = $gp_locale->wp_locale;
+			if ( 'default' !== $set->locale_slug && ! str_contains( $wp_locale, $set->locale_slug ) ) {
+				$wp_locale .= '_' . $set->locale_slug;
+			}
+
+			// Rounded down, like GlotPress.
+			$percent_translated = $set->all ? (int) floor( $set->current / $set->all * 100 ) : 0;
+
+			// Several sets can share a wp_locale, e.g. ca-val and ca/valencia.
+			if ( $percent_translated < $min_percent || $percent_translated <= ( $locales[ $wp_locale ]->percent_translated ?? -1 ) ) {
+				continue;
+			}
+
+			$locales[ $wp_locale ] = (object) [
+				'wp_locale'          => $wp_locale,
+				'percent_translated' => $percent_translated,
+			];
+		}
+
+		return array_values( $locales );
 	}
 
 	/**

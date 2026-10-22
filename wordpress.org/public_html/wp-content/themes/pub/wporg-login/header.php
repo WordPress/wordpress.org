@@ -10,7 +10,7 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
-<title><?php echo wporg_login_title(); ?></title>
+<title><?php echo esc_html( wporg_login_title() ); ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php wp_head(); ?>
 </head>
@@ -20,4 +20,4 @@
 
 <div id="login">
 	<?php /* The following translation pulls from the WordPress translations, mimicking wp-login.php intentionally for consistency. */ ?>
-	<h1><a href="<?php echo wporg_login_wordpress_url(); ?>" tabindex="-1"><?php echo translate( 'Powered by WordPress' ); ?></a></h1>
+	<h1><a href="<?php echo wporg_login_wordpress_url(); ?>" tabindex="-1"><?php esc_html_e( 'Powered by WordPress' ); ?></a></h1>

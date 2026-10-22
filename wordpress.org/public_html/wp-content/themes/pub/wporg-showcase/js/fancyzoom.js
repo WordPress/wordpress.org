@@ -79,7 +79,9 @@ function prepZooms() {
 	if (! document.getElementsByTagName) {
 		return;
 	}
-	var links = document.getElementsByTagName("a");
+	// Only the theme's own gallery is zoomable; unrelated anchors (comment links) must not be bound.
+	var gallery = document.querySelector(".gallery");
+	var links = gallery ? gallery.getElementsByTagName("a") : [];
 	for (i = 0; i < links.length; i++) {
 		if (links[i].getAttribute("href")) {
 			if (links[i].getAttribute("href").search(/(.*)\.(jpg|jpeg|gif|png|bmp|tif|tiff)/gi) != -1) {
@@ -239,10 +241,10 @@ function zoomIn(from, shift) {
 		if (includeCaption) {
 			document.getElementById(zoomCaptionDiv).style.visibility = "hidden";
 			if (from.getAttribute('title') && includeCaption) {
-				// Yes, there's a caption, set it up
-				document.getElementById(zoomCaption).innerHTML = from.getAttribute('title');
+				// Yes, there's a caption, set it up. The title is untrusted, so it is written as text.
+				document.getElementById(zoomCaption).textContent = from.getAttribute('title');
 			} else {
-				document.getElementById(zoomCaption).innerHTML = "";
+				document.getElementById(zoomCaption).textContent = "";
 			}
 		}
 
