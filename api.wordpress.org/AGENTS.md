@@ -1,0 +1,21 @@
+# Agent instructions — api.wordpress.org/
+
+Everything under `public_html/` is served from `https://api.wordpress.org/`, including test files.
+
+## Patterns API tests
+
+`public_html/patterns/1.0/tests/` holds end-to-end tests that send real requests to the Patterns API and assert on production pattern data. No CI job runs them, so run them yourself:
+
+-   When changing anything in `public_html/patterns/`.
+-   Before committing a pattern-directory change that affects the `wporg-pattern` REST response: its fields, meta, categories, keywords, or search. Run them on a sandbox with the change applied, where they target the sandbox's API instead of production.
+-   After deploying such a change, against production.
+
+Run from the repository root, after `composer install`:
+
+```
+cd api.wordpress.org/public_html/patterns/1.0 && ../../../../vendor/bin/phpunit
+```
+
+`test_search_locale_sort` is expected to be incomplete until https://github.com/WordPress/pattern-directory/issues/347 is fixed.
+
+A failure is either a regression or a change in production data, such as an edited or deleted pattern. Check which before changing code: a data change means updating the test case, not the endpoint.
