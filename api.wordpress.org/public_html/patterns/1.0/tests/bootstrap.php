@@ -62,7 +62,7 @@ function send_request( string $path ): object {
 	}
 
 	$status_code = 0;
-	foreach ( $http_response_header ?? array() as $header ) {
+	foreach ( http_get_last_response_headers() ?? array() as $header ) {
 		if ( preg_match( '#^HTTP/\S+\s+(\d+)#', $header, $m ) ) {
 			$status_code = (int) $m[1];
 		}
