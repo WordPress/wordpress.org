@@ -441,7 +441,7 @@ let wpTrac,
 						alt = alt.text();
 					} else {
 						// Use attachment filename if it has no description.
-						alt = el.find( '.trac-attachment-name' ).text();
+						alt = el.prev().text();
 					}
 					image.onload = function () {
 						$( '<img />' )
