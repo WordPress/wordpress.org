@@ -15,6 +15,6 @@
 	</testsuites>
 	<!--
 		Groups:
-		* e2e  Hits the live api.wordpress.org Patterns endpoint. Run by the patterns-api-live workflow.
+		* e2e  Hits the live api.wordpress.org Patterns endpoint.
 	-->
 </phpunit>
