@@ -100,7 +100,7 @@ class Guideline_Labels {
 	 *
 	 * @param int|\WP_Post $post Post ID or post object.
 	 */
-	public static function save_post( $post ): void {
+	public static function save_post( int|\WP_Post $post ): void {
 		$post = get_post( $post );
 
 		if (

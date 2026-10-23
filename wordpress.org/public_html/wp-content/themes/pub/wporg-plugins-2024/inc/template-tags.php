@@ -817,7 +817,7 @@ function the_author_notice( $post = null ) {
  */
 function the_guideline_label_notice( $post = null ) {
 	$post   = get_post( $post );
-	$labels = $post ? Guideline_Labels::get( $post ) : array();
+	$labels = $post && ! in_array( $post->post_status, array( 'closed', 'disabled' ), true ) ? Guideline_Labels::get( $post ) : array();
 
 	if ( ! $labels ) {
 		return;
