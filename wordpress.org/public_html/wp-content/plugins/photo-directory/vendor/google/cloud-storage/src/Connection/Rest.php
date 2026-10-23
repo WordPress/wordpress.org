@@ -17,39 +17,58 @@
 
 namespace Google\Cloud\Storage\Connection;
 
+use Google\Auth\GetUniverseDomainInterface;
 use Google\Cloud\Core\RequestBuilder;
 use Google\Cloud\Core\RequestWrapper;
 use Google\Cloud\Core\RestTrait;
+use Google\Cloud\Core\Retry;
 use Google\Cloud\Core\Upload\AbstractUploader;
 use Google\Cloud\Core\Upload\MultipartUploader;
 use Google\Cloud\Core\Upload\ResumableUploader;
 use Google\Cloud\Core\Upload\StreamableUploader;
 use Google\Cloud\Core\UriTrait;
-use Google\Cloud\Storage\Connection\ConnectionInterface;
 use Google\Cloud\Storage\StorageClient;
-use Google\CRC32\Builtin;
-use Google\CRC32\CRC32;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\MimeType;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Utils;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Implementation of the
  * [Google Cloud Storage JSON API](https://cloud.google.com/storage/docs/json_api/).
+ *
+ * @internal
  */
 class Rest implements ConnectionInterface
 {
-    use RestTrait;
+    use RestTrait {
+        send as private traitSend;
+    }
+    use RetryTrait;
     use UriTrait;
+
+    /**
+     * Header and value that helps us identify a transcoded obj
+     * w/o making a metadata(info) call.
+     */
+    private const TRANSCODED_OBJ_HEADER_KEY = 'X-Goog-Stored-Content-Encoding';
+    private const TRANSCODED_OBJ_HEADER_VAL = 'gzip';
 
     /**
      * @deprecated
      */
     const BASE_URI = 'https://storage.googleapis.com/storage/v1/';
 
+    /**
+     * @deprecated
+     */
     const DEFAULT_API_ENDPOINT = 'https://storage.googleapis.com';
+
+    const DEFAULT_API_ENDPOINT_TEMPLATE = 'https://storage.UNIVERSE_DOMAIN';
 
     /**
      * @deprecated
@@ -76,6 +95,32 @@ class Rest implements ConnectionInterface
     private $apiEndpoint;
 
     /**
+     * @var callable
+     * value null accepted
+     */
+    private $restRetryFunction;
+
+    /**
+     * @var string|null
+     */
+    private ?string $retryStrategy;
+
+    /**
+     * @var callable|null
+     */
+    private $restDelayFunction;
+
+    /**
+     * @var callable|null
+     */
+    private $restCalcDelayFunction;
+
+    /**
+     * @var callable|null
+     */
+    private $restRetryListener;
+
+    /**
      * @param array $config
      */
     public function __construct(array $config = [])
@@ -83,10 +128,17 @@ class Rest implements ConnectionInterface
         $config += [
             'serviceDefinitionPath' => __DIR__ . '/ServiceDefinition/storage-v1.json',
             'componentVersion' => StorageClient::VERSION,
-            'apiEndpoint' => self::DEFAULT_API_ENDPOINT
+            'apiEndpoint' => null,
+            // If the user has not supplied a universe domain, use the environment variable if set.
+            // Otherwise, use the default ("googleapis.com").
+            'universeDomain' => getenv('GOOGLE_CLOUD_UNIVERSE_DOMAIN')
+                ?: GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN,
+            // Cloud Storage needs to provide a default scope because the Storage
+            // API does not accept JWTs with "audience"
+            'scopes' => StorageClient::FULL_CONTROL_SCOPE,
         ];
 
-        $this->apiEndpoint = $this->getApiEndpoint(self::DEFAULT_API_ENDPOINT, $config);
+        $this->apiEndpoint = $this->getApiEndpoint(null, $config, self::DEFAULT_API_ENDPOINT_TEMPLATE);
 
         $this->setRequestWrapper(new RequestWrapper($config));
         $this->setRequestBuilder(new RequestBuilder(
@@ -95,6 +147,11 @@ class Rest implements ConnectionInterface
         ));
 
         $this->projectId = $this->pluck('projectId', $config, false);
+        $this->restRetryFunction = (isset($config['restRetryFunction'])) ? $config['restRetryFunction'] : null;
+        $this->retryStrategy = $config['retryStrategy'] ?? null;
+        $this->restDelayFunction = $config['restDelayFunction'] ?? null;
+        $this->restCalcDelayFunction = $config['restCalcDelayFunction'] ?? null;
+        $this->restRetryListener = $config['restRetryListener'] ?? null;
     }
 
     /**
@@ -156,6 +213,14 @@ class Rest implements ConnectionInterface
     /**
      * @param array $args
      */
+    public function restoreBucket(array $args = [])
+    {
+        return $this->send('buckets', 'restore', $args);
+    }
+
+    /**
+     * @param array $args
+     */
     public function getBucket(array $args = [])
     {
         return $this->send('buckets', 'get', $args);
@@ -196,6 +261,14 @@ class Rest implements ConnectionInterface
     /**
      * @param array $args
      */
+    public function restoreObject(array $args = [])
+    {
+        return $this->send('objects', 'restore', $args);
+    }
+
+    /**
+     * @param array $args
+     */
     public function copyObject(array $args = [])
     {
         return $this->send('objects', 'copy', $args);
@@ -207,6 +280,14 @@ class Rest implements ConnectionInterface
     public function rewriteObject(array $args = [])
     {
         return $this->send('objects', 'rewrite', $args);
+    }
+
+    /**
+     * @param array $args
+     */
+    public function moveObject(array $args = [])
+    {
+        return $this->send('objects', 'move', $args);
     }
 
     /**
@@ -246,12 +327,86 @@ class Rest implements ConnectionInterface
      */
     public function downloadObject(array $args = [])
     {
+        // This makes sure we honour the range headers specified by the user
+        $requestedBytes = $this->getRequestedBytes($args);
+        $resultStream = Utils::streamFor(null);
+        $transcodedObj = false;
+
+        $args['retryStrategy'] ??= $this->retryStrategy;
+
         list($request, $requestOptions) = $this->buildDownloadObjectParams($args);
 
-        return $this->requestWrapper->send(
+        $invocationId = Uuid::uuid4()->toString();
+        $requestOptions['retryHeaders'] = self::getRetryHeaders($invocationId, 1);
+        $requestOptions['restRetryFunction'] = $this->getRestRetryFunction('objects', 'get', $args);
+        // We try to deduce if the object is a transcoded object when we receive the headers.
+        $requestOptions['restOptions']['on_headers'] = function ($response) use (&$transcodedObj) {
+            $header = $response->getHeader(self::TRANSCODED_OBJ_HEADER_KEY);
+            if (is_array($header) && in_array(self::TRANSCODED_OBJ_HEADER_VAL, $header)) {
+                $transcodedObj = true;
+            }
+        };
+        $attempt = null;
+        $requestOptions['restRetryListener'] = function (
+            \Exception $e,
+            $retryAttempt,
+            &$arguments
+        ) use (
+            $resultStream,
+            $requestedBytes,
+            $invocationId,
+            &$attempt,
+        ) {
+            // if the exception has a response for us to use
+            if ($e instanceof RequestException
+                && $e->hasResponse()
+                && $e->getResponse()->getStatusCode() >= 200
+                && $e->getResponse()->getStatusCode() < 300
+            ) {
+                $msg = (string) $e->getResponse()->getBody();
+
+                $fetchedStream = Utils::streamFor($msg);
+
+                // add the partial response to our stream that we will return
+                Utils::copyToStream($fetchedStream, $resultStream);
+
+                // Start from the byte that was last fetched
+                $startByte = intval($requestedBytes['startByte']) + $resultStream->getSize();
+                $endByte = $requestedBytes['endByte'];
+
+                // modify the range headers to fetch the remaining data
+                $arguments[1]['headers']['Range'] = sprintf('bytes=%s-%s', $startByte, $endByte);
+                $arguments[0] = $this->modifyRequestForRetry($arguments[0], $retryAttempt, $invocationId);
+
+                // Copy the final result to the end of the stream
+                $attempt = $retryAttempt;
+            }
+        };
+
+        $fetchedStream = $this->requestWrapper->send(
             $request,
             $requestOptions
         )->getBody();
+
+        // If no retry attempt was made, then we can return the stream as is.
+        // This is important in the case where downloadObject is called to open
+        // the file but not to read from it yet.
+        if ($attempt === null) {
+            return $fetchedStream;
+        }
+
+        // If our object is a transcoded object, then Range headers are not honoured.
+        // That means even if we had a partial download available, the final obj
+        // that was fetched will contain the complete object. So, we don't need to copy
+        // the partial stream, we can just return the stream we fetched.
+        if ($transcodedObj) {
+            return $fetchedStream;
+        }
+
+        Utils::copyToStream($fetchedStream, $resultStream);
+
+        $resultStream->seek(0);
+        return $resultStream;
     }
 
     /**
@@ -299,6 +454,15 @@ class Rest implements ConnectionInterface
             ]
         ];
 
+        // Passing the preconditions we want to extract out of arguments
+        // into our query params.
+        $preconditions = self::$condIdempotentOps['objects.insert'];
+        foreach ($preconditions as $precondition) {
+            if (isset($args[$precondition])) {
+                $uriParams['query'][$precondition] = $args[$precondition];
+            }
+        }
+
         return new $uploaderClass(
             $this->requestWrapper,
             $args['data'],
@@ -323,6 +487,8 @@ class Rest implements ConnectionInterface
             'userProject' => null,
         ];
 
+        $args['retryStrategy'] ??= $this->retryStrategy;
+
         $args['data'] = Utils::streamFor($args['data']);
 
         if ($args['resumable'] === null) {
@@ -334,17 +500,35 @@ class Rest implements ConnectionInterface
         }
 
         $validate = $this->chooseValidationMethod($args);
-        if ($validate === 'md5') {
-            $args['metadata']['md5Hash'] = base64_encode(Utils::hash($args['data'], 'md5', true));
-        } elseif ($validate === 'crc32') {
-            $args['metadata']['crc32c'] = $this->crcFromStream($args['data']);
+        $xGoogHashHeader = '';
+        if ($validate !== false) {
+            $md5Hash = base64_encode(Utils::hash($args['data'], 'md5', true));
+            $crc32c = $this->crcFromStream($args['data']);
+
+            // Add validation metadata
+            if ($validate === 'md5') {
+                $args['metadata']['md5Hash'] = $md5Hash;
+            } elseif ($validate === 'crc32') {
+                $args['metadata']['crc32c'] = $crc32c;
+            }
+
+            // Prepare the X-Goog-Hash header string
+            $xGoogHashHeader = implode(',', array_filter([
+                $md5Hash ? 'md5=' . $md5Hash : null,
+                $crc32c ? 'crc32c=' . $crc32c : null,
+            ]));
         }
 
         $args['metadata']['name'] = $args['name'];
+        if (isset($args['retention'])) {
+            // during object creation retention properties go into metadata
+            // but not into request body
+            $args['metadata']['retention'] = $args['retention'];
+            unset($args['retention']);
+        }
         unset($args['name']);
-        $args['contentType'] = isset($args['metadata']['contentType'])
-            ? $args['metadata']['contentType']
-            : MimeType::fromFilename($args['metadata']['name']);
+        $args['contentType'] = $args['metadata']['contentType']
+            ?? MimeType::fromFilename($args['metadata']['name']);
 
         $uploaderOptionKeys = [
             'restOptions',
@@ -353,17 +537,44 @@ class Rest implements ConnectionInterface
             'chunkSize',
             'contentType',
             'metadata',
-            'uploadProgressCallback'
+            'uploadProgressCallback',
+            'restDelayFunction',
+            'restCalcDelayFunction',
         ];
 
         $args['uploaderOptions'] = array_intersect_key($args, array_flip($uploaderOptionKeys));
         $args = array_diff_key($args, array_flip($uploaderOptionKeys));
 
+        // Add the X-Goog-Hash header only if there are hashes to include
+        if (!empty($xGoogHashHeader)) {
+            $args['uploaderOptions']['restOptions']['headers']['X-Goog-Hash'] = $xGoogHashHeader;
+        }
+
+        if (!empty($args['headers'])) {
+            $args['uploaderOptions']['restOptions']['headers'] = array_merge(
+                $args['uploaderOptions']['restOptions']['headers'] ?? [],
+                $args['headers']
+            );
+        }
+        unset($args['headers']);
+
+        // Passing on custom retry function to $args['uploaderOptions']
+        $retryFunc = $this->getRestRetryFunction(
+            'objects',
+            'insert',
+            $args
+        );
+        $args['uploaderOptions']['restRetryFunction'] = $retryFunc;
+
+        $args['uploaderOptions'] = $this->addRetryHeaderLogic(
+            $args['uploaderOptions']
+        );
+
         return $args;
     }
 
     /**
-     * @param  array $args
+     * @param array $args
      */
     public function getBucketIamPolicy(array $args)
     {
@@ -371,7 +582,7 @@ class Rest implements ConnectionInterface
     }
 
     /**
-     * @param  array $args
+     * @param array $args
      */
     public function setBucketIamPolicy(array $args)
     {
@@ -379,7 +590,7 @@ class Rest implements ConnectionInterface
     }
 
     /**
-     * @param  array $args
+     * @param array $args
      */
     public function testBucketIamPermissions(array $args)
     {
@@ -495,14 +706,22 @@ class Rest implements ConnectionInterface
             'restDelayFunction' => null
         ]);
 
+        $queryOptions = [
+            'generation' => $args['generation'],
+            'alt' => 'media',
+            'userProject' => $args['userProject'],
+        ];
+        if (isset($args['softDeleted'])) {
+            // alt param cannot be specified with softDeleted param. See:
+            // https://cloud.google.com/storage/docs/json_api/v1/objects/get
+            unset($args['alt']);
+            $queryOptions['softDeleted'] = $args['softDeleted'];
+        }
+
         $uri = $this->expandUri($this->apiEndpoint . self::DOWNLOAD_PATH, [
             'bucket' => $args['bucket'],
             'object' => $args['object'],
-            'query' => [
-                'generation' => $args['generation'],
-                'alt' => 'media',
-                'userProject' => $args['userProject']
-            ]
+            'query' => $queryOptions,
         ]);
 
         return [
@@ -512,7 +731,7 @@ class Rest implements ConnectionInterface
     }
 
     /**
-     * Choose a upload validation method based on user input and platform
+     * Choose an upload validation method based on user input and platform
      * requirements.
      *
      * @param array $args
@@ -521,7 +740,10 @@ class Rest implements ConnectionInterface
     private function chooseValidationMethod(array $args)
     {
         // If the user provided a hash, skip hashing.
-        if (isset($args['metadata']['md5Hash']) || isset($args['metadata']['crc32c'])) {
+        if (isset($args['metadata']['md5Hash'])
+            || isset($args['metadata']['crc32c'])
+            || isset($args['headers']['X-Goog-Hash'])
+        ) {
             return false;
         }
 
@@ -557,21 +779,15 @@ class Rest implements ConnectionInterface
     private function crcFromStream(StreamInterface $data)
     {
         $pos = $data->tell();
-
-        if ($pos > 0) {
-            $data->rewind();
-        }
-
-        $crc32c = CRC32::create(CRC32::CASTAGNOLI);
-
         $data->rewind();
+        $crc32c = hash_init('crc32c');
         while (!$data->eof()) {
-            $crc32c->update($data->read(1048576));
+            $buffer = $data->read(1048576);
+            hash_update($crc32c, $buffer);
         }
-
         $data->seek($pos);
-
-        return base64_encode($crc32c->hash(true));
+        $hash = hash_final($crc32c, true);
+        return base64_encode($hash);
     }
 
     /**
@@ -589,12 +805,140 @@ class Rest implements ConnectionInterface
     /**
      * Check if hash() supports crc32c.
      *
-     * Protected access for unit testing.
-     *
      * @return bool
+     * @deprecated
      */
     protected function supportsBuiltinCrc32c()
     {
-        return Builtin::supports(CRC32::CASTAGNOLI);
+        return extension_loaded('hash') && in_array('crc32c', hash_algos());
+    }
+
+    /**
+     * Add the required retry function and send the request.
+     *
+     * @param string $resource resource name, eg: buckets.
+     * @param string $method method name, eg: get
+     * @param array $options [optional] Options used to build out the request.
+     * @param array $whitelisted [optional]
+     */
+    public function send($resource, $method, array $options = [], $whitelisted = false)
+    {
+        $retryMap = [
+            'projects.resources.serviceAccount' => 'serviceaccount',
+            'projects.resources.hmacKeys' => 'hmacKey',
+            'bucketAccessControls' => 'bucket_acl',
+            'defaultObjectAccessControls' => 'default_object_acl',
+            'objectAccessControls' => 'object_acl'
+        ];
+        $retryResource = isset($retryMap[$resource]) ? $retryMap[$resource] : $resource;
+
+        $options['restRetryFunction'] = $this->restRetryFunction ?? $this->getRestRetryFunction(
+            $retryResource,
+            $method,
+            $options
+        );
+
+        $options += array_filter([
+            'retryStrategy' => $this->retryStrategy,
+            'restDelayFunction' => $this->restDelayFunction,
+            'restCalcDelayFunction' => $this->restCalcDelayFunction,
+            'restRetryListener' => $this->restRetryListener,
+        ]);
+
+        $options = $this->addRetryHeaderLogic($options);
+
+        return $this->traitSend($resource, $method, $options);
+    }
+
+    /**
+     * Adds the retry headers to $args which amends retry hash and attempt
+     * count to the required header.
+     * @param array $args
+     * @return array
+     */
+    private function addRetryHeaderLogic(array $args)
+    {
+        $invocationId = Uuid::uuid4()->toString();
+        $args['retryHeaders'] = self::getRetryHeaders($invocationId, 1);
+
+        $userListener = $args['restRetryListener'] ?? null;
+
+        // Adding callback logic to update headers while retrying
+        $args['restRetryListener'] = function (
+            \Exception $e,
+            $retryAttempt,
+            &$arguments
+        ) use (
+            $invocationId,
+            $userListener
+        ) {
+            $arguments[0] = $this->modifyRequestForRetry(
+                $arguments[0],
+                $retryAttempt,
+                $invocationId
+            );
+
+            if ($userListener) {
+                $userListener($e, $retryAttempt, $arguments);
+            }
+        };
+
+        return $args;
+    }
+
+    private function modifyRequestForRetry(
+        RequestInterface $request,
+        int $retryAttempt,
+        string $invocationId
+    ) {
+        $changes = self::getRetryHeaders($invocationId, $retryAttempt + 1);
+        $headerLine = $request->getHeaderLine(Retry::RETRY_HEADER_KEY);
+
+        // An associative array to contain final header values as
+        // $headerValueKey => $headerValue
+        $headerElements = [];
+
+        // Adding existing values
+        $headerLineValues = explode(' ', $headerLine);
+        foreach ($headerLineValues as $value) {
+            $key = explode('/', $value)[0];
+            $headerElements[$key] = $value;
+        }
+
+        // Adding changes with replacing value if $key already present
+        foreach ($changes as $change) {
+            $key = explode('/', $change)[0];
+            $headerElements[$key] = $change;
+        }
+
+        return $request->withHeader(
+            Retry::RETRY_HEADER_KEY,
+            implode(' ', $headerElements)
+        );
+    }
+
+    /**
+     * Util function to compute the bytes requested for a download request.
+     *
+     * @param array $options Request options
+     * @return array
+     */
+    private function getRequestedBytes(array $options)
+    {
+        $startByte = 0;
+        $endByte = '';
+
+        if (isset($options['restOptions']) && isset($options['restOptions']['headers'])) {
+            $headers = $options['restOptions']['headers'];
+            if (isset($headers['Range']) || isset($headers['range'])) {
+                $header = isset($headers['Range']) ? $headers['Range'] : $headers['range'];
+                $range = explode('=', $header);
+                $bytes = explode('-', $range[1]);
+                $startByte = $bytes[0];
+                $endByte = $bytes[1];
+            }
+        }
+
+        return compact('startByte', 'endByte');
     }
 }

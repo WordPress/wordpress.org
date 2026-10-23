@@ -32,6 +32,8 @@
 
 namespace Google\ApiCore\Transport\Grpc;
 
+use Grpc\ServerStreamingCall;
+
 /**
  * Class ForwardingServerStreamingCall wraps a \Grpc\ServerStreamingCall.
  *
@@ -39,6 +41,9 @@ namespace Google\ApiCore\Transport\Grpc;
  */
 class ForwardingServerStreamingCall extends ForwardingCall
 {
+    /** @var ServerStreamingCall */
+    protected object $innerCall;
+
     /**
      * @return mixed An iterator of response values
      */

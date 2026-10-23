@@ -14,23 +14,9 @@ class PostalAddress
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0ab1030a20676f6f676c652f747970652f706f7374616c5f616464726573" .
-            "732e70726f746f120b676f6f676c652e7479706522fd010a0d506f737461" .
-            "6c4164647265737312100a087265766973696f6e18012001280512130a0b" .
-            "726567696f6e5f636f646518022001280912150a0d6c616e67756167655f" .
-            "636f646518032001280912130a0b706f7374616c5f636f64651804200128" .
-            "0912140a0c736f7274696e675f636f6465180520012809121b0a1361646d" .
-            "696e6973747261746976655f6172656118062001280912100a086c6f6361" .
-            "6c69747918072001280912130a0b7375626c6f63616c6974791808200128" .
-            "0912150a0d616464726573735f6c696e657318092003280912120a0a7265" .
-            "63697069656e7473180a2003280912140a0c6f7267616e697a6174696f6e" .
-            "180b2001280942780a0f636f6d2e676f6f676c652e747970654212506f73" .
-            "74616c4164647265737350726f746f50015a46676f6f676c652e676f6c61" .
-            "6e672e6f72672f67656e70726f746f2f676f6f676c65617069732f747970" .
-            "652f706f7374616c616464726573733b706f7374616c61646472657373f8" .
-            "0101a20203475450620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xAE\x03\x0A google/type/postal_address.proto\x12\x0Bgoogle.type\"\xFD\x01\x0A\x0DPostalAddress\x12\x10\x0A\x08revision\x18\x01 \x01(\x05\x12\x13\x0A\x0Bregion_code\x18\x02 \x01(\x09\x12\x15\x0A\x0Dlanguage_code\x18\x03 \x01(\x09\x12\x13\x0A\x0Bpostal_code\x18\x04 \x01(\x09\x12\x14\x0A\x0Csorting_code\x18\x05 \x01(\x09\x12\x1B\x0A\x13administrative_area\x18\x06 \x01(\x09\x12\x10\x0A\x08locality\x18\x07 \x01(\x09\x12\x13\x0A\x0Bsublocality\x18\x08 \x01(\x09\x12\x15\x0A\x0Daddress_lines\x18\x09 \x03(\x09\x12\x12\x0A\x0Arecipients\x18\x0A \x03(\x09\x12\x14\x0A\x0Corganization\x18\x0B \x01(\x09Bu\x0A\x0Fcom.google.typeB\x12PostalAddressProtoP\x01ZFgoogle.golang.org/genproto/googleapis/type/postaladdress;postaladdress\xA2\x02\x03GTPb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

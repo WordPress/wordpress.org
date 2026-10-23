@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * A list of requests to annotate files using the BatchAnnotateFiles API.
@@ -34,7 +34,31 @@ class BatchAnnotateFilesRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string parent = 3;</code>
      */
-    private $parent = '';
+    protected $parent = '';
+    /**
+     * Optional. The labels with user-defined metadata for the request.
+     * Label keys and values can be no longer than 63 characters
+     * (Unicode codepoints), can only contain lowercase letters, numeric
+     * characters, underscores and dashes. International characters are allowed.
+     * Label values are optional. Label keys must start with a letter.
+     *
+     * Generated from protobuf field <code>map<string, string> labels = 5 [(.google.api.field_behavior) = OPTIONAL];</code>
+     */
+    private $labels;
+
+    /**
+     * @param \Google\Cloud\Vision\V1\AnnotateFileRequest[] $requests Required. The list of file annotation requests. Right now we support only
+     *                                                                one AnnotateFileRequest in BatchAnnotateFilesRequest.
+     *
+     * @return \Google\Cloud\Vision\V1\BatchAnnotateFilesRequest
+     *
+     * @experimental
+     */
+    public static function build(array $requests): self
+    {
+        return (new self())
+            ->setRequests($requests);
+    }
 
     /**
      * Constructor.
@@ -42,7 +66,7 @@ class BatchAnnotateFilesRequest extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
-     *     @type \Google\Cloud\Vision\V1\AnnotateFileRequest[]|\Google\Protobuf\Internal\RepeatedField $requests
+     *     @type \Google\Cloud\Vision\V1\AnnotateFileRequest[] $requests
      *           Required. The list of file annotation requests. Right now we support only
      *           one AnnotateFileRequest in BatchAnnotateFilesRequest.
      *     @type string $parent
@@ -54,6 +78,12 @@ class BatchAnnotateFilesRequest extends \Google\Protobuf\Internal\Message
      *               `asia`: East asia areas, like Japan, Taiwan,
      *               `eu`: The European Union.
      *           Example: `projects/project-A/locations/eu`.
+     *     @type array|\Google\Protobuf\Internal\MapField $labels
+     *           Optional. The labels with user-defined metadata for the request.
+     *           Label keys and values can be no longer than 63 characters
+     *           (Unicode codepoints), can only contain lowercase letters, numeric
+     *           characters, underscores and dashes. International characters are allowed.
+     *           Label values are optional. Label keys must start with a letter.
      * }
      */
     public function __construct($data = NULL) {
@@ -66,7 +96,7 @@ class BatchAnnotateFilesRequest extends \Google\Protobuf\Internal\Message
      * one AnnotateFileRequest in BatchAnnotateFilesRequest.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.AnnotateFileRequest requests = 1 [(.google.api.field_behavior) = REQUIRED];</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Cloud\Vision\V1\AnnotateFileRequest>
      */
     public function getRequests()
     {
@@ -78,7 +108,7 @@ class BatchAnnotateFilesRequest extends \Google\Protobuf\Internal\Message
      * one AnnotateFileRequest in BatchAnnotateFilesRequest.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.AnnotateFileRequest requests = 1 [(.google.api.field_behavior) = REQUIRED];</code>
-     * @param \Google\Cloud\Vision\V1\AnnotateFileRequest[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Cloud\Vision\V1\AnnotateFileRequest[] $var
      * @return $this
      */
     public function setRequests($var)
@@ -125,6 +155,40 @@ class BatchAnnotateFilesRequest extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->parent = $var;
+
+        return $this;
+    }
+
+    /**
+     * Optional. The labels with user-defined metadata for the request.
+     * Label keys and values can be no longer than 63 characters
+     * (Unicode codepoints), can only contain lowercase letters, numeric
+     * characters, underscores and dashes. International characters are allowed.
+     * Label values are optional. Label keys must start with a letter.
+     *
+     * Generated from protobuf field <code>map<string, string> labels = 5 [(.google.api.field_behavior) = OPTIONAL];</code>
+     * @return \Google\Protobuf\Internal\MapField
+     */
+    public function getLabels()
+    {
+        return $this->labels;
+    }
+
+    /**
+     * Optional. The labels with user-defined metadata for the request.
+     * Label keys and values can be no longer than 63 characters
+     * (Unicode codepoints), can only contain lowercase letters, numeric
+     * characters, underscores and dashes. International characters are allowed.
+     * Label values are optional. Label keys must start with a letter.
+     *
+     * Generated from protobuf field <code>map<string, string> labels = 5 [(.google.api.field_behavior) = OPTIONAL];</code>
+     * @param array|\Google\Protobuf\Internal\MapField $var
+     * @return $this
+     */
+    public function setLabels($var)
+    {
+        $arr = GPBUtil::checkMapField($var, \Google\Protobuf\Internal\GPBType::STRING, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->labels = $arr;
 
         return $this;
     }

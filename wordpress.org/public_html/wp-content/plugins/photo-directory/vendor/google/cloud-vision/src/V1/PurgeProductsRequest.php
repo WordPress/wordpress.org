@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Request message for the `PurgeProducts` method.
@@ -21,15 +21,31 @@ class PurgeProductsRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string parent = 1 [(.google.api.field_behavior) = REQUIRED, (.google.api.resource_reference) = {</code>
      */
-    private $parent = '';
+    protected $parent = '';
     /**
      * The default value is false. Override this value to true to actually perform
      * the purge.
      *
      * Generated from protobuf field <code>bool force = 4;</code>
      */
-    private $force = false;
+    protected $force = false;
     protected $target;
+
+    /**
+     * @param string $parent Required. The project and location in which the Products should be deleted.
+     *
+     *                       Format is `projects/PROJECT_ID/locations/LOC_ID`. Please see
+     *                       {@see ProductSearchClient::locationName()} for help formatting this field.
+     *
+     * @return \Google\Cloud\Vision\V1\PurgeProductsRequest
+     *
+     * @experimental
+     */
+    public static function build(string $parent): self
+    {
+        return (new self())
+            ->setParent($parent);
+    }
 
     /**
      * Constructor.

@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Request message for the `AddProductToProductSet` method.
@@ -22,7 +22,7 @@ class AddProductToProductSetRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string name = 1 [(.google.api.field_behavior) = REQUIRED, (.google.api.resource_reference) = {</code>
      */
-    private $name = '';
+    protected $name = '';
     /**
      * Required. The resource name for the Product to be added to this ProductSet.
      * Format is:
@@ -30,7 +30,30 @@ class AddProductToProductSetRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string product = 2 [(.google.api.field_behavior) = REQUIRED, (.google.api.resource_reference) = {</code>
      */
-    private $product = '';
+    protected $product = '';
+
+    /**
+     * @param string $name    Required. The resource name for the ProductSet to modify.
+     *
+     *                        Format is:
+     *                        `projects/PROJECT_ID/locations/LOC_ID/productSets/PRODUCT_SET_ID`
+     *                        Please see {@see ProductSearchClient::productSetName()} for help formatting this field.
+     * @param string $product Required. The resource name for the Product to be added to this ProductSet.
+     *
+     *                        Format is:
+     *                        `projects/PROJECT_ID/locations/LOC_ID/products/PRODUCT_ID`
+     *                        Please see {@see ProductSearchClient::productName()} for help formatting this field.
+     *
+     * @return \Google\Cloud\Vision\V1\AddProductToProductSetRequest
+     *
+     * @experimental
+     */
+    public static function build(string $name, string $product): self
+    {
+        return (new self())
+            ->setName($name)
+            ->setProduct($product);
+    }
 
     /**
      * Constructor.

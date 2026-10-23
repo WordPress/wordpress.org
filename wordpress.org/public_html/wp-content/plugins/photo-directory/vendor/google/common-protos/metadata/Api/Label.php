@@ -14,19 +14,9 @@ class Label
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0aac020a16676f6f676c652f6170692f6c6162656c2e70726f746f120a67" .
-            "6f6f676c652e617069229c010a0f4c6162656c44657363726970746f7212" .
-            "0b0a036b657918012001280912390a0a76616c75655f7479706518022001" .
-            "280e32252e676f6f676c652e6170692e4c6162656c44657363726970746f" .
-            "722e56616c75655479706512130a0b6465736372697074696f6e18032001" .
-            "2809222c0a0956616c756554797065120a0a06535452494e47100012080a" .
-            "04424f4f4c100112090a05494e5436341002425f0a0e636f6d2e676f6f67" .
-            "6c652e617069420a4c6162656c50726f746f50015a35676f6f676c652e67" .
-            "6f6c616e672e6f72672f67656e70726f746f2f676f6f676c65617069732f" .
-            "6170692f6c6162656c3b6c6162656cf80101a2020447415049620670726f" .
-            "746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xA9\x02\x0A\x16google/api/label.proto\x12\x0Agoogle.api\"\x9C\x01\x0A\x0FLabelDescriptor\x12\x0B\x0A\x03key\x18\x01 \x01(\x09\x129\x0A\x0Avalue_type\x18\x02 \x01(\x0E2%.google.api.LabelDescriptor.ValueType\x12\x13\x0A\x0Bdescription\x18\x03 \x01(\x09\",\x0A\x09ValueType\x12\x0A\x0A\x06STRING\x10\x00\x12\x08\x0A\x04BOOL\x10\x01\x12\x09\x0A\x05INT64\x10\x02B\\\x0A\x0Ecom.google.apiB\x0ALabelProtoP\x01Z5google.golang.org/genproto/googleapis/api/label;label\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }
