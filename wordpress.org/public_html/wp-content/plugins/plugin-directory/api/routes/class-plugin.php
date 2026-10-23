@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 
+use WordPressdotorg\Plugin_Directory\Guideline_Labels;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Plugin_i18n;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -246,6 +247,18 @@ class Plugin extends Base {
 			} else {
 				$result['repository_url']         = get_post_meta( $post_id, 'external_repository_url', true ) ?: '';
 			}
+		}
+
+		$result['guideline_labels'] = array();
+		foreach ( Guideline_Labels::get( $post ) as $label ) {
+			$result['guideline_labels'][] = array(
+				'guideline' => $label['guideline'],
+				'reason'    => $label['reason'],
+				'message'   => $label['message'],
+				'url'       => $label['url'],
+				'since'     => $label['since_version'],
+				'date'      => gmdate( 'Y-m-d', $label['labeled_at'] ),
+			);
 		}
 
 		$result['donate_link'] = get_post_meta( $post_id, 'donate_link', true ) ?: '';
