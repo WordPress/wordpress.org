@@ -250,7 +250,11 @@ class Comment_Handler {
 							if ( '' === $next_line || 0 === strpos( $next_line, ' * ' ) ) {
 								break;
 							}
-							$keywords_change .= ' ' . $next_line;
+							// Trac can break a keyword after its hyphen, so don't split it in two.
+							if ( '-' !== substr( $keywords_change, -1 ) ) {
+								$keywords_change .= ' ';
+							}
+							$keywords_change .= ltrim( $next_line );
 						}
 
 						if ( preg_match( '~^ \* keywords:\s+(.*?)\s*=>\s*(.*)$~', $keywords_change, $kw_matches ) ) {
