@@ -467,14 +467,14 @@ final class People {
 
 		$email     = Email::sanitizeLength( $email );
 		$email_row = Email::query()->where( 'email', $email )->first();
-		$customer  = $email_row && $email_row->customer ? $email_row->customer : new Customer();
+		$sender    = $email_row && $email_row->customer ? $email_row->customer : new Customer();
 
 		$data = array(
 			'first_name' => trim( (string) ( $person['firstName'] ?? '' ) ),
 			'last_name'  => trim( (string) ( $person['lastName'] ?? '' ) ),
 		);
-		if ( $customer->setData( $data, false ) || ! $customer->id ) {
-			$customer->save();
+		if ( $sender->setData( $data, false ) || ! $sender->id ) {
+			$sender->save();
 		}
 
 		if ( ! $email_row ) {
@@ -482,12 +482,12 @@ final class People {
 			$email_row->email = $email;
 		}
 
-		if ( (int) $email_row->customer_id !== (int) $customer->id ) {
-			$email_row->customer()->associate( $customer );
+		if ( (int) $email_row->customer_id !== (int) $sender->id ) {
+			$email_row->customer()->associate( $sender );
 			$email_row->save();
 		}
 
-		return $customer;
+		return $sender;
 	}
 
 	/**

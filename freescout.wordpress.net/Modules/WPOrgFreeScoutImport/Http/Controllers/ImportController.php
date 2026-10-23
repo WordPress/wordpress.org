@@ -71,7 +71,7 @@ final class ImportController extends Controller {
 				'mailboxes'   => $mailboxes,
 				'error'       => $error,
 				'message_ids' => MessageId::query()->where( 'source_id', $source->id )->count(),
-				'deletable'   => ! $source->has_runs(),
+				'deletable'   => ! $source->has_imports(),
 			);
 		}
 

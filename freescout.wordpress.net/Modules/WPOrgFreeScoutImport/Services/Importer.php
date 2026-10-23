@@ -684,10 +684,10 @@ final class Importer {
 	 */
 	private function create_thread( Conversation $conversation, array $source, Customer $sender ): void {
 		$type         = (int) $source['fs_type'];
-		$by_customer  = 'customer' === ( $source['createdBy']['type'] ?? '' );
+		$by_sender    = 'customer' === ( $source['createdBy']['type'] ?? '' );
 		$is_line_item = Thread::TYPE_LINEITEM === $type;
-		$author       = $by_customer ? ( $this->people->sender( $source['createdBy'] ?? null ) ?? $sender ) : null;
-		$user         = $by_customer ? null : $this->people->user( $source['createdBy'] ?? null );
+		$author       = $by_sender ? ( $this->people->sender( $source['createdBy'] ?? null ) ?? $sender ) : null;
+		$user         = $by_sender ? null : $this->people->user( $source['createdBy'] ?? null );
 		$created_at   = self::date( $source['createdAt'] ?? null ) ?? Carbon::now();
 		$message_id   = $source['message_id'];
 
@@ -704,7 +704,7 @@ final class Importer {
 			}
 		}
 
-		$customer = $this->people->sender( $source['customer'] ?? null );
+		$thread_sender = $this->people->sender( $source['customer'] ?? null );
 
 		$thread                  = new Thread();
 		$thread->conversation_id = $conversation->id;
@@ -712,9 +712,9 @@ final class Importer {
 		$thread->status          = (int) $source['fs_status'];
 		$thread->state           = Thread::STATE_PUBLISHED;
 		$thread->body            = $is_line_item ? null : (string) ( $source['body'] ?? '' );
-		$thread->source_via      = $by_customer ? Thread::PERSON_CUSTOMER : Thread::PERSON_USER;
+		$thread->source_via      = $by_sender ? Thread::PERSON_CUSTOMER : Thread::PERSON_USER;
 		$thread->source_type     = (int) ( array_flip( Thread::$source_types )[ $source['source']['type'] ?? '' ] ?? Thread::SOURCE_TYPE_WEB );
-		$thread->customer_id     = $customer ? $customer->id : $conversation->customer_id;
+		$thread->customer_id     = $thread_sender ? $thread_sender->id : $conversation->customer_id;
 		$thread->imported        = true;
 		$thread->first           = ! $is_line_item && ! $conversation->threads()->where( 'type', '!=', Thread::TYPE_LINEITEM )->exists();
 		$thread->has_attachments = (bool) $source['files'];
@@ -727,7 +727,7 @@ final class Importer {
 			$thread->action_type = (int) $source['fs_action'];
 		}
 
-		if ( $by_customer ) {
+		if ( $by_sender ) {
 			$thread->created_by_customer_id = $author->id;
 			$thread->from                   = self::email( $author->getMainEmail() );
 		} else {

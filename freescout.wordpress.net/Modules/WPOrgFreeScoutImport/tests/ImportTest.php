@@ -28,6 +28,7 @@ use Modules\WPOrgFreeScoutImport\Services\People;
 use Modules\WPOrgFreeScoutImport\Services\RemoteApi;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Services\Client;
+use Modules\WPOrgFreeScoutImport\Tests\Support\FakeSource;
 use Psr\Http\Message\RequestInterface;
 
 require_once __DIR__ . '/ImportTestCase.php';
@@ -352,6 +353,17 @@ final class ImportTest extends ImportTestCase {
 			)
 		);
 		$this->assertSame( '', $source->fresh()->key() );
+
+		// Once something was imported from it, its host stays.
+		$this->import( self::conversation() );
+		$this->actingAs( $admin )->post(
+			route( 'wporgfreescoutimport.sources.update', array( 'id' => $this->source->id ) ),
+			array(
+				'url'     => 'https://elsewhere.test',
+				'api_key' => 'other-key',
+			)
+		);
+		$this->assertSame( FakeSource::URL, $this->source->fresh()->url );
 	}
 
 	/**

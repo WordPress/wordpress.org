@@ -23,13 +23,6 @@ use Modules\WPOrgFreeScoutImport\Services\People;
 final class SourcesController extends Controller {
 
 	/**
-	 * Why an address isn't taken.
-	 *
-	 * @var string
-	 */
-	private const BAD_URL = 'Enter the FreeScout’s https address, like https://scout.wc-us.org.';
-
-	/**
 	 * Adds a source.
 	 *
 	 * @param Request $request Request.
@@ -37,8 +30,9 @@ final class SourcesController extends Controller {
 	 */
 	public function store( Request $request ): RedirectResponse {
 		$source = new Source();
-		if ( ! $source->configure( (string) $request->input( 'url' ), (string) $request->input( 'name' ), (string) $request->input( 'api_key' ) ) ) {
-			return ImportController::back_with_error( __( self::BAD_URL ) );
+		$error  = $source->configure( (string) $request->input( 'url' ), (string) $request->input( 'name' ), (string) $request->input( 'api_key' ) );
+		if ( '' !== $error ) {
+			return ImportController::back_with_error( $error );
 		}
 
 		$source->save();
@@ -57,8 +51,9 @@ final class SourcesController extends Controller {
 		$source = Source::query()->findOrFail( $id );
 		$url    = (string) $source->url;
 
-		if ( ! $source->configure( (string) $request->input( 'url' ), (string) $request->input( 'name' ), (string) $request->input( 'api_key' ) ) ) {
-			return ImportController::back_with_error( __( self::BAD_URL ) );
+		$error = $source->configure( (string) $request->input( 'url' ), (string) $request->input( 'name' ), (string) $request->input( 'api_key' ) );
+		if ( '' !== $error ) {
+			return ImportController::back_with_error( $error );
 		}
 
 		$source->save();
@@ -93,7 +88,7 @@ final class SourcesController extends Controller {
 	 */
 	public function delete( int $id ): RedirectResponse {
 		$source = Source::query()->findOrFail( $id );
-		if ( $source->has_runs() ) {
+		if ( $source->has_imports() ) {
 			return ImportController::back_with_error( __( ':name can’t be deleted: what was imported from it is matched up by it. Forget its API key instead.', array( 'name' => $source->name ) ) );
 		}
 
