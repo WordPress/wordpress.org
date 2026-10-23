@@ -260,7 +260,7 @@ class Comment_Handler {
 						if ( preg_match( '~^ \* keywords:\s+(.*?)\s*=>\s*(.*)$~', $keywords_change, $kw_matches ) ) {
 							$old_keywords         = preg_split( '/\s+/', $kw_matches[1], -1, PREG_SPLIT_NO_EMPTY );
 							$new_keywords         = preg_split( '/\s+/', $kw_matches[2], -1, PREG_SPLIT_NO_EMPTY );
-							$this->keywords_added = array_diff( $new_keywords, $old_keywords );
+							$this->keywords_added = array_unique( array_diff( $new_keywords, $old_keywords ) );
 						}
 					}
 					// Applies Slack formatting for other changes.
