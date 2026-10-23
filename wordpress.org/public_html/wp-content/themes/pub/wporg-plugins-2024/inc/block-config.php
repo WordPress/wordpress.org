@@ -31,6 +31,12 @@ function add_site_navigation_menus( $menus ) {
 	$host   = $_SERVER['HTTP_HOST'] ?? wp_parse_url( home_url(), PHP_URL_HOST ) ?: 'localhost';
 	$path   = parse_url( ( $_SERVER['REQUEST_URI'] ?? '/' ) ?: '/', PHP_URL_PATH );
 	$url    = $scheme . '://' . $host . $path;
+	$all_url = home_url( '/' );
+	if ( is_search() ) {
+		$all_url = get_search_link();
+	} elseif ( get_query_var( 'browse' ) ) {
+		$all_url = esc_url( $url );
+	}
 
 	$items = array(
 		'plugins' => array(
@@ -47,7 +53,7 @@ function add_site_navigation_menus( $menus ) {
 		'section-bar' => array(
 			array(
 				'label' => __( 'All', 'wporg-plugins' ),
-				'url'   => is_search() ? get_search_link() : home_url( '/' ),
+				'url'   => $all_url,
 			),
 			array(
 				'label' => __( 'Community', 'wporg-plugins' ),
