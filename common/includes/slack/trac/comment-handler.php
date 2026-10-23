@@ -243,11 +243,21 @@ class Comment_Handler {
 				if ( preg_match( '~Attachment "([^"]+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
 					$changes[] = "_*attachment:*_ `{$matches[1]}` {$matches[2]}";
 				} else {
-					// Track keywords added for Workflow Keyword notifications.
-					if ( preg_match( '~^ \* keywords:  (.*) => (.*)$~', $line, $kw_matches ) ) {
-						$old_keywords = array_filter( array_map( 'trim', explode( ' ', $kw_matches[1] ) ) );
-						$new_keywords = array_filter( array_map( 'trim', explode( ' ', $kw_matches[2] ) ) );
-						$this->keywords_added = array_diff( $new_keywords, $old_keywords );
+					if ( 0 === strpos( $line, ' * keywords:' ) ) {
+						// Trac wraps long changes onto indented lines, so read the keywords change through them.
+						$keywords_change = $line;
+						foreach ( $lines as $next_line ) {
+							if ( '' === $next_line || 0 === strpos( $next_line, ' * ' ) ) {
+								break;
+							}
+							$keywords_change .= ' ' . $next_line;
+						}
+
+						if ( preg_match( '~^ \* keywords:\s+(.*?)\s*=>\s*(.*)$~', $keywords_change, $kw_matches ) ) {
+							$old_keywords         = preg_split( '/\s+/', $kw_matches[1], -1, PREG_SPLIT_NO_EMPTY );
+							$new_keywords         = preg_split( '/\s+/', $kw_matches[2], -1, PREG_SPLIT_NO_EMPTY );
+							$this->keywords_added = array_diff( $new_keywords, $old_keywords );
+						}
 					}
 					// Applies Slack formatting for other changes.
 					$changes[] = preg_replace( '~^ \* (.*?):  ~', '_*$1:*_ ', $line );
