@@ -478,6 +478,16 @@
 		render: function() {
 			this.clearSubViews();
 
+			if ( ! this.collection.length ) {
+				const emptyItem = document.createElement( 'li' );
+				emptyItem.className = 'no-results';
+				emptyItem.setAttribute( 'role', 'status' );
+				emptyItem.textContent = l10n.noProjectsFound;
+
+				this.el.replaceChildren( emptyItem );
+				return this;
+			}
+
 			const fragment = document.createDocumentFragment();
 			const subProjects = this.collection.first( this.limit );
 
