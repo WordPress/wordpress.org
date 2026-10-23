@@ -9,6 +9,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+use WordPressdotorg\Plugin_Directory\Guideline_Labels;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -807,6 +808,53 @@ function the_author_notice( $post = null ) {
 			wp_kses_post( $import_warnings )
 		);
 	}
+}
+
+/**
+ * Displays a notice naming the guidelines the plugin doesn't currently meet.
+ *
+ * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+ */
+function the_guideline_label_notice( $post = null ) {
+	$post   = get_post( $post );
+	$labels = $post ? Guideline_Labels::get( $post ) : array();
+
+	if ( ! $labels ) {
+		return;
+	}
+
+	$reasons = array();
+	foreach ( $labels as $label ) {
+		$reasons[] = sprintf(
+			/* translators: 1: Link to the guideline, e.g. "Guideline 8". 2: Description of the issue. */
+			__( '%1$s: %2$s', 'wporg-plugins' ),
+			sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( $label['url'] ),
+				/* translators: %d: Guideline number. */
+				esc_html( sprintf( __( 'Guideline %d', 'wporg-plugins' ), $label['guideline'] ) )
+			),
+			esc_html( trim( $label['message'] . ' ' . $label['detail'] ) )
+		);
+	}
+
+	$flagged = sprintf(
+		/* translators: %s: Month and year the plugin was labeled. */
+		__( 'Flagged %s.', 'wporg-plugins' ),
+		wp_date( _x( 'F Y', 'guideline label date format', 'wporg-plugins' ), min( wp_list_pluck( $labels, 'labeled_at' ) ) )
+	);
+
+	if ( 1 === count( $reasons ) ) {
+		$body = '<p>' . $reasons[0] . ' ' . esc_html( $flagged ) . '</p>';
+	} else {
+		$body = '<ul><li>' . implode( '</li><li>', $reasons ) . '</li></ul><p>' . esc_html( $flagged ) . '</p>';
+	}
+
+	printf(
+		'<div class="notice notice-warning notice-alt"><p><strong>%1$s</strong></p>%2$s</div>',
+		esc_html__( 'This plugin doesn’t currently meet the Plugin Directory guidelines.', 'wporg-plugins' ),
+		wp_kses_post( $body )
+	);
 }
 
 /**

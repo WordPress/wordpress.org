@@ -73,6 +73,7 @@
 				<element value="plugin_edit"/>
 				<element value="plugin_edit_others"/>
 				<element value="plugin_edit_pending"/>
+				<element value="plugin_label"/>
 				<element value="plugin_manage_releases"/>
 				<element value="plugin_reject"/>
 				<element value="plugin_remove_committer"/>
