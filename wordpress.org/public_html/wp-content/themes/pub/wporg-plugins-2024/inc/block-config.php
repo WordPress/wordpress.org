@@ -47,7 +47,7 @@ function add_site_navigation_menus( $menus ) {
 		'section-bar' => array(
 			array(
 				'label' => __( 'All', 'wporg-plugins' ),
-				'url'   => is_search() ? get_search_link() : home_url( '/' ),
+				'url'   => is_search() ? get_search_link() : esc_url( $url ),
 			),
 			array(
 				'label' => __( 'Community', 'wporg-plugins' ),
