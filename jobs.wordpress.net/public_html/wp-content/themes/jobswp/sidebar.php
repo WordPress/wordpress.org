@@ -17,6 +17,15 @@
 				</ul>
 			</aside>
 
+		<?php $subscribe_form = Jobs_Dot_WP_Digest::get_subscribe_form( is_tax( 'job_category' ) ? get_queried_object() : null, true ); ?>
+		<?php if ( $subscribe_form ) : ?>
+			<aside class="widget widget-job-alerts">
+				<h3 class="widget-title"><?php esc_html_e( 'Job Alerts', 'jobswp' ); ?></h3>
+				<p class="widget-job-alerts__description"><?php echo esc_html( is_tax( 'job_category' ) && Jobs_Dot_WP_Digest::has_newsletter_categories() ? __( 'Get a daily email when new jobs are posted in this category.', 'jobswp' ) : __( 'Get a daily email with new jobs.', 'jobswp' ) ); ?></p>
+				<?php echo $subscribe_form; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered Jetpack block. ?>
+			</aside>
+		<?php endif; ?>
+
 		<?php dynamic_sidebar( 'sidebar-1' ); ?>
 
 		<?php

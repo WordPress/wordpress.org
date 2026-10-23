@@ -1431,6 +1431,35 @@ input[type="submit"].submit-job {
 
 
 /* ============================================
+   Job Alerts
+   ============================================ */
+
+.job-alerts-section {
+	background: var(--color-blueberry-4);
+	padding: var(--space-40) var(--space-20);
+}
+
+.job-alerts-section__inner {
+	max-width: var(--wide-width);
+	margin-inline: auto;
+}
+
+.job-alerts-section h2 {
+	font-size: var(--font-size-h3);
+	margin-bottom: 8px;
+}
+
+.widget-job-alerts {
+	margin-top: var(--space-20);
+}
+
+.widget-job-alerts__description {
+	font-size: var(--font-size-sm);
+	margin-bottom: 10px; /* Jetpack's gap between the field and the button. */
+}
+
+
+/* ============================================
    Candidates / Open to Work Section
    ============================================ */
 
