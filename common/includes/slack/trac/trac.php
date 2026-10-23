@@ -268,7 +268,7 @@ class Trac implements User {
 			$channels[ $this->tickets_channel ] = true;
 		}
 
-		// Component and focuses are needed for the component filters.
+		// Component, focuses, and keywords are needed for the channel filters.
 		if ( $ticket instanceof Ticket  ) {
 			$ticket->fetch();
 		}
@@ -282,6 +282,12 @@ class Trac implements User {
 				if ( isset( $this->ticket_component_filters[ $focus ] ) ) {
 					$channels = array_merge( $channels, (array) $this->ticket_component_filters[ $focus ] );
 				}
+			}
+		}
+
+		if ( isset( $ticket->keywords ) ) {
+			foreach ( preg_split( '/\s+/', $ticket->keywords, -1, PREG_SPLIT_NO_EMPTY ) as $keyword ) {
+				$channels = array_merge( $channels, array_fill_keys( $this->get_keyword_channels( $keyword ), true ) );
 			}
 		}
 
