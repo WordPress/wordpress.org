@@ -37,14 +37,10 @@ $version = isset( $_REQUEST['version'] ) ? filter_var(
 	)
 ) : null;
 
-if ( isset( $_REQUEST['slug'] ) && ! is_string( $slug ) ) {
-	http_response_code( 400 );
-	die( '?slug= invalid.' );
-}
-
-if ( isset( $_REQUEST['version'] ) && ! is_string( $version ) ) {
-	http_response_code( 400 );
-	die( '?version= invalid.' );
+// WP-CLI aborts a whole `--all` run on an error response, so a slug or version that can't have packs gets none.
+if ( ! is_string( $slug ) || ( isset( $_REQUEST['version'] ) && ! is_string( $version ) ) ) {
+	$slug    = '';
+	$version = null;
 }
 
 // Version headers are free text, so drop the spaces a cache key can't hold rather than reject them.
