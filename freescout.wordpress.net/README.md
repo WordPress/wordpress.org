@@ -5,7 +5,7 @@
 | Module | What it does |
 |---|---|
 | [WPOrgAkismet](Modules/WPOrgAkismet) | Checks new conversations from senders with Akismet, and teaches it from what agents mark as spam. |
-| [WPOrgFreeScoutImport](Modules/WPOrgFreeScoutImport) | Imports another FreeScout's mailboxes, like WordCamp US's, so their history moves here. Administrators run it under Manage » FreeScout Import. |
+| [WPOrgFreeScoutImport](Modules/WPOrgFreeScoutImport) | Imports other FreeScouts' mailboxes, like WordCamp US's, so their history moves here. Administrators run it under Manage » FreeScout Import. |
 | [WPOrgHelpScoutImport](Modules/WPOrgHelpScoutImport) | Imports HelpScout mailboxes' conversations, so their history moves to FreeScout. Administrators run it under Manage » HelpScout Import. |
 | [WPOrgPluginReview](Modules/WPOrgPluginReview) | Shows the plugins team a conversation's latest plugin review in its sidebar: its details, flags, issues, and the plugin as it is now on WordPress.org. |
 | [WPOrgSearch](Modules/WPOrgSearch) | Speeds up conversation search: an After date for searches without other filters, and one query instead of two. |

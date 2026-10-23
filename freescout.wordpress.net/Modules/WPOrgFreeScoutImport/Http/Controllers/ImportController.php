@@ -17,20 +17,16 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\WPOrgFreeScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgFreeScoutImport\Entities\MessageId;
+use Modules\WPOrgFreeScoutImport\Entities\Source;
 use Modules\WPOrgFreeScoutImport\Entities\Run;
-use Modules\WPOrgFreeScoutImport\Jobs\ApplyMessageIds;
 use Modules\WPOrgFreeScoutImport\Jobs\ImportPage;
-use Modules\WPOrgFreeScoutImport\Services\MessageIds;
-use Modules\WPOrgFreeScoutImport\Services\People;
-use Modules\WPOrgFreeScoutImport\Services\Settings;
-use Modules\WPOrgFreeScoutImport\Services\Source;
+use Modules\WPOrgFreeScoutImport\Services\RemoteApi;
 
 /**
- * Lists runs, starts them, and pauses, resumes, cancels, and retries them; takes the Message-ID file; and finds
- * conversations by the number they had in the other FreeScout.
+ * Lists the sources and runs, starts runs, and pauses, resumes, cancels, and retries them; and finds conversations by
+ * the number they had in a source.
  *
- * Starting imports everything the first time, and what the other FreeScout changed since the last finished import
- * after that.
+ * Starting imports everything the first time, and what the source changed since the last finished import after that.
  */
 final class ImportController extends Controller {
 
@@ -49,71 +45,81 @@ final class ImportController extends Controller {
 	private const BUSY = 'An import is still running or paused. Finish or cancel it first.';
 
 	/**
-	 * Shows the other FreeScout's mailboxes, the runs so far, and the forms to start more.
+	 * Shows the sources with their mailboxes, the runs so far, and the forms to start more.
 	 *
 	 * @return View
 	 */
 	public function index(): View {
-		$source  = app( Source::class );
 		$sources = array();
-		$error   = '';
 
-		if ( $source->is_configured() ) {
-			try {
-				$sources = $source->mailboxes();
-			} catch ( \Throwable $e ) {
-				$error = $e->getMessage();
+		foreach ( Source::query()->orderBy( 'name' )->get() as $source ) {
+			$api       = RemoteApi::for_source( $source );
+			$mailboxes = array();
+			$error     = '';
+
+			if ( $api->is_configured() ) {
+				try {
+					$mailboxes = $api->mailboxes();
+				} catch ( \Throwable $e ) {
+					$error = $e->getMessage();
+				}
 			}
+
+			$sources[] = array(
+				'source'      => $source,
+				'configured'  => $api->is_configured(),
+				'mailboxes'   => $mailboxes,
+				'error'       => $error,
+				'message_ids' => MessageId::query()->where( 'source_id', $source->id )->count(),
+				'deletable'   => ! $source->has_runs(),
+			);
 		}
 
-		$runs = Run::query()->with( 'mailbox' )->orderByDesc( 'id' )->limit( 100 )->get();
+		$runs = Run::query()->with( array( 'mailbox', 'source' ) )->orderByDesc( 'id' )->limit( 100 )->get();
 
 		return view(
 			'wporgfreescoutimport::index',
 			array(
-				'configured'  => $source->is_configured(),
-				'name'        => $source->name(),
-				'url'         => Settings::url(),
-				'has_key'     => Settings::has_api_key(),
-				'error'       => $error,
-				'sources'     => $sources,
-				'mailboxes'   => Mailbox::query()->orderBy( 'name' )->get(),
-				'runs'        => $runs,
-				'running'     => $runs->contains( 'status', Run::STATUS_RUNNING ),
-				'message_ids' => MessageId::query()->count(),
+				'sources'   => $sources,
+				'mailboxes' => Mailbox::query()->orderBy( 'name' )->get(),
+				'runs'      => $runs,
+				'running'   => $runs->contains( 'status', Run::STATUS_RUNNING ),
 			)
 		);
 	}
 
 	/**
-	 * Starts importing a mailbox: everything, or what changed since its last finished import into the mailbox.
+	 * Starts importing a source's mailbox: everything, or what changed since its last finished import into the mailbox.
 	 *
-	 * @param Request $request Request.
+	 * @param Request $request Request, with `remote_mailbox` as the source's ID and the mailbox's ID there, like `2:7`.
 	 * @return RedirectResponse
 	 */
 	public function start( Request $request ): RedirectResponse {
-		$source_id  = (int) $request->input( 'source_mailbox_id' );
+		list( $source_id, $remote_mailbox_id ) = array_map( 'intval', array_pad( explode( ':', (string) $request->input( 'remote_mailbox' ), 2 ), 2, 0 ) );
+
+		$source     = Source::find( $source_id );
 		$mailbox    = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
 		$everything = filter_var( $request->input( 'everything' ), FILTER_VALIDATE_BOOLEAN );
 
 		try {
-			$source = collect( app( Source::class )->mailboxes() )->firstWhere( 'id', $source_id );
+			$remote = $source ? collect( RemoteApi::for_source( $source )->mailboxes() )->firstWhere( 'id', $remote_mailbox_id ) : null;
 		} catch ( \Throwable $e ) {
 			return self::back_with_error( $e->getMessage() );
 		}
 
-		if ( ! $source || ! $mailbox ) {
+		if ( ! $remote || ! $mailbox ) {
 			return self::back_with_error( __( 'Choose a mailbox to import, and one to import it into.' ) );
 		}
 
 		$run = \DB::transaction(
-			static function () use ( $source_id, $source, $mailbox, $everything ): ?Run {
+			static function () use ( $source_id, $remote_mailbox_id, $remote, $mailbox, $everything ): ?Run {
 				if ( ! self::lock() ) {
 					return null;
 				}
 
 				$previous = $everything ? null : Run::query()
-					->where( 'source_mailbox_id', $source_id )
+					->where( 'source_id', $source_id )
+					->where( 'remote_mailbox_id', $remote_mailbox_id )
 					->where( 'mailbox_id', $mailbox->id )
 					->where( 'status', Run::STATUS_DONE )
 					->whereNull( 'retry_ids' )
@@ -122,7 +128,7 @@ final class ImportController extends Controller {
 					->first();
 				$since    = $previous ? $previous->started_at->copy()->subMinutes( self::CHANGES_OVERLAP_MINUTES ) : null;
 
-				return self::begin( $source_id, (string) ( $source['name'] ?? '' ), (int) $mailbox->id, $since );
+				return self::begin( $source_id, $remote_mailbox_id, (string) ( $remote['name'] ?? '' ), (int) $mailbox->id, $since );
 			}
 		);
 
@@ -133,8 +139,8 @@ final class ImportController extends Controller {
 		ImportPage::dispatch( (int) $run->id, (string) $run->token );
 
 		$message = $run->since
-			? __( 'Importing what changed in :name since its last import.', array( 'name' => $source['name'] ?? '' ) )
-			: __( 'Importing :name.', array( 'name' => $source['name'] ?? '' ) );
+			? __( 'Importing what changed in :name since its last import.', array( 'name' => $remote['name'] ?? '' ) )
+			: __( 'Importing :name.', array( 'name' => $remote['name'] ?? '' ) );
 
 		return redirect()->route( 'wporgfreescoutimport.index' )->with( 'flash_success', $message );
 	}
@@ -232,7 +238,7 @@ final class ImportController extends Controller {
 					return null;
 				}
 
-				$run            = self::begin( (int) $failed->source_mailbox_id, (string) $failed->source_mailbox_name, (int) $failed->mailbox_id, null, false );
+				$run            = self::begin( (int) $failed->source_id, (int) $failed->remote_mailbox_id, (string) $failed->remote_mailbox_name, (int) $failed->mailbox_id, null, false );
 				$run->retry_ids = array_map( 'intval', array_keys( (array) $failed->failures ) );
 				$run->total     = count( $run->retry_ids );
 				$run->save();
@@ -251,73 +257,14 @@ final class ImportController extends Controller {
 	}
 
 	/**
-	 * Saves the other FreeScout's address, and its API key if one was entered.
+	 * Opens the conversation that had a number in a source.
 	 *
-	 * @param Request $request Request.
-	 * @return RedirectResponse
-	 */
-	public function settings( Request $request ): RedirectResponse {
-		$changed = Settings::url() !== rtrim( trim( (string) $request->input( 'url' ) ), '/' );
-
-		if ( ! Settings::save( (string) $request->input( 'url' ), (string) $request->input( 'api_key' ) ) ) {
-			return self::back_with_error( __( 'Enter the other FreeScout’s https address, like https://scout.wc-us.org.' ) );
-		}
-
-		// Another FreeScout has other users.
-		if ( $changed ) {
-			People::forget_directory();
-		}
-
-		return redirect()->route( 'wporgfreescoutimport.index' )->with( 'flash_success', __( 'Saved.' ) );
-	}
-
-	/**
-	 * Forgets the API key, like after the last import.
-	 *
-	 * @return RedirectResponse
-	 */
-	public function forget(): RedirectResponse {
-		Settings::forget_api_key();
-
-		return redirect()->route( 'wporgfreescoutimport.index' )->with( 'flash_success', __( 'Forgot the API key.' ) );
-	}
-
-	/**
-	 * Keeps the Message-IDs of the file bin/export-message-ids.php wrote, and gives them to threads imported already.
-	 *
-	 * @param Request $request Request.
-	 * @return RedirectResponse
-	 */
-	public function message_ids( Request $request ): RedirectResponse {
-		$file = $request->file( 'message_ids' );
-		if ( ! $file || ! $file->isValid() ) {
-			return self::back_with_error( __( 'Choose the file of Message-IDs.' ) );
-		}
-
-		try {
-			$count = MessageIds::store( (string) $file->getRealPath() );
-		} catch ( \Throwable $e ) {
-			return self::back_with_error( $e->getMessage() );
-		}
-
-		if ( ! $count ) {
-			return self::back_with_error( __( 'The file has no Message-IDs: each line needs a thread ID and a Message-ID, separated by a comma.' ) );
-		}
-
-		ApplyMessageIds::dispatch();
-
-		return redirect()->route( 'wporgfreescoutimport.index' )->with( 'flash_success', __( 'Kept :count Message-IDs. Threads imported already get theirs on the queue.', array( 'count' => number_format( $count ) ) ) );
-	}
-
-	/**
-	 * Opens the conversation that had a number in the other FreeScout.
-	 *
-	 * @param Request $request Request.
+	 * @param Request $request Request, with `source_id` and `number`.
 	 * @return RedirectResponse
 	 */
 	public function find( Request $request ): RedirectResponse {
 		$number          = (int) ltrim( trim( (string) $request->input( 'number' ) ), '#' );
-		$conversation_id = $number > 0 ? (int) ImportedConversation::query()->where( 'source_number', $number )->value( 'conversation_id' ) : 0;
+		$conversation_id = $number > 0 ? (int) ImportedConversation::query()->where( 'source_id', (int) $request->input( 'source_id' ) )->where( 'remote_number', $number )->value( 'conversation_id' ) : 0;
 
 		if ( ! $conversation_id ) {
 			return self::back_with_error( __( 'No conversation was imported with that number.' ) );
@@ -329,17 +276,19 @@ final class ImportController extends Controller {
 	/**
 	 * Creates a running run; its first page is queued once the transaction is committed.
 	 *
-	 * @param int         $source_id   Source mailbox ID.
-	 * @param string      $source_name Source mailbox name.
-	 * @param int         $mailbox_id  Mailbox ID.
-	 * @param Carbon|null $since       Only conversations changed since then.
-	 * @param bool        $save        Whether to save it.
+	 * @param int         $source_id           Source.
+	 * @param int         $remote_mailbox_id   Mailbox ID there.
+	 * @param string      $remote_mailbox_name Mailbox name there.
+	 * @param int         $mailbox_id          Mailbox ID here.
+	 * @param Carbon|null $since               Only conversations changed since then.
+	 * @param bool        $save                Whether to save it.
 	 * @return Run
 	 */
-	private static function begin( int $source_id, string $source_name, int $mailbox_id, ?Carbon $since, bool $save = true ): Run {
+	private static function begin( int $source_id, int $remote_mailbox_id, string $remote_mailbox_name, int $mailbox_id, ?Carbon $since, bool $save = true ): Run {
 		$run                      = new Run();
-		$run->source_mailbox_id   = $source_id;
-		$run->source_mailbox_name = $source_name;
+		$run->source_id           = $source_id;
+		$run->remote_mailbox_id   = $remote_mailbox_id;
+		$run->remote_mailbox_name = $remote_mailbox_name;
 		$run->mailbox_id          = $mailbox_id;
 		$run->user_id             = auth()->id();
 		$run->status              = Run::STATUS_RUNNING;
@@ -378,7 +327,7 @@ final class ImportController extends Controller {
 	 * @param string $error Error.
 	 * @return RedirectResponse
 	 */
-	private static function back_with_error( string $error ): RedirectResponse {
+	public static function back_with_error( string $error ): RedirectResponse {
 		return redirect()->route( 'wporgfreescoutimport.index' )->with( 'flash_error', $error );
 	}
 }

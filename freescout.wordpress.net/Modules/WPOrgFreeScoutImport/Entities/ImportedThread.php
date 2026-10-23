@@ -1,6 +1,6 @@
 <?php
 /**
- * Which thread of the other FreeScout a thread was imported from.
+ * Which thread of a source a thread was imported from.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -16,9 +16,10 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property int      $id
  * @property int      $source_id
+ * @property int      $remote_id
  * @property int      $thread_id
- * @property int|null $source_user_id     Source user who wrote it, for replies, notes, and line items.
- * @property int|null $source_assignee_id Source user the conversation was assigned to then.
+ * @property int|null $remote_user_id     Remote user who wrote it, for replies, notes, and line items.
+ * @property int|null $remote_assignee_id Remote user the conversation was assigned to then.
  */
 final class ImportedThread extends Model {
 
@@ -41,5 +42,5 @@ final class ImportedThread extends Model {
 	 *
 	 * @var array
 	 */
-	protected $fillable = array( 'source_id', 'thread_id', 'source_user_id', 'source_assignee_id' );
+	protected $fillable = array( 'source_id', 'remote_id', 'thread_id', 'remote_user_id', 'remote_assignee_id' );
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Read-only client for the other FreeScout's API, from its API & Webhooks module.
+ * Read-only client for a source's API, from its API & Webhooks module.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -11,6 +11,7 @@ namespace Modules\WPOrgFreeScoutImport\Services;
 
 use Carbon\Carbon;
 use GuzzleHttp\ClientInterface;
+use Modules\WPOrgFreeScoutImport\Entities\Source;
 use Modules\WPOrgFreeScoutImport\Exceptions\ApiError;
 use Psr\Http\Message\ResponseInterface;
 
@@ -19,7 +20,7 @@ use Psr\Http\Message\ResponseInterface;
  *
  * @see https://api-docs.freescout.net/
  */
-final class Source {
+final class RemoteApi {
 
 	/**
 	 * Conversations per page of the list: a page is one job, and FreeScout's single worker takes email first.
@@ -36,7 +37,21 @@ final class Source {
 	private const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
 	/**
-	 * Base URL of the other FreeScout, with a trailing slash.
+	 * Container binding of the HTTP client every source is read with.
+	 *
+	 * @var string
+	 */
+	public const HTTP = 'wporgfreescoutimport.http';
+
+	/**
+	 * The FreeScout it reads.
+	 *
+	 * @var Source
+	 */
+	private $source;
+
+	/**
+	 * Base URL of the source, with a trailing slash.
 	 *
 	 * @var string
 	 */
@@ -59,41 +74,56 @@ final class Source {
 	/**
 	 * Constructor.
 	 *
-	 * @param string          $url     Base URL of the other FreeScout.
-	 * @param string          $api_key Its global API key.
-	 * @param ClientInterface $http    HTTP client.
+	 * @param Source          $source The FreeScout to read.
+	 * @param ClientInterface $http   HTTP client.
 	 */
-	public function __construct( string $url, string $api_key, ClientInterface $http ) {
-		$this->url     = '' !== $url ? rtrim( $url, '/' ) . '/' : '';
-		$this->api_key = $api_key;
+	public function __construct( Source $source, ClientInterface $http ) {
+		$this->source  = $source;
+		$this->url     = '' !== (string) $source->url ? rtrim( (string) $source->url, '/' ) . '/' : '';
+		$this->api_key = $source->key();
 		$this->http    = $http;
 	}
 
 	/**
-	 * Creates a client from the settings on the import page.
+	 * A client for a source, with the HTTP client bound in the container.
 	 *
+	 * @param Source $source The FreeScout to read.
 	 * @return self
 	 */
-	public static function from_settings(): self {
-		return new self(
-			Settings::url(),
-			Settings::api_key(),
-			new \GuzzleHttp\Client(
-				\Helper::setGuzzleDefaultOptions(
-					array(
-						'timeout'         => 60,
-						'connect_timeout' => 10,
-						'allow_redirects' => false,
-						'http_errors'     => false,
-						'headers'         => array( 'User-Agent' => 'FreeScout/' . config( 'app.version' ) . ' | WPOrgFreeScoutImport/1.0.0' ),
-					)
+	public static function for_source( Source $source ): self {
+		return new self( $source, app( self::HTTP ) );
+	}
+
+	/**
+	 * The HTTP client every source is read with, for the container.
+	 *
+	 * @return ClientInterface
+	 */
+	public static function http(): ClientInterface {
+		return new \GuzzleHttp\Client(
+			\Helper::setGuzzleDefaultOptions(
+				array(
+					'timeout'         => 60,
+					'connect_timeout' => 10,
+					'allow_redirects' => false,
+					'http_errors'     => false,
+					'headers'         => array( 'User-Agent' => 'FreeScout/' . config( 'app.version' ) . ' | WPOrgFreeScoutImport/1.0.0' ),
 				)
 			)
 		);
 	}
 
 	/**
-	 * Whether the other FreeScout and its API key are configured.
+	 * The FreeScout it reads.
+	 *
+	 * @return Source
+	 */
+	public function source(): Source {
+		return $this->source;
+	}
+
+	/**
+	 * Whether the source's address and API key are set.
 	 *
 	 * @return bool
 	 */
@@ -102,12 +132,12 @@ final class Source {
 	}
 
 	/**
-	 * The other FreeScout's host name, which names it on the import pages.
+	 * What the import pages call the source.
 	 *
 	 * @return string
 	 */
 	public function name(): string {
-		return (string) parse_url( $this->url, PHP_URL_HOST );
+		return (string) $this->source->name;
 	}
 
 	/**
@@ -210,7 +240,7 @@ final class Source {
 	}
 
 	/**
-	 * Whether a URL is on the other FreeScout: only its files are downloaded.
+	 * Whether a URL is on the source: only its files are downloaded.
 	 *
 	 * @param string $url URL.
 	 * @return bool
@@ -231,7 +261,7 @@ final class Source {
 	 * Attachment links carry their own token, so they need no API key.
 	 *
 	 * @param string $url The attachment's `fileUrl`.
-	 * @return resource|null Null if it's gone, or isn't the other FreeScout's.
+	 * @return resource|null Null if it's gone, or isn't the source's.
 	 *
 	 * @throws ApiError          If it couldn't be downloaded otherwise.
 	 * @throws \RuntimeException If it couldn't be saved.
@@ -248,7 +278,7 @@ final class Source {
 		}
 
 		if ( 200 !== $status ) {
-			throw new ApiError( 'The other FreeScout answered ' . $status . ' for an attachment.', $status );
+			throw new ApiError( $this->name() . ' answered ' . $status . ' for an attachment.', $status );
 		}
 
 		$file = self::to_file( $response, PHP_INT_MAX, true );
@@ -262,7 +292,7 @@ final class Source {
 	/**
 	 * Downloads an image from an email's body into a temporary file.
 	 *
-	 * @param string $url Image URL, on the other FreeScout.
+	 * @param string $url Image URL, on the source.
 	 * @return resource|null Null if it couldn't be downloaded, or is too large.
 	 */
 	public function image( string $url ): mixed {
@@ -350,7 +380,7 @@ final class Source {
 	 */
 	private function get( string $path, array $query = array() ): array {
 		if ( ! $this->is_configured() ) {
-			throw new ApiError( 'The other FreeScout’s address and API key aren’t set.' );
+			throw new ApiError( $this->name() . '’s address and API key aren’t set.' );
 		}
 
 		$response = $this->send(
@@ -367,12 +397,12 @@ final class Source {
 		$status   = $response->getStatusCode();
 
 		if ( $status < 200 || $status >= 300 ) {
-			throw new ApiError( 'The other FreeScout answered ' . $status . ' for ' . $path . '.', $status );
+			throw new ApiError( $this->name() . ' answered ' . $status . ' for ' . $path . '.', $status );
 		}
 
 		$body = json_decode( (string) $response->getBody(), true );
 		if ( ! is_array( $body ) ) {
-			throw new ApiError( 'The other FreeScout’s answer for ' . $path . ' isn’t JSON.', $status );
+			throw new ApiError( $this->name() . '’s answer for ' . $path . ' isn’t JSON.', $status );
 		}
 
 		return $body;
@@ -392,7 +422,7 @@ final class Source {
 		try {
 			return $this->http->request( $method, $url, $options + array( 'http_errors' => false ) );
 		} catch ( \Throwable $e ) {
-			throw new ApiError( 'The other FreeScout could not be reached: ' . $e->getMessage(), 0, $e );
+			throw new ApiError( $this->name() . ' could not be reached: ' . $e->getMessage(), 0, $e );
 		}
 	}
 }

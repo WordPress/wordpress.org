@@ -28,7 +28,6 @@
 		</div>
 		<div class="flexy-block"></div>
 		<div class="flexy-item">
-			<a href="{{ route( 'wporgfreescoutimport.users' ) }}" class="btn btn-bordered">{{ __('Users') }}</a>
 			<a href="{{ route( 'wporgfreescoutimport.index' ) }}" class="btn btn-bordered">{{ __('Refresh') }}</a>
 		</div>
 	</div>
@@ -36,23 +35,87 @@
 	<div class="margin-top">
 		@include('partials/flash_messages')
 
-		@if ( ! $configured )
-			<p>{{ __('Enter the address of the FreeScout to import from, and its API key.') }}</p>
-			@include('wporgfreescoutimport::settings')
-		@elseif ( $error )
-			<div class="alert alert-danger">{{ __(':name couldn’t be reached: :error', [ 'name' => $name, 'error' => $error ]) }}</div>
+		<p>{{ __('Imports copy a mailbox’s conversations from another FreeScout, a source, into a mailbox here, without sending anything. The first import copies everything; importing the same mailbox again copies only what changed since. Import before the mailbox’s email moves, and once more after.') }}</p>
+		<p>{{ __('Every conversation gets a new number here; find one by the number it had there below. Each source’s users are credited to the users chosen on its Users page, or else to the ones with the same email; an import creates a disabled user for anyone else.') }}</p>
+
+		<h3 class="margin-top">{{ __('Sources') }}</h3>
+		@if ( $sources )
+			<table class="table">
+				<thead>
+					<tr>
+						<th>{{ __('Source') }}</th>
+						<th>{{ __('Mailboxes') }}</th>
+						<th>{{ __('Message-IDs') }}</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach ( $sources as $item )
+						@php( $source = $item['source'] )
+						<tr id="source-{{ $source->id }}">
+							<td>
+								<strong>{{ $source->name }}</strong><br/>
+								<small>{{ $source->url }}</small>
+								@if ( ! $item['configured'] )
+									<br/><small class="text-warning">{{ __('No API key: enter one to import.') }}</small>
+								@elseif ( $item['error'] )
+									<br/><small class="text-danger">{{ __('Couldn’t be reached: :error', [ 'error' => $item['error'] ]) }}</small>
+								@endif
+							</td>
+							<td>{{ implode( ', ', array_column( $item['mailboxes'], 'name' ) ) }}</td>
+							<td>
+								{{ number_format( $item['message_ids'] ) }}
+								<form method="POST" action="{{ route( 'wporgfreescoutimport.message_ids', [ 'id' => $source->id ] ) }}" enctype="multipart/form-data">
+									{{ csrf_field() }}
+									<input type="file" name="message_ids" accept=".csv,.gz,text/csv,application/gzip" aria-label="{{ __('File of Message-IDs from :name', [ 'name' => $source->name ]) }}" required>
+									<button type="submit" class="btn btn-default btn-xs">{{ __('Upload') }}</button>
+								</form>
+							</td>
+							<td class="text-right">
+								<a href="{{ route( 'wporgfreescoutimport.users', [ 'id' => $source->id ] ) }}" class="btn btn-default btn-xs">{{ __('Users') }}</a>
+								<details>
+									<summary><small>{{ __('Edit') }}</small></summary>
+									@include( 'wporgfreescoutimport::source', [ 'source' => $source, 'action' => route( 'wporgfreescoutimport.sources.update', [ 'id' => $source->id ] ) ] )
+									@if ( $source->has_key() )
+										<form method="POST" action="{{ route( 'wporgfreescoutimport.sources.forget', [ 'id' => $source->id ] ) }}">
+											{{ csrf_field() }}
+											<button type="submit" class="btn btn-link btn-xs">{{ __('Forget the API key') }}</button>
+										</form>
+									@endif
+									@if ( $item['deletable'] )
+										<form method="POST" action="{{ route( 'wporgfreescoutimport.sources.delete', [ 'id' => $source->id ] ) }}">
+											{{ csrf_field() }}
+											<button type="submit" class="btn btn-link btn-xs text-danger">{{ __('Delete') }}</button>
+										</form>
+									@endif
+								</details>
+							</td>
+						</tr>
+					@endforeach
+				</tbody>
+			</table>
+			<p class="text-help">{{ __('A source’s API doesn’t give its emails’ Message-IDs, which replies to old emails find their conversation by. Run the module’s bin/export-message-ids.php on its server, and upload what it writes, gzipped or not, before the last import. Threads imported already get theirs too. Uploading again replaces those it has.') }}</p>
 		@endif
 
-		@if ( $sources )
-			<p>{{ __('Imports copy a mailbox’s conversations from :name into a mailbox here, without sending anything. The first import copies everything; importing the same mailbox again copies only what changed since. Import before the mailbox’s email moves, and once more after.', [ 'name' => $name ]) }}</p>
-			<p>{{ __('Every conversation gets a new number here; find one by the number it had there below. Each of :name’s users is credited to the user chosen on the Users page, or else to the one with the same email; an import creates a disabled user for anyone else.', [ 'name' => $name ]) }}</p>
+		<details @if ( ! $sources ) open @endif>
+			<summary>{{ __('Add a source') }}</summary>
+			@include( 'wporgfreescoutimport::source', [ 'source' => null, 'action' => route( 'wporgfreescoutimport.sources.store' ) ] )
+		</details>
 
+		@if ( array_filter( array_column( $sources, 'mailboxes' ) ) )
+			<h3 class="margin-top">{{ __('Import') }}</h3>
 			<form method="POST" action="{{ route( 'wporgfreescoutimport.start' ) }}" class="form-inline">
 				{{ csrf_field() }}
-				<select name="source_mailbox_id" class="form-control" aria-label="{{ __('Mailbox on :name', [ 'name' => $name ]) }}" required>
-					<option value="" disabled selected>{{ __('Choose a mailbox on :name…', [ 'name' => $name ]) }}</option>
-					@foreach ( $sources as $source )
-						<option value="{{ $source['id'] }}">{{ $source['name'] }}</option>
+				<select name="remote_mailbox" class="form-control" aria-label="{{ __('Mailbox to import') }}" required>
+					<option value="" disabled selected>{{ __('Choose a mailbox to import…') }}</option>
+					@foreach ( $sources as $item )
+						@if ( $item['mailboxes'] )
+							<optgroup label="{{ $item['source']->name }}">
+								@foreach ( $item['mailboxes'] as $remote )
+									<option value="{{ $item['source']->id }}:{{ $remote['id'] }}">{{ $remote['name'] }}</option>
+								@endforeach
+							</optgroup>
+						@endif
 					@endforeach
 				</select>
 				&rarr;
@@ -71,7 +134,7 @@
 			<table class="table table-striped margin-top">
 				<thead>
 					<tr>
-						<th>{{ __('From :name', [ 'name' => $name ]) }}</th>
+						<th>{{ __('From') }}</th>
 						<th>{{ __('Into') }}</th>
 						<th>{{ __('What') }}</th>
 						<th>{{ __('Status') }}</th>
@@ -86,7 +149,7 @@
 				<tbody>
 					@foreach ( $runs as $run )
 						<tr>
-							<td>{{ $run->source_mailbox_name }}</td>
+							<td>{{ $run->remote_mailbox_name }}<br/><small class="text-help">{{ $run->source ? $run->source->name : __('(deleted)') }}</small></td>
 							<td>{{ $run->mailbox ? $run->mailbox->name : __('(deleted)') }}</td>
 							<td>
 								@if ( $run->is_retry() )
@@ -130,8 +193,8 @@
 									<details>
 										<summary><small>{{ __('Which') }}</small></summary>
 										<ul class="list-unstyled">
-											@foreach ( (array) $run->failures as $source_id => $failure )
-												<li><small>{{ $source_id }}: {{ $failure }}</small></li>
+											@foreach ( (array) $run->failures as $remote_id => $failure )
+												<li><small>{{ $remote_id }}: {{ $failure }}</small></li>
 											@endforeach
 										</ul>
 									</details>
@@ -169,25 +232,14 @@
 
 			<h3 class="margin-top">{{ __('Find a conversation') }}</h3>
 			<form method="GET" action="{{ route( 'wporgfreescoutimport.find' ) }}" class="form-inline">
-				<input type="text" name="number" class="form-control" inputmode="numeric" aria-label="{{ __('Number on :name', [ 'name' => $name ]) }}" placeholder="{{ __('Its number on :name', [ 'name' => $name ]) }}" required>
+				<select name="source_id" class="form-control" aria-label="{{ __('Source') }}" required>
+					@foreach ( $sources as $item )
+						<option value="{{ $item['source']->id }}">{{ $item['source']->name }}</option>
+					@endforeach
+				</select>
+				<input type="text" name="number" class="form-control" inputmode="numeric" aria-label="{{ __('Number there') }}" placeholder="{{ __('Its number there') }}" required>
 				<button type="submit" class="btn btn-default">{{ __('Open') }}</button>
 			</form>
-		@endif
-
-		@if ( $configured )
-			<h3 class="margin-top">{{ __('Message-IDs') }}</h3>
-			<p class="text-help">{{ __(':name’s API doesn’t give its emails’ Message-IDs, which replies to old emails find their conversation by. Run the module’s bin/export-message-ids.php there, and upload what it writes, gzipped or not, before the last import. Threads imported already get theirs too. Uploading again replaces those it has.', [ 'name' => $name ]) }}</p>
-			<p>{{ __(':count Message-IDs uploaded so far.', [ 'count' => number_format( $message_ids ) ]) }}</p>
-			<form method="POST" action="{{ route( 'wporgfreescoutimport.message_ids' ) }}" enctype="multipart/form-data" class="form-inline">
-				{{ csrf_field() }}
-				<input type="file" name="message_ids" accept=".csv,.gz,text/csv,application/gzip" aria-label="{{ __('File of Message-IDs') }}" required>
-				<button type="submit" class="btn btn-default">{{ __('Upload') }}</button>
-			</form>
-		@endif
-
-		@if ( $configured )
-			<h3 class="margin-top">{{ __('Where to import from') }}</h3>
-			@include('wporgfreescoutimport::settings')
 		@endif
 	</div>
 </div>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Imports one conversation of the other FreeScout.
+ * Imports one conversation of a source: another FreeScout.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -24,7 +24,7 @@ use Modules\WPOrgFreeScoutImport\Exceptions\ApiError;
 
 /**
  * Creates the conversation, with a number of this FreeScout's, or adds what's new to it, and keeps its status,
- * assignee, and dates as the other FreeScout has them.
+ * assignee, and dates as the source has them.
  *
  * Everything is written as imported, without the events live email fires, so nothing is sent, workflows aren't
  * triggered, and our other modules leave it alone. That doesn't keep it from automatic workflows that the Workflows
@@ -90,7 +90,7 @@ final class Importer {
 	public const SKIPPED_MOVED = 'moved';
 
 	/**
-	 * Left it out: the other FreeScout no longer has it.
+	 * Left it out: the source no longer has it.
 	 *
 	 * @var string
 	 */
@@ -135,11 +135,18 @@ final class Importer {
 	private static $columns = array();
 
 	/**
-	 * The other FreeScout.
+	 * The source's API.
 	 *
-	 * @var Source
+	 * @var RemoteApi
 	 */
-	private $source;
+	private $api;
+
+	/**
+	 * The source's ID.
+	 *
+	 * @var int
+	 */
+	private $source_id;
 
 	/**
 	 * Users and senders.
@@ -179,12 +186,13 @@ final class Importer {
 	/**
 	 * Constructor.
 	 *
-	 * @param Source $source The other FreeScout.
-	 * @param People $people Users and senders.
+	 * @param RemoteApi $api    The source's API.
+	 * @param People    $people Users and senders, for the same source.
 	 */
-	public function __construct( Source $source, People $people ) {
-		$this->source = $source;
-		$this->people = $people;
+	public function __construct( RemoteApi $api, People $people ) {
+		$this->api       = $api;
+		$this->source_id = (int) $api->source()->id;
+		$this->people    = $people;
 	}
 
 	/**
@@ -214,8 +222,8 @@ final class Importer {
 	 *                    downloaded; nothing of it is written then.
 	 */
 	public function import( array $source, Mailbox $mailbox ): string {
-		$source_id    = (int) ( $source['id'] ?? 0 );
-		$imported     = $source_id ? ImportedConversation::query()->where( 'source_id', $source_id )->first() : null;
+		$remote_id    = (int) ( $source['id'] ?? 0 );
+		$imported     = $remote_id ? ImportedConversation::query()->where( 'source_id', $this->source_id )->where( 'remote_id', $remote_id )->first() : null;
 		$conversation = $imported ? Conversation::find( $imported->conversation_id ) : null;
 		$worked_on    = $conversation && People::worked_on()->where( 'conversation_id', $conversation->id )->exists();
 
@@ -241,7 +249,7 @@ final class Importer {
 		}
 
 		$status = array_flip( Conversation::$statuses )[ $source['status'] ?? '' ] ?? null;
-		if ( ! $source_id || ! $status || 'published' !== ( $source['state'] ?? '' ) ) {
+		if ( ! $remote_id || ! $status || 'published' !== ( $source['state'] ?? '' ) ) {
 			return self::SKIPPED_UNPUBLISHED;
 		}
 
@@ -287,7 +295,7 @@ final class Importer {
 					$this->update_conversation( $conversation, $source, $status, ! $worked_on, (bool) $threads );
 
 					$record = array(
-						'source_number'   => (int) ( $source['number'] ?? 0 ),
+						'remote_number'   => (int) ( $source['number'] ?? 0 ),
 						'conversation_id' => (int) $conversation->id,
 						'creator_id'      => People::user_id( $source['createdBy'] ?? null ),
 						'assignee_id'     => People::user_id( $source['assignee'] ?? null ),
@@ -301,7 +309,13 @@ final class Importer {
 						$record['written_tags'] = (string) json_encode( (object) $written, JSON_UNESCAPED_UNICODE );
 					}
 
-					ImportedConversation::query()->updateOrCreate( array( 'source_id' => (int) $source['id'] ), $record );
+					ImportedConversation::query()->updateOrCreate(
+						array(
+							'source_id' => $this->source_id,
+							'remote_id' => (int) $source['id'],
+						),
+						$record
+					);
 				}
 			);
 		} catch ( \Throwable $e ) {
@@ -356,7 +370,7 @@ final class Importer {
 	 */
 	private function tag_colors(): array {
 		if ( null === $this->tag_colors ) {
-			$this->tag_colors = $this->source->tag_colors();
+			$this->tag_colors = $this->api->tag_colors();
 		}
 
 		return $this->tag_colors;
@@ -403,7 +417,7 @@ final class Importer {
 		);
 
 		$ids  = array_map( 'intval', array_column( $threads, 'id' ) );
-		$done = $ids ? ImportedThread::query()->whereIn( 'source_id', $ids )->pluck( 'source_id' )->map( 'intval' )->all() : array();
+		$done = $ids ? ImportedThread::query()->where( 'source_id', $this->source_id )->whereIn( 'remote_id', $ids )->pluck( 'remote_id' )->map( 'intval' )->all() : array();
 		$new  = array();
 
 		foreach ( $threads as $thread ) {
@@ -441,7 +455,7 @@ final class Importer {
 	 * @throws \Throwable If an attachment the source still has couldn't be downloaded; what was downloaded is closed then.
 	 */
 	private function read_threads( array $threads ): array {
-		$message_ids = MessageIds::of( array_map( 'intval', array_column( $threads, 'id' ) ) );
+		$message_ids = MessageIds::of( $this->source_id, array_map( 'intval', array_column( $threads, 'id' ) ) );
 		$read        = array();
 
 		try {
@@ -453,7 +467,7 @@ final class Importer {
 				$index                = count( $read ) - 1;
 
 				foreach ( (array) ( $thread['_embedded']['attachments'] ?? array() ) as $attachment ) {
-					$data = $this->source->attachment( (string) ( $attachment['fileUrl'] ?? '' ) );
+					$data = $this->api->attachment( (string) ( $attachment['fileUrl'] ?? '' ) );
 					// Deleted there since, or not the source's own: the rest of the thread is imported without it.
 					if ( ! $data ) {
 						continue;
@@ -499,7 +513,7 @@ final class Importer {
 	}
 
 	/**
-	 * Downloads the images in a body that the other FreeScout keeps, which would go with it: pasted images.
+	 * Downloads the images in a body that the source keeps, which would go with it: pasted images.
 	 *
 	 * An image that can't be downloaded keeps its link.
 	 *
@@ -513,7 +527,7 @@ final class Importer {
 
 		foreach ( array_unique( $matches[2] ) as $src ) {
 			$url = html_entity_decode( $src, ENT_QUOTES | ENT_HTML5 );
-			if ( ! $this->source->is_own( $url ) ) {
+			if ( ! $this->api->is_own( $url ) ) {
 				continue;
 			}
 
@@ -541,7 +555,7 @@ final class Importer {
 			return null;
 		}
 
-		$file = $this->source->image( $url );
+		$file = $this->api->image( $url );
 		if ( ! $file ) {
 			return null;
 		}
@@ -760,10 +774,11 @@ final class Importer {
 	private function remember_thread( array $source, int $thread_id ): void {
 		ImportedThread::query()->create(
 			array(
-				'source_id'          => (int) $source['id'],
+				'source_id'          => $this->source_id,
+				'remote_id'          => (int) $source['id'],
 				'thread_id'          => $thread_id,
-				'source_user_id'     => People::user_id( $source['createdBy'] ?? null ),
-				'source_assignee_id' => People::user_id( $source['assignedTo'] ?? null ),
+				'remote_user_id'     => People::user_id( $source['createdBy'] ?? null ),
+				'remote_assignee_id' => People::user_id( $source['assignedTo'] ?? null ),
 			)
 		);
 	}

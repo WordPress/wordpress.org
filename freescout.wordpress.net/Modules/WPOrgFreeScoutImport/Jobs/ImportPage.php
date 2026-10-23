@@ -1,6 +1,6 @@
 <?php
 /**
- * Queued import of one page of a mailbox's conversations in the other FreeScout.
+ * Queued import of one page of a source mailbox's conversations.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -18,7 +18,7 @@ use Modules\WPOrgFreeScoutImport\Entities\Run;
 use Modules\WPOrgFreeScoutImport\Exceptions\ApiError;
 use Modules\WPOrgFreeScoutImport\Services\Importer;
 use Modules\WPOrgFreeScoutImport\Services\People;
-use Modules\WPOrgFreeScoutImport\Services\Source;
+use Modules\WPOrgFreeScoutImport\Services\RemoteApi;
 
 /**
  * Imports a page of 25 conversations, then queues the next page; or 25 of the conversations a run retries.
@@ -31,7 +31,7 @@ final class ImportPage implements ShouldQueue {
 	use Queueable;
 
 	/**
-	 * Seconds before a page the other FreeScout failed is tried again.
+	 * Seconds before a page the source failed is tried again.
 	 *
 	 * @var int
 	 */
@@ -104,9 +104,15 @@ final class ImportPage implements ShouldQueue {
 			return;
 		}
 
+		if ( ! $run->source ) {
+			$this->stop( $run, 'The source was deleted.' );
+
+			return;
+		}
+
 		try {
-			$source   = app( Source::class );
-			$importer = new Importer( $source, new People() );
+			$source   = RemoteApi::for_source( $run->source );
+			$importer = new Importer( $source, new People( (int) $run->source_id ) );
 
 			if ( $run->is_retry() ) {
 				$listed = array_map(
@@ -116,7 +122,7 @@ final class ImportPage implements ShouldQueue {
 							'retry' => true,
 						);
 					},
-					array_slice( array_values( array_diff( self::ids( (array) $run->retry_ids ), self::ids( (array) $run->page_done ) ) ), 0, Source::PAGE_SIZE )
+					array_slice( array_values( array_diff( self::ids( (array) $run->retry_ids ), self::ids( (array) $run->page_done ) ) ), 0, RemoteApi::PAGE_SIZE )
 				);
 				$page   = array( 'conversations' => array() );
 			} else {
@@ -124,7 +130,7 @@ final class ImportPage implements ShouldQueue {
 				$listed = $page['conversations'];
 
 				if ( $run->page > 1 ) {
-					$previous = $source->conversations( (int) $run->source_mailbox_id, (int) $run->page - 1, $run->since );
+					$previous = $source->conversations( (int) $run->remote_mailbox_id, (int) $run->page - 1, $run->since );
 					$known    = self::ids( (array) $run->previous_page );
 					$moved    = array_filter(
 						$previous['conversations'],
@@ -182,7 +188,7 @@ final class ImportPage implements ShouldQueue {
 			return;
 		} catch ( \Throwable $e ) {
 			// FreeScout's worker doesn't retry jobs: without this, the run would wait for a job that's gone.
-			\Log::error( '[WPOrgFreeScoutImport] Could not import a page of ' . $run->source_mailbox_name . ': ' . Run::describe( $e ) );
+			\Log::error( '[WPOrgFreeScoutImport] Could not import a page of ' . $run->remote_mailbox_name . ': ' . Run::describe( $e ) );
 			$this->fail_page( $run, Run::describe( $e ) );
 
 			return;
@@ -223,15 +229,15 @@ final class ImportPage implements ShouldQueue {
 	 * Imports one conversation; a conversation that fails is counted and logged, and the page goes on.
 	 *
 	 * @param Importer     $importer     Importer.
-	 * @param Source       $source       The other FreeScout.
-	 * @param array        $conversation Source conversation, or for a retry, `id` and `retry`.
+	 * @param RemoteApi    $source       The source's API.
+	 * @param array        $conversation Remote conversation, or for a retry, `id` and `retry`.
 	 * @param \App\Mailbox $mailbox      Mailbox.
 	 * @param Run          $run          Run, whose counters are added to.
 	 * @return void
 	 *
-	 * @throws ApiError If the other FreeScout is unavailable or refuses the key, which stops the page.
+	 * @throws ApiError If the source is unavailable or refuses the key, which stops the page.
 	 */
-	private function import( Importer $importer, Source $source, array $conversation, \App\Mailbox $mailbox, Run $run ): void {
+	private function import( Importer $importer, RemoteApi $source, array $conversation, \App\Mailbox $mailbox, Run $run ): void {
 		$id = (int) ( $conversation['id'] ?? 0 );
 
 		try {
@@ -241,7 +247,7 @@ final class ImportPage implements ShouldQueue {
 
 			if ( ! $conversation ) {
 				$result = Importer::SKIPPED_GONE;
-			} elseif ( isset( $conversation['mailboxId'] ) && (int) $conversation['mailboxId'] !== (int) $run->source_mailbox_id ) {
+			} elseif ( isset( $conversation['mailboxId'] ) && (int) $conversation['mailboxId'] !== (int) $run->remote_mailbox_id ) {
 				// Moved to another mailbox there since it failed: it's imported with that one.
 				$result = Importer::SKIPPED_MOVED;
 			} else {
@@ -292,15 +298,15 @@ final class ImportPage implements ShouldQueue {
 	 *
 	 * Past the last page the list had so far, an answer the API won't give counts as an empty page: the end of the list.
 	 *
-	 * @param Source $source The other FreeScout.
-	 * @param Run    $run    Run.
-	 * @return array See Source::conversations().
+	 * @param RemoteApi $source The source's API.
+	 * @param Run       $run    Run.
+	 * @return array See RemoteApi::conversations().
 	 *
 	 * @throws ApiError If the page couldn't be read.
 	 */
-	private function page( Source $source, Run $run ): array {
+	private function page( RemoteApi $source, Run $run ): array {
 		try {
-			return $source->conversations( (int) $run->source_mailbox_id, (int) $run->page, $run->since );
+			return $source->conversations( (int) $run->remote_mailbox_id, (int) $run->page, $run->since );
 		} catch ( ApiError $e ) {
 			if ( $run->pages && $run->page > $run->pages && $e->status >= 400 && $e->status < 500 && ! $e->is_denied() ) {
 				return array(
@@ -338,7 +344,7 @@ final class ImportPage implements ShouldQueue {
 	 * Counts and logs a conversation that failed.
 	 *
 	 * @param Run        $run Run.
-	 * @param int        $id  Source conversation ID.
+	 * @param int        $id  Remote conversation ID.
 	 * @param \Throwable $e   What went wrong.
 	 * @return void
 	 */
@@ -348,7 +354,7 @@ final class ImportPage implements ShouldQueue {
 	}
 
 	/**
-	 * Source IDs of a list of conversations, or of a list of IDs.
+	 * Remote IDs of a list of conversations, or of a list of IDs.
 	 *
 	 * @param array $items Conversations or IDs.
 	 * @return int[]
@@ -404,7 +410,7 @@ final class ImportPage implements ShouldQueue {
 		$run->finished_at = Carbon::now();
 		$this->save( $run );
 
-		\Log::error( '[WPOrgFreeScoutImport] Stopped importing ' . $run->source_mailbox_name . ': ' . $reason );
+		\Log::error( '[WPOrgFreeScoutImport] Stopped importing ' . $run->remote_mailbox_name . ': ' . $reason );
 	}
 
 	/**

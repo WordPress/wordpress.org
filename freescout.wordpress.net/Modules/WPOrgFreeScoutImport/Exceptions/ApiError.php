@@ -1,6 +1,6 @@
 <?php
 /**
- * The other FreeScout's API refused or failed a request.
+ * A source's API refused or failed a request.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */

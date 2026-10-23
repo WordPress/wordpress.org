@@ -21,11 +21,11 @@ use Illuminate\Support\Facades\Queue;
 use Modules\WPOrgFreeScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgFreeScoutImport\Entities\ImportedThread;
 use Modules\WPOrgFreeScoutImport\Entities\Run;
-use Modules\WPOrgFreeScoutImport\Entities\SourceUser;
+use Modules\WPOrgFreeScoutImport\Entities\RemoteUser;
+use Modules\WPOrgFreeScoutImport\Entities\Source;
 use Modules\WPOrgFreeScoutImport\Services\Importer;
 use Modules\WPOrgFreeScoutImport\Services\People;
-use Modules\WPOrgFreeScoutImport\Services\Settings;
-use Modules\WPOrgFreeScoutImport\Services\Source;
+use Modules\WPOrgFreeScoutImport\Services\RemoteApi;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Services\Client;
 use Psr\Http\Message\RequestInterface;
@@ -53,7 +53,7 @@ final class ImportTest extends ImportTestCase {
 		$this->assertSame( Importer::IMPORTED, $result );
 		// Raw: without custom numbers, core shows the ID as the number.
 		$this->assertSame( $next, (int) $conversation->getOriginal( 'number' ) );
-		$this->assertSame( 150, (int) ImportedConversation::query()->where( 'source_id', 501 )->value( 'source_number' ) );
+		$this->assertSame( 150, (int) ImportedConversation::query()->where( 'source_id', $this->source->id )->where( 'remote_id', 501 )->value( 'remote_number' ) );
 		$this->assertSame( 2000000, (int) \Option::get( 'next_ticket', 0, true, false ) );
 
 		$this->assertSame( Conversation::STATUS_CLOSED, (int) $conversation->status );
@@ -75,7 +75,7 @@ final class ImportTest extends ImportTestCase {
 		$this->assertStringContainsString( $image->url(), (string) $threads[0]->body );
 		$this->assertStringContainsString( 'https://elsewhere.test/logo.png', (string) $threads[0]->body );
 		$this->assertStringNotContainsString( 'scout.test', (string) $threads[0]->body );
-		$this->assertSame( array( 'scout.test' ), $this->source->hosts() );
+		$this->assertSame( array( 'scout.test' ), $this->remote->hosts() );
 
 		$tag = \DB::table( 'tags' )->where( 'name', 'sponsors' )->first();
 		$this->assertSame( 3, (int) $tag->color );
@@ -99,7 +99,7 @@ final class ImportTest extends ImportTestCase {
 
 		$conversation->refresh();
 		$this->assertSame( 6, $conversation->threads()->count() );
-		$this->assertSame( 1, ImportedThread::query()->where( 'source_id', 9007 )->count() );
+		$this->assertSame( 1, ImportedThread::query()->where( 'source_id', $this->source->id )->where( 'remote_id', 9007 )->count() );
 		$this->assertSame( Conversation::STATUS_CLOSED, (int) $conversation->status );
 	}
 
@@ -119,7 +119,7 @@ final class ImportTest extends ImportTestCase {
 		file_put_contents( $path, "9001,<sam-1@example.com>\n9002,FS_reply-9002-abcdef0123456789@wordcamp.org\n9101,taken@example.com\n9102,sam-2@example.com\n" );
 
 		$this->actingAs( $this->create_user() )
-			->post( route( 'wporgfreescoutimport.message_ids' ), array( 'message_ids' => new UploadedFile( $path, 'message-ids.csv', 'text/csv', null, null, true ) ) )
+			->post( route( 'wporgfreescoutimport.message_ids', array( 'id' => $this->source->id ) ), array( 'message_ids' => new UploadedFile( $path, 'message-ids.csv', 'text/csv', null, null, true ) ) )
 			->assertRedirect( route( 'wporgfreescoutimport.index' ) );
 
 		$later = self::conversation(
@@ -139,8 +139,8 @@ final class ImportTest extends ImportTestCase {
 		$this->assertSame(
 			array( 'sam-1@example.com', 'FS_reply-9002-abcdef0123456789@wordcamp.org', null, 'sam-2@example.com' ),
 			array_map(
-				static function ( int $source_id ): ?string {
-					return Thread::query()->whereKey( ImportedThread::query()->where( 'source_id', $source_id )->value( 'thread_id' ) )->value( 'message_id' );
+				function ( int $remote_id ): ?string {
+					return Thread::query()->whereKey( ImportedThread::query()->where( 'source_id', $this->source->id )->where( 'remote_id', $remote_id )->value( 'thread_id' ) )->value( 'message_id' );
 				},
 				array( 9001, 9002, 9101, 9102 )
 			)
@@ -162,10 +162,10 @@ final class ImportTest extends ImportTestCase {
 		);
 
 		$this->actingAs( $this->create_user() )
-			->post( route( 'wporgfreescoutimport.users.save' ), array( 'users' => array( 66 => $nora->id ) ) )
-			->assertRedirect( route( 'wporgfreescoutimport.users' ) );
+			->post( route( 'wporgfreescoutimport.users.save', array( 'id' => $this->source->id ) ), array( 'users' => array( 66 => $nora->id ) ) )
+			->assertRedirect( route( 'wporgfreescoutimport.users', array( 'id' => $this->source->id ) ) );
 
-		$note = Thread::query()->whereKey( ImportedThread::query()->where( 'source_id', 9003 )->value( 'thread_id' ) )->first();
+		$note = Thread::query()->whereKey( ImportedThread::query()->where( 'source_id', $this->source->id )->where( 'remote_id', 9003 )->value( 'thread_id' ) )->first();
 		$this->assertSame( (int) $nora->id, (int) $note->created_by_user_id );
 	}
 
@@ -176,7 +176,7 @@ final class ImportTest extends ImportTestCase {
 	 * @return void
 	 */
 	public function test_a_run_imports_every_page_and_finds_conversations_by_their_old_number(): void {
-		$this->source->json(
+		$this->remote->json(
 			'api/mailboxes',
 			self::page(
 				'mailboxes',
@@ -209,15 +209,15 @@ final class ImportTest extends ImportTestCase {
 				),
 			)
 		);
-		$this->source->json( 'api/conversations', $listed, 1 );
-		$this->source->json( 'api/conversations', self::page( 'conversations', array() ), 2 );
+		$this->remote->json( 'api/conversations', $listed, 1 );
+		$this->remote->json( 'api/conversations', self::page( 'conversations', array() ), 2 );
 
 		$admin = $this->create_user();
 		$this->actingAs( $admin )->post(
 			route( 'wporgfreescoutimport.start' ),
 			array(
-				'source_mailbox_id' => self::SOURCE_MAILBOX_ID,
-				'mailbox_id'        => $this->mailbox->id,
+				'remote_mailbox' => $this->source->id . ':' . self::SOURCE_MAILBOX_ID,
+				'mailbox_id'     => $this->mailbox->id,
 			)
 		);
 
@@ -233,7 +233,15 @@ final class ImportTest extends ImportTestCase {
 		);
 
 		$this->actingAs( $admin )
-			->get( route( 'wporgfreescoutimport.find', array( 'number' => '#150' ) ) )
+			->get(
+				route(
+					'wporgfreescoutimport.find',
+					array(
+						'source_id' => $this->source->id,
+						'number'    => '#150',
+					)
+				)
+			)
 			->assertRedirect( route( 'conversations.view', array( 'id' => $this->imported( 501 )->id ) ) );
 	}
 
@@ -252,7 +260,7 @@ final class ImportTest extends ImportTestCase {
 				'bonew'    => array( 'Bo', 'New', 'bo@wordpress.example' ),
 			)
 		);
-		$this->source->json(
+		$this->remote->json(
 			'api/users',
 			self::page(
 				'users',
@@ -267,20 +275,20 @@ final class ImportTest extends ImportTestCase {
 
 		$this->actingAs( $this->create_user() )
 			->post(
-				route( 'wporgfreescoutimport.users.connect' ),
+				route( 'wporgfreescoutimport.users.connect', array( 'id' => $this->source->id ) ),
 				array(
-					'csv'   => "source_id,wporg_username\n55,adaagent\n66,noranote\n77,bonew\n",
+					'csv'   => "remote_id,wporg_username\n55,adaagent\n66,noranote\n77,bonew\n",
 					'apply' => 1,
 				)
 			)
 			->assertSessionHas( 'flash_success', 'Connected 2 users to WordPress.org accounts.' );
 
-		$nora = User::query()->findOrFail( (int) SourceUser::query()->where( 'source_user_id', 66 )->value( 'user_id' ) );
+		$nora = User::query()->findOrFail( (int) RemoteUser::query()->where( 'source_id', $this->source->id )->where( 'remote_user_id', 66 )->value( 'user_id' ) );
 		$this->assertSame( 'noranote', Account::username_for( (int) $nora->id ) );
 		$this->assertSame( User::STATUS_ACTIVE, (int) $nora->status );
 		$this->assertTrue( $nora->mailboxes()->where( 'mailboxes.id', $this->mailbox->id )->exists() );
 
-		$bo = User::query()->findOrFail( (int) SourceUser::query()->where( 'source_user_id', 77 )->value( 'user_id' ) );
+		$bo = User::query()->findOrFail( (int) RemoteUser::query()->where( 'source_id', $this->source->id )->where( 'remote_user_id', 77 )->value( 'user_id' ) );
 		$this->assertSame( 'bonew', Account::username_for( (int) $bo->id ) );
 		$this->assertSame( User::STATUS_ACTIVE, (int) $bo->status );
 
@@ -288,39 +296,62 @@ final class ImportTest extends ImportTestCase {
 	}
 
 	/**
-	 * The API key is kept encrypted, and saving the address again without one keeps it, unless it names another host.
+	 * Two sources number their conversations, threads, and users alike: each source's are imported apart.
 	 *
 	 * @return void
 	 */
-	public function test_settings_keep_the_saved_api_key_encrypted(): void {
+	public function test_sources_with_the_same_ids_are_imported_apart(): void {
+		$other = $this->create_source( 'https://scout2.test' );
+		$this->remote->json( 'api/tags', self::page( 'tags', array() ), null, 'scout2.test' );
+
+		$this->assertSame( Importer::IMPORTED, $this->import( self::conversation() ) );
+		$this->assertSame( Importer::IMPORTED, $this->import( self::conversation(), $other ) );
+
+		$first  = $this->imported( 501 );
+		$second = $this->imported( 501, $other );
+		$this->assertNotSame( (int) $first->id, (int) $second->id );
+		$this->assertSame( 4, $first->threads()->count() );
+		$this->assertSame( 4, $second->threads()->count() );
+	}
+
+	/**
+	 * A source's API key is kept encrypted, and saving its address again without one keeps it, unless the address
+	 * names another host.
+	 *
+	 * @return void
+	 */
+	public function test_sources_keep_their_api_key_encrypted(): void {
 		$admin = $this->create_user();
 		$this->actingAs( $admin )->post(
-			route( 'wporgfreescoutimport.settings' ),
+			route( 'wporgfreescoutimport.sources.store' ),
 			array(
 				'url'     => 'https://scout.wc-us.org/',
 				'api_key' => 'secret-key',
 			)
 		);
+		$source = Source::query()->where( 'url', 'https://scout.wc-us.org' )->firstOrFail();
 		$this->actingAs( $admin )->post(
-			route( 'wporgfreescoutimport.settings' ),
+			route( 'wporgfreescoutimport.sources.update', array( 'id' => $source->id ) ),
 			array(
 				'url'     => 'https://scout.wc-us.org',
+				'name'    => 'WordCamp US',
 				'api_key' => '',
 			)
 		);
 
-		$this->assertSame( 'https://scout.wc-us.org', Settings::url() );
-		$this->assertSame( 'secret-key', Settings::api_key() );
-		$this->assertStringNotContainsString( 'secret-key', (string) \Option::get( Settings::KEY_OPTION, '', true, false ) );
+		$source->refresh();
+		$this->assertSame( 'WordCamp US', $source->name );
+		$this->assertSame( 'secret-key', $source->key() );
+		$this->assertStringNotContainsString( 'secret-key', (string) \DB::table( 'wporgfreescoutimport_sources' )->where( 'id', $source->id )->value( 'api_key' ) );
 
 		$this->actingAs( $admin )->post(
-			route( 'wporgfreescoutimport.settings' ),
+			route( 'wporgfreescoutimport.sources.update', array( 'id' => $source->id ) ),
 			array(
 				'url'     => 'https://elsewhere.test',
 				'api_key' => '',
 			)
 		);
-		$this->assertSame( '', Settings::api_key() );
+		$this->assertSame( '', $source->fresh()->key() );
 	}
 
 	/**
@@ -354,22 +385,31 @@ final class ImportTest extends ImportTestCase {
 	}
 
 	/**
-	 * Imports a source conversation into the mailbox.
+	 * Imports a remote conversation into the mailbox.
 	 *
-	 * @param array $source Source conversation.
+	 * @param array       $remote Remote conversation.
+	 * @param Source|null $source Its source; the test's if null.
 	 * @return string What the importer returned.
 	 */
-	private function import( array $source ): string {
-		return ( new Importer( app( Source::class ), new People() ) )->import( $source, $this->mailbox );
+	private function import( array $remote, ?Source $source = null ): string {
+		$source = $source ?? $this->source;
+
+		return ( new Importer( RemoteApi::for_source( $source ), new People( (int) $source->id ) ) )->import( $remote, $this->mailbox );
 	}
 
 	/**
-	 * The conversation a source conversation was imported as.
+	 * The conversation a remote conversation was imported as.
 	 *
-	 * @param int $source_id Source conversation ID.
+	 * @param int         $remote_id Remote conversation ID.
+	 * @param Source|null $source    Its source; the test's if null.
 	 * @return Conversation
 	 */
-	private function imported( int $source_id ): Conversation {
-		return Conversation::query()->findOrFail( (int) ImportedConversation::query()->where( 'source_id', $source_id )->value( 'conversation_id' ) );
+	private function imported( int $remote_id, ?Source $source = null ): Conversation {
+		$conversation_id = ImportedConversation::query()
+			->where( 'source_id', ( $source ?? $this->source )->id )
+			->where( 'remote_id', $remote_id )
+			->value( 'conversation_id' );
+
+		return Conversation::query()->findOrFail( (int) $conversation_id );
 	}
 }

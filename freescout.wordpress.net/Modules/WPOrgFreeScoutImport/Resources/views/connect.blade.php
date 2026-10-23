@@ -20,7 +20,7 @@
 		</div>
 		<div class="flexy-block"></div>
 		<div class="flexy-item">
-			<a href="{{ route( 'wporgfreescoutimport.users' ) }}" class="btn btn-bordered">{{ __('Users on :name', [ 'name' => $name ]) }}</a>
+			<a href="{{ route( 'wporgfreescoutimport.users', [ 'id' => $source->id ] ) }}" class="btn btn-bordered">{{ __('Users on :name', [ 'name' => $name ]) }}</a>
 		</div>
 	</div>
 
@@ -41,11 +41,11 @@
 				@foreach ( $plan as $step )
 					<tr @if ( $step['error'] ) class="danger" @elseif ( $step['mismatch'] ) class="warning" @endif>
 						<td>
-							@if ( $step['source_user'] )
-								{{ trim( ( $step['source_user']['firstName'] ?? '' ) . ' ' . ( $step['source_user']['lastName'] ?? '' ) ) }}<br/>
-								<small>{{ $step['source_user']['email'] ?? '' }}</small>
+							@if ( $step['remote_user'] )
+								{{ trim( ( $step['remote_user']['firstName'] ?? '' ) . ' ' . ( $step['remote_user']['lastName'] ?? '' ) ) }}<br/>
+								<small>{{ $step['remote_user']['email'] ?? '' }}</small>
 							@else
-								{{ $step['row']['source_id'] ?: $step['row']['email'] }}
+								{{ $step['row']['remote_id'] ?: $step['row']['email'] }}
 							@endif
 						</td>
 						<td>
@@ -70,7 +70,7 @@
 							@else
 								{{ $actions[ $step['action'] ] }}
 								@if ( $step['mismatch'] )
-									<br/><label class="checkbox-inline"><input type="checkbox" name="confirmed[]" value="{{ $step['source_user']['id'] }}" form="wporgfreescoutimport-connect"> <strong>{{ __('Not their name or email: connect anyway') }}</strong></label>
+									<br/><label class="checkbox-inline"><input type="checkbox" name="confirmed[]" value="{{ $step['remote_user']['id'] }}" form="wporgfreescoutimport-connect"> <strong>{{ __('Not their name or email: connect anyway') }}</strong></label>
 								@endif
 							@endif
 						</td>
@@ -80,7 +80,7 @@
 		</table>
 
 		@if ( $ready )
-			<form method="POST" action="{{ route( 'wporgfreescoutimport.users.connect' ) }}" id="wporgfreescoutimport-connect">
+			<form method="POST" action="{{ route( 'wporgfreescoutimport.users.connect', [ 'id' => $source->id ] ) }}" id="wporgfreescoutimport-connect">
 				{{ csrf_field() }}
 				<input type="hidden" name="csv" value="{{ $csv }}">
 				<input type="hidden" name="apply" value="1">
@@ -88,7 +88,7 @@
 				@if ( $mismatched )
 					<span class="text-help">{{ __(':count of them only if their boxes are checked.', [ 'count' => $mismatched ]) }}</span>
 				@endif
-				<a href="{{ route( 'wporgfreescoutimport.users' ) }}" class="btn btn-link">{{ __('Cancel') }}</a>
+				<a href="{{ route( 'wporgfreescoutimport.users', [ 'id' => $source->id ] ) }}" class="btn btn-link">{{ __('Cancel') }}</a>
 			</form>
 		@else
 			<p><strong>{{ __('Nothing to connect.') }}</strong></p>

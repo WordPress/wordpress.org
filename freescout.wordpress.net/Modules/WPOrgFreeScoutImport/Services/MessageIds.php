@@ -1,6 +1,6 @@
 <?php
 /**
- * Keeps the other FreeScout's emails' Message-IDs, which its API doesn't give, and gives them to imported threads.
+ * Keeps sources' emails' Message-IDs, which their API doesn't give, and gives them to imported threads.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -14,11 +14,11 @@ use Modules\WPOrgFreeScoutImport\Entities\ImportedThread;
 use Modules\WPOrgFreeScoutImport\Entities\MessageId;
 
 /**
- * Reads the file bin/export-message-ids.php writes on the other FreeScout: a line per email, its thread ID there and
+ * Reads the file bin/export-message-ids.php writes on a source's server: a line per email, its thread ID there and
  * its Message-ID, separated by a comma.
  *
  * A sender who replies to an old email names its Message-ID, which finds the thread it's in, and so the conversation.
- * Senders' emails keep their own. Replies the other FreeScout sent have one it made up from the thread ID and its
+ * Senders' emails keep their own. Replies a source sent have one it made up from the thread ID and its
  * APP_KEY: core here can't tell it's one of FreeScout's, so it looks it up like a sender's.
  */
 final class MessageIds {
@@ -31,14 +31,15 @@ final class MessageIds {
 	private const CHUNK = 500;
 
 	/**
-	 * Keeps the Message-IDs in a file, replacing those kept for the same threads.
+	 * Keeps the Message-IDs in a source's file, replacing those kept for the same threads.
 	 *
-	 * @param string $path File, plain or gzipped.
+	 * @param int    $source_id Source.
+	 * @param string $path      File, plain or gzipped.
 	 * @return int How many were read.
 	 *
 	 * @throws \RuntimeException If it can't be read.
 	 */
-	public static function store( string $path ): int {
+	public static function store( int $source_id, string $path ): int {
 		$file = gzopen( $path, 'rb' );
 		if ( ! $file ) {
 			throw new \RuntimeException( 'Could not read the file.' );
@@ -59,14 +60,14 @@ final class MessageIds {
 					continue;
 				}
 
-				$rows[ $row['source_thread_id'] ] = $row;
+				$rows[ $row['remote_thread_id'] ] = array( 'source_id' => $source_id ) + $row;
 				if ( count( $rows ) >= self::CHUNK ) {
-					$count += self::write( $rows );
+					$count += self::write( $source_id, $rows );
 					$rows   = array();
 				}
 			}
 
-			$count += self::write( $rows );
+			$count += self::write( $source_id, $rows );
 		} finally {
 			gzclose( $file );
 		}
@@ -75,19 +76,21 @@ final class MessageIds {
 	}
 
 	/**
-	 * The Message-IDs of source threads.
+	 * The Message-IDs of a source's threads.
 	 *
-	 * @param int[] $source_thread_ids Source thread IDs.
-	 * @return string[] Message-IDs, by source thread ID.
+	 * @param int   $source_id         Source.
+	 * @param int[] $remote_thread_ids Remote thread IDs.
+	 * @return string[] Message-IDs, by remote thread ID.
 	 */
-	public static function of( array $source_thread_ids ): array {
-		if ( ! $source_thread_ids ) {
+	public static function of( int $source_id, array $remote_thread_ids ): array {
+		if ( ! $remote_thread_ids ) {
 			return array();
 		}
 
 		return MessageId::query()
-			->whereIn( 'source_thread_id', $source_thread_ids )
-			->pluck( 'message_id', 'source_thread_id' )
+			->where( 'source_id', $source_id )
+			->whereIn( 'remote_thread_id', $remote_thread_ids )
+			->pluck( 'message_id', 'remote_thread_id' )
 			->all();
 	}
 
@@ -101,7 +104,13 @@ final class MessageIds {
 
 		ImportedThread::query()
 			->join( 'threads', 'threads.id', '=', 'wporgfreescoutimport_threads.thread_id' )
-			->join( 'wporgfreescoutimport_message_ids', 'wporgfreescoutimport_message_ids.source_thread_id', '=', 'wporgfreescoutimport_threads.source_id' )
+			->join(
+				'wporgfreescoutimport_message_ids',
+				static function ( \Illuminate\Database\Query\JoinClause $join ): void {
+					$join->on( 'wporgfreescoutimport_message_ids.source_id', '=', 'wporgfreescoutimport_threads.source_id' )
+						->on( 'wporgfreescoutimport_message_ids.remote_thread_id', '=', 'wporgfreescoutimport_threads.remote_id' );
+				}
+			)
 			->whereNull( 'threads.message_id' )
 			->whereIn( 'threads.type', array( Thread::TYPE_CUSTOMER, Thread::TYPE_MESSAGE ) )
 			->select( 'wporgfreescoutimport_threads.id', 'wporgfreescoutimport_threads.thread_id', 'wporgfreescoutimport_message_ids.message_id' )
@@ -132,7 +141,7 @@ final class MessageIds {
 	 * Reads a line of the file.
 	 *
 	 * @param string $line Line.
-	 * @return array|null `source_thread_id` and `message_id`; null if it isn't one.
+	 * @return array|null `remote_thread_id` and `message_id`; null if it isn't one.
 	 */
 	private static function parse( string $line ): ?array {
 		$fields = str_getcsv( trim( $line ), ',', '"', '' );
@@ -146,25 +155,26 @@ final class MessageIds {
 		}
 
 		return array(
-			'source_thread_id' => (int) $fields[0],
+			'remote_thread_id' => (int) $fields[0],
 			'message_id'       => mb_substr( $message_id, 0, 998 ),
 		);
 	}
 
 	/**
-	 * Writes rows, replacing those for the same threads.
+	 * Writes a source's rows, replacing those for the same threads.
 	 *
-	 * @param array[] $rows Rows, by source thread ID.
+	 * @param int     $source_id Source.
+	 * @param array[] $rows      Rows, by remote thread ID.
 	 * @return int How many were written.
 	 */
-	private static function write( array $rows ): int {
+	private static function write( int $source_id, array $rows ): int {
 		if ( ! $rows ) {
 			return 0;
 		}
 
 		\DB::transaction(
-			static function () use ( $rows ): void {
-				MessageId::query()->whereIn( 'source_thread_id', array_keys( $rows ) )->delete();
+			static function () use ( $source_id, $rows ): void {
+				MessageId::query()->where( 'source_id', $source_id )->whereIn( 'remote_thread_id', array_keys( $rows ) )->delete();
 				MessageId::query()->insert( array_values( $rows ) );
 			}
 		);

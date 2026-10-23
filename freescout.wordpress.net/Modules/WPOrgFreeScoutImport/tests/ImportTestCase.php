@@ -1,6 +1,6 @@
 <?php
 /**
- * Base test case for the importer: a fake other FreeScout, and its data.
+ * Base test case for the importer: a fake source, and its data.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -14,8 +14,9 @@ use App\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Modules\WPOrgFreeScoutImport\Entities\Source;
 use Modules\WPOrgFreeScoutImport\Providers\WPOrgFreeScoutImportServiceProvider;
-use Modules\WPOrgFreeScoutImport\Services\Source;
+use Modules\WPOrgFreeScoutImport\Services\RemoteApi;
 use Modules\WPOrgFreeScoutImport\Services\Tags;
 use Modules\WPOrgFreeScoutImport\Tests\Support\FakeSource;
 use WordPressdotorg\FreeScout\Tests\TestCase;
@@ -23,7 +24,7 @@ use WordPressdotorg\FreeScout\Tests\TestCase;
 require_once __DIR__ . '/Support/FakeSource.php';
 
 /**
- * Registers the module against a fake other FreeScout with one closed conversation, and the Tags module's tables.
+ * Registers the module against a fake source with one closed conversation, and the Tags module's tables.
  */
 abstract class ImportTestCase extends TestCase {
 
@@ -42,9 +43,16 @@ abstract class ImportTestCase extends TestCase {
 	protected const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
 	/**
-	 * Fake other FreeScout.
+	 * Fake HTTP answers of the sources.
 	 *
 	 * @var FakeSource
+	 */
+	protected $remote;
+
+	/**
+	 * Source imported from.
+	 *
+	 * @var Source
 	 */
 	protected $source;
 
@@ -93,7 +101,7 @@ abstract class ImportTestCase extends TestCase {
 	}
 
 	/**
-	 * Registers the module, fakes the other FreeScout and file storage, and creates the agent and mailbox.
+	 * Registers the module, fakes the source and file storage, and creates the source, the agent, and the mailbox.
 	 *
 	 * @return void
 	 */
@@ -114,8 +122,9 @@ abstract class ImportTestCase extends TestCase {
 			}
 		);
 
-		$this->source = new FakeSource();
-		$this->app->instance( Source::class, $this->source->client() );
+		$this->remote = new FakeSource();
+		$this->app->instance( RemoteApi::HTTP, $this->remote->http() );
+		$this->source = $this->create_source( FakeSource::URL );
 
 		$this->agent   = factory( User::class )->create(
 			array(
@@ -127,7 +136,7 @@ abstract class ImportTestCase extends TestCase {
 		);
 		$this->mailbox = $this->create_mailbox( 'WordCamp US' );
 
-		$this->source->json(
+		$this->remote->json(
 			'api/tags',
 			self::page(
 				'tags',
@@ -140,8 +149,22 @@ abstract class ImportTestCase extends TestCase {
 				)
 			)
 		);
-		$this->source->file( FakeSource::URL . '/storage/attachment/1/pasted.png', (string) base64_decode( self::PNG, true ) );
-		$this->source->file( FakeSource::URL . '/storage/attachment/2/notes.txt', 'Sponsor notes' );
+		$this->remote->file( FakeSource::URL . '/storage/attachment/1/pasted.png', (string) base64_decode( self::PNG, true ) );
+		$this->remote->file( FakeSource::URL . '/storage/attachment/2/notes.txt', 'Sponsor notes' );
+	}
+
+	/**
+	 * Creates a source.
+	 *
+	 * @param string $url Its address.
+	 * @return Source
+	 */
+	protected function create_source( string $url ): Source {
+		$source = new Source();
+		$source->configure( $url, '', 'api-key' );
+		$source->save();
+
+		return $source;
 	}
 
 	/**

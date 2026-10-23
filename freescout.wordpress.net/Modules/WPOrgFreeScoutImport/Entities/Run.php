@@ -1,6 +1,6 @@
 <?php
 /**
- * An import of one of the other FreeScout's mailboxes into a mailbox here.
+ * An import of one of a source's mailboxes into a mailbox here.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -16,15 +16,16 @@ use Illuminate\Database\Eloquent\Model;
  * Row in wporgfreescoutimport_runs.
  *
  * @property int              $id
- * @property int              $source_mailbox_id
- * @property string           $source_mailbox_name
+ * @property int              $source_id
+ * @property int              $remote_mailbox_id
+ * @property string           $remote_mailbox_name
  * @property int              $mailbox_id
  * @property int|null         $user_id     Administrator who started it.
  * @property string           $status      One of the STATUS_ constants.
- * @property \Carbon\Carbon|null $since    Only conversations the other FreeScout changed since then.
- * @property int              $page        Next page of the other FreeScout's conversation list.
- * @property int[]|null       $page_done     Source IDs done on that page.
- * @property int[]|null       $previous_page Source IDs the previous page listed.
+ * @property \Carbon\Carbon|null $since    Only conversations the source changed since then.
+ * @property int              $page        Next page of the source's conversation list.
+ * @property int[]|null       $page_done     Remote IDs done on that page.
+ * @property int[]|null       $previous_page Remote IDs the previous page listed.
  * @property int|null         $pages
  * @property int|null         $total
  * @property int              $imported
@@ -32,12 +33,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property int              $skipped
  * @property int              $failed
  * @property int[]|null       $skips       Skipped conversations, by why.
- * @property string[]|null    $failures    Failed conversations' errors, by source ID.
+ * @property string[]|null    $failures    Failed conversations' errors, by remote ID.
  * @property string|null      $last_error
- * @property int[]|null       $retry_ids   Source IDs to import again, for a run that retries another's failures.
- * @property int|null         $attempting  Source ID of the conversation being imported.
+ * @property int[]|null       $retry_ids   Remote IDs to import again, for a run that retries another's failures.
+ * @property int|null         $attempting  Remote ID of the conversation being imported.
  * @property int              $attempts    How often its import started.
- * @property int              $page_failures Pages the other FreeScout failed in a row.
+ * @property int              $page_failures Pages the source failed in a row.
  * @property string|null      $token       Identifies the run's current chain of jobs.
  * @property \Carbon\Carbon|null $started_at
  * @property \Carbon\Carbon|null $finished_at
@@ -123,6 +124,15 @@ final class Run extends Model {
 	);
 
 	/**
+	 * The FreeScout it imports from.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+	 */
+	public function source(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
+		return $this->belongsTo( Source::class );
+	}
+
+	/**
 	 * The mailbox it imports into.
 	 *
 	 * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -186,18 +196,18 @@ final class Run extends Model {
 	/**
 	 * Counts a conversation that failed, and keeps its error.
 	 *
-	 * @param int    $source_id Source conversation ID.
+	 * @param int    $remote_id Remote conversation ID.
 	 * @param string $error     Error.
 	 * @return void
 	 */
-	public function add_failure( int $source_id, string $error ): void {
+	public function add_failure( int $remote_id, string $error ): void {
 		$failures = (array) $this->failures;
-		if ( count( $failures ) < self::MAX_FAILURES || isset( $failures[ $source_id ] ) ) {
-			$failures[ $source_id ] = mb_substr( $error, 0, 300 );
+		if ( count( $failures ) < self::MAX_FAILURES || isset( $failures[ $remote_id ] ) ) {
+			$failures[ $remote_id ] = mb_substr( $error, 0, 300 );
 			$this->failures         = $failures;
 		}
 
-		$this->last_error = mb_substr( 'Conversation ' . $source_id . ': ' . $error, 0, 400 );
+		$this->last_error = mb_substr( 'Conversation ' . $remote_id . ': ' . $error, 0, 400 );
 		++$this->failed;
 	}
 

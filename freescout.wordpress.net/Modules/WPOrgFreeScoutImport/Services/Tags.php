@@ -1,6 +1,6 @@
 <?php
 /**
- * Gives imported conversations the other FreeScout's tags, in the Tags module.
+ * Gives imported conversations their source's tags, in the Tags module.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -12,7 +12,7 @@ namespace Modules\WPOrgFreeScoutImport\Services;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Tags conversations as the other FreeScout did, creating tags this one doesn't have yet in their color there.
+ * Tags conversations as their source did, creating tags this FreeScout doesn't have yet in their color there.
  *
  * The Tags module is a paid one, so its tables are written directly, without its classes; that way, nothing reacts to
  * the tags either, like workflows do when an agent adds one.

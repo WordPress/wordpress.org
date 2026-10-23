@@ -1,6 +1,6 @@
 <?php
 /**
- * Finds or creates the users and senders for the people in the other FreeScout's data.
+ * Finds or creates the users and senders for the people in sources' data.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -18,16 +18,18 @@ use App\User;
 use Illuminate\Support\Facades\Schema;
 use Modules\WPOrgFreeScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgFreeScoutImport\Entities\ImportedThread;
-use Modules\WPOrgFreeScoutImport\Entities\SourceUser;
+use Modules\WPOrgFreeScoutImport\Entities\RemoteUser;
 
 /**
- * Every source user is credited to a user here: the one an administrator chose, the one with their email, or a new,
- * disabled one. Connecting them to a WordPress.org account on the Users page switches them on, or creates them so.
+ * Every source's users are credited to users here: the one an administrator chose, the one with their email, or a
+ * new, disabled one. Connecting them to a WordPress.org account on the Users page switches them on, or creates them so.
+ *
+ * An instance is for one source's import job, and keeps what it found; its static methods take the source.
  */
 final class People {
 
 	/**
-	 * Email of the user that what nobody in particular did is credited to, like the other FreeScout's workflows.
+	 * Email of the user that what nobody in particular did is credited to, like a source's workflows.
 	 *
 	 * Core's own robot users have addresses like this.
 	 *
@@ -36,18 +38,18 @@ final class People {
 	public const ROBOT_EMAIL = 'fs-freescout-import@example.org';
 
 	/**
-	 * Domain of the emails given to users whose source email can't be a user's here.
+	 * Domain of the emails given to users whose remote email can't be a user's here.
 	 *
 	 * @var string
 	 */
 	private const PLACEHOLDER_DOMAIN = 'freescout-import.invalid';
 
 	/**
-	 * Cache key for the source's users.
+	 * Cache key for a source's users, before its ID.
 	 *
 	 * @var string
 	 */
-	private const DIRECTORY_CACHE_KEY = 'wporgfreescoutimport.directory';
+	private const DIRECTORY_CACHE_KEY = 'wporgfreescoutimport.directory.';
 
 	/**
 	 * How long the source's users are cached, in minutes.
@@ -71,7 +73,14 @@ final class People {
 	private static $reports = null;
 
 	/**
-	 * Users found or created so far, by source user ID.
+	 * Source the import job imports from.
+	 *
+	 * @var int
+	 */
+	private $source_id;
+
+	/**
+	 * Users found or created so far, by remote user ID.
 	 *
 	 * @var User[]
 	 */
@@ -85,9 +94,18 @@ final class People {
 	private $granted = array();
 
 	/**
-	 * The user for a source user, created if there's none yet.
+	 * Constructor.
 	 *
-	 * @param mixed $person Source user, as the API gives `createdBy` and `assignedTo`.
+	 * @param int $source_id Source the import job imports from.
+	 */
+	public function __construct( int $source_id ) {
+		$this->source_id = $source_id;
+	}
+
+	/**
+	 * The user for a remote user, created if there's none yet.
+	 *
+	 * @param mixed $person Remote user, as the API gives `createdBy` and `assignedTo`.
 	 * @return User|null Null if it isn't a user.
 	 */
 	public function user( mixed $person ): ?User {
@@ -97,7 +115,7 @@ final class People {
 		}
 
 		if ( ! isset( $this->users[ $id ] ) ) {
-			$this->users[ $id ] = self::mapped( $id ) ?? self::match_or_create( $person );
+			$this->users[ $id ] = self::mapped( $this->source_id, $id ) ?? self::match_or_create( $this->source_id, $person );
 		}
 
 		return $this->users[ $id ];
@@ -120,9 +138,9 @@ final class People {
 	}
 
 	/**
-	 * A source user's ID, for crediting what's imported for them to someone else later.
+	 * A remote user's ID, for crediting what's imported for them to someone else later.
 	 *
-	 * @param mixed $person Source person.
+	 * @param mixed $person Remote person.
 	 * @return int|null Null if it isn't a user.
 	 */
 	public static function user_id( mixed $person ): ?int {
@@ -132,19 +150,20 @@ final class People {
 	}
 
 	/**
-	 * The user a source user has already: the one chosen or created for them, or with their email.
+	 * The user a remote user has already: the one chosen or created for them, or with their email.
 	 *
-	 * @param array $source_user Source user.
+	 * @param int   $source_id   Source.
+	 * @param array $remote_user Remote user.
 	 * @return array|null `user`, and `how`: `chosen`, `created`, or `email`; null if there's none yet.
 	 */
-	public static function existing( array $source_user ): ?array {
-		$record = SourceUser::query()->where( 'source_user_id', (int) ( $source_user['id'] ?? 0 ) )->first();
-		$user   = $record ? self::mapped( (int) $record->source_user_id ) : null;
+	public static function existing( int $source_id, array $remote_user ): ?array {
+		$record = RemoteUser::query()->where( 'source_id', $source_id )->where( 'remote_user_id', (int) ( $remote_user['id'] ?? 0 ) )->first();
+		$user   = $record ? self::mapped( $source_id, (int) $record->remote_user_id ) : null;
 		if ( $user ) {
 			$how = 'chosen';
 			if ( $record->created ) {
 				$how = 'created';
-			} elseif ( mb_strtolower( (string) $user->email ) === mb_strtolower( (string) ( $source_user['email'] ?? '' ) ) ) {
+			} elseif ( mb_strtolower( (string) $user->email ) === mb_strtolower( (string) ( $remote_user['email'] ?? '' ) ) ) {
 				// Imports keep the user they matched by email too.
 				$how = 'email';
 			}
@@ -155,7 +174,7 @@ final class People {
 			);
 		}
 
-		$user = self::by_email( (string) ( $source_user['email'] ?? '' ) );
+		$user = self::by_email( (string) ( $remote_user['email'] ?? '' ) );
 
 		return $user ? array(
 			'user' => $user,
@@ -164,16 +183,16 @@ final class People {
 	}
 
 	/**
-	 * A source user, as the source lists them.
+	 * A remote user, as the source lists them.
 	 *
-	 * @param Source $source         The other FreeScout.
-	 * @param int    $source_user_id Source user ID.
+	 * @param RemoteApi $api            The source's API.
+	 * @param int       $remote_user_id Remote user ID.
 	 * @return array|null
 	 */
-	public static function source_user( Source $source, int $source_user_id ): ?array {
-		foreach ( self::directory( $source ) as $source_user ) {
-			if ( (int) ( $source_user['id'] ?? 0 ) === $source_user_id ) {
-				return $source_user;
+	public static function remote_user( RemoteApi $api, int $remote_user_id ): ?array {
+		foreach ( self::directory( $api ) as $remote_user ) {
+			if ( (int) ( $remote_user['id'] ?? 0 ) === $remote_user_id ) {
+				return $remote_user;
 			}
 		}
 
@@ -181,15 +200,16 @@ final class People {
 	}
 
 	/**
-	 * The user for a source user who'll work here: the one they have already, or a new, active one.
+	 * The user for a remote user who'll work here: the one they have already, or a new, active one.
 	 *
-	 * @param array $source_user Source user.
+	 * @param int   $source_id   Source.
+	 * @param array $remote_user Remote user.
 	 * @return User
 	 */
-	public static function find_or_create( array $source_user ): User {
-		$existing = self::existing( $source_user );
+	public static function find_or_create( int $source_id, array $remote_user ): User {
+		$existing = self::existing( $source_id, $remote_user );
 
-		return $existing ? $existing['user'] : self::match_or_create( $source_user, true );
+		return $existing ? $existing['user'] : self::match_or_create( $source_id, $remote_user, true );
 	}
 
 	/**
@@ -199,7 +219,7 @@ final class People {
 	 * @return bool
 	 */
 	public static function was_created( User $user ): bool {
-		return SourceUser::query()->where( 'user_id', $user->id )->where( 'created', true )->exists();
+		return RemoteUser::query()->where( 'user_id', $user->id )->where( 'created', true )->exists();
 	}
 
 	/**
@@ -228,51 +248,56 @@ final class People {
 	}
 
 	/**
-	 * Lists the source's users, cached, since every import page reads them.
+	 * Lists a source's users, cached, since every import page reads them.
 	 *
-	 * @param Source $source  The other FreeScout.
-	 * @param bool   $refresh Whether to read them again.
-	 * @return array[] Source users.
+	 * @param RemoteApi $api     The source's API.
+	 * @param bool      $refresh Whether to read them again.
+	 * @return array[] Remote users.
 	 */
-	public static function directory( Source $source, bool $refresh = false ): array {
+	public static function directory( RemoteApi $api, bool $refresh = false ): array {
 		if ( $refresh ) {
-			self::forget_directory();
+			self::forget_directory( (int) $api->source()->id );
 		}
 
 		return (array) \Cache::remember(
-			self::DIRECTORY_CACHE_KEY,
+			self::DIRECTORY_CACHE_KEY . (int) $api->source()->id,
 			self::DIRECTORY_CACHE_MINUTES,
-			static function () use ( $source ): array {
-				return $source->users();
+			static function () use ( $api ): array {
+				return $api->users();
 			}
 		);
 	}
 
 	/**
-	 * Forgets the source's users, so they're read again.
+	 * Forgets a source's users, so they're read again.
 	 *
+	 * @param int $source_id Source.
 	 * @return void
 	 */
-	public static function forget_directory(): void {
-		\Cache::forget( self::DIRECTORY_CACHE_KEY );
+	public static function forget_directory( int $source_id ): void {
+		\Cache::forget( self::DIRECTORY_CACHE_KEY . $source_id );
 	}
 
 	/**
-	 * Credits a source user to a user here, and what's imported already with them.
+	 * Credits a remote user to a user here, and what's imported already with them.
 	 *
-	 * @param int  $source_user_id Source user ID.
+	 * @param int  $source_id      Source.
+	 * @param int  $remote_user_id Remote user ID.
 	 * @param User $user           User here.
 	 * @return void
 	 */
-	public static function choose( int $source_user_id, User $user ): void {
-		$previous = SourceUser::query()->where( 'source_user_id', $source_user_id )->value( 'user_id' );
+	public static function choose( int $source_id, int $remote_user_id, User $user ): void {
+		$previous = RemoteUser::query()->where( 'source_id', $source_id )->where( 'remote_user_id', $remote_user_id )->value( 'user_id' );
 		$from     = $previous ? User::find( (int) $previous ) : null;
 		if ( $from && (int) $from->id === (int) $user->id ) {
 			return;
 		}
 
-		SourceUser::query()->updateOrCreate(
-			array( 'source_user_id' => $source_user_id ),
+		RemoteUser::query()->updateOrCreate(
+			array(
+				'source_id'      => $source_id,
+				'remote_user_id' => $remote_user_id,
+			),
 			array(
 				'user_id' => $user->id,
 				'created' => false,
@@ -280,28 +305,29 @@ final class People {
 		);
 
 		if ( $from ) {
-			self::recredit( $source_user_id, $from, $user );
+			self::recredit( $source_id, $remote_user_id, $from, $user );
 		}
 	}
 
 	/**
-	 * Credits what was imported for a source user to someone else: replies, notes, and assignments.
+	 * Credits what was imported for a remote user to someone else: replies, notes, and assignments.
 	 *
-	 * Only what was imported for that source user moves, not what others credited to the same user did; and
+	 * Only what was imported for that remote user moves, not what others credited to the same user did; and
 	 * conversations agents worked on here keep their assignee. Conversations keep their dates, and with the Reports
 	 * module, their metrics are computed again.
 	 *
-	 * @param int  $source_user_id Source user ID.
+	 * @param int  $source_id      Source.
+	 * @param int  $remote_user_id Remote user ID.
 	 * @param User $from           Who it's credited to now.
 	 * @param User $to             Who it's credited to from now on.
 	 * @return void
 	 */
-	public static function recredit( int $source_user_id, User $from, User $to ): void {
-		$threads  = static function ( string $column ) use ( $source_user_id ): \Illuminate\Database\Query\Builder {
-			return ImportedThread::query()->select( 'thread_id' )->where( $column, $source_user_id )->getQuery();
+	public static function recredit( int $source_id, int $remote_user_id, User $from, User $to ): void {
+		$threads  = static function ( string $column ) use ( $source_id, $remote_user_id ): \Illuminate\Database\Query\Builder {
+			return ImportedThread::query()->select( 'thread_id' )->where( 'source_id', $source_id )->where( $column, $remote_user_id )->getQuery();
 		};
-		$imported = static function ( string $column ) use ( $source_user_id ): \Illuminate\Database\Query\Builder {
-			return ImportedConversation::query()->select( 'conversation_id' )->where( $column, $source_user_id )->getQuery();
+		$imported = static function ( string $column ) use ( $source_id, $remote_user_id ): \Illuminate\Database\Query\Builder {
+			return ImportedConversation::query()->select( 'conversation_id' )->where( 'source_id', $source_id )->where( $column, $remote_user_id )->getQuery();
 		};
 
 		// Without the events of changed threads and conversations, and without touching updated_at, like the import.
@@ -319,8 +345,8 @@ final class People {
 			$query->toBase()->update( $values );
 		};
 
-		$update_threads( Thread::query()->whereIn( 'id', $threads( 'source_user_id' ) )->where( 'created_by_user_id', $from->id ), array( 'created_by_user_id' => $to->id ) );
-		$update_threads( Thread::query()->whereIn( 'id', $threads( 'source_assignee_id' ) )->where( 'user_id', $from->id ), array( 'user_id' => $to->id ) );
+		$update_threads( Thread::query()->whereIn( 'id', $threads( 'remote_user_id' ) )->where( 'created_by_user_id', $from->id ), array( 'created_by_user_id' => $to->id ) );
+		$update_threads( Thread::query()->whereIn( 'id', $threads( 'remote_assignee_id' ) )->where( 'user_id', $from->id ), array( 'user_id' => $to->id ) );
 		$update_conversations( Conversation::query()->whereIn( 'id', $imported( 'creator_id' ) )->where( 'created_by_user_id', $from->id ), array( 'created_by_user_id' => $to->id ) );
 		$update_conversations( Conversation::query()->whereIn( 'id', $imported( 'closer_id' ) )->where( 'closed_by_user_id', $from->id ), array( 'closed_by_user_id' => $to->id ) );
 
@@ -376,7 +402,7 @@ final class People {
 	}
 
 	/**
-	 * The users source users can be credited to: people, not robots, and not deleted.
+	 * The users remote users can be credited to: people, not robots, and not deleted.
 	 *
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
@@ -465,33 +491,38 @@ final class People {
 	}
 
 	/**
-	 * The user an administrator chose, or an import created or matched, for a source user.
+	 * The user an administrator chose, or an import created or matched, for a remote user.
 	 *
-	 * @param int $source_user_id Source user ID.
+	 * @param int $source_id      Source.
+	 * @param int $remote_user_id Remote user ID.
 	 * @return User|null
 	 */
-	private static function mapped( int $source_user_id ): ?User {
-		$user_id = SourceUser::query()->where( 'source_user_id', $source_user_id )->value( 'user_id' );
+	private static function mapped( int $source_id, int $remote_user_id ): ?User {
+		$user_id = RemoteUser::query()->where( 'source_id', $source_id )->where( 'remote_user_id', $remote_user_id )->value( 'user_id' );
 
 		return $user_id ? User::query()->where( 'status', '!=', User::STATUS_DELETED )->whereKey( (int) $user_id )->first() : null;
 	}
 
 	/**
-	 * The user with a source user's email, or a new one, credited to them from now on.
+	 * The user with a remote user's email, or a new one, credited to them from now on.
 	 *
-	 * @param array $person Source user.
-	 * @param bool  $active Whether a new user can log in, once connected to WordPress.org, or is disabled.
+	 * @param int   $source_id Source.
+	 * @param array $person    Remote user.
+	 * @param bool  $active    Whether a new user can log in, once connected to WordPress.org, or is disabled.
 	 * @return User
 	 */
-	private static function match_or_create( array $person, bool $active = false ): User {
+	private static function match_or_create( int $source_id, array $person, bool $active = false ): User {
 		$user    = self::by_email( (string) ( $person['email'] ?? '' ) );
 		$created = ! $user;
 		if ( $created ) {
-			$user = self::create( $person, $active );
+			$user = self::create( $source_id, $person, $active );
 		}
 
-		SourceUser::query()->updateOrCreate(
-			array( 'source_user_id' => (int) $person['id'] ),
+		RemoteUser::query()->updateOrCreate(
+			array(
+				'source_id'      => $source_id,
+				'remote_user_id' => (int) $person['id'],
+			),
 			array(
 				'user_id' => $user->id,
 				'created' => $created,
@@ -502,18 +533,19 @@ final class People {
 	}
 
 	/**
-	 * Creates a user for a source user, so what they did keeps their name.
+	 * Creates a user for a remote user, so what they did keeps their name.
 	 *
 	 * They have no password: they log in with WordPress.org once they're connected to their account.
 	 *
-	 * @param array $person Source user.
-	 * @param bool  $active Whether they can log in, or are disabled.
+	 * @param int   $source_id Source.
+	 * @param array $person    Remote user.
+	 * @param bool  $active    Whether they can log in, or are disabled.
 	 * @return User
 	 */
-	private static function create( array $person, bool $active ): User {
+	private static function create( int $source_id, array $person, bool $active ): User {
 		$email = Email::sanitizeEmail( (string) ( $person['email'] ?? '' ) );
 		if ( ! $email || strlen( $email ) > User::EMAIL_MAX_LENGTH || User::mailboxEmailExists( $email ) || User::query()->where( 'email', $email )->exists() ) {
-			$email = 'user-' . (int) $person['id'] . '@' . self::PLACEHOLDER_DOMAIN;
+			$email = 'user-' . $source_id . '-' . (int) $person['id'] . '@' . self::PLACEHOLDER_DOMAIN;
 		}
 
 		$first_name = trim( (string) ( $person['firstName'] ?? '' ) );

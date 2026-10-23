@@ -1,6 +1,6 @@
 <?php
 /**
- * The user here that a user of the other FreeScout is credited to.
+ * The user here that a source's user is credited to.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -15,11 +15,12 @@ use Illuminate\Database\Eloquent\Model;
  * Row in wporgfreescoutimport_users.
  *
  * @property int  $id
- * @property int  $source_user_id
+ * @property int  $source_id
+ * @property int  $remote_user_id
  * @property int  $user_id
  * @property bool $created Whether an import created the user, rather than finding them here.
  */
-final class SourceUser extends Model {
+final class RemoteUser extends Model {
 
 	/**
 	 * Table name.
@@ -33,7 +34,7 @@ final class SourceUser extends Model {
 	 *
 	 * @var array
 	 */
-	protected $fillable = array( 'source_user_id', 'user_id', 'created' );
+	protected $fillable = array( 'source_id', 'remote_user_id', 'user_id', 'created' );
 
 	/**
 	 * Attribute casts.

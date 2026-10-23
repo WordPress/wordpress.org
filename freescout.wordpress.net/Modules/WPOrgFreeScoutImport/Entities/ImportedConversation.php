@@ -1,6 +1,6 @@
 <?php
 /**
- * Which conversation of the other FreeScout a conversation was imported from.
+ * Which conversation of a source a conversation was imported from.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -16,11 +16,12 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property int         $id
  * @property int         $source_id
- * @property int         $source_number The number it had in the other FreeScout.
+ * @property int         $remote_id
+ * @property int         $remote_number The number it had there.
  * @property int         $conversation_id
- * @property int|null    $creator_id    Source user who started it.
- * @property int|null    $assignee_id   Source user it was assigned to.
- * @property int|null    $closer_id     Source user who closed it.
+ * @property int|null    $creator_id    Remote user who started it.
+ * @property int|null    $assignee_id   Remote user it was assigned to.
+ * @property int|null    $closer_id     Remote user who closed it.
  * @property string|null $written_tags  The source's tags the last import gave it, as JSON.
  */
 final class ImportedConversation extends Model {
@@ -37,5 +38,5 @@ final class ImportedConversation extends Model {
 	 *
 	 * @var array
 	 */
-	protected $fillable = array( 'source_id', 'source_number', 'conversation_id', 'creator_id', 'assignee_id', 'closer_id', 'written_tags' );
+	protected $fillable = array( 'source_id', 'remote_id', 'remote_number', 'conversation_id', 'creator_id', 'assignee_id', 'closer_id', 'written_tags' );
 }

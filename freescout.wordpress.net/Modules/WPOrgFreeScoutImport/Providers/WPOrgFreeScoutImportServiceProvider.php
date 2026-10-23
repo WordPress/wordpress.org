@@ -10,7 +10,7 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgFreeScoutImport\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Modules\WPOrgFreeScoutImport\Services\Source;
+use Modules\WPOrgFreeScoutImport\Services\RemoteApi;
 
 /**
  * Adds the import pages under Manage, for administrators.
@@ -31,9 +31,9 @@ final class WPOrgFreeScoutImportServiceProvider extends ServiceProvider {
 	 */
 	public function register(): void {
 		$this->app->bind(
-			Source::class,
-			static function (): Source {
-				return Source::from_settings();
+			RemoteApi::HTTP,
+			static function (): \GuzzleHttp\ClientInterface {
+				return RemoteApi::http();
 			}
 		);
 	}

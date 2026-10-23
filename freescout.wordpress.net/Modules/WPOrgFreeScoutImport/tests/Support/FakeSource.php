@@ -1,6 +1,6 @@
 <?php
 /**
- * A stand-in for the other FreeScout's API and attachment links.
+ * A stand-in for sources' APIs and attachment links.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -10,9 +10,9 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgFreeScoutImport\Tests\Support;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Psr7\Response;
-use Modules\WPOrgFreeScoutImport\Services\Source;
 use Psr\Http\Message\RequestInterface;
 
 /**
@@ -21,11 +21,18 @@ use Psr\Http\Message\RequestInterface;
 final class FakeSource {
 
 	/**
-	 * Address of the fake.
+	 * Address of the fake source the tests import from.
 	 *
 	 * @var string
 	 */
 	public const URL = 'https://scout.test';
+
+	/**
+	 * Host of that source.
+	 *
+	 * @var string
+	 */
+	public const HOST = 'scout.test';
 
 	/**
 	 * Answers by "host/path", or "host/path?page=N".
@@ -47,10 +54,11 @@ final class FakeSource {
 	 * @param string   $path Path, like `api/conversations`.
 	 * @param array    $body JSON body.
 	 * @param int|null $page Page, or null for every page.
+	 * @param string   $host Host of the source that answers.
 	 * @return self
 	 */
-	public function json( string $path, array $body, ?int $page = null ): self {
-		$this->answers[ 'scout.test/' . $path . ( null === $page ? '' : '?page=' . $page ) ] = new Response( 200, array( 'Content-Type' => 'application/json' ), (string) json_encode( $body ) );
+	public function json( string $path, array $body, ?int $page = null, string $host = self::HOST ): self {
+		$this->answers[ $host . '/' . $path . ( null === $page ? '' : '?page=' . $page ) ] = new Response( 200, array( 'Content-Type' => 'application/json' ), (string) json_encode( $body ) );
 
 		return $this;
 	}
@@ -69,12 +77,12 @@ final class FakeSource {
 	}
 
 	/**
-	 * A client talking to this fake.
+	 * An HTTP client talking to this fake, for every source.
 	 *
-	 * @return Source
+	 * @return ClientInterface
 	 */
-	public function client(): Source {
-		$http = new Client(
+	public function http(): ClientInterface {
+		return new Client(
 			array(
 				'handler'     => function ( RequestInterface $request ): FulfilledPromise {
 					return new FulfilledPromise( $this->answer( $request ) );
@@ -82,8 +90,6 @@ final class FakeSource {
 				'http_errors' => false,
 			)
 		);
-
-		return new Source( self::URL, 'api-key', $http );
 	}
 
 	/**

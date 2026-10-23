@@ -17,7 +17,7 @@
 		</div>
 		<div class="flexy-block"></div>
 		<div class="flexy-item">
-			<form method="POST" action="{{ route( 'wporgfreescoutimport.users.refresh' ) }}" class="pull-left">
+			<form method="POST" action="{{ route( 'wporgfreescoutimport.users.refresh', [ 'id' => $source->id ] ) }}" class="pull-left">
 				{{ csrf_field() }}
 				<button type="submit" class="btn btn-bordered">{{ __('Ask :name again', [ 'name' => $name ]) }}</button>
 			</form>
@@ -39,9 +39,9 @@
 			<div class="panel-body">
 				<h4>{{ __('Connect to WordPress.org accounts') }}</h4>
 				<p>{{ __('Download :name’s users, fill in the wporg_username column for those who’ll work here, and check it here. Each one’s user here is connected to that account, created if they have none yet, and switched on if an import created them disabled: their name, email, and avatar come from WordPress.org, and they can log in with it. Someone whose account is connected to a user already is credited to that user.', [ 'name' => $name ]) }}</p>
-				<p><a href="{{ route( 'wporgfreescoutimport.users.export' ) }}" class="btn btn-default">{{ __('Download CSV') }}</a></p>
+				<p><a href="{{ route( 'wporgfreescoutimport.users.export', [ 'id' => $source->id ] ) }}" class="btn btn-default">{{ __('Download CSV') }}</a></p>
 				@if ( $can_connect )
-					<form method="POST" action="{{ route( 'wporgfreescoutimport.users.connect' ) }}" enctype="multipart/form-data">
+					<form method="POST" action="{{ route( 'wporgfreescoutimport.users.connect', [ 'id' => $source->id ] ) }}" enctype="multipart/form-data">
 						{{ csrf_field() }}
 						<div class="form-group">
 							<label for="wporgfreescoutimport-csv-file">{{ __('Filled-in CSV') }}</label>
@@ -49,7 +49,7 @@
 						</div>
 						<div class="form-group">
 							<label for="wporgfreescoutimport-csv">{{ __('Or paste it') }}</label>
-							<textarea id="wporgfreescoutimport-csv" name="csv" class="form-control" rows="4" placeholder="source_id,…,wporg_username"></textarea>
+							<textarea id="wporgfreescoutimport-csv" name="csv" class="form-control" rows="4" placeholder="remote_id,…,wporg_username"></textarea>
 						</div>
 						<button type="submit" class="btn btn-default">{{ __('Check') }}</button>
 					</form>
@@ -60,7 +60,7 @@
 		</div>
 
 		@if ( $users )
-			<form method="POST" action="{{ route( 'wporgfreescoutimport.users.save' ) }}">
+			<form method="POST" action="{{ route( 'wporgfreescoutimport.users.save', [ 'id' => $source->id ] ) }}">
 				{{ csrf_field() }}
 				<table class="table">
 					<thead>

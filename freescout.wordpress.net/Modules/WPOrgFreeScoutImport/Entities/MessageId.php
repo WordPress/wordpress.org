@@ -1,6 +1,6 @@
 <?php
 /**
- * The Message-ID of an email in the other FreeScout, which its API doesn't give.
+ * The Message-ID of an email in a source, which its API doesn't give.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -15,7 +15,8 @@ use Illuminate\Database\Eloquent\Model;
  * Row in wporgfreescoutimport_message_ids.
  *
  * @property int    $id
- * @property int    $source_thread_id
+ * @property int    $source_id
+ * @property int    $remote_thread_id
  * @property string $message_id Without angle brackets, as FreeScout stores it.
  */
 final class MessageId extends Model {
@@ -39,5 +40,5 @@ final class MessageId extends Model {
 	 *
 	 * @var array
 	 */
-	protected $fillable = array( 'source_thread_id', 'message_id' );
+	protected $fillable = array( 'source_id', 'remote_thread_id', 'message_id' );
 }

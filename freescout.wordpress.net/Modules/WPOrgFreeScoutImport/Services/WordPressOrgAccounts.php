@@ -1,6 +1,6 @@
 <?php
 /**
- * Connects the other FreeScout's users' users here to WordPress.org accounts in bulk, from a CSV.
+ * Connects a source's users' users here to WordPress.org accounts in bulk, from a CSV.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -28,7 +28,7 @@ final class WordPressOrgAccounts {
 	 *
 	 * @var string[]
 	 */
-	public const COLUMNS = array( 'source_id', 'first_name', 'last_name', 'email', 'user_here', 'wporg_username' );
+	public const COLUMNS = array( 'remote_id', 'first_name', 'last_name', 'email', 'user_here', 'wporg_username' );
 
 	/**
 	 * Use the user connected to the account already.
@@ -38,21 +38,21 @@ final class WordPressOrgAccounts {
 	public const USE = 'use';
 
 	/**
-	 * Connect the source user's user here, or the one with the account's email, to the account.
+	 * Connect the remote user's user here, or the one with the account's email, to the account.
 	 *
 	 * @var string
 	 */
 	public const CONNECT = 'connect';
 
 	/**
-	 * Create a user for the source user, connected to the account.
+	 * Create a user for the remote user, connected to the account.
 	 *
 	 * @var string
 	 */
 	public const CREATE = 'create';
 
 	/**
-	 * Nothing to do: the source user's user here is connected to the account already.
+	 * Nothing to do: the remote user's user here is connected to the account already.
 	 *
 	 * @var string
 	 */
@@ -66,19 +66,27 @@ final class WordPressOrgAccounts {
 	private const LOOKUP_CACHE_MINUTES = 30;
 
 	/**
-	 * The other FreeScout.
+	 * The source's API.
 	 *
-	 * @var Source
+	 * @var RemoteApi
 	 */
-	private $source;
+	private $api;
+
+	/**
+	 * The source's ID.
+	 *
+	 * @var int
+	 */
+	private $source_id;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param Source $source The other FreeScout.
+	 * @param RemoteApi $api The source's API.
 	 */
-	public function __construct( Source $source ) {
-		$this->source = $source;
+	public function __construct( RemoteApi $api ) {
+		$this->api       = $api;
+		$this->source_id = (int) $api->source()->id;
 	}
 
 	/**
@@ -100,14 +108,14 @@ final class WordPressOrgAccounts {
 	public function export(): string {
 		$rows = array( self::COLUMNS );
 
-		foreach ( People::directory( $this->source ) as $source_user ) {
-			$existing = People::existing( $source_user );
+		foreach ( People::directory( $this->api ) as $remote_user ) {
+			$existing = People::existing( $this->source_id, $remote_user );
 			$user     = $existing ? $existing['user'] : null;
 			$rows[]   = array(
-				(int) ( $source_user['id'] ?? 0 ),
-				(string) ( $source_user['firstName'] ?? '' ),
-				(string) ( $source_user['lastName'] ?? '' ),
-				(string) ( $source_user['email'] ?? '' ),
+				(int) ( $remote_user['id'] ?? 0 ),
+				(string) ( $remote_user['firstName'] ?? '' ),
+				(string) ( $remote_user['lastName'] ?? '' ),
+				(string) ( $remote_user['email'] ?? '' ),
 				$user ? (string) $user->email : '',
 				$user && self::available() ? Account::username_for( (int) $user->id ) : '',
 			);
@@ -127,8 +135,8 @@ final class WordPressOrgAccounts {
 	/**
 	 * Reads the rows of a filled-in CSV that name a WordPress.org account.
 	 *
-	 * @param string $csv CSV with a header row: `source_id` or `email`, and `wporg_username`.
-	 * @return array[] Each with `source_id` (0 if the row has none), `email`, and `username`.
+	 * @param string $csv CSV with a header row: `remote_id` or `email`, and `wporg_username`.
+	 * @return array[] Each with `remote_id` (0 if the row has none), `email`, and `username`.
 	 */
 	public static function parse( string $csv ): array {
 		// Read as CSV, not line by line: a quoted cell can hold a line break.
@@ -153,7 +161,7 @@ final class WordPressOrgAccounts {
 			}
 
 			$rows[] = array(
-				'source_id' => (int) ( $row['source_id'] ?? 0 ),
+				'remote_id' => (int) ( $row['remote_id'] ?? 0 ),
 				'email'     => (string) ( $row['email'] ?? '' ),
 				'username'  => $username,
 			);
@@ -167,7 +175,7 @@ final class WordPressOrgAccounts {
 	 * What connecting a CSV's rows would do, without doing it.
 	 *
 	 * @param array[] $rows Rows, from parse().
-	 * @return array[] Each with `row`, `source_user` (or null), `wporg_user` (WordPressOrgUser, or null), `action`
+	 * @return array[] Each with `row`, `remote_user` (or null), `wporg_user` (WordPressOrgUser, or null), `action`
 	 *                 (one of the constants, or null), `user` (the user here it's for, or null for a new one),
 	 *                 `mismatch`, and `error` (why nothing can be done, or '').
 	 */
@@ -180,7 +188,7 @@ final class WordPressOrgAccounts {
 
 		foreach ( $rows as $row ) {
 			$step = $this->plan_row( $row, $client );
-			$id   = (int) ( $step['source_user']['id'] ?? 0 );
+			$id   = (int) ( $step['remote_user']['id'] ?? 0 );
 			$user = $step['user'] ? (int) $step['user']->id : 0;
 
 			// One account per person: a CSV can't connect anyone twice, one account twice, or one user here to two.
@@ -216,11 +224,11 @@ final class WordPressOrgAccounts {
 	}
 
 	/**
-	 * Connects what plan() says can be: creates or switches on users, connects them, and credits source users to them.
+	 * Connects what plan() says can be: creates or switches on users, connects them, and credits remote users to them.
 	 *
 	 * @param array[] $plan      From plan().
-	 * @param int[]   $confirmed Source user IDs of rows whose account doesn't look like theirs, connected anyway.
-	 * @return array `done`: the users connected or credited, by source user ID; `skipped`: why the rest weren't.
+	 * @param int[]   $confirmed Remote user IDs of rows whose account doesn't look like theirs, connected anyway.
+	 * @return array `done`: the users connected or credited, by remote user ID; `skipped`: why the rest weren't.
 	 */
 	public function apply( array $plan, array $confirmed = array() ): array {
 		$done    = array();
@@ -232,7 +240,7 @@ final class WordPressOrgAccounts {
 			}
 
 			$username = $step['wporg_user']->username;
-			$id       = (int) $step['source_user']['id'];
+			$id       = (int) $step['remote_user']['id'];
 
 			if ( $step['mismatch'] && ! in_array( $id, array_map( 'intval', $confirmed ), true ) ) {
 				$skipped[ $id ] = __( 'Its account doesn’t look like theirs, and wasn’t confirmed.' );
@@ -245,7 +253,7 @@ final class WordPressOrgAccounts {
 			try {
 				$user = \DB::transaction(
 					function () use ( $step, $connected, $username, $id ): User {
-						$user = $connected ?? $step['user'] ?? People::find_or_create( $step['source_user'] );
+						$user = $connected ?? $step['user'] ?? People::find_or_create( $this->source_id, $step['remote_user'] );
 
 						// Checked again: what plan() saw may have changed, like another row connecting the same user.
 						if ( ! $connected ) {
@@ -257,7 +265,7 @@ final class WordPressOrgAccounts {
 							Account::connect( (int) $user->id, $username );
 						}
 
-						People::choose( $id, $user );
+						People::choose( $this->source_id, $id, $user );
 						People::activate( $user );
 
 						return $user;
@@ -322,7 +330,7 @@ final class WordPressOrgAccounts {
 	private function plan_row( array $row, Client $client ): array {
 		$step = array(
 			'row'         => $row,
-			'source_user' => $row['source_id'] ? People::source_user( $this->source, $row['source_id'] ) : $this->by_email( $row['email'] ),
+			'remote_user' => $row['remote_id'] ? People::remote_user( $this->api, $row['remote_id'] ) : $this->by_email( $row['email'] ),
 			'wporg_user'  => null,
 			'action'      => null,
 			'user'        => null,
@@ -330,7 +338,7 @@ final class WordPressOrgAccounts {
 			'error'       => '',
 		);
 
-		if ( ! $step['source_user'] ) {
+		if ( ! $step['remote_user'] ) {
 			return array( 'error' => __( 'No user there with that ID or email.' ) ) + $step;
 		}
 
@@ -345,7 +353,7 @@ final class WordPressOrgAccounts {
 		}
 
 		$username = $step['wporg_user']->username;
-		$found    = People::existing( $step['source_user'] );
+		$found    = People::existing( $this->source_id, $step['remote_user'] );
 		$existing = $found ? $found['user'] : null;
 
 		// Someone with a user here connected to the account already is that user.
@@ -356,7 +364,7 @@ final class WordPressOrgAccounts {
 			return array(
 				'action'   => $action,
 				'user'     => $connected,
-				'mismatch' => self::USE === $action && self::mismatch( $step['source_user'], $step['wporg_user'] ),
+				'mismatch' => self::USE === $action && self::mismatch( $step['remote_user'], $step['wporg_user'] ),
 			) + $step;
 		}
 
@@ -373,22 +381,22 @@ final class WordPressOrgAccounts {
 		return array(
 			'action'   => $user ? self::CONNECT : self::CREATE,
 			'user'     => $user,
-			'mismatch' => self::mismatch( $step['source_user'], $step['wporg_user'] ),
+			'mismatch' => self::mismatch( $step['remote_user'], $step['wporg_user'] ),
 		) + $step;
 	}
 
 	/**
-	 * Whether a WordPress.org account looks like someone else's than a source user's: neither name nor email match.
+	 * Whether a WordPress.org account looks like someone else's than a remote user's: neither name nor email match.
 	 *
 	 * Connecting it lets its owner log in as the user, so a username a CSV got wrong has to be confirmed.
 	 *
-	 * @param array            $source_user Source user.
+	 * @param array            $remote_user Remote user.
 	 * @param WordPressOrgUser $wporg_user  WordPress.org account.
 	 * @return bool
 	 */
-	private static function mismatch( array $source_user, WordPressOrgUser $wporg_user ): bool {
-		$email = (string) ( $source_user['email'] ?? '' );
-		$name  = trim( ( $source_user['firstName'] ?? '' ) . ' ' . ( $source_user['lastName'] ?? '' ) );
+	private static function mismatch( array $remote_user, WordPressOrgUser $wporg_user ): bool {
+		$email = (string) ( $remote_user['email'] ?? '' );
+		$name  = trim( ( $remote_user['firstName'] ?? '' ) . ' ' . ( $remote_user['lastName'] ?? '' ) );
 
 		$same_email = '' !== $email && 0 === strcasecmp( $email, $wporg_user->email );
 		$same_name  = '' !== $name && 0 === strcasecmp( $name, trim( $wporg_user->first_name . ' ' . $wporg_user->last_name ) );
@@ -397,7 +405,7 @@ final class WordPressOrgAccounts {
 	}
 
 	/**
-	 * A source user by email, for a row without an ID.
+	 * A remote user by email, for a row without an ID.
 	 *
 	 * @param string $email Email.
 	 * @return array|null
@@ -407,9 +415,9 @@ final class WordPressOrgAccounts {
 			return null;
 		}
 
-		foreach ( People::directory( $this->source ) as $source_user ) {
-			if ( 0 === strcasecmp( (string) ( $source_user['email'] ?? '' ), $email ) ) {
-				return $source_user;
+		foreach ( People::directory( $this->api ) as $remote_user ) {
+			if ( 0 === strcasecmp( (string) ( $remote_user['email'] ?? '' ), $email ) ) {
+				return $remote_user;
 			}
 		}
 

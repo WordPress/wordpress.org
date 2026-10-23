@@ -2,7 +2,7 @@
     "name": "WP.org FreeScout Import",
     "alias": "wporgfreescoutimport",
     "img": "/modules/wporgfreescoutimport/img/icon.svg",
-    "description": "Imports another FreeScout's mailboxes, so their history moves here with them.",
+    "description": "Imports other FreeScouts' mailboxes, so their history moves here with them.",
     "version": "1.0.0",
     "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgFreeScoutImport",
     "author": "WordPress.org",
