@@ -58,13 +58,13 @@ class Guideline_Labels {
 			'trialware'                => array(
 				'guideline' => 5,
 				'url'       => self::GUIDELINES_URL . '#5-trialware-is-not-permitted',
-				'message'   => __( 'Locks built-in features behind a payment.', 'wporg-plugins' ),
+				'message'   => __( 'Limits or restricts built-in features.', 'wporg-plugins' ),
 				'detail'    => '',
 			),
 			'insubstantial-service'    => array(
 				'guideline' => 6,
 				'url'       => self::GUIDELINES_URL . '#6-software-as-a-service-is-permitted',
-				'message'   => __( 'Relies on a service that doesn’t provide substantial functionality of its own.', 'wporg-plugins' ),
+				'message'   => __( 'Relies on external services that don’t provide substantial functionality or aren’t allowed.', 'wporg-plugins' ),
 				'detail'    => '',
 			),
 			'tracking-without-consent' => array(
