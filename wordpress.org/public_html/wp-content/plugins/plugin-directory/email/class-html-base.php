@@ -23,7 +23,7 @@ abstract class HTML_Base extends Base {
 		$html = str_replace( '<p>', "\n", $html );
 
 		// Use some markdown style syntax.
-		$html = preg_replace( '!<a[^>]*href=(.).+\\1[^>]*>([^<>]*)</a>!', '[$2]($1)', $html );
+		$html = preg_replace( '!<a[^>]*href=(["\'])(.+?)\\1[^>]*>([^<>]*)</a>!', '[$3]($2)', $html );
 		$html = str_replace( '<li>', "\n * ", $html );
 		$html = preg_replace_callback( '!<h(?P<level>[0-9])>(?P<text>[^<>]*)</h\\1>!', function( $m ) {
 			return str_repeat( '#', $m['level'] ) . ' ' . $m['text'];
