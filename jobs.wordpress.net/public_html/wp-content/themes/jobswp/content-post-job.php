@@ -55,19 +55,27 @@
 
 	<?php jobswp_text_field( 'location', __( 'Location', 'jobswp' ), false, 'text',  __( 'The desired location for any applicants and not necessarily your business location. Use \'N/A\' or leave blank if allowing a remote worker from anywhere.', 'jobswp' ) ); ?>
 
+	<?php $howtoapply_methods = jobswp_get_howtoapply_methods(); ?>
 	<div class="post-job-input">
 		<label for="howtoapply"><?php esc_html_e( 'How to Apply', 'jobswp' ); ?>* <span><?php esc_html_e( '(also specify)', 'jobswp' ); ?></span></label>
 		<div class="howtoapply-inputs">
 			<select name="howtoapply_method" id="howtoapply_method" class="<?php echo esc_attr( jobswp_required_field_classes( 'howtoapply_method' ) ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
-				<option value="email" <?php echo jobswp_field_value( 'howtoapply_method', 'email' ); ?>><?php esc_html_e( 'Email Address', 'jobswp' ); ?></option>
-				<option value="web" <?php echo jobswp_field_value( 'howtoapply_method', 'web' ); ?>><?php esc_html_e( 'Online Form', 'jobswp' ); ?></option>
+				<?php foreach ( $howtoapply_methods as $method => $label ) : ?>
+					<option value="<?php echo esc_attr( $method ); ?>" <?php echo jobswp_field_value( 'howtoapply_method', $method ); ?>><?php echo esc_html( $label ); ?></option>
+				<?php endforeach; ?>
 			</select> :
 			<input type="text" name="howtoapply" id="howtoapply" class="<?php echo esc_attr( jobswp_required_field_classes( 'howtoapply' ) ); ?>" <?php echo jobswp_field_value( 'howtoapply' ); ?> />
 		</div>
 
 		<div class="job-help-text">
-			<?php esc_html_e( 'If choosing "Email Address", use an email address you are comfortable exposing to any visitor of the site. It need not match the private email address asked for in the Contact Information section.', 'jobswp' ); ?>
+			<?php
+			printf(
+				/* translators: %s: Label for the email how-to-apply method. */
+				esc_html__( 'If choosing "%s", use an email address you are comfortable exposing to any visitor of the site. It need not match the private email address asked for in the Contact Information section.', 'jobswp' ),
+				esc_html( $howtoapply_methods['email'] )
+			);
+			?>
 		</div>
 	</div>
 
