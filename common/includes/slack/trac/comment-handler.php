@@ -15,6 +15,7 @@ class Comment_Handler {
 	protected $ticket_url;
 	protected $comment_id;
 	protected $comment_url;
+	protected $keywords_added = array();
 
 	function __construct( \Dotorg\Slack\Send $send, array $email_message ) {
 		$this->send  = $send;
