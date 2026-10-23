@@ -785,8 +785,13 @@
 			// decompress
 			const decompressedStream = blob.stream().pipeThrough( new DecompressionStream( 'gzip' ) );
 			const jsonText = await new Response( decompressedStream ).text();
+			const data = JSON.parse( jsonText );
 
-			return JSON.parse( jsonText );
+			if ( ! Array.isArray( data ) ) {
+				throw new Error( 'Invalid cache payload: expected array' );
+			}
+
+			return data;
 		} finally {
 			db.close();
 		}
