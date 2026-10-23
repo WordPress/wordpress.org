@@ -1,17 +1,83 @@
-( function( $ ) {
+( function() {
+	'use strict';
 
-	var projects, l10n, $window = $(window);
+	/**
+	 * @typedef {Object} RosettaSettings
+	 * @property {Array<number|string>} accessList  - IDs of currently assigned projects.
+	 * @property {number}               lastUpdated - Timestamp used for IndexedDB cache invalidation.
+	 * @property {Object}               l10n        - Localized UI strings.
+	 */
+	const settings = window._rosettaProjectsSettings || {};
+	const l10n = settings.l10n || {};
 
-	projects = { model: {}, view: {}, controller: {} };
+	const projects = {
+		settings,
+		model: {},
+		view: {},
+		events: _.extend( {}, Backbone.Events )
+	};
 
-	projects.settings = window._rosettaProjectsSettings || {};
-	l10n = projects.settings.l10n || {};
-	delete projects.settings.l10n;
+	/**
+	 * Normalizes project IDs to ensure consistent type matching across sets and collections.
+	 *
+	 * @param {number|string} id - Raw project ID.
+	 * @return {number|string} Normalized ID.
+	 */
+	const normalizeId = id => {
+		if ( id === null || id === undefined || id === '' || typeof id === 'boolean' ) {
+			return '';
+		}
+		return ( id === 'all' || Number.isNaN( Number( id ) ) ) ? String( id ) : Number( id );
+	};
 
 	/**
 	 * MODELS
 	 */
-	projects.model.Project = Backbone.Model.extend({
+
+	/**
+	 * Base model providing shared selection and synchronization logic across project models.
+	 * Extended by Project and subProject.
+	 */
+	projects.model.SelectableModel = Backbone.Model.extend( {
+		/**
+		 * Unchecks the model.
+		 */
+		uncheck: function() {
+			this.set( 'checked', false );
+		},
+
+		/**
+		 * Checks if the model ID is already present in projects.selection upon initialization
+		 * and pre-sets the 'checked' attribute silently.
+		 */
+		syncInitialSelection: function() {
+			const id = normalizeId( this.get( 'id' ) );
+			this.set( 'id', id, { silent: true } );
+
+			if ( projects.selection.get( id ) ) {
+				this.set( 'checked', true, { silent: true } );
+			}
+		},
+
+		/**
+		 * Change listener for 'change:checked'.
+		 * Keeps the global projects.selection synchronized and triggers global uncheck events.
+		 *
+		 * @param {Backbone.Model} model   - The modified model instance.
+		 * @param {boolean}        checked - The updated selection state.
+		 */
+		updateSelection: function( model, checked ) {
+			const id = model.get( 'id' );
+			if ( checked ) {
+				projects.selection.add( { id } );
+				projects.events.trigger( 'uncheck:all-projects' );
+			} else {
+				projects.selection.remove( id );
+			}
+		}
+	} );
+
+	projects.model.Project = projects.model.SelectableModel.extend( {
 		defaults: {
 			id: 0,
 			name: '',
@@ -21,35 +87,42 @@
 		},
 
 		initialize: function() {
-			_.bindAll( this, 'uncheck' );
+			const subProjects = this.get( 'sub_projects' ) || [];
+			this.unset( 'sub_projects', { silent: true } );
 
-			// Store the original sub-projects data, it's used to reset the collection on searches.
-			this._subProjects = this.get( 'sub_projects' );
-			this.unset( 'sub_projects' );
+			this._subProjectIds = new Set( subProjects.map( sub => normalizeId( sub.id ) ) );
 
-			this.set( 'subProjects', new projects.model.subProjects( this._subProjects, {
-				project: this,
-			} ) );
+			const subProjectsCollection = new projects.model.SubProjects( subProjects, {
+				project: this
+			} );
 
-			var isChecked = projects.selection.get( this.get( 'id' ) );
-			if ( isChecked ) {
-				this.set( 'checked', true );
+			this.set( 'subProjects', subProjectsCollection, { silent: true } );
+
+			this.syncInitialSelection();
+			if ( this.get( 'checked' ) ) {
+				subProjectsCollection.uncheckAll();
 			}
 
-			this.listenTo( this.get( 'subProjects' ), 'change:checked', this.updateChecked );
-
-			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
-
-			this.on( 'change:checked', this.updateSelection );
-
+			this.listenTo( subProjectsCollection, 'change:checked', this.updateChecked );
+			this.on( 'change:checked', this.onCheckedChange );
 			this.checkForCheckedSubProjects();
 		},
 
-		uncheck: function() {
-			this.set( 'checked', false );
+		onCheckedChange: function( model, checked ) {
+			this.updateSelection( model, checked );
+
+			// Selecting the entire category grants access to all its items,
+			// making individual sub-project selections redundant.
+			if ( checked ) {
+				this.get( 'subProjects' ).uncheckAll();
+			}
 		},
 
 		updateChecked: function( model ) {
+			if ( this._isUncheckingAll ) {
+				return;
+			}
+
 			if ( model.get( 'checked' ) ) {
 				this.set( 'checked', false );
 			}
@@ -57,34 +130,31 @@
 			this.checkForCheckedSubProjects();
 		},
 
-		updateSelection: function( model, checked ) {
-			if ( checked ) {
-				projects.selection.add( { id: this.get( 'id' ) } );
-				$window.trigger( 'uncheck-all-projects.rosetta' );
-			} else {
-				projects.selection.remove( { id: this.get( 'id' ) } );
-			}
-		},
-
+		// Check against the ID set rather than the collection so active selections
+		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
-			var checked = this.get( 'subProjects' ).findWhere({ 'checked': true });
-			if ( checked ) {
-				this.set( 'checkedSubProjects', true );
-			} else {
-				this.set( 'checkedSubProjects', false );
-			}
+			const hasChecked = projects.selection.models.some( model => this._subProjectIds.has( model.id ) );
+			this.set( 'checkedSubProjects', hasChecked );
 		}
-	});
+	} );
 
-	projects.model.Projects = Backbone.Collection.extend({
+	projects.model.Projects = Backbone.Collection.extend( {
 		model: projects.model.Project,
 
+		// Listens on the global event bus to coordinate active tabs and selection
+		// state between individual category models and the standalone '#project-all' (GTE) toggle.
 		initialize: function() {
-			_.bindAll( this, 'disableActiveStates' );
-
 			this.on( 'change:isActive', this.toggleActiveStates );
 
-			$window.on( 'deactivate-other-projects.rosetta', this.disableActiveStates );
+			this.listenTo( projects.events, 'deactivate:other-projects', this.disableActiveStates );
+			this.listenTo( projects.events, 'uncheck:other-projects', this.uncheckAllProjects );
+		},
+
+		uncheckAllProjects: function() {
+			this.models.forEach( project => {
+				project.uncheck();
+				project.get( 'subProjects' ).uncheckAll();
+			} );
 		},
 
 		toggleActiveStates: function( model ) {
@@ -92,77 +162,92 @@
 				return;
 			}
 
-			this.each( function( project ) {
-				if ( project.get( 'id' ) != model.get( 'id' ) ) {
+			this.models.forEach( project => {
+				if ( project !== model ) {
 					project.set( 'isActive', false );
 				}
-			});
+			} );
 
-			$window.trigger( 'deactivate-all-projects.rosetta' );
+			projects.events.trigger( 'deactivate:all-projects' );
 		},
 
 		disableActiveStates: function() {
-			this.each( function( project ) {
-				project.set( 'isActive', false );
-			});
+			this.models.forEach( project => project.set( 'isActive', false ) );
 		}
-	});
+	} );
 
-	projects.model.subProject = Backbone.Model.extend({
+	projects.model.SubProject = projects.model.SelectableModel.extend( {
 		defaults: {
 			id: 0,
 			name: '',
-			checked: false,
-			matchScore: 0
+			checked: false
 		},
 
+		// Stored as direct instance property instead of Backbone attribute to avoid .set() overhead during search.
+		matchScore: 0,
+		_searchHaystack: null,
+
 		initialize: function() {
-			_.bindAll( this, 'uncheck' );
-
-			var isChecked = projects.selection.get( this.get( 'id' ) );
-			if ( isChecked ) {
-				this.set( 'checked', true );
-			}
-
-			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
-
+			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
 		},
 
-		uncheck: function() {
-			this.set( 'checked', false );
-		},
-
-		updateSelection: function( model, checked ) {
-			if ( checked ) {
-				projects.selection.add( { id: this.get( 'id' ) } );
-				$window.trigger( 'uncheck-all-projects.rosetta' );
-			} else {
-				projects.selection.remove( { id: this.get( 'id' ) } );
+		/**
+		 * Lazily builds and caches the lowercase search haystack on first search.
+		 *
+		 * @return {string} Lowercase combination of name and slug.
+		 */
+		getSearchHaystack: function() {
+			if ( this._searchHaystack === null ) {
+				this._searchHaystack = `${ this.attributes.name || '' } ${ this.attributes.slug || '' }`.toLowerCase();
 			}
+			return this._searchHaystack;
 		}
-	});
+	} );
 
-	projects.model.subProjects = Backbone.Collection.extend({
-		model: projects.model.subProject,
+	/**
+	 * Collection representing sub-projects with integrated relevance-based filtering.
+	 *
+	 * @property {string} terms - Most recently executed search query.
+	 * @property {Backbone.Model} project - Reference to the owning parent Project model.
+	 */
+	projects.model.SubProjects = Backbone.Collection.extend( {
+		model: projects.model.SubProject,
 
 		// Search terms
 		terms: '',
 
-		_sortBy: 'checked',
-
 		initialize: function( models, options ) {
-			this.project = options.project;
-			this.on( 'uncheckall', this.uncheckall );
+			this.project = options?.project;
 		},
 
-		uncheckall: function() {
-			this.each( function( project ) {
-				project.set( 'checked', false );
-			});
+		getAllModels: function() {
+			return ( this._allModels ||= this.models.slice() );
+		},
+
+		uncheckAll: function() {
+			if ( this.project ) {
+				this.project._isUncheckingAll = true;
+			}
+
+			try {
+				const allModels = this.getAllModels();
+				for ( let i = 0; i < allModels.length; i++ ) {
+					if ( allModels[ i ].get( 'checked' ) ) {
+						allModels[ i ].uncheck();
+					}
+				}
+			} finally {
+				if ( this.project ) {
+					this.project._isUncheckingAll = false;
+					this.project.set( 'checkedSubProjects', false );
+				}
+			}
 		},
 
 		doSearch: function( value ) {
+			value = value.trim();
+
 			// Don't do anything if we've already done this search
 			if ( this.terms === value ) {
 				return;
@@ -172,11 +257,9 @@
 
 			if ( this.terms.length > 0 ) {
 				this.search( this.terms );
-			}
-
-			// If search is blank, show all projects.
-			if ( '' === this.terms ) {
-				this.reset( this.project._subProjects );
+			} else {
+				// If search is blank, show all projects.
+				this.reset( this.getAllModels() );
 			}
 
 			// Trigger a 'projects:update' event
@@ -184,448 +267,613 @@
 		},
 
 		// Performs a search within the collection
-		// @uses RegExp
 		search: function( term ) {
-			var match, results, escapedTerm;
+			// Split into tokens; ignore empty tokens.
+			const tokens = term.toLowerCase().split( /\s+/ ).filter( Boolean );
+			const hasScoreFn = typeof String.prototype.score === 'function';
 
-			// Start with a full collection
-			this.reset( this.project._subProjects, { silent: true } );
+			// Step 1 (Filter): Token-based pre-filter. Ensures all search terms
+			// are present in either 'name' or 'slug' regardless of word order.
+			const results = this.getAllModels().filter( project => {
+				const haystack = project.getSearchHaystack();
 
-			// Escape the term string for RegExp meta characters
-			escapedTerm = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
-
-			// Consider spaces as word delimiters and match the whole string
-			// so matching terms can be combined
-			escapedTerm = escapedTerm.replace( / /g, ')(?=.*' );
-			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
-
-			results = this.filter( function( project ) {
-				var haystack = _.union( [ project.get( 'name' ), project.get( 'slug' ) ] );
-				if ( match.test( haystack ) ) {
-					_.each( haystack, function( word ) {
-						var score = word.score( term, .5 );
-						project.set( 'matchScore', Math.max( score, project.get( 'matchScore' ) ) );
-					});
+				if ( tokens.every( token => haystack.includes( token ) ) ) {
+					// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
+					const name = project.attributes.name;
+					const nameScore = ( name && hasScoreFn ) ? String( name ).score( term, 0.5 ) : 0;
+					const slug = project.attributes.slug;
+					const slugScore = ( slug && hasScoreFn ) ? String( slug ).score( term, 0.5 ) : 0;
+					project.matchScore = Math.max( nameScore, slugScore );
 					return true;
 				}
 				return false;
-			});
+			} );
 
-			this._sortBy = 'matchScore';
 			this.reset( results );
-			this._sortBy = 'checked';
 		},
 
 		comparator: function( project ) {
-			return - project.get( this._sortBy );
+			if ( this.terms ) {
+				return - project.matchScore;
+			}
+			// Default view: Floats assigned permissions to the top
+			// Search view: Overridden to prioritize search relevance over assignment state.
+			return - project.get( 'checked' );
 		}
-	});
+	} );
 
-	projects.model.Selection = Backbone.Collection.extend({
-
+	projects.model.Selection = Backbone.Collection.extend( {
 		initialize: function() {
-			this.$field = $( '#project-access-list' );
-			this.on( 'add remove reset', this.updateInputField );
+			this.field = document.getElementById( 'project-access-list' );
+			this._debouncedUpdate = _.debounce( this.updateInputField.bind( this ), 10 );
+			this.on( 'update reset', this._debouncedUpdate );
 		},
 
 		updateInputField: function() {
-			this.$field.val( _.pluck( this.toJSON(), 'id' ).join() );
+			if ( this.field ) {
+				this.field.value = this.pluck( 'id' ).join( ',' );
+			}
 		}
-	});
+	} );
 
 	/**
 	 * VIEWS
 	 */
-	projects.view.Frame = wp.Backbone.View.extend({
+	projects.view.Frame = wp.Backbone.View.extend( {
 		el: '#projects-list',
 
 		render: function() {
-			var view = this;
 			wp.Backbone.View.prototype.render.apply( this, arguments );
 
-			this.collection.each( function( project ) {
-				var projectView = new projects.view.Project({
-					model: project
-				});
+			const fragment = document.createDocumentFragment();
+			this.collection.models.forEach( project => {
+				const projectView = new projects.view.Project( { model: project } );
+				fragment.appendChild( projectView.render().el );
+			} );
 
-				projectView.render();
-				view.$el.append( projectView.el );
-			});
+			document.getElementById( 'project-loading' )?.remove();
+			this.el.append( fragment );
 
-			$( '#project-loading' ).remove();
-
-			// Mark the first item as active.
-			var $firstActive = view.$el.find( 'li.active' );
-			if ( ! $firstActive.length ) {
-				$firstActive = view.$el.find( 'li input[type=radio]' );
+			// Initialize the global #project-all view once it is rendered in the DOM and ensure it is only initialized once.
+			if ( document.getElementById( 'project-all' ) && ! projects.view.allProjectsInstance ) {
+				projects.view.allProjectsInstance = new projects.view.AllProjects();
 			}
-			if ( ! $firstActive.length ) {
-				$firstActive = view.$el.find( 'li:first-child' );
-			}
-			$firstActive.closest( 'li' ).addClass( 'active' );
 
-			this.views.ready();
+			// Activate the first relevant category tab if #project-all is not active.
+			if ( ! projects.selection.get( 'all' ) ) {
+				const activeProject = this.collection.find( p => p.get( 'isActive' ) || p.get( 'checkedSubProjects' ) || p.get( 'checked' ) )
+					|| this.collection.first();
+
+				activeProject?.set( 'isActive', true );
+			}
 
 			return this;
 		}
-	});
+	} );
 
-	projects.view.Checkbox = wp.Backbone.View.extend({
+	projects.view.Checkbox = wp.Backbone.View.extend( {
 		className: 'project-checkbox',
 		template: wp.template( 'project-checkbox' ),
 
-		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
+		events: {
+			'change input': 'updateChecked'
 		},
 
-		events: {
-			'click .input-checkbox': 'updateChecked',
-			'click .input-radio': 'setChecked'
+		initialize: function() {
+			this.listenTo( this.model, 'change:checked change:checkedSubProjects', this.syncInput );
+		},
+
+		render: function() {
+			wp.Backbone.View.prototype.render.apply( this, arguments );
+
+			this.inputEl = this.el.querySelector( 'input' );
+
+			this.syncInput();
+			return this;
+		},
+
+		syncInput: function() {
+			if ( ! this.inputEl ) {
+				return;
+			}
+
+			const isChecked = Boolean( this.model.get( 'checked' ) );
+			const hasCheckedSubProjects = Boolean( this.model.get( 'checkedSubProjects' ) );
+			const isIndeterminate = ! isChecked && hasCheckedSubProjects;
+
+			this.inputEl.checked = isChecked;
+			this.inputEl.indeterminate = isIndeterminate;
+
+			if ( isIndeterminate ) {
+				this.inputEl.setAttribute( 'aria-checked', 'mixed' );
+			} else {
+				this.inputEl.removeAttribute( 'aria-checked' );
+			}
 		},
 
 		prepare: function() {
-			return _.pick( this.model.toJSON(), 'name', 'slug', 'checked', 'checkedSubProjects' );
+			const { name, slug, checked, checkedSubProjects } = this.model.attributes;
+			return { name, slug, checked, checkedSubProjects };
 		},
 
-		updateChecked: function() {
-			this.model.set( 'checked', this.$el.find( 'input' ).prop( 'checked' ) );
-		},
-
-		setChecked: function() {
-			this.model.set( 'checked', true );
+		updateChecked: function( event ) {
+			this.model.set( 'checked', Boolean( event.target.checked ) );
 		}
-	});
+	} );
 
-	projects.view.Project = wp.Backbone.View.extend({
+	projects.view.Project = wp.Backbone.View.extend( {
 		tagName: 'li',
 
 		events: {
-			'click': 'updateIsActive'
+			'click': 'updateIsActive',
+			'focusin': 'updateIsActive'
 		},
 
 		initialize: function() {
-			this.listenTo( this.model, 'change:checked', this.propagateChange );
 			this.listenTo( this.model, 'change:isActive', this.toggleActiveState );
 
-			this.views.add( new projects.view.Checkbox({
+			this.views.add( new projects.view.Checkbox( {
 				model: this.model
-			}) );
+			} ) );
 
-			this.views.add( new projects.view.SubProjects({
+			this.views.add( new projects.view.SubProjects( {
 				model: this.model
-			}) );
+			} ) );
 
 			this.toggleActiveState();
-
-			this.views.ready();
-		},
-
-		propagateChange: function() {
-			if ( this.model.get( 'checked' ) ) {
-				this.model.get( 'subProjects' ).trigger( 'uncheckall' );
-			}
 		},
 
 		toggleActiveState: function() {
-			if ( this.model.get( 'isActive' ) ) {
-				this.$el.addClass( 'active' );
-			} else {
-				this.$el.removeClass( 'active' );
-			}
+			this.el.classList.toggle( 'active', Boolean( this.model.get( 'isActive' ) ) );
 		},
 
 		updateIsActive: function() {
 			this.model.set( 'isActive', true );
 		}
-	});
+	} );
 
-	projects.view.SubProjects = wp.Backbone.View.extend({
+	projects.view.SubProjects = wp.Backbone.View.extend( {
 		tagName: 'div',
 		className: 'sub-projects-wrapper',
 
 		initialize: function() {
-			var collection = this.model.get( 'subProjects' );
+			const collection = this.model.get( 'subProjects' );
 
 			if ( collection.length > 5 ) {
-				this.views.add( new projects.view.Search({
+				this.views.add( new projects.view.Search( {
 					collection: collection
-				}) );
+				} ) );
 			}
 
-			this.views.add( new projects.view.SubProjectsList({
+			this.views.add( new projects.view.SubProjectsList( {
 				collection: collection
-			}) );
-		},
+			} ) );
+		}
+	} );
 
-	});
-
-	projects.view.SubProjectsList = wp.Backbone.View.extend({
+	projects.view.SubProjectsList = wp.Backbone.View.extend( {
 		tagName: 'ul',
 		className: 'sub-projects-list',
 
-		// Number of projects which should be rendered.
+		// Number of projects which should be rendered to reduce bloat. Unrendered items remain searchable.
 		limit: 100,
 
-		initialize: function( options ) {
-			var self = this;
+		initialize: function() {
+			this._subViews = [];
+			this.listenTo( this.collection, 'projects:update', this.render );
+		},
 
-			this.listenTo( self.collection, 'projects:update', function() {
-				self.render( this );
-			} );
+		clearSubViews: function() {
+			for ( const view of this._subViews ) {
+				view.remove();
+			}
+			this._subViews = [];
+		},
+
+		remove: function() {
+			this.clearSubViews();
+			return wp.Backbone.View.prototype.remove.apply( this, arguments );
 		},
 
 		render: function() {
-			var self = this, subProjects;
+			this.clearSubViews();
 
-			self.$el.empty();
+			if ( ! this.collection.length ) {
+				const emptyItem = document.createElement( 'li' );
+				emptyItem.className = 'no-results';
+				emptyItem.setAttribute( 'role', 'status' );
+				emptyItem.textContent = l10n.noProjectsFound;
 
-			subProjects = self.collection.first( self.limit );
-			_.each( subProjects, function( model ) {
-				var subProjectView = new projects.view.SubProject({
-					model: model
-				});
+				this.el.replaceChildren( emptyItem );
+				return this;
+			}
 
-				subProjectView.render();
-				self.$el.append( subProjectView.el );
-			});
+			const fragment = document.createDocumentFragment();
+			const subProjects = this.collection.first( this.limit );
+
+			this._subViews = subProjects.map( model => {
+				const view = new projects.view.Checkbox( { model, tagName: 'li' } );
+				fragment.appendChild( view.render().el );
+				return view;
+			} );
+
+			this.el.replaceChildren( fragment );
+
+			return this;
 		}
-	});
+	} );
 
-	projects.view.SubProject = wp.Backbone.View.extend({
-		tagName: 'li',
-
-		initialize: function() {
-			this.views.add( new projects.view.Checkbox({
-				model: this.model
-			}) );
-		}
-	});
-
-	projects.view.Search = wp.Backbone.View.extend({
+	projects.view.Search = wp.Backbone.View.extend( {
 		tagName: 'input',
 		className: 'sub-projects-search',
 
 		attributes: {
 			placeholder: l10n.searchPlaceholder,
-			type: 'search'
+			type: 'search',
+			'aria-label': l10n.searchLabel,
+			autocomplete: 'off'
 		},
 
 		events: {
-			'input': 'search',
-			'keyup': 'search',
-			'keydown': 'search'
+			'input': 'onInput',
+			'keydown': 'onKeydown'
 		},
 
-		search: function( event ) {
-			// Prevent form submit
-			if ( event.type === 'keydown' && event.which === 13 ) {
+		initialize: function() {
+			this._debouncedSearch = _.debounce( () => {
+				this.collection.doSearch( this.el.value );
+			}, 300 );
+		},
+
+		remove: function() {
+			this._debouncedSearch?.cancel();
+			return wp.Backbone.View.prototype.remove.apply( this, arguments );
+		},
+
+		onInput: function() {
+			this._debouncedSearch();
+		},
+
+		onKeydown: function( event ) {
+			if ( event.key === 'Enter' ) {
 				event.preventDefault();
-			} else if ( event.type === 'keydown' ) {
+				this._debouncedSearch?.cancel();
+				this.collection.doSearch( this.el.value );
+			} else if ( event.key === 'Escape' ) {
+				this._debouncedSearch?.cancel();
+				this.el.value = '';
+				this.collection.doSearch( '' );
+			}
+		}
+	} );
+
+	/**
+	 * View handling the standalone global permission toggle (#project-all).
+	 * Coordinates checkbox toggles and synchronizes with
+	 * internal events ('deactivate:all-projects', 'uncheck:all-projects').
+	 */
+	projects.view.AllProjects = wp.Backbone.View.extend( {
+		el: '#project-all',
+
+		events: {
+			'click': 'onActivate',
+			'change input': 'onToggle'
+		},
+
+		initialize: function() {
+			this.checkbox = this.el.querySelector( 'input' );
+
+			if ( projects.selection.get( 'all' ) ) {
+				if ( this.checkbox ) {
+					this.checkbox.checked = true;
+				}
+				this.el.classList.add( 'active' );
+			}
+
+			this.listenTo( projects.events, 'deactivate:all-projects', this.onDeactivate );
+			this.listenTo( projects.events, 'uncheck:all-projects', this.onUncheck );
+		},
+
+		onActivate: function() {
+			if ( this.el.classList.contains( 'active' ) ) {
 				return;
 			}
 
-			// Clear on escape.
-			if ( event.type === 'keyup' && event.which === 27 ) {
-				event.target.value = '';
-			}
-
-			this.doSearch( event );
+			this.el.classList.add( 'active' );
+			projects.events.trigger( 'deactivate:other-projects' );
 		},
 
-		doSearch: _.debounce( function( event ) {
-			this.collection.doSearch( event.target.value );
-		}, 500 )
-	});
+		onToggle: function() {
+			if ( this.checkbox?.checked ) {
+				projects.selection.reset( [ { id: 'all' } ] );
+				projects.events.trigger( 'uncheck:other-projects' );
+			} else {
+				projects.selection.remove( 'all' );
+			}
+		},
+
+		onDeactivate: function() {
+			this.el.classList.remove( 'active' );
+		},
+
+		onUncheck: function() {
+			if ( this.checkbox?.checked ) {
+				projects.selection.remove( 'all' );
+				this.checkbox.checked = false;
+			}
+		}
+	} );
 
 	/**
 	 * UTILS
 	 */
 
-	projects._hasStorage = null;
+	const isValidTime = time => Number.isFinite( time ) && time > 0;
 
-	// Check if the browser supports localStorage.
-	projects.hasStorage = function() {
-		if ( null !== projects._hasStorage ) {
-			return projects._hasStorage;
-		}
+	// Check if the browser supports IndexedDB, Compression Streams, and has a valid cache timestamp.
+	projects.hasStorage = () => ! projects._storageDisabled
+		&& typeof indexedDB !== 'undefined'
+		&& typeof CompressionStream !== 'undefined'
+		&& typeof DecompressionStream !== 'undefined'
+		&& isValidTime( Number( projects.settings.lastUpdated ) );
 
-		var result = false;
-
+	projects.getProjects = async function() {
 		try {
-			window.localStorage.setItem( 'test', 'rosetta' );
-			result = window.localStorage.getItem( 'test' ) === 'rosetta';
-			window.localStorage.removeItem( 'test' );
-		} catch( e ) {}
+			return await projects.getLocalProjects();
+		} catch ( e ) {
+			const remoteProjects = await projects.getRemoteProjects();
 
-		projects._hasStorage = result;
-
-		return projects._hasStorage;
-	};
-
-	projects.getProjects = function() {
-		return projects.getLocalProjects().then(
-			function( localProjects ) {
-				return localProjects;
-			},
-			function() {
-				return projects.getRemoteProjects().then( function( remoteProjects ) {
-					if ( projects.hasStorage() ) {
-						projects.storeLocalProjects( remoteProjects );
-					}
-
-					return remoteProjects;
-				} );
+			if ( projects.hasStorage() ) {
+				projects.storeLocalProjects( remoteProjects );
 			}
-		);
+
+			return remoteProjects;
+		}
 	};
 
 	projects.getRemoteProjects = function() {
 		return wp.ajax.post( 'rosetta-get-projects' );
 	};
 
-	projects.getLocalProjects = function() {
+	const DB_NAME = 'rosetta_cache';
+	const STORE_NAME = 'projects';
+	const DB_VERSION = 1;
+
+	const promisifyReq = req => new Promise( ( resolve, reject ) => {
+		req.onsuccess = () => resolve( req.result );
+		req.onerror = () => reject( req.error );
+	} );
+
+	/**
+	 * Opens IndexedDB with protection against schema conflicts, blocked upgrades,
+	 * and cross-tab lock deadlocks.
+	 *
+	 * @param {number} attempt - Current recovery attempt count.
+	 * @return {Promise<IDBDatabase>} Promise resolving to the open IDB database instance.
+	 */
+	function openProjectsDB( attempt = 1 ) {
+		return new Promise( ( resolve, reject ) => {
+			let settled = false;
+
+			// Fall back to remote data if IndexedDB stalls or deadlocks across tabs.
+			const timeoutId = setTimeout( () => {
+				if ( settled ) {
+					return;
+				}
+				settled = true;
+				projects._storageDisabled = true;
+				reject( new Error( 'IndexedDB open timed out' ) );
+			}, 2500 );
+
+			const request = indexedDB.open( DB_NAME, DB_VERSION );
+
+			request.onupgradeneeded = event => {
+				const db = event.target.result;
+
+				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
+					db.createObjectStore( STORE_NAME );
+				}
+			};
+
+			// Reject and bypass cache if another tab blocks database access or schema changes.
+			request.onblocked = () => {
+				if ( settled ) {
+					return;
+				}
+				settled = true;
+				clearTimeout( timeoutId );
+				projects._storageDisabled = true;
+				console.warn( 'IndexedDB upgrade blocked: Falling back to remote data.' );
+				reject( new Error( 'IndexedDB upgrade blocked by another tab' ) );
+			};
+
+			request.onsuccess = () => {
+				if ( settled ) {
+					// Close stale connection if opened after timeout/rejection.
+					request.result?.close();
+					return;
+				}
+				settled = true;
+				clearTimeout( timeoutId );
+
+				const db = request.result;
+
+				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
+					db.close();
+					if ( attempt > 2 ) {
+						projects._storageDisabled = true;
+						reject( new Error( `Store ${ STORE_NAME } could not be created.` ) );
+						return;
+					}
+					recoverCorruptDB( attempt ).then( resolve ).catch( reject );
+					return;
+				}
+
+				// Yield connection when another tab initiates an upgrade.
+				db.onversionchange = () => {
+					db.close();
+				};
+
+				resolve( db );
+			};
+
+			request.onerror = () => {
+				if ( settled ) {
+					return;
+				}
+				settled = true;
+				clearTimeout( timeoutId );
+				projects._storageDisabled = true;
+				reject( request.error );
+			};
+		} );
+	}
+
+	/**
+	 * Fixes an inconsistent db state by completely deleting and rebuilding it.
+	 */
+	async function recoverCorruptDB( attempt ) {
+		await new Promise( ( resolve, reject ) => {
+			const deleteReq = indexedDB.deleteDatabase( DB_NAME );
+			deleteReq.onsuccess = () => resolve();
+			deleteReq.onerror = () => reject( deleteReq.error );
+			deleteReq.onblocked = () => {
+				console.warn( 'IndexedDB deletion blocked: The cache will be disabled for this session.' );
+				projects._storageDisabled = true;
+				reject( new Error( 'Database deletion blocked' ) );
+			};
+		} );
+
+		return openProjectsDB( attempt + 1 );
+	}
+
+	/**
+	 * Retrieves and decompresses cached project data from IndexedDB.
+	 *
+	 * @async
+	 * @throws {Error} Throws when storage is unavailable, timestamps are invalid/expired,
+	 *                 or data is corrupt, delegating fallback to projects.getRemoteProjects().
+	 * @return {Promise<ProjectData[]>} Parsed project data array.
+	 */
+	projects.getLocalProjects = async function() {
 		if ( ! projects.hasStorage() ) {
-			return Promise.reject();
+			throw new Error( 'No IndexedDB support' );
 		}
 
-		var lastUpdated = window.localStorage.getItem( 'projectsLastUpdated' );
-		if ( ! lastUpdated || 'undefined' === lastUpdated ) {
-			return Promise.reject();
-		}
+		const db = await openProjectsDB();
 
-		if ( lastUpdated < projects.settings.lastUpdated ) {
-			return Promise.reject();
-		}
+		try {
+			const store = db.transaction( STORE_NAME, 'readonly' ).objectStore( STORE_NAME );
 
-		var json = window.localStorage.getItem( 'projects' );
-		if ( ! json ) {
-			return Promise.reject();
-		}
+			const [ cachedTimeRaw, blob ] = await Promise.all( [
+				promisifyReq( store.get( 'projects_last_updated' ) ),
+				promisifyReq( store.get( 'projects_data' ) )
+			] );
 
-		if ( '[' === json.substring( 0, 1 ) ) {
-			return Promise.resolve( JSON.parse( json ) );
-		}
+			// Check timestamp
+			const cachedTime = Number( cachedTimeRaw );
+			const serverTime = Number( projects.settings.lastUpdated );
 
-		// decompress
-		return projects.decompress( json ).then( function( data ) {
-			return JSON.parse( data );
-		} );
+			if ( ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
+				throw new Error( 'Cache expired' );
+			}
+
+			if ( ! blob ) {
+				throw new Error( 'No cached data' );
+			}
+
+			// decompress
+			const decompressedStream = blob.stream().pipeThrough( new DecompressionStream( 'gzip' ) );
+			const jsonText = await new Response( decompressedStream ).text();
+			const data = JSON.parse( jsonText );
+
+			if ( ! Array.isArray( data ) ) {
+				throw new Error( 'Invalid cache payload: expected array' );
+			}
+
+			return data;
+		} finally {
+			db.close();
+		}
 	};
 
-	projects.storeLocalProjects = function( data ) {
-		window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
+	/**
+	 * Compresses and caches remote project data into IndexedDB as a binary gzip Blob.
+	 *
+	 * @async
+	 * @param {ProjectData[]} data - Array of project objects to serialize and cache.
+	 * @return {Promise<void>}
+	 */
+	projects.storeLocalProjects = async function( data ) {
+		let db;
+		try {
+			const stream = new Blob( [ JSON.stringify( data ) ] )
+				.stream()
+				.pipeThrough( new CompressionStream( 'gzip' ) );
+			const blob = await new Response( stream ).blob();
 
-		projects.compress( JSON.stringify( data ) ).then( function( data ) {
-			window.localStorage.setItem( 'projects', data );
-		} ).catch( function() {
-			console.log( "Caching projects locally failed." );
-		} );
-	};
+			db = await openProjectsDB();
+			const tx = db.transaction( STORE_NAME, 'readwrite' );
+			const store = tx.objectStore( STORE_NAME );
 
-	projects.compress = async function( data ) {
-		if ( 'undefined' === typeof CompressionStream ) {
-			return Promise.reject();
+			store.put( blob, 'projects_data' );
+			store.put( projects.settings.lastUpdated, 'projects_last_updated' );
+
+			await new Promise( ( resolve, reject ) => {
+				tx.oncomplete = () => resolve();
+				tx.onerror = () => reject( tx.error );
+				tx.onabort = () => reject( tx.error );
+			} );
+		} catch ( error ) {
+			console.warn( 'Caching projects in IndexedDB failed.', error );
+		} finally {
+			db?.close();
 		}
-
-		var stream = new CompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter();
-
-		streamWriter.write(
-			new TextEncoder().encode( data )
-		);
-		streamWriter.close();
-
-		return new Response( stream.readable ).arrayBuffer().then( function( buffer ) {
-			// Base64 encode it, so it can be stored in localStorage
-			return btoa(
-				new Uint8Array( buffer )
-					.reduce( ( data, byte ) => data + String.fromCharCode( byte ), '' )
-			);
-		} );		
-	};
-
-	projects.decompress = async function( data ) {
-		if ( 'undefined' === typeof DecompressionStream ) {
-			return Promise.reject();
-		}
-
-		// Base64 decode
-		var buffer = Uint8Array.from( atob( data ), c => c.charCodeAt(0) ),
-			stream = new DecompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter();
-
-		streamWriter.write( buffer );
-		streamWriter.close();
-
-		return new Response( stream.readable ).arrayBuffer().then( function( arrayBuffer ) {
-			return new TextDecoder().decode( arrayBuffer );
-		} );
 	};
 
 	projects.initFrame = function( projectData ) {
-		projects.view.frame = new projects.view.Frame({
+		new projects.view.Frame( {
 			collection: new projects.model.Projects( projectData )
-		}).render();
+		} ).render();
 	};
 
-	projects.selection = new projects.model.Selection();
-
 	projects.init = function() {
-		_.each( projects.settings.accessList, function( projectID ) {
-			projects.selection.add( { id: projectID } );
-		});
+		const rawList = ( projects.settings.accessList || [] )
+			.map( normalizeId )
+			.filter( id => id !== '' );
+		const initialSelection = rawList.includes( 'all' )
+			? [ { id: 'all' } ]
+			: rawList.map( id => ( { id } ) );
 
-		projects.getProjects().then( function( response ) {
-			projects.initFrame( response );
+		projects.selection = new projects.model.Selection( initialSelection );
+		projects.selection.updateInputField();
+
+		projects.getProjects()
+			.then( response => projects.initFrame( response ) )
+			.catch( () => {
+				const loadingEl = document.getElementById( 'project-loading' );
+				if ( loadingEl ) {
+					loadingEl.textContent = l10n.loadingError;
+				}
+			} );
+
+		const hadTranslatorStatus = Boolean( rawList.length );
+		const accessField = projects.selection.field;
+
+		accessField?.closest( 'form' )?.addEventListener( 'submit', event => {
+			projects.selection._debouncedUpdate?.cancel();
+			projects.selection.updateInputField();
+
+			if ( hadTranslatorStatus && ! accessField.value && ! confirm( l10n.removeTranslator ) ) {
+				event.preventDefault();
+			}
 		} );
 	};
 
-	$( projects.init );
+	if ( document.readyState === 'loading' ) {
+		document.addEventListener( 'DOMContentLoaded', projects.init );
+	} else {
+		projects.init();
+	}
 
-	var $projectAll = $( '#project-all' ), $projectAllCheckbox = $projectAll.find( 'input' );
-
-	$projectAll.on( 'click', function() {
-		var $el = $( this );
-
-		if ( $el.hasClass( 'active' ) ) {
-			return;
-		}
-
-		$el.addClass( 'active' );
-		$window.trigger( 'deactivate-other-projects.rosetta' );
-	});
-
-	$projectAll.find( 'input' ).on( 'change', function() {
-		var checked = $( this ).prop( 'checked' );
-
-		if ( checked ) {
-			projects.selection.add( { id: 'all' } );
-			$window.trigger( 'uncheck-other-projects.rosetta' );
-		} else {
-			projects.selection.remove( { id: 'all' } );
-		}
-	});
-
-	$window.on( 'deactivate-all-projects.rosetta', function() {
-		$projectAll.removeClass( 'active' );
-	} );
-
-	$window.on( 'uncheck-all-projects.rosetta', function() {
-		var checked = $projectAllCheckbox.prop( 'checked' );
-
-		if ( checked ) {
-			projects.selection.remove( { id: 'all' } );
-			$projectAllCheckbox.prop( 'checked', false );
-		}
-	} );
-
-	// Confirm removal of CLPTE status.
-	$( '#project-access-list' ).parents( 'form' ).on( 'submit', function( e ) {
-		if ( ! $( '#project-access-list' ).val() ) {
-			if ( ! confirm( l10n.removeTranslator ) ) {
-				e.preventDefault();
-			}
-		}
-	} );
-
-} )( jQuery );
+} )();
