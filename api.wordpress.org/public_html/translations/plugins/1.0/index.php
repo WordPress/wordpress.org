@@ -32,7 +32,7 @@ $version = isset( $_REQUEST['version'] ) ? filter_var(
 	FILTER_VALIDATE_REGEXP,
 	array(
 		'options' => array(
-			'regexp' => '/^[\x21-\x7e]{0,100}\z/',
+			'regexp' => '/^[\x20-\x7e]{0,100}\z/',
 		),
 	)
 ) : null;
@@ -45,6 +45,11 @@ if ( isset( $_REQUEST['slug'] ) && ! is_string( $slug ) ) {
 if ( isset( $_REQUEST['version'] ) && ! is_string( $version ) ) {
 	http_response_code( 400 );
 	die( '?version= invalid.' );
+}
+
+// Version headers are free text, so drop the spaces a cache key can't hold rather than reject them.
+if ( is_string( $version ) ) {
+	$version = str_replace( ' ', '', $version );
 }
 
 $translations = find_all_translations_for_type_and_domain( 'plugin', $slug, $version );
