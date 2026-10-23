@@ -212,6 +212,7 @@ class Cross_Locale_PTE {
 		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
 			'l10n' => array(
 				'loadingError'      => __( 'Error loading projects.', 'rosetta' ),
+				'noProjectsFound'   => __( 'No projects found.', 'rosetta' ),
 				'removeTranslator'  => __( 'Are you sure you wish to completely remove CLPTE status for this user?', 'rosetta' ),
 				'searchLabel'       => __( 'Search subprojects by name or slug', 'rosetta' ),
 				'searchPlaceholder' => __( 'Search…', 'rosetta' ),
