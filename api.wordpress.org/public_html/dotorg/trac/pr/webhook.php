@@ -1,4 +1,16 @@
 <?php
+/**
+ * GitHub webhook receiver for pull request events.
+ *
+ * This endpoint is a GitHub webhook receiver: requests are authenticated by the
+ * `X-Hub-Signature` HMAC computed with GH_PRBOT_WEBHOOK_SECRET, not by a user session,
+ * so there is no nonce to verify.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Trac
+ */
+
 namespace WordPressdotorg\API\Trac\GithubPRs;
 
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
@@ -12,10 +24,20 @@ function verify_signature() {
 
 	// Validate that the request came from GitHub.
 	if ( ! defined( 'GH_PRBOT_WEBHOOK_SECRET' ) ) {
-		return;
+		header( 'HTTP/1.0 500 Internal Server Error', true, 500 );
+		die( 'Webhook secret not configured.' );
 	}
 
-	$sent_signature     = $_SERVER['HTTP_X_HUB_SIGNATURE'] ?? '';
+	$sent_signature     = (string) filter_var(
+		wp_unslash( $_SERVER['HTTP_X_HUB_SIGNATURE'] ?? '' ),
+		FILTER_VALIDATE_REGEXP,
+		[
+			'options' => [
+				'regexp'  => '/^sha1=[0-9a-f]{40}\z/i',
+				'default' => '',
+			],
+		]
+	);
 	$expected_signature = 'sha1=' . hash_hmac( 'sha1', $HTTP_RAW_POST_DATA, GH_PRBOT_WEBHOOK_SECRET );
 
 	if ( ! hash_equals( $expected_signature, $sent_signature ) ) {
@@ -33,11 +55,12 @@ if ( empty( $_SERVER['CONTENT_TYPE'] ) || 'application/json' !== $_SERVER['CONTE
 
 $payload = json_decode( $HTTP_RAW_POST_DATA );
 
-if ( ! empty( $_GET['trac'] ) ) {
-	define( 'WEBHOOK_TRAC_HINT', $_GET['trac'] );
+$trac_hint = sanitize_key( wp_unslash( $_GET['trac'] ?? '' ) );
+if ( $trac_hint ) {
+	define( 'WEBHOOK_TRAC_HINT', $trac_hint );
 }
 
-switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
+switch ( sanitize_key( wp_unslash( $_SERVER['HTTP_X_GITHUB_EVENT'] ?? '' ) ) ) {
 	// Pull Request
 	case 'pull_request':
 
