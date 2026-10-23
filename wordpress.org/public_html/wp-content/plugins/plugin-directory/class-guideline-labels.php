@@ -143,7 +143,7 @@ class Guideline_Labels {
 		}
 
 		$labels[ $reason ] = $entry;
-		update_post_meta( $post->ID, self::META_KEY, $labels );
+		update_post_meta( $post->ID, self::META_KEY, wp_slash( $labels ) );
 
 		$log = sprintf(
 			'Guideline label %1$s: %2$s (Guideline %3$d), since version %4$s.',
@@ -156,7 +156,7 @@ class Guideline_Labels {
 			$log .= "\n\nNote: " . $entry['note'];
 		}
 
-		Tools::audit_log( $log, $post );
+		Tools::audit_log( wp_slash( $log ), $post );
 
 		Plugins_Info_API::flush_plugin_information_cache( $post->post_name );
 
@@ -186,7 +186,7 @@ class Guideline_Labels {
 
 		unset( $labels[ $reason ] );
 		if ( $labels ) {
-			update_post_meta( $post->ID, self::META_KEY, $labels );
+			update_post_meta( $post->ID, self::META_KEY, wp_slash( $labels ) );
 		} else {
 			delete_post_meta( $post->ID, self::META_KEY );
 		}
