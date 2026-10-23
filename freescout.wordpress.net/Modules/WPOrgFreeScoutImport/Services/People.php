@@ -90,7 +90,7 @@ final class People {
 	 * @param mixed $person Source user, as the API gives `createdBy` and `assignedTo`.
 	 * @return User|null Null if it isn't a user.
 	 */
-	public function user( $person ): ?User {
+	public function user( mixed $person ): ?User {
 		$id = self::user_id( $person );
 		if ( ! $id ) {
 			return null;
@@ -125,7 +125,7 @@ final class People {
 	 * @param mixed $person Source person.
 	 * @return int|null Null if it isn't a user.
 	 */
-	public static function user_id( $person ): ?int {
+	public static function user_id( mixed $person ): ?int {
 		$id = is_array( $person ) && 'user' === ( $person['type'] ?? 'user' ) ? (int) ( $person['id'] ?? 0 ) : 0;
 
 		return $id > 0 ? $id : null;
@@ -306,10 +306,10 @@ final class People {
 
 		// Without the events of changed threads and conversations, and without touching updated_at, like the import.
 		$reports              = self::has_reports();
-		$update_conversations = static function ( $query, array $values ) use ( $reports ): void {
+		$update_conversations = static function ( \Illuminate\Database\Eloquent\Builder $query, array $values ) use ( $reports ): void {
 			$query->toBase()->update( $reports ? $values + array( self::REPORTS_COLUMN => false ) : $values );
 		};
-		$update_threads       = static function ( $query, array $values ) use ( $reports ): void {
+		$update_threads       = static function ( \Illuminate\Database\Eloquent\Builder $query, array $values ) use ( $reports ): void {
 			if ( $reports ) {
 				Conversation::query()
 					->whereIn( 'id', ( clone $query )->select( 'conversation_id' )->getQuery() )
@@ -351,7 +351,7 @@ final class People {
 		return Thread::query()
 			->where( 'imported', false )
 			->where(
-				static function ( $query ): void {
+				static function ( \Illuminate\Database\Eloquent\Builder $query ): void {
 					$query->where( 'type', '!=', Thread::TYPE_LINEITEM )
 						->orWhereNull( 'created_by_user_id' )
 						->orWhereNotIn( 'created_by_user_id', User::getRobotsCondition()->select( 'id' )->getQuery() );
@@ -429,7 +429,7 @@ final class People {
 	 * @param mixed $person Source sender, as the API gives `customer` and `createdBy`.
 	 * @return Customer|null Null if it isn't a sender with an email.
 	 */
-	public function sender( $person ): ?Customer {
+	public function sender( mixed $person ): ?Customer {
 		if ( ! is_array( $person ) || 'customer' !== ( $person['type'] ?? 'customer' ) ) {
 			return null;
 		}

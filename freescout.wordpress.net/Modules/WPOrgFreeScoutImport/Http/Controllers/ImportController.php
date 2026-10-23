@@ -164,7 +164,7 @@ final class ImportController extends Controller {
 	 */
 	public function resume( int $id ): RedirectResponse {
 		$run = \DB::transaction(
-			static function () use ( $id ) {
+			static function () use ( $id ): Run|string|null {
 				if ( ! self::lock( $id ) ) {
 					return self::BUSY;
 				}
@@ -260,7 +260,7 @@ final class ImportController extends Controller {
 		$changed = Settings::url() !== rtrim( trim( (string) $request->input( 'url' ) ), '/' );
 
 		if ( ! Settings::save( (string) $request->input( 'url' ), (string) $request->input( 'api_key' ) ) ) {
-			return self::back_with_error( __( 'Enter the other FreeScout’s address, like https://scout.wc-us.org.' ) );
+			return self::back_with_error( __( 'Enter the other FreeScout’s https address, like https://scout.wc-us.org.' ) );
 		}
 
 		// Another FreeScout has other users.

@@ -446,7 +446,7 @@ final class WordPressOrgAccounts {
 	 * @param mixed $value Value.
 	 * @return string
 	 */
-	private static function cell( $value ): string {
+	private static function cell( mixed $value ): string {
 		$value = (string) preg_replace( '/[\x00-\x1F\x7F]+/', ' ', (string) $value );
 
 		return '' !== $value && in_array( $value[0], array( '=', '+', '-', '@' ), true ) ? "'" . $value : $value;
@@ -458,7 +458,7 @@ final class WordPressOrgAccounts {
 	 * @param mixed $value Cell.
 	 * @return string
 	 */
-	private static function uncell( $value ): string {
+	private static function uncell( mixed $value ): string {
 		$value = trim( (string) $value );
 
 		return (string) preg_replace( "/^'(?=[=+\-@])/", '', $value );

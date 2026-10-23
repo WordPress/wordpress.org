@@ -288,7 +288,7 @@ final class ImportTest extends ImportTestCase {
 	}
 
 	/**
-	 * The API key is kept encrypted, and saving the address again without one keeps it.
+	 * The API key is kept encrypted, and saving the address again without one keeps it, unless it names another host.
 	 *
 	 * @return void
 	 */
@@ -312,6 +312,15 @@ final class ImportTest extends ImportTestCase {
 		$this->assertSame( 'https://scout.wc-us.org', Settings::url() );
 		$this->assertSame( 'secret-key', Settings::api_key() );
 		$this->assertStringNotContainsString( 'secret-key', (string) \Option::get( Settings::KEY_OPTION, '', true, false ) );
+
+		$this->actingAs( $admin )->post(
+			route( 'wporgfreescoutimport.settings' ),
+			array(
+				'url'     => 'https://elsewhere.test',
+				'api_key' => '',
+			)
+		);
+		$this->assertSame( '', Settings::api_key() );
 	}
 
 	/**

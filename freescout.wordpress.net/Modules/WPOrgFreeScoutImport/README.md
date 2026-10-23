@@ -32,7 +32,7 @@ Copies mailboxes' conversations from another FreeScout, like WordCamp US's at sc
 
 ## Setup
 
-- On the other FreeScout, under **Manage » API & Webhooks**, copy its global API key. Enter it and the other FreeScout's address, like `https://scout.wc-us.org`, on the import page. The key is kept encrypted with the app key, in an option, and isn't shown again; leave it empty to keep it when changing the address. It reads everything there, so **Forget the API key** after the last import.
+- On the other FreeScout, under **Manage » API & Webhooks**, copy its global API key. Enter it and the other FreeScout's https address, like `https://scout.wc-us.org`, on the import page. The key is kept encrypted with the app key, in an option, and isn't shown again; leave it empty to keep it when changing the address, unless the address names another host, which forgets it. It reads everything there, so **Forget the API key** after the last import.
 - FreeScout's queue worker must be running.
 - Switch on the Tags module before importing, and give automatic workflows the condition **Imported** is **No** (see above).
 - **Message-IDs:** the API doesn't give them, so copy `bin/export-message-ids.php` to the other FreeScout's server, and run it there with the path of that FreeScout: `php export-message-ids.php /var/www/html/scout.wc-us.org | gzip > message-ids.csv.gz`. Upload the file under **Message-IDs** on the import page. Threads imported already get theirs on the queue; those imported later get theirs as they're imported. Before the last import after the email moves, run it and upload it again, for the emails since.

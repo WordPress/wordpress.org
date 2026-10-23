@@ -236,7 +236,7 @@ final class Source {
 	 * @throws ApiError          If it couldn't be downloaded otherwise.
 	 * @throws \RuntimeException If it couldn't be saved.
 	 */
-	public function attachment( string $url ) {
+	public function attachment( string $url ): mixed {
 		if ( ! $this->is_own( $url ) ) {
 			return null;
 		}
@@ -265,7 +265,7 @@ final class Source {
 	 * @param string $url Image URL, on the other FreeScout.
 	 * @return resource|null Null if it couldn't be downloaded, or is too large.
 	 */
-	public function image( string $url ) {
+	public function image( string $url ): mixed {
 		if ( ! $this->is_own( $url ) ) {
 			return null;
 		}
@@ -287,7 +287,7 @@ final class Source {
 	 * @param bool              $empty_ok Whether an empty body is fine.
 	 * @return resource|null Null if it's larger, empty, or couldn't be written.
 	 */
-	private static function to_file( ResponseInterface $response, int $max, bool $empty_ok = false ) {
+	private static function to_file( ResponseInterface $response, int $max, bool $empty_ok = false ): mixed {
 		$body    = $response->getBody();
 		$file    = tmpfile();
 		$size    = 0;

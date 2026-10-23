@@ -38,7 +38,7 @@ App\Thread::query()
 	->where( 'state', App\Thread::STATE_PUBLISHED )
 	->chunkById(
 		1000,
-		static function ( $threads ) use ( $output, &$count ): void {
+		static function ( \Illuminate\Support\Collection $threads ) use ( $output, &$count ): void {
 			foreach ( $threads as $thread ) {
 				$mailbox    = $thread->conversation ? $thread->conversation->mailbox : null;
 				$message_id = $mailbox ? (string) $thread->getMessageId( $mailbox ) : '';

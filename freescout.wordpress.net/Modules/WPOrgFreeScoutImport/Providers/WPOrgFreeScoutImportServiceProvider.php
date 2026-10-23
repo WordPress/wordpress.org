@@ -79,7 +79,7 @@ final class WPOrgFreeScoutImportServiceProvider extends ServiceProvider {
 		// The Users page searches users with FreeScout's own select2; the import page refreshes while running.
 		\Eventy::addFilter(
 			'javascripts',
-			static function ( $javascripts = array() ) {
+			static function ( mixed $javascripts = array() ): mixed {
 				$scripts = array(
 					'wporgfreescoutimport.users' => 'users.js',
 					'wporgfreescoutimport.index' => 'import.js',
@@ -101,7 +101,7 @@ final class WPOrgFreeScoutImportServiceProvider extends ServiceProvider {
 		// Highlights Manage while the pages are open.
 		\Eventy::addFilter(
 			'menu.selected',
-			static function ( $menu = null ) {
+			static function ( mixed $menu = null ): mixed {
 				if ( is_array( $menu ) && isset( $menu['manage'] ) && is_array( $menu['manage'] ) ) {
 					$menu['manage'][ self::ALIAS ] = array( 'wporgfreescoutimport.index', 'wporgfreescoutimport.users' );
 				}

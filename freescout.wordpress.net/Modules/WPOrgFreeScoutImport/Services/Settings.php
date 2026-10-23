@@ -67,20 +67,26 @@ final class Settings {
 	/**
 	 * Sets the address, and the key unless it's empty, so the saved one stays.
 	 *
-	 * @param string $url     Address, with http or https.
+	 * The key goes in every request, so the address has to be https, and a saved key is forgotten when the address
+	 * names another host: it would go to that one.
+	 *
+	 * @param string $url     Address, with https.
 	 * @param string $api_key API key, or empty to keep the saved one.
 	 * @return bool Whether the address is one.
 	 */
 	public static function save( string $url, string $api_key ): bool {
-		$url    = rtrim( trim( $url ), '/' );
-		$scheme = strtolower( (string) parse_url( $url, PHP_URL_SCHEME ) );
-		if ( ! in_array( $scheme, array( 'http', 'https' ), true ) || ! parse_url( $url, PHP_URL_HOST ) || ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+		$url = rtrim( trim( $url ), '/' );
+		if ( 'https' !== strtolower( (string) parse_url( $url, PHP_URL_SCHEME ) ) || ! parse_url( $url, PHP_URL_HOST ) || ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
 			return false;
+		}
+
+		$api_key = trim( $api_key );
+		if ( '' === $api_key && strtolower( (string) parse_url( self::url(), PHP_URL_HOST ) ) !== strtolower( (string) parse_url( $url, PHP_URL_HOST ) ) ) {
+			self::forget_api_key();
 		}
 
 		\Option::set( self::URL_OPTION, $url );
 
-		$api_key = trim( $api_key );
 		if ( '' !== $api_key ) {
 			\Option::set( self::KEY_OPTION, encrypt( $api_key ) );
 		}

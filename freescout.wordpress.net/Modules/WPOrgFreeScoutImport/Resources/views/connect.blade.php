@@ -10,8 +10,8 @@
 		'create'  => __('Create a user, connected to it'),
 		'done'    => __('Connected already'),
 	];
-	$ready      = count( array_filter( $plan, function ( $step ) { return $step['action'] && 'done' !== $step['action']; } ) );
-	$mismatched = count( array_filter( $plan, function ( $step ) { return $step['action'] && 'done' !== $step['action'] && $step['mismatch']; } ) );
+	$ready      = count( array_filter( $plan, function ( array $step ): bool { return $step['action'] && 'done' !== $step['action']; } ) );
+	$mismatched = count( array_filter( $plan, function ( array $step ): bool { return $step['action'] && 'done' !== $step['action'] && $step['mismatch']; } ) );
 @endphp
 <div class="container">
 	<div class="flexy-container">

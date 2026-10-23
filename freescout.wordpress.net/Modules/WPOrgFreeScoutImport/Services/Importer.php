@@ -316,8 +316,8 @@ final class Importer {
 			$this->close_downloads( $threads );
 		}
 
-		// Live email numbers conversations without seeing this one until it's committed: if one took its number, this takes the next.
-		if ( ! $imported && Conversation::query()->where( 'number', $conversation->number )->where( 'id', '!=', $conversation->id )->exists() ) {
+		// Live email can take this number before it's committed, then this takes the next; the stored one, as the accessor may give the ID.
+		if ( ! $imported && Conversation::query()->where( 'number', (int) $conversation->getOriginal( 'number' ) )->where( 'id', '!=', $conversation->id )->exists() ) {
 			Conversation::query()->whereKey( $conversation->id )->toBase()->update( array( 'number' => (int) Conversation::query()->max( 'number' ) + 1 ) );
 		}
 
@@ -397,7 +397,7 @@ final class Importer {
 	private function new_threads( array $threads ): array {
 		usort(
 			$threads,
-			static function ( $a, $b ): int {
+			static function ( array $a, array $b ): int {
 				return array( (string) ( $a['createdAt'] ?? '' ), (int) ( $a['id'] ?? 0 ) ) <=> array( (string) ( $b['createdAt'] ?? '' ), (int) ( $b['id'] ?? 0 ) );
 			}
 		);
@@ -591,10 +591,10 @@ final class Importer {
 	/**
 	 * A temporary file's path.
 	 *
-	 * @param resource $file Temporary file.
+	 * @param mixed $file Temporary file, a resource.
 	 * @return string
 	 */
-	private static function path( $file ): string {
+	private static function path( mixed $file ): string {
 		return (string) stream_get_meta_data( $file )['uri'];
 	}
 
@@ -849,7 +849,7 @@ final class Importer {
 	 * @param mixed $date ISO 8601 date, in UTC.
 	 * @return Carbon|null In the app's timezone, as core stores dates.
 	 */
-	private static function date( $date ): ?Carbon {
+	private static function date( mixed $date ): ?Carbon {
 		if ( ! is_string( $date ) || '' === $date ) {
 			return null;
 		}
@@ -867,7 +867,7 @@ final class Importer {
 	 * @param mixed $email Email.
 	 * @return string|null Null if it isn't one.
 	 */
-	private static function email( $email ): ?string {
+	private static function email( mixed $email ): ?string {
 		$email = is_string( $email ) ? Email::sanitizeEmail( $email ) : false;
 
 		return $email ? $email : null;

@@ -128,7 +128,7 @@ final class ImportPage implements ShouldQueue {
 					$known    = self::ids( (array) $run->previous_page );
 					$moved    = array_filter(
 						$previous['conversations'],
-						static function ( $conversation ) use ( $known ): bool {
+						static function ( mixed $conversation ) use ( $known ): bool {
 							return ! in_array( (int) ( $conversation['id'] ?? 0 ), $known, true );
 						}
 					);
@@ -278,7 +278,7 @@ final class ImportPage implements ShouldQueue {
 	 * @param \Throwable|null $exception Why it failed.
 	 * @return void
 	 */
-	public function failed( $exception = null ): void {
+	public function failed( ?\Throwable $exception = null ): void {
 		$run = $this->current_run();
 		if ( ! $run ) {
 			return;
@@ -355,7 +355,7 @@ final class ImportPage implements ShouldQueue {
 	 */
 	private static function ids( array $items ): array {
 		return array_map(
-			static function ( $item ): int {
+			static function ( mixed $item ): int {
 				return (int) ( is_array( $item ) ? ( $item['id'] ?? 0 ) : $item );
 			},
 			array_values( $items )

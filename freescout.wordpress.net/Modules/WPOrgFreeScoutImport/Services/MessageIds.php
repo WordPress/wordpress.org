@@ -107,7 +107,7 @@ final class MessageIds {
 			->select( 'wporgfreescoutimport_threads.id', 'wporgfreescoutimport_threads.thread_id', 'wporgfreescoutimport_message_ids.message_id' )
 			->chunkById(
 				self::CHUNK,
-				static function ( $rows ) use ( &$applied ): void {
+				static function ( \Illuminate\Support\Collection $rows ) use ( &$applied ): void {
 					$taken = Thread::query()->whereIn( 'message_id', $rows->pluck( 'message_id' )->all() )->pluck( 'message_id' )->flip()->all();
 
 					foreach ( $rows as $row ) {
