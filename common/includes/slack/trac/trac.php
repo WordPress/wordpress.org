@@ -290,6 +290,12 @@ class Trac implements User {
 		return $this->firehose_channel;
 	}
 
+	/**
+	 * Gets the channels a ticket update should be posted to when a workflow keyword is added.
+	 *
+	 * @param string $keyword Workflow keyword added to the ticket.
+	 * @return string[] Channel names.
+	 */
 	function get_keyword_channels( $keyword ) {
 		if ( isset( $this->ticket_keyword_filters[ $keyword ] ) ) {
 			$channel = $this->ticket_keyword_filters[ $keyword ];

@@ -37,6 +37,9 @@ class Comment_Handler {
 		return null;
 	}
 
+	/**
+	 * Processes the notification email and posts it to the firehose and keyword channels.
+	 */
 	function run() {
 		$this->process_message();
 
@@ -58,6 +61,9 @@ class Comment_Handler {
 		$this->send_keyword_notifications();
 	}
 
+	/**
+	 * Posts the payload to the channels for each workflow keyword added to the ticket.
+	 */
 	function send_keyword_notifications() {
 		if ( empty( $this->keywords_added ) ) {
 			return;
@@ -71,6 +77,11 @@ class Comment_Handler {
 		}
 	}
 
+	/**
+	 * Parses the Trac notification email into the ticket, comment, and change properties.
+	 *
+	 * @return void|false False if the email is not from a known Trac.
+	 */
 	function process_message() {
 		$lines = array_map( 'rtrim', $this->lines );
 		$base64 = false;
