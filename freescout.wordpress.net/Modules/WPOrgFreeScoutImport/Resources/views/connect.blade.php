@@ -26,7 +26,7 @@
 
 	<div class="margin-top">
 		<p>{{ __('Nothing is changed yet. Check that each WordPress.org account is the right person, then connect them. Rows with a problem are left out.') }}</p>
-		<p>{{ __('Connecting lets the account’s owner log in as the user here. Rows whose account has neither the user’s name nor email there are highlighted, and only connected if you tick them.') }}</p>
+		<p>{{ __('Connecting lets the account’s owner log in as the user here. Rows whose account has neither the user’s name nor email there are highlighted, and only connected if you check their boxes.') }}</p>
 
 		<table class="table">
 			<thead>
@@ -86,7 +86,7 @@
 				<input type="hidden" name="apply" value="1">
 				<button type="submit" class="btn btn-primary">{{ __('Connect :count users', [ 'count' => $ready ]) }}</button>
 				@if ( $mismatched )
-					<span class="text-help">{{ __(':count of them only if ticked.', [ 'count' => $mismatched ]) }}</span>
+					<span class="text-help">{{ __(':count of them only if their boxes are checked.', [ 'count' => $mismatched ]) }}</span>
 				@endif
 				<a href="{{ route( 'wporgfreescoutimport.users' ) }}" class="btn btn-link">{{ __('Cancel') }}</a>
 			</form>

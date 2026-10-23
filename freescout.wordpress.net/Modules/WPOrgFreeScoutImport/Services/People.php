@@ -141,9 +141,17 @@ final class People {
 		$record = SourceUser::query()->where( 'source_user_id', (int) ( $source_user['id'] ?? 0 ) )->first();
 		$user   = $record ? self::mapped( (int) $record->source_user_id ) : null;
 		if ( $user ) {
+			$how = 'chosen';
+			if ( $record->created ) {
+				$how = 'created';
+			} elseif ( mb_strtolower( (string) $user->email ) === mb_strtolower( (string) ( $source_user['email'] ?? '' ) ) ) {
+				// Imports keep the user they matched by email too.
+				$how = 'email';
+			}
+
 			return array(
 				'user' => $user,
-				'how'  => $record->created ? 'created' : 'chosen',
+				'how'  => $how,
 			);
 		}
 
@@ -328,7 +336,7 @@ final class People {
 		// Who sees them under Mine changed.
 		foreach ( $mailboxes as $mailbox ) {
 			self::grant( $to, $mailbox );
-			$mailbox->updateFoldersCounters();
+			Importer::update_counters( $mailbox );
 		}
 	}
 

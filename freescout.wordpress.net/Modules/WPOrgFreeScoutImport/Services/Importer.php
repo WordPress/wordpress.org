@@ -316,6 +316,11 @@ final class Importer {
 			$this->close_downloads( $threads );
 		}
 
+		// Live email numbers conversations without seeing this one until it's committed: if one took its number, this takes the next.
+		if ( ! $imported && Conversation::query()->where( 'number', $conversation->number )->where( 'id', '!=', $conversation->id )->exists() ) {
+			Conversation::query()->whereKey( $conversation->id )->toBase()->update( array( 'number' => (int) Conversation::query()->max( 'number' ) + 1 ) );
+		}
+
 		// The mailbox it left, or, once agents worked on it, the one it stays in: the import refreshes only its own.
 		$other_mailbox = $moved_from ?? ( (int) $conversation->mailbox_id !== (int) $mailbox->id ? $conversation->mailbox : null );
 		if ( $other_mailbox ) {
