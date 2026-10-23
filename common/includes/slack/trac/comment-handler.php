@@ -15,6 +15,12 @@ class Comment_Handler {
 	protected $ticket_url;
 	protected $comment_id;
 	protected $comment_url;
+
+	/**
+	 * Workflow keywords added to the ticket by this change.
+	 *
+	 * @var string[]
+	 */
 	protected $keywords_added = array();
 
 	function __construct( \Dotorg\Slack\Send $send, array $email_message ) {
@@ -57,14 +63,14 @@ class Comment_Handler {
 			$this->send->send( $firehose );
 		}
 
-		// Send notifications for Workflow Keyword additions
+		// Send notifications for Workflow Keyword additions.
 		$this->send_keyword_notifications();
 	}
 
 	/**
 	 * Posts the payload to the channels for each workflow keyword added to the ticket.
 	 */
-	function send_keyword_notifications() {
+	public function send_keyword_notifications() {
 		if ( empty( $this->keywords_added ) ) {
 			return;
 		}
@@ -236,7 +242,7 @@ class Comment_Handler {
 
 				if ( preg_match( '~Attachment "([^"]+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
 					$changes[] = "_*attachment:*_ `{$matches[1]}` {$matches[2]}";
-				} else { 
+				} else {
 					// Track keywords added for Workflow Keyword notifications.
 					if ( preg_match( '~^ \* keywords:  (.*) => (.*)$~', $line, $kw_matches ) ) {
 						$old_keywords = array_filter( array_map( 'trim', explode( ' ', $kw_matches[1] ) ) );

@@ -28,6 +28,12 @@ class Trac implements User {
 
 	protected $commit_path_filters = array();
 	protected $ticket_component_filters = array();
+
+	/**
+	 * Workflow keywords that cause ticket updates to be piped to particular channels.
+	 *
+	 * @var array
+	 */
 	protected $ticket_keyword_filters = array();
 
 	protected $color = '#0073aa';
@@ -296,7 +302,7 @@ class Trac implements User {
 	 * @param string $keyword Workflow keyword added to the ticket.
 	 * @return string[] Channel names.
 	 */
-	function get_keyword_channels( $keyword ) {
+	public function get_keyword_channels( $keyword ) {
 		if ( isset( $this->ticket_keyword_filters[ $keyword ] ) ) {
 			$channel = $this->ticket_keyword_filters[ $keyword ];
 			return is_array( $channel ) ? array_keys( array_filter( $channel ) ) : array( $channel );
