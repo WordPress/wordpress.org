@@ -84,6 +84,12 @@
 	margin: 0 2px 0 0;
 }
 
+.sub-projects-list .no-results {
+	padding: 6px 0;
+	color: #666;
+	list-style: none;
+}
+
 .project-checkbox .project-slug {
 	display: none;
 	color: #666;
