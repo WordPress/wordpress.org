@@ -87,7 +87,9 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	 * @param string $request_uri Current request URI.
 	 * @return array
 	 */
-	private function get_section_menu( $request_uri ) {
+	private function get_section_menu( $request_uri, $query_vars = array() ) {
+		global $wp_query;
+		$wp_query->parse_query( $query_vars );
 		$_SERVER['REQUEST_URI'] = $request_uri;
 		$menu                   = apply_filters( 'wporg_block_navigation_menus', array() );
 
@@ -114,11 +116,12 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	/**
 	 * The All link keeps supported browse sections.
 	 *
-	 * @param string $path Browse path.
+	 * @param string $path       Browse path.
+	 * @param array  $query_vars WordPress query variables.
 	 */
 	#[DataProvider( 'browse_section_provider' )]
-	public function test_all_link_preserves_browse_section( $path ) {
-		$menu = $this->get_section_menu( $path );
+	public function test_all_link_preserves_browse_section( $path, $query_vars ) {
+		$menu = $this->get_section_menu( $path, $query_vars );
 
 		$this->assertSame(
 			home_url() . $path,
@@ -133,10 +136,11 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	 */
 	public static function browse_section_provider() {
 		return array(
-			'blocks'   => array( '/browse/blocks/' ),
-			'popular'  => array( '/browse/popular/' ),
-			'featured' => array( '/browse/featured/' ),
-			'beta'     => array( '/browse/beta/' ),
+			'blocks'   => array( '/browse/blocks/', array( 'browse' => 'blocks' ) ),
+			'popular'  => array( '/browse/popular/', array( 'browse' => 'popular' ) ),
+			'featured' => array( '/browse/featured/', array( 'browse' => 'featured' ) ),
+			'beta'     => array( '/browse/beta/', array( 'browse' => 'beta' ) ),
+			'production_path' => array( '/plugins/browse/blocks/', array( 'browse' => 'blocks' ) ),
 		);
 	}
 
@@ -153,19 +157,37 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	 * The All link retains the search URL without the business-model filter.
 	 */
 	public function test_all_link_uses_search_url_on_search_results() {
-		global $wp_query;
-		$wp_query->parse_query( array( 's' => 'block editor' ) );
-		$menu = $this->get_section_menu( '/?s=block+editor&plugin_business_model=commercial' );
+		$menu = $this->get_section_menu( '/?s=block+editor&plugin_business_model=commercial', array( 's' => 'block editor' ) );
 
 		$this->assertTrue( is_search() );
 		$this->assertSame( get_search_link(), $this->find_menu_item( $menu, 'All' )['url'] );
 	}
 
 	/**
+	 * The All link points to the homepage on plugin tag archives.
+	 */
+	public function test_all_link_points_to_homepage_on_plugin_tag_archive() {
+		$menu = $this->get_section_menu( '/tags/widget/', array( 'plugin_tags' => 'widget' ) );
+
+		$this->assertSame( 'widget', get_query_var( 'plugin_tags' ) );
+		$this->assertSame( home_url( '/' ), $this->find_menu_item( $menu, 'All' )['url'] );
+	}
+
+	/**
+	 * The All link points to the homepage on plugin category archives.
+	 */
+	public function test_all_link_points_to_homepage_on_plugin_category_archive() {
+		$menu = $this->get_section_menu( '/category/widgets/', array( 'plugin_category' => 'widgets' ) );
+
+		$this->assertSame( 'widgets', get_query_var( 'plugin_category' ) );
+		$this->assertSame( home_url( '/' ), $this->find_menu_item( $menu, 'All' )['url'] );
+	}
+
+	/**
 	 * Community and Commercial links retain the browse section and add filters.
 	 */
 	public function test_community_and_commercial_links_keep_browse_section() {
-		$menu = $this->get_section_menu( '/browse/blocks/' );
+		$menu = $this->get_section_menu( '/browse/blocks/', array( 'browse' => 'blocks' ) );
 
 		$this->assertSame(
 			home_url( '/browse/blocks/' ) . '?plugin_business_model=community',
