@@ -37,9 +37,13 @@ $version = isset( $_REQUEST['version'] ) ? filter_var(
 	)
 ) : null;
 
-// WP-CLI aborts a whole `--all` run on an error response, so a slug or version that can't have packs gets none.
-if ( ! is_string( $slug ) || ( isset( $_REQUEST['version'] ) && ! is_string( $version ) ) ) {
-	$slug    = '';
+// WP-CLI aborts a whole `--all` run on an error response, so a slug that can't have packs gets none.
+if ( ! is_string( $slug ) ) {
+	$slug = '';
+}
+
+// A version only filters the packs, so an unusable one is dropped rather than hiding the slug's packs.
+if ( ! is_string( $version ) ) {
 	$version = null;
 }
 
