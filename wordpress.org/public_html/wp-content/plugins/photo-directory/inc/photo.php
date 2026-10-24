@@ -964,7 +964,16 @@ $exif = self::exif_read_data_as_data_stream( $file );
 					break;
 				case 'shutter_speed':
 					$label = 'Shutter Speed';
-					$value = '1/' . (int)( 1.0 / (float) $value );
+					// The value is the exposure time in seconds; skip anything that is not a positive number.
+					if ( ! is_numeric( $value ) || 0 >= $value ) {
+						continue 2;
+					}
+					// As cameras do, show exposures up to 1/4 second (with a margin for float error) as a rounded fraction and longer ones in seconds.
+					if ( $value < 0.25001 ) {
+						$value = '1/' . (int) round( 1 / $value );
+					} else {
+						$value = rtrim( rtrim( number_format( (float) $value, 1, '.', '' ), '0' ), '.' ) . 's';
+					}
 					break;
 			}
 
