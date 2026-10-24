@@ -367,21 +367,25 @@ let wpTrac,
 		},
 
 		showContributorLabels( labels ) {
+			const normalizedLabels = Object.fromEntries(
+				Object.entries( labels ).map( ( [ username, label ] ) => [ username.toLowerCase(), label ] )
+			);
+
 			$( 'h3.change .username' ).each( function () {
 				let html;
 				const $el = $( this ),
-					username = $el.data( 'username' );
+					username = String( $el.data( 'username' ) ).toLowerCase();
 
-				if ( username in labels ) {
-					if ( typeof labels[ username ] === 'object' ) {
+				if ( username in normalizedLabels ) {
+					if ( typeof normalizedLabels[ username ] === 'object' ) {
 						html = $( '<span />', {
 							class: 'contributor-label',
-							title: labels[ username ].title,
-						} ).text( labels[ username ].text );
+							title: normalizedLabels[ username ].title,
+						} ).text( normalizedLabels[ username ].text );
 					} else {
 						html = $( '<span />', {
 							class: 'contributor-label',
-						} ).text( labels[ username ] );
+						} ).text( normalizedLabels[ username ] );
 					}
 					$el.closest( '.username-line' ).append( '&ensp;' + html.prop( 'outerHTML' ) );
 				}
