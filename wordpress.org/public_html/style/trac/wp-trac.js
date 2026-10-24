@@ -376,7 +376,7 @@ let wpTrac,
 				const $el = $( this ),
 					username = String( $el.data( 'username' ) ).toLowerCase();
 
-				if ( username in normalizedLabels ) {
+				if ( Object.prototype.hasOwnProperty.call( normalizedLabels, username ) ) {
 					if ( typeof normalizedLabels[ username ] === 'object' ) {
 						html = $( '<span />', {
 							class: 'contributor-label',
