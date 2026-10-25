@@ -498,6 +498,40 @@ If you've gotten all the way down here and still think we should be hosting your
 		);
 	}
 
+	/**
+	 * Returns the rejection email content for remote administration.
+	 *
+	 * @return string
+	 */
+	public function reason_remote_administration() {
+		return __(
+			'Your plugin has been rejected because we have serious security concerns regarding this plugin.
+
+The plugin allows an external service to perform high-risk administrative actions on a site, such as granting administrator access for support, even when that access is time-limited.
+
+<strong>What to do next</strong>
+
+We understand it is hurtful to be told we will not host your code here and ask you please read this email carefully.
+
+You\'re welcome to submit a different plugin, but we feel that this is a poor choice to submit.
+
+If you have any questions, please reply to this email. Otherwise it\'s okay to just move on to something else.
+
+If you feel we\'ve made this decision in error, please reply with a copy of your code attached and explain why you think that is the case.
+
+<strong>Why these kinds of plugins are not accepted</strong>
+
+Plugins that create, connect users, expose services, allow editing from external platforms and/or enable other types of administrative actions are amazing and powerful. They\'re also incredibly dangerous and require a high level understanding of sanitization, security, and usage. These are skills that take years to master.
+
+To safeguard the security of the WordPress ecosystem, it is best to anticipate and prevent possible attack vectors that could compromise users.
+
+Because of those reasons, unless a submission demonstrates a solid understanding of the security and usage issues out of the gate, we reject them.
+
+If you\'ve gotten all the way down here and still think we should be hosting your code, we ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.',
+			'wporg-plugins'
+		);
+	}
+
 	public function reason_other() {
 		return __(
 			"Plugins are rejected after three months (90 days) when there has not been significant progress made on the review. If this is not the case for your plugin, you will receive a followup email explaining the reason for this decision within the next 24 hours. Please wait for that email before requesting further details.
