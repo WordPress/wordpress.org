@@ -454,12 +454,13 @@ let wpTrac,
 				const altText = filename || commentText || 'Attachment preview';
 
 				if ( /\.(jpg|jpeg|png|gif|svg|webp)$/i.test( href ) ) {
+					const link = document.createElement( 'a' );
+					link.href = href.replace( '/raw-attachment/', '/attachment/' );
+					changeBox.append( link );
+
 					const image = new window.Image();
 
 					image.onload = () => {
-						const link = document.createElement( 'a' );
-						link.href = href.replace( '/raw-attachment/', '/attachment/' );
-
 						const img = document.createElement( 'img' );
 						img.className = 'trac-image-preview';
 						img.src = href;
@@ -469,7 +470,10 @@ let wpTrac,
 							img.height = image.height;
 						}
 						link.append( img );
-						changeBox.append( link );
+					};
+
+					image.onerror = () => {
+						link.remove();
 					};
 
 					image.src = href;
