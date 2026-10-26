@@ -56,7 +56,6 @@ class Stats_Report_FreeScout_Test extends TestCase {
 		parent::setUp();
 
 		$this->filter( 'wporg_plugins_freescout_mailbox_id', static fn(): int => 3 );
-		$this->filter( 'wporg_plugins_freescout_api_key', static fn(): string => 'test-key' );
 		$this->filter(
 			'pre_http_request',
 			function ( mixed $preempt, array $args, string $url ): mixed {

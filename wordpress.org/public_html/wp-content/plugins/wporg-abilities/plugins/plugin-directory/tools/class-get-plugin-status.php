@@ -10,7 +10,7 @@ declare( strict_types = 1 );
 namespace WordPressdotorg\Abilities\Plugins\Plugin_Directory\Tools;
 
 use WordPressdotorg\Abilities\Plugins\Plugin_Directory\Ability_Base;
-use WordPressdotorg\Plugin_Directory\Clients\FreeScout as FreeScout_Client;
+use WordPressdotorg\MU_Plugins\Utilities\FreeScout as FreeScout_Client;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout as HelpScout_Client;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
@@ -442,9 +442,9 @@ class Get_Plugin_Status extends Ability_Base {
 			return $cached;
 		}
 
-		$response = FreeScout_Client::api( 'conversations/' . $conversation_id, array( 'embed' => 'threads' ), 'GET', $response_code );
+		$response = FreeScout_Client::get( $conversation_id );
 
-		if ( 200 !== $response_code || empty( $response['_embedded']['threads'] ) || ! is_array( $response['_embedded']['threads'] ) ) {
+		if ( is_wp_error( $response ) || empty( $response['_embedded']['threads'] ) || ! is_array( $response['_embedded']['threads'] ) ) {
 			return null;
 		}
 
