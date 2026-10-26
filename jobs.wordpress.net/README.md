@@ -10,6 +10,7 @@ Run the site locally with sample job categories and posts, and run the plugin's 
 cd ../environments
 npm install
 npm run jobs:env start   # http://localhost:8888
+npm run jobs:env stop    # the test environment uses the same port
 npm run jobs:test
 ```
 
