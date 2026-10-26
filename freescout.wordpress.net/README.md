@@ -21,7 +21,7 @@ WPOrgSidebar, WPOrgWebhooks, and WPOrgSSO talk to [`api.wordpress.org/dotorg/fre
 Run FreeScout locally with these modules, test mail, and a mock of the api.wordpress.org endpoints:
 
 ```bash
-cd environments
+cd ../environments
 npm install
 npm run freescout:start   # http://127.0.0.1:8890, log in as "admin" at the mock WordPress.org login
 npm run freescout:test
