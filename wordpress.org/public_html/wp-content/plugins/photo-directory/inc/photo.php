@@ -964,7 +964,17 @@ $exif = self::exif_read_data_as_data_stream( $file );
 					break;
 				case 'shutter_speed':
 					$label = 'Shutter Speed';
-					$value = '1/' . (int)( 1.0 / (float) $value );
+
+					if ( ! is_numeric( $value ) || 0 >= $value ) {
+						continue 2;
+					}
+
+					// Fractions up to 1/4s (with a float margin), seconds above.
+					if ( $value < 0.25001 ) {
+						$value = '1/' . (int) round( 1 / $value );
+					} else {
+						$value = rtrim( rtrim( number_format( (float) $value, 1, '.', '' ), '0' ), '.' ) . 's';
+					}
 					break;
 			}
 
