@@ -455,23 +455,24 @@ let wpTrac,
 
 				if ( /\.(jpg|jpeg|png|gif|svg|webp)$/i.test( href ) ) {
 					const image = new window.Image();
-					image.src = href;
 
 					image.onload = () => {
 						const link = document.createElement( 'a' );
 						link.href = href.replace( '/raw-attachment/', '/attachment/' );
 
 						const img = document.createElement( 'img' );
+						img.className = 'trac-image-preview';
 						img.src = href;
 						img.alt = altText;
-						img.width = image.width;
-						img.height = image.height;
-						img.loading = 'lazy';
-						img.className = 'trac-image-preview';
-
+						if ( image.width && image.height ) {
+							img.width = image.width;
+							img.height = image.height;
+						}
 						link.append( img );
 						changeBox.append( link );
 					};
+
+					image.src = href;
 				} else if ( /\.(mp4|mov|webm)$/i.test( href ) ) {
 					const video = document.createElement( 'video' );
 					video.src = href;
