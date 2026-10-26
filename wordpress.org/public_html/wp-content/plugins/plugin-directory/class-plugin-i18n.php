@@ -364,6 +364,11 @@ class Plugin_I18n {
 
 		$translations = $this->get_gp_translations( $slug, $branch, $originals, $translation_set_id );
 
+		// A code string is a whole original, and its project too large to search for fragments.
+		if ( ! empty( $args['code_i18n'] ) ) {
+			$originals = array_intersect( $originals, array( $content ) );
+		}
+
 		// Sort the originals so as to process long strings first.
 		uasort( $originals, function( $a, $b ) {
 			$a_len = strlen( $a );
@@ -421,8 +426,8 @@ class Plugin_I18n {
 	 * @return string The value, reduced to the field's own allow-list.
 	 */
 	public function sanitize_translation( $key, $translation ) {
-		// A block title is stored as the block declared it, so markup is all there is to drop.
-		if ( str_starts_with( $key, 'block_title:' ) ) {
+		// Block strings are stored as the block declared them, so markup is all there is to drop.
+		if ( str_starts_with( $key, 'block_title:' ) || str_starts_with( $key, 'block_description:' ) ) {
 			return wp_strip_all_tags( $translation );
 		}
 
