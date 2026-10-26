@@ -461,9 +461,11 @@ class Plugin extends Base {
 	 * @return string Them markup with `<dt>` replaced with `<h4>` and `<dd>` with `<p>`.
 	 */
 	protected function get_simplified_faq_markup( $markup ) {
+		// The readme parser gives each `<dt>` an id attribute.
+		$markup = preg_replace( '/<dt\b[^>]*>/', '<h4>', $markup );
 		$markup = str_replace(
-			array( '<dl>', '</dl>', '<dt>', '</dt>', '<h3>', '</h3>', '<dd>', '</dd>' ),
-			array( '',     '',      '<h4>', '</h4>', '',      '',     '<p>',  '</p>'  ),
+			array( '<dl>', '</dl>', '</dt>', '<h3>', '</h3>', '<dd>', '</dd>' ),
+			array( '', '', '</h4>', '', '', '<p>', '</p>' ),
 			$markup
 		);
 
