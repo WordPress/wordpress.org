@@ -215,6 +215,7 @@ class Jobs_Dot_WP_Digest {
 
 		$groups = array();
 		foreach ( $jobs as $job ) {
+			// Jobs only ever have one category.
 			$terms = get_the_terms( $job, 'job_category' );
 			$key   = $terms && ! is_wp_error( $terms ) ? $terms[0]->term_id : 0;
 
@@ -239,6 +240,7 @@ class Jobs_Dot_WP_Digest {
 			}
 		}
 		$content .= sprintf( '<p><a href="%1$s">%2$s</a></p>', esc_url( home_url( '/' ) ), esc_html__( 'See all open jobs', 'jobswp' ) );
+		$content .= '<p>' . esc_html__( 'Job listings were active when this email was generated. Some may have since been filled, closed, or removed.', 'jobswp' ) . "</p>\n";
 
 		// Digest markup is built from escaped values only, and kses would strip its links on this site.
 		kses_remove_filters();

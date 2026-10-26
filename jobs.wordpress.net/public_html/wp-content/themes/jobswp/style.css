@@ -1435,7 +1435,7 @@ input[type="submit"].submit-job {
    ============================================ */
 
 .job-alerts-section {
-	background: var(--color-blueberry-4);
+	background: var(--color-acid-green-3);
 	padding: var(--space-40) var(--space-20);
 }
 
