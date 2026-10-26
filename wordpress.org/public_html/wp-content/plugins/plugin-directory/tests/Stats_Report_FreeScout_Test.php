@@ -11,6 +11,9 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Stats_Report;
 
+// The key only needs to be non-empty: no request in this file leaves the process.
+defined( 'FREESCOUT_API_KEY' ) || define( 'FREESCOUT_API_KEY', 'test-key' );
+
 /**
  * Tests for `Stats_Report::get_stats()` once the plugins team is on FreeScout.
  *
@@ -56,7 +59,6 @@ class Stats_Report_FreeScout_Test extends TestCase {
 		parent::setUp();
 
 		$this->filter( 'wporg_plugins_freescout_mailbox_id', static fn(): int => 3 );
-		$this->filter( 'wporg_plugins_freescout_api_key', static fn(): string => 'test-key' );
 		$this->filter(
 			'pre_http_request',
 			function ( mixed $preempt, array $args, string $url ): mixed {

@@ -24,6 +24,13 @@ class Helpdesk {
 	const FREESCOUT_URL = 'https://freescout.wordpress.net/';
 
 	/**
+	 * The FreeScout agent the plugin directory writes as: wordpressdotorg's, which contributor stats don't credit.
+	 *
+	 * @var int
+	 */
+	const FREESCOUT_USER_ID = 81;
+
+	/**
 	 * Help Scout's search.
 	 *
 	 * @var string

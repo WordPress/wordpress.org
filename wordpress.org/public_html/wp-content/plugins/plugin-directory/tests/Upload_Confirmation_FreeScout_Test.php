@@ -9,9 +9,11 @@ declare( strict_types = 1 );
 
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
-use WordPressdotorg\Plugin_Directory\Clients\FreeScout as FreeScout_Client;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
+
+// The key only needs to be non-empty: no request in this file leaves the process.
+defined( 'FREESCOUT_API_KEY' ) || define( 'FREESCOUT_API_KEY', 'test-key' );
 
 /**
  * Tests for `Upload_Handler::update_review_email()` with FreeScout.
@@ -68,7 +70,6 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		parent::setUp();
 
 		$this->filter( 'wporg_plugins_freescout_mailbox_id', static fn(): int => 3 );
-		$this->filter( 'wporg_plugins_freescout_api_key', static fn(): string => 'test-key' );
 	}
 
 	/**
@@ -99,32 +100,31 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 
 	/**
 	 * The author's upload is confirmed by a reply from the configured agent, which makes the conversation active again,
-	 * and keeps who it copies: a thread sets the conversation's CC to its own.
+	 * and keeps who it copies.
 	 *
 	 * @return void
 	 */
 	public function test_replies_in_the_review_conversation(): void {
 		$this->answer( array( 'committer@example.org' ) );
-		list( $plugin, $attachment, $author ) = $this->upload( true );
+		list( $plugin, $attachment ) = $this->upload( true );
 
 		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
 
-		$this->assertCount( 2, $this->requests );
-		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[1]['url'] );
-		$this->assertSame( 'test-key', $this->requests[1]['args']['headers']['X-FreeScout-API-Key'] );
+		$this->assertSame( array( 'GET', 'GET', 'POST' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
+		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[2]['url'] );
 
-		$body = json_decode( (string) $this->requests[1]['args']['body'], true );
-		$this->assertSame( array( 'message', 81, array( $author->user_email ), array( 'committer@example.org' ), 'active' ), array( $body['type'], $body['user'], $body['to'], $body['cc'], $body['status'] ) );
+		$body = json_decode( (string) $this->requests[2]['args']['body'], true );
+		$this->assertSame( array( 'message', 81, array( 'committer@example.org' ), 'active' ), array( $body['type'], $body['user'], $body['cc'], $body['status'] ) );
 		$this->assertStringContainsString( 'This is an automated message to confirm that we have received your updated plugin file.', $body['text'] );
 		$this->assertStringContainsString( 'version 1.2', $body['text'] );
 	}
 
 	/**
-	 * Without the conversation's CC, a reply would clear it, so there's none.
+	 * Without the review conversation, there's no telling who started it, so there's no reply.
 	 *
 	 * @return void
 	 */
-	public function test_does_not_reply_without_the_conversations_cc(): void {
+	public function test_does_not_reply_without_the_review_conversation(): void {
 		$this->answer( null );
 		list( $plugin, $attachment ) = $this->upload( true );
 
@@ -145,22 +145,6 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
 		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
 		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
-	}
-
-
-	/**
-	 * Without a key, there's nothing to ask FreeScout with.
-	 *
-	 * @return void
-	 */
-	public function test_needs_a_key(): void {
-		$this->answer();
-		$this->filter( 'wporg_plugins_freescout_api_key', static fn(): string => '' );
-		list( $plugin, $attachment ) = $this->upload( true );
-
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
-		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
-		$this->assertSame( array(), $this->requests );
 	}
 
 	/**
@@ -197,7 +181,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		$this->assertSame( array( self::CONVERSATION_ID, self::HELPSCOUT_ID ), array_map( 'intval', wp_list_pluck( $emails, 'id' ) ) );
 
 		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
-		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[1]['url'] );
+		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[2]['url'] );
 	}
 
 	/**
@@ -213,20 +197,6 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		@Upload_Handler::update_review_email( $plugin, $attachment );
 
 		$this->assertSame( array(), $this->requests );
-	}
-
-	/**
-	 * A request that gets no response returns why, so the failure that's logged can be told apart.
-	 *
-	 * @return void
-	 */
-	public function test_request_without_a_response_returns_the_error(): void {
-		$this->filter( 'pre_http_request', static fn(): WP_Error => new WP_Error( 'http_request_failed', 'Connection timed out' ) );
-
-		$result = FreeScout_Client::api( 'conversations/' . self::CONVERSATION_ID, array(), 'GET', $response_code );
-
-		$this->assertSame( array( 'error' => 'Connection timed out' ), $result );
-		$this->assertSame( 0, $response_code );
 	}
 
 	/**

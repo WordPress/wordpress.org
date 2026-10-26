@@ -9,12 +9,13 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WordPressdotorg\Plugin_Directory\Trademarks;
 use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
 use WordPressdotorg\Plugin_Directory\Clients\Helpscout as Helpscout_Client;
-use WordPressdotorg\Plugin_Directory\Clients\FreeScout as FreeScout_Client;
+use WordPressdotorg\MU_Plugins\Utilities\FreeScout as FreeScout_Client;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submission_Email;
 
 /**
@@ -1040,7 +1041,7 @@ class Upload_Handler {
 		$text .= "\n" . wp_get_attachment_url( $attachment->ID );
 
 		if ( $review_email->freescout ) {
-			return self::reply_in_freescout( (int) $review_email->id, $text, wp_get_current_user() );
+			return self::reply_in_freescout( (int) $review_email->id, $text );
 		}
 
 		$name = wp_get_current_user()->display_name ?: wp_get_current_user()->user_login;
@@ -1075,23 +1076,15 @@ class Upload_Handler {
 	 * Replies to the author in the review conversation in FreeScout, as wordpressdotorg, and makes it active again, so the
 	 * plugins team sees there's something new to review.
 	 *
-	 * @param int      $conversation_id The review conversation's ID in FreeScout.
-	 * @param string   $text            The reply, as text.
-	 * @param \WP_User $author          The author who uploaded the update.
+	 * @param int    $conversation_id The review conversation's ID in FreeScout.
+	 * @param string $text            The reply, as text.
 	 * @return bool Whether it was sent.
 	 */
-	protected static function reply_in_freescout( int $conversation_id, string $text, \WP_User $author ): bool {
-		if ( '' === FreeScout_Client::api_key() ) {
-			trigger_error( 'FreeScout update failed: FREESCOUT_API_KEY isn\'t configured.', E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update.
-
-			return false;
-		}
-
-		// A new thread replaces the conversation's CC with its own, so pass the current CC on.
-		$conversation = FreeScout_Client::api( 'conversations/' . $conversation_id, array(), 'GET', $response_code );
-		if ( 200 !== $response_code || ! isset( $conversation['cc'] ) ) {
+	protected static function reply_in_freescout( int $conversation_id, string $text ): bool {
+		$conversation = FreeScout_Client::get( $conversation_id );
+		if ( is_wp_error( $conversation ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update; not rendered.
-			trigger_error( "FreeScout update failed: couldn't read the conversation's CC: $response_code: " . var_export( $conversation, true ), E_USER_WARNING );
+			trigger_error( "FreeScout update failed: couldn't read conversation $conversation_id: " . $conversation->get_error_message(), E_USER_WARNING );
 
 			return false;
 		}
@@ -1103,23 +1096,18 @@ class Upload_Handler {
 			return false;
 		}
 
-		$result = FreeScout_Client::api(
-			'conversations/' . $conversation_id . '/threads',
+		$result = FreeScout_Client::reply(
+			$conversation_id,
+			nl2br( make_clickable( esc_html( $text ) ) ),
 			array(
-				'type'   => 'message',
-				'text'   => nl2br( make_clickable( esc_html( $text ) ) ),
-				'user'   => FreeScout_Client::USER_ID,
-				'to'     => array( $author->user_email ),
-				'cc'     => array_values( (array) $conversation['cc'] ),
 				'status' => 'active',
-			),
-			'POST',
-			$response_code
+				'user'   => Helpdesk::FREESCOUT_USER_ID,
+			)
 		);
 
-		if ( 201 !== $response_code ) {
+		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update; not rendered.
-			trigger_error( "FreeScout update failed: $response_code: " . var_export( $result, true ), E_USER_WARNING );
+			trigger_error( 'FreeScout update failed: ' . $result->get_error_code() . ': ' . $result->get_error_message(), E_USER_WARNING );
 
 			return false;
 		}

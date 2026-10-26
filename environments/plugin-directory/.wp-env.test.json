@@ -7,7 +7,8 @@
 	],
 	"mappings": {
 		"wp-content/env-bin": "./plugin-directory/bin",
-		"wp-content/mu-plugins/pub/locales": "../wordpress.org/public_html/wp-content/mu-plugins/pub/locales"
+		"wp-content/mu-plugins/pub/locales": "../wordpress.org/public_html/wp-content/mu-plugins/pub/locales",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash plugin-directory/bin/after-start-test.sh"
