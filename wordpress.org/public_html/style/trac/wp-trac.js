@@ -434,50 +434,57 @@ let wpTrac,
 		// These ticket hacks need to be re-run after ticket previews.
 		postPreviewHacks() {
 			// Automatically preview images.
-			$( 'li.trac-field-attachment' ).each( function () {
-				const li = $( this );
-				if ( li.parent().parent().find( '.trac-image-preview' ).length ) {
+			document.querySelectorAll( 'li.trac-field-attachment' ).forEach( ( li ) => {
+				if ( li.classList.contains( 'trac-preview-processed' ) ) {
 					return;
 				}
-				const el = li.find( '.trac-rawlink' ),
-					href = el.attr( 'href' ),
-					appendTo = li.parent().parent(); // div.change
-				if ( href.match( /\.(jpg|jpeg|png|gif|svg|webp)$/i ) ) {
+
+				const rawLink = li.querySelector( '.trac-rawlink' );
+				const href = rawLink?.getAttribute( 'href' );
+				const changeBox = li.closest( 'div.change' );
+
+				if ( ! href || ! changeBox ) {
+					return;
+				}
+
+				li.classList.add( 'trac-preview-processed' );
+
+				const filename = rawLink.previousElementSibling?.textContent?.trim() || '';
+				const commentText = changeBox.querySelector( '.comment' )?.textContent?.trim() || '';
+				const altText = filename || commentText || 'Attachment preview';
+
+				if ( /\.(jpg|jpeg|png|gif|svg|webp)$/i.test( href ) ) {
 					const image = new window.Image();
 					image.src = href;
-					let alt = appendTo.find( '.comment' );
-					if ( alt.length > 0 ) {
-						alt = alt.text();
-					} else {
-						// Use attachment filename if it has no description.
-						alt = el.prev().text();
-					}
-					image.onload = function () {
-						$( '<img />' )
-							.attr( {
-								src: href,
-								alt: alt.trim(),
-								width: image.width,
-								height: image.height,
-								class: 'trac-image-preview',
-							} )
-							.appendTo( appendTo )
-							.wrap( $( '<a />' ).attr( 'href', href.replace( '/raw-attachment/', '/attachment/' ) ) );
+
+					image.onload = () => {
+						const link = document.createElement( 'a' );
+						link.href = href.replace( '/raw-attachment/', '/attachment/' );
+
+						const img = document.createElement( 'img' );
+						img.src = href;
+						img.alt = altText;
+						img.width = image.width;
+						img.height = image.height;
+						img.loading = 'lazy';
+						img.className = 'trac-image-preview';
+
+						link.append( img );
+						changeBox.append( link );
 					};
-				} else if ( href.match( /\.(mp4|mov|webm)$/i ) ) {
-					$( '<video />' )
-						.attr( {
-							src: href,
-							class: 'trac-image-preview',
-							controls: true,
-							preload: 'metadata',
-						} )
-						.appendTo( appendTo );
+				} else if ( /\.(mp4|mov|webm)$/i.test( href ) ) {
+					const video = document.createElement( 'video' );
+					video.src = href;
+					video.className = 'trac-image-preview';
+					video.controls = true;
+					video.preload = 'metadata';
+
+					changeBox.append( video );
 				}
 			} );
 
-			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );
-			wpTrac.linkMentions( '.ticketdraft .comment' );
+			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );[cite: 1]
+			wpTrac.linkMentions( '.ticketdraft .comment' );[cite: 1]
 		},
 
 		hacks() {
