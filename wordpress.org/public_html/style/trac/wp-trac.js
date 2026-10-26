@@ -484,8 +484,8 @@ let wpTrac,
 				}
 			} );
 
-			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );[cite: 1]
-			wpTrac.linkMentions( '.ticketdraft .comment' );[cite: 1]
+			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );
+			wpTrac.linkMentions( '.ticketdraft .comment' );
 		},
 
 		hacks() {
