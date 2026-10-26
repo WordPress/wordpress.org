@@ -230,7 +230,7 @@ class Upload {
 					</p>
 
 					<p>
-						<?php esc_html_e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the preview process and reduce delays by ensuring your plugin already meets the required standards when the Plugins Team examines it.', 'wporg-plugins' ); ?>
+						<?php esc_html_e( 'Please review the Plugin Check results for your plugin, and fix any significant problems. This will help streamline the review process and reduce delays by ensuring your plugin already meets the required standards when the Plugins Team examines it.', 'wporg-plugins' ); ?>
 					</p>
 
 					<ul>
