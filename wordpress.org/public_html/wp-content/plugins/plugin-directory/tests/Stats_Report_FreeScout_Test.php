@@ -11,9 +11,6 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Stats_Report;
 
-// The key only needs to be non-empty: no request in this file leaves the process.
-defined( 'FREESCOUT_API_KEY' ) || define( 'FREESCOUT_API_KEY', 'test-key' );
-
 /**
  * Tests for `Stats_Report::get_stats()` once the plugins team is on FreeScout.
  *

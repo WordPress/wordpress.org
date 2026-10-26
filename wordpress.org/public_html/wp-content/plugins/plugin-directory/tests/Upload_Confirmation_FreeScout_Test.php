@@ -12,9 +12,6 @@ use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 
-// The key only needs to be non-empty: no request in this file leaves the process.
-defined( 'FREESCOUT_API_KEY' ) || define( 'FREESCOUT_API_KEY', 'test-key' );
-
 /**
  * Tests for `Upload_Handler::update_review_email()` with FreeScout.
  *
