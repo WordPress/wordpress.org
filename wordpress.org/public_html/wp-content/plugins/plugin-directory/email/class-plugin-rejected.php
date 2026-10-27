@@ -505,29 +505,27 @@ If you've gotten all the way down here and still think we should be hosting your
 	 */
 	public function reason_remote_administration() {
 		return __(
-			'Your plugin has been rejected because we have serious security concerns regarding this plugin.
-
-The plugin allows an external service to perform high-risk administrative actions on a site, such as granting administrator access for support, even when that access is time-limited.
+			'Your plugin has been rejected because it lets an external service perform administrative actions on the sites it’s installed on, such as granting administrator access for support. Even when that access expires, this is a serious security risk.
 
 <strong>What to do next</strong>
 
-We understand it is hurtful to be told we will not host your code here and ask you please read this email carefully.
+We know it’s hard to hear that we won’t host your code, so please read this email carefully.
 
-You\'re welcome to submit a different plugin, but we feel that this is a poor choice to submit.
+You’re welcome to submit a different plugin, but we don’t think this one is a good fit for the directory.
 
-If you have any questions, please reply to this email. Otherwise it\'s okay to just move on to something else.
+If you have any questions, reply to this email. Otherwise, it’s okay to move on to something else.
 
-If you feel we\'ve made this decision in error, please reply with a copy of your code attached and explain why you think that is the case.
+If you think we’ve made this decision in error, reply with a copy of your code attached and explain why.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
-Plugins that create, connect users, expose services, allow editing from external platforms and/or enable other types of administrative actions are amazing and powerful. They\'re also incredibly dangerous and require a high level understanding of sanitization, security, and usage. These are skills that take years to master.
+Plugins that create users, connect to external services, or let other platforms administer a site are powerful, and incredibly dangerous. Building them safely takes a deep understanding of sanitization, security, and how they’ll be used, which takes years to master.
 
-To safeguard the security of the WordPress ecosystem, it is best to anticipate and prevent possible attack vectors that could compromise users.
+A plugin that lets an outside service act as an administrator makes that service a single point of failure: if the service, or the credentials it holds, is ever compromised, so is every site that uses the plugin.
 
-Because of those reasons, unless a submission demonstrates a solid understanding of the security and usage issues out of the gate, we reject them.
+To protect the WordPress ecosystem, we stop attack vectors like this before they reach users. Unless a submission shows a solid understanding of these security issues from the start, we don’t accept it.
 
-If you\'ve gotten all the way down here and still think we should be hosting your code, we ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.',
+If you’ve read this far and still think we should host your code, please don’t resubmit the plugin. Reply to this email instead.',
 			'wporg-plugins'
 		);
 	}
