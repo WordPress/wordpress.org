@@ -1,4 +1,9 @@
-f<?php
+<?php
+/**
+ * Tests the Slack #props handler.
+ *
+ * @package Dotorg\Slack\Props
+ */
 
 namespace Dotorg\Slack\Props\Tests;
 use wpdbStub;
