@@ -503,7 +503,7 @@ If you've gotten all the way down here and still think we should be hosting your
 	 *
 	 * @return string
 	 */
-	public function reason_remote_administration() {
+	public function reason_remote_admin() {
 		return __(
 			'Your plugin has been rejected because it lets an external service perform administrative actions on the sites it’s installed on, such as granting administrator access for support. Even when that access expires, this is a serious security risk.
 

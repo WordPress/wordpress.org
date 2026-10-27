@@ -1105,7 +1105,7 @@ class Template {
 			'banned'               => 'Banned developer trying to sneak back in',
 			'author-request'       => 'Author requested not to continue',
 			'security'             => 'Security concerns',
-			'remote-administration' => 'Remote administration',
+			'remote-admin'         => 'Remote administration',
 			'common-plugin'        => 'Common plugin',
 			'other'                => 'OTHER: See notes',
 		);
