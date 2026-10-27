@@ -50,6 +50,11 @@ function photoSubmitInit() {
 	}
 
 	const photo_upload_field = document.getElementById('ug_photo');
+	const descriptionField   = photo_upload_form.querySelector( 'textarea[name="post_content"]' );
+
+	if ( descriptionField ) {
+		photoBindDescriptionWordCount( descriptionField );
+	}
 
 	if ( photo_upload_field ) {
 		// Add custom validation for upload file size.
@@ -68,6 +73,11 @@ function photoSubmitInit() {
 	// Show/remove error when any form field value is changed.
 	photoGetInputFields( photo_upload_form ).forEach( (input, i) => {
 		input.addEventListener( 'change', e => {
+			if ( e.target === descriptionField ) {
+				// Keep a visible word-count error in sync instead of clearing it on blur.
+				photoSyncDescriptionWordCount( descriptionField, true );
+				return;
+			}
 			photoRemoveFieldError( e.target );
 		} );
 	} );
@@ -86,6 +96,10 @@ function photoSubmitInit() {
 		// Disable submit button.
 		photoSetSubmitButtonDisabled( photo_upload_form, true );
 
+		if ( descriptionField ) {
+			photoSyncDescriptionWordCount( descriptionField, false );
+		}
+
 		// Show errors for fields that aren't the file input.
 		photoShowFieldErrors( photo_upload_form );
 
@@ -102,6 +116,85 @@ function photoSubmitInit() {
 		return false;
 	} );
 
+}
+
+/**
+ * Estimates the number of words in a photo description.
+ *
+ * The server performs the definitive count. This deliberately simple check
+ * gives people earlier feedback for ordinary English prose.
+ *
+ * @param {string} text Description text.
+ * @return {number}
+ */
+function photoCountDescriptionWords( text ) {
+	if ( 'string' !== typeof text || '' === text.trim() ) {
+		return 0;
+	}
+
+	return text.trim().split( /\s+/ ).length;
+}
+
+/**
+ * Applies the description word-count constraint.
+ *
+ * @param {HTMLTextAreaElement} field Description field.
+ * @param {boolean} refreshVisibleError Whether to update an error already on screen.
+ * @return {number} Current number of words.
+ */
+function photoSyncDescriptionWordCount( field, refreshVisibleError ) {
+	const count = photoCountDescriptionWords( field.value );
+	const minimum = Number( PhotoDir.min_description_words );
+
+	if ( Number.isFinite( minimum ) && count < minimum ) {
+		field.setCustomValidity( PhotoDir.err_description_too_short || '' );
+	} else {
+		field.setCustomValidity( '' );
+	}
+
+	if ( ! refreshVisibleError ) {
+		return count;
+	}
+
+	const visibleError = field.parentNode.querySelector( '.' + PhotoDir.error_class );
+	if ( ! visibleError ) {
+		return count;
+	}
+
+	let nextMessage = '';
+	if ( field.validity.valueMissing ) {
+		nextMessage = PhotoDir.err_field_required;
+	} else if ( field.validationMessage ) {
+		nextMessage = field.validationMessage;
+	}
+
+	if ( ! nextMessage ) {
+		photoRemoveFieldError( field );
+	} else if ( visibleError.textContent !== nextMessage ) {
+		photoShowFieldError( field );
+	}
+
+	return count;
+}
+
+/**
+ * Watches the description field.
+ *
+ * @param {HTMLTextAreaElement} field Description field.
+ */
+function photoBindDescriptionWordCount( field ) {
+	field.addEventListener( 'input', () => {
+		photoSyncDescriptionWordCount( field, true );
+	} );
+
+	// A too-short description is already invalid, so the browser does not fire
+	// submit. Show the inline error from the field's invalid event instead.
+	field.addEventListener( 'invalid', ( event ) => {
+		event.preventDefault();
+		photoShowFieldError( field );
+	} );
+
+	photoSyncDescriptionWordCount( field, false );
 }
 
 /**
