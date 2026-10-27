@@ -678,11 +678,6 @@ class Uploads {
 			return 'too-many-files';
 		}
 
-		// Check description length.
-		if ( str_word_count( $_POST['post_content'] ) < self::MIN_WORDS_DESCRIPTION ) {
-			return 'description-too-short';
-		}
-
 		if ( ! empty( $_FILES['files']['error'][0] ) ) {
 			switch ( $_FILES['files']['error'][0] ) {
 				case UPLOAD_ERR_INI_SIZE:
