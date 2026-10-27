@@ -6,6 +6,8 @@ use Dotorg\Slack\User;
 class Resource implements User {
 
 	protected $data;
+	protected $trac;
+	protected $id;
 
 	static protected $instances = array();
 
@@ -22,7 +24,7 @@ class Resource implements User {
 		return strtolower( str_replace( __NAMESPACE__ . '\\', '', $class ) );
 	}
 
-	function get( Trac $trac, $id ) {
+	static function get( Trac $trac, $id ) {
 		$key = $trac->get_slug() . ':' . static::get_resource_type() . ':' . $id;
 		if ( isset( static::$instances[ $key ] ) ) {
 			return static::$instances[ $key ];
@@ -42,6 +44,16 @@ class Resource implements User {
 
 	function get_icon() {
 		return $this->trac->get_icon();
+	}
+
+	/**
+	 * Whether the resource is known not to exist, rather than merely unreadable.
+	 * Subclasses that can tell the difference override this.
+	 *
+	 * @return bool
+	 */
+	public function is_not_found() {
+		return false;
 	}
 
 	function __get( $prop ) {

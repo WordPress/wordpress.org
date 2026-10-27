@@ -1,0 +1,89 @@
+.block-validator {
+
+	> details summary {
+		padding: var( --wp--style--block-gap ) 0;
+	}
+
+	.block-validator__plugin-form label {
+		display: block;
+		margin-bottom: 0.8em;
+	}
+
+	.block-validator__plugin-input-container {
+		display: flex;
+		max-width: 34rem;
+	}
+
+	.block-validator__plugin-input {
+		flex: 1;
+	}
+
+	.block-validator__plugin-submit {
+		flex: 0;
+		margin-left: 4px;
+	}
+
+	/* Input width plus some padding */
+	@media (max-width: 36rem) {
+		.block-validator__plugin-submit {
+			width: 100%;
+		}
+
+		.block-validator__plugin-input-container {
+			display: block;
+		}
+
+		.block-validator__plugin-input {
+			width: 100%;
+		}
+
+		.block-validator__plugin-submit {
+			margin-left: 0;
+			margin-top: var( --wp--style--block-gap );
+		}
+	}
+
+	.notice {
+
+		details,
+		p {
+			font-size: var( --wp--preset--font-size--normal );
+			margin: var( --wp--style--block-gap ) 0;
+		}
+
+		details p {
+			margin-left: 1rem;
+			font-size: var( --wp--preset--font-size--small );
+		}
+
+		summary {
+			/* Needed for Firefox to make the triangle visible */
+			display: list-item;
+		}
+
+	}
+
+	figure {
+		border: 1px solid #aaa;
+		display: inline-block;
+		padding: 1em;
+	}
+
+	.test-screenshot {
+		text-align: center;
+	}
+
+	.plugin-upload-form-controls {
+		display: flex;
+		gap: 4px;
+		align-items: center;
+
+		> label {
+			min-width: 200px;
+			border: 1px solid var(--wp--custom--form--border--color);
+			border-radius: var(--wp--custom--form--border--radius);
+			padding: 4px 8px;
+			cursor: pointer;
+		}
+	}
+}

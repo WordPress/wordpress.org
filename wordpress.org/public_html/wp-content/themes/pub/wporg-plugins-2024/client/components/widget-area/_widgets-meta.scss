@@ -1,0 +1,155 @@
+.plugin-meta {
+	margin-top: var(--wp--style--block-gap);
+	font-size: var(--wp--preset--font-size--small);
+
+	ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	li {
+		border-top: 1px solid var( --wp--preset--color--light-grey-1 );
+		display: inline-block;
+		padding: 0.5rem 0;
+		width: 100%;
+		position: relative;
+
+		strong {
+			float: right;
+			font-weight: 500;
+		}
+
+		.plugin-admin {
+			font-weight: 400;
+			font-size: var(--wp--preset--font-size--normal);
+		}
+
+		&:first-child {
+			border-top: 0;
+		}
+	}
+
+	.languages,
+	.tags {
+		float: right;
+		text-align: right;
+	}
+
+	.tags {
+		width: 60%;
+	}
+
+	.languages button {
+		font-size: var(--wp--preset--font-size--small);
+		outline: revert;
+	}
+
+	.languages .popover {
+		margin-top: 8px;
+	}
+
+	.languages .popover-trigger {
+		color: var(--wp--custom--link--color--text);
+		text-decoration: underline;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	[rel="tag"] {
+		background: var(--wp--preset--color--blueberry-4);
+		border-radius: 2px;
+		color: var(--wp--preset--color--charcoal-1);
+		display: inline-block;
+		font-size: var(--wp--preset--font-size--extra-small);
+		margin: 2px;
+		max-width: 95%;
+		overflow: hidden;
+		padding: 3px 6px;
+		position: relative;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		width: auto;
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+}
+
+.popover {
+	display: none;
+	position: absolute;
+	width: 100%;
+	max-width: 300px;
+	left: 0;
+	z-index: 100;
+	padding: 1em 1em 2em;
+	margin-top: 10px;
+	background-color: #fff;
+	border: 1px solid var( --wp--preset--color--light-grey-1 );
+	border-radius: 2px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+	&.is-top-right {
+		left: auto;
+		right: 0;
+	}
+
+	&.is-visible {
+		display: block;
+	}
+
+	.popover-close {
+		position: absolute;
+		bottom: .5em;
+		right: .6em;
+		font-size: small;
+		color: var(--wp--custom--link--color--text);
+
+		&:hover,
+		&:focus,
+		&:active {
+			text-decoration: underline;
+		}
+	}
+
+	.popover-arrow {
+		position: absolute;
+		height: 0;
+		width: 0;
+		top: -10px;
+		right: 20px;
+		z-index: -1;
+		border: 10px solid #ccc;
+		border-top: none;
+		border-left-color: transparent;
+		border-right-color: transparent;
+
+		&:after {
+			content: '';
+			position: absolute;
+			top: 2px;
+			left: -10px;
+			border: 10px solid #fff;
+			border-top: none;
+			border-left-color: transparent;
+			border-right-color: transparent;
+		}
+	}
+
+	.popover-inner {
+		text-align: left;
+	}
+
+	.popover-inner p:first-child {
+		margin-top: 0;
+	}
+
+	.popover-inner p:last-child {
+		margin-bottom: 0;
+	}
+}

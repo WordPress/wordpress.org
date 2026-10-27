@@ -50,6 +50,10 @@ class Users {
 		add_action( 'bbp_unapproved_topic',             array( $this, 'clear_user_topics_count_cache' ) );
 		add_action( 'wporg_bbp_archived_topic',         array( $this, 'clear_user_topics_count_cache' ) );
 		add_action( 'wporg_bbp_unarchived_topic',       array( $this, 'clear_user_topics_count_cache' ) );
+
+		// Add bulk topic unsubscribe.
+		add_action( 'bbp_template_before_user_subscriptions', array( $this, 'bulk_topic_unsubscribe_process' ) );
+		add_action( 'bbp_template_after_user_subscriptions', array( $this, 'bulk_topic_unsubscribe' ) );
 	}
 
 	/**
@@ -180,7 +184,7 @@ class Users {
 			'href'   => bbp_get_user_profile_url( $user_id ) . 'replied-to/',
 		) );
 
-		if ( function_exists( 'bbp_is_engagements_active' ) && bbp_is_engagements_active() ) {
+		if ( bbp_is_engagements_active() ) {
 			$wp_admin_bar->add_menu( array(
 				'parent' => 'user-topics',
 				'id'     => 'engagements',
@@ -403,7 +407,16 @@ class Users {
 	 * @return array Filtered query arguments.
 	 */
 	public function parse_user_replies_query_args( $args ) {
-		if ( get_query_var( 'wporg_single_user_reported_topics' ) ) {
+		/*
+		 * The marker is a public query var, so it can be set on any request. Gate the switch to
+		 * the private reported_topics type on the same check as the reports template: the profile
+		 * owner, or a user who may edit that profile.
+		 */
+		if (
+			get_query_var( 'wporg_single_user_reported_topics' )
+			&&
+			( bbp_is_user_home() || current_user_can( 'edit_user', bbp_get_displayed_user_id() ) )
+		) {
 			$args['post_type'] = 'reported_topics';
 			unset( $args['meta_key'] );
 			unset( $args['meta_type'] );
@@ -605,6 +618,38 @@ class Users {
 			wp_cache_delete( $post->post_author, 'user-topics-count' );
 		} else {
 			wp_cache_delete( $post->post_author, 'user-reviews-count' );
+		}
+	}
+
+	/**
+	 * Allow bulk unsubscribe from all topics.
+	 */
+	public function bulk_topic_unsubscribe() {
+		$user_id = bbp_get_displayed_user_id();
+		if ( ! bbp_is_user_home() && ! current_user_can( 'edit_user', $user_id ) ) {
+			return;
+		}
+		if ( ! bbp_get_user_topic_subscriptions() ) {
+			return;
+		}
+
+		echo '<form method="post" style="margin-top: -2em;margin-bottom: 1em;">';
+		wp_nonce_field( 'bulk_unsubscribe_' . $user_id );
+		echo '<input type="submit" name="bulk-topic-unsub" class="button" value="' . esc_attr__( 'Unsubscribe from all topics', 'wporg-forums' ) . '">';
+		echo '</form>';
+	}
+
+	/**
+	 * Bulk topic unsubscription handler for `bulk_topic_unsubscribe()`.
+	 */
+	public function bulk_topic_unsubscribe_process() {
+		$user_id = bbp_get_displayed_user_id();
+		if (
+			isset( $_POST['bulk-topic-unsub'], $_POST['_wpnonce'] ) &&
+			( bbp_is_user_home() || current_user_can( 'edit_user', $user_id ) ) &&
+			wp_verify_nonce( $_POST['_wpnonce'], 'bulk_unsubscribe_' . $user_id )
+		) {
+			bbp_remove_user_from_all_objects( $user_id, '_bbp_subscription' );
 		}
 	}
 

@@ -6,20 +6,22 @@ class Bot {
 	const default_trac = 'core';
 
 	static private $default_tracs = array(
-		'#themereview'  => 'themes',
-		'#bbpress'      => 'bbpress',
-		'#buddypress'   => 'buddypress',
-		'#glotpress'    => 'glotpress',
-		'#meta'         => 'meta',
-		'#outreach'     => false,
+		'#themes'     => 'themes',
+		'#bbpress'    => 'bbpress',
+		'#buddypress' => 'buddypress',
+		'#glotpress'  => 'glotpress',
+		'#meta'       => 'meta',
+		'#outreach'   => false,
 	);
 
 	// Channels that are primarily GitHub issues, where digit-only tickets should not be expanded.
 	static protected $github_channels = array(
 		'#core-editor',
+		'#core-ai',
 	);
 
 	protected $parsed = array();
+	protected $post_data;
 
 	// We want to post to Trac no more than once per two hours, and to Slack no more than once every 10 minutes.
 	// After 5 minutes for Slack, show a link only and extend it the redundancy.

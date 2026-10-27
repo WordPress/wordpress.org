@@ -1,0 +1,32 @@
+.plugin-contributors.read-more {
+	border-bottom: 1px solid var( --wp--preset--color--light-grey-1 );
+	max-height: 200px;
+	overflow: hidden;
+	padding-bottom: 1px;
+
+	&.toggled {
+		max-height: none;
+	}
+
+	.no-js & {
+		max-height: none;
+		overflow: auto;
+	}
+}
+
+.contributors-list {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	li {
+		display: flex;
+		align-items: center;
+		margin-bottom: 1rem;
+	}
+
+	.avatar {
+		float: left;
+		margin-right: 10px;
+	}
+}

@@ -5,6 +5,8 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\API\Base;
 use WordPressdotorg\Plugin_Directory\Shortcodes\Upload_Handler;
+use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
+use WordPressdotorg\Plugin_Directory\Trademarks;
 use WP_REST_Server;
 use WP_Error;
 
@@ -57,7 +59,7 @@ class Plugin_Upload extends Base {
 			return false;
 		}
 
-		return true;
+		return $this->verify_action_nonce( $request, 'upload', $post->ID );
 	}
 
 	public function upload( $request ) {
@@ -67,7 +69,13 @@ class Plugin_Upload extends Base {
 			return $this->slug( $request );
 
 		} elseif ( ! empty( $_FILES['zip_file'] ) && current_user_can( 'plugin_approve' ) ) {
-			return ( new Upload_Handler() )->process_upload( $plugin->ID );
+			$result = ( new Upload_Handler() )->process_upload( $plugin->ID );
+
+			if ( ! is_wp_error( $result ) && function_exists( 'bump_stats_extra' ) && 'production' === wp_get_environment_type() ) {
+				bump_stats_extra( 'plugin-upload-source', 'api' );
+			}
+
+			return $result;
 		}
 	}
 
@@ -112,8 +120,13 @@ class Plugin_Upload extends Base {
 		}
 
 		// Check the slug is in a valid format.
-		if ( $slug != sanitize_title_with_dashes( $slug ) ) {
+		if ( ! preg_match( '/^[a-z0-9]+(?:-[a-z0-9]+)*\z/', $slug ) ) {
 			return new WP_Error( 'invalid_slug', __( 'Invalid slug. Slugs may only contain the lowercase characters a-z, 0-9, and -.', 'wporg-plugins' ) );
+		}
+
+		// Longer than post_name can store; it would be truncated on save.
+		if ( strlen( $slug ) > 200 ) {
+			return new WP_Error( 'too_long', __( 'Error: The plugin slug is too long.', 'wporg-plugins' ) );
 		}
 
 		// Check the plugin can have it's slug changed.
@@ -140,30 +153,19 @@ class Plugin_Upload extends Base {
 			return new WP_Error( 'reserved_slug', __( 'That slug is already in use.', 'wporg-plugins' ) );
 		}
 
-		// Duplicated from Upload handler.
 		// Make sure it doesn't use a TRADEMARK protected slug.
-		if ( false !== $upload_handler->has_trademarked_slug()  ) {
-			$error = __( 'That plugin slug includes a restricted term.', 'wporg-plugins' );
-
-			if ( $upload_handler->has_trademarked_slug() === trim( $upload_handler->has_trademarked_slug(), '-' ) ) {
-				// Trademarks that do NOT end in "-" indicate slug cannot contain term at all.
-				$message = sprintf(
-					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin slug - %1$s - contains the restricted term "%2$s", which cannot be used at all in your plugin permalink nor the display name.', 'wporg-plugins' ),
-					'<code>' . $slug . '</code>',
-					trim( $upload_handler->has_trademarked_slug(), '-' )
-				);
-			} else {
-				// Trademarks ending in "-" indicate slug cannot BEGIN with that term.
-				$message = sprintf(
-					/* translators: 1: plugin slug, 2: trademarked term, 3: 'Plugin Name:', 4: plugin email address */
-					__( 'Your chosen plugin slug - %1$s - contains the restricted term "%2$s" and cannot be used to begin your permalink or display name. We disallow the use of certain terms in ways that are abused, or potentially infringe on and/or are misleading with regards to trademarks.', 'wporg-plugins' ),
-					'<code>' . $slug . '</code>',
-					trim( $upload_handler->has_trademarked_slug(), '-' )
-				);
-			}
-
-			return new WP_Error( 'trademarked_slug', $error . ' ' . $message );
+		$has_trademarked_slug = Trademarks::check_slug( $slug, wp_get_current_user() );
+		if ( $has_trademarked_slug ) {
+			return new WP_Error(
+				'trademarked_slug',
+				Readme_Validator::instance()->translate_code_to_message(
+					'trademarked_slug',
+					[
+						'trademark' => $has_trademarked_slug,
+						'context'   => $slug
+					]
+				)
+			);
 		}
 
 		// Not ideal, but it's better than nothing.
@@ -178,15 +180,8 @@ class Plugin_Upload extends Base {
 		}
 
 		// Proceed with the slug change.
-		Tools::audit_log(
-			sprintf(
-				'Changed slug from %s to %s',
-				$plugin->post_name,
-				$slug
-			),
-			$plugin
-		);
-		update_post_meta( $plugin->ID, '_wporg_plugin_original_slug', $plugin->post_name );
+		$old_slug = $plugin->post_name;
+		update_post_meta( $plugin->ID, '_wporg_plugin_original_slug', $old_slug );
 		$success = wp_update_post( [
 			'ID'        => $plugin->ID,
 			'post_name' => $slug,
@@ -195,8 +190,14 @@ class Plugin_Upload extends Base {
 			return new WP_Error( 'unknown_error', __( 'An unknown error occurred.', 'wporg-plugins' ) );
 		}
 
-		// Refresh.
+		// Refresh, and log the slug the plugin got: core suffixes one that was taken between the check above and the update.
 		$plugin = get_post( $plugin->ID );
+
+		$audit_entry = sprintf( 'Changed slug from %s to %s.', $old_slug, $plugin->post_name );
+		if ( $plugin->post_name !== $slug ) {
+			$audit_entry .= sprintf( " The requested slug, '%s', was not available.", $slug );
+		}
+		Tools::audit_log( $audit_entry, $plugin );
 
 		$this->send_slug_change_email( $plugin );
 

@@ -37,7 +37,7 @@ function show_colors( $post = 0, $echo = true ) {
 			'<span class="photo-color photo-color-%s"><a href="%s">%s</a></span>',
 			esc_attr( $color->slug ),
 			esc_url( get_term_link( $color->slug, Registrations::get_taxonomy( 'colors' ) ) ),
-			$color->name
+			esc_html( $color->name )
 		);
 	}
 	$output .= implode( ', ', $colors_output );
@@ -45,7 +45,7 @@ function show_colors( $post = 0, $echo = true ) {
 	$output .= '</div>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -82,7 +82,7 @@ function show_categories( $post = 0, $echo = true ) {
 			'<a class="photo-category photo-category-%s" href="%s">%s</a>',
 			esc_attr( $cat->slug ),
 			esc_url( get_term_link( $cat->slug, Registrations::get_taxonomy( 'categories' ) ) ),
-			$cat->name
+			esc_html( $cat->name )
 		);
 	}
 	$output .= implode( ', ', $cats_output );
@@ -90,7 +90,7 @@ function show_categories( $post = 0, $echo = true ) {
 	$output .= '</div>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -127,7 +127,7 @@ function show_tags( $post = 0, $echo = true ) {
 			'<li class="photo-tag photo-tag-%s"><a href="%s">%s</a></li>',
 			esc_attr( $tag->slug ),
 			esc_url( get_term_link( $tag->slug, Registrations::get_taxonomy( 'tags' ) ) ),
-			$tag->name
+			esc_html( $tag->name )
 		);
 	}
 
@@ -135,7 +135,7 @@ function show_tags( $post = 0, $echo = true ) {
 	$output .= '</div>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -173,7 +173,7 @@ function show_moderation_flags( $post = 0, $echo = true ) {
 	$output .= '</div>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -206,8 +206,8 @@ function show_exif( $post = 0, $echo = true ) {
 		$exif_output[] = sprintf(
 			'<li><span class="photo-exif photo-exif-%s">%s: <strong>%s</strong></span></li>',
 			esc_attr( $key ),
-			$item['label'],
-			$item['value']
+			esc_html( $item['label'] ),
+			esc_html( $item['value'] )
 		);
 	}
 	$output .= implode( "\n", $exif_output );
@@ -215,7 +215,7 @@ function show_exif( $post = 0, $echo = true ) {
 	$output .= '</ul>' . "\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -251,7 +251,7 @@ function show_orientation( $post = 0, $echo = true ) {
 	);
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -286,7 +286,7 @@ function show_dimensions( $post = 0, $echo = true ) {
 	);
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
@@ -321,8 +321,63 @@ function show_publish_date( $post = 0, $echo = true ) {
 	$output .= "</div>\n";
 
 	if ( $echo ) {
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 
 	return $output;
+}
+
+/**
+ * Returns markup for a photo intended to be shown in a grid.
+ *
+ * Used at least by `Admin::meta_box_photos_by_contributor()` and `Uploads::output_user_recent_submissions()`.
+ *
+ * @param WP_Post      $post      Photo post object.
+ * @param string|int[] $size      Image size. Accepts any registered image size name, or an
+ *                                array of width and height values in pixels (in that order).
+ * @param bool         $link_type What should the link go? One of: 'image' (direct to image),
+ *                                'edit' (to edit the photo post), 'post' (to published photo post).
+ *                                Default 'post';
+ * @return string
+ */
+function get_photo_as_grid_item( $post, $size, $link_type = 'post' ) {
+	$image_id = get_post_thumbnail_id( $post );
+	if ( ! $image_id ) {
+		return '';
+	}
+
+	$pending_notice = '';
+	$classes = 'photo-thumbnail';
+
+	if ( Photo::is_controversial( $image_id ) ) {
+		$classes .= ' blurred';
+	}
+
+	if ( 'pending' === $post->post_status ) {
+		$classes .= ' pending';
+		if ( 'edit' === $link_type ) {
+			$pending_notice = '<div class="pending-notice">' . esc_html__( 'Pending', 'wporg-photos' ) . '</div>';
+		}
+	}
+
+	if ( 'fullsize' === $link_type ) {
+		$link_url = wp_get_attachment_url( $image_id );
+		$label = __( 'View full-sized version of the photo.', 'wporg-photos' );
+	} elseif ( 'edit' === $link_type ) {
+		$link_url = get_edit_post_link( $post );
+		/* translators: %s: Post title. */
+		$label = sprintf( __( 'Edit photo post &#8220;%s&#8221;', 'wporg-photos' ), $post->post_title );
+	} else {
+		$link_url = get_permalink( $post );
+		$label = __( 'View the photo.', 'wporg-photos' );
+	}
+
+	return sprintf(
+		'<span><a class="photos-photo-link row-title" href="%s" aria-label="%s"><img class="%s" src="%s" alt="" /></a>%s</span>',
+		esc_url( $link_url ),
+		esc_attr( $label ),
+		esc_attr( $classes ),
+		esc_url( get_the_post_thumbnail_url( $post->ID, $size ) ),
+		$pending_notice
+	);
 }

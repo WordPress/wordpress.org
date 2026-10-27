@@ -21,6 +21,9 @@ Themes owned by this user:
 
 */
 
+// Run as the plugin directory, such that any filters are correct.
+$wp_init_host = 'https://wordpress.org/plugins/';
+
 include __DIR__ . '/common.php';
 
 // $request is the validated HelpScout request.
@@ -63,7 +66,7 @@ foreach ( $mentioned as $type => $slugs ) {
 	] );
 
 	if ( $post_ids ) {
-		echo '<p><strong>' . ucwords( $type ) . ' mentioned in this email:</strong></p>';
+		echo '<p><strong>' . esc_html( ucwords( $type ) ) . ' mentioned in this email:</strong></p>';
 
 		display_items( $post_ids );
 
@@ -81,7 +84,7 @@ if ( $user ) {
 		$items = get_user_items( $user );
 		if ( $items ) {
 			$url = add_query_arg( [ 'post_type' => $repo_post_types[ $type ], 'author' => $user->ID ], admin_url( 'edit.php' ) );
-			echo '<p><strong><a href="' . esc_url( $url ) . '">' . ucwords( $type ) . ' owned by this user:</a></strong></p>';
+			echo '<p><strong><a href="' . esc_url( $url ) . '">' . esc_html( ucwords( $type ) ) . ' owned by this user:</a></strong></p>';
 
 			display_items( $items );
 
@@ -137,6 +140,8 @@ function get_user_items( $user ) {
 }
 
 function display_items( $post_ids ) {
+	global $request;
+
 	echo '<ul>';
 	foreach ( $post_ids as $post_id ) {
 		$post          = get_post( $post_id );
@@ -165,7 +170,16 @@ function display_items( $post_ids ) {
 					'order'          => 'DESC',
 					'posts_per_page' => 1,
 				] );
-				$download_link = $attachments ? wp_get_attachment_url( $attachments[0]->ID ) : '#';
+				$download_link = $attachments ? wp_get_attachment_url( $attachments[0]->ID ) : '';
+			}
+
+			// Append Info URL.
+			if (
+				$download_link &&
+				str_starts_with( $request->mailbox->email ?? '' , 'plugins' ) &&
+				class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' )
+			) {
+				$download_link = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $download_link, $post );
 			}
 		}
 

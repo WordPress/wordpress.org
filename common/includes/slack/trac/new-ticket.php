@@ -13,7 +13,7 @@ class New_Ticket extends Ticket {
 			return sprintf( 'New ticket: *%s*', $text );
 		}
 
-		return sprintf( 'New %s opened by %s: *%s*', self::get_type( $this->type ), $this->reporter, $text );
+		return sprintf( 'New %s opened by %s: *%s*', self::get_type( $this->type ), Trac::escape_for_slack( $this->reporter ), $text );
 	}
 
 	function get_attachment() {
@@ -22,9 +22,9 @@ class New_Ticket extends Ticket {
 			return $attachment;
 		}
 
-		$attachment['pretext'] = sprintf( 'New %s opened by %s', self::get_type( $this->type ), $this->reporter );
+		$attachment['pretext'] = sprintf( 'New %s opened by %s', self::get_type( $this->type ), Trac::escape_for_slack( $this->reporter ) );
 
-		$attachment['text']  = Trac::format_for_slack( $this->description );
+		$attachment['text']  = Trac::format_for_slack( Trac::escape_for_slack( $this->description ) );
 		$attachment['color'] = $this->trac->get_color();
 
 		return $attachment;

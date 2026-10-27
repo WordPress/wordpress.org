@@ -2,7 +2,7 @@
 
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/slack/autoload.php';
 
-class Test_Slack_Trac_Bot extends PHPUnit_Framework_TestCase {
+class Test_Slack_Trac_Bot extends \PHPUnit\Framework\TestCase {
 	function test_commit_parse() {
 		$post_data = $this->mock_post_data( '[1234] r12345 r897-core https://core.trac.wordpress.org/changeset/11223' );
 		$receiving = new \Dotorg\Slack\Trac\Bot( $post_data );

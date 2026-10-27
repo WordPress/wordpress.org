@@ -44,7 +44,7 @@ class WP_Directory extends GP_Route {
 
 			$contributors_by_locale[ $translation_editor->locale ]['editors'][ $translation_editor->user_id ] = (object) array(
 				'nicename'     => $user->user_nicename,
-				'display_name' => $this->_encode( $user->display_name ),
+				'display_name' => $user->display_name ?: $user->user_nicename,
 			);
 
 			$contributors_by_locale[ $translation_editor->locale ]['count']++;
@@ -72,7 +72,7 @@ class WP_Directory extends GP_Route {
 
 			$contributors_by_locale[ $row->locale ]['contributors'][ $row->user_id ] = (object) array(
 				'nicename'     => $user->user_nicename,
-				'display_name' => $this->_encode( $user->display_name ),
+				'display_name' => $user->display_name ?: $user->user_nicename,
 			);
 
 			$contributors_by_locale[ $row->locale ]['count']++;
@@ -105,7 +105,7 @@ class WP_Directory extends GP_Route {
 
 				$contributors_by_locale[ $row->locale ]['contributors'][ $row->user_id ] = (object) array(
 					'nicename'     => $user->user_nicename,
-					'display_name' => $this->_encode( $user->display_name ),
+					'display_name' => $user->display_name ?: $user->user_nicename,
 				);
 
 				$contributors_by_locale[ $row->locale ]['count']++;
@@ -199,17 +199,20 @@ class WP_Directory extends GP_Route {
 	 * @param string $slug Slug of a project.
 	 */
 	public function get_language_packs( $type, $slug ) {
-		$http_context = stream_context_create( array(
-			'http' => array(
-				'user_agent' => 'WordPress.org Translate',
-			),
-		) );
 		if ( 'plugin' === $type ) {
 			$type = 'plugins';
 		} else {
 			$type = 'themes';
 		}
-		$json = file_get_contents( "https://api.wordpress.org/translations/$type/1.0/?slug={$slug}", null, $http_context );
+
+		$json = wp_remote_retrieve_body(
+			wp_safe_remote_get(
+				"https://api.wordpress.org/translations/$type/1.0/?slug={$slug}",
+				array(
+					'user-agent' => 'WordPress.org Translate',
+				)
+			)
+		);
 		$language_packs = $json && '{' == $json[0] ? json_decode( $json ) : null;
 
 		return $language_packs;
@@ -236,10 +239,5 @@ class WP_Directory extends GP_Route {
 		", date( 'Y-m-d', time() - YEAR_IN_SECONDS ), $project_id );
 
 		return $wpdb->get_results( $sql );
-	}
-
-	private function _encode( $raw ) {
-		$raw = mb_convert_encoding( $raw, 'UTF-8', 'ASCII, JIS, UTF-8, Windows-1252, ISO-8859-1' );
-		return ent2ncr( htmlspecialchars_decode( htmlentities( $raw, ENT_NOQUOTES, 'UTF-8' ), ENT_NOQUOTES ) );
 	}
 }

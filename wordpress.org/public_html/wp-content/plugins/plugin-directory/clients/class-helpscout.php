@@ -12,7 +12,7 @@ class HelpScout {
 	/**
 	 * The HTTP timeout for the HelpScout API.
 	 */
-	const TIMEOUT = 15;
+	const TIMEOUT = 30;
 
 	public static function api( $url, $args = null, $method = 'GET', & $response_code = null ) {
 		// Verify the configuration variables are available.
@@ -38,7 +38,12 @@ class HelpScout {
 		// See https://developer.helpscout.com/mailbox-api/overview/content_type/
 		if ( in_array( $method, [ 'POST', 'PUT', 'PATCH' ], true ) ) {
 			$headers['Content-Type'] = 'application/json';
-			$body                    = json_encode( $args );
+			$body                    = wp_json_encode( $args );
+
+			// Requests rejects a non-string body with an uncaught exception.
+			if ( false === $body ) {
+				return false;
+			}
 		}
 
 		$request = wp_remote_request(

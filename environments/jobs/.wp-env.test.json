@@ -1,0 +1,11 @@
+{
+	"core": "https://wordpress.org/nightly-builds/wordpress-latest.zip",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"../jobs.wordpress.net/public_html/wp-content/plugins/jobswp"
+	],
+	"lifecycleScripts": {
+		"afterStart": "bash jobs/bin/after-start-test.sh"
+	}
+}

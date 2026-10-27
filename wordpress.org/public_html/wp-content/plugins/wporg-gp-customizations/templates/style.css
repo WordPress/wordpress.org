@@ -2469,7 +2469,7 @@ table.translations tr.editor td {
 	}
 }
 
-.editor-panel__left .panel-header {
+.editor-panel__left .panel-header, .editor-panel__right {
 	position: -webkit-sticky;
 	position: sticky;
 	top: 0;
@@ -2484,7 +2484,7 @@ table.translations tr.editor td {
 @media screen and (min-width: 890px) {
 	.admin-bar .editor-panel__left .panel-header,
 	.admin-bar .editor-panel__right {
-		top: calc( var(--wp-global-header-height) + var(--wp-admin--admin-bar--height) );
+		top: calc( var(--wp-admin--admin-bar--height) );
 	}
 }
 

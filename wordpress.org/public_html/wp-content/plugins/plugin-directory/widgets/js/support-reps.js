@@ -1,4 +1,5 @@
-(
+document.addEventListener( 'DOMContentLoaded' , function() {
+	(
 	/**
 	 * @param {Object} $
 	 * @param {Object} wp
@@ -36,7 +37,8 @@
 	
 				$this.addClass( 'spinner' );
 
-				url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/support-reps/' + user_id + '/?_wpnonce=' + pluginDir.restNonce;
+				url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/support-reps/' + user_id + '/?_wpnonce=' + pluginDir.restNonce
+					+ '&_wporg_action=' + pluginDir.removeNonce;
 
 				$.post( {
 					url: url,
@@ -55,7 +57,8 @@
 				var $row = $( this ).parents( 'li' ),
 					$newUserInput = $row.find( 'input[name="support_rep"]' ),
 					$button = $row.find( '.button-small' ).addClass( 'spinner' ),
-					url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/support-reps/?_wpnonce=' + pluginDir.restNonce;
+					url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/support-reps/?_wpnonce=' + pluginDir.restNonce
+						+ '&_wporg_action=' + pluginDir.addNonce;
 
 				$.post( {
 					url: url,
@@ -72,3 +75,4 @@
 				} ).fail( logError );
 			} );
 	} )( window.jQuery, window.wp, window.supportRepsWidget );
+})

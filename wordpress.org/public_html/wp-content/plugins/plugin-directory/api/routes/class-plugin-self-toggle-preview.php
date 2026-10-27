@@ -22,11 +22,9 @@ class Plugin_Self_Toggle_Preview extends Base {
 					'validate_callback' => [ $this, 'validate_plugin_slug_callback' ],
 				],
 			],
-			'permission_callback' => function( $request ) {
-				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-
-				return current_user_can( 'plugin_self_close', $plugin );
-			},
+			'permission_callback' => [ $this, 'permission_check_action' ],
+			'wporg_capability'    => 'plugin_toggle_public_preview',
+			'wporg_action'        => 'self_toggle_preview',
 		] );
 
 		add_filter( 'rest_pre_echo_response', [ $this, 'override_cookie_expired_message' ], 10, 3 );
@@ -42,7 +40,7 @@ class Plugin_Self_Toggle_Preview extends Base {
 		) {
 			if ( 'rest_cookie_invalid_nonce' == $result['code'] ) {
 				wp_die( 'The link you have followed has expired.' );
-			} elseif ( 'rest_forbidden' == $result['code'] ) {
+			} elseif ( 'rest_forbidden' === $result['code'] || 'rest_cross_origin_write' === $result['code'] ) {
 				wp_die( "Sorry, You can't do that." );
 			}
 		}
@@ -63,6 +61,10 @@ class Plugin_Self_Toggle_Preview extends Base {
 		];
 		header( 'Location: ' . $result['location'] );
 
+		if ( $request->get_param('dismiss') ) {
+			return $this->self_dismiss( $request, $plugin );
+		}
+
 		// Toggle the postmeta value. Note that there is a race condition here.
 		$did = '';
 		if ( get_post_meta( $plugin->ID, '_public_preview', true ) ) {
@@ -82,4 +84,21 @@ class Plugin_Self_Toggle_Preview extends Base {
 		return $result;
 	}
 
+	/**
+	 * Endpoint special case to dismiss the missing blueprint notice.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @param object $plugin The plugin post.
+	 * @return bool True if the toggle was successful.
+	 */
+	public function self_dismiss( $request, $plugin ) {
+		$result = [
+			'location' => wp_get_referer() ?: get_permalink( $plugin ),
+		];
+
+		// Change the value from 1 to 0. This will persist and prevent it from being added again.
+		update_post_meta( $plugin->ID, '_missing_blueprint_notice', 0, 1 );
+
+		return $result;
+	}
 }

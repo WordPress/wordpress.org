@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', function () {
+	// Move the 'current' menu class to the link to a post status specific menu link if appropriate.
+	const searchParams = new URLSearchParams(document.location.search);
+	if (window.location.pathname.endsWith('edit.php') && searchParams.has('post_status')) {
+		const linkToPostStatus = document.querySelector('.wp-submenu a[href="edit.php?post_type=' + searchParams.get('post_type') + '&post_status=' + searchParams.get('post_status') + '"]');
+		if (linkToPostStatus) {
+			// Remove existing 'current' classes.
+			document.querySelectorAll('.wp-submenu .current').forEach( n => n.classList.remove('current') );
+			// Assign 'current' class to new menu item and link.
+			linkToPostStatus.classList.add('current');
+			linkToPostStatus.parentElement?.classList.add('current');
+		}
+	}
+
 	// Convert Orientations taxonomy checkboxes to radio buttons.
 	document.querySelectorAll('#photo_orientationchecklist input[type="checkbox"]').forEach((item) => {item.setAttribute('type', 'radio');});
 
@@ -70,6 +83,30 @@ document.addEventListener('DOMContentLoaded', function () {
 	setNoteToUserHighlight();
 	photoRejectionReason?.addEventListener('change', e => setNoteToUserHighlight());
 	photoRejectionNoteToUser?.addEventListener('input', e => setNoteToUserHighlight());
+
+	// Move the skip button out of its metabox and into the top of the page. Also remove the metabox and its display toggle.
+	const skipButton = document.getElementById('photo-dir-skip-photo');
+	if (skipButton) {
+		document.querySelector('#wpbody-content .wrap h1')?.appendChild(skipButton);
+		document.querySelector('#photoskip')?.remove();
+		document.querySelector('label[for="photoskip-hide"]')?.remove();
+	}
+
+	// Handle toggle for full listing of EXIF data.
+	const exifContainer = document.querySelector('.photo-all-exif');
+	const exifToggle = document.querySelector('#photo-all-exif-toggle');
+	if (exifContainer && exifToggle) {
+		function toggleAllEXIF(event) {
+			const newExpandState = exifContainer.classList.toggle('hidden');
+			exifToggle.setAttribute('aria-expanded', newExpandState ? 'false' : 'true');
+			event.preventDefault();
+		}
+		// Hide the full EXIF data by default.
+		exifContainer.classList.add('hidden');
+		exifToggle.setAttribute('aria-expanded', 'false');
+		// Clicking the toggle should toggle the visibility of the EXIF data.
+		exifToggle.addEventListener('click', toggleAllEXIF, true);
+	}
 
 }, false);
 

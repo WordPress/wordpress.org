@@ -35,6 +35,11 @@ class Posts {
 		// Sync photo post content to photo media on update.
 		add_action( 'post_updated',       [ __CLASS__, 'sync_photo_post_to_photo_media_on_update' ], 5, 3 );
 
+		// Photo content is plain text (the alternative text), never post markup.
+		add_filter( 'wp_insert_post_data', [ __CLASS__, 'store_text_as_html' ], PHP_INT_MAX );
+		add_filter( 'wp_insert_attachment_data', [ __CLASS__, 'store_text_as_html' ], PHP_INT_MAX );
+		add_filter( 'the_content', [ __CLASS__, 'render_content_as_plain_text' ], PHP_INT_MIN );
+
 		// Offset subsequent paginations of front page by number of posts on front page.
 		add_action( 'pre_get_posts',      [ __CLASS__, 'offset_front_page_paginations' ], 11 );
 		// Fix pages count for front page paginations.
@@ -48,6 +53,9 @@ class Posts {
 		add_filter( 'the_content_feed',   [ __CLASS__, 'add_photo_to_rss_feed' ] );
 		add_action( 'rss2_item',          [ __CLASS__, 'add_photo_as_enclosure_to_rss_feed' ] );
 		add_filter( 'wp_get_attachment_image_attributes', [ __CLASS__, 'feed_attachment_image_attributes' ], 10, 3 );
+
+		// Allow the photos to be included in Jetpack Sitemaps.
+		add_filter( 'jetpack_sitemap_post_types', [ __CLASS__, 'jetpack_sitemap_post_types' ] );
 	}
 
 	/**
@@ -199,8 +207,8 @@ class Posts {
 	 * Redirects attachment permalink pages to the associated photo post page.
 	 */
 	public static function redirect_attachment_page_to_photo() {
-		// Must be request for attachment.
-		if ( ! is_attachment() ) {
+		// Must be request for attachment. Not is_attachment(), which is false for `?post_type=attachment&p=` on attached media.
+		if ( ! is_singular( 'attachment' ) ) {
 			return;
 		}
 
@@ -227,6 +235,7 @@ class Posts {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Attachment URLs are served from the photo storage host, so the target is off-site.
 		wp_redirect( wp_get_attachment_url( $post->ID ) );
 		exit;
 	}
@@ -251,6 +260,61 @@ class Posts {
 		}
 
 		return wp_get_attachment_url( $post_id );
+	}
+
+	/**
+	 * Renders a photo's content as the plain text it is.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public static function render_content_as_plain_text( $content ) {
+		$post = get_post();
+		if ( ! $post || ! self::holds_photo_text( $post->post_type, $post->post_parent ) ) {
+			return $content;
+		}
+
+		// Same flags as `store_text_as_html()`, so stored text passes through unchanged.
+		$content = htmlspecialchars( $content, ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false );
+
+		// Shortcode and URL syntax stay visible text: hide the characters shortcodes and embeds key on.
+		return str_replace( [ '[', '://' ], [ '&#91;', '&#58;//' ], $content );
+	}
+
+	/**
+	 * Stores a photo's text as the HTML that displays it.
+	 *
+	 * @param array $data Slashed, sanitized post data.
+	 * @return array
+	 */
+	public static function store_text_as_html( $data ) {
+		if ( ! self::holds_photo_text( $data['post_type'], $data['post_parent'] ) ) {
+			return $data;
+		}
+
+		foreach ( [ 'post_title', 'post_content', 'post_excerpt' ] as $field ) {
+			$text           = wp_unslash( $data[ $field ] );
+			$data[ $field ] = wp_slash( htmlspecialchars( $text, ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_HTML5, 'UTF-8', false ) );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Determines whether a post holds a photo's text: the photo itself, or its media.
+	 *
+	 * @param string $post_type   Post type.
+	 * @param int    $post_parent Post parent ID.
+	 * @return bool
+	 */
+	public static function holds_photo_text( $post_type, $post_parent ) {
+		$photo_post_type = Registrations::get_post_type();
+
+		if ( $photo_post_type === $post_type ) {
+			return true;
+		}
+
+		return 'attachment' === $post_type && $post_parent && get_post_type( $post_parent ) === $photo_post_type;
 	}
 
 	/**
@@ -346,13 +410,15 @@ class Posts {
 	 * by the current user.
 	 *
 	 * @param string $orderby The field to order posts by when determining the
-	 *                        next post in queue. Default 'date'.
+	 *                        next post in queue, e.g. 'date'. Default 'rand'.
 	 * @param string $order   The sort order used when determining the next post
 	 *                        in queue. Either 'ASC' or 'DESC'. Default 'ASC'.
+	 * @param int[]  $exclude Array of post IDs to exclude from being selected
+	 *                        next. Default empty array.
 	 * @return WP_Post|false The next post, or false if there are no other posts
 	 *                       available for the user to moderate.
 	 */
-	public static function get_next_post_in_queue( $orderby = 'date', $order = 'ASC' ) {
+	public static function get_next_post_in_queue( $orderby = 'rand', $order = 'ASC', $exclude = [] ) {
 		$next = false;
 
 		if ( 'rand' === $orderby ) {
@@ -366,21 +432,10 @@ class Posts {
 			'author__not_in' => [ get_current_user_id() ],
 			'order'          => $order,
 			'orderby'        => $orderby,
+			'post__not_in'   => $exclude,
 			'posts_per_page' => 1,
 			'post_status'    => 'pending',
 			'post_type'      => Registrations::get_post_type(),
-			'meta_query'     => [
-				'relation'   => 'OR',
-				[
-					'key'     => '_edit_lock',
-					'compare' => 'NOT EXISTS',
-				],
-				[
-					'key'     => '_edit_lock',
-					'value'   => '',
-					'compare' => '='
-				],
-			],
 		] );
 
 		if ( $posts ) {
@@ -418,7 +473,6 @@ class Posts {
 		if ( $post && Registrations::get_post_type() === get_post_type( $post ) && has_post_thumbnail( $post->ID ) ) {
 			$content = '<figure>'
 				. get_the_post_thumbnail( $post->ID, self::RSS_PHOTO_SIZE, [ 'alt' => $content, 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
-				. get_the_post_thumbnail( $post->ID, self::RSS_PHOTO_SIZE, [ 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
 				. ( $content ? "<figcaption aria-hidden=\"true\">{$content}</figcaption>\n" : '' )
 				. "</figure>\n";
 		}
@@ -485,6 +539,92 @@ class Posts {
 		}
 
 		return $attr;
+	}
+
+	/**
+	 * Retrieves the WP_Post object representing a given photo.
+	 *
+	 * Adapted from /plugins/plugin-directory/class-plugin-directory.php: get_plugin_post()
+	 *
+	 * @global \WP_Post $post WordPress post object.
+	 *
+	 * @param int|string|\WP_Post $plugin_slug The slug of the photo to retrieve.
+	 * @return \WP_Post|bool
+	 */
+	public static function get_photo_post( $photo_slug = null ) {
+		if ( $photo_slug instanceof \WP_Post ) {
+			return $photo_slug;
+		}
+
+		// Handle int $photo_slug being passed. NOT numeric slugs
+		if (
+			is_int( $photo_slug ) &&
+			( $post = get_post( $photo_slug ) ) &&
+			( $post->ID === $photo_slug )
+		) {
+			return $post;
+		}
+
+		// Use the global $post object when appropriate
+		if (
+			! empty( $GLOBALS['post']->post_type ) &&
+			Registrations::get_post_type() === $GLOBALS['post']->post_type
+		) {
+			// Default to the global object.
+			if ( is_null( $photo_slug ) || 0 === $photo_slug ) {
+				return get_post( $GLOBALS['post']->ID );
+			}
+
+			// Avoid hitting the database if it matches.
+			if ( $photo_slug == $GLOBALS['post']->post_name ) {
+				return get_post( $GLOBALS['post']->ID );
+			}
+		}
+
+		$photo_slug = sanitize_title_for_query( $photo_slug );
+		if ( ! $photo_slug ) {
+			return false;
+		}
+
+		$post    = false;
+		$post_id = wp_cache_get( $photo_slug, 'photo-slugs' );
+		if ( 0 === $post_id ) {
+			// Unknown photo slug.
+			return false;
+		} elseif ( $post_id ) {
+			$post = get_post( $post_id );
+		}
+
+		if ( ! $post ) {
+			// get_post_by_slug();
+			$posts = get_posts( [
+				'post_type'   => Registrations::get_post_type(),
+				'name'        => $photo_slug,
+				'post_status' => [ 'publish' ], // Only concerned with published photos.
+			] );
+
+			if ( ! $posts ) {
+				$post = false;
+				wp_cache_add( 0, $photo_slug, 'photo-slugs' );
+			} else {
+				$post = reset( $posts );
+				wp_cache_add( $post->ID, $photo_slug, 'photo-slugs' );
+			}
+		}
+
+		return $post;
+	}
+
+	/**
+	 * The array of post types to be included in the sitemap.
+	 *
+	 * @param array $post_types List of included post types.
+	 * @return array
+	 */
+	public static function jetpack_sitemap_post_types( $post_types ) {
+		$post_types[] = Registrations::get_post_type();
+
+		return $post_types;
 	}
 
 }

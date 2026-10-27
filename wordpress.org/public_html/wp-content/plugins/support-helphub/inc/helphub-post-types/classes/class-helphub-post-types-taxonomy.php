@@ -72,7 +72,7 @@ class HelpHub_Post_Types_Taxonomy {
 	 *
 	 * @access  public
 	 * @since   1.3.0
-	 * @param   array $post_type The post type key.
+	 * @param   array  $post_type The post type key.
 	 * @param   string $token     The taxonomy key.
 	 * @param   string $singular  Singular name.
 	 * @param   string $plural    Plural name.
@@ -94,6 +94,26 @@ class HelpHub_Post_Types_Taxonomy {
 		$this->args = wp_parse_args( $args, $this->_get_default_args() );
 
 		add_action( 'init', array( $this, 'register' ) );
+
+		if ( 'category' === $this->token ) {
+			add_action(
+				'load-edit-tags.php',
+				function() {
+					$screen_id = 'edit-' . $this->token;
+					add_filter( 'manage_' . $screen_id . '_columns', array( $this, 'register_custom_column_headings' ) );
+					add_filter( 'manage_' . $screen_id . '_sortable_columns', array( $this, 'register_custom_column_sorts' ) );
+					add_filter( 'manage_' . $this->token . '_custom_column', array( $this, 'register_custom_columns' ), 10, 3 );
+
+					add_action( 'pre_get_terms', array( $this, 'list_table_do_custom_sort' ) );
+					add_action(
+						'admin_head',
+						function() {
+							echo '<style>table .column-sort_order{width: 5rem;}</style>';
+						}
+					);
+				}
+			);
+		}
 	} // End __construct()
 
 	/**
@@ -161,4 +181,71 @@ class HelpHub_Post_Types_Taxonomy {
 	public function register() {
 		register_taxonomy( esc_attr( $this->token ), (array) $this->post_type, (array) $this->args );
 	} // End register()
+
+	/**
+	 * Add custom column headings for the "manage" screen of this post type.
+	 *
+	 * @param array $columns The default value.
+	 *
+	 * @return array
+	 */
+	public function register_custom_column_headings( $columns ) {
+		$new_columns = array(
+			'sort_order' => __( 'Order', 'wporg-forums' ),
+		);
+		$columns = array_merge( array_slice( $columns, 0, 1 ), $new_columns, array_slice( $columns, 1 ) );
+		return $columns;
+	}
+
+	/**
+	 * Enable sorting on columns.
+	 *
+	 * @param array $cols An array of sortable columns.
+	 * @return array Updated list of columns.
+	 */
+	public function register_custom_column_sorts( $cols ) {
+		$cols['sort_order'] = array(
+			'sort_order',
+			true,
+			__( 'Order', 'wporg-forums' ),
+			__( 'Table ordered by order.', 'wporg-forums' ),
+		);
+
+		return $cols;
+	} // End register_custom_column_sorts()
+
+	/**
+	 * Add custom columns for the "manage" screen of this post type.
+	 *
+	 * @access public
+	 *
+	 * @param string $value Filter content (value of column).
+	 * @param string $column_name The name of the column.
+	 * @param int    $id The ID.
+	 *
+	 * @since  1.0.0
+	 * @return void
+	 */
+	public function register_custom_columns( $value, $column_name, $id ) {
+		switch ( $column_name ) {
+			case 'sort_order':
+				// phpcs:ignore
+				echo get_term_meta( $id, 'sort_order', true );
+				break;
+			default:
+				break;
+		}
+	} // End register_custom_columns()
+
+	/**
+	 * Filter the term query if our custom sort is used.
+	 *
+	 * @param WP_Term_Query $term_query Current instance of WP_Term_Query (passed by reference).
+	 */
+	public function list_table_do_custom_sort( $term_query ) {
+		if ( isset( $term_query->query_vars['orderby'] ) && 'sort_order' === $term_query->query_vars['orderby'] ) {
+			$term_query->query_vars['orderby'] = 'meta_value_num';
+			$term_query->query_vars['meta_key'] = 'sort_order';
+		}
+	}
 } // End Class

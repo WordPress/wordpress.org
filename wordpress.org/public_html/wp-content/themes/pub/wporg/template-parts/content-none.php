@@ -19,7 +19,7 @@
 				<?php
 				printf(
 					/* translators: Link to post editor. */
-					__( 'Ready to publish your first post? <a href="%1$s">Get started here</a>.', 'wporg' ), // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+					wp_kses_post( __( 'Ready to publish your first post? <a href="%1$s">Get started here</a>.', 'wporg' ) ),
 					esc_url( admin_url( 'post-new.php' ) )
 				);
 				?>

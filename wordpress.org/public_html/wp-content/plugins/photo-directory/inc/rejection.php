@@ -46,7 +46,7 @@ class Rejection {
 			],
 			'copyright'     => [
 				'label' => __( 'Copyright: Potential copyright/ownership infringement', 'wporg-photos' ),
-				'email' => __( "The photo has been previously posted elsewhere, but due to our limited resources we are unable to verify its ownership. We require that you 'have the copyright or other legal ownership for any photo you submit'. This does not include posting photos created by others, even if their licensing is permissive in its use, since copyright is not conferred to you.\n\nIf you do have the copyright, we apologize, but hope you understand our abundance of caution. Reply to let us know and provide some verification of that fact and we can remove the block that would prevent you from resubmitting the photo.", 'wporg-photos' ),
+				'email' => __( 'The photo has been previously posted elsewhere so we are unable to accept it due to potential copyright and/or licensing conflicts.', 'wporg-photos' ),
 			],
 			'faces'         => [
 				'label' => __( 'Faces: Contains human face(s)', 'wporg-photos' ),
@@ -168,6 +168,9 @@ class Rejection {
 
 		// Use JS to inject rejected post status into post submit box.
 		add_action( 'admin_footer',                            [ __CLASS__, 'output_js_to_modify_post_status_in_submitbox_dropdown' ] );
+
+		// Register dashboard widget.
+		add_action( 'wp_dashboard_setup',                      [ __CLASS__, 'dashboard_setup' ] );
 	}
 
 	/**
@@ -207,7 +210,13 @@ class Rejection {
 			'moderator_note_to_user' => [
 				'input_in_metabox' => true,
 				'meta_config'      => [
-					'description' => __( 'A message sent to the user by the moderator within the approval/rejection email.', 'wporg-photos' ),
+					'description' => __( 'A message sent to the user by the moderator within the rejection email.', 'wporg-photos' ),
+				],
+			],
+			'moderator_note_to_user_on_publish' => [
+				'input_in_metabox' => true,
+				'meta_config'      => [
+					'description' => __( 'A message sent to the user by the moderator within the approval email.', 'wporg-photos' ),
 				],
 			],
 			'moderator_private_note' => [
@@ -276,10 +285,10 @@ class Rejection {
 	 *
 	 * @param int|WP_Post The post or post ID.
 	 * @param string      Format of the date to return (using PHP date format
-	 *                    syntax). Default 'Y/m/d g:s a'.
+	 *                    syntax). Default 'Y/m/d g:i a'.
 	 * @return string
 	 */
-	public static function get_rejection_date( $post, $format = 'Y/m/d g:s a' ) {
+	public static function get_rejection_date( $post, $format = 'Y/m/d g:i a' ) {
 		$post = get_post( $post );
 
 		if ( ! $post ) {
@@ -304,12 +313,17 @@ class Rejection {
 	 * @param string $field  Optional. If a specific reason is specified, this
 	 *                       is the specific attribute of the reason to return.
 	 *                       Empty string returns all data for reason. Default ''.
+	 * @param bool   $include_approval Optional. Should the approval entry (which is
+	 *                       technically not a rejection) be included? Default false.
 	 * @return array|string
 	 */
-	public static function get_rejection_reasons( $reason = '', $field = '' ) {
+	public static function get_rejection_reasons( $reason = '', $field = '', $include_approval = false ) {
 		// Return all reasons if one wasn't specified.
 		if ( ! $reason ) {
 			$reasons = self::$rejection_reasons;
+			if ( ! $include_approval ) {
+				unset( $reasons[''] );
+			}
 			uasort( $reasons, function( $a, $b ) {
 				return strcmp( $a['label'], $b['label'] );
 			} );
@@ -363,25 +377,59 @@ class Rejection {
 	}
 
 	/**
+	 * Returns a count of rejections for each rejection reason.
+	 *
+	 * @return array Associate array of rejection reason keys and their respective rejection counts.
+	 */
+	public static function count_rejections_per_reason() {
+		global $wpdb;
+
+		$reasons = self::get_rejection_reasons();
+		$reasons_keys = array_keys( $reasons );
+
+		$results = $wpdb->get_results( $wpdb->prepare(
+			"SELECT meta_value AS rejection_reason, COUNT(*) AS count FROM $wpdb->postmeta WHERE meta_key = %s GROUP BY meta_value",
+			'rejected_reason'
+		) );
+
+		$return = [];
+		foreach ( $results as $row ) {
+			$return[ $row->rejection_reason ] = $row->count;
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Returns the note the moderator has for the user.
 	 *
-	 * @param int|WP_Post The post or post ID.
+	 * There are two types of notes to user:
+	 * - 'publish': A note sent to the user when a photo is published.
+	 * - 'reject': A note sent to the user when a photo is rejected.
+	 *
+	 * It is possible for both types of notes to apply to a photo. However, it currently does not make sense
+	 * for two separate notes of a given type to be possible, nor does the implementation support it.
+	 *
+	 * @param int|WP_Post $post The post or post ID.
+	 * @param string      $type The note type. Either 'reject' or 'publish'. Default 'reject'.
 	 * @return string
 	 */
-	public static function get_moderator_note_to_user( $post ) {
+	public static function get_moderator_note_to_user( $post, $type = 'reject' ) {
 		$post = get_post( $post );
 
 		if ( ! $post ) {
 			return '';
 		}
 
-		return get_post_meta( $post->ID, 'moderator_note_to_user', true );
+		$meta_key = ( 'publish' === $type ) ? 'moderator_note_to_user_on_publish' : 'moderator_note_to_user';
+
+		return get_post_meta( $post->ID, $meta_key, true );
 	}
 
 	/**
 	 * Returns the private note left by the moderator.
 	 *
-	 * @param int|WP_Post The post or post ID.
+	 * @param int|WP_Post $post The post or post ID.
 	 * @return string
 	 */
 	public static function get_moderator_private_note( $post ) {
@@ -400,13 +448,48 @@ class Rejection {
 	 * @param int $user_id User ID.
 	 * @return WP_Post[] Array of rejected photo posts.
 	 */
-	public static function get_user_rejections( $user_id ) {
-		return get_posts( [
-			'posts_per_page' => 99,
+	public static function get_user_rejections( $user_id, $args = [] ) {
+		$args = wp_parse_args(
+			$args,
+			[
+				'fields'         => 'all',
+				'posts_per_page' => 99,
+			]
+		);
+
+		return get_posts( array_merge( $args, [
 			'author'         => (int) $user_id,
 			'post_status'    => Rejection::get_post_status(),
 			'post_type'      => Registrations::get_post_type(),
-		] );
+		] ) );
+	}
+
+	/**
+	 * Returns an array of the reasons and respective counts for all of the user's rejections.
+	 *
+	 * @param int $user_id The user ID.
+	 * @return int Associative array of rejection reasons and the counts for how many rejections
+	 *             the user has for each reason. This does not include rejection reasons for which
+	 *             the user does not have any rejections.
+	 */
+	public static function get_user_rejection_reasons( $user_id ) {
+		global $wpdb;
+		$reasons = [];
+		$rejection_ids = self::get_user_rejections( $user_id, [ 'fields' => 'ids', 'posts_per_page' => -1 ] );
+
+		if ( $rejection_ids ) {
+			$rejection_ids = implode( ',', array_map( 'absint', $rejection_ids ) );
+			$results = $wpdb->get_results( $n = $wpdb->prepare(
+				"SELECT pm.meta_value as rejection_reason, COUNT(*) as count FROM {$wpdb->postmeta} pm WHERE pm.post_id IN ($rejection_ids) AND meta_key = %s GROUP BY pm.meta_value",
+				'rejected_reason'
+			), ARRAY_A );
+
+			foreach ( $results as $item ) {
+				$reasons[ $item['rejection_reason'] ] = (int) $item['count'];
+			}
+		}
+
+		return $reasons;
 	}
 
 	/**
@@ -779,7 +862,7 @@ class Rejection {
 		}
 
 		$rejection_user = self::get_rejection_user( $post, 'link' );
-		$rejection_date = self::get_rejection_date( $post, 'Y-m-d H:m:s' );
+		$rejection_date = self::get_rejection_date( $post, 'Y-m-d H:i:s' );
 
 		if ( ! $rejection_user ) {
 			$rejection_user = __( 'unknown', 'wporg-photos' );
@@ -790,9 +873,11 @@ class Rejection {
 		}
 
 		echo '<div class="misc-pub-section curtime misc-pub-curtime">';
-		printf( __( 'Rejected by: %s', 'wporg-photos' ), '<b>' . $rejection_user . '</b>' );
+		/* translators: %s: Name of the rejecting user. */
+		printf( esc_html__( 'Rejected by: %s', 'wporg-photos' ), '<b>' . wp_kses_post( $rejection_user ) . '</b>' );
 		echo '<br>';
-		printf( __( 'Rejected on: %s', 'wporg-photos' ), '<b>' . $rejection_date . '</b>' );
+		/* translators: %s: Rejection date. */
+		printf( esc_html__( 'Rejected on: %s', 'wporg-photos' ), '<b>' . esc_html( $rejection_date ) . '</b>' );
 		echo '</div>';
 	}
 
@@ -813,7 +898,7 @@ class Rejection {
 		}
 
 		$selected = self::get_rejection_reason( $post );
-		$is_disabled = in_array( get_post_status( $post ), [ 'trash', self::get_post_status() ] );
+		$is_disabled = in_array( get_post_status( $post ), [ 'publish', 'trash', self::get_post_status() ] );
 
 		echo "<style>
 			.reject-fields textarea { width: 100%; }
@@ -825,6 +910,9 @@ class Rejection {
 			.reject-action input[type=submit] { background-color: #b32d2e; border-color: #b32d2e; color: white; }
 			.reject-action.post-is-rejected input[type=submit] { background-color: #2271b1; border-color: #2271b1; }
 			.reject-action input[type=submit]:hover { background-color: #8f2424; border-color: #8f2424; color: white; }
+
+			.reject-warn-if-published { border:1px solid #856404; background-color: #fff3cd; color: #856404; padding: 8px; margin-bottom: 0.5rem; }
+			.reject-warn-if-about-to-reject-published { border: 1px solid #721c24; background-color: #f8d7da; color: #721c24; padding: 8px 12px; margin-bottom: 0.5rem; }
 		</style>\n";
 
 		echo '<div class="reject-fields">';
@@ -837,12 +925,74 @@ class Rejection {
 			document.addEventListener('DOMContentLoaded', function () {
 				// Bind changing of value of rejection reason dropdown to toggle whether reject or publish button is enabled.
 				const rejectSelect = document.querySelector('#rejected_reason');
-				rejectSelect.addEventListener('change', (event) => {
+				rejectSelect?.addEventListener('change', (event) => {
 					const hasRejectReason = Boolean(event.target.value);
 					// Publish button should be disabled if a rejection reason is selected.
 					document.querySelector('#publish').disabled = hasRejectReason;
 					// Reject button should be disabled if no rejection reason is selected.
 					document.querySelector('#reject-post').disabled = !hasRejectReason;
+					// Rejection note to user should be disabled if no rejection reason is selected.
+					const inputRejectNoteToUser = document.querySelector('#moderator_note_to_user');
+					if ( inputRejectNoteToUser ) {
+						inputRejectNoteToUser.disabled = !hasRejectReason || rejectSelect.disabled;
+						const rejectNoteToUser = document.querySelector('.moderator_note_to_user');
+						// Potentially hide the note input based on whether the dropdown has a value.
+						rejectNoteToUser.style.display = !hasRejectReason ? 'none' : 'block';
+						// If choosing to not reject photo, then delete the rejection note content to avoid it being saved.
+						if ( !hasRejectReason ) {
+							inputRejectNoteToUser.value = '';
+						}
+					}
+
+					// Handling for the note-to-user fields for a pending photo (to facilitate only showing one at a time).
+					const pendingPublishNoteToUser = document.querySelector('.pending_moderator_note_to_user.moderator_note_to_user_on_publish');
+					const pendingRejectNoteToUser = document.querySelector('.pending_moderator_note_to_user.moderator_note_to_user');
+					if ( pendingPublishNoteToUser && pendingRejectNoteToUser ) {
+						// Hide one of the note-to-user fields if awaiting initial moderation.
+						pendingPublishNoteToUser.style.display = ( hasRejectReason ? 'none' : 'block' );
+						pendingRejectNoteToUser.style.display = ( hasRejectReason ? 'block' : 'none' );
+
+						// When a note field gets hidden, transfer note field value to other note then clear it out.
+						if ( 'none' === pendingPublishNoteToUser.style.display ) {
+							const pendingPublishNote = pendingPublishNoteToUser.querySelector('textarea').value;
+							// Transfer value from approval note to rejection note if it had a value.
+							if ( pendingPublishNote ) {
+								pendingRejectNoteToUser.querySelector('textarea').value = pendingPublishNote;
+							}
+							pendingPublishNoteToUser.querySelector('textarea').value = '';
+						} else {
+							const pendingRejectNote = pendingRejectNoteToUser.querySelector('textarea').value;
+							// Transfer value from rejection note to approval note if it had a value.
+							if ( pendingRejectNote ) {
+								pendingPublishNoteToUser.querySelector('textarea').value = pendingRejectNote;
+							}
+							pendingRejectNoteToUser.querySelector('textarea').value = '';
+						}
+					}
+
+					// Notice of rejection of published post should be shown if post is published.
+					const rejectPublishWarn = document.querySelector('.reject-warn-if-about-to-reject-published');
+					if ( rejectPublishWarn ) {
+						rejectPublishWarn.style.display = ( hasRejectReason ? 'block' : 'none' );
+					}
+				});
+
+				// Bind checkbox for enabling rejection of published photo.
+				const cbRejectPublished = document.querySelector('#reject-warn-if-reject-published');
+				cbRejectPublished?.addEventListener('change', (event) => {
+					if (rejectSelect) {
+						// If disabled, then undo any changes towards doing the rejection.
+						if ( !event.target.checked ) {
+							const inputRejectNoteToUser = document.querySelector('#moderator_note_to_user');
+							// Remove rejection note to user.
+							inputRejectNoteToUser.value = '';
+							// Unset rejection reason.
+							rejectSelect.value = '';
+							rejectSelect.dispatchEvent(new Event('change'));
+						}
+						// Disable rejection dropdown.
+						rejectSelect.disabled = !event.target.checked;
+					}
 				});
 
 				// Fire the select change event so the Reject button gets disabled initially.
@@ -852,33 +1002,52 @@ class Rejection {
 		</script>
 JS;
 
-		echo '<label for="rejected_reason">' . __( 'Reject due to:', 'wporg-photos' ) . '<br>';
+		// Show a notice if the post is already published and add a checkbox for enabling rejection field.
+		if ( 'publish' === get_post_status( $post ) ) {
+			echo '<div class="reject-warn-if-published">';
+			echo '<label class="warn-if-reject-published-container"><input id="reject-warn-if-reject-published" type="checkbox" name="reject_warn_if_reject_published" />';
+			esc_html_e( 'Allow rejection of published photo?', 'wporg-photos' );
+			echo "</label></div>\n";
+		}
+
+		echo '<label for="rejected_reason">' . esc_html__( 'Reject due to:', 'wporg-photos' ) . '<br>';
 		printf(
 			'<select id="rejected_reason" name="rejected_reason"%s>',
 			disabled( true, $is_disabled, false )
 		);
-		foreach ( self::get_rejection_reasons() as $reason => $args ) {
+		foreach ( self::get_rejection_reasons( '', '', true ) as $reason => $args ) {
 			printf(
 				'<option value="%s"%s>%s</option>' . "\n",
 				esc_attr( $reason ),
 				selected( $selected, $reason, false ),
-				sanitize_text_field( $args['label'] )
+				esc_html( $args['label'] )
 			);
 		}
 		echo '</select></label>';
 
 		echo '<div class="reject-additional-fields">';
 
+		// Assign a class only if the post is currently in a pending state.
+		$note_to_user_label_class = ( $is_disabled ? '' : ' pending_moderator_note_to_user' );
+
 		// Markup for optional note to send to user in rejection email.
-		echo '<label for="moderator_note_to_user">' . __( '(Optional) Note to user:', 'wporg-photos' );
-		echo '<p class="description"><em>' . __( 'Included in approval/rejection email.', 'wporg-photos' ) . '</em></p>';
+		echo '<label for="moderator_note_to_user" class="moderator_note_to_user' . esc_attr( $note_to_user_label_class ) . '">' . esc_html__( '(Optional) Note to user on rejection:', 'wporg-photos' );
+		echo '<p class="description"><em>' . esc_html__( 'Included in rejection email.', 'wporg-photos' ) . '</em></p>';
 		echo '<textarea id="moderator_note_to_user" name="moderator_note_to_user" rows="4"' . disabled( true, $is_disabled, false ) . '>';
-		echo esc_textarea( self::get_moderator_note_to_user( $post ) );
+		echo esc_textarea( self::get_moderator_note_to_user( $post, 'reject' ) );
+		echo '</textarea>';
+		echo '</label>';
+
+		// Markup for optional note sent to user in approval email.
+		echo '<label for="moderator_note_to_user_on_publish" class="moderator_note_to_user_on_publish' . esc_attr( $note_to_user_label_class ) . '">' . esc_html__( '(Optional) Note to user on approval:', 'wporg-photos' );
+		echo '<p class="description"><em>' . esc_html__( 'Included in approval email.', 'wporg-photos' ) . '</em></p>';
+		echo '<textarea id="moderator_note_to_user_on_publish" name="moderator_note_to_user_on_publish" rows="4"' . disabled( true, $is_disabled, false ) . '>';
+		echo esc_textarea( self::get_moderator_note_to_user( $post, 'publish' ) );
 		echo '</textarea>';
 		echo '</label>';
 
 		// Markup for optional private note for moderator-eyes only.
-		echo '<label for="moderator_private_note">' . __( '(Optional) Private moderators-only note:', 'wporg-photos' );
+		echo '<label for="moderator_private_note">' . esc_html__( '(Optional) Private moderators-only note:', 'wporg-photos' );
 		echo '<textarea id="moderator_private_note" name="moderator_private_note" rows="4">';
 		echo esc_textarea( self::get_moderator_private_note( $post ) );
 		echo '</textarea>';
@@ -886,12 +1055,19 @@ JS;
 
 		echo "</div></div>\n";
 
+		// Output a notice adjacent to reject button for use if about to reject a published post.
+		if ( 'publish' === get_post_status( $post ) ) {
+			echo '<div class="reject-warn-if-about-to-reject-published" style="display:none;" >';
+			esc_html_e( 'Warning: You are about to reject a published photo!', 'wporg-photos' );
+			echo "</div>\n";
+		}
+
 		$is_rejected = self::is_post_rejected( $post );
 
 		printf( '<div class="reject-action%s">', $is_rejected ? ' post-is-rejected' : '' );
 		printf(
 			'<input type="submit" name="%s" id="reject-post" value="%s" class="button button-large">',
-			self::$action,
+			esc_attr( self::$action ),
 			$is_rejected ? esc_attr__( 'Update', 'wporg-photos' ) : esc_attr__( 'Reject', 'wporg-photos' )
 		);
 		echo '</div>';
@@ -1025,15 +1201,15 @@ JS;
 	public static function custom_rejection_columns( $column_name, $post_id ) {
 		switch ( $column_name ) {
 			case 'rejected_by':
-				echo self::get_rejection_user( $post_id, 'link' );
+				echo wp_kses_post( self::get_rejection_user( $post_id, 'link' ) );
 				break;
 			case 'rejected_on':
-				echo self::get_rejection_date( $post_id );
+				echo esc_html( self::get_rejection_date( $post_id ) );
 				break;
 			case 'rejected_reason':
-				echo self::get_rejection_reason( $post_id );
+				echo esc_html( self::get_rejection_reason( $post_id ) );
 				// Add asterisk to denote there was a moderator note to user.
-				if ( self::get_moderator_note_to_user( $post_id ) ) {
+				if ( self::get_moderator_note_to_user( $post_id, 'reject' ) || self::get_moderator_note_to_user( $post_id, 'publish' ) ) {
 					echo '*';
 				}
 				break;
@@ -1140,7 +1316,7 @@ JS;
 
 		// If post is rejected, remove all existing post statuses from dropdown.
 		if ( self::is_post_rejected( $post ) ) {
-			echo <<<JS
+			?>
 			<script>
 			document.addEventListener('DOMContentLoaded', function () {
 				// Remove the 'Submit for Review' button.
@@ -1150,15 +1326,74 @@ JS;
 				document.querySelector("body.post-type-photo #preview-action")?.remove();
 
 				// Add rejected post status to status display.
-				document.querySelector("body.post-type-photo .misc-pub-post-status #post-status-display").innerText = "{$status_label}";
+				document.querySelector("body.post-type-photo .misc-pub-post-status #post-status-display").innerText = <?php echo wp_json_encode( $status_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 
 				// Change visibility display to indicate it is hidden.
-				document.querySelector("body.post-type-photo .misc-pub-visibility #post-visibility-display").innerText = "{$visibility_label}";
+				document.querySelector("body.post-type-photo .misc-pub-visibility #post-visibility-display").innerText = <?php echo wp_json_encode( $visibility_label, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>;
 			} );
 			</script>
 
-JS;
+			<?php
 		}
+	}
+
+	/**
+	 * Registers the admin dashboard.
+	 */
+	public static function dashboard_setup() {
+		if ( current_user_can( 'edit_photos' ) ) {
+			wp_add_dashboard_widget(
+				'dashboard_photo_rejections',
+				__( 'Rejection Stats', 'wporg-photos' ),
+				[ __CLASS__, 'dashboard_photo_rejections' ],
+				null,
+				null,
+				'column3'
+			);
+		}
+	}
+
+	/**
+	 * Outputs the photo rejection stats dashboard widget.
+	 */
+	public static function dashboard_photo_rejections() {
+		echo '<div class="main">';
+
+		// Get list of all rejection types.
+		$rejection_reasons = self::get_rejection_reasons();
+		ksort( $rejection_reasons );
+		$rejection_reasons_counts = self::count_rejections_per_reason();
+
+		// Omit submission errors since they aren't true rejections.
+		unset( $rejection_reasons['submission-error'] );
+		unset( $rejection_reasons_counts['submission-error'] );
+
+		echo '<table id="dashboard-photo-rejection-stats" class="wp-list-table widefat fixed striped table-view-list">';
+		echo '<thead><tr>';
+		echo '<th>' . esc_html__( 'Rejection reason', 'wporg-photos' ) . '</th>';
+		echo '<th class="col-num col-num-rejected" title="' . esc_attr__( 'Number of photos rejected', 'wporg-photos' ) . '"><span class="dashicons dashicons-thumbs-down"></span></th>';
+		echo '<th class="col-num col-percent-rejected" title="' . esc_attr( 'Percentage of overall rejections', 'wporg-photos' ) . '">%</th>';
+		echo '</tr></thead>';
+		echo '<tbody>';
+
+		$total_rejections = array_sum( $rejection_reasons_counts );
+
+		foreach ( $rejection_reasons as $reason => $data ) {
+			$data['count'] = $rejection_reasons_counts[ $reason ] ?? 0;
+			$rejection_pct = $total_rejections
+				? round( ( $data['count'] / $total_rejections ) * 100, 2 )
+				: 0;
+
+			echo '<tr>';
+			echo '<td title="' . esc_attr( $data['label'] ) . '">' . esc_html( $reason ) . '</td>';
+			echo '<td>' . esc_html( number_format_i18n( $data['count'] ) ) . '</td>';
+			echo '<td>' . esc_html( $rejection_pct ) . '%</td>';
+			echo "</tr>\n";
+		}
+
+		echo '<tr class="row-sum"><td>' . esc_html__( 'Total', 'wporg-photos' ) . '</td><td>' . esc_html( number_format_i18n( $total_rejections ) ) . '</td><td>100%</td></tr>';
+		echo '</tbody></table>';
+		echo '</div>';
 	}
 
 }

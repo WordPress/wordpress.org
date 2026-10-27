@@ -9,12 +9,15 @@
 --------------------------------------------------------------*/
 
 #bbpress-forums .type-reported_topics .topic-report-reply {
-	border: 2px solid #33b4ce;
-	padding: 8px;
+	border: 1px solid var(--wp--preset--color--light-grey-1, #d9d9d9);
+	background-color: var(--wp--preset--color--white, #ffffff);
+	border-radius: 2px;
+	padding: var(--wp--preset--spacing--20, 20px);
 }
+
 #bbpress-forums .type-reported_topics .topic-report-reply .topic-report-reply-meta {
-	color: #747474;
-	font-size: 0.7rem;
+	color: var(--wp--preset--color--charcoal-4, #656a71);
+	font-size: var(--wp--preset--font-size--extra-small, 12px);
 	text-align: right;
 }
 
@@ -22,11 +25,7 @@
 	min-height: 80px;
 	width: 100%;
 }
+
 #bbpress-forums .type-reported_topics .topic-report-reply-form .topic-report-reply-form-actions {
 	text-align: right;
-}
-
-body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.odd.type-reported_topics:not(.topic) ,
-body.single-topic:not(body.topic-edit) .entry-content #bbpress-forums div.even.type-reported_topics:not(.topic) {
-	background-color: #fdd;
 }

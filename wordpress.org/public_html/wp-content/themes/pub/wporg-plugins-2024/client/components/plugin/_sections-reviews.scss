@@ -1,0 +1,118 @@
+.plugin-reviews {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+
+	.plugin-review {
+		border-bottom: 1px solid var( --wp--preset--color--light-grey-1 );
+		margin: 2rem 0 1rem;
+		padding-bottom: 1rem;
+
+		a {
+			text-decoration: none;
+		}
+
+		&:first-child {
+			margin-top: 0;
+		}
+
+		.header-top {
+			display: flex;
+			.wporg-ratings {
+				flex-shrink: 0;
+			}
+		}
+
+		.header-bottom {
+			display: flex;
+			margin-top: 4px;
+		}
+	}
+
+	.review-avatar {
+		display: none;
+	}
+
+	.review,
+	.wporg-ratings,
+	.review-author {
+		display: inline-block;
+		vertical-align: top;
+	}
+
+	.review-header {
+		margin: 0 0 0.5rem;
+	}
+
+	.review-title {
+		font-size: var( --wp--preset--font-size--normal );
+		font-weight: 500;
+		margin: 2px 0 0 12px !important;
+		text-transform: inherit;
+	}
+
+	.review-author,
+	.review-date,
+	.review-replies {
+		line-height: 1.25;
+		font-size: var( --wp--preset--font-size--extra-small );
+	}
+
+	.review-date,
+	.review-replies {
+		margin-left: 12px;
+		color: var( --wp--preset--color--charcoal-4 );
+		font-size: var( --wp--preset--font-size--extra-small );
+	}
+
+	.review-replies::before {
+		content: '•';
+		margin-right: 12px;
+	}
+
+	.review-content {
+		margin: 1em 0;
+	}
+
+	@media screen and ( min-width: $ms-breakpoint ) {
+		.review-avatar {
+			display: inline-block;
+			vertical-align: top;
+
+			.avatar {
+				margin-right: 1rem;
+			}
+		}
+
+		.review {
+			width: calc(100% - 60px - 1rem);
+		}
+
+		.review-header {
+			margin: 0;
+		}
+
+		.review-author,
+		.review-date,
+		.review-replies {
+			line-height: 1;
+		}
+	}
+
+	.reviews-link {
+		display: inline-block;
+		font-size: var( --wp--preset--font-size--small );
+		text-decoration: none;
+
+		&:after {
+			content: "\f345";
+			font-family: dashicons;
+			vertical-align: text-top;
+			padding-left: 5px;
+			float: right;
+			position: relative;
+			top: 1px;
+		}
+	}
+	
+}

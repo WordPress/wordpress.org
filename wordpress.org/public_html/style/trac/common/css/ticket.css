@@ -1,13 +1,11 @@
 @import url(code.css);
 
 #content.ticket {
- width: 58em;
+ width: 56em;
  max-width: 100%;
  margin-left: auto;
  margin-right: auto;
 }
-
-#field-description-help { float: right }
 
 #content.ticket .trac-topnav {
  float: none;
@@ -15,8 +13,9 @@
  margin-top: 0;
 }
 
+
 /* "Yellow Ticket Box" */
-#ticket {
+#ticketbox {
  background: #ffd;
  border: 1px solid #dd9;
  border-radius: .4em;
@@ -26,7 +25,7 @@
 }
 
 /* YTB in preview mode */
-#ticket.ticketdraft {
+#ticketbox.ticketdraft {
  background: #f8f8f8 url(../draft.png);
 }
 #ticketchange.ticketdraft {
@@ -34,7 +33,7 @@
  padding: 0 1em;
  margin: 1em 0;
 }
-#ticketchange.ticketdraft h3 {
+#ticketchange.ticketdraft h3.change {
  margin-top: .5em;
 }
 .preview-notice { font-weight: bold; }
@@ -52,72 +51,73 @@
  clear: right;
 }
 
-#ticket > h2 {
- color: #844;
- margin: .3em 0 .4em 0;
-}
-#ticket > h2 .trac-id {
+#ticketbox > h1, #ticketbox > h2 { color: #844 }
+#ticketbox > h2 { margin: .3em 0 .4em 0 }
+#ticketbox > h2 .trac-id {
  font-size: 145%;
  vertical-align: middle;
  margin: 0 .4em 0 0;
 }
-#ticket > h2 .trac-status {
+#ticketbox > h2 .trac-status {
  vertical-align: middle;
 }
-#ticket > h2 .trac-type {
+#ticketbox > h2 .trac-type {
  color: #955;
  vertical-align: middle;
 }
-#ticket > h2 .trac-resolution {
+#ticketbox > h2 .trac-resolution {
  vertical-align: middle;
 }
 
-#ticket .date {
+#ticketbox .date {
  color: #996;
  float: right;
  font-size: 85%;
  position: relative;
  top: -.2em;
 }
-#ticket .date p { margin: .3em }
+#ticketbox .date p { margin: .3em }
 
-#ticket table.properties {
+#ticketbox table.properties {
  clear: both;
  border-top: 1px solid #dd9;
  border-collapse: collapse;
  table-layout: fixed;
  width: 100%;
 }
-#ticket table.properties > tbody > tr { border-bottom: 1px dotted #eed }
-#ticket table.properties > tbody > tr > td,
-#ticket table.properties > tbody > tr > th {
- font-size: 80%;
+#ticketbox table.properties > tbody > tr { border-bottom: 1px dotted #eed }
+#ticketbox table.properties > tbody > tr > td,
+#ticketbox table.properties > tbody > tr > th {
+ font-size: .9em;
  padding: .5em 1em;
  vertical-align: top;
 }
-#ticket table.properties > tbody > tr > th {
+#ticketbox table.properties > tbody > tr > th {
  color: #663;
  font-weight: normal;
  text-align: left;
  width: 20%;
 }
-#ticket table.properties > tbody > tr > th.missing { color: #d3d398; }
-#ticket table.properties > tbody > tr > td { width: 30% }
-#ticket table.properties > tbody > tr > td p:first-child { margin-top: 0 }
-#ticket table.properties > tbody > tr > td p:last-child { margin-bottom: 0 }
-#ticket div.description h3 {
+#ticketbox table.properties > tbody > tr > th.missing { color: #d3d398; }
+#ticketbox table.properties > tbody > tr > td { width: 30% }
+#ticketbox table.properties > tbody > tr > td p:first-child { margin-top: 0 }
+#ticketbox table.properties > tbody > tr > td p:last-child { margin-bottom: 0 }
+#ticketbox div.description h2 {
  border-bottom: 1px solid #dd9;
  color: #663;
- font-size: 100%;
- font-weight: normal;
+ font-size: 120%;
+ font-weight: 600;
 }
-#ticket div.description h3 .lastmod {
- font-size: 90%;
+#ticketbox div.description h3 .lastmod {
+ font-size: 85%;
 }
-#ticket .inlinebuttons {
+#ticketbox .inlinebuttons {
  float: right;
  position: relative;
  bottom: 0.3em;
+}
+#ticketbox .trac-noreplybutton {
+ display: none;
 }
 
 /* Change History */
@@ -132,18 +132,21 @@ ul.children {
  margin-top: 1.5em;
  padding-left: 2em;
 }
-ul.children, ul.children ul.children { list-style-image: url(../inreply.png) }
+ul.children, ul.children ul.children { list-style: none }
 ul.children ul, ul.children ol { list-style-image: none }
 ul.children > li.child {
- padding: .1em 0 0 .5em;
+ padding: 0 0 0 .5em;
  margin-bottom: 1.5em;
  border: 1px solid;
- border-color: #f8f8f8 #eee #e4e4e4 #ddd;
- border-top: 0;
- border-right: 0;
- border-radius: .8em;
+ border-color: transparent transparent transparent #d8d7d7;
+ border-radius: .8em 0 0 .8em;
+ box-shadow: -1.6em 0 #e9e9e9;
 }
-#changelog ul.children h3 { margin-right: .4em }
+#changelog ul.children h3.change {
+ margin-left: -.5rem;
+ padding: .1em .4em 1em .5em;
+ border-radius: .8em 0 0 0;
+}
 #changelog pre.wiki, #changelog div.code { clear: right }
 #ticketchange pre.wiki, #ticketchange div.code { clear: right }
 
@@ -154,18 +157,36 @@ ul.children > li.child {
 
 
 /* Comment contents */
-#changelog h3, #ticketchange h3 {
- border-bottom: 1px solid #d7d7d7;
- box-shadow: .1em .2em .4em 0 #f2f2f2;
- padding: 0 .2em;
- margin-bottom: .2em;
- color: #999;
+#changelog h3.change, #ticketchange h3.change {
+ background: linear-gradient(to top,
+  rgba(255, 255, 255, 0),
+  rgba(234, 234, 234, 0.21) .3em,
+  rgba(198, 198, 198, 0.21) .7em,
+  #c7c5c5 .8em, /* ticket_h_underline_color ticket_h_underline_shadow */
+  rgba(255, 255, 255, 0) .8em,
+  rgba(243, 243, 243, 0.3) 100%
+ );
+ padding: 0 .2em 1em; /* ticket_h_underline_padding _ (ticket_h_underline_padding + ticket_h_underline_shadow) */
+ margin: 0 0 .2em;
+ color: #655b5b;
  font-size: 100%;
  font-weight: normal;
 }
-@media print {
- #changelog h3, #ticketchange h3 { box-shadow: none }
+#changelog h3:target, #ticketchange h3:target {
+ background: linear-gradient(to top,
+  rgba(255, 255, 255, 0),
+  rgba(234, 234, 234, 0.21) .3em,
+  rgba(198, 198, 198, 0.21) .7em,
+  #c7c5c5 .8em, /* ticket_h_underline_color ticket_h_underline_shadow */
+  #fbffb6 .8em, /* trac_hl_color */
+  #fbffb6 100%
+ );
+ box-shadow: none;
 }
+@media print {
+ #changelog h3.change, #ticketchange h3.change { background: none }
+}
+#changelog h3 :link, #changelog h3 :visited { border-bottom: none }
 
 /* Comment editor */
 #trac-comment-editor { margin-left: .5em; margin-bottom: 1em }
@@ -188,12 +209,20 @@ ul.children > li.child {
 #changelog .trac-lastedit {
  padding-left: 2.5em;
  margin-top: .8em;
+ margin-bottom: 1.4em;
  color: #999;
  font-size: 80%;
 }
 #changelog .trac-lastedit :link, #changelog .trac-lastedit :visited { color: inherit }
+#changelog ul.children .trac-lastedit {
+ margin-bottom: .6em;
+}
+
 
 /*  - Change controls */
+.trac-change-panel {
+ margin-top: -.5em; /* related to #changelog h3.change, #ticketchange h3.change { padding-bottom: 1em } */
+}
 .trac-ticket-buttons {
  clear: right;
  visibility: hidden;
@@ -246,7 +275,7 @@ div.change:after {
  border-left: .3em solid #e44;
  padding-left: .3em;
 }
-#changelog .comment, #ticketchange .comment { margin-left: .5em }
+#changelog .comment, #ticketchange .comment { margin-left: .8em }
 button.trac-revert, button.trac-revert:hover {
  margin: 0;
  padding: 0;
@@ -265,9 +294,13 @@ button.trac-revert div { display: none; }
 form .field { margin-top: .75em; width: 100% }
 form .field fieldset { margin-left: 1px; margin-right: 1px }
 #trac-add-comment .author { margin-bottom: 1em; }
-#trac-add-comment table th { text-align: left; width: 22%; }
-#trac-add-comment table td { width: 78%; }
-label[for=comment] { float: right }
+#trac-add-comment .author span.hint {
+ display: block;
+ margin-top: 0;
+ text-align: right
+}
+#trac-add-comment table th { text-align: left; width: 30%; }
+#trac-add-comment table td { width: 70%; }
 
 #propertyform {
  clear: both;
@@ -284,13 +317,13 @@ label[for=comment] { float: right }
  box-sizing: border-box;
  width: 100%;
 }
-#properties { white-space: nowrap; line-height: 160%; padding: 1em }
+#properties { line-height: 160%; padding: 1em }
 #properties table.trac-properties > tbody > tr > th,
 #properties table.trac-properties > colgroup > col.th {
+ overflow: hidden;
  padding: .4em;
  text-align: right;
  vertical-align: middle;
- white-space: normal;
  width: 17%;
 }
 #properties table.trac-properties > tbody > tr > th.col2 { border-left: 1px dotted #d7d7d7 }
@@ -305,7 +338,8 @@ label[for=comment] { float: right }
 #properties table.trac-properties > tbody > tr > td.col1 > label,
 #properties table.trac-properties > tbody > tr > td.col2 > label { float: left; margin-right: 0.5em; }
 #properties table.trac-properties > tbody > tr > td > select { max-width: 100% }
-#properties table.trac-properties > tbody > tr > td > span.hint { padding-left: 0 }
+#properties table.trac-properties > tbody > tr > td > span.hint { display: block; line-height: 100%; text-align: right }
+#properties table.trac-properties > tbody > tr > td > label.trac-textarea-hint { line-height: 100%; margin-bottom: 1em }
 
 #action { line-height: 2em }
 

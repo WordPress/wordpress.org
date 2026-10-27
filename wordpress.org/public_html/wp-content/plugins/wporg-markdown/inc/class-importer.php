@@ -33,12 +33,12 @@ abstract class Importer {
 	/**
 	 * Posts per page to query for.
 	 *
-	 * This needs to be set at least as high as the number of pages being
-	 * imported, but should not be unbounded (-1).
+	 * Unbounded due to the expectation that the number of pages being imported
+	 * is bound by the manifest size.
 	 *
 	 * @var int
 	 */
-	protected $posts_per_page = 500;
+	protected $posts_per_page = -1;
 
 	/**
 	 * Data about existing handbook pages.
@@ -236,6 +236,13 @@ abstract class Importer {
 		if ( $doc['slug'] === 'index' ) {
 			$doc['slug'] = $this->get_post_type();
 		}
+
+		// Stop if sanitized slug doesn't match
+		$sanitized = sanitize_title_with_dashes( $doc['slug'] );
+		if ( $sanitized !== $doc['slug'] ) {
+			return false;
+		}
+
 		$post_data = array(
 			'post_type'   => $this->get_post_type(),
 			'post_status' => 'publish',
@@ -320,11 +327,28 @@ abstract class Importer {
 					$success++;
 				}
 			}
+
+			// Each update loads and caches every revision of the post, so drop the
+			// runtime cache to keep memory flat across a large handbook.
+			$this->clear_memory_heavy_variables();
 		}
 		if ( class_exists( 'WP_CLI' ) ) {
 			$total = count( $ids );
 			WP_CLI::success( "Successfully updated {$success} of {$total} pages." );
 		}
+	}
+
+	/**
+	 * Clears in-memory caches that grow with each imported post.
+	 *
+	 * @global \wpdb $wpdb
+	 */
+	protected function clear_memory_heavy_variables() {
+		global $wpdb;
+
+		$wpdb->queries = [];
+
+		wp_cache_flush_runtime();
 	}
 
 	/**

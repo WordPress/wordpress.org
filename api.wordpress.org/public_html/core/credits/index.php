@@ -39,7 +39,11 @@ if ( ! empty( $_GET['version'] ) ) {
 	$version = WP_CORE_LATEST_RELEASE;
 }
 
-if ( version_compare( $version, '3.2', '<' ) ) {
+if (
+	! is_string( $version ) ||
+	version_compare( $version, '3.2', '<' ) ||
+	( isset( $_GET['locale'] ) && ! is_string( $_GET['locale'] ) )
+) {
 	header( 'HTTP/1.0 400 Bad Request', true, 400 );
 	die( 'Bad request.' );
 }

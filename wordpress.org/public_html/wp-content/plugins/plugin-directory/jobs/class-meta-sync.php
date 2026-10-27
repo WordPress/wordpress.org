@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Jobs;
 
+use WPORG_Ratings;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 
@@ -24,9 +25,15 @@ class Meta_Sync {
 	 */
 	function sync() {
 		$this->sync_downloads();
-		$this->sync_ratings();
-		$this->update_tested_up_to();
+		Manager::clear_memory_heavy_variables();
 
+		$this->sync_ratings();
+		Manager::clear_memory_heavy_variables();
+
+		$this->update_tested_up_to();
+		Manager::clear_memory_heavy_variables();
+
+		$this->cleanup_empty_terms();
 		Manager::clear_memory_heavy_variables();
 	}
 
@@ -89,12 +96,17 @@ class Meta_Sync {
 			update_post_meta(
 				$post->ID,
 				'rating',
-				\WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name )
+				WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name )
 			);
 			update_post_meta(
 				$post->ID,
 				'ratings',
-				\WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name )
+				WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name )
+			);
+			update_post_meta(
+				$post->ID,
+				'num_ratings',
+				WPORG_Ratings::get_rating_count( 'plugin', $post->post_name )
 			);
 
 			$author_block_query = new \WP_Query( array(
@@ -186,6 +198,44 @@ class Meta_Sync {
 
 			if ( $i % 100 === 0 ) {
 				Manager::clear_memory_heavy_variables();
+			}
+		}
+	}
+
+	/**
+	 * Remove old plugin tags that are no longer in use.
+	 */
+	public function cleanup_empty_terms() {
+		global $wpdb;
+
+		$taxonomies = [
+			'plugin_tags',
+			'plugin_contributors',
+			'plugin_committers',
+			'plugin_support_reps'
+		];
+		foreach ( $taxonomies as $taxonomy ) {
+			$term_ids = $wpdb->get_col( $wpdb->prepare(
+				"SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s AND count = 0",
+				$taxonomy
+			) );
+			if ( ! $term_ids ) {
+				continue;
+			}
+
+			$terms = get_terms( array(
+				'taxonomy'   => $taxonomy,
+				'include'    => $term_ids,
+				'hide_empty' => false,
+				'count'      => true,
+			) );
+
+			$terms = array_filter( $terms, function( $term ) {
+				return $term->count === 0;
+			} );
+
+			foreach ( $terms as $term ) {
+				wp_delete_term( $term->term_id, $term->taxonomy );
 			}
 		}
 	}

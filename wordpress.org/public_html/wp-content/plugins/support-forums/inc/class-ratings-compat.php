@@ -4,10 +4,15 @@ namespace WordPressdotorg\Forums;
 
 class Ratings_Compat {
 
-	var $compat   = null;
-	var $slug     = null;
-	var $object   = null;
-	var $taxonomy = null;
+	var $compat             = null;
+	var $slug               = null;
+	var $object             = null;
+	var $taxonomy           = null;
+	var $ratings_counts     = null;
+	var $avg_rating         = null;
+	var $reviews_count      = null;
+	var $review_exists      = null;
+	var $review_topic_query = null;
 
 	var $filter = false;
 
@@ -44,12 +49,12 @@ class Ratings_Compat {
 				$filter = 5;
 			}
 			$this->filter = $filter;
-			add_filter( 'posts_clauses', array( $this, 'add_filter_to_posts_clauses' ) );
+			add_filter( 'posts_clauses', array( $this, 'add_filter_to_posts_clauses' ), 10, 2 );
 			add_action( 'pre_get_posts', array( $this, 'no_found_rows' ) );
 			add_filter( 'bbp_topic_pagination', array( $this, 'add_filter_topic_pagination' ) );
 
 			// <meta robots="noindex,follow"> for filtered views.
-			add_filter( 'wp_head', 'wp_no_robots' );
+			add_filter( 'wp_robots', 'wp_robots_no_robots' );
 		}
 
 		// Total reviews count. Can be altered using $this->filter if needed.
@@ -69,6 +74,9 @@ class Ratings_Compat {
 		add_action( 'wporg_compat_after_single_view', array( $this, 'add_topic_form' ) );
 		add_action( 'bbp_theme_before_topic_form_content', array( $this, 'add_topic_form_stars' ), 8 );
 
+		// Hide tags field on plugin reviews.
+		add_filter( 'bbp_allow_topic_tags', array( $this, 'show_topic_form_tags' ) );
+
 		// Check to see if a topic is being created/edited.
 		add_action( 'bbp_new_topic_post_extras', array( $this, 'topic_post_extras' ) );
 		add_action( 'bbp_edit_topic_post_extras', array( $this, 'topic_post_extras' ) );
@@ -81,6 +89,9 @@ class Ratings_Compat {
 			add_filter( 'bbp_get_topic_content', array( $this, 'feed_prepend_rating' ), 10, 2 );
 			add_filter( 'bbp_get_topic_title', array( $this, 'feed_append_rating' ), 10, 2 );
 		}
+
+		// Clear the review/ratings caches upon archive.
+		add_action( 'wporg_bbp_archived_topic', array( $this, 'wporg_bbp_archived_topic' ) );
 	}
 
 	/**
@@ -93,8 +104,18 @@ class Ratings_Compat {
 	/**
 	 * Allow ratings view to be filtered by star rating.
 	 */
-	public function add_filter_to_posts_clauses( $clauses ) {
+	public function add_filter_to_posts_clauses( $clauses, $query ) {
 		global $wpdb;
+
+		// Only adjust topic queries.
+		if ( ! in_array( bbp_get_topic_post_type(), (array) $query->get( 'post_type' ) ) ) {
+			return $clauses;
+		}
+
+		// Don't adjust if it's looking for a specific users review, such as, `::review_exists()`
+		if ( $query->get( 'author' ) ) {
+			return $clauses;
+		}
 
 		$clauses['join']  .= " INNER JOIN ratings ON ( $wpdb->posts.ID = ratings.post_id )";
 		$clauses['where'] .= $wpdb->prepare( " AND ratings.rating = %d", $this->filter );
@@ -113,10 +134,11 @@ class Ratings_Compat {
 	 */
 	public function add_topic_stars() {
 		if ( bbp_is_single_topic() && Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id() ) {
-			$user_id = bbp_get_topic_author_id();
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$user_id  = bbp_get_topic_author_id();
+			$topic_id = bbp_get_topic_id();
+			$rating   = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 			if ( $rating > 0 ) {
-				echo \WPORG_Ratings::get_dashicons_stars( $rating );
+				echo wp_kses_post( \WPORG_Ratings::get_dashicons_stars( $rating ) );
 			}
 		}
 	}
@@ -130,7 +152,9 @@ class Ratings_Compat {
 				return;
 			}
 
-			$notice = $object_link = $edit_link = '';
+			$notice      = '';
+			$object_link = '';
+			$edit_url    = '';
 			switch( $this->compat ) {
 				case 'plugin' :
 					/* translators: 1: link to the plugin, 2: review edit URL */
@@ -148,7 +172,7 @@ class Ratings_Compat {
 
 			printf(
 				'<div class="bbp-template-notice info"><p>%s</p></div>',
-				sprintf( $notice, $object_link, $edit_url )
+				wp_kses_post( sprintf( $notice, $object_link, esc_url( $edit_url ) ) )
 			);
 		}
 	}
@@ -166,7 +190,7 @@ class Ratings_Compat {
 
 		if ( bbp_is_single_view() && 'reviews' == bbp_get_view_id() ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 			if ( $rating > 0 ) {
 				$title .= ' ' . \WPORG_Ratings::get_dashicons_stars( $rating );
 			}
@@ -198,88 +222,47 @@ class Ratings_Compat {
 		add_filter( 'bbp_get_topic_last_topic_title', array( $this, 'undo_topic_title' ), 10, 1 );
 ?>
 <div class="review-ratings">
-	<div class="col-3">
-		<div class="reviews-about" style="display:none;"><?php echo esc_html( $this->object->post_title ); ?></div>
-		<div class="reviews-total-count"><?php
-			printf(
-				/* translators: %s: number of reviews */
-				_n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ),
-				'<span>' . number_format_i18n( $this->reviews_count ) . '</span>'
-			);
-		?></div>
-		<?php
-			foreach ( array( 5, 4, 3, 2, 1 ) as $rating ) {
-				$ratings_count = isset( $this->ratings_counts[ $rating ] ) ? $this->ratings_counts[ $rating ] : 0;
-				$ratings_count_total = isset( $this->ratings_counts ) ? array_sum( $this->ratings_counts) : 0;
-				$stars_title = sprintf(
-					/* translators: %s: number of stars */
-					_n( 'Click to see reviews that provided a rating of %d star',
-					    'Click to see reviews that provided a rating of %d stars',
-					    $rating,
-					    'wporg-forums' ),
-					$rating
-				);
-				/* translators: %d: number of stars */
-				$stars_text = sprintf(
-					/* translators: %d: number of stars */
-					_n( '%d star', '%d stars', $rating, 'wporg-forums' ),
-					$rating
-				);
-				$width = 0;
-				if ( $ratings_count && $ratings_count_total ) {
-					$width = 100 * ( $ratings_count / $ratings_count_total );
-				}
-				?>
-				<div class="counter-container">
-				<a href="<?php echo esc_url( sprintf( home_url( '/%s/%s/reviews/?filter=%s' ), $this->compat, $this->slug, $rating ) ); ?>"
-					title="<?php echo esc_attr( $stars_title ); ?>">
-					<span class="counter-label" style="float:left;margin-right:5px;min-width:58px;"><?php echo esc_html( $stars_text ); ?></span>
-					<span class="counter-back" style="height:17px;width:100px;background-color:#ececec;float:left;">
-						<span class="counter-bar" style="width:<?php echo esc_attr( $width ); ?>px;height:17px;background-color:#ffc733;float:left;"></span>
-					</span>
-				</a>
-				<span class="counter-count" style="margin-left:5px;"><?php echo esc_html( $ratings_count ); ?></span>
-				</div>
-				<?php
-			}
-		?>
-	</div>
-	<div class="col-5">
-		<div style="font-weight:bold;"><?php _e( 'Average Rating', 'wporg-forums' ); ?></div>
-		<?php
-			echo \WPORG_Ratings::get_dashicons_stars( $this->avg_rating );
-			printf(
-				/* translators: 1: number of stars in rating, 2: total number of stars (5) */
-				__( '%1$s out of %2$s stars', 'wporg-forums' ),
-				round( isset( $this->avg_rating ) ? $this->avg_rating : 0, 1 ),
-				'<span>5</span>'
-			);
-		?>
+	<div>
+		<div style="font-weight:bold;"><?php esc_html_e( 'Average Rating', 'wporg-forums' ); ?></div>
+		<?php echo do_blocks( '<!-- wp:wporg/ratings-stars /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 		<div class="reviews-submit-link">
 		<?php
 			if ( is_user_logged_in() ) {
 				echo '<a href="#new-post" class="btn">';
 				if ( $this->review_exists() ) {
-					_e( 'Edit your review', 'wporg-forums' );
+					esc_html_e( 'Edit your review', 'wporg-forums' );
 				} else {
-					_e( 'Add your own review', 'wporg-forums' );
+					esc_html_e( 'Add your own review', 'wporg-forums' );
 				}
 				echo '</a>';
 			} else {
 				echo '<span class="reviews-need-login">';
 				printf(
 					/* translators: %s: login URL */
-					__( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ),
-					add_query_arg(
-						'redirect_to',
-						urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
-						'https://login.wordpress.org/'
+					wp_kses_post( __( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ) ),
+					esc_url(
+						add_query_arg(
+							'redirect_to',
+							rawurlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
+							'https://login.wordpress.org/'
+						)
 					)
 				);
 				echo '</span>';
 			}
 		?>
 		</div>
+	</div>
+	<div>
+		<div class="reviews-about" style="display:none;"><?php echo esc_html( $this->object->post_title ); ?></div>
+		<div class="reviews-total-count"><?php
+			printf(
+				/* translators: %s: number of reviews */
+				esc_html( _n( '%s review', '%s reviews', $this->reviews_count, 'wporg-forums' ) ),
+				'<span>' . esc_html( number_format_i18n( $this->reviews_count ) ) . '</span>'
+			);
+		?></div>
+		<?php echo do_blocks( '<!-- wp:wporg/ratings-bars /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 	</div>
 </div>
 		<?php
@@ -289,16 +272,20 @@ class Ratings_Compat {
 		if ( $filter > 0 && $filter < 6 ) {
 			echo '<p class="reviews-filtered-msg" style="margin-top:12px;font-size:0.8rem;">';
 			printf(
-				/* translators: %d: number of stars */
-				_n( 'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
-				    'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
-			        $filter,
-				        'wporg-forums' ) . ' ',
-				$filter
+				wp_kses_post(
+					/* translators: %d: Number of stars. */
+					_n(
+						'You are currently viewing the reviews that provided a rating of <strong>%d star</strong>.',
+						'You are currently viewing the reviews that provided a rating of <strong>%d stars</strong>.',
+						$filter,
+						'wporg-forums'
+					)
+				) . ' ',
+				esc_html( $filter )
 			);
 			printf(
 				/* translators: %s: plugin/theme reviews URL */
-				__( '<a href="%s">See all reviews</a>.', 'wporg-forums' ),
+				wp_kses_post( __( '<a href="%s">See all reviews</a>.', 'wporg-forums' ) ),
 				esc_url( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) )
 			);
 			echo "</p>\n";
@@ -336,6 +323,9 @@ class Ratings_Compat {
 				bbp_get_topic_author_id( $topic_id ),
 				$rating
 			);
+
+			// Store it against the review post for later use.
+			update_post_meta( $topic_id, 'rating', $rating );
 		}
 	}
 
@@ -444,11 +434,13 @@ class Ratings_Compat {
 			echo '<div class="bbp-template-notice"><p>';
 			printf(
 				/* translators: %s: login URL */
-				__( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ),
-				add_query_arg(
-					'redirect_to',
-					urlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
-					'https://login.wordpress.org/'
+				wp_kses_post( __( 'You must be <a href="%s" rel="nofollow">logged in</a> to submit a review.', 'wporg-forums' ) ),
+				esc_url(
+					add_query_arg(
+						'redirect_to',
+						rawurlencode( esc_url_raw( sprintf( home_url( '/%s/%s/reviews/' ), $this->compat, $this->slug ) ) ),
+						'https://login.wordpress.org/'
+					)
 				)
 			);
 			echo '</p></div>';
@@ -469,12 +461,12 @@ class Ratings_Compat {
 
 	public function do_template_notice() {
 		if ( $this->object->post_author == get_current_user_id() ) { ?>
-			<p><?php _e( 'A review should be the review of an experience a user has with your project, not for self-promotion.', 'wporg-forums' ); ?></p>
+			<p><?php esc_html_e( 'A review should be the review of an experience a user has with your project, not for self-promotion.', 'wporg-forums' ); ?></p>
 
 			<?php if ( 'plugin' === $this->compat ) : ?>
-				<p><?php _e( 'Since you work on this plugin, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ); ?></p>
+				<p><?php echo wp_kses_post( __( 'Since you work on this plugin, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ) ); ?></p>
 			<?php elseif ( 'theme' === $this->compat ) : ?>
-				<p><?php _e( 'Since you work on this theme, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ); ?></p>
+				<p><?php echo wp_kses_post( __( 'Since you work on this theme, please consider <em>not</em> leaving a review on your own work. You were probably going to give it five stars anyway.', 'wporg-forums' ) ); ?></p>
 			<?php endif;
 
 			return;
@@ -494,20 +486,30 @@ class Ratings_Compat {
 				break;
 		}
 		?>
-		<p><?php _e( 'When posting a review, follow these guidelines:', 'wporg-forums' ); ?></p>
+		<p><?php esc_html_e( 'When posting a review, follow these guidelines:', 'wporg-forums' ); ?></p>
 		<ul>
-			<li><?php printf( $report, esc_url( sprintf( home_url( '/%s/%s/' ), $this->compat, $this->slug ) ) ); ?></li>
+			<li><?php printf( wp_kses_post( $report ), esc_url( sprintf( home_url( '/%s/%s/' ), $this->compat, $this->slug ) ) ); ?></li>
 			<li><?php echo esc_html( $rate ); ?></li>
 			<li><?php esc_html_e( 'Please provide as much detail as you can to justify your rating and to help others.', 'wporg-forums' ); ?></li>
 			<li><?php
 				printf(
 					/* translators: %s: Forum user guide URL */
-					__( 'Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ),
+					wp_kses_post( __( 'Please <a href="%s">do not add links to your review</a>, keep the review about your experience in text only.', 'wporg-forums' ) ),
 					esc_url( __( 'https://wordpress.org/support/forum-user-guide/faq/#why-are-links-not-allowed-in-reviews', 'wporg-forums' ) )
 				);
 			?></li>
 		</ul>
 		<?php
+	}
+
+	/**
+	 * Hide the tags field when displaying the plugin review form.
+	 */
+	public function show_topic_form_tags( $show ) {
+		if ( Plugin::REVIEWS_FORUM_ID === bbp_get_topic_forum_id() ) {
+			return false;
+		}
+		return $show;
 	}
 
 	public function add_topic_form_stars() {
@@ -521,7 +523,7 @@ class Ratings_Compat {
 
 		printf(
 			'<label for="rating">%s</label>',
-			__( 'Your Rating:', 'wporg-forums' )
+			esc_html__( 'Your Rating:', 'wporg-forums' )
 		);
 
 		\WPORG_Ratings::get_dashicons_form( $this->compat, $this->slug, true );
@@ -545,7 +547,7 @@ class Ratings_Compat {
 	public function feed_prepend_rating( $content, $topic_id ) {
 		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id ) ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 
 			if ( $rating ) {
 				$content = sprintf(
@@ -571,7 +573,7 @@ class Ratings_Compat {
 	public function feed_append_rating( $title, $topic_id ) {
 		if ( Plugin::REVIEWS_FORUM_ID == bbp_get_topic_forum_id( $topic_id ) ) {
 			$user_id = bbp_get_topic_author_id( $topic_id );
-			$rating = \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
+			$rating  = get_post_meta( $topic_id, 'rating', true ) ?: \WPORG_Ratings::get_user_rating( $this->compat, $this->slug, $user_id );
 
 			if ( $rating ) {
 				$title = sprintf(
@@ -586,5 +588,18 @@ class Ratings_Compat {
 		}
 
 		return $title;
+	}
+
+	/**
+	 * Clear the rating caches on topic archive.
+	 */
+	public function wporg_bbp_archived_topic( $post_id ) {
+		// Clear the rating caches.
+		\WPORG_Ratings::clear_cache(
+			$post_id,
+			$this->compat,
+			$this->slug,
+			bbp_get_topic_author_id( $post_id )
+		);
 	}
 }

@@ -126,7 +126,8 @@ function scripts() {
 		wp_enqueue_style( 'page-40-percent', get_theme_file_uri( '/css/page-40-percent-style.css' ), [], '20210527a' );
 	}
 
-	if ( is_page() && get_queried_object()->post_parent ) {
+	$queried_object = get_queried_object();
+	if ( is_page() && $queried_object && $queried_object->post_parent ) {
 		wp_enqueue_script( 'wporg-navigation', get_theme_file_uri( "/js/navigation$suffix.js" ), [], '20151215', true );
 	}
 }
@@ -195,7 +196,7 @@ add_filter( 'body_class', __NAMESPACE__ . '\body_class' );
 function child_page_templates( $templates ) {
 	$page = get_queried_object();
 
-	if ( $page->post_parent ) {
+	if ( $page && $page->post_parent ) {
 		$parent = get_post( $page->post_parent );
 
 		// We want it before page-{page_name}.php but after {Page Template}.php.
@@ -302,6 +303,8 @@ add_filter( 'template_redirect', __NAMESPACE__ . '\old_page_redirects' );
  *  - It's not a rosetta page owned by anyone other than wordpressdotorg (These are the globally synced pages).
  */
 function maybe_remove_hreflang_tags() {
+	$post = get_post();
+
 	if (
 		! is_page() ||
 		is_page( 'hosting' ) ||
@@ -309,7 +312,7 @@ function maybe_remove_hreflang_tags() {
 		// Only include posts authored by `wordPressdotorg` which are using a page template.
 		(
 			defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK &&
-			get_user_by( 'slug', 'wordpressdotorg' )->ID != get_post()->post_author
+			( ! $post || get_user_by( 'slug', 'wordpressdotorg' )->ID != $post->post_author )
 		)
 	) {
 		remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );

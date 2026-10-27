@@ -1,0 +1,17 @@
+.wp-block-wporg-table-of-contents {
+	border: 1px solid var(--wp--custom--color--border);
+	border-radius: 2px;
+	margin-bottom: var(--wp--preset--spacing--50);
+
+	@media screen and ( min-width: 1300px ) {
+		float: right;
+		width: 250px;
+		margin-left: var(--wp--style--block-gap);
+		margin-bottom: var(--wp--style--block-gap);
+		padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--20) 0;
+	}
+
+	li ul {
+		margin-left: 0;
+	}
+}

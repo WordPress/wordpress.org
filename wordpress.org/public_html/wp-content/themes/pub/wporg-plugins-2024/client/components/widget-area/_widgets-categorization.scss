@@ -1,0 +1,29 @@
+.widget.plugin-categorization {
+	margin-top: var(--wp--style--block-gap);
+
+	.widget-head {
+		h2 {
+			font-size: var( --wp--preset--font-size--heading-4 );
+			margin-top: 0;
+			margin-bottom: 0.2rem;
+		}
+
+		a {
+			font-size: var( --wp--preset--font-size--small );
+
+			&[href=""] {
+				display: none;
+			}
+		}
+	}
+
+	p {
+		font-size: var( --wp--preset--font-size--small );
+		margin-top: 0.5rem;
+	}
+
+	& ~ .plugin-meta li:first-child {
+		border-top: 1px solid var( --wp--preset--color--light-grey-1 );
+	}
+}
+
