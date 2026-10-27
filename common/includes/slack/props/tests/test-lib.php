@@ -1,4 +1,4 @@
-<?php
+f<?php
 
 namespace Dotorg\Slack\Props\Tests;
 use wpdbStub;
@@ -270,7 +270,7 @@ class Test_Props_Lib extends TestCase {
 			),
 
 			'unescaped channel' => array(
-				'message'  => '#props to @Nasim Miah for organising',
+				'message'  => '#props to @Foo Bar for organising',
 				'expected' => array(
 					'C0FRG66LR' => 'props',
 				),
