@@ -595,7 +595,7 @@ jQuery( function( $ ) {
 
 		echo '<ul>';
 
-		echo '<li><a href="' . esc_url( $this->trac_url() . '/component/' . rawurlencode( $component ) ) . '">Find some open tickets to work on in Trac.</a></li>';
+		echo '<li><a href="' . esc_url( $this->get_component_url( $component ) ) . '">Find some open tickets to work on in Trac.</a></li>';
 
 		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
 		if ( ! empty( $slack_channel ) ) {
@@ -937,7 +937,7 @@ jQuery( function( $ ) {
 
 		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
 		if ( ! empty( $slack_channel ) ) {
-			echo '<span class="component-slack-link"><a href="' . esc_url( $this->slack_channel_url( $slack_channel ) ) . '"><span class="screen-reader-text">Join the ' . esc_html( $component ) . ' Slack channel</span></a></span>';
+			echo '<span class="component-slack-link"><a href="' . esc_url( $this->slack_channel_url( $slack_channel ) ) . '" aria-label="Join the ' . esc_attr( $component ) . ' Slack channel">Slack</a></span>';
 		}
 
 		echo '</td>';
