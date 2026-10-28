@@ -816,7 +816,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			'l10n' => array(
 				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' ),
 			),
-			'lastUpdated' => $last_updated,
+			'lastUpdated' => absint( $last_updated ),
 			'accessList' => $project_access_list,
 		) );
 
