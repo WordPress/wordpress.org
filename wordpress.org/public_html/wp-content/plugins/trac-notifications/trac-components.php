@@ -59,8 +59,14 @@ class Make_Core_Trac_Components {
 		return ucfirst( $this->trac );
 	}
 
-	function slack_channel_url( $channel_id ) {
-		return 'https://wordpress.slack.com/archives/' . sanitize_text_field( $channel_id );
+	/**
+	 * Returns the URL of a Slack channel in the WordPress workspace.
+	 *
+	 * @param string $channel_id Slack channel ID.
+	 * @return string
+	 */
+	public function slack_channel_url( $channel_id ) {
+		return 'https://wordpress.slack.com/archives/' . rawurlencode( $channel_id );
 	}
 
 	function init() {
@@ -202,7 +208,10 @@ class Make_Core_Trac_Components {
 		}
 
 		if ( isset( $_POST['slack-channel'] ) ) {
-			update_post_meta( $post->ID, '_slack_channel', sanitize_text_field( wp_unslash( $_POST['slack-channel'] ) ) );
+			$slack_channel = strtoupper( trim( sanitize_text_field( wp_unslash( $_POST['slack-channel'] ) ) ) );
+			if ( '' === $slack_channel || preg_match( '/^[A-Z0-9]+$/', $slack_channel ) ) {
+				update_post_meta( $post->ID, '_slack_channel', $slack_channel );
+			}
 		}
 	}
 
@@ -575,7 +584,7 @@ jQuery( function( $ ) {
 			}
 			echo "</ul>\n\n";
 		} else {
-			echo "\n" . "<strong>There are currently no maintainers of this component.</strong>\n\n";
+			echo '<p><strong>There are currently no maintainers of this component.</strong></p>';
 		}
 
 		echo '<p>Component maintainers are vital to keeping WordPress development running as smoothly as possible. They triage new tickets, look after existing ones, spearhead or mentor tasks, pitch new ideas, curate roadmaps, and provide feedback to other contributors. Longtime maintainers with a deep understanding of particular areas of ' . esc_html( $this->trac_name() ) . ' are always seeking to mentor others to impart their knowledge. Many contributors help maintain one or more components.</p>';
@@ -928,7 +937,7 @@ jQuery( function( $ ) {
 
 		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
 		if ( ! empty( $slack_channel ) ) {
-				echo '<span class="component-slack-link"><a href="' . $this->slack_channel_url( $slack_channel ) . '"><span class="screen-reader-text">Join the ' . $component . ' Slack channel</span></a></span>';
+			echo '<span class="component-slack-link"><a href="' . esc_url( $this->slack_channel_url( $slack_channel ) ) . '"><span class="screen-reader-text">Join the ' . esc_html( $component ) . ' Slack channel</span></a></span>';
 		}
 
 		echo '</td>';
