@@ -121,18 +121,26 @@ function photoSubmitInit() {
 /**
  * Estimates the number of words in a photo description.
  *
- * The server performs the definitive count. This deliberately simple check
- * gives people earlier feedback for ordinary English prose.
+ * A word is a run of letters or numbers. An apostrophe or hyphen stays inside
+ * the word when it joins two such runs, as in "don't" or "close-up". Other
+ * punctuation separates words. HTML markup and entities are not processed, so
+ * the client may count more words than the server.
+ *
+ * NOTE: The server performs the definitive count and may still reject a
+ * description that passes here. This deliberately simple check gives people
+ * earlier feedback for ordinary English prose.
  *
  * @param {string} text Description text.
  * @return {number}
  */
 function photoCountDescriptionWords( text ) {
-	if ( 'string' !== typeof text || '' === text.trim() ) {
+	if ( 'string' !== typeof text ) {
 		return 0;
 	}
 
-	return text.trim().split( /\s+/ ).length;
+	const words = text.match( /[\p{L}\p{N}]+(?:['\u2019-][\p{L}\p{N}]+)*/gu );
+
+	return words ? words.length : 0;
 }
 
 /**
