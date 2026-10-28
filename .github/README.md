@@ -54,5 +54,5 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
 - **Purpose:** Audits one representative page per site template on the live network (performance, accessibility, best practices, SEO) and posts the category scores to the site-quality stats endpoint, so regressions show up as a trend. Settings live in [lighthouserc.json](lighthouserc.json).
 
 ### 6. [Static Analysis (JS/CSS)](workflows/js-css-lint.yml) (`js-css-lint.yml`)
-- **Trigger:** Runs on pull requests and pushes to `trunk` that touch `wordpress.org/public_html/style/`, the Plugin Directory theme (`wporg-plugins-2024`), or the Support theme (`wporg-support-2024`). Any of them runs the job for all three.
+- **Trigger:** Runs on pull requests and pushes to `trunk` that touch `wordpress.org/public_html/style/`, the Documentation theme (`wporg-documentation-2022`), the Plugin Directory theme (`wporg-plugins-2024`), or the Support theme (`wporg-support-2024`). Any of them runs the job for all four.
 - **Actions:** Installs each package from its committed `package-lock.json`, runs its `lint:js` and `lint:css` scripts (and Prettier for `style/`), then rebuilds and fails if the committed build output differs. To cover another package with a committed build, commit its lockfile, add it to the matrix, and add its path to both triggers.
