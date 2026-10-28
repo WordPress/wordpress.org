@@ -253,7 +253,7 @@ function comment_form_defaults( $fields ) {
 
 	$fields['logged_in_as']  = '<p>';
 	$fields['logged_in_as'] .= __( 'Feedback you send to us will go only to the folks who maintain documentation. They may reach out in case there are questions or would like to followup feedback. But that too will stay behind the scenes.', 'wporg-docs' );
-	$fields['logged_in_as'] .= '</p></p>';
+	$fields['logged_in_as'] .= '</p><p>';
 	$fields['logged_in_as'] .= sprintf(
 		/* translators: %s: support forums link. */
 		__( 'This is not for personalized support. Please create a <a href="%s">forum thread</a> instead to receive help from the community.', 'wporg-docs' ),
