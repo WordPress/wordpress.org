@@ -214,7 +214,7 @@ class Cross_Locale_PTE {
 				'removeTranslator'  => __( 'Are you sure you wish to completely remove CLPTE status for this user?', 'rosetta' ),
 				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' ),
 			),
-			'lastUpdated' => $last_updated,
+			'lastUpdated' => absint( $last_updated ),
 			'accessList' => $project_access_list,
 		) );
 
