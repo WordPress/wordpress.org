@@ -96,7 +96,7 @@ header, #main, footer {
 
 .wrap {
 	zoom: 1;
-	max-width: 1150px;
+	max-width: 1380px;
 	margin: 0 auto;
 }
 
@@ -311,7 +311,7 @@ html[dir="rtl"] #browserlist li {
 	background-position: -125px 0;
 }
 
-#browserlist li#opera .icon {
+#browserlist li#vivaldi .icon {
 	background-position: -250px 0;
 }
 
@@ -325,6 +325,10 @@ html[dir="rtl"] #browserlist li {
 
 #browserlist li#edge .icon {
 	background-position: -625px 0;
+}
+
+#browserlist li#brave .icon {
+	background-position: -750px 0;
 }
 
 #browserlist h2 {
@@ -351,14 +355,6 @@ html[dir="rtl"] #browserlist li {
 	background: url(imgs/alphabg.png) repeat;
 }
 
-.ie6 #browserlist h2 {
-	background: #E7DECD; /* 24-bit PNG not supported in IE6, replacing with flat color */
-}
-
-.ie6 #browserlist li a:hover h2 {
-	background: #EEE8DC; /* Lighter color on hover to simulate transparency */
-}
-
 #browserlist p {
 	padding: 0 5px;
 	text-shadow: 0 1px 0 rgba(255,255,255,.8);
@@ -366,10 +362,6 @@ html[dir="rtl"] #browserlist li {
 
 #browserlist p.info {
 	min-height: 150px;
-}
-
-.ie6 #browserlist p.info {
-	height: 120px; /* Fix for min-height bug */
 }
 
 #browserlist p.version {
@@ -392,10 +384,6 @@ html[dir="rtl"] #browserlist li {
 	background: url(imgs/alphabg.png) repeat;
 }
 
-.ie6 #browserlist p.website {
-	background: #E7DECD; /* 24-bit PNG not supported in IE6, replacing with flat color */
-}
-
 #browserlist li a:link, #browserlist li a:visited {
 	color: #324B4B;
 	padding: 10px;
@@ -416,10 +404,6 @@ html[dir="rtl"] #browserlist li {
 
 .no-rgba #browserlist li a:hover {
 	background: url(imgs/alphabg.png) repeat;
-}
-
-.ie6 #browserlist li a:hover {
-	background: #E7DECD; /* 24-bit PNG not supported in IE6, replacing with flat color */
 }
 
 #browserlist li a:hover .website {
@@ -511,10 +495,6 @@ footer h2 {
 	margin-left: 15px;
 }
 
-.ie6 #about {
-	display: inline; /* Fix for double margin float bug */
-}
-
 #share {
 	width: 30%;
 	float: right;
@@ -531,10 +511,6 @@ html[dir="rtl"] #share {
 	float: left;
 }
 
-.ie6 #share {
-	display: inline; /* Fix for double margin float bug */
-}
-
 #share nav li {
 	width: 32px;
 	height: 32px;
@@ -546,10 +522,6 @@ html[dir="rtl"] #share nav li {
 	float: right;
 	margin-right: 0;
 	margin-left: 9px;
-}
-
-.ie6 #share nav li {
-	display: inline; /* Fix for double margin float bug */
 }
 
 #share nav li a {
@@ -568,8 +540,17 @@ html[dir="rtl"] #share nav li {
 	transition: all .5s;
 }
 
+#share nav li.tumblr {
+	width: 21px;
+	margin-right: 6px;
+}
+
+#share nav li.tumblr a {
+	background-position: -362px -135px;
+}
+
 #share nav li.twitter a {
-	background-position: -300px -135px;
+	background-position: -300px -134px;
 }
 
 #share nav li.facebook a {
@@ -585,7 +566,7 @@ html[dir="rtl"] #share nav li {
 #byline {
 	clear: both;
 	margin: 0 auto;
-	padding-top: 10px;
+	padding-top: 60px;
 }
 
 #byline a {
@@ -601,7 +582,7 @@ html[dir="rtl"] #share nav li {
 	font-variant: initial;
 }
 
-@media (max-width: 1168px) {
+@media (max-width: 1379px) {
 	#main .wrap {
 		max-width: 728px;
 	}
@@ -609,12 +590,12 @@ html[dir="rtl"] #share nav li {
 		width: 242px;
 	}
 }
-@media (max-width: 976px)  {
+@media (max-width: 976px) {
 	#main .wrap {
 		max-width: 768px;
 	}
 }
-@media (max-width: 784px)  {
+@media (max-width: 784px) {
 	#main .wrap {
 		max-width: 690px;
 	}
@@ -622,12 +603,17 @@ html[dir="rtl"] #share nav li {
 		width: 230px;
 	}
 }
-@media (max-width: 705px)  {
+@media (max-width: 705px) {
 	#main .wrap {
 		max-width: 460px;
 	}
 	#browserlist li {
 		width: 230px;
+	}
+}
+@media (max-width: 705px) {
+	footer {
+		padding-bottom: 33px;
 	}
 }
 @media (max-width: 500px) {
@@ -654,6 +640,23 @@ html[dir="rtl"] #share nav li {
 	#browserlist li {
 		width: 242px;
 	}
+	#about,
+	#share {
+		float: none;
+		margin-left: 15px;
+		margin-right: 15px;
+		width: inherit;
+	}
+	#about {
+		margin-bottom: 15px;
+
+	}
+	#byline {
+		padding-top: 20px;
+	}
+	footer {
+		padding: 40px 0;
+	}
 }
 @media (max-width: 430px) {
 	header {
@@ -664,6 +667,9 @@ html[dir="rtl"] #share nav li {
 	}
 	.wf-leaguegothic1leaguegothic2-n4-active header h1 {
 		font-size: 1000%;
+	}
+	footer {
+		padding: 25px 0;
 	}
 }
 @media (max-width: 383px) {
@@ -686,6 +692,6 @@ html[dir="rtl"] #share nav li {
 	#browserlist li .icon, #share nav li a {
 		background-image: url(imgs/browsehappy-sprite-2x.png);
 		background-repeat: no-repeat;
-		background-size: 750px 170px;
+		background-size: 875px 170px;
 	}
 }

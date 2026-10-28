@@ -153,8 +153,9 @@ abstract class I18n_Import {
 	 * @param string $export_directory Relative path as provided by Dotorg_Plugins_Tracker.
 	 * @param string $project          GP project slug to import to
 	 * @param string $branch           GP project branch to import to (dev|stable)
+	 * @param int    $user_id          User ID to attribute the import to.
 	 */
-	public function import_translations_to_glotpress_project( $export_directory, $project, $branch ) {
+	public function import_translations_to_glotpress_project( $export_directory, $project, $branch, $user_id = 0 ) {
 		$files = Filesystem::list_files( $export_directory, true, '/\.po$/' );
 
 		if ( empty( $files ) ) {
@@ -229,7 +230,7 @@ abstract class I18n_Import {
 					break;
 			}
 
-			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate import-plugin-translations ' . escapeshellarg( "wp-plugins/{$project}/{$branch}" ) . ' ' . escapeshellarg( $language ) . ' ' . escapeshellarg( $file ) . ' --format=' . escapeshellarg( $ext );
+			$cmd = WPORGTRANSLATE_WPCLI . ' wporg-translate import-plugin-translations ' . escapeshellarg( "wp-plugins/{$project}/{$branch}" ) . ' ' . escapeshellarg( $language ) . ' ' . escapeshellarg( $file ) . ' --format=' . escapeshellarg( $ext ) . ' --user_id=' . escapeshellarg( $user_id );
 			exec( $cmd );
 		}
 	}

@@ -1,0 +1,25 @@
+dialog {
+	min-width: 30%;
+	min-height: 50%;
+
+	border: 0;
+	box-shadow: 6px 6px 6px rgba(0, 0, 0, 0.2);
+
+	@media (min-width:1280px) {
+		max-width: 55%;
+	}
+
+	&::backdrop {
+		background: #000;
+		opacity: 0.5;
+	}
+
+	.close {
+		position: absolute;
+		right: 1em;
+		top: 1em;
+		text-decoration: none !important;
+		cursor: pointer;
+		color: inherit;
+	}
+}

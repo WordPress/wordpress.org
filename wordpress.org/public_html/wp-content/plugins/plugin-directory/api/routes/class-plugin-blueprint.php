@@ -1,0 +1,286 @@
+<?php
+namespace WordPressdotorg\Plugin_Directory\API\Routes;
+
+use WordPressdotorg\Plugin_Directory\Plugin_Directory;
+use WordPressdotorg\Plugin_Directory\API\Base;
+use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Template;
+
+/**
+ * An API endpoint for fetching a plugin blueprint file.
+ *
+ * @package WordPressdotorg_Plugin_Directory
+ */
+class Plugin_Blueprint extends Base {
+
+	public function __construct() {
+		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/blueprint.json', array(
+			'methods'             => array( \WP_REST_Server::READABLE, \WP_REST_Server::CREATABLE ),
+			'callback'            => array( $this, 'blueprint' ),
+			// Note: the zip part of the endpoint is also public, since playground requests blueprints without cookie credentials
+			'permission_callback' => '__return_true',
+			'args'                => array(
+				'plugin_slug' => array(
+					'validate_callback' => array( $this, 'validate_plugin_slug_callback' ),
+				),
+			)
+		) );
+	}
+
+	/**
+	 * Endpoint to output a blueprint file contents.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool True if the favoriting was successful.
+	 */
+	public function blueprint( $request ) {
+		$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
+
+		if ( $request->get_param('zip_hash') ) {
+			$this->reviewer_blueprint( $request, $plugin );
+		}
+		if ( $request->get_param('url_hash') ) {
+			$this->developer_blueprint( $request, $plugin );
+		}
+
+		$blueprints = get_post_meta( $plugin->ID, 'assets_blueprints', true );
+		// Note: for now, only use a file called `blueprint.json`.
+		if ( !isset( $blueprints['blueprint.json'] ) ) {
+			return new \WP_Error( 'no_blueprint', 'File not found', array( 'status' => 404 ) );
+		}
+		$blueprint = $blueprints['blueprint.json'];
+		if ( !$blueprint || !isset( $blueprint['contents'] ) || !is_string( $blueprint['contents'] ) ) {
+			return new \WP_Error( 'invalid_blueprint', 'Invalid file', array( 'status' => 500 ) );
+		}
+
+		if ( $request->get_param('lang') && 'en' !== strtolower( substr( $request->get_param('lang'), 0, 2 ) ) ) {
+			// Check if there's already a setSiteLanguage step
+			$blueprint_data = json_decode( $blueprint['contents'] );
+			if ( isset( $blueprint_data->steps ) ) {
+				if ( !in_array( 'setSiteLanguage', wp_list_pluck( $blueprint_data->steps, 'step' ) ) ) {
+					// Add setSiteLanguage as the final step
+					array_push( $blueprint_data->steps, 
+						(object)[
+							'step' => 'setSiteLanguage',
+							'language' => sanitize_text_field( $request->get_param('lang') )
+						]
+					);
+				}
+			} else {
+				// No steps in blueprint, so create one
+				$blueprint_data->steps = [
+					(object)[
+						'step' => 'setSiteLanguage',
+						'language' => sanitize_text_field( $request->get_param('lang') )
+					]
+				];
+			}
+			header( 'Access-Control-Allow-Origin: *' );
+			return $blueprint_data;
+		}
+
+		// Configure this elsewhere?
+		header( 'Access-Control-Allow-Origin: *' );
+
+		// We already have a json string, returning would double-encode it.
+		die( $blueprint['contents'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
+	}
+
+	protected function get_zip_url_by_slug( $slug ) {
+		$plugin = Plugin_Directory::get_plugin_post( $slug );
+		if ( !$plugin ) {
+			return false;
+		}
+
+		$zips = get_attached_media( 'application/zip', $plugin );
+		// Return the last zip (the most recent?)
+		if ( $zips && count( $zips ) ) {
+			return wp_get_attachment_url( end($zips)->ID );
+		}
+		return false;
+	}
+
+	function reviewer_blueprint( $request, $plugin ) {
+		// Direct zip preview for plugin reviewers
+		if ( $request->get_param('zip_hash') ) {
+			foreach ( get_attached_media( 'application/zip', $plugin ) as $zip_file ) {
+				$zip_file_path = get_attached_file( $zip_file->ID );
+				if ( hash_equals( Template::preview_link_hash( $zip_file_path, 0 ), $request->get_param('zip_hash') ) ||
+				     hash_equals( Template::preview_link_hash( $zip_file_path, -1 ), $request->get_param('zip_hash') ) ) {
+					$zip_url = wp_get_attachment_url( $zip_file->ID );
+					if ( $zip_url ) {
+						$is_pcp = 'pcp' === $request->get_param('type');
+						$output = $this->generate_blueprint( $request, $plugin, $zip_url, $is_pcp, true );
+
+						if ( $output ) {
+							header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
+							die( $output );
+						}
+					}
+				}
+			}
+		}
+
+		return new \WP_Error( 'invalid_blueprint', 'Invalid file', array( 'status' => 500 ) );
+	}
+
+	function developer_blueprint( $request, $plugin ) {
+		// Generated blueprint for developers who haven't yet created a custom blueprint
+		if ( $request->get_param('url_hash') ) {
+			$download_link = Template::download_link( $plugin );
+			if ( $download_link ) {
+				if ( hash_equals( Template::preview_link_hash( $download_link, 0 ), $request->get_param('url_hash') ) ||
+					hash_equals( Template::preview_link_hash( $download_link, -1 ), $request->get_param('url_hash') ) ) {
+					$output = $this->generate_blueprint( $request, $plugin, $download_link, false, false );
+
+					if ( $output ) {
+						header( 'Access-Control-Allow-Origin: https://playground.wordpress.net' );
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
+						die( $output );
+					}
+				}
+			}
+		}
+	}
+
+	public function generate_blueprint( $request, $plugin, $zip_url, $install_pcp = true, $install_prh = true ) {
+		$landing_page = '/wp-admin/plugins.php';
+		$activate_plugin = true;
+		$dependencies = $plugin->requires_plugins ?: [];
+
+		if ( stripos( $plugin->post_title, 'woocommerce' ) ) {
+			$dependencies[] = 'woocommerce';
+		}
+		if ( stripos( $plugin->post_title, 'buddypress' ) ) {
+			$dependencies[] = 'buddypress';
+		}
+
+		$dependencies = array_diff( $dependencies, [ $plugin->post_name ] );
+
+		// Plugin deactivated, and land on the Plugin Check page
+		if ( $install_pcp ) {
+			$landing_page = '/wp-admin/admin.php?page=plugin-check&plugin=' . sanitize_title( $request['plugin_slug'] );
+			$activate_plugin = false;
+			$dependencies = [];
+		}
+
+		$zip_blueprint = (object)[
+			'landingPage' => $landing_page,
+			'preferredVersions' => (object)[
+				'php' => SUPPORTED_PHP, // Minimum recommended PHP.
+				'wp'  => 'latest',
+			],
+			'phpExtensionBundles' => [
+				'kitchen-sink'
+			],
+			'features' => (object)[
+				'networking' => true
+			],
+		];
+
+		$steps = [];
+
+		// PCP first, if needed.
+		if ( $install_pcp ) {
+			$steps[] = (object)[
+				'step' => 'installPlugin',
+				'pluginData' => (object)[
+					'resource' => 'wordpress.org/plugins',
+					'slug'     => 'plugin-check',
+				]
+			];
+		}
+
+		// Include the helper plugin too
+		$helper_zip = self::get_zip_url_by_slug( 'playground-review-helper' );
+		if ( $helper_zip && $install_prh ) {
+			$steps[] = (object)[
+				'step' => 'installPlugin',
+				'pluginData' => [
+					'resource' => 'url',
+					'url'      => $helper_zip,
+				],
+				'options' => (object)[
+					'activate' => (bool)$activate_plugin
+				]
+			];
+		}
+
+		// Dependencies next
+		if ( $dependencies ) {
+			foreach ( $dependencies as $slug ) {
+				$steps[] = (object)[
+					'step' => 'installPlugin',
+					'pluginData' => [
+						'resource' => 'wordpress.org/plugins',
+						'slug'     => sanitize_title( $slug ),
+					],
+					'options' => (object)[
+						'activate' => true
+					]
+				];
+			}
+		}
+
+		// Now the plugin itself
+		$steps[] = (object)[
+			'step' => 'installPlugin',
+			'pluginData' => (object)[
+				'resource' => 'url',
+				'url'      => $zip_url,
+			],
+			'options' => (object)[
+				'activate' => (bool)$activate_plugin
+			]
+		];
+
+		/*
+		 * Maybe rename the plugin to exist in the expected folder.
+		 *
+		 * Temporary workaround for https://github.com/WordPress/wordpress-playground/issues/1802
+		 */
+		if ( ! str_starts_with( 'https://downloads.wordpress.org/', $zip_url ) ) {
+			$steps[] = (object)[
+				'step' => 'runPHP',
+				'code' => '<?php
+					include "/wordpress/wp-load.php";
+					$expected_slug = ' . var_export( $plugin->post_name, true ) . ';
+					$expected_plugins = ' . var_export( array_merge( [ 'plugin-check', 'playground-review-helper' ], $dependencies ), true ) . ';
+					$installed_plugins = array_diff(
+						array_map( "basename", glob( WP_PLUGIN_DIR . "/*", GLOB_ONLYDIR ) ),
+						$expected_plugins
+					);
+					if ( 1 === count( $installed_plugins) ) {
+						$plugin_dir = reset( $installed_plugins );
+						if ( $plugin_dir !== $expected_slug ) {
+							if ( rename( WP_PLUGIN_DIR . "/" . $plugin_dir, WP_PLUGIN_DIR . "/" . $expected_slug ) ) {
+								$active_plugins = get_option( "active_plugins" );
+								foreach ( $active_plugins as &$active_plugin ) {
+									if ( 0 === strpos( $active_plugin, $plugin_dir ) ) {
+										$active_plugin = $expected_slug . substr( $active_plugin, strlen( $plugin_dir ) );
+									}
+								}
+								update_option( "active_plugins", $active_plugins );
+							}
+						}
+					}
+				'
+			];
+		}
+
+		// Finally log in
+		$steps[] = (object)[
+			'step' => 'login',
+			'username' => 'admin',
+			'password' => 'password',
+		];
+
+		$zip_blueprint->steps = $steps;
+
+		$output = json_encode( $zip_blueprint, JSON_PRETTY_PRINT );
+
+		return $output;
+	}
+
+}

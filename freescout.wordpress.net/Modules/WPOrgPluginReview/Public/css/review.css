@@ -1,0 +1,506 @@
+/**
+ * Styles the Plugin Review panel in the conversation sidebar, the buttons it adds to the Plugins & Themes panel, and the
+ * My Reviews and My Cases folders.
+ *
+ * Text colors meet WCAG AAA (7:1) on the panel background.
+ */
+
+.wporg-review .panel-body {
+	font-size: 13px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.wporg-review-heading {
+	margin: 12px 0 4px;
+	padding-top: 12px;
+	border-top: 1px solid #d6dde3;
+	color: #2a3b47;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.wporg-review-details {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 2px 8px;
+	margin: 4px 0 0;
+}
+
+.wporg-review-details dt {
+	color: #4a5561;
+	font-weight: 400;
+}
+
+.wporg-review-details dd {
+	margin: 0;
+}
+
+.wporg-review-copy {
+	margin-left: 2px;
+	padding: 0 2px;
+	border: 0;
+	background: none;
+	color: #4a5561;
+	font-size: 11px;
+}
+
+.wporg-review-copy:hover,
+.wporg-review-copy:focus {
+	color: #0078d7;
+}
+
+.wporg-review-copied {
+	margin-left: 4px;
+	color: #175a28;
+	font-size: 11px;
+}
+
+.wporg-review-flags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* Flags without a color of their own are orange. */
+.wporg-review-flag {
+	padding: 0 8px;
+	border-radius: 9px;
+	background-color: #ff8918;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 20px;
+}
+
+.wporg-review-flag[data-flag="UPD"] {
+	background-color: #dc2626;
+}
+
+.wporg-review-flag[data-flag="TRM"] {
+	background-color: #f59e0b;
+}
+
+.wporg-review-flag[data-flag="OWN"] {
+	background-color: #8c6e1e;
+}
+
+.wporg-review-flag[data-flag="DESC"] {
+	background-color: #4f3d0c;
+}
+
+.wporg-review-flag[data-flag="LIC"] {
+	background-color: #a72e9e;
+}
+
+.wporg-review-flag[data-flag="COM"] {
+	background-color: #0c4f4d;
+}
+
+.wporg-review-flag[data-flag="FUN"],
+.wporg-review-flag[data-flag="ACT"] {
+	background-color: #1d4ed8;
+}
+
+.wporg-review-flag[data-flag="RMT"] {
+	background-color: #b91c1c;
+}
+
+.wporg-review-flag[data-flag="SOCK"] {
+	background-color: #ffcafe;
+	color: #444;
+}
+
+.wporg-review-flag .wporg-review-copy {
+	color: inherit;
+}
+
+.wporg-review-badge {
+	margin-left: 4px;
+	padding: 0 6px;
+	border-radius: 9px;
+	background-color: #e1f4e5;
+	color: #175a28;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.wporg-review-issues {
+	margin: 0;
+	padding-left: 18px;
+}
+
+.wporg-review-issue {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #4a5561;
+	font-weight: 400;
+	text-align: left;
+}
+
+.wporg-review-issue:hover,
+.wporg-review-issue:focus {
+	text-decoration: underline;
+}
+
+.wporg-review-issue.is-priority-2 {
+	font-weight: 700;
+}
+
+.wporg-review-issue.is-priority-0 {
+	opacity: 0.6;
+}
+
+/* Where an issue the panel jumped to starts, for a moment. */
+.wporg-review-highlight {
+	background-color: #fff6bf;
+	transition: background-color 0.6s ease;
+}
+
+.wporg-review-action {
+	margin-left: 4px;
+	color: #4a5561;
+}
+
+/* Names and Owner: a section of their own, colored by whether the author followed the review. */
+.wporg-review-check {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid #d6dde3;
+}
+
+.wporg-review-check .wporg-review-heading {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: 0;
+}
+
+.wporg-review-check.is-followed,
+.wporg-review-check.is-ignored,
+.wporg-review-check.is-to-review {
+	padding: 8px 10px;
+	border: 1px solid;
+	border-left-width: 4px;
+	border-radius: 4px;
+}
+
+.wporg-review-check.is-followed {
+	border-color: #00a32a;
+	background-color: #edfaef;
+}
+
+.wporg-review-check.is-ignored {
+	border-color: #d63638;
+	background-color: #fcf0f1;
+}
+
+.wporg-review-check.is-to-review {
+	border-color: #dba617;
+	background-color: #fcf9e8;
+}
+
+.wporg-review-email {
+	color: #8a3a00;
+}
+
+.wporg-review-error {
+	color: #8c1616;
+}
+
+/* The warning above the reply editor, for a Review ID of another author. */
+.wporg-review-mismatch .btn {
+	margin-left: 4px;
+}
+
+.wporg-review-email.is-match {
+	color: #175a28;
+}
+
+/*
+ * The My Reviews and My Cases folders: their own table, like the conversation lists, rather than theirs, which core's
+ * scripts reload with a folder's conversations.
+ */
+
+/* In the folder list, they're with Unassigned and Mine, apart from the rest: Mine comes right after them. */
+#folders > li[data-folder_id="-229"] + li:not([data-folder_id="-230"]),
+#folders > li[data-folder_id="-230"] + li {
+	margin-bottom: 6px;
+	padding-bottom: 6px;
+	border-bottom: 1px solid #e3e8eb;
+}
+
+.wporg-worklist-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 14px;
+	border-bottom: 1px solid #e3e8eb;
+}
+
+.wporg-worklist-toolbar label {
+	margin: 0;
+}
+
+.wporg-worklist-toolbar .wporg-worklist-filter {
+	width: auto;
+	max-width: 100%;
+}
+
+.wporg-worklist-scope {
+	font-size: 13px;
+}
+
+.wporg-worklist-section + .wporg-worklist-section {
+	border-top: 1px solid #d6dde3;
+}
+
+.wporg-worklist-section-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 6px 12px;
+	padding: 18px 14px 2px;
+}
+
+.wporg-worklist-heading {
+	margin: 0;
+	color: #2a3b47;
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.wporg-worklist-count {
+	margin-left: 4px;
+	padding: 1px 7px;
+	border-radius: 9999px;
+	background-color: #eef1f4;
+	color: #3e4a55;
+	font-size: 12px;
+	vertical-align: 2px;
+}
+
+.wporg-worklist-description {
+	margin: 0;
+	padding: 0 14px 10px;
+	font-size: 13px;
+}
+
+.wporg-worklist-empty {
+	margin: 0;
+	padding: 0 14px 18px;
+	color: #4a5561;
+}
+
+.table.wporg-worklist-table {
+	margin: 0;
+	table-layout: fixed;
+}
+
+.wporg-worklist-table thead {
+	background-color: #deecf9;
+}
+
+.table.wporg-worklist-table th {
+	padding: 4px 14px 1px;
+	border-bottom: 1px solid #e3e8eb;
+	color: #2a3b47;
+	white-space: nowrap;
+}
+
+.table.wporg-worklist-table td {
+	padding: 0;
+	border-top: 0;
+	border-bottom: 1px solid #e3e8eb;
+	vertical-align: middle;
+}
+
+.wporg-worklist-table td a {
+	display: block;
+	padding: 12px 14px;
+	color: #2a3b47;
+	font-size: 14px;
+}
+
+.wporg-worklist-table td a:hover,
+.wporg-worklist-table td a:focus {
+	text-decoration: none;
+}
+
+.wporg-worklist-table tr:hover td {
+	background-color: #fbfcfd;
+}
+
+/* conv-subject is for the Tags module's scripts; core's lists move it around on phones. */
+.wporg-worklist .wporg-worklist-table .conv-subject {
+	position: static !important;
+	padding-right: 0 !important;
+	padding-left: 0 !important;
+}
+
+/* Active conversations stand out, like in core's lists. */
+.wporg-worklist-table tr.is-active td {
+	background-color: #f4f8fd;
+	font-weight: 700;
+}
+
+/* The Open buttons, and the conversations one would open while it's hovered or focused, numbered in order. */
+.wporg-worklist-open {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+
+.wporg-worklist-open-count,
+.wporg-worklist-status {
+	padding: 0 6px;
+	border-radius: 9px;
+	background-color: #eef1f4;
+	color: #3e4a55;
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.wporg-worklist-open-count {
+	margin-left: 2px;
+}
+
+.wporg-worklist-open-limit {
+	color: #4a5561;
+	font-size: 12px;
+}
+
+.wporg-worklist-table tr.is-to-open td {
+	background-color: #fff6bf;
+}
+
+.wporg-worklist-table tr.is-to-open td:first-child {
+	box-shadow: inset 4px 0 0 #b38a00;
+}
+
+.wporg-worklist-open-order {
+	display: inline-block;
+	min-width: 20px;
+	margin-right: 6px;
+	padding: 0 6px;
+	border-radius: 10px;
+	background-color: #2a3b47;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 18px;
+	text-align: center;
+}
+
+.wporg-worklist-sender {
+	width: 190px;
+}
+
+.wporg-worklist-cb {
+	width: 40px;
+	text-align: center;
+}
+
+.table.wporg-worklist-table .wporg-worklist-cb {
+	padding: 4px 0;
+}
+
+/* Core's checkboxes draw their box at the left of their label, which its own lists move into place. */
+.wporg-worklist-table .conv-cb label {
+	left: 10px;
+}
+
+.wporg-worklist-threads {
+	width: 84px;
+	text-align: center;
+}
+
+.wporg-worklist-threads-count {
+	padding: 0.1em 0.5em;
+	border: 1px solid #d6dde3;
+	border-radius: 4px;
+	background: #f8f9f9;
+	color: #4a5561;
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.wporg-worklist-date {
+	width: 138px;
+}
+
+.wporg-worklist-name,
+.wporg-worklist-email,
+.wporg-worklist-title,
+.wporg-worklist-preview {
+	display: block;
+	margin: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.wporg-worklist-email,
+.wporg-worklist-preview {
+	color: #4a5561;
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.wporg-worklist-preview {
+	margin-top: 2px;
+	font-size: 13px;
+}
+
+.wporg-worklist-status {
+	margin-right: 4px;
+}
+
+@media (max-width: 767px) {
+	.wporg-worklist-table thead,
+	.wporg-worklist-table .wporg-worklist-threads {
+		display: none;
+	}
+
+	/* Core hides the checkboxes of its lists on phones, which select by a long press instead. */
+	.wporg-worklist .wporg-worklist-table .wporg-worklist-cb {
+		display: table-cell !important;
+	}
+
+	.wporg-worklist-sender {
+		width: 35%;
+	}
+
+	.wporg-worklist-date {
+		width: 90px;
+	}
+}
+
+/* In the sidebar's Plugins & Themes panel, after a plugin's download link: adds its URL to the ones the header copies, or removes it. */
+.wporg-downloads-toggle {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #4a5561;
+	font-size: inherit;
+	line-height: 1;
+}
+
+.wporg-downloads-toggle[aria-pressed="true"],
+.wporg-downloads-toggle:hover,
+.wporg-downloads-toggle:focus {
+	color: #0078d7;
+}
+
+/* In the profile: how many conversations the Open buttons open at a time. */
+.wporg-open-limit {
+	max-width: 100px;
+}

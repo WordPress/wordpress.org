@@ -34,7 +34,7 @@ function custom_open_graph_tags( $tags = [] ) {
 			'description'     => __( 'Open source software which you can use to easily create a beautiful website, blog, or app.', 'wporg' ),
 			'og:url'          => home_url( '/' ),
 			'og:site_name'    => $site_title,
-			'og:image'        => 'https://s.w.org/images/home/screen-themes.png?3',
+			'og:image'        => 'https://s.w.org/images/home/wordpress-homepage-ogimage.png',
 			'og:locale'       => get_locale(),
 			'twitter:card'    => 'summary_large_image',
 			'twitter:creator' => '@WordPress',
@@ -393,6 +393,10 @@ function custom_page_title( $title, $post = null ) {
 
 		case 'page-download-source.php':
 			$title = esc_html_x( 'Source Code', 'Page title', 'wporg' );
+			break;
+
+		case 'page-40-percent-of-web.php':
+			$title = esc_html_x( 'WordPress and the Journey to 40% of the Web', 'Page title', 'wporg' );
 			break;
 
 		case 'page-hosting.php':

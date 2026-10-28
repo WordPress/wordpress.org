@@ -25,10 +25,16 @@ if ( 0 === strpos( $_SERVER['HTTP_USER_AGENT'], 'WordPress/' ) && 1 === rand( 1,
 }
 
 if ( $jsonp ) {
+	header( 'Access-Control-Allow-Origin: *' );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSONP or serialized PHP); escaping would corrupt the format.
 	echo $jsonp.'('.json_encode($data).')';
 } elseif ( defined( 'JSON_RESPONSE' ) ) {
+	header( 'Access-Control-Allow-Origin: *' );
+	header( 'Content-Type: application/json' );
 	echo json_encode( $data );
 } else {
+	header( 'Content-Type: text/plain' );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- API response body (JSONP or serialized PHP); escaping would corrupt the format.
 	echo serialize( $data );
 }
 

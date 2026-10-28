@@ -64,6 +64,9 @@ class Filesystem {
 		// Unzip it into the plugin directory.
 		exec( "unzip -DD {$esc_zip_file} -d {$esc_directory}" );
 
+		// Remove symlinks.
+		exec( "find {$esc_directory} -type l -delete" );
+
 		// Fix any permissions issues with the files. Sets 755 on directories, 644 on files.
 		exec( "chmod -R 755 {$esc_directory}" );
 		exec( "find {$esc_directory} -type f -exec chmod 644 {} \;" );
@@ -86,6 +89,22 @@ class Filesystem {
 	 * @return array All files within the passed directory.
 	 */
 	public static function list_files( $directory, $recursive = false, $pattern = null, $depth = -1 ) {
+		return self::list( $directory, 'files', $recursive, $pattern, $depth );
+	}
+
+	/**
+	 * Returns all (usable) files/directories of a given directory.
+	 *
+	 * @static
+	 * 
+	 * @param string $directory Path to directory to search.
+	 * @param bool   $type      Optional. Whether to return 'files', 'directories', or 'all'. Default: 'all'.
+	 * @param bool   $recursive Optional. Whether to recurse into subdirectories. Default: false.
+	 * @param string $pattern   Optional. A regular expression to match files against. Default: null.
+	 * @param int    $depth     Optional. Recursion depth. Default: -1 (infinite).
+	 * @return array All files within the passed directory.
+	 */
+	public static function list( $directory, $type = 'all', $recursive = false, $pattern = null, $depth = -1 ) {
 		if ( $recursive ) {
 			$iterator = new \RecursiveIteratorIterator(
 				new \RecursiveDirectoryIterator( $directory ),
@@ -104,7 +123,13 @@ class Filesystem {
 
 		$files = array();
 		foreach ( $filtered as $file ) {
-			if ( ! $file->isFile() ) {
+			if ( in_array( $file->getFilename(), [ '.', '..' ] ) ) {
+				continue;
+			} elseif ( $file->isLink() ) {
+				continue;
+			} elseif ( 'files' === $type && ! $file->isFile() ) {
+				continue;
+			} elseif ( 'directories' === $type && ! $file->isDir() ) {
 				continue;
 			} elseif ( stristr( $file->getPathname(), '__MACOSX' ) ) {
 				continue;

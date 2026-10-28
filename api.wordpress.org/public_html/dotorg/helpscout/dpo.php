@@ -1,9 +1,12 @@
 <?php
+namespace WordPressdotorg\API\HelpScout;
+
 // Add current DPO Export/Erasure status for the customer.
+$wp_init_host = 'https://wordpress.org/'; // DPO site.
+include __DIR__ . '/common.php';
 
 // $request is the validated HelpScout request.
-$wp_init_host = 'https://wordpress.org/'; // DPO site.
-$request      = include __DIR__ . '/common.php';
+$request = get_request();
 
 if ( empty( $request->customer->email ) ) {
 	die( json_encode( [ 'html' => 'No email found' ] ) );

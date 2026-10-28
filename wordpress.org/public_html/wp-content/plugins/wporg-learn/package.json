@@ -24,10 +24,11 @@
 		"@wordpress/element": "2.19.1",
 		"@wordpress/i18n": "3.18.0",
 		"@wordpress/plugins": "2.24.5",
-		"@wordpress/url": "3.19.0"
+		"@wordpress/url": "3.19.0",
+		"chart.js": "^4.5.1"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^19.2.2"
+		"@wordpress/scripts": "27.9.0"
 	},
 	"stylelint": {
 		"extends": "../../../.stylelintrc"

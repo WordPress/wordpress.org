@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wporg/filter-bar",
+  "version": "0.2.0",
+  "title": "Filter Bar",
+  "category": "design",
+  "icon": "",
+  "description": "Adds a filter bar",
+  "textdomain": "wporg",
+  "attributes": {},
+  "supports": {
+    "html": false
+  },
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}

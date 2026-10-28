@@ -17,8 +17,9 @@ require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
 function api_send_json( $data ) {
 	// Allow cross-domain calls from *.wordpress.org
-	if ( isset( $_SERVER['HTTP_ORIGIN'] ) && preg_match( '!^https?://[^.]+\.wordpress\.org/!i', $_SERVER['HTTP_ORIGIN'] ) ) {
+	if ( isset( $_SERVER['HTTP_ORIGIN'] ) && preg_match( '!^https?://([^.]+\.)?wordpress\.org/?$!i', $_SERVER['HTTP_ORIGIN'] ) ) {
 		header( 'Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] );
+		header( 'Access-Control-Allow-Credentials: true' ); // Allow cookies to be used.
 	}
 
 	if ( isset( $_GET['callback'] ) ) {
@@ -31,9 +32,11 @@ function api_send_json( $data ) {
 
 	if ( $callback ) {
 		header( 'Content-Type:application/javascript; charset=' . get_option( 'blog_charset' ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body (JSONP or JSON); escaping would corrupt the format.
 		echo "$callback( $json );";
 	} else {
 		header( 'Content-Type: application/json; charset=' . get_option( 'blog_charset' ) );
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Themes API response body (JSONP or JSON); escaping would corrupt the format.
 		echo $json;
 	}
 	die();

@@ -1,0 +1,17 @@
+.wp-block-wporg-local-navigation-bar {
+
+	&.is-sticking {
+		z-index: var(--wp--custom--z-index--local-nav);
+	}
+
+	figure.wp-block-image {
+		margin: 0;
+	}
+
+	.wp-block-site-title a {
+
+		&:visited {
+			color: inherit;
+		}
+	}
+}

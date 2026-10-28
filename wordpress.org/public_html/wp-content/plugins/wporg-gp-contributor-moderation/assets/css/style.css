@@ -1,0 +1,41 @@
+.show_banned_message {
+	width: 100%; 
+	border: 1px solid #dc3232; 
+	background: #dc3232; 
+	color: #fff; 
+	margin: 1rem 0; 
+	padding: 1rem;
+}
+
+.show_banned_message a {
+	color: #fff;
+	text-decoration: underline;
+	font-weight: regular;
+}
+
+.show_banned_message a:hover,
+.show_banned_message a:focus {
+	color: #f0f0f0;
+	text-decoration: underline;
+}
+
+.show_warned_message {
+	width: 100%; 
+	border: 1px solid #ffb900; 
+	background: #ffb900; 
+	color: #000; 
+	margin: 1rem 0; 
+	padding: 1rem;
+}
+
+.show_warned_message a {
+	color: #000;
+	text-decoration: underline;
+	font-weight: regular;
+}
+
+.show_warned_message a:hover,
+.show_warned_message a:focus {
+	color: #222;
+	text-decoration: underline;
+}

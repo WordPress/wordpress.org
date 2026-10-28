@@ -33,12 +33,12 @@ abstract class Importer {
 	/**
 	 * Posts per page to query for.
 	 *
-	 * This needs to be set at least as high as the number of pages being
-	 * imported, but should not be unbounded (-1).
+	 * Unbounded due to the expectation that the number of pages being imported
+	 * is bound by the manifest size.
 	 *
 	 * @var int
 	 */
-	protected $posts_per_page = 500;
+	protected $posts_per_page = -1;
 
 	/**
 	 * Data about existing handbook pages.
@@ -236,6 +236,13 @@ abstract class Importer {
 		if ( $doc['slug'] === 'index' ) {
 			$doc['slug'] = $this->get_post_type();
 		}
+
+		// Stop if sanitized slug doesn't match
+		$sanitized = sanitize_title_with_dashes( $doc['slug'] );
+		if ( $sanitized !== $doc['slug'] ) {
+			return false;
+		}
+
 		$post_data = array(
 			'post_type'   => $this->get_post_type(),
 			'post_status' => 'publish',
@@ -311,7 +318,7 @@ abstract class Importer {
 			$ret = $this->update_post_from_markdown_source( $id );
 			if ( class_exists( 'WP_CLI' ) ) {
 				if ( is_wp_error( $ret ) ) {
-					WP_CLI::warning( $ret->get_error_message() );
+					WP_CLI::warning( "{$id} returned an error: " . $ret->get_error_message() );
 				} elseif ( false === $ret ) {
 					WP_CLI::log( "No updates for {$id}" );
 					$success++;
@@ -320,11 +327,28 @@ abstract class Importer {
 					$success++;
 				}
 			}
+
+			// Each update loads and caches every revision of the post, so drop the
+			// runtime cache to keep memory flat across a large handbook.
+			$this->clear_memory_heavy_variables();
 		}
 		if ( class_exists( 'WP_CLI' ) ) {
 			$total = count( $ids );
 			WP_CLI::success( "Successfully updated {$success} of {$total} pages." );
 		}
+	}
+
+	/**
+	 * Clears in-memory caches that grow with each imported post.
+	 *
+	 * @global \wpdb $wpdb
+	 */
+	protected function clear_memory_heavy_variables() {
+		global $wpdb;
+
+		$wpdb->queries = [];
+
+		wp_cache_flush_runtime();
 	}
 
 	/**
@@ -396,6 +420,17 @@ abstract class Importer {
 			}
 		}
 
+		// Check to see if this differs from the actual post.
+		if ( $do_update && $post_data ) {
+			$post = get_post( $post_id );
+			foreach ( $post_data as $field => $value ) {
+				if ( $value == $post->$field ) {
+					// Unset it to prevent calling `wp_update_post()` with this and bumping the last_modified date.
+					unset( $post_data[ $field ] );
+				}
+			}
+		}
+
 		if ( $do_update && $post_data ) {
 			$post_data['ID'] = $post_id;
 
@@ -419,8 +454,12 @@ abstract class Importer {
 		if ( is_wp_error( $markdown_source ) ) {
 			return $markdown_source;
 		}
-		if ( ! function_exists( 'jetpack_require_lib' ) ) {
-			return new WP_Error( 'missing-jetpack-require-lib', 'jetpack_require_lib() is missing on system.' );
+
+		if ( ! class_exists( 'WPCom_GHF_Markdown_Parser' ) && defined( 'JETPACK__PLUGIN_DIR' ) ) {
+			include JETPACK__PLUGIN_DIR . '/_inc/lib/markdown.php';
+		}
+		if ( ! class_exists( 'WPCom_GHF_Markdown_Parser' ) ) {
+			return new WP_Error( 'missing-jetpack-markdown', 'Jetpack Markdown is missing on system.' );
 		}
 
 		// Transform GitHub repo HTML pages into their raw equivalents
@@ -471,19 +510,18 @@ abstract class Importer {
 		}
 		$markdown = trim( $markdown );
 
-		// Use the first sentence as the excerpt.
-		$excerpt = '';
-		if ( preg_match( '/^(.+)/', $markdown, $matches ) ) {
-			$excerpt = $matches[1];
-		}
-
 		// Transform to HTML and save the post
-		jetpack_require_lib( 'markdown' );
 		$parser = new WPCom_GHF_Markdown_Parser();
 		$parser->preserve_shortcodes = false;
 		$html = $parser->transform( $markdown );
 
 		$html = apply_filters( 'wporg_markdown_after_transform', $html, $this->get_post_type() );
+
+		// Use the first line as the excerpt, but first strip any HTML.
+		$excerpt = '';
+		if ( preg_match( '/^(.+)/', wp_strip_all_tags( $html ), $matches ) ) {
+			$excerpt = $matches[1];
+		}
 
 		add_filter( 'wp_kses_allowed_html', [ $this, 'wp_kses_allow_links' ], 10, 2 );
 

@@ -56,7 +56,7 @@ class Translation_Sync {
 		$plugin_slug    = $project_parts[1];
 		$plugin_project = $project_parts[1] . '/' . $this->project_mapping[ $project_parts[2] ];
 
-		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, 'wporg_translate_sync_plugin_translations', [
+		wp_schedule_single_event( time() + 5, 'wporg_translate_sync_plugin_translations', [
 			[
 				'plugin'     => $plugin_slug,
 				'gp_project' => $plugin_project,
@@ -135,7 +135,8 @@ class Translation_Sync {
 	public function queue_translation_for_sync( $translation ) {
 		global $wpdb;
 
-		$allowed_statuses = array( 'current', 'rejected', 'changesrequested', 'fuzzy' );
+		// Only statuses GlotPress gates on `approve`; one a user can set without it must not cross projects.
+		$allowed_statuses = array( 'current', 'rejected', 'changesrequested' );
 		
 		// Do not propagate waiting translations and other translations with warnings.
 		if ( ! in_array( $translation->status, $allowed_statuses ) || ! empty( $translation->warnings ) ) {
@@ -221,6 +222,12 @@ class Translation_Sync {
 	 * @return bool False on failure, true on success.
 	 */
 	private function copy_translation_into_set( $translation, $new_translation_set, $new_original ) {
+		// Only propagate what the acting user could do in the destination; cron and CLI aren't acting for anyone.
+		$is_system_run = ( defined( 'WP_CLI' ) && WP_CLI ) || wp_doing_cron();
+		if ( ! $is_system_run && ! GP::$permission->current_user_can( 'approve', 'translation-set', $new_translation_set->id ) ) {
+			return true;
+		}
+
 		$locale = GP_Locales::by_slug( $new_translation_set->locale );
 		$new_translation = [];
 
@@ -232,7 +239,7 @@ class Translation_Sync {
 		$existing_translations = GP::$translation->find( [
 			'translation_set_id' => $new_translation_set->id,
 			'original_id'        => $new_original->id,
-			'status'             => [ 'current', 'waiting', 'fuzzy' ],
+			'status'             => [ 'current', 'waiting', 'fuzzy', 'changesrequested' ],
 		] );
 
 		foreach ( $existing_translations as $_existing_translation ) {
@@ -249,11 +256,25 @@ class Translation_Sync {
 					$_existing_translation->save();
 				}
 
-				$_existing_translation->set_status( $translation->status );
+				if ( 'current' == $translation->status ) {
+					$_existing_translation->set_as_current();
+
+				} elseif ( 'changesrequested' == $translation->status ) {
+					$_existing_translation->set_as_changesrequested();
+
+				} else {
+					$_existing_translation->set_status( $translation->status );
+				}
+
 				gp_clean_translation_set_cache( $new_translation_set->id );
 
 				return true;
 			}
+		}
+
+		// Do not create a new translation if it is not current
+		if ( 'current' !== $translation->status ) {
+			return true;
 		}
 
 		// Create a new translation.

@@ -11,6 +11,8 @@
 		banner = false,
 		$adminbar = false,
 		$header = false,
+		$localNavBar = false,
+		$langBanner = false,
 		bannerOffset = 200,
 		isTyping = false,
 		_n = wp.i18n._n,
@@ -24,6 +26,8 @@
 	jQuery( document ).ready( function() {
 		$adminbar = jQuery('#wpadminbar');
 		$header = jQuery('header.global-header');
+		$localNavBar = jQuery('.wp-block-wporg-local-navigation-bar');
+		$langBanner = jQuery('.wp-block-wporg-language-suggest');
 
 		maybeDisplay();
 
@@ -47,23 +51,54 @@
 				return;
 			}
 
-			jQuery('#main').before(
-				'<div id="also-viewing-banner" style="display: none; font-size: 0.8rem; color: #fff; line-height: 2rem; background: #d54e21; width:100%; text-align: center; position: initial; top: 32px; left: 0; z-index: 150;"></div>'
-			);
+			// If using a block based theme with the local nav bar block
+			if ( $localNavBar.length ) {
+				// Insert the banner after the language banner if present,
+				// otherwise after the local nav
+				$element = $langBanner.length ? $langBanner : $localNavBar;
+
+				$element.after(
+					'<div id="also-viewing-banner" style="display: none; font-size: var(--wp--preset--font-size--extra-small, 12px); color: var(--wp--preset--color--charcoal-1, #1E1E1E); line-height: 18px; padding-top: 8px; padding-bottom: 8px; background: var(--wp--preset--color--acid-green-3, #E2FFED); width: 100%; text-align: center; position: initial; top: 32px; left: 0; z-index: 150;"></div>'
+				);
+			} else {
+				jQuery('#main').before( 
+					'<div id="also-viewing-banner" style="display: none; font-size: 0.8rem; color: #fff; line-height: 2rem; background: #d54e21; width:100%; text-align: center; position: initial; top: 32px; left: 0; z-index: 150;"></div>'
+				);
+			}
+
 			banner = jQuery( '#also-viewing-banner' );
 		}
 
 		if ( ! userCount ) {
 			banner.hide();
 		} else {
-			userList = currentlyViewing.map( function( item ) {
+			anonymousUsers      = currentlyViewing.filter( function( item ) { return ! item.user_id; } );
+			anonymousUserCount  = anonymousUsers.length;
+			anonymousUserTyping = anonymousUsers.filter( function( item ) { return !! item.isTyping; } ).length;
+			userList            = currentlyViewing.filter( function( item ) { return !! item.user_id; } );
+
+			// Markup those who are typing, and flatten it to just the name.
+			userList = userList.map( function( item ) {
 				return item.who + ( item.isTyping ? ' ' + __( '(is typing)', 'wporg-forums' ) : '' );
 			} );
 
-			if ( userCount > 1 ) {
+			// Add the anonymous users to the list.
+			if ( anonymousUserCount ) {
+				var anonymousText = _n( '%s other person', '%s other people', anonymousUserCount, 'wporg-forums' ).replace( '%s', anonymousUserCount );
+
+				if ( anonymousUserTyping ) {
+					anonymousText += ' ' + _n( '(%s is typing)', '(%s are typing)', anonymousUserTyping, 'wporg-forums' ).replace( '%s', anonymousUserTyping );
+				}
+
+				userList.push( anonymousText );
+			}
+
+			displayCount = userList.length;
+
+			if ( displayCount > 1 ) {
 				userlistPretty = __( '%1$s and %2$s', 'wporg-forums' )
-				.replace( '%1$s', userList.slice( 0, -1 ).join( ', ' ) + ( userCount > 2 ? ',' : '' ) )
-				.replace( '%2$s', userList.slice( -1 ) );
+					.replace( '%1$s', userList.slice( 0, -1 ).join( ', ' ) + ( displayCount > 2 ? ',' : '' ) )
+					.replace( '%2$s', userList.slice( -1 ) );
 			} else {
 				userlistPretty = userList.join( ', ' ); // only one element.
 			}
@@ -86,17 +121,28 @@
 			return;
 		}
 
-		var offset = 'var(--wp-admin--admin-bar--height, 0px)';
-		if ( 'fixed' === $header.css('position') ) {
-			offset = 'var(--wp-global-header-offset, 0px)';
-		}
-
-		if ( jQuery(window).scrollTop() > bannerOffset ) {
-			banner.css( 'position', 'fixed' );
-			banner.css( 'top', offset );
+		if ( $localNavBar.length ) {
+			// Local nav bar position is set to relative on small screens to stop it being sticky
+			if ( $localNavBar.hasClass( 'is-sticking' ) && $localNavBar.css( 'position' ) !== 'relative' ) {
+				banner.css( 'position', 'sticky' );
+				banner.css( 'top', 'calc(var(--wp-admin--admin-bar--height, 0px) + var(--wp--custom--local-navigation-bar--spacing--height, 60px))' );
+			} else {
+				banner.css( 'position', 'initial' );
+				banner.css( 'top', '' );
+			}
 		} else {
-			banner.css( 'position', 'initial' );
-			banner.css( 'top', '' );
+			var offset = 'var(--wp-admin--admin-bar--height, 0px)';
+			if ( 'fixed' === $header.css('position') ) {
+				offset = 'var(--wp-global-header-offset, 0px)';
+			}
+
+			if ( jQuery(window).scrollTop() > bannerOffset ) {
+				banner.css( 'position', 'fixed' );
+				banner.css( 'top', offset );
+			} else {
+				banner.css( 'position', 'initial' );
+				banner.css( 'top', '' );
+			}
 		}
 	} );
 

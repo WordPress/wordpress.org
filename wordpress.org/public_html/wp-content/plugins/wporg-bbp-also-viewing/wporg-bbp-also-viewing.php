@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\BBP_Also_Viewing;
 use function WordPressdotorg\SEO\Canonical\get_canonical_url;
+use const MINUTE_IN_SECONDS;
 
 /**
  * Plugin Name: bbPress: Also Viewing
@@ -27,10 +28,10 @@ use function WordPressdotorg\SEO\Canonical\get_canonical_url;
  */
 
 const USER_OPTION  = 'also-viewing';
-const TIMEOUT      = 5 * \MINUTE_IN_SECONDS;
+const TIMEOUT      = 5 * MINUTE_IN_SECONDS;
 const REFRESH_INT  = 45; // How often the client should check for new viewers in seconds.
 const CACHE_GROUP  = 'also-viewing';
-const CACHE_TIME   = 5 * \MINUTE_IN_SECONDS;
+const CACHE_TIME   = 5 * MINUTE_IN_SECONDS;
 const REPLY_THRESH = 20; // The number of replies a user must have before the feature can be opt'd into.
 
 function init() {
@@ -199,7 +200,8 @@ function bbp_user_edit_after() {
 		</p>',
 		checked( enabled( $user_id ), true, false ),
 		sprintf(
-			__( 'Enable the <a href="%s">Also Viewing</a> feature.', 'wporg-forums' ),
+			/* translators: %s: Handbook URL. */
+			wp_kses_post( __( 'Enable the <a href="%s">Also Viewing</a> feature.', 'wporg-forums' ) ),
 			'https://make.wordpress.org/support/handbook/appendix/helpful-tools/#avoiding-overlapping-replies'
 		)
 	);
@@ -274,6 +276,8 @@ function get_currently_viewing( $page ) {
 /**
  * Get the list of OTHER users who are currently viewing a page.
  *
+ * This anonymizes users so that only mods can see other mods, and plugin support reps can see other reps and committers.
+ *
  * @param string $page The page to get the userse for.
  *
  * @return array Array of user names + if they're typing.
@@ -286,7 +290,56 @@ function get_others_currently_viewing( $page ) {
 		}
 	}
 
+	// Anonymize the list of users if appropriate.
+	// Mods + Admins can see all.
+	if ( current_user_can( 'moderate' ) || current_user_can( 'list_users' ) ) {
+		return array_values( $users );
+	}
+
+	// Anonymize mods, and users unless they've got similar caps.
+	// Plugin support reps can see other reps and committers -for their own plugins-.
+	$current_user_objects = get_user_object_slugs( get_current_user_id() );
+	foreach ( $users as &$u ) {
+		if (
+			user_can( $u['user_id'], 'moderate' ) ||
+			! array_intersect( $current_user_objects, get_user_object_slugs( $u['user_id'] ) )
+		) {
+			$u['who']     = '';
+			$u['user_id'] = 0;
+		}
+	}
+
 	return array_values( $users );
+}
+
+/**
+ * Fetch the list of plugins/themes a user has access to.
+ *
+ * @param int $user_id The user ID to check for.
+ * @return array Array of plugin slugs.
+ */
+function get_user_object_slugs( $user_id ) {
+	if ( ! class_exists( '\WordPressdotorg\Forums\Plugin' ) ) {
+		return [];
+	}
+
+	$forums = \WordPressdotorg\Forums\Plugin::get_instance();
+	if ( ! $forums->plugins || ! $forums->themes ) {
+		return [];
+	}
+
+	$plugin_slugs = $forums->plugins->get_user_object_slugs( $user_id );
+	$theme_slugs  = $forums->themes->get_user_object_slugs( $user_id );
+
+	$matrix = [];
+	foreach ( $plugin_slugs as $slug ) {
+		$matrix[] = "plugin:{$slug}";
+	}
+	foreach ( $theme_slugs as $slug ) {
+		$matrix[] = "theme:{$slug}";
+	}
+
+	return $matrix;
 }
 
 /**

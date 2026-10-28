@@ -1,3 +1,4 @@
+/* global $gp */
 ( function( $ ){
 	var $html = $( 'html' );
 	var $document = $( document );
@@ -68,6 +69,17 @@
 
 		autosize( $textarea );
 	}
+
+
+	//Prefilter ajax requests to add translation_source to the request.
+	$.ajaxPrefilter( function ( options ) {
+		let data = Object.fromEntries( new URLSearchParams( options.data ) );
+
+		if ( 'POST' === options.type && $gp_editor_options.url === options.url ) {
+			options.data += '&translation_source=frontend';
+
+		}
+	});
 
 	// Override functions to adopt custom markup.
 	$gp.editor.copy = function() {
@@ -255,6 +267,49 @@
 				$gp.editor.current.find( '.' + type ).removeAttr( 'open' );
 			}
 		}
+		// Click on the last tab opened in the previous row, to show the same tab in the current row.
+		$gp.editor.current.find( '.' + states['last-tab-type-open'] ).first().click();
+	}
+
+	function changeRightTab( event ) {
+		var tab = $( this );
+		var tabType = tab.attr( 'class' ).split(' ')[0];
+		var tabId = tab.attr( 'data-tab' );
+		var divId = tabId.replace( 'tab', 'div' );
+		var originalId = tabId.replace( /[^\d-]/g, '' ).replace( /^-+/g, '' );
+		changeVisibleTab( tab );
+		changeVisibleDiv( divId, originalId );
+		updateDetailsState( 'last-tab-type-open', tabType );
+		// Avoid to execute the code from the gp-translation-helpers plugin.
+		event.stopImmediatePropagation();
+	}
+
+	/**
+	 * Hides all tabs and show one of them, the last clicked.
+	 *
+	 * @param {Object} tab The selected tab.
+	 */
+	function changeVisibleTab( tab ) {
+		var tabId = tab.attr( 'data-tab' );
+		tab.siblings().removeClass( 'current' );
+		tab.parents( '.sidebar-tabs ' ).find( '.helper' ).removeClass( 'current' );
+		tab.addClass( 'current' );
+
+		$( '#' + tabId ).addClass( 'current' );
+	}
+
+
+	/**
+	 * Hides all divs and show one of them, the last clicked.
+	 *
+	 * @param {string} tabId      The select tab id.
+	 * @param {number} originalId The id of the original string to translate.
+	 */
+	function changeVisibleDiv( tabId, originalId ) {
+		$( '#sidebar-div-meta-' + originalId ).hide();
+		$( '#sidebar-div-discussion-' + originalId ).hide();
+		$( '#sidebar-div-others-' + originalId ).hide();
+		$( '#' + tabId ).show();
 	}
 
 	$gp.editor.show = ( function( original ) {
@@ -282,7 +337,8 @@
 				.on( 'click', 'button.translation-actions__rtl', switchTextDirection )
 				.on( 'focus', 'textarea', textareaAutosize )
 				.on( 'click', 'summary', toggleDetails )
-				.on( 'click', 'button.button-menu__toggle', toggleLinkMenu );
+				.on( 'click', 'button.button-menu__toggle', toggleLinkMenu )
+				.on( 'click', '.sidebar-tabs li', changeRightTab );
 		}
 	})( $gp.editor.install_hooks );
 

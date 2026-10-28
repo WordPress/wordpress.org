@@ -90,15 +90,28 @@ namespace WordPressdotorg\MU_Plugins\Site_Branding {
 	 * Set a default og:image image.
 	 */
 	function jetpack_open_graph_image_default() {
-		return 'https://s.w.org/images/backgrounds/wordpress-bg-medblue.png';
+		return 'https://s.w.org/images/home/wordpress-default-ogimage.png';
 	}
 	add_filter( 'jetpack_open_graph_image_default', __NAMESPACE__ . '\jetpack_open_graph_image_default' );
+
+
+	/**
+	 * Jetpack 15 changed to using Text overlayed on the default image.
+	 * @see https://wordpress.slack.com/archives/C02QB8GMM/p1778829214437089
+	 */
+	add_filter( 'jetpack_og_default_site_image', function() {
+		return [
+			'src' => 'https://s.w.org/images/home/wordpress-default-ogimage.png',
+			'width' => 1728,
+			'height' => 972,
+		];
+	} );
 	
 	/**
 	 * To prevent a cropped version of the og:image on Twitter, provide a square version.
 	 */
 	function jetpack_twitter_cards_image_default() {
-		return 'https://s.w.org/images/backgrounds/wordpress-bg-medblue-square.png';
+		return 'https://s.w.org/images/home/wordpress-default-image-square.png';
 	}
 	add_filter( 'jetpack_twitter_cards_image_default', __NAMESPACE__ . '\jetpack_twitter_cards_image_default' );
 

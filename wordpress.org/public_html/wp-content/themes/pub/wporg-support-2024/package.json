@@ -1,0 +1,21 @@
+{
+	"name": "wporg-support",
+	"version": "1.0.0",
+	"description": "Theme for WordPress Support Forums",
+	"main": "index.php",
+	"scripts": {
+		"build": "wp-scripts build",
+		"start": "wp-scripts start",
+		"lint:css": "wp-scripts lint-style 'sass/**/*.scss'"
+	},
+	"author": "wordpressdotorg",
+	"license": "GPL-2.0-or-later",
+	"devDependencies": {
+		"@wordpress/browserslist-config": "~6.57.0",
+		"@wordpress/scripts": "~36.1.0",
+		"webpack-remove-empty-scripts": "~1.1.1"
+	},
+	"browserslist": [
+		"extends @wordpress/browserslist-config"
+	]
+}

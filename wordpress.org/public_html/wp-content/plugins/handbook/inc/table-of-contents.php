@@ -102,7 +102,7 @@ class WPorg_Handbook_TOC {
 
 		$this->args = (object) wp_parse_args( $args, array(
 			'header_text' => __( 'Topics', 'wporg' ),
-			'top_text'    => __( 'Top &uarr;', 'wporg' ),
+			'top_text'    => str_replace( ' ', '&nbsp;', __( 'Top &uarr;', 'wporg' ) ),
 		) );
 	}
 

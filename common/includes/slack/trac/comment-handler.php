@@ -4,11 +4,48 @@ namespace Dotorg\Slack\Trac;
 
 class Comment_Handler {
 
+	protected $send;
+	protected $lines;
+	protected $trac;
+	protected $title;
+	protected $author;
+	protected $comment;
+	protected $changes;
+	protected $ticket_id;
+	protected $ticket_url;
+	protected $comment_id;
+	protected $comment_url;
+
+	/**
+	 * Workflow keywords added to the ticket by this change.
+	 *
+	 * @var string[]
+	 */
+	protected $keywords_added = array();
+
 	function __construct( \Dotorg\Slack\Send $send, array $email_message ) {
 		$this->send  = $send;
 		$this->lines = $email_message;
 	}
 
+	/**
+	 * Back-compat accessor for protected properties.
+	 *
+	 * slack-trac-hook.php reads properties like $handler->comment and
+	 * $handler->$property directly from outside this class, which is
+	 * otherwise fatal now that these properties are explicitly declared
+	 * protected.
+	 */
+	function __get( $name ) {
+		if ( property_exists( $this, $name ) ) {
+			return $this->$name;
+		}
+		return null;
+	}
+
+	/**
+	 * Processes the notification email and posts it to the firehose and keyword channels.
+	 */
 	function run() {
 		$this->process_message();
 
@@ -25,8 +62,32 @@ class Comment_Handler {
 		if ( $firehose ) {
 			$this->send->send( $firehose );
 		}
+
+		// Send notifications for Workflow Keyword additions.
+		$this->send_keyword_notifications();
 	}
 
+	/**
+	 * Posts the payload to the channels for each workflow keyword added to the ticket.
+	 */
+	public function send_keyword_notifications() {
+		if ( empty( $this->keywords_added ) ) {
+			return;
+		}
+
+		foreach ( $this->keywords_added as $keyword ) {
+			$channels = $this->trac->get_keyword_channels( $keyword );
+			foreach ( $channels as $channel ) {
+				$this->send->send( $channel );
+			}
+		}
+	}
+
+	/**
+	 * Parses the Trac notification email into the ticket, comment, and change properties.
+	 *
+	 * @return void|false False if the email is not from a known Trac.
+	 */
 	function process_message() {
 		$lines = array_map( 'rtrim', $this->lines );
 		$base64 = false;
@@ -168,6 +229,7 @@ class Comment_Handler {
 		array_shift( $lines );
 
 		$changes = $comment = array();
+		$this->keywords_added = array();
 
 		// Check if the summary of a ticket was changed.
 		if ( preg_match( '/ \(was: (.*)\)$/', $subject, $matches ) ) {
@@ -180,7 +242,28 @@ class Comment_Handler {
 
 				if ( preg_match( '~Attachment "([^"]+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
 					$changes[] = "_*attachment:*_ `{$matches[1]}` {$matches[2]}";
-				} else { // * status:  assigned => closed
+				} else {
+					if ( 0 === strpos( $line, ' * keywords:' ) ) {
+						// Trac wraps long changes onto indented lines, so read the keywords change through them.
+						$keywords_change = $line;
+						foreach ( $lines as $next_line ) {
+							if ( '' === $next_line || 0 === strpos( $next_line, ' * ' ) ) {
+								break;
+							}
+							// Trac can break a keyword after its hyphen, so don't split it in two.
+							if ( '-' !== substr( $keywords_change, -1 ) ) {
+								$keywords_change .= ' ';
+							}
+							$keywords_change .= ltrim( $next_line );
+						}
+
+						if ( preg_match( '~^ \* keywords:\s+(.*?)\s*=>\s*(.*)$~', $keywords_change, $kw_matches ) ) {
+							$old_keywords         = preg_split( '/\s+/', $kw_matches[1], -1, PREG_SPLIT_NO_EMPTY );
+							$new_keywords         = preg_split( '/\s+/', $kw_matches[2], -1, PREG_SPLIT_NO_EMPTY );
+							$this->keywords_added = array_unique( array_diff( $new_keywords, $old_keywords ) );
+						}
+					}
+					// Applies Slack formatting for other changes.
 					$changes[] = preg_replace( '~^ \* (.*?):  ~', '_*$1:*_ ', $line );
 				}
 			}
@@ -214,12 +297,19 @@ class Comment_Handler {
 	function format_comment_for_slack() {
 		// Link 'Replying to [comment:1 user]:'
 		$ticket_url = $this->ticket_url;
-		$comment = preg_replace_callback( '/Replying to \[comment:(\d+) (.*)\]/m',
+
+		// Escape before the link below is built, so that one survives.
+		$comment = Trac::escape_for_slack( $this->comment );
+
+		$comment = preg_replace_callback(
+			'/Replying to \[comment:(\d+) (.*)\]/m',
 			function ( $matches ) use ( $ticket_url ) {
 				$comment_url = $ticket_url . '#comment:' . $matches[1];
 				$text = 'Replying to ' . $matches[2];
 				return "<$comment_url|$text>";
-			}, $this->comment );
+			},
+			$comment
+		);
 
 		$comment = Trac::format_for_slack( $comment );
 		return $comment;
@@ -230,9 +320,11 @@ class Comment_Handler {
 		$this->send->set_username( $this->trac->get_ticket_username() );
 
 		$comment         = $this->format_comment_for_slack();
-		$main_attachment = $this->changes ? implode( "\n", $this->changes ) : $comment;
+		$main_attachment = $this->changes ? Trac::escape_for_slack( implode( "\n", $this->changes ) ) : $comment;
 		$author          = $this->author ? $this->author : 'Someone';
-		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', $author, $this->comment_url, $this->ticket_id, htmlspecialchars( $this->title, ENT_NOQUOTES ) );
+		// A > would close the link early, so the label needs it escaped too.
+		$title           = htmlspecialchars( $this->title, ENT_NOQUOTES | ENT_SUBSTITUTE );
+		$pretext         = sprintf( '*%s updated <%s|#%s %s>*', Trac::escape_for_slack( $author ), $this->comment_url, $this->ticket_id, $title );
 		$fallback        = trim( $pretext, '*' ) . "\n" . $main_attachment;
 
 		$attachment = array(

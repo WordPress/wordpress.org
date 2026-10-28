@@ -29,6 +29,13 @@ class WPorg_Handbook {
 	public $setting_name = '';
 
 	/**
+	 * The configuration of the handbook.
+	 *
+	 * @var array
+	 */
+	public $config = [];
+
+	/**
 	 * The memoized and filtered label text for the handbook.
 	 *
 	 * @var string
@@ -129,7 +136,7 @@ class WPorg_Handbook {
 			if ( is_multisite() ) {
 				$name = trim( get_blog_details()->path, '/' );
 			} else {
-				$name = trim( parse_url( get_option( 'home' ), PHP_URL_PATH ), '/' );
+				$name = trim( (string) parse_url( get_option( 'home' ), PHP_URL_PATH ), '/' );
 			}
 
 			// If no name defined yet, try handbook post type if not standard.
@@ -184,6 +191,7 @@ class WPorg_Handbook {
 		add_filter( 'comments_open',                      [ $this, 'comments_open' ], 10, 2 );
 		add_filter( 'wp_nav_menu_objects',                [ $this, 'highlight_menu_handbook_link' ] );
 		add_filter( 'display_post_states',                [ $this, 'display_post_states' ], 10, 2 );
+		add_filter( 'jetpack_sitemap_post_types',         [ $this, 'jetpack_sitemap_post_types' ] );
 	}
 
 	/**
@@ -216,7 +224,7 @@ class WPorg_Handbook {
 			}
 		} elseif ( is_admin() && ( $config['manifest'] ?: false ) ) {
 			add_action( 'admin_notices', function () {
-				echo '<div class="notice notice-error"><p>' . __( 'Error: The <strong>WPORG Markdown Importer</strong> plugin needs to be activated in order to allow importing of handbooks.', 'wporg' ) . '</p></div>';
+				echo '<div class="notice notice-error"><p>' . wp_kses_post( __( 'Error: The <strong>WPORG Markdown Importer</strong> plugin needs to be activated in order to allow importing of handbooks.', 'wporg' ) ) . '</p></div>';
 			} );
 		}
 	}
@@ -408,6 +416,41 @@ class WPorg_Handbook {
 		}
 
 		return $is_landing_page;
+	}
+
+	/**
+	 * Returns an array of slugs suitable for use as the handbook's landing page.
+	 *
+	 * @return string[]
+	 */
+	public function get_possible_landing_page_slugs() {
+		return array_unique( [
+			'welcome',
+			'handbook',
+			str_replace( '-handbook', '', $this->post_type ),
+			$this->post_type,
+		] );
+	}
+
+	/**
+	 * Returns the landing page for the handbook of the given post type.
+	 *
+	 * @param string $fields The page fields to return. One of 'all', 'ids', or 'id=>parent'. Default 'all'.
+	 * @return WP_Post|false The handbook's landing page, else false.
+	 */
+	public function get_landing_page( $fields = 'all' ) {
+		$query = new WP_Query( [
+			'post_type'      => $this->post_type,
+			'post_name__in'  => $this->get_possible_landing_page_slugs(),
+			'posts_per_page' => 1,
+			'post_parent'    => 0,
+			'post_status'    => 'publish',
+			'fields'         => $fields,
+		] );
+
+		return $query->have_posts()
+			? $query->posts[0]
+			: false;
 	}
 
 	/**
@@ -717,4 +760,17 @@ class WPorg_Handbook {
 		return $menu_items;
 	}
 
+	/**
+	 * Include handbooks in Jetpack Sitemaps (if enabled).
+	 *
+	 * @param array $post_types The post types for inclusion in sitemaps.
+	 * @return array
+	 */
+	public function jetpack_sitemap_post_types( $post_types ) {
+		if ( ! in_array( $this->post_type, $post_types ) ) {
+			$post_types[] = $this->post_type;
+		}
+
+		return $post_types;
+	}
 }

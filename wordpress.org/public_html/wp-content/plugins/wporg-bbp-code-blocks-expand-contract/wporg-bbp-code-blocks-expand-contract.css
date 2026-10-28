@@ -35,6 +35,7 @@
 
 #bbpress-forums div.bbp-topic-content pre.wporg-bbp-code-expander-code-wrapper,
 #bbpress-forums div.bbp-reply-content pre.wporg-bbp-code-expander-code-wrapper {
+	tab-size: 4;
 	white-space: pre-wrap;
 }
 

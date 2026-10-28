@@ -1,0 +1,22 @@
+body.category {
+
+	#main {
+
+		h1 {
+			margin-bottom: var(--wp--preset--spacing--50);
+		}
+
+		article {
+
+			h2 {
+
+				font-size: 1.3rem;
+			}
+		}
+
+		.archive-pagination {
+			margin: var(--wp--preset--spacing--50) 0;
+			text-align: center;
+		}
+	}
+}

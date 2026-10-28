@@ -1,23 +1,18 @@
 /* global jQuery, wpCookies */
+// eslint-disable-next-line id-length
 ( function ( window, $, wpCookies ) {
 	'use strict';
 
 	const localeNotice = window.WPOrgLearnLocaleNotice || {};
 
 	const app = $.extend( localeNotice, {
-		$notice: $(),
-
 		init() {
 			app.$notice = $( '.wporg-learn-locale-notice' );
 
-			app.$notice.on(
-				'click',
-				'.wporg-learn-locale-notice-dismiss',
-				function ( event ) {
-					event.preventDefault();
-					app.dismissNotice();
-				}
-			);
+			app.$notice.on( 'click', '.wporg-learn-locale-notice-dismiss', function ( event ) {
+				event.preventDefault();
+				app.dismissNotice();
+			} );
 		},
 
 		dismissNotice() {
@@ -37,6 +32,7 @@
 			);
 		},
 	} );
+	app.$notice = $();
 
 	$( document ).ready( function () {
 		app.init();

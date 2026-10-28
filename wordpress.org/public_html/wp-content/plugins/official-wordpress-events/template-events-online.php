@@ -10,11 +10,13 @@
 
 <script type="text/template" id="tmpl-official-event">
 	<li>
+		{{ data.startTime }}
+		<span class="owe-timezone">{{ data.timezone }}</span>
+		<br>
 		<a href="{{ data.url }}">
 			{{ data.title }}
 		</a>
-		<span class="owe-separator"></span>
-		{{ data.startTime }}
-		<span class="owe-timezone">{{ data.timezone }}</span>
+		<br>
+		{{ data.type }}
 	</li>
 </script>

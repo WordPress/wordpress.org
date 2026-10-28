@@ -42,9 +42,6 @@ class Performance_Optimizations {
 		// Disable post meta key lookup, see https://core.trac.wordpress.org/ticket/33885.
 		add_filter( 'postmeta_form_keys', '__return_empty_array' );
 
-		// Disable canonical redirects for short post_names
-		add_filter( 'template_redirect', array( $this, 'maybe_disable_404_canonical' ), 9 );
-
 		// Disable the 'popular' view.
 		add_filter( 'bbp_register_views', array( $this, 'disable_popular_view' ) );
 
@@ -63,18 +60,11 @@ class Performance_Optimizations {
 		add_filter( 'pre_count_users', array( $this, 'cache_count_users' ), 10, 3 );
 		// ..and don't do expensive orderbys & counting for user queries that don't need it.
 		add_action( 'pre_get_users', array( $this, 'pre_get_users' ) );
-	}
 
-	/**
-	 * Disables Canonical redirects on 404 pages when a short (<5char) name is provided.
-	 *
-	 * This is used to avoid really bad queries in redirect_guess_404_permalink() on urls such as:
-	 * https://wordpress.org/support/topic/test/*1*
-	 */
-	public function maybe_disable_404_canonical() {
-		if ( is_404() && get_query_var( 'name' ) && strlen( get_query_var( 'name' ) ) < 5 ) {
-			remove_filter( 'template_redirect', 'redirect_canonical' );
-		}
+		// The Dashboard glance widget does not need an expensive forum user count.
+		add_filter( 'bbp_after_get_statistics_parse_args', array( $this, 'skip_dashboard_forum_user_count' ) );
+		add_filter( 'bbp_get_statistics', array( $this, 'remove_dashboard_forum_user_count' ) );
+
 	}
 
 	/**
@@ -101,7 +91,7 @@ class Performance_Optimizations {
 		}
 
 		if ( isset( $_GET['intext'] ) ) {
-			$search_terms .= ' intext:"' . esc_attr( $_GET['intext'] ) . '"';
+			$search_terms .= ' "' . sanitize_text_field( wp_unslash( $_GET['intext'] ) ) . '"';
 		}
 
 		if ( $search_terms ) {
@@ -164,6 +154,7 @@ class Performance_Optimizations {
 				$url = jetpack_photon_url( $url );
 			}
 
+			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Photon CDN host, so the target is deliberately off-site.
 			wp_redirect( $url, 301 );
 			exit;
 		}
@@ -330,7 +321,12 @@ class Performance_Optimizations {
 
 	public function enqueue_styles() {
 		if ( current_user_can( 'participate' ) ) {
-			wp_enqueue_style( 'support-forums-participants', plugins_url( 'css/styles-participants.css', __DIR__ ), array(), '20211105' );
+			wp_enqueue_style(
+				'support-forums-participants',
+				plugins_url( 'css/styles-participants.css', __DIR__ ),
+				array(),
+				filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'css/styles-participants.css' )
+			);
 		}
 	}
 
@@ -562,7 +558,7 @@ class Performance_Optimizations {
 
 	/**
 	 * Cache the result of `count_users()` as the Support Forums site has a lot of users.
-	 * 
+	 *
 	 * This slows wp-admin/users.php down so much that it's hard to use when required.
 	 * As these numbers don't change often, it's cached for 24hrs hours, which avoids a 20-60s query on each users.php pageload.
 	 */
@@ -598,9 +594,37 @@ class Performance_Optimizations {
 	}
 
 	/**
+	 * Avoid counting every forum-role holder for the Dashboard glance widget.
+	 *
+	 * @param array $args Parsed bbPress statistics arguments.
+	 * @return array Statistics arguments.
+	 */
+	public function skip_dashboard_forum_user_count( $args ) {
+		if ( doing_filter( 'dashboard_glance_items' ) ) {
+			$args['count_users'] = false;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Hide the zero user count produced when Dashboard counting is disabled.
+	 *
+	 * @param array $statistics Formatted bbPress statistics.
+	 * @return array Statistics without the Dashboard user count.
+	 */
+	public function remove_dashboard_forum_user_count( $statistics ) {
+		if ( doing_filter( 'dashboard_glance_items' ) ) {
+			unset( $statistics['user_count'], $statistics['user_count_int'] );
+		}
+
+		return $statistics;
+	}
+
+	/**
 	 * Filter use queries to be more performant, as the default WordPress user queries
 	 * just don't scale to several million users here.
-	 * 
+	 *
 	 * @param \WP_User_Query $query
 	 */
 	public function pre_get_users( $query ) {
@@ -635,4 +659,5 @@ class Performance_Optimizations {
 			$query->query_vars['blog_id'] = false;
 		}
 	}
+
 }

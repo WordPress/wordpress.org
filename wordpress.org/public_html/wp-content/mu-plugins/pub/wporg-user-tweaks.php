@@ -37,6 +37,12 @@ add_filter( 'get_the_author_display_name', function( $name, $user_id ) {
 // bbPress skips user filtering and does it's own
 add_filter( 'bbp_get_displayed_user_field', function( $value, $field, $filter ) {
 	if ( 'edit' === $filter ) {
+
+		// When editing a user, if the nickname is blank, fill it in with the nice name. 
+		if ( 'nickname' === $field && empty( $value ) ) {
+			$value = bbp_get_displayed_user_field( 'user_nicename', 'edit' );
+		}
+
 		return $value;
 	}
 
@@ -55,7 +61,7 @@ add_filter( 'bbp_get_displayed_user_field', function( $value, $field, $filter ) 
  * Filter the BuddyPress displayed name.
  */
 add_filter( 'bp_displayed_user_fullname', function( $name ) {
-	$userdata = buddypress()->displayed_user->userdata;
+	$userdata = buddypress()->displayed_user->userdata ?? false;
 
 	if ( ! $userdata ) {
 		return $name;
@@ -113,7 +119,8 @@ function maybe_replace_blocked_user_name( $name, $user ) {
 		return $user->user_nicename;
 	}
 
-	if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
+	// Check against the Support Forums if possible, additionally, check the site actually exists in this network.
+	if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && function_exists( 'get_site' ) && get_site( WPORG_SUPPORT_FORUMS_BLOGID ) ) {
 		$user->for_site( WPORG_SUPPORT_FORUMS_BLOGID );
 	}
 

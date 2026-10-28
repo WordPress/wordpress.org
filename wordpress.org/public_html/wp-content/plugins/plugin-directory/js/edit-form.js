@@ -46,13 +46,49 @@
 			} );
 
 			$( '#contact-author' ).appendTo( '#plugin-review .inside' );
+
+			$( '.plugin-upload-zip' ).click( PluginEdit.uploadZip );
+			$( '.plugin-upload-zip' ).parents('form').submit( PluginEdit.uploadZipDisable );
 		},
 
 		setPluginStatus: function() {
-			if ( 'approved' === $(this).val() ) {
-				return confirm( pluginDirectory.approvePluginAYS );
-			} else if ( 'rejected' === $(this).val() ) {
+			var $this = $(this),
+				status = $this.val();
+
+			if ( 'new' == status ) {
+				jQuery('#assigned_reviewer').val(0);
+
+			} else if ( 'pending' == status && $this.hasClass('pending-and-assign') ) {
+				jQuery('#assigned_reviewer').val( userSettings.uid );
+
+			} else if ( 'approved' === status ) {
+				var timeForDoubleClick = 1000;
+				var lastClick = $this.data( 'lastClick' ) || 0,
+					now = Date.now();
+
+				if ( now - lastClick > 0 && now - lastClick < timeForDoubleClick ) {
+					return true;
+				}
+
+				$this.data( 'lastClick', now );
+
+				// Make it clear that a double click is needed.
+				if ( ! $this.data( 'originalText' ) ) {
+					$this.data( 'originalText', $this.text() );
+				}
+
+				$this.text( pluginDirectory.approvePluginConfirm );
+
+				setTimeout( function() {
+					$this.text( $this.data( 'originalText' ) );
+					$this.data( 'lastClick', 0 );
+				}, timeForDoubleClick );
+
+				return false;
+
+			} else if ( 'rejected' === status ) {
 				return confirm( pluginDirectory.rejectPluginAYS );
+
 			} else {
 				return true;
 			}
@@ -74,6 +110,8 @@
 
 				if ( 'object' == typeof response && response.responses[0] ) {
 					$commentsList.append( response.responses[0].data ).show();
+
+					PluginEdit.collapseComments( $commentsList );
 
 					$( 'a[className*=\':\']' ).unbind();
 
@@ -147,6 +185,100 @@
 			} else {
 				$( '#support-rep-error' ).empty().hide();
 			}
+		},
+
+		uploadZip: function( e ) {
+			e.preventDefault();
+
+			var $this = $(this),
+				$container = $this.parents('label'),
+				post_ID = $( '#post_ID' ).val(),
+				$file = $container.find('input[type="file"]' ),
+				file_input = $file.get(0),
+				restEndpoint = 'plugins/v1/upload/' + post_ID;
+
+			if ( ! file_input.files.length ) {
+				alert( "Select a file first." );
+				return;
+			}
+
+			$this.prop( 'disabled', true );
+			$this.text( 'Uploading...' );
+			$container.find( '.notice' ).remove();
+
+			var data = new FormData()
+			data.append( $file.prop( 'name' ), file_input.files[0] );
+			data.append( 'admin', true );
+			data.append( '_wporg_action', pluginDirectory.uploadNonce );
+
+			wp.apiRequest( {
+				path: restEndpoint,
+				type: 'POST',
+				data: data,
+				processData: false,
+				contentType: false,
+			} )
+			.done( function( response, statusText ) {
+				var successHtml = response?.responseJSON?.message || statusText;
+
+				$container.append( '<div class="notice notice-success"><p>' + successHtml + '</p></div>' );
+
+				$('ul.plugin-zip-files').append(
+					'<li>' + new Date().toLocaleString() + ' ' + file_input.files[0].name + '</li>'
+				);
+
+				$file.val( '' );
+			} )
+			.fail( function( response, statusText ) {
+				var errorHtml = response?.responseJSON?.message || statusText;
+
+				$container.append( '<div class="notice notice-error"><p>' + errorHtml + '</p></div>' );
+			} )
+			.always( function() {
+				$this.text( 'Upload' ).prop( 'disabled', false );
+			} );
+		},
+	
+		// Disable any file input fields, to prevent the browser sending it.
+		uploadZipDisable: function() {
+			$(this).find('input[type="file"]').prop( 'disabled', true );
+		},
+
+		collapseComments: function( $list ) {
+			var maxHeight = 100;
+
+			$list.find( '.column-comment' ).each( function() {
+				var $col  = $( this ),
+					$body = $col.find( '> :not(.row-actions)' ).wrapAll( '<div class="comment-body"></div>' ).parent(),
+					$actions = $col.find( '.row-actions' );
+
+				if ( $body.prop( 'scrollHeight' ) <= maxHeight ) {
+					return;
+				}
+
+				// Match the fade gradient to the row's background color.
+				var bg = $col.closest( 'tr' ).css( 'background-color' );
+				if ( bg ) {
+					$body.css( '--comment-bg', bg );
+				}
+
+				$body.addClass( 'comment-collapsed' );
+
+				var $toggle = $( '<a class="comment-toggle">Show more</a>' );
+				$toggle.on( 'click', function( e ) {
+					e.preventDefault();
+
+					if ( $body.hasClass( 'comment-collapsed' ) ) {
+						$body.removeClass( 'comment-collapsed' );
+						$toggle.text( 'Show less' );
+					} else {
+						$body.addClass( 'comment-collapsed' );
+						$toggle.text( 'Show more' );
+					}
+				} );
+
+				$toggle.insertBefore( $actions );
+			} );
 		}
 
 	};

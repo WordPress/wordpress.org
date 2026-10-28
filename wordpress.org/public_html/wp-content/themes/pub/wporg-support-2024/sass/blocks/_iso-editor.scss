@@ -1,0 +1,15 @@
+/* Move the Block Editor toolbar below the Header & Also Viewing z-index bar */
+.iso-editor {
+	border-color: var(--wp--custom--form--border--color);
+	border-radius: var(--wp--custom--form--border--radius);
+
+	&.has-fixed-toolbar .interface-interface-skeleton__header {
+		z-index: var(--wp--custom--z-index--iso-editor);
+	}
+
+	pre {
+		// Matches Blocks Everywhere styles
+		// See https://github.com/Automattic/blocks-everywhere/issues/202
+		background-color: #f0f0f0;
+	}
+}

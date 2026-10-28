@@ -1,0 +1,54 @@
+/* Buttons that look like links, for a cross of good semantics with the visual */
+.button-link {
+	background: none;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	cursor: pointer;
+	margin: 0;
+	outline: none;
+	padding: 0;
+}
+
+/* See .wp-block-button__link for these styles source; this is just to avoid changing all of the HTML classes over straight away */
+.button {
+	opacity: 1;
+	color: var(--wp--custom--button--color--text);
+	background-color: var(--wp--custom--button--color--background);
+	border: none;
+	border-width: 0;
+	cursor: pointer;
+	vertical-align: middle;
+	border-radius: var(--wp--custom--button--border--radius);
+
+	padding-top: calc(var(--wp--custom--button--small--spacing--padding--top) + var(--wp--custom--button--border--width));
+	padding-bottom: calc(var(--wp--custom--button--small--spacing--padding--bottom) + var(--wp--custom--button--border--width));
+	padding-left: calc(var(--wp--custom--button--small--spacing--padding--left) + var(--wp--custom--button--border--width));
+	padding-right: calc(var(--wp--custom--button--small--spacing--padding--right) + var(--wp--custom--button--border--width));	
+
+	&.button-large {
+		padding-top: calc(var(--wp--custom--button--spacing--padding--top) + var(--wp--custom--button--border--width));
+		padding-bottom: calc(var(--wp--custom--button--spacing--padding--bottom) + var(--wp--custom--button--border--width));
+		padding-left: calc(var(--wp--custom--button--spacing--padding--left) + var(--wp--custom--button--border--width));
+		padding-right: calc(var(--wp--custom--button--spacing--padding--right) + var(--wp--custom--button--border--width));	
+	}
+}
+
+input + button.button,
+select + button.button {
+	margin-top: -3px;
+}
+
+.button.disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.wp-block-post-content a.button {
+	text-decoration: none;
+}
+
+/* See: https://meta.trac.wordpress.org/ticket/7818 */
+.wp-block-button__link {
+	width: auto;
+}

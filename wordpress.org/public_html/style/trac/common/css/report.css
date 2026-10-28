@@ -1,9 +1,14 @@
 @import url(code.css);
 
+.report.edit {
+ max-width: 56em;
+ margin: 0 auto;
+}
+
 /* Report listing */
 .report #trac-sort-order {
  float: right;
- font-size: 11px;
+ font-size: .5em;
  font-weight: normal;
 }
 
@@ -27,13 +32,12 @@
 
 .report div.reports h2 {
  /* taken from .wikipage h2 */
- border-bottom: 1px solid #ddd;
- box-shadow: .1em .4em .7em 0 #f2f2f2;
- padding: 0.2em .3em .1em;
+ padding: 0.2em .3em .1em 0; /* wiki_h2_padding */
+ border-bottom: 2pt solid #b00; /* wiki_h2_bottom */
+ box-shadow: .2em .3em .5em 0 #f6f6f6; /* wiki_h2_box_shadow */
 }
 .report div.reports h3 {
  /* taken from .wikipage h3 */
- border-bottom: 1px dashed #ddd;
 }
 .report div.reports h3 :link, .report div.reports h3 :visited {
  color: #000;
@@ -62,6 +66,13 @@
 #prefs fieldset legend {
  margin: 0;
  padding: 2px;
+ font-size: 1.1em;
+}
+#prefs fieldset th { text-align: right }
+.ui-autocomplete {
+ max-height: 10em;
+ overflow-y: auto;
+ overflow-x: hidden;
 }
 
 h1 .numrows, h2 .numrows {
@@ -73,7 +84,7 @@ h1 .numrows, h2 .numrows {
 h2.report-result {
  background: #f7f7f7;
  border-bottom: 1px solid #d7d7d7;
- margin: 2em 0 0;
+ margin: 2em 0 .6em 0;
  padding: .2em .4em;
  box-shadow: 1px 1px .5em 0 #ccc;
  border-radius: .1em
@@ -90,7 +101,7 @@ h2.report-result {
 
 #query { clear: right }
 #query fieldset, #query fieldset input, #query fieldset select {
- font-size: 11px;
+ font-size: .9em; /* query_filter_font_size */
 }
 #query fieldset { margin-top: 1em }
 #query fieldset.collapsed {
@@ -98,7 +109,9 @@ h2.report-result {
  margin-bottom: 0pt;
  padding: 0pt .5em;
 }
-#query .option, #query .option input, #query .option select { font-size: 11px }
+#query .option, #query .option input, #query .option select {
+ font-size: .9em; /* query_filter_font_size */
+}
 #query .option { float: left; line-height: 2em; margin: .9em 2.5em 0 .5em; padding: 0 0 .1em }
 #query .buttons { float: right; margin-top: .5em }
 #query .buttons input { margin: .5em }
@@ -129,8 +142,11 @@ h2.report-result {
 
 #filters tr { height: 2em }
 #filters th, #filters td { padding: 0 .2em; vertical-align: middle }
-#filters th { font-size: 11px; text-align: right; white-space: nowrap; }
-#filters td label { font-size: 11px }
+#filters th {
+ text-align: right;
+ white-space: nowrap;
+}
+
 #filters td.mode { text-align: right }
 #filters td.filter { width: 100% }
 #filters td.filter label.control { padding-right: 1em }
@@ -155,7 +171,7 @@ h2.report-result {
 .tickets tr.trac-columns th {
  border: 1px solid #d7d7d7;
  border-bottom-color: #999;
- font-size: 11px;
+ font-size: .9em;
  font-weight: bold;
  padding: 2px .5em;
  vertical-align: bottom;
@@ -204,6 +220,12 @@ h2.report-result {
 
 /* Query results table */
 
+table.tickets caption.trac-group {
+ padding: .1em .5em; /* same as .tickets tbody td */
+ border: 1px dotted #ddd;
+ text-align: left;
+}
+table.tickets caption.trac-group h2 { margin-top: 0 }
 table.tickets tbody tr.added td { font-weight: bold }
 table.tickets tbody tr.changed td { font-style: italic }
 table.tickets tbody tr.removed td { color: #999 }
@@ -231,39 +253,31 @@ table.tickets tbody tr p:last-child { margin-bottom: 0 }
 /* Batchmod Form */
 
 #batchmod_form { display: none; }
-#batchmod_form fieldset input#batchmod_submit { font-size: 100% }
-#batchmod_form fieldset input[type="button"]{ padding: 0.1em 0.5em; }
-#batchmod_form > fieldset { margin-top: 1.5em }
-#batchmod_form fieldset.collapsed {
+#batchmod_form > fieldset.collapsed {
  border-width: 0;
  margin-bottom: 0pt;
  padding: 0pt .5em;
 }
-.batchmod_property { width: 100%; }
-.batchmod_required:before { content: " * "; }
+#batchmod_form > fieldset { margin-top: 1.5em }
 #batchmod_form fieldset input,
-#batchmod_form fieldset select, .batchmod_property, .batchmod_label {
- font-size: 11px;
+#batchmod_form fieldset select, .batchmod_property {
+ font-size: .9em;  /* query_filter_font_size */
 }
-#action { margin-top: 0; line-height: 2em; }
+#batchmod_form fieldset input#batchmod_submit { font-size: 100% }
 #batchmod_form th {
  text-align: right;
  white-space: nowrap;
- font-size: 11px;
+ font-size: .9em; /* query_filter_font_size */
 }
+.batchmod_required:before { content: " * "; }
 .batchmod_required {
  color: red;
- font-size: 11px;
+ font-size: .9em; /* query_filter_font_size */
  font-weight: bold;
  font-style: italic;
  padding-left: .5em;
 }
-#batchmod_help {
- float: right;
- color: #999;
- margin: 0.3em 1em;
-}
-#batchmod_help :link, #batchmod_help :visited { cursor: help; }
+#action { margin-top: 0; line-height: 2em; }
 
 @media print {
  .sel { display: none }

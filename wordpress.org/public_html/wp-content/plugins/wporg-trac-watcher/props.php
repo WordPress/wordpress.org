@@ -231,6 +231,11 @@ function from_log( $log, $include_old = false ) {
 				}
 			}
 
+			// If it's a revision reference, skip it. Eg. Potbot "Generated from r12345"
+			if ( preg_match( '!^r[0-9]+$!', $u ) ) {
+				return false;
+			}
+
 			return true;
 		}
 	);

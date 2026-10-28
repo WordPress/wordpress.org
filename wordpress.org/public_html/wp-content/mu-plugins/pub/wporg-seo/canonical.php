@@ -64,44 +64,28 @@ function get_canonical_url() {
 
 		$url = get_term_link( $queried_object );
 
-		// Detect multi-term queries.
-		// Create a copy and remove the 'relation' param if present.
-		$tax_queries = $wp_query->tax_query->queries;
-		unset( $tax_queries['relation'] );
-
-		$term_queries    = count( $tax_queries );
-		$term_query_zero = count( $tax_queries[0]['terms'] ?? [] );
-		if ( $term_queries > 1 || $term_query_zero > 1 ) {
-			// Multiple terms are being queried for.
-			$terms = wp_list_pluck( $tax_queries, 'terms' );
-			$terms = call_user_func_array( 'array_merge', $terms );
-
-			// Determine how many taxonomies are involved in this query.
-			$taxonomies = array_unique( wp_list_pluck( $tax_queries, 'taxonomy' ) );
-
-			if ( count( $taxonomies ) > 1 ) {
-				// Multiple-taxonomy query. No canonical produced.
-				// TODO: Edgecase: on a site where a taxonomy query is added via pre_get_posts this will result in no canonical produced.
-				$url = false;
-			} elseif ( $term_queries > 1 && 1 === $term_query_zero ) {
-				// AND +
-				$glue = '+';
-			} elseif ( $term_query_zero > 1 && 1 === $term_queries && 'AND' === $wp_query->tax_query->relation ) {
-				if ( 'AND' === $tax_queries[0]['operator'] ) {
-					// AND +
-					$glue = '+';
-				} else {
-					// Union ,
-					$glue = ',';
+		// TODO: This isn't strictly correct for nested taxonomies.
+		$glue = ( 'AND' === $wp_query->tax_query->relation ) ? '+' : ',';
+		foreach ( $wp_query->tax_query->queried_terms as $taxonomy => $term_data ) {
+			if ( $taxonomy === $queried_object->taxonomy ) {
+				// TODO: If multiple tax_queries for the same taxonomy are included, this will miss those.
+				if ( count( $term_data['terms'] ) > 1 ) {
+					$url = str_replace(
+						'/' . $queried_object->slug . '/',
+						'/' . implode( $glue, $term_data['terms'] ) . '/',
+						$url
+					);
 				}
-			} else {
-				$url = false;
+
+				continue;
 			}
 
-			if ( $url ) {
-				$url = str_replace(
-					'/' . $queried_object->slug . '/',
-					'/' . implode( $glue, $terms ) . '/',
+			// If we have other taxonomies, append as query vars.
+			$tax_obj = get_taxonomy( $taxonomy );
+			if ( ! empty( $tax_obj->query_var ) ) {
+				$url = add_query_arg(
+					$tax_obj->query_var,
+					urlencode( implode( $glue, $term_data['terms'] ) ),
 					$url
 				);
 			}

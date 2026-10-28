@@ -88,6 +88,12 @@ function wporg_login_admin_page() {
 			$tr.append( "<td colspan=" + $tds.length + ">...</td>" );
 
 			var url = $this.prop('href') + '&ajax=1';
+			if ( url.indexOf( 'block_account' ) !== -1 ) {
+				if ( ! $('#block_reason').val() ) {
+					$('#block_reason').val( prompt( 'Reason for blocking?' ) );
+				}
+				url += '&block_reason=' + encodeURIComponent( $('#block_reason').val() );
+			}
 
 			$.get( url, function( data ) {
 				$tr.find('td:last').text( data );
@@ -141,7 +147,8 @@ function wporg_login_admin_page() {
 
 	if ( isset( $_GET['action'] ) ) {
 		echo '<div class="updated notice"><p>';
-		echo wporg_login_admin_action_text( $_GET['action'] );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Selects a fixed display message without changing state.
+			echo esc_html( wporg_login_admin_action_text( sanitize_key( wp_unslash( $_GET['action'] ) ) ) );
 		echo '</p></div>';
 	}
 
@@ -175,6 +182,8 @@ function wporg_login_admin_settings_page() {
 				wp_die( "Are you sure you wanted to do that? You attempted to change registration_block_words to less than 80% of the previous value." );
 			}
 
+			wporg_login_admin_settings_page_log_changes( 'Registration Block Words', get_option( 'registration_block_words' ), $block_words );
+
 			update_option( 'registration_block_words', $block_words );
 		}
 
@@ -188,8 +197,26 @@ function wporg_login_admin_settings_page() {
 				wp_die( "Are you sure you wanted to do that? You attempted to change banned_email_domains to less than 80% of the previous value." );
 			}
 
+			wporg_login_admin_settings_page_log_changes( 'Banned Email Domains', get_site_option( 'banned_email_domains' ), $banned_email_domains );
+
 			// Network-wide option.
 			update_site_option( 'banned_email_domains', $banned_email_domains );
+		}
+
+		$never_spam_tokens = wp_unslash( $_POST['never_spam_tokens'] ?? '' );
+		if ( $never_spam_tokens ) {
+			$never_spam_tokens = str_replace( "\r", '', $never_spam_tokens );
+			$never_spam_tokens = explode( "\n", $never_spam_tokens );
+			$never_spam_tokens = array_values( $never_spam_tokens );
+
+			// Sanity; Don't let it change more than 10%.
+			if ( count( $never_spam_tokens ) < count( get_option( 'never_spam_tokens' ) ) * 0.9 ) {
+				wp_die( "Are you sure you wanted to do that? You attempted to change never_spam_tokens to less than 90% of the previous value." );
+			}
+
+			wporg_login_admin_settings_page_log_changes( 'Never Spam Tokens', get_option( 'never_spam_tokens' ), $never_spam_tokens );
+
+			update_option( 'never_spam_tokens', $never_spam_tokens );
 		}
 
 		$ip_block = wp_unslash( $_POST['ip_block'] ?? '' );
@@ -197,11 +224,43 @@ function wporg_login_admin_settings_page() {
 		if ( $ip_block || $ip_allow ) {
 			wp_cache_add_global_groups( array( 'registration-limit' ) );
 
+			$expand_to_range = function( $ip ) {
+				$ip  = trim( $ip );
+				$ips = [ $ip ];
+				if ( str_ends_with( $ip, '.*' ) ) {
+					$ips = [];
+					$ip  = substr( $ip, 0, -2 );
+					foreach ( range( 0, 255 ) as $i ) {
+						$ips[] = $ip . '.' . $i;
+					}
+				}
+
+				return $ips;
+			};
+
 			if ( $ip_allow ) {
-				wp_cache_set( $ip_allow, 'whitelist', 'registration-limit', DAY_IN_SECONDS );
+				$time_to_allow = wp_unslash( $_POST['ip_allow_time'] ?? DAY_IN_SECONDS );
+				$allow = 0;
+				foreach ( $expand_to_range( $ip_allow ) as $ip ) {
+					wp_cache_set( $ip, 'whitelist', 'registration-limit', $time_to_allow );
+					$allow++;
+				}
+
+				printf( '<div class="notice notice-success"><p>%d IPs added to the allow list.</p></div>', (int) $allow );
+
+				wporg_login_admin_settings_page_log_changes( 'IP Allow', [], $ip_allow );
 			}
 			if ( $ip_block ) {
-				wp_cache_set( $ip_block, 999, 'registration-limit', DAY_IN_SECONDS );
+				$time_to_block = wp_unslash( $_POST['ip_block_time'] ?? DAY_IN_SECONDS );
+				$blocked = 0;
+				foreach ( $expand_to_range( $ip_block ) as $ip ) {
+					wp_cache_set( $ip, 999, 'registration-limit', $time_to_block );
+					$blocked++;
+				}
+
+				printf( '<div class="notice notice-success"><p>%d IPs blocked from registration.</p></div>', (int) $blocked );
+
+				wporg_login_admin_settings_page_log_changes( 'IP Block', [], $ip_allow );
 			}
 		}
 
@@ -251,19 +310,73 @@ function wporg_login_admin_settings_page() {
 		esc_textarea( implode( "\n", get_site_option( 'banned_email_domains', [] ) ) ),
 	);
 
+	printf(
+		'<tr>
+			<th>NEVER Spam Tokens</th>
+			<td>
+				<textarea id="never-spam-tokens" name="never_spam_tokens" rows="10" cols="80" style="width:100%%">%s</textarea>
+				<p id="never-spam-token-desc"><em>' .
+				'These tokens (Email domain, Location, referer, etc) will cause a registration to bypass all spam checks. Use sparingly.<br>' .
+				'Limited Regex: <code>*</code> may be used to match one-or-more non-spacey characters, <code>^</code> and <code>$</code> are supported.<br>' .
+				'One token per line. Comments may be added after each line by separating with #, eg: <code>@wordpress.net # Always allow WordPress.net signups</code>.' .
+				'</em></p>' .
+				'<p>TEST: <input type="text" id="never-spam-token-test" placeholder="Enter test string" onchange="wporgLoginNeverSpamTokenTest(this);" onkeyup="wporgLoginNeverSpamTokenTest(this);"> (Green: Bypass; Red: No match)</p>
+			</td>
+		</tr>',
+		esc_textarea( implode( "\n", get_option( 'never_spam_tokens', [] ) ) ),
+	);
+	echo '<script>
+	function wporgLoginNeverSpamTokenTest( testField ) {
+		const testString = testField.value;
+		const tokens = document.getElementById( "never-spam-tokens" ).value.split( "\\n" );
+
+		for ( let line of tokens ) {
+			line = line.split( "#" )[0].trim();
+			if ( ! line ) {
+				continue;
+			}
+			let pattern = line.replace( /[.*+?^${}()|[\\]\\\\]/g, \'\\\\$&\' ); // Escape regex chars.
+			pattern = pattern.replace( /\\\\\\*/g, \'[a-z0-9]+\' );
+			if ( pattern.startsWith( \'\\\\^\' ) ) {
+				pattern = \'^\' + pattern.slice( 2 );
+			}
+			if ( pattern.endsWith( \'\\\\$\' ) ) {
+				pattern = pattern.slice( 0, -2 ) + \'$\' ;
+			}
+			const regex = new RegExp( pattern, \'i\' );
+			if ( regex.test( testString ) ) {
+				testField.style.backgroundColor = "#aeeaad";
+				return;
+			}
+		}
+
+		testField.style.backgroundColor = "#eda3a3";
+	}
+	</script>';
+
 	echo '<tr>
-		<th>IP Block for 24hrs</th>
+		<th>IP Block</th>
 		<td>
-			<input class="regular-text" type="text" name="ip_block" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" placeholder="xxx.xxx.xxx.xxx">
-			<p><em>One IP only. IP will be blocked from registrations for 24hrs. </em></p>
+			<input class="regular-text" type="text" name="ip_block" minlength="7" maxlength="15" size="15" pattern="^([a-f0-9:*]{8,}|((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]|[*]))$" placeholder="xxx.xxx.xxx.xxx">
+			<select name="ip_block_time">
+				<option value="86400">24hrs</option>
+				<option value="604800">7 days</option>
+				<option value="2592000">30 days</option>
+			</select>
+			<p><em>Single IP, or range specified as <code>1.2.3.*</code> / <code>fe80:1234:*</code>. IP will be blocked from registrations for the selected time period. </em></p>
 		</td>
 	</tr>';
 
 	echo '<tr>
-		<th>IP Allow for 24hrs</th>
+		<th>IP Allow</th>
 		<td>
-			<input class="regular-text" type="text" name="ip_allow" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" placeholder="xxx.xxx.xxx.xxx">
-			<p><em>One IP only. IP will bypass per-IP limits on registrations for 24hrs. Will also bypass Jetpack Protect login limiter.</em></p>
+			<input class="regular-text" type="text" name="ip_allow" minlength="7" maxlength="15" size="15" pattern="^([a-f0-9:*]{8,}|((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]|[*]))$" placeholder="xxx.xxx.xxx.xxx">
+			<select name="ip_allow_time">
+				<option value="86400">24hrs</option>
+				<option value="259200">3 days</option>
+				<option value="604800">7 days</option>
+			</select>
+			<p><em>Single IP, or range specified as <code>1.2.3.*</code> / <code>fe80:1234:*</code>. IP will bypass per-IP limits on registrations for the selected time period. Will also bypass Jetpack Protect login limiter.</em></p>
 		</td>
 	</tr>';
 
@@ -273,6 +386,29 @@ function wporg_login_admin_settings_page() {
 	</p>';
 	echo '</form>';
 	echo '</div>';
+}
+
+function wporg_login_admin_settings_page_log_changes( $nicename, $before, $after ) {
+	$before = (array) $before;
+	$after  = (array) $after;
+	$added   = array_diff( $after, $before );
+	$removed = array_diff( $before, $after );
+	$changes = '';
+
+	if ( $before && $removed ) {
+		$changes .= rtrim( '> -`' . implode( "`\n> -`", $removed ), '`-' ) . "`\n";
+	}
+	if ( $after && $added ) {
+		$changes .= rtrim( '> +`' . implode( "`\n> +`", $added ), '`+' ) . "`\n";
+	}
+
+	if ( ! $changes ) {
+		return;
+	}
+
+	$changes = '*' . $nicename . " changed:*\n" . $changes;
+
+	return notify_slack( FORUMS_MODACTIONS_SLACK_CHANNEL, $changes, wp_get_current_user() );
 }
 
 add_action( 'admin_post_login_resend_email', function() { 
@@ -289,7 +425,7 @@ add_action( 'admin_post_login_resend_email', function() {
 	}
 
 	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'resent-email' ) );
+		die( esc_html( wporg_login_admin_action_text( 'resent-email' ) ) );
 	}
 
 	wp_safe_redirect( add_query_arg(
@@ -311,6 +447,11 @@ add_action( 'admin_post_login_mark_as_cleared', function() {
 
 	$user = wporg_get_pending_user( $email );
 	if ( $user ) {
+		// If a spectator role is specified, note that.
+		if ( ( $_REQUEST['role'] ?? '' ) === 'spectator' ) {
+			$user['meta']['role'] = 'spectator';
+		}
+
 		$user['cleared'] = 2;
 		wporg_update_pending_user( $user );
 
@@ -318,7 +459,7 @@ add_action( 'admin_post_login_mark_as_cleared', function() {
 	}
 
 	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'approved' ) );
+		die( esc_html( wporg_login_admin_action_text( 'approved' ) ) );
 	}
 
 	wp_safe_redirect( add_query_arg(
@@ -338,17 +479,10 @@ add_action( 'admin_post_login_block', function() {
 
 	check_admin_referer( 'block_' . $email );
 
-	$user = wporg_get_pending_user( $email );
-	if ( $user ) {
-		$user['cleared']             = 0;
-		$user['user_activation_key'] = '';
-		$user['user_profile_key']    = '';
-
-		wporg_update_pending_user( $user );
-	}
+	wporg_login_block_registration( $email );
 
 	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'blocked' ) );
+		die( esc_html( wporg_login_admin_action_text( 'blocked' ) ) );
 	}
 
 	wp_safe_redirect( add_query_arg(
@@ -358,6 +492,21 @@ add_action( 'admin_post_login_block', function() {
 	) );
 	exit;
 } );
+
+function wporg_login_block_registration( $user ) {
+	$user = wporg_get_pending_user( $user );
+	if ( $user ) {
+		$user['cleared']             = 0;
+		$user['user_activation_key'] = '';
+		$user['user_profile_key']    = '';
+
+		wporg_update_pending_user( $user );
+
+		return true;
+	}
+
+	return false;
+}
 
 add_action( 'admin_post_login_delete', function() { 
 	if ( ! current_user_can( 'promote_users' ) ) {
@@ -374,7 +523,7 @@ add_action( 'admin_post_login_delete', function() {
 	}
 
 	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'deleted' ) );
+		die( esc_html( wporg_login_admin_action_text( 'deleted' ) ) );
 	}
 
 	wp_safe_redirect( add_query_arg(
@@ -390,18 +539,47 @@ add_action( 'admin_post_login_block_account', function() {
 		wp_die();
 	}
 
-	if ( empty( $_REQUEST['user'] ) ) {
+	$user   = $_REQUEST['user'] ?? '';
+	$reason = $_REQUEST['block_reason'] ?? '';
+	if ( empty( $user ) ) {
 		die();
 	}
 
-	$pending_user = wporg_get_pending_user( $_REQUEST['user'] );
-	if ( ! $pending_user || ! $pending_user['created'] ) {
+	$pending_user = wporg_get_pending_user( $user );
+	if ( ! $user ) {
 		die();
 	}
 
 	$user = get_user_by( 'slug', $pending_user['user_login'] );
-	if ( ! $user ) {
+
+	check_admin_referer( 'block_account_' . $user->ID );
+
+	$result = wporg_login_block_account( $pending_user, $reason );
+	if ( ! $result ) {
 		die();
+	}
+
+	if ( isset( $_GET['ajax'] ) ) {
+		die( esc_html( wporg_login_admin_action_text( 'blocked_account' ) ) );
+	}
+
+	wp_safe_redirect( add_query_arg(
+		's',
+		urlencode( $user->user_email ),
+		'https://login.wordpress.org/wp-admin/index.php?page=user-registrations&action=blocked_account'
+	) );
+	exit;
+} );
+
+function wporg_login_block_account( $user, $reason = '' ) {
+	$pending_user = wporg_get_pending_user( $user );
+	if ( ! $pending_user || ! $pending_user['created'] ) {
+		return false;
+	}
+
+	$user = get_user_by( 'slug', $pending_user['user_login'] );
+	if ( ! $user ) {
+		return false;
 	}
 
 	$table = new User_Registrations_List_Table();
@@ -416,8 +594,6 @@ add_action( 'admin_post_login_block_account', function() {
 	$table->column_meta( $pending_as_object );
 	$meta_column = ob_get_clean();
 	$meta_column = wp_strip_all_tags( str_replace( '<br>', "\n", $meta_column ), false );
-
-	check_admin_referer( 'block_account_' . $user->ID );
 
 	if ( $user && defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) ) {
 
@@ -434,25 +610,52 @@ add_action( 'admin_post_login_block_account', function() {
 		restore_current_blog();
 		switch_to_blog( WPORG_SUPPORT_FORUMS_BLOGID );
 
-		add_filter( 'wporg_bbp_forum_role_changed_note_text', function( $text ) use ( $meta_column ) {
-			return trim( "{$meta_column}\n\n{$text}" );
-		} );
+		// Load the Support Forums, for logging and whatnot.
+		WordPressdotorg\Forums\Plugin::get_instance();
+
+		$callback = function( $text ) use ( $reason, $meta_column ) {
+			return trim( "{$reason}\n{$meta_column}\n\n{$text}" );
+		};
+		add_filter( 'wporg_bbp_forum_role_changed_note_text', $callback );
 
 		// Set the user to blocked. Support forum hooks will take care of the rest.
 		bbp_set_user_role( $user->ID, bbp_get_blocked_role() );
 
+		remove_filter( 'wporg_bbp_forum_role_changed_note_text', $callback );
+
 		restore_current_blog();
 	}
 
-	if ( isset( $_GET['ajax'] ) ) {
-		die( wporg_login_admin_action_text( 'blocked_account' ) );
+	return true;
+}
+
+add_action( 'load-toplevel_page_user-registrations', function() {
+	// Perform bulk actions.
+	$action = $_REQUEST['action'] ?? ( $_REQUEST['action2'] ?? '' );
+	if (
+		empty( $_REQUEST['pending_ids'] ) ||
+		'reg_block' !== $action ||
+		! wp_verify_nonce( $_REQUEST['_wpnonce'], 'bulk-toplevel_page_user-registrations' )
+	) {
+		return;
 	}
 
-	wp_safe_redirect( add_query_arg(
-		's',
-		urlencode( $user->user_email ),
-		'https://login.wordpress.org/wp-admin/index.php?page=user-registrations&action=blocked_account'
-	) );
+	$reason = $_REQUEST['block_reason'] ?? '';
+	foreach ( (array) $_REQUEST['pending_ids'] as $pending_id ) {
+		$pending_user = wporg_get_pending_user( $pending_id );
+		if ( ! $pending_user ) {
+			continue;
+		}
+
+		if ( $pending_user['created'] ) {
+			wporg_login_block_account( $pending_user, $reason );
+		} else {
+			wporg_login_block_registration( $pending_user );
+		}
+	}
+
+	$url = remove_query_arg( array( 'pending_ids', 'action', 'action2', '_wpnonce', '_wp_http_referer' ) );
+	$url = add_query_arg( 'action', 'blocked_account', $url );
+	wp_safe_redirect( $url );
 	exit;
 } );
-

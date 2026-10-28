@@ -85,22 +85,34 @@ function get_supported_patterns( $patterns ) {
 }
 
 function endpoint_handler() {
-	$patterns = \WP_Block_Patterns_Registry::get_instance()->get_all_registered();
+	$patterns       = \WP_Block_Patterns_Registry::get_instance()->get_all_registered();
 	$theme_patterns = get_supported_patterns( $patterns );
+	$theme_slug     = get_option( 'stylesheet' );
+	$theme_version  = urlencode( wp_get_theme()->get( 'Version' ) );
+	$return         = array();
 
 	/**
 	 * Add links since the links have internal business logic.
 	 */
-	foreach ( $theme_patterns as &$pattern ) {
-		$name       = $pattern['name'];
-		$theme_slug = get_option( 'stylesheet' );
-		$link       = "https://wp-themes.com/$theme_slug/?page_id=9999&pattern_name=$name";
+	foreach ( $theme_patterns as $pattern ) {
+		$name = urlencode( $pattern['name'] );
+		$link = "https://wp-themes.com/$theme_slug/?page_id=9999&pattern_name=$name";
 
-		$pattern['link']         = $link;
-		$pattern['preview_link'] = "$link&preview";
+		// Static list of fields to include in the response.
+		$return[] = array(
+			'title'        => $pattern['title'],
+			'slug'         => $pattern['slug'],
+			'description'  => $pattern['description'],
+			'categories'   => $pattern['categories'],
+			'keywords'     => $pattern['keywords'],
+			'name'         => $pattern['name'],
+			'content'      => $pattern['content'],
+			'link'         => $link,
+			'preview_link' => "$link&preview&tv=$theme_version"
+		);
 	}
 
-	return json_encode( array_values( $theme_patterns ) );
+	return $return;
 }
 
 add_action(
@@ -108,6 +120,19 @@ add_action(
 	function () {
 		register_rest_route(
 			'wporg-patterns/v1',
+			'/patterns',
+			array(
+				'methods'             => 'GET',
+				'callback'            => function() {
+					// v1 is a JSON string, so double-encoded.
+					return json_encode( endpoint_handler() );
+				},
+				'permission_callback' => '__return_true',
+			)
+		);
+
+		register_rest_route(
+			'wporg-patterns/v2',
 			'/patterns',
 			array(
 				'methods'             => 'GET',

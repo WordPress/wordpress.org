@@ -18,7 +18,42 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		 *
 		 * @var int
 		 */
-		const REMOTE_TOKEN_TIMEOUT = 5;
+		const REMOTE_TOKEN_TIMEOUT = 300;
+
+		/**
+		 * Clock skew allowed between the host minting a token and the host redeeming it.
+		 *
+		 * @var int
+		 */
+		const REMOTE_TOKEN_CLOCK_SKEW = 30;
+
+		/**
+		 * How long a bounce ticket is good for.
+		 *
+		 * Long enough for a user-paced login, and the cookie's own lifetime, so a
+		 * ticket never outlives the record of it being spent.
+		 *
+		 * @var int
+		 */
+		const REMOTE_BOUNCE_TIMEOUT = 3600;
+
+		/**
+		 * The cookie holding this browser's claim on an in-flight remote login.
+		 *
+		 * `__Host-` cookies cannot carry a `Domain`, so no sibling host can set this one.
+		 *
+		 * @var string
+		 */
+		const REMOTE_BOUNCE_COOKIE = '__Host-wporg_sso_bounce_v2';
+
+		/**
+		 * The object cache group recording which remote tokens have been redeemed.
+		 *
+		 * Registered as a global group, so the record is shared by every site on the network.
+		 *
+		 * @var string
+		 */
+		const REMOTE_TOKEN_CACHE_GROUP = 'wporg_sso_used_tokens';
 
 		const VALID_HOSTS = [
 			'wordpress.org',
@@ -27,10 +62,11 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			'wordcamp.org'
 		];
 
-		public $sso_host       = 'login.wordpress.org';
-		public $sso_host_url   = '';
-		public $sso_login_url  = '';
-		public $sso_signup_url = '';
+		public $sso_host        = 'login.wordpress.org';
+		public $sso_cookie_host = '.wordpress.org';
+		public $sso_host_url    = '';
+		public $sso_login_url   = '';
+		public $sso_signup_url  = '';
 
 		public $host   = '';
 		public $script = '';
@@ -50,6 +86,8 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				if ( parse_url( home_url(), PHP_URL_PORT ) ) {
 					$this->sso_host .= ':' . parse_url( home_url(), PHP_URL_PORT );
 				}
+
+				$this->sso_cookie_host = defined( 'COOKIE_DOMAIN' ) ? COOKIE_DOMAIN : '';
 			} else {
 				$this->sso_host_url = 'https://' . $this->sso_host;
 			}
@@ -122,7 +160,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 		public function login_url( $login_url = '', $redirect_to = '' ) {
 			$login_url = $this->sso_login_url;
 
-			if ( ! preg_match( '!wordpress\.org$!', $this->host ) ) {
+			if ( ! $this->_is_wordpress_org_host( $this->host ) ) {
 				$login_url = add_query_arg( 'from', $this->host, $login_url );
 			}
 
@@ -133,7 +171,8 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 
 			if ( ! empty( $redirect_to ) && $this->_is_valid_targeted_domain( $redirect_to ) ) {
 				$redirect_to = preg_replace( '/\/wp-(login|signup)\.php\??.*$/', '/', $redirect_to );
-				$login_url = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $login_url );
+				$redirect_to = preg_replace( '/\/login(\.php|\/)?$/', '/', $redirect_to ); // Thanks to wp_redirect_admin_locations()
+				$login_url   = add_query_arg( 'redirect_to', urlencode( $redirect_to ), $login_url );
 			}
 
 			return $login_url;
@@ -205,6 +244,11 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				$host = parse_url( $host, PHP_URL_HOST );
 			}
 
+			// Bail if the string did not actually have a hostname within it.
+			if ( empty( $host ) ) {
+				return false;
+			}
+
 			if ( $host === $this->sso_host ) {
 				return true;
 			}
@@ -212,6 +256,35 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 			$host = $this->_get_targetted_host( $host );
 
 			return in_array( $host, self::VALID_HOSTS, true );
+		}
+
+		/**
+		 * Whether a host is on wordpress.org, and so already shares its cookies.
+		 *
+		 * @param string $host A hostname, possibly with a port.
+		 * @return boolean True if the host is on wordpress.org, false if not.
+		 */
+		protected function _is_wordpress_org_host( $host ) {
+			return (bool) preg_match( '!(^|\.)wordpress\.org$!', $this->_normalize_token_host( $host ) ); // phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText -- A hostname, not prose.
+		}
+
+		/**
+		 * Normalize a host for comparison.
+		 *
+		 * Comparisons are case-insensitive and ignore the port, matching how the
+		 * rest of the SSO code treats hostnames.
+		 *
+		 * @param string $host A hostname, possibly with a port.
+		 * @return string The normalized hostname.
+		 */
+		protected function _normalize_token_host( $host ) {
+			$host = strtolower( (string) $host );
+
+			if ( false !== strpos( $host, ':' ) ) {
+				$host = strstr( $host, ':', true );
+			}
+
+			return $host;
 		}
 
 		/**
@@ -281,6 +354,7 @@ if ( ! class_exists( 'WPOrg_SSO' ) ) {
 				printf(
 					'<meta http-equiv="refresh" content="1;url=%1$s" />' . 
 					'<a href="%1$s">%1$s</a>',
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above, with a fallback for environments without WordPress helpers.
 					$to
 				);
 				exit;

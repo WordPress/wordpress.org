@@ -1,0 +1,7 @@
+/* Add default focus style. */
+:where(main) a:where(:not(.wp-element-button,.wp-block-wporg-link-wrapper)):focus,
+:where(main) button:where(:not([class*="wp-block-button"])):focus {
+	outline: none;
+	border-radius: 2px;
+	box-shadow: 0 0 0 1.5px currentColor;
+}

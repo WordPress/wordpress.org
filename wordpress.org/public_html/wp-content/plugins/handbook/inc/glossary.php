@@ -115,6 +115,7 @@ class WPorg_Handbook_Glossary {
 	}
 
 	static function page_content() {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Shortcode output rendered by the handbook glossary.
 		echo self::shortcode();
 	}
 }

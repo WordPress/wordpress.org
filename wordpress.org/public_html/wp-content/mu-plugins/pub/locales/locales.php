@@ -2,7 +2,7 @@
 /**
  * Locales used on WordPress.org.
  *
- * - Copy of https://github.com/GlotPress/GlotPress/blob/bf614ee290531da6ced571a79d5701dcf68d2212/locales/locales.php
+ * - Copy of https://github.com/GlotPress/GlotPress/blob/e6b0c7d6d82ee55c4246311f37b6eac39502e9fa/locales/locales.php
  * - With support for custom locale variants.
  * - Without https://github.com/GlotPress/GlotPress-WP/pull/1012 and https://github.com/GlotPress/GlotPress-WP/pull/1017.
  */
@@ -16,8 +16,9 @@ class GP_Locale {
 	public $lang_code_iso_639_2 = null;
 	public $lang_code_iso_639_3 = null;
 	public $country_code;
-	public $wp_locale;
+	public $wp_locale; // This should only be set for locales that are officially supported on translate.wordpress.org.
 	public $slug;
+	public $root_slug; // This is for locale variants parent locale, see 'wp-i18n-teams' plugin.
 	public $nplurals = 2;
 	public $plural_expression = 'n != 1';
 	public $google_code = null;
@@ -27,22 +28,11 @@ class GP_Locale {
 	public $word_count_type = 'words';
 
 	/**
-	 * The variant root for this locale.
-	 *
-	 * @since 3.0.0
-	 *
-	 * @var string
-	 */
-	public $variant_root = null;
-
-	/**
-	 * The variants of this locale.
 	 *
 	 * @since 3.0.0
 	 *
 	 * @var array
 	 */
-	public $variants = null;
 
 	// TODO: days, months, decimals, quotes
 
@@ -490,7 +480,7 @@ class GP_Locales {
 		$ca_valencia->lang_code_iso_639_1 = 'ca';
 		$ca_valencia->lang_code_iso_639_2 = 'cat';
 		$ca_valencia->wp_locale = 'ca_valencia';
-		$ca_valencia->slug = 'ca-valencia';
+		$ca_valencia->slug = 'ca-val'; // The slug can only be 10 chars long.
 		$ca_valencia->google_code = 'ca';
 		$ca_valencia->facebook_locale = 'ca_ES';
 
@@ -782,6 +772,16 @@ class GP_Locales {
 		$en_gb->google_code = 'en';
 		$en_gb->facebook_locale = 'en_GB';
 
+		$en_ie = new GP_Locale();
+		$en_ie->english_name = 'English (Ireland)';
+		$en_ie->native_name = 'English (Ireland)';
+		$en_ie->lang_code_iso_639_1 = 'en';
+		$en_ie->lang_code_iso_639_2 = 'eng';
+		$en_ie->lang_code_iso_639_3 = 'eng';
+		$en_ie->country_code = 'ie';
+		$en_ie->slug = 'en-ie';
+		$en_ie->google_code = 'en';
+
 		$en_nz = new GP_Locale();
 		$en_nz->english_name = 'English (New Zealand)';
 		$en_nz->native_name = 'English (New Zealand)';
@@ -932,7 +932,18 @@ class GP_Locales {
 		$es_mx->wp_locale = 'es_MX';
 		$es_mx->slug = 'es-mx';
 		$es_mx->google_code = 'es';
-		$es_mx->facebook_locale = 'es_MX';
+		$es_mx->facebook_locale = 'es_LA';
+
+		$es_pa = new GP_Locale();
+		$es_pa->english_name = 'Spanish (Panama)';
+		$es_pa->native_name = 'Español de Panamá';
+		$es_pa->lang_code_iso_639_1 = 'es';
+		$es_pa->lang_code_iso_639_2 = 'spa';
+		$es_pa->lang_code_iso_639_3 = 'spa';
+		$es_pa->country_code = 'pa';
+		$es_pa->slug = 'es-pa';
+		$es_pa->google_code = 'es';
+		$es_pa->facebook_locale = 'es_LA';
 
 		$es_pe = new GP_Locale();
 		$es_pe->english_name = 'Spanish (Peru)';
@@ -1021,8 +1032,8 @@ class GP_Locales {
 		$fa->lang_code_iso_639_2 = 'fas';
 		$fa->wp_locale = 'fa_IR';
 		$fa->slug = 'fa';
-		$fa->nplurals = 1;
-		$fa->plural_expression = '0';
+		$fa->nplurals = 2;
+		$fa->plural_expression = 'n > 1';
 		$fa->text_direction = 'rtl';
 		$fa->google_code = 'fa';
 		$fa->facebook_locale = 'fa_IR';
@@ -1036,8 +1047,8 @@ class GP_Locales {
 		$fa_af->country_code = 'af';
 		$fa_af->wp_locale = 'fa_AF';
 		$fa_af->slug = 'fa-af';
-		$fa_af->nplurals = 1;
-		$fa_af->plural_expression = '0';
+		$fa_af->nplurals = 2;
+		$fa_af->plural_expression = 'n > 1';
 		$fa_af->text_direction = 'rtl';
 		$fa_af->google_code = 'fa';
 		$fa_af->alphabet = 'persian';
@@ -2157,6 +2168,13 @@ class GP_Locales {
 		$rhg->nplurals = 1;
 		$rhg->plural_expression = '0';
 
+		$rif = new GP_Locale();
+		$rif->english_name = 'Tarifit';
+		$rif->native_name = 'Tarifiyt';
+		$rif->lang_code_iso_639_3 = 'rif';
+		$rif->country_code = 'ma';
+		$rif->slug = 'rif';
+
 		$ro = new GP_Locale();
 		$ro->english_name = 'Romanian';
 		$ro->native_name = 'Română';
@@ -2273,8 +2291,6 @@ class GP_Locales {
 		$skr->country_code = 'pk';
 		$skr->wp_locale = 'skr';
 		$skr->slug = 'skr';
-		$skr->nplurals = 2;
-		$skr->plural_expression = 'n > 1';
 		$skr->text_direction = 'rtl';
 		$skr->alphabet = 'saraiki';
 
