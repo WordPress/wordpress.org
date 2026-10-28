@@ -1,21 +1,26 @@
 <?php
-// phpcs:ignoreFile WordPress.Files.FileName.NotHyphenatedLowercase, WordPress.Files.FileName.InvalidClassFileName -- PHPUnit discovers this test class using its matching filename.
 /**
  * Tests for the Plugin Directory browse filter navigation.
  *
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
+declare( strict_types = 1 );
+
 namespace WordPressdotorg\Plugin_Directory\Tests;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 require_once WP_CONTENT_DIR . '/themes/wporg-plugins-2024/inc/block-config.php';
 
 /**
  * Tests the Plugin Directory browse filter navigation.
+ *
+ * @group plugin-directory
  */
+#[Group( 'plugin-directory' )]
 class Browse_Filter_Navigation_Test extends TestCase {
 	/**
 	 * Original request URI.
@@ -85,6 +90,7 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	 * Build the menu through the theme's registered WordPress filter.
 	 *
 	 * @param string $request_uri Current request URI.
+	 * @param array  $query_vars  WordPress query variables.
 	 * @return array
 	 */
 	private function get_section_menu( $request_uri, $query_vars = array() ) {
@@ -114,13 +120,13 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	}
 
 	/**
-	 * The All link keeps supported browse sections.
+	 * The All link keeps the current listing.
 	 *
-	 * @param string $path       Browse path.
+	 * @param string $path       Listing path.
 	 * @param array  $query_vars WordPress query variables.
 	 */
-	#[DataProvider( 'browse_section_provider' )]
-	public function test_all_link_preserves_browse_section( $path, $query_vars ) {
+	#[DataProvider( 'listing_provider' )]
+	public function test_all_link_preserves_listing( $path, $query_vars ) {
 		$menu = $this->get_section_menu( $path, $query_vars );
 
 		$this->assertSame(
@@ -130,17 +136,19 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	}
 
 	/**
-	 * Provide supported browse paths.
+	 * Provide listing paths.
 	 *
 	 * @return array
 	 */
-	public static function browse_section_provider() {
+	public static function listing_provider() {
 		return array(
-			'blocks'   => array( '/browse/blocks/', array( 'browse' => 'blocks' ) ),
-			'popular'  => array( '/browse/popular/', array( 'browse' => 'popular' ) ),
-			'featured' => array( '/browse/featured/', array( 'browse' => 'featured' ) ),
-			'beta'     => array( '/browse/beta/', array( 'browse' => 'beta' ) ),
+			'blocks'          => array( '/browse/blocks/', array( 'browse' => 'blocks' ) ),
+			'popular'         => array( '/browse/popular/', array( 'browse' => 'popular' ) ),
+			'featured'        => array( '/browse/featured/', array( 'browse' => 'featured' ) ),
+			'beta'            => array( '/browse/beta/', array( 'browse' => 'beta' ) ),
 			'production_path' => array( '/plugins/browse/blocks/', array( 'browse' => 'blocks' ) ),
+			'tag'             => array( '/tags/widget/', array( 'plugin_tags' => 'widget' ) ),
+			'category'        => array( '/category/widgets/', array( 'plugin_category' => 'widgets' ) ),
 		);
 	}
 
@@ -161,26 +169,6 @@ class Browse_Filter_Navigation_Test extends TestCase {
 
 		$this->assertTrue( is_search() );
 		$this->assertSame( get_search_link(), $this->find_menu_item( $menu, 'All' )['url'] );
-	}
-
-	/**
-	 * The All link points to the homepage on plugin tag archives.
-	 */
-	public function test_all_link_points_to_homepage_on_plugin_tag_archive() {
-		$menu = $this->get_section_menu( '/tags/widget/', array( 'plugin_tags' => 'widget' ) );
-
-		$this->assertSame( 'widget', get_query_var( 'plugin_tags' ) );
-		$this->assertSame( home_url( '/' ), $this->find_menu_item( $menu, 'All' )['url'] );
-	}
-
-	/**
-	 * The All link points to the homepage on plugin category archives.
-	 */
-	public function test_all_link_points_to_homepage_on_plugin_category_archive() {
-		$menu = $this->get_section_menu( '/category/widgets/', array( 'plugin_category' => 'widgets' ) );
-
-		$this->assertSame( 'widgets', get_query_var( 'plugin_category' ) );
-		$this->assertSame( home_url( '/' ), $this->find_menu_item( $menu, 'All' )['url'] );
 	}
 
 	/**
