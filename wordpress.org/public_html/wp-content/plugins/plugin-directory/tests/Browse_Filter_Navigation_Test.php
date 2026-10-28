@@ -27,21 +27,21 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	 *
 	 * @var string|null
 	 */
-	protected $original_request_uri;
+	protected ?string $original_request_uri;
 
 	/**
 	 * Original HTTP host.
 	 *
 	 * @var string|null
 	 */
-	protected $original_http_host;
+	protected ?string $original_http_host;
 
 	/**
 	 * Original main query variables.
 	 *
 	 * @var array
 	 */
-	protected $original_query_vars;
+	protected array $original_query_vars;
 
 	/**
 	 * Set request and query globals for an isolated navigation test.
@@ -93,7 +93,7 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	 * @param array  $query_vars  WordPress query variables.
 	 * @return array
 	 */
-	private function get_section_menu( $request_uri, $query_vars = array() ) {
+	private function get_section_menu( string $request_uri, array $query_vars = array() ): array {
 		global $wp_query;
 		$wp_query->parse_query( $query_vars );
 		$_SERVER['REQUEST_URI'] = $request_uri;
@@ -109,7 +109,7 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	 * @param string $label Item label.
 	 * @return array
 	 */
-	private function find_menu_item( $menu, $label ) {
+	private function find_menu_item( array $menu, string $label ): array {
 		foreach ( $menu as $item ) {
 			if ( $label === $item['label'] ) {
 				return $item;
@@ -126,7 +126,7 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	 * @param array  $query_vars WordPress query variables.
 	 */
 	#[DataProvider( 'listing_provider' )]
-	public function test_all_link_preserves_listing( $path, $query_vars ) {
+	public function test_all_link_preserves_listing( string $path, array $query_vars ): void {
 		$menu = $this->get_section_menu( $path, $query_vars );
 
 		$this->assertSame(
@@ -140,7 +140,7 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	 *
 	 * @return array
 	 */
-	public static function listing_provider() {
+	public static function listing_provider(): array {
 		return array(
 			'blocks'          => array( '/browse/blocks/', array( 'browse' => 'blocks' ) ),
 			'popular'         => array( '/browse/popular/', array( 'browse' => 'popular' ) ),
@@ -155,7 +155,7 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	/**
 	 * The All link continues to point to the homepage there.
 	 */
-	public function test_all_link_points_to_homepage_on_homepage() {
+	public function test_all_link_points_to_homepage_on_homepage(): void {
 		$menu = $this->get_section_menu( '/' );
 
 		$this->assertSame( home_url( '/' ), $this->find_menu_item( $menu, 'All' )['url'] );
@@ -164,7 +164,7 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	/**
 	 * The All link retains the search URL without the business-model filter.
 	 */
-	public function test_all_link_uses_search_url_on_search_results() {
+	public function test_all_link_uses_search_url_on_search_results(): void {
 		$menu = $this->get_section_menu( '/?s=block+editor&plugin_business_model=commercial', array( 's' => 'block editor' ) );
 
 		$this->assertTrue( is_search() );
@@ -174,7 +174,7 @@ class Browse_Filter_Navigation_Test extends TestCase {
 	/**
 	 * Community and Commercial links retain the browse section and add filters.
 	 */
-	public function test_community_and_commercial_links_keep_browse_section() {
+	public function test_community_and_commercial_links_keep_browse_section(): void {
 		$menu = $this->get_section_menu( '/browse/blocks/', array( 'browse' => 'blocks' ) );
 
 		$this->assertSame(
