@@ -14,6 +14,8 @@ use WordPressdotorg\Photo_Directory\Uploads;
 
 /**
  * Tests for `Uploads::count_description_words()`.
+ *
+ * @group photo-directory
  */
 #[Group( 'photo-directory' )]
 class Description_Word_Count_Test extends TestCase {
@@ -44,6 +46,8 @@ class Description_Word_Count_Test extends TestCase {
 	 * @param mixed $description Description to count.
 	 * @param int   $expected    Expected word count.
 	 * @return void
+	 *
+	 * @dataProvider descriptions
 	 */
 	#[DataProvider( 'descriptions' )]
 	public function test_count_description_words( $description, int $expected ): void {
