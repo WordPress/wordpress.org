@@ -451,7 +451,7 @@ let wpTrac,
 
 				const filename = rawLink.previousElementSibling?.textContent?.trim() || '';
 				const commentText = changeBox.querySelector( '.comment' )?.textContent?.trim() || '';
-				const altText = filename || commentText || 'Attachment preview';
+				const altText = commentText || filename;
 
 				if ( /\.(jpg|jpeg|png|gif|svg|webp)$/i.test( href ) ) {
 					const link = document.createElement( 'a' );
