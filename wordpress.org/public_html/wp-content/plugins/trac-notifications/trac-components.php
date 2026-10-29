@@ -466,7 +466,16 @@ body.post-type-archive-component table tr:last-child td { border-bottom: none; }
 td.maintainers { padding-top: 4px; padding-bottom: 4px; height: 26px; }
 td.maintainers img.avatar { margin-right: 5px; }
 .component-info .create-new-ticket { float: right; margin-top: 25px; }
-.component-slack-link { float: right; }
+.post-type-archive-component table .component-slack { width: 1em; padding-left: 0; padding-right: 0; }
+.component-slack a::before { vertical-align: -0.125em; margin-inline-end: 0; }
+.post-type-archive-component table .right { white-space: nowrap; }
+/* Trim the glyph's side bearings and center each caret on the digits. */
+.post-type-archive-component td .history:before { position: relative; margin-left: -10.5px; margin-right: -7.5px; }
+.post-type-archive-component td .history.growing:before { top: -1.5px; }
+.post-type-archive-component td .history.shrinking:before { top: -3px; }
+@media (max-width: 599px) {
+	.post-type-archive-component table .component-slack { display: none; }
+}
 </style>
 <script>
 jQuery( function( $ ) {
@@ -920,7 +929,7 @@ jQuery( function( $ ) {
 		static $once = true;
 		if ( $once ) {
 			$once = false;
-			echo '<thead><tr><th>Component</th><th class="right">Tickets</th><th class="right">7 Days</th><th class="right">0&nbsp;Replies</th><th>Maintainers</th></tr></thead>';
+			echo '<thead><tr><th>Component</th><th class="component-slack"><span class="screen-reader-text">Slack</span></th><th class="right">Tickets</th><th class="right">7 Days</th><th class="right">0&nbsp;Replies</th><th>Maintainers</th></tr></thead>';
 		}
 
 		$arrow = '';
@@ -932,16 +941,17 @@ jQuery( function( $ ) {
 		echo '<tr>';
 		echo '<td>';
 		if ( $post->post_parent ) {
-			echo '&mdash; <a href="' . esc_url( get_permalink() ) . '">' . esc_html( $post->post_title ) . '</a>';
+			echo '&mdash;&nbsp;<a href="' . esc_url( get_permalink() ) . '">' . esc_html( $post->post_title ) . '</a>';
 		} else {
 			echo '<a href="' . esc_url( get_permalink() ) . '"><strong>' . esc_html( $post->post_title ) . '</strong></a>';
 		}
+		echo '</td>';
 
+		echo '<td class="component-slack">';
 		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
 		if ( ! empty( $slack_channel ) ) {
-			echo '<span class="component-slack-link"><a href="' . esc_url( $this->slack_channel_url( $slack_channel ) ) . '" aria-label="Join the ' . esc_attr( $component ) . ' Slack channel">Slack</a></span>';
+			echo '<a href="' . esc_url( $this->slack_channel_url( $slack_channel ) ) . '"><span class="screen-reader-text">Join the ' . esc_html( $component ) . ' Slack channel</span></a>';
 		}
-
 		echo '</td>';
 
 		$open_tickets = 0;
