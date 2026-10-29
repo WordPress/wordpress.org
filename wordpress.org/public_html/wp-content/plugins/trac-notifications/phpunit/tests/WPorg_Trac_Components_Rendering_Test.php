@@ -187,7 +187,8 @@ class WPorg_Trac_Components_Rendering_Test extends WPorg_Trac_Components_TestCas
 		// The breakdowns are memoized on the shared instance.
 		unset( $this->components->breakdown_component_type, $this->components->breakdown_component_milestone_type, $this->components->breakdown_component_unreplied );
 
-		preg_match_all( '#<th scope="row"><a [^>]+>([^<]+)</a></th>#', $html, $labels );
+		preg_match( '#<tbody>.*</tbody>#s', $html, $tbody );
+		preg_match_all( '#<th scope="row"><a [^>]+>([^<]+)</a></th>#', $tbody[0], $labels );
 		$this->assertSame( array( 'No milestone', '7.9', '7.10', 'Awaiting Review', 'Future Release' ), $labels[1] );
 	}
 
