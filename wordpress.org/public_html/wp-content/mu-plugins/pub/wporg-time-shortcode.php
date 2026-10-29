@@ -22,6 +22,7 @@ function init() {
 
 	add_shortcode( 'time', __NAMESPACE__ . '\time_shortcode' );
 	add_filter( 'comment_text', __NAMESPACE__ . '\time_shortcode_in_comments', 1 );
+	add_filter( 'widget_text', __NAMESPACE__ . '\time_shortcode_in_widgets' );
 }
 add_action( 'init', __NAMESPACE__ . '\init' );
 
@@ -167,4 +168,19 @@ function time_shortcode_in_comments( $comment ) {
 	$shortcode_tags = $saved_tags;
 
 	return $comment;
+}
+
+/**
+ * Adds support for the time shortcode in Text and Custom HTML widgets.
+ *
+ * @param string $text Widget text.
+ * @return string Widget text.
+ */
+function time_shortcode_in_widgets( $text ) {
+	if ( has_shortcode( $text, 'time' ) ) {
+		$pattern = get_shortcode_regex( array( 'time' ) );
+		$text    = preg_replace_callback( "/$pattern/", 'do_shortcode_tag', $text );
+	}
+
+	return $text;
 }
