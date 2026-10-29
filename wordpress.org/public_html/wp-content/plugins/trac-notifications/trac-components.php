@@ -578,8 +578,8 @@ jQuery( function( $ ) {
 		echo '<h3>Component maintainers</h3>';
 
 		$maintainers = array();
-		foreach ( explode( ',', (string) get_post_meta( $post->ID, '_active_maintainers', true ) ) as $login ) {
-			$maintainer = get_user_by( 'login', trim( $login ) );
+		foreach ( $this->get_component_maintainers_by_post( $post->ID ) as $login ) {
+			$maintainer = get_user_by( 'login', $login );
 			if ( $maintainer ) {
 				$maintainers[] = $maintainer;
 			}
