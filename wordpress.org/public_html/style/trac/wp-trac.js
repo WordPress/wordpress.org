@@ -633,6 +633,13 @@ let wpTrac,
 					event.preventDefault();
 				} );
 
+				// Restore message when the page is restored from the back/forward cache.
+				window.addEventListener( 'pageshow', function ( event ) {
+					if ( event.persisted ) {
+						wpTrac.isSubmitting = false;
+					}
+				} );
+
 				document.getElementById( 'propertyform' )?.addEventListener( 'submit', function ( event ) {
 					wpTrac.isSubmitting = true;
 					setTimeout( function () {
