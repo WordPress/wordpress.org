@@ -22,7 +22,7 @@ function init() {
 
 	add_shortcode( 'time', __NAMESPACE__ . '\time_shortcode' );
 	add_filter( 'comment_text', __NAMESPACE__ . '\time_shortcode_in_comments', 1 );
-	add_filter( 'widget_text', __NAMESPACE__ . '\time_shortcode_in_widgets' );
+	add_filter( 'widget_custom_html_content', __NAMESPACE__ . '\time_shortcode_in_widgets' );
 }
 add_action( 'init', __NAMESPACE__ . '\init' );
 
@@ -50,8 +50,8 @@ function time_shortcode( $attr, $content = '' ) {
 	// Remove the word "at" from the string, if present. Allows strings like "Monday, April 6 at 19:00 UTC" to work.
 	$gmtcontent = str_replace( ' at ', ' ', $gmtcontent );
 
-	// Try to parse the time, relative to the post time. Or current time, if an attr is set.
-	$timestamp = ! isset( $attr[0] ) ? get_the_date( 'U' ) : time();
+	// Try to parse the time, relative to the post time. Or current time, if an attr is set or in a widget.
+	$timestamp = isset( $attr[0] ) || doing_filter( 'widget_custom_html_content' ) ? time() : get_the_date( 'U' );
 	$time      = strtotime( $gmtcontent, $timestamp );
 
 	// If that didn't work, give up.
@@ -171,7 +171,9 @@ function time_shortcode_in_comments( $comment ) {
 }
 
 /**
- * Adds support for the time shortcode in Text and Custom HTML widgets.
+ * Adds support for the time shortcode in Custom HTML widgets.
+ *
+ * Text widgets already process shortcodes in core.
  *
  * @param string $text Widget text.
  * @return string Widget text.
