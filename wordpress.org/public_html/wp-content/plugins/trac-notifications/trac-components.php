@@ -466,6 +466,7 @@ body.post-type-archive-component table tr:last-child td { border-bottom: none; }
 td.maintainers { padding-top: 4px; padding-bottom: 4px; height: 26px; }
 td.maintainers img.avatar { margin-right: 5px; }
 .component-info .create-new-ticket { float: right; margin-top: 25px; }
+.component-info a[href^="https://wordpress.slack.com"] { word-break: normal; }
 .post-type-archive-component table .component-slack { width: 1em; padding-left: 0; padding-right: 0; }
 .component-slack a::before { vertical-align: -0.125em; margin-inline-end: 0; }
 .post-type-archive-component table .right { white-space: nowrap; }
