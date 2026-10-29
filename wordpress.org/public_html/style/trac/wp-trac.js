@@ -325,6 +325,7 @@ let wpTrac,
 	wpTrac = {
 		gardener: true === window.wpBugGardener,
 		currentUser: wpTracCurrentUser,
+		isSubmitting: false,
 
 		init() {
 			// Gardener status as a body class, for rules that cannot see the flag.
@@ -589,7 +590,7 @@ let wpTrac,
 				}
 
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
-				let isSubmitting = false;
+				const normalize = ( str ) => ( str || '' ).replace( /\r\n/g, '\n' ).trim();
 
 				/**
 				 * Checks whether an input or textarea element has unsaved changes compared to its initial value.
@@ -599,18 +600,31 @@ let wpTrac,
 				 */
 				function isDirty( selector ) {
 					const el = document.querySelector( selector );
-					return Boolean( el && el.value.trim() !== el.defaultValue.trim() );
+					if ( ! el ) {
+						return false;
+					}
+
+					return normalize( el.value ) !== normalize( el.defaultValue );
+				}
+
+				/**
+				 * Checks whether an input or textarea element has a non-empty value.
+				 *
+				 * @param {string} selector CSS selector for the form element.
+				 * @return {boolean} True if the field exists and contains non-whitespace text, false otherwise.
+				 */
+				function hasValue( selector ) {
+					return Boolean( document.querySelector( selector )?.value.trim() );
 				}
 
 				window.addEventListener( 'beforeunload', function ( event ) {
-					if ( isSubmitting ) {
+					if ( wpTrac.isSubmitting ) {
 						return;
 					}
 
-					const hasModifiedProperties = isDirty( '#field-summary' ) || isDirty( '#field-description' );
 					const hasUnsavedContent = wpTrac.isNewTicket()
-						? hasModifiedProperties
-						: Boolean( $( '#comment' ).val()?.trim() ) || hasModifiedProperties;
+						? hasValue( '#field-summary' ) || hasValue( '#field-description' )
+						: hasValue( '#comment' ) || isDirty( '#field-summary' ) || isDirty( '#field-description' );
 
 					if ( ! hasUnsavedContent ) {
 						return;
@@ -619,11 +633,11 @@ let wpTrac,
 					event.preventDefault();
 				} );
 
-				$( '#propertyform' ).on( 'submit', function ( event ) {
-					isSubmitting = true;
+				document.getElementById( 'propertyform' )?.addEventListener( 'submit', function ( event ) {
+					wpTrac.isSubmitting = true;
 					setTimeout( function () {
-						if ( event.isDefaultPrevented() ) {
-							isSubmitting = false;
+						if ( event.defaultPrevented ) {
+							wpTrac.isSubmitting = false;
 						}
 					}, 0 );
 				} );
@@ -718,6 +732,7 @@ let wpTrac,
 
 				if ( 'duplicate' === action && ( ! duplicateTicket || currentTicket === duplicateTicket ) ) {
 					$( '#action_dupe' ).val( '' );
+					wpTrac.isSubmitting = false;
 					return false;
 				}
 			} );
@@ -1388,6 +1403,7 @@ let wpTrac,
 							url = href + ( href.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( urlParams );
 							window.open( url );
 						} else {
+							wpTrac.isSubmitting = true;
 							window.location.href = url;
 						}
 						return false;
