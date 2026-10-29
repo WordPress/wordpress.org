@@ -576,17 +576,18 @@ jQuery( function( $ ) {
 
 		echo '<h3>Component Maintainers</h3>';
 
-		$maintainers = get_post_meta( $post->ID, '_active_maintainers', true );
+		$maintainers = array();
+		foreach ( explode( ',', (string) get_post_meta( $post->ID, '_active_maintainers', true ) ) as $login ) {
+			$maintainer = get_user_by( 'login', trim( $login ) );
+			if ( $maintainer ) {
+				$maintainers[] = $maintainer;
+			}
+		}
+
 		if ( $maintainers ) {
-			$maintainers = array_map( 'trim', explode( ',', $maintainers ) );
 			echo '<p>Component maintainers:</p>';
 			echo '<ul class="maintainers">';
 			foreach ( $maintainers as $maintainer ) {
-				$maintainer = get_user_by( 'login', $maintainer );
-				if ( ! $maintainer ) {
-					continue;
-				}
-
 				printf( '<li><a href="//profiles.wordpress.org/%s/">%s %s</a></li>',
 					esc_attr( $maintainer->user_nicename ),
 					get_avatar( $maintainer->user_email, 36 ),
