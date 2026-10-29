@@ -419,15 +419,11 @@ class Make_Core_Trac_Components {
 .component-info .meta .actions { display: none }
 .component-info h3 { color: #333; font-size: 20px; margin: 30px 0 15px; font-weight: normal; }
 .compact-components .component-info h3 { margin: 15px 0 10px; }
-.trac-summary th, .trac-summary td { padding: 4px 8px; }
-.trac-summary th { font-weight: bold; text-align: right }
-.trac-summary tbody th { border-bottom: 1px solid #eee; border-right: 1px solid #eee; }
-.trac-summary tbody tr:last-child th { border-bottom: none; }
-.trac-summary th.title { font-weight: normal; text-align: left; font-size: 14px }
-.trac-summary th a { font-weight: bold }
-.trac-summary th.title a { color: #000; }
-.trac-summary .count { text-align: right; border-right: none; width: auto; }
-.trac-summary .zero { color: #ddd }
+.trac-summary { border-collapse: collapse; }
+.trac-summary .count { text-align: right; width: auto; font-variant-numeric: tabular-nums; }
+/* The theme drops the bottom border of every table's last row. */
+.trac-summary tr:last-of-type td { border-bottom: 1px solid var(--wp--custom--color--border); }
+.trac-summary .zero { color: var(--wp--preset--color--charcoal-4); }
 #main ul.maintainers, #main ul.followers { list-style: none; padding: 0; margin: 0 }
 ul.maintainers li, ul.followers li { display: inline-block; line-height: 36px; margin-right: 20px; margin-bottom: 10px }
 ul.maintainers img, ul.followers img { float: left; margin-right: 10px; }
@@ -686,11 +682,23 @@ jQuery( function( $ ) {
 		if ( ! is_singular() ) {
 			echo wp_kses_post( $last_x );
 		}
+		$milestones = $component_milestone_type[ $component ];
+		// Tickets without a milestone first, then releases in version order, then named milestones.
+		uksort(
+			$milestones,
+			static function ( $a, $b ) {
+				if ( '' === (string) $a || '' === (string) $b ) {
+					return ( '' !== (string) $a ) <=> ( '' !== (string) $b );
+				}
+				return strnatcasecmp( $a, $b );
+			}
+		);
+
 		echo '<table class="trac-summary">';
-		echo '<thead><tr><th class="title">' . wp_kses_post( $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) ) . '</th>';
+		echo '<thead><tr><th scope="col" class="title">' . wp_kses_post( $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) ) . '</th>';
 		foreach ( $component_type[ $component ] as $type => $count ) {
 			if ( $count ) {
-				echo '<th>' . wp_kses_post(
+				echo '<th scope="col" class="count">' . wp_kses_post(
 					$this->trac_query_link(
 						$type,
 						array(
@@ -702,15 +710,15 @@ jQuery( function( $ ) {
 				) . '</th>';
 			}
 		}
-		echo '</tr></thead>';
-		foreach ( $component_milestone_type[ $component ] as $milestone => $type_count ) {
-			echo '<tr><th>' . wp_kses_post(
+		echo '</tr></thead><tbody>';
+		foreach ( $milestones as $milestone => $type_count ) {
+			echo '<tr><th scope="row">' . wp_kses_post(
 				$this->trac_query_link(
-					$milestone,
+					'' === (string) $milestone ? 'No milestone' : $milestone,
 					array(
 						'component' => $component,
 						'milestone' => $milestone,
-						'group'     => $type,
+						'group'     => 'type',
 					)
 				)
 			) . '</th>';
@@ -725,7 +733,7 @@ jQuery( function( $ ) {
 			}
 			echo '</tr>';
 		}
-		echo "</table>\n\n";
+		echo "</tbody></table>\n\n";
 		if ( is_singular() ) {
 			echo wp_kses_post( $last_x );
 		}
