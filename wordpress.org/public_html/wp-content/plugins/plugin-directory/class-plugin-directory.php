@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Elasticsearch_Status, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Elasticsearch_Status, Related_Submissions, Stats_Report, Upload_Token };
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 
 /**
@@ -112,6 +112,7 @@ class Plugin_Directory {
 			Customizations::instance();
 			Author_Cards::instance();
 			Elasticsearch_Status::instance();
+			Related_Submissions::instance();
 			Stats_Report::instance();
 			Upload_Token::instance();
 
@@ -340,6 +341,28 @@ class Plugin_Directory {
 				'assign_terms' => 'plugin_set_category',
 			),
 		) );
+
+		// Public for the search index only; written through Guideline_Labels, which keeps the post meta in sync.
+		register_taxonomy(
+			Guideline_Labels::TAXONOMY,
+			'plugin',
+			array(
+				'hierarchical'       => false,
+				'rewrite'            => false,
+				'labels'             => array(
+					'name'          => __( 'Guideline Labels', 'wporg-plugins' ),
+					'singular_name' => __( 'Guideline Label', 'wporg-plugins' ),
+				),
+				'public'             => true,
+				'publicly_queryable' => false, // Keeps the query var for the admin list filter, without a front-end archive.
+				'show_ui'            => false,
+				'show_admin_column'  => false,
+				'meta_box_cb'        => false,
+				'capabilities'       => array(
+					'assign_terms' => 'plugin_label',
+				),
+			)
+		);
 
 		register_taxonomy( 'plugin_committers', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,

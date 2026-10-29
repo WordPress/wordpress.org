@@ -5,14 +5,21 @@
 	"plugins": [
 		"../wordpress.org/public_html/wp-content/plugins/plugin-directory"
 	],
+	"themes": [
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024"
+	],
 	"mappings": {
-		"wp-content/env-bin": "./plugin-directory/bin"
+		"wp-content/env-bin": "./plugin-directory/bin",
+		"wp-content/mu-plugins/pub/locales": "../wordpress.org/public_html/wp-content/mu-plugins/pub/locales",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash plugin-directory/bin/after-start-test.sh"
 	},
 	"config": {
+		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php",
 		"PLUGINS_TABLE_PREFIX": "wp_",
-		"WP_GANDALF_SCAN_SHARED_SECRET": "local-dev-secret"
+		"WP_GANDALF_SCAN_SHARED_SECRET": "local-dev-secret",
+		"FREESCOUT_API_KEY": "test-key"
 	}
 }

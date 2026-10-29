@@ -5,9 +5,12 @@
 | Module | What it does |
 |---|---|
 | [WPOrgAkismet](Modules/WPOrgAkismet) | Checks new conversations from senders with Akismet, and teaches it from what agents mark as spam. |
+| [WPOrgFreeScoutImport](Modules/WPOrgFreeScoutImport) | Imports other FreeScouts' mailboxes, like WordCamp US's, so their history moves here. Administrators run it under Manage » FreeScout Import. |
 | [WPOrgHelpScoutImport](Modules/WPOrgHelpScoutImport) | Imports HelpScout mailboxes' conversations, so their history moves to FreeScout. Administrators run it under Manage » HelpScout Import. |
+| [WPOrgPluginReview](Modules/WPOrgPluginReview) | Shows the plugins team a conversation's latest plugin review in its sidebar: its details, flags, issues, and the plugin as it is now on WordPress.org. |
+| [WPOrgSearch](Modules/WPOrgSearch) | Speeds up conversation search: an After date for searches without other filters, and one query instead of two. |
 | [WPOrgSidebar](Modules/WPOrgSidebar) | Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests next to each conversation. |
-| [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: WordPress.org branding, and the Modules page only lists installed modules, which can't be updated or deleted there. |
+| [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: WordPress.org branding, a Modules page that only lists installed modules, and conversation UX for agents, like keyboard shortcuts, `/` for saved replies, a collapsible sidebar, and pinned notes and headers. |
 | [WPOrgSSO](Modules/WPOrgSSO) | Agents log in with their WordPress.org account, through login.wordpress.org; there's no other way in. Every user is connected to a WordPress.org account, and new users are created from one. Name, email, and avatar are updated from it at every login. |
 | [WPOrgWebhooks](Modules/WPOrgWebhooks) | Sends conversation events to WordPress.org, which records them as contributor stats. |
 
@@ -18,7 +21,7 @@ WPOrgSidebar, WPOrgWebhooks, and WPOrgSSO talk to [`api.wordpress.org/dotorg/fre
 Run FreeScout locally with these modules, test mail, and a mock of the api.wordpress.org endpoints:
 
 ```bash
-cd environments
+cd ../environments
 npm install
 npm run freescout:start   # http://127.0.0.1:8890, log in as "admin" at the mock WordPress.org login
 npm run freescout:test
@@ -55,6 +58,6 @@ Optional:
 | `WPORG_HELPSCOUT_APP_ID`, `WPORG_HELPSCOUT_APP_SECRET` | | A HelpScout app's credentials, for `WPOrgHelpScoutImport`. Only needed while mailboxes move; delete the app after the last import. |
 | `WPORG_SSO_PASSWORD_LOGIN` | `false` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Every such login is logged. |
 
-FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events, `WPOrgSSO` updates avatars, `WPOrgAkismet` reports to Akismet, and `WPOrgHelpScoutImport` imports from the queue.
+FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events, `WPOrgSSO` updates avatars, `WPOrgAkismet` reports to Akismet, and `WPOrgHelpScoutImport` and `WPOrgFreeScoutImport` import from the queue.
 
 Behind a proxy, set core's `APP_TRUSTED_PROXIES`, so `WPOrgSSO` rate-limits its login endpoints per visitor rather than for everyone at once. Leave `SESSION_SAME_SITE` unset or `lax`: with `strict`, the browser drops the session cookie on the way back from login.wordpress.org, and every login fails. `WPOrgSSO` also hands logins over and forgets connections through FreeScout's cache, so every web server and `artisan` need the same cache store, and `artisan` runs as the web server user.

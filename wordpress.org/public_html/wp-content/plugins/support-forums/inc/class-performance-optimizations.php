@@ -42,9 +42,6 @@ class Performance_Optimizations {
 		// Disable post meta key lookup, see https://core.trac.wordpress.org/ticket/33885.
 		add_filter( 'postmeta_form_keys', '__return_empty_array' );
 
-		// Disable canonical redirects for short post_names
-		add_filter( 'template_redirect', array( $this, 'maybe_disable_404_canonical' ), 9 );
-
 		// Disable the 'popular' view.
 		add_filter( 'bbp_register_views', array( $this, 'disable_popular_view' ) );
 
@@ -64,20 +61,10 @@ class Performance_Optimizations {
 		// ..and don't do expensive orderbys & counting for user queries that don't need it.
 		add_action( 'pre_get_users', array( $this, 'pre_get_users' ) );
 
-		// Disable feeds for non-existent views. See https://bbpress.trac.wordpress.org/ticket/3544
-		add_action( 'bbp_request', array( $this, 'bbp_request_disable_missing_view_feeds' ), 9 ); // Before bbp_request_feed_trap().
-	}
+		// The Dashboard glance widget does not need an expensive forum user count.
+		add_filter( 'bbp_after_get_statistics_parse_args', array( $this, 'skip_dashboard_forum_user_count' ) );
+		add_filter( 'bbp_get_statistics', array( $this, 'remove_dashboard_forum_user_count' ) );
 
-	/**
-	 * Disables Canonical redirects on 404 pages when a short (<5char) name is provided.
-	 *
-	 * This is used to avoid really bad queries in redirect_guess_404_permalink() on urls such as:
-	 * https://wordpress.org/support/topic/test/*1*
-	 */
-	public function maybe_disable_404_canonical() {
-		if ( is_404() && get_query_var( 'name' ) && strlen( get_query_var( 'name' ) ) < 5 ) {
-			remove_filter( 'template_redirect', 'redirect_canonical' );
-		}
 	}
 
 	/**
@@ -104,7 +91,7 @@ class Performance_Optimizations {
 		}
 
 		if ( isset( $_GET['intext'] ) ) {
-			$search_terms .= ' intext:"' . esc_attr( $_GET['intext'] ) . '"';
+			$search_terms .= ' "' . sanitize_text_field( wp_unslash( $_GET['intext'] ) ) . '"';
 		}
 
 		if ( $search_terms ) {
@@ -607,6 +594,34 @@ class Performance_Optimizations {
 	}
 
 	/**
+	 * Avoid counting every forum-role holder for the Dashboard glance widget.
+	 *
+	 * @param array $args Parsed bbPress statistics arguments.
+	 * @return array Statistics arguments.
+	 */
+	public function skip_dashboard_forum_user_count( $args ) {
+		if ( doing_filter( 'dashboard_glance_items' ) ) {
+			$args['count_users'] = false;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Hide the zero user count produced when Dashboard counting is disabled.
+	 *
+	 * @param array $statistics Formatted bbPress statistics.
+	 * @return array Statistics without the Dashboard user count.
+	 */
+	public function remove_dashboard_forum_user_count( $statistics ) {
+		if ( doing_filter( 'dashboard_glance_items' ) ) {
+			unset( $statistics['user_count'], $statistics['user_count_int'] );
+		}
+
+		return $statistics;
+	}
+
+	/**
 	 * Filter use queries to be more performant, as the default WordPress user queries
 	 * just don't scale to several million users here.
 	 *
@@ -645,28 +660,4 @@ class Performance_Optimizations {
 		}
 	}
 
-	/**
-	 * Disable feeds for missing bbPress views.
-	 *
-	 * @see https://bbpress.trac.wordpress.org/ticket/3544
-	 *
-	 * @param array $query_vars
-	 * @return array
-	 */
-	public function bbp_request_disable_missing_view_feeds( $query_vars ) {
-		$view_id = bbp_get_view_rewrite_id();
-
-		if (
-			isset( $query_vars['feed'] ) &&
-			isset( $query_vars[ $view_id ] ) &&
-			! bbp_get_view_query_args( $query_vars[ $view_id ] )
-		) {
-			unset( $query_vars[ $view_id ] );
-
-			// Set a 404 status, without this bbPress is unsure of what to do.
-			$query_vars['error'] = 404;
-		}
-
-		return $query_vars;
-	}
 }

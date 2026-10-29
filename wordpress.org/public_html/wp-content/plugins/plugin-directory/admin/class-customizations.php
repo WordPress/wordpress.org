@@ -81,6 +81,7 @@ class Customizations {
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Author_Notice', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Reviewer', 'save_post' ) );
 		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Controls', 'save_post' ) );
+		add_action( 'save_post', array( __NAMESPACE__ . '\Metabox\Guideline_Labels', 'save_post' ) );
 	}
 
 	/**
@@ -789,6 +790,17 @@ class Customizations {
 				array( __NAMESPACE__ . '\Metabox\Author_Notice', 'display' ),
 				'plugin', 'normal', 'high'
 			);
+
+			if ( current_user_can( 'plugin_label' ) ) {
+				add_meta_box(
+					'plugin-guideline-labels',
+					__( 'Guideline Labels', 'wporg-plugins' ),
+					array( __NAMESPACE__ . '\Metabox\Guideline_Labels', 'display' ),
+					'plugin',
+					'normal',
+					'high'
+				);
+			}
 
 			if (
 				class_exists( '\Automattic\Jetpack\Search\Classic_Search' ) &&

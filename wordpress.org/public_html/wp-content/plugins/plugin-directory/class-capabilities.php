@@ -177,6 +177,7 @@ class Capabilities {
 			'plugin_reject'      => true,
 			'plugin_disable'     => true,
 			'plugin_close'       => true,
+			'plugin_label'       => true,
 			'plugin_set_section' => true, // Special categories.
 			'manage_categories'  => true, // Let them assign these special categories.
 		) );

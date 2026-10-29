@@ -30,18 +30,28 @@ add_action( 'admin_post_github_invite', function() {
 		$message = 'No teams selected';
 	} elseif ( is_email( $input ) ) {
 		$invite = $input;
-	} elseif ( preg_match( '!^https://github.com/(?<slug>[^/]+)!i', $input, $m ) ) {
+	} elseif ( preg_match( '!^(?:https?://)?(?:www\.)?github\.com/(?<slug>[^/]+)!i', $input, $m ) ) {
 		$gh_user         = api( '/users/' . $m['slug'] );
 		$github_username = $gh_user->login ?? false;
 		$invite          = $gh_user->id ?? 0;
+
+		if ( ! $invite ) {
+			$updated = 'error';
+			$message = is_wp_error( $gh_user ) ? $gh_user->get_error_message() : 'GitHub user not found.';
+		}
 	} else {
-		preg_match( '!^https://profiles.wordpress.org/(?<slug>[^/]+)!i', $input, $m );
+		preg_match( '!^(?:https?://)?profiles\.wordpress\.org/(?<slug>[^/]+)!i', $input, $m );
 
 		$user           = get_user_by( 'slug', $m['slug'] ?? $input );
-		$github_details = $wpdb->get_row( $wpdb->prepare(
-			'SELECT github_user, user_details FROM wporg_github_users WHERE user_id = %d',
-			$user->ID
-		) );
+		$github_details = false;
+		if ( $user ) {
+			$github_details = $wpdb->get_row(
+				$wpdb->prepare(
+					'SELECT github_user, user_details FROM wporg_github_users WHERE user_id = %d',
+					$user->ID
+				)
+			);
+		}
 		if ( $github_details ) {
 			$github_details->user_details = json_decode( $github_details->user_details );
 		}
@@ -60,7 +70,7 @@ add_action( 'admin_post_github_invite', function() {
 		if (
 			is_wp_error( $result ) &&
 			$github_username &&
-			'Invitee is already a part of this organization' === $result->get_error_data( 'api_error' )->errors[0]->message ?? ''
+			'Invitee is already a part of this organization' === ( $result->get_error_data( 'api_error' )->errors[0]->message ?? '' )
 		) {
 			// Already a GitHub member, just add them to the team.
 			$result  = add_to_team( $github_username, $team_ids );
@@ -93,10 +103,10 @@ add_action( 'admin_post_github_invite', function() {
 			function_exists( 'slack_dm' ) && slack_dm( $log, SLACK_CHANNEL );
 		}
 
-		if ( isset( $result->errors ) ) {
+		if ( is_wp_error( $result ) ) {
 			$updated = 'error';
-			$message = $result->errors[0]->message ?? '';
-		} elseif ( $result->login ?: $result->email ) {
+			$message = $result->get_error_message();
+		} elseif ( ! empty( $result->login ) || ! empty( $result->email ) ) {
 			$message = sprintf( 'Invited User: %s', $result->login ?: $result->email );
 		}
 	}

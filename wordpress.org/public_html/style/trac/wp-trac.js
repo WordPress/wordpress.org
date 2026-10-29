@@ -367,21 +367,25 @@ let wpTrac,
 		},
 
 		showContributorLabels( labels ) {
+			const normalizedLabels = Object.fromEntries(
+				Object.entries( labels ).map( ( [ username, label ] ) => [ username.toLowerCase(), label ] )
+			);
+
 			$( 'h3.change .username' ).each( function () {
 				let html;
 				const $el = $( this ),
-					username = $el.data( 'username' );
+					username = String( $el.data( 'username' ) ).toLowerCase();
 
-				if ( username in labels ) {
-					if ( typeof labels[ username ] === 'object' ) {
+				if ( Object.prototype.hasOwnProperty.call( normalizedLabels, username ) ) {
+					if ( typeof normalizedLabels[ username ] === 'object' ) {
 						html = $( '<span />', {
 							class: 'contributor-label',
-							title: labels[ username ].title,
-						} ).text( labels[ username ].text );
+							title: normalizedLabels[ username ].title,
+						} ).text( normalizedLabels[ username ].text );
 					} else {
 						html = $( '<span />', {
 							class: 'contributor-label',
-						} ).text( labels[ username ] );
+						} ).text( normalizedLabels[ username ] );
 					}
 					$el.closest( '.username-line' ).append( '&ensp;' + html.prop( 'outerHTML' ) );
 				}
@@ -441,10 +445,18 @@ let wpTrac,
 				if ( href.match( /\.(jpg|jpeg|png|gif|svg|webp)$/i ) ) {
 					const image = new window.Image();
 					image.src = href;
+					let alt = appendTo.find( '.comment' );
+					if ( alt.length > 0 ) {
+						alt = alt.text();
+					} else {
+						// Use attachment filename if it has no description.
+						alt = el.prev().text();
+					}
 					image.onload = function () {
 						$( '<img />' )
 							.attr( {
 								src: href,
+								alt: alt.trim(),
 								width: image.width,
 								height: image.height,
 								class: 'trac-image-preview',

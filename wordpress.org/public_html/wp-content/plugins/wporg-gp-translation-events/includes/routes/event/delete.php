@@ -53,8 +53,11 @@ class Delete_Route extends Route {
 			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
-		$this->event_repository->delete_event( $event );
-
+		if ( false === $this->event_repository->delete_event( $event ) ) {
+			gp_notice_set( __( 'Failed to permanently delete event.', 'gp-translation-events' ), 'error' );
+		} else {
+			gp_notice_set( __( 'Event permanently deleted.', 'gp-translation-events' ), 'success' );
+		}
 		wp_safe_redirect( Urls::events_home() );
 		$this->exit_();
 	}

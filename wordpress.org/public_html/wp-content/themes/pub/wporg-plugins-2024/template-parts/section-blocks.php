@@ -7,6 +7,8 @@
  * @package WordPressdotorg\Plugin_Directory\Theme
  */
 
+use WordPressdotorg\Plugin_Directory\Plugin_I18n;
+
 global $section_slug, $section_title, $section_content;
 
 $prefix = in_array( $section_slug, array( 'screenshots', 'faq', 'blocks' ), true ) ? '' : 'tab-';
@@ -42,7 +44,7 @@ $allowed_svg = array(
 	<ul class="plugin-blocks-list">
 		<?php
 		foreach ( $section_content as $block ) :
-			$block_name = isset( $block->title ) ? $block->title : false;
+			$block_name = isset( $block->title ) ? Plugin_I18n::instance()->translate( 'block_title:' . md5( $block->title ), $block->title, array( 'code_i18n' => true ) ) : false;
 			if ( ! $block_name ) {
 				$block_name = isset( $block->name ) ? $block->name : false;
 			}
@@ -84,7 +86,7 @@ $allowed_svg = array(
 				<?php endif; ?>
 				<span class="block-title"><?php echo esc_html( $block_name ); ?></span>
 				<?php if ( isset( $block->description ) ) : ?>
-					<span class="block-description"><?php echo esc_html( $block->description ); ?></dd>
+					<span class="block-description"><?php echo esc_html( Plugin_I18n::instance()->translate( 'block_description:' . md5( $block->description ), $block->description, array( 'code_i18n' => true ) ) ); ?></span>
 				<?php endif; ?>
 			</li>
 		<?php endforeach; ?>

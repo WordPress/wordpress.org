@@ -16,6 +16,13 @@ class Comment_Handler {
 	protected $comment_id;
 	protected $comment_url;
 
+	/**
+	 * Workflow keywords added to the ticket by this change.
+	 *
+	 * @var string[]
+	 */
+	protected $keywords_added = array();
+
 	function __construct( \Dotorg\Slack\Send $send, array $email_message ) {
 		$this->send  = $send;
 		$this->lines = $email_message;
@@ -36,6 +43,9 @@ class Comment_Handler {
 		return null;
 	}
 
+	/**
+	 * Processes the notification email and posts it to the firehose and keyword channels.
+	 */
 	function run() {
 		$this->process_message();
 
@@ -52,8 +62,32 @@ class Comment_Handler {
 		if ( $firehose ) {
 			$this->send->send( $firehose );
 		}
+
+		// Send notifications for Workflow Keyword additions.
+		$this->send_keyword_notifications();
 	}
 
+	/**
+	 * Posts the payload to the channels for each workflow keyword added to the ticket.
+	 */
+	public function send_keyword_notifications() {
+		if ( empty( $this->keywords_added ) ) {
+			return;
+		}
+
+		foreach ( $this->keywords_added as $keyword ) {
+			$channels = $this->trac->get_keyword_channels( $keyword );
+			foreach ( $channels as $channel ) {
+				$this->send->send( $channel );
+			}
+		}
+	}
+
+	/**
+	 * Parses the Trac notification email into the ticket, comment, and change properties.
+	 *
+	 * @return void|false False if the email is not from a known Trac.
+	 */
 	function process_message() {
 		$lines = array_map( 'rtrim', $this->lines );
 		$base64 = false;
@@ -195,6 +229,7 @@ class Comment_Handler {
 		array_shift( $lines );
 
 		$changes = $comment = array();
+		$this->keywords_added = array();
 
 		// Check if the summary of a ticket was changed.
 		if ( preg_match( '/ \(was: (.*)\)$/', $subject, $matches ) ) {
@@ -207,7 +242,28 @@ class Comment_Handler {
 
 				if ( preg_match( '~Attachment "([^"]+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
 					$changes[] = "_*attachment:*_ `{$matches[1]}` {$matches[2]}";
-				} else { // * status:  assigned => closed
+				} else {
+					if ( 0 === strpos( $line, ' * keywords:' ) ) {
+						// Trac wraps long changes onto indented lines, so read the keywords change through them.
+						$keywords_change = $line;
+						foreach ( $lines as $next_line ) {
+							if ( '' === $next_line || 0 === strpos( $next_line, ' * ' ) ) {
+								break;
+							}
+							// Trac can break a keyword after its hyphen, so don't split it in two.
+							if ( '-' !== substr( $keywords_change, -1 ) ) {
+								$keywords_change .= ' ';
+							}
+							$keywords_change .= ltrim( $next_line );
+						}
+
+						if ( preg_match( '~^ \* keywords:\s+(.*?)\s*=>\s*(.*)$~', $keywords_change, $kw_matches ) ) {
+							$old_keywords         = preg_split( '/\s+/', $kw_matches[1], -1, PREG_SPLIT_NO_EMPTY );
+							$new_keywords         = preg_split( '/\s+/', $kw_matches[2], -1, PREG_SPLIT_NO_EMPTY );
+							$this->keywords_added = array_unique( array_diff( $new_keywords, $old_keywords ) );
+						}
+					}
+					// Applies Slack formatting for other changes.
 					$changes[] = preg_replace( '~^ \* (.*?):  ~', '_*$1:*_ ', $line );
 				}
 			}

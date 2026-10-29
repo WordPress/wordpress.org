@@ -2,7 +2,6 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 use GP_Locales;
-use WP_Http;
 
 /**
  * Translation for plugin content.
@@ -365,6 +364,11 @@ class Plugin_I18n {
 
 		$translations = $this->get_gp_translations( $slug, $branch, $originals, $translation_set_id );
 
+		// A code string is a whole original, and its project too large to search for fragments.
+		if ( ! empty( $args['code_i18n'] ) ) {
+			$originals = array_intersect( $originals, array( $content ) );
+		}
+
 		// Sort the originals so as to process long strings first.
 		uasort( $originals, function( $a, $b ) {
 			$a_len = strlen( $a );
@@ -422,8 +426,8 @@ class Plugin_I18n {
 	 * @return string The value, reduced to the field's own allow-list.
 	 */
 	public function sanitize_translation( $key, $translation ) {
-		// A block title is stored as the block declared it, so markup is all there is to drop.
-		if ( str_starts_with( $key, 'block_title:' ) ) {
+		// Block strings are stored as the block declared them, so markup is all there is to drop.
+		if ( str_starts_with( $key, 'block_title:' ) || str_starts_with( $key, 'block_description:' ) ) {
 			return wp_strip_all_tags( $translation );
 		}
 
@@ -516,33 +520,65 @@ class Plugin_I18n {
 	 * @param string            $branch      Optional. Branch - 'stable-readme' for example. Default: 'stable'.
 	 * @param int               $min_percent Optional. Only return locales where percent_translated is >= this value.
 	 *                                       Default: 95.
-	 * @return array
+	 * @return array Locale objects with wp_locale and percent_translated properties.
 	 */
 	public function get_locales( $post = null, $branch = 'stable', $min_percent = 95 ) {
+		global $wpdb;
+
 		$post = get_post( $post );
 
-		$cache_suffix = 'translation_sets';
-
-		$translation_sets = $this->cache_get( $post->post_name, $branch, $cache_suffix );
-		if ( false === $translation_sets ) {
-			$api_url  = esc_url_raw( 'https://translate.wordpress.org/api/projects/wp-plugins/' . $post->post_name . '/' . $branch . '/', [ 'https' ] );
-			$response = wp_remote_get( $api_url );
-
-			if ( is_wp_error( $response ) || WP_Http::OK !== wp_remote_retrieve_response_code( $response ) ) {
-				$translation_sets = [];
-			} else {
-				$result           = json_decode( wp_remote_retrieve_body( $response ) );
-				$translation_sets = isset( $result->translation_sets ) ? $result->translation_sets : [];
-			}
-
-			$this->cache_set( $post->post_name, $branch, $translation_sets, $cache_suffix );
+		$project_id = $this->get_gp_branch_id( $post->post_name, $branch );
+		if ( ! $project_id ) {
+			return [];
 		}
 
-		$locales = array_filter( $translation_sets, function( $locale ) use ( $min_percent ) {
-			return $locale->percent_translated >= $min_percent;
-		} );
+		/*
+		 * translate.wordpress.org keeps these counts current on every translation edit and originals import,
+		 * but never removes a row, so the join drops sets that have since been deleted.
+		 */
+		$translation_sets = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT stats.locale, stats.locale_slug, stats.current, stats.all
+				FROM %i stats
+				INNER JOIN %i sets ON sets.project_id = stats.project_id AND sets.locale = stats.locale AND sets.slug = stats.locale_slug
+				WHERE stats.project_id = %d
+				ORDER BY stats.locale, stats.locale_slug',
+				GLOTPRESS_TABLE_PREFIX . 'project_translation_status',
+				GLOTPRESS_TABLE_PREFIX . 'translation_sets',
+				$project_id
+			)
+		);
 
-		return $locales;
+		require_once GLOTPRESS_LOCALES_PATH;
+
+		$locales = [];
+		foreach ( $translation_sets as $set ) {
+			$gp_locale = GP_Locales::by_slug( $set->locale );
+			if ( empty( $gp_locale->wp_locale ) ) {
+				continue;
+			}
+
+			// Variants are named the way translate.wordpress.org names them, e.g. de_DE_formal. See https://meta.trac.wordpress.org/ticket/4367.
+			$wp_locale = $gp_locale->wp_locale;
+			if ( 'default' !== $set->locale_slug && ! str_contains( $wp_locale, $set->locale_slug ) ) {
+				$wp_locale .= '_' . $set->locale_slug;
+			}
+
+			// Rounded down, like GlotPress.
+			$percent_translated = $set->all ? (int) floor( $set->current / $set->all * 100 ) : 0;
+
+			// Several sets can share a wp_locale, e.g. ca-val and ca/valencia.
+			if ( $percent_translated < $min_percent || $percent_translated <= ( $locales[ $wp_locale ]->percent_translated ?? -1 ) ) {
+				continue;
+			}
+
+			$locales[ $wp_locale ] = (object) [
+				'wp_locale'          => $wp_locale,
+				'percent_translated' => $percent_translated,
+			];
+		}
+
+		return array_values( $locales );
 	}
 
 	/**

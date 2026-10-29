@@ -46,6 +46,7 @@ class Plugins_Info_API_Request {
 		'repository_url'         => false,
 		'support_url'            => false,
 		'commercial_support_url' => false,
+		'guideline_labels'       => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -85,6 +86,7 @@ class Plugins_Info_API_Request {
 		'repository_url'         => true,
 		'support_url'            => true,
 		'commercial_support_url' => true,
+		'guideline_labels'       => true,
 	);
 
 	static $query_plugins_fields_defaults = array(

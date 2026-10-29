@@ -12,22 +12,13 @@ class Audit_Log {
 	 */
 	var $edited_notes = [];
 
-	/**
-	 * Keeps track of the role changes for each user.
-	 *
-	 * @var array
-	 */
-	var $last_role_change = [];
-
 	function __construct() {
 		// Audit-log entries for Term subscriptions (add/remove)
 		add_action( 'wporg_bbp_add_user_term_subscription',    [ $this, 'term_subscriptions' ], 10, 2 );
 		add_action( 'wporg_bbp_remove_user_term_subscription', [ $this, 'term_subscriptions' ], 10, 2 );
 
 		// Add a user note for forum role changes.
-		add_action( 'add_user_role',     [ $this, 'monitor_role_changes' ], 10, 2 );
-		add_action( 'remove_user_role',  [ $this, 'monitor_role_changes' ], 10, 2 );
-		add_filter( 'bbp_set_user_role', [ $this, 'bbp_set_user_role' ],    10, 3 );
+		add_action( 'bbp_transition_user_role', [ $this, 'bbp_transition_user_role' ], 10, 3 );
 
 		// Add a user note when flagging/unflagging a user.
 		add_action( 'wporg_bbp_flag_user',   [ $this, 'log_user_flag_changes' ], 10, 1 );
@@ -70,22 +61,19 @@ class Audit_Log {
 
 
 	/**
-	 * Keep track of the role changes that happen via bbp_set_user_role.
-	 *
-	 * TODO: Check if this is still needed, bbPress might pass context via bbp_set_user_role.
-	 */
-	function monitor_role_changes( $user_id, $role ) {
-		$this->last_role_change[ $user_id ] ??= [];
-		$this->last_role_change[ $user_id ][ current_filter() ] = $role;
-	}
-
-	/**
 	 * Monitor for role changes, and log as appropriate.
 	 *
 	 * NOTE: This is also triggered on Locale forums. We may need to revisit that at some point.
+	 *
+	 * @param string|bool $new_role      New forum role, or false for no role.
+	 * @param string|bool $previous_role Previous forum role, or false for no role.
+	 * @param WP_User     $user          User whose forum role changed.
 	 */
-	function bbp_set_user_role( $new_role, $user_id, WP_User $user ) {
-		$previous_role = $this->last_role_change[ $user_id ][ 'remove_user_role' ] ?? false;
+	public function bbp_transition_user_role( $new_role, $previous_role, WP_User $user ) {
+		// Preserve the existing policy of not logging role removals.
+		if ( ! $new_role ) {
+			return;
+		}
 
 		// For the purposes of this function, a previous participant role is irrelevant.
 		if ( bbp_get_participant_role() == $previous_role ) {
@@ -106,7 +94,7 @@ class Audit_Log {
 			// If we can't detect any change, bail.
 			$new_role === $previous_role
 		) {
-			return $new_role; // We're on a filter.
+			return;
 		}
 
 		// Determine what triggered this change.
@@ -117,8 +105,8 @@ class Audit_Log {
 		// Add a user note about this action.
 		$note_text = sprintf(
 			'Forum role changed to %s%s%s.',
-			get_role( $new_role )->name,
-			$previous_role ? sprintf( ' from %s', get_role( $previous_role )->name ) : '',
+			$new_role,
+			$previous_role ? sprintf( ' from %s', $previous_role ) : '',
 			$where_from ?    sprintf( ' via %s', $where_from ) : ''
 		);
 
@@ -130,9 +118,6 @@ class Audit_Log {
 			$user->ID,
 			$note_text
 		);
-
-		// It's a filter, so we need to return the value.
-		return $new_role;
 	}
 
 	/**

@@ -38,15 +38,6 @@ class Trac_Notifications_DB implements Trac_Notifications_API {
 			WHERE status <> 'closed' GROUP BY component, type, milestone ORDER BY component, type, milestone" );
 	}
 
-	function get_ticket_counts_for_component( $component ) {
-		$tickets_by_type = $this->db->get_results( $this->db->prepare( "SELECT type, COUNT(*) as count FROM ticket WHERE component = %s AND status <> 'closed' GROUP BY type", $component ), OBJECT_K );
-		foreach ( $tickets_by_type as &$object ) {
-			$object = $object->count;
-		}
-		unset( $object );
-		return $tickets_by_type;
-	}
-
 	function get_tickets_by( $args ) {
 		$where = 'AND ' . implode( ' = %s AND ', array_keys( $args ) ) . ' = %s';
 		if ( ! isset( $args['status'] ) ) {
