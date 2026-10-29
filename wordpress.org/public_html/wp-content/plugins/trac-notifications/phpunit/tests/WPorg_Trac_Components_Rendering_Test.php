@@ -167,6 +167,32 @@ class WPorg_Trac_Components_Rendering_Test extends WPorg_Trac_Components_TestCas
 	}
 
 	/**
+	 * The ticket table leads with the tickets that have no milestone, under a label of
+	 * their own, then lists releases in version order, then named milestones.
+	 */
+	public function test_ticket_table_orders_and_labels_milestones(): void {
+		$rows = array();
+		foreach ( array( 'Future Release', '7.10', '', 'Awaiting Review', '7.9' ) as $milestone ) {
+			$rows[] = array(
+				'component' => 'Media',
+				'type'      => 'defect (bug)',
+				'milestone' => $milestone,
+				'count'     => 1,
+			);
+		}
+		wp_cache_set( 'trac_tickets_by_component_type_milestone', $rows );
+
+		$html = $this->render_component();
+
+		// The breakdowns are memoized on the shared instance.
+		unset( $this->components->breakdown_component_type, $this->components->breakdown_component_milestone_type, $this->components->breakdown_component_unreplied );
+
+		preg_match( '#<tbody>.*</tbody>#s', $html, $tbody );
+		preg_match_all( '#<th scope="row"><a [^>]+>([^<]+)</a></th>#', $tbody[0], $labels );
+		$this->assertSame( array( 'No milestone', '7.9', '7.10', 'Awaiting Review', 'Future Release' ), $labels[1] );
+	}
+
+	/**
 	 * The block is appended after the shortcode pass.
 	 */
 	public function test_the_content_runs_after_the_shortcode_pass(): void {

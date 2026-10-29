@@ -10,6 +10,27 @@ class Make_Core_Trac_Components {
 
 	protected $tracs_supported = array( 'core', 'meta' );
 
+	/**
+	 * Open ticket counts per component and type, memoized by generate_component_breakdowns().
+	 *
+	 * @var array
+	 */
+	public $breakdown_component_type;
+
+	/**
+	 * Open ticket counts per component, milestone, and type, memoized by generate_component_breakdowns().
+	 *
+	 * @var array
+	 */
+	public $breakdown_component_milestone_type;
+
+	/**
+	 * IDs of unreplied tickets per component, memoized by generate_component_breakdowns().
+	 *
+	 * @var array
+	 */
+	public $breakdown_component_unreplied;
+
 	function __construct( $api ) {
 		$make_site = explode( '/', home_url( '' ) );
 		$trac = $make_site[3];
@@ -419,22 +440,19 @@ class Make_Core_Trac_Components {
 .component-info .meta .actions { display: none }
 .component-info h3 { color: #333; font-size: 20px; margin: 30px 0 15px; font-weight: normal; }
 .compact-components .component-info h3 { margin: 15px 0 10px; }
-.trac-summary th, .trac-summary td { padding: 4px 8px; }
-.trac-summary th { font-weight: bold; text-align: right }
-.trac-summary tbody th { border-bottom: 1px solid #eee; border-right: 1px solid #eee; }
-.trac-summary tbody tr:last-child th { border-bottom: none; }
-.trac-summary th.title { font-weight: normal; text-align: left; font-size: 14px }
-.trac-summary th a { font-weight: bold }
-.trac-summary th.title a { color: #000; }
-.trac-summary .count { text-align: right; border-right: none; width: auto; }
-.trac-summary .zero { color: #ddd }
+.trac-summary { border-collapse: collapse; }
+.trac-summary .count { text-align: right; width: auto; font-variant-numeric: tabular-nums; }
+/* The theme drops the bottom border of every table's last row. */
+.trac-summary tr:last-of-type td { border-bottom: 1px solid var(--wp--custom--color--border); }
+.trac-summary .zero { color: var(--wp--preset--color--charcoal-4); }
+.trac-summary tfoot td { font-weight: 700; }
 #main ul.maintainers, #main ul.followers { list-style: none; padding: 0; margin: 0 }
 ul.maintainers li, ul.followers li { display: inline-block; line-height: 36px; margin-right: 20px; margin-bottom: 10px }
 ul.maintainers img, ul.followers img { float: left; margin-right: 10px; }
 #main ul.ticket-list { list-style: none; margin: 0; padding: 0 }
 ul.ticket-list li { margin-bottom: 4px }
 ul.ticket-list .focus { display: inline-block; border-radius: 3px; background: #eee; padding: 2px 6px; margin-right: 4px }
-.history.growing:before, .history.shrinking:before { font-family: Dashicons; font-size: 30px; vertical-align: middle; line-height: 15px; }
+.history.growing:before, .history.shrinking:before { font: 20px/1 dashicons; vertical-align: text-bottom; }
 .history.growing:before { content: "\f142"; color: red }
 .history.shrinking:before { content: "\f140"; color: green }
 td.right, th.right { text-align: right; }
@@ -443,7 +461,7 @@ body.post-type-archive-component table td { vertical-align: middle; padding: 4px
 body.post-type-archive-component table tr:last-child td { border-bottom: none; }
 td.maintainers { padding-top: 4px; padding-bottom: 4px; height: 26px; }
 td.maintainers img.avatar { margin-right: 5px; }
-.component-info .create-new-ticket { float: right; margin-top: 25px; }
+.component-tickets-header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; column-gap: 1em; }
 </style>
 <script>
 jQuery( function( $ ) {
@@ -639,23 +657,22 @@ jQuery( function( $ ) {
 		$component_count = isset( $component_type[ $component ] ) ? array_sum( $component_type[ $component ] ) : 0;
 
 		if ( is_singular() ) {
-			echo '<div><a class="create-new-ticket button button-large button-primary" href="https://login.wordpress.org/?redirect_to=' . urlencode( $this->trac_url() . '/newticket?component=' . urlencode( $component ) ) . '" rel="nofollow">Create a new ticket</a></div>';
+			$heading = 'No open tickets!';
+			if ( $component_count ) {
+				$heading = sprintf(
+					/* translators: 1: Number of tickets. 2: Component name. */
+					_n( '%1$s open ticket in the %2$s component', '%1$s open tickets in the %2$s component', $component_count ),
+					(int) $component_count,
+					$component
+				);
+			}
+
+			echo '<div class="component-tickets-header"><h3>' . esc_html( $heading ) . '</h3>';
+			echo '<a class="create-new-ticket button button-large button-primary" href="' . esc_url( 'https://login.wordpress.org/?redirect_to=' . urlencode( $this->trac_url() . '/newticket?component=' . urlencode( $component ) ) ) . '" rel="nofollow">Create a new ticket</a></div>';
 		}
 
 		if ( ! $component_count ) {
-			if ( is_singular() ) {
-				echo '<h3>No open tickets!</h3>';
-			}
 			return;
-		}
-
-		if ( is_singular() ) {
-			echo '<h3>' . sprintf(
-				/* translators: 1: Number of tickets. 2: Component name. */
-				esc_html( _n( '%1$s open ticket in the %2$s component', '%1$s open tickets in the %2$s component', $component_count ) ),
-				(int) $component_count,
-				esc_html( $component )
-			) . '</h3>';
 		}
 
 		$history = $this->api->get_component_history( $component, self::last_x_days );
@@ -680,37 +697,40 @@ jQuery( function( $ ) {
 		$num_open_tickets_string = sprintf( _n( '%s open ticket', '%s open tickets', $component_count ), $component_count );
 
 		$last_x = "<strong class='compact'>" . $num_open_tickets_string . ".</strong> Last " . self::last_x_days . " days: <span title='" . wp_sprintf( '%l', $history_line ) . "'>";
-		$last_x .= sprintf( "%+d", $history['change'] ) . ' ' . _n( 'ticket', 'tickets', abs( $history['change'] ) );
-		$last_x .= '<span class="history ' . $direction . '"></span></span>' . "\n\n";
+		$last_x .= '<span class="history' . $direction . '"></span>';
+		$last_x .= sprintf( '%+d', $history['change'] ) . ' ' . _n( 'ticket', 'tickets', abs( $history['change'] ) ) . "</span>\n\n";
 
 		if ( ! is_singular() ) {
 			echo wp_kses_post( $last_x );
 		}
+		$milestones = $component_milestone_type[ $component ];
+		// Tickets without a milestone first, then releases in version order, then named milestones.
+		uksort(
+			$milestones,
+			static function ( $a, $b ) {
+				if ( '' === (string) $a || '' === (string) $b ) {
+					return ( '' !== (string) $a ) <=> ( '' !== (string) $b );
+				}
+				return strnatcasecmp( $a, $b );
+			}
+		);
+
 		echo '<table class="trac-summary">';
-		echo '<thead><tr><th class="title">' . wp_kses_post( $this->trac_query_link( $num_open_tickets_string, array( 'component' => $component ) ) ) . '</th>';
+		echo '<thead><tr><th scope="col">Milestone</th>';
 		foreach ( $component_type[ $component ] as $type => $count ) {
 			if ( $count ) {
-				echo '<th>' . wp_kses_post(
-					$this->trac_query_link(
-						$type,
-						array(
-							'component' => $component,
-							'type'      => $type,
-							'group'     => 'milestone',
-						)
-					)
-				) . '</th>';
+				echo '<th scope="col" class="count">' . esc_html( $type ) . '</th>';
 			}
 		}
-		echo '</tr></thead>';
-		foreach ( $component_milestone_type[ $component ] as $milestone => $type_count ) {
-			echo '<tr><th>' . wp_kses_post(
+		echo '</tr></thead><tbody>';
+		foreach ( $milestones as $milestone => $type_count ) {
+			echo '<tr><th scope="row">' . wp_kses_post(
 				$this->trac_query_link(
-					$milestone,
+					'' === (string) $milestone ? 'No milestone' : $milestone,
 					array(
 						'component' => $component,
 						'milestone' => $milestone,
-						'group'     => $type,
+						'group'     => 'type',
 					)
 				)
 			) . '</th>';
@@ -725,7 +745,22 @@ jQuery( function( $ ) {
 			}
 			echo '</tr>';
 		}
-		echo "</table>\n\n";
+		echo '</tbody><tfoot><tr><th scope="row">' . wp_kses_post( $this->trac_query_link( 'Total', array( 'component' => $component ) ) ) . '</th>';
+		foreach ( $component_type[ $component ] as $type => $count ) {
+			if ( $count ) {
+				echo '<td class="count">' . wp_kses_post(
+					$this->trac_query_link(
+						$count,
+						array(
+							'component' => $component,
+							'type'      => $type,
+							'group'     => 'milestone',
+						)
+					)
+				) . '</td>';
+			}
+		}
+		echo "</tr></tfoot></table>\n\n";
 		if ( is_singular() ) {
 			echo wp_kses_post( $last_x );
 		}
@@ -770,26 +805,6 @@ jQuery( function( $ ) {
 				)
 			);
 			$this->render_tickets( $next_milestone );
-		}
-
-		$tickets_by_type = (array) $this->api->get_ticket_counts_for_component( $component );
-
-		$count = array_sum( $tickets_by_type );
-		/* translators: %s: Number of tickets. */
-		echo '<h3>' . sprintf( esc_html( _n( '%s open ticket', '%s open tickets', $count ) ), (int) $count ) . '</h3>';
-
-		$types = array(
-			'enhancement'     => 'Open enhancements',
-			'task (blessed)'  => 'Open tasks',
-			'feature request' => 'Open feature requests',
-			'defect (bug)'    => 'Open defects',
-		);
-
-		foreach ( $types as $type => $title ) {
-			$count = $tickets_by_type[ $type ] ?? 0;
-			printf( '<strong>%s: %d</strong> ', esc_html( $title ), (int) $count );
-			echo wp_kses_post( $this->trac_query_link( 'View list on Trac', compact( 'component', 'type' ) ) );
-			echo '<br>';
 		}
 	}
 
