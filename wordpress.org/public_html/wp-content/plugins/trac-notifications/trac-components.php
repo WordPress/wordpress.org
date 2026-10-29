@@ -188,7 +188,7 @@ class Make_Core_Trac_Components {
 
 		$slack_channel = get_post_meta( $post->ID, '_slack_channel', true );
 		echo '<p><label for="slack-channel">Slack channel ID</label> <input type="text" class="large-text" id="slack-channel" name="slack-channel" value="' . esc_attr( $slack_channel ) . '" aria-describedby="slack-channel-description" /></p>';
-		echo '<p class="description" id="slack-channel-description">The ID at the bottom of the channel’s details in Slack, like C02RQBWTW. Anything else is ignored.</p>';
+		echo '<p class="description" id="slack-channel-description">The ID at the bottom of a public channel’s details in Slack, like C02RQBWTW. Anything else is ignored.</p>';
 	}
 
 	function save_post( $post_id, $post ) {
@@ -210,8 +210,8 @@ class Make_Core_Trac_Components {
 
 		if ( isset( $_POST['slack-channel'] ) ) {
 			$slack_channel = strtoupper( trim( sanitize_text_field( wp_unslash( $_POST['slack-channel'] ) ) ) );
-			// Public channel IDs start with C, private ones with G.
-			if ( '' === $slack_channel || preg_match( '/^[CG][A-Z0-9]{8,}$/', $slack_channel ) ) {
+			// Only public channels, whose IDs start with C.
+			if ( '' === $slack_channel || preg_match( '/^C[A-Z0-9]{8,}$/', $slack_channel ) ) {
 				update_post_meta( $post->ID, '_slack_channel', $slack_channel );
 			}
 		}
@@ -575,7 +575,7 @@ jQuery( function( $ ) {
 
 		$this->trac_content( $component );
 
-		echo '<h3>Component Maintainers</h3>';
+		echo '<h3>Component maintainers</h3>';
 
 		$maintainers = array();
 		foreach ( explode( ',', (string) get_post_meta( $post->ID, '_active_maintainers', true ) ) as $login ) {
