@@ -138,8 +138,8 @@ class WPorg_Trac_Components_Rendering_Test extends WPorg_Trac_Components_TestCas
 		$html = $this->render_component();
 
 		$this->assertStringContainsString( '<p>Component maintainers:</p>', $html );
-		$this->assertStringContainsString( '<p>Many contributors help maintain', $html );
-		$this->assertStringContainsString( '<p><strong>Want to help?', $html );
+		$this->assertStringContainsString( '<p>Component maintainers are vital', $html );
+		$this->assertStringContainsString( '<p>Want to help maintain this component?', $html );
 	}
 
 	/**
