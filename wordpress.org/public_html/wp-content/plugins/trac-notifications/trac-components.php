@@ -704,14 +704,15 @@ jQuery( function( $ ) {
 			echo wp_kses_post( $last_x );
 		}
 		$milestones = $component_milestone_type[ $component ];
-		// Tickets without a milestone first, then releases in version order, then named milestones.
+		// Most in need of triage first, then releases from the furthest out to the soonest.
+		$triage_order = array_flip( array( '', 'WordPress.org', 'Awaiting Review', 'Future Release' ) );
 		uksort(
 			$milestones,
-			static function ( $a, $b ) {
-				if ( '' === (string) $a || '' === (string) $b ) {
-					return ( '' !== (string) $a ) <=> ( '' !== (string) $b );
-				}
-				return strnatcasecmp( $a, $b );
+			static function ( $a, $b ) use ( $triage_order ) {
+				$a = (string) $a;
+				$b = (string) $b;
+
+				return ( $triage_order[ $a ] ?? PHP_INT_MAX ) <=> ( $triage_order[ $b ] ?? PHP_INT_MAX ) ?: strnatcasecmp( $b, $a );
 			}
 		);
 
