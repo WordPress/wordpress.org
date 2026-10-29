@@ -23,7 +23,7 @@
 					<?php comments_template(); ?>
 				<?php endwhile;
 			else: ?>
-				<p><?php _e( 'Sorry, no posts matched your criteria.', 'rosetta' ); ?></p>
+				<p><?php esc_html_e( 'Sorry, no posts matched your criteria.', 'rosetta' ); ?></p>
 			<?php endif; ?>
 
 			<nav class="posts-navigation">

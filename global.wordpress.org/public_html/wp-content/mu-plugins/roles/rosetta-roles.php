@@ -47,6 +47,13 @@ class Rosetta_Roles {
 	private $gp_locale = null;
 
 	/**
+	 * Holds the hook suffix of the translation editors admin page.
+	 *
+	 * @var string
+	 */
+	private $translation_editors_page;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -106,7 +113,7 @@ class Rosetta_Roles {
 			'translation-editors',
 			array( $this, 'render_translation_editors_page' ),
 			'dashicons-translation',
-			71 // After Users
+			71.1 // After Users.
 		);
 
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'load_translation_editors_page' ) );
@@ -230,12 +237,17 @@ class Rosetta_Roles {
 					check_admin_referer( 'add-translation-editor', '_nonce_add-translation-editor' );
 
 					if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
+						exit;
+					}
+
+					if ( empty( $_REQUEST['user'] ) ) {
+						wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 						exit;
 					}
 
 					$user_details = null;
-					$user = wp_unslash( $_REQUEST['user'] );
+					$user         = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
 					if ( false !== strpos( $user, '@' ) ) {
 						$user_details = get_user_by( 'email', $user );
 					} elseif ( is_numeric( $user ) ) {
@@ -249,14 +261,14 @@ class Rosetta_Roles {
 					}
 
 					if ( ! $user_details ) {
-						wp_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
+						wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 						exit;
 					}
 
 					if ( ! is_user_member_of_blog( $user_details->ID ) ) {
 						$added = add_existing_user_to_blog( array( 'user_id' => $user_details->ID, 'role' => 'subscriber' ) );
 						if ( ! $added || is_wp_error( $added ) ) {
-							wp_redirect( add_query_arg( array( 'error' => 'not-added-to-site' ), $redirect ) );
+							wp_safe_redirect( add_query_arg( array( 'error' => 'not-added-to-site' ), $redirect ) );
 							exit;
 						}
 
@@ -265,33 +277,33 @@ class Rosetta_Roles {
 					}
 
 					if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user_details->roles ) || in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user_details->roles ) ) {
-						wp_redirect( add_query_arg( array( 'error' => 'user-exists' ), $redirect ) );
+						wp_safe_redirect( add_query_arg( array( 'error' => 'user-exists' ), $redirect ) );
 						exit;
 					}
 
-					$projects = empty( $_REQUEST['projects'] ) ? '' : $_REQUEST['projects'];
+					$projects = ! empty( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
 					if ( 'custom' === $projects ) {
 						$this->update_translation_editor( $user_details );
 
 						$redirect = add_query_arg( 'user_id', $user_details->ID, $redirect );
-						wp_redirect( add_query_arg( array( 'update' => 'user-added-custom-projects' ), $redirect ) );
+						wp_safe_redirect( add_query_arg( array( 'update' => 'user-added-custom-projects' ), $redirect ) );
 						exit;
 					} else {
 						$this->update_translation_editor( $user_details, array( 'all' ) );
 
-						wp_redirect( add_query_arg( array( 'update' => 'user-added' ), $redirect ) );
+						wp_safe_redirect( add_query_arg( array( 'update' => 'user-added' ), $redirect ) );
 						exit;
 					}
 				case 'remove-translation-editors':
 					check_admin_referer( 'bulk-translation-editors' );
 
 					if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
 						exit;
 					}
 
 					if ( empty( $_REQUEST['translation-editors'] ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
 						exit;
 					}
 
@@ -302,25 +314,33 @@ class Rosetta_Roles {
 						$count++;
 					}
 
-					wp_redirect( add_query_arg( array( 'update' => 'user-removed', 'count' => $count ), $redirect ) );
+					wp_safe_redirect(
+						add_query_arg(
+							array(
+								'update' => 'user-removed',
+								'count'  => $count,
+							),
+							$redirect
+						)
+					);
 					exit;
 				case 'remove-translation-editor':
 					check_admin_referer( 'remove-translation-editor' );
 
 					if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
 						exit;
 					}
 
 					if ( empty( $_REQUEST['translation-editor'] ) ) {
-						wp_redirect( $redirect );
+						wp_safe_redirect( $redirect );
 						exit;
 					}
 
 					$user_id = (int) $_REQUEST['translation-editor'];
 					$this->remove_translation_editor( $user_id );
 
-					wp_redirect( add_query_arg( array( 'update' => 'user-removed' ), $redirect ) );
+					wp_safe_redirect( add_query_arg( array( 'update' => 'user-removed' ), $redirect ) );
 					exit;
 			}
 		}
@@ -335,24 +355,24 @@ class Rosetta_Roles {
 		$redirect = menu_page_url( 'translation-editors', false );
 
 		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
-			wp_redirect( $redirect );
+			wp_safe_redirect( $redirect );
 			exit;
 		}
 
 		$user_details = get_user_by( 'id', $user_id );
 
 		if ( ! $user_details ) {
-			wp_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
+			wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 			exit;
 		}
 
 		if ( ! is_user_member_of_blog( $user_details->ID ) ) {
-			wp_redirect( add_query_arg( array( 'error' => 'not-a-member' ), $redirect ) );
+			wp_safe_redirect( add_query_arg( array( 'error' => 'not-a-member' ), $redirect ) );
 			exit;
 		}
 
 		if ( ! in_array( self::TRANSLATION_EDITOR_ROLE, $user_details->roles ) && ! in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user_details->roles ) ) {
-			wp_redirect( add_query_arg( array( 'error' => 'user-cannot' ), $redirect ) );
+			wp_safe_redirect( add_query_arg( array( 'error' => 'user-cannot' ), $redirect ) );
 			exit;
 		}
 
@@ -367,7 +387,8 @@ class Rosetta_Roles {
 				$all_projects = wp_list_pluck( $all_projects, 'id' );
 				$all_projects = array_map( 'intval', $all_projects );
 
-				$projects = explode( ',', $_REQUEST['projects'] );
+				$raw_projects = isset( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
+				$projects     = explode( ',', $raw_projects );
 				if ( in_array( 'all', $projects, true ) ) {
 					$this->update_translation_editor( $user_details, array( 'all' ) );
 				} else {
@@ -376,7 +397,7 @@ class Rosetta_Roles {
 					$this->update_translation_editor( $user_details, $projects );
 				}
 
-				wp_redirect( add_query_arg( array( 'update' => 'user-updated' ), $redirect ) );
+				wp_safe_redirect( add_query_arg( array( 'update' => 'user-updated' ), $redirect ) );
 				exit;
 		}
 	}
@@ -626,9 +647,9 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			$project_list = [];
 
 			foreach ( $projects_added as $project_id ) {
-				if ( $projects[ $project_id ] ) {
+				if ( isset( $projects[ $project_id ] ) ) {
 					$parent = $this->get_parent_project( $project_tree, $project_id );
-					if ( $parent->id != $project_id ) {
+					if ( is_object( $parent ) && (int) $parent->id !== (int) $project_id ) {
 						$name = sprintf(
 							/* translators: 1: Parent project name, 2: Child project name */
 							__( '%1$s &rarr; %2$s', 'rosetta' ),
@@ -661,25 +682,59 @@ Welcome to the WordPress Polyglots team and happy translating.',
 					'items_wrap'     => '%3$s',
 					// Custom walker that returns plain text links.
 					'walker'         => new class() extends Walker_Nav_Menu {
-						public function start_lvl( &$output, $depth = 0, $args = array() ) {
+						/**
+						 * Starts the list before the elements are added.
+						 *
+						 * @param string   $output Used to append additional content (passed by reference).
+						 * @param int      $depth  Depth of menu item. Used for padding.
+						 * @param stdClass $args   An object of wp_nav_menu() arguments.
+						 */
+						public function start_lvl( &$output, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
-						public function end_lvl( &$output, $depth = 0, $args = array() ) {
+
+						/**
+						 * Ends the list after the elements are added.
+						 *
+						 * @param string   $output Used to append additional content (passed by reference).
+						 * @param int      $depth  Depth of menu item. Used for padding.
+						 * @param stdClass $args   An object of wp_nav_menu() arguments.
+						 */
+						public function end_lvl( &$output, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
-						public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
-							$href  = ! empty( $item->url ) ? $item->url : '';
-							$title = apply_filters( 'the_title', $item->title, $item->ID );
-							$title = apply_filters( 'nav_menu_item_title', $title, $item, $args, $depth );
+
+						/**
+						 * Starts the element output.
+						 *
+						 * @param string   $output            Used to append additional content (passed by reference).
+						 * @param WP_Post  $data_object       Menu item data object.
+						 * @param int      $depth             Depth of menu item. Used for padding.
+						 * @param stdClass $args              An object of wp_nav_menu() arguments.
+						 * @param int      $current_object_id Optional. ID of the current menu item. Default 0.
+						 */
+						public function start_el( &$output, $data_object, $depth = 0, $args = null, $current_object_id = 0 ) {
+							$href  = ! empty( $data_object->url ) ? $data_object->url : '';
+							$title = apply_filters( 'the_title', $data_object->title, $data_object->ID );
+							$title = apply_filters( 'nav_menu_item_title', $title, $data_object, $args, $depth );
 
 							$item_output = $title;
 							if ( $href ) {
 								$item_output .= ': ' . esc_url( $href );
 							}
 
-							$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
+							$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $data_object, $depth, $args );
 						}
-						public function end_el( &$output, $item, $depth = 0, $args = array() ) {
+
+						/**
+						 * Ends the element output, if needed.
+						 *
+						 * @param string   $output      Used to append additional content (passed by reference).
+						 * @param WP_Post  $data_object Menu item data object. Not used.
+						 * @param int      $depth       Depth of page. Not used.
+						 * @param stdClass $args        An object of wp_nav_menu() arguments.
+						 */
+						public function end_el( &$output, $data_object, $depth = 0, $args = null ) {
 							$output .= "\n";
 						}
 					},
@@ -937,9 +992,9 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param int   $max_depth Optional. Max depth to avoid endless recursion. Default 5.
 	 * @return array The project tree.
 	 */
-	public function get_project_tree( $projects, $parent_id = 0, $max_depth = 5 ) {
+	public function get_project_tree( array $projects, int $parent_id = 0, int $max_depth = 5 ): array {
 		if ( $max_depth < 0 ) { // Avoid an endless recursion.
-			return;
+			return array();
 		}
 
 		$tree = array();

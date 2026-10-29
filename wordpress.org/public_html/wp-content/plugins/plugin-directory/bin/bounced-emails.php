@@ -3,10 +3,13 @@ namespace WordPressdotorg\Plugin_Directory\Bin\BouncedEmails;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Admin\Metabox\Author_Notice;
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 
 use WordPressdotorg\MU_Plugins\Utilities\HelpScout; // NOTE: NOT the same as the HelpScout class in this plugin.
 
 use function WordPressdotorg\API\HelpScout\{ get_user_email_for_email };
+
+// phpcs:disable WordPress.Security.EscapeOutput
 
 /**
  * This script will process all the bounced emails in HelpScout and take the appropriate action.
@@ -383,6 +386,9 @@ foreach ( $actions_to_take as $post_id => $data ) {
 	// Record why it's closed
 	update_post_meta( $plugin->ID, '_close_reason', 'guideline-violation' );
 	update_post_meta( $plugin->ID, 'plugin_closed_date', current_time( 'mysql' ) );
+
+	// Set the translation project to inactive.
+	Status_Transitions::set_translation_status( $plugin, 'inactive' );
 
 	// Change status.
 	wp_update_post( [

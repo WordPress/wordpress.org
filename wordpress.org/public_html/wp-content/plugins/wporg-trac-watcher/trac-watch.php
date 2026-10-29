@@ -48,6 +48,8 @@ add_action( 'admin_init', function() {
  */
 register_activation_hook( __FILE__, __NAMESPACE__ . '\create_tables' );
 function create_tables() {
+	global $wpdb;
+
 	$trac_table = "CREATE TABLE IF NOT EXISTS `%s` (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`description` longtext NOT NULL,

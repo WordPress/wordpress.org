@@ -29,8 +29,7 @@ use Wporg\TranslationEvents\Attendee\Attendee_Adder;
 use Wporg\TranslationEvents\Attendee\Attendee_Repository;
 use Wporg\TranslationEvents\Event\Event_Capabilities;
 use Wporg\TranslationEvents\Event\Event_Form_Handler;
-use Wporg\TranslationEvents\Event\Event_Repository_Cached;
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Notifications\Notifications_Send;
 use Wporg\TranslationEvents\Stats\Stats_Calculator;
 use Wporg\TranslationEvents\Stats\Stats_Listener;
@@ -57,10 +56,15 @@ class Translation_Events {
 		return $now;
 	}
 
-	public static function get_event_repository(): Event_Repository_Interface {
+	/**
+	 * Get the shared event repository.
+	 *
+	 * @return Event_Repository
+	 */
+	public static function get_event_repository(): Event_Repository {
 		static $event_repository = null;
 		if ( null === $event_repository ) {
-			$event_repository = new Event_Repository_Cached( self::now(), self::get_attendee_repository() );
+			$event_repository = new Event_Repository( self::now(), self::get_attendee_repository() );
 		}
 		return $event_repository;
 	}
@@ -92,6 +96,7 @@ class Translation_Events {
 		add_action( 'init', array( $this, 'remove_incorrect_rss_feed' ) );
 		add_action( 'add_meta_boxes', array( $this, 'event_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_event_meta_boxes' ) );
+		add_action( 'clean_post_cache', array( $this, 'invalidate_event_cache' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'event_status_transition' ), 10, 3 );
 		add_filter( 'gp_nav_menu_items', array( $this, 'gp_event_nav_menu_items' ), 10, 2 );
 		add_filter( 'wp_insert_post_data', array( $this, 'generate_event_slug' ), 10, 2 );
@@ -155,8 +160,7 @@ class Translation_Events {
 			'translation-events-js',
 			'$translation_event',
 			array(
-				'url'          => admin_url( 'admin-ajax.php' ),
-				'_event_nonce' => wp_create_nonce( self::CPT ),
+				'url' => admin_url( 'admin-ajax.php' ),
 			)
 		);
 	}
@@ -244,7 +248,7 @@ class Translation_Events {
 				if ( ! $user ) {
 						return '<i>Unknown user id: ' . esc_html( $host->user_id() ) . '</i>';
 				}
-				return '<a href="' . esc_attr( get_author_posts_url( $host->user_id() ) ) . '">' . esc_html( $user->display_name ) . '</a>';
+				return '<a href="' . esc_url( get_author_posts_url( $host->user_id() ) ) . '">' . esc_html( $user->display_name ) . '</a>';
 			},
 			$hosts
 		);
@@ -278,6 +282,20 @@ class Translation_Events {
 			if ( isset( $_POST[ $field ] ) ) {
 				update_post_meta( $post_id, '_' . $field, sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) );
 			}
+		}
+		self::get_event_repository()->invalidate_cache( $post_id );
+	}
+
+	/**
+	 * Drop the cached event whenever WordPress drops the post's cache, so that edits made
+	 * outside the repository, like in wp-admin, are not served stale.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
+	 */
+	public function invalidate_event_cache( int $post_id, WP_Post $post ): void {
+		if ( self::CPT === $post->post_type ) {
+			self::get_event_repository()->invalidate_cache( $post_id );
 		}
 	}
 
@@ -391,13 +409,13 @@ class Translation_Events {
 			return;
 		}
 
-		$content = '<div id="active-events-before-translation-table" class="active-events-before-translation-table">';
+		$content = '<div id="active-events-before-translation-table" class="active-events-before-translation-table" style="width: 100%; border: 1px solid var(--gp-color-border-default); background: var(--gp-color-status-waiting-subtle); margin: 1rem 0; padding: 0.3rem 0.8rem;">';
 		/* translators: %d: Number of events */
 		$content .= sprintf( _n( 'Contributing to %d event:', 'Contributing to %d events:', $number_of_events, 'gp-translation-events' ), $number_of_events );
 		$content .= '&nbsp;&nbsp;';
 
 		foreach ( array_splice( $events, 0, 2 ) as $event ) {
-			$content .= '<span class="active-events-before-translation-table"><a href="' . Urls::event_details( $event->id() ) . '" target="_blank">' . esc_html( $event->title() ) . '</a></span>';
+			$content .= '<span class="active-events-before-translation-table" style="font-weight: 500; color: var(--gp-color-bubble-inactive-project-text); border: 1px solid var(--gp-color-bubble-inactive-project-text); font-size: .7em; margin-right: 0.3em; width: 6em; text-align: center; padding: 0.2em 0.5em; border-radius: 1em; text-transform: capitalize;"><a href="' . Urls::event_details( $event->id() ) . '" target="_blank" style="color: var(--gp-color-bubble-inactive-project-text); text-decoration: none;">' . esc_html( $event->title() ) . '</a></span>';
 		}
 
 		if ( $number_of_events > 3 ) {
@@ -414,17 +432,21 @@ class Translation_Events {
 				'div'  => array(
 					'id'    => array(),
 					'class' => array(),
+					'style' => array(),
 				),
 				'span' => array(
 					'class' => array(),
+					'style' => array(),
 				),
 				'a'    => array(
 					'href'   => array(),
 					'target' => array(),
+					'style'  => array(),
 				),
 			)
 		);
 	}
+
 
 	/**
 	 * Send notifications for the events.

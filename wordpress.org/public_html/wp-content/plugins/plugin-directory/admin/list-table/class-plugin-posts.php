@@ -3,15 +3,19 @@ namespace WordPressdotorg\Plugin_Directory\Admin\List_Table;
 
 use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Guideline_Labels;
 
 _get_list_table( 'WP_Posts_List_Table' );
 
 class Plugin_Posts extends \WP_Posts_List_Table {
 
-	protected $column_order = [
+	protected $sticky_posts_count = 0;
+	protected $is_trash           = false;
+	protected $column_order       = [
 		'cb',
 		'title',
 		'author',
+		'guideline_labels',
 		'reviewer',
 		'zip',
 		'loc',
@@ -40,6 +44,8 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$columns['zip']            = 'Latest Zip';
 		$columns['loc']            = 'Lines of PHP Code'; 
 		$columns['submitted_date'] = 'Submitted Date'; 
+
+		$columns['guideline_labels'] = __( 'Guideline Labels', 'wporg-plugins' );
 
 		// We don't want the stats column.
 		unset( $columns['stats'] );
@@ -209,7 +215,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			$classes[] = 'level-0';
 		}
 		?>
-		<tr id="post-<?php echo $post->ID; ?>" class="<?php echo implode( ' ', get_post_class( $classes, $post->ID ) ); ?>">
+		<tr id="post-<?php echo esc_attr( $post->ID ); ?>" class="<?php echo esc_attr( implode( ' ', get_post_class( $classes, $post->ID ) ) ); ?>">
 			<?php $this->single_row_columns( $post ); ?>
 		</tr>
 		<?php
@@ -327,15 +333,15 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	<form method="get"><table style="display: none"><tbody id="inlineedit">
 
 		<tr id="inline-edit"
-			class="inline-edit-row inline-edit-row-post inline-edit-<?php echo $screen->post_type; ?> quick-edit-row quick-edit-row-post"
-			style="display: none"><td colspan="<?php echo $this->get_column_count(); ?>" class="colspanchange">
+			class="inline-edit-row inline-edit-row-post inline-edit-<?php echo esc_attr( $screen->post_type ); ?> quick-edit-row quick-edit-row-post"
+			style="display: none"><td colspan="<?php echo esc_attr( $this->get_column_count() ); ?>" class="colspanchange">
 
 		<fieldset class="inline-edit-col-left">
-			<legend class="inline-edit-legend"><?php _e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
+			<legend class="inline-edit-legend"><?php esc_html_e( 'Quick Edit', 'wporg-plugins' ); ?></legend>
 			<div class="inline-edit-col">
 
 			<label>
-				<span class="title"><?php _e( 'Slug', 'wporg-plugins' ); ?></span>
+				<span class="title"><?php esc_html_e( 'Slug', 'wporg-plugins' ); ?></span>
 				<span class="input-text-wrap"><input type="text" name="post_name" value="" /></span>
 			</label>
 
@@ -360,9 +366,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 	<?php endif; // count( $hierarchical_taxonomies ) ?>
 
 		<p class="submit inline-edit-save">
-			<button type="button" class="button cancel alignleft"><?php _e( 'Cancel', 'wporg-plugins' ); ?></button>
+			<button type="button" class="button cancel alignleft"><?php esc_html_e( 'Cancel', 'wporg-plugins' ); ?></button>
 			<?php wp_nonce_field( 'inlineeditnonce', '_inline_edit', false ); ?>
-			<button type="button" class="button button-primary save alignright"><?php _e( 'Update', 'wporg-plugins' ); ?></button>
+			<button type="button" class="button button-primary save alignright"><?php esc_html_e( 'Update', 'wporg-plugins' ); ?></button>
 			<span class="spinner"></span>
 			<input type="hidden" name="post_author" value="" />
 			<input type="hidden" name="post_view" value="<?php echo esc_attr( $m ); ?>" />
@@ -598,6 +604,32 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				submit_button( __( 'Filter', 'wporg-plugins' ), 'secondary', false, false );
 				?>
 			</fieldset>
+			<fieldset class="alignleft actions filter-guideline-label">
+				<select name="<?php echo esc_attr( Guideline_Labels::TAXONOMY ); ?>">
+					<option value=""><?php esc_html_e( 'All Guideline Labels', 'wporg-plugins' ); ?></option>
+					<?php foreach ( Guideline_Labels::get_reasons() as $reason => $data ) : ?>
+						<option value="<?php echo esc_attr( $reason ); ?>" <?php selected( $reason, sanitize_key( wp_unslash( $_REQUEST[ Guideline_Labels::TAXONOMY ] ?? '' ) ) ); ?>>
+							<?php
+							/* translators: 1: Guideline number. 2: Reason slug. */
+							echo esc_html( sprintf( __( 'Guideline %1$d: %2$s', 'wporg-plugins' ), $data['guideline'], $reason ) );
+							?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+				<?php submit_button( __( 'Filter', 'wporg-plugins' ), 'secondary', false, false ); ?>
+			</fieldset>
+			<style>
+				.column-guideline_labels .guideline-label {
+					display: inline-block;
+					margin: 0 4px 4px 0;
+					padding: 0 8px;
+					border-radius: 2px;
+					background: #fcf9e8;
+					border: 1px solid #dba617;
+					color: #1d2327;
+					text-decoration: none;
+				}
+			</style>
 			<?php
 		}
 	}
@@ -624,7 +656,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			?>
 		</fieldset>
 		<fieldset class="alignleft actions hide-if-js bulk-plugin_close bulk-plugin_disable" disabled="disabled">
-			<select name="close_reason" id="close_reason<?php echo $maybe_dash_two; ?>">
+			<select name="close_reason" id="close_reason<?php echo esc_attr( $maybe_dash_two ); ?>">
 				<option disabled="disabled" value='' selected="selected"><?php esc_html_e( 'Close/Disable Reason:', 'wporg-plugins' ); ?></option>
 				<?php foreach ( Template::get_close_reasons() as $key => $label ) : ?>
 					<option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
@@ -683,15 +715,20 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$reviewer_time = (int) ( $post->assigned_reviewer_time ?? 0 );
 
 		if ( $reviewer ) {
+			$args = [
+				'post_type' => $post->post_type,
+				'reviewer'  => $reviewer_id,
+			];
+
 			printf(
-				"<a href='%s'>%s</a><br><span>%s</span>",
-				add_query_arg( [ 'reviewer' => $reviewer_id ] ),
-				$reviewer->display_name ?: $reviewer->user_login,
-				sprintf(
+				'%s<br><span>%s</span>',
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_edit_link() runs the URL through esc_url(), and the link text is escaped here.
+				$this->get_edit_link( $args, esc_html( $reviewer->display_name ?: $reviewer->user_login ) ),
+				esc_html( sprintf(
 					/* translators: %s The time/date different, '1 hour' */
 					__( '%s ago', 'wporg-plugins' ),
 					human_time_diff( $reviewer_time )
-				)
+				) )
 			);
 		} else {
 			echo '-';
@@ -706,6 +743,9 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			return;
 		}
 
+		// Only display the latest.
+		$media = array_slice( $media, -1 );
+
 		foreach ( $media as $zip_file ) {
 			$zip_size = size_format( filesize( get_attached_file( $zip_file->ID ) ), 1 );
 
@@ -717,7 +757,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			}
 
 			printf(
-				'<a href="%1$s">%2$s</a> v%3$s<br>%4$s<br>(<a href="%5$s" target="_blank">test</a> | <a href="%6$s" target="_blank">pcp</a>)<br></li>',
+				'<a href="%1$s">%2$s</a> v%3$s<br>%4$s<br>(<a href="%5$s" target="_blank">test</a> | <a href="%6$s" target="_blank">pcp</a>)<br>',
 				esc_url( $url ),
 				esc_html( $name ),
 				esc_html( $zip_file->version ),
@@ -734,10 +774,40 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 			return;
 		}
 
-		echo number_format_i18n( (int) $post->_submitted_zip_loc ) ?: '-';
+		echo esc_html( number_format_i18n( (int) $post->_submitted_zip_loc ) ) ?: '-';
 	}
 
 	public function column_submitted_date( $post ) {
-		echo gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 );
+		echo esc_html( gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 ) );
+	}
+
+	/**
+	 * The custom Guideline Labels column, linking each label to the list filtered by it.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 */
+	public function column_guideline_labels( $post ) {
+		$labels = Guideline_Labels::get( $post );
+
+		if ( ! $labels ) {
+			echo '-';
+			return;
+		}
+
+		$links = array();
+		foreach ( $labels as $reason => $label ) {
+			$links[] = $this->get_edit_link(
+				array(
+					'post_type'                => $post->post_type,
+					Guideline_Labels::TAXONOMY => $reason,
+				),
+				/* translators: %d: Guideline number. */
+				esc_html( sprintf( __( 'Guideline %d', 'wporg-plugins' ), $label['guideline'] ) ),
+				'guideline-label'
+			);
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_edit_link() runs the URL through esc_url(), and the link text is escaped above.
+		echo implode( ' ', $links );
 	}
 }

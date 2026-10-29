@@ -18,8 +18,8 @@ if ( ! empty( $sso::$matched_route_params['profile_user'] ) ) {
 	die();
 }
 
-$profile_user = $_COOKIE['wporg_profile_user'] ?? false;
-$profile_key  = $_COOKIE['wporg_profile_key']  ?? false;
+$profile_user = is_string( $_COOKIE['wporg_profile_user'] ?? null ) ? $_COOKIE['wporg_profile_user'] : '';
+$profile_key  = is_string( $_COOKIE['wporg_profile_key']  ?? null ) ? $_COOKIE['wporg_profile_key']  : '';
 
 $pending_user = wporg_get_pending_user( $profile_user );
 
@@ -63,65 +63,61 @@ $email_change_available = empty( $pending_user['meta']['changed_email'] );
 get_header();
 ?>
 <form name="registerform" id="registerform" action="" method="post">
+	<?php
+	if ( $pending_user['cleared'] ) {
+		printf(
+			'<h2>' . esc_html__( 'Confirm your email address', 'wporg' ) . '</h2>' .
+			/* translators: %s Email address */
+			'<p>' . esc_html__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ) . '</p>' .
+			'<p><a href="#" class="resend" data-account="%s">' . esc_html__( 'Resend confirmation email.', 'wporg' ) . '</a></p>' .
+			( $email_change_available ? '<a href="#" class="change-email">' . esc_html__( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
+			'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
+			esc_attr( $pending_user['user_email'] )
+		);
+	} else {
+		printf(
+			'<h2>' . esc_html__( 'Your account is pending approval', 'wporg' ) . '</h2>' .
+			/* translators: %s Email address */
+			'<p>' . esc_html__( 'You will receive an email at %s to set your password when approved.', 'wporg' ) . '</p>' .
+			/* translators: %s: Support email address. */
+			'<p>' . esc_html__( 'Please contact %s for more details.', 'wporg' ) . '</p>' .
+			( $email_change_available ? '<a href="#" class="change-email">' . esc_html__( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
+			'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
+			'<a href="' . esc_url( 'mailto:' . $sso::SUPPORT_EMAIL ) . '">' . esc_html( $sso::SUPPORT_EMAIL ) . '</a>'
+		);
+	}
 
-	<div class="message info">
-		<p><?php
-		if ( $pending_user['cleared'] ) {
-			printf(
-				/* translators: %s Email address */
-				__( 'Please check your email %s for a confirmation link to set your password.', 'wporg' ) .
-				'<br><br>' . '<a href="#" class="resend" data-account="%s">' . __( 'Resend confirmation email.', 'wporg' ) . '</a>' .
-				( $email_change_available ? '<br>' . '<a href="#" class="change-email">' . __( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
-				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
-				esc_attr( $pending_user['user_email'] )
-			);
-		} else {
-			printf(
-				/* translators: %s Email address */
-				__( 'Your account is pending approval. You will receive an email at %s to set your password when approved.', 'wporg' ) . 
-				'<br>' . __( 'Please contact %s for more details.', 'wporg' ) .
-				( $email_change_available ? '<br><br>' . '<a href="#" class="change-email">' . __( 'Incorrect email? Update email address.', 'wporg' ) . '</a>' : '' ),
-				'<code>' . esc_html( $pending_user['user_email'] ) . '</code>',
-				'<a href="mailto:' . $sso::SUPPORT_EMAIL . '">' . $sso::SUPPORT_EMAIL . '</a>'
-			);
-		}
-
-		if ( 'local' === wp_get_environment_type() && ! empty( $_COOKIE['emailed_url'] ) ) {
-			printf(
-				'<br><br><strong>Local Development</strong>: The URL emailed to you is: <a href="%1$s">%1$s</a>.',
-				wp_unslash( $_COOKIE['emailed_url'] )
-			);
-		}
-		?></p>
-	</div>
-
-	<p class="intro">
-		<?php _e( 'Complete your WordPress.org Profile information.', 'wporg' ); ?>
-	</p>
-
-	<p class="login-login">
-		<label for="user_login"><?php _e( 'Username', 'wporg' ); ?></label>
-		<input type="text" disabled="disabled" class=" disabled" value="<?php echo esc_attr( $profile_user ); ?>" size="20" />
-	</p>
+	if ( 'local' === wp_get_environment_type() && ! empty( $_COOKIE['emailed_url'] ) ) {
+		printf(
+			'<br><br><strong>Local Development</strong>: The URL emailed to you is: <a href="%1$s">%1$s</a>.',
+			esc_url( sanitize_url( wp_unslash( $_COOKIE['emailed_url'] ) ) )
+		);
+	}
+	?>
 
 	<p class="login-email hidden">
-		<label for="user_email"><?php _e( 'Email', 'wporg' ); ?></label>
+		<label for="user_email"><?php esc_html_e( 'Email', 'wporg' ); ?></label>
 		<input type="text" name="user_email" value="<?php echo esc_attr( $pending_user['user_email'] ); ?>" size="20" maxlength="100" />
 	</p>
 
-	<?php
-		$fields = &$pending_user['meta'];
-		include __DIR__ . '/partials/register-profilefields.php';
-	?>
+	<?php if ( ! $pending_user['cleared'] ) : ?>
+		<p class="login-profile-intro">
+			<?php esc_html_e( 'While waiting for approval, you can get a head start by adding some optional details to your profile.', 'wporg' ); ?>
+		</p>
 
-	<p class="login-submit">
+		<?php
+			$fields = isset( $pending_user['meta'] ) ? $pending_user['meta'] : [];
+			include __DIR__ . '/partials/register-profilefields.php';
+		?>
+	<?php endif; ?>
+
+	<p class="login-submit <?php echo esc_attr( $pending_user['cleared'] ? 'hidden' : '' ); ?>">
 		<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e( 'Save Profile Information', 'wporg' ); ?>" />
 	</p>
-
 </form>
 
 <p id="nav">
-	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php _e( 'WordPress.org', 'wporg' ); ?></a>
+	<a href="<?php echo wporg_login_wordpress_url(); ?>"><?php esc_html_e( 'WordPress.org', 'wporg' ); ?></a>
 </p>
 
 <?php get_footer(); ?>

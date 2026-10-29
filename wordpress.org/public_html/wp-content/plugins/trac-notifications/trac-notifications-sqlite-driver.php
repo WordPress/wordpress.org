@@ -6,6 +6,8 @@ define( 'ARRAY_A',  PDO::FETCH_ASSOC );
 define( 'ARRAY_N',  PDO::FETCH_NUM );
 
 class Trac_Notifications_SQLite_Driver /* implements wpdb_interface */ {
+	public $db;
+
 	function __construct( $path ) {
 		$this->db = new PDO( 'sqlite:' . $path );
 	}

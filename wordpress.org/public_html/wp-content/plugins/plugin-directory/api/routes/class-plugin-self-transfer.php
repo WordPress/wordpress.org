@@ -27,11 +27,9 @@ class Plugin_Self_Transfer extends Base {
 					}
 				]
 			],
-			'permission_callback' => function( $request ) {
-				$plugin = Plugin_Directory::get_plugin_post( $request['plugin_slug'] );
-
-				return current_user_can( 'plugin_self_transfer', $plugin );
-			},
+			'permission_callback' => [ $this, 'permission_check_action' ],
+			'wporg_capability'    => 'plugin_self_transfer',
+			'wporg_action'        => 'self_transfer',
 		] );
 
 		add_filter( 'rest_pre_echo_response', [ $this, 'override_cookie_expired_message' ], 10, 3 );
@@ -47,7 +45,7 @@ class Plugin_Self_Transfer extends Base {
 		) {
 			if ( 'rest_cookie_invalid_nonce' == $result['code'] ) {
 				wp_die( 'The link you have followed has expired.' );
-			} elseif ( 'rest_forbidden' == $result['code'] ) {
+			} elseif ( 'rest_forbidden' === $result['code'] || 'rest_cross_origin_write' === $result['code'] ) {
 				wp_die( "Sorry, You can't do that." );
 			}
 		}

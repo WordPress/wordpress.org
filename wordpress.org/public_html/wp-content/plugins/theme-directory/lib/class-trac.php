@@ -34,18 +34,31 @@ class Trac {
 	 */
 	public function __construct( $username, $password, $host, $path = '/', $port = 80, $ssl = false ) {
 		// Assume URL to $host, ignore $path, $port, $ssl.
-		$this->rpc = new WP_HTTP_IXR_Client( $host, false, false, 60 );
+		$this->rpc = new WP_HTTP_IXR_Client( $host, false, false, 90 );
 
 		$http_basic_auth  = 'Basic ';
 		$http_basic_auth .= base64_encode( $username . ':' . $password );
 
 		$this->rpc->headers['Authorization'] = $http_basic_auth;
 
-		// themes.trac requires both the Authorization header and the logged in Cookie.
-		$user = get_user_by( 'login', $username );
-		if ( $user ) {
-			$this->rpc->headers['Cookie'] = LOGGED_IN_COOKIE . '=' . wp_generate_auth_cookie( $user->ID, time() + MINUTE_IN_SECONDS, 'logged_in' );
+		// themes.trac requires both the Authorization header and the logged in cookie.
+		$logged_in = get_transient( "trac_logged_in_cookie_{$username}" );
+		if (
+			! $logged_in ||
+			! wp_validate_auth_cookie( $logged_in, 'logged_in' )
+		) {
+			// Generate a new WordPress user session, daily.
+			$user      = get_user_by( 'login', $username );
+			$logged_in = wp_generate_auth_cookie( $user->ID, time() + 2 * DAY_IN_SECONDS, 'logged_in' );
+
+			// Cache the session for 1 day.
+			set_transient( "trac_logged_in_cookie_{$username}", $logged_in, DAY_IN_SECONDS );
+
+			// Wait a moment for the session to become active before using it.
+			sleep( 1 );
 		}
+
+		$this->rpc->headers['Cookie'] = LOGGED_IN_COOKIE . '=' . $logged_in;
 
 	}
 
@@ -85,7 +98,12 @@ class Trac {
 	 */
 	public function ticket_update( $id, $comment, $attr = array(), $notify = false ) {
 		if ( empty( $attr['_ts'] ) ) {
-			$get         = $this->ticket_get( $id );
+			$get = $this->ticket_get( $id );
+			if ( ! $get ) {
+				trigger_error( 'Trac: ticket.update: Couldn\'t get: ' . $this->rpc->error->message, E_USER_WARNING );
+				return false;
+			}
+
 			$attr['_ts'] = $get['_ts'];
 		}
 		if ( empty( $attr['action'] ) ) {
@@ -109,7 +127,7 @@ class Trac {
 	 * @return bool|mixed
 	 */
 	public function ticket_query( $search ) {
-		$ok = $this->rpc->query( 'ticket.query', $search );
+		$ok = $this->rpc_query_retry( 3, 'ticket.query', $search );
 		if ( ! $ok ) {
 			return false;
 		}
@@ -124,8 +142,11 @@ class Trac {
 	 * @return [id, time_created, time_changed, attributes] or false on failure.
 	 */
 	public function ticket_get( $id ) {
-		$ok = $this->rpc->query( 'ticket.get', $id );
+		$ok = $this->rpc_query_retry( 5, 'ticket.get', $id );
+	
 		if ( ! $ok ) {
+			trigger_error( 'Trac: ticket.get: ' . $this->rpc->error->message, E_USER_WARNING );
+
 			return false;
 		}
 
@@ -137,4 +158,30 @@ class Trac {
 
 		return $response;
 	}
+
+	/**
+	 * Queries Trac RPC with a backoff retry.
+	 *
+	 * @param int $retries Number of retries.
+	 * @param mixed ...$args Arguments to pass to the query.
+	 */
+	public function rpc_query_retry( $retries, ...$args ) {
+		$ok    = false;
+		$retry = 0;
+		while ( ! $ok && $retry < $retries ) {
+			if ( $retry ) {
+				sleep( $retry );
+			}
+			$retry++;
+
+			$ok = call_user_func_array( [ $this->rpc, 'query' ], $args );
+		}
+
+		if ( ! $ok ) {
+			trigger_error( 'Trac: rpc query retry failed: ' . $args[0] . ' ' . $this->rpc->error->message, E_USER_WARNING );
+		}
+
+		return $ok;
+	}
+
 }

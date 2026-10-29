@@ -14,6 +14,7 @@ add_filter( 'wporg_query_filter_options_plugin_category', __NAMESPACE__ . '\wpor
 add_filter( 'wporg_query_filter_in_form', __NAMESPACE__ . '\wporg_query_filter_in_form' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\wporg_query_total_label', 10, 2 );
 add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
+add_filter( 'wporg_ratings_data', __NAMESPACE__ . '\set_rating_data', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\filter_search_block' );
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\filter_site_title_block' );
 add_filter( 'render_block_core/navigation', __NAMESPACE__ . '\filter_navigation_block', 10, 2 );
@@ -25,7 +26,11 @@ add_filter( 'render_block_wporg/language-suggest', __NAMESPACE__ . '\filter_lang
 function add_site_navigation_menus( $menus ) {
 	global $wp;
 
-	$url = 'https://' . $_SERVER['HTTP_HOST'] . parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+	// This accounts for test and local environments.
+	$scheme = wp_parse_url( home_url(), PHP_URL_SCHEME ) ?: 'https';
+	$host   = $_SERVER['HTTP_HOST'] ?? wp_parse_url( home_url(), PHP_URL_HOST ) ?: 'localhost';
+	$path   = parse_url( ( $_SERVER['REQUEST_URI'] ?? '/' ) ?: '/', PHP_URL_PATH );
+	$url    = is_search() ? get_search_link() : $scheme . '://' . $host . $path;
 
 	$items = array(
 		'plugins' => array(
@@ -42,16 +47,16 @@ function add_site_navigation_menus( $menus ) {
 		'section-bar' => array(
 			array(
 				'label' => __( 'All', 'wporg-plugins' ),
-				'url'   => is_search() ? get_search_link() : home_url( '/' ),
+				'url'   => $url,
 			),
 			array(
 				'label' => __( 'Community', 'wporg-plugins' ),
-				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=community' ) :  esc_url( $url . '?plugin_business_model=community' ),
+				'url'   => add_query_arg( 'plugin_business_model', 'community', $url ),
 				'term'  => get_term_by( 'slug', 'community', 'plugin_business_model' ),
 			),
 			array(
 				'label' => __( 'Commercial', 'wporg-plugins' ),
-				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=commercial' ) : esc_url( $url . '?plugin_business_model=commercial' ),
+				'url'   => add_query_arg( 'plugin_business_model', 'commercial', $url ),
 				'term'  => get_term_by( 'slug', 'commercial', 'plugin_business_model' ),
 			),
 			/*
@@ -73,6 +78,15 @@ function add_site_navigation_menus( $menus ) {
 			),*/
 		)
 	);
+
+	if ( ! is_user_logged_in() ) {
+		global $wp;
+		$redirect_url = home_url( $wp->request );
+		$items['plugins'][] = array(
+			'label' => __( 'Log in', 'wporg-plugins' ),
+			'url' => wp_login_url( $redirect_url ),
+		);
+	}
 
 	/*
 	// Not usually in the menu, but we need to show these somehow.
@@ -226,7 +240,7 @@ function wporg_query_filter_in_form( $key ) {
 function wporg_query_total_label( $label, $count ) {
 
 	if ( ! is_search() ) {
-		return;
+		return '';
 	}
 
 	$plugin_business_model = get_query_var( 'plugin_business_model' );
@@ -281,14 +295,52 @@ function get_favorite_settings( $settings, $post_id ) {
 }
 
 /**
- * Filters the search block to remove the required attribute, and add the query fields.
+ * Update ratings blocks with real rating data.
+ *
+ * @param array $data    Rating data.
+ * @param int   $post_id Current post.
+ *
+ * @return array
+ */
+function set_rating_data( $data, $post_id ) {
+	$post = get_post( $post_id );
+
+	if ( class_exists( '\WPORG_Ratings' ) ) {
+		$rating  = \WPORG_Ratings::get_avg_rating( 'plugin', $post->post_name ) ?: 0;
+		$ratings = \WPORG_Ratings::get_rating_counts( 'plugin', $post->post_name ) ?: array();
+	} else {
+		$rating  = get_post_meta( $post->ID, 'rating', true ) ?: 0;
+		$ratings = get_post_meta( $post->ID, 'ratings', true ) ?: array();
+	}
+
+	/**
+	 * Why do we multiply the average rating by 20?
+	 * The themes API does it this way, and the rating plugin was built to fit that. 
+	 * Instead of redoing everything, multiplying here keeps things simple and works well.
+	 *
+	 * @see theme-directory/class-themes-api.php for more info.
+	 */
+	$adjusted_rating = $rating * 20;
+
+	return array(
+		'rating' => $adjusted_rating,
+		'ratingsCount' => array_sum( $ratings ),
+		'ratings' => $ratings,
+		'supportUrl' => esc_url( 'https://wordpress.org/support/plugin/' . $post->post_name . '/reviews/' )
+	);
+}
+
+/**
+ * Filters the search block to remove the required attribute on search results, and add the query fields.
  *
  * @param string $block_content
  * @return string
  */
 function filter_search_block( $block_content ) {
-	// Remove the required attribute
-	$block_content = preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
+	if ( is_search() ) {
+		// Remove the required attribute, so an empty submission can clear the current search.
+		$block_content = preg_replace( '/(<input[^>]*)\s+required\s*([^>]*)>/', '$1$2>', $block_content );
+	}
 
 	/* Temporarily disable this until filters are enabled.
 	// Insert the current query filters into the search form.

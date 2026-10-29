@@ -24,7 +24,7 @@ get_header(); ?>
 		<?php do_action( 'bbp_template_notices' ); ?>
 
 		<section id="forum-welcome">
-			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/welcome-cards"} /-->' ); ?>
+			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/welcome-cards"} /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 		</section>
 
 		<section>
@@ -32,19 +32,19 @@ get_header(); ?>
 		</section>
 
 		<section class="forums-homepage-topics">
-			<h2 class="has-heading-5-font-size"><?php _e( 'Topics', 'wporg-forums' ); ?></h2>
+			<h2 class="has-heading-5-font-size"><?php esc_html_e( 'Topics', 'wporg-forums' ); ?></h2>
 
-			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/forums-views"} /-->' ); ?>
+			<?php echo do_blocks( '<!-- wp:pattern {"slug":"wporg-support/forums-views"} /-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup. ?>
 		</section>
 
 		<section class="clear helpful-links">
 			<div>
-				<h2 class="has-heading-5-font-size"><?php _e( 'Helpful Links', 'wporg-forums' ); ?></h2>
+				<h2 class="has-heading-5-font-size"><?php esc_html_e( 'Helpful Links', 'wporg-forums' ); ?></h2>
 				<ul class="meta-list">
-					<li><?php _e( '<a href="https://wordpress.org/support/article/new_to_wordpress_-_where_to_start/">New to WordPress &mdash; Where to Start</a>', 'wporg-forums' ); ?></li>
-					<li><?php _e( '<a href="https://wordpress.org/support/article/faq-installation/">Frequently Asked Questions about Installing WordPress</a>', 'wporg-forums' ); ?></li>
-					<li><?php _e( '<a href="https://wordpress.org/support/article/first-steps-with-wordpress-classic/">First Steps with WordPress</a>', 'wporg-forums' ); ?></li>
-					<li><?php _e( '<a href="https://wordpress.org/support/article/writing-posts/">Writing Posts</a>', 'wporg-forums' ); ?></li>
+					<li><?php echo wp_kses_post( __( '<a href="https://wordpress.org/support/article/new_to_wordpress_-_where_to_start/">New to WordPress &mdash; Where to Start</a>', 'wporg-forums' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( '<a href="https://wordpress.org/support/article/faq-installation/">Frequently Asked Questions about Installing WordPress</a>', 'wporg-forums' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( '<a href="https://wordpress.org/support/article/first-steps-with-wordpress-classic/">First Steps with WordPress</a>', 'wporg-forums' ) ); ?></li>
+					<li><?php echo wp_kses_post( __( '<a href="https://wordpress.org/support/article/writing-posts/">Writing Posts</a>', 'wporg-forums' ) ); ?></li>
 				</ul>
 			</div>
 		</section>

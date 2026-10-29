@@ -107,17 +107,22 @@ function show_authorization( $user, $channel ) {
 	} elseif ( in_array( $channel, $channels ) ) {
 		$channels = array_filter( $channels, function( $c ) use ( $channel ) { return $c !== $channel; } );
 		if ( $channels ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 			printf( "You are allowed to use these commands in #%s (also %s).", $channel, '#' . implode( ' #', $channels ) );
 		} else {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 			echo "You are allowed to use these commands in in #$channel.";
 		}
 	} else {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 		printf( "You are not allowed to use these commands in #%s, but you are in #%s.", $channel, implode( ' #', $channels ) );
 	}
 
 	echo "\n";
 
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 	printf( "If you are a team lead and need to be granted access, contact an admin in <#%s|%s> for assistance.\n", SLACKHELP_CHANNEL_ID, SLACKHELP_CHANNEL_NAME );
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 	printf( "Your linked WordPress.org account that needs to be granted access is '%s'.", $user );
 }
 
@@ -134,6 +139,7 @@ function get_parent_channels( $channel ) {
 	}
 
 	list( $root, ) = explode( '-', $channel, 2 );
+	$direct_root = $root;
 
 	// Some channels parents are not a 1:1 match.
 	switch ( $root ) {
@@ -141,14 +147,20 @@ function get_parent_channels( $channel ) {
 		case 'feature':
 		case 'performance':
 		case 'tide':
+		case 'accessibility':
 		case 'core':
 			$root = 'core';
 			break;
 		case 'mentorship': // Such as #mentorship-cohort-july-2023
 			$root = 'contributor-mentorship';
 			break;
+		case 'campusconnect':
+		case 'wpcredits':
 		case 'community':
 			$root = 'community-team';
+			break;
+		case 'media':
+			$root = 'media-corps';
 			break;
 	}
 
@@ -160,15 +172,22 @@ function get_parent_channels( $channel ) {
 	$parent_channels = [];
 
 	// For when a channel has multiple parents.
-
-	// Accessibility is a sub-team of Core, but is a parent channel itself.
-	if ( 'accessibility' === $root ) {
-		$parent_channels[] = 'core';
-	}
-
 	// Learn is a sub-team of Training, plus of #meta.
 	if ( 'meta-learn' === $channel ) {
 		$parent_channels[] = 'training';
+	}
+
+	// When the switch above remapped to a team-level parent (e.g. wpcredits -> community-team),
+	// also inherit from the intermediate channel itself if it has its own whitelist.
+	// e.g. #wpcredits-spanish inherits from both #wpcredits and #community-team.
+	// Note: check the raw whitelist directly — calling get_whitelist_for_channel()
+	// here would recurse back through get_parent_channels() and infinite-loop.
+	if (
+		$direct_root !== $root &&
+		$direct_root !== $channel &&
+		! empty( get_whitelist()[ $direct_root ] )
+	) {
+		$parent_channels[] = $direct_root;
 	}
 
 	// Is it an actual channel? Assume that there'll always be at least one whitelisted user for the parent channel.
@@ -241,17 +260,15 @@ function run( $data ) {
 	}
 
 	if ( str_word_count( $data['text'] ) <= 2 ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 		printf( "When making announcements, please use a descriptive message for notifications. %s is too short.", $data['text'] );
 		return;
 	}
 
-	// Default to an @here, unless explicitely an @channel OR it's a private group.
+	// Default to an @here, unless explicitely an @channel.
 	$command = 'here';
 	if ( $data['command'] === '/at-channel' ) {
 		$command = 'channel';
-	} elseif ( $channel === 'privategroup' ) {
-		// @channel and @group are interchangeable.
-		$command = 'group';
 	}
 
 	// Use their Slack Display name, falling back to their WordPress.org login if that's not available.
@@ -294,6 +311,7 @@ function run( $data ) {
 	// Don't send to these parent channels.
 	$dont_send_to = [
 		'contributor-mentorship',
+		'wpcredits',
 	];
 
 	$text = $data['text'];
@@ -305,6 +323,12 @@ function run( $data ) {
 
 	foreach ( $parent_channels as $parent_channel ) {
 		if ( in_array( $parent_channel, $dont_send_to, true ) ) {
+			continue;
+		}
+
+		// #wpcredits and #wpcredits-* inherit from #community-team for whitelist
+		// purposes, but their announcements should stay within the wpcredits family.
+		if ( 'community-team' === $parent_channel && str_starts_with( $channel, 'wpcredits' ) ) {
 			continue;
 		}
 

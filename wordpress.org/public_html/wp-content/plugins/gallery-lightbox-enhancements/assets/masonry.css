@@ -1,0 +1,110 @@
+/**
+ * Masonry style variation for the core/gallery block.
+ *
+ * Polyfill for https://github.com/WordPress/gutenberg/pull/77615 — adds
+ * `is-style-masonry` to the Gallery block's style picker. The variation
+ * uses CSS multi-column flow so figures keep their natural aspect
+ * ratios and settle into a brick rhythm; the figure markup is the same
+ * one core ships, so caption, lightbox, linkTo, random order and
+ * resolution work unchanged.
+ *
+ * Visual treatment is intentionally minimal — no border, no radius, no
+ * shadow, no hover lift. wp.org gallery patterns render thumbnails as
+ * bare images; this variation does the same so it sits inside the
+ * existing UI vocabulary.
+ */
+
+.wp-block-gallery.has-nested-images.is-style-masonry {
+	display: block;
+	column-gap: var(--wp--style--unstable-gallery-gap, 16px);
+	column-count: 2;
+}
+
+.wp-block-gallery.has-nested-images.is-style-masonry.columns-1 {
+	column-count: 1;
+}
+
+@media (min-width: 600px) {
+
+	.wp-block-gallery.has-nested-images.is-style-masonry {
+		column-count: 3;
+	}
+
+	.wp-block-gallery.has-nested-images.is-style-masonry.columns-2 {
+		column-count: 2;
+	}
+
+	.wp-block-gallery.has-nested-images.is-style-masonry.columns-3 {
+		column-count: 3;
+	}
+
+	.wp-block-gallery.has-nested-images.is-style-masonry.columns-4 {
+		column-count: 4;
+	}
+
+	.wp-block-gallery.has-nested-images.is-style-masonry.columns-5 {
+		column-count: 5;
+	}
+
+	.wp-block-gallery.has-nested-images.is-style-masonry.columns-6 {
+		column-count: 6;
+	}
+
+	.wp-block-gallery.has-nested-images.is-style-masonry.columns-7 {
+		column-count: 7;
+	}
+
+	.wp-block-gallery.has-nested-images.is-style-masonry.columns-8 {
+		column-count: 8;
+	}
+
+	.wp-block-gallery.has-nested-images.is-style-masonry.columns-default {
+		column-count: 3;
+	}
+}
+
+/**
+ * Each figure spans its column with natural height. The aspect-ratio
+ * override neutralises core/gallery's shared aspect-ratio inline style,
+ * which would otherwise force every tile to the same shape and undo
+ * the brick layout.
+ */
+.wp-block-gallery.has-nested-images.is-style-masonry figure.wp-block-image:not(#individual-image) {
+	width: 100%;
+	margin: 0 0 var(--wp--style--unstable-gallery-gap, 16px);
+	break-inside: avoid;
+	display: block;
+	aspect-ratio: auto !important;
+}
+
+/**
+ * The is-cropped rules in core force a fixed height and object-fit:
+ * cover on images. That collapses masonry into a grid, so neutralise
+ * them. !important is required because is-cropped can co-exist with
+ * is-style-masonry on the wrapper.
+ */
+.wp-block-gallery.has-nested-images.is-style-masonry figure.wp-block-image:not(#individual-image) a,
+.wp-block-gallery.has-nested-images.is-style-masonry figure.wp-block-image:not(#individual-image) img {
+	height: auto !important;
+	object-fit: initial !important;
+}
+
+.wp-block-gallery.has-nested-images.is-style-masonry figure.wp-block-image:not(#individual-image) img {
+	display: block;
+	width: 100%;
+}
+
+.wp-block-gallery.has-nested-images.is-style-masonry figure.wp-block-image:not(#individual-image) button.lightbox-trigger {
+	cursor: zoom-in;
+}
+
+/**
+ * Default Gallery paints a `backdrop-filter: blur(3px)` strip over the
+ * bottom of every figure with a figcaption to host a legible scrim.
+ * In the masonry style captions live in the lightbox, so the strip is
+ * visible over a clean image and reads as accidental softening.
+ * Disable it.
+ */
+.wp-block-gallery.has-nested-images.is-style-masonry figure.wp-block-image::before {
+	content: none;
+}

@@ -26,8 +26,8 @@ function customize_open_graph_tags( $og_tags ) {
 
 	// Make WPTV videos embeddable in Twitter player cards
 	$video_info = video_get_info_by_guid( $video_id[0] );
-	list( $width, $height ) = wp_expand_dimensions( $video_info->width, $video_info->height, 560, 315 );
-	$mp4_url = set_url_scheme( wp_get_attachment_url( $video_info->post_id ), 'https' );
+	list( $width, $height ) = wp_expand_dimensions( $video_info->width ?? null, $video_info->height ?? null, 560, 315 );
+	$mp4_url = set_url_scheme( wp_get_attachment_url( $video_info->post_id ?? null ), 'https' );
 
 	$og_tags['twitter:card']                       = 'player';
 	$og_tags['twitter:player']                     = sprintf( 'https://videopress.com/v/%s?autoplay=0', $video_id[0] );

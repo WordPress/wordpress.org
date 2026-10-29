@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\API\Routes;
 
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\API\Base;
+use WordPressdotorg\Plugin_Directory\Template;
 
 /**
  * WordPress.org is many different systems operating with one anothers data.
@@ -23,6 +24,30 @@ class Internal_Stats extends Base {
 			'callback'            => array( $this, 'bulk_update_stats' ),
 			'permission_callback' => array( $this, 'permission_check_internal_api_bearer' ),
 		) );
+
+		register_rest_route(
+			'plugins/v1',
+			'/stats',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_stats' ),
+				'permission_callback' => '__return_true',
+			)
+		);
+	}
+
+	/**
+	 * Gets public Plugin Directory statistics.
+	 *
+	 * @param \WP_REST_Request $request The REST API request.
+	 * @return array The public statistics.
+	 */
+	public function get_stats( $request ) {
+		$counts = wp_count_posts( 'plugin' );
+
+		return array(
+			'queue_count' => (int) ( $counts->new ?? 0 ),
+		);
 	}
 
 	/**
@@ -55,7 +80,7 @@ class Internal_Stats extends Base {
 					// Store an unsanitized private version of the active_installs stat for consistent ordering.
 					update_post_meta( $plugin->ID, '_active_installs', wp_slash( $value ) );
 
-					$value = $this->sanitize_active_installs( $value );
+					$value = Template::sanitize_active_installs( $value );
 				} elseif ( 'usage' == $stat_name ) {
 					$value = $this->sanitize_usage_numbers( $value, $plugin );
 				} elseif ( 'support_threads' == $stat_name || 'support_threads_resolved' == $stat_name ) {
@@ -69,34 +94,6 @@ class Internal_Stats extends Base {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Sanitizes the Active Install count number to a rounded display value.
-	 *
-	 * @param int $active_installs The raw active install number.
-	 * @return int The sanitized version for display.
-	 */
-	protected function sanitize_active_installs( $active_installs ) {
-		if ( $active_installs > 10000000 ) {
-			// 10 million +
-			return 10000000;
-		} elseif ( $active_installs > 1000000 ) {
-			$round = 1000000;
-		} elseif ( $active_installs > 100000 ) {
-			$round = 100000;
-		} elseif ( $active_installs > 10000 ) {
-			$round = 10000;
-		} elseif ( $active_installs > 1000 ) {
-			$round = 1000;
-		} elseif ( $active_installs > 100 ) {
-			$round = 100;
-		} else {
-			// Rounded to ten, else 0
-			$round = 10;
-		}
-
-		return floor( $active_installs / $round ) * $round;
 	}
 
 	/**

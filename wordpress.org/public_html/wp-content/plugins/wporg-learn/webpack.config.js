@@ -4,6 +4,7 @@ const config = require( '@wordpress/scripts/config/webpack.config' );
  * Set up the custom entry points.
  */
 config.entry = {
+	'course-completion-meta': './js/course-completion-meta/index.js',
 	'course-status': './js/course-status/src/index.js',
 	'duration-meta': './js/duration-meta/index.js',
 	'expiration-date': './js/expiration-date/index.js',
@@ -19,6 +20,10 @@ config.entry = {
 	'lesson-plan-details': './js/lesson-plan-details/src/index.js',
 	'course-data': './js/course-data/src/index.js',
 	'language-meta': './js/language-meta/index.js',
+	'activity-kit-card': './js/activity-kit-card/src/index.js',
+	'activity-kit-sidebar': './js/activity-kit-sidebar/src/index.js',
+	'query-activity-kits': './js/query-activity-kits/src/index.js',
+	'activity-kit-stats': './js/activity-kit-stats/index.js',
 };
 
 module.exports = config;

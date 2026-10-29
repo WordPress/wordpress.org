@@ -66,7 +66,7 @@ foreach ( $mentioned as $type => $slugs ) {
 	] );
 
 	if ( $post_ids ) {
-		echo '<p><strong>' . ucwords( $type ) . ' mentioned in this email:</strong></p>';
+		echo '<p><strong>' . esc_html( ucwords( $type ) ) . ' mentioned in this email:</strong></p>';
 
 		display_items( $post_ids );
 
@@ -84,7 +84,7 @@ if ( $user ) {
 		$items = get_user_items( $user );
 		if ( $items ) {
 			$url = add_query_arg( [ 'post_type' => $repo_post_types[ $type ], 'author' => $user->ID ], admin_url( 'edit.php' ) );
-			echo '<p><strong><a href="' . esc_url( $url ) . '">' . ucwords( $type ) . ' owned by this user:</a></strong></p>';
+			echo '<p><strong><a href="' . esc_url( $url ) . '">' . esc_html( ucwords( $type ) ) . ' owned by this user:</a></strong></p>';
 
 			display_items( $items );
 
@@ -175,11 +175,11 @@ function display_items( $post_ids ) {
 
 			// Append Info URL.
 			if (
-				$download_url &&
+				$download_link &&
 				str_starts_with( $request->mailbox->email ?? '' , 'plugins' ) &&
 				class_exists( '\WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review' )
 			) {
-				$download_url = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $download_url, $post );
+				$download_link = \WordPressdotorg\Plugin_Directory\API\Routes\Plugin_Review::append_plugin_review_info_url( $download_link, $post );
 			}
 		}
 

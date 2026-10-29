@@ -6,12 +6,13 @@
 		<div class="my-account">
 			<ul>
 				<li><?php
-					/* translators: %s: user's display name */
-					printf( __( 'Howdy, %s', 'wporg-forums' ),
-						'<a href="' . esc_url( bbp_get_user_profile_url( bbp_get_current_user_id() ) ) . '">' . bbp_get_current_user_name() . '</a>'
+					printf(
+						/* translators: %s: Current user's profile link. */
+						esc_html__( 'Howdy, %s', 'wporg-forums' ),
+						'<a href="' . esc_url( bbp_get_user_profile_url( bbp_get_current_user_id() ) ) . '">' . esc_html( bbp_get_current_user_name() ) . '</a>'
 					);
 				?></li>
-				<li><a href="<?php echo esc_url( wp_logout_url() ); ?>"><?php _e( 'Log Out', 'wporg-forums' ); ?></a></li>
+				<li><a href="<?php echo esc_url( wp_logout_url() ); ?>"><?php esc_html_e( 'Log Out', 'wporg-forums' ); ?></a></li>
 			</ul>
 		</div>
 
@@ -24,10 +25,10 @@
 			<div>
 				<ul class="forum-info">
 					<?php bb_base_single_forum_description(); ?>
-					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/"><?php _e( 'RSS Recent Posts', 'wporg-forums' ); ?></a></li>
-					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/?type=topic"><?php _e( 'RSS Recent Topics', 'wporg-forums' ); ?></a></li>
+					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/"><?php esc_html_e( 'RSS Recent Posts', 'wporg-forums' ); ?></a></li>
+					<li><a class="feed" href="<?php bbp_forum_permalink(); ?>feed/?type=topic"><?php esc_html_e( 'RSS Recent Topics', 'wporg-forums' ); ?></a></li>
 					<?php if ( is_user_logged_in() && $forum_subscription_link = bbp_get_forum_subscription_link() ) : ?>
-						<li class="forum-subscribe"><?php echo $forum_subscription_link; ?></li>
+						<li class="forum-subscribe"><?php echo wp_kses_post( $forum_subscription_link ); ?></li>
 					<?php endif; ?>
 				</ul>
 			</div>
@@ -76,6 +77,7 @@
 					$term_subscription = WordPressdotorg\Forums\Term_Subscription\get_subscription_link( get_queried_object()->term_id );
 				}
 				if ( $term_subscription ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Subscription renderer escapes fields and includes a confirmation handler.
 					echo '<div>' . $term_subscription . "</div>\n";
 				}
 			?>
@@ -85,9 +87,11 @@
 		<?php if ( ! bbp_is_single_user() && ! ( wporg_support_is_compat_forum() ) ) : ?>
 
 			<div>
-				<h2><?php _e( 'Topics', 'wporg-forums' ); ?></h2>
+				<h2><?php esc_html_e( 'Topics', 'wporg-forums' ); ?></h2>
 
-				<?php echo do_blocks(
+				<?php
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
+				echo do_blocks(
 					sprintf(
 						'<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"className":"topic-views is-style-cards-grid","layout":{"type":"grid"},"fontSize":"small"} -->
 						<div class="topic-views wp-block-group is-style-cards-grid">%s</div>
@@ -102,10 +106,10 @@
 		<?php if ( bbp_is_single_view() && ! wporg_support_is_compat_view() || is_tax( 'topic-tag' ) ) : ?>
 
 			<div>
-				<h2><?php _e( 'Feeds', 'wporg-forums' ); ?></h2>
+				<h2><?php esc_html_e( 'Feeds', 'wporg-forums' ); ?></h2>
 				<ul class="forum-feeds">
-					<li><a class="feed" href="<?php bbp_forums_url(); ?>feed/"><?php _e( 'RSS Recent Posts', 'wporg-forums' ); ?></a></li>
-					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/"><?php _e( 'RSS Recent Topics', 'wporg-forums' ); ?></a></li>
+					<li><a class="feed" href="<?php bbp_forums_url(); ?>feed/"><?php esc_html_e( 'RSS Recent Posts', 'wporg-forums' ); ?></a></li>
+					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/"><?php esc_html_e( 'RSS Recent Topics', 'wporg-forums' ); ?></a></li>
 				</ul>
 			</div>
 

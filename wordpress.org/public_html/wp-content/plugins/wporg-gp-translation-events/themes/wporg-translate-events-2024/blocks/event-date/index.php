@@ -1,5 +1,12 @@
 <?php
+/**
+ * Registers the event-start block, which renders an event's start date and time.
+ *
+ * @package wporg-translate-events-2024
+ */
+
 namespace Wporg\TranslationEvents\Theme_2024;
+
 use Wporg\TranslationEvents\Translation_Events;
 
 register_block_type(
@@ -31,7 +38,7 @@ register_block_type(
 			}
 			$event_id = $block->context['postId'];
 			$event = Translation_Events::get_event_repository()->get_event( $event_id );
-			if ( ! $event ) {
+			if ( ! $event || $event->end()->is_open_ended() ) {
 				return '';
 			}
 			$end = $event->end()->format( 'F j, Y' );

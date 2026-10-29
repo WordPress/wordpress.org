@@ -21,13 +21,13 @@ $is_all_replies_view = bbp_get_view_id() === 'all-replies';
 	<?php if ( ! $is_all_replies_view ) { ?>
 		<li class="bbp-header">
 			<ul class="forum-titles">
-				<li class="bbp-topic-title"><?php esc_html_e( 'Topic', 'bbpress' ); ?></li>
-				<li class="bbp-topic-voice-count"><?php esc_html_e( 'Participants', 'bbpress' ); ?></li>
+				<li class="bbp-topic-title"><?php esc_html_e( 'Topic', 'wporg-forums' ); ?></li>
+				<li class="bbp-topic-voice-count"><?php esc_html_e( 'Participants', 'wporg-forums' ); ?></li>
 				<li class="bbp-topic-reply-count"><?php bbp_show_lead_topic()
-					? esc_html_e( 'Replies', 'bbpress' )
-					: esc_html_e( 'Posts',   'bbpress' );
+					? esc_html_e( 'Replies', 'wporg-forums' )
+					: esc_html_e( 'Posts',   'wporg-forums' );
 				?></li>
-				<li class="bbp-topic-freshness"><?php esc_html_e( 'Last Post', 'bbpress' ); ?></li>
+				<li class="bbp-topic-freshness"><?php esc_html_e( 'Last Post', 'wporg-forums' ); ?></li>
 			</ul>
 		</li>
 	<?php } ?>

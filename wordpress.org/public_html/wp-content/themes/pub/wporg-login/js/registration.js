@@ -43,20 +43,24 @@
 
 				e.preventDefault();
 
-				$this.closest( 'div.message' ).next('div.message.info').remove();
-
 				$.post(
 					wporg_registration.rest_url + '/resend-confirmation-email',
 					{
 						account: account,
 					},
 					function( datas ) {
-						$this.closest( 'div.message' ).after(
-							'<div class="message info"><p><span>' + datas + '</span></p></div>'
-						);
+						const content = `<div class="message info"><p><span>${ datas }</span></p></div>`;
+						const $message = $this.closest( 'div.message' );
+					
+						// On the pending-create page, we offer to resend the email.
+						// In that case, the resend button exists within the message div, so we replace it.
+						if ( $message.length) {
+							$message.replaceWith( content );
+						} else {
+							$this.before( content );
+						}
 					}
 				);
-
 			});
 
 			$loginForm.on( 'click', '.change-email', function( e ) {
@@ -64,6 +68,7 @@
 
 				$(this).remove();
 				$loginForm.find( '.login-email' ).removeClass( 'hidden' ).find( 'input' ).addClass( 'error' );
+				$loginForm.find( '.login-submit' ).removeClass( 'hidden' );
 			});
 
 			// Apply the input validation after initial blur, to avoid showing as invalid during initial edits.

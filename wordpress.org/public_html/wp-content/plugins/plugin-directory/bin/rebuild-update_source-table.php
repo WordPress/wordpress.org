@@ -45,6 +45,7 @@ if ( ! $slugs ) {
 }
 
 foreach ( $slugs as $i => $slug ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 	echo ++$i . '/' . count( $slugs ) . "\t" . $slug . "\n";
 
 	Jobs\API_Update_Updater::update_single_plugin( $slug );

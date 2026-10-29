@@ -199,13 +199,36 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme( $file_or_url ) {
-		$context = stream_context_create( array(
-			'http' => array(
-				'user_agent' => 'WordPress.org Plugin Readme Parser',
-			)
-		) );
+		$is_http = (bool) preg_match( '!^https?://!i', $file_or_url );
 
-		$contents = file_get_contents( $file_or_url, false, $context );
+		// Prefer wp_safe_remote_get for HTTP fetches — it has a 5s timeout, so a hung readme host can't stall queue() or the SVN watcher. Fall back to a no-timeout file_get_contents when WP isn't loaded (early bootstrap / standalone CLI) or for non-HTTP sources (local files, data URIs).
+		if ( $is_http && function_exists( 'wp_safe_remote_get' ) ) {
+			$response = wp_safe_remote_get(
+				$file_or_url,
+				array(
+					'user-agent' => 'WordPress.org Plugin Readme Parser',
+				)
+			);
+
+			if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) >= 400 ) {
+				return false;
+			}
+
+			$contents = wp_remote_retrieve_body( $response );
+		} else {
+			$context = stream_context_create( array(
+				'http' => array(
+					'user_agent' => 'WordPress.org Plugin Readme Parser',
+				),
+			) );
+
+			// Suppress warnings for the common 404 / unreachable-URL case; downstream callers see an empty parser.
+			$contents = @file_get_contents( $file_or_url, false, $context );
+		}
+
+		if ( ! is_string( $contents ) ) {
+			return false;
+		}
 
 		return $this->parse_readme_contents( $contents );
 	}
@@ -215,6 +238,11 @@ class Parser {
 	 * @return bool
 	 */
 	protected function parse_readme_contents( $contents ) {
+		// Belt-and-braces: external callers (or future code paths) shouldn't be able to fatal preg_match by passing a non-string.
+		if ( ! is_string( $contents ) ) {
+			return false;
+		}
+
 		$this->raw_contents = $contents;
 
 		if ( preg_match( '!!u', $contents ) ) {
@@ -339,13 +367,13 @@ class Parser {
 			$this->donate_link = $headers['donate_link'];
 		}
 		if ( ! empty( $headers['license'] ) ) {
-			// Handle the many cases of "License: GPLv2 - http://..."
+			// Handle "License: GPLv2 - http://..." and wrapped forms like "<http://...>" or "(http://...)".
 			if ( empty( $headers['license_uri'] ) && preg_match( '!(https?://\S+)!i', $headers['license'], $url ) ) {
-				$headers['license_uri'] = trim( $url[1], " -*\t\n\r\n(" );
-				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n(" );
+				$headers['license_uri'] = trim( $url[1], " -*\t\n\r\n()<>" );
+				$headers['license']     = trim( str_replace( $url[1], '', $headers['license'] ), " -*\t\n\r\n()<>" );
 			}
 
-			$this->license = $headers['license'];
+			$this->license = $this->sanitize_text( $headers['license'] );
 		}
 		if ( ! empty( $headers['license_uri'] ) ) {
 			$this->license_uri = $headers['license_uri'];
@@ -618,7 +646,8 @@ class Parser {
 
 		list( $key, $value ) = explode( ':', $line, 2 );
 		$key                 = strtolower( trim( $key, " \t*-\r\n" ) );
-		$value               = trim( $value, " \t*-\r\n" );
+		// Strip `<>` so the markdown autolink form `<https://example.com>` resolves like a bare URL.
+		$value               = trim( $value, " \t*-\r\n<>" );
 
 		if ( $only_valid && ! isset( $this->valid_headers[ $key ] ) ) {
 			return false;
@@ -628,12 +657,16 @@ class Parser {
 	}
 
 	/**
-	 * @access protected
+	 * Reduce readme text to the markup the directory accepts in a readme section.
+	 *
+	 * Public so that a value which stands in for a readme section (the plugin
+	 * file's Description header when there is no readme) can go through the same
+	 * list instead of carrying a copy of it.
 	 *
 	 * @param string $text
 	 * @return string
 	 */
-	protected function filter_text( $text ) {
+	public function filter_text( $text ) {
 		$text = trim( $text );
 
 		$allowed = array(
@@ -667,6 +700,10 @@ class Parser {
 		// TODO: make_clickable() will act inside shortcodes.
 		// $text = make_clickable( $text );
 		$text = wp_kses( $text, $allowed );
+
+		// Readme text has no use for HTML comments, and dropping them keeps
+		// comment syntax out of the fields that are later composed into markup.
+		$text = preg_replace( '#<!--.*?(?:-->|$)#s', '', $text );
 
 		// wpautop() will eventually replace all \n's with <br>s, and that isn't what we want (The text may be line-wrapped in the readme, we don't want that, we want paragraph-wrapped text)
 		// TODO: This incorrectly also applies within `<code>` tags which we don't want either.

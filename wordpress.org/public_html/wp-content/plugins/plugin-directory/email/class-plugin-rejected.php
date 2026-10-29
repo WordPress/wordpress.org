@@ -12,7 +12,7 @@ class Plugin_Rejected extends Markdown_Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( '%s has been rejected', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -20,7 +20,7 @@ class Plugin_Rejected extends Markdown_Base {
 		$placeholders = [
 			// Should be first, to allow placeholders in the rejection reasons too.
 			'###REASON###'          => $this->get_rejection_reason(),
-			'###NAME###'            => $this->plugin->post_title,
+			'###NAME###'            => $this->plugin_title(),
 			'###SLUG###'            => ( $this->args['slug'] ?? '' ) ?: $this->plugin->post_name,
 			'###SUBMISSION_DATE###' => $this->args['submission_date'],
 		];
@@ -68,6 +68,7 @@ If you want to finish your review, please do the following:
 
 - <strong>First</strong>, find the last email we sent you with our latest review, read that email thoroughly and <strong>fix the issues mentioned</strong>.
 - Once your plugin is corrected, you are ready to <a href='https://wordpress.org/plugins/developers/add/'>resubmit it</a> and <strong>reply to this email</strong> so we know you want to continue.
+- You will then have to <strong>wait</strong> your turn for the team to review your plugin again.
 
 We understand that sometimes emails get lost or mistakenly filed as spam, and it's entirely possible that you never received or seen our previous emails. If you can't find it, let us know and we'll send it to you again.
 
@@ -93,6 +94,25 @@ Please read this email in it's entirety. We know it's hurtful to be told we're n
 If you feel that we have, please reply to this email with your plugin zip attached, explain why, and we will re-review.
 
 We ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.",
+			'wporg-plugins'
+		);
+	}
+
+	public function reason_common_plugin() {
+		return __(
+			"We have rejected your plugin submission because it addresses a functionality (e.g., scroll to top, post duplication, maintenance mode, post view counter, log viewer, admin dashboard notes, image optimisation, etc) that is already widely available in the directory.
+
+The WordPress plugin ecosystem thrives on innovation, and we encourage you to explore its vast potential by creating unique solutions that fill unmet needs.
+
+Please consider developing plugins that offer fresh value to users. We'd be excited to review your plugin in the future!
+
+<strong>What to do next</strong>
+
+Don't worry! We encourage you to iterate and submit something new-WordPress's potential is limitless!
+
+Please do not resubmit the plugin, even if you believe we are incorrect.
+
+Instead, reply to this email and explain the situation so we can properly direct you forward. If you resubmit this plugin without replying and communicating with us first, your account will be suspended.",
 			'wporg-plugins'
 		);
 	}
@@ -184,6 +204,32 @@ We also do not accept 'translation' plugins, or copies of plugins that are in an
 Plugins with obfuscated (i.e. hidden or encrypted) code will never be accepted.
 
 If you've gotten all the way down here and still think we should be hosting your code, we ask you not resubmit the plugin, and reply to this email instead.",
+			'wporg-plugins'
+		);
+	}
+
+	/**
+	 * Returns the rejection email content for scraping.
+	 *
+	 * @return string
+	 */
+	public function reason_scraping() {
+		return __(
+			'Your plugin has been rejected because it retrieves or extracts content from third-party websites by scraping them.
+
+<strong>Why this is not permitted</strong>
+
+Plugin developers are responsible for ensuring that their plugins comply with the terms of use and licensing requirements of every third-party service or website they use. Content that is publicly available is not necessarily available for automated collection or reuse.
+
+The Plugin Directory guidelines require developers to comply with the terms of use for all third-party services and APIs. When the applicable terms or licensing cannot be validated, that content or service cannot be used.
+
+https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#2-developers-are-responsible-for-the-contents-and-actions-of-their-plugins
+
+<strong>What to do next</strong>
+
+Please do not resubmit this plugin before corresponding with us. If you believe this decision was made in error, reply to this email with an explanation of how your plugin obtains and uses the content, along with documentation showing that the website owner permits that use.
+
+If the issue can be resolved, we will advise you on the appropriate next steps. Resubmitting without first communicating with us may result in further action against your account.',
 			'wporg-plugins'
 		);
 	}
@@ -448,6 +494,38 @@ To safeguard the security of the WordPress ecosystem, it is best to anticipate a
 Because of those reasons, unless a submission demonstrates a solid understanding of the security and usage issues out of the gate, we reject them.
 
 If you've gotten all the way down here and still think we should be hosting your code, we ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.",
+			'wporg-plugins'
+		);
+	}
+
+	/**
+	 * Returns the rejection email content for remote administration.
+	 *
+	 * @return string
+	 */
+	public function reason_remote_admin() {
+		return __(
+			'Your plugin has been rejected because it lets an external service perform administrative actions on the sites it’s installed on, such as granting administrator access for support. Even when that access expires, this is a serious security risk.
+
+<strong>What to do next</strong>
+
+We know it’s hard to hear that we won’t host your code, so please read this email carefully.
+
+You’re welcome to submit a different plugin, but we don’t think this one is a good fit for the directory.
+
+If you have any questions, reply to this email. Otherwise, it’s okay to move on to something else.
+
+If you think we’ve made this decision in error, reply with a copy of your code attached and explain why.
+
+<strong>Why these kinds of plugins are not accepted</strong>
+
+Plugins that create users, connect to external services, or let other platforms administer a site are powerful, and incredibly dangerous. Building them safely takes a deep understanding of sanitization, security, and how they’ll be used, which takes years to master.
+
+A plugin that lets an outside service act as an administrator makes that service a single point of failure: if the service, or the credentials it holds, is ever compromised, so is every site that uses the plugin.
+
+To protect the WordPress ecosystem, we stop attack vectors like this before they reach users. Unless a submission shows a solid understanding of these security issues from the start, we don’t accept it.
+
+If you’ve read this far and still think we should host your code, please don’t resubmit the plugin. Reply to this email instead.',
 			'wporg-plugins'
 		);
 	}

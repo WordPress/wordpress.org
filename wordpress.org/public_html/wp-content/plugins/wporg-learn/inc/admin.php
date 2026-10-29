@@ -157,7 +157,7 @@ function render_workshop_list_table_columns( $column_name, $post_id ) {
 			echo esc_html( implode(
 				', ',
 				array_map(
-					function( $caption_lang ) {
+					function ( $caption_lang ) {
 						return get_locale_name_from_code( $caption_lang, 'english' );
 					},
 					$captions
@@ -245,10 +245,10 @@ function add_admin_list_table_filters( $post_type, $which ) {
 		return;
 	}
 
-	$audience    = filter_input( INPUT_GET, 'wporg_audience', FILTER_SANITIZE_STRING );
-	$language    = filter_input( INPUT_GET, 'language', FILTER_SANITIZE_STRING );
-	$level       = filter_input( INPUT_GET, 'wporg_experience_level', FILTER_SANITIZE_STRING );
-	$post_status = filter_input( INPUT_GET, 'post_status', FILTER_SANITIZE_STRING );
+	$audience    = sanitize_text_field( wp_unslash( $_GET['wporg_audience'] ?? '' ) );
+	$language    = sanitize_text_field( wp_unslash( $_GET['language'] ?? '' ) );
+	$level       = sanitize_text_field( wp_unslash( $_GET['wporg_experience_level'] ?? '' ) );
+	$post_status = sanitize_text_field( wp_unslash( $_GET['post_status'] ?? '' ) );
 
 	$available_audiences = get_available_taxonomy_terms( 'audience', $post_type, $post_status );
 	$available_levels    = get_available_taxonomy_terms( 'level', $post_type, $post_status );
@@ -325,9 +325,9 @@ function handle_admin_list_table_filters( WP_Query $query ) {
 		'edit-lesson' === $current_screen->id ||
 		'edit-course' === $current_screen->id
 	) {
-		$audience = filter_input( INPUT_GET, 'wporg_audience', FILTER_SANITIZE_STRING );
-		$language = filter_input( INPUT_GET, 'language', FILTER_SANITIZE_STRING );
-		$level    = filter_input( INPUT_GET, 'wporg_experience_level', FILTER_SANITIZE_STRING );
+		$audience = sanitize_text_field( wp_unslash( $_GET['wporg_audience'] ?? '' ) );
+		$language = sanitize_text_field( wp_unslash( $_GET['language'] ?? '' ) );
+		$level    = sanitize_text_field( wp_unslash( $_GET['wporg_experience_level'] ?? '' ) );
 
 		// Tax queries
 		$tax_query = $query->get( 'tax_query', array() );
@@ -573,4 +573,44 @@ function add_sensei_course_custom_navigation_tabs( $tabs ) {
 	);
 
 	return $tabs;
+}
+
+// Activity Kit admin hooks.
+add_action( 'admin_menu', __NAMESPACE__ . '\add_activity_kit_stats_submenu' );
+add_action( 'admin_menu', __NAMESPACE__ . '\remove_activity_kit_taxonomy_submenus', 99 );
+
+/**
+ * Remove shared taxonomy submenu items from under Activity Kits.
+ * Level and Topic are shared across post types; editing them from here is confusing.
+ */
+function remove_activity_kit_taxonomy_submenus() {
+	global $submenu;
+
+	$parent = 'edit.php?post_type=activity_kit';
+	if ( ! isset( $submenu[ $parent ] ) ) {
+		return;
+	}
+
+	foreach ( $submenu[ $parent ] as $key => $item ) {
+		if ( isset( $item[2] ) && (
+			false !== strpos( $item[2], 'taxonomy=level' ) ||
+			false !== strpos( $item[2], 'taxonomy=topic' )
+		) ) {
+			unset( $submenu[ $parent ][ $key ] );
+		}
+	}
+}
+
+/**
+ * Add a Stats submenu page under the Activity Kits post type menu.
+ */
+function add_activity_kit_stats_submenu() {
+	add_submenu_page(
+		'edit.php?post_type=activity_kit',
+		__( 'Activity Kit Stats', 'wporg-learn' ),
+		__( 'Stats', 'wporg-learn' ),
+		'manage_options',
+		'activity-kit-stats',
+		'WPOrg_Learn\Activity_Kit_Stats\render_page'
+	);
 }

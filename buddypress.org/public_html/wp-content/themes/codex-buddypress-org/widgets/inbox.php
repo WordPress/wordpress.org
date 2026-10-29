@@ -8,8 +8,9 @@ class BPOrg_Inbox_Widget extends WP_Widget {
 		global $bp;
 
 	    extract( $args );
-		echo $before_widget;
-		echo $before_title . __( 'Inbox', 'bp-follow' ) . ' &middot <a href="' . esc_url( $bp->loggedin_user->domain . 'messages/inbox/' ) . '">View All</a>' . $after_title; ?>
+		echo $before_widget; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $before_title . esc_html__( 'Inbox', 'bp-follow' ) . ' &middot <a href="' . esc_url( $bp->loggedin_user->domain . 'messages/inbox/' ) . '">View All</a>' . $after_title; ?>
 
 		<?php if ( bp_has_message_threads( 'per_page=5&max=5' ) ) : ?>
 
@@ -20,7 +21,7 @@ class BPOrg_Inbox_Widget extends WP_Widget {
 						<?php bp_message_thread_avatar() ?>
 						<div class="details">
 							<a class="title" href="<?php bp_message_thread_view_link() ?>" title="<?php esc_attr_e( "View Message", "buddypress" ); ?>"><?php bp_message_thread_subject() ?></a>
-							<div class="meta"><?php _e( 'From:', 'buddypress' ); ?> <?php bp_message_thread_from() ?> &middot; <?php bp_message_thread_last_post_date() ?></div>
+							<div class="meta"><?php esc_html_e( 'From:', 'buddypress' ); ?> <?php bp_message_thread_from(); ?> &middot; <?php bp_message_thread_last_post_date(); ?></div>
 						</div>
 					</li>
 
@@ -33,7 +34,10 @@ class BPOrg_Inbox_Widget extends WP_Widget {
 			</div>
 		<?php endif;?>
 
-		<?php echo $after_widget; ?>
+		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Registered sidebar wrapper markup.
+		echo $after_widget;
+		?>
 
 	<?php
 	}

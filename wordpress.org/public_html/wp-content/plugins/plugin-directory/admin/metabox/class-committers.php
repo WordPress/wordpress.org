@@ -115,6 +115,6 @@ class Committers {
 
 		$result = Tools::revoke_plugin_committer( $plugin_slug, $committer );
 
-		wp_die( $result );
+		wp_die( esc_html( $result ) );
 	}
 }

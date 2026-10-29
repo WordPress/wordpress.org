@@ -1,4 +1,10 @@
 <?php
+/**
+ * Title: Local Nav
+ * Slug: wporg-support/local-nav
+ * Inserter: no
+ */
+
 if ( function_exists( 'register_block_pattern' ) ) {
 	register_block_pattern(
 		'wporg-support/local-nav',

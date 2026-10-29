@@ -1,3 +1,11 @@
+<?php
+/**
+ * Notice shown when a forum view has no topics.
+ *
+ * @package bbPress
+ */
+
+?>
 <div class="bbp-template-notice">
-	<p><?php _e( 'No topics found. Select another view or start a new post.', 'wporg-forums' ); ?></p>
+	<p><?php esc_html_e( 'No topics found. Select another view or start a new post.', 'wporg-forums' ); ?></p>
 </div>

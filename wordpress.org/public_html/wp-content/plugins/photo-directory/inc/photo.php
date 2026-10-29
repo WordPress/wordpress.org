@@ -206,7 +206,13 @@ class Photo {
 			return false;
 		}
 
-		list( , , $image_type ) = wp_getimagesize( $file );
+		$image_size = wp_getimagesize( $file );
+
+		if ( false === $image_size ) {
+			return false;
+		}
+
+		list( , , $image_type ) = $image_size;
 
 		/*
 		 * EXIF contains a bunch of data we'll probably never need formatted in ways
@@ -384,14 +390,14 @@ $exif = self::exif_read_data_as_data_stream( $file );
 		}
 
 		foreach ( array( 'title', 'caption', 'credit', 'copyright', 'camera', 'iso' ) as $key ) {
-			if ( $meta[ $key ] && ! seems_utf8( $meta[ $key ] ) ) {
-				$meta[ $key ] = utf8_encode( $meta[ $key ] );
+			if ( $meta[ $key ] && ! wp_is_valid_utf8( $meta[ $key ] ) ) {
+				$meta[ $key ] = mb_convert_encoding( $meta[ $key ], 'UTF-8', 'ISO-8859-1' );
 			}
 		}
 
 		foreach ( $meta['keywords'] as $key => $keyword ) {
-			if ( ! seems_utf8( $keyword ) ) {
-				$meta['keywords'][ $key ] = utf8_encode( $keyword );
+			if ( ! wp_is_valid_utf8( $keyword ) ) {
+				$meta['keywords'][ $key ] = mb_convert_encoding( $keyword, 'UTF-8', 'ISO-8859-1' );
 			}
 		}
 
@@ -817,10 +823,10 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	 *
 	 * @param int   $post_id          The ID of the photo post type post.
 	 * @param array $skip_likelihoods Likelihoods to skip due to not being of concern.
-	 *                                Default ['very_unlikely', 'unlikely'].
+	 *                                Default ['very_unlikely', 'unlikely', 'possible'].
 	 * @return array
 	 */
-	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely' ] ) {
+	public static function get_filtered_moderation_assessment( $post_id, $skip_likelihoods = [ 'very_unlikely', 'unlikely', 'possible' ] ) {
 		$flags = [];
 		$safe_search_flags = self::get_raw_moderation_assessment( $post_id );
 
@@ -933,7 +939,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 
 			switch ( $key ) {
 				case 'aperture':
-					$value = 'f/' . $value;
+					$value = 'ƒ/' . $value;
 					break;
 				case 'created_timestamp':
 					$label = 'Created';
@@ -950,10 +956,25 @@ $exif = self::exif_read_data_as_data_stream( $file );
 					break;
 				case 'iso':
 					$label = 'ISO';
+					// Cast to discard the arbitrary string EXIF can supply for this tag.
+					$value = (int) $value;
+					if ( 0 >= $value ) {
+						continue 2;
+					}
 					break;
 				case 'shutter_speed':
 					$label = 'Shutter Speed';
-					$value = '1/' . (int)( 1.0 / (float) $value );
+
+					if ( ! is_numeric( $value ) || 0 >= $value ) {
+						continue 2;
+					}
+
+					// Fractions up to 1/4s (with a float margin), seconds above.
+					if ( $value < 0.25001 ) {
+						$value = '1/' . (int) round( 1 / $value );
+					} else {
+						$value = rtrim( rtrim( number_format( (float) $value, 1, '.', '' ), '0' ), '.' ) . 's';
+					}
 					break;
 			}
 
@@ -967,6 +988,20 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	}
 
 	/**
+	 * Determines if a photo has EXIF data.
+	 *
+	 * @param array $exif_keys Optional. EXIF keys to check for. An empty array will
+	 *                         check if any EXIF data exists. Default empty array.
+	 * @param int   $post_id   Optional. Post ID. Default null, indicating the current post.
+	 * @return bool True if the photo has EXIF data, else false.
+	 */
+	public static function has_exif( $exif_keys = [], $post_id = null ) {
+		$post_id = $post_id ?: get_the_ID();
+		$exif = self::get_exif( $post_id, $exif_keys );
+		return ! empty( $exif );
+	}
+
+	/**
 	 * Strips markups from text and UTF8 encodes it if it appears to be UTF8.
 	 *
 	 * @param string $text Text to strip of tags and UTF8 encode.
@@ -975,8 +1010,8 @@ $exif = self::exif_read_data_as_data_stream( $file );
 	public static function _strip_and_utf8_encode( $text ) {
 		$text = wp_kses( $text, 'strip' );
 
-		if ( $text && ! seems_utf8( $text ) ) {
-			$text = utf8_encode( $text );
+		if ( $text && ! wp_is_valid_utf8( $text ) ) {
+			$text = mb_convert_encoding( $text, 'UTF-8', 'ISO-8859-1' );
 		}
 
 		return $text;
@@ -1104,7 +1139,7 @@ $exif = self::exif_read_data_as_data_stream( $file );
 			$link = sprintf(
 				'<span id="photo-moderator"><a href="%s">%s</a></span>',
 				esc_url( 'https://profiles.wordpress.org/' . $moderator->user_nicename . '/' ),
-				sanitize_text_field( $moderator->display_name )
+				esc_html( $moderator->display_name )
 			);
 		}
 

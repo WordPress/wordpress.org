@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Theme\Plugins_2024\PluginCard;
 
 use WordPressdotorg\Plugin_Directory\Template;
+use function WordPressdotorg\Plugin_Directory\Theme\get_plugin_excerpt_text;
 
 $post = get_post();
 // Simulates wporg/link-wrapper block until this is migrated to a block, or it supports href=permalink.
@@ -10,7 +11,7 @@ do_blocks( '<!-- wp:wporg/link-wrapper /-->' ); // Import the styles
 <div class="plugin-card wp-block-wporg-link-wrapper is-style-no-underline">
 	<div class="entry">
 		<div class="entry-thumbnail">
-			<?php echo Template::get_plugin_icon( get_post(), 'html' ); ?>
+			<?php echo Template::get_plugin_icon( get_post(), 'html' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() output and Template::get_plugin_icon() markup; escaping would print the markup. ?>
 		</div>
 
 		<header class="entry-header">
@@ -20,14 +21,14 @@ do_blocks( '<!-- wp:wporg/link-wrapper /-->' ); // Import the styles
 		<?php echo wp_kses_post( Template::get_star_rating( $post, false ) ); ?>
 
 		<div class="entry-excerpt">
-			<?php the_excerpt(); ?>
+			<p><?php echo esc_html( get_plugin_excerpt_text() ); ?></p>
 		</div><!-- .entry-excerpt -->
 	</div>
 
 	<footer>
 		<span class="plugin-author">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M15.5 9.5a1 1 0 100-2 1 1 0 000 2zm0 1.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm-2.25 6v-2a2.75 2.75 0 00-2.75-2.75h-4A2.75 2.75 0 003.75 15v2h1.5v-2c0-.69.56-1.25 1.25-1.25h4c.69 0 1.25.56 1.25 1.25v2h1.5zm7-2v2h-1.5v-2c0-.69-.56-1.25-1.25-1.25H15v-1.5h2.5A2.75 2.75 0 0120.25 15zM9.5 8.5a1 1 0 11-2 0 1 1 0 012 0zm1.5 0a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" fill-rule="evenodd"></path></svg>
-			<span><?php echo esc_html( strip_tags( get_post_meta( get_the_ID(), 'header_author', true ) ) ?: get_the_author() ); ?></span>
+			<span><?php the_author(); ?></span>
 		</span>
 		<span class="active-installs">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path fill-rule="evenodd" d="M11.25 5h1.5v15h-1.5V5zM6 10h1.5v10H6V10zm12 4h-1.5v6H18v-6z" clip-rule="evenodd"></path></svg>

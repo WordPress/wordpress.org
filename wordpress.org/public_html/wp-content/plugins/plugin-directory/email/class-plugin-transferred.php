@@ -10,7 +10,7 @@ class Plugin_Transferred extends Base {
 		return sprintf(
 			/* translators: 1: Plugin Name */
 			__( '%s has been transferred', 'wporg-plugins' ),
-			$this->plugin->post_title
+			$this->plugin_title()
 		);
 	}
 
@@ -24,7 +24,7 @@ If you believe this to be in error, please contact %5$s immediately.', 'wporg-pl
 			$email_text,
 			$this->user_text( wp_get_current_user() ),
 			gmdate( 'Y-m-d H:i:s \G\M\T' ),
-			$this->plugin->post_title,
+			$this->plugin_title(),
 			$this->user_text( $this->args['owner'] ) . ' (' . $this->args['owner']->user_login . ')',
 			PLUGIN_TEAM_EMAIL
 		);

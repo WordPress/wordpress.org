@@ -27,7 +27,7 @@ if ( ! is_array( $default_sort ) ) {
 	);
 }
 ?>
-<h2><?php _e( 'Your Settings', 'glotpress' ); ?></h2>
+<h2><?php esc_html_e( 'Your Settings', 'glotpress' ); ?></h2>
 <form action="" method="post">
 	<?php require_once __DIR__ . '/settings-edit.php'; ?>
 	<br>

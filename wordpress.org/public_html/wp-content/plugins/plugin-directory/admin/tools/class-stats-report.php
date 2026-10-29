@@ -1,7 +1,9 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Tools;
 use WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\MU_Plugins\Utilities\FreeScout;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
+use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
 /**
  * All functionality related to Stats_Report Tool.
@@ -80,14 +82,14 @@ class Stats_Report {
 	 *     @type array $in_queue_pending_why                  The number of pending plugins currently in the queue, broken down by whom we're waiting on.
 	 *     @type int   $in_queue_from_time_window             The number of plugins currently in the queue submitted during the specified time window.
 	 *     @type int   $in_queue_old                          The number of plugins currently in the queue that are older than "recently".
-	 *     @type int   $helpscout_queue_total_conversations   The number of ongoing Help Scout conversations.
-	 *     @type int   $helpscout_queue_new_conversations     The number of new Help Scout conversations.
-	 *     @type int   $helpscout_queue_customers             The number of unique Plugin authors contacted.
-	 *     @type int   $helpscout_queue_conversations_per_day The number of Help Scout conversations per day.
-	 *     @type int   $helpscout_queue_busiest_day           The busiest day in the Help Scout queue.
-	 *     @type int   $helpscout_queue_messages_received     The number of emails received in HelpScout.
-	 *     @type int   $helpscout_queue_replies_sent          The number of replies sent to emails.
-	 *     @type int   $helpscout_queue_emails_created        The number of new outgoing conversations created.
+	 *     @type int    $email_queue_total_conversations   The number of ongoing conversations in the helpdesk.
+	 *     @type int    $email_queue_new_conversations     The number of new conversations in the helpdesk.
+	 *     @type int    $email_queue_customers             The number of unique Plugin authors contacted.
+	 *     @type int    $email_queue_conversations_per_day The number of conversations per day.
+	 *     @type string $email_queue_busiest_day           The busiest day in the helpdesk's queue.
+	 *     @type int    $email_queue_messages_received     The number of emails received.
+	 *     @type int    $email_queue_replies_sent          The number of replies sent to emails.
+	 *     @type int    $email_queue_emails_created        The number of new outgoing conversations created; Help Scout only.
 	 * }
 	 */
 	public function get_stats( $args = array() ) {
@@ -153,29 +155,31 @@ class Stats_Report {
 			"SELECT COUNT(*) FROM $wpdb->posts WHERE `post_type` = 'plugin' AND `post_status` = 'pending'"
 		);
 
-		// # Break down the plugins in the queue, based on if we're still waiting on a reply.
-		$stats['in_queue_pending_why'] = $wpdb->get_row( $wpdb->prepare(
-			'SELECT
-				SUM( IF( active = 0 AND closed > 0, 1, 0 ) ) AS `author`,
-				SUM( IF( active > 0, 1, 0 ) ) AS `reviewer`,
-				SUM( IF( active = 0 AND closed = 0, 1, 0 ) ) AS `noemail`
-			FROM (
-				SELECT
-					p.post_name,
-					SUM( IF( emails.status = "closed", 1, 0 ) ) AS `closed`,
-					SUM( IF( emails.status = "active", 1, 0 ) ) AS `active`
-				FROM %i p
-					LEFT JOIN %i meta ON meta.meta_key = "plugins" AND meta.meta_value = p.post_name
-					LEFT JOIN %i emails ON meta.helpscout_id = emails.id
-				WHERE p.post_status = "pending"
-				GROUP BY p.ID
-			) subquery',
-			$wpdb->posts,
-			"{$wpdb->base_prefix}helpscout_meta",
-			"{$wpdb->base_prefix}helpscout",
-		), ARRAY_A );
+		// Break down the plugins in the queue by whom we're waiting on; needs the helpscout tables, which either helpdesk fills.
+		if ( Helpdesk::is_freescout() || defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) {
+			$stats['in_queue_pending_why'] = $wpdb->get_row( $wpdb->prepare(
+				'SELECT
+					SUM( IF( active = 0 AND closed > 0, 1, 0 ) ) AS `author`,
+					SUM( IF( active > 0, 1, 0 ) ) AS `reviewer`,
+					SUM( IF( active = 0 AND closed = 0, 1, 0 ) ) AS `noemail`
+				FROM (
+					SELECT
+						p.post_name,
+						SUM( IF( emails.status = "closed", 1, 0 ) ) AS `closed`,
+						SUM( IF( emails.status = "active", 1, 0 ) ) AS `active`
+					FROM %i p
+						LEFT JOIN %i meta ON meta.meta_key = "plugins" AND meta.meta_value = p.post_name
+						LEFT JOIN %i emails ON meta.helpscout_id = emails.id
+					WHERE p.post_status = "pending"
+					GROUP BY p.ID
+				) subquery',
+				$wpdb->posts,
+				"{$wpdb->base_prefix}helpscout_meta",
+				"{$wpdb->base_prefix}helpscout",
+			), ARRAY_A );
 
-		$stats['in_queue_pending_why'] = array_map( 'intval', $stats['in_queue_pending_why'] );
+			$stats['in_queue_pending_why'] = array_map( 'intval', $stats['in_queue_pending_why'] ?? [] );
+		}
 
 		// # of plugins currently in the queue (new + pending)
 		$stats['in_queue'] = $stats['in_queue_new'] + $stats['in_queue_pending'];
@@ -196,37 +200,79 @@ class Stats_Report {
 		) );
 
 		// --------------
-		// Help Scout Queue
+		// Email Queue
 		// --------------
 
-		$start_datetime = gmdate( 'Y-m-d\T00:00:00\Z', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) );
-		$end_datetime   = gmdate( 'Y-m-d\T23:59:59\Z', strtotime( $args['date'] ) );
+		if ( Helpdesk::is_freescout() ) {
+			$stats = array_merge( $stats, $this->get_freescout_queue_stats( $args ) );
+		} elseif ( defined( 'HELPSCOUT_PLUGINS_MAILBOXID' ) ) {
+			$start_datetime = gmdate( 'Y-m-d\T00:00:00\Z', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) );
+			$end_datetime   = gmdate( 'Y-m-d\T23:59:59\Z', strtotime( $args['date'] ) );
 
-		$api_payload = [
-			'start'     => $start_datetime,
-			'end'       => $end_datetime,
-			'mailboxes' => HELPSCOUT_PLUGINS_MAILBOXID,
-		];
-		
-		$company_report  = HelpScout::api( '/v2/reports/company', $api_payload );
-		$mailbox_overall = HelpScout::api( '/v2/reports/conversations', $api_payload );
-		$email_report    = HelpScout::api( '/v2/reports/email', $api_payload );
+			$api_payload = [
+				'start'     => $start_datetime,
+				'end'       => $end_datetime,
+				'mailboxes' => HELPSCOUT_PLUGINS_MAILBOXID,
+			];
 
-		// If any of the API's are unavailable, make it obvious that the requests have failed, but returning 0's for everything.
-		if ( ! $company_report || ! $mailbox_overall || ! $email_report ) {
-			$company_report = $mailbox_overall = $email_report = false;
+			$company_report  = HelpScout::api( '/v2/reports/company', $api_payload );
+			$mailbox_overall = HelpScout::api( '/v2/reports/conversations', $api_payload );
+			$email_report    = HelpScout::api( '/v2/reports/email', $api_payload );
+
+			// If any of the API's are unavailable, make it obvious that the requests have failed, but returning 0's for everything.
+			if ( ! $company_report || ! $mailbox_overall || ! $email_report ) {
+				$company_report = $mailbox_overall = $email_report = false;
+			}
+
+			// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Help Scout's API.
+			$stats['email_queue_total_conversations']   = $mailbox_overall->current->totalConversations ?? 0;
+			$stats['email_queue_new_conversations']     = $mailbox_overall->current->newConversations ?? 0;
+			$stats['email_queue_customers']             = $mailbox_overall->current->customers ?? 0;
+			$stats['email_queue_conversations_per_day'] = $mailbox_overall->current->conversationsPerDay ?? 0;
+			$stats['email_queue_busiest_day']           = gmdate( 'l', strtotime( 'Sunday +' . ( $mailbox_overall->busiestDay->day ?? 0 ) . ' days' ) ); // Hacky? but works.
+			$stats['email_queue_messages_received']     = $mailbox_overall->current->messagesReceived ?? 0;
+			$stats['email_queue_replies_sent']          = $company_report->current->totalReplies;
+			$stats['email_queue_emails_created']        = $email_report->current->volume->emailsCreated ?? 0;
+			// phpcs:enable
 		}
 
-		$stats['helpscout_queue_total_conversations']     = $mailbox_overall->current->totalConversations ?? 0;
-		$stats['helpscout_queue_new_conversations']       = $mailbox_overall->current->newConversations ?? 0;
-		$stats['helpscout_queue_customers']               = $mailbox_overall->current->customers ?? 0;
-		$stats['helpscout_queue_conversations_per_day']   = $mailbox_overall->current->conversationsPerDay ?? 0;
-		$stats['helpscout_queue_busiest_day']             = gmdate( 'l', strtotime( 'Sunday +' . ( $mailbox_overall->busiestDay->day ?? 0 ) . ' days' ) ); // Hacky? but works
-		$stats['helpscout_queue_messages_received']       = $mailbox_overall->current->messagesReceived ?? 0;
-		$stats['helpscout_queue_replies_sent']            = $company_report->current->totalReplies;
-		$stats['helpscout_queue_emails_created']          = $email_report->current->volume->emailsCreated ?? 0;
-
 		return $stats;
+	}
+
+	/**
+	 * Gets the Plugins mailbox's queue stats from FreeScout's Reports module, through its API.
+	 *
+	 * FreeScout has no count of outgoing conversations, so there's no `email_queue_emails_created`.
+	 *
+	 * @param array $args The stats' date, and number of days before it.
+	 * @return array The queue stats, see get_stats(); zeros if FreeScout's reports couldn't be fetched.
+	 */
+	protected function get_freescout_queue_stats( $args ) {
+		$filters = array(
+			'from' => gmdate( 'Y-m-d', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) ),
+			'to'   => gmdate( 'Y-m-d', strtotime( $args['date'] ) ),
+		);
+
+		$conversations = FreeScout::report( 'conversations', Helpdesk::freescout_mailbox_id(), $filters );
+		$productivity  = FreeScout::report( 'productivity', Helpdesk::freescout_mailbox_id(), $filters );
+
+		// All zeros, so a failed request is obvious.
+		if ( is_wp_error( $conversations ) || is_wp_error( $productivity ) || ! isset( $conversations['metrics'], $productivity['metrics'] ) ) {
+			$conversations = array();
+			$productivity  = array();
+		}
+
+		$metrics = $conversations['metrics'] ?? array();
+
+		return array(
+			'email_queue_total_conversations'   => (int) ( $metrics['total']['value'] ?? 0 ),
+			'email_queue_new_conversations'     => (int) ( $metrics['new']['value'] ?? 0 ),
+			'email_queue_customers'             => (int) ( $metrics['customers']['value'] ?? 0 ),
+			'email_queue_conversations_per_day' => (int) ( $metrics['conv_day']['value'] ?? 0 ),
+			'email_queue_busiest_day'           => (string) ( $metrics['busy_day']['value'] ?? '' ),
+			'email_queue_messages_received'     => (int) ( $metrics['messages']['value'] ?? 0 ),
+			'email_queue_replies_sent'          => (int) ( $productivity['metrics']['replies']['value'] ?? 0 ),
+		);
 	}
 
 	public function get_user_stats( $args = array() ) {
@@ -303,16 +349,22 @@ class Stats_Report {
 			$stats['all-hs-warning'] = true;
 		}
 
+		// FreeScout's counterpart: all mailboxes when HelpScout's are, otherwise the plugins mailbox.
+		$email_field_prefix = 'hs-' === $stats_field_prefix ? 'email-' : 'email-plugins-';
+
 		$emails = $wpdb->get_results( $wpdb->prepare(
 			"SELECT `name`, `value`, SUM(views) AS count
 			FROM %i
-			WHERE `name` IN( %s, %s )
+			WHERE `name` IN( %s, %s, %s, %s )
 				AND `value` IN( {$reviewer_nicenames_list} )
 				AND `date` > %s
 			GROUP BY `name`, `value`",
 			'stats_extras',
 			$stats_field_prefix . 'total',
 			$stats_field_prefix . 'replies',
+			// FreeScout stats, see api.wordpress.org/public_html/dotorg/freescout/webhook.php.
+			$email_field_prefix . 'total',
+			$email_field_prefix . 'replies',
 			$stats['start_date']
 		) );
 
@@ -320,7 +372,7 @@ class Stats_Report {
 			$user  = get_user_by( 'slug', $row->value );
 			$field = str_ends_with( $row->name, '-total' ) ? 'Email Actions' : 'Email Replies';
 			$stats['data'][ $user->ID ] ??= [];
-			$stats['data'][ $user->ID ][ $field ] = $row->count;
+			$stats['data'][ $user->ID ][ $field ] = ( $stats['data'][ $user->ID ][ $field ] ?? 0 ) + $row->count;
 		}
 
 		uasort( $stats['data'], function( $a, $b ) {
@@ -360,44 +412,47 @@ class Stats_Report {
 
 		<div class="wrap stats-report">
 
-		<h1><?php _e( 'Plugin Repository and email Stats Report', 'wporg-plugins' ); ?></h1>
+		<h1><?php esc_html_e( 'Plugin Repository and email Stats Report', 'wporg-plugins' ); ?></h1>
 
 		<form method="get">
 		<input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>"/>
 		<table class="form-table"><tbody>
-		<tr><th scope="row"><label for="date"><?php _e( 'Date', 'wporg-plugins' ); ?></label></th><td>
+		<tr><th scope="row"><label for="date"><?php esc_html_e( 'Date', 'wporg-plugins' ); ?></label></th><td>
 		<input name="date" type="text" id="date" value="<?php echo esc_attr( $args['date'] ); ?>" class="text">
 		<p>
 		<?php
 			/* translators: %s: today's date */
 			printf(
-				__( 'The day up to which stats are to be gathered. In YYYY-MM-DD format. Defaults to today (%s).', 'wporg-plugins' ),
+				/* translators: %s: Today's date. */
+				esc_html__( 'The day up to which stats are to be gathered. In YYYY-MM-DD format. Defaults to today (%s).', 'wporg-plugins' ),
 				esc_html( $date )
 			);
 		?>
 		</p>
 		</td></tr>
 
-		<tr><th scope="row"><label for="days"><?php _e( 'Number of days', 'wporg-plugins' ); ?></label></th><td>
+		<tr><th scope="row"><label for="days"><?php esc_html_e( 'Number of days', 'wporg-plugins' ); ?></label></th><td>
 		<input name="days" type="text" id="days" value="<?php echo esc_attr( $args['num_days'] ); ?>" class="small-text">
 		<p>
 		<?php
 			/* translators: %d: 7 */
 			printf(
-				__( 'The number of days before "Date" to include in stats. Default is %d.', 'wporg-plugins' ),
+				/* translators: %d: Default number of days. */
+				esc_html__( 'The number of days before "Date" to include in stats. Default is %d.', 'wporg-plugins' ),
 				7
 			);
 		?>
 		</p>
 		</td></tr>
 
-		<tr><th scope="row"><label for="recentdays"><?php _e( '"Recent" number of days', 'wporg-plugins' ); ?></label></th><td>
+		<tr><th scope="row"><label for="recentdays"><?php esc_html_e( '"Recent" number of days', 'wporg-plugins' ); ?></label></th><td>
 		<input name="recentdays" type="text" id="recentdays" value="<?php echo esc_attr( $args['recentdays'] ); ?>" class="small-text">
 		<p>
 		<?php
 			/* translators: %d: 7 */
 			printf(
-				__( 'The number of days before today to consider as being "recent" (stats marked with **). Default is %d.', 'wporg-plugins' ),
+				/* translators: %d: Default number of days. */
+				esc_html__( 'The number of days before today to consider as being "recent" (stats marked with **). Default is %d.', 'wporg-plugins' ),
 				7
 			);
 		?>
@@ -408,13 +463,14 @@ class Stats_Report {
 		<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="<?php esc_attr_e( 'Submit', 'wporg-plugins' ); ?>"></p>
 		</form>
 
-		<h2><?php _e( 'Stats', 'wporg-plugins' ); ?></h2>
+		<h2><?php esc_html_e( 'Stats', 'wporg-plugins' ); ?></h2>
 
 		<p>
 		<?php
 			/* translators: 1: number of days, 2: selected date, 3: number of most recent days */
 			printf(
-				__( 'Displaying stats for the %1$d days preceding %2$s (and other stats for the %3$d most recent days).', 'wporg-plugins' ),
+				/* translators: 1: Number of days, 2: Date, 3: Number of recent days. */
+				esc_html__( 'Displaying stats for the %1$d days preceding %2$s (and other stats for the %3$d most recent days).', 'wporg-plugins' ),
 				esc_html( $stats['num_days'] ),
 				esc_html( $stats['date'] ),
 				esc_html( $stats['recentdays'] )
@@ -422,14 +478,15 @@ class Stats_Report {
 		?>
 		</p>
 
-		<h3><?php _e( 'Plugin Status Change Stats', 'wporg-plugins' ); ?></h3>
+		<h3><?php esc_html_e( 'Plugin Status Change Stats', 'wporg-plugins' ); ?></h3>
 
 		<ul style="font-family:Courier New;">
 			<li>
 			<?php
 				/* translators: %d: number of requested plugins */
 				printf(
-					__( 'Plugins requested : %d', 'wporg-plugins' ),
+					/* translators: %d: Number of plugins. */
+					esc_html__( 'Plugins requested : %d', 'wporg-plugins' ),
 					esc_html( $stats['plugin_new'] )
 				);
 			?>
@@ -438,7 +495,8 @@ class Stats_Report {
 			<?php
 				/* translators: %s: number of rejected plugins */
 				printf(
-					__( 'Plugins rejected : %s', 'wporg-plugins' ),
+					/* translators: %s: Number of plugins. */
+					esc_html__( 'Plugins rejected : %s', 'wporg-plugins' ),
 					esc_html( $stats['plugin_reject'] )
 				);
 			?>
@@ -447,7 +505,8 @@ class Stats_Report {
 			<?php
 				/* translators: %s: number of closed plugins */
 				printf(
-					__( 'Plugins closed : %s', 'wporg-plugins' ),
+					/* translators: %s: Number of plugins. */
+					esc_html__( 'Plugins closed : %s', 'wporg-plugins' ),
 					esc_html( $stats['plugin_delist'] )
 				);
 				$reasons = array();
@@ -455,7 +514,7 @@ class Stats_Report {
 					echo '<ul>';
 					foreach ( $stats['plugin_delist_reasons'] as $reason => $number ) {
 						$reason = Template::get_close_reasons()[ $reason ];
-						echo "<li>&nbsp;&nbsp;{$reason}: {$number}</li>";
+						echo '<li>&nbsp;&nbsp;' . esc_html( $reason ) . ': ' . esc_html( $number ) . '</li>';
 					}
 					echo '</ul>';
 				}
@@ -465,21 +524,23 @@ class Stats_Report {
 			<?php
 				/* translators: %s: number of approved plugins */
 				printf(
-					__( 'Plugins approved : %s', 'wporg-plugins' ),
+					/* translators: %s: Number of plugins. */
+					esc_html__( 'Plugins approved : %s', 'wporg-plugins' ),
 					esc_html( $stats['plugin_approve'] )
 				);
 			?>
 			</li>
 		</ul>
 
-		<h3><?php _e( 'Plugin Queue Stats (current)', 'wporg-plugins' ); ?></h3>
+		<h3><?php esc_html_e( 'Plugin Queue Stats (current)', 'wporg-plugins' ); ?></h3>
 
 		<ul style="font-family:Courier New;">
 			<li>
 			<?php
 				/* translators: %d: number of plugins in the queue */
 				printf(
-					__( 'Plugins in the queue (new and pending)* : %d', 'wporg-plugins' ),
+					/* translators: %d: Number of plugins. */
+					esc_html__( 'Plugins in the queue (new and pending)* : %d', 'wporg-plugins' ),
 					esc_html( $stats['in_queue'] )
 				);
 			?>
@@ -488,7 +549,8 @@ class Stats_Report {
 			<?php
 				/* translators: 1: number of most recent days, 2: number of older plugins in the queue */
 				printf(
-					__( '&rarr; (older than %1$d days ago)** : %2$d', 'wporg-plugins' ),
+					/* translators: 1: Number of days, 2: Number of plugins. */
+					esc_html__( '&rarr; (older than %1$d days ago)** : %2$d', 'wporg-plugins' ),
 					esc_html( $stats['recentdays'] ),
 					esc_html( $stats['in_queue_old'] )
 				);
@@ -498,7 +560,8 @@ class Stats_Report {
 			<?php
 				/* translators: 1: start date, 2: end date, 3: number of plugins in the queue within defined time window */
 				printf(
-					__( '&rarr; (%1$s - %2$s) : %3$d', 'wporg-plugins' ),
+					/* translators: 1: Start date, 2: End date, 3: Number of plugins. */
+					esc_html__( '&rarr; (%1$s - %2$s) : %3$d', 'wporg-plugins' ),
 					esc_html( $start_date ),
 					esc_html( $stats['date'] ),
 					esc_html( $stats['in_queue_from_time_window'] )
@@ -509,7 +572,8 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of new plugins */
 				printf(
-					__( '&rarr; (new; not processed or replied to yet)* : %d', 'wporg-plugins' ),
+					/* translators: %d: Number of plugins. */
+					esc_html__( '&rarr; (new; not processed or replied to yet)* : %d', 'wporg-plugins' ),
 					esc_html( $stats['in_queue_new'] )
 				);
 			?>
@@ -518,7 +582,8 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of pending plugins */
 				printf(
-					__( '&rarr; (pending; replied to)* : %d', 'wporg-plugins' ),
+					/* translators: %d: Number of plugins. */
+					esc_html__( '&rarr; (pending; replied to)* : %d', 'wporg-plugins' ),
 					esc_html( $stats['in_queue_pending'] )
 				);
 			?>
@@ -527,8 +592,9 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of pending plugins */
 				printf(
-					__( '&rarr; (pending; waiting on author)* : %d', 'wporg-plugins' ),
-					esc_html( $stats['in_queue_pending_why']['author'] )
+					/* translators: %d: Number of plugins. */
+					esc_html__( '&rarr; (pending; waiting on author)* : %d', 'wporg-plugins' ),
+					esc_html( $stats['in_queue_pending_why']['author'] ?? 0 )
 				);
 			?>
 			</li>
@@ -536,17 +602,19 @@ class Stats_Report {
 			<?php
 				/* translators: %d: number of pending plugins */
 				printf(
-					__( '&rarr; (pending; waiting on reviewer)* : %d', 'wporg-plugins' ),
-					esc_html( $stats['in_queue_pending_why']['reviewer'] )
+					/* translators: %d: Number of plugins. */
+					esc_html__( '&rarr; (pending; waiting on reviewer)* : %d', 'wporg-plugins' ),
+					esc_html( $stats['in_queue_pending_why']['reviewer'] ?? 0 )
 				);
 			?>
 			</li>
-			<?php if ( $stats['in_queue_pending_why']['noemail'] ) : ?>
+			<?php if ( ! empty( $stats['in_queue_pending_why']['noemail'] ) ) : ?>
 				<li>
 				<?php
 					/* translators: %d: number of pending plugins */
 					printf(
-						__( '&rarr; (pending; waiting on reviewer, email not yet sent)* : %d', 'wporg-plugins' ),
+						/* translators: %d: Number of plugins. */
+						esc_html__( '&rarr; (pending; waiting on reviewer, email not yet sent)* : %d', 'wporg-plugins' ),
 						esc_html( $stats['in_queue_pending_why']['noemail'] )
 					);
 				?>
@@ -554,14 +622,23 @@ class Stats_Report {
 			<?php endif; ?>
 		</ul>
 
-		<h3><?php _e( 'Help Scout Queue Stats', 'wporg-plugins' ); ?></h3>
+		<?php if ( isset( $stats['email_queue_total_conversations'] ) ) : ?>
+		<h3>
+			<?php
+				printf(
+					/* translators: %s: Helpdesk name, like FreeScout. */
+					esc_html__( '%s Queue Stats', 'wporg-plugins' ),
+					esc_html( Helpdesk::name() )
+				);
+			?>
+		</h3>
 
 		<ul style="font-family:Courier New;">
 			<li>
 			<?php
 				printf(
 					'Total Conversations: %d',
-					esc_html( $stats['helpscout_queue_total_conversations'] )
+					esc_html( $stats['email_queue_total_conversations'] )
 				);
 			?>
 			</li>
@@ -569,7 +646,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'New Conversations: %d',
-					esc_html( $stats['helpscout_queue_new_conversations'] )
+					esc_html( $stats['email_queue_new_conversations'] )
 				);
 			?>
 			</li>
@@ -577,7 +654,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'Customers: %d',
-					esc_html( $stats['helpscout_queue_customers'] )
+					esc_html( $stats['email_queue_customers'] )
 				);
 			?>
 			</li>
@@ -585,7 +662,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'Conversations per Day: %d',
-					esc_html( $stats['helpscout_queue_conversations_per_day'] )
+					esc_html( $stats['email_queue_conversations_per_day'] )
 				);
 			?>
 			</li>
@@ -593,7 +670,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'Busiest Day: %s',
-					esc_html( $stats['helpscout_queue_busiest_day'] )
+					esc_html( $stats['email_queue_busiest_day'] )
 				);
 			?>
 			</li>
@@ -601,7 +678,7 @@ class Stats_Report {
 			<?php
 				printf(
 					'Messages Received: %d',
-					esc_html( $stats['helpscout_queue_messages_received'] )
+					esc_html( $stats['email_queue_messages_received'] )
 				);
 			?>
 			</li>
@@ -609,23 +686,26 @@ class Stats_Report {
 			<?php
 				printf(
 					'Replies Sent: %d',
-					esc_html( $stats['helpscout_queue_replies_sent'] )
+					esc_html( $stats['email_queue_replies_sent'] )
 				);
 			?>
 			</li>
-			<li>
-			<?php
-				printf(
-					'Emails Created: %d',
-					esc_html( $stats['helpscout_queue_emails_created'] )
-				);
-			?>
-			</li>
+			<?php if ( isset( $stats['email_queue_emails_created'] ) ) : ?>
+				<li>
+				<?php
+					printf(
+						'Emails Created: %d',
+						esc_html( $stats['email_queue_emails_created'] )
+					);
+				?>
+				</li>
+			<?php endif; ?>
 		</ul>
+		<?php endif; ?>
 
 		<ul style="font-style:italic;">
-			<li><code>*</code> : <?php _e( "Stat reflects current size of queue and does not take into account 'date' or 'day' interval", 'wporg-plugins' ); ?></li>
-			<li><code>**</code> : <?php _e( "Stat reflects activity only within the 'recentdays' from today", 'wporg-plugins' ); ?></li>
+			<li><code>*</code> : <?php esc_html_e( "Stat reflects current size of queue and does not take into account 'date' or 'day' interval", 'wporg-plugins' ); ?></li>
+			<li><code>**</code> : <?php esc_html_e( "Stat reflects activity only within the 'recentdays' from today", 'wporg-plugins' ); ?></li>
 		</ul>
 
 		<h3>Reviewer Stats</h3>
@@ -651,17 +731,17 @@ class Stats_Report {
 				echo '<tr><th>', esc_html( $user->display_name ?: $user->user_login ), '</th>';
 
 				// Assigned, Unassigned, Assigned to others.
-				echo '<td><span title="Assigned to self">', number_format_i18n( $user_stat[ 'Assigned to self.' ] ?? 0 ), '</span>';
+				echo '<td><span title="Assigned to self">', esc_html( number_format_i18n( $user_stat['Assigned to self.'] ?? 0 ) ), '</span>';
 				if ( $user_stat[ 'Unassigned.' ] ?? 0 ) {
-					echo '<span title="Unassigned"> -', number_format_i18n( $user_stat[ 'Unassigned.' ] ), '</span>';
+					echo '<span title="Unassigned"> -', esc_html( number_format_i18n( $user_stat['Unassigned.'] ) ), '</span>';
 				}
 				if ( $user_stat[ 'Assigned to others.' ] ?? 0 ) {
-					echo ' <span title="Assigned to others">(', number_format_i18n( $user_stat[ 'Assigned to others.' ] ), ')</span>';
+					echo ' <span title="Assigned to others">(', esc_html( number_format_i18n( $user_stat['Assigned to others.'] ) ), ')</span>';
 				}
 				echo '</td>';
 
 				// Plugins Approved.
-				echo '<td>', number_format_i18n( $user_stat[ 'Plugin approved.' ] ?? 0 ), '</td>';
+				echo '<td>', esc_html( number_format_i18n( $user_stat['Plugin approved.'] ?? 0 ) ), '</td>';
 
 				// Plugins Rejected.
 				$user_rejected_breakdown = '';
@@ -685,9 +765,9 @@ class Stats_Report {
 				}
 				$user_rejected_breakdown = trim( $user_rejected_breakdown );
 
-				echo '<td class="breakdown">', '<span title="', esc_attr( $user_rejected_breakdown ), '">', number_format_i18n( $user_rejected_count ), '</span>';
+				echo '<td class="breakdown">', '<span title="', esc_attr( $user_rejected_breakdown ), '">', esc_html( number_format_i18n( $user_rejected_count ) ), '</span>';
 				if ( $user_rejected_breakdown ) {
-					echo '<div class="hidden">', nl2br( $user_rejected_breakdown ), '</div>';
+					echo '<div class="hidden">', nl2br( esc_html( $user_rejected_breakdown ) ), '</div>';
 				}
 				echo '</td>';
 
@@ -709,15 +789,15 @@ class Stats_Report {
 				}
 				$user_closed_breakdown = trim( $user_closed_breakdown );
 
-				echo '<td class="breakdown">', '<span title="', esc_attr( $user_closed_breakdown ), '">', number_format_i18n( $user_closed_count ), '</span>';
+				echo '<td class="breakdown">', '<span title="', esc_attr( $user_closed_breakdown ), '">', esc_html( number_format_i18n( $user_closed_count ) ), '</span>';
 				if ( $user_closed_breakdown ) {
-					echo '<div class="hidden">', nl2br( $user_closed_breakdown ), '</div>';
+					echo '<div class="hidden">', nl2br( esc_html( $user_closed_breakdown ) ), '</div>';
 				}
 				echo '</td>';
 
 				// Emails.
-				echo '<td>', number_format_i18n( $user_stat[ "Email Actions" ] ?? 0 ), '</td>';
-				echo '<td>', number_format_i18n( $user_stat[ "Email Replies" ] ?? 0 ), '</td>';
+				echo '<td>', esc_html( number_format_i18n( $user_stat['Email Actions'] ?? 0 ) ), '</td>';
+				echo '<td>', esc_html( number_format_i18n( $user_stat['Email Replies'] ?? 0 ) ), '</td>';
 				echo '</tr>';
 			}
 			echo '</tbody>';
@@ -732,9 +812,9 @@ class Stats_Report {
 			?>
 			<ul style="font-style:italic;">
 				<?php if ( isset( $user_stats['all-hs-warning'] ) ) : ?>
-					<li><code>^</code> : This is of all Helpscout mailboxes, not Plugins specific, as plugins-only data is only available after <a href="https://meta.trac.wordpress.org/changeset/13010">2023-12-05</a>.</li>
+					<li><code>^</code> : This is of all Help Scout and FreeScout mailboxes, not Plugins specific, as plugins-only data is only available after <a href="https://meta.trac.wordpress.org/changeset/13010">2023-12-05</a>.</li>
 				<?php endif; ?>
-				<li><code>^</code> : Requires your Helpscout email to be the same as your WordPress.org email, or as one of your profiles alternate emails.</li>
+				<li><code>^</code> : Requires your Help Scout email to be the same as your WordPress.org email, or as one of your profiles alternate emails, and that you log in to FreeScout with your WordPress.org account.</li>
 				<li><code>^</code> : Email "Actions" include sending emails, replying to emails, marking as spam, moving to different inbox, etc.</li>
 			</ul>
 

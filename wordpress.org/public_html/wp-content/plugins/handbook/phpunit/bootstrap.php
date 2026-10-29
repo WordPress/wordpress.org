@@ -14,14 +14,24 @@ $_tests_dir = getenv( 'WP_TESTS_DIR' );
 if ( ! $_tests_dir && false !== ( $pos = stripos( __FILE__, '/src/wp-content/plugins/' ) ) ) {
 	$_tests_dir = substr( __FILE__, 0, $pos ) . '/tests/phpunit/';
 }
+// Check for wp-env test directory.
+elseif ( ! $_tests_dir && file_exists( '/wordpress-phpunit/includes/functions.php' ) ) {
+	$_tests_dir = '/wordpress-phpunit/';
+}
 // Elseif no path yet, assume a temp directory path.
 elseif ( ! $_tests_dir ) {
 	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib/tests/phpunit/';
 }
 
 if ( ! file_exists( $_tests_dir . '/includes/functions.php' ) ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Test bootstrap console output, not HTML.
 	echo "Could not find $_tests_dir/includes/functions.php\n";
 	exit( 1 );
+}
+
+// Set polyfills path if available (required by WP test suite).
+if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) && file_exists( $_tests_dir . '/vendor/yoast/phpunit-polyfills' ) ) {
+	define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', $_tests_dir . '/vendor/yoast/phpunit-polyfills' );
 }
 
 // Give access to tests_add_filter() function.
@@ -40,5 +50,6 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
 
-// Include utility functions.
+// Include the base test case and utility functions.
+require __DIR__ . '/includes/testcase.php';
 require __DIR__ . '/includes/utils.php';

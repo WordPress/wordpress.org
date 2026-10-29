@@ -10,6 +10,11 @@ class Readme_Validator {
 	 * Displays a form to validate readme.txt files and blobs of text.
 	 */
 	public static function display() {
+		// In the rest-api, just return the shortcode tag, so it can be rendered properly in the app or other consumers.
+		if ( wp_is_serving_rest_request() ) {
+			return '[readme-validator]';
+		}
+
 		$readme_url      = '';
 		$readme_contents = '';
 		if ( ! empty( $_REQUEST['readme'] ) && is_string( $_REQUEST['readme'] ) ) {
@@ -29,7 +34,10 @@ class Readme_Validator {
 		if ( $readme_url && preg_match( '!^https?://([^./]+\.)?wordpress.org/plugins/(?P<slug>[^/]+)!i', $readme_url, $m ) ) {
 			$plugin = Plugin_Directory::get_plugin_post( $m['slug'] );
 
-			if ( $plugin ) {
+			if ( $plugin && (
+				in_array( $plugin->post_status, array( 'publish', 'closed', 'disabled' ), true ) ||
+				current_user_can( 'plugin_admin_view', $plugin )
+			) ) {
 				$readme_url         = 'https://plugins.svn.wordpress.org/' . $plugin->post_name . '/' . ( ( $plugin->stable_tag && 'trunk' != $plugin->stable_tag ) ? 'tags/' . $plugin->stable_tag : 'trunk' ) . '/readme.txt';
 				$_REQUEST['readme'] = $readme_url;
 			}
@@ -49,16 +57,16 @@ class Readme_Validator {
 			<form method="get" action="">
 				<p>
 					<input type="text" name="readme" size="70" placeholder="https://" value="<?php echo esc_attr( $readme_url ); ?>" />
-					<input type="submit" class="button button-secondary" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" />
+					<input type="submit" class="wp-element-button button" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" />
 				</p>
 			</form>
 
-			<p><?php _e( '... or paste your <code>readme.txt</code> here:', 'wporg-plugins' ); ?></p>
+			<p><?php echo wp_kses_post( __( '... or paste your <code>readme.txt</code> here:', 'wporg-plugins' ) ); ?></p>
 				<textarea rows="20" cols="100" name="readme_visible" placeholder="=== Plugin Name ==="><?php echo esc_textarea( $readme_contents ); ?></textarea>
 				<form id="readme-data" method="post" action="">
 					<input type="hidden" name="readme" value="" />
 					<textarea class="screen-reader-text" rows="20" cols="100" name="readme_contents"><?php echo esc_textarea( $readme_contents ); ?></textarea>
-				<p><input type="submit" class="button button-secondary" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" /></p>
+				<p><input type="submit" class="wp-element-button button" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" /></p>
 			</form>
 			<script>
 				document.getElementById( 'readme-data' ).addEventListener( 'submit', function() {
@@ -130,6 +138,6 @@ class Readme_Validator {
 			$output .= '</div>';
 		}
 
-		echo $output;
+		echo wp_kses_post( $output );
 	}
 }

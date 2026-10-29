@@ -1,16 +1,27 @@
-<div class="wrap">
-	<h2><?php _e( 'Edit Translation Editor', 'rosetta' ); ?></h2>
+<?php
+/**
+ * Admin view for editing a translation editor.
+ *
+ * @package Rosetta
+ */
 
-	<?php echo $feedback_message; ?>
+$user = get_user_by( 'id', $user_id );
+if ( ! $user ) {
+	return;
+}
+?>
+<div class="wrap">
+	<h2><?php esc_html_e( 'Edit Translation Editor', 'rosetta' ); ?></h2>
+
+	<?php echo $feedback_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice markup assembled by get_feedback_message() from escaped parts. ?>
 
 	<p><?php
-		$user = get_user_by( 'id', $user_id );
 		printf(
 			/* translators: %s: WP.org profile link */
-			__( 'You are currently editing the user %s.', 'rosetta' ),
+			esc_html__( 'You are currently editing the user %s.', 'rosetta' ),
 			sprintf( '<a href="%1$s">%2$s</a>',
-				'https://profiles.wordpress.org/' . $user->user_nicename . '/',
-				$user->user_login
+				esc_url( 'https://profiles.wordpress.org/' . $user->user_nicename . '/' ),
+				esc_html( $user->user_login )
 			)
 		);
 	?></p>
@@ -20,33 +31,33 @@
 			<tbody>
 				<tr>
 					<th scope="row">
-						<?php _e( 'Add editor access for:', 'rosetta' ); ?><br>
+						<?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?><br>
 					</th>
 					<td>
 						<fieldset id="projects">
-							<legend class="screen-reader-text"><span><?php _e( 'Add editor access for:', 'rosetta' ); ?></span></legend>
+							<legend class="screen-reader-text"><span><?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?></span></legend>
 
 							<ul id="projects-list" class="projects-list">
 								<li id="project-all" class="active">
 									<label>
-										<input type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php _e( 'All projects', 'rosetta' ); ?>
+										<input type="checkbox"<?php checked( in_array( 'all', (array) $project_access_list, true ) ); ?>> <?php esc_html_e( 'All projects', 'rosetta' ); ?>
 									</label>
 									<div class="sub-projects-wrapper">
-										<?php _e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
+										<?php esc_html_e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
 									</div>
 								</li>
 								<li id="project-loading" class="loading">
-									<?php _e( 'Loading&hellip;', 'rosetta' ); ?>
+									<?php esc_html_e( 'Loading&hellip;', 'rosetta' ); ?>
 								</li>
 							</ul>
 						</fieldset>
-						<p class="description"><?php _e( 'Each project includes sub projects and newly-added sub projects.', 'rosetta' ); ?></p>
+						<p class="description"><?php esc_html_e( 'Each project includes sub projects and newly-added sub projects.', 'rosetta' ); ?></p>
 					</td>
 				</tr>
 			</tbody>
 		</table>
 
-		<input type="hidden" id="project-access-list" name="projects" value="<?php esc_attr( implode( ',', $project_access_list ) ); ?>">
+		<input type="hidden" id="project-access-list" name="projects" value="<?php echo esc_attr( implode( ',', $project_access_list ) ); ?>">
 		<input type="hidden" name="action" value="update-translation-editor">
 		<input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
 		<?php

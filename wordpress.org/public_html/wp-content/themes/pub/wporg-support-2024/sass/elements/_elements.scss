@@ -20,7 +20,8 @@ section {
 	margin-bottom: var(--wp--preset--spacing--40);
 }
 
-blockquote, q {
+blockquote,
+q {
 	quotes: "" "";
 
 	&::before,
@@ -37,7 +38,7 @@ blockquote {
 	padding-left: var(--wp--preset--spacing--20);
 
 	cite {
-		font-size: ms( -2 );
+		font-size: ms(-2);
 	}
 
 	p {

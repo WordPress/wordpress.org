@@ -41,34 +41,35 @@ class Themes_API {
 	 * @var array
 	 */
 	public $fields = array(
-		'description'        => false,
-		'downloaded'         => false,
-		'downloadlink'       => false,
-		'last_updated'       => false,
-		'creation_time'      => false,
-		'parent'             => false,
-		'rating'             => false,
-		'ratings'            => false,
-		'reviews_url'        => false,
-		'screenshot_count'   => false,
-		'screenshot_url'     => true,
-		'screenshots'        => false,
-		'sections'           => false,
-		'tags'               => false,
-		'template'           => false,
-		'versions'           => false,
-		'theme_url'          => false,
-		'extended_author'    => false,
-		'photon_screenshots' => false,
-		'active_installs'    => false,
-		'requires'           => false,
-		'requires_php'       => false,
-		'trac_tickets'       => false,
-		'is_commercial'      => false,
-		'is_community'       => false,
+		'description'             => false,
+		'downloaded'              => false,
+		'downloadlink'            => false,
+		'last_updated'            => false,
+		'creation_time'           => false,
+		'parent'                  => false,
+		'rating'                  => false,
+		'ratings'                 => false,
+		'reviews_url'             => false,
+		'screenshot_count'        => false,
+		'screenshot_url'          => true,
+		'screenshots'             => false,
+		'sections'                => false,
+		'tags'                    => false,
+		'template'                => false,
+		'versions'                => false,
+		'theme_url'               => false,
+		'homepage'                => false,
+		'extended_author'         => false,
+		'photon_screenshots'      => false,
+		'active_installs'         => false,
+		'requires'                => false,
+		'requires_php'            => false,
+		'trac_tickets'            => false,
+		'is_commercial'           => false,
+		'is_community'            => false,
 		'external_repository_url' => false,
-		'external_support_url' => false,
-		'upload_date'        => false,
+		'external_support_url'    => false,
+		'upload_date'             => false,
 	);
 
 	/**
@@ -120,6 +121,17 @@ class Themes_API {
 			}
 		}
 
+		// Malformed locales fall back to the site default.
+		if (
+			isset( $this->request->locale ) &&
+			(
+				! is_string( $this->request->locale ) ||
+				sanitize_locale_name( $this->request->locale ) !== $this->request->locale
+			)
+		) {
+			unset( $this->request->locale );
+		}
+
 		// Favorites requests require a user to fetch favorites for.
 		if ( isset( $this->request->browse ) && 'favorites' === $this->request->browse && ! isset( $this->request->user ) ) {
 			$this->request->user = '';
@@ -141,6 +153,17 @@ class Themes_API {
 					$this->bad_input = true;
 				}
 			}
+		}
+
+		// Standardise the 'fields' parameter.
+		if ( ! isset( $this->request->fields ) ) {
+			$this->request->fields = [];
+		} elseif ( wp_is_numeric_array( $this->request->fields ) ) {
+			// [ 'field1', 'field2' ] => [ 'field1' => true, 'field2' => true ]
+			$this->request->fields = array_combine( $this->request->fields, array_fill( 0, count( $this->request->fields ), true ) );
+		} else {
+			// [ 'field1' => 1, 'field2' => 'false'] => [ 'field1' => true, 'field2' => false ]
+			$this->request->fields = array_map( 'wp_validate_boolean', $this->request->fields );
 		}
 
 		// The locale we should use is specified by the request
@@ -471,8 +494,6 @@ class Themes_API {
 			$defaults['external_support_url'] = true;
 		}
 
-		$this->request->fields = (array) ( $this->request->fields ?? [] );
-
 		$this->fields = array_merge( $this->fields, $defaults, (array) $this->request->fields );
 
 		if ( !empty( $post ) && 'repopackage' == $post->post_type && $this->request->slug === $post->post_name ) {
@@ -532,8 +553,6 @@ class Themes_API {
 			$defaults['external_repository_url'] = true;
 			$defaults['external_support_url'] = true;
 		}
-
-		$this->request->fields = (array) ( $this->request->fields ?? [] );
 
 		$this->fields = array_merge( $this->fields, $defaults, $this->request->fields );
 
@@ -655,6 +674,7 @@ class Themes_API {
 
 		$theme_shops = new WP_Query( array(
 			'post_type'      => 'theme_shop',
+			'post_status'    => 'publish',
 			'posts_per_page' => -1,
 			// NOTE: This rand() disables WP_Query caching.
 			'orderby'        => 'rand(' . gmdate('YmdH') . ')',
@@ -690,10 +710,9 @@ class Themes_API {
 			'slug' => $theme->post_name,
 		);
 
-		$repo_package  = new WPORG_Themes_Repo_Package( $theme->ID );
-		$phil->version = $repo_package->latest_version();
-
-		$phil->preview_url = "https://wp-themes.com/{$theme->post_name}/";
+		$repo_package      = new WPORG_Themes_Repo_Package( $theme->ID );
+		$phil->version     = $repo_package->latest_version();
+		$phil->preview_url = $repo_package->preview_url();
 
 		$author = get_user_by( 'id', $theme->post_author );
 
@@ -702,7 +721,7 @@ class Themes_API {
 				// WordPress.org user details.
 				'user_nicename' => $author->user_nicename,
 				'profile'       => 'https://profiles.wordpress.org/' . $author->user_nicename . '/',
-				'avatar'        => 'https://secure.gravatar.com/avatar/' . md5( $author->user_email ) . '?s=96&d=monsterid&r=g',
+				'avatar'        => 'https://secure.gravatar.com/avatar/' . hash( 'sha256', $author->user_email ) . '?s=96&d=monsterid&r=g',
 				'display_name'  => $author->display_name ?: $author->user_nicename,
 
 				// Theme headers details.
@@ -752,13 +771,13 @@ class Themes_API {
 
 		if ( $this->fields['ratings'] ) {
 			// Amount of reviews for each rating level.
-			$phil->ratings = \WPORG_Ratings::get_rating_counts( 'theme', $theme->post_name );
+			$phil->ratings = class_exists( 'WPORG_Ratings' ) ? WPORG_Ratings::get_rating_counts( 'theme', $theme->post_name ) : 0;
 		}
 
 		if ( $this->fields['rating'] ) {
 			// Return a % rating; Rating range: 0~5.
-			$phil->rating = \WPORG_Ratings::get_avg_rating( 'theme', $theme->post_name ) * 20;
-			$phil->num_ratings = \WPORG_Ratings::get_rating_count( 'theme', $theme->post_name );
+			$phil->rating      = class_exists( 'WPORG_Ratings' ) ? WPORG_Ratings::get_avg_rating( 'theme', $theme->post_name ) * 20 : 0;
+			$phil->num_ratings = class_exists( 'WPORG_Ratings' ) ? WPORG_Ratings::get_rating_count( 'theme', $theme->post_name ) : 0;
 		}
 
 		if ( $this->fields['reviews_url'] ) {
@@ -859,7 +878,9 @@ class Themes_API {
 		if ( $this->fields['versions'] ) {
 			$phil->versions = array();
 
-			foreach ( array_keys( get_post_meta( $theme->ID, '_status', true ) ) as $version ) {
+			$status   = get_post_meta( $theme->ID, '_status', true );
+			$versions = is_array( $status ) ? array_keys( $status ) : array();
+			foreach ( $versions as $version ) {
 				$phil->versions[ $version ] = $repo_package->download_url( $version );
 			}
 		}
@@ -905,14 +926,14 @@ class Themes_API {
 		if ( class_exists( 'GlotPress_Translate_Bridge' ) ) {
 			$glotpress_project = "wp-themes/{$phil->slug}";
 
-			$phil->name = GlotPress_Translate_Bridge::translate( $phil->name, $glotpress_project );
+			$phil->name = self::translate_header( $phil->name, $glotpress_project );
 
 			if ( isset( $phil->description ) ) {
-				$phil->description = GlotPress_Translate_Bridge::translate( $phil->description, $glotpress_project );
+				$phil->description = self::translate_header( $phil->description, $glotpress_project );
 			}
 
 			if ( isset( $phil->sections['description'] ) ) {
-				$phil->sections['description'] = GlotPress_Translate_Bridge::translate( $phil->sections['description'], $glotpress_project );
+				$phil->sections['description'] = self::translate_header( $phil->sections['description'], $glotpress_project );
 			}
 
 		}
@@ -944,6 +965,42 @@ class Themes_API {
 	}
 
 	/* Helper functions */
+
+	/**
+	 * Replaces a header with its translation, reduced to what the header may hold.
+	 *
+	 * The bridge answers with the value it was given when there is no translation,
+	 * which is every value in English, so the stored one is handed back untouched.
+	 *
+	 * @param string $value             The stored header.
+	 * @param string $glotpress_project The theme's GlotPress project.
+	 *
+	 * @return string The translation, or the stored header.
+	 */
+	private static function translate_header( $value, $glotpress_project ) {
+		$translation = GlotPress_Translate_Bridge::translate( $value, $glotpress_project );
+
+		return $translation === $value ? $value : self::sanitize_translation( $translation );
+	}
+
+	/**
+	 * Reduces a translated header to the value the header may hold.
+	 *
+	 * The Name and Description are returned as plain text, and the import makes
+	 * the shortcode delimiters inert. A translation replaces those values for
+	 * every consumer, so it passes both boundaries rather than inherit them.
+	 *
+	 * @param string $value The translation as GlotPress stored it.
+	 *
+	 * @return string The translation, reduced to what the header may hold.
+	 */
+	public static function sanitize_translation( $value ) {
+		return str_replace(
+			array( '[', ']' ),
+			array( '&#91;', '&#93;' ),
+			wp_strip_all_tags( $value )
+		);
+	}
 
 	/**
 	 * Fixes mangled descriptions.

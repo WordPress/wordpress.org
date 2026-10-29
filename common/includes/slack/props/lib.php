@@ -22,6 +22,7 @@ function handle_props_message( object $request ) : string {
 	// The 'Received props from @...' would be broken if the giver can't be found.
 	// Don't throw if a recipient lookup fails, since we still want other recipients to get props.
 	if ( empty( $giver_user ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Slack request handler; the message is returned to Slack as plain text, not rendered as HTML.
 		throw new Exception( 'w.org user lookup for slack ID '. $request->event->user .' failed' );
 	}
 
@@ -46,7 +47,7 @@ function handle_props_message( object $request ) : string {
 	// This is Slack's unintuitive way of giving messages a unique ID :|
 	// https://api.slack.com/messaging/retrieving#individual_messages
 	$message_id    = sprintf( '%s-%s', $request->event->channel, $request->event->ts );
-	$channel_names = map_slack_channel_ids_to_names( $request->event->text );
+	$channel_names = map_slack_channel_ids_to_names( $request->event->text ?? '' );
 	$message       = prepare_message( $request->event->blocks[0]->elements[0]->elements, $recipient_users, $channel_names );
 
 	add_activity_to_profile( compact( 'giver_user', 'recipient_ids', 'url', 'message_id', 'message' ) );
@@ -162,7 +163,10 @@ function map_slack_users_to_wporg( array $slack_ids ) : array {
  * This avoids having to make an API call to Slack to fetch the channels, like their docs recommend.
  */
 function map_slack_channel_ids_to_names( string $message ) : array {
-	$map = array();
+	// Slack doesn't always escape channels in `text`, e.g., `#props` instead of `<#C0FRG66LR|props>`.
+	$map = array(
+		'C0FRG66LR' => 'props',
+	);
 
 	preg_match_all( '/<#(\w*\d*)\|([\w-]*)>/m', $message, $matches, PREG_SET_ORDER );
 
@@ -202,7 +206,7 @@ function prepare_message( array $elements, array $user_map, array $channel_map )
 			break;
 
 			case 'channel':
-				$prepared .= '#' . $channel_map[ $element->channel_id ];
+				$prepared .= '#' . ( $channel_map[ $element->channel_id ] ?? $element->channel_id );
 			break;
 
 			default:
@@ -239,6 +243,7 @@ function add_activity_to_profile( array $request_args ) : bool {
 	} else {
 		$success = false;
 
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response body, not HTML.
 		trigger_error( 'Adding activity failed with error: ' . $response_body, E_USER_WARNING );
 	}
 

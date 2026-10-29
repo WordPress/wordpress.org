@@ -19,6 +19,9 @@ class Search {
 		add_filter( 'posts_search',         [ __CLASS__, 'tag_where_for_search' ], 10, 2 );
 		add_filter( 'posts_groupby',        [ __CLASS__, 'tag_groupby_for_search' ], 10, 2 );
 		add_filter( 'posts_search_orderby', [ __CLASS__, 'tag_orderby_for_search' ], 10, 2 );
+
+		// Disable ElasticSearch so that the search customization can take effect.
+		add_filter( 'jetpack_search_should_handle_query', '__return_false' );
 	}
 
 	/**
@@ -81,11 +84,11 @@ class Search {
 		if ( self::is_search( $query ) ) {
 			$join .= "
 				LEFT JOIN
-				  {$wpdb->term_relationships} ON {$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id
+					{$wpdb->term_relationships} AS tr_search ON {$wpdb->posts}.ID = tr_search.object_id
 				LEFT JOIN
-				  {$wpdb->term_taxonomy} ON {$wpdb->term_taxonomy}.term_taxonomy_id = {$wpdb->term_relationships}.term_taxonomy_id
+					{$wpdb->term_taxonomy} AS tt_search ON tt_search.term_taxonomy_id = tr_search.term_taxonomy_id
 				LEFT JOIN
-				  {$wpdb->terms} ON {$wpdb->terms}.term_id = {$wpdb->term_taxonomy}.term_id
+					{$wpdb->terms} AS t_search ON t_search.term_id = tt_search.term_id
 			  ";
 		}
 
@@ -127,13 +130,13 @@ class Search {
 		global $wpdb;
 
 		if ( self::is_search( $query ) ) {
-			$insert_at = strpos( $where, 'OR (' . $wpdb->prefix . 'posts.post_content LIKE ' );
+			$insert_at = strpos( $where, 'OR (' . $wpdb->prefix . 'posts.post_content REGEXP ' );
 			if ( $insert_at ) {
 				$or_tag = $wpdb->prepare( "OR
 					(
-						{$wpdb->term_taxonomy}.taxonomy = %s
+						tt_search.taxonomy = %s
 						AND
-						{$wpdb->terms}.name = %s
+						t_search.name = %s
 					) ",
 					Registrations::get_taxonomy( 'tags' ),
 					get_query_var('s')

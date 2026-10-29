@@ -163,6 +163,7 @@ switch ( $event ) {
 	case 'issues':
 		if ( ! in_array( $payload->action, [ 'opened', 'edited', 'closed', 'deleted' ] ) ) {
 			header( 'HTTP/1.0 422 Unprocessable Entity', true, 422 );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text webhook acknowledgement; the payload is signature-verified upstream.
 			die( "NO; $event:{$payload->action} not required." );
 		}
 
@@ -215,6 +216,7 @@ switch ( $event ) {
 
 		if ( ! in_array( $payload->action, [ 'opened', 'reopened', 'edited', 'closed' ] ) ) {
 			header( 'HTTP/1.0 422 Unprocessable Entity', true, 422 );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text webhook acknowledgement; the payload is signature-verified upstream.
 			die( "NO; $event:{$payload->action} not required." );
 		}
 

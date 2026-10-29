@@ -2,7 +2,7 @@
 
 namespace Wporg\TranslationEvents\Routes\Event;
 
-use Wporg\TranslationEvents\Event\Event_Repository_Interface;
+use Wporg\TranslationEvents\Event\Event_Repository;
 use Wporg\TranslationEvents\Routes\Route;
 use Wporg\TranslationEvents\Translation_Events;
 use Wporg\TranslationEvents\Urls;
@@ -13,7 +13,12 @@ use Wporg\TranslationEvents\Urls;
  * If the event is currently trashed, it will be un-trashed.
  */
 class Trash_Route extends Route {
-	private Event_Repository_Interface $event_repository;
+	/**
+	 * Event repository.
+	 *
+	 * @var Event_Repository
+	 */
+	private Event_Repository $event_repository;
 
 	public function __construct() {
 		parent::__construct();
@@ -24,29 +29,46 @@ class Trash_Route extends Route {
 		if ( ! is_user_logged_in() ) {
 			global $wp;
 			wp_safe_redirect( wp_login_url( home_url( $wp->request ) ) );
-			exit;
+			$this->exit_();
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
+		}
+
+		$nonce_action = 'trash_translation_event_' . $event_id;
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), $nonce_action ) ) {
+			$this->die_with_error( esc_html__( 'Your link has expired or is invalid. Please go back and try again.', 'gp-translation-events' ), 403 );
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
 		$event = $this->event_repository->get_event( $event_id );
 		if ( ! $event ) {
 			$this->die_with_404();
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
 		if ( ! current_user_can( 'trash_translation_event', $event->id() ) ) {
 			$this->die_with_error( esc_html__( 'You do not have permission to delete or restore this event.', 'gp-translation-events' ), 403 );
+			return; // Pre-4.1 GlotPress falls through here under GP_Route::$fake_request.
 		}
 
 		if ( ! $event->is_trashed() ) {
 			// Trash.
-			$this->event_repository->trash_event( $event );
+			if ( false === $this->event_repository->trash_event( $event ) ) {
+				gp_notice_set( __( 'Failed to delete event.', 'gp-translation-events' ), 'error' );
+			} else {
+				gp_notice_set( __( 'Event moved to the trash.', 'gp-translation-events' ), 'success' );
+			}
 			wp_safe_redirect( Urls::events_home() );
 		} else {
 			// Restore.
 			$event->set_status( 'draft' );
-			$this->event_repository->update_event( $event );
+			if ( is_wp_error( $this->event_repository->update_event( $event ) ) ) {
+				gp_notice_set( __( 'Failed to restore event.', 'gp-translation-events' ), 'error' );
+			} else {
+				gp_notice_set( __( 'Event restored.', 'gp-translation-events' ), 'success' );
+			}
 			wp_safe_redirect( Urls::event_edit( $event->id() ) );
 		}
 
-		exit;
+		$this->exit_();
 	}
 }

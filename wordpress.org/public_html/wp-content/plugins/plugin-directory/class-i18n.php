@@ -94,6 +94,7 @@ class I18n {
 		_x( 'New plugins', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Recently updated plugins', 'Plugin Section Name', 'wporg-plugins' );
 		_x( 'Preview-Enabled plugins', 'Plugin Section Name', 'wporg-plugins' );
+		_x( 'Dashboard Widgets', 'Plugin Section Name', 'wporg-plugins' );
 
 		// Section descriptions.
 		_x( 'Plugins that have been offered for adoption by others.', 'Plugin Section Description', 'wporg-plugins' );
@@ -101,6 +102,10 @@ class I18n {
 		_x( 'The below plugins have been marked as favorites.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'Plugins that offer blocks for the block-based editor.', 'Plugin Section Description', 'wporg-plugins' );
 		_x( 'Block Plugins as used in the Block Directory.', 'Plugin Section Description', 'wporg-plugins' );
+
+		// Business model terms.
+		_x( 'Community', 'Plugin Business Model', 'wporg-plugins' );
+		_x( 'Commercial', 'Plugin Business Model', 'wporg-plugins' );
 
 		// Business model descriptions.
 		__( 'These plugins are developed and supported by a community.', 'wporg-plugins' );

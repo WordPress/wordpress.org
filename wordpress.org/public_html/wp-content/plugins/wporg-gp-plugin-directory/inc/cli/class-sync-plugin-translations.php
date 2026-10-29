@@ -88,6 +88,10 @@ class Sync_Plugin_Translations extends WP_CLI_Command {
 				return $args;
 			}
 
+			if ( isset( $args['status'] ) && 'old' === $args['status'] ) {
+				return $args;
+			}
+
 			$translation_entry = new Translation_Entry( [
 				'singular' => $original->singular,
 				'plural'   => $original->plural,
