@@ -13,21 +13,22 @@ class Make_Core_Trac_Components {
 	/**
 	 * Open ticket counts per component and type, memoized by generate_component_breakdowns().
 	 *
-	 * @var array
+	 * @var array|null
 	 */
 	public $breakdown_component_type;
 
 	/**
 	 * Open ticket counts per component, milestone, and type, memoized by generate_component_breakdowns().
 	 *
-	 * @var array
+	 * @var array|null
 	 */
 	public $breakdown_component_milestone_type;
 
 	/**
 	 * IDs of unreplied tickets per component, memoized by generate_component_breakdowns().
+	 * False when the Trac API call failed.
 	 *
-	 * @var array
+	 * @var array|false|null
 	 */
 	public $breakdown_component_unreplied;
 

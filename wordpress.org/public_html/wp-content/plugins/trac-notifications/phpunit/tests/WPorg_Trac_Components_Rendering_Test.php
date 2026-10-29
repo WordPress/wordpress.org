@@ -74,6 +74,17 @@ class WPorg_Trac_Components_Rendering_Test extends WPorg_Trac_Components_TestCas
 	}
 
 	/**
+	 * Clears the breakdowns memoized on the shared instance, so no test inherits another's.
+	 */
+	public function tearDown(): void {
+		$this->components->breakdown_component_type           = null;
+		$this->components->breakdown_component_milestone_type = null;
+		$this->components->breakdown_component_unreplied      = null;
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Stores the maintainer's display name directly, bypassing profile write filters,
 	 * to exercise the render path in isolation.
 	 *
@@ -184,9 +195,6 @@ class WPorg_Trac_Components_Rendering_Test extends WPorg_Trac_Components_TestCas
 		wp_cache_set( 'trac_tickets_by_component_type_milestone', $rows );
 
 		$html = $this->render_component();
-
-		// The breakdowns are memoized on the shared instance.
-		unset( $this->components->breakdown_component_type, $this->components->breakdown_component_milestone_type, $this->components->breakdown_component_unreplied );
 
 		preg_match( '#<tbody>.*</tbody>#s', $html, $tbody );
 		preg_match_all( '#<th scope="row"><a [^>]+>([^<]+)</a></th>#', $tbody[0], $labels );
