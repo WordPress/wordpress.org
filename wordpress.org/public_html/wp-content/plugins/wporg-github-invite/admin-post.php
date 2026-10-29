@@ -45,10 +45,12 @@ add_action( 'admin_post_github_invite', function() {
 		$user           = get_user_by( 'slug', $m['slug'] ?? $input );
 		$github_details = false;
 		if ( $user ) {
-			$github_details = $wpdb->get_row( $wpdb->prepare(
-				'SELECT github_user, user_details FROM wporg_github_users WHERE user_id = %d',
-				$user->ID
-			) );
+			$github_details = $wpdb->get_row(
+				$wpdb->prepare(
+					'SELECT github_user, user_details FROM wporg_github_users WHERE user_id = %d',
+					$user->ID
+				)
+			);
 		}
 		if ( $github_details ) {
 			$github_details->user_details = json_decode( $github_details->user_details );
