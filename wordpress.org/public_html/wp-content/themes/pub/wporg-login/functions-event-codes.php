@@ -1048,18 +1048,18 @@ function wporg_login_event_code_meta_box_render( WP_Post $post ): void {
 
 			input.addEventListener( 'input', function () {
 				var search = input.value.trim();
+				// Every keystroke makes the answers still in flight stale, before the next
+				// request has even been sent.
+				var id     = ++latest;
 
 				clearTimeout( timer );
 
 				if ( search.length < 3 ) {
-					latest++;
 					say( '' );
 					return;
 				}
 
 				timer = setTimeout( function () {
-					// A slower answer to an earlier search must not land on top of this one.
-					var id   = ++latest;
 					var body = new URLSearchParams( { action: 'wporg_event_code_central_search', nonce: input.dataset.nonce, search: search } );
 
 					say( 'Looking on WordCamp Central...' );
