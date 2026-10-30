@@ -250,11 +250,13 @@ class Translation_Sync {
 			}
 
 			// Check if the translation already exists.
-			$existing_translations = GP::$translation->find( [
-				'translation_set_id' => $new_translation_set->id,
-				'original_id'        => $new_original->id,
-				'status'             => [ 'current', 'waiting', 'fuzzy', 'changesrequested' ],
-			] );
+			$existing_translations = GP::$translation->find(
+				[
+					'translation_set_id' => $new_translation_set->id,
+					'original_id'        => $new_original->id,
+					'status'             => [ 'current', 'waiting', 'fuzzy', 'changesrequested' ],
+				]
+			);
 
 			foreach ( $existing_translations as $_existing_translation ) {
 				$existing_translation = [];
