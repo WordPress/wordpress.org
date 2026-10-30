@@ -8,6 +8,8 @@ use UnexpectedValueException;
 
 /**
  * The kind of measurement. It describes how the data is reported.
+ * For information on setting the start time and end time based on
+ * the MetricKind, see [TimeInterval][google.monitoring.v3.TimeInterval].
  *
  * Protobuf type <code>google.api.MetricDescriptor.MetricKind</code>
  */
@@ -69,7 +71,4 @@ class MetricKind
         return constant($const);
     }
 }
-
-// Adding a class alias for backwards compatibility with the previous class name.
-class_alias(MetricKind::class, \Google\Api\MetricDescriptor_MetricKind::class);
 

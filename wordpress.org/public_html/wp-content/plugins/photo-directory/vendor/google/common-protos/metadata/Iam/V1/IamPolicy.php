@@ -14,51 +14,16 @@ class IamPolicy
         if (static::$is_initialized == true) {
           return;
         }
-        \GPBMetadata\Google\Iam\V1\Options::initOnce();
-        \GPBMetadata\Google\Iam\V1\Policy::initOnce();
         \GPBMetadata\Google\Api\Annotations::initOnce();
         \GPBMetadata\Google\Api\Client::initOnce();
         \GPBMetadata\Google\Api\FieldBehavior::initOnce();
         \GPBMetadata\Google\Api\Resource::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0ad3080a1e676f6f676c652f69616d2f76312f69616d5f706f6c6963792e" .
-            "70726f746f120d676f6f676c652e69616d2e76311a1a676f6f676c652f69" .
-            "616d2f76312f706f6c6963792e70726f746f1a1c676f6f676c652f617069" .
-            "2f616e6e6f746174696f6e732e70726f746f1a17676f6f676c652f617069" .
-            "2f636c69656e742e70726f746f1a1f676f6f676c652f6170692f6669656c" .
-            "645f6265686176696f722e70726f746f1a19676f6f676c652f6170692f72" .
-            "65736f757263652e70726f746f225e0a1353657449616d506f6c69637952" .
-            "657175657374121b0a087265736f757263651801200128094209e04102fa" .
-            "41030a012a122a0a06706f6c69637918022001280b32152e676f6f676c65" .
-            "2e69616d2e76312e506f6c6963794203e0410222640a1347657449616d50" .
-            "6f6c69637952657175657374121b0a087265736f75726365180120012809" .
-            "4209e04102fa41030a012a12300a076f7074696f6e7318022001280b321f" .
-            "2e676f6f676c652e69616d2e76312e476574506f6c6963794f7074696f6e" .
-            "7322520a195465737449616d5065726d697373696f6e7352657175657374" .
-            "121b0a087265736f757263651801200128094209e04102fa41030a012a12" .
-            "180a0b7065726d697373696f6e731802200328094203e0410222310a1a54" .
-            "65737449616d5065726d697373696f6e73526573706f6e736512130a0b70" .
-            "65726d697373696f6e7318012003280932b4030a0949414d506f6c696379" .
-            "12740a0c53657449616d506f6c69637912222e676f6f676c652e69616d2e" .
-            "76312e53657449616d506f6c696379526571756573741a152e676f6f676c" .
-            "652e69616d2e76312e506f6c696379222982d3e4930223221e2f76312f7b" .
-            "7265736f757263653d2a2a7d3a73657449616d506f6c6963793a012a1274" .
-            "0a0c47657449616d506f6c69637912222e676f6f676c652e69616d2e7631" .
-            "2e47657449616d506f6c696379526571756573741a152e676f6f676c652e" .
-            "69616d2e76312e506f6c696379222982d3e4930223221e2f76312f7b7265" .
-            "736f757263653d2a2a7d3a67657449616d506f6c6963793a012a129a010a" .
-            "125465737449616d5065726d697373696f6e7312282e676f6f676c652e69" .
-            "616d2e76312e5465737449616d5065726d697373696f6e73526571756573" .
-            "741a292e676f6f676c652e69616d2e76312e5465737449616d5065726d69" .
-            "7373696f6e73526573706f6e7365222f82d3e493022922242f76312f7b72" .
-            "65736f757263653d2a2a7d3a7465737449616d5065726d697373696f6e73" .
-            "3a012a1a1eca411b69616d2d6d6574612d6170692e676f6f676c65617069" .
-            "732e636f6d4286010a11636f6d2e676f6f676c652e69616d2e7631420e49" .
-            "616d506f6c69637950726f746f50015a30676f6f676c652e676f6c616e67" .
-            "2e6f72672f67656e70726f746f2f676f6f676c65617069732f69616d2f76" .
-            "313b69616df80101aa0213476f6f676c652e436c6f75642e49616d2e5631" .
-            "ca0213476f6f676c655c436c6f75645c49616d5c5631620670726f746f33"
-        ), true);
+        \GPBMetadata\Google\Iam\V1\Options::initOnce();
+        \GPBMetadata\Google\Iam\V1\Policy::initOnce();
+        \GPBMetadata\Google\Protobuf\FieldMask::initOnce();
+        $pool->internalAddGeneratedFile(
+            "\x0A\x9B\x09\x0A\x1Egoogle/iam/v1/iam_policy.proto\x12\x0Dgoogle.iam.v1\x1A\x17google/api/client.proto\x1A\x1Fgoogle/api/field_behavior.proto\x1A\x19google/api/resource.proto\x1A\x1Bgoogle/iam/v1/options.proto\x1A\x1Agoogle/iam/v1/policy.proto\x1A google/protobuf/field_mask.proto\"\x8F\x01\x0A\x13SetIamPolicyRequest\x12\x1B\x0A\x08resource\x18\x01 \x01(\x09B\x09\xE0A\x02\xFAA\x03\x0A\x01*\x12*\x0A\x06policy\x18\x02 \x01(\x0B2\x15.google.iam.v1.PolicyB\x03\xE0A\x02\x12/\x0A\x0Bupdate_mask\x18\x03 \x01(\x0B2\x1A.google.protobuf.FieldMask\"d\x0A\x13GetIamPolicyRequest\x12\x1B\x0A\x08resource\x18\x01 \x01(\x09B\x09\xE0A\x02\xFAA\x03\x0A\x01*\x120\x0A\x07options\x18\x02 \x01(\x0B2\x1F.google.iam.v1.GetPolicyOptions\"R\x0A\x19TestIamPermissionsRequest\x12\x1B\x0A\x08resource\x18\x01 \x01(\x09B\x09\xE0A\x02\xFAA\x03\x0A\x01*\x12\x18\x0A\x0Bpermissions\x18\x02 \x03(\x09B\x03\xE0A\x02\"1\x0A\x1ATestIamPermissionsResponse\x12\x13\x0A\x0Bpermissions\x18\x01 \x03(\x092\xB4\x03\x0A\x09IAMPolicy\x12t\x0A\x0CSetIamPolicy\x12\".google.iam.v1.SetIamPolicyRequest\x1A\x15.google.iam.v1.Policy\")\x82\xD3\xE4\x93\x02#\"\x1E/v1/{resource=**}:setIamPolicy:\x01*\x12t\x0A\x0CGetIamPolicy\x12\".google.iam.v1.GetIamPolicyRequest\x1A\x15.google.iam.v1.Policy\")\x82\xD3\xE4\x93\x02#\"\x1E/v1/{resource=**}:getIamPolicy:\x01*\x12\x9A\x01\x0A\x12TestIamPermissions\x12(.google.iam.v1.TestIamPermissionsRequest\x1A).google.iam.v1.TestIamPermissionsResponse\"/\x82\xD3\xE4\x93\x02)\"\$/v1/{resource=**}:testIamPermissions:\x01*\x1A\x1E\xCAA\x1Biam-meta-api.googleapis.comB|\x0A\x11com.google.iam.v1B\x0EIamPolicyProtoP\x01Z)cloud.google.com/go/iam/apiv1/iampb;iampb\xAA\x02\x13Google.Cloud.Iam.V1\xCA\x02\x13Google\\Cloud\\Iam\\V1b\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

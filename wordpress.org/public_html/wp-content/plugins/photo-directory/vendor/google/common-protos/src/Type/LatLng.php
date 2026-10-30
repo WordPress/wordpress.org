@@ -5,15 +5,15 @@
 namespace Google\Type;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
- * An object representing a latitude/longitude pair. This is expressed as a pair
- * of doubles representing degrees latitude and degrees longitude. Unless
- * specified otherwise, this must conform to the
- * <a href="http://www.unoosa.org/pdf/icg/2012/template/WGS_84.pdf">WGS84
- * standard</a>. Values must be within normalized ranges.
+ * An object that represents a latitude/longitude pair. This is expressed as a
+ * pair of doubles to represent degrees latitude and degrees longitude. Unless
+ * specified otherwise, this object must conform to the
+ * <a href="https://en.wikipedia.org/wiki/World_Geodetic_System#1984_version">
+ * WGS84 standard</a>. Values must be within normalized ranges.
  *
  * Generated from protobuf message <code>google.type.LatLng</code>
  */
@@ -24,13 +24,13 @@ class LatLng extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>double latitude = 1;</code>
      */
-    private $latitude = 0.0;
+    protected $latitude = 0.0;
     /**
      * The longitude in degrees. It must be in the range [-180.0, +180.0].
      *
      * Generated from protobuf field <code>double longitude = 2;</code>
      */
-    private $longitude = 0.0;
+    protected $longitude = 0.0;
 
     /**
      * Constructor.

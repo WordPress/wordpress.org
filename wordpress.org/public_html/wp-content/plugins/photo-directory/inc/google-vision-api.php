@@ -15,8 +15,13 @@ require_once WPORG_PHOTO_DIRECTORY_DIRECTORY . '/vendor/autoload.php';
 require_once WPORG_PHOTO_DIRECTORY_DIRECTORY . '/inc/color-utils.php';
 
 // Import Google libraries.
-use Google\Cloud\Storage\StorageClient;
-use Google\Cloud\Vision\VisionClient;
+use Google\Cloud\Vision\V1\AnnotateImageRequest;
+use Google\Cloud\Vision\V1\BatchAnnotateImagesRequest;
+use Google\Cloud\Vision\V1\Client\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\Feature;
+use Google\Cloud\Vision\V1\Feature\Type;
+use Google\Cloud\Vision\V1\Image;
+use Google\Cloud\Vision\V1\ImageSource;
 
 class VisionAPI {
 
@@ -85,38 +90,35 @@ class VisionAPI {
 			);
 		}
 
+		$image  = new Image();
 		$bucket = self::get_cloud_bucket();
 		if ( $bucket ) {
-			$storage = new StorageClient();
-			$file = $storage->bucket( $bucket )->object( $path );
+			$image->setSource( ( new ImageSource() )->setGcsImageUri( 'gs://' . $bucket . '/' . $path ) );
 		} else {
 			$upload_dir = wp_get_upload_dir();
-			$file = fopen( $upload_dir['basedir'] . '/'. $path, 'r' );
+			$image->setContent( file_get_contents( $upload_dir['basedir'] . '/' . $path ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file.
 		}
 
-		$vision = new VisionClient();
-		$image = $vision->image( $file,
-			[
-				'faces',
-				'imageProperties',
-				'labels',
-				'safeSearch',
-			],
-			[
-				'maxResults' => [
-					'face'            => 10,
-					'imageProperties' => 50,
-					'labels'          => 10,
-					'safeSearch'      => 50,
-				],
-			],
+		$features = [
+			( new Feature() )->setType( Type::FACE_DETECTION )->setMaxResults( 10 ),
+			( new Feature() )->setType( Type::IMAGE_PROPERTIES )->setMaxResults( 50 ),
+			( new Feature() )->setType( Type::LABEL_DETECTION )->setMaxResults( 10 ),
+			( new Feature() )->setType( Type::SAFE_SEARCH_DETECTION )->setMaxResults( 50 ),
+		];
+
+		$request = ( new BatchAnnotateImagesRequest() )->setRequests(
+			[ ( new AnnotateImageRequest() )->setImage( $image )->setFeatures( $features ) ]
 		);
 
-		$annotation = $vision->annotate( $image );
+		$vision   = new ImageAnnotatorClient( [ 'transport' => 'rest' ] );
+		$response = $vision->batchAnnotateImages( $request )->getResponses()[0];
 
-		if ( $annotation->error() ) {
-			return new \WP_Error( 'wporg-photos-vision-error', $annotation->error()['message'] );
+		if ( $response->hasError() ) {
+			return new \WP_Error( 'wporg-photos-vision-error', $response->getError()->getMessage() );
 		}
+
+		// Stored as post meta, so keep it a plain array rather than a library object.
+		$annotation = json_decode( $response->serializeToJsonString(), true );
 
 		return [ 'vision_raw_annotation' => $annotation ] + self::extract_from_api( $annotation );
 	}
@@ -124,9 +126,9 @@ class VisionAPI {
 	/**
 	 * Extracts data from Vision API response.
 	 *
-	 * @link https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.148.0/vision/annotation
+	 * @link https://cloud.google.com/vision/docs/reference/rest/v1/AnnotateImageResponse
 	 *
-	 * @param Annotation $response Image annotation response object.
+	 * @param array $response Image annotation response, decoded from its JSON form.
 	 * @return array {
 	 *     Array of data extracted from the Vision API. Keys only present if extracted.
 	 *
@@ -141,33 +143,27 @@ class VisionAPI {
 		$results = [];
 
 		// Extract colors.
-		$image_properties = $response->imageProperties();
-		if ( $image_properties ) {
-			$raw_colors = $image_properties->info()['dominantColors']['colors'] ?? [];
-			if ( $raw_colors ) {
-				$colors = self::extract_colors( $raw_colors );
-				$results['vision_raw_colors'] = $colors[0];
-				$results['vision_colors']     = $colors[1];
-			}
+		$raw_colors = $response['imagePropertiesAnnotation']['dominantColors']['colors'] ?? [];
+		if ( $raw_colors ) {
+			$colors                       = self::extract_colors( $raw_colors );
+			$results['vision_raw_colors'] = $colors[0];
+			$results['vision_colors']     = $colors[1];
 		}
 
 		// Basic use of face detection, just to count detected faces.
-		$faces = $response->faces();
-		if ( ! is_array( $faces ) ) {
-			$faces = [];
-		}
+		$faces                   = $response['faceAnnotations'] ?? [];
 		$results['vision_faces'] = [ 'count' => count( $faces ) ];
 		// Save raw faces data for potential future use.
 		if ( $faces ) {
 			$results['vision_faces']['raw'] = $faces;
 		}
 
-		$labels = self::extract_labels( $response->labels() );
+		$labels = self::extract_labels( $response['labelAnnotations'] ?? [] );
 		if ( $labels ) {
 			$results['vision_labels'] = array_map( 'strtolower', $labels );
 		}
 
-		$safe_search = self::extract_safe_search_assessment( $response->safeSearch()->info() );
+		$safe_search = self::extract_safe_search_assessment( $response['safeSearchAnnotation'] ?? [] );
 		if ( $safe_search ) {
 			$results['vision_safe_search'] = $safe_search;
 		}
@@ -239,9 +235,9 @@ class VisionAPI {
 		// Minimum confidence threshold for applicability.
 		$min_score = 0.80;
 
-		foreach ( $api_labels as $label_obj ) {
-			if ( $label_obj->info()['score'] > $min_score ) {
-				$labels[] = $label_obj->info()['description'];
+		foreach ( $api_labels as $label ) {
+			if ( ( $label['score'] ?? 0 ) > $min_score ) {
+				$labels[] = $label['description'];
 			}
 		}
 

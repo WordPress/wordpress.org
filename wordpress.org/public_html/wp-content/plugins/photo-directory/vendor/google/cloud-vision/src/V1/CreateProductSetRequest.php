@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Request message for the `CreateProductSet` method.
@@ -21,13 +21,13 @@ class CreateProductSetRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string parent = 1 [(.google.api.field_behavior) = REQUIRED, (.google.api.resource_reference) = {</code>
      */
-    private $parent = '';
+    protected $parent = '';
     /**
      * Required. The ProductSet to create.
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.ProductSet product_set = 2 [(.google.api.field_behavior) = REQUIRED];</code>
      */
-    private $product_set = null;
+    protected $product_set = null;
     /**
      * A user-supplied resource id for this ProductSet. If set, the server will
      * attempt to use this value as the resource id. If it is already in use, an
@@ -36,7 +36,30 @@ class CreateProductSetRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string product_set_id = 3;</code>
      */
-    private $product_set_id = '';
+    protected $product_set_id = '';
+
+    /**
+     * @param string                             $parent       Required. The project in which the ProductSet should be created.
+     *
+     *                                                         Format is `projects/PROJECT_ID/locations/LOC_ID`. Please see
+     *                                                         {@see ProductSearchClient::locationName()} for help formatting this field.
+     * @param \Google\Cloud\Vision\V1\ProductSet $productSet   Required. The ProductSet to create.
+     * @param string                             $productSetId A user-supplied resource id for this ProductSet. If set, the server will
+     *                                                         attempt to use this value as the resource id. If it is already in use, an
+     *                                                         error is returned with code ALREADY_EXISTS. Must be at most 128 characters
+     *                                                         long. It cannot contain the character `/`.
+     *
+     * @return \Google\Cloud\Vision\V1\CreateProductSetRequest
+     *
+     * @experimental
+     */
+    public static function build(string $parent, \Google\Cloud\Vision\V1\ProductSet $productSet, string $productSetId): self
+    {
+        return (new self())
+            ->setParent($parent)
+            ->setProductSet($productSet)
+            ->setProductSetId($productSetId);
+    }
 
     /**
      * Constructor.

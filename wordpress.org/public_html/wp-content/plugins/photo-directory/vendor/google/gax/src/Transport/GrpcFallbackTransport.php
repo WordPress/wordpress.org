@@ -54,15 +54,15 @@ class GrpcFallbackTransport implements TransportInterface
     use ServiceAddressTrait;
     use HttpUnaryTransportTrait;
 
-    private $baseUri;
+    private string $baseUri;
 
     /**
      * @param string $baseUri
      * @param callable $httpHandler A handler used to deliver PSR-7 requests.
      */
     public function __construct(
-        $baseUri,
-        callable $httpHandler
+        string $baseUri,
+        callable $httpHandler,
     ) {
         $this->baseUri = $baseUri;
         $this->httpHandler = $httpHandler;
@@ -82,14 +82,15 @@ class GrpcFallbackTransport implements TransportInterface
      * @return GrpcFallbackTransport
      * @throws ValidationException
      */
-    public static function build($apiEndpoint, array $config = [])
+    public static function build(string $apiEndpoint, array $config = [])
     {
         $config += [
             'httpHandler'  => null,
             'clientCertSource' => null,
+            'logger' => null,
         ];
         list($baseUri, $port) = self::normalizeServiceAddress($apiEndpoint);
-        $httpHandler = $config['httpHandler'] ?: self::buildHttpHandlerAsync();
+        $httpHandler = $config['httpHandler'] ?: self::buildHttpHandlerAsync(logger: $config['logger']);
         $transport = new GrpcFallbackTransport("$baseUri:$port", $httpHandler);
         if ($config['clientCertSource']) {
             $transport->configureMtlsChannel($config['clientCertSource']);
@@ -103,8 +104,11 @@ class GrpcFallbackTransport implements TransportInterface
     public function startUnaryCall(Call $call, array $options)
     {
         $httpHandler = $this->httpHandler;
+
+        $options['requestId'] = crc32((string) spl_object_id($call) . getmypid());
+
         return $httpHandler(
-            $this->buildRequest($call, $options),
+            $this->buildGrpcFallbackRequest($call, $options),
             $this->getCallOptions($options)
         )->then(
             function (ResponseInterface $response) use ($options) {
@@ -129,7 +133,7 @@ class GrpcFallbackTransport implements TransportInterface
      * @param array $options
      * @return RequestInterface
      */
-    private function buildRequest(Call $call, array $options)
+    private function buildGrpcFallbackRequest(Call $call, array $options)
     {
         // Build common headers and set the content type to 'application/x-protobuf'
         $headers = ['Content-Type' => 'application/x-protobuf'] + self::buildCommonHeaders($options);
@@ -159,8 +163,8 @@ class GrpcFallbackTransport implements TransportInterface
     {
         $decodeType = $call->getDecodeType();
         /** @var Message $responseMessage */
-        $responseMessage = new $decodeType;
-        $responseMessage->mergeFromString((string)$response->getBody());
+        $responseMessage = new $decodeType();
+        $responseMessage->mergeFromString((string) $response->getBody());
         return $responseMessage;
     }
 
@@ -170,16 +174,22 @@ class GrpcFallbackTransport implements TransportInterface
      */
     private function getCallOptions(array $options)
     {
-        $callOptions = isset($options['transportOptions']['grpcFallbackOptions'])
-            ? $options['transportOptions']['grpcFallbackOptions']
-            : [];
+        $callOptions = $options['transportOptions']['grpcFallbackOptions'] ?? [];
 
         if (isset($options['timeoutMillis'])) {
             $callOptions['timeout'] = $options['timeoutMillis'] / 1000;
         }
 
+        if (isset($options['retryAttempt'])) {
+            $callOptions['retryAttempt'] = $options['retryAttempt'];
+        }
+
+        if (isset($options['requestId'])) {
+            $callOptions['requestId'] = $options['requestId'];
+        }
+
         if ($this->clientCertSource) {
-            list($cert, $key) = self::loadClientCertSource();
+            list($cert, $key) = self::loadClientCertSource($this->clientCertSource);
             $callOptions['cert'] = $cert;
             $callOptions['key'] = $key;
         }
@@ -193,7 +203,9 @@ class GrpcFallbackTransport implements TransportInterface
      */
     private function transformException(\Exception $ex)
     {
-        if ($ex instanceof RequestException && $ex->hasResponse()) {
+        // Guzzle 7 carries the response on RequestException, Guzzle 8 only on
+        // its ResponseException subclass, hence the method_exists() check.
+        if ($ex instanceof RequestException && method_exists($ex, 'getResponse') && $ex->getResponse()) {
             $res = $ex->getResponse();
             $body = (string) $res->getBody();
             $status = new Status();

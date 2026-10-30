@@ -5,23 +5,28 @@
 namespace Google\Api;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
- * `Endpoint` describes a network endpoint that serves a set of APIs.
- * A service may expose any number of endpoints, and all endpoints share the
- * same service configuration, such as quota configuration and monitoring
- * configuration.
- * Example service configuration:
+ * `Endpoint` describes a network address of a service that serves a set of
+ * APIs. It is commonly known as a service endpoint. A service may expose
+ * any number of service endpoints, and all service endpoints share the same
+ * service definition, such as quota limits and monitoring metrics.
+ * Example:
+ *     type: google.api.Service
  *     name: library-example.googleapis.com
  *     endpoints:
- *       # Below entry makes 'google.example.library.v1.Library'
- *       # API be served from endpoint address library-example.googleapis.com.
- *       # It also allows HTTP OPTIONS calls to be passed to the backend, for
- *       # it to decide whether the subsequent cross-origin request is
- *       # allowed to proceed.
+ *       # Declares network address `https://library-example.googleapis.com`
+ *       # for service `library-example.googleapis.com`. The `https` scheme
+ *       # is implicit for all service endpoints. Other schemes may be
+ *       # supported in the future.
  *     - name: library-example.googleapis.com
+ *       allow_cors: false
+ *     - name: content-staging-library-example.googleapis.com
+ *       # Allows HTTP OPTIONS calls to be passed to the API frontend, for it
+ *       # to decide whether the subsequent cross-origin request is allowed
+ *       # to proceed.
  *       allow_cors: true
  *
  * Generated from protobuf message <code>google.api.Endpoint</code>
@@ -33,31 +38,25 @@ class Endpoint extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string name = 1;</code>
      */
-    private $name = '';
+    protected $name = '';
     /**
-     * DEPRECATED: This field is no longer supported. Instead of using aliases,
-     * please specify multiple [google.api.Endpoint][google.api.Endpoint] for each of the intended
-     * aliases.
-     * Additional names that this endpoint will be hosted on.
+     * Aliases for this endpoint, these will be served by the same UrlMap as the
+     * parent endpoint, and will be provisioned in the GCP stack for the Regional
+     * Endpoints.
      *
      * Generated from protobuf field <code>repeated string aliases = 2;</code>
      */
     private $aliases;
     /**
-     * The list of features enabled on this endpoint.
-     *
-     * Generated from protobuf field <code>repeated string features = 4;</code>
-     */
-    private $features;
-    /**
      * The specification of an Internet routable address of API frontend that will
-     * handle requests to this [API Endpoint](https://cloud.google.com/apis/design/glossary).
-     * It should be either a valid IPv4 address or a fully-qualified domain name.
-     * For example, "8.8.8.8" or "myservice.appspot.com".
+     * handle requests to this [API
+     * Endpoint](https://cloud.google.com/apis/design/glossary). It should be
+     * either a valid IPv4 address or a fully-qualified domain name. For example,
+     * "8.8.8.8" or "myservice.appspot.com".
      *
      * Generated from protobuf field <code>string target = 101;</code>
      */
-    private $target = '';
+    protected $target = '';
     /**
      * Allowing
      * [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing), aka
@@ -68,7 +67,7 @@ class Endpoint extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>bool allow_cors = 5;</code>
      */
-    private $allow_cors = false;
+    protected $allow_cors = false;
 
     /**
      * Constructor.
@@ -78,18 +77,16 @@ class Endpoint extends \Google\Protobuf\Internal\Message
      *
      *     @type string $name
      *           The canonical name of this endpoint.
-     *     @type string[]|\Google\Protobuf\Internal\RepeatedField $aliases
-     *           DEPRECATED: This field is no longer supported. Instead of using aliases,
-     *           please specify multiple [google.api.Endpoint][google.api.Endpoint] for each of the intended
-     *           aliases.
-     *           Additional names that this endpoint will be hosted on.
-     *     @type string[]|\Google\Protobuf\Internal\RepeatedField $features
-     *           The list of features enabled on this endpoint.
+     *     @type string[] $aliases
+     *           Aliases for this endpoint, these will be served by the same UrlMap as the
+     *           parent endpoint, and will be provisioned in the GCP stack for the Regional
+     *           Endpoints.
      *     @type string $target
      *           The specification of an Internet routable address of API frontend that will
-     *           handle requests to this [API Endpoint](https://cloud.google.com/apis/design/glossary).
-     *           It should be either a valid IPv4 address or a fully-qualified domain name.
-     *           For example, "8.8.8.8" or "myservice.appspot.com".
+     *           handle requests to this [API
+     *           Endpoint](https://cloud.google.com/apis/design/glossary). It should be
+     *           either a valid IPv4 address or a fully-qualified domain name. For example,
+     *           "8.8.8.8" or "myservice.appspot.com".
      *     @type bool $allow_cors
      *           Allowing
      *           [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing), aka
@@ -131,13 +128,12 @@ class Endpoint extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * DEPRECATED: This field is no longer supported. Instead of using aliases,
-     * please specify multiple [google.api.Endpoint][google.api.Endpoint] for each of the intended
-     * aliases.
-     * Additional names that this endpoint will be hosted on.
+     * Aliases for this endpoint, these will be served by the same UrlMap as the
+     * parent endpoint, and will be provisioned in the GCP stack for the Regional
+     * Endpoints.
      *
      * Generated from protobuf field <code>repeated string aliases = 2;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<string>
      */
     public function getAliases()
     {
@@ -145,13 +141,12 @@ class Endpoint extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * DEPRECATED: This field is no longer supported. Instead of using aliases,
-     * please specify multiple [google.api.Endpoint][google.api.Endpoint] for each of the intended
-     * aliases.
-     * Additional names that this endpoint will be hosted on.
+     * Aliases for this endpoint, these will be served by the same UrlMap as the
+     * parent endpoint, and will be provisioned in the GCP stack for the Regional
+     * Endpoints.
      *
      * Generated from protobuf field <code>repeated string aliases = 2;</code>
-     * @param string[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param string[] $var
      * @return $this
      */
     public function setAliases($var)
@@ -163,36 +158,11 @@ class Endpoint extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * The list of features enabled on this endpoint.
-     *
-     * Generated from protobuf field <code>repeated string features = 4;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
-     */
-    public function getFeatures()
-    {
-        return $this->features;
-    }
-
-    /**
-     * The list of features enabled on this endpoint.
-     *
-     * Generated from protobuf field <code>repeated string features = 4;</code>
-     * @param string[]|\Google\Protobuf\Internal\RepeatedField $var
-     * @return $this
-     */
-    public function setFeatures($var)
-    {
-        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::STRING);
-        $this->features = $arr;
-
-        return $this;
-    }
-
-    /**
      * The specification of an Internet routable address of API frontend that will
-     * handle requests to this [API Endpoint](https://cloud.google.com/apis/design/glossary).
-     * It should be either a valid IPv4 address or a fully-qualified domain name.
-     * For example, "8.8.8.8" or "myservice.appspot.com".
+     * handle requests to this [API
+     * Endpoint](https://cloud.google.com/apis/design/glossary). It should be
+     * either a valid IPv4 address or a fully-qualified domain name. For example,
+     * "8.8.8.8" or "myservice.appspot.com".
      *
      * Generated from protobuf field <code>string target = 101;</code>
      * @return string
@@ -204,9 +174,10 @@ class Endpoint extends \Google\Protobuf\Internal\Message
 
     /**
      * The specification of an Internet routable address of API frontend that will
-     * handle requests to this [API Endpoint](https://cloud.google.com/apis/design/glossary).
-     * It should be either a valid IPv4 address or a fully-qualified domain name.
-     * For example, "8.8.8.8" or "myservice.appspot.com".
+     * handle requests to this [API
+     * Endpoint](https://cloud.google.com/apis/design/glossary). It should be
+     * either a valid IPv4 address or a fully-qualified domain name. For example,
+     * "8.8.8.8" or "myservice.appspot.com".
      *
      * Generated from protobuf field <code>string target = 101;</code>
      * @param string $var

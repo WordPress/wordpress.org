@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * A `ReferenceImage` represents a product image and its associated metadata,
@@ -24,17 +24,17 @@ class ReferenceImage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string name = 1;</code>
      */
-    private $name = '';
+    protected $name = '';
     /**
      * Required. The Google Cloud Storage URI of the reference image.
      * The URI must start with `gs://`.
      *
      * Generated from protobuf field <code>string uri = 2 [(.google.api.field_behavior) = REQUIRED];</code>
      */
-    private $uri = '';
+    protected $uri = '';
     /**
-     * Optional. Bounding polygons around the areas of interest in the reference image.
-     * If this field is empty, the system will try to detect regions of
+     * Optional. Bounding polygons around the areas of interest in the reference
+     * image. If this field is empty, the system will try to detect regions of
      * interest. At most 10 bounding polygons will be used.
      * The provided shape is converted into a non-rotated rectangle. Once
      * converted, the small edge of the rectangle must be greater than or equal
@@ -59,9 +59,9 @@ class ReferenceImage extends \Google\Protobuf\Internal\Message
      *     @type string $uri
      *           Required. The Google Cloud Storage URI of the reference image.
      *           The URI must start with `gs://`.
-     *     @type \Google\Cloud\Vision\V1\BoundingPoly[]|\Google\Protobuf\Internal\RepeatedField $bounding_polys
-     *           Optional. Bounding polygons around the areas of interest in the reference image.
-     *           If this field is empty, the system will try to detect regions of
+     *     @type \Google\Cloud\Vision\V1\BoundingPoly[] $bounding_polys
+     *           Optional. Bounding polygons around the areas of interest in the reference
+     *           image. If this field is empty, the system will try to detect regions of
      *           interest. At most 10 bounding polygons will be used.
      *           The provided shape is converted into a non-rotated rectangle. Once
      *           converted, the small edge of the rectangle must be greater than or equal
@@ -135,8 +135,8 @@ class ReferenceImage extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Optional. Bounding polygons around the areas of interest in the reference image.
-     * If this field is empty, the system will try to detect regions of
+     * Optional. Bounding polygons around the areas of interest in the reference
+     * image. If this field is empty, the system will try to detect regions of
      * interest. At most 10 bounding polygons will be used.
      * The provided shape is converted into a non-rotated rectangle. Once
      * converted, the small edge of the rectangle must be greater than or equal
@@ -144,7 +144,7 @@ class ReferenceImage extends \Google\Protobuf\Internal\Message
      * is not).
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.BoundingPoly bounding_polys = 3 [(.google.api.field_behavior) = OPTIONAL];</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Cloud\Vision\V1\BoundingPoly>
      */
     public function getBoundingPolys()
     {
@@ -152,8 +152,8 @@ class ReferenceImage extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Optional. Bounding polygons around the areas of interest in the reference image.
-     * If this field is empty, the system will try to detect regions of
+     * Optional. Bounding polygons around the areas of interest in the reference
+     * image. If this field is empty, the system will try to detect regions of
      * interest. At most 10 bounding polygons will be used.
      * The provided shape is converted into a non-rotated rectangle. Once
      * converted, the small edge of the rectangle must be greater than or equal
@@ -161,7 +161,7 @@ class ReferenceImage extends \Google\Protobuf\Internal\Message
      * is not).
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.BoundingPoly bounding_polys = 3 [(.google.api.field_behavior) = OPTIONAL];</code>
-     * @param \Google\Cloud\Vision\V1\BoundingPoly[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Cloud\Vision\V1\BoundingPoly[] $var
      * @return $this
      */
     public function setBoundingPolys($var)

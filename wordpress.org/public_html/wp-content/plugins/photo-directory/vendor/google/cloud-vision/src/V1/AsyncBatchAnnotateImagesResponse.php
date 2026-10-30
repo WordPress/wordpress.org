@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Response to an async batch image annotation request.
@@ -20,7 +20,7 @@ class AsyncBatchAnnotateImagesResponse extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.OutputConfig output_config = 1;</code>
      */
-    private $output_config = null;
+    protected $output_config = null;
 
     /**
      * Constructor.

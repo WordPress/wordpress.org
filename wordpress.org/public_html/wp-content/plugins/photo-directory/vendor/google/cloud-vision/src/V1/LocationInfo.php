@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Detected entity location information.
@@ -20,7 +20,7 @@ class LocationInfo extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.type.LatLng lat_lng = 1;</code>
      */
-    private $lat_lng = null;
+    protected $lat_lng = null;
 
     /**
      * Constructor.

@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Parameters for a product search request.
@@ -21,15 +21,16 @@ class ProductSearchParams extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.BoundingPoly bounding_poly = 9;</code>
      */
-    private $bounding_poly = null;
+    protected $bounding_poly = null;
     /**
-     * The resource name of a [ProductSet][google.cloud.vision.v1.ProductSet] to be searched for similar images.
+     * The resource name of a [ProductSet][google.cloud.vision.v1.ProductSet] to
+     * be searched for similar images.
      * Format is:
      * `projects/PROJECT_ID/locations/LOC_ID/productSets/PRODUCT_SET_ID`.
      *
      * Generated from protobuf field <code>string product_set = 6 [(.google.api.resource_reference) = {</code>
      */
-    private $product_set = '';
+    protected $product_set = '';
     /**
      * The list of product categories to search in. Currently, we only consider
      * the first category, and either "homegoods-v2", "apparel-v2", "toys-v2",
@@ -53,7 +54,7 @@ class ProductSearchParams extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string filter = 8;</code>
      */
-    private $filter = '';
+    protected $filter = '';
 
     /**
      * Constructor.
@@ -65,10 +66,11 @@ class ProductSearchParams extends \Google\Protobuf\Internal\Message
      *           The bounding polygon around the area of interest in the image.
      *           If it is not specified, system discretion will be applied.
      *     @type string $product_set
-     *           The resource name of a [ProductSet][google.cloud.vision.v1.ProductSet] to be searched for similar images.
+     *           The resource name of a [ProductSet][google.cloud.vision.v1.ProductSet] to
+     *           be searched for similar images.
      *           Format is:
      *           `projects/PROJECT_ID/locations/LOC_ID/productSets/PRODUCT_SET_ID`.
-     *     @type string[]|\Google\Protobuf\Internal\RepeatedField $product_categories
+     *     @type string[] $product_categories
      *           The list of product categories to search in. Currently, we only consider
      *           the first category, and either "homegoods-v2", "apparel-v2", "toys-v2",
      *           "packagedgoods-v1", or "general-v1" should be specified. The legacy
@@ -130,7 +132,8 @@ class ProductSearchParams extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * The resource name of a [ProductSet][google.cloud.vision.v1.ProductSet] to be searched for similar images.
+     * The resource name of a [ProductSet][google.cloud.vision.v1.ProductSet] to
+     * be searched for similar images.
      * Format is:
      * `projects/PROJECT_ID/locations/LOC_ID/productSets/PRODUCT_SET_ID`.
      *
@@ -143,7 +146,8 @@ class ProductSearchParams extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * The resource name of a [ProductSet][google.cloud.vision.v1.ProductSet] to be searched for similar images.
+     * The resource name of a [ProductSet][google.cloud.vision.v1.ProductSet] to
+     * be searched for similar images.
      * Format is:
      * `projects/PROJECT_ID/locations/LOC_ID/productSets/PRODUCT_SET_ID`.
      *
@@ -169,7 +173,7 @@ class ProductSearchParams extends \Google\Protobuf\Internal\Message
      * migrate existing products to these categories as well.
      *
      * Generated from protobuf field <code>repeated string product_categories = 7;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<string>
      */
     public function getProductCategories()
     {
@@ -186,7 +190,7 @@ class ProductSearchParams extends \Google\Protobuf\Internal\Message
      * migrate existing products to these categories as well.
      *
      * Generated from protobuf field <code>repeated string product_categories = 7;</code>
-     * @param string[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param string[] $var
      * @return $this
      */
     public function setProductCategories($var)

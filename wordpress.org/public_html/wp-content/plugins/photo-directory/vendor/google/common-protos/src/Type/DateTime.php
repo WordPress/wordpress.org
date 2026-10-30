@@ -5,11 +5,12 @@
 namespace Google\Type;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
- * Represents civil time in one of a few possible ways:
+ * Represents civil time (or occasionally physical time).
+ * This type can represent a civil time in one of a few possible ways:
  *  * When utc_offset is set and time_zone is unset: a civil time on a calendar
  *    day with a particular offset from UTC.
  *  * When time_zone is set and utc_offset is unset: a civil time on a calendar
@@ -17,8 +18,13 @@ use Google\Protobuf\Internal\GPBUtil;
  *  * When neither time_zone nor utc_offset is set: a civil time on a calendar
  *    day in local time.
  * The date is relative to the Proleptic Gregorian Calendar.
- * If year is 0, the DateTime is considered not to have a specific year. month
- * and day must have valid, non-zero values.
+ * If year, month, or day are 0, the DateTime is considered not to have a
+ * specific year, month, or day respectively.
+ * This type may also be used to represent a physical time if all the date and
+ * time fields are set and either case of the `time_offset` oneof is set.
+ * Consider using `Timestamp` message for physical time instead. If your use
+ * case also would like to store the user's timezone, that can be done in
+ * another field.
  * This type is more flexible than some applications may want. Make sure to
  * document and validate your application's limitations.
  *
@@ -32,48 +38,49 @@ class DateTime extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>int32 year = 1;</code>
      */
-    private $year = 0;
+    protected $year = 0;
     /**
-     * Required. Month of year. Must be from 1 to 12.
+     * Optional. Month of year. Must be from 1 to 12, or 0 if specifying a
+     * datetime without a month.
      *
      * Generated from protobuf field <code>int32 month = 2;</code>
      */
-    private $month = 0;
+    protected $month = 0;
     /**
-     * Required. Day of month. Must be from 1 to 31 and valid for the year and
-     * month.
+     * Optional. Day of month. Must be from 1 to 31 and valid for the year and
+     * month, or 0 if specifying a datetime without a day.
      *
      * Generated from protobuf field <code>int32 day = 3;</code>
      */
-    private $day = 0;
+    protected $day = 0;
     /**
-     * Required. Hours of day in 24 hour format. Should be from 0 to 23. An API
-     * may choose to allow the value "24:00:00" for scenarios like business
-     * closing time.
+     * Optional. Hours of day in 24 hour format. Should be from 0 to 23, defaults
+     * to 0 (midnight). An API may choose to allow the value "24:00:00" for
+     * scenarios like business closing time.
      *
      * Generated from protobuf field <code>int32 hours = 4;</code>
      */
-    private $hours = 0;
+    protected $hours = 0;
     /**
-     * Required. Minutes of hour of day. Must be from 0 to 59.
+     * Optional. Minutes of hour of day. Must be from 0 to 59, defaults to 0.
      *
      * Generated from protobuf field <code>int32 minutes = 5;</code>
      */
-    private $minutes = 0;
+    protected $minutes = 0;
     /**
-     * Required. Seconds of minutes of the time. Must normally be from 0 to 59. An
-     * API may allow the value 60 if it allows leap-seconds.
+     * Optional. Seconds of minutes of the time. Must normally be from 0 to 59,
+     * defaults to 0. An API may allow the value 60 if it allows leap-seconds.
      *
      * Generated from protobuf field <code>int32 seconds = 6;</code>
      */
-    private $seconds = 0;
+    protected $seconds = 0;
     /**
-     * Required. Fractions of seconds in nanoseconds. Must be from 0 to
-     * 999,999,999.
+     * Optional. Fractions of seconds in nanoseconds. Must be from 0 to
+     * 999,999,999, defaults to 0.
      *
      * Generated from protobuf field <code>int32 nanos = 7;</code>
      */
-    private $nanos = 0;
+    protected $nanos = 0;
     protected $time_offset;
 
     /**
@@ -86,22 +93,23 @@ class DateTime extends \Google\Protobuf\Internal\Message
      *           Optional. Year of date. Must be from 1 to 9999, or 0 if specifying a
      *           datetime without a year.
      *     @type int $month
-     *           Required. Month of year. Must be from 1 to 12.
+     *           Optional. Month of year. Must be from 1 to 12, or 0 if specifying a
+     *           datetime without a month.
      *     @type int $day
-     *           Required. Day of month. Must be from 1 to 31 and valid for the year and
-     *           month.
+     *           Optional. Day of month. Must be from 1 to 31 and valid for the year and
+     *           month, or 0 if specifying a datetime without a day.
      *     @type int $hours
-     *           Required. Hours of day in 24 hour format. Should be from 0 to 23. An API
-     *           may choose to allow the value "24:00:00" for scenarios like business
-     *           closing time.
+     *           Optional. Hours of day in 24 hour format. Should be from 0 to 23, defaults
+     *           to 0 (midnight). An API may choose to allow the value "24:00:00" for
+     *           scenarios like business closing time.
      *     @type int $minutes
-     *           Required. Minutes of hour of day. Must be from 0 to 59.
+     *           Optional. Minutes of hour of day. Must be from 0 to 59, defaults to 0.
      *     @type int $seconds
-     *           Required. Seconds of minutes of the time. Must normally be from 0 to 59. An
-     *           API may allow the value 60 if it allows leap-seconds.
+     *           Optional. Seconds of minutes of the time. Must normally be from 0 to 59,
+     *           defaults to 0. An API may allow the value 60 if it allows leap-seconds.
      *     @type int $nanos
-     *           Required. Fractions of seconds in nanoseconds. Must be from 0 to
-     *           999,999,999.
+     *           Optional. Fractions of seconds in nanoseconds. Must be from 0 to
+     *           999,999,999, defaults to 0.
      *     @type \Google\Protobuf\Duration $utc_offset
      *           UTC offset. Must be whole seconds, between -18 hours and +18 hours.
      *           For example, a UTC offset of -4:00 would be represented as
@@ -144,7 +152,8 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Month of year. Must be from 1 to 12.
+     * Optional. Month of year. Must be from 1 to 12, or 0 if specifying a
+     * datetime without a month.
      *
      * Generated from protobuf field <code>int32 month = 2;</code>
      * @return int
@@ -155,7 +164,8 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Month of year. Must be from 1 to 12.
+     * Optional. Month of year. Must be from 1 to 12, or 0 if specifying a
+     * datetime without a month.
      *
      * Generated from protobuf field <code>int32 month = 2;</code>
      * @param int $var
@@ -170,8 +180,8 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Day of month. Must be from 1 to 31 and valid for the year and
-     * month.
+     * Optional. Day of month. Must be from 1 to 31 and valid for the year and
+     * month, or 0 if specifying a datetime without a day.
      *
      * Generated from protobuf field <code>int32 day = 3;</code>
      * @return int
@@ -182,8 +192,8 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Day of month. Must be from 1 to 31 and valid for the year and
-     * month.
+     * Optional. Day of month. Must be from 1 to 31 and valid for the year and
+     * month, or 0 if specifying a datetime without a day.
      *
      * Generated from protobuf field <code>int32 day = 3;</code>
      * @param int $var
@@ -198,9 +208,9 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Hours of day in 24 hour format. Should be from 0 to 23. An API
-     * may choose to allow the value "24:00:00" for scenarios like business
-     * closing time.
+     * Optional. Hours of day in 24 hour format. Should be from 0 to 23, defaults
+     * to 0 (midnight). An API may choose to allow the value "24:00:00" for
+     * scenarios like business closing time.
      *
      * Generated from protobuf field <code>int32 hours = 4;</code>
      * @return int
@@ -211,9 +221,9 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Hours of day in 24 hour format. Should be from 0 to 23. An API
-     * may choose to allow the value "24:00:00" for scenarios like business
-     * closing time.
+     * Optional. Hours of day in 24 hour format. Should be from 0 to 23, defaults
+     * to 0 (midnight). An API may choose to allow the value "24:00:00" for
+     * scenarios like business closing time.
      *
      * Generated from protobuf field <code>int32 hours = 4;</code>
      * @param int $var
@@ -228,7 +238,7 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Minutes of hour of day. Must be from 0 to 59.
+     * Optional. Minutes of hour of day. Must be from 0 to 59, defaults to 0.
      *
      * Generated from protobuf field <code>int32 minutes = 5;</code>
      * @return int
@@ -239,7 +249,7 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Minutes of hour of day. Must be from 0 to 59.
+     * Optional. Minutes of hour of day. Must be from 0 to 59, defaults to 0.
      *
      * Generated from protobuf field <code>int32 minutes = 5;</code>
      * @param int $var
@@ -254,8 +264,8 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Seconds of minutes of the time. Must normally be from 0 to 59. An
-     * API may allow the value 60 if it allows leap-seconds.
+     * Optional. Seconds of minutes of the time. Must normally be from 0 to 59,
+     * defaults to 0. An API may allow the value 60 if it allows leap-seconds.
      *
      * Generated from protobuf field <code>int32 seconds = 6;</code>
      * @return int
@@ -266,8 +276,8 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Seconds of minutes of the time. Must normally be from 0 to 59. An
-     * API may allow the value 60 if it allows leap-seconds.
+     * Optional. Seconds of minutes of the time. Must normally be from 0 to 59,
+     * defaults to 0. An API may allow the value 60 if it allows leap-seconds.
      *
      * Generated from protobuf field <code>int32 seconds = 6;</code>
      * @param int $var
@@ -282,8 +292,8 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Fractions of seconds in nanoseconds. Must be from 0 to
-     * 999,999,999.
+     * Optional. Fractions of seconds in nanoseconds. Must be from 0 to
+     * 999,999,999, defaults to 0.
      *
      * Generated from protobuf field <code>int32 nanos = 7;</code>
      * @return int
@@ -294,8 +304,8 @@ class DateTime extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Required. Fractions of seconds in nanoseconds. Must be from 0 to
-     * 999,999,999.
+     * Optional. Fractions of seconds in nanoseconds. Must be from 0 to
+     * 999,999,999, defaults to 0.
      *
      * Generated from protobuf field <code>int32 nanos = 7;</code>
      * @param int $var
@@ -315,11 +325,16 @@ class DateTime extends \Google\Protobuf\Internal\Message
      * { seconds: -14400 }.
      *
      * Generated from protobuf field <code>.google.protobuf.Duration utc_offset = 8;</code>
-     * @return \Google\Protobuf\Duration
+     * @return \Google\Protobuf\Duration|null
      */
     public function getUtcOffset()
     {
         return $this->readOneof(8);
+    }
+
+    public function hasUtcOffset()
+    {
+        return $this->hasOneof(8);
     }
 
     /**
@@ -343,11 +358,16 @@ class DateTime extends \Google\Protobuf\Internal\Message
      * Time zone.
      *
      * Generated from protobuf field <code>.google.type.TimeZone time_zone = 9;</code>
-     * @return \Google\Type\TimeZone
+     * @return \Google\Type\TimeZone|null
      */
     public function getTimeZone()
     {
         return $this->readOneof(9);
+    }
+
+    public function hasTimeZone()
+    {
+        return $this->hasOneof(9);
     }
 
     /**

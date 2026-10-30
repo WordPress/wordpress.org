@@ -47,14 +47,33 @@ class StorageClient
     use ArrayTrait;
     use ClientTrait;
 
-    const VERSION = '1.26.1';
+    const VERSION = '1.51.0';
 
     const FULL_CONTROL_SCOPE = 'https://www.googleapis.com/auth/devstorage.full_control';
     const READ_ONLY_SCOPE = 'https://www.googleapis.com/auth/devstorage.read_only';
     const READ_WRITE_SCOPE = 'https://www.googleapis.com/auth/devstorage.read_write';
 
     /**
+     * Retry strategy to signify that we never want to retry an operation
+     * even if the error is retryable.
+     *
+     * We can set $options['retryStrategy'] to one of "always", "never" and
+     * "idempotent".
+     */
+    const RETRY_NEVER = 'never';
+    /**
+     * Retry strategy to signify that we always want to retry an operation.
+     */
+    const RETRY_ALWAYS = 'always';
+    /**
+     * This is the default. This signifies that we want to retry an operation
+     * only if it is retryable and the error is retryable.
+     */
+    const RETRY_IDEMPOTENT = 'idempotent';
+
+    /**
      * @var ConnectionInterface Represents a connection to Storage.
+     * @internal
      */
     protected $connection;
 
@@ -78,16 +97,71 @@ class StorageClient
      *           fetcher instance.
      *     @type callable $httpHandler A handler used to deliver Psr7 requests.
      *           Only valid for requests sent over REST.
-     *     @type array $keyFile The contents of the service account credentials
-     *           .json file retrieved from the Google Developer's Console.
-     *           Ex: `json_decode(file_get_contents($path), true)`.
-     *     @type string $keyFilePath The full path to your service account
-     *           credentials .json file retrieved from the Google Developers
-     *           Console.
+     *     @type array $keyFile [DEPRECATED]
+     *           This option is being deprecated because of a potential security risk.
+     *           This option does not validate the credential configuration. The security
+     *           risk occurs when a credential configuration is accepted from a source
+     *           that is not under your control and used without validation on your side.
+     *           If you know that you will be loading credential configurations of a
+     *           specific type, it is recommended to create the credentials directly and
+     *           configure them using the `credentialsFetcher` option instead.
+     *           ```
+     *           use Google\Auth\Credentials\ServiceAccountCredentials;
+     *           $credentialsFetcher = new ServiceAccountCredentials($scopes, $json);
+     *           $creds = new StorageClient(['credentialsFetcher' => $creds]);
+     *           ```
+     *           This will ensure that an unexpected credential type with potential for
+     *           malicious intent is not loaded unintentionally. You might still have to do
+     *           validation for certain credential types.
+     *           If you are loading your credential configuration from an untrusted source and have
+     *           not mitigated the risks (e.g. by validating the configuration yourself), make
+     *           these changes as soon as possible to prevent security risks to your environment.
+     *           Regardless of the method used, it is always your responsibility to validate
+     *           configurations received from external sources.
+     *           @see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials
+    *     @type string $keyFilePath [DEPRECATED]
+     *           This option is being deprecated because of a potential security risk.
+     *           This option does not validate the credential configuration. The security
+     *           risk occurs when a credential configuration is accepted from a source
+     *           that is not under your control and used without validation on your side.
+     *           If you know that you will be loading credential configurations of a
+     *           specific type, it is recommended to create the credentials directly and
+     *           configure them using the `credentialsFetcher` option instead.
+     *           ```
+     *           use Google\Auth\Credentials\ServiceAccountCredentials;
+     *           $credentialsFetcher = new ServiceAccountCredentials($scopes, $json);
+     *           $creds = new StorageClient(['credentialsFetcher' => $creds]);
+     *           ```
+     *           This will ensure that an unexpected credential type with potential for
+     *           malicious intent is not loaded unintentionally. You might still have to do
+     *           validation for certain credential types.
+     *           If you are loading your credential configuration from an untrusted source and have
+     *           not mitigated the risks (e.g. by validating the configuration yourself), make
+     *           these changes as soon as possible to prevent security risks to your environment.
+     *           Regardless of the method used, it is always your responsibility to validate
+     *           configurations received from external sources.
+     *           @see https://cloud.google.com/docs/authentication/external/externally-sourced-credentials
      *     @type float $requestTimeout Seconds to wait before timing out the
      *           request. **Defaults to** `0` with REST and `60` with gRPC.
      *     @type int $retries Number of retries for a failed request.
      *           **Defaults to** `3`.
+     *     @type string $retryStrategy Retry strategy to signify that we never
+     *           want to retry an operation even if the error is retryable.
+     *           **Defaults to** `StorageClient::RETRY_IDEMPOTENT`.
+     *     @type callable $restDelayFunction Executes a delay, defaults to
+     *           utilizing `usleep`. Function signature should match:
+     *           `function (int $delay) : void`.
+     *     @type callable $restCalcDelayFunction Sets the conditions for
+     *           determining how long to wait between attempts to retry. Function
+     *           signature should match: `function (int $attempt) : int`.
+     *     @type callable $restRetryFunction Sets the conditions for whether or
+     *           not a request should attempt to retry. Function signature should
+     *           match: `function (\Exception $ex) : bool`.
+     *     @type callable $restRetryListener Runs after the restRetryFunction.
+     *           This might be used to simply consume the exception and
+     *           $arguments b/w retries. This returns the new $arguments thus
+     *           allowing modification on demand for $arguments. For ex:
+     *           changing the headers in b/w retries.
      *     @type array $scopes Scopes to be used for the request.
      *     @type string $quotaProject Specifies a user project to bill for
      *           access charges associated with the request.
@@ -108,9 +182,10 @@ class StorageClient
     }
 
     /**
-     * Lazily instantiates a bucket. There are no network requests made at this
-     * point. To see the operations that can be performed on a bucket please
-     * see {@see Google\Cloud\Storage\Bucket}.
+     * Lazily instantiates a bucket.
+     *
+     * There are no network requests made at this point. To see the operations
+     * that can be performed on a bucket please see {@see Bucket}.
      *
      * If `$userProject` is set to true, the current project ID (used to
      * instantiate the client) will be billed for all requests. If
@@ -128,9 +203,19 @@ class StorageClient
      *        will be used. If a string, that string will be used as the
      *        userProject argument, and that project will be billed for the
      *        request. **Defaults to** `false`.
+     * @param array $options [optional] {
+     *     Configuration Options.
+     *
+     *     @type bool $softDeleted  If set to true, only soft-deleted bucket versions
+     *           are listed as distinct results in order of bucket name and generation
+     *           number. The default value is false.
+     *     @type string $generation If present, selects a specific soft-deleted version
+     *           of this bucket instead of the live version. This parameter is required if
+     *           softDeleted is set to true.
+     * }
      * @return Bucket
      */
-    public function bucket($name, $userProject = false)
+    public function bucket($name, $userProject = false, array $options = [])
     {
         if (!$userProject) {
             $userProject = null;
@@ -138,7 +223,7 @@ class StorageClient
             $userProject = $this->projectId;
         }
 
-        return new Bucket($this->connection, $name, [
+        return new Bucket($this->connection, $name, $options + [
             'requesterProjectId' => $userProject
         ]);
     }
@@ -180,29 +265,45 @@ class StorageClient
      *           return the specified fields.
      *     @type string $userProject If set, this is the ID of the project which
      *           will be billed for the request.
+     *     @type bool $softDeleted  If set to true, only soft-deleted bucket versions
+     *           are listed as distinct results in order of bucket name and generation
+     *           number. The default value is false.
      *     @type bool $bucketUserProject If true, each returned instance will
      *           have `$userProject` set to the value of `$options.userProject`.
      *           If false, `$options.userProject` will be used ONLY for the
      *           listBuckets operation. If `$options.userProject` is not set,
      *           this option has no effect. **Defaults to** `true`.
+     *      @type bool $returnPartialSuccess If true, the returned iterator will contain an
+     *           `unreachable` property with a list of buckets that were not retrieved.
+     *           **Note:** If set to false (default) and unreachable buckets are found,
+     *           the operation will throw an exception.
+     *
      * }
-     * @return ItemIterator<Bucket>
+     * @return BucketIterator<Bucket>
      * @throws GoogleException When a project ID has not been detected.
      */
     public function buckets(array $options = [])
     {
         $this->requireProjectId();
-
         $resultLimit = $this->pluck('resultLimit', $options, false);
-        $bucketUserProject = $this->pluck('bucketUserProject', $options, false);
-        $bucketUserProject = !is_null($bucketUserProject)
-            ? $bucketUserProject
-            : true;
-        $userProject = (isset($options['userProject']) && $bucketUserProject)
-            ? $options['userProject']
-            : null;
+        $bucketUserProject = $this->pluck('bucketUserProject', $options, null) ?? true;
+        $userProject = $bucketUserProject ? ($options['userProject'] ?? null) : null;
 
-        return new ItemIterator(
+        $unreachable = new \ArrayObject();
+
+        $apiCall = [$this->connection, 'listBuckets'];
+        $callDelegate = function (array $args) use ($apiCall, $unreachable) {
+            $response = call_user_func($apiCall, $args);
+            if (isset($response['unreachable']) && is_array($response['unreachable'])) {
+                $current = $unreachable->getArrayCopy();
+                $updated = array_unique(array_merge($current, $response['unreachable']));
+                $unreachable->exchangeArray($updated);
+            }
+            return $response;
+        };
+
+        // Return the new BucketIterator with the wrapped unreachable bucket
+        return new BucketIterator(
             new PageIterator(
                 function (array $bucket) use ($userProject) {
                     return new Bucket(
@@ -211,10 +312,43 @@ class StorageClient
                         $bucket + ['requesterProjectId' => $userProject]
                     );
                 },
-                [$this->connection, 'listBuckets'],
+                $callDelegate,
                 $options + ['project' => $this->projectId],
                 ['resultLimit' => $resultLimit]
-            )
+            ),
+            $unreachable
+        );
+    }
+
+    /**
+     * Restores a soft-deleted bucket.
+     *
+     * Example:
+     * ```
+     * $bucket = $storage->bucket->restore('my-bucket');
+     * ```
+     *
+     * @param string $name The name of the bucket to restore.
+     * @param string $generation The specific version of the bucket to be restored.
+     * @param array $options [optional] {
+     *     Configuration Options.
+     *
+     *     @type string $projection Determines which properties to return. May
+     *           be either `"full"` or `"noAcl"`. **Defaults to** `"noAcl"`,
+     *           unless the bucket resource specifies acl or defaultObjectAcl
+     *           properties, when it defaults to `"full"`.
+     * }
+     * @return Bucket
+     */
+    public function restore(string $name, string $generation, array $options = [])
+    {
+        $res = $this->connection->restoreBucket([
+            'bucket' => $name,
+            'generation' => $generation,
+        ] + $options);
+        return new Bucket(
+            $this->connection,
+            $name
         );
     }
 
@@ -251,6 +385,10 @@ class StorageClient
      *           `"projectPrivate"`, and `"publicRead"`.
      *     @type string $predefinedDefaultObjectAcl Apply a predefined set of
      *           default object access controls to this bucket.
+     *     @type bool $enableObjectRetention Whether object retention should
+     *          be enabled on this bucket. For more information, refer to the
+     *          [Object Retention Lock](https://cloud.google.com/storage/docs/object-lock)
+     *          documentation.
      *     @type string $projection Determines which properties to return. May
      *           be either `"full"` or `"noAcl"`. **Defaults to** `"noAcl"`,
      *           unless the bucket resource specifies acl or defaultObjectAcl
@@ -263,8 +401,16 @@ class StorageClient
      *     @type array $defaultObjectAcl Default access controls to apply to new
      *           objects when no ACL is provided.
      *     @type array|Lifecycle $lifecycle The bucket's lifecycle configuration.
-     *     @type string $location The location of the bucket. **Defaults to**
-     *           `"US"`.
+     *     @type string $location The location of the bucket. If specifying
+     *           a dual-region, the `customPlacementConfig` property should be
+     *           set in conjunction. For more information, see
+     *           [Bucket Locations](https://cloud.google.com/storage/docs/locations).
+     *           **Defaults to** `"US"`.
+     *     @type array $hierarchicalNamespace The hierarchical namespace configuration
+     *           on this bucket.
+     *     @type array $customPlacementConfig The bucket's dual regions. For more
+     *           information, see
+     *           [Bucket Locations](https://cloud.google.com/storage/docs/locations).
      *     @type array $logging The bucket's logging configuration, which
      *           defines the destination bucket and optional name prefix for the
      *           current bucket's logs.
@@ -278,6 +424,12 @@ class StorageClient
      *           more information, refer to the
      *           [Storage Classes](https://cloud.google.com/storage/docs/storage-classes)
      *           documentation. **Defaults to** `"STANDARD"`.
+     *     @type array $autoclass The bucket's autoclass configuration.
+     *           Buckets can have either StorageClass OLM rules or Autoclass,
+     *           but not both. When Autoclass is enabled on a bucket, adding
+     *           StorageClass OLM rules will result in failure.
+     *           For more information, refer to
+     *           [Storage Autoclass](https://cloud.google.com/storage/docs/autoclass)
      *     @type array $versioning The bucket's versioning configuration.
      *     @type array $website The bucket's website configuration.
      *     @type array $billing The bucket's billing configuration.
@@ -302,12 +454,33 @@ class StorageClient
      *           `projects/my-project/locations/kr-location/keyRings/my-kr/cryptoKeys/my-key`.
      *           Please note the KMS key ring must use the same location as the
      *           bucket.
+     *     @type array $encryption.googleManagedEncryptionEnforcementConfig
+     *           Enforcement configuration for Google-managed encryption.
+     *     @type string $encryption.googleManagedEncryptionEnforcementConfig.restrictionMode
+     *           The restriction state of the encryption policy. Acceptable values are
+     *           `"NotRestricted"` and `"FullyRestricted"`.
+     *     @type string $encryption.googleManagedEncryptionEnforcementConfig.effectiveTime
+     *           [readonly] The time from which the policy was effective in RFC 3339 format.
+     *     @type array $encryption.customerManagedEncryptionEnforcementConfig
+     *           Enforcement configuration for Cloud KMS (customer-managed) encryption.
+     *     @type string $encryption.customerManagedEncryptionEnforcementConfig.restrictionMode
+     *           The restriction state of the encryption policy. Acceptable values are
+     *           `"NotRestricted"` and `"FullyRestricted"`.
+     *     @type string $encryption.customerManagedEncryptionEnforcementConfig.effectiveTime
+     *           [readonly] The time from which the policy was effective in RFC 3339 format.
+     *     @type array $encryption.customerSuppliedEncryptionEnforcementConfig
+     *           Enforcement configuration for customer-supplied encryption keys (CSEK).
+     *     @type string $encryption.customerSuppliedEncryptionEnforcementConfig.restrictionMode
+     *           The restriction state of the encryption policy. Acceptable values are
+     *           `"NotRestricted"` and `"FullyRestricted"`.
+     *     @type string $encryption.customerSuppliedEncryptionEnforcementConfig.effectiveTime
+     *           [readonly] The time from which the policy was effective in RFC 3339 format.
      *     @type bool $defaultEventBasedHold When `true`, newly created objects
      *           in this bucket will be retained indefinitely until an event
      *           occurs, signified by the hold's release.
      *     @type array $retentionPolicy Defines the retention policy for a
      *           bucket. In order to lock a retention policy, please see
-     *           {@see Google\Cloud\Storage\Bucket::lockRetentionPolicy()}.
+     *           {@see Bucket::lockRetentionPolicy()}.
      *     @type int $retentionPolicy.retentionPeriod Specifies the retention
      *           period for objects in seconds. During the retention period an
      *           object cannot be overwritten or deleted. Retention period must
@@ -387,7 +560,7 @@ class StorageClient
      * @param string $uri The URI to accept an upload request.
      * @param string|resource|StreamInterface $data The data to be uploaded
      * @param array $options [optional] Configuration Options. Refer to
-     *        {@see Google\Cloud\Core\Upload\AbstractUploader::__construct()}.
+     *        {@see \Google\Cloud\Core\Upload\AbstractUploader::__construct()}.
      * @return SignedUrlUploader
      */
     public function signedUrlUploader($uri, $data, array $options = [])
