@@ -53,8 +53,8 @@ class Vision_Analysis_Test extends TestCase {
 
 		$this->filters = array(
 			// The path only has to exist; the client under test never reads it.
-			'wporg_photos_google_credentials_json_path' => fn() => __FILE__,
-			'wporg_photos_google_cloud_bucket'          => fn() => 'photos-test',
+			'wporg_photos_google_credentials_json_path' => fn(): string => __FILE__,
+			'wporg_photos_google_cloud_bucket'          => fn(): string => 'photos-test',
 		);
 		foreach ( $this->filters as $hook => $callback ) {
 			add_filter( $hook, $callback );
@@ -171,7 +171,7 @@ class Vision_Analysis_Test extends TestCase {
 		// Post meta must not depend on the library's classes to unserialize.
 		array_walk_recursive(
 			$results,
-			function ( $value ): void {
+			function ( mixed $value ): void {
 				$this->assertIsNotObject( $value );
 			}
 		);
