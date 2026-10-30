@@ -1547,6 +1547,9 @@ let wpTrac,
 					return results;
 				},
 
+				/**
+				 * Collects usernames and nicenames of participants from the ticket change history.
+				 */
 				initTicketParticipants() {
 					const users = new Set();
 					const excludeSet = new Set( Array.isArray( settings.exclude ) ? settings.exclude : [] );
@@ -2669,6 +2672,9 @@ let wpTrac,
 				} );
 			}
 
+			/**
+			 * Suggests specific Trac components based on keywords found in the summary and description.
+			 */
 			function maybeSuggest() {
 				const matchText =
 						$( '#field-summary' ).val().toLowerCase() + ' ' + $( '#field-description' ).val().toLowerCase(),
