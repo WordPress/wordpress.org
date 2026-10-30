@@ -799,7 +799,7 @@ class Official_WordPress_Events {
 
 		if ( $has_point ) {
 			// Formatted like the Meetup.com events that have no `localized_location`, for consistency in the widget.
-			$location_parts = $this->parse_reverse_geocode_address( $this->reverse_geocode( $latitude, $longitude ) );
+			$location_parts = $this->parse_reverse_geocode_address( $this->reverse_geocode( (float) $latitude, (float) $longitude ) );
 			$location       = implode(
 				', ',
 				array_filter(
@@ -1136,7 +1136,7 @@ class Official_WordPress_Events {
 	 */
 	protected function reverse_geocode( $latitude, $longitude ) {
 		$address  = false;
-		$cache_key       = 'geocode_' . md5( $latitude, $longitude );
+		$cache_key       = 'geocode_' . md5( $latitude . ',' . $longitude );
 		$cached_response = wp_cache_get( $cache_key, 'events' );
 
 		if ( false !== $cached_response ) {
