@@ -325,6 +325,7 @@ let wpTrac,
 	wpTrac = {
 		gardener: true === window.wpBugGardener,
 		currentUser: wpTracCurrentUser,
+		isSubmitting: false,
 
 		init() {
 			// Gardener status as a body class, for rules that cannot see the flag.
@@ -589,18 +590,63 @@ let wpTrac,
 				}
 
 				// Rudimentary save alerts for new tickets (summary/description) and comments.
-				window.onbeforeunload = function () {
-					if ( wpTrac.isNewTicket() ) {
-						if ( ! $( '#field-description' ).val() && ! $( '#field-summary' ).val() ) {
-							return;
-						}
-					} else if ( ! $( '#comment' ).val() ) {
+				const normalize = ( str ) => ( str || '' ).replace( /\r\n/g, '\n' ).trim();
+
+				/**
+				 * Checks whether an input or textarea element has unsaved changes compared to its initial value.
+				 *
+				 * @param {string} selector CSS selector for the form element.
+				 * @return {boolean} True if the field exists and its value was modified, false otherwise.
+				 */
+				function isDirty( selector ) {
+					const el = document.querySelector( selector );
+					if ( ! el ) {
+						return false;
+					}
+
+					return normalize( el.value ) !== normalize( el.defaultValue );
+				}
+
+				/**
+				 * Checks whether an input or textarea element has a non-empty value.
+				 *
+				 * @param {string} selector CSS selector for the form element.
+				 * @return {boolean} True if the field exists and contains non-whitespace text, false otherwise.
+				 */
+				function hasValue( selector ) {
+					return Boolean( document.querySelector( selector )?.value.trim() );
+				}
+
+				window.addEventListener( 'beforeunload', function ( event ) {
+					if ( wpTrac.isSubmitting ) {
 						return;
 					}
-					return 'The changes you made will be lost if you navigate away from this page.';
-				};
-				$( '.buttons' ).on( 'click', 'input', function () {
-					window.onbeforeunload = null;
+
+					const hasUnsavedContent = wpTrac.isNewTicket()
+						? hasValue( '#field-summary' ) || hasValue( '#field-description' )
+						: hasValue( '#comment' ) || isDirty( '#field-summary' ) || isDirty( '#field-description' );
+
+					if ( ! hasUnsavedContent ) {
+						return;
+					}
+
+					event.preventDefault();
+				} );
+
+				// Restore message when the page is restored from the back/forward cache.
+				window.addEventListener( 'pageshow', function ( event ) {
+					if ( event.persisted ) {
+						wpTrac.isSubmitting = false;
+					}
+				} );
+
+				document.getElementById( 'propertyform' )?.addEventListener( 'submit', function ( event ) {
+					wpTrac.isSubmitting = true;
+					setTimeout( function () {
+						if ( event.defaultPrevented ) {
+							wpTrac.isSubmitting = false;
+						}
+					}, 0 );
 				} );
 			}
 
@@ -686,13 +732,24 @@ let wpTrac,
 			}
 
 			// Prevent marking a ticket as a duplicate of itself.
-			$( '#propertyform' ).on( 'submit', function () {
-				const action = $( 'input[name="action"]:checked' ).val(),
-					currentTicket = parseInt( $( '.trac-id' ).text().replace( '#', '' ) ),
-					duplicateTicket = parseInt( $( '#action_dupe' ).val() );
+			$( '#propertyform' ).on( 'submit', function ( event ) {
+				const action = $( 'input[name="action"]:checked' ).val();
+				if ( 'duplicate' !== action ) {
+					return;
+				}
 
-				if ( 'duplicate' === action && ( ! duplicateTicket || currentTicket === duplicateTicket ) ) {
-					$( '#action_dupe' ).val( '' );
+				const $dupeInput = $( '#action_dupe' ),
+					currentTicket = Number.parseInt(
+						( document.querySelector( '.trac-id' )?.textContent || '' ).replace( '#', '' ),
+						10
+					),
+					duplicateTicket = Number.parseInt( ( $dupeInput.val() || '' ).replace( '#', '' ), 10 );
+
+				if ( ! duplicateTicket || currentTicket === duplicateTicket ) {
+					$dupeInput.val( '' );
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					wpTrac.isSubmitting = false;
 					return false;
 				}
 			} );
@@ -1363,6 +1420,7 @@ let wpTrac,
 							url = href + ( href.indexOf( '?' ) !== -1 ? '&' : '?' ) + $.param( urlParams );
 							window.open( url );
 						} else {
+							wpTrac.isSubmitting = true;
 							window.location.href = url;
 						}
 						return false;
@@ -1624,6 +1682,7 @@ let wpTrac,
 					'has-dev-note': 'needs-dev-note',
 					'needs-dev-note': 'has-dev-note',
 					'dev-reviewed': 'dev-feedback',
+					'dev-feedback': 'dev-reviewed',
 					'has-privacy-review': 'needs-privacy-review',
 					'needs-privacy-review': 'has-privacy-review',
 					'has-copy-review': 'needs-copy-review',
