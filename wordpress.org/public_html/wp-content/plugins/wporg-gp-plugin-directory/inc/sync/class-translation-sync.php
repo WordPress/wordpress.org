@@ -236,7 +236,7 @@ class Translation_Sync {
 		$lock_key = 'gp_sync_' . implode( '_', $ids ) . '_' . $new_translation_set->locale;
 
 		// Wait a maximum of 2 seconds.
-		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 2)', $lock_key ) );
+		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 3)', $lock_key ) );
 		if ( ! $acquired ) {
 			return false;
 		}
