@@ -474,6 +474,102 @@ function wporg_login_event_code_record_account( array $pending_user ): array {
 add_filter( 'wporg_login_registration_update_pending_user', 'wporg_login_event_code_record_account' );
 
 /**
+ * Link the accounts confirmed with a code before this existed, once.
+ *
+ * Re-saves every confirmed registration record that carries a code and no marker, which runs
+ * wporg_login_event_code_record_account() over it. Registration records are purged eight weeks
+ * after sign-up, so this is for soon after deploy. Running it again finds nothing: every record
+ * it touched is marked, linked or settled.
+ *
+ * @param bool $dry_run Count the records without saving anything.
+ * @return array {
+ *     @type int $found   Records waiting.
+ *     @type int $linked  Records marked as linked (or already linked).
+ *     @type int $settled Records marked as having nothing to link.
+ * }
+ */
+function wporg_login_event_code_link_accounts( bool $dry_run = false ): array {
+	global $wpdb;
+
+	$ids = $wpdb->get_col(
+		$wpdb->prepare(
+			'SELECT pending_id FROM %i WHERE created = 1 AND meta LIKE %s AND meta NOT LIKE %s',
+			"{$wpdb->base_prefix}user_pending_registrations",
+			'%' . $wpdb->esc_like( '"event_code":"' ) . '%',
+			'%' . $wpdb->esc_like( 'event_code_recorded' ) . '%'
+		)
+	);
+
+	$result = array(
+		'found'   => count( $ids ),
+		'linked'  => 0,
+		'settled' => 0,
+	);
+
+	if ( $dry_run ) {
+		return $result;
+	}
+
+	foreach ( $ids as $id ) {
+		$record = wporg_get_pending_user( (int) $id );
+
+		if ( ! $record ) {
+			continue;
+		}
+
+		wporg_update_pending_user( $record );
+
+		$after  = wporg_get_pending_user( (int) $id );
+		$marker = is_array( $after ) ? ( $after['meta']['event_code_recorded'] ?? '' ) : '';
+
+		if ( 'none' === $marker ) {
+			++$result['settled'];
+		} elseif ( $marker ) {
+			++$result['linked'];
+		}
+	}
+
+	return $result;
+}
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	/**
+	 * Link the accounts confirmed with an event code to it, once.
+	 *
+	 * Handles every confirmed registration record that carries a code and has not been handled
+	 * yet. Registration records are purged eight weeks after sign-up, so run it soon after deploy.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--dry-run]
+	 * : Count the records without changing anything.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp wporg-login event-codes link-accounts --url=login.wordpress.org
+	 *
+	 * @param array $args       Positional arguments, none.
+	 * @param array $assoc_args Options.
+	 * @return void
+	 */
+	function wporg_login_event_code_link_accounts_command( array $args, array $assoc_args ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed -- WP-CLI signature.
+		$dry_run = ! empty( $assoc_args['dry-run'] );
+		$result  = wporg_login_event_code_link_accounts( $dry_run );
+
+		WP_CLI::success(
+			sprintf(
+				'%d record(s) found%s: %d linked, %d settled with nothing to link.',
+				$result['found'],
+				$dry_run ? ' (dry run, nothing changed)' : '',
+				$result['linked'],
+				$result['settled']
+			)
+		);
+	}
+	WP_CLI::add_command( 'wporg-login event-codes link-accounts', 'wporg_login_event_code_link_accounts_command' );
+}
+
+/**
  * Keep a deleted code's counts.
  *
  * Trashing revokes a code and the trash is emptied on its own. The accounts made with the code
@@ -892,6 +988,7 @@ function wporg_login_event_code_meta_box_render( WP_Post $post ): void {
 			var input = document.getElementById( 'wporg-event-code-central' );
 			var list  = document.getElementById( 'wporg-event-code-central-matches' );
 			var timer;
+			var latest = 0;
 
 			if ( ! input || ! list ) {
 				return;
@@ -955,11 +1052,14 @@ function wporg_login_event_code_meta_box_render( WP_Post $post ): void {
 				clearTimeout( timer );
 
 				if ( search.length < 3 ) {
+					latest++;
 					say( '' );
 					return;
 				}
 
 				timer = setTimeout( function () {
+					// A slower answer to an earlier search must not land on top of this one.
+					var id   = ++latest;
 					var body = new URLSearchParams( { action: 'wporg_event_code_central_search', nonce: input.dataset.nonce, search: search } );
 
 					say( 'Looking on WordCamp Central...' );
@@ -969,6 +1069,9 @@ function wporg_login_event_code_meta_box_render( WP_Post $post ): void {
 							return response.json();
 						} )
 						.then( function ( json ) {
+							if ( id !== latest ) {
+								return;
+							}
 							if ( json.success ) {
 								show( json.data );
 							} else {
@@ -976,7 +1079,9 @@ function wporg_login_event_code_meta_box_render( WP_Post $post ): void {
 							}
 						} )
 						.catch( function () {
-							say( 'WordCamp Central did not answer.' );
+							if ( id === latest ) {
+								say( 'WordCamp Central did not answer.' );
+							}
 						} );
 				}, 300 );
 			} );
