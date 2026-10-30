@@ -2,12 +2,14 @@
 
 namespace WordPressdotorg\GlotPress\Routes\Routes;
 
+use Collator;
 use GP;
 use GP_Locales;
 use GP_Route;
 use stdClass;
 use WordPressdotorg\GlotPress\Rosetta_Roles\Plugin as Rosetta_Roles;
 use WordPressdotorg\GlotPress\Routes\Plugin;
+use WP_User;
 
 /**
  * Locale Route Class.
@@ -25,6 +27,35 @@ class Locale extends GP_Route {
 	 */
 	private $roles_adapter = null;
 
+	/**
+	 * In-memory cache for projects by ID per instance.
+	 * Sub-projects are omitted as they are not re-fetched via get_project_by_id().
+	 *
+	 * @var array
+	 */
+	private $projects_cache = [];
+
+	/**
+	 * In-memory cache for active sub projects per instance.
+	 *
+	 * @var array
+	 */
+	private $sub_projects_cache = [];
+
+	/**
+	 * In-memory cache for single-project statuses per instance.
+	 *
+	 * @var array
+	 */
+	private $project_status_cache = [];
+
+	/**
+	 * In-memory cache for user favorites per instance.
+	 *
+	 * @var array
+	 */
+	private $user_favorites_cache = [];
+
 	public function __construct() {
 		parent::__construct();
 
@@ -41,8 +72,6 @@ class Locale extends GP_Route {
 	 * @param bool|string $project_path Path of a project.
 	 */
 	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = false ) {
-		global $wpdb;
-
 		$per_page = 24;
 		$page = (int) gp_get( 'page', 1 );
 		$search = gp_get( 's', '' );
@@ -61,7 +90,8 @@ class Locale extends GP_Route {
 			return $this->die_with_404();
 		}
 
-		if ( ! $this->translation_set_slug_exists( $locale, $set_slug ) ) {
+		$variants = $this->get_locale_variants( $locale_slug );
+		if ( ! in_array( $set_slug, $variants, true ) ) {
 			return $this->die_with_404();
 		}
 
@@ -84,20 +114,32 @@ class Locale extends GP_Route {
 		}
 
 		// Filter out the Waiting Tab if the current user cannot validate strings
-		if ( 'waiting' != $default_project_tab ) {
-			foreach ( $top_level_projects as $i => $project ) {
-				if ( 'waiting' == $project->slug ) {
+		if ( 'waiting' !== $default_project_tab ) {
+			foreach ( $top_level_projects as $i => $tl_project ) {
+				if ( 'waiting' === $tl_project->slug ) {
 					unset( $top_level_projects[ $i ] );
 					break;
 				}
+			}
+
+			if ( 'waiting' === $project_path ) {
+				$redirect_url = gp_url( sprintf( '/locale/%s/%s/%s', $locale_slug, $set_slug, $default_project_tab ) );
+
+				if ( ! empty( $_GET ) ) {
+					$redirect_url = add_query_arg( wp_unslash( $_GET ), $redirect_url );
+				}
+
+				wp_safe_redirect( $redirect_url );
+				exit;
 			}
 		}
 
 		$project_path = $project_path ?: $default_project_tab;
 
-		$project = GP::$project->by_path( $project_path );
+		// Load and cache project; render 404 if not found.
+		$project = $this->get_project_by_path( $project_path );
 		if ( ! $project ) {
-			return $this->die_with_404();
+			return;
 		}
 
 		$paged_sub_projects = $this->get_paged_active_sub_projects(
@@ -113,21 +155,23 @@ class Locale extends GP_Route {
 			)
 		);
 
-		$data['project']                = $project;
-		$data['sub_projects']           = $paged_sub_projects['projects'];
-		$data['pages']                  = $paged_sub_projects['pages'];
-		$data                           = apply_filters( 'gp_subprojects', $data );
-		$paged_sub_projects['projects'] = $data['sub_projects'];
-		$paged_sub_projects['pages']    = $data['pages'];
+		$data = apply_filters(
+			'gp_subprojects',
+			array(
+				'project'      => $project,
+				'sub_projects' => $paged_sub_projects['projects'],
+				'pages'        => $paged_sub_projects['pages'],
+			)
+		);
 
-		if ( ! $paged_sub_projects ) {
-			return $this->die_with_404();
-		}
-
-		$sub_projects = $paged_sub_projects['projects'];
-		$pages        = $paged_sub_projects['pages'];
+		$sub_projects = $data['sub_projects'];
+		$pages        = $data['pages'];
 		$filter       = $paged_sub_projects['filter'];
 		unset( $paged_sub_projects );
+
+		if ( $page > 1 && empty( $sub_projects ) ) {
+			return $this->die_with_404();
+		}
 
 		$project_status = $project_icons = array();
 		foreach ( $sub_projects as $key => $sub_project ) {
@@ -135,27 +179,13 @@ class Locale extends GP_Route {
 			$project_icons[ $sub_project->id ] = $this->get_project_icon( $project, $sub_project );
 		}
 
-		$project_ids = array_keys( $project_status );
-		$project_ids[] = $project->id;
-		$project_ids = array_merge(
-			$project_ids,
-			$wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IN( " . implode( ', ', $project_ids ) . ')' )
-		);
-
 		$contributors_count = Plugin::get_contributors_count();
 
-		$variants = $this->get_locale_variants( $locale_slug );
-		// If there were no results for the current variant in the current project branch, it should still show it.
-		if ( ! in_array( $set_slug, $variants, true ) ) {
-			$variants[] = $set_slug;
-		}
-
 		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
-		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
-		$locale_glossary = false;
-		if ( $locale_glossary_translation_set ) {
-			$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
-		}
+		[
+			'translation_set' => $locale_glossary_translation_set,
+			'glossary'        => $locale_glossary,
+		] = $this->get_locale_glossary_details( $locale_slug, $set_slug );
 
 		$this->tmpl( 'locale-projects', get_defined_vars() );
 	}
@@ -174,22 +204,25 @@ class Locale extends GP_Route {
 			return $this->die_with_404();
 		}
 
-		if ( ! $this->translation_set_slug_exists( $locale, $set_slug ) ) {
+		$variants = $this->get_locale_variants( $locale_slug );
+		if ( ! in_array( $set_slug, $variants, true ) ) {
 			return $this->die_with_404();
 		}
 
-		$project = GP::$project->by_path( $project_path );
+		// Load and cache project; render 404 if not found.
+		$project = $this->get_project_by_path( $project_path );
 		if ( ! $project ) {
-			return $this->die_with_404();
+			return;
 		}
 
-		$sub_project = GP::$project->by_path( $project_path . '/' . $sub_project_path );
+		// Load and cache sub-project; render 404 if not found.
+		$sub_project = $this->get_project_by_path( $project_path . '/' . $sub_project_path );
 		if ( ! $sub_project ) {
-			return $this->die_with_404();
+			return;
 		}
 
 		$project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug );
-		$sub_project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug, null, false );
+		$sub_project_status = $this->get_project_status( $sub_project, $locale_slug, $set_slug, false );
 
 		$project_icon = $this->get_project_icon( $project, $sub_project, 64 );
 
@@ -203,7 +236,6 @@ class Locale extends GP_Route {
 					$_sub_project,
 					$locale_slug,
 					$set_slug,
-					null,
 					false
 				);
 			}
@@ -211,38 +243,30 @@ class Locale extends GP_Route {
 
 		$sub_project_slugs = array_keys( $sub_project_statuses );
 
-		$variants = $this->get_locale_variants( $locale_slug );
-
 		$locale_contributors = $this->get_locale_contributors( $sub_project, $locale_slug, $set_slug );
 
 		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
-		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
-		$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
+		[
+			'translation_set' => $locale_glossary_translation_set,
+			'glossary'        => $locale_glossary,
+		] = $this->get_locale_glossary_details( $locale_slug, $set_slug );
 
 		$this->tmpl( 'locale-project', get_defined_vars() );
 	}
 
 	/**
-	 * Whether a translation set slug exists for a locale.
+	 * Generates HTML markup for a Dashicon inside a wrapper.
 	 *
-	 * For performance reasons, this checks the wp/dev project which is the canonical
-	 * source for all available and active locales.
-	 *
-	 * @param \GP_Locale $locale The locale.
-	 * @param string     $slug   The slug of a translation set.
-	 * @return bool True if slug exists, false if not.
+	 * @param string $dashicon      The Dashicon name (without the 'dashicons-' prefix).
+	 * @param string $wrapper_class Optional. CSS class for the wrapper div. Default 'default-icon'.
+	 * @return string HTML markup of the icon.
 	 */
-	private function translation_set_slug_exists( $locale, $slug ) {
-		global $wpdb;
-
-		$id = $wpdb->get_var( $wpdb->prepare(
-			"SELECT id FROM {$wpdb->gp_translation_sets} WHERE locale = %s AND slug = %s AND project_id = %d",
-			$locale->slug,
-			$slug,
-			2 // wp/dev
-		) );
-
-		return null !== $id;
+	private function render_dashicon( $dashicon, $wrapper_class = 'default-icon' ) {
+		return sprintf(
+			'<div class="%s"><span class="dashicons dashicons-%s"></span></div>',
+			esc_attr( $wrapper_class ),
+			esc_attr( $dashicon )
+		);
 	}
 
 	/**
@@ -255,71 +279,102 @@ class Locale extends GP_Route {
 	 */
 	private function get_project_icon( $project, $sub_project, $size = 128 ) {
 		// The Waiting tab will have $sub_project's which are not sub-projects of $project
-		if ( $sub_project->parent_project_id && $sub_project->parent_project_id !== $project->id ) {
-			$project = GP::$project->get( $sub_project->parent_project_id );
-			// In the case of Plugins, we may need to go up another level yet
-			if ( $project->parent_project_id ) {
-				$sub_project = $project;
-				$project = GP::$project->get( $sub_project->parent_project_id );
+		if ( $sub_project->parent_project_id && (int) $sub_project->parent_project_id !== (int) $project->id ) {
+			$parent = $this->get_project_by_id( $sub_project->parent_project_id );
+			if ( $parent ) {
+				$project = $parent;
+
+				// In the case of Plugins, we may need to go up another level yet.
+				if ( ! empty( $parent->parent_project_id ) ) {
+					$grand_parent = $this->get_project_by_id( $parent->parent_project_id );
+					if ( $grand_parent ) {
+						$sub_project = $parent;
+						$project     = $grand_parent;
+					}
+				}
 			}
 		}
 
-		switch ( $project->slug ) {
-			case 'wp':
-				return '<div class="wordpress-icon"><span class="dashicons dashicons-wordpress-alt"></span></div>';
-			case 'meta':
-				switch ( $sub_project->slug ) {
-					case 'forums':
-						return '<div class="default-icon"><span class="dashicons dashicons-format-chat"></span></div>';
-					case 'rosetta':
-						return '<div class="default-icon"><span class="dashicons dashicons-admin-site"></span></div>';
-					case 'plugins':
-					case 'plugins-v3':
-						return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
-					case 'themes':
-						return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
-					case 'wordcamp':
-						return '<div class="default-icon"><span class="dashicons dashicons-tickets"></span></div>';
-					case 'pattern-directory':
-						return '<div class="default-icon"><span class="dashicons dashicons-art"></span></div>';
-					case 'browsehappy':
-						return '<div class="icon"><img src="' . plugins_url( 'templates/images/browsehappy.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
-					case 'openverse':
-						return '<div class="icon"><img src="' . plugins_url( 'templates/images/openverse.png', 'wporg-gp-customizations/wporg-gp-customizations.php' ) . '" width="' . $size . '" height="' . $size . '"></div>';
-					default:
-						return '<div class="default-icon"><span class="dashicons dashicons-networking"></span></div>';
-				}
-			case 'wp-themes':
-				$screenshot = gp_get_meta( 'wp-themes', $sub_project->id, 'screenshot' );
-				if ( $screenshot ) {
-					return '<div class="theme icon"><img src="' . esc_url( 'https://i0.wp.com/' . $screenshot . '?w=' . ( $size * 2 ) . '&strip=all' ) . '" width="' . $size . '" height="' . $size . '"></div>';
-				} else {
-					return '<div class="default-icon"><span class="dashicons dashicons-admin-appearance"></span></div>';
-				}
-			case 'wp-plugins':
-				$icon = '';
+		if ( 'wp' === $project->slug ) {
+			return $this->render_dashicon( 'wordpress-alt', 'wordpress-icon' );
+		}
 
-				if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) ) {
-					$directory_post_id = gp_get_meta( 'wp-plugins', $sub_project->id, 'directory-post-id' );
-					if ( $directory_post_id ) {
-						switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
-						$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
-						restore_current_blog();
+		if ( 'meta' === $project->slug ) {
+			$meta_dashicons = [
+				'forums'            => 'format-chat',
+				'rosetta'           => 'admin-site',
+				'plugins'           => 'admin-plugins',
+				'plugins-v3'        => 'admin-plugins',
+				'themes'            => 'admin-appearance',
+				'wordcamp'          => 'tickets',
+				'pattern-directory' => 'art',
+			];
+
+			if ( isset( $meta_dashicons[ $sub_project->slug ] ) ) {
+				return $this->render_dashicon( $meta_dashicons[ $sub_project->slug ] );
+			}
+
+			if ( in_array( $sub_project->slug, [ 'browsehappy', 'openverse' ], true ) ) {
+				$image_file = sprintf( 'templates/images/%s.png', $sub_project->slug );
+				$image_url  = plugins_url( $image_file, 'wporg-gp-customizations/wporg-gp-customizations.php' );
+
+				return sprintf(
+					'<div class="icon"><img src="%s" width="%d" height="%d" decoding="async"></div>',
+					esc_url( $image_url ),
+					(int) $size,
+					(int) $size
+				);
+			}
+
+			return $this->render_dashicon( 'networking' );
+		}
+
+		if ( 'wp-themes' === $project->slug ) {
+			$screenshot = gp_get_meta( 'wp-themes', $sub_project->id, 'screenshot' );
+			if ( $screenshot ) {
+				return sprintf(
+					'<div class="theme icon"><img src="%s" width="%d" height="%d" decoding="async"></div>',
+					esc_url( 'https://i0.wp.com/' . $screenshot . '?w=' . ( $size * 2 ) . '&strip=all' ),
+					(int) $size,
+					(int) $size
+				);
+			}
+
+			return $this->render_dashicon( 'admin-appearance' );
+		}
+
+		if ( 'wp-plugins' === $project->slug ) {
+			if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
+				$directory_post_id = gp_get_meta( 'wp-plugins', $sub_project->id, 'directory-post-id' );
+				if ( $directory_post_id ) {
+					$switched = switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
+					if ( $switched ) {
+						$icon = null;
+						try {
+							$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
+						} finally {
+							restore_current_blog();
+						}
+						if ( $icon ) {
+							return $icon;
+						}
 					}
 				}
+			}
 
-				if ( $icon ) {
-					return $icon;
-				}
-
-				return '<div class="default-icon"><span class="dashicons dashicons-admin-plugins"></span></div>';
-			case 'apps':
-				return '<div class="default-icon"><span class="dashicons dashicons-smartphone"></span></div>';
-			case 'patterns':
-				return '<div class="default-icon"><span class="dashicons dashicons-art"></span></div>';
-			default:
-				return '<div class="default-icon"><span class="dashicons dashicons-translation"></span></div>';
+			return $this->render_dashicon( 'admin-plugins' );
 		}
+
+		$project_dashicons = [
+			'apps'     => 'smartphone',
+			'patterns' => 'art',
+		];
+
+		if ( isset( $project_dashicons[ $project->slug ] ) ) {
+			return $this->render_dashicon( $project_dashicons[ $project->slug ] );
+		}
+
+		return $this->render_dashicon( 'translation' );
 	}
 
 	/**
@@ -342,6 +397,30 @@ class Locale extends GP_Route {
 	}
 
 	/**
+	 * Retrieves the locale glossary and its translation set for a given locale and set.
+	 *
+	 * @param string $locale_slug Slug of the locale.
+	 * @param string $set_slug    Slug of the translation set.
+	 * @return array {
+	 *     @type GP_Translation_Set|false $translation_set The root translation set, if found.
+	 *     @type GP_Glossary|false        $glossary        The glossary instance, if found.
+	 * }
+	 */
+	private function get_locale_glossary_details( $locale_slug, $set_slug ) {
+		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
+		$glossary        = false;
+
+		if ( $translation_set ) {
+			$glossary = GP::$glossary->by_set_id( $translation_set->id );
+		}
+
+		return [
+			'translation_set' => $translation_set,
+			'glossary'        => $glossary,
+		];
+	}
+
+	/**
 	 * Retrieves translation editors of a project.
 	 *
 	 * Also includes cross-locale editors and editors of parent projects.
@@ -358,44 +437,45 @@ class Locale extends GP_Route {
 			'inherited' => [],
 		];
 
-		// Get the translation editors of the project.
-		$editors['project'] = (array) $wpdb->get_col( $wpdb->prepare( "
-			SELECT
-				`user_id`
-			FROM {$wpdb->wporg_translation_editors}
-			WHERE
-				`project_id` = %d
-				AND `locale` IN (%s, 'all-locales')
-		", $project->id, $locale_slug ) );
+		$project_id        = (int) $project->id;
+		$project_ids       = [ $project_id ];
+		$parent_project_id = (int) $project->parent_project_id;
 
-		// Get the translation editors of parent projects.
-		if ( $project->parent_project_id ) {
-			$parent_project_id = $project->parent_project_id;
-			$parent_project = GP::$project->get( $parent_project_id );
-			while ( $parent_project_id ) {
-				$editors['inherited'] = array_merge( $editors['inherited'], (array) $wpdb->get_col( $wpdb->prepare( "
-					SELECT
-						`user_id`
-					FROM {$wpdb->wporg_translation_editors}
-					WHERE
-						`project_id` = %d
-						AND `locale` IN (%s, 'all-locales')
-				", $parent_project->id, $locale_slug ) ) );
+		// Collect parent project IDs.
+		while ( $parent_project_id && ! in_array( $parent_project_id, $project_ids, true ) ) {
+			$parent_project = $this->get_project_by_id( $parent_project_id );
 
-				$parent_project = GP::$project->get( $parent_project_id );
-				$parent_project_id = $parent_project->parent_project_id;
+			if ( ! $parent_project ) {
+				break;
 			}
+
+			$project_ids[]     = $parent_project_id;
+			$parent_project_id = (int) $parent_project->parent_project_id;
 		}
 
-		// Get the translation editors for all projects.
-		$editors['inherited'] = array_merge( $editors['inherited'], (array) $wpdb->get_col( $wpdb->prepare( "
+		$id_placeholders = $this->prepare_in_placeholders( count( $project_ids ), '%d' );
+
+		$editors_sql = "
 			SELECT
+				`project_id`,
 				`user_id`
 			FROM {$wpdb->wporg_translation_editors}
 			WHERE
-				`project_id` = '0'
-				AND `locale` = %s
-		", $locale_slug ) ) );
+				( `project_id` IN ( {$id_placeholders} ) AND `locale` IN ( %s, 'all-locales' ) )
+				OR ( `project_id` = 0 AND `locale` = %s )
+		";
+
+		$query_args = array_merge( $project_ids, [ $locale_slug, $locale_slug ] );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $editors_sql uses dynamically generated %d placeholders.
+		$results = $wpdb->get_results( $wpdb->prepare( $editors_sql, $query_args ) );
+
+		foreach ( (array) $results as $row ) {
+			if ( (int) $row->project_id === $project_id ) {
+				$editors['project'][] = $row->user_id;
+			} else {
+				$editors['inherited'][] = $row->user_id;
+			}
+		}
 
 		return $editors;
 	}
@@ -422,12 +502,81 @@ class Locale extends GP_Route {
 		// Get the translation editors of the project.
 		$editors = $this->get_translation_editors( $project, $locale_slug );
 
+		// Deduplicate editor IDs before processing to avoid redundant iterations.
+		$editors['project']   = array_unique( array_map( 'intval', $editors['project'] ) );
+		$editors['inherited'] = array_unique( array_map( 'intval', $editors['inherited'] ) );
+
+		// Collect project IDs: parent project, active sub-projects, and sub-sub-projects (e.g. wp/dev/admin/network).
+		$sub_projects = $this->get_active_sub_projects( $project, true );
+		$projects     = [ (int) $project->id => $project ];
+
+		foreach ( $sub_projects as $sub_project ) {
+			$projects[ (int) $sub_project->id ] = $sub_project;
+		}
+
+		// Batch-fetch all matching translation set IDs in a single query.
+		$project_ids_sql = $this->prepare_in_int_list( array_keys( $projects ) );
+
+		$translation_set_ids = [];
+		if ( ! empty( $project_ids_sql ) ) {
+			$translation_sets_sql = "
+				SELECT id
+				FROM {$wpdb->gp_translation_sets}
+				WHERE
+					project_id IN ( {$project_ids_sql} )
+					AND slug = %s
+					AND locale = %s
+			";
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $translation_sets_sql contains an IN clause with sanitized project IDs.
+			$translation_set_ids = $wpdb->get_col( $wpdb->prepare( $translation_sets_sql, $set_slug, $locale_slug ) );
+		}
+
+		// Batch-fetch contributors across all translation sets.
+		$contributors = [];
+		if ( ! empty( $translation_set_ids ) ) {
+			$contributors = $this->get_locale_contributors_by_translation_set( $translation_set_ids );
+		}
+
+		// Collect and deduplicate all user IDs to prime user caches in a single request.
+		$user_ids = array_merge(
+			$editors['project'],
+			$editors['inherited'],
+			wp_list_pluck( $contributors, 'user_id' )
+		);
+		$user_ids = array_unique( array_filter( array_map( 'intval', $user_ids ) ) );
+
+		if ( ! empty( $user_ids ) ) {
+			// Check which users are already in the object cache using the public Cache API.
+			$cached_users      = wp_cache_get_multiple( $user_ids, 'users' );
+			$uncached_user_ids = [];
+
+			foreach ( $user_ids as $id ) {
+				if ( empty( $cached_users[ $id ] ) ) {
+					$uncached_user_ids[] = $id;
+				}
+			}
+
+			// Batch-load missing users from wp_users without touching usermeta.
+			// Deleted wp.org accounts are anonymized (not removed), so all IDs exist.
+			if ( ! empty( $uncached_user_ids ) ) {
+				$user_ids_sql = $this->prepare_in_int_list( $uncached_user_ids );
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $user_ids_sql contains sanitized, integer-cast IDs.
+				$users = $wpdb->get_results( "SELECT * FROM {$wpdb->users} WHERE ID IN ( {$user_ids_sql} )" );
+				foreach ( (array) $users as $user ) {
+					update_user_caches( $user );
+				}
+			}
+		}
+
+		// Sorts special characters as well.
+		$collator   = class_exists( 'Collator' ) ? new Collator( $locale_slug ) : null;
 		$editor_ids = [];
 
 		// Get the names of the translation editors.
-		foreach ( [ 'project', 'inherited'] as $editor_source ) {
+		// Use WP_User::get_data_by() instead of get_user_by() to avoid retrieving wp_usermeta.
+		foreach ( [ 'project', 'inherited' ] as $editor_source ) {
 			foreach ( $editors[ $editor_source ] as $editor_id ) {
-				$user = get_user_by( 'id', $editor_id );
+				$user = WP_User::get_data_by( 'id', $editor_id );
 				if ( ! $user ) {
 					continue;
 				}
@@ -438,130 +587,102 @@ class Locale extends GP_Route {
 					'email'        => $user->user_email,
 				);
 
-				$editor_ids[] = $editor_id;
+				// Store editor IDs.
+				$editor_ids[ (int) $editor_id ] = true;
 			}
 
-			uasort( $locale_contributors['editors'][ $editor_source ], function( $a, $b ) {
-				return strcasecmp( $a->display_name, $b->display_name );
-			} );
+			uasort(
+				$locale_contributors['editors'][ $editor_source ],
+				static function ( $a, $b ) use ( $collator ) {
+					if ( $collator ) {
+						return $collator->compare( $a->display_name, $b->display_name );
+					}
+
+					return strcasecmp( $a->display_name, $b->display_name );
+				}
+			);
 		}
 
 		unset( $editors );
 
-		// Get the contributors of the project.
-		$contributors = array();
+		// Aggregate contributors and detailed counts.
+		foreach ( $contributors as $contributor ) {
+			$user_id    = (int) $contributor->user_id;
+			$project_id = (int) $contributor->project_id;
 
-		// In case the project has a translation set, like /wp-themes/twentysixteen.
-		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $set_slug, $locale_slug );
-		if ( $translation_set ) {
-			$contributors = array_merge(
-				$contributors,
-				$this->get_locale_contributors_by_translation_set( $translation_set )
-			);
-		}
-
-		// Check if the project has sub-projects, like /wp-plugins/wordpress-importer.
-		$sub_projects = $wpdb->get_col( $wpdb->prepare( "
-			SELECT id
-			FROM {$wpdb->gp_projects}
-			WHERE
-				parent_project_id = %d
-				AND active = 1
-		", $project->id ) );
-
-		foreach ( $sub_projects as $sub_project ) {
-			$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $sub_project, $set_slug, $locale_slug );
-			if ( ! $translation_set ) {
-				continue;
+			if ( ! isset( $projects[ $project_id ] ) ) {
+				$projects[ $project_id ] = $this->get_project_by_id( $project_id );
 			}
 
-			$contributors = array_merge(
-				$contributors,
-				$this->get_locale_contributors_by_translation_set( $translation_set )
-			);
-		}
+			$detail = (object) [
+				'total_count'   => (int) $contributor->total_count,
+				'current_count' => (int) $contributor->current_count,
+				'waiting_count' => (int) $contributor->waiting_count,
+				'fuzzy_count'   => (int) $contributor->fuzzy_count,
+				'project'       => $projects[ $project_id ],
+			];
 
-		$projects = [];
-
-		// Get the names of the contributors.
-		foreach ( $contributors as $contributor ) {
-			if ( isset( $locale_contributors['contributors'][ $contributor->user_id ] ) ) {
-				// Update last updated and counts per status.
-				$locale_contributors['contributors'][ $contributor->user_id ]->last_update = max(
-					$locale_contributors['contributors'][ $contributor->user_id ]->last_update,
-					$contributor->last_update
-				);
-
-				$locale_contributors['contributors'][ $contributor->user_id ]->total_count   += $contributor->total_count;
-				$locale_contributors['contributors'][ $contributor->user_id ]->current_count += $contributor->current_count;
-				$locale_contributors['contributors'][ $contributor->user_id ]->waiting_count += $contributor->waiting_count;
-				$locale_contributors['contributors'][ $contributor->user_id ]->fuzzy_count   += $contributor->fuzzy_count;
-
-				if ( ! isset( $projects[ $contributor->project_id ] ) ) {
-					$projects[ $contributor->project_id ] = GP::$project->get( $contributor->project_id );
+			if ( ! isset( $locale_contributors['contributors'][ $user_id ] ) ) {
+				$user = WP_User::get_data_by( 'id', $user_id );
+				if ( ! $user ) {
+					continue;
 				}
 
-				$locale_contributors['contributors'][ $contributor->user_id ]->detailed[ $contributor->project_id ] = (object) [
-					'total_count'   => $contributor->total_count,
-					'current_count' => $contributor->current_count,
-					'waiting_count' => $contributor->waiting_count,
-					'fuzzy_count'   => $contributor->fuzzy_count,
-					'project'       => $projects[ $contributor->project_id ],
-				];
-
-				continue;
-			}
-
-			$user = get_user_by( 'id', $contributor->user_id );
-			if ( ! $user ) {
-				continue;
-			}
-
-			if ( ! isset( $projects[ $contributor->project_id ] ) ) {
-				$projects[ $contributor->project_id ] = GP::$project->get( $contributor->project_id );
-			}
-
-			$locale_contributors['contributors'][ $contributor->user_id ] = (object) array(
-				'login'         => $user->user_login,
-				'nicename'      => $user->user_nicename,
-				'display_name'  => $user->display_name ?: $user->user_nicename,
-				'email'         => $user->user_email,
-				'last_update'   => $contributor->last_update,
-				'total_count'   => $contributor->total_count,
-				'current_count' => $contributor->current_count,
-				'waiting_count' => $contributor->waiting_count,
-				'fuzzy_count'   => $contributor->fuzzy_count,
-				'detailed'      => [
-					$contributor->project_id => (object) [
-						'total_count'   => $contributor->total_count,
-						'current_count' => $contributor->current_count,
-						'waiting_count' => $contributor->waiting_count,
-						'fuzzy_count'   => $contributor->fuzzy_count,
-						'project'       => $projects[ $contributor->project_id ],
+				$locale_contributors['contributors'][ $user_id ] = (object) array(
+					'login'         => $user->user_login,
+					'nicename'      => $user->user_nicename,
+					'display_name'  => $user->display_name ?: $user->user_nicename,
+					'email'         => $user->user_email,
+					'last_update'   => $contributor->last_update,
+					'total_count'   => (int) $contributor->total_count,
+					'current_count' => (int) $contributor->current_count,
+					'waiting_count' => (int) $contributor->waiting_count,
+					'fuzzy_count'   => (int) $contributor->fuzzy_count,
+					'detailed'      => [
+						$project_id => $detail,
 					],
-				],
-				'is_editor'     => in_array( $user->ID, $editor_ids ),
-			);
+					'is_editor'     => isset( $editor_ids[ $user_id ] ),
+				);
+			} else {
+				$entry = $locale_contributors['contributors'][ $user_id ];
+				$entry->last_update   = max( $entry->last_update, $contributor->last_update );
+				$entry->total_count   += (int) $contributor->total_count;
+				$entry->current_count += (int) $contributor->current_count;
+				$entry->waiting_count += (int) $contributor->waiting_count;
+				$entry->fuzzy_count   += (int) $contributor->fuzzy_count;
+				$entry->detailed[ $project_id ] = $detail;
+			}
 		}
 		unset( $contributors, $editor_ids );
 
-		uasort( $locale_contributors['contributors'], function( $a, $b ) {
-			return $b->total_count <=> $a->total_count;
-		} );
+		uasort(
+			$locale_contributors['contributors'],
+			static function ( $a, $b ) {
+				return $b->total_count <=> $a->total_count;
+			}
+		);
 
 		return $locale_contributors;
 	}
 
 	/**
-	 * Retrieves contributors of a translation set.
+	 * Retrieves contributors of translation sets.
 	 *
-	 * @param GP_Translation_Set $translation_set A translation set.
-	 * @return array List of user IDs.
+	 * Aggregates user contributions across multiple translation sets in a single query.
+	 *
+	 * @param array $set_ids List of translation set IDs.
+	 * @return array List of contributor aggregated rows.
 	 */
-	private function get_locale_contributors_by_translation_set( $translation_set ) {
+	private function get_locale_contributors_by_translation_set( array $set_ids ) {
 		global $wpdb;
 
-		$contributors = $wpdb->get_results( $wpdb->prepare( "
+		$set_ids_sql = $this->prepare_in_int_list( $set_ids );
+
+		if ( empty( $set_ids_sql ) ) {
+			return [];
+		}
+
+		$contributors_sql = "
 			SELECT
 				`t`.`user_id` as `user_id`,
 				`o`.`project_id` as `project_id`,
@@ -574,13 +695,64 @@ class Locale extends GP_Route {
 			JOIN `{$wpdb->gp_originals}` as `o`
 				ON `t`.`original_id` = `o`.`id` AND `o`.`status` = '+active'
 			WHERE
-				`t`.`translation_set_id` = %d
+				`t`.`translation_set_id` IN ( {$set_ids_sql} )
 				AND `t`.`user_id` IS NOT NULL AND `t`.`user_id` != 0
 				AND `t`.`status` IN( 'current', 'waiting', 'fuzzy' )
-			GROUP BY `t`.`user_id`
-		", $translation_set->id ) );
+			GROUP BY `t`.`user_id`, `o`.`project_id`
+			ORDER BY `t`.`user_id` ASC, `o`.`project_id` ASC
+		";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $contributors_sql uses sanitized, integer-cast translation set IDs.
+		$contributors = $wpdb->get_results( $contributors_sql );
 
-		return $contributors;
+		return (array) $contributors;
+	}
+
+	/**
+	 * Generates comma-separated placeholders for prepared SQL statements.
+	 *
+	 * @param int    $count Number of placeholders needed.
+	 * @param string $type  Placeholder type ('%d', '%s', '%f'). Default '%d'.
+	 * @return string Comma-separated placeholder string (e.g. "%d, %d, %d").
+	 */
+	private function prepare_in_placeholders( $count, $type = '%d' ) {
+		$count = (int) $count;
+		if ( $count <= 0 ) {
+			return '';
+		}
+
+		return implode( ', ', array_fill( 0, $count, $type ) );
+	}
+
+	/**
+	 * Sanitizes an array of values into a comma-separated list of integers for direct SQL interpolation.
+	 *
+	 * @param array $ids List of numeric IDs.
+	 * @return string Comma-separated string of sanitized integers.
+	 */
+	private function prepare_in_int_list( array $ids ) {
+		$sanitized = array_filter( array_map( 'intval', $ids ) );
+
+		return implode( ', ', $sanitized );
+	}
+
+	/**
+	 * Calculates the completion percentage with asymmetric rounding.
+	 *
+	 * > 50% rounds down so that a project with all strings except 1 translated shows 99% instead of 100%.
+	 * < 50% rounds up so that a project with just a few strings shows 1% instead of 0%.
+	 *
+	 * @param int $current Translated strings count.
+	 * @param int $all     Total strings count.
+	 * @return int Percentage complete (0–100).
+	 */
+	private function calculate_percent_complete( $current, $all ) {
+		if ( ! $all ) {
+			return 0;
+		}
+
+		$percent = ( $current / $all ) * 100;
+
+		return (int) ( ( $percent > 50 ) ? floor( $percent ) : ceil( $percent ) );
 	}
 
 	/**
@@ -589,60 +761,76 @@ class Locale extends GP_Route {
 	 * @param GP_Project $project           The GlotPress project.
 	 * @param string     $locale            Slug of GlotPress locale.
 	 * @param string     $set_slug          Slug of the translation set.
-	 * @param object     $status            The status object.
 	 * @param bool       $calc_sub_projects Whether sub projects should be calculated too.
 	 *                                      Default true.
 	 * @return object The status of a project.
 	 */
-	private function get_project_status( $project, $locale, $set_slug, $status = null, $calc_sub_projects = true ) {
-		if ( null === $status ) {
-			$status = new stdClass;
-			$status->sub_projects_count     = 0;
-			$status->waiting_count          = 0;
-			$status->current_count          = 0;
-			$status->fuzzy_count            = 0;
-			$status->untranslated_count     = 0;
-			$status->changesrequested_count = 0;
-			$status->all_count              = 0;
-			$status->percent_complete       = 0;
+	private function get_project_status( $project, $locale, $set_slug, $calc_sub_projects = true ) {
+		$cache_key = (int) $project->id . ':' . $locale . ':' . $set_slug;
+
+		if ( ! isset( $this->project_status_cache[ $cache_key ] ) ) {
+			$single_status = new stdClass();
+			$single_status->sub_projects_count     = 0;
+			$single_status->waiting_count          = 0;
+			$single_status->current_count          = 0;
+			$single_status->fuzzy_count            = 0;
+			$single_status->untranslated_count     = 0;
+			$single_status->changesrequested_count = 0;
+			$single_status->all_count              = 0;
+			$single_status->percent_complete       = 0;
+
+			$single_status = apply_filters( 'gp_get_project_status', $single_status, $project, $locale, $set_slug );
+			if ( empty( $single_status->is_pattern ) ) {
+				$set = GP::$translation_set->by_project_id_slug_and_locale(
+					$project->id,
+					$set_slug,
+					$locale
+				);
+
+				if ( $set ) {
+					$single_status->sub_projects_count     += 1;
+					$single_status->waiting_count          += (int) $set->waiting_count();
+					$single_status->current_count          += (int) $set->current_count();
+					$single_status->fuzzy_count            += (int) $set->fuzzy_count();
+					$single_status->untranslated_count     += (int) $set->untranslated_count();
+					$single_status->changesrequested_count += (int) $set->changesrequested_count();
+					$single_status->all_count              += (int) $set->all_count();
+
+					$single_status->percent_complete = $this->calculate_percent_complete(
+						$single_status->current_count,
+						$single_status->all_count
+					);
+				}
+			}
+
+			$this->project_status_cache[ $cache_key ] = $single_status;
 		}
 
-		$status = apply_filters( 'gp_get_project_status', $status, $project, $locale, $set_slug );
+		$status = clone $this->project_status_cache[ $cache_key ];
+
 		if ( isset( $status->is_pattern ) && $status->is_pattern ) {
 			return $status;
-		}
-
-		$set = GP::$translation_set->by_project_id_slug_and_locale(
-			$project->id,
-			$set_slug,
-			$locale
-		);
-
-		if ( $set ) {
-			$status->sub_projects_count += 1;
-			$status->waiting_count          += (int) $set->waiting_count();
-			$status->current_count          += (int) $set->current_count();
-			$status->fuzzy_count            += (int) $set->fuzzy_count();
-			$status->untranslated_count     += (int) $set->untranslated_count();
-			$status->changesrequested_count += (int) $set->changesrequested_count();
-			$status->all_count              += (int) $set->all_count();
-
-			if ( $status->all_count ) {
-				/*
-				 * > 50% round down, so that a project with all strings except 1 translated shows 99%, instead of 100%.
-				 * < 50% round up, so that a project with just a few strings shows 1%, instead of 0%.
-				 */
-				$percent_complete = ( $status->current_count / $status->all_count * 100 );
-				$status->percent_complete = ( $percent_complete > 50 ) ? floor( $percent_complete ) : ceil( $percent_complete );
-			}
 		}
 
 		if ( $calc_sub_projects ) {
 			$sub_projects = $this->get_active_sub_projects( $project, true );
 			if ( $sub_projects ) {
 				foreach ( $sub_projects as $sub_project ) {
-					$this->get_project_status( $sub_project, $locale, $set_slug, $status, false );
+					$sub_status = $this->get_project_status( $sub_project, $locale, $set_slug, false );
+
+					$status->sub_projects_count     += $sub_status->sub_projects_count;
+					$status->waiting_count          += $sub_status->waiting_count;
+					$status->current_count          += $sub_status->current_count;
+					$status->fuzzy_count            += $sub_status->fuzzy_count;
+					$status->untranslated_count     += $sub_status->untranslated_count;
+					$status->changesrequested_count += $sub_status->changesrequested_count;
+					$status->all_count              += $sub_status->all_count;
 				}
+
+				$status->percent_complete = $this->calculate_percent_complete(
+					$status->current_count,
+					$status->all_count
+				);
 			}
 		}
 
@@ -650,9 +838,46 @@ class Locale extends GP_Route {
 	}
 
 	/**
+	 * Retrieves a project by path with 404 handling and in-memory caching.
+	 *
+	 * @param string $path Project path.
+	 * @return GP_Project|false The project object, or false on 404.
+	 */
+	private function get_project_by_path( $path ) {
+		$project = GP::$project->by_path( $path );
+		if ( ! $project ) {
+			$this->die_with_404();
+			return false;
+		}
+
+		$this->projects_cache[ (int) $project->id ] = $project;
+
+		return $project;
+	}
+
+	/**
+	 * Retrieves a project by ID with in-memory caching.
+	 *
+	 * @param int $project_id The project ID.
+	 * @return GP_Project|false The project object, or false if not found.
+	 */
+	private function get_project_by_id( $project_id ) {
+		$project_id = (int) $project_id;
+		if ( ! $project_id ) {
+			return false;
+		}
+
+		if ( ! array_key_exists( $project_id, $this->projects_cache ) ) {
+			$this->projects_cache[ $project_id ] = GP::$project->get( $project_id );
+		}
+
+		return $this->projects_cache[ $project_id ];
+	}
+
+	/**
 	 * Retrieves active sub projects.
 	 *
-	 * @param  GP_Project $project           The parent project
+	 * @param  GP_Project $project           The parent project.
 	 * @param  bool       $with_sub_projects Whether sub projects should be fetched too.
 	 *                                       Default false.
 	 * @return array List of sub projects.
@@ -660,37 +885,68 @@ class Locale extends GP_Route {
 	private function get_active_sub_projects( $project, $with_sub_projects = false ) {
 		global $wpdb;
 
-		$_projects = $project->many( "
+		$cache_key = (int) $project->id . ':' . (int) $with_sub_projects;
+		if ( isset( $this->sub_projects_cache[ $cache_key ] ) ) {
+			return $this->sub_projects_cache[ $cache_key ];
+		}
+
+		$projects_sql = "
 			SELECT *
 			FROM {$wpdb->gp_projects}
 			WHERE
 				parent_project_id = %d
 				AND active = 1
 			ORDER BY id ASC
-		", $project->id );
+		";
+		$_projects = $project->many( $projects_sql, $project->id );
 
-		$projects = array();
-		foreach ( $_projects as $project ) {
-			$projects[ $project->id ] = $project;
+		$projects = [];
 
-			if ( $with_sub_projects ) {
-				// e.g. wp/dev/admin/network
-				$sub_projects = $project->many( "
+		if ( $with_sub_projects && ! empty( $_projects ) ) {
+			// Batch fetch all nested child projects in a single query.
+			$parent_ids     = wp_list_pluck( $_projects, 'id' );
+			$parent_ids_sql = $this->prepare_in_int_list( $parent_ids );
+
+			$sub_sub_projects = [];
+			if ( ! empty( $parent_ids_sql ) ) {
+				$sub_sub_projects_sql = "
 					SELECT *
 					FROM {$wpdb->gp_projects}
 					WHERE
-						parent_project_id = %d
+						parent_project_id IN ( {$parent_ids_sql} )
 						AND active = 1
 					ORDER BY id ASC
-				", $project->id );
+				";
+				$sub_sub_projects = $project->many( $sub_sub_projects_sql );
+			}
 
-				foreach ( $sub_projects as $sub_project ) {
-					$projects[ $sub_project->id ] = $sub_project;
+			// Group child projects by parent.
+			$children_by_parent = [];
+			foreach ( $sub_sub_projects as $child ) {
+				$children_by_parent[ (int) $child->parent_project_id ][] = $child;
+			}
+			unset( $sub_sub_projects );
+
+			foreach ( $_projects as $sub_project ) {
+				$sub_id              = (int) $sub_project->id;
+				$projects[ $sub_id ] = $sub_project;
+
+				if ( isset( $children_by_parent[ $sub_id ] ) ) {
+					foreach ( $children_by_parent[ $sub_id ] as $child ) {
+						$projects[ (int) $child->id ] = $child;
+					}
 				}
-				unset( $sub_projects);
+			}
+			unset( $children_by_parent );
+		} else {
+			foreach ( $_projects as $sub_project ) {
+				$projects[ (int) $sub_project->id ] = $sub_project;
 			}
 		}
 		unset( $_projects );
+
+		// Skip $projects_cache as child projects are not re-fetched via get_project_by_id().
+		$this->sub_projects_cache[ $cache_key ] = $projects;
 
 		return $projects;
 	}
@@ -698,15 +954,15 @@ class Locale extends GP_Route {
 	/**
 	 * Retrieves active sub projects with paging.
 	 *
-	 * @param GP_Project $project           The parent project
+	 * @param GP_Project $project           The parent project.
 	 * @param array $args {
-	 *	@type int    $per_page Number of items per page. Default 20
-	 *	@type int    $page     The page of results to view. Default 1.
-	 *	@type string $orderby  The field to order by, id or name. Default id.
-	 *	@type string $order    The sorting order, ASC or DESC. Default ASC.
-	 *	@type string $search   The search string
-	 *	@type string $set_slug The translation set to view.
-	 *	@type string $locale   The locale of the translation set to view.
+	 *     @type int         $per_page        Number of items per page. Default 20.
+	 *     @type int         $page            The page of results to view. Default 1.
+	 *     @type string      $search          The search string.
+	 *     @type string      $set_slug        The translation set to view.
+	 *     @type string      $locale          The locale of the translation set to view.
+	 *     @type string|bool $filter          The filter to apply, or false. Default false.
+	 *     @type bool        $without_editors Whether to exclude projects with editors. Default false.
 	 * }
 	 * @return array List of sub projects.
 	 */
@@ -722,13 +978,26 @@ class Locale extends GP_Route {
 			'filter'          => false,
 			'without_editors' => false,
 		);
-		$r = wp_parse_args( $args, $defaults );
-		extract( $r, EXTR_SKIP );
+
+		[
+			'per_page'        => $per_page,
+			'page'            => $page,
+			'search'          => $search,
+			'set_slug'        => $set_slug,
+			'locale'          => $locale,
+			'filter'          => $filter,
+			'without_editors' => $without_editors,
+		] = wp_parse_args( $args, $defaults );
+
+		$page     = max( 1, (int) $page );
+		$per_page = (int) $per_page;
 
 		$limit_sql = '';
 		if ( $per_page ) {
-			$limit_sql = $wpdb->prepare( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
+			$limit_sql = sprintf( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
 		}
+
+		$sql_params = array( $locale, $set_slug );
 
 		/*
 		 * Conditions are split by which table they reference. When $stats_where is
@@ -741,13 +1010,15 @@ class Locale extends GP_Route {
 
 		$search_sql = '';
 		if ( $search ) {
-			$esc_search = '%%' . $wpdb->esc_like( $search ) . '%%';
-			$search_sql = $wpdb->prepare( ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )', $esc_search, $esc_search );
+			$search_sql = ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )';
+			$search_param = '%' . $wpdb->esc_like( $search ) . '%';
+			$sql_params[] = $search_param;
+			$sql_params[] = $search_param;
 		}
 
 		// Special Waiting Project Tab
 		// This removes the parent_project_id restriction and replaces it with all-translation-editor-projects
-		if ( 'waiting' == $project->slug && is_user_logged_in() && $this->roles_adapter ) {
+		if ( 'waiting' === $project->slug && is_user_logged_in() && $this->roles_adapter ) {
 
 			if ( ! $filter ) {
 				$filter = 'strings-waiting-and-fuzzy';
@@ -760,10 +1031,12 @@ class Locale extends GP_Route {
 
 			// Limit to only showing base-level projects.
 			$base_level_project_sql = '';
-			$base_level_project_ids = $wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IS NULL AND active = 1" );
+			$base_level_project_ids = wp_list_pluck( $this->get_active_top_level_projects(), 'id' );
 			if ( $base_level_project_ids ) {
-				$ids = implode( ', ', array_map( 'intval', $base_level_project_ids ) );
-				$base_level_project_sql = " AND tp.parent_project_id IN( $ids )";
+				$ids = $this->prepare_in_int_list( $base_level_project_ids );
+				if ( ! empty( $ids ) ) {
+					$base_level_project_sql = " AND tp.parent_project_id IN( $ids )";
+				}
 			}
 
 			// Check to see if they have any special approval permissions.
@@ -776,7 +1049,7 @@ class Locale extends GP_Route {
 				$allowed_projects = array_diff( $allowed_projects, $base_level_project_ids );
 
 				// Check to see if they can approve for all projects in this locale.
-				if ( Rosetta_Roles::LOCALE_MANAGER_ROLE === $role || in_array( 'all', $allowed_projects ) ) {
+				if ( Rosetta_Roles::LOCALE_MANAGER_ROLE === $role || in_array( 'all', $allowed_projects, true ) ) {
 					$can_approve_for_all = true;
 					$allowed_projects = array();
 				}
@@ -790,12 +1063,16 @@ class Locale extends GP_Route {
 				$stats_where = ' AND stats.has_pending = 1';
 				$tp_where    = ' AND ( (';
 
+				/*
+				 * The current user can approve for a small set of projects.
+				 * We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check.
+				 */
+				$ids = '';
 				if ( $allowed_projects ) {
-					/*
-					 * The current user can approve for a small set of projects.
-					 * We only need to check against tp.id and not tp_sub.id in this case as we've overriding the parent_project_id check.
-					 */
-					$ids = implode( ', ', array_map( 'intval', $allowed_projects ) );
+					$ids = $this->prepare_in_int_list( $allowed_projects );
+				}
+
+				if ( $ids ) {
 					$tp_where .= "tp.id IN( $ids )" . $base_level_project_sql;
 				} else {
 					$tp_where .= '0=1';
@@ -803,11 +1080,15 @@ class Locale extends GP_Route {
 
 				$tp_where .= ') OR (';
 
+				/*
+				 * The current user can approve all sub-projects of a base level project.
+				 */
+				$ids = '';
 				if ( $allowed_base_level_projects ) {
-					/*
-					 * The current user can approve all sub-projects of a base level project.
-					 */
-					$ids = implode( ', ', array_map( 'intval', $allowed_base_level_projects ) );
+					$ids = $this->prepare_in_int_list( $allowed_base_level_projects );
+				}
+
+				if ( $ids ) {
 					$tp_where .= "tp.parent_project_id IN( $ids )";
 				} else {
 					$tp_where .= '0=1';
@@ -823,13 +1104,15 @@ class Locale extends GP_Route {
 			// Exclude projects which have an assigned editor.
 			if ( $without_editors ) {
 				$project_ids_with_editor = $wpdb->get_col( $wpdb->prepare(
-					"SELECT DISTINCT(project_id) FROM `translate_translation_editors` WHERE (locale = %s OR locale = 'all-locales') AND project_id != 0 AND user_id != %d",
+					"SELECT DISTINCT(project_id) FROM {$wpdb->wporg_translation_editors} WHERE (locale = %s OR locale = 'all-locales') AND project_id != 0 AND user_id != %d",
 					$locale,
 					$user_id
 				) );
 				if ( $project_ids_with_editor ) {
-					$project_ids_with_editor = implode( ', ', array_map( 'intval', $project_ids_with_editor ) );
-					$tp_where .= " AND tp.id NOT IN( $project_ids_with_editor )";
+					$ids       = $this->prepare_in_int_list( $project_ids_with_editor );
+					if ( ! empty( $ids ) ) {
+						$tp_where .= " AND tp.id NOT IN( $ids )";
+					}
 				}
 			}
 		}
@@ -839,7 +1122,7 @@ class Locale extends GP_Route {
 		$filter_order_by = '';
 		$sort_order = 'DESC';
 		$filter_name = $filter;
-		if ( $filter && '-asc' == substr( $filter, -4 ) ) {
+		if ( $filter && '-asc' === substr( $filter, -4 ) ) {
 			$sort_order = 'ASC';
 			$filter_name = substr( $filter, 0, -4 );
 		}
@@ -853,13 +1136,19 @@ class Locale extends GP_Route {
 					}
 					break;
 				}
+				// Fall through.
 			case 'special':
-				// Float favorites to the start, but only if they have untranslated strings
-				$user_fav_projects = array_map( 'esc_sql', $this->get_user_favorites( $project->slug ) );
+				$user_fav_projects = $this->get_user_favorites( $project->slug );
 
 				// Float Favorites to the start, float fully translated to the bottom, order the rest by name
-				if ( $user_fav_projects ) {
-					$filter_order_by = 'FIELD( tp.path, "' . implode( '", "', $user_fav_projects ) . '" ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC';
+				if ( ! empty( $user_fav_projects ) ) {
+					// Cap favorites to avoid building an oversized FIELD() clause in ORDER BY.
+					$top_fav_projects = array_slice( $user_fav_projects, 0, 100 );
+
+					// Safely quote and escape values for SQL.
+					$escaped_favs    = array_map( 'esc_sql', $top_fav_projects );
+					$quoted_favs     = "'" . implode( "', '", $escaped_favs ) . "'";
+					$filter_order_by = "FIELD( tp.path, {$quoted_favs} ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC";
 				} else {
 					$filter_order_by = 'stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC';
 				}
@@ -867,15 +1156,17 @@ class Locale extends GP_Route {
 
 			case 'favorites':
 				// Only list favorites
-				$user_fav_projects = array_map( 'esc_sql', $this->get_user_favorites( $project->slug ) );
+				$user_fav_projects = $this->get_user_favorites( $project->slug );
 
-				if ( $user_fav_projects ) {
-					$tp_where .= ' AND tp.path IN( "' . implode( '", "', $user_fav_projects ) . '" )';
+				if ( ! empty( $user_fav_projects ) ) {
+					$favorite_path_placeholders = $this->prepare_in_placeholders( count( $user_fav_projects ), '%s' );
+					$tp_where                  .= " AND tp.path IN( {$favorite_path_placeholders} )";
+					$sql_params                 = array_merge( $sql_params, $user_fav_projects );
 				} else {
 					$tp_where .= ' AND 0=1';
 				}
-				$filter_order_by = 'stats.untranslated > 0 DESC, tp.name ASC';
 
+				$filter_order_by = 'stats.untranslated > 0 DESC, tp.name ASC';
 				break;
 
 			case 'strings-remaining':
@@ -884,18 +1175,18 @@ class Locale extends GP_Route {
 				break;
 
 			case 'strings-waiting-and-fuzzy':
-				$stats_where    .= ' AND stats.has_pending = 1';
+				$stats_where     = ' AND stats.has_pending = 1';
 				$filter_order_by = "tp.path LIKE 'wp/%%' DESC, (stats.fuzzy + stats.waiting) $sort_order, tp.name ASC";
 				break;
 
 			case 'strings-waiting-and-fuzzy-by-modified-date':
-				$stats_where    .= ' AND stats.has_pending = 1 AND stats.date_modified > "0000-00-00 00:00:00"';
+				$stats_where     = ' AND stats.has_pending = 1 AND stats.date_modified > "0000-00-00 00:00:00"';
 				$filter_order_by = "stats.date_modified $sort_order, tp.name ASC";
 				break;
 
 			case 'percent-completed':
 				$stats_where    .= ' AND stats.untranslated > 0';
-				$filter_order_by = "( stats.current / stats.all ) $sort_order, tp.name ASC";
+				$filter_order_by = "( stats.current / NULLIF( stats.all, 0 ) ) $sort_order, tp.name ASC";
 				break;
 
 			case 'completed':
@@ -908,6 +1199,11 @@ class Locale extends GP_Route {
 		/*
 		 * Find all child projects with translation sets that match the current locale/slug.
 		 *
+		 * Two dedicated queries are used instead of the deprecated SQL_CALC_FOUND_ROWS:
+		 * 1. Data query: Fetches current page records with ORDER BY and LIMIT.
+		 * 2. Count query: Fetches the total matching rows using COUNT(*) without ORDER BY
+		 *    or LIMIT, avoiding expensive filesorts and full table scans.
+		 *
 		 * When the filter requires a stats row (waiting/fuzzy/untranslated/etc.), the
 		 * stats lookup is wrapped in a derived table that pre-filters by locale +
 		 * condition. The optimizer then drives the join from that small set and
@@ -917,8 +1213,7 @@ class Locale extends GP_Route {
 		 * with no status row for this locale still appear (ordered last by NULL).
 		 */
 		if ( $stats_where ) {
-			$sql = "
-				SELECT SQL_CALC_FOUND_ROWS tp.*
+			$from_where = "
 				FROM (
 					SELECT project_id, `all`, `current`, waiting, fuzzy, untranslated, date_modified
 					FROM {$wpdb->project_translation_status} stats
@@ -928,78 +1223,95 @@ class Locale extends GP_Route {
 				INNER JOIN {$wpdb->gp_projects} tp ON tp.id = stats.project_id
 				WHERE tp.active = 1
 					$tp_where
-				ORDER BY $filter_order_by
-				$limit_sql
 			";
 		} else {
-			$sql = "
-				SELECT SQL_CALC_FOUND_ROWS tp.*
+			$from_where = "
 				FROM {$wpdb->gp_projects} tp
 					LEFT JOIN {$wpdb->project_translation_status} stats ON stats.project_id = tp.id AND stats.locale = %s AND stats.locale_slug = %s
 				WHERE tp.active = 1
 					$tp_where
-				ORDER BY $filter_order_by
-				$limit_sql
 			";
 		}
 
-		$_projects = $project->many( $sql, $locale, $set_slug );
+		$sql       = "SELECT tp.* $from_where ORDER BY $filter_order_by $limit_sql";
+		$count_sql = "SELECT COUNT(*) $from_where";
 
-		$results = (int) $project->found_rows();
-		$pages = (int) ceil( $results / $per_page );
+		// Fetch records for the current page.
+		$_projects = $project->many( $sql, ...$sql_params );
 
+		// Fetch total count for pagination calculations.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $count_sql is dynamically constructed for pagination and safely bound via $sql_params.
+		$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$sql_params ) );
+
+		$pages = $per_page > 0 ? max( 1, (int) ceil( $results / $per_page ) ) : 1;
+
+		// Skip $projects_cache as get_project_icon() only looks up top-level parent projects.
 		$projects = array();
-		foreach ( $_projects as $project ) {
-			$projects[ $project->id ] = $project;
+		foreach ( $_projects as $sub_project ) {
+			$projects[ $sub_project->id ] = $sub_project;
 		}
 
-		return array(
-			'pages' => compact( 'pages', 'page', 'per_page', 'results' ),
+		return [
+			'pages' => [
+				'pages'    => $pages,
+				'page'     => $page,
+				'per_page' => $per_page,
+				'results'  => $results,
+			],
 			'projects' => $projects,
-			'filter' => $filter,
+			'filter'   => $filter,
+		];
+	}
+
+	/**
+	 * Helper to fetch and format user favorites by meta key and prefix.
+	 *
+	 * @param int    $user_id  The user ID.
+	 * @param string $meta_key Usermeta key name.
+	 * @param string $prefix   GlotPress path prefix (e.g. 'wp-themes').
+	 * @return array Formatted favorite slugs.
+	 */
+	private function get_favorites_for_meta( $user_id, $meta_key, $prefix ) {
+		$raw = array_filter( (array) get_user_meta( $user_id, $meta_key, true ) );
+
+		return array_map(
+			static function ( $slug ) use ( $prefix ) {
+				return "{$prefix}/{$slug}";
+			},
+			$raw
 		);
 	}
 
 	/**
 	 * Retrieves a list of projects which the current user has favorited.
 	 *
+	 * @param string|false $project_slug Project slug to filter by, or false for all.
 	 * @return array List of favorited items, eg [ 'wp-themes/twentyten', 'wp-themes/twentyeleven' ]
 	 */
-	function get_user_favorites( $project_slug = false ) {
-		global $wpdb;
-
+	public function get_user_favorites( $project_slug = false ) {
 		if ( ! is_user_logged_in() ) {
 			return array();
 		}
 
-		$user_id = get_current_user_id();
+		$user_id   = get_current_user_id();
+		$cache_key = (int) $user_id . ':' . (string) $project_slug;
 
-		switch ( $project_slug ) {
-			default:
-				// Fall through to include both Themes and Plugins
-			case 'wp-themes':
-				// Theme favorites are stored as theme slugs, these map 1:1 to GlotPress projects.
-				$theme_favorites = array_map( function( $slug ) {
-					return "wp-themes/$slug";
-				}, (array) get_user_meta( $user_id, 'theme_favorites', true ) );
-
-				if ( 'wp-themes' === $project_slug ) {
-					return $theme_favorites;
-				}
-
-			case 'wp-plugins':
-				// Plugin favorites are stored as plugin slugs, these map 1:1 to GlotPress projects.
-				$plugin_favorites = array_map( function( $slug ) {
-					return "wp-plugins/$slug";
-				}, (array) get_user_meta( $user_id, 'plugin_favorites', true ) );
-
-				if ( 'wp-plugins' === $project_slug ) {
-					return $plugin_favorites;
-				}
+		if ( isset( $this->user_favorites_cache[ $cache_key ] ) ) {
+			return $this->user_favorites_cache[ $cache_key ];
 		}
 
-		// Return all favorites, for uses in things like the Waiting tab
-		return array_merge( $theme_favorites, $plugin_favorites );
+		$favorites = match ( $project_slug ) {
+			'wp-themes'  => $this->get_favorites_for_meta( $user_id, 'theme_favorites', 'wp-themes' ),
+			'wp-plugins' => $this->get_favorites_for_meta( $user_id, 'plugin_favorites', 'wp-plugins' ),
+			default      => array_merge(
+				$this->get_favorites_for_meta( $user_id, 'theme_favorites', 'wp-themes' ),
+				$this->get_favorites_for_meta( $user_id, 'plugin_favorites', 'wp-plugins' )
+			),
+		};
+
+		$this->user_favorites_cache[ $cache_key ] = $favorites;
+
+		return $favorites;
 	}
 
 	/**
@@ -1008,15 +1320,31 @@ class Locale extends GP_Route {
 	 * @return array List of top level projects.
 	 */
 	public function get_active_top_level_projects() {
-		global $wpdb;
+		$last_updated = get_option( 'wporg_projects_last_updated', 0 );
+		$cache_key    = 'active_top_level_projects:' . $last_updated;
+		$projects     = wp_cache_get( $cache_key, $this->cache_group );
 
-		return GP::$project->many( "
-			SELECT *
-			FROM {$wpdb->gp_projects}
-			WHERE
-				parent_project_id IS NULL
-				AND active = 1
-			ORDER BY FIELD( slug, 'waiting', 'wp', 'wp-themes', 'wp-plugins', 'patterns', 'meta', 'apps' )
-		" );
+		if ( false === $projects ) {
+			global $wpdb;
+
+			$projects_sql = "
+				SELECT *
+				FROM {$wpdb->gp_projects}
+				WHERE
+					parent_project_id IS NULL
+					AND active = 1
+				ORDER BY FIELD( slug, 'waiting', 'wp', 'wp-themes', 'wp-plugins', 'patterns', 'meta', 'apps' )
+			";
+
+			$projects = GP::$project->many( $projects_sql );
+
+			wp_cache_set( $cache_key, $projects, $this->cache_group, DAY_IN_SECONDS );
+		}
+
+		foreach ( $projects as $project ) {
+			$this->projects_cache[ (int) $project->id ] = $project;
+		}
+
+		return $projects;
 	}
 }
