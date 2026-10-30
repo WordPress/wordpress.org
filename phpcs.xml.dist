@@ -139,6 +139,8 @@
 				<element value="edit_any_learn_content"/>
 				<!-- HelpHub -->
 				<element value="manage_helphub"/>
+				<!-- Login -->
+				<element value="manage_event_codes"/>
 			</property>
 		</properties>
 	</rule>
