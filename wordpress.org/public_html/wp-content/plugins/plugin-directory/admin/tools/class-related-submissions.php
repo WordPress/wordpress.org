@@ -45,29 +45,45 @@ class Related_Submissions {
 	 */
 	public static $shared_domains = array(
 		// Email.
+		'126.com',
 		'163.com',
 		'aol.*',
+		'bk.ru',
+		'email.cz',
+		'free.fr',
 		'gmail.com',
 		'gmx.*',
 		'googlemail.com',
+		'grokbot.com',
 		'hotmail.*',
 		'icloud.com',
+		'inwind.it',
+		'laposte.net',
 		'live.*',
 		'mail.com',
+		'mail.de',
 		'mail.ru',
 		'me.com',
 		'msn.com',
+		'naver.com',
 		'outlook.*',
 		'pm.me',
+		'post.com',
+		'posteo.de',
 		'proton.me',
 		'protonmail.*',
 		'qq.com',
+		'seznam.cz',
+		'ukr.net',
 		'web.de',
+		'windowslive.com',
 		'wp.pl',
+		'ya.ru',
 		'yahoo.*',
 		'yandex.*',
 		'ymail.com',
 		'zoho.*',
+		'zohomail.com',
 
 		// URL shorteners.
 		'bit.ly',
@@ -99,33 +115,45 @@ class Related_Submissions {
 		'v.gd',
 
 		// Code.
+		'apify.com',
 		'bitbucket.org',
+		'buddypress.org',
+		'codeberg.org',
 		'codecanyon.net',
 		'envato.com',
 		'fiverr.com',
 		'github.com',
 		'gitlab.com',
+		'stackoverflow.com',
 		'upwork.com',
 		'w.org',
 		'wordpress.org',
 
 		// Social.
 		'about.me',
+		'behance.net',
 		'facebook.com',
+		'fb.com',
 		'gravatar.com',
 		'instagram.com',
 		'linkedin.com',
 		'medium.com',
+		'meetup.com',
 		'pinterest.*',
 		't.me',
 		'tiktok.com',
 		'twitter.com',
+		'vk.com',
 		'wa.me',
 		'x.com',
 		'youtube.com',
 
+		// Site builders, such as sites.google.com/view/{user}.
+		'google.com',
+
 		// Payments.
 		'buymeacoffee.com',
+		'patreon.com',
 		'paypal.*',
 		'stripe.com',
 
@@ -141,18 +169,42 @@ class Related_Submissions {
 	 * @var array
 	 */
 	public static $hosting_domains = array(
+		'000webhostapp.com',
+		'42web.io',
+		'biz.id',
 		'blogspot.com',
+		'chatgpt.site',
+		'dev.br',
+		'freedev.app',
 		'gitbook.io',
 		'github.io',
 		'gitlab.io',
+		'gt.tc',
+		'gumroad.com',
 		'herokuapp.com',
+		'hostingersite.com',
+		'id.vn',
+		'in.ua',
+		'infinityfree.me',
+		'io.vn',
+		'is-a.dev',
+		'my.id',
+		'name.ng',
 		'netlify.app',
+		'netlify.com',
 		'pages.dev',
+		'pp.ua',
+		'pro.bd',
+		'rf.gd',
 		'vercel.app',
+		'web.app',
 		'web.id',
 		'wixsite.com',
 		'wordpress.com',
+		'workers.dev',
 		'wpcomstaging.com',
+		'wuaze.com',
+		'xo.je',
 	);
 
 	/**
@@ -480,8 +532,16 @@ class Related_Submissions {
 			esc_html__( 'Check again', 'wporg-plugins' )
 		);
 
-		foreach ( self::get_type_labels() as $type => $label ) {
-			echo '<h2>' . esc_html( $label ) . '</h2>';
+		$labels = self::get_type_labels();
+
+		$links = array();
+		foreach ( $labels as $type => $label ) {
+			$links[] = sprintf( '<a href="#%s">%s</a>', esc_attr( $type ), esc_html( $label ) );
+		}
+		echo '<p>' . wp_kses_post( implode( ' | ', $links ) ) . '</p>';
+
+		foreach ( $labels as $type => $label ) {
+			printf( '<h2 id="%s">%s</h2>', esc_attr( $type ), esc_html( $label ) );
 
 			if ( empty( $matches['groups'][ $type ] ) ) {
 				echo '<p>' . esc_html__( 'None found.', 'wporg-plugins' ) . '</p>';
