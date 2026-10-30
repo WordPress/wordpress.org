@@ -43,6 +43,7 @@ class Plugin_Directory {
 		add_filter( 'jetpack_sitemap_post_types', array( $this, 'jetpack_sitemap_post_types' ) );
 		add_filter( 'jetpack_sitemap_skip_post', array( $this, 'jetpack_sitemap_skip_post' ), 10, 2 );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
+		add_filter( 'redirect_canonical', array( $this, 'keep_feed_like_term_slugs' ) );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ), 1 );
@@ -1319,6 +1320,37 @@ class Plugin_Directory {
 		if ( is_404() ) {
 			remove_action( 'template_redirect', 'redirect_canonical' );
 		}
+	}
+
+	/**
+	 * Keeps Canonical from stripping a term slug that looks like a feed endpoint.
+	 *
+	 * On paginated archives, Core removes a trailing `feed`, `rss`, `rss2`, `rdf` or `atom`
+	 * segment as if it were a feed, so `/tags/feed/page/2/` redirects to `/tags/page/2/`.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/46061
+	 *
+	 * @param string|false $redirect_url The redirect URL.
+	 * @return string|false The redirect URL, or false to stay on the requested URL.
+	 */
+	public function keep_feed_like_term_slugs( $redirect_url ) {
+		$term = get_queried_object();
+
+		if (
+			! $redirect_url ||
+			! is_tax() ||
+			! ( $term instanceof \WP_Term ) ||
+			! preg_match( '#^(feed|rss2?|rdf|atom)$#', $term->slug )
+		) {
+			return $redirect_url;
+		}
+
+		$term_link = get_term_link( $term );
+		if ( is_wp_error( $term_link ) || str_starts_with( $redirect_url, $term_link ) ) {
+			return $redirect_url;
+		}
+
+		return false;
 	}
 
 	/**
