@@ -7,7 +7,7 @@ gp_enqueue_styles( array( 'gp-jquery-webui-popover', 'driver-js' ) );
 gp_enqueue_scripts( array( 'gp-tour' ) );
 
 ?>
-<script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
+<?php wp_print_inline_script_tag( "document.body.className = document.body.className.replace('no-js','js');" ); ?>
 
 <header id="masthead" class="site-header <?php echo wporg_gp_is_index() ? 'home' : ''; ?>" role="banner">
 	<div class="site-branding">
