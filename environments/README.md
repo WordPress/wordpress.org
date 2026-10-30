@@ -267,6 +267,16 @@ All accounts use the password `password`.
 
 **Block editor:** the forums use the block editor through [Blocks Everywhere](https://github.com/Automattic/blocks-everywhere), which is not installed here — it needs a Gutenberg old enough to break against WordPress trunk until [Automattic/blocks-everywhere#211](https://github.com/Automattic/blocks-everywhere/pull/211) lands. `Plugin::__construct()` loads the block support only when that plugin is present, so the environment runs on bbPress' plain editor until then.
 
+### Photo Directory
+
+A test-only environment for the Photo Directory plugin in `wordpress.org/public_html/wp-content/plugins/photo-directory/`. The plugin is mounted at `wp-content/plugins/photo-directory` but not activated: its test bootstrap loads only the classes under test, so the suite runs without Google Cloud credentials.
+
+**Run tests:**
+
+```bash
+npm run photo-directory:test
+```
+
 ### WordPress.org SSO
 
 A test-only environment for the shared single sign-on code in `common/includes/wporg-sso/`. The SSO is a library rather than a plugin, so it is mounted at `wp-content/wporg-sso` instead of being activated, and its PHPUnit suite runs from there.
