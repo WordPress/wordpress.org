@@ -365,6 +365,9 @@ let wpTrac,
 		gardener: true === window.wpBugGardener,
 		currentUser: wpTracCurrentUser,
 
+		/**
+		 * Initializes Trac UI enhancements, event handlers, and feature modules.
+		 */
 		init() {
 			// Gardener status as a body class, for rules that cannot see the flag.
 			document.body.classList.toggle( 'wp-bug-gardener', wpTrac.gardener );
@@ -477,7 +480,9 @@ let wpTrac,
 			} );
 		},
 
-		// These ticket hacks need to be re-run after ticket previews.
+		/**
+		 * Re-applies ticket UI enhancements, linkers, and image/video previews after preview updates.
+		 */
 		postPreviewHacks() {
 			// Automatically preview images.
 			$( 'li.trac-field-attachment' ).each( function () {
@@ -2251,6 +2256,9 @@ let wpTrac,
 				return false;
 			}
 
+			/**
+			 * Initializes ticket subscription star states and click handlers for report table views.
+			 */
 			function reportInit() {
 				const tickets = [],
 					cells = $( 'table.listing' ).find( 'td.Stars' );
