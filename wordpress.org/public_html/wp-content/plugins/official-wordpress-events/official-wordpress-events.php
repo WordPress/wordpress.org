@@ -652,11 +652,13 @@ class Official_WordPress_Events {
 
 		$events = $this->parse_gatherpress_events( $feed['events'] );
 
-		$this->log( sprintf(
-			'returning %d GatherPress events (%s)',
-			count( $events ),
-			$feed['complete'] ? 'complete' : 'incomplete'
-		) );
+		$this->log(
+			sprintf(
+				'returning %d GatherPress events (%s)',
+				count( $events ),
+				$feed['complete'] ? 'complete' : 'incomplete'
+			)
+		);
 
 		return $events;
 	}
@@ -798,11 +800,16 @@ class Official_WordPress_Events {
 		if ( $has_point ) {
 			// Formatted like the Meetup.com events that have no `localized_location`, for consistency in the widget.
 			$location_parts = $this->parse_reverse_geocode_address( $this->reverse_geocode( $latitude, $longitude ) );
-			$location       = implode( ', ', array_filter( array(
-				$location_parts['city'] ?? $this->plain_text( $venue['city'] ?? '' ),
-				$location_parts['state'] ?? '',
-				$location_parts['country_name'] ?? '',
-			) ) );
+			$location       = implode(
+				', ',
+				array_filter(
+					array(
+						$location_parts['city'] ?? $this->plain_text( $venue['city'] ?? '' ),
+						$location_parts['state'] ?? '',
+						$location_parts['country_name'] ?? '',
+					)
+				)
+			);
 
 			$country_code = $country_code ?: $this->country_code( $location_parts['country_code'] ?? '' );
 		} elseif ( $is_online ) {
@@ -822,24 +829,26 @@ class Official_WordPress_Events {
 		$start_timestamp = $start + $offset;
 		$end_timestamp   = max( $start_timestamp, $end + $offset );
 
-		return new Official_WordPress_Event( array(
-			'type'            => 'meetup',
-			'source_id'       => $source_id,
-			'status'          => $status,
-			'title'           => mb_substr( $title, 0, 255 ),
-			'url'             => $url,
-			'meetup_name'     => mb_substr( $this->plain_text( $raw_event['group']['name'] ?? '' ), 0, 255 ),
-			'meetup_url'      => $group_url,
-			'description'     => $this->plain_text( $raw_event['description'] ?? '' ),
-			'num_attendees'   => max( 0, (int) ( $raw_event['attending'] ?? 0 ) ),
-			'start_timestamp' => $start_timestamp,
-			'end_timestamp'   => $end_timestamp,
-			'utc_offset'      => $offset,
-			'location'        => $location,
-			'country_code'    => $country_code,
-			'latitude'        => $has_point ? (float) $latitude : null,
-			'longitude'       => $has_point ? (float) $longitude : null,
-		) );
+		return new Official_WordPress_Event(
+			array(
+				'type'            => 'meetup',
+				'source_id'       => $source_id,
+				'status'          => $status,
+				'title'           => mb_substr( $title, 0, 255 ),
+				'url'             => $url,
+				'meetup_name'     => mb_substr( $this->plain_text( $raw_event['group']['name'] ?? '' ), 0, 255 ),
+				'meetup_url'      => $group_url,
+				'description'     => $this->plain_text( $raw_event['description'] ?? '' ),
+				'num_attendees'   => max( 0, (int) ( $raw_event['attending'] ?? 0 ) ),
+				'start_timestamp' => $start_timestamp,
+				'end_timestamp'   => $end_timestamp,
+				'utc_offset'      => $offset,
+				'location'        => $location,
+				'country_code'    => $country_code,
+				'latitude'        => $has_point ? (float) $latitude : null,
+				'longitude'       => $has_point ? (float) $longitude : null,
+			)
+		);
 	}
 
 	/**
@@ -971,18 +980,20 @@ class Official_WordPress_Events {
 
 		$feed_source_ids = array_flip( $this->gatherpress_feed['source_ids'] );
 
-		$local_events = $wpdb->get_results( $wpdb->prepare(
-			"SELECT id, source_id, title
-			FROM %i
-			WHERE
-				type       = 'meetup'                     AND
-				source_id LIKE %s                         AND
-				status    IN ( 'scheduled', 'cancelled' ) AND
-				date_utc  >= DATE_ADD( NOW(), INTERVAL 24 HOUR )
-			LIMIT 5000",
-			self::EVENTS_TABLE,
-			$wpdb->esc_like( 'gp-' ) . '%'
-		) );
+		$local_events = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, source_id, title
+				FROM %i
+				WHERE
+					type       = 'meetup'                     AND
+					source_id LIKE %s                         AND
+					status    IN ( 'scheduled', 'cancelled' ) AND
+					date_utc  >= DATE_ADD( NOW(), INTERVAL 24 HOUR )
+				LIMIT 5000",
+				self::EVENTS_TABLE,
+				$wpdb->esc_like( 'gp-' ) . '%'
+			)
+		);
 
 		foreach ( $local_events as $local_event ) {
 			if ( isset( $feed_source_ids[ $local_event->source_id ] ) ) {
