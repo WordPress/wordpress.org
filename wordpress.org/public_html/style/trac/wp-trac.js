@@ -2673,7 +2673,6 @@ let wpTrac,
 				const matchText =
 						$( '#field-summary' ).val().toLowerCase() + ' ' + $( '#field-description' ).val().toLowerCase(),
 					matchingWords = [],
-					matchingComponents = [];
 
 				if ( ! enabled || ! matchText.length ) {
 					return;
