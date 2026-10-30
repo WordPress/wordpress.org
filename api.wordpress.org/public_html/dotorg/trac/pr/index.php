@@ -1,15 +1,23 @@
 <?php
+/**
+ * Trac endpoint for GitHub pull request data attached to tickets.
+ *
+ * This is a public, unauthenticated, read-only JSON endpoint consumed by Trac: requests are
+ * anonymous GET requests, so there is no session or nonce to verify.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Trac
+ */
+
 namespace WordPressdotorg\API\Trac\GithubPRs;
 
 require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 require __DIR__ . '/functions.php';
 
-$trac          = $_GET['trac'] ?? '';
-$trac          = is_string( $trac ) ? $trac : '';
-$trac          = preg_replace( '![^a-z]!', '', $trac );
+$trac          = preg_replace( '![^a-z]!', '', sanitize_key( wp_unslash( $_GET['trac'] ?? '' ) ) );
 $ticket        = intval( $_GET['ticket'] ?? 0 );
-$author        = wp_unslash( $_GET['author'] ?? '' );
-$author        = is_string( $author ) ? $author : '';
+$author        = sanitize_text_field( wp_unslash( $_GET['author'] ?? '' ) );
 $authenticated = ! empty( $_GET['authenticated'] ); // Longer caches for logged out requests.
 
 header( 'Content-Type: application/json' );
