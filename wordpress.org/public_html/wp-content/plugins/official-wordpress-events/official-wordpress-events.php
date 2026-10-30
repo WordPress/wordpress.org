@@ -23,6 +23,9 @@ class Official_WordPress_Events {
 	const GATHERPRESS_FEED_URL   = 'https://events.wordpress.org/group/?rest_route=/wporg-groups/v1/events';
 	const GATHERPRESS_URL_PREFIX = 'https://events.wordpress.org/group/';
 
+	// `wporg_events` is unique on the first 255 characters of `url`, so a longer URL could overwrite another event's row.
+	const GATHERPRESS_URL_MAX_LENGTH = 255;
+
 	// A runaway-loop guard. Each page holds a fixed number of group sites, so this allows for thousands of groups.
 	const GATHERPRESS_MAX_PAGES = 500;
 
@@ -42,7 +45,9 @@ class Official_WordPress_Events {
 	 *
 	 * @var array|null {
 	 *     @type bool     $complete   Whether every page, and every group site on it, was read successfully.
-	 *     @type string[] $source_ids The source IDs of every event in the feed, including ones that were skipped.
+	 *     @type string[] $source_ids The source IDs of the events this run stores. An event the feed lists but this
+	 *                                can't store, e.g. because it lost its venue, is left out, so its old row is
+	 *                                marked deleted rather than left up with stale details.
 	 * }
 	 */
 	protected $gatherpress_feed = null;
@@ -167,7 +172,7 @@ class Official_WordPress_Events {
 			);
 
 			// Latitude and longitude are required by the database, so skip events that don't have one.
-			if ( empty( $row_values['latitude'] ) || empty( $row_values['longitude'] ) ) {
+			if ( ! $this->has_coordinates( $event ) ) {
 				continue;
 			}
 
@@ -643,14 +648,19 @@ class Official_WordPress_Events {
 	 * @return Official_WordPress_Event[]
 	 */
 	protected function get_gatherpress_events() {
-		$feed = $this->fetch_gatherpress_feed();
+		$feed   = $this->fetch_gatherpress_feed();
+		$events = $this->parse_gatherpress_events( $feed['events'] );
+		$stored = array_filter(
+			$events,
+			function ( $event ) {
+				return $this->has_coordinates( $event );
+			}
+		);
 
 		$this->gatherpress_feed = array(
 			'complete'   => $feed['complete'],
-			'source_ids' => wp_list_pluck( $feed['events'], 'source_id' ),
+			'source_ids' => wp_list_pluck( $stored, 'source_id' ),
 		);
-
-		$events = $this->parse_gatherpress_events( $feed['events'] );
 
 		$this->log(
 			sprintf(
@@ -780,6 +790,7 @@ class Official_WordPress_Events {
 			! preg_match( '/^gp-[0-9a-z]+-[0-9a-z]+(?:-[0-9]{8}(?:T[0-9]{6})?)?$/', $source_id ) ||
 			strlen( $source_id ) > 32 ||
 			! str_starts_with( $url, self::GATHERPRESS_URL_PREFIX ) ||
+			strlen( $url ) > self::GATHERPRESS_URL_MAX_LENGTH ||
 			! str_starts_with( $group_url, self::GATHERPRESS_URL_PREFIX ) ||
 			! in_array( $status, array( 'scheduled', 'cancelled' ), true ) ||
 			! is_int( $offset ) || abs( $offset ) > 14 * HOUR_IN_SECONDS ||
@@ -893,6 +904,17 @@ class Official_WordPress_Events {
 	}
 
 	/**
+	 * Whether an event has the coordinates the `wporg_events` table requires.
+	 *
+	 * @param Official_WordPress_Event $event The event.
+	 *
+	 * @return bool
+	 */
+	protected function has_coordinates( $event ) {
+		return ! empty( $event->latitude ) && ! empty( $event->longitude );
+	}
+
+	/**
 	 * Hide Meetup.com events that are also posted on WordPress Groups.
 	 *
 	 * While a group moves to WordPress Groups, it may post the same event in both places. The GatherPress copy wins.
@@ -962,13 +984,16 @@ class Official_WordPress_Events {
 	}
 
 	/**
-	 * Mark GatherPress events as deleted when they're no longer in the feed.
+	 * Mark GatherPress events as deleted when they're no longer in the feed, or can no longer be stored.
 	 *
 	 * Organizers unpublish or delete events, and recurring series drop occurrences, so those events stop appearing
-	 * in the feed rather than changing status. This only acts on a complete read of the feed: from an incomplete one,
-	 * a missing event could just be on a page or a group site that failed to load, and marking it deleted would hide a
-	 * real event. Events starting within the next day are left alone, like in `mark_postponed_wordcamps()`, because
-	 * the feed's window and this table's local-time dates don't line up exactly around "now".
+	 * in the feed rather than changing status. An event that loses its coordinates, e.g. by moving online, stays in
+	 * the feed but is skipped, so its old row would otherwise stay up at the old venue.
+	 *
+	 * This only acts on a complete read of the feed: from an incomplete one, a missing event could just be on a page or
+	 * a group site that failed to load, and marking it deleted would hide a real event. Events starting within the next
+	 * day are left alone, like in `mark_postponed_wordcamps()`, because the feed's window and this table's local-time
+	 * dates don't line up exactly around "now".
 	 */
 	protected function mark_deleted_gatherpress_events() {
 		global $wpdb;
