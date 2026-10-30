@@ -732,13 +732,23 @@ let wpTrac,
 			}
 
 			// Prevent marking a ticket as a duplicate of itself.
-			$( '#propertyform' ).on( 'submit', function () {
-				const action = $( 'input[name="action"]:checked' ).val(),
-					currentTicket = parseInt( $( '.trac-id' ).text().replace( '#', '' ) ),
-					duplicateTicket = parseInt( $( '#action_dupe' ).val() );
+			$( '#propertyform' ).on( 'submit', function ( event ) {
+				const action = $( 'input[name="action"]:checked' ).val();
+				if ( 'duplicate' !== action ) {
+					return;
+				}
 
-				if ( 'duplicate' === action && ( ! duplicateTicket || currentTicket === duplicateTicket ) ) {
-					$( '#action_dupe' ).val( '' );
+				const $dupeInput = $( '#action_dupe' ),
+					currentTicket = Number.parseInt(
+						( document.querySelector( '.trac-id' )?.textContent || '' ).replace( '#', '' ),
+						10
+					),
+					duplicateTicket = Number.parseInt( ( $dupeInput.val() || '' ).replace( '#', '' ), 10 );
+
+				if ( ! duplicateTicket || currentTicket === duplicateTicket ) {
+					$dupeInput.val( '' );
+					event.preventDefault();
+					event.stopImmediatePropagation();
 					wpTrac.isSubmitting = false;
 					return false;
 				}
@@ -1672,6 +1682,7 @@ let wpTrac,
 					'has-dev-note': 'needs-dev-note',
 					'needs-dev-note': 'has-dev-note',
 					'dev-reviewed': 'dev-feedback',
+					'dev-feedback': 'dev-reviewed',
 					'has-privacy-review': 'needs-privacy-review',
 					'needs-privacy-review': 'has-privacy-review',
 					'has-copy-review': 'needs-copy-review',
