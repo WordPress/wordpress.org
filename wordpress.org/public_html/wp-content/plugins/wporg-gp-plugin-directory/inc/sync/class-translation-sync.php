@@ -235,8 +235,8 @@ class Translation_Sync {
 		sort( $ids );
 		$lock_key = 'gp_sync_' . implode( '_', $ids ) . '_' . $new_translation_set->locale;
 
-		// Wait a maximum of 2 seconds
-		$acquired = $wpdb->get_var( $wpdb->prepare( "SELECT GET_LOCK(%s, 2)", $lock_key ) );
+		// Wait a maximum of 2 seconds.
+		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 2)', $lock_key ) );
 		if ( ! $acquired ) {
 			return false;
 		}
@@ -309,7 +309,7 @@ class Translation_Sync {
 
 			return true;
 		} finally {
-			$wpdb->query( $wpdb->prepare( "SELECT RELEASE_LOCK(%s)", $lock_key ) );
+			$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_key ) );
 		}
 	}
 
