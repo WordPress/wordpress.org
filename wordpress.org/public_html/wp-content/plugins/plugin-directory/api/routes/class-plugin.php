@@ -416,7 +416,7 @@ class Plugin extends Base {
 					echo Template::dashicons_stars(
 						array(
 							'rating'   => (int) $review->post_rating,
-							'template' => '<span class="star %1$s"></span>',
+							'template' => '<span class="star %1$s" aria-hidden="true"></span>',
 						)
 					);
 				?>
