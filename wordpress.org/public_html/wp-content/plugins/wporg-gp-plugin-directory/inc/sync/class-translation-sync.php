@@ -288,7 +288,7 @@ class Translation_Sync {
 				}
 			}
 
-			// Do not create a new translation if it is not current
+			// Do not create a new translation if it is not current.
 			if ( 'current' !== $translation->status ) {
 				return true;
 			}
@@ -306,7 +306,7 @@ class Translation_Sync {
 
 			do_action( 'wporg_translate_translation_synced', $copy, $translation );
 
-			$translation->set_status($copy->status);
+			$translation->set_status( $copy->status );
 			gp_clean_translation_set_cache( $new_translation_set->id );
 
 			return true;
