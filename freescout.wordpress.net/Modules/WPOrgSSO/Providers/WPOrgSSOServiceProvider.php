@@ -102,6 +102,13 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 	public const OPTION_ENFORCED_SINCE = 'wporgsso.enforced_since';
 
 	/**
+	 * Server variable nginx sets to 1 for requests from the proxy's IP addresses, and to 0 for all others.
+	 *
+	 * @var string
+	 */
+	public const SERVER_PROXIED_REQUEST = 'WPORG_PROXIED_REQUEST';
+
+	/**
 	 * Registers the module's dependencies.
 	 *
 	 * @return void
@@ -143,6 +150,32 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 	 */
 	public static function password_login_enabled(): bool {
 		return (bool) config( self::ALIAS . '.password_login' );
+	}
+
+	/**
+	 * Whether administrators may only use the helpdesk through the proxy.
+	 *
+	 * @return bool
+	 */
+	public static function proxy_required(): bool {
+		return (bool) config( self::ALIAS . '.require_proxy' );
+	}
+
+	/**
+	 * Whether a request came through the proxy, as nginx tells.
+	 *
+	 * @param Request $request Request.
+	 * @return bool
+	 */
+	public static function proxied( Request $request ): bool {
+		$proxied = $request->server( self::SERVER_PROXIED_REQUEST );
+
+		// Without it, nobody counts as proxied, so administrators stay out until nginx passes it.
+		if ( null === $proxied && \Cache::add( self::ALIAS . '.proxy_misconfigured', 1, 60 ) ) {
+			\Log::error( '[WPOrgSSO] WPORG_SSO_REQUIRE_PROXY is on, but nginx doesn\'t pass ' . self::SERVER_PROXIED_REQUEST . '; administrators are logged out.' );
+		}
+
+		return '1' === $proxied;
 	}
 
 	/**
