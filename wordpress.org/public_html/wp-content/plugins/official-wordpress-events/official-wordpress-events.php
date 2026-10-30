@@ -16,7 +16,41 @@ class Official_WordPress_Events {
 	const MEETUP_MEMBER_ID      = 72560962;
 	const CACHEBUSTER           = 3;
 
+	/*
+	 * Events organized on WordPress Groups, the GatherPress-based group sites under events.wordpress.org/group/.
+	 * See `mu-plugins/groups/events-feed.php` in the WordCamp.org repository for what the feed contains.
+	 */
+	const GATHERPRESS_FEED_URL   = 'https://events.wordpress.org/group/?rest_route=/wporg-groups/v1/events';
+	const GATHERPRESS_URL_PREFIX = 'https://events.wordpress.org/group/';
+
+	// `wporg_events` is unique on the first 255 characters of `url`, so a longer URL could overwrite another event's row.
+	const GATHERPRESS_URL_MAX_LENGTH = 255;
+
+	// A runaway-loop guard. Each page holds a fixed number of group sites, so this allows for thousands of groups.
+	const GATHERPRESS_MAX_PAGES = 500;
+
+	/*
+	 * A Meetup.com event this close in time and place to a GatherPress event is taken to be the same event, posted
+	 * in both places while a group moves off Meetup.com. Group names can't be compared, because organizers name
+	 * the two groups however they like. The distance is generous because a Meetup.com event without a venue
+	 * carries its group's coordinates, which are usually the city center.
+	 */
+	const DUPLICATE_MAX_MINUTES = 30;
+	const DUPLICATE_MAX_KM      = 25;
+
 	public $log = [];
+
+	/**
+	 * The result of the last full read of the GatherPress feed, or null when it hasn't been read during this run.
+	 *
+	 * @var array|null {
+	 *     @type bool     $complete   Whether every page, and every group site on it, was read successfully.
+	 *     @type string[] $source_ids The source IDs of the events this run stores. An event the feed lists but this
+	 *                                can't store, e.g. because it lost its venue, is left out, so its old row is
+	 *                                marked deleted rather than left up with stale details.
+	 * }
+	 */
+	protected $gatherpress_feed = null;
 
 	/*
 	 * @todo
@@ -138,7 +172,7 @@ class Official_WordPress_Events {
 			);
 
 			// Latitude and longitude are required by the database, so skip events that don't have one.
-			if ( empty( $row_values['latitude'] ) || empty( $row_values['longitude'] ) ) {
+			if ( ! $this->has_coordinates( $event ) ) {
 				continue;
 			}
 
@@ -152,6 +186,8 @@ class Official_WordPress_Events {
 				array_diff( array_keys( $row_values ), $keys_not_to_update )
 			);
 		}
+
+		$this->mark_deleted_gatherpress_events();
 
 		$this->log( "finished job\n\n" );
 	}
@@ -283,10 +319,13 @@ class Official_WordPress_Events {
 	 * @return array
 	 */
 	protected function fetch_upcoming_events() {
-		$wordcamp_events = $this->get_wordcamp_events();
-		$meetup_events   = $this->get_meetup_events();
+		$wordcamp_events    = $this->get_wordcamp_events();
+		$meetup_events      = $this->get_meetup_events();
+		$gatherpress_events = $this->get_gatherpress_events();
 
-		$events = array_merge( $wordcamp_events, $meetup_events );
+		$meetup_events = $this->hide_duplicate_meetups( $meetup_events, $gatherpress_events );
+
+		$events = array_merge( $wordcamp_events, $meetup_events, $gatherpress_events );
 
 		return $events;
 	}
@@ -600,6 +639,403 @@ class Official_WordPress_Events {
 	}
 
 	/**
+	 * Get events from WordPress Groups.
+	 *
+	 * They're stored as `meetup` events, because `api.wordpress.org/events/1.0` and the Events Widget only know the
+	 * `meetup` and `wordcamp` types, and these are meetups; they're just organized on WordPress.org rather than on
+	 * Meetup.com. Their `gp-` source IDs keep them apart from Meetup.com's.
+	 *
+	 * @return Official_WordPress_Event[]
+	 */
+	protected function get_gatherpress_events() {
+		$feed   = $this->fetch_gatherpress_feed();
+		$events = $this->parse_gatherpress_events( $feed['events'] );
+		$stored = array_filter(
+			$events,
+			function ( $event ) {
+				return $this->has_coordinates( $event );
+			}
+		);
+
+		$this->gatherpress_feed = array(
+			'complete'   => $feed['complete'],
+			'source_ids' => wp_list_pluck( $stored, 'source_id' ),
+		);
+
+		$this->log(
+			sprintf(
+				'returning %d GatherPress events (%s)',
+				count( $events ),
+				$feed['complete'] ? 'complete' : 'incomplete'
+			)
+		);
+
+		return $events;
+	}
+
+	/**
+	 * Read every page of the GatherPress feed.
+	 *
+	 * The feed pages by group site ID: each page names the cursor for the next, and the last has none. The read is
+	 * incomplete if any page fails, if the feed reports a group site it couldn't read, or if the cursors don't move
+	 * forward. Whatever was read is still returned, so those events stay up to date, but nothing may be marked
+	 * deleted from an incomplete read; see `mark_deleted_gatherpress_events()`.
+	 *
+	 * @return array {
+	 *     @type array[] $events   Raw events from the feed.
+	 *     @type bool    $complete Whether the whole feed was read.
+	 * }
+	 */
+	protected function fetch_gatherpress_feed() {
+		$api_client = $this->get_api_client();
+		$events     = array();
+		$complete   = true;
+		$after      = 0;
+
+		for ( $page = 0; $page < self::GATHERPRESS_MAX_PAGES; $page++ ) {
+			$request_url  = add_query_arg( 'after', $after, self::GATHERPRESS_FEED_URL );
+			$request_args = array(
+				// The feed never redirects. A redirect means it isn't being served, e.g., before it was deployed,
+				// so don't follow it to an HTML page.
+				'redirection' => 0,
+			);
+
+			$response = $api_client->tenacious_remote_get( $request_url, $request_args );
+			$body     = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			$body_is_valid = is_array( $body )
+				&& isset( $body['events'], $body['complete'] )
+				&& is_array( $body['events'] )
+				&& is_bool( $body['complete'] )
+				&& array_key_exists( 'next', $body )
+				&& ( null === $body['next'] || ( is_int( $body['next'] ) && $body['next'] > $after ) );
+
+			if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) || ! $body_is_valid ) {
+				$api_client->handle_error_response( $response, $request_url, $request_args );
+				$this->log( 'GatherPress feed request failed: ' . $request_url, true );
+
+				return array(
+					'events'   => $events,
+					'complete' => false,
+				);
+			}
+
+			$events = array_merge( $events, array_values( array_filter( $body['events'], 'is_array' ) ) );
+
+			if ( ! $body['complete'] ) {
+				$complete = false;
+				$this->log( 'GatherPress feed page was incomplete: ' . $request_url, true );
+			}
+
+			if ( null === $body['next'] ) {
+				return compact( 'events', 'complete' );
+			}
+
+			$after = $body['next'];
+		}
+
+		$this->log( 'GatherPress feed had more than ' . self::GATHERPRESS_MAX_PAGES . ' pages; stopped reading.', true );
+
+		return array(
+			'events'   => $events,
+			'complete' => false,
+		);
+	}
+
+	/**
+	 * Parse events from the GatherPress feed.
+	 *
+	 * The feed is ours, but it's still treated as untrusted input, since what's in it was typed by group organizers:
+	 * anything malformed is skipped rather than stored, every URL must point at a group site, and the text fields are
+	 * stored as plain text.
+	 *
+	 * @param array[] $raw_events Events as decoded from the feed.
+	 *
+	 * @return Official_WordPress_Event[]
+	 */
+	protected function parse_gatherpress_events( $raw_events ) {
+		$events = array();
+
+		foreach ( $raw_events as $raw_event ) {
+			$event = $this->parse_gatherpress_event( $raw_event );
+
+			if ( $event ) {
+				$events[] = $event;
+			} else {
+				$this->log( 'Skipped malformed GatherPress event: ' . wp_json_encode( $raw_event['source_id'] ?? null ) );
+			}
+		}
+
+		return $events;
+	}
+
+	/**
+	 * Parse one event from the GatherPress feed.
+	 *
+	 * @param array $raw_event An event as decoded from the feed.
+	 *
+	 * @return Official_WordPress_Event|null Null when the event is malformed.
+	 */
+	protected function parse_gatherpress_event( $raw_event ) {
+		$source_id = (string) ( $raw_event['source_id'] ?? '' );
+		$url       = esc_url_raw( (string) ( $raw_event['url'] ?? '' ), array( 'https' ) );
+		$group_url = esc_url_raw( (string) ( $raw_event['group']['url'] ?? '' ), array( 'https' ) );
+		$status    = $raw_event['status'] ?? '';
+		$offset    = $raw_event['utc_offset'] ?? null;
+		$start     = $this->parse_gmt_datetime( $raw_event['start_gmt'] ?? '' );
+		$end       = $this->parse_gmt_datetime( $raw_event['end_gmt'] ?? '' );
+		$title     = $this->plain_text( $raw_event['title'] ?? '' );
+
+		if (
+			! preg_match( '/^gp-[0-9a-z]+-[0-9a-z]+(?:-[0-9]{8}(?:T[0-9]{6})?)?$/', $source_id ) ||
+			strlen( $source_id ) > 32 ||
+			! str_starts_with( $url, self::GATHERPRESS_URL_PREFIX ) ||
+			strlen( $url ) > self::GATHERPRESS_URL_MAX_LENGTH ||
+			! str_starts_with( $group_url, self::GATHERPRESS_URL_PREFIX ) ||
+			! in_array( $status, array( 'scheduled', 'cancelled' ), true ) ||
+			! is_int( $offset ) || abs( $offset ) > 14 * HOUR_IN_SECONDS ||
+			! $start || ! $end ||
+			'' === $title
+		) {
+			return null;
+		}
+
+		$venue        = is_array( $raw_event['venue'] ?? null ) ? $raw_event['venue'] : array();
+		$latitude     = $venue['latitude'] ?? null;
+		$longitude    = $venue['longitude'] ?? null;
+		$has_point    = is_numeric( $latitude ) && is_numeric( $longitude ) && abs( $latitude ) <= 90 && abs( $longitude ) <= 180;
+		$is_online    = true === ( $raw_event['online'] ?? false );
+		$country_code = $this->country_code( $venue['country_code'] ?? '' );
+		$location     = '';
+
+		if ( $has_point ) {
+			// Formatted like the Meetup.com events that have no `localized_location`, for consistency in the widget.
+			$location_parts = $this->parse_reverse_geocode_address( $this->reverse_geocode( (float) $latitude, (float) $longitude ) );
+			$location       = implode(
+				', ',
+				array_filter(
+					array(
+						$location_parts['city'] ?? $this->plain_text( $venue['city'] ?? '' ),
+						$location_parts['state'] ?? '',
+						$location_parts['country_name'] ?? '',
+					)
+				)
+			);
+
+			$country_code = $country_code ?: $this->country_code( $location_parts['country_code'] ?? '' );
+		} elseif ( $is_online ) {
+			/*
+			 * Online events with no venue have no coordinates, which the table requires, so they're skipped by
+			 * `prime_events_cache()` for now. `location` is still set the way online WordCamps do it, so they're
+			 * ready to be listed once there's a placement for them.
+			 */
+			$location = 'online';
+		}
+
+		if ( ! $country_code ) {
+			$country_code = $this->country_code( $raw_event['group']['location']['country_code'] ?? '' );
+		}
+
+		// `date_utc` is misnamed; like Meetup.com events, these are stored in the event's local time.
+		$start_timestamp = $start + $offset;
+		$end_timestamp   = max( $start_timestamp, $end + $offset );
+
+		return new Official_WordPress_Event(
+			array(
+				'type'            => 'meetup',
+				'source_id'       => $source_id,
+				'status'          => $status,
+				'title'           => mb_substr( $title, 0, 255 ),
+				'url'             => $url,
+				'meetup_name'     => mb_substr( $this->plain_text( $raw_event['group']['name'] ?? '' ), 0, 255 ),
+				'meetup_url'      => $group_url,
+				'description'     => $this->plain_text( $raw_event['description'] ?? '' ),
+				'num_attendees'   => max( 0, (int) ( $raw_event['attending'] ?? 0 ) ),
+				'start_timestamp' => $start_timestamp,
+				'end_timestamp'   => $end_timestamp,
+				'utc_offset'      => $offset,
+				'location'        => $location,
+				'country_code'    => $country_code,
+				'latitude'        => $has_point ? (float) $latitude : null,
+				'longitude'       => $has_point ? (float) $longitude : null,
+			)
+		);
+	}
+
+	/**
+	 * Parse a `Y-m-d H:i:s` GMT datetime into a Unix timestamp.
+	 *
+	 * @param mixed $datetime The value from the feed.
+	 *
+	 * @return int|null
+	 */
+	protected function parse_gmt_datetime( $datetime ) {
+		if ( ! is_string( $datetime ) ) {
+			return null;
+		}
+
+		$parsed = DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $datetime, new DateTimeZone( 'UTC' ) );
+
+		return $parsed && $parsed->format( 'Y-m-d H:i:s' ) === $datetime ? $parsed->getTimestamp() : null;
+	}
+
+	/**
+	 * Reduce a feed value to plain text.
+	 *
+	 * Organizers write these, so markup is stripped rather than trusted to every place that displays the table.
+	 *
+	 * @param mixed $text The value from the feed.
+	 *
+	 * @return string
+	 */
+	protected function plain_text( $text ) {
+		return is_string( $text ) ? trim( wp_strip_all_tags( $text ) ) : '';
+	}
+
+	/**
+	 * Normalize a two-letter country code.
+	 *
+	 * @param mixed $country_code The value from the feed or the geocoder.
+	 *
+	 * @return string An uppercase code, or empty when invalid.
+	 */
+	protected function country_code( $country_code ) {
+		return is_string( $country_code ) && preg_match( '/^[a-z]{2}$/i', $country_code ) ? strtoupper( $country_code ) : '';
+	}
+
+	/**
+	 * Whether an event has the coordinates the `wporg_events` table requires.
+	 *
+	 * @param Official_WordPress_Event $event The event.
+	 *
+	 * @return bool
+	 */
+	protected function has_coordinates( $event ) {
+		return ! empty( $event->latitude ) && ! empty( $event->longitude );
+	}
+
+	/**
+	 * Hide Meetup.com events that are also posted on WordPress Groups.
+	 *
+	 * While a group moves to WordPress Groups, it may post the same event in both places. The GatherPress copy wins.
+	 * The Meetup.com copy is kept with the `hidden` status rather than dropped, because dropping it would leave its
+	 * existing row `scheduled`; and if the GatherPress event goes away, the next run shows the Meetup.com one again.
+	 *
+	 * @param Official_WordPress_Event[] $meetup_events      Events from Meetup.com.
+	 * @param Official_WordPress_Event[] $gatherpress_events Events from WordPress Groups.
+	 *
+	 * @return Official_WordPress_Event[]
+	 */
+	protected function hide_duplicate_meetups( $meetup_events, $gatherpress_events ) {
+		$candidates = array_filter(
+			$gatherpress_events,
+			function ( $event ) {
+				return 'scheduled' === $event->status && null !== $event->latitude;
+			}
+		);
+
+		if ( ! $candidates ) {
+			return $meetup_events;
+		}
+
+		foreach ( $meetup_events as $meetup_event ) {
+			if ( 'scheduled' !== $meetup_event->status || empty( $meetup_event->latitude ) ) {
+				continue;
+			}
+
+			foreach ( $candidates as $candidate ) {
+				$minutes_apart = abs( $meetup_event->start_timestamp - $meetup_event->utc_offset - ( $candidate->start_timestamp - $candidate->utc_offset ) ) / MINUTE_IN_SECONDS;
+
+				if ( $minutes_apart > self::DUPLICATE_MAX_MINUTES ) {
+					continue;
+				}
+
+				if ( $this->distance_km( $meetup_event->latitude, $meetup_event->longitude, $candidate->latitude, $candidate->longitude ) > self::DUPLICATE_MAX_KM ) {
+					continue;
+				}
+
+				$meetup_event->status = 'hidden';
+				$this->log( "Hid Meetup.com event {$meetup_event->source_id} as a duplicate of {$candidate->source_id}." );
+				break;
+			}
+		}
+
+		return $meetup_events;
+	}
+
+	/**
+	 * The great-circle distance between two points.
+	 *
+	 * @param float $latitude1  Latitude of the first point.
+	 * @param float $longitude1 Longitude of the first point.
+	 * @param float $latitude2  Latitude of the second point.
+	 * @param float $longitude2 Longitude of the second point.
+	 *
+	 * @return float Kilometers.
+	 */
+	protected function distance_km( $latitude1, $longitude1, $latitude2, $longitude2 ) {
+		$delta_latitude  = deg2rad( $latitude2 - $latitude1 );
+		$delta_longitude = deg2rad( $longitude2 - $longitude1 );
+
+		$a = sin( $delta_latitude / 2 ) ** 2
+			+ cos( deg2rad( $latitude1 ) ) * cos( deg2rad( $latitude2 ) ) * sin( $delta_longitude / 2 ) ** 2;
+
+		return 6371 * 2 * atan2( sqrt( $a ), sqrt( 1 - $a ) );
+	}
+
+	/**
+	 * Mark GatherPress events as deleted when they're no longer in the feed, or can no longer be stored.
+	 *
+	 * Organizers unpublish or delete events, and recurring series drop occurrences, so those events stop appearing
+	 * in the feed rather than changing status. An event that loses its coordinates, e.g. by moving online, stays in
+	 * the feed but is skipped, so its old row would otherwise stay up at the old venue.
+	 *
+	 * This only acts on a complete read of the feed: from an incomplete one, a missing event could just be on a page or
+	 * a group site that failed to load, and marking it deleted would hide a real event. Events starting within the next
+	 * day are left alone, like in `mark_postponed_wordcamps()`, because the feed's window and this table's local-time
+	 * dates don't line up exactly around "now".
+	 */
+	protected function mark_deleted_gatherpress_events() {
+		global $wpdb;
+
+		if ( empty( $this->gatherpress_feed['complete'] ) ) {
+			$this->log( 'Not marking GatherPress events deleted, because the feed was not read completely.' );
+			return;
+		}
+
+		$feed_source_ids = array_flip( $this->gatherpress_feed['source_ids'] );
+
+		$local_events = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, source_id, title
+				FROM %i
+				WHERE
+					type       = 'meetup'                     AND
+					source_id LIKE %s                         AND
+					status    IN ( 'scheduled', 'cancelled' ) AND
+					date_utc  >= DATE_ADD( NOW(), INTERVAL 24 HOUR )
+				LIMIT 5000",
+				self::EVENTS_TABLE,
+				$wpdb->esc_like( 'gp-' ) . '%'
+			)
+		);
+
+		foreach ( $local_events as $local_event ) {
+			if ( isset( $feed_source_ids[ $local_event->source_id ] ) ) {
+				continue;
+			}
+
+			$wpdb->update(
+				self::EVENTS_TABLE,
+				array( 'status' => 'deleted' ),
+				array( 'id' => $local_event->id )
+			);
+
+			$this->log( "Marked {$local_event->title} ({$local_event->source_id}) as deleted." );
+		}
+	}
+
+	/**
 	 * Get WordPress meetups from the Meetup.com API
 	 *
 	 * @return array
@@ -725,7 +1161,7 @@ class Official_WordPress_Events {
 	 */
 	protected function reverse_geocode( $latitude, $longitude ) {
 		$address  = false;
-		$cache_key       = 'geocode_' . md5( $latitude, $longitude );
+		$cache_key       = 'geocode_' . md5( $latitude . ',' . $longitude );
 		$cached_response = wp_cache_get( $cache_key, 'events' );
 
 		if ( false !== $cached_response ) {
@@ -806,6 +1242,9 @@ class Official_WordPress_Events {
 	 *
 	 * This checks all the upcoming Meetup.com events to see if any of them are missing. If they are, it assumes
 	 * that they were deleted, and updates their status.
+	 *
+	 * Events from WordPress Groups are stored as `meetup` too, but Meetup.com doesn't know them, so they're left out
+	 * here. `mark_deleted_gatherpress_events()` handles them instead.
 	 */
 	public function mark_deleted_meetups() {
 		global $wpdb;
@@ -822,6 +1261,7 @@ class Official_WordPress_Events {
 			WHERE
 				type      = 'meetup'    AND
 				status    = 'scheduled' AND
+				source_id NOT LIKE 'gp-%' AND
 				date_utc >= NOW()
 			LIMIT 5000
 		", ARRAY_A );
