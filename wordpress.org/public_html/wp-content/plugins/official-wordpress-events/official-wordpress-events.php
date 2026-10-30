@@ -1217,6 +1217,9 @@ class Official_WordPress_Events {
 	 *
 	 * This checks all the upcoming Meetup.com events to see if any of them are missing. If they are, it assumes
 	 * that they were deleted, and updates their status.
+	 *
+	 * Events from WordPress Groups are stored as `meetup` too, but Meetup.com doesn't know them, so they're left out
+	 * here. `mark_deleted_gatherpress_events()` handles them instead.
 	 */
 	public function mark_deleted_meetups() {
 		global $wpdb;
@@ -1233,6 +1236,7 @@ class Official_WordPress_Events {
 			WHERE
 				type      = 'meetup'    AND
 				status    = 'scheduled' AND
+				source_id NOT LIKE 'gp-%' AND
 				date_utc >= NOW()
 			LIMIT 5000
 		", ARRAY_A );
