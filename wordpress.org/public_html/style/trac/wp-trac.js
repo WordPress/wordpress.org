@@ -236,16 +236,49 @@ let wpTrac,
 	];
 
 	/**
+	 * Combined regular expression for matching Gutenberg issue IDs and user mentions.
+	 *
+	 * Compiled once at load time. Yields capture groups:
+	 * 1: Prefix / leading character before mention
+	 * 2: Username
+	 * 3: Gutenberg issue number
+	 *
+	 * @type {RegExp}
+	 */
+	const mentionPre  = '(^|[^a-zA-Z0-9_＠!@#$%&*])';
+	const mentionAt   = '(?:@|＠)(?!\\/)';
+	const mentionUser = '([a-zA-Z0-9_](?:[a-zA-Z0-9_\\-.]{0,18}[a-zA-Z0-9_])?)';
+	const mentionEnd  = '(?:\\b(?!@|＠)|$)';
+	const gbIssue     = '\\bGB-?(\\d+)\\b';
+
+	const combinedRegEx = new RegExp(
+		`(?:${ mentionPre }${ mentionAt }${ mentionUser }${ mentionEnd })|(?:${ gbIssue })`,
+		'gi'
+	);
+
+	/**
+	 * Set of lowercased reserved terms that should not be converted to user mention links.
+	 *
+	 * @type {Set<string>}
+	 */
+	const reservedTermsSet = new Set( reservedTerms.map( ( term ) => term.toLowerCase() ) );
+
+	/**
 	 * Escapes a value for insertion into an HTML string.
 	 *
-	 * Safe for element content only: quotes are left alone, so attribute values
-	 * must be set through jQuery rather than built by concatenation.
-	 *
-	 * @param {string} value Value to escape.
+	 * @param {*} value Value to escape.
 	 * @return {string} The escaped value.
 	 */
 	function escapeHtml( value ) {
-		return $( '<span />' ).text( value ).html();
+		if ( typeof value !== 'string' ) {
+			value = String( value ?? '' );
+		}
+		return value
+			.replace( /&/g, '&amp;' )
+			.replace( /</g, '&lt;' )
+			.replace( />/g, '&gt;' )
+			.replace( /"/g, '&quot;' )
+			.replace( /'/g, '&#39;' );
 	}
 
 	/**
@@ -284,8 +317,14 @@ let wpTrac,
 		}
 
 		textNodes.forEach( function ( textNode ) {
-			const value = textNode.nodeValue,
-				matches = [ ...value.matchAll( regex ) ];
+			const value = textNode.nodeValue;
+
+			if ( ! regex.test( value ) ) {
+				return;
+			}
+			regex.lastIndex = 0;
+
+			const matches = [ ...value.matchAll( regex ) ];
 
 			if ( ! matches.length ) {
 				return;
@@ -348,8 +387,7 @@ let wpTrac,
 			}
 
 			wpTrac.autocomplete.init();
-			wpTrac.linkMentions();
-			wpTrac.linkGutenbergIssues();
+			wpTrac.linkTicketText();
 			wpTrac.githubPRs.init();
 			wpTrac.suggestNotGeneral.init();
 
@@ -392,41 +430,49 @@ let wpTrac,
 			} );
 		},
 
-		linkMentions( selector ) {
-			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-			const mentionsRegEx =
-				/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_\-.]{1,20})(?:\b(?!@|＠)|$)/g;
-
+		/**
+		 * Replaces Gutenberg issue identifiers (e.g. GB1234, GB-1234) and user
+		 * mentions (e.g. @username) in text nodes with links.
+		 *
+		 * Walks text nodes in a single pass using combinedRegEx to avoid multiple
+		 * DOM traversals. Skips reserved phpDocumentor/Trac terms.
+		 *
+		 * @param {string} [selector] Optional CSS selector to target specific elements.
+		 *                            Defaults to 'div.change .comment, #ticket .description'.
+		 */
+		linkTicketText( selector ) {
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
-				linkTextNodes( this, mentionsRegEx, function ( match, pre, username ) {
-					if ( reservedTerms.includes( username ) ) {
-						return match;
+				linkTextNodes( this, combinedRegEx, function ( match, pre, username, gbNumber ) {
+					// Gutenberg Issue (GB1234 oder GB-1234)
+					if ( gbNumber ) {
+						const link = document.createElement( 'a' );
+						link.className = 'gutenberg-issue github ext-link';
+						link.href = `https://github.com/WordPress/Gutenberg/issues/${ gbNumber }`;
+
+						const icon = document.createElement( 'span' );
+						icon.className = 'icon';
+						icon.textContent = '\u200B';
+
+						link.append( icon, document.createTextNode( match ) );
+						return link;
 					}
 
-					const meClass = username === wpTrac.currentUser ? ' me' : '';
-					return [
-						pre,
-						$( '<a />', {
-							class: `mention${ meClass }`,
-							href: `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`,
-							text: `@${ username }`,
-						} )[ 0 ],
-					];
-				} );
-			} );
-		},
+					// User-Mention (@username)
+					if ( username ) {
+						if ( reservedTermsSet.has( username.toLowerCase() ) ) {
+							return match;
+						}
 
-		linkGutenbergIssues( selector ) {
-			const gutenbergIssueRegEx = /\bGB[-]?(\d+)\b/gi;
+						const meClass = username === wpTrac.currentUser ? ' me' : '';
+						const link = document.createElement( 'a' );
+						link.className = `mention${ meClass }`;
+						link.href = `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`;
+						link.textContent = `@${ username }`;
 
-			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
-				linkTextNodes( this, gutenbergIssueRegEx, function ( match, issueNumber ) {
-					return $( '<a />', {
-						class: 'gutenberg-issue github ext-link',
-						href: `https://github.com/WordPress/Gutenberg/issues/${ issueNumber }`,
-					} )
-						.append( $( '<span class="icon">&#8203;</span>' ) )
-						.append( document.createTextNode( match ) )[ 0 ];
+						return [ pre, link ];
+					}
+
+					return match;
 				} );
 			} );
 		},
@@ -476,8 +522,7 @@ let wpTrac,
 				}
 			} );
 
-			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );
-			wpTrac.linkMentions( '.ticketdraft .comment' );
+			wpTrac.linkTicketText( '.ticketdraft .comment' );
 		},
 
 		hacks() {
@@ -1503,14 +1548,13 @@ let wpTrac,
 				},
 
 				initTicketParticipants() {
-					let users = [];
-					const exclude = Array.isArray( settings.exclude ) ? settings.exclude : [];
+					const users = new Set();
+					const excludeSet = new Set( Array.isArray( settings.exclude ) ? settings.exclude : [] );
 
 					// Most recent should show up first.
 					$( $( '.change .username' ).get().reverse() ).each( function () {
 						let username = $( this ).data( 'username' );
 
-						// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
 						if (
 							$( this ).data( 'nicename' ) &&
 							username.toLowerCase() !== $( this ).data( 'nicename' ).toLowerCase() &&
@@ -1519,19 +1563,14 @@ let wpTrac,
 							username = $( this ).data( 'nicename' );
 						}
 
-						if (
-							typeof username !== 'undefined' &&
-							! users.includes( username ) &&
-							! exclude.includes( username )
-						) {
-							users.push( username );
+						if ( typeof username !== 'undefined' && ! excludeSet.has( username ) ) {
+							users.add( username );
 						}
 					} );
 
 					// Add ticket reporter.
 					let ticketReporter = $( '#ticket td[headers="h_reporter"]' ).text().trim();
 					const ticketReporterNicename = $( '#ticket td[headers="h_reporter"] a' ).data( 'nicename' );
-					// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
 					if (
 						ticketReporter &&
 						ticketReporterNicename &&
@@ -1541,16 +1580,16 @@ let wpTrac,
 						ticketReporter = ticketReporterNicename;
 					}
 
-					if ( ticketReporter && ! users.includes( ticketReporter ) ) {
-						users.push( ticketReporter );
+					if ( ticketReporter && ! excludeSet.has( ticketReporter ) ) {
+						users.add( ticketReporter );
 					}
 
 					// Exclude current user.
 					if ( wpTrac.currentUser ) {
-						users = users.filter( ( user ) => user !== wpTrac.currentUser );
+						users.delete( wpTrac.currentUser );
 					}
 
-					ticketParticipants = users;
+					ticketParticipants = Array.from( users );
 				},
 
 				getTicketParticipants() {
@@ -2247,9 +2286,11 @@ let wpTrac,
 						_nonce = data.data.nonce;
 					}
 
+					const subscribedSet = new Set( ( data.data.tickets || [] ).map( Number ) );
+
 					stars
 						.each( function () {
-							if ( data.data.tickets?.includes( $( this ).data( 'ticket' ) ) ) {
+							if ( subscribedSet.has( Number( $( this ).data( 'ticket' ) ) ) ) {
 								$( this ).toggleClass( 'dashicons-star-empty dashicons-star-filled' );
 							}
 						} )
@@ -2647,13 +2688,9 @@ let wpTrac,
 				// Longest match first.
 				matchingWords.sort( ( a, b ) => ( a.length > b.length ? -1 : 1 ) );
 
-				matchingWords.forEach( ( word ) => {
-					componentWords[ word ].forEach( ( component ) => {
-						if ( -1 === matchingComponents.indexOf( component ) ) {
-							matchingComponents.push( component );
-						}
-					} );
-				} );
+				const matchingComponents = [
+					...new Set( matchingWords.flatMap( ( word ) => componentWords[ word ] || [] ) )
+				];
 
 				if ( ! noticeDiv ) {
 					noticeDiv = $( '<div id="componentSuggest"/>' ).insertBefore( $( '.buttons' ).first() );
