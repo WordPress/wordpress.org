@@ -2672,7 +2672,7 @@ let wpTrac,
 			function maybeSuggest() {
 				const matchText =
 						$( '#field-summary' ).val().toLowerCase() + ' ' + $( '#field-description' ).val().toLowerCase(),
-					matchingWords = [],
+					matchingWords = [];
 
 				if ( ! enabled || ! matchText.length ) {
 					return;
