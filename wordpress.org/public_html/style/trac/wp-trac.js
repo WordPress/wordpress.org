@@ -245,11 +245,11 @@ let wpTrac,
 	 *
 	 * @type {RegExp}
 	 */
-	const mentionPre  = '(^|[^a-zA-Z0-9_＠!@#$%&*])';
-	const mentionAt   = '(?:@|＠)(?!\\/)';
+	const mentionPre = '(^|[^a-zA-Z0-9_＠!@#$%&*])';
+	const mentionAt = '(?:@|＠)(?!\\/)';
 	const mentionUser = '([a-zA-Z0-9_](?:[a-zA-Z0-9_\\-.]{0,18}[a-zA-Z0-9_])?)';
-	const mentionEnd  = '(?:\\b(?!@|＠)|$)';
-	const gbIssue     = '\\bGB-?(\\d+)\\b';
+	const mentionEnd = '(?:\\b(?!@|＠)|$)';
+	const gbIssue = '\\bGB-?(\\d+)\\b';
 
 	const combinedRegEx = new RegExp(
 		`(?:${ mentionPre }${ mentionAt }${ mentionUser }${ mentionEnd })|(?:${ gbIssue })`,
@@ -2688,7 +2688,7 @@ let wpTrac,
 				matchingWords.sort( ( a, b ) => ( a.length > b.length ? -1 : 1 ) );
 
 				const matchingComponents = [
-					...new Set( matchingWords.flatMap( ( word ) => componentWords[ word ] || [] ) )
+					...new Set( matchingWords.flatMap( ( word ) => componentWords[ word ] || [] ) ),
 				];
 
 				if ( ! noticeDiv ) {
