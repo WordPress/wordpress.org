@@ -713,11 +713,12 @@
 	 */
 	async function recoverCorruptDB( attempt ) {
 		await new Promise( ( resolve, reject ) => {
+			const timeoutId = setTimeout( () => reject( new Error( 'IDB delete timed out' ) ), 1500 );
 			const deleteReq = indexedDB.deleteDatabase( DB_NAME );
-			deleteReq.onsuccess = () => resolve();
-			deleteReq.onerror = () => reject( deleteReq.error );
+			deleteReq.onsuccess = () => { clearTimeout( timeoutId ); resolve(); };
+			deleteReq.onerror = () => { clearTimeout( timeoutId ); reject( deleteReq.error ); };
 			deleteReq.onblocked = () => {
-				console.warn( 'IndexedDB deletion blocked: The cache will be disabled for this session.' );
+				clearTimeout( timeoutId );
 				projects._storageDisabled = true;
 				reject( new Error( 'Database deletion blocked' ) );
 			};
