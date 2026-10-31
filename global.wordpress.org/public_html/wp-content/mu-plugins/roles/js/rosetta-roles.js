@@ -132,19 +132,13 @@
 
 			// Selecting the entire category grants access to all its items,
 			// making individual sub-project selections redundant.
-			if ( checked ) {
-				this.get( 'subProjects' ).uncheckAll();
-			}
+			if ( checked ) this.get( 'subProjects' ).uncheckAll();
 		},
 
 		updateChecked: function( model ) {
-			if ( this._isUncheckingAll ) {
-				return;
-			}
+			if ( this._isUncheckingAll ) return;
 
-			if ( model.get( 'checked' ) ) {
-				this.set( 'checked', false );
-			}
+			if ( model.get( 'checked' ) ) this.set( 'checked', false );
 
 			this.checkForCheckedSubProjects();
 		},
@@ -164,7 +158,6 @@
 		// state between individual category models and the standalone '#project-all' (GTE) toggle.
 		initialize: function() {
 			this.on( 'change:isActive', this.toggleActiveStates );
-
 			this.listenTo( projects.events, 'deactivate:other-projects', this.disableActiveStates );
 			this.listenTo( projects.events, 'uncheck:other-projects', this.uncheckAllProjects );
 		},
@@ -177,9 +170,7 @@
 		},
 
 		toggleActiveStates: function( model ) {
-			if ( ! model.get( 'isActive' ) ) {
-				return;
-			}
+			if ( ! model.get( 'isActive' ) ) return;
 
 			this.models.forEach( project => {
 				if ( project !== model ) {
@@ -247,16 +238,10 @@
 		},
 
 		uncheckAll: function() {
-			if ( this.project ) {
-				this.project._isUncheckingAll = true;
-			}
+			if ( this.project ) this.project._isUncheckingAll = true;
 
 			try {
-				this.getAllModels().forEach( model => {
-					if ( model.get( 'checked' ) ) {
-						model.uncheck();
-					}
-				} );
+				this.getAllModels().forEach( model => model.get( 'checked' ) && model.uncheck() );
 			} finally {
 				if ( this.project ) {
 					this.project._isUncheckingAll = false;
@@ -269,9 +254,7 @@
 			value = value.trim();
 
 			// Don't do anything if we've already done this search
-			if ( this.terms === value ) {
-				return;
-			}
+			if ( this.terms === value ) return;
 
 			this.terms = value;
 
@@ -386,9 +369,7 @@
 		},
 
 		syncInput: function() {
-			if ( ! this.inputEl ) {
-				return;
-			}
+			if ( ! this.inputEl ) return;
 
 			const isChecked = Boolean( this.model.get( 'checked' ) );
 			const hasCheckedSubProjects = Boolean( this.model.get( 'checkedSubProjects' ) );
@@ -453,14 +434,10 @@
 			const collection = this.model.get( 'subProjects' );
 
 			if ( collection.length > 5 ) {
-				this.views.add( new projects.view.Search( {
-					collection: collection
-				} ) );
+				this.views.add( new projects.view.Search( { collection } ) );
 			}
 
-			this.views.add( new projects.view.SubProjectsList( {
-				collection: collection
-			} ) );
+			this.views.add( new projects.view.SubProjectsList( { collection } ) );
 		}
 	} );
 
@@ -575,9 +552,7 @@
 			this.checkbox = this.el.querySelector( 'input' );
 
 			if ( projects.selection.get( 'all' ) ) {
-				if ( this.checkbox ) {
-					this.checkbox.checked = true;
-				}
+				if ( this.checkbox ) this.checkbox.checked = true;
 				this.el.classList.add( 'active' );
 			}
 
@@ -586,9 +561,7 @@
 		},
 
 		onActivate: function() {
-			if ( this.el.classList.contains( 'active' ) ) {
-				return;
-			}
+			if ( this.el.classList.contains( 'active' ) ) return;
 
 			this.el.classList.add( 'active' );
 			projects.events.trigger( 'deactivate:other-projects' );
@@ -618,7 +591,6 @@
 	/**
 	 * UTILS
 	 */
-
 	const isValidTime = time => Number.isFinite( time ) && time > 0;
 
 	// Check if the browser supports IndexedDB, Compression Streams, and has a valid cache timestamp.
@@ -668,9 +640,7 @@
 
 			// Fall back to remote data if IndexedDB stalls or deadlocks across tabs.
 			const timeoutId = setTimeout( () => {
-				if ( settled ) {
-					return;
-				}
+				if ( settled ) return;
 				settled = true;
 				projects._storageDisabled = true;
 				reject( new Error( 'IndexedDB open timed out' ) );
@@ -688,9 +658,7 @@
 
 			// Reject and bypass cache if another tab blocks database access or schema changes.
 			request.onblocked = () => {
-				if ( settled ) {
-					return;
-				}
+				if ( settled ) return;
 				settled = true;
 				clearTimeout( timeoutId );
 				projects._storageDisabled = true;
@@ -721,17 +689,13 @@
 				}
 
 				// Yield connection when another tab initiates an upgrade.
-				db.onversionchange = () => {
-					db.close();
-				};
+				db.onversionchange = () => db.close();
 
 				resolve( db );
 			};
 
 			request.onerror = () => {
-				if ( settled ) {
-					return;
-				}
+				if ( settled ) return;
 				settled = true;
 				clearTimeout( timeoutId );
 				projects._storageDisabled = true;
