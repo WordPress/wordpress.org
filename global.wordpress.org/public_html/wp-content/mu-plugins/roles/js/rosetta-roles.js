@@ -197,27 +197,15 @@
 			checked: false
 		},
 
-		// Stored as direct instance property instead of Backbone attribute to avoid .set() overhead during search.
-		matchScore: 0,
-		_searchHaystack: null,
-
 		initialize() {
+			// Initialize all properties immediately to ensure identical, monomorphic hidden classes.
+			this.matchScore = 0;
+			this._lowerName = String( this.attributes.name || '' ).toLowerCase();
+			this._lowerSlug = String( this.attributes.slug || '' ).toLowerCase();
+			this._searchHaystack = `${ this._lowerName } ${ this._lowerSlug }`;
+
 			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
-		},
-
-		/**
-		 * Lazily builds and caches the lowercase search haystack on first search.
-		 *
-		 * @return {string} Lowercase combination of name and slug.
-		 */
-		getSearchHaystack() {
-			if ( this._searchHaystack === null ) {
-				this._lowerName = String( this.attributes.name || '' ).toLowerCase();
-				this._lowerSlug = String( this.attributes.slug || '' ).toLowerCase();
-				this._searchHaystack = `${ this._lowerName } ${ this._lowerSlug }`;
-			}
-			return this._searchHaystack;
 		}
 	} );
 
@@ -288,7 +276,7 @@
 
 			for ( let i = 0; i < allModels.length; i++ ) {
 				const project = allModels[ i ];
-				const haystack = project.getSearchHaystack();
+				const haystack = project._searchHaystack;
 
 				// Step 1 (Filter): Ensure all search terms are present in name or slug.
 				let matchesAll = true;
@@ -302,6 +290,7 @@
 				if ( ! matchesAll ) continue;
 
 				// Step 2 (Ranking): Calculate 'matchScore' for comparator sorting.
+				// Cache properties to avoid repeated heap lookups across multiple search tokens.
 				const { _lowerName, _lowerSlug } = project;
 				let score = 0;
 				for ( let j = 0; j < tokenCount; j++ ) {
