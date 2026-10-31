@@ -330,11 +330,6 @@
 			document.getElementById( 'project-loading' )?.remove();
 			this.el.append( fragment );
 
-			// Initialize the global #project-all view once it is rendered in the DOM and ensure it is only initialized once.
-			if ( document.getElementById( 'project-all' ) && ! projects.view.allProjectsInstance ) {
-				projects.view.allProjectsInstance = new projects.view.AllProjects();
-			}
-
 			// Activate the first relevant category tab if #project-all is not active.
 			if ( ! projects.selection.get( 'all' ) ) {
 				const activeProject = this.collection.find( p => p.get( 'isActive' ) || p.get( 'checkedSubProjects' ) || p.get( 'checked' ) )
@@ -828,6 +823,12 @@
 
 		projects.selection = new projects.model.Selection( initialSelection );
 		projects.selection.updateInputField();
+
+		// Initialize the global #project-all view and ensure it is only initialized once.
+		// Omitted from the DOM for CLPTEs.
+		if ( document.getElementById( 'project-all' ) ) {
+			projects.view.allProjectsInstance ||= new projects.view.AllProjects();
+		}
 
 		projects.getProjects()
 			.then( response => projects.initFrame( response ) )
