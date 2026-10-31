@@ -109,7 +109,11 @@
 			const subProjects = this.get( 'sub_projects' ) || [];
 			this.unset( 'sub_projects', { silent: true } );
 
-			this._subProjectIds = new Set( subProjects.map( sub => normalizeId( sub.id ) ) );
+			// Populate sub-project IDs without allocating an intermediate array.
+			this._subProjectIds = new Set();
+			for ( const sub of subProjects ) {
+				this._subProjectIds.add( normalizeId( sub.id ) );
+			}
 
 			const subProjectsCollection = new projects.model.SubProjects( subProjects, {
 				project: this
@@ -273,20 +277,33 @@
 		search( term ) {
 			// Split into tokens; ignore empty tokens.
 			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
+			const allModels = this.getAllModels();
+			const results = [];
 
-			const results = this.getAllModels().filter( project => {
+			for ( let i = 0; i < allModels.length; i++ ) {
+				const project = allModels[ i ];
+				const haystack = project.getSearchHaystack();
+
 				// Step 1 (Filter): Ensure all search terms are present in name or slug.
-				if ( ! tokens.every( token => project.getSearchHaystack().includes( token ) ) ) {
-					return false;
+				let matchesAll = true;
+				for ( let j = 0; j < tokens.length; j++ ) {
+					if ( ! haystack.includes( tokens[ j ] ) ) {
+						matchesAll = false;
+						break;
+					}
 				}
+
+				if ( ! matchesAll ) continue;
 
 				// Step 2 (Ranking): Calculate 'matchScore' for comparator sorting.
 				const { _lowerName, _lowerSlug } = project;
-				project.matchScore = tokens.reduce( ( sum, token ) =>
-					sum + Math.max( getMatchScore( _lowerName, token ), getMatchScore( _lowerSlug, token ) ), 0 );
-
-				return true;
-			} );
+				let score = 0;
+				for ( let j = 0; j < tokens.length; j++ ) {
+					score += Math.max( getMatchScore( _lowerName, tokens[ j ] ), getMatchScore( _lowerSlug, tokens[ j ] ) );
+				}
+				project.matchScore = score;
+				results.push( project );
+			}
 
 			this.reset( results );
 		},
