@@ -31,6 +31,34 @@
 	};
 
 	/**
+	 * Calculates a relevance score based on match position and density.
+	 *
+	 * @param {string} text  - Target text to evaluate (e.g. name or slug).
+	 * @param {string} query - Lowercase query term.
+	 * @return {number} Calculated relevance score between 0 and 1.
+	 */
+	const getMatchScore = ( text, query ) => {
+		if ( ! text || ! query ) {
+			return 0;
+		}
+
+		const lower = String( text ).toLowerCase();
+		const index = lower.indexOf( query );
+
+		if ( index === -1 ) {
+			return 0;
+		}
+
+		// 0.5 for prefix match, 0.4 for word boundary, 0.1 for mid-word matches.
+		const positionBonus = index === 0
+			? 0.5
+			: ( lower[ index - 1 ] === ' ' || lower[ index - 1 ] === '-' ? 0.4 : 0.1 );
+
+		// Density bonus: prefers shorter, more concise matches.
+		return positionBonus + ( 0.5 * ( query.length / lower.length ) );
+	};
+
+	/**
 	 * MODELS
 	 */
 
@@ -269,8 +297,8 @@
 		// Performs a search within the collection
 		search: function( term ) {
 			// Split into tokens; ignore empty tokens.
-			const tokens = term.toLowerCase().split( /\s+/ ).filter( Boolean );
-			const hasScoreFn = typeof String.prototype.score === 'function';
+			const cleanTerm = term.toLowerCase().trim();
+			const tokens = cleanTerm.split( /\s+/ ).filter( Boolean );
 
 			// Step 1 (Filter): Token-based pre-filter. Ensures all search terms
 			// are present in either 'name' or 'slug' regardless of word order.
@@ -278,11 +306,10 @@
 				const haystack = project.getSearchHaystack();
 
 				if ( tokens.every( token => haystack.includes( token ) ) ) {
-					// Step 2 (Ranking): Calculates 'matchScore' via string_score for sorting.
-					const name = project.attributes.name;
-					const nameScore = ( name && hasScoreFn ) ? String( name ).score( term, 0.5 ) : 0;
-					const slug = project.attributes.slug;
-					const slugScore = ( slug && hasScoreFn ) ? String( slug ).score( term, 0.5 ) : 0;
+					// Step 2 (Ranking): Calculates 'matchScore' for comparator sorting.
+					const nameScore = getMatchScore( project.attributes.name, cleanTerm );
+					const slugScore = getMatchScore( project.attributes.slug, cleanTerm );
+
 					project.matchScore = Math.max( nameScore, slugScore );
 					return true;
 				}
@@ -522,7 +549,7 @@
 		initialize: function() {
 			this._debouncedSearch = _.debounce( () => {
 				this.collection.doSearch( this.el.value );
-			}, 300 );
+			}, 200 );
 		},
 
 		remove: function() {
