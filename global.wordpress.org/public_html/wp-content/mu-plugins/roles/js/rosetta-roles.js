@@ -279,7 +279,7 @@
 
 			this.terms = value;
 
-			if ( this.terms.length > 0 ) {
+			if ( this.terms ) {
 				this.search( this.terms );
 			} else {
 				// If search is blank, show all projects.
@@ -414,7 +414,7 @@
 		},
 
 		updateChecked: function( event ) {
-			this.model.set( 'checked', Boolean( event.target.checked ) );
+			this.model.set( 'checked', event.target.checked );
 		}
 	} );
 
@@ -481,9 +481,7 @@
 		},
 
 		clearSubViews: function() {
-			for ( const view of this._subViews ) {
-				view.remove();
-			}
+			this._subViews.forEach( view => view.remove() );
 			this._subViews = [];
 		},
 
