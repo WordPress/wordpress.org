@@ -161,7 +161,7 @@
 		// Check against the ID set rather than the collection so active selections
 		// are still detected even when the collection is filtered by an active search.
 		checkForCheckedSubProjects: function() {
-			const hasChecked = projects.selection.models.some( model => this._subProjectIds.has( model.id ) );
+			const hasChecked = projects.selection.some( model => this._subProjectIds.has( model.id ) );
 			this.set( 'checkedSubProjects', hasChecked );
 		}
 	} );
