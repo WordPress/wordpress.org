@@ -24,38 +24,29 @@
 	 * @return {number|string} Normalized ID.
 	 */
 	const normalizeId = id => {
-		if ( id === null || id === undefined || id === '' || typeof id === 'boolean' ) {
-			return '';
-		}
-		return ( id === 'all' || Number.isNaN( Number( id ) ) ) ? String( id ) : Number( id );
+		if ( id == null || id === '' || typeof id === 'boolean' ) return '';
+		const num = Number( id );
+		return Number.isNaN( num ) ? String( id ) : num;
 	};
 
 	/**
 	 * Calculates a relevance score based on match position and density.
 	 *
-	 * @param {string} text  - Target text to evaluate (e.g. name or slug).
-	 * @param {string} query - Lowercase query term.
+	 * @param {string} lowerText - Target text to evaluate (e.g. name or slug).
+	 * @param {string} query     - Lowercase query term.
 	 * @return {number} Calculated relevance score between 0 and 1.
 	 */
-	const getMatchScore = ( text, query ) => {
-		if ( ! text || ! query ) {
-			return 0;
-		}
+	const getMatchScore = ( lowerText, query ) => {
+		if ( ! lowerText || ! query ) return 0;
 
-		const lower = String( text ).toLowerCase();
-		const index = lower.indexOf( query );
-
-		if ( index === -1 ) {
-			return 0;
-		}
+		const index = lowerText.indexOf( query );
+		if ( index === -1 ) return 0;
 
 		// 0.5 for prefix match, 0.4 for word boundary, 0.1 for mid-word matches.
-		const positionBonus = index === 0
-			? 0.5
-			: ( ' -_'.includes( lower[ index - 1 ] ) ? 0.4 : 0.1 );
+		const positionBonus = index === 0 ? 0.5 : ( ' -_'.includes( lowerText[ index - 1 ] ) ? 0.4 : 0.1 );
 
 		// Density bonus: prefers shorter, more concise matches.
-		return positionBonus + ( 0.5 * ( query.length / lower.length ) );
+		return positionBonus + ( 0.5 * ( query.length / lowerText.length ) );
 	};
 
 	/**
@@ -226,7 +217,12 @@
 		 * @return {string} Lowercase combination of name and slug.
 		 */
 		getSearchHaystack: function() {
-			return ( this._searchHaystack ??= `${ this.attributes.name || '' } ${ this.attributes.slug || '' }`.toLowerCase() );
+			if ( this._searchHaystack === null ) {
+				this._lowerName = String( this.attributes.name || '' ).toLowerCase();
+				this._lowerSlug = String( this.attributes.slug || '' ).toLowerCase();
+				this._searchHaystack = `${ this._lowerName } ${ this._lowerSlug }`;
+			}
+			return this._searchHaystack;
 		}
 	} );
 
@@ -302,9 +298,9 @@
 				}
 
 				// Step 2 (Ranking): Calculate 'matchScore' for comparator sorting.
-				const { name, slug } = project.attributes;
+				const { _lowerName, _lowerSlug } = project;
 				project.matchScore = tokens.reduce( ( sum, token ) =>
-					sum + Math.max( getMatchScore( name, token ), getMatchScore( slug, token ) ), 0 );
+					sum + Math.max( getMatchScore( _lowerName, token ), getMatchScore( _lowerSlug, token ) ), 0 );
 
 				return true;
 			} );
