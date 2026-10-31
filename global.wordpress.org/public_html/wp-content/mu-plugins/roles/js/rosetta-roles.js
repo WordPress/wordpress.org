@@ -827,9 +827,7 @@
 			.then( response => projects.initFrame( response ) )
 			.catch( () => {
 				const loadingEl = document.getElementById( 'project-loading' );
-				if ( loadingEl ) {
-					loadingEl.textContent = l10n.loadingError;
-				}
+				if ( loadingEl ) loadingEl.textContent = l10n.loadingError;
 			} );
 
 		const hadTranslatorStatus = Boolean( rawList.length );
