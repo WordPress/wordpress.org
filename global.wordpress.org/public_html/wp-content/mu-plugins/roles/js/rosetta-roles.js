@@ -273,7 +273,12 @@
 			this.trigger( 'projects:update' );
 		},
 
-		// Performs a search within the collection and ranks results.
+		/**
+		 * Performs a search within the collection and ranks results.
+		 * Uses imperative loops to avoid closure allocations and GC pressure during live typing.
+		 *
+		 * @param {string} term - Search query.
+		 */
 		search( term ) {
 			// Split into tokens; ignore empty tokens.
 			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
