@@ -751,13 +751,14 @@
 			const tx = db.transaction( STORE_NAME, 'readonly' );
 			const store = tx.objectStore( STORE_NAME );
 
-			const [ cachedTimeRaw, blob ] = await Promise.all( [
-				promisifyReq( store.get( 'projects_last_updated' ), tx ),
-				promisifyReq( store.get( 'projects_data' ), tx )
-			] );
+			const cached = await promisifyReq( store.get( 'payload' ), tx );
+			if ( ! cached ) {
+				throw new Error( 'No cached data' );
+			}
 
 			// Check timestamp
-			const cachedTime = Number( cachedTimeRaw );
+			const { timestamp, blob } = cached;
+			const cachedTime = Number( timestamp );
 			const serverTime = Number( projects.settings.lastUpdated );
 
 			if ( ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
@@ -801,8 +802,10 @@
 			const tx = db.transaction( STORE_NAME, 'readwrite' );
 			const store = tx.objectStore( STORE_NAME );
 
-			store.put( blob, 'projects_data' );
-			store.put( projects.settings.lastUpdated, 'projects_last_updated' );
+			store.put( {
+				timestamp: projects.settings.lastUpdated,
+				blob
+			}, 'payload' );
 
 			await new Promise( ( resolve, reject ) => {
 				tx.oncomplete = () => resolve();
