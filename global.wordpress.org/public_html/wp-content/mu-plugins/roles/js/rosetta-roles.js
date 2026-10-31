@@ -277,6 +277,7 @@
 		search( term ) {
 			// Split into tokens; ignore empty tokens.
 			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
+			const tokenCount = tokens.length;
 			const allModels = this.getAllModels();
 			const results = [];
 
@@ -286,7 +287,7 @@
 
 				// Step 1 (Filter): Ensure all search terms are present in name or slug.
 				let matchesAll = true;
-				for ( let j = 0; j < tokens.length; j++ ) {
+				for ( let j = 0; j < tokenCount; j++ ) {
 					if ( ! haystack.includes( tokens[ j ] ) ) {
 						matchesAll = false;
 						break;
@@ -298,7 +299,7 @@
 				// Step 2 (Ranking): Calculate 'matchScore' for comparator sorting.
 				const { _lowerName, _lowerSlug } = project;
 				let score = 0;
-				for ( let j = 0; j < tokens.length; j++ ) {
+				for ( let j = 0; j < tokenCount; j++ ) {
 					score += Math.max( getMatchScore( _lowerName, tokens[ j ] ), getMatchScore( _lowerSlug, tokens[ j ] ) );
 				}
 				project.matchScore = score;
