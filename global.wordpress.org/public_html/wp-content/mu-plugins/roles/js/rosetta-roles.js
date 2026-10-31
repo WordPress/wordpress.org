@@ -226,10 +226,7 @@
 		 * @return {string} Lowercase combination of name and slug.
 		 */
 		getSearchHaystack: function() {
-			if ( this._searchHaystack === null ) {
-				this._searchHaystack = `${ this.attributes.name || '' } ${ this.attributes.slug || '' }`.toLowerCase();
-			}
-			return this._searchHaystack;
+			return ( this._searchHaystack ??= `${ this.attributes.name || '' } ${ this.attributes.slug || '' }`.toLowerCase() );
 		}
 	} );
 
@@ -316,12 +313,9 @@
 		},
 
 		comparator: function( project ) {
-			if ( this.terms ) {
-				return - project.matchScore;
-			}
 			// Default view: Floats assigned permissions to the top
 			// Search view: Overridden to prioritize search relevance over assignment state.
-			return - project.get( 'checked' );
+			return this.terms ? - project.matchScore : - project.get( 'checked' );
 		}
 	} );
 
