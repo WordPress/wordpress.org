@@ -61,7 +61,7 @@
 		/**
 		 * Unchecks the model.
 		 */
-		uncheck: function() {
+		uncheck() {
 			this.set( 'checked', false );
 		},
 
@@ -85,7 +85,7 @@
 		 * @param {Backbone.Model} model   - The modified model instance.
 		 * @param {boolean}        checked - The updated selection state.
 		 */
-		updateSelection: function( model, checked ) {
+		updateSelection( model, checked ) {
 			const id = model.get( 'id' );
 			if ( checked ) {
 				projects.selection.add( { id } );
@@ -105,7 +105,7 @@
 			checkedSubProjects: false
 		},
 
-		initialize: function() {
+		initialize() {
 			const subProjects = this.get( 'sub_projects' ) || [];
 			this.unset( 'sub_projects', { silent: true } );
 
@@ -127,7 +127,7 @@
 			this.checkForCheckedSubProjects();
 		},
 
-		onCheckedChange: function( model, checked ) {
+		onCheckedChange( model, checked ) {
 			this.updateSelection( model, checked );
 
 			// Selecting the entire category grants access to all its items,
@@ -135,7 +135,7 @@
 			if ( checked ) this.get( 'subProjects' ).uncheckAll();
 		},
 
-		updateChecked: function( model ) {
+		updateChecked( model ) {
 			if ( this._isUncheckingAll ) return;
 
 			if ( model.get( 'checked' ) ) this.set( 'checked', false );
@@ -145,7 +145,7 @@
 
 		// Check against the ID set rather than the collection so active selections
 		// are still detected even when the collection is filtered by an active search.
-		checkForCheckedSubProjects: function() {
+		checkForCheckedSubProjects() {
 			const hasChecked = projects.selection.some( model => this._subProjectIds.has( model.id ) );
 			this.set( 'checkedSubProjects', hasChecked );
 		}
@@ -156,20 +156,20 @@
 
 		// Listens on the global event bus to coordinate active tabs and selection
 		// state between individual category models and the standalone '#project-all' (GTE) toggle.
-		initialize: function() {
+		initialize() {
 			this.on( 'change:isActive', this.toggleActiveStates );
 			this.listenTo( projects.events, 'deactivate:other-projects', this.disableActiveStates );
 			this.listenTo( projects.events, 'uncheck:other-projects', this.uncheckAllProjects );
 		},
 
-		uncheckAllProjects: function() {
+		uncheckAllProjects() {
 			this.models.forEach( project => {
 				project.uncheck();
 				project.get( 'subProjects' ).uncheckAll();
 			} );
 		},
 
-		toggleActiveStates: function( model ) {
+		toggleActiveStates( model ) {
 			if ( ! model.get( 'isActive' ) ) return;
 
 			this.models.forEach( project => {
@@ -181,7 +181,7 @@
 			projects.events.trigger( 'deactivate:all-projects' );
 		},
 
-		disableActiveStates: function() {
+		disableActiveStates() {
 			this.models.forEach( project => project.set( 'isActive', false ) );
 		}
 	} );
@@ -197,7 +197,7 @@
 		matchScore: 0,
 		_searchHaystack: null,
 
-		initialize: function() {
+		initialize() {
 			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
 		},
@@ -207,7 +207,7 @@
 		 *
 		 * @return {string} Lowercase combination of name and slug.
 		 */
-		getSearchHaystack: function() {
+		getSearchHaystack() {
 			if ( this._searchHaystack === null ) {
 				this._lowerName = String( this.attributes.name || '' ).toLowerCase();
 				this._lowerSlug = String( this.attributes.slug || '' ).toLowerCase();
@@ -229,15 +229,15 @@
 		// Search terms
 		terms: '',
 
-		initialize: function( models, options ) {
+		initialize( models, options ) {
 			this.project = options?.project;
 		},
 
-		getAllModels: function() {
+		getAllModels() {
 			return ( this._allModels ||= this.models.slice() );
 		},
 
-		uncheckAll: function() {
+		uncheckAll() {
 			if ( this.project ) this.project._isUncheckingAll = true;
 
 			try {
@@ -250,7 +250,7 @@
 			}
 		},
 
-		doSearch: function( value ) {
+		doSearch( value ) {
 			value = value.trim();
 
 			// Don't do anything if we've already done this search
@@ -270,7 +270,7 @@
 		},
 
 		// Performs a search within the collection and ranks results.
-		search: function( term ) {
+		search( term ) {
 			// Split into tokens; ignore empty tokens.
 			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
 
@@ -291,7 +291,7 @@
 			this.reset( results );
 		},
 
-		comparator: function( project ) {
+		comparator( project ) {
 			// Default view: Floats assigned permissions to the top
 			// Search view: Overridden to prioritize search relevance over assignment state.
 			return this.terms ? - project.matchScore : - project.get( 'checked' );
@@ -299,13 +299,13 @@
 	} );
 
 	projects.model.Selection = Backbone.Collection.extend( {
-		initialize: function() {
+		initialize() {
 			this.field = document.getElementById( 'project-access-list' );
 			this._debouncedUpdate = _.debounce( this.updateInputField.bind( this ), 10 );
 			this.on( 'update reset', this._debouncedUpdate );
 		},
 
-		updateInputField: function() {
+		updateInputField() {
 			if ( this.field ) {
 				this.field.value = this.pluck( 'id' ).join( ',' );
 			}
@@ -318,7 +318,7 @@
 	projects.view.Frame = wp.Backbone.View.extend( {
 		el: '#projects-list',
 
-		render: function() {
+		render() {
 			wp.Backbone.View.prototype.render.apply( this, arguments );
 
 			const fragment = document.createDocumentFragment();
@@ -350,11 +350,11 @@
 			'change input': 'updateChecked'
 		},
 
-		initialize: function() {
+		initialize() {
 			this.listenTo( this.model, 'change:checked change:checkedSubProjects', this.syncInput );
 		},
 
-		render: function() {
+		render() {
 			wp.Backbone.View.prototype.render.apply( this, arguments );
 
 			this.inputEl = this.el.querySelector( 'input' );
@@ -363,7 +363,7 @@
 			return this;
 		},
 
-		syncInput: function() {
+		syncInput() {
 			if ( ! this.inputEl ) return;
 
 			const isChecked = Boolean( this.model.get( 'checked' ) );
@@ -380,7 +380,7 @@
 			}
 		},
 
-		prepare: function() {
+		prepare() {
 			const { name, slug, checked, checkedSubProjects } = this.model.attributes;
 			return { name, slug, checked, checkedSubProjects };
 		},
@@ -398,7 +398,7 @@
 			'focusin': 'updateIsActive'
 		},
 
-		initialize: function() {
+		initialize() {
 			this.listenTo( this.model, 'change:isActive', this.toggleActiveState );
 
 			this.views.add( new projects.view.Checkbox( {
@@ -412,11 +412,11 @@
 			this.toggleActiveState();
 		},
 
-		toggleActiveState: function() {
+		toggleActiveState() {
 			this.el.classList.toggle( 'active', Boolean( this.model.get( 'isActive' ) ) );
 		},
 
-		updateIsActive: function() {
+		updateIsActive() {
 			this.model.set( 'isActive', true );
 		}
 	} );
@@ -425,7 +425,7 @@
 		tagName: 'div',
 		className: 'sub-projects-wrapper',
 
-		initialize: function() {
+		initialize() {
 			const collection = this.model.get( 'subProjects' );
 
 			if ( collection.length > 5 ) {
@@ -443,22 +443,22 @@
 		// Number of projects which should be rendered to reduce bloat. Unrendered items remain searchable.
 		limit: 100,
 
-		initialize: function() {
+		initialize() {
 			this._subViews = [];
 			this.listenTo( this.collection, 'projects:update', this.render );
 		},
 
-		clearSubViews: function() {
+		clearSubViews() {
 			this._subViews.forEach( view => view.remove() );
 			this._subViews = [];
 		},
 
-		remove: function() {
+		remove() {
 			this.clearSubViews();
 			return wp.Backbone.View.prototype.remove.apply( this, arguments );
 		},
 
-		render: function() {
+		render() {
 			this.clearSubViews();
 
 			if ( ! this.collection.length ) {
@@ -502,18 +502,18 @@
 			'keydown': 'onKeydown'
 		},
 
-		initialize: function() {
+		initialize() {
 			this._debouncedSearch = _.debounce( () => {
 				this.collection.doSearch( this.el.value );
 			}, 200 );
 		},
 
-		remove: function() {
+		remove() {
 			this._debouncedSearch?.cancel();
 			return wp.Backbone.View.prototype.remove.apply( this, arguments );
 		},
 
-		onInput: function() {
+		onInput() {
 			this._debouncedSearch();
 		},
 
@@ -543,7 +543,7 @@
 			'change input': 'onToggle'
 		},
 
-		initialize: function() {
+		initialize() {
 			this.checkbox = this.el.querySelector( 'input' );
 
 			if ( projects.selection.get( 'all' ) ) {
@@ -555,14 +555,14 @@
 			this.listenTo( projects.events, 'uncheck:all-projects', this.onUncheck );
 		},
 
-		onActivate: function() {
+		onActivate() {
 			if ( this.el.classList.contains( 'active' ) ) return;
 
 			this.el.classList.add( 'active' );
 			projects.events.trigger( 'deactivate:other-projects' );
 		},
 
-		onToggle: function() {
+		onToggle() {
 			if ( this.checkbox?.checked ) {
 				projects.selection.reset( [ { id: 'all' } ] );
 				projects.events.trigger( 'uncheck:other-projects' );
@@ -571,11 +571,11 @@
 			}
 		},
 
-		onDeactivate: function() {
+		onDeactivate() {
 			this.el.classList.remove( 'active' );
 		},
 
-		onUncheck: function() {
+		onUncheck() {
 			if ( this.checkbox?.checked ) {
 				projects.selection.remove( 'all' );
 				this.checkbox.checked = false;
@@ -609,9 +609,7 @@
 		}
 	};
 
-	projects.getRemoteProjects = function() {
-		return wp.ajax.post( 'rosetta-get-projects' );
-	};
+	projects.getRemoteProjects = () => wp.ajax.post( 'rosetta-get-projects' );
 
 	const DB_NAME = 'rosetta_cache';
 	const STORE_NAME = 'projects';
@@ -807,7 +805,7 @@
 		}
 	};
 
-	projects.initFrame = function( projectData ) {
+	projects.initFrame = projectData => {
 		new projects.view.Frame( {
 			collection: new projects.model.Projects( projectData )
 		} ).render();
