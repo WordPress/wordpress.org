@@ -52,7 +52,7 @@
 		// 0.5 for prefix match, 0.4 for word boundary, 0.1 for mid-word matches.
 		const positionBonus = index === 0
 			? 0.5
-			: ( lower[ index - 1 ] === ' ' || lower[ index - 1 ] === '-' ? 0.4 : 0.1 );
+			: ( lower[ index - 1 ] === ' ' || lower[ index - 1 ] === '-' || lower[ index - 1 ] === '_' ? 0.4 : 0.1 );
 
 		// Density bonus: prefers shorter, more concise matches.
 		return positionBonus + ( 0.5 * ( query.length / lower.length ) );
