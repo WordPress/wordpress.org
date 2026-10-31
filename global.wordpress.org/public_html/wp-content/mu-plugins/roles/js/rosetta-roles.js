@@ -595,10 +595,10 @@
 		&& typeof DecompressionStream !== 'undefined'
 		&& isValidTime( Number( projects.settings.lastUpdated ) );
 
-	projects.getProjects = async function() {
+	projects.getProjects = async () => {
 		try {
 			return await projects.getLocalProjects();
-		} catch ( e ) {
+		} catch {
 			const remoteProjects = await projects.getRemoteProjects();
 
 			if ( projects.hasStorage() ) {
@@ -728,7 +728,7 @@
 	 *                 or data is corrupt, delegating fallback to projects.getRemoteProjects().
 	 * @return {Promise<ProjectData[]>} Parsed project data array.
 	 */
-	projects.getLocalProjects = async function() {
+	projects.getLocalProjects = async () => {
 		if ( ! projects.hasStorage() ) {
 			throw new Error( 'No IndexedDB support' );
 		}
@@ -758,8 +758,7 @@
 
 			// decompress
 			const decompressedStream = blob.stream().pipeThrough( new DecompressionStream( 'gzip' ) );
-			const jsonText = await new Response( decompressedStream ).text();
-			const data = JSON.parse( jsonText );
+			const data = await new Response( decompressedStream ).json();
 
 			if ( ! Array.isArray( data ) ) {
 				throw new Error( 'Invalid cache payload: expected array' );
@@ -778,7 +777,7 @@
 	 * @param {ProjectData[]} data - Array of project objects to serialize and cache.
 	 * @return {Promise<void>}
 	 */
-	projects.storeLocalProjects = async function( data ) {
+	projects.storeLocalProjects = async data => {
 		let db;
 		try {
 			const stream = new Blob( [ JSON.stringify( data ) ] )
@@ -811,7 +810,7 @@
 		} ).render();
 	};
 
-	projects.init = function() {
+	projects.init = () => {
 		const rawList = ( projects.settings.accessList || [] )
 			.map( normalizeId )
 			.filter( id => id !== '' );
