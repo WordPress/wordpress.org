@@ -294,26 +294,23 @@
 			this.trigger( 'projects:update' );
 		},
 
-		// Performs a search within the collection
+		// Performs a search within the collection and ranks results.
 		search: function( term ) {
 			// Split into tokens; ignore empty tokens.
-			const cleanTerm = term.toLowerCase().trim();
-			const tokens = cleanTerm.split( /\s+/ ).filter( Boolean );
+			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
 
-			// Step 1 (Filter): Token-based pre-filter. Ensures all search terms
-			// are present in either 'name' or 'slug' regardless of word order.
 			const results = this.getAllModels().filter( project => {
-				const haystack = project.getSearchHaystack();
-
-				if ( tokens.every( token => haystack.includes( token ) ) ) {
-					// Step 2 (Ranking): Calculates 'matchScore' for comparator sorting.
-					const nameScore = getMatchScore( project.attributes.name, cleanTerm );
-					const slugScore = getMatchScore( project.attributes.slug, cleanTerm );
-
-					project.matchScore = Math.max( nameScore, slugScore );
-					return true;
+				// Step 1 (Filter): Ensure all search terms are present in name or slug.
+				if ( ! tokens.every( token => project.getSearchHaystack().includes( token ) ) ) {
+					return false;
 				}
-				return false;
+
+				// Step 2 (Ranking): Calculate 'matchScore' for comparator sorting.
+				const { name, slug } = project.attributes;
+				project.matchScore = tokens.reduce( ( sum, token ) =>
+					sum + Math.max( getMatchScore( name, token ), getMatchScore( slug, token ) ), 0 );
+
+				return true;
 			} );
 
 			this.reset( results );
