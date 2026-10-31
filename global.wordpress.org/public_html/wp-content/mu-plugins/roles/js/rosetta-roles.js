@@ -622,9 +622,13 @@
 	const STORE_NAME = 'projects';
 	const DB_VERSION = 1;
 
-	const promisifyReq = req => new Promise( ( resolve, reject ) => {
+	const promisifyReq = ( req, tx = null ) => new Promise( ( resolve, reject ) => {
 		req.onsuccess = () => resolve( req.result );
 		req.onerror = () => reject( req.error );
+		if ( tx ) {
+			tx.onabort = () => reject( tx.error || new Error( 'Transaction aborted' ) );
+			tx.onerror = () => reject( tx.error || new Error( 'Transaction error' ) );
+		}
 	} );
 
 	/**
@@ -644,7 +648,7 @@
 				settled = true;
 				projects._storageDisabled = true;
 				reject( new Error( 'IndexedDB open timed out' ) );
-			}, 2500 );
+			}, 2000 );
 
 			const request = indexedDB.open( DB_NAME, DB_VERSION );
 
@@ -738,11 +742,12 @@
 		const db = await openProjectsDB();
 
 		try {
-			const store = db.transaction( STORE_NAME, 'readonly' ).objectStore( STORE_NAME );
+			const tx = db.transaction( STORE_NAME, 'readonly' );
+			const store = tx.objectStore( STORE_NAME );
 
 			const [ cachedTimeRaw, blob ] = await Promise.all( [
-				promisifyReq( store.get( 'projects_last_updated' ) ),
-				promisifyReq( store.get( 'projects_data' ) )
+				promisifyReq( store.get( 'projects_last_updated' ), tx ),
+				promisifyReq( store.get( 'projects_data' ), tx )
 			] );
 
 			// Check timestamp
