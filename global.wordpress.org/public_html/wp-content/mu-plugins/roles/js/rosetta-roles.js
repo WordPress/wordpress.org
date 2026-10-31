@@ -751,7 +751,19 @@
 			const tx = db.transaction( STORE_NAME, 'readonly' );
 			const store = tx.objectStore( STORE_NAME );
 
-			const cached = await promisifyReq( store.get( 'payload' ), tx );
+			let timer;
+			const timeout = new Promise( ( _, reject ) => {
+				timer = setTimeout( () => {
+					try { tx.abort(); } catch {}
+					reject( new Error( 'IndexedDB transaction timed out' ) );
+				}, 500 );
+			} );
+
+			const cached = await Promise.race( [
+				promisifyReq( store.get( 'payload' ), tx ),
+				timeout
+			] ).finally( () => clearTimeout( timer ) );
+
 			if ( ! cached ) {
 				throw new Error( 'No cached data' );
 			}
