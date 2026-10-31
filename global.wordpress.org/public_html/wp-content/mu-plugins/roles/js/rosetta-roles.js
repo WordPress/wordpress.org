@@ -69,7 +69,7 @@
 		 * Checks if the model ID is already present in projects.selection upon initialization
 		 * and pre-sets the 'checked' attribute silently.
 		 */
-		syncInitialSelection: function() {
+		syncInitialSelection() {
 			const id = normalizeId( this.get( 'id' ) );
 			this.set( 'id', id, { silent: true } );
 
@@ -385,8 +385,8 @@
 			return { name, slug, checked, checkedSubProjects };
 		},
 
-		updateChecked: function( event ) {
-			this.model.set( 'checked', event.target.checked );
+		updateChecked( { target } ) {
+			this.model.set( 'checked', target.checked );
 		}
 	} );
 
@@ -517,7 +517,7 @@
 			this._debouncedSearch();
 		},
 
-		onKeydown: function( event ) {
+		onKeydown( event ) {
 			if ( event.key === 'Enter' ) {
 				event.preventDefault();
 				this._debouncedSearch?.cancel();
