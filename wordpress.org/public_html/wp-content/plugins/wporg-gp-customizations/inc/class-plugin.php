@@ -303,7 +303,7 @@ class Plugin {
 		return $args;
 	}
 
-/**
+	/**
 	 * Automatically rejects incoming suggestions that are identical to an existing rejected translation
 	 * by the same user, or an open changes-requested translation by any user.
 	 *
