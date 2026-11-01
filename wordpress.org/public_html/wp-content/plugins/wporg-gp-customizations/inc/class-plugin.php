@@ -304,64 +304,65 @@ class Plugin {
 	}
 
 	/**
-	 * Rejects translation submissions where the suggested string has already been rejected for the user.
+	 * Automatically rejects incoming suggestions that are identical to an existing rejected or changes-requested translation.
 	 *
-	 * @param array          $args        Translation arguments.
-	 * @param GP_Translation $translation Translation instance.
-	 * @return array Translation arguments.
+	 * @param array|false    $args        Arguments for creating or saving a translation.
+	 * @param GP_Translation $translation Existing translation object.
+	 * @return array|false Arguments array or false.
 	 */
-	public function auto_reject_already_rejected( $args, GP_Translation $translation ) {
+	public function auto_reject_already_rejected( $args, $translation ) {
+		// Only trigger on web form submissions.
 		if (
-			! $translation->id &&
-			! empty( $args['user_id'] ) &&
-			'waiting' === $args['status'] &&
-			! empty( GP::$current_route ) &&
-			GP::$current_route->class_name === 'GP_Route_Translation' &&
-			GP::$current_route->last_method_called === 'translations_post'
+			empty( $args ) ||
+			empty( GP::$current_route ) ||
+			'GP_Route_Translation' !== GP::$current_route->class_name ||
+			'translations_post' !== GP::$current_route->last_method_called
 		) {
-			// New translation being added.
+			return $args;
+		}
 
-			$translation_set = GP::$translation_set->get( $args['translation_set_id'] );
-			$project = GP::$project->get( $translation_set->project_id );
+		// Only check incoming suggestions ('waiting').
+		if ( empty( $args['status'] ) || 'waiting' !== $args['status'] ) {
+			return $args;
+		}
 
-			// If the current user can approve / write to the project, skip.
-			if (
-				GP::$permission->current_user_can( 'approve', 'translation-set', $translation_set->id )
-				||
-				GP::$permission->current_user_can( 'write', 'project', $project->id )
-			) {
-				return $args;
+		$translation_set = GP::$translation_set->get( $args['translation_set_id'] );
+		if ( ! $translation_set ) {
+			return $args;
+		}
+
+		$locale = GP_Locales::by_slug( $translation_set->locale );
+
+		// Normalize incoming plural forms.
+		$incoming = array();
+		for ( $i = 0; $i < $locale->nplurals; $i++ ) {
+			$incoming[] = isset( $args[ "translation_$i" ] ) ? str_replace( "\r\n", "\n", $args[ "translation_$i" ] ) : null;
+		}
+
+		// Retrieve existing translations for this original.
+		$existing_translations = GP::$translation->find_many(
+			array(
+				'translation_set_id' => $args['translation_set_id'],
+				'original_id'        => $args['original_id'],
+			)
+		);
+
+		foreach ( $existing_translations as $existing ) {
+			// Check against both 'rejected' and 'changesrequested' statuses.
+			if ( ! in_array( $existing->status, array( 'rejected', 'changesrequested' ), true ) ) {
+				continue;
 			}
 
-			$existing_rejected_translations = GP::$translation->for_translation(
-				$project,
-				$translation_set,
-				'no-limit',
-				array(
-					'user_login'  => get_user_by( 'ID', $args['user_id'] )->user_login,
-					'original_id' => $args['original_id'],
-					'status'      => 'rejected',
-				),
-				array()
-			);
-
-			if ( $existing_rejected_translations ) {
-				$locale = GP_Locales::by_slug( $translation_set->locale );
-
-				$translations = [];
-				foreach ( range( 0, GP::$translation->get_static( 'number_of_plural_translations' ) - 1 ) as $i ) {
-					if ( isset( $args[ "translation_$i" ] ) ) {
-						$translations[] = $args[ "translation_$i" ];
-					}
-				}
-
-				foreach ( $existing_rejected_translations as $e ) {
-					if ( array_pad( $translations, $locale->nplurals, null ) == $e->translations ) {
-						GP::$current_route->die_with_error( __( 'Identical rejected translation already exists.', 'wporg' ), 200 );
-					}
-				}
+			$existing_trimmed = array();
+			foreach ( array_slice( $existing->translations(), 0, $locale->nplurals ) as $entry_string ) {
+				$existing_trimmed[] = null !== $entry_string ? str_replace( "\r\n", "\n", $entry_string ) : null;
 			}
 
+			// If the text is identical, mark as rejected to prevent cluttering the review queue.
+			if ( $incoming === $existing_trimmed ) {
+				$args['status'] = 'rejected';
+				break;
+			}
 		}
 
 		return $args;
