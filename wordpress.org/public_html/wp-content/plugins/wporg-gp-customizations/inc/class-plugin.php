@@ -303,7 +303,7 @@ class Plugin {
 		return $args;
 	}
 
-	/**
+/**
 	 * Automatically rejects incoming suggestions that are identical to an existing rejected translation
 	 * by the same user, or an open changes-requested translation by any user.
 	 *
@@ -317,13 +317,20 @@ class Plugin {
 			! empty( $args['user_id'] ) &&
 			'waiting' === $args['status'] &&
 			! empty( GP::$current_route ) &&
-			GP::$current_route->class_name === 'GP_Route_Translation' &&
-			GP::$current_route->last_method_called === 'translations_post'
+			'GP_Route_Translation' === GP::$current_route->class_name &&
+			'translations_post' === GP::$current_route->last_method_called
 		) {
-			// New translation being added.
+			// New translation being added via web interface.
 
 			$translation_set = GP::$translation_set->get( $args['translation_set_id'] );
-			$project         = GP::$project->get( $translation_set->project_id );
+			if ( ! $translation_set ) {
+				return $args;
+			}
+
+			$project = GP::$project->get( $translation_set->project_id );
+			if ( ! $project ) {
+				return $args;
+			}
 
 			// If the current user can approve / write to the project, skip.
 			if (
@@ -331,6 +338,11 @@ class Plugin {
 				||
 				GP::$permission->current_user_can( 'write', 'project', $project->id )
 			) {
+				return $args;
+			}
+
+			$locale = GP_Locales::by_slug( $translation_set->locale );
+			if ( ! $locale ) {
 				return $args;
 			}
 
@@ -343,16 +355,13 @@ class Plugin {
 			);
 
 			if ( $existing_translations ) {
-				$locale = GP_Locales::by_slug( $translation_set->locale );
-
-				$translations = array();
-				foreach ( range( 0, GP::$translation->get_static( 'number_of_plural_translations' ) - 1 ) as $i ) {
-					if ( isset( $args[ "translation_$i" ] ) ) {
-						$translations[] = $args[ "translation_$i" ];
-					}
+				// Normalize incoming plural forms and line breaks; treat missing or empty slots as null.
+				$incoming = array();
+				for ( $i = 0; $i < $locale->nplurals; $i++ ) {
+					$incoming[] = ( isset( $args[ "translation_$i" ] ) && '' !== $args[ "translation_$i" ] )
+						? str_replace( array( "\r\n", "\r" ), "\n", $args[ "translation_$i" ] )
+						: null;
 				}
-
-				$padded_translations = array_pad( $translations, $locale->nplurals, null );
 
 				foreach ( $existing_translations as $e ) {
 					// Only inspect rejected or changesrequested translations.
@@ -360,10 +369,15 @@ class Plugin {
 						continue;
 					}
 
-					// Use the translations() method and pad to match plural count.
-					$existing_entry_translations = array_pad( $e->translations(), $locale->nplurals, null );
+					// Build existing plural forms identically to incoming.
+					$existing_strings = array();
+					for ( $i = 0; $i < $locale->nplurals; $i++ ) {
+						$existing_strings[] = ( isset( $e->{ "translation_$i" } ) && '' !== $e->{ "translation_$i" } )
+							? str_replace( array( "\r\n", "\r" ), "\n", $e->{ "translation_$i" } )
+							: null;
+					}
 
-					if ( $padded_translations == $existing_entry_translations ) {
+					if ( $incoming === $existing_strings ) {
 						// Changes requested: Block ANY user from submitting the uncorrected text.
 						if ( 'changesrequested' === $e->status ) {
 							GP::$current_route->die_with_error(
