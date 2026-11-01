@@ -80,7 +80,6 @@ class Plugin {
 		add_filter( 'gp_original_extracted_comments', array( $this, 'format_translator_commments' ), 15 );
 		add_filter( 'wporg_translate_language_pack_theme_args', array( $this, 'set_version_for_default_themes_in_development' ), 10, 2 );
 
-		add_filter( 'gp_translation_prepare_for_save', array( $this, 'auto_reject_already_rejected' ), 10, 2 );
 		add_action( 'gp_translation_created', array( $this, 'auto_reject_replaced_suggestions' ) );
 
 		add_filter( 'gp_for_translation_clauses', array( $this, 'allow_searching_for_no_author_translations' ), 10, 3 );
@@ -297,104 +296,6 @@ class Plugin {
 		foreach ( range( 0, $translation->get_static( 'number_of_plural_translations' ) - 1 ) as $i ) {
 			if ( isset( $args[ "translation_$i" ] ) ) {
 				$args[ "translation_$i" ] = capital_P_dangit( $args[ "translation_$i" ] );
-			}
-		}
-
-		return $args;
-	}
-
-	/**
-	 * Automatically rejects incoming suggestions that are identical to an existing rejected translation
-	 * by the same user, or an open changes-requested translation by any user.
-	 *
-	 * @param array|false    $args        Arguments for creating or saving a translation.
-	 * @param GP_Translation $translation Existing translation object.
-	 * @return array|false Arguments array or false.
-	 */
-	public function auto_reject_already_rejected( $args, GP_Translation $translation ) {
-		if (
-			! $translation->id &&
-			! empty( $args['user_id'] ) &&
-			'waiting' === $args['status'] &&
-			! empty( GP::$current_route ) &&
-			'GP_Route_Translation' === GP::$current_route->class_name &&
-			'translations_post' === GP::$current_route->last_method_called
-		) {
-			// New translation being added via web interface.
-
-			$translation_set = GP::$translation_set->get( $args['translation_set_id'] );
-			if ( ! $translation_set ) {
-				return $args;
-			}
-
-			$project = GP::$project->get( $translation_set->project_id );
-			if ( ! $project ) {
-				return $args;
-			}
-
-			// If the current user can approve / write to the project, skip.
-			if (
-				GP::$permission->current_user_can( 'approve', 'translation-set', $translation_set->id )
-				||
-				GP::$permission->current_user_can( 'write', 'project', $project->id )
-			) {
-				return $args;
-			}
-
-			$locale = GP_Locales::by_slug( $translation_set->locale );
-			if ( ! $locale ) {
-				return $args;
-			}
-
-			// Directly query all translations for this original (bypasses for_translation status exclusions).
-			$existing_translations = GP::$translation->find_many(
-				array(
-					'translation_set_id' => $args['translation_set_id'],
-					'original_id'        => $args['original_id'],
-				)
-			);
-
-			if ( $existing_translations ) {
-				// Normalize incoming plural forms and line breaks; treat missing or empty slots as null.
-				$incoming = array();
-				for ( $i = 0; $i < $locale->nplurals; $i++ ) {
-					$incoming[] = ( isset( $args[ "translation_$i" ] ) && '' !== $args[ "translation_$i" ] )
-						? str_replace( array( "\r\n", "\r" ), "\n", $args[ "translation_$i" ] )
-						: null;
-				}
-
-				foreach ( $existing_translations as $e ) {
-					// Only inspect rejected or changesrequested translations.
-					if ( ! in_array( $e->status, array( 'rejected', 'changesrequested' ), true ) ) {
-						continue;
-					}
-
-					// Build existing plural forms identically to incoming.
-					$existing_strings = array();
-					for ( $i = 0; $i < $locale->nplurals; $i++ ) {
-						$existing_strings[] = ( isset( $e->{ "translation_$i" } ) && '' !== $e->{ "translation_$i" } )
-							? str_replace( array( "\r\n", "\r" ), "\n", $e->{ "translation_$i" } )
-							: null;
-					}
-
-					if ( $incoming === $existing_strings ) {
-						// Changes requested: Block ANY user from submitting the uncorrected text.
-						if ( 'changesrequested' === $e->status ) {
-							GP::$current_route->die_with_error(
-								__( 'Identical translation with changes requested already exists.', 'wporg' ),
-								200
-							);
-						}
-
-						// Rejected: Block the same user from repeatedly submitting the rejected text.
-						if ( 'rejected' === $e->status && (int) $e->user_id === (int) $args['user_id'] ) {
-							GP::$current_route->die_with_error(
-								__( 'Identical rejected translation already exists.', 'wporg' ),
-								200
-							);
-						}
-					}
-				}
 			}
 		}
 
