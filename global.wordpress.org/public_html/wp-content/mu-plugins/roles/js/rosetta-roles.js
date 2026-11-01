@@ -859,7 +859,7 @@
 		const accessField = projects.selection.field;
 
 		accessField?.closest( 'form' )?.addEventListener( 'submit', event => {
-			projects.selection._debouncedUpdate?.cancel();
+			projects.selection._debouncedUpdate.cancel();
 			projects.selection.updateInputField();
 
 			if ( hadTranslatorStatus && ! accessField.value && ! confirm( l10n.removeTranslator ) ) {
