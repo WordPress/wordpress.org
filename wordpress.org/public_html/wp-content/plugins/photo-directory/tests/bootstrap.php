@@ -39,12 +39,16 @@ if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) && file_exists( $_tests_dir 
 require_once $_tests_dir . '/includes/functions.php';
 
 /**
- * Loads the uploads class being tested.
+ * Loads the plugin classes being tested.
  *
  * @return void
  */
 function manually_load_plugin(): void {
+	if ( ! defined( 'WPORG_PHOTO_DIRECTORY_DIRECTORY' ) ) {
+		define( 'WPORG_PHOTO_DIRECTORY_DIRECTORY', dirname( __DIR__ ) );
+	}
 	require_once dirname( __DIR__ ) . '/inc/uploads.php';
+	require_once dirname( __DIR__ ) . '/inc/google-vision-api.php';
 }
 tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );
 

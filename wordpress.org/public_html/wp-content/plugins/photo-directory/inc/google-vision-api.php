@@ -75,10 +75,11 @@ class VisionAPI {
 	/**
 	 * Fetches the Vision API analysis of the image at the given path.
 	 *
-	 * @param string $path Path to image.
+	 * @param string               $path   Path to image.
+	 * @param ImageAnnotatorClient $client Optional. Client to send the request through. Default a REST client.
 	 * @return array
 	 */
-	public static function get_vision_analysis( $path ) {
+	public static function get_vision_analysis( $path, $client = null ) {
 		if ( ! self::init_google_credentials() ) {
 			return new \WP_Error(
 				'wporg-photos-vision-init-error',
@@ -110,7 +111,7 @@ class VisionAPI {
 			[ ( new AnnotateImageRequest() )->setImage( $image )->setFeatures( $features ) ]
 		);
 
-		$vision   = new ImageAnnotatorClient( [ 'transport' => 'rest' ] );
+		$vision   = $client ?: new ImageAnnotatorClient( [ 'transport' => 'rest' ] );
 		$response = $vision->batchAnnotateImages( $request )->getResponses()[0];
 
 		if ( $response->hasError() ) {

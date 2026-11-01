@@ -115,6 +115,15 @@ suites:
     paths:
       - 'environments/jobs/**'
 
+  photo-directory:
+    type: wordpress
+    name: Photo Directory
+    script: photo-directory:test
+    paths:
+      - 'environments/photo-directory/**'
+      # Mounted for its suite but not activated, so not read from the environment's plugin list.
+      - 'wordpress.org/public_html/wp-content/plugins/photo-directory/**'
+
   make:
     type: wordpress
     name: Make
