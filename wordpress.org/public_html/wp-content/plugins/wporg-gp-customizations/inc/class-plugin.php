@@ -334,15 +334,12 @@ class Plugin {
 				return $args;
 			}
 
-			// Query all existing translations for this original without user restriction.
-			$existing_translations = GP::$translation->for_translation(
-				$project,
-				$translation_set,
-				'no-limit',
+			// Directly query all translations for this original (bypasses for_translation status exclusions).
+			$existing_translations = GP::$translation->find_many(
 				array(
-					'original_id' => $args['original_id'],
-				),
-				array()
+					'translation_set_id' => $args['translation_set_id'],
+					'original_id'        => $args['original_id'],
+				)
 			);
 
 			if ( $existing_translations ) {
@@ -358,6 +355,7 @@ class Plugin {
 				$padded_translations = array_pad( $translations, $locale->nplurals, null );
 
 				foreach ( $existing_translations as $e ) {
+					// Only inspect rejected or changesrequested translations.
 					if ( ! in_array( $e->status, array( 'rejected', 'changesrequested' ), true ) ) {
 						continue;
 					}
