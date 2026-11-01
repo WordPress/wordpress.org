@@ -142,7 +142,14 @@ class Upload {
 					__( 'Your file could not be uploaded because it is too large. The maximum upload size is %s.', 'wporg-plugins' ),
 					size_format( wp_max_upload_size() )
 				);
-			} elseif ( isset( $_POST['action'] ) && in_array( $_POST['action'], array( 'upload', 'upload-additional' ), true ) ) {
+			} elseif (
+				isset( $_POST['action'] ) &&
+				(
+					'upload-additional' === $_POST['action'] ||
+					// When new submissions are not accepted, the upload form is not shown and the page has not expired.
+					( 'upload' === $_POST['action'] && $can_submit_new_plugin )
+				)
+			) {
 				// Most likely an expired nonce, from a page left open too long.
 				$message = __( 'Your file could not be uploaded because the page has expired. Please select your file and upload it again.', 'wporg-plugins' );
 			}
