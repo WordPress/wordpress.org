@@ -269,7 +269,7 @@
 		 */
 		search( term ) {
 			// Split into tokens; ignore empty tokens.
-			const tokens = term.toLowerCase().trim().split( /\s+/ ).filter( Boolean );
+			const tokens = term.toLowerCase().match( /\S+/g ) || [];
 			const tokenCount = tokens.length;
 			const allModels = this.getAllModels();
 			const results = [];
