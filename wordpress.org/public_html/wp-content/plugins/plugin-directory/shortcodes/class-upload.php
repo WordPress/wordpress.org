@@ -131,6 +131,25 @@ class Upload {
 			if ( ! empty( $message ) ) {
 				printf( '<div class="notice notice-%s notice-alt"><p>%s</p></div>' . "\n", esc_attr( $type ), wp_kses_post( $message ) );
 			}
+		} elseif ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+			// The form was submitted, but the upload was not processed. Say so instead of silently re-rendering.
+			$message = '';
+
+			if ( empty( $_POST ) && ! empty( $_SERVER['CONTENT_LENGTH'] ) ) {
+				// PHP discards the entire request body when it exceeds post_max_size.
+				$message = sprintf(
+					/* translators: %s: Maximum upload size. */
+					__( 'Your file could not be uploaded because it is too large. The maximum upload size is %s.', 'wporg-plugins' ),
+					size_format( wp_max_upload_size() )
+				);
+			} elseif ( isset( $_POST['action'] ) && in_array( $_POST['action'], array( 'upload', 'upload-additional' ), true ) ) {
+				// Most likely an expired nonce, from a page left open too long.
+				$message = __( 'Your file could not be uploaded because the page has expired. Please select your file and upload it again.', 'wporg-plugins' );
+			}
+
+			if ( $message ) {
+				printf( '<div class="notice notice-error notice-alt"><p>%s</p></div>' . "\n", esc_html( $message ) );
+			}
 		}
 
 		if ( ! is_wp_error( $upload_result ) || $submitted_counts->total /* has a plugin in the review queue */ ) :
