@@ -298,7 +298,8 @@
 				results.push( project );
 			}
 
-			this.reset( results );
+			results.sort( ( a, b ) => ( b.matchScore - a.matchScore ) || ( b.get( 'checked' ) - a.get( 'checked' ) ) );
+			this.reset( results, { sort: false } );
 		},
 
 		comparator( project ) {
