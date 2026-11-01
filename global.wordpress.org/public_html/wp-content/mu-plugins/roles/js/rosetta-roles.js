@@ -222,7 +222,7 @@
 		terms: '',
 
 		initialize( models, options ) {
-			this.project = options?.project;
+			this.project = options.project;
 		},
 
 		getAllModels() {
