@@ -230,15 +230,13 @@
 		},
 
 		uncheckAll() {
-			if ( this.project ) this.project._isUncheckingAll = true;
+			this.project._isUncheckingAll = true;
 
 			try {
 				this.getAllModels().forEach( model => model.get( 'checked' ) && model.uncheck() );
 			} finally {
-				if ( this.project ) {
-					this.project._isUncheckingAll = false;
-					this.project.set( 'checkedSubProjects', false );
-				}
+				this.project._isUncheckingAll = false;
+				this.project.set( 'checkedSubProjects', false );
 			}
 		},
 
