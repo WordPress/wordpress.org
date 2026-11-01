@@ -468,6 +468,9 @@ class Uploads {
 				case 'duplicate-file':
 					$rejection = __( 'Your submission appears to be a duplicate of something uploaded before.', 'wporg-photos' );
 					break;
+				case 'duplicate-pending-file-name':
+					$rejection = __( 'You already have a pending submission with this file name.', 'wporg-photos' );
+					break;
 				case 'file-not-jpg':
 					$rejection = __( 'Your submission must be an image in the JPEG format.', 'wporg-photos' );
 					break;
@@ -702,6 +705,12 @@ class Uploads {
 
 		if ( ! empty( $_FILES['files']['tmp_name'] ) && count( $_FILES['files']['tmp_name'] ) > 1 ) {
 			return 'too-many-files';
+		}
+
+		// The browser compares the raw file name, but pending file names are stored sanitized.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by has_pending_file_name() the same way the name is stored.
+		if ( User::has_pending_file_name( $_FILES['files']['name'][0] ?? '' ) ) {
+			return 'duplicate-pending-file-name';
 		}
 
 		// Check file size.

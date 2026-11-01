@@ -50,6 +50,7 @@ function manually_load_plugin(): void {
 	require_once dirname( __DIR__ ) . '/inc/registrations.php';
 	require_once dirname( __DIR__ ) . '/inc/photo.php';
 	require_once dirname( __DIR__ ) . '/inc/favorites.php';
+	require_once dirname( __DIR__ ) . '/inc/user.php';
 	require_once dirname( __DIR__ ) . '/inc/uploads.php';
 	require_once dirname( __DIR__ ) . '/inc/google-vision-api.php';
 }
