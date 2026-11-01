@@ -519,7 +519,7 @@
 		},
 
 		remove() {
-			this._debouncedSearch?.cancel();
+			this._debouncedSearch.cancel();
 			return wp.Backbone.View.prototype.remove.apply( this, arguments );
 		},
 
@@ -530,10 +530,10 @@
 		onKeydown( event ) {
 			if ( event.key === 'Enter' ) {
 				event.preventDefault();
-				this._debouncedSearch?.cancel();
+				this._debouncedSearch.cancel();
 				this.collection.doSearch( this.el.value );
 			} else if ( event.key === 'Escape' ) {
-				this._debouncedSearch?.cancel();
+				this._debouncedSearch.cancel();
 				this.el.value = '';
 				this.collection.doSearch( '' );
 			}
