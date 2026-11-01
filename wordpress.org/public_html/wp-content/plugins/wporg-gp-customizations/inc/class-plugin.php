@@ -360,7 +360,10 @@ class Plugin {
 						continue;
 					}
 
-					if ( $padded_translations == $e->translations ) {
+					// Use the translations() method and pad to match plural count.
+					$existing_entry_translations = array_pad( $e->translations(), $locale->nplurals, null );
+
+					if ( $padded_translations == $existing_entry_translations ) {
 						// Changes requested: Block ANY user from submitting the uncorrected text.
 						if ( 'changesrequested' === $e->status ) {
 							GP::$current_route->die_with_error(
