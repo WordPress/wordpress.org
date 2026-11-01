@@ -764,7 +764,7 @@
 				timeout
 			] ).finally( () => clearTimeout( timer ) );
 
-			if ( ! cached ) {
+			if ( ! cached?.blob ) {
 				throw new Error( 'No cached data' );
 			}
 
@@ -775,10 +775,6 @@
 
 			if ( ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
 				throw new Error( 'Cache expired' );
-			}
-
-			if ( ! blob ) {
-				throw new Error( 'No cached data' );
 			}
 
 			// decompress
