@@ -304,10 +304,11 @@ class Plugin {
 	}
 
 	/**
-	 * Automatically rejects incoming suggestions that are identical to an existing rejected or changes-requested translation by the same user.
+	 * Automatically rejects incoming suggestions that are identical to an existing rejected translation
+	 * by the same user, or an open changes-requested translation by any user.
 	 *
 	 * @param array|false    $args        Arguments for creating or saving a translation.
-	 * @param GP_Translation $translation Translation instance.
+	 * @param GP_Translation $translation Existing translation object.
 	 * @return array|false Arguments array or false.
 	 */
 	public function auto_reject_already_rejected( $args, GP_Translation $translation ) {
@@ -333,18 +334,12 @@ class Plugin {
 				return $args;
 			}
 
-			$user = get_user_by( 'ID', $args['user_id'] );
-			if ( ! $user ) {
-				return $args;
-			}
-
-			// Query all existing translations from this user for this original.
+			// Query all existing translations for this original without user restriction.
 			$existing_translations = GP::$translation->for_translation(
 				$project,
 				$translation_set,
 				'no-limit',
 				array(
-					'user_login'  => $user->user_login,
 					'original_id' => $args['original_id'],
 				),
 				array()
@@ -363,17 +358,26 @@ class Plugin {
 				$padded_translations = array_pad( $translations, $locale->nplurals, null );
 
 				foreach ( $existing_translations as $e ) {
-					// Check against both 'rejected' and 'changesrequested'.
 					if ( ! in_array( $e->status, array( 'rejected', 'changesrequested' ), true ) ) {
 						continue;
 					}
 
 					if ( $padded_translations == $e->translations ) {
-						$error_message = ( 'changesrequested' === $e->status )
-							? __( 'Identical translation with changes requested already exists.', 'wporg' )
-							: __( 'Identical rejected translation already exists.', 'wporg' );
+						// Changes requested: Block ANY user from submitting the uncorrected text.
+						if ( 'changesrequested' === $e->status ) {
+							GP::$current_route->die_with_error(
+								__( 'Identical translation with changes requested already exists.', 'wporg' ),
+								200
+							);
+						}
 
-						GP::$current_route->die_with_error( $error_message, 200 );
+						// Rejected: Block the same user from repeatedly submitting the rejected text.
+						if ( 'rejected' === $e->status && (int) $e->user_id === (int) $args['user_id'] ) {
+							GP::$current_route->die_with_error(
+								__( 'Identical rejected translation already exists.', 'wporg' ),
+								200
+							);
+						}
 					}
 				}
 			}
