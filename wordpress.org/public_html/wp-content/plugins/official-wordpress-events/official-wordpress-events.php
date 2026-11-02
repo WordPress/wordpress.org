@@ -30,13 +30,15 @@ class Official_WordPress_Events {
 	const GATHERPRESS_MAX_PAGES = 500;
 
 	/*
-	 * A Meetup.com event this close in time and place to a GatherPress event is taken to be the same event, posted
-	 * in both places while a group moves off Meetup.com. Group names can't be compared, because organizers name
-	 * the two groups however they like. The distance is generous because a Meetup.com event without a venue
-	 * carries its group's coordinates, which are usually the city center.
+	 * How close a Meetup.com event must be to a GatherPress event to be its copy, posted in both places while a
+	 * group moves off Meetup.com; see `find_gatherpress_original()`. The distance is generous because a Meetup.com
+	 * event without a venue carries its group's coordinates, which are usually the city center.
 	 */
 	const DUPLICATE_MAX_MINUTES = 30;
 	const DUPLICATE_MAX_KM      = 25;
+
+	// Shortest normalized title that may match by containment rather than equality.
+	const DUPLICATE_MIN_TITLE_LENGTH = 10;
 
 	public $log = [];
 
@@ -51,6 +53,16 @@ class Official_WordPress_Events {
 	 * }
 	 */
 	protected $gatherpress_feed = null;
+
+	/**
+	 * What the Meetup.com import recorded for each GatherPress event in this run, keyed by source ID.
+	 *
+	 * @var array[] {
+	 *     @type string $meetup_id      The Meetup.com event it was imported from, or empty.
+	 *     @type string $meetup_urlname The Meetup.com group its group site was imported from, or empty.
+	 * }
+	 */
+	protected $gatherpress_links = array();
 
 	/*
 	 * @todo
@@ -756,11 +768,18 @@ class Official_WordPress_Events {
 	protected function parse_gatherpress_events( $raw_events ) {
 		$events = array();
 
+		$this->gatherpress_links = array();
+
 		foreach ( $raw_events as $raw_event ) {
 			$event = $this->parse_gatherpress_event( $raw_event );
 
 			if ( $event ) {
 				$events[] = $event;
+
+				$this->gatherpress_links[ $event->source_id ] = array(
+					'meetup_id'      => $this->meetup_id( $raw_event['meetup_id'] ?? '' ),
+					'meetup_urlname' => $this->meetup_urlname( $raw_event['group']['meetup_urlname'] ?? '' ),
+				);
 			} else {
 				$this->log( 'Skipped malformed GatherPress event: ' . wp_json_encode( $raw_event['source_id'] ?? null ) );
 			}
@@ -904,6 +923,28 @@ class Official_WordPress_Events {
 	}
 
 	/**
+	 * Normalize a Meetup.com event ID, as `source_id` stores Meetup.com events.
+	 *
+	 * @param mixed $meetup_id The value from the feed.
+	 *
+	 * @return string The ID, or empty when invalid.
+	 */
+	protected function meetup_id( $meetup_id ) {
+		return is_string( $meetup_id ) && preg_match( '/^[0-9a-z]{1,32}$/i', $meetup_id ) ? $meetup_id : '';
+	}
+
+	/**
+	 * Normalize a Meetup.com group URL name.
+	 *
+	 * @param mixed $urlname The value from the feed, or a Meetup.com group URL's path.
+	 *
+	 * @return string The lowercase name, or empty when invalid.
+	 */
+	protected function meetup_urlname( $urlname ) {
+		return is_string( $urlname ) && preg_match( '/^[0-9a-z_-]{1,100}$/i', $urlname ) ? strtolower( $urlname ) : '';
+	}
+
+	/**
 	 * Whether an event has the coordinates the `wporg_events` table requires.
 	 *
 	 * @param Official_WordPress_Event $event The event.
@@ -917,9 +958,13 @@ class Official_WordPress_Events {
 	/**
 	 * Hide Meetup.com events that are also posted on WordPress Groups.
 	 *
-	 * While a group moves to WordPress Groups, it may post the same event in both places. The GatherPress copy wins.
-	 * The Meetup.com copy is kept with the `hidden` status rather than dropped, because dropping it would leave its
-	 * existing row `scheduled`; and if the GatherPress event goes away, the next run shows the Meetup.com one again.
+	 * While a group moves to WordPress Groups, it may post the same event in both places. The GatherPress copy wins,
+	 * as long as it's one this run stores. The Meetup.com copy is kept with the `hidden` status rather than dropped,
+	 * because dropping it would leave its existing row `scheduled`; and if the GatherPress event goes away, the next
+	 * complete run shows the Meetup.com one again.
+	 *
+	 * After an incomplete read of the feed, a Meetup.com event that's already hidden stays hidden: its GatherPress copy
+	 * may be on a page that failed to load, and showing it would list the event twice until the next complete read.
 	 *
 	 * @param Official_WordPress_Event[] $meetup_events      Events from Meetup.com.
 	 * @param Official_WordPress_Event[] $gatherpress_events Events from WordPress Groups.
@@ -930,37 +975,148 @@ class Official_WordPress_Events {
 		$candidates = array_filter(
 			$gatherpress_events,
 			function ( $event ) {
-				return 'scheduled' === $event->status && null !== $event->latitude;
+				return 'scheduled' === $event->status && $this->has_coordinates( $event );
 			}
 		);
 
-		if ( ! $candidates ) {
-			return $meetup_events;
-		}
+		$still_hidden = empty( $this->gatherpress_feed['complete'] ) ? $this->get_hidden_meetup_source_ids() : array();
 
 		foreach ( $meetup_events as $meetup_event ) {
-			if ( 'scheduled' !== $meetup_event->status || empty( $meetup_event->latitude ) ) {
+			if ( 'scheduled' !== $meetup_event->status ) {
 				continue;
 			}
 
-			foreach ( $candidates as $candidate ) {
-				$minutes_apart = abs( $meetup_event->start_timestamp - $meetup_event->utc_offset - ( $candidate->start_timestamp - $candidate->utc_offset ) ) / MINUTE_IN_SECONDS;
+			$original = $this->find_gatherpress_original( $meetup_event, $candidates );
 
-				if ( $minutes_apart > self::DUPLICATE_MAX_MINUTES ) {
-					continue;
-				}
-
-				if ( $this->distance_km( $meetup_event->latitude, $meetup_event->longitude, $candidate->latitude, $candidate->longitude ) > self::DUPLICATE_MAX_KM ) {
-					continue;
-				}
-
+			if ( $original ) {
 				$meetup_event->status = 'hidden';
-				$this->log( "Hid Meetup.com event {$meetup_event->source_id} as a duplicate of {$candidate->source_id}." );
-				break;
+				$this->log( "Hid Meetup.com event {$meetup_event->source_id} as a duplicate of {$original->source_id}." );
+			} elseif ( isset( $still_hidden[ (string) $meetup_event->source_id ] ) ) {
+				$meetup_event->status = 'hidden';
+				$this->log( "Kept Meetup.com event {$meetup_event->source_id} hidden, because the GatherPress feed was not read completely." );
 			}
 		}
 
 		return $meetup_events;
+	}
+
+	/**
+	 * Find the GatherPress event that a Meetup.com event is a copy of.
+	 *
+	 * In order of certainty:
+	 *
+	 * 1. The GatherPress event was imported from this Meetup.com event.
+	 * 2. Its group site was imported from this Meetup.com group, and it starts within `DUPLICATE_MAX_MINUTES`. A group
+	 *    site imported from another Meetup.com group never matches by time and place: that's another group's event.
+	 * 3. Its group site records no Meetup.com group, and it starts within `DUPLICATE_MAX_MINUTES`, is within
+	 *    `DUPLICATE_MAX_KM`, and has the same title. Time and place alone also match another group's event across
+	 *    town, and group names can't be compared, because organizers name the two groups however they like.
+	 *
+	 * @param Official_WordPress_Event   $meetup_event A scheduled Meetup.com event.
+	 * @param Official_WordPress_Event[] $candidates   The scheduled GatherPress events this run stores.
+	 *
+	 * @return Official_WordPress_Event|null
+	 */
+	protected function find_gatherpress_original( $meetup_event, $candidates ) {
+		$meetup_id      = (string) $meetup_event->source_id;
+		$meetup_urlname = preg_match( '#^https://www\.meetup\.com/([^/]+)/?$#i', (string) $meetup_event->meetup_url, $matches )
+			? $this->meetup_urlname( $matches[1] )
+			: '';
+
+		foreach ( $candidates as $candidate ) {
+			if ( '' !== $meetup_id && $meetup_id === ( $this->gatherpress_links[ $candidate->source_id ]['meetup_id'] ?? '' ) ) {
+				return $candidate;
+			}
+		}
+
+		foreach ( $candidates as $candidate ) {
+			$minutes_apart = abs( $meetup_event->start_timestamp - $meetup_event->utc_offset - ( $candidate->start_timestamp - $candidate->utc_offset ) ) / MINUTE_IN_SECONDS;
+
+			if ( $minutes_apart > self::DUPLICATE_MAX_MINUTES ) {
+				continue;
+			}
+
+			$group_urlname = $this->gatherpress_links[ $candidate->source_id ]['meetup_urlname'] ?? '';
+
+			if ( '' !== $group_urlname ) {
+				if ( $group_urlname === $meetup_urlname ) {
+					return $candidate;
+				}
+
+				continue;
+			}
+
+			if (
+				! empty( $meetup_event->latitude ) && ! empty( $meetup_event->longitude ) &&
+				$this->distance_km( $meetup_event->latitude, $meetup_event->longitude, $candidate->latitude, $candidate->longitude ) <= self::DUPLICATE_MAX_KM &&
+				$this->titles_match( $meetup_event->title, $candidate->title )
+			) {
+				return $candidate;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Whether two titles name the same event.
+	 *
+	 * They match when they're equal once case, spaces and punctuation are ignored, or when one contains the other and
+	 * is long enough not to be a generic word like "Meetup".
+	 *
+	 * @param string $title1 A title.
+	 * @param string $title2 Another title.
+	 *
+	 * @return bool
+	 */
+	protected function titles_match( $title1, $title2 ) {
+		$normalize = function ( $title ) {
+			$title = html_entity_decode( wp_strip_all_tags( (string) $title ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+			return mb_strtolower( (string) preg_replace( '/[^\p{L}\p{N}]+/u', '', $title ) );
+		};
+
+		$title1 = $normalize( $title1 );
+		$title2 = $normalize( $title2 );
+
+		if ( '' === $title1 || '' === $title2 ) {
+			return false;
+		}
+
+		if ( $title1 === $title2 ) {
+			return true;
+		}
+
+		$shorter = mb_strlen( $title1 ) <= mb_strlen( $title2 ) ? $title1 : $title2;
+		$longer  = $shorter === $title1 ? $title2 : $title1;
+
+		return mb_strlen( $shorter ) >= self::DUPLICATE_MIN_TITLE_LENGTH && str_contains( $longer, $shorter );
+	}
+
+	/**
+	 * The Meetup.com events that are currently hidden as copies of GatherPress events.
+	 *
+	 * @return true[] Keyed by source ID.
+	 */
+	protected function get_hidden_meetup_source_ids() {
+		global $wpdb;
+
+		$source_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT source_id
+				FROM %i
+				WHERE
+					type          = 'meetup'   AND
+					status        = 'hidden'   AND
+					source_id NOT LIKE %s      AND
+					date_utc     >= DATE_SUB( NOW(), INTERVAL 2 DAY )
+				LIMIT 5000",
+				self::EVENTS_TABLE,
+				$wpdb->esc_like( 'gp-' ) . '%'
+			)
+		);
+
+		return array_fill_keys( $source_ids, true );
 	}
 
 	/**
@@ -991,9 +1147,11 @@ class Official_WordPress_Events {
 	 * the feed but is skipped, so its old row would otherwise stay up at the old venue.
 	 *
 	 * This only acts on a complete read of the feed: from an incomplete one, a missing event could just be on a page or
-	 * a group site that failed to load, and marking it deleted would hide a real event. Events starting within the next
-	 * day are left alone, like in `mark_postponed_wordcamps()`, because the feed's window and this table's local-time
-	 * dates don't line up exactly around "now".
+	 * a group site that failed to load, and marking it deleted would hide a real event.
+	 *
+	 * It covers every row that hasn't ended, so an event unpublished hours before it starts comes down too. That's
+	 * safe: the feed lists every event that ended less than a day ago, and `end_date` is in the event's local time,
+	 * never more than 14 hours from UTC, so a published event that ends after now is always in the feed.
 	 */
 	protected function mark_deleted_gatherpress_events() {
 		global $wpdb;
@@ -1013,7 +1171,7 @@ class Official_WordPress_Events {
 					type       = 'meetup'                     AND
 					source_id LIKE %s                         AND
 					status    IN ( 'scheduled', 'cancelled' ) AND
-					date_utc  >= DATE_ADD( NOW(), INTERVAL 24 HOUR )
+					end_date  >= NOW()
 				LIMIT 5000",
 				self::EVENTS_TABLE,
 				$wpdb->esc_like( 'gp-' ) . '%'
