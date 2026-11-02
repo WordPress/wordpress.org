@@ -56,7 +56,7 @@ final class PartialSendsTest extends TestCase {
 	/**
 	 * A reply Gmail accepted part of before its daily limit isn't retried; one it refused from the start is.
 	 *
-	 * Each reply comes after one that Gmail accepted, so the earlier one mustn't count for it.
+	 * Each follows a reply Gmail accepted, which mustn't count for it.
 	 *
 	 * @dataProvider data_replies
 	 *
@@ -92,7 +92,7 @@ final class PartialSendsTest extends TestCase {
 	private function send( bool $accepted ): void {
 		\Eventy::filter( 'email.reply_to_customer.threads', collect() );
 
-		// Gmail accepts the sender and recipient even when it then refuses the email.
+		// Gmail's 250s to these don't mean it accepted the email.
 		$this->exchange( "MAIL FROM:<support@example.org>\r\n", array( 250 ), '250 2.1.0 OK gsmtp', true );
 		$this->exchange( "RCPT TO:<person@example.org>\r\n", array( 250, 251, 252 ), '250 2.1.5 OK gsmtp', true );
 

@@ -39,7 +39,7 @@ final class LimitRecipientsTest extends TestCase {
 	/**
 	 * Up to 100 people in To, Cc, and Bcc together reach FreeScout; more are refused.
 	 *
-	 * The email's subject is longer than FreeScout allows, so it refuses it too, rather than send it.
+	 * Its subject is too long for FreeScout, so nothing is sent either way.
 	 *
 	 * @dataProvider data_recipients
 	 *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Keeps emails from going to more people than Gmail lets the mailbox send to.
+ * Limits how many people an email goes to.
  *
  * @package WordPressdotorg\FreeScout\WPOrgSite
  */
@@ -17,11 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Refuses to send a reply, forward, or new conversation to more than 100 people in To, Cc, and Bcc together.
  *
- * Gmail refuses an email to more than 100 people over SMTP outright, which FreeScout then retries for a week.
- * FreeScout's mailer also sends each Bcc address an email of its own, and Gmail counts each of them towards the
- * mailbox's daily sending limit. Once that's reached partway through, the whole email counts as failed, and it's sent
- * again every hour, from the top of the list, so the first people get it again and again, and the mailbox can't send
- * anything else.
+ * Gmail refuses more over SMTP, and counts every recipient towards the mailbox's daily limits.
  *
  * @see https://support.google.com/a/answer/166852
  */
@@ -65,7 +61,7 @@ final class LimitRecipients {
 	 * @return int
 	 */
 	private static function count( Request $request ): int {
-		// Forwards go to `to_email`; replies go to the conversation's sender when `to` is empty.
+		// Forwards use `to_email`; a reply without `to` goes to the sender.
 		$to = self::emails( Thread::SUBTYPE_FORWARD === (int) $request->input( 'subtype' ) ? $request->input( 'to_email' ) : $request->input( 'to' ) );
 		$to = $to ? $to : array( '' );
 

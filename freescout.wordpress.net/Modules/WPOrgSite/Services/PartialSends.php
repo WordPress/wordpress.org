@@ -10,13 +10,10 @@ declare( strict_types = 1 );
 namespace Modules\WPOrgSite\Services;
 
 /**
- * Doesn't retry a reply that reached Gmail's daily sending limit after Gmail accepted part of it.
+ * Doesn't retry a reply that hit Gmail's daily limit after Gmail accepted part of it.
  *
- * FreeScout's mailer sends To and Cc one email, then each Bcc address one of its own. When Gmail's daily limit is
- * reached partway through, FreeScout retries the whole reply every hour for a week, so those it already reached get it
- * again each time. Once Gmail accepted any of its emails, such a reply fails instead, and shows as not sent, for an
- * agent to decide what to do. One that Gmail refused from the start, like any reply while the mailbox is over its limit,
- * is still retried.
+ * FreeScout sends To and Cc one email, then each Bcc address its own, and retries the whole reply hourly for a week,
+ * so those already reached would get it again each time. A reply Gmail refused from the start is still retried.
  */
 final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events_ResponseListener {
 
@@ -28,7 +25,7 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	public const ERROR = 'Daily user sending limit exceeded';
 
 	/**
-	 * SMTP's end of an email's data, which the server answers with 250 once it accepted the email.
+	 * Ends an email's data in SMTP; a 250 to it means the server accepted the email.
 	 *
 	 * @var string
 	 */
@@ -76,9 +73,9 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	}
 
 	/**
-	 * Starts watching a reply, on the mailer core just set up for its mailbox.
+	 * Starts watching a reply, on the mailer core just set up for it.
 	 *
-	 * The worker runs one job after another, so each starts with core's errors. Swift ignores a listener it already has.
+	 * Each reply starts from core's errors, as the worker runs one job after another. Swift ignores a listener it has.
 	 *
 	 * @return void
 	 */
