@@ -290,15 +290,17 @@
 				// Step 2 (Ranking): Calculate 'matchScore' for comparator sorting.
 				// Cache properties to avoid repeated heap lookups across multiple search tokens.
 				const { _lowerName, _lowerSlug } = project;
+				const isSame = _lowerName === _lowerSlug;
 				let score = 0;
 				for ( let j = 0; j < tokenCount; j++ ) {
-					score += Math.max( getMatchScore( _lowerName, tokens[ j ] ), getMatchScore( _lowerSlug, tokens[ j ] ) );
+					const scoreName = getMatchScore( _lowerName, tokens[ j ] );
+					score += isSame ? scoreName : Math.max( scoreName, getMatchScore( _lowerSlug, tokens[ j ] ) );
 				}
 				project.matchScore = score;
 				results.push( project );
 			}
 
-			results.sort( ( a, b ) => ( b.matchScore - a.matchScore ) || ( b.get( 'checked' ) - a.get( 'checked' ) ) );
+			results.sort( ( a, b ) => ( b.matchScore - a.matchScore ) || ( b.attributes.checked - a.attributes.checked ) );
 			this.reset( results, { sort: false } );
 		},
 
