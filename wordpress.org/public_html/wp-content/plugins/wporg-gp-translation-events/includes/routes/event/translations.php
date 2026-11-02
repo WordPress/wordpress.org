@@ -74,6 +74,9 @@ class Translations_Route extends Route {
 		$editor_options = array();
 
 		foreach ( $translation_sets as $ts ) {
+			// Same rule as GP_Translation::for_translation(): hidden originals are for project writers only.
+			$priority_where = $this->can( 'write', 'project', $ts->project_id ) ? '' : 'AND o.priority > -2';
+
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
 					"
@@ -93,6 +96,7 @@ class Translations_Route extends Route {
 					AND t.translation_set_id = %d
 					AND t.user_id = ea.user_id
 					AND t.status LIKE %s
+					{$priority_where}
 					",
 					$event->id(),
 					$ts->translation_set_id,

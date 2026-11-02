@@ -2,12 +2,13 @@
 
 namespace WordPressdotorg\GlotPress\TranslationSuggestions\Routes;
 
-use GP;
-use GP_Route;
 use WordPressdotorg\GlotPress\TranslationSuggestions\Translation_Memory_Client;
 use const WordPressdotorg\GlotPress\TranslationSuggestions\PLUGIN_DIR;
 
-class Other_Languages extends GP_Route {
+/**
+ * Serves current translations of an original from the other locales.
+ */
+class Other_Languages extends Suggestions_Route {
 
 	/**
 	 * Indicates the related locales for each locale, so we will put them in the top list
@@ -28,32 +29,16 @@ class Other_Languages extends GP_Route {
 		'ug'  => array( 'tr', 'uz', 'az', 'zh-cn', 'zh-tw' ),
 	);
 
+	/**
+	 * Returns current translations of the original from other locales as a JSON template.
+	 *
+	 * @param string $project_path         Project path.
+	 * @param string $locale_slug          Locale slug.
+	 * @param string $translation_set_slug Translation set slug.
+	 * @return void
+	 */
 	public function get_suggestions( $project_path, $locale_slug, $translation_set_slug ) {
-		$original_id = gp_get( 'original' );
-		$nonce       = gp_get( 'nonce' );
-
-		if ( ! wp_verify_nonce( $nonce, 'other-languages-suggestions-' . $original_id ) ) {
-			wp_send_json_error( 'invalid_nonce' );
-		}
-
-		if ( empty( $original_id ) ) {
-			wp_send_json_error( 'no_original' );
-		}
-
-		$original = GP::$original->get( $original_id );
-		if ( ! $original ) {
-			wp_send_json_error( 'invalid_original' );
-		}
-
-		$project = GP::$project->by_path( $project_path );
-		if ( ! $project ) {
-			wp_send_json_error( 'project_not_found' );
-		}
-
-		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( $project->id, $translation_set_slug, $locale_slug );
-		if ( ! $translation_set ) {
-			wp_send_json_error( 'translation_set_found' );
-		}
+		list( $original, $translation_set ) = $this->authorize_original( 'other-languages-suggestions-', $project_path, $locale_slug, $translation_set_slug );
 
 		$suggestions = $this->query( $original, $translation_set );
 
