@@ -124,7 +124,7 @@ class Locale extends GP_Route {
 				$redirect_url = gp_url( sprintf( '/locale/%s/%s/%s', $locale_slug, $set_slug, $default_project_tab ) );
 
 				if ( ! empty( $_GET ) ) {
-					$redirect_url = add_query_arg( urlencode_deep( wp_unslash( $_GET ) ), $redirect_url );
+					$redirect_url = remove_query_arg( 'page', add_query_arg( urlencode_deep( wp_unslash( $_GET ) ), $redirect_url ) );
 				}
 
 				wp_safe_redirect( $redirect_url );
