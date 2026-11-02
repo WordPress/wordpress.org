@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgSite\Http\Middleware;
 
+use App\Mailbox;
 use App\Thread;
 use Closure;
 use Illuminate\Http\Request;
@@ -55,7 +56,7 @@ final class LimitRecipients {
 	}
 
 	/**
-	 * Counts the people an email goes to, as core reads its fields.
+	 * Counts the people an email goes to, as core reads its fields, with the mailbox's Auto Bcc.
 	 *
 	 * @param Request $request Request.
 	 * @return int
@@ -65,7 +66,10 @@ final class LimitRecipients {
 		$to = self::emails( Thread::SUBTYPE_FORWARD === (int) $request->input( 'subtype' ) ? $request->input( 'to_email' ) : $request->input( 'to' ) );
 		$to = $to ? $to : array( '' );
 
-		return count( array_unique( array_merge( $to, self::emails( $request->input( 'cc' ) ), self::emails( $request->input( 'bcc' ) ) ) ) );
+		$mailbox  = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
+		$auto_bcc = $mailbox ? \MailHelper::sanitizeEmails( (string) $mailbox->auto_bcc ) : array();
+
+		return count( array_unique( array_merge( $to, self::emails( $request->input( 'cc' ) ), self::emails( $request->input( 'bcc' ) ), $auto_bcc ) ) );
 	}
 
 	/**

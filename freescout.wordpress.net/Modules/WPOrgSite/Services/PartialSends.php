@@ -95,7 +95,11 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 		\Eventy::addFilter(
 			'email.reply_to_customer.threads',
 			static function ( mixed $threads ) use ( $listener ): mixed {
-				$listener->start( is_iterable( $threads ) ? collect( $threads )->first() : null );
+				try {
+					$listener->start( is_iterable( $threads ) ? collect( $threads )->first() : null );
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not watch a reply as it’s sent: ' . $e->getMessage() );
+				}
 
 				return $threads;
 			}
@@ -128,10 +132,14 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	 * @return void
 	 */
 	public function beforeSendPerformed( \Swift_Events_SendEvent $evt ): void {
-		$message = $evt->getMessage();
-		$emails  = array_merge( array_keys( (array) $message->getTo() ), array_keys( (array) $message->getCc() ), array_keys( (array) $message->getBcc() ) );
+		try {
+			$message = $evt->getMessage();
+			$emails  = array_merge( array_keys( (array) $message->getTo() ), array_keys( (array) $message->getCc() ), array_keys( (array) $message->getBcc() ) );
 
-		$this->recipients = array_values( array_unique( array_map( 'strtolower', $emails ) ) );
+			$this->recipients = array_values( array_unique( array_map( 'strtolower', $emails ) ) );
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgSite] Could not read a reply’s recipients: ' . $e->getMessage() );
+		}
 	}
 
 	/**
@@ -172,7 +180,12 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 			$this->reached = array_merge( $this->reached, $this->pending );
 			config( array( 'app.no_retry_mail_errors' => $this->errors . '|' . self::ERROR ) );
 		} elseif ( ! $evt->isValid() && $this->reached && false !== stripos( $evt->getResponse(), self::ERROR ) ) {
-			$this->note();
+			// Swift is sending; failing here would fail the email.
+			try {
+				$this->note();
+			} catch ( \Throwable $e ) {
+				\Log::error( '[WPOrgSite] Could not note who didn’t get a reply: ' . $e->getMessage() );
+			}
 		}
 	}
 
