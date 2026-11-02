@@ -1243,15 +1243,22 @@ class Locale extends GP_Route {
 			";
 		}
 
-		$sql       = "SELECT tp.* $from_where ORDER BY $filter_order_by $limit_sql";
-		$count_sql = "SELECT COUNT(*) $from_where";
+		$sql = "SELECT tp.* $from_where ORDER BY $filter_order_by $limit_sql";
+
+		if ( $stats_where ) {
+			$count_sql    = "SELECT COUNT(*) $from_where";
+			$count_params = $sql_params;
+		} else {
+			// The LEFT JOIN is on stats' unique (project_id, locale, locale_slug) key, so it can't change the count.
+			$count_sql    = "SELECT COUNT(*) FROM {$wpdb->gp_projects} tp WHERE tp.active = 1 $tp_where";
+			$count_params = array_slice( $sql_params, 2 );
+		}
 
 		// Fetch records for the current page.
 		$_projects = $project->many( $sql, ...$sql_params );
 
-		// Fetch total count for pagination calculations.
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $count_sql is dynamically constructed for pagination and safely bound via $sql_params.
-		$results = (int) $wpdb->get_var( $wpdb->prepare( $count_sql, ...$sql_params ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $count_sql is dynamically constructed for pagination and safely bound via $count_params.
+		$results = (int) $wpdb->get_var( $count_params ? $wpdb->prepare( $count_sql, ...$count_params ) : $count_sql );
 
 		$pages = $per_page > 0 ? max( 1, (int) ceil( $results / $per_page ) ) : 1;
 
