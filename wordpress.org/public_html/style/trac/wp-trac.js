@@ -1284,8 +1284,11 @@ let wpTrac,
 
 				event.preventDefault();
 
+				// Trac strips one pair of enclosing quotes from a label, so add a pair to keep them.
+				const text = /^(["']).+\1$/.test( label ) ? `"${ label }"` : label;
+
 				// Whitespace around the selection stays outside the link.
-				const link = selection.replace( label, () => `[${ url } ${ label }]` );
+				const link = selection.replace( label, () => `[${ url } ${ text }]` );
 
 				// execCommand keeps the native undo stack intact; setRangeText doesn't.
 				if ( ! document.execCommand( 'insertText', false, link ) ) {
