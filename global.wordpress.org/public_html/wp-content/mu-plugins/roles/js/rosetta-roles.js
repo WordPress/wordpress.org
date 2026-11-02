@@ -7,11 +7,13 @@
 	 * @property {number}               lastUpdated - Timestamp used for IndexedDB cache invalidation.
 	 * @property {Object}               l10n        - Localized UI strings.
 	 */
-	const settings = window._rosettaProjectsSettings || {};
-	const l10n = settings.l10n || {};
+	const config = window._rosettaConfig || {};
+	const settings = config.settings || {};
+	const l10n = config.l10n || {};
 
 	const projects = {
 		settings,
+		l10n,
 		model: {},
 		view: {},
 		events: _.extend( {}, Backbone.Events )
@@ -620,7 +622,9 @@
 		}
 	};
 
-	projects.getRemoteProjects = () => wp.ajax.post( 'rosetta-get-projects' );
+	projects.getRemoteProjects = () => wp.ajax.post( 'rosetta-get-projects', {
+		_ajax_nonce: projects.settings.nonce
+	} );
 
 	const DB_NAME = 'rosetta_cache';
 	const STORE_NAME = 'projects';
@@ -833,9 +837,9 @@
 	};
 
 	projects.init = () => {
-		const rawList = ( projects.settings.accessList || [] )
-			.map( normalizeId )
-			.filter( id => id !== '' );
+		const rawList = Array.isArray( projects.settings.accessList )
+			? projects.settings.accessList.map( normalizeId ).filter( id => id !== '' )
+			: [];
 		const initialSelection = rawList.includes( 'all' )
 			? [ { id: 'all' } ]
 			: rawList.map( id => ( { id } ) );
