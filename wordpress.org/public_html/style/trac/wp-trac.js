@@ -238,7 +238,7 @@ let wpTrac,
 	// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
 	const mentionPre = '(^|[^a-zA-Z0-9_＠!@#$%&*])';
 	const mentionAt = '(?:@|＠)(?!\\/)';
-	const mentionUser = '([a-zA-Z0-9_](?:[a-zA-Z0-9_\\-.]{0,18}[a-zA-Z0-9_])?)';
+	const mentionUser = '([a-zA-Z0-9_](?:[a-zA-Z0-9_\\-.]{0,58}[a-zA-Z0-9_])?)';
 	const mentionEnd = '(?:\\b(?!@|＠)|$)';
 	const gbIssue = '\\bGB-?(\\d+)\\b';
 
