@@ -107,7 +107,8 @@ class Translation_Memory_Client {
 			$original        = GP::$original->get( $translation->original_id );
 			$translation_set = GP::$translation_set->get( $translation->translation_set_id );
 
-			if ( ! $original || ! $translation_set ) {
+			// TM matches are served to every translator, so hidden originals must not be indexed.
+			if ( ! $original || ! $translation_set || (int) $original->priority <= -2 ) {
 				continue;
 			}
 
