@@ -82,6 +82,7 @@
 
 .sub-projects-list {
 	margin: 0 0 0 2px;
+	contain: content;
 }
 
 .sub-projects-list .no-results {
