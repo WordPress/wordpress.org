@@ -41,7 +41,8 @@
 	border-right: 0;
 	background: #fff;
 	display: none;
-	overflow: scroll;
+	overflow-x: auto;
+	overflow-y: scroll;
 	box-sizing: border-box;
 	cursor: default;
 }
