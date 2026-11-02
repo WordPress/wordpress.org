@@ -9,11 +9,12 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgSite\Tests;
 
+use App\Thread;
 use Modules\WPOrgSite\Providers\WPOrgSiteServiceProvider;
 use WordPressdotorg\FreeScout\Tests\TestCase;
 
 /**
- * Covers which replies the reply job retries after Gmail's daily limit.
+ * Covers which replies the reply job retries after Gmail's daily limit, and the note on who didn't get them.
  */
 final class PartialSendsTest extends TestCase {
 
@@ -54,67 +55,101 @@ final class PartialSendsTest extends TestCase {
 	}
 
 	/**
-	 * A reply Gmail accepted part of before its daily limit isn't retried; one it refused from the start is.
+	 * A reply Gmail accepted part of before its daily limit isn't retried, and notes who didn't get it; one it refused
+	 * from the start is retried.
 	 *
 	 * Each follows a reply Gmail accepted, which mustn't count for it.
 	 *
 	 * @dataProvider data_replies
 	 *
-	 * @param bool $accepted Whether Gmail accepted one of the reply's emails before its limit.
-	 * @param bool $retried  Whether the reply job retries the reply.
+	 * @param bool        $accepted Whether Gmail accepted the reply's first email, to To, before its limit.
+	 * @param bool        $retried  Whether the reply job retries the reply.
+	 * @param string|null $missed   Who the note says didn't get it, if there's one.
 	 * @return void
 	 */
-	public function test_retries_only_replies_gmail_refused_from_the_start( bool $accepted, bool $retried ): void {
-		$this->send( true );
-		$this->send( $accepted );
+	public function test_handles_replies_gmail_stopped( bool $accepted, bool $retried, ?string $missed ): void {
+		$this->send( $this->create_reply(), true, false );
+		$reply = $this->create_reply();
+		$this->send( $reply, $accepted, true );
 
 		$this->assertSame( $retried, ! preg_match( '/' . config( 'app.no_retry_mail_errors' ) . '/i', self::GMAIL_ERROR ) );
+
+		$notes = Thread::where( 'conversation_id', $reply->conversation_id )->where( 'type', Thread::TYPE_NOTE )->pluck( 'body' )->all();
+		if ( $missed ) {
+			$this->assertCount( 1, $notes );
+			$this->assertStringContainsString( "<p>$missed</p>", $notes[0] );
+		} else {
+			$this->assertSame( array(), $notes );
+		}
 	}
 
 	/**
-	 * Replies, and whether they're retried.
+	 * Replies, whether they're retried, and who the note says didn't get them.
 	 *
-	 * @return array<string, array{bool, bool}>
+	 * @return array<string, array{bool, bool, string|null}>
 	 */
 	public static function data_replies(): array {
 		return array(
-			'Accepted in part' => array( true, false ),
-			'Refused'          => array( false, true ),
+			'Accepted in part' => array( true, false, 'first@example.org, second@example.org' ),
+			'Refused'          => array( false, true, null ),
 		);
 	}
 
 	/**
-	 * Runs the filter the reply job runs just before sending, then Swift's events for Gmail's answers.
+	 * Creates an agent's reply.
 	 *
-	 * @param bool $accepted Whether Gmail accepts the first email, before refusing the next with its daily limit.
-	 * @return void
+	 * @return Thread
 	 */
-	private function send( bool $accepted ): void {
-		\Eventy::filter( 'email.reply_to_customer.threads', collect() );
+	private function create_reply(): Thread {
+		$conversation = $this->create_conversation( $this->create_mailbox(), $this->create_sender( 'sender@example.org' ) );
 
-		// Gmail's 250s to these don't mean it accepted the email.
-		$this->exchange( "MAIL FROM:<support@example.org>\r\n", array( 250 ), '250 2.1.0 OK gsmtp', true );
-		$this->exchange( "RCPT TO:<person@example.org>\r\n", array( 250, 251, 252 ), '250 2.1.5 OK gsmtp', true );
-
-		if ( $accepted ) {
-			$this->exchange( "DATA\r\n", array( 354 ), '354 Go ahead gsmtp', true );
-			$this->exchange( "\r\n.\r\n", array( 250 ), '250 2.0.0 OK 1793574420 gsmtp', true );
-		}
-
-		$this->exchange( "DATA\r\n", array( 354 ), '550-5.4.5 Daily user sending limit exceeded.', false );
+		return $this->create_thread( $conversation, Thread::TYPE_MESSAGE, 'An announcement.', $this->create_user(), now()->toDateTimeString() );
 	}
 
 	/**
-	 * Dispatches the events Swift dispatches for a command and its response.
+	 * Sends a reply to the sender, with two people in Bcc, as the reply job and Swift do, and plays Gmail's answers.
 	 *
-	 * @param string $command  SMTP command.
-	 * @param int[]  $codes    Response codes the command expects.
-	 * @param string $response Server's response.
-	 * @param bool   $valid    Whether the response has one of the expected codes.
+	 * Swift sends the sender and recipients before it reads Gmail's answers, so they come in after all of them.
+	 *
+	 * @param Thread $reply    The reply.
+	 * @param bool   $accepted Whether Gmail accepts the email to To.
+	 * @param bool   $limited  Whether Gmail then refuses the first Bcc email with its daily limit.
 	 * @return void
 	 */
-	private function exchange( string $command, array $codes, string $response, bool $valid ): void {
-		$this->events->dispatchEvent( $this->events->createCommandEvent( $this->transport, $command, $codes ), 'commandSent' );
-		$this->events->dispatchEvent( $this->events->createResponseEvent( $this->transport, $response, $valid ), 'responseReceived' );
+	private function send( Thread $reply, bool $accepted, bool $limited ): void {
+		\Eventy::filter( 'email.reply_to_customer.threads', collect( array( $reply ) ), $reply->conversation, $reply->conversation->mailbox );
+
+		$message = ( new \Swift_Message( 'An announcement' ) )->setTo( 'sender@example.org' )->setBcc( array( 'first@example.org', 'second@example.org' ) );
+		$this->events->dispatchEvent( $this->events->createSendEvent( $this->transport, $message ), 'beforeSendPerformed' );
+
+		// Gmail's 250s to the sender and recipients don't mean it accepted the email.
+		$this->exchange( array( 'MAIL FROM:<support@example.org>', 'RCPT TO:<sender@example.org>', 'DATA' ), array( '250 2.1.0 OK', '250 2.1.5 OK', $accepted ? '354 Go ahead' : '550-5.4.5 Daily user sending limit exceeded.' ) );
+		if ( ! $accepted ) {
+			return;
+		}
+
+		$this->exchange( array( "\r\n.\r\n" ), array( '250 2.0.0 OK' ) );
+
+		if ( $limited ) {
+			$this->exchange( array( 'MAIL FROM:<support@example.org>', 'RCPT TO:<first@example.org>', 'DATA' ), array( '250 2.1.0 OK', '250 2.1.5 OK', '550-5.4.5 Daily user sending limit exceeded.' ) );
+		}
+	}
+
+	/**
+	 * Dispatches Swift's events for commands, then for Gmail's answers to them, a 2xx or 3xx one being expected.
+	 *
+	 * @param string[] $commands  SMTP commands, without the line break, except the end of an email's data.
+	 * @param string[] $responses Gmail's answers, in the same order.
+	 * @return void
+	 */
+	private function exchange( array $commands, array $responses ): void {
+		foreach ( $commands as $command ) {
+			$command = "\r\n.\r\n" === $command ? $command : "$command\r\n";
+			$this->events->dispatchEvent( $this->events->createCommandEvent( $this->transport, $command, array() ), 'commandSent' );
+		}
+
+		foreach ( $responses as $response ) {
+			$this->events->dispatchEvent( $this->events->createResponseEvent( $this->transport, $response, ! preg_match( '/^[45]/', $response ) ), 'responseReceived' );
+		}
 	}
 }

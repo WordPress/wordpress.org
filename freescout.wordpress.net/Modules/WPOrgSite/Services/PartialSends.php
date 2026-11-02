@@ -9,13 +9,15 @@ declare( strict_types = 1 );
 
 namespace Modules\WPOrgSite\Services;
 
+use App\Thread;
+
 /**
- * Doesn't retry a reply that hit Gmail's daily limit after Gmail accepted part of it.
+ * Doesn't retry a reply that hit Gmail's daily limit after Gmail accepted part of it, and notes who didn't get it.
  *
  * FreeScout sends To and Cc one email, then each Bcc address its own, and retries the whole reply hourly for a week,
  * so those already reached would get it again each time. A reply Gmail refused from the start is still retried.
  */
-final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events_ResponseListener {
+final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events_ResponseListener, \Swift_Events_SendListener {
 
 	/**
 	 * Gmail's error for an account that reached its daily sending limit.
@@ -39,11 +41,39 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	private string $errors;
 
 	/**
-	 * Whether the last command was the end of an email's data.
+	 * The reply being sent.
 	 *
-	 * @var bool
+	 * @var Thread|null
 	 */
-	private bool $ended = false;
+	private ?Thread $reply = null;
+
+	/**
+	 * Everyone the reply goes to.
+	 *
+	 * @var string[]
+	 */
+	private array $recipients = array();
+
+	/**
+	 * Those Gmail accepted the reply for.
+	 *
+	 * @var string[]
+	 */
+	private array $reached = array();
+
+	/**
+	 * Recipients Gmail took in the email being sent, which it hasn't accepted yet.
+	 *
+	 * @var string[]
+	 */
+	private array $pending = array();
+
+	/**
+	 * Commands Gmail hasn't answered yet, oldest first; Swift sends the sender and recipients before reading the answers.
+	 *
+	 * @var string[]
+	 */
+	private array $commands = array();
 
 	/**
 	 * Remembers core's errors not to retry.
@@ -65,7 +95,7 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 		\Eventy::addFilter(
 			'email.reply_to_customer.threads',
 			static function ( mixed $threads ) use ( $listener ): mixed {
-				$listener->start();
+				$listener->start( is_iterable( $threads ) ? collect( $threads )->first() : null );
 
 				return $threads;
 			}
@@ -77,36 +107,101 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	 *
 	 * Each reply starts from core's errors, as the worker runs one job after another. Swift ignores a listener it has.
 	 *
+	 * @param mixed $reply The reply, the newest of the threads the job sends.
 	 * @return void
 	 */
-	private function start(): void {
+	private function start( mixed $reply ): void {
 		config( array( 'app.no_retry_mail_errors' => $this->errors ) );
-		$this->ended = false;
+		$this->reply      = $reply instanceof Thread ? $reply : null;
+		$this->recipients = array();
+		$this->reached    = array();
+		$this->pending    = array();
+		$this->commands   = array();
 
 		\Mail::getSwiftMailer()->registerPlugin( $this );
 	}
 
 	/**
-	 * Notes whether a command ended an email's data.
+	 * Notes everyone the reply goes to, before Swift sets Bcc aside to send each address its own email.
+	 *
+	 * @param \Swift_Events_SendEvent $evt Send event.
+	 * @return void
+	 */
+	public function beforeSendPerformed( \Swift_Events_SendEvent $evt ): void {
+		$message = $evt->getMessage();
+		$emails  = array_merge( array_keys( (array) $message->getTo() ), array_keys( (array) $message->getCc() ), array_keys( (array) $message->getBcc() ) );
+
+		$this->recipients = array_values( array_unique( array_map( 'strtolower', $emails ) ) );
+	}
+
+	/**
+	 * Does nothing once the reply was sent.
+	 *
+	 * @param \Swift_Events_SendEvent $evt Send event.
+	 * @return void
+	 */
+	public function sendPerformed( \Swift_Events_SendEvent $evt ): void {}
+
+	/**
+	 * Queues a command for its answer.
 	 *
 	 * @param \Swift_Events_CommandEvent $evt Command event.
 	 * @return void
 	 */
 	public function commandSent( \Swift_Events_CommandEvent $evt ): void {
-		$this->ended = self::END_OF_DATA === $evt->getCommand();
+		$this->commands[] = $evt->getCommand();
 	}
 
 	/**
-	 * Once Gmail accepted one of the reply's emails, makes its daily limit an error not to retry.
+	 * Notes whom Gmail accepted the reply for, and what to do when its daily limit stops the reply partway through.
+	 *
+	 * Once Gmail accepted one of the reply's emails, its daily limit is an error not to retry, and stopping the reply
+	 * adds a note with everyone who didn't get it.
 	 *
 	 * @param \Swift_Events_ResponseEvent $evt Response event.
 	 * @return void
 	 */
 	public function responseReceived( \Swift_Events_ResponseEvent $evt ): void {
-		if ( $this->ended && $evt->isValid() ) {
+		$command = (string) array_shift( $this->commands );
+
+		if ( str_starts_with( $command, 'MAIL FROM:' ) ) {
+			$this->pending = array();
+		} elseif ( $evt->isValid() && preg_match( '/^RCPT TO:<([^>]+)>/', $command, $m ) ) {
+			$this->pending[] = strtolower( $m[1] );
+		} elseif ( $evt->isValid() && self::END_OF_DATA === $command ) {
+			$this->reached = array_merge( $this->reached, $this->pending );
 			config( array( 'app.no_retry_mail_errors' => $this->errors . '|' . self::ERROR ) );
+		} elseif ( ! $evt->isValid() && $this->reached && false !== stripos( $evt->getResponse(), self::ERROR ) ) {
+			$this->note();
+		}
+	}
+
+	/**
+	 * Adds a note to the reply's conversation, with everyone who didn't get it, ready to paste into Bcc.
+	 *
+	 * @return void
+	 */
+	private function note(): void {
+		$missed = array_values( array_diff( $this->recipients, $this->reached ) );
+		if ( ! $this->reply || ! $missed ) {
+			return;
 		}
 
-		$this->ended = false;
+		$body = '<p>' . e( __( 'Gmail stopped this reply at the mailbox’s daily sending limit, so it won’t be sent again. These :count people didn’t get it; paste them into Bcc to send it to them once the mailbox can send again:', array( 'count' => count( $missed ) ) ) ) . '</p>'
+			. '<p>' . e( implode( ', ', $missed ) ) . '</p>';
+
+		Thread::create(
+			$this->reply->conversation,
+			Thread::TYPE_NOTE,
+			$body,
+			array(
+				'created_by_user_id' => $this->reply->created_by_user_id,
+				'source_via'         => Thread::PERSON_USER,
+				'source_type'        => Thread::SOURCE_TYPE_WEB,
+			)
+		);
+
+		// Gmail answers nothing more, but a later failure mustn't note it twice.
+		$this->reached = array();
 	}
 }
