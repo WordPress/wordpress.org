@@ -42,34 +42,60 @@ final class LimitRecipients {
 		$action = $request->route() ? (string) $request->route()->getActionName() : '';
 
 		// Notes aren't emailed, and anyone logged out is left to FreeScout.
-		if ( $request->user() && 'App\Http\Controllers\ConversationsController@ajax' === $action && 'send_reply' === $request->input( 'action' ) && ! $request->input( 'is_note' ) && self::count( $request ) > self::MAX ) {
-			// Successful, like core's own errors; the form only shows the message of those.
-			return response()->json(
-				array(
-					'status' => 'error',
-					'msg'    => __( 'An email can go to up to :max people, in To, Cc, and Bcc together. Gmail counts each of them towards the mailbox’s daily limit, and a long list uses it up, so the mailbox can’t send anything else. Send announcements from a mailing list instead.', array( 'max' => self::MAX ) ),
-				)
-			);
+		if ( ! $request->user() || 'App\Http\Controllers\ConversationsController@ajax' !== $action || 'send_reply' !== $request->input( 'action' ) || $request->input( 'is_note' ) ) {
+			return $next( $request );
 		}
 
-		return $next( $request );
+		$people = self::people( $request );
+		$total  = count( array_unique( array_merge( $people, self::auto_bcc( $request ) ) ) );
+		if ( $total <= self::MAX ) {
+			return $next( $request );
+		}
+
+		$limit = count( $people ) > self::MAX
+			? __( 'An email can go to up to :max people, in To, Cc, and Bcc together.', array( 'max' => self::MAX ) )
+			: __(
+				'An email can go to up to :max people, in To, Cc, and Bcc together, and this mailbox’s Auto Bcc adds :auto_bcc, which makes :total.',
+				array(
+					'max'      => self::MAX,
+					'auto_bcc' => $total - count( $people ),
+					'total'    => $total,
+				)
+			);
+
+		// Successful, like core's own errors; the form only shows the message of those.
+		return response()->json(
+			array(
+				'status' => 'error',
+				'msg'    => $limit . ' ' . __( 'Gmail counts each of them towards the mailbox’s daily limit, and a long list uses it up, so the mailbox can’t send anything else. Send announcements from a mailing list instead.' ),
+			)
+		);
 	}
 
 	/**
-	 * Counts the people an email goes to, as core reads its fields, with the mailbox's Auto Bcc.
+	 * The people in the email's To, Cc, and Bcc, as core reads its fields.
 	 *
 	 * @param Request $request Request.
-	 * @return int
+	 * @return string[]
 	 */
-	private static function count( Request $request ): int {
+	private static function people( Request $request ): array {
 		// Forwards use `to_email`; a reply without `to` goes to the sender.
 		$to = self::emails( Thread::SUBTYPE_FORWARD === (int) $request->input( 'subtype' ) ? $request->input( 'to_email' ) : $request->input( 'to' ) );
 		$to = $to ? $to : array( '' );
 
-		$mailbox  = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
-		$auto_bcc = $mailbox ? \MailHelper::sanitizeEmails( (string) $mailbox->auto_bcc ) : array();
+		return array_values( array_unique( array_merge( $to, self::emails( $request->input( 'cc' ) ), self::emails( $request->input( 'bcc' ) ) ) ) );
+	}
 
-		return count( array_unique( array_merge( $to, self::emails( $request->input( 'cc' ) ), self::emails( $request->input( 'bcc' ) ), $auto_bcc ) ) );
+	/**
+	 * The mailbox's Auto Bcc, which core adds to every email it sends.
+	 *
+	 * @param Request $request Request.
+	 * @return string[]
+	 */
+	private static function auto_bcc( Request $request ): array {
+		$mailbox = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
+
+		return $mailbox ? \MailHelper::sanitizeEmails( (string) $mailbox->auto_bcc ) : array();
 	}
 
 	/**

@@ -18,11 +18,11 @@ use WordPressdotorg\FreeScout\Tests\TestCase;
 final class LimitRecipientsTest extends TestCase {
 
 	/**
-	 * The message the reply form shows when there are too many.
+	 * The end of the message the reply form shows when there are too many, after the limit.
 	 *
 	 * @var string
 	 */
-	private const MESSAGE = 'An email can go to up to 100 people, in To, Cc, and Bcc together. Gmail counts each of them towards the mailbox’s daily limit, and a long list uses it up, so the mailbox can’t send anything else. Send announcements from a mailing list instead.';
+	private const WHY = 'Gmail counts each of them towards the mailbox’s daily limit, and a long list uses it up, so the mailbox can’t send anything else. Send announcements from a mailing list instead.';
 
 	/**
 	 * Registers the module, and logs in an administrator.
@@ -43,12 +43,12 @@ final class LimitRecipientsTest extends TestCase {
 	 *
 	 * @dataProvider data_recipients
 	 *
-	 * @param int    $cc       People in Cc, besides one in To and 49 in Bcc.
-	 * @param string $auto_bcc The mailbox's Auto Bcc.
-	 * @param bool   $refused  Whether it's refused for them.
+	 * @param int         $cc       People in Cc, besides one in To and 49 in Bcc.
+	 * @param string      $auto_bcc The mailbox's Auto Bcc.
+	 * @param string|null $limit    How the message gives the limit, if it's refused.
 	 * @return void
 	 */
-	public function test_limits_recipients( int $cc, string $auto_bcc, bool $refused ): void {
+	public function test_limits_recipients( int $cc, string $auto_bcc, ?string $limit ): void {
 		$people  = static fn( string $field, int $count ): array => array_map( static fn( int $i ): string => "$field-$i@example.org", range( 1, $count ) );
 		$mailbox = $this->create_mailbox();
 
@@ -69,29 +69,29 @@ final class LimitRecipientsTest extends TestCase {
 			)
 		);
 
-		if ( $refused ) {
+		if ( $limit ) {
 			$response->assertExactJson(
 				array(
 					'status' => 'error',
-					'msg'    => self::MESSAGE,
+					'msg'    => $limit . ' ' . self::WHY,
 				)
 			);
 		} else {
 			// This Laravel's json() takes no key.
-			$this->assertNotSame( self::MESSAGE, $response->json()['msg'] ?? null );
+			$this->assertStringEndsNotWith( self::WHY, (string) ( $response->json()['msg'] ?? '' ) );
 		}
 	}
 
 	/**
-	 * People in Cc, the mailbox's Auto Bcc, and whether the email is refused.
+	 * People in Cc, the mailbox's Auto Bcc, and how the message gives the limit, if the email is refused.
 	 *
-	 * @return array<string, array{int, string, bool}>
+	 * @return array<string, array{int, string, string|null}>
 	 */
 	public static function data_recipients(): array {
 		return array(
-			'100 people'             => array( 50, '', false ),
-			'101 people'             => array( 51, '', true ),
-			'99 people and Auto Bcc' => array( 49, 'archive@example.org, audit@example.org', true ),
+			'100 people'             => array( 50, '', null ),
+			'101 people'             => array( 51, 'archive@example.org', 'An email can go to up to 100 people, in To, Cc, and Bcc together.' ),
+			'99 people and Auto Bcc' => array( 49, 'archive@example.org, audit@example.org', 'An email can go to up to 100 people, in To, Cc, and Bcc together, and this mailbox’s Auto Bcc adds 2, which makes 101.' ),
 		);
 	}
 }
