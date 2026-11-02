@@ -89,9 +89,15 @@ footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 	background: 0;
 }
 
-/* Trac's stock link hover ring reads as a thick outline on the global header and footer. */
+/* Trac's stock link hover ring reads as a thick outline on the site headers, footers, and nav bars. */
 header :link:hover, header :visited:hover,
-footer :link:hover, footer :visited:hover {
+footer :link:hover, footer :visited:hover,
+#headline :link:hover, #headline :visited:hover,
+#metanav :link:hover, #metanav :visited:hover,
+#metanav form.trac-logout button:hover,
+#wporg-header :link:hover, #wporg-header :visited:hover,
+#subnav :link:hover, #subnav :visited:hover,
+#footer :link:hover, #footer :visited:hover {
 	border-radius: 0;
 	box-shadow: none;
 }
