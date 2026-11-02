@@ -76,6 +76,20 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	private array $commands = array();
 
 	/**
+	 * Whether the next email Swift sends is the reply.
+	 *
+	 * @var bool
+	 */
+	private bool $armed = false;
+
+	/**
+	 * Whether the email being sent is the reply; the mailer also sends others, like notifications.
+	 *
+	 * @var bool
+	 */
+	private bool $active = false;
+
+	/**
 	 * Remembers core's errors not to retry.
 	 *
 	 * @param string $errors Core's errors not to retry, a regular expression.
@@ -121,17 +135,25 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 		$this->reached    = array();
 		$this->pending    = array();
 		$this->commands   = array();
+		$this->armed      = true;
+		$this->active     = false;
 
 		\Mail::getSwiftMailer()->registerPlugin( $this );
 	}
 
 	/**
-	 * Notes everyone the reply goes to, before Swift sets Bcc aside to send each address its own email.
+	 * Starts watching the email the reply filter armed for, noting everyone it goes to before Swift sets Bcc aside.
 	 *
 	 * @param \Swift_Events_SendEvent $evt Send event.
 	 * @return void
 	 */
 	public function beforeSendPerformed( \Swift_Events_SendEvent $evt ): void {
+		$this->active = $this->armed;
+		$this->armed  = false;
+		if ( ! $this->active ) {
+			return;
+		}
+
 		try {
 			$message = $evt->getMessage();
 			$emails  = array_merge( array_keys( (array) $message->getTo() ), array_keys( (array) $message->getCc() ), array_keys( (array) $message->getBcc() ) );
@@ -143,12 +165,17 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	}
 
 	/**
-	 * Does nothing once the reply was sent.
+	 * Stops watching once the reply was sent, and gives core's errors back, as there's no error to keep from a retry.
 	 *
 	 * @param \Swift_Events_SendEvent $evt Send event.
 	 * @return void
 	 */
-	public function sendPerformed( \Swift_Events_SendEvent $evt ): void {}
+	public function sendPerformed( \Swift_Events_SendEvent $evt ): void {
+		if ( $this->active ) {
+			$this->active = false;
+			config( array( 'app.no_retry_mail_errors' => $this->errors ) );
+		}
+	}
 
 	/**
 	 * Queues a command for its answer.
@@ -157,7 +184,9 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	 * @return void
 	 */
 	public function commandSent( \Swift_Events_CommandEvent $evt ): void {
-		$this->commands[] = $evt->getCommand();
+		if ( $this->active ) {
+			$this->commands[] = $evt->getCommand();
+		}
 	}
 
 	/**
@@ -170,9 +199,13 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	 * @return void
 	 */
 	public function responseReceived( \Swift_Events_ResponseEvent $evt ): void {
+		if ( ! $this->active ) {
+			return;
+		}
+
 		$command = (string) array_shift( $this->commands );
 
-		if ( str_starts_with( $command, 'MAIL FROM:' ) ) {
+		if ( $evt->isValid() && str_starts_with( $command, 'MAIL FROM:' ) ) {
 			$this->pending = array();
 		} elseif ( $evt->isValid() && preg_match( '/^RCPT TO:<([^>]+)>/', $command, $m ) ) {
 			$this->pending[] = strtolower( $m[1] );

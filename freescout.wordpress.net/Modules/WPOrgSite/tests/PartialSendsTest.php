@@ -84,6 +84,19 @@ final class PartialSendsTest extends TestCase {
 	}
 
 	/**
+	 * Another email the mailer sends after a reply, like a notification, isn't taken for it when Gmail stops it.
+	 *
+	 * @return void
+	 */
+	public function test_ignores_other_emails(): void {
+		$reply = $this->create_reply();
+		$this->send( $reply, true, false );
+		$this->send( null, true, true );
+
+		$this->assertSame( 0, Thread::where( 'conversation_id', $reply->conversation_id )->where( 'type', Thread::TYPE_NOTE )->count() );
+	}
+
+	/**
 	 * Replies, whether they're retried, and who the note says didn't get them.
 	 *
 	 * @return array<string, array{bool, bool, string|null}>
@@ -107,17 +120,19 @@ final class PartialSendsTest extends TestCase {
 	}
 
 	/**
-	 * Sends a reply to the sender, with two people in Bcc, as the reply job and Swift do, and plays Gmail's answers.
+	 * Sends an email to the sender, with two people in Bcc, as the reply job and Swift do, and plays Gmail's answers.
 	 *
 	 * Swift sends the sender and recipients before it reads Gmail's answers, so they come in after all of them.
 	 *
-	 * @param Thread $reply    The reply.
-	 * @param bool   $accepted Whether Gmail accepts the email to To.
-	 * @param bool   $limited  Whether Gmail then refuses the first Bcc email with its daily limit.
+	 * @param Thread|null $reply    The reply, or null for an email that isn't one.
+	 * @param bool        $accepted Whether Gmail accepts the email to To.
+	 * @param bool        $limited  Whether Gmail then refuses the first Bcc email with its daily limit; otherwise, it's sent.
 	 * @return void
 	 */
-	private function send( Thread $reply, bool $accepted, bool $limited ): void {
-		\Eventy::filter( 'email.reply_to_customer.threads', collect( array( $reply ) ), $reply->conversation, $reply->conversation->mailbox );
+	private function send( ?Thread $reply, bool $accepted, bool $limited ): void {
+		if ( $reply ) {
+			\Eventy::filter( 'email.reply_to_customer.threads', collect( array( $reply ) ), $reply->conversation, $reply->conversation->mailbox );
+		}
 
 		$message = ( new \Swift_Message( 'An announcement' ) )->setTo( 'sender@example.org' )->setBcc( array( 'first@example.org', 'second@example.org' ) );
 		$this->events->dispatchEvent( $this->events->createSendEvent( $this->transport, $message ), 'beforeSendPerformed' );
@@ -132,6 +147,8 @@ final class PartialSendsTest extends TestCase {
 
 		if ( $limited ) {
 			$this->exchange( array( 'MAIL FROM:<support@example.org>', 'RCPT TO:<first@example.org>', 'DATA' ), array( '250 2.1.0 OK', '250 2.1.5 OK', '550-5.4.5 Daily user sending limit exceeded.' ) );
+		} else {
+			$this->events->dispatchEvent( $this->events->createSendEvent( $this->transport, $message ), 'sendPerformed' );
 		}
 	}
 

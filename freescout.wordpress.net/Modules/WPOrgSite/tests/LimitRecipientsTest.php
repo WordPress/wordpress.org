@@ -89,8 +89,8 @@ final class LimitRecipientsTest extends TestCase {
 	 */
 	public static function data_recipients(): array {
 		return array(
-			'100 people'              => array( 50, '', false ),
-			'101 people'              => array( 51, '', true ),
+			'100 people'             => array( 50, '', false ),
+			'101 people'             => array( 51, '', true ),
 			'99 people and Auto Bcc' => array( 49, 'archive@example.org, audit@example.org', true ),
 		);
 	}
