@@ -135,7 +135,12 @@ class Upload {
 			// The form was submitted, but the upload was not processed. Say so instead of silently re-rendering.
 			$message = '';
 
-			if ( empty( $_POST ) && ! empty( $_SERVER['CONTENT_LENGTH'] ) ) {
+			if (
+				empty( $_POST ) &&
+				! empty( $_SERVER['CONTENT_LENGTH'] ) &&
+				isset( $_SERVER['CONTENT_TYPE'] ) &&
+				str_starts_with( $_SERVER['CONTENT_TYPE'], 'multipart/form-data' ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Only compared to a fixed prefix.
+			) {
 				// PHP discards the entire request body when it exceeds post_max_size.
 				$message = sprintf(
 					/* translators: %s: Maximum upload size. */
@@ -150,8 +155,8 @@ class Upload {
 					( 'upload' === $_POST['action'] && $can_submit_new_plugin )
 				)
 			) {
-				// Most likely an expired nonce, from a page left open too long.
-				$message = __( 'Your file could not be uploaded because the page has expired. Please select your file and upload it again.', 'wporg-plugins' );
+				// Most likely an expired nonce: the page was left open too long, or the user logged in again since.
+				$message = __( 'Your upload wasn’t processed because your session expired. Please upload your file again.', 'wporg-plugins' );
 			}
 
 			if ( $message ) {
