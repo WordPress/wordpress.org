@@ -211,7 +211,7 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 			return;
 		}
 
-		$body = '<p>' . e( __( 'Gmail stopped this reply at the mailbox’s daily sending limit. Don’t retry it, as everyone who got it would get it again. These :count people didn’t get it; paste them into Bcc to send it to them once the mailbox can send again:', array( 'count' => count( $missed ) ) ) ) . '</p>'
+		$body = '<p>' . e( __( 'Gmail stopped this reply at the mailbox’s daily sending limit. Don’t retry it, as everyone who got it would get it again. To send it to everyone who didn’t get it, paste this list into Bcc once the mailbox can send again:' ) ) . '</p>'
 			. '<p>' . e( implode( ', ', $missed ) ) . '</p>';
 
 		Thread::create(
