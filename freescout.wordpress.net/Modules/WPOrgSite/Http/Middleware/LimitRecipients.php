@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Refuses to send a reply, forward, or new conversation to more than 100 people in To, Cc, and Bcc together.
  *
- * Gmail refuses more over SMTP, and counts every recipient towards the mailbox's daily limits.
+ * Gmail refuses more than 100 in To and Cc over SMTP, and counts every recipient towards the mailbox's daily limits.
  *
  * @see https://support.google.com/a/answer/166852
  */
