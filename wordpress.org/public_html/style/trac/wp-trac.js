@@ -235,6 +235,13 @@ let wpTrac,
 		'wp',
 	];
 
+	// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
+	const mentionPre = '(^|[^a-zA-Z0-9_＠!@#$%&*])';
+	const mentionAt = '(?:@|＠)(?!\\/)';
+	const mentionUser = '([a-zA-Z0-9_](?:[a-zA-Z0-9_\\-.]{0,18}[a-zA-Z0-9_])?)';
+	const mentionEnd = '(?:\\b(?!@|＠)|$)';
+	const gbIssue = '\\bGB-?(\\d+)\\b';
+
 	/**
 	 * Combined regular expression for matching Gutenberg issue IDs and user mentions.
 	 *
@@ -245,12 +252,6 @@ let wpTrac,
 	 *
 	 * @type {RegExp}
 	 */
-	const mentionPre = '(^|[^a-zA-Z0-9_＠!@#$%&*])';
-	const mentionAt = '(?:@|＠)(?!\\/)';
-	const mentionUser = '([a-zA-Z0-9_](?:[a-zA-Z0-9_\\-.]{0,18}[a-zA-Z0-9_])?)';
-	const mentionEnd = '(?:\\b(?!@|＠)|$)';
-	const gbIssue = '\\bGB-?(\\d+)\\b';
-
 	const combinedRegEx = new RegExp(
 		`(?:${ mentionPre }${ mentionAt }${ mentionUser }${ mentionEnd })|(?:${ gbIssue })`,
 		'gi'
@@ -318,12 +319,6 @@ let wpTrac,
 
 		textNodes.forEach( function ( textNode ) {
 			const value = textNode.nodeValue;
-
-			if ( ! regex.test( value ) ) {
-				return;
-			}
-			regex.lastIndex = 0;
-
 			const matches = [ ...value.matchAll( regex ) ];
 
 			if ( ! matches.length ) {
@@ -446,7 +441,6 @@ let wpTrac,
 		linkTicketText( selector ) {
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
 				linkTextNodes( this, combinedRegEx, function ( match, pre, username, gbNumber ) {
-					// Gutenberg Issue (GB1234 oder GB-1234)
 					if ( gbNumber ) {
 						const link = document.createElement( 'a' );
 						link.className = 'gutenberg-issue github ext-link';
@@ -460,7 +454,6 @@ let wpTrac,
 						return link;
 					}
 
-					// User-Mention (@username)
 					if ( username ) {
 						if ( reservedTermsSet.has( username.toLowerCase() ) ) {
 							return match;
@@ -1563,6 +1556,7 @@ let wpTrac,
 					$( $( '.change .username' ).get().reverse() ).each( function () {
 						let username = $( this ).data( 'username' );
 
+						// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
 						if (
 							$( this ).data( 'nicename' ) &&
 							username.toLowerCase() !== $( this ).data( 'nicename' ).toLowerCase() &&
@@ -1579,6 +1573,7 @@ let wpTrac,
 					// Add ticket reporter.
 					let ticketReporter = $( '#ticket td[headers="h_reporter"]' ).text().trim();
 					const ticketReporterNicename = $( '#ticket td[headers="h_reporter"] a' ).data( 'nicename' );
+					// Override the username with the nicename if it differs by more than just case (ie. spaces, etc)
 					if (
 						ticketReporter &&
 						ticketReporterNicename &&
