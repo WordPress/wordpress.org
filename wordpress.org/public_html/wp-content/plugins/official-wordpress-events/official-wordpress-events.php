@@ -1024,7 +1024,9 @@ class Official_WordPress_Events {
 			: '';
 
 		foreach ( $candidates as $candidate ) {
-			if ( '' !== $meetup_id && $meetup_id === ( $this->gatherpress_links[ $candidate->source_id ]['meetup_id'] ?? '' ) ) {
+			$imported_from = $this->gatherpress_links[ $candidate->source_id ]['meetup_id'] ?? '';
+
+			if ( '' !== $meetup_id && $imported_from === $meetup_id ) {
 				return $candidate;
 			}
 		}
