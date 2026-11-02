@@ -76,8 +76,6 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		$this->loadRoutesFrom( __DIR__ . '/../Http/routes.php' );
 		$this->loadMigrationsFrom( __DIR__ . '/../Database/Migrations' );
 
-		PartialSends::register();
-
 		// Modules come with deploys, so the Modules page only lists installed ones; site.css hides the empty directory.
 		\View::composer(
 			'modules/modules',
@@ -156,6 +154,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		self::register_settings_hooks();
 		self::register_pinned_note_hooks();
 		self::register_helpscout_link_hooks();
+		self::register_partial_sends_hooks();
 
 		// For alt-conversation.js, which lays the conversation out.
 		\Eventy::addAction(
@@ -392,6 +391,28 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgSite] Could not record the HelpScout ID of an imported conversation: ' . $e->getMessage() );
 				}
+			}
+		);
+	}
+
+	/**
+	 * Watches each reply as it's sent, so one Gmail stopped partway through isn't sent again.
+	 *
+	 * @return void
+	 */
+	private static function register_partial_sends_hooks(): void {
+		$listener = new PartialSends( (string) config( 'app.no_retry_mail_errors' ) );
+
+		\Eventy::addFilter(
+			'email.reply_to_customer.threads',
+			static function ( mixed $threads ) use ( $listener ): mixed {
+				try {
+					$listener->start( is_iterable( $threads ) ? collect( $threads )->first() : null );
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not watch a reply as it’s sent: ' . $e->getMessage() );
+				}
+
+				return $threads;
 			}
 		);
 	}

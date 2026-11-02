@@ -94,41 +94,19 @@ final class PartialSends implements \Swift_Events_CommandListener, \Swift_Events
 	 *
 	 * @param string $errors Core's errors not to retry, a regular expression.
 	 */
-	private function __construct( string $errors ) {
+	public function __construct( string $errors ) {
 		$this->errors = $errors;
 	}
 
 	/**
-	 * Watches each reply as it's sent, from the filter the reply job runs just before sending.
-	 *
-	 * @return void
-	 */
-	public static function register(): void {
-		$listener = new self( (string) config( 'app.no_retry_mail_errors' ) );
-
-		\Eventy::addFilter(
-			'email.reply_to_customer.threads',
-			static function ( mixed $threads ) use ( $listener ): mixed {
-				try {
-					$listener->start( is_iterable( $threads ) ? collect( $threads )->first() : null );
-				} catch ( \Throwable $e ) {
-					\Log::error( '[WPOrgSite] Could not watch a reply as it’s sent: ' . $e->getMessage() );
-				}
-
-				return $threads;
-			}
-		);
-	}
-
-	/**
-	 * Starts watching a reply, on the mailer core just set up for it.
+	 * Starts watching a reply, on the mailer core just set up for it, from the filter the reply job runs before sending.
 	 *
 	 * Each reply starts from core's errors, as the worker runs one job after another. Swift ignores a listener it has.
 	 *
 	 * @param mixed $reply The reply, the newest of the threads the job sends.
 	 * @return void
 	 */
-	private function start( mixed $reply ): void {
+	public function start( mixed $reply ): void {
 		config( array( 'app.no_retry_mail_errors' => $this->errors ) );
 		$this->reply      = $reply instanceof Thread ? $reply : null;
 		$this->recipients = array();
