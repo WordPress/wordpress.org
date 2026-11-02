@@ -89,6 +89,13 @@ footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 	background: 0;
 }
 
+/* Trac's stock link hover ring reads as a thick outline on the global header and footer. */
+header :link:hover, header :visited:hover,
+footer :link:hover, footer :visited:hover {
+	border-radius: 0;
+	box-shadow: none;
+}
+
 #headline .menu {
 	list-style: none;
 	float: right;
