@@ -776,7 +776,8 @@ class Locale extends GP_Route {
 	 * @return object The status of a project.
 	 */
 	private function get_project_status( $project, $locale, $set_slug, $calc_sub_projects = true ) {
-		$cache_key = (int) $project->id . ':' . $locale . ':' . $set_slug;
+		// Virtual Patterns projects use their pattern slug as ID, so the key can't cast it to int.
+		$cache_key = $project->parent_project_id . ':' . $project->id . ':' . $locale . ':' . $set_slug;
 
 		if ( ! isset( $this->project_status_cache[ $cache_key ] ) ) {
 			$single_status = new stdClass();
