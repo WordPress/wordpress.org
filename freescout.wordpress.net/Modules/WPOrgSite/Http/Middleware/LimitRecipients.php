@@ -16,7 +16,8 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Refuses to send a reply, forward, or new conversation to more than 100 people in To, Cc, and Bcc together.
+ * Refuses to send a reply, forward, or new conversation to more than 100 people in To, Cc, and Bcc together, from a
+ * mailbox that sends through Gmail.
  *
  * Gmail refuses more than 100 in To and Cc over SMTP, and counts every recipient towards the mailbox's daily limits.
  *
@@ -47,8 +48,10 @@ final class LimitRecipients {
 		}
 
 		try {
-			$people = self::people( $request );
-			$total  = count( array_unique( array_merge( $people, self::auto_bcc( $request ) ) ) );
+			$mailbox = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
+			$gmail   = $mailbox && self::sends_with_gmail( $mailbox );
+			$people  = $gmail ? self::people( $request ) : array();
+			$total   = $gmail ? count( array_unique( array_merge( $people, \MailHelper::sanitizeEmails( (string) $mailbox->auto_bcc ) ) ) ) : 0;
 		} catch ( \Throwable $e ) {
 			\Log::error( '[WPOrgSite] Could not count an email’s recipients: ' . $e->getMessage() );
 
@@ -94,15 +97,13 @@ final class LimitRecipients {
 	}
 
 	/**
-	 * The mailbox's Auto Bcc, which core adds to every email it sends.
+	 * Whether the mailbox sends through Gmail's SMTP server; other servers, and PHP's mail(), have limits of their own.
 	 *
-	 * @param Request $request Request.
-	 * @return string[]
+	 * @param Mailbox $mailbox Mailbox.
+	 * @return bool
 	 */
-	private static function auto_bcc( Request $request ): array {
-		$mailbox = Mailbox::find( (int) $request->input( 'mailbox_id' ) );
-
-		return $mailbox ? \MailHelper::sanitizeEmails( (string) $mailbox->auto_bcc ) : array();
+	private static function sends_with_gmail( Mailbox $mailbox ): bool {
+		return Mailbox::OUT_METHOD_SMTP === (int) $mailbox->out_method && \MailHelper::OAUTH_GOOGLE_SMTP === strtolower( trim( (string) $mailbox->out_server ) );
 	}
 
 	/**
