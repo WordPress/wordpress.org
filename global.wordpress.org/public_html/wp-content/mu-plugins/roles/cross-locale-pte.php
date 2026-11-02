@@ -206,20 +206,26 @@ class Cross_Locale_PTE {
 			return;
 		}
 
-		$project_access_list = self::get_users_projects( $user->ID );
-		$last_updated        = get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' );
-
-		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
-			'l10n' => array(
+		$payload = array(
+			'settings' => array(
+				'lastUpdated' => absint( get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' ) ),
+				'accessList'  => array_values( array_map( 'absint', self::get_users_projects( $user->ID ) ) ),
+				'nonce'       => wp_create_nonce( 'rosetta_projects_nonce' ),
+			),
+			'l10n'     => array(
 				'loadingError'      => __( 'Error loading projects.', 'rosetta' ),
 				'noProjectsFound'   => __( 'No projects found.', 'rosetta' ),
 				'removeTranslator'  => __( 'Are you sure you wish to completely remove CLPTE status for this user?', 'rosetta' ),
 				'searchLabel'       => __( 'Search subprojects by name or slug', 'rosetta' ),
 				'searchPlaceholder' => __( 'Search…', 'rosetta' ),
 			),
-			'lastUpdated' => absint( $last_updated ),
-			'accessList'  => array_values( (array) $project_access_list ),
-		) );
+		);
+
+		wp_add_inline_script(
+			'rosetta-roles',
+			'window._rosettaConfig = Object.freeze(' . wp_json_encode( $payload ) . ');',
+			'before'
+		);
 
 		$feedback_message = self::get_feedback_message();
 		require __DIR__ . '/views/edit-cross-locale-pte.php';
