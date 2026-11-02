@@ -15,7 +15,7 @@ function is_valid_request( string $app_id, string $app_signing_secret, array $re
 
 	$valid_signature = is_valid_request_signature(
 		$request_headers['X-Slack-Signature'] ?? '',
-		(int) $request_headers['X-Slack-Request-Timestamp'] ?? 0,
+		(int) ( $request_headers['X-Slack-Request-Timestamp'] ?? 0 ),
 		$raw_request_body,
 		$app_signing_secret
 	);
