@@ -16,10 +16,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
+use Modules\WPOrgSite\Http\Middleware\LimitRecipients;
 use Modules\WPOrgSite\Http\Middleware\LockModules;
 use Modules\WPOrgSite\Http\Middleware\RedirectHelpScoutLinks;
 use Modules\WPOrgSite\Services\AltConversation;
 use Modules\WPOrgSite\Services\Assets;
+use Modules\WPOrgSite\Services\BccRetries;
 use Modules\WPOrgSite\Services\EnvSettings;
 use Modules\WPOrgSite\Services\HelpScoutLinks;
 use Modules\WPOrgSite\Services\PinnedNote;
@@ -67,11 +69,14 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function boot(): void {
+		$this->app['router']->pushMiddlewareToGroup( 'web', LimitRecipients::class );
 		$this->app['router']->pushMiddlewareToGroup( 'web', LockModules::class );
 		$this->app['router']->pushMiddlewareToGroup( 'web', RedirectHelpScoutLinks::class );
 		$this->loadViewsFrom( __DIR__ . '/../Resources/views', self::ALIAS );
 		$this->loadRoutesFrom( __DIR__ . '/../Http/routes.php' );
 		$this->loadMigrationsFrom( __DIR__ . '/../Database/Migrations' );
+
+		BccRetries::register();
 
 		// Modules come with deploys, so the Modules page only lists installed ones; site.css hides the empty directory.
 		\View::composer(
