@@ -651,6 +651,8 @@ let wpTrac,
 			// Add custom buttons to the formatting toolbar.
 			wpTrac.wikiToolbar();
 
+			wpTrac.linkPastedUrls();
+
 			// Force 'Attachments' and 'Modify Ticket' to be shown.
 			document.querySelector( '#attachments' )?.classList.remove( 'collapsed' );
 
@@ -1245,6 +1247,51 @@ let wpTrac,
 						encloseSelection( textarea, '{{{#!php\n<?php\n', '\n}}}\n' ); // jshint ignore:line
 					}
 				);
+			} );
+		},
+
+		/**
+		 * Turns a URL pasted over selected text into a wiki link, like Gutenberg, TinyMCE, and GitHub do.
+		 *
+		 * Pasting with Cmd/Ctrl+Shift+V skips the link and pastes the URL as-is.
+		 */
+		linkPastedUrls() {
+			const isUrl = ( text ) => /^https?:\/\/[^\s\]]+$/.test( text );
+			let plainPaste = false;
+
+			// Paste events don't carry modifier keys, so the last keydown decides.
+			document.addEventListener( 'keydown', ( event ) => {
+				plainPaste = event.shiftKey && ( event.metaKey || event.ctrlKey );
+			} );
+
+			document.addEventListener( 'paste', ( event ) => {
+				const textarea = event.target;
+				const skip = plainPaste;
+				plainPaste = false;
+
+				if ( skip || ! textarea.matches?.( 'textarea.wikitext' ) || textarea.readOnly || textarea.disabled ) {
+					return;
+				}
+
+				const url = event.clipboardData?.getData( 'text/plain' ).trim() ?? '';
+				const selection = textarea.value.substring( textarea.selectionStart, textarea.selectionEnd );
+				const label = selection.trim();
+
+				// Link labels can't span lines or contain `]`; a selected URL is being replaced, not labeled.
+				if ( ! isUrl( url ) || ! label || /[\]\n]/.test( label ) || isUrl( label ) ) {
+					return;
+				}
+
+				event.preventDefault();
+
+				// Whitespace around the selection stays outside the link.
+				const link = selection.replace( label, () => `[${ url } ${ label }]` );
+
+				// execCommand keeps the native undo stack intact; setRangeText doesn't.
+				if ( ! document.execCommand( 'insertText', false, link ) ) {
+					textarea.setRangeText( link, textarea.selectionStart, textarea.selectionEnd, 'end' );
+					textarea.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+				}
 			} );
 		},
 
