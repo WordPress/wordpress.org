@@ -144,9 +144,22 @@ class Cross_Locale_PTE {
 		check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
 
 		$raw_projects     = isset( $_POST['projects'] ) ? sanitize_text_field( wp_unslash( $_POST['projects'] ) ) : '';
-		$projects         = array_filter( array_map( 'absint', explode( ',', $raw_projects ) ) );
-		$current_projects = self::get_users_projects( self::$user->ID );
+		$projects = ( '' !== $raw_projects )
+			? array_values( array_filter( array_map( 'absint', explode( ',', $raw_projects ) ) ) )
+			: array();
 
+		if ( ! empty( $projects ) ) {
+			$placeholders   = implode( ', ', array_fill( 0, count( $projects ), '%d' ) );
+			$valid_projects = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT id FROM translate_projects WHERE id IN ( {$placeholders} )",
+					$projects
+				)
+			);
+			$projects = array_map( 'intval', $valid_projects );
+		}
+
+		$current_projects   = self::get_users_projects( self::$user->ID );
 		$projects_to_remove = array_diff( $current_projects, $projects );
 		$projects_to_add    = array_diff( $projects, $current_projects );
 
