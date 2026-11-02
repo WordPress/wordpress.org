@@ -9,7 +9,6 @@ use GP_Route;
 use stdClass;
 use WordPressdotorg\GlotPress\Rosetta_Roles\Plugin as Rosetta_Roles;
 use WordPressdotorg\GlotPress\Routes\Plugin;
-use WP_User;
 
 /**
  * Locale Route Class.
@@ -29,7 +28,6 @@ class Locale extends GP_Route {
 
 	/**
 	 * In-memory cache for projects by ID per instance.
-	 * Sub-projects are omitted as they are not re-fetched via get_project_by_id().
 	 *
 	 * @var array
 	 */
@@ -126,7 +124,7 @@ class Locale extends GP_Route {
 				$redirect_url = gp_url( sprintf( '/locale/%s/%s/%s', $locale_slug, $set_slug, $default_project_tab ) );
 
 				if ( ! empty( $_GET ) ) {
-					$redirect_url = add_query_arg( wp_unslash( $_GET ), $redirect_url );
+					$redirect_url = add_query_arg( urlencode_deep( wp_unslash( $_GET ) ), $redirect_url );
 				}
 
 				wp_safe_redirect( $redirect_url );
@@ -155,6 +153,20 @@ class Locale extends GP_Route {
 			)
 		);
 
+		/**
+		 * Filters the sub-projects listed on a locale's project tab.
+		 *
+		 * @param array $data {
+		 *     @type GP_Project   $project      The project whose sub-projects are listed.
+		 *     @type GP_Project[] $sub_projects Sub-projects on the current page, keyed by project ID.
+		 *     @type array        $pages {
+		 *         @type int $pages    Total number of pages.
+		 *         @type int $page     Current page.
+		 *         @type int $per_page Sub-projects per page.
+		 *         @type int $results  Total number of sub-projects.
+		 *     }
+		 * }
+		 */
 		$data = apply_filters(
 			'gp_subprojects',
 			array(
@@ -557,7 +569,6 @@ class Locale extends GP_Route {
 			}
 
 			// Batch-load missing users from wp_users without touching usermeta.
-			// Deleted wp.org accounts are anonymized (not removed), so all IDs exist.
 			if ( ! empty( $uncached_user_ids ) ) {
 				$user_ids_sql = $this->prepare_in_int_list( $uncached_user_ids );
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $user_ids_sql contains sanitized, integer-cast IDs.
@@ -572,11 +583,10 @@ class Locale extends GP_Route {
 		$collator   = class_exists( 'Collator' ) ? new Collator( $locale_slug ) : null;
 		$editor_ids = [];
 
-		// Get the names of the translation editors.
-		// Use WP_User::get_data_by() instead of get_user_by() to avoid retrieving wp_usermeta.
+		// WP_User::get_data_by() rather than get_user_by(), which would also load wp_usermeta.
 		foreach ( [ 'project', 'inherited' ] as $editor_source ) {
 			foreach ( $editors[ $editor_source ] as $editor_id ) {
-				$user = WP_User::get_data_by( 'id', $editor_id );
+				$user = \WP_User::get_data_by( 'id', $editor_id );
 				if ( ! $user ) {
 					continue;
 				}
@@ -623,7 +633,7 @@ class Locale extends GP_Route {
 			];
 
 			if ( ! isset( $locale_contributors['contributors'][ $user_id ] ) ) {
-				$user = WP_User::get_data_by( 'id', $user_id );
+				$user = \WP_User::get_data_by( 'id', $user_id );
 				if ( ! $user ) {
 					continue;
 				}
