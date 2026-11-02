@@ -235,27 +235,19 @@ let wpTrac,
 		'wp',
 	];
 
-	// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-	const mentionPre = '(^|[^a-zA-Z0-9_＠!@#$%&*])';
-	const mentionAt = '(?:@|＠)(?!\\/)';
-	const mentionUser = '([a-zA-Z0-9_](?:[a-zA-Z0-9_\\-.]{0,58}[a-zA-Z0-9_])?)';
-	const mentionEnd = '(?:\\b(?!@|＠)|$)';
-	const gbIssue = '\\bGB-?(\\d+)\\b';
-
 	/**
 	 * Combined regular expression for matching Gutenberg issue IDs and user mentions.
 	 *
-	 * Compiled once at load time. Yields capture groups:
+	 * The mention half is based on https://github.com/regexps/mentions-regex/blob/master/index.js#L21.
+	 * Yields capture groups:
 	 * 1: Prefix / leading character before mention
 	 * 2: Username
 	 * 3: Gutenberg issue number
 	 *
 	 * @type {RegExp}
 	 */
-	const combinedRegEx = new RegExp(
-		`(?:${ mentionPre }${ mentionAt }${ mentionUser }${ mentionEnd })|(?:${ gbIssue })`,
-		'gi'
-	);
+	const combinedRegEx =
+		/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:@|＠)(?!\/)([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,58}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)|\bGB-?(\d+)\b/gi;
 
 	/**
 	 * Set of lowercased reserved terms that should not be converted to user mention links.
@@ -271,15 +263,9 @@ let wpTrac,
 	 * @return {string} The escaped value.
 	 */
 	function escapeHtml( value ) {
-		if ( typeof value !== 'string' ) {
-			value = String( value ?? '' );
-		}
-		return value
-			.replace( /&/g, '&amp;' )
-			.replace( /</g, '&lt;' )
-			.replace( />/g, '&gt;' )
-			.replace( /"/g, '&quot;' )
-			.replace( /'/g, '&#39;' );
+		const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+		return String( value ?? '' ).replace( /[&<>"']/g, ( char ) => entities[ char ] );
 	}
 
 	/**
@@ -454,21 +440,17 @@ let wpTrac,
 						return link;
 					}
 
-					if ( username ) {
-						if ( reservedTermsSet.has( username.toLowerCase() ) ) {
-							return match;
-						}
-
-						const meClass = username === wpTrac.currentUser ? ' me' : '';
-						const link = document.createElement( 'a' );
-						link.className = `mention${ meClass }`;
-						link.href = `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`;
-						link.textContent = `@${ username }`;
-
-						return [ pre, link ];
+					if ( reservedTermsSet.has( username.toLowerCase() ) ) {
+						return match;
 					}
 
-					return match;
+					const meClass = username === wpTrac.currentUser ? ' me' : '';
+					const link = document.createElement( 'a' );
+					link.className = `mention${ meClass }`;
+					link.href = `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`;
+					link.textContent = `@${ username }`;
+
+					return [ pre, link ];
 				} );
 			} );
 		},
