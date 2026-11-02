@@ -96,7 +96,6 @@ footer :link:hover, footer :visited:hover,
 #metanav :link:hover, #metanav :visited:hover,
 #metanav form.trac-logout button:hover,
 #wporg-header :link:hover, #wporg-header :visited:hover,
-#subnav :link:hover, #subnav :visited:hover,
 #footer :link:hover, #footer :visited:hover {
 	border-radius: 0;
 	box-shadow: none;
