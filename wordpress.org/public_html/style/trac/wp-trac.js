@@ -1261,7 +1261,7 @@ let wpTrac,
 
 			// Paste events don't carry modifier keys, so the last keydown decides.
 			document.addEventListener( 'keydown', ( event ) => {
-				plainPaste = event.shiftKey && ( event.metaKey || event.ctrlKey );
+				plainPaste = 'KeyV' === event.code && event.shiftKey && ( event.metaKey || event.ctrlKey );
 			} );
 
 			document.addEventListener( 'paste', ( event ) => {
