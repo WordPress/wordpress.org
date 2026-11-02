@@ -134,7 +134,7 @@ class Admin {
 		}
 
 		// Don't need to report flagging/unflagging for published posts.
-		if ( 'published' === $post->post_status ) {
+		if ( 'publish' === $post->post_status ) {
 			return;
 		}
 
