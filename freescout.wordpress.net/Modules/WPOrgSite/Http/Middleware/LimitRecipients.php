@@ -46,8 +46,15 @@ final class LimitRecipients {
 			return $next( $request );
 		}
 
-		$people = self::people( $request );
-		$total  = count( array_unique( array_merge( $people, self::auto_bcc( $request ) ) ) );
+		try {
+			$people = self::people( $request );
+			$total  = count( array_unique( array_merge( $people, self::auto_bcc( $request ) ) ) );
+		} catch ( \Throwable $e ) {
+			\Log::error( '[WPOrgSite] Could not count an email’s recipients: ' . $e->getMessage() );
+
+			return $next( $request );
+		}
+
 		if ( $total <= self::MAX ) {
 			return $next( $request );
 		}
