@@ -519,17 +519,7 @@ class User {
 			return false;
 		}
 
-		$sanitized = sanitize_file_name( $file_name );
-
-		// A name without letters or numbers sanitizes to nothing or to core's generic
-		// 'unnamed-file.{ext}', which says nothing about the photo. A file actually
-		// named 'unnamed-file.jpg' is still compared.
-		$generic = 'unnamed-file.' . pathinfo( $sanitized, PATHINFO_EXTENSION );
-		if ( '' === $sanitized || ( $generic === $sanitized && $sanitized !== $file_name ) ) {
-			return false;
-		}
-
-		return in_array( $sanitized, self::get_pending_file_names( $user_id ), true );
+		return in_array( sanitize_file_name( $file_name ), self::get_pending_file_names( $user_id ), true );
 	}
 
 	/**
