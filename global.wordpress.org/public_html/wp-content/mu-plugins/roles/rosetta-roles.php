@@ -792,22 +792,29 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * Renders the edit page.
 	 */
 	private function render_edit_translation_editor( $user_id ) {
-		global $wpdb;
+		$assigned_projects = $this->get_users_projects( $user_id );
+		$is_all            = in_array( 'all', $assigned_projects, true );
 
-		$project_access_list = $this->get_users_projects( $user_id );
-		$last_updated = get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' );
-
-		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
-			'l10n' => array(
+		$payload = array(
+			'settings' => array(
+				'lastUpdated' => absint( get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' ) ),
+				'accessList'  => $is_all ? array( 'all' ) : array_values( array_map( 'absint', $assigned_projects ) ),
+				'nonce'       => wp_create_nonce( 'rosetta_projects_nonce' ),
+			),
+			'l10n'     => array(
 				'loadingError'      => __( 'Error loading projects.', 'rosetta' ),
 				'noProjectsFound'   => __( 'No projects found.', 'rosetta' ),
 				'removeTranslator'  => __( 'Are you sure you wish to completely remove translation editor status for this user?', 'rosetta' ),
 				'searchLabel'       => __( 'Search subprojects by name or slug', 'rosetta' ),
 				'searchPlaceholder' => __( 'Search…', 'rosetta' ),
 			),
-			'lastUpdated' => absint( $last_updated ),
-			'accessList'  => array_values( (array) $project_access_list ),
-		) );
+		);
+
+		wp_add_inline_script(
+			'rosetta-roles',
+			'window._rosettaConfig = Object.freeze(' . wp_json_encode( $payload ) . ');',
+			'before'
+		);
 
 		$feedback_message = $this->get_feedback_message();
 
@@ -818,6 +825,12 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * Ajax handler for retrieving projects.
 	 */
 	public function ajax_rosetta_get_projects() {
+		check_ajax_referer( 'rosetta_projects_nonce' );
+
+		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
+			wp_send_json_error( array( 'message' => 'Unauthorized' ), 403 );
+		}
+
 		$projects = $this->get_translate_projects();
 		array_walk( $projects, function( $value ) {
 			unset( $value->path ); // Path is not needed.
