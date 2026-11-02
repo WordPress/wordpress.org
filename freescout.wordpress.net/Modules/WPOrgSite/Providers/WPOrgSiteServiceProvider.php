@@ -21,9 +21,9 @@ use Modules\WPOrgSite\Http\Middleware\LockModules;
 use Modules\WPOrgSite\Http\Middleware\RedirectHelpScoutLinks;
 use Modules\WPOrgSite\Services\AltConversation;
 use Modules\WPOrgSite\Services\Assets;
-use Modules\WPOrgSite\Services\BccRetries;
 use Modules\WPOrgSite\Services\EnvSettings;
 use Modules\WPOrgSite\Services\HelpScoutLinks;
+use Modules\WPOrgSite\Services\PartialSends;
 use Modules\WPOrgSite\Services\PinnedNote;
 use Modules\WPOrgSite\Services\UserChoice;
 
@@ -76,7 +76,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		$this->loadRoutesFrom( __DIR__ . '/../Http/routes.php' );
 		$this->loadMigrationsFrom( __DIR__ . '/../Database/Migrations' );
 
-		BccRetries::register();
+		PartialSends::register();
 
 		// Modules come with deploys, so the Modules page only lists installed ones; site.css hides the empty directory.
 		\View::composer(
