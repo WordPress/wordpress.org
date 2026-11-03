@@ -445,6 +445,11 @@ div.attachment #preview .diff .entry h2 a {
 	display: none;
 }
 
+/* Undo the inline 60% width on the Syntax Highlighting preview. */
+#content.prefs div.code pre {
+	width: auto;
+}
+
 /* =report.css */
 #content.report .tickets tbody tr:hover {
 	background: #eee;
