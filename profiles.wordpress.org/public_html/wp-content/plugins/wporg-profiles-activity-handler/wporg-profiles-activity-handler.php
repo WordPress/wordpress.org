@@ -500,9 +500,8 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 					// Keep the excerpt in sync with the post's current content.
 					$activity_obj->action  = $action;
 					$activity_obj->content = esc_html( $data['message'] ?? '' );
-					$activity_obj->save();
 
-					return true;
+					return $activity_obj->save();
 				}
 
 				// Edits never add an activity, nor do topics and replies without an excerpt, such as quote-only ones.
