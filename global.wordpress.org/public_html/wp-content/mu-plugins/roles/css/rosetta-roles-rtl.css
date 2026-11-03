@@ -41,8 +41,9 @@
 	border-right: 0;
 	background: #fff;
 	display: none;
-	overflow-x: auto;
-	overflow-y: scroll;
+	overflow-x: hidden;
+	overflow-y: auto;
+	scrollbar-gutter: stable;
 	box-sizing: border-box;
 	cursor: default;
 }
@@ -69,6 +70,7 @@
 	margin-right: 24px !important;
 	padding-top: 3px;
 	padding-bottom: 3px;
+	overflow-wrap: break-word;
 }
 
 .sub-projects-wrapper label > input {
@@ -78,6 +80,7 @@
 
 .sub-projects-search {
 	width: 100%;
+	box-sizing: border-box;
 	margin-bottom: 10px;
 }
 
@@ -105,10 +108,16 @@
 @media screen and (max-width: 782px) {
 	.projects-list {
 		display: block;
+		border-left: 1px solid #dfdfdf;
 	}
 
 	.projects-list > li {
 		width: 100%;
+		border-left: 0;
+	}
+
+	.projects-list > li.active {
+		border-left: 0;
 	}
 
 	.sub-projects-wrapper {
