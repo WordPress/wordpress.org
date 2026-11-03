@@ -1023,6 +1023,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			foreach ( $activities as $activity ) {
 				$bump        = intval( $activity['bump'] ?? 1 );
+				$project  = $this->get_glotpress_project( $activity );
 				$activity = $this->sanitize_activity( $activity );
 
 				switch ( $activity['type'] ) {
@@ -1039,8 +1040,19 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						break;
 				}
 
-				$singular    = $action . ' %d string on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
-				$plural      = $action . ' %d strings on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+				// Keep the projects from earlier today, so the digest can list all of them.
+				$digest_id = $this->get_digest_id( $activity );
+				$projects  = $digest_id ? ( bp_activity_get_meta( $digest_id, 'digest_projects', true ) ?: array() ) : array();
+
+				if ( $project ) {
+					$projects[ $project['url'] ] = $project;
+				}
+
+				// `digest_bump()` runs this through sprintf(); escape literal percent signs from names or URLs.
+				$where = $projects ? str_replace( '%', '%%', ' for ' . $this->format_glotpress_projects( $projects ) ) : '';
+
+				$singular    = $action . ' %d string' . $where . ' on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
+				$plural      = $action . ' %d strings' . $where . ' on <a href="https://translate.wordpress.org">translate.wordpress.org</a>.';
 				$activity_id = $this->digest_bump( $activity, $bump, $singular, $plural );
 
 				if ( is_wp_error( $activity_id ) ) {
@@ -1049,10 +1061,53 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						$activity['user_id'],
 						$activity_id->get_error_message()
 					);
+				} elseif ( $project && $activity_id ) {
+					bp_activity_update_meta( $activity_id, 'digest_projects', $projects );
 				}
 			}
 
 			return $errors ?: true;
+		}
+
+		/**
+		 * Get the project of a translation activity, before `sanitize_activity()` drops its fields.
+		 *
+		 * @param array $activity The activity from translate.w.org.
+		 * @return array Empty if the activity has no project.
+		 */
+		protected function get_glotpress_project( array $activity ): array {
+			$project = array(
+				'name'   => sanitize_text_field( $activity['project_name'] ?? '' ),
+				'url'    => sanitize_url( $activity['project_url'] ?? '' ),
+				'locale' => sanitize_text_field( $activity['project_locale'] ?? '' ),
+			);
+
+			return $project['name'] && $project['url'] ? $project : array();
+		}
+
+		/**
+		 * List the projects of a translation digest, like "A, B, C and 2 more".
+		 *
+		 * @param array $projects Each with a `name`, `url` and `locale`.
+		 * @return string The linked project names.
+		 */
+		protected function format_glotpress_projects( array $projects ): string {
+			// Name the locale only when the projects span more than one, like formal and informal German.
+			$show_locale = count( array_unique( array_column( $projects, 'locale' ) ) ) > 1;
+			$links       = array();
+
+			foreach ( array_slice( $projects, 0, 3 ) as $project ) {
+				$name    = $show_locale && $project['locale'] ? $project['name'] . ' in ' . $project['locale'] : $project['name'];
+				$links[] = sprintf( '<a href="%s">%s</a>', esc_url( $project['url'] ), esc_html( $name ) );
+			}
+
+			if ( count( $projects ) > 3 ) {
+				$links[] = ( count( $projects ) - 3 ) . ' more';
+			}
+
+			$last = array_pop( $links );
+
+			return $links ? implode( ', ', $links ) . ' and ' . $last : $last;
 		}
 
 		/**
@@ -1078,46 +1133,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			// Also done in `sanitize_activity()`, but callers aren't guaranteed to use that.
 			$new_activity['error_type'] = 'wp_error';
 
-			$args = array(
-				'fields'   => 'ids',
-				'per_page' => 1,
-
-				'date_query' => array(
-					array(
-						'after' => date( 'Y-m-d H:i:s', strtotime( 'today midnight' ) ),
-					),
-				),
-
-				'filter_query' => array(
-					array(
-						'column'   => 'component',
-						'value'    => $new_activity['component'],
-						'relation' => 'AND',
-					),
-					array(
-						'column'   => 'type',
-						'value'    => $new_activity['type'],
-						'relation' => 'AND',
-					),
-					array(
-						'column'   => 'user_id',
-						'value'    => $new_activity['user_id'],
-						'relation' => 'AND',
-					),
-				),
-			);
-
-			if ( $group_by_site ) {
-				$args['filter_query'][] = array(
-					array(
-						'column'   => 'primary_link',
-						'value'    => $new_activity['primary_link'],
-						'relation' => 'AND',
-					),
-				);
-			}
-
-			$stored_activity_id = bp_activity_get( $args )['activities'][0] ?? false;
+			$stored_activity_id = $this->get_digest_id( $new_activity, $group_by_site );
 			$current_count      = (int) bp_activity_get_meta( $stored_activity_id, 'digest_count', true );
 			$new_total          = $current_count + $bump;
 
@@ -1143,6 +1159,46 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			return $activity_id;
+		}
+
+		/**
+		 * Get today's digest entry for an activity.
+		 *
+		 * @param array $new_activity  The activity.
+		 * @param bool  $group_by_site See `digest_bump()`.
+		 * @return int|false The activity ID, or false if there's no entry yet.
+		 */
+		protected function get_digest_id( array $new_activity, bool $group_by_site = false ) {
+			$columns = array( 'component', 'type', 'user_id' );
+
+			if ( $group_by_site ) {
+				$columns[] = 'primary_link';
+			}
+
+			$filter_query = array();
+
+			foreach ( $columns as $column ) {
+				$filter_query[] = array(
+					'column'   => $column,
+					'value'    => $new_activity[ $column ],
+					'relation' => 'AND',
+				);
+			}
+
+			$digest = bp_activity_get(
+				array(
+					'fields'       => 'ids',
+					'per_page'     => 1,
+					'date_query'   => array(
+						array(
+							'after' => gmdate( 'Y-m-d H:i:s', strtotime( 'today midnight' ) ),
+						),
+					),
+					'filter_query' => $filter_query,
+				)
+			);
+
+			return $digest['activities'][0] ?? false;
 		}
 	} /* /class WPOrg_Profiles_Activity_Handler */
 } /* if class_exists */
