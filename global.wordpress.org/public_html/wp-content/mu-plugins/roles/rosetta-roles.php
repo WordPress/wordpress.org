@@ -906,7 +906,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			) );
 		}
 
-		$this->update_translation_editor( $user, array_map( 'intval', $valid_projects ) );
+		$this->update_translation_editor( $user, $valid_projects );
 
 		wp_send_json_success( array( 'message' => __( 'Translation editor updated.', 'rosetta' ) ) );
 	}
