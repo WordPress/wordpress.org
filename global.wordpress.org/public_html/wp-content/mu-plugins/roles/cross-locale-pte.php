@@ -270,7 +270,6 @@ class Cross_Locale_PTE {
 				'searchLabel'       => __( 'Search subprojects by name or slug', 'rosetta' ),
 				'searchPlaceholder' => __( 'Search…', 'rosetta' ),
 				'saving'            => __( 'Saving…', 'rosetta' ),
-				'saved'             => __( 'Cross-Locale PTE updated.', 'rosetta' ),
 				'saveError'         => __( 'An error occurred while saving.', 'rosetta' ),
 			),
 		);
