@@ -41,8 +41,9 @@
 	border-left: 0;
 	background: #fff;
 	display: none;
-	overflow-x: auto;
-	overflow-y: scroll;
+	overflow-x: hidden;
+	overflow-y: auto;
+	scrollbar-gutter: stable;
 	box-sizing: border-box;
 	cursor: default;
 }
@@ -69,6 +70,7 @@
 	margin-left: 24px !important;
 	padding-top: 3px;
 	padding-bottom: 3px;
+	overflow-wrap: break-word;
 }
 
 .sub-projects-wrapper label > input {
