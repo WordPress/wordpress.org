@@ -9,7 +9,7 @@
 
 			$question.html( $h3.html( $button.text( $question.text() ) ) );
 		} )
-		.on( 'click', function ( event ) {
+		.on( 'click', function ( event, isDeepLink ) {
 			if ( 'keydown' === event.type && 13 !== event.which ) {
 				return;
 			}
@@ -17,12 +17,24 @@
 			const $question = $( event.currentTarget );
 
 			if ( ! $question.is( '.open' ) ) {
+				const questionTop =
+					event.currentTarget.getBoundingClientRect().top;
+
 				$question
 					.siblings( '.open' )
 					.toggleClass( 'open' )
 					.attr( 'aria-expanded', false )
 					.next( 'dd' )
-					.slideToggle( 200 );
+					.slideToggle( {
+						duration: 200,
+						// Keep the clicked question still while an answer above it collapses.
+						progress: () =>
+							window.scrollBy(
+								0,
+								event.currentTarget.getBoundingClientRect()
+									.top - questionTop
+							),
+					} );
 			}
 
 			$question
@@ -33,16 +45,21 @@
 				.next( 'dd' )
 				.slideToggle( 200 );
 
-			if ( window.location.hash ) {
-				const scrollPaddingTop = parseInt(
-					$( 'html' ).css( 'scroll-padding-top' ) || 0
-				);
+			if ( isDeepLink ) {
+				const scrollPaddingTop =
+					parseInt( $( 'html' ).css( 'scroll-padding-top' ), 10 ) ||
+					0;
 
 				window.scrollTo( 0, $question.offset().top - scrollPaddingTop );
 			}
 
 			if ( $question.prop( 'id' ) ) {
-				window.location.hash = $question.prop( 'id' );
+				// Assigning location.hash would make the browser jump to the question.
+				window.history.replaceState(
+					window.history.state,
+					'',
+					'#' + $question.prop( 'id' )
+				);
 			}
 		} );
 
@@ -68,6 +85,6 @@
 			}
 		}
 
-		$( uriElement ).trigger( 'click' );
+		$( uriElement ).trigger( 'click', [ true ] );
 	}
 } )( window.jQuery );
