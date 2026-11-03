@@ -114,6 +114,7 @@ suites:
     script: jobs:test
     paths:
       - 'environments/jobs/**'
+      - 'jobs.wordpress.net/public_html/wp-content/themes/jobswp/**'
 
   photo-directory:
     type: wordpress
