@@ -59,9 +59,6 @@ class Cross_Locale_PTE {
 		);
 
 		add_action( 'load-' . self::$admin_page, array( __CLASS__, 'handle_admin_post' ) );
-		add_action( 'admin_print_scripts-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_scripts' ) );
-		add_action( 'admin_print_styles-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_styles' ) );
-		add_action( 'admin_footer-' . self::$admin_page, array( 'Rosetta_Roles', 'print_js_templates' ) );
 	}
 
 	/**
@@ -99,6 +96,12 @@ class Cross_Locale_PTE {
 				wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 				exit;
 			}
+		}
+
+		if ( self::$user ) {
+			add_action( 'admin_print_scripts-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_scripts' ) );
+			add_action( 'admin_print_styles-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_styles' ) );
+			add_action( 'admin_footer-' . self::$admin_page, array( 'Rosetta_Roles', 'print_js_templates' ) );
 		}
 	}
 
