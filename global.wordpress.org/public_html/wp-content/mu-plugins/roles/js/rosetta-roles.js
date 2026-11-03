@@ -3,9 +3,16 @@
 
 	/**
 	 * @typedef {Object} RosettaSettings
-	 * @property {Array<number|string>} accessList  - IDs of currently assigned projects.
-	 * @property {number}               lastUpdated - Timestamp used for IndexedDB cache invalidation.
-	 * @property {Object}               l10n        - Localized UI strings.
+	 * @property {number}               [userId]     - Target user ID (present on edit screens).
+	 * @property {string}               [saveAction] - AJAX action hook name for saving.
+	 * @property {string}               [saveNonce]  - Security nonce for saving permissions.
+	 * @property {string}               nonce        - Security nonce for fetching projects.
+	 * @property {number}               lastUpdated  - Timestamp used for IndexedDB cache invalidation.
+	 * @property {Array<number|string>} accessList   - IDs of currently assigned projects.
+	 *
+	 * @typedef {Object} RosettaConfig
+	 * @property {RosettaSettings} settings - Runtime configuration settings.
+	 * @property {Object}          l10n     - Localized UI strings.
 	 */
 	const config = window._rosettaConfig || {};
 	const settings = config.settings || {};
@@ -13,7 +20,6 @@
 
 	const projects = {
 		settings,
-		l10n,
 		model: {},
 		view: {},
 		events: _.extend( {}, Backbone.Events )
