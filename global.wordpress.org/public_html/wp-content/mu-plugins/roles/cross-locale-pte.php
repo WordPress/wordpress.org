@@ -358,7 +358,7 @@ class Cross_Locale_PTE {
 		return $projects ?: array();
 	}
 	/**
-	 * Retrieves the projects for which a user has cross-locale PTE permissions.
+	 * Retrieves all users who have cross-locale PTE permissions.
 	 *
 	 * @return array List of User IDs.
 	 */
