@@ -151,10 +151,12 @@ class Cross_Locale_PTE {
 
 		if ( empty( $project_ids ) ) {
 			self::update_cross_locale_pte( $user->ID, array() );
-			wp_send_json_success( array(
-				'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
-				'redirect' => add_query_arg( array( 'update' => 'user-updated' ), menu_page_url( 'cross-locale-pte', false ) ),
-			) );
+			wp_send_json_success(
+				[
+					'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
+					'redirect' => add_query_arg( array( 'update' => 'user-updated' ), menu_page_url( 'cross-locale-pte', false ) ),
+				]
+			);
 		}
 
 		global $wpdb;
@@ -171,24 +173,28 @@ class Cross_Locale_PTE {
 
 		if ( empty( $valid_projects ) ) {
 			self::update_cross_locale_pte( $user->ID, array() );
-			wp_send_json_success( array(
-				'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
-				'redirect' => add_query_arg( array( 'update' => 'user-updated' ), menu_page_url( 'cross-locale-pte', false ) ),
-			) );
+			wp_send_json_success(
+				[
+					'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
+					'redirect' => add_query_arg( array( 'update' => 'user-updated' ), menu_page_url( 'cross-locale-pte', false ) ),
+				]
+			);
 		}
 
 		self::update_cross_locale_pte( $user->ID, $valid_projects );
 
-		wp_send_json_success( array(
-			'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
-			'redirect' => add_query_arg(
-				array(
-					'user_id' => $user->ID,
-					'update'  => 'user-updated',
+		wp_send_json_success(
+			[
+				'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
+				'redirect' => add_query_arg(
+					[
+						'user_id' => $user->ID,
+						'update'  => 'user-updated',
+					],
+					menu_page_url( 'cross-locale-pte', false )
 				),
-				menu_page_url( 'cross-locale-pte', false )
-			),
-		) );
+			]
+		);
 	}
 
 	/**
@@ -337,6 +343,7 @@ class Cross_Locale_PTE {
 			SELECT project_id FROM
 			{$wpdb->wporg_translation_editors}
 			WHERE user_id = %d AND locale = %s
+			AND project_id NOT IN (" . implode( ',', Rosetta_Roles::IGNORE_PROJECT_IDS ) . ")
 		", $user_id, self::ALL_LOCALES ) );
 
 		return $projects;
@@ -354,6 +361,7 @@ class Cross_Locale_PTE {
 			{$wpdb->wporg_translation_editors} te
 			JOIN translate_projects p ON te.project_id = p.id
 			WHERE te.locale = %s
+			AND te.project_id NOT IN (" . implode( ',', Rosetta_Roles::IGNORE_PROJECT_IDS ) . ")
 		", self::ALL_LOCALES ) );
 
 		if ( empty( $rows ) ) {
