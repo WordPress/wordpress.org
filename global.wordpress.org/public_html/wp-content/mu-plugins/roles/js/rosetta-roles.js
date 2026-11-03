@@ -870,17 +870,17 @@
 		const submitBtn = form?.querySelector( 'input[type="submit"], button[type="submit"]' );
 
 		form?.addEventListener( 'submit', async event => {
-			event.preventDefault();
+			if ( ! projects.settings.saveAction ) return;
 
-			if ( ! projects.settings.saveAction ) {
-				return;
-			}
+			event.preventDefault();
 
 			const selectedIds = projects.selection.pluck( 'id' );
 
 			if ( hadTranslatorStatus && selectedIds.length === 0 && ! confirm( l10n.removeTranslator ) ) {
 				return;
 			}
+
+			let isRedirecting = false;
 
 			if ( submitBtn ) {
 				submitBtn.disabled = true;
@@ -895,13 +895,19 @@
 					projects:    selectedIds
 				} );
 
+				if ( response?.redirect ) {
+					isRedirecting = true;
+					window.location.href = response.redirect;
+					return;
+				}
+
 				projects.showNotice( response.message || l10n.saved, 'success' );
 				hadTranslatorStatus = Boolean( selectedIds.length );
 			} catch ( error ) {
 				const message = error?.responseJSON?.data?.message || error?.message || l10n.saveError;
 				projects.showNotice( message, 'error' );
 			} finally {
-				if ( submitBtn ) {
+				if ( submitBtn && ! isRedirecting ) {
 					submitBtn.disabled = false;
 					submitBtn.value = submitBtn.dataset.originalText;
 				}
