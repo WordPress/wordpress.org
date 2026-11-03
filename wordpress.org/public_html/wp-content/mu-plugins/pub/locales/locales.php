@@ -985,7 +985,6 @@ class GP_Locales {
 		$es_an->lang_code_iso_639_2 = 'spa';
 		$es_an->lang_code_iso_639_3 = 'spa';
 		$es_an->country_code = 'es';
-		$es_an->wp_locale = 'es_AN';
 		$es_an->slug = 'es-an';
 
 		$es_ar = new GP_Locale();
