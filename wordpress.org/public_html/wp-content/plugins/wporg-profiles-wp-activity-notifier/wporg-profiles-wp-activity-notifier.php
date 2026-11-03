@@ -358,8 +358,8 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param int $topic_id Topic ID.
 	 */
 	public function notify_forum_edit_topic( $topic_id ) {
-		// An edit can send the topic back to moderation.
-		if ( bbp_is_topic_pending( $topic_id ) || bbp_is_topic_spam( $topic_id ) ) {
+		// An edit can hide the topic: pending, spam, or trash.
+		if ( ! bbp_is_topic_public( $topic_id ) ) {
 			$this->notify_forum_remove_topic( $topic_id );
 		} else {
 			$this->notify_forum_topic_payload( 'update-topic', $topic_id );
@@ -441,8 +441,8 @@ class WPOrg_WP_Activity_Notifier {
 	 * @param int $reply_id Reply ID.
 	 */
 	public function notify_forum_edit_reply( $reply_id ) {
-		// An edit can send the reply back to moderation.
-		if ( bbp_is_reply_pending( $reply_id ) || bbp_is_reply_spam( $reply_id ) ) {
+		// An edit can hide the reply: pending, spam, trash, or archived.
+		if ( ! bbp_is_reply_public( $reply_id ) ) {
 			$this->notify_forum_remove_reply( $reply_id );
 		} else {
 			$this->notify_forum_reply_payload( 'update-reply', $reply_id );
