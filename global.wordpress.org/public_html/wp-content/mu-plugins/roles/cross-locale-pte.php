@@ -59,7 +59,8 @@ class Cross_Locale_PTE {
 		);
 
 		add_action( 'load-' . self::$admin_page, array( __CLASS__, 'handle_admin_post' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
+		add_action( 'admin_print_scripts-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_scripts' ) );
+		add_action( 'admin_print_styles-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_styles' ) );
 		add_action( 'admin_footer-' . self::$admin_page, array( 'Rosetta_Roles', 'print_js_templates' ) );
 	}
 
@@ -225,15 +226,15 @@ class Cross_Locale_PTE {
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-			$placeholders = implode( ', ', array_fill( 0, count( $values_to_remove ), '%d' ) );
 
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamically constructed %d placeholders for integer IDs are safe.
 			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->wporg_translation_editors}
 					WHERE `user_id` = %d AND `locale` = %s
-					AND project_id IN ( {$placeholders} )",
-					array_merge( array( $user_id, self::ALL_LOCALES ), $values_to_remove )
+					AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
+					$user_id,
+					self::ALL_LOCALES
 				)
 			);
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
