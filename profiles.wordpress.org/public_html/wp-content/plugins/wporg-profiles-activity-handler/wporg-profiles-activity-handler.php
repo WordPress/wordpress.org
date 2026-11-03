@@ -406,6 +406,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		 * Recognized activities:
 		 *  - Creating new topic
 		 *  - Replying to a topic
+		 *  - Editing a topic or reply
 		 *  - Removing a topic
 		 *  - Removing a topic reply
 		 */
@@ -421,8 +422,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			// Check for valid forum activities.
 			$activities = array(
 				'create-topic' => 'forum_topic_create',
+				'update-topic' => 'forum_topic_update',
 				'remove-topic' => 'forum_topic_remove',
 				'create-reply' => 'forum_reply_create',
+				'update-reply' => 'forum_reply_update',
 				'remove-reply' => 'forum_reply_remove',
 			);
 			if ( ! empty( $data['activity'] ) && ! empty( $activities[ $data['activity'] ] ) ) {
@@ -433,10 +436,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 
 			// Check for required args.
 			$required_args = array( 'forum_id' );
-			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
+			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_update', 'forum_reply_create', 'forum_reply_update' ) ) ) {
 				$required_args = array_merge( $required_args, array( 'title', 'site', 'url' ) );
 			}
-			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ) {
+			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_update', 'forum_topic_remove' ) ) ) {
 				$required_args[] = 'topic_id';
 			} else {
 				$required_args[] = 'post_id';
@@ -448,41 +451,30 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			// Determine 'item_id' value based on context.
-			$item_id = in_array( $type, array( 'forum_topic_create', 'forum_topic_remove' ) ) ?
+			$item_id = in_array( $type, array( 'forum_topic_create', 'forum_topic_update', 'forum_topic_remove' ) ) ?
 				intval( $data['topic_id'] ) :
 				intval( $data['post_id'] );
 
 			// Find an existing activity uniquely identified by the reported criteria.
 			// For a creation, this prevents duplication and permits a previously
 			// trashed/spammed/unapproved activity to be restored.
+			// For an edit, this is the activity whose excerpt gets refreshed.
 			// For a removal, this is used to find the activity to mark it as spam.
 			// Note: It's unlikely, but possible, that this is a non-unique request.
 			$args = array(
 				'user_id'           => $user->ID,
 				'component'         => 'forums',
-				'type'              => str_replace( 'remove', 'create', $type ),
+				'type'              => str_replace( array( 'update', 'remove' ), 'create', $type ),
 				'item_id'           => $item_id,
 				'secondary_item_id' => intval( $data['forum_id'] ),
 			);
 			$activity_id  = bp_activity_get_activity_id( $args );
 			$activity_obj = $activity_id ? new BP_Activity_Activity( $activity_id ) : false;
 
-			// Record the creation of a topic or reply.
-			if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
-				if ( $activity_obj ) {
-					bp_activity_mark_as_ham( $activity_obj, 'by_source' );
-					$activity_obj->save();
-
-					return true;
-				}
-
-				// Topics and replies without an excerpt, such as quote-only ones, are not recorded.
-				if ( empty( $data['message'] ) ) {
-					return true;
-				}
-
+			// Record the creation or edit of a topic or reply.
+			if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_update', 'forum_reply_create', 'forum_reply_update' ) ) ) {
 				// Action message for topic creation.
-				if ( 'forum_topic_create' === $type ) {
+				if ( in_array( $type, array( 'forum_topic_create', 'forum_topic_update' ) ) ) {
 					$action = sprintf(
 						'Created a topic, <i><a href="%s">%s</a></i>, on the site %s',
 						esc_url( $data['url'] ),
@@ -498,6 +490,24 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 						esc_html( $data['title'] ),
 						esc_html( $data['site'] )
 					);
+				}
+
+				if ( $activity_obj ) {
+					if ( in_array( $type, array( 'forum_topic_create', 'forum_reply_create' ) ) ) {
+						bp_activity_mark_as_ham( $activity_obj, 'by_source' );
+					}
+
+					// Keep the excerpt in sync with the post's current content.
+					$activity_obj->action  = $action;
+					$activity_obj->content = esc_html( $data['message'] ?? '' );
+					$activity_obj->save();
+
+					return true;
+				}
+
+				// Edits never add an activity, nor do topics and replies without an excerpt, such as quote-only ones.
+				if ( in_array( $type, array( 'forum_topic_update', 'forum_reply_update' ) ) || empty( $data['message'] ) ) {
+					return true;
 				}
 
 				$args = array(
