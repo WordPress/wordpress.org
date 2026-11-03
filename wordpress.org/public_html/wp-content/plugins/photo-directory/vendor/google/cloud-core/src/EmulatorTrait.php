@@ -36,16 +36,21 @@ trait EmulatorTrait
             $emulatorHost = str_replace($search, '', $emulatorHost);
         }
 
-        return [
+        $config = [
             'apiEndpoint' => $emulatorHost,
-            'transportConfig' => [
+            'credentials' => new InsecureCredentialsWrapper(),
+        ];
+        if (class_exists('Grpc\ChannelCredentials')) {
+            $config['transportConfig'] = [
                 'grpc' => [
                     'stubOpts' => [
                         'credentials' => \Grpc\ChannelCredentials::createInsecure()
                     ]
                 ]
-            ]
-        ];
+            ];
+        }
+
+        return $config;
     }
     /**
      * Retrieve a valid base uri for a service emulator.

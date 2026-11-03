@@ -1,7 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Admin\Tools;
 use WordPressdotorg\Plugin_Directory\Template;
-use WordPressdotorg\Plugin_Directory\Clients\FreeScout;
+use WordPressdotorg\MU_Plugins\Utilities\FreeScout;
 use WordPressdotorg\Plugin_Directory\Clients\HelpScout;
 use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
@@ -248,19 +248,16 @@ class Stats_Report {
 	 * @return array The queue stats, see get_stats(); zeros if FreeScout's reports couldn't be fetched.
 	 */
 	protected function get_freescout_queue_stats( $args ) {
-		$query = array(
-			'filters' => array(
-				'from'    => gmdate( 'Y-m-d', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) ),
-				'to'      => gmdate( 'Y-m-d', strtotime( $args['date'] ) ),
-				'mailbox' => Helpdesk::freescout_mailbox_id(),
-			),
+		$filters = array(
+			'from' => gmdate( 'Y-m-d', strtotime( $args['date'] ) - ( $args['num_days'] * DAY_IN_SECONDS ) ),
+			'to'   => gmdate( 'Y-m-d', strtotime( $args['date'] ) ),
 		);
 
-		$conversations = FreeScout::api( 'reports/conversations', $query );
-		$productivity  = FreeScout::api( 'reports/productivity', $query );
+		$conversations = FreeScout::report( 'conversations', Helpdesk::freescout_mailbox_id(), $filters );
+		$productivity  = FreeScout::report( 'productivity', Helpdesk::freescout_mailbox_id(), $filters );
 
 		// All zeros, so a failed request is obvious.
-		if ( ! isset( $conversations['metrics'], $productivity['metrics'] ) ) {
+		if ( is_wp_error( $conversations ) || is_wp_error( $productivity ) || ! isset( $conversations['metrics'], $productivity['metrics'] ) ) {
 			$conversations = array();
 			$productivity  = array();
 		}

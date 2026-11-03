@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Rectangle determined by min and max `LatLng` pairs.
@@ -20,13 +20,13 @@ class LatLongRect extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.type.LatLng min_lat_lng = 1;</code>
      */
-    private $min_lat_lng = null;
+    protected $min_lat_lng = null;
     /**
      * Max lat/long pair.
      *
      * Generated from protobuf field <code>.google.type.LatLng max_lat_lng = 2;</code>
      */
-    private $max_lat_lng = null;
+    protected $max_lat_lng = null;
 
     /**
      * Constructor.

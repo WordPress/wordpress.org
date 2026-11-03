@@ -364,6 +364,11 @@ body:not(.trac):not(.home-page) #main {
 
 .forums-homepage-footer .wp-block-heading a {
 	text-decoration: none;
+
+	&:hover,
+	&:focus {
+		text-decoration: underline;
+	}
 }
 
 .forums-homepage-topics {

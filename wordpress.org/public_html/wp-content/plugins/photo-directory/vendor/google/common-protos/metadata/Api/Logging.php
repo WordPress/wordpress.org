@@ -14,22 +14,9 @@ class Logging
         if (static::$is_initialized == true) {
           return;
         }
-        \GPBMetadata\Google\Api\Annotations::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0af8020a18676f6f676c652f6170692f6c6f6767696e672e70726f746f12" .
-            "0a676f6f676c652e61706922d7010a074c6f6767696e6712450a1570726f" .
-            "64756365725f64657374696e6174696f6e7318012003280b32262e676f6f" .
-            "676c652e6170692e4c6f6767696e672e4c6f6767696e6744657374696e61" .
-            "74696f6e12450a15636f6e73756d65725f64657374696e6174696f6e7318" .
-            "022003280b32262e676f6f676c652e6170692e4c6f6767696e672e4c6f67" .
-            "67696e6744657374696e6174696f6e1a3e0a124c6f6767696e6744657374" .
-            "696e6174696f6e121a0a126d6f6e69746f7265645f7265736f7572636518" .
-            "0320012809120c0a046c6f6773180120032809426e0a0e636f6d2e676f6f" .
-            "676c652e617069420c4c6f6767696e6750726f746f50015a45676f6f676c" .
-            "652e676f6c616e672e6f72672f67656e70726f746f2f676f6f676c656170" .
-            "69732f6170692f73657276696365636f6e6669673b73657276696365636f" .
-            "6e666967a2020447415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xF8\x02\x0A\x18google/api/logging.proto\x12\x0Agoogle.api\"\xD7\x01\x0A\x07Logging\x12E\x0A\x15producer_destinations\x18\x01 \x03(\x0B2&.google.api.Logging.LoggingDestination\x12E\x0A\x15consumer_destinations\x18\x02 \x03(\x0B2&.google.api.Logging.LoggingDestination\x1A>\x0A\x12LoggingDestination\x12\x1A\x0A\x12monitored_resource\x18\x03 \x01(\x09\x12\x0C\x0A\x04logs\x18\x01 \x03(\x09Bn\x0A\x0Ecom.google.apiB\x0CLoggingProtoP\x01ZEgoogle.golang.org/genproto/googleapis/api/serviceconfig;serviceconfig\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

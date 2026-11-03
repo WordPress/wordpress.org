@@ -473,7 +473,6 @@ class Posts {
 		if ( $post && Registrations::get_post_type() === get_post_type( $post ) && has_post_thumbnail( $post->ID ) ) {
 			$content = '<figure>'
 				. get_the_post_thumbnail( $post->ID, self::RSS_PHOTO_SIZE, [ 'alt' => $content, 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
-				. get_the_post_thumbnail( $post->ID, self::RSS_PHOTO_SIZE, [ 'style' => 'margin-bottom: 10px;', 'srcset' => ' ' ] ) . "\n"
 				. ( $content ? "<figcaption aria-hidden=\"true\">{$content}</figcaption>\n" : '' )
 				. "</figure>\n";
 		}

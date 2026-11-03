@@ -43,6 +43,7 @@ class Plugin_Directory {
 		add_filter( 'jetpack_sitemap_post_types', array( $this, 'jetpack_sitemap_post_types' ) );
 		add_filter( 'jetpack_sitemap_skip_post', array( $this, 'jetpack_sitemap_skip_post' ), 10, 2 );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
+		add_filter( 'redirect_canonical', array( $this, 'keep_feed_like_term_slugs' ) );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ), 1 );
@@ -341,6 +342,28 @@ class Plugin_Directory {
 				'assign_terms' => 'plugin_set_category',
 			),
 		) );
+
+		// Public for the search index only; written through Guideline_Labels, which keeps the post meta in sync.
+		register_taxonomy(
+			Guideline_Labels::TAXONOMY,
+			'plugin',
+			array(
+				'hierarchical'       => false,
+				'rewrite'            => false,
+				'labels'             => array(
+					'name'          => __( 'Guideline Labels', 'wporg-plugins' ),
+					'singular_name' => __( 'Guideline Label', 'wporg-plugins' ),
+				),
+				'public'             => true,
+				'publicly_queryable' => false, // Keeps the query var for the admin list filter, without a front-end archive.
+				'show_ui'            => false,
+				'show_admin_column'  => false,
+				'meta_box_cb'        => false,
+				'capabilities'       => array(
+					'assign_terms' => 'plugin_label',
+				),
+			)
+		);
 
 		register_taxonomy( 'plugin_committers', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
@@ -1297,6 +1320,49 @@ class Plugin_Directory {
 		if ( is_404() ) {
 			remove_action( 'template_redirect', 'redirect_canonical' );
 		}
+	}
+
+	/**
+	 * Keeps Canonical from stripping a term slug that looks like a feed endpoint.
+	 *
+	 * On paginated archives, Core removes a trailing `feed`, `rss`, `rss2`, `rdf` or `atom`
+	 * segment as if it were a feed, so `/tags/feed/page/2/` redirects to `/tags/page/2/`.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/46061
+	 *
+	 * @param string|false $redirect_url The redirect URL.
+	 * @return string|false The redirect URL, or false to stay on the requested URL.
+	 */
+	public function keep_feed_like_term_slugs( $redirect_url ) {
+		$term = get_queried_object();
+
+		if (
+			! $redirect_url ||
+			! is_tax( 'plugin_tags' ) ||
+			! ( $term instanceof \WP_Term ) ||
+			! in_array( $term->slug, array( 'feed', 'rss', 'rss2', 'rdf', 'atom' ), true )
+		) {
+			return $redirect_url;
+		}
+
+		$term_link = get_term_link( $term );
+		if ( is_wp_error( $term_link ) ) {
+			return $redirect_url;
+		}
+
+		// Canonical keeps the request's scheme, which can differ from the home URL's.
+		$term_link = set_url_scheme( $term_link, wp_parse_url( $redirect_url, PHP_URL_SCHEME ) );
+		if ( str_starts_with( $redirect_url, $term_link ) ) {
+			return $redirect_url;
+		}
+
+		// Only cancel the redirect that dropped the slug, e.g. to `/tags/page/2/`.
+		$tag_base = trailingslashit( dirname( untrailingslashit( $term_link ) ) );
+		if ( ! str_starts_with( $redirect_url, $tag_base ) ) {
+			return $redirect_url;
+		}
+
+		return false;
 	}
 
 	/**

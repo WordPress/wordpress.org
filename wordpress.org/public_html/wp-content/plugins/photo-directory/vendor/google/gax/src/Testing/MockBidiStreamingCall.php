@@ -36,10 +36,13 @@ use Google\ApiCore\ApiException;
 use Google\Protobuf\Internal\Message;
 use Google\Rpc\Code;
 use Grpc;
+use stdClass;
 
 /**
  * The MockBidiStreamingCall class is used to mock out the \Grpc\BidiStreamingCall class
  * (https://github.com/grpc/grpc/blob/master/src/php/lib/Grpc/BidiStreamingCall.php)
+ *
+ * @internal
  */
 class MockBidiStreamingCall extends Grpc\BidiStreamingCall
 {
@@ -53,10 +56,10 @@ class MockBidiStreamingCall extends Grpc\BidiStreamingCall
     /**
      * MockBidiStreamingCall constructor.
      * @param mixed[] $responses A list of response objects.
-     * @param callable|null $deserialize An optional deserialize method for the response object.
-     * @param MockStatus|null $status An optional status object. If set to null, a status of OK is used.
+     * @param mixed|null $deserialize An optional deserialize method for the response object.
+     * @param stdClass|null $status An optional status object. If set to null, a status of OK is used.
      */
-    public function __construct($responses, $deserialize = null, $status = null)
+    public function __construct(array $responses, $deserialize = null, ?stdClass $status = null)
     {
         $this->responses = $responses;
         $this->deserialize = $deserialize;
@@ -88,8 +91,8 @@ class MockBidiStreamingCall extends Grpc\BidiStreamingCall
             return null;
         } else {
             throw new ApiException(
-                "No more responses to read, but closeWrite() not called - "
-                . "this would be blocking",
+                'No more responses to read, but closeWrite() not called - '
+                . 'this would be blocking',
                 Grpc\STATUS_INTERNAL,
                 null
             );
@@ -97,21 +100,21 @@ class MockBidiStreamingCall extends Grpc\BidiStreamingCall
     }
 
     /**
-     * @return MockStatus|null|\stdClass
+     * @return stdClass|null
      * @throws ApiException
      */
     public function getStatus()
     {
         if (count($this->responses) > 0) {
             throw new ApiException(
-                "Calls to getStatus() will block if all responses are not read",
+                'Calls to getStatus() will block if all responses are not read',
                 Grpc\STATUS_INTERNAL,
                 null
             );
         }
         if (!$this->writesDone) {
             throw new ApiException(
-                "Calls to getStatus() will block if closeWrite() not called",
+                'Calls to getStatus() will block if closeWrite() not called',
                 Grpc\STATUS_INTERNAL,
                 null
             );
@@ -121,7 +124,7 @@ class MockBidiStreamingCall extends Grpc\BidiStreamingCall
 
     /**
      * Save the request object, to be retrieved via getReceivedCalls()
-     * @param \Google\Protobuf\Internal\Message|mixed $request The request object
+     * @param Message|mixed $request The request object
      * @param array $options An array of options.
      * @throws ApiException
      */
@@ -129,7 +132,7 @@ class MockBidiStreamingCall extends Grpc\BidiStreamingCall
     {
         if ($this->writesDone) {
             throw new ApiException(
-                "Cannot call write() after writesDone()",
+                'Cannot call write() after writesDone()',
                 Grpc\STATUS_INTERNAL,
                 null
             );

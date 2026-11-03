@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * TextAnnotation contains a structured representation of OCR extracted text.
@@ -14,8 +14,9 @@ use Google\Protobuf\Internal\GPBUtil;
  *     TextAnnotation -> Page -> Block -> Paragraph -> Word -> Symbol
  * Each structural component, starting from Page, may further have their own
  * properties. Properties describe detected languages, breaks etc.. Please refer
- * to the [TextAnnotation.TextProperty][google.cloud.vision.v1.TextAnnotation.TextProperty] message definition below for more
- * detail.
+ * to the
+ * [TextAnnotation.TextProperty][google.cloud.vision.v1.TextAnnotation.TextProperty]
+ * message definition below for more detail.
  *
  * Generated from protobuf message <code>google.cloud.vision.v1.TextAnnotation</code>
  */
@@ -32,7 +33,7 @@ class TextAnnotation extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string text = 2;</code>
      */
-    private $text = '';
+    protected $text = '';
 
     /**
      * Constructor.
@@ -40,7 +41,7 @@ class TextAnnotation extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
-     *     @type \Google\Cloud\Vision\V1\Page[]|\Google\Protobuf\Internal\RepeatedField $pages
+     *     @type \Google\Cloud\Vision\V1\Page[] $pages
      *           List of pages detected by OCR.
      *     @type string $text
      *           UTF-8 text detected on the pages.
@@ -55,7 +56,7 @@ class TextAnnotation extends \Google\Protobuf\Internal\Message
      * List of pages detected by OCR.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.Page pages = 1;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Cloud\Vision\V1\Page>
      */
     public function getPages()
     {
@@ -66,7 +67,7 @@ class TextAnnotation extends \Google\Protobuf\Internal\Message
      * List of pages detected by OCR.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.Page pages = 1;</code>
-     * @param \Google\Cloud\Vision\V1\Page[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Cloud\Vision\V1\Page[] $var
      * @return $this
      */
     public function setPages($var)

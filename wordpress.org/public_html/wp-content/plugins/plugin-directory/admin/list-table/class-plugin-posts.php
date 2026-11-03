@@ -3,6 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\List_Table;
 
 use \WordPressdotorg\Plugin_Directory\Tools;
 use \WordPressdotorg\Plugin_Directory\Template;
+use WordPressdotorg\Plugin_Directory\Guideline_Labels;
 
 _get_list_table( 'WP_Posts_List_Table' );
 
@@ -14,6 +15,7 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		'cb',
 		'title',
 		'author',
+		'guideline_labels',
 		'reviewer',
 		'zip',
 		'loc',
@@ -42,6 +44,8 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 		$columns['zip']            = 'Latest Zip';
 		$columns['loc']            = 'Lines of PHP Code'; 
 		$columns['submitted_date'] = 'Submitted Date'; 
+
+		$columns['guideline_labels'] = __( 'Guideline Labels', 'wporg-plugins' );
 
 		// We don't want the stats column.
 		unset( $columns['stats'] );
@@ -600,6 +604,32 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 				submit_button( __( 'Filter', 'wporg-plugins' ), 'secondary', false, false );
 				?>
 			</fieldset>
+			<fieldset class="alignleft actions filter-guideline-label">
+				<select name="<?php echo esc_attr( Guideline_Labels::TAXONOMY ); ?>">
+					<option value=""><?php esc_html_e( 'All Guideline Labels', 'wporg-plugins' ); ?></option>
+					<?php foreach ( Guideline_Labels::get_reasons() as $reason => $data ) : ?>
+						<option value="<?php echo esc_attr( $reason ); ?>" <?php selected( $reason, sanitize_key( wp_unslash( $_REQUEST[ Guideline_Labels::TAXONOMY ] ?? '' ) ) ); ?>>
+							<?php
+							/* translators: 1: Guideline number. 2: Reason slug. */
+							echo esc_html( sprintf( __( 'Guideline %1$d: %2$s', 'wporg-plugins' ), $data['guideline'], $reason ) );
+							?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+				<?php submit_button( __( 'Filter', 'wporg-plugins' ), 'secondary', false, false ); ?>
+			</fieldset>
+			<style>
+				.column-guideline_labels .guideline-label {
+					display: inline-block;
+					margin: 0 4px 4px 0;
+					padding: 0 8px;
+					border-radius: 2px;
+					background: #fcf9e8;
+					border: 1px solid #dba617;
+					color: #1d2327;
+					text-decoration: none;
+				}
+			</style>
 			<?php
 		}
 	}
@@ -749,5 +779,35 @@ class Plugin_Posts extends \WP_Posts_List_Table {
 
 	public function column_submitted_date( $post ) {
 		echo esc_html( gmdate( 'Y/m/d g:i a', $post->_submitted_date ?? 0 ) );
+	}
+
+	/**
+	 * The custom Guideline Labels column, linking each label to the list filtered by it.
+	 *
+	 * @param \WP_Post $post The plugin post.
+	 */
+	public function column_guideline_labels( $post ) {
+		$labels = Guideline_Labels::get( $post );
+
+		if ( ! $labels ) {
+			echo '-';
+			return;
+		}
+
+		$links = array();
+		foreach ( $labels as $reason => $label ) {
+			$links[] = $this->get_edit_link(
+				array(
+					'post_type'                => $post->post_type,
+					Guideline_Labels::TAXONOMY => $reason,
+				),
+				/* translators: %d: Guideline number. */
+				esc_html( sprintf( __( 'Guideline %d', 'wporg-plugins' ), $label['guideline'] ) ),
+				'guideline-label'
+			);
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_edit_link() runs the URL through esc_url(), and the link text is escaped above.
+		echo implode( ' ', $links );
 	}
 }

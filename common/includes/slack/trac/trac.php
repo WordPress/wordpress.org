@@ -29,6 +29,13 @@ class Trac implements User {
 	protected $commit_path_filters = array();
 	protected $ticket_component_filters = array();
 
+	/**
+	 * Workflow keywords that cause ticket updates to be piped to particular channels.
+	 *
+	 * @var array
+	 */
+	protected $ticket_keyword_filters = array();
+
 	protected $color = '#0073aa';
 	protected $icon  = ':wordpress:';
 
@@ -261,7 +268,7 @@ class Trac implements User {
 			$channels[ $this->tickets_channel ] = true;
 		}
 
-		// Component and focuses are needed for the component filters.
+		// Component, focuses, and keywords are needed for the channel filters.
 		if ( $ticket instanceof Ticket  ) {
 			$ticket->fetch();
 		}
@@ -278,6 +285,12 @@ class Trac implements User {
 			}
 		}
 
+		if ( isset( $ticket->keywords ) ) {
+			foreach ( preg_split( '/\s+/', $ticket->keywords, -1, PREG_SPLIT_NO_EMPTY ) as $keyword ) {
+				$channels = array_merge( $channels, array_fill_keys( $this->get_keyword_channels( $keyword ), true ) );
+			}
+		}
+
 		if ( $this->firehose_channel ) {
 			$channels[ $this->firehose_channel ] = true;
 		}
@@ -287,6 +300,20 @@ class Trac implements User {
 
 	function get_firehose_channel() {
 		return $this->firehose_channel;
+	}
+
+	/**
+	 * Gets the channels a ticket update should be posted to when a workflow keyword is added.
+	 *
+	 * @param string $keyword Workflow keyword added to the ticket.
+	 * @return string[] Channel names.
+	 */
+	public function get_keyword_channels( $keyword ) {
+		if ( isset( $this->ticket_keyword_filters[ $keyword ] ) ) {
+			$channel = $this->ticket_keyword_filters[ $keyword ];
+			return is_array( $channel ) ? array_keys( array_filter( $channel ) ) : array( $channel );
+		}
+		return array();
 	}
 
 	function get_ticket_format( $channel ) {

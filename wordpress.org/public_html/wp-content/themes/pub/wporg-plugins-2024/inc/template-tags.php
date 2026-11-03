@@ -9,6 +9,7 @@
 
 namespace WordPressdotorg\Plugin_Directory\Theme;
 
+use WordPressdotorg\Plugin_Directory\Guideline_Labels;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -326,7 +327,7 @@ function the_plugin_advanced_zone() {
 
 	echo '<hr>';
 
-	echo '<h2>' . esc_html__( 'Advanced Options', 'wporg-plugins' ) . '</h2>';
+	echo '<h2 id="plugin-advanced-options">' . esc_html__( 'Advanced Options', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'This section is intended for advanced users and developers only. They are presented here for testing and educational purposes.', 'wporg-plugins' ) . '</p>';
 
@@ -420,7 +421,7 @@ function the_plugin_community_zone() {
 
 	echo '<hr>';
 
-	echo '<h2>' . esc_html__( 'Community Options', 'wporg-plugins' ) . '</h2>';
+	echo '<h2 id="plugin-community-options">' . esc_html__( 'Community Options', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'This plugin is developed and supported by a community.', 'wporg-plugins' ) . '</p>';
 
@@ -466,7 +467,7 @@ function the_plugin_commercial_zone() {
 
 	echo '<hr>';
 
-	echo '<h2>' . esc_html__( 'Commercial Options', 'wporg-plugins' ) . '</h2>';
+	echo '<h2 id="plugin-commercial-options">' . esc_html__( 'Commercial Options', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'This plugin is free but offers paid upgrades, support, and/or add-ons.', 'wporg-plugins' ) . '</p>';
 
@@ -504,7 +505,7 @@ function the_plugin_danger_zone() {
 
 	echo '<div class="plugin-danger-zone">';
 
-	echo '<h2>' . esc_html__( 'The Danger Zone', 'wporg-plugins' ) . '</h2>';
+	echo '<h2 id="plugin-danger-zone">' . esc_html__( 'The Danger Zone', 'wporg-plugins' ) . '</h2>';
 
 	echo '<p>' . esc_html__( 'The following features are restricted to plugin committers only. They exist to allow plugin developers more control over their work.', 'wporg-plugins' ) . '</p>';
 
@@ -807,6 +808,53 @@ function the_author_notice( $post = null ) {
 			wp_kses_post( $import_warnings )
 		);
 	}
+}
+
+/**
+ * Displays a notice naming the guidelines the plugin doesn't currently meet.
+ *
+ * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+ */
+function the_guideline_label_notice( $post = null ) {
+	$post   = get_post( $post );
+	$labels = $post && ! in_array( $post->post_status, array( 'closed', 'disabled' ), true ) ? Guideline_Labels::get( $post ) : array();
+
+	if ( ! $labels ) {
+		return;
+	}
+
+	$reasons = array();
+	foreach ( $labels as $label ) {
+		$reasons[] = sprintf(
+			/* translators: 1: Link to the guideline, e.g. "Guideline 8". 2: Description of the issue. */
+			__( '%1$s: %2$s', 'wporg-plugins' ),
+			sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url( $label['url'] ),
+				/* translators: %d: Guideline number. */
+				esc_html( sprintf( __( 'Guideline %d', 'wporg-plugins' ), $label['guideline'] ) )
+			),
+			esc_html( trim( $label['message'] . ' ' . $label['detail'] ) )
+		);
+	}
+
+	$flagged = sprintf(
+		/* translators: %s: Month and year the plugin was labeled. */
+		__( 'Flagged %s.', 'wporg-plugins' ),
+		wp_date( _x( 'F Y', 'guideline label date format', 'wporg-plugins' ), min( wp_list_pluck( $labels, 'labeled_at' ) ) )
+	);
+
+	if ( 1 === count( $reasons ) ) {
+		$body = '<p>' . $reasons[0] . ' ' . esc_html( $flagged ) . '</p>';
+	} else {
+		$body = '<ul><li>' . implode( '</li><li>', $reasons ) . '</li></ul><p>' . esc_html( $flagged ) . '</p>';
+	}
+
+	printf(
+		'<div class="notice notice-warning notice-alt"><p><strong>%1$s</strong></p>%2$s</div>',
+		esc_html__( 'This plugin doesn’t currently meet the Plugin Directory guidelines.', 'wporg-plugins' ),
+		wp_kses_post( $body )
+	);
 }
 
 /**

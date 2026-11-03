@@ -14,18 +14,9 @@ class Context
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0a97020a18676f6f676c652f6170692f636f6e746578742e70726f746f12" .
-            "0a676f6f676c652e61706922310a07436f6e7465787412260a0572756c65" .
-            "7318012003280b32172e676f6f676c652e6170692e436f6e746578745275" .
-            "6c6522440a0b436f6e7465787452756c6512100a0873656c6563746f7218" .
-            "012001280912110a0972657175657374656418022003280912100a087072" .
-            "6f7669646564180320032809426e0a0e636f6d2e676f6f676c652e617069" .
-            "420c436f6e7465787450726f746f50015a45676f6f676c652e676f6c616e" .
-            "672e6f72672f67656e70726f746f2f676f6f676c65617069732f6170692f" .
-            "73657276696365636f6e6669673b73657276696365636f6e666967a20204" .
-            "47415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xE1\x02\x0A\x18google/api/context.proto\x12\x0Agoogle.api\"1\x0A\x07Context\x12&\x0A\x05rules\x18\x01 \x03(\x0B2\x17.google.api.ContextRule\"\x8D\x01\x0A\x0BContextRule\x12\x10\x0A\x08selector\x18\x01 \x01(\x09\x12\x11\x0A\x09requested\x18\x02 \x03(\x09\x12\x10\x0A\x08provided\x18\x03 \x03(\x09\x12\"\x0A\x1Aallowed_request_extensions\x18\x04 \x03(\x09\x12#\x0A\x1Ballowed_response_extensions\x18\x05 \x03(\x09Bn\x0A\x0Ecom.google.apiB\x0CContextProtoP\x01ZEgoogle.golang.org/genproto/googleapis/api/serviceconfig;serviceconfig\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

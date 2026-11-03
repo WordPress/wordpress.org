@@ -19,6 +19,7 @@ class Editor {
 		add_filter( 'get_edit_post_link', array( $this, 'redirect_edit_link_to_github' ), 10, 3 );
 		add_filter( 'o2_filter_post_actions', array( $this, 'redirect_o2_edit_link_to_github' ), 11, 2 );
 		add_action( 'edit_form_top', array( $this, 'render_editor_warning' ) );
+		add_filter( 'syntaxhighlighter_pre_getcodeformat', array( $this, 'filter_syntaxhighlighter_code_format' ), 10, 2 );
 
 		if ( ! has_action( 'wp_head', array( __CLASS__, 'render_edit_button_style' ) ) ) {
 			add_action( 'wp_head', array( __CLASS__, 'render_edit_button_style' ) );
@@ -71,6 +72,29 @@ class Editor {
 			$this->get_markdown_edit_link( $post->ID ),
 			'Edit on GitHub'
 		);
+	}
+
+	/**
+	 * Tell SyntaxHighlighter that code in imported posts is already HTML-encoded.
+	 *
+	 * The Markdown parser encodes fenced code blocks when turning them into `[code]`
+	 * shortcodes, but posts saved by the importer never get SyntaxHighlighter's
+	 * `_syntaxhighlighter_encoded` meta flag, so it would encode them a second time.
+	 *
+	 * @param int|null         $format Code format, or null to let SyntaxHighlighter decide.
+	 * @param WP_Post|stdClass $post   Post being displayed.
+	 * @return int|null Code format.
+	 */
+	public function filter_syntaxhighlighter_code_format( $format, $post ) {
+		if ( empty( $post->ID ) || get_post_type( $post->ID ) !== $this->importer->get_post_type() ) {
+			return $format;
+		}
+
+		if ( is_wp_error( $this->importer->get_markdown_source( $post->ID ) ) ) {
+			return $format;
+		}
+
+		return 2;
 	}
 
 	/**

@@ -54,6 +54,22 @@ class Review_Edit_Lock_Test extends WP_UnitTestCase {
 		parent::tearDown();
 	}
 
+	/**
+	 * Restore the PHPUnit 9 API that Core's expectDeprecated() relies on.
+	 *
+	 * Core's test framework predates PHPUnit 10 and falls back to other
+	 * PHPUnit 9 APIs when this method is missing. None of these tests use
+	 * annotation-based expectations, so an empty set is equivalent.
+	 *
+	 * @return array[]
+	 */
+	public function getAnnotations(): array {
+		return array(
+			'class'  => array(),
+			'method' => array(),
+		);
+	}
+
 	/** Review authors can edit after the window, without changing other permissions. */
 	public function test_only_author_can_edit_old_review_topic_from_directory_view() {
 		$author_id = self::factory()->user->create();

@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1\WebDetection;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Metadata for web pages.
@@ -20,19 +20,19 @@ class WebPage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string url = 1;</code>
      */
-    private $url = '';
+    protected $url = '';
     /**
      * (Deprecated) Overall relevancy score for the web page.
      *
      * Generated from protobuf field <code>float score = 2;</code>
      */
-    private $score = 0.0;
+    protected $score = 0.0;
     /**
      * Title for the web page, may contain HTML markups.
      *
      * Generated from protobuf field <code>string page_title = 3;</code>
      */
-    private $page_title = '';
+    protected $page_title = '';
     /**
      * Fully matching images on the page.
      * Can include resized copies of the query image.
@@ -62,10 +62,10 @@ class WebPage extends \Google\Protobuf\Internal\Message
      *           (Deprecated) Overall relevancy score for the web page.
      *     @type string $page_title
      *           Title for the web page, may contain HTML markups.
-     *     @type \Google\Cloud\Vision\V1\WebDetection\WebImage[]|\Google\Protobuf\Internal\RepeatedField $full_matching_images
+     *     @type \Google\Cloud\Vision\V1\WebDetection\WebImage[] $full_matching_images
      *           Fully matching images on the page.
      *           Can include resized copies of the query image.
-     *     @type \Google\Cloud\Vision\V1\WebDetection\WebImage[]|\Google\Protobuf\Internal\RepeatedField $partial_matching_images
+     *     @type \Google\Cloud\Vision\V1\WebDetection\WebImage[] $partial_matching_images
      *           Partial matching images on the page.
      *           Those images are similar enough to share some key-point features. For
      *           example an original image will likely have partial matching for its
@@ -160,7 +160,7 @@ class WebPage extends \Google\Protobuf\Internal\Message
      * Can include resized copies of the query image.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.WebDetection.WebImage full_matching_images = 4;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Cloud\Vision\V1\WebDetection\WebImage>
      */
     public function getFullMatchingImages()
     {
@@ -172,7 +172,7 @@ class WebPage extends \Google\Protobuf\Internal\Message
      * Can include resized copies of the query image.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.WebDetection.WebImage full_matching_images = 4;</code>
-     * @param \Google\Cloud\Vision\V1\WebDetection\WebImage[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Cloud\Vision\V1\WebDetection\WebImage[] $var
      * @return $this
      */
     public function setFullMatchingImages($var)
@@ -190,7 +190,7 @@ class WebPage extends \Google\Protobuf\Internal\Message
      * crops.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.WebDetection.WebImage partial_matching_images = 5;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Cloud\Vision\V1\WebDetection\WebImage>
      */
     public function getPartialMatchingImages()
     {
@@ -204,7 +204,7 @@ class WebPage extends \Google\Protobuf\Internal\Message
      * crops.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.WebDetection.WebImage partial_matching_images = 5;</code>
-     * @param \Google\Cloud\Vision\V1\WebDetection\WebImage[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Cloud\Vision\V1\WebDetection\WebImage[] $var
      * @return $this
      */
     public function setPartialMatchingImages($var)
@@ -216,7 +216,4 @@ class WebPage extends \Google\Protobuf\Internal\Message
     }
 
 }
-
-// Adding a class alias for backwards compatibility with the previous class name.
-class_alias(WebPage::class, \Google\Cloud\Vision\V1\WebDetection_WebPage::class);
 

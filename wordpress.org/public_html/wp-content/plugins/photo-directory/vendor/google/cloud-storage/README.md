@@ -4,7 +4,7 @@
 
 [![Latest Stable Version](https://poser.pugx.org/google/cloud-storage/v/stable)](https://packagist.org/packages/google/cloud-storage) [![Packagist](https://img.shields.io/packagist/dm/google/cloud-storage.svg)](https://packagist.org/packages/google/cloud-storage)
 
-* [API documentation](http://googleapis.github.io/google-cloud-php/#/docs/cloud-storage/latest)
+* [API documentation](https://cloud.google.com/php/docs/reference/cloud-storage/latest)
 
 **NOTE:** This repository is part of [Google Cloud PHP](https://github.com/googleapis/google-cloud-php). Any
 support requests, bug reports, or development contributions should be directed to
@@ -17,21 +17,15 @@ scenarios including serving website content, storing data for archival and disas
 
 To begin, install the preferred dependency manager for PHP, [Composer](https://getcomposer.org/).
 
-Now to install just this component:
+Now install this component:
 
 ```sh
 $ composer require google/cloud-storage
 ```
 
-Or to install the entire suite of components at once:
-
-```sh
-$ composer require google/cloud
-```
-
 ### Authentication
 
-Please see our [Authentication guide](https://github.com/googleapis/google-cloud-php/blob/master/AUTHENTICATION.md) for more information
+Please see our [Authentication guide](https://github.com/googleapis/google-cloud-php/blob/main/AUTHENTICATION.md) for more information
 on authenticating your client. Once authenticated, you'll be ready to start making requests.
 
 ### Sample
@@ -76,6 +70,11 @@ $storage->registerStreamWrapper();
 
 $contents = file_get_contents('gs://my_bucket/file_backup.txt');
 ```
+
+### Debugging
+
+Please see our [Debugging guide](https://github.com/googleapis/google-cloud-php/blob/main/DEBUG.md)
+for more information about the debugging tools.
 
 ### Version
 

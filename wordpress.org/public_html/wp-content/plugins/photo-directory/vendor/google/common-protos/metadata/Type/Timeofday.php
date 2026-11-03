@@ -14,16 +14,9 @@ class Timeofday
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0aed010a1b676f6f676c652f747970652f74696d656f666461792e70726f" .
-            "746f120b676f6f676c652e74797065224b0a0954696d654f66446179120d" .
-            "0a05686f757273180120012805120f0a076d696e75746573180220012805" .
-            "120f0a077365636f6e6473180320012805120d0a056e616e6f7318042001" .
-            "2805426c0a0f636f6d2e676f6f676c652e74797065420e54696d654f6644" .
-            "617950726f746f50015a3e676f6f676c652e676f6c616e672e6f72672f67" .
-            "656e70726f746f2f676f6f676c65617069732f747970652f74696d656f66" .
-            "6461793b74696d656f66646179f80101a20203475450620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xEA\x01\x0A\x1Bgoogle/type/timeofday.proto\x12\x0Bgoogle.type\"K\x0A\x09TimeOfDay\x12\x0D\x0A\x05hours\x18\x01 \x01(\x05\x12\x0F\x0A\x07minutes\x18\x02 \x01(\x05\x12\x0F\x0A\x07seconds\x18\x03 \x01(\x05\x12\x0D\x0A\x05nanos\x18\x04 \x01(\x05Bi\x0A\x0Fcom.google.typeB\x0ETimeOfDayProtoP\x01Z>google.golang.org/genproto/googleapis/type/timeofday;timeofday\xA2\x02\x03GTPb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }
