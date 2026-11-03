@@ -159,19 +159,7 @@ class Cross_Locale_PTE {
 			);
 		}
 
-		global $wpdb;
-		$placeholders = implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) );
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Dynamically constructed %d placeholders and hardcoded integer IDs from constant are safe.
-		$valid_projects = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT id FROM translate_projects
-				WHERE id IN ( {$placeholders} )
-				AND id NOT IN (" . implode( ',', Rosetta_Roles::IGNORE_PROJECT_IDS ) . ')',
-				$project_ids
-			)
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		$valid_projects = array_values( array_intersect( $project_ids, array_keys( Rosetta_Roles::get_translate_projects() ) ) );
 
 		if ( empty( $valid_projects ) ) {
 			self::update_cross_locale_pte( $user->ID, array() );
