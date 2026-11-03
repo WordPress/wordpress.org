@@ -901,14 +901,16 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		global $wpdb;
 		$placeholders = implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Dynamically constructed %d placeholders and hardcoded integer IDs from constant are safe.
 		$valid_projects = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT id FROM translate_projects
 				WHERE id IN ( {$placeholders} )
-				AND id NOT IN (" . implode( ',', self::IGNORE_PROJECT_IDS ) . ")",
+				AND id NOT IN (" . implode( ',', self::IGNORE_PROJECT_IDS ) . ')',
 				$project_ids
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( empty( $valid_projects ) ) {
 			$this->remove_translation_editor( $user );
@@ -1044,13 +1046,15 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			return $projects;
 		}
 
-		$_projects = $wpdb->get_results( '
-			SELECT id, name, parent_project_id, slug, path
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded integer IDs from constant are safe.
+		$_projects = $wpdb->get_results(
+			'SELECT id, name, parent_project_id, slug, path
 			FROM translate_projects
 			WHERE
-				id NOT IN(' . implode( ',', self::IGNORE_PROJECT_IDS ) . ') AND
-				LENGTH(path) - LENGTH(REPLACE(path, "/", "")) BETWEEN 0 AND 1;
-		' );
+				id NOT IN (' . implode( ',', self::IGNORE_PROJECT_IDS ) . ') AND
+				LENGTH(path) - LENGTH(REPLACE(path, "/", "")) BETWEEN 0 AND 1;'
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$projects = array();
 		foreach ( $_projects as $project ) {
