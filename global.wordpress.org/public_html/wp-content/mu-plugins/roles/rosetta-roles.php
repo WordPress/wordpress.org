@@ -922,7 +922,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 						'user_id' => $user->ID,
 						'update'  => 'user-updated',
 					],
-					menu_page_url( 'translation-editors', false )
+					$redirect
 				),
 			]
 		);
