@@ -1302,8 +1302,8 @@ let wpTrac,
 		nonGardeners() {
 			const elements = {};
 
-			// Hide disabled fields (new ticket & ticket modify)
-			$( '.trac-properties select[disabled]' ).parents( 'td' ).hide().prev().hide();
+			// Hide disabled fields and the milestone (new ticket & ticket modify)
+			$( '.trac-properties select[disabled], #field-milestone' ).parents( 'td' ).hide().prev().hide();
 
 			elements.type = $( '#field-type' );
 			elements.version = $( '#field-version' );
