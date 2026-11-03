@@ -17,12 +17,24 @@
 			const $question = $( event.currentTarget );
 
 			if ( ! $question.is( '.open' ) ) {
+				const questionTop =
+					event.currentTarget.getBoundingClientRect().top;
+
 				$question
 					.siblings( '.open' )
 					.toggleClass( 'open' )
 					.attr( 'aria-expanded', false )
 					.next( 'dd' )
-					.slideToggle( 200 );
+					.slideToggle( {
+						duration: 200,
+						// Keep the clicked question still while an answer above it collapses.
+						progress: () =>
+							window.scrollBy(
+								0,
+								event.currentTarget.getBoundingClientRect()
+									.top - questionTop
+							),
+					} );
 			}
 
 			$question
