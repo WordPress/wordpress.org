@@ -67,27 +67,29 @@ class Tag_Feed_Pagination_Test extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Slugs that Canonical strips from paginated URLs as feed endpoints.
+	 * Slugs that Canonical strips from paginated URLs as feed endpoints, and the request scheme.
 	 *
-	 * @return array<string, array{0: string}>
+	 * @return array<string, array{0: string, 1: string}>
 	 */
 	public static function feed_like_slug_provider(): array {
 		return array(
-			'feed' => array( 'feed' ),
-			'rss'  => array( 'rss' ),
-			'rss2' => array( 'rss2' ),
-			'rdf'  => array( 'rdf' ),
-			'atom' => array( 'atom' ),
+			'feed'            => array( 'feed', 'http' ),
+			'rss'             => array( 'rss', 'http' ),
+			'rss2'            => array( 'rss2', 'http' ),
+			'rdf'             => array( 'rdf', 'http' ),
+			'atom'            => array( 'atom', 'http' ),
+			'feed over https' => array( 'feed', 'https' ),
 		);
 	}
 
 	/**
 	 * Page 2 of a feed-like tag isn't redirected to the tag-less `/tags/page/2/`.
 	 *
-	 * @param string $slug The tag slug.
+	 * @param string $slug   The tag slug.
+	 * @param string $scheme The request scheme.
 	 */
 	#[DataProvider( 'feed_like_slug_provider' )]
-	public function test_second_page_of_feed_like_tag_is_canonical( string $slug ): void {
+	public function test_second_page_of_feed_like_tag_is_canonical( string $slug, string $scheme ): void {
 		$tag_id = $this->create_tag( $slug );
 
 		// One more plugin than fits on a page, so page 2 exists.
@@ -105,7 +107,7 @@ class Tag_Feed_Pagination_Test extends \WP_UnitTestCase {
 			wp_set_object_terms( $plugin_id, $tag_id, 'plugin_tags' );
 		}
 
-		$url = get_term_link( $tag_id, 'plugin_tags' ) . 'page/2/';
+		$url = set_url_scheme( get_term_link( $tag_id, 'plugin_tags' ) . 'page/2/', $scheme );
 		$this->go_to( $url );
 
 		$this->assertNull( redirect_canonical( $url, false ) );

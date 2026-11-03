@@ -1346,7 +1346,13 @@ class Plugin_Directory {
 		}
 
 		$term_link = get_term_link( $term );
-		if ( is_wp_error( $term_link ) || str_starts_with( $redirect_url, $term_link ) ) {
+		if ( is_wp_error( $term_link ) ) {
+			return $redirect_url;
+		}
+
+		// Canonical keeps the request's scheme, which can differ from the home URL's.
+		$term_link = set_url_scheme( $term_link, wp_parse_url( $redirect_url, PHP_URL_SCHEME ) );
+		if ( str_starts_with( $redirect_url, $term_link ) ) {
 			return $redirect_url;
 		}
 
