@@ -96,7 +96,7 @@ abstract class Event_Date extends DateTimeImmutable {
 		echo wp_kses(
 			'<time
 				class="event-utc-time relative' . ( $this->is_in_the_past() ? '' : ' future' ) . '"
-				datetime="' . esc_attr( $this ) . '">' . $this->get_relative_time() . '</time>',
+				datetime="' . esc_attr( $this->utc()->format( 'Y-m-d\TH:i:s\Z' ) ) . '">' . $this->get_relative_time() . '</time>',
 			array(
 				'span' => array(),
 				'time' => array(
@@ -139,7 +139,7 @@ abstract class Event_Date extends DateTimeImmutable {
 		echo wp_kses(
 			'<time
 				class="event-utc-time absolute relative' . ( $this->is_in_the_past() ? '' : ' future' ) . '"
-				datetime="' . esc_attr( $this ) . '">' . $this->get_prefixed_date( $this->format( $format ) . ' (' . $this->get_relative_time() . ')' ) . '</time>',
+				datetime="' . esc_attr( $this->utc()->format( 'Y-m-d\TH:i:s\Z' ) ) . '">' . $this->get_prefixed_date( $this->format( $format ) . ' (' . $this->get_relative_time() . ')' ) . '</time>',
 			array(
 				'span' => array(),
 				'time' => array(
@@ -160,7 +160,7 @@ abstract class Event_Date extends DateTimeImmutable {
 			'<time
 				class="event-utc-time absolute full-time"
 				data-format="' . esc_attr( $format ) . '"
-				datetime="' . esc_attr( $this ) . '">' . $this->format( $format ) . '</time>',
+				datetime="' . esc_attr( $this->utc()->format( 'Y-m-d\TH:i:s\Z' ) ) . '">' . $this->format( $format ) . '</time>',
 			array(
 				'span' => array(),
 				'time' => array(

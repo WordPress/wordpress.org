@@ -270,10 +270,6 @@
 					timeEl.title       = eventDateObj.toUTCString();
 					const timeContent  = timeEl.querySelector( 'span' ) ? timeEl.querySelector( 'span' ) : timeEl;
 
-					const userTimezoneOffset   = new Date().getTimezoneOffset();
-					const userTimezoneOffsetMs = userTimezoneOffset * 60 * 1000;
-					const userLocalDateTime    = new Date( eventDateObj.getTime() - userTimezoneOffsetMs );
-
 					const options = {
 						weekday: 'short',
 						year: 'numeric',
@@ -296,13 +292,13 @@
 								options.month = 'numeric';
 							}
 						}
-						timeContent.textContent = userLocalDateTime.toLocaleTimeString( navigator.language, options );
+						timeContent.textContent = eventDateObj.toLocaleTimeString( navigator.language, options );
 					}
 
 					if ( timeEl.classList.contains( 'relative' ) ) {
 						// Display the relative time.
 						const now    = new Date();
-						let diff     = userLocalDateTime - now;
+						let diff     = eventDateObj - now;
 						let in_text  = 'in ';
 						let ago_text = '';
 						if ( diff < 0 ) {
