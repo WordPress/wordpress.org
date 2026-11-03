@@ -153,8 +153,8 @@ class Cross_Locale_PTE {
 			self::update_cross_locale_pte( $user->ID, array() );
 			wp_send_json_success(
 				[
-					'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
-					'redirect' => add_query_arg( array( 'update' => 'user-updated' ), menu_page_url( 'cross-locale-pte', false ) ),
+					'message'  => __( 'Cross-Locale PTE removed.', 'rosetta' ),
+					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'cross-locale-pte', false ) ),
 				]
 			);
 		}
@@ -177,8 +177,8 @@ class Cross_Locale_PTE {
 			self::update_cross_locale_pte( $user->ID, array() );
 			wp_send_json_success(
 				[
-					'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
-					'redirect' => add_query_arg( array( 'update' => 'user-updated' ), menu_page_url( 'cross-locale-pte', false ) ),
+					'message'  => __( 'Cross-Locale PTE removed.', 'rosetta' ),
+					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'cross-locale-pte', false ) ),
 				]
 			);
 		}
@@ -316,8 +316,9 @@ class Cross_Locale_PTE {
 
 		$messages = array(
 			'update' => array(
-				'user-updated' => __( 'Translation editor updated.', 'rosetta' ),
-				'user-added'   => __( 'New translation editor added.', 'rosetta' ),
+				'user-updated' => __( 'Cross-Locale PTE updated.', 'rosetta' ),
+				'user-added'   => __( 'New Cross-Locale PTE added.', 'rosetta' ),
+				'user-removed' => __( 'Cross-Locale PTE removed.', 'rosetta' ),
 			),
 			'error'  => array(
 				'no-user-found' => __( 'The user couldn&#8217;t be found.', 'rosetta' ),
