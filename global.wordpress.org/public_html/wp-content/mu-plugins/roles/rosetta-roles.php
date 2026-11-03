@@ -132,9 +132,6 @@ class Rosetta_Roles {
 
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'load_translation_editors_page' ) );
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'register_screen_options' ) );
-		add_action( 'admin_print_scripts-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_scripts' ) );
-		add_action( 'admin_footer-' . $this->translation_editors_page, array( __CLASS__, 'print_js_templates' ) );
-		add_action( 'admin_print_styles-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_styles' ) );
 	}
 
 	/**
@@ -374,6 +371,10 @@ class Rosetta_Roles {
 			wp_safe_redirect( add_query_arg( array( 'error' => 'user-cannot' ), $redirect ) );
 			exit;
 		}
+
+		add_action( 'admin_print_scripts-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_scripts' ) );
+		add_action( 'admin_print_styles-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_styles' ) );
+		add_action( 'admin_footer-' . $this->translation_editors_page, array( __CLASS__, 'print_js_templates' ) );
 	}
 
 	/**
