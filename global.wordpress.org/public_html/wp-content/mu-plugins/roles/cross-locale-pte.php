@@ -136,6 +136,7 @@ class Cross_Locale_PTE {
 			? array_map( 'sanitize_text_field', wp_unslash( $_POST['projects'] ) )
 			: array();
 
+		$redirect    = admin_url( 'admin.php?page=cross-locale-pte' );
 		$project_ids = array_values( array_filter( array_map( 'absint', $raw_projects ) ) );
 
 		if ( empty( $project_ids ) ) {
@@ -143,7 +144,7 @@ class Cross_Locale_PTE {
 			wp_send_json_success(
 				[
 					'message'  => __( 'Cross-Locale PTE removed.', 'rosetta' ),
-					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'cross-locale-pte', false ) ),
+					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), $redirect ),
 				]
 			);
 		}
@@ -155,7 +156,7 @@ class Cross_Locale_PTE {
 			wp_send_json_success(
 				[
 					'message'  => __( 'Cross-Locale PTE removed.', 'rosetta' ),
-					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'cross-locale-pte', false ) ),
+					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), $redirect ),
 				]
 			);
 		}
@@ -170,7 +171,7 @@ class Cross_Locale_PTE {
 						'user_id' => $user->ID,
 						'update'  => 'user-updated',
 					],
-					menu_page_url( 'cross-locale-pte', false )
+					$redirect
 				),
 			]
 		);
@@ -337,7 +338,7 @@ class Cross_Locale_PTE {
 	/**
 	 * Retrieves all users who have cross-locale PTE permissions.
 	 *
-	 * @return array List of User IDs.
+	 * @return array<int, object> Associative array of user objects indexed by user ID.
 	 */
 	public static function get_all_users() {
 		global $wpdb;
