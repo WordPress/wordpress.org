@@ -390,7 +390,7 @@ class Rosetta_Roles {
 			$user = get_user_by( 'id', $user );
 		}
 
-		if ( ! $user->exists() ) {
+		if ( ! $user || ! $user->exists() ) {
 			return false;
 		}
 
@@ -428,7 +428,7 @@ class Rosetta_Roles {
 			$user = get_user_by( 'id', $user );
 		}
 
-		if ( ! $user->exists() ) {
+		if ( ! $user || ! $user->exists() ) {
 			return false;
 		}
 
