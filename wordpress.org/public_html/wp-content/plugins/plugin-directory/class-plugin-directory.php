@@ -1340,7 +1340,7 @@ class Plugin_Directory {
 			! $redirect_url ||
 			! is_tax( 'plugin_tags' ) ||
 			! ( $term instanceof \WP_Term ) ||
-			! preg_match( '#^(feed|rss2?|rdf|atom)$#', $term->slug )
+			! in_array( $term->slug, array( 'feed', 'rss', 'rss2', 'rdf', 'atom' ), true )
 		) {
 			return $redirect_url;
 		}
