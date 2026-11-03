@@ -898,11 +898,7 @@
 				if ( response?.redirect ) {
 					isRedirecting = true;
 					window.location.href = response.redirect;
-					return;
 				}
-
-				projects.showNotice( response.message || l10n.saved, 'success' );
-				hadTranslatorStatus = Boolean( selectedIds.length );
 			} catch ( error ) {
 				const message = error?.responseJSON?.data?.message || error?.message || l10n.saveError;
 				projects.showNotice( message, 'error' );
