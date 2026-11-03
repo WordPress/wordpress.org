@@ -1,6 +1,7 @@
 <?php
 /**
- * Lets a locale's editors mark editor requests for that locale as done.
+ * Lets a locale's editors mark editor requests for that locale as done, and
+ * shows on each request who marked it done.
  *
  * @package WordPressdotorg\I18nTeams
  */
@@ -26,6 +27,9 @@ function bootstrap(): void {
 
 	// And twice when it saves a new state: in its write API, then in the resolved posts callback.
 	add_action( 'o2_write_api', __NAMESPACE__ . '\allow_locale_editors_to_save_resolution' );
+
+	// o2 adds its log of state changes to the post at priority 10.
+	add_filter( 'o2_post_fragment', __NAMESPACE__ . '\add_resolution_line', 11, 2 );
 }
 
 /**
@@ -215,4 +219,51 @@ function get_request_locales( int $post_id ): array {
 	}
 
 	return array_values( $locales );
+}
+
+/**
+ * Shows on a request who marked it as done, and when.
+ *
+ * Only o2's menu that opens on hover lists it, so it can't be seen on a phone.
+ * The line repeats the latest entry of o2's log, as o2 formats it.
+ *
+ * @param array $fragment o2's data for the post.
+ * @param int   $post_id  Post ID.
+ * @return array
+ */
+function add_resolution_line( $fragment, $post_id ) {
+	if ( ! is_polyglots_site() || ! has_tag( 'editor-requests', $post_id ) ) {
+		return $fragment;
+	}
+
+	$post_meta = $fragment['postMeta'] ?? [];
+	if ( 'resolved' !== ( $post_meta['resolvedPostsPostState'] ?? '' ) || empty( $post_meta['resolvedPostsAuditLogs'] ) || ! is_array( $post_meta['resolvedPostsAuditLogs'] ) ) {
+		return $fragment;
+	}
+
+	$entry = end( $post_meta['resolvedPostsAuditLogs'] );
+	if ( ! is_array( $entry ) || empty( $entry['log'] ) || empty( $entry['timestamp'] ) ) {
+		return $fragment;
+	}
+
+	// Small and muted, with the theme's own classes, like the post's other meta.
+	$line = sprintf(
+		'<p class="wporg-editor-request-resolution has-small-font-size has-charcoal-4-color"><span aria-hidden="true">&#10003;</span> %s</p>',
+		sprintf(
+			/* translators: 1: An entry of the post's log, like "Jane marked this done". 2: Date. */
+			esc_html__( '%1$s on %2$s', 'wporg' ),
+			wp_kses_post( $entry['log'] ),
+			esc_html( wp_date( get_option( 'date_format' ), (int) $entry['timestamp'] ) )
+		)
+	);
+
+	// Above o2's "Mark as done" control, which o2 adds to the end of the content, after anything the post itself has.
+	$content = $fragment['contentFiltered'] ?? '';
+	if ( preg_match_all( '/<nav\b[^>]*\bo2-post-footer-actions\b/', $content, $matches, PREG_OFFSET_CAPTURE ) ) {
+		$fragment['contentFiltered'] = substr_replace( $content, $line, end( $matches[0] )[1], 0 );
+	} else {
+		$fragment['contentFiltered'] = $content . $line;
+	}
+
+	return $fragment;
 }

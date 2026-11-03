@@ -175,6 +175,98 @@ class WPorg_I18n_Teams_Editor_Requests_Test extends WPorg_I18n_Teams_TestCase {
 	}
 
 	/**
+	 * Gets a post's content as o2 shows it, for a state and log as o2's to-do module adds them.
+	 *
+	 * @param int    $post_id Post ID.
+	 * @param string $state   o2 state of the post.
+	 * @param array  $log     o2's log entries, oldest first.
+	 * @param string $content Content before the line is added.
+	 * @return string
+	 */
+	protected function o2_content( int $post_id, string $state, array $log, string $content = '<p>Request.</p>' ): string {
+		$fragment = [
+			'contentFiltered' => $content,
+			'postMeta'        => [
+				'resolvedPostsPostState' => $state,
+				'resolvedPostsAuditLogs' => $log,
+			],
+		];
+
+		return apply_filters( 'o2_post_fragment', $fragment, $post_id )['contentFiltered'];
+	}
+
+	/**
+	 * A request that is done shows who marked it done, and when, from o2's latest log entry.
+	 */
+	public function test_done_request_shows_who_marked_it_done() {
+		$request = $this->create_post_with_tags( [ 'editor-requests', 'de_DE' ] );
+		$log     = [
+			[
+				'timestamp' => strtotime( '2026-11-01 09:00:00 UTC' ),
+				'log'       => 'Jane marked this to-do',
+			],
+			[
+				'timestamp' => strtotime( '2026-11-04 10:00:00 UTC' ),
+				'log'       => 'Jane marked this done',
+			],
+		];
+
+		$content = $this->o2_content( $request, 'resolved', $log );
+
+		$this->assertStringStartsWith( '<p>Request.</p>', $content );
+		$this->assertStringContainsString( 'Jane marked this done on November 4, 2026', $content );
+		$this->assertStringNotContainsString( 'marked this to-do', $content );
+	}
+
+	/**
+	 * The line is small and muted, and goes above o2's "Mark as done" control at the end of the content.
+	 */
+	public function test_resolution_line_is_above_the_mark_as_done_control() {
+		$request = $this->create_post_with_tags( [ 'editor-requests', 'de_DE' ] );
+		$log     = [
+			[
+				'timestamp' => strtotime( '2026-11-04 10:00:00 UTC' ),
+				'log'       => 'Jane marked this done',
+			],
+		];
+
+		$content = $this->o2_content( $request, 'resolved', $log, "<p>Request.</p><nav class='o2-post-footer-actions'>Mark as done</nav>" );
+
+		$this->assertSame(
+			'<p>Request.</p><p class="wporg-editor-request-resolution has-small-font-size has-charcoal-4-color"><span aria-hidden="true">&#10003;</span> Jane marked this done on November 4, 2026</p>' .
+			"<nav class='o2-post-footer-actions'>Mark as done</nav>",
+			$content
+		);
+
+		$content = $this->o2_content( $request, 'resolved', $log, '<nav class="o2-post-footer-actions">In the post.</nav>' . "<nav class='o2-post-footer-actions'>Mark as done</nav>" );
+
+		$this->assertStringStartsWith( '<nav class="o2-post-footer-actions">In the post.</nav><p class="wporg-editor-request-resolution', $content, 'A matching element in the post itself.' );
+	}
+
+	/**
+	 * Only a request that is done gets the line.
+	 */
+	public function test_resolution_line_is_only_on_done_requests() {
+		$request = $this->create_post_with_tags( [ 'editor-requests', 'de_DE' ] );
+		$post    = $this->create_post_with_tags( [ 'de_DE' ] );
+		$log     = [
+			[
+				'timestamp' => strtotime( '2026-11-04 10:00:00 UTC' ),
+				'log'       => 'Jane marked this done',
+			],
+		];
+
+		$this->assertSame( '<p>Request.</p>', $this->o2_content( $request, 'unresolved', $log ), 'A request still to do.' );
+		$this->assertSame( '<p>Request.</p>', $this->o2_content( $request, 'resolved', [] ), 'A request done without a log entry.' );
+		$this->assertSame( '<p>Request.</p>', $this->o2_content( $request, 'resolved', [ [ 'log' => 'Jane marked this done' ] ] ), 'A log entry without a time.' );
+		$this->assertSame( '<p>Request.</p>', $this->o2_content( $post, 'resolved', $log ), 'A post that is not a request.' );
+
+		switch_to_blog( get_main_site_id() );
+		$other_site = $this->create_post_with_tags( [ 'editor-requests', 'de_DE' ] );
+		$this->assertSame( '<p>Request.</p>', $this->o2_content( $other_site, 'resolved', $log ), 'A request on another site.' );
+	}
+
+	/**
 	 * A GTE of the locale a request is for can mark it as done.
 	 */
 	public function test_locale_editor_can_resolve_request_for_their_locale() {
