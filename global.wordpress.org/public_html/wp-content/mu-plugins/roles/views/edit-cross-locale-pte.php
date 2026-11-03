@@ -48,12 +48,6 @@ if ( empty( $user ) || ! is_a( $user, 'WP_User' ) ) {
 			</tbody>
 		</table>
 
-		<input type="hidden" id="project-access-list" name="projects" value="<?php echo esc_attr( implode( ',', (array) $project_access_list ) ); ?>">
-		<input type="hidden" name="action" value="update-cross-locale-pte">
-		<input type="hidden" name="user_id" value="<?php echo esc_attr( $user->ID ); ?>">
-		<?php
-		wp_nonce_field( 'update-cross-locale-pte_' . $user->ID );
-		submit_button( _x( 'Update', 'translation editor', 'rosetta' ) );
-		?>
+		<?php submit_button( _x( 'Update', 'translation editor', 'rosetta' ) ); ?>
 	</form>
 </div>
