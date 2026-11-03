@@ -9,7 +9,7 @@
 
 			$question.html( $h3.html( $button.text( $question.text() ) ) );
 		} )
-		.on( 'click', function ( event ) {
+		.on( 'click', function ( event, isDeepLink ) {
 			if ( 'keydown' === event.type && 13 !== event.which ) {
 				return;
 			}
@@ -33,7 +33,7 @@
 				.next( 'dd' )
 				.slideToggle( 200 );
 
-			if ( window.location.hash ) {
+			if ( isDeepLink ) {
 				const scrollPaddingTop = parseInt(
 					$( 'html' ).css( 'scroll-padding-top' ) || 0
 				);
@@ -42,7 +42,12 @@
 			}
 
 			if ( $question.prop( 'id' ) ) {
-				window.location.hash = $question.prop( 'id' );
+				// Assigning location.hash would make the browser jump to the question.
+				window.history.replaceState(
+					window.history.state,
+					'',
+					'#' + $question.prop( 'id' )
+				);
 			}
 		} );
 
@@ -68,6 +73,6 @@
 			}
 		}
 
-		$( uriElement ).trigger( 'click' );
+		$( uriElement ).trigger( 'click', [ true ] );
 	}
 } )( window.jQuery );
