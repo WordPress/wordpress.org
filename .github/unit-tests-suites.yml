@@ -72,7 +72,7 @@ suites:
     type: standalone
     name: Slack Trac Bot
     working-directory: common/includes/tests/slack/trac
-    phpunit-args: --no-configuration bot.php
+    phpunit-args: --no-configuration --test-suffix .php .
     paths:
       - 'common/includes/slack/**'
       - 'common/includes/tests/slack/**'
