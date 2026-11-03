@@ -11,7 +11,7 @@ if ( ! $user ) {
 }
 ?>
 <div class="wrap">
-	<h2><?php esc_html_e( 'Edit Translation Editor', 'rosetta' ); ?></h2>
+	<h1><?php esc_html_e( 'Edit Translation Editor', 'rosetta' ); ?></h1>
 
 	<?php echo $feedback_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice markup assembled by get_feedback_message() from escaped parts. ?>
 
