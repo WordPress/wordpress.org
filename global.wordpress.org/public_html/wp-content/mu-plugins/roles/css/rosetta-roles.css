@@ -78,6 +78,7 @@
 
 .sub-projects-search {
 	width: 100%;
+	box-sizing: border-box;
 	margin-bottom: 10px;
 }
 
@@ -105,10 +106,16 @@
 @media screen and (max-width: 782px) {
 	.projects-list {
 		display: block;
+		border-right: 1px solid #dfdfdf;
 	}
 
 	.projects-list > li {
 		width: 100%;
+		border-right: 0;
+	}
+
+	.projects-list > li.active {
+		border-right: 0;
 	}
 
 	.sub-projects-wrapper {
