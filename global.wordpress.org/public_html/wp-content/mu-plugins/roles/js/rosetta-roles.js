@@ -311,20 +311,6 @@
 		}
 	} );
 
-	projects.model.Selection = Backbone.Collection.extend( {
-		initialize() {
-			this.field = document.getElementById( 'project-access-list' );
-			this._debouncedUpdate = _.debounce( this.updateInputField.bind( this ), 10 );
-			this.on( 'update reset', this._debouncedUpdate );
-		},
-
-		updateInputField() {
-			if ( this.field ) {
-				this.field.value = this.pluck( 'id' ).join( ',' );
-			}
-		}
-	} );
-
 	/**
 	 * VIEWS
 	 */
@@ -836,6 +822,20 @@
 		} ).render();
 	};
 
+	projects.showNotice = ( text, type = 'info' ) => {
+		document.querySelectorAll( '.rosetta-dynamic-notice' ).forEach( el => el.remove() );
+
+		const notice = document.createElement( 'div' );
+		notice.className = `notice notice-${ type } is-dismissible rosetta-dynamic-notice`;
+
+		const p = document.createElement( 'p' );
+		p.textContent = text;
+		notice.appendChild( p );
+
+		const anchor = document.querySelector( '.wrap > h1' ) || document.getElementById( 'projects-list' );
+		anchor?.insertAdjacentElement( 'afterend', notice );
+	};
+
 	projects.init = () => {
 		const rawList = Array.isArray( projects.settings.accessList )
 			? projects.settings.accessList.map( normalizeId ).filter( id => id !== '' )
@@ -844,8 +844,7 @@
 			? [ { id: 'all' } ]
 			: rawList.map( id => ( { id } ) );
 
-		projects.selection = new projects.model.Selection( initialSelection );
-		projects.selection.updateInputField();
+		projects.selection = new Backbone.Collection( initialSelection );
 
 		// Initialize the global #project-all view and ensure it is only initialized once.
 		// Omitted from the DOM for CLPTEs.
@@ -860,15 +859,46 @@
 				if ( loadingEl ) loadingEl.textContent = l10n.loadingError;
 			} );
 
-		const hadTranslatorStatus = Boolean( rawList.length );
-		const accessField = projects.selection.field;
+		let hadTranslatorStatus = Boolean( rawList.length );
+		const form = document.getElementById( 'projects-list' )?.closest( 'form' );
+		const submitBtn = form?.querySelector( 'input[type="submit"], button[type="submit"]' );
 
-		accessField?.closest( 'form' )?.addEventListener( 'submit', event => {
-			projects.selection._debouncedUpdate.cancel();
-			projects.selection.updateInputField();
+		form?.addEventListener( 'submit', async event => {
+			event.preventDefault();
 
-			if ( hadTranslatorStatus && ! accessField.value && ! confirm( l10n.removeTranslator ) ) {
-				event.preventDefault();
+			if ( ! projects.settings.saveAction ) {
+				return;
+			}
+
+			const selectedIds = projects.selection.pluck( 'id' );
+
+			if ( hadTranslatorStatus && selectedIds.length === 0 && ! confirm( l10n.removeTranslator ) ) {
+				return;
+			}
+
+			if ( submitBtn ) {
+				submitBtn.disabled = true;
+				submitBtn.dataset.originalText = submitBtn.value;
+				submitBtn.value = l10n.saving;
+			}
+
+			try {
+				const response = await wp.ajax.post( projects.settings.saveAction, {
+					_ajax_nonce: projects.settings.saveNonce,
+					user_id:     projects.settings.userId,
+					projects:    selectedIds
+				} );
+
+				projects.showNotice( response.message || l10n.saved, 'success' );
+				hadTranslatorStatus = Boolean( selectedIds.length );
+			} catch ( error ) {
+				const message = error?.responseJSON?.data?.message || error?.message || l10n.saveError;
+				projects.showNotice( message, 'error' );
+			} finally {
+				if ( submitBtn ) {
+					submitBtn.disabled = false;
+					submitBtn.value = submitBtn.dataset.originalText;
+				}
 			}
 		} );
 	};
