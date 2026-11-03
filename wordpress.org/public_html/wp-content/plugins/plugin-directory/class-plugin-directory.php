@@ -1338,7 +1338,7 @@ class Plugin_Directory {
 
 		if (
 			! $redirect_url ||
-			! is_tax() ||
+			! is_tax( 'plugin_tags' ) ||
 			! ( $term instanceof \WP_Term ) ||
 			! preg_match( '#^(feed|rss2?|rdf|atom)$#', $term->slug )
 		) {
@@ -1347,6 +1347,12 @@ class Plugin_Directory {
 
 		$term_link = get_term_link( $term );
 		if ( is_wp_error( $term_link ) || str_starts_with( $redirect_url, $term_link ) ) {
+			return $redirect_url;
+		}
+
+		// Only cancel the redirect that dropped the slug, e.g. to `/tags/page/2/`.
+		$tag_base = trailingslashit( dirname( untrailingslashit( $term_link ) ) );
+		if ( ! str_starts_with( $redirect_url, $tag_base ) ) {
 			return $redirect_url;
 		}
 

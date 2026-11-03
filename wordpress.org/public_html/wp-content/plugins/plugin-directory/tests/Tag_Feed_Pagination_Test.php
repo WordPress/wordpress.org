@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace WordPressdotorg\Plugin_Directory\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -18,6 +19,13 @@ use PHPUnit\Framework\Attributes\Group;
  */
 #[Group( 'plugin-directory' )]
 class Tag_Feed_Pagination_Test extends \WP_UnitTestCase {
+
+	/**
+	 * The rewrite state before the test switched to pretty permalinks.
+	 *
+	 * @var \WP_Rewrite
+	 */
+	private \WP_Rewrite $original_rewrite;
 
 	/**
 	 * Restore the PHPUnit 9 API that Core's expectDeprecated() relies on.
@@ -36,21 +44,51 @@ class Tag_Feed_Pagination_Test extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Page 2 of the `feed` tag isn't redirected to the tag-less `/tags/page/2/`.
+	 * Switches to pretty permalinks with `/tags/` rewrite rules.
 	 */
-	public function test_second_page_of_feed_tag_is_canonical(): void {
+	public function set_up(): void {
+		parent::set_up();
+
+		$this->original_rewrite = clone $GLOBALS['wp_rewrite'];
+
 		// The taxonomy was registered without pretty permalinks, so it has no `/tags/` rules yet.
 		$this->set_permalink_structure( '/%postname%/' );
 		get_taxonomy( 'plugin_tags' )->add_rewrite_rules();
 		flush_rewrite_rules();
+	}
 
-		$tag_id = self::factory()->term->create(
-			array(
-				'taxonomy' => 'plugin_tags',
-				'name'     => 'feed',
-				'slug'     => 'feed',
-			)
+	/**
+	 * Restores the rewrite state, which Core's test case only resets for Core tests.
+	 */
+	public function tear_down(): void {
+		$GLOBALS['wp_rewrite'] = $this->original_rewrite; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the state saved in set_up().
+
+		parent::tear_down();
+	}
+
+	/**
+	 * Slugs that Canonical strips from paginated URLs as feed endpoints.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public static function feed_like_slug_provider(): array {
+		return array(
+			'feed' => array( 'feed' ),
+			'rss'  => array( 'rss' ),
+			'rss2' => array( 'rss2' ),
+			'rdf'  => array( 'rdf' ),
+			'atom' => array( 'atom' ),
 		);
+	}
+
+	/**
+	 * Page 2 of a feed-like tag isn't redirected to the tag-less `/tags/page/2/`.
+	 *
+	 * @param string $slug The tag slug.
+	 */
+	#[DataProvider( 'feed_like_slug_provider' )]
+	public function test_second_page_of_feed_like_tag_is_canonical( string $slug ): void {
+		$tag_id = $this->create_tag( $slug );
 
 		// One more plugin than fits on a page, so page 2 exists.
 		$plugin_ids = self::factory()->post->create_many(
@@ -71,5 +109,33 @@ class Tag_Feed_Pagination_Test extends \WP_UnitTestCase {
 		$this->go_to( $url );
 
 		$this->assertNull( redirect_canonical( $url, false ) );
+	}
+
+	/**
+	 * A feed-like tag's query-string URL still redirects to its permalink.
+	 */
+	public function test_feed_like_tag_keeps_canonical_redirect_to_permalink(): void {
+		$tag_id = $this->create_tag( 'feed' );
+
+		$url = home_url( '/?plugin_tags=feed' );
+		$this->go_to( $url );
+
+		$this->assertSame( get_term_link( $tag_id, 'plugin_tags' ), redirect_canonical( $url, false ) );
+	}
+
+	/**
+	 * Creates a plugin tag.
+	 *
+	 * @param string $slug The tag name and slug.
+	 * @return int The tag ID.
+	 */
+	private function create_tag( string $slug ): int {
+		return self::factory()->term->create(
+			array(
+				'taxonomy' => 'plugin_tags',
+				'name'     => $slug,
+				'slug'     => $slug,
+			)
+		);
 	}
 }
