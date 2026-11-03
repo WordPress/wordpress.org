@@ -41,6 +41,7 @@ class Cross_Locale_PTE {
 	 */
 	public static function init_admin() {
 		add_action( 'admin_menu', array( __CLASS__, 'register_admin_page' ) );
+		add_action( 'wp_ajax_rosetta-save-clpte-projects', array( __CLASS__, 'ajax_rosetta_save_clpte_projects' ) );
 	}
 
 	/**
@@ -110,11 +111,6 @@ class Cross_Locale_PTE {
 				exit;
 			}
 		}
-
-		$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
-		if ( 'update-cross-locale-pte' === $action ) {
-			return self::update_cross_locale_pte();
-		}
 	}
 
 	/**
@@ -131,44 +127,88 @@ class Cross_Locale_PTE {
 	}
 
 	/**
-	 * Update the projects for the Cross-Locale PTE.
+	 * Ajax handler to save Cross-Locale PTE project assignments.
 	 */
-	public static function update_cross_locale_pte() {
-		global $wpdb;
+	public static function ajax_rosetta_save_clpte_projects() {
+		check_ajax_referer( 'rosetta_clpte_save_nonce', '_ajax_nonce' );
 
-		if ( ! self::$user ) {
-			wp_safe_redirect( menu_page_url( 'cross-locale-pte', false ) );
-			exit;
+		if ( ! current_user_can( self::MANAGE_CROSS_LOCALE_PTES_CAP ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized', 'rosetta' ) ), 403 );
 		}
 
-		check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
+		$user_id = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+		$user    = get_user_by( 'id', $user_id );
 
-		$raw_projects     = isset( $_POST['projects'] ) ? sanitize_text_field( wp_unslash( $_POST['projects'] ) ) : '';
-		$projects = ( '' !== $raw_projects )
-			? array_values( array_filter( array_map( 'absint', explode( ',', $raw_projects ) ) ) )
+		if ( ! $user ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid user.', 'rosetta' ) ), 400 );
+		}
+
+		$raw_projects = isset( $_POST['projects'] ) && is_array( $_POST['projects'] )
+			? array_map( 'sanitize_text_field', wp_unslash( $_POST['projects'] ) )
 			: array();
 
-		if ( ! empty( $projects ) ) {
-			$placeholders   = implode( ', ', array_fill( 0, count( $projects ), '%d' ) );
-			$valid_projects = $wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT id FROM translate_projects WHERE id IN ( {$placeholders} )",
-					$projects
-				)
-			);
-			$projects = array_map( 'intval', $valid_projects );
+		$project_ids = array_values( array_filter( array_map( 'absint', $raw_projects ) ) );
+
+		if ( empty( $project_ids ) ) {
+			self::update_cross_locale_pte( $user->ID, array() );
+			wp_send_json_success( array(
+				'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
+				'redirect' => add_query_arg( array( 'update' => 'user-updated' ), menu_page_url( 'cross-locale-pte', false ) ),
+			) );
 		}
 
-		$current_projects   = self::get_users_projects( self::$user->ID );
+		global $wpdb;
+		$placeholders = implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) );
+
+		$valid_projects = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT id FROM translate_projects
+				WHERE id IN ( {$placeholders} )
+				AND id NOT IN (" . implode( ',', Rosetta_Roles::IGNORE_PROJECT_IDS ) . ')',
+				$project_ids
+			)
+		);
+
+		if ( empty( $valid_projects ) ) {
+			self::update_cross_locale_pte( $user->ID, array() );
+			wp_send_json_success( array(
+				'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
+				'redirect' => add_query_arg( array( 'update' => 'user-updated' ), menu_page_url( 'cross-locale-pte', false ) ),
+			) );
+		}
+
+		self::update_cross_locale_pte( $user->ID, $valid_projects );
+
+		wp_send_json_success( array(
+			'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
+			'redirect' => add_query_arg(
+				array(
+					'user_id' => $user->ID,
+					'update'  => 'user-updated',
+				),
+				menu_page_url( 'cross-locale-pte', false )
+			),
+		) );
+	}
+
+	/**
+	 * Update the projects for the Cross-Locale PTE.
+	 */
+	public static function update_cross_locale_pte( $user_id, array $projects = array() ) {
+		global $wpdb;
+
+		$projects           = array_map( 'strval', $projects );
+		$current_projects   = array_map( 'strval', self::get_users_projects( $user_id ) );
 		$projects_to_remove = array_diff( $current_projects, $projects );
 		$projects_to_add    = array_diff( $projects, $current_projects );
 
-		$now = current_time( 'mysql', 1 );
-
 		$values_to_add = array();
+		$now           = current_time( 'mysql', 1 );
+
 		foreach ( $projects_to_add as $project_id ) {
-			$values_to_add[] = $wpdb->prepare( '(%d, %d, %s, %s)',
-				self::$user->ID,
+			$values_to_add[] = $wpdb->prepare(
+				'(%d, %d, %s, %s)',
+				$user_id,
 				$project_id,
 				self::ALL_LOCALES,
 				$now
@@ -176,32 +216,27 @@ class Cross_Locale_PTE {
 		}
 
 		if ( $values_to_add ) {
-			$wpdb->query( "
-				INSERT INTO {$wpdb->wporg_translation_editors}
-				( `user_id`,`project_id`, `locale`, `date_added` )
+			$wpdb->query(
+				"INSERT INTO {$wpdb->wporg_translation_editors}
+				( `user_id`, `project_id`, `locale`, `date_added` )
 				VALUES " . implode( ', ', $values_to_add )
 			);
 		}
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-			$wpdb->query( $wpdb->prepare( "
-				DELETE FROM {$wpdb->wporg_translation_editors}
-				WHERE `user_id` = %d AND `locale` = %s
-				AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
-			self::$user->ID, self::ALL_LOCALES ) );
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->wporg_translation_editors}
+					WHERE `user_id` = %d AND `locale` = %s
+					AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
+					$user_id,
+					self::ALL_LOCALES
+				)
+			);
 		}
 
-		wp_safe_redirect(
-			add_query_arg(
-				array(
-					'user_id' => self::$user->ID,
-					'update'  => 'user-updated',
-				),
-				menu_page_url( 'cross-locale-pte', false )
-			)
-		);
-		exit;
+		return true;
 	}
 
 	/**
@@ -221,6 +256,9 @@ class Cross_Locale_PTE {
 
 		$payload = array(
 			'settings' => array(
+				'userId'      => $user->ID,
+				'saveAction'  => 'rosetta-save-clpte-projects',
+				'saveNonce'   => wp_create_nonce( 'rosetta_clpte_save_nonce' ),
 				'lastUpdated' => absint( get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' ) ),
 				'accessList'  => array_values( array_map( 'absint', self::get_users_projects( $user->ID ) ) ),
 				'nonce'       => wp_create_nonce( 'rosetta_projects_nonce' ),
@@ -231,6 +269,9 @@ class Cross_Locale_PTE {
 				'removeTranslator'  => __( 'Are you sure you wish to completely remove CLPTE status for this user?', 'rosetta' ),
 				'searchLabel'       => __( 'Search subprojects by name or slug', 'rosetta' ),
 				'searchPlaceholder' => __( 'Search…', 'rosetta' ),
+				'saving'            => __( 'Saving…', 'rosetta' ),
+				'saved'             => __( 'Cross-Locale PTE updated.', 'rosetta' ),
+				'saveError'         => __( 'An error occurred while saving.', 'rosetta' ),
 			),
 		);
 
