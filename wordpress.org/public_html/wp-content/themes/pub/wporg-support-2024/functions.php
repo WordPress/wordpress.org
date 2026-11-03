@@ -987,56 +987,7 @@ function wporg_support_add_moderation_notice() {
 				if ( ! $user_posting_history['last_archived_post'] ) {
 					$notices[] = __( 'The user has no previously archived posts.' ,'wporg-forums' );
 				} else {
-					// Get a DateTime object for when the last archived post was created.
-					$last_archive_time = get_post_modified_time( 'U', true, $user_posting_history['last_archived_post'][0] );
-
-					// Generate a differential time between the last archived post, and the current date and time.
-					$last_archive_elapsed = human_time_diff( strtotime( $user_posting_history['last_archived_post'][0]->post_modified_gmt ) );
-
 					$lines = array();
-
-					if ( $last_archive_time < DAY_IN_SECONDS ) {
-						$lines[] = sprintf(
-							// translators: %s: Time since the last archived post.
-							__( 'The user last had content archived %s.', 'wporg-forums' ),
-							sprintf(
-								'<span title="%s">%s</span>',
-								esc_attr(
-									sprintf(
-										// translators: %s: The original date and time when the users last archived post was.
-										__( 'Last archived post is from %s', 'wporg-forums' ),
-										$user_posting_history['last_archived_post'][0]->post_modified_gmt
-									)
-								),
-								__( 'today', 'wporg-forums' )
-							)
-						);
-					} else {
-						$lines[] = sprintf(
-							// translators: %s: Time since the last archived post.
-							__( 'The user last had content archived %s.', 'wporg-forums' ),
-							sprintf(
-								'<span title="%s">%s</span>',
-								esc_attr(
-									sprintf(
-										// translators: %s: The original date and time when the users last archived post was.
-										__( 'Last archived post is from %s', 'wporg-forums' ),
-										$user_posting_history['last_archived_post'][0]->post_modified_gmt
-									)
-								),
-								sprintf(
-									// translators: %d: Amount of days since the last archived post.
-									_n(
-										'%d day ago',
-										'%d days ago',
-										ceil( ( $last_archive_time - time() ) / DAY_IN_SECONDS ),
-										'wporg-forums'
-									),
-									esc_html( $last_archive_elapsed )
-								)
-							)
-						);
-					}
 
 					$lines[] = sprintf(
 						// translators: %d: The amount of approved posts since the last archived entry.
