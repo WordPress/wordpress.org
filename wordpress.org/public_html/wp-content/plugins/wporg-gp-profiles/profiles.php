@@ -271,6 +271,9 @@ function get_project_details( $translation_set ): array {
 	// Use the parent project, like wp-plugins/akismet instead of wp-plugins/akismet/stable.
 	$root_path = implode( '/', array_slice( explode( '/', $project->path ), 0, 2 ) );
 
+	// A locale page lists the contributors of its project and its direct sub-projects, so link a sub-project's parent.
+	$link_path = $root_path === $project->path ? $root_path : dirname( $project->path );
+
 	if ( $root_path !== $project->path ) {
 		$project = GP::$project->by_path( $root_path );
 
@@ -288,7 +291,8 @@ function get_project_details( $translation_set ): array {
 
 	return array(
 		'project_name'   => $name,
-		'project_url'    => gp_url_join( gp_url_public_root(), 'locale', $translation_set->locale, $translation_set->slug, $project->path ),
+		'project_key'    => $root_path . '/' . $translation_set->locale . '/' . $translation_set->slug,
+		'project_url'    => gp_url_join( gp_url_public_root(), 'locale', $translation_set->locale, $translation_set->slug, $link_path ),
 		'project_locale' => $translation_set->name,
 	);
 }

@@ -1044,8 +1044,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				$digest_id = $this->get_digest_id( $activity );
 				$projects  = $digest_id ? ( bp_activity_get_meta( $digest_id, 'digest_projects', true ) ?: array() ) : array();
 
+				// Sub-projects of one project can link to different pages, so group them by the project and keep the first link.
 				if ( $project ) {
-					$projects[ $project['url'] ] = $project;
+					$projects[ $project['key'] ?: $project['url'] ] ??= $project;
 				}
 
 				// `digest_bump()` runs this through sprintf(); escape literal percent signs from names or URLs.
@@ -1078,6 +1079,7 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 		protected function get_glotpress_project( array $activity ): array {
 			$project = array(
 				'name'   => sanitize_text_field( $activity['project_name'] ?? '' ),
+				'key'    => sanitize_text_field( $activity['project_key'] ?? '' ),
 				'url'    => sanitize_url( $activity['project_url'] ?? '' ),
 				'locale' => sanitize_text_field( $activity['project_locale'] ?? '' ),
 			);
