@@ -1026,7 +1026,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 *
 	 * @return array List of projects.
 	 */
-	private function get_translate_projects() {
+	public static function get_translate_projects() {
 		global $wpdb;
 		static $projects = null;
 
