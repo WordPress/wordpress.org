@@ -34,9 +34,9 @@
 				.slideToggle( 200 );
 
 			if ( isDeepLink ) {
-				const scrollPaddingTop = parseInt(
-					$( 'html' ).css( 'scroll-padding-top' ) || 0
-				);
+				const scrollPaddingTop =
+					parseInt( $( 'html' ).css( 'scroll-padding-top' ), 10 ) ||
+					0;
 
 				window.scrollTo( 0, $question.offset().top - scrollPaddingTop );
 			}
