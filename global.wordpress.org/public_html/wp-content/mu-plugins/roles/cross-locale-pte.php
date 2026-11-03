@@ -143,7 +143,9 @@ class Cross_Locale_PTE {
 		$project_ids = array_values( array_filter( array_map( 'absint', $raw_projects ) ) );
 
 		if ( empty( $project_ids ) ) {
-			self::update_cross_locale_pte( $user->ID, array() );
+			if ( ! self::update_cross_locale_pte( $user->ID, array() ) ) {
+				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+			}
 			wp_send_json_success(
 				[
 					'message'  => __( 'Cross-Locale PTE removed.', 'rosetta' ),
@@ -155,7 +157,9 @@ class Cross_Locale_PTE {
 		$valid_projects = array_values( array_intersect( $project_ids, array_keys( Rosetta_Roles::get_translate_projects() ) ) );
 
 		if ( empty( $valid_projects ) ) {
-			self::update_cross_locale_pte( $user->ID, array() );
+			if ( ! self::update_cross_locale_pte( $user->ID, array() ) ) {
+				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+			}
 			wp_send_json_success(
 				[
 					'message'  => __( 'Cross-Locale PTE removed.', 'rosetta' ),
@@ -164,7 +168,9 @@ class Cross_Locale_PTE {
 			);
 		}
 
-		self::update_cross_locale_pte( $user->ID, $valid_projects );
+		if ( ! self::update_cross_locale_pte( $user->ID, $valid_projects ) ) {
+			wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+		}
 
 		wp_send_json_success(
 			[
@@ -209,18 +215,22 @@ class Cross_Locale_PTE {
 		}
 
 		if ( $values_to_add ) {
-			$wpdb->query(
+			$inserted = $wpdb->query(
 				"INSERT INTO {$wpdb->wporg_translation_editors}
 				( `user_id`, `project_id`, `locale`, `date_added` )
 				VALUES " . implode( ', ', $values_to_add )
 			);
+
+			if ( false === $inserted ) {
+				return false;
+			}
 		}
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
 
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $values_to_remove consists solely of integers sanitized via array_map('intval').
-			$wpdb->query(
+			$deleted = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->wporg_translation_editors}
 					WHERE `user_id` = %d AND `locale` = %s
@@ -230,6 +240,10 @@ class Cross_Locale_PTE {
 				)
 			);
 			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+			if ( false === $deleted ) {
+				return false;
+			}
 		}
 
 		return true;
