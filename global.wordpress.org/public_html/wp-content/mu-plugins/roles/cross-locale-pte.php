@@ -161,7 +161,7 @@ class Cross_Locale_PTE {
 
 		global $wpdb;
 		$placeholders = implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) );
-		
+
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Dynamically constructed %d placeholders and hardcoded integer IDs from constant are safe.
 		$valid_projects = $wpdb->get_col(
 			$wpdb->prepare(
@@ -201,6 +201,10 @@ class Cross_Locale_PTE {
 
 	/**
 	 * Update the projects for the Cross-Locale PTE.
+	 *
+	 * @param int   $user_id  User ID.
+	 * @param array $projects Optional. List of project IDs. Default empty array.
+	 * @return bool True on success.
 	 */
 	public static function update_cross_locale_pte( $user_id, array $projects = array() ) {
 		global $wpdb;
@@ -233,15 +237,18 @@ class Cross_Locale_PTE {
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
+			$placeholders = implode( ', ', array_fill( 0, count( $values_to_remove ), '%d' ) );
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamically constructed %d placeholders for integer IDs are safe.
 			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->wporg_translation_editors}
 					WHERE `user_id` = %d AND `locale` = %s
-					AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
-					$user_id,
-					self::ALL_LOCALES
+					AND project_id IN ( {$placeholders} )",
+					array_merge( array( $user_id, self::ALL_LOCALES ), $values_to_remove )
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 
 		return true;
@@ -345,7 +352,6 @@ class Cross_Locale_PTE {
 			SELECT project_id FROM
 			{$wpdb->wporg_translation_editors}
 			WHERE user_id = %d AND locale = %s
-			AND project_id NOT IN (" . implode( ',', Rosetta_Roles::IGNORE_PROJECT_IDS ) . ")
 		", $user_id, self::ALL_LOCALES ) );
 
 		return $projects;
@@ -363,7 +369,6 @@ class Cross_Locale_PTE {
 			{$wpdb->wporg_translation_editors} te
 			JOIN translate_projects p ON te.project_id = p.id
 			WHERE te.locale = %s
-			AND te.project_id NOT IN (" . implode( ',', Rosetta_Roles::IGNORE_PROJECT_IDS ) . ")
 		", self::ALL_LOCALES ) );
 
 		if ( empty( $rows ) ) {
