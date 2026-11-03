@@ -65,18 +65,6 @@ class Cross_Locale_PTE {
 	}
 
 	/**
-	 * Enqueue assets only on this specific admin page.
-	 *
-	 * @param string $hook The current admin page hook.
-	 */
-	public static function enqueue_admin_assets( $hook ) {
-		if ( $hook === self::$admin_page ) {
-			Rosetta_Roles::enqueue_scripts();
-			Rosetta_Roles::enqueue_styles();
-		}
-	}
-
-	/**
 	 * Handle POST requests for the admin page.
 	 */
 	public static function handle_admin_post() {
@@ -227,7 +215,7 @@ class Cross_Locale_PTE {
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
 
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamically constructed %d placeholders for integer IDs are safe.
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $values_to_remove consists solely of integers sanitized via array_map('intval').
 			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->wporg_translation_editors}
@@ -237,7 +225,7 @@ class Cross_Locale_PTE {
 					self::ALL_LOCALES
 				)
 			);
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		}
 
 		return true;
