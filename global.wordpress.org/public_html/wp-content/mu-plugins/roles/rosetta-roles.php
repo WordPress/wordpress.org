@@ -870,6 +870,8 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			? array_map( 'sanitize_text_field', wp_unslash( $_POST['projects'] ) )
 			: array();
 
+		$redirect = admin_url( 'admin.php?page=translation-editors' );
+
 		if ( in_array( 'all', $raw_projects, true ) ) {
 			$this->update_translation_editor( $user, array( 'all' ) );
 			wp_send_json_success(
@@ -880,7 +882,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 							'user_id' => $user->ID,
 							'update'  => 'user-updated',
 						],
-						menu_page_url( 'translation-editors', false )
+						$redirect
 					),
 				]
 			);
@@ -893,7 +895,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			wp_send_json_success(
 				[
 					'message'  => __( 'Translation editor removed.', 'rosetta' ),
-					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'translation-editors', false ) ),
+					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), $redirect ),
 				]
 			);
 		}
@@ -905,7 +907,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			wp_send_json_success(
 				[
 					'message'  => __( 'Translation editor removed.', 'rosetta' ),
-					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'translation-editors', false ) ),
+					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), $redirect ),
 				]
 			);
 		}
