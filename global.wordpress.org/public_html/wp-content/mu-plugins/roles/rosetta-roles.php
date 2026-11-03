@@ -821,7 +821,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	public function ajax_rosetta_get_projects() {
 		check_ajax_referer( 'rosetta_projects_nonce' );
 
-		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
+		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) && ! current_user_can( 'manage_network_users' ) ) {
 			wp_send_json_error( array( 'message' => 'Unauthorized' ), 403 );
 		}
 
@@ -898,19 +898,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			);
 		}
 
-		global $wpdb;
-		$placeholders = implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) );
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Dynamically constructed %d placeholders and hardcoded integer IDs from constant are safe.
-		$valid_projects = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT id FROM translate_projects
-				WHERE id IN ( {$placeholders} )
-				AND id NOT IN (" . implode( ',', self::IGNORE_PROJECT_IDS ) . ')',
-				$project_ids
-			)
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		$valid_projects = array_values( array_intersect( $project_ids, array_keys( $this->get_translate_projects() ) ) );
 
 		if ( empty( $valid_projects ) ) {
 			$this->remove_translation_editor( $user );
