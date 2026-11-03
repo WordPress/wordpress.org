@@ -394,11 +394,11 @@ class Cross_Locale_PTE {
 			$cache = array();
 		}
 
-		if ( empty( $user->ID ) ) {
+		$user_id = $user instanceof WP_User ? (int) $user->ID : (int) $user;
+		if ( ! $user_id ) {
 			return false;
 		}
 
-		$user_id    = (int) $user->ID;
 		$project_id = intval( $project_id );
 
 		if ( isset( $cache[ $user_id ][ $project_id ] ) ) {
