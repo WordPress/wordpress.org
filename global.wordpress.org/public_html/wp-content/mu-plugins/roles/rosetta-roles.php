@@ -366,23 +366,38 @@ class Rosetta_Roles {
 			case 'update-translation-editor':
 				check_admin_referer( 'update-translation-editor_' . $user_details->ID );
 
-				$redirect = add_query_arg( 'user_id', $user_details->ID, $redirect );
+				$raw_projects = isset( $_POST['projects'] ) ? sanitize_text_field( wp_unslash( $_POST['projects'] ) ) : '';
+				$project_tokens = ( '' !== $raw_projects ) ? explode( ',', $raw_projects ) : array();
 
-				$all_projects = $this->get_translate_projects();
-				$all_projects = wp_list_pluck( $all_projects, 'id' );
-				$all_projects = array_map( 'intval', $all_projects );
-
-				$raw_projects = isset( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
-				$projects     = explode( ',', $raw_projects );
-				if ( in_array( 'all', $projects, true ) ) {
+				if ( in_array( 'all', $project_tokens, true ) ) {
 					$this->update_translation_editor( $user_details, array( 'all' ) );
 				} else {
-					$projects = array_map( 'intval', $projects );
-					$projects = array_values( array_intersect( $all_projects, $projects ) );
+					$projects = array_values( array_filter( array_map( 'absint', $project_tokens ) ) );
+
+					if ( empty( $projects ) ) {
+						$this->remove_translation_editor( $user_details );
+						wp_safe_redirect( add_query_arg( array( 'update' => 'user-removed' ), $redirect ) );
+						exit;
+					}
+					global $wpdb;
+
+					$ignore_project_ids = array( 13, 58, 67, 91, 481, 2804, 369622 );
+					$placeholders       = implode( ', ', array_fill( 0, count( $projects ), '%d' ) );
+
+					$valid_projects = $wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT id FROM translate_projects
+							WHERE id IN ( {$placeholders} )
+							AND id NOT IN (" . implode( ',', $ignore_project_ids ) . ")",
+							$projects
+						)
+					);
+
+					$projects = array_map( 'intval', $valid_projects );
 					$this->update_translation_editor( $user_details, $projects );
 				}
 
-				wp_safe_redirect( add_query_arg( array( 'update' => 'user-updated' ), $redirect ) );
+				wp_safe_redirect( add_query_arg( array( 'user_id' => $user_details->ID, 'update' => 'user-updated' ), $redirect ) );
 				exit;
 		}
 	}
