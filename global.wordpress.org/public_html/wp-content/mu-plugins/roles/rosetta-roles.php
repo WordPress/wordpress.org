@@ -890,10 +890,12 @@ Welcome to the WordPress Polyglots team and happy translating.',
 
 		if ( empty( $project_ids ) ) {
 			$this->remove_translation_editor( $user );
-			wp_send_json_success( array(
-				'message'  => __( 'Translation editor removed.', 'rosetta' ),
-				'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'translation-editors', false ) ),
-			) );
+			wp_send_json_success(
+				[
+					'message'  => __( 'Translation editor removed.', 'rosetta' ),
+					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'translation-editors', false ) ),
+				]
+			);
 		}
 
 		global $wpdb;
@@ -910,24 +912,28 @@ Welcome to the WordPress Polyglots team and happy translating.',
 
 		if ( empty( $valid_projects ) ) {
 			$this->remove_translation_editor( $user );
-			wp_send_json_success( array(
-				'message'  => __( 'Translation editor removed.', 'rosetta' ),
-				'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'translation-editors', false ) ),
-			) );
+			wp_send_json_success(
+				[
+					'message'  => __( 'Translation editor removed.', 'rosetta' ),
+					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), menu_page_url( 'translation-editors', false ) ),
+				]
+			);
 		}
 
 		$this->update_translation_editor( $user, $valid_projects );
 
-		wp_send_json_success( array(
-			'message'  => __( 'Translation editor updated.', 'rosetta' ),
-			'redirect' => add_query_arg(
-				array(
-					'user_id' => $user->ID,
-					'update'  => 'user-updated',
+		wp_send_json_success(
+			[
+				'message'  => __( 'Translation editor updated.', 'rosetta' ),
+				'redirect' => add_query_arg(
+					[
+						'user_id' => $user->ID,
+						'update'  => 'user-updated',
+					],
+					menu_page_url( 'translation-editors', false )
 				),
-				menu_page_url( 'translation-editors', false )
-			),
-		) );
+			]
+		);
 	}
 
 	/**
