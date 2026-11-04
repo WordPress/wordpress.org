@@ -1,0 +1,29 @@
+.wp-block-term-template.is-style-pills .wp-block-term-name {
+	margin: 0;
+}
+
+.wp-block-term-template.is-style-pills a {
+	display: block;
+	padding: 8px 20px;
+	border: 1px solid var(--wp--preset--color--hairline);
+	border-radius: var(--wp--preset--border-radius--pill);
+	background-color: var(--wp--preset--color--base);
+	color: var(--wp--preset--color--charcoal-3);
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 500;
+	line-height: normal;
+	text-decoration: none;
+}
+
+.wp-block-term-template.is-style-pills a:hover {
+	border-color: var(--wp--preset--color--subtle);
+	color: var(--wp--preset--color--ink);
+}
+
+.wp-block-term-template.is-style-pills a[aria-current="true"],
+.wp-block-term-template.is-style-pills a[aria-current="page"] {
+	border-color: var(--wp--preset--color--acid);
+	background-color: var(--wp--preset--color--acid);
+	color: var(--wp--preset--color--ink);
+	font-weight: 600;
+}
