@@ -313,15 +313,15 @@ class Rosetta_Roles {
 					$user_ids = array_map( 'intval', (array) $_REQUEST['translation-editors'] );
 					foreach ( $user_ids as $user_id ) {
 						if ( $this->remove_translation_editor( $user_id ) ) {
-							$count++;
+							++$count;
 						}
 					}
 
-				if ( 0 === $count ) {
-					wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
-					exit;
-				}
-	
+					if ( 0 === $count ) {
+						wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
+						exit;
+					}
+
 					wp_safe_redirect(
 						add_query_arg(
 							array(
@@ -417,10 +417,14 @@ class Rosetta_Roles {
 			$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
 		}
 
-		$deleted = $wpdb->query( $wpdb->prepare( "
-			DELETE FROM {$wpdb->wporg_translation_editors}
-			WHERE `user_id` = %d AND `locale` = %s
-		", $user->ID, $this->gp_locale->slug ) );
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->wporg_translation_editors}
+				WHERE `user_id` = %d AND `locale` = %s",
+				$user->ID,
+				$this->gp_locale->slug
+			)
+		);
 
 		if ( false === $deleted ) {
 			return false;
