@@ -35,7 +35,7 @@ class Rosetta_Roles {
 	const GENERAL_TRANSLATION_EDITOR_ROLE = 'general_translation_editor';
 
 	/**
-	 * Capabaility to promote translation editor.
+	 * Capability to promote translation editor.
 	 */
 	const MANAGE_TRANSLATION_EDITORS_CAP = 'manage_translation_editors';
 
@@ -419,10 +419,14 @@ class Rosetta_Roles {
 			return false;
 		}
 
-		$deleted = $wpdb->query( $wpdb->prepare( "
-			DELETE FROM {$wpdb->wporg_translation_editors}
-			WHERE `user_id` = %d AND `locale` = %s
-		", $user->ID, $this->gp_locale->slug ) );
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->wporg_translation_editors}
+				WHERE `user_id` = %d AND `locale` = %s",
+				$user->ID,
+				$this->gp_locale->slug
+			)
+		);
 
 		if ( false === $deleted ) {
 			return false;
@@ -526,11 +530,17 @@ class Rosetta_Roles {
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-			$deleted = $wpdb->query( $wpdb->prepare( "
-				DELETE FROM {$wpdb->wporg_translation_editors}
-				WHERE `user_id` = %d AND `locale` = %s
-				AND project_id IN (" . implode( ', ', $values_to_remove ) . ")
-			", $user->ID, $this->gp_locale->slug ) );
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+			$deleted = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->wporg_translation_editors}
+					WHERE `user_id` = %d AND `locale` = %s
+					AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
+					$user->ID,
+					$this->gp_locale->slug
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 			if ( false === $deleted ) {
 				return false;
