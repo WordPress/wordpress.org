@@ -1,0 +1,7 @@
+{
+	"description": "Abilities registered through a bundled base class: the plugin's own, and a second bundled package's, flagged as bundled (modelled on Jetpack).",
+	"abilities": [
+		{ "name": "bundled-registrar/own", "label": "Own", "description": "The plugin's own." },
+		{ "name": "acme-forms/list-forms", "label": "List forms", "description": "Lists forms.", "bundled": true }
+	]
+}

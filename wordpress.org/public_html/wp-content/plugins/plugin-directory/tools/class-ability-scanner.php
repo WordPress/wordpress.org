@@ -41,6 +41,12 @@ use stdClass;
  */
 class Ability_Scanner {
 
+	/**
+	 * Bump when a change to detection could change what's found, so each plugin is
+	 * scanned again on its next import.
+	 */
+	const VERSION = 1;
+
 	/** The ability name format core accepts. */
 	const NAME_PATTERN = '#^[a-z0-9-]+/[a-z0-9-]+$#';
 
@@ -237,6 +243,72 @@ class Ability_Scanner {
 	 * @var \WeakMap
 	 */
 	private \WeakMap $closers;
+	/**
+	 * Each file's contents, read once.
+	 *
+	 * @var string[]
+	 */
+	private array $sources = [];
+	/**
+	 * Each file's position in the sorted list, so files indexed out of order merge as if in order.
+	 *
+	 * @var int[]
+	 */
+	private array $rank = [];
+	/**
+	 * Files indexed so far.
+	 *
+	 * @var bool[]
+	 */
+	private array $indexed = [];
+	/**
+	 * Files that may declare a name, from a cheap pass over their text: 'class',
+	 * 'function', 'define', 'extends' and 'filter' (add_filter() hook names) =>
+	 * name => files. A superset; indexing confirms each declaration.
+	 *
+	 * @var array
+	 */
+	private array $declarations = [
+		'class'    => [],
+		'function' => [],
+		'define'   => [],
+		'extends'  => [],
+		'filter'   => [],
+	];
+	/**
+	 * Lowercase short names of the classes each file may declare.
+	 *
+	 * @var array
+	 */
+	private array $declared_in = [];
+	/**
+	 * Names whose candidate files have all been indexed, as "kind:name".
+	 *
+	 * @var bool[]
+	 */
+	private array $loaded = [];
+	/**
+	 * Rank of the file each indexed class, function and constant comes from.
+	 *
+	 * @var array
+	 */
+	private array $origin = [
+		'class'    => [],
+		'function' => [],
+		'define'   => [],
+	];
+	/**
+	 * Each class's position in an index built in file order, for ordering subclasses.
+	 *
+	 * @var int[]
+	 */
+	private array $class_order = [];
+	/**
+	 * Whether classes have been indexed since $children was built.
+	 *
+	 * @var bool
+	 */
+	private bool $children_stale = true;
 
 	/**
 	 * Find the abilities a plugin registers.
@@ -251,9 +323,9 @@ class Ability_Scanner {
 	/**
 	 * Find the abilities and ability categories a plugin registers.
 	 *
-	 * Bundled third-party code (see BUNDLED_DIRECTORIES) is scanned too, but
-	 * only packages that mention abilities, and what it registers is flagged
-	 * as bundled. Whether to list it is up to whoever displays the data.
+	 * Bundled third-party code (see BUNDLED_DIRECTORIES) is scanned too, and
+	 * what it registers is flagged as bundled. Whether to list it is up to
+	 * whoever displays the data.
 	 *
 	 * @param string $base_dir The plugin's root directory.
 	 * @return array {
@@ -273,12 +345,12 @@ class Ability_Scanner {
 		sort( $files );
 
 		// Most plugins register no abilities: a plain text check comes first, so they're never tokenised.
-		$relevant = [];
+		// Each file is read once, here.
+		$sources  = [];
+		$relevant = false;
 		foreach ( $files as $file ) {
-			$contents = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
-			if ( false !== stripos( $contents, 'register_ability' ) || false !== stripos( $contents, 'abilities_registry' ) ) {
-				$relevant[ self::package_of( substr( $file, strlen( $base_dir ) ) ) ] = true;
-			}
+			$sources[ $file ] = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
+			$relevant         = $relevant || self::mentions_registration( $sources[ $file ] );
 		}
 		if ( ! $relevant ) {
 			return [
@@ -287,20 +359,22 @@ class Ability_Scanner {
 			];
 		}
 
-		// Bundled packages are only indexed when they mention abilities themselves.
-		$files = array_values(
-			array_filter(
-				$files,
-				static function ( $file ) use ( $base_dir, $relevant ) {
-					$package = self::package_of( substr( $file, strlen( $base_dir ) ) );
-					return '' === $package || isset( $relevant[ $package ] );
-				}
-			)
-		);
-
-		$scanner           = new self( $files );
+		// Every file stays available: one bundled package can register through another's
+		// base class. Files are only tokenised when a registration or a lookup needs them.
+		$scanner           = new self( $files, $sources );
 		$scanner->base_dir = $base_dir;
 		return $scanner->run();
+	}
+
+	/**
+	 * Whether source code may register an ability or category: every
+	 * wp_register_ability(), wp_register_ability_category() and registry call
+	 * contains one of these strings.
+	 *
+	 * @param string $contents PHP source code.
+	 */
+	private static function mentions_registration( string $contents ): bool {
+		return false !== stripos( $contents, 'register_ability' ) || false !== stripos( $contents, 'abilities_registry' );
 	}
 
 	/**
@@ -321,12 +395,39 @@ class Ability_Scanner {
 	/**
 	 * Set up a scan of the given files.
 	 *
-	 * @param string[] $files The plugin's PHP files.
+	 * @param string[] $files   The plugin's PHP files, sorted.
+	 * @param string[] $sources Each file's contents, by path.
 	 */
-	private function __construct( array $files ) {
+	private function __construct( array $files, array $sources ) {
 		$this->files   = $files;
+		$this->sources = $sources;
+		$this->rank    = array_flip( $files );
 		$this->spans   = new \WeakMap();
 		$this->closers = new \WeakMap();
+
+		// Note which files may declare which names, without tokenising them. Files are
+		// tokenised and indexed only when a registration or a lookup needs them.
+		$patterns = [
+			'class'    => '/\b(?:class|interface|trait|enum)\s+([a-z_\x80-\xff][\w\x80-\xff]*)/i',
+			'function' => '/\bfunction\s+&?\s*([a-z_\x80-\xff][\w\x80-\xff]*)\s*\(/i',
+			'define'   => '/\bdefine\s*\(\s*[\'"]([^\'"\\\\]+)[\'"]/i',
+			'extends'  => '/\bextends\s+\\\\?(?:[\w\x80-\xff]+\\\\)*([\w\x80-\xff]+)/i',
+			'filter'   => '/\badd_filter\s*\(\s*[\'"]([^\'"\\\\]+)[\'"]/i',
+		];
+		foreach ( $sources as $file => $contents ) {
+			foreach ( $patterns as $kind => $pattern ) {
+				if ( preg_match_all( $pattern, $contents, $matches ) ) {
+					foreach ( array_unique( $matches[1] ) as $name ) {
+						// Constants and hook names are case-sensitive; class and function names aren't.
+						$key                                   = in_array( $kind, [ 'define', 'filter' ], true ) ? $name : strtolower( $name );
+						$this->declarations[ $kind ][ $key ][] = $file;
+						if ( 'class' === $kind ) {
+							$this->declared_in[ $file ][] = strtolower( $name );
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -364,13 +465,11 @@ class Ability_Scanner {
 	 * @return array See scan_plugin().
 	 */
 	private function run(): array {
+		// Only files that may register are indexed up front, in order, so call sites keep their order.
+		// Everything else is indexed when a lookup needs it.
 		foreach ( $this->files as $file ) {
-			$this->index( $file );
-		}
-		foreach ( $this->classes as $lname => $class ) {
-			$parent = $this->parent_of( $lname );
-			if ( $parent ) {
-				$this->children[ $parent ][] = $lname;
+			if ( self::mentions_registration( $this->sources[ $file ] ) ) {
+				$this->index( $file );
 			}
 		}
 
@@ -418,7 +517,11 @@ class Ability_Scanner {
 		if ( $dynamic ) {
 			$budget = self::DEFINITIONS_BUDGET;
 			foreach ( $this->files as $file ) {
-				$definitions = self::find_definitions( (string) file_get_contents( $file ), $budget ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
+				// A definition is keyed by a quoted ability name, or has a 'name' key.
+				if ( ! preg_match( '#[\'"][a-z0-9-]+/[a-z0-9-]+[\'"]|[\'"]name[\'"]#', $this->sources[ $file ] ) ) {
+					continue;
+				}
+				$definitions = self::find_definitions( $this->sources[ $file ], $budget );
 				foreach ( $definitions as $ability ) {
 					$ability->file    = $this->relative( $file );
 					$ability->bundled = $this->is_bundled( $file );
@@ -709,8 +812,10 @@ class Ability_Scanner {
 		$name      = strtolower( $scope['name'] );
 		$is_method = 'method' === $scope['kind'];
 		$sites     = [];
+		// Only files where the name is followed by `(` can call it.
+		$pattern = '/(?<![\w\x80-\xff])' . preg_quote( $name, '/' ) . '\s*\(/i';
 		foreach ( $this->files as $file ) {
-			if ( ! isset( $this->identifiers[ $file ][ $name ] ) ) {
+			if ( ! $this->mentions( $file, $name, $pattern ) ) {
 				continue;
 			}
 			$tokens = $this->tokens( $file );
@@ -835,8 +940,10 @@ class Ability_Scanner {
 	private function instantiations( string $class_name ): array {
 		$short   = strtolower( self::short_name( $this->classes[ $class_name ]['name'] ?? $class_name ) );
 		$objects = [];
+		// Only files that write `new Name`, `new Some\\Name` or `new $variable` (with the name elsewhere) can instantiate it.
+		$pattern = '/\bnew\s+(?:\\\\?(?:[\w\x80-\xff]+\\\\)*' . preg_quote( $short, '/' ) . '(?![\w\x80-\xff])|\$)/i';
 		foreach ( $this->files as $file ) {
-			if ( ! isset( $this->identifiers[ $file ][ $short ] ) ) {
+			if ( ! $this->mentions( $file, $short, $pattern ) ) {
 				continue;
 			}
 			$tokens = $this->tokens( $file );
@@ -1588,9 +1695,15 @@ class Ability_Scanner {
 	 */
 	private function apply_filters( $hook, $value, array $extra ) {
 		$key = is_string( $hook ) ? "filtering:$hook" : null;
-		if ( ! $key || empty( $this->filters[ $hook ] ) || isset( $this->memo[ $key ] ) ) {
+		if ( ! $key || isset( $this->memo[ $key ] ) ) {
 			return $value;
 		}
+		$this->load( 'filter', $hook );
+		if ( empty( $this->filters[ $hook ] ) ) {
+			return $value;
+		}
+		// In file order, whatever order the files were indexed in.
+		usort( $this->filters[ $hook ], fn( $a, $b ) => [ $this->rank[ $a[0] ], $a[1][0] ] <=> [ $this->rank[ $b[0] ], $b[1][0] ] );
 		$this->memo[ $key ] = true; // A callback that applies the same filter sees the unfiltered value.
 		try {
 			foreach ( array_slice( $this->filters[ $hook ], 0, 50 ) as [ $file, $range ] ) {
@@ -1658,6 +1771,7 @@ class Ability_Scanner {
 	 */
 	private function call_method( $target, string $name, array $args, ?string $from = null ) {
 		if ( is_string( $target ) ) {
+			$this->load_class( strtolower( ltrim( $target, '\\' ) ) );
 			$class  = $this->classes[ strtolower( ltrim( $target, '\\' ) ) ] ?? null;
 			$target = $class ? $this->bare( strtolower( ltrim( $class['name'], '\\' ) ) ) : null;
 		}
@@ -2064,6 +2178,7 @@ class Ability_Scanner {
 		if ( 'false' === $lower ) {
 			return false;
 		}
+		$this->load( 'define', $name );
 		if ( ! isset( $this->defines[ $name ] ) ) {
 			return null;
 		}
@@ -2091,6 +2206,7 @@ class Ability_Scanner {
 	 * @param string $name The constant's name.
 	 */
 	private function class_constant( string $class_name, string $name ) {
+		$this->load_class( $class_name );
 		for ( $c = $class_name, $hops = 0; $c && $hops < 20; $c = $this->parent_of( $c ), $hops++ ) {
 			$range = $this->classes[ $c ]['consts'][ $name ] ?? null;
 			if ( ! $range ) {
@@ -2184,6 +2300,7 @@ class Ability_Scanner {
 	 * @param string $name The method's name, lowercase.
 	 */
 	private function find_method( string $class_name, string $name ): ?array {
+		$this->load_class( $class_name );
 		for ( $c = $class_name, $hops = 0; $c && $hops < 20; $c = $this->parent_of( $c ), $hops++ ) {
 			if ( isset( $this->classes[ $c ]['methods'][ $name ] ) ) {
 				return $this->classes[ $c ]['methods'][ $name ];
@@ -2198,6 +2315,7 @@ class Ability_Scanner {
 	 * @param string $class_name A known class (lowercase fully-qualified name).
 	 */
 	private function parent_of( string $class_name ): ?string {
+		$this->load_class( $class_name );
 		$info = $this->classes[ $class_name ] ?? null;
 		if ( ! $info || ! $info['parent'] ) {
 			return null;
@@ -2237,6 +2355,10 @@ class Ability_Scanner {
 	 * @param string $class_name A known class (lowercase fully-qualified name).
 	 */
 	private function descendants( string $class_name ): array {
+		$this->load_subclasses( $class_name );
+		if ( $this->children_stale ) {
+			$this->build_children();
+		}
 		$found = [];
 		$queue = $this->children[ $class_name ] ?? [];
 		for ( $found_count = 0; $queue && $found_count < 500; ) {
@@ -2269,6 +2391,9 @@ class Ability_Scanner {
 	 */
 	private function lookup_class( string $name, array $scope ): ?string {
 		$fqn = $this->qualify( $name, $scope );
+		// By the name as written and as resolved: an import alias (`use A\B as C;`) has a different short name.
+		$this->load( 'class', strtolower( self::short_name( $name ) ) );
+		$this->load( 'class', self::short_name( $fqn ) );
 		if ( isset( $this->classes[ $fqn ] ) ) {
 			return $fqn;
 		}
@@ -2283,7 +2408,10 @@ class Ability_Scanner {
 	 * @param array  $scope The scope the code runs in.
 	 */
 	private function lookup_function( string $name, array $scope ): ?array {
-		$fqn = $this->qualify( $name, $scope );
+		$imported = $scope['uses'][ 'function:' . strtolower( $name ) ] ?? null;
+		$fqn      = $imported ? strtolower( $imported ) : $this->qualify( $name, $scope );
+		$this->load( 'function', strtolower( self::short_name( $name ) ) );
+		$this->load( 'function', self::short_name( $fqn ) );
 		if ( isset( $this->functions[ $fqn ] ) ) {
 			return $this->functions[ $fqn ];
 		}
@@ -2321,19 +2449,50 @@ class Ability_Scanner {
 	 * @param string $file Path of one of the plugin's PHP files.
 	 */
 	private function index( string $file ): void {
-		$parsed                     = $this->parse( $file );
+		if ( isset( $this->indexed[ $file ] ) ) {
+			return;
+		}
+		$this->indexed[ $file ] = true;
+		$rank                   = $this->rank[ $file ];
+
+		// Indexing isn't charged to the budget, even when a lookup needs it mid-evaluation.
+		$evaluating       = $this->evaluating;
+		$this->evaluating = false;
+		try {
+			$parsed = $this->parse( $file );
+		} finally {
+			$this->evaluating = $evaluating;
+		}
+
 		$this->meta[ $file ]        = [
 			'scopes'     => $parsed['scopes'],
 			'scope_ends' => array_column( $parsed['scopes'], 'end', 'start' ),
 			'namespaces' => $parsed['namespaces'],
 		];
 		$this->identifiers[ $file ] = $parsed['identifiers'];
+		// As if every file were indexed in order: a later class replaces an earlier one, but
+		// keeps the earlier one's position; the first function or constant of a name wins.
+		$position = 0;
 		foreach ( $parsed['classes'] as $lname => $class ) {
-			$this->classes[ $lname ] = $class;
+			if ( ( $this->origin['class'][ $lname ] ?? -1 ) <= $rank ) {
+				$this->classes[ $lname ]         = $class;
+				$this->origin['class'][ $lname ] = $rank;
+			}
+			$this->class_order[ $lname ] = min( $this->class_order[ $lname ] ?? PHP_INT_MAX, $rank * 100000 + $position++ );
 			$this->short_names[ strtolower( self::short_name( $class['name'] ) ) ][] = $lname;
+			$this->children_stale = true;
 		}
-		$this->functions += $parsed['functions'];
-		$this->defines   += $parsed['defines'];
+		foreach ( [
+			'function' => 'functions',
+			'define'   => 'defines',
+		] as $kind => $property ) {
+			foreach ( $parsed[ $property ] as $key => $value ) {
+				if ( $rank < ( $this->origin[ $kind ][ $key ] ?? PHP_INT_MAX ) ) {
+					$this->{$property}[ $key ]     = $value;
+					$this->origin[ $kind ][ $key ] = $rank;
+				}
+			}
+		}
 		foreach ( $parsed['sites'] as $index ) {
 			$this->sites[] = [ $file, $index ];
 		}
@@ -2348,6 +2507,87 @@ class Ability_Scanner {
 	}
 
 	/**
+	 * Whether a file uses a name, indexing it first if its text matches a pattern for
+	 * how the name would be used. Once indexed, its tokens decide.
+	 *
+	 * @param string $file    Path of one of the plugin's PHP files.
+	 * @param string $name    A lowercase short name.
+	 * @param string $pattern A regular expression that any use of the name matches.
+	 */
+	private function mentions( string $file, string $name, string $pattern ): bool {
+		if ( ! isset( $this->indexed[ $file ] ) ) {
+			if ( false === stripos( $this->sources[ $file ], $name ) || ! preg_match( $pattern, $this->sources[ $file ] ) ) {
+				return false;
+			}
+			$this->index( $file );
+		}
+		return isset( $this->identifiers[ $file ][ $name ] );
+	}
+
+	/**
+	 * Index every file that may declare a name, so lookups see all of its declarations.
+	 *
+	 * @param string $kind 'class', 'function', 'define' or 'filter'.
+	 * @param string $name A lowercase short name, or a constant's or hook's exact name.
+	 */
+	private function load( string $kind, string $name ): void {
+		if ( isset( $this->loaded[ "$kind:$name" ] ) ) {
+			return;
+		}
+		$this->loaded[ "$kind:$name" ] = true;
+		foreach ( $this->declarations[ $kind ][ $name ] ?? [] as $file ) {
+			$this->index( $file );
+		}
+	}
+
+	/**
+	 * Index every file that may declare a class.
+	 *
+	 * @param string $class_name A lowercase fully-qualified class name.
+	 */
+	private function load_class( string $class_name ): void {
+		$this->load( 'class', self::short_name( $class_name ) );
+	}
+
+	/**
+	 * Index every file that may declare a class that extends a class, directly or not.
+	 *
+	 * @param string $class_name A lowercase fully-qualified class name.
+	 */
+	private function load_subclasses( string $class_name ): void {
+		$queue = [ self::short_name( $class_name ) ];
+		$seen  = [];
+		while ( $queue ) {
+			$short = array_shift( $queue );
+			if ( isset( $seen[ $short ] ) ) {
+				continue;
+			}
+			$seen[ $short ] = true;
+			foreach ( $this->declarations['extends'][ $short ] ?? [] as $file ) {
+				$this->index( $file );
+				// Its classes' own subclasses are descendants too.
+				$queue = array_merge( $queue, $this->declared_in[ $file ] ?? [] );
+			}
+		}
+	}
+
+	/**
+	 * Map each indexed class's parent to it, in the order an in-order index would have.
+	 */
+	private function build_children(): void {
+		$this->children_stale = false;
+		$this->children       = [];
+		$order                = $this->class_order;
+		asort( $order );
+		foreach ( array_keys( $order ) as $lname ) {
+			$parent = $this->parent_of( $lname );
+			if ( $parent ) {
+				$this->children[ $parent ][] = $lname;
+			}
+		}
+	}
+
+	/**
 	 * Tokenise a file and outline it: namespaces and imports, classes with their
 	 * constants and methods, functions, closures, define() calls and
 	 * wp_register_ability() call sites.
@@ -2357,7 +2597,7 @@ class Ability_Scanner {
 	private function parse( string $file ): array {
 		$tokens = array_values(
 			array_filter(
-				PhpToken::tokenize( (string) file_get_contents( $file ) ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
+				PhpToken::tokenize( $this->sources[ $file ] ),
 				static fn( PhpToken $t ) => ! $t->isIgnorable()
 			)
 		);
@@ -2632,8 +2872,14 @@ class Ability_Scanner {
 	 */
 	private function parse_use( array $tokens, int $i ): array {
 		$next = $tokens[ $i + 1 ] ?? null;
-		if ( ! $next || in_array( $next->id, [ T_FUNCTION, T_CONST ], true ) ) {
+		if ( ! $next || T_CONST === $next->id ) {
 			return [];
+		}
+		// `use function A\b as c;` imports are kept as "function:c".
+		$kind = '';
+		if ( T_FUNCTION === $next->id ) {
+			$kind = 'function:';
+			++$i;
 		}
 		$end = $this->statement_end( $tokens, $i + 1 );
 		if ( null === $end ) {
@@ -2643,7 +2889,7 @@ class Ability_Scanner {
 		$imports = [];
 		$prefix  = '';
 		$clause  = [];
-		$flush   = static function () use ( &$clause, &$imports, &$prefix ) {
+		$flush   = static function () use ( &$clause, &$imports, &$prefix, $kind ) {
 			if ( ! $clause ) {
 				return;
 			}
@@ -2657,7 +2903,7 @@ class Ability_Scanner {
 				$name .= $t->text;
 			}
 			$fqn = ltrim( ( $prefix ? $prefix . '\\' : '' ) . ltrim( $name, '\\' ), '\\' );
-			$imports[ strtolower( $alias ?? self::short_name( $fqn ) ) ] = $fqn;
+			$imports[ $kind . strtolower( $alias ?? self::short_name( $fqn ) ) ] = $fqn;
 			$clause = [];
 		};
 		for ( $j = $i + 1; $j < $end; $j++ ) {
@@ -2776,7 +3022,7 @@ class Ability_Scanner {
 		}
 		$tokens = array_values(
 			array_filter(
-				PhpToken::tokenize( (string) file_get_contents( $file ) ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
+				PhpToken::tokenize( $this->sources[ $file ] ),
 				static fn( PhpToken $t ) => ! $t->isIgnorable()
 			)
 		);
