@@ -1082,7 +1082,7 @@ EMAIL;
 	/**
 	 * Schedules job pruning if it isn't already scheduled.
 	 *
-	 * Jobs are scheduled to be pruned daily.
+	 * Jobs are scheduled to be pruned hourly.
 	 */
 	private function schedule_job_pruning() {
 		if ( ! wp_next_scheduled( 'jobswp_scheduled_job_pruning' ) && ! defined( 'WP_INSTALLING' ) )
