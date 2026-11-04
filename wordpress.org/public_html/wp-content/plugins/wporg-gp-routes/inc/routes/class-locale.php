@@ -854,7 +854,7 @@ class Locale extends GP_Route {
 	 * @param string $path Project path.
 	 * @return GP_Project|false The project object, or false on 404.
 	 */
-	private function get_project_by_path( $path ) {
+	private function get_project_by_path( string $path ): GP_Project|false {
 		$project = GP::$project->by_path( $path );
 		if ( ! $project ) {
 			$this->die_with_404();
@@ -872,7 +872,7 @@ class Locale extends GP_Route {
 	 * @param int $project_id The project ID.
 	 * @return GP_Project|false The project object, or false if not found.
 	 */
-	private function get_project_by_id( $project_id ) {
+	private function get_project_by_id( int $project_id ): GP_Project|false {
 		$project_id = (int) $project_id;
 		if ( ! $project_id ) {
 			return false;
@@ -893,7 +893,7 @@ class Locale extends GP_Route {
 	 *                                       Default false.
 	 * @return array List of sub projects.
 	 */
-	private function get_active_sub_projects( $project, $with_sub_projects = false ) {
+	private function get_active_sub_projects( GP_Project $project, bool $with_sub_projects = false ): array {
 		global $wpdb;
 
 		$cache_key = (int) $project->id . ':' . (int) $with_sub_projects;
@@ -1289,7 +1289,7 @@ class Locale extends GP_Route {
 	 * @param string $prefix   GlotPress path prefix (e.g. 'wp-themes').
 	 * @return array Formatted favorite slugs.
 	 */
-	private function get_favorites_for_meta( $user_id, $meta_key, $prefix ) {
+	private function get_favorites_for_meta( int $user_id, string $meta_key, string $prefix ): array {
 		$raw = array_filter( (array) get_user_meta( $user_id, $meta_key, true ) );
 
 		return array_map(
@@ -1306,7 +1306,7 @@ class Locale extends GP_Route {
 	 * @param string|false $project_slug Project slug to filter by, or false for all.
 	 * @return array List of favorited items, eg [ 'wp-themes/twentyten', 'wp-themes/twentyeleven' ]
 	 */
-	public function get_user_favorites( $project_slug = false ) {
+	public function get_user_favorites( string|false $project_slug = false ): array {
 		if ( ! is_user_logged_in() ) {
 			return array();
 		}
@@ -1337,7 +1337,7 @@ class Locale extends GP_Route {
 	 *
 	 * @return array List of top level projects.
 	 */
-	public function get_active_top_level_projects() {
+	public function get_active_top_level_projects(): array {
 		$last_updated = get_option( 'wporg_projects_last_updated', 0 );
 		$cache_key    = 'active_top_level_projects:' . $last_updated;
 		$projects     = wp_cache_get( $cache_key, $this->cache_group );
