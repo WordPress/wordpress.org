@@ -63,6 +63,29 @@ class Import_Abilities_Test extends TestCase {
 	}
 
 	/**
+	 * Abilities in a vendor/ package are reported and flagged as bundled. Built
+	 * in a temporary directory, because the repository ignores vendor/ folders.
+	 */
+	public function test_vendor_abilities_are_bundled(): void {
+		$dir = sys_get_temp_dir() . '/abilities-vendor-' . uniqid();
+		mkdir( $dir . '/vendor/acme/tools', 0777, true ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
+		file_put_contents( $dir . '/plugin.php', "<?php\nwp_register_ability( 'mine/own', array( 'label' => 'Mine' ) );\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
+		file_put_contents( $dir . '/vendor/acme/tools/register.php', "<?php\nwp_register_ability( 'acme/tool', array( 'label' => 'Tool' ) );\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
+		$bundled = array_column( array_map( 'get_object_vars', Import::find_abilities_in_directory( $dir ) ), 'bundled', 'name' );
+		unlink( $dir . '/vendor/acme/tools/register.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
+		unlink( $dir . '/plugin.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
+		array_map( 'rmdir', array( "$dir/vendor/acme/tools", "$dir/vendor/acme", "$dir/vendor", $dir ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
+
+		$this->assertSame(
+			array(
+				'acme/tool' => true,
+				'mine/own'  => false,
+			),
+			array_merge( array( 'acme/tool' => null ), $bundled )
+		);
+	}
+
+	/**
 	 * One case per scenario directory, named after the directory.
 	 */
 	public static function scenario_provider(): array {
