@@ -450,6 +450,9 @@ class Rosetta_Roles {
 
 		$projects = array_map( 'strval', $projects );
 		$current_projects = $this->get_users_projects( $user->ID );
+		if ( in_array( 'all', $current_projects, true ) ) {
+			$current_projects = array( '0' );
+		}
 		$projects_to_add = $projects_to_remove = array();
 
 		if ( in_array( 'all', $projects, true ) ) {
@@ -991,6 +994,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 				'not-added-to-site' => __( 'The user couldn&#8217;t be added to this site.', 'rosetta' ),
 				'user-cannot'       => __( 'The user is not a translation editor.', 'rosetta' ),
 				'user-exists'       => __( 'The user is already a translation editor.', 'rosetta' ),
+				'save-error'        => __( 'An error occurred while saving.', 'rosetta' ),
 			),
 		);
 
