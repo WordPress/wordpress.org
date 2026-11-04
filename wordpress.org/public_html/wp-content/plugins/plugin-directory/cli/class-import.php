@@ -10,6 +10,7 @@ use WordPressdotorg\Plugin_Directory\Readme\{ Parser as Readme_Parser, Validator
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Tools\Ability_Scanner;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Tools\Tokenisation_Helpers;
@@ -137,6 +138,7 @@ class Import {
 		$blocks             = $data['blocks'];
 		$block_files        = $data['block_files'];
 		$dashboard_widgets  = $data['dashboard_widgets'] ?? array();
+		$abilities          = $data['abilities'] ?? array();
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
@@ -652,6 +654,20 @@ class Import {
 		} else {
 			wp_remove_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
+		}
+
+		// Store the ability data, if known. `ability_name` is one row per ability so it can be queried.
+		if ( $abilities ) {
+			$changed = update_post_meta( $plugin->ID, 'all_abilities', $abilities );
+			if ( $changed || count( get_post_meta( $plugin->ID, 'ability_name' ) ) !== count( $abilities ) ) {
+				delete_post_meta( $plugin->ID, 'ability_name' );
+				foreach ( $abilities as $ability ) {
+					add_post_meta( $plugin->ID, 'ability_name', $ability->name, false );
+				}
+			}
+		} else {
+			delete_post_meta( $plugin->ID, 'all_abilities' );
+			delete_post_meta( $plugin->ID, 'ability_name' );
 		}
 
 		self::record_release( $plugin, $stable_tag, $version, $current_stable_tag, $last_committer, $last_revision );
@@ -1228,9 +1244,11 @@ class Import {
 			}
 		}
 
+		$abilities = self::find_abilities_in_directory( $base_dir );
+
 		return apply_filters(
 			'wporg_plugins_export_and_parse_plugin',
-			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files', 'dashboard_widgets' ),
+			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files', 'dashboard_widgets', 'abilities' ),
 			$plugin_slug,
 			$this,
 		);
@@ -1633,6 +1651,24 @@ class Import {
 			$widgets[] = is_string( $label ) ? $label : '';
 		}
 		return array_unique( $widgets );
+	}
+
+	/**
+	 * Find the abilities a plugin registers, across all of its PHP files.
+	 *
+	 * @see Ability_Scanner for what's recognised.
+	 *
+	 * @param string $base_dir The plugin's root directory.
+	 * @return object[] Unique abilities, each with name, label and description properties.
+	 */
+	public static function find_abilities_in_directory( $base_dir ) {
+		try {
+			return Ability_Scanner::scan( $base_dir );
+		} catch ( \Throwable $e ) {
+			// Ability detection must never stop a plugin from importing.
+			trigger_error( 'Ability scan failed: ' . $e->getMessage(), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			return array();
+		}
 	}
 
 	/**

@@ -81,6 +81,127 @@ class Tokenisation_Helpers {
 	}
 
 	/**
+	 * Find every inline `array(...)` / `[...]` literal in PHP source, including
+	 * nested ones, and return each resolved the same way as array args to
+	 * find_function_calls(): string-keyed entries only, with values that are
+	 * string|array|null.
+	 *
+	 * Index access (`$a['x']`, `foo()[0]`) and literals inside comments or
+	 * strings are not arrays and are skipped, except that assigning an array
+	 * literal to a string key (`$a['x'] = array( ... )`) is reported as the
+	 * one-entry array `array( 'x' => array( ... ) )`.
+	 *
+	 * @param string $contents PHP source code.
+	 * @return array[] One entry per array literal, in source order.
+	 */
+	public static function find_array_literals( string $contents ): array {
+		$tokens = array_values(
+			array_filter( self::tokenise( $contents ), static fn( PhpToken $t ) => ! $t->isIgnorable() )
+		);
+		$count  = count( $tokens );
+		$arrays = [];
+
+		for ( $i = 0; $i < $count; $i++ ) {
+			$tok = $tokens[ $i ];
+
+			if ( $tok->is( '[' ) ) {
+				$prev = $tokens[ $i - 1 ] ?? null;
+				if ( $prev && ( $prev->is( [ ']', ')', '}' ] ) || in_array( $prev->id, self::INDEXABLE_TOKEN_IDS, true ) ) ) {
+					$assigned = self::keyed_array_assignment( $tokens, $i );
+					if ( null !== $assigned ) {
+						$arrays[] = $assigned;
+					}
+					continue;
+				}
+				$open = $i;
+			} elseif ( T_ARRAY === $tok->id && ( $tokens[ $i + 1 ] ?? null )?->is( '(' ) ) {
+				$open = $i + 1;
+			} else {
+				continue;
+			}
+
+			$close = self::matching_close_index( $tokens, $open );
+			if ( null !== $close ) {
+				$arrays[] = self::resolve_array_literal( array_slice( $tokens, $open + 1, $close - $open - 1 ) );
+			}
+		}
+
+		return $arrays;
+	}
+
+	/**
+	 * Treat `$x['key'] = array( ... );` as the one-entry literal
+	 * `array( 'key' => array( ... ) )`, so arrays built up one key at a time
+	 * are found the same way as arrays written out in full.
+	 *
+	 * @param PhpToken[] $tokens     Significant tokens.
+	 * @param int        $open_index Index of the `[` of the index access.
+	 * @return array|null The one-entry array, or null if this isn't such an assignment.
+	 */
+	private static function keyed_array_assignment( array $tokens, int $open_index ): ?array {
+		$key = $tokens[ $open_index + 1 ] ?? null;
+		if ( ! $key || T_CONSTANT_ENCAPSED_STRING !== $key->id
+			|| ! ( $tokens[ $open_index + 2 ] ?? null )?->is( ']' )
+			|| ! ( $tokens[ $open_index + 3 ] ?? null )?->is( '=' )
+		) {
+			return null;
+		}
+
+		$start = $open_index + 4;
+		$value = $tokens[ $start ] ?? null;
+		if ( $value?->is( '[' ) ) {
+			$open = $start;
+		} elseif ( $value && T_ARRAY === $value->id && ( $tokens[ $start + 1 ] ?? null )?->is( '(' ) ) {
+			$open = $start + 1;
+		} else {
+			return null;
+		}
+
+		$close = self::matching_close_index( $tokens, $open );
+		if ( null === $close ) {
+			return null;
+		}
+
+		return [
+			self::unescape_string_token( $key->text ) => self::resolve_array_literal( array_slice( $tokens, $open + 1, $close - $open - 1 ) ),
+		];
+	}
+
+	/**
+	 * Token types that can be followed by `[` for index access rather than
+	 * starting an array literal.
+	 */
+	private const INDEXABLE_TOKEN_IDS = [
+		T_VARIABLE,
+		T_STRING,
+		T_NAME_QUALIFIED,
+		T_NAME_FULLY_QUALIFIED,
+		T_CONSTANT_ENCAPSED_STRING,
+	];
+
+	/**
+	 * Given the index of an opening bracket in a list of significant tokens,
+	 * return the index of its matching closing bracket, or null when unbalanced.
+	 *
+	 * @param PhpToken[] $tokens
+	 */
+	private static function matching_close_index( array $tokens, int $open_index ): ?int {
+		$depth = 0;
+		$count = count( $tokens );
+		for ( $k = $open_index; $k < $count; $k++ ) {
+			if ( $tokens[ $k ]->is( [ '(', '[', '{' ] ) ) {
+				$depth++;
+			} elseif ( $tokens[ $k ]->is( [ ')', ']', '}' ] ) ) {
+				$depth--;
+				if ( 0 === $depth ) {
+					return $k;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * @return PhpToken[]
 	 */
 	private static function tokenise( string $contents ): array {
@@ -229,10 +350,10 @@ class Tokenisation_Helpers {
 			return self::resolve_array_literal( $inner );
 		}
 
-		// Known translation wrapper: `T_STRING '(' ... ')'`.
-		if ( T_STRING === $first->id
+		// Known translation wrapper: `T_STRING '(' ... ')'`, or `\__( ... )` from inside a namespace.
+		if ( ( T_STRING === $first->id || T_NAME_FULLY_QUALIFIED === $first->id )
 			&& ( $tokens[1] ?? null )?->is( '(' )
-			&& self::is_translation_function( $first->text )
+			&& self::is_translation_function( ltrim( $first->text, '\\' ) )
 		) {
 			return self::resolve_value( self::first_inner_arg_tokens( $tokens ) );
 		}

@@ -1,0 +1,7 @@
+{
+	"description": "Definitions kept in an array keyed by name and registered in a loop in the same file.",
+	"abilities": [
+		{ "name": "loop/first", "label": "First", "description": "The first ability." },
+		{ "name": "loop/second", "label": "Second", "description": "The second ability." }
+	]
+}

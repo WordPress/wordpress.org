@@ -1,0 +1,6 @@
+{
+	"description": "The same ability registered in two files is listed once; the first registration (by sorted path) wins, with gaps filled from later ones.",
+	"abilities": [
+		{ "name": "dupe/export", "label": "Export (legacy)", "description": "Exports content." }
+	]
+}

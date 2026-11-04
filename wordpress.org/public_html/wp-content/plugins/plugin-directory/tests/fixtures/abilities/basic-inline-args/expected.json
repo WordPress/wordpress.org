@@ -1,0 +1,6 @@
+{
+	"description": "One literal registration with an inline array() of translated args.",
+	"abilities": [
+		{ "name": "basic/get-site-info", "label": "Get site info", "description": "Returns the site title and URL." }
+	]
+}

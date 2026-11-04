@@ -354,4 +354,63 @@ PHP;
 			$this->calls( "WP_Add_Dashboard_Widget( 'id', 'X', 'cb' );", 'wp_add_dashboard_widget' )
 		);
 	}
+
+	/**
+	 * find_array_literals().
+	 */
+	private function arrays( string $php ): array {
+		return Tokenisation_Helpers::find_array_literals( "<?php\n" . $php );
+	}
+
+	public function test_array_literals_both_syntaxes_and_nesting() {
+		$this->assertSame(
+			array(
+				array( 'a' => array( 'b' => 'c' ) ),
+				array( 'b' => 'c' ),
+				array( 'd' => 'e' ),
+			),
+			$this->arrays( "\$x = array( 'a' => [ 'b' => 'c' ] );\n\$y = [ 'd' => __( 'e', 'td' ) ];" )
+		);
+	}
+
+	public function test_array_literals_skip_index_access() {
+		$this->assertSame(
+			array(),
+			$this->arrays( "\$a['x']; \$o->prop['y']; foo()['z']; \$b[0][1]; CONSTANT['k']; 'str'[0];" )
+		);
+	}
+
+	public function test_array_literals_skip_comments_and_strings() {
+		$this->assertSame(
+			array(),
+			$this->arrays( "// array( 'a' => 'b' );\n/* [ 'c' => 'd' ] */\n\$s = \"[ 'e' => 'f' ]\";" )
+		);
+	}
+
+	public function test_array_literals_in_call_args_and_returns() {
+		$this->assertSame(
+			array( array( 'k' => 'v' ), array( 'r' => 's' ) ),
+			$this->arrays( "foo( 1, [ 'k' => 'v' ] );\nfunction f() { return array( 'r' => 's' ); }" )
+		);
+	}
+
+	public function test_array_literals_keyed_assignment() {
+		$this->assertSame(
+			array(
+				array( 'a/b' => array( 'label' => 'L' ) ),
+				array( 'label' => 'L' ),
+				array( 'c/d' => array() ),
+				array(), // The `[]` assigned to c/d.
+				array(), // `[ 'x' ]`: list entries have no string keys.
+			),
+			$this->arrays( "\$r['a/b'] = array( 'label' => 'L' );\n\$this->r['c/d'] = [];\n\$r[ \$k ] = [ 'x' ];\n\$r['e'] .= 'f';" )
+		);
+	}
+
+	public function test_array_literals_list_entries_are_dropped() {
+		$this->assertSame(
+			array( array(), array( 'name' => 'a/b' ) ),
+			$this->arrays( "\$list = [ [ 'name' => 'a/b' ] ];" )
+		);
+	}
 }

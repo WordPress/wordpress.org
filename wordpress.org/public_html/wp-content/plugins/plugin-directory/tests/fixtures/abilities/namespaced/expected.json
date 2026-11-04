@@ -1,0 +1,7 @@
+{
+	"description": "Calls from inside a namespace, with and without a leading backslash, in a subdirectory.",
+	"abilities": [
+		{ "name": "acme/fully-qualified", "label": "Fully qualified", "description": null },
+		{ "name": "acme/unqualified", "label": "Unqualified", "description": null }
+	]
+}

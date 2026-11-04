@@ -1,0 +1,6 @@
+{
+	"description": "Registrations inside vendor/ belong to bundled dependencies and are skipped.",
+	"abilities": [
+		{ "name": "mine/own-ability", "label": "Mine", "description": null }
+	]
+}
