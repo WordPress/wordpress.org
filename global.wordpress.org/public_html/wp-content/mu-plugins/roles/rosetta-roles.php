@@ -415,7 +415,16 @@ class Rosetta_Roles {
 			$user = get_user_by( 'id', $user );
 		}
 
-		if ( ! $user->exists() ) {
+		if ( ! $user || ! $user->exists() ) {
+			return false;
+		}
+
+		$deleted = $wpdb->query( $wpdb->prepare( "
+			DELETE FROM {$wpdb->wporg_translation_editors}
+			WHERE `user_id` = %d AND `locale` = %s
+		", $user->ID, $this->gp_locale->slug ) );
+
+		if ( false === $deleted ) {
 			return false;
 		}
 
@@ -426,11 +435,6 @@ class Rosetta_Roles {
 		if ( in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
 			$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
 		}
-
-		$wpdb->query( $wpdb->prepare( "
-			DELETE FROM {$wpdb->wporg_translation_editors}
-			WHERE `user_id` = %d AND `locale` = %s
-		", $user->ID, $this->gp_locale->slug ) );
 
 		do_action( 'translation_editor_removed', $user );
 
@@ -453,7 +457,7 @@ class Rosetta_Roles {
 			$user = get_user_by( 'id', $user );
 		}
 
-		if ( ! $user->exists() ) {
+		if ( ! $user || ! $user->exists() ) {
 			return false;
 		}
 
@@ -461,7 +465,15 @@ class Rosetta_Roles {
 
 		$projects = array_map( 'strval', $projects );
 		$current_projects = $this->get_users_projects( $user->ID );
+
+		if ( in_array( 'all', $current_projects, true ) ) {
+			$current_projects = array( '0' );
+		}
+
 		$projects_to_add = $projects_to_remove = array();
+
+		$role_to_remove = null;
+		$role_to_add    = null;
 
 		if ( in_array( 'all', $projects, true ) ) {
 			$projects_to_remove = array_diff( $current_projects, array( '0' ) );
@@ -470,22 +482,22 @@ class Rosetta_Roles {
 			}
 
 			if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->remove_role( self::TRANSLATION_EDITOR_ROLE );
+				$role_to_remove = self::TRANSLATION_EDITOR_ROLE;
 			}
 
 			if ( ! in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->add_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+				$role_to_add = self::GENERAL_TRANSLATION_EDITOR_ROLE;
 			}
 		} else {
 			$projects_to_remove = array_diff( $current_projects, $projects );
 			$projects_to_add = array_diff( $projects, $current_projects );
 
 			if ( in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+				$role_to_remove = self::GENERAL_TRANSLATION_EDITOR_ROLE;
 			}
 
 			if ( ! in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->add_role( self::TRANSLATION_EDITOR_ROLE );
+				$role_to_add = self::TRANSLATION_EDITOR_ROLE;
 			}
 		}
 
@@ -501,20 +513,36 @@ class Rosetta_Roles {
 		}
 
 		if ( $values_to_add ) {
-			$wpdb->query( "
+			$inserted = $wpdb->query( "
 				INSERT INTO {$wpdb->wporg_translation_editors}
 				(`user_id`,`project_id`, `locale`, `locale_slug`, `date_added`)
 				VALUES " . implode( ', ', $values_to_add ) . "
 			" );
+			
+			if ( false === $inserted ) {
+				return false;
+			}
 		}
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-			$wpdb->query( $wpdb->prepare( "
+			$deleted = $wpdb->query( $wpdb->prepare( "
 				DELETE FROM {$wpdb->wporg_translation_editors}
 				WHERE `user_id` = %d AND `locale` = %s
 				AND project_id IN (" . implode( ', ', $values_to_remove ) . ")
 			", $user->ID, $this->gp_locale->slug ) );
+
+			if ( false === $deleted ) {
+				return false;
+			}
+		}
+
+		if ( $role_to_remove ) {
+			$user->remove_role( $role_to_remove );
+		}
+
+		if ( $role_to_add ) {
+			$user->add_role( $role_to_add );
 		}
 
 		if ( $update ) {
@@ -570,7 +598,7 @@ class Rosetta_Roles {
 		$to      = $user->user_email;
 		$subject = __( 'You have been added to a WordPress project as a translation editor', 'rosetta' );
 
-		if ( [ '0' ] === $projects_added ) {
+		if ( in_array( '0', $projects_added, true ) || in_array( 0, $projects_added, true ) ) {
 			// General Translation Editor.
 
 			/* translators: Do not translate the placeholders USERNAME, LOCALENAME, LOCALEURL, CURRENTUSERNAME. */
@@ -999,13 +1027,15 @@ Welcome to the WordPress Polyglots team and happy translating.',
 
 		$tree = array();
 		foreach ( $projects as $project ) {
-			if ( $project->parent_project_id == $parent_id ) {
-				$sub_projects = $this->get_project_tree( $projects, $project->id, $max_depth - 1 );
+			if ( (int) $project->parent_project_id === $parent_id ) {
+				$item = clone $project;
+
+				$sub_projects = $this->get_project_tree( $projects, (int) $item->id, $max_depth - 1 );
 				if ( $sub_projects ) {
-					$project->sub_projects = $sub_projects;
+					$item->sub_projects = $sub_projects;
 				}
 
-				$tree[ $project->id ] = $project;
+				$tree[ $item->id ] = $item;
 			}
 		}
 		return $tree;
