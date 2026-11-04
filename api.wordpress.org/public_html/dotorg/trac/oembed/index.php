@@ -15,7 +15,15 @@
  * oEmbed Discovery is not enabled, as although adding the tag to trac is possible, it requires inline Javascript.
  * 
  * Please do not abuse this API, otherwise an API KEY will become required.
+ *
+ * This is a public, unauthenticated, stateless oEmbed endpoint: requests are anonymous
+ * GET requests from arbitrary sites, so there is no session or nonce to verify.
+ *
+ * phpcs:disable WordPress.Security.NonceVerification
+ *
+ * @package WordPressdotorg\API\Trac
  */
+
 include dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
 // Avoid warnings from DomDocument.
@@ -24,8 +32,8 @@ libxml_use_internal_errors( true );
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = $_GET['url'] ?? '';
-$url = is_string( $url ) ? wp_unslash( $url ) : '';
+// Control characters only; percent-encoding or stripping `%` would corrupt the URLs matched below.
+$url = (string) filter_var( wp_unslash( $_GET['url'] ?? '' ), FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW );
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );
@@ -38,6 +46,7 @@ $allowed_hosts = [
 
 if (
 	! $url ||
+	! isset( $_SERVER['REQUEST_METHOD'] ) ||
 	'GET' !== $_SERVER['REQUEST_METHOD'] ||
 	! in_array( strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ), $allowed_hosts, true )
 ) {
@@ -108,7 +117,7 @@ if ( ! isset( $_GET['embed'] ) ) {
 	);
 
 	if ( ! empty( $_GET['api_key'] ) ) {
-		$embed_url = add_query_arg( 'api_key', wp_unslash( $_GET['api_key'] ), $embed_url );
+		$embed_url = add_query_arg( 'api_key', sanitize_text_field( wp_unslash( $_GET['api_key'] ) ), $embed_url );
 	}
 
 	$embed_url .= '#el=' . $id;
