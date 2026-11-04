@@ -654,12 +654,12 @@ class Locale extends GP_Route {
 					'is_editor'     => isset( $editor_ids[ $user_id ] ),
 				);
 			} else {
-				$entry = $locale_contributors['contributors'][ $user_id ];
-				$entry->last_update   = max( $entry->last_update, $contributor->last_update );
-				$entry->total_count   += (int) $contributor->total_count;
-				$entry->current_count += (int) $contributor->current_count;
-				$entry->waiting_count += (int) $contributor->waiting_count;
-				$entry->fuzzy_count   += (int) $contributor->fuzzy_count;
+				$entry                          = $locale_contributors['contributors'][ $user_id ];
+				$entry->last_update             = max( $entry->last_update, $contributor->last_update );
+				$entry->total_count            += (int) $contributor->total_count;
+				$entry->current_count          += (int) $contributor->current_count;
+				$entry->waiting_count          += (int) $contributor->waiting_count;
+				$entry->fuzzy_count            += (int) $contributor->fuzzy_count;
 				$entry->detailed[ $project_id ] = $detail;
 			}
 		}
