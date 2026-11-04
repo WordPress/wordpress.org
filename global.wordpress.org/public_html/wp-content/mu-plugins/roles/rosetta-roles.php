@@ -35,7 +35,7 @@ class Rosetta_Roles {
 	const GENERAL_TRANSLATION_EDITOR_ROLE = 'general_translation_editor';
 
 	/**
-	 * Capabaility to promote translation editor.
+	 * Capability to promote translation editor.
 	 */
 	const MANAGE_TRANSLATION_EDITORS_CAP = 'manage_translation_editors';
 
