@@ -90,16 +90,18 @@ class Cross_Locale_PTE {
 
 			$user_input = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
 
-			if ( false !== strpos( $user_input, '@' ) ) {
-				self::$user = get_user_by( 'email', $user_input );
-			} elseif ( is_numeric( $user_input ) ) {
-				self::$user = get_user_by( 'id', (int) $user_input );
-			} else {
-				self::$user = get_user_by( 'login', $user_input );
+			self::$user = get_user_by( 'login', $user_input );
 
-				if ( ! self::$user ) {
-					self::$user = get_user_by( 'slug', $user_input );
-				}
+			if ( ! self::$user && false !== strpos( $user_input, '@' ) ) {
+				self::$user = get_user_by( 'email', $user_input );
+			}
+
+			if ( ! self::$user && is_numeric( $user_input ) ) {
+				self::$user = get_user_by( 'id', (int) $user_input );
+			}
+
+			if ( ! self::$user ) {
+				self::$user = get_user_by( 'slug', $user_input );
 			}
 
 			if ( self::$user ) {
