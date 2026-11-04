@@ -845,6 +845,10 @@
 	};
 
 	projects.init = () => {
+		if ( ! document.getElementById( 'projects-list' ) ) {
+			return;
+		}
+
 		const rawList = Array.isArray( projects.settings.accessList )
 			? projects.settings.accessList.map( normalizeId ).filter( id => id !== '' )
 			: [];
