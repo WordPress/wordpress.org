@@ -273,7 +273,7 @@ class Locale extends GP_Route {
 	 * @param string $wrapper_class Optional. CSS class for the wrapper div. Default 'default-icon'.
 	 * @return string HTML markup of the icon.
 	 */
-	private function render_dashicon( $dashicon, $wrapper_class = 'default-icon' ) {
+	private function render_dashicon( string $dashicon, string $wrapper_class = 'default-icon' ): string {
 		return sprintf(
 			'<div class="%s"><span class="dashicons dashicons-%s"></span></div>',
 			esc_attr( $wrapper_class ),
@@ -724,7 +724,7 @@ class Locale extends GP_Route {
 	 * @param string $type  Placeholder type ('%d', '%s', '%f'). Default '%d'.
 	 * @return string Comma-separated placeholder string (e.g. "%d, %d, %d").
 	 */
-	private function prepare_in_placeholders( $count, $type = '%d' ) {
+	private function prepare_in_placeholders( int $count, string $type = '%d' ): string {
 		$count = (int) $count;
 		if ( $count <= 0 ) {
 			return '';
