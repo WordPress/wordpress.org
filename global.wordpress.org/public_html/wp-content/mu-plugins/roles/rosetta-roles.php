@@ -1127,19 +1127,21 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @return array The project tree.
 	 */
 	public function get_project_tree( array $projects, int $parent_id = 0, int $max_depth = 5 ): array {
-		if ( $max_depth < 0 ) { // Avoid an endless recursion.
+		if ( $max_depth < 0 ) {
 			return array();
 		}
 
 		$tree = array();
 		foreach ( $projects as $project ) {
-			if ( $project->parent_project_id == $parent_id ) {
-				$sub_projects = $this->get_project_tree( $projects, $project->id, $max_depth - 1 );
+			if ( (int) $project->parent_project_id === $parent_id ) {
+				$item = clone $project;
+
+				$sub_projects = $this->get_project_tree( $projects, (int) $item->id, $max_depth - 1 );
 				if ( $sub_projects ) {
-					$project->sub_projects = $sub_projects;
+					$item->sub_projects = $sub_projects;
 				}
 
-				$tree[ $project->id ] = $project;
+				$tree[ $item->id ] = $item;
 			}
 		}
 		return $tree;
