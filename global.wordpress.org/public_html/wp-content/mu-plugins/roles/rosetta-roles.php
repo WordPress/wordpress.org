@@ -516,11 +516,15 @@ class Rosetta_Roles {
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $values_to_remove consists solely of integers sanitized via array_map('intval').
-			$deleted = $wpdb->query( $wpdb->prepare(
-				"DELETE FROM {$wpdb->wporg_translation_editors}
-				WHERE `user_id` = %d AND `locale` = %s
-				AND project_id IN (" . implode( ', ', $values_to_remove ) . ")
-			", $user->ID, $this->gp_locale->slug ) );
+			$deleted = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->wporg_translation_editors}
+					WHERE `user_id` = %d AND `locale` = %s
+					AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
+					$user->ID,
+					$this->gp_locale->slug
+				)
+			);
 			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 			if ( false === $deleted ) {
