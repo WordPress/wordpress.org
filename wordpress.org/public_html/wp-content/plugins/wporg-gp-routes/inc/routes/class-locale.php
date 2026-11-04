@@ -914,6 +914,7 @@ class Locale extends GP_Route {
 				AND active = 1
 			ORDER BY id ASC
 		";
+
 		$_projects = $project->many( $projects_sql, $project->id );
 
 		$projects = [];
@@ -933,6 +934,7 @@ class Locale extends GP_Route {
 						AND active = 1
 					ORDER BY id ASC
 				";
+
 				$sub_sub_projects = $project->many( $sub_sub_projects_sql );
 			}
 
@@ -1026,7 +1028,7 @@ class Locale extends GP_Route {
 
 		$search_sql = '';
 		if ( '' !== $search ) {
-			$search_sql = ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )';
+			$search_sql   = ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )';
 			$search_param = '%' . $wpdb->esc_like( $search ) . '%';
 			$sql_params[] = $search_param;
 			$sql_params[] = $search_param;
@@ -1125,7 +1127,7 @@ class Locale extends GP_Route {
 					$user_id
 				) );
 				if ( $project_ids_with_editor ) {
-					$ids       = $this->prepare_in_int_list( $project_ids_with_editor );
+					$ids = $this->prepare_in_int_list( $project_ids_with_editor );
 					if ( ! empty( $ids ) ) {
 						$tp_where .= " AND tp.id NOT IN( $ids )";
 					}
@@ -1275,7 +1277,7 @@ class Locale extends GP_Route {
 		}
 
 		return [
-			'pages' => [
+			'pages'    => [
 				'pages'    => $pages,
 				'page'     => $page,
 				'per_page' => $per_page,
