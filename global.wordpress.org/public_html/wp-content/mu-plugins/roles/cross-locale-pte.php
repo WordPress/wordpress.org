@@ -549,8 +549,13 @@ class Cross_Locale_PTE {
 			return $verdict;
 		}
 
+		$user_id = $args['user'] instanceof WP_User ? (int) $args['user']->ID : (int) $args['user'];
+		if ( ! $user_id ) {
+			return $verdict;
+		}
+
 		static $current_translation_by_user = array();
-		$cache_key = $args['user']->ID . '_' . $translation->translation_set_id . '_' . $translation->original_id;
+		$cache_key = $user_id . '_' . $translation->translation_set_id . '_' . $translation->original_id;
 
 		if ( isset( $current_translation_by_user[ $cache_key ] ) ) {
 			return $current_translation_by_user[ $cache_key ];
@@ -560,7 +565,7 @@ class Cross_Locale_PTE {
 			$current_translation = GP::$translation->find_one( array( 'translation_set_id' => $translation->translation_set_id, 'original_id' => $translation->original_id, 'status' => 'current' ) );
 			if ( $current_translation ) {
 				$translation_owner_id = $current_translation->user_id_last_modified ?: $current_translation->user_id;
-				if ( intval( $translation_owner_id ) !== $args['user']->ID ) {
+				if ( intval( $translation_owner_id ) !== $user_id ) {
 					// Current translation was approved by someone else. Disallow setting to current.
 					return $current_translation_by_user[ $cache_key ] = false;
 				}
