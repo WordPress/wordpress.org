@@ -923,7 +923,11 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			wp_send_json_error( array( 'message' => __( 'The user is not a translation editor.', 'rosetta' ) ), 400 );
 		}
 
-		$raw_projects = isset( $_POST['projects'] ) && is_array( $_POST['projects'] )
+		if ( isset( $_POST['projects'] ) && ! is_array( $_POST['projects'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid project selection.', 'rosetta' ) ), 400 );
+		}
+
+		$raw_projects = isset( $_POST['projects'] )
 			? array_map( 'sanitize_text_field', wp_unslash( $_POST['projects'] ) )
 			: array();
 
