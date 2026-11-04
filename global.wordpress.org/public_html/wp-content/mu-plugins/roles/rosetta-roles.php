@@ -317,6 +317,11 @@ class Rosetta_Roles {
 						}
 					}
 
+				if ( 0 === $count ) {
+					wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
+					exit;
+				}
+	
 					wp_safe_redirect(
 						add_query_arg(
 							array(
@@ -978,7 +983,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			return $message;
 		}
 
-		$count = empty( $_REQUEST['count'] ) ? 1 : (int) $_REQUEST['count'];
+		$count = isset( $_REQUEST['count'] ) ? (int) $_REQUEST['count'] : 1;
 
 		$messages = array(
 			'update' => array(
