@@ -52,8 +52,14 @@ class Ability_Scanner_Limits_Test extends TestCase {
 	}
 
 	public function test_huge_sprintf_width_is_not_built(): void {
-		$names = $this->scan( "wp_register_ability( sprintf( '%999999999s/x', 'a' ), array() );\nwp_register_ability( sprintf( '%*s/x', 999999999, 'a' ), array() );" );
-		$this->assertSame( array( 'real/ability' ), $names );
+		$names = $this->scan(
+			"wp_register_ability( sprintf( '%999999999s/x', 'a' ), array() );\n"
+			. "wp_register_ability( sprintf( '%*s/x', 999999999, 'a' ), array() );\n"
+			. "wp_register_ability( sprintf( \"%'a999999999s/x\", 'a' ), array() );\n"
+			. "wp_register_ability( sprintf( '%1\$s/%2\$s', 'positional', 'ok' ), array() );"
+		);
+		sort( $names );
+		$this->assertSame( array( 'positional/ok', 'real/ability' ), $names );
 	}
 
 	public function test_doubling_concatenation_is_capped(): void {
@@ -65,6 +71,17 @@ class Ability_Scanner_Limits_Test extends TestCase {
 		$names = $this->scan( $php );
 		sort( $names );
 		$this->assertSame( array( 'real/ability', 'same/file' ), $names );
+	}
+
+	public function test_doubling_arrays_through_constants_are_capped(): void {
+		$php = "class D {\n\tconst A0 = array( 'x', 'x', 'x', 'x' );\n";
+		for ( $i = 1; $i <= 40; $i++ ) {
+			$php .= sprintf( "\tconst A%d = [ ...self::A%d, ...self::A%d ];\n", $i, $i - 1, $i - 1 );
+		}
+		$php .= "\tconst M = array_merge( self::A40, self::A40 );\n}\n";
+		$php .= "foreach ( D::A40 as \$x ) { wp_register_ability( \$x . '/x', array() ); }\n";
+		$php .= "wp_register_ability( count( array_merge( D::M, D::M ) ) . '/x', array() );";
+		$this->assertSame( array( 'real/ability' ), $this->scan( $php ) );
 	}
 
 	public function test_deeply_nested_arrays(): void {

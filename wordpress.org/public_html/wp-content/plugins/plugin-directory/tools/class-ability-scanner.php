@@ -59,6 +59,9 @@ class Ability_Scanner {
 	/** Longest string the interpreter will build (labels and descriptions are far shorter). */
 	private const MAX_STRING = 8192;
 
+	/** Most elements in an array the interpreter will build by merging or spreading. */
+	private const MAX_ARRAY = 2000;
+
 	/** Contexts (loop iterations, subclasses, call sites) evaluated per call. */
 	private const MAX_CONTEXTS = 500;
 
@@ -130,6 +133,15 @@ class Ability_Scanner {
 		$this->files = $files;
 		$this->spans   = new \WeakMap();
 		$this->closers = new \WeakMap();
+	}
+
+	/**
+	 * Whether a built array is small enough to keep. Charges its size, since
+	 * memoised values (e.g. class constants) can be combined repeatedly.
+	 */
+	private function array_fits( array $array ): bool {
+		$this->spend( count( $array ) );
+		return count( $array ) <= self::MAX_ARRAY;
 	}
 
 	/**
@@ -814,7 +826,8 @@ class Ability_Scanner {
 		foreach ( $slices as $slice ) {
 			if ( T_ELLIPSIS === ( $slice[0] ?? null )?->id ) {
 				$spread = $this->evaluate( array_slice( $slice, 1 ), $scope, $ctx );
-				foreach ( is_array( $spread ) ? $spread : [] as $value ) {
+				$spread = is_array( $spread ) && $this->array_fits( $spread ) ? $spread : [];
+				foreach ( $spread as $value ) {
 					$values[] = $value;
 				}
 			} elseif ( self::is_name( $slice[0] ?? null ) && ( $slice[1] ?? null )?->is( ':' ) ) {
@@ -835,6 +848,9 @@ class Ability_Scanner {
 			if ( T_ELLIPSIS === ( $entry[0] ?? null )?->id ) {
 				$spread = $this->evaluate( array_slice( $entry, 1 ), $scope, $ctx );
 				$result = is_array( $spread ) ? array_merge( $result, $spread ) : $result;
+				if ( ! $this->array_fits( $result ) ) {
+					return [];
+				}
 				continue;
 			}
 			$arrow = null;
@@ -869,29 +885,22 @@ class Ability_Scanner {
 		switch ( $short ) {
 			case 'sprintf':
 				$format = array_shift( $args );
-				// No `*` widths and no widths or precisions over 3 digits, so a format can't build a huge string.
-				if ( ! is_string( $format ) || preg_match( '/%[^a-zA-Z%]*(?:\*|\d{4,})/', $format ) || array_filter( $args, static fn( $a ) => ! is_scalar( $a ) ) ) {
-					return null;
-				}
-				$length = strlen( $format ) + array_sum( array_map( static fn( $a ) => strlen( (string) $a ), $args ) );
-				if ( $length > self::MAX_STRING ) {
-					return null;
-				}
-				try {
-					return vsprintf( $format, array_values( $args ) );
-				} catch ( \ValueError | \ArgumentCountError $e ) {
-					return null;
-				}
+				return is_string( $format ) ? self::format( $format, array_values( $args ) ) : null;
 			case 'array_merge':
 			case 'array_replace':
 				// Unknown parts are treated as empty: what's known is still worth reading.
 				$merged = [];
 				foreach ( $args as $arg ) {
-					$merged = 'array_merge' === $short ? array_merge( $merged, (array) ( is_array( $arg ) ? $arg : [] ) ) : array_replace( $merged, is_array( $arg ) ? $arg : [] );
+					$arg    = is_array( $arg ) ? $arg : [];
+					$merged = 'array_merge' === $short ? array_merge( $merged, $arg ) : array_replace( $merged, $arg );
+					if ( ! $this->array_fits( $merged ) ) {
+						return null;
+					}
 				}
 				return $merged;
 			case 'wp_parse_args':
-				return array_merge( is_array( $args[1] ?? null ) ? $args[1] : [], is_array( $args[0] ?? null ) ? $args[0] : [] );
+				$merged = array_merge( is_array( $args[1] ?? null ) ? $args[1] : [], is_array( $args[0] ?? null ) ? $args[0] : [] );
+				return $this->array_fits( $merged ) ? $merged : null;
 			case 'apply_filters':
 				return $args[1] ?? null;
 		}
@@ -1751,6 +1760,40 @@ class Ability_Scanner {
 
 	private static function is_name( ?PhpToken $t ): bool {
 		return $t && in_array( $t->id, [ T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED ], true );
+	}
+
+	/**
+	 * A minimal sprintf(): only `%s`, `%d`, `%%` and positional `%1$s` / `%1$d`.
+	 * Anything else (widths, precisions, padding, other conversions) is
+	 * unknown, so a format can never be used to build a large string.
+	 */
+	private static function format( string $format, array $args ): ?string {
+		if ( strlen( $format ) > self::MAX_STRING ) {
+			return null;
+		}
+		$next   = 0;
+		$failed = false;
+		$result = preg_replace_callback(
+			'/%(?:(\d{1,2})\$)?(.?)/s',
+			static function ( $m ) use ( $args, &$next, &$failed ) {
+				if ( '%' === $m[2] && '' === $m[1] ) {
+					return '%';
+				}
+				if ( 's' !== $m[2] && 'd' !== $m[2] ) {
+					$failed = true;
+					return '';
+				}
+				$index = '' === $m[1] ? $next++ : (int) $m[1] - 1;
+				$value = $args[ $index ] ?? null;
+				if ( ! is_scalar( $value ) ) {
+					$failed = true;
+					return '';
+				}
+				return 'd' === $m[2] ? (string) (int) $value : (string) $value;
+			},
+			$format
+		);
+		return $failed || null === $result || strlen( $result ) > self::MAX_STRING ? null : $result;
 	}
 
 	private static function short_name( string $name ): string {
