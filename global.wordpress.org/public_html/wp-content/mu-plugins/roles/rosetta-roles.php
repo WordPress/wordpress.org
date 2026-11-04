@@ -464,7 +464,6 @@ class Rosetta_Roles {
 		}
 		$projects_to_add = $projects_to_remove = array();
 
-		// Geplante Rollenänderungen zwischenspeichern, anstatt sie sofort auszuführen
 		$role_to_remove = null;
 		$role_to_add    = null;
 
@@ -536,7 +535,6 @@ class Rosetta_Roles {
 			}
 		}
 
-		// Rollen erst aktualisieren, nachdem alle DB-Statements fehlerfrei durchliefen:
 		if ( $role_to_remove ) {
 			$user->remove_role( $role_to_remove );
 		}
