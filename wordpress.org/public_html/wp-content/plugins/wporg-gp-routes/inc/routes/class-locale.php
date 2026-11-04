@@ -123,9 +123,11 @@ class Locale extends GP_Route {
 			if ( 'waiting' === $project_path ) {
 				$redirect_url = gp_url( sprintf( '/locale/%s/%s/%s', $locale_slug, $set_slug, $default_project_tab ) );
 
+				// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Safe redirect preserving existing query arguments for pagination/filtering.
 				if ( ! empty( $_GET ) ) {
 					$redirect_url = remove_query_arg( 'page', add_query_arg( urlencode_deep( wp_unslash( $_GET ) ), $redirect_url ) );
 				}
+				// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 				wp_safe_redirect( $redirect_url );
 				exit;
@@ -194,6 +196,7 @@ class Locale extends GP_Route {
 		$contributors_count = Plugin::get_contributors_count();
 
 		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
+
 		[
 			'translation_set' => $locale_glossary_translation_set,
 			'glossary'        => $locale_glossary,
@@ -258,6 +261,7 @@ class Locale extends GP_Route {
 		$locale_contributors = $this->get_locale_contributors( $sub_project, $locale_slug, $set_slug );
 
 		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
+
 		[
 			'translation_set' => $locale_glossary_translation_set,
 			'glossary'        => $locale_glossary,
@@ -781,6 +785,7 @@ class Locale extends GP_Route {
 
 		if ( ! isset( $this->project_status_cache[ $cache_key ] ) ) {
 			$single_status = new stdClass();
+
 			$single_status->sub_projects_count     = 0;
 			$single_status->waiting_count          = 0;
 			$single_status->current_count          = 0;
