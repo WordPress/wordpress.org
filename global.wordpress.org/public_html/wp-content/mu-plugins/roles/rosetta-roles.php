@@ -402,10 +402,14 @@ class Rosetta_Roles {
 			$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
 		}
 
-		$wpdb->query( $wpdb->prepare( "
+		$deleted = $wpdb->query( $wpdb->prepare( "
 			DELETE FROM {$wpdb->wporg_translation_editors}
 			WHERE `user_id` = %d AND `locale` = %s
 		", $user->ID, $this->gp_locale->slug ) );
+
+		if ( false === $deleted ) {
+			return false;
+		}
 
 		do_action( 'translation_editor_removed', $user );
 
@@ -476,20 +480,30 @@ class Rosetta_Roles {
 		}
 
 		if ( $values_to_add ) {
-			$wpdb->query( "
+			$inserted = $wpdb->query( "
 				INSERT INTO {$wpdb->wporg_translation_editors}
 				(`user_id`,`project_id`, `locale`, `locale_slug`, `date_added`)
 				VALUES " . implode( ', ', $values_to_add ) . "
 			" );
+
+			if ( false === $inserted ) {
+				return false;
+			}
 		}
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-			$wpdb->query( $wpdb->prepare( "
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $values_to_remove consists solely of integers sanitized via array_map('intval').
+			$deleted = $wpdb->query( $wpdb->prepare( "
 				DELETE FROM {$wpdb->wporg_translation_editors}
 				WHERE `user_id` = %d AND `locale` = %s
 				AND project_id IN (" . implode( ', ', $values_to_remove ) . ")
 			", $user->ID, $this->gp_locale->slug ) );
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+			if ( false === $deleted ) {
+				return false;
+			}
 		}
 
 		if ( $update ) {
@@ -874,7 +888,9 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		$redirect = admin_url( 'admin.php?page=translation-editors' );
 
 		if ( in_array( 'all', $raw_projects, true ) ) {
-			$this->update_translation_editor( $user, array( 'all' ) );
+			if ( ! $this->update_translation_editor( $user, array( 'all' ) ) ) {
+				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+			}
 			wp_send_json_success(
 				[
 					'message'  => __( 'Translation editor updated.', 'rosetta' ),
@@ -892,7 +908,9 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		$project_ids = array_values( array_filter( array_map( 'absint', $raw_projects ) ) );
 
 		if ( empty( $project_ids ) ) {
-			$this->remove_translation_editor( $user );
+			if ( ! $this->remove_translation_editor( $user ) ) {
+				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+			}
 			wp_send_json_success(
 				[
 					'message'  => __( 'Translation editor removed.', 'rosetta' ),
@@ -904,7 +922,9 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		$valid_projects = array_values( array_intersect( $project_ids, array_keys( $this->get_translate_projects() ) ) );
 
 		if ( empty( $valid_projects ) ) {
-			$this->remove_translation_editor( $user );
+			if ( ! $this->remove_translation_editor( $user ) ) {
+				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+			}
 			wp_send_json_success(
 				[
 					'message'  => __( 'Translation editor removed.', 'rosetta' ),
@@ -913,7 +933,9 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			);
 		}
 
-		$this->update_translation_editor( $user, $valid_projects );
+		if ( ! $this->update_translation_editor( $user, $valid_projects ) ) {
+			wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+		}
 
 		wp_send_json_success(
 			[
