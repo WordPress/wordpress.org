@@ -27,11 +27,15 @@ class Import_Abilities_Test extends TestCase {
 	private const FIXTURES = __DIR__ . '/fixtures/abilities';
 
 	/**
+	 * Each scenario's abilities are found, with the expected labels and descriptions.
+	 *
+	 * @param string $dir The scenario's directory.
+	 *
 	 * @dataProvider scenario_provider
 	 */
 	#[DataProvider( 'scenario_provider' )]
 	public function test_scenario( string $dir ): void {
-		$expected = json_decode( (string) file_get_contents( "$dir/expected.json" ), true, 512, JSON_THROW_ON_ERROR );
+		$expected = json_decode( (string) file_get_contents( "$dir/expected.json" ), true, 512, JSON_THROW_ON_ERROR ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local fixture file.
 
 		$want = self::normalize( $expected['abilities'] ?? array() );
 		$got  = self::normalize(
@@ -64,6 +68,8 @@ class Import_Abilities_Test extends TestCase {
 	/**
 	 * Fill in missing properties and sort by name, so scenarios only need to
 	 * list what they care about and file order doesn't matter.
+	 *
+	 * @param array[] $abilities Abilities, as arrays.
 	 */
 	private static function normalize( array $abilities ): array {
 		$abilities = array_map(

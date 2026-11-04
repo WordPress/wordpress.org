@@ -659,7 +659,7 @@ class Import {
 		// Store the ability data, if known. `ability_name` is one row per ability so it can be queried.
 		if ( $abilities ) {
 			$changed = update_post_meta( $plugin->ID, 'all_abilities', $abilities );
-			if ( $changed || count( get_post_meta( $plugin->ID, 'ability_name' ) ) !== count( $abilities ) ) {
+			if ( $changed || count( get_post_meta( $plugin->ID, 'ability_name', false ) ) !== count( $abilities ) ) {
 				delete_post_meta( $plugin->ID, 'ability_name' );
 				foreach ( $abilities as $ability ) {
 					add_post_meta( $plugin->ID, 'ability_name', $ability->name, false );
@@ -1666,7 +1666,7 @@ class Import {
 			return Ability_Scanner::scan( $base_dir );
 		} catch ( \Throwable $e ) {
 			// Ability detection must never stop a plugin from importing.
-			trigger_error( 'Ability scan failed: ' . $e->getMessage(), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			trigger_error( 'Ability scan failed: ' . esc_html( $e->getMessage() ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 			return array();
 		}
 	}

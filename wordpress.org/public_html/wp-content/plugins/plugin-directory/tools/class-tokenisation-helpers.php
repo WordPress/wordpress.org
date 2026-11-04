@@ -45,9 +45,18 @@ class Tokenisation_Helpers {
 	/** Default work allowed for one find_array_literals() call, in tokens. */
 	private const ARRAY_LITERALS_BUDGET = 2000000;
 
+	/**
+	 * Current nesting while resolving values.
+	 *
+	 * @var int
+	 */
 	private static int $depth = 0;
 
-	/** Remaining work during find_array_literals(); null when unlimited. */
+	/**
+	 * Remaining work during find_array_literals(); null when unlimited.
+	 *
+	 * @var int|null
+	 */
 	private static ?int $budget = null;
 
 	/**
@@ -138,6 +147,7 @@ class Tokenisation_Helpers {
 	 *
 	 * @param PhpToken[] $tokens Significant tokens.
 	 * @param int[]      $closes Index of each opening bracket's closing bracket.
+	 * @param int        $i      Index of the token to check.
 	 */
 	private static function array_literal_at( array $tokens, array $closes, int $i ): ?array {
 		$tok = $tokens[ $i ];
@@ -161,7 +171,7 @@ class Tokenisation_Helpers {
 	/**
 	 * Match every bracket in one pass.
 	 *
-	 * @param PhpToken[] $tokens
+	 * @param PhpToken[] $tokens Significant tokens.
 	 * @return int[] Index of each opening bracket => index of its closing bracket.
 	 */
 	private static function pair_brackets( array $tokens ): array {
@@ -364,14 +374,19 @@ class Tokenisation_Helpers {
 		if ( self::$depth >= self::MAX_DEPTH ) {
 			return null;
 		}
-		self::$depth++;
+		++self::$depth;
 		try {
 			return self::resolve_value_inner( $tokens );
 		} finally {
-			self::$depth--;
+			--self::$depth;
 		}
 	}
 
+	/**
+	 * Resolve an arg-token list, without the depth check; see resolve_value().
+	 *
+	 * @param PhpToken[] $tokens Tokens of the value.
+	 */
 	private static function resolve_value_inner( array $tokens ): string|array|null {
 		$count = count( $tokens );
 		if ( 0 === $count ) {
@@ -455,8 +470,11 @@ class Tokenisation_Helpers {
 	 */
 	private static function resolve_array_literal( array $inner_tokens ): array {
 		// Splitting walks the tokens twice (entries, then key/value).
-		if ( null !== self::$budget && ( self::$budget -= 2 * count( $inner_tokens ) + 1 ) < 0 ) {
-			return [];
+		if ( null !== self::$budget ) {
+			self::$budget -= 2 * count( $inner_tokens ) + 1;
+			if ( self::$budget < 0 ) {
+				return [];
+			}
 		}
 		$result = [];
 		foreach ( self::split_array_entries( $inner_tokens ) as $entry_tokens ) {

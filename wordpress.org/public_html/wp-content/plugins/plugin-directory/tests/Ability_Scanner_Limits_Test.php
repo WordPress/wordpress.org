@@ -23,25 +23,38 @@ class Ability_Scanner_Limits_Test extends TestCase {
 
 	private const SECONDS = 10;
 
+	/**
+	 * The plugin directory being scanned.
+	 *
+	 * @var string
+	 */
 	private string $dir;
 
+	/**
+	 * Create an empty plugin directory.
+	 */
 	protected function setUp(): void {
 		$this->dir = sys_get_temp_dir() . '/ability-scanner-limits-' . uniqid();
-		mkdir( $this->dir );
+		mkdir( $this->dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
 	}
 
+	/**
+	 * Remove the plugin directory.
+	 */
 	protected function tearDown(): void {
 		array_map( 'unlink', glob( $this->dir . '/*' ) );
-		rmdir( $this->dir );
+		rmdir( $this->dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
 	}
 
 	/**
 	 * Scan $php as a plugin, next to a file with one real ability, and return
 	 * the ability names found, failing if it takes too long.
+	 *
+	 * @param string $php Code for the hostile file, without the opening tag.
 	 */
 	private function scan( string $php ): array {
-		file_put_contents( $this->dir . '/hostile.php', "<?php\n" . $php . "\n" );
-		file_put_contents( $this->dir . '/real.php', "<?php\nwp_register_ability( 'real/ability', array( 'label' => 'Real', 'description' => 'Real.' ) );\n" );
+		file_put_contents( $this->dir . '/hostile.php', "<?php\n" . $php . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
+		file_put_contents( $this->dir . '/real.php', "<?php\nwp_register_ability( 'real/ability', array( 'label' => 'Real', 'description' => 'Real.' ) );\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- A throwaway directory for the test, not WordPress content.
 		$this->assertLessThan( 1048576, filesize( $this->dir . '/hostile.php' ), 'Keep under the 1 MB limit, or the file is skipped unscanned.' );
 
 		$start = microtime( true );
@@ -51,6 +64,9 @@ class Ability_Scanner_Limits_Test extends TestCase {
 		return $names;
 	}
 
+	/**
+	 * Widths, `*` widths and custom padding in sprintf() can't build a huge string; positional placeholders still work.
+	 */
 	public function test_huge_sprintf_width_is_not_built(): void {
 		$names = $this->scan(
 			"wp_register_ability( sprintf( '%999999999s/x', 'a' ), array() );\n"
@@ -62,6 +78,9 @@ class Ability_Scanner_Limits_Test extends TestCase {
 		$this->assertSame( array( 'positional/ok', 'real/ability' ), $names );
 	}
 
+	/**
+	 * A chain of variables that each double a string stops at the size cap.
+	 */
 	public function test_doubling_concatenation_is_capped(): void {
 		$php = "\$s0 = 'aaaaaaaaaaaaaaaa';\n";
 		for ( $i = 1; $i <= 40; $i++ ) {
@@ -73,6 +92,9 @@ class Ability_Scanner_Limits_Test extends TestCase {
 		$this->assertSame( array( 'real/ability', 'same/file' ), $names );
 	}
 
+	/**
+	 * Class constants that each double an array stop at the size cap.
+	 */
 	public function test_doubling_arrays_through_constants_are_capped(): void {
 		$php = "class D {\n\tconst A0 = array( 'x', 'x', 'x', 'x' );\n";
 		for ( $i = 1; $i <= 40; $i++ ) {
@@ -84,22 +106,31 @@ class Ability_Scanner_Limits_Test extends TestCase {
 		$this->assertSame( array( 'real/ability' ), $this->scan( $php ) );
 	}
 
+	/**
+	 * Very deep array nesting doesn't exhaust the stack or the time limit.
+	 */
 	public function test_deeply_nested_arrays(): void {
 		$depth = 50000;
 		$php   = "wp_register_ability( \$dynamic, array() );\n\$a = " . str_repeat( 'array( ', $depth ) . str_repeat( ' )', $depth ) . ";\n";
-		$php  .= "\$b = " . str_repeat( '[', $depth ) . str_repeat( ']', $depth ) . ";";
+		$php  .= '$b = ' . str_repeat( '[', $depth ) . str_repeat( ']', $depth ) . ';';
 		$this->assertContains( 'real/ability', $this->scan( $php ) );
 	}
 
+	/**
+	 * Thousands of definition-shaped arrays stay within the time limit.
+	 */
 	public function test_many_definition_arrays(): void {
 		$php = "wp_register_ability( \$dynamic, array() );\n\$defs = array(\n";
 		for ( $i = 0; $i < 7000; $i++ ) {
 			$php .= "\t'gen/ability-$i' => array( 'label' => 'L', 'description' => 'D', 'nested' => array( array( array( 'x' => 'y' ) ) ) ),\n";
 		}
-		$php .= ");";
+		$php .= ');';
 		$this->assertContains( 'real/ability', $this->scan( $php ) );
 	}
 
+	/**
+	 * A long chain of variables and calls, evaluated from many call sites, stays within the time limit.
+	 */
 	public function test_long_chain_of_variables_and_calls(): void {
 		$php = "\$v0 = 'a/b';\n";
 		for ( $i = 1; $i < 5000; $i++ ) {
@@ -112,6 +143,9 @@ class Ability_Scanner_Limits_Test extends TestCase {
 		$this->assertContains( 'real/ability', $this->scan( $php ) );
 	}
 
+	/**
+	 * Self-referencing functions, methods and constants resolve to unknown instead of recursing.
+	 */
 	public function test_recursive_functions_and_constants(): void {
 		$php = "function loop( \$x ) { return loop( \$x ); }\n"
 			. "class A { const X = B::Y; public function m() { return \$this->m(); } }\n"
@@ -120,7 +154,7 @@ class Ability_Scanner_Limits_Test extends TestCase {
 			. "wp_register_ability( loop( 'a/b' ), array() );\n"
 			. "wp_register_ability( A::X, array() );\n"
 			. "wp_register_ability( ( new A() )->m(), array() );\n"
-			. "wp_register_ability( C, array() );";
+			. 'wp_register_ability( C, array() );';
 		$this->assertSame( array( 'real/ability' ), $this->scan( $php ) );
 	}
 }

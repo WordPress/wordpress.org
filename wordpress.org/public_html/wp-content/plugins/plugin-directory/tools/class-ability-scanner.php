@@ -1,4 +1,10 @@
 <?php
+/**
+ * Ability detection for the plugin importer.
+ *
+ * @package WordPressdotorg\Plugin_Directory\Tools
+ */
+
 namespace WordPressdotorg\Plugin_Directory\Tools;
 
 use OverflowException;
@@ -73,27 +79,127 @@ class Ability_Scanner {
 
 	/** Functions that return their first argument, translated. */
 	private const PASSTHROUGH_FUNCTIONS = [
-		'__', '_e', '_x', '_ex', '_n', '_nx', 'esc_html__', 'esc_html_e', 'esc_html_x',
-		'esc_attr__', 'esc_attr_e', 'esc_attr_x', 'translate', 'translate_with_gettext_context',
-		'esc_html', 'esc_attr', 'trim', 'strval',
+		'__',
+		'_e',
+		'_x',
+		'_ex',
+		'_n',
+		'_nx',
+		'esc_html__',
+		'esc_html_e',
+		'esc_html_x',
+		'esc_attr__',
+		'esc_attr_e',
+		'esc_attr_x',
+		'translate',
+		'translate_with_gettext_context',
+		'esc_html',
+		'esc_attr',
+		'trim',
+		'strval',
 	];
 
-	private array $files       = [];
-	private array $cache       = [];
-	private array $meta        = [];
+	/**
+	 * The plugin's PHP files, sorted.
+	 *
+	 * @var string[]
+	 */
+	private array $files = [];
+	/**
+	 * Tokenised files, by path; the least recently added are evicted.
+	 *
+	 * @var array
+	 */
+	private array $cache = [];
+	/**
+	 * Per file: its functions ('scopes'), their closing indexes ('scope_ends') and namespaces.
+	 *
+	 * @var array
+	 */
+	private array $meta = [];
+	/**
+	 * Per file: the lowercase names that appear in it, for finding call sites quickly.
+	 *
+	 * @var array
+	 */
 	private array $identifiers = [];
-	private array $classes     = [];
+	/**
+	 * Known classes, by lowercase fully-qualified name.
+	 *
+	 * @var array
+	 */
+	private array $classes = [];
+	/**
+	 * Known classes by lowercase short name.
+	 *
+	 * @var array
+	 */
 	private array $short_names = [];
-	private array $children    = [];
-	private array $functions   = [];
-	private array $defines     = [];
-	private array $sites       = [];
-	private array $memo        = [];
-	private int $budget        = self::BUDGET;
-	private int $site_budget   = self::SITE_BUDGET;
-	private int $depth         = 0;
-	private bool $evaluating   = false;
+	/**
+	 * Direct subclasses, by parent class.
+	 *
+	 * @var array
+	 */
+	private array $children = [];
+	/**
+	 * The plugin's functions, by lowercase fully-qualified name.
+	 *
+	 * @var array
+	 */
+	private array $functions = [];
+	/**
+	 * Constants set with define(): name => [ file, value range ].
+	 *
+	 * @var array
+	 */
+	private array $defines = [];
+	/**
+	 * Calls to wp_register_ability(): [ file, index ].
+	 *
+	 * @var array
+	 */
+	private array $sites = [];
+	/**
+	 * Memoised lookups (constants, call sites, receivers, returns).
+	 *
+	 * @var array
+	 */
+	private array $memo = [];
+	/**
+	 * Work left for the whole plugin.
+	 *
+	 * @var int
+	 */
+	private int $budget = self::BUDGET;
+	/**
+	 * Work left for the current wp_register_ability() call.
+	 *
+	 * @var int
+	 */
+	private int $site_budget = self::SITE_BUDGET;
+	/**
+	 * Current nesting of evaluations.
+	 *
+	 * @var int
+	 */
+	private int $depth = 0;
+	/**
+	 * Whether work is being charged (it isn't while indexing).
+	 *
+	 * @var bool
+	 */
+	private bool $evaluating = false;
+	/**
+	 * Opening bracket token => distance to its closing bracket.
+	 *
+	 * @var \WeakMap
+	 */
 	private \WeakMap $spans;
+	/**
+	 * Opening bracket token => its closing bracket token.
+	 *
+	 * @var \WeakMap
+	 */
 	private \WeakMap $closers;
 
 	/**
@@ -106,17 +212,19 @@ class Ability_Scanner {
 	 * @return object[] Unique abilities, each with name, label and description properties.
 	 */
 	public static function scan( string $base_dir ): array {
-		$files = array_values( array_filter(
-			Filesystem::list_files( $base_dir, true, '!\.php$!i' ),
-			static fn( $file ) => ! str_contains( $file, '/vendor/' ) && filesize( $file ) <= self::MAX_FILE_SIZE
-		) );
+		$files = array_values(
+			array_filter(
+				Filesystem::list_files( $base_dir, true, '!\.php$!i' ),
+				static fn( $file ) => ! str_contains( $file, '/vendor/' ) && filesize( $file ) <= self::MAX_FILE_SIZE
+			)
+		);
 		// Directory order varies by filesystem; sort so duplicate registrations merge the same way every time.
 		sort( $files );
 
 		// Most plugins register no abilities; don't tokenise them.
 		$relevant = false;
 		foreach ( $files as $file ) {
-			$contents = (string) file_get_contents( $file );
+			$contents = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
 			if ( false !== stripos( $contents, 'register_ability' ) || false !== stripos( $contents, 'abilities_registry' ) ) {
 				$relevant = true;
 				break;
@@ -129,8 +237,13 @@ class Ability_Scanner {
 		return ( new self( $files ) )->run();
 	}
 
+	/**
+	 * Set up a scan of the given files.
+	 *
+	 * @param string[] $files The plugin's PHP files.
+	 */
 	private function __construct( array $files ) {
-		$this->files = $files;
+		$this->files   = $files;
 		$this->spans   = new \WeakMap();
 		$this->closers = new \WeakMap();
 	}
@@ -138,16 +251,19 @@ class Ability_Scanner {
 	/**
 	 * Whether a built array is small enough to keep. Charges its size, since
 	 * memoised values (e.g. class constants) can be combined repeatedly.
+	 *
+	 * @param array $values The array.
 	 */
-	private function array_fits( array $array ): bool {
-		$this->spend( count( $array ) );
-		return count( $array ) <= self::MAX_ARRAY;
+	private function array_fits( array $values ): bool {
+		$this->spend( count( $values ) );
+		return count( $values ) <= self::MAX_ARRAY;
 	}
 
 	/**
 	 * Charge work against the budget. Only evaluation is charged; indexing is
 	 * linear in the plugin's size.
 	 *
+	 * @param int $units Units of work to charge.
 	 * @throws OverflowException When the budget is spent.
 	 */
 	private function spend( int $units = 1 ): void {
@@ -162,6 +278,8 @@ class Ability_Scanner {
 	}
 
 	/**
+	 * Index the plugin, then evaluate each wp_register_ability() call.
+	 *
 	 * @return object[]
 	 */
 	private function run(): array {
@@ -219,7 +337,7 @@ class Ability_Scanner {
 		if ( $dynamic ) {
 			$budget = self::DEFINITIONS_BUDGET;
 			foreach ( $this->files as $file ) {
-				$found = array_merge( $found, self::find_definitions( (string) file_get_contents( $file ), $budget ) );
+				$found = array_merge( $found, self::find_definitions( (string) file_get_contents( $file ), $budget ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
 				if ( $budget <= 0 ) {
 					break;
 				}
@@ -236,6 +354,9 @@ class Ability_Scanner {
 	/**
 	 * Evaluate one wp_register_ability() call in every context it can run in.
 	 *
+	 * @param string $file Path of one of the plugin's PHP files.
+	 * @param int    $index Index of a token in the file.
+	 * @param array  $args The `[start, end]` ranges of the call's arguments.
 	 * @return object[]
 	 */
 	private function evaluate_site( string $file, int $index, array $args ): array {
@@ -261,10 +382,19 @@ class Ability_Scanner {
 	 * function's parameters (from its call sites, when $expand), each `$this`
 	 * class, and each iteration of the foreach loops around $index.
 	 *
+	 * @param array $scope The scope the code runs in.
+	 * @param int   $index Index of a token in the file.
+	 * @param bool  $expand Whether to bind the function's parameters from its call sites.
+	 * @param int   $depth How many callers have been followed so far.
 	 * @return array[] Each with 'vars' (name => value) and 'this' (object|null).
 	 */
 	private function contexts( array $scope, int $index, bool $expand, int $depth ): array {
-		$bindings = [ [ 'vars' => [], 'this' => null ] ];
+		$bindings = [
+			[
+				'vars' => [],
+				'this' => null,
+			],
+		];
 
 		if ( $expand && $scope['name'] && $depth < self::MAX_CALL_DEPTH ) {
 			foreach ( $this->call_sites( $scope ) as [ $file, $call, $receiver ] ) {
@@ -291,7 +421,10 @@ class Ability_Scanner {
 		foreach ( $bindings as $binding ) {
 			$receivers = $binding['this'] ? [ $binding['this'] ] : ( $scope['class'] ? $this->receivers_for( $scope['class'] ) : [ null ] );
 			foreach ( $receivers as $this_object ) {
-				$ctx = [ 'vars' => $binding['vars'], 'this' => $this_object ];
+				$ctx = [
+					'vars' => $binding['vars'],
+					'this' => $this_object,
+				];
 				foreach ( $this->unroll_loops( $scope, $index, $ctx ) as $unrolled ) {
 					$contexts[] = $unrolled;
 					if ( count( $contexts ) >= self::MAX_CONTEXTS ) {
@@ -305,6 +438,9 @@ class Ability_Scanner {
 
 	/**
 	 * Whether tokens refer to a parameter of the scope's function.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param array      $scope The scope the code runs in.
 	 */
 	private function uses_params( array $tokens, array $scope ): bool {
 		if ( ! $scope['params'] ) {
@@ -322,6 +458,8 @@ class Ability_Scanner {
 	/**
 	 * Where a function or method is called: [ file, index of the name token, receiver index ].
 	 * The receiver index points at the token before `->`/`::` for method calls, or is null.
+	 *
+	 * @param array $scope The scope the code runs in.
 	 */
 	private function call_sites( array $scope ): array {
 		$key = "calls:{$scope['file']}:{$scope['start']}";
@@ -359,12 +497,17 @@ class Ability_Scanner {
 				}
 			}
 		}
-		return $this->memo[ $key ] = $sites;
+		$this->memo[ $key ] = $sites;
+		return $this->memo[ $key ];
 	}
 
 	/**
 	 * For `Foo::method()`, whether Foo is the method's class (or a subclass).
 	 * `self::`, `static::` and `parent::` are accepted; the scope check happens when evaluating.
+	 *
+	 * @param string $file Path of one of the plugin's PHP files.
+	 * @param int    $index Index of a token in the file.
+	 * @param array  $scope The scope the code runs in.
 	 */
 	private function static_receiver_matches( string $file, int $index, array $scope ): bool {
 		$token = $this->tokens( $file )[ $index ] ?? null;
@@ -377,6 +520,12 @@ class Ability_Scanner {
 
 	/**
 	 * The `$this` a wrapper method runs with, given the receiver at its call site.
+	 *
+	 * @param ?int       $index Index of a token in the file.
+	 * @param array      $scope The scope the code runs in.
+	 * @param PhpToken[] $caller_tokens Tokens of the calling file.
+	 * @param array      $caller_scope Scope of the calling code.
+	 * @param array      $caller_ctx Evaluation context of the calling code.
 	 */
 	private function receiver( ?int $index, array $scope, array $caller_tokens, array $caller_scope, array $caller_ctx ): ?stdClass {
 		if ( null === $index || ! $scope['class'] ) {
@@ -407,20 +556,23 @@ class Ability_Scanner {
 	 * it or extends it, as constructed wherever the plugin does `new`, and as
 	 * constructed with no arguments.
 	 *
+	 * @param string $class_name A known class (lowercase fully-qualified name).
 	 * @return stdClass[]
 	 */
-	private function receivers_for( string $class ): array {
-		$key = "receivers:$class";
+	private function receivers_for( string $class_name ): array {
+		$key = "receivers:$class_name";
 		if ( isset( $this->memo[ $key ] ) ) {
 			return $this->memo[ $key ];
 		}
-		$this->memo[ $key ] = [ $this->bare( $class ) ]; // Guards against recursion through instantiations().
+		$this->memo[ $key ] = [ $this->bare( $class_name ) ]; // Guards against recursion through instantiations().
 
-		$concrete = array_values( array_filter(
-			array_merge( [ $class ], $this->descendants( $class ) ),
-			fn( $c ) => empty( $this->classes[ $c ]['abstract'] ) && 'class' === ( $this->classes[ $c ]['kind'] ?? 'class' )
-		) );
-		$concrete = $concrete ?: [ $class ];
+		$concrete = array_values(
+			array_filter(
+				array_merge( [ $class_name ], $this->descendants( $class_name ) ),
+				fn( $c ) => empty( $this->classes[ $c ]['abstract'] ) && 'class' === ( $this->classes[ $c ]['kind'] ?? 'class' )
+			)
+		);
+		$concrete = $concrete ?: [ $class_name ];
 
 		$receivers = [];
 		foreach ( array_slice( $concrete, 0, 50 ) as $c ) {
@@ -430,17 +582,19 @@ class Ability_Scanner {
 			// Also as built with no arguments, for classes instantiated from a list of class names.
 			$receivers[] = $this->instantiate( $c, [] );
 		}
-		return $this->memo[ $key ] = array_slice( $receivers, 0, 60 );
+		$this->memo[ $key ] = array_slice( $receivers, 0, 60 );
+		return $this->memo[ $key ];
 	}
 
 	/**
 	 * Objects built by `new Class( ... )` anywhere in the plugin, with the
 	 * arguments evaluated where they're written.
 	 *
+	 * @param string $class_name A known class (lowercase fully-qualified name).
 	 * @return stdClass[]
 	 */
-	private function instantiations( string $class ): array {
-		$short   = strtolower( self::short_name( $this->classes[ $class ]['name'] ?? $class ) );
+	private function instantiations( string $class_name ): array {
+		$short   = strtolower( self::short_name( $this->classes[ $class_name ]['name'] ?? $class_name ) );
 		$objects = [];
 		foreach ( $this->files as $file ) {
 			if ( ! isset( $this->identifiers[ $file ][ $short ] ) ) {
@@ -453,16 +607,19 @@ class Ability_Scanner {
 					continue;
 				}
 				$scope = $this->scope_at( $file, $i );
-				if ( $this->lookup_class( $tokens[ $i + 1 ]->text, $scope ) !== $class ) {
+				if ( $this->lookup_class( $tokens[ $i + 1 ]->text, $scope ) !== $class_name ) {
 					continue;
 				}
 				$values = [];
 				if ( ( $tokens[ $i + 2 ] ?? null )?->is( '(' ) ) {
 					$slices = array_map( fn( $range ) => $this->slice( $tokens, $range ), $this->split_args( $tokens, $i + 2 ) );
-					$ctx    = [ 'vars' => [], 'this' => $scope['class'] ? $this->bare( $scope['class'] ) : null ];
+					$ctx    = [
+						'vars' => [],
+						'this' => $scope['class'] ? $this->bare( $scope['class'] ) : null,
+					];
 					$values = $this->evaluate_args( $slices, $scope, $ctx );
 				}
-				$objects[] = $this->instantiate( $class, $values );
+				$objects[] = $this->instantiate( $class_name, $values );
 				if ( count( $objects ) >= 10 ) {
 					return $objects;
 				}
@@ -474,6 +631,9 @@ class Ability_Scanner {
 	/**
 	 * Expand a context into one per iteration of each foreach loop enclosing $index.
 	 *
+	 * @param array $scope The scope the code runs in.
+	 * @param int   $index Index of a token in the file.
+	 * @param array $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 * @return array[]
 	 */
 	private function unroll_loops( array $scope, int $index, array $ctx ): array {
@@ -508,6 +668,8 @@ class Ability_Scanner {
 	/**
 	 * The foreach loops in a scope whose body contains $index, outermost first.
 	 *
+	 * @param array $scope The scope the code runs in.
+	 * @param int   $index Index of a token in the file.
 	 * @return array[] Each with 'expr' (tokens), 'key' and 'value' (variable names or null).
 	 */
 	private function enclosing_loops( array $scope, int $index ): array {
@@ -539,9 +701,9 @@ class Ability_Scanner {
 			$as = null;
 			for ( $j = $i + 2, $depth = 0; $j < $close; $j++ ) {
 				if ( self::is_open( $tokens[ $j ] ) ) {
-					$depth++;
+					++$depth;
 				} elseif ( self::is_close( $tokens[ $j ] ) ) {
-					$depth--;
+					--$depth;
 				} elseif ( 0 === $depth && T_AS === $tokens[ $j ]->id ) {
 					$as = $j;
 					break;
@@ -577,7 +739,9 @@ class Ability_Scanner {
 	/**
 	 * Evaluate an expression. Returns null when any part of it is unknown.
 	 *
-	 * @param PhpToken[] $tokens
+	 * @param PhpToken[] $tokens Tokens of the expression.
+	 * @param array      $scope The scope the code runs in.
+	 * @param array      $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 * @return string|int|float|bool|array|stdClass|null
 	 */
 	private function evaluate( array $tokens, array $scope, array $ctx ) {
@@ -588,36 +752,44 @@ class Ability_Scanner {
 		if ( $this->depth >= self::MAX_DEPTH ) {
 			return null;
 		}
-		$this->depth++;
+		++$this->depth;
 		try {
 			$i     = 0;
 			$value = $this->parse_expression( $tokens, $i, $scope, $ctx );
 			return count( $tokens ) === $i ? $value : null;
 		} finally {
-			$this->depth--;
+			--$this->depth;
 		}
 	}
 
+	/**
+	 * Parse an expression: an operand followed by any operators.
+	 *
+	 * @param PhpToken[] $t Tokens of the expression being parsed.
+	 * @param int        &$i Index of the current token; moved past what's consumed.
+	 * @param array      $scope The scope the code runs in.
+	 * @param array      $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
+	 */
 	private function parse_expression( array $t, int &$i, array $scope, array $ctx ) {
 		$left = $this->parse_postfix( $t, $i, $scope, $ctx );
 		$n    = count( $t );
 		while ( $i < $n ) {
 			$token = $t[ $i ];
 			if ( $token->is( '.' ) ) {
-				$i++;
+				++$i;
 				$right = $this->parse_postfix( $t, $i, $scope, $ctx );
 				$left  = is_scalar( $left ) && is_scalar( $right ) && strlen( (string) $left ) + strlen( (string) $right ) <= self::MAX_STRING ? $left . $right : null;
 			} elseif ( T_COALESCE === $token->id ) {
-				$i++;
+				++$i;
 				$right = $this->parse_expression( $t, $i, $scope, $ctx );
 				$left  = $left ?? $right;
 			} elseif ( $token->is( '=' ) || T_COALESCE_EQUAL === $token->id ) {
 				// An assignment's value is what's assigned: `return $this->cache = new Foo();`.
-				$i++;
+				++$i;
 				$right = $this->parse_expression( $t, $i, $scope, $ctx );
 				$left  = $token->is( '=' ) ? $right : ( $left ?? $right );
 			} elseif ( T_BOOLEAN_AND === $token->id || T_BOOLEAN_OR === $token->id ) {
-				$i++;
+				++$i;
 				$right = $this->parse_postfix( $t, $i, $scope, $ctx );
 				$left  = self::logical( T_BOOLEAN_AND === $token->id, self::truthy( $left ), self::truthy( $right ) );
 			} elseif ( $token->is( '?' ) ) {
@@ -637,6 +809,12 @@ class Ability_Scanner {
 	 * When the condition can't be known, the branch that resolves is used
 	 * (the first, if both do): e.g. `defined( $c . '::NAME' ) ? $c::NAME : $c::get_name()`
 	 * resolves for classes with either.
+	 *
+	 * @param mixed      $condition The condition's value, or null when unknown.
+	 * @param PhpToken[] $t Tokens of the expression being parsed.
+	 * @param int        &$i Index of the current token; moved past what's consumed.
+	 * @param array      $scope The scope the code runs in.
+	 * @param array      $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 */
 	private function ternary( $condition, array $t, int &$i, array $scope, array $ctx ) {
 		$n     = count( $t );
@@ -645,7 +823,7 @@ class Ability_Scanner {
 			if ( self::is_open( $t[ $k ] ) ) {
 				$k = $this->match( $t, $k ) ?? $n;
 			} elseif ( $t[ $k ]->is( '?' ) ) {
-				$nested++;
+				++$nested;
 			} elseif ( $t[ $k ]->is( ':' ) && 0 === $nested-- ) {
 				$colon = $k;
 				break;
@@ -671,13 +849,22 @@ class Ability_Scanner {
 
 	/**
 	 * PHP truthiness of a known value, or null when unknown.
+	 *
+	 * @param mixed $value A value, or null when unknown.
 	 */
 	private static function truthy( $value ): ?bool {
 		return null === $value ? null : (bool) $value;
 	}
 
-	private static function logical( bool $and, ?bool $left, ?bool $right ): ?bool {
-		if ( $and ) {
+	/**
+	 * Combine two booleans that may be unknown with `&&` or `||`.
+	 *
+	 * @param bool  $is_and True for `&&`, false for `||`.
+	 * @param ?bool $left The left operand's truthiness, or null when unknown.
+	 * @param ?bool $right The right operand's truthiness, or null when unknown.
+	 */
+	private static function logical( bool $is_and, ?bool $left, ?bool $right ): ?bool {
+		if ( $is_and ) {
 			return false === $left || false === $right ? false : ( true === $left && true === $right ? true : null );
 		}
 		return true === $left || true === $right ? true : ( false === $left && false === $right ? false : null );
@@ -686,14 +873,16 @@ class Ability_Scanner {
 	/**
 	 * Whether an expression is set: true or false when that can be known, else null.
 	 *
-	 * @param PhpToken[] $tokens
+	 * @param PhpToken[] $tokens Tokens of the expression.
+	 * @param array      $scope The scope the code runs in.
+	 * @param array      $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 */
 	private function is_set( array $tokens, array $scope, array $ctx ): ?bool {
 		$last = count( $tokens ) - 1;
 		if ( $last > 0 && $tokens[ $last ]->is( ']' ) ) {
 			for ( $open = $last - 1, $depth = 0; $open > 0; $open-- ) {
 				if ( self::is_close( $tokens[ $open ] ) ) {
-					$depth++;
+					++$depth;
 				} elseif ( self::is_open( $tokens[ $open ] ) && 0 === $depth-- ) {
 					break;
 				}
@@ -710,6 +899,14 @@ class Ability_Scanner {
 		return null !== $this->evaluate( $tokens, $scope, $ctx ) ? true : null;
 	}
 
+	/**
+	 * Parse an operand followed by any index, property, method or static access.
+	 *
+	 * @param PhpToken[] $t Tokens of the expression being parsed.
+	 * @param int        &$i Index of the current token; moved past what's consumed.
+	 * @param array      $scope The scope the code runs in.
+	 * @param array      $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
+	 */
 	private function parse_postfix( array $t, int &$i, array $scope, array $ctx ) {
 		$value = $this->parse_primary( $t, $i, $scope, $ctx );
 		$n     = count( $t );
@@ -743,9 +940,9 @@ class Ability_Scanner {
 					$value = null;
 				}
 			} elseif ( T_DOUBLE_COLON === $token->id ) {
-				// `$object::CONST`, `$class_name::method()`.
+				// A constant or static method reached through an object or class name held in a variable.
 				$class = $value instanceof stdClass ? $value->class : ( is_string( $value ) ? $this->lookup_class( $value, $scope ) : null );
-				$i++;
+				++$i;
 				$value = $this->static_member( $class, $value instanceof stdClass ? $value : null, $t, $i, $scope, $ctx );
 			} else {
 				break;
@@ -754,6 +951,14 @@ class Ability_Scanner {
 		return $value;
 	}
 
+	/**
+	 * Parse an operand: a literal, variable, call, `new`, constant or bracketed expression.
+	 *
+	 * @param PhpToken[] $t Tokens of the expression being parsed.
+	 * @param int        &$i Index of the current token; moved past what's consumed.
+	 * @param array      $scope The scope the code runs in.
+	 * @param array      $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
+	 */
 	private function parse_primary( array $t, int &$i, array $scope, array $ctx ) {
 		$n     = count( $t );
 		$token = $t[ $i ] ?? null;
@@ -771,11 +976,11 @@ class Ability_Scanner {
 
 		switch ( true ) {
 			case T_CONSTANT_ENCAPSED_STRING === $token->id:
-				$i++;
+				++$i;
 				return self::unescape( $token->text );
 
 			case T_LNUMBER === $token->id:
-				$i++;
+				++$i;
 				return (int) $token->text;
 
 			case $token->is( '(' ):
@@ -801,7 +1006,7 @@ class Ability_Scanner {
 				return $value;
 
 			case T_VARIABLE === $token->id:
-				$i++;
+				++$i;
 				return '$this' === $token->text ? $ctx['this'] : $this->variable( substr( $token->text, 1 ), $scope, $ctx );
 
 			case T_NEW === $token->id:
@@ -822,7 +1027,7 @@ class Ability_Scanner {
 				return $class ? $this->instantiate( $class, $args ) : null;
 
 			case $token->is( '!' ):
-				$i++;
+				++$i;
 				$value = self::truthy( $this->parse_postfix( $t, $i, $scope, $ctx ) );
 				return null === $value ? null : ! $value;
 
@@ -846,18 +1051,18 @@ class Ability_Scanner {
 				return $set;
 
 			case T_NS_C === $token->id:
-				$i++;
+				++$i;
 				return $scope['ns'];
 
 			case T_CLASS_C === $token->id:
-				$i++;
+				++$i;
 				return $scope['class'] ? $this->classes[ $scope['class'] ]['name'] : null;
 
 			case T_STATIC === $token->id && T_DOUBLE_COLON === ( $t[ $i + 1 ] ?? null )?->id:
 			case self::is_name( $token ):
 				$next = $t[ $i + 1 ] ?? null;
 				if ( $next?->is( '(' ) ) {
-					$i++;
+					++$i;
 					$args = $this->call_args( $t, $i, $scope, $ctx );
 					return $this->call_function( $token->text, $args, $scope );
 				}
@@ -867,12 +1072,12 @@ class Ability_Scanner {
 					$class  = $this->class_ref( $token->text, $scope, $ctx );
 					$object = in_array( $lower, [ 'self', 'static', 'parent' ], true ) ? $ctx['this'] : null;
 					if ( T_CLASS === ( $t[ $i ] ?? null )?->id ) {
-						$i++;
+						++$i;
 						return $class ? $this->classes[ $class ]['name'] : ltrim( $token->text, '\\' );
 					}
 					return $this->static_member( $class, $object, $t, $i, $scope, $ctx );
 				}
-				$i++;
+				++$i;
 				return $this->constant( $token->text );
 
 			default:
@@ -884,27 +1089,38 @@ class Ability_Scanner {
 
 	/**
 	 * `Class::CONST` or `Class::method( ... )`, with $i just past the `::`.
+	 *
+	 * @param ?string    $class_name The class, or null when unknown.
+	 * @param ?stdClass  $owner The object the call is made through, if any.
+	 * @param PhpToken[] $t Tokens of the expression being parsed.
+	 * @param int        &$i Index of the current token; moved past what's consumed.
+	 * @param array      $scope The scope the code runs in.
+	 * @param array      $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 */
-	private function static_member( ?string $class, ?stdClass $object, array $t, int &$i, array $scope, array $ctx ) {
+	private function static_member( ?string $class_name, ?stdClass $owner, array $t, int &$i, array $scope, array $ctx ) {
 		$member = $t[ $i ] ?? null;
 		if ( ! self::is_name( $member ) ) {
 			$i = count( $t );
 			return null;
 		}
-		$i++;
+		++$i;
 		if ( ( $t[ $i ] ?? null )?->is( '(' ) ) {
 			$args = $this->call_args( $t, $i, $scope, $ctx );
-			if ( ! $class ) {
+			if ( ! $class_name ) {
 				return null;
 			}
-			$receiver = $object && $this->is_a( $object->class, $class ) ? $object : $this->bare( $class );
-			return $this->call_method( $receiver, $member->text, $args, $class );
+			$receiver = $owner && $this->is_a( $owner->class, $class_name ) ? $owner : $this->bare( $class_name );
+			return $this->call_method( $receiver, $member->text, $args, $class_name );
 		}
-		return $class ? $this->class_constant( $class, $member->text ) : null;
+		return $class_name ? $this->class_constant( $class_name, $member->text ) : null;
 	}
 
 	/**
 	 * Resolve `self`, `static`, `parent` or a class name to a known class.
+	 *
+	 * @param string $name A name as written in the code.
+	 * @param array  $scope The scope the code runs in.
+	 * @param array  $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 */
 	private function class_ref( string $name, array $scope, array $ctx ): ?string {
 		switch ( strtolower( $name ) ) {
@@ -922,6 +1138,10 @@ class Ability_Scanner {
 	/**
 	 * Evaluate a call's argument list, with $i at its `(`; leaves $i past the `)`.
 	 *
+	 * @param PhpToken[] $t Tokens of the expression being parsed.
+	 * @param int        &$i Index of the current token; moved past what's consumed.
+	 * @param array      $scope The scope the code runs in.
+	 * @param array      $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 * @return array Positional values, plus named arguments under their names.
 	 */
 	private function call_args( array $t, int &$i, array $scope, array $ctx ): array {
@@ -935,6 +1155,13 @@ class Ability_Scanner {
 		return $this->evaluate_args( $slices, $scope, $ctx );
 	}
 
+	/**
+	 * Evaluate argument tokens: positional, spread and named.
+	 *
+	 * @param PhpToken[][] $slices Each argument's tokens.
+	 * @param array        $scope The scope the code runs in.
+	 * @param array        $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
+	 */
 	private function evaluate_args( array $slices, array $scope, array $ctx ): array {
 		$values = [];
 		foreach ( $slices as $slice ) {
@@ -954,7 +1181,11 @@ class Ability_Scanner {
 	}
 
 	/**
+	 * Evaluate the entries of an array literal.
+	 *
 	 * @param PhpToken[] $inner Tokens between the brackets.
+	 * @param array      $scope The scope the code runs in.
+	 * @param array      $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 */
 	private function array_literal( array $inner, array $scope, array $ctx ): array {
 		$result = [];
@@ -970,9 +1201,9 @@ class Ability_Scanner {
 			$arrow = null;
 			for ( $k = 0, $depth = 0, $c = count( $entry ); $k < $c; $k++ ) {
 				if ( self::is_open( $entry[ $k ] ) ) {
-					$depth++;
+					++$depth;
 				} elseif ( self::is_close( $entry[ $k ] ) ) {
-					$depth--;
+					--$depth;
 				} elseif ( 0 === $depth && T_DOUBLE_ARROW === $entry[ $k ]->id ) {
 					$arrow = $k;
 					break;
@@ -990,6 +1221,13 @@ class Ability_Scanner {
 		return $result;
 	}
 
+	/**
+	 * Evaluate a function call: a built-in the scanner understands, or one of the plugin's functions.
+	 *
+	 * @param string $name A name as written in the code.
+	 * @param array  $args Evaluated arguments: positional, plus named ones under their names.
+	 * @param array  $scope The scope the code runs in.
+	 */
 	private function call_function( string $name, array $args, array $scope ) {
 		$short = strtolower( self::short_name( $name ) );
 
@@ -1048,6 +1286,11 @@ class Ability_Scanner {
 
 	/**
 	 * Call a method on an object (or class name), looking it up from class $from (default: the object's class).
+	 *
+	 * @param mixed   $target The object, or class name, to call the method on.
+	 * @param string  $name A name as written in the code.
+	 * @param array   $args Evaluated arguments.
+	 * @param ?string $from Optional. Class to look the method up from; defaults to the object's class.
 	 */
 	private function call_method( $target, string $name, array $args, ?string $from = null ) {
 		if ( is_string( $target ) ) {
@@ -1064,23 +1307,33 @@ class Ability_Scanner {
 
 	/**
 	 * Evaluate what a function or method returns.
+	 *
+	 * @param array     $func A function or method, as recorded when indexing.
+	 * @param array     $args Evaluated arguments: positional, plus named ones under their names.
+	 * @param ?stdClass $this_object The object to use as `$this`, if any.
 	 */
-	private function invoke( array $callable, array $args, ?stdClass $this_object ) {
-		$return = $this->return_expression( $callable );
+	private function invoke( array $func, array $args, ?stdClass $this_object ) {
+		$return = $this->return_expression( $func );
 		if ( null === $return ) {
 			return null;
 		}
-		$ctx = [ 'vars' => $this->bind( $callable, $args ), 'this' => $this_object ];
-		return $this->evaluate( $return, $callable, $ctx );
+		$ctx = [
+			'vars' => $this->bind( $func, $args ),
+			'this' => $this_object,
+		];
+		return $this->evaluate( $return, $func, $ctx );
 	}
 
 	/**
 	 * Build an object, running the constructor's promoted properties and its
 	 * `$this->prop = ...;` assignments.
+	 *
+	 * @param string $class_name A known class (lowercase fully-qualified name).
+	 * @param array  $args Evaluated constructor arguments.
 	 */
-	private function instantiate( string $class, array $args ): stdClass {
-		$object = $this->bare( $class );
-		$ctor   = $this->find_method( $class, '__construct' );
+	private function instantiate( string $class_name, array $args ): stdClass {
+		$object = $this->bare( $class_name );
+		$ctor   = $this->find_method( $class_name, '__construct' );
 		if ( ! $ctor ) {
 			return $object;
 		}
@@ -1093,7 +1346,10 @@ class Ability_Scanner {
 		}
 
 		$tokens = $this->tokens( $ctor['file'] );
-		$ctx    = [ 'vars' => $vars, 'this' => $object ];
+		$ctx    = [
+			'vars' => $vars,
+			'this' => $object,
+		];
 		for ( $i = $ctor['start'] + 1; $i < $ctor['end']; $i++ ) {
 			$i = $this->skip_inner_scope( $ctor, $i );
 			$this->spend();
@@ -1113,11 +1369,14 @@ class Ability_Scanner {
 
 	/**
 	 * Bind call arguments to a function's parameters, evaluating defaults for missing ones.
+	 *
+	 * @param array $func A function or method, as recorded when indexing.
+	 * @param array $args Evaluated arguments: positional, plus named ones under their names.
 	 */
-	private function bind( array $callable, array $args ): array {
+	private function bind( array $func, array $args ): array {
 		$vars     = [];
 		$position = 0;
-		foreach ( $callable['params'] as $param ) {
+		foreach ( $func['params'] as $param ) {
 			$name = $param['name'];
 			if ( $param['variadic'] ) {
 				$vars[ $name ] = array_values( array_filter( $args, 'is_int', ARRAY_FILTER_USE_KEY ) );
@@ -1129,11 +1388,18 @@ class Ability_Scanner {
 			} elseif ( array_key_exists( $position, $args ) ) {
 				$vars[ $name ] = $args[ $position ];
 			} elseif ( $param['default'] ) {
-				$vars[ $name ] = $this->evaluate( $this->slice( $this->tokens( $callable['file'] ), $param['default'] ), $callable, [ 'vars' => $vars, 'this' => null ] );
+				$vars[ $name ] = $this->evaluate(
+					$this->slice( $this->tokens( $func['file'] ), $param['default'] ),
+					$func,
+					[
+						'vars' => $vars,
+						'this' => null,
+					]
+				);
 			} else {
 				$vars[ $name ] = null;
 			}
-			$position++;
+			++$position;
 		}
 		return $vars;
 	}
@@ -1147,6 +1413,10 @@ class Ability_Scanner {
 	 * `$x = array_merge( $x, … )` (or anything else using `$x`), `$x[] = …` and
 	 * `$x['key'] = …`. Other later assignments, typically fallbacks such as
 	 * `if ( ! is_array( $x ) ) { $x = array(); }`, are ignored.
+	 *
+	 * @param string $name A name as written in the code.
+	 * @param array  $scope The scope the code runs in.
+	 * @param array  $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 */
 	private function variable( string $name, array $scope, array $ctx ) {
 		if ( array_key_exists( $name, $ctx['vars'] ) ) {
@@ -1170,7 +1440,7 @@ class Ability_Scanner {
 				continue;
 			}
 
-			// `$x = …`, `$x[] = …` or `$x['key'] = …`.
+			// A plain assignment, an append, or an assignment to a key.
 			$key_range = null;
 			$rhs       = null;
 			if ( ( $tokens[ $i + 1 ] ?? null )?->is( '=' ) ) {
@@ -1204,7 +1474,7 @@ class Ability_Scanner {
 
 			foreach ( $this->unroll_loops( $scope, $i, $ctx ) as $iteration ) {
 				$iteration['vars'][ $name ] = $value;
-				$next = $this->evaluate( $expr, $scope, $iteration );
+				$next                       = $this->evaluate( $expr, $scope, $iteration );
 				if ( null === $key_range ) {
 					$value = $next ?? $value;
 				} elseif ( is_array( $value ) ) {
@@ -1230,6 +1500,10 @@ class Ability_Scanner {
 	/**
 	 * The value of the first `$this->name = ...;` in a scope, for properties
 	 * the constructor didn't set, e.g. `$this->cache ??= $this->build(); return $this->cache;`.
+	 *
+	 * @param string $name A name as written in the code.
+	 * @param array  $scope The scope the code runs in.
+	 * @param array  $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
 	 */
 	private function assigned_property( string $name, array $scope, array $ctx ) {
 		$tokens = $this->tokens( $scope['file'] );
@@ -1238,7 +1512,7 @@ class Ability_Scanner {
 			$this->spend();
 			if ( '$this' !== ( $tokens[ $i ] ?? null )?->text
 				|| T_OBJECT_OPERATOR !== ( $tokens[ $i + 1 ] ?? null )?->id
-				|| $name !== ( $tokens[ $i + 2 ] ?? null )?->text
+				|| ( $tokens[ $i + 2 ] ?? null )?->text !== $name
 			) {
 				continue;
 			}
@@ -1252,13 +1526,18 @@ class Ability_Scanner {
 			}
 			// Mark it unknown while evaluating, so `$this->x = f( $this->x )` can't recurse.
 			$ctx['this']->props[ $name ] = null;
-			$value = $this->evaluate( array_slice( $tokens, $i + 4, $stop - $i - 4 ), $scope, $ctx );
+			$value                       = $this->evaluate( array_slice( $tokens, $i + 4, $stop - $i - 4 ), $scope, $ctx );
 			unset( $ctx['this']->props[ $name ] );
 			return $value;
 		}
 		return null;
 	}
 
+	/**
+	 * The value of a `define()`d constant, `true` or `false`.
+	 *
+	 * @param string $name A name as written in the code.
+	 */
 	private function constant( string $name ) {
 		$name  = ltrim( $name, '\\' );
 		$lower = strtolower( $name );
@@ -1272,16 +1551,30 @@ class Ability_Scanner {
 			return null;
 		}
 		[ $file, $range ] = $this->defines[ $name ];
-		$key = "define:$name";
+		$key              = "define:$name";
 		if ( array_key_exists( $key, $this->memo ) ) {
 			return $this->memo[ $key ];
 		}
 		$this->memo[ $key ] = null;
-		return $this->memo[ $key ] = $this->evaluate( $this->slice( $this->tokens( $file ), $range ), $this->scope_at( $file, $range[0] ), [ 'vars' => [], 'this' => null ] );
+		$this->memo[ $key ] = $this->evaluate(
+			$this->slice( $this->tokens( $file ), $range ),
+			$this->scope_at( $file, $range[0] ),
+			[
+				'vars' => [],
+				'this' => null,
+			]
+		);
+		return $this->memo[ $key ];
 	}
 
-	private function class_constant( string $class, string $name ) {
-		for ( $c = $class, $hops = 0; $c && $hops < 20; $c = $this->parent_of( $c ), $hops++ ) {
+	/**
+	 * The value of a class constant, looking through the class's parents.
+	 *
+	 * @param string $class_name A known class (lowercase fully-qualified name).
+	 * @param string $name The constant's name.
+	 */
+	private function class_constant( string $class_name, string $name ) {
+		for ( $c = $class_name, $hops = 0; $c && $hops < 20; $c = $this->parent_of( $c ), $hops++ ) {
 			$range = $this->classes[ $c ]['consts'][ $name ] ?? null;
 			if ( ! $range ) {
 				continue;
@@ -1291,10 +1584,18 @@ class Ability_Scanner {
 				return $this->memo[ $key ];
 			}
 			$this->memo[ $key ] = null;
-			$file  = $this->classes[ $c ]['file'];
-			$scope = $this->scope_at( $file, $range[0] );
-			$scope['class'] = $c;
-			return $this->memo[ $key ] = $this->evaluate( $this->slice( $this->tokens( $file ), $range ), $scope, [ 'vars' => [], 'this' => null ] );
+			$file               = $this->classes[ $c ]['file'];
+			$scope              = $this->scope_at( $file, $range[0] );
+			$scope['class']     = $c;
+			$this->memo[ $key ] = $this->evaluate(
+				$this->slice( $this->tokens( $file ), $range ),
+				$scope,
+				[
+					'vars' => [],
+					'this' => null,
+				]
+			);
+			return $this->memo[ $key ];
 		}
 		return null;
 	}
@@ -1302,54 +1603,68 @@ class Ability_Scanner {
 	/**
 	 * The expression a function returns: its only `return`, or the last one in its outermost block.
 	 *
+	 * @param array $func A function or method, as recorded when indexing.
 	 * @return PhpToken[]|null
 	 */
-	private function return_expression( array $callable ): ?array {
-		$key = "return:{$callable['file']}:{$callable['start']}";
+	private function return_expression( array $func ): ?array {
+		$key = "return:{$func['file']}:{$func['start']}";
 		if ( array_key_exists( $key, $this->memo ) ) {
 			return $this->memo[ $key ];
 		}
 
-		$tokens  = $this->tokens( $callable['file'] );
+		$tokens  = $this->tokens( $func['file'] );
 		$returns = [];
-		for ( $i = $callable['start'] + 1, $depth = 0; $i < $callable['end']; $i++ ) {
+		for ( $i = $func['start'] + 1, $depth = 0; $i < $func['end']; $i++ ) {
 			$this->spend();
-			$skipped = $this->skip_inner_scope( $callable, $i );
+			$skipped = $this->skip_inner_scope( $func, $i );
 			if ( $skipped !== $i ) {
 				$i = $skipped;
 				continue;
 			}
 			if ( self::is_open( $tokens[ $i ] ) ) {
-				$depth++;
+				++$depth;
 			} elseif ( self::is_close( $tokens[ $i ] ) ) {
-				$depth--;
+				--$depth;
 			} elseif ( T_RETURN === $tokens[ $i ]->id ) {
 				$returns[] = [ $i, $depth ];
 			}
 		}
 		if ( ! $returns ) {
-			return $this->memo[ $key ] = null;
+			$this->memo[ $key ] = null;
+			return $this->memo[ $key ];
 		}
 
-		$top    = array_filter( $returns, static fn( $r ) => 0 === $r[1] );
-		[ $at ] = $top ? end( $top ) : end( $returns );
-		$end    = $this->statement_end( $tokens, $at + 1 );
-		return $this->memo[ $key ] = null === $end ? null : array_slice( $tokens, $at + 1, $end - $at - 1 );
+		$top                = array_filter( $returns, static fn( $r ) => 0 === $r[1] );
+		[ $at ]             = $top ? end( $top ) : end( $returns );
+		$end                = $this->statement_end( $tokens, $at + 1 );
+		$this->memo[ $key ] = null === $end ? null : array_slice( $tokens, $at + 1, $end - $at - 1 );
+		return $this->memo[ $key ];
 	}
 
 	/*
 	 * Classes and functions.
 	 */
 
-	private function bare( string $class ): stdClass {
+	/**
+	 * An object of a class with no properties set.
+	 *
+	 * @param string $class_name A known class (lowercase fully-qualified name).
+	 */
+	private function bare( string $class_name ): stdClass {
 		$object        = new stdClass();
-		$object->class = $class;
+		$object->class = $class_name;
 		$object->props = [];
 		return $object;
 	}
 
-	private function find_method( string $class, string $name ): ?array {
-		for ( $c = $class, $hops = 0; $c && $hops < 20; $c = $this->parent_of( $c ), $hops++ ) {
+	/**
+	 * A method of a class, looking through the class's parents.
+	 *
+	 * @param string $class_name A known class (lowercase fully-qualified name).
+	 * @param string $name The method's name, lowercase.
+	 */
+	private function find_method( string $class_name, string $name ): ?array {
+		for ( $c = $class_name, $hops = 0; $c && $hops < 20; $c = $this->parent_of( $c ), $hops++ ) {
 			if ( isset( $this->classes[ $c ]['methods'][ $name ] ) ) {
 				return $this->classes[ $c ]['methods'][ $name ];
 			}
@@ -1357,21 +1672,38 @@ class Ability_Scanner {
 		return null;
 	}
 
-	private function parent_of( string $class ): ?string {
-		$info = $this->classes[ $class ] ?? null;
+	/**
+	 * A class's parent, if it's a known class.
+	 *
+	 * @param string $class_name A known class (lowercase fully-qualified name).
+	 */
+	private function parent_of( string $class_name ): ?string {
+		$info = $this->classes[ $class_name ] ?? null;
 		if ( ! $info || ! $info['parent'] ) {
 			return null;
 		}
-		$key = "parent:$class";
+		$key = "parent:$class_name";
 		if ( ! array_key_exists( $key, $this->memo ) ) {
-			$parent             = $this->lookup_class( $info['parent'], [ 'ns' => $info['ns'], 'uses' => $info['uses'] ] );
-			$this->memo[ $key ] = $parent !== $class ? $parent : null;
+			$parent             = $this->lookup_class(
+				$info['parent'],
+				[
+					'ns'   => $info['ns'],
+					'uses' => $info['uses'],
+				]
+			);
+			$this->memo[ $key ] = $parent !== $class_name ? $parent : null;
 		}
 		return $this->memo[ $key ];
 	}
 
-	private function is_a( ?string $class, ?string $ancestor ): bool {
-		for ( $c = $class, $hops = 0; $c && $hops < 20; $c = $this->parent_of( $c ), $hops++ ) {
+	/**
+	 * Whether a class is, or extends, another.
+	 *
+	 * @param ?string $class_name A known class, or null.
+	 * @param ?string $ancestor The class it may be or extend.
+	 */
+	private function is_a( ?string $class_name, ?string $ancestor ): bool {
+		for ( $c = $class_name, $hops = 0; $c && $hops < 20; $c = $this->parent_of( $c ), $hops++ ) {
 			if ( $c === $ancestor ) {
 				return true;
 			}
@@ -1379,14 +1711,20 @@ class Ability_Scanner {
 		return false;
 	}
 
-	private function descendants( string $class ): array {
+	/**
+	 * Every known class that extends a class, directly or not.
+	 *
+	 * @param string $class_name A known class (lowercase fully-qualified name).
+	 */
+	private function descendants( string $class_name ): array {
 		$found = [];
-		$queue = $this->children[ $class ] ?? [];
-		while ( $queue && count( $found ) < 500 ) {
+		$queue = $this->children[ $class_name ] ?? [];
+		for ( $found_count = 0; $queue && $found_count < 500; ) {
 			$c = array_shift( $queue );
 			if ( ! in_array( $c, $found, true ) ) {
 				$found[] = $c;
 				$queue   = array_merge( $queue, $this->children[ $c ] ?? [] );
+				++$found_count;
 			}
 		}
 		return $found;
@@ -1394,6 +1732,9 @@ class Ability_Scanner {
 
 	/**
 	 * Resolve a class name as written in a scope to a known class (lowercase FQN).
+	 *
+	 * @param string $name A name as written in the code.
+	 * @param array  $scope The scope the code runs in.
 	 */
 	private function lookup_class( string $name, array $scope ): ?string {
 		$fqn = $this->qualify( $name, $scope );
@@ -1404,6 +1745,12 @@ class Ability_Scanner {
 		return 1 === count( $candidates ) ? $candidates[0] : null;
 	}
 
+	/**
+	 * Resolve a function name as written in a scope to one of the plugin's functions.
+	 *
+	 * @param string $name A name as written in the code.
+	 * @param array  $scope The scope the code runs in.
+	 */
 	private function lookup_function( string $name, array $scope ): ?array {
 		$fqn = $this->qualify( $name, $scope );
 		if ( isset( $this->functions[ $fqn ] ) ) {
@@ -1416,6 +1763,9 @@ class Ability_Scanner {
 
 	/**
 	 * The lowercase fully-qualified form of a name, using the scope's namespace and imports.
+	 *
+	 * @param string $name A name as written in the code.
+	 * @param array  $scope The scope the code runs in.
 	 */
 	private function qualify( string $name, array $scope ): string {
 		if ( str_starts_with( $name, '\\' ) ) {
@@ -1434,9 +1784,14 @@ class Ability_Scanner {
 	 * Indexing.
 	 */
 
+	/**
+	 * Parse a file and add what it declares to the plugin-wide index.
+	 *
+	 * @param string $file Path of one of the plugin's PHP files.
+	 */
 	private function index( string $file ): void {
-		$parsed = $this->parse( $file );
-		$this->meta[ $file ] = [
+		$parsed                     = $this->parse( $file );
+		$this->meta[ $file ]        = [
 			'scopes'     => $parsed['scopes'],
 			'scope_ends' => array_column( $parsed['scopes'], 'end', 'start' ),
 			'namespaces' => $parsed['namespaces'],
@@ -1457,16 +1812,26 @@ class Ability_Scanner {
 	 * Tokenise a file and outline it: namespaces and imports, classes with their
 	 * constants and methods, functions, closures, define() calls and
 	 * wp_register_ability() call sites.
+	 *
+	 * @param string $file Path of one of the plugin's PHP files.
 	 */
 	private function parse( string $file ): array {
-		$tokens = array_values( array_filter(
-			PhpToken::tokenize( (string) file_get_contents( $file ) ),
-			static fn( PhpToken $t ) => ! $t->isIgnorable()
-		) );
+		$tokens = array_values(
+			array_filter(
+				PhpToken::tokenize( (string) file_get_contents( $file ) ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
+				static fn( PhpToken $t ) => ! $t->isIgnorable()
+			)
+		);
 		$this->remember( $file, $tokens );
 
 		$count       = count( $tokens );
-		$namespaces  = [ [ 'start' => 0, 'ns' => '', 'uses' => [] ] ];
+		$namespaces  = [
+			[
+				'start' => 0,
+				'ns'    => '',
+				'uses'  => [],
+			],
+		];
 		$ns_end      = null;
 		$classes     = [];
 		$functions   = [];
@@ -1485,7 +1850,11 @@ class Ability_Scanner {
 				array_pop( $fn_stack );
 			}
 			if ( null !== $ns_end && $i > $ns_end ) {
-				$namespaces[] = [ 'start' => $i, 'ns' => '', 'uses' => [] ];
+				$namespaces[] = [
+					'start' => $i,
+					'ns'    => '',
+					'uses'  => [],
+				];
 				$ns_end       = null;
 			}
 
@@ -1503,19 +1872,27 @@ class Ability_Scanner {
 				case T_NAMESPACE:
 					$next = $tokens[ $i + 1 ] ?? null;
 					if ( $next && ( T_STRING === $next->id || T_NAME_QUALIFIED === $next->id ) ) {
-						$namespaces[] = [ 'start' => $i, 'ns' => $next->text, 'uses' => [] ];
+						$namespaces[] = [
+							'start' => $i,
+							'ns'    => $next->text,
+							'uses'  => [],
+						];
 						if ( ( $tokens[ $i + 2 ] ?? null )?->is( '{' ) ) {
 							$ns_end = $this->match( $tokens, $i + 2 );
 						}
 					} elseif ( $next?->is( '{' ) ) {
-						$namespaces[] = [ 'start' => $i, 'ns' => '', 'uses' => [] ];
+						$namespaces[] = [
+							'start' => $i,
+							'ns'    => '',
+							'uses'  => [],
+						];
 						$ns_end       = $this->match( $tokens, $i + 1 );
 					}
 					break;
 
 				case T_USE:
 					if ( ! $class_stack && ! $fn_stack ) {
-						$last = count( $namespaces ) - 1;
+						$last                        = count( $namespaces ) - 1;
 						$namespaces[ $last ]['uses'] = array_merge( $namespaces[ $last ]['uses'], $this->parse_use( $tokens, $i ) );
 					}
 					break;
@@ -1544,7 +1921,10 @@ class Ability_Scanner {
 						}
 					}
 					$abstract = false;
-					for ( $j = $i - 1; $j >= 0 && in_array( $tokens[ $j ]->id, [ T_ABSTRACT, T_FINAL, T_READONLY ], true ); $j-- ) {
+					for ( $j = $i - 1; $j >= 0; $j-- ) {
+						if ( ! in_array( $tokens[ $j ]->id, [ T_ABSTRACT, T_FINAL, T_READONLY ], true ) ) {
+							break;
+						}
 						$abstract = $abstract || T_ABSTRACT === $tokens[ $j ]->id;
 					}
 					$classes[ $lname ] = [
@@ -1558,7 +1938,11 @@ class Ability_Scanner {
 						'consts'   => [],
 						'methods'  => [],
 					];
-					$class_stack[] = [ 'lname' => $lname, 'open' => $open, 'end' => $end ?? $count ];
+					$class_stack[]     = [
+						'lname' => $lname,
+						'open'  => $open,
+						'end'   => $end ?? $count,
+					];
 					break;
 
 				case T_CONST:
@@ -1578,7 +1962,7 @@ class Ability_Scanner {
 				case T_FUNCTION:
 					$j = $i + 1;
 					if ( ( $tokens[ $j ] ?? null )?->is( '&' ) ) {
-						$j++;
+						++$j;
 					}
 					$name = null;
 					if ( ! ( $tokens[ $j ] ?? null )?->is( '(' ) ) {
@@ -1586,7 +1970,7 @@ class Ability_Scanner {
 							break;
 						}
 						$name = $tokens[ $j ]->text;
-						$j++;
+						++$j;
 					}
 					$close = $this->match( $tokens, $j );
 					if ( null === $close ) {
@@ -1607,10 +1991,10 @@ class Ability_Scanner {
 					if ( null === $open ) {
 						break; // Abstract or interface method.
 					}
-					$end   = $this->match( $tokens, $open ) ?? $count;
-					$kind  = null === $name ? 'closure' : ( $class && $in_class_body ? 'method' : 'function' );
-					$ns    = end( $namespaces );
-					$scope = [
+					$end      = $this->match( $tokens, $open ) ?? $count;
+					$kind     = null === $name ? 'closure' : ( $class && $in_class_body ? 'method' : 'function' );
+					$ns       = end( $namespaces );
+					$scope    = [
 						'file'   => $file,
 						'start'  => $open,
 						'end'    => $end,
@@ -1661,6 +2045,10 @@ class Ability_Scanner {
 	/**
 	 * Whether the innermost open function started before the class body opened,
 	 * i.e. the class is declared inside that function and we're in its body.
+	 *
+	 * @param array $fn_stack Closing indexes of the functions open at this point.
+	 * @param array $scopes Functions recorded so far in the file.
+	 * @param int   $class_open Index of the class body's opening brace.
 	 */
 	private function fn_started_before( array $fn_stack, array $scopes, int $class_open ): bool {
 		$end = end( $fn_stack );
@@ -1674,6 +2062,9 @@ class Ability_Scanner {
 
 	/**
 	 * `WP_Abilities_Registry::get_instance()->register(`, with $i at `register`.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int        $i Index of the current token; moved past what's consumed.
 	 */
 	private function is_registry_call( array $tokens, int $i ): bool {
 		return T_OBJECT_OPERATOR === ( $tokens[ $i - 1 ] ?? null )?->id
@@ -1686,6 +2077,9 @@ class Ability_Scanner {
 
 	/**
 	 * Imports from a top-level `use` statement: alias (lowercase) => fully-qualified name.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int        $i Index of the current token; moved past what's consumed.
 	 */
 	private function parse_use( array $tokens, int $i ): array {
 		$next = $tokens[ $i + 1 ] ?? null;
@@ -1732,10 +2126,22 @@ class Ability_Scanner {
 		return $imports;
 	}
 
+	/**
+	 * Parse a function's parameter list.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int        $open Index of the list's `(`.
+	 * @param int        $close Index of the list's `)`.
+	 */
 	private function parse_params( array $tokens, int $open, int $close ): array {
 		$params = [];
 		foreach ( self::split_ranges( $tokens, $open + 1, $close - 1 ) as [ $s, $e ] ) {
-			$param = [ 'name' => null, 'promoted' => false, 'variadic' => false, 'default' => null ];
+			$param = [
+				'name'     => null,
+				'promoted' => false,
+				'variadic' => false,
+				'default'  => null,
+			];
 			for ( $j = $s; $j <= $e; $j++ ) {
 				$t = $tokens[ $j ];
 				if ( in_array( $t->id, [ T_PUBLIC, T_PROTECTED, T_PRIVATE, T_READONLY ], true ) ) {
@@ -1763,6 +2169,9 @@ class Ability_Scanner {
 
 	/**
 	 * The innermost function, method or closure containing $index, or the file's top level.
+	 *
+	 * @param string $file Path of one of the plugin's PHP files.
+	 * @param int    $index Index of a token in the file.
 	 */
 	private function scope_at( string $file, int $index ): array {
 		$this->spend( count( $this->meta[ $file ]['scopes'] ) );
@@ -1797,6 +2206,9 @@ class Ability_Scanner {
 
 	/**
 	 * If $i starts a function nested inside $scope, the index of its closing brace; else $i.
+	 *
+	 * @param array $scope The scope the code runs in.
+	 * @param int   $i Index of the current token; moved past what's consumed.
 	 */
 	private function skip_inner_scope( array $scope, int $i ): int {
 		$end = $this->meta[ $scope['file'] ]['scope_ends'][ $i ] ?? null;
@@ -1804,20 +2216,31 @@ class Ability_Scanner {
 	}
 
 	/**
+	 * A file's significant tokens.
+	 *
+	 * @param string $file Path of one of the plugin's PHP files.
 	 * @return PhpToken[] Significant tokens of a file.
 	 */
 	private function tokens( string $file ): array {
 		if ( isset( $this->cache[ $file ] ) ) {
 			return $this->cache[ $file ];
 		}
-		$tokens = array_values( array_filter(
-			PhpToken::tokenize( (string) file_get_contents( $file ) ),
-			static fn( PhpToken $t ) => ! $t->isIgnorable()
-		) );
+		$tokens = array_values(
+			array_filter(
+				PhpToken::tokenize( (string) file_get_contents( $file ) ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
+				static fn( PhpToken $t ) => ! $t->isIgnorable()
+			)
+		);
 		$this->remember( $file, $tokens );
 		return $tokens;
 	}
 
+	/**
+	 * Cache a file's tokens and record their bracket pairs.
+	 *
+	 * @param string     $file Path of one of the plugin's PHP files.
+	 * @param PhpToken[] $tokens Significant tokens.
+	 */
 	private function remember( string $file, array $tokens ): void {
 		if ( count( $this->cache ) >= self::CACHE_SIZE ) {
 			array_shift( $this->cache );
@@ -1826,12 +2249,21 @@ class Ability_Scanner {
 		$this->pair( $tokens );
 	}
 
+	/**
+	 * The tokens in a `[start, end]` range.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int[]      $range A `[start, end]` token range, inclusive.
+	 */
 	private function slice( array $tokens, array $range ): array {
 		return array_slice( $tokens, $range[0], $range[1] - $range[0] + 1 );
 	}
 
 	/**
 	 * The `[start, end]` ranges of a call's arguments, given the index of its `(`.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int        $open Index of an opening bracket.
 	 */
 	private function split_args( array $tokens, int $open ): array {
 		$close = $this->match( $tokens, $open );
@@ -1841,6 +2273,9 @@ class Ability_Scanner {
 	/**
 	 * Index of the `;` (or `?>`) ending the statement that starts at $from, or
 	 * of the bracket closing the expression it's in.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int        $from Index to start at.
 	 */
 	private function statement_end( array $tokens, int $from ): ?int {
 		for ( $i = $from, $n = count( $tokens ); $i < $n; $i++ ) {
@@ -1859,6 +2294,13 @@ class Ability_Scanner {
 		return null;
 	}
 
+	/**
+	 * Index of the next token of a type.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int        $from Index to start at.
+	 * @param int        $id The token type to look for.
+	 */
 	private function find_token( array $tokens, int $from, int $id ): ?int {
 		for ( $i = $from, $n = count( $tokens ); $i < $n; $i++ ) {
 			if ( $id === $tokens[ $i ]->id ) {
@@ -1868,6 +2310,12 @@ class Ability_Scanner {
 		return null;
 	}
 
+	/**
+	 * Index of the `{` opening a declaration's body, or null if its statement ends first.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int        $from Index to start at.
+	 */
 	private function find_open_brace( array $tokens, int $from ): ?int {
 		for ( $i = $from, $n = count( $tokens ); $i < $n; $i++ ) {
 			if ( $tokens[ $i ]->is( '{' ) ) {
@@ -1882,17 +2330,22 @@ class Ability_Scanner {
 
 	/**
 	 * Index of the bracket closing the one at $open, in a file's tokens or any slice of them.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int        $open Index of the opening bracket.
 	 */
 	private function match( array $tokens, int $open ): ?int {
 		$token = $tokens[ $open ] ?? null;
 		$span  = $token ? ( $this->spans[ $token ] ?? null ) : null;
-		return null !== $span && isset( $tokens[ $open + $span ] ) && $tokens[ $open + $span ] === ( $this->closers[ $token ] ?? null ) ? $open + $span : null;
+		return null !== $span && isset( $tokens[ $open + $span ] ) && ( $this->closers[ $token ] ?? null ) === $tokens[ $open + $span ] ? $open + $span : null;
 	}
 
 	/**
 	 * Record, for each opening bracket in a file, the distance to its closing
 	 * bracket, so matching is a lookup rather than a scan. Tokens are shared
 	 * between a file's list and its slices, so this works for both.
+	 *
+	 * @param PhpToken[] $tokens A file's significant tokens.
 	 */
 	private function pair( array $tokens ): void {
 		$stack = [];
@@ -1909,6 +2362,10 @@ class Ability_Scanner {
 
 	/**
 	 * Split tokens $from..$to (inclusive) at top-level commas into `[start, end]` ranges.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int        $from Index of the first token.
+	 * @param int        $to Index of the last token, inclusive.
 	 */
 	private static function split_ranges( array $tokens, int $from, int $to ): array {
 		$ranges = [];
@@ -1916,9 +2373,9 @@ class Ability_Scanner {
 		for ( $i = $from, $depth = 0; $i <= $to; $i++ ) {
 			$t = $tokens[ $i ];
 			if ( self::is_open( $t ) ) {
-				$depth++;
+				++$depth;
 			} elseif ( self::is_close( $t ) ) {
-				$depth--;
+				--$depth;
 			} elseif ( 0 === $depth && $t->is( ',' ) ) {
 				if ( $i > $start ) {
 					$ranges[] = [ $start, $i - 1 ];
@@ -1933,6 +2390,9 @@ class Ability_Scanner {
 	}
 
 	/**
+	 * Split tokens at top-level commas.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
 	 * @return PhpToken[][]
 	 */
 	private static function split( array $tokens ): array {
@@ -1942,14 +2402,29 @@ class Ability_Scanner {
 		);
 	}
 
+	/**
+	 * Whether a token opens a bracket.
+	 *
+	 * @param PhpToken $t A token.
+	 */
 	private static function is_open( PhpToken $t ): bool {
 		return $t->is( [ '(', '[', '{' ] ) || in_array( $t->id, [ T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES, T_ATTRIBUTE ], true );
 	}
 
+	/**
+	 * Whether a token closes a bracket.
+	 *
+	 * @param PhpToken $t A token.
+	 */
 	private static function is_close( PhpToken $t ): bool {
 		return $t->is( [ ')', ']', '}' ] );
 	}
 
+	/**
+	 * Whether a token is a name, qualified or not.
+	 *
+	 * @param PhpToken|null $t A token.
+	 */
 	private static function is_name( ?PhpToken $t ): bool {
 		return $t && in_array( $t->id, [ T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED ], true );
 	}
@@ -1958,6 +2433,9 @@ class Ability_Scanner {
 	 * A minimal sprintf(): only `%s`, `%d`, `%%` and positional `%1$s` / `%1$d`.
 	 * Anything else (widths, precisions, padding, other conversions) is
 	 * unknown, so a format can never be used to build a large string.
+	 *
+	 * @param string $format The format string.
+	 * @param array  $args Values for the placeholders.
 	 */
 	private static function format( string $format, array $args ): ?string {
 		if ( strlen( $format ) > self::MAX_STRING ) {
@@ -1988,11 +2466,21 @@ class Ability_Scanner {
 		return $failed || null === $result || strlen( $result ) > self::MAX_STRING ? null : $result;
 	}
 
+	/**
+	 * The last segment of a namespaced name.
+	 *
+	 * @param string $name A name as written in the code.
+	 */
 	private static function short_name( string $name ): string {
 		$pos = strrpos( $name, '\\' );
 		return false === $pos ? $name : substr( $name, $pos + 1 );
 	}
 
+	/**
+	 * Decode a PHP string literal token to its value.
+	 *
+	 * @param string $literal The literal, including its quotes.
+	 */
 	private static function unescape( string $literal ): string {
 		if ( strlen( $literal ) < 2 ) {
 			return $literal;
@@ -2042,15 +2530,19 @@ class Ability_Scanner {
 			}
 		}
 
-		return array_values( array_filter(
-			$abilities,
-			static fn( $ability ) => $ability && ! str_starts_with( $ability->name, 'core/' )
-		) );
+		return array_values(
+			array_filter(
+				$abilities,
+				static fn( $ability ) => $ability && ! str_starts_with( $ability->name, 'core/' )
+			)
+		);
 	}
 
 	/**
 	 * Build an ability record from a name and its args, as passed to wp_register_ability().
 	 *
+	 * @param mixed $name The ability name.
+	 * @param mixed $args The resolved args.
 	 * @return object|null The ability, or null if the name isn't one core would accept.
 	 */
 	public static function make_ability( $name, $args ): ?object {
@@ -2069,7 +2561,7 @@ class Ability_Scanner {
 	 * Collapse abilities found in several places into one entry per name. The
 	 * first one found wins, with missing properties filled in from later ones.
 	 *
-	 * @param object[] $abilities
+	 * @param object[] $abilities Abilities found, in order.
 	 * @return object[] Unique abilities, in the order first seen.
 	 */
 	public static function merge( array $abilities ): array {

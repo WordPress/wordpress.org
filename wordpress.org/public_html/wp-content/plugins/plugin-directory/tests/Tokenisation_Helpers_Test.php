@@ -356,12 +356,17 @@ PHP;
 	}
 
 	/**
-	 * find_array_literals().
+	 * Run Tokenisation_Helpers::find_array_literals() on a PHP snippet.
+	 *
+	 * @param string $php Code, without the opening tag.
 	 */
 	private function arrays( string $php ): array {
 		return Tokenisation_Helpers::find_array_literals( "<?php\n" . $php );
 	}
 
+	/**
+	 * Both array syntaxes are found, and nested arrays are reported on their own too.
+	 */
 	public function test_array_literals_both_syntaxes_and_nesting() {
 		$this->assertSame(
 			array(
@@ -373,6 +378,9 @@ PHP;
 		);
 	}
 
+	/**
+	 * Index access isn't an array literal.
+	 */
 	public function test_array_literals_skip_index_access() {
 		$this->assertSame(
 			array(),
@@ -380,6 +388,9 @@ PHP;
 		);
 	}
 
+	/**
+	 * Arrays inside comments and strings aren't found.
+	 */
 	public function test_array_literals_skip_comments_and_strings() {
 		$this->assertSame(
 			array(),
@@ -387,6 +398,9 @@ PHP;
 		);
 	}
 
+	/**
+	 * Arrays passed to calls and returned from functions are found.
+	 */
 	public function test_array_literals_in_call_args_and_returns() {
 		$this->assertSame(
 			array( array( 'k' => 'v' ), array( 'r' => 's' ) ),
@@ -394,6 +408,9 @@ PHP;
 		);
 	}
 
+	/**
+	 * Assigning an array to a string key is reported as a one-entry array.
+	 */
 	public function test_array_literals_keyed_assignment() {
 		$this->assertSame(
 			array(
@@ -407,6 +424,9 @@ PHP;
 		);
 	}
 
+	/**
+	 * Entries without string keys are dropped from the resolved array.
+	 */
 	public function test_array_literals_list_entries_are_dropped() {
 		$this->assertSame(
 			array( array(), array( 'name' => 'a/b' ) ),

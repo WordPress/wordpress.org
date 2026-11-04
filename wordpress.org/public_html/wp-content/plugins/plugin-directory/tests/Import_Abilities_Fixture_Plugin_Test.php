@@ -38,13 +38,29 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 		'abilities-fixture/search-orders' => 'wrapper-functions: the description is built at runtime when missing (needs "unreadable": ["description"] in expected-abilities.json).',
 	);
 
+	/**
+	 * The fixture's answer file, once read.
+	 *
+	 * @var array|null
+	 */
 	private static ?array $expected = null;
-	private static ?array $found    = null;
+	/**
+	 * Abilities found in the fixture plugin, once scanned.
+	 *
+	 * @var array|null
+	 */
+	private static ?array $found = null;
 
+	/**
+	 * The fixture's answer file.
+	 */
 	private static function expected(): array {
-		return self::$expected ??= json_decode( (string) file_get_contents( self::DIR . '/expected-abilities.json' ), true, 512, JSON_THROW_ON_ERROR );
+		return self::$expected ??= json_decode( (string) file_get_contents( self::DIR . '/expected-abilities.json' ), true, 512, JSON_THROW_ON_ERROR ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local fixture file.
 	}
 
+	/**
+	 * Abilities found in the fixture plugin, keyed by name.
+	 */
 	private static function found(): array {
 		if ( null === self::$found ) {
 			self::$found = array();
@@ -56,6 +72,11 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 	}
 
 	/**
+	 * Each expected ability is found, with the expected label and description.
+	 *
+	 * @param string $name The ability name.
+	 * @param array  $spec The ability's entry in expected-abilities.json.
+	 *
 	 * @dataProvider ability_provider
 	 */
 	#[DataProvider( 'ability_provider' )]
@@ -88,6 +109,9 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 		return $cases;
 	}
 
+	/**
+	 * Nothing listed in must_not_report is reported.
+	 */
 	public function test_look_alikes_are_not_reported(): void {
 		$reported = array_intersect( self::expected()['must_not_report'], array_keys( self::found() ) );
 		$this->assertSame( array(), array_values( $reported ) );
