@@ -596,7 +596,7 @@ class Rosetta_Roles {
 		$to      = $user->user_email;
 		$subject = __( 'You have been added to a WordPress project as a translation editor', 'rosetta' );
 
-		if ( [ '0' ] === $projects_added ) {
+		if ( in_array( '0', $projects_added, true ) || in_array( 0, $projects_added, true ) ) {
 			// General Translation Editor.
 
 			/* translators: Do not translate the placeholders USERNAME, LOCALENAME, LOCALEURL, CURRENTUSERNAME. */
@@ -947,9 +947,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			);
 		}
 
-		$project_ids = array_values( array_filter( array_map( 'absint', $raw_projects ) ) );
-
-		if ( empty( $project_ids ) ) {
+		if ( empty( $raw_projects ) ) {
 			if ( ! $this->remove_translation_editor( $user ) ) {
 				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
 			}
@@ -959,6 +957,12 @@ Welcome to the WordPress Polyglots team and happy translating.',
 					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), $redirect ),
 				]
 			);
+		}
+
+		$project_ids = array_values( array_filter( array_map( 'absint', $raw_projects ) ) );
+
+		if ( empty( $project_ids ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid project selection.', 'rosetta' ) ), 400 );
 		}
 
 		$valid_projects = array_values( array_intersect( $project_ids, array_keys( $this->get_translate_projects() ) ) );
