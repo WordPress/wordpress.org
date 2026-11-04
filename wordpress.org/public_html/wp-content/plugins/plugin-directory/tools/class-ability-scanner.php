@@ -44,8 +44,20 @@ class Ability_Scanner {
 	/** Wrapper functions followed back through their callers. */
 	private const MAX_CALL_DEPTH = 4;
 
-	/** Evaluation steps for a whole plugin, so a pathological plugin can't stall the import. */
-	private const BUDGET = 500000;
+	/**
+	 * Work allowed for a whole plugin: one unit per expression evaluated and per
+	 * token scanned while evaluating, so a pathological plugin can't stall the import.
+	 */
+	private const BUDGET = 5000000;
+
+	/** Work allowed per wp_register_ability() call, so one expensive call can't starve the rest. */
+	private const SITE_BUDGET = 250000;
+
+	/** Work allowed for the definition-array fallback, in tokens. */
+	private const DEFINITIONS_BUDGET = 5000000;
+
+	/** Longest string the interpreter will build (labels and descriptions are far shorter). */
+	private const MAX_STRING = 8192;
 
 	/** Contexts (loop iterations, subclasses, call sites) evaluated per call. */
 	private const MAX_CONTEXTS = 500;
@@ -75,7 +87,11 @@ class Ability_Scanner {
 	private array $sites       = [];
 	private array $memo        = [];
 	private int $budget        = self::BUDGET;
+	private int $site_budget   = self::SITE_BUDGET;
 	private int $depth         = 0;
+	private bool $evaluating   = false;
+	private \WeakMap $spans;
+	private \WeakMap $closers;
 
 	/**
 	 * Find the abilities a plugin registers.
@@ -112,6 +128,25 @@ class Ability_Scanner {
 
 	private function __construct( array $files ) {
 		$this->files = $files;
+		$this->spans   = new \WeakMap();
+		$this->closers = new \WeakMap();
+	}
+
+	/**
+	 * Charge work against the budget. Only evaluation is charged; indexing is
+	 * linear in the plugin's size.
+	 *
+	 * @throws OverflowException When the budget is spent.
+	 */
+	private function spend( int $units = 1 ): void {
+		if ( ! $this->evaluating ) {
+			return;
+		}
+		$this->budget      -= $units;
+		$this->site_budget -= $units;
+		if ( $this->budget < 0 || $this->site_budget < 0 ) {
+			throw new OverflowException( 'Ability scan budget exhausted.' );
+		}
 	}
 
 	/**
@@ -128,10 +163,25 @@ class Ability_Scanner {
 			}
 		}
 
-		$found      = [];
-		$dynamic    = false;
-		$exhausted  = false;
-		foreach ( $this->sites as [ $file, $index ] ) {
+		$this->evaluating = true;
+		$found            = [];
+		$dynamic          = false;
+		$exhausted        = false;
+
+		// Calls with a literal name cost almost nothing; evaluate them first so
+		// expensive calls elsewhere can't use up the budget before they're reached.
+		$literal = [];
+		$other   = [];
+		foreach ( $this->sites as $site ) {
+			$tokens = $this->tokens( $site[0] );
+			if ( T_CONSTANT_ENCAPSED_STRING === ( $tokens[ $site[1] + 2 ] ?? null )?->id && ( $tokens[ $site[1] + 3 ] ?? null )?->is( ',' ) ) {
+				$literal[] = $site;
+			} else {
+				$other[] = $site;
+			}
+		}
+
+		foreach ( array_merge( $literal, $other ) as [ $file, $index ] ) {
 			$tokens = $this->tokens( $file );
 			$args   = $this->split_args( $tokens, $index + 1 );
 			if ( ! $args ) {
@@ -144,17 +194,23 @@ class Ability_Scanner {
 			if ( $exhausted ) {
 				continue;
 			}
+			$this->site_budget = self::SITE_BUDGET;
+			$this->depth       = 0;
 			try {
 				$found = array_merge( $found, $this->evaluate_site( $file, $index, $args ) );
 			} catch ( OverflowException $e ) {
-				// Out of budget: keep what was found so far.
-				$exhausted = true;
+				// Out of budget for this call (skip it) or for the plugin (keep what was found so far).
+				$exhausted = $this->budget < 0;
 			}
 		}
 
 		if ( $dynamic ) {
+			$budget = self::DEFINITIONS_BUDGET;
 			foreach ( $this->files as $file ) {
-				$found = array_merge( $found, self::find_definitions( (string) file_get_contents( $file ) ) );
+				$found = array_merge( $found, self::find_definitions( (string) file_get_contents( $file ), $budget ) );
+				if ( $budget <= 0 ) {
+					break;
+				}
 			}
 		}
 
@@ -269,6 +325,7 @@ class Ability_Scanner {
 				continue;
 			}
 			$tokens = $this->tokens( $file );
+			$this->spend( count( $tokens ) );
 			foreach ( $tokens as $i => $token ) {
 				if ( ! self::is_name( $token ) || strtolower( self::short_name( $token->text ) ) !== $name || ! ( $tokens[ $i + 1 ] ?? null )?->is( '(' ) ) {
 					continue;
@@ -378,6 +435,7 @@ class Ability_Scanner {
 				continue;
 			}
 			$tokens = $this->tokens( $file );
+			$this->spend( count( $tokens ) );
 			foreach ( $tokens as $i => $token ) {
 				if ( T_NEW !== $token->id || ! self::is_name( $tokens[ $i + 1 ] ?? null ) ) {
 					continue;
@@ -445,17 +503,18 @@ class Ability_Scanner {
 		$loops  = [];
 		for ( $i = $scope['start'] + 1; $i < $index; $i++ ) {
 			$i = $this->skip_inner_scope( $scope, $i );
+			$this->spend();
 			if ( T_FOREACH !== ( $tokens[ $i ] ?? null )?->id || ! ( $tokens[ $i + 1 ] ?? null )?->is( '(' ) ) {
 				continue;
 			}
-			$close = self::match( $tokens, $i + 1 );
+			$close = $this->match( $tokens, $i + 1 );
 			if ( null === $close ) {
 				continue;
 			}
 
 			$body_start = $close + 1;
 			if ( ( $tokens[ $body_start ] ?? null )?->is( '{' ) ) {
-				$body_end = self::match( $tokens, $body_start );
+				$body_end = $this->match( $tokens, $body_start );
 			} elseif ( ( $tokens[ $body_start ] ?? null )?->is( ':' ) ) {
 				$body_end = $this->find_token( $tokens, $body_start, T_ENDFOREACH );
 			} else {
@@ -513,9 +572,7 @@ class Ability_Scanner {
 		if ( ! $tokens ) {
 			return null;
 		}
-		if ( --$this->budget < 0 ) {
-			throw new OverflowException( 'Ability scan budget exhausted.' );
-		}
+		$this->spend();
 		if ( $this->depth >= self::MAX_DEPTH ) {
 			return null;
 		}
@@ -537,7 +594,7 @@ class Ability_Scanner {
 			if ( $token->is( '.' ) ) {
 				$i++;
 				$right = $this->parse_postfix( $t, $i, $scope, $ctx );
-				$left  = is_scalar( $left ) && is_scalar( $right ) ? $left . $right : null;
+				$left  = is_scalar( $left ) && is_scalar( $right ) && strlen( (string) $left ) + strlen( (string) $right ) <= self::MAX_STRING ? $left . $right : null;
 			} elseif ( T_COALESCE === $token->id ) {
 				$i++;
 				$right = $this->parse_expression( $t, $i, $scope, $ctx );
@@ -557,7 +614,7 @@ class Ability_Scanner {
 		while ( $i < $n ) {
 			$token = $t[ $i ];
 			if ( $token->is( '[' ) ) {
-				$close = self::match( $t, $i );
+				$close = $this->match( $t, $i );
 				if ( null === $close ) {
 					$i = $n;
 					return null;
@@ -620,7 +677,7 @@ class Ability_Scanner {
 				return (int) $token->text;
 
 			case $token->is( '(' ):
-				$close = self::match( $t, $i );
+				$close = $this->match( $t, $i );
 				if ( null === $close ) {
 					$i = $n;
 					return null;
@@ -632,7 +689,7 @@ class Ability_Scanner {
 			case $token->is( '[' ):
 			case T_ARRAY === $token->id && ( $t[ $i + 1 ] ?? null )?->is( '(' ):
 				$open  = $token->is( '[' ) ? $i : $i + 1;
-				$close = self::match( $t, $open );
+				$close = $this->match( $t, $open );
 				if ( null === $close ) {
 					$i = $n;
 					return null;
@@ -742,7 +799,7 @@ class Ability_Scanner {
 	 * @return array Positional values, plus named arguments under their names.
 	 */
 	private function call_args( array $t, int &$i, array $scope, array $ctx ): array {
-		$close = self::match( $t, $i );
+		$close = $this->match( $t, $i );
 		if ( null === $close ) {
 			$i = count( $t );
 			return [];
@@ -812,12 +869,17 @@ class Ability_Scanner {
 		switch ( $short ) {
 			case 'sprintf':
 				$format = array_shift( $args );
-				if ( ! is_string( $format ) || array_filter( $args, static fn( $a ) => ! is_scalar( $a ) ) ) {
+				// No `*` widths and no widths or precisions over 3 digits, so a format can't build a huge string.
+				if ( ! is_string( $format ) || preg_match( '/%[^a-zA-Z%]*(?:\*|\d{4,})/', $format ) || array_filter( $args, static fn( $a ) => ! is_scalar( $a ) ) ) {
+					return null;
+				}
+				$length = strlen( $format ) + array_sum( array_map( static fn( $a ) => strlen( (string) $a ), $args ) );
+				if ( $length > self::MAX_STRING ) {
 					return null;
 				}
 				try {
 					return vsprintf( $format, array_values( $args ) );
-				} catch ( \ValueError $e ) {
+				} catch ( \ValueError | \ArgumentCountError $e ) {
 					return null;
 				}
 			case 'array_merge':
@@ -888,6 +950,7 @@ class Ability_Scanner {
 		$ctx    = [ 'vars' => $vars, 'this' => $object ];
 		for ( $i = $ctor['start'] + 1; $i < $ctor['end']; $i++ ) {
 			$i = $this->skip_inner_scope( $ctor, $i );
+			$this->spend();
 			if ( '$this' === ( $tokens[ $i ] ?? null )?->text
 				&& T_OBJECT_OPERATOR === ( $tokens[ $i + 1 ] ?? null )?->id
 				&& self::is_name( $tokens[ $i + 2 ] ?? null )
@@ -944,6 +1007,7 @@ class Ability_Scanner {
 		$tokens = $this->tokens( $scope['file'] );
 		for ( $i = $scope['start'] + 1, $end = min( $scope['end'], count( $tokens ) ); $i < $end; $i++ ) {
 			$i = $this->skip_inner_scope( $scope, $i );
+			$this->spend();
 			if ( T_VARIABLE !== ( $tokens[ $i ] ?? null )?->id || "\$$name" !== $tokens[ $i ]->text || ! ( $tokens[ $i + 1 ] ?? null )?->is( '=' ) ) {
 				continue;
 			}
@@ -970,6 +1034,7 @@ class Ability_Scanner {
 		$tokens = $this->tokens( $scope['file'] );
 		for ( $i = $scope['start'] + 1, $end = min( $scope['end'], count( $tokens ) ); $i < $end; $i++ ) {
 			$i = $this->skip_inner_scope( $scope, $i );
+			$this->spend();
 			if ( '$this' !== ( $tokens[ $i ] ?? null )?->text
 				|| T_OBJECT_OPERATOR !== ( $tokens[ $i + 1 ] ?? null )?->id
 				|| $name !== ( $tokens[ $i + 2 ] ?? null )?->text
@@ -1047,6 +1112,7 @@ class Ability_Scanner {
 		$tokens  = $this->tokens( $callable['file'] );
 		$returns = [];
 		for ( $i = $callable['start'] + 1, $depth = 0; $i < $callable['end']; $i++ ) {
+			$this->spend();
 			$skipped = $this->skip_inner_scope( $callable, $i );
 			if ( $skipped !== $i ) {
 				$i = $skipped;
@@ -1238,11 +1304,11 @@ class Ability_Scanner {
 					if ( $next && ( T_STRING === $next->id || T_NAME_QUALIFIED === $next->id ) ) {
 						$namespaces[] = [ 'start' => $i, 'ns' => $next->text, 'uses' => [] ];
 						if ( ( $tokens[ $i + 2 ] ?? null )?->is( '{' ) ) {
-							$ns_end = self::match( $tokens, $i + 2 );
+							$ns_end = $this->match( $tokens, $i + 2 );
 						}
 					} elseif ( $next?->is( '{' ) ) {
 						$namespaces[] = [ 'start' => $i, 'ns' => '', 'uses' => [] ];
-						$ns_end       = self::match( $tokens, $i + 1 );
+						$ns_end       = $this->match( $tokens, $i + 1 );
 					}
 					break;
 
@@ -1265,7 +1331,7 @@ class Ability_Scanner {
 					if ( T_STRING !== $name_token?->id || null === $open ) {
 						break;
 					}
-					$end    = self::match( $tokens, $open );
+					$end    = $this->match( $tokens, $open );
 					$ns     = end( $namespaces );
 					$fqn    = ltrim( $ns['ns'] . '\\' . $name_token->text, '\\' );
 					$lname  = strtolower( $fqn );
@@ -1321,7 +1387,7 @@ class Ability_Scanner {
 						$name = $tokens[ $j ]->text;
 						$j++;
 					}
-					$close = self::match( $tokens, $j );
+					$close = $this->match( $tokens, $j );
 					if ( null === $close ) {
 						break;
 					}
@@ -1329,7 +1395,7 @@ class Ability_Scanner {
 					$open   = null;
 					for ( $k = $close + 1; $k < $count; $k++ ) {
 						if ( $tokens[ $k ]->is( '(' ) ) {
-							$k = self::match( $tokens, $k ) ?? $count;
+							$k = $this->match( $tokens, $k ) ?? $count;
 						} elseif ( $tokens[ $k ]->is( '{' ) ) {
 							$open = $k;
 							break;
@@ -1340,7 +1406,7 @@ class Ability_Scanner {
 					if ( null === $open ) {
 						break; // Abstract or interface method.
 					}
-					$end   = self::match( $tokens, $open ) ?? $count;
+					$end   = $this->match( $tokens, $open ) ?? $count;
 					$kind  = null === $name ? 'closure' : ( $class && $in_class_body ? 'method' : 'function' );
 					$ns    = end( $namespaces );
 					$scope = [
@@ -1498,6 +1564,7 @@ class Ability_Scanner {
 	 * The innermost function, method or closure containing $index, or the file's top level.
 	 */
 	private function scope_at( string $file, int $index ): array {
+		$this->spend( count( $this->meta[ $file ]['scopes'] ) );
 		$best = null;
 		foreach ( $this->meta[ $file ]['scopes'] as $scope ) {
 			if ( $scope['start'] < $index && $index < $scope['end'] && ( ! $best || $scope['start'] > $best['start'] ) ) {
@@ -1555,6 +1622,7 @@ class Ability_Scanner {
 			array_shift( $this->cache );
 		}
 		$this->cache[ $file ] = $tokens;
+		$this->pair( $tokens );
 	}
 
 	private function slice( array $tokens, array $range ): array {
@@ -1565,7 +1633,7 @@ class Ability_Scanner {
 	 * The `[start, end]` ranges of a call's arguments, given the index of its `(`.
 	 */
 	private function split_args( array $tokens, int $open ): array {
-		$close = self::match( $tokens, $open );
+		$close = $this->match( $tokens, $open );
 		return null === $close ? [] : self::split_ranges( $tokens, $open + 1, $close - 1 );
 	}
 
@@ -1574,15 +1642,16 @@ class Ability_Scanner {
 	 * of the bracket closing the expression it's in.
 	 */
 	private function statement_end( array $tokens, int $from ): ?int {
-		for ( $i = $from, $depth = 0, $n = count( $tokens ); $i < $n; $i++ ) {
+		for ( $i = $from, $n = count( $tokens ); $i < $n; $i++ ) {
+			$this->spend();
 			$t = $tokens[ $i ];
 			if ( self::is_open( $t ) ) {
-				$depth++;
-			} elseif ( self::is_close( $t ) ) {
-				if ( 0 === $depth-- ) {
-					return $i;
+				$close = $this->match( $tokens, $i );
+				if ( null === $close ) {
+					return null;
 				}
-			} elseif ( 0 === $depth && ( $t->is( ';' ) || T_CLOSE_TAG === $t->id ) ) {
+				$i = $close;
+			} elseif ( self::is_close( $t ) || $t->is( ';' ) || T_CLOSE_TAG === $t->id ) {
 				return $i;
 			}
 		}
@@ -1610,15 +1679,31 @@ class Ability_Scanner {
 		return null;
 	}
 
-	private static function match( array $tokens, int $open ): ?int {
-		for ( $i = $open, $depth = 0, $n = count( $tokens ); $i < $n; $i++ ) {
-			if ( self::is_open( $tokens[ $i ] ) ) {
-				$depth++;
-			} elseif ( self::is_close( $tokens[ $i ] ) && 0 === --$depth ) {
-				return $i;
+	/**
+	 * Index of the bracket closing the one at $open, in a file's tokens or any slice of them.
+	 */
+	private function match( array $tokens, int $open ): ?int {
+		$token = $tokens[ $open ] ?? null;
+		$span  = $token ? ( $this->spans[ $token ] ?? null ) : null;
+		return null !== $span && isset( $tokens[ $open + $span ] ) && $tokens[ $open + $span ] === ( $this->closers[ $token ] ?? null ) ? $open + $span : null;
+	}
+
+	/**
+	 * Record, for each opening bracket in a file, the distance to its closing
+	 * bracket, so matching is a lookup rather than a scan. Tokens are shared
+	 * between a file's list and its slices, so this works for both.
+	 */
+	private function pair( array $tokens ): void {
+		$stack = [];
+		foreach ( $tokens as $i => $token ) {
+			if ( self::is_open( $token ) ) {
+				$stack[] = $i;
+			} elseif ( self::is_close( $token ) && $stack ) {
+				$open                              = array_pop( $stack );
+				$this->spans[ $tokens[ $open ] ]   = $i - $open;
+				$this->closers[ $tokens[ $open ] ] = $token;
 			}
 		}
-		return null;
 	}
 
 	/**
@@ -1699,10 +1784,11 @@ class Ability_Scanner {
 	 * Names in the core/ namespace are skipped; they belong to WordPress, and
 	 * arrays keyed by core block names are a common false positive.
 	 *
-	 * @param string $contents PHP source code.
+	 * @param string   $contents PHP source code.
+	 * @param int|null $budget   Optional. Work allowed, in tokens; reduced by the work done.
 	 * @return object[]
 	 */
-	public static function find_definitions( string $contents ): array {
+	public static function find_definitions( string $contents, ?int &$budget = null ): array {
 		if ( false === stripos( $contents, 'description' ) ) {
 			return [];
 		}
@@ -1710,7 +1796,7 @@ class Ability_Scanner {
 		$is_definition = static fn( $value ) => is_array( $value ) && array_key_exists( 'description', $value );
 
 		$abilities = [];
-		foreach ( Tokenisation_Helpers::find_array_literals( $contents ) as $array ) {
+		foreach ( Tokenisation_Helpers::find_array_literals( $contents, $budget ) as $array ) {
 			if ( $is_definition( $array ) && is_string( $array['name'] ?? null ) ) {
 				$abilities[] = self::make_ability( $array['name'], $array );
 			}
