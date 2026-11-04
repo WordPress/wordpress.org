@@ -409,14 +409,6 @@ class Rosetta_Roles {
 			return false;
 		}
 
-		if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-			$user->remove_role( self::TRANSLATION_EDITOR_ROLE );
-		}
-
-		if ( in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-			$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
-		}
-
 		$deleted = $wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->wporg_translation_editors}
@@ -428,6 +420,14 @@ class Rosetta_Roles {
 
 		if ( false === $deleted ) {
 			return false;
+		}
+
+		if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
+			$user->remove_role( self::TRANSLATION_EDITOR_ROLE );
+		}
+
+		if ( in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
+			$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
 		}
 
 		do_action( 'translation_editor_removed', $user );
@@ -464,6 +464,10 @@ class Rosetta_Roles {
 		}
 		$projects_to_add = $projects_to_remove = array();
 
+		// Geplante Rollenänderungen zwischenspeichern, anstatt sie sofort auszuführen
+		$role_to_remove = null;
+		$role_to_add    = null;
+
 		if ( in_array( 'all', $projects, true ) ) {
 			$projects_to_remove = array_diff( $current_projects, array( '0' ) );
 			if ( ! in_array( '0', $current_projects, true ) ) {
@@ -471,22 +475,22 @@ class Rosetta_Roles {
 			}
 
 			if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->remove_role( self::TRANSLATION_EDITOR_ROLE );
+				$role_to_remove = self::TRANSLATION_EDITOR_ROLE;
 			}
 
 			if ( ! in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->add_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+				$role_to_add = self::GENERAL_TRANSLATION_EDITOR_ROLE;
 			}
 		} else {
 			$projects_to_remove = array_diff( $current_projects, $projects );
-			$projects_to_add = array_diff( $projects, $current_projects );
+			$projects_to_add    = array_diff( $projects, $current_projects );
 
 			if ( in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+				$role_to_remove = self::GENERAL_TRANSLATION_EDITOR_ROLE;
 			}
 
 			if ( ! in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->add_role( self::TRANSLATION_EDITOR_ROLE );
+				$role_to_add = self::TRANSLATION_EDITOR_ROLE;
 			}
 		}
 
@@ -515,7 +519,7 @@ class Rosetta_Roles {
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $values_to_remove consists solely of integers sanitized via array_map('intval').
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			$deleted = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->wporg_translation_editors}
@@ -530,6 +534,15 @@ class Rosetta_Roles {
 			if ( false === $deleted ) {
 				return false;
 			}
+		}
+
+		// Rollen erst aktualisieren, nachdem alle DB-Statements fehlerfrei durchliefen:
+		if ( $role_to_remove ) {
+			$user->remove_role( $role_to_remove );
+		}
+
+		if ( $role_to_add ) {
+			$user->add_role( $role_to_add );
 		}
 
 		if ( $update ) {
