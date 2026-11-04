@@ -279,13 +279,19 @@ class Rosetta_Roles {
 
 					$projects = ! empty( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
 					if ( 'custom' === $projects ) {
-						$this->update_translation_editor( $user_details );
+						if ( ! $this->update_translation_editor( $user_details ) ) {
+							wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
+							exit;
+						}
 
 						$redirect = add_query_arg( 'user_id', $user_details->ID, $redirect );
 						wp_safe_redirect( add_query_arg( array( 'update' => 'user-added-custom-projects' ), $redirect ) );
 						exit;
 					} else {
-						$this->update_translation_editor( $user_details, array( 'all' ) );
+						if ( ! $this->update_translation_editor( $user_details, array( 'all' ) ) ) {
+							wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
+							exit;
+						}
 
 						wp_safe_redirect( add_query_arg( array( 'update' => 'user-added' ), $redirect ) );
 						exit;
@@ -306,8 +312,9 @@ class Rosetta_Roles {
 					$count = 0;
 					$user_ids = array_map( 'intval', (array) $_REQUEST['translation-editors'] );
 					foreach ( $user_ids as $user_id ) {
-						$this->remove_translation_editor( $user_id );
-						$count++;
+						if ( $this->remove_translation_editor( $user_id ) ) {
+							$count++;
+						}
 					}
 
 					wp_safe_redirect(
@@ -334,7 +341,10 @@ class Rosetta_Roles {
 					}
 
 					$user_id = (int) $_REQUEST['translation-editor'];
-					$this->remove_translation_editor( $user_id );
+					if ( ! $this->remove_translation_editor( $user_id ) ) {
+						wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
+						exit;
+					}
 
 					wp_safe_redirect( add_query_arg( array( 'update' => 'user-removed' ), $redirect ) );
 					exit;
@@ -841,9 +851,11 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		}
 
 		$projects = $this->get_translate_projects();
-		array_walk( $projects, function( $value ) {
-			unset( $value->path ); // Path is not needed.
-		} );
+		$projects = array_map( function( $project ) {
+			$clone = clone $project;
+			unset( $clone->path ); // Path is not needed.
+			return $clone;
+		}, $projects );
 		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		// Sort the tree and remove array keys.
