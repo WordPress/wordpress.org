@@ -1095,12 +1095,39 @@ EMAIL;
 	public function scheduled_job_pruning() {
 		global $wpdb;
 
-		$wpdb->query( $wpdb->prepare(
-			"UPDATE {$wpdb->prefix}posts
-			 SET post_status = 'pruned'
-			 WHERE DateDiff(NOW(), post_date) > %d AND post_type = 'job' AND post_status = 'publish'",
-			self::get_days_until_pruning()
-		) );
+		$cutoff = gmdate( 'Y-m-d H:i:s', time() - self::get_days_until_pruning() * DAY_IN_SECONDS );
+
+		$job_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts}
+				WHERE post_type = 'job' AND post_status = 'publish' AND post_date_gmt < %s",
+				$cutoff
+			)
+		);
+
+		// Set the status directly, since wp_update_post() would re-filter the content without a user's unfiltered_html.
+		wp_defer_term_counting( true );
+
+		foreach ( $job_ids as $job_id ) {
+			// A job closed since the query above no longer matches, and must not be transitioned.
+			$pruned = $wpdb->update(
+				$wpdb->posts,
+				array( 'post_status' => 'pruned' ),
+				array(
+					'ID'          => $job_id,
+					'post_status' => 'publish',
+				)
+			);
+
+			if ( ! $pruned ) {
+				continue;
+			}
+
+			clean_post_cache( $job_id );
+			wp_transition_post_status( 'pruned', 'publish', get_post( $job_id ) );
+		}
+
+		wp_defer_term_counting( false );
 	}
 
 	/**
