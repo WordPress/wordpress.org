@@ -866,12 +866,15 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			wp_send_json_error( array( 'message' => 'Unauthorized' ), 403 );
 		}
 
-		$projects = $this->get_translate_projects();
-		$projects = array_map( function( $project ) {
-			$clone = clone $project;
-			unset( $clone->path ); // Path is not needed.
-			return $clone;
-		}, $projects );
+		$projects = array_map(
+			function ( $project ) {
+				$clone = clone $project;
+				unset( $clone->path ); // Path is not needed.
+				return $clone;
+			},
+			$this->get_translate_projects()
+		);
+
 		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		// Sort the tree and remove array keys.
