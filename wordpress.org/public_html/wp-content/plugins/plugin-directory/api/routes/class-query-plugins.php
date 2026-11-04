@@ -2,6 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 
 use WordPressdotorg\Plugin_Directory\API\Base;
+use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WP_REST_Server;
 use WP_Query;
 
@@ -11,13 +12,6 @@ use WP_Query;
  * @package WordPressdotorg_Plugin_Directory
  */
 class Query_Plugins extends Base {
-
-	/**
-	 * The highest page a query can request.
-	 *
-	 * @var int
-	 */
-	const MAX_PAGES = 999;
 
 	protected $valid_query_fields = array(
 		'paged',
@@ -62,7 +56,7 @@ class Query_Plugins extends Base {
 
 		// Add some sane pagination limits to prevent insane queries.
 		if ( isset( $query['paged'] ) ) {
-			$query['paged'] = min( $query['paged'], self::MAX_PAGES );
+			$query['paged'] = min( $query['paged'], Plugins_Info_API::QUERY_PLUGINS_MAX_PAGES );
 		}
 		if ( isset( $query['posts_per_page'] ) ) {
 			$query['posts_per_page'] = min( $query['posts_per_page'], 250 );
@@ -138,7 +132,7 @@ class Query_Plugins extends Base {
 		}
 
 		$response['info']['page']    = (int) $wp_query->get( 'paged' ) ?: 1;
-		$response['info']['pages']   = min( (int) $wp_query->max_num_pages, self::MAX_PAGES );
+		$response['info']['pages']   = min( (int) $wp_query->max_num_pages, Plugins_Info_API::QUERY_PLUGINS_MAX_PAGES );
 		$response['info']['results'] = (int) $wp_query->found_posts ?: 0;
 
 		foreach ( $wp_query->posts as $post ) {

@@ -8,6 +8,13 @@ class Plugins_Info_API {
 	const LONG_CACHE_EXPIRY = 86400; // 24 hour cache, wporg_object_cache will spread this out.
 	const QUERY_CACHEBUSTER = 2; // Increment to force query caches (including search) to be refreshed.
 
+	/**
+	 * The highest page a query_plugins request can ask for.
+	 *
+	 * @var int
+	 */
+	const QUERY_PLUGINS_MAX_PAGES = 999;
+
 	protected $format  = 'json';
 	protected $jsonp   = false;
 	protected $formats = array(
@@ -223,6 +230,19 @@ class Plugins_Info_API {
 	 * API Endpoint to handle the 'query_plugins' action.
 	 */
 	public function query_plugins( $request ) {
+		if ( isset( $request->page ) && (int) $request->page > self::QUERY_PLUGINS_MAX_PAGES ) {
+			$this->output(
+				(object) [
+					'error' => sprintf(
+						'A maximum of %d pages can be queried. Use a larger per_page to reach more results.',
+						self::QUERY_PLUGINS_MAX_PAGES
+					),
+				],
+				422
+			);
+			return;
+		}
+
 		$response = array(
 			'info'    => array(
 				'page'    => 0,
