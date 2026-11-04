@@ -76,10 +76,10 @@ class Locale extends GP_Route {
 		$filter = gp_get( 'filter', false );
 		$without_editors = (bool) gp_get( 'without-editors', false );
 
-		if ( $search && ! is_string( $search ) ) {
+		if ( ! is_string( $search ) ) {
 			$search = '';
 		}
-		if ( $filter && ! is_string( $filter ) ) {
+		if ( ! is_string( $filter ) ) {
 			$filter = false;
 		}
 
@@ -1020,7 +1020,7 @@ class Locale extends GP_Route {
 		$stats_where = '';
 
 		$search_sql = '';
-		if ( $search ) {
+		if ( '' !== $search ) {
 			$search_sql = ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )';
 			$search_param = '%' . $wpdb->esc_like( $search ) . '%';
 			$sql_params[] = $search_param;
