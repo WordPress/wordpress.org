@@ -502,8 +502,8 @@ class Rosetta_Roles {
 		}
 
 		if ( $values_to_add ) {
-			$inserted = $wpdb->query( "
-				INSERT INTO {$wpdb->wporg_translation_editors}
+			$inserted = $wpdb->query(
+				"INSERT INTO {$wpdb->wporg_translation_editors}
 				(`user_id`,`project_id`, `locale`, `locale_slug`, `date_added`)
 				VALUES " . implode( ', ', $values_to_add ) . "
 			" );
@@ -516,8 +516,8 @@ class Rosetta_Roles {
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $values_to_remove consists solely of integers sanitized via array_map('intval').
-			$deleted = $wpdb->query( $wpdb->prepare( "
-				DELETE FROM {$wpdb->wporg_translation_editors}
+			$deleted = $wpdb->query( $wpdb->prepare(
+				"DELETE FROM {$wpdb->wporg_translation_editors}
 				WHERE `user_id` = %d AND `locale` = %s
 				AND project_id IN (" . implode( ', ', $values_to_remove ) . ")
 			", $user->ID, $this->gp_locale->slug ) );
