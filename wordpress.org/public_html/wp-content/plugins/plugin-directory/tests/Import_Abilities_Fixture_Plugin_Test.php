@@ -123,10 +123,6 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 	}
 
 	/**
-	 * Everything reported must be in the answer file. Vendored, runtime-only and
-	 * WooCommerce-dependent abilities are allowed until we decide whether to list them.
-	 */
-	/**
 	 * Bundled libraries' abilities are reported, flagged as bundled.
 	 */
 	public function test_bundled_abilities_are_flagged(): void {
@@ -148,7 +144,7 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 	}
 
 	/**
-	 * Each expected ability category is found, with its label and description.
+	 * Exactly the expected ability categories are found, with their labels and descriptions.
 	 */
 	public function test_categories_are_detected(): void {
 		$found = array();
@@ -158,14 +154,15 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 				'description' => $category->description,
 			);
 		}
-		$want = array();
-		foreach ( self::expected()['categories'] as $slug => $category ) {
+		// The complete list: the plugin's own categories, and the bundled library's.
+		$expected = self::expected();
+		$want     = array();
+		foreach ( $expected['categories'] + ( $expected['vendored']['categories'] ?? array() ) as $slug => $category ) {
 			$want[ $slug ] = array(
 				'label'       => $category['label'],
 				'description' => $category['description'],
 			);
 		}
-		$found = array_intersect_key( $found, $want );
 		ksort( $found );
 		ksort( $want );
 		$this->assertSame( $want, $found );
