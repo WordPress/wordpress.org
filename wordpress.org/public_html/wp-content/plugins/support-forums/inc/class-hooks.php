@@ -68,6 +68,9 @@ class Hooks {
 		// Auto-close topics after a certain number of months since the last reply.
 		add_filter( 'bbp_is_topic_closed', array( $this, 'auto_close_old_topics' ), 10, 2 );
 
+		// Hide the reply form on closed topics from users who can't reply to them.
+		add_filter( 'bbp_current_user_can_access_create_reply_form', array( $this, 'hide_reply_form_on_closed_topics' ) );
+
 		// Limit no-replies view to a certain number of days and hide resolved topics.
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
 
@@ -812,6 +815,29 @@ class Hooks {
 		}
 
 		return $is_topic_closed;
+	}
+
+	/**
+	 * Hides the new reply form on closed topics from users who can't reply to them.
+	 *
+	 * The form shows to anyone who can edit the topic, while bbp_new_reply_handler()
+	 * rejects replies to closed topics from non-moderators. This applies the same check.
+	 *
+	 * @param bool $can_access Whether the current user can access the reply form.
+	 * @return bool
+	 */
+	public function hide_reply_form_on_closed_topics( $can_access ) {
+		if ( ! $can_access || bbp_is_reply_edit() ) {
+			return $can_access;
+		}
+
+		$topic_id = bbp_get_topic_id();
+
+		if ( $topic_id && bbp_is_topic_closed( $topic_id ) && ! current_user_can( 'moderate', $topic_id ) ) {
+			$can_access = false;
+		}
+
+		return $can_access;
 	}
 
 	/**
