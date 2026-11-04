@@ -76,9 +76,17 @@ class Cross_Locale_PTE {
 			check_admin_referer( 'cross-locale-pte', '_nonce_cross-locale-pte' );
 
 			$user_input = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
-			self::$user = get_user_by( 'login', $user_input );
-			if ( ! self::$user ) {
+
+			if ( false !== strpos( $user_input, '@' ) ) {
 				self::$user = get_user_by( 'email', $user_input );
+			} elseif ( is_numeric( $user_input ) ) {
+				self::$user = get_user_by( 'id', (int) $user_input );
+			} else {
+				self::$user = get_user_by( 'login', $user_input );
+
+				if ( ! self::$user ) {
+					self::$user = get_user_by( 'slug', $user_input );
+				}
 			}
 
 			if ( self::$user ) {
@@ -139,10 +147,9 @@ class Cross_Locale_PTE {
 			? array_map( 'sanitize_text_field', wp_unslash( $_POST['projects'] ) )
 			: array();
 
-		$redirect    = admin_url( 'admin.php?page=cross-locale-pte' );
-		$project_ids = array_values( array_filter( array_map( 'absint', $raw_projects ) ) );
+		$redirect = admin_url( 'admin.php?page=cross-locale-pte' );
 
-		if ( empty( $project_ids ) ) {
+		if ( empty( $raw_projects ) ) {
 			if ( ! self::update_cross_locale_pte( $user->ID, array() ) ) {
 				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
 			}
@@ -154,23 +161,37 @@ class Cross_Locale_PTE {
 			);
 		}
 
+		$project_ids = array_values( array_filter( array_map( 'absint', $raw_projects ) ) );
+
+		if ( empty( $project_ids ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid project selection.', 'rosetta' ) ), 400 );
+		}
+
 		$valid_projects = array_values( array_intersect( $project_ids, array_keys( Rosetta_Roles::get_translate_projects() ) ) );
 
 		if ( empty( $valid_projects ) ) {
 			wp_send_json_error( array( 'message' => __( 'No valid projects selected.', 'rosetta' ) ), 400 );
 		}
 
+		$current_projects = self::get_users_projects( $user->ID );
+		$is_new           = empty( $current_projects );
+
 		if ( ! self::update_cross_locale_pte( $user->ID, $valid_projects ) ) {
 			wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
 		}
 
+		$update_key = $is_new ? 'user-added' : 'user-updated';
+		$message    = $is_new
+			? __( 'New Cross-Locale PTE added.', 'rosetta' )
+			: __( 'Cross-Locale PTE updated.', 'rosetta' );
+
 		wp_send_json_success(
 			[
-				'message'  => __( 'Cross-Locale PTE updated.', 'rosetta' ),
+				'message'  => $message,
 				'redirect' => add_query_arg(
 					[
 						'user_id' => $user->ID,
-						'update'  => 'user-updated',
+						'update'  => $update_key,
 					],
 					$redirect
 				),
