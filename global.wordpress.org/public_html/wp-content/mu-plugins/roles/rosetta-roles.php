@@ -987,7 +987,8 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			return $message;
 		}
 
-		$count = isset( $_REQUEST['count'] ) ? (int) $_REQUEST['count'] : 1;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query parameter used solely for feedback notice display.
+		$count = isset( $_GET['count'] ) ? absint( wp_unslash( $_GET['count'] ) ) : 1;
 
 		$messages = array(
 			'update' => array(
