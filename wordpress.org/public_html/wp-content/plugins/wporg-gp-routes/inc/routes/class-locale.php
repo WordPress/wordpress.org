@@ -398,7 +398,7 @@ class Locale extends GP_Route {
 	 * @param string $locale Slug of a GlotPress locale.
 	 * @return array List of translation set slugs.
 	 */
-	private function get_locale_variants( $locale ) {
+	private function get_locale_variants( string $locale ): array {
 		global $wpdb;
 
 		return $wpdb->get_col( $wpdb->prepare(
@@ -418,7 +418,7 @@ class Locale extends GP_Route {
 	 *     @type GP_Glossary|false        $glossary        The glossary instance, if found.
 	 * }
 	 */
-	private function get_locale_glossary_details( $locale_slug, $set_slug ) {
+	private function get_locale_glossary_details( string $locale_slug, string $set_slug ): array {
 		$translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
 		$glossary        = false;
 
@@ -441,7 +441,7 @@ class Locale extends GP_Route {
 	 * @param string     $locale_slug Slug of the locale.
 	 * @return array List of user IDs.
 	 */
-	private function get_translation_editors( $project, $locale_slug ) {
+	private function get_translation_editors( GP_Project $project, string $locale_slug ): array {
 		global $wpdb;
 
 		$editors = [
@@ -500,7 +500,7 @@ class Locale extends GP_Route {
 	 * @param string     $set_slug    Slug of the translation set.
 	 * @return array Contributors.
 	 */
-	private function get_locale_contributors( $project, $locale_slug, $set_slug ) {
+	private function get_locale_contributors( GP_Project $project, string $locale_slug, string $set_slug ): array {
 		global $wpdb;
 
 		$locale_contributors = [
@@ -683,7 +683,7 @@ class Locale extends GP_Route {
 	 * @param array $set_ids List of translation set IDs.
 	 * @return array List of contributor aggregated rows.
 	 */
-	private function get_locale_contributors_by_translation_set( array $set_ids ) {
+	private function get_locale_contributors_by_translation_set( array $set_ids ): array {
 		global $wpdb;
 
 		$set_ids_sql = $this->prepare_in_int_list( $set_ids );
@@ -775,7 +775,7 @@ class Locale extends GP_Route {
 	 *                                      Default true.
 	 * @return object The status of a project.
 	 */
-	private function get_project_status( $project, $locale, $set_slug, $calc_sub_projects = true ) {
+	private function get_project_status( GP_Project $project, string $locale, string $set_slug, bool $calc_sub_projects = true ): stdClass {
 		// Virtual Patterns projects use their pattern slug as ID, so the key can't cast it to int.
 		$cache_key = $project->parent_project_id . ':' . $project->id . ':' . $locale . ':' . $set_slug;
 
