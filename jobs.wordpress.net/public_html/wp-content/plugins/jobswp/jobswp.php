@@ -1109,13 +1109,13 @@ EMAIL;
 		wp_defer_term_counting( true );
 
 		foreach ( $job_ids as $job_id ) {
-			// A job closed since the query above no longer matches, and must not be transitioned.
-			$pruned = $wpdb->update(
-				$wpdb->posts,
-				array( 'post_status' => 'pruned' ),
-				array(
-					'ID'          => $job_id,
-					'post_status' => 'publish',
+			// A job closed or extended since the query above no longer matches, and must not be transitioned.
+			$pruned = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->posts} SET post_status = 'pruned'
+					WHERE ID = %d AND post_status = 'publish' AND post_date_gmt < %s",
+					$job_id,
+					$cutoff
 				)
 			);
 

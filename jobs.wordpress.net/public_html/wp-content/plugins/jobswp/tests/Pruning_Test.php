@@ -242,4 +242,44 @@ class Pruning_Test extends TestCase {
 		$closed = current( array_diff( $job_ids, $transitioned ) );
 		$this->assertSame( 'closed', get_post_status( $closed ) );
 	}
+
+	/**
+	 * A job extended while a run is underway stays published and is not transitioned.
+	 *
+	 * @return void
+	 */
+	public function test_skips_jobs_extended_during_the_run(): void {
+		global $wpdb;
+
+		$age          = ( Jobs_Dot_WP::get_days_until_pruning() + 1 ) * DAY_IN_SECONDS;
+		$job_ids      = array( $this->publish_job( $age ), $this->publish_job( $age ) );
+		$transitioned = array();
+
+		// The first job pruned moves the other one's publish date to now, as extending its listing would.
+		$this->on_prune(
+			static function ( WP_Post $post ) use ( &$transitioned, $job_ids, $wpdb ): void {
+				$transitioned[] = $post->ID;
+
+				if ( 1 === count( $transitioned ) ) {
+					$other = current( array_diff( $job_ids, array( $post->ID ) ) );
+					$wpdb->update(
+						$wpdb->posts,
+						array(
+							'post_date'     => current_time( 'mysql' ),
+							'post_date_gmt' => current_time( 'mysql', true ),
+						),
+						array( 'ID' => $other )
+					);
+					clean_post_cache( $other );
+				}
+			}
+		);
+
+		Jobs_Dot_WP::get_instance()->scheduled_job_pruning();
+
+		$this->assertCount( 1, $transitioned );
+		$extended = current( array_diff( $job_ids, $transitioned ) );
+		$this->assertSame( 'publish', get_post_status( $extended ) );
+		$this->assertSame( 1, $this->get_category_count() );
+	}
 }
