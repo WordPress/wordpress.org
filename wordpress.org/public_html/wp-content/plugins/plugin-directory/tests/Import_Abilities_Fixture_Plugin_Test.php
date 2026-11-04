@@ -20,8 +20,8 @@ use WordPressdotorg\Plugin_Directory\CLI\Import;
  *
  * Category isn't compared; the directory doesn't list it.
  *
- * Per ability, an optional "static" object overrides runtime values a scanner
- * can't read from the code (e.g. a label the plugin falls back to at runtime).
+ * Fields listed in an ability's "unreadable" exist only at runtime (e.g. a
+ * description read from a file), so the scanner is expected to report null.
  *
  * @group import
  */
@@ -35,7 +35,7 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 	 * test passes; the test fails as a reminder if it's left here.
 	 */
 	private const KNOWN_GAPS = array(
-		'abilities-fixture/search-orders' => 'wrapper-functions: the description is built at runtime when missing (needs a "static" override in expected-abilities.json).',
+		'abilities-fixture/search-orders' => 'wrapper-functions: the description is built at runtime when missing (needs "unreadable": ["description"] in expected-abilities.json).',
 	);
 
 	private static ?array $expected = null;
@@ -62,7 +62,7 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 	public function test_ability_is_detected( string $name, array $spec ): void {
 		$want = array( 'name' => $name );
 		foreach ( array( 'label', 'description' ) as $prop ) {
-			$want[ $prop ] = array_key_exists( $prop, $spec['static'] ?? array() ) ? $spec['static'][ $prop ] : ( $spec[ $prop ] ?? null );
+			$want[ $prop ] = in_array( $prop, $spec['unreadable'] ?? array(), true ) ? null : ( $spec[ $prop ] ?? null );
 		}
 		$got = self::found()[ $name ] ?? null;
 

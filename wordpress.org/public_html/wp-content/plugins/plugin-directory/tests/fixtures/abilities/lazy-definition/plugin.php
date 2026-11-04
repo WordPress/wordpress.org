@@ -35,7 +35,13 @@ abstract class Ability {
 	public function register(): void {
 		$args                     = $this->definition()->to_array();
 		$args['execute_callback'] = [ $this, 'execute' ];
+		// Decorated at runtime; the undecorated description is still the best listing.
+		$args['description'] = $this->for_llm( $args['description'] );
 		wp_register_ability( $this->get_ability_id(), $args );
+	}
+
+	private function for_llm( string $description ): string {
+		return $description . Prompt_Loader::load( 'suffix' );
 	}
 }
 

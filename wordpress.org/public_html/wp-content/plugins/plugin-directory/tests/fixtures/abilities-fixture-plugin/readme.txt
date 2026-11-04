@@ -28,6 +28,7 @@ Popular plugins rarely call `wp_register_ability()` with literal arguments. Each
 * `loops-and-variables.php`: categories registered in a loop over an array, and a category held in a local variable, like All in One SEO and WordPress core.
 * `plain-strings.php`: untranslated labels, a namespace that differs from the plugin's slug, a generic `forms` category, and `label` keys inside the input schema, like Ninja Forms.
 * `other-plugin-hooks.php`: an ability WooCommerce registers on the plugin's behalf, and a `wp_register_ability_args` filter, like MailPoet and Formidable Forms.
+* `assembled-definitions.php`: arguments assembled at runtime: definitions merged in a loop, a name chosen by a ternary, abilities injected by a dependency injection container, and a description read from a file, like Fluent Forms, WooCommerce, MailPoet and Elementor.
 * `not-abilities.php`: code that looks like an ability but isn't one, and two abilities whose names are only known at runtime.
 
 `jetpack_vendor/` holds a bundled library that registers its own ability, the way Elementor ships the MCP adapter.
@@ -46,8 +47,9 @@ The patterns come from the releases available on November 4, 2026: Jetpack 16.4,
 
 * `abilities` and `categories`: what a scanner should report, each marked with the pattern it uses.
 * `vendored`: registered by the bundled library.
-* `runtime_only`: registered, but with names built from data, so a scanner reading the code can't recover them.
+* `runtime_only`: registered, but with names that come from the site's post types, so a scanner reading the code can't recover them. The list is what a default install registers.
 * `requires_woocommerce`: registered only when WooCommerce is active.
+* `unreadable`, on an ability: fields that only exist at runtime, such as a description read from a file. A scanner should report them as null.
 * `must_not_report`: look-alikes, such as a REST route namespace and a commented-out call.
 
 Some entries have a `note` where the registered value isn't written in the code, such as a description the wrapper builds from the label.

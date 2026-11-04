@@ -611,13 +611,103 @@ class Ability_Scanner {
 				$i++;
 				$right = $this->parse_expression( $t, $i, $scope, $ctx );
 				$left  = $left ?? $right;
+			} elseif ( $token->is( '=' ) || T_COALESCE_EQUAL === $token->id ) {
+				// An assignment's value is what's assigned: `return $this->cache = new Foo();`.
+				$i++;
+				$right = $this->parse_expression( $t, $i, $scope, $ctx );
+				$left  = $token->is( '=' ) ? $right : ( $left ?? $right );
+			} elseif ( T_BOOLEAN_AND === $token->id || T_BOOLEAN_OR === $token->id ) {
+				$i++;
+				$right = $this->parse_postfix( $t, $i, $scope, $ctx );
+				$left  = self::logical( T_BOOLEAN_AND === $token->id, self::truthy( $left ), self::truthy( $right ) );
+			} elseif ( $token->is( '?' ) ) {
+				return $this->ternary( $left, $t, $i, $scope, $ctx );
 			} else {
-				// Ternaries, arithmetic, comparisons: not followed.
+				// Arithmetic, comparisons: not followed.
 				$i = $n;
 				return null;
 			}
 		}
 		return $left;
+	}
+
+	/**
+	 * `cond ? a : b` or `cond ?: b`, with $i at the `?`; consumes the rest of the expression.
+	 *
+	 * When the condition can't be known, the branch that resolves is used
+	 * (the first, if both do): e.g. `defined( $c . '::NAME' ) ? $c::NAME : $c::get_name()`
+	 * resolves for classes with either.
+	 */
+	private function ternary( $condition, array $t, int &$i, array $scope, array $ctx ) {
+		$n     = count( $t );
+		$colon = null;
+		for ( $k = $i + 1, $nested = 0; $k < $n; $k++ ) {
+			if ( self::is_open( $t[ $k ] ) ) {
+				$k = $this->match( $t, $k ) ?? $n;
+			} elseif ( $t[ $k ]->is( '?' ) ) {
+				$nested++;
+			} elseif ( $t[ $k ]->is( ':' ) && 0 === $nested-- ) {
+				$colon = $k;
+				break;
+			}
+		}
+		$then = null === $colon ? [] : array_slice( $t, $i + 1, $colon - $i - 1 );
+		$else = null === $colon ? [] : array_slice( $t, $colon + 1 );
+		$i    = $n;
+		if ( null === $colon ) {
+			return null;
+		}
+
+		$known = self::truthy( $condition );
+		if ( ! $then ) {
+			// Short ternary: `cond ?: b`.
+			return true === $known ? $condition : ( false === $known ? $this->evaluate( $else, $scope, $ctx ) : ( $condition ?? $this->evaluate( $else, $scope, $ctx ) ) );
+		}
+		if ( null !== $known ) {
+			return $this->evaluate( $known ? $then : $else, $scope, $ctx );
+		}
+		return $this->evaluate( $then, $scope, $ctx ) ?? $this->evaluate( $else, $scope, $ctx );
+	}
+
+	/**
+	 * PHP truthiness of a known value, or null when unknown.
+	 */
+	private static function truthy( $value ): ?bool {
+		return null === $value ? null : (bool) $value;
+	}
+
+	private static function logical( bool $and, ?bool $left, ?bool $right ): ?bool {
+		if ( $and ) {
+			return false === $left || false === $right ? false : ( true === $left && true === $right ? true : null );
+		}
+		return true === $left || true === $right ? true : ( false === $left && false === $right ? false : null );
+	}
+
+	/**
+	 * Whether an expression is set: true or false when that can be known, else null.
+	 *
+	 * @param PhpToken[] $tokens
+	 */
+	private function is_set( array $tokens, array $scope, array $ctx ): ?bool {
+		$last = count( $tokens ) - 1;
+		if ( $last > 0 && $tokens[ $last ]->is( ']' ) ) {
+			for ( $open = $last - 1, $depth = 0; $open > 0; $open-- ) {
+				if ( self::is_close( $tokens[ $open ] ) ) {
+					$depth++;
+				} elseif ( self::is_open( $tokens[ $open ] ) && 0 === $depth-- ) {
+					break;
+				}
+			}
+			if ( $open > 0 && $tokens[ $open ]->is( '[' ) && $this->match( $tokens, $open ) === $last ) {
+				$base = $this->evaluate( array_slice( $tokens, 0, $open ), $scope, $ctx );
+				$key  = $this->evaluate( array_slice( $tokens, $open + 1, $last - $open - 1 ), $scope, $ctx );
+				if ( is_array( $base ) && ( is_string( $key ) || is_int( $key ) ) ) {
+					// A known array without the key isn't set; a key with an unknown value might be.
+					return array_key_exists( $key, $base ) ? ( null !== $base[ $key ] ? true : null ) : false;
+				}
+			}
+		}
+		return null !== $this->evaluate( $tokens, $scope, $ctx ) ? true : null;
 	}
 
 	private function parse_postfix( array $t, int &$i, array $scope, array $ctx ) {
@@ -730,6 +820,30 @@ class Ability_Scanner {
 				}
 				$args = ( $t[ $i ] ?? null )?->is( '(' ) ? $this->call_args( $t, $i, $scope, $ctx ) : [];
 				return $class ? $this->instantiate( $class, $args ) : null;
+
+			case $token->is( '!' ):
+				$i++;
+				$value = self::truthy( $this->parse_postfix( $t, $i, $scope, $ctx ) );
+				return null === $value ? null : ! $value;
+
+			case T_ISSET === $token->id || T_EMPTY === $token->id:
+				$open  = $i + 1;
+				$close = ( $t[ $open ] ?? null )?->is( '(' ) ? $this->match( $t, $open ) : null;
+				if ( null === $close ) {
+					$i = $n;
+					return null;
+				}
+				$i     = $close + 1;
+				$parts = array_map( static fn( $r ) => array_slice( $t, $r[0], $r[1] - $r[0] + 1 ), self::split_ranges( $t, $open + 1, $close - 1 ) );
+				if ( T_EMPTY === $token->id ) {
+					$inner = $this->evaluate( $parts[0] ?? [], $scope, $ctx );
+					return null !== $inner ? empty( $inner ) : ( false === $this->is_set( $parts[0] ?? [], $scope, $ctx ) ? true : null );
+				}
+				$set = true;
+				foreach ( $parts as $part ) {
+					$set = self::logical( true, $set, $this->is_set( $part, $scope, $ctx ) );
+				}
+				return $set;
 
 			case T_NS_C === $token->id:
 				$i++;
@@ -903,6 +1017,29 @@ class Ability_Scanner {
 				return $this->array_fits( $merged ) ? $merged : null;
 			case 'apply_filters':
 				return $args[1] ?? null;
+			case 'is_array':
+			case 'is_string':
+				return null === ( $args[0] ?? null ) ? null : ( 'is_array' === $short ? is_array( $args[0] ) : is_string( $args[0] ) );
+			case 'array_values':
+			case 'array_keys':
+				return is_array( $args[0] ?? null ) ? ( 'array_values' === $short ? array_values( $args[0] ) : array_keys( $args[0] ) ) : null;
+			case 'array_unique':
+				$values = $args[0] ?? null;
+				return is_array( $values ) && ! array_filter( $values, static fn( $v ) => ! is_scalar( $v ) ) ? array_unique( $values ) : null;
+			case 'array_filter':
+				$values   = $args[0] ?? null;
+				$callback = $args[1] ?? null;
+				if ( ! is_array( $values ) || in_array( null, $values, true ) ) {
+					return null;
+				}
+				if ( null === $callback && ! isset( $args[1] ) ) {
+					return array_filter( $values );
+				}
+				// Only side-effect-free type checks as callbacks.
+				if ( 'strlen' === $callback && array_filter( $values, static fn( $v ) => ! is_scalar( $v ) ) ) {
+					return null;
+				}
+				return in_array( $callback, [ 'is_string', 'is_array', 'is_numeric', 'is_scalar', 'strlen' ], true ) ? array_filter( $values, $callback ) : null;
 		}
 
 		$function = $this->lookup_function( $name, $scope );
@@ -1002,8 +1139,14 @@ class Ability_Scanner {
 	}
 
 	/**
-	 * A variable's value: bound (parameter or loop variable), or else its first
-	 * plain assignment in the scope.
+	 * A variable's value: bound (parameter or loop variable), or else built from
+	 * its assignments in the scope.
+	 *
+	 * The first plain assignment sets the value. Later assignments that build on
+	 * it are applied in order, once per iteration of any loop around them:
+	 * `$x = array_merge( $x, … )` (or anything else using `$x`), `$x[] = …` and
+	 * `$x['key'] = …`. Other later assignments, typically fallbacks such as
+	 * `if ( ! is_array( $x ) ) { $x = array(); }`, are ignored.
 	 */
 	private function variable( string $name, array $scope, array $ctx ) {
 		if ( array_key_exists( $name, $ctx['vars'] ) ) {
@@ -1014,25 +1157,74 @@ class Ability_Scanner {
 		}
 
 		$tokens = $this->tokens( $scope['file'] );
+		$var    = "\$$name";
+		$value  = null;
+		$first  = true;
+		// Bind it to unknown while evaluating, so `$x = f( $x )` can't recurse.
+		$ctx['vars'][ $name ] = null;
+
 		for ( $i = $scope['start'] + 1, $end = min( $scope['end'], count( $tokens ) ); $i < $end; $i++ ) {
 			$i = $this->skip_inner_scope( $scope, $i );
 			$this->spend();
-			if ( T_VARIABLE !== ( $tokens[ $i ] ?? null )?->id || "\$$name" !== $tokens[ $i ]->text || ! ( $tokens[ $i + 1 ] ?? null )?->is( '=' ) ) {
+			if ( T_VARIABLE !== ( $tokens[ $i ] ?? null )?->id || $var !== $tokens[ $i ]->text || T_DOUBLE_COLON === ( $tokens[ $i - 1 ] ?? null )?->id ) {
 				continue;
 			}
-			$prev = $tokens[ $i - 1 ] ?? null;
-			if ( $prev && T_DOUBLE_COLON === $prev->id ) {
+
+			// `$x = …`, `$x[] = …` or `$x['key'] = …`.
+			$key_range = null;
+			$rhs       = null;
+			if ( ( $tokens[ $i + 1 ] ?? null )?->is( '=' ) ) {
+				$rhs = $i + 2;
+			} elseif ( ( $tokens[ $i + 1 ] ?? null )?->is( '[' ) && ! $first ) {
+				$close = $this->match( $tokens, $i + 1 );
+				if ( null !== $close && ( $tokens[ $close + 1 ] ?? null )?->is( '=' ) ) {
+					$key_range = [ $i + 2, $close - 1 ];
+					$rhs       = $close + 2;
+				}
+			}
+			if ( null === $rhs ) {
 				continue;
 			}
-			$stop = $this->statement_end( $tokens, $i + 2 );
+			$stop = $this->statement_end( $tokens, $rhs );
 			if ( null === $stop ) {
-				return null;
+				continue;
 			}
-			// Bind it to unknown while evaluating, so `$x = f( $x )` can't recurse.
-			$ctx['vars'][ $name ] = null;
-			return $this->evaluate( array_slice( $tokens, $i + 2, $stop - $i - 2 ), $scope, $ctx );
+			$expr = array_slice( $tokens, $rhs, $stop - $rhs );
+
+			if ( $first ) {
+				$value = $this->evaluate( $expr, $scope, $ctx );
+				$first = false;
+				continue;
+			}
+
+			$self_referential = (bool) array_filter( $expr, static fn( $t ) => $var === $t->text );
+			if ( null === $key_range && ! $self_referential ) {
+				continue;
+			}
+
+			foreach ( $this->unroll_loops( $scope, $i, $ctx ) as $iteration ) {
+				$iteration['vars'][ $name ] = $value;
+				$next = $this->evaluate( $expr, $scope, $iteration );
+				if ( null === $key_range ) {
+					$value = $next ?? $value;
+				} elseif ( is_array( $value ) ) {
+					if ( $key_range[0] > $key_range[1] ) {
+						$value[] = $next;
+					} else {
+						$key = $this->evaluate( $this->slice( $tokens, $key_range ), $scope, $iteration );
+						// An unknown value doesn't replace a known one: `$args['description'] = $this->decorate();`
+						// most likely builds on what was there, which is still the best listing.
+						if ( ( is_string( $key ) || is_int( $key ) ) && ( null !== $next || ! isset( $value[ $key ] ) ) ) {
+							$value[ $key ] = $next;
+						}
+					}
+					if ( ! $this->array_fits( $value ) ) {
+						return null;
+					}
+				}
+			}
 		}
-		return null;
+		return $value;
 	}
 
 	/**

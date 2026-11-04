@@ -1,5 +1,5 @@
 {
-	"_comment": "What WordPress registers when this plugin runs, from wp_get_abilities() and wp_get_ability_categories() on WordPress 7.2-beta4. 'abilities' and 'categories' are what a static scanner should report. 'vendored' comes from a bundled library; whether to list it is undecided. 'runtime_only' names are built from data, so no scanner can recover them. 'requires_woocommerce' registers only with WooCommerce active and was not checked at runtime. 'must_not_report' are look-alikes.",
+	"_comment": "What WordPress registers when this plugin runs, from wp_get_abilities() and wp_get_ability_categories() on WordPress 7.2-beta4. 'abilities' and 'categories' are what a static scanner should report. 'vendored' comes from a bundled library; whether to list it is undecided. 'runtime_only' names come from the site's public built-in post types, so no scanner can recover them; the list is what a default install registers. 'requires_woocommerce' registers only with WooCommerce active and was not checked at runtime. 'must_not_report' are look-alikes. Fields listed in an ability's 'unreadable' exist only at runtime, so a scanner should report them as null.",
 	"categories": {
 		"abilities-fixture": {
 			"label": "Abilities Fixture",
@@ -192,6 +192,50 @@
 			"category": "forms",
 			"pattern": "plain-strings",
 			"note": "The input schema also has a \"label\" key, which is not the ability label."
+		},
+		"abilities-fixture/get-report": {
+			"label": "Get report",
+			"description": "Returns entry counts by day.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions"
+		},
+		"abilities-fixture/export-report": {
+			"label": "abilities-fixture/export-report",
+			"description": "Exports the report as CSV.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "No label in the code; the registrar uses the name."
+		},
+		"abilities-fixture/coupon-create": {
+			"label": "Create coupon",
+			"description": "Creates a discount coupon.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "The name is a ternary between a class constant and a method."
+		},
+		"abilities-fixture/coupons-query": {
+			"label": "Query coupons",
+			"description": "Lists coupons, newest first.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "The name is a ternary between a class constant and a method."
+		},
+		"abilities-fixture/get-bounce-rate": {
+			"label": "Get bounce rate",
+			"description": "Returns the share of emails that bounced this month.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "Built by a dependency injection container, never with new in the plugin."
+		},
+		"abilities-fixture/summarize-site": {
+			"label": "Summarize site",
+			"description": "Summarizes the site's purpose and its most recent posts.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "The description is read from a file, so a scanner reports it as unknown.",
+			"unreadable": [
+				"description"
+			]
 		}
 	},
 	"vendored": {
@@ -211,6 +255,7 @@
 		}
 	},
 	"runtime_only": [
+		"abilities-fixture/count-attachments",
 		"abilities-fixture/count-pages",
 		"abilities-fixture/count-posts"
 	],

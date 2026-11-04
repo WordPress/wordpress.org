@@ -53,13 +53,20 @@ function site_summary_exists() {
 }
 
 /*
- * Registered at runtime, but its name and label are built from data, so no scanner
- * can read them. It appears in expected-abilities.json under runtime_only, not abilities.
+ * Registered at runtime, but the names and labels come from the site's post types, so
+ * no scanner can read them. They appear in expected-abilities.json under runtime_only,
+ * not abilities. A loop over a literal array would be readable; this one isn't.
  */
 add_action(
 	'wp_abilities_api_init',
 	function () {
-		foreach ( array( 'post', 'page' ) as $post_type ) {
+		$post_types = get_post_types(
+			array(
+				'public'   => true,
+				'_builtin' => true,
+			)
+		);
+		foreach ( $post_types as $post_type ) {
 			wp_register_ability(
 				sprintf( 'abilities-fixture/count-%ss', $post_type ),
 				array(

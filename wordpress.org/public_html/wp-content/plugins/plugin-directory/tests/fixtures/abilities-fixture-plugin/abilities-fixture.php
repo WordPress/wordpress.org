@@ -24,6 +24,7 @@
  * - includes/loops-and-variables.php Categories from a loop, a category in a local variable (All in One SEO, WordPress core).
  * - includes/plain-strings.php      Untranslated labels, a generic category and nested schema labels (Ninja Forms).
  * - includes/other-plugin-hooks.php Registering through WooCommerce's filter, and wp_register_ability_args (MailPoet, Formidable Forms).
+ * - includes/assembled-definitions.php Arguments assembled from loops, ternaries, a DI container and a file (Fluent Forms, WooCommerce, MailPoet, Elementor).
  * - includes/not-abilities.php      Look-alikes and runtime-only names a scanner must not report.
  * - jetpack_vendor/                 A bundled library that registers its own abilities.
  *
@@ -50,6 +51,7 @@ require_once __DIR__ . '/includes/inherited-const.php';
 require_once __DIR__ . '/includes/loops-and-variables.php';
 require_once __DIR__ . '/includes/plain-strings.php';
 require_once __DIR__ . '/includes/other-plugin-hooks.php';
+require_once __DIR__ . '/includes/assembled-definitions.php';
 require_once __DIR__ . '/includes/not-abilities.php';
 require_once __DIR__ . '/jetpack_vendor/acme/mcp-tools/register.php';
 
