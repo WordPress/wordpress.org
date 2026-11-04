@@ -953,15 +953,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		$valid_projects = array_values( array_intersect( $project_ids, array_keys( $this->get_translate_projects() ) ) );
 
 		if ( empty( $valid_projects ) ) {
-			if ( ! $this->remove_translation_editor( $user ) ) {
-				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
-			}
-			wp_send_json_success(
-				[
-					'message'  => __( 'Translation editor removed.', 'rosetta' ),
-					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), $redirect ),
-				]
-			);
+			wp_send_json_error( array( 'message' => __( 'No valid projects selected.', 'rosetta' ) ), 400 );
 		}
 
 		if ( ! $this->update_translation_editor( $user, $valid_projects ) ) {
