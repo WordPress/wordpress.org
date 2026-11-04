@@ -139,6 +139,7 @@ class Import {
 		$block_files        = $data['block_files'];
 		$dashboard_widgets  = $data['dashboard_widgets'] ?? array();
 		$abilities          = $data['abilities'] ?? array();
+		$ability_categories = $data['ability_categories'] ?? array();
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
@@ -668,6 +669,13 @@ class Import {
 		} else {
 			delete_post_meta( $plugin->ID, 'all_abilities' );
 			delete_post_meta( $plugin->ID, 'ability_name' );
+		}
+
+		// Ability categories, with their labels and descriptions, for browsing abilities by category.
+		if ( $ability_categories ) {
+			update_post_meta( $plugin->ID, 'all_ability_categories', $ability_categories );
+		} else {
+			delete_post_meta( $plugin->ID, 'all_ability_categories' );
 		}
 
 		self::record_release( $plugin, $stable_tag, $version, $current_stable_tag, $last_committer, $last_revision );
@@ -1244,11 +1252,13 @@ class Import {
 			}
 		}
 
-		$abilities = self::find_abilities_in_directory( $base_dir );
+		$ability_data       = self::find_ability_data_in_directory( $base_dir );
+		$abilities          = $ability_data['abilities'];
+		$ability_categories = $ability_data['categories'];
 
 		return apply_filters(
 			'wporg_plugins_export_and_parse_plugin',
-			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files', 'dashboard_widgets', 'abilities' ),
+			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files', 'dashboard_widgets', 'abilities', 'ability_categories' ),
 			$plugin_slug,
 			$this,
 		);
@@ -1659,15 +1669,30 @@ class Import {
 	 * @see Ability_Scanner for what's recognised.
 	 *
 	 * @param string $base_dir The plugin's root directory.
-	 * @return object[] Unique abilities, each with name, label and description properties.
+	 * @return object[] Unique abilities, each with name, label, description, category, bundled, file and line.
 	 */
 	public static function find_abilities_in_directory( $base_dir ) {
+		return self::find_ability_data_in_directory( $base_dir )['abilities'];
+	}
+
+	/**
+	 * Find the abilities and ability categories a plugin registers.
+	 *
+	 * @see Ability_Scanner::scan_plugin()
+	 *
+	 * @param string $base_dir The plugin's root directory.
+	 * @return array With 'abilities' and 'categories'.
+	 */
+	public static function find_ability_data_in_directory( $base_dir ) {
 		try {
-			return Ability_Scanner::scan( $base_dir );
+			return Ability_Scanner::scan_plugin( $base_dir );
 		} catch ( \Throwable $e ) {
 			// Ability detection must never stop a plugin from importing.
 			trigger_error( 'Ability scan failed: ' . esc_html( $e->getMessage() ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			return array();
+			return array(
+				'abilities'  => array(),
+				'categories' => array(),
+			);
 		}
 	}
 

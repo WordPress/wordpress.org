@@ -11,14 +11,13 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\CLI\Import;
+use WordPressdotorg\Plugin_Directory\Tools\Ability_Scanner;
 
 /**
  * Runs Import::find_abilities_in_directory() over tests/fixtures/abilities-fixture-plugin/,
  * a plugin that registers abilities the way popular plugins do, and checks the
  * result against its expected-abilities.json. That file records what WordPress
  * registers at runtime, and is kept as its author maintains it.
- *
- * Category isn't compared; the directory doesn't list it.
  *
  * Fields listed in an ability's "unreadable" exist only at runtime (e.g. a
  * description read from a file), so the scanner is expected to report null.
@@ -34,9 +33,7 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 	 * Abilities that aren't fully detected yet, and why. Remove an entry once its
 	 * test passes; the test fails as a reminder if it's left here.
 	 */
-	private const KNOWN_GAPS = array(
-		'abilities-fixture/search-orders' => 'wrapper-functions: the description is built at runtime when missing (needs "unreadable": ["description"] in expected-abilities.json).',
-	);
+	private const KNOWN_GAPS = array();
 
 	/**
 	 * The fixture's answer file, once read.
@@ -81,11 +78,19 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 	 */
 	#[DataProvider( 'ability_provider' )]
 	public function test_ability_is_detected( string $name, array $spec ): void {
-		$want = array( 'name' => $name );
-		foreach ( array( 'label', 'description' ) as $prop ) {
+		$want = array(
+			'name'    => $name,
+			'bundled' => false,
+		);
+		foreach ( array( 'label', 'description', 'category' ) as $prop ) {
 			$want[ $prop ] = in_array( $prop, $spec['unreadable'] ?? array(), true ) ? null : ( $spec[ $prop ] ?? null );
 		}
-		$got = self::found()[ $name ] ?? null;
+		$found = self::found()[ $name ] ?? null;
+		$got   = $found ? array_intersect_key( $found, $want ) : null;
+		if ( $got ) {
+			ksort( $got );
+		}
+		ksort( $want );
 
 		if ( isset( self::KNOWN_GAPS[ $name ] ) ) {
 			if ( $want === $got ) {
@@ -120,6 +125,54 @@ class Import_Abilities_Fixture_Plugin_Test extends TestCase {
 	/**
 	 * Everything reported must be in the answer file. Vendored, runtime-only and
 	 * WooCommerce-dependent abilities are allowed until we decide whether to list them.
+	 */
+	/**
+	 * Bundled libraries' abilities are reported, flagged as bundled.
+	 */
+	public function test_bundled_abilities_are_flagged(): void {
+		$vendored = array_keys( self::expected()['vendored']['abilities'] ?? array() );
+		$this->assertNotEmpty( $vendored );
+		foreach ( $vendored as $name ) {
+			$this->assertTrue( self::found()[ $name ]['bundled'] ?? null, "$name should be reported as bundled." );
+		}
+	}
+
+	/**
+	 * Every ability records the file and line it comes from.
+	 */
+	public function test_sources_are_recorded(): void {
+		foreach ( self::found() as $name => $ability ) {
+			$this->assertFileExists( self::DIR . '/' . $ability['file'], $name );
+			$this->assertIsInt( $ability['line'], $name );
+		}
+	}
+
+	/**
+	 * Each expected ability category is found, with its label and description.
+	 */
+	public function test_categories_are_detected(): void {
+		$found = array();
+		foreach ( Ability_Scanner::scan_plugin( self::DIR )['categories'] as $category ) {
+			$found[ $category->slug ] = array(
+				'label'       => $category->label,
+				'description' => $category->description,
+			);
+		}
+		$want = array();
+		foreach ( self::expected()['categories'] as $slug => $category ) {
+			$want[ $slug ] = array(
+				'label'       => $category['label'],
+				'description' => $category['description'],
+			);
+		}
+		$found = array_intersect_key( $found, $want );
+		ksort( $found );
+		ksort( $want );
+		$this->assertSame( $want, $found );
+	}
+
+	/**
+	 * Nothing outside the answer file is reported.
 	 */
 	public function test_nothing_unexpected_is_reported(): void {
 		$expected = self::expected();

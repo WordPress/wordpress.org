@@ -44,6 +44,12 @@ class Ability_Scanner {
 	/** The ability name format core accepts. */
 	const NAME_PATTERN = '#^[a-z0-9-]+/[a-z0-9-]+$#';
 
+	/** The ability category slug format core accepts. */
+	const CATEGORY_PATTERN = '#^[a-z0-9]+(?:-[a-z0-9]+)*$#';
+
+	/** Directories holding bundled third-party code. Abilities found in them are flagged as bundled. */
+	const BUNDLED_DIRECTORIES = [ 'vendor', 'vendor-prefixed', 'vendor_prefixed', 'jetpack_vendor' ];
+
 	/** Nested evaluations (calls, constants, variables) before giving up on a value. */
 	private const MAX_DEPTH = 24;
 
@@ -56,7 +62,10 @@ class Ability_Scanner {
 	 */
 	private const BUDGET = 5000000;
 
-	/** Work allowed per wp_register_ability() call, so one expensive call can't starve the rest. */
+	/**
+	 * Work allowed per wp_register_ability() call, and again per context it's
+	 * evaluated in, so one expensive call can't starve the rest.
+	 */
 	private const SITE_BUDGET = 250000;
 
 	/** Work allowed for the definition-array fallback, in tokens. */
@@ -73,6 +82,9 @@ class Ability_Scanner {
 
 	/** Files larger than this are generated or minified, not hand-written registration code. */
 	private const MAX_FILE_SIZE = 1048576;
+
+	/** Objects a constructor may build in turn (e.g. dependency injection containers), before they're left unconstructed. */
+	private const MAX_CONSTRUCTION_DEPTH = 3;
 
 	/** Tokenised files kept in memory. */
 	private const CACHE_SIZE = 64;
@@ -105,6 +117,12 @@ class Ability_Scanner {
 	 * @var string[]
 	 */
 	private array $files = [];
+	/**
+	 * The plugin's root directory, for reporting paths relative to it.
+	 *
+	 * @var string
+	 */
+	private string $base_dir = '';
 	/**
 	 * Tokenised files, by path; the least recently added are evicted.
 	 *
@@ -160,6 +178,18 @@ class Ability_Scanner {
 	 */
 	private array $sites = [];
 	/**
+	 * Calls to wp_register_ability_category(): [ file, index ].
+	 *
+	 * @var array
+	 */
+	private array $category_sites = [];
+	/**
+	 * Filter callbacks added with add_filter(): hook => list of [ file, callback range ].
+	 *
+	 * @var array
+	 */
+	private array $filters = [];
+	/**
 	 * Memoised lookups (constants, call sites, receivers, returns).
 	 *
 	 * @var array
@@ -184,6 +214,12 @@ class Ability_Scanner {
 	 */
 	private int $depth = 0;
 	/**
+	 * Constructors currently running, nested.
+	 *
+	 * @var int
+	 */
+	private int $constructing = 0;
+	/**
 	 * Whether work is being charged (it isn't while indexing).
 	 *
 	 * @var bool
@@ -205,36 +241,81 @@ class Ability_Scanner {
 	/**
 	 * Find the abilities a plugin registers.
 	 *
-	 * Files under vendor/ are skipped: they belong to bundled dependencies,
-	 * not the plugin itself.
-	 *
 	 * @param string $base_dir The plugin's root directory.
-	 * @return object[] Unique abilities, each with name, label and description properties.
+	 * @return object[] Unique abilities; see make_ability().
 	 */
 	public static function scan( string $base_dir ): array {
-		$files = array_values(
+		return self::scan_plugin( $base_dir )['abilities'];
+	}
+
+	/**
+	 * Find the abilities and ability categories a plugin registers.
+	 *
+	 * Bundled third-party code (see BUNDLED_DIRECTORIES) is scanned too, but
+	 * only packages that mention abilities, and what it registers is flagged
+	 * as bundled. Whether to list it is up to whoever displays the data.
+	 *
+	 * @param string $base_dir The plugin's root directory.
+	 * @return array {
+	 *     @type object[] $abilities  Unique abilities; see make_ability().
+	 *     @type object[] $categories Unique ability categories, each with slug, label, description, bundled, file and line.
+	 * }
+	 */
+	public static function scan_plugin( string $base_dir ): array {
+		$base_dir = rtrim( $base_dir, '/' );
+		$files    = array_values(
 			array_filter(
 				Filesystem::list_files( $base_dir, true, '!\.php$!i' ),
-				static fn( $file ) => ! str_contains( $file, '/vendor/' ) && filesize( $file ) <= self::MAX_FILE_SIZE
+				static fn( $file ) => filesize( $file ) <= self::MAX_FILE_SIZE
 			)
 		);
 		// Directory order varies by filesystem; sort so duplicate registrations merge the same way every time.
 		sort( $files );
 
-		// Most plugins register no abilities; don't tokenise them.
-		$relevant = false;
+		// Most plugins register no abilities: a plain text check comes first, so they're never tokenised.
+		$relevant = [];
 		foreach ( $files as $file ) {
 			$contents = (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
 			if ( false !== stripos( $contents, 'register_ability' ) || false !== stripos( $contents, 'abilities_registry' ) ) {
-				$relevant = true;
-				break;
+				$relevant[ self::package_of( substr( $file, strlen( $base_dir ) ) ) ] = true;
 			}
 		}
 		if ( ! $relevant ) {
-			return [];
+			return [
+				'abilities'  => [],
+				'categories' => [],
+			];
 		}
 
-		return ( new self( $files ) )->run();
+		// Bundled packages are only indexed when they mention abilities themselves.
+		$files = array_values(
+			array_filter(
+				$files,
+				static function ( $file ) use ( $base_dir, $relevant ) {
+					$package = self::package_of( substr( $file, strlen( $base_dir ) ) );
+					return '' === $package || isset( $relevant[ $package ] );
+				}
+			)
+		);
+
+		$scanner           = new self( $files );
+		$scanner->base_dir = $base_dir;
+		return $scanner->run();
+	}
+
+	/**
+	 * The bundled package a path belongs to, e.g. `/vendor/acme/tools`, or '' for the plugin's own code.
+	 *
+	 * @param string $path A path relative to the plugin's root, starting with `/`.
+	 */
+	private static function package_of( string $path ): string {
+		$parts = explode( '/', ltrim( $path, '/' ) );
+		foreach ( $parts as $i => $part ) {
+			if ( in_array( $part, self::BUNDLED_DIRECTORIES, true ) ) {
+				return '/' . implode( '/', array_slice( $parts, 0, min( $i + 3, count( $parts ) - 1 ) ) );
+			}
+		}
+		return '';
 	}
 
 	/**
@@ -278,9 +359,9 @@ class Ability_Scanner {
 	}
 
 	/**
-	 * Index the plugin, then evaluate each wp_register_ability() call.
+	 * Index the plugin, then evaluate each wp_register_ability() and wp_register_ability_category() call.
 	 *
-	 * @return object[]
+	 * @return array See scan_plugin().
 	 */
 	private function run(): array {
 		foreach ( $this->files as $file ) {
@@ -337,14 +418,36 @@ class Ability_Scanner {
 		if ( $dynamic ) {
 			$budget = self::DEFINITIONS_BUDGET;
 			foreach ( $this->files as $file ) {
-				$found = array_merge( $found, self::find_definitions( (string) file_get_contents( $file ), $budget ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
+				$definitions = self::find_definitions( (string) file_get_contents( $file ), $budget ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file from the plugin export.
+				foreach ( $definitions as $ability ) {
+					$ability->file    = $this->relative( $file );
+					$ability->bundled = $this->is_bundled( $file );
+				}
+				$found = array_merge( $found, $definitions );
 				if ( $budget <= 0 ) {
 					break;
 				}
 			}
 		}
 
-		return self::merge( $found );
+		$categories = [];
+		foreach ( $this->category_sites as [ $file, $index ] ) {
+			if ( $this->budget <= 0 ) {
+				break;
+			}
+			$this->site_budget = self::SITE_BUDGET;
+			$this->depth       = 0;
+			try {
+				$categories = array_merge( $categories, $this->evaluate_category_site( $file, $index ) );
+			} catch ( OverflowException $e ) {
+				continue;
+			}
+		}
+
+		return [
+			'abilities'  => self::merge( $found ),
+			'categories' => self::merge( $categories, 'slug' ),
+		];
 	}
 
 	/*
@@ -358,6 +461,7 @@ class Ability_Scanner {
 	 * @param int    $index Index of a token in the file.
 	 * @param array  $args The `[start, end]` ranges of the call's arguments.
 	 * @return object[]
+	 * @throws OverflowException When the plugin's whole budget is spent.
 	 */
 	private function evaluate_site( string $file, int $index, array $args ): array {
 		$tokens = $this->tokens( $file );
@@ -367,14 +471,144 @@ class Ability_Scanner {
 
 		$found = [];
 		foreach ( $this->contexts( $scope, $index, $params, 0 ) as $ctx ) {
-			$value = $this->evaluate( $name, $scope, $ctx );
-			if ( ! is_string( $value ) || ! preg_match( self::NAME_PATTERN, $value ) ) {
-				continue;
+			// Each context (a subclass, a loop iteration, a call site) is its own registration, with its own share of the budget.
+			$this->site_budget = self::SITE_BUDGET;
+			$this->depth       = 0;
+			try {
+				$value = $this->evaluate( $name, $scope, $ctx );
+				if ( ! is_string( $value ) || ! preg_match( self::NAME_PATTERN, $value ) ) {
+					continue;
+				}
+				$options = isset( $args[1] ) ? $this->evaluate( $this->slice( $tokens, $args[1] ), $scope, $ctx ) : null;
+				$ability = self::make_ability( $value, $options );
+				if ( null === $ability->category && is_array( $options ) && is_string( $options['ability_class'] ?? null ) ) {
+					$ability->category = $this->ability_class_category( $options['ability_class'], $value, $options, $scope );
+				}
+				[ $source_file, $ability->line ] = $this->source( $file, $index, $scope, $ctx );
+				$ability->file                   = $this->relative( $source_file );
+				$ability->bundled                = $this->is_bundled( $source_file );
+				$found[]                         = $ability;
+			} catch ( OverflowException $e ) {
+				if ( $this->budget < 0 ) {
+					throw $e;
+				}
 			}
-			$options = isset( $args[1] ) ? $this->evaluate( $this->slice( $tokens, $args[1] ), $scope, $ctx ) : null;
-			$found[] = self::make_ability( $value, $options );
 		}
 		return $found;
+	}
+
+	/**
+	 * Evaluate one wp_register_ability_category() call in every context it can run in.
+	 *
+	 * @param string $file  Path of one of the plugin's PHP files.
+	 * @param int    $index Index of a token in the file.
+	 * @return object[] Categories, each with slug, label, description, bundled, file and line.
+	 */
+	private function evaluate_category_site( string $file, int $index ): array {
+		$tokens = $this->tokens( $file );
+		$args   = $this->split_args( $tokens, $index + 1 );
+		if ( ! $args ) {
+			return [];
+		}
+		$scope = $this->scope_at( $file, $index );
+		$slug  = $this->slice( $tokens, $args[0] );
+		$found = [];
+		foreach ( $this->contexts( $scope, $index, $this->uses_params( $slug, $scope ), 0 ) as $ctx ) {
+			$value = $this->evaluate( $slug, $scope, $ctx );
+			if ( ! is_string( $value ) || ! preg_match( self::CATEGORY_PATTERN, $value ) ) {
+				continue;
+			}
+			$options                = isset( $args[1] ) ? $this->evaluate( $this->slice( $tokens, $args[1] ), $scope, $ctx ) : null;
+			$options                = is_array( $options ) ? $options : [];
+			[ $source_file, $line ] = $this->source( $file, $index, $scope, $ctx );
+			$found[]                = (object) [
+				'slug'        => $value,
+				'label'       => is_string( $options['label'] ?? null ) ? $options['label'] : null,
+				'description' => is_string( $options['description'] ?? null ) ? $options['description'] : null,
+				'bundled'     => $this->is_bundled( $source_file ),
+				'file'        => $this->relative( $source_file ),
+				'line'        => $line,
+			];
+		}
+		return $found;
+	}
+
+	/**
+	 * The category a custom `ability_class` sets, when the args don't: read
+	 * from the arguments its constructor passes to `parent::__construct()`.
+	 *
+	 * @param string $class_name The `ability_class` value.
+	 * @param string $name       The ability name.
+	 * @param array  $options    The ability's args.
+	 * @param array  $scope      The scope of the registration.
+	 */
+	private function ability_class_category( string $class_name, string $name, array $options, array $scope ): ?string {
+		$class = $this->lookup_class_value( $class_name, $scope );
+		$ctor  = $class ? $this->find_method( $class, '__construct' ) : null;
+		if ( ! $ctor ) {
+			return null;
+		}
+		$tokens = $this->tokens( $ctor['file'] );
+		for ( $i = $ctor['start'] + 1; $i < $ctor['end']; $i++ ) {
+			$this->spend();
+			if ( 'parent' === strtolower( $tokens[ $i ]->text ) && T_DOUBLE_COLON === ( $tokens[ $i + 1 ] ?? null )?->id
+				&& '__construct' === strtolower( $tokens[ $i + 2 ]->text ?? '' ) && ( $tokens[ $i + 3 ] ?? null )?->is( '(' )
+			) {
+				$args = $this->split_args( $tokens, $i + 3 );
+				if ( ! isset( $args[1] ) ) {
+					return null;
+				}
+				$ctx    = [
+					'vars' => $this->bind( $ctor, [ $name, $options ] ),
+					'this' => $this->bare( $class ),
+					'at'   => $i,
+				];
+				$values = $this->evaluate( $this->slice( $tokens, $args[1] ), $ctor, $ctx );
+				return is_array( $values ) && is_string( $values['category'] ?? null ) ? $values['category'] : null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Where a registration comes from, for reviewing it: the outermost call
+	 * through the plugin's wrappers, else the class whose ability it is, else
+	 * the call itself.
+	 *
+	 * @param string $file  Path of the file with the call.
+	 * @param int    $index Index of the call's name token.
+	 * @param array  $scope The scope of the call.
+	 * @param array  $ctx   The context it was evaluated in.
+	 * @return array [ file, line ].
+	 */
+	private function source( string $file, int $index, array $scope, array $ctx ): array {
+		if ( isset( $ctx['origin'] ) ) {
+			[ $origin_file, $origin_index ] = $ctx['origin'];
+			return [ $origin_file, $this->tokens( $origin_file )[ $origin_index ]->line ?? null ];
+		}
+		$class = $ctx['this']->class ?? null;
+		if ( $class && $class !== $scope['class'] && isset( $this->classes[ $class ] ) ) {
+			return [ $this->classes[ $class ]['file'], $this->classes[ $class ]['line'] ];
+		}
+		return [ $file, $this->tokens( $file )[ $index ]->line ?? null ];
+	}
+
+	/**
+	 * A path relative to the plugin's root.
+	 *
+	 * @param string $file An absolute path.
+	 */
+	private function relative( string $file ): string {
+		return ltrim( substr( $file, strlen( $this->base_dir ) ), '/' );
+	}
+
+	/**
+	 * Whether a file is in a bundled package.
+	 *
+	 * @param string $file An absolute path.
+	 */
+	private function is_bundled( string $file ): bool {
+		return '' !== self::package_of( '/' . $this->relative( $file ) );
 	}
 
 	/**
@@ -407,8 +641,9 @@ class Ability_Scanner {
 				foreach ( $this->contexts( $caller_scope, $call, $needs_params, $depth + 1 ) as $caller_ctx ) {
 					$values     = $this->evaluate_args( $slices, $caller_scope, $caller_ctx );
 					$bindings[] = [
-						'vars' => $this->bind( $scope, $values ),
-						'this' => $this->receiver( $receiver, $scope, $caller_tokens, $caller_scope, $caller_ctx ),
+						'vars'   => $this->bind( $scope, $values ),
+						'this'   => $this->receiver( $receiver, $scope, $caller_tokens, $caller_scope, $caller_ctx ),
+						'origin' => $caller_ctx['origin'] ?? [ $file, $call ],
 					];
 					if ( count( $bindings ) > self::MAX_CONTEXTS ) {
 						break 2;
@@ -424,7 +659,11 @@ class Ability_Scanner {
 				$ctx = [
 					'vars' => $binding['vars'],
 					'this' => $this_object,
+					'at'   => $index,
 				];
+				if ( isset( $binding['origin'] ) ) {
+					$ctx['origin'] = $binding['origin'];
+				}
 				foreach ( $this->unroll_loops( $scope, $index, $ctx ) as $unrolled ) {
 					$contexts[] = $unrolled;
 					if ( count( $contexts ) >= self::MAX_CONTEXTS ) {
@@ -544,7 +783,7 @@ class Ability_Scanner {
 			if ( $value instanceof stdClass ) {
 				return $value;
 			}
-			$class = is_string( $value ) ? $this->lookup_class( $value, $caller_scope ) : null;
+			$class = is_string( $value ) ? $this->lookup_class_value( $value, $caller_scope ) : null;
 			return $class ? $this->bare( $class ) : null;
 		}
 		$class = $this->lookup_class( $token->text, $caller_scope );
@@ -603,25 +842,38 @@ class Ability_Scanner {
 			$tokens = $this->tokens( $file );
 			$this->spend( count( $tokens ) );
 			foreach ( $tokens as $i => $token ) {
-				if ( T_NEW !== $token->id || ! self::is_name( $tokens[ $i + 1 ] ?? null ) ) {
+				$named    = self::is_name( $tokens[ $i + 1 ] ?? null );
+				$variable = T_VARIABLE === ( $tokens[ $i + 1 ] ?? null )?->id && '$this' !== $tokens[ $i + 1 ]->text;
+				if ( T_NEW !== $token->id || ( ! $named && ! $variable ) ) {
 					continue;
 				}
 				$scope = $this->scope_at( $file, $i );
-				if ( $this->lookup_class( $tokens[ $i + 1 ]->text, $scope ) !== $class_name ) {
+				if ( $named && $this->lookup_class( $tokens[ $i + 1 ]->text, $scope ) !== $class_name ) {
 					continue;
 				}
-				$values = [];
-				if ( ( $tokens[ $i + 2 ] ?? null )?->is( '(' ) ) {
-					$slices = array_map( fn( $range ) => $this->slice( $tokens, $range ), $this->split_args( $tokens, $i + 2 ) );
-					$ctx    = [
-						'vars' => [],
-						'this' => $scope['class'] ? $this->bare( $scope['class'] ) : null,
-					];
-					$values = $this->evaluate_args( $slices, $scope, $ctx );
-				}
-				$objects[] = $this->instantiate( $class_name, $values );
-				if ( count( $objects ) >= 10 ) {
-					return $objects;
+				$base = [
+					'vars' => [],
+					'this' => $scope['class'] ? $this->bare( $scope['class'] ) : null,
+					'at'   => $i,
+				];
+				// `new $class_name( … )`: each loop iteration whose variable names this class.
+				$contexts = $named ? [ $base ] : array_filter(
+					array_slice( $this->unroll_loops( $scope, $i, $base ), 0, 20 ),
+					function ( $ctx ) use ( $tokens, $i, $scope, $class_name ) {
+						$value = $this->evaluate( [ $tokens[ $i + 1 ] ], $scope, $ctx );
+						return is_string( $value ) && $this->lookup_class_value( $value, $scope ) === $class_name;
+					}
+				);
+				foreach ( $contexts as $ctx ) {
+					$values = [];
+					if ( ( $tokens[ $i + 2 ] ?? null )?->is( '(' ) ) {
+						$slices = array_map( fn( $range ) => $this->slice( $tokens, $range ), $this->split_args( $tokens, $i + 2 ) );
+						$values = $this->evaluate_args( $slices, $scope, $ctx );
+					}
+					$objects[] = $this->instantiate( $class_name, $values );
+					if ( count( $objects ) >= 10 ) {
+						return $objects;
+					}
 				}
 			}
 		}
@@ -673,6 +925,21 @@ class Ability_Scanner {
 	 * @return array[] Each with 'expr' (tokens), 'key' and 'value' (variable names or null).
 	 */
 	private function enclosing_loops( array $scope, int $index ): array {
+		$key = "loops:{$scope['file']}:{$scope['start']}:$index";
+		if ( ! isset( $this->memo[ $key ] ) ) {
+			$this->memo[ $key ] = $this->find_enclosing_loops( $scope, $index );
+		}
+		return $this->memo[ $key ];
+	}
+
+	/**
+	 * Uncached enclosing_loops().
+	 *
+	 * @param array $scope The scope the code runs in.
+	 * @param int   $index Index of a token in the file.
+	 * @return array[]
+	 */
+	private function find_enclosing_loops( array $scope, int $index ): array {
 		$tokens = $this->tokens( $scope['file'] );
 		$loops  = [];
 		for ( $i = $scope['start'] + 1; $i < $index; $i++ ) {
@@ -788,6 +1055,10 @@ class Ability_Scanner {
 				++$i;
 				$right = $this->parse_expression( $t, $i, $scope, $ctx );
 				$left  = $token->is( '=' ) ? $right : ( $left ?? $right );
+			} elseif ( in_array( $token->id, [ T_IS_IDENTICAL, T_IS_NOT_IDENTICAL, T_IS_EQUAL, T_IS_NOT_EQUAL ], true ) ) {
+				++$i;
+				$right = $this->parse_postfix( $t, $i, $scope, $ctx );
+				$left  = self::compare( $token->id, $left, $right );
 			} elseif ( T_BOOLEAN_AND === $token->id || T_BOOLEAN_OR === $token->id ) {
 				++$i;
 				$right = $this->parse_postfix( $t, $i, $scope, $ctx );
@@ -845,6 +1116,29 @@ class Ability_Scanner {
 			return $this->evaluate( $known ? $then : $else, $scope, $ctx );
 		}
 		return $this->evaluate( $then, $scope, $ctx ) ?? $this->evaluate( $else, $scope, $ctx );
+	}
+
+	/**
+	 * Compare two values with `===`, `!==`, `==` or `!=`, or null when either is unknown.
+	 *
+	 * @param int   $operator The operator's token type.
+	 * @param mixed $left     The left value, or null when unknown.
+	 * @param mixed $right    The right value, or null when unknown.
+	 */
+	private static function compare( int $operator, $left, $right ): ?bool {
+		if ( null === $left || null === $right || $left instanceof stdClass || $right instanceof stdClass ) {
+			return null;
+		}
+		switch ( $operator ) {
+			case T_IS_IDENTICAL:
+				return $left === $right;
+			case T_IS_NOT_IDENTICAL:
+				return $left !== $right;
+			case T_IS_EQUAL:
+				return $left == $right; // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- Evaluating the plugin's own `==`.
+			default:
+				return $left != $right; // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual -- Evaluating the plugin's own `!=`.
+		}
 	}
 
 	/**
@@ -941,7 +1235,7 @@ class Ability_Scanner {
 				}
 			} elseif ( T_DOUBLE_COLON === $token->id ) {
 				// A constant or static method reached through an object or class name held in a variable.
-				$class = $value instanceof stdClass ? $value->class : ( is_string( $value ) ? $this->lookup_class( $value, $scope ) : null );
+				$class = $value instanceof stdClass ? $value->class : ( is_string( $value ) ? $this->lookup_class_value( $value, $scope ) : null );
 				++$i;
 				$value = $this->static_member( $class, $value instanceof stdClass ? $value : null, $t, $i, $scope, $ctx );
 			} else {
@@ -1014,7 +1308,7 @@ class Ability_Scanner {
 				$i          += 2;
 				if ( T_VARIABLE === $class_token?->id ) {
 					$value = $this->variable( substr( $class_token->text, 1 ), $scope, $ctx );
-					$class = is_string( $value ) ? $this->lookup_class( $value, $scope ) : null;
+					$class = is_string( $value ) ? $this->lookup_class_value( $value, $scope ) : null;
 				} elseif ( T_STATIC === $class_token?->id ) {
 					$class = $ctx['this']->class ?? $scope['class'];
 				} elseif ( self::is_name( $class_token ) ) {
@@ -1254,7 +1548,7 @@ class Ability_Scanner {
 				$merged = array_merge( is_array( $args[1] ?? null ) ? $args[1] : [], is_array( $args[0] ?? null ) ? $args[0] : [] );
 				return $this->array_fits( $merged ) ? $merged : null;
 			case 'apply_filters':
-				return $args[1] ?? null;
+				return $this->apply_filters( $args[0] ?? null, $args[1] ?? null, array_slice( array_values( $args ), 2 ) );
 			case 'is_array':
 			case 'is_string':
 				return null === ( $args[0] ?? null ) ? null : ( 'is_array' === $short ? is_array( $args[0] ) : is_string( $args[0] ) );
@@ -1282,6 +1576,76 @@ class Ability_Scanner {
 
 		$function = $this->lookup_function( $name, $scope );
 		return $function ? $this->invoke( $function, $args, null ) : null;
+	}
+
+	/**
+	 * The value of `apply_filters( $hook, $value, … )`: passed through each
+	 * callback the plugin adds to the hook, in the order they're added.
+	 *
+	 * @param mixed $hook  The hook name, or null when unknown.
+	 * @param mixed $value The value being filtered, or null when unknown.
+	 * @param array $extra Any further arguments.
+	 */
+	private function apply_filters( $hook, $value, array $extra ) {
+		$key = is_string( $hook ) ? "filtering:$hook" : null;
+		if ( ! $key || empty( $this->filters[ $hook ] ) || isset( $this->memo[ $key ] ) ) {
+			return $value;
+		}
+		$this->memo[ $key ] = true; // A callback that applies the same filter sees the unfiltered value.
+		try {
+			foreach ( array_slice( $this->filters[ $hook ], 0, 50 ) as [ $file, $range ] ) {
+				$result = $this->call_callback( $file, $range, array_merge( [ $value ], $extra ) );
+				if ( null !== $result ) {
+					$value = $result;
+				}
+			}
+		} finally {
+			unset( $this->memo[ $key ] );
+		}
+		return $value;
+	}
+
+	/**
+	 * Call a callback as written in the code: a closure, a function name, or
+	 * an `array( $object_or_class, 'method' )` or `'Class::method'` callable.
+	 *
+	 * @param string $file  The file the callback is written in.
+	 * @param int[]  $range The callback expression's token range.
+	 * @param array  $args  Evaluated arguments.
+	 */
+	private function call_callback( string $file, array $range, array $args ) {
+		$tokens = $this->tokens( $file );
+		$first  = $tokens[ $range[0] ] ?? null;
+		if ( T_STATIC === $first?->id ) {
+			$first = $tokens[ $range[0] + 1 ] ?? null;
+		}
+		if ( T_FUNCTION === $first?->id ) {
+			foreach ( $this->meta[ $file ]['scopes'] as $closure ) {
+				if ( 'closure' === $closure['kind'] && $closure['start'] > $range[0] && $closure['end'] <= $range[1] ) {
+					return $this->invoke( $closure, $args, $closure['class'] ? $this->bare( $closure['class'] ) : null );
+				}
+			}
+			return null;
+		}
+
+		$scope    = $this->scope_at( $file, $range[0] );
+		$ctx      = [
+			'vars' => [],
+			'this' => $scope['class'] ? $this->bare( $scope['class'] ) : null,
+			'at'   => $range[0],
+		];
+		$callable = $this->evaluate( $this->slice( $tokens, $range ), $scope, $ctx );
+		if ( is_string( $callable ) && str_contains( $callable, '::' ) ) {
+			$callable = explode( '::', $callable, 2 );
+		}
+		if ( is_string( $callable ) ) {
+			$func = $this->lookup_function( $callable, $scope );
+			return $func ? $this->invoke( $func, $args, null ) : null;
+		}
+		if ( is_array( $callable ) && 2 === count( $callable ) && is_string( $callable[1] ?? null ) ) {
+			return $this->call_method( $callable[0], $callable[1], $args );
+		}
+		return null;
 	}
 
 	/**
@@ -1320,8 +1684,9 @@ class Ability_Scanner {
 		$ctx = [
 			'vars' => $this->bind( $func, $args ),
 			'this' => $this_object,
+			'at'   => $return['at'],
 		];
-		return $this->evaluate( $return, $func, $ctx );
+		return $this->evaluate( $return['tokens'], $func, $ctx );
 	}
 
 	/**
@@ -1334,21 +1699,37 @@ class Ability_Scanner {
 	private function instantiate( string $class_name, array $args ): stdClass {
 		$object = $this->bare( $class_name );
 		$ctor   = $this->find_method( $class_name, '__construct' );
-		if ( ! $ctor ) {
+		if ( ! $ctor || $this->constructing >= self::MAX_CONSTRUCTION_DEPTH ) {
 			return $object;
 		}
+		++$this->constructing;
+		try {
+			return $this->construct( $object, $ctor, $args );
+		} finally {
+			--$this->constructing;
+		}
+	}
+
+	/**
+	 * Run a constructor's promoted properties and `$this->prop = ...;` assignments on an object.
+	 *
+	 * @param stdClass $owner The object being built.
+	 * @param array    $ctor  The constructor, as recorded when indexing.
+	 * @param array    $args  Evaluated constructor arguments.
+	 */
+	private function construct( stdClass $owner, array $ctor, array $args ): stdClass {
 
 		$vars = $this->bind( $ctor, $args );
 		foreach ( $ctor['params'] as $param ) {
 			if ( $param['promoted'] ) {
-				$object->props[ $param['name'] ] = $vars[ $param['name'] ] ?? null;
+				$owner->props[ $param['name'] ] = $vars[ $param['name'] ] ?? null;
 			}
 		}
 
 		$tokens = $this->tokens( $ctor['file'] );
 		$ctx    = [
 			'vars' => $vars,
-			'this' => $object,
+			'this' => $owner,
 		];
 		for ( $i = $ctor['start'] + 1; $i < $ctor['end']; $i++ ) {
 			$i = $this->skip_inner_scope( $ctor, $i );
@@ -1360,11 +1741,11 @@ class Ability_Scanner {
 			) {
 				$end = $this->statement_end( $tokens, $i + 4 );
 				if ( null !== $end ) {
-					$object->props[ $tokens[ $i + 2 ]->text ] = $this->evaluate( array_slice( $tokens, $i + 4, $end - $i - 4 ), $ctor, $ctx );
+					$owner->props[ $tokens[ $i + 2 ]->text ] = $this->evaluate( array_slice( $tokens, $i + 4, $end - $i - 4 ), $ctor, $ctx );
 				}
 			}
 		}
-		return $object;
+		return $owner;
 	}
 
 	/**
@@ -1405,35 +1786,46 @@ class Ability_Scanner {
 	}
 
 	/**
-	 * A variable's value: bound (parameter or loop variable), or else built from
-	 * its assignments in the scope.
+	 * A variable's value, from its binding or its assignments in the scope.
 	 *
-	 * The first plain assignment sets the value. Later assignments that build on
-	 * it are applied in order, once per iteration of any loop around them:
-	 * `$x = array_merge( $x, … )` (or anything else using `$x`), `$x[] = …` and
-	 * `$x['key'] = …`. Other later assignments, typically fallbacks such as
-	 * `if ( ! is_array( $x ) ) { $x = array(); }`, are ignored.
+	 * The value starts from the variable's binding (a parameter or loop
+	 * variable), or else its first plain assignment, and later assignments
+	 * that build on it are applied in order, once per iteration of any loop
+	 * around them: `$x = array_merge( $x, … )` (or anything else using `$x`),
+	 * `$x[] = …` and `$x['key'] = …`. Other later assignments, typically
+	 * fallbacks such as `if ( ! is_array( $x ) ) { $x = array(); }`, are ignored.
 	 *
-	 * @param string $name A name as written in the code.
+	 * Only assignments before the code being evaluated (the context's 'at')
+	 * count, and each is skipped when an `if` condition around it is known not
+	 * to hold. When a condition can't be known, building on the value still
+	 * applies, but a key assignment only fills in a missing value, so a fallback
+	 * like `if ( empty( $x['label'] ) ) { $x['label'] = $name; }` can't replace
+	 * a real one.
+	 *
+	 * @param string $name  A name as written in the code.
 	 * @param array  $scope The scope the code runs in.
-	 * @param array  $ctx Evaluation context: 'vars' (name => value) and 'this' (object or null).
+	 * @param array  $ctx   Evaluation context: 'vars' (name => value), 'this' (object or null) and 'at'.
 	 */
 	private function variable( string $name, array $scope, array $ctx ) {
-		if ( array_key_exists( $name, $ctx['vars'] ) ) {
+		$is_param = in_array( $name, array_column( $scope['params'], 'name' ), true );
+		$bound    = array_key_exists( $name, $ctx['vars'] );
+		if ( $bound && ! empty( $ctx['building'][ $name ] ) ) {
 			return $ctx['vars'][ $name ];
 		}
-		if ( in_array( $name, array_column( $scope['params'], 'name' ), true ) ) {
+		if ( $is_param && ! $bound ) {
 			return null;
 		}
 
 		$tokens = $this->tokens( $scope['file'] );
 		$var    = "\$$name";
-		$value  = null;
-		$first  = true;
-		// Bind it to unknown while evaluating, so `$x = f( $x )` can't recurse.
-		$ctx['vars'][ $name ] = null;
+		$value  = $bound ? $ctx['vars'][ $name ] : null;
+		$first  = ! $bound;
+		$until  = min( $scope['end'], count( $tokens ), $ctx['at'] ?? PHP_INT_MAX );
+		// While building it, the variable reads as its binding (or unknown), so `$x = f( $x )` can't recurse.
+		$ctx['vars'][ $name ]     = $value;
+		$ctx['building'][ $name ] = true;
 
-		for ( $i = $scope['start'] + 1, $end = min( $scope['end'], count( $tokens ) ); $i < $end; $i++ ) {
+		for ( $i = $scope['start'] + 1; $i < $until; $i++ ) {
 			$i = $this->skip_inner_scope( $scope, $i );
 			$this->spend();
 			if ( T_VARIABLE !== ( $tokens[ $i ] ?? null )?->id || $var !== $tokens[ $i ]->text || T_DOUBLE_COLON === ( $tokens[ $i - 1 ] ?? null )?->id ) {
@@ -1462,8 +1854,9 @@ class Ability_Scanner {
 			$expr = array_slice( $tokens, $rhs, $stop - $rhs );
 
 			if ( $first ) {
-				$value = $this->evaluate( $expr, $scope, $ctx );
-				$first = false;
+				$value                = $this->evaluate( $expr, $scope, $ctx );
+				$ctx['vars'][ $name ] = $value;
+				$first                = false;
 				continue;
 			}
 
@@ -1472,19 +1865,27 @@ class Ability_Scanner {
 				continue;
 			}
 
+			$conditions = $this->enclosing_conditions( $scope, $i );
 			foreach ( $this->unroll_loops( $scope, $i, $ctx ) as $iteration ) {
 				$iteration['vars'][ $name ] = $value;
-				$next                       = $this->evaluate( $expr, $scope, $iteration );
+				$holds                      = $this->conditions_hold( $conditions, $scope, $iteration );
+				if ( false === $holds ) {
+					continue;
+				}
+				$next = $this->evaluate( $expr, $scope, $iteration );
 				if ( null === $key_range ) {
+					// Building on the value (`$x = array_merge( $x, … )`) applies even under an unknown condition:
+					// guards like `if ( class_exists( $c ) )` usually hold.
 					$value = $next ?? $value;
 				} elseif ( is_array( $value ) ) {
 					if ( $key_range[0] > $key_range[1] ) {
 						$value[] = $next;
 					} else {
 						$key = $this->evaluate( $this->slice( $tokens, $key_range ), $scope, $iteration );
-						// An unknown value doesn't replace a known one: `$args['description'] = $this->decorate();`
-						// most likely builds on what was there, which is still the best listing.
-						if ( ( is_string( $key ) || is_int( $key ) ) && ( null !== $next || ! isset( $value[ $key ] ) ) ) {
+						// An unknown value doesn't replace a known one (`$args['description'] = $this->decorate();`
+						// most likely builds on what was there), and under an unknown condition only gaps are filled.
+						$fill_only = true !== $holds || null === $next;
+						if ( ( is_string( $key ) || is_int( $key ) ) && ( ! $fill_only || ! isset( $value[ $key ] ) ) ) {
 							$value[ $key ] = $next;
 						}
 					}
@@ -1493,8 +1894,124 @@ class Ability_Scanner {
 					}
 				}
 			}
+			$ctx['vars'][ $name ] = $value;
 		}
 		return $value;
+	}
+
+	/**
+	 * The `if`/`elseif`/`else` conditions that must hold for code at $index to run.
+	 *
+	 * @param array $scope The scope the code runs in.
+	 * @param int   $index Index of a token in the file.
+	 * @return array[] Each with 'expr' (tokens) and 'want' (the truthiness it needs).
+	 */
+	private function enclosing_conditions( array $scope, int $index ): array {
+		$key = "conditions:{$scope['file']}:{$scope['start']}:$index";
+		if ( ! isset( $this->memo[ $key ] ) ) {
+			$this->memo[ $key ] = $this->find_enclosing_conditions( $scope, $index );
+		}
+		return $this->memo[ $key ];
+	}
+
+	/**
+	 * Uncached enclosing_conditions().
+	 *
+	 * @param array $scope The scope the code runs in.
+	 * @param int   $index Index of a token in the file.
+	 * @return array[]
+	 */
+	private function find_enclosing_conditions( array $scope, int $index ): array {
+		$tokens     = $this->tokens( $scope['file'] );
+		$conditions = [];
+		for ( $i = $scope['start'] + 1; $i < $index; $i++ ) {
+			$i = $this->skip_inner_scope( $scope, $i );
+			$this->spend();
+			$token = $tokens[ $i ] ?? null;
+			// Start of a chain: an `if` that isn't the `if` of `else if`.
+			if ( T_IF !== $token?->id || T_ELSE === ( $tokens[ $i - 1 ] ?? null )?->id ) {
+				continue;
+			}
+
+			// Each branch of the chain: [ condition tokens, or null for `else`; body start; body end ].
+			$branches = [];
+			$at       = $i;
+			while ( true ) {
+				$cond = null;
+				if ( T_ELSE === $tokens[ $at ]->id ) {
+					$body_start = $at + 1;
+				} else {
+					$open  = $at + 1;
+					$close = ( $tokens[ $open ] ?? null )?->is( '(' ) ? $this->match( $tokens, $open ) : null;
+					if ( null === $close ) {
+						break;
+					}
+					$cond       = array_slice( $tokens, $open + 1, $close - $open - 1 );
+					$body_start = $close + 1;
+				}
+				$body_end = ( $tokens[ $body_start ] ?? null )?->is( '{' ) ? $this->match( $tokens, $body_start ) : $this->statement_end( $tokens, $body_start );
+				if ( null === $body_end ) {
+					break;
+				}
+				$branches[] = [ $cond, $body_start, $body_end ];
+
+				$next = $tokens[ $body_end + 1 ] ?? null;
+				if ( null === $cond || ! $next ) {
+					break; // A plain `else` ends the chain.
+				}
+				if ( T_ELSEIF === $next->id ) {
+					$at = $body_end + 1;
+				} elseif ( T_ELSE === $next->id ) {
+					// `else if` continues the chain like `elseif`.
+					$at = T_IF === ( $tokens[ $body_end + 2 ] ?? null )?->id ? $body_end + 2 : $body_end + 1;
+				} else {
+					break;
+				}
+			}
+
+			$prior = [];
+			foreach ( $branches as [ $cond, $body_start, $body_end ] ) {
+				if ( $index > $body_start && $index <= $body_end ) {
+					foreach ( $prior as $expr ) {
+						$conditions[] = [
+							'expr' => $expr,
+							'want' => false,
+						];
+					}
+					if ( null !== $cond ) {
+						$conditions[] = [
+							'expr' => $cond,
+							'want' => true,
+						];
+					}
+					break;
+				}
+				if ( null !== $cond ) {
+					$prior[] = $cond;
+				}
+			}
+		}
+		return $conditions;
+	}
+
+	/**
+	 * Whether conditions hold: true or false when that can be known, else null.
+	 *
+	 * @param array[] $conditions As returned by enclosing_conditions().
+	 * @param array   $scope      The scope the code runs in.
+	 * @param array   $ctx        Evaluation context.
+	 */
+	private function conditions_hold( array $conditions, array $scope, array $ctx ): ?bool {
+		$holds = true;
+		foreach ( $conditions as $condition ) {
+			$value = self::truthy( $this->evaluate( $condition['expr'], $scope, $ctx ) );
+			if ( null === $value ) {
+				$holds = null;
+			} elseif ( $value !== $condition['want'] ) {
+				return false;
+			}
+		}
+		return $holds;
 	}
 
 	/**
@@ -1604,7 +2121,7 @@ class Ability_Scanner {
 	 * The expression a function returns: its only `return`, or the last one in its outermost block.
 	 *
 	 * @param array $func A function or method, as recorded when indexing.
-	 * @return PhpToken[]|null
+	 * @return array|null The expression's 'tokens', and 'at', the index of its `return`.
 	 */
 	private function return_expression( array $func ): ?array {
 		$key = "return:{$func['file']}:{$func['start']}";
@@ -1637,7 +2154,10 @@ class Ability_Scanner {
 		$top                = array_filter( $returns, static fn( $r ) => 0 === $r[1] );
 		[ $at ]             = $top ? end( $top ) : end( $returns );
 		$end                = $this->statement_end( $tokens, $at + 1 );
-		$this->memo[ $key ] = null === $end ? null : array_slice( $tokens, $at + 1, $end - $at - 1 );
+		$this->memo[ $key ] = null === $end ? null : [
+			'tokens' => array_slice( $tokens, $at + 1, $end - $at - 1 ),
+			'at'     => $at,
+		];
 		return $this->memo[ $key ];
 	}
 
@@ -1731,6 +2251,17 @@ class Ability_Scanner {
 	}
 
 	/**
+	 * Resolve a class name held in a string (e.g. from `Foo::class`) to a known class.
+	 * Names in strings are always fully qualified; imports and the namespace don't apply.
+	 *
+	 * @param string $name  The class name.
+	 * @param array  $scope The scope the code runs in.
+	 */
+	private function lookup_class_value( string $name, array $scope ): ?string {
+		return $this->lookup_class( '\\' . ltrim( $name, '\\' ), $scope );
+	}
+
+	/**
 	 * Resolve a class name as written in a scope to a known class (lowercase FQN).
 	 *
 	 * @param string $name A name as written in the code.
@@ -1806,6 +2337,14 @@ class Ability_Scanner {
 		foreach ( $parsed['sites'] as $index ) {
 			$this->sites[] = [ $file, $index ];
 		}
+		foreach ( $parsed['category_sites'] as $index ) {
+			$this->category_sites[] = [ $file, $index ];
+		}
+		foreach ( $parsed['filters'] as $hook => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				$this->filters[ $hook ][] = $callback;
+			}
+		}
 	}
 
 	/**
@@ -1824,23 +2363,25 @@ class Ability_Scanner {
 		);
 		$this->remember( $file, $tokens );
 
-		$count       = count( $tokens );
-		$namespaces  = [
+		$count          = count( $tokens );
+		$namespaces     = [
 			[
 				'start' => 0,
 				'ns'    => '',
 				'uses'  => [],
 			],
 		];
-		$ns_end      = null;
-		$classes     = [];
-		$functions   = [];
-		$defines     = [];
-		$sites       = [];
-		$scopes      = [];
-		$identifiers = [];
-		$class_stack = [];
-		$fn_stack    = [];
+		$ns_end         = null;
+		$classes        = [];
+		$functions      = [];
+		$defines        = [];
+		$sites          = [];
+		$category_sites = [];
+		$filters        = [];
+		$scopes         = [];
+		$identifiers    = [];
+		$class_stack    = [];
+		$fn_stack       = [];
 
 		for ( $i = 0; $i < $count; $i++ ) {
 			while ( $class_stack && end( $class_stack )['end'] < $i ) {
@@ -1930,6 +2471,7 @@ class Ability_Scanner {
 					$classes[ $lname ] = [
 						'name'     => $fqn,
 						'file'     => $file,
+						'line'     => $token->line,
 						'kind'     => strtolower( $token->text ),
 						'abstract' => $abstract,
 						'parent'   => $parent,
@@ -2024,6 +2566,13 @@ class Ability_Scanner {
 					$is_call = ! $prev || ! in_array( $prev->id, [ T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON, T_FUNCTION, T_NEW ], true );
 					if ( 'wp_register_ability' === $lower && $is_call ) {
 						$sites[] = $i;
+					} elseif ( 'wp_register_ability_category' === $lower && $is_call ) {
+						$category_sites[] = $i;
+					} elseif ( 'add_filter' === $lower && $is_call && T_CONSTANT_ENCAPSED_STRING === ( $tokens[ $i + 2 ] ?? null )?->id ) {
+						$args = $this->split_args( $tokens, $i + 1 );
+						if ( isset( $args[1] ) && $args[0][0] === $args[0][1] ) {
+							$filters[ self::unescape( $tokens[ $i + 2 ]->text ) ][] = [ $file, $args[1] ];
+						}
 					} elseif ( 'register' === $lower && $this->is_registry_call( $tokens, $i ) ) {
 						$sites[] = $i;
 					} elseif ( 'define' === $lower && $is_call
@@ -2039,7 +2588,7 @@ class Ability_Scanner {
 			}
 		}
 
-		return compact( 'namespaces', 'classes', 'functions', 'defines', 'sites', 'scopes', 'identifiers' );
+		return compact( 'namespaces', 'classes', 'functions', 'defines', 'sites', 'category_sites', 'filters', 'scopes', 'identifiers' );
 	}
 
 	/**
@@ -2496,9 +3045,10 @@ class Ability_Scanner {
 	/**
 	 * Find array literals in PHP source that look like ability definitions.
 	 *
-	 * Two shapes are recognised, both requiring a 'description' key (core
-	 * requires one to register an ability; 'label' is optional because some
-	 * registrars fall back to the name):
+	 * Two shapes are recognised, both requiring 'label' and 'description'
+	 * keys, which core requires to register an ability. Requiring both rules
+	 * out lookalikes such as block patterns and variations, which pair
+	 * 'title' with 'description':
 	 *
 	 * - Keyed by name:  'ns/name' => array( 'label' => ..., 'description' => ... ),
 	 *                   or $defs['ns/name'] = array( 'label' => ..., 'description' => ... );
@@ -2516,7 +3066,7 @@ class Ability_Scanner {
 			return [];
 		}
 
-		$is_definition = static fn( $value ) => is_array( $value ) && array_key_exists( 'description', $value );
+		$is_definition = static fn( $value ) => is_array( $value ) && array_key_exists( 'label', $value ) && array_key_exists( 'description', $value );
 
 		$abilities = [];
 		foreach ( Tokenisation_Helpers::find_array_literals( $contents, $budget ) as $array ) {
@@ -2530,16 +3080,30 @@ class Ability_Scanner {
 			}
 		}
 
-		return array_values(
+		$abilities = array_values(
 			array_filter(
 				$abilities,
 				static fn( $ability ) => $ability && ! str_starts_with( $ability->name, 'core/' )
 			)
 		);
+		foreach ( $abilities as $ability ) {
+			foreach ( [ "'", '"' ] as $quote ) {
+				$at = strpos( $contents, $quote . $ability->name . $quote );
+				if ( false !== $at ) {
+					$ability->line = substr_count( $contents, "\n", 0, $at ) + 1;
+					break;
+				}
+			}
+		}
+		return $abilities;
 	}
 
 	/**
 	 * Build an ability record from a name and its args, as passed to wp_register_ability().
+	 *
+	 * The label, description and category are kept when they resolve to
+	 * strings, and are null otherwise. 'bundled', 'file' and 'line' are filled
+	 * in by the caller.
 	 *
 	 * @param mixed $name The ability name.
 	 * @param mixed $args The resolved args.
@@ -2554,6 +3118,10 @@ class Ability_Scanner {
 			'name'        => $name,
 			'label'       => is_string( $args['label'] ?? null ) ? $args['label'] : null,
 			'description' => is_string( $args['description'] ?? null ) ? $args['description'] : null,
+			'category'    => is_string( $args['category'] ?? null ) ? $args['category'] : null,
+			'bundled'     => false,
+			'file'        => null,
+			'line'        => null,
 		];
 	}
 
@@ -2561,19 +3129,21 @@ class Ability_Scanner {
 	 * Collapse abilities found in several places into one entry per name. The
 	 * first one found wins, with missing properties filled in from later ones.
 	 *
-	 * @param object[] $abilities Abilities found, in order.
+	 * @param object[] $abilities Abilities (or categories) found, in order.
+	 * @param string   $key       Optional. The property that identifies one. Default 'name'.
 	 * @return object[] Unique abilities, in the order first seen.
 	 */
-	public static function merge( array $abilities ): array {
+	public static function merge( array $abilities, string $key = 'name' ): array {
 		$merged = [];
 		foreach ( array_filter( $abilities ) as $ability ) {
-			if ( ! isset( $merged[ $ability->name ] ) ) {
-				$merged[ $ability->name ] = clone $ability;
+			$id = $ability->$key;
+			if ( ! isset( $merged[ $id ] ) ) {
+				$merged[ $id ] = clone $ability;
 				continue;
 			}
 			foreach ( get_object_vars( $ability ) as $prop => $value ) {
-				if ( null === ( $merged[ $ability->name ]->$prop ?? null ) ) {
-					$merged[ $ability->name ]->$prop = $value;
+				if ( null === ( $merged[ $id ]->$prop ?? null ) ) {
+					$merged[ $id ]->$prop = $value;
 				}
 			}
 		}

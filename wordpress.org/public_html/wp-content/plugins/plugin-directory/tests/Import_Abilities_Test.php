@@ -53,6 +53,16 @@ class Import_Abilities_Test extends TestCase {
 	}
 
 	/**
+	 * Abilities record the file and line they're registered at.
+	 */
+	public function test_source_is_recorded(): void {
+		$abilities = Import::find_abilities_in_directory( self::FIXTURES . '/basic-inline-args' );
+		$this->assertCount( 1, $abilities );
+		$this->assertSame( 'plugin.php', $abilities[0]->file );
+		$this->assertSame( 7, $abilities[0]->line );
+	}
+
+	/**
 	 * One case per scenario directory, named after the directory.
 	 */
 	public static function scenario_provider(): array {
@@ -77,6 +87,7 @@ class Import_Abilities_Test extends TestCase {
 				'name'        => $ability['name'] ?? null,
 				'label'       => $ability['label'] ?? null,
 				'description' => $ability['description'] ?? null,
+				'bundled'     => $ability['bundled'] ?? false,
 			),
 			$abilities
 		);

@@ -19,6 +19,12 @@ $block_variations = array(
 	'core/paragraph' => array( 'label' => 'Lead paragraph', 'description' => 'A larger intro paragraph.' ),
 );
 
+// Block patterns pair a title with a description: not ability definitions.
+$patterns = array(
+	'fp/hero'   => array( 'title' => 'Hero', 'description' => 'A large header.' ),
+	'fp/footer' => array( 'title' => 'Footer', 'description' => 'A site footer.' ),
+);
+
 // Label only: not enough to be an ability definition.
 $menu = array(
 	'fp/menu-item' => array( 'label' => 'Menu item' ),
