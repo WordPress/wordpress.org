@@ -441,125 +441,235 @@
 	 * UTILS
 	 */
 
-	projects._hasStorage = null;
+	const isValidTime = time => Number.isFinite( time ) && time > 0;
 
-	// Check if the browser supports localStorage.
-	projects.hasStorage = function() {
-		if ( null !== projects._hasStorage ) {
-			return projects._hasStorage;
-		}
+	// Check if the browser supports IndexedDB, Compression Streams, and has a valid cache timestamp.
+	projects.hasStorage = () => ! projects._storageDisabled
+		&& typeof indexedDB !== 'undefined'
+		&& typeof CompressionStream !== 'undefined'
+		&& typeof DecompressionStream !== 'undefined'
+		&& isValidTime( Number( projects.settings.lastUpdated ) );
 
-		var result = false;
-
+	projects.getProjects = async () => {
 		try {
-			window.localStorage.setItem( 'test', 'rosetta' );
-			result = window.localStorage.getItem( 'test' ) === 'rosetta';
-			window.localStorage.removeItem( 'test' );
-		} catch( e ) {}
+			return await projects.getLocalProjects();
+		} catch {
+			const remoteProjects = await projects.getRemoteProjects();
 
-		projects._hasStorage = result;
-
-		return projects._hasStorage;
-	};
-
-	projects.getProjects = function() {
-		return projects.getLocalProjects().then(
-			function( localProjects ) {
-				return localProjects;
-			},
-			function() {
-				return projects.getRemoteProjects().then( function( remoteProjects ) {
-					if ( projects.hasStorage() ) {
-						projects.storeLocalProjects( remoteProjects );
-					}
-
-					return remoteProjects;
-				} );
+			if ( projects.hasStorage() ) {
+				projects.storeLocalProjects( remoteProjects );
 			}
-		);
+
+			return remoteProjects;
+		}
 	};
 
 	projects.getRemoteProjects = function() {
 		return wp.ajax.post( 'rosetta-get-projects' );
 	};
 
-	projects.getLocalProjects = function() {
+	const DB_NAME = 'rosetta_cache';
+	const STORE_NAME = 'projects';
+	const DB_VERSION = 1;
+
+	const promisifyReq = ( req, tx = null ) => new Promise( ( resolve, reject ) => {
+		req.onsuccess = () => resolve( req.result );
+		req.onerror = () => reject( req.error );
+		if ( tx ) {
+			tx.onabort = () => reject( tx.error || new Error( 'Transaction aborted' ) );
+			tx.onerror = () => reject( tx.error || new Error( 'Transaction error' ) );
+		}
+	} );
+
+	/**
+	 * Opens IndexedDB with protection against schema conflicts, blocked upgrades,
+	 * and cross-tab lock deadlocks.
+	 *
+	 * @param {number} attempt - Current recovery attempt count.
+	 * @return {Promise<IDBDatabase>} Promise resolving to the open IDB database instance.
+	 */
+	function openProjectsDB( attempt = 1 ) {
+		return new Promise( ( resolve, reject ) => {
+			let settled = false;
+
+			// Fall back to remote data if IndexedDB stalls or deadlocks across tabs.
+			const timeoutId = setTimeout( () => {
+				if ( settled ) return;
+				settled = true;
+				projects._storageDisabled = true;
+				reject( new Error( 'IndexedDB open timed out' ) );
+			}, 2000 );
+
+			const request = indexedDB.open( DB_NAME, DB_VERSION );
+
+			request.onupgradeneeded = event => {
+				const db = event.target.result;
+
+				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
+					db.createObjectStore( STORE_NAME );
+				}
+			};
+
+			// Reject and bypass cache if another tab blocks database access or schema changes.
+			request.onblocked = () => {
+				if ( settled ) return;
+				settled = true;
+				clearTimeout( timeoutId );
+				projects._storageDisabled = true;
+				console.warn( 'IndexedDB upgrade blocked: Falling back to remote data.' );
+				reject( new Error( 'IndexedDB upgrade blocked by another tab' ) );
+			};
+
+			request.onsuccess = () => {
+				if ( settled ) {
+					// Close stale connection if opened after timeout/rejection.
+					request.result?.close();
+					return;
+				}
+				settled = true;
+				clearTimeout( timeoutId );
+
+				const db = request.result;
+
+				if ( ! db.objectStoreNames.contains( STORE_NAME ) ) {
+					db.close();
+					if ( attempt > 2 ) {
+						projects._storageDisabled = true;
+						reject( new Error( `Store ${ STORE_NAME } could not be created.` ) );
+						return;
+					}
+					recoverCorruptDB( attempt ).then( resolve ).catch( reject );
+					return;
+				}
+
+				// Yield connection when another tab initiates an upgrade.
+				db.onversionchange = () => db.close();
+
+				resolve( db );
+			};
+
+			request.onerror = () => {
+				if ( settled ) return;
+				settled = true;
+				clearTimeout( timeoutId );
+				projects._storageDisabled = true;
+				reject( request.error );
+			};
+		} );
+	}
+
+	/**
+	 * Fixes an inconsistent db state by completely deleting and rebuilding it.
+	 */
+	async function recoverCorruptDB( attempt ) {
+		await new Promise( ( resolve, reject ) => {
+			const timeoutId = setTimeout( () => reject( new Error( 'IDB delete timed out' ) ), 1500 );
+			const deleteReq = indexedDB.deleteDatabase( DB_NAME );
+			deleteReq.onsuccess = () => { clearTimeout( timeoutId ); resolve(); };
+			deleteReq.onerror = () => { clearTimeout( timeoutId ); reject( deleteReq.error ); };
+			deleteReq.onblocked = () => {
+				clearTimeout( timeoutId );
+				projects._storageDisabled = true;
+				reject( new Error( 'Database deletion blocked' ) );
+			};
+		} );
+
+		return openProjectsDB( attempt + 1 );
+	}
+
+	/**
+	 * Retrieves and decompresses cached project data from IndexedDB.
+	 *
+	 * @async
+	 * @throws {Error} Throws when storage is unavailable, timestamps are invalid/expired,
+	 *                 or data is corrupt, delegating fallback to projects.getRemoteProjects().
+	 * @return {Promise<ProjectData[]>} Parsed project data array.
+	 */
+	projects.getLocalProjects = async () => {
 		if ( ! projects.hasStorage() ) {
-			return Promise.reject();
+			throw new Error( 'No IndexedDB support' );
 		}
 
-		var lastUpdated = window.localStorage.getItem( 'projectsLastUpdated' );
-		if ( ! lastUpdated || 'undefined' === lastUpdated ) {
-			return Promise.reject();
-		}
+		const db = await openProjectsDB();
 
-		if ( lastUpdated < projects.settings.lastUpdated ) {
-			return Promise.reject();
-		}
+		try {
+			const tx = db.transaction( STORE_NAME, 'readonly' );
+			const store = tx.objectStore( STORE_NAME );
 
-		var json = window.localStorage.getItem( 'projects' );
-		if ( ! json ) {
-			return Promise.reject();
-		}
+			let timer;
+			const timeout = new Promise( ( _, reject ) => {
+				timer = setTimeout( () => {
+					try { tx.abort(); } catch {}
+					reject( new Error( 'IndexedDB transaction timed out' ) );
+				}, 500 );
+			} );
 
-		if ( '[' === json.substring( 0, 1 ) ) {
-			return Promise.resolve( JSON.parse( json ) );
-		}
+			const cached = await Promise.race( [
+				promisifyReq( store.get( 'payload' ), tx ),
+				timeout
+			] ).finally( () => clearTimeout( timer ) );
 
-		// decompress
-		return projects.decompress( json ).then( function( data ) {
-			return JSON.parse( data );
-		} );
+			if ( ! cached?.blob ) {
+				throw new Error( 'No cached data' );
+			}
+
+			// Check timestamp
+			const { timestamp, blob } = cached;
+			const cachedTime = Number( timestamp );
+			const serverTime = Number( projects.settings.lastUpdated );
+
+			if ( ! isValidTime( cachedTime ) || cachedTime < serverTime ) {
+				throw new Error( 'Cache expired' );
+			}
+
+			// decompress
+			const decompressedStream = blob.stream().pipeThrough( new DecompressionStream( 'gzip' ) );
+			const data = await new Response( decompressedStream ).json();
+
+			if ( ! Array.isArray( data ) ) {
+				throw new Error( 'Invalid cache payload: expected array' );
+			}
+
+			return data;
+		} finally {
+			db.close();
+		}
 	};
 
-	projects.storeLocalProjects = function( data ) {
-		window.localStorage.setItem( 'projectsLastUpdated', projects.settings.lastUpdated );
+	/**
+	 * Compresses and caches remote project data into IndexedDB as a binary gzip Blob.
+	 *
+	 * @async
+	 * @param {ProjectData[]} data - Array of project objects to serialize and cache.
+	 * @return {Promise<void>}
+	 */
+	projects.storeLocalProjects = async data => {
+		let db;
+		try {
+			const stream = new Blob( [ JSON.stringify( data ) ] )
+				.stream()
+				.pipeThrough( new CompressionStream( 'gzip' ) );
+			const blob = await new Response( stream ).blob();
 
-		projects.compress( JSON.stringify( data ) ).then( function( data ) {
-			window.localStorage.setItem( 'projects', data );
-		} ).catch( function() {
-			console.log( "Caching projects locally failed." );
-		} );
-	};
+			db = await openProjectsDB();
+			const tx = db.transaction( STORE_NAME, 'readwrite' );
+			const store = tx.objectStore( STORE_NAME );
 
-	projects.compress = async function( data ) {
-		if ( 'undefined' === typeof CompressionStream ) {
-			return Promise.reject();
+			store.put( {
+				timestamp: projects.settings.lastUpdated,
+				blob
+			}, 'payload' );
+
+			await new Promise( ( resolve, reject ) => {
+				tx.oncomplete = () => resolve();
+				tx.onerror = () => reject( tx.error );
+				tx.onabort = () => reject( tx.error );
+			} );
+		} catch ( error ) {
+			console.warn( 'Caching projects in IndexedDB failed.', error );
+		} finally {
+			db?.close();
 		}
-
-		var stream = new CompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter();
-
-		streamWriter.write(
-			new TextEncoder().encode( data )
-		);
-		streamWriter.close();
-
-		return new Response( stream.readable ).arrayBuffer().then( function( buffer ) {
-			// Base64 encode it, so it can be stored in localStorage
-			return btoa(
-				new Uint8Array( buffer )
-					.reduce( ( data, byte ) => data + String.fromCharCode( byte ), '' )
-			);
-		} );		
-	};
-
-	projects.decompress = async function( data ) {
-		if ( 'undefined' === typeof DecompressionStream ) {
-			return Promise.reject();
-		}
-
-		// Base64 decode
-		var buffer = Uint8Array.from( atob( data ), c => c.charCodeAt(0) ),
-			stream = new DecompressionStream( 'gzip' ),
-			streamWriter = stream.writable.getWriter();
-
-		streamWriter.write( buffer );
-		streamWriter.close();
-
-		return new Response( stream.readable ).arrayBuffer().then( function( arrayBuffer ) {
-			return new TextDecoder().decode( arrayBuffer );
-		} );
 	};
 
 	projects.initFrame = function( projectData ) {
