@@ -32,9 +32,11 @@
 	 * @return {number|string} Normalized ID.
 	 */
 	const normalizeId = id => {
-		if ( id == null || id === '' || typeof id === 'boolean' ) return '';
-		const num = Number( id );
-		return Number.isNaN( num ) ? String( id ) : num;
+		if ( id == null || typeof id === 'boolean' ) return '';
+		const trimmed = typeof id === 'string' ? id.trim() : id;
+		if ( trimmed === '' ) return '';
+		const num = Number( trimmed );
+		return Number.isNaN( num ) ? String( trimmed ) : num;
 	};
 
 	/**
