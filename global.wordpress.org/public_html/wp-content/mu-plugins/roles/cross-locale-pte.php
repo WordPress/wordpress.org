@@ -482,6 +482,7 @@ class Cross_Locale_PTE {
 		}
 
 		static $current_translation_by_user = array();
+
 		$cache_key = $user_id . '_' . $translation->translation_set_id . '_' . $translation->original_id;
 
 		if ( isset( $current_translation_by_user[ $cache_key ] ) ) {
