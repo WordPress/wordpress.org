@@ -965,13 +965,24 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			wp_send_json_error( array( 'message' => __( 'Invalid project selection.', 'rosetta' ) ), 400 );
 		}
 
-		$valid_projects = array_values( array_intersect( $project_ids, array_keys( $this->get_translate_projects() ) ) );
+		$manageable_projects        = array_keys( $this->get_translate_projects() );
+		$valid_projects             = array_values( array_intersect( $project_ids, $manageable_projects ) );
+		$current_projects           = array_map( 'absint', $this->get_users_projects( $user->ID ) );
+		$excluded_existing_projects = array_values( array_diff( $current_projects, $manageable_projects ) );
 
-		if ( empty( $valid_projects ) ) {
+		$unknown_projects = array_diff( $project_ids, $valid_projects, $excluded_existing_projects );
+		if ( ! empty( $unknown_projects ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid project selection.', 'rosetta' ) ), 400 );
+		}
+
+		if ( empty( $valid_projects ) && empty( $excluded_existing_projects ) ) {
 			wp_send_json_error( array( 'message' => __( 'No valid projects selected.', 'rosetta' ) ), 400 );
 		}
 
-		if ( ! $this->update_translation_editor( $user, $valid_projects ) ) {
+		$preserved_projects = array_values( array_intersect( $project_ids, $excluded_existing_projects ) );
+		$projects_to_save   = array_merge( $valid_projects, $preserved_projects );
+
+		if ( ! $this->update_translation_editor( $user, $projects_to_save ) ) {
 			wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
 		}
 
