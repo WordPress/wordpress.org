@@ -78,6 +78,9 @@ class Favorites {
 		add_action( 'template_redirect',                       [ __CLASS__, 'template_redirect' ] );
 		add_filter( 'document_title_parts',                    [ __CLASS__, 'filter_page_title' ] );
 
+		// Don't 404 for the favorites of a user who has not favorited any photos yet.
+		add_filter( 'pre_handle_404', [ __CLASS__, 'prevent_404_for_empty_favorites' ], 10, 2 );
+
 		// Add post listing column.
 		add_filter( "manage_{$post_type}_posts_columns",       [ __CLASS__, 'add_favorites_column' ] );
 		add_action( "manage_{$post_type}_posts_custom_column", [ __CLASS__, 'handle_photo_column_data' ], 10, 2 );
@@ -149,8 +152,8 @@ class Favorites {
 	 * Adds the rewrite rule for the 'favorites' URL endpoint.
 	 */
 	public static function add_rewrite_rule() {
-		add_rewrite_rule( '^' . self::PATH . '/([^/]*)/page/?([0-9]{1,})/?', 'index.php?' . self::QUERY_VAR_USER_FAVORITES . '=$matches[1]&paged=$matches[2]', 'top' );
-		add_rewrite_rule( '^' . self::PATH . '/([^/]*)/?', 'index.php?' . self::QUERY_VAR_USER_FAVORITES . '=$matches[1]', 'top' );
+		add_rewrite_rule( '^' . self::PATH . '/([^/]*)/page/?([0-9]{1,})/?$', 'index.php?' . self::QUERY_VAR_USER_FAVORITES . '=$matches[1]&paged=$matches[2]', 'top' );
+		add_rewrite_rule( '^' . self::PATH . '/([^/]*)/?$', 'index.php?' . self::QUERY_VAR_USER_FAVORITES . '=$matches[1]', 'top' );
 		add_rewrite_rule( '^' . self::PATH . '/page/?([0-9]{1,})/?$', 'index.php?' . self::QUERY_VAR_MY_FAVORITES . '=1&paged=$matches[1]', 'top' );
 		add_rewrite_rule( '^' . self::PATH . '/?$', 'index.php?' . self::QUERY_VAR_MY_FAVORITES . '=1', 'top' );
 	}
@@ -209,6 +212,9 @@ class Favorites {
 
 		$user = get_user_by( 'slug', $favorites_username );
 		if ( ! $user ) {
+			// Find nothing, so the request for an unknown user is a 404 instead of the front page.
+			$query->set( 'post__in', [ 0 ] );
+			$query->is_home = false;
 			return;
 		}
 		self::$favorites_user = $user;
@@ -227,6 +233,24 @@ class Favorites {
 	}
 
 	/**
+	 * Prevents a 404 for the favorites of a user who has not favorited any photos yet.
+	 *
+	 * Core only skips the 404 for empty archives it knows about, such as author
+	 * archives. Pages past the last one are still left to core.
+	 *
+	 * @param bool     $preempt Whether to short-circuit default header status handling. Default false.
+	 * @param WP_Query $query   WordPress Query object.
+	 * @return bool
+	 */
+	public static function prevent_404_for_empty_favorites( $preempt, $query ) {
+		if ( $query->is_main_query() && self::$favorites_user && ! $query->is_paged() ) {
+			return true;
+		}
+
+		return $preempt;
+	}
+
+	/**
 	 * Loads the user-favorites.php template when appropriate, if possible.
 	 *
 	 * @param string $template The path of the template to include.
@@ -236,7 +260,7 @@ class Favorites {
 		global $wp_query;
 
 		$favorites_user = get_query_var( self::QUERY_VAR_USER_FAVORITES );
-		if ( $favorites_user ) {
+		if ( $favorites_user && self::$favorites_user ) {
 			$new_template = locate_template( [ 'user-favorites.php' ] );
 			// Find a block template if there is one. Will fall back to the PHP template if none found.
 			$new_template = locate_block_template( $new_template, 'user-favorites', [ 'user-favorites.php' ] );

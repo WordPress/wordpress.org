@@ -4,13 +4,15 @@ namespace WordPressdotorg\GlotPress\TranslationSuggestions\Routes;
 
 use GP;
 use GP_Locales;
-use GP_Route;
 use WordPressdotorg\GlotPress\TranslationSuggestions\Translation_Memory_Client;
 use WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Client;
 use WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Messages;
 use const WordPressdotorg\GlotPress\TranslationSuggestions\PLUGIN_DIR;
 
-class Translation_Memory extends GP_Route {
+/**
+ * Serves Translation Memory, OpenAI, and DeepL suggestions for an original.
+ */
+class Translation_Memory extends Suggestions_Route {
 
 	/**
 	 * Get the suggestions from the translation memory and return a JSON template.
@@ -22,22 +24,9 @@ class Translation_Memory extends GP_Route {
 	 * @return void
 	 */
 	public function get_suggestions( $project_path, $locale_slug, $set_slug ) {
-		$type        = 'Translation';
-		$original_id = gp_get( 'original' );
-		$nonce       = gp_get( 'nonce' );
+		$type = 'Translation';
 
-		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
-			wp_send_json_error( 'invalid_nonce' );
-		}
-
-		if ( empty( $original_id ) ) {
-			wp_send_json_error( 'no_original' );
-		}
-
-		$original = GP::$original->get( $original_id );
-		if ( ! $original ) {
-			wp_send_json_error( 'invalid_original' );
-		}
+		list( $original ) = $this->authorize_original( 'translation-memory-suggestions-', $project_path, $locale_slug, $set_slug );
 
 		$locale = $locale_slug;
 		if ( 'default' !== $set_slug ) {
@@ -70,26 +59,13 @@ class Translation_Memory extends GP_Route {
 	 */
 	public function get_openai_suggestions( $project_path, $locale_slug, $set_slug ) {
 		$type                                  = 'OpenAI';
-		$original_id                           = gp_get( 'original' );
 		$translation_id                        = gp_get( 'translation', 0 );
-		$nonce                                 = gp_get( 'nonce' );
 		$gp_default_sort                       = get_user_option( 'gp_default_sort' );
 		$external_services_exclude_some_status = gp_array_get( $gp_default_sort, 'external_services_exclude_some_status', 0 );
 		$translation                           = null;
 		$suggestions                           = array();
 
-		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
-			wp_send_json_error( 'invalid_nonce' );
-		}
-
-		if ( empty( $original_id ) ) {
-			wp_send_json_error( 'no_original' );
-		}
-
-		$original = GP::$original->get( $original_id );
-		if ( ! $original ) {
-			wp_send_json_error( 'invalid_original' );
-		}
+		list( $original ) = $this->authorize_original( 'translation-memory-suggestions-', $project_path, $locale_slug, $set_slug );
 
 		$current_set_slug                = 'default';
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $current_set_slug, $locale_slug );
@@ -126,26 +102,13 @@ class Translation_Memory extends GP_Route {
 	 */
 	public function get_deepl_suggestions( $project_path, $locale_slug, $set_slug ) {
 		$type                                  = 'DeepL';
-		$original_id                           = gp_get( 'original' );
 		$translation_id                        = gp_get( 'translation', 0 );
-		$nonce                                 = gp_get( 'nonce' );
 		$gp_default_sort                       = get_user_option( 'gp_default_sort' );
 		$external_services_exclude_some_status = gp_array_get( $gp_default_sort, 'external_services_exclude_some_status', 0 );
 		$translation                           = null;
 		$suggestions                           = array();
 
-		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
-			wp_send_json_error( 'invalid_nonce' );
-		}
-
-		if ( empty( $original_id ) ) {
-			wp_send_json_error( 'no_original' );
-		}
-
-		$original = GP::$original->get( $original_id );
-		if ( ! $original ) {
-			wp_send_json_error( 'invalid_original' );
-		}
+		list( $original ) = $this->authorize_original( 'translation-memory-suggestions-', $project_path, $locale_slug, $set_slug );
 
 		$locale = $locale_slug;
 		if ( 'default' !== $set_slug ) {

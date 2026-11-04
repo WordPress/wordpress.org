@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * The Google Cloud Storage location where the input will be read from.
@@ -21,7 +21,7 @@ class GcsSource extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string uri = 1;</code>
      */
-    private $uri = '';
+    protected $uri = '';
 
     /**
      * Constructor.

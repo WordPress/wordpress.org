@@ -35,7 +35,7 @@ abstract class Directory_Compat {
 
 	public function init() {
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
-			// Intercept feed requests prior to bbp_request_feed_trap at 10, before Performance::bbp_request_disable_missing_view_feeds at 9
+			// Intercept feed requests before bbp_request_feed_trap() at priority 10.
 			add_filter( 'bbp_request', array( $this, 'request' ), 5 );
 
 			// Add feed links to head.

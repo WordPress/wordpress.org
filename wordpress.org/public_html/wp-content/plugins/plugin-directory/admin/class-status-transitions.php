@@ -18,6 +18,14 @@ use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
  */
 class Status_Transitions {
 	/**
+	 * The namespace a rejected plugin's slug is wrapped in.
+	 *
+	 * The trailing digits are the suffix `wp_update_post()` adds when the wrapped slug
+	 * is itself taken.
+	 */
+	const REJECTED_SLUG_REGEX = '/^rejected-(.+)-rejected(-\d+)?$/i';
+
+	/**
 	 * Fetch the instance of the Status_Transitions class.
 	 */
 	public static function instance() {
@@ -364,7 +372,7 @@ class Status_Transitions {
 	 */
 	public function restore_rejected_plugin( $post ) {
 		$slug = $post->post_name;
-		$slug = preg_replace( '!^rejected-(.+)-rejected$!i', '$1', $slug );
+		$slug = preg_replace( self::REJECTED_SLUG_REGEX, '$1', $slug );
 
 		// Change slug back to 'plugin-name'.
 		wp_update_post( array(

@@ -498,6 +498,38 @@ If you've gotten all the way down here and still think we should be hosting your
 		);
 	}
 
+	/**
+	 * Returns the rejection email content for remote administration.
+	 *
+	 * @return string
+	 */
+	public function reason_remote_admin() {
+		return __(
+			'Your plugin has been rejected because it lets an external service perform administrative actions on the sites it’s installed on, such as granting administrator access for support. Even when that access expires, this is a serious security risk.
+
+<strong>What to do next</strong>
+
+We know it’s hard to hear that we won’t host your code, so please read this email carefully.
+
+You’re welcome to submit a different plugin, but we don’t think this one is a good fit for the directory.
+
+If you have any questions, reply to this email. Otherwise, it’s okay to move on to something else.
+
+If you think we’ve made this decision in error, reply with a copy of your code attached and explain why.
+
+<strong>Why these kinds of plugins are not accepted</strong>
+
+Plugins that create users, connect to external services, or let other platforms administer a site are powerful, and incredibly dangerous. Building them safely takes a deep understanding of sanitization, security, and how they’ll be used, which takes years to master.
+
+A plugin that lets an outside service act as an administrator makes that service a single point of failure: if the service, or the credentials it holds, is ever compromised, so is every site that uses the plugin.
+
+To protect the WordPress ecosystem, we stop attack vectors like this before they reach users. Unless a submission shows a solid understanding of these security issues from the start, we don’t accept it.
+
+If you’ve read this far and still think we should host your code, please don’t resubmit the plugin. Reply to this email instead.',
+			'wporg-plugins'
+		);
+	}
+
 	public function reason_other() {
 		return __(
 			"Plugins are rejected after three months (90 days) when there has not been significant progress made on the review. If this is not the case for your plugin, you will receive a followup email explaining the reason for this decision within the next 24 hours. Please wait for that email before requesting further details.

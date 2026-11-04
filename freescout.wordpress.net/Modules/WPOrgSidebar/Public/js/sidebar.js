@@ -22,11 +22,18 @@
 	const TONES = [ 'success', 'warning', 'error', 'neutral' ];
 
 	/**
-	 * Glyphicons an item's links may use.
+	 * Item tones the stylesheet colors titles and status lines in.
 	 *
 	 * @type {string[]}
 	 */
-	const ICONS = [ 'link', 'download-alt' ];
+	const ITEM_TONES = [ 'warning', 'error', 'muted' ];
+
+	/**
+	 * Icons an item's links may use: glyphicons, and a shield the stylesheet draws, as there's no glyphicon for one.
+	 *
+	 * @type {string[]}
+	 */
+	const ICONS = [ 'link', 'download-alt', 'shield' ];
 
 	/**
 	 * Profile panel actions, by the class of the link that does them.
@@ -39,14 +46,38 @@
 	};
 
 	/**
-	 * Parses a URL, if it's an absolute web address.
+	 * How long to wait before asking again whether the queue has saved the sender's photo, in milliseconds.
 	 *
-	 * @param {string} url URL.
+	 * Doubles after each check, up to PHOTO_MAX_INTERVAL.
+	 *
+	 * @type {number}
+	 */
+	const PHOTO_INTERVAL = 3000;
+
+	/**
+	 * Longest wait between checks, in milliseconds.
+	 *
+	 * @type {number}
+	 */
+	const PHOTO_MAX_INTERVAL = 30000;
+
+	/**
+	 * How many times to ask: over three minutes, since outgoing email goes ahead of the job in the queue.
+	 *
+	 * @type {number}
+	 */
+	const PHOTO_CHECKS = 10;
+
+	/**
+	 * Parses a URL, if it's a web address.
+	 *
+	 * @param {string} url  URL.
+	 * @param {string} base URL a relative one is relative to; none if it must be absolute.
 	 * @return {string} The URL, or an empty string.
 	 */
-	function webUrl( url ) {
+	function webUrl( url, base ) {
 		try {
-			const parsed = new URL( String( url ) );
+			const parsed = new URL( String( url ), base );
 
 			return [ 'http:', 'https:' ].includes( parsed.protocol )
 				? parsed.href
@@ -95,9 +126,120 @@
 	}
 
 	/**
+	 * Builds a link's icon.
+	 *
+	 * @param {string} icon One of ICONS.
+	 * @return {jQuery} Element.
+	 */
+	function renderIcon( icon ) {
+		return 'shield' === icon
+			? $( '<i class="wporg-sidebar-icon-shield">' )
+			: $( '<i class="glyphicon">' ).addClass( 'glyphicon-' + icon );
+	}
+
+	/**
+	 * Builds an item's status line: an icon, and the status in words.
+	 *
+	 * @param {Object} status Status: icon, text, and tooltip; text required.
+	 * @return {jQuery|null} Element, or null without text.
+	 */
+	function renderStatus( status ) {
+		if ( ! status || ! status.text ) {
+			return null;
+		}
+
+		const $status = $( '<div class="wporg-sidebar-item-status">' );
+
+		if ( status.icon ) {
+			$status.append(
+				$(
+					'<span class="wporg-sidebar-item-status-icon" aria-hidden="true">'
+				).text( String( status.icon ) )
+			);
+		}
+
+		if ( status.tooltip ) {
+			$status.attr( 'title', String( status.tooltip ) );
+		}
+
+		return $status.append(
+			document.createTextNode( String( status.text ) )
+		);
+	}
+
+	/**
+	 * Builds an item's meta line, its parts separated by dots.
+	 *
+	 * @param {Array} meta Parts: text, url, and tooltip.
+	 * @return {jQuery|null} Element, or null without parts.
+	 */
+	function renderMeta( meta ) {
+		if ( ! meta || ! meta.length ) {
+			return null;
+		}
+
+		const $meta = $( '<div class="wporg-sidebar-item-meta">' );
+
+		meta.forEach( function ( part, index ) {
+			const $part = textLink( part.text, part.url );
+
+			if ( part.tooltip ) {
+				$part.attr( 'title', String( part.tooltip ) );
+			}
+			$meta.append( index ? ' · ' : '', $part );
+		} );
+
+		return $meta;
+	}
+
+	/**
+	 * Builds the age and links that end an item's meta line.
+	 *
+	 * @param {Object} item Item: age, and links; both optional.
+	 * @return {jQuery|null} Element, or null with neither.
+	 */
+	function renderActions( item ) {
+		const $actions = $( '<span class="wporg-sidebar-item-actions">' );
+
+		if ( item.age && item.age.text ) {
+			const $age = $( '<span class="wporg-sidebar-item-age">' ).text(
+				String( item.age.text )
+			);
+
+			if ( item.age.tooltip ) {
+				$age.attr( 'title', String( item.age.tooltip ) );
+			}
+			$actions.append( $age );
+		}
+
+		( item.links || [] ).forEach( function ( link ) {
+			const href = webUrl( link.url );
+			const icon = ICONS.includes( link.icon ) ? link.icon : 'link';
+
+			if ( ! href ) {
+				return;
+			}
+
+			$actions.append(
+				$( '<a>' )
+					.attr( {
+						href,
+						title: String( link.text ),
+						'aria-label': String( link.text ),
+					} )
+					.append( renderIcon( icon ) )
+			);
+		} );
+
+		return $actions.children().length ? $actions : null;
+	}
+
+	/**
 	 * Builds a list item: a plugin, a signup, a note, and the like.
 	 *
-	 * @param {Object} item Item: title, url, tooltip, badges, note, meta, and links; all optional.
+	 * The title takes the full width; the age and links end the meta line, so they line up down the list.
+	 *
+	 * @param {Object} item Item: title, url, tooltip, tone, badges, status, note, meta, age, and links; all optional.
 	 * @return {jQuery} Element.
 	 */
 	function renderItem( item ) {
@@ -107,33 +249,8 @@
 			$item.attr( 'title', String( item.tooltip ) );
 		}
 
-		if ( item.links && item.links.length ) {
-			const $links = $( '<span class="wporg-sidebar-item-links">' );
-
-			item.links.forEach( function ( link, index ) {
-				const href = webUrl( link.url );
-				const icon = ICONS.includes( link.icon ) ? link.icon : 'link';
-
-				if ( ! href ) {
-					return;
-				}
-
-				$links.append(
-					index ? ' ' : '',
-					$( '<a>' )
-						.attr( {
-							href,
-							title: String( link.text ),
-							'aria-label': String( link.text ),
-						} )
-						.append(
-							$( '<i class="glyphicon">' ).addClass(
-								'glyphicon-' + icon
-							)
-						)
-				);
-			} );
-			$item.append( $links );
+		if ( ITEM_TONES.includes( item.tone ) ) {
+			$item.addClass( 'is-' + item.tone );
 		}
 
 		if ( item.title ) {
@@ -143,6 +260,8 @@
 			);
 		}
 
+		$item.append( renderStatus( item.status ) );
+
 		if ( item.note ) {
 			$item.append(
 				$( '<p class="wporg-sidebar-note">' ).text(
@@ -151,17 +270,17 @@
 			);
 		}
 
-		if ( item.meta && item.meta.length ) {
-			const $meta = $( '<div class="wporg-sidebar-item-meta">' );
+		const $meta = renderMeta( item.meta );
+		const $actions = renderActions( item );
 
-			item.meta.forEach( function ( part, index ) {
-				const $part = textLink( part.text, part.url );
-
-				if ( part.tooltip ) {
-					$part.attr( 'title', String( part.tooltip ) );
-				}
-				$meta.append( index ? ' · ' : '', $part );
-			} );
+		if ( $actions ) {
+			$item.append(
+				$( '<div class="wporg-sidebar-item-footer">' ).append(
+					$meta || $( '<div class="wporg-sidebar-item-meta">' ),
+					$actions
+				)
+			);
+		} else {
 			$item.append( $meta );
 		}
 
@@ -252,8 +371,74 @@
 		}
 	}
 
+	/**
+	 * Shows the sender's photo once the queue has saved their WordPress.org avatar, since the page was drawn without it.
+	 *
+	 * @param {string} url Address that answers with the photo, once there is one.
+	 */
+	function showSenderPhoto( url ) {
+		let checks = 0;
+		let interval = PHOTO_INTERVAL;
+
+		/**
+		 * Asks again later, unless that was the last time.
+		 */
+		function retry() {
+			if ( checks < PHOTO_CHECKS ) {
+				setTimeout( check, interval );
+				interval = Math.min( interval * 2, PHOTO_MAX_INTERVAL );
+			}
+		}
+
+		/**
+		 * Asks once; a request over the rate limit or that the server or network failed counts as a check.
+		 */
+		function check() {
+			checks++;
+			$.getJSON( url )
+				.fail( function ( xhr ) {
+					// Not a lost session or access, which asking again won't change.
+					if (
+						0 === xhr.status ||
+						429 === xhr.status ||
+						xhr.status >= 500
+					) {
+						retry();
+					}
+				} )
+				.done( function ( photo ) {
+					const src =
+						photo && photo.url
+							? webUrl( photo.url, window.location.href )
+							: '';
+
+					if ( ! src ) {
+						// Not once the job ran without saving one, like for an account without an avatar.
+						if ( photo && photo.pending ) {
+							retry();
+						}
+						return;
+					}
+
+					$( '.customer-photo' ).attr( 'src', src );
+
+					// The sender's messages, which link to their page; not those of others on the conversation.
+					$( '.thread-person a' )
+						.filter( function () {
+							return this.href === photo.sender;
+						} )
+						.closest( '.thread' )
+						.find( '.thread-photo .person-photo' )
+						.attr( 'src', src );
+				} );
+		}
+
+		check();
+	}
+
 	$( function () {
 		const strings = $( '.wporg-sidebar' ).data( 'strings' ) || {};
+		let watchingPhoto = false;
 
 		$( '.wporg-sidebar' ).on( 'shown.bs.collapse', fitLayout );
 
@@ -300,6 +485,15 @@
 
 			request
 				.done( function ( response ) {
+					if (
+						response &&
+						response.sender_photo &&
+						! watchingPhoto
+					) {
+						watchingPhoto = true;
+						showSenderPhoto( response.sender_photo );
+					}
+
 					const blocks =
 						response && Array.isArray( response.blocks )
 							? response.blocks
@@ -311,6 +505,9 @@
 						$panel.empty().append( blocks );
 						shortenLists( $panel );
 						$block.show();
+
+						// For other modules to add to, like WPOrgPluginReview's buttons for its download URLs.
+						$panel.trigger( 'wporgsidebar:panel' );
 					} else {
 						// Not removed: the other account may have something to show.
 						$block.hide();

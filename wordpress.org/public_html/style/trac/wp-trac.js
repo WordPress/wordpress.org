@@ -5,8 +5,7 @@ let wpTrac,
 	hideFromNewTickets,
 	reservedTerms,
 	coreFocusesList,
-	bugTrackerLocations,
-	$body;
+	bugTrackerLocations;
 
 ( function ( $ ) {
 	coreKeywordList = {
@@ -181,13 +180,19 @@ let wpTrac,
 	reservedTerms = [
 		'access',
 		'author',
+		'backupStaticAttributes',
 		'category',
 		'copyright',
 		'covers',
 		'coversNothing',
 		'deprecated',
+		'doesNotPerformAssertions',
 		'example',
 		'expectedDeprecated',
+		'expectedExceptionCode',
+		'expectedExceptionMessage',
+		'expectedExceptionMessageRegExp',
+		'expectedIncorrectUsage',
 		'final',
 		'filesource',
 		'global',
@@ -214,6 +219,7 @@ let wpTrac,
 		'requires',
 		'return',
 		'returns',
+		'runTestsInSeparateProcesses',
 		'see',
 		'since',
 		'static',
@@ -236,19 +242,37 @@ let wpTrac,
 		'wp',
 	];
 
-	$body = $( document.body );
+	/**
+	 * Combined regular expression for matching Gutenberg issue IDs and user mentions.
+	 *
+	 * The mention half is based on https://github.com/regexps/mentions-regex/blob/master/index.js#L21.
+	 * Yields capture groups:
+	 * 1: Prefix / leading character before mention
+	 * 2: Username
+	 * 3: Gutenberg issue number
+	 *
+	 * @type {RegExp}
+	 */
+	const combinedRegEx =
+		/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:@|＠)(?!\/)([a-zA-Z0-9_](?:[a-zA-Z0-9_\-.]{0,58}[a-zA-Z0-9_])?)(?:\b(?!@|＠)|$)|\bGB-?(\d+)\b/gi;
+
+	/**
+	 * Set of lowercased reserved terms that should not be converted to user mention links.
+	 *
+	 * @type {Set<string>}
+	 */
+	const reservedTermsSet = new Set( reservedTerms.map( ( term ) => term.toLowerCase() ) );
 
 	/**
 	 * Escapes a value for insertion into an HTML string.
 	 *
-	 * Safe for element content only: quotes are left alone, so attribute values
-	 * must be set through jQuery rather than built by concatenation.
-	 *
-	 * @param {string} value Value to escape.
+	 * @param {*} value Value to escape.
 	 * @return {string} The escaped value.
 	 */
 	function escapeHtml( value ) {
-		return $( '<span />' ).text( value ).html();
+		const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+		return String( value ?? '' ).replace( /[&<>"']/g, ( char ) => entities[ char ] );
 	}
 
 	/**
@@ -268,19 +292,27 @@ let wpTrac,
 	 *                            string, a DOM Node, or an array of either to insert as-is.
 	 */
 	function linkTextNodes( root, regex, replacer ) {
-		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_TEXT ),
-			textNodes = [];
+		const walker = document.createTreeWalker( root, window.NodeFilter.SHOW_TEXT, {
+			acceptNode( node ) {
+				if ( node.parentElement && node.parentElement.closest( 'a' ) ) {
+					return window.NodeFilter.FILTER_REJECT;
+				}
+				return node.nodeValue && node.nodeValue.trim()
+					? window.NodeFilter.FILTER_ACCEPT
+					: window.NodeFilter.FILTER_SKIP;
+			},
+		} );
+
+		const textNodes = [];
 		let node;
 
 		while ( ( node = walker.nextNode() ) ) {
-			if ( ! $( node.parentNode ).closest( 'a' ).length ) {
-				textNodes.push( node );
-			}
+			textNodes.push( node );
 		}
 
 		textNodes.forEach( function ( textNode ) {
-			const value = textNode.nodeValue,
-				matches = [ ...value.matchAll( regex ) ];
+			const value = textNode.nodeValue;
+			const matches = [ ...value.matchAll( regex ) ];
 
 			if ( ! matches.length ) {
 				return;
@@ -321,9 +353,12 @@ let wpTrac,
 		gardener: true === window.wpBugGardener,
 		currentUser: wpTracCurrentUser,
 
+		/**
+		 * Initializes Trac UI enhancements, event handlers, and feature modules.
+		 */
 		init() {
 			// Gardener status as a body class, for rules that cannot see the flag.
-			$body.toggleClass( 'wp-bug-gardener', wpTrac.gardener );
+			document.body.classList.toggle( 'wp-bug-gardener', wpTrac.gardener );
 
 			// Markup rewrites first, so everything below sees the rewritten DOM (e.g. data-nicename on gravatar links).
 			wpTrac.updateAuthLinks();
@@ -343,14 +378,13 @@ let wpTrac,
 			}
 
 			wpTrac.autocomplete.init();
-			wpTrac.linkMentions();
-			wpTrac.linkGutenbergIssues();
+			wpTrac.linkTicketText();
 			wpTrac.githubPRs.init();
 			wpTrac.suggestNotGeneral.init();
 
-			if ( ! $body.hasClass( 'plugins' ) ) {
+			if ( ! document.body.classList.contains( 'plugins' ) ) {
 				wpTrac.workflow.init();
-				if ( $body.hasClass( 'core' ) ) {
+				if ( document.body.classList.contains( 'core' ) ) {
 					wpTrac.reports();
 					wpTrac.focuses.init();
 				}
@@ -362,129 +396,156 @@ let wpTrac,
 		},
 
 		showContributorLabels( labels ) {
+			const normalizedLabels = Object.fromEntries(
+				Object.entries( labels ).map( ( [ username, label ] ) => [ username.toLowerCase(), label ] )
+			);
+
 			$( 'h3.change .username' ).each( function () {
 				let html;
 				const $el = $( this ),
-					username = $el.data( 'username' );
+					username = String( $el.data( 'username' ) ).toLowerCase();
 
-				if ( username in labels ) {
-					if ( typeof labels[ username ] === 'object' ) {
+				if ( Object.prototype.hasOwnProperty.call( normalizedLabels, username ) ) {
+					if ( typeof normalizedLabels[ username ] === 'object' ) {
 						html = $( '<span />', {
 							class: 'contributor-label',
-							title: labels[ username ].title,
-						} ).text( labels[ username ].text );
+							title: normalizedLabels[ username ].title,
+						} ).text( normalizedLabels[ username ].text );
 					} else {
 						html = $( '<span />', {
 							class: 'contributor-label',
-						} ).text( labels[ username ] );
+						} ).text( normalizedLabels[ username ] );
 					}
 					$el.closest( '.username-line' ).append( '&ensp;' + html.prop( 'outerHTML' ) );
 				}
 			} );
 		},
 
-		linkMentions( selector ) {
-			// See https://github.com/regexps/mentions-regex/blob/master/index.js#L21
-			const mentionsRegEx =
-				/(^|[^a-zA-Z0-9_＠!@#$%&*])(?:(?:@|＠)(?!\/))([a-zA-Z0-9_\-.]{1,20})(?:\b(?!@|＠)|$)/g;
-
+		/**
+		 * Replaces Gutenberg issue identifiers (e.g. GB1234, GB-1234) and user
+		 * mentions (e.g. @username) in text nodes with links.
+		 *
+		 * Walks text nodes in a single pass using combinedRegEx to avoid multiple
+		 * DOM traversals. Skips reserved phpDocumentor/Trac terms.
+		 *
+		 * @param {string} [selector] Optional CSS selector to target specific elements.
+		 *                            Defaults to 'div.change .comment, #ticket .description'.
+		 */
+		linkTicketText( selector ) {
 			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
-				linkTextNodes( this, mentionsRegEx, function ( match, pre, username ) {
-					if ( -1 !== $.inArray( username, reservedTerms ) ) {
+				linkTextNodes( this, combinedRegEx, function ( match, pre, username, gbNumber ) {
+					if ( gbNumber ) {
+						const link = document.createElement( 'a' );
+						link.className = 'gutenberg-issue github ext-link';
+						link.href = `https://github.com/WordPress/Gutenberg/issues/${ gbNumber }`;
+
+						const icon = document.createElement( 'span' );
+						icon.className = 'icon';
+						icon.textContent = '\u200B';
+
+						link.append( icon, document.createTextNode( match ) );
+						return link;
+					}
+
+					if ( reservedTermsSet.has( username.toLowerCase() ) ) {
 						return match;
 					}
 
 					const meClass = username === wpTrac.currentUser ? ' me' : '';
-					return [
-						pre,
-						$( '<a />', {
-							class: `mention${ meClass }`,
-							href: `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`,
-							text: `@${ username }`,
-						} )[ 0 ],
-					];
+					const link = document.createElement( 'a' );
+					link.className = `mention${ meClass }`;
+					link.href = `https://profiles.wordpress.org/${ encodeURIComponent( username ) }/`;
+					link.textContent = `@${ username }`;
+
+					return [ pre, link ];
 				} );
 			} );
 		},
 
-		linkGutenbergIssues( selector ) {
-			const gutenbergIssueRegEx = /\bGB[-]?(\d+)\b/gi;
-
-			$( selector || 'div.change .comment, #ticket .description' ).each( function () {
-				linkTextNodes( this, gutenbergIssueRegEx, function ( match, issueNumber ) {
-					return $( '<a />', {
-						class: 'gutenberg-issue github ext-link',
-						href: `https://github.com/WordPress/Gutenberg/issues/${ issueNumber }`,
-					} )
-						.append( $( '<span class="icon">&#8203;</span>' ) )
-						.append( document.createTextNode( match ) )[ 0 ];
-				} );
-			} );
-		},
-
-		// These ticket hacks need to be re-run after ticket previews.
+		/**
+		 * Re-applies ticket UI enhancements, linkers, and image/video previews after preview updates.
+		 */
 		postPreviewHacks() {
 			// Automatically preview images.
-			$( 'li.trac-field-attachment' ).each( function () {
-				const li = $( this );
-				if ( li.parent().parent().find( '.trac-image-preview' ).length ) {
+			document.querySelectorAll( 'li.trac-field-attachment' ).forEach( ( li ) => {
+				if ( li.classList.contains( 'trac-preview-processed' ) ) {
 					return;
 				}
-				const el = li.find( '.trac-rawlink' ),
-					href = el.attr( 'href' ),
-					appendTo = li.parent().parent(); // div.change
-				if ( href.match( /\.(jpg|jpeg|png|gif|svg|webp)$/i ) ) {
+
+				const rawLink = li.querySelector( '.trac-rawlink' );
+				const href = rawLink?.getAttribute( 'href' );
+				const changeBox = li.closest( 'div.change' );
+
+				if ( ! href || ! changeBox ) {
+					return;
+				}
+
+				li.classList.add( 'trac-preview-processed' );
+
+				const filename = rawLink.previousElementSibling?.textContent?.trim() || '';
+				const commentText = changeBox.querySelector( '.comment' )?.textContent?.trim() || '';
+				const altText = commentText || filename;
+
+				if ( /\.(jpg|jpeg|png|gif|svg|webp)$/i.test( href ) ) {
+					const link = document.createElement( 'a' );
+					link.href = href.replace( '/raw-attachment/', '/attachment/' );
+					changeBox.append( link );
+
 					const image = new window.Image();
-					image.src = href;
-					image.onload = function () {
-						$( '<img />' )
-							.attr( {
-								src: href,
-								width: image.width,
-								height: image.height,
-								class: 'trac-image-preview',
-							} )
-							.appendTo( appendTo )
-							.wrap( $( '<a />' ).attr( 'href', href.replace( '/raw-attachment/', '/attachment/' ) ) );
+
+					image.onload = () => {
+						const img = document.createElement( 'img' );
+						img.className = 'trac-image-preview';
+						img.src = href;
+						img.alt = altText;
+						if ( image.width && image.height ) {
+							img.width = image.width;
+							img.height = image.height;
+						}
+						link.append( img );
 					};
-				} else if ( href.match( /\.(mp4|mov|webm)$/i ) ) {
-					$( '<video />' )
-						.attr( {
-							src: href,
-							class: 'trac-image-preview',
-							controls: true,
-							preload: 'metadata',
-						} )
-						.appendTo( appendTo );
+
+					image.onerror = () => {
+						link.remove();
+					};
+
+					image.src = href;
+				} else if ( /\.(mp4|mov|webm)$/i.test( href ) ) {
+					const video = document.createElement( 'video' );
+					video.src = href;
+					video.className = 'trac-image-preview';
+					video.controls = true;
+					video.preload = 'metadata';
+
+					changeBox.append( video );
 				}
 			} );
 
-			wpTrac.linkGutenbergIssues( '.ticketdraft .comment' );
-			wpTrac.linkMentions( '.ticketdraft .comment' );
+			wpTrac.linkTicketText( '.ticketdraft .comment' );
 		},
 
 		hacks() {
-			const content = $( '#content' );
+			const content = document.getElementById( 'content' );
 
 			// Add deprecated notice for core's test repository.
-			if ( $body.hasClass( 'core' ) && content.hasClass( 'browser' ) ) {
-				$( '#repoindex tbody .odd .name a[href="/browser/tests"]' )
-					.parent()
-					.append(
-						'<p style="display:inline">Deprecated. <a href="/browser/trunk/tests">Please see default repository</a>.'
-					);
+			if ( document.body.classList.contains( 'core' ) && content?.classList.contains( 'browser' ) ) {
+				const testRepoLink = document
+					.getElementById( 'repoindex' )
+					?.querySelector( 'a[href="/browser/tests"]' );
+				testRepoLink?.parentElement?.insertAdjacentHTML(
+					'beforeend',
+					'<p style="display:inline">Deprecated. <a href="/browser/trunk/tests">Please see default repository</a>.</p>'
+				);
 
-				if ( window.location.pathname.substring( 0, 14 ) === '/browser/tests' ) {
-					content.before(
-						$( '<div />', {
-							class: 'system-message warning',
-							html: 'You are currently viewing the <strong>deprecated</strong> test repository. You may want to <a href="/browser/trunk/tests">view the tests in the default repository</a>.',
-						} )
+				if ( window.location.pathname.startsWith( '/browser/tests' ) ) {
+					content?.insertAdjacentHTML(
+						'beforebegin',
+						'<div class="system-message warning">You are currently viewing the <strong>deprecated</strong> test repository. You may want to <a href="/browser/trunk/tests">view the tests in the default repository</a>.</div>'
 					);
 				}
 			}
 
-			if ( $body.hasClass( 'themes' ) ) {
+			if ( document.body.classList.contains( 'themes' ) ) {
 				$( '#h_reporter' ).text( 'Developer:' );
 				$( '#h_owner' ).text( 'Reviewer:' );
 
@@ -513,54 +574,61 @@ let wpTrac,
 			wpTrac.linkHeaderUsername();
 
 			// Ticket-only tweaks.
-			if ( content.hasClass( 'ticket' ) ) {
+			if ( content?.classList.contains( 'ticket' ) ) {
 				wpTrac.redirectTicketsToProperTracker.init();
 
 				// A collection of ticket hacks that must be run again after previews.
 				wpTrac.postPreviewHacks();
-				content.on( 'wpTracPostPreview', wpTrac.postPreviewHacks );
+				$( content ).on( 'wpTracPostPreview', wpTrac.postPreviewHacks );
 
 				// Allow 'Modify Ticket' to be shown even after a Trac preview tries to close it,
 				// but only if it was already open.
 				wpTrac.keepModifyTicketOpen();
 
 				// Open WikiFormatting links in a new window.
-				$( '#content.ticket' ).on( 'click', 'a[href$="wiki/WikiFormatting"]', function () {
-					window.open( $( this ).attr( 'href' ) );
-					return false;
+				content.addEventListener( 'click', ( event ) => {
+					const link = event.target.closest( 'a[href$="wiki/WikiFormatting"]' );
+					if ( link ) {
+						event.preventDefault();
+						window.open( link.getAttribute( 'href' ) );
+					}
 				} );
 
 				// Submit comment form on Cmd/Ctrl + Enter.
-				$( '#comment' ).on( 'keydown', function ( event ) {
+				document.getElementById( 'comment' )?.addEventListener( 'keydown', ( event ) => {
 					if ( ( event.ctrlKey || event.metaKey ) && event.key === 'Enter' ) {
-						$( 'input[name="submit"]' ).trigger( 'click' );
+						document.querySelector( 'input[name="submit"]' )?.click();
 					}
 				} );
 
 				// Move all of the ticket actions text into the label.
 				// Trac markup is like this: `<label>close</label> as fixed`
-				window.jQuery( '#action div label' ).each( function () {
-					if ( this.nextSibling && window.Node.TEXT_NODE === this.nextSibling.nodeType ) {
-						this.textContent += this.nextSibling.nodeValue;
-						this.nextSibling.nodeValue = '';
+				document.querySelectorAll( '#action div label' ).forEach( ( label ) => {
+					const next = label.nextSibling;
+					if ( next && 3 === next.nodeType ) {
+						label.textContent += next.nodeValue;
+						next.remove();
 					}
 				} );
 
 				// Point users to open new tickets when they comment on old tickets.
-				if ( $( '#ticket' ).find( '.milestone' ).hasClass( 'closed' ) ) {
-					const component = $( '#field-component' ).val(),
-						ticketId = $( '.trac-id' ).text(),
+				if ( document.querySelector( '#ticket .milestone.closed' ) ) {
+					const component = document.getElementById( 'field-component' )?.value || '',
+						ticketId = document.querySelector( '.trac-id' )?.textContent?.trim() || '',
 						newticket = `/newticket?component=${ encodeURIComponent(
 							component
 						) }&description=${ encodeURIComponent( `This is a follow-up to ${ ticketId }.` ) }`;
-					$( '#trac-add-comment fieldset' ).prepend(
+
+					document.querySelector( '#trac-add-comment fieldset' )?.insertAdjacentHTML(
+						'afterbegin',
 						`<p class="ticket-reopen-notice"><span class="dashicons dashicons-info"></span>
 						<strong>This ticket was closed on a completed milestone.</strong><br />
 						If you have a bug or enhancement to report, please <a href="${ newticket }">open a new ticket</a>.
 						Be sure to mention this ticket, ${ escapeHtml( ticketId ) }.</p>`
 					);
+
 					if ( ! wpTrac.gardener ) {
-						$( '#action_reopen' ).parent().remove();
+						document.getElementById( 'action_reopen' )?.parentElement?.remove();
 					}
 				}
 
@@ -583,15 +651,25 @@ let wpTrac,
 			// Add custom buttons to the formatting toolbar.
 			wpTrac.wikiToolbar();
 
+			wpTrac.linkPastedUrls();
+
 			// Force 'Attachments' and 'Modify Ticket' to be shown.
-			$( '#attachments' ).removeClass( 'collapsed' );
-			$( '#modify' ).parent().removeClass( 'collapsed' );
+			document.querySelector( '#attachments' )?.classList.remove( 'collapsed' );
+
+			const modifyParent = document.getElementById( 'modify' )?.parentElement;
+			modifyParent?.classList.remove( 'collapsed' );
 
 			// Move the Add-Comment before Ticket Modify dialogue.
-			$( '#trac-add-comment' ).insertBefore( $( '#modify' ).parent() );
+			const addComment = document.getElementById( 'trac-add-comment' );
+			if ( addComment && modifyParent ) {
+				modifyParent.before( addComment );
+			}
 
 			// Push live comment previews above 'Modify Ticket'.
-			$( '#ticketchange' ).insertAfter( '#trac-add-comment' );
+			const ticketChange = document.getElementById( 'ticketchange' );
+			if ( ticketChange && addComment ) {
+				addComment.after( ticketChange );
+			}
 
 			// Toggle the security notice on component change, if rendered.
 			if ( $( '#wp-security-notice' ).length ) {
@@ -609,7 +687,7 @@ let wpTrac,
 			// Allow action text inputs and select fields to be clicked directly.
 			$( '#action' )
 				.find( 'input[type=text], select' )
-				.enable()
+				.prop( 'disabled', false )
 				.on( 'focus', function () {
 					$( this ).siblings( 'input[type=radio]' ).trigger( 'click' );
 				} )
@@ -621,7 +699,7 @@ let wpTrac,
 				.has( 'select' )
 				.find( 'input[type=radio]' )
 				.on( 'change', function () {
-					$( this ).siblings( 'select' ).enable();
+					$( this ).siblings( 'select' ).prop( 'disabled', false );
 				} );
 
 			// Hide action text inputs and select fields from keyboard, unless the corresponding action is focused.
@@ -790,15 +868,16 @@ let wpTrac,
 				}
 			}
 
-			if ( content.hasClass( 'search' ) ) {
+			if ( content?.classList.contains( 'search' ) ) {
 				// Remove 'Wiki' and 'Milestone' from search.
 				$( '#fullsearch #milestone' ).next().remove().end().remove();
 				$( '#fullsearch #wiki' ).next().remove().end().remove();
 
 				// Offer to create a new ticket.
 				content
-					.find( 'h1' )
-					.append(
+					.querySelector( 'h1' )
+					?.insertAdjacentHTML(
+						'beforeend',
 						`<span class="create-new-ticket button button-large button-primary"><a href="https://login.wordpress.org/?redirect_to=https://${ window.location.host }/newticket" rel="nofollow">Create a new ticket</a></span>`
 					);
 			}
@@ -807,26 +886,30 @@ let wpTrac,
 			$( '#batchmod_value_comment' ).prop( 'required', true );
 
 			// Show the number of query results even on a single page; Trac only renders a heading when they paginate.
-			if ( content.hasClass( 'query' ) && ! content.find( 'h2.report-result' ).length ) {
-				const numResults = content.find( 'table.listing tbody tr' ).length;
+			if ( content?.classList.contains( 'query' ) && ! content.querySelector( 'h2.report-result' ) ) {
+				const numResults = content.querySelectorAll( 'table.listing tbody tr' ).length;
 				if ( numResults ) {
-					$( 'form#query' ).after(
-						'<h2 class="report-result">Results <span class="numresults">(' + numResults + ')</span></h2>'
-					);
+					document
+						.querySelector( 'form#query' )
+						?.insertAdjacentHTML(
+							'afterend',
+							'<h2 class="report-result">Results <span class="numresults">(' +
+								numResults +
+								')</span></h2>'
+						);
 				}
 			}
 
 			// Hide the "arguments are missing" warning on report views for users who cannot edit the report to fix it.
 			if (
 				/^\/report\/\d/.test( window.location.pathname ) &&
-				! content.find( '.buttons input[value="Edit report"]' ).length
+				! content?.querySelector( '.buttons input[value="Edit report"]' )
 			) {
-				content
-					.find( '#warning.system-message' )
-					.filter( function () {
-						return /arguments are missing/i.test( $( this ).text() );
-					} )
-					.hide();
+				content?.querySelectorAll( '#warning.system-message' ).forEach( ( warning ) => {
+					if ( /arguments are missing/i.test( warning.textContent ) ) {
+						warning.style.display = 'none';
+					}
+				} );
 			}
 
 			// Demote the nav "Preferences" link to the footer.
@@ -1117,42 +1200,37 @@ let wpTrac,
 				$wikitoolbar.find( after ).after( $button );
 			}
 
+			/**
+			 * Encloses the selected text in a textarea with the given prefix and suffix.
+			 *
+			 * @param {HTMLTextAreaElement} textarea DOM textarea element.
+			 * @param {string}              prefix   Text to prepend to selection.
+			 * @param {string}              suffix   Text to append to selection.
+			 */
 			function encloseSelection( textarea, prefix, suffix ) {
-				let start, end, sel, scrollPos;
-				// A DOM element, not a jQuery object: see the caller.
 				textarea.focus();
-				if ( 'undefined' !== typeof document.selection ) {
-					sel = document.selection.createRange().text;
-				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-					start = textarea.selectionStart;
-					end = textarea.selectionEnd;
-					scrollPos = textarea.scrollTop;
-					sel = textarea.value.substring( start, end );
+
+				const start = textarea.selectionStart;
+				const end = textarea.selectionEnd;
+				let selectedText = textarea.value.substring( start, end );
+
+				if ( selectedText.endsWith( ' ' ) ) {
+					selectedText = selectedText.slice( 0, -1 );
+					suffix += ' ';
 				}
-				if ( sel.match( / $/ ) ) {
-					// exclude ending space char, if any
-					sel = sel.substring( 0, sel.length - 1 );
-					suffix = suffix + ' ';
-				}
-				const subst = prefix + sel + suffix;
-				if ( 'undefined' !== typeof document.selection ) {
-					document.selection.createRange().text = subst;
-					textarea.caretPos -= suffix.length;
-				} else if ( 'undefined' !== typeof textarea.setSelectionRange ) {
-					textarea.value = textarea.value.substring( 0, start ) + subst + textarea.value.substring( end );
-					if ( sel ) {
-						textarea.setSelectionRange( start + subst.length, start + subst.length );
-					} else {
-						textarea.setSelectionRange( start + prefix.length, start + prefix.length );
-					}
-					textarea.scrollTop = scrollPos;
-				}
+
+				const replacement = prefix + selectedText + suffix;
+				const caret = selectedText ? start + replacement.length : start + prefix.length;
+
+				textarea.setRangeText( replacement, start, end, 'preserve' );
+				textarea.setSelectionRange( caret, caret );
 			}
 
 			$( 'textarea.wikitext' ).each( function () {
-				const $textarea = $( this ),
-					textarea = $textarea[ 0 ];
-				if ( 'undefined' === typeof document.selection && 'undefined' === typeof textarea.setSelectionRange ) {
+				const $textarea = $( this );
+				const textarea = $textarea[ 0 ];
+
+				if ( ! textarea || 'function' !== typeof textarea.setRangeText ) {
 					return;
 				}
 
@@ -1172,12 +1250,60 @@ let wpTrac,
 			} );
 		},
 
+		/**
+		 * Turns a URL pasted over selected text into a wiki link, like Gutenberg, TinyMCE, and GitHub do.
+		 *
+		 * Pasting with Cmd/Ctrl+Shift+V skips the link and pastes the URL as-is.
+		 */
+		linkPastedUrls() {
+			const isUrl = ( text ) => /^https?:\/\/[^\s\]]+$/.test( text );
+			let plainPaste = false;
+
+			// Paste events don't carry modifier keys, so the last keydown decides.
+			document.addEventListener( 'keydown', ( event ) => {
+				plainPaste = 'KeyV' === event.code && event.shiftKey && ( event.metaKey || event.ctrlKey );
+			} );
+
+			document.addEventListener( 'paste', ( event ) => {
+				const textarea = event.target;
+				const skip = plainPaste;
+				plainPaste = false;
+
+				if ( skip || ! textarea.matches?.( 'textarea.wikitext' ) || textarea.readOnly || textarea.disabled ) {
+					return;
+				}
+
+				const url = event.clipboardData?.getData( 'text/plain' ).trim() ?? '';
+				const selection = textarea.value.substring( textarea.selectionStart, textarea.selectionEnd );
+				const label = selection.trim();
+
+				// Link labels can't span lines or contain `]`; a selected URL is being replaced, not labeled.
+				if ( ! isUrl( url ) || ! label || /[\]\n]/.test( label ) || isUrl( label ) ) {
+					return;
+				}
+
+				event.preventDefault();
+
+				// Trac strips one pair of enclosing quotes from a label, so add a pair to keep them.
+				const text = /^(["']).+\1$/.test( label ) ? `"${ label }"` : label;
+
+				// Whitespace around the selection stays outside the link.
+				const link = selection.replace( label, () => `[${ url } ${ text }]` );
+
+				// execCommand keeps the native undo stack intact; setRangeText doesn't.
+				if ( ! document.execCommand( 'insertText', false, link ) ) {
+					textarea.setRangeText( link, textarea.selectionStart, textarea.selectionEnd, 'end' );
+					textarea.dispatchEvent( new Event( 'input', { bubbles: true } ) );
+				}
+			} );
+		},
+
 		// If we're not dealing with a trusted bug gardener:
 		nonGardeners() {
 			const elements = {};
 
-			// Hide disabled fields (new ticket & ticket modify)
-			$( '.trac-properties select[disabled]' ).parents( 'td' ).hide().prev().hide();
+			// Hide disabled fields and the milestone (new ticket & ticket modify)
+			$( '.trac-properties select[disabled], #field-milestone' ).parents( 'td' ).hide().prev().hide();
 
 			elements.type = $( '#field-type' );
 			elements.version = $( '#field-version' );
@@ -1259,13 +1385,13 @@ let wpTrac,
 					} )
 						.done( function ( data ) {
 							$( data ).find( '.ticket-reports' ).appendTo( popup );
-							$body.addClass( 'ticket-reports-open' );
+							document.body.classList.add( 'ticket-reports-open' );
 						} )
 						.fail( function () {
 							failed = true;
 						} );
 				} else {
-					$body.toggleClass( 'ticket-reports-open' );
+					document.body.classList.toggle( 'ticket-reports-open' );
 					event.preventDefault();
 				}
 				if ( ! failed ) {
@@ -1273,7 +1399,7 @@ let wpTrac,
 				}
 			} );
 			popup.on( 'click', '.close', function () {
-				$body.removeClass( 'ticket-reports-open' );
+				document.body.classList.remove( 'ticket-reports-open' );
 				return false;
 			} );
 		},
@@ -1470,13 +1596,12 @@ let wpTrac,
 					return results;
 				},
 
+				/**
+				 * Collects usernames and nicenames of participants from the ticket change history.
+				 */
 				initTicketParticipants() {
-					let users = [],
-						exclude = [];
-
-					if ( 'undefined' !== typeof settings.exclude ) {
-						exclude = settings.exclude;
-					}
+					const users = new Set();
+					const excludeSet = new Set( Array.isArray( settings.exclude ) ? settings.exclude : [] );
 
 					// Most recent should show up first.
 					$( $( '.change .username' ).get().reverse() ).each( function () {
@@ -1491,12 +1616,8 @@ let wpTrac,
 							username = $( this ).data( 'nicename' );
 						}
 
-						if (
-							typeof username !== 'undefined' &&
-							-1 === $.inArray( username, users ) &&
-							-1 === $.inArray( username, exclude )
-						) {
-							users.push( username );
+						if ( typeof username !== 'undefined' && ! excludeSet.has( username ) ) {
+							users.add( username );
 						}
 					} );
 
@@ -1513,18 +1634,16 @@ let wpTrac,
 						ticketReporter = ticketReporterNicename;
 					}
 
-					if ( ticketReporter && -1 === $.inArray( ticketReporter, users ) ) {
-						users.push( ticketReporter );
+					if ( ticketReporter && ! excludeSet.has( ticketReporter ) ) {
+						users.add( ticketReporter );
 					}
 
 					// Exclude current user.
 					if ( wpTrac.currentUser ) {
-						users = $.grep( users, function ( user ) {
-							return user !== wpTrac.currentUser;
-						} );
+						users.delete( wpTrac.currentUser );
 					}
 
-					ticketParticipants = users;
+					ticketParticipants = Array.from( users );
 				},
 
 				getTicketParticipants() {
@@ -1532,20 +1651,17 @@ let wpTrac,
 				},
 
 				addTicketParticipant( ticketParticipant ) {
-					if ( -1 === $.inArray( ticketParticipant, ticketParticipants ) ) {
-						$.merge( ticketParticipants, [ ticketParticipant ] );
+					if ( ! ticketParticipants.includes( ticketParticipant ) ) {
+						ticketParticipants.push( ticketParticipant );
 					}
 				},
 
 				initNonTicketParticipants() {
 					let users = [];
 
-					if ( 'undefined' !== typeof settings.include ) {
-						$.each( settings.include, function ( k, username ) {
-							if (
-								-1 === $.inArray( username, users ) &&
-								-1 === $.inArray( username, ticketParticipants )
-							) {
+					if ( Array.isArray( settings.include ) ) {
+						settings.include.forEach( ( username ) => {
+							if ( ! users.includes( username ) && ! ticketParticipants.includes( username ) ) {
 								users.push( username );
 							}
 						} );
@@ -1553,9 +1669,7 @@ let wpTrac,
 
 					// Exclude current user.
 					if ( wpTrac.currentUser ) {
-						users = $.grep( users, function ( user ) {
-							return user !== wpTrac.currentUser;
-						} );
+						users = users.filter( ( user ) => user !== wpTrac.currentUser );
 					}
 
 					nonTicketParticipants = users;
@@ -1566,8 +1680,8 @@ let wpTrac,
 				},
 
 				addNonTicketParticipant( nonTicketParticipant ) {
-					if ( -1 === $.inArray( nonTicketParticipant, nonTicketParticipants ) ) {
-						$.merge( nonTicketParticipants, [ nonTicketParticipant ] );
+					if ( ! nonTicketParticipants.includes( nonTicketParticipant ) ) {
+						nonTicketParticipants.push( nonTicketParticipant );
 					}
 				},
 
@@ -1611,17 +1725,26 @@ let wpTrac,
 					'needs-screenshots': 'has-screenshots',
 				};
 
-			// Build a keyword bin <span> with its remove button.
+			/**
+			 * Builds a keyword badge element with an associated remove button.
+			 *
+			 * Constructs a `<span>` DOM node configured with a `data-keyword` attribute,
+			 * containing a dismiss button for removal and a text node with the keyword label.
+			 *
+			 * @param {string} keyword Keyword name to display.
+			 * @return {HTMLSpanElement} The constructed span element.
+			 */
 			function keywordSpan( keyword ) {
-				return $( '<span />' )
-					.text( keyword )
-					.attr( 'data-keyword', keyword )
-					.prepend(
-						$( '<button type="button" class="keyword-button-remove dashicons dashicons-dismiss" />' ).attr(
-							'aria-label',
-							'Remove ' + keyword + ' keyword'
-						)
-					);
+				const span = document.createElement( 'span' );
+				span.dataset.keyword = keyword;
+
+				const button = document.createElement( 'button' );
+				button.type = 'button';
+				button.className = 'keyword-button-remove dashicons dashicons-dismiss';
+				button.setAttribute( 'aria-label', `Remove ${ keyword } keyword` );
+
+				span.append( button, document.createTextNode( keyword ) );
+				return span;
 			}
 
 			return {
@@ -1646,7 +1769,7 @@ let wpTrac,
 					wpTrac.workflow.populate();
 
 					// Save these for later.
-					originalKeywords = $.merge( [], keywords );
+					originalKeywords = [ ...keywords ];
 
 					// Catch the submit to see if keywords were simply reordered.
 					elements.hiddenEl.parents( 'form' ).on( 'submit', wpTrac.workflow.submit );
@@ -1666,7 +1789,7 @@ let wpTrac,
 					// Keyword adds.
 					$( '#keyword-add' ).on( 'change keypress', function ( e ) {
 						if ( e.type === 'keypress' ) {
-							if ( e.which === 13 ) {
+							if ( e.key === 'Enter' ) {
 								e.stopPropagation();
 								e.preventDefault();
 							} else {
@@ -1692,7 +1815,7 @@ let wpTrac,
 					// Handle keyboard interaction on the field-keywords field.
 					$( '#field-keywords' ).on( 'keydown', function ( event ) {
 						// When pressing Enter or Escape.
-						if ( event.which === 13 || event.which === 27 ) {
+						if ( event.key === 'Enter' || event.key === 'Escape' ) {
 							// Prevent form submission.
 							event.preventDefault();
 							// Hide the input field and populate the keywords.
@@ -1756,12 +1879,12 @@ let wpTrac,
 
 					// If we have a non-empty keyword, let's go through the process of adding the spans.
 					if ( 1 !== keywords.length || keywords[ 0 ] !== '' ) {
-						$.each( keywords, function ( k, v ) {
-							const html = keywordSpan( v );
+						keywords.forEach( function ( v ) {
+							const span = keywordSpan( v );
 							if ( v in coreKeywordList ) {
-								html.attr( 'title', coreKeywordList[ v ] );
+								span.title = coreKeywordList[ v ];
 							}
-							html.appendTo( elements.bin );
+							elements.bin.append( span );
 						} );
 					}
 
@@ -1774,16 +1897,16 @@ let wpTrac,
 
 					$.each( coreKeywordList, function ( k ) {
 						// Don't show special (permission-based) ones.
-						if ( ! wpTrac.gardener && -1 !== $.inArray( k, gardenerKeywordList ) ) {
+						if ( ! wpTrac.gardener && gardenerKeywordList.includes( k ) ) {
 							return;
 						}
 						// Don't show workflow keywords such as 'reporter-feedback' for new ticket.
-						if ( wpTrac.isNewTicket() && -1 !== $.inArray( k, hideFromNewTickets ) ) {
+						if ( wpTrac.isNewTicket() && hideFromNewTickets.includes( k ) ) {
 							return;
 						}
 						elements.add.append(
 							`<option value="${ k }${
-								-1 !== $.inArray( k, keywords ) ? '" disabled="disabled">* ' : '">'
+								keywords.includes( k ) ? '" disabled="disabled">* ' : '">'
 							}${ k }</option>`
 						);
 					} );
@@ -1798,7 +1921,7 @@ let wpTrac,
 					let title = '';
 
 					// Don't add it again.
-					if ( -1 !== $.inArray( keyword, keywords ) ) {
+					if ( keywords.includes( keyword ) ) {
 						return;
 					}
 					keywords.push( keyword );
@@ -1818,11 +1941,11 @@ let wpTrac,
 					}
 
 					// Add it to the bin, and refresh the hidden input.
-					const html = keywordSpan( keyword );
+					const span = keywordSpan( keyword );
 					if ( title ) {
-						html.attr( 'title', title );
+						span.title = title;
 					}
-					html.appendTo( elements.bin );
+					elements.bin.append( span );
 					elements.hiddenEl.val( keywords.join( ' ' ) );
 				},
 
@@ -1837,12 +1960,10 @@ let wpTrac,
 							return;
 						}
 					} else {
-						keyword = object.text();
+						keyword = object.attr( 'data-keyword' );
 					}
 
-					keywords = $.grep( keywords, function ( v ) {
-						return v !== keyword;
-					} );
+					keywords = keywords.filter( ( v ) => v !== keyword );
 
 					// Update the core keyword dropdown.
 					if ( keyword in coreKeywordList ) {
@@ -1862,9 +1983,7 @@ let wpTrac,
 						return;
 					}
 
-					const testKeywords = $.grep( keywords, function ( v ) {
-						return -1 === $.inArray( v, originalKeywords );
-					} );
+					const testKeywords = keywords.filter( ( v ) => ! originalKeywords.includes( v ) );
 
 					// If the difference has no length, then restore to the original keyword order.
 					if ( ! testKeywords.length ) {
@@ -1903,7 +2022,7 @@ let wpTrac,
 				} else {
 					focuses = focuses.split( ' ' );
 				}
-				originalFocuses = $.merge( [], focuses );
+				originalFocuses = [ ...focuses ];
 
 				container = $( '#focuses' );
 
@@ -1911,7 +2030,7 @@ let wpTrac,
 				$.each( coreFocusesList, function ( focus, description ) {
 					let ariaPressed = 'false';
 					classes = focus.replace( ' ', '-' );
-					if ( -1 !== $.inArray( focus, focuses ) ) {
+					if ( focuses.includes( focus ) ) {
 						classes += ' active';
 						ariaPressed = 'true';
 					}
@@ -1962,16 +2081,14 @@ let wpTrac,
 				focus.removeClass( 'active' );
 				focus.find( '.core-focuses-button' ).attr( 'aria-pressed', 'false' );
 				const removedFocus = focus.data( 'focus' );
-				focuses = $.grep( focuses, function ( value ) {
-					return value !== removedFocus;
-				} );
+				focuses = focuses.filter( ( value ) => value !== removedFocus );
 				updateField();
 			}
 
 			function updateField() {
 				const orderedFocuses = [];
 				$.each( coreFocusesList, function ( focus ) {
-					if ( -1 !== $.inArray( focus, focuses ) ) {
+					if ( focuses.includes( focus ) ) {
 						orderedFocuses.push( focus );
 					}
 				} );
@@ -1990,9 +2107,7 @@ let wpTrac,
 					return;
 				}
 
-				const testFocuses = $.grep( focuses, function ( v ) {
-					return -1 === $.inArray( v, originalFocuses );
-				} );
+				const testFocuses = focuses.filter( ( v ) => ! originalFocuses.includes( v ) );
 
 				// If the difference has no length, then restore to the original order.
 				if ( ! testFocuses.length ) {
@@ -2187,6 +2302,9 @@ let wpTrac,
 				return false;
 			}
 
+			/**
+			 * Initializes ticket subscription star states and click handlers for report table views.
+			 */
 			function reportInit() {
 				const tickets = [],
 					cells = $( 'table.listing' ).find( 'td.Stars' );
@@ -2225,9 +2343,11 @@ let wpTrac,
 						_nonce = data.data.nonce;
 					}
 
+					const subscribedSet = new Set( ( data.data.tickets || [] ).map( Number ) );
+
 					stars
 						.each( function () {
-							if ( -1 !== $.inArray( $( this ).data( 'ticket' ), data.data.tickets ) ) {
+							if ( subscribedSet.has( Number( $( this ).data( 'ticket' ) ) ) ) {
 								$( this ).toggleClass( 'dashicons-star-empty dashicons-star-filled' );
 							}
 						} )
@@ -2266,19 +2386,21 @@ let wpTrac,
 				container;
 
 			function init() {
-				if ( $body.hasClass( 'core' ) ) {
+				const classList = document.body.classList;
+
+				if ( classList.contains( 'core' ) ) {
 					trac = 'core';
 					primaryGitRepo = 'WordPress/wordpress-develop';
 					primaryGitRepoDesc = 'WordPress GitHub mirror';
-				} else if ( $body.hasClass( 'meta' ) ) {
+				} else if ( classList.contains( 'meta' ) ) {
 					trac = 'meta';
 					primaryGitRepo = 'WordPress/wordpress.org';
 					primaryGitRepoDesc = 'WordPress.org Meta GitHub mirror';
-				} else if ( $body.hasClass( 'bbpress' ) ) {
+				} else if ( classList.contains( 'bbpress' ) ) {
 					trac = 'bbpress';
 					primaryGitRepo = 'bbpress/bbPress';
 					primaryGitRepoDesc = 'bbPress GitHub mirror';
-				} else if ( $body.hasClass( 'buddypress' ) ) {
+				} else if ( classList.contains( 'buddypress' ) ) {
 					trac = 'buddypress';
 					primaryGitRepo = 'buddypress/buddypress';
 					primaryGitRepoDesc = 'BuddyPress GitHub mirror';
@@ -2562,8 +2684,10 @@ let wpTrac,
 					return;
 				}
 
+				const classList = document.body.classList;
+
 				// bbPress Trac.. has a set of components that I wish everyone had.
-				if ( $( 'body.bbpress' ).length ) {
+				if ( classList.contains( 'bbpress' ) ) {
 					skipWords.push( 'api' );
 					skipWords.push( 'component' );
 					skipWords.push( 'tools' );
@@ -2571,14 +2695,13 @@ let wpTrac,
 				}
 
 				// On Meta, WordPress.org site is a "generic" category that shouldn't be used if possible.
-				if ( $( 'body.meta' ).length ) {
+				if ( classList.contains( 'meta' ) ) {
 					generalCategories.push( 'WordPress.org Site' );
 					skipWords.push( 'wordpress.org' );
 				}
 
 				// Only if we have a 'General' option.
-				const components = window
-						.jQuery( '#field-component option' )
+				const components = $( '#field-component option' )
 						.get()
 						.map( ( opt ) => opt.value ),
 					hasDefaultCat = generalCategories.some( ( value ) => components.includes( value ) );
@@ -2603,11 +2726,13 @@ let wpTrac,
 				} );
 			}
 
+			/**
+			 * Suggests specific Trac components based on keywords found in the summary and description.
+			 */
 			function maybeSuggest() {
 				const matchText =
 						$( '#field-summary' ).val().toLowerCase() + ' ' + $( '#field-description' ).val().toLowerCase(),
-					matchingWords = [],
-					matchingComponents = [];
+					matchingWords = [];
 
 				if ( ! enabled || ! matchText.length ) {
 					return;
@@ -2622,13 +2747,9 @@ let wpTrac,
 				// Longest match first.
 				matchingWords.sort( ( a, b ) => ( a.length > b.length ? -1 : 1 ) );
 
-				matchingWords.forEach( ( word ) => {
-					componentWords[ word ].forEach( ( component ) => {
-						if ( -1 === matchingComponents.indexOf( component ) ) {
-							matchingComponents.push( component );
-						}
-					} );
-				} );
+				const matchingComponents = [
+					...new Set( matchingWords.flatMap( ( word ) => componentWords[ word ] || [] ) ),
+				];
 
 				if ( ! noticeDiv ) {
 					noticeDiv = $( '<div id="componentSuggest"/>' ).insertBefore( $( '.buttons' ).first() );
@@ -2683,8 +2804,8 @@ let wpTrac,
 
 					// If it's a plural, add the non-plural form.
 					words.forEach( ( word ) => {
-						if ( 's' === word.substr( -1 ) ) {
-							words.push( word.substr( 0, word.length - 1 ) );
+						if ( 's' === word.slice( -1 ) ) {
+							words.push( word.slice( 0, -1 ) );
 						}
 					} );
 
@@ -2763,7 +2884,7 @@ let wpTrac,
 		},
 	};
 
-	$( document ).ready( wpTrac.init );
+	$( wpTrac.init );
 
 	// Perform this as soon as this file loads.
 	wpTrac.disableTracAutoFocus();

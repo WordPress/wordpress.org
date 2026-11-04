@@ -65,7 +65,7 @@
 					display: none;
 				}
 			}
-			  
+
 		}
 
 		.plugin-title {
@@ -281,10 +281,9 @@
 		flex: 0 0 auto;
 		font-size: 0.9rem;
 		align-self: flex-end;
+		padding: 0.64rem 0 0.64rem 1.25rem;
 
 		a {
-			display: inline-block;
-			padding: 0.64rem 0 0.64rem 1.25rem;
 			font-size: var(--wp--preset--font-size--normal);
 		}
 
@@ -292,10 +291,6 @@
 			border-bottom: 0;
 			display: block;
 			width: 100%;
-
-			a {
-				padding-right: 1.25rem;
-			}
 		}
 	}
 

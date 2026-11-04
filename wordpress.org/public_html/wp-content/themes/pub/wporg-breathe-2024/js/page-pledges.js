@@ -24,9 +24,9 @@
 		grid.querySelectorAll( '.pledges-card' )
 	);
 	var resultCount = document.getElementById( 'pledges-result-count' );
-	var resultPhrase = document.getElementById( 'pledges-result-phrase' );
 	var emptyState = document.getElementById( 'pledges-empty' );
 	var divider = grid.querySelector( '.pledges-inactive-divider' );
+	var dividerLabel = divider && divider.querySelector( 'span' );
 	var hiwBanner = document.getElementById( 'pledges-howitworks' );
 	var hiwDismiss = hiwBanner && hiwBanner.querySelector( '.pledges-howitworks-dismiss' );
 	var hiwKey = 'wporg-pledges-hiw-dismissed';
@@ -106,6 +106,9 @@
 		// so users don't see an orphan "N contributors with no verified..." label.
 		if ( divider ) {
 			divider.hidden = inactiveVisible === 0;
+			if ( dividerLabel && dividerLabel.dataset[ state.sponsorship ] ) {
+				dividerLabel.textContent = dividerLabel.dataset[ state.sponsorship ];
+			}
 		}
 
 		// Empty state shows only when nothing is visible at all.
@@ -114,22 +117,9 @@
 		}
 
 		// Result count is "active contributors" — inactive cards don't belong here.
-		if ( resultCount ) {
-			resultCount.textContent = activeVisible;
-		}
-
-		// Rebuild the phrase so the singular/plural form follows the live visible
-		// count instead of being frozen at the server-rendered $active_count.
-		// (Two-form approximation; for fully plural-aware locales we'd swap this
-		// for wp.i18n._n once the script depends on @wordpress/i18n.)
-		if ( resultPhrase ) {
-			var total = parseInt( resultPhrase.dataset.total || '0', 10 );
-			var template = activeVisible === 1
-				? resultPhrase.dataset.singular
-				: resultPhrase.dataset.plural;
-			if ( template ) {
-				resultPhrase.textContent = template.replace( '%d', String( total ) );
-			}
+		// The server pre-renders the translated phrase for each sponsorship filter.
+		if ( resultCount && resultCount.dataset[ state.sponsorship ] ) {
+			resultCount.textContent = resultCount.dataset[ state.sponsorship ];
 		}
 
 		// Propagate the user's visible-relative rank to the standing card and

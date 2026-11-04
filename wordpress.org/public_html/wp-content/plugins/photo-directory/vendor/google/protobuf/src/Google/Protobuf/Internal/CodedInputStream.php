@@ -2,33 +2,10 @@
 
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// https://developers.google.com/protocol-buffers/
 //
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are
-// met:
-//
-//     * Redistributions of source code must retain the above copyright
-// notice, this list of conditions and the following disclaimer.
-//     * Redistributions in binary form must reproduce the above
-// copyright notice, this list of conditions and the following disclaimer
-// in the documentation and/or other materials provided with the
-// distribution.
-//     * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file or at
+// https://developers.google.com/open-source/licenses/bsd
 
 namespace Google\Protobuf\Internal;
 
@@ -45,14 +22,12 @@ class CodedInputStream
     private $legitimate_message_end;
     private $recursion_budget;
     private $recursion_limit;
-    private $total_bytes_limit;
     private $total_bytes_read;
 
     const MAX_VARINT_BYTES = 10;
     const DEFAULT_RECURSION_LIMIT = 100;
-    const DEFAULT_TOTAL_BYTES_LIMIT = 33554432; // 32 << 20, 32MB
 
-    public function __construct($buffer)
+    public function __construct($buffer, $recursion_limit = self::DEFAULT_RECURSION_LIMIT)
     {
         $start = 0;
         $end = strlen($buffer);
@@ -62,9 +37,8 @@ class CodedInputStream
         $this->current = $start;
         $this->current_limit = $end;
         $this->legitimate_message_end = false;
-        $this->recursion_budget = self::DEFAULT_RECURSION_LIMIT;
-        $this->recursion_limit = self::DEFAULT_RECURSION_LIMIT;
-        $this->total_bytes_limit = self::DEFAULT_TOTAL_BYTES_LIMIT;
+        $this->recursion_budget = $recursion_limit;
+        $this->recursion_limit = $recursion_limit;
         $this->total_bytes_read = $end - $start;
     }
 
@@ -93,12 +67,11 @@ class CodedInputStream
     private function recomputeBufferLimits()
     {
         $this->buffer_end += $this->buffer_size_after_limit;
-        $closest_limit = min($this->current_limit, $this->total_bytes_limit);
-        if ($closest_limit < $this->total_bytes_read) {
+        if ($this->current_limit < $this->total_bytes_read) {
             // The limit position is in the current buffer.  We must adjust the
             // buffer size accordingly.
             $this->buffer_size_after_limit = $this->total_bytes_read -
-                $closest_limit;
+                $this->current_limit;
             $this->buffer_end -= $this->buffer_size_after_limit;
         } else {
             $this->buffer_size_after_limit = 0;
@@ -113,7 +86,7 @@ class CodedInputStream
     /**
      * Read uint32 into $var. Advance buffer with consumed bytes. If the
      * contained varint is larger than 32 bits, discard the high order bits.
-     * @param $var.
+     * @param $var
      */
     public function readVarint32(&$var)
     {
@@ -142,7 +115,7 @@ class CodedInputStream
 
     /**
      * Read Uint64 into $var. Advance buffer with consumed bytes.
-     * @param $var.
+     * @param $var
      */
     public function readVarint64(&$var)
     {
@@ -208,7 +181,7 @@ class CodedInputStream
     /**
      * Read int into $var. If the result is larger than the largest integer, $var
      * will be -1. Advance buffer with consumed bytes.
-     * @param $var.
+     * @param $var
      */
     public function readVarintSizeAsInt(&$var)
     {
@@ -222,7 +195,7 @@ class CodedInputStream
     /**
      * Read 32-bit unsigned integer to $var. If the buffer has less than 4 bytes,
      * return false. Advance buffer with consumed bytes.
-     * @param $var.
+     * @param $var
      */
     public function readLittleEndian32(&$var)
     {
@@ -238,7 +211,7 @@ class CodedInputStream
     /**
      * Read 64-bit unsigned integer to $var. If the buffer has less than 8 bytes,
      * return false. Advance buffer with consumed bytes.
-     * @param $var.
+     * @param $var
      */
     public function readLittleEndian64(&$var)
     {
@@ -261,24 +234,11 @@ class CodedInputStream
 
     /**
      * Read tag into $var. Advance buffer with consumed bytes.
-     * @param $var.
      */
     public function readTag()
     {
         if ($this->current === $this->buffer_end) {
-            // Make sure that it failed due to EOF, not because we hit
-            // total_bytes_limit, which, unlike normal limits, is not a valid
-            // place to end a message.
-            $current_position = $this->total_bytes_read -
-                $this->buffer_size_after_limit;
-            if ($current_position >= $this->total_bytes_limit) {
-                // Hit total_bytes_limit_.  But if we also hit the normal limit,
-                // we're still OK.
-                $this->legitimate_message_end =
-                    ($this->current_limit === $this->total_bytes_limit);
-            } else {
-                $this->legitimate_message_end = true;
-            }
+            $this->legitimate_message_end = true;
             return 0;
         }
 
@@ -295,7 +255,8 @@ class CodedInputStream
     public function readRaw($size, &$buffer)
     {
         $current_buffer_size = 0;
-        if ($this->bufferSize() < $size) {
+        // size (varint) read from the wire could be negative.
+        if ($size < 0 || $this->bufferSize() < $size) {
             return false;
         }
 
@@ -361,7 +322,7 @@ class CodedInputStream
         $byte_limit, &$old_limit, &$recursion_budget)
     {
         $old_limit = $this->pushLimit($byte_limit);
-        $recursion_limit = --$this->recursion_limit;
+        $recursion_budget = --$this->recursion_budget;
     }
 
     public function decrementRecursionDepthAndPopLimit($byte_limit)

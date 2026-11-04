@@ -5,28 +5,31 @@ p {
 
 	&.subheading {
 		color: #82878c;
-		font-size: ms( 2 );
+		font-size: ms(2);
 		font-weight: 300;
 		margin: -0.4rem auto 2rem;
 		text-align: center;
 	}
 
 	&.intro {
-		font-size: ms( 2 );
+		font-size: ms(2);
 	}
 
 	&.aside {
-		font-size: ms( -2 );
+		font-size: ms(-2);
 	}
 
 	&.note {
-		font-size: ms( -4 );
+		font-size: ms(-4);
 		letter-spacing: 0.01rem;
-		max-width: ms( 26 );
+		max-width: ms(26);
 	}
 }
 
-dfn, cite, em, i {
+dfn,
+cite,
+em,
+i {
 	font-style: italic;
 }
 
@@ -42,7 +45,7 @@ pre {
 	background: var(--wp--preset--color--light-grey-2);
 	box-sizing: content-box;
 	font-family: $font__pre;
-	font-size: ms( -2 );
+	font-size: ms(-2);
 	line-height: $font__line-height-pre;
 	margin-bottom: 1.6em;
 	max-width: 100%;
@@ -50,17 +53,22 @@ pre {
 	padding: 1.6em;
 }
 
-code, kbd, tt, var {
+code,
+kbd,
+tt,
+var {
 	font-family: $font__code;
-	font-size: ms( -2 );
+	font-size: ms(-2);
 }
 
-abbr, acronym {
+abbr,
+acronym {
 	border-bottom: 1px dotted var(--wp--preset--color--charcoal-4);
 	cursor: help;
 }
 
-mark, ins {
+mark,
+ins {
 	background: var(--wp--preset--color--lemon-1);
 	text-decoration: none;
 }

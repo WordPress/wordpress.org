@@ -176,7 +176,7 @@ function wporg_support_scripts() {
 		filemtime( get_theme_root() . '/wporg-parent-2021/build/block-styles.css' )
 	);
 
-	wp_enqueue_style( 'support-style', get_stylesheet_uri(), [ 'dashicons' ], filemtime( __DIR__ . '/style.css' ) );
+	wp_enqueue_style( 'support-style', get_theme_file_uri( '/build/style.css' ), [ 'dashicons' ], filemtime( __DIR__ . '/build/style.css' ) );
 	wp_style_add_data( 'support-style', 'rtl', 'replace' );
 
 	// Preload the heading font(s).
@@ -987,56 +987,7 @@ function wporg_support_add_moderation_notice() {
 				if ( ! $user_posting_history['last_archived_post'] ) {
 					$notices[] = __( 'The user has no previously archived posts.' ,'wporg-forums' );
 				} else {
-					// Get a DateTime object for when the last archived post was created.
-					$last_archive_time = get_post_modified_time( 'U', true, $user_posting_history['last_archived_post'][0] );
-
-					// Generate a differential time between the last archived post, and the current date and time.
-					$last_archive_elapsed = human_time_diff( strtotime( $user_posting_history['last_archived_post'][0]->post_modified_gmt ) );
-
 					$lines = array();
-
-					if ( $last_archive_time < DAY_IN_SECONDS ) {
-						$lines[] = sprintf(
-							// translators: %s: Time since the last archived post.
-							__( 'The user last had content archived %s.', 'wporg-forums' ),
-							sprintf(
-								'<span title="%s">%s</span>',
-								esc_attr(
-									sprintf(
-										// translators: %s: The original date and time when the users last archived post was.
-										__( 'Last archived post is from %s', 'wporg-forums' ),
-										$user_posting_history['last_archived_post'][0]->post_modified_gmt
-									)
-								),
-								__( 'today', 'wporg-forums' )
-							)
-						);
-					} else {
-						$lines[] = sprintf(
-							// translators: %s: Time since the last archived post.
-							__( 'The user last had content archived %s.', 'wporg-forums' ),
-							sprintf(
-								'<span title="%s">%s</span>',
-								esc_attr(
-									sprintf(
-										// translators: %s: The original date and time when the users last archived post was.
-										__( 'Last archived post is from %s', 'wporg-forums' ),
-										$user_posting_history['last_archived_post'][0]->post_modified_gmt
-									)
-								),
-								sprintf(
-									// translators: %d: Amount of days since the last archived post.
-									_n(
-										'%d day ago',
-										'%d days ago',
-										ceil( ( $last_archive_time - time() ) / DAY_IN_SECONDS ),
-										'wporg-forums'
-									),
-									esc_html( $last_archive_elapsed )
-								)
-							)
-						);
-					}
 
 					$lines[] = sprintf(
 						// translators: %d: The amount of approved posts since the last archived entry.
@@ -1163,136 +1114,6 @@ function wporg_support_current_user_can_stick( $topic_id ) {
 }
 
 /**
- * Correct reply URLs for pending posts.
- *
- * bbPress appends '/edit/' even to ugly permalinks, which pending posts will
- * always have.
- *
- * @see https://meta.trac.wordpress.org/ticket/2478
- * @see https://bbpress.trac.wordpress.org/ticket/3054
- *
- * @param string $url     URL to edit the post.
- * @param int    $post_id Post ID.
- * @return string
- */
-function wporg_support_fix_pending_posts_reply_url( $url, $post_id ) {
-	if ( false !== strpos( $url, '?' ) ) {
-		if ( false !== strpos( $url, '/edit/' ) ) {
-			$url = str_replace( '/edit/', '', $url );
-			$url = add_query_arg( 'edit', '1', $url );
-		} elseif ( false !== strpos( $url, '%2Fedit%2F' ) ) {
-			$url = str_replace( '%2Fedit%2F', '', $url );
-			$url = add_query_arg( 'edit', '1', $url );
-		}
-	}
-
-	return $url;
-}
-add_filter( 'bbp_get_topic_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
-add_filter( 'bbp_get_reply_edit_url', 'wporg_support_fix_pending_posts_reply_url', 10, 2 );
-
-/**
- * Prevent standalone <li> tags from breaking the theme layout.
- *
- * If a <li> tag is not preceded by <ul> or <ol>, prepend it with <ul>
- * and let force_balance_tags() do the rest.
- *
- * @see https://meta.trac.wordpress.org/ticket/20
- * @see https://bbpress.trac.wordpress.org/ticket/2357
- *
- * @param string $content Topic or reply content.
- * @return string Filtered content.
- */
-function wporg_support_wrap_standalone_li_tags_in_ul( $content ) {
-	remove_filter( current_filter(), 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
-
-	// No lists? No worries.
-	if ( false === stripos( $content, '<li>' ) ) {
-		return $content;
-	}
-
-	// Split the content into chunks of <Not a List, OL/UL tags, Content of Ol/UL tags>.
-	$parts = preg_split( '#(<[uo]l(?:\s+[^>]+)?>)#im', $content, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
-
-	// We can rebuild.
-	$content = '';
-
-	for ( $i = 0; $i < count( $parts ); $i++ ) {
-		$part = $parts[ $i ];
-		$next_part = $parts[ $i + 1 ] ?? '';
-
-		// If the chunk is a list element, process it as such.
-		if ( preg_match( '#^<([uo]l)(\s+[^>]+)?>#i', $part, $m ) ) {
-			$closing_tag_pos = stripos( $next_part, '</' . $m[1] . '>' );
-			if ( false !== $closing_tag_pos ) {
-				// List is closed, assume that part of the content is OK
-				$content .= $part . substr( $next_part, 0, $closing_tag_pos + 5 );
-
-				// But check the content after the list too.
-				$next_part = substr( $next_part, $closing_tag_pos + 5 );
-				if ( $next_part ) {
-					// Replace the first li tag if one exists.
-					// This may break nested lists, but that's okay.
-					$next_part = preg_replace( '#<li>#i', '<ul><li>', $next_part, 1 );
-
-					$content .= force_balance_tags( $next_part );
-				}
-			} else {
-				// List is not closed, balance it.
-				$content .= force_balance_tags( $part . $next_part );
-			}
-			$i++; // Skip $next_part;
-
-		// Does this text chunk contain a <li>? If so, it's got no matching start element.
-		} elseif ( false !== stripos( $part, '<li>' ) ) {
-			$part = preg_replace( '#<li>#i', '<ul><li>', $part, 1 ); // Replace the first li tag
-			$content .= force_balance_tags( $part );
-
-		// This shouldn't actually be hit, but is here for completeness.
-		} else {
-			$content .= force_balance_tags( $part );
-		}
-	}
-
-	return $content;
-}
-
-/**
- * Maybe wrap standalone <li> tags in <ul> tags.
- * This only wraps non-block-posts.
- * 
- * @see https://meta.trac.wordpress.org/ticket/7618
- */
-function wporg_support_maybe_wrap_standalone_li_tags_in_ul( $content ) {
-	// If it's not a block post, we'll need to filter it after all transforms.
-	if ( ! has_blocks( $content ) ) {
-		add_filter( current_filter(), 'wporg_support_wrap_standalone_li_tags_in_ul', 50 );
-	}
-
-	return $content;
-}
-add_filter( 'bbp_get_topic_content', 'wporg_support_maybe_wrap_standalone_li_tags_in_ul', 1 );
-add_filter( 'bbp_get_reply_content', 'wporg_support_maybe_wrap_standalone_li_tags_in_ul', 1 );
-
-/**
- * Set 'is_single' query var to true on single replies.
- *
- * @see https://meta.trac.wordpress.org/ticket/2551
- * @see https://bbpress.trac.wordpress.org/ticket/3055
- *
- * @param array $args Theme compat query vars.
- * @return array
- */
-function wporg_support_set_is_single_on_single_replies( $args ) {
-	if ( bbp_is_single_reply() ) {
-		$args['is_single'] = true;
-	}
-
-	return $args;
-}
-add_filter( 'bbp_after_theme_compat_reset_post_parse_args', 'wporg_support_set_is_single_on_single_replies' );
-
-/**
  * Add query vars
  */
 function wporg_add_query_vars( array $vars ) : array {
@@ -1409,7 +1230,7 @@ function bb_base_plugin_search_form() {
 
 function bb_base_topic_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['ts'] ) ) {
+	if ( empty( $_GET['ts'] ) || ! is_string( $_GET['ts'] ) ) {
 		return false;
 	}
 
@@ -1423,7 +1244,7 @@ function bb_base_topic_search_query( $escaped = true ) {
 
 function bb_base_reply_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['rs'] ) ) {
+	if ( empty( $_GET['rs'] ) || ! is_string( $_GET['rs'] ) ) {
 		return false;
 	}
 
@@ -1437,7 +1258,7 @@ function bb_base_reply_search_query( $escaped = true ) {
 
 function bb_base_plugin_search_query( $escaped = true ) {
 
-	if ( empty( $_GET['ps'] ) ) {
+	if ( empty( $_GET['ps'] ) || ! is_string( $_GET['ps'] ) ) {
 		return false;
 	}
 

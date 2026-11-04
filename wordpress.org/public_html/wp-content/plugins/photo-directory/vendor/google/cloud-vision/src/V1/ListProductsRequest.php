@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Request message for the `ListProducts` method.
@@ -22,19 +22,36 @@ class ListProductsRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string parent = 1 [(.google.api.field_behavior) = REQUIRED, (.google.api.resource_reference) = {</code>
      */
-    private $parent = '';
+    protected $parent = '';
     /**
      * The maximum number of items to return. Default 10, maximum 100.
      *
      * Generated from protobuf field <code>int32 page_size = 2;</code>
      */
-    private $page_size = 0;
+    protected $page_size = 0;
     /**
      * The next_page_token returned from a previous List request, if any.
      *
      * Generated from protobuf field <code>string page_token = 3;</code>
      */
-    private $page_token = '';
+    protected $page_token = '';
+
+    /**
+     * @param string $parent Required. The project OR ProductSet from which Products should be listed.
+     *
+     *                       Format:
+     *                       `projects/PROJECT_ID/locations/LOC_ID`
+     *                       Please see {@see ProductSearchClient::locationName()} for help formatting this field.
+     *
+     * @return \Google\Cloud\Vision\V1\ListProductsRequest
+     *
+     * @experimental
+     */
+    public static function build(string $parent): self
+    {
+        return (new self())
+            ->setParent($parent);
+    }
 
     /**
      * Constructor.

@@ -84,6 +84,11 @@ trait PageIteratorTrait
     private $initialResultToken;
 
     /**
+     * @var bool
+     */
+    private $isInitialized = false;
+
+    /**
      * @param callable $resultMapper Maps a result.
      * @param callable $call The call to execute.
      * @param array $callOptions Options to use with the call.
@@ -142,14 +147,13 @@ trait PageIteratorTrait
     }
 
     /**
-     * Rewind the iterator.
-     *
-     * @return null
+     * Set up the initial pagination state and tokens.
      */
-    public function rewind()
+    private function initialize()
     {
-        $this->itemCount = 0;
-        $this->position = 0;
+        if ($this->isInitialized) {
+            return;
+        }
 
         if ($this->config['firstPage']) {
             list($this->page, $shouldContinue) = $this->mapResults($this->config['firstPage']);
@@ -162,6 +166,23 @@ trait PageIteratorTrait
         if ($nextResultToken) {
             $this->set($this->resultTokenPath, $this->callOptions, $nextResultToken);
         }
+
+        $this->isInitialized = true;
+    }
+
+    /**
+     * Rewind the iterator.
+     *
+     * @return null
+     */
+    #[\ReturnTypeWillChange]
+    public function rewind()
+    {
+        $this->isInitialized = false;
+        $this->initialize();
+
+        $this->itemCount = 0;
+        $this->position = 0;
     }
 
     /**
@@ -169,8 +190,11 @@ trait PageIteratorTrait
      *
      * @return array|null
      */
+    #[\ReturnTypeWillChange]
     public function current()
     {
+        $this->initialize();
+
         if ($this->page === null) {
             $this->page = $this->executeCall();
         }
@@ -189,6 +213,7 @@ trait PageIteratorTrait
      *
      * @return int
      */
+    #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->position;
@@ -199,6 +224,7 @@ trait PageIteratorTrait
      *
      * @return null
      */
+    #[\ReturnTypeWillChange]
     public function next()
     {
         $this->position++;
@@ -212,6 +238,7 @@ trait PageIteratorTrait
      *
      * @return bool
      */
+    #[\ReturnTypeWillChange]
     public function valid()
     {
         if (!$this->page && $this->position) {

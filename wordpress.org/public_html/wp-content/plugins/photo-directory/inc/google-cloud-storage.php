@@ -11,8 +11,6 @@ require_once WPORG_PHOTO_DIRECTORY_DIRECTORY . '/vendor/autoload.php';
 
 // Import Google libraries.
 use Google\Cloud\Storage\StorageClient;
-use Google\Cloud\Storage\StreamWrapper;
-use Google\Cloud\Storage\WPORG_StreamWrapper;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 
 class GoogleCloudStorage {
@@ -60,15 +58,38 @@ class GoogleCloudStorage {
 		}
 
 		self::$gs_client = $gs_client;
-		// The default way of registering a stream wrapper...
-		//self::$gs_client->registerStreamWrapper();
-		// But instead, register an extended version of the StreamWrapper that
-		// handles `stream_metadata()` to avoid PHP warnings.
-		WPORG_StreamWrapper::register( self::$gs_client );
+		self::$gs_client->registerStreamWrapper();
 
-		add_filter( 'upload_dir',                      [ __CLASS__, 'filter_upload_dir' ] );
-		add_filter( 'wp_get_attachment_url',           [ __CLASS__, 'filter_wp_get_attachment_url' ], 10, 2 );
+		add_filter( 'upload_dir', [ __CLASS__, 'filter_upload_dir' ] );
+		add_filter( 'wp_get_attachment_url', [ __CLASS__, 'filter_wp_get_attachment_url' ], 10, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ __CLASS__, 'append_attachment_metadata' ], 10, 3 );
+		add_filter( 'pre_recurse_dirsize', [ __CLASS__, 'filter_pre_recurse_dirsize' ], 10, 2 );
+		add_filter( 'pre_get_space_used', [ __CLASS__, 'filter_pre_get_space_used' ] );
+	}
+
+	/**
+	 * Short-circuits directory size calculations for Google Cloud Storage paths.
+	 *
+	 * @param int|false $size      The directory size in bytes, or false to calculate it.
+	 * @param string    $directory Full path of the directory.
+	 * @return int|false
+	 */
+	public static function filter_pre_recurse_dirsize( $size, $directory ) {
+		if ( str_starts_with( $directory, 'gs://' ) ) {
+			return 0;
+		}
+
+		return $size;
+	}
+
+	/**
+	 * Short-circuits the multisite space-used lookup when uploads live in Google Cloud Storage.
+	 *
+	 * @param int|false $space_used The space used in megabytes, or false to calculate it.
+	 * @return int|false
+	 */
+	public static function filter_pre_get_space_used( $space_used ) {
+		return self::filter_pre_recurse_dirsize( $space_used, wp_get_upload_dir()['basedir'] );
 	}
 
 	/**

@@ -3,25 +3,109 @@
 		{
 			"type": "heading",
 			"text": "Plugins mentioned",
-			"count": 1
+			"count": 8
 		},
 		{
 			"type": "items",
 			"items": [
 				{
+					"title": "Booking Widget for Salons",
+					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=900003",
+					"meta": [
+						{
+							"text": "booking-widget-for-salons"
+						}
+					],
+					"age": {
+						"text": "1d",
+						"tooltip": "Updated 2026-10-04"
+					},
+					"links": [
+						{
+							"text": "View on WordPress.org",
+							"url": "https://wordpress.org/plugins/booking-widget-for-salons/",
+							"icon": "link"
+						},
+						{
+							"text": "Download",
+							"url": "https://wordpress.org/plugins/wp-content/uploads/2026/10/booking-widget-for-salons.zip",
+							"icon": "download-alt"
+						}
+					],
+					"tone": "warning",
+					"status": {
+						"icon": "✅",
+						"text": "Approved"
+					}
+				},
+				{
+					"title": "Contact Form Builder Pro",
+					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=900002",
+					"meta": [
+						{
+							"text": "contact-form-builder-pro"
+						}
+					],
+					"age": {
+						"text": "5d",
+						"tooltip": "Updated 2026-09-30"
+					},
+					"links": [
+						{
+							"text": "Download",
+							"url": "https://wordpress.org/plugins/wp-content/uploads/2026/10/contact-form-builder-pro.zip",
+							"icon": "download-alt"
+						}
+					],
+					"tone": "warning",
+					"status": {
+						"icon": "🔍",
+						"text": "In review · Assigned to Priya Shah"
+					}
+				},
+				{
+					"title": "Custom Checkout Fields, Order Notes and Delivery Date Picker for WooCommerce",
+					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=900001",
+					"meta": [
+						{
+							"text": "custom-checkout-fields-order-notes-delivery-date-picker"
+						}
+					],
+					"age": {
+						"text": "3d",
+						"tooltip": "Updated 2026-10-02"
+					},
+					"links": [
+						{
+							"text": "Download",
+							"url": "https://wordpress.org/plugins/wp-content/uploads/2026/10/custom-checkout-fields-order-notes-delivery-date-picker.zip",
+							"icon": "download-alt"
+						}
+					],
+					"tone": "warning",
+					"status": {
+						"icon": "⏳",
+						"text": "Pending initial review · Assigned to Marco Rossi"
+					}
+				},
+				{
 					"title": "The Events Calendar",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=203",
-					"badges": [],
 					"meta": [
 						{
 							"text": "the-events-calendar"
-						},
-						{
-							"text": "Updated 5 days ago",
-							"tooltip": "2026-09-30"
 						}
 					],
+					"age": {
+						"text": "5d",
+						"tooltip": "Updated 2026-09-30"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/the-events-calendar?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/the-events-calendar/",
@@ -33,6 +117,131 @@
 							"icon": "download-alt"
 						}
 					]
+				},
+				{
+					"title": "Easy Gallery Slider",
+					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=900004",
+					"meta": [
+						{
+							"text": "easy-gallery-slider"
+						}
+					],
+					"age": {
+						"text": "3w",
+						"tooltip": "Updated 2026-09-14"
+					},
+					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/easy-gallery-slider?tab=runs",
+							"icon": "shield"
+						},
+						{
+							"text": "View on WordPress.org",
+							"url": "https://wordpress.org/plugins/easy-gallery-slider/",
+							"icon": "link"
+						},
+						{
+							"text": "Download",
+							"url": "https://downloads.wordpress.org/plugin/easy-gallery-slider.latest-stable.zip",
+							"icon": "download-alt"
+						}
+					],
+					"tone": "error",
+					"status": {
+						"icon": "🛡️",
+						"text": "Closed: Security Issue"
+					}
+				},
+				{
+					"title": "SEO Booster Ultimate",
+					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=900005",
+					"meta": [
+						{
+							"text": "seo-booster-ultimate"
+						}
+					],
+					"age": {
+						"text": "6mo",
+						"tooltip": "Updated 2026-04-02"
+					},
+					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/seo-booster-ultimate?tab=runs",
+							"icon": "shield"
+						},
+						{
+							"text": "View on WordPress.org",
+							"url": "https://wordpress.org/plugins/seo-booster-ultimate/",
+							"icon": "link"
+						},
+						{
+							"text": "Download",
+							"url": "https://downloads.wordpress.org/plugin/seo-booster-ultimate.latest-stable.zip",
+							"icon": "download-alt"
+						}
+					],
+					"tone": "error",
+					"status": {
+						"icon": "📜",
+						"text": "Closed: Guideline Violation"
+					}
+				},
+				{
+					"title": "Turbo Checkout for WooCommerce",
+					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=900006",
+					"meta": [
+						{
+							"text": "turbo-checkout-for-woocommerce"
+						}
+					],
+					"age": {
+						"text": "1y",
+						"tooltip": "Updated 2025-10-20"
+					},
+					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/turbo-checkout-for-woocommerce?tab=runs",
+							"icon": "shield"
+						},
+						{
+							"text": "View on WordPress.org",
+							"url": "https://wordpress.org/plugins/turbo-checkout-for-woocommerce/",
+							"icon": "link"
+						},
+						{
+							"text": "Download",
+							"url": "https://downloads.wordpress.org/plugin/turbo-checkout-for-woocommerce.latest-stable.zip",
+							"icon": "download-alt"
+						}
+					],
+					"tone": "error",
+					"status": {
+						"icon": "™️",
+						"text": "Disabled: Licensing/Trademark Violation"
+					}
+				},
+				{
+					"title": "Smart AI Page Builder",
+					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=900007",
+					"meta": [
+						{
+							"text": "rejected-smart-ai-page-builder-rejected"
+						}
+					],
+					"age": {
+						"text": "2d",
+						"tooltip": "Updated 2026-10-03"
+					},
+					"links": [],
+					"tone": "muted",
+					"status": {
+						"icon": "🚫",
+						"text": "Rejected",
+						"tooltip": "Duplicate (copy) of another Plugin"
+					}
 				}
 			]
 		},
@@ -48,17 +257,21 @@
 				{
 					"title": "Block for Strava",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=308916",
-					"badges": [],
 					"meta": [
 						{
 							"text": "block-for-strava"
-						},
-						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
 						}
 					],
+					"age": {
+						"text": "2mo",
+						"tooltip": "Updated 2026-08-21"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/block-for-strava?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/block-for-strava/",
@@ -74,17 +287,21 @@
 				{
 					"title": "Change From Address",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=183755",
-					"badges": [],
 					"meta": [
 						{
 							"text": "change-from-address"
-						},
-						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
 						}
 					],
+					"age": {
+						"text": "2mo",
+						"tooltip": "Updated 2026-08-21"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/change-from-address?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/change-from-address/",
@@ -100,17 +317,21 @@
 				{
 					"title": "Clicky Popular Posts Widget",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=15101",
-					"badges": [],
 					"meta": [
 						{
 							"text": "clicky-popular-posts-widget"
-						},
-						{
-							"text": "Updated 12 years ago",
-							"tooltip": "2014-09-04"
 						}
 					],
+					"age": {
+						"text": "12y",
+						"tooltip": "Updated 2014-09-04"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/clicky-popular-posts-widget?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/clicky-popular-posts-widget/",
@@ -126,17 +347,21 @@
 				{
 					"title": "Jetpack Twitter Via",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=20510",
-					"badges": [],
 					"meta": [
 						{
 							"text": "jetpack-twitter-via"
-						},
-						{
-							"text": "Updated 14 years ago",
-							"tooltip": "2012-11-26"
 						}
 					],
+					"age": {
+						"text": "14y",
+						"tooltip": "Updated 2012-11-26"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/jetpack-twitter-via?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/jetpack-twitter-via/",
@@ -152,17 +377,21 @@
 				{
 					"title": "Shiny Updates",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=40",
-					"badges": [],
 					"meta": [
 						{
 							"text": "shiny-updates"
-						},
-						{
-							"text": "Updated 10 years ago",
-							"tooltip": "2016-09-27"
 						}
 					],
+					"age": {
+						"text": "10y",
+						"tooltip": "Updated 2016-09-27"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/shiny-updates?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/shiny-updates/",
@@ -178,17 +407,21 @@
 				{
 					"title": "Twenty Eleven Showcase Slider",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=18855",
-					"badges": [],
 					"meta": [
 						{
 							"text": "twenty-eleven-showcase-slider"
-						},
-						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
 						}
 					],
+					"age": {
+						"text": "2mo",
+						"tooltip": "Updated 2026-08-21"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/twenty-eleven-showcase-slider?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/twenty-eleven-showcase-slider/",
@@ -204,17 +437,21 @@
 				{
 					"title": "Uploads Unleashed",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=278625",
-					"badges": [],
 					"meta": [
 						{
 							"text": "uploads-unleashed"
-						},
-						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
 						}
 					],
+					"age": {
+						"text": "2mo",
+						"tooltip": "Updated 2026-08-21"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/uploads-unleashed?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/uploads-unleashed/",
@@ -230,17 +467,21 @@
 				{
 					"title": "WP Approve User",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=16677",
-					"badges": [],
 					"meta": [
 						{
 							"text": "wp-approve-user"
-						},
-						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
 						}
 					],
+					"age": {
+						"text": "2mo",
+						"tooltip": "Updated 2026-08-21"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wp-approve-user?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wp-approve-user/",
@@ -256,17 +497,21 @@
 				{
 					"title": "WP Author Slug",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=149",
-					"badges": [],
 					"meta": [
 						{
 							"text": "wp-author-slug"
-						},
-						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
 						}
 					],
+					"age": {
+						"text": "2mo",
+						"tooltip": "Updated 2026-08-21"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wp-author-slug?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wp-author-slug/",
@@ -282,17 +527,21 @@
 				{
 					"title": "WP Display Header",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=12688",
-					"badges": [],
 					"meta": [
 						{
 							"text": "wp-display-header"
-						},
-						{
-							"text": "Updated 1 month ago",
-							"tooltip": "2026-09-02"
 						}
 					],
+					"age": {
+						"text": "1mo",
+						"tooltip": "Updated 2026-09-02"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wp-display-header?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wp-display-header/",
@@ -308,17 +557,21 @@
 				{
 					"title": "WP Last Login",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=13408",
-					"badges": [],
 					"meta": [
 						{
 							"text": "wp-last-login"
-						},
-						{
-							"text": "Updated 3 weeks ago",
-							"tooltip": "2026-09-16"
 						}
 					],
+					"age": {
+						"text": "3w",
+						"tooltip": "Updated 2026-09-16"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wp-last-login?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wp-last-login/",
@@ -334,17 +587,21 @@
 				{
 					"title": "WP Search Suggest",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=13050",
-					"badges": [],
 					"meta": [
 						{
 							"text": "wp-search-suggest"
-						},
-						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
 						}
 					],
+					"age": {
+						"text": "2mo",
+						"tooltip": "Updated 2026-08-21"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wp-search-suggest?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wp-search-suggest/",
@@ -360,17 +617,21 @@
 				{
 					"title": "WPMU Author Description",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=17940",
-					"badges": [],
 					"meta": [
 						{
 							"text": "wpmu-author-description"
-						},
-						{
-							"text": "Updated 14 years ago",
-							"tooltip": "2012-07-12"
 						}
 					],
+					"age": {
+						"text": "14y",
+						"tooltip": "Updated 2012-07-12"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wpmu-author-description?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wpmu-author-description/",
@@ -386,17 +647,21 @@
 				{
 					"title": "WPMU Network Site Users Dropdown",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=12552",
-					"badges": [],
 					"meta": [
 						{
 							"text": "wpmu-network-site-users-dropdown"
-						},
-						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-08-21"
 						}
 					],
+					"age": {
+						"text": "2mo",
+						"tooltip": "Updated 2026-08-21"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wpmu-network-site-users-dropdown?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wpmu-network-site-users-dropdown/",
@@ -412,22 +677,21 @@
 				{
 					"title": "Arya Stark",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=48935",
-					"badges": [
-						{
-							"label": "Closed",
-							"tone": "error"
-						}
-					],
 					"meta": [
 						{
 							"text": "arya-stark"
-						},
-						{
-							"text": "Updated 10 years ago",
-							"tooltip": "2016-04-27"
 						}
 					],
+					"age": {
+						"text": "10y",
+						"tooltip": "Updated 2016-04-27"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/arya-stark?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/arya-stark/",
@@ -438,27 +702,31 @@
 							"url": "https://downloads.wordpress.org/plugin/arya-stark.latest-stable.zip",
 							"icon": "download-alt"
 						}
-					]
+					],
+					"tone": "error",
+					"status": {
+						"icon": "🔒",
+						"text": "Closed"
+					}
 				},
 				{
 					"title": "WP Google Suggest",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=13214",
-					"badges": [
-						{
-							"label": "Closed: Author Request",
-							"tone": "error"
-						}
-					],
 					"meta": [
 						{
 							"text": "wp-google-suggest"
-						},
-						{
-							"text": "Updated 6 years ago",
-							"tooltip": "2020-11-23"
 						}
 					],
+					"age": {
+						"text": "6y",
+						"tooltip": "Updated 2020-11-23"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wp-google-suggest?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wp-google-suggest/",
@@ -469,27 +737,31 @@
 							"url": "https://downloads.wordpress.org/plugin/wp-google-suggest.latest-stable.zip",
 							"icon": "download-alt"
 						}
-					]
+					],
+					"tone": "error",
+					"status": {
+						"icon": "👤",
+						"text": "Closed: Author Request"
+					}
 				},
 				{
 					"title": "WP Save Custom Header",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=48065",
-					"badges": [
-						{
-							"label": "Closed",
-							"tone": "error"
-						}
-					],
 					"meta": [
 						{
 							"text": "wp-save-custom-header"
-						},
-						{
-							"text": "Updated 15 years ago",
-							"tooltip": "2011-05-11"
 						}
 					],
+					"age": {
+						"text": "15y",
+						"tooltip": "Updated 2011-05-11"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wp-save-custom-header?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wp-save-custom-header/",
@@ -500,58 +772,31 @@
 							"url": "https://downloads.wordpress.org/plugin/wp-save-custom-header.latest-stable.zip",
 							"icon": "download-alt"
 						}
-					]
-				},
-				{
-					"title": "wp-time-background-color",
-					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=64541",
-					"badges": [
-						{
-							"label": "Closed: Unused",
-							"tone": "error"
-						}
 					],
-					"meta": [
-						{
-							"text": "wp-time-background-color"
-						},
-						{
-							"text": "Updated 12 years ago",
-							"tooltip": "2014-12-15"
-						}
-					],
-					"links": [
-						{
-							"text": "View on WordPress.org",
-							"url": "https://wordpress.org/plugins/wp-time-background-color/",
-							"icon": "link"
-						},
-						{
-							"text": "Download",
-							"url": "https://downloads.wordpress.org/plugin/wp-time-background-color.latest-stable.zip",
-							"icon": "download-alt"
-						}
-					]
+					"tone": "error",
+					"status": {
+						"icon": "🔒",
+						"text": "Closed"
+					}
 				},
 				{
 					"title": "WP.org Site Icon",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=37008",
-					"badges": [
-						{
-							"label": "Closed",
-							"tone": "error"
-						}
-					],
 					"meta": [
 						{
 							"text": "wporg-site-icon"
-						},
-						{
-							"text": "Updated 11 years ago",
-							"tooltip": "2015-06-29"
 						}
 					],
+					"age": {
+						"text": "11y",
+						"tooltip": "Updated 2015-06-29"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wporg-site-icon?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/plugins/wporg-site-icon/",
@@ -562,59 +807,85 @@
 							"url": "https://downloads.wordpress.org/plugin/wporg-site-icon.latest-stable.zip",
 							"icon": "download-alt"
 						}
-					]
+					],
+					"tone": "error",
+					"status": {
+						"icon": "🔒",
+						"text": "Closed"
+					}
+				},
+				{
+					"title": "wp-time-background-color",
+					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=64541",
+					"meta": [
+						{
+							"text": "wp-time-background-color"
+						}
+					],
+					"age": {
+						"text": "12y",
+						"tooltip": "Updated 2014-12-15"
+					},
+					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/plugin/wp-time-background-color?tab=runs",
+							"icon": "shield"
+						},
+						{
+							"text": "View on WordPress.org",
+							"url": "https://wordpress.org/plugins/wp-time-background-color/",
+							"icon": "link"
+						},
+						{
+							"text": "Download",
+							"url": "https://downloads.wordpress.org/plugin/wp-time-background-color.latest-stable.zip",
+							"icon": "download-alt"
+						}
+					],
+					"tone": "error",
+					"status": {
+						"icon": "💤",
+						"text": "Closed: Unused"
+					}
 				},
 				{
 					"title": "Hello World Greeting",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=342576",
-					"badges": [
-						{
-							"label": "Rejected",
-							"tone": "error"
-						}
-					],
 					"meta": [
 						{
 							"text": "rejected-hello-world-greeting-rejected-2"
-						},
-						{
-							"text": "Updated 2 months ago",
-							"tooltip": "2026-07-30"
 						}
 					],
-					"links": [
-						{
-							"text": "View on WordPress.org",
-							"url": "https://wordpress.org/plugins/rejected-hello-world-greeting-rejected-2/",
-							"icon": "link"
-						}
-					]
+					"age": {
+						"text": "2mo",
+						"tooltip": "Updated 2026-07-30"
+					},
+					"links": [],
+					"tone": "muted",
+					"status": {
+						"icon": "🚫",
+						"text": "Rejected"
+					}
 				},
 				{
 					"title": "Hello World Greeting",
 					"url": "https://wordpress.org/plugins/wp-admin/post.php?action=edit&post=321620",
-					"badges": [
-						{
-							"label": "Rejected",
-							"tone": "error"
-						}
-					],
 					"meta": [
 						{
 							"text": "rejected-hello-world-greeting-rejected"
-						},
-						{
-							"text": "Updated 4 months ago",
-							"tooltip": "2026-06-01"
 						}
 					],
-					"links": [
-						{
-							"text": "View on WordPress.org",
-							"url": "https://wordpress.org/plugins/rejected-hello-world-greeting-rejected/",
-							"icon": "link"
-						}
-					]
+					"age": {
+						"text": "4mo",
+						"tooltip": "Updated 2026-06-01"
+					},
+					"links": [],
+					"tone": "muted",
+					"status": {
+						"icon": "🚫",
+						"text": "Rejected"
+					}
 				}
 			]
 		},
@@ -628,19 +899,61 @@
 			"type": "items",
 			"items": [
 				{
+					"title": "Arya Stark Testing",
+					"url": "https://wordpress.org/themes/wp-admin/post.php?action=edit&post=111841",
+					"meta": [
+						{
+							"text": "arya-stark-testing"
+						}
+					],
+					"age": {
+						"text": "6mo",
+						"tooltip": "Updated 2026-03-28"
+					},
+					"links": [],
+					"tone": "warning",
+					"status": {
+						"icon": "⏳",
+						"text": "In review or rejected"
+					}
+				},
+				{
+					"title": "Canary Build",
+					"url": "https://wordpress.org/themes/wp-admin/post.php?action=edit&post=132216",
+					"meta": [
+						{
+							"text": "canary-build"
+						}
+					],
+					"age": {
+						"text": "3mo",
+						"tooltip": "Updated 2026-07-02"
+					},
+					"links": [],
+					"tone": "warning",
+					"status": {
+						"icon": "⏳",
+						"text": "In review or rejected"
+					}
+				},
+				{
 					"title": "Test theme",
 					"url": "https://wordpress.org/themes/wp-admin/post.php?action=edit&post=10234",
-					"badges": [],
 					"meta": [
 						{
 							"text": "testr-2__trashed"
-						},
-						{
-							"text": "Updated 6 years ago",
-							"tooltip": "2020-07-07"
 						}
 					],
+					"age": {
+						"text": "6y",
+						"tooltip": "Updated 2020-07-07"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/theme/testr-2__trashed?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/themes/testr-2__trashed/",
@@ -656,17 +969,21 @@
 				{
 					"title": "Test theme",
 					"url": "https://wordpress.org/themes/wp-admin/post.php?action=edit&post=10235",
-					"badges": [],
 					"meta": [
 						{
 							"text": "testr-3__trashed"
-						},
-						{
-							"text": "Updated 6 years ago",
-							"tooltip": "2020-07-07"
 						}
 					],
+					"age": {
+						"text": "6y",
+						"tooltip": "Updated 2020-07-07"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/theme/testr-3__trashed?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/themes/testr-3__trashed/",
@@ -682,17 +999,21 @@
 				{
 					"title": "The Bootstrap",
 					"url": "https://wordpress.org/themes/wp-admin/post.php?action=edit&post=6007",
-					"badges": [],
 					"meta": [
 						{
 							"text": "the-bootstrap"
-						},
-						{
-							"text": "Updated 1 year ago",
-							"tooltip": "2025-07-24"
 						}
 					],
+					"age": {
+						"text": "1y",
+						"tooltip": "Updated 2025-07-24"
+					},
 					"links": [
+						{
+							"text": "Scans in Gandalf",
+							"url": "https://gandalf.wordpress.org/admin/subjects/theme/the-bootstrap?tab=runs",
+							"icon": "shield"
+						},
 						{
 							"text": "View on WordPress.org",
 							"url": "https://wordpress.org/themes/the-bootstrap/",
@@ -708,21 +1029,15 @@
 				{
 					"title": "Testr",
 					"url": "https://wordpress.org/themes/wp-admin/post.php?action=edit&post=12500",
-					"badges": [
-						{
-							"label": "Suspended",
-							"tone": "error"
-						}
-					],
 					"meta": [
 						{
 							"text": "testr"
-						},
-						{
-							"text": "Updated 6 years ago",
-							"tooltip": "2020-07-07"
 						}
 					],
+					"age": {
+						"text": "6y",
+						"tooltip": "Updated 2020-07-07"
+					},
 					"links": [
 						{
 							"text": "View on WordPress.org",
@@ -734,59 +1049,12 @@
 							"url": "https://downloads.wordpress.org/theme/testr.latest-stable.zip",
 							"icon": "download-alt"
 						}
-					]
-				},
-				{
-					"title": "Arya Stark Testing",
-					"url": "https://wordpress.org/themes/wp-admin/post.php?action=edit&post=111841",
-					"badges": [
-						{
-							"label": "In Review or Rejected",
-							"tone": "warning"
-						}
 					],
-					"meta": [
-						{
-							"text": "arya-stark-testing"
-						},
-						{
-							"text": "Updated 6 months ago",
-							"tooltip": "2026-03-28"
-						}
-					],
-					"links": [
-						{
-							"text": "View on WordPress.org",
-							"url": "https://wordpress.org/themes/arya-stark-testing/",
-							"icon": "link"
-						}
-					]
-				},
-				{
-					"title": "Canary Build",
-					"url": "https://wordpress.org/themes/wp-admin/post.php?action=edit&post=132216",
-					"badges": [
-						{
-							"label": "In Review or Rejected",
-							"tone": "warning"
-						}
-					],
-					"meta": [
-						{
-							"text": "canary-build"
-						},
-						{
-							"text": "Updated 3 months ago",
-							"tooltip": "2026-07-02"
-						}
-					],
-					"links": [
-						{
-							"text": "View on WordPress.org",
-							"url": "https://wordpress.org/themes/canary-build/",
-							"icon": "link"
-						}
-					]
+					"tone": "error",
+					"status": {
+						"icon": "⛔",
+						"text": "Suspended"
+					}
 				}
 			]
 		}

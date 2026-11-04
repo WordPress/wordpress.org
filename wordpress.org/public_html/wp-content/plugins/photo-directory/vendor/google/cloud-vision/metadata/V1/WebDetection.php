@@ -14,36 +14,8 @@ class WebDetection
         if (static::$is_initialized == true) {
           return;
         }
-        \GPBMetadata\Google\Api\Annotations::initOnce();
         $pool->internalAddGeneratedFile(
-            '
-ž
-*google/cloud/vision/v1/web_detection.protogoogle.cloud.vision.v1"Ô
-WebDetectionD
-web_entities (2..google.cloud.vision.v1.WebDetection.WebEntityK
-full_matching_images (2-.google.cloud.vision.v1.WebDetection.WebImageN
-partial_matching_images (2-.google.cloud.vision.v1.WebDetection.WebImageP
-pages_with_matching_images (2,.google.cloud.vision.v1.WebDetection.WebPageN
-visually_similar_images (2-.google.cloud.vision.v1.WebDetection.WebImageH
-best_guess_labels (2-.google.cloud.vision.v1.WebDetection.WebLabelB
-	WebEntity
-	entity_id (	
-score (
-description (	&
-WebImage
-url (	
-score (Ö
-WebPage
-url (	
-score (
-
-page_title (	K
-full_matching_images (2-.google.cloud.vision.v1.WebDetection.WebImageN
-partial_matching_images (2-.google.cloud.vision.v1.WebDetection.WebImage0
-WebLabel
-label (	
-language_code (	By
-com.google.cloud.vision.v1BWebDetectionProtoPZ<google.golang.org/genproto/googleapis/cloud/vision/v1;visionø¢GCVNbproto3'
+            "\x0A\x97\x08\x0A*google/cloud/vision/v1/web_detection.proto\x12\x16google.cloud.vision.v1\"\xD4\x06\x0A\x0CWebDetection\x12D\x0A\x0Cweb_entities\x18\x01 \x03(\x0B2..google.cloud.vision.v1.WebDetection.WebEntity\x12K\x0A\x14full_matching_images\x18\x02 \x03(\x0B2-.google.cloud.vision.v1.WebDetection.WebImage\x12N\x0A\x17partial_matching_images\x18\x03 \x03(\x0B2-.google.cloud.vision.v1.WebDetection.WebImage\x12P\x0A\x1Apages_with_matching_images\x18\x04 \x03(\x0B2,.google.cloud.vision.v1.WebDetection.WebPage\x12N\x0A\x17visually_similar_images\x18\x06 \x03(\x0B2-.google.cloud.vision.v1.WebDetection.WebImage\x12H\x0A\x11best_guess_labels\x18\x08 \x03(\x0B2-.google.cloud.vision.v1.WebDetection.WebLabel\x1AB\x0A\x09WebEntity\x12\x11\x0A\x09entity_id\x18\x01 \x01(\x09\x12\x0D\x0A\x05score\x18\x02 \x01(\x02\x12\x13\x0A\x0Bdescription\x18\x03 \x01(\x09\x1A&\x0A\x08WebImage\x12\x0B\x0A\x03url\x18\x01 \x01(\x09\x12\x0D\x0A\x05score\x18\x02 \x01(\x02\x1A\xD6\x01\x0A\x07WebPage\x12\x0B\x0A\x03url\x18\x01 \x01(\x09\x12\x0D\x0A\x05score\x18\x02 \x01(\x02\x12\x12\x0A\x0Apage_title\x18\x03 \x01(\x09\x12K\x0A\x14full_matching_images\x18\x04 \x03(\x0B2-.google.cloud.vision.v1.WebDetection.WebImage\x12N\x0A\x17partial_matching_images\x18\x05 \x03(\x0B2-.google.cloud.vision.v1.WebDetection.WebImage\x1A0\x0A\x08WebLabel\x12\x0D\x0A\x05label\x18\x01 \x01(\x09\x12\x15\x0A\x0Dlanguage_code\x18\x02 \x01(\x09Br\x0A\x1Acom.google.cloud.vision.v1B\x11WebDetectionProtoP\x01Z5cloud.google.com/go/vision/v2/apiv1/visionpb;visionpb\xF8\x01\x01\xA2\x02\x04GCVNb\x06proto3"
         , true);
 
         static::$is_initialized = true;

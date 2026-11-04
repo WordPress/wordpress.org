@@ -14,25 +14,8 @@ class Geometry
         if (static::$is_initialized == true) {
           return;
         }
-        \GPBMetadata\Google\Api\Annotations::initOnce();
         $pool->internalAddGeneratedFile(
-            '
-¿
-%google/cloud/vision/v1/geometry.protogoogle.cloud.vision.v1"
-Vertex	
-x (	
-y ("(
-NormalizedVertex	
-x (	
-y ("‡
-BoundingPoly0
-vertices (2.google.cloud.vision.v1.VertexE
-normalized_vertices (2(.google.cloud.vision.v1.NormalizedVertex"+
-Position	
-x (	
-y (	
-z (Bu
-com.google.cloud.vision.v1BGeometryProtoPZ<google.golang.org/genproto/googleapis/cloud/vision/v1;visionø¢GCVNbproto3'
+            "\x0A\xB8\x03\x0A%google/cloud/vision/v1/geometry.proto\x12\x16google.cloud.vision.v1\"\x1E\x0A\x06Vertex\x12\x09\x0A\x01x\x18\x01 \x01(\x05\x12\x09\x0A\x01y\x18\x02 \x01(\x05\"(\x0A\x10NormalizedVertex\x12\x09\x0A\x01x\x18\x01 \x01(\x02\x12\x09\x0A\x01y\x18\x02 \x01(\x02\"\x87\x01\x0A\x0CBoundingPoly\x120\x0A\x08vertices\x18\x01 \x03(\x0B2\x1E.google.cloud.vision.v1.Vertex\x12E\x0A\x13normalized_vertices\x18\x02 \x03(\x0B2(.google.cloud.vision.v1.NormalizedVertex\"+\x0A\x08Position\x12\x09\x0A\x01x\x18\x01 \x01(\x02\x12\x09\x0A\x01y\x18\x02 \x01(\x02\x12\x09\x0A\x01z\x18\x03 \x01(\x02Bn\x0A\x1Acom.google.cloud.vision.v1B\x0DGeometryProtoP\x01Z5cloud.google.com/go/vision/v2/apiv1/visionpb;visionpb\xF8\x01\x01\xA2\x02\x04GCVNb\x06proto3"
         , true);
 
         static::$is_initialized = true;

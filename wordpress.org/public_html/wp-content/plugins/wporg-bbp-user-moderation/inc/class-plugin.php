@@ -367,6 +367,7 @@ class Plugin {
 					'posts_per_page' => 1,
 					'post_status'    => 'archived',
 					'author'         => $user_id,
+					'orderby'        => 'modified',
 				) ),
 			];
 

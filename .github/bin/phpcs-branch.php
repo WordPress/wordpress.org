@@ -68,7 +68,7 @@ function emit_annotations( $report, $file_override = null ) {
  * configured in phpcs.xml.dist can scan them concurrently.
  */
 function run_phpcs( $files, $bin_dir ) {
-	$args = implode( ' ', array_map( 'escapeshellarg', $files ) ) . ' -snq';
+	$args = implode( ' ', array_map( 'escapeshellarg', $files ) ) . ' -sq';
 
 	// Only produce the JSON report when there are annotations to feed.
 	if ( getenv( 'GITHUB_ACTIONS' ) ) {
@@ -110,10 +110,10 @@ function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
 	exec( "$git diff $branch_arg $file_arg > $diff" );
 
 	exec( "$git show " . escapeshellarg( "$base_branch:$file" ) . " > $test_file" );
-	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -snq > $orig_json" );
+	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -sq > $orig_json" );
 
 	exec( "cat $file_arg > $test_file" );
-	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -snq > $new_json" );
+	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -sq > $new_json" );
 
 	$cmd = "$bin_dir/phpcs-changed -s --diff $diff --phpcs-orig $orig_json --phpcs-new $new_json";
 	exec( $cmd, $output, $exec_exit_status );

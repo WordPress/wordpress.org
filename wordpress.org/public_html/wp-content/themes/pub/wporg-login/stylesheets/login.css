@@ -46,8 +46,6 @@ body.route-pending-create {
 
 .wp-core-ui .button-primary, .wp-core-ui.login .button-primary {
 	width: 100%;
-	height: 40px;
-	font-size: 14px;
 }
 .hidden,
 #backtoblog {
@@ -578,20 +576,14 @@ form {
 }
 
 .language-switcher label {
+	display: inline-block;
 	margin-right: .5em;
+	margin-bottom: 0;
 }
 
 .rtl .language-switcher label {
 	margin-right: 0;
 	margin-left: .5em;
-}
-
-.language-switcher span.dashicons {
-	line-height: 30px;
-}
-
-.language-switcher select {
-	height: 30px;
 }
 
 @media (max-width: 375px) {

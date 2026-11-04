@@ -18,36 +18,8 @@ class ProductSearch
         \GPBMetadata\Google\Cloud\Vision\V1\Geometry::initOnce();
         \GPBMetadata\Google\Cloud\Vision\V1\ProductSearchService::initOnce();
         \GPBMetadata\Google\Protobuf\Timestamp::initOnce();
-        \GPBMetadata\Google\Api\Annotations::initOnce();
         $pool->internalAddGeneratedFile(
-            '
-¬	
-+google/cloud/vision/v1/product_search.protogoogle.cloud.vision.v1%google/cloud/vision/v1/geometry.proto3google/cloud/vision/v1/product_search_service.protogoogle/protobuf/timestamp.protogoogle/api/annotations.proto"º
-ProductSearchParams;
-bounding_poly	 (2$.google.cloud.vision.v1.BoundingPoly:
-product_set (	B%úA"
- vision.googleapis.com/ProductSet
-product_categories (	
-filter (	"ˆ
-ProductSearchResults.
-
-index_time (2.google.protobuf.TimestampD
-results (23.google.cloud.vision.v1.ProductSearchResults.Result[
-product_grouped_results (2:.google.cloud.vision.v1.ProductSearchResults.GroupedResultX
-Result0
-product (2.google.cloud.vision.v1.Product
-score (
-image (	S
-ObjectAnnotation
-mid (	
-language_code (	
-name (	
-score (í
-GroupedResult;
-bounding_poly (2$.google.cloud.vision.v1.BoundingPolyD
-results (23.google.cloud.vision.v1.ProductSearchResults.ResultY
-object_annotations (2=.google.cloud.vision.v1.ProductSearchResults.ObjectAnnotationBz
-com.google.cloud.vision.v1BProductSearchProtoPZ<google.golang.org/genproto/googleapis/cloud/vision/v1;visionø¢GCVNbproto3'
+            "\x0A\x87\x09\x0A+google/cloud/vision/v1/product_search.proto\x12\x16google.cloud.vision.v1\x1A%google/cloud/vision/v1/geometry.proto\x1A3google/cloud/vision/v1/product_search_service.proto\x1A\x1Fgoogle/protobuf/timestamp.proto\"\xBA\x01\x0A\x13ProductSearchParams\x12;\x0A\x0Dbounding_poly\x18\x09 \x01(\x0B2\$.google.cloud.vision.v1.BoundingPoly\x12:\x0A\x0Bproduct_set\x18\x06 \x01(\x09B%\xFAA\"\x0A vision.googleapis.com/ProductSet\x12\x1A\x0A\x12product_categories\x18\x07 \x03(\x09\x12\x0E\x0A\x06filter\x18\x08 \x01(\x09\"\x88\x05\x0A\x14ProductSearchResults\x12.\x0A\x0Aindex_time\x18\x02 \x01(\x0B2\x1A.google.protobuf.Timestamp\x12D\x0A\x07results\x18\x05 \x03(\x0B23.google.cloud.vision.v1.ProductSearchResults.Result\x12[\x0A\x17product_grouped_results\x18\x06 \x03(\x0B2:.google.cloud.vision.v1.ProductSearchResults.GroupedResult\x1AX\x0A\x06Result\x120\x0A\x07product\x18\x01 \x01(\x0B2\x1F.google.cloud.vision.v1.Product\x12\x0D\x0A\x05score\x18\x02 \x01(\x02\x12\x0D\x0A\x05image\x18\x03 \x01(\x09\x1AS\x0A\x10ObjectAnnotation\x12\x0B\x0A\x03mid\x18\x01 \x01(\x09\x12\x15\x0A\x0Dlanguage_code\x18\x02 \x01(\x09\x12\x0C\x0A\x04name\x18\x03 \x01(\x09\x12\x0D\x0A\x05score\x18\x04 \x01(\x02\x1A\xED\x01\x0A\x0DGroupedResult\x12;\x0A\x0Dbounding_poly\x18\x01 \x01(\x0B2\$.google.cloud.vision.v1.BoundingPoly\x12D\x0A\x07results\x18\x02 \x03(\x0B23.google.cloud.vision.v1.ProductSearchResults.Result\x12Y\x0A\x12object_annotations\x18\x03 \x03(\x0B2=.google.cloud.vision.v1.ProductSearchResults.ObjectAnnotationBs\x0A\x1Acom.google.cloud.vision.v1B\x12ProductSearchProtoP\x01Z5cloud.google.com/go/vision/v2/apiv1/visionpb;visionpb\xF8\x01\x01\xA2\x02\x04GCVNb\x06proto3"
         , true);
 
         static::$is_initialized = true;

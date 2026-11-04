@@ -32,6 +32,8 @@ Follow the link below to login and confirm the release.
 
 <%5$s>
 
+Once confirmed, the new version is released when the Stable tag in trunk/readme.txt points to it.
+
 This notice has been sent to all plugin committers.', 'wporg-plugins' ),
 			$this->user_text( $this->user ),
 			$this->user_text( $this->args['who'] ),

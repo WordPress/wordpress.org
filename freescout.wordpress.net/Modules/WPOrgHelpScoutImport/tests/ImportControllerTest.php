@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Queue;
 use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\Run;
 use Modules\WPOrgHelpScoutImport\Jobs\ImportPage;
+use Modules\WPOrgHelpScoutImport\Services\Copies;
 
 require_once __DIR__ . '/ImportTestCase.php';
 
@@ -299,6 +300,33 @@ final class ImportControllerTest extends ImportTestCase {
 
 		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() );
 		$this->assertSame( 2, Run::query()->count() );
+	}
+
+	/**
+	 * The page shows how far pointing WordPress.org at a mailbox's imported conversations got, and why it stopped.
+	 *
+	 * @return void
+	 */
+	public function test_shows_how_far_wordpress_org_was_pointed(): void {
+		$this->post( route( 'wporghelpscoutimport.start' ), $this->start_form() );
+		$mailbox_id = (int) Run::query()->firstOrFail()->mailbox_id;
+		Copies::start( $mailbox_id );
+
+		$this->assertStringContainsString( '0 of 0 sent so far', $this->get( route( 'wporghelpscoutimport.index' ) )->getContent() );
+
+		Copies::note(
+			$mailbox_id,
+			(string) Copies::get( $mailbox_id )['run'],
+			array(
+				'sent'        => 3,
+				'finished_at' => '2026-10-02 10:00:00',
+				'error'       => 'WordPress.org answered 503.',
+			)
+		);
+		$page = $this->get( route( 'wporghelpscoutimport.index' ) )->getContent();
+
+		$this->assertStringContainsString( '3 sent, done', $page );
+		$this->assertStringContainsString( 'WordPress.org answered 503.', $page );
 	}
 
 	/**

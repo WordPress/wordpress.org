@@ -184,7 +184,7 @@ class Users {
 			'href'   => bbp_get_user_profile_url( $user_id ) . 'replied-to/',
 		) );
 
-		if ( function_exists( 'bbp_is_engagements_active' ) && bbp_is_engagements_active() ) {
+		if ( bbp_is_engagements_active() ) {
 			$wp_admin_bar->add_menu( array(
 				'parent' => 'user-topics',
 				'id'     => 'engagements',

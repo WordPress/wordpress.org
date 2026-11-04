@@ -26,6 +26,7 @@ use Psr\Cache\CacheItemPoolInterface;
 class FetchAuthTokenCache implements
     FetchAuthTokenInterface,
     GetQuotaProjectInterface,
+    GetUniverseDomainInterface,
     SignBlobInterface,
     ProjectIdProviderInterface,
     UpdateMetadataInterface
@@ -38,31 +39,35 @@ class FetchAuthTokenCache implements
     private $fetcher;
 
     /**
-     * @var array
+     * @var int
      */
-    private $cacheConfig;
-
-    /**
-     * @var CacheItemPoolInterface
-     */
-    private $cache;
+    private $eagerRefreshThresholdSeconds = 10;
 
     /**
      * @param FetchAuthTokenInterface $fetcher A credentials fetcher
-     * @param array $cacheConfig Configuration for the cache
+     * @param array<mixed>|null $cacheConfig Configuration for the cache
      * @param CacheItemPoolInterface $cache
      */
     public function __construct(
         FetchAuthTokenInterface $fetcher,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null
     ) {
         $this->fetcher = $fetcher;
         $this->cache = $cache;
         $this->cacheConfig = array_merge([
             'lifetime' => 1500,
             'prefix' => '',
+            'cacheUniverseDomain' => $fetcher instanceof Credentials\GCECredentials,
         ], (array) $cacheConfig);
+    }
+
+    /**
+     * @return FetchAuthTokenInterface
+     */
+    public function getFetcher()
+    {
+        return $this->fetcher;
     }
 
     /**
@@ -71,11 +76,11 @@ class FetchAuthTokenCache implements
      * Checks the cache for a valid auth token and fetches the auth tokens
      * from the supplied fetcher.
      *
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @return array the response
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> the response
      * @throws \Exception
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         if ($cached = $this->fetchAuthTokenFromCache()) {
             return $cached;
@@ -97,7 +102,7 @@ class FetchAuthTokenCache implements
     }
 
     /**
-     * @return array|null
+     * @return array<mixed>|null
      */
     public function getLastReceivedToken()
     {
@@ -107,10 +112,10 @@ class FetchAuthTokenCache implements
     /**
      * Get the client name from the fetcher.
      *
-     * @param callable $httpHandler An HTTP handler to deliver PSR7 requests.
+     * @param callable|null $httpHandler An HTTP handler to deliver PSR7 requests.
      * @return string
      */
-    public function getClientName(callable $httpHandler = null)
+    public function getClientName(?callable $httpHandler = null)
     {
         if (!$this->fetcher instanceof SignBlobInterface) {
             throw new \RuntimeException(
@@ -118,7 +123,7 @@ class FetchAuthTokenCache implements
                 'Google\Auth\SignBlobInterface'
             );
         }
-        
+
         return $this->fetcher->getClientName($httpHandler);
     }
 
@@ -142,11 +147,14 @@ class FetchAuthTokenCache implements
             );
         }
 
-        // Pass the access token from cache to GCECredentials for signing a blob.
-        // This saves a call to the metadata server when a cached token exists.
-        if ($this->fetcher instanceof Credentials\GCECredentials) {
+        // Pass the access token from cache for credentials that sign blobs
+        // using the IAM API. This saves a call to fetch an access token when a
+        // cached token exists.
+        if ($this->fetcher instanceof Credentials\GCECredentials
+            || $this->fetcher instanceof Credentials\ImpersonatedServiceAccountCredentials
+        ) {
             $cached = $this->fetchAuthTokenFromCache();
-            $accessToken = isset($cached['access_token']) ? $cached['access_token'] : null;
+            $accessToken = $cached['access_token'] ?? null;
             return $this->fetcher->signBlob($stringToSign, $forceOpenSsl, $accessToken);
         }
 
@@ -164,17 +172,19 @@ class FetchAuthTokenCache implements
         if ($this->fetcher instanceof GetQuotaProjectInterface) {
             return $this->fetcher->getQuotaProject();
         }
+
+        return null;
     }
 
-    /*
+    /**
      * Get the Project ID from the fetcher.
      *
-     * @param callable $httpHandler Callback which delivers psr7 request
+     * @param callable|null $httpHandler Callback which delivers psr7 request
      * @return string|null
      * @throws \RuntimeException If the fetcher does not implement
      *     `Google\Auth\ProvidesProjectIdInterface`.
      */
-    public function getProjectId(callable $httpHandler = null)
+    public function getProjectId(?callable $httpHandler = null)
     {
         if (!$this->fetcher instanceof ProjectIdProviderInterface) {
             throw new \RuntimeException(
@@ -183,23 +193,49 @@ class FetchAuthTokenCache implements
             );
         }
 
+        // Pass the access token from cache for credentials that require an
+        // access token to fetch the project ID. This saves a call to fetch an
+        // access token when a cached token exists.
+        if ($this->fetcher instanceof Credentials\ExternalAccountCredentials) {
+            $cached = $this->fetchAuthTokenFromCache();
+            $accessToken = $cached['access_token'] ?? null;
+            return $this->fetcher->getProjectId($httpHandler, $accessToken);
+        }
+
         return $this->fetcher->getProjectId($httpHandler);
+    }
+
+    /*
+     * Get the Universe Domain from the fetcher.
+     *
+     * @return string
+     */
+    public function getUniverseDomain(): string
+    {
+        if ($this->fetcher instanceof GetUniverseDomainInterface) {
+            if ($this->cacheConfig['cacheUniverseDomain']) {
+                return $this->getCachedUniverseDomain($this->fetcher);
+            }
+            return $this->fetcher->getUniverseDomain();
+        }
+
+        return GetUniverseDomainInterface::DEFAULT_UNIVERSE_DOMAIN;
     }
 
     /**
      * Updates metadata with the authorization token.
      *
-     * @param array $metadata metadata hashmap
+     * @param array<mixed> $metadata metadata hashmap
      * @param string $authUri optional auth uri
-     * @param callable $httpHandler callback which delivers psr7 request
-     * @return array updated metadata hashmap
+     * @param callable|null $httpHandler callback which delivers psr7 request
+     * @return array<mixed> updated metadata hashmap
      * @throws \RuntimeException If the fetcher does not implement
      *     `Google\Auth\UpdateMetadataInterface`.
      */
     public function updateMetadata(
         $metadata,
         $authUri = null,
-        callable $httpHandler = null
+        ?callable $httpHandler = null
     ) {
         if (!$this->fetcher instanceof UpdateMetadataInterface) {
             throw new \RuntimeException(
@@ -217,6 +253,10 @@ class FetchAuthTokenCache implements
                 $metadata[self::AUTH_METADATA_KEY] = [
                     'Bearer ' . $cached['access_token']
                 ];
+            } elseif (isset($cached['id_token'])) {
+                $metadata[self::AUTH_METADATA_KEY] = [
+                    'Bearer ' . $cached['id_token']
+                ];
             }
         }
 
@@ -233,6 +273,10 @@ class FetchAuthTokenCache implements
         return $newMetadata;
     }
 
+    /**
+     * @param string|null $authUri
+     * @return array<mixed>|null
+     */
     private function fetchAuthTokenFromCache($authUri = null)
     {
         // Use the cached value if its available.
@@ -254,7 +298,7 @@ class FetchAuthTokenCache implements
                 // (for JwtAccess and ID tokens)
                 return $cached;
             }
-            if (time() < $cached['expires_at']) {
+            if ((time() + $this->eagerRefreshThresholdSeconds) < $cached['expires_at']) {
                 // access token is not expired
                 return $cached;
             }
@@ -263,6 +307,11 @@ class FetchAuthTokenCache implements
         return null;
     }
 
+    /**
+     * @param array<mixed> $authToken
+     * @param string|null  $authUri
+     * @return void
+     */
     private function saveAuthTokenInCache($authToken, $authUri = null)
     {
         if (isset($authToken['access_token']) ||
@@ -274,5 +323,17 @@ class FetchAuthTokenCache implements
 
             $this->setCachedValue($cacheKey, $authToken);
         }
+    }
+
+    private function getCachedUniverseDomain(GetUniverseDomainInterface $fetcher): string
+    {
+        $cacheKey = $this->getFullCacheKey($fetcher->getCacheKey() . 'universe_domain'); // @phpstan-ignore-line
+        if ($universeDomain = $this->getCachedValue($cacheKey)) {
+            return $universeDomain;
+        }
+
+        $universeDomain = $fetcher->getUniverseDomain();
+        $this->setCachedValue($cacheKey, $universeDomain);
+        return $universeDomain;
     }
 }

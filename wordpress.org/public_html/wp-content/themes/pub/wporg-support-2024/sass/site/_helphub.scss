@@ -41,7 +41,7 @@ body.helphub-with-sidebar {
 			padding-right: 3rem;
 			width: $size__site-sidebar;
 
-			& + #main-content {
+			+ #main-content {
 				float: right;
 				width: ( 100 - $size__site-sidebar );
 
@@ -82,10 +82,6 @@ body.helphub-with-sidebar {
 				}
 			}
 		}
-	}
-
-	#main-content {
-		margin-top: 0;
 	}
 
 	.comment-respond {

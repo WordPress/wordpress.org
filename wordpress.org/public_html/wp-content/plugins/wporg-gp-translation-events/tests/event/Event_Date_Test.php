@@ -5,6 +5,7 @@
  * @package wporg-gp-translation-events
  */
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Wporg\Tests\Base_Test as TestCase;
 use Wporg\TranslationEvents\Event\Event_Start_Date;
 
@@ -31,5 +32,34 @@ class Event_Date_Test extends TestCase {
 		$this->assertEquals( '2024-03-07 20:00:00', $start->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( '2024-03-07 12:00:00', $start->utc()->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( '2024-03-07 12:00:00', strval( $start ) );
+	}
+
+	/**
+	 * The time element's datetime attribute is an ISO 8601 UTC timestamp, so browsers convert it unambiguously.
+	 *
+	 * @param string $method The print method to call.
+	 */
+	#[DataProvider( 'data_print_methods' )]
+	public function test_time_element_datetime_is_iso_8601_utc( string $method ) {
+		$start = new Event_Start_Date( '2025-04-05 11:30:00', new \DateTimeZone( 'Europe/Berlin' ) );
+
+		ob_start();
+		$start->$method();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'datetime="2025-04-05T11:30:00Z"', $html );
+	}
+
+	/**
+	 * The methods that print a time element.
+	 *
+	 * @return array[]
+	 */
+	public static function data_print_methods(): array {
+		return array(
+			'relative'              => array( 'print_relative_time_html' ),
+			'absolute and relative' => array( 'print_absolute_and_relative_time_html' ),
+			'absolute'              => array( 'print_time_html' ),
+		);
 	}
 }

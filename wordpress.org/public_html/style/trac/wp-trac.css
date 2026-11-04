@@ -24,6 +24,14 @@
 	}
 }
 
+/* Push the header icons right; the global header only does this for html[lang=en-US], Trac is lang=en. */
+@media (max-width: 889px) {
+
+	.wp-block-group.global-header .wp-block-image.global-header__wporg-logo-mark {
+		flex-basis: 100%;
+	}
+}
+
 #main {
 	clear: both;
 }
@@ -87,6 +95,18 @@ footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 #headline :link:hover, #headline :visited:hover,
 #metanav :link:hover, #metanav :visited:hover {
 	background: 0;
+}
+
+/* Trac's stock link hover ring reads as a thick outline on the site headers, footers, and nav bars. */
+header :link:hover, header :visited:hover,
+footer :link:hover, footer :visited:hover,
+#headline :link:hover, #headline :visited:hover,
+#metanav :link:hover, #metanav :visited:hover,
+#metanav form.trac-logout button:hover,
+#wporg-header :link:hover, #wporg-header :visited:hover,
+#footer :link:hover, #footer :visited:hover {
+	border-radius: 0;
+	box-shadow: none;
 }
 
 #headline .menu {
@@ -425,6 +445,11 @@ div.attachment #preview .diff .entry h2 a {
 	display: none;
 }
 
+/* Undo the inline 60% width on the Syntax Highlighting preview. */
+#content.prefs div.code pre {
+	width: auto;
+}
+
 /* =report.css */
 #content.report .tickets tbody tr:hover {
 	background: #eee;
@@ -653,10 +678,6 @@ h2 {
 /* =trac.css */
 #main, #main th, #main tr, #main h1, #main h2, #main h3, #main h4 {
 	font-family: "Open Sans", sans-serif;
-}
-
-body {
-	min-width: 48.5em; /* don't let it get ugly unless responsive */
 }
 
 body, th, tr {
@@ -2364,7 +2385,6 @@ table.listing th.desc a::after {
 	border: none !important;
 	display: block;
 	height: 100%;
-	width: 100%;
 	padding: 0 12px 2px;
 }
 
@@ -2690,7 +2710,6 @@ a.mention.me {
 @media (max-width: 640px) {
 
 	body {
-		min-width: 1em; /* small value to override previous min-width */
 		-webkit-text-size-adjust: 100%;
 	}
 

@@ -2500,7 +2500,7 @@ h3#comments {
 /* Media Queries
 ============================================================= */
 
-@media screen and ( min-width: 415px ) {
+@media screen and ( min-width: 320px ) {
 	.wptv-hero .secondary-videos li {
 		max-width: initial;
 		min-height: 75px;
@@ -2591,6 +2591,17 @@ h3#comments {
 	#footer div.menu li {
 		display: inline-block;
 		margin: 0 10px;
+	}
+}
+
+@media screen and ( max-width: 939px ) {
+	.video-list.four-col {
+		display: grid;
+		grid-template-columns: repeat( auto-fill, minmax( 170px, 1fr ) );
+	}
+
+	.video-list.four-col:after {
+		display: none;
 	}
 }
 

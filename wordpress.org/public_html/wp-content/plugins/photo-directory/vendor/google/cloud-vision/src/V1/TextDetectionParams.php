@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Parameters for text detections. This is used to control TEXT_DETECTION and
@@ -23,7 +23,18 @@ class TextDetectionParams extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>bool enable_text_detection_confidence_score = 9;</code>
      */
-    private $enable_text_detection_confidence_score = false;
+    protected $enable_text_detection_confidence_score = false;
+    /**
+     * A list of advanced OCR options to further fine-tune OCR behavior.
+     * Current valid values are:
+     * - `legacy_layout`: a heuristics layout detection algorithm, which serves as
+     * an alternative to the current ML-based layout detection algorithm.
+     * Customers can choose the best suitable layout algorithm based on their
+     * situation.
+     *
+     * Generated from protobuf field <code>repeated string advanced_ocr_options = 11;</code>
+     */
+    private $advanced_ocr_options;
 
     /**
      * Constructor.
@@ -35,6 +46,13 @@ class TextDetectionParams extends \Google\Protobuf\Internal\Message
      *           By default, Cloud Vision API only includes confidence score for
      *           DOCUMENT_TEXT_DETECTION result. Set the flag to true to include confidence
      *           score for TEXT_DETECTION as well.
+     *     @type string[] $advanced_ocr_options
+     *           A list of advanced OCR options to further fine-tune OCR behavior.
+     *           Current valid values are:
+     *           - `legacy_layout`: a heuristics layout detection algorithm, which serves as
+     *           an alternative to the current ML-based layout detection algorithm.
+     *           Customers can choose the best suitable layout algorithm based on their
+     *           situation.
      * }
      */
     public function __construct($data = NULL) {
@@ -68,6 +86,42 @@ class TextDetectionParams extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->enable_text_detection_confidence_score = $var;
+
+        return $this;
+    }
+
+    /**
+     * A list of advanced OCR options to further fine-tune OCR behavior.
+     * Current valid values are:
+     * - `legacy_layout`: a heuristics layout detection algorithm, which serves as
+     * an alternative to the current ML-based layout detection algorithm.
+     * Customers can choose the best suitable layout algorithm based on their
+     * situation.
+     *
+     * Generated from protobuf field <code>repeated string advanced_ocr_options = 11;</code>
+     * @return RepeatedField<string>
+     */
+    public function getAdvancedOcrOptions()
+    {
+        return $this->advanced_ocr_options;
+    }
+
+    /**
+     * A list of advanced OCR options to further fine-tune OCR behavior.
+     * Current valid values are:
+     * - `legacy_layout`: a heuristics layout detection algorithm, which serves as
+     * an alternative to the current ML-based layout detection algorithm.
+     * Customers can choose the best suitable layout algorithm based on their
+     * situation.
+     *
+     * Generated from protobuf field <code>repeated string advanced_ocr_options = 11;</code>
+     * @param string[] $var
+     * @return $this
+     */
+    public function setAdvancedOcrOptions($var)
+    {
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::STRING);
+        $this->advanced_ocr_options = $arr;
 
         return $this;
     }

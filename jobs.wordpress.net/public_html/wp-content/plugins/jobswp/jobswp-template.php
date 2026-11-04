@@ -246,3 +246,16 @@ function jobswp_allowed_tags() {
 	}
 	return htmlentities( $allowed );
 }
+
+/**
+ * Returns the list of supported how-to-apply methods.
+ *
+ * @return array<string, string> List of how-to-apply methods, with the key being
+ *                               the method and the value being the label.
+ */
+function jobswp_get_howtoapply_methods() {
+	return [
+		'email' => __( 'Email', 'jobswp' ),
+		'web'   => __( 'Online Form', 'jobswp' ),
+	];
+}

@@ -5,7 +5,8 @@ Agents log in with their WordPress.org account, through login.wordpress.org. Apa
 ## How it works
 
 - **Logging in:** "Log in with WordPress.org" replaces the password form. The account needs two-factor authentication, and blocked accounts can't log in. Accounts are checked again every hour, so a blocked account loses its session too; if WordPress.org can't be reached, the session goes on until the next check.
-- **Users:** every FreeScout user is connected to a WordPress.org account. Administrators add users by WordPress.org username, and the name, email, and avatar come from that account. They're updated at every login, and can't be changed in FreeScout. If the WordPress.org email already belongs to another user or a mailbox, the old email stays and a warning is logged.
+- **Users:** every FreeScout user is connected to a WordPress.org account. Administrators add users by WordPress.org username, and the name, email, and avatar come from that account. They're updated at every login, and can't be changed in FreeScout. On their profile, the username links to their WordPress.org profile. If the WordPress.org email already belongs to another user or a mailbox, the old email stays and a warning is logged.
+- **Users who leave:** disable them; deleting users is refused. Disabling keeps their mailbox permissions, so remove those by hand.
 - **Existing users:** administrators connect them on their profile, or with `php artisan wporgsso:connect <email> <wporg-username>`.
 - **Passwords:** password logins (except break-glass), resets, and invites are closed. Users have no FreeScout password: new users get none, and logging in with WordPress.org clears the one they had. Only break-glass passwords stay.
 - **Deleting a mailbox:** instead of your password, you type the mailbox name to confirm, exactly as it's written. Administrators with a break-glass password are asked for both.

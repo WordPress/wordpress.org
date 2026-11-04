@@ -1,4 +1,9 @@
 <?php
+/**
+ * Tests the Slack #props handler.
+ *
+ * @package Dotorg\Slack\Props
+ */
 
 namespace Dotorg\Slack\Props\Tests;
 use wpdbStub;
@@ -264,12 +269,22 @@ class Test_Props_Lib extends TestCase {
 		$cases = array(
 			'none' => array(
 				'message'  => 'thanks to <@U039G75HC> for great work on',
-				'expected' => array(),
+				'expected' => array(
+					'C0FRG66LR' => 'props',
+				),
+			),
+
+			'unescaped channel' => array(
+				'message'  => '#props to @Foo Bar for organising',
+				'expected' => array(
+					'C0FRG66LR' => 'props',
+				),
 			),
 
 			'single team' => array(
 				'message'  => 'thanks to <@U02RR7CQY> for great work on the <#C037W5S7X|community-team>',
 				'expected' => array(
+					'C0FRG66LR' => 'props',
 					'C037W5S7X' => 'community-team',
 				),
 			),
@@ -277,6 +292,7 @@ class Test_Props_Lib extends TestCase {
 			'multiple teams' => array(
 				'message'  => 'thanks to <@U039G75HC> for great work in <#C037W5S7X|community-team> and <#C08M59V3P|meta-wordcamp>',
 				'expected' => array(
+					'C0FRG66LR' => 'props',
 					'C037W5S7X' => 'community-team',
 					'C08M59V3P' => 'meta-wordcamp',
 				),
@@ -419,6 +435,23 @@ class Test_Props_Lib extends TestCase {
 				),
 
 				'expected' => 'Props to @aurooba for title fix in https://github.com/WordPress/wordpress.org/pull/73, and to @estelaris for facilitating the #docs triage :thank-you::pizza:',
+			),
+
+			'unknown channel' => array(
+				'elements' => array(
+					(object) array(
+						'type'       => 'channel',
+						'channel_id' => 'C0123ABCD',
+					),
+					(object) array(
+						'type' => 'text',
+						'text' => ' thanks',
+					),
+				),
+
+				'user_map'    => array(),
+				'channel_map' => array(),
+				'expected'    => '#C0123ABCD thanks',
 			),
 		);
 

@@ -72,6 +72,23 @@ final class SyncSenderAvatarTest extends TestCase {
 	}
 
 	/**
+	 * Pages waiting for the photo stop once the job is done, whatever it did.
+	 *
+	 * @return void
+	 */
+	public function test_ends_the_wait_for_the_photo(): void {
+		$sender             = $this->create_sender();
+		$sender->photo_url  = 'uploaded.png';
+		$sender->photo_type = Customer::PHOTO_TYPE_UKNOWN;
+		$sender->save();
+		\Cache::put( SyncSenderAvatar::pending_key( (int) $sender->id ), true, SyncSenderAvatar::PENDING_MINUTES );
+
+		( new SyncSenderAvatar( (int) $sender->id, 'https://secure.gravatar.com/avatar/abc?d=404' ) )->handle();
+
+		$this->assertFalse( \Cache::has( SyncSenderAvatar::pending_key( (int) $sender->id ) ) );
+	}
+
+	/**
 	 * A synced photo goes once the account's avatar is removed.
 	 *
 	 * @return void

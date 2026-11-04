@@ -1,4 +1,9 @@
 <?php
+/**
+ * The date of an event.
+ *
+ * @package wporg-gp-translation-events
+ */
 
 namespace Wporg\TranslationEvents\Event;
 
@@ -16,7 +21,19 @@ use Wporg\TranslationEvents\Translation_Events;
  * @package Wporg\TranslationEvents
  */
 abstract class Event_Date extends DateTimeImmutable {
+	/**
+	 * The event's timezone.
+	 *
+	 * @var DateTimeZone
+	 */
 	protected $event_timezone;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string            $date     The date in UTC, or 'now'.
+	 * @param DateTimeZone|null $timezone The event's timezone. Default UTC.
+	 */
 	public function __construct( string $date, ?DateTimeZone $timezone = null ) {
 		if ( ! $timezone ) {
 			$timezone = new DateTimeZone( 'UTC' );
@@ -37,6 +54,11 @@ abstract class Event_Date extends DateTimeImmutable {
 		$this->event_timezone = $timezone;
 	}
 
+	/**
+	 * Get the event's timezone.
+	 *
+	 * @return DateTimeZone The timezone.
+	 */
 	public function timezone() {
 		return $this->event_timezone;
 	}
@@ -58,15 +80,23 @@ abstract class Event_Date extends DateTimeImmutable {
 		return $this->setTimeZone( new DateTimeZone( 'UTC' ) );
 	}
 
+	/**
+	 * Whether the date has passed.
+	 *
+	 * @return bool True if the date is before now.
+	 */
 	public function is_in_the_past() {
 		return $this->utc() < Translation_Events::now();
 	}
 
+	/**
+	 * Print the time relative to now, e.g. "in 3 weeks", as a time element.
+	 */
 	public function print_relative_time_html() {
 		echo wp_kses(
 			'<time
 				class="event-utc-time relative' . ( $this->is_in_the_past() ? '' : ' future' ) . '"
-				datetime="' . esc_attr( $this ) . '">' . $this->get_relative_time() . '</time>',
+				datetime="' . esc_attr( $this->utc()->format( 'Y-m-d\TH:i:s\Z' ) ) . '">' . $this->get_relative_time() . '</time>',
 			array(
 				'span' => array(),
 				'time' => array(
@@ -77,6 +107,11 @@ abstract class Event_Date extends DateTimeImmutable {
 		);
 	}
 
+	/**
+	 * Get the time relative to now, e.g. "3 weeks ago" or "next month".
+	 *
+	 * @return string The relative time.
+	 */
 	public function get_relative_time() {
 		$relative = human_time_diff( $this->format( 'U' ) );
 		if ( $this->is_in_the_past() ) {
@@ -95,11 +130,16 @@ abstract class Event_Date extends DateTimeImmutable {
 		return sprintf( __( 'in %s', 'gp-translation-events' ), $relative );
 	}
 
+	/**
+	 * Print the prefixed date followed by the relative time as a time element.
+	 *
+	 * @param string $format The date format. Default 'D, F j, Y H:i T'.
+	 */
 	public function print_absolute_and_relative_time_html( $format = 'D, F j, Y H:i T' ) {
 		echo wp_kses(
 			'<time
 				class="event-utc-time absolute relative' . ( $this->is_in_the_past() ? '' : ' future' ) . '"
-				datetime="' . esc_attr( $this ) . '">' . $this->get_prefixed_date( $this->format( $format ) . ' (' . $this->get_relative_time() . ')' ) . '</time>',
+				datetime="' . esc_attr( $this->utc()->format( 'Y-m-d\TH:i:s\Z' ) ) . '">' . $this->get_prefixed_date( $this->format( $format ) . ' (' . $this->get_relative_time() . ')' ) . '</time>',
 			array(
 				'span' => array(),
 				'time' => array(
@@ -110,12 +150,17 @@ abstract class Event_Date extends DateTimeImmutable {
 		);
 	}
 
+	/**
+	 * Print the date as a time element.
+	 *
+	 * @param string $format The date format. Default 'D, F j, Y H:i T'.
+	 */
 	public function print_time_html( $format = 'D, F j, Y H:i T' ) {
 		echo wp_kses(
 			'<time
 				class="event-utc-time absolute full-time"
 				data-format="' . esc_attr( $format ) . '"
-				datetime="' . esc_attr( $this ) . '">' . $this->format( $format ) . '</time>',
+				datetime="' . esc_attr( $this->utc()->format( 'Y-m-d\TH:i:s\Z' ) ) . '">' . $this->format( $format ) . '</time>',
 			array(
 				'span' => array(),
 				'time' => array(

@@ -40,9 +40,7 @@ class Cross_Locale_PTE {
 	 * Init Admin hooks.
 	 */
 	public static function init_admin() {
-		if ( current_user_can( self::MANAGE_CROSS_LOCALE_PTES_CAP ) ) {
-			add_action( 'admin_menu', array( __CLASS__, 'register_admin_page' ) );
-		}
+		add_action( 'admin_menu', array( __CLASS__, 'register_admin_page' ) );
 	}
 
 	/**
@@ -56,13 +54,24 @@ class Cross_Locale_PTE {
 			'cross-locale-pte',
 			array( __CLASS__, 'render_admin_page' ),
 			'dashicons-translation',
-			71 // After Users.
+			71.2 // After Users.
 		);
 
 		add_action( 'load-' . self::$admin_page, array( __CLASS__, 'handle_admin_post' ) );
-		add_action( 'admin_print_scripts-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
 		add_action( 'admin_footer-' . self::$admin_page, array( 'Rosetta_Roles', 'print_js_templates' ) );
-		add_action( 'admin_print_styles-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_styles' ) );
+	}
+
+	/**
+	 * Enqueue assets only on this specific admin page.
+	 *
+	 * @param string $hook The current admin page hook.
+	 */
+	public static function enqueue_admin_assets( $hook ) {
+		if ( $hook === self::$admin_page ) {
+			Rosetta_Roles::enqueue_scripts();
+			Rosetta_Roles::enqueue_styles();
+		}
 	}
 
 	/**
@@ -79,9 +88,10 @@ class Cross_Locale_PTE {
 		if ( ! empty( $_REQUEST['user'] ) ) {
 			check_admin_referer( 'cross-locale-pte', '_nonce_cross-locale-pte' );
 
-			self::$user = get_user_by( 'login', $_REQUEST['user'] );
+			$user_input = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
+			self::$user = get_user_by( 'login', $user_input );
 			if ( ! self::$user ) {
-				self::$user = get_user_by( 'email', $_REQUEST['user'] );
+				self::$user = get_user_by( 'email', $user_input );
 			}
 
 			if ( self::$user ) {
@@ -93,21 +103,17 @@ class Cross_Locale_PTE {
 		}
 
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
-			self::$user = get_user_by( 'id', $_REQUEST['user_id'] );
+			$user_id    = absint( wp_unslash( $_REQUEST['user_id'] ) );
+			self::$user = get_user_by( 'id', $user_id );
 			if ( ! self::$user ) {
 				wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 				exit;
 			}
 		}
 
-		if ( ! empty( $_REQUEST['action'] ) ) {
-			switch ( $_REQUEST['action'] ) {
-				case 'update-cross-locale-pte':
-					check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
-					return self::update_cross_locale_pte();
-			}
-
-			return self::render_edit_page();
+		$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
+		if ( 'update-cross-locale-pte' === $action ) {
+			return self::update_cross_locale_pte();
 		}
 	}
 
@@ -116,10 +122,10 @@ class Cross_Locale_PTE {
 	 */
 	public static function render_admin_page() {
 		if ( ! empty( $_REQUEST['user_id'] ) ) {
-			return self::render_edit_page( $_REQUEST['user_id'] );
+			return self::render_edit_page( (int) $_REQUEST['user_id'] );
 		}
 
-		$feedback_message = '';
+		$feedback_message = self::get_feedback_message();
 		$cross_locale_pte_users = self::get_all_users();
 		require __DIR__ . '/views/cross-locale-pte.php';
 	}
@@ -130,11 +136,19 @@ class Cross_Locale_PTE {
 	public static function update_cross_locale_pte() {
 		global $wpdb;
 
-		$projects = array_filter( array_map( 'strval', explode( ',', $_REQUEST['projects'] ) ) );
+		if ( ! self::$user ) {
+			wp_safe_redirect( menu_page_url( 'cross-locale-pte', false ) );
+			exit;
+		}
+
+		check_admin_referer( 'update-cross-locale-pte_' . self::$user->ID );
+
+		$raw_projects     = isset( $_POST['projects'] ) ? sanitize_text_field( wp_unslash( $_POST['projects'] ) ) : '';
+		$projects         = array_filter( array_map( 'absint', explode( ',', $raw_projects ) ) );
 		$current_projects = self::get_users_projects( self::$user->ID );
 
 		$projects_to_remove = array_diff( $current_projects, $projects );
-		$projects_to_add = array_diff( $projects, $current_projects );
+		$projects_to_add    = array_diff( $projects, $current_projects );
 
 		$now = current_time( 'mysql', 1 );
 
@@ -165,17 +179,35 @@ class Cross_Locale_PTE {
 			self::$user->ID, self::ALL_LOCALES ) );
 		}
 
-		wp_safe_redirect( add_query_arg( array( 'user_id' => self::$user->ID ), menu_page_url( 'cross-locale-pte', false ) ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'user_id' => self::$user->ID,
+					'update'  => 'user-updated',
+				),
+				menu_page_url( 'cross-locale-pte', false )
+			)
+		);
 		exit;
 	}
 
 	/**
 	 * Render the page to edit a single Cross-Locale PTE.
+	 *
+	 * @param int $user_id Optional. User ID. Default 0.
 	 */
-	public static function render_edit_page() {
+	public static function render_edit_page( $user_id = 0 ) {
+		if ( ! self::$user && $user_id ) {
+			self::$user = get_user_by( 'id', (int) $user_id );
+		}
+
 		$user = self::$user;
+		if ( ! $user ) {
+			return;
+		}
+
 		$project_access_list = self::get_users_projects( $user->ID );
-		$last_updated = get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' );
+		$last_updated        = get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' );
 
 		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
 			'l10n' => array(
@@ -186,8 +218,48 @@ class Cross_Locale_PTE {
 			'accessList' => $project_access_list,
 		) );
 
-		$feedback_message = '';
+		$feedback_message = self::get_feedback_message();
 		require __DIR__ . '/views/edit-cross-locale-pte.php';
+	}
+
+	/**
+	 * Returns a feedback message based on the current request.
+	 *
+	 * @return string HTML formatted message.
+	 */
+	private static function get_feedback_message() {
+		$message = '';
+
+		$error  = isset( $_REQUEST['error'] ) ? sanitize_key( wp_unslash( $_REQUEST['error'] ) ) : '';
+		$update = isset( $_REQUEST['update'] ) ? sanitize_key( wp_unslash( $_REQUEST['update'] ) ) : '';
+
+		if ( $error && $update ) {
+			return $message;
+		}
+
+		$messages = array(
+			'update' => array(
+				'user-updated' => __( 'Translation editor updated.', 'rosetta' ),
+				'user-added'   => __( 'New translation editor added.', 'rosetta' ),
+			),
+			'error'  => array(
+				'no-user-found' => __( 'The user couldn&#8217;t be found.', 'rosetta' ),
+			),
+		);
+
+		if ( $error && isset( $messages['error'][ $error ] ) ) {
+			$message = sprintf(
+				'<div class="notice notice-error"><p>%s</p></div>',
+				esc_html( $messages['error'][ $error ] )
+			);
+		} elseif ( $update && isset( $messages['update'][ $update ] ) ) {
+			$message = sprintf(
+				'<div class="notice notice-success"><p>%s</p></div>',
+				esc_html( $messages['update'][ $update ] )
+			);
+		}
+
+		return $message;
 	}
 
 	/**
@@ -221,6 +293,13 @@ class Cross_Locale_PTE {
 			JOIN translate_projects p ON te.project_id = p.id
 			WHERE te.locale = %s
 		", self::ALL_LOCALES ) );
+
+		if ( empty( $rows ) ) {
+			return array();
+		}
+
+		$user_ids_to_prime = array_unique( wp_list_pluck( $rows, 'user_id' ) );
+		cache_users( $user_ids_to_prime );
 
 		$user_ids = array();
 		foreach ( $rows as $row ) {
@@ -256,7 +335,11 @@ class Cross_Locale_PTE {
 			$cache = array();
 		}
 
-		$user_id = intval( $user->ID );
+		if ( empty( $user->ID ) ) {
+			return false;
+		}
+
+		$user_id    = (int) $user->ID;
 		$project_id = intval( $project_id );
 
 		if ( isset( $cache[ $user_id ][ $project_id ] ) ) {
@@ -342,11 +425,10 @@ class Cross_Locale_PTE {
 		}
 
 		return $verdict;
-
 	}
 
 	/**
-	 * A GlotPress sub-filter for the permission 'cross-lte'.
+	 * A GlotPress sub-filter for the permission 'cross-pte'.
 	 *
 	 * @param string|bool $verdict The verdict from an earlier filter.
 	 * @param array       $args    Arguments that describe the object to judge for.
@@ -394,8 +476,8 @@ class Cross_Locale_PTE {
 			return $verdict;
 		}
 
-		static $current_translation_by_user;
-		$cache_key = $args['user']->ID . '_' . $translation->original_id;
+		static $current_translation_by_user = array();
+		$cache_key = $args['user']->ID . '_' . $translation->translation_set_id . '_' . $translation->original_id;
 
 		if ( isset( $current_translation_by_user[ $cache_key ] ) ) {
 			return $current_translation_by_user[ $cache_key ];

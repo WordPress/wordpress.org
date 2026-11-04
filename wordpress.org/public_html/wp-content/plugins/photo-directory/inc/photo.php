@@ -56,13 +56,89 @@ class Photo {
 			'art', 'band', 'dancer', 'dancing', 'drawing', 'crafts', 'instrument', 'music', 'painting', 'sculpture', 'statue',
 		],
 		'athletics' => [
-			'athelete', 'baseball', 'basketball', 'boxing', 'bicycling', 'cricket', 'fencing', 'football', 'golf', 'gymnastics', 'hockey', 'ice skating', 'jai alai', 'karate', 'kickboxing', 'marathon', 'martial arts', 'mma', 'power lifting', 'olympics', 'polo', 'race', 'racing', 'running', 'rugby', 'ski', 'skiing', 'soccer', 'sport', 'sports', 'swimming', 'tai chi', 'tennis', 'weightlifting', 'wrestling', 'yoga',
+			'athlete',
+			'baseball',
+			'basketball',
+			'boxing',
+			'bicycling',
+			'cricket',
+			'fencing',
+			'football',
+			'golf',
+			'gymnastics',
+			'hockey',
+			'ice skating',
+			'jai alai',
+			'karate',
+			'kickboxing',
+			'marathon',
+			'martial arts',
+			'mma',
+			'power lifting',
+			'olympics',
+			'polo',
+			'race',
+			'racing',
+			'running',
+			'rugby',
+			'ski',
+			'skiing',
+			'soccer',
+			'sport',
+			'sports',
+			'swimming',
+			'tai chi',
+			'tennis',
+			'weightlifting',
+			'wrestling',
+			'yoga',
 		],
 		'fashion' => [
 			'belt', 'blouse', 'bowtie', 'coat', 'dress', 'dresses', 'hat', 'hats', 'heels', 'jacket', 'pants', 'scarf', 'shoe', 'shoes', 'shorts', 'skirt', 'socks', 'suit', 'sweatshirt', 'sweatpants', 'sweats',
 		],
 		'food-drink' => [
-			'appetizer', 'bake', 'baking', 'beef', 'beer', 'breakfast', 'brunch', 'bourbon', 'cake', 'champagne', 'chocolate', 'cocktai', 'coffee', 'cook', 'cookie', 'cookies', 'cooking', 'dairy', 'dessert', 'dinner', 'drink', 'drinks', 'food', 'fruit', 'gin', 'lunch', 'meal', 'pasta', 'pastry', 'pork', 'salad', 'sandwich', 'seafood', 'snack', 'soda', 'tea', 'tequila', 'vegetable', 'vegetables', 'whiskey', 'whisky', 'wine',
+			'appetizer',
+			'bake',
+			'baking',
+			'beef',
+			'beer',
+			'breakfast',
+			'brunch',
+			'bourbon',
+			'cake',
+			'champagne',
+			'chocolate',
+			'cocktail',
+			'coffee',
+			'cook',
+			'cookie',
+			'cookies',
+			'cooking',
+			'dairy',
+			'dessert',
+			'dinner',
+			'drink',
+			'drinks',
+			'food',
+			'fruit',
+			'gin',
+			'lunch',
+			'meal',
+			'pasta',
+			'pastry',
+			'pork',
+			'salad',
+			'sandwich',
+			'seafood',
+			'snack',
+			'soda',
+			'tea',
+			'tequila',
+			'vegetable',
+			'vegetables',
+			'whiskey',
+			'whisky',
+			'wine',
 		],
 		'interiors' => [
 			'auditorium', 'bathroom', 'bedroom', 'den', 'furniture', 'kitchen', 'library', 'office', 'room', 'stage',
@@ -964,7 +1040,17 @@ $exif = self::exif_read_data_as_data_stream( $file );
 					break;
 				case 'shutter_speed':
 					$label = 'Shutter Speed';
-					$value = '1/' . (int)( 1.0 / (float) $value );
+
+					if ( ! is_numeric( $value ) || 0 >= $value ) {
+						continue 2;
+					}
+
+					// Fractions up to 1/4s (with a float margin), seconds above.
+					if ( $value < 0.25001 ) {
+						$value = '1/' . (int) round( 1 / $value );
+					} else {
+						$value = rtrim( rtrim( number_format( (float) $value, 1, '.', '' ), '0' ), '.' ) . 's';
+					}
 					break;
 			}
 

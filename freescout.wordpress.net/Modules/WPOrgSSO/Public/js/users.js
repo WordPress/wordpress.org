@@ -2,7 +2,7 @@
  * Adapts FreeScout's user forms to accounts that come from WordPress.org.
  *
  * - "Create a New User" asks for a WordPress.org username; name and email come from the account.
- * - The profile doesn't offer to change what WordPress.org keeps up to date, or passwords.
+ * - The profile doesn't offer to change what WordPress.org keeps up to date, or passwords, or to delete the user.
  *
  * The server enforces all of this; these only keep the forms from offering it.
  *
@@ -46,6 +46,8 @@
 				'.reset-password-trigger, .send-invite-trigger, .resend-invite-trigger'
 			).remove();
 		}
+
+		$( '#delete-user-trigger, #delete_user_modal' ).remove();
 	} );
 
 	$( function () {
