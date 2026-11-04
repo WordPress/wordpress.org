@@ -157,15 +157,7 @@ class Cross_Locale_PTE {
 		$valid_projects = array_values( array_intersect( $project_ids, array_keys( Rosetta_Roles::get_translate_projects() ) ) );
 
 		if ( empty( $valid_projects ) ) {
-			if ( ! self::update_cross_locale_pte( $user->ID, array() ) ) {
-				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
-			}
-			wp_send_json_success(
-				[
-					'message'  => __( 'Cross-Locale PTE removed.', 'rosetta' ),
-					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), $redirect ),
-				]
-			);
+			wp_send_json_error( array( 'message' => __( 'No valid projects selected.', 'rosetta' ) ), 400 );
 		}
 
 		if ( ! self::update_cross_locale_pte( $user->ID, $valid_projects ) ) {
