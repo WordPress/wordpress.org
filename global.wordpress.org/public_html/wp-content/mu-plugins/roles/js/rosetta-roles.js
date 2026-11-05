@@ -120,9 +120,6 @@
 			this.set( 'subProjects', subProjectsCollection, { silent: true } );
 
 			this.syncInitialSelection();
-			if ( this.get( 'checked' ) ) {
-				subProjectsCollection.uncheckAll();
-			}
 
 			this.listenTo( subProjectsCollection, 'change:checked', this.updateChecked );
 			this.on( 'change:checked', this.onCheckedChange );
