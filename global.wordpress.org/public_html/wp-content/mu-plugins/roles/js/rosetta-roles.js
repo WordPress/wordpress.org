@@ -9,6 +9,40 @@
 	delete projects.settings.l10n;
 
 	/**
+	 * Normalizes project IDs to ensure consistent type matching across sets and collections.
+	 *
+	 * @param {number|string} id - Raw project ID.
+	 * @return {number|string} Normalized ID.
+	 */
+	const normalizeId = id => {
+		if ( id == null || typeof id === 'boolean' ) return '';
+		const trimmed = typeof id === 'string' ? id.trim() : id;
+		if ( trimmed === '' ) return '';
+		const num = Number( trimmed );
+		return Number.isNaN( num ) ? String( trimmed ) : num;
+	};
+
+	/**
+	 * Calculates a relevance score based on match position and density.
+	 *
+	 * @param {string} lowerText - Target text to evaluate (e.g. name or slug).
+	 * @param {string} query     - Lowercase query term.
+	 * @return {number} Calculated relevance score between 0 and 1.
+	 */
+	const getMatchScore = ( lowerText, query ) => {
+		if ( ! lowerText || ! query ) return 0;
+
+		const index = lowerText.indexOf( query );
+		if ( index === -1 ) return 0;
+
+		// 0.5 for prefix match, 0.4 for word boundary, 0.1 for mid-word matches.
+		const positionBonus = index === 0 ? 0.5 : ( ' -_'.includes( lowerText[ index - 1 ] ) ? 0.4 : 0.1 );
+
+		// Density bonus: prefers shorter, more concise matches.
+		return positionBonus + ( 0.5 * ( query.length / lowerText.length ) );
+	};
+
+	/**
 	 * MODELS
 	 */
 	projects.model.Project = Backbone.Model.extend({
@@ -562,10 +596,10 @@
 		} );
 	};
 
-	projects.initFrame = function( projectData ) {
-		projects.view.frame = new projects.view.Frame({
+	projects.initFrame = projectData => {
+		new projects.view.Frame( {
 			collection: new projects.model.Projects( projectData )
-		}).render();
+		} ).render();
 	};
 
 	projects.selection = new projects.model.Selection();
