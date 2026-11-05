@@ -11,6 +11,7 @@ namespace Modules\WPOrgFreeScoutImport\Tests;
 
 use App\Attachment;
 use App\Conversation;
+use App\Folder;
 use App\Thread;
 use App\User;
 use GuzzleHttp\Promise\FulfilledPromise;
@@ -28,10 +29,12 @@ use Modules\WPOrgFreeScoutImport\Services\People;
 use Modules\WPOrgFreeScoutImport\Services\RemoteApi;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Services\Client;
+use Modules\Teams\Providers\TeamsServiceProvider;
 use Modules\WPOrgFreeScoutImport\Tests\Support\FakeSource;
 use Psr\Http\Message\RequestInterface;
 
 require_once __DIR__ . '/ImportTestCase.php';
+require_once __DIR__ . '/Support/TeamsServiceProvider.php';
 
 /**
  * Covers a conversation's import, importing it again, Message-IDs, crediting users, and a whole run.
@@ -168,6 +171,76 @@ final class ImportTest extends ImportTestCase {
 
 		$note = Thread::query()->whereKey( ImportedThread::query()->where( 'source_id', $this->source->id )->where( 'remote_id', 9003 )->value( 'thread_id' ) )->first();
 		$this->assertSame( (int) $nora->id, (int) $note->created_by_user_id );
+	}
+
+	/**
+	 * A conversation assigned to a team there's none of here comes across unassigned, tagged with its name, and what
+	 * the source's workflows did is credited to the import's robot: neither gets a user. Choosing a team for it later
+	 * assigns it.
+	 *
+	 * @return void
+	 */
+	public function test_teams_without_a_team_here_and_robots_get_no_users(): void {
+		$sponsors = self::user( 102, 'Sponsors', 'Team', 'fsteam-1465840985@example.org' );
+		$workflow = self::user( 109, 'Workflow', '', 'fsworkflow@example.org' );
+		$this->remote->json( 'api/users', self::page( 'users', array( $sponsors, $workflow ) ) );
+		$this->use_teams();
+
+		$source = self::conversation(
+			array(
+				'status'       => 'active',
+				'assignee'     => $sponsors,
+				'closedByUser' => null,
+				'closedAt'     => null,
+			)
+		);
+		array_unshift(
+			$source['_embedded']['threads'],
+			self::thread(
+				9007,
+				'lineitem',
+				$workflow,
+				'2025-01-02T11:09:00Z',
+				array(
+					'action'     => array( 'type' => 'changed-ticket-assignee' ),
+					'assignedTo' => $sponsors,
+				)
+			)
+		);
+		$this->import( $source );
+
+		$conversation = $this->imported( 501 );
+		$this->assertNull( $conversation->user_id );
+		$tag = \DB::table( 'tags' )->where( 'name', 'sponsors team' )->first();
+		$this->assertTrue( $tag && \DB::table( 'conversation_tag' )->where( 'conversation_id', $conversation->id )->where( 'tag_id', $tag->id )->exists() );
+		$this->assertFalse( User::query()->whereIn( 'email', array( 'fsteam-1465840985@example.org', 'fsworkflow@example.org' ) )->exists() );
+
+		$line_item = Thread::query()->whereKey( ImportedThread::query()->where( 'source_id', $this->source->id )->where( 'remote_id', 9007 )->value( 'thread_id' ) )->first();
+		$this->assertSame( People::ROBOT_EMAIL, $line_item->created_by_user->email );
+
+		$team = $this->team( 'Sponsorships' );
+		$this->actingAs( $this->create_user() )
+			->post( route( 'wporgfreescoutimport.users.save', array( 'id' => $this->source->id ) ), array( 'teams' => array( 102 => $team->id ) ) )
+			->assertRedirect( route( 'wporgfreescoutimport.users', array( 'id' => $this->source->id ) ) );
+
+		$conversation->refresh();
+		$this->assertSame( (int) $team->id, (int) $conversation->user_id );
+		$this->assertSame( Folder::TYPE_ASSIGNED, (int) $conversation->folder->type );
+		$this->assertSame( (int) $team->id, (int) $line_item->fresh()->user_id );
+	}
+
+	/**
+	 * A conversation assigned to a team there is assigned to the team here with the same name.
+	 *
+	 * @return void
+	 */
+	public function test_teams_go_to_the_team_here_with_the_same_name(): void {
+		$this->use_teams();
+		$team = $this->team( 'Sponsors' );
+
+		$this->import( self::conversation( array( 'assignee' => self::user( 102, 'Sponsors', 'Team', 'fsteam-1465840985@example.org' ) ) ) );
+
+		$this->assertSame( (int) $team->id, (int) $this->imported( 501 )->user_id );
 	}
 
 	/**
@@ -394,6 +467,44 @@ final class ImportTest extends ImportTestCase {
 				}
 			)
 		);
+	}
+
+	/**
+	 * Switches the Teams module on, with the teams a test makes.
+	 *
+	 * @return void
+	 */
+	private function use_teams(): void {
+		\App\Module::clearModulesCache();
+		\App\Module::setActive( People::TEAMS_MODULE, true );
+		\App\Module::clearModulesCache();
+		$this->beforeApplicationDestroyed(
+			static function (): void {
+				TeamsServiceProvider::$team_ids = array();
+			}
+		);
+	}
+
+	/**
+	 * A team of the Teams module, which keeps them as deleted robot users named "Team".
+	 *
+	 * @param string $name Team name.
+	 * @return User
+	 */
+	private function team( string $name ): User {
+		$team = factory( User::class )->create(
+			array(
+				'first_name' => $name,
+				'last_name'  => 'Team',
+				'email'      => uniqid( 'fsteam-' ) . '@example.org',
+				'type'       => User::TYPE_ROBOT,
+				'status'     => User::STATUS_DELETED,
+			)
+		);
+
+		TeamsServiceProvider::$team_ids[] = (int) $team->id;
+
+		return $team;
 	}
 
 	/**
