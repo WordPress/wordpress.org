@@ -304,7 +304,13 @@ final class Importer {
 
 					// What agents changed stays; what the source changed since the last import comes across.
 					if ( null !== $tags ) {
-						$names                  = array_filter( array_map( 'strval', array_column( (array) ( $source['_embedded']['tags'] ?? array() ), 'name' ) ), 'strlen' );
+						$names = array_filter( array_map( 'strval', array_column( (array) ( $source['_embedded']['tags'] ?? array() ), 'name' ) ), 'strlen' );
+
+						// Unless the import assigns it to a team here, the team's name keeps which team had the conversation.
+						if ( People::is_team( $source['assignee'] ?? null ) && '' !== People::team_name( $source['assignee'] ) && ( $worked_on || ! $this->people->assignee( $source['assignee'] ) ) ) {
+							$names[] = People::team_name( $source['assignee'] ) . ' Team';
+						}
+
 						$written                = Tags::sync( (int) $conversation->id, $names, self::decode( $imported->written_tags ?? null ), $tags );
 						$record['written_tags'] = (string) json_encode( (object) $written, JSON_UNESCAPED_UNICODE );
 					}
@@ -387,10 +393,11 @@ final class Importer {
 	 * @return void
 	 */
 	private function meet_people( array $source, array $threads, Mailbox $mailbox ): void {
-		$people = array( $source['createdBy'] ?? null, $source['assignee'] ?? null, $source['closedByUser'] ?? null );
+		$people    = array( $source['createdBy'] ?? null, $source['closedByUser'] ?? null );
+		$assignees = array( $source['assignee'] ?? null );
 		foreach ( $threads as $thread ) {
-			$people[] = $thread['createdBy'] ?? null;
-			$people[] = $thread['assignedTo'] ?? null;
+			$people[]    = $thread['createdBy'] ?? null;
+			$assignees[] = $thread['assignedTo'] ?? null;
 			$this->people->sender( $thread['createdBy'] ?? null );
 		}
 
@@ -398,6 +405,13 @@ final class Importer {
 			$user = $this->people->user( $person );
 			if ( $user ) {
 				$this->people->grant_once( $user, $mailbox );
+			}
+		}
+
+		foreach ( $assignees as $person ) {
+			$assignee = $this->people->assignee( $person );
+			if ( $assignee ) {
+				$this->people->grant_once( $assignee, $mailbox );
 			}
 		}
 	}
@@ -734,7 +748,7 @@ final class Importer {
 			$thread->created_by_user_id = $user ? $user->id : $this->people->robot()->id;
 		}
 
-		$assignee = $this->people->user( $source['assignedTo'] ?? null );
+		$assignee = $this->people->assignee( $source['assignedTo'] ?? null );
 		if ( $assignee ) {
 			$thread->user_id = $assignee->id;
 		}
@@ -830,7 +844,7 @@ final class Importer {
 			$conversation->status       = $status;
 			$conversation->read_by_user = true;
 
-			$assignee              = $this->people->user( $source['assignee'] ?? null );
+			$assignee              = $this->people->assignee( $source['assignee'] ?? null );
 			$conversation->user_id = $assignee ? $assignee->id : null;
 
 			// Someone it's assigned to can see it.

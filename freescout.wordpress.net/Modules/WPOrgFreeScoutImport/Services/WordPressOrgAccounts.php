@@ -108,7 +108,7 @@ final class WordPressOrgAccounts {
 	public function export(): string {
 		$rows = array( self::COLUMNS );
 
-		foreach ( People::directory( $this->api ) as $remote_user ) {
+		foreach ( People::people( $this->api ) as $remote_user ) {
 			$existing = People::existing( $this->source_id, $remote_user );
 			$user     = $existing ? $existing['user'] : null;
 			$rows[]   = array(
@@ -415,7 +415,7 @@ final class WordPressOrgAccounts {
 			return null;
 		}
 
-		foreach ( People::directory( $this->api ) as $remote_user ) {
+		foreach ( People::people( $this->api ) as $remote_user ) {
 			if ( 0 === strcasecmp( (string) ( $remote_user['email'] ?? '' ), $email ) ) {
 				return $remote_user;
 			}
