@@ -80,11 +80,19 @@ class Trac_Sync {
 			// Get array of tickets. ltrim() the leading `?` that add_query_arg() emits, so
 			// Trac's ticket.query parser doesn't fold it into the first field name (see
 			// release_to_live()).
-			$tickets = $trac->ticket_query( ltrim( add_query_arg( wp_parse_args( $args, [
-				'order'      => 'changetime',
-				'changetime' => date( 'c', $last_request - MINUTE_IN_SECONDS ),
-				'desc'       => 1,
-			] ), '' ), '?' ) );
+			$query = add_query_arg(
+				wp_parse_args(
+					$args,
+					[
+						'order'      => 'changetime',
+						'changetime' => gmdate( 'c', $last_request - MINUTE_IN_SECONDS ),
+						'desc'       => 1,
+					]
+				),
+				''
+			);
+
+			$tickets = $trac->ticket_query( ltrim( $query, '?' ) );
 
 			// Trac couldn't be reached; Trac::rpc_query_retry() has already logged why.
 			if ( false === $tickets ) {
@@ -189,12 +197,17 @@ class Trac_Sync {
 		 * parser splits on `&`/`=` and would otherwise read the first field as `?status`
 		 * (an unknown field it silently ignores), returning tickets regardless of status.
 		 */
-		$tickets = $trac->ticket_query( ltrim( add_query_arg( [
-			'status'   => 'approved',
-			'owner'    => 'themetracbot',
-			'priority' => 'theme update',
-			'order'    => 'changetime',
-		], '' ), '?' ) );
+		$query = add_query_arg(
+			[
+				'status'   => 'approved',
+				'owner'    => 'themetracbot',
+				'priority' => 'theme update',
+				'order'    => 'changetime',
+			],
+			''
+		);
+
+		$tickets = $trac->ticket_query( ltrim( $query, '?' ) );
 
 		/*
 		 * Trac couldn't be reached; Trac::rpc_query_retry() has already logged why. Casting
