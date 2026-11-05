@@ -474,8 +474,61 @@
 
 		doSearch: _.debounce( function( event ) {
 			this.collection.doSearch( event.target.value );
-		}, 500 )
+		}, 200 )
 	});
+
+	/**
+	 * View handling the standalone global permission toggle (#project-all).
+	 * Coordinates checkbox toggles and synchronizes with
+	 * internal events ('deactivate:all-projects', 'uncheck:all-projects').
+	 */
+	projects.view.AllProjects = wp.Backbone.View.extend( {
+		el: '#project-all',
+
+		events: {
+			'click': 'onActivate',
+			'change input': 'onToggle'
+		},
+
+		initialize() {
+			this.checkbox = this.el.querySelector( 'input' );
+
+			if ( projects.selection.get( 'all' ) ) {
+				if ( this.checkbox ) this.checkbox.checked = true;
+				this.el.classList.add( 'active' );
+			}
+
+			this.listenTo( projects.events, 'deactivate:all-projects', this.onDeactivate );
+			this.listenTo( projects.events, 'uncheck:all-projects', this.onUncheck );
+		},
+
+		onActivate() {
+			if ( this.el.classList.contains( 'active' ) ) return;
+
+			this.el.classList.add( 'active' );
+			projects.events.trigger( 'deactivate:other-projects' );
+		},
+
+		onToggle() {
+			if ( this.checkbox?.checked ) {
+				projects.selection.reset( [ { id: 'all' } ] );
+				projects.events.trigger( 'uncheck:other-projects' );
+			} else {
+				projects.selection.remove( 'all' );
+			}
+		},
+
+		onDeactivate() {
+			this.el.classList.remove( 'active' );
+		},
+
+		onUncheck() {
+			if ( this.checkbox?.checked ) {
+				projects.selection.remove( 'all' );
+				this.checkbox.checked = false;
+			}
+		}
+	} );
 
 	/**
 	 * UTILS
@@ -611,13 +664,15 @@
 	projects.selection = new projects.model.Selection();
 
 	projects.init = function() {
-		if ( ! document.getElementById( 'projects-list' ) ) {
-			return;
-		}
-
 		_.each( projects.settings.accessList, function( projectID ) {
 			projects.selection.add( { id: projectID } );
 		});
+
+		// Initialize the global #project-all view and ensure it is only initialized once.
+		// Omitted from the DOM for CLPTEs.
+		if ( document.getElementById( 'project-all' ) ) {
+			projects.view.allProjectsInstance ||= new projects.view.AllProjects();
+		}
 
 		projects.getProjects().then( function( response ) {
 			projects.initFrame( response );
@@ -625,43 +680,6 @@
 	};
 
 	$( projects.init );
-
-	var $projectAll = $( '#project-all' ), $projectAllCheckbox = $projectAll.find( 'input' );
-
-	$projectAll.on( 'click', function() {
-		var $el = $( this );
-
-		if ( $el.hasClass( 'active' ) ) {
-			return;
-		}
-
-		$el.addClass( 'active' );
-		$window.trigger( 'deactivate-other-projects.rosetta' );
-	});
-
-	$projectAll.find( 'input' ).on( 'change', function() {
-		var checked = $( this ).prop( 'checked' );
-
-		if ( checked ) {
-			projects.selection.add( { id: 'all' } );
-			$window.trigger( 'uncheck-other-projects.rosetta' );
-		} else {
-			projects.selection.remove( { id: 'all' } );
-		}
-	});
-
-	$window.on( 'deactivate-all-projects.rosetta', function() {
-		$projectAll.removeClass( 'active' );
-	} );
-
-	$window.on( 'uncheck-all-projects.rosetta', function() {
-		var checked = $projectAllCheckbox.prop( 'checked' );
-
-		if ( checked ) {
-			projects.selection.remove( { id: 'all' } );
-			$projectAllCheckbox.prop( 'checked', false );
-		}
-	} );
 
 	// Confirm removal of CLPTE status.
 	$( '#project-access-list' ).parents( 'form' ).on( 'submit', function( e ) {
