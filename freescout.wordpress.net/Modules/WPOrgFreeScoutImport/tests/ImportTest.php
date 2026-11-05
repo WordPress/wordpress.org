@@ -370,6 +370,41 @@ final class ImportTest extends ImportTestCase {
 	}
 
 	/**
+	 * Rows naming the same account, like someone's older, deleted users there, are all credited to the one user the
+	 * account is connected to.
+	 *
+	 * @return void
+	 */
+	public function test_csv_credits_rows_naming_the_same_account_to_one_user(): void {
+		Queue::fake();
+		$this->use_wordpress_org( array( 'noranote' => array( 'Nora', 'Note', 'nora@wordpress.example' ) ) );
+		$this->remote->json(
+			'api/users',
+			self::page(
+				'users',
+				array(
+					self::user( 66, 'Nora', 'Note', 'nora@wcus.test' ),
+					self::user( 88, 'Nora', 'Note', 'nora@wcus.test_deleted20210601184317' ),
+				)
+			)
+		);
+
+		$this->actingAs( $this->create_user() )
+			->post(
+				route( 'wporgfreescoutimport.users.connect', array( 'id' => $this->source->id ) ),
+				array(
+					'csv'   => "remote_id,wporg_username\n66,noranote\n88,noranote\n",
+					'apply' => 1,
+				)
+			)
+			->assertSessionHas( 'flash_success', 'Connected 2 users to WordPress.org accounts.' );
+
+		$users = RemoteUser::query()->where( 'source_id', $this->source->id )->pluck( 'user_id', 'remote_user_id' )->map( 'intval' )->all();
+		$this->assertSame( $users[66], $users[88] ?? null );
+		$this->assertSame( 'noranote', Account::username_for( $users[66] ) );
+	}
+
+	/**
 	 * Two sources number their conversations, threads, and users alike: each source's are imported apart.
 	 *
 	 * @return void
