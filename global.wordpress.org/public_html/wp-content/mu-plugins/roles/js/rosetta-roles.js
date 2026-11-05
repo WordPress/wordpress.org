@@ -664,6 +664,10 @@
 	projects.selection = new projects.model.Selection();
 
 	projects.init = function() {
+		if ( ! document.getElementById( 'projects-list' ) ) {
+			return;
+		}
+
 		_.each( projects.settings.accessList, function( projectID ) {
 			projects.selection.add( { id: projectID } );
 		});
