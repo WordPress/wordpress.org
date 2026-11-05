@@ -1,0 +1,25 @@
+{
+	"name": "wporg-documentation-2022",
+	"version": "1.0.0",
+	"description": "Theme for WordPress.org Documentation",
+	"author": "WordPress.org",
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"repository": {
+		"type": "svn",
+		"url": "https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022/"
+	},
+	"engines": {
+		"node": ">=24"
+	},
+	"scripts": {
+		"build": "wp-scripts build",
+		"start": "wp-scripts start",
+		"format": "wp-scripts format src eslint.config.js webpack.config.js",
+		"lint:js": "wp-scripts lint-js src eslint.config.js webpack.config.js",
+		"lint:css": "wp-scripts lint-style \"*.css\" \"src/**/*.scss\""
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "36.0.0"
+	}
+}

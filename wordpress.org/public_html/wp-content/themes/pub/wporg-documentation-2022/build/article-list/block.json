@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wporg/article-list",
+  "version": "0.1.0",
+  "title": "Article list",
+  "category": "design",
+  "icon": "",
+  "description": "Article list for a top-level category.",
+  "textdomain": "wporg",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "category": {
+      "type": "string"
+    }
+  },
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css"
+}
