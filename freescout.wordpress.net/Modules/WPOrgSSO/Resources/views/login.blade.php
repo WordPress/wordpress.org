@@ -19,7 +19,7 @@
 					<span>{{ __( 'Log in with WordPress.org' ) }}</span>
 				</a>
 
-				<p class="wporgsso-login-help">{!! __( 'Need access? Please reach out in :channel.', array( 'channel' => '<a href="https://wordpress.slack.com/archives/C02QB8GMM">#meta</a>' ) ) !!}</p>
+				<p class="wporgsso-login-help">{!! str_replace( ':channel', '<a href="https://wordpress.slack.com/archives/C02QB8GMM">#meta</a>', e( __( 'Need access? Please reach out in :channel.' ) ) ) !!}</p>
 
 				@if ( $password_login )
 					<p class="margin-top">

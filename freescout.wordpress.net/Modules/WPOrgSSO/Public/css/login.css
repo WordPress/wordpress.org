@@ -34,7 +34,8 @@ body.wporgsso-login #app > .footer {
 	justify-content: center;
 	gap: 10px;
 	width: 100%;
-	height: 48px;
+	min-height: 48px;
+	white-space: normal;
 	padding: 0 18px;
 	border-color: #3858e9;
 	border-radius: 8px;
@@ -56,6 +57,8 @@ body.wporgsso-login #app > .footer {
 	line-height: 1.5;
 }
 
+/* Underlined: its blue is about as light as the gray around it, so color alone doesn't set it apart. */
 .wporgsso-login-help a {
 	color: #3858e9;
+	text-decoration: underline;
 }
