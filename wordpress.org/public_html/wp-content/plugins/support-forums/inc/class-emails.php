@@ -5,7 +5,8 @@ namespace WordPressdotorg\Forums;
  * Support Forum Email modifications.
  * 
  * This provides an override to filter outgoing bbPress emails to 'unroll'
- * subscription emails from a set of BCC's to individual emails.
+ * subscription emails from a set of BCC's to individual emails, and sets up the
+ * plugin/theme context for notifications bbPress sends after moderation.
  */
 class Emails {
 	public function __construct() {
@@ -16,6 +17,51 @@ class Emails {
 		// Topic subscribers. This is also for Term (Plugin/Theme/Tag) subscriptions new replies.
 		add_action( 'bbp_pre_notify_subscribers',  [ $this, 'start_unroll' ] );
 		add_action( 'bbp_post_notify_subscribers', [ $this, 'stop_unroll' ] );
+
+		// Before any subscription notification for an approved or unspammed topic/reply goes out.
+		add_action( 'bbp_deferred_topic_published', [ $this, 'init_compat_for_deferred_topic' ], 5 );
+		add_action( 'bbp_deferred_reply_published', [ $this, 'init_compat_for_deferred_reply' ], 5, 2 );
+	}
+
+	// --- Notifications sent after moderation...
+
+	/**
+	 * Sets up the plugin/theme context for a topic that bbPress announces after moderation.
+	 *
+	 * Email subjects are prefixed with the plugin or theme name, which is otherwise only
+	 * known when the request came from that plugin or theme's support forum.
+	 *
+	 * @param int $topic_id Topic ID.
+	 */
+	public function init_compat_for_deferred_topic( $topic_id ) {
+		$this->init_compat_for_topic( $topic_id );
+	}
+
+	/**
+	 * Sets up the plugin/theme context for a reply that bbPress announces after moderation.
+	 *
+	 * @param int $reply_id Reply ID.
+	 * @param int $topic_id Topic ID.
+	 */
+	public function init_compat_for_deferred_reply( $reply_id, $topic_id ) {
+		$this->init_compat_for_topic( $topic_id );
+	}
+
+	/**
+	 * Initializes the plugin and theme compat classes for a topic.
+	 *
+	 * @param int $topic_id Topic ID.
+	 */
+	private function init_compat_for_topic( $topic_id ) {
+		$forums = Plugin::get_instance();
+
+		// Only loaded on the main forums.
+		if ( ! $forums->plugins ) {
+			return;
+		}
+
+		$forums->plugins->init_for_topic( $topic_id );
+		$forums->themes->init_for_topic( $topic_id );
 	}
 
 	// --- Email BCC unrolling...

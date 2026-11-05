@@ -1,0 +1,64 @@
+/**
+ * The login page: the button and its help line on the page itself, without core's panel, and the footer at the
+ * window's bottom.
+ */
+body.wporgsso-login {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+body.wporgsso-login #app {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+body.wporgsso-login #app > .content {
+	flex: 1;
+}
+
+body.wporgsso-login #app > .footer {
+	margin: 0;
+	padding: 24px 0;
+}
+
+.wporgsso-login-body {
+	max-width: 340px;
+	margin: 0 auto;
+	padding-top: 48px;
+	text-align: center;
+}
+
+.wporgsso-login-body .wporgsso-login-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	min-height: 48px;
+	white-space: normal;
+	padding: 0 18px;
+	border-color: #3858e9;
+	border-radius: 8px;
+	background-color: #3858e9;
+	font-size: 16px;
+	font-weight: 500;
+}
+
+.wporgsso-login-body .wporgsso-login-button:is( :hover, :focus, :active ) {
+	border-color: #2145e6;
+	background-color: #2145e6;
+}
+
+/* #646970 rather than a lighter gray: it meets WCAG AA (4.5:1) on core's background. */
+.wporgsso-login-help {
+	margin: 40px 0 0;
+	color: #646970;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+/* Underlined: its blue is about as light as the gray around it, so color alone doesn't set it apart. */
+.wporgsso-login-help a {
+	color: #3858e9;
+	text-decoration: underline;
+}

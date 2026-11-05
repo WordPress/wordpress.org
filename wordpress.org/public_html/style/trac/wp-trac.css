@@ -669,6 +669,7 @@ h2 {
 }
 
 #content.timeline h2 {
+	display: flow-root; /* Stop the date bar at the floated #prefs form instead of running under it. */
 	padding: 3px 5px;
 	font-size: 105%;
 	-webkit-box-shadow: none;
