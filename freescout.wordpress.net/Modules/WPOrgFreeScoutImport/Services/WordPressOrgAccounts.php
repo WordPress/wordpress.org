@@ -205,13 +205,13 @@ final class WordPressOrgAccounts {
 					'action' => null,
 					'error'  => __( 'Another row is for this user already.' ),
 				) + $step;
-			} elseif ( null !== $first && in_array( $first['action'], array( self::CONNECT, self::CREATE ), true ) ) {
-				// The account is connected once, by its first row; this one is credited to that row's user.
+			} elseif ( null !== $first && ! $first['mismatch'] && in_array( $first['action'], array( self::CONNECT, self::CREATE ), true ) ) {
+				// Credited to the first row's user, unless that row has to be confirmed: then whichever row connects first is.
 				$step = array(
 					'action' => self::SAME,
 					'user'   => $first['user'],
 				) + $step;
-			} elseif ( ! $step['error'] && null === $first && $user && isset( $targets[ $user ] ) && $targets[ $user ] !== $step['wporg_user']->username ) {
+			} elseif ( ! $step['error'] && $user && isset( $targets[ $user ] ) && $targets[ $user ] !== $step['wporg_user']->username ) {
 				$step = array(
 					'action' => null,
 					'error'  => __( 'Another row connects this user here to :username.', array( 'username' => $targets[ $user ] ) ),
