@@ -280,9 +280,9 @@ class Cross_Locale_PTE {
 		return $projects;
 	}
 	/**
-	 * Retrieves the projects for which a user has cross-locale PTE permissions.
+	 * Retrieves all users who have cross-locale PTE permissions.
 	 *
-	 * @return array List of User IDs.
+	 * @return array<int, object> Associative array of user objects indexed by user ID.
 	 */
 	public static function get_all_users() {
 		global $wpdb;
