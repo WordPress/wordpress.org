@@ -52,5 +52,6 @@ For more detailed information, see the [Environments Guide](environments/README.
 
 Because this repository is a read-only mirror of the `meta.svn.wordpress.org` Subversion (SVN) codebase:
 
-1. **Link the ticket you're fixing:** If your PR addresses an existing [WordPress.org Meta Trac](https://meta.trac.wordpress.org/) ticket, always reference it in the PR description (e.g., `https://meta.trac.wordpress.org/ticket/XXXXX` or `Meta Trac #XXXXX`).
-2. **Commit Process:** Staged Git PR changes will not be merged directly on GitHub; a Meta committer will review and commit the patch to the Meta repository, which will automatically sync and resolve the PR on GitHub.
+1. **Open PRs from a fork:** [Fork this repository](https://github.com/WordPress/wordpress.org/fork) and push your branches there, even if you have write access to `WordPress/wordpress.org`. The SVN sync deletes branches here that don't exist in SVN, which closes any PR opened from them.
+2. **Link the ticket you're fixing:** If your PR addresses an existing [WordPress.org Meta Trac](https://meta.trac.wordpress.org/) ticket, always reference it in the PR description (e.g., `https://meta.trac.wordpress.org/ticket/XXXXX` or `Meta Trac #XXXXX`).
+3. **Commit Process:** Staged Git PR changes will not be merged directly on GitHub; a Meta committer will review and commit the patch to the Meta repository, which will automatically sync and resolve the PR on GitHub.
