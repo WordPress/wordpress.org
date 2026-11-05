@@ -476,7 +476,7 @@ class Cross_Locale_PTE {
 			return $verdict;
 		}
 
-		$user_id = $args['user'] instanceof WP_User ? (int) $args['user']->ID : (int) $args['user'];
+		$user_id = (int) $args['user_id'];
 		if ( ! $user_id ) {
 			return $verdict;
 		}
