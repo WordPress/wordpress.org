@@ -34,7 +34,7 @@ use Modules\WPOrgFreeScoutImport\Tests\Support\FakeSource;
 use Psr\Http\Message\RequestInterface;
 
 require_once __DIR__ . '/ImportTestCase.php';
-require_once __DIR__ . '/Support/TeamsServiceProvider.php';
+require_once dirname( __DIR__, 3 ) . '/tests/Support/TeamsServiceProvider.php';
 
 /**
  * Covers a conversation's import, importing it again, Message-IDs, crediting users, and a whole run.
