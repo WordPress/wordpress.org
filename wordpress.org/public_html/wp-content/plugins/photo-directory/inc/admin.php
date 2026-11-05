@@ -92,6 +92,8 @@ class Admin {
 
 		// Shrink height of content editor.
 		add_filter( 'wp_editor_settings',                      [ __CLASS__, 'shrink_editor_height' ], 10, 2 );
+		// Prevent editor expand from restoring the default textarea height.
+		add_filter( 'wp_editor_expand', [ __CLASS__, 'disable_editor_expand' ], 10, 2 );
 	}
 
 	/**
@@ -1778,13 +1780,37 @@ class Admin {
 	public static function shrink_editor_height( $settings, $editor_id ) {
 		global $post_type;
 
-		if ( Registrations::get_post_type() === $post_type ) {
-			$settings['editor_height'] = '80';
+		if ( Registrations::get_post_type() === $post_type && 'content' === $editor_id ) {
+			$settings['editor_height'] = 80;
+
+			if ( ! isset( $settings['tinymce'] ) || ! is_array( $settings['tinymce'] ) ) {
+				$settings['tinymce'] = [];
+			}
+
+			// Stops the ed_size cookie from replacing editor_height.
+			$settings['tinymce']['wp_autoresize_on'] = true;
 		}
 
 		return $settings;
 	}
 
+	/**
+	 * Disables editor expand for photo posts so the text editor keeps its initial height.
+	 *
+	 * Core's editor-expand script floors the textarea at 300px whenever the content
+	 * gets shorter, which undoes the shorter editor height.
+	 *
+	 * @param bool   $expand    Whether to enable the expand functionality.
+	 * @param string $post_type Post type.
+	 * @return bool
+	 */
+	public static function disable_editor_expand( $expand, $post_type ) {
+		if ( Registrations::get_post_type() === $post_type ) {
+			return false;
+		}
+
+		return $expand;
+	}
 }
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\Admin', 'init' ] );
