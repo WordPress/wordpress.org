@@ -306,8 +306,8 @@ final class Importer {
 					if ( null !== $tags ) {
 						$names = array_filter( array_map( 'strval', array_column( (array) ( $source['_embedded']['tags'] ?? array() ), 'name' ) ), 'strlen' );
 
-						// A team there's none of here: its name keeps which team had the conversation.
-						if ( People::is_team( $source['assignee'] ?? null ) && '' !== People::team_name( $source['assignee'] ) && ! $this->people->assignee( $source['assignee'] ) ) {
+						// Unless the import assigns it to a team here, the team's name keeps which team had the conversation.
+						if ( People::is_team( $source['assignee'] ?? null ) && '' !== People::team_name( $source['assignee'] ) && ( $worked_on || ! $this->people->assignee( $source['assignee'] ) ) ) {
 							$names[] = People::team_name( $source['assignee'] ) . ' Team';
 						}
 

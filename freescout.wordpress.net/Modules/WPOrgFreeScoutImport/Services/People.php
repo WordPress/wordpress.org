@@ -779,7 +779,7 @@ final class People {
 	/**
 	 * The mailboxes a source team's imported conversations are in that its team here has no access to.
 	 *
-	 * The Teams module gives a team a folder, and lets it be assigned, only in the mailboxes ticked on its page.
+	 * The Teams module gives a team a folder, and lets it be assigned, only in the mailboxes checked on its page.
 	 *
 	 * @param int  $source_id      Source.
 	 * @param int  $remote_team_id Remote team ID.
