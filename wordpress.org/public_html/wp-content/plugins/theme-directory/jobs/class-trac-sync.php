@@ -80,6 +80,10 @@ class Trac_Sync {
 			// Get array of tickets. ltrim() the leading `?` that add_query_arg() emits, so
 			// Trac's ticket.query parser doesn't fold it into the first field name (see
 			// release_to_live()).
+			//
+			// `max=0` turns off Trac's paging (100 results by default). Without it, a long
+			// window, such as one carried over from failed runs, would only return its newest
+			// page, and the cursor would then move past the rest.
 			$query = add_query_arg(
 				wp_parse_args(
 					$args,
@@ -87,6 +91,7 @@ class Trac_Sync {
 						'order'      => 'changetime',
 						'changetime' => gmdate( 'c', $last_request - MINUTE_IN_SECONDS ),
 						'desc'       => 1,
+						'max'        => 0,
 					]
 				),
 				''

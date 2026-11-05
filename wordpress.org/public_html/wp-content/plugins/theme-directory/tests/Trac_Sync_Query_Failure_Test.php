@@ -271,6 +271,7 @@ class Trac_Sync_Query_Failure_Test extends TestCase {
 		);
 
 		$this->assertSame( gmdate( 'c', $last_sync - MINUTE_IN_SECONDS ), $approved_queries[0]['changetime'] );
+		$this->assertSame( '0', $approved_queries[0]['max'], 'The whole window should be returned, not just its first page.' );
 		$this->assertSame( array( '1.0' => 'approved' ), get_post_meta( $post_id, '_status', true ) );
 		$this->assertGreaterThanOrEqual( $before, (int) get_option( self::CURSOR_OPTION ) );
 	}
