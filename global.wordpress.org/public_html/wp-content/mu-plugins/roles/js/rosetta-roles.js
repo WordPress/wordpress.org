@@ -695,16 +695,25 @@
 		}).render();
 	};
 
-	projects.selection = new projects.model.Selection();
+	projects.selection = new Backbone.Collection();
+	projects.selection.on( 'add remove reset', () => {
+		const field = document.getElementById( 'project-access-list' );
+		if ( field ) field.value = projects.selection.pluck( 'id' ).join();
+	} );
 
 	projects.init = function() {
 		if ( ! document.getElementById( 'projects-list' ) ) {
 			return;
 		}
 
-		_.each( projects.settings.accessList, function( projectID ) {
-			projects.selection.add( { id: projectID } );
-		});
+		const rawList = Array.isArray( projects.settings.accessList )
+			? projects.settings.accessList.map( normalizeId ).filter( id => id !== '' )
+			: [];
+		const initialSelection = rawList.includes( 'all' )
+			? [ { id: 'all' } ]
+			: rawList.map( id => ( { id } ) );
+
+		projects.selection.reset( initialSelection );
 
 		// Initialize the global #project-all view and ensure it is only initialized once.
 		// Omitted from the DOM for CLPTEs.
