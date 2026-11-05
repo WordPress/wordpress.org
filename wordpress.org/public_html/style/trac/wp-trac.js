@@ -631,6 +631,8 @@ let wpTrac,
 					}
 
 					event.preventDefault();
+					// Chrome before 119 and older Safari only prompt when returnValue is set.
+					event.returnValue = true;
 				} );
 
 				// Restore message when the page is restored from the back/forward cache.
