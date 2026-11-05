@@ -67,24 +67,24 @@ function get_post_by_guid( $guid ) {
 	if ( ! is_string( $guid ) || ! preg_match( '/^[A-Za-z0-9]{8}$/D', $guid ) ) {
 		return false;
 	}
-	$page = 1;
-	do {
-		$candidates = get_posts(
-			array(
-				's'              => $guid,
-				'post_status'    => 'publish',
-				'posts_per_page' => 100,
-				'paged'          => $page++,
-			)
-		);
-		$count      = count( $candidates );
-		foreach ( $candidates as $candidate ) {
-			// A textual mention, cached iframe or shortcode is not a block match.
-			if ( false === stristr( $candidate->post_content, '[wpvideo' ) && Video\get_guid( $candidate ) === $guid ) {
-				return $candidate;
-			}
+	// One bounded search for the serialized block attribute, so arbitrary words cannot scan the whole catalog.
+	$candidates = get_posts(
+		array(
+			's'                      => '"guid":"' . $guid . '"',
+			'sentence'               => true,
+			'post_status'            => 'publish',
+			'posts_per_page'         => 10,
+			'no_found_rows'          => true,
+			'update_post_meta_cache' => false,
+			'update_post_term_cache' => false,
+		)
+	);
+	foreach ( $candidates as $candidate ) {
+		// A textual mention, cached iframe or shortcode is not a block match.
+		if ( false === stristr( $candidate->post_content, '[wpvideo' ) && Video\get_guid( $candidate ) === $guid ) {
+			return $candidate;
 		}
-	} while ( 100 === $count );
+	}
 	return false;
 }
 

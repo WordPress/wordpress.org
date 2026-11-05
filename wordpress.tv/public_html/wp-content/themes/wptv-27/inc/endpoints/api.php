@@ -7,7 +7,7 @@
  *
  * Methods:
  * - videos: the posts of the main query. Accepts query vars such as `event`,
- *   `paged` and `posts_per_page`.
+ *   `paged` and `posts_per_page` (at most MAX_PER_PAGE).
  * - events, speakers, languages, tags, categories: terms, 200 per page, `paged`.
  *
  * Formats: `json`, and `array` (print_r, WordPress.com sandboxes only).
@@ -22,6 +22,11 @@ use WordPressTV\Video;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/**
+ * Largest `posts_per_page` the videos method accepts. Larger or negative values get this size.
+ */
+const MAX_PER_PAGE = 100;
 
 /**
  * Registers the rewrite rule. Runs on init, priority 5, as in wptv2.
@@ -128,8 +133,14 @@ function get_videos_response() {
 
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only endpoint.
 	if ( isset( $_REQUEST['posts_per_page'] ) ) {
-		// phpcs:ignore WordPress.WP.DiscouragedFunctions.query_posts_query_posts, WordPress.Security.NonceVerification.Recommended -- Re-runs the main query with a custom page size, as wptv2 did.
-		query_posts( array_merge( $wp_query->query, array( 'posts_per_page' => intval( $_REQUEST['posts_per_page'] ) ) ) );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public read-only endpoint.
+		$per_page = intval( $_REQUEST['posts_per_page'] );
+		// Unlike wptv2, cap the page size: -1 or a huge value would build one response for every video.
+		if ( $per_page < 0 || $per_page > MAX_PER_PAGE ) {
+			$per_page = MAX_PER_PAGE;
+		}
+		// phpcs:ignore WordPress.WP.DiscouragedFunctions.query_posts_query_posts -- Re-runs the main query with a custom page size, as wptv2 did.
+		query_posts( array_merge( $wp_query->query, array( 'posts_per_page' => $per_page ) ) );
 	}
 
 	$response = array(
@@ -214,6 +225,11 @@ function get_video_item( $post ) {
 		$video['producer']['username'] = $producer_username[0]->name;
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode -- urlencode() (not rawurlencode()) keeps the wptv2 output byte for byte.
 		$video['producer']['link'] = 'https://profiles.wordpress.org/' . urlencode( $producer_username[0]->name ) . '/';
+	}
+
+	// Password-protected videos keep their metadata but expose no file URLs.
+	if ( post_password_required( $post ) ) {
+		return $video;
 	}
 
 	$attachment_url = Video\get_attachment_url( $post );

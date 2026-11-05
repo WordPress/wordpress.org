@@ -91,11 +91,23 @@ function handle() {
 		$redir = add_query_arg( array( 'error' => 5 ), $redir );
 	}
 	if ( $keep ) {
-		$redir = add_query_arg( urlencode_deep( array_intersect_key( $_POST, array_flip( $keep ) ) ), $redir );
+		// Only category IDs and plain strings go back into the URL.
+		$kept = array();
+		foreach ( array_intersect_key( $_POST, array_flip( $keep ) ) as $key => $value ) {
+			if ( 'post_category' === $key ) {
+				$kept[ $key ] = array_values( array_filter( array_map( 'intval', (array) $value ) ) );
+			} elseif ( is_string( $value ) ) {
+				$kept[ $key ] = $value;
+			}
+		}
+		$redir = add_query_arg( urlencode_deep( $kept ), $redir );
 	}
-	// For an XHR request, send the redirect location instead of redirecting.
+	// For an XHR request, send the redirect location as plain text instead of redirecting.
 	if ( isset( $_GET['xhr'] ) ) {
-		die( $redir ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Encoded URL response, as in wptv2.
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		send_nosniff_header();
+		echo esc_url_raw( $redir ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response, read by submission-form.js.
+		exit;
 	}
 	wp_safe_redirect( $redir );
 	exit;
@@ -111,7 +123,7 @@ add_action( 'admin_post_nopriv_wptv_video_upload', __NAMESPACE__ . '\\handle' );
  * @return bool
  */
 function wporg_username_exists( $username ) {
-	$url      = add_query_arg( 'user', $username, 'https://wordpress.org/grav-redirect.php' );
+	$url      = add_query_arg( 'user', rawurlencode( $username ), 'https://wordpress.org/grav-redirect.php' );
 	$response = wp_remote_get( $url, array( 'redirection' => 0 ) );
 	$location = wp_remote_retrieve_header( $response, 'location' );
 	return is_string( $location ) && '' !== $location && false === strpos( $location, 'd=mm' );
@@ -275,7 +287,8 @@ function insert_submission( $posted ) {
 		array(
 			'attachment_id'     => $attachment_id,
 			'submitted_by'      => $user->ID ? $user->display_name : sanitize_text( $posted['wptv_uploaded_by'] ?? '' ),
-			'submitted_email'   => $user->ID ? $user->user_email : sanitize_text( $posted['wptv_email'] ?? '' ),
+			// Store the address that validate() checked, HTML-escaped like the other fields.
+			'submitted_email'   => $user->ID ? $user->user_email : htmlspecialchars( sanitize_email( wp_unslash( $posted['wptv_email'] ?? '' ) ), ENT_QUOTES, 'UTF-8' ),
 			'title'             => sanitize_text( $posted['wptv_video_title'] ?? '' ),
 			'producer_username' => sanitize_text( $posted['wptv_producer_username'] ?? '' ),
 			'speakers'          => sanitize_text( $posted['wptv_speakers'] ?? '' ),

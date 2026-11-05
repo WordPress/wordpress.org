@@ -129,7 +129,7 @@ function json_ld() {
 				'@context' => 'https://schema.org',
 				'@graph'   => array( $data ),
 			),
-			JSON_PRETTY_PRINT
+			JSON_PRETTY_PRINT | JSON_HEX_TAG | JSON_HEX_AMP
 		)
 	);
 }

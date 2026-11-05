@@ -34,11 +34,12 @@ add_action( 'publish_post', __NAMESPACE__ . '\init_post_views' );
  * The bump_stats_extras() function only exists on WordPress.com. wptv2 defined an empty
  * global stub elsewhere; a function_exists() guard does the same job.
  *
- * @param string $new_status New post status.
- * @param string $old_status Old post status.
+ * @param string   $new_status New post status.
+ * @param string   $old_status Old post status.
+ * @param \WP_Post $post       Post being transitioned. Only videos (posts) count.
  */
-function bump_publish_stats( $new_status, $old_status ) {
-	if ( 'publish' !== $new_status || 'publish' === $old_status ) {
+function bump_publish_stats( $new_status, $old_status, $post ) {
+	if ( 'post' !== $post->post_type || 'publish' !== $new_status || 'publish' === $old_status ) {
 		return;
 	}
 
@@ -46,7 +47,7 @@ function bump_publish_stats( $new_status, $old_status ) {
 		bump_stats_extras( 'wptv-activity', 'publish-video' );
 	}
 }
-add_action( 'transition_post_status', __NAMESPACE__ . '\bump_publish_stats', 10, 2 );
+add_action( 'transition_post_status', __NAMESPACE__ . '\bump_publish_stats', 10, 3 );
 
 /**
  * Raises the upload quota, since videos are uploaded to the media library.
