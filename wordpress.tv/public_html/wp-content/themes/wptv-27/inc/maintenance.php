@@ -46,7 +46,8 @@ function maybe_flush_rewrite_rules() {
 	flush_rewrite_rules();
 	exit( 'Rewrite rules flushed.' );
 }
-add_action( 'init', __NAMESPACE__ . '\maybe_flush_rewrite_rules', 99 );
+// Core defers a flush requested before wp_loaded, so an earlier hook would exit before it ran.
+add_action( 'wp_loaded', __NAMESPACE__ . '\maybe_flush_rewrite_rules' );
 
 /**
  * Flushes rewrite rules when the theme is activated, so its routes work at once.
