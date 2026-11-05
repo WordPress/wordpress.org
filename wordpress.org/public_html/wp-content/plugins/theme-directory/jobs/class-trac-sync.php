@@ -53,9 +53,24 @@ class Trac_Sync {
 			require_once dirname( __DIR__ ) . '/lib/class-trac.php';
 		}
 
-		$trac         = new \Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
+		$trac = new \Trac( 'themetracbot', THEME_TRACBOT_PASSWORD, 'https://themes.trac.wordpress.org/login/xmlrpc' );
+
+		self::sync( $trac );
+	}
+
+	/**
+	 * Imports Trac ticket status changes made since the last successful sync.
+	 *
+	 * The sync cursor only moves forward once every status has been queried. If Trac
+	 * can't be reached for any of them, the next run re-queries the same window instead
+	 * of skipping past the changes made in it.
+	 *
+	 * @param \Trac $trac An authenticated Trac client.
+	 */
+	public static function sync( $trac ) {
+		$sync_start   = time();
 		$last_request = get_option( 'wporg-themes-last-trac-sync', strtotime( '-2 days' ) );
-		update_option( 'wporg-themes-last-trac-sync', time() );
+		$synced       = true;
 
 		// Migrate approved theme updates whose release delay has elapsed to live on Trac,
 		// so the sync below imports them as it would any other newly-live ticket.
@@ -65,13 +80,19 @@ class Trac_Sync {
 			// Get array of tickets. ltrim() the leading `?` that add_query_arg() emits, so
 			// Trac's ticket.query parser doesn't fold it into the first field name (see
 			// release_to_live()).
-			$tickets = (array) $trac->ticket_query( ltrim( add_query_arg( wp_parse_args( $args, [
+			$tickets = $trac->ticket_query( ltrim( add_query_arg( wp_parse_args( $args, [
 				'order'      => 'changetime',
 				'changetime' => date( 'c', $last_request - MINUTE_IN_SECONDS ),
 				'desc'       => 1,
 			] ), '' ), '?' ) );
 
-			foreach ( $tickets as $ticket_id ) {
+			// Trac couldn't be reached; Trac::rpc_query_retry() has already logged why.
+			if ( false === $tickets ) {
+				$synced = false;
+				continue;
+			}
+
+			foreach ( (array) $tickets as $ticket_id ) {
 				// Get the theme associated with that ticket.
 				$theme_id = self::get_theme_id( $ticket_id );
 				if ( ! $theme_id ) {
@@ -138,6 +159,10 @@ class Trac_Sync {
 				wporg_themes_update_version_status( $theme_id, $version, $new_status );
 			}
 		}
+
+		if ( $synced ) {
+			update_option( 'wporg-themes-last-trac-sync', $sync_start );
+		}
 	}
 
 	/**
@@ -145,9 +170,8 @@ class Trac_Sync {
 	 *
 	 * Finds `theme update` tickets that have been in the `approved` status for at least
 	 * the theme's release cooldown delay (wporg_themes_get_release_cooldown_delay()) and
-	 * closes them as resolution=live. That's the only change made here — cron_trigger()'s
-	 * normal sync, which runs straight after, imports the now-live ticket into WordPress
-	 * like any other.
+	 * closes them as resolution=live. That's the only change made here: sync(),
+	 * which runs straight after, imports the now-live ticket into WordPress like any other.
 	 *
 	 * Scoped to the `theme update` priority on purpose: first-time theme submissions also
 	 * pass through the `approved` status, but a trusted reviewer marks those live by hand,
@@ -165,14 +189,23 @@ class Trac_Sync {
 		 * parser splits on `&`/`=` and would otherwise read the first field as `?status`
 		 * (an unknown field it silently ignores), returning tickets regardless of status.
 		 */
-		$tickets = (array) $trac->ticket_query( ltrim( add_query_arg( [
+		$tickets = $trac->ticket_query( ltrim( add_query_arg( [
 			'status'   => 'approved',
 			'owner'    => 'themetracbot',
 			'priority' => 'theme update',
 			'order'    => 'changetime',
 		], '' ), '?' ) );
 
-		foreach ( $tickets as $ticket_id ) {
+		/*
+		 * Trac couldn't be reached; Trac::rpc_query_retry() has already logged why. Casting
+		 * false to an array would yield `[ false ]` and ask Trac for ticket `False`. Nothing
+		 * is lost by stopping here: the next run picks these tickets up again.
+		 */
+		if ( false === $tickets ) {
+			return;
+		}
+
+		foreach ( (array) $tickets as $ticket_id ) {
 			$ticket = $trac->ticket_get( $ticket_id );
 
 			// Skip if the ticket was force-released or reopened since the query.
@@ -191,7 +224,7 @@ class Trac_Sync {
 			}
 
 			// Close as live. Pass the concurrency token we just read to avoid a second
-			// ticket.get; cron_trigger()'s sync then imports it as a newly-live version.
+			// ticket.get; sync() then imports it as a newly-live version.
 			$trac->ticket_update(
 				$ticket_id,
 				'Marking live.',
