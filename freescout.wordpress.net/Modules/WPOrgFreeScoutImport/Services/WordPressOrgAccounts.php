@@ -59,13 +59,6 @@ final class WordPressOrgAccounts {
 	public const DONE = 'done';
 
 	/**
-	 * Credit the remote user to the user an earlier row connects to the same account, like someone's older, deleted user.
-	 *
-	 * @var string
-	 */
-	public const SAME = 'same';
-
-	/**
 	 * How long WordPress.org accounts looked up are cached, in minutes: between checking a CSV and connecting it.
 	 *
 	 * @var int
@@ -206,9 +199,9 @@ final class WordPressOrgAccounts {
 					'error'  => __( 'Another row is for this user already.' ),
 				) + $step;
 			} elseif ( null !== $first && ! $first['mismatch'] && in_array( $first['action'], array( self::CONNECT, self::CREATE ), true ) ) {
-				// Credited to the first row's user, unless that row has to be confirmed: then whichever row connects first is.
+				// The account's first row connects it, and the rest are credited to its user; unless that row has to be confirmed.
 				$step = array(
-					'action' => self::SAME,
+					'action' => self::USE,
 					'user'   => $first['user'],
 				) + $step;
 			} elseif ( ! $step['error'] && $user && isset( $targets[ $user ] ) && $targets[ $user ] !== $step['wporg_user']->username ) {
@@ -221,7 +214,7 @@ final class WordPressOrgAccounts {
 			if ( ! $step['error'] ) {
 				$usernames[ $step['wporg_user']->username ] = $usernames[ $step['wporg_user']->username ] ?? $step;
 				$people[ $id ]                              = true;
-				if ( $user && self::SAME !== $step['action'] ) {
+				if ( $user ) {
 					$targets[ $user ] = $step['wporg_user']->username;
 				}
 			}
@@ -258,11 +251,6 @@ final class WordPressOrgAccounts {
 
 			// Someone may have connected the account since it was checked, like on a user's profile.
 			$connected = Account::user_for( $username );
-
-			if ( self::SAME === $step['action'] && ! $connected ) {
-				$skipped[ $id ] = __( 'The row that connects its account wasn’t connected.' );
-				continue;
-			}
 
 			try {
 				$user = \DB::transaction(

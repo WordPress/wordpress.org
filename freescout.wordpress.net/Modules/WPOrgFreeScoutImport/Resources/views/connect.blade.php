@@ -9,7 +9,6 @@
 		'connect' => __('Connect this user'),
 		'create'  => __('Create a user, connected to it'),
 		'done'    => __('Connected already'),
-		'same'    => __('Credit to the same user as this account’s first row'),
 	];
 	$ready      = count( array_filter( $plan, function ( array $step ): bool { return $step['action'] && 'done' !== $step['action']; } ) );
 	$mismatched = count( array_filter( $plan, function ( array $step ): bool { return $step['action'] && 'done' !== $step['action'] && $step['mismatch']; } ) );
