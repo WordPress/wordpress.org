@@ -1751,6 +1751,13 @@ ul.projects-dropdown li > a > span {
 	border-top: none;
 }
 
+.sort-bar form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 5px;
+}
+
 .sort-bar label {
 	font-size: 12px;
 	line-height: 14px;

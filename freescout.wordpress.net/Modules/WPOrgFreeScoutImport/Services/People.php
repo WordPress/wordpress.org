@@ -12,6 +12,7 @@ namespace Modules\WPOrgFreeScoutImport\Services;
 use App\Conversation;
 use App\Customer;
 use App\Email;
+use App\Folder;
 use App\Mailbox;
 use App\Thread;
 use App\User;
@@ -23,6 +24,8 @@ use Modules\WPOrgFreeScoutImport\Entities\RemoteUser;
 /**
  * Every source's users are credited to users here: the one an administrator chose, the one with their email, or a
  * new, disabled one. Connecting them to a WordPress.org account on the Users page switches them on, or creates them so.
+ * A source's teams become the teams here an administrator chose, or with the same name; its other robots, like its
+ * workflows, become the import's own robot.
  *
  * An instance is for one source's import job, and keeps what it found; its static methods take the source.
  */
@@ -36,6 +39,34 @@ final class People {
 	 * @var string
 	 */
 	public const ROBOT_EMAIL = 'fs-freescout-import@example.org';
+
+	/**
+	 * Alias of the Teams module, whose teams are users.
+	 *
+	 * @var string
+	 */
+	public const TEAMS_MODULE = 'teams';
+
+	/**
+	 * Teams module's service provider, which lists its teams.
+	 *
+	 * @var string
+	 */
+	public const TEAMS_PROVIDER = '\\Modules\\Teams\\Providers\\TeamsServiceProvider';
+
+	/**
+	 * Emails of robot users, like the Workflows module's and the Teams module's, even once deleted.
+	 *
+	 * @var string
+	 */
+	private const ROBOT_PATTERN = '/^fs[^@]*@example\.org(_deleted.*)?$/i';
+
+	/**
+	 * Emails of the Teams module's teams, which it names "<name> Team".
+	 *
+	 * @var string
+	 */
+	private const TEAM_PATTERN = '/^fsteam-\d+@example\.org(_deleted.*)?$/i';
 
 	/**
 	 * Domain of the emails given to users whose remote email can't be a user's here.
@@ -87,6 +118,13 @@ final class People {
 	private $users = array();
 
 	/**
+	 * Teams found so far, by remote team ID; null if there's none here.
+	 *
+	 * @var array<int, User|null>
+	 */
+	private $teams = array();
+
+	/**
 	 * Mailboxes users were given access to so far, by user ID and mailbox ID.
 	 *
 	 * @var bool[][]
@@ -103,7 +141,7 @@ final class People {
 	}
 
 	/**
-	 * The user for a remote user, created if there's none yet.
+	 * The user for a remote user, created if there's none yet; the import's robot for the source's robots and teams.
 	 *
 	 * @param mixed $person Remote user, as the API gives `createdBy` and `assignedTo`.
 	 * @return User|null Null if it isn't a user.
@@ -114,11 +152,69 @@ final class People {
 			return null;
 		}
 
+		if ( self::is_robot( $person ) ) {
+			return $this->robot();
+		}
+
 		if ( ! isset( $this->users[ $id ] ) ) {
 			$this->users[ $id ] = self::mapped( $this->source_id, $id ) ?? self::match_or_create( $this->source_id, $person );
 		}
 
 		return $this->users[ $id ];
+	}
+
+	/**
+	 * The user or team a conversation was assigned to.
+	 *
+	 * @param mixed $person Remote user, as the API gives `assignee` and `assignedTo`.
+	 * @return User|null Null if it's unassigned, or assigned to a team there's none of here, or another robot.
+	 */
+	public function assignee( mixed $person ): ?User {
+		if ( self::is_team( $person ) ) {
+			return $this->team( $person );
+		}
+
+		return self::is_robot( $person ) ? null : $this->user( $person );
+	}
+
+	/**
+	 * The team here for a source's team: the one an administrator chose, or the only one with the same name.
+	 *
+	 * @param array $person Remote team, as the API gives `assignee`.
+	 * @return User|null The Teams module's user for the team, or null if there's none.
+	 */
+	public function team( array $person ): ?User {
+		$id = (int) ( $person['id'] ?? 0 );
+		if ( ! $id ) {
+			return null;
+		}
+
+		if ( ! array_key_exists( $id, $this->teams ) ) {
+			$team = self::mapped( $this->source_id, $id, true );
+			if ( ! $team ) {
+				/*
+				 * Kept once found by name, so choosing another team later moves its conversations. Those imported
+				 * unassigned before, while there was none, are assigned to it now.
+				 */
+				$team = self::team_by_name( self::team_name( $person ) );
+				if ( $team ) {
+					RemoteUser::query()->updateOrCreate(
+						array(
+							'source_id'      => $this->source_id,
+							'remote_user_id' => $id,
+						),
+						array(
+							'user_id' => $team->id,
+							'created' => false,
+						)
+					);
+					self::recredit( $this->source_id, $id, null, $team );
+				}
+			}
+			$this->teams[ $id ] = $team;
+		}
+
+		return $this->teams[ $id ];
 	}
 
 	/**
@@ -190,7 +286,7 @@ final class People {
 	 * @return array|null
 	 */
 	public static function remote_user( RemoteApi $api, int $remote_user_id ): ?array {
-		foreach ( self::directory( $api ) as $remote_user ) {
+		foreach ( self::people( $api ) as $remote_user ) {
 			if ( (int) ( $remote_user['id'] ?? 0 ) === $remote_user_id ) {
 				return $remote_user;
 			}
@@ -279,33 +375,162 @@ final class People {
 	}
 
 	/**
-	 * Credits a remote user to a user here, and what's imported already with them.
+	 * Lists a source's users who are people: not its teams, workflows, or other robots.
+	 *
+	 * @param RemoteApi $api     The source's API.
+	 * @param bool      $refresh Whether to read them again.
+	 * @return array[] Remote users.
+	 */
+	public static function people( RemoteApi $api, bool $refresh = false ): array {
+		return array_values(
+			array_filter(
+				self::directory( $api, $refresh ),
+				static function ( array $remote_user ): bool {
+					return ! self::is_robot( $remote_user );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Lists a source's teams with the team here each is assigned to.
+	 *
+	 * @param RemoteApi $api The source's API.
+	 * @return array[] By name, each with `id`, `name`, `team` (the team here, or null), `chosen`, and `missing`
+	 *                 (names of the mailboxes its conversations are in that the team here has no access to).
+	 */
+	public static function teams( RemoteApi $api ): array {
+		$source_id = (int) $api->source()->id;
+		$teams     = array();
+
+		foreach ( self::directory( $api ) as $remote_team ) {
+			if ( ! self::is_team( $remote_team ) ) {
+				continue;
+			}
+
+			$id     = (int) ( $remote_team['id'] ?? 0 );
+			$chosen = self::mapped( $source_id, $id, true );
+			$team   = $chosen ?? self::team_by_name( self::team_name( $remote_team ) );
+
+			$teams[] = array(
+				'id'      => $id,
+				'name'    => self::team_name( $remote_team ),
+				'team'    => $team,
+				'chosen'  => (bool) $chosen,
+				'missing' => $team ? self::missing_mailboxes( $source_id, $id, $team ) : array(),
+			);
+		}
+
+		usort(
+			$teams,
+			static function ( array $a, array $b ): int {
+				return array( mb_strtolower( $a['name'] ), $a['id'] ) <=> array( mb_strtolower( $b['name'] ), $b['id'] );
+			}
+		);
+
+		return $teams;
+	}
+
+	/**
+	 * Whether a remote user is a robot, like the Workflows module's user or a team: core makes up their emails.
+	 *
+	 * @param mixed $person Remote user, as the API gives them.
+	 * @return bool
+	 */
+	public static function is_robot( mixed $person ): bool {
+		return is_array( $person ) && 'user' === ( $person['type'] ?? 'user' ) && 1 === preg_match( self::ROBOT_PATTERN, (string) ( $person['email'] ?? '' ) );
+	}
+
+	/**
+	 * Whether a remote user is one of the Teams module's teams.
+	 *
+	 * @param mixed $person Remote user, as the API gives them.
+	 * @return bool
+	 */
+	public static function is_team( mixed $person ): bool {
+		return self::is_robot( $person ) && 1 === preg_match( self::TEAM_PATTERN, (string) ( $person['email'] ?? '' ) );
+	}
+
+	/**
+	 * A team's name, as the Teams module shows it: its first name, followed by "Team" as its last name.
+	 *
+	 * @param array $person Remote team.
+	 * @return string
+	 */
+	public static function team_name( array $person ): string {
+		return trim( (string) ( $person['firstName'] ?? '' ) );
+	}
+
+	/**
+	 * The teams here: the users the Teams module lists as its teams.
+	 *
+	 * The module keeps its teams as users that aren't like others, so it's asked which they are. If it can't say, that
+	 * isn't taken for none: conversations would be imported unassigned instead of failing, to be imported again.
+	 *
+	 * @return \Illuminate\Database\Eloquent\Builder
+	 * @throws \UnexpectedValueException If the module doesn't list its teams.
+	 */
+	public static function freescout_teams(): \Illuminate\Database\Eloquent\Builder {
+		$query = User::query();
+
+		if ( ! self::teams_module_active() || ! class_exists( self::TEAMS_PROVIDER ) ) {
+			return $query->whereRaw( '1 = 0' );
+		}
+
+		$teams = call_user_func( array( self::TEAMS_PROVIDER, 'getTeams' ) );
+		if ( ! $teams instanceof \Illuminate\Support\Collection ) {
+			throw new \UnexpectedValueException( 'The Teams module did not list its teams.' );
+		}
+
+		return $query->whereKey( $teams->pluck( 'id' )->map( 'intval' )->all() );
+	}
+
+	/**
+	 * Whether the Teams module is on.
+	 *
+	 * @return bool
+	 */
+	public static function teams_module_active(): bool {
+		try {
+			return (bool) \App\Module::isActive( self::TEAMS_MODULE );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Credits a remote user to a user here, or a remote team to a team here, and what's imported already with them.
 	 *
 	 * @param int  $source_id      Source.
-	 * @param int  $remote_user_id Remote user ID.
-	 * @param User $user           User here.
+	 * @param int  $remote_user_id Remote user or team ID.
+	 * @param User $user           User or team here.
 	 * @return void
 	 */
 	public static function choose( int $source_id, int $remote_user_id, User $user ): void {
 		$previous = RemoteUser::query()->where( 'source_id', $source_id )->where( 'remote_user_id', $remote_user_id )->value( 'user_id' );
 		$from     = $previous ? User::find( (int) $previous ) : null;
-		if ( $from && (int) $from->id === (int) $user->id ) {
-			return;
+		$same     = $from && (int) $from->id === (int) $user->id;
+
+		if ( ! $same ) {
+			RemoteUser::query()->updateOrCreate(
+				array(
+					'source_id'      => $source_id,
+					'remote_user_id' => $remote_user_id,
+				),
+				array(
+					'user_id' => $user->id,
+					'created' => false,
+				)
+			);
 		}
 
-		RemoteUser::query()->updateOrCreate(
-			array(
-				'source_id'      => $source_id,
-				'remote_user_id' => $remote_user_id,
-			),
-			array(
-				'user_id' => $user->id,
-				'created' => false,
-			)
-		);
-
-		if ( $from ) {
+		if ( $from && ! $same ) {
 			self::recredit( $source_id, $remote_user_id, $from, $user );
+		}
+
+		// Conversations imported unassigned, while the team had no team here, are assigned to the one chosen now.
+		if ( User::TYPE_ROBOT === (int) $user->type ) {
+			self::recredit( $source_id, $remote_user_id, null, $user );
 		}
 	}
 
@@ -316,18 +541,22 @@ final class People {
 	 * conversations agents worked on here keep their assignee. Conversations keep their dates, and with the Reports
 	 * module, their metrics are computed again.
 	 *
-	 * @param int  $source_id      Source.
-	 * @param int  $remote_user_id Remote user ID.
-	 * @param User $from           Who it's credited to now.
-	 * @param User $to             Who it's credited to from now on.
+	 * @param int       $source_id      Source.
+	 * @param int       $remote_user_id Remote user or team ID.
+	 * @param User|null $from           Who it's credited to now; null for a team that had none, whose conversations
+	 *                                  were imported unassigned.
+	 * @param User      $to             Who it's credited to from now on.
 	 * @return void
 	 */
-	public static function recredit( int $source_id, int $remote_user_id, User $from, User $to ): void {
+	public static function recredit( int $source_id, int $remote_user_id, ?User $from, User $to ): void {
 		$threads  = static function ( string $column ) use ( $source_id, $remote_user_id ): \Illuminate\Database\Query\Builder {
 			return ImportedThread::query()->select( 'thread_id' )->where( 'source_id', $source_id )->where( $column, $remote_user_id )->getQuery();
 		};
 		$imported = static function ( string $column ) use ( $source_id, $remote_user_id ): \Illuminate\Database\Query\Builder {
 			return ImportedConversation::query()->select( 'conversation_id' )->where( 'source_id', $source_id )->where( $column, $remote_user_id )->getQuery();
+		};
+		$is_from  = static function ( \Illuminate\Database\Eloquent\Builder $query, string $column ) use ( $from ): \Illuminate\Database\Eloquent\Builder {
+			return $from ? $query->where( $column, $from->id ) : $query->whereNull( $column );
 		};
 
 		// Without the events of changed threads and conversations, and without touching updated_at, like the import.
@@ -345,21 +574,40 @@ final class People {
 			$query->toBase()->update( $values );
 		};
 
-		$update_threads( Thread::query()->whereIn( 'id', $threads( 'remote_user_id' ) )->where( 'created_by_user_id', $from->id ), array( 'created_by_user_id' => $to->id ) );
-		$update_threads( Thread::query()->whereIn( 'id', $threads( 'remote_assignee_id' ) )->where( 'user_id', $from->id ), array( 'user_id' => $to->id ) );
-		$update_conversations( Conversation::query()->whereIn( 'id', $imported( 'creator_id' ) )->where( 'created_by_user_id', $from->id ), array( 'created_by_user_id' => $to->id ) );
-		$update_conversations( Conversation::query()->whereIn( 'id', $imported( 'closer_id' ) )->where( 'closed_by_user_id', $from->id ), array( 'closed_by_user_id' => $to->id ) );
+		if ( $from ) {
+			$update_threads( Thread::query()->whereIn( 'id', $threads( 'remote_user_id' ) )->where( 'created_by_user_id', $from->id ), array( 'created_by_user_id' => $to->id ) );
+			$update_conversations( Conversation::query()->whereIn( 'id', $imported( 'creator_id' ) )->where( 'created_by_user_id', $from->id ), array( 'created_by_user_id' => $to->id ) );
+			$update_conversations( Conversation::query()->whereIn( 'id', $imported( 'closer_id' ) )->where( 'closed_by_user_id', $from->id ), array( 'closed_by_user_id' => $to->id ) );
+		}
+		$update_threads( $is_from( Thread::query()->whereIn( 'id', $threads( 'remote_assignee_id' ) ), 'user_id' ), array( 'user_id' => $to->id ) );
 
 		// Conversations agents worked on here keep their assignee.
-		$assigned = Conversation::query()
-			->whereIn( 'id', $imported( 'assignee_id' ) )
-			->where( 'user_id', $from->id )
+		$assigned = $is_from( Conversation::query()->whereIn( 'id', $imported( 'assignee_id' ) ), 'user_id' )
 			->whereNotIn( 'id', self::worked_on()->select( 'conversation_id' )->whereIn( 'conversation_id', $imported( 'assignee_id' ) )->getQuery() );
 
 		$mailboxes = Mailbox::query()->whereIn( 'id', ( clone $assigned )->distinct()->pluck( 'mailbox_id' ) )->get();
+
+		// Open ones that were unassigned move to the Assigned folder, as core moves them when they're assigned.
+		foreach ( $mailboxes as $mailbox ) {
+			$unassigned_folder = $mailbox->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->value( 'id' );
+			$assigned_folder   = $mailbox->folders()->where( 'type', Folder::TYPE_ASSIGNED )->value( 'id' );
+			if ( $unassigned_folder && $assigned_folder ) {
+				$update_conversations(
+					( clone $assigned )
+						->where( 'mailbox_id', $mailbox->id )
+						->where( 'folder_id', $unassigned_folder )
+						->whereIn( 'status', array( Conversation::STATUS_ACTIVE, Conversation::STATUS_PENDING ) )
+						->where( 'state', Conversation::STATE_PUBLISHED ),
+					array(
+						'user_id'   => $to->id,
+						'folder_id' => $assigned_folder,
+					)
+				);
+			}
+		}
 		$update_conversations( $assigned, array( 'user_id' => $to->id ) );
 
-		// Who sees them under Mine changed.
+		// Who sees them under Mine changed, and what's in Unassigned and Assigned.
 		foreach ( $mailboxes as $mailbox ) {
 			self::grant( $to, $mailbox );
 			Importer::update_counters( $mailbox );
@@ -491,16 +739,62 @@ final class People {
 	}
 
 	/**
-	 * The user an administrator chose, or an import created or matched, for a remote user.
+	 * The user an administrator chose, or an import created or matched, for a remote user; or the team for a team.
 	 *
-	 * @param int $source_id      Source.
-	 * @param int $remote_user_id Remote user ID.
+	 * @param int  $source_id      Source.
+	 * @param int  $remote_user_id Remote user or team ID.
+	 * @param bool $team           Whether it's a team, which only a team here can be.
 	 * @return User|null
 	 */
-	private static function mapped( int $source_id, int $remote_user_id ): ?User {
+	private static function mapped( int $source_id, int $remote_user_id, bool $team = false ): ?User {
 		$user_id = RemoteUser::query()->where( 'source_id', $source_id )->where( 'remote_user_id', $remote_user_id )->value( 'user_id' );
+		if ( ! $user_id ) {
+			return null;
+		}
 
-		return $user_id ? User::query()->where( 'status', '!=', User::STATUS_DELETED )->whereKey( (int) $user_id )->first() : null;
+		return ( $team ? self::freescout_teams() : User::query()->where( 'status', '!=', User::STATUS_DELETED ) )->whereKey( (int) $user_id )->first();
+	}
+
+	/**
+	 * The only team here with a name.
+	 *
+	 * @param string $name Team name.
+	 * @return User|null
+	 */
+	private static function team_by_name( string $name ): ?User {
+		if ( '' === $name ) {
+			return null;
+		}
+
+		// By its own name: the module keeps "Team" as every team's last name.
+		$teams = self::freescout_teams()->get()->filter(
+			static function ( User $team ) use ( $name ): bool {
+				return 0 === strcasecmp( (string) $team->first_name, $name );
+			}
+		);
+
+		return 1 === $teams->count() ? $teams->first() : null;
+	}
+
+	/**
+	 * The mailboxes a source team's imported conversations are in that its team here has no access to.
+	 *
+	 * The Teams module gives a team a folder, and lets it be assigned, only in the mailboxes checked on its page.
+	 *
+	 * @param int  $source_id      Source.
+	 * @param int  $remote_team_id Remote team ID.
+	 * @param User $team           Team here.
+	 * @return string[] Mailbox names, by ID.
+	 */
+	private static function missing_mailboxes( int $source_id, int $remote_team_id, User $team ): array {
+		$imported = ImportedConversation::query()->select( 'conversation_id' )->where( 'source_id', $source_id )->where( 'assignee_id', $remote_team_id )->getQuery();
+
+		return Mailbox::query()
+			->whereIn( 'id', Conversation::query()->select( 'mailbox_id' )->whereIn( 'id', $imported )->getQuery() )
+			->whereNotIn( 'id', $team->mailboxes()->pluck( 'mailboxes.id' )->all() )
+			->orderBy( 'name' )
+			->pluck( 'name', 'id' )
+			->all();
 	}
 
 	/**

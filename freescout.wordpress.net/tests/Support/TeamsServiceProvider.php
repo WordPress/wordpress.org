@@ -2,7 +2,9 @@
 /**
  * Stands in for the Teams module's service provider, which lists its teams, without the module.
  *
- * @package WordPressdotorg\FreeScout\WPOrgHelpScoutImport
+ * Shared by the import modules' tests.
+ *
+ * @package WordPressdotorg\FreeScout\Tests
  */
 
 declare( strict_types = 1 );
