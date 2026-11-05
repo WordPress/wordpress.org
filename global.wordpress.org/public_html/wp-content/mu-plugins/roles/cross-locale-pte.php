@@ -277,7 +277,7 @@ class Cross_Locale_PTE {
 			WHERE user_id = %d AND locale = %s
 		", $user_id, self::ALL_LOCALES ) );
 
-		return $projects ?: array();
+		return $projects;
 	}
 	/**
 	 * Retrieves all users who have cross-locale PTE permissions.
