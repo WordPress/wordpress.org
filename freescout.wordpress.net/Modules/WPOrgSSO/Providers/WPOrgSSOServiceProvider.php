@@ -216,6 +216,15 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 			}
 		);
 
+		\Eventy::addFilter(
+			'stylesheets',
+			static function ( array $styles ): array {
+				$styles[] = \Module::getPublicPath( self::ALIAS ) . '/css/login.css';
+
+				return $styles;
+			}
+		);
+
 		// Reset links would get around WordPress.org's two-factor authentication, even in break-glass mode.
 		\Eventy::addFilter(
 			'auth.password_reset_available',
