@@ -37,17 +37,15 @@ use Google\Protobuf\Internal\Message;
 
 /**
  * Middleware which wraps the response in an OperationResponse object.
+ *
+ * @internal
  */
-class OperationsMiddleware
+class OperationsMiddleware implements MiddlewareInterface
 {
     /** @var callable */
     private $nextHandler;
-
-    /** @var object */
-    private $operationsClient;
-
-    /** @var array */
-    private $descriptor;
+    private object $operationsClient;
+    private array $descriptor;
 
     public function __construct(
         callable $nextHandler,
@@ -69,8 +67,7 @@ class OperationsMiddleware
             $options = $this->descriptor + [
                 'lastProtoResponse' => $response
             ];
-            $operationNameMethod = isset($options['operationNameMethod'])
-                ? $options['operationNameMethod'] : 'getName';
+            $operationNameMethod = $options['operationNameMethod'] ?? 'getName';
             $operationName = call_user_func([$response, $operationNameMethod]);
             return new OperationResponse($operationName, $this->operationsClient, $options);
         });

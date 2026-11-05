@@ -131,6 +131,37 @@ class Upload {
 			if ( ! empty( $message ) ) {
 				printf( '<div class="notice notice-%s notice-alt"><p>%s</p></div>' . "\n", esc_attr( $type ), wp_kses_post( $message ) );
 			}
+		} elseif ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+			// The form was submitted, but the upload was not processed. Say so instead of silently re-rendering.
+			$message = '';
+
+			if (
+				empty( $_POST ) &&
+				! empty( $_SERVER['CONTENT_LENGTH'] ) &&
+				isset( $_SERVER['CONTENT_TYPE'] ) &&
+				str_starts_with( $_SERVER['CONTENT_TYPE'], 'multipart/form-data' ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Only compared to a fixed prefix.
+			) {
+				// PHP discards the entire request body when it exceeds post_max_size.
+				$message = sprintf(
+					/* translators: %s: Maximum upload size. */
+					__( 'Your file could not be uploaded because it is too large. The maximum upload size is %s.', 'wporg-plugins' ),
+					size_format( wp_max_upload_size() )
+				);
+			} elseif (
+				isset( $_POST['action'] ) &&
+				(
+					'upload-additional' === $_POST['action'] ||
+					// When new submissions are not accepted, the upload form is not shown and the page has not expired.
+					( 'upload' === $_POST['action'] && $can_submit_new_plugin )
+				)
+			) {
+				// Most likely an expired nonce: the page was left open too long, or the user logged in again since.
+				$message = __( 'Your upload wasn’t processed because your session expired. Please upload your file again.', 'wporg-plugins' );
+			}
+
+			if ( $message ) {
+				printf( '<div class="notice notice-error notice-alt"><p>%s</p></div>' . "\n", esc_html( $message ) );
+			}
 		}
 
 		if ( ! is_wp_error( $upload_result ) || $submitted_counts->total /* has a plugin in the review queue */ ) :

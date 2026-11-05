@@ -32,12 +32,9 @@
 
 namespace Google\ApiCore\Transport\Grpc;
 
-use Google\ApiCore\Serializer;
 use Google\ApiCore\ServerStreamingCallInterface;
-use Google\Rpc\Code;
-use Google\Rpc\Status;
-use Grpc\ServerStreamingCall;
 use Grpc\Gcp\GCPServerStreamCall;
+use Grpc\ServerStreamingCall;
 
 /**
  * Class ServerStreamingCallWrapper implements \Google\ApiCore\ServerStreamingCallInterface.
@@ -45,10 +42,13 @@ use Grpc\Gcp\GCPServerStreamCall;
  */
 class ServerStreamingCallWrapper implements ServerStreamingCallInterface
 {
-    private $stream;
+    /**
+     * @var ServerStreamingCall|GCPServerStreamCall
+     */
+    private object $stream;
 
     /**
-     * @param $stream ServerStreamingCall|GCPServerStreamCall
+     * @param ServerStreamingCall|GCPServerStreamCall $stream
      */
     public function __construct($stream)
     {

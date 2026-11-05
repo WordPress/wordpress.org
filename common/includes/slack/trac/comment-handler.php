@@ -218,8 +218,10 @@ class Comment_Handler {
 		}
 		// Remove -- which starts footer.
 		array_pop( $lines );
-		// Remove empty line before footer.
-		array_pop( $lines );
+		// Remove empty line before footer, which Trac 1.6 no longer sends.
+		if ( $lines && '' === trim( end( $lines ) ) ) {
+			array_pop( $lines );
+		}
 
 		preg_match( '/^(Comment|Changes|Description changed) \(?by (.*[^\)])\)?:$/', array_shift( $lines ), $matches );
 		$has_changes = ( isset( $matches[1] ) && 'Changes' === $matches[1] );

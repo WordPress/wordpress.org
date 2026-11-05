@@ -40,22 +40,12 @@ class ScopedAccessTokenMiddleware
     const DEFAULT_CACHE_LIFETIME = 1500;
 
     /**
-     * @var CacheItemPoolInterface
-     */
-    private $cache;
-
-    /**
-     * @var array configuration
-     */
-    private $cacheConfig;
-
-    /**
      * @var callable
      */
     private $tokenFunc;
 
     /**
-     * @var array|string
+     * @var array<string>|string
      */
     private $scopes;
 
@@ -63,15 +53,15 @@ class ScopedAccessTokenMiddleware
      * Creates a new ScopedAccessTokenMiddleware.
      *
      * @param callable $tokenFunc a token generator function
-     * @param array|string $scopes the token authentication scopes
-     * @param array $cacheConfig configuration for the cache when it's present
-     * @param CacheItemPoolInterface $cache an implementation of CacheItemPoolInterface
+     * @param array<string>|string $scopes the token authentication scopes
+     * @param array<mixed>|null $cacheConfig configuration for the cache when it's present
+     * @param CacheItemPoolInterface|null $cache an implementation of CacheItemPoolInterface
      */
     public function __construct(
         callable $tokenFunc,
         $scopes,
-        array $cacheConfig = null,
-        CacheItemPoolInterface $cache = null
+        ?array $cacheConfig = null,
+        ?CacheItemPoolInterface $cache = null
     ) {
         $this->tokenFunc = $tokenFunc;
         if (!(is_string($scopes) || is_array($scopes))) {

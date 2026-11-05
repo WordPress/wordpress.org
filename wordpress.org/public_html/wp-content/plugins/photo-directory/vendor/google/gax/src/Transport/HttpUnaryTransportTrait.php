@@ -35,10 +35,13 @@ use Exception;
 use Google\ApiCore\Call;
 use Google\ApiCore\ValidationException;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * A trait for shared functionality between transports that support only unary RPCs using simple
  * HTTP requests.
+ *
+ * @internal
  */
 trait HttpUnaryTransportTrait
 {
@@ -48,6 +51,7 @@ trait HttpUnaryTransportTrait
 
     /**
      * {@inheritdoc}
+     * @return never
      * @throws \BadMethodCallException
      */
     public function startClientStreamingCall(Call $call, array $options)
@@ -57,6 +61,7 @@ trait HttpUnaryTransportTrait
 
     /**
      * {@inheritdoc}
+     * @return never
      * @throws \BadMethodCallException
      */
     public function startServerStreamingCall(Call $call, array $options)
@@ -66,6 +71,7 @@ trait HttpUnaryTransportTrait
 
     /**
      * {@inheritdoc}
+     * @return never
      * @throws \BadMethodCallException
      */
     public function startBidiStreamingCall(Call $call, array $options)
@@ -87,9 +93,7 @@ trait HttpUnaryTransportTrait
      */
     private static function buildCommonHeaders(array $options)
     {
-        $headers = isset($options['headers'])
-            ? $options['headers']
-            : [];
+        $headers = $options['headers'] ?? [];
 
         if (!is_array($headers)) {
             throw new \InvalidArgumentException(
@@ -100,15 +104,14 @@ trait HttpUnaryTransportTrait
         // If not already set, add an auth header to the request
         if (!isset($headers['Authorization']) && isset($options['credentialsWrapper'])) {
             $credentialsWrapper = $options['credentialsWrapper'];
-            $audience = isset($options['audience'])
-                ? $options['audience']
-                : null;
+            $audience = $options['audience'] ?? null;
             $callback = $credentialsWrapper
                 ->getAuthorizationHeaderCallback($audience);
             // Prevent unexpected behavior, as the authorization header callback
             // uses lowercase "authorization"
             unset($headers['authorization']);
-            $authHeaders = $callback();
+            // Mitigate scenario where InsecureCredentialsWrapper returns null.
+            $authHeaders = empty($callback) ? [] : $callback();
             if (!is_array($authHeaders)) {
                 throw new \UnexpectedValueException(
                     'Expected array response from authorization header callback'
@@ -124,25 +127,29 @@ trait HttpUnaryTransportTrait
      * @return callable
      * @throws ValidationException
      */
-    private static function buildHttpHandlerAsync()
+    private static function buildHttpHandlerAsync(null|false|LoggerInterface $logger = null)
     {
         try {
-            return [HttpHandlerFactory::build(), 'async'];
+            return [HttpHandlerFactory::build(logger: $logger), 'async'];
         } catch (Exception $ex) {
-            throw new ValidationException("Failed to build HttpHandler", $ex->getCode(), $ex);
+            throw new ValidationException('Failed to build HttpHandler', $ex->getCode(), $ex);
         }
     }
 
     /**
      * Set the path to a client certificate.
      *
-     * @param string $clientCertSource
+     * @param callable $clientCertSource
      */
     private function configureMtlsChannel(callable $clientCertSource)
     {
         $this->clientCertSource = $clientCertSource;
     }
 
+    /**
+     * @return never
+     * @throws \BadMethodCallException
+     */
     private function throwUnsupportedException()
     {
         throw new \BadMethodCallException(
@@ -154,7 +161,7 @@ trait HttpUnaryTransportTrait
     {
         $certFile = tempnam(sys_get_temp_dir(), 'cert');
         $keyFile = tempnam(sys_get_temp_dir(), 'key');
-        list($cert, $key) = call_user_func($this->clientCertSource);
+        list($cert, $key) = call_user_func($clientCertSource);
         file_put_contents($certFile, $cert);
         file_put_contents($keyFile, $key);
 

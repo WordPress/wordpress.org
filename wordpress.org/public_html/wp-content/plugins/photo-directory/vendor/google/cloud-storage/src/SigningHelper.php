@@ -20,9 +20,11 @@ namespace Google\Cloud\Storage;
 use Google\Auth\CredentialsLoader;
 use Google\Auth\SignBlobInterface;
 use Google\Cloud\Core\ArrayTrait;
+use Google\Cloud\Core\Exception\ServiceException;
 use Google\Cloud\Core\JsonTrait;
 use Google\Cloud\Core\Timestamp;
 use Google\Cloud\Storage\Connection\ConnectionInterface;
+use Google\Cloud\Storage\Connection\RetryTrait;
 
 /**
  * Provides common methods for signing storage URLs.
@@ -33,6 +35,7 @@ class SigningHelper
 {
     use ArrayTrait;
     use JsonTrait;
+    use RetryTrait;
 
     const DEFAULT_URL_SIGNING_VERSION = 'v2';
     const DEFAULT_DOWNLOAD_HOST = 'storage.googleapis.com';
@@ -40,6 +43,7 @@ class SigningHelper
     const V4_ALGO_NAME = 'GOOG4-RSA-SHA256';
     const V4_TIMESTAMP_FORMAT = 'Ymd\THis\Z';
     const V4_DATESTAMP_FORMAT = 'Ymd';
+    const MAX_RETRIES = 5;
 
     /**
      * Create or fetch a SigningHelper instance.
@@ -50,7 +54,7 @@ class SigningHelper
     {
         static $helper;
         if (!$helper) {
-            $helper = new static;
+            $helper = new static();
         }
 
         return $helper;
@@ -60,14 +64,15 @@ class SigningHelper
      * Sign using the version inferred from `$options.version`.
      *
      * @param ConnectionInterface $connection A connection to the Cloud Storage
-     *        API.
+     *        API. This object is created by StorageClient,
+     *        and should not be instantiated outside of this client.
      * @param Timestamp|\DateTimeInterface|int $expires The signed URL
      *        expiration.
      * @param string $resource The URI to the storage resource, preceded by a
      *        leading slash.
      * @param int|null $generation The resource generation.
      * @param array $options Configuration options. See
-     *        {@see Google\Cloud\Storage\StorageObject::signedUrl()} for
+     *        {@see StorageObject::signedUrl()} for
      *        details.
      * @return string
      * @throws \InvalidArgumentException
@@ -78,9 +83,7 @@ class SigningHelper
      */
     public function sign(ConnectionInterface $connection, $expires, $resource, $generation, array $options)
     {
-        $version = isset($options['version'])
-            ? $options['version']
-            : self::DEFAULT_URL_SIGNING_VERSION;
+        $version = $options['version'] ?? self::DEFAULT_URL_SIGNING_VERSION;
 
         unset($options['version']);
 
@@ -112,14 +115,15 @@ class SigningHelper
      * This method will be deprecated in the future.
      *
      * @param ConnectionInterface $connection A connection to the Cloud Storage
-     *        API.
+     *        API. This object is created by StorageClient,
+     *        and should not be instantiated outside of this client.
      * @param Timestamp|\DateTimeInterface|int $expires The signed URL
      *        expiration.
      * @param string $resource The URI to the storage resource, preceded by a
      *        leading slash.
      * @param int|null $generation The resource generation.
      * @param array $options Configuration options. See
-     *        {@see Google\Cloud\Storage\StorageObject::signedUrl()} for
+     *        {@see StorageObject::signedUrl()} for
      *        details.
      * @return string
      * @throws \InvalidArgumentException
@@ -169,7 +173,7 @@ class SigningHelper
 
         $signedHeaders = [];
         foreach ($headers as $name => $value) {
-            $signedHeaders[] = $name .':'. $value;
+            $signedHeaders[] = $name . ':' . $value;
         }
 
         // Push the headers onto the end of the signing string.
@@ -181,9 +185,10 @@ class SigningHelper
 
         $stringToSign = $this->createV2CanonicalRequest($toSign);
 
-        $signature = $credentials->signBlob($stringToSign, [
+        // Use exponential backOff
+        $signature = $this->retrySignBlob(fn () => $credentials->signBlob($stringToSign, [
             'forceOpenssl' => $options['forceOpenssl']
-        ]);
+        ]));
 
         // Start with user-provided query params and add required parameters.
         $params = $options['queryParams'];
@@ -193,7 +198,7 @@ class SigningHelper
 
         // urlencode parameter values
         foreach ($params as &$value) {
-            $value = rawurlencode($value);
+            $value = rawurlencode($value ?? '');
         }
 
         $params = $this->addCommonParams($generation, $params, $options);
@@ -208,14 +213,15 @@ class SigningHelper
      * Sign a storage URL using Google Signed URLs v4.
      *
      * @param ConnectionInterface $connection A connection to the Cloud Storage
-     *        API.
+     *        API. This object is created by StorageClient,
+     *        and should not be instantiated outside of this client.
      * @param Timestamp|\DateTimeInterface|int $expires The signed URL
      *        expiration.
      * @param string $resource The URI to the storage resource, preceded by a
      *        leading slash.
      * @param int|null $generation The resource generation.
      * @param array $options Configuration options. See
-     *        {@see Google\Cloud\Storage\StorageObject::signedUrl()} for
+     *        {@see StorageObject::signedUrl()} for
      *        details.
      * @return string
      * @throws \InvalidArgumentException
@@ -336,9 +342,11 @@ class SigningHelper
             $requestHash
         ]);
 
-        $signature = bin2hex(base64_decode($credentials->signBlob($stringToSign, [
-            'forceOpenssl' => $options['forceOpenssl']
-        ])));
+        $signature = bin2hex(base64_decode($this->retrySignBlob(
+            fn () => $credentials->signBlob($stringToSign, [
+                'forceOpenssl' => $options['forceOpenssl']
+            ])
+        ) ?? ''));
 
         // Construct the modified resource name. If a custom hostname is provided,
         // this will remove the bucket name from the resource.
@@ -364,12 +372,14 @@ class SigningHelper
      * Create an HTTP POST policy using v4 signing.
      *
      * @param ConnectionInterface $connection A Connection to Google Cloud Storage.
+     *        This object is created by StorageClient,
+     *        and should not be instantiated outside of this client.
      * @param Timestamp|\DateTimeInterface|int $expires The signed URL
      *        expiration.
      * @param string $resource The URI to the storage resource, preceded by a
      *        leading slash.
      * @param array $options Configuration options. See
-     *        {@see Google\Cloud\Storage\Bucket::generateSignedPostPolicyV4()} for details.
+     *        {@see Bucket::generateSignedPostPolicyV4()} for details.
      * @return array An associative array, containing (string) `uri` and
      *        (array) `fields` keys.
      */
@@ -618,6 +628,7 @@ class SigningHelper
             'headers' => [],
             'keyFile' => null,
             'keyFilePath' => null,
+            'credentialsFetcher' => null,
             'method' => 'GET',
             'queryParams' => [],
             'responseDisposition' => null,
@@ -782,6 +793,8 @@ class SigningHelper
      * Get the credentials for use with signing.
      *
      * @param ConnectionInterface $connection A Storage connection object.
+     *        This object is created by StorageClient,
+     *        and should not be instantiated outside of this client.
      * @param array $options Configuration options.
      * @return array A list containing a credentials object at index 0 and the
      *        modified options at index 1.
@@ -790,9 +803,7 @@ class SigningHelper
      */
     private function getSigningCredentials(ConnectionInterface $connection, array $options)
     {
-        $keyFilePath = isset($options['keyFilePath'])
-            ? $options['keyFilePath']
-            : null;
+        $keyFilePath = $options['keyFilePath'] ?? null;
 
         if ($keyFilePath) {
             if (!file_exists($keyFilePath)) {
@@ -807,15 +818,13 @@ class SigningHelper
 
         $rw = $connection->requestWrapper();
 
-        $keyFile = isset($options['keyFile'])
-            ? $options['keyFile']
-            : null;
+        $keyFile = $options['keyFile'] ?? null;
         if ($keyFile) {
-            $scopes = isset($options['scopes'])
-                ? $options['scopes']
-                : $rw->scopes();
+            $scopes = $options['scopes'] ?? $rw->scopes();
 
             $credentials = CredentialsLoader::makeCredentials($scopes, $keyFile);
+        } elseif (isset($options['credentialsFetcher'])) {
+            $credentials = $options['credentialsFetcher'];
         } else {
             $credentials = $rw->getCredentialsFetcher();
         }
@@ -832,6 +841,7 @@ class SigningHelper
         unset(
             $options['keyFilePath'],
             $options['keyFile'],
+            $options['credentialsFetcher'],
             $options['scopes']
         );
 
@@ -882,5 +892,34 @@ class SigningHelper
         }
 
         return implode('&', $q);
+    }
+
+    /**
+     * Retry logic for signBlob
+     *
+     * @param callable $signBlobFn  A callable that perform the actual signBlob operation.
+     * @param string $resourceName The resource name for logging or retry strategy determination.
+     * @param array $args Arguments for the operations, include preconditions
+     * @return string The signature genarated by signBlob.
+     * @throws ServiceException If non-retryable error occur.
+     * @throws \RuntimeException If retries are exhausted.
+     */
+    private function retrySignBlob(callable $signBlobFn, string $resourceName = 'signBlob', array $args = [])
+    {
+        $attempt = 0;
+        // Generate a retry decider function using the RetryTrait logic.
+        $retryDecider = $this->getRestRetryFunction($resourceName, 'execute', $args);
+        while (true) {
+            ++$attempt;
+            try {
+                // Attempt the operation
+                return $signBlobFn();
+            } catch (\Exception $exception) {
+                if (!$retryDecider($exception, $attempt, self::MAX_RETRIES)) {
+                    // Non-retryable error
+                    throw $exception;
+                }
+            }
+        }
     }
 }

@@ -41,8 +41,10 @@ use Grpc\AbstractCall;
  */
 abstract class ForwardingCall
 {
-    /** @var AbstractCall */
-    protected $innerCall;
+    /**
+     * @var AbstractCall|ForwardingCall
+     */
+    protected object $innerCall;
 
     /**
      * ForwardingCall constructor.

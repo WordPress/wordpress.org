@@ -18,7 +18,8 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
 - **Purpose:** Optimizes static analysis checks inside PRs. Instead of checking the whole repository (which contains legacy code violations), it isolates PHPCS violations to **only the lines added or modified in the current branch**.
 - **Mechanism:**
   - Runs standard `phpcs` on newly added files (`diff-filter=A`).
-  - Runs `phpcs-changed` on modified files (`diff-filter=M`), creating temporary files/diffs to calculate only the errors introduced on the changed lines.
+  - Runs `phpcs-changed` on modified files (`diff-filter=M`), creating temporary files/diffs to calculate only the violations introduced on the changed lines.
+  - Errors and warnings both fail the check.
   - In GitHub Actions, also emits each violation as an inline annotation on the PR diff.
 - **Usage:**
   ```bash

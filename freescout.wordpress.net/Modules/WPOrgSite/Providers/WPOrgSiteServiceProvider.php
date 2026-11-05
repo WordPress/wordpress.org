@@ -16,12 +16,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
+use Modules\WPOrgSite\Http\Middleware\LimitRecipients;
 use Modules\WPOrgSite\Http\Middleware\LockModules;
 use Modules\WPOrgSite\Http\Middleware\RedirectHelpScoutLinks;
 use Modules\WPOrgSite\Services\AltConversation;
 use Modules\WPOrgSite\Services\Assets;
 use Modules\WPOrgSite\Services\EnvSettings;
 use Modules\WPOrgSite\Services\HelpScoutLinks;
+use Modules\WPOrgSite\Services\PartialSends;
 use Modules\WPOrgSite\Services\PinnedNote;
 use Modules\WPOrgSite\Services\UserChoice;
 
@@ -67,6 +69,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function boot(): void {
+		$this->app['router']->pushMiddlewareToGroup( 'web', LimitRecipients::class );
 		$this->app['router']->pushMiddlewareToGroup( 'web', LockModules::class );
 		$this->app['router']->pushMiddlewareToGroup( 'web', RedirectHelpScoutLinks::class );
 		$this->loadViewsFrom( __DIR__ . '/../Resources/views', self::ALIAS );
@@ -151,6 +154,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		self::register_settings_hooks();
 		self::register_pinned_note_hooks();
 		self::register_helpscout_link_hooks();
+		self::register_partial_sends_hooks();
 
 		// For alt-conversation.js, which lays the conversation out.
 		\Eventy::addAction(
@@ -387,6 +391,28 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgSite] Could not record the HelpScout ID of an imported conversation: ' . $e->getMessage() );
 				}
+			}
+		);
+	}
+
+	/**
+	 * Watches each reply as it's sent, so one Gmail stopped partway through isn't sent again.
+	 *
+	 * @return void
+	 */
+	private static function register_partial_sends_hooks(): void {
+		$listener = new PartialSends( (string) config( 'app.no_retry_mail_errors' ) );
+
+		\Eventy::addFilter(
+			'email.reply_to_customer.threads',
+			static function ( mixed $threads ) use ( $listener ): mixed {
+				try {
+					$listener->start( is_iterable( $threads ) ? collect( $threads )->first() : null );
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not watch a reply as it’s sent: ' . $e->getMessage() );
+				}
+
+				return $threads;
 			}
 		);
 	}

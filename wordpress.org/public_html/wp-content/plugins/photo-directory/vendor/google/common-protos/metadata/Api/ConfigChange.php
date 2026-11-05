@@ -14,23 +14,9 @@ class ConfigChange
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0ab1030a1e676f6f676c652f6170692f636f6e6669675f6368616e67652e" .
-            "70726f746f120a676f6f676c652e6170692297010a0c436f6e6669674368" .
-            "616e6765120f0a07656c656d656e7418012001280912110a096f6c645f76" .
-            "616c756518022001280912110a096e65775f76616c756518032001280912" .
-            "2b0a0b6368616e67655f7479706518042001280e32162e676f6f676c652e" .
-            "6170692e4368616e67655479706512230a07616476696365731805200328" .
-            "0b32122e676f6f676c652e6170692e416476696365221d0a064164766963" .
-            "6512130a0b6465736372697074696f6e1802200128092a4f0a0a4368616e" .
-            "676554797065121b0a174348414e47455f545950455f554e535045434946" .
-            "494544100012090a0541444445441001120b0a0752454d4f564544100212" .
-            "0c0a084d4f444946494544100342710a0e636f6d2e676f6f676c652e6170" .
-            "694211436f6e6669674368616e676550726f746f50015a43676f6f676c65" .
-            "2e676f6c616e672e6f72672f67656e70726f746f2f676f6f676c65617069" .
-            "732f6170692f636f6e6669676368616e67653b636f6e6669676368616e67" .
-            "65a2020447415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xB1\x03\x0A\x1Egoogle/api/config_change.proto\x12\x0Agoogle.api\"\x97\x01\x0A\x0CConfigChange\x12\x0F\x0A\x07element\x18\x01 \x01(\x09\x12\x11\x0A\x09old_value\x18\x02 \x01(\x09\x12\x11\x0A\x09new_value\x18\x03 \x01(\x09\x12+\x0A\x0Bchange_type\x18\x04 \x01(\x0E2\x16.google.api.ChangeType\x12#\x0A\x07advices\x18\x05 \x03(\x0B2\x12.google.api.Advice\"\x1D\x0A\x06Advice\x12\x13\x0A\x0Bdescription\x18\x02 \x01(\x09*O\x0A\x0AChangeType\x12\x1B\x0A\x17CHANGE_TYPE_UNSPECIFIED\x10\x00\x12\x09\x0A\x05ADDED\x10\x01\x12\x0B\x0A\x07REMOVED\x10\x02\x12\x0C\x0A\x08MODIFIED\x10\x03Bq\x0A\x0Ecom.google.apiB\x11ConfigChangeProtoP\x01ZCgoogle.golang.org/genproto/googleapis/api/configchange;configchange\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

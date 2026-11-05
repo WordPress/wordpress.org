@@ -379,13 +379,13 @@ class Validator {
 				if ( ! $data ) {
 					return sprintf(
 						/* translators: %s: plugin header tag */
-						__( 'One or more contributors listed were ignored. The %s field should only contain WordPress.org usernames.', 'wporg-plugins' ),
+						__( 'One or more contributors listed were ignored. The %s field should only contain WordPress.org usernames, separated by commas.', 'wporg-plugins' ),
 						'<code>Contributors</code>'
 					);
 				} else {
 					return sprintf(
 						/* translators: 1: List of authors from the readme 2: plugin header tag */
-						__( 'The following contributors listed were ignored, as the WordPress.org user could not be found. %1$s. The %2$s field should only contain WordPress.org usernames.', 'wporg-plugins' ),
+						__( 'The following contributors listed were ignored, as the WordPress.org user could not be found. %1$s. The %2$s field should only contain WordPress.org usernames, separated by commas.', 'wporg-plugins' ),
 						'<code>' . implode( '</code>, <code>', array_map( 'esc_html', $data ) ) . '</code>',
 						'<code>Contributors</code>'
 					);

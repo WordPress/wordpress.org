@@ -11,7 +11,8 @@
 
 namespace Monolog\Handler;
 
-use Monolog\Logger;
+use Monolog\Level;
+use Monolog\LogRecord;
 
 /**
  * Logs to syslog service.
@@ -28,17 +29,14 @@ use Monolog\Logger;
  */
 class SyslogHandler extends AbstractSyslogHandler
 {
-    /** @var string */
-    protected $ident;
-    /** @var int */
-    protected $logopts;
+    protected string $ident;
+    protected int $logopts;
 
     /**
-     * @param string     $ident
      * @param string|int $facility Either one of the names of the keys in $this->facilities, or a LOG_* facility constant
      * @param int        $logopts  Option flags for the openlog() call, defaults to LOG_PID
      */
-    public function __construct(string $ident, $facility = LOG_USER, $level = Logger::DEBUG, bool $bubble = true, int $logopts = LOG_PID)
+    public function __construct(string $ident, string|int $facility = LOG_USER, int|string|Level $level = Level::Debug, bool $bubble = true, int $logopts = LOG_PID)
     {
         parent::__construct($facility, $level, $bubble);
 
@@ -47,7 +45,7 @@ class SyslogHandler extends AbstractSyslogHandler
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function close(): void
     {
@@ -55,13 +53,11 @@ class SyslogHandler extends AbstractSyslogHandler
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
-    protected function write(array $record): void
+    protected function write(LogRecord $record): void
     {
-        if (!openlog($this->ident, $this->logopts, $this->facility)) {
-            throw new \LogicException('Can\'t open syslog for ident "'.$this->ident.'" and facility "'.$this->facility.'"');
-        }
-        syslog($this->logLevels[$record['level']], (string) $record['formatted']);
+        openlog($this->ident, $this->logopts, $this->facility);
+        syslog($this->toSyslogPriority($record->level), (string) $record->formatted);
     }
 }

@@ -14,18 +14,9 @@ class Endpoint
         if (static::$is_initialized == true) {
           return;
         }
-        \GPBMetadata\Google\Api\Annotations::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0a81020a19676f6f676c652f6170692f656e64706f696e742e70726f746f" .
-            "120a676f6f676c652e617069225f0a08456e64706f696e74120c0a046e61" .
-            "6d65180120012809120f0a07616c696173657318022003280912100a0866" .
-            "65617475726573180420032809120e0a0674617267657418652001280912" .
-            "120a0a616c6c6f775f636f7273180520012808426f0a0e636f6d2e676f6f" .
-            "676c652e617069420d456e64706f696e7450726f746f50015a45676f6f67" .
-            "6c652e676f6c616e672e6f72672f67656e70726f746f2f676f6f676c6561" .
-            "7069732f6170692f73657276696365636f6e6669673b7365727669636563" .
-            "6f6e666967a2020447415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xEF\x01\x0A\x19google/api/endpoint.proto\x12\x0Agoogle.api\"M\x0A\x08Endpoint\x12\x0C\x0A\x04name\x18\x01 \x01(\x09\x12\x0F\x0A\x07aliases\x18\x02 \x03(\x09\x12\x0E\x0A\x06target\x18e \x01(\x09\x12\x12\x0A\x0Aallow_cors\x18\x05 \x01(\x08Bo\x0A\x0Ecom.google.apiB\x0DEndpointProtoP\x01ZEgoogle.golang.org/genproto/googleapis/api/serviceconfig;serviceconfig\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

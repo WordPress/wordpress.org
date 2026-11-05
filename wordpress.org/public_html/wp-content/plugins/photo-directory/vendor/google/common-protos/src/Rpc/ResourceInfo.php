@@ -5,8 +5,8 @@
 namespace Google\Rpc;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Describes the resource that is being accessed.
@@ -25,8 +25,9 @@ class ResourceInfo extends \Google\Protobuf\Internal\Message
     protected $resource_type = '';
     /**
      * The name of the resource being accessed.  For example, a shared calendar
-     * name: "example.com_4fghdhgsrgh&#64;group.calendar.google.com", if the current
-     * error is [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
+     * name: "example.com_4fghdhgsrgh\@group.calendar.google.com", if the current
+     * error is
+     * [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
      *
      * Generated from protobuf field <code>string resource_name = 2;</code>
      */
@@ -60,8 +61,9 @@ class ResourceInfo extends \Google\Protobuf\Internal\Message
      *           of the resource: e.g. "type.googleapis.com/google.pubsub.v1.Topic".
      *     @type string $resource_name
      *           The name of the resource being accessed.  For example, a shared calendar
-     *           name: "example.com_4fghdhgsrgh&#64;group.calendar.google.com", if the current
-     *           error is [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
+     *           name: "example.com_4fghdhgsrgh\@group.calendar.google.com", if the current
+     *           error is
+     *           [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
      *     @type string $owner
      *           The owner of the resource (optional).
      *           For example, "user:<owner email>" or "project:<Google developer project
@@ -109,8 +111,9 @@ class ResourceInfo extends \Google\Protobuf\Internal\Message
 
     /**
      * The name of the resource being accessed.  For example, a shared calendar
-     * name: "example.com_4fghdhgsrgh&#64;group.calendar.google.com", if the current
-     * error is [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
+     * name: "example.com_4fghdhgsrgh\@group.calendar.google.com", if the current
+     * error is
+     * [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
      *
      * Generated from protobuf field <code>string resource_name = 2;</code>
      * @return string
@@ -122,8 +125,9 @@ class ResourceInfo extends \Google\Protobuf\Internal\Message
 
     /**
      * The name of the resource being accessed.  For example, a shared calendar
-     * name: "example.com_4fghdhgsrgh&#64;group.calendar.google.com", if the current
-     * error is [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
+     * name: "example.com_4fghdhgsrgh\@group.calendar.google.com", if the current
+     * error is
+     * [google.rpc.Code.PERMISSION_DENIED][google.rpc.Code.PERMISSION_DENIED].
      *
      * Generated from protobuf field <code>string resource_name = 2;</code>
      * @param string $var

@@ -15,39 +15,9 @@ class Policy
           return;
         }
         \GPBMetadata\Google\Type\Expr::initOnce();
-        \GPBMetadata\Google\Api\Annotations::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0afd060a1a676f6f676c652f69616d2f76312f706f6c6963792e70726f74" .
-            "6f120d676f6f676c652e69616d2e76311a1c676f6f676c652f6170692f61" .
-            "6e6e6f746174696f6e732e70726f746f22510a06506f6c696379120f0a07" .
-            "76657273696f6e18012001280512280a0862696e64696e67731804200328" .
-            "0b32162e676f6f676c652e69616d2e76312e42696e64696e67120c0a0465" .
-            "74616718032001280c224e0a0742696e64696e67120c0a04726f6c651801" .
-            "20012809120f0a076d656d6265727318022003280912240a09636f6e6469" .
-            "74696f6e18032001280b32112e676f6f676c652e747970652e4578707222" .
-            "80010a0b506f6c69637944656c746112330a0e62696e64696e675f64656c" .
-            "74617318012003280b321b2e676f6f676c652e69616d2e76312e42696e64" .
-            "696e6744656c7461123c0a1361756469745f636f6e6669675f64656c7461" .
-            "7318022003280b321f2e676f6f676c652e69616d2e76312e417564697443" .
-            "6f6e66696744656c746122bd010a0c42696e64696e6744656c746112320a" .
-            "06616374696f6e18012001280e32222e676f6f676c652e69616d2e76312e" .
-            "42696e64696e6744656c74612e416374696f6e120c0a04726f6c65180220" .
-            "012809120e0a066d656d62657218032001280912240a09636f6e64697469" .
-            "6f6e18042001280b32112e676f6f676c652e747970652e4578707222350a" .
-            "06416374696f6e12160a12414354494f4e5f554e53504543494649454410" .
-            "0012070a034144441001120a0a0652454d4f5645100222bd010a10417564" .
-            "6974436f6e66696744656c746112360a06616374696f6e18012001280e32" .
-            "262e676f6f676c652e69616d2e76312e4175646974436f6e66696744656c" .
-            "74612e416374696f6e120f0a077365727669636518022001280912170a0f" .
-            "6578656d707465645f6d656d62657218032001280912100a086c6f675f74" .
-            "79706518042001280922350a06416374696f6e12160a12414354494f4e5f" .
-            "554e535045434946494544100012070a034144441001120a0a0652454d4f" .
-            "564510024283010a11636f6d2e676f6f676c652e69616d2e7631420b506f" .
-            "6c69637950726f746f50015a30676f6f676c652e676f6c616e672e6f7267" .
-            "2f67656e70726f746f2f676f6f676c65617069732f69616d2f76313b6961" .
-            "6df80101aa0213476f6f676c652e436c6f75642e49616d2e5631ca021347" .
-            "6f6f676c655c436c6f75645c49616d5c5631620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\x9F\x09\x0A\x1Agoogle/iam/v1/policy.proto\x12\x0Dgoogle.iam.v1\"\x84\x01\x0A\x06Policy\x12\x0F\x0A\x07version\x18\x01 \x01(\x05\x12(\x0A\x08bindings\x18\x04 \x03(\x0B2\x16.google.iam.v1.Binding\x121\x0A\x0Daudit_configs\x18\x06 \x03(\x0B2\x1A.google.iam.v1.AuditConfig\x12\x0C\x0A\x04etag\x18\x03 \x01(\x0C\"N\x0A\x07Binding\x12\x0C\x0A\x04role\x18\x01 \x01(\x09\x12\x0F\x0A\x07members\x18\x02 \x03(\x09\x12\$\x0A\x09condition\x18\x03 \x01(\x0B2\x11.google.type.Expr\"X\x0A\x0BAuditConfig\x12\x0F\x0A\x07service\x18\x01 \x01(\x09\x128\x0A\x11audit_log_configs\x18\x03 \x03(\x0B2\x1D.google.iam.v1.AuditLogConfig\"\xB7\x01\x0A\x0EAuditLogConfig\x127\x0A\x08log_type\x18\x01 \x01(\x0E2%.google.iam.v1.AuditLogConfig.LogType\x12\x18\x0A\x10exempted_members\x18\x02 \x03(\x09\"R\x0A\x07LogType\x12\x18\x0A\x14LOG_TYPE_UNSPECIFIED\x10\x00\x12\x0E\x0A\x0AADMIN_READ\x10\x01\x12\x0E\x0A\x0ADATA_WRITE\x10\x02\x12\x0D\x0A\x09DATA_READ\x10\x03\"\x80\x01\x0A\x0BPolicyDelta\x123\x0A\x0Ebinding_deltas\x18\x01 \x03(\x0B2\x1B.google.iam.v1.BindingDelta\x12<\x0A\x13audit_config_deltas\x18\x02 \x03(\x0B2\x1F.google.iam.v1.AuditConfigDelta\"\xBD\x01\x0A\x0CBindingDelta\x122\x0A\x06action\x18\x01 \x01(\x0E2\".google.iam.v1.BindingDelta.Action\x12\x0C\x0A\x04role\x18\x02 \x01(\x09\x12\x0E\x0A\x06member\x18\x03 \x01(\x09\x12\$\x0A\x09condition\x18\x04 \x01(\x0B2\x11.google.type.Expr\"5\x0A\x06Action\x12\x16\x0A\x12ACTION_UNSPECIFIED\x10\x00\x12\x07\x0A\x03ADD\x10\x01\x12\x0A\x0A\x06REMOVE\x10\x02\"\xBD\x01\x0A\x10AuditConfigDelta\x126\x0A\x06action\x18\x01 \x01(\x0E2&.google.iam.v1.AuditConfigDelta.Action\x12\x0F\x0A\x07service\x18\x02 \x01(\x09\x12\x17\x0A\x0Fexempted_member\x18\x03 \x01(\x09\x12\x10\x0A\x08log_type\x18\x04 \x01(\x09\"5\x0A\x06Action\x12\x16\x0A\x12ACTION_UNSPECIFIED\x10\x00\x12\x07\x0A\x03ADD\x10\x01\x12\x0A\x0A\x06REMOVE\x10\x02B|\x0A\x11com.google.iam.v1B\x0BPolicyProtoP\x01Z)cloud.google.com/go/iam/apiv1/iampb;iampb\xF8\x01\x01\xAA\x02\x13Google.Cloud.Iam.V1\xCA\x02\x13Google\\Cloud\\Iam\\V1b\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

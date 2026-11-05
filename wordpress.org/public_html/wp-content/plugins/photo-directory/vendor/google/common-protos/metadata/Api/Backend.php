@@ -14,27 +14,9 @@ class Backend
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0ab4040a18676f6f676c652f6170692f6261636b656e642e70726f746f12" .
-            "0a676f6f676c652e61706922310a074261636b656e6412260a0572756c65" .
-            "7318012003280b32172e676f6f676c652e6170692e4261636b656e645275" .
-            "6c6522e0020a0b4261636b656e6452756c6512100a0873656c6563746f72" .
-            "180120012809120f0a076164647265737318022001280912100a08646561" .
-            "646c696e6518032001280112140a0c6d696e5f646561646c696e65180420" .
-            "012801121a0a126f7065726174696f6e5f646561646c696e651805200128" .
-            "0112410a10706174685f7472616e736c6174696f6e18062001280e32272e" .
-            "676f6f676c652e6170692e4261636b656e6452756c652e50617468547261" .
-            "6e736c6174696f6e12160a0c6a77745f61756469656e6365180720012809" .
-            "480012160a0c64697361626c655f61757468180820012808480022650a0f" .
-            "506174685472616e736c6174696f6e12200a1c504154485f5452414e534c" .
-            "4154494f4e5f554e535045434946494544100012140a10434f4e5354414e" .
-            "545f414444524553531001121a0a16415050454e445f504154485f544f5f" .
-            "41444452455353100242100a0e61757468656e7469636174696f6e426e0a" .
-            "0e636f6d2e676f6f676c652e617069420c4261636b656e6450726f746f50" .
-            "015a45676f6f676c652e676f6c616e672e6f72672f67656e70726f746f2f" .
-            "676f6f676c65617069732f6170692f73657276696365636f6e6669673b73" .
-            "657276696365636f6e666967a2020447415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xA5\x06\x0A\x18google/api/backend.proto\x12\x0Agoogle.api\"1\x0A\x07Backend\x12&\x0A\x05rules\x18\x01 \x03(\x0B2\x17.google.api.BackendRule\"\xD1\x04\x0A\x0BBackendRule\x12\x10\x0A\x08selector\x18\x01 \x01(\x09\x12\x0F\x0A\x07address\x18\x02 \x01(\x09\x12\x10\x0A\x08deadline\x18\x03 \x01(\x01\x12\x18\x0A\x0Cmin_deadline\x18\x04 \x01(\x01B\x02\x18\x01\x12\x1A\x0A\x12operation_deadline\x18\x05 \x01(\x01\x12A\x0A\x10path_translation\x18\x06 \x01(\x0E2'.google.api.BackendRule.PathTranslation\x12\x16\x0A\x0Cjwt_audience\x18\x07 \x01(\x09H\x00\x12\x16\x0A\x0Cdisable_auth\x18\x08 \x01(\x08H\x00\x12\x10\x0A\x08protocol\x18\x09 \x01(\x09\x12^\x0A\x1Doverrides_by_request_protocol\x18\x0A \x03(\x0B27.google.api.BackendRule.OverridesByRequestProtocolEntry\x12\x1D\x0A\x15load_balancing_policy\x18\x0B \x01(\x09\x1AZ\x0A\x1FOverridesByRequestProtocolEntry\x12\x0B\x0A\x03key\x18\x01 \x01(\x09\x12&\x0A\x05value\x18\x02 \x01(\x0B2\x17.google.api.BackendRule:\x028\x01\"e\x0A\x0FPathTranslation\x12 \x0A\x1CPATH_TRANSLATION_UNSPECIFIED\x10\x00\x12\x14\x0A\x10CONSTANT_ADDRESS\x10\x01\x12\x1A\x0A\x16APPEND_PATH_TO_ADDRESS\x10\x02B\x10\x0A\x0EauthenticationBn\x0A\x0Ecom.google.apiB\x0CBackendProtoP\x01ZEgoogle.golang.org/genproto/googleapis/api/serviceconfig;serviceconfig\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

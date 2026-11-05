@@ -44,7 +44,7 @@ gp_tmpl_header();
 
 <?php if ( ! $project->active ) : ?>
 	<div class="wporg-notice wporg-notice-warning">
-		<p>This theme is no longer listed in the theme directory. Translations remain for archiving purposes.</p>
+		<p>This theme is no longer listed in the theme directory or hasn’t been updated in over two years. Translations remain for archiving purposes.</p>
 	</div>
 <?php endif; ?>
 

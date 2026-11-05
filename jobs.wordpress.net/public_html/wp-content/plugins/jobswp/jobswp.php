@@ -868,14 +868,22 @@ EMAIL;
 			}
 			// Validate syntax of certain fields
 			if ( ! $has_errors ) :
+				$howtoapply_methods = jobswp_get_howtoapply_methods();
 				if ( ! is_email( $_POST['email'] ) ) {
 					$has_errors = __( 'The provided "Email Address" is not a proper email address.', 'jobswp' );
 					unset( $_POST['email'] );
+				} elseif ( ! isset( $howtoapply_methods[ $_POST['howtoapply_method'] ] ) ) {
+					$has_errors = __( 'The provided "How to Apply" method is not valid.', 'jobswp' );
+					unset( $_POST['howtoapply_method'] );
 				} elseif ( 'email' == $_POST['howtoapply_method'] && ! is_email( $_POST['howtoapply'] ) ) {
 					$has_errors = __( 'The provided "How to Apply" email address is not a proper email address.', 'jobswp' );
 					unset( $_POST['howtoapply'] );
 				} elseif ( 'web' == $_POST['howtoapply_method'] && is_email( $_POST['howtoapply'] ) ) {
-					$has_errors = __( 'The provided "How to Apply" online form address appear to be an email address. Either supply a website address or change the dropdown to "Email Address".', 'jobswp' );
+					$has_errors = sprintf(
+						/* translators: %s: Label for the email how-to-apply method. */
+						__( 'The provided "How to Apply" online form address appears to be an email address. Either supply a website address or change the dropdown to "%s".', 'jobswp' ),
+						$howtoapply_methods['email']
+					);
 				} elseif ( 'web' == $_POST['howtoapply_method'] && ! wp_http_validate_url( esc_url_raw( $_POST['howtoapply'] ) ) ) {
 					$has_errors = __( 'The provided "How to Apply" online form address is not a proper URL.', 'jobswp' );
 				}
@@ -1074,7 +1082,7 @@ EMAIL;
 	/**
 	 * Schedules job pruning if it isn't already scheduled.
 	 *
-	 * Jobs are scheduled to be pruned daily.
+	 * Jobs are scheduled to be pruned hourly.
 	 */
 	private function schedule_job_pruning() {
 		if ( ! wp_next_scheduled( 'jobswp_scheduled_job_pruning' ) && ! defined( 'WP_INSTALLING' ) )
@@ -1087,12 +1095,39 @@ EMAIL;
 	public function scheduled_job_pruning() {
 		global $wpdb;
 
-		$wpdb->query( $wpdb->prepare(
-			"UPDATE {$wpdb->prefix}posts
-			 SET post_status = 'pruned'
-			 WHERE DateDiff(NOW(), post_date) > %d AND post_type = 'job' AND post_status = 'publish'",
-			self::get_days_until_pruning()
-		) );
+		$cutoff = gmdate( 'Y-m-d H:i:s', time() - self::get_days_until_pruning() * DAY_IN_SECONDS );
+
+		$job_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts}
+				WHERE post_type = 'job' AND post_status = 'publish' AND post_date_gmt < %s",
+				$cutoff
+			)
+		);
+
+		// Set the status directly, since wp_update_post() would re-filter the content without a user's unfiltered_html.
+		wp_defer_term_counting( true );
+
+		foreach ( $job_ids as $job_id ) {
+			// A job closed or extended since the query above no longer matches, and must not be transitioned.
+			$pruned = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->posts} SET post_status = 'pruned'
+					WHERE ID = %d AND post_status = 'publish' AND post_date_gmt < %s",
+					$job_id,
+					$cutoff
+				)
+			);
+
+			if ( ! $pruned ) {
+				continue;
+			}
+
+			clean_post_cache( $job_id );
+			wp_transition_post_status( 'pruned', 'publish', get_post( $job_id ) );
+		}
+
+		wp_defer_term_counting( false );
 	}
 
 	/**
@@ -1107,6 +1142,7 @@ EMAIL;
 	 *
 	 * Currently:
 	 *   for 'email' : sanitizes the value as an email
+	 *   for 'howtoapply_method' : ensures the value is a recognized apply-to method
 	 *   for 'howtoapply' : depending on 'howtoapply_method', sanitizes the value as
 	 *     email or URL
 	 *
@@ -1119,6 +1155,12 @@ EMAIL;
 		switch ( $field ) {
 			case 'email':
 				$value = sanitize_email( $value );
+				break;
+			case 'howtoapply_method':
+				$howtoapply_methods = jobswp_get_howtoapply_methods();
+				if ( ! isset( $howtoapply_methods[ $value ] ) ) {
+					$value = '';
+				}
 				break;
 			case 'howtoapply':
 				if ( isset( $extra_data['howtoapply_method'] ) ) {

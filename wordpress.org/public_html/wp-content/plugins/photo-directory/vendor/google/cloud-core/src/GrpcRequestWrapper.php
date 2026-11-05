@@ -17,17 +17,10 @@
 
 namespace Google\Cloud\Core;
 
-use Google\Auth\HttpHandler\HttpHandlerFactory;
-use Google\Cloud\Core\Exception;
 use Google\ApiCore\ApiException;
-use Google\ApiCore\OperationResponse;
-use Google\ApiCore\PagedListResponse;
 use Google\ApiCore\Serializer;
-use Google\ApiCore\ServerStream;
-use Google\Protobuf\Internal\Message;
-use Google\Rpc\BadRequest;
+use Google\Auth\HttpHandler\HttpHandlerFactory;
 use Google\Rpc\Code;
-use Google\Rpc\RetryInfo;
 
 /**
  * The GrpcRequestWrapper is responsible for delivering gRPC requests.
@@ -35,6 +28,7 @@ use Google\Rpc\RetryInfo;
 class GrpcRequestWrapper
 {
     use RequestWrapperTrait;
+    use RequestProcessorTrait;
 
     /**
      * @var callable A handler used to deliver Psr7 requests specifically for
@@ -64,17 +58,9 @@ class GrpcRequestWrapper
     ];
 
     /**
-     * @var array Map of error metadata types to RPC wrappers.
-     */
-    private $metadataTypes = [
-        'google.rpc.retryinfo-bin' => RetryInfo::class,
-        'google.rpc.badrequest-bin' => BadRequest::class
-    ];
-
-    /**
      * @param array $config [optional] {
      *     Configuration options. Please see
-     *     {@see Google\Cloud\Core\RequestWrapperTrait::setCommonDefaults()} for
+     *     {@see \Google\Cloud\Core\RequestWrapperTrait::setCommonDefaults()} for
      *     the other available options.
      *
      *     @type callable $authHttpHandler A handler used to deliver Psr7
@@ -90,7 +76,7 @@ class GrpcRequestWrapper
 
         $config += [
             'authHttpHandler' => null,
-            'serializer' => new Serializer,
+            'serializer' => new Serializer(),
             'grpcOptions' => []
         ];
 
@@ -111,20 +97,25 @@ class GrpcRequestWrapper
      *           request. **Defaults to** `60`.
      *     @type int $retries Number of retries for a failed request.
      *           **Defaults to** `3`.
+     *     @type callable $grpcRetryFunction Sets the conditions for whether or
+     *           not a request should attempt to retry. Function signature should
+     *           match: `function (\Exception $ex) : bool`.
      *     @type array $grpcOptions gRPC specific configuration options.
      * }
      * @return array
+     * @throws Exception\ServiceException
      */
     public function send(callable $request, array $args, array $options = [])
     {
-        $retries = isset($options['retries']) ? $options['retries'] : $this->retries;
-        $grpcOptions = isset($options['grpcOptions']) ? $options['grpcOptions'] : $this->grpcOptions;
-        $timeout = isset($options['requestTimeout']) ? $options['requestTimeout'] : $this->requestTimeout;
-        $backoff = new ExponentialBackoff($retries, function (\Exception $ex) {
-            $statusCode = $ex->getCode();
-
-            return in_array($statusCode, $this->grpcRetryCodes);
-        });
+        $retries = $options['retries'] ?? $this->retries;
+        $retryFunction = $options['grpcRetryFunction']
+            ?? function (\Exception $ex) {
+                $statusCode = $ex->getCode();
+                return in_array($statusCode, $this->grpcRetryCodes);
+            };
+        $grpcOptions = $options['grpcOptions'] ?? $this->grpcOptions;
+        $timeout = $options['requestTimeout'] ?? $this->requestTimeout;
+        $backoff = new ExponentialBackoff($retries, $retryFunction);
 
         if (!isset($grpcOptions['retrySettings'])) {
             $retrySettings = [
@@ -148,112 +139,5 @@ class GrpcRequestWrapper
 
             throw $ex;
         }
-    }
-
-    /**
-     * Serializes a gRPC response.
-     *
-     * @param mixed $response
-     * @return \Generator|OperationResponse|array|null
-     */
-    private function handleResponse($response)
-    {
-        if ($response instanceof PagedListResponse) {
-            $response = $response->getPage()->getResponseObject();
-        }
-
-        if ($response instanceof Message) {
-            return $this->serializer->encodeMessage($response);
-        }
-
-        if ($response instanceof OperationResponse) {
-            return $response;
-        }
-
-        if ($response instanceof ServerStream) {
-            return $this->handleStream($response);
-        }
-
-        return null;
-    }
-
-    /**
-     * Handles a streaming response.
-     *
-     * @param ServerStream $response
-     * @return \Generator|array|null
-     */
-    private function handleStream($response)
-    {
-        try {
-            foreach ($response->readAll() as $count => $result) {
-                $res = $this->serializer->encodeMessage($result);
-                yield $res;
-            }
-        } catch (\Exception $ex) {
-            throw $this->convertToGoogleException($ex);
-        }
-    }
-
-    /**
-     * Convert a ApiCore exception to a Google Exception.
-     *
-     * @param \Exception $ex
-     * @return Exception\ServiceException
-     */
-    private function convertToGoogleException($ex)
-    {
-        switch ($ex->getCode()) {
-            case Code::INVALID_ARGUMENT:
-                $exception = Exception\BadRequestException::class;
-                break;
-
-            case Code::NOT_FOUND:
-            case Code::UNIMPLEMENTED:
-                $exception = Exception\NotFoundException::class;
-                break;
-
-            case Code::ALREADY_EXISTS:
-                $exception = Exception\ConflictException::class;
-                break;
-
-            case Code::FAILED_PRECONDITION:
-                $exception = Exception\FailedPreconditionException::class;
-                break;
-
-            case Code::UNKNOWN:
-                $exception = Exception\ServerException::class;
-                break;
-
-            case Code::INTERNAL:
-                $exception = Exception\ServerException::class;
-                break;
-
-            case Code::ABORTED:
-                $exception = Exception\AbortedException::class;
-                break;
-
-            case Code::DEADLINE_EXCEEDED:
-                $exception = Exception\DeadlineExceededException::class;
-                break;
-
-            default:
-                $exception = Exception\ServiceException::class;
-                break;
-        }
-
-        $metadata = [];
-        if ($ex->getMetadata()) {
-            foreach ($ex->getMetadata() as $type => $binaryValue) {
-                if (!isset($this->metadataTypes[$type])) {
-                    continue;
-                }
-                $metadataElement = new $this->metadataTypes[$type];
-                $metadataElement->mergeFromString($binaryValue[0]);
-                $metadata[] = $this->serializer->encodeMessage($metadataElement);
-            }
-        }
-
-        return new $exception($ex->getMessage(), $ex->getCode(), $ex, $metadata);
     }
 }

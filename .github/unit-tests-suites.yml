@@ -72,7 +72,7 @@ suites:
     type: standalone
     name: Slack Trac Bot
     working-directory: common/includes/tests/slack/trac
-    phpunit-args: --no-configuration bot.php
+    phpunit-args: --no-configuration --test-suffix .php .
     paths:
       - 'common/includes/slack/**'
       - 'common/includes/tests/slack/**'
@@ -114,6 +114,16 @@ suites:
     script: jobs:test
     paths:
       - 'environments/jobs/**'
+      - 'jobs.wordpress.net/public_html/wp-content/themes/jobswp/**'
+
+  photo-directory:
+    type: wordpress
+    name: Photo Directory
+    script: photo-directory:test
+    paths:
+      - 'environments/photo-directory/**'
+      # Mounted for its suite but not activated, so not read from the environment's plugin list.
+      - 'wordpress.org/public_html/wp-content/plugins/photo-directory/**'
 
   make:
     type: wordpress

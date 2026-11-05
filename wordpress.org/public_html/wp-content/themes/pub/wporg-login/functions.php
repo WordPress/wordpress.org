@@ -566,8 +566,11 @@ function wporg_remember_where_user_came_from() {
 		return;
 	}
 
-	// Make sure value is a string, since setcookie requires it to be.
-	$came_from = sanitize_text_field( $_REQUEST['redirect_to'] ?? ( $_SERVER['HTTP_REFERER'] ?? '' ) );
+	if ( isset( $_REQUEST['redirect_to'] ) ) {
+		$came_from = is_string( $_REQUEST['redirect_to'] ) ? wp_sanitize_redirect( wp_unslash( $_REQUEST['redirect_to'] ) ) : '';
+	} else {
+		$came_from = wp_sanitize_redirect( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
+	}
 	if ( ! $came_from ) {
 		return;
 	}

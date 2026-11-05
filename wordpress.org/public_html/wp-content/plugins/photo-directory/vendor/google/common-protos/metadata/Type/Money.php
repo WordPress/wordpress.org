@@ -14,15 +14,9 @@ class Money
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0ace010a17676f6f676c652f747970652f6d6f6e65792e70726f746f120b" .
-            "676f6f676c652e74797065223c0a054d6f6e657912150a0d63757272656e" .
-            "63795f636f6465180120012809120d0a05756e697473180220012803120d" .
-            "0a056e616e6f7318032001280542600a0f636f6d2e676f6f676c652e7479" .
-            "7065420a4d6f6e657950726f746f50015a36676f6f676c652e676f6c616e" .
-            "672e6f72672f67656e70726f746f2f676f6f676c65617069732f74797065" .
-            "2f6d6f6e65793b6d6f6e6579f80101a20203475450620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xCB\x01\x0A\x17google/type/money.proto\x12\x0Bgoogle.type\"<\x0A\x05Money\x12\x15\x0A\x0Dcurrency_code\x18\x01 \x01(\x09\x12\x0D\x0A\x05units\x18\x02 \x01(\x03\x12\x0D\x0A\x05nanos\x18\x03 \x01(\x05B]\x0A\x0Fcom.google.typeB\x0AMoneyProtoP\x01Z6google.golang.org/genproto/googleapis/type/money;money\xA2\x02\x03GTPb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

@@ -5,10 +5,11 @@
 namespace Google\Type;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
+ * A quaternion, represented by four 64-bit floating point values.
  * A quaternion is defined as the quotient of two directed lines in a
  * three-dimensional space or equivalently as the quotient of two Euclidean
  * vectors (https://en.wikipedia.org/wiki/Quaternion).
@@ -21,7 +22,7 @@ use Google\Protobuf\Internal\GPBUtil;
  *     w + xi + yj + zk
  * where x, y, z, and w are real numbers, and i, j, and k are three imaginary
  * numbers.
- * Our naming choice `(x, y, z, w)` comes from the desire to avoid confusion for
+ * The naming choice `(x, y, z, w)` comes from the desire to avoid confusion for
  * those interested in the geometric properties of the quaternion in the 3D
  * Cartesian space. Other texts often use alternative names or subscripts, such
  * as `(a, b, c, d)`, `(1, i, j, k)`, or `(0, 1, 2, 3)`, which are perhaps
@@ -62,25 +63,25 @@ class Quaternion extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>double x = 1;</code>
      */
-    private $x = 0.0;
+    protected $x = 0.0;
     /**
      * The y component.
      *
      * Generated from protobuf field <code>double y = 2;</code>
      */
-    private $y = 0.0;
+    protected $y = 0.0;
     /**
      * The z component.
      *
      * Generated from protobuf field <code>double z = 3;</code>
      */
-    private $z = 0.0;
+    protected $z = 0.0;
     /**
      * The scalar component.
      *
      * Generated from protobuf field <code>double w = 4;</code>
      */
-    private $w = 0.0;
+    protected $w = 0.0;
 
     /**
      * Constructor.
