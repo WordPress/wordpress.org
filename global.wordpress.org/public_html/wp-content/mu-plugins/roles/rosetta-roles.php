@@ -248,18 +248,16 @@ class Rosetta_Roles {
 
 					$user_details = null;
 					$user         = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
-					$user_details = get_user_by( 'login', $user );
-
-					if ( ! $user_details && false !== strpos( $user, '@' ) ) {
+					if ( false !== strpos( $user, '@' ) ) {
 						$user_details = get_user_by( 'email', $user );
-					}
-
-					if ( ! $user_details && is_numeric( $user ) ) {
+					} elseif ( is_numeric( $user ) ) {
 						$user_details = get_user_by( 'id', $user );
-					}
+					} else {
+						$user_details = get_user_by( 'login', $user );
 
-					if ( ! $user_details ) {
-						$user_details = get_user_by( 'slug', $user );
+						if ( ! $user_details ) {
+							$user_details = get_user_by( 'slug', $user );
+						}
 					}
 
 					if ( ! $user_details ) {
