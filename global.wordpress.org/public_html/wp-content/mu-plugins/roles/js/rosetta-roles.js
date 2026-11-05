@@ -2,7 +2,12 @@
 
 	var projects, l10n, $window = $(window);
 
-	projects = { model: {}, view: {}, controller: {} };
+	projects = {
+		settings: window._rosettaProjectsSettings || {},
+		model: {},
+		view: {},
+		events: _.extend( {}, Backbone.Events )
+	};
 
 	projects.settings = window._rosettaProjectsSettings || {};
 	l10n = projects.settings.l10n || {};
@@ -11,7 +16,51 @@
 	/**
 	 * MODELS
 	 */
-	projects.model.Project = Backbone.Model.extend({
+
+	/**
+	 * Base model providing shared selection and synchronization logic across project models.
+	 * Extended by Project and subProject.
+	 */
+	projects.model.SelectableModel = Backbone.Model.extend( {
+		/**
+		 * Unchecks the model.
+		 */
+		uncheck() {
+			this.set( 'checked', false );
+		},
+
+		/**
+		 * Checks if the model ID is already present in projects.selection upon initialization
+		 * and pre-sets the 'checked' attribute silently.
+		 */
+		syncInitialSelection() {
+			const id = normalizeId( this.get( 'id' ) );
+			this.set( 'id', id, { silent: true } );
+
+			if ( projects.selection.get( id ) ) {
+				this.set( 'checked', true, { silent: true } );
+			}
+		},
+
+		/**
+		 * Change listener for 'change:checked'.
+		 * Keeps the global projects.selection synchronized and triggers global uncheck events.
+		 *
+		 * @param {Backbone.Model} model   - The modified model instance.
+		 * @param {boolean}        checked - The updated selection state.
+		 */
+		updateSelection( model, checked ) {
+			const id = model.get( 'id' );
+			if ( checked ) {
+				projects.selection.add( { id } );
+				projects.events.trigger( 'uncheck:all-projects' );
+			} else {
+				projects.selection.remove( id );
+			}
+		}
+	} );
+
+	projects.model.Project = projects.model.SelectableModel.extend( {
 		defaults: {
 			id: 0,
 			name: '',
@@ -20,218 +69,209 @@
 			checkedSubProjects: false
 		},
 
-		initialize: function() {
-			_.bindAll( this, 'uncheck' );
+		initialize() {
+			const subProjects = this.get( 'sub_projects' ) || [];
+			this.unset( 'sub_projects', { silent: true } );
 
-			// Store the original sub-projects data, it's used to reset the collection on searches.
-			this._subProjects = this.get( 'sub_projects' );
-			this.unset( 'sub_projects' );
-
-			this.set( 'subProjects', new projects.model.subProjects( this._subProjects, {
-				project: this,
-			} ) );
-
-			var isChecked = projects.selection.get( this.get( 'id' ) );
-			if ( isChecked ) {
-				this.set( 'checked', true );
+			// Populate sub-project IDs without allocating an intermediate array.
+			this._subProjectIds = new Set();
+			for ( const sub of subProjects ) {
+				this._subProjectIds.add( normalizeId( sub.id ) );
 			}
 
-			this.listenTo( this.get( 'subProjects' ), 'change:checked', this.updateChecked );
+			const subProjectsCollection = new projects.model.SubProjects( subProjects, {
+				project: this
+			} );
 
-			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
+			this.set( 'subProjects', subProjectsCollection, { silent: true } );
 
-			this.on( 'change:checked', this.updateSelection );
+			this.syncInitialSelection();
+			if ( this.get( 'checked' ) ) {
+				subProjectsCollection.uncheckAll();
+			}
+
+			this.listenTo( subProjectsCollection, 'change:checked', this.updateChecked );
+			this.on( 'change:checked', this.onCheckedChange );
+			this.checkForCheckedSubProjects();
+		},
+
+		onCheckedChange( model, checked ) {
+			this.updateSelection( model, checked );
+
+			// Selecting the entire category grants access to all its items,
+			// making individual sub-project selections redundant.
+			if ( checked ) this.get( 'subProjects' ).uncheckAll();
+		},
+
+		updateChecked( model ) {
+			if ( this._isUncheckingAll ) return;
+
+			if ( model.get( 'checked' ) ) this.set( 'checked', false );
 
 			this.checkForCheckedSubProjects();
 		},
 
-		uncheck: function() {
-			this.set( 'checked', false );
-		},
-
-		updateChecked: function( model ) {
-			if ( model.get( 'checked' ) ) {
-				this.set( 'checked', false );
-			}
-
-			this.checkForCheckedSubProjects();
-		},
-
-		updateSelection: function( model, checked ) {
-			if ( checked ) {
-				projects.selection.add( { id: this.get( 'id' ) } );
-				$window.trigger( 'uncheck-all-projects.rosetta' );
-			} else {
-				projects.selection.remove( { id: this.get( 'id' ) } );
-			}
-		},
-
-		checkForCheckedSubProjects: function() {
-			var checked = this.get( 'subProjects' ).findWhere({ 'checked': true });
-			if ( checked ) {
-				this.set( 'checkedSubProjects', true );
-			} else {
-				this.set( 'checkedSubProjects', false );
-			}
+		// Check against the ID set rather than the collection so active selections
+		// are still detected even when the collection is filtered by an active search.
+		checkForCheckedSubProjects() {
+			const hasChecked = projects.selection.some( model => this._subProjectIds.has( model.id ) );
+			this.set( 'checkedSubProjects', hasChecked );
 		}
-	});
+	} );
 
-	projects.model.Projects = Backbone.Collection.extend({
+	projects.model.Projects = Backbone.Collection.extend( {
 		model: projects.model.Project,
 
-		initialize: function() {
-			_.bindAll( this, 'disableActiveStates' );
-
+		// Listens on the global event bus to coordinate active tabs and selection
+		// state between individual category models and the standalone '#project-all' (GTE) toggle.
+		initialize() {
 			this.on( 'change:isActive', this.toggleActiveStates );
-
-			$window.on( 'deactivate-other-projects.rosetta', this.disableActiveStates );
+			this.listenTo( projects.events, 'deactivate:other-projects', this.disableActiveStates );
+			this.listenTo( projects.events, 'uncheck:other-projects', this.uncheckAllProjects );
 		},
 
-		toggleActiveStates: function( model ) {
-			if ( ! model.get( 'isActive' ) ) {
-				return;
-			}
+		uncheckAllProjects() {
+			this.models.forEach( project => {
+				project.uncheck();
+				project.get( 'subProjects' ).uncheckAll();
+			} );
+		},
 
-			this.each( function( project ) {
-				if ( project.get( 'id' ) != model.get( 'id' ) ) {
+		toggleActiveStates( model ) {
+			if ( ! model.get( 'isActive' ) ) return;
+
+			this.models.forEach( project => {
+				if ( project !== model ) {
 					project.set( 'isActive', false );
 				}
-			});
+			} );
 
-			$window.trigger( 'deactivate-all-projects.rosetta' );
+			projects.events.trigger( 'deactivate:all-projects' );
 		},
 
-		disableActiveStates: function() {
-			this.each( function( project ) {
-				project.set( 'isActive', false );
-			});
+		disableActiveStates() {
+			this.models.forEach( project => project.set( 'isActive', false ) );
 		}
-	});
+	} );
 
-	projects.model.subProject = Backbone.Model.extend({
+	projects.model.SubProject = projects.model.SelectableModel.extend( {
 		defaults: {
 			id: 0,
 			name: '',
-			checked: false,
-			matchScore: 0
+			checked: false
 		},
 
-		initialize: function() {
-			_.bindAll( this, 'uncheck' );
+		initialize() {
+			// Initialize all properties immediately to ensure identical, monomorphic hidden classes.
+			this.matchScore = 0;
+			this._lowerName = String( this.attributes.name || '' ).toLowerCase();
+			this._lowerSlug = String( this.attributes.slug || '' ).toLowerCase();
+			this._searchHaystack = `${ this._lowerName } ${ this._lowerSlug }`;
 
-			var isChecked = projects.selection.get( this.get( 'id' ) );
-			if ( isChecked ) {
-				this.set( 'checked', true );
-			}
-
-			$window.on( 'uncheck-other-projects.rosetta', this.uncheck );
-
+			this.syncInitialSelection();
 			this.on( 'change:checked', this.updateSelection );
-		},
-
-		uncheck: function() {
-			this.set( 'checked', false );
-		},
-
-		updateSelection: function( model, checked ) {
-			if ( checked ) {
-				projects.selection.add( { id: this.get( 'id' ) } );
-				$window.trigger( 'uncheck-all-projects.rosetta' );
-			} else {
-				projects.selection.remove( { id: this.get( 'id' ) } );
-			}
 		}
-	});
+	} );
 
-	projects.model.subProjects = Backbone.Collection.extend({
-		model: projects.model.subProject,
+	/**
+	 * Collection representing sub-projects with integrated relevance-based filtering.
+	 *
+	 * @property {string} terms - Most recently executed search query.
+	 * @property {Backbone.Model} project - Reference to the owning parent Project model.
+	 */
+	projects.model.SubProjects = Backbone.Collection.extend( {
+		model: projects.model.SubProject,
 
 		// Search terms
 		terms: '',
 
-		_sortBy: 'checked',
-
-		initialize: function( models, options ) {
+		initialize( models, options ) {
 			this.project = options.project;
-			this.on( 'uncheckall', this.uncheckall );
 		},
 
-		uncheckall: function() {
-			this.each( function( project ) {
-				project.set( 'checked', false );
-			});
+		getAllModels() {
+			return ( this._allModels ||= this.models.slice() );
 		},
 
-		doSearch: function( value ) {
-			// Don't do anything if we've already done this search
-			if ( this.terms === value ) {
-				return;
+		uncheckAll() {
+			this.project._isUncheckingAll = true;
+
+			try {
+				this.getAllModels().forEach( model => model.get( 'checked' ) && model.uncheck() );
+			} finally {
+				this.project._isUncheckingAll = false;
+				this.project.set( 'checkedSubProjects', false );
 			}
+		},
+
+		doSearch( value ) {
+			value = value.trim();
+
+			// Don't do anything if we've already done this search
+			if ( this.terms === value ) return;
 
 			this.terms = value;
 
-			if ( this.terms.length > 0 ) {
+			if ( this.terms ) {
 				this.search( this.terms );
-			}
-
-			// If search is blank, show all projects.
-			if ( '' === this.terms ) {
-				this.reset( this.project._subProjects );
+			} else {
+				// If search is blank, show all projects.
+				this.reset( this.getAllModels() );
 			}
 
 			// Trigger a 'projects:update' event
 			this.trigger( 'projects:update' );
 		},
 
-		// Performs a search within the collection
-		// @uses RegExp
-		search: function( term ) {
-			var match, results, escapedTerm;
+		/**
+		 * Performs a search within the collection and ranks results.
+		 * Uses imperative loops to avoid closure allocations and GC pressure during live typing.
+		 *
+		 * @param {string} term - Search query.
+		 */
+		search( term ) {
+			// Split into tokens; ignore empty tokens.
+			const tokens = term.toLowerCase().match( /\S+/g ) || [];
+			const tokenCount = tokens.length;
+			const allModels = this.getAllModels();
+			const results = [];
 
-			// Start with a full collection
-			this.reset( this.project._subProjects, { silent: true } );
+			for ( let i = 0; i < allModels.length; i++ ) {
+				const project = allModels[ i ];
+				const haystack = project._searchHaystack;
 
-			// Escape the term string for RegExp meta characters
-			escapedTerm = term.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' );
-
-			// Consider spaces as word delimiters and match the whole string
-			// so matching terms can be combined
-			escapedTerm = escapedTerm.replace( / /g, ')(?=.*' );
-			match = new RegExp( '^(?=.*' + escapedTerm + ').+', 'i' );
-
-			results = this.filter( function( project ) {
-				var haystack = _.union( [ project.get( 'name' ), project.get( 'slug' ) ] );
-				if ( match.test( haystack ) ) {
-					_.each( haystack, function( word ) {
-						var score = word.score( term, .5 );
-						project.set( 'matchScore', Math.max( score, project.get( 'matchScore' ) ) );
-					});
-					return true;
+				// Step 1 (Filter): Ensure all search terms are present in name or slug.
+				let matchesAll = true;
+				for ( let j = 0; j < tokenCount; j++ ) {
+					if ( ! haystack.includes( tokens[ j ] ) ) {
+						matchesAll = false;
+						break;
+					}
 				}
-				return false;
-			});
 
-			this._sortBy = 'matchScore';
-			this.reset( results );
-			this._sortBy = 'checked';
+				if ( ! matchesAll ) continue;
+
+				// Step 2 (Ranking): Calculate 'matchScore' for comparator sorting.
+				// Cache properties to avoid repeated heap lookups across multiple search tokens.
+				const { _lowerName, _lowerSlug } = project;
+				let score = 0;
+				for ( let j = 0; j < tokenCount; j++ ) {
+					score += Math.max( getMatchScore( _lowerName, tokens[ j ] ), getMatchScore( _lowerSlug, tokens[ j ] ) );
+				}
+				project.matchScore = score;
+				results.push( project );
+			}
+
+			results.sort( ( a, b ) => ( b.matchScore - a.matchScore ) || ( b.attributes.checked - a.attributes.checked ) );
+			this.reset( results, { sort: false } );
 		},
 
-		comparator: function( project ) {
-			return - project.get( this._sortBy );
+		comparator( project ) {
+			// Default view: Floats assigned permissions to the top
+			// Search view: Overridden to prioritize search relevance over assignment state.
+			return this.terms ? - project.matchScore : - project.get( 'checked' );
 		}
-	});
-
-	projects.model.Selection = Backbone.Collection.extend({
-
-		initialize: function() {
-			this.$field = $( '#project-access-list' );
-			this.on( 'add remove reset', this.updateInputField );
-		},
-
-		updateInputField: function() {
-			this.$field.val( _.pluck( this.toJSON(), 'id' ).join() );
-		}
-	});
+	} );
 
 	/**
 	 * VIEWS
