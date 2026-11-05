@@ -89,7 +89,6 @@ class Cross_Locale_PTE {
 			check_admin_referer( 'cross-locale-pte', '_nonce_cross-locale-pte' );
 
 			$user_input = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
-
 			self::$user = get_user_by( 'login', $user_input );
 
 			if ( ! self::$user && false !== strpos( $user_input, '@' ) ) {
