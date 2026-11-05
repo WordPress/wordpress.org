@@ -20,6 +20,7 @@ class WPorg_I18n_Teams_Editor_Requests_Test extends WPorg_I18n_Teams_TestCase {
 	const LOCALE_SITES = [
 		'de_DE' => 9001,
 		'fr_FR' => 9002,
+		'de_CH' => 9003,
 	];
 
 	/**
@@ -291,6 +292,26 @@ class WPorg_I18n_Teams_Editor_Requests_Test extends WPorg_I18n_Teams_TestCase {
 		$request = $this->create_post_with_tags( [ 'editor-requests', 'de_DE_formal' ] );
 
 		$this->assertSame( [ true, true, true ], $this->o2_lets_user_resolve( $this->create_locale_user( 'de_DE' ), $request ) );
+	}
+
+	/**
+	 * A request tagged with a locale and its variant is for one locale.
+	 */
+	public function test_request_for_a_locale_and_its_variant_is_for_one_locale() {
+		$request = $this->create_post_with_tags( [ 'editor-requests', 'de_DE', 'de_DE_formal' ] );
+
+		$this->assertSame( [ true, true, true ], $this->o2_lets_user_resolve( $this->create_locale_user( 'de_DE' ), $request ) );
+	}
+
+	/**
+	 * A variant of another locale still makes a request for several locales.
+	 */
+	public function test_request_with_a_variant_of_another_locale_stays_with_the_site_editors() {
+		// de_CH_informal is a variant of de_CH, which has its own editors.
+		$request = $this->create_post_with_tags( [ 'editor-requests', 'de_DE', 'de_CH_informal' ] );
+
+		$this->assertSame( [ false, false, false ], $this->o2_lets_user_resolve( $this->create_locale_user( 'de_DE' ), $request ) );
+		$this->assertSame( [ false, false, false ], $this->o2_lets_user_resolve( $this->create_locale_user( 'de_CH' ), $request ) );
 	}
 
 	/**

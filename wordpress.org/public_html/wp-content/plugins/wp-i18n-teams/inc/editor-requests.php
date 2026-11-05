@@ -166,16 +166,7 @@ function is_locale_editor_for_request( int $user_id, int $post_id ): bool {
 		return false;
 	}
 
-	// Editors are only assigned to the parent locale.
-	$locale = $locales[0];
-	if ( ! empty( $locale->root_slug ) ) {
-		$parent = GP_Locales::by_slug( $locale->root_slug );
-		if ( $parent ) {
-			$locale = $parent;
-		}
-	}
-
-	$site_id = get_locale_site_id( $locale );
+	$site_id = get_locale_site_id( $locales[0] );
 	if ( ! $site_id ) {
 		return false;
 	}
@@ -200,6 +191,9 @@ function is_polyglots_site(): bool {
 /**
  * Gets the locales a request is tagged with.
  *
+ * A variant counts as its parent locale, so a request tagged with a locale and
+ * its variant is for one locale.
+ *
  * @param int $post_id Post ID.
  * @return \GP_Locale[]
  */
@@ -213,9 +207,16 @@ function get_request_locales( int $post_id ): array {
 	$locales = [];
 	foreach ( get_the_tags( $post_id ) ?: [] as $tag ) {
 		$locale = $locales_by_wp_locale[ $tag->name ] ?? $locales_by_wp_locale[ $tag->slug ] ?? null;
-		if ( $locale ) {
-			$locales[ $locale->wp_locale ] = $locale;
+		if ( ! $locale ) {
+			continue;
 		}
+
+		// Editors are only assigned to the parent locale, and their role covers its variants.
+		if ( ! empty( $locale->root_slug ) ) {
+			$locale = GP_Locales::by_slug( $locale->root_slug ) ?: $locale;
+		}
+
+		$locales[ $locale->wp_locale ] = $locale;
 	}
 
 	return array_values( $locales );
