@@ -187,20 +187,22 @@ final class WordPressOrgAccounts {
 		$usernames = array();
 
 		foreach ( $rows as $row ) {
-			$step = $this->plan_row( $row, $client );
-			$id   = (int) ( $step['remote_user']['id'] ?? 0 );
-			$user = $step['user'] ? (int) $step['user']->id : 0;
+			$step  = $this->plan_row( $row, $client );
+			$id    = (int) ( $step['remote_user']['id'] ?? 0 );
+			$user  = $step['user'] ? (int) $step['user']->id : 0;
+			$first = $step['error'] ? null : ( $usernames[ $step['wporg_user']->username ] ?? null );
 
-			// One account per person: a CSV can't connect anyone twice, one account twice, or one user here to two.
-			if ( ! $step['error'] && isset( $usernames[ $step['wporg_user']->username ] ) ) {
-				$step = array(
-					'action' => null,
-					'error'  => __( 'Another row names this WordPress.org account already.' ),
-				) + $step;
-			} elseif ( ! $step['error'] && isset( $people[ $id ] ) ) {
+			// A CSV can't connect anyone twice, or one user here to two accounts.
+			if ( ! $step['error'] && isset( $people[ $id ] ) ) {
 				$step = array(
 					'action' => null,
 					'error'  => __( 'Another row is for this user already.' ),
+				) + $step;
+			} elseif ( null !== $first && ! $first['mismatch'] && in_array( $first['action'], array( self::CONNECT, self::CREATE ), true ) ) {
+				// The account's first row connects it, and the rest are credited to its user; unless that row has to be confirmed.
+				$step = array(
+					'action' => self::USE,
+					'user'   => $first['user'],
 				) + $step;
 			} elseif ( ! $step['error'] && $user && isset( $targets[ $user ] ) && $targets[ $user ] !== $step['wporg_user']->username ) {
 				$step = array(
@@ -210,7 +212,7 @@ final class WordPressOrgAccounts {
 			}
 
 			if ( ! $step['error'] ) {
-				$usernames[ $step['wporg_user']->username ] = true;
+				$usernames[ $step['wporg_user']->username ] = $usernames[ $step['wporg_user']->username ] ?? $step;
 				$people[ $id ]                              = true;
 				if ( $user ) {
 					$targets[ $user ] = $step['wporg_user']->username;
