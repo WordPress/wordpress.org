@@ -90,8 +90,17 @@ class Cross_Locale_PTE {
 
 			$user_input = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
 			self::$user = get_user_by( 'login', $user_input );
-			if ( ! self::$user ) {
+
+			if ( ! self::$user && false !== strpos( $user_input, '@' ) ) {
 				self::$user = get_user_by( 'email', $user_input );
+			}
+
+			if ( ! self::$user && is_numeric( $user_input ) ) {
+				self::$user = get_user_by( 'id', (int) $user_input );
+			}
+
+			if ( ! self::$user ) {
+				self::$user = get_user_by( 'slug', $user_input );
 			}
 
 			if ( self::$user ) {
@@ -280,9 +289,9 @@ class Cross_Locale_PTE {
 		return $projects;
 	}
 	/**
-	 * Retrieves all users who have cross-locale PTE permissions.
+	 * Retrieves the projects for which a user has cross-locale PTE permissions.
 	 *
-	 * @return array<int, object> Associative array of user objects indexed by user ID.
+	 * @return array List of User IDs.
 	 */
 	public static function get_all_users() {
 		global $wpdb;
