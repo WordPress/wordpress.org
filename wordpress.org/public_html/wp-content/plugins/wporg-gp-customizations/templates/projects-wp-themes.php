@@ -117,7 +117,9 @@ gp_tmpl_header();
 	</table>
 </div>
 
-<script type="text/javascript">
+<?php
+wp_print_inline_script_tag(
+	<<<'JS'
 jQuery( function( $ ) {
 	$( '#stats-table' ).tablesorter( {
 		theme: 'wporg-translate',
@@ -133,6 +135,8 @@ jQuery( function( $ ) {
 		$( this ).parent( '.projects-dropdown' ).toggleClass( 'open' );
 	});
 });
-</script>
+JS
+);
+?>
 
 <?php gp_tmpl_footer();

@@ -509,7 +509,9 @@ class wporg_trac_notifications {
 			}
 		}
 		</style>
-		<script>
+		<?php
+		wp_print_inline_script_tag(
+			<<<'JS'
 		jQuery(document).ready( function($) {
 			$('#show-completed').on('click', 'a', function() {
 				$('#show-completed').hide();
@@ -521,8 +523,8 @@ class wporg_trac_notifications {
 				return false;
 			});
 		});
-		</script>
-		<?php
+		JS
+		);
 		echo '<form method="post" action="">';
 		wp_nonce_field( 'save-trac-notifications', 'trac-nonce', false );
 		echo '<h3>New Tickets</h3>';
