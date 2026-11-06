@@ -93,7 +93,7 @@ function handle() {
 	if ( $keep ) {
 		// Only category IDs and plain strings go back into the URL.
 		$kept = array();
-		foreach ( array_intersect_key( $_POST, array_flip( $keep ) ) as $key => $value ) {
+		foreach ( array_intersect_key( wp_unslash( $_POST ), array_flip( $keep ) ) as $key => $value ) {
 			if ( 'post_category' === $key ) {
 				$kept[ $key ] = array_values( array_filter( array_map( 'intval', (array) $value ) ) );
 			} elseif ( is_string( $value ) ) {
