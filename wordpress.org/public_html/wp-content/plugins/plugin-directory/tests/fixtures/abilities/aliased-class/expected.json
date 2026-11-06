@@ -1,0 +1,6 @@
+{
+	"description": "A class and a function imported under other names, from files nothing else makes the scanner read.",
+	"abilities": [
+		{ "name": "aliased/summarize", "label": "Summarize", "description": "Summarizes a post." }
+	]
+}

@@ -10,6 +10,7 @@ use WordPressdotorg\Plugin_Directory\Readme\{ Parser as Readme_Parser, Validator
 use WordPressdotorg\Plugin_Directory\Standalone\Plugins_Info_API;
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Tools\Ability_Scanner;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
 use WordPressdotorg\Plugin_Directory\Tools\SVN;
 use WordPressdotorg\Plugin_Directory\Tools\Tokenisation_Helpers;
@@ -652,6 +653,41 @@ class Import {
 		} else {
 			wp_remove_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
+		}
+
+		// Store the ability data. Detection is the slowest part of an import, so it's only
+		// redone when the stable code may have changed, or the scanner has changed since.
+		$scanned_with = get_post_meta( $plugin->ID, 'abilities_scanner_version', true );
+		if ( self::should_scan_abilities( $touches_stable_tag, $stable_tag, $current_stable_tag, $scanned_with ) ) {
+			$failed       = false;
+			$ability_data = self::find_ability_data_in_directory( "{$data['tmp_dir']}/export", $failed );
+
+			// A failed scan keeps what was stored before, and is retried on the next import.
+			if ( ! $failed ) {
+				$abilities = $ability_data['abilities'];
+				// `ability_name` is one row per ability so it can be queried.
+				if ( $abilities ) {
+					$changed = update_post_meta( $plugin->ID, 'all_abilities', $abilities );
+					if ( $changed || count( get_post_meta( $plugin->ID, 'ability_name', false ) ) !== count( $abilities ) ) {
+						delete_post_meta( $plugin->ID, 'ability_name' );
+						foreach ( $abilities as $ability ) {
+							add_post_meta( $plugin->ID, 'ability_name', $ability->name, false );
+						}
+					}
+				} else {
+					delete_post_meta( $plugin->ID, 'all_abilities' );
+					delete_post_meta( $plugin->ID, 'ability_name' );
+				}
+
+				// Ability categories, with their labels and descriptions, for browsing abilities by category.
+				if ( $ability_data['categories'] ) {
+					update_post_meta( $plugin->ID, 'all_ability_categories', $ability_data['categories'] );
+				} else {
+					delete_post_meta( $plugin->ID, 'all_ability_categories' );
+				}
+
+				update_post_meta( $plugin->ID, 'abilities_scanner_version', (string) Ability_Scanner::VERSION );
+			}
 		}
 
 		self::record_release( $plugin, $stable_tag, $version, $current_stable_tag, $last_committer, $last_revision );
@@ -1633,6 +1669,58 @@ class Import {
 			$widgets[] = is_string( $label ) ? $label : '';
 		}
 		return array_unique( $widgets );
+	}
+
+	/**
+	 * Whether a plugin's abilities need scanning on this import: when the stable code may
+	 * have changed, or when it was last scanned with a different scanner version.
+	 *
+	 * @param bool   $touches_stable_tag Whether this import includes the stable tag.
+	 * @param string $stable_tag         The stable tag now.
+	 * @param string $current_stable_tag The stable tag as of the last import.
+	 * @param string $scanned_with       The scanner version of the last scan, or '' if none.
+	 * @return bool
+	 */
+	public static function should_scan_abilities( $touches_stable_tag, $stable_tag, $current_stable_tag, $scanned_with ) {
+		return $touches_stable_tag
+			|| $stable_tag !== $current_stable_tag
+			|| (string) Ability_Scanner::VERSION !== (string) $scanned_with;
+	}
+
+	/**
+	 * Find the abilities a plugin registers, across all of its PHP files.
+	 *
+	 * @see Ability_Scanner for what's recognised.
+	 *
+	 * @param string $base_dir The plugin's root directory.
+	 * @return object[] Unique abilities, each with name, label, description, category, bundled, file and line.
+	 */
+	public static function find_abilities_in_directory( $base_dir ) {
+		return self::find_ability_data_in_directory( $base_dir )['abilities'];
+	}
+
+	/**
+	 * Find the abilities and ability categories a plugin registers.
+	 *
+	 * @see Ability_Scanner::scan_plugin()
+	 *
+	 * @param string $base_dir The plugin's root directory.
+	 * @param bool   $failed   Optional. Set to true if the scan failed. Default false.
+	 * @return array With 'abilities' and 'categories'.
+	 */
+	public static function find_ability_data_in_directory( $base_dir, &$failed = false ) {
+		$failed = false;
+		try {
+			return Ability_Scanner::scan_plugin( $base_dir );
+		} catch ( \Throwable $e ) {
+			// Ability detection must never stop a plugin from importing.
+			$failed = true;
+			trigger_error( 'Ability scan failed: ' . esc_html( $e->getMessage() ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			return array(
+				'abilities'  => array(),
+				'categories' => array(),
+			);
+		}
 	}
 
 	/**

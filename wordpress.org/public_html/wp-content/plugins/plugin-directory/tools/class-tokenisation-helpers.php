@@ -39,6 +39,26 @@ class Tokenisation_Helpers {
 	private static ?string $cached_contents = null;
 	private static array $cached_tokens = [];
 
+	/** Deepest array nesting resolved; deeper values resolve to null. */
+	private const MAX_DEPTH = 64;
+
+	/** Default work allowed for one find_array_literals() call, in tokens. */
+	private const ARRAY_LITERALS_BUDGET = 2000000;
+
+	/**
+	 * Current nesting while resolving values.
+	 *
+	 * @var int
+	 */
+	private static int $depth = 0;
+
+	/**
+	 * Remaining work during find_array_literals(); null when unlimited.
+	 *
+	 * @var int|null
+	 */
+	private static ?int $budget = null;
+
 	/**
 	 * Find calls to `$function_name` in PHP source and return structured arg
 	 * values for each call.
@@ -79,6 +99,145 @@ class Tokenisation_Helpers {
 		}
 		return $calls;
 	}
+
+	/**
+	 * Find every inline `array(...)` / `[...]` literal in PHP source, including
+	 * nested ones, and return each resolved the same way as array args to
+	 * find_function_calls(): string-keyed entries only, with values that are
+	 * string|array|null.
+	 *
+	 * Index access (`$a['x']`, `foo()[0]`) and literals inside comments or
+	 * strings are not arrays and are skipped, except that assigning an array
+	 * literal to a string key (`$a['x'] = array( ... )`) is reported as the
+	 * one-entry array `array( 'x' => array( ... ) )`.
+	 *
+	 * Work is linear in the source size per nesting level, and bounded by
+	 * $budget: once it's spent, the arrays found so far are returned.
+	 *
+	 * @param string   $contents PHP source code.
+	 * @param int|null $budget   Optional. Work allowed, in tokens; reduced by the work done.
+	 * @return array[] One entry per array literal, in source order.
+	 */
+	public static function find_array_literals( string $contents, ?int &$budget = null ): array {
+		$tokens = array_values(
+			array_filter( self::tokenise( $contents ), static fn( PhpToken $t ) => ! $t->isIgnorable() )
+		);
+		$count  = count( $tokens );
+		$arrays = [];
+		$closes = self::pair_brackets( $tokens );
+
+		self::$budget = $budget ?? self::ARRAY_LITERALS_BUDGET;
+		try {
+			for ( $i = 0; $i < $count && self::$budget > 0; $i++ ) {
+				$found = self::array_literal_at( $tokens, $closes, $i );
+				if ( null !== $found ) {
+					$arrays[] = $found;
+				}
+			}
+		} finally {
+			$budget       = self::$budget;
+			self::$budget = null;
+		}
+
+		return $arrays;
+	}
+
+	/**
+	 * The array literal (or keyed array assignment) starting at $i, resolved, or null.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @param int[]      $closes Index of each opening bracket's closing bracket.
+	 * @param int        $i      Index of the token to check.
+	 */
+	private static function array_literal_at( array $tokens, array $closes, int $i ): ?array {
+		$tok = $tokens[ $i ];
+
+		if ( $tok->is( '[' ) ) {
+			$prev = $tokens[ $i - 1 ] ?? null;
+			if ( $prev && ( $prev->is( [ ']', ')', '}' ] ) || in_array( $prev->id, self::INDEXABLE_TOKEN_IDS, true ) ) ) {
+				return self::keyed_array_assignment( $tokens, $closes, $i );
+			}
+			$open = $i;
+		} elseif ( T_ARRAY === $tok->id && ( $tokens[ $i + 1 ] ?? null )?->is( '(' ) ) {
+			$open = $i + 1;
+		} else {
+			return null;
+		}
+
+		$close = $closes[ $open ] ?? null;
+		return null === $close ? null : self::resolve_array_literal( array_slice( $tokens, $open + 1, $close - $open - 1 ) );
+	}
+
+	/**
+	 * Match every bracket in one pass.
+	 *
+	 * @param PhpToken[] $tokens Significant tokens.
+	 * @return int[] Index of each opening bracket => index of its closing bracket.
+	 */
+	private static function pair_brackets( array $tokens ): array {
+		$closes = [];
+		$stack  = [];
+		foreach ( $tokens as $i => $t ) {
+			if ( $t->is( [ '(', '[', '{' ] ) || in_array( $t->id, [ T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES, T_ATTRIBUTE ], true ) ) {
+				$stack[] = $i;
+			} elseif ( $t->is( [ ')', ']', '}' ] ) && $stack ) {
+				$closes[ array_pop( $stack ) ] = $i;
+			}
+		}
+		return $closes;
+	}
+
+	/**
+	 * Treat `$x['key'] = array( ... );` as the one-entry literal
+	 * `array( 'key' => array( ... ) )`, so arrays built up one key at a time
+	 * are found the same way as arrays written out in full.
+	 *
+	 * @param PhpToken[] $tokens     Significant tokens.
+	 * @param int[]      $closes     Index of each opening bracket's closing bracket.
+	 * @param int        $open_index Index of the `[` of the index access.
+	 * @return array|null The one-entry array, or null if this isn't such an assignment.
+	 */
+	private static function keyed_array_assignment( array $tokens, array $closes, int $open_index ): ?array {
+		$key = $tokens[ $open_index + 1 ] ?? null;
+		if ( ! $key || T_CONSTANT_ENCAPSED_STRING !== $key->id
+			|| ! ( $tokens[ $open_index + 2 ] ?? null )?->is( ']' )
+			|| ! ( $tokens[ $open_index + 3 ] ?? null )?->is( '=' )
+		) {
+			return null;
+		}
+
+		$start = $open_index + 4;
+		$value = $tokens[ $start ] ?? null;
+		if ( $value?->is( '[' ) ) {
+			$open = $start;
+		} elseif ( $value && T_ARRAY === $value->id && ( $tokens[ $start + 1 ] ?? null )?->is( '(' ) ) {
+			$open = $start + 1;
+		} else {
+			return null;
+		}
+
+		$close = $closes[ $open ] ?? null;
+		if ( null === $close ) {
+			return null;
+		}
+
+		return [
+			self::unescape_string_token( $key->text ) => self::resolve_array_literal( array_slice( $tokens, $open + 1, $close - $open - 1 ) ),
+		];
+	}
+
+	/**
+	 * Token types that can be followed by `[` for index access rather than
+	 * starting an array literal.
+	 */
+	private const INDEXABLE_TOKEN_IDS = [
+		T_VARIABLE,
+		T_STRING,
+		T_NAME_QUALIFIED,
+		T_NAME_FULLY_QUALIFIED,
+		T_CONSTANT_ENCAPSED_STRING,
+	];
+
 
 	/**
 	 * @return PhpToken[]
@@ -212,6 +371,23 @@ class Tokenisation_Helpers {
 	 * @param PhpToken[] $tokens
 	 */
 	private static function resolve_value( array $tokens ): string|array|null {
+		if ( self::$depth >= self::MAX_DEPTH ) {
+			return null;
+		}
+		++self::$depth;
+		try {
+			return self::resolve_value_inner( $tokens );
+		} finally {
+			--self::$depth;
+		}
+	}
+
+	/**
+	 * Resolve an arg-token list, without the depth check; see resolve_value().
+	 *
+	 * @param PhpToken[] $tokens Tokens of the value.
+	 */
+	private static function resolve_value_inner( array $tokens ): string|array|null {
 		$count = count( $tokens );
 		if ( 0 === $count ) {
 			return null;
@@ -229,10 +405,10 @@ class Tokenisation_Helpers {
 			return self::resolve_array_literal( $inner );
 		}
 
-		// Known translation wrapper: `T_STRING '(' ... ')'`.
-		if ( T_STRING === $first->id
+		// Known translation wrapper: `T_STRING '(' ... ')'`, or `\__( ... )` from inside a namespace.
+		if ( ( T_STRING === $first->id || T_NAME_FULLY_QUALIFIED === $first->id )
 			&& ( $tokens[1] ?? null )?->is( '(' )
-			&& self::is_translation_function( $first->text )
+			&& self::is_translation_function( ltrim( $first->text, '\\' ) )
 		) {
 			return self::resolve_value( self::first_inner_arg_tokens( $tokens ) );
 		}
@@ -293,6 +469,13 @@ class Tokenisation_Helpers {
 	 * @param PhpToken[] $inner_tokens
 	 */
 	private static function resolve_array_literal( array $inner_tokens ): array {
+		// Splitting walks the tokens twice (entries, then key/value).
+		if ( null !== self::$budget ) {
+			self::$budget -= 2 * count( $inner_tokens ) + 1;
+			if ( self::$budget < 0 ) {
+				return [];
+			}
+		}
 		$result = [];
 		foreach ( self::split_array_entries( $inner_tokens ) as $entry_tokens ) {
 			[ $key_tokens, $value_tokens ] = self::split_key_value( $entry_tokens );
