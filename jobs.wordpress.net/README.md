@@ -14,13 +14,13 @@ A block theme rebuild of the site is in progress alongside the classic theme. It
 
 It requires WordPress 7.1 or later (per-viewport style states, and the core accordion, tabs and terms-query blocks). Jetpack Subscriptions and Stats are optional.
 
-To try it, activate `jobswp-blocks` and then the "Jobs Theme 2026" theme, and create these pages from `content/pages/`:
+To try it, activate `jobswp-blocks` and then the "Jobs Theme 2026" theme, and set up these pages from `content/pages/`. The local environment already creates FAQ, Feedback, Post a Job and Remove a Job, so update those pages rather than adding new ones: navigation and the form hooks rely on their slugs.
 
-- **Home** (`home`): `home.html`, template "Landing", set as the static homepage.
-- **FAQ** (`faq`): `faq.html`, default template.
-- **Feedback** (`feedback`): `feedback.html`, template "Wide page".
+- **Home** (`home`): create it with `home.html`, template "Landing", and set it as the static homepage.
+- **FAQ** (`faq`): replace the content with `faq.html`. Default template.
+- **Feedback** (`feedback`): replace the content with `feedback.html`. Template "Wide page".
 - **Post a Job** (`post-a-job`): no content, template "Wide page". The jobswp plugin adds the form.
-- **Remove A Job** (`remove-a-job`): `remove-a-job.html`, template "Wide page". The companion plugin adds the form.
+- **Remove a Job** (`remove-a-job`): replace the content with `remove-a-job.html`. Template "Wide page". The companion plugin adds the form.
 
 The local environment below makes both available without activating them.
 

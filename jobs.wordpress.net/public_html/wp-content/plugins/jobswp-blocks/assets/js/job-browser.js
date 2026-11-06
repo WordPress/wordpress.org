@@ -15,8 +15,18 @@ const { state } = store( 'jobswp/job-browser', {
 	},
 	actions: {
 		select( event ) {
+			const { slug } = getContext();
+			// The homepage renders only the newest jobs. When some of a
+			// category's jobs aren't on the page, follow the link to its
+			// archive instead of filtering an incomplete list.
+			if (
+				'all' !== slug &&
+				( state.counts[ slug ] || 0 ) < ( state.totals?.[ slug ] || 0 )
+			) {
+				return;
+			}
 			event.preventDefault();
-			state.active = getContext().slug;
+			state.active = slug;
 		},
 	},
 } );

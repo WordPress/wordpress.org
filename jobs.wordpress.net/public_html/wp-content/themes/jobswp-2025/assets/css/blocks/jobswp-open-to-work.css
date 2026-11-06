@@ -73,7 +73,7 @@
 }
 
 .wp-block-jobswp-open-to-work .jobswp-open-to-work__company {
-	color: var(--wp--preset--color--subtle);
+	color: var(--wp--preset--color--muted);
 }
 
 .wp-block-jobswp-open-to-work .jobswp-open-to-work__company::before {

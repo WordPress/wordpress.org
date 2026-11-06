@@ -58,6 +58,7 @@ function jobswp_blocks_browser_state( $counts = null ) {
 	);
 	if ( null !== $counts ) {
 		$state['counts'] = (object) $counts;
+		$state['totals'] = (object) jobswp_blocks_snapshot()['counts'];
 	}
 	wp_interactivity_state( JOBSWP_BLOCKS_BROWSER_NS, $state );
 }
@@ -66,12 +67,12 @@ function jobswp_blocks_browser_state( $counts = null ) {
  * Whether a rendered block carries a class.
  *
  * @param array  $block Parsed block.
- * @param string $class Class.
+ * @param string $class_name Class.
  * @return bool
  */
-function jobswp_blocks_has_class( $block, $class ) {
+function jobswp_blocks_has_class( $block, $class_name ) {
 	$classes = isset( $block['attrs']['className'] ) && is_string( $block['attrs']['className'] ) ? $block['attrs']['className'] : '';
-	return in_array( $class, preg_split( '/\s+/', $classes ), true );
+	return in_array( $class_name, preg_split( '/\s+/', $classes ), true );
 }
 
 /**
@@ -127,8 +128,8 @@ function jobswp_blocks_browser_items( $block_content ) {
 		$cats = array();
 		foreach ( iterator_to_array( $tags->class_list(), false ) as $class ) {
 			if ( 0 === strpos( $class, 'job_category-' ) ) {
-				$slug           = substr( $class, strlen( 'job_category-' ) );
-				$cats[]         = $slug;
+				$slug            = substr( $class, strlen( 'job_category-' ) );
+				$cats[]          = $slug;
 				$counts[ $slug ] = isset( $counts[ $slug ] ) ? $counts[ $slug ] + 1 : 1;
 			}
 		}

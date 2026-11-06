@@ -30,7 +30,14 @@ function jobswp_blocks_search_title( $block_content, $block ) {
 		'<span class="jobswp-search-count">(' . esc_html( number_format_i18n( $found ) ) . ')</span>'
 	);
 
-	return (string) preg_replace( '#(<h[1-6][^>]*>).*?(</h[1-6]>)#s', '$1' . $text . '$2', $block_content, 1 );
+	return (string) preg_replace_callback(
+		'#(<h[1-6][^>]*>).*?(</h[1-6]>)#s',
+		static function ( $matches ) use ( $text ) {
+			return $matches[1] . $text . $matches[2];
+		},
+		$block_content,
+		1
+	);
 }
 add_filter( 'render_block_core/query-title', 'jobswp_blocks_search_title', 10, 2 );
 
@@ -50,6 +57,9 @@ function jobswp_blocks_apply_button( $block_content, $block, $block_instance ) {
 	}
 
 	$post_id = isset( $block_instance->context['postId'] ) ? (int) $block_instance->context['postId'] : get_the_ID();
+	if ( '' === jobswp_blocks_job_field( $post_id, 'apply_url' ) ) {
+		return '';
+	}
 	if ( 'web' !== jobswp_blocks_job_field( $post_id, 'howtoapply_method' ) ) {
 		return $block_content;
 	}

@@ -141,7 +141,7 @@ div.wp-block-post-content.is-style-job-description blockquote {
 
 .wp-block-post-content .job-help-text {
 	margin-block: 4px var(--wp--preset--spacing--20);
-	color: var(--wp--preset--color--subtle);
+	color: var(--wp--preset--color--muted);
 	font-size: var(--wp--preset--font-size--x-small);
 	font-style: italic;
 }

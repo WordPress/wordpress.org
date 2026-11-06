@@ -107,7 +107,7 @@ function jobswp_blocks_single_job_preview() {
  */
 function jobswp_blocks_remove_job_form( $content ) {
 	static $done = false;
-	if ( $done || ! is_page( 'remove-a-job' ) || ! in_the_loop() || ! is_main_query() ) {
+	if ( $done || ! wp_is_block_theme() || ! is_page( 'remove-a-job' ) || ! in_the_loop() || ! is_main_query() ) {
 		return $content;
 	}
 	$done = true;

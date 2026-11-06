@@ -23,7 +23,19 @@ require_once JOBSWP_BLOCKS_DIR . 'includes/bindings.php';
 require_once JOBSWP_BLOCKS_DIR . 'includes/render-filters.php';
 require_once JOBSWP_BLOCKS_DIR . 'includes/job-browser.php';
 require_once JOBSWP_BLOCKS_DIR . 'includes/partials.php';
-require_once JOBSWP_BLOCKS_DIR . 'includes/site.php';
+
+/*
+ * The classic jobswp theme prints its own analytics, feed links and robots
+ * rules, so the plugin's copies load only under a block theme.
+ */
+add_action(
+	'after_setup_theme',
+	static function () {
+		if ( wp_is_block_theme() ) {
+			require_once JOBSWP_BLOCKS_DIR . 'includes/site.php';
+		}
+	}
+);
 
 /**
  * Registers the plugin's blocks.

@@ -161,7 +161,13 @@ function jobswp_blocks_snapshot() {
 	$seen   = array();
 	$remote = 0;
 	foreach ( (array) Jobs_Dot_WP::get_job_categories() as $category ) {
-		$jobs                               = (array) Jobs_Dot_WP::get_jobs_for_category( $category );
+		$jobs                               = (array) Jobs_Dot_WP::get_jobs_for_category(
+			$category,
+			array(
+				'posts_per_page' => -1,
+				'no_found_rows'  => true,
+			)
+		);
 		$cache['counts'][ $category->slug ] = count( $jobs );
 		if ( $jobs ) {
 			++$cache['categories'];

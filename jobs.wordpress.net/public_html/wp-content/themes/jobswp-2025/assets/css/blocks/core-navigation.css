@@ -3,6 +3,10 @@
 	color: var(--wp--preset--color--blueberry);
 }
 
+/*
+ * Core switches to the overlay menu below 600px; the classic theme did so at
+ * 600px and below. This one-pixel range keeps exactly 600px on the hamburger.
+ */
 @media (min-width: 600px) and (max-width: 600px) {
 	.wp-block-navigation .wp-block-navigation__responsive-container-open:not(.always-shown) {
 		display: flex;

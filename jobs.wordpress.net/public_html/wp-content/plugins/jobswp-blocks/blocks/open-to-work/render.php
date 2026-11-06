@@ -22,7 +22,7 @@ if ( ! function_exists( 'jobswp_get_open_to_work_candidates' ) ) {
 $jobswp_blocks_variant  = in_array( $attributes['variant'] ?? 'grid', array( 'grid', 'compact', 'list' ), true ) ? $attributes['variant'] : 'grid';
 $jobswp_blocks_per_page = max( 1, min( 30, (int) ( $attributes['perPage'] ?? 10 ) ) );
 $jobswp_blocks_paged    = 'grid' === $jobswp_blocks_variant && ! empty( $attributes['showPagination'] );
-$jobswp_blocks_page     = $jobswp_blocks_paged && isset( $_GET['cp'] ) ? max( 1, absint( $_GET['cp'] ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only pagination.
+$jobswp_blocks_page     = $jobswp_blocks_paged && isset( $_GET['cp'] ) ? max( 1, min( 100, absint( $_GET['cp'] ) ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only pagination.
 $jobswp_blocks_result   = jobswp_get_open_to_work_candidates( $jobswp_blocks_page, $jobswp_blocks_per_page );
 $jobswp_blocks_people   = (array) $jobswp_blocks_result['candidates'];
 
@@ -94,7 +94,7 @@ foreach ( $jobswp_blocks_people as $jobswp_blocks_person ) {
 $jobswp_blocks_items = (array) apply_filters( 'jobswp_blocks_open_to_work_items', $jobswp_blocks_items, $jobswp_blocks_variant );
 
 $jobswp_blocks_pagination = '';
-$jobswp_blocks_pages      = (int) $jobswp_blocks_result['pages'];
+$jobswp_blocks_pages      = min( 100, (int) $jobswp_blocks_result['pages'] ); // jobswp_get_open_to_work_candidates() serves pages 1-100.
 if ( $jobswp_blocks_paged && $jobswp_blocks_pages > 1 ) {
 	$jobswp_blocks_link = static function ( $page, $label, $enabled ) {
 		if ( ! $enabled ) {
