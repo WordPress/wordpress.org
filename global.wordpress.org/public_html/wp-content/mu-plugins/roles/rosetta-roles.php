@@ -670,13 +670,12 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			);
 
 			$projects     = $this->get_translate_projects();
-			$project_tree = $this->get_project_tree( $projects, 0, 1 );
-
 			$project_list = [];
 
 			foreach ( $projects_added as $project_id ) {
 				if ( isset( $projects[ $project_id ] ) ) {
-					$parent = $this->get_parent_project( $project_tree, $project_id );
+					$parent_id = (int) $projects[ $project_id ]->parent_project_id;
+					$parent    = $projects[ $parent_id ] ?? null;
 					if ( is_object( $parent ) && (int) $parent->id !== (int) $project_id ) {
 						$name = sprintf(
 							/* translators: 1: Parent project name, 2: Child project name */
@@ -891,10 +890,10 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		// Sort the tree and remove array keys.
-		usort( $project_tree, array( $this, '_sort_name_callback' ) );
+		usort( $project_tree, array( $this, 'sort_name_callback' ) );
 		foreach ( $project_tree as $key => $project ) {
 			if ( isset( $project->sub_projects ) ) {
-				usort( $project->sub_projects, array( $this, '_sort_name_callback' ) );
+				usort( $project->sub_projects, array( $this, 'sort_name_callback' ) );
 				$project->sub_projects = array_values( $project->sub_projects );
 			}
 		}
@@ -1088,6 +1087,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 */
 	private function notify_profiles_wporg_translation_editor_update( int $user_id, string $action ): void {
 		$args = array(
+			'blocking' => false,
 			'body' => array(
 				'action'      => 'wporg_handle_association',
 				'source'      => 'polyglots',
@@ -1192,7 +1192,14 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		return null;
 	}
 
-	private function _sort_name_callback( object $a, object $b ): int {
+	/**
+	 * Callback to sort projects alphabetically by name using natural case-insensitive comparison.
+	 *
+	 * @param object $a First project object.
+	 * @param object $b Second project object.
+	 * @return int Standard comparison return values (< 0, 0, > 0).
+	 */
+	private function sort_name_callback( object $a, object $b ): int {
 		return strnatcasecmp( $a->name, $b->name );
 	}
 }
