@@ -1522,7 +1522,7 @@ class Import {
 		$requires = $headers->RequiresWP ?? ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Plugin header key.
 		if ( $requires ) {
 			// Same rules the readme parser applies to its Requires at least field.
-			if ( ! preg_match( '!^\d+\.\d(\.\d+)?$!', $requires ) || (float) $requires > (float) $stable_branch + 0.1 ) {
+			if ( ! preg_match( '!^\d+\.\d(\.\d+)?$!', $requires ) || (float) $requires > round( (float) $stable_branch + 0.1, 1 ) ) {
 				$warnings['plugin_requires_header_invalid'] = $requires;
 			} elseif ( ! empty( $readme->requires ) && $normalize( $requires ) !== $normalize( $readme->requires ) ) {
 				$warnings['requires_header_mismatch'] = [
