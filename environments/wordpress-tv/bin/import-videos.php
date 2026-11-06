@@ -184,7 +184,8 @@ function import_video( array $video, array $names, array $tags ): bool {
 				'post_author'   => 1,
 				'post_name'     => $slug,
 				'post_title'    => $video['title'],
-				'post_excerpt'  => $video['description'],
+				// The API appends the slides link to the excerpt, and the theme appends it again from the meta.
+				'post_excerpt'  => preg_replace( '#<p><a href="[^"]*">Presentation Slides &raquo;</a></p>$#', '', $video['description'] ),
 				'post_content'  => "[wpvideo $guid]",
 				'post_date_gmt' => $video['date'],
 				'post_date'     => get_date_from_gmt( $video['date'] ),
