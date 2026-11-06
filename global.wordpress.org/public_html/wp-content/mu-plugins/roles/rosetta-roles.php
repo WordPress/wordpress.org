@@ -57,14 +57,14 @@ class Rosetta_Roles {
 	 *
 	 * @var GP_Locale
 	 */
-	private $gp_locale = null;
+	private ?GP_Locale $gp_locale = null;
 
 	/**
 	 * Holds the hook suffix of the translation editors admin page.
 	 *
 	 * @var string
 	 */
-	private $translation_editors_page;
+	private ?string $translation_editors_page = null;
 
 	/**
 	 * Constructor.
@@ -364,7 +364,7 @@ class Rosetta_Roles {
 	 *
 	 * @param  int $user_id User ID of a translation editor.
 	 */
-	private function load_edit_translation_editor( $user_id ) {
+	private function load_edit_translation_editor( int $user_id ): void {
 		$redirect = menu_page_url( 'translation-editors', false );
 
 		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
@@ -400,7 +400,7 @@ class Rosetta_Roles {
 	 * @param int|WP_User $user User ID or object.
 	 * @return bool True on success, false on failure.
 	 */
-	private function remove_translation_editor( $user ) {
+	private function remove_translation_editor( int|WP_User $user ): bool {
 		global $wpdb;
 
 		if ( ! $user instanceof WP_User ) {
@@ -446,7 +446,7 @@ class Rosetta_Roles {
 	 *                              editor.
 	 * @return bool True on success, false on failure.
 	 */
-	private function update_translation_editor( $user, $projects = array() ) {
+	private function update_translation_editor( int|WP_User $user, array $projects = array() ): bool {
 		global $wpdb;
 
 		if ( ! $user instanceof WP_User ) {
@@ -560,7 +560,7 @@ class Rosetta_Roles {
 	 *
 	 * @param \WP_User $user The user object of the translation editor.
 	 */
-	public function update_wporg_profile_badge( $user ) {
+	public function update_wporg_profile_badge( WP_User $user ): void {
 		global $wpdb;
 
 		$action = 'translation_editor_added' === current_filter() ? 'add' : 'remove';
@@ -589,7 +589,7 @@ class Rosetta_Roles {
 	 * @param \WP_User $user           The user object of the translation editor.
 	 * @param array    $projects_added List of project IDs.
 	 */
-	public function send_email_notification( $user, $projects_added ) {
+	public function send_email_notification( WP_User $user, array $projects_added ): void {
 		// Don't send an email if no new projects have been added.
 		if ( ! $projects_added ) {
 			return;
@@ -799,7 +799,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param int $user_id User ID.
 	 * @return array List of project IDs.
 	 */
-	public function get_users_projects( $user_id ) {
+	public function get_users_projects( int $user_id ): array {
 		global $wpdb;
 
 		$projects = $wpdb->get_col( $wpdb->prepare( "
@@ -834,7 +834,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	/**
 	 * Renders the edit page.
 	 */
-	private function render_edit_translation_editor( $user_id ) {
+	private function render_edit_translation_editor( int $user_id ): void {
 		$assigned_projects = $this->get_users_projects( $user_id );
 		$is_all            = in_array( 'all', $assigned_projects, true );
 
@@ -1108,7 +1108,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 *
 	 * @return array List of projects.
 	 */
-	public static function get_translate_projects() {
+	public static function get_translate_projects(): array {
 		global $wpdb;
 		static $projects = null;
 
@@ -1171,7 +1171,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param int $child_id The project tree.
 	 * @return object The parent project.
 	 */
-	public function get_parent_project( array $tree, int $child_id ) {
+	public function get_parent_project( array $tree, int $child_id ): ?object {
 		foreach ( $tree as $project ) {
 			if ( (int) $project->id === $child_id ) {
 				return $project;
@@ -1194,7 +1194,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		return null;
 	}
 
-	private function _sort_name_callback( $a, $b ) {
+	private function _sort_name_callback( object $a, object $b ): int {
 		return strnatcasecmp( $a->name, $b->name );
 	}
 }
