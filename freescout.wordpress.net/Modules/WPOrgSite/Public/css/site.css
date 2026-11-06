@@ -54,13 +54,24 @@
 	line-height: 28px;
 }
 
+/* As light as the search's border, and the label muted next to its count, in every state Bootstrap sets them. */
+.wporgsite-users-filters .btn,
+.wporgsite-users-filters .btn:hover,
+.wporgsite-users-filters .btn:focus,
+.wporgsite-users-filters .btn.active,
+.wporgsite-users-filters .btn.active:hover,
+.wporgsite-users-filters .btn.active:focus {
+	border-color: #d5dbe0;
+	color: #666;
+}
+
 /* Bootstrap's pressed shadow, lighter. */
 .wporgsite-users-filters .btn.active {
 	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.075 );
 }
 
 .wporgsite-users-count {
-	opacity: 0.75;
+	color: #333;
 }
 
 /* Core's search shows and hides cards inline, so the filters' hiding needs !important. */
