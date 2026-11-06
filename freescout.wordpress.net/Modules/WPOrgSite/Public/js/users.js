@@ -5,8 +5,19 @@
  * @param {jQuery} $ jQuery.
  */
 ( function ( $ ) {
+	/**
+	 * The class of the cards the filters hide; site.css hides them over core's search, which shows and hides inline.
+	 *
+	 * @type {string}
+	 */
 	const HIDDEN = 'wporgsite-users-filtered';
 
+	/**
+	 * The filters: each group's key in the URL, its label, and its choices, each with its value in the URL, its text,
+	 * and which users it matches.
+	 *
+	 * @type {Object[]}
+	 */
 	const GROUPS = [
 		{
 			key: 'role',
@@ -46,9 +57,10 @@
 
 	$( function () {
 		const $cards = $( '#users-list > .card' );
+		const $search = $( '#search-users' ).closest( '.flexy-item' );
 
-		// Core shows its search only with more than one user; there's nothing to filter either.
-		if ( $cards.length < 2 ) {
+		// Core shows the search only on the Users page, with more than one user; the Teams module reuses #users-list.
+		if ( $cards.length < 2 || ! $search.length ) {
 			return;
 		}
 
@@ -160,12 +172,12 @@
 		function updateUrl() {
 			const url = new window.URL( window.location.href );
 
-			groups.forEach( function ( group ) {
-				if ( selected[ group.key ].value ) {
-					url.searchParams.set(
-						group.key,
-						selected[ group.key ].value
-					);
+			// Every group, so a role from a shared link goes for agents who don't get the role filter.
+			GROUPS.forEach( function ( group ) {
+				const choice = selected[ group.key ];
+
+				if ( choice && choice.value ) {
+					url.searchParams.set( group.key, choice.value );
 				} else {
 					url.searchParams.delete( group.key );
 				}
@@ -179,7 +191,7 @@
 
 		// Before the live region is in the page, so the first count isn't announced.
 		apply();
-		$( '#search-users' ).closest( '.flexy-item' ).before( $filters );
+		$search.before( $filters );
 		$( '#users-list' ).after( $empty, $live );
 	} );
 } )( jQuery );
