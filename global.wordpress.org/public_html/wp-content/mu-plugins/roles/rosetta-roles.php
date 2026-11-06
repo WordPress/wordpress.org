@@ -1066,12 +1066,10 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		}
 
 		$projects = $this->get_translate_projects();
-		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		$args = array(
 			'user_roles'    => array( self::TRANSLATION_EDITOR_ROLE, self::GENERAL_TRANSLATION_EDITOR_ROLE ),
 			'projects'      => $projects,
-			'project_tree'  => $project_tree,
 			'rosetta_roles' => $this,
 		);
 		$list_table = new Rosetta_Translation_Editors_List_Table( $args );
@@ -1168,36 +1166,6 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		};
 
 		return $build_branch( $parent_id, $max_depth );
-	}
-
-	/**
-	 * Returns the parent project for a sub project.
-	 *
-	 * @param array $tree The project tree.
-	 * @param int $child_id The project tree.
-	 * @return object The parent project.
-	 */
-	public function get_parent_project( array $tree, int $child_id ): ?object {
-		foreach ( $tree as $project ) {
-			if ( (int) $project->id === $child_id ) {
-				return $project;
-			}
-
-			if ( ! empty( $project->sub_projects ) && is_array( $project->sub_projects ) ) {
-				foreach ( $project->sub_projects as $sub_project ) {
-					if ( (int) $sub_project->id === $child_id ) {
-						return $project;
-					}
-				}
-
-				$parent = $this->get_parent_project( $project->sub_projects, $child_id );
-				if ( $parent ) {
-					return $parent;
-				}
-			}
-		}
-
-		return null;
 	}
 
 	/**
