@@ -269,7 +269,8 @@ final class WordPressOrgAccounts {
 						}
 
 						People::choose( $this->source_id, $id, $user );
-						if ( ! $step['deleted'] ) {
+						// A deleted remote user's row doesn't switch their user on, but still gives an active one access.
+						if ( ! $step['deleted'] || User::STATUS_ACTIVE === (int) $user->status ) {
 							People::activate( $user );
 						}
 
