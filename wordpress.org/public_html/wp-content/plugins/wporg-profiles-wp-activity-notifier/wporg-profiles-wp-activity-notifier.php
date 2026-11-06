@@ -206,10 +206,19 @@ class WPOrg_WP_Activity_Notifier {
 
 	/**
 	 * Send an activity notification if the post being updated matches certain criteria.
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $after   Post object following the update.
+	 * @param WP_Post $before  Post object before the update.
 	 */
-	public function maybe_notify_updated_post( int $post_id, WP_Post $before, WP_Post $after ) : void {
+	public function maybe_notify_updated_post( int $post_id, WP_Post $after, WP_Post $before ): void {
 		if ( 'publish' !== $before->post_status || 'publish' !== $after->post_status ) {
 			return;
+		}
+
+		// When a published post is given to another author, credit them as if they had just published it.
+		if ( (int) $after->post_author !== (int) $before->post_author && $this->is_post_notifiable( $after, 'publish' ) ) {
+			$this->notify_blog_post( $after, 'new' );
 		}
 
 		if ( ! $this->is_post_notifiable( $after, 'update' ) ) {
