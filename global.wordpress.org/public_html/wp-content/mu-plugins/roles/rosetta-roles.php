@@ -929,9 +929,10 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param  int    $user_id User ID.
 	 * @param  string $action  Can be 'add' or 'remove'.
 	 */
-	private function notify_profiles_wporg_translation_editor_update( $user_id, $action ) {
+	private function notify_profiles_wporg_translation_editor_update( int $user_id, string $action ): void {
 		$args = array(
-			'body' => array(
+			'blocking' => false,
+			'body'     => array(
 				'action'      => 'wporg_handle_association',
 				'source'      => 'polyglots',
 				'command'     => $action,
