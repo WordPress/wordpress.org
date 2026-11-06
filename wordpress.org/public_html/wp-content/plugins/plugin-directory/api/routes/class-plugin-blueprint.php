@@ -53,9 +53,30 @@ class Plugin_Blueprint extends Base {
 			return new \WP_Error( 'invalid_blueprint', 'Invalid file', array( 'status' => 500 ) );
 		}
 
+		$blueprint_data = json_decode( $blueprint['contents'] );
+		if ( ! is_object( $blueprint_data ) ) {
+			return new \WP_Error( 'invalid_blueprint', 'Invalid file', array( 'status' => 500 ) );
+		}
+
+		// Preview on current WordPress, and never on a PHP version older than the plugin requires.
+		$versions = $blueprint_data->preferredVersions ?? null; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Blueprint schema key.
+		if ( is_object( $versions ) ) {
+			$versions->wp = 'latest';
+
+			$preferred_php = $versions->php ?? null;
+			$requires_php  = implode( '.', array_slice( explode( '.', (string) $plugin->requires_php ), 0, 2 ) );
+			if (
+				$requires_php &&
+				is_scalar( $preferred_php ) &&
+				'latest' !== $preferred_php &&
+				version_compare( (string) $preferred_php, $requires_php, '<' )
+			) {
+				$versions->php = $requires_php;
+			}
+		}
+
 		if ( $request->get_param('lang') && 'en' !== strtolower( substr( $request->get_param('lang'), 0, 2 ) ) ) {
 			// Check if there's already a setSiteLanguage step
-			$blueprint_data = json_decode( $blueprint['contents'] );
 			if ( isset( $blueprint_data->steps ) ) {
 				if ( !in_array( 'setSiteLanguage', wp_list_pluck( $blueprint_data->steps, 'step' ) ) ) {
 					// Add setSiteLanguage as the final step
@@ -75,15 +96,13 @@ class Plugin_Blueprint extends Base {
 					]
 				];
 			}
-			header( 'Access-Control-Allow-Origin: *' );
-			return $blueprint_data;
 		}
 
+		$response = new \WP_REST_Response( $blueprint_data );
 		// Configure this elsewhere?
-		header( 'Access-Control-Allow-Origin: *' );
+		$response->header( 'Access-Control-Allow-Origin', '*' );
 
-		// We already have a json string, returning would double-encode it.
-		die( $blueprint['contents'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Blueprint JSON served to WordPress Playground; escaping would corrupt it.
+		return $response;
 	}
 
 	protected function get_zip_url_by_slug( $slug ) {
