@@ -353,6 +353,13 @@ function inline_scripts() {
 					'; path=<?php echo esc_js( $current_site->path ); ?>';
 			} );
 		}
+
+		var closeButton = document.getElementById( 'secondary-close' );
+		if ( closeButton ) {
+			closeButton.addEventListener( 'click', function() {
+				document.body.classList.remove( 'responsive-show' );
+			} );
+		}
 	</script>
 	<?php
 }

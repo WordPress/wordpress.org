@@ -916,6 +916,10 @@ input[type="submit"]:hover {
 	clear: inline-end;
 }
 
+#secondary-close {
+	display: none;
+}
+
 @media (max-width: 876px) {
 	.content-area {
 		width: 100%;
@@ -971,12 +975,6 @@ input[type="submit"]:hover {
 		text-align: end;
 	}
 
-	#main #secondary-toggle {
-		margin-inline-start: 4px;
-		margin-inline-end: var(--wp--style--block-gap);
-		margin-top: 20px;
-	}
-
 	#secondary-toggle:before {
 		top: 0;
 		color: var(--wp--preset--color--charcoal-4);
@@ -988,7 +986,24 @@ input[type="submit"]:hover {
 		color: #0073aa;
 	}
 
-	#secondary-toggle svg {
+	#secondary-close {
+		display: flex;
+		justify-content: flex-end;
+		position: relative;
+		z-index: 1;
+		float: inline-start;
+		width: 48px;
+		height: 48px;
+		margin-inline-start: 4px;
+		margin-inline-end: var(--wp--style--block-gap);
+		margin-top: 20px;
+		padding: 0;
+		border: 0;
+		background: none;
+		cursor: pointer;
+	}
+
+	#secondary-close svg {
 		background-color: #fff;
 		fill: var(--wp--preset--color--charcoal-4);
 		height: 36px;
