@@ -916,6 +916,11 @@ input[type="submit"]:hover {
 	clear: inline-end;
 }
 
+/* The sidebar clips overflow, so a field resized wider would lose its edge and resize handle. */
+.widget-area textarea {
+	max-width: 100%;
+}
+
 @media (max-width: 876px) {
 	.content-area {
 		width: 100%;
