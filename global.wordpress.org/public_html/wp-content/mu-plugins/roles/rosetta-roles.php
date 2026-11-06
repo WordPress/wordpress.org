@@ -891,7 +891,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 
 		// Sort the tree and remove array keys.
 		usort( $project_tree, array( $this, 'sort_name_callback' ) );
-		foreach ( $project_tree as $key => $project ) {
+		foreach ( $project_tree as $project ) {
 			if ( isset( $project->sub_projects ) ) {
 				usort( $project->sub_projects, array( $this, 'sort_name_callback' ) );
 				$project->sub_projects = array_values( $project->sub_projects );
@@ -1151,13 +1151,13 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			$grouped[ (int) $project->parent_project_id ][] = $project;
 		}
 
-		$build_branch = function( $pid, $depth ) use ( &$build_branch, $grouped ) {
+		$build_branch = function ( $pid, $depth ) use ( &$build_branch, $grouped ) {
 			if ( $depth < 0 || ! isset( $grouped[ $pid ] ) ) {
 				return array();
 			}
 			$branch = array();
 			foreach ( $grouped[ $pid ] as $item ) {
-				$clone = clone $item;
+				$clone    = clone $item;
 				$children = $build_branch( (int) $clone->id, $depth - 1 );
 				if ( $children ) {
 					$clone->sub_projects = $children;
