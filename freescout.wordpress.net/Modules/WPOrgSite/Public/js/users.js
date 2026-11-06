@@ -29,8 +29,8 @@
 		{
 			key: 'status',
 			label: 'Status',
-			// All last, so it isn't next to the roles' All.
 			options: [
+				{ value: '', text: 'All', test: () => true },
 				{
 					value: 'active',
 					text: 'Active',
@@ -41,7 +41,6 @@
 					text: 'Inactive',
 					test: ( user ) => user.inactive,
 				},
-				{ value: '', text: 'All', test: () => true },
 			],
 		},
 	];
@@ -80,7 +79,7 @@
 			selected[ group.key ] =
 				group.options.find(
 					( option ) => option.value === params.get( group.key )
-				) || group.options.find( ( option ) => ! option.value );
+				) || group.options[ 0 ];
 		} );
 
 		const $filters = $(
