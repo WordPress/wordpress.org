@@ -216,6 +216,11 @@ class CLI extends \WP_CLI_Command {
 				continue;
 			}
 
+			// Core also sets 'original_image' for copies that were only EXIF-rotated.
+			if ( ! str_contains( wp_basename( $meta['file'] ), '-scaled.' ) ) {
+				continue;
+			}
+
 			$original_path = wp_get_original_image_path( $attachment_id );
 			$image_size    = $original_path ? wp_getimagesize( $original_path ) : false;
 
@@ -229,6 +234,12 @@ class CLI extends \WP_CLI_Command {
 				continue;
 			}
 
+			// The original is stored unrotated, so its dimensions don't match the rotated copy.
+			if ( ( $meta['width'] > $meta['height'] ) !== ( $image_size[0] > $image_size[1] ) ) {
+				WP_CLI::warning( "Photo {$parent->ID}: {$meta['file']} was rotated from its original, skipping." );
+				continue;
+			}
+
 			$file = path_join( dirname( $meta['file'] ), $meta['original_image'] );
 
 			WP_CLI::log( "Photo {$parent->ID}: {$meta['file']} ({$meta['width']}x{$meta['height']}) -> {$file} ({$image_size[0]}x{$image_size[1]})" );
@@ -239,6 +250,14 @@ class CLI extends \WP_CLI_Command {
 			}
 
 			update_attached_file( $attachment_id, $file );
+
+			// Keep the "-scaled" copy tracked so deleting the photo deletes it too.
+			$meta['sizes']['scaled'] = [
+				'file'      => wp_basename( $meta['file'] ),
+				'width'     => $meta['width'],
+				'height'    => $meta['height'],
+				'mime-type' => get_post_mime_type( $attachment_id ),
+			];
 
 			$meta['file']     = $file;
 			$meta['width']    = $image_size[0];
