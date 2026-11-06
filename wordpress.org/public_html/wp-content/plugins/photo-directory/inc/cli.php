@@ -157,6 +157,112 @@ class CLI extends \WP_CLI_Command {
 		}
 	}
 
+	/**
+	 * Points scaled-down photos back at their original files.
+	 *
+	 * Photos uploaded while a lower 'big_image_size_threshold' was in effect
+	 * have a "-scaled" copy as their attached file, so their "Original Size"
+	 * download served the copy. The original file is still stored next to it,
+	 * and the "-scaled" copy is left in place.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--dry-run]
+	 * : List the photos that would be updated without changing them.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Preview which photos would be updated.
+	 *     $ wp photos restore-originals --dry-run
+	 *
+	 *     # Update them.
+	 *     $ wp photos restore-originals
+	 *
+	 * @param array $args       Positional arguments. Unused.
+	 * @param array $assoc_args Associative arguments.
+	 *
+	 * @subcommand restore-originals
+	 * @when after_wp_load
+	 */
+	public function restore_originals( $args, $assoc_args ) {
+		$dry_run   = $assoc_args['dry-run'] ?? false;
+		$threshold = Uploads::big_image_size_threshold( 0 );
+		$updated   = 0;
+
+		$attachment_ids = get_posts(
+			[
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'meta_query'     => [
+					[
+						'key'     => '_wp_attachment_metadata',
+						'value'   => 'original_image',
+						'compare' => 'LIKE',
+					],
+				],
+			]
+		);
+
+		foreach ( $attachment_ids as $attachment_id ) {
+			$parent = get_post_parent( $attachment_id );
+			if ( ! $parent || Registrations::get_post_type() !== $parent->post_type ) {
+				continue;
+			}
+
+			$meta = wp_get_attachment_metadata( $attachment_id );
+			if ( empty( $meta['original_image'] ) || empty( $meta['file'] ) ) {
+				continue;
+			}
+
+			$original_path = wp_get_original_image_path( $attachment_id );
+			$image_size    = $original_path ? wp_getimagesize( $original_path ) : false;
+
+			if ( ! $image_size ) {
+				WP_CLI::warning( "Photo {$parent->ID}: original file {$meta['original_image']} could not be read." );
+				continue;
+			}
+
+			// Still above the current threshold, so scaling it was intended.
+			if ( max( $image_size[0], $image_size[1] ) > $threshold ) {
+				continue;
+			}
+
+			$file = path_join( dirname( $meta['file'] ), $meta['original_image'] );
+
+			WP_CLI::log( "Photo {$parent->ID}: {$meta['file']} ({$meta['width']}x{$meta['height']}) -> {$file} ({$image_size[0]}x{$image_size[1]})" );
+			++$updated;
+
+			if ( $dry_run ) {
+				continue;
+			}
+
+			update_attached_file( $attachment_id, $file );
+
+			$meta['file']     = $file;
+			$meta['width']    = $image_size[0];
+			$meta['height']   = $image_size[1];
+			$meta['filesize'] = wp_filesize( $original_path );
+			unset( $meta['original_image'] );
+
+			if ( isset( $meta['gcs_name'] ) ) {
+				$meta['gcs_name'] = $file;
+			}
+			if ( isset( $meta['gcs_url'] ) ) {
+				$meta['gcs_url'] = wp_get_attachment_url( $attachment_id );
+			}
+
+			wp_update_attachment_metadata( $attachment_id, $meta );
+		}
+
+		if ( $dry_run ) {
+			WP_CLI::success( "{$updated} photo(s) would be updated." );
+		} else {
+			WP_CLI::success( "{$updated} photo(s) updated." );
+		}
+	}
+
 }
 
 WP_CLI::add_command( 'photos', 'WordPressdotorg\Photo_Directory\CLI' );
