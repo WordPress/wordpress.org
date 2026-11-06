@@ -219,10 +219,14 @@ function import_video( array $video, array $names, array $tags ): bool {
 /**
  * Imports the published pages, keeping their slugs and rendered content.
  *
- * @return int Number of pages created.
+ * @return int|null Number of pages created, or null when they couldn't be fetched.
  */
-function import_pages(): int {
-	$pages = fetch_json( PAGES_API . '?per_page=50&_fields=slug,title,content' ) ?? array();
+function import_pages(): ?int {
+	$pages = fetch_json( PAGES_API . '?per_page=50&_fields=slug,title,content' );
+	if ( null === $pages ) {
+		return null;
+	}
+
 	$count = 0;
 	foreach ( $pages as $page ) {
 		if ( get_page_by_path( $page['slug'] ) ) {
@@ -363,6 +367,10 @@ function run(): void {
 
 	$pages = import_pages();
 	seed_submission();
+	if ( null === $pages ) {
+		WP_CLI::warning( 'No pages were fetched. Run `npm run wptv:refresh` to try again.' );
+		return;
+	}
 	update_option( 'wptv_env_imported', time() );
 
 	WP_CLI::success( sprintf( 'Imported %d new videos and %d new pages.', $imported, $pages ) );

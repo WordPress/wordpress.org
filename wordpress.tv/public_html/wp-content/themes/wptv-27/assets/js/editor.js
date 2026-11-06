@@ -220,7 +220,7 @@
 		return el('table', { className: 'wptv-review', 'aria-label': __('Submitted video', 'wptv') }, el('tbody', null,
 				row(__('Submitted by', 'wptv'), el('div', { className: 'wptv-review__links' },
 					el('span', null, submission.submitted_by),
-					el('a', { href: `mailto:${submission.submitted_email}?Subject=Your%20WordPress.tv%20submission` }, submission.submitted_email),
+					el('a', { href: `mailto:${encodeURIComponent(submission.submitted_email)}?Subject=Your%20WordPress.tv%20submission` }, submission.submitted_email),
 					el(components.ExternalLink, { href: `http://en.utrace.de/?query=${encodeURIComponent(submission.ip)}` }, submission.ip)
 				)),
 				field('title', __('Title', 'wptv'), () => { editPost({ title: values.title }); done('title'); }),

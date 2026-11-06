@@ -9,7 +9,8 @@ WP="npx wp-env $CONFIG run cli --"
 $WP wp option update blogname 'WordPress.tv'
 $WP wp option update blogdescription 'WordPress-related videos curated and moderated by the WordPress.org community'
 $WP wp rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard
-$WP wp theme activate wptv-27
+# The theme registers the taxonomies the import assigns.
+$WP wp theme activate wptv-27 || exit 1
 
 # Anonymous submissions are filed under this account.
 if ! $WP wp user get anonvideoupload --field=ID > /dev/null 2>&1; then
