@@ -1171,24 +1171,27 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param int $child_id The project tree.
 	 * @return object The parent project.
 	 */
-	public function get_parent_project( $tree, $child_id ) {
-		$parent = null;
+	public function get_parent_project( array $tree, int $child_id ) {
 		foreach ( $tree as $project ) {
-			if ( $project->id == $child_id ) {
-				$parent = $project;
-				break;
+			if ( (int) $project->id === $child_id ) {
+				return $project;
 			}
 
-			if ( isset( $project->sub_projects ) ) {
+			if ( ! empty( $project->sub_projects ) && is_array( $project->sub_projects ) ) {
+				foreach ( $project->sub_projects as $sub_project ) {
+					if ( (int) $sub_project->id === $child_id ) {
+						return $project;
+					}
+				}
+
 				$parent = $this->get_parent_project( $project->sub_projects, $child_id );
 				if ( $parent ) {
-					$parent = $project;
-					break;
+					return $parent;
 				}
 			}
 		}
 
-		return $parent;
+		return null;
 	}
 
 	private function _sort_name_callback( $a, $b ) {
