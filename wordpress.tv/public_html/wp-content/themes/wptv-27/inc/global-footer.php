@@ -17,31 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Endpoint that renders the global footer.
- */
-const ENDPOINT = 'https://wordpress.org/wp-json/global-header-footer/v1/footer';
-
-/**
- * Stylesheet the global header and footer share.
- */
-const STYLESHEET = 'https://s.w.org/wp-content/mu-plugins/pub-sync/blocks/global-header-footer/build/style.css';
-
-/**
- * Option caching the footer markup and when to fetch it again.
- */
-const OPTION = 'wptv_global_footer';
-
-/**
- * Seconds a fetched footer is kept.
- */
-const LIFETIME = 12 * HOUR_IN_SECONDS;
-
-/**
- * Seconds until a failed fetch is retried.
- */
-const RETRY = 5 * MINUTE_IN_SECONDS;
-
-/**
  * Registers the block the footer template part renders.
  *
  * @return void
@@ -70,43 +45,49 @@ add_action( 'init', __NAMESPACE__ . '\register_block' );
  * @return string Footer markup, or an empty string when it was never fetched.
  */
 function render(): string {
-	$markup = get_markup();
-	if ( '' === $markup ) {
+	$footer = get_footer();
+	if ( '' === $footer['markup'] ) {
 		return '';
 	}
 
-	wp_enqueue_style( 'wporg-global-header-footer', STYLESHEET, array(), gmdate( 'Ymd' ) );
+	// Versioned by the fetch, so a new footer never meets a stylesheet the browser cached for the old one.
+	wp_enqueue_style( 'wporg-global-header-footer', 'https://s.w.org/wp-content/mu-plugins/pub-sync/blocks/global-header-footer/build/style.css', array(), (string) $footer['fetched'] );
 	// Core only loads block styles for blocks it renders, and the footer's social links aren't rendered here.
 	wp_enqueue_style( 'wp-block-social-links' );
 
-	return $markup;
+	return $footer['markup'];
 }
 
 /**
- * Returns the cached footer markup, fetching it again once it expires.
+ * Returns the cached footer, fetching it again after 12 hours.
  *
- * A failed fetch keeps the last footer and tries again a few minutes later.
+ * A failed fetch keeps the last footer and tries again 5 minutes later.
  *
- * @return string Footer markup, or an empty string when it was never fetched.
+ * @return array Footer markup, when it was fetched, and when it expires.
  */
-function get_markup(): string {
-	$cached = get_option( OPTION );
+function get_footer(): array {
+	$cached = get_option( 'wptv_global_footer' );
 	if ( is_array( $cached ) && $cached['expires'] > time() ) {
-		return $cached['markup'];
+		return $cached;
 	}
 
-	$fetched = fetch_markup();
-	$markup  = $fetched ?? ( $cached['markup'] ?? '' );
-	update_option(
-		OPTION,
-		array(
+	$markup = fetch_markup();
+	if ( null === $markup ) {
+		$footer = array(
+			'markup'  => $cached['markup'] ?? '',
+			'fetched' => $cached['fetched'] ?? 0,
+			'expires' => time() + 5 * MINUTE_IN_SECONDS,
+		);
+	} else {
+		$footer = array(
 			'markup'  => $markup,
-			'expires' => time() + ( null === $fetched ? RETRY : LIFETIME ),
-		),
-		false
-	);
+			'fetched' => time(),
+			'expires' => time() + 12 * HOUR_IN_SECONDS,
+		);
+	}
+	update_option( 'wptv_global_footer', $footer, false );
 
-	return $markup;
+	return $footer;
 }
 
 /**
@@ -115,7 +96,7 @@ function get_markup(): string {
  * @return string|null Footer markup, or null when the request fails.
  */
 function fetch_markup(): ?string {
-	$response = wp_safe_remote_get( ENDPOINT, array( 'timeout' => 3 ) );
+	$response = wp_safe_remote_get( 'https://wordpress.org/wp-json/global-header-footer/v1/footer', array( 'timeout' => 3 ) );
 	if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 		return null;
 	}
@@ -124,13 +105,14 @@ function fetch_markup(): ?string {
 }
 
 /**
- * Takes the footer element from the endpoint's response.
+ * Takes the footer element from the endpoint's response, as a div.
  *
  * The response goes on with wordpress.org's `wp_footer()` scripts and closes the
- * document, so only the element itself is kept.
+ * document, so only the element is kept. The template part is the page's footer
+ * element, as on wordpress.org, where the block renders as a div inside it.
  *
  * @param string $body Response body.
- * @return string|null Footer element, or null when the body doesn't start with one.
+ * @return string|null Footer markup, or null when the body doesn't start with a footer element.
  */
 function extract_footer( string $body ): ?string {
 	$body = ltrim( $body );
@@ -139,5 +121,5 @@ function extract_footer( string $body ): ?string {
 		return null;
 	}
 
-	return substr( $body, 0, $end + strlen( '</footer>' ) );
+	return '<div ' . substr( $body, strlen( '<footer ' ), $end - strlen( '<footer ' ) ) . '</div>';
 }
