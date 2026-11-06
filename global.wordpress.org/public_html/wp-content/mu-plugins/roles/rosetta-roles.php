@@ -1146,20 +1146,28 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			return array();
 		}
 
-		$tree = array();
+		$grouped = array();
 		foreach ( $projects as $project ) {
-			if ( (int) $project->parent_project_id === $parent_id ) {
-				$item = clone $project;
-
-				$sub_projects = $this->get_project_tree( $projects, (int) $item->id, $max_depth - 1 );
-				if ( $sub_projects ) {
-					$item->sub_projects = $sub_projects;
-				}
-
-				$tree[ $item->id ] = $item;
-			}
+			$grouped[ (int) $project->parent_project_id ][] = $project;
 		}
-		return $tree;
+
+		$build_branch = function( $pid, $depth ) use ( &$build_branch, $grouped ) {
+			if ( $depth < 0 || ! isset( $grouped[ $pid ] ) ) {
+				return array();
+			}
+			$branch = array();
+			foreach ( $grouped[ $pid ] as $item ) {
+				$clone = clone $item;
+				$children = $build_branch( (int) $clone->id, $depth - 1 );
+				if ( $children ) {
+					$clone->sub_projects = $children;
+				}
+				$branch[ $clone->id ] = $clone;
+			}
+			return $branch;
+		};
+
+		return $build_branch( $parent_id, $max_depth );
 	}
 
 	/**
