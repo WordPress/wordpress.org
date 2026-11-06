@@ -35,30 +35,15 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 	public $projects;
 
 	/**
-	 * Holds the list of a project tree.
-	 *
-	 * @var array
-	 */
-	public $project_tree;
-
-	/**
-	 * Cache for resolved parent projects.
-	 *
-	 * @var array
-	 */
-	private $parent_cache = array();
-
-	/**
 	 * Constructor.
 	 *
 	 * @param array $args An associative array of arguments.
 	 */
-	public function __construct( $args = array() ) {
+	public function __construct( array $args = array() ) {
 		$defaults = array(
 			'screen'        => null,
 			'user_roles'    => array(),
 			'projects'      => array(),
-			'project_tree'  => array(),
 			'rosetta_roles' => null,
 		);
 
@@ -72,7 +57,6 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 
 		$this->user_roles       = (array) $args['user_roles'];
 		$this->projects         = (array) $args['projects'];
-		$this->project_tree     = (array) $args['project_tree'];
 		$this->rosetta_roles    = $args['rosetta_roles'];
 		$this->user_can_promote = current_user_can( Rosetta_Roles::MANAGE_TRANSLATION_EDITORS_CAP );
 	}
@@ -389,15 +373,13 @@ class Rosetta_Translation_Editors_List_Table extends WP_List_Table {
 		$projects = array();
 		foreach ( $project_access_list as $project_id ) {
 			if ( isset( $this->projects[ $project_id ] ) ) {
-				if ( ! array_key_exists( $project_id, $this->parent_cache ) ) {
-					$this->parent_cache[ $project_id ] = $this->rosetta_roles->get_parent_project( $this->project_tree, $project_id );
-				}
-				$parent = $this->parent_cache[ $project_id ];
+				$parent_id = (int) $this->projects[ $project_id ]->parent_project_id;
+				$parent    = $this->projects[ $parent_id ] ?? null;
 
 				if ( is_object( $parent ) && (int) $parent->id !== (int) $project_id ) {
 					$name = sprintf(
 						/* translators: 1: Parent project name, 2: Child project name */
-						__( '%1$s &rarr;  %2$s', 'rosetta' ),
+						__( '%1$s &rarr; %2$s', 'rosetta' ),
 						$parent->name,
 						$this->projects[ $project_id ]->name
 					);
