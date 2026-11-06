@@ -1011,11 +1011,9 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 *
 	 * @return string HTML formatted message.
 	 */
-	private function get_feedback_message() {
-		$message = '';
-
+	private function get_feedback_message(): string {
 		if ( ! empty( $_REQUEST['update'] ) && ! empty( $_REQUEST['error'] ) ) {
-			return $message;
+			return '';
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query parameter used solely for feedback notice display.
@@ -1040,18 +1038,18 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		);
 
 		if ( isset( $_REQUEST['error'], $messages['error'][ $_REQUEST['error'] ] ) ) {
-			$message = sprintf(
+			return sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
 				$messages['error'][ $_REQUEST['error'] ]
 			);
 		} elseif ( isset( $_REQUEST['update'], $messages['update'][ $_REQUEST['update'] ] ) ) {
-			$message = sprintf(
+			return sprintf(
 				'<div class="notice notice-success"><p>%s</p></div>',
 				$messages['update'][ $_REQUEST['update'] ]
 			);
 		}
 
-		return $message;
+		return '';
 	}
 
 	/**
@@ -1088,7 +1086,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param  int    $user_id User ID.
 	 * @param  string $action  Can be 'add' or 'remove'.
 	 */
-	private function notify_profiles_wporg_translation_editor_update( $user_id, $action ) {
+	private function notify_profiles_wporg_translation_editor_update( int $user_id, string $action ): void {
 		$args = array(
 			'body' => array(
 				'action'      => 'wporg_handle_association',
