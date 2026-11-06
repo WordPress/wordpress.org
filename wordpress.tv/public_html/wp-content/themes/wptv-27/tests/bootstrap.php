@@ -33,7 +33,7 @@ if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) && file_exists( $_tests_dir 
 	define( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH', $_tests_dir . '/vendor/yoast/phpunit-polyfills' );
 }
 
-// Activate the theme, so WordPress loads it like on the site.
+// Run the tests with the theme active.
 $GLOBALS['wp_tests_options'] = array(
 	'template'            => 'wptv-27',
 	'stylesheet'          => 'wptv-27',

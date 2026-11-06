@@ -74,7 +74,7 @@ class Routes_Test extends TestCase {
 	public function test_legacy_url_resolves( string $path, string $query_var, string $value ): void {
 		$_SERVER['REQUEST_URI'] = $path;
 
-		// A clone keeps the query variables taxonomies registered on the global instance.
+		// A new WP instance lacks the taxonomies' query variables.
 		$wp = clone $GLOBALS['wp'];
 		$wp->parse_request();
 

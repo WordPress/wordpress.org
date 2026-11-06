@@ -3,11 +3,6 @@
  * Plugin Name: WordPress.tv Local
  * Description: Stands in for what WordPress.com provides WordPress.tv, so the theme runs locally.
  *
- * Jetpack runs in offline mode here, which skips the modules that need a
- * WordPress.com connection; WordPress.tv uses VideoPress and Sharing.
- * Uploads stay local instead of going to VideoPress, so submissions get the
- * GUID of a published video instead of one of their own.
- *
  * @package WordPressdotorg\Environments
  */
 
@@ -21,7 +16,7 @@ namespace WordPressdotorg\Environments\WordPressTV_Local;
 const SUBMISSION_GUID = 'NxCFxkXD';
 
 /**
- * Jetpack modules WordPress.tv uses that need a connection.
+ * Jetpack modules WordPress.tv uses that offline mode skips, because they need a connection.
  */
 const MODULES = array( 'videopress', 'sharedaddy' );
 
@@ -54,7 +49,7 @@ function activate( array $modules ): array {
 add_filter( 'jetpack_active_modules', __NAMESPACE__ . '\activate' );
 
 /**
- * Gives a submitted video a published VideoPress GUID.
+ * Gives local uploads, which never reach VideoPress, a published video's GUID.
  *
  * @return string VideoPress GUID.
  */

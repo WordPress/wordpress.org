@@ -1,7 +1,6 @@
 #!/bin/bash
 #
-# Runs after wp-env start. Sets up the site like WordPress.tv and imports
-# videos from it on the first start.
+# Runs after wp-env start. Sets up the site like WordPress.tv and imports its videos once.
 #
 
 CONFIG="--config wordpress-tv/.wp-env.json"

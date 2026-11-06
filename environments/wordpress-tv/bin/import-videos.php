@@ -1,14 +1,8 @@
 <?php
 /**
- * Imports videos and pages from WordPress.tv for local development.
+ * Imports videos, their terms, and pages from WordPress.tv's public APIs.
  *
- * Reads the site's public JSON API (/api/videos.json, /api/categories.json) and
- * the WordPress.com REST API for pages, then recreates the videos as posts with
- * their speakers, events, languages, tags, categories and producers. Each post
- * embeds its VideoPress video with the legacy `[wpvideo]` shortcode, as most
- * production posts do, so the player streams the real video.
- *
- * Run with: wp eval-file wp-content/env-bin/import-videos.php
+ * Posts embed their video with the `[wpvideo]` shortcode, as most production posts do.
  *
  * @package WordPressdotorg\Environments\WordPressTV
  */
@@ -341,12 +335,7 @@ function run(): void {
 
 	$names = fetch_category_names();
 
-	/*
-	 * The newest videos fill the home page and the WordCampTV landing page; the
-	 * featured ones fill the home page's lead and Featured row; the others give
-	 * the Education and How-To sections something to show. The API leaves every
-	 * video's tags empty, so the featured query's tag is added here.
-	 */
+	// The API leaves every video's tags empty, so the featured query adds its tag.
 	$queries = array(
 		'posts_per_page=40'                        => array(),
 		'tag=featured&posts_per_page=8'            => array( 'featured' ),
