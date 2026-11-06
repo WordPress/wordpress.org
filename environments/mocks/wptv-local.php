@@ -25,10 +25,6 @@ const SUBMISSION_GUID = 'NxCFxkXD';
  */
 const MODULES = array( 'videopress', 'sharedaddy' );
 
-add_filter( 'jetpack_get_module', __NAMESPACE__ . '\allow_offline', 10, 2 );
-add_filter( 'jetpack_active_modules', __NAMESPACE__ . '\activate' );
-add_filter( 'wptv_pre_submission_video_guid', __NAMESPACE__ . '\submission_guid' );
-
 /**
  * Lets WordPress.tv's Jetpack modules load in offline mode.
  *
@@ -44,6 +40,7 @@ function allow_offline( array|false $module, string $slug ): array|false {
 
 	return $module;
 }
+add_filter( 'jetpack_get_module', __NAMESPACE__ . '\allow_offline', 10, 2 );
 
 /**
  * Turns WordPress.tv's Jetpack modules on, along with the Blocks module.
@@ -54,6 +51,7 @@ function allow_offline( array|false $module, string $slug ): array|false {
 function activate( array $modules ): array {
 	return array_merge( $modules, array( 'blocks' ), MODULES );
 }
+add_filter( 'jetpack_active_modules', __NAMESPACE__ . '\activate' );
 
 /**
  * Gives a submitted video a published VideoPress GUID.
@@ -63,3 +61,4 @@ function activate( array $modules ): array {
 function submission_guid(): string {
 	return SUBMISSION_GUID;
 }
+add_filter( 'wptv_pre_submission_video_guid', __NAMESPACE__ . '\submission_guid' );
