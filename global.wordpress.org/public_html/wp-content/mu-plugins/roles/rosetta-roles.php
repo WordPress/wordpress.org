@@ -1144,7 +1144,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @return array The project tree.
 	 */
 	public function get_project_tree( array $projects, int $parent_id = 0, int $max_depth = 5 ): array {
-		if ( $max_depth < 0 ) {
+		if ( $max_depth < 0 ) { // Avoid an endless recursion.
 			return array();
 		}
 
