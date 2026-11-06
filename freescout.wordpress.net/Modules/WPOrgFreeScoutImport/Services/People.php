@@ -296,7 +296,7 @@ final class People {
 	}
 
 	/**
-	 * The user for a remote user who'll work here: the one they have already, or a new, active one.
+	 * The user for a remote user who'll work here: the one they have already, or a new one, disabled if they're deleted there.
 	 *
 	 * @param int   $source_id   Source.
 	 * @param array $remote_user Remote user.
@@ -305,7 +305,17 @@ final class People {
 	public static function find_or_create( int $source_id, array $remote_user ): User {
 		$existing = self::existing( $source_id, $remote_user );
 
-		return $existing ? $existing['user'] : self::match_or_create( $source_id, $remote_user, true );
+		return $existing ? $existing['user'] : self::match_or_create( $source_id, $remote_user, ! self::is_deleted( $remote_user ) );
+	}
+
+	/**
+	 * Whether a remote user is deleted there: FreeScout appends a suffix and the time to a deleted user's email.
+	 *
+	 * @param array $remote_user Remote user.
+	 * @return bool
+	 */
+	public static function is_deleted( array $remote_user ): bool {
+		return 1 === preg_match( '/' . preg_quote( User::EMAIL_DELETED_SUFFIX, '/' ) . '\d{14}$/', (string) ( $remote_user['email'] ?? '' ) );
 	}
 
 	/**

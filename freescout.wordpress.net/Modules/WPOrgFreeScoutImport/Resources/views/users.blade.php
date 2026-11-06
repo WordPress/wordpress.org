@@ -38,7 +38,7 @@
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<h4>{{ __('Connect to WordPress.org accounts') }}</h4>
-				<p>{{ __('Download :name’s users, fill in the wporg_username column for those who’ll work here, and check it here. Each one’s user here is connected to that account, created if they have none yet, and switched on if an import created them disabled: their name, email, and avatar come from WordPress.org, and they can log in with it. Someone whose account is connected to a user already is credited to that user.', [ 'name' => $name ]) }}</p>
+				<p>{{ __('Download :name’s users, fill in the wporg_username column for those who’ll work here, and check it here. Each one’s user here is connected to that account, created if they have none yet, and switched on if an import created them disabled, unless they’re deleted there: their name, email, and avatar come from WordPress.org, and they can log in with it. Someone whose account is connected to a user already is credited to that user.', [ 'name' => $name ]) }}</p>
 				<p><a href="{{ route( 'wporgfreescoutimport.users.export', [ 'id' => $source->id ] ) }}" class="btn btn-default">{{ __('Download CSV') }}</a></p>
 				@if ( $can_connect )
 					<form method="POST" action="{{ route( 'wporgfreescoutimport.users.connect', [ 'id' => $source->id ] ) }}" enctype="multipart/form-data">
