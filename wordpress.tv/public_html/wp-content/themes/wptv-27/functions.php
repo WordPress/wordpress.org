@@ -32,6 +32,7 @@ require_once WPTV_THEME_DIR . '/inc/wordcamp-blocks.php';
 require_once WPTV_THEME_DIR . '/inc/content.php';
 require_once WPTV_THEME_DIR . '/inc/publishing.php';
 require_once WPTV_THEME_DIR . '/inc/open-graph.php';
+require_once WPTV_THEME_DIR . '/inc/global-footer.php';
 require_once WPTV_THEME_DIR . '/inc/redirects.php';
 require_once WPTV_THEME_DIR . '/inc/maintenance.php';
 require_once WPTV_THEME_DIR . '/inc/endpoints/api.php';
