@@ -530,8 +530,13 @@ class Import {
 		// Set tags from the readme
 		wp_set_object_terms( $plugin->ID, $readme->tags, 'plugin_tags' );
 
-		// Update the contributors list
-		wp_set_object_terms( $plugin->ID, $readme->contributors, 'plugin_contributors' );
+		// Update the contributors list, which always includes the plugin owner.
+		$contributors = $readme->contributors;
+		$owner        = get_user_by( 'id', $plugin->post_author );
+		if ( $owner && ! in_array( $owner->user_nicename, $contributors, true ) ) {
+			$contributors[] = $owner->user_nicename;
+		}
+		wp_set_object_terms( $plugin->ID, $contributors, 'plugin_contributors' );
 
 		// Update the committers list
 		Tools::sync_plugin_committers_with_taxonomy( $plugin->post_name );
