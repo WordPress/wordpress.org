@@ -69,6 +69,9 @@
 								<strong class="text-danger">{{ $step['error'] }}</strong>
 							@else
 								{{ $actions[ $step['action'] ] }}
+								@if ( $step['deleted'] )
+									<br/><small class="text-help">{{ __('Deleted on :name: not switched on', [ 'name' => $name ]) }}</small>
+								@endif
 								@if ( $step['mismatch'] )
 									<br/><label class="checkbox-inline"><input type="checkbox" name="confirmed[]" value="{{ $step['remote_user']['id'] }}" form="wporgfreescoutimport-connect"> <strong>{{ __('Not their name or email: connect anyway') }}</strong></label>
 								@endif
