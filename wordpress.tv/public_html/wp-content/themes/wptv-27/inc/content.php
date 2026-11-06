@@ -49,11 +49,13 @@ add_filter( 'document_title_parts', __NAMESPACE__ . '\document_title_parts' );
 /**
  * Appends the presentation slides link to the excerpt.
  *
- * @param string $excerpt Post excerpt.
+ * @param string        $excerpt Post excerpt.
+ * @param \WP_Post|null $post    Post the excerpt belongs to. Defaults to the current post.
  * @return string
  */
-function excerpt_slides( $excerpt ) {
-	$slides = get_post_meta( get_the_ID(), '_wptv_slides_url', true );
+function excerpt_slides( $excerpt, $post = null ) {
+	$post   = get_post( $post );
+	$slides = $post ? get_post_meta( $post->ID, '_wptv_slides_url', true ) : '';
 
 	if ( ! empty( $slides ) ) {
 		$excerpt .= '<p><a href="' . esc_url( $slides ) . '">Presentation Slides &raquo;</a></p>';
@@ -61,7 +63,7 @@ function excerpt_slides( $excerpt ) {
 
 	return $excerpt;
 }
-add_filter( 'get_the_excerpt', __NAMESPACE__ . '\excerpt_slides' );
+add_filter( 'get_the_excerpt', __NAMESPACE__ . '\excerpt_slides', 10, 2 );
 
 /*
  * Media RSS (WordPress.com only; the filters do nothing elsewhere).
