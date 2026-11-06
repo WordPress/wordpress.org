@@ -642,13 +642,12 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			);
 
 			$projects     = $this->get_translate_projects();
-			$project_tree = $this->get_project_tree( $projects, 0, 1 );
-
 			$project_list = [];
 
 			foreach ( $projects_added as $project_id ) {
 				if ( isset( $projects[ $project_id ] ) ) {
-					$parent = $this->get_parent_project( $project_tree, $project_id );
+					$parent_id = (int) $projects[ $project_id ]->parent_project_id;
+					$parent    = $projects[ $parent_id ] ?? null;
 					if ( is_object( $parent ) && (int) $parent->id !== (int) $project_id ) {
 						$name = sprintf(
 							/* translators: 1: Parent project name, 2: Child project name */
@@ -829,17 +828,22 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * Ajax handler for retrieving projects.
 	 */
 	public function ajax_rosetta_get_projects() {
-		$projects = $this->get_translate_projects();
-		array_walk( $projects, function( $value ) {
-			unset( $value->path ); // Path is not needed.
-		} );
+		$projects = array_map(
+			function ( $project ) {
+				$clone = clone $project;
+				unset( $clone->path ); // Path is not needed.
+				return $clone;
+			},
+			$this->get_translate_projects()
+		);
+
 		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		// Sort the tree and remove array keys.
-		usort( $project_tree, array( $this, '_sort_name_callback' ) );
-		foreach ( $project_tree as $key => $project ) {
+		usort( $project_tree, array( $this, 'sort_name_callback' ) );
+		foreach ( $project_tree as $project ) {
 			if ( isset( $project->sub_projects ) ) {
-				usort( $project->sub_projects, array( $this, '_sort_name_callback' ) );
+				usort( $project->sub_projects, array( $this, 'sort_name_callback' ) );
 				$project->sub_projects = array_values( $project->sub_projects );
 			}
 		}
@@ -910,12 +914,10 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		}
 
 		$projects = $this->get_translate_projects();
-		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		$args = array(
 			'user_roles'    => array( self::TRANSLATION_EDITOR_ROLE, self::GENERAL_TRANSLATION_EDITOR_ROLE ),
 			'projects'      => $projects,
-			'project_tree'  => $project_tree,
 			'rosetta_roles' => $this,
 		);
 		$list_table = new Rosetta_Translation_Editors_List_Table( $args );
@@ -997,48 +999,38 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			return array();
 		}
 
-		$tree = array();
+		$grouped = array();
 		foreach ( $projects as $project ) {
-			if ( $project->parent_project_id == $parent_id ) {
-				$sub_projects = $this->get_project_tree( $projects, $project->id, $max_depth - 1 );
-				if ( $sub_projects ) {
-					$project->sub_projects = $sub_projects;
-				}
-
-				$tree[ $project->id ] = $project;
-			}
+			$grouped[ (int) $project->parent_project_id ][] = $project;
 		}
-		return $tree;
+
+		$build_branch = function ( $pid, $depth ) use ( &$build_branch, $grouped ) {
+			if ( $depth < 0 || ! isset( $grouped[ $pid ] ) ) {
+				return array();
+			}
+			$branch = array();
+			foreach ( $grouped[ $pid ] as $item ) {
+				$clone    = clone $item;
+				$children = $build_branch( (int) $clone->id, $depth - 1 );
+				if ( $children ) {
+					$clone->sub_projects = $children;
+				}
+				$branch[ $clone->id ] = $clone;
+			}
+			return $branch;
+		};
+
+		return $build_branch( $parent_id, $max_depth );
 	}
 
 	/**
-	 * Returns the parent project for a sub project.
+	 * Callback to sort projects alphabetically by name using natural case-insensitive comparison.
 	 *
-	 * @param array $tree The project tree.
-	 * @param int $child_id The project tree.
-	 * @return object The parent project.
+	 * @param object $a First project object.
+	 * @param object $b Second project object.
+	 * @return int Standard comparison return values (< 0, 0, > 0).
 	 */
-	public function get_parent_project( $tree, $child_id ) {
-		$parent = null;
-		foreach ( $tree as $project ) {
-			if ( $project->id == $child_id ) {
-				$parent = $project;
-				break;
-			}
-
-			if ( isset( $project->sub_projects ) ) {
-				$parent = $this->get_parent_project( $project->sub_projects, $child_id );
-				if ( $parent ) {
-					$parent = $project;
-					break;
-				}
-			}
-		}
-
-		return $parent;
-	}
-
-	private function _sort_name_callback( $a, $b ) {
+	private function sort_name_callback( object $a, object $b ): int {
 		return strnatcasecmp( $a->name, $b->name );
 	}
 }
