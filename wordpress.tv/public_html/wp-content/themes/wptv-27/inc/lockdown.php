@@ -69,7 +69,8 @@ add_filter( 'wp_get_custom_css', '__return_empty_string' );
  * @return mixed
  */
 function block_design_writes( $result, $server, $request ) {
-	if ( 'GET' === $request->get_method() ) {
+	// Read-only methods stay available: the editor uses OPTIONS for discovery and HEAD mirrors GET.
+	if ( in_array( $request->get_method(), array( 'GET', 'HEAD', 'OPTIONS' ), true ) ) {
 		return $result;
 	}
 	if ( preg_match( '#^/wp/v2/(templates|template-parts|global-styles)(/|$)#i', $request->get_route() ) ) {

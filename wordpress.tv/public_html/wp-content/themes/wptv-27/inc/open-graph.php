@@ -25,7 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function customize_tags( $tags ) {
 	$post = get_post();
-	if ( ! $post instanceof \WP_Post || ! function_exists( 'video_get_info_by_guid' ) ) {
+	// Password-protected videos get no player or MP4 URL.
+	if ( ! $post instanceof \WP_Post || post_password_required( $post ) || ! function_exists( 'video_get_info_by_guid' ) ) {
 		return $tags;
 	}
 

@@ -73,7 +73,11 @@ function json_ld() {
 		return;
 	}
 
-	$post  = get_post();
+	$post = get_post();
+	// Password-protected videos would expose their file URLs in contentUrl.
+	if ( post_password_required( $post ) ) {
+		return;
+	}
 	$video = Video\get_details( $post );
 	if ( ! $video ) {
 		return;
@@ -98,10 +102,15 @@ function json_ld() {
 		'inLanguage'       => $lang ? $lang : 'en',
 		'isFamilyFriendly' => ( 'G' === $video->rating || 'PG' === $video->rating ),
 		'recordedAt'       => array(),
-		'thumbnailUrl'     => Video\get_image_url( $post ),
 		'uploadDate'       => gmdate( 'Y-m-d', strtotime( get_the_date() ) ),
 		'width'            => $video->width ?? 940,
 	);
+
+	// schema.org expects a URL here; omit the key rather than print false.
+	$thumbnail = Video\get_image_url( $post );
+	if ( $thumbnail ) {
+		$data['thumbnailUrl'] = $thumbnail;
+	}
 
 	$speakers = get_the_terms( $post, 'speakers' );
 	if ( is_array( $speakers ) ) {

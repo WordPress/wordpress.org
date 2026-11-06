@@ -53,6 +53,10 @@ function not_found() {
  * @return \WP_Post|false
  */
 function get_post_by_guid( $guid ) {
+	// Public query vars can arrive as arrays, for example ?guid[]=x.
+	if ( ! is_string( $guid ) ) {
+		return false;
+	}
 	$posts = get_posts(
 		array(
 			's'           => "[wpvideo $guid]",
@@ -64,7 +68,7 @@ function get_post_by_guid( $guid ) {
 	}
 
 	// Keep the legacy search first. Only valid block GUIDs enter the fallback.
-	if ( ! is_string( $guid ) || ! preg_match( '/^[A-Za-z0-9]{8}$/D', $guid ) ) {
+	if ( ! preg_match( '/^[A-Za-z0-9]{8}$/D', $guid ) ) {
 		return false;
 	}
 	// One bounded search for the serialized block attribute, so arbitrary words cannot scan the whole catalog.
