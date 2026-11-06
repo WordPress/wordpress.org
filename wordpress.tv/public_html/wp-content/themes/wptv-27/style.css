@@ -26,6 +26,7 @@ img, video, iframe { max-width: 100%; }
 .wp-site-blocks > * + * { margin-block-start: 0; }
 .wp-site-blocks main { padding-block: var(--wp--preset--spacing--60); }
 .wp-site-blocks main.is-flush { padding-block: 0; }
+.wp-site-blocks main.wptv-single { padding-block-end: var(--wp--preset--spacing--60); }
 :where(.wp-block-group, .wp-block-column, .wp-block-post, .wp-block-query) { min-width: 0; }
 :where(input:not([type="submit"]):not([type="checkbox"]):not([type="radio"]), textarea, select) {
 	box-sizing: border-box; max-width: 100%; padding: 8px 15px; border: 1px solid var(--wp--preset--color--charcoal-4); border-radius: 2px;
