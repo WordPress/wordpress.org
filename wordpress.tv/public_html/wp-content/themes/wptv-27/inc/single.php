@@ -40,3 +40,6 @@ function full_description( $content, $parsed, $block ) {
 	);
 }
 add_filter( 'render_block_core/post-excerpt', __NAMESPACE__ . '\\full_description', 10, 3 );
+
+// The pattern's Sharing Buttons block replaces Jetpack's classic buttons, which would add two more rows.
+add_filter( 'sharing_show', '__return_false' );

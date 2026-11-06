@@ -19,11 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 function setup() {
 	add_editor_style( 'style.css' );
 
-	// Same location names as wptv2, so the assigned menus survive switching between both themes.
+	// Same location name as wptv2, so the assigned menu survives switching between both themes.
 	register_nav_menus(
 		array(
 			'primary' => __( 'Primary Menu', 'wptv' ),
-			'footer'  => __( 'Footer Menu', 'wptv' ),
 		)
 	);
 }
@@ -83,46 +82,6 @@ function primary_menu_links( $parsed_block ) {
 	return $parsed_block;
 }
 add_filter( 'render_block_data', __NAMESPACE__ . '\primary_menu_links' );
-
-/**
- * Fills the footer "Contribute" list with the classic menu assigned to `footer`.
- *
- * Only top-level items are shown, as wptv2's footer menu (depth 1). Links to
- * other sites get the decorative arrow the footer design uses. Without an
- * assigned menu, or with an empty one, the pattern's own links are kept.
- *
- * @param string $content Rendered List block.
- * @param array  $block   Parsed block.
- * @return string
- */
-function footer_menu_links( $content, $block ) {
-	$classes = preg_split( '/\s+/', $block['attrs']['className'] ?? '' );
-	if ( ! in_array( 'wptv-footer__contribute', $classes, true ) || ! preg_match( '/^\s*(<ul\b[^>]*>)/', $content, $opening ) ) {
-		return $content;
-	}
-
-	$locations = get_nav_menu_locations();
-	$menu      = wp_get_nav_menu_object( $locations['footer'] ?? 0 );
-	$items     = $menu ? wp_get_nav_menu_items( $menu->term_id ) : array();
-	if ( ! $items ) {
-		return $content;
-	}
-
-	$home_host = wp_parse_url( home_url(), PHP_URL_HOST );
-	$links     = '';
-	foreach ( $items as $item ) {
-		if ( (int) $item->menu_item_parent ) {
-			continue;
-		}
-		$host   = wp_parse_url( $item->url, PHP_URL_HOST );
-		$arrow  = ( $host && $host !== $home_host ) ? ' <span aria-hidden="true">↗</span>' : '';
-		$target = $item->target ? ' target="' . esc_attr( $item->target ) . '" rel="noopener"' : '';
-		$links .= '<li><a href="' . esc_url( $item->url ) . '"' . $target . '>' . esc_html( $item->title ) . $arrow . '</a></li>';
-	}
-
-	return $links ? $opening[1] . $links . '</ul>' : $content;
-}
-add_filter( 'render_block_core/list', __NAMESPACE__ . '\footer_menu_links', 10, 2 );
 
 /**
  * Registers the recurring visual treatments used by theme patterns.
