@@ -203,6 +203,32 @@ function content() {
 add_action( 'template_redirect', __NAMESPACE__ . '\content' );
 
 /**
+ * Show closed and disabled plugins by their slug instead of their name in the front-end.
+ */
+function closed_plugin_title_filters() {
+	add_filter( 'the_title', __NAMESPACE__ . '\closed_plugin_title', 10, 2 );
+	add_filter( 'single_post_title', __NAMESPACE__ . '\closed_plugin_title', 10, 2 );
+}
+add_action( 'template_redirect', __NAMESPACE__ . '\closed_plugin_title_filters' );
+
+/**
+ * Replaces the title of a closed or disabled plugin with its slug.
+ *
+ * @param string            $title The post title.
+ * @param int|\WP_Post|null $post  Optional. The post ID or object.
+ * @return string The filtered title.
+ */
+function closed_plugin_title( $title, $post = null ) {
+	$post = $post ? get_post( $post ) : null;
+
+	if ( $post && 'plugin' === $post->post_type && in_array( $post->post_status, array( 'closed', 'disabled' ), true ) ) {
+		return $post->post_name;
+	}
+
+	return $title;
+}
+
+/**
  * Filters the list of CSS body classes for the current post or page.
  *
  * @param array $classes An array of body classes.

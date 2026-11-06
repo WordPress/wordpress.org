@@ -17,7 +17,7 @@ global $section_slug, $section_title, $section_content, $post;
 $content   = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
 
-$plugin_title = $is_closed ? $post->post_name : get_the_title();
+$plugin_title = get_the_title();
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'alignwide' ); ?>>
