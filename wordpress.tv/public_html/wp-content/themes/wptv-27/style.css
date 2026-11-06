@@ -71,6 +71,7 @@ img, video, iframe { max-width: 100%; }
 .wptv-header .is-menu-open .wp-block-navigation-item { padding-block: 12px; border-bottom: 1px solid var(--wp--preset--color--light-grey-1); }
 .wptv-header .is-menu-open .wp-block-search { width: 100%; }
 .global-footer a:focus { outline-color: var(--wp--preset--color--blueberry-2); }
+.global-footer a[href="https://wordpress.tv/"] [aria-hidden="true"] { display: none; }
 /* === cards === */
 .is-style-cards-grid { gap: var(--wp--preset--spacing--20); }
 .is-style-cards-grid > :where(li, .wp-block-group) { position: relative; border: 1px solid var(--wp--preset--color--light-grey-1); border-radius: 2px; box-sizing: border-box; overflow-wrap: anywhere; padding: 20px; }
