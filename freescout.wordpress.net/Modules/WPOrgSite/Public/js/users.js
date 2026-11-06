@@ -1,7 +1,6 @@
 /**
- * Filters the Users page by role and status, each choice with how many users it matches. The filters are kept in the
- * URL, so going back from a profile, or opening a shared link, shows the same users. The heading's count is of the
- * users shown, after core's search too.
+ * Filters the Users page by role and status. The filters are kept in the URL, so going back from a profile, or opening
+ * a shared link, shows the same users. The heading's count is of the users shown, after core's search too.
  *
  * @param {jQuery} $ jQuery.
  */
@@ -91,14 +90,10 @@
 			).attr( 'aria-label', group.label );
 
 			group.options.forEach( function ( option ) {
-				option.$count = $(
-					'<span class="wporgsite-users-count"></span>'
-				);
 				option.$button = $(
 					'<button type="button" class="btn btn-default"></button>'
 				)
-					.text( option.text + ' ' )
-					.append( option.$count )
+					.text( option.text )
 					.on( 'click', function () {
 						selected[ group.key ] = option;
 						updateUrl();
@@ -116,25 +111,16 @@
 		const $live = $( '<span class="sr-only" aria-live="polite"></span>' );
 
 		/**
-		 * Whether a user matches the chosen filters, with one group's choice swapped for another.
-		 *
-		 * @param {Object} user   User.
-		 * @param {Object} group  Group to swap the choice of.
-		 * @param {Object} option Choice to swap in.
-		 * @return {boolean} Whether they match.
-		 */
-		function matches( user, group, option ) {
-			return groups.every( ( each ) =>
-				( each === group ? option : selected[ each.key ] ).test( user )
-			);
-		}
-
-		/**
-		 * Shows the users the filters match, each choice's count, and the heading's.
+		 * Shows the users the filters match, marks the chosen filters, and counts the users shown.
 		 */
 		function apply() {
 			users.forEach( ( user ) =>
-				user.$card.toggleClass( HIDDEN, ! matches( user ) )
+				user.$card.toggleClass(
+					HIDDEN,
+					! groups.every( ( group ) =>
+						selected[ group.key ].test( user )
+					)
+				)
 			);
 
 			groups.forEach( function ( group ) {
@@ -144,11 +130,6 @@
 					option.$button
 						.toggleClass( 'active', on )
 						.attr( 'aria-pressed', String( on ) );
-					option.$count.text(
-						users.filter( ( user ) =>
-							matches( user, group, option )
-						).length
-					);
 				} );
 			} );
 
