@@ -106,7 +106,7 @@ function handle() {
 	if ( isset( $_GET['xhr'] ) ) {
 		header( 'Content-Type: text/plain; charset=utf-8' );
 		send_nosniff_header();
-		echo esc_url_raw( $redir ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response, read by submission-form.js.
+		echo $redir; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text response, read by submission-form.js; esc_url_raw() would strip the description's encoded line breaks.
 		exit;
 	}
 	wp_safe_redirect( $redir );
