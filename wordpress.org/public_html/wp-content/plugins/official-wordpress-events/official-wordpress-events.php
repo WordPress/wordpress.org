@@ -844,11 +844,20 @@ class Official_WordPress_Events {
 			$country_code = $country_code ?: $this->country_code( $location_parts['country_code'] ?? '' );
 		} elseif ( $is_online ) {
 			/*
-			 * Online events with no venue have no coordinates, which the table requires, so they're skipped by
-			 * `prime_events_cache()` for now. `location` is still set the way online WordCamps do it, so they're
-			 * ready to be listed once there's a placement for them.
+			 * An online event with no venue is placed at its group's city, the way Meetup.com events are placed at
+			 * their group's city and online WordCamps at their host's. The table requires a point, and the Events API
+			 * finds events by it. `location` marks it online wherever it's shown, as online WordCamps do.
+			 *
+			 * A group with no city has nowhere to place it, so its online events are skipped by `prime_events_cache()`.
 			 */
-			$location = 'online';
+			$location   = 'online';
+			$group_city = $this->geocode_group_city( $raw_event['group']['location'] ?? null );
+
+			if ( $group_city ) {
+				$latitude  = $group_city['latitude'];
+				$longitude = $group_city['longitude'];
+				$has_point = true;
+			}
 		}
 
 		if ( ! $country_code ) {
@@ -942,6 +951,77 @@ class Official_WordPress_Events {
 	 */
 	protected function meetup_urlname( $urlname ) {
 		return is_string( $urlname ) && preg_match( '/^[0-9a-z_-]{1,100}$/i', $urlname ) ? strtolower( $urlname ) : '';
+	}
+
+	/**
+	 * Geocode a group's city, to place the group's online events.
+	 *
+	 * Groups record a city and a country, not coordinates. Found cities are cached like `reverse_geocode()`'s results.
+	 * A city that can't be found is cached for a day, so it isn't looked up again on every run.
+	 *
+	 * @param mixed $group_location The group's `location` from the feed, with `city` and `country_code`, or null.
+	 *
+	 * @return float[]|null `latitude` and `longitude`, or null when the group has no city or it can't be found.
+	 */
+	protected function geocode_group_city( $group_location ) {
+		if ( ! is_array( $group_location ) ) {
+			return null;
+		}
+
+		$city         = $this->plain_text( $group_location['city'] ?? '' );
+		$country_code = $this->country_code( $group_location['country_code'] ?? '' );
+
+		if ( '' === $city || '' === $country_code ) {
+			return null;
+		}
+
+		$cache_key = 'geocode_city_' . md5( mb_strtolower( $city ) . ',' . $country_code );
+		$cached    = wp_cache_get( $cache_key, 'events' );
+
+		if ( false !== $cached ) {
+			return $cached ?: null;
+		}
+
+		// Rough attempt at avoiding rate limit.
+		usleep( 75000 );
+
+		$api_client  = $this->get_api_client();
+		$request_url = sprintf(
+			'https://maps.googleapis.com/maps/api/geocode/json?address=%s&components=%s&key=%s',
+			rawurlencode( $city ),
+			rawurlencode( 'country:' . $country_code ),
+			OFFICIAL_WP_EVENTS_GOOGLE_MAPS_API_KEY
+		);
+
+		$response = $api_client->tenacious_remote_get( $request_url );
+		$body     = json_decode( wp_remote_retrieve_body( $response ) );
+		$status   = $body->status ?? '';
+
+		if ( is_wp_error( $response ) || ! in_array( $status, array( 'OK', 'ZERO_RESULTS' ), true ) ) {
+			$api_client->handle_error_response( $response, $request_url );
+			$this->log( "Group city geocode failed for {$city}, {$country_code}: " . ( $status ? $status : 'no response' ) );
+
+			return null;
+		}
+
+		$latitude  = $body->results[0]->geometry->location->lat ?? null;
+		$longitude = $body->results[0]->geometry->location->lng ?? null;
+
+		if ( ! is_numeric( $latitude ) || ! is_numeric( $longitude ) ) {
+			wp_cache_set( $cache_key, array(), 'events', DAY_IN_SECONDS );
+			$this->log( "Group city not found: {$city}, {$country_code}" );
+
+			return null;
+		}
+
+		$point = array(
+			'latitude'  => (float) $latitude,
+			'longitude' => (float) $longitude,
+		);
+
+		wp_cache_set( $cache_key, $point, 'events', 0 );
+
+		return $point;
 	}
 
 	/**
@@ -1145,8 +1225,8 @@ class Official_WordPress_Events {
 	 * Mark GatherPress events as deleted when they're no longer in the feed, or can no longer be stored.
 	 *
 	 * Organizers unpublish or delete events, and recurring series drop occurrences, so those events stop appearing
-	 * in the feed rather than changing status. An event that loses its coordinates, e.g. by moving online, stays in
-	 * the feed but is skipped, so its old row would otherwise stay up at the old venue.
+	 * in the feed rather than changing status. An event that loses its coordinates, e.g. by moving online in a group
+	 * with no city, stays in the feed but is skipped, so its old row would otherwise stay up at the old venue.
 	 *
 	 * This only acts on a complete read of the feed: from an incomplete one, a missing event could just be on a page or
 	 * a group site that failed to load, and marking it deleted would hide a real event.
