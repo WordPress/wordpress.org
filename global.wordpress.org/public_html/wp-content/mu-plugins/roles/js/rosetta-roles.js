@@ -895,7 +895,7 @@
 				const response = await wp.ajax.post( projects.settings.saveAction, {
 					_ajax_nonce: projects.settings.saveNonce,
 					user_id:     projects.settings.userId,
-					projects:    selectedIds
+					projects:    selectedIds.length ? selectedIds : [ '' ]
 				} );
 
 				if ( response?.redirect ) {
