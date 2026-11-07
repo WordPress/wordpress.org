@@ -67,6 +67,7 @@ class Hooks {
 
 		// Auto-close topics after a certain number of months since the last reply.
 		add_filter( 'bbp_is_topic_closed', array( $this, 'auto_close_old_topics' ), 10, 2 );
+		add_filter( 'bbp_get_topic_class', array( $this, 'add_closed_class_to_auto_closed_topics' ), 10, 2 );
 
 		// Hide the reply form on closed topics from users who can't reply to them.
 		add_filter( 'bbp_current_user_can_access_create_reply_form', array( $this, 'hide_reply_form_on_closed_topics' ) );
@@ -815,6 +816,24 @@ class Hooks {
 		}
 
 		return $is_topic_closed;
+	}
+
+	/**
+	 * Add the `status-closed` class to auto-closed topics.
+	 *
+	 * Auto-closed topics keep the `publish` status, so they would otherwise
+	 * miss the closed styling and lock icon that closed topics get.
+	 *
+	 * @param string[] $classes  Topic classes.
+	 * @param int      $topic_id Topic ID.
+	 * @return string[]
+	 */
+	public function add_closed_class_to_auto_closed_topics( $classes, $topic_id ) {
+		if ( ! in_array( 'status-closed', $classes, true ) && bbp_is_topic_closed( $topic_id ) ) {
+			$classes[] = 'status-closed';
+		}
+
+		return $classes;
 	}
 
 	/**
