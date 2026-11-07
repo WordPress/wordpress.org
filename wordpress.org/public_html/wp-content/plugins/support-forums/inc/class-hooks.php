@@ -1139,6 +1139,19 @@ class Hooks {
 						);
 				}
 			}
+
+			if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view filter.
+				$filter = isset( $_GET['filter'] ) ? absint( $_GET['filter'] ) : 0;
+
+				if ( $filter >= 1 && $filter <= 5 ) {
+					$title['text'] .= ' ' . sprintf(
+						/* translators: %d: Number of stars. */
+						_n( '(%d star only)', '(%d stars only)', $filter, 'wporg-forums' ),
+						$filter
+					);
+				}
+			}
 		}
 
 		return $title;
