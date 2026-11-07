@@ -35,23 +35,36 @@ class Rosetta_Roles {
 	const GENERAL_TRANSLATION_EDITOR_ROLE = 'general_translation_editor';
 
 	/**
-	 * Capabaility to promote translation editor.
+	 * Capability to promote translation editor.
 	 */
 	const MANAGE_TRANSLATION_EDITORS_CAP = 'manage_translation_editors';
+
+	/**
+	 * Project IDs to exclude from assignment and query results.
+	 */
+	const IGNORE_PROJECT_IDS = array(
+		13, // BuddyPress.
+		58, // bbPress.
+		67, // WordCamp Base Theme.
+		91, // GlotPress.
+		481, // Plugin Directory.
+		2804, // Waiting.
+		369622, // Disabled.
+	);
 
 	/**
 	 * Holds the GlotPress locale of current site.
 	 *
 	 * @var GP_Locale
 	 */
-	private $gp_locale = null;
+	private ?GP_Locale $gp_locale = null;
 
 	/**
 	 * Holds the hook suffix of the translation editors admin page.
 	 *
 	 * @var string
 	 */
-	private $translation_editors_page;
+	private ?string $translation_editors_page = null;
 
 	/**
 	 * Constructor.
@@ -91,6 +104,7 @@ class Rosetta_Roles {
 		add_action( 'translation_editor_updated', array( $this, 'send_email_notification' ), 10, 2 );
 
 		add_action( 'wp_ajax_rosetta-get-projects', array( $this, 'ajax_rosetta_get_projects' ) );
+		add_action( 'wp_ajax_rosetta-save-pte-projects', array( $this, 'ajax_rosetta_save_pte_projects' ) );
 
 		Cross_Locale_PTE::init_admin();
 	}
@@ -118,17 +132,13 @@ class Rosetta_Roles {
 
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'load_translation_editors_page' ) );
 		add_action( 'load-' . $this->translation_editors_page, array( $this, 'register_screen_options' ) );
-		add_action( 'admin_print_scripts-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_scripts' ) );
-		add_action( 'admin_footer-' . $this->translation_editors_page, array( __CLASS__, 'print_js_templates' ) );
-		add_action( 'admin_print_styles-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_styles' ) );
 	}
 
 	/**
 	 * Enqueues scripts.
 	 */
 	public static function enqueue_scripts() {
-		wp_enqueue_script( 'string_score', plugins_url( '/js/string_score.min.js', __FILE__ ), array(), '0.1.22', true );
-		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'jquery', 'wp-backbone', 'string_score' ), 12, true );
+		wp_enqueue_script( 'rosetta-roles', plugins_url( '/js/rosetta-roles.js', __FILE__ ), array( 'wp-backbone' ), 13, true );
 	}
 
 	/**
@@ -136,7 +146,7 @@ class Rosetta_Roles {
 	 */
 	public static function enqueue_styles() {
 		$suffix = is_rtl() ? '-rtl' : '';
-		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '4' );
+		wp_enqueue_style( 'rosetta-roles', plugins_url( "/css/rosetta-roles$suffix.css", __FILE__ ), array(), '5' );
 	}
 
 	/**
@@ -145,25 +155,11 @@ class Rosetta_Roles {
 	public static function print_js_templates() {
 		?>
 		<script id="tmpl-project-checkbox" type="text/html">
-			<# if ( ! data.checkedSubProjects ) {
-				#>
-				<label>
-					<input type="checkbox" class="input-checkbox"
-					<#
-					if ( data.checked ) {
-						#> checked="checked"<#
-					}
-					#>
-					/>
-					{{data.name}}
-					<span class="project-slug">({{data.slug}})</span>
-				</label>
-			<# } else { #>
-				<label>
-					<input type="radio" class="input-radio" checked="checked" /> {{data.name}}
-					<span class="project-slug">({{data.slug}})</span>
-				</label>
-			<# } #>
+			<label>
+				<input type="checkbox" class="input-checkbox"<# if ( data.checked ) { #> checked="checked"<# } #> />
+				{{data.name}}
+				<span class="project-slug">({{data.slug}})</span>
+			</label>
 		</script>
 		<?php
 	}
@@ -248,16 +244,18 @@ class Rosetta_Roles {
 
 					$user_details = null;
 					$user         = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
-					if ( false !== strpos( $user, '@' ) ) {
-						$user_details = get_user_by( 'email', $user );
-					} elseif ( is_numeric( $user ) ) {
-						$user_details = get_user_by( 'id', $user );
-					} else {
-						$user_details = get_user_by( 'login', $user );
+					$user_details = get_user_by( 'login', $user );
 
-						if ( ! $user_details ) {
-							$user_details = get_user_by( 'slug', $user );
-						}
+					if ( ! $user_details && false !== strpos( $user, '@' ) ) {
+						$user_details = get_user_by( 'email', $user );
+					}
+
+					if ( ! $user_details && is_numeric( $user ) ) {
+						$user_details = get_user_by( 'id', $user );
+					}
+
+					if ( ! $user_details ) {
+						$user_details = get_user_by( 'slug', $user );
 					}
 
 					if ( ! $user_details ) {
@@ -283,13 +281,19 @@ class Rosetta_Roles {
 
 					$projects = ! empty( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
 					if ( 'custom' === $projects ) {
-						$this->update_translation_editor( $user_details );
+						if ( ! $this->update_translation_editor( $user_details ) ) {
+							wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
+							exit;
+						}
 
 						$redirect = add_query_arg( 'user_id', $user_details->ID, $redirect );
 						wp_safe_redirect( add_query_arg( array( 'update' => 'user-added-custom-projects' ), $redirect ) );
 						exit;
 					} else {
-						$this->update_translation_editor( $user_details, array( 'all' ) );
+						if ( ! $this->update_translation_editor( $user_details, array( 'all' ) ) ) {
+							wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
+							exit;
+						}
 
 						wp_safe_redirect( add_query_arg( array( 'update' => 'user-added' ), $redirect ) );
 						exit;
@@ -310,8 +314,14 @@ class Rosetta_Roles {
 					$count = 0;
 					$user_ids = array_map( 'intval', (array) $_REQUEST['translation-editors'] );
 					foreach ( $user_ids as $user_id ) {
-						$this->remove_translation_editor( $user_id );
-						$count++;
+						if ( $this->remove_translation_editor( $user_id ) ) {
+							++$count;
+						}
+					}
+
+					if ( 0 === $count ) {
+						wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
+						exit;
 					}
 
 					wp_safe_redirect(
@@ -338,7 +348,10 @@ class Rosetta_Roles {
 					}
 
 					$user_id = (int) $_REQUEST['translation-editor'];
-					$this->remove_translation_editor( $user_id );
+					if ( ! $this->remove_translation_editor( $user_id ) ) {
+						wp_safe_redirect( add_query_arg( array( 'error' => 'save-error' ), $redirect ) );
+						exit;
+					}
 
 					wp_safe_redirect( add_query_arg( array( 'update' => 'user-removed' ), $redirect ) );
 					exit;
@@ -351,7 +364,7 @@ class Rosetta_Roles {
 	 *
 	 * @param  int $user_id User ID of a translation editor.
 	 */
-	private function load_edit_translation_editor( $user_id ) {
+	private function load_edit_translation_editor( int $user_id ): void {
 		$redirect = menu_page_url( 'translation-editors', false );
 
 		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
@@ -376,30 +389,9 @@ class Rosetta_Roles {
 			exit;
 		}
 
-		$action = empty( $_REQUEST['action'] ) ? '' : $_REQUEST['action'];
-		switch ( $action ) {
-			case 'update-translation-editor':
-				check_admin_referer( 'update-translation-editor_' . $user_details->ID );
-
-				$redirect = add_query_arg( 'user_id', $user_details->ID, $redirect );
-
-				$all_projects = $this->get_translate_projects();
-				$all_projects = wp_list_pluck( $all_projects, 'id' );
-				$all_projects = array_map( 'intval', $all_projects );
-
-				$raw_projects = isset( $_REQUEST['projects'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['projects'] ) ) : '';
-				$projects     = explode( ',', $raw_projects );
-				if ( in_array( 'all', $projects, true ) ) {
-					$this->update_translation_editor( $user_details, array( 'all' ) );
-				} else {
-					$projects = array_map( 'intval', $projects );
-					$projects = array_values( array_intersect( $all_projects, $projects ) );
-					$this->update_translation_editor( $user_details, $projects );
-				}
-
-				wp_safe_redirect( add_query_arg( array( 'update' => 'user-updated' ), $redirect ) );
-				exit;
-		}
+		add_action( 'admin_print_scripts-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_scripts' ) );
+		add_action( 'admin_print_styles-' . $this->translation_editors_page, array( __CLASS__, 'enqueue_styles' ) );
+		add_action( 'admin_footer-' . $this->translation_editors_page, array( __CLASS__, 'print_js_templates' ) );
 	}
 
 	/**
@@ -408,14 +400,27 @@ class Rosetta_Roles {
 	 * @param int|WP_User $user User ID or object.
 	 * @return bool True on success, false on failure.
 	 */
-	private function remove_translation_editor( $user ) {
+	private function remove_translation_editor( int|WP_User $user ): bool {
 		global $wpdb;
 
 		if ( ! $user instanceof WP_User ) {
 			$user = get_user_by( 'id', $user );
 		}
 
-		if ( ! $user->exists() ) {
+		if ( ! $user || ! $user->exists() ) {
+			return false;
+		}
+
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->wporg_translation_editors}
+				WHERE `user_id` = %d AND `locale` = %s",
+				$user->ID,
+				$this->gp_locale->slug
+			)
+		);
+
+		if ( false === $deleted ) {
 			return false;
 		}
 
@@ -426,11 +431,6 @@ class Rosetta_Roles {
 		if ( in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
 			$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
 		}
-
-		$wpdb->query( $wpdb->prepare( "
-			DELETE FROM {$wpdb->wporg_translation_editors}
-			WHERE `user_id` = %d AND `locale` = %s
-		", $user->ID, $this->gp_locale->slug ) );
 
 		do_action( 'translation_editor_removed', $user );
 
@@ -446,14 +446,14 @@ class Rosetta_Roles {
 	 *                              editor.
 	 * @return bool True on success, false on failure.
 	 */
-	private function update_translation_editor( $user, $projects = array() ) {
+	private function update_translation_editor( int|WP_User $user, array $projects = array() ): bool {
 		global $wpdb;
 
 		if ( ! $user instanceof WP_User ) {
 			$user = get_user_by( 'id', $user );
 		}
 
-		if ( ! $user->exists() ) {
+		if ( ! $user || ! $user->exists() ) {
 			return false;
 		}
 
@@ -461,7 +461,13 @@ class Rosetta_Roles {
 
 		$projects = array_map( 'strval', $projects );
 		$current_projects = $this->get_users_projects( $user->ID );
+		if ( in_array( 'all', $current_projects, true ) ) {
+			$current_projects = array( '0' );
+		}
 		$projects_to_add = $projects_to_remove = array();
+
+		$role_to_remove = null;
+		$role_to_add    = null;
 
 		if ( in_array( 'all', $projects, true ) ) {
 			$projects_to_remove = array_diff( $current_projects, array( '0' ) );
@@ -470,22 +476,22 @@ class Rosetta_Roles {
 			}
 
 			if ( in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->remove_role( self::TRANSLATION_EDITOR_ROLE );
+				$role_to_remove = self::TRANSLATION_EDITOR_ROLE;
 			}
 
 			if ( ! in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->add_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+				$role_to_add = self::GENERAL_TRANSLATION_EDITOR_ROLE;
 			}
 		} else {
 			$projects_to_remove = array_diff( $current_projects, $projects );
-			$projects_to_add = array_diff( $projects, $current_projects );
+			$projects_to_add    = array_diff( $projects, $current_projects );
 
 			if ( in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->remove_role( self::GENERAL_TRANSLATION_EDITOR_ROLE );
+				$role_to_remove = self::GENERAL_TRANSLATION_EDITOR_ROLE;
 			}
 
 			if ( ! in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles ) ) {
-				$user->add_role( self::TRANSLATION_EDITOR_ROLE );
+				$role_to_add = self::TRANSLATION_EDITOR_ROLE;
 			}
 		}
 
@@ -501,20 +507,42 @@ class Rosetta_Roles {
 		}
 
 		if ( $values_to_add ) {
-			$wpdb->query( "
-				INSERT INTO {$wpdb->wporg_translation_editors}
+			$inserted = $wpdb->query(
+				"INSERT INTO {$wpdb->wporg_translation_editors}
 				(`user_id`,`project_id`, `locale`, `locale_slug`, `date_added`)
 				VALUES " . implode( ', ', $values_to_add ) . "
 			" );
+
+			if ( false === $inserted ) {
+				return false;
+			}
 		}
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-			$wpdb->query( $wpdb->prepare( "
-				DELETE FROM {$wpdb->wporg_translation_editors}
-				WHERE `user_id` = %d AND `locale` = %s
-				AND project_id IN (" . implode( ', ', $values_to_remove ) . ")
-			", $user->ID, $this->gp_locale->slug ) );
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+			$deleted = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->wporg_translation_editors}
+					WHERE `user_id` = %d AND `locale` = %s
+					AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
+					$user->ID,
+					$this->gp_locale->slug
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+			if ( false === $deleted ) {
+				return false;
+			}
+		}
+
+		if ( $role_to_remove ) {
+			$user->remove_role( $role_to_remove );
+		}
+
+		if ( $role_to_add ) {
+			$user->add_role( $role_to_add );
 		}
 
 		if ( $update ) {
@@ -532,7 +560,7 @@ class Rosetta_Roles {
 	 *
 	 * @param \WP_User $user The user object of the translation editor.
 	 */
-	public function update_wporg_profile_badge( $user ) {
+	public function update_wporg_profile_badge( WP_User $user ): void {
 		global $wpdb;
 
 		$action = 'translation_editor_added' === current_filter() ? 'add' : 'remove';
@@ -561,7 +589,7 @@ class Rosetta_Roles {
 	 * @param \WP_User $user           The user object of the translation editor.
 	 * @param array    $projects_added List of project IDs.
 	 */
-	public function send_email_notification( $user, $projects_added ) {
+	public function send_email_notification( WP_User $user, array $projects_added ): void {
 		// Don't send an email if no new projects have been added.
 		if ( ! $projects_added ) {
 			return;
@@ -570,7 +598,7 @@ class Rosetta_Roles {
 		$to      = $user->user_email;
 		$subject = __( 'You have been added to a WordPress project as a translation editor', 'rosetta' );
 
-		if ( [ '0' ] === $projects_added ) {
+		if ( in_array( '0', $projects_added, true ) || in_array( 0, $projects_added, true ) ) {
 			// General Translation Editor.
 
 			/* translators: Do not translate the placeholders USERNAME, LOCALENAME, LOCALEURL, CURRENTUSERNAME. */
@@ -642,13 +670,12 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			);
 
 			$projects     = $this->get_translate_projects();
-			$project_tree = $this->get_project_tree( $projects, 0, 1 );
-
 			$project_list = [];
 
 			foreach ( $projects_added as $project_id ) {
 				if ( isset( $projects[ $project_id ] ) ) {
-					$parent = $this->get_parent_project( $project_tree, $project_id );
+					$parent_id = (int) $projects[ $project_id ]->parent_project_id;
+					$parent    = $projects[ $parent_id ] ?? null;
 					if ( is_object( $parent ) && (int) $parent->id !== (int) $project_id ) {
 						$name = sprintf(
 							/* translators: 1: Parent project name, 2: Child project name */
@@ -771,7 +798,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param int $user_id User ID.
 	 * @return array List of project IDs.
 	 */
-	public function get_users_projects( $user_id ) {
+	public function get_users_projects( int $user_id ): array {
 		global $wpdb;
 
 		$projects = $wpdb->get_col( $wpdb->prepare( "
@@ -806,19 +833,35 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	/**
 	 * Renders the edit page.
 	 */
-	private function render_edit_translation_editor( $user_id ) {
-		global $wpdb;
+	private function render_edit_translation_editor( int $user_id ): void {
+		$assigned_projects = $this->get_users_projects( $user_id );
+		$is_all            = in_array( 'all', $assigned_projects, true );
 
-		$project_access_list = $this->get_users_projects( $user_id );
-		$last_updated = get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' );
-
-		wp_localize_script( 'rosetta-roles', '_rosettaProjectsSettings', array(
-			'l10n' => array(
-				'searchPlaceholder' => esc_attr__( 'Search...', 'rosetta' ),
+		$payload = array(
+			'settings' => array(
+				'userId'      => $user_id,
+				'saveAction'  => 'rosetta-save-pte-projects',
+				'saveNonce'   => wp_create_nonce( 'rosetta_save_nonce' ),
+				'lastUpdated' => absint( get_blog_option( WPORG_TRANSLATE_BLOGID, 'wporg_projects_last_updated' ) ),
+				'accessList'  => $is_all ? array( 'all' ) : array_values( array_map( 'absint', $assigned_projects ) ),
+				'nonce'       => wp_create_nonce( 'rosetta_projects_nonce' ),
 			),
-			'lastUpdated' => $last_updated,
-			'accessList' => $project_access_list,
-		) );
+			'l10n'     => array(
+				'loadingError'      => __( 'Error loading projects.', 'rosetta' ),
+				'noProjectsFound'   => __( 'No projects found.', 'rosetta' ),
+				'removeTranslator'  => __( 'Are you sure you wish to completely remove translation editor status for this user?', 'rosetta' ),
+				'searchLabel'       => __( 'Search subprojects by name or slug', 'rosetta' ),
+				'searchPlaceholder' => __( 'Search…', 'rosetta' ),
+				'saving'            => __( 'Saving…', 'rosetta' ),
+				'saveError'         => __( 'An error occurred while saving.', 'rosetta' ),
+			),
+		);
+
+		wp_add_inline_script(
+			'rosetta-roles',
+			'window._rosettaConfig = Object.freeze(' . wp_json_encode( $payload ) . ');',
+			'before'
+		);
 
 		$feedback_message = $this->get_feedback_message();
 
@@ -829,17 +872,28 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * Ajax handler for retrieving projects.
 	 */
 	public function ajax_rosetta_get_projects() {
-		$projects = $this->get_translate_projects();
-		array_walk( $projects, function( $value ) {
-			unset( $value->path ); // Path is not needed.
-		} );
+		check_ajax_referer( 'rosetta_projects_nonce' );
+
+		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) && ! current_user_can( 'manage_network_users' ) ) {
+			wp_send_json_error( array( 'message' => 'Unauthorized' ), 403 );
+		}
+
+		$projects = array_map(
+			function ( $project ) {
+				$clone = clone $project;
+				unset( $clone->path ); // Path is not needed.
+				return $clone;
+			},
+			$this->get_translate_projects()
+		);
+
 		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		// Sort the tree and remove array keys.
-		usort( $project_tree, array( $this, '_sort_name_callback' ) );
-		foreach ( $project_tree as $key => $project ) {
+		usort( $project_tree, array( $this, 'sort_name_callback' ) );
+		foreach ( $project_tree as $project ) {
 			if ( isset( $project->sub_projects ) ) {
-				usort( $project->sub_projects, array( $this, '_sort_name_callback' ) );
+				usort( $project->sub_projects, array( $this, 'sort_name_callback' ) );
 				$project->sub_projects = array_values( $project->sub_projects );
 			}
 		}
@@ -850,18 +904,119 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	}
 
 	/**
+	 * Ajax handler to save user project assignments.
+	 */
+	public function ajax_rosetta_save_pte_projects() {
+		check_ajax_referer( 'rosetta_save_nonce', '_ajax_nonce' );
+
+		if ( ! current_user_can( self::MANAGE_TRANSLATION_EDITORS_CAP ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized', 'rosetta' ) ), 403 );
+		}
+
+		$user_id = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+		$user    = get_user_by( 'id', $user_id );
+
+		if ( ! $user || ! is_user_member_of_blog( $user->ID ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid user.', 'rosetta' ) ), 400 );
+		}
+
+		if ( ! in_array( self::TRANSLATION_EDITOR_ROLE, $user->roles, true ) && ! in_array( self::GENERAL_TRANSLATION_EDITOR_ROLE, $user->roles, true ) ) {
+			wp_send_json_error( array( 'message' => __( 'The user is not a translation editor.', 'rosetta' ) ), 400 );
+		}
+
+		if ( isset( $_POST['projects'] ) && ! is_array( $_POST['projects'] ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid project selection.', 'rosetta' ) ), 400 );
+		}
+
+		$raw_projects = isset( $_POST['projects'] )
+			? array_map( 'sanitize_text_field', wp_unslash( $_POST['projects'] ) )
+			: array();
+
+		$redirect = admin_url( 'admin.php?page=translation-editors' );
+
+		if ( in_array( 'all', $raw_projects, true ) ) {
+			if ( ! $this->update_translation_editor( $user, array( 'all' ) ) ) {
+				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+			}
+			wp_send_json_success(
+				[
+					'message'  => __( 'Translation editor updated.', 'rosetta' ),
+					'redirect' => add_query_arg(
+						[
+							'user_id' => $user->ID,
+							'update'  => 'user-updated',
+						],
+						$redirect
+					),
+				]
+			);
+		}
+
+		if ( empty( $raw_projects ) ) {
+			if ( ! $this->remove_translation_editor( $user ) ) {
+				wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+			}
+			wp_send_json_success(
+				[
+					'message'  => __( 'Translation editor removed.', 'rosetta' ),
+					'redirect' => add_query_arg( array( 'update' => 'user-removed' ), $redirect ),
+				]
+			);
+		}
+
+		$project_ids = array_values( array_filter( array_map( 'absint', $raw_projects ) ) );
+
+		if ( empty( $project_ids ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid project selection.', 'rosetta' ) ), 400 );
+		}
+
+		$manageable_projects        = array_keys( $this->get_translate_projects() );
+		$valid_projects             = array_values( array_intersect( $project_ids, $manageable_projects ) );
+		$current_projects           = array_map( 'absint', $this->get_users_projects( $user->ID ) );
+		$excluded_existing_projects = array_values( array_diff( $current_projects, $manageable_projects ) );
+
+		$unknown_projects = array_diff( $project_ids, $valid_projects, $excluded_existing_projects );
+		if ( ! empty( $unknown_projects ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid project selection.', 'rosetta' ) ), 400 );
+		}
+
+		if ( empty( $valid_projects ) && empty( $excluded_existing_projects ) ) {
+			wp_send_json_error( array( 'message' => __( 'No valid projects selected.', 'rosetta' ) ), 400 );
+		}
+
+		$preserved_projects = array_values( array_intersect( $project_ids, $excluded_existing_projects ) );
+		$projects_to_save   = array_merge( $valid_projects, $preserved_projects );
+
+		if ( ! $this->update_translation_editor( $user, $projects_to_save ) ) {
+			wp_send_json_error( array( 'message' => __( 'An error occurred while saving.', 'rosetta' ) ), 500 );
+		}
+
+		wp_send_json_success(
+			[
+				'message'  => __( 'Translation editor updated.', 'rosetta' ),
+				'redirect' => add_query_arg(
+					[
+						'user_id' => $user->ID,
+						'update'  => 'user-updated',
+					],
+					$redirect
+				),
+			]
+		);
+	}
+
+	/**
 	 * Returns a feedback message based on the current request.
 	 *
 	 * @return string HTML formatted message.
 	 */
-	private function get_feedback_message() {
-		$message = '';
-
+	private function get_feedback_message(): string {
 		if ( ! empty( $_REQUEST['update'] ) && ! empty( $_REQUEST['error'] ) ) {
-			return $message;
+			return '';
 		}
 
-		$count = empty( $_REQUEST['count'] ) ? 1 : (int) $_REQUEST['count'];
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only query parameter used solely for feedback notice display.
+		$count = isset( $_GET['count'] ) ? absint( wp_unslash( $_GET['count'] ) ) : 1;
 
 		$messages = array(
 			'update' => array(
@@ -877,22 +1032,23 @@ Welcome to the WordPress Polyglots team and happy translating.',
 				'not-added-to-site' => __( 'The user couldn&#8217;t be added to this site.', 'rosetta' ),
 				'user-cannot'       => __( 'The user is not a translation editor.', 'rosetta' ),
 				'user-exists'       => __( 'The user is already a translation editor.', 'rosetta' ),
+				'save-error'        => __( 'An error occurred while saving.', 'rosetta' ),
 			),
 		);
 
 		if ( isset( $_REQUEST['error'], $messages['error'][ $_REQUEST['error'] ] ) ) {
-			$message = sprintf(
+			return sprintf(
 				'<div class="notice notice-error"><p>%s</p></div>',
 				$messages['error'][ $_REQUEST['error'] ]
 			);
 		} elseif ( isset( $_REQUEST['update'], $messages['update'][ $_REQUEST['update'] ] ) ) {
-			$message = sprintf(
+			return sprintf(
 				'<div class="notice notice-success"><p>%s</p></div>',
 				$messages['update'][ $_REQUEST['update'] ]
 			);
 		}
 
-		return $message;
+		return '';
 	}
 
 	/**
@@ -910,12 +1066,10 @@ Welcome to the WordPress Polyglots team and happy translating.',
 		}
 
 		$projects = $this->get_translate_projects();
-		$project_tree = $this->get_project_tree( $projects, 0, 1 );
 
 		$args = array(
 			'user_roles'    => array( self::TRANSLATION_EDITOR_ROLE, self::GENERAL_TRANSLATION_EDITOR_ROLE ),
 			'projects'      => $projects,
-			'project_tree'  => $project_tree,
 			'rosetta_roles' => $this,
 		);
 		$list_table = new Rosetta_Translation_Editors_List_Table( $args );
@@ -929,9 +1083,10 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 * @param  int    $user_id User ID.
 	 * @param  string $action  Can be 'add' or 'remove'.
 	 */
-	private function notify_profiles_wporg_translation_editor_update( $user_id, $action ) {
+	private function notify_profiles_wporg_translation_editor_update( int $user_id, string $action ): void {
 		$args = array(
-			'body' => array(
+			'blocking' => false,
+			'body'     => array(
 				'action'      => 'wporg_handle_association',
 				'source'      => 'polyglots',
 				'command'     => $action,
@@ -949,7 +1104,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 *
 	 * @return array List of projects.
 	 */
-	private function get_translate_projects() {
+	public static function get_translate_projects(): array {
 		global $wpdb;
 		static $projects = null;
 
@@ -957,23 +1112,15 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			return $projects;
 		}
 
-		$ignore_project_ids = array(
-			13, // BuddyPress
-			58, // bbPress
-			67, // WordCamp Base Theme
-			91, // GlotPress
-			481, // Plugin Directory
-			2804, // Waiting
-			369622, // Disabled
-		);
-
-		$_projects = $wpdb->get_results( '
-			SELECT id, name, parent_project_id, slug, path
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded integer IDs from constant are safe.
+		$_projects = $wpdb->get_results(
+			'SELECT id, name, parent_project_id, slug, path
 			FROM translate_projects
 			WHERE
-				id NOT IN(' . implode( ',', $ignore_project_ids ) . ') AND
-				LENGTH(path) - LENGTH(REPLACE(path, "/", "")) BETWEEN 0 AND 1;
-		' );
+				id NOT IN (' . implode( ',', self::IGNORE_PROJECT_IDS ) . ') AND
+				LENGTH(path) - LENGTH(REPLACE(path, "/", "")) BETWEEN 0 AND 1;'
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$projects = array();
 		foreach ( $_projects as $project ) {
@@ -997,48 +1144,38 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			return array();
 		}
 
-		$tree = array();
+		$grouped = array();
 		foreach ( $projects as $project ) {
-			if ( $project->parent_project_id == $parent_id ) {
-				$sub_projects = $this->get_project_tree( $projects, $project->id, $max_depth - 1 );
-				if ( $sub_projects ) {
-					$project->sub_projects = $sub_projects;
-				}
-
-				$tree[ $project->id ] = $project;
-			}
+			$grouped[ (int) $project->parent_project_id ][] = $project;
 		}
-		return $tree;
+
+		$build_branch = function ( $pid, $depth ) use ( &$build_branch, $grouped ) {
+			if ( $depth < 0 || ! isset( $grouped[ $pid ] ) ) {
+				return array();
+			}
+			$branch = array();
+			foreach ( $grouped[ $pid ] as $item ) {
+				$clone    = clone $item;
+				$children = $build_branch( (int) $clone->id, $depth - 1 );
+				if ( $children ) {
+					$clone->sub_projects = $children;
+				}
+				$branch[ $clone->id ] = $clone;
+			}
+			return $branch;
+		};
+
+		return $build_branch( $parent_id, $max_depth );
 	}
 
 	/**
-	 * Returns the parent project for a sub project.
+	 * Callback to sort projects alphabetically by name using natural case-insensitive comparison.
 	 *
-	 * @param array $tree The project tree.
-	 * @param int $child_id The project tree.
-	 * @return object The parent project.
+	 * @param object $a First project object.
+	 * @param object $b Second project object.
+	 * @return int Standard comparison return values (< 0, 0, > 0).
 	 */
-	public function get_parent_project( $tree, $child_id ) {
-		$parent = null;
-		foreach ( $tree as $project ) {
-			if ( $project->id == $child_id ) {
-				$parent = $project;
-				break;
-			}
-
-			if ( isset( $project->sub_projects ) ) {
-				$parent = $this->get_parent_project( $project->sub_projects, $child_id );
-				if ( $parent ) {
-					$parent = $project;
-					break;
-				}
-			}
-		}
-
-		return $parent;
-	}
-
-	private function _sort_name_callback( $a, $b ) {
+	private function sort_name_callback( object $a, object $b ): int {
 		return strnatcasecmp( $a->name, $b->name );
 	}
 }
