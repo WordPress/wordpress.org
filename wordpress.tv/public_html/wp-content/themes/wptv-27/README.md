@@ -2,7 +2,7 @@
 
 Block theme for [WordPress.tv](https://wordpress.tv/), the WordPress community site that publishes videos from WordCamps, meetups and other community events.
 
-wptv-27 replaces the legacy classic theme (`wptv2`). It is built with Full Site Editing (block templates, template parts, patterns and `theme.json`), and relies on WordPress core features instead of hand-written code wherever possible. Its first release keeps `wptv2`'s behavior: same content, data model and URLs.
+wptv-27 replaces the legacy classic theme (`wptv2`). It is built with Full Site Editing (block templates, template parts, patterns and `theme.json`), and relies on WordPress core features instead of hand-written code wherever possible. Its first release aims to keep `wptv2`'s content, data model and URLs. The deliberate differences, such as the legacy API returning at most 100 videos per request, are listed in the project's [decision log](https://github.com/nilovelez/wptv-27/blob/trunk/docs/decisions.md).
 
 ## Documentation
 
