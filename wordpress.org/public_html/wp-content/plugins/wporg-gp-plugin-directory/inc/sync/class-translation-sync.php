@@ -222,78 +222,97 @@ class Translation_Sync {
 	 * @return bool False on failure, true on success.
 	 */
 	private function copy_translation_into_set( $translation, $new_translation_set, $new_original ) {
+		global $wpdb;
+
 		// Only propagate what the acting user could do in the destination; cron and CLI aren't acting for anyone.
 		$is_system_run = ( defined( 'WP_CLI' ) && WP_CLI ) || wp_doing_cron();
 		if ( ! $is_system_run && ! GP::$permission->current_user_can( 'approve', 'translation-set', $new_translation_set->id ) ) {
 			return true;
 		}
 
-		$locale = GP_Locales::by_slug( $new_translation_set->locale );
-		$new_translation = [];
+		// Generate a lock key from the sorted IDs of both originals.
+		$ids = [ (int) $translation->original_id, (int) $new_original->id ];
+		sort( $ids );
+		$lock_key = 'gp_sync_' . implode( '_', $ids ) . '_' . $new_translation_set->locale;
 
-		for ( $i = 0; $i < $locale->nplurals; $i++ ) {
-			$new_translation[] = $translation->{"translation_{$i}"};
-		}
-
-		// Check if the translation already exists.
-		$existing_translations = GP::$translation->find( [
-			'translation_set_id' => $new_translation_set->id,
-			'original_id'        => $new_original->id,
-			'status'             => [ 'current', 'waiting', 'fuzzy', 'changesrequested' ],
-		] );
-
-		foreach ( $existing_translations as $_existing_translation ) {
-			$existing_translation = [];
-			for ( $i = 0; $i < $locale->nplurals; $i++ ) {
-				$existing_translation[] = $_existing_translation->{"translation_{$i}"};
-			}
-
-			if ( $existing_translation === $new_translation ) {
-				// Translations are only synced if they have no warnings.
-				// If the existing translation still has warnings discard them automatically.
-				if ( $_existing_translation->warnings ) {
-					$_existing_translation->warnings = null;
-					$_existing_translation->save();
-				}
-
-				if ( 'current' == $translation->status ) {
-					$_existing_translation->set_as_current();
-
-				} elseif ( 'changesrequested' == $translation->status ) {
-					$_existing_translation->set_as_changesrequested();
-
-				} else {
-					$_existing_translation->set_status( $translation->status );
-				}
-
-				gp_clean_translation_set_cache( $new_translation_set->id );
-
-				return true;
-			}
-		}
-
-		// Do not create a new translation if it is not current
-		if ( 'current' !== $translation->status ) {
-			return true;
-		}
-
-		// Create a new translation.
-		$copy = new GP_Translation( $translation->fields() );
-		$copy->original_id = $new_original->id;
-		$copy->translation_set_id = $new_translation_set->id;
-		$copy->status = $translation->status;
-
-		$translation = GP::$translation->create( $copy );
-		if ( ! $translation ) {
+		// Wait a maximum of 2 seconds.
+		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 3)', $lock_key ) );
+		if ( ! $acquired ) {
 			return false;
 		}
 
-		do_action( 'wporg_translate_translation_synced', $copy, $translation );
+		try {
+			$locale = GP_Locales::by_slug( $new_translation_set->locale );
+			$new_translation = [];
 
-		$translation->set_status($copy->status);
-		gp_clean_translation_set_cache( $new_translation_set->id );
+			for ( $i = 0; $i < $locale->nplurals; $i++ ) {
+				$new_translation[] = $translation->{"translation_{$i}"};
+			}
 
-		return true;
+			// Check if the translation already exists.
+			$existing_translations = GP::$translation->find(
+				[
+					'translation_set_id' => $new_translation_set->id,
+					'original_id'        => $new_original->id,
+					'status'             => [ 'current', 'waiting', 'fuzzy', 'changesrequested' ],
+				]
+			);
+
+			foreach ( $existing_translations as $_existing_translation ) {
+				$existing_translation = [];
+				for ( $i = 0; $i < $locale->nplurals; $i++ ) {
+					$existing_translation[] = $_existing_translation->{"translation_{$i}"};
+				}
+
+				if ( $existing_translation === $new_translation ) {
+					// Translations are only synced if they have no warnings.
+					// If the existing translation still has warnings discard them automatically.
+					if ( $_existing_translation->warnings ) {
+						$_existing_translation->warnings = null;
+						$_existing_translation->save();
+					}
+
+					if ( 'current' == $translation->status ) {
+						$_existing_translation->set_as_current();
+
+					} elseif ( 'changesrequested' == $translation->status ) {
+						$_existing_translation->set_as_changesrequested();
+
+					} else {
+						$_existing_translation->set_status( $translation->status );
+					}
+
+					gp_clean_translation_set_cache( $new_translation_set->id );
+
+					return true;
+				}
+			}
+
+			// Do not create a new translation if it is not current.
+			if ( 'current' !== $translation->status ) {
+				return true;
+			}
+
+			// Create a new translation.
+			$copy = new GP_Translation( $translation->fields() );
+			$copy->original_id = $new_original->id;
+			$copy->translation_set_id = $new_translation_set->id;
+			$copy->status = $translation->status;
+
+			$translation = GP::$translation->create( $copy );
+			if ( ! $translation ) {
+				return false;
+			}
+
+			do_action( 'wporg_translate_translation_synced', $copy, $translation );
+
+			$translation->set_status( $copy->status );
+			gp_clean_translation_set_cache( $new_translation_set->id );
+
+			return true;
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock_key ) );
+		}
 	}
 
 	/**
