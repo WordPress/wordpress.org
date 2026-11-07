@@ -7,7 +7,7 @@
  *              mocks/mu-plugins/class-wporg-ratings.php; this only gives that
  *              activation a plugin to find.
  *
- * Mapped in as wp-content/plugins/wporg-ratings/wporg-ratings.php.
+ * Mapped in as wp-content/plugins/wporg-ratings/.
  *
  * @package support-forums-env
  */
