@@ -321,7 +321,8 @@ final class ImportTest extends ImportTestCase {
 
 	/**
 	 * A CSV connects users who'll work here: one an import created disabled is switched on, with access to its mailbox,
-	 * and someone new gets a user; one who was here before, under another email than the account's, isn't connected.
+	 * and someone new gets a user, disabled if they're deleted there; one who was here before, under another email than
+	 * the account's, isn't connected.
 	 *
 	 * @return void
 	 */
@@ -332,6 +333,7 @@ final class ImportTest extends ImportTestCase {
 				'adaagent' => array( 'Ada', 'Agent', 'ada@wordpress.example' ),
 				'noranote' => array( 'Nora', 'Note', 'nora@wordpress.example' ),
 				'bonew'    => array( 'Bo', 'New', 'bo@wordpress.example' ),
+				'ezragone' => array( 'Ezra', 'Gone', 'ezra@wordpress.example' ),
 			)
 		);
 		$this->remote->json(
@@ -342,6 +344,7 @@ final class ImportTest extends ImportTestCase {
 					self::user( 55, 'Ada', 'Agent', 'agent@example.org' ),
 					self::user( 66, 'Nora', 'Note', 'nora@wcus.test' ),
 					self::user( 77, 'Bo', 'New', 'bo@wcus.test' ),
+					self::user( 99, 'Ezra', 'Gone', 'ezra@wcus.test_deleted20210601184317' ),
 				)
 			)
 		);
@@ -351,11 +354,11 @@ final class ImportTest extends ImportTestCase {
 			->post(
 				route( 'wporgfreescoutimport.users.connect', array( 'id' => $this->source->id ) ),
 				array(
-					'csv'   => "remote_id,wporg_username\n55,adaagent\n66,noranote\n77,bonew\n",
+					'csv'   => "remote_id,wporg_username\n55,adaagent\n66,noranote\n77,bonew\n99,ezragone\n",
 					'apply' => 1,
 				)
 			)
-			->assertSessionHas( 'flash_success', 'Connected 2 users to WordPress.org accounts.' );
+			->assertSessionHas( 'flash_success', 'Connected 3 users to WordPress.org accounts.' );
 
 		$nora = User::query()->findOrFail( (int) RemoteUser::query()->where( 'source_id', $this->source->id )->where( 'remote_user_id', 66 )->value( 'user_id' ) );
 		$this->assertSame( 'noranote', Account::username_for( (int) $nora->id ) );
@@ -366,12 +369,16 @@ final class ImportTest extends ImportTestCase {
 		$this->assertSame( 'bonew', Account::username_for( (int) $bo->id ) );
 		$this->assertSame( User::STATUS_ACTIVE, (int) $bo->status );
 
+		$ezra = User::query()->findOrFail( (int) RemoteUser::query()->where( 'source_id', $this->source->id )->where( 'remote_user_id', 99 )->value( 'user_id' ) );
+		$this->assertSame( 'ezragone', Account::username_for( (int) $ezra->id ) );
+		$this->assertSame( User::STATUS_DISABLED, (int) $ezra->status );
+
 		$this->assertSame( '', Account::username_for( (int) $this->agent->id ) );
 	}
 
 	/**
 	 * Rows naming the same account, like someone's older, deleted users there, are all credited to the one user the
-	 * account is connected to.
+	 * account is connected to, switched on even when the row of a deleted one comes first.
 	 *
 	 * @return void
 	 */
@@ -393,7 +400,7 @@ final class ImportTest extends ImportTestCase {
 			->post(
 				route( 'wporgfreescoutimport.users.connect', array( 'id' => $this->source->id ) ),
 				array(
-					'csv'   => "remote_id,wporg_username\n66,noranote\n88,noranote\n",
+					'csv'   => "remote_id,wporg_username\n88,noranote\n66,noranote\n",
 					'apply' => 1,
 				)
 			)
@@ -402,6 +409,7 @@ final class ImportTest extends ImportTestCase {
 		$users = RemoteUser::query()->where( 'source_id', $this->source->id )->pluck( 'user_id', 'remote_user_id' )->map( 'intval' )->all();
 		$this->assertSame( $users[66], $users[88] ?? null );
 		$this->assertSame( 'noranote', Account::username_for( $users[66] ) );
+		$this->assertSame( User::STATUS_ACTIVE, (int) User::query()->findOrFail( $users[66] )->status );
 	}
 
 	/**

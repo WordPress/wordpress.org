@@ -3,7 +3,7 @@
     "alias": "wporgfreescoutimport",
     "img": "/modules/wporgfreescoutimport/img/icon.svg",
     "description": "Imports other FreeScouts' mailboxes, so their history moves here with them.",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgFreeScoutImport",
     "author": "WordPress.org",
     "authorUrl": "https://wordpress.org/",

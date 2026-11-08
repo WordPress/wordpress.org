@@ -177,7 +177,8 @@ final class WordPressOrgAccounts {
 	 * @param array[] $rows Rows, from parse().
 	 * @return array[] Each with `row`, `remote_user` (or null), `wporg_user` (WordPressOrgUser, or null), `action`
 	 *                 (one of the constants, or null), `user` (the user here it's for, or null for a new one),
-	 *                 `mismatch`, and `error` (why nothing can be done, or '').
+	 *                 `mismatch`, `deleted` (whether the remote user is deleted there, so isn't switched on), and
+	 *                 `error` (why nothing can be done, or '').
 	 */
 	public function plan( array $rows ): array {
 		$client    = Client::from_config();
@@ -268,7 +269,10 @@ final class WordPressOrgAccounts {
 						}
 
 						People::choose( $this->source_id, $id, $user );
-						People::activate( $user );
+						// A deleted remote user's row doesn't switch their user on, but still gives an active one access.
+						if ( ! $step['deleted'] || User::STATUS_ACTIVE === (int) $user->status ) {
+							People::activate( $user );
+						}
 
 						return $user;
 					}
@@ -337,12 +341,15 @@ final class WordPressOrgAccounts {
 			'action'      => null,
 			'user'        => null,
 			'mismatch'    => false,
+			'deleted'     => false,
 			'error'       => '',
 		);
 
 		if ( ! $step['remote_user'] ) {
 			return array( 'error' => __( 'No user there with that ID or email.' ) ) + $step;
 		}
+
+		$step['deleted'] = People::is_deleted( $step['remote_user'] );
 
 		try {
 			$step['wporg_user'] = $this->lookup( $row['username'], $client );
