@@ -249,10 +249,21 @@
 		}
 		function selectUserTimezone() {
 			const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-			// phpcs:disable WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore
-			// phpcs:disable WordPress.WhiteSpace.OperatorSpacing.NoSpaceAfter
-			document.querySelector( `#event-timezone option[value="${timezone}"]` ).selected = true
-			// phpcs:enable
+			const options  = Array.from( document.querySelectorAll( '#event-timezone option' ) );
+
+			// Browsers can report a legacy alias (Chrome says Asia/Calcutta for Asia/Kolkata), so fall back to comparing resolved names.
+			const option = options.find( ( timezoneOption ) => timezoneOption.value === timezone ) || options.find(
+				function ( timezoneOption ) {
+					try {
+						return Intl.DateTimeFormat( 'en', { timeZone: timezoneOption.value } ).resolvedOptions().timeZone === timezone;
+					} catch ( e ) {
+						return false;
+					}
+				}
+			);
+			if ( option ) {
+				option.selected = true;
+			}
 		}
 
 		function convertToUserLocalTime() {
