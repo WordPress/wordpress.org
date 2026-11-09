@@ -249,8 +249,10 @@
 		}
 		function selectUserTimezone() {
 			const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-			// Browsers can report a legacy alias (Chrome says Asia/Calcutta for Asia/Kolkata), so compare resolved names.
-			const option = Array.from( document.querySelectorAll( '#event-timezone option' ) ).find(
+			const options  = Array.from( document.querySelectorAll( '#event-timezone option' ) );
+
+			// Browsers can report a legacy alias (Chrome says Asia/Calcutta for Asia/Kolkata), so fall back to comparing resolved names.
+			const option = options.find( ( timezoneOption ) => timezoneOption.value === timezone ) || options.find(
 				function ( timezoneOption ) {
 					try {
 						return Intl.DateTimeFormat( 'en', { timeZone: timezoneOption.value } ).resolvedOptions().timeZone === timezone;
