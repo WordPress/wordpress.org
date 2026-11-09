@@ -553,6 +553,43 @@ If youâ€™ve read this far and still think we should host your code, please donâ€
 		);
 	}
 
+	/**
+	 * Returns the rejection email content for an organization using multiple accounts.
+	 *
+	 * @return string
+	 */
+	public function reason_multiple() {
+		return __(
+			"Your plugin has been rejected because of an issue with your accounts.
+
+We noticed that your organization is using more than one account to own or submit plugins. This causes two problems:
+
+- All plugins that belong to the same organization must be owned by the same account.
+- In most cases, you can only have one plugin submission at a time. 
+
+You can read more in our FAQ:
+
+- https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#how-many-plugins-can-i-submit-for-review-at-a-time
+- https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#can-i-submit-multiple-plugins-with-multiple-accounts
+
+Please take this as a warning, and don't use multiple accounts this way in the future.
+
+<strong>What to do next</strong>
+
+1. Choose one account for your organization and transfer all your plugins to it. You can transfer plugins yourself from the plugin's Advanced tab by following this guide: https://developer.wordpress.org/plugins/wordpress-org/transferring-your-plugin-to-a-new-owner/
+2. Once all your plugins are under that account, use it to submit your plugins, <strong>one at a time</strong>.
+
+<strong>If you can solve this yourself, you don't need to reply to this email.</strong> If you need help with a transfer, reply to this email and we'll help you.
+
+<strong>Submissions from your other accounts</strong>
+
+If one of your other accounts has a submission that hasn't been rejected, you'll need to wait until we reject it. We reject in bulk submissions after 3 months (90 days) without progress. Manual rejections are time-consuming, especially when carried out one by one. Therefore, we won't speed this up, so please don't ask us to reject them sooner.
+
+If you believe we've made a mistake, don't resubmit the plugin. Reply to this email and explain the situation instead.",
+			'wporg-plugins'
+		);
+	}
+
 	public function reason_other() {
 		return __(
 			"Plugins are rejected after three months (90 days) when there has not been significant progress made on the review. If this is not the case for your plugin, you will receive a followup email explaining the reason for this decision within the next 24 hours. Please wait for that email before requesting further details.
