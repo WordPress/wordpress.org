@@ -5,12 +5,9 @@ use Dotorg\Slack\Trac\Trac;
 
 class Core extends Trac {
 	protected $name = 'WordPress';
-	protected $primary_channel  = '#core';
 	protected $commits_channel  = '#core-commits';
 	protected $tickets_channel  = '#core-newtickets';
 	protected $firehose_channel = '#core-firehose';
-
-	protected $primary_channel_ticket_format = 'title';
 
 	/**
 	 * File paths that cause commits to be piped to particular channels.
@@ -54,7 +51,7 @@ class Core extends Trac {
 		'webpack.config.js'                => '#core-build-test-tools',
 		'wp-tests-config-sample.php'       => '#core-build-test-tools',
 		'#\.n(v|p)mrc#'                    => '#core-build-test-tools',
-		'#\.version-support-[a-z]+\.json'  => '#core-build-test-tools',
+		'#\.version-support-[a-z]+\.json#' => '#core-build-test-tools',
 		'#^package(-lock)?\.json$#'        => '#core-build-test-tools',
 		'#^php[a-z]+\.xml\.dist$#'         => '#core-build-test-tools',
 	);
@@ -70,34 +67,89 @@ class Core extends Trac {
 	);
 
 	/**
-	 * Components or focuses that cause new tickets to be piped to particular channels.
+	 * Maps each Core Trac component to its component specific channel.
+	 *
+	 * Notifications for a component go to that channel's -firehose, -newtickets and -commits
+	 * channels, not to the channel itself.
+	 *
+	 * Subcomponents map to their parent's channel, unless they have their own.
+	 *
+	 * Components without a channel have an empty value, and only post to the global channels.
+	 *
+	 * @var array
 	 */
-	protected $ticket_component_filters = array(
+	protected $component_channels = array(
+		'AI'                     => '#core-ai',
 		'Build/Test Tools'       => '#core-build-test-tools',
 		'Bundled Theme'          => '#core-themes',
-		'Customize'              => '#core-customize',
-		'Date/Time'              => '#core-datetime',
-		'Press This'             => '#core-pressthis',
-		'multisite'              => '#core-multisite',
-		'Networks and Sites'     => '#core-multisite',
-		'REST API'               => '#core-restapi',
-		'rest-api'               => '#core-restapi',
-		'I18N'                   => '#core-i18n',
-		'Media'                  => '#core-media',
-		'docs'                   => '#core-docs',
-		'css'                    => '#core-css',
-		'javascript'             => '#core-js',
-		'coding-standards'       => '#core-coding-standards',
-		'performance'            => '#core-performance',
-		'Privacy'                => '#core-privacy',
-		'privacy'                => '#core-privacy',
-		'Site Health'            => '#core-site-health',
-		'Sitemaps'               => '#core-sitemaps',
-		'Upgrade/Install'        => '#core-upgrade-install',
-		'Application Passwords'  => [ '#core-passwords' => true, '#core-restapi' => true ],
-		'Login and Registration' => '#core-passwords',
+		'Editor'                 => '#core-editor',
 		'HTML API'               => '#core-html-api',
+		'I18N'                   => '#core-i18n',
+		'Import'                 => '#core-importers',
 		'Interactivity API'      => '#core-interactivity-api',
+		'Media'                  => '#core-media',
+		'Networks and Sites'     => '#core-multisite',
+		'Privacy'                => '#core-privacy',
+		'REST API'               => '#core-restapi',
+		'Upgrade/Install'        => '#core-upgrade-install',
+
+		// Subcomponents.
+		'Application Passwords'  => '#core-restapi',
+		'Autosave'               => '#core-editor',
+		'Embeds'                 => '#core-media',
+		'Gallery'                => '#core-media',
+		'Login and Registration' => '#core-passwords',
+		'Multisite'              => '#core-multisite',
+		'Notes'                  => '#core-notes',
+		'Quick/Bulk Edit'        => '#core-editor',
+		'TinyMCE'                => '#core-editor',
+		'Upload'                 => '#core-media',
+
+		// Components without a component specific channel.
+		'Administration'         => '',
+		'Abilities API'          => '',
+		'Bootstrap/Load'         => '',
+		'Cache API'              => '',
+		'Comments'               => '',
+		'Pings/Trackbacks'       => '',
+		'Cron API'               => '',
+		'Customize'              => '',
+		'Database'               => '',
+		'Date/Time'              => '',
+		'Export'                 => '',
+		'External Libraries'     => '',
+		'Feeds'                  => '',
+		'Filesystem API'         => '',
+		'Formatting'             => '',
+		'Charset'                => '',
+		'Emoji'                  => '',
+		'Shortcodes'             => '',
+		'General'                => '',
+		'Help/About'             => '',
+		'HTTP API'               => '',
+		'Mail'                   => '',
+		'Options, Meta APIs'     => '',
+		'Permalinks'             => '',
+		'Canonical'              => '',
+		'Rewrite Rules'          => '',
+		'Plugins'                => '',
+		'Posts, Post Types'      => '',
+		'Post Formats'           => '',
+		'Post Thumbnails'        => '',
+		'Revisions'              => '',
+		'Query'                  => '',
+		'Script Loader'          => '',
+		'Security'               => '',
+		'Site Health'            => '',
+		'Sitemaps'               => '',
+		'Taxonomy'               => '',
+		'Themes'                 => '',
+		'Menus'                  => '',
+		'Widgets'                => '',
+		'Toolbar'                => '',
+		'Users'                  => '',
+		'Role/Capability'        => '',
+		'XML-RPC'                => '',
 	);
 }
 

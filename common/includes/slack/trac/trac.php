@@ -36,6 +36,19 @@ class Trac implements User {
 	 */
 	protected $ticket_keyword_filters = array();
 
+	/**
+	 * Maps Trac components (or commit message prefixes) to component specific channels.
+	 *
+	 * Notifications for a component go to that channel's -firehose, -newtickets and -commits
+	 * channels, not to the channel itself. This includes commits that $commit_path_filters
+	 * sends to one of these channels.
+     *
+	 * Components with an empty value have no component channels.
+	 *
+	 * @var array
+	 */
+	protected $component_channels = array();
+
 	protected $color = '#0073aa';
 	protected $icon  = ':wordpress:';
 
@@ -250,6 +263,21 @@ class Trac implements User {
 			}
 		}
 
+		foreach ( $this->component_channels as $component => $channel ) {
+			if ( $channel && 0 === stripos( $log_text, $component ) ) {
+				$channels[ $channel ] = true;
+			}
+		}
+
+		// Commits for a component go to its -commits and -firehose channels rather than the component channel itself.
+		foreach ( array_unique( array_filter( $this->component_channels ) ) as $channel ) {
+			if ( ! empty( $channels[ $channel ] ) ) {
+				unset( $channels[ $channel ] );
+				$channels[ $channel . '-commits' ]  = true;
+				$channels[ $channel . '-firehose' ] = true;
+			}
+		}
+
 		if ( $this->firehose_channel ) {
 			$channels[ $this->firehose_channel ] = true;
 		}
@@ -291,6 +319,14 @@ class Trac implements User {
 			}
 		}
 
+		// New tickets in a component with a channel go to that channel's -newtickets and -firehose channels.
+		if ( isset( $ticket->component ) && ! empty( $this->component_channels[ $ticket->component ] ) ) {
+			$channel = $this->component_channels[ $ticket->component ];
+
+			$channels[ $channel . '-newtickets' ] = true;
+			$channels[ $channel . '-firehose' ]   = true;
+		}
+
 		if ( $this->firehose_channel ) {
 			$channels[ $this->firehose_channel ] = true;
 		}
@@ -300,6 +336,19 @@ class Trac implements User {
 
 	function get_firehose_channel() {
 		return $this->firehose_channel;
+	}
+
+	/**
+	 * Gets the firehose channel for a component.
+	 *
+	 * @param string $component Trac component name.
+	 * @return string|false Channel name, or false if the component has no channels.
+	 */
+	public function get_component_firehose_channel( $component ) {
+		if ( ! empty( $this->component_channels[ $component ] ) ) {
+			return $this->component_channels[ $component ] . '-firehose';
+		}
+		return false;
 	}
 
 	/**

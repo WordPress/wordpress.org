@@ -61,6 +61,32 @@ class Test_Slack_Trac_Comment_Handler extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
+	 * The ticket's component is read from either column of the properties table.
+	 */
+	public function test_component_is_read(): void {
+		$body = array(
+			'',
+			'Comment (by desrosj):',
+			'',
+			' Does anyone have any idea why Nacin would make this change?',
+		);
+
+		$handler = new \Dotorg\Slack\Trac\Comment_Handler( new \Dotorg\Slack\Send( '' ), $this->get_email( $body ) );
+		$handler->process_message();
+		$this->assertSame( 'Trac', $handler->component );
+
+		$email = str_replace(
+			array( 'Component:  Trac             |  Resolution:', '     Type:  defect (bug)     |      Status:  new' ),
+			array( '     Type:  defect (bug)     |  Resolution:', ' Priority:  normal          |   Component:  Build/Test Tools' ),
+			$this->get_email( $body )
+		);
+
+		$handler = new \Dotorg\Slack\Trac\Comment_Handler( new \Dotorg\Slack\Send( '' ), $email );
+		$handler->process_message();
+		$this->assertSame( 'Build/Test Tools', $handler->component );
+	}
+
+	/**
 	 * Data provider for test_last_line_is_kept().
 	 *
 	 * @return array[]

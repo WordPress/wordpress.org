@@ -15,6 +15,7 @@ class Comment_Handler {
 	protected $ticket_url;
 	protected $comment_id;
 	protected $comment_url;
+	protected $component;
 
 	/**
 	 * Workflow keywords added to the ticket by this change.
@@ -61,6 +62,11 @@ class Comment_Handler {
 		// is specified, as we may use it to process mentions and such.
 		if ( $firehose ) {
 			$this->send->send( $firehose );
+		}
+
+		$component_firehose = $this->trac->get_component_firehose_channel( $this->component );
+		if ( $component_firehose ) {
+			$this->send->send( $component_firehose );
 		}
 
 		// Send notifications for Workflow Keyword additions.
@@ -200,9 +206,13 @@ class Comment_Handler {
 		}
 		// Remove top border of table.
 		array_shift( $lines );
-		// Remove ticket properties table.
+		// Remove ticket properties table, keeping the component. It can be in either column.
+		$component = '';
 		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
-			array_shift( $lines );
+			$line = array_shift( $lines );
+			if ( preg_match( '/(?:^|\|)\s*Component:\s+([^|]*?)\s*(?:\||$)/', $line, $matches ) ) {
+				$component = $matches[1];
+			}
 		}
 		// Remove bottom border of table.
 		array_shift( $lines );
@@ -290,6 +300,7 @@ class Comment_Handler {
 		$this->author  = $author;
 		$this->comment = $comment;
 		$this->changes = $changes;
+		$this->component   = $component;
 		$this->ticket_id   = $ticket_id;
 		$this->ticket_url  = $ticket_url;
 		$this->comment_id  = $comment_id;
