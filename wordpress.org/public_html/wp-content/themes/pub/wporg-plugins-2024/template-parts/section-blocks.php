@@ -22,6 +22,7 @@ $svg_presentation_attributes = array(
 	'fill-rule'       => true,
 	'fill-opacity'    => true,
 	'clip-rule'       => true,
+	'clip-path'       => true,
 	'stroke'          => true,
 	'stroke-width'    => true,
 	'stroke-linecap'  => true,
@@ -73,6 +74,10 @@ $allowed_svg = array(
 	) + $svg_presentation_attributes,
 	'polyline' => array( 'points' => true ) + $svg_presentation_attributes,
 	'polygon'  => array( 'points' => true ) + $svg_presentation_attributes,
+	// Keep clip and mask definitions so their shapes are not drawn as content.
+	'defs'     => array(),
+	'clippath' => array( 'id' => true ),
+	'mask'     => array(),
 );
 ?>
 

@@ -116,6 +116,21 @@ class Section_Blocks_Icon_Test extends TestCase {
 	}
 
 	/**
+	 * Shapes inside clip paths and masks stay inside their definitions.
+	 */
+	public function test_clip_path_shapes_stay_in_definitions(): void {
+		$output = $this->render_section(
+			"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>" .
+			"<g clip-path='url(#clip)'><path d='M4 4h16v16H4z'/></g>" .
+			"<defs><clipPath id='clip'><rect width='24' height='24' fill='white'/></clipPath></defs>" .
+			'</svg>'
+		);
+
+		$this->assertMatchesRegularExpression( '#<defs><clipPath id="clip"><rect[^>]*/></clipPath></defs>#i', $output );
+		$this->assertSame( 'url(#clip)', $this->find_tag( $output, 'G' )?->get_attribute( 'clip-path' ) );
+	}
+
+	/**
 	 * Scripts and event handlers are still removed.
 	 */
 	public function test_scripts_and_handlers_are_removed(): void {
