@@ -88,12 +88,14 @@ class Upload {
 			(
 				// New submission.
 				empty( $_POST['plugin_id'] ) &&
+				isset( $_POST['action'] ) &&
 				'upload' === $_POST['action'] &&
 				$can_submit_new_plugin &&
 				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload' )
 			) || (
 				// Existing submission
 				! empty( $_POST['plugin_id'] ) &&
+				isset( $_POST['action'] ) &&
 				'upload-additional' === $_POST['action'] &&
 				wp_verify_nonce( $_POST['_wpnonce'], 'wporg-plugins-upload-' . $_POST['plugin_id'] )
 			)
