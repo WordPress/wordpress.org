@@ -102,7 +102,7 @@ Any time your plugin replicates functionality found in WordPress (i.e. the uploa
 
 Please read this email in it's entirety. We know it's hurtful to be told we're not hosting your code, and there is always the possibility that we've made a mistake.
 
-If you feel that we have, please reply to this email with your plugin zip attached, explain why, and we will re-review.
+If you feel that we have, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why. We will then re-review it.
 
 We ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.",
 			'wporg-plugins'
@@ -141,7 +141,7 @@ We know it can be hurtful to be told we will not host your code, and we ask you 
 - contribute back to the original plugin and improve it
 - create an add-on to the existing plugin
 - contribute a translation via the polyglots team - https://make.wordpress.org/polyglots/handbook/rosetta/theme-plugin-directories/
-- If you feel this rejection was in error, please <strong>reply to this email</strong> with a copy of your code attached and let us know. We will re-review your code and proceed from there.
+- If you feel this rejection was in error, please <strong>reply to this email</strong> with a link to download your plugin as a zip file (or with the zip file attached) and let us know. We will re-review your code and proceed from there.
 
 Remember, <strong>do not</strong> resubmit the plugin. If you resubmit the plugin without replying to this email, your account will be suspended.",
 			'wporg-plugins'
@@ -154,7 +154,7 @@ Remember, <strong>do not</strong> resubmit the plugin. If you resubmit the plugi
 
 <strong>What to do next</strong>
 
-If you feel this was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin is not a library or boilerplate.
+If you feel this was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin is not a library or boilerplate.
 
 Before you do so, we ask you take the time to read this email in it's entirety. We know it's hurtful to be told we will not host your code, and this particular subject can be contentious, especially because we used to allow library code.
 
@@ -202,7 +202,7 @@ While the directory is open for all secure, GPLv2 (or later) compatible plugins,
 
 We know that being told we won't host your code is hurtful, and we ask you please read this email in full.
 
-If, at the end, you feel this decision was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be accepted.
+If, at the end, you feel this decision was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be accepted.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
@@ -307,7 +307,7 @@ We understand it is hurtful to be told we will not host your code here. This dec
 
 We recommend you include this code in your existing plugin instead of as a separate add-on.
 
-If you feel this was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be hosted here.
+If you feel this was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be hosted here.
 
 Before you do so, we ask you take the time to read this email in it's entirety.
 
@@ -332,7 +332,7 @@ We understand it is hurtful to be told we will not host your code here. This dec
 
 We recommend you host this on your own service, and make use of self-directed updates for your ongoing support and maintenance.
 
-If you feel this was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be hosted here.
+If you feel this was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be hosted here.
 
 Before you do so, we ask you take the time to read this email in it's entirety.
 
@@ -383,7 +383,7 @@ You're welcome to submit a different plugin, but we feel that this is a poor cho
 
 If you have any questions, please reply to this email. Otherwise it's okay to just move on to something else.
 
-If you feel we've made this decision in error, please reply with a copy of you code attached and explain why you think that is the case.
+If you feel we've made this decision in error, please reply with a link to download your plugin as a zip file (or with the zip file attached) and explain why you think that is the case.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
@@ -408,7 +408,7 @@ If you've gotten all the way down here and still think we should be hosting your
 
 We know that being told we won't host your code is hurtful, and we ask you please read this email in full.
 
-If, at the end, you feel this decision was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be accepted.
+If, at the end, you feel this decision was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be accepted.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
@@ -454,7 +454,7 @@ While the directory is open for all secure, GPLv2 (or later) compatible plugins,
 
 We know that being told we won't host your code is hurtful, and we ask you please read this email in full.
 
-If, at the end, you feel this decision was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be accepted.
+If, at the end, you feel this decision was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be accepted.
 
 <strong>Why this plugin was not accepted</strong>
 
@@ -477,7 +477,7 @@ If you've gotten all the way down here and still think we should be hosting your
 
 Your submission has been successfully rejected.
 
-If, at the end, you feel this decision was in error, please <strong>reply</strong> to this email with your plugin attached as a zip and explain what happened.",
+If, at the end, you feel this decision was in error, please <strong>reply</strong> to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain what happened.",
 			'wporg-plugins'
 		);
 	}
@@ -494,7 +494,7 @@ You're welcome to submit a different plugin, but we feel that this is a poor cho
 
 If you have any questions, please reply to this email. Otherwise it's okay to just move on to something else.
 
-If you feel we've made this decision in error, please reply with a copy of you code attached and explain why you think that is the case.
+If you feel we've made this decision in error, please reply with a link to download your plugin as a zip file (or with the zip file attached) and explain why you think that is the case.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
@@ -526,7 +526,7 @@ You’re welcome to submit a different plugin, but we don’t think this one is 
 
 If you have any questions, reply to this email. Otherwise, it’s okay to move on to something else.
 
-If you think we’ve made this decision in error, reply with a copy of your code attached and explain why.
+If you think we’ve made this decision in error, reply with a link to download your plugin as a zip file (or with the zip file attached) and explain why.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
@@ -545,7 +545,7 @@ If you’ve read this far and still think we should host your code, please don�
 		return __(
 			"Plugins are rejected after three months (90 days) when there has not been significant progress made on the review. If this is not the case for your plugin, you will receive a followup email explaining the reason for this decision within the next 24 hours. Please wait for that email before requesting further details.
 
-If you believe this to be in error, please email us with your plugin attached as a zip and explain why you feel your plugin should not have been rejected.
+If you believe this to be in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should not have been rejected.
 
 If you're still working on your code, don't panic. You can reply to the original review (or even this email) with your updated code for as long as needed. Even years. All we ask is you do not resubmit your plugin until asked to do so.",
 			'wporg-plugins'
