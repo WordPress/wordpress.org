@@ -42,7 +42,7 @@ class Trac implements User {
 	 * Notifications for a component go to that channel's -firehose, -newtickets and -commits
 	 * channels, not to the channel itself. This includes commits that $commit_path_filters
 	 * sends to one of these channels.
-     *
+	 *
 	 * Components with an empty value have no component channels.
 	 *
 	 * @var array

@@ -15,6 +15,12 @@ class Comment_Handler {
 	protected $ticket_url;
 	protected $comment_id;
 	protected $comment_url;
+
+	/**
+	 * The ticket's component, read from the notification's ticket properties table.
+	 *
+	 * @var string
+	 */
 	protected $component;
 
 	/**
