@@ -108,14 +108,14 @@ class Core extends Trac {
 		// Components without a component specific channel.
 		'Administration'         => '',
 		'Abilities API'          => '',
-		'Bootstrap/Load'         => '',
+		'Bootstrap/Load'         => '', // #core-bootstrap is archived.
 		'Cache API'              => '',
-		'Comments'               => '',
+		'Comments'               => '', // #core-comments is archived.
 		'Pings/Trackbacks'       => '',
 		'Cron API'               => '',
-		'Customize'              => '',
+		'Customize'              => '', // #core-customize is archived.
 		'Database'               => '',
-		'Date/Time'              => '',
+		'Date/Time'              => '', // #core-datetime is archived.
 		'Export'                 => '',
 		'External Libraries'     => '',
 		'Feeds'                  => '',
@@ -126,7 +126,7 @@ class Core extends Trac {
 		'Shortcodes'             => '',
 		'General'                => '',
 		'Help/About'             => '',
-		'HTTP API'               => '',
+		'HTTP API'               => '', // #core-http-api is archived.
 		'Mail'                   => '',
 		'Options, Meta APIs'     => '',
 		'Permalinks'             => '',
@@ -140,8 +140,8 @@ class Core extends Trac {
 		'Query'                  => '',
 		'Script Loader'          => '',
 		'Security'               => '',
-		'Site Health'            => '',
-		'Sitemaps'               => '',
+		'Site Health'            => '', // #core-site-health is archived.
+		'Sitemaps'               => '', // #core-sitemaps is archived.
 		'Taxonomy'               => '',
 		'Themes'                 => '',
 		'Menus'                  => '',
