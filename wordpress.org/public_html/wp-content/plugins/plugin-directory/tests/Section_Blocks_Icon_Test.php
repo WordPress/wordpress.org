@@ -116,7 +116,7 @@ class Section_Blocks_Icon_Test extends TestCase {
 	}
 
 	/**
-	 * Shapes inside clip paths and masks stay inside their definitions.
+	 * Shapes inside clip paths stay inside their definitions, and the clip-path reference is removed.
 	 */
 	public function test_clip_path_shapes_stay_in_definitions(): void {
 		$output = $this->render_section(
@@ -126,8 +126,10 @@ class Section_Blocks_Icon_Test extends TestCase {
 			'</svg>'
 		);
 
-		$this->assertMatchesRegularExpression( '#<defs><clipPath id="clip"><rect[^>]*/></clipPath></defs>#i', $output );
-		$this->assertSame( 'url(#clip)', $this->find_tag( $output, 'G' )?->get_attribute( 'clip-path' ) );
+		$this->assertMatchesRegularExpression( '#<defs><clipPath><rect[^>]*/></clipPath></defs>#i', $output );
+		$group = $this->find_tag( $output, 'G' );
+		$this->assertNotNull( $group, 'The g element is missing.' );
+		$this->assertNull( $group->get_attribute( 'clip-path' ) );
 	}
 
 	/**
