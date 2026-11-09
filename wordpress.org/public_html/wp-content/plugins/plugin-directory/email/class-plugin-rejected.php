@@ -98,6 +98,8 @@ A rejection isn't the end of the road. When you're ready, fix your plugin and su
 
 Any time your plugin replicates functionality found in WordPress (i.e. the uploader, jquery) is frowned upon, as it presents a possible security risk. The features in WordPress have been tested by many more people than use most plugins, so the built in tools are less likely to have issues.
 
+This is one of the types of plugins we don't accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
 <strong>What to do next</strong>
 
 Please read this email in it's entirety. We know it's hurtful to be told we're not hosting your code, and there is always the possibility that we've made a mistake.
@@ -117,6 +119,8 @@ The WordPress plugin ecosystem thrives on innovation, and we encourage you to ex
 
 Please consider developing plugins that offer fresh value to users. We'd be excited to review your plugin in the future!
 
+Note that this is one of the types of plugins we don't accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
 <strong>What to do next</strong>
 
 Don't worry! We encourage you to iterate and submit something new-WordPress's potential is limitless!
@@ -133,6 +137,8 @@ Instead, reply to this email and explain the situation so we can properly direct
 			"Your plugin has been rejected because it is a duplicate of another plugin, already hosted on WordPress.org
 
 Despite the fact that all plugins in our directory are licensed under the GPL or compatible licenses, we do not allow direct copies of other plugins to be re-listed under somebody else's name. \"Forking\" is acceptable only when the resulting fork is of a substantial nature, or when the original plugin is no longer updated or supported. When this is not the case, the plugin is rejected.
+
+This is one of the types of plugins we don't accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
 
 <strong>What to do next</strong>
 
@@ -151,6 +157,10 @@ Remember, <strong>do not</strong> resubmit the plugin. If you resubmit the plugi
 	public function reason_library_or_framework() {
 		return __(
 			"Your plugin has been rejected because we no longer accepting frameworks, boilerplates, and libraries as stand-alone plugins.
+
+This is one of the types of plugins we don't accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
+<strong>Insisting won't change this decision.</strong> To get your plugin accepted, you'll need to change its functionality or reconsider your idea. If you believe we've made a mistake about your plugin, you can still reply as explained below.
 
 <strong>What to do next</strong>
 
@@ -326,6 +336,10 @@ If you've gotten all the way down here and still think we should be hosting your
 		return __(
 			"Your plugin has been rejected because we do not currently accept storefront plugins.
 
+This is one of the types of plugins we don't accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
+<strong>Insisting won't change this decision.</strong> To get your plugin accepted, you'll need to change its functionality or reconsider your idea. If you believe we've made a mistake about your plugin, you can still reply as explained below.
+
 <strong>What to do next</strong>
 
 We understand it is hurtful to be told we will not host your code here. This decision has nothing to do with the quality or purpose of your code, and is solely related to the fact that it is, in fact, a storefront.
@@ -373,29 +387,27 @@ If you resubmit this plugin without replying and communicating with us first, yo
 
 	public function reason_script_insertion() {
 		return __(
-			"Your plugin has been rejected because we are not accepting plugins of this nature in most cases.
+			"Your plugin has been rejected because it lets users insert or execute arbitrary code on their site, and we don't accept new plugins that do this.
+
+This includes plugins that let users add or run their own PHP or JavaScript, such as code snippet managers, PHP or JavaScript editors, file managers, and AI tools that generate code meant to run on the site. It's one of the types of plugins listed in our FAQ as not accepted: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
+<strong>This decision is final</strong>
+
+Security measures won't change this decision. Restricting the feature to administrators, capability checks, nonces, sanitization, code validation, or any other safeguard can't make this kind of plugin acceptable, because the risk comes from the feature itself.
 
 <strong>What to do next</strong>
 
-We understand it is hurtful to be told we will not host your code here and ask you please read this email carefully.
+If you'd like to have this plugin in the directory, you'll need to change its functionality. For example, instead of letting users enter their own code, your plugin could offer the specific features they need as settings. Once your plugin no longer allows arbitrary code, you're welcome to submit it again. Submitting it again without that change will lead to the same result.
 
-You're welcome to submit a different plugin, but we feel that this is a poor choice to submit. Also there are a handful of plugins out there that already handle this, it's preferred you use those instead.
+If we have misread your plugin and it does not allow the insertion or execution of arbitrary code, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and please clarify that for us. Other replies won't change this decision.
 
-If you have any questions, please reply to this email. Otherwise it's okay to just move on to something else.
+<strong>Why we don't accept these plugins</strong>
 
-If you feel we've made this decision in error, please reply with a link to download your plugin as a zip file (or with the zip file attached) and explain why you think that is the case.
+Code added through a plugin like this runs on the site without limits. A single mistake, a snippet copied from an untrusted source, or a compromised administrator account is enough to take over the site or attack its visitors, and the plugin becomes the way in.
 
-<strong>Why these kinds of plugins are not accepted</strong>
+WordPress lets site owners and hosts turn off code editing in the dashboard for exactly this reason. A plugin that adds that ability back undoes the protection.
 
-Script insertion plugins are amazing and powerful. They're also incredibly dangerous and require a high level understanding of sanitization, security, and usage. These are skills that take years to master. WordPress has a highly complicated tool to insert CSS, and it opts not to handle javascript because of the dangers. PHP is even more complicated.
-
-Besides the sanitization issues, allowing arbitrary script insertion leads to users adding scripts that are dangerous without knowing. Users will paste in just anything and your plugin can become the unwitting vector for hacks.
-
-This is why WordPress itself allows you to lock people out of being able to edit theme and plugin files directly (via DEFINES that are used by many managed hosts), but also has post-processing checks that verify the site will still function after any changes.
-
-Because of those reasons, unless a submission demonstrates a solid understanding of the security and usage issues out of the gate, we reject them.
-
-If you've gotten all the way down here and still think we should be hosting your code, we ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.",
+A few plugins with this functionality are already in the directory. They were accepted under different standards in the past, and we learnt a lot. Removing them now would cause harm to users. They aren't a reason to accept new ones.",
 			'wporg-plugins'
 		);
 	}
