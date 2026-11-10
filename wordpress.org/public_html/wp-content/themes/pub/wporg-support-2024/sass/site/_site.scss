@@ -483,6 +483,11 @@ body.error404 {
 	a {
 		color: var(--wp--preset--color--blueberry-1);
 	}
+
+	/* The parent theme unsets it, relying on its charcoal body. */
+	.wp-block-wporg-global-footer {
+		background-color: var(--wp-global-header--background-color);
+	}
 }
 
 .error-404 .page-title,
