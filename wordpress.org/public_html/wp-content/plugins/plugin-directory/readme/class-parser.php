@@ -867,7 +867,7 @@ class Parser {
 				// x.y or x.y.z
 				! preg_match( '!^\d+\.\d(\.\d+)?$!', $version ) ||
 				// Allow plugins to mark themselves as requireing Stable+0.1 (trunk/master) but not higher
-				defined( 'WP_CORE_STABLE_BRANCH' ) && ( (float)$version > (float)WP_CORE_STABLE_BRANCH+0.1 )
+				( defined( 'WP_CORE_STABLE_BRANCH' ) && (float) $version > round( (float) WP_CORE_STABLE_BRANCH + 0.1, 1 ) )
 			 ) {
 				$this->warnings['requires_header_ignored'] = true;
 				// Ignore the readme value.
