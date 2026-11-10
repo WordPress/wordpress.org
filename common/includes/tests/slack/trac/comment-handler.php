@@ -67,7 +67,7 @@ class Test_Slack_Trac_Comment_Handler extends \PHPUnit\Framework\TestCase {
 	 */
 	public function data_last_line_is_kept(): array {
 		return array(
-			'comment'            => array(
+			'comment'                => array(
 				array(
 					'',
 					'Comment (by obenland):',
@@ -79,7 +79,7 @@ class Test_Slack_Trac_Comment_Handler extends \PHPUnit\Framework\TestCase {
 				"I started such a thread.\n\nSo it was closed.",
 				array(),
 			),
-			'changes only'       => array(
+			'changes only'           => array(
 				array(
 					'Changes (by obenland):',
 					'',
@@ -92,7 +92,7 @@ class Test_Slack_Trac_Comment_Handler extends \PHPUnit\Framework\TestCase {
 					'_*status:*_ new => assigned',
 				),
 			),
-			'wrapped attachment' => array(
+			'wrapped attachment'     => array(
 				array(
 					'Changes (by adamsilverstein):',
 					'',
@@ -102,6 +102,18 @@ class Test_Slack_Trac_Comment_Handler extends \PHPUnit\Framework\TestCase {
 				'',
 				array(
 					'_*attachment:*_ `Monosnap Site Health - Info ‹ My... Website — WordPress 2024-07-15 15-14-25.jpg` added',
+				),
+			),
+			'wrapped CJK attachment' => array(
+				array(
+					'Changes (by obenland):',
+					'',
+					' * Attachment "ワードプレスのサイトヘルス情報画面のスクリーンショット二〇二',
+					' 四年七月十五日撮影分.png" added.',
+				),
+				'',
+				array(
+					'_*attachment:*_ `ワードプレスのサイトヘルス情報画面のスクリーンショット二〇二四年七月十五日撮影分.png` added',
 				),
 			),
 		);
