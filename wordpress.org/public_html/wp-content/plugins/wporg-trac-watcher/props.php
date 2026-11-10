@@ -48,7 +48,6 @@ function from_log( $log, $include_old = false ) {
 		// These matchers apply no matter which ones above have matched.
 		// They're intended to catch additional inline mentions.
 		'multiple' => [
-			"{$sol}unprops:? {$props_greedy}{$eol}", 
 			"{$sol}(dev)?reviewed[- ]by {$props}{$eol}",
 			"\sthanks {$props_one}",
 		]

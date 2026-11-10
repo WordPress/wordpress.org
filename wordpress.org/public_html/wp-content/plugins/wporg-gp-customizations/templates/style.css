@@ -2288,7 +2288,10 @@ ul.ct-legend {
 .editor .translation,
 span.context,
 table.translations td.original,
-table.translations td.translation {
+table.translations td.translation,
+.consistency-table td,
+.consistency-table th,
+.translations-unique li {
 	word-break: normal;
 	word-wrap: break-word;
 	overflow-wrap: break-word;

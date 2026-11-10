@@ -276,6 +276,21 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\wporg_breathe_add_site_navigation_menus' );
 
 /**
+ * Drops page-pledges.php from the page template hierarchy on sites without a team.
+ *
+ * @param array $templates Page template file names, in order of preference.
+ * @return array Page template file names.
+ */
+function remove_pledges_template_without_team( $templates ) {
+	if ( function_exists( 'WordPressdotorg\\Make\\Pledges\\get_current_team' ) && \WordPressdotorg\Make\Pledges\get_current_team() ) {
+		return $templates;
+	}
+
+	return array_values( array_diff( $templates, array( 'page-pledges.php' ) ) );
+}
+add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\remove_pledges_template_without_team' );
+
+/**
  * Add postMessage support for site title and description in the customizer.
  *
  * @param WP_Customize_Manager $wp_customize The customizer object.

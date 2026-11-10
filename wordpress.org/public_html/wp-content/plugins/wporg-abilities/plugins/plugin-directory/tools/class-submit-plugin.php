@@ -21,6 +21,21 @@ defined( 'ABSPATH' ) || exit;
 class Submit_Plugin extends Ability_Base {
 
 	/**
+	 * Hosts a plugin ZIP may be downloaded from, including the ones their downloads redirect to.
+	 *
+	 * @var string[]
+	 */
+	const ZIP_HOSTS = array(
+		'github.com',
+		'codeload.github.com',
+		'objects.githubusercontent.com',
+		'raw.githubusercontent.com',
+		'release-assets.githubusercontent.com',
+		'gitlab.com',
+		'codeberg.org',
+	);
+
+	/**
 	 * Register this tool as an ability.
 	 */
 	public static function register(): void {
@@ -53,7 +68,7 @@ TEXT
 						'zip_url'       => array(
 							'type'        => 'string',
 							'format'      => 'uri',
-							'description' => 'URL to download the plugin ZIP from. Must be a publicly accessible HTTPS URL ending in .zip. Preferred for larger plugins. Provide exactly one of zip_url or zip_base64.',
+							'description' => 'URL to download the plugin ZIP from. Must be a publicly accessible HTTPS URL ending in .zip, hosted on GitHub, GitLab, or Codeberg. Preferred for larger plugins. Provide exactly one of zip_url or zip_base64.',
 						),
 						'plugin_slug'   => array(
 							'type'        => 'string',
@@ -404,30 +419,54 @@ TEXT
 			);
 		}
 
-		// Do not allow link-local addresses.
-		$host = wp_parse_url( $url, PHP_URL_HOST );
-		if ( $host ) {
-			$ip    = gethostbyname( $host );
-			$parts = array_map( 'intval', explode( '.', $ip ) );
-			if ( 169 === $parts[0] && 254 === $parts[1] ) {
-				return self::error_response(
-					'invalid_url',
-					'The URL is not allowed.',
-					'Provide a publicly accessible HTTPS URL that does not point to an internal network address.'
-				);
-			}
+		if ( ! self::is_allowed_zip_url( $url ) ) {
+			return self::error_response(
+				'invalid_url',
+				'The URL must be hosted on GitHub, GitLab, or Codeberg.',
+				'Provide a release or archive URL from one of those services, or use zip_base64 instead.'
+			);
 		}
 
-		$temp_path = download_url( $url );
+		// Redirects never pass through the checks above.
+		$check_hop = static function ( $hop ): void {
+			if ( ! self::is_allowed_zip_url( (string) $hop ) ) {
+				throw new \WpOrg\Requests\Exception( 'The URL is not allowed.', 'wporg_disallowed_zip_url' );
+			}
+		};
+		add_action( 'requests-requests.before_request', $check_hop );
+
+		try {
+			$temp_path = download_url( $url );
+		} finally {
+			remove_action( 'requests-requests.before_request', $check_hop );
+		}
+
 		if ( is_wp_error( $temp_path ) ) {
 			return self::error_response(
 				'download_failed',
-				'Failed to download the ZIP file: ' . $temp_path->get_error_message(),
+				'Failed to download the ZIP file.',
 				'Ensure the URL is publicly accessible and points to a valid .zip file.'
 			);
 		}
 
 		return $temp_path;
+	}
+
+	/**
+	 * Whether a URL uses HTTPS on the default port and one of the hosts ZIPs may be downloaded from.
+	 *
+	 * @param string $url The URL to check.
+	 * @return bool Whether the URL may be requested.
+	 */
+	public static function is_allowed_zip_url( string $url ): bool {
+		$parts = wp_parse_url( $url );
+
+		return is_array( $parts )
+			&& 'https' === strtolower( $parts['scheme'] ?? '' )
+			&& ! isset( $parts['port'] )
+			&& ! isset( $parts['user'] )
+			&& ! isset( $parts['pass'] )
+			&& in_array( strtolower( $parts['host'] ?? '' ), self::ZIP_HOSTS, true );
 	}
 
 	/**

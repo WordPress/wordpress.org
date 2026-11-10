@@ -9,8 +9,8 @@
 		"../wordpress.tv/public_html/wp-content/themes/wptv-27"
 	],
 	"mappings": {
-		"wp-content/mu-plugins/wporg-dev-login.php": "./mocks/mu-plugins/wporg-dev-login.php",
-		"wp-content/mu-plugins/wptv-local.php": "./mocks/wptv-local.php",
+		"wp-content/mu-plugins": "./wordpress-tv/mu-plugins",
+		"wp-content/env-mocks": "./mocks",
 		"wp-content/env-bin": "./wordpress-tv/bin"
 	},
 	"lifecycleScripts": {
