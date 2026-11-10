@@ -1145,9 +1145,10 @@ class Hooks {
 				$filter = isset( $_GET['filter'] ) ? absint( $_GET['filter'] ) : 0;
 
 				if ( $filter >= 1 && $filter <= 5 ) {
-					$title['text'] .= ' ' . sprintf(
-						/* translators: %d: Number of stars. */
-						_n( '(%d star only)', '(%d stars only)', $filter, 'wporg-forums' ),
+					$title['text'] = sprintf(
+						/* translators: 1: Reviews page title, like "[Gutenberg] Reviews". 2: Number of stars. */
+						_n( '%1$s (%2$d star only)', '%1$s (%2$d stars only)', $filter, 'wporg-forums' ),
+						$title['text'],
 						$filter
 					);
 				}
