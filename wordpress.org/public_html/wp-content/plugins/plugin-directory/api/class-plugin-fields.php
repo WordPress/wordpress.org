@@ -76,12 +76,6 @@ class Plugin_Fields {
 			'show_in_rest' => true,
 		] );
 
-		register_meta( 'post', 'assets_banners_color', [
-			'description'  => 'Fallback color for the plugin.',
-			'single'       => true,
-			'show_in_rest' => true,
-		] );
-
 		register_meta( 'post', 'last_updated', [
 			'description'  => 'Date the plugin was last updated.',
 			'single'       => true,
