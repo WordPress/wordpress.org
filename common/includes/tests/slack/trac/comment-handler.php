@@ -67,7 +67,7 @@ class Test_Slack_Trac_Comment_Handler extends \PHPUnit\Framework\TestCase {
 	 */
 	public function data_last_line_is_kept(): array {
 		return array(
-			'comment'      => array(
+			'comment'            => array(
 				array(
 					'',
 					'Comment (by obenland):',
@@ -79,7 +79,7 @@ class Test_Slack_Trac_Comment_Handler extends \PHPUnit\Framework\TestCase {
 				"I started such a thread.\n\nSo it was closed.",
 				array(),
 			),
-			'changes only' => array(
+			'changes only'       => array(
 				array(
 					'Changes (by obenland):',
 					'',
@@ -90,6 +90,18 @@ class Test_Slack_Trac_Comment_Handler extends \PHPUnit\Framework\TestCase {
 				array(
 					'_*owner:*_ (none) => obenland',
 					'_*status:*_ new => assigned',
+				),
+			),
+			'wrapped attachment' => array(
+				array(
+					'Changes (by adamsilverstein):',
+					'',
+					' * Attachment "Monosnap Site Health - Info ‹ My... Website — WordPress',
+					' 2024-07-15 15-14-25.jpg" added.',
+				),
+				'',
+				array(
+					'_*attachment:*_ `Monosnap Site Health - Info ‹ My... Website — WordPress 2024-07-15 15-14-25.jpg` added',
 				),
 			),
 		);

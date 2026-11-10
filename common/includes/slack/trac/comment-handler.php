@@ -242,7 +242,17 @@ class Comment_Handler {
 			while ( $lines && '' !== current( $lines ) ) {
 				$line = array_shift( $lines );
 
-				if ( preg_match( '~Attachment "([^"]+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
+				// Trac wraps long file names onto indented lines.
+				if ( 0 === strpos( $line, ' * Attachment "' ) ) {
+					while ( $lines && '' !== current( $lines ) && 0 !== strpos( current( $lines ), ' * ' ) ) {
+						if ( '-' !== substr( $line, -1 ) ) {
+							$line .= ' ';
+						}
+						$line .= ltrim( array_shift( $lines ) );
+					}
+				}
+
+				if ( preg_match( '~Attachment "(.+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
 					$changes[] = "_*attachment:*_ `{$matches[1]}` {$matches[2]}";
 				} else {
 					if ( 0 === strpos( $line, ' * keywords:' ) ) {
