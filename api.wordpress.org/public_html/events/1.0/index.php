@@ -279,8 +279,8 @@ function validate_request() {
  * The `Content-Type` is set explicitly, because the header that `send_response()` sets is only
  * reached on the success path, and PHP would otherwise default this body to `text/html`.
  *
- * `wp_json_encode()` is intentionally not used here; it is loaded by `bootstrap()`, which runs
- * after the request is validated.
+ * `wp_json_encode()` is intentionally not used here; it is loaded by `bootstrap()`, which has
+ * not run yet when `validate_request()` rejects a request.
  *
  * @param string $reason The reason the request was rejected. Must not contain any unescaped
  *                       request input.
@@ -981,7 +981,7 @@ function get_events( $args = array() ) {
 	}
 
 	// Allow queries for limiting to specific countries.
-	if ( $args['restrict_by_country'] && ! empty( $args['country'] ) && preg_match( '![a-z]{2}!i', $args['country'] ) ) {
+	if ( $args['restrict_by_country'] && ! empty( $args['country'] ) && preg_match( '/^[a-z]{2}\z/i', $args['country'] ) ) {
 		$wheres[]     = '`country` = %s';
 		$sql_values[] = $args['country'];
 	}
@@ -1152,7 +1152,7 @@ function build_sticky_wordcamp_query( $request_args, $distance ) {
 	}
 
 	// Allow queries for limiting to specific countries.
-	if ( $request_args['restrict_by_country'] && ! empty( $request_args['country'] ) && preg_match( '![a-z]{2}!i', $request_args['country'] ) ) {
+	if ( $request_args['restrict_by_country'] && ! empty( $request_args['country'] ) && preg_match( '/^[a-z]{2}\z/i', $request_args['country'] ) ) {
 		$where[]  = '`country` = %s';
 		$values[] = $request_args['country'];
 	}
