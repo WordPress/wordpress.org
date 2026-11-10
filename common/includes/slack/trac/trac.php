@@ -23,6 +23,15 @@ class Trac implements User {
 	// 'title', 'fields', 'description'
 	protected $primary_channel_ticket_format = 'description';
 
+	/**
+	 * How much of the commit message to post to the primary channel.
+	 *
+	 * 'full' posts the whole commit message, 'summary' only its first line.
+	 *
+	 * @var string
+	 */
+	protected $primary_channel_commit_format = 'full';
+
 	protected $bypass_primary_channel_for_commit_filter_matches = false;
 	protected $bypass_primary_channel_for_ticket_filter_matches = false;
 
@@ -370,6 +379,19 @@ class Trac implements User {
 			return $this->primary_channel_ticket_format;
 		}
 		return 'description';
+	}
+
+	/**
+	 * Gets how much of the commit message to post to a channel.
+	 *
+	 * @param string $channel Channel name.
+	 * @return string 'full' or 'summary'.
+	 */
+	public function get_commit_format( $channel ) {
+		if ( $channel === $this->primary_channel ) {
+			return $this->primary_channel_commit_format;
+		}
+		return 'full';
 	}
 
 	/**

@@ -13,6 +13,13 @@ class Core extends Trac {
 	protected $primary_channel_ticket_format = 'title';
 
 	/**
+	 * Post only the first line of each commit message to #core.
+	 *
+	 * @var string
+	 */
+	protected $primary_channel_commit_format = 'summary';
+
+	/**
 	 * File paths that cause commits to be piped to particular channels.
 	 * Start regex matches with # as your delimiter.
 	 */

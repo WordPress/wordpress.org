@@ -92,6 +92,22 @@ class Commit extends Resource {
 		return $this->data;
 	}
 
+	/**
+	 * Gets the summary of a commit message: its first non-empty line.
+	 *
+	 * @param string $message Commit message.
+	 * @return string
+	 */
+	public static function get_summary( $message ) {
+		foreach ( explode( "\n", $message ) as $line ) {
+			$line = trim( $line );
+			if ( '' !== $line ) {
+				return $line;
+			}
+		}
+		return '';
+	}
+
 	static function format_commit_for_slack( Trac $trac, $message ) {
 		// Convert ASCII numbers to an UTF-8 character, like ?\226?\128?\148 => — (m-dash).
 		$message = preg_replace_callback( '/(?:\?\\\\(\d{1,3}))/', function( $matches ) {
