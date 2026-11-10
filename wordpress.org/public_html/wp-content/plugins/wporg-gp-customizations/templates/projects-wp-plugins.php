@@ -10,7 +10,13 @@ $table_headings = [
 ];
 
 gp_title( sprintf( __( '%s &lt; GlotPress' ), esc_html( $project->name ) ) );
-gp_breadcrumb_project( $project );
+// The Plugins archive redirects to the homepage, so its crumb is merged into the project name.
+gp_breadcrumb(
+	array(
+		gp_link_get( gp_url( '/projects' ), __( 'Projects', 'glotpress' ) ),
+		'Plugins: ' . esc_html( $project->name ),
+	)
+);
 
 gp_enqueue_script( 'common' );
 gp_enqueue_script( 'tablesorter' );
