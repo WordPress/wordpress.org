@@ -312,8 +312,12 @@ function inject_term_description( $block_content, $block ) {
 	);
 
 	if ( is_page( $topic_pages ) ) {
-		$term_slug        = ( 'overview' === $post->post_name ) ? 'wordpress-overview' : $post->post_name;
-		$term             = get_term_by( 'slug', $term_slug, 'category' );
+		$term_slug = ( 'overview' === $post->post_name ) ? 'wordpress-overview' : $post->post_name;
+		$term      = get_term_by( 'slug', $term_slug, 'category' );
+		if ( ! $term ) {
+			return $block_content;
+		}
+
 		$term_description = term_description( $term->term_id );
 		$extra_attributes = ( isset( $attributes['textAlign'] ) )
 			? array( 'class' => 'has-text-align-' . $attributes['textAlign'] )
