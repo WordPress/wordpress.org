@@ -16,24 +16,69 @@ $prefix = in_array( $section_slug, array( 'screenshots', 'faq', 'blocks' ), true
 $classes = [ 'plugin-' . $section_slug, 'section' ];
 $classes = implode( ' ', $classes );
 
+// Presentation attributes allowed on every SVG shape and group.
+$svg_presentation_attributes = array(
+	'fill'              => true,
+	'fill-rule'         => true,
+	'fill-opacity'      => true,
+	'clip-rule'         => true,
+	'stroke'            => true,
+	'stroke-width'      => true,
+	'stroke-linecap'    => true,
+	'stroke-linejoin'   => true,
+	'stroke-miterlimit' => true,
+	'stroke-dasharray'  => true,
+	'stroke-opacity'    => true,
+	'opacity'           => true,
+	'transform'         => true,
+);
+
 $allowed_svg = array(
-	'svg'   => array(
-		'class' => true,
-		'aria-hidden' => true,
+	'svg'      => array(
+		'class'           => true,
+		'aria-hidden'     => true,
 		'aria-labelledby' => true,
-		'role' => true,
-		'xmlns' => true,
-		'width' => true,
+		'role'            => true,
+		'focusable'       => true,
+		'xmlns'           => true,
+		'width'           => true,
+		'height'          => true,
+		'viewbox'         => true,
+	) + $svg_presentation_attributes,
+	'g'        => $svg_presentation_attributes,
+	'title'    => array( 'title' => true ),
+	'path'     => array( 'd' => true ) + $svg_presentation_attributes,
+	'circle'   => array(
+		'cx' => true,
+		'cy' => true,
+		'r'  => true,
+	) + $svg_presentation_attributes,
+	'ellipse'  => array(
+		'cx' => true,
+		'cy' => true,
+		'rx' => true,
+		'ry' => true,
+	) + $svg_presentation_attributes,
+	'rect'     => array(
+		'x'      => true,
+		'y'      => true,
+		'width'  => true,
 		'height' => true,
-		'viewbox' => true,
-	),
-	'g'     => array( 'fill' => true ),
-	'title' => array( 'title' => true ),
-	'path'  => array(
-		'd' => true,
-		'fill' => true,
-		'transform' => true,
-	),
+		'rx'     => true,
+		'ry'     => true,
+	) + $svg_presentation_attributes,
+	'line'     => array(
+		'x1' => true,
+		'y1' => true,
+		'x2' => true,
+		'y2' => true,
+	) + $svg_presentation_attributes,
+	'polyline' => array( 'points' => true ) + $svg_presentation_attributes,
+	'polygon'  => array( 'points' => true ) + $svg_presentation_attributes,
+	// Keep clip and mask definitions so their shapes are not drawn as content.
+	'defs'     => array(),
+	'clippath' => array(),
+	'mask'     => array(),
 );
 ?>
 
