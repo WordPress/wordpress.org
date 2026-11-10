@@ -4,7 +4,7 @@
  *
  * The tests assemble fake requests in the superglobals, so the usual request
  * handling sniffs don't apply. The rejection paths that end in
- * send_bad_request() exit the process and are covered by the e2e suite instead.
+ * send_bad_request() exit the process, so they aren't covered here.
  *
  * phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
  *
