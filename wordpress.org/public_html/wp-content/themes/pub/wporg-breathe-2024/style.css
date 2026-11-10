@@ -974,38 +974,41 @@ input[type="submit"]:hover {
 	}
 
 	#secondary-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		float: inline-start;
-		margin-right: unset;
-		margin-top: -12px;
-		text-align: end;
+		margin-top: -24px;
+		margin-inline: 8px 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--wp--preset--color--charcoal-4);
+		cursor: pointer;
 	}
 
 	#secondary-toggle:before {
 		top: 0;
-		color: var(--wp--preset--color--charcoal-4);
 		font-size: 24px;
-	}
-
-	body.responsive-show #secondary-toggle:before {
-		content: '';
-		color: #0073aa;
 	}
 
 	#secondary-close {
 		display: flex;
-		justify-content: flex-end;
-		position: relative;
-		z-index: 1;
-		float: inline-start;
+		align-items: center;
+		justify-content: center;
 		width: 48px;
 		height: 48px;
-		margin-inline-start: 4px;
-		margin-inline-end: var(--wp--style--block-gap);
-		margin-top: 20px;
+		margin-block: 8px 0;
+		margin-inline: auto 8px;
 		padding: 0;
 		border: 0;
 		background: none;
 		cursor: pointer;
+	}
+
+	#secondary-toggle:focus-visible,
+	#secondary-close:focus-visible {
+		outline: thin dotted;
 	}
 
 	#secondary-close svg {
