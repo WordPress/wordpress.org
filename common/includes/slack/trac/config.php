@@ -5,9 +5,12 @@ use Dotorg\Slack\Trac\Trac;
 
 class Core extends Trac {
 	protected $name = 'WordPress';
+	protected $primary_channel  = '#core';
 	protected $commits_channel  = '#core-commits';
 	protected $tickets_channel  = '#core-newtickets';
 	protected $firehose_channel = '#core-firehose';
+
+	protected $primary_channel_ticket_format = 'title';
 
 	/**
 	 * File paths that cause commits to be piped to particular channels.

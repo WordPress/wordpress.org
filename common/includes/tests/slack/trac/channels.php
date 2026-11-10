@@ -39,7 +39,7 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 	 * @return array[]
 	 */
 	public static function data_core_commit_channels(): array {
-		$global = array( '#core-commits', '#core-firehose' );
+		$global = array( '#core', '#core-commits', '#core-firehose' );
 
 		return array(
 			'component prefix'                       => array(
@@ -99,7 +99,7 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 
 		sort( $channels );
 		$this->assertSame(
-			array( '#core-firehose', '#core-media-firehose', '#core-media-newtickets', '#core-newtickets', '#core-test' ),
+			array( '#core', '#core-firehose', '#core-media-firehose', '#core-media-newtickets', '#core-newtickets', '#core-test' ),
 			$channels
 		);
 	}
@@ -111,7 +111,7 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 		$channels = Trac::get( 'core' )->get_ticket_channels( (object) array( 'component' => 'Text Changes' ) );
 
 		sort( $channels );
-		$this->assertSame( array( '#core-firehose', '#core-newtickets' ), $channels );
+		$this->assertSame( array( '#core', '#core-firehose', '#core-newtickets' ), $channels );
 	}
 
 	/**
