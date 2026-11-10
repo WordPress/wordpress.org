@@ -74,7 +74,10 @@ class Core extends Trac {
 	 *
 	 * Subcomponents map to their parent's channel, unless they have their own.
 	 *
-	 * Components without a channel have an empty value, and only post to the global channels.
+	 * Some components have no discussion channel, or an archived one, but still have
+	 * -firehose, -newtickets and -commits channels.
+	 *
+	 * Retired components have an empty value, and only post to the global channels.
 	 *
 	 * @var array
 	 */
@@ -91,65 +94,70 @@ class Core extends Trac {
 		'Networks and Sites'     => '#core-multisite',
 		'Privacy'                => '#core-privacy',
 		'REST API'               => '#core-restapi',
+		'Themes'                 => '#core-themes',
 		'Upgrade/Install'        => '#core-upgrade-install',
 
 		// Subcomponents.
+		'Abilities API'          => '#core-ai',
 		'Application Passwords'  => '#core-restapi',
 		'Autosave'               => '#core-editor',
+		'Canonical'              => '#core-permalinks',
+		'Charset'                => '#core-formatting',
 		'Embeds'                 => '#core-media',
+		'Emoji'                  => '#core-formatting',
 		'Gallery'                => '#core-media',
 		'Login and Registration' => '#core-passwords',
+		'Menus'                  => '#core-themes',
 		'Multisite'              => '#core-multisite',
 		'Notes'                  => '#core-notes',
+		'Pings/Trackbacks'       => '#core-comments',
+		'Post Formats'           => '#core-posts-post-types',
+		'Post Thumbnails'        => '#core-posts-post-types',
 		'Quick/Bulk Edit'        => '#core-editor',
-		'TinyMCE'                => '#core-editor',
+		'Revisions'              => '#core-posts-post-types',
+		'Rewrite Rules'          => '#core-permalinks',
+		'Role/Capability'        => '#core-users',
+		'Shortcodes'             => '#core-formatting',
+		'TinyMCE'                => '#core-editor', // #core-tinymce has been archived since 2025-06-24.
 		'Upload'                 => '#core-media',
+		'Widgets'                => '#core-themes',
 
-		// Components without a component specific channel.
-		'Administration'         => '',
-		'Abilities API'          => '',
-		'Bootstrap/Load'         => '', // #core-bootstrap is archived.
-		'Cache API'              => '',
-		'Comments'               => '', // #core-comments is archived.
-		'Pings/Trackbacks'       => '',
-		'Cron API'               => '',
-		'Customize'              => '', // #core-customize is archived.
-		'Database'               => '',
-		'Date/Time'              => '', // #core-datetime is archived.
-		'Export'                 => '',
-		'External Libraries'     => '',
-		'Feeds'                  => '',
-		'Filesystem API'         => '',
-		'Formatting'             => '',
-		'Charset'                => '',
-		'Emoji'                  => '',
-		'Shortcodes'             => '',
-		'General'                => '',
-		'Help/About'             => '',
-		'HTTP API'               => '', // #core-http-api is archived.
-		'Mail'                   => '',
-		'Options, Meta APIs'     => '',
-		'Permalinks'             => '',
-		'Canonical'              => '',
-		'Rewrite Rules'          => '',
-		'Plugins'                => '',
-		'Posts, Post Types'      => '',
-		'Post Formats'           => '',
-		'Post Thumbnails'        => '',
-		'Revisions'              => '',
-		'Query'                  => '',
-		'Script Loader'          => '',
-		'Security'               => '',
-		'Site Health'            => '', // #core-site-health is archived.
-		'Sitemaps'               => '', // #core-sitemaps is archived.
-		'Taxonomy'               => '',
-		'Themes'                 => '',
-		'Menus'                  => '',
-		'Widgets'                => '',
-		'Toolbar'                => '',
-		'Users'                  => '',
-		'Role/Capability'        => '',
-		'XML-RPC'                => '',
+		// Components with an archived component specific channel.
+		'Bootstrap/Load'         => '#core-bootstrap',
+		'Comments'               => '#core-comments',
+		'Customize'              => '#core-customize',
+		'Date/Time'              => '#core-datetime',
+		'HTTP API'               => '#core-http-api',
+		'Site Health'            => '#core-site-health',
+		'Sitemaps'               => '#core-sitemaps',
+
+		// Components that have never had a component specific channel.
+		'Administration'         => '#core-administration',
+		'Cache API'              => '#core-cache-api',
+		'Cron API'               => '#core-cron-api',
+		'Database'               => '#core-database',
+		'Export'                 => '#core-export',
+		'External Libraries'     => '#core-external-libraries',
+		'Feeds'                  => '#core-feeds',
+		'Filesystem API'         => '#core-filesystem-api',
+		'Formatting'             => '#core-formatting',
+		'General'                => '#core-general',
+		'Help/About'             => '#core-help-about',
+		'Mail'                   => '#core-mail',
+		'Options, Meta APIs'     => '#core-options-meta-apis',
+		'Permalinks'             => '#core-permalinks',
+		'Plugins'                => '#core-plugins',
+		'Posts, Post Types'      => '#core-posts-post-types',
+		'Query'                  => '#core-query',
+		'Script Loader'          => '#core-script-loader',
+		'Security'               => '#core-security',
+		'Taxonomy'               => '#core-taxonomy',
+		'Toolbar'                => '#core-toolbar',
+		'Users'                  => '#core-users',
+		'XML-RPC'                => '#core-xml-rpc',
+
+		// Retired components.
+		'Press This'             => '', // #core-pressthis is archived.
 	);
 }
 

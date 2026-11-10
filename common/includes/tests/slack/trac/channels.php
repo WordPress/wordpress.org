@@ -42,37 +42,42 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 		$global = array( '#core-commits', '#core-firehose' );
 
 		return array(
-			'component prefix'           => array(
+			'component prefix'                       => array(
 				'trunk/src/wp-admin/import.php',
 				"Import: Check the file type.\n\nFixes #12345.",
 				array_merge( $global, array( '#core-importers-commits', '#core-importers-firehose' ) ),
 			),
-			'component without channels' => array(
+			'component without a discussion channel' => array(
 				'trunk/src/wp-includes/class-wp-query.php',
 				'Query: Cache the results.',
-				$global,
+				array_merge( $global, array( '#core-query-commits', '#core-query-firehose' ) ),
 			),
-			'subcomponent prefix'        => array(
+			'archived channel path filter'           => array(
+				'trunk/src/wp-includes/sitemaps/class-wp-sitemaps.php',
+				'Fix a typo.',
+				array_merge( $global, array( '#core-sitemaps-commits', '#core-sitemaps-firehose' ) ),
+			),
+			'subcomponent prefix'                    => array(
 				'trunk/src/wp-includes/embed.php',
 				'Embeds: Fix the iframe title.',
 				array_merge( $global, array( '#core-media-commits', '#core-media-firehose' ) ),
 			),
-			'bundled themes'             => array(
+			'bundled themes'                         => array(
 				'trunk/src/wp-includes/theme.php',
 				'Bundled Themes: Fix a typo.',
 				array_merge( $global, array( '#core-themes-commits', '#core-themes-firehose' ) ),
 			),
-			'path filter'                => array(
+			'path filter'                            => array(
 				'trunk/src/wp-includes/html-api/class-wp-html-processor.php',
 				'Fix a typo.',
 				array_merge( $global, array( '#core-html-api-commits', '#core-html-api-firehose' ) ),
 			),
-			'path filter and prefix'     => array(
+			'path filter and prefix'                 => array(
 				'trunk/src/wp-includes/media.php',
 				'I18N: Add context to a string.',
 				array_merge( $global, array( '#core-i18n-commits', '#core-i18n-firehose', '#core-media-commits', '#core-media-firehose' ) ),
 			),
-			'no component'               => array(
+			'no component'                           => array(
 				'trunk/src/wp-includes/formatting.php',
 				'Docs: Correct a parameter type.',
 				$global,
@@ -100,10 +105,10 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * New Core tickets in a component without channels post only to the global channels.
+	 * New Core tickets in a component that isn't listed post only to the global channels.
 	 */
-	public function test_core_new_ticket_component_without_channels(): void {
-		$channels = Trac::get( 'core' )->get_ticket_channels( (object) array( 'component' => 'Query' ) );
+	public function test_core_new_ticket_unlisted_component(): void {
+		$channels = Trac::get( 'core' )->get_ticket_channels( (object) array( 'component' => 'Text Changes' ) );
 
 		sort( $channels );
 		$this->assertSame( array( '#core-firehose', '#core-newtickets' ), $channels );
@@ -116,7 +121,8 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 		$trac = Trac::get( 'core' );
 
 		$this->assertSame( '#core-passwords-firehose', $trac->get_component_firehose_channel( 'Login and Registration' ) );
-		$this->assertFalse( $trac->get_component_firehose_channel( 'Query' ) );
+		$this->assertSame( '#core-formatting-firehose', $trac->get_component_firehose_channel( 'Shortcodes' ) );
+		$this->assertFalse( $trac->get_component_firehose_channel( 'Text Changes' ) );
 		$this->assertFalse( $trac->get_component_firehose_channel( 'Not A Component' ) );
 	}
 
