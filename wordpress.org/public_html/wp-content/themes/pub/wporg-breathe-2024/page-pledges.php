@@ -12,11 +12,6 @@ use WordPressdotorg\Make\Pledges;
 
 defined( 'WPINC' ) || die();
 
-if ( ! function_exists( 'WordPressdotorg\Make\Pledges\get_current_team' ) || ! Pledges\get_current_team() ) {
-	require __DIR__ . '/index.php';
-	return;
-}
-
 require_once __DIR__ . '/inc/contribution-metrics.php';
 
 // Enqueue BEFORE get_header() so wp_print_styles (priority 8 on wp_head)
