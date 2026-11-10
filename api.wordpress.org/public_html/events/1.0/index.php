@@ -331,7 +331,7 @@ function build_response( $location, $location_args ) {
 		);
 
 		if ( isset( $_REQUEST['number'] ) && is_numeric( $_REQUEST['number'] ) ) {
-			$event_args['number'] = intval( $_REQUEST['number'] );
+			$event_args['number'] = (int) $_REQUEST['number'];
 		}
 
 		if ( ! empty( $location['latitude'] ) ) {
