@@ -596,13 +596,8 @@ class Import {
 		update_post_meta( $plugin->ID, 'assets_banners',     wp_slash( $assets['banner'] ) );
 		update_post_meta( $plugin->ID, 'last_updated',       wp_slash( $plugin->post_modified_gmt ) );
 
-		// Calculate the 'plugin color' from the average color of the banner if provided. This is used for fallback icons.
-		$banner_average_color = '';
-		if ( $first_banner = reset( $assets['banner'] ) ) {
-			// The Banners are not stored locally, which is why a URL is used here
-			$banner_average_color = Tools::get_image_average_color( Template::get_asset_url( $plugin, $first_banner, false /* no CDN */ ) );
-		}
-		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
+		// Fallback icons are no longer colored from the banner. Clear any stored color.
+		delete_post_meta( $plugin->ID, 'assets_banners_color' );
 
 		// Store the content of blueprint files, if they're available and valid.
 		if ( isset( $assets['blueprint'] ) && count( $assets['blueprint'] ) > 0 ) {

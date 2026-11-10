@@ -584,7 +584,6 @@ class Upload_Handler {
 				'assets_screenshots'       => array(),
 				'assets_icons'             => array(),
 				'assets_banners'           => array(),
-				'assets_banners_color'     => false,
 				'support_threads'          => 0,
 				'support_threads_resolved' => 0,
 				'downloads'                => 0,
