@@ -82,7 +82,16 @@ class Jobs_Dot_WP_Contact_Form {
 
 		// validate() limits the subject to 200 bytes, so truncate by bytes without splitting a multibyte character.
 		if ( strlen( $title ) > 150 ) {
-			$title = mb_strcut( $title, 0, 150, 'UTF-8' ) . '…';
+			if ( function_exists( 'mb_strcut' ) ) {
+				$title = mb_strcut( $title, 0, 150, 'UTF-8' );
+			} else {
+				// Core does not polyfill mb_strcut(); drop any partial multibyte character left at the end.
+				$title = substr( $title, 0, 150 );
+				while ( '' !== $title && 1 !== preg_match( '//u', $title ) ) {
+					$title = substr( $title, 0, -1 );
+				}
+			}
+			$title .= '…';
 		}
 
 		return sprintf(
