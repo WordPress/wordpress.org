@@ -1,8 +1,6 @@
 <?php
 
 /*
- * Template Name: Pledges
- *
  * Note: Pledges is a simulated page, rather than actually existing in the database; see `mu-plugins/make-network/team-pledges.php`.
  *
  * Page 1 of the Five for the Future redesign — team contributor directory.
@@ -13,6 +11,11 @@ namespace WordPressdotorg\Make\Breathe_2024;
 use WordPressdotorg\Make\Pledges;
 
 defined( 'WPINC' ) || die();
+
+if ( ! function_exists( 'WordPressdotorg\Make\Pledges\get_current_team' ) || ! Pledges\get_current_team() ) {
+	require __DIR__ . '/index.php';
+	return;
+}
 
 require_once __DIR__ . '/inc/contribution-metrics.php';
 
