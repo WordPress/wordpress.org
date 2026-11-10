@@ -18,17 +18,19 @@ $classes = implode( ' ', $classes );
 
 // Presentation attributes allowed on every SVG shape and group.
 $svg_presentation_attributes = array(
-	'fill'            => true,
-	'fill-rule'       => true,
-	'fill-opacity'    => true,
-	'clip-rule'       => true,
-	'stroke'          => true,
-	'stroke-width'    => true,
-	'stroke-linecap'  => true,
-	'stroke-linejoin' => true,
-	'stroke-opacity'  => true,
-	'opacity'         => true,
-	'transform'       => true,
+	'fill'              => true,
+	'fill-rule'         => true,
+	'fill-opacity'      => true,
+	'clip-rule'         => true,
+	'stroke'            => true,
+	'stroke-width'      => true,
+	'stroke-linecap'    => true,
+	'stroke-linejoin'   => true,
+	'stroke-miterlimit' => true,
+	'stroke-dasharray'  => true,
+	'stroke-opacity'    => true,
+	'opacity'           => true,
+	'transform'         => true,
 );
 
 $allowed_svg = array(
