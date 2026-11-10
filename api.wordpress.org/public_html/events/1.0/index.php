@@ -143,7 +143,7 @@ function parse_request() {
 		is_numeric( $_GET['latitude'] ) && is_numeric( $_GET['longitude'] )
 	) {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- is_numeric()-checked above; kept as strings because core compares the echoed values with ===.
-		$location_args['latitude']  = $_GET['latitude'];
+		$location_args['latitude'] = $_GET['latitude'];
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- is_numeric()-checked above; kept as strings because core compares the echoed values with ===.
 		$location_args['longitude'] = $_GET['longitude'];
 	}
