@@ -2106,3 +2106,23 @@ input[type="submit"].submit-job {
 	width: 100%;
 	margin-top: 0;
 }
+
+.job-sidebar__report {
+	margin: var(--space-10) 0 0;
+	font-size: var(--font-size-sm);
+	text-align: center;
+}
+
+.job-sidebar__report:first-child {
+	margin-top: 0;
+}
+
+.job-sidebar__report a {
+	color: var(--color-charcoal-4);
+}
+
+.job-sidebar__report a:hover,
+.job-sidebar__report a:focus {
+	color: var(--color-charcoal-1);
+	text-decoration: underline;
+}

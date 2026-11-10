@@ -37,12 +37,60 @@ class Jobs_Dot_WP_Contact_Form {
 	const RATE_LIMIT_WINDOW = 600;
 
 	/**
+	 * Query var carrying the ID of the job being reported.
+	 *
+	 * @var string
+	 */
+	const REPORT_QUERY_VAR = 'report_job';
+
+	/**
 	 * Initializes plugin.
 	 */
 	public static function init() {
 		add_shortcode( 'jobswp-contact-form', [ self::class, 'shortcode' ] );
 		add_action( 'init', [ self::class, 'maybe_handle_submission' ], 20 );
 		add_action( 'jobswp_contact_form_fields', [ Jobs_Dot_WP_Captcha::class, 'output_recaptcha_field' ] );
+	}
+
+	/**
+	 * Gets the URL of the feedback form prefilled to report a job.
+	 *
+	 * @param int $job_id Job post ID.
+	 * @return string Feedback page URL.
+	 */
+	public static function get_report_url( $job_id ) {
+		return add_query_arg( self::REPORT_QUERY_VAR, absint( $job_id ), home_url( '/feedback/' ) );
+	}
+
+	/**
+	 * Gets the prefilled subject for reporting a job.
+	 *
+	 * Built server-side from the job ID so links cannot prefill arbitrary text.
+	 *
+	 * @param int $job_id Job post ID.
+	 * @return string Subject, or an empty string if the job is not a published job.
+	 */
+	public static function get_report_subject( $job_id ) {
+		$job = get_post( $job_id );
+
+		if ( ! $job || 'job' !== $job->post_type || 'publish' !== $job->post_status ) {
+			return '';
+		}
+
+		// Raw title (not get_the_title()) to avoid texturized entities. Stored titles are kses-encoded (&amp;), so decode to plain text.
+		$title = sanitize_text_field( wp_specialchars_decode( $job->post_title, ENT_QUOTES ) );
+
+		// validate() limits the subject to 200 bytes, so truncate by bytes without splitting a multibyte character.
+		if ( strlen( $title ) > 150 ) {
+			$title = mb_strcut( $title, 0, 150, 'UTF-8' ) . '…';
+		}
+
+		return sprintf(
+			/* translators: 1: Job title, 2: Job ID */
+			__( 'Reporting - %1$s (%2$d)', 'jobswp' ),
+			$title,
+			$job->ID
+		);
 	}
 
 	/**
@@ -333,6 +381,13 @@ class Jobs_Dot_WP_Contact_Form {
 		$email   = isset( $fields['email'] ) ? $fields['email'] : '';
 		$subject = isset( $fields['subject'] ) ? $fields['subject'] : '';
 		$message = isset( $fields['message'] ) ? $fields['message'] : '';
+
+		// Flash values (a failed submission) take priority over the report prefill.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only prefill of a form field.
+		if ( '' === $subject && isset( $_GET[ self::REPORT_QUERY_VAR ] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only prefill of a form field.
+			$subject = self::get_report_subject( absint( wp_unslash( $_GET[ self::REPORT_QUERY_VAR ] ) ) );
+		}
 
 		ob_start();
 
