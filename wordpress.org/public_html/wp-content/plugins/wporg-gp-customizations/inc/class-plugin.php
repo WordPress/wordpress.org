@@ -763,6 +763,7 @@ class Plugin {
 	 * Merges the Plugins and Themes breadcrumbs into the project breadcrumb that follows them.
 	 *
 	 * The wp-plugins and wp-themes archives redirect to the homepage, so they shouldn't be linked.
+	 * Without a project link to merge into, the label is kept as plain text.
 	 *
 	 * @param string[] $items Breadcrumb items as HTML strings.
 	 * @return string[] Filtered breadcrumb items.
@@ -778,10 +779,16 @@ class Plugin {
 			foreach ( array( 'wp-plugins', 'wp-themes' ) as $path ) {
 				$url = esc_url( gp_url_project( $path ) );
 
-				// Only merge into a link to one of the directory's projects, not an action like "Edit".
-				if ( str_starts_with( $item, '<a href="' . $url . '"' ) && str_starts_with( $items[ $index + 1 ], '<a href="' . $url ) ) {
+				if ( ! str_starts_with( $item, '<a href="' . $url . '"' ) ) {
+					continue;
+				}
+
+				// Only merge into a link to one of the directory's projects, not plain text like "Edit".
+				if ( str_starts_with( $items[ $index + 1 ], '<a href="' . $url ) ) {
 					$items[ $index + 1 ] = wp_strip_all_tags( $item ) . ': ' . $items[ $index + 1 ];
 					unset( $items[ $index ] );
+				} else {
+					$items[ $index ] = wp_strip_all_tags( $item );
 				}
 			}
 		}
