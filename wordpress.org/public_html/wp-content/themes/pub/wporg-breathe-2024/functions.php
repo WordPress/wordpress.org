@@ -278,8 +278,6 @@ add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\wporg_breathe_add_
 /**
  * Drops page-pledges.php from the page template hierarchy on sites without a team.
  *
- * The template depends on the team-pledges mu-plugin, so a `pledges` page elsewhere falls through to page.php instead.
- *
  * @param array $templates Page template file names, in order of preference.
  * @return array Page template file names.
  */
