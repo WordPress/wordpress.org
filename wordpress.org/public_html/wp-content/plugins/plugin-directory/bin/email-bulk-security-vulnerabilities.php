@@ -78,6 +78,13 @@ if ( 'live' == OPERATION_MODE ) {
 // Set a user to run as.
 wp_set_current_user( get_user_by( 'slug', 'wordpressdotorg' )->ID );
 
+foreach ( array( 'from', 'assign' ) as $opt ) {
+	if ( isset( $opts[ $opt ] ) && ! ctype_digit( (string) $opts[ $opt ] ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
+		die( "--$opt must be a numeric FreeScout ID.\n" );
+	}
+}
+
 // FreeScout agent the emails come from; wordpressdotorg's by default.
 define( __NAMESPACE__ . '\ATTRIBUTE_TO_USER', (int) ( $opts['from'] ?? FreeScout::USER_ID ) );
 // FreeScout user or team to assign the conversations to; unassigned by default.
