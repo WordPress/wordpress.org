@@ -32,7 +32,6 @@ class Submit_Plugin extends Ability_Base {
 		'raw.githubusercontent.com',
 		'release-assets.githubusercontent.com',
 		'gitlab.com',
-		'bitbucket.org',
 		'codeberg.org',
 	);
 
@@ -69,7 +68,7 @@ TEXT
 						'zip_url'       => array(
 							'type'        => 'string',
 							'format'      => 'uri',
-							'description' => 'URL to download the plugin ZIP from. Must be a publicly accessible HTTPS URL ending in .zip, hosted on GitHub, GitLab, Bitbucket, or Codeberg. Preferred for larger plugins. Provide exactly one of zip_url or zip_base64.',
+							'description' => 'URL to download the plugin ZIP from. Must be a publicly accessible HTTPS URL ending in .zip, hosted on GitHub, GitLab, or Codeberg. Preferred for larger plugins. Provide exactly one of zip_url or zip_base64.',
 						),
 						'plugin_slug'   => array(
 							'type'        => 'string',
@@ -423,7 +422,7 @@ TEXT
 		if ( ! self::is_allowed_zip_url( $url ) ) {
 			return self::error_response(
 				'invalid_url',
-				'The URL must be hosted on GitHub, GitLab, Bitbucket, or Codeberg.',
+				'The URL must be hosted on GitHub, GitLab, or Codeberg.',
 				'Provide a release or archive URL from one of those services, or use zip_base64 instead.'
 			);
 		}
