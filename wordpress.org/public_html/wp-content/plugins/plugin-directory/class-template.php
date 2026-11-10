@@ -481,10 +481,7 @@ class Template {
 	public static function get_geopattern_icon_url( $post = null ) {
 		$plugin = get_post( $post );
 
-		// This is a cached resource.
-		$url = "https://s.w.org/plugins/geopattern-icon/{$plugin->post_name}.svg";
-
-		return $url;
+		return "https://s.w.org/plugins/geopattern-icon/{$plugin->post_name}.svg";
 	}
 
 	/**

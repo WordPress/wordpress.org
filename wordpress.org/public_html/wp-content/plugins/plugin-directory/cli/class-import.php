@@ -596,9 +596,6 @@ class Import {
 		update_post_meta( $plugin->ID, 'assets_banners',     wp_slash( $assets['banner'] ) );
 		update_post_meta( $plugin->ID, 'last_updated',       wp_slash( $plugin->post_modified_gmt ) );
 
-		// Fallback icons are no longer colored from the banner. Clear any stored color.
-		delete_post_meta( $plugin->ID, 'assets_banners_color' );
-
 		// Store the content of blueprint files, if they're available and valid.
 		if ( isset( $assets['blueprint'] ) && count( $assets['blueprint'] ) > 0 ) {
 			update_post_meta( $plugin->ID, 'assets_blueprints', wp_slash( $assets['blueprint'] ) );
