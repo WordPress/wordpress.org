@@ -142,7 +142,7 @@ class Test_Parse_Request extends TestCase {
 	}
 
 	/**
-	 * ISO 3166-1 alpha-2 and alpha-3 codes should be accepted verbatim.
+	 * ISO 3166-1 alpha-2 codes should be accepted verbatim.
 	 *
 	 * @covers ::parse_request
 	 *
@@ -168,7 +168,6 @@ class Test_Parse_Request extends TestCase {
 		return array(
 			'alpha-2 lowercase' => array( 'de' ),
 			'alpha-2 uppercase' => array( 'US' ),
-			'alpha-3'           => array( 'DEU' ),
 		);
 	}
 

@@ -149,15 +149,15 @@ function parse_request() {
 	}
 
 	if ( isset( $_GET['country'] ) && '' !== $_GET['country'] ) {
-		// An ISO 3166-1 alpha-2 or alpha-3 country code.
+		// An ISO 3166-1 alpha-2 country code, which is what events are stored with.
 		$country = filter_var(
 			$_GET['country'],
 			FILTER_VALIDATE_REGEXP,
-			array( 'options' => array( 'regexp' => '/^[a-z]{2,3}\z/i' ) )
+			array( 'options' => array( 'regexp' => '/^[a-z]{2}\z/i' ) )
 		);
 
 		if ( false === $country ) {
-			send_bad_request( 'country must be an ISO 3166-1 alpha-2 or alpha-3 country code.' );
+			send_bad_request( 'country must be an ISO 3166-1 alpha-2 country code.' );
 		}
 
 		$location_args['country']             = $country;
@@ -242,9 +242,13 @@ function validate_request() {
 		'ip',
 	];
 
+	$get_only = array( 'latitude', 'longitude', 'country' );
+
 	foreach ( $must_be_strings as $field ) {
-		// Check `$_REQUEST` because `parse_request()` accepts some of these fields from either method.
-		if ( isset( $_REQUEST[ $field ] ) && ! is_scalar( $_REQUEST[ $field ] ) ) {
+		// Check the superglobal that `parse_request()` reads the field from.
+		$source = in_array( $field, $get_only, true ) ? $_GET : $_REQUEST;
+
+		if ( isset( $source[ $field ] ) && ! is_scalar( $source[ $field ] ) ) {
 			send_bad_request( $field . ' must be of type string.' );
 		}
 	}
@@ -254,11 +258,16 @@ function validate_request() {
 	}
 
 	if ( ! empty( $_POST['location_data'] ) ) {
-		// phpcs:ignore WordPress.Security -- Public unauthenticated endpoint; the value is only type-checked here, never used or output.
-		foreach ( $_POST['location_data'] as $value ) {
+		// phpcs:ignore WordPress.Security -- Public unauthenticated endpoint; the values are only validated here, never used or output.
+		foreach ( $_POST['location_data'] as $key => $value ) {
 			if ( ! is_scalar( $value ) ) {
 				// The key is omitted from the message because it is unsanitized request input.
 				send_bad_request( 'location_data values must be of type string.' );
+			}
+
+			// An invalid code would otherwise skip the country filter in `get_events()`.
+			if ( 'country' === $key && '' !== (string) $value && ! preg_match( '/^[a-z]{2}\z/i', (string) $value ) ) {
+				send_bad_request( 'country must be an ISO 3166-1 alpha-2 country code.' );
 			}
 		}
 	}
