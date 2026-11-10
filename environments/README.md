@@ -156,7 +156,7 @@ npm run documentation:env start
 
 First start imports the categories, pages, articles, and WordPress version pages from the live site's REST API, keeping their production IDs. The API only serves rendered content to logged-out requests, so the posts are imported as rendered HTML rather than block markup.
 
-**Re-seed** (clears the import flag, then re-imports):
+**Re-seed** (clears the import flag, then imports whatever is missing locally; existing posts and terms are not updated):
 
 ```bash
 npm run documentation:refresh
