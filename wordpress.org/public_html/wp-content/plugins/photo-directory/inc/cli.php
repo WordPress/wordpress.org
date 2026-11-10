@@ -185,6 +185,8 @@ class CLI extends \WP_CLI_Command {
 	 * @when after_wp_load
 	 */
 	public function restore_originals( $args, $assoc_args ) {
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+
 		$dry_run   = $assoc_args['dry-run'] ?? false;
 		$threshold = Uploads::big_image_size_threshold( 0 );
 		$updated   = 0;
@@ -234,8 +236,9 @@ class CLI extends \WP_CLI_Command {
 				continue;
 			}
 
-			// The original is stored unrotated, so its dimensions don't match the rotated copy.
-			if ( ( $meta['width'] > $meta['height'] ) !== ( $image_size[0] > $image_size[1] ) ) {
+			// Core rotates the copy per the original's EXIF orientation, but stores the original unrotated.
+			$exif = wp_read_image_metadata( $original_path );
+			if ( ( $exif['orientation'] ?? 0 ) > 1 || ( $meta['width'] > $meta['height'] ) !== ( $image_size[0] > $image_size[1] ) ) {
 				WP_CLI::warning( "Photo {$parent->ID}: {$meta['file']} was rotated from its original, skipping." );
 				continue;
 			}
