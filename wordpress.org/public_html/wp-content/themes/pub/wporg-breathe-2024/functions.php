@@ -368,6 +368,18 @@ function inline_scripts() {
 					'; path=<?php echo esc_js( $current_site->path ); ?>';
 			} );
 		}
+
+		var closeButton = document.getElementById( 'secondary-close' );
+		if ( closeButton ) {
+			closeButton.addEventListener( 'click', function() {
+				document.body.classList.remove( 'responsive-show' );
+
+				var toggle = document.getElementById( 'secondary-toggle' );
+				if ( toggle ) {
+					toggle.focus();
+				}
+			} );
+		}
 	</script>
 	<?php
 }
@@ -398,7 +410,7 @@ function welcome_box() {
 	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
-		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu', 'wporg' ); ?></strong></a>
+		<button type="button" id="secondary-toggle" aria-label="<?php esc_attr_e( 'Open menu', 'wporg' ); ?>"></button>
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
 			<button
