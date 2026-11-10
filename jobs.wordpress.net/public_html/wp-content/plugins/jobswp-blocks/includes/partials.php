@@ -86,6 +86,21 @@ function jobswp_blocks_single_job_preview() {
 		return '';
 	}
 
+	/*
+	 * The job is still awaiting moderation, and core's post date binding
+	 * returns nothing for posts the visitor can't read yet. Give the date
+	 * block the submission date directly, unlinked, as the draft's
+	 * permalink isn't public.
+	 */
+	$submission_date = static function ( $parsed_block ) {
+		if ( 'core/post-date' === $parsed_block['blockName'] && empty( $parsed_block['attrs']['datetime'] ) ) {
+			$parsed_block['attrs']['datetime'] = get_the_date( 'c' );
+			$parsed_block['attrs']['isLink']   = false;
+		}
+		return $parsed_block;
+	};
+	add_filter( 'render_block_data', $submission_date );
+
 	$output = '';
 	foreach ( parse_blocks( $template->content ) as $block ) {
 		if ( 'core/group' !== $block['blockName'] || 'main' !== ( $block['attrs']['tagName'] ?? '' ) ) {
@@ -95,6 +110,8 @@ function jobswp_blocks_single_job_preview() {
 			$output .= render_block( $inner_block );
 		}
 	}
+
+	remove_filter( 'render_block_data', $submission_date );
 
 	return $output;
 }
@@ -122,21 +139,62 @@ function jobswp_blocks_remove_job_form( $content ) {
 }
 add_filter( 'the_content', 'jobswp_blocks_remove_job_form', 12 );
 
+/**
+ * Starts capturing the Post a Job form.
+ *
+ * The jobswp plugin echoes the form from its the_content filter at priority 12,
+ * so the submitted values never pass through later the_content filters. A classic
+ * theme prints as it renders, but a block theme renders the page into a
+ * string first, so the echoed form would land before the document. This
+ * buffers around jobswp's filter and appends the form after every other
+ * the_content filter, which keeps jobswp's guarantee.
+ *
+ * @param string $content Page content.
+ * @return string
+ */
+function jobswp_blocks_post_job_form_start( $content ) {
+	if ( wp_is_block_theme() && is_page( 'post-a-job' ) ) {
+		ob_start();
+		$GLOBALS['jobswp_blocks_post_job_buffers'] = ( $GLOBALS['jobswp_blocks_post_job_buffers'] ?? 0 ) + 1;
+	}
+	return $content;
+}
+add_filter( 'the_content', 'jobswp_blocks_post_job_form_start', 11 );
+
+/**
+ * Appends the captured Post a Job form to the content.
+ *
+ * @param string $content Page content.
+ * @return string
+ */
+function jobswp_blocks_post_job_form_end( $content ) {
+	if ( empty( $GLOBALS['jobswp_blocks_post_job_buffers'] ) ) {
+		return $content;
+	}
+	--$GLOBALS['jobswp_blocks_post_job_buffers'];
+	return $content . ob_get_clean();
+}
+add_filter( 'the_content', 'jobswp_blocks_post_job_form_end', PHP_INT_MAX );
+
 if ( ! function_exists( 'jobswp_posted_on' ) ) {
 	/**
 	 * "Posted <date>" line used by the submitted job's preview. The classic
 	 * theme defined it; kept under its name for the partials.
 	 */
 	function jobswp_posted_on() {
+		$date_link = sprintf(
+			'<a href="%1$s" rel="bookmark"><time class="entry-date published" datetime="%2$s">%3$s</time></a>',
+			esc_url( get_permalink() ),
+			esc_attr( get_the_date( 'c' ) ),
+			esc_html( get_the_date() )
+		);
+
+		echo '<span class="posted-on">';
 		printf(
 			/* translators: %s: Linked post date. */
-			wp_kses_post( __( '<span class="posted-on">Posted %s</span>', 'jobswp' ) ),
-			sprintf(
-				'<a href="%1$s" rel="bookmark"><time class="entry-date published" datetime="%2$s">%3$s</time></a>',
-				esc_url( get_permalink() ),
-				esc_attr( get_the_date( 'c' ) ),
-				esc_html( get_the_date() )
-			)
+			esc_html__( 'Posted %s', 'jobswp' ),
+			$date_link // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built above from escaped parts.
 		);
+		echo '</span>';
 	}
 }

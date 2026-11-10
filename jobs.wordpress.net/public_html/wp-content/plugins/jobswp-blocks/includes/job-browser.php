@@ -159,7 +159,7 @@ function jobswp_blocks_browser_pills( $block_content, $block ) {
 		return $block_content;
 	}
 
-	$all = sprintf(
+	$all           = sprintf(
 		'<li class="wp-block-term jobswp-filter-all"><a href="%1$s" data-wp-on--click="actions.select" data-wp-context="%2$s" data-wp-bind--aria-current="state.current">%3$s</a></li>',
 		esc_url( home_url( '/#jobs' ) ),
 		esc_attr( wp_json_encode( array( 'slug' => 'all' ) ) ),

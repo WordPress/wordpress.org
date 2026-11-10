@@ -25,7 +25,9 @@
 		/* translators: %s: Remove a job URL. */
 		wp_kses( __( '<strong>Important!</strong> Take note of the following job token. It is your only means of removing the job from the site in a <em>timely</em> fashion prior to its automatic expiration. (Otherwise, you would have to make a request via the feedback form which could take 24-48 hours or longer to honor). The token is used on the <a href="%s">job removal page</a>.', 'jobswp' ), 'jobswp-ui' ),
 		'/remove-a-job/'
-	); ?></p>
+	);
+	?>
+	</p>
 
 	<p class="job-token">
 		<?php

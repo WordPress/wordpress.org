@@ -61,7 +61,7 @@ foreach ( $jobswp_blocks_people as $jobswp_blocks_person ) {
 	if ( 'list' === $jobswp_blocks_variant ) {
 		$jobswp_blocks_body = $jobswp_blocks_img . $jobswp_blocks_name;
 	} else {
-		$jobswp_blocks_img = sprintf(
+		$jobswp_blocks_img  = sprintf(
 			'<span class="jobswp-open-to-work__photo%1$s">%2$s</span>',
 			empty( $jobswp_blocks_person->show_badge ) ? '' : ' has-badge',
 			$jobswp_blocks_img

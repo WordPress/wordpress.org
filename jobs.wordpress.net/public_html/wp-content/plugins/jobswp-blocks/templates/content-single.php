@@ -21,8 +21,8 @@ $fields = array(
 // Build apply URL for the prominent CTA.
 $howtoapply_raw    = get_post_meta( get_the_ID(), 'howtoapply', true );
 $howtoapply_method = get_post_meta( get_the_ID(), 'howtoapply_method', true );
-$apply_url  = '';
-$apply_text = __( 'Apply Now', 'jobswp' );
+$apply_url         = '';
+$apply_text        = __( 'Apply Now', 'jobswp' );
 
 if ( $howtoapply_raw ) {
 	if ( ! $howtoapply_method ) {
@@ -128,28 +128,28 @@ if ( $howtoapply_raw ) {
 
 <?php
 // "Consider These Candidates" section on single job pages.
-	$single_result     = jobswp_get_open_to_work_candidates( 1, 4 );
-	$single_candidates = $single_result['candidates'];
-	if ( ! empty( $single_candidates ) ) :
-?>
+$single_result     = jobswp_get_open_to_work_candidates( 1, 4 );
+$single_candidates = $single_result['candidates'];
+if ( ! empty( $single_candidates ) ) :
+	?>
 <div class="job-detail-candidates">
 	<div class="job-detail-candidates__inner">
 		<h3><?php esc_html_e( 'WordPress Professionals Open to Work', 'jobswp' ); ?></h3>
 		<div class="job-detail-candidates__grid">
 			<?php foreach ( $single_candidates as $person ) : ?>
 				<?php
-				$role    = isset( $person->current_role )    ? $person->current_role    : '';
-				$company = isset( $person->current_company ) ? $person->current_company : '';
+				$candidate_role = isset( $person->current_role ) ? $person->current_role : '';
+				$company        = isset( $person->current_company ) ? $person->current_company : '';
 				?>
 				<a href="<?php echo esc_url( $person->profile_url ); ?>" class="candidate-card candidate-card--compact" target="_blank" rel="noopener noreferrer">
 					<div class="candidate-card__avatar<?php echo ! empty( $person->show_badge ) ? ' has-badge' : ''; ?>">
-						<img src="<?php echo esc_url( 'https://wordpress.org/grav-redirect.php?user=' . urlencode( $person->user_login ) . '&s=64' ); ?>" alt="" width="64" height="64" loading="lazy">
+						<img src="<?php echo esc_url( 'https://wordpress.org/grav-redirect.php?user=' . rawurlencode( $person->user_login ) . '&s=64' ); ?>" alt="" width="64" height="64" loading="lazy">
 					</div>
 					<div class="candidate-card__info">
 						<h3 class="candidate-card__name"><?php echo esc_html( $person->display_name ); ?></h3>
-						<?php if ( $role || $company ) : ?>
+						<?php if ( $candidate_role || $company ) : ?>
 							<p class="candidate-card__role">
-								<?php echo esc_html( $role ); ?>
+								<?php echo esc_html( $candidate_role ); ?>
 								<?php if ( $company ) : ?>
 									<span class="candidate-card__company"><?php echo esc_html( $company ); ?></span>
 								<?php endif; ?>
@@ -165,6 +165,6 @@ if ( $howtoapply_raw ) {
 		</p>
 	</div>
 </div>
-<?php
+	<?php
 	endif;
 ?>

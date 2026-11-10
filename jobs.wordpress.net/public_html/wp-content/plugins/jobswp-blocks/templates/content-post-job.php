@@ -8,7 +8,7 @@
 ?>
 <div class="items-required">* <?php esc_html_e( 'Items are required.', 'jobswp' ); ?></div>
 
-<?php if ( isset( $_POST['errors'] ) ) : ?>
+<?php if ( isset( $_POST['errors'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Missing -- jobswp checks the jobswppostjob nonce before it sets this flag; display only. ?>
 
 	<div class="notice notice-error">
 		<?php
@@ -22,7 +22,7 @@
 		<?php do_action( 'jobswp_notice', 'error' ); ?>
 	</div>
 
-<?php elseif ( isset( $_POST['verify'] ) ) : ?>
+<?php elseif ( isset( $_POST['verify'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Missing -- jobswp checks the jobswppostjob nonce before it sets this flag; display only. ?>
 
 	<div class="notice notice-info">
 		<div>
@@ -53,7 +53,7 @@
 
 	<?php jobswp_text_field( 'company', __( 'Company Name', 'jobswp' ), true ); ?>
 
-	<?php jobswp_text_field( 'location', __( 'Location', 'jobswp' ), false, 'text',  __( 'The desired location for any applicants and not necessarily your business location. Use \'N/A\' or leave blank if allowing a remote worker from anywhere.', 'jobswp' ) ); ?>
+	<?php jobswp_text_field( 'location', __( 'Location', 'jobswp' ), false, 'text', __( 'The desired location for any applicants and not necessarily your business location. Use \'N/A\' or leave blank if allowing a remote worker from anywhere.', 'jobswp' ) ); ?>
 
 	<?php $howtoapply_methods = jobswp_get_howtoapply_methods(); ?>
 	<div class="post-job-input">
@@ -100,8 +100,8 @@
 			<label for="category"><?php esc_html_e( 'Category', 'jobswp' ); ?>*</label>
 			<select name="category" id="category" class="<?php echo esc_attr( jobswp_required_field_classes( 'category' ) ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
-				<?php foreach ( Jobs_Dot_WP::get_job_categories() as $cat ) : ?>
-					<option value="<?php echo esc_attr( $cat->slug ); ?>" <?php echo jobswp_field_value( 'category', esc_attr( $cat->slug ) ); ?>><?php echo esc_html( $cat->name ); ?></option>
+				<?php foreach ( Jobs_Dot_WP::get_job_categories() as $job_category ) : ?>
+					<option value="<?php echo esc_attr( $job_category->slug ); ?>" <?php echo jobswp_field_value( 'category', esc_attr( $job_category->slug ) ); ?>><?php echo esc_html( $job_category->name ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</div>
@@ -140,9 +140,10 @@
 
 	<?php do_action( 'jobswp_post_job_form' ); ?>
 
-	<?php if ( isset( $_POST['verify'] ) ) {
+	<?php
+	if ( isset( $_POST['verify'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- jobswp checks the jobswppostjob nonce before it sets this flag; display only.
 		$button_label = __( 'Verify Job', 'jobswp' );
-	?>
+		?>
 		<input type="hidden" name="verify" value="1" />
 		<div class="notice notice-info accept">
 			<p><?php esc_html_e( 'By submitting a job to this site you acknowledge the following:', 'jobswp' ); ?></p>
@@ -162,9 +163,11 @@
 				<input type="checkbox" name="accept" id="accept" value="1" required /><label for="accept"><?php esc_html_e( 'I agree to the terms stated above.', 'jobswp' ); ?>*</label>
 			</p>
 		</div>
-	<?php } else {
+		<?php
+	} else {
 		$button_label = __( 'Submit Job', 'jobswp' );
-	} ?>
+	}
+	?>
 	<input class="btn btn-primary submit-job wp-element-button" id="submit-job" type="submit" name="submitjob" value="<?php echo esc_attr( $button_label ); ?>" />
 
 	<p class="post-job-remove-note">
