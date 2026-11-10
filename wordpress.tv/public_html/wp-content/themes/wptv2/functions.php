@@ -32,7 +32,6 @@ class WordPressTV_Theme {
 		add_action( 'publish_post', array( $this, 'publish_post' ), 10, 1 );
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_boxes' ) );
 		add_action( 'save_post', array( $this, 'save_meta_box_fields' ), 10, 2);
-		add_action( 'wp_footer', array( $this, 'videopress_flash_params' ) );
 		add_action( 'transition_post_status', array( $this, 'transition_post_status' ), 10, 2 );
 
 		add_filter( 'pre_option_blog_upload_space', array( $this, 'blog_upload_space' ) );
@@ -449,14 +448,6 @@ class WordPressTV_Theme {
 		} else {
 			delete_post_meta( $post_id, '_wptv_slides_url' );
 		}
-	}
-
-
-	/**
-	 * Change VideoPress Params, runs during wp_footer
-	 */
-	function videopress_flash_params() {
-		echo '<script type="text/javascript">if(jQuery.VideoPress){jQuery.VideoPress.video.flash.params.wmode="opaque";}</script>';
 	}
 
 	/**
