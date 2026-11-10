@@ -373,6 +373,11 @@ function inline_scripts() {
 		if ( closeButton ) {
 			closeButton.addEventListener( 'click', function() {
 				document.body.classList.remove( 'responsive-show' );
+
+				var toggle = document.getElementById( 'secondary-toggle' );
+				if ( toggle ) {
+					toggle.focus();
+				}
 			} );
 		}
 	</script>
