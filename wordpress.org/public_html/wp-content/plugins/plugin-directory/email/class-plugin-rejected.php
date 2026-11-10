@@ -387,7 +387,7 @@ If you resubmit this plugin without replying and communicating with us first, yo
 
 	public function reason_script_insertion() {
 		return __(
-			"Your plugin has been rejected because it lets users insert or execute arbitrary code on their site, and we don’t accept new plugins that do this.
+			'Your plugin has been rejected because it lets users insert or execute arbitrary code on their site, and we don’t accept new plugins that do this.
 
 This includes plugins that let users add or run their own PHP or JavaScript, such as code snippet managers, PHP or JavaScript editors, file managers, and AI tools that generate code meant to run on the site. It’s one of the types of plugins listed in our FAQ as not accepted: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
 
@@ -407,7 +407,7 @@ Code added through a plugin like this runs on the site without limits. A single 
 
 WordPress lets site owners and hosts turn off code editing in the dashboard for exactly this reason. A plugin that adds that ability back undoes the protection.
 
-A few plugins with this functionality are already in the directory. They were accepted under different standards in the past, and we learned a lot. Removing them now would cause harm to users. They aren’t a reason to accept new ones.",
+A few plugins with this functionality are already in the directory. They were accepted under different standards in the past, and we learned a lot. Removing them now would cause harm to users. They aren’t a reason to accept new ones.',
 			'wporg-plugins'
 		);
 	}
@@ -560,7 +560,7 @@ If you’ve read this far and still think we should host your code, please don�
 	 */
 	public function reason_multiple() {
 		return __(
-			"Your plugin has been rejected because of an issue with your accounts.
+			'Your plugin has been rejected because of an issue with your accounts.
 
 We noticed that your organization is using more than one account to own or submit plugins. This causes two problems:
 
@@ -585,7 +585,7 @@ Please take this as a warning, and don’t use multiple accounts this way in the
 
 If one of your other accounts has a submission that hasn’t been rejected, you’ll need to wait until we reject it. We reject submissions in bulk after 3 months (90 days) without progress. Manual rejections are time-consuming, especially when carried out one by one. Therefore, we won’t speed this up, so please don’t ask us to reject them sooner.
 
-If you believe we’ve made a mistake, don’t resubmit the plugin. Reply to this email and explain the situation instead.",
+If you believe we’ve made a mistake, don’t resubmit the plugin. Reply to this email and explain the situation instead.',
 			'wporg-plugins'
 		);
 	}
