@@ -1107,6 +1107,7 @@ class Template {
 			'security'             => 'Security concerns',
 			'remote-admin'         => 'Remote administration',
 			'common-plugin'        => 'Common plugin',
+			'multiple'             => 'Multiple accounts',
 			'other'                => 'OTHER: See notes',
 		);
 	}
