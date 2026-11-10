@@ -75,6 +75,23 @@ final class ProxyTest extends SsoTestCase {
 	}
 
 	/**
+	 * Until WordPress.org is enforced, core's password form tells the administrator why, too.
+	 *
+	 * @return void
+	 */
+	public function test_explains_the_logout_on_the_password_form(): void {
+		config( array( 'wporgsso.idp.cert' => '' ) );
+
+		$this->proxied( '0' )->actingAs( $this->admin )->get( route( 'dashboard' ) )->assertRedirect( route( 'login' ) );
+
+		// Core escapes old('email'), which is null on a first visit; PHP 8 deprecates that, and tests turn it into an exception.
+		$form = (string) $this->withSession( array( '_old_input' => array( 'email' => '' ) ) )->get( route( 'login' ) )->getContent();
+
+		$this->assertStringContainsString( 'name="password"', $form );
+		$this->assertStringContainsString( 'Administrators can only use the helpdesk through the proxy.', $form );
+	}
+
+	/**
 	 * Logging in through WordPress.org from outside the proxy doesn't get an administrator in either.
 	 *
 	 * @return void

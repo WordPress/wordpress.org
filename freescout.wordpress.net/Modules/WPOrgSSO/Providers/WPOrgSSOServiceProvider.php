@@ -266,6 +266,17 @@ final class WPOrgSSOServiceProvider extends ServiceProvider {
 			}
 		);
 
+		// Core's password form, shown until WordPress.org is enforced, doesn't show why someone was logged out.
+		\Eventy::addAction(
+			'login_form.before',
+			static function (): void {
+				$error = (string) session( self::SESSION_ERROR, '' );
+				if ( '' !== $error ) {
+					echo '<div class="alert alert-danger">' . e( $error ) . '</div>';
+				}
+			}
+		);
+
 		\Eventy::addAction(
 			'user.create.before_email',
 			static function (): void {
