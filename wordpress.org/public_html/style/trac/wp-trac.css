@@ -126,7 +126,7 @@ footer :link:hover, footer :visited:hover,
 
 #headline .menu a,
 #headline .menu a:visited {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 }
 
 #headline .menu a:hover,
@@ -250,7 +250,7 @@ h3.change a {
 #metanav.nav a,
 #metanav.nav a:visited,
 #metanav form.trac-logout button {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	background: inherit;
 	border: inherit;
 }

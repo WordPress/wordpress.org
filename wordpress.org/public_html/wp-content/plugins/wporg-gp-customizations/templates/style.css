@@ -250,7 +250,7 @@ p.site-title a {
 }
 
 .site-description {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	font-size: 1.25rem;
 	font-weight: 300;
 	margin: -0.4rem auto 2rem;
@@ -316,7 +316,7 @@ p.site-title a {
 }
 
 .navigation-main a {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	font-size: 14px;
 }
 
