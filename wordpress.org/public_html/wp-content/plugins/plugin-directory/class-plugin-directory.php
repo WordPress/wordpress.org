@@ -211,6 +211,8 @@ class Plugin_Directory {
 		}
 
 		wp_set_object_terms( $post_id, $contributors, 'plugin_contributors' );
+
+		Standalone\Plugins_Info_API::flush_plugin_information_cache( $post_after->post_name );
 	}
 
 	/**
