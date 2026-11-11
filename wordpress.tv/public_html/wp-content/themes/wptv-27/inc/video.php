@@ -273,7 +273,7 @@ function thumbnail_html( $html, $post_id, $thumbnail_id, $size, $attr ) {
 			$srcset[] = esc_url_raw( add_query_arg( 'w', $width, $url ) ) . " {$width}w";
 		}
 		$image->set_attribute( 'srcset', implode( ', ', $srcset ) );
-		$image->set_attribute( 'sizes', 'auto, (max-width: 600px) 100vw, 280px' );
+		$image->set_attribute( 'sizes', 'auto, (max-width: 600px) 100vw, (max-width: 959px) 50vw, 280px' );
 		$url = add_query_arg( 'w', 640, $url );
 	}
 	$image->set_attribute( 'src', esc_url_raw( $url ) );
