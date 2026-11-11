@@ -33,12 +33,6 @@ add_action( 'login_init', function() {
 /**
  * Serve a 404 for a non-numeric `p`, such as `?p=job/abc123`.
  *
- * These are malformed links to a page that doesn't exist, which search engines
- * should see as Not Found rather than as a 400 Bad Request. Runs before
- * bbp_request and check_for_invalid_query_vars(), which would reject it.
- *
- * @see https://meta.trac.wordpress.org/ticket/6768
- *
  * @param array $query_vars The parsed query variables.
  * @return array The query variables.
  */
