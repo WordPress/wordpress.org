@@ -110,7 +110,7 @@ npm run themes:test
 
 ### Jobs
 
-A local instance of jobs.wordpress.net with the JobsWP plugin, theme, sample job categories, and sample job posts.
+A local instance of jobs.wordpress.net with the JobsWP plugin, the block theme and its plugin, sample job categories, and sample job posts. The pages are created from `jobs/pages/`.
 
 **Start:**
 
@@ -126,10 +126,10 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
-**Block theme** (switches the running site to the `wporg-jobs-2026` block theme and fills its pages from `jobs/pages/`; starting the environment switches back to the classic theme):
+**Classic theme** (the one production runs; starting the environment activates the block theme again):
 
 ```bash
-npm run jobs:block-theme
+npm run jobs:env -- run cli -- wp theme activate jobswp
 ```
 
 **Run tests** (the JobsWP plugin's PHPUnit suite, in a dedicated test environment):

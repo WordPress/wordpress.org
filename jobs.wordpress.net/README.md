@@ -21,7 +21,7 @@ To use it, activate `wporg-jobs-blocks`, then “Jobs Theme 2026”, and set up 
 - **Post a Job** (`post-a-job`): no content, template “Wide page”. The JobsWP plugin adds the form.
 - **Remove a Job** (`remove-a-job`): content from `remove-a-job.html`, template “Wide page”. `wporg-jobs-blocks` adds the form.
 
-Locally, `npm run jobs:block-theme` does all of this. The environment activates the classic theme each time it starts, so run it again after a restart.
+The local environment does all of this when it starts.
 
 ## Development
 
@@ -31,7 +31,6 @@ Run the site locally with sample job categories and posts, and run the plugin's 
 cd ../environments
 npm install
 npm run jobs:env start   # http://localhost:8888
-npm run jobs:block-theme # switch the running site to the block theme
 npm run jobs:env stop    # the test environment uses the same port
 npm run jobs:test
 ```
