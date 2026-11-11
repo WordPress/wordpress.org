@@ -118,17 +118,11 @@ function wporg_support_filter_update_php_content( $content ) {
 	);
 	$content .= '</li>';
 	$content .= '<li>' . __( '<strong>Update WordPress, themes, and plugins:</strong> from your WordPress Dashboard, head to the Updates page under the <em>Dashboard &gt; Updates</em> menu, and then update everything. You should do this regularly anyway :). When done, check that your site is working as expected.', 'wporg-forums' ) . '</li>';
-	$content .= '<li>';
-	$content .= sprintf(
-		/* translators: %s: link URL to the PHP Compatibility Checker plugin */
-		__( '<strong>Check PHP compatibility:</strong> install the <a href="%s">PHP Compatibility Checker plugin</a> to check your themes and plugins for possible issues. This plugin isn&#8217;t perfect and may miss items or flag false positives, but it does work in most cases.', 'wporg-forums' ),
-		esc_url( _x( 'https://wordpress.org/plugins/php-compatibility-checker/', 'link URL to the PHP Compatibility Checker plugin', 'wporg-forums' ) )
-	);
-	$content .= '</li>';
+	$content .= '<li>' . __( '<strong>Check PHP compatibility:</strong> make sure your themes and plugins are actively maintained by checking when each was last updated on its WordPress.org page or its developer&#8217;s website. If you&#8217;re unsure whether one works with newer versions of PHP, ask its developer. If your hosting company offers a staging site, update PHP there first and test your site before updating your live site.', 'wporg-forums' ) . '</li>';
 	$content .= '<li>';
 	$content .= sprintf(
 		/* translators: %s: link URL to wordpress.org */
-		__( '<strong>Fix any PHP compatibility issues:</strong> if the PHP Compatibility Checker plugin picks up any issues, get in touch with the theme or plugin developer and ask them to investigate. If they can&#8217;t or won&#8217;t get back to you, have a look for themes or plugins on <a href="%s">WordPress.org</a> with similar functionality and use one of these instead.', 'wporg-forums' ),
+		__( '<strong>Fix any PHP compatibility issues:</strong> if a theme or plugin hasn&#8217;t been updated in a long time, or its developer can&#8217;t confirm that it works with newer versions of PHP, have a look for themes or plugins on <a href="%s">WordPress.org</a> with similar functionality and use one of these instead.', 'wporg-forums' ),
 		esc_url( _x( 'https://wordpress.org/', 'link URL to wordpress.org', 'wporg-forums' ) )
 	);
 	$content .= '</li>';
