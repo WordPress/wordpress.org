@@ -267,6 +267,45 @@ All accounts use the password `password`.
 
 **Block editor:** the forums use the block editor through [Blocks Everywhere](https://github.com/Automattic/blocks-everywhere), which is not installed here — it needs a Gutenberg old enough to break against WordPress trunk until [Automattic/blocks-everywhere#211](https://github.com/Automattic/blocks-everywhere/pull/211) lands. `Plugin::__construct()` loads the block support only when that plugin is present, so the environment runs on bbPress' plain editor until then.
 
+### WordPress.tv
+
+A local instance of [WordPress.tv](https://wordpress.tv/) with the `wptv-27` block theme and Jetpack, which provides the VideoPress player and the sharing buttons.
+
+**Start:**
+
+```bash
+npm run wptv:env start
+```
+
+The first start imports about 60 recent, featured, Education and How-To videos from WordPress.tv. It brings their speakers, events, languages, categories and producers, plus the site's pages. Each video embeds its real VideoPress video, so the players stream and the thumbnails load. A pending submission is added for the moderation tools.
+
+**Access:** `http://localhost:8888`. Log in with `admin` / `password` to edit videos or moderate submissions.
+
+**Import new videos** (clears the import flag, then imports the videos that are missing):
+
+```bash
+npm run wptv:refresh
+```
+
+**WP CLI:**
+
+```bash
+npm run wptv:env -- run cli -- wp <command>
+```
+
+**Run tests** (the theme's PHPUnit suite, in a dedicated test environment):
+
+```bash
+npm run wptv:test
+```
+
+**What differs from production.** WordPress.tv runs on WordPress.com, which provides VideoPress internals that Jetpack doesn't have. Without them, the theme leaves out what it builds from them:
+
+- Download links, subtitle tracks, and the video data in JSON-LD and Open Graph tags are missing, and `/api/videos.json` lists no video files.
+- `/oembed/` and `/unisubs/` answer with an error for every video.
+- Jetpack runs in offline mode. `wordpress-tv/mu-plugins/wptv-local.php` turns on the VideoPress and Sharing modules anyway, so the players and sharing buttons render. The Like button needs a connection, so it doesn't show, and the editor asks to connect Jetpack.
+- Uploads from the submission form stay local instead of going to VideoPress, so every submission gets the State of the Word 2024 video.
+
 ### Photo Directory
 
 A test-only environment for the Photo Directory plugin in `wordpress.org/public_html/wp-content/plugins/photo-directory/`. The plugin is mounted at `wp-content/plugins/photo-directory` but not activated: its test bootstrap loads only the classes under test, so the suite runs without Google Cloud credentials.

@@ -1751,6 +1751,13 @@ ul.projects-dropdown li > a > span {
 	border-top: none;
 }
 
+.sort-bar form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 5px;
+}
+
 .sort-bar label {
 	font-size: 12px;
 	line-height: 14px;
@@ -2281,7 +2288,10 @@ ul.ct-legend {
 .editor .translation,
 span.context,
 table.translations td.original,
-table.translations td.translation {
+table.translations td.translation,
+.consistency-table td,
+.consistency-table th,
+.translations-unique li {
 	word-break: normal;
 	word-wrap: break-word;
 	overflow-wrap: break-word;

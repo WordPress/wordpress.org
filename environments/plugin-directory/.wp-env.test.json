@@ -10,6 +10,7 @@
 	],
 	"mappings": {
 		"wp-content/env-bin": "./plugin-directory/bin",
+		"wp-content/plugins/wporg-abilities": "../wordpress.org/public_html/wp-content/plugins/wporg-abilities",
 		"wp-content/mu-plugins/pub/locales": "../wordpress.org/public_html/wp-content/mu-plugins/pub/locales",
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build"
 	},

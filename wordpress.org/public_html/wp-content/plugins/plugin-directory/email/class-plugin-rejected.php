@@ -54,29 +54,40 @@ class Plugin_Rejected extends Markdown_Base {
 		return $this->{$method}();
 	}
 
+	/**
+	 * Returns the rejection email content for a review without progress in 3 months.
+	 *
+	 * @return string
+	 */
 	public function reason_3_month() {
 		return __(
-			"Your plugin has been rejected because it has been roughly 90 days without significant progress being made on the review we sent to the email address on record at the beginning of the review.
+			"Your plugin has been rejected because there has been no significant progress on its review for about 90 days.
 
-https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#why-was-my-plugin-rejected-after-three-months
+When the review started, we sent our feedback to the email address on record for your account. Since the issues we pointed out haven’t been addressed in that time, we’ve closed the review.
+
+More details: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#why-was-my-plugin-rejected-after-three-months
 
 <strong>What to do next</strong>
 
-If you no longer wish to have your plugin reviewed you can simply delete this message. No harm, no foul.
+If you no longer want your plugin reviewed, you don’t need to do anything. You can ignore or delete this email.
 
-If you want to finish your review, please do the following:
+If you’d like to continue with the review:
 
-- <strong>First</strong>, find the last email we sent you with our latest review, read that email thoroughly and <strong>fix the issues mentioned</strong>.
-- Once your plugin is corrected, you are ready to <a href='https://wordpress.org/plugins/developers/add/'>resubmit it</a> and <strong>reply to this email</strong> so we know you want to continue.
-- You will then have to <strong>wait</strong> your turn for the team to review your plugin again.
+1. Find the last email we sent you with our review. Read it carefully and fix all the issues it mentions.
+2. Once your plugin is fixed, <a href='https://wordpress.org/plugins/developers/add/'>submit it again</a>.
+3. That’s it. <strong>You don’t need to reply to this email.</strong> Submitting your plugin again is enough. It will go back into the queue, and the team will review it again when its turn comes.
 
-We understand that sometimes emails get lost or mistakenly filed as spam, and it's entirely possible that you never received or seen our previous emails. If you can't find it, let us know and we'll send it to you again.
+<strong>Can’t find our review email?</strong>
+
+Emails sometimes get lost or land in the spam folder, so it’s possible you never received our previous messages. Please check your spam or junk folder first, and search for emails from plugins@wordpress.org.
+
+If you still can’t find it, <strong>reply to this email and ask us to resend it.</strong> We’ll send you a new copy so you can work on the fixes.
 
 <strong>Why this happens</strong>
 
-In order to keep the plugin queue manageable, we reject plugins that are not making progress after 3 months (90 days). Even with this policy, we have more than 500 plugins waiting for developers to complete their review at any given time.
+To keep the review queue manageable, we reject plugins that haven’t made progress in 3 months (90 days). Even with this policy, more than 4000 plugins are waiting for their developers to address our feedback at any given time.
 
-Thankfully, a rejection does not mean we can't go forward. If you want to continue, please just update your plugin, submit it and reply to let us know.",
+A rejection isn’t the end of the road. When you’re ready, fix your plugin and submit it again.",
 			'wporg-plugins'
 		);
 	}
@@ -87,11 +98,13 @@ Thankfully, a rejection does not mean we can't go forward. If you want to contin
 
 Any time your plugin replicates functionality found in WordPress (i.e. the uploader, jquery) is frowned upon, as it presents a possible security risk. The features in WordPress have been tested by many more people than use most plugins, so the built in tools are less likely to have issues.
 
+This is one of the types of plugins we don’t accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
 <strong>What to do next</strong>
 
 Please read this email in it's entirety. We know it's hurtful to be told we're not hosting your code, and there is always the possibility that we've made a mistake.
 
-If you feel that we have, please reply to this email with your plugin zip attached, explain why, and we will re-review.
+If you feel that we have, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why. We will then re-review it.
 
 We ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.",
 			'wporg-plugins'
@@ -105,6 +118,8 @@ We ask you <strong>not</strong> resubmit the plugin, and reply to this email ins
 The WordPress plugin ecosystem thrives on innovation, and we encourage you to explore its vast potential by creating unique solutions that fill unmet needs.
 
 Please consider developing plugins that offer fresh value to users. We'd be excited to review your plugin in the future!
+
+Note that this is one of the types of plugins we don’t accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
 
 <strong>What to do next</strong>
 
@@ -123,6 +138,8 @@ Instead, reply to this email and explain the situation so we can properly direct
 
 Despite the fact that all plugins in our directory are licensed under the GPL or compatible licenses, we do not allow direct copies of other plugins to be re-listed under somebody else's name. \"Forking\" is acceptable only when the resulting fork is of a substantial nature, or when the original plugin is no longer updated or supported. When this is not the case, the plugin is rejected.
 
+This is one of the types of plugins we don’t accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
 <strong>What to do next</strong>
 
 We know it can be hurtful to be told we will not host your code, and we ask you consider the following options:
@@ -130,7 +147,7 @@ We know it can be hurtful to be told we will not host your code, and we ask you 
 - contribute back to the original plugin and improve it
 - create an add-on to the existing plugin
 - contribute a translation via the polyglots team - https://make.wordpress.org/polyglots/handbook/rosetta/theme-plugin-directories/
-- If you feel this rejection was in error, please <strong>reply to this email</strong> with a copy of your code attached and let us know. We will re-review your code and proceed from there.
+- If you feel this rejection was in error, please <strong>reply to this email</strong> with a link to download your plugin as a zip file (or with the zip file attached) and let us know. We will re-review your code and proceed from there.
 
 Remember, <strong>do not</strong> resubmit the plugin. If you resubmit the plugin without replying to this email, your account will be suspended.",
 			'wporg-plugins'
@@ -141,9 +158,13 @@ Remember, <strong>do not</strong> resubmit the plugin. If you resubmit the plugi
 		return __(
 			"Your plugin has been rejected because we no longer accepting frameworks, boilerplates, and libraries as stand-alone plugins.
 
+This is one of the types of plugins we don’t accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
+<strong>Insisting won’t change this decision.</strong> To get your plugin accepted, you’ll need to change its functionality or reconsider your idea. If you believe we’ve made a mistake about your plugin, you can still reply as explained below.
+
 <strong>What to do next</strong>
 
-If you feel this was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin is not a library or boilerplate.
+If you feel this was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin is not a library or boilerplate.
 
 Before you do so, we ask you take the time to read this email in it's entirety. We know it's hurtful to be told we will not host your code, and this particular subject can be contentious, especially because we used to allow library code.
 
@@ -191,7 +212,7 @@ While the directory is open for all secure, GPLv2 (or later) compatible plugins,
 
 We know that being told we won't host your code is hurtful, and we ask you please read this email in full.
 
-If, at the end, you feel this decision was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be accepted.
+If, at the end, you feel this decision was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be accepted.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
@@ -296,7 +317,7 @@ We understand it is hurtful to be told we will not host your code here. This dec
 
 We recommend you include this code in your existing plugin instead of as a separate add-on.
 
-If you feel this was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be hosted here.
+If you feel this was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be hosted here.
 
 Before you do so, we ask you take the time to read this email in it's entirety.
 
@@ -315,13 +336,17 @@ If you've gotten all the way down here and still think we should be hosting your
 		return __(
 			"Your plugin has been rejected because we do not currently accept storefront plugins.
 
+This is one of the types of plugins we don’t accept in the directory. You can see them all in our FAQ: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
+<strong>Insisting won’t change this decision.</strong> To get your plugin accepted, you’ll need to change its functionality or reconsider your idea. If you believe we’ve made a mistake about your plugin, you can still reply as explained below.
+
 <strong>What to do next</strong>
 
 We understand it is hurtful to be told we will not host your code here. This decision has nothing to do with the quality or purpose of your code, and is solely related to the fact that it is, in fact, a storefront.
 
 We recommend you host this on your own service, and make use of self-directed updates for your ongoing support and maintenance.
 
-If you feel this was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be hosted here.
+If you feel this was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be hosted here.
 
 Before you do so, we ask you take the time to read this email in it's entirety.
 
@@ -362,29 +387,27 @@ If you resubmit this plugin without replying and communicating with us first, yo
 
 	public function reason_script_insertion() {
 		return __(
-			"Your plugin has been rejected because we are not accepting plugins of this nature in most cases.
+			'Your plugin has been rejected because it lets users insert or execute arbitrary code on their site, and we don’t accept new plugins that do this.
+
+This includes plugins that let users add or run their own PHP or JavaScript, such as code snippet managers, PHP or JavaScript editors, file managers, and AI tools that generate code meant to run on the site. It’s one of the types of plugins listed in our FAQ as not accepted: https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#are-there-plugins-you-dont-accept
+
+<strong>This decision is final</strong>
+
+Security measures won’t change this decision. Restricting the feature to administrators, capability checks, nonces, sanitization, code validation, or any other safeguard can’t make this kind of plugin acceptable, because the risk comes from the feature itself.
 
 <strong>What to do next</strong>
 
-We understand it is hurtful to be told we will not host your code here and ask you please read this email carefully.
+If you’d like to have this plugin in the directory, you’ll need to change its functionality. For example, instead of letting users enter their own code, your plugin could offer the specific features they need as settings. Once your plugin no longer allows arbitrary code, you’re welcome to submit it again. Submitting it again without that change will lead to the same result.
 
-You're welcome to submit a different plugin, but we feel that this is a poor choice to submit. Also there are a handful of plugins out there that already handle this, it's preferred you use those instead.
+If we have misread your plugin and it does not allow the insertion or execution of arbitrary code, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and please clarify that for us. Other replies won’t change this decision.
 
-If you have any questions, please reply to this email. Otherwise it's okay to just move on to something else.
+<strong>Why we don’t accept these plugins</strong>
 
-If you feel we've made this decision in error, please reply with a copy of you code attached and explain why you think that is the case.
+Code added through a plugin like this runs on the site without limits. A single mistake, a snippet copied from an untrusted source, or a compromised administrator account is enough to take over the site or attack its visitors, and the plugin becomes the way in.
 
-<strong>Why these kinds of plugins are not accepted</strong>
+WordPress lets site owners and hosts turn off code editing in the dashboard for exactly this reason. A plugin that adds that ability back undoes the protection.
 
-Script insertion plugins are amazing and powerful. They're also incredibly dangerous and require a high level understanding of sanitization, security, and usage. These are skills that take years to master. WordPress has a highly complicated tool to insert CSS, and it opts not to handle javascript because of the dangers. PHP is even more complicated.
-
-Besides the sanitization issues, allowing arbitrary script insertion leads to users adding scripts that are dangerous without knowing. Users will paste in just anything and your plugin can become the unwitting vector for hacks.
-
-This is why WordPress itself allows you to lock people out of being able to edit theme and plugin files directly (via DEFINES that are used by many managed hosts), but also has post-processing checks that verify the site will still function after any changes.
-
-Because of those reasons, unless a submission demonstrates a solid understanding of the security and usage issues out of the gate, we reject them.
-
-If you've gotten all the way down here and still think we should be hosting your code, we ask you <strong>not</strong> resubmit the plugin, and reply to this email instead.",
+A few plugins with this functionality are already in the directory. They were accepted under different standards in the past, and we learned a lot. Removing them now would cause harm to users. They aren’t a reason to accept new ones.',
 			'wporg-plugins'
 		);
 	}
@@ -397,7 +420,7 @@ If you've gotten all the way down here and still think we should be hosting your
 
 We know that being told we won't host your code is hurtful, and we ask you please read this email in full.
 
-If, at the end, you feel this decision was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be accepted.
+If, at the end, you feel this decision was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be accepted.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
@@ -443,7 +466,7 @@ While the directory is open for all secure, GPLv2 (or later) compatible plugins,
 
 We know that being told we won't host your code is hurtful, and we ask you please read this email in full.
 
-If, at the end, you feel this decision was in error, please reply to this email with your plugin attached as a zip and explain why you feel your plugin should be accepted.
+If, at the end, you feel this decision was in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should be accepted.
 
 <strong>Why this plugin was not accepted</strong>
 
@@ -466,7 +489,7 @@ If you've gotten all the way down here and still think we should be hosting your
 
 Your submission has been successfully rejected.
 
-If, at the end, you feel this decision was in error, please <strong>reply</strong> to this email with your plugin attached as a zip and explain what happened.",
+If, at the end, you feel this decision was in error, please <strong>reply</strong> to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain what happened.",
 			'wporg-plugins'
 		);
 	}
@@ -483,7 +506,7 @@ You're welcome to submit a different plugin, but we feel that this is a poor cho
 
 If you have any questions, please reply to this email. Otherwise it's okay to just move on to something else.
 
-If you feel we've made this decision in error, please reply with a copy of you code attached and explain why you think that is the case.
+If you feel we’ve made this decision in error, please reply with a link to download your plugin as a zip file (or with the zip file attached) and explain why you think that is the case.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
@@ -515,7 +538,7 @@ You’re welcome to submit a different plugin, but we don’t think this one is 
 
 If you have any questions, reply to this email. Otherwise, it’s okay to move on to something else.
 
-If you think we’ve made this decision in error, reply with a copy of your code attached and explain why.
+If you think we’ve made this decision in error, reply with a link to download your plugin as a zip file (or with the zip file attached) and explain why.
 
 <strong>Why these kinds of plugins are not accepted</strong>
 
@@ -530,11 +553,48 @@ If you’ve read this far and still think we should host your code, please don�
 		);
 	}
 
+	/**
+	 * Returns the rejection email content for an organization using multiple accounts.
+	 *
+	 * @return string
+	 */
+	public function reason_multiple() {
+		return __(
+			'Your plugin has been rejected because of an issue with your accounts.
+
+We noticed that your organization is using more than one account to own or submit plugins. This causes two problems:
+
+- All plugins that belong to the same organization must be owned by the same account.
+- In most cases, you can only have one plugin submission at a time.
+
+You can read more in our FAQ:
+
+- https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#how-many-plugins-can-i-submit-for-review-at-a-time
+- https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/#can-i-submit-multiple-plugins-with-multiple-accounts
+
+Please take this as a warning, and don’t use multiple accounts this way in the future.
+
+<strong>What to do next</strong>
+
+1. Choose one account for your organization and transfer all your plugins to it. You can transfer plugins yourself from the plugin’s Advanced tab by following this guide: https://developer.wordpress.org/plugins/wordpress-org/transferring-your-plugin-to-a-new-owner/
+2. Once all your plugins are under that account, use it to submit your plugins, <strong>one at a time</strong>.
+
+<strong>If you can solve this yourself, you don’t need to reply to this email.</strong> If you need help with a transfer, reply to this email and we’ll help you.
+
+<strong>Submissions from your other accounts</strong>
+
+If one of your other accounts has a submission that hasn’t been rejected, you’ll need to wait until we reject it. We reject submissions in bulk after 3 months (90 days) without progress. Manual rejections are time-consuming, especially when carried out one by one. Therefore, we won’t speed this up, so please don’t ask us to reject them sooner.
+
+If you believe we’ve made a mistake, don’t resubmit the plugin. Reply to this email and explain the situation instead.',
+			'wporg-plugins'
+		);
+	}
+
 	public function reason_other() {
 		return __(
 			"Plugins are rejected after three months (90 days) when there has not been significant progress made on the review. If this is not the case for your plugin, you will receive a followup email explaining the reason for this decision within the next 24 hours. Please wait for that email before requesting further details.
 
-If you believe this to be in error, please email us with your plugin attached as a zip and explain why you feel your plugin should not have been rejected.
+If you believe this to be in error, please reply to this email with a link to download your plugin as a zip file (or with the zip file attached) and explain why you feel your plugin should not have been rejected.
 
 If you're still working on your code, don't panic. You can reply to the original review (or even this email) with your updated code for as long as needed. Even years. All we ask is you do not resubmit your plugin until asked to do so.",
 			'wporg-plugins'

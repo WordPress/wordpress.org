@@ -90,8 +90,17 @@ class Cross_Locale_PTE {
 
 			$user_input = sanitize_text_field( wp_unslash( $_REQUEST['user'] ) );
 			self::$user = get_user_by( 'login', $user_input );
-			if ( ! self::$user ) {
+
+			if ( ! self::$user && false !== strpos( $user_input, '@' ) ) {
 				self::$user = get_user_by( 'email', $user_input );
+			}
+
+			if ( ! self::$user && is_numeric( $user_input ) ) {
+				self::$user = get_user_by( 'id', (int) $user_input );
+			}
+
+			if ( ! self::$user ) {
+				self::$user = get_user_by( 'slug', $user_input );
 			}
 
 			if ( self::$user ) {
@@ -335,11 +344,11 @@ class Cross_Locale_PTE {
 			$cache = array();
 		}
 
-		if ( empty( $user->ID ) ) {
+		$user_id = $user instanceof WP_User ? (int) $user->ID : (int) $user;
+		if ( ! $user_id ) {
 			return false;
 		}
 
-		$user_id    = (int) $user->ID;
 		$project_id = intval( $project_id );
 
 		if ( isset( $cache[ $user_id ][ $project_id ] ) ) {
@@ -476,8 +485,14 @@ class Cross_Locale_PTE {
 			return $verdict;
 		}
 
+		$user_id = (int) $args['user_id'];
+		if ( ! $user_id ) {
+			return $verdict;
+		}
+
 		static $current_translation_by_user = array();
-		$cache_key = $args['user']->ID . '_' . $translation->translation_set_id . '_' . $translation->original_id;
+
+		$cache_key = $user_id . '_' . $translation->translation_set_id . '_' . $translation->original_id;
 
 		if ( isset( $current_translation_by_user[ $cache_key ] ) ) {
 			return $current_translation_by_user[ $cache_key ];
@@ -487,7 +502,7 @@ class Cross_Locale_PTE {
 			$current_translation = GP::$translation->find_one( array( 'translation_set_id' => $translation->translation_set_id, 'original_id' => $translation->original_id, 'status' => 'current' ) );
 			if ( $current_translation ) {
 				$translation_owner_id = $current_translation->user_id_last_modified ?: $current_translation->user_id;
-				if ( intval( $translation_owner_id ) !== $args['user']->ID ) {
+				if ( intval( $translation_owner_id ) !== $user_id ) {
 					// Current translation was approved by someone else. Disallow setting to current.
 					return $current_translation_by_user[ $cache_key ] = false;
 				}

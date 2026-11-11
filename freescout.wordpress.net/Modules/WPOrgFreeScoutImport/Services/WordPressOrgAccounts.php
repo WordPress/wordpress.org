@@ -108,7 +108,7 @@ final class WordPressOrgAccounts {
 	public function export(): string {
 		$rows = array( self::COLUMNS );
 
-		foreach ( People::directory( $this->api ) as $remote_user ) {
+		foreach ( People::people( $this->api ) as $remote_user ) {
 			$existing = People::existing( $this->source_id, $remote_user );
 			$user     = $existing ? $existing['user'] : null;
 			$rows[]   = array(
@@ -177,7 +177,8 @@ final class WordPressOrgAccounts {
 	 * @param array[] $rows Rows, from parse().
 	 * @return array[] Each with `row`, `remote_user` (or null), `wporg_user` (WordPressOrgUser, or null), `action`
 	 *                 (one of the constants, or null), `user` (the user here it's for, or null for a new one),
-	 *                 `mismatch`, and `error` (why nothing can be done, or '').
+	 *                 `mismatch`, `deleted` (whether the remote user is deleted there, so isn't switched on), and
+	 *                 `error` (why nothing can be done, or '').
 	 */
 	public function plan( array $rows ): array {
 		$client    = Client::from_config();
@@ -187,20 +188,22 @@ final class WordPressOrgAccounts {
 		$usernames = array();
 
 		foreach ( $rows as $row ) {
-			$step = $this->plan_row( $row, $client );
-			$id   = (int) ( $step['remote_user']['id'] ?? 0 );
-			$user = $step['user'] ? (int) $step['user']->id : 0;
+			$step  = $this->plan_row( $row, $client );
+			$id    = (int) ( $step['remote_user']['id'] ?? 0 );
+			$user  = $step['user'] ? (int) $step['user']->id : 0;
+			$first = $step['error'] ? null : ( $usernames[ $step['wporg_user']->username ] ?? null );
 
-			// One account per person: a CSV can't connect anyone twice, one account twice, or one user here to two.
-			if ( ! $step['error'] && isset( $usernames[ $step['wporg_user']->username ] ) ) {
-				$step = array(
-					'action' => null,
-					'error'  => __( 'Another row names this WordPress.org account already.' ),
-				) + $step;
-			} elseif ( ! $step['error'] && isset( $people[ $id ] ) ) {
+			// A CSV can't connect anyone twice, or one user here to two accounts.
+			if ( ! $step['error'] && isset( $people[ $id ] ) ) {
 				$step = array(
 					'action' => null,
 					'error'  => __( 'Another row is for this user already.' ),
+				) + $step;
+			} elseif ( null !== $first && ! $first['mismatch'] && in_array( $first['action'], array( self::CONNECT, self::CREATE ), true ) ) {
+				// The account's first row connects it, and the rest are credited to its user; unless that row has to be confirmed.
+				$step = array(
+					'action' => self::USE,
+					'user'   => $first['user'],
 				) + $step;
 			} elseif ( ! $step['error'] && $user && isset( $targets[ $user ] ) && $targets[ $user ] !== $step['wporg_user']->username ) {
 				$step = array(
@@ -210,7 +213,7 @@ final class WordPressOrgAccounts {
 			}
 
 			if ( ! $step['error'] ) {
-				$usernames[ $step['wporg_user']->username ] = true;
+				$usernames[ $step['wporg_user']->username ] = $usernames[ $step['wporg_user']->username ] ?? $step;
 				$people[ $id ]                              = true;
 				if ( $user ) {
 					$targets[ $user ] = $step['wporg_user']->username;
@@ -266,7 +269,10 @@ final class WordPressOrgAccounts {
 						}
 
 						People::choose( $this->source_id, $id, $user );
-						People::activate( $user );
+						// A deleted remote user's row doesn't switch their user on, but still gives an active one access.
+						if ( ! $step['deleted'] || User::STATUS_ACTIVE === (int) $user->status ) {
+							People::activate( $user );
+						}
 
 						return $user;
 					}
@@ -335,12 +341,15 @@ final class WordPressOrgAccounts {
 			'action'      => null,
 			'user'        => null,
 			'mismatch'    => false,
+			'deleted'     => false,
 			'error'       => '',
 		);
 
 		if ( ! $step['remote_user'] ) {
 			return array( 'error' => __( 'No user there with that ID or email.' ) ) + $step;
 		}
+
+		$step['deleted'] = People::is_deleted( $step['remote_user'] );
 
 		try {
 			$step['wporg_user'] = $this->lookup( $row['username'], $client );
@@ -415,7 +424,7 @@ final class WordPressOrgAccounts {
 			return null;
 		}
 
-		foreach ( People::directory( $this->api ) as $remote_user ) {
+		foreach ( People::people( $this->api ) as $remote_user ) {
 			if ( 0 === strcasecmp( (string) ( $remote_user['email'] ?? '' ), $email ) ) {
 				return $remote_user;
 			}

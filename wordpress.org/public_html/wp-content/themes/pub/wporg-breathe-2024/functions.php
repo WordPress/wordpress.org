@@ -276,6 +276,21 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\wporg_breathe_add_site_navigation_menus' );
 
 /**
+ * Drops page-pledges.php from the page template hierarchy on sites without a team.
+ *
+ * @param array $templates Page template file names, in order of preference.
+ * @return array Page template file names.
+ */
+function remove_pledges_template_without_team( $templates ) {
+	if ( function_exists( 'WordPressdotorg\\Make\\Pledges\\get_current_team' ) && \WordPressdotorg\Make\Pledges\get_current_team() ) {
+		return $templates;
+	}
+
+	return array_values( array_diff( $templates, array( 'page-pledges.php' ) ) );
+}
+add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\remove_pledges_template_without_team' );
+
+/**
  * Add postMessage support for site title and description in the customizer.
  *
  * @param WP_Customize_Manager $wp_customize The customizer object.
@@ -353,6 +368,18 @@ function inline_scripts() {
 					'; path=<?php echo esc_js( $current_site->path ); ?>';
 			} );
 		}
+
+		var closeButton = document.getElementById( 'secondary-close' );
+		if ( closeButton ) {
+			closeButton.addEventListener( 'click', function() {
+				document.body.classList.remove( 'responsive-show' );
+
+				var toggle = document.getElementById( 'secondary-toggle' );
+				if ( toggle ) {
+					toggle.focus();
+				}
+			} );
+		}
 	</script>
 	<?php
 }
@@ -383,7 +410,7 @@ function welcome_box() {
 	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
-		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu', 'wporg' ); ?></strong></a>
+		<button type="button" id="secondary-toggle" aria-label="<?php esc_attr_e( 'Open menu', 'wporg' ); ?>"></button>
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
 			<button
