@@ -20,8 +20,14 @@ declare( strict_types = 1 );
 		} else {
 			echo wp_kses_post( __( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'wporg-jobs-blocks' ) );
 		}
+
+		/**
+		 * Fires inside a form notice, after its message.
+		 *
+		 * @param string $type Notice type: 'error' or 'verify'.
+		 */
+		do_action( 'jobswp_notice', 'error' );
 		?>
-		<?php do_action( 'jobswp_notice', 'error' ); ?>
 	</div>
 
 <?php elseif ( isset( $_POST['verify'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The Jobs plugin checks its nonce before it sets this flag; display only. ?>
@@ -29,7 +35,10 @@ declare( strict_types = 1 );
 	<div class="notice notice-info">
 		<div>
 		<?php esc_html_e( 'Please review the data you submitted for accuracy. Make any necessary corrections, then re-submit this form.', 'wporg-jobs-blocks' ); ?>
-		<?php do_action( 'jobswp_notice', 'verify' ); ?>
+		<?php
+		/** This action is documented in wp-content/plugins/wporg-jobs-blocks/templates/content-post-job.php */
+		do_action( 'jobswp_notice', 'verify' );
+		?>
 		</div>
 	</div>
 
@@ -140,7 +149,12 @@ declare( strict_types = 1 );
 	<input type="hidden" name="postjob" value="1" />
 	<?php wp_nonce_field( 'jobswppostjob' ); ?>
 
-	<?php do_action( 'jobswp_post_job_form' ); ?>
+	<?php
+	/**
+	 * Fires at the end of the Post a Job form's fields, before the submit button.
+	 */
+	do_action( 'jobswp_post_job_form' );
+	?>
 
 	<?php
 	if ( isset( $_POST['verify'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The Jobs plugin checks its nonce before it sets this flag; display only.

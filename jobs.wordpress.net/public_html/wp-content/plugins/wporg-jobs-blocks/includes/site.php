@@ -17,6 +17,11 @@ defined( 'ABSPATH' ) || exit;
  * @return string
  */
 function wporg_jobs_blocks_gtm_id(): string {
+	/**
+	 * Filters the Google Tag Manager container id.
+	 *
+	 * @param string $gtm_id Container id. An empty string turns GTM off.
+	 */
 	return (string) apply_filters( 'wporg_jobs_blocks_gtm_id', wp_get_environment_type() === 'production' ? 'GTM-P24PF4B' : '' );
 }
 

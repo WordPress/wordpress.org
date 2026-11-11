@@ -22,6 +22,8 @@ declare( strict_types = 1 );
 		} else {
 			echo wp_kses_post( __( '<strong>ERROR:</strong> One or more required fields are missing a value.', 'wporg-jobs-blocks' ) );
 		}
+
+		/** This action is documented in wp-content/plugins/wporg-jobs-blocks/templates/content-post-job.php */
 		do_action( 'jobswp_notice', 'error' );
 		?>
 	</div>
