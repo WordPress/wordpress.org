@@ -31,6 +31,25 @@ add_action( 'login_init', function() {
 } );
 
 /**
+ * Serve a 404 for a non-numeric `p`, such as `?p=job/abc123`.
+ *
+ * @param array $query_vars The parsed query variables.
+ * @return array The query variables.
+ */
+function not_found_for_non_numeric_p( $query_vars ) {
+	$p = $query_vars['p'] ?? '';
+
+	// `p=12345/` is valid, see check_for_invalid_query_vars().
+	if ( is_string( $p ) && ! empty( $p ) && ! is_numeric( $p ) && intval( $p ) . '/' !== $p ) {
+		unset( $query_vars['p'] );
+		$query_vars['error'] = '404';
+	}
+
+	return $query_vars;
+}
+add_filter( 'request', __NAMESPACE__ . '\not_found_for_non_numeric_p', 0 );
+
+/**
  * Detect invalid query parameters being passed in Core query fields.
  * Generally causes WP_Query to throw a PHP Warning.
  *
