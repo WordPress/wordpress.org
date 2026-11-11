@@ -110,7 +110,7 @@ npm run themes:test
 
 ### Jobs
 
-A local instance of jobs.wordpress.net with the JobsWP plugin, theme, sample job categories, and sample job posts.
+A local instance of jobs.wordpress.net with the JobsWP plugin, the block theme and its plugin, sample job categories, and sample job posts. The pages are created from `jobs/pages/`.
 
 **Start:**
 

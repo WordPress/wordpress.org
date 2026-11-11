@@ -1,0 +1,15 @@
+.wp-block-navigation__responsive-container.is-menu-open .current-menu-item > .wp-block-navigation-item__content,
+.wp-block-navigation__responsive-container.is-menu-open .wp-block-navigation-link:hover > .wp-block-navigation-item__content {
+	color: var(--wp--preset--color--blueberry);
+}
+
+/* Keeps exactly 600px on the overlay menu, as the classic theme did; core switches below 600px. */
+@media (min-width: 600px) and (max-width: 600px) {
+	.wp-block-navigation .wp-block-navigation__responsive-container-open:not(.always-shown) {
+		display: flex;
+	}
+
+	.wp-block-navigation .wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) {
+		display: none;
+	}
+}

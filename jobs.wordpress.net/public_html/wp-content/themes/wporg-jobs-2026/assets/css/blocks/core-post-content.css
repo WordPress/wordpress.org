@@ -1,0 +1,245 @@
+div.wp-block-post-content.is-style-job-description > * {
+	margin-block: 0 20px;
+}
+
+div.wp-block-post-content.is-style-job-description > h2 {
+	margin-block: var(--wp--preset--spacing--40) 10px;
+	font-size: var(--wp--preset--font-size--h-5);
+}
+
+div.wp-block-post-content.is-style-job-description > h3 {
+	margin-block: var(--wp--preset--spacing--30) 10px;
+	font-size: var(--wp--preset--font-size--h-6);
+}
+
+.wp-block-post-content.is-style-job-description ul {
+	padding-left: 20px;
+}
+
+.wp-block-post-content.is-style-job-description ol {
+	padding-left: 30px;
+}
+
+.wp-block-post-content.is-style-job-description li {
+	margin-bottom: 8px;
+}
+
+div.wp-block-post-content.is-style-job-description blockquote {
+	margin: 20px 30px;
+	padding: 20px 30px;
+	border-left: 4px solid var(--wp--preset--color--blueberry-light);
+	border-radius: var(--wp--preset--border-radius--small);
+	background-color: var(--wp--preset--color--surface);
+	color: var(--wp--preset--color--charcoal-3);
+}
+
+.wp-block-post-content.is-style-job-description blockquote > :last-child {
+	margin-bottom: 0;
+}
+
+.wp-block-post-content.is-style-job-description blockquote cite {
+	display: block;
+	margin-top: 10px;
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--small);
+	font-style: italic;
+}
+
+@media (max-width: 600px) {
+	div.wp-block-post-content.is-style-job-description blockquote {
+		margin-inline: 0;
+		padding: 20px;
+	}
+}
+
+.wp-block-post-content .items-required {
+	margin-bottom: var(--wp--preset--spacing--20);
+	color: var(--wp--preset--color--muted);
+	font-style: italic;
+}
+
+.wp-block-post-content .post-job {
+	margin-top: var(--wp--preset--spacing--30);
+}
+
+.wp-block-post-content .post-job p,
+.wp-block-post-content .notice p,
+.wp-block-post-content .jobswp-contact-form p {
+	margin-block: 0 var(--wp--preset--spacing--20);
+}
+
+.wp-block-post-content .post-field-section-header {
+	margin-block: 0 var(--wp--preset--spacing--10);
+	font-family: var(--wp--preset--font-family--body);
+	font-size: var(--wp--preset--font-size--medium);
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.wp-block-post-content .post-field-section-subheader {
+	margin-bottom: var(--wp--preset--spacing--30);
+	color: var(--wp--preset--color--muted);
+	font-style: italic;
+}
+
+.wp-block-post-content :is(.post-job-contact-info, .post-job-company-info) {
+	display: inline-block;
+	box-sizing: border-box;
+	width: 48%;
+	margin-bottom: var(--wp--preset--spacing--30);
+	vertical-align: top;
+}
+
+.wp-block-post-content .post-job-contact-info {
+	margin-right: 2%;
+	padding-right: 2%;
+	border-right: 1px solid var(--wp--preset--color--hairline);
+}
+
+@media (max-width: 600px) {
+	.wp-block-post-content :is(.post-job-contact-info, .post-job-company-info) {
+		display: block;
+		width: 100%;
+	}
+
+	.wp-block-post-content .post-job-contact-info {
+		margin-right: 0;
+		padding-right: 0;
+		border-right: 0;
+	}
+}
+
+.wp-block-post-content .post-job-job-info {
+	display: flow-root;
+	margin-top: var(--wp--preset--spacing--30);
+	padding-top: var(--wp--preset--spacing--30);
+	border-top: 1px solid var(--wp--preset--color--hairline);
+}
+
+.wp-block-post-content .post-job-input {
+	margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.wp-block-post-content .post-job select {
+	margin-block: 2px var(--wp--preset--spacing--10);
+}
+
+.wp-block-post-content .howtoapply-inputs {
+	display: flex;
+	gap: var(--wp--preset--spacing--10);
+	align-items: center;
+}
+
+.wp-block-post-content .howtoapply-inputs select {
+	width: auto;
+	min-width: 140px;
+}
+
+.wp-block-post-content .post-job-job-info textarea {
+	margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.wp-block-post-content .job-help-text {
+	margin-block: 4px var(--wp--preset--spacing--20);
+	color: var(--wp--preset--color--muted);
+	font-size: var(--wp--preset--font-size--x-small);
+	font-style: italic;
+}
+
+.wp-block-post-content .submit-job {
+	float: right;
+	margin-top: var(--wp--preset--spacing--20);
+}
+
+.wp-block-post-content form.post-job > .submit-job {
+	margin-bottom: calc(-1 * var(--wp--preset--spacing--60));
+}
+
+.wp-block-post-content .required.lacks-input {
+	border-color: #c44;
+	background-color: #fee;
+}
+
+.wp-block-post-content .notice {
+	padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+	border: 1px solid;
+	border-radius: var(--wp--preset--border-radius--small);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.wp-block-post-content div.notice {
+	margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.wp-block-post-content .notice h2 {
+	margin-block: 0 var(--wp--preset--spacing--10);
+	color: inherit;
+	font-family: var(--wp--preset--font-family--body);
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 700;
+}
+
+.wp-block-post-content .notice p:last-child {
+	margin-bottom: 0;
+}
+
+.wp-block-post-content .notice-success {
+	border-color: #4f8a10;
+	background-color: var(--wp--preset--color--mint);
+	color: #2d6a30;
+}
+
+.wp-block-post-content .notice-success .job-token {
+	font-size: var(--wp--preset--font-size--large);
+	font-weight: 700;
+}
+
+.wp-block-post-content .notice-info {
+	border-color: #9f6000;
+	background-color: #feefb3;
+	color: #9f6000;
+}
+
+.wp-block-post-content .notice-error {
+	border-color: #d8000c;
+	background-color: #ffbaba;
+	color: #d8000c;
+}
+
+.wp-block-post-content .accept {
+	margin-top: var(--wp--preset--spacing--20);
+}
+
+.wp-block-post-content .accept ul {
+	margin: 0 0 var(--wp--preset--spacing--20) var(--wp--preset--spacing--20);
+	padding: 0;
+	list-style: disc;
+}
+
+.wp-block-post-content .accept li {
+	margin-bottom: 8px;
+}
+
+.wp-block-post-content .accept p:last-child {
+	text-align: right;
+}
+
+.wp-block-post-content .accept input[type="checkbox"] {
+	margin: 0;
+}
+
+.wp-block-post-content .jobswp-contact-form {
+	max-width: 600px;
+}
+
+.wp-block-post-content .jobswp-contact-form__field--honeypot {
+	position: absolute;
+	left: -9999px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+.wp-block-post-content .jobswp-contact-form p.jobswp-contact-form__submit {
+	padding-top: var(--wp--preset--spacing--20);
+}

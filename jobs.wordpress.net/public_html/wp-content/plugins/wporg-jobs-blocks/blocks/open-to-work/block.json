@@ -1,0 +1,37 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "wporg-jobs/open-to-work",
+	"title": "Open to Work",
+	"category": "widgets",
+	"icon": "groups",
+	"description": "WordPress.org community members whose profiles say they are open to work, fetched from the profiles.wordpress.org API through the Jobs plugin and cached for an hour. Three layouts: a paginated grid of cards, a compact strip of cards, and a list of names. Each person links to their profile in a new tab.",
+	"keywords": [ "candidates", "profiles", "jobs" ],
+	"textdomain": "wporg-jobs-blocks",
+	"attributes": {
+		"variant": {
+			"type": "string",
+			"enum": [ "grid", "compact", "list" ],
+			"default": "grid"
+		},
+		"perPage": {
+			"type": "number",
+			"default": 10
+		},
+		"showPagination": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"layout": false
+	},
+	"editorScript": "file:./index.js",
+	"render": "file:./render.php"
+}
