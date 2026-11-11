@@ -400,7 +400,9 @@ body.wporg-make #headline h2 a:before {
 		display: none;
 	}
 
-	.navigation-main ul li:hover > a {
+	.navigation-main ul li:hover > a,
+	.navigation-main ul li.current-menu-item a,
+	.navigation-main ul li.current-menu-item:hover a {
 		text-decoration: underline;
 	}
 }
