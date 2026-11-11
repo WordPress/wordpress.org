@@ -246,8 +246,8 @@ if ( 'wp-plugins' === $project->path ) {
 	<div class="locale-project-contributors-group locale-project-contributors-contributors">
 		<?php
 		$contributor_groups = array(
-			'Current Translation Contributors' => $locale_contributors['contributors'],
-			'Past Translation Contributors'    => $locale_contributors['contributors_past'],
+			'current' => array( 'Current Translation Contributors', $locale_contributors['contributors'] ),
+			'past'    => array( 'Past Translation Contributors', $locale_contributors['contributors_past'] ),
 		);
 
 		if ( ! $locale_contributors['contributors'] && ! $locale_contributors['contributors_past'] ) :
@@ -257,13 +257,13 @@ if ( 'wp-plugins' === $project->path ) {
 			<?php
 		endif;
 
-		foreach ( $contributor_groups as $contributor_group => $contributors ) :
+		foreach ( $contributor_groups as $group_slug => list( $contributor_group, $contributors ) ) :
 			if ( ! $contributors ) {
 				continue;
 			}
 			?>
-			<h3><?php echo esc_html( $contributor_group ); ?> (<?php echo esc_html( number_format_i18n( count( $contributors ) ) ); ?>)</h3>
-			<table class="gp-table locale-project-contributors-table">
+			<h3 id="contributors-<?php echo esc_attr( $group_slug ); ?>"><?php echo esc_html( $contributor_group ); ?> (<?php echo esc_html( number_format_i18n( count( $contributors ) ) ); ?>)</h3>
+			<table class="gp-table locale-project-contributors-table" aria-labelledby="contributors-<?php echo esc_attr( $group_slug ); ?>">
 				<thead>
 					<tr>
 						<th class="contributor-details">Contributor</th>
