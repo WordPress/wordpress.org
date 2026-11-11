@@ -58,20 +58,6 @@ class Cross_Locale_PTE {
 		);
 
 		add_action( 'load-' . self::$admin_page, array( __CLASS__, 'handle_admin_post' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ) );
-		add_action( 'admin_footer-' . self::$admin_page, array( 'Rosetta_Roles', 'print_js_templates' ) );
-	}
-
-	/**
-	 * Enqueue assets only on this specific admin page.
-	 *
-	 * @param string $hook The current admin page hook.
-	 */
-	public static function enqueue_admin_assets( $hook ) {
-		if ( $hook === self::$admin_page ) {
-			Rosetta_Roles::enqueue_scripts();
-			Rosetta_Roles::enqueue_styles();
-		}
 	}
 
 	/**
@@ -118,6 +104,10 @@ class Cross_Locale_PTE {
 				wp_safe_redirect( add_query_arg( array( 'error' => 'no-user-found' ), $redirect ) );
 				exit;
 			}
+
+			add_action( 'admin_print_scripts-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_scripts' ) );
+			add_action( 'admin_print_styles-' . self::$admin_page, array( 'Rosetta_Roles', 'enqueue_styles' ) );
+			add_action( 'admin_footer-' . self::$admin_page, array( 'Rosetta_Roles', 'print_js_templates' ) );
 		}
 
 		$action = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : '';
