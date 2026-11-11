@@ -36,6 +36,9 @@ class Performance_Optimizations {
 		// Redirect (.+)/page/[01]/ and (.+)?paged=[01] to $1
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_page_zero_one' ) );
 
+		// Add the trailing slash to paginated topic URLs, bbPress disables redirect_canonical() for them.
+		add_action( 'bbp_template_redirect', array( $this, 'redirect_topic_page_trailing_slash' ) );
+
 		// Redirect Attachments to their file
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_attachments' ) );
 
@@ -135,6 +138,24 @@ class Performance_Optimizations {
 				wp_safe_redirect( $pageless_url, 301 );
 				exit;
 			}
+		}
+	}
+
+	/**
+	 * Redirects paginated single topic URLs without a trailing slash, like /topic/<slug>/page/2.
+	 */
+	public function redirect_topic_page_trailing_slash() {
+		if ( ! bbp_is_single_topic() || bbp_get_paged() < 2 || bbp_is_post_request() ) {
+			return;
+		}
+
+		$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+		$path        = strtok( $request_uri, '?' );
+		$slashed     = user_trailingslashit( $path, 'paged' );
+
+		if ( $slashed !== $path ) {
+			wp_safe_redirect( $slashed . substr( $request_uri, strlen( $path ) ), 301 );
+			exit;
 		}
 	}
 
