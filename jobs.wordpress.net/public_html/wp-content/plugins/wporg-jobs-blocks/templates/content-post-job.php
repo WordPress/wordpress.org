@@ -153,7 +153,7 @@ declare( strict_types = 1 );
 				<li>
 					<?php
 					/* translators: %s: URL of the FAQ page. */
-					printf( wp_kses_post( __( 'You have read the <a href="%s">FAQ</a> and understand everything listed, especially pertaining to what is unacceptable for a job posting.', 'wporg-jobs-blocks' ) ), esc_url( home_url( '/faq/' ) ) );
+					printf( wp_kses( __( 'You have read the <a href="%s">FAQ</a> and understand everything listed, especially pertaining to what is unacceptable for a job posting.', 'wporg-jobs-blocks' ), 'jobswp-ui' ), esc_url( home_url( '/faq/' ) ) );
 					?>
 				</li>
 				<li><?php esc_html_e( 'If you provided a contact email address as your method of contact for job seekers, that email address will be made publicly available and you will likely receive a lot of email.', 'wporg-jobs-blocks' ); ?></li>
@@ -180,7 +180,7 @@ declare( strict_types = 1 );
 				__( 'Looking to remove a job? Visit the <a href="%s">job removal page</a>.', 'wporg-jobs-blocks' ),
 				esc_url( home_url( '/remove-a-job/' ) )
 			),
-			array( 'a' => array( 'href' => array() ) )
+			'jobswp-ui'
 		);
 		?>
 	</p>
