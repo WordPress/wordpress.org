@@ -387,8 +387,8 @@ class Hooks {
 		if ( ! wp_script_is( 'quicktags' ) ) {
 			return;
 		}
-		?>
-		<script type="text/javascript">
+		wp_print_inline_script_tag(
+			<<<'JS'
 			if ( 'undefined' !== typeof edButtons && 'undefined' !== QTags ) {
 				// Replace Quicktags' blockquote button.
 				edButtons[40]  = new QTags.TagButton(
@@ -405,8 +405,8 @@ class Hooks {
 					}
 				);
 			}
-		</script>
-		<?php
+			JS
+		);
 	}
 
 	/**

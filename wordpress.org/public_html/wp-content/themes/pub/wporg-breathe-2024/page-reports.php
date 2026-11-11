@@ -39,7 +39,9 @@ if ( isset( $_GET['from-trac'] ) ) {
 	margin-right: 40px;
 }
 </style>
-<script>
+<?php
+wp_print_inline_script_tag(
+	<<<'JS'
 jQuery(document).ready( function($) {
 	$( '.tickets-by-topic' ).on( 'change', function() {
 		var topic = $(this).val();
@@ -50,7 +52,9 @@ jQuery(document).ready( function($) {
 		return false;
 	});
 });
-</script>
+JS
+);
+?>
 
 <div id="primary" class="content-area">
 	<div class="site-content">

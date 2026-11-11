@@ -106,7 +106,7 @@ $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
 			<a href="<?php echo esc_url( Template::get_support_url() ); ?>"><?php esc_html_e( 'Support', 'wporg-plugins' ); ?></a>
 		</div>
 	</span>
-	<script type="text/javascript">if ( '#changelog' == window.location.hash ) { window.setTimeout( function() { window.location.hash = '#developers'; }, 10 ); }</script>
+	<?php wp_print_inline_script_tag( "if ( '#changelog' == window.location.hash ) { window.setTimeout( function() { window.location.hash = '#developers'; }, 10 ); }" ); ?>
 
 	<div class="entry-content">
 		<?php
