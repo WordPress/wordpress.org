@@ -48,11 +48,11 @@ add_action( 'get_template_part_content', 'jobswp_blocks_template_part_fallback',
  * `wp-element-button` the theme's button element styles it, as it does the
  * Post a Job and Remove a Job submits.
  *
- * @param string $output Shortcode output.
+ * @param mixed  $output Shortcode output.
  * @param string $tag    Shortcode name.
- * @return string
+ * @return mixed
  */
-function jobswp_blocks_contact_form_button( $output, string $tag ) {
+function jobswp_blocks_contact_form_button( mixed $output, string $tag ): mixed {
 	if ( 'jobswp-contact-form' !== $tag || ! is_string( $output ) ) {
 		return $output;
 	}

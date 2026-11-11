@@ -4,7 +4,7 @@
  * Description:       Block-editor layer for jobs.wordpress.net: Block Bindings sources for job data, the Open to Work block, Interactivity filtering for the job browser, the job form partials and site-level hooks. Companion to the jobswp plugin, and meant to move into it.
  * Version:           0.1.0
  * Requires at least: 7.1
- * Requires PHP:      7.4
+ * Requires PHP:      8.0
  * Requires Plugins:  jobswp
  * License:           GPL-2.0-or-later
  * Text Domain:       jobswp-blocks

@@ -51,7 +51,7 @@ add_action( 'init', 'jobswp_blocks_browser_register' );
 function jobswp_blocks_browser_state( ?array $counts = null ): void {
 	$state = array(
 		'active'    => 'all',
-		'current'   => static function () {
+		'current'   => static function (): string|false {
 			$context = wp_interactivity_get_context();
 			return isset( $context['slug'] ) && 'all' === $context['slug'] ? 'true' : false;
 		},

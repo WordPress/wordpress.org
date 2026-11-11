@@ -1,4 +1,4 @@
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, withSyncEvent } from '@wordpress/interactivity';
 
 const { state } = store( 'jobswp/job-browser', {
 	state: {
@@ -14,7 +14,7 @@ const { state } = store( 'jobswp/job-browser', {
 		},
 	},
 	actions: {
-		select( event ) {
+		select: withSyncEvent( ( event ) => {
 			const { slug } = getContext();
 			// Follow the link to the archive when the page doesn't hold all of the category's jobs.
 			if (
@@ -25,6 +25,6 @@ const { state } = store( 'jobswp/job-browser', {
 			}
 			event.preventDefault();
 			state.active = slug;
-		},
+		} ),
 	},
 } );
