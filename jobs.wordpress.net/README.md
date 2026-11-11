@@ -19,7 +19,7 @@ To try it, activate `wporg-jobs-blocks` and then the "Jobs Theme 2026" theme, an
 - **Home** (`home`): create it with `home.html`, template "Landing", and set it as the static homepage.
 - **FAQ** (`faq`): replace the content with `faq.html`. Default template.
 - **Feedback** (`feedback`): replace the content with `feedback.html`. Template "Wide page".
-- **Post a Job** (`post-a-job`): no content, template "Wide page". The jobswp plugin adds the form.
+- **Post a Job** (`post-a-job`): no content, template "Wide page". The Jobs plugin adds the form.
 - **Remove a Job** (`remove-a-job`): replace the content with `remove-a-job.html`. Template "Wide page". The companion plugin adds the form.
 
 The local environment below makes both available without activating them.

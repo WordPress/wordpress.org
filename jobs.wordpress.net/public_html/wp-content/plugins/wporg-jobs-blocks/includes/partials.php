@@ -2,7 +2,7 @@
 /**
  * The job form partials.
  *
- * The jobswp plugin prints its Post a Job form, the success notice and the
+ * The Jobs plugin prints its Post a Job form, the success notice and the
  * submitted job's preview with get_template_part( 'content', … ), which looks
  * in the theme. A block theme has no such files, so this plugin supplies
  * them. It also prints the Remove a Job form and its notice on that page. A theme that ships
@@ -44,7 +44,7 @@ add_action( 'get_template_part_content', 'wporg_jobs_blocks_template_part_fallba
 /**
  * Gives the feedback form's submit input the button element class.
  *
- * The jobswp plugin's [jobswp-contact-form] prints a bare submit input. With
+ * The Jobs plugin's contact form shortcode prints a bare submit input. With
  * `wp-element-button` the theme's button element styles it, as it does the
  * Post a Job and Remove a Job submits.
  *
@@ -71,7 +71,7 @@ add_filter( 'do_shortcode_tag', 'wporg_jobs_blocks_contact_form_button', 10, 2 )
 /**
  * Renders the submitted job's preview with the block theme's single-job design.
  *
- * After a job is submitted, the jobswp plugin prints content-single.php for
+ * After a job is submitted, the Jobs plugin prints content-single.php for
  * it below the thank-you notice. In a block theme the single job's design is
  * the `single-job` template, so its main content is rendered here for the
  * current post. The template's parts and its `main` wrapper are left out.
@@ -139,12 +139,12 @@ add_filter( 'the_content', 'wporg_jobs_blocks_remove_job_form', 12 );
 /**
  * Starts capturing the Post a Job form.
  *
- * The jobswp plugin echoes the form from its the_content filter at priority 12,
+ * The Jobs plugin echoes the form from its the_content filter at priority 12,
  * so the submitted values never pass through later the_content filters. A classic
  * theme prints as it renders, but a block theme renders the page into a
  * string first, so the echoed form would land before the document. This
- * buffers around jobswp's filter and appends the form after every other
- * the_content filter, which keeps jobswp's guarantee.
+ * buffers around that filter and appends the form after every other
+ * the_content filter, which keeps that guarantee.
  *
  * @param string $content Page content.
  * @return string

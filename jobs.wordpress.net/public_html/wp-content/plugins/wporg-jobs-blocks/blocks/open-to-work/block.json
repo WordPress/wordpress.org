@@ -5,7 +5,7 @@
 	"title": "Open to Work",
 	"category": "widgets",
 	"icon": "groups",
-	"description": "WordPress.org community members whose profiles say they are open to work, fetched from the profiles.wordpress.org API through the jobswp plugin and cached for an hour. Three layouts: a paginated grid of cards, a compact strip of cards, and a list of names. Each person links to their profile in a new tab.",
+	"description": "WordPress.org community members whose profiles say they are open to work, fetched from the profiles.wordpress.org API through the Jobs plugin and cached for an hour. Three layouts: a paginated grid of cards, a compact strip of cards, and a list of names. Each person links to their profile in a new tab.",
 	"keywords": [ "candidates", "profiles", "jobs" ],
 	"textdomain": "wporg-jobs-blocks",
 	"attributes": {

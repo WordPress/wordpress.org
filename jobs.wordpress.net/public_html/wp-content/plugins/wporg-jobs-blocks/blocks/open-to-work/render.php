@@ -96,7 +96,7 @@ foreach ( $wporg_jobs_blocks_people as $wporg_jobs_blocks_person ) {
 $wporg_jobs_blocks_items = (array) apply_filters( 'wporg_jobs_blocks_open_to_work_items', $wporg_jobs_blocks_items, $wporg_jobs_blocks_variant );
 
 $wporg_jobs_blocks_pagination = '';
-$wporg_jobs_blocks_pages      = min( 100, (int) $wporg_jobs_blocks_result['pages'] ); // jobswp_get_open_to_work_candidates() serves pages 1-100.
+$wporg_jobs_blocks_pages      = min( 100, (int) $wporg_jobs_blocks_result['pages'] ); // The candidates helper serves pages 1-100.
 if ( $wporg_jobs_blocks_paged && $wporg_jobs_blocks_pages > 1 ) {
 	$wporg_jobs_blocks_link = static function ( int $page, string $label, bool $enabled ): string {
 		if ( ! $enabled ) {
