@@ -141,6 +141,10 @@
 			color: #fff;
 		}
 
+		&:hover {
+			text-decoration: underline;
+		}
+
 		@media screen and (min-width: $ms-breakpoint) {
 
 			&.active {

@@ -398,6 +398,10 @@ body.wporg-make #headline h2 a:before {
 	.navigation-main ul li.current-menu-item:hover a:after {
 		display: none;
 	}
+
+	.navigation-main ul li:hover > a {
+		text-decoration: underline;
+	}
 }
 
 /**
