@@ -93,8 +93,8 @@ class Locale_Banner extends Base {
 			return \GP_Locales::by_field( 'wp_locale', $locale );
 		} );
 
-		// Build a list of WordPress locales which we'll suggest to the user.
-		$suggest_locales              = array_values( array_intersect( $locales_from_header, $translated_locales ) );
+		// Map against translated locales so a same-language variant (nl_BE for "nl") can be suggested.
+		$suggest_locales              = array_values( $this->get_locale_from_header( array_intersect( $translated_locales, $all_locales ) ) );
 		$current_locale_is_suggested  = in_array( $current_locale, $suggest_locales );
 		$current_locale_is_translated = in_array( $current_locale, $translated_locales );
 
