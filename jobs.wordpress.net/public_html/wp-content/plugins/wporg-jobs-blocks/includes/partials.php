@@ -172,3 +172,19 @@ function wporg_jobs_blocks_post_job_form_end( string $content ): string {
 	return $content . ob_get_clean();
 }
 add_filter( 'the_content', 'wporg_jobs_blocks_post_job_form_end', PHP_INT_MAX );
+
+/**
+ * Keeps wptexturize() out of textareas.
+ *
+ * A block theme texturizes the whole rendered template, so without this the
+ * Post a Job form would hand a submitted description back with curly quotes
+ * and dashes in place of what the poster typed.
+ *
+ * @param string[] $tags Elements wptexturize() skips.
+ * @return string[]
+ */
+function wporg_jobs_blocks_no_texturize_textarea( array $tags ): array {
+	$tags[] = 'textarea';
+	return $tags;
+}
+add_filter( 'no_texturize_tags', 'wporg_jobs_blocks_no_texturize_textarea' );
