@@ -13,6 +13,7 @@
 	"mappings": {
 		"wp-content/plugins/wporg-jobs-blocks": "../jobs.wordpress.net/public_html/wp-content/plugins/wporg-jobs-blocks",
 		"wp-content/mu-plugins": "./jobs/mu-plugins",
+		"wp-content/env-pages": "./jobs/pages",
 		"wp-content/env-mocks": "./mocks"
 	},
 	"lifecycleScripts": {

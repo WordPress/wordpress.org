@@ -8,13 +8,12 @@ The plugins and themes powering [jobs.wordpress.net](https://jobs.wordpress.net/
 | [`themes/jobswp`](public_html/wp-content/themes/jobswp) | The classic theme. Active on production. |
 | [`themes/wporg-jobs-2026`](public_html/wp-content/themes/wporg-jobs-2026) | “Jobs Theme 2026”, a block theme. Not active on production. Presentation only: `theme.json` design tokens, templates, parts and one small stylesheet per block type. |
 | [`plugins/wporg-jobs-blocks`](public_html/wp-content/plugins/wporg-jobs-blocks) | The plugin the block theme needs: Block Bindings sources for job data, the `wporg-jobs/open-to-work` block, Interactivity API filtering for the homepage job browser, the job form partials and site-level hooks. Requires `jobswp`. |
-| [`content/pages`](content/pages) | Block markup for the pages the block theme expects. Page content lives in the database, so these aren’t deployed. |
 
 ## Block theme
 
 The block theme and its plugin require WordPress 7.1 or later and PHP 8.0. Jetpack Subscriptions and Stats are optional.
 
-To use it, activate `wporg-jobs-blocks`, then “Jobs Theme 2026”, and set up these pages. Navigation and the forms rely on their slugs.
+To use it, activate `wporg-jobs-blocks`, then “Jobs Theme 2026”, and set up these pages with the block markup in [`environments/jobs/pages`](../environments/jobs/pages). Page content lives in the database, so it isn’t deployed with the theme. Navigation and the forms rely on the slugs.
 
 - **Home** (`home`): content from `home.html`, template “Landing”, set as the static homepage.
 - **FAQ** (`faq`): content from `faq.html`, default template.
@@ -22,7 +21,7 @@ To use it, activate `wporg-jobs-blocks`, then “Jobs Theme 2026”, and set up 
 - **Post a Job** (`post-a-job`): no content, template “Wide page”. The JobsWP plugin adds the form.
 - **Remove a Job** (`remove-a-job`): content from `remove-a-job.html`, template “Wide page”. `wporg-jobs-blocks` adds the form.
 
-The local environment creates every page except Home, and activates the classic theme each time it starts.
+Locally, `npm run jobs:block-theme` does all of this. The environment activates the classic theme each time it starts, so run it again after a restart.
 
 ## Development
 
@@ -32,6 +31,7 @@ Run the site locally with sample job categories and posts, and run the plugin's 
 cd ../environments
 npm install
 npm run jobs:env start   # http://localhost:8888
+npm run jobs:block-theme # switch the running site to the block theme
 npm run jobs:env stop    # the test environment uses the same port
 npm run jobs:test
 ```

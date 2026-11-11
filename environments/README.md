@@ -126,6 +126,12 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
+**Block theme** (switches the running site to the `wporg-jobs-2026` block theme and fills its pages from `jobs/pages/`; starting the environment switches back to the classic theme):
+
+```bash
+npm run jobs:block-theme
+```
+
 **Run tests** (the JobsWP plugin's PHPUnit suite, in a dedicated test environment):
 
 ```bash
