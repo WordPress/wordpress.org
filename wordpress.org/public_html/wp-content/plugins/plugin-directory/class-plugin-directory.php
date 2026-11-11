@@ -175,6 +175,7 @@ class Plugin_Directory {
 	/**
 	 * Moves the plugin owner's contributor term to the new owner when ownership changes.
 	 *
+	 * The owner is listed first, like in the Contributors widget.
 	 * The import adds the owner to the contributors listed in the readme, and
 	 * restores the previous owner on the next run if the readme lists them.
 	 *
@@ -187,15 +188,29 @@ class Plugin_Directory {
 			return;
 		}
 
+		$contributors = wp_get_object_terms(
+			$post_id,
+			'plugin_contributors',
+			array(
+				'orderby' => 'term_order',
+				'fields'  => 'names',
+			)
+		);
+		if ( is_wp_error( $contributors ) ) {
+			return;
+		}
+
 		$previous_owner = get_user_by( 'id', $post_before->post_author );
 		if ( $previous_owner ) {
-			wp_remove_object_terms( $post_id, $previous_owner->user_nicename, 'plugin_contributors' );
+			$contributors = array_diff( $contributors, array( $previous_owner->user_nicename ) );
 		}
 
 		$new_owner = get_user_by( 'id', $post_after->post_author );
 		if ( $new_owner ) {
-			wp_add_object_terms( $post_id, $new_owner->user_nicename, 'plugin_contributors' );
+			$contributors = array_unique( array_merge( array( $new_owner->user_nicename ), $contributors ) );
 		}
+
+		wp_set_object_terms( $post_id, $contributors, 'plugin_contributors' );
 	}
 
 	/**

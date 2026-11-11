@@ -26,7 +26,7 @@ class Plugin_Owner_Contributor_Test extends TestCase {
 	 *
 	 * @var string[]
 	 */
-	const NICENAMES = array( 'owner-contrib-previous', 'owner-contrib-new', 'owner-contrib-readme' );
+	const NICENAMES = array( 'owner-contrib-previous', 'owner-contrib-new', 'owner-contrib-aa-readme' );
 
 	/**
 	 * The plugin post under test.
@@ -102,12 +102,12 @@ class Plugin_Owner_Contributor_Test extends TestCase {
 	}
 
 	/**
-	 * The new owner replaces the previous one, and readme contributors stay.
+	 * The new owner replaces the previous one and is listed first, and readme contributors stay.
 	 *
 	 * @return void
 	 */
 	public function test_ownership_change_moves_owner_contributor_term(): void {
-		wp_set_object_terms( $this->plugin_id, array( 'owner-contrib-readme', 'owner-contrib-previous' ), 'plugin_contributors' );
+		wp_set_object_terms( $this->plugin_id, array( 'owner-contrib-aa-readme', 'owner-contrib-previous' ), 'plugin_contributors' );
 
 		wp_update_post(
 			array(
@@ -116,9 +116,15 @@ class Plugin_Owner_Contributor_Test extends TestCase {
 			)
 		);
 
-		$contributors = wp_get_object_terms( $this->plugin_id, 'plugin_contributors', array( 'fields' => 'slugs' ) );
-		sort( $contributors );
+		$contributors = wp_get_object_terms(
+			$this->plugin_id,
+			'plugin_contributors',
+			array(
+				'orderby' => 'term_order',
+				'fields'  => 'slugs',
+			)
+		);
 
-		$this->assertSame( array( 'owner-contrib-new', 'owner-contrib-readme' ), $contributors );
+		$this->assertSame( array( 'owner-contrib-new', 'owner-contrib-aa-readme' ), $contributors );
 	}
 }
