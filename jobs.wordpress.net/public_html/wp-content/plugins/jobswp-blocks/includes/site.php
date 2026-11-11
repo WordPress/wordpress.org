@@ -66,6 +66,9 @@ function jobswp_blocks_category_feed_links() {
 }
 add_action( 'wp_head', 'jobswp_blocks_category_feed_links' );
 
+// Jobs have no comments.
+add_filter( 'feed_links_show_comments_feed', '__return_false' );
+
 /**
  * Author archives answer 404: job posters are not public people.
  */

@@ -54,7 +54,7 @@ function jobswp_blocks_format_binding( $value, $source_args ) {
 		return '';
 	}
 	if ( isset( $source_args['format'] ) && is_string( $source_args['format'] ) && false !== strpos( $source_args['format'], '%s' ) ) {
-		return sprintf( $source_args['format'], $value );
+		return str_replace( '%s', $value, $source_args['format'] );
 	}
 	return $value;
 }
