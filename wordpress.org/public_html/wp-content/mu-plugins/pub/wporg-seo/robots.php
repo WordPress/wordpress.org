@@ -17,6 +17,8 @@ function meta_robots() {
 		$noindex = true;
 	} elseif ( ( is_tax() || is_tag() || is_category() ) && $wp_query->found_posts <= 3 ) {
 		$noindex = true;
+	} elseif ( is_home() && ! $wp_query->found_posts ) {
+		$noindex = true;
 	}
 
 	// Allow sites to alter this
