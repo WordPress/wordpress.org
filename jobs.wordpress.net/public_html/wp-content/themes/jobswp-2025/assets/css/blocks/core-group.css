@@ -13,6 +13,11 @@
 	inset: 0;
 }
 
+.wp-block-group.is-style-card .wp-block-post-terms a {
+	position: relative;
+	z-index: 1;
+}
+
 @media (prefers-reduced-motion: no-preference) {
 	.wp-block-group.is-style-card {
 		transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;

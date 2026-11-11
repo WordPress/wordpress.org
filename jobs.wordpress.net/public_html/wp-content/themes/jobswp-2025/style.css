@@ -82,7 +82,7 @@ a:where(:not(.wp-element-button)) {
 }
 
 :where(input, select, textarea):focus {
-	outline: none;
+	outline: 2px solid transparent;
 	border-color: var(--wp--preset--color--blueberry);
 	box-shadow: 0 0 0 1px var(--wp--preset--color--blueberry);
 }

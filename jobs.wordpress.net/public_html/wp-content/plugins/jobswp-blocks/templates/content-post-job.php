@@ -57,9 +57,9 @@
 
 	<?php $howtoapply_methods = jobswp_get_howtoapply_methods(); ?>
 	<div class="post-job-input">
-		<label for="howtoapply"><?php esc_html_e( 'How to Apply', 'jobswp' ); ?>* <span><?php esc_html_e( '(also specify)', 'jobswp' ); ?></span></label>
+		<label id="howtoapply-label" for="howtoapply"><?php esc_html_e( 'How to Apply', 'jobswp' ); ?>* <span><?php esc_html_e( '(also specify)', 'jobswp' ); ?></span></label>
 		<div class="howtoapply-inputs">
-			<select name="howtoapply_method" id="howtoapply_method" class="<?php echo esc_attr( jobswp_required_field_classes( 'howtoapply_method' ) ); ?>" required>
+			<select name="howtoapply_method" id="howtoapply_method" aria-labelledby="howtoapply-label" class="<?php echo esc_attr( jobswp_required_field_classes( 'howtoapply_method' ) ); ?>" required>
 				<option value="" selected="selected" disabled="disabled"></option>
 				<?php foreach ( $howtoapply_methods as $method => $label ) : ?>
 					<option value="<?php echo esc_attr( $method ); ?>" <?php echo jobswp_field_value( 'howtoapply_method', $method ); ?>><?php echo esc_html( $label ); ?></option>
