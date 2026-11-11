@@ -5,6 +5,8 @@
  * @package jobswp
  */
 
+declare( strict_types = 1 );
+
 ?>
 <div class="items-required">* <?php esc_html_e( 'Items are required.', 'jobswp' ); ?></div>
 

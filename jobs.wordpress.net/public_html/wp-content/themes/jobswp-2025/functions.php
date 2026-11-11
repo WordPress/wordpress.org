@@ -8,10 +8,12 @@
  * @package jobswp-2025
  */
 
+declare( strict_types = 1 );
+
 /**
  * Theme supports and the editor stylesheet.
  */
-function jobswp_2025_setup() {
+function jobswp_2025_setup(): void {
 	add_theme_support( 'editor-styles' );
 	add_editor_style( 'style.css' );
 }
@@ -20,7 +22,7 @@ add_action( 'after_setup_theme', 'jobswp_2025_setup' );
 /**
  * Root stylesheet. Block themes do not enqueue style.css by themselves.
  */
-function jobswp_2025_enqueue_assets() {
+function jobswp_2025_enqueue_assets(): void {
 	wp_enqueue_style(
 		'jobswp-2025-style',
 		get_stylesheet_uri(),
@@ -33,7 +35,7 @@ add_action( 'wp_enqueue_scripts', 'jobswp_2025_enqueue_assets' );
 /**
  * Block style variations and the one stylesheet per block type that backs them.
  */
-function jobswp_2025_register_block_styles() {
+function jobswp_2025_register_block_styles(): void {
 	$ver = wp_get_theme()->get( 'Version' );
 
 	wp_enqueue_block_style(
@@ -225,7 +227,7 @@ add_action( 'init', 'jobswp_2025_register_block_styles' );
  * @param string $html Logo markup from get_custom_logo().
  * @return string
  */
-function jobswp_2025_default_custom_logo( $html ) {
+function jobswp_2025_default_custom_logo( string $html ): string {
 	if ( ! empty( $html ) ) {
 		return $html;
 	}
@@ -251,7 +253,7 @@ add_filter( 'get_custom_logo', 'jobswp_2025_default_custom_logo' );
  * @param array  $block         Parsed block.
  * @return string
  */
-function jobswp_2025_mark_current_nav_link( $block_content, $block ) {
+function jobswp_2025_mark_current_nav_link( string $block_content, array $block ): string {
 	if ( is_search() || empty( $block['attrs']['url'] ) || ! is_string( $block['attrs']['url'] ) ) {
 		return $block_content;
 	}

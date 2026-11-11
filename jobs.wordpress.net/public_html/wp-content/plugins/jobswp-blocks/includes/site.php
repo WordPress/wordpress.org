@@ -1,10 +1,12 @@
 <?php
 /**
- * Site-level behaviour that must survive a theme swap: analytics, feed
+ * Site-level behavior that must survive a theme swap: analytics, feed
  * discovery, routing and robots rules. Moved from the theme.
  *
  * @package jobswp-blocks
  */
+
+declare( strict_types = 1 );
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,14 +16,14 @@ defined( 'ABSPATH' ) || exit;
  *
  * @return string
  */
-function jobswp_blocks_gtm_id() {
+function jobswp_blocks_gtm_id(): string {
 	return (string) apply_filters( 'jobswp_blocks_gtm_id', wp_get_environment_type() === 'production' ? 'GTM-P24PF4B' : '' );
 }
 
 /**
  * GTM loader in the head.
  */
-function jobswp_blocks_gtm_head() {
+function jobswp_blocks_gtm_head(): void {
 	$gtm_id = jobswp_blocks_gtm_id();
 	if ( '' === $gtm_id ) {
 		return;
@@ -36,7 +38,7 @@ add_action( 'wp_head', 'jobswp_blocks_gtm_head', 1 );
 /**
  * GTM fallback frame at the start of the body.
  */
-function jobswp_blocks_gtm_body() {
+function jobswp_blocks_gtm_body(): void {
 	$gtm_id = jobswp_blocks_gtm_id();
 	if ( '' === $gtm_id ) {
 		return;
@@ -51,7 +53,7 @@ add_action( 'wp_body_open', 'jobswp_blocks_gtm_body' );
 /**
  * RSS discovery links for each job category on the front page.
  */
-function jobswp_blocks_category_feed_links() {
+function jobswp_blocks_category_feed_links(): void {
 	if ( ! is_front_page() || ! class_exists( 'Jobs_Dot_WP' ) ) {
 		return;
 	}
@@ -72,7 +74,7 @@ add_filter( 'feed_links_show_comments_feed', '__return_false' );
 /**
  * Author archives answer 404: job posters are not public people.
  */
-function jobswp_blocks_author_archives_404() {
+function jobswp_blocks_author_archives_404(): void {
 	if ( is_author() ) {
 		global $wp_query;
 		$wp_query->set_404();
@@ -87,7 +89,7 @@ add_action( 'wp', 'jobswp_blocks_author_archives_404' );
  * @param array $robots Robots directives.
  * @return array
  */
-function jobswp_blocks_noindex( $robots ) {
+function jobswp_blocks_noindex( array $robots ): array {
 	global $wp_query;
 	if ( is_search() || ( is_tax( 'job_category' ) && 0 === (int) $wp_query->found_posts ) ) {
 		$robots['noindex']  = true;

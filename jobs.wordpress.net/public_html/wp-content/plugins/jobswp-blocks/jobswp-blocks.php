@@ -12,6 +12,8 @@
  * @package jobswp-blocks
  */
 
+declare( strict_types = 1 );
+
 defined( 'ABSPATH' ) || exit;
 
 define( 'JOBSWP_BLOCKS_VERSION', '0.1.0' );
@@ -24,13 +26,10 @@ require_once JOBSWP_BLOCKS_DIR . 'includes/render-filters.php';
 require_once JOBSWP_BLOCKS_DIR . 'includes/job-browser.php';
 require_once JOBSWP_BLOCKS_DIR . 'includes/partials.php';
 
-/*
- * The classic jobswp theme prints its own analytics, feed links and robots
- * rules, so the plugin's copies load only under a block theme.
- */
+// The classic theme prints its own analytics, feed links and robots rules.
 add_action(
 	'after_setup_theme',
-	static function () {
+	static function (): void {
 		if ( wp_is_block_theme() ) {
 			require_once JOBSWP_BLOCKS_DIR . 'includes/site.php';
 		}
@@ -40,7 +39,7 @@ add_action(
 /**
  * Registers the plugin's blocks.
  */
-function jobswp_blocks_register_blocks() {
+function jobswp_blocks_register_blocks(): void {
 	register_block_type( JOBSWP_BLOCKS_DIR . 'blocks/open-to-work' );
 }
 add_action( 'init', 'jobswp_blocks_register_blocks' );

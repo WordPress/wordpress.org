@@ -10,6 +10,8 @@
  * @package jobswp-blocks
  */
 
+declare( strict_types = 1 );
+
 ?>
 <?php if ( isset( $_POST['errors'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Display-only redisplay of the plugin's error. ?>
 	<div class="notice notice-error">

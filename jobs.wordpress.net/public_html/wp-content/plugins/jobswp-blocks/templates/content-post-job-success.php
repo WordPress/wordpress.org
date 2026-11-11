@@ -5,6 +5,8 @@
  * @package jobswp
  */
 
+declare( strict_types = 1 );
+
 ?>
 <div class="notice notice-success">
 	<h2><?php esc_html_e( 'Thank you for submitting your job posting!', 'jobswp' ); ?></h2>

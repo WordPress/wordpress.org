@@ -13,6 +13,8 @@
  * @var WP_Block $block      Block instance.
  */
 
+declare( strict_types = 1 );
+
 defined( 'ABSPATH' ) || exit;
 
 if ( ! function_exists( 'jobswp_get_open_to_work_candidates' ) ) {
@@ -53,7 +55,7 @@ foreach ( $jobswp_blocks_people as $jobswp_blocks_person ) {
 
 	$jobswp_blocks_img  = sprintf(
 		'<img class="jobswp-open-to-work__avatar" src="%1$s" alt="" width="%2$d" height="%2$d" loading="lazy" />',
-		esc_url( 'https://wordpress.org/grav-redirect.php?user=' . rawurlencode( $jobswp_blocks_person->user_login ) . '&s=' . $jobswp_blocks_size ),
+		esc_url( 'https://wordpress.org/grav-redirect.php?user=' . rawurlencode( (string) $jobswp_blocks_person->user_login ) . '&s=' . $jobswp_blocks_size ),
 		$jobswp_blocks_size
 	);
 	$jobswp_blocks_name = '<span class="jobswp-open-to-work__name">' . esc_html( $jobswp_blocks_person->display_name ?? $jobswp_blocks_person->user_login ) . '</span>';
@@ -96,7 +98,7 @@ $jobswp_blocks_items = (array) apply_filters( 'jobswp_blocks_open_to_work_items'
 $jobswp_blocks_pagination = '';
 $jobswp_blocks_pages      = min( 100, (int) $jobswp_blocks_result['pages'] ); // jobswp_get_open_to_work_candidates() serves pages 1-100.
 if ( $jobswp_blocks_paged && $jobswp_blocks_pages > 1 ) {
-	$jobswp_blocks_link = static function ( $page, $label, $enabled ) {
+	$jobswp_blocks_link = static function ( int $page, string $label, bool $enabled ): string {
 		if ( ! $enabled ) {
 			return '<span class="jobswp-open-to-work__page is-disabled">' . $label . '</span>';
 		}

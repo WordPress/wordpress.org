@@ -10,18 +10,16 @@ const { state } = store( 'jobswp/job-browser', {
 			return 'all' === state.active || cats.includes( state.active );
 		},
 		get isEmpty() {
-			return 'all' !== state.active && ! state.counts[ state.active ];
+			return 'all' !== state.active && ! state.counts?.[ state.active ];
 		},
 	},
 	actions: {
 		select( event ) {
 			const { slug } = getContext();
-			// The homepage renders only the newest jobs. When some of a
-			// category's jobs aren't on the page, follow the link to its
-			// archive instead of filtering an incomplete list.
+			// Follow the link to the archive when the page doesn't hold all of the category's jobs.
 			if (
 				'all' !== slug &&
-				( state.counts[ slug ] || 0 ) < ( state.totals?.[ slug ] || 0 )
+				( state.counts?.[ slug ] || 0 ) < ( state.totals?.[ slug ] || 0 )
 			) {
 				return;
 			}

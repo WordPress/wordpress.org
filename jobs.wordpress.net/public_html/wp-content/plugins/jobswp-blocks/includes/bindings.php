@@ -9,12 +9,14 @@
  * @package jobswp-blocks
  */
 
+declare( strict_types = 1 );
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Registers the sources.
  */
-function jobswp_blocks_register_bindings() {
+function jobswp_blocks_register_bindings(): void {
 	register_block_bindings_source(
 		'jobswp/job-field',
 		array(
@@ -49,7 +51,7 @@ add_action( 'init', 'jobswp_blocks_register_bindings' );
  * @param array  $source_args Binding arguments.
  * @return string
  */
-function jobswp_blocks_format_binding( $value, $source_args ) {
+function jobswp_blocks_format_binding( string $value, array $source_args ): string {
 	if ( '' === $value ) {
 		return '';
 	}
@@ -63,15 +65,15 @@ function jobswp_blocks_format_binding( $value, $source_args ) {
  * The jobswp/job-field source.
  *
  * Keys: company, budget, location, location_label, jobtype, jobtype_label,
- * apply_url, apply_label, views.
+ * apply_url, apply_label, views, views_label.
  *
  * @param array    $source_args    Binding arguments.
  * @param WP_Block $block_instance Bound block.
  * @return string
  */
-function jobswp_blocks_binding_job_field( $source_args, $block_instance ) {
+function jobswp_blocks_binding_job_field( array $source_args, WP_Block $block_instance ): string {
 	$key     = isset( $source_args['key'] ) && is_string( $source_args['key'] ) ? $source_args['key'] : '';
-	$post_id = isset( $block_instance->context['postId'] ) ? (int) $block_instance->context['postId'] : get_the_ID();
+	$post_id = (int) ( $block_instance->context['postId'] ?? get_the_ID() );
 
 	return jobswp_blocks_format_binding( jobswp_blocks_job_field( $post_id, $key ), $source_args );
 }
@@ -82,7 +84,7 @@ function jobswp_blocks_binding_job_field( $source_args, $block_instance ) {
  * @param array $source_args Binding arguments.
  * @return string
  */
-function jobswp_blocks_binding_stats( $source_args ) {
+function jobswp_blocks_binding_stats( array $source_args ): string {
 	$key      = isset( $source_args['key'] ) && is_string( $source_args['key'] ) ? $source_args['key'] : '';
 	$snapshot = jobswp_blocks_snapshot();
 
@@ -119,7 +121,7 @@ function jobswp_blocks_binding_stats( $source_args ) {
  * @param array $source_args Binding arguments.
  * @return string
  */
-function jobswp_blocks_binding_archive( $source_args ) {
+function jobswp_blocks_binding_archive( array $source_args ): string {
 	global $wp_query;
 
 	$key   = isset( $source_args['key'] ) && is_string( $source_args['key'] ) ? $source_args['key'] : '';

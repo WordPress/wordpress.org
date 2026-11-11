@@ -5,17 +5,9 @@
  * @package jobswp-blocks
  */
 
-defined( 'ABSPATH' ) || exit;
+declare( strict_types = 1 );
 
-/**
- * Public meta keys a binding may read. Poster names, email and token are
- * never exposed.
- *
- * @return string[]
- */
-function jobswp_blocks_public_fields() {
-	return array( 'company', 'jobtype', 'location', 'budget', 'howtoapply', 'howtoapply_method' );
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Plain-text value of a job field, labelled the way the classic theme
@@ -25,13 +17,12 @@ function jobswp_blocks_public_fields() {
  * @param string $key     Field key, or one of the derived keys.
  * @return string Plain text, or an empty string when there is nothing to show.
  */
-function jobswp_blocks_job_field( $post_id, $key ) {
-	$post_id = (int) $post_id;
+function jobswp_blocks_job_field( int $post_id, string $key ): string {
 	if ( ! $post_id || 'job' !== get_post_type( $post_id ) ) {
 		return '';
 	}
 
-	$raw = static function ( $meta_key ) use ( $post_id ) {
+	$raw = static function ( string $meta_key ) use ( $post_id ): string {
 		$value = get_post_meta( $post_id, $meta_key, true );
 		return is_string( $value ) ? trim( $value ) : '';
 	};
@@ -102,6 +93,14 @@ function jobswp_blocks_job_field( $post_id, $key ) {
 		case 'views':
 			$views = jobswp_blocks_job_views( $post_id );
 			return null === $views ? '' : number_format_i18n( $views );
+
+		case 'views_label':
+			$views = jobswp_blocks_job_views( $post_id );
+			if ( null === $views ) {
+				return '';
+			}
+			/* translators: %s: number of views. */
+			return sprintf( _n( 'Seen by %s candidate', 'Seen by %s candidates', $views, 'jobswp-blocks' ), number_format_i18n( $views ) );
 	}
 
 	return '';
@@ -114,8 +113,8 @@ function jobswp_blocks_job_field( $post_id, $key ) {
  * @param int $post_id Job id.
  * @return int|null
  */
-function jobswp_blocks_job_views( $post_id ) {
-	$cache_key = 'jobswp_blocks_views_' . (int) $post_id;
+function jobswp_blocks_job_views( int $post_id ): ?int {
+	$cache_key = 'jobswp_blocks_views_' . $post_id;
 	$cached    = get_transient( $cache_key );
 	if ( false !== $cached ) {
 		return is_numeric( $cached ) ? (int) $cached : null;
@@ -124,7 +123,7 @@ function jobswp_blocks_job_views( $post_id ) {
 	$views = null;
 	if ( class_exists( '\Automattic\Jetpack\Stats\WPCOM_Stats' ) ) {
 		$stats = new \Automattic\Jetpack\Stats\WPCOM_Stats();
-		$data  = $stats->get_post_views( (int) $post_id );
+		$data  = $stats->get_post_views( $post_id );
 		if ( is_array( $data ) && isset( $data['views'] ) ) {
 			$views = (int) $data['views'];
 		}
@@ -137,11 +136,11 @@ function jobswp_blocks_job_views( $post_id ) {
 
 /**
  * Homepage snapshot: open positions, categories with jobs, remote share and
- * per-category counts. Memoised per request.
+ * per-category counts. Memoized per request.
  *
  * @return array{total:int,categories:int,remote_pct:int,counts:array<string,int>}
  */
-function jobswp_blocks_snapshot() {
+function jobswp_blocks_snapshot(): array {
 	static $cache = null;
 	if ( null !== $cache ) {
 		return $cache;
@@ -158,32 +157,33 @@ function jobswp_blocks_snapshot() {
 		return $cache;
 	}
 
-	$seen   = array();
-	$remote = 0;
 	foreach ( (array) Jobs_Dot_WP::get_job_categories() as $category ) {
-		$jobs                               = (array) Jobs_Dot_WP::get_jobs_for_category(
-			$category,
-			array(
-				'posts_per_page' => -1,
-				'no_found_rows'  => true,
-			)
-		);
-		$cache['counts'][ $category->slug ] = count( $jobs );
-		if ( $jobs ) {
+		$cache['counts'][ $category->slug ] = (int) $category->count;
+		if ( $category->count ) {
 			++$cache['categories'];
-		}
-		foreach ( $jobs as $job ) {
-			if ( isset( $seen[ $job->ID ] ) ) {
-				continue;
-			}
-			$seen[ $job->ID ] = true;
-			if ( '' === jobswp_blocks_job_field( $job->ID, 'location_label' ) || false !== strpos( jobswp_blocks_job_field( $job->ID, 'location_label' ), "\u{1F30E}" ) ) {
-				++$remote;
-			}
 		}
 	}
 
-	$cache['total']      = count( $seen );
+	$job_ids = get_posts(
+		array(
+			'post_type'      => 'job',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		)
+	);
+	_prime_post_caches( $job_ids, false, true );
+
+	$remote = 0;
+	foreach ( $job_ids as $job_id ) {
+		$location = jobswp_blocks_job_field( $job_id, 'location_label' );
+		if ( '' === $location || false !== strpos( $location, "\u{1F30E}" ) ) {
+			++$remote;
+		}
+	}
+
+	$cache['total']      = count( $job_ids );
 	$cache['remote_pct'] = $cache['total'] ? (int) round( $remote / $cache['total'] * 100 ) : 0;
 
 	return $cache;

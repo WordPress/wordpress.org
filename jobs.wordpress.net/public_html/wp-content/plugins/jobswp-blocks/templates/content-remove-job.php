@@ -9,6 +9,8 @@
  * @package jobswp-blocks
  */
 
+declare( strict_types = 1 );
+
 ?>
 <form class="post-job" method="post" action="">
 	<?php jobswp_text_field( 'job_token', __( 'Job Token:', 'jobswp' ) ); ?>

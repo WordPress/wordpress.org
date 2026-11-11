@@ -5,6 +5,8 @@
  * @package jobswp-blocks
  */
 
+declare( strict_types = 1 );
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -15,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * @param array  $block         Parsed block.
  * @return string
  */
-function jobswp_blocks_search_title( $block_content, $block ) {
+function jobswp_blocks_search_title( string $block_content, array $block ): string {
 	if ( ! is_search() || empty( $block['attrs']['type'] ) || 'search' !== $block['attrs']['type'] ) {
 		return $block_content;
 	}
@@ -32,7 +34,7 @@ function jobswp_blocks_search_title( $block_content, $block ) {
 
 	return (string) preg_replace_callback(
 		'#(<h[1-6][^>]*>).*?(</h[1-6]>)#s',
-		static function ( $matches ) use ( $text ) {
+		static function ( array $matches ) use ( $text ): string {
 			return $matches[1] . $text . $matches[2];
 		},
 		$block_content,
@@ -50,13 +52,13 @@ add_filter( 'render_block_core/query-title', 'jobswp_blocks_search_title', 10, 2
  * @param WP_Block $block_instance Block instance.
  * @return string
  */
-function jobswp_blocks_apply_button( $block_content, $block, $block_instance ) {
+function jobswp_blocks_apply_button( string $block_content, array $block, WP_Block $block_instance ): string {
 	$binding = $block['attrs']['metadata']['bindings']['url'] ?? null;
 	if ( ! is_array( $binding ) || 'jobswp/job-field' !== ( $binding['source'] ?? '' ) || 'apply_url' !== ( $binding['args']['key'] ?? '' ) ) {
 		return $block_content;
 	}
 
-	$post_id = isset( $block_instance->context['postId'] ) ? (int) $block_instance->context['postId'] : get_the_ID();
+	$post_id = (int) ( $block_instance->context['postId'] ?? get_the_ID() );
 	if ( '' === jobswp_blocks_job_field( $post_id, 'apply_url' ) ) {
 		return '';
 	}

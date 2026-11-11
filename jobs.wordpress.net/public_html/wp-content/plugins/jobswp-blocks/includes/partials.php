@@ -11,6 +11,8 @@
  * @package jobswp-blocks
  */
 
+declare( strict_types = 1 );
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -19,10 +21,10 @@ defined( 'ABSPATH' ) || exit;
  * A partial that prints nothing (a notice with no state to report) gets no
  * wrapper, so it leaves no empty block in the page's layout.
  *
- * @param string $slug Template slug ("content").
- * @param string $name Template name.
+ * @param string      $slug Template slug ("content").
+ * @param string|null $name Template name.
  */
-function jobswp_blocks_template_part_fallback( $slug, $name ) {
+function jobswp_blocks_template_part_fallback( string $slug, ?string $name ): void {
 	$partials = array( 'post-job', 'post-job-success', 'single', 'remove-job', 'remove-job-notice' );
 	if ( ! in_array( $name, $partials, true ) || locate_template( "content-{$name}.php" ) ) {
 		return;
@@ -50,7 +52,7 @@ add_action( 'get_template_part_content', 'jobswp_blocks_template_part_fallback',
  * @param string $tag    Shortcode name.
  * @return string
  */
-function jobswp_blocks_contact_form_button( $output, $tag ) {
+function jobswp_blocks_contact_form_button( $output, string $tag ) {
 	if ( 'jobswp-contact-form' !== $tag || ! is_string( $output ) ) {
 		return $output;
 	}
@@ -76,7 +78,7 @@ add_filter( 'do_shortcode_tag', 'jobswp_blocks_contact_form_button', 10, 2 );
  *
  * @return string Rendered markup, or an empty string when the theme has no such template.
  */
-function jobswp_blocks_single_job_preview() {
+function jobswp_blocks_single_job_preview(): string {
 	if ( ! wp_is_block_theme() ) {
 		return '';
 	}
@@ -86,13 +88,8 @@ function jobswp_blocks_single_job_preview() {
 		return '';
 	}
 
-	/*
-	 * The job is still awaiting moderation, and core's post date binding
-	 * returns nothing for posts the visitor can't read yet. Give the date
-	 * block the submission date directly, unlinked, as the draft's
-	 * permalink isn't public.
-	 */
-	$submission_date = static function ( $parsed_block ) {
+	// Core's date block prints nothing for a job awaiting moderation, and its permalink isn't public.
+	$submission_date = static function ( array $parsed_block ): array {
 		if ( 'core/post-date' === $parsed_block['blockName'] && empty( $parsed_block['attrs']['datetime'] ) ) {
 			$parsed_block['attrs']['datetime'] = get_the_date( 'c' );
 			$parsed_block['attrs']['isLink']   = false;
@@ -122,7 +119,7 @@ function jobswp_blocks_single_job_preview() {
  * @param string $content Page content.
  * @return string
  */
-function jobswp_blocks_remove_job_form( $content ) {
+function jobswp_blocks_remove_job_form( string $content ): string {
 	static $done = false;
 	if ( $done || ! wp_is_block_theme() || ! is_page( 'remove-a-job' ) || ! in_the_loop() || ! is_main_query() ) {
 		return $content;
@@ -152,7 +149,7 @@ add_filter( 'the_content', 'jobswp_blocks_remove_job_form', 12 );
  * @param string $content Page content.
  * @return string
  */
-function jobswp_blocks_post_job_form_start( $content ) {
+function jobswp_blocks_post_job_form_start( string $content ): string {
 	if ( wp_is_block_theme() && is_page( 'post-a-job' ) ) {
 		ob_start();
 		$GLOBALS['jobswp_blocks_post_job_buffers'] = ( $GLOBALS['jobswp_blocks_post_job_buffers'] ?? 0 ) + 1;
@@ -167,7 +164,7 @@ add_filter( 'the_content', 'jobswp_blocks_post_job_form_start', 11 );
  * @param string $content Page content.
  * @return string
  */
-function jobswp_blocks_post_job_form_end( $content ) {
+function jobswp_blocks_post_job_form_end( string $content ): string {
 	if ( empty( $GLOBALS['jobswp_blocks_post_job_buffers'] ) ) {
 		return $content;
 	}
@@ -175,26 +172,3 @@ function jobswp_blocks_post_job_form_end( $content ) {
 	return $content . ob_get_clean();
 }
 add_filter( 'the_content', 'jobswp_blocks_post_job_form_end', PHP_INT_MAX );
-
-if ( ! function_exists( 'jobswp_posted_on' ) ) {
-	/**
-	 * "Posted <date>" line used by the submitted job's preview. The classic
-	 * theme defined it; kept under its name for the partials.
-	 */
-	function jobswp_posted_on() {
-		$date_link = sprintf(
-			'<a href="%1$s" rel="bookmark"><time class="entry-date published" datetime="%2$s">%3$s</time></a>',
-			esc_url( get_permalink() ),
-			esc_attr( get_the_date( 'c' ) ),
-			esc_html( get_the_date() )
-		);
-
-		echo '<span class="posted-on">';
-		printf(
-			/* translators: %s: Linked post date. */
-			esc_html__( 'Posted %s', 'jobswp' ),
-			$date_link // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built above from escaped parts.
-		);
-		echo '</span>';
-	}
-}

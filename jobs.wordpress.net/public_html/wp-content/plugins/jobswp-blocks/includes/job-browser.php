@@ -16,6 +16,8 @@
  * @package jobswp-blocks
  */
 
+declare( strict_types = 1 );
+
 defined( 'ABSPATH' ) || exit;
 
 const JOBSWP_BLOCKS_BROWSER_NS = 'jobswp/job-browser';
@@ -23,7 +25,7 @@ const JOBSWP_BLOCKS_BROWSER_NS = 'jobswp/job-browser';
 /**
  * Registers the view script module and the empty-state paragraph style.
  */
-function jobswp_blocks_browser_register() {
+function jobswp_blocks_browser_register(): void {
 	wp_register_script_module(
 		'jobswp-blocks/job-browser',
 		JOBSWP_BLOCKS_URL . 'assets/js/job-browser.js',
@@ -44,9 +46,9 @@ add_action( 'init', 'jobswp_blocks_browser_register' );
 /**
  * Seeds the store on the server, with derived state for the first paint.
  *
- * @param array $counts Jobs per category slug, when known.
+ * @param array|null $counts Jobs per category slug, when known.
  */
-function jobswp_blocks_browser_state( $counts = null ) {
+function jobswp_blocks_browser_state( ?array $counts = null ): void {
 	$state = array(
 		'active'    => 'all',
 		'current'   => static function () {
@@ -70,7 +72,7 @@ function jobswp_blocks_browser_state( $counts = null ) {
  * @param string $class_name Class.
  * @return bool
  */
-function jobswp_blocks_has_class( $block, $class_name ) {
+function jobswp_blocks_has_class( array $block, string $class_name ): bool {
 	$classes = isset( $block['attrs']['className'] ) && is_string( $block['attrs']['className'] ) ? $block['attrs']['className'] : '';
 	return in_array( $class_name, preg_split( '/\s+/', $classes ), true );
 }
@@ -83,7 +85,7 @@ function jobswp_blocks_has_class( $block, $class_name ) {
  * @param array       $block      Parsed block.
  * @return string|null
  */
-function jobswp_blocks_browser_enter( $pre_render, $block ) {
+function jobswp_blocks_browser_enter( ?string $pre_render, array $block ): ?string {
 	if ( 'core/query' === $block['blockName'] && isset( $block['attrs']['namespace'] ) && JOBSWP_BLOCKS_BROWSER_NS === $block['attrs']['namespace'] ) {
 		$GLOBALS['jobswp_blocks_in_browser'] = true;
 	}
@@ -98,7 +100,7 @@ add_filter( 'pre_render_block', 'jobswp_blocks_browser_enter', 10, 2 );
  * @param array  $block         Parsed block.
  * @return string
  */
-function jobswp_blocks_browser_leave( $block_content, $block ) {
+function jobswp_blocks_browser_leave( string $block_content, array $block ): string {
 	if ( isset( $block['attrs']['namespace'] ) && JOBSWP_BLOCKS_BROWSER_NS === $block['attrs']['namespace'] ) {
 		$GLOBALS['jobswp_blocks_in_browser'] = false;
 	}
@@ -112,7 +114,7 @@ add_filter( 'render_block_core/query', 'jobswp_blocks_browser_leave', 10, 2 );
  * @param string $block_content Rendered post-template.
  * @return string
  */
-function jobswp_blocks_browser_items( $block_content ) {
+function jobswp_blocks_browser_items( string $block_content ): string {
 	if ( empty( $GLOBALS['jobswp_blocks_in_browser'] ) ) {
 		return $block_content;
 	}
@@ -154,7 +156,7 @@ add_filter( 'render_block_core/post-template', 'jobswp_blocks_browser_items' );
  * @param array  $block         Parsed block.
  * @return string
  */
-function jobswp_blocks_browser_pills( $block_content, $block ) {
+function jobswp_blocks_browser_pills( string $block_content, array $block ): string {
 	if ( ! jobswp_blocks_has_class( $block, 'is-style-pills' ) ) {
 		return $block_content;
 	}
@@ -165,7 +167,14 @@ function jobswp_blocks_browser_pills( $block_content, $block ) {
 		esc_attr( wp_json_encode( array( 'slug' => 'all' ) ) ),
 		esc_html__( 'All', 'jobswp-blocks' )
 	);
-	$block_content = (string) preg_replace( '#(<ul\b[^>]*>)#', '$1' . $all, $block_content, 1 );
+	$block_content = (string) preg_replace_callback(
+		'#<ul\b[^>]*>#',
+		static function ( array $matches ) use ( $all ): string {
+			return $matches[0] . $all;
+		},
+		$block_content,
+		1
+	);
 
 	$tags = new WP_HTML_Tag_Processor( $block_content );
 	if ( ! $tags->next_tag( 'ul' ) ) {
@@ -202,7 +211,7 @@ add_filter( 'render_block_core/term-template', 'jobswp_blocks_browser_pills', 10
  * @param array  $block         Parsed block.
  * @return string
  */
-function jobswp_blocks_browser_empty( $block_content, $block ) {
+function jobswp_blocks_browser_empty( string $block_content, array $block ): string {
 	if ( ! jobswp_blocks_has_class( $block, 'is-style-filter-empty' ) ) {
 		return $block_content;
 	}
