@@ -13,6 +13,10 @@ $WP wp option update blogdescription 'WordPress related Job Postings'
 # Set up permalinks.
 $WP wp rewrite structure '/%postname%/' --hard
 
+# Clear the classic sidebar's default widgets to match production; the reset only works while it is registered.
+$WP wp theme activate jobswp > /dev/null
+$WP wp widget reset sidebar-1 > /dev/null 2>&1 || true
+
 # Activate the block theme. The classic theme stays installed: wp theme activate jobswp.
 $WP wp theme activate wporg-jobs-2026
 
