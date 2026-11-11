@@ -1,28 +1,28 @@
 # jobs.wordpress.net
 
-The JobsWP [plugin](public_html/wp-content/plugins/jobswp) and [theme](public_html/wp-content/themes/jobswp) powering [jobs.wordpress.net](https://jobs.wordpress.net/), the official WordPress job board.
-
-## Block theme redesign
-
-A block theme rebuild of the site is in progress alongside the classic theme. It isn't active on production.
+The plugins and themes powering [jobs.wordpress.net](https://jobs.wordpress.net/), the official WordPress job board.
 
 | Path | What it is |
 |---|---|
-| [`themes/wporg-jobs-2026`](public_html/wp-content/themes/wporg-jobs-2026) | The block theme, "Jobs Theme 2026". Presentation only: `theme.json` design tokens, templates, parts and one small stylesheet per block type. |
-| [`plugins/wporg-jobs-blocks`](public_html/wp-content/plugins/wporg-jobs-blocks) | Companion plugin: Block Bindings sources for job data, the `wporg-jobs/open-to-work` block, Interactivity API filtering for the homepage job browser, the job form partials and site-level hooks. Meant to move into `jobswp` eventually. |
-| [`content/pages`](content/pages) | Block markup for the pages the theme expects. Page content lives in the database, so these aren't deployed. |
+| [`plugins/jobswp`](public_html/wp-content/plugins/jobswp) | The JobsWP plugin: the job post type, the Post a Job and Remove a Job forms, moderation, the contact form and the email digest. |
+| [`themes/jobswp`](public_html/wp-content/themes/jobswp) | The classic theme. Active on production. |
+| [`themes/wporg-jobs-2026`](public_html/wp-content/themes/wporg-jobs-2026) | “Jobs Theme 2026”, a block theme. Not active on production. Presentation only: `theme.json` design tokens, templates, parts and one small stylesheet per block type. |
+| [`plugins/wporg-jobs-blocks`](public_html/wp-content/plugins/wporg-jobs-blocks) | The plugin the block theme needs: Block Bindings sources for job data, the `wporg-jobs/open-to-work` block, Interactivity API filtering for the homepage job browser, the job form partials and site-level hooks. Requires `jobswp`. |
+| [`content/pages`](content/pages) | Block markup for the pages the block theme expects. Page content lives in the database, so these aren’t deployed. |
 
-It requires WordPress 7.1 or later (per-viewport style states, and the core accordion, tabs and terms-query blocks). Jetpack Subscriptions and Stats are optional.
+## Block theme
 
-To try it, activate `wporg-jobs-blocks` and then the "Jobs Theme 2026" theme, and set up these pages from `content/pages/`. The local environment already creates FAQ, Feedback, Post a Job and Remove a Job, so update those pages rather than adding new ones: navigation and the form hooks rely on their slugs.
+The block theme and its plugin require WordPress 7.1 or later and PHP 8.0. Jetpack Subscriptions and Stats are optional.
 
-- **Home** (`home`): create it with `home.html`, template "Landing", and set it as the static homepage.
-- **FAQ** (`faq`): replace the content with `faq.html`. Default template.
-- **Feedback** (`feedback`): replace the content with `feedback.html`. Template "Wide page".
-- **Post a Job** (`post-a-job`): no content, template "Wide page". The Jobs plugin adds the form.
-- **Remove a Job** (`remove-a-job`): replace the content with `remove-a-job.html`. Template "Wide page". The companion plugin adds the form.
+To use it, activate `wporg-jobs-blocks`, then “Jobs Theme 2026”, and set up these pages. Navigation and the forms rely on their slugs.
 
-The local environment below makes both available without activating them.
+- **Home** (`home`): content from `home.html`, template “Landing”, set as the static homepage.
+- **FAQ** (`faq`): content from `faq.html`, default template.
+- **Feedback** (`feedback`): content from `feedback.html`, template “Wide page”.
+- **Post a Job** (`post-a-job`): no content, template “Wide page”. The JobsWP plugin adds the form.
+- **Remove a Job** (`remove-a-job`): content from `remove-a-job.html`, template “Wide page”. `wporg-jobs-blocks` adds the form.
+
+The local environment creates every page except Home, and activates the classic theme each time it starts.
 
 ## Development
 
