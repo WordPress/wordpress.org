@@ -557,7 +557,20 @@ class WordPressTV_Theme {
 		if ( $arrow ) {
 			?><a href="<?php the_permalink() ?>" class="showarrow arrow"><?php the_title(); ?></a><?php
 		}
-		if ( $html_code ) {
+		if ( $html_code && $ret ) {
+			// The thumbnail host resizes on request; `auto` sizes match the rendered cell where supported.
+			$srcset = [];
+			foreach ( [ 160, 320, 640 ] as $width ) {
+				$srcset[] = esc_url( add_query_arg( 'w', $width, $ret ) ) . " {$width}w";
+			}
+
+			$ret = sprintf(
+				'<img src="%1$s" srcset="%2$s" sizes="auto, (max-width: 620px) 100vw, (max-width: 939px) 340px, 220px" width="320" height="180" loading="lazy" decoding="async" alt="%3$s" />',
+				esc_url( add_query_arg( 'w', 320, $ret ) ),
+				implode( ', ', $srcset ),
+				esc_attr( $post->post_title )
+			);
+		} elseif ( $html_code ) {
 			$ret = '<img src="' . $ret . '" alt="' . esc_attr( $post->post_title ) . '" />';
 		}
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Rendered markup: core link helpers, the_content/the_title filter output, and widget before/after wrappers.
