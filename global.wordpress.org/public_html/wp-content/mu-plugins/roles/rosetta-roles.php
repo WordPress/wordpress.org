@@ -1085,8 +1085,7 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	 */
 	private function notify_profiles_wporg_translation_editor_update( int $user_id, string $action ): void {
 		$args = array(
-			'blocking' => false,
-			'body'     => array(
+			'body' => array(
 				'action'      => 'wporg_handle_association',
 				'source'      => 'polyglots',
 				'command'     => $action,
