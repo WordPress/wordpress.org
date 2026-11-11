@@ -253,7 +253,7 @@ if ( 'wp-plugins' === $project->path ) {
 		if ( ! $locale_contributors['contributors'] && ! $locale_contributors['contributors_past'] ) :
 			?>
 			<h3>Translation Contributors</h3>
-			<p>None, be the first?</p>
+			<p>None, <a href="https://make.wordpress.org/polyglots/handbook/translating/how-to-translate/">be the first</a>?</p>
 			<?php
 		endif;
 
