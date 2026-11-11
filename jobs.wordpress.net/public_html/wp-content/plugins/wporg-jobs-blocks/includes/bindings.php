@@ -1,10 +1,8 @@
 <?php
 /**
- * Block Bindings sources for job data, so templates stay core blocks.
+ * Block Bindings sources for job data.
  *
- * Every source takes a `key` argument and an optional `format`, in which %s
- * stands for the value ("Posted %s", "Seen by %s candidates"). An empty value
- * returns an empty string; the block then prints empty and the theme hides it.
+ * Every source takes a `key` and an optional `format`, in which %s stands for the value.
  *
  * @package wporg-jobs-blocks
  */
@@ -64,9 +62,6 @@ function wporg_jobs_blocks_format_binding( string $value, array $source_args ): 
 /**
  * The wporg-jobs/job-field source.
  *
- * Keys: company, budget, location, location_label, jobtype, jobtype_label,
- * apply_url, apply_label, views, views_label.
- *
  * @param array    $source_args    Binding arguments.
  * @param WP_Block $block_instance Bound block.
  * @return string
@@ -114,9 +109,6 @@ function wporg_jobs_blocks_binding_stats( array $source_args ): string {
 
 /**
  * The wporg-jobs/archive source, for the archive and search headers.
- *
- * Keys: feed_url (the feed of the queried term or search), found (number of
- * jobs found by the main query), jobs_label ("8 jobs").
  *
  * @param array $source_args Binding arguments.
  * @return string

@@ -1,17 +1,8 @@
 <?php
 /**
- * Client-side category filtering for the homepage job browser, built with
- * the Interactivity API on core blocks rather than a custom block.
+ * Category filtering for the homepage job browser, with the Interactivity API on core blocks.
  *
- * Opt-ins, all visible in the editor:
- * - a core/query whose `namespace` is `wporg-jobs/job-browser` (its post-template
- *   items become filterable by their job_category-<slug> classes);
- * - a core/term-template with the theme's `pills` style (each term link
- *   becomes a filter; an "All" link is prepended);
- * - a core/paragraph with the `filter-empty` style (shown only when the
- *   selected category has no jobs).
- *
- * Without JavaScript the pills stay links to the category archives.
+ * Opt-ins: a core/query with the `wporg-jobs/job-browser` namespace, a core/term-template with the `pills` style and a core/paragraph with the `filter-empty` style.
  *
  * @package wporg-jobs-blocks
  */
@@ -78,8 +69,7 @@ function wporg_jobs_blocks_has_class( array $block, string $class_name ): bool {
 }
 
 /**
- * Tracks whether a job-browser query is rendering, so its post-template
- * can be told apart from other loops.
+ * Flags that a job-browser query is rendering.
  *
  * @param string|null $pre_render Short-circuit value.
  * @param array       $block      Parsed block.

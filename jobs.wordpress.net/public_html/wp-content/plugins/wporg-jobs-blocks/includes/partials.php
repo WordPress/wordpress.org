@@ -1,12 +1,6 @@
 <?php
 /**
- * The job form partials.
- *
- * The Jobs plugin prints its Post a Job form, the success notice and the
- * submitted job's preview with get_template_part( 'content', … ), which looks
- * in the theme. A block theme has no such files, so this plugin supplies
- * them. It also prints the Remove a Job form and its notice on that page. A theme that ships
- * its own partial still wins.
+ * The job form partials the Jobs plugin loads with get_template_part(), which a block theme can't supply.
  *
  * @package wporg-jobs-blocks
  */
@@ -17,9 +11,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Prints the plugin's partial when the theme has none.
- *
- * A partial that prints nothing (a notice with no state to report) gets no
- * wrapper, so it leaves no empty block in the page's layout.
  *
  * @param string      $slug Template slug ("content").
  * @param string|null $name Template name.
@@ -44,10 +35,6 @@ add_action( 'get_template_part_content', 'wporg_jobs_blocks_template_part_fallba
 /**
  * Gives the feedback form's submit input the button element class.
  *
- * The Jobs plugin's contact form shortcode prints a bare submit input. With
- * `wp-element-button` the theme's button element styles it, as it does the
- * Post a Job and Remove a Job submits.
- *
  * @param mixed  $output Shortcode output.
  * @param string $tag    Shortcode name.
  * @return mixed
@@ -69,12 +56,7 @@ function wporg_jobs_blocks_contact_form_button( mixed $output, string $tag ): mi
 add_filter( 'do_shortcode_tag', 'wporg_jobs_blocks_contact_form_button', 10, 2 );
 
 /**
- * Renders the submitted job's preview with the block theme's single-job design.
- *
- * After a job is submitted, the Jobs plugin prints content-single.php for
- * it below the thank-you notice. In a block theme the single job's design is
- * the `single-job` template, so its main content is rendered here for the
- * current post. The template's parts and its `main` wrapper are left out.
+ * Renders the submitted job's preview from the single-job template, without its parts and `main` wrapper.
  *
  * @return string Rendered markup, or an empty string when the theme has no such template.
  */
@@ -137,14 +119,7 @@ function wporg_jobs_blocks_remove_job_form( string $content ): string {
 add_filter( 'the_content', 'wporg_jobs_blocks_remove_job_form', 12 );
 
 /**
- * Starts capturing the Post a Job form.
- *
- * The Jobs plugin echoes the form from its the_content filter at priority 12,
- * so the submitted values never pass through later the_content filters. A classic
- * theme prints as it renders, but a block theme renders the page into a
- * string first, so the echoed form would land before the document. This
- * buffers around that filter and appends the form after every other
- * the_content filter, which keeps that guarantee.
+ * Starts capturing the Post a Job form, which the Jobs plugin echoes and a block theme would print before the document.
  *
  * @param string $content Page content.
  * @return string
@@ -159,7 +134,7 @@ function wporg_jobs_blocks_post_job_form_start( string $content ): string {
 add_filter( 'the_content', 'wporg_jobs_blocks_post_job_form_start', 11 );
 
 /**
- * Appends the captured Post a Job form to the content.
+ * Appends the captured form after every other the_content filter, so submitted values skip them.
  *
  * @param string $content Page content.
  * @return string
@@ -174,11 +149,7 @@ function wporg_jobs_blocks_post_job_form_end( string $content ): string {
 add_filter( 'the_content', 'wporg_jobs_blocks_post_job_form_end', PHP_INT_MAX );
 
 /**
- * Keeps wptexturize() out of textareas.
- *
- * A block theme texturizes the whole rendered template, so without this the
- * Post a Job form would hand a submitted description back with curly quotes
- * and dashes in place of what the poster typed.
+ * Keeps wptexturize() out of textareas, so a submitted description comes back as typed.
  *
  * @param string[] $tags Elements wptexturize() skips.
  * @return string[]

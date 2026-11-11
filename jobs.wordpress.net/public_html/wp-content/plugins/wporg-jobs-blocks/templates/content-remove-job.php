@@ -2,10 +2,6 @@
 /**
  * The form for removing a job with its token.
  *
- * Ported from the classic theme's page-remove-a-job.php. The Jobs
- * plugin handles the submission in Jobs_Dot_WP::maybe_remove_job(). The
- * notice above the page's content is content-remove-job-notice.php.
- *
  * @package wporg-jobs-blocks
  */
 

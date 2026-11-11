@@ -1,11 +1,6 @@
 <?php
 /**
- * Renders the Open to Work block.
- *
- * Headings, intro copy and the people count stay editable core blocks
- * around this one (the count is the wporg-jobs/stats `candidates` binding).
- * Pagination is server-side through the `cp` query argument, so it works
- * without JavaScript.
+ * Renders the Open to Work block, paginated on the server through the `cp` query argument.
  *
  * @package wporg-jobs-blocks
  *

@@ -10,8 +10,7 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The search heading reads "Search Results for: <term> (N)", as the classic
- * theme printed it, where core prints 'Search results for: "term"'.
+ * Makes the search heading read "Search Results for: <term> (N)".
  *
  * @param string $block_content Rendered heading.
  * @param array  $block         Parsed block.
@@ -44,8 +43,7 @@ function wporg_jobs_blocks_search_title( string $block_content, array $block ): 
 add_filter( 'render_block_core/query-title', 'wporg_jobs_blocks_search_title', 10, 2 );
 
 /**
- * A button bound to a job's web application form opens it in a new tab as
- * user-supplied, unendorsed link; an email address opens the mail client.
+ * Opens a job's web application link in a new tab as a user-supplied link, and drops the button when there is none.
  *
  * @param string   $block_content  Rendered button.
  * @param array    $block          Parsed block.
@@ -78,10 +76,7 @@ add_filter( 'render_block_core/button', 'wporg_jobs_blocks_apply_button', 10, 3 
 /**
  * Keeps brackets in job and profile data from running as shortcodes.
  *
- * Page content runs do_shortcode() after do_blocks(), so a block that prints
- * job or profile data there would have that text parsed for shortcodes. This
- * covers every job query, every block bound to one of the plugin's sources
- * and the Open to Work block, wherever an editor places them.
+ * Page content runs do_shortcode() after do_blocks(), so rendered job and profile text would be parsed for them.
  *
  * @param string $block_content Rendered block.
  * @param array  $block         Parsed block.

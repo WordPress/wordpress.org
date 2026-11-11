@@ -17,7 +17,7 @@ $WP wp rewrite structure '/%postname%/' --hard
 $WP wp theme activate jobswp > /dev/null
 $WP wp widget reset sidebar-1 > /dev/null 2>&1 || true
 
-# Activate the block theme. The classic theme stays installed: wp theme activate jobswp.
+# Activate the block theme.
 $WP wp theme activate wporg-jobs-2026
 
 # The plugin files every submitted job under this account; the form errors without it.

@@ -2,8 +2,7 @@
 /**
  * Jobs Theme 2026 functions and definitions.
  *
- * Presentation only. Job data, bindings, the candidates block, the form
- * partials and the site-level hooks live in the wporg-jobs-blocks plugin.
+ * Presentation only; job data and behavior live in the wporg-jobs-blocks plugin.
  *
  * @package wporg-jobs-2026
  */
@@ -221,8 +220,7 @@ function wporg_jobs_2026_register_block_styles(): void {
 add_action( 'init', 'wporg_jobs_2026_register_block_styles' );
 
 /**
- * Falls back to the theme's SVG logo when no custom logo is set, so the
- * header part holds no environment-specific media id.
+ * Falls back to the theme's SVG logo when no custom logo is set.
  *
  * @param string $html Logo markup from get_custom_logo().
  * @return string
@@ -242,12 +240,7 @@ function wporg_jobs_2026_default_custom_logo( string $html ): string {
 add_filter( 'get_custom_logo', 'wporg_jobs_2026_default_custom_logo' );
 
 /**
- * Marks the navigation link whose path matches the request as core marks
- * a current item: `current-menu-item` on the item (the `-current` state in
- * theme.json styles it) and aria-current="page" on the link. Core matches by
- * post id, which differs per environment. In-page links (`/#candidates`),
- * links to other hosts and search results (whose address is `/?s=`) are never
- * current.
+ * Marks the navigation link matching the request path as current; core matches by post id, which differs per environment.
  *
  * @param string $block_content Rendered link.
  * @param array  $block         Parsed block.

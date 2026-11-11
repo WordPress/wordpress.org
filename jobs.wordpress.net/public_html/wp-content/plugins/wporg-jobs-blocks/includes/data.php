@@ -10,8 +10,7 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Plain-text value of a job field, labelled the way the classic theme
- * printed it.
+ * Plain-text value of a job field.
  *
  * @param int    $post_id Job id.
  * @param string $key     Field key, or one of the derived keys.
@@ -107,11 +106,10 @@ function wporg_jobs_blocks_job_field( int $post_id, string $key ): string {
 }
 
 /**
- * All-time view count from Jetpack Stats, cached for an hour. Null when no
- * Stats source is available, so callers can print nothing.
+ * All-time view count from Jetpack Stats, cached for an hour.
  *
  * @param int $post_id Job id.
- * @return int|null
+ * @return int|null Null when Stats is unavailable.
  */
 function wporg_jobs_blocks_job_views( int $post_id ): ?int {
 	$cache_key = 'wporg_jobs_blocks_views_' . $post_id;
@@ -135,8 +133,7 @@ function wporg_jobs_blocks_job_views( int $post_id ): ?int {
 }
 
 /**
- * Homepage snapshot: open positions, categories with jobs, remote share and
- * per-category counts. Memoized per request.
+ * Homepage stats: open positions, categories with jobs, remote share and per-category counts.
  *
  * @return array{total:int,categories:int,remote_pct:int,counts:array<string,int>}
  */

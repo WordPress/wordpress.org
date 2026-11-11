@@ -1,7 +1,6 @@
 <?php
 /**
- * Site-level behavior that must survive a theme swap: analytics, feed
- * discovery, routing and robots rules. Moved from the theme.
+ * Site-level hooks: analytics, feed discovery, author archives and robots rules.
  *
  * @package wporg-jobs-blocks
  */
@@ -11,8 +10,7 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Google Tag Manager container id. Filter it to an empty string to turn GTM
- * off, as on local and staging sites.
+ * Google Tag Manager container id, empty outside production.
  *
  * @return string
  */

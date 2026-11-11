@@ -126,12 +126,6 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
-**Classic theme** (the one production runs; starting the environment activates the block theme again):
-
-```bash
-npm run jobs:env -- run cli -- wp theme activate jobswp
-```
-
 **Run tests** (the JobsWP plugin's PHPUnit suite, in a dedicated test environment):
 
 ```bash

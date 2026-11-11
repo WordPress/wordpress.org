@@ -1,11 +1,6 @@
 <?php
 /**
- * The Remove a Job page's notice: the plugin's error after a failed removal,
- * or the confirmation after the redirect to ?removedjob=1. Prints nothing
- * otherwise.
- *
- * Ported from the classic theme's page-remove-a-job.php, which prints
- * it above the page's content.
+ * The Remove a Job page's notice: the error after a failed removal, or the confirmation after a successful one.
  *
  * @package wporg-jobs-blocks
  */
