@@ -103,9 +103,6 @@ add_filter( 'pre_render_block', 'wporg_jobs_blocks_browser_enter', 10, 2 );
 function wporg_jobs_blocks_browser_leave( string $block_content, array $block ): string {
 	if ( isset( $block['attrs']['namespace'] ) && WPORG_JOBS_BLOCKS_BROWSER_NS === $block['attrs']['namespace'] ) {
 		$GLOBALS['wporg_jobs_blocks_in_browser'] = false;
-
-		// Page content runs do_shortcode() after do_blocks(), so job titles and fields must not read as shortcodes.
-		$block_content = str_replace( '[', '&#91;', $block_content );
 	}
 	return $block_content;
 }

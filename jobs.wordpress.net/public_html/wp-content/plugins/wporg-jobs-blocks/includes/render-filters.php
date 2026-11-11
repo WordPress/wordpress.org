@@ -74,3 +74,29 @@ function wporg_jobs_blocks_apply_button( string $block_content, array $block, WP
 	return $tags->get_updated_html();
 }
 add_filter( 'render_block_core/button', 'wporg_jobs_blocks_apply_button', 10, 3 );
+
+/**
+ * Keeps brackets in job and profile data from running as shortcodes.
+ *
+ * Page content runs do_shortcode() after do_blocks(), so a block that prints
+ * job or profile data there would have that text parsed for shortcodes. This
+ * covers every job query, every block bound to one of the plugin's sources
+ * and the Open to Work block, wherever an editor places them.
+ *
+ * @param string $block_content Rendered block.
+ * @param array  $block         Parsed block.
+ * @return string
+ */
+function wporg_jobs_blocks_escape_shortcode_syntax( string $block_content, array $block ): string {
+	$prints_data = 'wporg-jobs/open-to-work' === $block['blockName']
+		|| ( 'core/query' === $block['blockName'] && 'job' === ( $block['attrs']['query']['postType'] ?? '' ) );
+
+	foreach ( (array) ( $block['attrs']['metadata']['bindings'] ?? array() ) as $binding ) {
+		if ( is_array( $binding ) && str_starts_with( (string) ( $binding['source'] ?? '' ), 'wporg-jobs/' ) ) {
+			$prints_data = true;
+		}
+	}
+
+	return $prints_data ? str_replace( '[', '&#91;', $block_content ) : $block_content;
+}
+add_filter( 'render_block', 'wporg_jobs_blocks_escape_shortcode_syntax', 10, 2 );

@@ -119,7 +119,6 @@ if ( $wporg_jobs_blocks_paged && $wporg_jobs_blocks_pages > 1 ) {
 printf(
 	'<div %1$s><ul class="wporg-jobs-open-to-work__people">%2$s</ul>%3$s</div>',
 	wp_kses_data( get_block_wrapper_attributes( array( 'class' => 'is-variant-' . $wporg_jobs_blocks_variant ) ) ),
-	// Page content runs do_shortcode() after do_blocks(), so profile fields must not read as shortcodes.
-	str_replace( '[', '&#91;', implode( '', $wporg_jobs_blocks_items ) ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Each item is escaped above.
+	implode( '', $wporg_jobs_blocks_items ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Each item is escaped above.
 	$wporg_jobs_blocks_pagination // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above.
 );
