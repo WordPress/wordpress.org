@@ -2120,6 +2120,7 @@ h5 {
 
 .video-list li .video-thumbnail img {
 	width: 100%;
+	height: auto;
 	min-height: 100px;
 }
 
