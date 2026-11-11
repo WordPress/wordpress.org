@@ -38,13 +38,30 @@ class Test_Slack_Trac_Commit_Handler extends \PHPUnit\Framework\TestCase {
 		$sent = new ArrayObject();
 
 		$send = new class( 'https://example.com/webhook', $sent ) extends Send {
+			/**
+			 * Attachment text sent to each channel, keyed by channel.
+			 *
+			 * @var ArrayObject
+			 */
 			private $sent;
 
+			/**
+			 * Records sends instead of posting to the webhook.
+			 *
+			 * @param string      $webhook Webhook URL.
+			 * @param ArrayObject $sent    Where to record what is sent.
+			 */
 			public function __construct( $webhook, ArrayObject $sent ) {
 				parent::__construct( $webhook );
 				$this->sent = $sent;
 			}
 
+			/**
+			 * Records the attachment text instead of sending it.
+			 *
+			 * @param string      $channel Channel name.
+			 * @param string|bool $thread  Thread timestamp, or false.
+			 */
 			public function send( $channel, $thread = false ) {
 				$attachments            = $this->get_attachments();
 				$this->sent[ $channel ] = $attachments[0]['text'];
@@ -52,8 +69,19 @@ class Test_Slack_Trac_Commit_Handler extends \PHPUnit\Framework\TestCase {
 		};
 
 		$handler = new class( $send, $trac, '/repo', 1 ) extends Commit_Handler {
+			/**
+			 * Output for each svnlook subcommand.
+			 *
+			 * @var string[]
+			 */
 			public $svnlook_output = array();
 
+			/**
+			 * Returns canned output instead of running svnlook.
+			 *
+			 * @param string $subcommand svnlook subcommand.
+			 * @return string
+			 */
 			protected function svnlook( $subcommand ) {
 				return $this->svnlook_output[ $subcommand ];
 			}
@@ -149,11 +177,11 @@ class Test_Slack_Trac_Commit_Handler extends \PHPUnit\Framework\TestCase {
 	/**
 	 * Returns an array's keys, sorted.
 	 *
-	 * @param array $array Array.
+	 * @param array $items Array.
 	 * @return string[]
 	 */
-	private function sorted_keys( array $array ): array {
-		$keys = array_keys( $array );
+	private function sorted_keys( array $items ): array {
+		$keys = array_keys( $items );
 		sort( $keys );
 		return $keys;
 	}
