@@ -15,6 +15,9 @@ const { state } = store( 'jobswp/job-browser', {
 	},
 	actions: {
 		select: withSyncEvent( ( event ) => {
+			if ( event.metaKey || event.ctrlKey || event.shiftKey || event.altKey ) {
+				return;
+			}
 			const { slug } = getContext();
 			// Follow the link to the archive when the page doesn't hold all of the category's jobs.
 			if (

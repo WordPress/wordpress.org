@@ -39,7 +39,7 @@ function jobswp_blocks_job_field( int $post_id, string $key ): string {
 		case 'location_label':
 			$location = $raw( 'location' );
 			if ( '' === $location || 'N/A' === $location ) {
-				return '';
+				return "\u{1F30E} " . __( 'Remote', 'jobswp-blocks' );
 			}
 			$remote = false !== stripos( $location, 'remote' ) || false !== stripos( $location, 'anywhere' );
 			return ( $remote ? "\u{1F30E} " : "\u{1F4CD} " ) . $location;
