@@ -37,8 +37,9 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 	 * @param array  $paths    Map of path => action, or a list of paths (assumed modified).
 	 * @param string $author   The commit author.
 	 * @param string $message  The commit message.
+	 * @param array  $kinds    Optional. Map of path => 'file' or 'dir'.
 	 */
-	private function log_entry( int $revision, array $paths, string $author = 'committer', string $message = '' ): array {
+	private function log_entry( int $revision, array $paths, string $author = 'committer', string $message = '', array $kinds = array() ): array {
 		$actions = array();
 
 		foreach ( $paths as $key => $value ) {
@@ -55,6 +56,7 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 			'date'     => 0,
 			'paths'    => array_keys( $actions ),
 			'actions'  => $actions,
+			'kinds'    => $kinds,
 			'message'  => $message,
 		);
 	}
@@ -185,6 +187,40 @@ class SVN_Watcher_Log_Summary_Test extends TestCase {
 
 		$this->assertSame( array( '1.0' ), $plugins['plugin-a']['tags_deleted'] );
 		$this->assertSame( array( '2.0' ), $plugins['plugin-a']['tags_touched'] );
+	}
+
+	/**
+	 * Files committed directly into /tags/ are not tags, so must not be built or deleted as releases.
+	 */
+	public function test_files_directly_in_tags_are_not_tags() {
+		$plugins = $this->summarize(
+			array(
+				$this->log_entry(
+					600,
+					array(
+						'/plugin-a/tags/readme.txt'   => 'M',
+						'/plugin-a/tags/old.php'      => 'D',
+						'/plugin-a/tags/1.0'          => 'A',
+						'/plugin-a/tags/0.9'          => 'D',
+						'/plugin-a/tags/2.0/a.php'    => 'M',
+						'/plugin-a/tags/unknown-kind' => 'A',
+					),
+					'committer',
+					'',
+					array(
+						'/plugin-a/tags/readme.txt'   => 'file',
+						'/plugin-a/tags/old.php'      => 'file',
+						'/plugin-a/tags/1.0'          => 'dir',
+						'/plugin-a/tags/0.9'          => 'dir',
+						'/plugin-a/tags/2.0/a.php'    => 'file',
+						'/plugin-a/tags/unknown-kind' => '',
+					)
+				),
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( array( '1.0', '2.0', 'unknown-kind' ), $plugins['plugin-a']['tags_touched'] );
+		$this->assertSame( array( '0.9' ), $plugins['plugin-a']['tags_deleted'] );
 	}
 
 	/**
