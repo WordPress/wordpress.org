@@ -122,10 +122,11 @@ class Locale_Banner extends Base {
 
 		// A localized directory only points readers elsewhere when their languages don't include its own.
 		if ( ! $is_english_directory ) {
-			$reads_english = (bool) preg_grep( '/^en(-|$)/i', $this->get_http_locales( (string) $request->get_header( 'accept-language' ) ) );
+			$http_locales  = $this->get_http_locales( (string) $request->get_header( 'accept-language' ) );
+			$reads_english = (bool) preg_grep( '/^en(-|$)/i', $http_locales );
 
-			// The header locales leave out English, so an English-variant directory matches any `en` tag.
-			if ( $current_locale_is_suggested || in_array( $current_locale, $locales_from_header, true ) || ( $reads_english && str_starts_with( $current_locale, 'en_' ) ) ) {
+			// Match the language, not the locale: map_locale() turns `es-419` or `pt` into a sibling regional locale.
+			if ( preg_grep( '/^' . strtok( $current_locale, '_' ) . '(-|$)/i', $http_locales ) ) {
 				$suggest_named_locales = array();
 			} elseif ( ! $suggest_named_locales && $reads_english ) {
 				$suggest_named_locales = array( 'en_US' => \GP_Locales::by_field( 'wp_locale', 'en_US' )->native_name );
