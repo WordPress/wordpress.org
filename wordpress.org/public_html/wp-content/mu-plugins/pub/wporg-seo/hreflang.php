@@ -172,8 +172,8 @@ function get_sites(): array {
  * @return void
  */
 function the_links( string $path ): void {
-	// A REST request that calls `wp_head` never expects these.
-	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+	// No alternates for a 404, or for a REST request that calls `wp_head`.
+	if ( is_404() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 		return;
 	}
 
