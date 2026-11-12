@@ -79,7 +79,7 @@ function markup_wporg_links( $content ) {
 		if (
 			$is_tag &&
 			! $ignore_element &&
-			preg_match( '/^<(' . $tags_to_ignore . ')[^>]*>/', $text, $matches )
+			preg_match( '/^<(' . $tags_to_ignore . ')(?=[\s\/>])[^>]*>/', $text, $matches )
 		) {
 			$ignore_element = $matches[1];
 			$closing_tag    = '</' . $ignore_element . '>';
@@ -87,7 +87,7 @@ function markup_wporg_links( $content ) {
 
 		// Process this stand-alone chunk of text.
 		if ( ! $is_tag && ! $ignore_element ) {
-			$content = str_replace( $text, preg_replace( $find, $replace, $text ), $content );
+			$arr[ $i ] = preg_replace( $find, $replace, $text );
 		}
 
 		// Did we leave the ignored tag?
@@ -96,5 +96,5 @@ function markup_wporg_links( $content ) {
 		}
 	}
 
-	return $content;
+	return implode( '', $arr );
 }
