@@ -1651,7 +1651,7 @@ class Plugin_Directory {
 			Tools::clear_memory_heavy_variables();
 		}
 
-		if ( Template::is_plugin_outdated( $plugin_db_row->ID, 5 ) ) {
+		if ( Template::is_plugin_outdated( $plugin_db_row->ID ) ) {
 			$skip = true;
 		}
 

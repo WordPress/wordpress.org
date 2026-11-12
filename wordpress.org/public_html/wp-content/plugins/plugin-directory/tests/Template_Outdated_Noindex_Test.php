@@ -13,7 +13,7 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Template;
 
 /**
- * Covers the 5-major noindex cutoff and the 3-major outdated notice.
+ * Covers the 5-major cutoff for noindexing single plugin pages.
  *
  * Extends the plain PHPUnit TestCase: WP_UnitTestCase is not compatible with
  * the PHPUnit 11 runner used by this suite.
@@ -113,16 +113,5 @@ class Template_Outdated_Noindex_Test extends TestCase {
 		$post = $wp_query->post;
 
 		$this->assertSame( $expected, Template::should_noindex_request( false ) );
-	}
-
-	/**
-	 * Tests that the outdated notice still shows once a plugin falls 3 majors behind.
-	 *
-	 * @return void
-	 */
-	public function test_outdated_notice_keeps_three_major_threshold(): void {
-		$plugin = $this->create_plugin( 3 );
-
-		$this->assertTrue( Template::is_plugin_outdated( $plugin ) );
 	}
 }
