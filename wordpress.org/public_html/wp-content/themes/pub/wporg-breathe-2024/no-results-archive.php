@@ -18,15 +18,8 @@ if ( ! $archive_user ) {
 	return;
 }
 
-if ( is_author() ) {
-	$heading = __( 'No posts yet', 'wporg' );
-	/* translators: %s: User display name. */
-	$message = sprintf( __( '%s hasn’t published any posts here yet.', 'wporg' ), $archive_user->display_name );
-} else {
-	$heading = __( 'No mentions yet', 'wporg' );
-	/* translators: %s: Username. */
-	$message = sprintf( __( 'No posts here mention @%s yet.', 'wporg' ), $archive_user->user_login );
-}
+$heading = is_author() ? __( 'No posts yet', 'wporg' ) : __( 'No mentions yet', 'wporg' );
+$message = get_empty_archive_message( $archive_user );
 ?>
 
 <article id="post-0" class="post no-results not-found">
