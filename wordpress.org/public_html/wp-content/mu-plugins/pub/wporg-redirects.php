@@ -59,6 +59,13 @@ if ( 1 === get_current_blog_id() && is_multisite() && 'wordpress.org' === get_bl
 
 				// Data Liberation
 				'/and' => '/data-liberation/',
+
+				// Legacy URLs that are still linked to, see https://meta.trac.wordpress.org/ticket/5359.
+				'/future'                   => '/about/roadmap/',
+				'/nightly'                  => '/download/beta-nightly/',
+				'/get-involved'             => 'https://make.wordpress.org/',
+				'/download/svn'             => 'https://make.wordpress.org/core/handbook/contribute/svn/',
+				'/about/contact'            => '/support/',
 			];
 
 			foreach ( $path_redirects as $test => $redirect ) {
@@ -114,6 +121,22 @@ add_action( 'template_redirect', function() {
 
 		// Short URL for Gutenberg Phase 3 publicity
 		$path_redirects['/phase-3'] = '/core/tag/phase-3/';
+	}
+
+	if ( 'wordpress.org' === $host ) {
+		// Legacy URLs that are still linked to, see https://meta.trac.wordpress.org/ticket/5359.
+		$path_redirects['/topic-tag/']     = '/support/topic-tag/';
+		$path_redirects['/themesnew/tag/'] = '/themes/tags/';
+		$path_redirects['/themesnew/']     = '/themes/';
+		$path_redirects['/suport/']        = '/support/';
+	}
+
+	if ( 'wordpress.org' === $host || ( defined( 'IS_ROSETTA_NETWORK' ) && IS_ROSETTA_NETWORK ) ) {
+		// Pre-HelpHub article URLs, Rosetta sites included, see https://meta.trac.wordpress.org/ticket/5359.
+		$path_redirects['/getting-started/'] = 'https://wordpress.org/documentation/article/';
+		$path_redirects['/installation/']    = 'https://wordpress.org/documentation/article/';
+		$path_redirects['/advanced-topics/'] = 'https://wordpress.org/documentation/article/';
+		$path_redirects['/article/']         = 'https://wordpress.org/documentation/article/';
 	}
 
 	foreach ( $path_redirects as $test => $redirect ) {
