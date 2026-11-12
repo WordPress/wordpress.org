@@ -35,6 +35,7 @@ class Hooks {
 
 		// Output meta description.
 		add_action( 'wp_head', array( $this, 'meta_description' ) );
+		add_filter( 'jetpack_open_graph_tags', array( $this, 'open_graph_tags' ) );
 
 		// Link to create new topics atop topic list.
 		add_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
@@ -579,9 +580,11 @@ class Hooks {
 	}
 
 	/**
-	 * Outputs meta description tags.
+	 * Builds the meta description for the current page.
+	 *
+	 * @return string The description, or an empty string when the page has none.
 	 */
-	public function meta_description() {
+	public function get_meta_description() {
 		$description = '';
 		$max_length  = 150;
 
@@ -613,7 +616,7 @@ class Hooks {
 			// word or sentence.
 			if ( mb_strlen( $excerpt ) > $length ) {
 				// Truncate string at max length.
-				$excerpt = substr( $excerpt, 0, $length );
+				$excerpt = mb_substr( $excerpt, 0, $length );
 				// Reverse string for easier handling.
 				$rev = strrev( $excerpt );
 				// Find first reasonable and natural break.
@@ -628,13 +631,37 @@ class Hooks {
 			$description = sprintf( $description, $excerpt );
 		}
 
-		// Output description meta tags if a description has been set.
-		if ( $description ) {
-			$description = trim( $description );
+		return trim( $description );
+	}
 
-			printf( '<meta name="og:description" content="%s" />' . "\n", esc_attr( $description ) );
+	/**
+	 * Outputs the meta description tag.
+	 */
+	public function meta_description() {
+		$description = $this->get_meta_description();
+
+		if ( $description ) {
 			printf( '<meta name="description" content="%s" />' . "\n", esc_attr( $description ) );
 		}
+	}
+
+	/**
+	 * Uses the meta description for social sharing cards.
+	 *
+	 * Without it, Jetpack builds the description from the rendered topic, which leads with its title, author and date.
+	 *
+	 * @param array $tags Open Graph and Twitter Card tags.
+	 * @return array
+	 */
+	public function open_graph_tags( $tags ) {
+		$description = $this->get_meta_description();
+
+		if ( $description ) {
+			$tags['og:description']      = $description;
+			$tags['twitter:description'] = $description;
+		}
+
+		return $tags;
 	}
 
 	/**
