@@ -292,7 +292,7 @@ function old_page_redirects() {
 add_filter( 'template_redirect', __NAMESPACE__ . '\old_page_redirects' );
 
 /**
- * Enables hreflang tags on the pages that have localised variants.
+ * Enables hreflang tags on the pages that have localized variants.
  *
  * The criteria is that...
  *  - It's a page
