@@ -117,10 +117,20 @@ class Locale_Banner extends Base {
 			$suggest_named_locales[ $locale ] = \GP_Locales::by_field( 'wp_locale', $locale )->native_name;
 		}
 
-		$suggest_string = '';
+		$suggest_string       = '';
+		$is_english_directory = 'en_US' === $current_locale || ! $current_gp_locale;
 
-		// English directory.
-		if ( 'en_US' === $current_locale || ! $current_gp_locale ) {
+		// A localized directory only points readers elsewhere when their languages don't include its own.
+		if ( ! $is_english_directory ) {
+			if ( $current_locale_is_suggested || in_array( $current_locale, $locales_from_header, true ) ) {
+				$suggest_named_locales = array();
+			} elseif ( ! $suggest_named_locales && preg_grep( '/^en(-|$)/i', $this->get_http_locales( (string) $request->get_header( 'accept-language' ) ) ) ) {
+				$suggest_named_locales = array( 'en_US' => \GP_Locales::by_field( 'wp_locale', 'en_US' )->native_name );
+			}
+		}
+
+		// English directory, or a localized directory with suggestions for its reader.
+		if ( $is_english_directory || $suggest_named_locales ) {
 			$current_path   = function_exists( 'get_site' ) && get_site() ? get_site()->path : '/';
 			$referring_path = wp_parse_url( $request->get_header( 'referer' ), PHP_URL_PATH );
 
@@ -143,14 +153,15 @@ class Locale_Banner extends Base {
 				$suggestions = array();
 				foreach ( $suggest_named_locales as $locale => $language ) {
 					$suggestions[] = sprintf(
-						'<a href="https://%s.wordpress.org%s">%s</a>',
-						$locale_subdomain_assoc[ $locale ]->subdomain,
+						'<a href="https://%s%s">%s</a>',
+						'en_US' === $locale ? 'wordpress.org' : $locale_subdomain_assoc[ $locale ]->subdomain . '.wordpress.org',
 						esc_url( $current_path ),
 						$language
 					);
 				}
 
-				if ( $is_plugin_request ) {
+				// English is the source language, so there is no translation to improve.
+				if ( $is_plugin_request && 'en_US' !== $primary_locale ) {
 					$suggest_string = sprintf(
 						$this->translate( 'This plugin is also available in %1$s. <a href="%2$s">Help improve the translation!</a>', $primary_locale ),
 						wp_sprintf_l( '%l', $suggestions ),
