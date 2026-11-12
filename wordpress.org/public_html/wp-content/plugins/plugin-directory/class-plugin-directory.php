@@ -51,7 +51,7 @@ class Plugin_Directory {
 		add_filter( 'get_the_archive_title_prefix', array( $this, 'filter_get_the_archive_title_prefix' ) );
 		add_filter( 'the_content', array( $this, 'filter_rel_nofollow_ugc' ) );
 		add_action( 'wp_head', array( Template::class, 'json_ld_schema' ), 1 );
-		add_action( 'wp_head', array( Template::class, 'hreflang_link_attributes' ), 2 );
+		add_filter( 'wporg_hreflang_sites', array( Template::class, 'hreflang_sites' ) );
 		add_filter( 'allowed_redirect_hosts', array( $this, 'filter_redirect_hosts' ) );
 		add_filter( 'wp_get_attachment_url', array( $this, 'add_info_to_zip_url' ), 100, 2 );
 		add_action( 'post_updated', [ Helpscout::class, 'post_updated' ], 10, 3 );

@@ -1182,187 +1182,30 @@ class Template {
 	}
 
 	/**
-	 * Adds hreflang link attributes to WordPress.org pages.
+	 * Limits a plugin's hreflang alternates to the locales it is translated into.
 	 *
-	 * @link https://support.google.com/webmasters/answer/189077?hl=en Use hreflang for language and regional URLs.
-	 * @link https://sites.google.com/site/webmasterhelpforum/en/faq-internationalisation FAQ: Internationalisation.
+	 * @param object[] $sites Locale sites, keyed by locale.
+	 * @return object[] The sites to list for the current page.
 	 */
-	public static function hreflang_link_attributes() {
-		global $wpdb;
-
-		$post = false;
-		if ( is_singular( 'plugin' ) ) {
-			$post = get_post();
-		}
-
-		$path = self::get_current_url( $path_only = true );
-		if ( ! $path ) {
-			return;
+	public static function hreflang_sites( $sites ) {
+		if ( ! is_singular( 'plugin' ) ) {
+			return $sites;
 		}
 
 		wp_cache_add_global_groups( array( 'locale-associations' ) );
 
-		// Google doesn't have support for a whole lot of languages and throws errors about it,
-		// so we exclude them, as we're otherwise outputting data that isn't used at all.
-		$unsupported_languages = array(
-			'arq',
-			'art',
-			'art-xemoji',
-			'art-pirate', 'pirate',
-			'ary',
-			'ast',
-			'az-ir',
-			'azb',
-			'bal',
-			'bcc',
-			'bho',
-			'brx',
-			'dsb',
-			'ff-sn',
-			'fon',
-			'frp',
-			'fuc',
-			'fur',
-			'gax',
-			'haz',
-			'hsb',
-			'ido',
-			'io',
-			'kaa',
-			'kab',
-			'li',
-			'li-nl',
-			'lij',
-			'lmo',
-			'mai',
-			'me',
-			'me-me',
-			'mfe',
-			'nqo',
-			'pap-aw',
-			'pap-cw',
-			'pcd',
-			'pcm',
-			'rhg',
-			'rup',
-			'sah',
-			'sc-it',
-			'scn',
-			'skr',
-			'srd',
-			'syr',
-			'szl',
-			'tah',
-			'twd',
-			'ty-tj',
-			'tzm',
-			'vec',
-			'zgh',
-		);
+		$cache_key = 'translated-locales-' . get_post()->post_name;
+		$locales   = wp_cache_get( $cache_key, 'locale-associations' );
+		if ( false === $locales ) {
+			$locales = wp_list_pluck( Plugin_I18n::instance()->get_locales(), 'wp_locale' );
 
-		// WARNING: for any changes below, check other uses of the `locale-assosciations` group as there's shared cache keys in use.
-		$cache_key = $post ? 'local-sites-' . $post->post_name : 'local-sites';
-		if ( false === ( $sites = wp_cache_get( $cache_key, 'locale-associations' ) ) ) {
-
-			// get subdomain/locale associations
-			$subdomains = $wpdb->get_results( 'SELECT locale, subdomain FROM wporg_locales', OBJECT_K );
-
-			require_once GLOTPRESS_LOCALES_PATH;
-
-			if ( $post ) {
-				$sites = Plugin_I18n::instance()->get_locales();
-
-				// Always include the current locale, regardless of translation status. #5614
-				if ( 'en_US' !== get_locale() ) {
-					if ( ! wp_list_filter( $sites, [ 'wp_locale' => get_locale() ] ) ) {
-						$sites[] = (object) array(
-							'wp_locale' => get_locale(),
-						);
-					}
-				}
-
-			} else {
-				$sites = array();
-				foreach ( array_keys( $subdomains ) as $locale ) {
-					$sites[] = (object) array(
-						'wp_locale' => $locale,
-					);
-				}
-			}
-
-			foreach ( $sites as $key => $site ) {
-				$gp_locale = \GP_Locales::by_field( 'wp_locale', $site->wp_locale );
-				if ( empty( $gp_locale ) || ! isset( $subdomains[ $site->wp_locale ] ) ) {
-					unset( $sites[ $key ] );
-					continue;
-				}
-
-				// Skip unsupported locales.
-				if ( in_array( $gp_locale->slug, $unsupported_languages ) ) {
-					unset( $sites[ $key ] );
-					continue;
-				}
-
-				$sites[ $key ]->subdomain = $subdomains[ $site->wp_locale ]->subdomain;
-
-				// Skip non-existing subdomains, e.g. 'de_CH_informal'.
-				if ( false !== strpos( $site->subdomain, '_' ) ) {
-					unset( $sites[ $key ] );
-					continue;
-				}
-
-				// Note that Google only supports ISO 639-1 codes.
-				if ( isset( $gp_locale->lang_code_iso_639_1 ) && isset( $gp_locale->country_code ) ) {
-					$hreflang = $gp_locale->lang_code_iso_639_1 . '-' . $gp_locale->country_code;
-				} elseif ( isset( $gp_locale->lang_code_iso_639_1 ) ) {
-					$hreflang = $gp_locale->lang_code_iso_639_1;
-				} elseif ( isset( $gp_locale->lang_code_iso_639_2 ) ) {
-					$hreflang = $gp_locale->lang_code_iso_639_2;
-				} elseif ( isset( $gp_locale->lang_code_iso_639_3 ) ) {
-					$hreflang = $gp_locale->lang_code_iso_639_3;
-				}
-
-				if ( $hreflang ) {
-					$sites[ $key ]->hreflang = strtolower( $hreflang );
-				} else {
-					unset( $sites[ $key ] );
-				}
-			}
-
-			// Add en_US to the list of sites.
-			$sites['en_US'] = (object) array(
-				'locale'    => 'en_US',
-				'hreflang'  => 'en',
-				'subdomain' => '',
-			);
-
-			// Add x-default to the list of sites.
-			$sites['x-default'] = (object) array(
-				'locale'    => 'x-default',
-				'hreflang'  => 'x-default',
-				'subdomain' => '',
-			);
-
-			uasort( $sites, function( $a, $b ) {
-				return strcasecmp( $a->hreflang, $b->hreflang );
-			} );
-
-			wp_cache_set( $cache_key, $sites, 'locale-associations', DAY_IN_SECONDS );
+			wp_cache_set( $cache_key, $locales, 'locale-associations', DAY_IN_SECONDS );
 		}
 
-		foreach ( $sites as $site ) {
-			$url = sprintf(
-				'https://%swordpress.org%s',
-				$site->subdomain ? "{$site->subdomain}." : '',
-				$path
-			);
+		// Always include the current locale, regardless of translation status. See #5614.
+		array_push( $locales, 'en_US', 'x-default', get_locale() );
 
-			printf(
-				'<link rel="alternate" href="%s" hreflang="%s" />' . "\n",
-				esc_url( $url ),
-				esc_attr( $site->hreflang )
-			);
-		}
+		return array_intersect_key( $sites, array_flip( $locales ) );
 	}
 
 	/**

@@ -20,6 +20,8 @@ use function WordPressdotorg\SEO\Canonical\get_canonical_url;
  */
 const SITE_PATHS = array(
 	'/gutenberg/',
+	'/plugins/',
+	'/themes/',
 );
 
 /**
@@ -100,8 +102,7 @@ function get_sites(): array {
 
 	wp_cache_add_global_groups( array( 'locale-associations' ) );
 
-	// Shared with the hreflang code in the themes and the theme directory, so keep the same shape.
-	$sites = wp_cache_get( 'local-sites', 'locale-associations' );
+	$sites = wp_cache_get( 'hreflang-sites', 'locale-associations' );
 	if ( false !== $sites ) {
 		return $sites;
 	}
@@ -170,7 +171,7 @@ function get_sites(): array {
 		}
 	);
 
-	wp_cache_set( 'local-sites', $sites, 'locale-associations' );
+	wp_cache_set( 'hreflang-sites', $sites, 'locale-associations' );
 
 	return $sites;
 }
@@ -201,7 +202,14 @@ function output_links(): void {
 		$path .= '?' . $query;
 	}
 
-	foreach ( get_sites() as $site ) {
+	/**
+	 * Filters the locale sites that are listed as alternates of the current page.
+	 *
+	 * @param object[] $sites Sites keyed by locale, each with `locale`, `subdomain` and `hreflang`.
+	 */
+	$sites = apply_filters( 'wporg_hreflang_sites', get_sites() );
+
+	foreach ( $sites as $site ) {
 		$url = sprintf(
 			'https://%swordpress.org%s',
 			$site->subdomain ? "{$site->subdomain}." : '',
