@@ -37,6 +37,9 @@ jQuery( document ).ready( function( $ ) {
 # elif req.path_info.startswith('/changeset/') and req.path_info.strip('/').split('/')[2:]:
 ## e.g. /changeset/123/trunk (a changeset restricted to a path)
 <meta name="robots" content="noindex, follow"/>
+# elif req.path_info.rstrip('/') == '/changeset' and 'old_path' in req.args:
+## e.g. /changeset?old=123&old_path=trunk&new=124&new_path=trunk (a diff between two paths)
+<meta name="robots" content="noindex, follow"/>
 # endif
 
 ## Per-environment <head> additions (optional; e.g. core/site-specific-head.html)
