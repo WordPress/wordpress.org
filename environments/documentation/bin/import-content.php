@@ -93,11 +93,11 @@ function import_terms( string $endpoint, string $taxonomy ): array {
 			}
 
 			$result = wp_insert_term(
-				wp_specialchars_decode( $term['name'], ENT_QUOTES ),
+				wp_slash( wp_specialchars_decode( $term['name'], ENT_QUOTES ) ),
 				$taxonomy,
 				array(
 					'slug'        => $term['slug'],
-					'description' => $term['description'] ?? '',
+					'description' => wp_slash( $term['description'] ?? '' ),
 					'parent'      => $parent ? $map[ $parent ] : 0,
 				)
 			);
@@ -146,18 +146,20 @@ function import_posts( string $endpoint, string $post_type, array $taxonomies = 
 		}
 
 		$post_id = wp_insert_post(
-			array(
-				'import_id'     => (int) $item['id'],
-				'post_type'     => $post_type,
-				'post_status'   => 'publish',
-				'post_title'    => html_entity_decode( $item['title']['rendered'], ENT_QUOTES, 'UTF-8' ),
-				'post_name'     => $item['slug'],
-				'post_content'  => $item['content']['rendered'],
-				'post_excerpt'  => wp_strip_all_tags( $item['excerpt']['rendered'] ?? '' ),
-				'post_date'     => $item['date'],
-				'post_date_gmt' => $item['date_gmt'],
-				'post_parent'   => (int) ( $item['parent'] ?? 0 ),
-				'menu_order'    => (int) ( $item['menu_order'] ?? 0 ),
+			wp_slash(
+				array(
+					'import_id'     => (int) $item['id'],
+					'post_type'     => $post_type,
+					'post_status'   => 'publish',
+					'post_title'    => html_entity_decode( $item['title']['rendered'], ENT_QUOTES, 'UTF-8' ),
+					'post_name'     => $item['slug'],
+					'post_content'  => $item['content']['rendered'],
+					'post_excerpt'  => wp_strip_all_tags( $item['excerpt']['rendered'] ?? '' ),
+					'post_date'     => $item['date'],
+					'post_date_gmt' => $item['date_gmt'],
+					'post_parent'   => (int) ( $item['parent'] ?? 0 ),
+					'menu_order'    => (int) ( $item['menu_order'] ?? 0 ),
+				),
 			),
 			true
 		);
