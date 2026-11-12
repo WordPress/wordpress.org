@@ -191,7 +191,7 @@ class Template {
 			$noindex = true;
 		} elseif ( 'preview' == get_query_var( 'browse' ) ) {
 			$noindex = true;
-		} elseif ( is_singular( 'plugin' ) && self::is_plugin_outdated() ) {
+		} elseif ( is_singular( 'plugin' ) && self::is_plugin_outdated( null, 5 ) ) {
 			$noindex = true;
 		}
 
@@ -230,16 +230,17 @@ class Template {
 	}
 
 	/**
-	 * Checks if the plugin was tested with the latest 3 major releases of WordPress.
+	 * Checks if the plugin was not tested with any of the latest major releases of WordPress.
 	 *
 	 * @static
 	 *
-	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
-	 * @return bool True if the plugin is marked as tested, false otherwise.
+	 * @param int|\WP_Post|null $post     Optional. Post ID or post object. Defaults to global $post.
+	 * @param int               $releases Optional. Number of latest major releases to check against. Default 3.
+	 * @return bool True if the plugin is outdated, false otherwise.
 	 */
-	public static function is_plugin_outdated( $post = null ) {
+	public static function is_plugin_outdated( $post = null, $releases = 3 ) {
 		$tested_up_to             = (string) get_post_meta( get_post( $post )->ID, 'tested', true );
-		$version_to_check_against = (string) ( self::get_current_major_wp_version() - 0.2 );
+		$version_to_check_against = (string) ( self::get_current_major_wp_version() - ( $releases - 1 ) / 10 );
 
 		return version_compare( $version_to_check_against, $tested_up_to, '>' );
 	}
