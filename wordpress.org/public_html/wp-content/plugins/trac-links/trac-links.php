@@ -43,6 +43,7 @@ function markup_wporg_links( $content ) {
 		'/(\s|^|\()(r(\d{4,5}))(\b|$)/im', // core changeset r1234 in http://core.trac.wordpress.org/changeset/1234
 		'/(?<!\w)\[(\d{4,5})\](?!\w)/im', // core changeset [12345]
 		'/(?<!\w)\[(\d{4,5})-(\d{4,5})\](?!\w)/im', // core log [12345-54321]
+		'/(?<!\w)\[(\d{4,5}(?:-\d{4,5})?(?:,\d{4,5}(?:-\d{4,5})?)+)\](?!\w)/im', // core log [12345,12350-12355].
 		'/(\s|^|\()(diff:@(\d{4,5}):(\d{4,5}))(\b|$)/im', // core diff diff-core:@20:30 https://core.trac.wordpress.org/changeset?new=30&old=20
 	);
 
@@ -55,6 +56,7 @@ function markup_wporg_links( $content ) {
 		'$1<a href="https://'. $trac .'.trac.wordpress.org/changeset/$3">$2</a>', // core changeset
 		'<a href="https://'. $trac .'.trac.wordpress.org/changeset/$1">$0</a>', // trac changeset
 		'<a href="https://'. $trac .'.trac.wordpress.org/log/?revs=$1-$2">$0</a>', // trac log
+		'<a href="https://' . $trac . '.trac.wordpress.org/log/?revs=$1">$0</a>', // trac log list.
 		'$1<a href="https://'. $trac .'.trac.wordpress.org/changeset?new=$4&old=$3">$2</a>', // diff
 	);
 
