@@ -179,7 +179,7 @@ class SVN_Watcher {
 					$plugin['tags_touched'][] = 'trunk';
 
 				} elseif (
-					'tags' == $path_parts[1] &&
+					'tags' === $path_parts[1] &&
 					isset( $path_parts[2] ) &&
 					// A file committed directly into /tags/ is not a tag.
 					( isset( $path_parts[3] ) || 'file' !== ( $log['kinds'][ $path ] ?? '' ) )
