@@ -87,6 +87,7 @@ class Plugin {
 	 *  - /projects/wp-themes/?
 	 *
 	 * Adds:
+	 *  - API: (/locale)/$locale/$dir/glossary
 	 *  - /
 	 *  - /robots.txt
 	 *  - /locale/$locale
@@ -121,6 +122,9 @@ class Plugin {
 			GP::$router->remove( '/languages' );
 			GP::$router->remove( "/languages/$locale" );
 			GP::$router->remove( '/profile' );
+
+			// Register custom routes.
+			GP::$router->prepend( "(/locale)/$locale/$sets/glossary", array( 'GP_Route_Glossary_Entry', 'glossary_entries_get' ) );
 		} else {
 			// Delete default routes.
 			GP::$router->remove( "/languages/$locale" );
