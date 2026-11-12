@@ -616,7 +616,7 @@ class Hooks {
 			// word or sentence.
 			if ( mb_strlen( $excerpt ) > $length ) {
 				// Truncate string at max length.
-				$excerpt = substr( $excerpt, 0, $length );
+				$excerpt = mb_substr( $excerpt, 0, $length );
 				// Reverse string for easier handling.
 				$rev = strrev( $excerpt );
 				// Find first reasonable and natural break.
