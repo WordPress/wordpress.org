@@ -1386,6 +1386,9 @@ function wporg_themes_noindex_request( $noindex ) {
 }
 add_filter( 'wporg_noindex_request', 'wporg_themes_noindex_request' );
 
+// Every locale site has a copy of the directory, list them as hreflang alternates.
+add_filter( 'wporg_hreflang_enabled', '__return_true' );
+
 /**
  * Get the current front-end requested URL.
  */

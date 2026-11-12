@@ -12,19 +12,6 @@ namespace WordPressdotorg\SEO\Hreflang;
 use function WordPressdotorg\SEO\Canonical\get_canonical_url;
 
 /**
- * Paths of the sites that have a copy on every locale subdomain.
- *
- * Sites that still output their own hreflang links are left out until that code is removed.
- *
- * @var string[]
- */
-const SITE_PATHS = array(
-	'/gutenberg/',
-	'/plugins/',
-	'/themes/',
-);
-
-/**
  * Locales Google doesn't support and reports errors for.
  *
  * @var string[]
@@ -182,7 +169,12 @@ function get_sites(): array {
  * @return void
  */
 function output_links(): void {
-	if ( ! in_array( wp_parse_url( home_url( '/' ), PHP_URL_PATH ), SITE_PATHS, true ) ) {
+	/**
+	 * Filters whether the current site lists its locale copies as hreflang alternates.
+	 *
+	 * @param bool $enabled Whether to output the links. Off unless a site with locale copies turns it on.
+	 */
+	if ( ! apply_filters( 'wporg_hreflang_enabled', false ) ) {
 		return;
 	}
 
