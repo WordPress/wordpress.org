@@ -77,7 +77,7 @@ function markup_wporg_links( $content ) {
 		if (
 			$is_tag &&
 			! $ignore_element &&
-			preg_match( '/^<(' . $tags_to_ignore . ')\b[^>]*>/', $text, $matches )
+			preg_match( '/^<(' . $tags_to_ignore . ')(?=[\s\/>])[^>]*>/', $text, $matches )
 		) {
 			$ignore_element = $matches[1];
 			$closing_tag    = '</' . $ignore_element . '>';
