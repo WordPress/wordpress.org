@@ -2,15 +2,25 @@
 /**
  * Hreflang alternates for pages that exist on every locale site.
  *
- * Nothing here is hooked. A site that has the same page on the locale
- * subdomains calls the_links() from its own `wp_head` callback.
- *
  * @package WordPressdotorg\SEO
  */
 
 declare( strict_types = 1 );
 
 namespace WordPressdotorg\SEO\Hreflang;
+
+use function WordPressdotorg\SEO\Canonical\get_canonical_url;
+
+/**
+ * Paths of the sites that have a copy on every locale subdomain.
+ *
+ * Sites that still output their own hreflang links are left out until that code is removed.
+ *
+ * @var string[]
+ */
+const SITE_PATHS = array(
+	'/gutenberg/',
+);
 
 /**
  * Locales Google doesn't support and reports errors for.
@@ -166,15 +176,29 @@ function get_sites(): array {
 }
 
 /**
- * Outputs a hreflang link to the given path on every locale site.
+ * Outputs a hreflang link to the current page on every locale site.
  *
- * @param string $path Path of the page, the same on every locale site. E.g. `/download/`.
  * @return void
  */
-function the_links( string $path ): void {
+function output_links(): void {
+	if ( ! in_array( wp_parse_url( home_url( '/' ), PHP_URL_PATH ), SITE_PATHS, true ) ) {
+		return;
+	}
+
 	// No alternates for a 404, or for a REST request that calls `wp_head`.
 	if ( is_404() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 		return;
+	}
+
+	$canonical = get_canonical_url();
+	if ( ! $canonical ) {
+		return;
+	}
+
+	$path  = wp_parse_url( $canonical, PHP_URL_PATH );
+	$query = wp_parse_url( $canonical, PHP_URL_QUERY );
+	if ( $query ) {
+		$path .= '?' . $query;
 	}
 
 	foreach ( get_sites() as $site ) {
@@ -191,3 +215,4 @@ function the_links( string $path ): void {
 		);
 	}
 }
+add_action( 'wp_head', __NAMESPACE__ . '\output_links' );
