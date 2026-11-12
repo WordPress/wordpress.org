@@ -32,10 +32,6 @@ if ( !defined( 'OPENVERSE_SUBPATH' ) ) {
  * runs before the init hook.
  */
 function setup() {
-	// The parent wporg theme is designed for use on wordpress.org/* and assumes
-	// locale-domains are available. Remove hreflang support.
-	remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
-
 	// This page is not oEmbed'able
 	remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
 
