@@ -54,11 +54,17 @@ function get_requested_locale(): ?GP_Locale {
  * @return GP_Locale|null The locale, or null when not on a locale's details page.
  */
 function get_displayed_locale(): ?GP_Locale {
-	if ( ! is_singular() || ! has_shortcode( get_queried_object()->post_content, 'wp-locales' ) ) {
+	$locale = get_requested_locale();
+	if ( ! $locale || ! is_singular() ) {
 		return null;
 	}
 
-	return get_requested_locale();
+	$post = get_queried_object();
+	if ( ! $post instanceof \WP_Post || ! has_shortcode( $post->post_content, 'wp-locales' ) ) {
+		return null;
+	}
+
+	return $locale;
 }
 
 /**
