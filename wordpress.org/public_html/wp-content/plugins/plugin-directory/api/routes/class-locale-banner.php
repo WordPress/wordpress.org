@@ -125,8 +125,18 @@ class Locale_Banner extends Base {
 			$http_locales  = $this->get_http_locales( (string) $request->get_header( 'accept-language' ) );
 			$reads_english = (bool) preg_grep( '/^en(-|$)/i', $http_locales );
 
+			// Browsers send ISO 639 codes, which aren't always the wp_locale prefix: `bel` is `be`.
+			$directory_languages = array_filter(
+				array(
+					strtok( $current_locale, '_' ),
+					$current_gp_locale->lang_code_iso_639_1,
+					$current_gp_locale->lang_code_iso_639_2,
+					$current_gp_locale->lang_code_iso_639_3,
+				)
+			);
+
 			// Match the language, not the locale: map_locale() turns `es-419` or `pt` into a sibling regional locale.
-			if ( preg_grep( '/^' . strtok( $current_locale, '_' ) . '(-|$)/i', $http_locales ) ) {
+			if ( preg_grep( '/^(' . implode( '|', $directory_languages ) . ')(-|$)/i', $http_locales ) ) {
 				$suggest_named_locales = array();
 			} elseif ( ! $suggest_named_locales && $reads_english ) {
 				$suggest_named_locales = array( 'en_US' => \GP_Locales::by_field( 'wp_locale', 'en_US' )->native_name );
