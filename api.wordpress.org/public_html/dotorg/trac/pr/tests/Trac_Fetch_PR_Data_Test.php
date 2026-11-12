@@ -169,6 +169,35 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 	}
 
 	/**
+	 * A run still in progress is reported even when a failed run of the same app outranks it.
+	 *
+	 * @return void
+	 */
+	public function test_a_running_check_is_reported_beside_a_failed_one(): void {
+		$this->respond(
+			array(
+				'check_runs' => array(
+					'total_count' => 2,
+					'check_runs'  => array(
+						self::check_run( 'failure' ),
+						array(
+							'status'     => 'in_progress',
+							'conclusion' => null,
+							'app'        => array( 'name' => 'GitHub Actions' ),
+						),
+					),
+				),
+			)
+		);
+
+		$pr = fetch_pr_data( 'WordPress/wordpress-develop', 1 );
+
+		$this->assertIsObject( $pr );
+		$this->assertSame( array( 'GitHub Actions' => 'failed' ), $pr->check_runs );
+		$this->assertTrue( $pr->checks_running );
+	}
+
+	/**
 	 * A failed run past the first page of check runs is still seen.
 	 *
 	 * @return void

@@ -75,13 +75,15 @@ function fetch_partial_pr_data( $repo, $pr ) {
 		'in_progress' => 1,
 		'failed'      => 3,
 	];
-	$check_runs = [];
+	$check_runs     = [];
+	$checks_running = false;
 	foreach ( is_array( $_check_runs ) ? $_check_runs : [] as $check ) {
 		$state = null;
 		switch ( $check->status ) {
 			case 'queued':
 			case 'in_progress':
-				$state = 'in_progress';
+				$state          = 'in_progress';
+				$checks_running = true;
 				break;
 			case 'completed':
 				switch ( $check->conclusion ) {
@@ -137,6 +139,7 @@ function fetch_partial_pr_data( $repo, $pr ) {
 		'closed_at'       => $data->closed_at,
 		'mergeable_state' => $data->mergeable_state,
 		'check_runs'      => $check_runs,
+		'checks_running'  => $checks_running,
 		'reviews'         => $reviews,
 		'touches_tests'   => $touches_tests,
 		'body'            => $data->body,
@@ -188,7 +191,8 @@ function select_prs_to_refresh( $prs, $authenticated, $limit = 10 ) {
 
 			// Every two minutes while the PR was created/updated in the last half hour, or its unit tests are running.
 			$recently_updated = strtotime( $data->data->updated_at ) > time() - 30 * 60;
-			$tests_running    = in_array( 'in_progress', (array) $data->data->check_runs, true );
+			// A failed run hides a running one in `check_runs`. Rows stored before `checks_running` lack it.
+			$tests_running    = $data->data->checks_running ?? in_array( 'in_progress', (array) $data->data->check_runs, true );
 
 			return $checked_ago >= 2 * 60 && ( $recently_updated || $tests_running );
 		}
