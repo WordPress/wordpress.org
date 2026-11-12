@@ -454,15 +454,10 @@ class Make_Core_Trac_Components {
 		}
 ?>
 <style>
-#toggle-compact-components { text-align: right }
 .component-info .compact { display: none }
-.compact-components .component-info { width: 49%; float: left; margin-right: 1% }
-.compact-components .compact { display: inline }
-.compact-components .trac-summary { display: none }
 .postcontent { padding-left: 0; }
 .component-info .meta .actions { display: none }
 .component-info h3 { color: #333; font-size: 20px; margin: 30px 0 15px; font-weight: normal; }
-.compact-components .component-info h3 { margin: 15px 0 10px; }
 .trac-summary { border-collapse: collapse; }
 .trac-summary .count { text-align: right; width: auto; font-variant-numeric: tabular-nums; }
 /* The theme drops the bottom border of every table's last row. */
@@ -497,15 +492,6 @@ td.maintainers img.avatar { margin-right: 5px; }
 }
 </style>
 		<?php
-		wp_print_inline_script_tag(
-			<<<'JS'
-			jQuery( function( $ ) {
-				$( '#toggle-compact-components' ).on( 'change', 'input', function() {
-					$( '#main' ).toggleClass( 'compact-components' );
-				});
-			});
-			JS
-		);
 	}
 
 	function the_content( $content ) {
