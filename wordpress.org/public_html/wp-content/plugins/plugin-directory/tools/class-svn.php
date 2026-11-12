@@ -454,8 +454,7 @@ class SVN {
 					foreach ( $entry->paths->children() as $child_path ) {
 						$path   = (string) $child_path;
 						$action = (string) ( $child_path->attributes()['action'] ?? 'M' );
-						// Either 'file' or 'dir', but empty on some very old revisions.
-						$kind = (string) ( $child_path->attributes()['kind'] ?? '' );
+						$kind   = (string) ( $child_path->attributes()['kind'] ?? '' );
 
 						$paths[]          = $path;
 						$actions[ $path ] = $action;
