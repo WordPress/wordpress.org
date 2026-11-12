@@ -448,14 +448,18 @@ class SVN {
 				foreach ( $simple_xml->logentry as $entry ) {
 					$revision = (int) $entry->attributes()['revision'];
 					$actions  = array();
+					$kinds    = array();
 					$paths    = array();
 
 					foreach ( $entry->paths->children() as $child_path ) {
 						$path   = (string) $child_path;
 						$action = (string) ( $child_path->attributes()['action'] ?? 'M' );
+						// Either 'file' or 'dir', but empty on some very old revisions.
+						$kind = (string) ( $child_path->attributes()['kind'] ?? '' );
 
 						$paths[]          = $path;
 						$actions[ $path ] = $action;
+						$kinds[ $path ]   = $kind;
 					}
 
 					$log[ $revision ] = array(
@@ -464,6 +468,7 @@ class SVN {
 						'date'     => strtotime( (string) $entry->date ),
 						'paths'    => $paths,
 						'actions'  => $actions,
+						'kinds'    => $kinds,
 						'message'  => (string) $entry->msg,
 					);
 				}
