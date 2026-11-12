@@ -37,6 +37,7 @@ class WordPressTV_Theme {
 		add_filter( 'pre_option_blog_upload_space', array( $this, 'blog_upload_space' ) );
 
 		add_filter( 'document_title_parts', array( $this, 'document_title_parts' ) );
+		add_filter( 'wp_robots', array( $this, 'robots' ) );
 
 		add_filter( 'template_redirect', array( $this, 'redirects' ), 1 );
 
@@ -89,6 +90,28 @@ class WordPressTV_Theme {
 		if ( $canonical ) {
 			printf( '<link rel="canonical" href="%s">', esc_url( $canonical ) );
 		}
+	}
+
+	/**
+	 * Keeps tag, speaker and year archives out of search results.
+	 *
+	 * Search results are already noindexed by core.
+	 *
+	 * @param array $robots Associative array of robots directives.
+	 * @return array
+	 */
+	public function robots( $robots ) {
+		$year = is_category() ? get_category_by_slug( 'year' ) : false;
+
+		if (
+			is_tag() ||
+			is_tax( 'speakers' ) ||
+			( $year && ( is_category( $year->term_id ) || cat_is_ancestor_of( $year, get_queried_object() ) ) )
+		) {
+			$robots = wp_robots_no_robots( $robots );
+		}
+
+		return $robots;
 	}
 
 	/**
