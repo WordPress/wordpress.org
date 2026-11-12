@@ -30,7 +30,6 @@ foreach ( $editor_options as $translation_set_id => $options ) {
 			$gp.editor.install_hooks();
 			hooks_installed[%1$s] = true;
 		}
-		$gp_translation_helpers_editor = $gp_translation_helpers_editor_%1$s;
 		}
 	JS,
 		absint( $translation_set_id ),
