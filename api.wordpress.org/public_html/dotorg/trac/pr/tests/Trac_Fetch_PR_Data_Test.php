@@ -118,11 +118,108 @@ class Trac_Fetch_PR_Data_Test extends TestCase {
 		};
 
 		Fake_GitHub_Stream::$responses = array(
-			'!/pulls/1$!'         => $encode( $bodies['pr'] ),
-			'!/check-runs$!'      => $encode( $bodies['check_runs'] ),
-			'!/pulls/1/reviews$!' => $encode( $bodies['reviews'] ),
-			'!/pulls/1/files\?!'  => $encode( $bodies['files'] ),
+			'!/pulls/1$!'               => $encode( $bodies['pr'] ),
+			'!/check-runs\?.*&page=1$!' => $encode( $bodies['check_runs'] ),
+			'!/pulls/1/reviews$!'       => $encode( $bodies['reviews'] ),
+			'!/pulls/1/files\?!'        => $encode( $bodies['files'] ),
 		);
+
+		if ( isset( $bodies['check_runs_page_2'] ) ) {
+			Fake_GitHub_Stream::$responses['!/check-runs\?.*&page=2$!'] = $encode( $bodies['check_runs_page_2'] );
+		}
+	}
+
+	/**
+	 * Builds a completed GitHub Actions check run.
+	 *
+	 * @param string $conclusion How the run ended.
+	 * @return array The check run.
+	 */
+	private static function check_run( string $conclusion ): array {
+		return array(
+			'status'     => 'completed',
+			'conclusion' => $conclusion,
+			'app'        => array( 'name' => 'GitHub Actions' ),
+		);
+	}
+
+	/**
+	 * A failed run is not hidden by a later passing run of the same app.
+	 *
+	 * @return void
+	 */
+	public function test_a_failed_check_run_outranks_later_passing_ones(): void {
+		$this->respond(
+			array(
+				'check_runs' => array(
+					'total_count' => 3,
+					'check_runs'  => array(
+						self::check_run( 'success' ),
+						self::check_run( 'failure' ),
+						self::check_run( 'success' ),
+					),
+				),
+			)
+		);
+
+		$pr = fetch_pr_data( 'WordPress/wordpress-develop', 1 );
+
+		$this->assertIsObject( $pr );
+		$this->assertSame( array( 'GitHub Actions' => 'failed' ), $pr->check_runs );
+	}
+
+	/**
+	 * A run still in progress is reported even when a failed run of the same app outranks it.
+	 *
+	 * @return void
+	 */
+	public function test_a_running_check_is_reported_beside_a_failed_one(): void {
+		$this->respond(
+			array(
+				'check_runs' => array(
+					'total_count' => 2,
+					'check_runs'  => array(
+						self::check_run( 'failure' ),
+						array(
+							'status'     => 'in_progress',
+							'conclusion' => null,
+							'app'        => array( 'name' => 'GitHub Actions' ),
+						),
+					),
+				),
+			)
+		);
+
+		$pr = fetch_pr_data( 'WordPress/wordpress-develop', 1 );
+
+		$this->assertIsObject( $pr );
+		$this->assertSame( array( 'GitHub Actions' => 'failed' ), $pr->check_runs );
+		$this->assertTrue( $pr->checks_running );
+	}
+
+	/**
+	 * A failed run past the first page of check runs is still seen.
+	 *
+	 * @return void
+	 */
+	public function test_check_runs_past_the_first_page_are_read(): void {
+		$this->respond(
+			array(
+				'check_runs'        => array(
+					'total_count' => 2,
+					'check_runs'  => array( self::check_run( 'success' ) ),
+				),
+				'check_runs_page_2' => array(
+					'total_count' => 2,
+					'check_runs'  => array( self::check_run( 'failure' ) ),
+				),
+			)
+		);
+
+		$pr = fetch_pr_data( 'WordPress/wordpress-develop', 1 );
+
+		$this->assertIsObject( $pr );
+		$this->assertSame( array( 'GitHub Actions' => 'failed' ), $pr->check_runs );
 	}
 
 	/**
