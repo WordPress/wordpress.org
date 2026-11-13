@@ -736,9 +736,17 @@ blockquote.citation {
 	border-radius: 0;
 	line-height: 1;
 	margin-top: 8px;
+	margin-bottom: 8px;
 	padding: 0;
 
 /*	width: 100%; /* for IE, surprise */
+}
+
+/* Contain the floated menu, and the search form floated beside it. */
+#mainnav::after {
+	clear: both;
+	content: "";
+	display: table;
 }
 
 #mainnav .first, #mainnav .first :link,
@@ -768,7 +776,6 @@ blockquote.citation {
 	border: 0;
 	color: #000;
 	display: block;
-	padding: 6px 19px;
 }
 
 #mainnav :link:hover, #mainnav :visited:hover {
@@ -2758,7 +2765,6 @@ a.mention.me {
 	}
 
 	#mainnav :link, #mainnav :visited { /* bigger tap target */
-		padding: .5em 20px;
 		-webkit-text-size-adjust: 120%;
 	}
 
