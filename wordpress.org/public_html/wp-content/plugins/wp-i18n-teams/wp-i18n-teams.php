@@ -16,5 +16,6 @@ const PLUGIN_DIR  = __DIR__;
 
 require_once PLUGIN_DIR . '/inc/namespace.php';
 require_once PLUGIN_DIR . '/inc/locales.php';
+require_once PLUGIN_DIR . '/inc/editor-requests.php';
 
 bootstrap();
