@@ -1,0 +1,10 @@
+.readme-validator form p {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--preset--spacing--10);
+}
+
+.readme-validator input[type="text"] {
+	flex: 1 1 20em;
+	min-width: 0;
+}

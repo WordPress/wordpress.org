@@ -45,7 +45,7 @@ class Readme_Validator {
 
 		ob_start();
 		?>
-		<div class="wrap">
+		<div class="wrap readme-validator">
 			<?php
 			if ( $readme_contents || $readme_url ) {
 				self::validate_readme( $readme_contents ?: $readme_url );
