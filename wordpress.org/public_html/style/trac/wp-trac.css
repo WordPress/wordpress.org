@@ -736,7 +736,6 @@ blockquote.citation {
 	border-radius: 0;
 	line-height: 1;
 	margin-top: 8px;
-	margin-bottom: 8px;
 	padding: 0;
 
 /*	width: 100%; /* for IE, surprise */
@@ -755,6 +754,7 @@ blockquote.citation {
 }
 
 #mainnav ul {
+	margin-bottom: 8px;
 	margin-left: 5px;
 	float: left;
 	font-size: 11px;
