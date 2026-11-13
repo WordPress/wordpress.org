@@ -47,6 +47,12 @@ body.route-pending-create {
 .wp-core-ui .button-primary, .wp-core-ui.login .button-primary {
 	width: 100%;
 }
+
+/* Keep "Save Password" on the same row as "Generate Password". */
+.wp-core-ui.login .reset-pass-submit .button-primary {
+	width: auto;
+}
+
 .hidden,
 #backtoblog {
 	display: none;
