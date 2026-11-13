@@ -136,11 +136,8 @@
 	color: #1d2327;
 }
 
-/* The admin bar scrolls away at this width; topbar.js sets the offsets that follow it. */
+/* Tighter padding on narrow screens, where the admin bar scrolls away with the page. */
 @media screen and ( max-width: 600px ) {
 	.translation-editor-topbar__inner { padding: 6px 12px; gap: 8px; }
-	.admin-bar .translation-editor-topbar { top: var( --translation-editor-topbar-top, 46px ); }
-	body.admin-bar .editor-panel__left .panel-header {
-		top: calc( var( --translation-editor-topbar-top, 0px ) + var( --translation-editor-topbar-height, 0px ) );
-	}
+	.admin-bar .translation-editor-topbar { top: 0; }
 }
