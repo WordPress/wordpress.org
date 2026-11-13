@@ -1,0 +1,8 @@
+{
+	"description": "Several registrations in one file using different array and string syntax.",
+	"abilities": [
+		{ "name": "syntax/short-array", "label": "Short array", "description": "Uses [] and double quotes." },
+		{ "name": "syntax/with-context", "label": "With context", "description": "Uses _x()." },
+		{ "name": "syntax/mixed-case", "label": "Mixed case", "description": null }
+	]
+}

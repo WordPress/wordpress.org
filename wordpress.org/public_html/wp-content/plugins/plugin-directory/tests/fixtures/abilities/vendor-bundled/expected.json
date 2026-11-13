@@ -1,0 +1,7 @@
+{
+	"description": "Registrations in a bundled package (here vendor-prefixed/; vendor/ is covered by Import_Abilities_Test, since the repo ignores vendor/ folders) are reported, flagged as bundled.",
+	"abilities": [
+		{ "name": "mine/own-ability", "label": "Mine", "description": null },
+		{ "name": "somelib/bundled", "label": "Bundled", "description": null, "bundled": true }
+	]
+}

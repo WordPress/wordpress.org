@@ -1,0 +1,6 @@
+{
+	"description": "Definition-shaped arrays are ignored when every wp_register_ability() call uses a literal name.",
+	"abilities": [
+		{ "name": "nodyn/real", "label": "Real", "description": "The only real one." }
+	]
+}
