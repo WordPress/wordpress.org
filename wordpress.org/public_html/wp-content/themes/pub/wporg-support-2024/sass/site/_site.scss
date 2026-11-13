@@ -338,8 +338,9 @@ body:not(.trac):not(.home-page) #main {
 		border: none;
 		border-radius: 0;
 		box-shadow: none;
+		align-items: center;
 		color: #32373c;
-		display: block;
+		display: flex;
 		height: 100%;
 		padding-inline: var(--wp--custom--form--padding--block);
 		padding-block: var(--wp--custom--form--padding--block);
