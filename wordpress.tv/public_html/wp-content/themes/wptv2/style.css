@@ -2415,6 +2415,7 @@ h3#comments {
 ============================================================= */
 
 .error404 .primary-content {
+	display: flow-root;
 	max-width: 940px;
 }
 
@@ -2443,7 +2444,7 @@ h3#comments {
 
 .message-404 {
 	float: left;
-	width: 680px;
+	max-width: 680px;
 }
 
 /* Footer
