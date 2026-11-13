@@ -182,7 +182,7 @@ function get_plugin_status_notice( $post = null ) {
 			if ( Template::is_plugin_outdated( $post ) ) {
 				$message = sprintf(
 					$warning_notice,
-					__( 'This plugin <strong>hasn&#146;t been tested with the latest 3 major releases of WordPress</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' )
+					__( 'This plugin <strong>hasn’t been tested with the latest 5 major releases of WordPress</strong>. It may no longer be maintained or supported and may have compatibility issues when used with more recent versions of WordPress.', 'wporg-plugins' )
 				);
 			}
 			break;
