@@ -319,8 +319,8 @@ function inject_term_description( $block_content, $block ) {
 		}
 
 		$term_description = term_description( $term->term_id );
-		$extra_attributes = ( isset( $attributes['textAlign'] ) )
-			? array( 'class' => 'has-text-align-' . $attributes['textAlign'] )
+		$extra_attributes = ( isset( $block['attrs']['textAlign'] ) )
+			? array( 'class' => 'has-text-align-' . $block['attrs']['textAlign'] )
 			: array();
 
 		// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
