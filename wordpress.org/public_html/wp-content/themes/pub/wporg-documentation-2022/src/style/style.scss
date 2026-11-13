@@ -32,6 +32,11 @@ body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
 	margin: 0;
 }
 
+/* See https://github.com/WordPress/Documentation-Issue-Tracker/issues/2036. */
+.wp-block-group.changelog.has-background {
+	padding: 30px !important;
+}
+
 .entry-content h2 > a,
 .wporg-front-page-footer a {
 	text-decoration-line: none;

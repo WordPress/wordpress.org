@@ -27,6 +27,8 @@
 				<!-- wp:paragraph -->
 				<p>Ask questions in the support forums.</p>
 				<!-- /wp:paragraph -->
+
+				<!-- wp:search {"label":"","buttonText":"Search"} /-->
 			</div>
 			<!-- /wp:column -->
 
