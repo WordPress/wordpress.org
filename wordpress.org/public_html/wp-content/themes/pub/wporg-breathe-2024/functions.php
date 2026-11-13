@@ -331,6 +331,101 @@ function no_robots( $noindex ) {
 add_filter( 'wporg_noindex_request', __NAMESPACE__ . '\no_robots' );
 
 /**
+ * Gets the user an author or mentions archive belongs to.
+ *
+ * @param \WP_Query $query The query to check.
+ * @return \WP_User|null The user, or null when the query isn't an existing user's archive.
+ */
+function get_archive_user( $query ) {
+	$user = null;
+
+	// The To Do and Done filters narrow the archive, so an empty one doesn't mean the user has no posts.
+	if ( $query->get( 'resolved' ) ) {
+		return null;
+	}
+
+	if ( $query->is_author() ) {
+		$user = $query->get_queried_object();
+	} elseif ( $query->is_tax() ) {
+		// is_tax( 'mentions' ) is false until someone is mentioned, as there's no term yet.
+		$mentions = $query->get( 'mentions' );
+
+		if ( is_string( $mentions ) && '' !== $mentions ) {
+			$user = get_user_by( 'login', $mentions );
+		}
+	}
+
+	return $user instanceof \WP_User ? $user : null;
+}
+
+/**
+ * Shows an empty archive instead of a 404 for users without posts or mentions.
+ *
+ * Core only does this for author archives of site members, which most people
+ * following "My Posts" and "My @Mentions" aren't.
+ *
+ * @param bool      $preempt Whether to short-circuit default header status handling.
+ * @param \WP_Query $query   The main query.
+ * @return bool
+ */
+function prevent_empty_user_archive_404( $preempt, $query ) {
+	if ( $preempt || ! $query->is_main_query() || $query->is_404() || $query->is_paged() || $query->posts ) {
+		return $preempt;
+	}
+
+	if ( get_archive_user( $query ) ) {
+		status_header( 200 );
+
+		return true;
+	}
+
+	return $preempt;
+}
+add_filter( 'pre_handle_404', __NAMESPACE__ . '\prevent_empty_user_archive_404', 10, 2 );
+
+/**
+ * Gets the message for an author or mentions archive without posts.
+ *
+ * @param \WP_User $user The user the archive belongs to.
+ * @return string
+ */
+function get_empty_archive_message( $user ) {
+	if ( is_author() ) {
+		/* translators: %s: User display name. */
+		return sprintf( __( '%s hasn’t published any posts here yet.', 'wporg' ), $user->display_name );
+	}
+
+	/* translators: %s: Username. */
+	return sprintf( __( 'No posts here mention @%s yet.', 'wporg' ), $user->user_login );
+}
+
+/**
+ * Shows the empty archive message in o2, which replaces the page content when it loads.
+ *
+ * The o2 app only renders an empty state for search and 404 views, so the archive borrows the search one.
+ *
+ * @param array $options The o2 options.
+ * @return array
+ */
+function o2_empty_user_archive_message( $options ) {
+	global $wp_query;
+
+	if ( $wp_query->posts || $wp_query->is_404() ) {
+		return $options;
+	}
+
+	$user = get_archive_user( $wp_query );
+
+	if ( $user ) {
+		$options['options']['viewType']     = 'search';
+		$options['strings']['searchFailed'] = esc_html( get_empty_archive_message( $user ) );
+	}
+
+	return $options;
+}
+add_filter( 'o2_options', __NAMESPACE__ . '\o2_empty_user_archive_message' );
+
+/**
  * Renders the site title for the selective refresh partial.
  */
 function customize_partial_blogname() {
