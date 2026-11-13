@@ -37,6 +37,39 @@ body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
 	padding: 30px !important;
 }
 
+.wporg-changelog > summary {
+	display: flex;
+	align-items: center;
+	gap: 0.75em;
+	cursor: pointer;
+	list-style: none;
+
+	&::-webkit-details-marker {
+		display: none;
+	}
+
+	&::before {
+		content: "";
+		flex-shrink: 0;
+		border-style: solid;
+		border-width: 0.35em 0 0.35em 0.55em;
+		border-color: transparent transparent transparent currentcolor;
+		transition: transform 0.1s ease-in-out;
+
+		@media (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	> :is(h1, h2, h3, h4, h5, h6) {
+		margin: 0;
+	}
+}
+
+.wporg-changelog[open] > summary::before {
+	transform: rotate(90deg);
+}
+
 .entry-content h2 > a,
 .wporg-front-page-footer a {
 	text-decoration-line: none;
