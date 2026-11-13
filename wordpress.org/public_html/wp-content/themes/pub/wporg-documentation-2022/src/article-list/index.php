@@ -35,6 +35,29 @@ function init() {
 }
 
 /**
+ * Versions the block's stylesheet by when it was built.
+ *
+ * Core versions a block.json stylesheet with the block's `version`, which
+ * doesn't change when the stylesheet does.
+ *
+ * @param array $metadata Metadata from the block's block.json.
+ * @return array Filtered metadata.
+ */
+function set_style_version( array $metadata ): array {
+	if ( 'wporg/article-list' !== ( $metadata['name'] ?? '' ) ) {
+		return $metadata;
+	}
+
+	$style = dirname( __DIR__, 2 ) . '/build/article-list/style-index.css';
+	if ( file_exists( $style ) ) {
+		$metadata['version'] = (string) filemtime( $style );
+	}
+
+	return $metadata;
+}
+add_filter( 'block_type_metadata', __NAMESPACE__ . '\set_style_version' );
+
+/**
  * Render the content for a topic landing page.
  *
  * @param array $attributes Block attributes.
