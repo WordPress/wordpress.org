@@ -37,6 +37,15 @@ body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
 	padding: 30px !important;
 }
 
+.wporg-changelog > summary {
+	cursor: pointer;
+
+	/* Keeps the disclosure marker on the heading's line. */
+	> :is(h1, h2, h3, h4, h5, h6) {
+		display: inline;
+	}
+}
+
 .entry-content h2 > a,
 .wporg-front-page-footer a {
 	text-decoration-line: none;

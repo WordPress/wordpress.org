@@ -336,6 +336,42 @@ function inject_term_description( $block_content, $block ) {
 }
 
 /**
+ * Collapses an article's changelog behind its heading.
+ *
+ * Changelogs are groups with the `changelog` class that start with a heading.
+ *
+ * @param array $parsed_block The block being rendered.
+ * @return array The block, with its content in a closed details element summarized by the heading.
+ */
+function collapse_changelog( array $parsed_block ): array {
+	if ( 'core/group' !== $parsed_block['blockName'] || 'core/heading' !== ( $parsed_block['innerBlocks'][0]['blockName'] ?? '' ) ) {
+		return $parsed_block;
+	}
+
+	$classes = explode( ' ', $parsed_block['attrs']['className'] ?? '' );
+	if ( ! in_array( 'changelog', $classes, true ) ) {
+		return $parsed_block;
+	}
+
+	$inner_content = $parsed_block['innerContent'];
+	$heading       = array_search( null, $inner_content, true );
+
+	// The new tags go into the group's own opening and closing markup.
+	if ( ! $heading || ! is_string( end( $inner_content ) ) ) {
+		return $parsed_block;
+	}
+
+	array_splice( $inner_content, count( $inner_content ) - 1, 0, array( '</details>' ) );
+	array_splice( $inner_content, $heading + 1, 0, array( '</summary>' ) );
+	array_splice( $inner_content, $heading, 0, array( '<details class="wporg-changelog"><summary>' ) );
+
+	$parsed_block['innerContent'] = $inner_content;
+
+	return $parsed_block;
+}
+add_filter( 'render_block_data', __NAMESPACE__ . '\collapse_changelog' );
+
+/**
  * Customize the open graph tags.
  *
  * This provides better tags on the front page and ensures the tags are set on content.
