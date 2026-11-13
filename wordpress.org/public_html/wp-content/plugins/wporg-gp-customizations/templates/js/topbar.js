@@ -18,6 +18,19 @@
 	var userClosedTopbar = false;
 
 	/**
+	 * Publish the bar's offset and height for the phone layout in topbar.css,
+	 * where the admin bar scrolls away with the page.
+	 */
+	function updateOffsets() {
+		var adminBar = document.getElementById( 'wpadminbar' );
+		var top      = adminBar ? Math.max( 0, adminBar.getBoundingClientRect().bottom ) : 0;
+		var style    = document.documentElement.style;
+
+		style.setProperty( '--translation-editor-topbar-top', top + 'px' );
+		style.setProperty( '--translation-editor-topbar-height', $topbar[0].offsetHeight + 'px' );
+	}
+
+	/**
 	 * Populate the top bar from the currently open editor row and show it.
 	 */
 	function showTopbar() {
@@ -36,6 +49,7 @@
 
 		if ( ! $statusButtons.length ) {
 			$topbar.hide();
+			updateOffsets();
 			return;
 		}
 
@@ -62,6 +76,7 @@
 		} );
 
 		$topbar.show();
+		updateOffsets();
 	}
 
 	/**
@@ -70,6 +85,7 @@
 	function hideTopbar() {
 		$topbarButtons.empty();
 		$topbar.hide();
+		updateOffsets();
 	}
 
 	/**
@@ -89,6 +105,9 @@
 		}
 
 		$topbar.find( '.translation-editor-topbar__close' ).on( 'click', closeTopbar );
+
+		updateOffsets();
+		$( window ).on( 'scroll resize', updateOffsets );
 
 		$gp.editor.show = ( function( original ) {
 			return function() {
