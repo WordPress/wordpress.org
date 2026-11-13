@@ -338,8 +338,6 @@ function inject_term_description( $block_content, $block ) {
 /**
  * Checks whether a block is an article's changelog.
  *
- * Changelogs are groups with the `changelog` class that start with a heading.
- *
  * @param array $block A parsed block.
  * @return bool Whether the block is a changelog.
  */
@@ -365,7 +363,6 @@ function collapse_changelog( array $parsed_block ): array {
 	$inner_content = $parsed_block['innerContent'];
 	$heading       = array_search( null, $inner_content, true );
 
-	// The new tags go into the group's own opening and closing markup.
 	if ( ! $heading || ! is_string( end( $inner_content ) ) ) {
 		return $parsed_block;
 	}
@@ -383,10 +380,6 @@ add_filter( 'render_block_data', __NAMESPACE__ . '\collapse_changelog' );
 /**
  * Leaves changelog headings out of the table of contents.
  *
- * The table of contents turns each heading it lists into a link to itself, and
- * selecting a link in the changelog's summary would follow it instead of
- * opening the changelog.
- *
  * @param string $content The post content the table of contents collects headings from.
  * @return string The content without changelog headings.
  */
@@ -400,7 +393,7 @@ function remove_changelog_headings( string $content ): string {
 add_filter( 'wporg_table_of_contents_post_content', __NAMESPACE__ . '\remove_changelog_headings' );
 
 /**
- * Removes the heading from a changelog, looking through nested blocks.
+ * Removes the heading from changelogs in a block tree.
  *
  * @param array $block A parsed block.
  * @return array The block, without its changelog heading.
