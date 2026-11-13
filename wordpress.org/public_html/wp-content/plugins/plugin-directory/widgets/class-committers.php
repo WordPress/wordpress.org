@@ -44,6 +44,11 @@ class Committers extends \WP_Widget {
 				'pluginSlug'         => $post->post_name,
 				'removeCommitterAYS' => __( 'Are you sure you want to remove %s as a committer?', 'wporg-plugins' ),
 			) );
+
+			// Adding or removing a committer needs a recent two-factor check; this loads the prompt for it.
+			if ( function_exists( 'WordPressdotorg\Two_Factor\Revalidation\enqueue_assets' ) ) {
+				\WordPressdotorg\Two_Factor\Revalidation\enqueue_assets();
+			}
 		}
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Committers', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
