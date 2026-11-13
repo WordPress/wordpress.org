@@ -336,20 +336,29 @@ function inject_term_description( $block_content, $block ) {
 }
 
 /**
- * Collapses an article's changelog behind its heading.
+ * Checks whether a block is an article's changelog.
  *
  * Changelogs are groups with the `changelog` class that start with a heading.
+ *
+ * @param array $block A parsed block.
+ * @return bool Whether the block is a changelog.
+ */
+function is_changelog( array $block ): bool {
+	if ( 'core/group' !== $block['blockName'] || 'core/heading' !== ( $block['innerBlocks'][0]['blockName'] ?? '' ) ) {
+		return false;
+	}
+
+	return in_array( 'changelog', explode( ' ', $block['attrs']['className'] ?? '' ), true );
+}
+
+/**
+ * Collapses an article's changelog behind its heading.
  *
  * @param array $parsed_block The block being rendered.
  * @return array The block, with its content in a closed details element summarized by the heading.
  */
 function collapse_changelog( array $parsed_block ): array {
-	if ( 'core/group' !== $parsed_block['blockName'] || 'core/heading' !== ( $parsed_block['innerBlocks'][0]['blockName'] ?? '' ) ) {
-		return $parsed_block;
-	}
-
-	$classes = explode( ' ', $parsed_block['attrs']['className'] ?? '' );
-	if ( ! in_array( 'changelog', $classes, true ) ) {
+	if ( ! is_changelog( $parsed_block ) ) {
 		return $parsed_block;
 	}
 
@@ -370,6 +379,44 @@ function collapse_changelog( array $parsed_block ): array {
 	return $parsed_block;
 }
 add_filter( 'render_block_data', __NAMESPACE__ . '\collapse_changelog' );
+
+/**
+ * Leaves changelog headings out of the table of contents.
+ *
+ * The table of contents turns each heading it lists into a link to itself, and
+ * selecting a link in the changelog's summary would follow it instead of
+ * opening the changelog.
+ *
+ * @param string $content The post content the table of contents collects headings from.
+ * @return string The content without changelog headings.
+ */
+function remove_changelog_headings( string $content ): string {
+	if ( ! str_contains( $content, 'changelog' ) ) {
+		return $content;
+	}
+
+	return serialize_blocks( array_map( __NAMESPACE__ . '\remove_changelog_heading', parse_blocks( $content ) ) );
+}
+add_filter( 'wporg_table_of_contents_post_content', __NAMESPACE__ . '\remove_changelog_headings' );
+
+/**
+ * Removes the heading from a changelog, looking through nested blocks.
+ *
+ * @param array $block A parsed block.
+ * @return array The block, without its changelog heading.
+ */
+function remove_changelog_heading( array $block ): array {
+	if ( is_changelog( $block ) ) {
+		array_shift( $block['innerBlocks'] );
+		$block['innerContent'][ array_search( null, $block['innerContent'], true ) ] = '';
+
+		return $block;
+	}
+
+	$block['innerBlocks'] = array_map( __NAMESPACE__ . '\remove_changelog_heading', $block['innerBlocks'] );
+
+	return $block;
+}
 
 /**
  * Customize the open graph tags.
