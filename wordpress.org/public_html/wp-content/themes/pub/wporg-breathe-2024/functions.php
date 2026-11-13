@@ -938,7 +938,7 @@ function jetpack_sharing_o2_compat() {
 	wp_add_inline_script(
 		'sharing-js',
 		<<<'JS'
-		jQuery( document.body ).on( 'post-load ready.o2', function() {
+		jQuery( document.body ).on( 'post-load ready.o2 post-post-save.o2', function() {
 			document.body.dispatchEvent( new CustomEvent( 'is.post-load' ) );
 		} );
 		JS,
