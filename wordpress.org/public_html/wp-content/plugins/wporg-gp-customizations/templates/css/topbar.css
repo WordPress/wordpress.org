@@ -17,6 +17,10 @@
 @media screen and ( max-width: 782px ) {
 	.admin-bar .translation-editor-topbar { top: 46px; }
 }
+/* The admin bar scrolls away with the page at this width. */
+@media screen and ( max-width: 600px ) {
+	.admin-bar .translation-editor-topbar { top: 0; }
+}
 
 /* Inner layout: buttons grouped on the left, close (×) on the right.
    No max-width — the inner spans the full viewport so buttons sit at the
