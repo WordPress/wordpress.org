@@ -559,7 +559,8 @@ table.progress td.closed {
 }
 
 #ticket img,
-.comment img {
+.comment img,
+.tickets .fullrow img {
 	max-width: 100%;
 	height: auto;
 }
