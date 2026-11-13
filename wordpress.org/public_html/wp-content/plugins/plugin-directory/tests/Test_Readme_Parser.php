@@ -216,7 +216,7 @@ class Test_Readme_Parser extends TestCase {
 		return array(
 			'heading questions'         => array( "= How do I style it? =\n\n$code\n\n= Is that all? =\n\nYes." ),
 			'bold questions'            => array( "**How do I style it?**\n\n$code\n\n**Is that all?**\n\nYes." ),
-			'unclosed backtick ignored' => array( "= How do I style it? =\n\n`body is a typo\n\n= Is that all? =\n\nYes." ),
+			'unclosed backtick ignored' => array( "= How do I style it? =\n\n`body is a typo\n\n= Is that all? =\n\nYes, see `wp-config.php`." ),
 		);
 	}
 

@@ -897,8 +897,9 @@ class Parser {
 		$trimmed_lines = array_map( 'trim', $lines );
 
 		/*
-		 * Lines inside a `...` code block are never headings. As in Markdown::code_trick(),
-		 * a block opens with a backtick at the start of a line and closes at the next backtick.
+		 * Lines inside a `...` code block are never headings. A block opens on a line that starts
+		 * with its only backtick and closes on the next line with a single backtick, so a stray
+		 * opening backtick can't pair with inline code in a later answer.
 		 */
 		$line_count    = count( $lines );
 		$in_code_block = array_fill( 0, $line_count, false );
@@ -909,7 +910,7 @@ class Parser {
 			}
 
 			$close = $i + 1;
-			while ( $close < $line_count && ! str_contains( $trimmed_lines[ $close ], '`' ) ) {
+			while ( $close < $line_count && 1 !== substr_count( $trimmed_lines[ $close ], '`' ) ) {
 				++$close;
 			}
 
