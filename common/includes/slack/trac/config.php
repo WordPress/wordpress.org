@@ -13,6 +13,13 @@ class Core extends Trac {
 	protected $primary_channel_ticket_format = 'title';
 
 	/**
+	 * Post only the first line of each commit message to #core.
+	 *
+	 * @var string
+	 */
+	protected $primary_channel_commit_format = 'summary';
+
+	/**
 	 * File paths that cause commits to be piped to particular channels.
 	 * Start regex matches with # as your delimiter.
 	 */
@@ -54,7 +61,7 @@ class Core extends Trac {
 		'webpack.config.js'                => '#core-build-test-tools',
 		'wp-tests-config-sample.php'       => '#core-build-test-tools',
 		'#\.n(v|p)mrc#'                    => '#core-build-test-tools',
-		'#\.version-support-[a-z]+\.json'  => '#core-build-test-tools',
+		'#\.version-support-[a-z]+\.json#' => '#core-build-test-tools',
 		'#^package(-lock)?\.json$#'        => '#core-build-test-tools',
 		'#^php[a-z]+\.xml\.dist$#'         => '#core-build-test-tools',
 	);
@@ -70,34 +77,97 @@ class Core extends Trac {
 	);
 
 	/**
-	 * Components or focuses that cause new tickets to be piped to particular channels.
+	 * Maps each Core Trac component to its component specific channel.
+	 *
+	 * Notifications for a component go to that channel's -firehose, -newtickets and -commits
+	 * channels, not to the channel itself.
+	 *
+	 * Subcomponents map to their parent's channel, unless they have their own.
+	 *
+	 * Some components have no discussion channel, or an archived one, but still have
+	 * -firehose, -newtickets and -commits channels.
+	 *
+	 * Retired components have an empty value, and only post to the global channels.
+	 *
+	 * @var array
 	 */
-	protected $ticket_component_filters = array(
+	protected $component_channels = array(
+		'AI'                     => '#core-ai',
 		'Build/Test Tools'       => '#core-build-test-tools',
 		'Bundled Theme'          => '#core-themes',
+		'Editor'                 => '#core-editor',
+		'HTML API'               => '#core-html-api',
+		'I18N'                   => '#core-i18n',
+		'Import'                 => '#core-importers',
+		'Interactivity API'      => '#core-interactivity-api',
+		'Media'                  => '#core-media',
+		'Networks and Sites'     => '#core-multisite',
+		'Privacy'                => '#core-privacy',
+		'REST API'               => '#core-restapi',
+		'Themes'                 => '#core-themes',
+		'Upgrade/Install'        => '#core-upgrade-install',
+
+		// Subcomponents.
+		'Abilities API'          => '#core-ai',
+		'Application Passwords'  => '#core-restapi',
+		'Autosave'               => '#core-editor',
+		'Canonical'              => '#core-permalinks',
+		'Charset'                => '#core-formatting',
+		'Embeds'                 => '#core-media',
+		'Emoji'                  => '#core-formatting',
+		'Gallery'                => '#core-media',
+		'Login and Registration' => '#core-passwords',
+		'Menus'                  => '#core-themes',
+		'Multisite'              => '#core-multisite',
+		'Notes'                  => '#core-notes',
+		'Pings/Trackbacks'       => '#core-comments',
+		'Post Formats'           => '#core-posts-post-types',
+		'Post Thumbnails'        => '#core-posts-post-types',
+		'Quick/Bulk Edit'        => '#core-editor',
+		'Revisions'              => '#core-posts-post-types',
+		'Rewrite Rules'          => '#core-permalinks',
+		'Role/Capability'        => '#core-users',
+		'Shortcodes'             => '#core-formatting',
+		'TinyMCE'                => '#core-editor', // #core-tinymce has been archived since 2025-06-24.
+		'Upload'                 => '#core-media',
+		'Widgets'                => '#core-themes',
+
+		// Components with an archived component specific channel.
+		'Bootstrap/Load'         => '#core-bootstrap',
+		'Comments'               => '#core-comments',
 		'Customize'              => '#core-customize',
 		'Date/Time'              => '#core-datetime',
-		'Press This'             => '#core-pressthis',
-		'multisite'              => '#core-multisite',
-		'Networks and Sites'     => '#core-multisite',
-		'REST API'               => '#core-restapi',
-		'rest-api'               => '#core-restapi',
-		'I18N'                   => '#core-i18n',
-		'Media'                  => '#core-media',
-		'docs'                   => '#core-docs',
-		'css'                    => '#core-css',
-		'javascript'             => '#core-js',
-		'coding-standards'       => '#core-coding-standards',
-		'performance'            => '#core-performance',
-		'Privacy'                => '#core-privacy',
-		'privacy'                => '#core-privacy',
+		'HTTP API'               => '#core-http-api',
 		'Site Health'            => '#core-site-health',
 		'Sitemaps'               => '#core-sitemaps',
-		'Upgrade/Install'        => '#core-upgrade-install',
-		'Application Passwords'  => [ '#core-passwords' => true, '#core-restapi' => true ],
-		'Login and Registration' => '#core-passwords',
-		'HTML API'               => '#core-html-api',
-		'Interactivity API'      => '#core-interactivity-api',
+
+		// Components that have never had a component specific channel.
+		'Administration'         => '#core-administration',
+		'Cache API'              => '#core-cache-api',
+		'Cron API'               => '#core-cron-api',
+		'Database'               => '#core-database',
+		'Export'                 => '#core-export',
+		'External Libraries'     => '#core-external-libraries',
+		'Feeds'                  => '#core-feeds',
+		'Filesystem API'         => '#core-filesystem-api',
+		'Formatting'             => '#core-formatting',
+		'General'                => '#core-general',
+		'Help/About'             => '#core-help-about',
+		'Mail'                   => '#core-mail',
+		'Options, Meta APIs'     => '#core-options-meta-apis',
+		'Permalinks'             => '#core-permalinks',
+		'Plugins'                => '#core-plugins',
+		'Posts, Post Types'      => '#core-posts-post-types',
+		'Query'                  => '#core-query',
+		'Script Loader'          => '#core-script-loader',
+		'Security'               => '#core-security',
+		'Taxonomy'               => '#core-taxonomy',
+		'Toolbar'                => '#core-toolbar',
+		'Users'                  => '#core-users',
+		'XML-RPC'                => '#core-xml-rpc',
+
+		// Retired components.
+		'Press This'             => '', // #core-pressthis is archived.
 	);
 }
 
