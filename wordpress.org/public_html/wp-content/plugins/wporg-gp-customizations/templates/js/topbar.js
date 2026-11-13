@@ -16,6 +16,8 @@
 	var $topbar          = null;
 	var $topbarButtons   = null;
 	var userClosedTopbar = false;
+	var lastTop          = null;
+	var lastHeight       = null;
 
 	/**
 	 * Publish the bar's offset and height for the phone layout in topbar.css,
@@ -24,10 +26,18 @@
 	function updateOffsets() {
 		var adminBar = document.getElementById( 'wpadminbar' );
 		var top      = adminBar ? Math.max( 0, adminBar.getBoundingClientRect().bottom ) : 0;
+		var height   = $topbar[0].offsetHeight;
 		var style    = document.documentElement.style;
 
-		style.setProperty( '--translation-editor-topbar-top', top + 'px' );
-		style.setProperty( '--translation-editor-topbar-height', $topbar[0].offsetHeight + 'px' );
+		// Runs on every scroll event; a changed property restyles the whole page.
+		if ( top !== lastTop ) {
+			lastTop = top;
+			style.setProperty( '--translation-editor-topbar-top', top + 'px' );
+		}
+		if ( height !== lastHeight ) {
+			lastHeight = height;
+			style.setProperty( '--translation-editor-topbar-height', height + 'px' );
+		}
 	}
 
 	/**
