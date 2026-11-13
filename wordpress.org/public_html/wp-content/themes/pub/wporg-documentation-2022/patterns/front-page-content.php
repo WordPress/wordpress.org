@@ -208,6 +208,30 @@
 			<!-- /wp:wporg/link-wrapper -->
 
 			<!-- wp:wporg/link-wrapper -->
+			<a class="wp-block-wporg-link-wrapper" href="<?php echo esc_url( site_url( '/category/block-editor/' ) ); ?>">
+				<!-- wp:heading {"level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"600"}},"fontSize":"normal","fontFamily":"inter"} -->
+				<h3 class="wp-block-heading has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:600">Block Editor</h3>
+				<!-- /wp:heading -->
+
+				<!-- wp:paragraph {"fontSize":"small"} -->
+				<p class="has-small-font-size">Learn how to create and edit your posts and pages with blocks.</p>
+				<!-- /wp:paragraph -->
+			</a>
+			<!-- /wp:wporg/link-wrapper -->
+
+			<!-- wp:wporg/link-wrapper -->
+			<a class="wp-block-wporg-link-wrapper" href="<?php echo esc_url( site_url( '/category/site-editor/' ) ); ?>">
+				<!-- wp:heading {"level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"600"}},"fontSize":"normal","fontFamily":"inter"} -->
+				<h3 class="wp-block-heading has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:600">Site Editor</h3>
+				<!-- /wp:heading -->
+
+				<!-- wp:paragraph {"fontSize":"small"} -->
+				<p class="has-small-font-size">Learn how to design your whole site with templates, patterns, and styles.</p>
+				<!-- /wp:paragraph -->
+			</a>
+			<!-- /wp:wporg/link-wrapper -->
+
+			<!-- wp:wporg/link-wrapper -->
 			<a class="wp-block-wporg-link-wrapper" href="<?php echo esc_url( site_url( '/category/default-themes/' ) ); ?>">
 				<!-- wp:heading {"level":3,"style":{"typography":{"fontStyle":"normal","fontWeight":"600"}},"fontSize":"normal","fontFamily":"inter"} -->
 				<h3 class="wp-block-heading has-inter-font-family has-normal-font-size" style="font-style:normal;font-weight:600">Default themes</h3>
