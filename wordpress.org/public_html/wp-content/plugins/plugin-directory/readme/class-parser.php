@@ -898,7 +898,7 @@ class Parser {
 
 		/*
 		 * Lines inside a `...` code block are never headings. A block opens on a line that starts
-		 * with its only backtick and closes on the next line with a single backtick, so a stray
+		 * with its only backtick and closes on the next line with an odd number of them, so a stray
 		 * opening backtick can't pair with inline code in a later answer.
 		 */
 		$line_count    = count( $lines );
@@ -910,7 +910,7 @@ class Parser {
 			}
 
 			$close = $i + 1;
-			while ( $close < $line_count && 1 !== substr_count( $trimmed_lines[ $close ], '`' ) ) {
+			while ( $close < $line_count && 0 === substr_count( $trimmed_lines[ $close ], '`' ) % 2 ) {
 				++$close;
 			}
 
