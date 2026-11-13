@@ -925,3 +925,24 @@ add_action(
 );
 // Ensure assets are loaded, regardless of what's there on page load.
 add_filter( 'mkaz_code_syntax_force_loading', '__return_true' );
+
+/**
+ * Re-initializes Jetpack sharing buttons after o2 renders posts.
+ *
+ * Jetpack sharing only listens for the native `is.post-load` event, while o2 fires
+ * jQuery events. Without it, share links miss the `nb=1` flag and the Mastodon modal.
+ *
+ * @see https://meta.trac.wordpress.org/ticket/7877
+ */
+function jetpack_sharing_o2_compat() {
+	wp_add_inline_script(
+		'sharing-js',
+		<<<'JS'
+		jQuery( document.body ).on( 'post-load ready.o2', function() {
+			document.body.dispatchEvent( new CustomEvent( 'is.post-load' ) );
+		} );
+		JS,
+		'after'
+	);
+}
+add_action( 'wp_footer', __NAMESPACE__ . '\jetpack_sharing_o2_compat' );
