@@ -897,24 +897,53 @@ class Parser {
 		$trimmed_lines = array_map( 'trim', $lines );
 
 		/*
+		 * Lines inside a `...` code block are never headings. A block opens on a line that starts
+		 * with its only backtick and closes on the next line with an odd number of them, so a stray
+		 * opening backtick can't pair with inline code in a later answer.
+		 */
+		$line_count    = count( $lines );
+		$in_code_block = array_fill( 0, $line_count, false );
+		for ( $i = 0; $i < $line_count; $i++ ) {
+			$trimmed = $trimmed_lines[ $i ];
+			if ( ! $trimmed || '`' !== $trimmed[0] || 1 !== substr_count( $trimmed, '`' ) ) {
+				continue;
+			}
+
+			$close = $i + 1;
+			while ( $close < $line_count && 0 === substr_count( $trimmed_lines[ $close ], '`' ) % 2 ) {
+				++$close;
+			}
+
+			// An opening backtick that is never closed is not a code block.
+			if ( $close < $line_count ) {
+				$in_code_block = array_replace( $in_code_block, array_fill( $i + 1, $close - $i, true ) );
+				$i             = $close;
+			}
+		}
+
+		/*
 		 * The heading style being matched in the block. Can be 'heading' or 'bold'.
 		 * Standard Markdown headings (## .. and == ... ==) are used, but if none are present.
 		 * full line bolding will be used as a heading style.
 		 */
 		$heading_style = 'bold'; // 'heading' or 'bold'
-		foreach ( $trimmed_lines as $trimmed ) {
-			if ( $trimmed && ( $trimmed[0] == '#' || $trimmed[0] == '=' ) ) {
+		foreach ( $trimmed_lines as $i => $trimmed ) {
+			if ( $trimmed && ! $in_code_block[ $i ] && ( '#' === $trimmed[0] || '=' === $trimmed[0] ) ) {
 				$heading_style = 'heading';
 				break;
 			}
 		}
 
-		$line_count = count( $lines );
 		for ( $i = 0; $i < $line_count; $i++ ) {
 			$line    = &$lines[ $i ];
 			$trimmed = &$trimmed_lines[ $i ];
 			if ( ! $trimmed ) {
 				$value .= "\n";
+				continue;
+			}
+
+			if ( $in_code_block[ $i ] ) {
+				$value .= $line . "\n";
 				continue;
 			}
 
