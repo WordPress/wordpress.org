@@ -136,9 +136,7 @@
 	color: #1d2327;
 }
 
-/* Narrow screens: tighter padding, and the admin bar scrolls away with the page.
-   topbar.js tracks what is still visible of it, so the bar follows it up and
-   the editor's sticky header stays below the bar. */
+/* The admin bar scrolls away at this width; topbar.js sets the offsets that follow it. */
 @media screen and ( max-width: 600px ) {
 	.translation-editor-topbar__inner { padding: 6px 12px; gap: 8px; }
 	.admin-bar .translation-editor-topbar { top: var( --translation-editor-topbar-top, 46px ); }
