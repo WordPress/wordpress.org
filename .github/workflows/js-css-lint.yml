@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
     - 'wordpress.org/public_html/style/**'
+    - 'wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022/**'
     - 'wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024/**'
     - 'wordpress.org/public_html/wp-content/themes/pub/wporg-support-2024/**'
     - .github/workflows/js-css-lint.yml
@@ -11,6 +12,7 @@ on:
     branches: [trunk]
     paths:
     - 'wordpress.org/public_html/style/**'
+    - 'wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022/**'
     - 'wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024/**'
     - 'wordpress.org/public_html/wp-content/themes/pub/wporg-support-2024/**'
     - .github/workflows/js-css-lint.yml
@@ -36,6 +38,8 @@ jobs:
         - name: Style
           dir: wordpress.org/public_html/style
           prettier: true
+        - name: Documentation Theme
+          dir: wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022
         - name: Plugin Directory Theme
           dir: wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024
         - name: Support Theme

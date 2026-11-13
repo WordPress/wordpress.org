@@ -1,0 +1,30 @@
+{
+	"core": "WordPress/WordPress#master",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/gutenberg.zip",
+		"https://downloads.wordpress.org/plugin/jetpack.zip",
+		"https://downloads.wordpress.org/plugin/syntaxhighlighter.zip",
+		"../wordpress.org/public_html/wp-content/plugins/support-helphub"
+	],
+	"themes": [
+		"../wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022",
+		"WordPress/wporg-parent-2021#build"
+	],
+	"mappings": {
+		"wp-content/mu-plugins": "./mocks/mu-plugins",
+		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
+		"wp-content/env-bin": "./documentation/bin"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash documentation/bin/after-start.sh"
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"JETPACK_DEV_DEBUG": true,
+		"WP_ENVIRONMENT_TYPE": "local",
+		"GLOTPRESS_LOCALES_PATH": "/var/www/html/wp-content/mu-plugins/pub/locales/locales.php"
+	}
+}
