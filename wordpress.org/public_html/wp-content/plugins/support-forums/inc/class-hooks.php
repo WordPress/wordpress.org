@@ -124,6 +124,9 @@ class Hooks {
 		// Freshness links should have the datetime as a title rather than the thread title.
 		add_filter( 'bbp_get_topic_freshness_link', array( $this, 'bbp_get_topic_freshness_link' ), 10, 5 );
 
+		// Keep hidden replies from pushing reply links onto the next page. Runs after the moderator view=all filter.
+		add_filter( 'bbp_get_reply_url', array( $this, 'correct_reply_url_page' ), 20, 3 );
+
 		// Add a no-reply-to-email suggestion to topic subscription emails
 		add_filter( 'bbp_subscription_mail_message', array( $this, 'bbp_subscription_mail_message'), 5, 3 );
 
@@ -1252,6 +1255,71 @@ class Hooks {
 			) . '"',
 			$anchor
 		);
+	}
+
+	/**
+	 * Point reply URLs at the page the reply is shown on.
+	 *
+	 * The page bbPress computes comes from the reply position, which also counts spam, pending, and archived
+	 * replies that only show with `view=all`. Those push later replies onto a page they're not on.
+	 * Only URLs past the first page can be affected, so the rest skip the lookup.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/6443
+	 * @see https://bbpress.trac.wordpress.org/ticket/3503
+	 *
+	 * @param string $url         Reply URL.
+	 * @param int    $reply_id    Reply ID.
+	 * @param string $redirect_to Redirect URL passed to bbp_get_reply_url().
+	 * @return string Reply URL with the page the reply is shown on.
+	 */
+	public function correct_reply_url_page( $url, $reply_id, $redirect_to ) {
+		if ( bbp_thread_replies() ) {
+			return $url;
+		}
+
+		// A view=all page lists hidden replies too, so bbPress's page is right.
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query_args );
+		if ( isset( $query_args['view'] ) && 'all' === $query_args['view'] ) {
+			return $url;
+		}
+
+		$per_page = (int) bbp_get_replies_per_page();
+		$page     = (int) ceil( bbp_get_reply_position( $reply_id ) / $per_page );
+		if ( $page < 2 ) {
+			return $url;
+		}
+
+		$topic_id = bbp_get_reply_topic_id( $reply_id );
+		$replies  = array_reverse( array_map( 'intval', bbp_get_public_child_ids( $topic_id, bbp_get_reply_post_type() ) ) );
+		$position = array_search( (int) $reply_id, $replies, true );
+
+		if ( false === $position ) {
+			return $url;
+		}
+
+		++$position;
+		if ( ! bbp_show_lead_topic() ) {
+			++$position;
+		}
+
+		if ( (int) ceil( $position / $per_page ) === $page ) {
+			return $url;
+		}
+
+		// Let bbPress rebuild the URL from the visible position, so pretty and plain links keep their format.
+		$visible_position = static function () use ( $position ) {
+			return $position;
+		};
+
+		remove_filter( 'bbp_get_reply_url', array( $this, 'correct_reply_url_page' ), 20 );
+		add_filter( 'bbp_get_reply_position', $visible_position );
+
+		$url = bbp_get_reply_url( $reply_id, $redirect_to );
+
+		remove_filter( 'bbp_get_reply_position', $visible_position );
+		add_filter( 'bbp_get_reply_url', array( $this, 'correct_reply_url_page' ), 20, 3 );
+
+		return $url;
 	}
 
 	/**
