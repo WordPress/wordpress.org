@@ -14,7 +14,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	}
 
 	function compat_views() {
-		return array( self::COMPAT, 'reviews', 'active', 'unresolved' );
+		return array( self::COMPAT, 'reviews', 'active', 'unresolved', 'unresolved-active' );
 	}
 
 	function compat_title() {
@@ -35,6 +35,16 @@ class Plugin_Directory_Compat extends Directory_Compat {
 	function unresolved_title() {
 		/* translators: %s: plugin title */
 		return sprintf( _x( '[%s] Unresolved Topics', 'plugin', 'wporg-forums' ), $this->title() );
+	}
+
+	/**
+	 * Get the title of the unresolved topics view ordered by last activity.
+	 *
+	 * @return string View title.
+	 */
+	public function unresolved_active_title() {
+		/* translators: %s: plugin title */
+		return sprintf( _x( '[%s] Unresolved Topics by Activity', 'plugin', 'wporg-forums' ), $this->title() );
 	}
 
 	function slug() {
@@ -134,14 +144,15 @@ class Plugin_Directory_Compat extends Directory_Compat {
 
 		$plugin_repo_url = get_home_url( WPORG_PLUGIN_DIRECTORY_BLOGID, '/' . $this->slug() . '/' );
 
-		$icon       = '';
-		$plugin     = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url ), esc_html( $this->plugin->post_title ) );
-		$faq        = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url . '#faq' ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
-		$support    = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
-		$active     = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/active/' ), __( 'Active Topics', 'wporg-forums' ) );
-		$unresolved = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/unresolved/' ), __( 'Unresolved Topics', 'wporg-forums' ) );
-		$reviews    = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/reviews/' ), __( 'Reviews', 'wporg-forums' ) );
-		$create     = '';
+		$icon              = '';
+		$plugin            = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url ), esc_html( $this->plugin->post_title ) );
+		$faq               = sprintf( '<a href="%s">%s</a>', esc_url( $plugin_repo_url . '#faq' ), __( 'Frequently Asked Questions', 'wporg-forums' ) );
+		$support           = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
+		$active            = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/active/' ), __( 'Active Topics', 'wporg-forums' ) );
+		$unresolved        = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/unresolved/' ), __( 'Unresolved Topics', 'wporg-forums' ) );
+		$unresolved_active = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/unresolved-active/' ), __( 'Unresolved Topics by Activity', 'wporg-forums' ) );
+		$reviews           = sprintf( '<a href="%s">%s</a>', home_url( '/plugin/' . esc_attr( $this->slug() ) . '/reviews/' ), __( 'Reviews', 'wporg-forums' ) );
+		$create            = '';
 
 		if ( class_exists( '\WordPressdotorg\Plugin_Directory\Template' ) ) {
 			switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
@@ -174,6 +185,7 @@ class Plugin_Directory_Compat extends Directory_Compat {
 				<li><?php echo wp_kses_post( $support ); ?></li>
 				<li><?php echo wp_kses_post( $active ); ?></li>
 				<li><?php echo wp_kses_post( $unresolved ); ?></li>
+				<li><?php echo wp_kses_post( $unresolved_active ); ?></li>
 				<li><?php echo wp_kses_post( $reviews ); ?></li>
 				<?php if ( $create ) : ?>
 				<li class="create-topic"><?php echo wp_kses_post( $create ); ?></li>
