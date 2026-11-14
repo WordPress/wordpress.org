@@ -91,13 +91,13 @@ gp_tmpl_header();
 						}
 
 						foreach ( $sub_projects as $_sub_project ) {
-							$status = $sub_project_statuses[ $_sub_project->id ];
+							$_sub_project_status = $sub_project_statuses[ $_sub_project->id ];
 
 							printf(
 								'<li><a href="%s">%s <span>%s</span></a>',
 								esc_url( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ) ) ),
 								esc_html( $_sub_project->name ),
-								esc_html( $status->percent_complete ) . '%'
+								esc_html( $_sub_project_status->percent_complete ) . '%'
 							);
 						}
 						?>
@@ -128,11 +128,11 @@ if ( 'wp-plugins' === $project->path ) {
 	} else {
 		$stable_project_slug = isset( $sub_project_ids_by_slug['stable'] ) ? 'stable' : 'dev';
 		$stable_project_name = 'stable' === $stable_project_slug ? 'Stable (latest release)' : 'Development (trunk)';
-		$status              = $sub_project_statuses[ $sub_project_ids_by_slug[ $stable_project_slug ] ];
+		$_sub_project_status = $sub_project_statuses[ $sub_project_ids_by_slug[ $stable_project_slug ] ];
 		?>
 		<div class="wporg-notice wporg-notice-info">
 			<p>Translations for the readme are published almost immediately.
-				The initial language pack for the plugin will be generated when 90% of the <a href="<?php echo esc_url( gp_url_project( $sub_project->path, gp_url_join( $stable_project_slug, $locale->slug, $set_slug ) ) ); ?>"><?php echo esc_html( $stable_project_name ); ?></a> sub-project strings have been translated (currently <?php echo esc_html( $status->percent_complete ) . '%'; ?>).</p>
+				The initial language pack for the plugin will be generated when 90% of the <a href="<?php echo esc_url( gp_url_project( $sub_project->path, gp_url_join( $stable_project_slug, $locale->slug, $set_slug ) ) ); ?>"><?php echo esc_html( $stable_project_name ); ?></a> sub-project strings have been translated (currently <?php echo esc_html( $_sub_project_status->percent_complete ) . '%'; ?>).</p>
 		</div>
 		<?php
 	}
@@ -209,31 +209,31 @@ if ( 'wp-plugins' === $project->path ) {
 			}
 
 			foreach ( $sub_projects as $_sub_project ) {
-				$status = $sub_project_statuses[ $_sub_project->id ];
+				$_sub_project_status = $sub_project_statuses[ $_sub_project->id ];
 				?>
 				<tr>
 					<td class="set-name">
 						<strong><?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ) ), esc_html( $_sub_project->name ) ); ?></strong>
-						<?php if ( $status->percent_complete > 90 ) : ?>
-							<span class="sub-project-status percent-90"><?php echo esc_html( $status->percent_complete ); ?>%</span>
+						<?php if ( $_sub_project_status->percent_complete > 90 ) : ?>
+							<span class="sub-project-status percent-90"><?php echo esc_html( $_sub_project_status->percent_complete ); ?>%</span>
 						<?php else : ?>
-							<span class="sub-project-status"><?php echo esc_html( $status->percent_complete ); ?>%</span>
+							<span class="sub-project-status"><?php echo esc_html( $_sub_project_status->percent_complete ); ?>%</span>
 						<?php endif; ?>
 					</td>
 					<td class="stats translated">
-						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), number_format_i18n( $status->current_count ) ); ?>
+						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), number_format_i18n( $_sub_project_status->current_count ) ); ?>
 					</td>
 					<td class="stats fuzzy">
-						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'fuzzy' ) ), number_format_i18n( $status->fuzzy_count ) ); ?>
+						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'fuzzy' ) ), number_format_i18n( $_sub_project_status->fuzzy_count ) ); ?>
 					</td>
 					<td class="stats untranslated">
-						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), number_format_i18n( $status->untranslated_count ) ); ?>
+						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), number_format_i18n( $_sub_project_status->untranslated_count ) ); ?>
 					</td>
 					<td class="stats waiting">
-						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), number_format_i18n( $status->waiting_count ) ); ?>
+						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'waiting' ) ), number_format_i18n( $_sub_project_status->waiting_count ) ); ?>
 					</td>
 					<td class="stats changesrequested">
-						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[changesrequested]' => 'yes', 'filters[status]' => 'changesrequested' ) ), number_format_i18n( $status->changesrequested_count ) ); ?>
+						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[changesrequested]' => 'yes', 'filters[status]' => 'changesrequested' ) ), number_format_i18n( $_sub_project_status->changesrequested_count ) ); ?>
 					</td>
 				</tr>
 				<?php
