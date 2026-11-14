@@ -2379,7 +2379,7 @@ table.listing th.desc a::after {
 
 /* =Report screens */
 .create-new-ticket.button {
-	margin: 10px 10px 0;
+	margin: 10px 6px 0; /* Line up with the header search form, inset by #banner's padding. */
 	float: right;
 	clear: right;
 	font-size: 15px;
