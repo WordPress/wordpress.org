@@ -118,7 +118,7 @@ gp_tmpl_header();
 if ( 'wp-plugins' === $project->path ) {
 	$sub_project_ids_by_slug = wp_list_pluck( $sub_projects, 'id', 'slug' );
 
-	! isset( $sub_project_ids_by_slug['dev'] ) && ! isset( $sub_project_ids_by_slug['stable'] )
+	if ( ! isset( $sub_project_ids_by_slug['dev'] ) && ! isset( $sub_project_ids_by_slug['stable'] ) ) {
 		?>
 		<div class="wporg-notice wporg-notice-error">
 			<p>This plugin is not <a href="https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/">properly prepared for localization</a>. If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $sub_project->slug ); ?>">please contact the author</a>.</p>
