@@ -70,6 +70,7 @@ class Plugin {
 		add_filter( 'gp_breadcrumb_items', array( $this, 'merge_directory_breadcrumbs' ), 5 );
 		add_action( 'gp_project_created', array( $this, 'update_projects_last_updated' ) );
 		add_action( 'gp_project_saved', array( $this, 'update_projects_last_updated' ) );
+		add_action( 'gp_project_deleted', array( $this, 'update_projects_last_updated' ) );
 		add_filter( 'pre_handle_404', array( $this, 'short_circuit_handle_404' ) );
 		add_filter( 'request', array( $this, 'drop_wp_query_vars' ) );
 		add_action( 'init', array( $this, 'bump_assets_versions' ), 20 );
@@ -742,7 +743,7 @@ class Plugin {
 	/**
 	 * Stores the timestamp of the last update for projects.
 	 *
-	 * Used by the Rosetta Roles plugin to invalidate local caches.
+	 * Used by the Rosetta Roles plugin and the Locale route to invalidate caches.
 	 */
 	public function update_projects_last_updated() {
 		update_option( 'wporg_projects_last_updated', time() );
