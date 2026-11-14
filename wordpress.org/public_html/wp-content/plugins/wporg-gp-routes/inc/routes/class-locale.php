@@ -41,8 +41,6 @@ class Locale extends GP_Route {
 	 * @param bool|string $project_path Path of a project.
 	 */
 	public function get_locale_projects( $locale_slug, $set_slug = 'default', $project_path = false ) {
-		global $wpdb;
-
 		$per_page = 24;
 		$page = (int) gp_get( 'page', 1 );
 		$search = gp_get( 's', '' );
@@ -61,7 +59,8 @@ class Locale extends GP_Route {
 			return $this->die_with_404();
 		}
 
-		if ( ! $this->translation_set_slug_exists( $locale, $set_slug ) ) {
+		$variants = $this->get_locale_variants( $locale_slug );
+		if ( ! in_array( $set_slug, $variants, true ) ) {
 			return $this->die_with_404();
 		}
 
@@ -120,10 +119,6 @@ class Locale extends GP_Route {
 		$paged_sub_projects['projects'] = $data['sub_projects'];
 		$paged_sub_projects['pages']    = $data['pages'];
 
-		if ( ! $paged_sub_projects ) {
-			return $this->die_with_404();
-		}
-
 		$sub_projects = $paged_sub_projects['projects'];
 		$pages        = $paged_sub_projects['pages'];
 		$filter       = $paged_sub_projects['filter'];
@@ -135,20 +130,7 @@ class Locale extends GP_Route {
 			$project_icons[ $sub_project->id ] = $this->get_project_icon( $project, $sub_project );
 		}
 
-		$project_ids = array_keys( $project_status );
-		$project_ids[] = $project->id;
-		$project_ids = array_merge(
-			$project_ids,
-			$wpdb->get_col( "SELECT id FROM {$wpdb->gp_projects} WHERE parent_project_id IN( " . implode( ', ', $project_ids ) . ')' )
-		);
-
 		$contributors_count = Plugin::get_contributors_count();
-
-		$variants = $this->get_locale_variants( $locale_slug );
-		// If there were no results for the current variant in the current project branch, it should still show it.
-		if ( ! in_array( $set_slug, $variants, true ) ) {
-			$variants[] = $set_slug;
-		}
 
 		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $set_slug, $locale_slug );
@@ -174,7 +156,8 @@ class Locale extends GP_Route {
 			return $this->die_with_404();
 		}
 
-		if ( ! $this->translation_set_slug_exists( $locale, $set_slug ) ) {
+		$variants = $this->get_locale_variants( $locale_slug );
+		if ( ! in_array( $set_slug, $variants, true ) ) {
 			return $this->die_with_404();
 		}
 
@@ -211,8 +194,6 @@ class Locale extends GP_Route {
 
 		$sub_project_slugs = array_keys( $sub_project_statuses );
 
-		$variants = $this->get_locale_variants( $locale_slug );
-
 		$locale_contributors = $this->get_locale_contributors( $sub_project, $locale_slug, $set_slug );
 
 		$can_create_locale_glossary = GP::$permission->current_user_can( 'admin' );
@@ -220,29 +201,6 @@ class Locale extends GP_Route {
 		$locale_glossary = GP::$glossary->by_set_id( $locale_glossary_translation_set->id );
 
 		$this->tmpl( 'locale-project', get_defined_vars() );
-	}
-
-	/**
-	 * Whether a translation set slug exists for a locale.
-	 *
-	 * For performance reasons, this checks the wp/dev project which is the canonical
-	 * source for all available and active locales.
-	 *
-	 * @param \GP_Locale $locale The locale.
-	 * @param string     $slug   The slug of a translation set.
-	 * @return bool True if slug exists, false if not.
-	 */
-	private function translation_set_slug_exists( $locale, $slug ) {
-		global $wpdb;
-
-		$id = $wpdb->get_var( $wpdb->prepare(
-			"SELECT id FROM {$wpdb->gp_translation_sets} WHERE locale = %s AND slug = %s AND project_id = %d",
-			$locale->slug,
-			$slug,
-			2 // wp/dev
-		) );
-
-		return null !== $id;
 	}
 
 	/**
@@ -976,8 +934,6 @@ class Locale extends GP_Route {
 	 * @return array List of favorited items, eg [ 'wp-themes/twentyten', 'wp-themes/twentyeleven' ]
 	 */
 	function get_user_favorites( $project_slug = false ) {
-		global $wpdb;
-
 		if ( ! is_user_logged_in() ) {
 			return array();
 		}
