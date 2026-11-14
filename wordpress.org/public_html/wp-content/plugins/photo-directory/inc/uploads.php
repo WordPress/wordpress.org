@@ -79,6 +79,7 @@ class Uploads {
 		/* Image restrictions. */
 
 		add_filter( 'big_image_size_threshold',         [ __CLASS__, 'big_image_size_threshold' ], 99999 );
+		add_filter( 'image_memory_limit', [ __CLASS__, 'raise_image_memory_limit' ] );
 
 		/* Frontend Uploader customizations. */
 
@@ -1204,6 +1205,28 @@ class Uploads {
 		}
 
 		return $transforms;
+	}
+
+	/**
+	 * Raises the memory limit for image processing so the largest allowed photo fits.
+	 *
+	 * GD keeps two full copies of a photo in memory while it rotates the photo to
+	 * match its EXIF orientation. At the maximum allowed dimensions that peaks at
+	 * around 525 MB, past the default limit, and the submission is left unfinished.
+	 *
+	 * @see https://meta.trac.wordpress.org/ticket/6142
+	 *
+	 * @param int|string $limit Memory limit, in bytes or shorthand byte notation.
+	 * @return int|string The memory limit, never lower than 1 GB.
+	 */
+	public static function raise_image_memory_limit( $limit ) {
+		$bytes = wp_convert_hr_to_bytes( $limit );
+
+		if ( -1 === $bytes || $bytes >= GB_IN_BYTES ) {
+			return $limit;
+		}
+
+		return '1G';
 	}
 
 	/**
