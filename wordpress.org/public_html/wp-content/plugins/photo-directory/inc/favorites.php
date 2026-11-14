@@ -50,6 +50,11 @@ class Favorites {
 	const USER_TERM_SLUG_PREFIX = 'user_';
 
 	/**
+	 * The post meta key caching how many users favorited a photo, used for sorting.
+	 */
+	const META_KEY_FAVORITES_COUNT = '_favorites_count';
+
+	/**
 	 * Memoized user whose favorites listing is being shown.
 	 *
 	 * @var WP_User
@@ -94,6 +99,10 @@ class Favorites {
 
 		// Handle photo rejection (a published photo could later get rejected).
 		add_action( 'wporg_photos_reject_post',                [ __CLASS__, 'handle_photo_rejection' ] );
+
+		// Keep each photo's cached favorites count in sync.
+		add_action( 'added_term_relationship', [ __CLASS__, 'handle_term_relationship_change' ], 10, 3 );
+		add_action( 'deleted_term_relationships', [ __CLASS__, 'handle_term_relationship_change' ], 10, 3 );
 	}
 
 	/**
@@ -497,7 +506,53 @@ class Favorites {
 			return 0;
 		}
 
-		return (int) $term[0]->count;
+		return count( $term );
+	}
+
+	/**
+	 * Updates a photo's cached favorites count when users favorite or unfavorite it.
+	 *
+	 * @param int       $object_id Object ID.
+	 * @param int|int[] $tt_ids    Term taxonomy ID, or IDs when relationships were deleted.
+	 * @param string    $taxonomy  Taxonomy slug.
+	 */
+	public static function handle_term_relationship_change( $object_id, $tt_ids, $taxonomy ) {
+		if ( self::FAVORITES_TAXONOMY !== $taxonomy ) {
+			return;
+		}
+
+		self::update_photo_favorites_count( $object_id );
+	}
+
+	/**
+	 * Caches the number of users who favorited a photo in post meta.
+	 *
+	 * Photos nobody has favorited have no meta.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return int The number of users who favorited the photo.
+	 */
+	public static function update_photo_favorites_count( $post_id ) {
+		global $wpdb;
+
+		// Term caches are only cleared after the term relationship hooks fire, so query directly.
+		$count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->term_relationships} AS tr
+				INNER JOIN {$wpdb->term_taxonomy} AS tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
+				WHERE tr.object_id = %d AND tt.taxonomy = %s",
+				$post_id,
+				self::FAVORITES_TAXONOMY
+			)
+		);
+
+		if ( $count ) {
+			update_post_meta( $post_id, self::META_KEY_FAVORITES_COUNT, $count );
+		} else {
+			delete_post_meta( $post_id, self::META_KEY_FAVORITES_COUNT );
+		}
+
+		return $count;
 	}
 
 	/**

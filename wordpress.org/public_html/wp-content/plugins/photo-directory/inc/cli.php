@@ -157,6 +157,47 @@ class CLI extends \WP_CLI_Command {
 		}
 	}
 
+	/**
+	 * Recalculates the cached favorites count of every favorited photo.
+	 *
+	 * Favoriting and unfavoriting keep the count in sync, so this is only
+	 * needed for favorites made before the count existed.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     # Recalculate the favorites counts.
+	 *     $ wp photos update-favorites-count
+	 *
+	 * @subcommand update-favorites-count
+	 * @when after_wp_load
+	 *
+	 * @param array $args       Positional arguments. Unused.
+	 * @param array $assoc_args Associative arguments. Unused.
+	 */
+	public function update_favorites_count( $args, $assoc_args ) {
+		global $wpdb;
+
+		// Photos with favorites, plus any whose stale count needs removing.
+		$post_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT tr.object_id FROM {$wpdb->term_relationships} AS tr
+				INNER JOIN {$wpdb->term_taxonomy} AS tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
+				WHERE tt.taxonomy = %s
+				UNION
+				SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s",
+				Favorites::FAVORITES_TAXONOMY,
+				Favorites::META_KEY_FAVORITES_COUNT
+			)
+		);
+
+		foreach ( $post_ids as $post_id ) {
+			$count = Favorites::update_photo_favorites_count( (int) $post_id );
+			WP_CLI::log( "\tPhoto {$post_id}: {$count}" );
+		}
+
+		WP_CLI::success( sprintf( 'Updated the favorites count of %d photos.', count( $post_ids ) ) );
+	}
+
 }
 
 WP_CLI::add_command( 'photos', 'WordPressdotorg\Photo_Directory\CLI' );
