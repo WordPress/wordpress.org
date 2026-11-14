@@ -289,8 +289,8 @@ class Performance_Optimizations {
 			// Theme and plugin views rely on taxonomy queries.
 			if ( isset( $r['tax_query'] ) ) {
 
-				// Only look at the last year of topics for the active view.
-				if ( bbp_is_single_view() && bbp_get_view_id() == 'active' ) {
+				// Only look at the last year of topics for the views sorted by activity.
+				if ( bbp_is_single_view() && in_array( bbp_get_view_id(), array( 'active', 'unresolved-active' ), true ) ) {
 					add_filter( 'posts_where', array( $this, 'posts_in_last_year' ) );
 				}
 				return $r;
