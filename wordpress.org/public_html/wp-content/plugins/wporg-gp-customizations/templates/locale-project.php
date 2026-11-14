@@ -116,9 +116,7 @@ gp_tmpl_header();
 
 <?php
 if ( 'wp-plugins' === $project->path ) {
-	$sub_project_ids_by_slug = wp_list_pluck( $sub_projects, 'id', 'slug' );
-
-	if ( ! isset( $sub_project_ids_by_slug['dev'] ) && ! isset( $sub_project_ids_by_slug['stable'] ) ) {
+	if ( ! isset( $sub_project_slugs['dev'] ) && ! isset( $sub_project_slugs['stable'] ) ) {
 		?>
 		<div class="wporg-notice wporg-notice-error">
 			<p>This plugin is not <a href="https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/">properly prepared for localization</a>. If you would like to translate this plugin, <a href="<?php echo esc_url( 'https://wordpress.org/support/plugin/' . $sub_project->slug ); ?>">please contact the author</a>.</p>
@@ -126,9 +124,9 @@ if ( 'wp-plugins' === $project->path ) {
 		</div>
 		<?php
 	} else {
-		$stable_project_slug = isset( $sub_project_ids_by_slug['stable'] ) ? 'stable' : 'dev';
+		$stable_project_slug = isset( $sub_project_slugs['stable'] ) ? 'stable' : 'dev';
 		$stable_project_name = 'stable' === $stable_project_slug ? 'Stable (latest release)' : 'Development (trunk)';
-		$_sub_project_status = $sub_project_statuses[ $sub_project_ids_by_slug[ $stable_project_slug ] ];
+		$_sub_project_status = $sub_project_statuses[ $sub_project_slugs[ $stable_project_slug ] ];
 		?>
 		<div class="wporg-notice wporg-notice-info">
 			<p>Translations for the readme are published almost immediately.
