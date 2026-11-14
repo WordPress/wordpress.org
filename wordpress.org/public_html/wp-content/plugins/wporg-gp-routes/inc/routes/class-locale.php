@@ -247,7 +247,7 @@ class Locale extends GP_Route {
 		$sub_projects         = $this->get_active_sub_projects( $sub_project, true );
 		if ( $sub_projects ) {
 			foreach ( $sub_projects as $key => $_sub_project ) {
-				$sub_project_statuses[ $_sub_project->slug ] = $this->get_project_status(
+				$sub_project_statuses[ $_sub_project->id ] = $this->get_project_status(
 					$_sub_project,
 					$locale_slug,
 					$set_slug,
@@ -256,7 +256,7 @@ class Locale extends GP_Route {
 			}
 		}
 
-		$sub_project_slugs = array_keys( $sub_project_statuses );
+		$sub_project_slugs = array_unique( wp_list_pluck( $sub_projects, 'slug' ) );
 
 		$locale_contributors = $this->get_locale_contributors( $sub_project, $locale_slug, $set_slug );
 
