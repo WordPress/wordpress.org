@@ -30,7 +30,7 @@ function redirect_to_english_article(): void {
 	$url = get_english_article_url( $slug );
 
 	if ( $url ) {
-		wp_safe_redirect( $url );
+		wp_redirect( $url ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Trusted URL on another host, which wp_safe_redirect() rejects.
 		exit;
 	}
 }
