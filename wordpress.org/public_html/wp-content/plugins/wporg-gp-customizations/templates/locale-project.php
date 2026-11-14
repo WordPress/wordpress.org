@@ -285,7 +285,7 @@ if ( 'wp-plugins' === $project->path ) {
 								gp_url_join( $locale->slug, $set_slug ),
 								array(
 									'filters[changesrequested]' => 'yes',
-									'filters[status]'           => 'changesrequested'
+									'filters[status]'           => 'changesrequested',
 								)
 							),
 							number_format_i18n( $_sub_project_status->changesrequested_count )
