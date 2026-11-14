@@ -796,11 +796,17 @@ class Moderators {
 			'data'       => array( 'ID' => $reply_id )
 		);
 
+		// Hiding the reply redirects to view=all, which counts hidden replies, so keep bbPress's page.
+		$hooks = Plugin::get_instance()->hooks;
+		remove_filter( 'bbp_get_reply_url', array( $hooks, 'correct_reply_url_page' ), 20 );
+		$redirect_to = bbp_get_reply_url( $args['id'], bbp_get_redirect_to() );
+		add_filter( 'bbp_get_reply_url', array( $hooks, 'correct_reply_url_page' ), 20, 3 );
+
 		// Default return values
 		$retval = array(
 			'status'      => 0,
 			'message'     => '',
-			'redirect_to' => bbp_get_reply_url( $args['id'], bbp_get_redirect_to() ),
+			'redirect_to' => $redirect_to,
 			'view_all'    => false
 		);
 

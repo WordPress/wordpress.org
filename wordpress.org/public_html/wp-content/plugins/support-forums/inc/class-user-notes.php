@@ -461,7 +461,11 @@ class User_Notes {
 				'show_user_notes' => $post_id,
 			), $permalink );
 		} elseif ( 'reply' === $post_type ) {
+			// The view=all page counts hidden replies, so keep bbPress's page.
+			$hooks = Plugin::get_instance()->hooks;
+			remove_filter( 'bbp_get_reply_url', array( $hooks, 'correct_reply_url_page' ), 20 );
 			$permalink = bbp_get_reply_url( $post_id );
+			add_filter( 'bbp_get_reply_url', array( $hooks, 'correct_reply_url_page' ), 20, 3 );
 			$permalink = add_query_arg( array(
 				'view'            => 'all',
 				'show_user_notes' => $post_id,
