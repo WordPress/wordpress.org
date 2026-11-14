@@ -49,10 +49,10 @@ class Locale extends GP_Route {
 		$filter = gp_get( 'filter', false );
 		$without_editors = (bool) gp_get( 'without-editors', false );
 
-		if ( $search && ! is_string( $search ) ) {
+		if ( ! is_string( $search ) ) {
 			$search = '';
 		}
-		if ( $filter && ! is_string( $filter ) ) {
+		if ( ! is_string( $filter ) ) {
 			$filter = false;
 		}
 
@@ -128,6 +128,10 @@ class Locale extends GP_Route {
 		$pages        = $paged_sub_projects['pages'];
 		$filter       = $paged_sub_projects['filter'];
 		unset( $paged_sub_projects );
+
+		if ( $page > 1 && empty( $sub_projects ) ) {
+			return $this->die_with_404();
+		}
 
 		$project_status = $project_icons = array();
 		foreach ( $sub_projects as $key => $sub_project ) {
@@ -299,12 +303,18 @@ class Locale extends GP_Route {
 			case 'wp-plugins':
 				$icon = '';
 
-				if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) ) {
+				if ( class_exists( 'WordPressdotorg\Plugin_Directory\Template' ) && defined( 'WPORG_PLUGIN_DIRECTORY_BLOGID' ) ) {
 					$directory_post_id = gp_get_meta( 'wp-plugins', $sub_project->id, 'directory-post-id' );
 					if ( $directory_post_id ) {
-						switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
-						$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
-						restore_current_blog();
+						$switched = switch_to_blog( WPORG_PLUGIN_DIRECTORY_BLOGID );
+						if ( $switched ) {
+							$icon = null;
+							try {
+								$icon = \WordPressdotorg\Plugin_Directory\Template::get_plugin_icon( $directory_post_id, 'html' );
+							} finally {
+								restore_current_blog();
+							}
+						}
 					}
 				}
 
@@ -587,7 +597,7 @@ class Locale extends GP_Route {
 				`t`.`translation_set_id` = %d
 				AND `t`.`user_id` IS NOT NULL AND `t`.`user_id` != 0
 				AND `t`.`status` IN( 'current', 'waiting', 'fuzzy' )
-			GROUP BY `t`.`user_id`
+			GROUP BY `t`.`user_id`, `o`.`project_id`
 		", $translation_set->id ) );
 
 		return $contributors;
@@ -735,6 +745,9 @@ class Locale extends GP_Route {
 		$r = wp_parse_args( $args, $defaults );
 		extract( $r, EXTR_SKIP );
 
+		$page     = max( 1, (int) $page );
+		$per_page = (int) $per_page;
+
 		$limit_sql = '';
 		if ( $per_page ) {
 			$limit_sql = $wpdb->prepare( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
@@ -833,7 +846,7 @@ class Locale extends GP_Route {
 			// Exclude projects which have an assigned editor.
 			if ( $without_editors ) {
 				$project_ids_with_editor = $wpdb->get_col( $wpdb->prepare(
-					"SELECT DISTINCT(project_id) FROM `translate_translation_editors` WHERE (locale = %s OR locale = 'all-locales') AND project_id != 0 AND user_id != %d",
+					"SELECT DISTINCT(project_id) FROM {$wpdb->wporg_translation_editors} WHERE (locale = %s OR locale = 'all-locales') AND project_id != 0 AND user_id != %d",
 					$locale,
 					$user_id
 				) );
@@ -894,18 +907,18 @@ class Locale extends GP_Route {
 				break;
 
 			case 'strings-waiting-and-fuzzy':
-				$stats_where    .= ' AND stats.has_pending = 1';
+				$stats_where     = ' AND stats.has_pending = 1';
 				$filter_order_by = "tp.path LIKE 'wp/%%' DESC, (stats.fuzzy + stats.waiting) $sort_order, tp.name ASC";
 				break;
 
 			case 'strings-waiting-and-fuzzy-by-modified-date':
-				$stats_where    .= ' AND stats.has_pending = 1 AND stats.date_modified > "0000-00-00 00:00:00"';
+				$stats_where     = ' AND stats.has_pending = 1 AND stats.date_modified > "0000-00-00 00:00:00"';
 				$filter_order_by = "stats.date_modified $sort_order, tp.name ASC";
 				break;
 
 			case 'percent-completed':
 				$stats_where    .= ' AND stats.untranslated > 0';
-				$filter_order_by = "( stats.current / stats.all ) $sort_order, tp.name ASC";
+				$filter_order_by = "( stats.current / NULLIF( stats.all, 0 ) ) $sort_order, tp.name ASC";
 				break;
 
 			case 'completed':
