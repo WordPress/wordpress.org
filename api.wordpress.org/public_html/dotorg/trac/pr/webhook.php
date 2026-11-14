@@ -201,6 +201,11 @@ switch ( $_SERVER['HTTP_X_GITHUB_EVENT'] ) {
 			die( 'UNSUPPORTED - EDIT' );
 		}
 
+		// Without this, deleting a comment that was never synced would post it to Trac.
+		if ( isset( $payload->action ) && 'deleted' === $payload->action ) {
+			die( 'UNSUPPORTED - DELETE' );
+		}
+
 		// Make sure it's a PR comment..
 		if ( empty( $payload->issue->pull_request ) ) {
 			die( 'UNSUPPORTED - Only PR comments supported.' );
