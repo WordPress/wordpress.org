@@ -1903,6 +1903,11 @@ body, td, p,
 	margin: -8px auto 10px auto;
 }
 
+/* Match the .container gutter for titles printed directly in the hero. */
+.wptv-hero > .page-title {
+	padding: 0 10px;
+}
+
 .page-title {
 	max-width: 940px;
 	margin: auto;
