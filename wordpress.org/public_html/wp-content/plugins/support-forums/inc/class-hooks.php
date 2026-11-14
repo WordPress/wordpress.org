@@ -1271,7 +1271,10 @@ class Hooks {
 		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );
 		$reply_url = bbp_get_reply_url( $reply_id );
 
-		$message = sprintf( __( '%1$s wrote:
+		$message = sprintf(
+			/* translators: 1: Author, 2: Forum message, 3: Link to the reply, 4: Link to unsubscribe from the topic. */
+			__(
+				'%1$s wrote:
 
 %2$s
 
@@ -1279,11 +1282,17 @@ Post Link: %3$s
 -----------
 You are receiving this email because you subscribed to a forum topic.
 
-Log in and visit the topic to reply to the topic or unsubscribe from these emails. Note that replying to this email has no effect.', 'wporg-forums' ),
-                $reply_author_name,
-                $reply_content,
-                $reply_url
-        );
+Log in and visit the topic to reply to the topic. Note that replying to this email has no effect.
+
+To unsubscribe from future emails, click here:
+%4$s',
+				'wporg-forums'
+			),
+			$reply_author_name,
+			$reply_content,
+			$reply_url,
+			Emails::TOPIC_UNSUBSCRIBE_PLACEHOLDER
+		);
 
 		return $message;
 	}
