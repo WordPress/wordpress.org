@@ -21,6 +21,7 @@ class Hooks {
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ), 5 );
 		add_action( 'template_redirect',               array( $this, 'redirect_ask_question_plugin_forum' ) );
+		add_action( 'template_redirect', array( $this, 'redirect_mixed_case_urls' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
 		add_filter( 'bbp_show_user_profile',           array( $this, 'allow_mods_to_view_inactive_users' ), 10, 2 );
 		add_action( 'init',                            array( $this, 'add_rewrite_rules' ) );
@@ -359,6 +360,45 @@ class Hooks {
 			}
 		}
 
+	}
+
+	/**
+	 * Redirect mixed-case forum, topic, topic tag and view URLs to their lowercase equivalent.
+	 *
+	 * Their slugs are always lowercase, and so are their canonical URLs.
+	 */
+	public function redirect_mixed_case_urls() {
+		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) ) {
+			return;
+		}
+
+		$query_vars = array(
+			bbp_get_forum_post_type(),
+			bbp_get_topic_post_type(),
+			bbp_get_topic_tag_tax_id(),
+			bbp_get_view_rewrite_id(),
+		);
+
+		if ( ! array_filter( array_map( 'get_query_var', $query_vars ) ) ) {
+			return;
+		}
+
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+		$path        = explode( '?', $request_uri )[0];
+
+		// Compare decoded paths, so that uppercase percent-encoding doesn't cause a redirect loop.
+		$decoded_path   = rawurldecode( $path );
+		$lowercase_path = mb_strtolower( $decoded_path, 'UTF-8' );
+
+		if ( $decoded_path === $lowercase_path ) {
+			return;
+		}
+
+		$url  = implode( '/', array_map( 'rawurlencode', explode( '/', $lowercase_path ) ) );
+		$url .= substr( $request_uri, strlen( $path ) );
+
+		wp_safe_redirect( $url, 301 );
+		exit;
 	}
 
 	/**
