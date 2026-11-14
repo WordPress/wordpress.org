@@ -32,6 +32,13 @@ class Plugin {
 	private $sites = [];
 
 	/**
+	 * Default date and time option values, translated in the site locale.
+	 *
+	 * @var string[]|null
+	 */
+	private $date_option_defaults = null;
+
+	/**
 	 * Returns the singleton instance of this plugin.
 	 *
 	 * @return \WordPressdotorg\Rosetta\Plugin The plugin instance.
@@ -127,12 +134,7 @@ class Plugin {
 	 * @return string Valid timezone identifier or empty string.
 	 */
 	public function filter_timezone_string() {
-		/*
-		 * translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
-		 * or a valid timezone string (America/New_York). See https://www.php.net/manual/timezones.php
-		 * for all timezone strings supported by PHP.
-		 */
-		$offset_or_tz = _x( '0', 'default GMT offset or timezone string', 'rosetta' );
+		$offset_or_tz = $this->get_date_option_default( 'offset_or_tz' );
 
 		if ( '' !== $offset_or_tz && ! is_numeric( $offset_or_tz ) && in_array( $offset_or_tz, timezone_identifiers_list(), true ) ) {
 			return $offset_or_tz;
@@ -157,12 +159,7 @@ class Plugin {
 			}
 		}
 
-		/*
-		 * translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
-		 * or a valid timezone string (America/New_York). See https://www.php.net/manual/timezones.php
-		 * for all timezone strings supported by PHP.
-		 */
-		$offset_or_tz = _x( '0', 'default GMT offset or timezone string', 'rosetta' );
+		$offset_or_tz = $this->get_date_option_default( 'offset_or_tz' );
 
 		if ( '' !== $offset_or_tz && is_numeric( $offset_or_tz ) ) {
 			return (int) $offset_or_tz;
@@ -177,8 +174,7 @@ class Plugin {
 	 * @return string Localized date format.
 	 */
 	public function filter_date_format() {
-		/* translators: default date format, see https://www.php.net/date */
-		return __( 'F j, Y', 'rosetta' );
+		return $this->get_date_option_default( 'date_format' );
 	}
 
 	/**
@@ -187,8 +183,7 @@ class Plugin {
 	 * @return string Localized time format.
 	 */
 	public function filter_time_format() {
-		/* translators: default time format, see https://www.php.net/date */
-		return __( 'g:i a', 'rosetta' );
+		return $this->get_date_option_default( 'time_format' );
 	}
 
 	/**
@@ -197,7 +192,55 @@ class Plugin {
 	 * @return string Default start of the week (0 = Sunday, 1 = Monday).
 	 */
 	public function filter_start_of_week() {
-		/* translators: default start of the week. 0 = Sunday, 1 = Monday */
-		return _x( '1', 'start of week', 'rosetta' );
+		return $this->get_date_option_default( 'start_of_week' );
+	}
+
+	/**
+	 * Retrieves a default date or time option value, translated in the site locale.
+	 *
+	 * In the admin, translations load in the user's locale, but these defaults belong to the site.
+	 *
+	 * @global \WP_Locale_Switcher $wp_locale_switcher WordPress locale switcher object.
+	 *
+	 * @param string $key One of 'offset_or_tz', 'date_format', 'time_format', or 'start_of_week'.
+	 * @return string The translated default value.
+	 */
+	private function get_date_option_default( $key ) {
+		global $wp_locale_switcher;
+
+		if ( null !== $this->date_option_defaults ) {
+			return $this->date_option_defaults[ $key ];
+		}
+
+		$site_locale = get_locale();
+		$switched    = switch_to_locale( $site_locale );
+
+		/*
+		 * translators: default GMT offset or timezone string. Must be either a valid offset (-12 to 14)
+		 * or a valid timezone string (America/New_York). See https://www.php.net/manual/timezones.php
+		 * for all timezone strings supported by PHP.
+		 */
+		$offset_or_tz = _x( '0', 'default GMT offset or timezone string', 'rosetta' );
+
+		$defaults = [
+			'offset_or_tz'  => $offset_or_tz,
+			/* translators: default date format, see https://www.php.net/date */
+			'date_format'   => __( 'F j, Y', 'rosetta' ),
+			/* translators: default time format, see https://www.php.net/date */
+			'time_format'   => __( 'g:i a', 'rosetta' ),
+			/* translators: default start of the week. 0 = Sunday, 1 = Monday */
+			'start_of_week' => _x( '1', 'start of week', 'rosetta' ),
+		];
+
+		if ( $switched ) {
+			restore_previous_locale();
+		}
+
+		// Before the locale switcher is set up, or while another locale is switched in, the values may not be the site's.
+		if ( $switched || ( $wp_locale_switcher && ! $wp_locale_switcher->is_switched() && determine_locale() === $site_locale ) ) {
+			$this->date_option_defaults = $defaults;
+		}
+
+		return $defaults[ $key ];
 	}
 }
