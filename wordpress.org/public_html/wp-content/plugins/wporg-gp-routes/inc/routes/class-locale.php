@@ -1183,7 +1183,6 @@ class Locale extends GP_Route {
 				} else {
 					$tp_where .= ' AND 0=1';
 				}
-
 				$filter_order_by = 'stats.untranslated > 0 DESC, tp.name ASC';
 				break;
 
