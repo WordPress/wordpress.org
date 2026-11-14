@@ -7,30 +7,9 @@ function subtitles_upload_css() {
 	?>
 	<style type="text/css">
 	<?php // theme structural css ?>
-	html,
-	body {
-		width: 100%;
-		height: 100%;
-		margin: 0;
-	}
-
-	#page {
-		height: auto;
-		min-height: 100%;
-		position: relative;
-		width: 100%;
-	}
-
 	#header {
 		margin: 0;
 		padding-top: 10px;
-	}
-
-	#footer {
-		position: absolute;
-		bottom: 0;
-		right: 0;
-		left: 0;
 	}
 
 	.video-upload {
