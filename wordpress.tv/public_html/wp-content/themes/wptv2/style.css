@@ -241,7 +241,8 @@ div.success p {
 	padding-top: 8px;
 }
 
-#header .sleeve {
+#header .sleeve,
+#footer .container {
 	max-width: 942px;
 	margin: 0 auto;
 }
@@ -2535,6 +2536,11 @@ h3#comments {
 @media screen and ( min-width: 500px ) {
 	#header {
 		padding: 0 20px;
+	}
+
+	#footer {
+		padding-left: 20px;
+		padding-right: 20px;
 	}
 
 	#header h1 {
