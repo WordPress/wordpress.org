@@ -167,22 +167,43 @@ class Consistency extends GP_Route {
 	private function query( $args ) {
 		global $wpdb;
 
-		$collation     = $args['case_sensitive'] ? 'BINARY' : '';
-		$project_where = '';
-		$query_params  = [];
+		$args = wp_parse_args(
+			$args,
+			[
+				'search'         => '',
+				'locale'         => '',
+				'set_slug'       => '',
+				'case_sensitive' => false,
+				'project'        => 0,
+			]
+		);
+
+		$query_params = [
+			$args['locale'],
+			$args['set_slug'],
+			$args['search'],
+		];
+
+		$case_sensitive_where = '';
+		if ( ! empty( $args['case_sensitive'] ) ) {
+			$case_sensitive_where = 'AND CAST( o.singular AS CHAR CHARACTER SET binary ) = CAST( %s AS CHAR CHARACTER SET binary )';
+			$query_params[]       = $args['search'];
+		}
 
 		// Hidden originals are for project writers only; results span projects, so only admins see them here.
 		$priority_where = GP::$permission->current_user_can( 'admin' ) ? '' : 'AND o.priority > -2';
 
+		$project_where = '';
 		if ( ! empty( $args['project'] ) ) {
 			$project = GP::$project->get( (int) $args['project'] );
-			if ( $project && ! empty( $project->path ) ) {
-				$project_where  = 'AND p.path LIKE %s';
-				$query_params[] = $wpdb->esc_like( $project->path ) . '/%';
+			if ( ! $project || empty( $project->path ) ) {
+				return [];
 			}
-		}
 
-		array_unshift( $query_params, $args['search'], $args['locale'], $args['set_slug'] );
+			$project_where  = 'AND ( p.path = %s OR p.path LIKE %s )';
+			$query_params[] = $project->path;
+			$query_params[] = $wpdb->esc_like( $project->path ) . '/%';
+		}
 
 		$query = "
 			SELECT
@@ -201,18 +222,22 @@ class Consistency extends GP_Route {
 			JOIN
 				{$wpdb->gp_projects} AS p ON p.id = o.project_id
 			JOIN
-				{$wpdb->gp_translations} AS t ON o.id = t.original_id
+				{$wpdb->gp_translation_sets} AS ts
+					ON ts.project_id = o.project_id
+					AND ts.locale = %s
+					AND ts.slug = %s
 			JOIN
-				{$wpdb->gp_translation_sets} AS ts ON ts.id = t.translation_set_id
+				{$wpdb->gp_translations} AS t
+					ON t.original_id = o.id
+					AND t.translation_set_id = ts.id
 			WHERE
-				p.active = 1
-				AND t.status = 'current'
+				o.singular = %s
+				{$case_sensitive_where}
 				AND o.status = '+active'
-				AND o.singular = {$collation} %s
-				AND ts.locale = %s
-				AND ts.slug = %s
 				{$priority_where}
+				AND p.active = 1
 				{$project_where}
+				AND t.status = 'current'
 			LIMIT 0, 500
 		";
 
