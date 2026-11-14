@@ -369,8 +369,8 @@ class Plugin {
 
 		remove_all_filters( 'bbp_get_topic_content' );
 
-		// Strip tags from text and set up message body.
-		$topic_content = strip_tags( bbp_get_topic_content( $topic_id ) );
+		// The mail is plain text, so decode the entities left behind once the tags are gone, like &lt; in code.
+		$topic_content = html_entity_decode( wp_strip_all_tags( bbp_get_topic_content( $topic_id ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		$topic_url     = get_permalink( $topic_id );
 
 		$message = sprintf(
@@ -509,8 +509,8 @@ To unsubscribe from future emails, click here:
 
 		remove_all_filters( 'bbp_get_reply_content' );
 
-		// Strip tags from text and set up message body.
-		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );
+		// The mail is plain text, so decode the entities left behind once the tags are gone, like &lt; in code.
+		$reply_content = html_entity_decode( wp_strip_all_tags( bbp_get_reply_content( $reply_id ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		$reply_url = bbp_get_reply_url( $reply_id );
 
 		$message = sprintf(
