@@ -91,7 +91,7 @@ gp_tmpl_header();
 						}
 
 						foreach ( $sub_projects as $_sub_project ) {
-							$status = $sub_project_statuses[ $_sub_project->slug ];
+							$status = $sub_project_statuses[ $_sub_project->id ];
 
 							printf(
 								'<li><a href="%s">%s <span>%s</span></a>',
