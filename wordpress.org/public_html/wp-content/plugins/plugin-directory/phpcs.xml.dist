@@ -4,7 +4,7 @@
 
 	<!-- Exclude external libraries -->
 	<exclude-pattern>/libs/geopattern-1.1.2/*</exclude-pattern>
-	<exclude-pattern>/libs/michelf-php-markdown-1.6.0/*</exclude-pattern>
+	<exclude-pattern>/libs/michelf-php-markdown-2.0.0/*</exclude-pattern>
 
 	<!-- Exclude JS/CSS files. -->
 	<exclude-pattern>*.js[x]?</exclude-pattern>

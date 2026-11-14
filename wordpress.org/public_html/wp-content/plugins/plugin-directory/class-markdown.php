@@ -15,6 +15,15 @@ if ( ! class_exists( '\Michelf\MarkdownExtra' ) ) {
 class Markdown extends \Michelf\MarkdownExtra {
 
 	/**
+	 * Block-level tags, as of 1.6.0.
+	 *
+	 * 1.9.1 added `details` and `summary`, which stops Markdown inside them from rendering.
+	 *
+	 * @var string
+	 */
+	protected string $block_tags_re = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|address|form|fieldset|iframe|hr|legend|article|section|nav|aside|hgroup|header|footer|figcaption|figure';
+
+	/**
 	 * @param string $text
 	 * @return string
 	 */
