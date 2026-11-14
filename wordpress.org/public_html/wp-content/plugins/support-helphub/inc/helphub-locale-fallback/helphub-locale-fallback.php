@@ -39,6 +39,8 @@ add_action( 'template_redirect', __NAMESPACE__ . '\redirect_to_english_article',
 /**
  * Returns the URL of the published English article for a slug.
  *
+ * When the slug is one the English article was renamed from, a locale translation published under the new slug wins.
+ *
  * @param string $slug Article slug, current or one the English article was renamed from.
  * @return string Article URL, or an empty string when there is no such article.
  */
@@ -73,5 +75,14 @@ function get_english_article_url( string $slug ): string {
 
 	restore_current_blog();
 
-	return $post_name ? get_home_url( $blog_id, '/article/' . $post_name . '/' ) : '';
+	if ( ! $post_name ) {
+		return '';
+	}
+
+	// A translation published under the English article’s new slug beats the English article.
+	if ( $post_name !== $slug && get_posts( $args + array( 'name' => $post_name ) ) ) {
+		return home_url( '/article/' . $post_name . '/' );
+	}
+
+	return get_home_url( $blog_id, '/article/' . $post_name . '/' );
 }
