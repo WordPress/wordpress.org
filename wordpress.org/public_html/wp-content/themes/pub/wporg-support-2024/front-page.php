@@ -33,6 +33,7 @@ get_header(); ?>
 						); ?>
 					</section>
 
+					<?php if ( function_exists( 'bbp_get_forum_post_type' ) && wp_count_posts( bbp_get_forum_post_type() )->publish > 0 ) : ?>
 					<section id="helphub-forum-link">
 						<h2><?php esc_html_e( 'Support Forums', 'wporg-forums' ); ?></h2>
 
@@ -40,6 +41,7 @@ get_header(); ?>
 							<?php esc_html_e( 'Can\'t find what you\'re looking for? Find out if others share your experience.', 'wporg-forums' ); ?> <a href="<?php echo esc_url( site_url( '/forums/' ) ); ?>"><?php esc_html_e( 'Check out our support forums', 'wporg-forums' ); ?></a>.
 						</p>
 					</section>
+					<?php endif; ?>
 
 				</div>
 

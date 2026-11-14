@@ -82,20 +82,26 @@ echo do_blocks( $is_forums_home || is_front_page() || $is_homepage
 
 					<!-- wp:wporg/language-suggest {"align":"full"} -->
 					<div class="wp-block-wporg-language-suggest alignfull"></div>
-					<!-- /wp:wporg/language-suggest -->
-
-					<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
-					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
-
-						<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
-
-					</div>
-					<!-- /wp:group -->',
+					<!-- /wp:wporg/language-suggest -->',
 					__( 'Support', 'wporg-forums' ),
 					/* Translators: subhead */
 					__( 'We&#8217;ve got a variety of resources to help you get the most out of WordPress.', 'wporg-forums' )
 				)
 			);
+
+			// Locale sites without forums only host documentation here, so a forum search would find nothing.
+			if ( function_exists( 'bbp_get_forum_post_type' ) && wp_count_posts( bbp_get_forum_post_type() )->publish > 0 ) :
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- do_blocks() renders the block markup defined here; escaping it would print the markup.
+				echo do_blocks(
+					'<!-- wp:group {"layout":{"type":"constrained","justifyContent":"center"},"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space"}}}} -->
+					<div class="wp-block-group alignfull" style="padding-left:var(--wp--preset--spacing--edge-space);padding-right:var(--wp--preset--spacing--edge-space)">
+
+						<!-- wp:pattern {"slug":"wporg-support/search-field"} /-->
+
+					</div>
+					<!-- /wp:group -->'
+				);
+			endif;
 
 		elseif ( $is_forums_home ) :
 
