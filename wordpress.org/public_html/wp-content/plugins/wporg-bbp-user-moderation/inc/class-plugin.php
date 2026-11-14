@@ -70,6 +70,9 @@ class Plugin {
 
 			// Prevent editing their topics/replies.
 			add_filter( 'bbp_map_meta_caps', array( $this, 'bbp_map_meta_caps' ), 100, 4 );
+
+			// Held replies would otherwise resolve other people's topics before approval.
+			add_filter( 'wporg_bbp_user_can_resolve', array( $this, 'user_can_resolve' ), 20, 3 );
 		}
 
 		// Alter queries for the current user.
@@ -344,6 +347,22 @@ class Plugin {
 		}
 
 		return $caps;
+	}
+
+	/**
+	 * Limit flagged users to resolving their own topics.
+	 *
+	 * @param bool $retval   Whether the user can resolve the topic.
+	 * @param int  $user_id  User ID.
+	 * @param int  $topic_id Topic ID.
+	 * @return bool
+	 */
+	public function user_can_resolve( $retval, $user_id, $topic_id ) {
+		if ( $retval && $this->is_user_flagged( $user_id ) ) {
+			$retval = (int) bbp_get_topic_author_id( $topic_id ) === (int) $user_id;
+		}
+
+		return $retval;
 	}
 
 	/**
