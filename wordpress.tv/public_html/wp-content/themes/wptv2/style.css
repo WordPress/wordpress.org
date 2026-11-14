@@ -2538,6 +2538,11 @@ h3#comments {
 		padding: 0 20px;
 	}
 
+	#footer {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
 	#header h1 {
 		float: left;
 	}
