@@ -6,6 +6,7 @@ class Moderators {
 
 	const ARCHIVED               = 'archived';
 	const ARCHIVED_META          = '_wporg_bbp_unarchived_post_status';
+	const ARCHIVED_REPLIES_META  = '_wporg_bbp_archived_replies';
 	const MODERATOR_META         = '_wporg_bbp_moderator';
 	const MODERATOR_REPLY_AUTHOR = '_wporg_bbp_moderator_reply_author';
 	const DEFAULT_STATUS         = 'publish';
@@ -545,6 +546,7 @@ class Moderators {
 					do_action( 'wporg_bbp_archived_reply', $post->ID );
 				} else {
 					bbp_unstick_topic( $post->ID );
+					$this->archive_topic_replies( $post->ID );
 
 					if ( Support_Compat::is_compat_forum( $post->post_parent ) ) {
 						$term            = null;
@@ -609,6 +611,8 @@ class Moderators {
 
 					do_action( 'wporg_bbp_unarchived_reply', $post->ID );
 				} else {
+					$this->unarchive_topic_replies( $post->ID );
+
 					do_action( 'wporg_bbp_unarchived_topic', $post->ID );
 				}
 
@@ -617,6 +621,46 @@ class Moderators {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Archive the public replies of a topic that is being archived.
+	 *
+	 * Records which replies were archived here, so that unarchiving the topic
+	 * doesn't also restore replies that were archived on their own.
+	 *
+	 * @param int $topic_id Topic ID.
+	 */
+	public function archive_topic_replies( $topic_id ) {
+		$archived_replies = array();
+
+		foreach ( bbp_get_public_child_ids( $topic_id, bbp_get_reply_post_type() ) as $reply_id ) {
+			if ( $this->archive_post( $reply_id ) ) {
+				$archived_replies[] = $reply_id;
+			}
+		}
+
+		if ( $archived_replies ) {
+			update_post_meta( $topic_id, self::ARCHIVED_REPLIES_META, $archived_replies );
+		}
+	}
+
+	/**
+	 * Unarchive the replies that were archived along with a topic.
+	 *
+	 * @param int $topic_id Topic ID.
+	 */
+	public function unarchive_topic_replies( $topic_id ) {
+		$archived_replies = get_post_meta( $topic_id, self::ARCHIVED_REPLIES_META, true );
+		if ( ! $archived_replies ) {
+			return;
+		}
+
+		foreach ( (array) $archived_replies as $reply_id ) {
+			$this->unarchive_post( $reply_id );
+		}
+
+		delete_post_meta( $topic_id, self::ARCHIVED_REPLIES_META );
 	}
 
 	public function get_permalink( $post_id ) {
