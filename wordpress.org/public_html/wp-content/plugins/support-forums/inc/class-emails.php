@@ -346,7 +346,7 @@ class Emails {
 			return;
 		}
 
-		$topic_title = bbp_get_topic_title( $topic_id );
+		$topic_title = wp_strip_all_tags( bbp_get_topic_title( $topic_id ) ); // Drops the NSFW <abbr> prefix markup.
 		$topic_link  = bbp_get_topic_permalink( $topic_id );
 
 		// Require a POST request, so that link scanners and prefetching don't unsubscribe anyone.
