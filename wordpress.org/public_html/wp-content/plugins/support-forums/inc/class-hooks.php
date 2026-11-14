@@ -1267,8 +1267,8 @@ class Hooks {
 			add_filter( 'bbp_get_reply_content', array( Plugin::get_instance()->blocks, 'limit_blocks' ), 7 );
 		}
 
-		// Strip tags from text and set up message body.
-		$reply_content = strip_tags( bbp_get_reply_content( $reply_id ) );
+		// The mail is plain text, so decode the entities left behind once the tags are gone, like &lt; in code.
+		$reply_content = html_entity_decode( wp_strip_all_tags( bbp_get_reply_content( $reply_id ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		$reply_url = bbp_get_reply_url( $reply_id );
 
 		$message = sprintf( __( '%1$s wrote:
