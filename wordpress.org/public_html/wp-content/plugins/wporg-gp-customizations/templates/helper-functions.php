@@ -367,6 +367,8 @@ function wporg_get_locale_resources( $locale ) {
 		'locale'     => $locale->wp_locale,
 		'network_id' => WPORG_GLOBAL_NETWORK_ID,
 		'path'       => '/',
+		'archived'   => 0,
+		'deleted'    => 0,
 		'fields'     => 'ids',
 		'number'     => '1',
 	] );
