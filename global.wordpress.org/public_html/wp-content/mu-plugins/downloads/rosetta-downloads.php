@@ -39,6 +39,8 @@ class Rosetta_Downloads {
 	/**
 	 * Returns download counts for release packages of the current stable branch.
 	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 *
 	 * @return array Download counts per locale.
 	 */
 	function get_release_download_counts() {
@@ -73,6 +75,8 @@ class Rosetta_Downloads {
 
 	/**
 	 * Returns download counts for language packs of the current stable branch.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @return array Download counts per locale.
 	 */

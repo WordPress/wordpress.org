@@ -15,6 +15,11 @@ use stdClass;
 
 /**
  * Main entry point
+ *
+ * @global string             $cache_group Object cache group.
+ * @global int                $cache_life  Object cache lifetime, in seconds.
+ * @global false|array|string $location    The location found for the request.
+ * @global array              $response    The response sent to the client.
  */
 function main() {
 	// Note: $location and $response are included for use in wrapping APIs which utilise this.
@@ -423,6 +428,9 @@ function send_response( $response, $ttl ) {
 /**
  * Guess the location based on a city inside the given input
  *
+ * @global string $cache_group Object cache group.
+ * @global int    $cache_life  Object cache lifetime, in seconds.
+ *
  * @param string $location_name
  * @param string $timezone
  * @param string $country_code
@@ -477,6 +485,8 @@ function guess_location_from_city( $location_name, $timezone, $country_code ) {
 
 /**
  * Look for the given location in the Geonames database
+ *
+ * @global \wpdb $wpdb WordPress database abstraction object.
  *
  * @param string $location_name
  * @param string $timezone
@@ -551,6 +561,10 @@ function guess_location_from_geonames( $location_name, $timezone, $country, $wil
  *
  * NOTE: The location that is found here cannot be returned to the client.
  *       See `rebuild_location_from_geonames()`.
+ *
+ * @global \wpdb  $wpdb        WordPress database abstraction object.
+ * @global string $cache_group Object cache group.
+ * @global int    $cache_life  Object cache lifetime, in seconds.
  *
  * @param string $dotted_ip
  *
@@ -810,6 +824,9 @@ function get_country_code_from_locale( $locale ) {
  *
  * Currently, this only works with English names because that's the only data we have.
  *
+ * @global string $cache_group Object cache group.
+ * @global int    $cache_life  Object cache lifetime, in seconds.
+ *
  * @param string $location_name
  *
  * @return false|array false on failure; an array with country details on success
@@ -875,6 +892,8 @@ function guess_location_from_country( $location_name ) {
 /**
  * Get the country that corresponds to the given country name
  *
+ * @global \wpdb $wpdb WordPress database abstraction object.
+ *
  * @param string $country_name
  *
  * @return false|array false on failure; an array with country details on success
@@ -902,6 +921,10 @@ function get_country_from_name( $country_name ) {
 
 /**
  * Get upcoming events for the requested location.
+ *
+ * @global \wpdb  $wpdb        WordPress database abstraction object.
+ * @global int    $cache_life  Object cache lifetime, in seconds.
+ * @global string $cache_group Object cache group.
  *
  * @param array $args
  *
@@ -1101,6 +1124,8 @@ function should_stick_wordcamp( $request_args, $raw_events ) {
  * WordCamps are large, all-day (or multi-day) events that require more of attendees that meetups do. Attendees
  * need to have more advanced notice of when they're occurring. In a city with an active meetup, the camp
  * might not show up in the Events Widget until a week or two before it happens, which isn't enough time.
+ *
+ * @global \wpdb $wpdb WordPress database abstraction object.
  *
  * @param array $request_args
  * @param int   $distance
@@ -1529,6 +1554,10 @@ function is_wp15_event( $title ) {
 /**
  * Pin the next upcoming online WordCamp to the Events Widget.
  *
+ * @global \wpdb  $wpdb        WordPress database abstraction object.
+ * @global string $cache_group Object cache group.
+ * @global int    $cache_life  Object cache lifetime, in seconds.
+ *
  * @param array  $events
  * @param string $user_agent
  * @param int    $current_time
@@ -1633,6 +1662,10 @@ function pin_next_online_wordcamp( $events, $user_agent, $current_time, $user_co
 
 /**
  * Pin upcoming learn.wordpress.org discussion groups to the Events Widget.
+ *
+ * @global \wpdb  $wpdb        WordPress database abstraction object.
+ * @global string $cache_group Object cache group.
+ * @global int    $cache_life  Object cache lifetime, in seconds.
  *
  * @param array  $events
  * @param string $user_agent

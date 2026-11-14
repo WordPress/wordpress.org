@@ -407,6 +407,8 @@ add_action( 'admin_init', 'wporg_login_cron_tasks' );
 
 /**
  * Clears the Pending Registrations table reguarly.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
  */
 function wporg_login_purge_pending_registrations() {
 	global $wpdb;
