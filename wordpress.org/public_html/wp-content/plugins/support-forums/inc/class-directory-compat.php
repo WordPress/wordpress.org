@@ -498,6 +498,9 @@ abstract class Directory_Compat {
 			get_query_var( 'wporg_single_user_topics_replied_to' )
 		||
 			is_tax( 'topic-tag' )
+		||
+			// bbPress renders feeds in the `request` filter, where is_feed() isn't always set.
+			did_action( 'bbp_feed' )
 		) {
 			$terms = get_the_terms( $topic_id, $this->taxonomy() );
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
