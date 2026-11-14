@@ -64,6 +64,32 @@ do_action( 'bbp_template_before_user_profile' ); ?>
 				printf( esc_html__( 'Email: %s', 'wporg-forums' ), esc_html( bbp_get_displayed_user_field( 'user_email' ) ) );
 			?></p>
 
+			<?php
+			$admin_posts_url = add_query_arg( 'author', bbp_get_displayed_user_id(), admin_url( 'edit.php' ) );
+			?>
+
+			<p class="bbp-user-all-posts">
+				<?php
+				printf(
+					/* translators: 1: URL of the user's topics, 2: URL of the user's replies. */
+					wp_kses_post( __( 'View all <a href="%1$s">topics</a> and <a href="%2$s">replies</a>, including hidden ones.', 'wporg-forums' ) ),
+					esc_url( bbp_add_view_all( bbp_get_user_topics_created_url( bbp_get_displayed_user_id() ), true ) ),
+					esc_url( bbp_add_view_all( bbp_get_user_replies_created_url( bbp_get_displayed_user_id() ), true ) )
+				);
+				?>
+			</p>
+
+			<p class="bbp-user-admin-posts">
+				<?php
+				printf(
+					/* translators: 1: URL of the user's topics in the admin, 2: URL of the user's replies in the admin. */
+					wp_kses_post( __( 'Search their <a href="%1$s">topics</a> and <a href="%2$s">replies</a> in the admin.', 'wporg-forums' ) ),
+					esc_url( add_query_arg( 'post_type', bbp_get_topic_post_type(), $admin_posts_url ) ),
+					esc_url( add_query_arg( 'post_type', bbp_get_reply_post_type(), $admin_posts_url ) )
+				);
+				?>
+			</p>
+
 		<?php endif; ?>
 
 		<p class="bbp-user-wporg-profile"><?php
