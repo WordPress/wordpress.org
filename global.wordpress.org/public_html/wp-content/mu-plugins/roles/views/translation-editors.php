@@ -1,5 +1,5 @@
 <div class="wrap">
-	<h2>
+	<h1>
 		<?php
 		esc_html_e( 'Translation Editors', 'rosetta' );
 
@@ -8,7 +8,7 @@
 			echo '<span class="subtitle">' . sprintf( esc_html__( 'Search results for &#8220;%s&#8221;', 'rosetta' ), esc_html( wp_unslash( $_REQUEST['s'] ) ) ) . '</span>'; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Escaped for display.
 		}
 		?>
-	</h2>
+	</h1>
 
 	<?php echo $feedback_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice markup assembled by get_feedback_message() from escaped parts. ?>
 

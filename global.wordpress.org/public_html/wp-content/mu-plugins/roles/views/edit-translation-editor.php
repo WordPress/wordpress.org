@@ -11,7 +11,7 @@ if ( ! $user ) {
 }
 ?>
 <div class="wrap">
-	<h2><?php esc_html_e( 'Edit Translation Editor', 'rosetta' ); ?></h2>
+	<h1><?php esc_html_e( 'Edit Translation Editor', 'rosetta' ); ?></h1>
 
 	<?php echo $feedback_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice markup assembled by get_feedback_message() from escaped parts. ?>
 
@@ -38,9 +38,9 @@ if ( ! $user ) {
 							<legend class="screen-reader-text"><span><?php esc_html_e( 'Add editor access for:', 'rosetta' ); ?></span></legend>
 
 							<ul id="projects-list" class="projects-list">
-								<li id="project-all" class="active">
+								<li id="project-all"<?php echo $is_all ? ' class="active"' : ''; ?>>
 									<label>
-										<input type="checkbox"<?php checked( in_array( 'all', (array) $project_access_list, true ) ); ?>> <?php esc_html_e( 'All projects', 'rosetta' ); ?>
+										<input type="checkbox"<?php checked( $is_all ); ?>> <?php esc_html_e( 'All projects', 'rosetta' ); ?>
 									</label>
 									<div class="sub-projects-wrapper">
 										<?php esc_html_e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
@@ -57,12 +57,6 @@ if ( ! $user ) {
 			</tbody>
 		</table>
 
-		<input type="hidden" id="project-access-list" name="projects" value="<?php echo esc_attr( implode( ',', $project_access_list ) ); ?>">
-		<input type="hidden" name="action" value="update-translation-editor">
-		<input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
-		<?php
-		wp_nonce_field( 'update-translation-editor_' . $user_id );
-		submit_button( _x( 'Update', 'translation editor', 'rosetta' ) );
-		?>
+		<?php submit_button( _x( 'Update', 'translation editor', 'rosetta' ) ); ?>
 	</form>
 </div>
