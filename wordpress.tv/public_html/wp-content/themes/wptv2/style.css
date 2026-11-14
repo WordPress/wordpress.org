@@ -241,7 +241,8 @@ div.success p {
 	padding-top: 8px;
 }
 
-#header .sleeve {
+#header .sleeve,
+#footer .container {
 	max-width: 942px;
 	margin: 0 auto;
 }
