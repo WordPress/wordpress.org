@@ -946,3 +946,50 @@ function jetpack_sharing_o2_compat() {
 	);
 }
 add_action( 'wp_footer', __NAMESPACE__ . '\jetpack_sharing_o2_compat' );
+
+/**
+ * Attaches Gravatar hovercards to avatars that o2 renders.
+ *
+ * Jetpack attaches hovercards once, on page load, but o2 then replaces the page content
+ * with its own rendering and keeps adding comments, so those avatars never got a card.
+ *
+ * @see https://meta.trac.wordpress.org/ticket/7956
+ */
+function gravatar_hovercards_o2_compat() {
+	wp_add_inline_script(
+		'wpgroho',
+		<<<'JS'
+		( function() {
+			function attachHovercards() {
+				document.querySelectorAll( 'img[src*="gravatar.com/avatar/"]:not(.grav-hashed):not([data-o2-hovercard])' ).forEach( function( avatar ) {
+					if ( avatar.closest( '#wpadminbar, .gravatar-hovercard' ) ) {
+						return;
+					}
+
+					// Gravatar.init() takes a selector, so flag the avatar to attach to it alone.
+					avatar.setAttribute( 'data-o2-hovercard', 'pending' );
+					Gravatar.init( 'img[data-o2-hovercard="pending"]' );
+					avatar.setAttribute( 'data-o2-hovercard', '' );
+				} );
+			}
+
+			function init() {
+				if ( 'undefined' === typeof Gravatar ) {
+					return;
+				}
+
+				attachHovercards();
+				new MutationObserver( attachHovercards ).observe( document.body, { childList: true, subtree: true } );
+			}
+
+			if ( 'loading' === document.readyState ) {
+				document.addEventListener( 'DOMContentLoaded', init );
+			} else {
+				init();
+			}
+		} )();
+		JS,
+		'after'
+	);
+}
+add_action( 'wp_footer', __NAMESPACE__ . '\gravatar_hovercards_o2_compat' );
