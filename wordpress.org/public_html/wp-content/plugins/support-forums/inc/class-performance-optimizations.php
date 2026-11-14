@@ -387,7 +387,10 @@ class Performance_Optimizations {
 	 * @return array Filtered query args.
 	 */
 	public function view_feed_query_args( $args ) {
-		$args['no_found_rows'] = true;
+		// Empty args mean an unregistered view, which bbPress must still 404.
+		if ( $args ) {
+			$args['no_found_rows'] = true;
+		}
 
 		return $args;
 	}
