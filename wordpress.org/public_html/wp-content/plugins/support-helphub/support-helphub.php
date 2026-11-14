@@ -23,4 +23,5 @@ require __DIR__ . '/inc/helphub-read-time/helphub-read-time.php';
 require __DIR__ . '/inc/helphub-front-page-blocks/helphub-front-page-blocks.php';
 require __DIR__ . '/inc/helphub-customroles/class-helphub-custom-roles.php';
 require __DIR__ . '/inc/helphub-manager/class-helphub-manager.php';
+require __DIR__ . '/inc/helphub-locale-fallback/helphub-locale-fallback.php';
 require __DIR__ . '/inc/handbook-toc/index.php';
