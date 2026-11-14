@@ -219,10 +219,30 @@ if ( 'wp-plugins' === $project->path ) {
 						<?php endif; ?>
 					</td>
 					<td class="stats translated">
-						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'current') ), number_format_i18n( $_sub_project_status->current_count ) ); ?>
+						<?php gp_link(
+							gp_url_project(
+								$_sub_project->path,
+								gp_url_join( $locale->slug, $set_slug ),
+								array(
+									'filters[translated]' => 'yes',
+									'filters[status]'     => 'current',
+								)
+							),
+							number_format_i18n( $_sub_project_status->current_count )
+						); ?>
 					</td>
 					<td class="stats fuzzy">
-						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[translated]' => 'yes', 'filters[status]' => 'fuzzy' ) ), number_format_i18n( $_sub_project_status->fuzzy_count ) ); ?>
+						<?php gp_link(
+							gp_url_project(
+								$_sub_project->path,
+								gp_url_join( $locale->slug, $set_slug ),
+								array(
+									'filters[translated]' => 'yes',
+									'filters[status]'     => 'fuzzy',
+								)
+							),
+							number_format_i18n( $_sub_project_status->fuzzy_count )
+						); ?>
 					</td>
 					<td class="stats untranslated">
 						<?php gp_link( gp_url_project( $_sub_project->path, gp_url_join( $locale->slug, $set_slug ), array( 'filters[status]' => 'untranslated' ) ), number_format_i18n( $_sub_project_status->untranslated_count ) ); ?>
