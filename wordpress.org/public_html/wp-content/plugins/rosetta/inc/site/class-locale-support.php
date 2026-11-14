@@ -39,6 +39,17 @@ class Locale_Support implements Site {
 	 */
 	public function register_events() {
 		add_action( 'bbp_loaded', [ $this, 'initialize_bbpress_customizations' ] );
+
+		add_filter(
+			'option_stats_options',
+			function ( $options ) {
+				$options          = is_array( $options ) ? $options : [];
+				$options['roles'] = [ 'administrator', 'helphub_manager', 'helphub_editor' ];
+				return $options;
+			},
+			10,
+			1
+		);
 	}
 
 	/**
