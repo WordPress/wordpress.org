@@ -7,7 +7,8 @@ class Users {
 	public function __construct() {
 		// Add custom fields to user's profile.
 		add_action( 'bbp_user_edit_after_name',         array( $this, 'add_custom_title_input' ) );
-		add_action( 'bbp_user_edit_after',              array( $this, 'add_posting_options' ) );
+		add_action( 'bbp_user_edit_after',              array( $this, 'add_options_section_header' ), 0 );
+		add_action( 'bbp_user_edit_after',              array( $this, 'add_auto_topic_subscription_checkbox' ) );
 
 		// Save custom field values.
 		add_action( 'personal_options_update',          array( $this, 'save_custom_fields' ), 10, 2 );
@@ -90,26 +91,25 @@ class Users {
 	}
 
 	/**
-	 * Add posting options to the user's profile.
+	 * Add a section header to the extra user options.
 	 */
-	public function add_posting_options() {
+	public function add_options_section_header() {
+		printf(
+			'<h2 id="user-settings" class="entry-title">%s</h2>',
+			esc_html__( 'User Options', 'wporg-forums' )
+		);
+	}
+
+	/**
+	 * Add an auto topic subscription checkbox to user's profile.
+	 */
+	public function add_auto_topic_subscription_checkbox() {
 		$auto_topic_subscription = get_user_option( 'auto_topic_subscription', bbp_get_displayed_user_id() );
 		?>
-
-		<h2 id="user-settings" class="entry-title"><?php esc_html_e( 'Posting Options', 'wporg-forums' ); ?></h2>
-
-		<fieldset class="bbp-form">
-			<legend><?php esc_html_e( 'Posting Options', 'wporg-forums' ); ?></legend>
-
-			<div>
-				<label for="auto_topic_subscription"><?php esc_html_e( 'Subscriptions', 'wporg-forums' ); ?></label>
-				<label>
-					<input class="checkbox" name="auto_topic_subscription" id="auto_topic_subscription" type="checkbox" value="yes" <?php checked( $auto_topic_subscription ); ?> />
-					<?php esc_html_e( 'Automatically subscribe to topics I reply to', 'wporg-forums' ); ?>
-				</label>
-			</div>
-		</fieldset>
-
+        <p>
+            <input name="auto_topic_subscription" id="auto_topic_subscription" type="checkbox" value="yes" <?php checked( $auto_topic_subscription ); ?> />
+            <label for="auto_topic_subscription"><?php esc_html_e( 'Always notify me via email of follow-up posts in any topics I reply to', 'wporg-forums' ); ?></label>
+        </p>
 		<?php
 	}
 
