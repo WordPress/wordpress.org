@@ -144,7 +144,7 @@ class Audit_Log {
 
 	/**
 	 * Add a user note when a user's own topic, reply, or review is held for moderation,
-	 * naming the Comment Moderation words it matched, or Akismet.
+	 * naming the Comment Moderation words it matched.
 	 *
 	 * @param int $post_id The topic or reply ID.
 	 */
@@ -161,19 +161,9 @@ class Audit_Log {
 			return;
 		}
 
-		$reasons = [];
-
-		$words = $this->get_matched_moderation_keys( $post );
-		if ( $words ) {
-			$reasons[] = 'matched ' . implode( ', ', array_map( fn( $word ) => '"' . $word . '"', $words ) );
-		}
-
-		if ( 'true' === get_post_meta( $post->ID, '_bbp_akismet_result', true ) ) {
-			$reasons[] = 'flagged by Akismet';
-		}
-
 		// Only log the holds a moderator can act on.
-		if ( ! $reasons ) {
+		$words = $this->get_matched_moderation_keys( $post );
+		if ( ! $words ) {
 			return;
 		}
 
@@ -186,12 +176,13 @@ class Audit_Log {
 		}
 
 		$note_text = sprintf(
-			'%s held for moderation: %s.',
+			'%s held for moderation: matched %s.',
 			str_starts_with( current_action(), 'bbp_edit_' ) ? 'Edited ' . $type : ucfirst( $type ),
-			implode( '; ', $reasons )
+			implode( ', ', array_map( fn( $word ) => '"' . $word . '"', $words ) )
 		);
 
-		Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
+		// A separate note for each hold, so each one links to its own post.
+		Plugin::get_instance()->user_notes->add_user_note(
 			$post->post_author,
 			$note_text,
 			$post->ID

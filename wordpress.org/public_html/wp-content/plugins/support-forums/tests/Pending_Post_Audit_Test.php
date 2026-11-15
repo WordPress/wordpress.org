@@ -125,13 +125,19 @@ class Pending_Post_Audit_Test extends WP_UnitTestCase {
 		$this->assertSame( 'Edited review held for moderation: matched "peculiar".', $this->get_notes()[1]->text );
 	}
 
-	/** Akismet holds are logged too. */
-	public function test_akismet_hold_is_logged(): void {
-		$topic_id = $this->insert_topic( bbp_get_pending_status_id(), 'Nothing unusual.' );
-		update_post_meta( $topic_id, '_bbp_akismet_result', 'true' );
-		do_action( 'bbp_new_topic', $topic_id, $this->forum_id, array(), $this->author_id );
+	/** Holds minutes apart each get their own note, linked to their own post. */
+	public function test_each_hold_gets_its_own_note(): void {
+		$first = $this->insert_topic( bbp_get_pending_status_id(), 'A peculiar error.' );
+		do_action( 'bbp_new_topic', $first, $this->forum_id, array(), $this->author_id );
 
-		$this->assertSame( 'Topic held for moderation: flagged by Akismet.', $this->get_notes()[1]->text );
+		$second = $this->insert_topic( bbp_get_pending_status_id(), 'Another peculiar error.' );
+		do_action( 'bbp_new_topic', $second, $this->forum_id, array(), $this->author_id );
+
+		$notes = $this->get_notes();
+		$this->assertCount( 2, $notes );
+		$this->assertSame( $first, $notes[1]->post_id );
+		$this->assertSame( $second, $notes[2]->post_id );
+		$this->assertSame( 'Topic held for moderation: matched "peculiar".', $notes[2]->text );
 	}
 
 	/** Published posts, spam, holds with no known cause, and moderator edits add no note. */
@@ -140,7 +146,6 @@ class Pending_Post_Audit_Test extends WP_UnitTestCase {
 		do_action( 'bbp_new_topic', $published, $this->forum_id, array(), $this->author_id );
 
 		$spam = $this->insert_topic( bbp_get_spam_status_id(), 'A peculiar error.' );
-		update_post_meta( $spam, '_bbp_akismet_result', 'true' );
 		do_action( 'bbp_new_topic', $spam, $this->forum_id, array(), $this->author_id );
 
 		$unknown = $this->insert_topic( bbp_get_pending_status_id(), 'Nothing unusual.' );
