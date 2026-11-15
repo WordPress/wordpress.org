@@ -108,6 +108,8 @@ class Plugin {
 	 * @return bool False on failure, true on success.
 	 */
 	public function update_project_status( $args ) {
+		global $wpdb;
+
 		$project = GP::$project->by_path( self::GP_MASTER_PROJECT . '/' . $args['plugin'] . '/' );
 		if ( ! $project ) {
 			return false;
@@ -121,6 +123,15 @@ class Plugin {
 			$project->save( [
 				'active' => 0,
 			] );
+
+			if ( ! empty( $project->path ) ) {
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->gp_projects} SET active = 0 WHERE path LIKE %s AND active = 1",
+						$wpdb->esc_like( $project->path ) . '/%'
+					)
+				);
+			}
 		}
 
 		return true;
