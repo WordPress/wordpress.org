@@ -119,18 +119,24 @@ class Plugin {
 			$project->save( [
 				'active' => 1,
 			] );
-		} elseif ( 'inactive' === $args['status'] && $project->active ) {
-			$project->save( [
-				'active' => 0,
-			] );
+		} elseif ( 'inactive' === $args['status'] ) {
+			if ( $project->active ) {
+				$project->save( [
+					'active' => 0,
+				] );
+			}
 
 			if ( ! empty( $project->path ) ) {
-				$wpdb->query(
+				$updated = $wpdb->query(
 					$wpdb->prepare(
 						"UPDATE {$wpdb->gp_projects} SET active = 0 WHERE path LIKE %s AND active = 1",
 						$wpdb->esc_like( $project->path ) . '/%'
 					)
 				);
+
+				if ( false === $updated ) {
+					return false;
+				}
 			}
 		}
 
