@@ -5,6 +5,8 @@
  * @package WordPressdotorg\Plugin_Directory\Tests
  */
 
+declare( strict_types = 1 );
+
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
@@ -23,7 +25,7 @@ class Import_AI_Client_Detection_Test extends TestCase {
 	 *
 	 * @var string
 	 */
-	private $file;
+	private string $file;
 
 	/**
 	 * Create a temporary file to scan.
@@ -50,7 +52,7 @@ class Import_AI_Client_Detection_Test extends TestCase {
 	 *
 	 * @return array[]
 	 */
-	public static function data_sources() {
+	public static function data_sources(): array {
 		return array(
 			'prompt call'             => array( "<?php\n\$text = wp_ai_client_prompt( 'Summarize this' )->generate_text();", true ),
 			'embedding call'          => array( "<?php\n\$vector = wp_ai_client_embedding( \$content );", true ),
@@ -71,7 +73,7 @@ class Import_AI_Client_Detection_Test extends TestCase {
 	 * @param bool   $expected Whether the source uses the WP AI Client.
 	 */
 	#[DataProvider( 'data_sources' )]
-	public function test_file_uses_ai_client( $source, $expected ) {
+	public function test_file_uses_ai_client( string $source, bool $expected ): void {
 		file_put_contents( $this->file, $source ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture.
 
 		$this->assertSame( $expected, Import::file_uses_ai_client( $this->file ) );
@@ -80,7 +82,7 @@ class Import_AI_Client_Detection_Test extends TestCase {
 	/**
 	 * Ignores files that are not PHP.
 	 */
-	public function test_ignores_non_php_files() {
+	public function test_ignores_non_php_files(): void {
 		$this->assertFalse( Import::file_uses_ai_client( __DIR__ . '/fixtures/does-not-exist.js' ) );
 	}
 }
