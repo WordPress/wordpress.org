@@ -137,6 +137,7 @@ class Import {
 		$blocks             = $data['blocks'];
 		$block_files        = $data['block_files'];
 		$dashboard_widgets  = $data['dashboard_widgets'] ?? array();
+		$uses_ai_client     = $data['uses_ai_client'] ?? false;
 		$current_stable_tag = get_post_meta( $plugin->ID, 'stable_tag', true ) ?: 'trunk';
 		$touches_stable_tag = (bool) array_intersect( [ $stable_tag, $current_stable_tag ], $svn_changed_tags );
 
@@ -649,6 +650,13 @@ class Import {
 		} else {
 			wp_remove_object_terms( $plugin->ID, 'dashboard-widgets', 'plugin_section' );
 			delete_post_meta( $plugin->ID, 'dashboard_widget_name' );
+		}
+
+		// WP AI Client: flag plugins that route AI features through the site's connected provider.
+		if ( $uses_ai_client ) {
+			update_post_meta( $plugin->ID, 'uses_ai_client', 1 );
+		} else {
+			delete_post_meta( $plugin->ID, 'uses_ai_client' );
 		}
 
 		self::record_release( $plugin, $stable_tag, $version, $current_stable_tag, $last_committer, $last_revision );
@@ -1213,8 +1221,9 @@ class Import {
 			return preg_match( '!\.(?:js|jsx|css)$!i', $filename );
 		} ) );
 
-		// Find dashboard widget registrations (wp_add_dashboard_widget calls).
+		// Find dashboard widget registrations (wp_add_dashboard_widget calls) and WP AI Client usage.
 		$dashboard_widgets = array();
+		$uses_ai_client    = false;
 		foreach ( Filesystem::list_files( $base_dir, true, '!\.php$!i' ) as $filename ) {
 			// Skip third-party dependencies — they are not the plugin itself.
 			if ( str_contains( $filename, '/vendor/' ) ) {
@@ -1223,11 +1232,14 @@ class Import {
 			foreach ( self::find_dashboard_widgets_in_file( $filename ) as $widget ) {
 				$dashboard_widgets[] = $widget;
 			}
+			if ( ! $uses_ai_client ) {
+				$uses_ai_client = self::file_uses_ai_client( $filename );
+			}
 		}
 
 		return apply_filters(
 			'wporg_plugins_export_and_parse_plugin',
-			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files', 'dashboard_widgets' ),
+			compact( 'readme', 'stable_tag', 'last_modified', 'last_committer', 'last_revision', 'tmp_dir', 'plugin_headers', 'assets', 'tagged_versions', 'blocks', 'block_files', 'dashboard_widgets', 'uses_ai_client' ),
 			$plugin_slug,
 			$this,
 		);
@@ -1630,6 +1642,34 @@ class Import {
 			$widgets[] = is_string( $label ) ? $label : '';
 		}
 		return array_unique( $widgets );
+	}
+
+	/**
+	 * Whether a single PHP file calls the WP AI Client.
+	 *
+	 * Looks for wp_ai_client_prompt() and wp_ai_client_embedding(), the
+	 * entry points core provides for prompting the site's connected AI provider.
+	 *
+	 * @param string $filename Pathname of the file.
+	 * @return bool
+	 */
+	public static function file_uses_ai_client( $filename ) {
+		if ( 'php' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) ) {
+			return false;
+		}
+
+		$contents = file_get_contents( $filename ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file.
+		if ( ! $contents || false === stripos( $contents, 'wp_ai_client_' ) ) {
+			return false;
+		}
+
+		foreach ( array( 'wp_ai_client_prompt', 'wp_ai_client_embedding' ) as $function_name ) {
+			if ( Tokenisation_Helpers::find_function_calls( $contents, $function_name ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
