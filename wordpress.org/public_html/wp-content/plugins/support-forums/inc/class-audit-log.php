@@ -12,6 +12,13 @@ class Audit_Log {
 	 */
 	var $edited_notes = [];
 
+	/**
+	 * IDs of topics and replies that were already pending before this request edited them.
+	 *
+	 * @var int[]
+	 */
+	protected $pending_before_edit = [];
+
 	function __construct() {
 		// Audit-log entries for Term subscriptions (add/remove)
 		add_action( 'wporg_bbp_add_user_term_subscription',    [ $this, 'term_subscriptions' ], 10, 2 );
@@ -29,6 +36,8 @@ class Audit_Log {
 		add_action( 'bbp_edit_topic', [ $this, 'log_pending_post' ], 20, 1 );
 		add_action( 'bbp_new_reply', [ $this, 'log_pending_post' ], 20, 1 );
 		add_action( 'bbp_edit_reply', [ $this, 'log_pending_post' ], 20, 1 );
+		add_action( 'bbp_edit_topic_pre_extras', [ $this, 'remember_pending_before_edit' ] );
+		add_action( 'bbp_edit_reply_pre_extras', [ $this, 'remember_pending_before_edit' ] );
 
 		// Slack logs for Moderation notes.
 		add_action( 'wporg_bbp_note_added', [ $this, 'forums_notes_added' ], 10, 2 );
@@ -155,6 +164,8 @@ class Audit_Log {
 			! $post ||
 			bbp_get_pending_status_id() !== $post->post_status ||
 			! $post->post_author ||
+			// bbPress doesn't re-check a post that was already held, so this edit didn't hold it.
+			in_array( $post->ID, $this->pending_before_edit, true ) ||
 			// Only the author's own posts, not a moderator editing someone else's.
 			get_current_user_id() !== (int) $post->post_author
 		) {
@@ -178,7 +189,7 @@ class Audit_Log {
 		$note_text = sprintf(
 			'%s held for moderation: matched %s.',
 			str_starts_with( current_action(), 'bbp_edit_' ) ? 'Edited ' . $type : ucfirst( $type ),
-			implode( ', ', array_map( fn( $word ) => '"' . $word . '"', $words ) )
+			implode( ', ', array_map( fn( $word ) => '“' . $word . '”', $words ) )
 		);
 
 		// A separate note for each hold, so each one links to its own post.
@@ -187,6 +198,17 @@ class Audit_Log {
 			$note_text,
 			$post->ID
 		);
+	}
+
+	/**
+	 * Remember a topic or reply that is still pending as its edit is about to be saved.
+	 *
+	 * @param int $post_id The topic or reply ID.
+	 */
+	public function remember_pending_before_edit( $post_id ) {
+		if ( bbp_get_pending_status_id() === get_post_status( $post_id ) ) {
+			$this->pending_before_edit[] = (int) $post_id;
+		}
 	}
 
 	/**

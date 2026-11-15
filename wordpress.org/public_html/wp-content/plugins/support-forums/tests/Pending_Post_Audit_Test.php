@@ -93,7 +93,7 @@ class Pending_Post_Audit_Test extends WP_UnitTestCase {
 
 		$notes = $this->get_notes();
 		$this->assertCount( 1, $notes );
-		$this->assertSame( 'Topic held for moderation: matched "peculiar", "odd#word".', $notes[1]->text );
+		$this->assertSame( 'Topic held for moderation: matched “peculiar”, “odd#word”.', $notes[1]->text );
 		$this->assertSame( $topic_id, $notes[1]->post_id );
 	}
 
@@ -114,15 +114,22 @@ class Pending_Post_Audit_Test extends WP_UnitTestCase {
 		);
 		do_action( 'bbp_new_reply', $reply_id, $topic_id, $this->forum_id, array(), $this->author_id, false, 0 );
 
-		$this->assertSame( 'Reply held for moderation: matched "peculiar".', $this->get_notes()[1]->text );
+		$this->assertSame( 'Reply held for moderation: matched “peculiar”.', $this->get_notes()[1]->text );
 	}
 
 	/** An edit that is held says so, and a review is called a review. */
 	public function test_edited_review_is_labeled(): void {
-		$topic_id = $this->insert_topic( bbp_get_pending_status_id(), 'Works, but peculiar.', Plugin::REVIEWS_FORUM_ID );
+		$topic_id = $this->insert_topic( 'publish', 'Works, but peculiar.', Plugin::REVIEWS_FORUM_ID );
+		do_action( 'bbp_edit_topic_pre_extras', $topic_id );
+		wp_update_post(
+			array(
+				'ID'          => $topic_id,
+				'post_status' => bbp_get_pending_status_id(),
+			)
+		);
 		do_action( 'bbp_edit_topic', $topic_id, Plugin::REVIEWS_FORUM_ID, array(), $this->author_id, true );
 
-		$this->assertSame( 'Edited review held for moderation: matched "peculiar".', $this->get_notes()[1]->text );
+		$this->assertSame( 'Edited review held for moderation: matched “peculiar”.', $this->get_notes()[1]->text );
 	}
 
 	/** Holds minutes apart each get their own note, linked to their own post. */
@@ -137,10 +144,10 @@ class Pending_Post_Audit_Test extends WP_UnitTestCase {
 		$this->assertCount( 2, $notes );
 		$this->assertSame( $first, $notes[1]->post_id );
 		$this->assertSame( $second, $notes[2]->post_id );
-		$this->assertSame( 'Topic held for moderation: matched "peculiar".', $notes[2]->text );
+		$this->assertSame( 'Topic held for moderation: matched “peculiar”.', $notes[2]->text );
 	}
 
-	/** Published posts, spam, holds with no known cause, and moderator edits add no note. */
+	/** Published posts, spam, holds with no known cause, edits of held posts, and moderator edits add no note. */
 	public function test_no_note_without_a_moderation_hold(): void {
 		$published = $this->insert_topic( 'publish', 'A peculiar error.' );
 		do_action( 'bbp_new_topic', $published, $this->forum_id, array(), $this->author_id );
@@ -152,8 +159,12 @@ class Pending_Post_Audit_Test extends WP_UnitTestCase {
 		do_action( 'bbp_new_topic', $unknown, $this->forum_id, array(), $this->author_id );
 
 		$held = $this->insert_topic( bbp_get_pending_status_id(), 'A peculiar error.' );
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		do_action( 'bbp_edit_topic_pre_extras', $held );
 		do_action( 'bbp_edit_topic', $held, $this->forum_id, array(), $this->author_id, true );
+
+		$edited_by_moderator = $this->insert_topic( bbp_get_pending_status_id(), 'A peculiar error.' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		do_action( 'bbp_edit_topic', $edited_by_moderator, $this->forum_id, array(), $this->author_id, true );
 
 		$this->assertEmpty( $this->get_notes() );
 	}
