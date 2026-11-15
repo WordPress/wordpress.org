@@ -121,9 +121,11 @@ class Plugin {
 			] );
 		} elseif ( 'inactive' === $args['status'] ) {
 			if ( $project->active ) {
-				$project->save( [
-					'active' => 0,
-				] );
+				$project->save(
+					[
+						'active' => 0,
+					]
+				);
 			}
 
 			if ( ! empty( $project->path ) ) {
