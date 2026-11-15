@@ -24,6 +24,12 @@ class Audit_Log {
 		add_action( 'wporg_bbp_flag_user',   [ $this, 'log_user_flag_changes' ], 10, 1 );
 		add_action( 'wporg_bbp_unflag_user', [ $this, 'log_user_flag_changes' ], 10, 1 );
 
+		// Add a user note when a user's topic, reply, or review is held for moderation.
+		add_action( 'bbp_new_topic', [ $this, 'log_pending_post' ], 20, 1 );
+		add_action( 'bbp_edit_topic', [ $this, 'log_pending_post' ], 20, 1 );
+		add_action( 'bbp_new_reply', [ $this, 'log_pending_post' ], 20, 1 );
+		add_action( 'bbp_edit_reply', [ $this, 'log_pending_post' ], 20, 1 );
+
 		// Slack logs for Moderation notes.
 		add_action( 'wporg_bbp_note_added', [ $this, 'forums_notes_added' ], 10, 2 );
 		add_action( 'shutdown',             [ $this, 'forums_notes_added_shutdown' ] );
@@ -134,6 +140,106 @@ class Audit_Log {
 			$user_id,
 			$note_text
 		);
+	}
+
+	/**
+	 * Add a user note when a user's own topic, reply, or review is held for moderation,
+	 * naming the Comment Moderation words it matched, or Akismet.
+	 *
+	 * @param int $post_id The topic or reply ID.
+	 */
+	public function log_pending_post( $post_id ) {
+		$post = get_post( $post_id );
+
+		if (
+			! $post ||
+			bbp_get_pending_status_id() !== $post->post_status ||
+			! $post->post_author ||
+			// Only the author's own posts, not a moderator editing someone else's.
+			get_current_user_id() !== (int) $post->post_author
+		) {
+			return;
+		}
+
+		$reasons = [];
+
+		$words = $this->get_matched_moderation_keys( $post );
+		if ( $words ) {
+			$reasons[] = 'matched ' . implode( ', ', array_map( fn( $word ) => '"' . $word . '"', $words ) );
+		}
+
+		if ( 'true' === get_post_meta( $post->ID, '_bbp_akismet_result', true ) ) {
+			$reasons[] = 'flagged by Akismet';
+		}
+
+		// Only log the holds a moderator can act on.
+		if ( ! $reasons ) {
+			return;
+		}
+
+		if ( bbp_get_reply_post_type() === $post->post_type ) {
+			$type = 'reply';
+		} elseif ( Plugin::REVIEWS_FORUM_ID === (int) $post->post_parent ) {
+			$type = 'review';
+		} else {
+			$type = 'topic';
+		}
+
+		$note_text = sprintf(
+			'%s held for moderation: %s.',
+			str_starts_with( current_action(), 'bbp_edit_' ) ? 'Edited ' . $type : ucfirst( $type ),
+			implode( '; ', $reasons )
+		);
+
+		Plugin::get_instance()->user_notes->add_user_note_or_update_previous(
+			$post->post_author,
+			$note_text,
+			$post->ID
+		);
+	}
+
+	/**
+	 * Find the Comment Moderation words a topic or reply matches, the same way
+	 * bbp_check_for_moderation() looks for them.
+	 *
+	 * @param \WP_Post $post The topic or reply.
+	 * @return string[] The matched words.
+	 */
+	public function get_matched_moderation_keys( $post ) {
+		$moderation = apply_filters( 'bbp_moderation_keys', trim( get_option( 'moderation_keys' ) ) );
+		if ( ! $moderation ) {
+			return [];
+		}
+
+		$user   = get_userdata( $post->post_author );
+		$fields = [
+			$user->display_name,
+			$user->user_email,
+			$user->user_url,
+			bbp_current_author_ip(),
+			bbp_current_author_ua(),
+			$post->post_title,
+			$post->post_content,
+			wp_strip_all_tags( $post->post_content ),
+		];
+
+		$matched = [];
+		foreach ( explode( "\n", $moderation ) as $word ) {
+			$word = trim( $word );
+			if ( ! $word ) {
+				continue;
+			}
+
+			$pattern = '#' . preg_quote( $word, '#' ) . '#iu';
+			foreach ( $fields as $field ) {
+				if ( preg_match( $pattern, (string) $field ) ) {
+					$matched[] = $word;
+					break;
+				}
+			}
+		}
+
+		return $matched;
 	}
 
 	/**
