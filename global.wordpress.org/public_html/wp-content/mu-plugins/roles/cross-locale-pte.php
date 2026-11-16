@@ -141,6 +141,8 @@ class Cross_Locale_PTE {
 
 	/**
 	 * Update the projects for the Cross-Locale PTE.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	public static function update_cross_locale_pte() {
 		global $wpdb;
@@ -274,6 +276,8 @@ class Cross_Locale_PTE {
 	/**
 	 * Retrieves the projects for which a user has cross-locale PTE permissions.
 	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 *
 	 * @param int $user_id User ID.
 	 * @return array List of project IDs.
 	 */
@@ -290,6 +294,8 @@ class Cross_Locale_PTE {
 	}
 	/**
 	 * Retrieves the projects for which a user has cross-locale PTE permissions.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @return array List of User IDs.
 	 */
@@ -332,6 +338,8 @@ class Cross_Locale_PTE {
 
 	/**
 	 * Check for the Cross-Locale PTE permission for the project.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @param WP_User $user   The user.
 	 * @param int $project_id The Project ID.

@@ -55,6 +55,8 @@ class Rosetta_Roles {
 
 	/**
 	 * Constructor.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	public function __construct() {
 		global $wpdb;
@@ -405,6 +407,8 @@ class Rosetta_Roles {
 	/**
 	 * Removes a translation editor.
 	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 *
 	 * @param int|WP_User $user User ID or object.
 	 * @return bool True on success, false on failure.
 	 */
@@ -439,6 +443,8 @@ class Rosetta_Roles {
 
 	/**
 	 * Creates or updates a translation editor.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @param int|WP_User $user     User ID or object.
 	 * @param array       $projects The projects to which the user should get assigned.
@@ -529,6 +535,8 @@ class Rosetta_Roles {
 	/**
 	 * Handles the update of the translation editor badges on
 	 * profiles.wordpress.org.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @param \WP_User $user The user object of the translation editor.
 	 */
@@ -768,6 +776,8 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	/**
 	 * Retrieves the assigned projects of a user
 	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 *
 	 * @param int $user_id User ID.
 	 * @return array List of project IDs.
 	 */
@@ -805,6 +815,8 @@ Welcome to the WordPress Polyglots team and happy translating.',
 
 	/**
 	 * Renders the edit page.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	private function render_edit_translation_editor( $user_id ) {
 		global $wpdb;
@@ -946,6 +958,8 @@ Welcome to the WordPress Polyglots team and happy translating.',
 	/**
 	 * Fetches all parent projects and their direct sub-projects like 'wp'
 	 * and 'wp/dev' or 'wp-plugins' and 'wp-plugins/wordpress-importer'.
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
 	 * @return array List of projects.
 	 */
