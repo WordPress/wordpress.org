@@ -50,8 +50,10 @@ class Helpscout {
 		$slug   = self::get_unwrapped_slug( $post->post_name, $post->ID );
 		$wheres = '';
 
-		foreach ( $filters as $key => $value ) { 
-			$wheres .= $wpdb->prepare( 'AND emails.%i LIKE %s ', $key, '%' . $value . '%' );
+		foreach ( $filters as $key => $value ) {
+			$wheres .= 'user_id' === $key
+				? $wpdb->prepare( 'AND emails.user_id = %d ', $value )
+				: $wpdb->prepare( 'AND emails.%i LIKE %s ', $key, '%' . $value . '%' );
 		}
 
 		/*

@@ -1002,7 +1002,15 @@ class Upload_Handler {
 			return false;
 		}
 
-		return Helpscout::get_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
+		// The review conversation is the author's; anyone else's can mention the plugin too.
+		return Helpscout::get_emails(
+			$post,
+			[
+				'subject' => 'Review in Progress:',
+				'user_id' => $post->post_author,
+				'limit'   => 1,
+			]
+		);
 	}
 
 	/**
@@ -1091,6 +1099,14 @@ class Upload_Handler {
 		// Review conversations are agent-started; a sender's could name any plugin and CC anyone.
 		if ( 'user' !== ( $conversation['createdBy']['type'] ?? '' ) ) {
 			trigger_error( "FreeScout update skipped: conversation $conversation_id wasn't started by the plugins team.", E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
+
+			return false;
+		}
+
+		// The reply is emailed to the conversation's customer, who has to be the author uploading.
+		$customer = (string) ( $conversation['customer']['email'] ?? '' );
+		if ( ! $customer || 0 !== strcasecmp( $customer, wp_get_current_user()->user_email ) ) {
+			trigger_error( "FreeScout update skipped: conversation $conversation_id isn't the author's.", E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
 
 			return false;
 		}

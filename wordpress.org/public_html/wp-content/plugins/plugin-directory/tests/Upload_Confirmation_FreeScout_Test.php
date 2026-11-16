@@ -35,6 +35,13 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	const HELPSCOUT_ID = 9000000042;
 
 	/**
+	 * Another submitter's review conversation.
+	 *
+	 * @var int
+	 */
+	const OTHER_CONVERSATION_ID = 43;
+
+	/**
 	 * Filters added during a test, each a hook and its callback, removed again on teardown.
 	 *
 	 * @var array[]
@@ -86,7 +93,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		foreach ( $this->created['users'] as $user_id ) {
 			wp_delete_user( $user_id );
 		}
-		foreach ( array( self::CONVERSATION_ID, self::HELPSCOUT_ID ) as $id ) {
+		foreach ( array( self::CONVERSATION_ID, self::HELPSCOUT_ID, self::OTHER_CONVERSATION_ID ) as $id ) {
 			$wpdb->delete( "{$wpdb->base_prefix}helpscout", array( 'id' => $id ) );
 			$wpdb->delete( "{$wpdb->base_prefix}helpscout_meta", array( 'helpscout_id' => $id ) );
 		}
@@ -145,6 +152,20 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	}
 
 	/**
+	 * No confirmation goes into a conversation whose customer isn't the author, whatever WordPress.org's copy says.
+	 *
+	 * @return void
+	 */
+	public function test_does_not_reply_when_the_customer_is_not_the_author(): void {
+		$this->answer( array(), 'user', 'someone-else@example.net' );
+		list( $plugin, $attachment ) = $this->upload( true );
+
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
+		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
+	}
+
+	/**
 	 * While HelpScout's copy of an imported conversation lingers next to FreeScout's, with the same date, FreeScout's is
 	 * the review conversation, whatever their IDs.
 	 *
@@ -161,6 +182,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 			array(
 				'id'      => self::HELPSCOUT_ID,
 				'number'  => 1234,
+				'user_id' => $plugin->post_author,
 				'subject' => '[WordPress Plugin Directory] Review in Progress: Upload Confirmation Fixture',
 				'created' => '2026-08-01 10:00:00',
 			)
@@ -176,6 +198,57 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 
 		$emails = Helpscout::get_emails( $plugin );
 		$this->assertSame( array( self::CONVERSATION_ID, self::HELPSCOUT_ID ), array_map( 'intval', wp_list_pluck( $emails, 'id' ) ) );
+
+		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[2]['url'] );
+	}
+
+	/**
+	 * Another submitter's newer review conversation that mentions the plugin isn't the plugin's review conversation.
+	 *
+	 * @return void
+	 */
+	public function test_replies_only_in_the_authors_review_conversation(): void {
+		global $wpdb;
+
+		$this->answer();
+		list( $plugin, $attachment ) = $this->upload( true );
+
+		$other_id                 = wp_insert_user(
+			array(
+				'user_login' => 'other-submitter-' . wp_generate_password( 6, false ),
+				'user_email' => 'other-' . wp_generate_password( 6, false ) . '@example.org',
+				'user_pass'  => wp_generate_password(),
+			)
+		);
+		$this->created['users'][] = $other_id;
+
+		$wpdb->insert(
+			"{$wpdb->base_prefix}helpscout",
+			array(
+				'id'      => self::OTHER_CONVERSATION_ID,
+				'number'  => 1235,
+				'user_id' => $other_id,
+				'subject' => '[WordPress Plugin Directory] Review in Progress: Another Plugin',
+				'created' => '2026-09-01 10:00:00',
+			)
+		);
+		$meta = array(
+			'plugins'  => 'upload-confirmation-fixture',
+			'helpdesk' => 'freescout',
+		);
+		foreach ( $meta as $key => $value ) {
+			$wpdb->insert(
+				"{$wpdb->base_prefix}helpscout_meta",
+				array(
+					'helpscout_id' => self::OTHER_CONVERSATION_ID,
+					'meta_key'     => $key, // phpcs:ignore WordPress.DB.SlowDBQuery -- Test fixture.
+					'meta_value'   => $value, // phpcs:ignore WordPress.DB.SlowDBQuery -- Test fixture.
+				)
+			);
+		}
+
+		$this->assertSame( self::CONVERSATION_ID, (int) Upload_Handler::find_review_email( $plugin )->id );
 
 		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
 		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[2]['url'] );
@@ -214,12 +287,13 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	 *
 	 * @param string[]|null $cc         Who the conversation copies; null if FreeScout can't be reached.
 	 * @param string        $created_by Who started the conversation: `user`, an agent, or `customer`, a sender.
+	 * @param string|null   $customer   The conversation customer's email; null for the current user's.
 	 * @return void
 	 */
-	protected function answer( ?array $cc = array(), string $created_by = 'user' ): void {
+	protected function answer( ?array $cc = array(), string $created_by = 'user', ?string $customer = null ): void {
 		$this->filter(
 			'pre_http_request',
-			function ( mixed $preempt, array $args, string $url ) use ( $cc, $created_by ): mixed {
+			function ( mixed $preempt, array $args, string $url ) use ( $cc, $created_by, $customer ): mixed {
 				if ( ! str_starts_with( $url, 'https://freescout.wordpress.net/api/' ) ) {
 					return $preempt;
 				}
@@ -238,6 +312,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 							'id'   => 7,
 							'type' => $created_by,
 						),
+						'customer'  => array( 'email' => $customer ?? wp_get_current_user()->user_email ),
 						'cc'        => $cc,
 						'bcc'       => array(),
 					);
@@ -300,6 +375,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 			array(
 				'id'      => self::CONVERSATION_ID,
 				'number'  => 1234,
+				'user_id' => $author_id,
 				'subject' => '[WordPress Plugin Directory] Review in Progress: Upload Confirmation Fixture',
 				'created' => '2026-08-01 10:00:00',
 			)
