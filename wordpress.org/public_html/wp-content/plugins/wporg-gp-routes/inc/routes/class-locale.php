@@ -574,9 +574,12 @@ class Locale extends GP_Route {
 
 			// Batch-load missing users from wp_users without touching usermeta.
 			if ( ! empty( $uncached_user_ids ) ) {
-				$user_ids_sql = $this->prepare_in_int_list( $uncached_user_ids );
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $user_ids_sql contains sanitized, integer-cast IDs.
-				$users = $wpdb->get_results( "SELECT * FROM {$wpdb->users} WHERE ID IN ( {$user_ids_sql} )" );
+				$users = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT * FROM {$wpdb->users} WHERE ID IN ( " . implode( ', ', array_fill( 0, count( $uncached_user_ids ), '%d' ) ) . ' )',
+						...$uncached_user_ids
+					)
+				);
 				foreach ( (array) $users as $user ) {
 					update_user_caches( $user );
 				}
@@ -690,33 +693,33 @@ class Locale extends GP_Route {
 	private function get_locale_contributors_by_translation_set( array $set_ids ): array {
 		global $wpdb;
 
-		$set_ids_sql = $this->prepare_in_int_list( $set_ids );
+		$set_ids = array_values( array_filter( array_map( 'intval', $set_ids ) ) );
 
-		if ( empty( $set_ids_sql ) ) {
+		if ( empty( $set_ids ) ) {
 			return [];
 		}
 
-		$contributors_sql = "
-			SELECT
-				`t`.`user_id` as `user_id`,
-				`o`.`project_id` as `project_id`,
-				MAX( `t`.`date_added` ) AS `last_update`,
-				COUNT( * ) as `total_count`,
-				COUNT( CASE WHEN `t`.`status` = 'current' THEN `t`.`status` END ) AS `current_count`,
-				COUNT( CASE WHEN `t`.`status` = 'waiting' THEN `t`.`status` END ) AS `waiting_count`,
-				COUNT( CASE WHEN `t`.`status` = 'fuzzy' THEN `t`.`status` END ) AS `fuzzy_count`
-			FROM `{$wpdb->gp_translations}` as `t`
-			JOIN `{$wpdb->gp_originals}` as `o`
-				ON `t`.`original_id` = `o`.`id` AND `o`.`status` = '+active'
-			WHERE
-				`t`.`translation_set_id` IN ( {$set_ids_sql} )
-				AND `t`.`user_id` IS NOT NULL AND `t`.`user_id` != 0
-				AND `t`.`status` IN( 'current', 'waiting', 'fuzzy' )
-			GROUP BY `t`.`user_id`, `o`.`project_id`
-			ORDER BY `t`.`user_id` ASC, `o`.`project_id` ASC
-		";
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $contributors_sql uses sanitized, integer-cast translation set IDs.
-		$contributors = $wpdb->get_results( $contributors_sql );
+		$contributors = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT
+					`t`.`user_id` AS `user_id`,
+					`o`.`project_id` AS `project_id`,
+					MAX( `t`.`date_added` ) AS `last_update`,
+					COUNT( * ) AS `total_count`,
+					COUNT( CASE WHEN `t`.`status` = 'current' THEN `t`.`status` END ) AS `current_count`,
+					COUNT( CASE WHEN `t`.`status` = 'waiting' THEN `t`.`status` END ) AS `waiting_count`,
+					COUNT( CASE WHEN `t`.`status` = 'fuzzy' THEN `t`.`status` END ) AS `fuzzy_count`
+				FROM `{$wpdb->gp_translations}` AS `t`
+				JOIN `{$wpdb->gp_originals}` AS `o`
+					ON `t`.`original_id` = `o`.`id` AND `o`.`status` = '+active'
+				WHERE
+					`t`.`translation_set_id` IN ( " . implode( ', ', array_fill( 0, count( $set_ids ), '%d' ) ) . " )
+					AND `t`.`user_id` IS NOT NULL AND `t`.`user_id` != 0
+					AND `t`.`status` IN ( 'current', 'waiting', 'fuzzy' )
+				GROUP BY `t`.`user_id`, `o`.`project_id`",
+				...$set_ids
+			)
+		);
 
 		return (array) $contributors;
 	}
