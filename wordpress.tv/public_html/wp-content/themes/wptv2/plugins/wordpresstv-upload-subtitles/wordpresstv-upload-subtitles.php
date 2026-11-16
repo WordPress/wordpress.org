@@ -598,8 +598,9 @@ class WordPressTV_Subtitles_Upload {
 			$pending_subs = $wpdb->get_var( "SELECT COUNT( 1 ) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status != 'trash' AND post_parent = 0 AND post_mime_type = 'application/ttml+xml'" );
 
 			if ( $pending_subs ) {
+				// The grid view ignores the detached filter, so pending subtitles only show in the list view.
 				echo '<div class="updated"><p><a href="upload.php?post_mime_type=' . urlencode( 'application/ttml+xml' ) .
-					'&amp;detached=1">Subtitles awaiting moderation (' . (int) $pending_subs . ')</a></p></div>';
+					'&amp;detached=1&amp;mode=list">Subtitles awaiting moderation (' . (int) $pending_subs . ')</a></p></div>';
 			}
 		}
 	}
