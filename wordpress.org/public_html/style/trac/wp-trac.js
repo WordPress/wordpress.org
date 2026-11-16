@@ -699,6 +699,13 @@ let wpTrac,
 			// Add custom buttons to the formatting toolbar.
 			wpTrac.wikiToolbar();
 
+			// Trac's positive tabindex values on toolbar buttons and WikiFormatting links put them ahead of the whole page.
+			$( '[tabindex]' )
+				.filter( function () {
+					return this.tabIndex > 0;
+				} )
+				.removeAttr( 'tabindex' );
+
 			wpTrac.linkPastedUrls();
 
 			// Force 'Attachments' and 'Modify Ticket' to be shown.
@@ -1254,7 +1261,6 @@ let wpTrac,
 					href: '#',
 					id,
 					title,
-					tabIndex: 400,
 				} );
 				$button.on( 'click', function () {
 					if ( false === $textarea.prop( 'disabled' ) && false === $textarea.prop( 'readonly' ) ) {
