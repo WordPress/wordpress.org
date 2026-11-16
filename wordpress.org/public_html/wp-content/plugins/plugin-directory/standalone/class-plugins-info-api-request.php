@@ -342,7 +342,6 @@ class Plugins_Info_API_Request {
 					}
 				}
 			}
-
 		}
 
 		/*
