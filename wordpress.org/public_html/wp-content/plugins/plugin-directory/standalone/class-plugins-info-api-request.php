@@ -224,8 +224,8 @@ class Plugins_Info_API_Request {
 		$requested_fields = array();
 		foreach ( $fields as $field => $include ) {
 			if ( is_int( $field ) ) {
-				// A list entry is the field name, so a nested one (like `fields[0][]=x`) isn't a field.
-				if ( is_array( $include ) || is_object( $include ) ) {
+				// A list entry is the field name, so skip one that isn't a string (like `fields[0][]=x`).
+				if ( ! is_string( $include ) ) {
 					continue;
 				}
 
