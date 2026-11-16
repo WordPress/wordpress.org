@@ -40,6 +40,9 @@ jQuery( document ).ready( function( $ ) {
 # elif req.path_info.rstrip('/') == '/changeset' and 'old_path' in req.args:
 ## e.g. /changeset?old=123&old_path=trunk&new=124&new_path=trunk (a diff between two paths)
 <meta name="robots" content="noindex, follow"/>
+# elif req.path_info.startswith('/report') and ('max' in req.args or 'sort' in req.args or 'asc' in req.args or 'sfp_email' in req.args or 'sfph_mail' in req.args):
+## e.g. /report/5?sort=ticket&asc=1 (a resorted or resized copy of a report)
+<meta name="robots" content="noindex, follow"/>
 # endif
 
 ## Per-environment <head> additions (optional; e.g. core/site-specific-head.html)
