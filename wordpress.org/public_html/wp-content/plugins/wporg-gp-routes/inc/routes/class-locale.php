@@ -5,6 +5,7 @@ namespace WordPressdotorg\GlotPress\Routes\Routes;
 use Collator;
 use GP;
 use GP_Locales;
+use GP_Project;
 use GP_Route;
 use stdClass;
 use WordPressdotorg\GlotPress\Rosetta_Roles\Plugin as Rosetta_Roles;
