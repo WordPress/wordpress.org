@@ -241,7 +241,8 @@ div.success p {
 	padding-top: 8px;
 }
 
-#header .sleeve {
+#header .sleeve,
+#footer .container {
 	max-width: 942px;
 	margin: 0 auto;
 }
@@ -1903,11 +1904,6 @@ body, td, p,
 	margin: -8px auto 10px auto;
 }
 
-/* Match the .container gutter for titles printed directly in the hero. */
-.wptv-hero > .page-title {
-	padding: 0 10px;
-}
-
 .page-title {
 	max-width: 940px;
 	margin: auto;
@@ -2540,6 +2536,11 @@ h3#comments {
 @media screen and ( min-width: 500px ) {
 	#header {
 		padding: 0 20px;
+	}
+
+	#footer {
+		padding-left: 20px;
+		padding-right: 20px;
 	}
 
 	#header h1 {
