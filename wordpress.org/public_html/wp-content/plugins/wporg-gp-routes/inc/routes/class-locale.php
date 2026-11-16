@@ -561,14 +561,12 @@ class Locale extends GP_Route {
 
 		if ( ! empty( $user_ids ) ) {
 			// Check which users are already in the object cache using the public Cache API.
-			$cached_users      = wp_cache_get_multiple( $user_ids, 'users' );
-			$uncached_user_ids = [];
-
-			foreach ( $user_ids as $id ) {
-				if ( empty( $cached_users[ $id ] ) ) {
-					$uncached_user_ids[] = $id;
-				}
-			}
+			$uncached_user_ids = array_keys(
+				array_filter(
+					wp_cache_get_multiple( $user_ids, 'users' ),
+					static fn( $user ) => empty( $user )
+				)
+			);
 
 			// Batch-load missing users from wp_users without touching usermeta.
 			if ( ! empty( $uncached_user_ids ) ) {
@@ -608,13 +606,9 @@ class Locale extends GP_Route {
 
 			uasort(
 				$locale_contributors['editors'][ $editor_source ],
-				static function ( $a, $b ) use ( $collator ) {
-					if ( $collator ) {
-						return $collator->compare( $a->display_name, $b->display_name );
-					}
-
-					return strcasecmp( $a->display_name, $b->display_name );
-				}
+				static fn( $a, $b ) => $collator
+					? $collator->compare( $a->display_name, $b->display_name )
+					: strcasecmp( $a->display_name, $b->display_name )
 			);
 		}
 
@@ -672,9 +666,7 @@ class Locale extends GP_Route {
 
 		uasort(
 			$locale_contributors['contributors'],
-			static function ( $a, $b ) {
-				return $b->total_count <=> $a->total_count;
-			}
+			static fn( $a, $b ) => $b->total_count <=> $a->total_count
 		);
 
 		return $locale_contributors;
@@ -1125,7 +1117,7 @@ class Locale extends GP_Route {
 		$filter_order_by = '';
 		$sort_order = 'DESC';
 		$filter_name = $filter;
-		if ( $filter && '-asc' === substr( $filter, -4 ) ) {
+		if ( $filter && str_ends_with( $filter, '-asc' ) ) {
 			$sort_order = 'ASC';
 			$filter_name = substr( $filter, 0, -4 );
 		}
@@ -1279,13 +1271,9 @@ class Locale extends GP_Route {
 	 * @return array Formatted favorite slugs.
 	 */
 	private function get_favorites_for_meta( int $user_id, string $meta_key, string $prefix ): array {
-		$raw = array_filter( (array) get_user_meta( $user_id, $meta_key, true ) );
-
 		return array_map(
-			static function ( $slug ) use ( $prefix ) {
-				return "{$prefix}/{$slug}";
-			},
-			$raw
+			static fn( $slug ) => "{$prefix}/{$slug}",
+			array_filter( (array) get_user_meta( $user_id, $meta_key, true ) )
 		);
 	}
 
