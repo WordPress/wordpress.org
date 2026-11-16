@@ -745,7 +745,7 @@ class Plugin {
 	 * Used by the Rosetta Roles plugin and the Locale route to invalidate caches.
 	 */
 	public function update_projects_last_updated() {
-		update_option( 'wporg_projects_last_updated', time() );
+		update_option( 'wporg_projects_last_updated', (string) microtime( true ) );
 	}
 
 	/**
