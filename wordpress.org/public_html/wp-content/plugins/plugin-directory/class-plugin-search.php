@@ -408,7 +408,7 @@ class Plugin_Search {
 
 		// Check the search term rather than `is_search()`, as Jetpack calls `set_404()` on pages past its
 		// maximum offset, which resets the query flags.
-		if ( is_admin() || ! $query->is_main_query() || '' === (string) $query->get( 's' ) || ! in_array( 'plugin', $post_type ) ) {
+		if ( is_admin() || ! $query->is_main_query() || '' === (string) $query->get( 's' ) || ! in_array( 'plugin', $post_type, true ) ) {
 			return $posts;
 		}
 
