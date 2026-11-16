@@ -333,11 +333,10 @@ class Plugins_Info_API_Request {
 				return false;
 			}
 
-			// `slugs` is a comma-separated string or a list of slugs, e.g. not `slugs[foo][slug]=foo`.
-			if ( ! empty( $this->args->slugs ) ) {
-				$slugs = is_array( $this->args->slugs ) ? $this->args->slugs : [ $this->args->slugs ];
-				foreach ( $slugs as $slug ) {
-					if ( ! is_string( $slug ) ) {
+			// Each entry of `slugs` is trim()'d, so a nested one (like `slugs[foo][slug]=foo`) fatals.
+			if ( isset( $this->args->slugs ) && is_array( $this->args->slugs ) ) {
+				foreach ( $this->args->slugs as $slug ) {
+					if ( is_array( $slug ) || is_object( $slug ) ) {
 						return false;
 					}
 				}
