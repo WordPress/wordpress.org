@@ -1083,9 +1083,19 @@ class Uploads {
 					esc_attr( __( 'Photo', 'wporg-photos' ) )
 				)
 				. sprintf(
-					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" accept="%s">' . "\n",
+					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" aria-describedby="ug-photo-help" accept="%s">' . "\n",
 					esc_attr( $valid_upload_mimetypes )
 				)
+				. '<p class="ugc-help" id="ug-photo-help">'
+				. sprintf(
+					/* translators: 1: minimum width/height in pixels, 2: maximum width/height in pixels, 3: minimum file size in megabytes, 4: maximum file size in megabytes. */
+					esc_html__( 'Select a JPEG image of high quality (in terms of resolution and composition). Width and height must each be between %1$s and %2$s pixels. File size must be between %3$s MB and %4$s MB.', 'wporg-photos' ),
+					number_format_i18n( self::get_minimum_photo_dimension() ),
+					number_format_i18n( self::big_image_size_threshold( 0 ) ),
+					number_format_i18n( self::get_minimum_photo_file_size( false ) ),
+					number_format_i18n( self::get_maximum_photo_file_size( false ) )
+				)
+				. '</p>' . "\n"
 				. '<div id="ug_photo_preview_wrap" class="ugc-photo-preview" hidden>' . "\n"
 				. sprintf(
 					'<button type="button" id="ug_photo_preview_button" class="ugc-photo-preview__button" aria-haspopup="dialog" aria-controls="ug_photo_preview_dialog" title="%1$s" aria-label="%1$s">' . "\n",
