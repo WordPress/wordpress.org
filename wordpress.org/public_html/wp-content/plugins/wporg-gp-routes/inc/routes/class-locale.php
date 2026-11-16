@@ -996,32 +996,27 @@ class Locale extends GP_Route {
 		$per_page = (int) $per_page;
 
 		$limit_sql = '';
-		if ( $per_page ) {
+		if ( $per_page > 0 ) {
 			$limit_sql = sprintf( 'LIMIT %d, %d', ( $page - 1 ) * $per_page, $per_page );
 		}
 
-		$sql_params = array( $locale, $set_slug );
-
 		/*
-		 * Conditions are split by which table they reference. When $stats_where is
-		 * non-empty, the stats lookup is wrapped in a derived table so the join is
-		 * driven from the (typically small) qualifying stats set; otherwise we LEFT
-		 * JOIN stats directly so projects with no status row still appear.
+		 * Conditions and bound parameters are split by clause ($stats_where,
+		 * $tp_where, $filter_order_by). When $stats_where is non-empty, the
+		 * stats lookup is wrapped in a derived table so the join is driven from
+		 * the qualifying stats set; otherwise we LEFT JOIN stats directly so
+		 * projects with no status row still appear.
 		 */
-		$tp_where    = $wpdb->prepare( 'AND tp.parent_project_id = %d', $project->id );
-		$stats_where = '';
-
-		$search_sql = '';
-		if ( '' !== $search ) {
-			$search_sql   = ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )';
-			$search_param = '%' . $wpdb->esc_like( $search ) . '%';
-			$sql_params[] = $search_param;
-			$sql_params[] = $search_param;
-		}
+		$stats_where  = '';
+		$stats_params = array( $locale, $set_slug );
+		$tp_where     = ' AND tp.parent_project_id = %d';
+		$tp_params    = array( (int) $project->id );
+		$order_params = array();
 
 		// Special Waiting Project Tab
 		// This removes the parent_project_id restriction and replaces it with all-translation-editor-projects
 		if ( 'waiting' === $project->slug && is_user_logged_in() && $this->roles_adapter ) {
+			$tp_params = array();
 
 			if ( ! $filter ) {
 				$filter = 'strings-waiting-and-fuzzy';
@@ -1120,7 +1115,12 @@ class Locale extends GP_Route {
 			}
 		}
 
-		$tp_where .= $search_sql;
+		if ( '' !== $search ) {
+			$tp_where    .= ' AND ( tp.name LIKE %s OR tp.slug LIKE %s )';
+			$search_param = '%' . $wpdb->esc_like( $search ) . '%';
+			$tp_params[]  = $search_param;
+			$tp_params[]  = $search_param;
+		}
 
 		$filter_order_by = '';
 		$sort_order = 'DESC';
@@ -1131,7 +1131,7 @@ class Locale extends GP_Route {
 		}
 		switch ( $filter_name ) {
 			default:
-				if ( ! is_user_logged_in() || ! in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ) ) ) {
+				if ( ! is_user_logged_in() || ! in_array( $project->slug, array( 'waiting', 'wp-themes', 'wp-plugins' ), true ) ) {
 					if ( 'wp' === $project->slug ) {
 						$filter_order_by = 'stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name DESC';
 					} else {
@@ -1147,11 +1147,9 @@ class Locale extends GP_Route {
 				if ( ! empty( $user_fav_projects ) ) {
 					// Cap favorites to avoid building an oversized FIELD() clause in ORDER BY.
 					$top_fav_projects = array_slice( $user_fav_projects, 0, 100 );
-
-					// Safely quote and escape values for SQL.
-					$escaped_favs    = array_map( 'esc_sql', $top_fav_projects );
-					$quoted_favs     = "'" . implode( "', '", $escaped_favs ) . "'";
-					$filter_order_by = "FIELD( tp.path, {$quoted_favs} ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC";
+					$fav_placeholders = implode( ', ', array_fill( 0, count( $top_fav_projects ), '%s' ) );
+					$order_params     = array_merge( $order_params, $top_fav_projects );
+					$filter_order_by  = "FIELD( tp.path, {$fav_placeholders} ) > 0 AND stats.untranslated > 0 DESC, stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC";
 				} else {
 					$filter_order_by = 'stats.untranslated > 0 DESC, stats.untranslated DESC, tp.name ASC';
 				}
@@ -1162,8 +1160,8 @@ class Locale extends GP_Route {
 				$user_fav_projects = $this->get_user_favorites( $project->slug );
 
 				if ( ! empty( $user_fav_projects ) ) {
-					$tp_where  .= ' AND tp.path IN( ' . implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) ) . ' )';
-					$sql_params = array_merge( $sql_params, $user_fav_projects );
+					$tp_where .= ' AND tp.path IN( ' . implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) ) . ' )';
+					$tp_params = array_merge( $tp_params, $user_fav_projects );
 				} else {
 					$tp_where .= ' AND 0=1';
 				}
@@ -1234,15 +1232,16 @@ class Locale extends GP_Route {
 			";
 		}
 
-		$sql = "SELECT tp.* $from_where ORDER BY $filter_order_by $limit_sql";
+		$sql        = "SELECT tp.* $from_where ORDER BY $filter_order_by $limit_sql";
+		$sql_params = array_merge( $stats_params, $tp_params, $order_params );
 
 		if ( $stats_where ) {
 			$count_sql    = "SELECT COUNT(*) $from_where";
-			$count_params = $sql_params;
+			$count_params = array_merge( $stats_params, $tp_params );
 		} else {
 			// The LEFT JOIN is on stats' unique (project_id, locale, locale_slug) key, so it can't change the count.
 			$count_sql    = "SELECT COUNT(*) FROM {$wpdb->gp_projects} tp WHERE tp.active = 1 $tp_where";
-			$count_params = array_slice( $sql_params, 2 );
+			$count_params = $tp_params;
 		}
 
 		// Fetch records for the current page.
