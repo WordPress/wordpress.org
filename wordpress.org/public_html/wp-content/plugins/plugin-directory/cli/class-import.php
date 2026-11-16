@@ -1132,22 +1132,25 @@ class Import {
 					}
 				}
 			}
-		} else {
-			foreach ( Filesystem::list_files( $base_dir, true, '!\.(?:php|js|jsx)$!i' ) as $filename ) {
-				$blocks_in_file = $this->find_blocks_in_file( $filename );
-				if ( ! empty( $blocks_in_file ) ) {
-					$relative_filename = str_replace( "$base_dir/", '', $filename );
-					$potential_block_directories[] = dirname( $relative_filename );
-					foreach ( $blocks_in_file as $block ) {
-						if ( isset( $blocks[ $block->name ] ) ) {
-							$blocks[ $block->name ] = (object) array_merge( (array) $blocks[ $block->name ], array_filter( (array) $block ) );
-						} else {
-							$blocks[ $block->name ] = $block;
-						}
+		}
+
+		// Also list blocks registered only in code; block.json data takes precedence.
+		$code_blocks = array();
+		foreach ( Filesystem::list_files( $base_dir, true, '!\.(?:php|js|jsx)$!i' ) as $filename ) {
+			$blocks_in_file = $this->find_blocks_in_file( $filename );
+			if ( ! empty( $blocks_in_file ) ) {
+				$relative_filename             = str_replace( "$base_dir/", '', $filename );
+				$potential_block_directories[] = dirname( $relative_filename );
+				foreach ( $blocks_in_file as $block ) {
+					if ( isset( $code_blocks[ $block->name ] ) ) {
+						$code_blocks[ $block->name ] = (object) array_merge( (array) $code_blocks[ $block->name ], array_filter( (array) $block ) );
+					} else {
+						$code_blocks[ $block->name ] = $block;
 					}
 				}
 			}
 		}
+		$blocks += $code_blocks;
 
 		// Set the fallback name for the blocks.
 		foreach ( $blocks as $block_name => &$block ) {
