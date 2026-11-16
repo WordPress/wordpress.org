@@ -469,21 +469,20 @@ class Locale extends GP_Route {
 			$parent_project_id = (int) $parent_project->parent_project_id;
 		}
 
-		$id_placeholders = $this->prepare_in_placeholders( count( $project_ids ), '%d' );
-
-		$editors_sql = "
-			SELECT
-				`project_id`,
-				`user_id`
-			FROM {$wpdb->wporg_translation_editors}
-			WHERE
-				( `project_id` IN ( {$id_placeholders} ) AND `locale` IN ( %s, 'all-locales' ) )
-				OR ( `project_id` = 0 AND `locale` = %s )
-		";
-
-		$query_args = array_merge( $project_ids, [ $locale_slug, $locale_slug ] );
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $editors_sql uses dynamically generated %d placeholders.
-		$results = $wpdb->get_results( $wpdb->prepare( $editors_sql, $query_args ) );
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT
+					`project_id`,
+					`user_id`
+				FROM {$wpdb->wporg_translation_editors}
+				WHERE
+					( `project_id` IN ( " . implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) ) . " ) AND `locale` IN ( %s, 'all-locales' ) )
+					OR ( `project_id` = 0 AND `locale` = %s )",
+				...$project_ids,
+				$locale_slug,
+				$locale_slug
+			)
+		);
 
 		foreach ( (array) $results as $row ) {
 			if ( (int) $row->project_id === $project_id ) {
@@ -531,20 +530,23 @@ class Locale extends GP_Route {
 		}
 
 		// Batch-fetch all matching translation set IDs in a single query.
-		$project_ids_sql = $this->prepare_in_int_list( array_keys( $projects ) );
+		$project_ids = array_values( array_filter( array_map( 'intval', array_keys( $projects ) ) ) );
 
 		$translation_set_ids = [];
-		if ( ! empty( $project_ids_sql ) ) {
-			$translation_sets_sql = "
-				SELECT id
-				FROM {$wpdb->gp_translation_sets}
-				WHERE
-					project_id IN ( {$project_ids_sql} )
-					AND slug = %s
-					AND locale = %s
-			";
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $translation_sets_sql contains an IN clause with sanitized project IDs.
-			$translation_set_ids = $wpdb->get_col( $wpdb->prepare( $translation_sets_sql, $set_slug, $locale_slug ) );
+		if ( ! empty( $project_ids ) ) {
+			$translation_set_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT id
+					FROM {$wpdb->gp_translation_sets}
+					WHERE
+						project_id IN ( " . implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) ) . ' )
+						AND slug = %s
+						AND locale = %s',
+					...$project_ids,
+					$set_slug,
+					$locale_slug
+				)
+			);
 		}
 
 		// Batch-fetch contributors across all translation sets.
@@ -722,22 +724,6 @@ class Locale extends GP_Route {
 		);
 
 		return (array) $contributors;
-	}
-
-	/**
-	 * Generates comma-separated placeholders for prepared SQL statements.
-	 *
-	 * @param int    $count Number of placeholders needed.
-	 * @param string $type  Placeholder type ('%d', '%s', '%f'). Default '%d'.
-	 * @return string Comma-separated placeholder string (e.g. "%d, %d, %d").
-	 */
-	private function prepare_in_placeholders( int $count, string $type = '%d' ): string {
-		$count = (int) $count;
-		if ( $count <= 0 ) {
-			return '';
-		}
-
-		return implode( ', ', array_fill( 0, $count, $type ) );
 	}
 
 	/**
@@ -1180,9 +1166,8 @@ class Locale extends GP_Route {
 				$user_fav_projects = $this->get_user_favorites( $project->slug );
 
 				if ( ! empty( $user_fav_projects ) ) {
-					$favorite_path_placeholders = $this->prepare_in_placeholders( count( $user_fav_projects ), '%s' );
-					$tp_where                  .= " AND tp.path IN( {$favorite_path_placeholders} )";
-					$sql_params                 = array_merge( $sql_params, $user_fav_projects );
+					$tp_where  .= ' AND tp.path IN( ' . implode( ', ', array_fill( 0, count( $user_fav_projects ), '%s' ) ) . ' )';
+					$sql_params = array_merge( $sql_params, $user_fav_projects );
 				} else {
 					$tp_where .= ' AND 0=1';
 				}
