@@ -134,6 +134,19 @@ class Query_Plugins extends Base {
 		$response['info']['pages']   = (int) $wp_query->max_num_pages ?: 0;
 		$response['info']['results'] = (int) $wp_query->found_posts ?: 0;
 
+		/*
+		 * Cap the reported results to what can be paged through (`max_num_pages` * `posts_per_page`),
+		 * so the total stays consistent with the pages that return results.
+		 * `max_num_pages` is capped in Plugin_Search::set_max_num_pages().
+		 * See https://core.trac.wordpress.org/ticket/66694
+		 */
+		if ( ! empty( $query['s'] ) && $wp_query->max_num_pages ) {
+			$response['info']['results'] = min(
+				$response['info']['results'],
+				(int) $wp_query->max_num_pages * (int) $wp_query->get( 'posts_per_page' )
+			);
+		}
+
 		foreach ( $wp_query->posts as $post ) {
 			$response['plugins'][] = $post->post_name ?: get_post( $post->ID )->post_name;
 		}

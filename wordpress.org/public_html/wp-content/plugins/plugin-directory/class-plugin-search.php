@@ -400,16 +400,35 @@ class Plugin_Search {
 	 * `Classic_Search::filter__posts_pre_query()`. When there are more than 1,000 matches, their value causes
 	 * Core's `paginate_links()` to generated 51 links, even though we redirect the user to the homepage when
 	 * page 51+ is requested.
+	 *
+	 * Jetpack also can't page past its maximum offset, so the page count is capped to the pages it can serve.
 	 */
 	function set_max_num_pages( $posts, $query ) {
 		$post_type = (array) $query->query_vars['post_type'] ?? '';
 
-		if ( is_admin() || ! is_search() || ! in_array( 'plugin', $post_type ) ) {
+		// Check the search term rather than `is_search()`, as Jetpack calls `set_404()` on pages past its
+		// maximum offset, which resets the query flags.
+		if ( is_admin() || ! $query->is_main_query() || '' === (string) $query->get( 's' ) || ! in_array( 'plugin', $post_type ) ) {
 			return $posts;
 		}
 
-		if ( $query->max_num_pages > 50 ) {
-			$query->max_num_pages = 50;
+		$max_pages = min( 50, $this->get_max_search_pages( $query ) );
+
+		/*
+		 * Jetpack aborts without results when the requested page is past its maximum offset.
+		 * Return no results rather than letting WP_Query fall back to a MySQL search, which has
+		 * different results and a different total to the Elasticsearch search.
+		 * See https://core.trac.wordpress.org/ticket/66694
+		 */
+		if ( null === $posts && $query->get( 'paged' ) > $max_pages ) {
+			$query->found_posts   = 0;
+			$query->max_num_pages = 0;
+
+			return array();
+		}
+
+		if ( $query->max_num_pages > $max_pages ) {
+			$query->max_num_pages = $max_pages;
 		}
 
 		// Set the number of found plugins, ignoring pagination.
@@ -419,6 +438,28 @@ class Plugin_Search {
 		}
 
 		return $posts;
+	}
+
+	/**
+	 * Get the number of search result pages that Jetpack Search can serve for a query.
+	 *
+	 * Mirrors the offset check in `Classic_Search::do_search()`.
+	 *
+	 * @param \WP_Query $query The search query.
+	 * @return int The maximum page number.
+	 */
+	public function get_max_search_pages( $query ) {
+		$max_offset         = 1000;
+		$max_posts_per_page = 100;
+		if ( class_exists( '\Automattic\Jetpack\Search\Helper' ) ) {
+			$max_offset         = \Automattic\Jetpack\Search\Helper::get_max_offset();
+			$max_posts_per_page = \Automattic\Jetpack\Search\Helper::get_max_posts_per_page();
+		}
+
+		$posts_per_page = (int) $query->get( 'posts_per_page' ) ?: (int) get_option( 'posts_per_page' );
+		$posts_per_page = max( 1, min( $posts_per_page, $max_posts_per_page ) );
+
+		return max( 1, (int) floor( $max_offset / $posts_per_page ) );
 	}
 
 	public function log_search_es_wp_query_args( $es_wp_query_args, $query ) {
