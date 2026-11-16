@@ -2719,6 +2719,32 @@ h3#comments {
 	.dot {
 		display: none;
 	}
+
+	.pagination .nav-links {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
+	/* Breaks the page numbers onto their own line, below the previous/next links. */
+	.pagination .nav-links::before {
+		content: "";
+		flex-basis: 100%;
+	}
+
+	.pagination .nav-links .prev,
+	.pagination .nav-links .next {
+		margin: 0 0 10px;
+		order: -1;
+	}
+
+	.pagination .nav-links .prev {
+		margin-right: auto;
+	}
+
+	.pagination .nav-links .next {
+		margin-left: auto;
+	}
 }
 
 @media screen and ( min-width:621px ) {
