@@ -333,6 +333,14 @@ class Plugins_Info_API_Request {
 				return false;
 			}
 
+			// Each entry of `slugs` is trim()'d, so a nested one (like `slugs[foo][slug]=foo`) fatals.
+			if ( isset( $this->args->slugs ) && is_array( $this->args->slugs ) ) {
+				foreach ( $this->args->slugs as $slug ) {
+					if ( is_array( $slug ) || is_object( $slug ) ) {
+						return false;
+					}
+				}
+			}
 		}
 
 		/*
