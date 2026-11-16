@@ -333,6 +333,16 @@ class Plugins_Info_API_Request {
 				return false;
 			}
 
+			// `slugs` is a comma-separated string or a list of slugs, e.g. not `slugs[foo][slug]=foo`.
+			if ( ! empty( $this->args->slugs ) ) {
+				$slugs = is_array( $this->args->slugs ) ? $this->args->slugs : [ $this->args->slugs ];
+				foreach ( $slugs as $slug ) {
+					if ( ! is_string( $slug ) ) {
+						return false;
+					}
+				}
+			}
+
 		}
 
 		/*
