@@ -224,6 +224,11 @@ class Plugins_Info_API_Request {
 		$requested_fields = array();
 		foreach ( $fields as $field => $include ) {
 			if ( is_int( $field ) ) {
+				// A list entry is the field name, so skip one that isn't a string (like `fields[0][]=x`).
+				if ( ! is_string( $include ) ) {
+					continue;
+				}
+
 				$field   = $include;
 				$include = true;
 				if ( '-' == substr( $field, 0, 1 ) ) {
