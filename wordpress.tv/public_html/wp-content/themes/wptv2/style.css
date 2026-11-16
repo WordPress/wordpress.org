@@ -241,8 +241,7 @@ div.success p {
 	padding-top: 8px;
 }
 
-#header .sleeve,
-#footer .container {
+#header .sleeve {
 	max-width: 942px;
 	margin: 0 auto;
 }
@@ -1904,6 +1903,11 @@ body, td, p,
 	margin: -8px auto 10px auto;
 }
 
+/* Match the .container gutter for titles printed directly in the hero. */
+.wptv-hero > .page-title {
+	padding: 0 10px;
+}
+
 .page-title {
 	max-width: 940px;
 	margin: auto;
@@ -2416,6 +2420,7 @@ h3#comments {
 ============================================================= */
 
 .error404 .primary-content {
+	display: flow-root;
 	max-width: 940px;
 }
 
@@ -2444,7 +2449,7 @@ h3#comments {
 
 .message-404 {
 	float: left;
-	width: 680px;
+	max-width: 680px;
 }
 
 /* Footer
@@ -2536,11 +2541,6 @@ h3#comments {
 @media screen and ( min-width: 500px ) {
 	#header {
 		padding: 0 20px;
-	}
-
-	#footer {
-		padding-left: 20px;
-		padding-right: 20px;
 	}
 
 	#header h1 {
