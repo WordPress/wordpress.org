@@ -478,9 +478,7 @@ class Locale extends GP_Route {
 				WHERE
 					( `project_id` IN ( " . implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) ) . " ) AND `locale` IN ( %s, 'all-locales' ) )
 					OR ( `project_id` = 0 AND `locale` = %s )",
-				...$project_ids,
-				$locale_slug,
-				$locale_slug
+				array_merge( $project_ids, [ $locale_slug, $locale_slug ] )
 			)
 		);
 
@@ -542,9 +540,7 @@ class Locale extends GP_Route {
 						project_id IN ( " . implode( ', ', array_fill( 0, count( $project_ids ), '%d' ) ) . ' )
 						AND slug = %s
 						AND locale = %s',
-					...$project_ids,
-					$set_slug,
-					$locale_slug
+					array_merge( $project_ids, [ $set_slug, $locale_slug ] )
 				)
 			);
 		}
