@@ -295,6 +295,7 @@ form#search input {
 
 #content.report {
 	max-width: 98%;
+	overflow-x: auto; /* Wide report tables scroll here instead of widening the page. */
 	width: auto;
 }
 
