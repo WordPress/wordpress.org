@@ -112,6 +112,8 @@ class Core extends Trac {
 	 * Some components have no discussion channel, or an archived one, but still have
 	 * -firehose, -newtickets and -commits channels.
 	 *
+	 * Retired components have an empty value, and only post to the global channels.
+	 *
 	 * @var array
 	 */
 	protected $component_channels = array(
@@ -187,6 +189,10 @@ class Core extends Trac {
 		'Toolbar'                => '#core-toolbar',
 		'Users'                  => '#core-users',
 		'XML-RPC'                => '#core-xml-rpc',
+
+		// Retired components.
+		'Text Changes'           => '',
+		'WordPress.org Site'     => '',
 	);
 }
 
