@@ -618,7 +618,7 @@
 		} catch {
 			const remoteProjects = await projects.getRemoteProjects();
 
-			if ( projects.hasStorage() ) {
+			if ( projects.hasStorage() && Array.isArray( remoteProjects ) ) {
 				projects.storeLocalProjects( remoteProjects );
 			}
 
