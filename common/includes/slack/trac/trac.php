@@ -273,8 +273,9 @@ class Trac implements User {
 			}
 		}
 
+		// The component must be followed by a word boundary, so "AI" doesn't match "AIX".
 		foreach ( array_keys( $this->component_channels ) as $component ) {
-			if ( 0 === stripos( $log_text, $component ) ) {
+			if ( preg_match( '/^' . preg_quote( $component, '/' ) . '\b/i', $log_text ) ) {
 				foreach ( $this->get_component_base_channels( $component ) as $channel ) {
 					$channels[ $channel ] = true;
 				}

@@ -87,6 +87,21 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 				'Fix a typo.',
 				$global,
 			),
+			'short component prefix'                 => array(
+				'trunk/src/wp-includes/ai.php',
+				'AI: Fix a typo.',
+				array_merge( $global, array( '#core-ai-commits', '#core-ai-firehose' ) ),
+			),
+			'more than one component in the prefix'  => array(
+				'trunk/src/wp-includes/ai.php',
+				'AI, REST API: Fix a typo.',
+				array_merge( $global, array( '#core-ai-commits', '#core-ai-firehose' ) ),
+			),
+			'component name inside a longer word'    => array(
+				'trunk/src/wp-includes/ai.php',
+				'AIX compatibility fixes.',
+				$global,
+			),
 			'commit prefix alias'                    => array(
 				'trunk/src/wp-includes/class-wp-customize-manager.php',
 				'Customizer: Fix a typo.',
@@ -96,6 +111,11 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 				'trunk/src/wp-includes/theme.php',
 				'Bundled Themes: Fix a typo.',
 				array_merge( $global, array( '#core-themes-commits', '#core-themes-firehose' ) ),
+			),
+			'alias that is a common verb'            => array(
+				'trunk/package.json',
+				'Update @wordpress packages.',
+				$global,
 			),
 		);
 	}
