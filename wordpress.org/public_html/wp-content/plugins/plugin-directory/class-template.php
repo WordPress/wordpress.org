@@ -472,24 +472,16 @@ class Template {
 
 	/**
 	 * Retrieve the Geopattern SVG URL for a given plugin.
+	 *
+	 * The pattern color is derived from the slug.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string The Geopattern SVG URL.
 	 */
-	public static function get_geopattern_icon_url( $post = null, $color = null ) {
+	public static function get_geopattern_icon_url( $post = null ) {
 		$plugin = get_post( $post );
 
-		if ( is_null( $color ) ) {
-			$color = get_post_meta( $plugin->ID, 'assets_banners_color', true );
-		}
-
-		if ( strlen( $color ) === 6 && strspn( $color, 'abcdef0123456789' ) === 6 ) {
-			$color = "_{$color}";
-		} else {
-			$color = '';
-		}
-
-		// This is a cached resource. The slug + color combine to form the cache buster.
-		$url = "https://s.w.org/plugins/geopattern-icon/{$plugin->post_name}{$color}.svg";
-
-		return $url;
+		return "https://s.w.org/plugins/geopattern-icon/{$plugin->post_name}.svg";
 	}
 
 	/**
@@ -1107,6 +1099,7 @@ class Template {
 			'security'             => 'Security concerns',
 			'remote-admin'         => 'Remote administration',
 			'common-plugin'        => 'Common plugin',
+			'multiple'             => 'Multiple accounts',
 			'other'                => 'OTHER: See notes',
 		);
 	}

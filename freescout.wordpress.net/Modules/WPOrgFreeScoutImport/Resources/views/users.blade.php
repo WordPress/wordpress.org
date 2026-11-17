@@ -38,7 +38,7 @@
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<h4>{{ __('Connect to WordPress.org accounts') }}</h4>
-				<p>{{ __('Download :name’s users, fill in the wporg_username column for those who’ll work here, and check it here. Each one’s user here is connected to that account, created if they have none yet, and switched on if an import created them disabled: their name, email, and avatar come from WordPress.org, and they can log in with it. Someone whose account is connected to a user already is credited to that user.', [ 'name' => $name ]) }}</p>
+				<p>{{ __('Download :name’s users, fill in the wporg_username column for those who’ll work here, and check it here. Each one’s user here is connected to that account, created if they have none yet, and switched on if an import created them disabled, unless they’re deleted there: their name, email, and avatar come from WordPress.org, and once their user is on, they can log in with it. Someone whose account is connected to a user already is credited to that user.', [ 'name' => $name ]) }}</p>
 				<p><a href="{{ route( 'wporgfreescoutimport.users.export', [ 'id' => $source->id ] ) }}" class="btn btn-default">{{ __('Download CSV') }}</a></p>
 				@if ( $can_connect )
 					<form method="POST" action="{{ route( 'wporgfreescoutimport.users.connect', [ 'id' => $source->id ] ) }}" enctype="multipart/form-data">
@@ -59,9 +59,10 @@
 			</div>
 		</div>
 
-		@if ( $users )
+		@if ( $users || $teams )
 			<form method="POST" action="{{ route( 'wporgfreescoutimport.users.save', [ 'id' => $source->id ] ) }}">
 				{{ csrf_field() }}
+				@if ( $users )
 				<table class="table">
 					<thead>
 						<tr>
@@ -99,6 +100,49 @@
 						@endforeach
 					</tbody>
 				</table>
+				@endif
+
+				@if ( $teams )
+					<h4 id="teams">{{ __('Teams') }}</h4>
+					<p>{{ __('Conversations assigned to a team on :name are assigned to the team chosen here, or else to the one with the same name. Without either, they’re imported unassigned, tagged with the team’s name; choosing a team later assigns them to it. No team is created.', [ 'name' => $name ]) }}</p>
+					@if ( ! $teams_module )
+						<p class="text-help">{{ __('Choosing teams needs the Teams module to be on.') }}</p>
+					@endif
+					<table class="table">
+						<thead>
+							<tr>
+								<th>{{ __('Team on :name', [ 'name' => $name ]) }}</th>
+								<th>{{ __('Team here') }}</th>
+								<th>{{ __('Choose another') }}</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach ( $teams as $team )
+								<tr id="team-{{ $team['id'] }}">
+									<td>{{ $team['name'] }}</td>
+									<td>
+										@if ( $team['team'] )
+											{{ $team['team']->first_name }} <small class="text-help">({{ $team['chosen'] ? __('chosen') : __('same name') }})</small>
+											@if ( $team['missing'] )
+												<br/><small class="text-danger">{{ __('Has no access to :mailboxes, where its conversations are.', [ 'mailboxes' => implode( ', ', $team['missing'] ) ]) }}</small>
+											@endif
+										@else
+											<em>{{ __('None: unassigned, tagged “:tag”', [ 'tag' => $team['name'] . ' Team' ]) }}</em>
+										@endif
+									</td>
+									<td>
+										<select name="teams[{{ $team['id'] }}]" class="form-control input-sm" aria-label="{{ __('Team here for :name', [ 'name' => $team['name'] ]) }}" @if ( ! $teams_module ) disabled @endif>
+											<option value="">{{ __('Keep') }}</option>
+											@foreach ( $local_teams as $option )
+												<option value="{{ $option->id }}">{{ $option->first_name }}</option>
+											@endforeach
+										</select>
+									</td>
+								</tr>
+							@endforeach
+						</tbody>
+					</table>
+				@endif
 				<button type="submit" class="btn btn-primary">{{ __('Save') }}</button>
 			</form>
 		@endif

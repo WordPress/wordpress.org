@@ -373,7 +373,7 @@ p.has-background,
 
 .navigation-main a,
 .navigation-main a:visited {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	font-size: 0.75em;
 }
 
@@ -916,6 +916,15 @@ input[type="submit"]:hover {
 	clear: inline-end;
 }
 
+/* The sidebar clips overflow, so a field resized wider would lose its edge and resize handle. */
+.widget-area textarea {
+	max-width: 100%;
+}
+
+#secondary-close {
+	display: none;
+}
+
 @media (max-width: 876px) {
 	.content-area {
 		width: 100%;
@@ -965,30 +974,44 @@ input[type="submit"]:hover {
 	}
 
 	#secondary-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		float: inline-start;
-		margin-right: unset;
-		margin-top: -12px;
-		text-align: end;
-	}
-
-	#main #secondary-toggle {
-		margin-inline-start: 4px;
-		margin-inline-end: var(--wp--style--block-gap);
-		margin-top: 20px;
+		margin-top: -24px;
+		margin-inline: 8px 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--wp--preset--color--charcoal-4);
+		cursor: pointer;
 	}
 
 	#secondary-toggle:before {
 		top: 0;
-		color: var(--wp--preset--color--charcoal-4);
 		font-size: 24px;
 	}
 
-	body.responsive-show #secondary-toggle:before {
-		content: '';
-		color: #0073aa;
+	#secondary-close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		margin-block: 8px 0;
+		margin-inline: auto 8px;
+		padding: 0;
+		border: 0;
+		background: none;
+		cursor: pointer;
 	}
 
-	#secondary-toggle svg {
+	#secondary-toggle:focus-visible,
+	#secondary-close:focus-visible {
+		outline: thin dotted;
+	}
+
+	#secondary-close svg {
 		background-color: #fff;
 		fill: var(--wp--preset--color--charcoal-4);
 		height: 36px;

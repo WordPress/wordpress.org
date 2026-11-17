@@ -23,6 +23,13 @@ class Comment_Handler {
 	 */
 	protected $keywords_added = array();
 
+	/**
+	 * Characters Trac's text wrapper breaks between, mirroring UnicodeTextWrapper::breakable_char_ranges.
+	 *
+	 * @var string
+	 */
+	const BREAKABLE_CHARS = '[\x{1100}-\x{11FF}\x{2E80}-\x{2EFF}\x{3000}-\x{30FF}\x{3130}-\x{319F}\x{31C0}-\x{31EF}\x{3200}-\x{4DBF}\x{4E00}-\x{9FFF}\x{A960}-\x{A97F}\x{AC00}-\x{D7FF}\x{F900}-\x{FAFF}\x{FE30}-\x{FE4F}\x{FF00}-\x{FFEF}\x{20000}-\x{3FFFF}]';
+
 	function __construct( \Dotorg\Slack\Send $send, array $email_message ) {
 		$this->send  = $send;
 		$this->lines = $email_message;
@@ -242,7 +249,22 @@ class Comment_Handler {
 			while ( $lines && '' !== current( $lines ) ) {
 				$line = array_shift( $lines );
 
-				if ( preg_match( '~Attachment "([^"]+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
+				// Trac wraps long file names onto indented lines.
+				if ( 0 === strpos( $line, ' * Attachment "' ) ) {
+					while ( $lines && '' !== current( $lines ) && 0 !== strpos( current( $lines ), ' * ' ) ) {
+						$next_line = ltrim( array_shift( $lines ) );
+
+						// Trac also breaks between CJK characters, where there is no space to restore.
+						$cjk_break = preg_match( '/' . self::BREAKABLE_CHARS . '$/u', $line ) && preg_match( '/^' . self::BREAKABLE_CHARS . '/u', $next_line );
+
+						if ( '-' !== substr( $line, -1 ) && ! $cjk_break ) {
+							$line .= ' ';
+						}
+						$line .= $next_line;
+					}
+				}
+
+				if ( preg_match( '~Attachment "(.+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
 					$changes[] = "_*attachment:*_ `{$matches[1]}` {$matches[2]}";
 				} else {
 					if ( 0 === strpos( $line, ' * keywords:' ) ) {

@@ -1,0 +1,17 @@
+/* Match the parent theme's text input styles, which leave select unstyled. */
+select:not([multiple]) {
+	appearance: none;
+	background: var(--wp--custom--form--color--background) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%231e1e1e' d='M17.5 11.6 12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z'/%3E%3C/svg%3E") no-repeat right calc(var(--wp--custom--form--padding--inline) / 2) center / 24px;
+	border: var(--wp--custom--form--border--width) var(--wp--custom--form--border--style) var(--wp--custom--form--border--color);
+	border-radius: var(--wp--custom--form--border--radius);
+	color: var(--wp--custom--form--color--text);
+	font-size: var(--wp--custom--form--typography--font-size);
+	line-height: var(--wp--custom--form--typography--line-height);
+	max-width: 100%;
+	padding-block: var(--wp--custom--form--padding--block);
+	padding-inline: var(--wp--custom--form--padding--inline) calc(var(--wp--custom--form--padding--inline) + 24px);
+
+	&:focus {
+		border-color: var(--wp--custom--form--active--color--border);
+	}
+}

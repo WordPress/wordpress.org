@@ -18,6 +18,104 @@ use function WordPressdotorg\I18nTeams\get_locales;
 function bootstrap(): void {
 	add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets', 20 );
 	add_shortcode( 'wp-locales', __NAMESPACE__ . '\render_wp_locales_shortcode' );
+	add_filter( 'document_title_parts', __NAMESPACE__ . '\filter_document_title_parts' );
+	add_filter( 'wporg_canonical_url', __NAMESPACE__ . '\filter_canonical_url' );
+	add_filter( 'jetpack_open_graph_tags', __NAMESPACE__ . '\filter_open_graph_tags' );
+}
+
+/**
+ * Gets the locale requested through the `locale` query var.
+ *
+ * Matches case-insensitively, since canonical URLs are lowercased.
+ *
+ * @return GP_Locale|null The locale, or null if none was requested or it doesn't exist.
+ */
+function get_requested_locale(): ?GP_Locale {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A public, read-only page view.
+	$requested = isset( $_GET['locale'] ) && is_string( $_GET['locale'] ) ? sanitize_key( wp_unslash( $_GET['locale'] ) ) : '';
+	if ( ! $requested ) {
+		return null;
+	}
+
+	require_once GLOTPRESS_LOCALES_PATH;
+
+	foreach ( GP_Locales::locales() as $locale ) {
+		if ( isset( $locale->wp_locale ) && 'en_US' !== $locale->wp_locale && strtolower( $locale->wp_locale ) === $requested ) {
+			return $locale;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Gets the locale whose details the current page shows.
+ *
+ * @return GP_Locale|null The locale, or null when not on a locale's details page.
+ */
+function get_displayed_locale(): ?GP_Locale {
+	$locale = get_requested_locale();
+	if ( ! $locale || ! is_singular() ) {
+		return null;
+	}
+
+	$post = get_queried_object();
+	if ( ! $post instanceof \WP_Post || ! has_shortcode( $post->post_content, 'wp-locales' ) ) {
+		return null;
+	}
+
+	return $locale;
+}
+
+/**
+ * Adds the locale's name to the document title on a locale's details page.
+ *
+ * @param array $parts The document title parts.
+ * @return array
+ */
+function filter_document_title_parts( array $parts ): array {
+	$locale = get_displayed_locale();
+	if ( ! $locale || empty( $parts['title'] ) ) {
+		return $parts;
+	}
+
+	return array_merge(
+		[
+			'title'  => $parts['title'],
+			'locale' => $locale->english_name,
+		],
+		$parts
+	);
+}
+
+/**
+ * Points the canonical URL of a locale's details page at that locale.
+ *
+ * @param string|false $url The canonical URL.
+ * @return string|false
+ */
+function filter_canonical_url( $url ) {
+	$locale = get_displayed_locale();
+	if ( ! $locale || ! $url ) {
+		return $url;
+	}
+
+	return add_query_arg( 'locale', $locale->wp_locale, $url );
+}
+
+/**
+ * Points the Open Graph URL of a locale's details page at that locale.
+ *
+ * @param array $tags The Open Graph tags.
+ * @return array
+ */
+function filter_open_graph_tags( array $tags ): array {
+	$locale = get_displayed_locale();
+	if ( $locale && ! empty( $tags['og:url'] ) ) {
+		$tags['og:url'] = add_query_arg( 'locale', $locale->wp_locale, $tags['og:url'] );
+	}
+
+	return $tags;
 }
 
 /**
@@ -43,9 +141,8 @@ function render_wp_locales_shortcode(): string {
 		$language_packs_data = get_language_packs_data();
 		include PLUGIN_DIR . '/views/all-locales.php';
 	} else {
-		require_once GLOTPRESS_LOCALES_PATH;
-		$locale = GP_Locales::by_field( 'wp_locale', $_GET['locale'] );
-		if ( $locale && 'en_US' !== $locale->wp_locale ) {
+		$locale = get_requested_locale();
+		if ( $locale ) {
 			$locale_data = get_extended_locale_data( $locale );
 			include PLUGIN_DIR . '/views/locale-details.php';
 		} else {

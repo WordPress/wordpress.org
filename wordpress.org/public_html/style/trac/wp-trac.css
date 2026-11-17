@@ -126,7 +126,7 @@ footer :link:hover, footer :visited:hover,
 
 #headline .menu a,
 #headline .menu a:visited {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 }
 
 #headline .menu a:hover,
@@ -250,7 +250,7 @@ h3.change a {
 #metanav.nav a,
 #metanav.nav a:visited,
 #metanav form.trac-logout button {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	background: inherit;
 	border: inherit;
 }
@@ -295,6 +295,7 @@ form#search input {
 
 #content.report {
 	max-width: 98%;
+	overflow-x: auto; /* Wide report tables scroll here instead of widening the page. */
 	width: auto;
 }
 
@@ -559,7 +560,8 @@ table.progress td.closed {
 }
 
 #ticket img,
-.comment img {
+.comment img,
+.tickets .fullrow img {
 	max-width: 100%;
 	height: auto;
 }
@@ -669,6 +671,7 @@ h2 {
 }
 
 #content.timeline h2 {
+	display: flow-root; /* Stop the date bar at the floated #prefs form instead of running under it. */
 	padding: 3px 5px;
 	font-size: 105%;
 	-webkit-box-shadow: none;
@@ -740,12 +743,20 @@ blockquote.citation {
 /*	width: 100%; /* for IE, surprise */
 }
 
+/* Contain the floated menu, and the search form floated beside it. */
+#mainnav::after {
+	clear: both;
+	content: "";
+	display: table;
+}
+
 #mainnav .first, #mainnav .first :link,
 #mainnav .last, #mainnav .last :link {
 	border-radius: 0;
 }
 
 #mainnav ul {
+	margin-bottom: 8px;
 	margin-left: 5px;
 	float: left;
 	font-size: 11px;
@@ -767,7 +778,6 @@ blockquote.citation {
 	border: 0;
 	color: #000;
 	display: block;
-	padding: 6px 19px;
 }
 
 #mainnav :link:hover, #mainnav :visited:hover {
@@ -2370,7 +2380,7 @@ table.listing th.desc a::after {
 
 /* =Report screens */
 .create-new-ticket.button {
-	margin: 10px 10px 0;
+	margin: 10px 6px 0; /* Line up with the header search form, inset by #banner's padding. */
 	float: right;
 	clear: right;
 	font-size: 15px;
@@ -2757,7 +2767,6 @@ a.mention.me {
 	}
 
 	#mainnav :link, #mainnav :visited { /* bigger tap target */
-		padding: .5em 20px;
 		-webkit-text-size-adjust: 120%;
 	}
 

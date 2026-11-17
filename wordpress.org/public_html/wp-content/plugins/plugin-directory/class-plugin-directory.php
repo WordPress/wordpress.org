@@ -88,6 +88,9 @@ class Plugin_Directory {
 		// Allow post_modified not to be modified when we don't specifically bump it, and slugs for pending plugins.
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 
+		// Keep the plugin owner in the contributors list, which author queries search.
+		add_action( 'post_updated', array( $this, 'update_owner_contributor' ), 10, 3 );
+
 		add_filter( 'jetpack_active_modules', function( $modules ) {
 			// Enable Jetpack Search
 			#$modules[] = 'search';
@@ -167,6 +170,49 @@ class Plugin_Directory {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Moves the plugin owner's contributor term to the new owner when ownership changes.
+	 *
+	 * A new owner who isn't a contributor yet is listed first, like in the Contributors widget.
+	 * The import adds the owner to the contributors listed in the readme, and
+	 * restores the previous owner on the next run if the readme lists them.
+	 *
+	 * @param int      $post_id     Post ID.
+	 * @param \WP_Post $post_after  Post object following the update.
+	 * @param \WP_Post $post_before Post object before the update.
+	 */
+	public function update_owner_contributor( $post_id, $post_after, $post_before ) {
+		if ( 'plugin' !== $post_after->post_type || $post_after->post_author === $post_before->post_author ) {
+			return;
+		}
+
+		$contributors = wp_get_object_terms(
+			$post_id,
+			'plugin_contributors',
+			array(
+				'orderby' => 'term_order',
+				'fields'  => 'names',
+			)
+		);
+		if ( is_wp_error( $contributors ) ) {
+			return;
+		}
+
+		$previous_owner = get_user_by( 'id', $post_before->post_author );
+		if ( $previous_owner ) {
+			$contributors = array_diff( $contributors, array( $previous_owner->user_nicename ) );
+		}
+
+		$new_owner = get_user_by( 'id', $post_after->post_author );
+		if ( $new_owner && ! in_array( $new_owner->user_nicename, $contributors, true ) ) {
+			array_unshift( $contributors, $new_owner->user_nicename );
+		}
+
+		wp_set_object_terms( $post_id, $contributors, 'plugin_contributors' );
+
+		Standalone\Plugins_Info_API::flush_plugin_information_cache( $post_after->post_name );
 	}
 
 	/**

@@ -14,7 +14,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Modules\Teams\Providers\TeamsServiceProvider;
 
-require_once __DIR__ . '/TeamsServiceProvider.php';
+require_once dirname( __DIR__, 4 ) . '/tests/Support/TeamsServiceProvider.php';
 
 /**
  * Creates the tables of the Saved Replies, Tags, and Custom Fields modules as their migrations leave them, and drops

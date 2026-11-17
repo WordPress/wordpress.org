@@ -23,9 +23,17 @@ foreach ( $lines as $line ) {
 	$ticket_url = $matches[2];
 	$ticket_base_url = $matches[3];
 	$ticket = $matches[4];
-	// Attachment notifcations use the ticket URL, check for attachment change line and process mail as comment on match.
-	$is_attachment = (bool) preg_grep( '/^ \* Attachment "([^"]+)"/', $lines );
-	$type = ( isset( $matches[5] ) || $is_attachment ) ? 'comment' : 'ticket';
+	// Attachment notifications use the ticket URL, but Trac sets In-Reply-To on all except new-ticket ones.
+	$is_reply = false;
+	foreach ( $lines as $header ) {
+		if ( '' === trim( $header ) ) {
+			break;
+		}
+		if ( 0 === stripos( $header, 'In-Reply-To:' ) ) {
+			$is_reply = true;
+		}
+	}
+	$type = ( isset( $matches[5] ) || $is_reply ) ? 'comment' : 'ticket'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WordPress isn't loaded here.
 	preg_match( '~^https?://([^.]+)\.trac~i', $ticket_base_url, $matches );
 	$trac = $matches[1];
 	break;

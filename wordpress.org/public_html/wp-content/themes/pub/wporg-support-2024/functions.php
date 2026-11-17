@@ -150,7 +150,7 @@ add_action( 'after_setup_theme', 'wporg_support_theme_support' );
  * Swaps out the no-js for the js body class if the browser supports Javascript.
  */
 function nojs_body_tag() {
-	echo "<script>document.body.className = document.body.className.replace('no-js','js');</script>\n";
+	wp_print_inline_script_tag( "document.body.className = document.body.className.replace('no-js','js');" );
 }
 add_action( 'wp_body_open', __NAMESPACE__ . '\nojs_body_tag' );
 
@@ -407,6 +407,11 @@ function wporg_support_breadcrumb() {
 	$args['include_home']    = true;
 	$args['home_text']       = __( 'Forums', 'wporg-forums' );
 
+	// HelpHub pages aren't part of the forums.
+	if ( is_singular( array( 'helphub_article', 'helphub_version' ) ) || is_category() ) {
+		$args['home_text'] = esc_html__( 'Support', 'wporg-forums' );
+	}
+
 	// Forum root
 	$args['include_root']    = false;
 
@@ -415,6 +420,11 @@ function wporg_support_breadcrumb() {
 	$args['current_before']  = '<span class="bbp-breadcrumb-current">';
 	$args['current_after']   = '</span>';
 
+	// bbPress would use the title of the first post in the archive.
+	if ( is_category() ) {
+		$args['current_text'] = esc_html( single_cat_title( '', false ) );
+	}
+
 	return $args;
 }
 add_filter( 'bbp_before_get_breadcrumb_parse_args', 'wporg_support_breadcrumb' );
@@ -422,9 +432,27 @@ add_filter( 'bbp_before_get_breadcrumb_parse_args', 'wporg_support_breadcrumb' )
 add_filter(
 	'bbp_breadcrumbs',
 	/**
-	 * Filters the breadcrumbs to replace the home URL with the forums page.
+	 * Filters the breadcrumbs to replace the home URL with the forums page,
+	 * and to add the category to HelpHub articles.
 	 */
 	function( $crumbs ) {
+		if ( is_singular( 'helphub_article' ) ) {
+			$categories = get_the_category( get_queried_object_id() );
+
+			if ( $categories ) {
+				$category_crumb = sprintf(
+					'<a href="%1$s" class="bbp-breadcrumb-category">%2$s</a>',
+					esc_url( get_category_link( $categories[0] ) ),
+					esc_html( $categories[0]->name )
+				);
+				array_splice( $crumbs, 1, 0, $category_crumb );
+			}
+		}
+
+		if ( is_singular( array( 'helphub_article', 'helphub_version' ) ) || is_category() ) {
+			return $crumbs;
+		}
+
 		foreach ( $crumbs as $i => $link ) {
 			if ( str_contains( $link, 'bbp-breadcrumb-home' ) ) {
 				$crumbs[ $i ] = str_replace( home_url(), home_url( '/forums/' ), $link );

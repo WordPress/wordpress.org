@@ -15,7 +15,7 @@
 <?php wp_head(); ?>
 </head>
 <body <?php body_class( 'wp-core-ui login no-js' ); ?>>
-<script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
+<?php wp_print_inline_script_tag( "document.body.className = document.body.className.replace('no-js','js');" ); ?>
 <?php wp_body_open(); ?>
 
 <div id="login">

@@ -1,0 +1,9 @@
+.wp-block-post-template.is-style-zebra > li:nth-child(odd),
+.wp-block-post-template.is-style-zebra > li:hover {
+	background-color: var(--wp--preset--color--surface);
+}
+
+.wp-block-post-template.is-style-zebra .wp-block-post-title {
+	word-break: normal;
+	overflow-wrap: break-word;
+}

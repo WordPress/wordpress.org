@@ -39,6 +39,48 @@
 	margin-left: 0;
 }
 
+/* The Users page's filters, from users.js, left of the search and as tall as it. */
+.wporgsite-users-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-right: 10px;
+}
+
+.wporgsite-users-filters .btn {
+	height: 30px;
+	padding: 0 10px;
+	font-size: 13px;
+	line-height: 28px;
+}
+
+/* As light as the search's border, with gray text, in every state Bootstrap darkens them. */
+.wporgsite-users-filters .btn,
+.wporgsite-users-filters .btn:hover,
+.wporgsite-users-filters .btn:focus,
+.wporgsite-users-filters .btn.active,
+.wporgsite-users-filters .btn.active:hover,
+.wporgsite-users-filters .btn.active:focus {
+	border-color: #d5dbe0;
+	color: #666;
+}
+
+/* Bootstrap's focus border, which is its only focus indicator, for keyboard focus. */
+.wporgsite-users-filters .btn:focus-visible,
+.wporgsite-users-filters .btn.active:focus-visible {
+	border-color: #a5a9ac;
+}
+
+/* Bootstrap's pressed shadow, lighter. */
+.wporgsite-users-filters .btn.active {
+	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.075 );
+}
+
+/* Core's search shows and hides cards inline, so the filters' hiding needs !important. */
+#users-list > .card.wporgsite-users-filtered {
+	display: none !important;
+}
+
 /* A conversation's number, which copies it. */
 .wporgsite-number {
 	cursor: pointer;

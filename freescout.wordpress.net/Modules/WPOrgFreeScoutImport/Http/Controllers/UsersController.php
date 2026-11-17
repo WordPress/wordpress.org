@@ -1,6 +1,6 @@
 <?php
 /**
- * The page where administrators see which user here each of a source's users is credited to.
+ * The page where administrators see which user here each of a source's users is credited to, and which team each team is.
  *
  * @package WordPressdotorg\FreeScout\WPOrgFreeScoutImport
  */
@@ -20,26 +20,32 @@ use Modules\WPOrgFreeScoutImport\Services\WordPressOrgAccounts;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Lists a source's users, saves who they're credited to, and connects them to WordPress.org accounts from a CSV.
+ * Lists a source's users and teams, saves who they're credited to, and connects users to WordPress.org accounts from a
+ * CSV.
  *
  * Imports credit remote users to the user with their email, or create a disabled one. This page is for those who
- * have a user here under another email, and for those who'll work here.
+ * have a user here under another email, for those who'll work here, and for the source's teams.
  */
 final class UsersController extends Controller {
 
 	/**
-	 * Shows a source's users with the users they're credited to.
+	 * Shows a source's users with the users they're credited to, and its teams with their teams.
 	 *
 	 * @param int $id Source ID.
 	 * @return View
 	 */
 	public function index( int $id ): View {
-		$source = Source::query()->findOrFail( $id );
-		$users  = array();
-		$error  = '';
+		$source      = Source::query()->findOrFail( $id );
+		$users       = array();
+		$teams       = array();
+		$local_teams = collect();
+		$error       = '';
 
 		try {
-			foreach ( People::directory( RemoteApi::for_source( $source ) ) as $remote_user ) {
+			$api         = RemoteApi::for_source( $source );
+			$teams       = People::teams( $api );
+			$local_teams = People::freescout_teams()->orderBy( 'first_name' )->get();
+			foreach ( People::people( $api ) as $remote_user ) {
 				$users[] = array(
 					'id'       => (int) ( $remote_user['id'] ?? 0 ),
 					'name'     => trim( ( $remote_user['firstName'] ?? '' ) . ' ' . ( $remote_user['lastName'] ?? '' ) ),
@@ -61,20 +67,23 @@ final class UsersController extends Controller {
 		return view(
 			'wporgfreescoutimport::users',
 			array(
-				'source'      => $source,
-				'name'        => $source->name,
-				'users'       => $users,
-				'creditable'  => People::creditable()->orderBy( 'first_name' )->orderBy( 'last_name' )->get(),
-				'can_connect' => WordPressOrgAccounts::available(),
-				'error'       => $error,
+				'source'       => $source,
+				'name'         => $source->name,
+				'users'        => $users,
+				'creditable'   => People::creditable()->orderBy( 'first_name' )->orderBy( 'last_name' )->get(),
+				'teams'        => $teams,
+				'local_teams'  => $local_teams,
+				'teams_module' => People::teams_module_active(),
+				'can_connect'  => WordPressOrgAccounts::available(),
+				'error'        => $error,
 			)
 		);
 	}
 
 	/**
-	 * Saves who a source's users are credited to, and credits what's imported already to them.
+	 * Saves who a source's users and teams are credited to, and credits what's imported already to them.
 	 *
-	 * Rows left at their default are left alone.
+	 * People can only be credited to people, and teams to teams. Rows left at their default are left alone.
 	 *
 	 * @param Request $request Request.
 	 * @param int     $id      Source ID.
@@ -87,6 +96,22 @@ final class UsersController extends Controller {
 			$user = (int) $remote_user_id > 0 && (int) $user_id > 0 ? People::creditable()->whereKey( (int) $user_id )->first() : null;
 			if ( $user ) {
 				People::choose( (int) $source->id, (int) $remote_user_id, $user );
+			}
+		}
+
+		$chosen = array_filter( array_map( 'intval', (array) $request->input( 'teams', array() ) ) );
+		if ( $chosen ) {
+			try {
+				$remote_teams = array_column( People::teams( RemoteApi::for_source( $source ) ), 'id' );
+			} catch ( \Throwable $e ) {
+				return self::back( $source )->with( 'flash_error', self::unreachable( $source, $e ) );
+			}
+
+			foreach ( $chosen as $remote_team_id => $team_id ) {
+				$team = in_array( (int) $remote_team_id, $remote_teams, true ) ? People::freescout_teams()->whereKey( $team_id )->first() : null;
+				if ( $team ) {
+					People::choose( (int) $source->id, (int) $remote_team_id, $team );
+				}
 			}
 		}
 

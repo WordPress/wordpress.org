@@ -705,6 +705,12 @@ https://wordpress.org/photos/
 				}
 		}
 
+		// Flag if the photo's metadata carries a copyright notice other than CC0, which conflicts with the license.
+		$copyright = Photo::get_exif( $post->ID, 'copyright' );
+		if ( $copyright && ! preg_match( '/\bCC[\s-]?0\b|public domain/i', $copyright['copyright']['value'] ) ) {
+			$flags[ __( 'copyright notice in metadata', 'wporg-photos' ) ] = 'likely';
+		}
+
 		$user = get_user_by( 'id', $post->post_author );
 		if ( ! $user ) {
 			return;

@@ -60,11 +60,15 @@ Before making commits, you should execute:
 
 Because this Git repository is a read-only mirror of the `meta.svn.wordpress.org` Subversion (SVN) repository, developers and agents should follow this workflow for all modifications:
 
-### 1. Meta Trac Ticket
+### 1. Open PRs from a Fork
+*   **Push branches to a fork:** Open PRs from a fork of this repository, even with write access to `WordPress/wordpress.org`. Never push a PR branch to `WordPress/wordpress.org` itself.
+*   **Why:** The SVN sync can delete branches in this repository, which closes any PR opened from or based on them.
+
+### 2. Meta Trac Ticket
 *   **Link the ticket you're fixing:** If a PR addresses an existing [WordPress.org Meta Trac](https://meta.trac.wordpress.org/) ticket, always reference it in the PR description — link its URL (e.g., `https://meta.trac.wordpress.org/ticket/XXXXX`) or write `Meta Trac #XXXXX`.
 *   **Commit Rights:** Code changes are not merged on GitHub directly. Instead, a Meta committer will review the PR, commit the patch to the Meta repository, and close the Trac ticket. SVN commits are automatically mirrored to GitHub, closing the PR in the process.
 
-### 2. Contributor "Props" System
+### 3. Contributor "Props" System
 *   The repository utilizes an automated workflow called `Props Bot` (defined in [.github/workflows/props-bot.yml](.github/workflows/props-bot.yml)).
 *   The bot automatically scans the commits, comments, and reviewers of the PR to compile a standard SVN-formatted "Props" attribution line (e.g., `Props username, corecommitter.`).
 *   Ensure that any co-authors or helpers are correctly credited so they are recognized when the commit is written to SVN.

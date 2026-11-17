@@ -584,7 +584,6 @@ class Upload_Handler {
 				'assets_screenshots'       => array(),
 				'assets_icons'             => array(),
 				'assets_banners'           => array(),
-				'assets_banners_color'     => false,
 				'support_threads'          => 0,
 				'support_threads_resolved' => 0,
 				'downloads'                => 0,
@@ -1003,7 +1002,53 @@ class Upload_Handler {
 			return false;
 		}
 
-		return Helpscout::get_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
+		return Helpscout::get_review_emails( $post, [ 'limit' => 1 ] );
+	}
+
+	/**
+	 * Locate the review conversation an upload is confirmed in: the newest one the plugins team started.
+	 *
+	 * Authors also write in under a similar subject, which starts a conversation of their own, and a sender's could
+	 * name any plugin and CC anyone. Only its helpdesk knows who started a conversation.
+	 *
+	 * @param WP_Post $post The plugin post.
+	 *
+	 * @return object|false The conversation, from WordPress.org's copy.
+	 */
+	protected static function find_team_review_email( $post ) {
+		if ( ! self::find_review_email( $post ) ) {
+			return false;
+		}
+
+		// Each is a request to its helpdesk; the newest is usually the team's.
+		foreach ( Helpscout::get_review_emails( $post ) as $review_email ) {
+			if ( $review_email->freescout ) {
+				$conversation = FreeScout_Client::get( (int) $review_email->id );
+				$failed       = is_wp_error( $conversation );
+				$qualifies    = ! $failed && 'user' === ( $conversation['createdBy']['type'] ?? '' );
+			} else {
+				$conversation = Helpscout_Client::api( '/v2/conversations/' . $review_email->id, null, 'GET', $http_response_code );
+				$failed       = 200 !== $http_response_code;
+
+				// HelpScout's stored owner can come from a subject line, so its customer has to be the author too.
+				$qualifies = ! $failed &&
+					'user' === ( $conversation->createdBy->type ?? '' ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+					0 === strcasecmp( (string) ( $conversation->primaryCustomer->email ?? '' ), wp_get_current_user()->user_email ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+			}
+
+			// Without it, there's no telling whether an older one is the newest the team started.
+			if ( $failed ) {
+				trigger_error( "Review email update failed: couldn't read conversation {$review_email->id}.", E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
+
+				return false;
+			}
+
+			if ( $qualifies ) {
+				return $review_email;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -1015,13 +1060,13 @@ class Upload_Handler {
 	 * @return bool True if the email was updated, false otherwise.
 	 */
 	public static function update_review_email( $post, $attachment ) {
-		$review_email = self::find_review_email( $post );
-		if ( ! $review_email ) {
+		// Don't update the review email if the plugin author isn't the one who uploaded the ZIP.
+		if ( get_current_user_id() !== (int) $post->post_author ) {
 			return false;
 		}
 
-		// Don't update the review email if the plugin author isn't the one who uploaded the ZIP.
-		if ( $post->post_author != get_current_user_id() ) {
+		$review_email = self::find_team_review_email( $post );
+		if ( ! $review_email ) {
 			return false;
 		}
 
@@ -1081,21 +1126,6 @@ class Upload_Handler {
 	 * @return bool Whether it was sent.
 	 */
 	protected static function reply_in_freescout( int $conversation_id, string $text ): bool {
-		$conversation = FreeScout_Client::get( $conversation_id );
-		if ( is_wp_error( $conversation ) ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update; not rendered.
-			trigger_error( "FreeScout update failed: couldn't read conversation $conversation_id: " . $conversation->get_error_message(), E_USER_WARNING );
-
-			return false;
-		}
-
-		// Review conversations are agent-started; a sender's could name any plugin and CC anyone.
-		if ( 'user' !== ( $conversation['createdBy']['type'] ?? '' ) ) {
-			trigger_error( "FreeScout update skipped: conversation $conversation_id wasn't started by the plugins team.", E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
-
-			return false;
-		}
-
 		$result = FreeScout_Client::reply(
 			$conversation_id,
 			nl2br( make_clickable( esc_html( $text ) ) ),

@@ -402,10 +402,11 @@ class Screenshots {
 		// available without delaying the first paint.
 		$priority = $above_fold ? 'high' : 'low';
 
-		// Wrap the `<img>` in an `<a href="{src}" target="_blank">` so
-		// the no-JS reader still gets a path to the full-resolution
-		// screenshot. The JS path cancels only this fallback navigation;
-		// core's image lightbox click handlers still receive the event.
+		/*
+		 * Wrap the `<img>` in an `<a href="{src}" target="_blank">` so the no-JS
+		 * reader still gets a path to the full-resolution screenshot. screenshots.js
+		 * unwraps it, so with JS the lightbox controls aren't nested in a link.
+		 */
 		$figure  = '<figure class="' . esc_attr( $class ) . '">';
 		$figure .= sprintf(
 			'<a class="plugin-screenshots__fallback-link" href="%1$s" target="_blank" rel="noopener">',

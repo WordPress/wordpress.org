@@ -14,30 +14,6 @@ use WordPressdotorg\Plugin_Directory\Email\Support_Rep_Added as Support_Rep_Adde
 class Tools {
 
 	/**
-	 * Retrieve the average color of a specified image.
-	 *
-	 * This currently relies upon the Jetpack libraries.
-	 *
-	 * @static
-	 *
-	 * @param $file_location string URL or filepath of image.
-	 * @return string|bool Average color as a hex value, False on failure.
-	 */
-	public static function get_image_average_color( $file_location ) {
-		if ( ! class_exists( 'Tonesque' ) && defined( 'JETPACK__PLUGIN_DIR' ) ) {
-			include JETPACK__PLUGIN_DIR . '/_inc/lib/tonesque.php';
-		}
-
-		if ( ! class_exists( 'Tonesque' ) ) {
-			return false;
-		}
-
-		$tonesque = new \Tonesque( $file_location );
-
-		return $tonesque->color();
-	}
-
-	/**
 	 * Returns the latest reviews of a specific plugin.
 	 *
 	 * @static

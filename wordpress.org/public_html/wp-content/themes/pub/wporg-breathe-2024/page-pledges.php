@@ -1,8 +1,6 @@
 <?php
 
 /*
- * Template Name: Pledges
- *
  * Note: Pledges is a simulated page, rather than actually existing in the database; see `mu-plugins/make-network/team-pledges.php`.
  *
  * Page 1 of the Five for the Future redesign — team contributor directory.

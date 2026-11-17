@@ -358,7 +358,7 @@ class Status_Transitions {
 			[
 				'slug'            => $original_permalink,
 				'submission_date' => $submission_date,
-				'reason'          => sanitize_key( $_POST['rejection_reason'] ?? '' )
+				'reason'          => (string) get_post_meta( $post_id, '_rejection_reason', true ),
 			]
 		);
 

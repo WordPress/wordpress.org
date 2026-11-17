@@ -36,6 +36,9 @@ class Performance_Optimizations {
 		// Redirect (.+)/page/[01]/ and (.+)?paged=[01] to $1
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_page_zero_one' ) );
 
+		// 404 topic pages past the last page of replies.
+		add_action( 'bbp_template_redirect', array( $this, 'topic_page_out_of_range_404' ) );
+
 		// Redirect Attachments to their file
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_attachments' ) );
 
@@ -135,6 +138,40 @@ class Performance_Optimizations {
 				wp_safe_redirect( $pageless_url, 301 );
 				exit;
 			}
+		}
+	}
+
+	/**
+	 * Sets a 404 for single topic pages beyond the last page of replies the current user can see.
+	 *
+	 * Mirrors the page count of bbp_get_topic_pagination(), plus the hidden replies that
+	 * bbp_has_replies() includes when viewing all replies.
+	 */
+	public function topic_page_out_of_range_404() {
+		if ( ! bbp_is_single_topic() || bbp_thread_replies() || bbp_get_paged() < 2 ) {
+			return;
+		}
+
+		// Moderators' reply loop also holds topic reports, which no stored count tracks.
+		if ( current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		$topic_id    = bbp_get_topic_id();
+		$reply_count = bbp_get_topic_reply_count( $topic_id, true );
+
+		if ( bbp_get_view_all( 'edit_others_replies' ) ) {
+			$reply_count += bbp_get_topic_reply_count_hidden( $topic_id, true );
+		}
+
+		if ( ! bbp_show_lead_topic() ) {
+			++$reply_count;
+		}
+
+		$last_page = max( 1, (int) ceil( $reply_count / bbp_get_replies_per_page() ) );
+
+		if ( bbp_get_paged() > $last_page ) {
+			bbp_set_404();
 		}
 	}
 

@@ -347,14 +347,16 @@ function wporg_login_language_switcher( $display = true ) {
 			</select>
 		</form>
 	</div>
-	<script>
+	<?php
+	wp_print_inline_script_tag(
+		<<<'JS'
 		var switcherForm  = document.getElementById( 'language-switcher' );
 		var localesSelect = document.getElementById( 'language-switcher-locales' );
 		localesSelect.addEventListener( 'change', function() {
 			switcherForm.submit()
 		} );
-	</script>
-	<?php
+		JS
+	);
 
 	return false; // For the login_display_language_dropdown filter.
 }
@@ -405,6 +407,8 @@ add_action( 'admin_init', 'wporg_login_cron_tasks' );
 
 /**
  * Clears the Pending Registrations table reguarly.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
  */
 function wporg_login_purge_pending_registrations() {
 	global $wpdb;

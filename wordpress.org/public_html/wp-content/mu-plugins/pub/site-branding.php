@@ -38,6 +38,16 @@ namespace WordPressdotorg\MU_Plugins\Site_Branding {
 	add_filter( 'document_title_parts', __NAMESPACE__ . '\document_title_parts', 100 );
 
 	/**
+	 * Use a pipe as the document title separator.
+	 *
+	 * @return string
+	 */
+	function document_title_separator() {
+		return '&#124;';
+	}
+	add_filter( 'document_title_separator', __NAMESPACE__ . '\document_title_separator' );
+
+	/**
 	 * Always suffix the WordPress brand to bbPress titles.
 	 */
 	function bbp_title( $title ) {

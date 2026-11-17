@@ -120,6 +120,7 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/header.js';
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/discard.js';
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/settings.js';
+				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/users.js';
 
 				return $javascripts;
 			}

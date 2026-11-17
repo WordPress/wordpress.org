@@ -250,7 +250,7 @@ class Get_Plugin_Status extends Ability_Base {
 			return array();
 		}
 
-		$emails = Helpscout::get_emails( $post, array( 'subject' => 'Review in Progress:' ) );
+		$emails = Helpscout::get_review_emails( $post );
 
 		if ( ! $emails ) {
 			return array();

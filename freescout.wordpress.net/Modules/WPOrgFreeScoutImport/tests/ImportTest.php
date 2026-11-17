@@ -11,6 +11,7 @@ namespace Modules\WPOrgFreeScoutImport\Tests;
 
 use App\Attachment;
 use App\Conversation;
+use App\Folder;
 use App\Thread;
 use App\User;
 use GuzzleHttp\Promise\FulfilledPromise;
@@ -28,10 +29,12 @@ use Modules\WPOrgFreeScoutImport\Services\People;
 use Modules\WPOrgFreeScoutImport\Services\RemoteApi;
 use Modules\WPOrgSSO\Entities\Account;
 use Modules\WPOrgSSO\Services\Client;
+use Modules\Teams\Providers\TeamsServiceProvider;
 use Modules\WPOrgFreeScoutImport\Tests\Support\FakeSource;
 use Psr\Http\Message\RequestInterface;
 
 require_once __DIR__ . '/ImportTestCase.php';
+require_once dirname( __DIR__, 3 ) . '/tests/Support/TeamsServiceProvider.php';
 
 /**
  * Covers a conversation's import, importing it again, Message-IDs, crediting users, and a whole run.
@@ -171,6 +174,76 @@ final class ImportTest extends ImportTestCase {
 	}
 
 	/**
+	 * A conversation assigned to a team there's none of here comes across unassigned, tagged with its name, and what
+	 * the source's workflows did is credited to the import's robot: neither gets a user. Choosing a team for it later
+	 * assigns it.
+	 *
+	 * @return void
+	 */
+	public function test_teams_without_a_team_here_and_robots_get_no_users(): void {
+		$sponsors = self::user( 102, 'Sponsors', 'Team', 'fsteam-1465840985@example.org' );
+		$workflow = self::user( 109, 'Workflow', '', 'fsworkflow@example.org' );
+		$this->remote->json( 'api/users', self::page( 'users', array( $sponsors, $workflow ) ) );
+		$this->use_teams();
+
+		$source = self::conversation(
+			array(
+				'status'       => 'active',
+				'assignee'     => $sponsors,
+				'closedByUser' => null,
+				'closedAt'     => null,
+			)
+		);
+		array_unshift(
+			$source['_embedded']['threads'],
+			self::thread(
+				9007,
+				'lineitem',
+				$workflow,
+				'2025-01-02T11:09:00Z',
+				array(
+					'action'     => array( 'type' => 'changed-ticket-assignee' ),
+					'assignedTo' => $sponsors,
+				)
+			)
+		);
+		$this->import( $source );
+
+		$conversation = $this->imported( 501 );
+		$this->assertNull( $conversation->user_id );
+		$tag = \DB::table( 'tags' )->where( 'name', 'sponsors team' )->first();
+		$this->assertTrue( $tag && \DB::table( 'conversation_tag' )->where( 'conversation_id', $conversation->id )->where( 'tag_id', $tag->id )->exists() );
+		$this->assertFalse( User::query()->whereIn( 'email', array( 'fsteam-1465840985@example.org', 'fsworkflow@example.org' ) )->exists() );
+
+		$line_item = Thread::query()->whereKey( ImportedThread::query()->where( 'source_id', $this->source->id )->where( 'remote_id', 9007 )->value( 'thread_id' ) )->first();
+		$this->assertSame( People::ROBOT_EMAIL, $line_item->created_by_user->email );
+
+		$team = $this->team( 'Sponsorships' );
+		$this->actingAs( $this->create_user() )
+			->post( route( 'wporgfreescoutimport.users.save', array( 'id' => $this->source->id ) ), array( 'teams' => array( 102 => $team->id ) ) )
+			->assertRedirect( route( 'wporgfreescoutimport.users', array( 'id' => $this->source->id ) ) );
+
+		$conversation->refresh();
+		$this->assertSame( (int) $team->id, (int) $conversation->user_id );
+		$this->assertSame( Folder::TYPE_ASSIGNED, (int) $conversation->folder->type );
+		$this->assertSame( (int) $team->id, (int) $line_item->fresh()->user_id );
+	}
+
+	/**
+	 * A conversation assigned to a team there is assigned to the team here with the same name.
+	 *
+	 * @return void
+	 */
+	public function test_teams_go_to_the_team_here_with_the_same_name(): void {
+		$this->use_teams();
+		$team = $this->team( 'Sponsors' );
+
+		$this->import( self::conversation( array( 'assignee' => self::user( 102, 'Sponsors', 'Team', 'fsteam-1465840985@example.org' ) ) ) );
+
+		$this->assertSame( (int) $team->id, (int) $this->imported( 501 )->user_id );
+	}
+
+	/**
 	 * A run started on the page imports page after page until one is empty, leaves out spam and deleted
 	 * conversations, and the old number then finds what it imported.
 	 *
@@ -248,7 +321,8 @@ final class ImportTest extends ImportTestCase {
 
 	/**
 	 * A CSV connects users who'll work here: one an import created disabled is switched on, with access to its mailbox,
-	 * and someone new gets a user; one who was here before, under another email than the account's, isn't connected.
+	 * and someone new gets a user, disabled if they're deleted there; one who was here before, under another email than
+	 * the account's, isn't connected.
 	 *
 	 * @return void
 	 */
@@ -259,6 +333,7 @@ final class ImportTest extends ImportTestCase {
 				'adaagent' => array( 'Ada', 'Agent', 'ada@wordpress.example' ),
 				'noranote' => array( 'Nora', 'Note', 'nora@wordpress.example' ),
 				'bonew'    => array( 'Bo', 'New', 'bo@wordpress.example' ),
+				'ezragone' => array( 'Ezra', 'Gone', 'ezra@wordpress.example' ),
 			)
 		);
 		$this->remote->json(
@@ -269,6 +344,7 @@ final class ImportTest extends ImportTestCase {
 					self::user( 55, 'Ada', 'Agent', 'agent@example.org' ),
 					self::user( 66, 'Nora', 'Note', 'nora@wcus.test' ),
 					self::user( 77, 'Bo', 'New', 'bo@wcus.test' ),
+					self::user( 99, 'Ezra', 'Gone', 'ezra@wcus.test_deleted20210601184317' ),
 				)
 			)
 		);
@@ -278,11 +354,11 @@ final class ImportTest extends ImportTestCase {
 			->post(
 				route( 'wporgfreescoutimport.users.connect', array( 'id' => $this->source->id ) ),
 				array(
-					'csv'   => "remote_id,wporg_username\n55,adaagent\n66,noranote\n77,bonew\n",
+					'csv'   => "remote_id,wporg_username\n55,adaagent\n66,noranote\n77,bonew\n99,ezragone\n",
 					'apply' => 1,
 				)
 			)
-			->assertSessionHas( 'flash_success', 'Connected 2 users to WordPress.org accounts.' );
+			->assertSessionHas( 'flash_success', 'Connected 3 users to WordPress.org accounts.' );
 
 		$nora = User::query()->findOrFail( (int) RemoteUser::query()->where( 'source_id', $this->source->id )->where( 'remote_user_id', 66 )->value( 'user_id' ) );
 		$this->assertSame( 'noranote', Account::username_for( (int) $nora->id ) );
@@ -293,7 +369,47 @@ final class ImportTest extends ImportTestCase {
 		$this->assertSame( 'bonew', Account::username_for( (int) $bo->id ) );
 		$this->assertSame( User::STATUS_ACTIVE, (int) $bo->status );
 
+		$ezra = User::query()->findOrFail( (int) RemoteUser::query()->where( 'source_id', $this->source->id )->where( 'remote_user_id', 99 )->value( 'user_id' ) );
+		$this->assertSame( 'ezragone', Account::username_for( (int) $ezra->id ) );
+		$this->assertSame( User::STATUS_DISABLED, (int) $ezra->status );
+
 		$this->assertSame( '', Account::username_for( (int) $this->agent->id ) );
+	}
+
+	/**
+	 * Rows naming the same account, like someone's older, deleted users there, are all credited to the one user the
+	 * account is connected to, switched on even when the row of a deleted one comes first.
+	 *
+	 * @return void
+	 */
+	public function test_csv_credits_rows_naming_the_same_account_to_one_user(): void {
+		Queue::fake();
+		$this->use_wordpress_org( array( 'noranote' => array( 'Nora', 'Note', 'nora@wordpress.example' ) ) );
+		$this->remote->json(
+			'api/users',
+			self::page(
+				'users',
+				array(
+					self::user( 66, 'Nora', 'Note', 'nora@wcus.test' ),
+					self::user( 88, 'Nora', 'Note', 'nora@wcus.test_deleted20210601184317' ),
+				)
+			)
+		);
+
+		$this->actingAs( $this->create_user() )
+			->post(
+				route( 'wporgfreescoutimport.users.connect', array( 'id' => $this->source->id ) ),
+				array(
+					'csv'   => "remote_id,wporg_username\n88,noranote\n66,noranote\n",
+					'apply' => 1,
+				)
+			)
+			->assertSessionHas( 'flash_success', 'Connected 2 users to WordPress.org accounts.' );
+
+		$users = RemoteUser::query()->where( 'source_id', $this->source->id )->pluck( 'user_id', 'remote_user_id' )->map( 'intval' )->all();
+		$this->assertSame( $users[66], $users[88] ?? null );
+		$this->assertSame( 'noranote', Account::username_for( $users[66] ) );
+		$this->assertSame( User::STATUS_ACTIVE, (int) User::query()->findOrFail( $users[66] )->status );
 	}
 
 	/**
@@ -394,6 +510,44 @@ final class ImportTest extends ImportTestCase {
 				}
 			)
 		);
+	}
+
+	/**
+	 * Switches the Teams module on, with the teams a test makes.
+	 *
+	 * @return void
+	 */
+	private function use_teams(): void {
+		\App\Module::clearModulesCache();
+		\App\Module::setActive( People::TEAMS_MODULE, true );
+		\App\Module::clearModulesCache();
+		$this->beforeApplicationDestroyed(
+			static function (): void {
+				TeamsServiceProvider::$team_ids = array();
+			}
+		);
+	}
+
+	/**
+	 * A team of the Teams module, which keeps them as deleted robot users named "Team".
+	 *
+	 * @param string $name Team name.
+	 * @return User
+	 */
+	private function team( string $name ): User {
+		$team = factory( User::class )->create(
+			array(
+				'first_name' => $name,
+				'last_name'  => 'Team',
+				'email'      => uniqid( 'fsteam-' ) . '@example.org',
+				'type'       => User::TYPE_ROBOT,
+				'status'     => User::STATUS_DELETED,
+			)
+		);
+
+		TeamsServiceProvider::$team_ids[] = (int) $team->id;
+
+		return $team;
 	}
 
 	/**

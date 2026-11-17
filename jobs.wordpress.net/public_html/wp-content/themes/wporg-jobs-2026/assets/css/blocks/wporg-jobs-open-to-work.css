@@ -1,0 +1,185 @@
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__people {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.wp-block-wporg-jobs-open-to-work:is(.is-variant-grid, .is-variant-compact) .wporg-jobs-open-to-work__people {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--wp--preset--spacing--20);
+}
+
+.wp-block-wporg-jobs-open-to-work:is(.is-variant-grid, .is-variant-compact) .wporg-jobs-open-to-work__person > a {
+	display: flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--20);
+	box-sizing: border-box;
+	height: 100%;
+	padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+	border: 1px solid var(--wp--preset--color--hairline);
+	border-radius: var(--wp--preset--border-radius--small);
+	background-color: var(--wp--preset--color--base);
+	color: inherit;
+	text-decoration: none;
+}
+
+.wp-block-wporg-jobs-open-to-work:is(.is-variant-grid, .is-variant-compact) .wporg-jobs-open-to-work__person > a:hover {
+	border-color: var(--wp--preset--color--blueberry);
+	box-shadow: var(--wp--preset--shadow--card-hover);
+	color: inherit;
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__photo {
+	position: relative;
+	flex-shrink: 0;
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__photo img {
+	display: block;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__photo.has-badge::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 110'><defs><clipPath id='c'><circle cx='55' cy='55' r='55'/></clipPath></defs><circle cx='55' cy='55' r='52' fill='none' stroke='%2300a32a' stroke-width='6'/><g clip-path='url(%23c)'><rect x='0' y='82' width='110' height='18' fill='%2300a32a'/><text x='55' y='94.5' text-anchor='middle' fill='white' font-family='Inter,Helvetica,Arial,sans-serif' font-size='9' font-weight='800' letter-spacing='0.5'>%23OPENTOWORK</text></g></svg>");
+	background-size: 100% 100%;
+	pointer-events: none;
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__info {
+	flex: 1;
+	min-width: 0;
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__info .wporg-jobs-open-to-work__name {
+	display: block;
+	margin-bottom: 2px;
+	color: var(--wp--preset--color--ink);
+	font-family: var(--wp--preset--font-family--heading);
+	font-size: var(--wp--preset--font-size--large);
+	line-height: 1.3;
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__role {
+	display: block;
+	color: var(--wp--preset--color--charcoal-3);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__company {
+	color: var(--wp--preset--color--muted);
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__company::before {
+	content: " \2014\00a0";
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__arrow {
+	flex-shrink: 0;
+	color: var(--wp--preset--color--hairline);
+	font-size: var(--wp--preset--font-size--x-large);
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__person > a:hover .wporg-jobs-open-to-work__arrow {
+	color: var(--wp--preset--color--blueberry);
+}
+
+.wp-block-wporg-jobs-open-to-work.is-variant-compact .wporg-jobs-open-to-work__person > a {
+	padding: var(--wp--preset--spacing--20);
+}
+
+.wp-block-wporg-jobs-open-to-work.is-variant-compact .wporg-jobs-open-to-work__photo img {
+	width: 44px;
+	height: 44px;
+}
+
+.wp-block-wporg-jobs-open-to-work.is-variant-compact .wporg-jobs-open-to-work__info .wporg-jobs-open-to-work__name {
+	margin-bottom: 2px;
+	font-size: var(--wp--preset--font-size--medium);
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--wp--preset--spacing--30);
+	margin-top: var(--wp--preset--spacing--30);
+	font-size: var(--wp--preset--font-size--small);
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__page {
+	color: var(--wp--preset--color--blueberry);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.wp-block-wporg-jobs-open-to-work a.wporg-jobs-open-to-work__page:hover {
+	color: var(--wp--preset--color--blueberry-dark);
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__page.is-disabled {
+	color: var(--wp--preset--color--subtle);
+}
+
+.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__page-info {
+	color: var(--wp--preset--color--muted);
+}
+
+.wp-block-wporg-jobs-open-to-work.is-variant-list .wporg-jobs-open-to-work__person {
+	margin-bottom: var(--wp--preset--spacing--10);
+}
+
+.wp-block-wporg-jobs-open-to-work.is-variant-list .wporg-jobs-open-to-work__person > a {
+	display: flex;
+	align-items: center;
+	gap: var(--wp--preset--spacing--10);
+	color: var(--wp--preset--color--blueberry);
+	font-size: var(--wp--preset--font-size--small);
+	text-decoration: none;
+}
+
+.wp-block-wporg-jobs-open-to-work.is-variant-list .wporg-jobs-open-to-work__person > a:hover {
+	color: var(--wp--preset--color--blueberry-dark);
+}
+
+.wp-block-wporg-jobs-open-to-work.is-variant-list img {
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__person > a,
+	.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__page,
+	.wp-block-wporg-jobs-open-to-work .wporg-jobs-open-to-work__arrow {
+		transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+	}
+}
+
+@media (max-width: 900px) {
+	.wp-block-wporg-jobs-open-to-work:is(.is-variant-grid, .is-variant-compact) .wporg-jobs-open-to-work__people {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (max-width: 600px) {
+	.wp-block-wporg-jobs-open-to-work.is-variant-grid .wporg-jobs-open-to-work__person > a {
+		padding: var(--wp--preset--spacing--20);
+	}
+
+	.wp-block-wporg-jobs-open-to-work.is-variant-grid .wporg-jobs-open-to-work__photo img {
+		width: 40px;
+		height: 40px;
+	}
+
+	.wp-block-wporg-jobs-open-to-work:is(.is-variant-grid, .is-variant-compact) .wporg-jobs-open-to-work__arrow {
+		display: none;
+	}
+}

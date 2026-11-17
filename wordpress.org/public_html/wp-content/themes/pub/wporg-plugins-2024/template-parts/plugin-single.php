@@ -16,8 +16,6 @@ global $section_slug, $section_title, $section_content, $post;
 
 $content   = Plugin_Directory::instance()->split_post_content_into_pages( get_the_content() );
 $is_closed = in_array( get_post_status(), [ 'closed', 'disabled' ], true );
-
-$plugin_title = $is_closed ? $post->post_name : get_the_title();
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'alignwide' ); ?>>
@@ -41,9 +39,9 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 
 				<div>
 					<?php if ( get_query_var( 'plugin_advanced' ) ) : ?>
-					<h1 class="plugin-title"><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo wp_kses_post( $plugin_title ); ?></a></h1>
+					<h1 class="plugin-title"><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo wp_kses_post( get_the_title() ); ?></a></h1>
 					<?php else : ?>
-					<h1 class="plugin-title"><?php echo wp_kses_post( $plugin_title ); ?></h1>
+					<h1 class="plugin-title"><?php echo wp_kses_post( get_the_title() ); ?></h1>
 					<?php endif; ?>
 
 					<span class="byline"><?php the_author_byline(); ?></span>
@@ -108,7 +106,7 @@ $plugin_title = $is_closed ? $post->post_name : get_the_title();
 			<a href="<?php echo esc_url( Template::get_support_url() ); ?>"><?php esc_html_e( 'Support', 'wporg-plugins' ); ?></a>
 		</div>
 	</span>
-	<script type="text/javascript">if ( '#changelog' == window.location.hash ) { window.setTimeout( function() { window.location.hash = '#developers'; }, 10 ); }</script>
+	<?php wp_print_inline_script_tag( "if ( '#changelog' == window.location.hash ) { window.setTimeout( function() { window.location.hash = '#developers'; }, 10 ); }" ); ?>
 
 	<div class="entry-content">
 		<?php

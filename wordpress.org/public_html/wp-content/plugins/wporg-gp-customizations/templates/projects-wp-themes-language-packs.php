@@ -64,12 +64,16 @@ gp_tmpl_header();
 	?>
 </div>
 
-<script type="text/javascript">
+<?php
+wp_print_inline_script_tag(
+	<<<'JS'
 jQuery( function( $ ) {
 	$( '.projects-dropdown > li' ).on( 'click', function() {
 		$( this ).parent( '.projects-dropdown' ).toggleClass( 'open' );
 	});
 });
-</script>
+JS
+);
+?>
 
 <?php gp_tmpl_footer();

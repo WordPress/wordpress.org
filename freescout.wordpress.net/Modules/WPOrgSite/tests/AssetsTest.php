@@ -37,7 +37,7 @@ final class AssetsTest extends TestCase {
 	public function test_adds_assets(): void {
 		$assets = array(
 			'stylesheets' => array( '/css/style.css', '/css/site.css' ),
-			'javascripts' => array( '/js/main.js', '/js/modules.js', '/js/alt-conversation.js', '/js/conversation.js', '/js/saved-replies.js', '/js/sidebar.js', '/js/header.js', '/js/discard.js', '/js/settings.js' ),
+			'javascripts' => array( '/js/main.js', '/js/modules.js', '/js/alt-conversation.js', '/js/conversation.js', '/js/saved-replies.js', '/js/sidebar.js', '/js/header.js', '/js/discard.js', '/js/settings.js', '/js/users.js' ),
 		);
 
 		foreach ( $assets as $filter => $files ) {

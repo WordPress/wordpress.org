@@ -89,6 +89,10 @@ class Plugin {
 		add_action( 'bbp_new_topic', array( $this, 'notify_term_subscribers_of_new_topic' ), 10, 2 );
 		add_action( 'bbp_new_reply', array( $this, 'notify_term_subscribers_of_new_reply' ), 10, 3 );
 
+		// Held topics and replies are announced once they're approved or unspammed.
+		add_action( 'bbp_deferred_topic_published', array( $this, 'notify_term_subscribers_of_new_topic' ), 10, 2 );
+		add_action( 'bbp_deferred_reply_published', array( $this, 'notify_term_subscribers_of_new_reply' ), 10, 3 );
+
 		// Replace the title of subscription emails with the term-specific prefix.
 		// This applies to all notification emails sent related to the topic, not just the term-specific emails.
 		add_filter( 'bbp_forum_subscription_mail_title', array( $this, 'replace_forum_subscription_mail_title' ), 10, 2 );

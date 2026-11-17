@@ -92,21 +92,19 @@
 	/**
 	 * Keeps the full-size anchor as a no-JS fallback only.
 	 *
-	 * Core opens the lightbox from img/button handlers but does not cancel
-	 * navigation on a wrapping anchor, so cancel the anchor default without
-	 * stopping propagation.
+	 * Core's lightbox opens from its own img and button handlers, so with JS
+	 * the wrapping anchor only adds a nested control and an extra tab stop.
+	 * Replaces each anchor with its children.
 	 *
 	 * @param {Document|HTMLElement} root Document or section element to scan.
 	 */
-	function disableFallbackNavigation( root ) {
+	function unwrapFallbackLinks( root ) {
 		var links = root.querySelectorAll(
-			'#screenshots figure.wp-block-image > a.plugin-screenshots__fallback-link[href]'
+			'#screenshots figure.wp-block-image > a.plugin-screenshots__fallback-link'
 		);
 
 		links.forEach( function ( link ) {
-			link.addEventListener( 'click', function ( event ) {
-				event.preventDefault();
-			} );
+			link.replaceWith.apply( link, Array.from( link.childNodes ) );
 		} );
 	}
 
@@ -310,10 +308,12 @@
 	 */
 	function init( root ) {
 		hideBrokenFigures( root );
-		disableFallbackNavigation( root );
 		var roots = root.querySelectorAll( '.plugin-screenshots__reveal' );
 		roots.forEach( bind );
 	}
+
+	// Footer script: the figures are parsed, and Interactivity hasn't hydrated them yet.
+	unwrapFallbackLinks( document );
 
 	if ( document.readyState === 'loading' ) {
 		document.addEventListener( 'DOMContentLoaded', function () { init( document ); } );

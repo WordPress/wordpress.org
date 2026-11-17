@@ -425,8 +425,8 @@ function wporg_gp_is_index() {
  * Prints JavaScript helper for menu toggle.
  */
 add_action( 'gp_footer', function() {
-	?>
-	<script>
+	wp_print_inline_script_tag(
+		<<<'JS'
 		( function( $ ) {
 			$( function() {
 				var $menu = $( '#site-navigation' );
@@ -438,8 +438,8 @@ add_action( 'gp_footer', function() {
 				}
 			} );
 		} )( jQuery );
-	</script>
-	<?php
+		JS
+	);
 } );
 
 /**
@@ -469,7 +469,7 @@ function wporg_gp_translate_textarea( $entry, $permissions, $index = 0 ) {
 			endforeach;
 		endif;
 		?>
-		<textarea placeholder="Enter translation here" class="foreign-text" name="translation[<?php echo esc_attr( $entry->original_id ); ?>][]" id="translation_<?php echo esc_attr( $entry->original_id ); ?>_<?php echo esc_attr( $index ); ?>" <?php disabled( ! $can_edit ); ?>><?php echo esc_translation( gp_array_get( $entry->translations, $index ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></textarea>
+		<textarea placeholder="Enter translation here" class="foreign-text" name="translation[<?php echo esc_attr( $entry->original_id ); ?>][]" id="translation_<?php echo esc_attr( $entry->original_id ); ?>_<?php echo esc_attr( $index ); ?>" <?php disabled( ! $can_edit ); ?>><?php echo gp_prepare_translation_textarea( esc_translation( gp_array_get( $entry->translations, $index ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></textarea>
 	</div>
 	<?php
 }
