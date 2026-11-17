@@ -84,7 +84,7 @@ class Committers extends \WP_Widget {
 						<input type="text" name="committer" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
 						<span class="screen-reader-text"><?php esc_html_e( 'Add a new committer', 'wporg-plugins' ); ?></span>
 					</label>
-					<button type="submit" class="button button-secondary button-small"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
+					<span class="wp-block-button is-small"><button type="submit" class="wp-block-button__link"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button></span>
 				</form>
 
 				<script id="tmpl-new-committer" type="text/template">

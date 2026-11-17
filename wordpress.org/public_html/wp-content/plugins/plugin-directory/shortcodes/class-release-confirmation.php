@@ -424,7 +424,7 @@ class Release_Confirmation {
 				$discard_link = get_revalidation_js_url( $discard_link );
 
 				$buttons[] = sprintf(
-					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</button>',
+					'<span class="wp-block-button is-small"><button formaction="%s" class="wp-block-button__link approve-release" data-2fa-required data-2fa-message="%s">%s</button></span>',
 					esc_attr( $confirm_link ),
 					esc_attr(
 						sprintf(
@@ -438,7 +438,7 @@ class Release_Confirmation {
 				);
 
 				$buttons[] = sprintf(
-					'<button formaction="%s" class="wp-element-button button discard-release has-very-light-gray-background-color has-charcoal-1-color" data-2fa-required data-2fa-message="%s">%s</button>',
+					'<span class="wp-block-button is-small is-style-outline"><button formaction="%s" class="wp-block-button__link discard-release" data-2fa-required data-2fa-message="%s">%s</button></span>',
 					esc_attr( $discard_link ),
 					esc_attr(
 						sprintf(
@@ -459,7 +459,7 @@ class Release_Confirmation {
 		) {
 			// Plugin reviewers can undo a discard within 48hrs.
 			$buttons[] = sprintf(
-				'<button formaction="%s" class="wp-element-button button undo-discard">%s</buttona>',
+				'<span class="wp-block-button is-small"><button formaction="%s" class="wp-block-button__link undo-discard">%s</button></span>',
 				esc_url( Template::get_release_confirmation_link( $data['tag'], $plugin, 'undo-discard' ) ),
 				esc_html__( 'Undo Discard', 'wporg-plugins' )
 			);

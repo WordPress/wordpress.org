@@ -57,7 +57,7 @@ class Readme_Validator {
 			<form method="get" action="">
 				<p>
 					<input type="text" name="readme" size="70" placeholder="https://" value="<?php echo esc_attr( $readme_url ); ?>" />
-					<input type="submit" class="wp-element-button button" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" />
+					<span class="wp-block-button is-small"><input type="submit" class="wp-block-button__link" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" /></span>
 				</p>
 			</form>
 
@@ -66,7 +66,7 @@ class Readme_Validator {
 				<form id="readme-data" method="post" action="">
 					<input type="hidden" name="readme" value="" />
 					<textarea class="screen-reader-text" rows="20" cols="100" name="readme_contents"><?php echo esc_textarea( $readme_contents ); ?></textarea>
-				<p><input type="submit" class="wp-element-button button" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" /></p>
+				<p class="wp-block-button is-small"><input type="submit" class="wp-block-button__link" value="<?php esc_attr_e( 'Validate!', 'wporg-plugins' ); ?>" /></p>
 			</form>
 			<?php
 			wp_print_inline_script_tag(

@@ -77,7 +77,7 @@ document.addEventListener( 'DOMContentLoaded' , function() {
 	
 					var $row = $( this ).parents( 'li' ),
 						$newUserInput = $row.find( 'input[name="committer"]' ),
-						$button = $row.find( '.button-small' ).addClass( 'spinner' ),
+						$button = $row.find( 'button[type="submit"]' ).addClass( 'spinner' ),
 						url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/committers/?_wpnonce=' + pluginDir.restNonce
 						+ '&_wporg_action=' + pluginDir.addNonce;
 	
