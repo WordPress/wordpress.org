@@ -5,12 +5,18 @@ on:
     paths:
       - '.oss-scanner/**'
       - 'environments/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/unit-tests-suites.yml'
       - '.github/workflows/oss-scanner.yml'
   push:
     branches: [ trunk ]
     paths:
       - '.oss-scanner/**'
       - 'environments/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/unit-tests-suites.yml'
       - '.github/workflows/oss-scanner.yml'
   # The image builds from unpinned sources (nightly WordPress, plugin zips, live WordPress.org content); catch breakage
   # before the scanner's next build does, which reports it to the security team.
@@ -18,9 +24,9 @@ on:
     - cron: '0 5 * * *'
   workflow_dispatch:
 
-# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
+# Cancel superseded runs, on trunk too: only the newest image matters, and the daily run backs it up.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -31,9 +37,12 @@ jobs:
     name: Build and check
     if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v7
+      # Without persisted credentials: the checkout, .git included, is copied into the image.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # As the scanner builds it: the checkout is the build context, with network access.
       - name: Build the image
