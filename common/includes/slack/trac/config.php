@@ -77,6 +77,25 @@ class Core extends Trac {
 	);
 
 	/**
+	 * Focuses that cause new tickets to be piped to particular channels.
+	 * These also match commit messages that start with the focus.
+	 *
+	 * Unlike components, focuses post to the focus channel itself.
+	 *
+	 * @var array
+	 */
+	protected $ticket_component_filters = array(
+		'coding-standards' => '#core-coding-standards',
+		'css'              => '#core-css',
+		'docs'             => '#core-docs',
+		'javascript'       => '#core-js',
+		'multisite'        => '#core-multisite',
+		'performance'      => '#core-performance',
+		'privacy'          => '#core-privacy',
+		'rest-api'         => '#core-restapi',
+	);
+
+	/**
 	 * Maps each Core Trac component to its component specific channel.
 	 *
 	 * Notifications for a component go to that channel's -firehose, -newtickets and -commits

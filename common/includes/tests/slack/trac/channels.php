@@ -77,16 +77,21 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 				'I18N: Add context to a string.',
 				array_merge( $global, array( '#core-i18n-commits', '#core-i18n-firehose', '#core-media-commits', '#core-media-firehose' ) ),
 			),
-			'no component'                           => array(
+			'focus prefix'                           => array(
 				'trunk/src/wp-includes/formatting.php',
 				'Docs: Correct a parameter type.',
+				array_merge( $global, array( '#core-docs' ) ),
+			),
+			'no component'                           => array(
+				'trunk/src/wp-includes/formatting.php',
+				'Fix a typo.',
 				$global,
 			),
 		);
 	}
 
 	/**
-	 * New Core tickets post to the global channels and the component's channels.
+	 * New Core tickets post to the global channels, the component's channels and the focus channels.
 	 */
 	public function test_core_new_ticket_channels(): void {
 		$ticket = (object) array(
@@ -99,7 +104,7 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 
 		sort( $channels );
 		$this->assertSame(
-			array( '#core', '#core-firehose', '#core-media-firehose', '#core-media-newtickets', '#core-newtickets', '#core-test' ),
+			array( '#core', '#core-css', '#core-firehose', '#core-js', '#core-media-firehose', '#core-media-newtickets', '#core-newtickets', '#core-test' ),
 			$channels
 		);
 	}
