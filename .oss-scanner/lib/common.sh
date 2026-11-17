@@ -33,6 +33,11 @@ site_name() {
 	esac
 }
 
+# Prints a KEY="value" file, as wporg-provision writes them from docker-compose.yml, as KEY=value lines for `env`.
+env_assignments() {
+	sed -nE 's/^([A-Za-z_][A-Za-z0-9_]*)="(.*)"$/\1=\2/p' "$1"
+}
+
 # Loads a site's settings (NAME, KIND, CONFIG, PORT, ROOT, TESTS, DB) into the caller's scope.
 load_site() {
 	[ -f "$SITES/$1/site.env" ] || die "no site named $1 (see: wporg sites)"

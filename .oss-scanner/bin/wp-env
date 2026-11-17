@@ -29,7 +29,11 @@ case $command in
 			# Only works with network access, which a scan does not have.
 			wporg-provision "$( realpath --relative-to="$ENVDIR" "$config" )"
 		fi
-		wporg start
+		if [ "$( id -u )" = 0 ]; then
+			wporg start
+		elif ! mariadb-admin ping --silent 2> /dev/null; then
+			die "the sites are not running; run \`wporg start\` as root"
+		fi
 		load_site "$name"
 		echo "WordPress started at http://localhost:$PORT (site $name; its setup ran when the image was built)."
 		;;
@@ -51,6 +55,7 @@ case $command in
 			esac
 		done
 		load_site "$name"
+		cwd=${cwd//\/var\/www\/html/$ROOT}
 		args=()
 		for arg in "$@"; do
 			arg=${arg//\/var\/www\/html/$ROOT}

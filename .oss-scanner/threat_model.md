@@ -125,9 +125,11 @@ built the way `wp-env` would build it, but on one Apache and one MariaDB instead
 
 What differs from production: the environments stand in for production-only services with mocks under
 `environments/mocks/` and each environment's `mu-plugins/` (profiles, ratings, two-factor, locales tables), and SSO
-across domains is not reproduced on the WordPress sites. `WP_DEBUG` is on locally and off in production. A finding
-that only works because of a mock, a local setting, or the missing SSO is not a finding; confirm it on the production
-code path.
+across domains is not reproduced on the WordPress sites. `WP_DEBUG` is on locally and off in production. The web
+server's user, `www-data`, owns `/src` and has passwordless sudo here, as `wp-env`'s user does, and the sites share
+hard-linked copies of WordPress and of plugins from elsewhere; production has none of that. A finding that only works
+because of a mock, a local setting, this image's layout, or the missing SSO is not a finding, and its impact is what
+it would be in production; confirm it on the production code path.
 
 ### Reproducers must not fabricate the attacker's state
 

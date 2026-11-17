@@ -83,11 +83,15 @@ start() {
 
 		# The mock API answers FreeScout on 8080, and the browser's SAML logins on 8892, as Compose maps it.
 		local env
-		mapfile -t env < <( sed -E 's/^([A-Z_]+)="(.*)"$/\1=\2/' "$SITES/freescout/mock-api.env" )
+		mapfile -t env < <( env_assignments "$SITES/freescout/mock-api.env" )
 		daemon mock-api runuser -u www-data -- env "${env[@]}" php -S 0.0.0.0:8080 /srv/mock-api/index.php
 		daemon mock-api-idp runuser -u www-data -- env "${env[@]}" php -S 0.0.0.0:8892 /srv/mock-api/index.php
 
-		# FreeScout's scheduler, which also starts the queue worker, as its container's entrypoint runs it.
+		# FreeScout's scheduler, which also starts the queue worker, as its container's entrypoint runs it. It waits for
+		# setup.sh's marker in /tmp, which a scan may start without; setup ran when the image was built.
+		if [ -f "$SITES/freescout/after-start.done" ]; then
+			touch /tmp/wporg-setup-done
+		fi
 		daemon freescout-scheduler runuser -u www-data -- bash -c '
 			until [ -f /tmp/wporg-setup-done ]; do
 				sleep 1
@@ -175,7 +179,7 @@ run() {
 	case $cwd in
 		'') cwd=$ROOT ;;
 		/*) ;;
-		*) cwd=$( realpath -m "$ROOT/$cwd" ) ;;
+		*) cwd=$( realpath -m -s "$ROOT/$cwd" ) ;;
 	esac
 
 	local env=(
@@ -183,13 +187,15 @@ run() {
 		COMPOSER_CACHE_DIR="$WPORG_OPT/composer-cache"
 	)
 	if [ "$KIND" = freescout ]; then
-		local line
-		while IFS= read -r line; do
-			env+=( "$( sed -E 's/^([A-Z_]+)="(.*)"$/\1=\2/' <<< "$line" )" )
-		done < <( grep -E '^[A-Z_]+=' "$ROOT/.env" )
+		local dotenv
+		mapfile -t dotenv < <( env_assignments "$ROOT/.env" )
+		env+=( "${dotenv[@]}" )
 	else
 		# What wp-env's cli container has in its environment, including its own global Composer packages.
+		# WP_CLI_CONFIG_PATH points WP-CLI at the site even from a plugin linked into /src, where the directory it
+		# would search upward from is.
 		env+=(
+			WP_CLI_CONFIG_PATH="$ROOT/wp-cli.yml"
 			COMPOSER_HOME="$SITES/$NAME/composer"
 			PATH="$SITES/$NAME/composer/vendor/bin:$PATH"
 			WP_TESTS_DIR="$TESTS"

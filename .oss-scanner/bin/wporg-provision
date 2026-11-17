@@ -8,7 +8,8 @@
 #   wporg-provision <config>...     a site for each config, as a path relative to environments/
 #   wporg-provision freescout       FreeScout and the services it talks to
 #
-# Several sites are built side by side, each logging to $LOGS/provision/<site>.log, which is printed at the end.
+# Several sites are built side by side, as many as there are CPUs but at least 4, since most of the time goes to
+# waiting on the network. Each logs to $LOGS/provision/<site>.log, which is printed at the end.
 # A site that fails, or whose afterStart lifecycle script fails, is kept, marked failed (see `wporg sites`), and does
 # not stop the build: those scripts import live WordPress.org content, and a hiccup there should not cost the scan.
 
@@ -100,7 +101,10 @@ resolve_source() {
 	local spec=$1 path base
 	case $spec in
 		.* | /*)
-			path=$( realpath -m "$ENVDIR/$spec" )
+			case $spec in
+				/*) path=$( realpath -m "$spec" ) ;;
+				*) path=$( realpath -m "$ENVDIR/$spec" ) ;;
+			esac
 			[ -e "$path" ] || die "$spec: no such file or directory (relative paths are resolved against $ENVDIR)"
 			printf '%s\t%s\tlocal\n' "$path" "$( basename "$path" )"
 			;;
@@ -193,17 +197,19 @@ provision_site() {
 	IFS=$'\t' read -r src base kind <<< "$out"
 	[ "$kind" = remote ] || die "$config: a local core checkout is not supported"
 	cp -al "$src" "$root"
-	rm -rf "$root/.git"
 	cp -al "$SOURCES/wordpress-develop/tests/phpunit" "$tests"
 
 	# Plugins, themes and mappings, shallowest first, like Docker's mounts. Local sources are linked, so a change in
 	# /src shows on the next request; remote ones are hard-linked copies of the shared download.
-	local mounts=() spec dest
+	local mounts=() plugins=() spec dest
 	while IFS=$'\t' read -r dest spec; do
 		out=$( resolve_source "$spec" )
 		IFS=$'\t' read -r src base kind <<< "$out"
 		case $dest in
-			:plugin) dest=wp-content/plugins/$base ;;
+			:plugin)
+				dest=wp-content/plugins/$base
+				plugins+=( "$base" )
+				;;
 			:theme) dest=wp-content/themes/$base ;;
 		esac
 		mounts+=( "$( tr -cd / <<< "$dest" | wc -c )"$'\t'"$dest"$'\t'"$src"$'\t'"$kind" )
@@ -225,7 +231,7 @@ provision_site() {
 		fi
 	done < <( printf '%s\n' "${mounts[@]}" | sort -s -n -k1,1 )
 
-	printf 'apache_modules:\n  - mod_rewrite\n' > "$root/wp-cli.yml"
+	printf 'path: %s\napache_modules:\n  - mod_rewrite\n' "$root" > "$root/wp-cli.yml"
 	mkdir -p "$root/wp-content/uploads"
 	chown -R www-data:www-data "$dir"
 
@@ -244,9 +250,10 @@ provision_site() {
 	mariadb -e "DROP DATABASE IF EXISTS \`$db\`; CREATE DATABASE \`$db\`;"
 
 	# What wp-env's configureWordPress() does, in its order.
-	local wp=( wporg run "$name" -- wp ) url="http://localhost:$port"
+	local wp=( wporg run "$name" -- wp ) url="http://localhost:$port" multisite
+	multisite=$( jq -r '.multisite // false' "$file" )
 	"${wp[@]}" config create --dbname="$db" --dbuser="$DB_USER" --dbpass="$DB_PASSWORD" --dbhost=127.0.0.1 --skip-check --quiet
-	if [ "$( jq -r '.multisite // false' "$file" )" = true ]; then
+	if [ "$multisite" = true ]; then
 		"${wp[@]}" core multisite-install --url="$url" --title="$name" --admin_user=admin --admin_password=password \
 			--admin_email=wordpress@example.com --skip-email
 	else
@@ -254,7 +261,7 @@ provision_site() {
 			--admin_email=wordpress@example.com --skip-email
 	fi
 	"${wp[@]}" rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard --quiet
-	if [ "$( jq -r '.multisite // false' "$file" )" = true ]; then
+	if [ "$multisite" = true ]; then
 		cat > "$root/.htaccess" <<-'EOF'
 			RewriteEngine On
 			RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -297,18 +304,16 @@ provision_site() {
 		| @tsv' "$file" )
 
 	# wp-env retries its whole setup once, which GlotPress relies on: its first activation fails before its tables exist.
-	while read -r base; do
+	for base in "${plugins[@]}"; do
 		"${wp[@]}" plugin activate "$base" --quiet 2> /dev/null || "${wp[@]}" plugin activate "$base" --quiet
-	done < <(
-		jq -r '.plugins // [] | .[]' "$file" | while read -r spec; do
-			resolve_source "$spec" | cut -f2
-		done
-	)
+	done
 
 	# WordPress' PHPUnit suite reads wp-tests-config.php from its own directory.
 	sed -e '/^require.*wp-settings.php/d' \
 		-e "s|define( 'ABSPATH', __DIR__ . '/' );|define( 'ABSPATH', '$root/' );\n\tdefine( 'WP_DEFAULT_THEME', 'default' );|" \
 		"$root/wp-config.php" > "$tests/wp-tests-config.php"
+	grep -qF "define( 'ABSPATH', '$root/' );" "$tests/wp-tests-config.php" ||
+		die "could not point ABSPATH in wp-tests-config.php at the site: wp-config.php no longer defines it as expected"
 	chown www-data:www-data "$tests/wp-tests-config.php"
 
 	local script
@@ -512,7 +517,8 @@ main() {
 	done
 	apachectl -k graceful
 
-	# Each in its own process, so one that breaks is marked failed and the rest still get built.
+	# Each in its own process, so one that breaks is marked failed and the rest still get built. At least 4 at a time:
+	# the longest builds mostly wait on live imports.
 	local jobs
 	jobs=$( nproc )
 	[ "$jobs" -ge 4 ] || jobs=4

@@ -91,3 +91,6 @@ RUN composer install --no-progress && chown -R www-data:www-data /src/vendor
 # than failing the build, so the others still get scanned.
 RUN wporg start && { wporg-provision freescout || true; } && wporg stop
 RUN wporg start && wporg-provision && wporg stop
+
+# A shell rather than the base image's Apache, which would run as PID 1 without the rest: `wporg start` starts it all.
+CMD ["bash"]
