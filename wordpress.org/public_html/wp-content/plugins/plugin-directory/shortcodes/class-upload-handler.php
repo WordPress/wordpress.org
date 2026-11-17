@@ -1002,15 +1002,7 @@ class Upload_Handler {
 			return false;
 		}
 
-		// The review conversation is the author's; anyone else's can mention the plugin too.
-		return Helpscout::get_emails(
-			$post,
-			[
-				'subject' => 'Review in Progress:',
-				'user_id' => $post->post_author,
-				'limit'   => 1,
-			]
-		);
+		return Helpscout::get_review_emails( $post, 1 );
 	}
 
 	/**

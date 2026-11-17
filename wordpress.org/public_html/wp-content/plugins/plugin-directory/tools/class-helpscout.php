@@ -34,6 +34,9 @@ class Helpscout {
 	/**
 	 * Fetch the list of known Helpscout emails for a given post.
 	 *
+	 * These are the conversations that mention the plugin, in their subject or any message, whoever wrote it. That
+	 * doesn't make them the plugin's: use get_review_emails() for anything shown or sent to its author.
+	 *
 	 * @param \WP_Post $post The post to fetch emails for.
 	 * @return array
 	 */
@@ -87,6 +90,29 @@ class Helpscout {
 		}
 
 		return $emails;
+	}
+
+	/**
+	 * Fetch a plugin's review conversations: the "Review in Progress" ones with its author, newest first.
+	 *
+	 * @param \WP_Post $post  The plugin post.
+	 * @param int      $limit How many to fetch.
+	 * @return array|object|false The conversations; with a limit of 1, the newest, or false.
+	 */
+	public static function get_review_emails( $post, $limit = 999 ) {
+		// Conversations whose sender has no account are recorded with a user ID of 0.
+		if ( ! (int) $post->post_author ) {
+			return 1 === $limit ? false : [];
+		}
+
+		return self::get_emails(
+			$post,
+			[
+				'subject' => 'Review in Progress:',
+				'user_id' => (int) $post->post_author,
+				'limit'   => $limit,
+			]
+		);
 	}
 
 	/**

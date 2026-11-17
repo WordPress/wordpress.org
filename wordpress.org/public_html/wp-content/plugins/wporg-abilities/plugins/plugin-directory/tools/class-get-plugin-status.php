@@ -250,14 +250,7 @@ class Get_Plugin_Status extends Ability_Base {
 			return array();
 		}
 
-		// Only the author's conversations; anyone else's can mention the plugin too.
-		$emails = Helpscout::get_emails(
-			$post,
-			array(
-				'subject' => 'Review in Progress:',
-				'user_id' => $post->post_author,
-			)
-		);
+		$emails = Helpscout::get_review_emails( $post );
 
 		if ( ! $emails ) {
 			return array();
