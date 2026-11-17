@@ -314,14 +314,17 @@
 				results.push( project );
 			}
 
-			results.sort( ( a, b ) => ( b.matchScore - a.matchScore ) || ( b.attributes.checked - a.attributes.checked ) );
-			this.reset( results, { sort: false } );
+			this.reset( results );
 		},
 
-		comparator( project ) {
+		comparator( a, b ) {
 			// Default view: Floats assigned permissions to the top
-			// Search view: Overridden to prioritize search relevance over assignment state.
-			return this.terms ? - project.matchScore : - project.get( 'checked' );
+			// Search view: Prioritizes search relevance over assignment state.
+			if ( this.terms ) {
+				return ( b.matchScore - a.matchScore ) || ( b.attributes.checked - a.attributes.checked );
+			}
+
+			return b.attributes.checked - a.attributes.checked;
 		}
 	} );
 
