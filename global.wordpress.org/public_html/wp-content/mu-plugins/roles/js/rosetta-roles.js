@@ -660,11 +660,21 @@
 				blob
 			}, 'payload' );
 
-			await new Promise( ( resolve, reject ) => {
+			let timer;
+			const writePromise = new Promise( ( resolve, reject ) => {
 				tx.oncomplete = () => resolve();
-				tx.onerror = () => reject( tx.error );
-				tx.onabort = () => reject( tx.error );
+				tx.onerror = () => reject( tx.error || new Error( 'Transaction error' ) );
+				tx.onabort = () => reject( tx.error || new Error( 'Transaction aborted' ) );
 			} );
+
+			const timeout = new Promise( ( _, reject ) => {
+				timer = setTimeout( () => {
+					try { tx.abort(); } catch {}
+					reject( new Error( 'IndexedDB write transaction timed out' ) );
+				}, 2000 );
+			} );
+
+			await Promise.race( [ writePromise, timeout ] ).finally( () => clearTimeout( timer ) );
 		} catch ( error ) {
 			console.warn( 'Caching projects in IndexedDB failed.', error );
 		} finally {
