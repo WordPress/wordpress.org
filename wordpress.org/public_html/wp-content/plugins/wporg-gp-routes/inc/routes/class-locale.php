@@ -116,6 +116,10 @@ class Locale extends GP_Route {
 		$data['project']                = $project;
 		$data['sub_projects']           = $paged_sub_projects['projects'];
 		$data['pages']                  = $paged_sub_projects['pages'];
+		$data['locale']                 = $locale_slug;
+		$data['set_slug']               = $set_slug;
+		$data['filter']                 = $paged_sub_projects['filter'];
+		$data['search']                 = $search;
 		$data                           = apply_filters( 'gp_subprojects', $data );
 		$paged_sub_projects['projects'] = $data['sub_projects'];
 		$paged_sub_projects['pages']    = $data['pages'];
