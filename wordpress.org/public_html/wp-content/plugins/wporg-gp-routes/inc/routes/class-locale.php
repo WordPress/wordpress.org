@@ -176,6 +176,10 @@ class Locale extends GP_Route {
 				'project'      => $project,
 				'sub_projects' => $paged_sub_projects['projects'],
 				'pages'        => $paged_sub_projects['pages'],
+				'locale'       => $locale_slug,
+				'set_slug'     => $set_slug,
+				'filter'       => $paged_sub_projects['filter'],
+				'search'       => $search,
 			)
 		);
 
@@ -506,11 +510,12 @@ class Locale extends GP_Route {
 		global $wpdb;
 
 		$locale_contributors = [
-			'editors'      => [
+			'editors'           => [
 				'project'   => [],
 				'inherited' => [],
 			],
-			'contributors' => [],
+			'contributors'      => [],
+			'contributors_past' => [],
 		];
 
 		// Get the translation editors of the project.
@@ -669,6 +674,15 @@ class Locale extends GP_Route {
 			$locale_contributors['contributors'],
 			static fn( $a, $b ) => $b->total_count <=> $a->total_count
 		);
+
+		// Same one-year cutoff as the Current/Past Translation Contributors on the Polyglots teams page.
+		$active_cutoff = gmdate( 'Y-m-d H:i:s', strtotime( '-365 days' ) );
+		foreach ( $locale_contributors['contributors'] as $user_id => $contributor ) {
+			if ( $contributor->last_update < $active_cutoff ) {
+				$locale_contributors['contributors_past'][ $user_id ] = $contributor;
+				unset( $locale_contributors['contributors'][ $user_id ] );
+			}
+		}
 
 		return $locale_contributors;
 	}
