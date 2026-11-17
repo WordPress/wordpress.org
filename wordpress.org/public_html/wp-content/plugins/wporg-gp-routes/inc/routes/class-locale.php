@@ -168,6 +168,10 @@ class Locale extends GP_Route {
 		 *         @type int $per_page Sub-projects per page.
 		 *         @type int $results  Total number of sub-projects.
 		 *     }
+		 *     @type string       $locale       Slug of the locale.
+		 *     @type string       $set_slug     Slug of the translation set.
+		 *     @type string|bool  $filter       The filter to apply, or false.
+		 *     @type string       $search       The search string.
 		 * }
 		 */
 		$data = apply_filters(
