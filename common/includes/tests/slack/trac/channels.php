@@ -120,15 +120,52 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * Core ticket updates post to the component's firehose.
+	 * Components in more than one area post to every area's channels.
 	 */
-	public function test_core_component_firehose_channel(): void {
+	public function test_core_component_in_more_than_one_area(): void {
 		$trac = Trac::get( 'core' );
 
-		$this->assertSame( '#core-passwords-firehose', $trac->get_component_firehose_channel( 'Login and Registration' ) );
-		$this->assertSame( '#core-formatting-firehose', $trac->get_component_firehose_channel( 'Shortcodes' ) );
-		$this->assertFalse( $trac->get_component_firehose_channel( 'Text Changes' ) );
-		$this->assertFalse( $trac->get_component_firehose_channel( 'Not A Component' ) );
+		$tickets = $trac->get_ticket_channels( (object) array( 'component' => 'Application Passwords' ) );
+		sort( $tickets );
+		$this->assertSame(
+			array( '#core', '#core-firehose', '#core-newtickets', '#core-passwords-firehose', '#core-passwords-newtickets', '#core-restapi-firehose', '#core-restapi-newtickets' ),
+			$tickets
+		);
+
+		$tickets = $trac->get_ticket_channels( (object) array( 'component' => 'Login and Registration' ) );
+		sort( $tickets );
+		$this->assertSame(
+			array( '#core', '#core-firehose', '#core-newtickets', '#core-passwords-firehose', '#core-passwords-newtickets', '#core-users-firehose', '#core-users-newtickets' ),
+			$tickets
+		);
+
+		// Path filter.
+		$commits = $trac->get_commit_channels( 'trunk/src/wp-includes/class-wp-application-passwords.php', 'Fix a typo.' );
+		sort( $commits );
+		$this->assertSame(
+			array( '#core', '#core-commits', '#core-firehose', '#core-passwords-commits', '#core-passwords-firehose', '#core-restapi-commits', '#core-restapi-firehose' ),
+			$commits
+		);
+
+		// Commit message prefix.
+		$commits = $trac->get_commit_channels( 'trunk/src/wp-login.php', 'Login and Registration: Fix a typo.' );
+		sort( $commits );
+		$this->assertSame(
+			array( '#core', '#core-commits', '#core-firehose', '#core-passwords-commits', '#core-passwords-firehose', '#core-users-commits', '#core-users-firehose' ),
+			$commits
+		);
+	}
+
+	/**
+	 * Core ticket updates post to the component's firehose channels.
+	 */
+	public function test_core_component_firehose_channels(): void {
+		$trac = Trac::get( 'core' );
+
+		$this->assertSame( array( '#core-passwords-firehose', '#core-users-firehose' ), $trac->get_component_firehose_channels( 'Login and Registration' ) );
+		$this->assertSame( array( '#core-formatting-firehose' ), $trac->get_component_firehose_channels( 'Shortcodes' ) );
+		$this->assertSame( array(), $trac->get_component_firehose_channels( 'Text Changes' ) );
+		$this->assertSame( array(), $trac->get_component_firehose_channels( 'Not A Component' ) );
 	}
 
 	/**

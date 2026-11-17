@@ -52,7 +52,8 @@ class Trac implements User {
 	 * channels, not to the channel itself. This includes commits that $commit_path_filters
 	 * sends to one of these channels.
 	 *
-	 * Components with an empty value have no component channels.
+	 * A value can be one channel, or an array of channels for a component that belongs to
+	 * more than one area. Components with an empty value have no component channels.
 	 *
 	 * @var array
 	 */
@@ -272,14 +273,16 @@ class Trac implements User {
 			}
 		}
 
-		foreach ( $this->component_channels as $component => $channel ) {
-			if ( $channel && 0 === stripos( $log_text, $component ) ) {
-				$channels[ $channel ] = true;
+		foreach ( array_keys( $this->component_channels ) as $component ) {
+			if ( 0 === stripos( $log_text, $component ) ) {
+				foreach ( $this->get_component_base_channels( $component ) as $channel ) {
+					$channels[ $channel ] = true;
+				}
 			}
 		}
 
 		// Commits for a component go to its -commits and -firehose channels rather than the component channel itself.
-		foreach ( array_unique( array_filter( $this->component_channels ) ) as $channel ) {
+		foreach ( $this->get_all_component_base_channels() as $channel ) {
 			if ( ! empty( $channels[ $channel ] ) ) {
 				unset( $channels[ $channel ] );
 				$channels[ $channel . '-commits' ]  = true;
@@ -328,12 +331,12 @@ class Trac implements User {
 			}
 		}
 
-		// New tickets in a component with a channel go to that channel's -newtickets and -firehose channels.
-		if ( isset( $ticket->component ) && ! empty( $this->component_channels[ $ticket->component ] ) ) {
-			$channel = $this->component_channels[ $ticket->component ];
-
-			$channels[ $channel . '-newtickets' ] = true;
-			$channels[ $channel . '-firehose' ]   = true;
+		// New tickets in a component with channels go to each channel's -newtickets and -firehose channels.
+		if ( isset( $ticket->component ) ) {
+			foreach ( $this->get_component_base_channels( $ticket->component ) as $channel ) {
+				$channels[ $channel . '-newtickets' ] = true;
+				$channels[ $channel . '-firehose' ]   = true;
+			}
 		}
 
 		if ( $this->firehose_channel ) {
@@ -348,16 +351,44 @@ class Trac implements User {
 	}
 
 	/**
-	 * Gets the firehose channel for a component.
+	 * Gets the firehose channels for a component.
 	 *
 	 * @param string $component Trac component name.
-	 * @return string|false Channel name, or false if the component has no channels.
+	 * @return string[] Channel names. Empty if the component has no channels.
 	 */
-	public function get_component_firehose_channel( $component ) {
-		if ( ! empty( $this->component_channels[ $component ] ) ) {
-			return $this->component_channels[ $component ] . '-firehose';
+	public function get_component_firehose_channels( $component ) {
+		return array_map(
+			function ( $channel ) {
+				return $channel . '-firehose';
+			},
+			$this->get_component_base_channels( $component )
+		);
+	}
+
+	/**
+	 * Gets the component specific channels a component maps to, without a suffix.
+	 *
+	 * @param string $component Trac component name, or commit message prefix.
+	 * @return string[] Channel names. Empty if the component has no channels.
+	 */
+	protected function get_component_base_channels( $component ) {
+		if ( empty( $this->component_channels[ $component ] ) ) {
+			return array();
 		}
-		return false;
+		return array_values( array_filter( (array) $this->component_channels[ $component ] ) );
+	}
+
+	/**
+	 * Gets every component specific channel, without a suffix.
+	 *
+	 * @return string[] Channel names.
+	 */
+	protected function get_all_component_base_channels() {
+		$channels = array();
+		foreach ( array_keys( $this->component_channels ) as $component ) {
+			$channels = array_merge( $channels, $this->get_component_base_channels( $component ) );
+		}
+		return array_unique( $channels );
 	}
 
 	/**

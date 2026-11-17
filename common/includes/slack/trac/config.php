@@ -46,8 +46,14 @@ class Core extends Trac {
 		'wp-includes/sitemaps'             => '#core-sitemaps',
 		'#wp-admin/includes/.*upgrader#'   => '#core-upgrade-install',
 		'#wp-admin/includes/.*install#'    => '#core-upgrade-install',
-		'application-passwords'            => '#core-passwords',
-		'auth-app'                         => '#core-passwords',
+		'application-passwords'            => array(
+			'#core-passwords' => true,
+			'#core-restapi'   => true,
+		),
+		'auth-app'                         => array(
+			'#core-passwords' => true,
+			'#core-restapi'   => true,
+		),
 		'wp-includes/interactivity-api'    => '#core-interactivity-api',
 		'wp-includes/html-api'             => '#core-html-api',
 		'.devcontainer'                    => '#core-build-test-tools',
@@ -101,7 +107,8 @@ class Core extends Trac {
 	 * Notifications for a component go to that channel's -firehose, -newtickets and -commits
 	 * channels, not to the channel itself.
 	 *
-	 * Subcomponents map to their parent's channel, unless they have their own.
+	 * Subcomponents map to their parent's channel, unless they have their own. Components
+	 * that belong to more than one area map to an array of channels.
 	 *
 	 * Some components have no discussion channel, or an archived one, but still have
 	 * -firehose, -newtickets and -commits channels.
@@ -128,14 +135,14 @@ class Core extends Trac {
 
 		// Subcomponents.
 		'Abilities API'          => '#core-ai',
-		'Application Passwords'  => '#core-restapi',
+		'Application Passwords'  => array( '#core-passwords', '#core-restapi' ),
 		'Autosave'               => '#core-editor',
 		'Canonical'              => '#core-permalinks',
 		'Charset'                => '#core-formatting',
 		'Embeds'                 => '#core-media',
 		'Emoji'                  => '#core-formatting',
 		'Gallery'                => '#core-media',
-		'Login and Registration' => '#core-passwords',
+		'Login and Registration' => array( '#core-passwords', '#core-users' ),
 		'Menus'                  => '#core-themes',
 		'Multisite'              => '#core-multisite',
 		'Notes'                  => '#core-notes',

@@ -70,8 +70,7 @@ class Comment_Handler {
 			$this->send->send( $firehose );
 		}
 
-		$component_firehose = $this->trac->get_component_firehose_channel( $this->component );
-		if ( $component_firehose ) {
+		foreach ( $this->trac->get_component_firehose_channels( $this->component ) as $component_firehose ) {
 			$this->send->send( $component_firehose );
 		}
 

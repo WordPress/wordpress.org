@@ -165,7 +165,12 @@ class Test_Slack_Trac_Commit_Handler extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( 'title', $core->get_ticket_format( '#core' ) );
 		$this->assertSame( 'description', $core->get_ticket_format( '#core-newtickets' ) );
 
-		foreach ( array_unique( array_filter( $map ) ) as $channel ) {
+		$channels = array();
+		foreach ( array_filter( $map ) as $value ) {
+			$channels = array_merge( $channels, (array) $value );
+		}
+
+		foreach ( array_unique( $channels ) as $channel ) {
 			$this->assertSame(
 				$core->get_ticket_format( '#core-newtickets' ),
 				$core->get_ticket_format( $channel . '-newtickets' ),
