@@ -1020,21 +1020,22 @@ class Upload_Handler {
 			return false;
 		}
 
-		// Each is a request to its helpdesk, so only the newest few.
-		foreach ( Helpscout::get_review_emails( $post, [ 'limit' => 5 ] ) as $review_email ) {
+		// Each is a request to its helpdesk; the newest is usually the team's.
+		foreach ( Helpscout::get_review_emails( $post ) as $review_email ) {
 			if ( $review_email->freescout ) {
 				$conversation = FreeScout_Client::get( (int) $review_email->id );
 				$failed       = is_wp_error( $conversation );
-				$started_by   = $failed ? '' : ( $conversation['createdBy']['type'] ?? '' );
+				$qualifies    = ! $failed && 'user' === ( $conversation['createdBy']['type'] ?? '' );
+				$skipped      = "FreeScout update skipped: conversation {$review_email->id} wasn't started by the plugins team.";
 			} else {
 				$conversation = Helpscout_Client::api( '/v2/conversations/' . $review_email->id, null, 'GET', $http_response_code );
 				$failed       = 200 !== $http_response_code;
-				$started_by   = $conversation->createdBy->type ?? ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+				$skipped      = "Helpscout update skipped: conversation {$review_email->id} isn't the author's.";
 
 				// HelpScout's stored owner can come from a subject line, so its customer has to be the author too.
-				if ( ! $failed && 0 !== strcasecmp( (string) ( $conversation->primaryCustomer->email ?? '' ), wp_get_current_user()->user_email ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
-					continue;
-				}
+				$qualifies = ! $failed &&
+					'user' === ( $conversation->createdBy->type ?? '' ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+					0 === strcasecmp( (string) ( $conversation->primaryCustomer->email ?? '' ), wp_get_current_user()->user_email ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
 			}
 
 			// Without it, there's no telling whether an older one is the newest the team started.
@@ -1044,9 +1045,11 @@ class Upload_Handler {
 				return false;
 			}
 
-			if ( 'user' === $started_by ) {
+			if ( $qualifies ) {
 				return $review_email;
 			}
+
+			trigger_error( $skipped, E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
 		}
 
 		return false;
