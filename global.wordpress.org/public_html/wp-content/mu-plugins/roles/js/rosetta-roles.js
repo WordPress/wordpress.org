@@ -601,7 +601,7 @@
 				timer = setTimeout( () => {
 					try { tx.abort(); } catch {}
 					reject( new Error( 'IndexedDB transaction timed out' ) );
-				}, 500 );
+				}, 1500 );
 			} );
 
 			const cached = await Promise.race( [
