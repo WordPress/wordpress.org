@@ -36,7 +36,7 @@
 		const trimmed = typeof id === 'string' ? id.trim() : id;
 		if ( trimmed === '' ) return '';
 		const num = Number( trimmed );
-		return Number.isNaN( num ) ? String( trimmed ) : num;
+		return Number.isFinite( num ) ? num : String( trimmed );
 	};
 
 	/**
@@ -544,6 +544,7 @@
 
 		events: {
 			'click': 'onActivate',
+			'focusin': 'onActivate',
 			'change input': 'onToggle'
 		},
 
@@ -750,7 +751,7 @@
 				timer = setTimeout( () => {
 					try { tx.abort(); } catch {}
 					reject( new Error( 'IndexedDB transaction timed out' ) );
-				}, 500 );
+				}, 1500 );
 			} );
 
 			const cached = await Promise.race( [
@@ -868,9 +869,9 @@
 				if ( loadingEl ) loadingEl.textContent = l10n.loadingError;
 			} );
 
-		let hadTranslatorStatus = Boolean( rawList.length );
+		const hadTranslatorStatus = Boolean( rawList.length );
 		const form = document.getElementById( 'projects-list' )?.closest( 'form' );
-		const submitBtn = form?.querySelector( 'input[type="submit"], button[type="submit"]' );
+		const submitBtn = form?.querySelector( 'input[type="submit"]' );
 
 		form?.addEventListener( 'submit', async event => {
 			if ( ! projects.settings.saveAction ) return;
