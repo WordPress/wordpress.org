@@ -1002,7 +1002,7 @@ class Upload_Handler {
 			return false;
 		}
 
-		return Helpscout::get_review_emails( $post, 1 );
+		return Helpscout::get_review_emails( $post, [ 'limit' => 1 ] );
 	}
 
 	/**

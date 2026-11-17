@@ -95,14 +95,14 @@ class Helpscout {
 	/**
 	 * Fetch a plugin's review conversations: the "Review in Progress" ones with its author, newest first.
 	 *
-	 * @param \WP_Post $post  The plugin post.
-	 * @param int      $limit How many to fetch.
+	 * @param \WP_Post $post    The plugin post.
+	 * @param array    $filters Further filters, as for get_emails(); the subject and the author can't be changed.
 	 * @return array|object|false The conversations; with a limit of 1, the newest, or false.
 	 */
-	public static function get_review_emails( $post, $limit = 999 ) {
+	public static function get_review_emails( $post, $filters = [] ) {
 		// Conversations whose sender has no account are recorded with a user ID of 0.
 		if ( ! (int) $post->post_author ) {
-			return 1 === $limit ? false : [];
+			return 1 === absint( $filters['limit'] ?? 999 ) ? false : [];
 		}
 
 		return self::get_emails(
@@ -110,8 +110,7 @@ class Helpscout {
 			[
 				'subject' => 'Review in Progress:',
 				'user_id' => (int) $post->post_author,
-				'limit'   => $limit,
-			]
+			] + $filters
 		);
 	}
 
