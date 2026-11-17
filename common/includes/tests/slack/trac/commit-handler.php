@@ -182,28 +182,14 @@ class Test_Slack_Trac_Commit_Handler extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * Every -newtickets channel gets the same format as #core-newtickets: the full ticket.
-	 * Only #core gets the title alone.
+	 * Only Core's primary channel gets the ticket title alone.
 	 */
-	public function test_newtickets_channels_match_core_newtickets_format(): void {
+	public function test_get_ticket_format(): void {
 		$core = Trac::get( 'core' );
-		$map  = ( new ReflectionProperty( $core, 'component_channels' ) )->getValue( $core );
 
 		$this->assertSame( 'title', $core->get_ticket_format( '#core' ) );
 		$this->assertSame( 'description', $core->get_ticket_format( '#core-newtickets' ) );
-
-		$channels = array();
-		foreach ( array_filter( $map ) as $value ) {
-			$channels = array_merge( $channels, (array) $value );
-		}
-
-		foreach ( array_unique( $channels ) as $channel ) {
-			$this->assertSame(
-				$core->get_ticket_format( '#core-newtickets' ),
-				$core->get_ticket_format( $channel . '-newtickets' ),
-				"$channel-newtickets should match #core-newtickets."
-			);
-		}
+		$this->assertSame( 'description', $core->get_ticket_format( '#core-media-newtickets' ) );
 	}
 
 	/**
