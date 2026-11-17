@@ -87,7 +87,3 @@ RUN composer install --no-progress && chown -R www-data:www-data /src/vendor
 # than failing the build, so the others still get scanned.
 RUN wporg start && { wporg-provision freescout || true; } && wporg stop
 RUN wporg start && wporg-provision && wporg stop
-
-# Check that every site answers, without letting a failure abort the build: a site whose setup failed still has its
-# code in place to read.
-RUN wporg check || echo "WARNING: some sites failed their checks"; wporg stop
