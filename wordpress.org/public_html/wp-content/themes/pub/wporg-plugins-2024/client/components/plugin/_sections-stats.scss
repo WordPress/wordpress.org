@@ -2,15 +2,6 @@
 	text-align: right;
 }
 
-.previous-versions {
-	max-width: 60%;
-
-	@media screen and ( min-width: $ms-breakpoint ) {
-		height: 32px;
-		vertical-align: middle;
-	}
-}
-
 hr {
 	margin: 2.5rem auto;
 }
