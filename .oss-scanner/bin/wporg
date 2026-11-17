@@ -29,6 +29,12 @@ daemon() {
 	echo $! > "$RUNDIR/$name.pid"
 }
 
+# Whether a process with this name is running. Exited ones count as gone even before they are reaped, which nothing
+# does in a container without an init process.
+running() {
+	pgrep -x "$1" -r R,S,D,T > /dev/null
+}
+
 # Waits up to 60 seconds for a TCP port on 127.0.0.1 to accept connections, and warns if nothing does: a FreeScout
 # service that fails to start must not keep the WordPress sites from starting.
 wait_for_port() {
@@ -65,7 +71,7 @@ start() {
 	fi
 
 	# Apache has nothing to listen on until wporg-provision adds the first site.
-	if ! pgrep -x apache2 > /dev/null && compgen -G '/etc/apache2/sites-enabled/wporg-*.conf' > /dev/null; then
+	if ! running apache2 && compgen -G '/etc/apache2/sites-enabled/wporg-*.conf' > /dev/null; then
 		apachectl -k start
 	fi
 
@@ -111,7 +117,13 @@ stop() {
 	pkill -f 'artisan queue:work' 2> /dev/null || true
 	apachectl -k stop 2> /dev/null || true
 	mariadb-admin shutdown 2> /dev/null || true
-	while pgrep -x apache2 > /dev/null || pgrep -x mariadbd > /dev/null; do
+	local tries=120
+	while running apache2 || running mariadbd; do
+		tries=$(( tries - 1 ))
+		if [ "$tries" -le 0 ]; then
+			warn "Apache or MariaDB did not stop within 60 seconds"
+			return 1
+		fi
 		sleep 0.5
 	done
 }
@@ -235,8 +247,9 @@ check() {
 		echo "== FreeScout module tests"
 		wporg run freescout -- bash /srv/env/bin/test.sh || { echo "FAIL  FreeScout module tests"; failed=1; }
 
+		# Fields are separated by \x1f: tabs would collapse an empty field into the next.
 		local dir args bootstrap
-		while IFS=$'\t' read -r dir args bootstrap; do
+		while IFS=$'\x1f' read -r dir args bootstrap; do
 			if [ -n "$bootstrap" ]; then
 				echo
 				echo "skip  $dir: needs the $bootstrap bootstrap that .github/workflows/unit-tests.yml writes"
@@ -250,7 +263,7 @@ check() {
 			import sys, yaml
 			for suite in yaml.safe_load( open( sys.argv[1] ) )["suites"].values():
 			    if suite["type"] == "standalone":
-			        print( "\t".join( ( suite["working-directory"], suite.get( "phpunit-args", "" ), suite.get( "bootstrap", "" ) ) ) )
+			        print( "\x1f".join( ( suite["working-directory"], suite.get( "phpunit-args", "" ), suite.get( "bootstrap", "" ) ) ) )
 		EOF
 		)
 	fi
