@@ -21,7 +21,7 @@ if ( ! $_tests_dir ) {
  */
 function _glotpress_path( string $path ): string {
 	// Not this plugin's parent directory, which is elsewhere when the plugin is a symlink.
-	$plugins_dir = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR : dirname( __DIR__, 2 );
+	$plugins_dir = WP_PLUGIN_DIR;
 
 	// GlotPress may be installed as 'glotpress' or 'GlotPress' depending on the environment.
 	foreach ( array( 'glotpress', 'GlotPress' ) as $dir_name ) {

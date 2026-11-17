@@ -25,7 +25,7 @@ name=$( site_name "$config" )
 
 case $command in
 	start)
-		if [ ! -f "$SITES/$name/site.env" ]; then
+		if [ ! -f "$SITES/$name/site.env" ] || [ -f "$SITES/$name/provision.failed" ]; then
 			# Only works with network access, which a scan does not have.
 			wporg-provision "$( realpath --relative-to="$ENVDIR" "$config" )"
 		fi

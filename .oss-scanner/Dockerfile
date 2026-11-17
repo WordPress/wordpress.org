@@ -36,7 +36,8 @@ RUN curl -fsSL -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/bui
     && chmod +x /usr/local/bin/wp \
     && wp --info
 
-# wp-env's PHP settings, with errors logged rather than shown, and OPcache picking up a patch on the next request.
+# wp-env's PHP settings, with errors logged (WP_DEBUG still shows them on pages, as it does under wp-env), and OPcache
+# picking up a patch on the next request.
 RUN { echo 'memory_limit=512M'; \
       echo 'upload_max_filesize=1G'; \
       echo 'post_max_size=1G'; \
@@ -61,8 +62,10 @@ RUN a2enmod rewrite headers expires \
     && a2enconf wporg \
     && : > /etc/apache2/ports.conf
 
-# Commands in a site run as www-data, the web server's user, with sudo, as wp-env's host user has.
+# Commands in a site run as www-data, the web server's user, with sudo, as wp-env's host user has. www-data owns /src,
+# so git has to be told root may use it too.
 RUN echo 'www-data ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/www-data \
+    && git config --system --add safe.directory /src \
     && mkdir -p /opt/wporg/home /opt/wporg/composer /srv/sites \
     && chown www-data:www-data /opt/wporg/home /opt/wporg/composer
 
@@ -80,8 +83,9 @@ RUN ln -s /src/.oss-scanner/bin/wporg /src/.oss-scanner/bin/wporg-provision /src
 RUN composer install --no-progress && chown -R www-data:www-data /src/vendor
 
 # Build FreeScout, then every WordPress site. This downloads WordPress, plugins and themes, and imports content from
-# the live WordPress.org, so it has to happen here, while the network is up.
-RUN wporg start && wporg-provision freescout && wporg stop
+# the live WordPress.org, so it has to happen here, while the network is up. A site that fails is marked failed rather
+# than failing the build, so the others still get scanned.
+RUN wporg start && { wporg-provision freescout || true; } && wporg stop
 RUN wporg start && wporg-provision && wporg stop
 
 # Check that every site answers, without letting a failure abort the build: a site whose setup failed still has its

@@ -1,0 +1,4 @@
+# Installed or created locally; the OSS Scanner image installs its own.
+vendor
+environments/node_modules
+environments/*/.wp-env.override.json

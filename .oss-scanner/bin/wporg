@@ -29,12 +29,16 @@ daemon() {
 	echo $! > "$RUNDIR/$name.pid"
 }
 
-# Waits up to 60 seconds for a TCP port on 127.0.0.1 to accept connections.
+# Waits up to 60 seconds for a TCP port on 127.0.0.1 to accept connections, and warns if nothing does: a FreeScout
+# service that fails to start must not keep the WordPress sites from starting.
 wait_for_port() {
 	local tries=120
 	until (: < "/dev/tcp/127.0.0.1/$1") 2> /dev/null; do
 		tries=$(( tries - 1 ))
-		[ "$tries" -gt 0 ] || die "nothing is listening on port $1 (see $LOGS)"
+		if [ "$tries" -le 0 ]; then
+			warn "nothing is listening on port $1 (see $LOGS)"
+			return
+		fi
 		sleep 0.5
 	done
 }
@@ -199,7 +203,7 @@ check() {
 		(
 			NAME=$( basename "$dir" )
 			if [ "$( site_status "$NAME" )" = FAILED ]; then
-				echo "FAIL  $NAME: its setup failed; see the image build log, or $dir/after-start.log"
+				echo "FAIL  $NAME: its setup failed; see the image build log, or $SITES/$NAME/after-start.log"
 				exit 1
 			fi
 			load_site "$NAME"
@@ -223,25 +227,29 @@ check() {
 		while read -r script; do
 			echo
 			echo "== npm run $script"
-			( cd "$ENVDIR" && npm run --silent "$script" ) || { echo "FAIL  npm run $script"; failed=1; }
+			( cd "$ENVDIR" && npm run --silent "$script" < /dev/null ) || { echo "FAIL  npm run $script"; failed=1; }
 		done < <( jq -r '.scripts | keys[] | select( test( "^[a-z-]+:test$" ) and . != "freescout:test" )' "$ENVDIR/package.json" )
 
 		echo
 		echo "== FreeScout module tests"
 		wporg run freescout -- bash /srv/env/bin/test.sh || { echo "FAIL  FreeScout module tests"; failed=1; }
 
-		local dir args
-		while IFS=$'\t' read -r dir args; do
+		local dir args bootstrap
+		while IFS=$'\t' read -r dir args bootstrap; do
+			if [ -n "$bootstrap" ]; then
+				echo
+				echo "skip  $dir: needs the $bootstrap bootstrap that .github/workflows/unit-tests.yml writes"
+				continue
+			fi
 			echo
 			echo "== $dir"
 			# shellcheck disable=SC2086 # The arguments are a list, as the workflow passes them.
-			( cd "/src/$dir" && /src/vendor/bin/phpunit $args ) || { echo "FAIL  $dir"; failed=1; }
+			( cd "/src/$dir" && /src/vendor/bin/phpunit $args < /dev/null ) || { echo "FAIL  $dir"; failed=1; }
 		done < <( python3 -I - /src/.github/unit-tests-suites.yml <<-'EOF'
 			import sys, yaml
 			for suite in yaml.safe_load( open( sys.argv[1] ) )["suites"].values():
-			    # Suites with a bootstrap need the stub the workflow writes for them.
-			    if suite["type"] == "standalone" and "bootstrap" not in suite:
-			        print( suite["working-directory"] + "\t" + suite.get( "phpunit-args", "" ) )
+			    if suite["type"] == "standalone":
+			        print( "\t".join( ( suite["working-directory"], suite.get( "phpunit-args", "" ), suite.get( "bootstrap", "" ) ) ) )
 		EOF
 		)
 	fi

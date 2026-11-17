@@ -412,8 +412,12 @@ main() {
 	mariadb-admin ping --silent 2> /dev/null || die "MariaDB is not running; run \`wporg start\` first"
 	prepare_database
 
-	# One target is built here, and fails loudly.
+	# One target is built here. If it fails, it is marked failed, which `wporg sites` and `wporg check` report.
 	if [ $# -eq 1 ]; then
+		local name=freescout
+		[ "$1" = freescout ] || name=$( site_name "$ENVDIR/$1" )
+		# shellcheck disable=SC2064 # $name is fixed now.
+		trap "[ \$? -eq 0 ] || { mkdir -p '$SITES/$name' && touch '$SITES/$name/provision.failed'; }" EXIT
 		if [ "$1" = freescout ]; then
 			provision_freescout
 		else
@@ -431,16 +435,9 @@ main() {
 	fi
 
 	# Each of several is built in its own process, so one that breaks is marked failed and the rest still get built.
-	local target name
+	local target
 	for target in "${targets[@]}"; do
-		if "$0" "$target"; then
-			continue
-		fi
-		name=freescout
-		[ "$target" = freescout ] || name=$( site_name "$ENVDIR/$target" )
-		mkdir -p "$SITES/$name"
-		touch "$SITES/$name/provision.failed"
-		warn "$name: could not be built; see the output above"
+		"$0" "$target" || warn "$target: could not be built; see the output above"
 	done
 
 	echo

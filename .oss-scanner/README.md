@@ -11,8 +11,6 @@ A new environment in `environments/` is picked up without changes here. A [workf
 
 ## Trying it locally
 
-From a clean checkout, without `vendor/` or `environments/node_modules/`, which would be copied into the image:
-
 ```bash
 docker build --file .oss-scanner/Dockerfile --tag wporg-oss-scanner .
 docker run --rm -it --network none wporg-oss-scanner bash
