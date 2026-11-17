@@ -8,7 +8,7 @@ select:not([multiple]) {
 	font-size: var(--wp--custom--form--typography--font-size);
 	line-height: var(--wp--custom--form--typography--line-height);
 	max-width: 100%;
-	padding-block: var(--wp--custom--form--padding--block);
+	padding-block: calc(var(--wp--custom--form--padding--block) - var(--wp--custom--form--border--width));
 	padding-inline: var(--wp--custom--form--padding--inline) calc(var(--wp--custom--form--padding--inline) + 24px);
 
 	&:focus {
