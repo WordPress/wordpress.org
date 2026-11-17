@@ -141,7 +141,6 @@ class Core extends Trac {
 		'Gallery'                => '#core-media',
 		'Login and Registration' => array( '#core-passwords', '#core-users' ),
 		'Menus'                  => '#core-themes',
-		'Multisite'              => '#core-multisite',
 		'Notes'                  => '#core-notes',
 		'Pings/Trackbacks'       => '#core-comments',
 		'Post Formats'           => '#core-posts-post-types',
