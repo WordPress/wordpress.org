@@ -56,6 +56,13 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	protected array $requests = array();
 
 	/**
+	 * IDs of the FreeScout conversations a sender started, whatever answer() says of the others.
+	 *
+	 * @var int[]
+	 */
+	protected array $sender_started = array();
+
+	/**
 	 * IDs of posts and users created during a test.
 	 *
 	 * @var int[][]
@@ -147,23 +154,66 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		$this->answer( array( 'outsider@example.net' ), 'customer' );
 		list( $plugin, $attachment ) = $this->upload( true );
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
-		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertFalse( Upload_Handler::update_review_email( $plugin, $attachment ) );
 		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
 	}
 
 	/**
-	 * No confirmation goes into a conversation whose customer isn't the author, whatever WordPress.org's copy says.
+	 * An author who answered the review from another address, which FreeScout then makes the conversation's customer,
+	 * still gets the confirmation.
 	 *
 	 * @return void
 	 */
-	public function test_does_not_reply_when_the_customer_is_not_the_author(): void {
-		$this->answer( array(), 'user', 'someone-else@example.net' );
+	public function test_replies_when_the_author_answered_from_another_address(): void {
+		$this->answer( array(), 'user', 'another-address@example.net' );
 		list( $plugin, $attachment ) = $this->upload( true );
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
-		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
-		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
+		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', $this->requests[2]['url'] );
+	}
+
+	/**
+	 * An author who answers the review in a new email starts a conversation of their own, under a similar subject. The
+	 * confirmation goes into the newest one the plugins team started instead.
+	 *
+	 * @return void
+	 */
+	public function test_replies_in_the_newest_conversation_the_team_started(): void {
+		global $wpdb;
+
+		$this->answer();
+		list( $plugin, $attachment ) = $this->upload( true );
+
+		$this->sender_started = array( self::OTHER_CONVERSATION_ID );
+		$wpdb->insert(
+			"{$wpdb->base_prefix}helpscout",
+			array(
+				'id'      => self::OTHER_CONVERSATION_ID,
+				'number'  => 1235,
+				'user_id' => $plugin->post_author,
+				'subject' => 'Re: [WordPress Plugin Directory] Review in Progress: Upload Confirmation Fixture',
+				'created' => '2026-09-01 10:00:00',
+			)
+		);
+		$meta = array(
+			'plugins'  => 'upload-confirmation-fixture',
+			'helpdesk' => 'freescout',
+		);
+		foreach ( $meta as $key => $value ) {
+			$wpdb->insert(
+				"{$wpdb->base_prefix}helpscout_meta",
+				array(
+					'helpscout_id' => self::OTHER_CONVERSATION_ID,
+					'meta_key'     => $key, // phpcs:ignore WordPress.DB.SlowDBQuery -- Test fixture.
+					'meta_value'   => $value, // phpcs:ignore WordPress.DB.SlowDBQuery -- Test fixture.
+				)
+			);
+		}
+
+		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
+
+		$this->assertStringStartsWith( 'https://freescout.wordpress.net/api/conversations/' . self::OTHER_CONVERSATION_ID, $this->requests[0]['url'] );
+		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', end( $this->requests )['url'] );
 	}
 
 	/**
@@ -272,16 +322,29 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	}
 
 	/**
-	 * No confirmation goes into a HelpScout conversation whose customer isn't the author, though its subject names them.
+	 * No confirmation goes into a HelpScout conversation a sender started, though its subject names the author.
+	 *
+	 * @return void
+	 */
+	public function test_does_not_reply_in_a_helpscout_conversation_a_sender_started(): void {
+		$this->answer_helpscout( 'customer' );
+		list( $plugin, $attachment ) = $this->upload( false );
+
+		$this->assertFalse( Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
+	}
+
+	/**
+	 * No confirmation goes into a HelpScout conversation the team started with someone else, though WordPress.org's
+	 * copy names the author from its subject.
 	 *
 	 * @return void
 	 */
 	public function test_does_not_reply_in_helpscout_when_the_customer_is_not_the_author(): void {
-		$this->answer_helpscout( 'customer', 'someone-else@example.net' );
+		$this->answer_helpscout( 'user', 'someone-else@example.net' );
 		list( $plugin, $attachment ) = $this->upload( false );
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
-		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertFalse( Upload_Handler::update_review_email( $plugin, $attachment ) );
 		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
 	}
 
@@ -363,13 +426,14 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 						return new WP_Error( 'http_request_failed', 'Connection timed out' );
 					}
 
+					$id           = (int) preg_replace( '!^.*/conversations/(\d+).*$!', '$1', $url );
 					$conversation = array(
-						'id'        => self::CONVERSATION_ID,
+						'id'        => $id,
 						'number'    => 1234,
 						'status'    => 'closed',
 						'createdBy' => array(
 							'id'   => 7,
-							'type' => $created_by,
+							'type' => in_array( $id, $this->sender_started, true ) ? 'customer' : $created_by,
 						),
 						'customer'  => array( 'email' => $customer ?? wp_get_current_user()->user_email ),
 						'cc'        => $cc,
