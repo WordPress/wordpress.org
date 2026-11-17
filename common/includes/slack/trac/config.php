@@ -35,7 +35,6 @@ class Core extends Trac {
 		'wp-includes/css/editor.css'       => '#core-editor',
 		'wp-includes/js/tinymce'           => '#core-editor',
 		'class-wp-editor.php'              => '#core-editor',
-		'press-this.php'                   => '#core-pressthis',
 		'#wp-(admin|includes)/ms-#'        => '#core-multisite',
 		'wp-admin/network'                 => '#core-multisite',
 		'#wp-admin/includes/(ms|network)#' => '#core-multisite',
@@ -113,8 +112,6 @@ class Core extends Trac {
 	 * Some components have no discussion channel, or an archived one, but still have
 	 * -firehose, -newtickets and -commits channels.
 	 *
-	 * Retired components have an empty value, and only post to the global channels.
-	 *
 	 * @var array
 	 */
 	protected $component_channels = array(
@@ -191,9 +188,6 @@ class Core extends Trac {
 		'Toolbar'                => '#core-toolbar',
 		'Users'                  => '#core-users',
 		'XML-RPC'                => '#core-xml-rpc',
-
-		// Retired components.
-		'Press This'             => '', // #core-pressthis is archived.
 	);
 }
 
