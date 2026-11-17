@@ -112,6 +112,9 @@ class Core extends Trac {
 	 * Some components have no discussion channel, or an archived one, but still have
 	 * -firehose, -newtickets and -commits channels.
 	 *
+	 * Commit messages are matched against every key, so keys can also be commit message prefixes
+	 * that differ from the component name, such as "Customizer" or "Bundled Themes".
+	 *
 	 * Retired components have an empty value, and only post to the global channels.
 	 *
 	 * @var array
@@ -189,6 +192,53 @@ class Core extends Trac {
 		'Toolbar'                => '#core-toolbar',
 		'Users'                  => '#core-users',
 		'XML-RPC'                => '#core-xml-rpc',
+
+		// Commit message prefixes that differ from the component name.
+		'About'                  => '#core-help-about',
+		'Admin'                  => '#core-administration',
+		'Admin Bar'              => '#core-toolbar',
+		'App Passwords'          => array( '#core-passwords', '#core-restapi' ),
+		'Block'                  => '#core-editor',
+		'Blocks'                 => '#core-editor',
+		'Bootstrap'              => '#core-bootstrap',
+		'Build'                  => '#core-build-test-tools',
+		'Bundled Themes'         => '#core-themes',
+		'Cache'                  => '#core-cache-api',
+		'Cron'                   => '#core-cron-api',
+		'Customizer'             => '#core-customize',
+		'Default Themes'         => '#core-themes',
+		'Email'                  => '#core-mail',
+		'Feed'                   => '#core-feeds',
+		'Filesystem'             => '#core-filesystem-api',
+		'Global Styles'          => '#core-editor',
+		'HTTP'                   => '#core-http-api',
+		'Importer'               => '#core-importers',
+		'Importers'              => '#core-importers',
+		'Install'                => '#core-upgrade-install',
+		'KSES'                   => '#core-formatting',
+		'L10n'                   => '#core-i18n',
+		'List Tables'            => '#core-administration',
+		'Load'                   => '#core-bootstrap',
+		'Nav Menus'              => '#core-themes',
+		'Network'                => '#core-multisite',
+		'oEmbed'                 => '#core-media',
+		'Options'                => '#core-options-meta-apis',
+		'Post Types'             => '#core-posts-post-types',
+		'Posts'                  => '#core-posts-post-types',
+		'Rewrite'                => '#core-permalinks',
+		'Script Modules'         => '#core-script-loader',
+		'Scripts'                => '#core-script-loader',
+		'Site Editor'            => '#core-editor',
+		'Tests/Build'            => '#core-build-test-tools',
+		'Theme JSON'             => '#core-editor',
+		'Update/Install'         => '#core-upgrade-install',
+		'Updates'                => '#core-upgrade-install',
+		'Upgrade'                => '#core-upgrade-install',
+		'Upgrader'               => '#core-upgrade-install',
+		'Upgrades'               => '#core-upgrade-install',
+		'Uploads'                => '#core-media',
+		'WP_Debug_Data'          => '#core-site-health',
+		'WPDB'                   => '#core-database',
 
 		// Retired components.
 		'Text Changes'           => '',

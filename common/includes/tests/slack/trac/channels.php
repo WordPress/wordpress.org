@@ -87,6 +87,16 @@ class Test_Slack_Trac_Channels extends \PHPUnit\Framework\TestCase {
 				'Fix a typo.',
 				$global,
 			),
+			'commit prefix alias'                    => array(
+				'trunk/src/wp-includes/class-wp-customize-manager.php',
+				'Customizer: Fix a typo.',
+				array_merge( $global, array( '#core-customize-commits', '#core-customize-firehose' ) ),
+			),
+			'plural commit prefix alias'             => array(
+				'trunk/src/wp-includes/theme.php',
+				'Bundled Themes: Fix a typo.',
+				array_merge( $global, array( '#core-themes-commits', '#core-themes-firehose' ) ),
+			),
 		);
 	}
 
