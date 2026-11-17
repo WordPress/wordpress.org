@@ -1026,11 +1026,9 @@ class Upload_Handler {
 				$conversation = FreeScout_Client::get( (int) $review_email->id );
 				$failed       = is_wp_error( $conversation );
 				$qualifies    = ! $failed && 'user' === ( $conversation['createdBy']['type'] ?? '' );
-				$skipped      = "FreeScout update skipped: conversation {$review_email->id} wasn't started by the plugins team.";
 			} else {
 				$conversation = Helpscout_Client::api( '/v2/conversations/' . $review_email->id, null, 'GET', $http_response_code );
 				$failed       = 200 !== $http_response_code;
-				$skipped      = "Helpscout update skipped: conversation {$review_email->id} isn't the author's.";
 
 				// HelpScout's stored owner can come from a subject line, so its customer has to be the author too.
 				$qualifies = ! $failed &&
@@ -1048,8 +1046,6 @@ class Upload_Handler {
 			if ( $qualifies ) {
 				return $review_email;
 			}
-
-			trigger_error( $skipped, E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
 		}
 
 		return false;

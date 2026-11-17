@@ -154,8 +154,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		$this->answer( array( 'outsider@example.net' ), 'customer' );
 		list( $plugin, $attachment ) = $this->upload( true );
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
-		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertFalse( Upload_Handler::update_review_email( $plugin, $attachment ) );
 		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
 	}
 
@@ -211,8 +210,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 			);
 		}
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
-		$this->assertTrue( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
 
 		$this->assertStringStartsWith( 'https://freescout.wordpress.net/api/conversations/' . self::OTHER_CONVERSATION_ID, $this->requests[0]['url'] );
 		$this->assertSame( 'https://freescout.wordpress.net/api/conversations/' . self::CONVERSATION_ID . '/threads', end( $this->requests )['url'] );
@@ -332,8 +330,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		$this->answer_helpscout( 'customer' );
 		list( $plugin, $attachment ) = $this->upload( false );
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
-		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertFalse( Upload_Handler::update_review_email( $plugin, $attachment ) );
 		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
 	}
 
@@ -347,8 +344,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 		$this->answer_helpscout( 'user', 'someone-else@example.net' );
 		list( $plugin, $attachment ) = $this->upload( false );
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
-		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertFalse( Upload_Handler::update_review_email( $plugin, $attachment ) );
 		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
 	}
 
