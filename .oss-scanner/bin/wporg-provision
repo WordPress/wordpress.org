@@ -1,0 +1,450 @@
+#!/usr/bin/env bash
+#
+# Builds the sites that environments/ describes, the way `wp-env start` and `npm run freescout:start` would, but on
+# this machine's own Apache and MariaDB instead of in Docker containers. Needs network access, so it runs while the
+# OSS Scanner image is built, with MariaDB running (`wporg start`).
+#
+#   wporg-provision                 a site for every wp-env config
+#   wporg-provision <config>...     a site for each config, as a path relative to environments/
+#   wporg-provision freescout       FreeScout and the services it talks to
+#
+# A site whose afterStart lifecycle script fails is kept, marked failed (see `wporg sites`), and does not stop the
+# build: those scripts import live WordPress.org content, and a hiccup there should not cost the whole scan.
+
+set -euo pipefail
+
+# shellcheck source=SCRIPTDIR/../lib/common.sh
+. "$( dirname "$( realpath "$0" )" )/../lib/common.sh"
+
+SOURCES=$WPORG_OPT/sources
+FIRST_PORT=8101
+PHP_VERSION=$( php -r 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;' )
+
+# The wp-config constants wp-env sets on every site, before the config's own.
+WP_ENV_DEFAULTS='{
+	"FS_METHOD": "direct",
+	"WP_DEBUG": true,
+	"SCRIPT_DEBUG": true,
+	"WP_ENVIRONMENT_TYPE": "local",
+	"WP_PHP_BINARY": "php",
+	"WP_TESTS_EMAIL": "admin@example.org",
+	"WP_TESTS_TITLE": "Test Blog",
+	"WP_TESTS_DOMAIN": "localhost",
+	"WP_SITEURL": "http://localhost",
+	"WP_HOME": "http://localhost"
+}'
+
+log() {
+	printf '\n== %s\n' "$*"
+}
+
+# Prints the port a site is served on, giving it the next free one the first time.
+assign_port() {
+	local ports=$SITES/ports port
+	touch "$ports"
+	port=$( awk -v name="$1" '$1 == name { print $2 }' "$ports" )
+	if [ -z "$port" ]; then
+		port=$( awk -v first="$FIRST_PORT" 'BEGIN { max = first - 1 } $2 > max { max = $2 } END { print max + 1 }' "$ports" )
+		echo "$1 $port" >> "$ports"
+	fi
+	echo "$port"
+}
+
+# Downloads a zip into a new directory, unwrapped from its single top-level folder if it has one, as wp-env does.
+download_zip() {
+	local url=$1 dest=$2 tmp entries
+	tmp=$( mktemp -d )
+	curl -fsSL --retry 5 --retry-all-errors -o "$tmp/source.zip" "$url"
+	unzip -q "$tmp/source.zip" -d "$tmp/source"
+	mapfile -t entries < <( ls -A "$tmp/source" )
+	mkdir -p "$( dirname "$dest" )"
+	if [ "${#entries[@]}" -eq 1 ] && [ -d "$tmp/source/${entries[0]}" ]; then
+		mv "$tmp/source/${entries[0]}" "$dest"
+	else
+		mv "$tmp/source" "$dest"
+	fi
+	rm -rf "$tmp"
+}
+
+# Prints "<path>\t<basename>\t<kind>" for a wp-env source string. Remote sources are fetched once into $SOURCES and
+# shared by every site that names them; kind is local or remote.
+resolve_source() {
+	local spec=$1 path base
+	case $spec in
+		.* | /*)
+			path=$( realpath -m "$ENVDIR/$spec" )
+			[ -e "$path" ] || die "$spec: no such file or directory (relative paths are resolved against $ENVDIR)"
+			printf '%s\t%s\tlocal\n' "$path" "$( basename "$path" )"
+			;;
+		http://*.zip | https://*.zip | http://*.zip\?* | https://*.zip\?*)
+			base=${spec%%\?*}
+			base=${base##*/}
+			base=$( sed -E 's/\.zip$//; s/\.([0-9]+\.)*[0-9]+$//' <<< "$base" )
+			path=$SOURCES/zip/$( printf '%s' "$spec" | sha1sum | cut -c1-12 )/$base
+			[ -d "$path" ] || download_zip "$spec" "$path" >&2
+			printf '%s\t%s\tremote\n' "$path" "$base"
+			;;
+		*/*)
+			[[ $spec =~ ^([^/]+)/([^#/]+)(/([^#]+))?(#(.+))?$ ]] || die "unsupported source: $spec"
+			local owner=${BASH_REMATCH[1]} repo=${BASH_REMATCH[2]} sub=${BASH_REMATCH[4]} ref=${BASH_REMATCH[6]}
+			local clone=$SOURCES/git/$owner/$repo@${ref:-HEAD}
+			if [ ! -d "$clone" ]; then
+				git clone -q --depth 1 ${ref:+--branch "$ref"} "https://github.com/$owner/$repo.git" "$clone" >&2
+			fi
+			path=$clone${sub:+/$sub}
+			printf '%s\t%s\tremote\n' "$path" "${sub:-$repo}"
+			;;
+		*)
+			die "unsupported source: $spec"
+			;;
+	esac
+}
+
+# Turns each symlinked directory on the way to $1 into a real directory holding a copy of what it pointed to, so a
+# mapping can land inside another mapping, as a Docker mount can be nested in another. A copy rather than links,
+# because PHP resolves symlinks in __DIR__, and the files there have to find the nested mapping beside them.
+materialize() {
+	local root=$1 rel=$2 path=$1 part target
+	local -a parts
+	IFS=/ read -ra parts <<< "$rel"
+	for part in "${parts[@]}"; do
+		[ -n "$part" ] || continue
+		path=$path/$part
+		if [ -L "$path" ]; then
+			target=$( readlink -f "$path" )
+			rm "$path"
+			cp -a "$target" "$path"
+			echo "  copied $target to ${path#"$root"/}, so a mapping can be placed inside it"
+		elif [ ! -e "$path" ]; then
+			mkdir "$path"
+		fi
+	done
+}
+
+# Builds one site from a wp-env config: core, plugins, themes and mappings in place, WordPress installed and
+# configured as wp-env configures it, then the config's afterStart lifecycle script.
+provision_site() {
+	local config=$1 file name port dir root tests db
+	file=$( realpath -m "$ENVDIR/$config" )
+	[ -f "$file" ] || die "$config: no such config"
+	name=$( site_name "$file" )
+	config=${file#"$ENVDIR"/}
+	port=$( assign_port "$name" )
+	dir=$SITES/$name
+	root=$dir/html
+	tests=$dir/wordpress-phpunit
+	db=wp_${name//-/_}
+
+	log "$name: $config, http://localhost:$port"
+
+	if jq -e '( .env // {} ) | length > 0' "$file" > /dev/null; then
+		warn "$config: the per-environment settings under \"env\" are not applied"
+	fi
+	local php
+	php=$( jq -r '.phpVersion // empty' "$file" )
+	if [ -n "$php" ] && [ "$php" != "$PHP_VERSION" ]; then
+		warn "$config asks for PHP $php; this image has PHP $PHP_VERSION"
+	fi
+
+	rm -rf "$dir"
+	mkdir -p "$dir"
+
+	# Core, as a hard-linked copy: each site needs its own wp-config.php and wp-content.
+	local out src base kind
+	out=$( resolve_source "$( jq -r '.core // "https://wordpress.org/latest.zip"' "$file" )" )
+	IFS=$'\t' read -r src base kind <<< "$out"
+	[ "$kind" = remote ] || die "$config: a local core checkout is not supported"
+	cp -al "$src" "$root"
+	rm -rf "$root/.git"
+	cp -al "$SOURCES/wordpress-develop/tests/phpunit" "$tests"
+
+	# Plugins, themes and mappings, shallowest first, like Docker's mounts. Local sources are linked, so a change in
+	# /src shows on the next request; remote ones are hard-linked copies of the shared download.
+	local mounts=() spec dest
+	while IFS=$'\t' read -r dest spec; do
+		out=$( resolve_source "$spec" )
+		IFS=$'\t' read -r src base kind <<< "$out"
+		case $dest in
+			:plugin) dest=wp-content/plugins/$base ;;
+			:theme) dest=wp-content/themes/$base ;;
+		esac
+		mounts+=( "$( tr -cd / <<< "$dest" | wc -c )"$'\t'"$dest"$'\t'"$src"$'\t'"$kind" )
+	done < <( jq -r '
+		( .mappings // {} | to_entries[] | [ .key, .value ] ),
+		( .plugins // [] | .[] | [ ":plugin", . ] ),
+		( .themes // [] | .[] | [ ":theme", . ] )
+		| @tsv' "$file" )
+
+	while IFS=$'\t' read -r _ dest src kind; do
+		[ -n "$dest" ] || continue
+		dest=${dest#/}
+		materialize "$root" "$( dirname "$dest" )"
+		rm -rf "${root:?}/$dest"
+		if [ "$kind" = local ]; then
+			ln -s "$src" "$root/$dest"
+		else
+			cp -al "$src" "$root/$dest"
+		fi
+	done < <( printf '%s\n' "${mounts[@]}" | sort -s -n -k1,1 )
+
+	printf 'apache_modules:\n  - mod_rewrite\n' > "$root/wp-cli.yml"
+	mkdir -p "$root/wp-content/uploads"
+	chown -R www-data:www-data "$dir"
+
+	cat > "$dir/site.env" <<-EOF
+		NAME=$name
+		KIND=wordpress
+		CONFIG=$config
+		PORT=$port
+		ROOT=$root
+		TESTS=$tests
+		DB=$db
+	EOF
+
+	cat > "/etc/apache2/sites-available/wporg-$name.conf" <<-EOF
+		Listen $port
+		<VirtualHost *:$port>
+		    ServerName localhost
+		    DocumentRoot $root
+		    ErrorLog \${APACHE_LOG_DIR}/$name-error.log
+		    CustomLog \${APACHE_LOG_DIR}/$name-access.log combined
+		</VirtualHost>
+	EOF
+	a2ensite -q "wporg-$name"
+	apachectl -k graceful
+
+	mariadb -e "DROP DATABASE IF EXISTS \`$db\`; CREATE DATABASE \`$db\`;"
+
+	# What wp-env's configureWordPress() does, in its order.
+	local wp=( wporg run "$name" -- wp ) url="http://localhost:$port"
+	"${wp[@]}" config create --dbname="$db" --dbuser="$DB_USER" --dbpass="$DB_PASSWORD" --dbhost=127.0.0.1 --skip-check --quiet
+	if [ "$( jq -r '.multisite // false' "$file" )" = true ]; then
+		"${wp[@]}" core multisite-install --url="$url" --title="$name" --admin_user=admin --admin_password=password \
+			--admin_email=wordpress@example.com --skip-email
+	else
+		"${wp[@]}" core install --url="$url" --title="$name" --admin_user=admin --admin_password=password \
+			--admin_email=wordpress@example.com --skip-email
+	fi
+	"${wp[@]}" rewrite structure '/%year%/%monthnum%/%day%/%postname%/' --hard --quiet
+	if [ "$( jq -r '.multisite // false' "$file" )" = true ]; then
+		cat > "$root/.htaccess" <<-'EOF'
+			RewriteEngine On
+			RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+			RewriteBase /
+			RewriteRule ^index\.php$ - [L]
+
+			# add a trailing slash to /wp-admin
+			RewriteRule ^([_0-9a-zA-Z-]+/)?wp-admin$ $1wp-admin/ [R=301,L]
+
+			RewriteCond %{REQUEST_FILENAME} -f [OR]
+			RewriteCond %{REQUEST_FILENAME} -d
+			RewriteRule ^ - [L]
+			RewriteRule ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) $2 [L]
+			RewriteRule ^([_0-9a-zA-Z-]+/)?(.*\.php)$ $2 [L]
+			RewriteRule . index.php [L]
+		EOF
+		chown www-data:www-data "$root/.htaccess"
+	fi
+
+	# Paths wp-env's containers see are this site's paths here.
+	local key type value
+	while IFS=$'\t' read -r key type value; do
+		if [ "$type" = string ]; then
+			"${wp[@]}" config set "$key" "$value" --anchor="define( 'WP_DEBUG'," --quiet
+		else
+			"${wp[@]}" config set "$key" "$value" --raw --anchor="define( 'WP_DEBUG'," --quiet
+		fi
+	done < <( jq -r --argjson defaults "$WP_ENV_DEFAULTS" --arg port "$port" --arg root "$root" --arg tests "$tests" '
+		$defaults + ( .config // {} )
+		| with_entries( select( .value != null ) )
+		| with_entries(
+			if ( .key | IN( "WP_TESTS_DOMAIN", "WP_SITEURL", "WP_HOME" ) ) and ( .value | test( ":[0-9]+$" ) | not )
+			then .value += ":" + $port else . end
+		)
+		| to_entries[]
+		| if ( .value | type ) == "string"
+			then [ .key, "string", ( .value | gsub( "/var/www/html"; $root ) | gsub( "/wordpress-phpunit"; $tests ) ) ]
+			else [ .key, "raw", ( .value | tostring ) ]
+			end
+		| @tsv' "$file" )
+
+	# wp-env retries its whole setup once, which GlotPress relies on: its first activation fails before its tables exist.
+	while read -r base; do
+		"${wp[@]}" plugin activate "$base" --quiet 2> /dev/null || "${wp[@]}" plugin activate "$base" --quiet
+	done < <(
+		jq -r '.plugins // [] | .[]' "$file" | while read -r spec; do
+			resolve_source "$spec" | cut -f2
+		done
+	)
+
+	# WordPress' PHPUnit suite reads wp-tests-config.php from its own directory.
+	sed -e '/^require.*wp-settings.php/d' \
+		-e "s|define( 'ABSPATH', __DIR__ . '/' );|define( 'ABSPATH', '$root/' );\n\tdefine( 'WP_DEFAULT_THEME', 'default' );|" \
+		"$root/wp-config.php" > "$tests/wp-tests-config.php"
+	chown www-data:www-data "$tests/wp-tests-config.php"
+
+	local script
+	script=$( jq -r '.lifecycleScripts.afterStart // empty' "$file" )
+	if [ -z "$script" ]; then
+		return
+	fi
+	echo "  afterStart: $script"
+	if ( cd "$ENVDIR" && bash -c "$script" ) > "$dir/after-start.log" 2>&1; then
+		touch "$dir/after-start.done"
+	else
+		touch "$dir/after-start.failed"
+		tail -n 40 "$dir/after-start.log" | sed 's/^/  | /'
+		warn "$name: the afterStart script failed; its log is $dir/after-start.log"
+	fi
+}
+
+# Prints a docker-compose service's environment as KEY="value" lines, with ${VAR:-default} resolved as Compose would
+# resolve it with none of those variables set.
+compose_environment() {
+	python3 -I - "$ENVDIR/freescout/docker-compose.yml" "$1" <<-'EOF'
+		import re, sys, yaml
+		service = yaml.safe_load( open( sys.argv[1] ) )["services"][ sys.argv[2] ]
+		for key, value in ( service.get( "environment" ) or {} ).items():
+		    value = re.sub( r"\$\{\w+(?::?-([^}]*))?\}", lambda m: m.group( 1 ) or "", str( value ) )
+		    print( f'{key}="{value}"' )
+	EOF
+}
+
+# FreeScout as environments/freescout/docker-compose.yml runs it, with every service in this one machine: FreeScout
+# on Apache, MariaDB, GreenMail for incoming mail, Mailpit for outgoing mail, and the mock WordPress.org API.
+provision_freescout() {
+	local dir=$SITES/freescout app=/var/www/html ref=dist arch
+	log "freescout: environments/freescout/docker-compose.yml, http://127.0.0.1:8890"
+
+	# The versions environments/freescout/docker-compose.yml runs.
+	local greenmail mailpit
+	greenmail=$( sed -nE 's|^\s*image: greenmail/standalone:([0-9.]+).*|\1|p' "$ENVDIR/freescout/docker-compose.yml" )
+	mailpit=$( sed -nE 's|^\s*image: axllent/mailpit:(v[0-9.]+).*|\1|p' "$ENVDIR/freescout/docker-compose.yml" )
+	arch=$( dpkg --print-architecture )
+	curl -fsSL --retry 5 --retry-all-errors -o "$WPORG_OPT/greenmail.jar" \
+		"https://repo1.maven.org/maven2/com/icegreen/greenmail-standalone/$greenmail/greenmail-standalone-$greenmail.jar"
+	curl -fsSL --retry 5 --retry-all-errors \
+		"https://github.com/axllent/mailpit/releases/download/$mailpit/mailpit-linux-$arch.tar.gz" | tar -xz -C /usr/local/bin mailpit
+
+	rm -rf "$dir" "$app"
+	mkdir -p "$dir"
+	git clone -q --depth 1 --branch "$ref" https://github.com/freescout-help-desk/freescout.git "$app"
+	rm -rf "$app/.git" "$app/vendor" "$app/Modules"
+
+	# dist's bundled vendor/ lacks PHPUnit, so it's reinstalled with dev dependencies, as environments/freescout does.
+	composer install --working-dir="$app" --no-interaction --no-progress --ignore-platform-req=php
+	ln -s /src/freescout.wordpress.net/Modules "$app/Modules"
+	compose_environment app > "$app/.env"
+	chown -R www-data:www-data "$app"
+
+	# The paths docker-compose.yml mounts.
+	ln -sfn /src/environments/freescout /srv/env
+	ln -sfn /src/freescout.wordpress.net /srv/wporg
+	ln -sfn /src/environments/freescout/mock-api /srv/mock-api
+	ln -sfn /src/freescout.wordpress.net/Modules /srv/modules
+
+	cat > "$dir/site.env" <<-EOF
+		NAME=freescout
+		KIND=freescout
+		CONFIG=freescout/docker-compose.yml
+		PORT=8890
+		ROOT=$app
+		TESTS=
+		DB=freescout
+	EOF
+	compose_environment mock-api > "$dir/mock-api.env"
+
+	cat > /etc/apache2/sites-available/wporg-freescout.conf <<-EOF
+		Listen 8890
+		<VirtualHost *:8890>
+		    ServerName 127.0.0.1
+		    DocumentRoot $app/public
+		    LimitRequestBody 20971520
+		    php_admin_value upload_max_filesize 2M
+		    php_admin_value post_max_size 8M
+		    ErrorLog \${APACHE_LOG_DIR}/freescout-error.log
+		    CustomLog \${APACHE_LOG_DIR}/freescout-access.log combined
+		</VirtualHost>
+	EOF
+	a2ensite -q wporg-freescout
+	apachectl -k graceful
+
+	# What the db service's environment and its init script set up.
+	mariadb -e "DROP DATABASE IF EXISTS freescout; CREATE DATABASE freescout;
+		CREATE USER IF NOT EXISTS 'freescout'@'%' IDENTIFIED BY 'freescout';
+		GRANT ALL ON freescout.* TO 'freescout'@'%';"
+	mariadb < "$ENVDIR/freescout/db/init.sql"
+
+	# Image builds mount /etc/hosts read-only, so nss_wrapper answers for the service hostnames while setup runs.
+	if [ ! -w /etc/hosts ]; then
+		printf '127.0.0.1 localhost %s\n::1 localhost\n' "$HOST_ALIASES" > "$WPORG_OPT/hosts"
+		export LD_PRELOAD=libnss_wrapper.so NSS_WRAPPER_HOSTS=$WPORG_OPT/hosts
+	fi
+	wporg start
+
+	# setup.sh as `npm run freescout:start` runs it. GreenMail keeps mail in memory, so the sample email it delivers is
+	# fetched into FreeScout now, while it is still there.
+	wporg run freescout -- bash /srv/env/bin/setup.sh
+	wporg run freescout -- php artisan freescout:fetch-emails
+	unset LD_PRELOAD NSS_WRAPPER_HOSTS
+	touch "$dir/after-start.done"
+}
+
+# MariaDB's root as wp-env's database containers set it up: password "password", reachable over TCP.
+prepare_database() {
+	mariadb -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA unix_socket OR mysql_native_password USING PASSWORD('$DB_PASSWORD');
+		CREATE USER IF NOT EXISTS '$DB_USER'@'127.0.0.1' IDENTIFIED BY '$DB_PASSWORD';
+		GRANT ALL ON *.* TO '$DB_USER'@'127.0.0.1' WITH GRANT OPTION;"
+}
+
+# WordPress' PHPUnit test library, which wp-env mounts at /wordpress-phpunit. It takes trunk's for nightly builds.
+fetch_test_library() {
+	local dest=$SOURCES/wordpress-develop
+	[ -d "$dest" ] && return
+	git clone -q --depth 1 --filter=blob:none --no-checkout https://github.com/WordPress/wordpress-develop.git "$dest"
+	git -C "$dest" sparse-checkout set --cone tests/phpunit
+	git -C "$dest" checkout -q trunk
+}
+
+main() {
+	[ "$( id -u )" = 0 ] || die "run as root"
+	mkdir -p "$SITES" "$SOURCES"
+	mariadb-admin ping --silent 2> /dev/null || die "MariaDB is not running; run \`wporg start\` first"
+	prepare_database
+
+	# One target is built here, and fails loudly.
+	if [ $# -eq 1 ]; then
+		if [ "$1" = freescout ]; then
+			provision_freescout
+		else
+			fetch_test_library
+			provision_site "$1"
+		fi
+		return
+	fi
+
+	local targets=( "$@" )
+	if [ "${#targets[@]}" -eq 0 ]; then
+		while read -r config; do
+			targets+=( "${config#"$ENVDIR"/}" )
+		done < <( find "$ENVDIR" -mindepth 2 -maxdepth 2 \( -name .wp-env.json -o -name .wp-env.test.json \) | sort )
+	fi
+
+	# Each of several is built in its own process, so one that breaks is marked failed and the rest still get built.
+	local target name
+	for target in "${targets[@]}"; do
+		if "$0" "$target"; then
+			continue
+		fi
+		name=freescout
+		[ "$target" = freescout ] || name=$( site_name "$ENVDIR/$target" )
+		mkdir -p "$SITES/$name"
+		touch "$SITES/$name/provision.failed"
+		warn "$name: could not be built; see the output above"
+	done
+
+	echo
+	wporg sites
+}
+
+main "$@"

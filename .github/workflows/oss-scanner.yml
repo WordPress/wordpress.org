@@ -1,0 +1,44 @@
+name: OSS Scanner Image
+
+on:
+  pull_request:
+    paths:
+      - '.oss-scanner/**'
+      - 'environments/**'
+      - '.github/workflows/oss-scanner.yml'
+  push:
+    branches: [ trunk ]
+    paths:
+      - '.oss-scanner/**'
+      - 'environments/**'
+      - '.github/workflows/oss-scanner.yml'
+  # The image builds from unpinned sources (nightly WordPress, plugin zips, live WordPress.org content); catch breakage
+  # before the scanner's next build does, which reports it to the security team.
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+# Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.sha || '' }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Build and check
+    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+
+      # As the scanner builds it: the checkout is the build context, with network access.
+      - name: Build the image
+        run: docker build --progress=plain --file .oss-scanner/Dockerfile --tag wporg-oss-scanner .
+
+      # As the scanner runs it: no network. Every site must answer and every test suite must pass.
+      - name: Check every site and test suite offline
+        run: docker run --rm --network none wporg-oss-scanner wporg check --tests

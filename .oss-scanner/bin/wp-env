@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+#
+# Stands in for @wordpress/env in the OSS Scanner image, which has no Docker. The npm scripts and lifecycle scripts in
+# environments/ call `wp-env --config <config> start|run ...`; this runs them against the site wporg-provision built
+# from that config, mapping the paths wp-env's containers use (/var/www/html, /wordpress-phpunit) to the site's.
+
+set -euo pipefail
+
+# shellcheck source=SCRIPTDIR/../lib/common.sh
+. "$( dirname "$( realpath "$0" )" )/../lib/common.sh"
+
+config=.wp-env.json
+while [ $# -gt 0 ]; do
+	case $1 in
+		--config) config=${2:-}; shift 2 ;;
+		--config=*) config=${1#*=}; shift ;;
+		--debug) shift ;;
+		*) break ;;
+	esac
+done
+command=${1:-}
+shift || true
+
+name=$( site_name "$config" )
+
+case $command in
+	start)
+		if [ ! -f "$SITES/$name/site.env" ]; then
+			# Only works with network access, which a scan does not have.
+			wporg-provision "$( realpath --relative-to="$ENVDIR" "$config" )"
+		fi
+		wporg start
+		load_site "$name"
+		echo "WordPress started at http://localhost:$PORT (site $name; its setup ran when the image was built)."
+		;;
+
+	run)
+		container=${1:-}
+		shift || true
+		case $container in
+			cli | tests-cli | wordpress | tests-wordpress | mysql | tests-mysql) ;;
+			*) die "run: unknown container \"$container\"" ;;
+		esac
+		cwd=
+		while [ $# -gt 0 ]; do
+			case $1 in
+				--env-cwd=*) cwd=${1#*=}; shift ;;
+				--env-cwd) cwd=${2:-}; shift 2 ;;
+				--) shift; break ;;
+				*) break ;;
+			esac
+		done
+		load_site "$name"
+		args=()
+		for arg in "$@"; do
+			arg=${arg//\/var\/www\/html/$ROOT}
+			args+=( "${arg//\/wordpress-phpunit/$TESTS}" )
+		done
+		exec wporg run "$name" --cwd="${cwd:-.}" -- "${args[@]}"
+		;;
+
+	stop)
+		echo "wp-env stop: every site shares one Apache and MariaDB here, so they keep running. \`wporg stop\` stops them all."
+		;;
+
+	install-path)
+		load_site "$name"
+		echo "$ROOT"
+		;;
+
+	logs)
+		load_site "$name"
+		tail -n 100 "/var/log/apache2/$name-error.log"
+		;;
+
+	*)
+		die "\`wp-env $command\` is not available in this image. Sites are built with network access, at image build time, by wporg-provision."
+		;;
+esac
