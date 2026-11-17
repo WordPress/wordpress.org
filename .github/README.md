@@ -25,14 +25,17 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
   ```bash
   BASE_REF=trunk php .github/bin/phpcs-branch.php
   ```
+  `BASE_REF` accepts a Git branch, ref, or commit. CI compares PR merge commits
+  against `HEAD^1`, and trunk pushes against the push's previous commit. An
+  unset or invalid comparison ref fails the check.
 
 ---
 
 ## GitHub Actions Workflows (`.github/workflows/`)
 
 ### 1. [Static Analysis (PHP Linting)](workflows/phpcs.yml) (`phpcs.yml`)
-- **Trigger:** Runs on pull requests that modify PHP files, `phpcs.xml.dist`, `composer.json`, or the workflow files themselves.
-- **Actions:** Sets up PHP 8.4, installs composer tools, and executes the `phpcs-branch.php` helper script to report PHPCS syntax/standard compliance on PR diffs.
+- **Trigger:** Runs on pull requests and pushes to `trunk` that modify PHP files, either PHPCS ruleset, the root Composer manifest or lockfile, or the lint workflow/helper.
+- **Actions:** Sets up PHP 8.4, installs composer tools, and executes the `phpcs-branch.php` helper script to report PHPCS syntax/standard compliance on changed lines. FreeScout's separate full scan only runs when FreeScout files, Composer dependencies, or this workflow change.
 
 ### 2. [Unit Tests](workflows/unit-tests.yml) (`unit-tests.yml`)
 - **Trigger:** Runs on pull requests and pushes to `trunk` (only the suites affected by the changed files), plus a daily scheduled run and manual dispatch (all suites).
