@@ -97,6 +97,8 @@
 		 */
 		updateSelection( model, checked ) {
 			const id = model.get( 'id' );
+			if ( id === '' ) return;
+
 			if ( checked ) {
 				projects.selection.add( { id } );
 				projects.events.trigger( 'uncheck:all-projects' );
@@ -116,13 +118,20 @@
 		},
 
 		initialize() {
-			const subProjects = this.get( 'sub_projects' ) || [];
+			const rawSubProjects = this.get( 'sub_projects' );
 			this.unset( 'sub_projects', { silent: true } );
 
-			// Populate sub-project IDs without allocating an intermediate array.
+			const subProjects = [];
 			this._subProjectIds = new Set();
-			for ( const sub of subProjects ) {
-				this._subProjectIds.add( normalizeId( sub.id ) );
+
+			if ( Array.isArray( rawSubProjects ) ) {
+				for ( const sub of rawSubProjects ) {
+					const id = normalizeId( sub?.id );
+					if ( id === '' ) continue;
+
+					this._subProjectIds.add( id );
+					subProjects.push( sub );
+				}
 			}
 
 			const subProjectsCollection = new projects.model.SubProjects( subProjects, {
@@ -810,11 +819,21 @@
 				blob
 			}, 'payload' );
 
-			await new Promise( ( resolve, reject ) => {
+			let timer;
+			const writePromise = new Promise( ( resolve, reject ) => {
 				tx.oncomplete = () => resolve();
-				tx.onerror = () => reject( tx.error );
-				tx.onabort = () => reject( tx.error );
+				tx.onerror = () => reject( tx.error || new Error( 'Transaction error' ) );
+				tx.onabort = () => reject( tx.error || new Error( 'Transaction aborted' ) );
 			} );
+
+			const timeout = new Promise( ( _, reject ) => {
+				timer = setTimeout( () => {
+					try { tx.abort(); } catch {}
+					reject( new Error( 'IndexedDB write transaction timed out' ) );
+				}, 2000 );
+			} );
+
+			await Promise.race( [ writePromise, timeout ] ).finally( () => clearTimeout( timer ) );
 		} catch ( error ) {
 			console.warn( 'Caching projects in IndexedDB failed.', error );
 		} finally {
@@ -823,8 +842,12 @@
 	};
 
 	projects.initFrame = projectData => {
+		const validProjects = Array.isArray( projectData )
+			? projectData.filter( p => normalizeId( p?.id ) !== '' )
+			: [];
+
 		new projects.view.Frame( {
-			collection: new projects.model.Projects( projectData )
+			collection: new projects.model.Projects( validProjects )
 		} ).render();
 	};
 
