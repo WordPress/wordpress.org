@@ -337,12 +337,27 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	}
 
 	/**
-	 * Answers HelpScout's API: the review conversation, and that the reply was created.
+	 * No confirmation goes into a HelpScout conversation the team started with someone else, though WordPress.org's
+	 * copy names the author from its subject.
 	 *
-	 * @param string $created_by Who started the conversation: `user`, an agent, or `customer`, a sender.
 	 * @return void
 	 */
-	protected function answer_helpscout( string $created_by = 'user' ): void {
+	public function test_does_not_reply_in_helpscout_when_the_customer_is_not_the_author(): void {
+		$this->answer_helpscout( 'user', 'someone-else@example.net' );
+		list( $plugin, $attachment ) = $this->upload( false );
+
+		$this->assertFalse( Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
+	}
+
+	/**
+	 * Answers HelpScout's API: the review conversation, and that the reply was created.
+	 *
+	 * @param string      $created_by Who started the conversation: `user`, an agent, or `customer`, a sender.
+	 * @param string|null $customer   The conversation customer's email; null for the current user's.
+	 * @return void
+	 */
+	protected function answer_helpscout( string $created_by = 'user', ?string $customer = null ): void {
 		if ( ! defined( 'HELPSCOUT_APP_ID' ) ) {
 			define( 'HELPSCOUT_APP_ID', 'test' );
 			define( 'HELPSCOUT_APP_SECRET', 'test' );
@@ -357,7 +372,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 
 		$this->filter(
 			'pre_http_request',
-			function ( mixed $preempt, array $args, string $url ) use ( $created_by ): mixed {
+			function ( mixed $preempt, array $args, string $url ) use ( $created_by, $customer ): mixed {
 				if ( ! str_starts_with( $url, 'https://api.helpscout.net/' ) ) {
 					return $preempt;
 				}
@@ -367,7 +382,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 					$conversation = array(
 						'id'              => self::CONVERSATION_ID,
 						'createdBy'       => array( 'type' => $created_by ),
-						'primaryCustomer' => array( 'email' => wp_get_current_user()->user_email ),
+						'primaryCustomer' => array( 'email' => $customer ?? wp_get_current_user()->user_email ),
 					);
 
 					return array( 'response' => array( 'code' => 200 ), 'body' => wp_json_encode( $conversation ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- A short HTTP response.

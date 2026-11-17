@@ -1030,6 +1030,11 @@ class Upload_Handler {
 				$conversation = Helpscout_Client::api( '/v2/conversations/' . $review_email->id, null, 'GET', $http_response_code );
 				$failed       = 200 !== $http_response_code;
 				$started_by   = $conversation->createdBy->type ?? ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+
+				// HelpScout's stored owner can come from a subject line, so its customer has to be the author too.
+				if ( ! $failed && 0 !== strcasecmp( (string) ( $conversation->primaryCustomer->email ?? '' ), wp_get_current_user()->user_email ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+					continue;
+				}
 			}
 
 			// Without it, there's no telling whether an older one is the newest the team started.
