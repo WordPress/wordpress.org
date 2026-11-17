@@ -1,0 +1,294 @@
+#!/usr/bin/env bash
+#
+# Runs the WordPress.org sites in the OSS Scanner image. See .oss-scanner/threat_model.md.
+#
+#   wporg start                          start MariaDB, Apache, and FreeScout's mail servers and mock API; safe to rerun
+#   wporg stop                           stop them all
+#   wporg sites                          list the sites, their URLs, and whether their setup finished
+#   wporg run <site> [--cwd=<dir>] [--] <command>...
+#                                        run a command in a site as its web server user, the way
+#                                        `wp-env run cli` does: <dir> is relative to the site's root
+#   wporg check [--tests]                check every site answers, and with --tests run every test suite
+
+# NAME, CONFIG and the other site settings come from each site's site.env.
+# shellcheck disable=SC2153
+
+set -euo pipefail
+
+# shellcheck source=SCRIPTDIR/../lib/common.sh
+. "$( dirname "$( realpath "$0" )" )/../lib/common.sh"
+
+# Starts a command in the background, once, logging to $LOGS/<name>.log.
+daemon() {
+	local name=$1
+	shift
+	if [ -f "$RUNDIR/$name.pid" ] && kill -0 "$( cat "$RUNDIR/$name.pid" )" 2> /dev/null; then
+		return
+	fi
+	setsid nohup "$@" > "$LOGS/$name.log" 2>&1 < /dev/null &
+	echo $! > "$RUNDIR/$name.pid"
+}
+
+# Whether a process with this name is running. Exited ones count as gone even before they are reaped, which nothing
+# does in a container without an init process.
+running() {
+	pgrep -x "$1" -r R,S,D,T > /dev/null
+}
+
+# Waits up to 60 seconds for a TCP port on 127.0.0.1 to accept connections, and warns if nothing does: a FreeScout
+# service that fails to start must not keep the WordPress sites from starting.
+wait_for_port() {
+	local tries=120
+	until (: < "/dev/tcp/127.0.0.1/$1") 2> /dev/null; do
+		tries=$(( tries - 1 ))
+		if [ "$tries" -le 0 ]; then
+			warn "nothing is listening on port $1 (see $LOGS)"
+			return
+		fi
+		sleep 0.5
+	done
+}
+
+start() {
+	[ "$( id -u )" = 0 ] || die "run as root"
+	mkdir -p "$LOGS" "$RUNDIR"
+
+	# Image builds mount /etc/hosts read-only; wporg-provision resolves the names another way there.
+	if [ -w /etc/hosts ] && ! grep -qE "^127\.0\.0\.1\s+$HOST_ALIASES\$" /etc/hosts; then
+		echo "127.0.0.1 $HOST_ALIASES" >> /etc/hosts
+	fi
+
+	if ! mariadb-admin ping --silent 2> /dev/null; then
+		mkdir -p /run/mysqld
+		chown mysql:mysql /run/mysqld
+		daemon mariadb mysqld_safe
+		local tries=120
+		until mariadb-admin ping --silent 2> /dev/null; do
+			tries=$(( tries - 1 ))
+			[ "$tries" -gt 0 ] || die "MariaDB did not start (see $LOGS/mariadb.log)"
+			sleep 0.5
+		done
+	fi
+
+	# Apache has nothing to listen on until wporg-provision adds the first site.
+	if ! running apache2 && compgen -G '/etc/apache2/sites-enabled/wporg-*.conf' > /dev/null; then
+		apachectl -k start
+	fi
+
+	if [ -f "$SITES/freescout/site.env" ]; then
+		daemon greenmail java -Xmx192m -Dgreenmail.setup.test.smtp -Dgreenmail.setup.test.imap \
+			-Dgreenmail.hostname=0.0.0.0 -Dgreenmail.auth.disabled -Dgreenmail.users.login=email \
+			-jar "$WPORG_OPT/greenmail.jar"
+		daemon mailpit mailpit --listen 0.0.0.0:8891 --smtp 0.0.0.0:1025
+
+		# The mock API answers FreeScout on 8080, and the browser's SAML logins on 8892, as Compose maps it.
+		local env
+		mapfile -t env < <( env_assignments "$SITES/freescout/mock-api.env" )
+		daemon mock-api runuser -u www-data -- env "${env[@]}" php -S 0.0.0.0:8080 /srv/mock-api/index.php
+		daemon mock-api-idp runuser -u www-data -- env "${env[@]}" php -S 0.0.0.0:8892 /srv/mock-api/index.php
+
+		# FreeScout's scheduler, which also starts the queue worker, as its container's entrypoint runs it. It waits for
+		# setup.sh's marker in /tmp, which a scan may start without; setup ran when the image was built.
+		if [ -f "$SITES/freescout/after-start.done" ]; then
+			touch /tmp/wporg-setup-done
+		fi
+		daemon freescout-scheduler runuser -u www-data -- bash -c '
+			until [ -f /tmp/wporg-setup-done ]; do
+				sleep 1
+			done
+			while true; do
+				php /var/www/html/artisan schedule:run > /dev/null 2>&1 || true
+				sleep 60
+			done
+		'
+		wait_for_port 3025
+		wait_for_port 3143
+		wait_for_port 1025
+		wait_for_port 8080
+	fi
+}
+
+stop() {
+	local pidfile
+	for pidfile in "$RUNDIR"/*.pid; do
+		[ -f "$pidfile" ] || continue
+		case $( basename "$pidfile" ) in
+			mariadb.pid) ;;
+			*) kill -- -"$( cat "$pidfile" )" 2> /dev/null || true ;;
+		esac
+		rm -f "$pidfile"
+	done
+	pkill -f 'artisan queue:work' 2> /dev/null || true
+	apachectl -k stop 2> /dev/null || true
+	mariadb-admin shutdown 2> /dev/null || true
+	local tries=120
+	while running apache2 || running mariadbd; do
+		tries=$(( tries - 1 ))
+		if [ "$tries" -le 0 ]; then
+			warn "Apache or MariaDB did not stop within 60 seconds"
+			return 1
+		fi
+		sleep 0.5
+	done
+}
+
+# Prints a site's setup status: ok, FAILED (it was not built, or its afterStart script failed), or - (it has none).
+site_status() {
+	if [ -f "$SITES/$1/provision.failed" ] || [ -f "$SITES/$1/after-start.failed" ]; then
+		echo FAILED
+	elif [ -f "$SITES/$1/after-start.done" ]; then
+		echo ok
+	else
+		echo -
+	fi
+}
+
+sites() {
+	local dir name
+	printf '%-24s %-26s %-8s %s\n' SITE URL SETUP CONFIG
+	for dir in "$SITES"/*/; do
+		name=$( basename "$dir" )
+		if [ ! -f "$dir/site.env" ]; then
+			printf '%-24s %-26s %-8s\n' "$name" - "$( site_status "$name" )"
+			continue
+		fi
+		(
+			load_site "$name"
+			url=http://localhost:$PORT
+			[ "$KIND" = freescout ] && url=http://127.0.0.1:$PORT
+			printf '%-24s %-26s %-8s environments/%s\n' "$NAME" "$url" "$( site_status "$NAME" )" "$CONFIG"
+		)
+	done
+}
+
+run() {
+	local site=${1:-} cwd=
+	[ -n "$site" ] || die "usage: wporg run <site> [--cwd=<dir>] [--] <command>..."
+	shift
+	while [ $# -gt 0 ]; do
+		case $1 in
+			--cwd=*) cwd=${1#*=}; shift ;;
+			--cwd) cwd=${2:-}; shift 2 ;;
+			--) shift; break ;;
+			*) break ;;
+		esac
+	done
+	[ $# -gt 0 ] || die "wporg run $site: no command given"
+
+	load_site "$site"
+	case $cwd in
+		'') cwd=$ROOT ;;
+		/*) ;;
+		*) cwd=$( realpath -m -s "$ROOT/$cwd" ) ;;
+	esac
+
+	local env=(
+		HOME="$WPORG_OPT/home"
+		COMPOSER_CACHE_DIR="$WPORG_OPT/composer-cache"
+	)
+	if [ "$KIND" = freescout ]; then
+		local dotenv
+		mapfile -t dotenv < <( env_assignments "$ROOT/.env" )
+		env+=( "${dotenv[@]}" )
+	else
+		# What wp-env's cli container has in its environment, including its own global Composer packages.
+		# WP_CLI_CONFIG_PATH points WP-CLI at the site even from a plugin linked into /src, where the directory it
+		# would search upward from is.
+		env+=(
+			WP_CLI_CONFIG_PATH="$ROOT/wp-cli.yml"
+			COMPOSER_HOME="$SITES/$NAME/composer"
+			PATH="$SITES/$NAME/composer/vendor/bin:$PATH"
+			WP_TESTS_DIR="$TESTS"
+			WORDPRESS_DB_HOST=127.0.0.1
+			WORDPRESS_DB_USER="$DB_USER"
+			WORDPRESS_DB_PASSWORD="$DB_PASSWORD"
+			WORDPRESS_DB_NAME="$DB"
+		)
+	fi
+
+	cd "$cwd"
+	if [ "$( id -u )" = 0 ]; then
+		exec runuser -u www-data -- env "${env[@]}" "$@"
+	fi
+	exec env "${env[@]}" "$@"
+}
+
+check() {
+	local tests=false failed=0 dir
+	[ "${1:-}" = --tests ] && tests=true
+	start
+
+	for dir in "$SITES"/*/; do
+		(
+			NAME=$( basename "$dir" )
+			if [ "$( site_status "$NAME" )" = FAILED ]; then
+				echo "FAIL  $NAME: its setup failed; see the image build log, or $SITES/$NAME/after-start.log"
+				exit 1
+			fi
+			load_site "$NAME"
+			# Test sites only serve their suites, so only the others are requested.
+			case $NAME in
+				*-test) exit 0 ;;
+			esac
+			local url=http://localhost:$PORT/ code
+			[ "$KIND" = freescout ] && url=http://127.0.0.1:$PORT/login
+			code=$( curl -sS -L -o /tmp/wporg-check.html -w '%{http_code}' "$url" || true )
+			if [ "$code" != 200 ] || grep -q 'There has been a critical error' /tmp/wporg-check.html; then
+				echo "FAIL  $NAME: $url answered $code"
+				exit 1
+			fi
+			echo "ok    $NAME: $url"
+		) || failed=1
+	done
+
+	if $tests; then
+		local script
+		while read -r script; do
+			echo
+			echo "== npm run $script"
+			( cd "$ENVDIR" && npm run --silent "$script" < /dev/null ) || { echo "FAIL  npm run $script"; failed=1; }
+		done < <( jq -r '.scripts | keys[] | select( test( "^[a-z-]+:test$" ) and . != "freescout:test" )' "$ENVDIR/package.json" )
+
+		echo
+		echo "== FreeScout module tests"
+		wporg run freescout -- bash /srv/env/bin/test.sh || { echo "FAIL  FreeScout module tests"; failed=1; }
+
+		# Fields are separated by \x1f: tabs would collapse an empty field into the next.
+		local dir args bootstrap
+		while IFS=$'\x1f' read -r dir args bootstrap; do
+			if [ -n "$bootstrap" ]; then
+				echo
+				echo "skip  $dir: needs the $bootstrap bootstrap that .github/workflows/unit-tests.yml writes"
+				continue
+			fi
+			echo
+			echo "== $dir"
+			# shellcheck disable=SC2086 # The arguments are a list, as the workflow passes them.
+			( cd "/src/$dir" && /src/vendor/bin/phpunit $args < /dev/null ) || { echo "FAIL  $dir"; failed=1; }
+		done < <( python3 -I - /src/.github/unit-tests-suites.yml <<-'EOF'
+			import sys, yaml
+			for suite in yaml.safe_load( open( sys.argv[1] ) )["suites"].values():
+			    if suite["type"] == "standalone":
+			        print( "\x1f".join( ( suite["working-directory"], suite.get( "phpunit-args", "" ), suite.get( "bootstrap", "" ) ) ) )
+		EOF
+		)
+	fi
+
+	echo
+	if [ "$failed" = 1 ]; then
+		echo "Some checks failed."
+		return 1
+	fi
+	echo "All checks passed."
+}
+
+command=${1:-}
+shift || true
+case $command in
+	start) start ;;
+	stop) stop ;;
+	sites) sites ;;
+	run) run "$@" ;;
+	check) check "$@" ;;
+	*) sed -n '3,12s/^# \{0,1\}//p' "$0"; [ -z "$command" ] || exit 1 ;;
+esac
