@@ -25,7 +25,7 @@ The rest is not WordPress:
 - `freescout.wordpress.net/`: modules for the FreeScout helpdesk (Laravel) that the plugin and theme review teams
   answer email in.
 - `trac.wordpress.org/`, `svn.wordpress.org/`, `profiles.wordpress.org/`, `common/includes/slack/`: Trac templates
-  and configuration, Subversion hooks, profile handlers, and Slack integrations. Read only.
+  and configuration, Subversion hooks, profile handlers, and Slack integrations. They can only be read here, not run.
 
 ### Who can do what
 
@@ -35,7 +35,7 @@ input enters through:
 - Requests from anonymous visitors, and from any logged-in account with no role on the site: page views, search,
   feeds, the REST API (`/wp-json/`), `admin-ajax.php` and `admin-post.php`, and the APIs under api.wordpress.org.
 - Anything a logged-in account can post: forum topics and replies, reviews, translation suggestions, photo
-  submissions, job postings, WordPress.tv submissions, profile fields, and reports.
+  submissions, job postings, profile fields, and reports.
 - **Plugins and themes.** Anyone can submit a plugin or theme, and once it is approved, its owner controls everything
   in its SVN repository: `readme.txt`, plugin headers, `style.css`, `blueprint.json`, screenshots, banners, block
   metadata, and every file in the zip. The directories parse all of it and render it to visitors and reviewers. A
@@ -46,6 +46,24 @@ input enters through:
 Roles that are appointed, not taken, are trusted: plugin and theme reviewers, forum moderators and keymasters,
 translation editors (PTEs and GTEs), locale site editors, team representatives, and site administrators. Roles on
 WordPress.org sites are assigned individually; no site grants Contributor, Author or Editor on sign-up.
+
+### Which sites count, and for whom
+
+The WordPress HackerOne program (https://hackerone.com/wordpress) decides what counts, site by site, with the
+narrower eligibility announced at
+https://make.wordpress.org/security/2026/09/01/updates-to-the-wordpress-vulnerability-disclosure-program/, which
+applies to all of this repository. Find the row for where the code runs:
+
+| Where the code runs | Counts when the attacker is | Highest severity |
+|---|---|---|
+| wordpress.org and its subdomains: the directories, forums, Photo Directory, translate, login, make, developer, learn, the locale sites | Anonymous, any account with the role every new account gets, or a plugin or theme owner | Critical |
+| api.wordpress.org, profiles.wordpress.org, bbpress.org, buddypress.org | Anonymous | Critical |
+| Trac and the Subversion hooks (`trac.wordpress.org/`, `svn.wordpress.org/`) | Anonymous | Low, or High when it lets the attacker change source code |
+| jobs.wordpress.net, freescout.wordpress.net, and the other `*.wordpress.net` sites | Anonymous | Low |
+| wordpress.tv, browsehappy.com, wp-themes.com | Not covered: wordpress.tv runs on WordPress.com, and the others are not in the program | None |
+
+Where only an anonymous attacker counts, a finding that needs an account still counts if it gives a clear path to
+administrator or to code execution on the server.
 
 ## Components that matter most / least
 
@@ -74,8 +92,8 @@ Out of scope:
   stand in for production services, and its dev-login helpers deliberately skip authentication.
 - Tests, and third-party code bundled in the repository (`vendor/`, `libs/`, and copies of external projects), except
   where the way WordPress.org uses it creates the vulnerability.
-- WordPress core, Gutenberg, bbPress, BuddyPress, GlotPress, Jetpack and other plugins installed from elsewhere. Report
-  those upstream.
+- WordPress core, Gutenberg, bbPress, BuddyPress, GlotPress, Trac, Jetpack and other plugins installed from elsewhere.
+  Report those upstream.
 
 `.github/` is in scope: the CI and pull request workflows run against untrusted pull requests.
 
@@ -126,11 +144,10 @@ For XSS, show that the payload executes in a browser context, not only that it a
 
 ## How you rate severity
 
-This follows the WordPress HackerOne program (https://hackerone.com/wordpress), which decides what counts. On
-WordPress.org, a vulnerability is in scope only when it can be exploited without an account, or with the account
-anyone gets on sign-up, and has a clear security impact. A plugin committer or theme author counts as that account.
+Rate a finding with this table, then cap it at the highest severity for its site in the table above. Only attackers
+who count on that site apply.
 
-| Finding, by an anonymous visitor, any account, or a plugin or theme owner | Severity |
+| Finding | Severity |
 |---|---|
 | Code execution on the server, unchained | Critical |
 | Taking over another account, or gaining a trusted role, unchained | Critical |
@@ -145,9 +162,13 @@ anyone gets on sign-up, and has a clear security impact. A plugin committer or t
 | Blind SSRF, or other low-impact issues | Low |
 | No real security impact | Informative |
 
-A finding that needs an appointed role (reviewer, moderator, translation editor, locale editor, administrator) is out
-of scope. The exception is code execution on the server or taking over another account from such a role, which is
-Medium.
+A finding that needs a role only an administrator can grant (reviewer, moderator, translation editor, locale editor,
+Contributor or higher) is out of scope, unless it leads to a high-severity escalation with a real security impact,
+such as a clear path to administrator or to code execution on the server. Rate that by what the attacker reaches.
+
+One authenticated role doing what another authenticated role normally can is not a finding on its own, for example a
+plugin's support rep doing what its committers can, or one forum role doing another's moderation. It counts only when
+it leads to a high-impact escalation, such as writing to code that ships to sites.
 
 Rules by class:
 
@@ -164,13 +185,19 @@ Rules by class:
 
 ## Anything to leave alone
 
-- Anything that needs an appointed role, except as described above.
+- Anything on wordpress.tv, browsehappy.com or wp-themes.com.
+- Anything that needs an appointed role, or an account where only anonymous attackers count, except as described above.
+- Findings that are not severe (Low or Informative) on a wordpress.org subdomain, such as translate, make, developer,
+  learn or a locale site, or on any other low-impact site. The directories, forums and Photo Directory are on
+  wordpress.org itself.
 - Bypassing plugin or theme review, plugin release confirmation, or other directory checks: that is a review bypass,
   not a vulnerability.
 - Bypassing a moderation control where the attacker gains nothing, such as comment or forum moderation. Content that
   was public before it was marked as spam staying reachable afterwards.
 - Username, user ID and author enumeration, by any mechanism.
 - Intentionally public data: plugin and theme metadata, public profiles, statistics.
+- Broken links to external resources in documentation or a profile, without a significant security impact.
+- Exposing an unapproved comment or trackback through social engineering, session theft, brute force, or similar.
 - Version disclosure, path disclosure from errors, warnings or notices, missing security headers, and missing rate
   limiting.
 - Brute force, denial of service, memory exhaustion, phishing, text injection and social engineering. Wikis, Trac and
