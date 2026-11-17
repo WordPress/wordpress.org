@@ -97,6 +97,7 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 			$wpdb->delete( "{$wpdb->base_prefix}helpscout", array( 'id' => $id ) );
 			$wpdb->delete( "{$wpdb->base_prefix}helpscout_meta", array( 'helpscout_id' => $id ) );
 		}
+		delete_site_transient( 'WordPressdotorg\Plugin_Directory\Clients\HelpScoutget_auth_token' );
 		wp_set_current_user( 0 );
 
 		parent::tearDown();
@@ -261,12 +262,70 @@ class Upload_Confirmation_FreeScout_Test extends TestCase {
 	 */
 	public function test_leaves_helpscouts_conversations_to_helpscout(): void {
 		$this->answer();
+		$this->answer_helpscout();
 		list( $plugin, $attachment ) = $this->upload( false );
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- HelpScout isn't configured here, and the warning it logs is expected.
-		@Upload_Handler::update_review_email( $plugin, $attachment );
+		$this->assertTrue( Upload_Handler::update_review_email( $plugin, $attachment ) );
 
-		$this->assertSame( array(), $this->requests );
+		$this->assertSame( array( 'GET', 'POST' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
+		$this->assertSame( 'https://api.helpscout.net/v2/conversations/' . self::CONVERSATION_ID . '/reply', $this->requests[1]['url'] );
+	}
+
+	/**
+	 * No confirmation goes into a HelpScout conversation whose customer isn't the author, though its subject names them.
+	 *
+	 * @return void
+	 */
+	public function test_does_not_reply_in_helpscout_when_the_customer_is_not_the_author(): void {
+		$this->answer_helpscout( 'customer', 'someone-else@example.net' );
+		list( $plugin, $attachment ) = $this->upload( false );
+
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- The warning it logs is expected.
+		$this->assertFalse( @Upload_Handler::update_review_email( $plugin, $attachment ) );
+		$this->assertSame( array( 'GET' ), wp_list_pluck( wp_list_pluck( $this->requests, 'args' ), 'method' ) );
+	}
+
+	/**
+	 * Answers HelpScout's API: the review conversation, and that the reply was created.
+	 *
+	 * @param string      $created_by Who started the conversation: `user`, an agent, or `customer`, a sender.
+	 * @param string|null $customer   The conversation customer's email; null for the current user's.
+	 * @return void
+	 */
+	protected function answer_helpscout( string $created_by = 'user', ?string $customer = null ): void {
+		if ( ! defined( 'HELPSCOUT_APP_ID' ) ) {
+			define( 'HELPSCOUT_APP_ID', 'test' );
+			define( 'HELPSCOUT_APP_SECRET', 'test' );
+		}
+		set_site_transient(
+			'WordPressdotorg\Plugin_Directory\Clients\HelpScoutget_auth_token',
+			array(
+				'exp'   => time() + HOUR_IN_SECONDS,
+				'token' => 'test',
+			)
+		);
+
+		$this->filter(
+			'pre_http_request',
+			function ( mixed $preempt, array $args, string $url ) use ( $created_by, $customer ): mixed {
+				if ( ! str_starts_with( $url, 'https://api.helpscout.net/' ) ) {
+					return $preempt;
+				}
+				$this->requests[] = compact( 'url', 'args' );
+
+				if ( 'GET' === $args['method'] ) {
+					$conversation = array(
+						'id'              => self::CONVERSATION_ID,
+						'createdBy'       => array( 'type' => $created_by ),
+						'primaryCustomer' => array( 'email' => $customer ?? wp_get_current_user()->user_email ),
+					);
+
+					return array( 'response' => array( 'code' => 200 ), 'body' => wp_json_encode( $conversation ) ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- A short HTTP response.
+				}
+
+				return array( 'response' => array( 'code' => 201 ), 'body' => '' ); // phpcs:ignore WordPress.Arrays.ArrayDeclarationSpacing.AssociativeArrayFound -- A short HTTP response.
+			}
+		);
 	}
 
 	/**

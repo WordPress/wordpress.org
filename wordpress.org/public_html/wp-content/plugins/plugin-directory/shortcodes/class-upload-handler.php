@@ -1051,6 +1051,18 @@ class Upload_Handler {
 			return self::reply_in_freescout( (int) $review_email->id, $text );
 		}
 
+		// HelpScout's stored owner can come from a subject line, so check the live conversation, as for FreeScout.
+		$conversation = Helpscout_Client::api( '/v2/conversations/' . $review_email->id, null, 'GET', $http_response_code );
+		if (
+			200 !== $http_response_code ||
+			'user' !== ( $conversation->createdBy->type ?? '' ) || // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+			0 !== strcasecmp( (string) ( $conversation->primaryCustomer->email ?? '' ), wp_get_current_user()->user_email ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+		) {
+			trigger_error( "Helpscout update skipped: conversation {$review_email->id} isn't the author's.", E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
+
+			return false;
+		}
+
 		$name = wp_get_current_user()->display_name ?: wp_get_current_user()->user_login;
 		$payload = [
 			'customer' => array_filter( [
