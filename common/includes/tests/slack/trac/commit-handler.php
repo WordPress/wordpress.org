@@ -27,6 +27,13 @@ class Test_Slack_Trac_Commit_Handler extends \PHPUnit\Framework\TestCase {
 	const LOG = "Media: Add a missing alt attribute.\n\nThe image in the media modal had no alt text.\n\nProps desrosj.\nFixes #12345.";
 
 	/**
+	 * Number of times each svnlook subcommand ran in the last run_handler() call.
+	 *
+	 * @var int[]
+	 */
+	private $svnlook_runs = array();
+
+	/**
 	 * Runs a commit through Commit_Handler without svnlook or the Slack webhook.
 	 *
 	 * @param string $trac          Trac slug.
@@ -77,12 +84,20 @@ class Test_Slack_Trac_Commit_Handler extends \PHPUnit\Framework\TestCase {
 			public $svnlook_output = array();
 
 			/**
+			 * Number of times each svnlook subcommand ran.
+			 *
+			 * @var int[]
+			 */
+			public $svnlook_runs = array();
+
+			/**
 			 * Returns canned output instead of running svnlook.
 			 *
 			 * @param string $subcommand svnlook subcommand.
 			 * @return string
 			 */
-			protected function svnlook( $subcommand ) {
+			protected function run_svnlook( $subcommand ) {
+				$this->svnlook_runs[ $subcommand ] = ( $this->svnlook_runs[ $subcommand ] ?? 0 ) + 1;
 				return $this->svnlook_output[ $subcommand ];
 			}
 		};
@@ -95,7 +110,19 @@ class Test_Slack_Trac_Commit_Handler extends \PHPUnit\Framework\TestCase {
 		);
 		$handler->run();
 
+		$this->svnlook_runs = $handler->svnlook_runs;
+
 		return $sent->getArrayCopy();
+	}
+
+	/**
+	 * Each svnlook subcommand runs once per commit, even when more than one payload is built.
+	 */
+	public function test_svnlook_runs_once_per_subcommand(): void {
+		$this->run_handler( 'core', 'trunk/src/wp-includes/media.php', self::LOG );
+
+		$this->assertSame( array( 'author', 'changed', 'date', 'log' ), $this->sorted_keys( $this->svnlook_runs ) );
+		$this->assertSame( array( 1 ), array_values( array_unique( $this->svnlook_runs ) ) );
 	}
 
 	/**

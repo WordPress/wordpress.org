@@ -12,6 +12,13 @@ class Commit_Handler {
 	protected $test_mode = false;
 	protected $svnlook = '/usr/bin/svnlook';
 
+	/**
+	 * Output of each svnlook subcommand already run, keyed by subcommand.
+	 *
+	 * @var string[]
+	 */
+	protected $svnlook_cache = array();
+
 	public function __construct( Send $send, $trac, $repo, $rev ) {
 		$this->send = $send;
 		$this->trac = Trac::get( $trac );
@@ -84,7 +91,28 @@ class Commit_Handler {
 		return $send;
 	}
 
+	/**
+	 * Gets the output of an svnlook subcommand for this revision.
+	 *
+	 * Each subcommand runs once, as the same output is needed for every channel's payload.
+	 *
+	 * @param string $subcommand svnlook subcommand.
+	 * @return string
+	 */
 	protected function svnlook( $subcommand ) {
+		if ( ! isset( $this->svnlook_cache[ $subcommand ] ) ) {
+			$this->svnlook_cache[ $subcommand ] = $this->run_svnlook( $subcommand );
+		}
+		return $this->svnlook_cache[ $subcommand ];
+	}
+
+	/**
+	 * Runs an svnlook subcommand for this revision.
+	 *
+	 * @param string $subcommand svnlook subcommand.
+	 * @return string
+	 */
+	protected function run_svnlook( $subcommand ) {
 		$args = array(
 			$subcommand,
 			'-r' . $this->rev,
