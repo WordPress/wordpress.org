@@ -8,8 +8,9 @@
 #   wporg-provision <config>...     a site for each config, as a path relative to environments/
 #   wporg-provision freescout       FreeScout and the services it talks to
 #
-# A site whose afterStart lifecycle script fails is kept, marked failed (see `wporg sites`), and does not stop the
-# build: those scripts import live WordPress.org content, and a hiccup there should not cost the whole scan.
+# Several sites are built side by side, each logging to $LOGS/provision/<site>.log, which is printed at the end.
+# A site that fails, or whose afterStart lifecycle script fails, is kept, marked failed (see `wporg sites`), and does
+# not stop the build: those scripts import live WordPress.org content, and a hiccup there should not cost the scan.
 
 set -euo pipefail
 
@@ -41,13 +42,40 @@ log() {
 # Prints the port a site is served on, giving it the next free one the first time.
 assign_port() {
 	local ports=$SITES/ports port
-	touch "$ports"
-	port=$( awk -v name="$1" '$1 == name { print $2 }' "$ports" )
-	if [ -z "$port" ]; then
-		port=$( awk -v first="$FIRST_PORT" 'BEGIN { max = first - 1 } $2 > max { max = $2 } END { print max + 1 }' "$ports" )
-		echo "$1 $port" >> "$ports"
-	fi
-	echo "$port"
+	(
+		flock 9
+		touch "$ports"
+		port=$( awk -v name="$1" '$1 == name { print $2 }' "$ports" )
+		if [ -z "$port" ]; then
+			port=$( awk -v first="$FIRST_PORT" 'BEGIN { max = first - 1 } $2 > max { max = $2 } END { print max + 1 }' "$ports" )
+			echo "$1 $port" >> "$ports"
+		fi
+		echo "$port"
+	) 9> "$SITES/ports.lock"
+}
+
+# Serves a site on its port. Apache is only reloaded when the vhost changes, so sites built side by side, whose vhosts
+# were all written beforehand, do not reload it under each other.
+enable_vhost() {
+	local name=$1 port=$2 conf=/etc/apache2/sites-available/wporg-$1.conf vhost
+	vhost=$( cat <<-EOF
+		Listen $port
+		<VirtualHost *:$port>
+		    ServerName localhost
+		    DocumentRoot $SITES/$name/html
+		    ErrorLog \${APACHE_LOG_DIR}/$name-error.log
+		    CustomLog \${APACHE_LOG_DIR}/$name-access.log combined
+		</VirtualHost>
+	EOF
+	)
+	(
+		flock 9
+		if [ "$vhost" != "$( cat "$conf" 2> /dev/null )" ] || [ ! -e "/etc/apache2/sites-enabled/wporg-$name.conf" ]; then
+			printf '%s\n' "$vhost" > "$conf"
+			a2ensite -q "wporg-$name"
+			[ "${3:-}" = --no-reload ] || apachectl -k graceful
+		fi
+	) 9> "$RUNDIR/apache.lock"
 }
 
 # Downloads a zip into a new directory, unwrapped from its single top-level folder if it has one, as wp-env does.
@@ -81,16 +109,26 @@ resolve_source() {
 			base=${base##*/}
 			base=$( sed -E 's/\.zip$//; s/\.([0-9]+\.)*[0-9]+$//' <<< "$base" )
 			path=$SOURCES/zip/$( printf '%s' "$spec" | sha1sum | cut -c1-12 )/$base
-			[ -d "$path" ] || download_zip "$spec" "$path" >&2
+			(
+				flock 9
+				[ -d "$path" ] || download_zip "$spec" "$path" >&2
+			) 9> "$SOURCES/.lock"
 			printf '%s\t%s\tremote\n' "$path" "$base"
 			;;
 		*/*)
 			[[ $spec =~ ^([^/]+)/([^#/]+)(/([^#]+))?(#(.+))?$ ]] || die "unsupported source: $spec"
 			local owner=${BASH_REMATCH[1]} repo=${BASH_REMATCH[2]} sub=${BASH_REMATCH[4]} ref=${BASH_REMATCH[6]}
 			local clone=$SOURCES/git/$owner/$repo@${ref:-HEAD}
-			if [ ! -d "$clone" ]; then
-				git clone -q --depth 1 ${ref:+--branch "$ref"} "https://github.com/$owner/$repo.git" "$clone" >&2
-			fi
+			# Cloned beside its final place and moved there when complete, without its .git, which nothing here uses
+			# and every site would carry.
+			(
+				flock 9
+				[ -d "$clone" ] && exit
+				rm -rf "$clone.tmp"
+				git clone -q --depth 1 ${ref:+--branch "$ref"} "https://github.com/$owner/$repo.git" "$clone.tmp" >&2 &&
+					rm -rf "$clone.tmp/.git" &&
+					mv "$clone.tmp" "$clone"
+			) 9> "$SOURCES/.lock"
 			path=$clone${sub:+/$sub}
 			printf '%s\t%s\tremote\n' "$path" "${sub:-$repo}"
 			;;
@@ -201,17 +239,7 @@ provision_site() {
 		DB=$db
 	EOF
 
-	cat > "/etc/apache2/sites-available/wporg-$name.conf" <<-EOF
-		Listen $port
-		<VirtualHost *:$port>
-		    ServerName localhost
-		    DocumentRoot $root
-		    ErrorLog \${APACHE_LOG_DIR}/$name-error.log
-		    CustomLog \${APACHE_LOG_DIR}/$name-access.log combined
-		</VirtualHost>
-	EOF
-	a2ensite -q "wporg-$name"
-	apachectl -k graceful
+	enable_vhost "$name" "$port"
 
 	mariadb -e "DROP DATABASE IF EXISTS \`$db\`; CREATE DATABASE \`$db\`;"
 
@@ -400,17 +428,55 @@ prepare_database() {
 # WordPress' PHPUnit test library, which wp-env mounts at /wordpress-phpunit. It takes trunk's for nightly builds.
 fetch_test_library() {
 	local dest=$SOURCES/wordpress-develop
-	[ -d "$dest" ] && return
-	git clone -q --depth 1 --filter=blob:none --no-checkout https://github.com/WordPress/wordpress-develop.git "$dest"
-	git -C "$dest" sparse-checkout set --cone tests/phpunit
-	git -C "$dest" checkout -q trunk
+	(
+		flock 9
+		[ -d "$dest" ] && exit
+		rm -rf "$dest.tmp"
+		git clone -q --depth 1 --filter=blob:none --no-checkout https://github.com/WordPress/wordpress-develop.git "$dest.tmp" &&
+			git -C "$dest.tmp" sparse-checkout set --cone tests/phpunit &&
+			git -C "$dest.tmp" checkout -q trunk &&
+			rm -rf "$dest.tmp/.git" &&
+			mv "$dest.tmp" "$dest"
+	) 9> "$SOURCES/.lock"
+}
+
+# Prints the site a target builds.
+target_name() {
+	if [ "$1" = freescout ]; then
+		echo freescout
+	else
+		site_name "$ENVDIR/$1"
+	fi
+}
+
+# Downloads everything a config uses, and gives its site a port and a vhost, so the sites can then be built side by side
+# without racing for them.
+prepare_site() {
+	local file=$ENVDIR/$1 spec name
+	while read -r spec; do
+		resolve_source "$spec" > /dev/null
+	done < <( jq -r '( .core // "https://wordpress.org/latest.zip" ), ( .mappings // {} | .[] ), ( .plugins // [] | .[] ), ( .themes // [] | .[] )' "$file" )
+	name=$( site_name "$file" )
+	mkdir -p "$SITES/$name/html"
+	enable_vhost "$name" "$( assign_port "$name" )" --no-reload
+}
+
+# Builds one target in its own process, logging to $LOGS/provision/<site>.log, and says how it went.
+build_logged() {
+	local name start=$SECONDS status=ok
+	name=$( target_name "$1" )
+	"$0" "$1" > "$LOGS/provision/$name.log" 2>&1 || status=FAILED
+	[ ! -f "$SITES/$name/after-start.failed" ] || status='FAILED in afterStart'
+	printf '== %-24s %s, %ss\n' "$name" "$status" "$(( SECONDS - start ))"
 }
 
 main() {
 	[ "$( id -u )" = 0 ] || die "run as root"
 	mkdir -p "$SITES" "$SOURCES"
 	mariadb-admin ping --silent 2> /dev/null || die "MariaDB is not running; run \`wporg start\` first"
-	prepare_database
+	mkdir -p "$RUNDIR"
+	# Built side by side, the sites leave this to the process that started them.
+	[ -n "${WPORG_PREPARED:-}" ] || prepare_database
 
 	# One target is built here. If it fails, it is marked failed, which `wporg sites` and `wporg check` report.
 	if [ $# -eq 1 ]; then
@@ -427,19 +493,44 @@ main() {
 		return
 	fi
 
+	# The development sites first: they import content, and take longest.
 	local targets=( "$@" )
 	if [ "${#targets[@]}" -eq 0 ]; then
 		while read -r config; do
 			targets+=( "${config#"$ENVDIR"/}" )
-		done < <( find "$ENVDIR" -mindepth 2 -maxdepth 2 \( -name .wp-env.json -o -name .wp-env.test.json \) | sort )
+		done < <(
+			find "$ENVDIR" -mindepth 2 -maxdepth 2 -name .wp-env.json | sort
+			find "$ENVDIR" -mindepth 2 -maxdepth 2 -name .wp-env.test.json | sort
+		)
 	fi
 
-	# Each of several is built in its own process, so one that breaks is marked failed and the rest still get built.
+	# Best effort: whatever fails here is tried again, and reported, when its site is built.
 	local target
+	fetch_test_library || warn "could not fetch the WordPress test library"
 	for target in "${targets[@]}"; do
-		"$0" "$target" || warn "$target: could not be built; see the output above"
+		[ "$target" = freescout ] || ( prepare_site "$target" ) || warn "$target: could not be prepared"
 	done
+	apachectl -k graceful
 
+	# Each in its own process, so one that breaks is marked failed and the rest still get built.
+	local jobs
+	jobs=$( nproc )
+	[ "$jobs" -ge 4 ] || jobs=4
+	mkdir -p "$LOGS/provision"
+	export WPORG_PREPARED=1
+	echo "Building ${#targets[@]} sites, $jobs at a time."
+	for target in "${targets[@]}"; do
+		while [ "$( jobs -rp | wc -l )" -ge "$jobs" ]; do
+			wait -n || true
+		done
+		build_logged "$target" &
+	done
+	wait
+
+	for target in "${targets[@]}"; do
+		echo
+		cat "$LOGS/provision/$( target_name "$target" ).log"
+	done
 	echo
 	wporg sites
 }

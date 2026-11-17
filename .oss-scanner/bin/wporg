@@ -168,8 +168,7 @@ run() {
 
 	local env=(
 		HOME="$WPORG_OPT/home"
-		COMPOSER_HOME="$WPORG_OPT/composer"
-		PATH="$WPORG_OPT/composer/vendor/bin:$PATH"
+		COMPOSER_CACHE_DIR="$WPORG_OPT/composer-cache"
 	)
 	if [ "$KIND" = freescout ]; then
 		local line
@@ -177,8 +176,10 @@ run() {
 			env+=( "$( sed -E 's/^([A-Z_]+)="(.*)"$/\1=\2/' <<< "$line" )" )
 		done < <( grep -E '^[A-Z_]+=' "$ROOT/.env" )
 	else
-		# What wp-env's cli container has in its environment.
+		# What wp-env's cli container has in its environment, including its own global Composer packages.
 		env+=(
+			COMPOSER_HOME="$SITES/$NAME/composer"
+			PATH="$SITES/$NAME/composer/vendor/bin:$PATH"
 			WP_TESTS_DIR="$TESTS"
 			WORDPRESS_DB_HOST=127.0.0.1
 			WORDPRESS_DB_USER="$DB_USER"

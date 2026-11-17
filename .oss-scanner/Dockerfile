@@ -16,7 +16,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
     WP_CLI_ALLOW_ROOT=1
 
 # The PHP extensions are the official WordPress image's, plus pcntl and pdo_mysql for FreeScout. Java runs GreenMail.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# MariaDB's redo log is cut from 96 MB before the package creates it: the image carries a copy in every layer that writes
+# to the database.
+RUN mkdir -p /etc/mysql/mariadb.conf.d \
+    && printf '[mariadbd]\ninnodb_log_file_size=16M\n' > /etc/mysql/mariadb.conf.d/99-wporg.cnf \
+    && apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl git jq less libnss-wrapper procps rsync subversion sudo unzip zip \
       mariadb-server mariadb-client openjdk-21-jre-headless python3 python3-yaml \
       libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev libavif-dev libzip-dev libicu-dev \
@@ -66,8 +70,8 @@ RUN a2enmod rewrite headers expires \
 # so git has to be told root may use it too.
 RUN echo 'www-data ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/www-data \
     && git config --system --add safe.directory /src \
-    && mkdir -p /opt/wporg/home /opt/wporg/composer /srv/sites \
-    && chown www-data:www-data /opt/wporg/home /opt/wporg/composer
+    && mkdir -p /opt/wporg/home /opt/wporg/composer-cache /srv/sites \
+    && chown www-data:www-data /opt/wporg/home /opt/wporg/composer-cache
 
 # scanner contract: the checkout lives inside the image, at /src
 COPY --chown=www-data:www-data . /src
