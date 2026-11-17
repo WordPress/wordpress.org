@@ -17,7 +17,7 @@
 ## Code style
 
 - The WordPress coding standards, as `phpcs.xml.dist` configures them: `/src/vendor/bin/phpcs <file>` must report
-  nothing new on the lines the patch touches. Tabs for indentation.
+  nothing on the lines the patch touches, including what was already wrong there. Tabs for indentation.
 - Comments only where the code cannot speak for itself, one line wherever possible. Docblocks on new functions.
 - A new PHP file declares `declare( strict_types = 1 );` after its file docblock; existing files are not converted.
 - A change to a FreeScout module under `freescout.wordpress.net/Modules/` bumps the `version` in its `module.json`.
