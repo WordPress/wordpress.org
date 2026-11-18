@@ -17,6 +17,13 @@ class Comment_Handler {
 	protected $comment_url;
 
 	/**
+	 * The ticket's component, read from the notification's ticket properties table.
+	 *
+	 * @var string
+	 */
+	protected $component;
+
+	/**
 	 * Workflow keywords added to the ticket by this change.
 	 *
 	 * @var string[]
@@ -68,6 +75,10 @@ class Comment_Handler {
 		// is specified, as we may use it to process mentions and such.
 		if ( $firehose ) {
 			$this->send->send( $firehose );
+		}
+
+		foreach ( $this->trac->get_component_firehose_channels( $this->component ) as $component_firehose ) {
+			$this->send->send( $component_firehose );
 		}
 
 		// Send notifications for Workflow Keyword additions.
@@ -205,12 +216,14 @@ class Comment_Handler {
 		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
 			array_shift( $lines );
 		}
-		// Remove top border of table.
-		array_shift( $lines );
-		// Remove ticket properties table.
+		// Remove top border of table, which shows where the columns are split.
+		$border = (string) array_shift( $lines );
+		// Remove ticket properties table, keeping the component.
+		$rows = array();
 		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
-			array_shift( $lines );
+			$rows[] = array_shift( $lines );
 		}
+		$component = $this->get_component_from_properties( $rows, $border );
 		// Remove bottom border of table.
 		array_shift( $lines );
 
@@ -312,10 +325,60 @@ class Comment_Handler {
 		$this->author  = $author;
 		$this->comment = $comment;
 		$this->changes = $changes;
+		$this->component   = $component;
 		$this->ticket_id   = $ticket_id;
 		$this->ticket_url  = $ticket_url;
 		$this->comment_id  = $comment_id;
 		$this->comment_url = $comment_url;
+	}
+
+	/**
+	 * Reads the component from the rows of a notification's ticket properties table.
+	 *
+	 * Trac lays the table out in two columns, and wraps a long value onto the following
+	 * lines of the same column. Each row is split into its columns where the top border
+	 * has a +, so text inside another field's value, such as keywords, isn't read as a field.
+	 *
+	 * @param string[] $rows   Table rows, without the borders.
+	 * @param string   $border Top border of the table.
+	 * @return string Component, or an empty string if the table has none.
+	 */
+	protected function get_component_from_properties( array $rows, $border ) {
+		$split  = strpos( $border, '+' );
+		$column = null;
+		$value  = '';
+
+		foreach ( $rows as $row ) {
+			$cells = array( $row );
+			if ( false !== $split ) {
+				// The left column is padded to a display width, so cut it by width, not bytes.
+				$left  = function_exists( 'mb_strimwidth' ) ? mb_strimwidth( $row, 0, $split, '', 'UTF-8' ) : substr( $row, 0, $split );
+				$cells = array( $left, (string) substr( $row, strlen( $left ) + 1 ) );
+			}
+
+			// Find the first Component field. It comes before keywords, the only free text field.
+			if ( null === $column ) {
+				foreach ( $cells as $i => $cell ) {
+					if ( preg_match( '/^\s*Component:\s+(.*)$/', $cell, $matches ) ) {
+						$column = $i;
+						$value  = trim( $matches[1] );
+						break;
+					}
+				}
+				continue;
+			}
+
+			// A wrapped value continues on the next lines of its column, until a blank cell or the next field.
+			$cell = isset( $cells[ $column ] ) ? trim( $cells[ $column ] ) : '';
+			if ( '' === $cell || preg_match( '/^[^:]+:(\s|$)/', $cell ) ) {
+				break;
+			}
+
+			// Trac wraps after hyphens too, which needs no space when rejoined.
+			$value .= ( '-' === substr( $value, -1 ) ? '' : ' ' ) . $cell;
+		}
+
+		return $value;
 	}
 
 	function format_comment_for_slack() {
