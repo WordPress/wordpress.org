@@ -1061,12 +1061,11 @@ body.trac #github-prs ul.pull-requests li > div:first-of-type > a:first-of-type 
 }
 
 body.trac #github-prs .button {
-    color: var(--bbbase-brightest-white);
     white-space: nowrap;
 	font-size: 12px;
 	padding: 5px 8px;
 	background-color: var(--bbbase-code-background-color);
-	color: var(--bbbase-lightest-text-color-low-contrast);
+	color: var(--bbbase-darkest-text-color-low-contrast);
 	border: var(--bbbase-wrapper-border);
 	border-radius: var(--bbbase-border-radius);
 }
