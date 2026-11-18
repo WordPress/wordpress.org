@@ -520,17 +520,17 @@ class Rosetta_Roles {
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			$deleted = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->wporg_translation_editors}
 					WHERE `user_id` = %d AND `locale` = %s
-					AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
-					$user->ID,
-					$this->gp_locale->slug
+					AND project_id IN (" . implode( ', ', array_fill( 0, count( $values_to_remove ), '%d' ) ) . ')',
+					array_merge(
+						array( $user->ID, $this->gp_locale->slug ),
+						$values_to_remove
+					)
 				)
 			);
-			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 			if ( false === $deleted ) {
 				return false;
@@ -1111,15 +1111,16 @@ Welcome to the WordPress Polyglots team and happy translating.',
 			return $projects;
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- Hardcoded integer IDs from constant are safe.
 		$_projects = $wpdb->get_results(
-			'SELECT id, name, parent_project_id, slug, path
-			FROM translate_projects
-			WHERE
-				id NOT IN (' . implode( ',', self::IGNORE_PROJECT_IDS ) . ') AND
-				LENGTH(path) - LENGTH(REPLACE(path, "/", "")) BETWEEN 0 AND 1;'
+			$wpdb->prepare(
+				'SELECT id, name, parent_project_id, slug, path
+				FROM translate_projects
+				WHERE
+					id NOT IN (' . implode( ', ', array_fill( 0, count( self::IGNORE_PROJECT_IDS ), '%d' ) ) . ') AND
+					LENGTH(path) - LENGTH(REPLACE(path, "/", "")) BETWEEN 0 AND 1;',
+				self::IGNORE_PROJECT_IDS
+			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 		$projects = array();
 		foreach ( $_projects as $project ) {
