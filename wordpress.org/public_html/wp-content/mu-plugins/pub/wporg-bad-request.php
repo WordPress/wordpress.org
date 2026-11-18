@@ -260,8 +260,9 @@ add_action( 'admin_init', function() {
 /**
  * Detect badly formed XMLRPC requests.
  * pingback.ping is not a valid multicall target, blocking due to the excessive requests.
+ * pingback.ping needs a source and a target URL, Core reads both without checking they exist.
  */
-add_action( 'xmlrpc_call', function() {
+add_action( 'xmlrpc_call', function( $method, $args = null ) {
 	global $HTTP_RAW_POST_DATA;
 	if (
 		false !== stripos( $HTTP_RAW_POST_DATA, '<methodName>system.multicall</methodName>' ) &&
@@ -269,7 +270,15 @@ add_action( 'xmlrpc_call', function() {
 	) {
 		die_bad_request( 'pingback.ping inside a system.multicall' );
 	}
-}, 1 );
+
+	// IXR unwraps a single param to a bare value, so anything but a 2+ item array is malformed.
+	if (
+		'pingback.ping' === $method &&
+		( ! is_array( $args ) || ! isset( $args[0], $args[1] ) || ! is_scalar( $args[0] ) || ! is_scalar( $args[1] ) )
+	) {
+		die_bad_request( 'pingback.ping without a source and target URL' );
+	}
+}, 1, 2 );
 
 /**
  * Disable Demo XMLRPC endpoints that are easy to trigger noisy fatals with invalid inputs.
