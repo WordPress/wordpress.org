@@ -253,18 +253,14 @@ class Cross_Locale_PTE {
 
 		$values_to_remove = array_map( 'intval', $projects_to_remove );
 		if ( $values_to_remove ) {
-
-			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $values_to_remove consists solely of integers sanitized via array_map('intval').
 			$deleted = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->wporg_translation_editors}
 					WHERE `user_id` = %d AND `locale` = %s
-					AND project_id IN (" . implode( ', ', $values_to_remove ) . ')',
-					$user_id,
-					self::ALL_LOCALES
+					AND project_id IN (" . implode( ', ', array_fill( 0, count( $values_to_remove ), '%d' ) ) . ')',
+					array_merge( array( $user_id, self::ALL_LOCALES ), $values_to_remove )
 				)
 			);
-			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 			if ( false === $deleted ) {
 				return false;
