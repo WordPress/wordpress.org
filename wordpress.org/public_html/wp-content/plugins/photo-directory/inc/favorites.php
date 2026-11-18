@@ -530,13 +530,13 @@ class Favorites {
 	 * Photos nobody has favorited have no meta.
 	 *
 	 * @param int $post_id Post ID.
-	 * @return int The number of users who favorited the photo.
+	 * @return int|false The number of users who favorited the photo, or false if the query failed.
 	 */
 	public static function update_photo_favorites_count( $post_id ) {
 		global $wpdb;
 
 		// Term caches are only cleared after the term relationship hooks fire, so query directly.
-		$count = (int) $wpdb->get_var(
+		$count = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->term_relationships} AS tr
 				INNER JOIN {$wpdb->term_taxonomy} AS tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
@@ -545,6 +545,13 @@ class Favorites {
 				self::FAVORITES_TAXONOMY
 			)
 		);
+
+		// Keep the existing count rather than wiping it on a database error.
+		if ( null === $count ) {
+			return false;
+		}
+
+		$count = (int) $count;
 
 		if ( $count ) {
 			update_post_meta( $post_id, self::META_KEY_FAVORITES_COUNT, $count );

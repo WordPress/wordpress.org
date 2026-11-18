@@ -190,9 +190,22 @@ class CLI extends \WP_CLI_Command {
 			)
 		);
 
+		$failed = 0;
+
 		foreach ( $post_ids as $post_id ) {
 			$count = Favorites::update_photo_favorites_count( (int) $post_id );
+
+			if ( false === $count ) {
+				++$failed;
+				WP_CLI::warning( "Photo {$post_id}: could not count its favorites." );
+				continue;
+			}
+
 			WP_CLI::log( "\tPhoto {$post_id}: {$count}" );
+		}
+
+		if ( $failed ) {
+			WP_CLI::error( sprintf( 'Could not update the favorites count of %d of %d photos.', $failed, count( $post_ids ) ) );
 		}
 
 		WP_CLI::success( sprintf( 'Updated the favorites count of %d photos.', count( $post_ids ) ) );
