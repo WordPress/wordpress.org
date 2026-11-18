@@ -2019,6 +2019,13 @@ div.plugin-meta img {
 	#header-inner h1 a {
 		width: 65px !important;
 	}
+	#showcase-inner,
+	#main,
+	#footer-inner {
+		box-sizing: border-box;
+		padding-right: 20px;
+		padding-left: 20px;
+	}
 	#main {
 		display: block;
 	}
@@ -2031,7 +2038,7 @@ div.plugin-meta img {
 @media screen and ( max-width: 782px ) {
 	#footer-inner {
 		display: block;
-		padding: 20px 10px;
+		padding: 20px;
 	}
 	#footer-inner div {
 		padding: 10px;
