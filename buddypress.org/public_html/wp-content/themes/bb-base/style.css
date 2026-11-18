@@ -2050,6 +2050,11 @@ div.plugin-meta img {
 		border: none;
 		background: transparent;
 		color: var(--bbbase-darkest-black);
+		cursor: pointer;
+	}
+	#header #bb-menu-icon:focus {
+		outline: 2px solid var(--bbbase-darkest-black);
+		outline-offset: -4px;
 	}
 
 	#header #nav,
@@ -2092,22 +2097,22 @@ div.plugin-meta img {
 	#wporg-header #wporg-header-menu {
 		display: none;
 	}
-	#header #nav:hover #bb-nav,
-	#header #nav:focus #bb-nav,
+	#header #bb-menu-icon[aria-expanded="true"] ~ #bb-nav,
 	#wporg-header #wporg-header-menu.toggled {
 		background-color: var(--bbbase-grey-background-color-low-contrast);
 		display: block !important;
 		z-index: 100;
 	}
-	#header #nav:hover #bb-menu-icon,
-	#header #nav:focus #bb-menu-icon,
+	#header #bb-menu-icon[aria-expanded="true"],
 	#wporg-header #mobile-menu-button[aria-expanded="true"] {
 		background-color: var(--bbbase-brightest-white-blend);
 	}
-	#header #nav:hover #bb-menu-icon:before,
-	#header #nav:focus #bb-menu-icon:before,
+	#header #bb-menu-icon[aria-expanded="true"]:before,
 	#wporg-header #mobile-menu-button[aria-expanded="true"]:before {
 		color: var(--bbbase-darkest-black);
+	}
+	#header #bb-menu-icon[aria-expanded="true"]:before {
+		content: '\f335';
 	}
 }
 

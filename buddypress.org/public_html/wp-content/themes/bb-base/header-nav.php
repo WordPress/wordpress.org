@@ -1,5 +1,5 @@
 <div id="nav">
-	<a href="#" id="bb-menu-icon"></a>
+	<button type="button" id="bb-menu-icon" aria-controls="bb-nav" aria-expanded="false"><span class="screen-reader-text"><?php esc_html_e( 'Menu', 'bborg' ); ?></span></button>
 	<?php if ( ! has_nav_menu( 'header-nav-menu' ) ) : ?>
 		<ul id="bb-nav" class="menu">
 			<li <?php echo is_page( 'about' ) ? 'class="current"' : ''; ?>><a href="<?php echo esc_url( home_url( 'about' ) ); ?>"><?php esc_html_e( 'About', 'bborg' ); ?></a></li>
