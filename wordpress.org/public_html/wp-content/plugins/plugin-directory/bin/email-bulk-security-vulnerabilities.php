@@ -225,6 +225,8 @@ function send_email( $args ) {
 		'threads'   => [
 			[
 				'type' => 'note',
+				// FreeScout replaces the conversation's CC with every new thread's, notes included.
+				'cc'   => (array) ( $args['cc'] ?? [] ),
 				'text' => 'This was automated by <code>bin/email-bulk-security-vulnerabilities.php</code> processing a CSV file: <code>' . esc_html( $opts['csv'] ?? '' ) . '</code>',
 				'user' => ATTRIBUTE_TO_USER,
 			],
