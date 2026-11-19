@@ -38,6 +38,49 @@
 .bbp-about-links {
 	box-sizing: border-box;
 	padding: 20px;
+	border: 1px solid var(--bbbase-grey-border-color-low-contrast);
+	border-radius: var(--bbbase-border-radius);
+	background-color: var(--bbbase-light-background-color-low-contrast) !important;
+}
+
+#main .content:has(.bbp-about-links) > h2 {
+	font-size: 28px;
+	line-height: 1.25;
+	margin-bottom: 24px;
+}
+
+#main .content:has(.bbp-about-links) .wp-block-column:first-child > h2 {
+	font-size: 22px;
+	line-height: 1.35;
+	margin-bottom: 16px;
+}
+
+#main .content:has(.bbp-about-links) .wp-block-column:first-child > h3 {
+	font-size: 18px;
+	line-height: 1.4;
+	margin: 24px 0 12px;
+}
+
+.bbp-about-links h3,
+.bbp-about-links h4 {
+	font-size: 17px;
+	line-height: 1.4;
+	margin: 24px 0 8px;
+}
+
+.bbp-about-links h3:first-child,
+.bbp-about-links h4:first-child {
+	margin-top: 0;
+}
+
+.bbp-about-links ul {
+	margin: 0;
+	padding: 0;
+}
+
+.bbp-about-links li {
+	list-style: none;
+	margin: 0 0 6px;
 }
 
 /* Keep page columns inset until the centered layout provides enough space. */
