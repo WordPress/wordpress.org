@@ -94,6 +94,14 @@ const WARN_THRESHOLD = 10000;  // active installs to go from instant close => wa
 const TIMEOUT        = 30;     // seconds a request to FreeScout may take.
 
 /**
+ * Each saved reply's placeholder for the vulnerability details; FreeScout's editor may write the line breaks differently.
+ */
+const DETAILS_PLACEHOLDERS = [
+	'Warning: Security Issue (NOT CLOSED)' => '#LINK(\s*<br\s*/?>\s*)+DETAILS#i',
+	'Closed: Security Exploit'             => '#REPORT(\s*<br\s*/?>\s*)+OPTIONAL_ADDITIONAL#i',
+];
+
+/**
  * Fetch the email template, a saved reply of FreeScout's Plugins mailbox.
  */
 function get_email_template( $name ) {
@@ -279,6 +287,14 @@ $all_csv_vulns = [
 
 $only_warn = isset( $opts['only-warn'] );
 
+// Before anything is sent, so a rerun doesn't email the same authors again.
+foreach ( DETAILS_PLACEHOLDERS as $template_name => $placeholder ) {
+	if ( ! preg_match( $placeholder, get_email_template( $template_name ) ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
+		die( "The saved reply \"$template_name\" has no placeholder for the details.\n" );
+	}
+}
+
 foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 	$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
 	if ( ! $plugin ) {
@@ -321,8 +337,8 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 
 		$body = $email_template;
 		$body = str_replace( 'PLUGIN_LINK', get_permalink( $plugin ), $body );
-		// FreeScout's editor may write the line breaks differently; a callback, as the details may hold a "$1".
-		$body = preg_replace_callback( '#LINK(\s*<br\s*/?>\s*)+DETAILS#i', fn() => '<pre>' . $vuln_desc . '</pre>', $body );
+		// A callback, as the details may hold a "$1".
+		$body = preg_replace_callback( DETAILS_PLACEHOLDERS['Warning: Security Issue (NOT CLOSED)'], fn() => '<pre>' . $vuln_desc . '</pre>', $body );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "Subject: $subject\n\n";
@@ -355,7 +371,7 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 
 		$body = $email_template;
 		$body = str_replace( 'PLUGIN_LINK', get_permalink( $plugin ), $body );
-		$body = preg_replace_callback( '#REPORT(\s*<br\s*/?>\s*)+OPTIONAL_ADDITIONAL#i', fn() => '<pre>' . $vuln_desc . '</pre>', $body );
+		$body = preg_replace_callback( DETAILS_PLACEHOLDERS['Closed: Security Exploit'], fn() => '<pre>' . $vuln_desc . '</pre>', $body );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "Subject: $subject\n\n";
