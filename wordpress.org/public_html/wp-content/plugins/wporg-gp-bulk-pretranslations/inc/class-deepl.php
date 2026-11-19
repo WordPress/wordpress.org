@@ -58,7 +58,7 @@ class Deepl extends Pretranslation {
 			'body' => wp_json_encode( array(
 				'text'        => array( $original->singular ),
 				'target_lang' => $target_lang,
-				'formality'   => $this->get_language_formality( $target_lang, $locale->slug ),
+				'formality'   => $this->get_language_formality( $target_lang, $translation_set->slug ),
 			)),
 		);
 		$deepl_response = wp_remote_post(
@@ -168,6 +168,7 @@ class Deepl extends Pretranslation {
 			'CS'    => 'prefer_less',
 			'DA'    => 'prefer_less',
 			'DE'    => 'prefer_less',
+			'DE-CH' => 'prefer_more',
 			'EL'    => 'prefer_more',
 			'EN-GB' => 'prefer_less',
 			'ES'    => 'prefer_less',
@@ -199,8 +200,17 @@ class Deepl extends Pretranslation {
 		if ( ( 'DE' === $locale || 'NL' === $locale ) && 'formal' === $set_slug ) {
 			return 'prefer_more';
 		}
+		if ( 'DE-CH' === $locale && 'informal' === $set_slug ) {
+			return 'prefer_less';
+		}
 		if ( array_key_exists( $locale, $lang_informality ) ) {
 			return $lang_informality[ $locale ];
+		}
+
+		// Regional targets like ES-419 and FR-CA share their base language's register.
+		$base_locale = explode( '-', $locale )[0];
+		if ( array_key_exists( $base_locale, $lang_informality ) ) {
+			return $lang_informality[ $base_locale ];
 		}
 
 		return 'default';

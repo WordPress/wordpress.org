@@ -387,6 +387,7 @@ class Translation_Memory extends Suggestions_Route {
 			'CS'    => 'prefer_less',
 			'DA'    => 'prefer_less',
 			'DE'    => 'prefer_less',
+			'DE-CH' => 'prefer_more',
 			'EL'    => 'prefer_more',
 			'EN-GB' => 'prefer_less',
 			'ES'    => 'prefer_less',
@@ -418,8 +419,17 @@ class Translation_Memory extends Suggestions_Route {
 		if ( ( 'DE' == $locale || 'NL' == $locale ) && 'formal' == $set_slug ) {
 			return 'prefer_more';
 		}
+		if ( 'DE-CH' === $locale && 'informal' === $set_slug ) {
+			return 'prefer_less';
+		}
 		if ( array_key_exists( $locale, $lang_informality ) ) {
 			return $lang_informality[ $locale ];
+		}
+
+		// Regional targets like ES-419 and FR-CA share their base language's register.
+		$base_locale = explode( '-', $locale )[0];
+		if ( array_key_exists( $base_locale, $lang_informality ) ) {
+			return $lang_informality[ $base_locale ];
 		}
 
 		return 'default';
