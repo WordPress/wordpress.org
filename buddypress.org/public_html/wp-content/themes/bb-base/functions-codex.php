@@ -274,21 +274,27 @@ class Codex_Loader {
 	}
 
 	public static function get_h2s( $content = '' ) {
-		preg_match_all( "/(<h2>)(.*)(<\/h2>)/", $content, $matches, PREG_SET_ORDER );
+		preg_match_all( "/(<h2>)(.*?)(<\/h2>)/", $content, $matches, PREG_SET_ORDER );
 
-		return $matches;
+		return self::remove_empty_headings( $matches );
 	}
 
 	public static function get_h3s( $content = '' ) {
-		preg_match_all( "/(<h3>)(.*)(<\/h3>)/", $content, $matches, PREG_SET_ORDER );
+		preg_match_all( "/(<h3>)(.*?)(<\/h3>)/", $content, $matches, PREG_SET_ORDER );
 
-		return $matches;
+		return self::remove_empty_headings( $matches );
 	}
 
 	public static function get_h4s( $content = '' ) {
-		preg_match_all( "/(<h4>)(.*)(<\/h4>)/", $content, $matches, PREG_SET_ORDER );
+		preg_match_all( "/(<h4>)(.*?)(<\/h4>)/", $content, $matches, PREG_SET_ORDER );
 
-		return $matches;
+		return self::remove_empty_headings( $matches );
+	}
+
+	private static function remove_empty_headings( $headings ) {
+		return array_values( array_filter( $headings, static function ( $heading ) {
+			return '' !== trim( wp_strip_all_tags( $heading[2] ) );
+		} ) );
 	}
 
 	public function add_h2_ids( $content = '' ) {
