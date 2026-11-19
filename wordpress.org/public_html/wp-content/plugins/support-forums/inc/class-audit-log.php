@@ -32,10 +32,10 @@ class Audit_Log {
 		add_action( 'wporg_bbp_unflag_user', [ $this, 'log_user_flag_changes' ], 10, 1 );
 
 		// Add a user note when a user's topic, reply, or review is held for moderation.
-		add_action( 'bbp_new_topic', [ $this, 'log_pending_post' ], 20, 1 );
-		add_action( 'bbp_edit_topic', [ $this, 'log_pending_post' ], 20, 1 );
-		add_action( 'bbp_new_reply', [ $this, 'log_pending_post' ], 20, 1 );
-		add_action( 'bbp_edit_reply', [ $this, 'log_pending_post' ], 20, 1 );
+		add_action( 'bbp_new_topic', [ $this, 'log_pending_post' ], 20 );
+		add_action( 'bbp_edit_topic', [ $this, 'log_pending_post' ], 20 );
+		add_action( 'bbp_new_reply', [ $this, 'log_pending_post' ], 20 );
+		add_action( 'bbp_edit_reply', [ $this, 'log_pending_post' ], 20 );
 		add_action( 'bbp_edit_topic_pre_extras', [ $this, 'remember_pending_before_edit' ] );
 		add_action( 'bbp_edit_reply_pre_extras', [ $this, 'remember_pending_before_edit' ] );
 
