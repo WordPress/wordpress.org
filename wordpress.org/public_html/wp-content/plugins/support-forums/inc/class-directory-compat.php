@@ -506,7 +506,10 @@ abstract class Directory_Compat {
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
 				$term = $terms[0];
 				$object = $this->get_object( $term->slug );
-				if ( $object ) {
+				if ( $object && did_action( 'bbp_feed' ) ) {
+					// the_title_rss strips tags and escapes; escaping first would show tags as text.
+					$title = sprintf( '[%s] %s', $object->post_title, $title );
+				} elseif ( $object ) {
 					$title = sprintf( "[%s] %s", esc_html( $object->post_title ), esc_html( $title ) );
 				}
 			}
