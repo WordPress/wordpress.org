@@ -25,6 +25,10 @@
 /* Typography
 --------------------------------------------------------------------*/
 
+.content {
+	overflow-wrap: anywhere;
+}
+
 .content h1 {
   font-size: 24px;
   margin-bottom: .5em;
