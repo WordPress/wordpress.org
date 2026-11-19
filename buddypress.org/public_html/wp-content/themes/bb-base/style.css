@@ -668,12 +668,22 @@ img {
 	height: auto;
 }
 
+div.single-post img {
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
 div.wp-caption {
 	max-width: 680px;
 	padding: 10px;
 	border: 1px solid var(--bbbase-grey-border-color-low-contrast);
 	background: var(--bbbase-grey-background-color-low-contrast);
 	position: relative;
+}
+
+div.single-post div.wp-caption {
+	max-width: 100%;
+	box-sizing: border-box;
 }
 
 div.wp-caption img {
