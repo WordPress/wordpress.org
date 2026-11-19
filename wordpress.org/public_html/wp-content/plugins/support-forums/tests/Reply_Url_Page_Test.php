@@ -62,7 +62,7 @@ class Reply_Url_Page_Test extends WP_UnitTestCase {
 		return array(
 			'all replies visible'              => array( 'publish', false, 'page/2/' ),
 			'first reply archived'             => array( 'archived', false, '' ),
-			'reader’s own first reply pending' => array( 'pending', true, 'page/2/' ),
+			'reader’s own first reply pending' => array( 'pending', true, '' ),
 		);
 	}
 
