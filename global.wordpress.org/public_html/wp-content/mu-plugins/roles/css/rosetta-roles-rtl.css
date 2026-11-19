@@ -30,6 +30,15 @@
 	margin: 0 !important;
 }
 
+.projects-list input[type="checkbox"]:indeterminate::before {
+	content: "";
+	display: block;
+	width: 0.625rem;
+	height: 2px;
+	margin: 0.4375rem auto 0;
+	background-color: #3582c4;
+}
+
 .sub-projects-wrapper {
 	position: absolute;
 	top: -1px;
