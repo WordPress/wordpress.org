@@ -618,7 +618,11 @@
 		} catch {
 			const remoteProjects = await projects.getRemoteProjects();
 
-			if ( projects.hasStorage() && Array.isArray( remoteProjects ) ) {
+			if ( ! Array.isArray( remoteProjects ) ) {
+				throw new Error( 'Invalid remote projects payload' );
+			}
+
+			if ( projects.hasStorage() ) {
 				projects.storeLocalProjects( remoteProjects );
 			}
 
@@ -869,8 +873,33 @@
 	};
 
 	projects.init = () => {
-		if ( ! document.getElementById( 'projects-list' ) ) {
+		const projectsList = document.getElementById( 'projects-list' );
+		if ( ! projectsList ) {
 			return;
+		}
+
+		const form = projectsList.closest( 'form' );
+		const submitBtn = form?.querySelector( 'input[type="submit"], button[type="submit"]' );
+		const projectsFieldset = projectsList.closest( 'fieldset' );
+
+		const setControlsDisabled = disabled => {
+			if ( projectsFieldset ) {
+				projectsFieldset.disabled = disabled;
+			} else {
+				projectsList.querySelectorAll( 'input, button, select, textarea' ).forEach( el => {
+					el.disabled = disabled;
+				} );
+			}
+		};
+
+		const canSave = Boolean(
+			projects.settings.saveAction &&
+			projects.settings.saveNonce &&
+			typeof wp?.ajax?.post === 'function'
+		);
+
+		if ( submitBtn ) {
+			submitBtn.disabled = true;
 		}
 
 		const rawList = Array.isArray( projects.settings.accessList )
@@ -888,21 +917,16 @@
 			projects.view.allProjectsInstance ||= new projects.view.AllProjects();
 		}
 
-		projects.getProjects()
-			.then( response => projects.initFrame( response ) )
-			.catch( () => {
-				const loadingEl = document.getElementById( 'project-loading' );
-				if ( loadingEl ) loadingEl.textContent = l10n.loadingError;
-			} );
-
+		let isReady = false;
+		let isSaving = false;
 		const hadTranslatorStatus = Boolean( rawList.length );
-		const form = document.getElementById( 'projects-list' )?.closest( 'form' );
-		const submitBtn = form?.querySelector( 'input[type="submit"]' );
 
 		form?.addEventListener( 'submit', async event => {
-			if ( ! projects.settings.saveAction ) return;
-
 			event.preventDefault();
+
+			if ( ! isReady || ! canSave || isSaving ) {
+				return;
+			}
 
 			const selectedIds = projects.selection.pluck( 'id' );
 
@@ -910,7 +934,10 @@
 				return;
 			}
 
+			isSaving = true;
 			let isRedirecting = false;
+
+			setControlsDisabled( true );
 
 			if ( submitBtn ) {
 				submitBtn.disabled = true;
@@ -922,7 +949,7 @@
 				const response = await wp.ajax.post( projects.settings.saveAction, {
 					_ajax_nonce: projects.settings.saveNonce,
 					user_id:     projects.settings.userId,
-					projects:    selectedIds.length ? selectedIds : [ '' ]
+					projects:    JSON.stringify( selectedIds )
 				} );
 
 				if ( response?.redirect ) {
@@ -933,12 +960,41 @@
 				const message = error?.responseJSON?.data?.message || error?.message || l10n.saveError;
 				projects.showNotice( message, 'error' );
 			} finally {
-				if ( submitBtn && ! isRedirecting ) {
-					submitBtn.disabled = false;
-					submitBtn.value = submitBtn.dataset.originalText;
+				isSaving = false;
+
+				if ( ! isRedirecting ) {
+					setControlsDisabled( false );
+
+					if ( submitBtn ) {
+						submitBtn.disabled = false;
+						submitBtn.value = submitBtn.dataset.originalText;
+					}
 				}
 			}
 		} );
+
+		projects.getProjects()
+			.then( response => {
+				projects.initFrame( response );
+
+				if ( canSave ) {
+					isReady = true;
+					if ( submitBtn ) {
+						submitBtn.disabled = false;
+					}
+				} else {
+					projects.showNotice( l10n.saveUnavailable || l10n.saveError, 'error' );
+				}
+			} )
+			.catch( () => {
+				const loadingEl = document.getElementById( 'project-loading' );
+				if ( loadingEl ) loadingEl.textContent = l10n.loadingError;
+
+				const unavailableNotice = l10n.saveUnavailable
+					? `${ l10n.loadingError } ${ l10n.saveUnavailable }`
+					: l10n.loadingError;
+				projects.showNotice( unavailableNotice, 'error' );
+			} );
 	};
 
 	if ( document.readyState === 'loading' ) {
