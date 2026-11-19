@@ -2029,13 +2029,22 @@ div.plugin-meta img {
 	}
 }
 
-/* Keep the showcase and footer 20px from the edge until the centered layout provides that space. */
+/* Keep the header, showcase, and footer 20px from the edge until the centered layout provides that space. */
 @media screen and ( min-width: 960px ) and ( max-width: 999px ) {
+	#header-inner,
 	#showcase-inner,
 	#footer-inner {
 		box-sizing: border-box;
 		padding-right: calc(500px - 50vw);
 		padding-left: calc(500px - 50vw);
+	}
+}
+
+@media screen and ( min-width: 783px ) and ( max-width: 959px ) {
+	#header-inner {
+		box-sizing: border-box;
+		padding-right: 20px;
+		padding-left: 20px;
 	}
 }
 
