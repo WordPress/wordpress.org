@@ -257,7 +257,10 @@ function send_email( $args ) {
 
 	$response_code = (int) wp_remote_retrieve_response_code( $response );
 	$result        = is_wp_error( $response ) ? $response->get_error_message() : json_decode( wp_remote_retrieve_body( $response ), true );
-	if ( 201 !== $response_code ) {
+	if ( is_wp_error( $response ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
+		echo "ERROR: FreeScout didn't respond, but may have sent the email; check the mailbox before running this again: $result\n";
+	} elseif ( 201 !== $response_code ) {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "ERROR: FreeScout didn't create the conversation: $response_code " . wp_json_encode( $result ) . "\n";
 	}
