@@ -114,6 +114,10 @@
 	z-index: 3;
 	text-align: center;
 }
+.footer-meta-wrap .footer-meta .contributor:first-child .contributor-name {
+	left: 0;
+	text-align: left;
+}
 .footer-meta-wrap .footer-meta .contributor-avatar .contributor-name span {
 	color: #fff;
 	padding: 5px;
