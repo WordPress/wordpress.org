@@ -907,6 +907,8 @@ add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\modify_site_title_
 
 /**
  * Inject a script to trigger Prism (syntax highlighter) after o2 content is rendered.
+ *
+ * Runs again on `pd-script-load`, which o2 fires each time it re-renders a post, for example after Follow.
  */
 add_action(
 	'wp_footer',
@@ -914,7 +916,7 @@ add_action(
 		wp_add_inline_script(
 			'mkaz-code-syntax-prism-js',
 			'jQuery( document ).on(
-				"ready.o2",
+				"ready.o2 pd-script-load",
 				function () {
 					setTimeout( () => Prism.highlightAll(), 10 );
 				}
