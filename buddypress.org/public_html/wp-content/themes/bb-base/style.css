@@ -2069,6 +2069,17 @@ div.plugin-meta img {
 		position: static;
 		margin: 0 0 20px;
 	}
+	#bbpress-forums .bbp-pagination {
+		flex-direction: column;
+		gap: 12px;
+	}
+	#bbpress-forums .bbp-pagination-count,
+	#bbpress-forums .bbp-pagination-links {
+		display: block;
+		width: 100%;
+		margin: 0;
+		text-align: center;
+	}
 	#footer-inner {
 		display: block;
 		padding: 20px;
@@ -2132,7 +2143,6 @@ div.plugin-meta img {
 		background-color: var(--bbbase-button-background-color-hover);
 	}
 	#header #bb-nav,
-	#bbpress-forums .bbp-pagination-count,
 	.bbp-topic-meta,
 	#wporg-header #wporg-header-menu {
 		display: none;
