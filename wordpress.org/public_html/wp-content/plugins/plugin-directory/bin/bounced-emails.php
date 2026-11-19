@@ -215,7 +215,8 @@ function extract_bounce_message( $email ) {
 		break;
 	}
 
-	$body = preg_replace( '#<br\s*/?>#i', "\n", $body );
+	// FreeScout keeps the line break after each `<br />` it adds.
+	$body = preg_replace( '#<br\s*/?>(\r?\n)?#i', "\n", $body );
 	// FreeScout stores plain-text emails HTML-escaped; the sinks escape again.
 	$body = html_entity_decode( $body );
 	$body = str_replace( "\r", '', $body );
