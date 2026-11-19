@@ -456,6 +456,13 @@ div.attachment #preview .diff .entry h2 a {
 	background: #eee;
 }
 
+/* Keep wide report columns scrollable instead of clipping them at the page edge. */
+#content.report table.tickets {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
 .report div.reports h2 {
 	border-bottom: 1px solid #ddd; /* report.css draws a 2pt solid #b00 line */
 	-webkit-box-shadow: none;
