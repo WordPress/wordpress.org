@@ -91,7 +91,7 @@ a img { border: 1px solid transparent; }
 	--bbbase-form-field-outline-color: rgba(102, 128, 189, 1);
 
 	/* Fonts */
-	--bbbase-font-base: 100 16px/1.5 'Inter', sans-serif;
+	--bbbase-font-base: 400 16px/1.5 'Inter', sans-serif;
 	--bbbase-font-code: 400 14px/14px monospace;
 	--bbbase-font-dashicons: 400 20px/1 'dashicons';
 	--bbbase-font-input: 400 14px/16px sans-serif;
