@@ -2418,6 +2418,47 @@ table.listing th.desc a::after {
 	display: inline;
 }
 
+/* Keep query options together without the theme's paragraph margins. */
+body.trac #main #query {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+body.trac #main #query > fieldset,
+body.trac #main #query > hr {
+	box-sizing: border-box;
+	flex-basis: 100%;
+}
+
+body.trac #main #query > p.option {
+	display: inline-flex;
+	float: none;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 10px 0;
+}
+
+body.trac #main #query > .buttons {
+	display: inline-flex;
+	float: none;
+	align-items: center;
+	margin: 10px 0 10px auto;
+}
+
+#query > .buttons input[type="submit"] {
+	margin: 0;
+}
+
+@media (max-width: 959px) {
+	body.trac #main #query {
+		box-sizing: border-box;
+		padding: 0 10px;
+	}
+}
+
 body.core #ctxtnav a[href="/report"] {
 	display: none;
 }
