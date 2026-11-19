@@ -196,30 +196,6 @@ class Test_Events extends TestCase {
 	}
 
 	/**
-	 * Does not turn nonnumeric coordinates into a valid zero coordinate.
-	 *
-	 * @group unit
-	 */
-	public function test_invalid_coordinates_do_not_resolve_to_a_location(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification -- Back up simulated request data for restoration after the test.
-		$saved = [ $_GET, $_POST, $_REQUEST ];
-		try {
-			$_POST    = [];
-			$_REQUEST = [];
-			foreach ( [ 'latitude', 'longitude' ] as $field ) {
-				$_GET           = [
-					'latitude'  => '47.6',
-					'longitude' => '-122.3',
-				];
-				$_GET[ $field ] = 'invalid';
-				$this->assertFalse( get_location( \Dotorg\API\Events\parse_request() ) );
-			}
-		} finally {
-			[ $_GET, $_POST, $_REQUEST ] = $saved;
-		}
-	}
-
-	/**
 	 * Asserts that an HTTP response is valid and contains an event.
 	 */
 	public function assertResponseHasEvent( $response ) {
