@@ -2026,6 +2026,10 @@ div.plugin-meta img {
 		padding-right: 20px;
 		padding-left: 20px;
 	}
+	div.feature p span {
+		margin-right: 0;
+		margin-left: 0;
+	}
 	#main {
 		display: block;
 	}
