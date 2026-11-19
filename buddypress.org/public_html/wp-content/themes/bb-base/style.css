@@ -910,7 +910,15 @@ img.centered {
 .commentlist {
 	padding: 0;
 	text-align: justify;
+	overflow-wrap: anywhere;
 }
+
+@media screen and ( max-width: 782px ) {
+	.commentlist {
+		text-align: left;
+	}
+}
+
 .commentlist li {
 	margin: 15px 0 10px;
 	padding: 5px 5px 0 10px;
