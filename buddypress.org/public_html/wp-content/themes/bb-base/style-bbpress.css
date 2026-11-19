@@ -34,3 +34,20 @@
 	/* Lists */
 	--bbbase-list-hover-helper-background: rgba(235, 255, 235, 1);
 }
+
+.bbp-about-links {
+	box-sizing: border-box;
+	padding: 20px;
+}
+
+/* Keep page columns inset until the centered layout provides enough space. */
+@media screen and ( min-width: 960px ) and ( max-width: 999px ) {
+	body.page-template-default #main {
+		box-sizing: border-box;
+		padding-right: calc(500px - 50vw);
+		padding-left: calc(500px - 50vw);
+	}
+	body.page-template-default #main > div.content {
+		width: calc(100vw - 300px);
+	}
+}
