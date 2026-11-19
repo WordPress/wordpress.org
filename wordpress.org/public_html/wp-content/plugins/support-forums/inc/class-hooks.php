@@ -1298,6 +1298,24 @@ class Hooks {
 		}
 
 		++$position;
+
+		// wporg-bbp-user-moderation shows readers their own pending and spam replies in the topic.
+		if ( is_user_logged_in() ) {
+			$position += count(
+				get_posts(
+					array(
+						'fields'      => 'ids',
+						'post_parent' => $topic_id,
+						'post_type'   => bbp_get_reply_post_type(),
+						'post_status' => array( bbp_get_pending_status_id(), bbp_get_spam_status_id() ),
+						'author'      => get_current_user_id(),
+						'date_query'  => array( array( 'before' => get_post_field( 'post_date', $reply_id ) ) ),
+						'nopaging'    => true,
+					)
+				)
+			);
+		}
+
 		if ( ! bbp_show_lead_topic() ) {
 			++$position;
 		}

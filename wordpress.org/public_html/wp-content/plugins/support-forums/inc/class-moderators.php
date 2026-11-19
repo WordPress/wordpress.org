@@ -970,6 +970,9 @@ class Moderators {
 				}
 				$retval['view_all'] = false;
 
+				// Rebuild the URL now that the reply is public, so its page no longer counts it as hidden.
+				$retval['redirect_to'] = bbp_get_reply_url( $r['id'], bbp_get_redirect_to() );
+
 				break;
 
 			case 'wporg_bbp_unapprove_reply':
@@ -991,6 +994,9 @@ class Moderators {
 					$retval['message']  = __( '<strong>Error:</strong> There was a problem approving the reply.', 'wporg-forums' );
 				}
 				$retval['view_all'] = false;
+
+				// Rebuild the URL now that the reply is public, so its page no longer counts it as hidden.
+				$retval['redirect_to'] = bbp_get_reply_url( $r['id'], bbp_get_redirect_to() );
 
 				break;
 		}
