@@ -100,7 +100,7 @@ function get_bounces() {
 			FreeScout::URL . '/api/conversations?' . http_build_query(
 				[
 					'mailboxId' => Helpdesk::freescout_mailbox_id(),
-					'embed'     => 'threads',
+					'embed'     => 'threads,tags',
 					'status'    => 'pending',
 					'tag'       => 'auto-bounce',
 					'page'      => $page,
@@ -123,7 +123,12 @@ function get_bounces() {
 
 		$response = (array) json_decode( wp_remote_retrieve_body( $response ), true );
 
-		$bounces = array_merge( $bounces, $response['_embedded']['conversations'] ?? [] );
+		// FreeScout ignores the `tag` filter when the Tags module is off.
+		foreach ( $response['_embedded']['conversations'] ?? [] as $conversation ) {
+			if ( in_array( 'auto-bounce', array_column( $conversation['_embedded']['tags'] ?? [], 'name' ), true ) ) {
+				$bounces[] = $conversation;
+			}
+		}
 	} while ( $page++ < (int) ( $response['page']['totalPages'] ?? 0 ) );
 
 	return $bounces;
