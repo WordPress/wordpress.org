@@ -103,6 +103,9 @@ const DETAILS_PLACEHOLDERS = [
 
 /**
  * Fetch the email template, a saved reply of FreeScout's Plugins mailbox.
+ *
+ * @param string $name The saved reply's name.
+ * @return string Its HTML; dies if it couldn't be read.
  */
 function get_email_template( $name ) {
 	static $cache = [];
