@@ -2463,7 +2463,7 @@ body.trac #main #query {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 8px;
+	gap: 12px 16px;
 }
 
 body.trac #main #query > fieldset,
@@ -2473,19 +2473,27 @@ body.trac #main #query > hr {
 }
 
 body.trac #main #query > p.option {
+	box-sizing: border-box;
 	display: inline-flex;
 	float: none;
 	align-items: center;
 	flex-wrap: wrap;
-	gap: 6px;
-	margin: 10px 0;
+	gap: 8px;
+	max-width: 100%;
+	margin: 0;
+	padding: 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fafafa;
 }
 
 body.trac #main #query > .buttons {
 	display: inline-flex;
 	float: none;
 	align-items: center;
-	margin: 10px 0 10px auto;
+	justify-content: flex-end;
+	flex-basis: 100%;
+	margin: 0;
 }
 
 #query > .buttons input[type="submit"] {
@@ -2496,6 +2504,23 @@ body.trac #main #query > .buttons {
 	body.trac #main #query {
 		box-sizing: border-box;
 		padding: 0 10px;
+	}
+}
+
+@media (max-width: 600px) {
+	body.trac #main #query > p.option {
+		flex-basis: 100%;
+	}
+
+	body.trac #main #query > p.option:has(#group) {
+		display: grid;
+		grid-template-columns: max-content minmax(0, 1fr);
+		gap: 6px 8px;
+	}
+
+	body.trac #main #query > p.option #groupdesc {
+		justify-self: end;
+		margin: 0;
 	}
 }
 
