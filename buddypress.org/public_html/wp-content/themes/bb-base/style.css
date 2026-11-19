@@ -1284,6 +1284,11 @@ body.reply-edit #bbpress-forums fieldset legend {
 	margin-bottom: 10px;
 }
 
+#bbpress-forums .bbp-topic-content iframe,
+#bbpress-forums .bbp-reply-content iframe {
+	max-width: 100%;
+}
+
 #bbpress-forums li.bbp-body div.bbp-topic-content ul:hover,
 #bbpress-forums li.bbp-body div.bbp-reply-content ul:hover {
 	background-color: inherit;
