@@ -94,3 +94,27 @@
 		width: calc(100vw - 300px);
 	}
 }
+
+/* Allow forum-list author names to wrap inside the narrow freshness column. */
+@media screen and ( max-width: 782px ) {
+	#bbpress-forums p.bbp-topic-meta > span.bbp-topic-freshness-author,
+	#bbpress-forums p.bbp-forum-meta > span.bbp-forum-freshness-author {
+		overflow: visible;
+		overflow-wrap: anywhere;
+		white-space: normal;
+	}
+
+	#bbpress-forums p.bbp-topic-meta > span.bbp-topic-freshness-author .bbp-author-link,
+	#bbpress-forums p.bbp-forum-meta > span.bbp-forum-freshness-author .bbp-author-link {
+		display: inline-block;
+		max-width: 100%;
+		overflow: visible;
+		overflow-wrap: anywhere;
+		white-space: normal;
+	}
+
+	#bbpress-forums p.bbp-topic-meta > span.bbp-topic-freshness-author .bbp-author-name,
+	#bbpress-forums p.bbp-forum-meta > span.bbp-forum-freshness-author .bbp-author-name {
+		white-space: normal;
+	}
+}
