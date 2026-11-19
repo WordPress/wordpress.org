@@ -2893,14 +2893,18 @@ a.mention.me {
 
 @media (max-width: 550px) {
 
-	.create-new-ticket.button {
+	body.trac .create-new-ticket.button {
+		display: block;
 		float: none;
+		width: max-content;
+		max-width: 100%;
 		margin: 20px 0 0 !important; /* Override inline styles */
-		padding: 0 20px;
+		padding: 0;
 	}
 
-	.create-new-ticket a {
-		padding: 0;
+	body.trac .create-new-ticket a {
+		display: block;
+		padding: 0 20px;
 	}
 
 	#ticket .date {
