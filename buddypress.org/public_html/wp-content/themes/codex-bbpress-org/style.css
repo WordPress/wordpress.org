@@ -227,6 +227,10 @@
 }
 
 @media screen and ( max-width: 782px ) {
+	body.page-id-4797 .wp-block-table table.has-fixed-layout {
+		min-width: 700px;
+	}
+
 	.footer-meta-wrap .footer-meta {
 		width: auto;
 		padding: 0;
