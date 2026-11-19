@@ -24,7 +24,8 @@ libxml_use_internal_errors( true );
 // Mark this as an oEmbed response for caching.
 header( 'X-WP-Embed: true' );
 
-$url = isset( $_GET['url'] ) && is_string( $_GET['url'] ) ? esc_url_raw( wp_unslash( $_GET['url'] ) ) : '';
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- esc_url_raw() drops Trac query operators like `^`; the host and path patterns below validate it.
+$url = isset( $_GET['url'] ) && is_string( $_GET['url'] ) ? wp_unslash( $_GET['url'] ) : '';
 
 header( 'Allow: GET' );
 header( 'Expires: ' . gmdate( 'D, d M Y H:i:s \G\M\T', time() + HOUR_IN_SECONDS ), true );
@@ -49,8 +50,7 @@ $trac_baseurl = '^(?P<baseurl>https://(?P<trac>meta|core)\.trac\.wordpress\.org/
 $allowed_urls = [
 	'!' . $trac_baseurl . '(?P<type>ticket|changeset)/\d+$!iD',
 	'!' . $trac_baseurl . '(?P<type>query)[?].+$!iD',
-	// esc_url_raw() has already turned any space in the milestone name into %20.
-	'!' . $trac_baseurl . '(?P<type>milestone)/[a-z0-9.]+(?:%20)?[a-z0-9.]*$!iD',
+	'!' . $trac_baseurl . '(?P<type>milestone)/[a-z0-9.]+[ ]?[a-z0-9.]*$!iD',
 	'!' . $trac_baseurl . '(?P<type>ticketgraph)([?]component=[^&]+)?$!iD',
 ];
 

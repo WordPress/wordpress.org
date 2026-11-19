@@ -139,7 +139,7 @@ class WordPressTV_Subtitles_Upload {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- post() verifies the upload nonce before calling this.
-		$name = sanitize_file_name( wp_unslash( $_FILES['wptv_subtitles_file']['name'] ?? '' ) );
+		$name = sanitize_text_field( wp_unslash( $_FILES['wptv_subtitles_file']['name'] ?? '' ) );
 		add_filter( 'wp_handle_upload_prefilter', array( $this, 'generate_filename' ), 5 );
 
 		$file = wp_handle_upload( $_FILES['wptv_subtitles_file'], $overrides );
@@ -151,7 +151,7 @@ class WordPressTV_Subtitles_Upload {
 		$filepath = $file['file'];
 
 		$attachment = array(
-			'post_title'     => sanitize_text_field( wp_unslash( $name ) ),
+			'post_title'     => $name,
 			'guid'           => $file['url'],
 			'post_mime_type' => $file['type'],
 			'post_content'   => '',

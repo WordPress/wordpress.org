@@ -257,7 +257,8 @@ class Markdown_Import {
 
 		// The field holds a source URL, so esc_url_raw() keeps any percent-encoding that sanitize_text_field() would strip.
 		$submitted = esc_url_raw( wp_unslash( $_POST[ self::$input_name ] ) );
-		if ( '' === $submitted ) {
+		// Only a field left empty clears the source; esc_url_raw() also empties a mistyped URL.
+		if ( '' === $_POST[ self::$input_name ] ) {
 			update_post_meta( $post_id, self::$meta_key, '' );
 			return;
 		}
