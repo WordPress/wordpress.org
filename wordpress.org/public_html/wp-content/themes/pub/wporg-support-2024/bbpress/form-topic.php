@@ -95,6 +95,17 @@
 								<li><?php echo wp_kses_post( __( '<strong>Update your plugins, themes, and WordPress site</strong> to the latest versions.', 'wporg-forums' ) ); ?></li>
 								<li><?php echo wp_kses_post( __( '<strong>Describe the steps</strong> needed to reproduce an issue.', 'wporg-forums' ) ); ?></li>
 								<li><?php echo wp_kses_post( __( '<strong>Provide relevant information</strong>, such as your browser, operating system, or server environment.', 'wporg-forums' ) ); ?></li>
+								<?php if ( class_exists( 'Automattic\Blocks_Everywhere\Blocks_Everywhere' ) && apply_filters( 'blocks_everywhere_bbpress_editor', true ) ) : ?>
+								<li>
+									<?php
+									printf(
+										/* translators: %s: Forum user guide URL for the Code block. */
+										wp_kses_post( __( '<strong>Sharing code?</strong> Insert a <a href="%s">Code block</a> first, then paste your code into it.', 'wporg-forums' ) ),
+										esc_url( __( 'https://wordpress.org/support/forum-user-guide/block-editor/#code-block', 'wporg-forums' ) )
+									);
+									?>
+								</li>
+								<?php endif; ?>
 								<?php if ( ! bbp_is_single_view() || ! in_array( bbp_get_view_id(), array( 'theme', 'plugin' ) ) ) : ?>
 								<li><?php
 									printf(
