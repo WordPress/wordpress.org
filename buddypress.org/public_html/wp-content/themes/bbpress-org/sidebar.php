@@ -103,7 +103,9 @@ endif;
 
 	<?php elseif ( is_page( array( 'plugins', 116247 ) ) ) : ?>
 
-		<?php bb_base_plugin_search_form(); ?>
+		<?php if ( is_page( 'plugins' ) ) : ?>
+			<?php bb_base_plugin_search_form(); ?>
+		<?php endif; ?>
 
 		<div>
 			<h2><?php esc_html_e( 'Legacy', 'bbporg' ); ?></h2>
