@@ -42,13 +42,11 @@ class Locale_Support implements Site {
 
 		add_filter(
 			'option_stats_options',
-			function ( $options ) {
+			static function ( $options ) {
 				$options          = is_array( $options ) ? $options : [];
 				$options['roles'] = [ 'administrator', 'helphub_manager', 'helphub_editor' ];
 				return $options;
-			},
-			10,
-			1
+			}
 		);
 	}
 
