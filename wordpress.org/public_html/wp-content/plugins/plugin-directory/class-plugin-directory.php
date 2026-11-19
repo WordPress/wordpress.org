@@ -1419,6 +1419,12 @@ class Plugin_Directory {
 
 		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name.
 		if ( get_query_var( 'redirect_plugin' ) && get_query_var( 'redirect_plugin_tab' ) ) {
+			// The old developer FAQ at /about/faq/ matches the plugin tab rule.
+			if ( 'about' === get_query_var( 'redirect_plugin' ) && 'faq' === get_query_var( 'redirect_plugin_tab' ) ) {
+				wp_safe_redirect( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/', 301 );
+				die();
+			}
+
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin' ) . '/#' . get_query_var( 'redirect_plugin_tab' ) ), 301 );
 			die();
 		}
@@ -1448,6 +1454,10 @@ class Plugin_Directory {
 					wp_safe_redirect( home_url( '/developers/add/' ), 301 );
 				} elseif ( isset( $path[1] ) && 'validator' == $path[1] ) {
 					wp_safe_redirect( home_url( '/developers/readme-validator/' ), 301 );
+				} elseif ( isset( $path[1] ) && 'readme.txt' === $path[1] ) {
+					wp_safe_redirect( home_url( '/readme.txt' ), 301 );
+				} elseif ( isset( $path[1] ) && 'svn' === $path[1] ) {
+					wp_safe_redirect( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/', 301 );
 				} else {
 					wp_safe_redirect( home_url( '/developers/' ), 301 );
 				}
@@ -1591,6 +1601,7 @@ class Plugin_Directory {
 	 */
 	function filter_redirect_hosts( $hosts ) {
 		$hosts[] = 'playground.wordpress.net';
+		$hosts[] = 'developer.wordpress.org';
 
 		return $hosts;
 	}
