@@ -54,9 +54,9 @@ class Query_Plugins extends Base {
 		$query = array_intersect_key( $request->get_params(), array_flip( $this->valid_query_fields ) );
 
 		// Add some sane pagination limits to prevent insane queries.
-		if ( isset( $query['paged'] ) && (int) $query['paged'] > 999 ) {
+		if ( isset( $query['paged'] ) && absint( $query['paged'] ) > 999 ) {
 			// Return an empty page, as past the last page, rather than repeating page 999.
-			$response['info']['page'] = (int) $query['paged'];
+			$response['info']['page'] = absint( $query['paged'] );
 
 			return $response;
 		}
