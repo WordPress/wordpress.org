@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory\Bin\BulkSecurityEmails;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools;
 
-use WordPressdotorg\Plugin_Directory\Clients\FreeScout;
+use WordPressdotorg\MU_Plugins\Utilities\FreeScout;
 use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
 /**
@@ -63,7 +63,7 @@ if ( empty( $opts['csv'] ) ) {
 	die( "Need a --csv param." );
 }
 
-if ( ! Helpdesk::is_freescout() || ! FreeScout::api_key() ) {
+if ( ! Helpdesk::is_freescout() || ! defined( 'FREESCOUT_API_KEY' ) ) {
 	die( "Define FREESCOUT_PLUGINS_MAILBOX_ID and FREESCOUT_API_KEY first.\n" );
 }
 
@@ -86,10 +86,11 @@ foreach ( array( 'from', 'assign' ) as $opt ) {
 }
 
 // FreeScout agent the emails come from; wordpressdotorg's by default.
-define( __NAMESPACE__ . '\ATTRIBUTE_TO_USER', (int) ( $opts['from'] ?? FreeScout::USER_ID ) );
+define( __NAMESPACE__ . '\ATTRIBUTE_TO_USER', (int) ( $opts['from'] ?? Helpdesk::FREESCOUT_USER_ID ) );
 // FreeScout user or team to assign the conversations to; unassigned by default.
 define( __NAMESPACE__ . '\ASSIGN_TO_USER', (int) ( $opts['assign'] ?? 0 ) );
 const WARN_THRESHOLD = 10000;  // active installs to go from instant close => warn w/ 30days.
+const TIMEOUT        = 30;     // seconds a request to FreeScout may take.
 
 /**
  * Fetch the email template, a saved reply of FreeScout's Plugins mailbox.
@@ -97,13 +98,52 @@ const WARN_THRESHOLD = 10000;  // active installs to go from instant close => wa
 function get_email_template( $name ) {
 	static $cache = [];
 
-	$cache[ $name ] ??= FreeScout::saved_reply( $name );
+	$cache[ $name ] ??= get_saved_reply( $name );
 	if ( null === $cache[ $name ] ) {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		die( "Couldn't fetch the saved reply \"$name\" from FreeScout.\n" );
 	}
 
 	return $cache[ $name ];
+}
+
+/**
+ * A saved reply of the Plugins mailbox, by name, from FreeScout's WPOrgApi module, as the API has none.
+ *
+ * @param string $name The saved reply's name.
+ * @return string|null Its HTML; null if there's no such reply, or it couldn't be read.
+ */
+function get_saved_reply( $name ) {
+	if ( ! defined( 'FREESCOUT_SECRET' ) || '' === (string) FREESCOUT_SECRET ) {
+		return null;
+	}
+
+	$body = (string) wp_json_encode( [
+		'mailbox_id' => Helpdesk::freescout_mailbox_id(),
+		'name'       => $name,
+		'endpoint'   => 'saved-reply',
+		'sent_at'    => time(),
+	] );
+
+	$response = wp_remote_post(
+		FreeScout::URL . '/wporgapi/saved-reply',
+		[
+			'timeout' => TIMEOUT,
+			'headers' => [
+				'Accept'            => 'application/json',
+				'Content-Type'      => 'application/json',
+				'X-WPOrg-Signature' => hash_hmac( 'sha256', $body, (string) FREESCOUT_SECRET ),
+			],
+			'body'    => $body,
+		]
+	);
+
+	$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+	if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) || ! isset( $data['text'] ) ) {
+		return null;
+	}
+
+	return (string) $data['text'];
 }
 
 function fetch_all_from_csv() {
@@ -188,7 +228,22 @@ function send_email( $args ) {
 		$payload['assignTo'] = ASSIGN_TO_USER;
 	}
 
-	$result = FreeScout::api( 'conversations', $payload, 'POST', $response_code );
+	// The shared FreeScout client can't BCC, or add the note.
+	$response = wp_remote_post(
+		FreeScout::URL . '/api/conversations',
+		[
+			'timeout' => TIMEOUT,
+			'headers' => [
+				'Accept'              => 'application/json',
+				'Content-Type'        => 'application/json',
+				'X-FreeScout-API-Key' => FREESCOUT_API_KEY,
+			],
+			'body'    => wp_json_encode( $payload ),
+		]
+	);
+
+	$response_code = (int) wp_remote_retrieve_response_code( $response );
+	$result        = is_wp_error( $response ) ? $response->get_error_message() : json_decode( wp_remote_retrieve_body( $response ), true );
 	if ( 201 !== $response_code ) {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "ERROR: FreeScout didn't create the conversation: $response_code " . wp_json_encode( $result ) . "\n";

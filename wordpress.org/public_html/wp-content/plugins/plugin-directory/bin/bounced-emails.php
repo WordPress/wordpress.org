@@ -5,7 +5,7 @@ use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Admin\Metabox\Author_Notice;
 use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 
-use WordPressdotorg\Plugin_Directory\Clients\FreeScout;
+use WordPressdotorg\MU_Plugins\Utilities\FreeScout;
 use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
 use function WordPressdotorg\API\FreeScout\{ get_user_email_for_email };
@@ -70,7 +70,7 @@ if ( 'live' == OPERATION_MODE ) {
 }
 
 
-if ( ! Helpdesk::is_freescout() || ! FreeScout::api_key() ) {
+if ( ! Helpdesk::is_freescout() || ! defined( 'FREESCOUT_API_KEY' ) ) {
 	fwrite( STDERR, "Error! Define FREESCOUT_PLUGINS_MAILBOX_ID and FREESCOUT_API_KEY first.\n" );
 	die();
 }
@@ -79,6 +79,11 @@ require_once API_WPORGPATH . '/dotorg/freescout/common.php';
 
 // Set a user to run as.
 wp_set_current_user( get_user_by( 'slug', 'wordpressdotorg' )->ID );
+
+/**
+ * How long a request to FreeScout may take, in seconds.
+ */
+const TIMEOUT = 30;
 
 /**
  * Fetch the bounce conversations, with their threads, from every page.
@@ -90,23 +95,31 @@ function get_bounces() {
 	$page    = 1;
 
 	do {
-		$response = FreeScout::api(
-			'conversations',
-			[
+		// The shared FreeScout client doesn't list conversations.
+		$response = wp_remote_get(
+			FreeScout::URL . '/api/conversations?' . http_build_query( [
 				'mailboxId' => Helpdesk::freescout_mailbox_id(),
 				'embed'     => 'threads',
 				'status'    => 'pending',
 				'tag'       => 'auto-bounce',
 				'page'      => $page,
-			],
-			'GET',
-			$response_code
+			] ),
+			[
+				'timeout' => TIMEOUT,
+				'headers' => [
+					'Accept'              => 'application/json',
+					'X-FreeScout-API-Key' => FREESCOUT_API_KEY,
+				],
+			]
 		);
 
+		$response_code = (int) wp_remote_retrieve_response_code( $response );
 		if ( 200 !== $response_code ) {
 			fwrite( STDERR, "Error! Couldn't list the bounces: $response_code\n" );
 			die();
 		}
+
+		$response = (array) json_decode( wp_remote_retrieve_body( $response ), true );
 
 		$bounces = array_merge( $bounces, $response['_embedded']['conversations'] ?? [] );
 	} while ( $page++ < (int) ( $response['page']['totalPages'] ?? 0 ) );
@@ -132,7 +145,7 @@ function get_bounce_request( $bounce ) {
 			$content   = null;
 
 			if ( $size <= 100 * KB_IN_BYTES && preg_match( '/message|text|rfc/', $mime_type ) ) {
-				$response = wp_remote_get( (string) ( $attachment['fileUrl'] ?? '' ), [ 'timeout' => FreeScout::TIMEOUT ] );
+				$response = wp_remote_get( (string) ( $attachment['fileUrl'] ?? '' ), [ 'timeout' => TIMEOUT ] );
 				$content  = 200 === wp_remote_retrieve_response_code( $response ) ? wp_remote_retrieve_body( $response ) : null;
 			}
 
@@ -169,18 +182,10 @@ function get_bounce_request( $bounce ) {
  * @param int $conversation_id Conversation ID.
  */
 function close_conversation( $conversation_id ) {
-	FreeScout::api(
-		'conversations/' . $conversation_id,
-		[
-			'status' => 'closed',
-			'byUser' => FreeScout::USER_ID,
-		],
-		'PUT',
-		$response_code
-	);
+	$result = FreeScout::update( (int) $conversation_id, [ 'status' => 'closed' ] );
 
-	if ( $response_code < 200 || $response_code >= 300 ) {
-		echo "\tCouldn't close " . Helpdesk::conversation_url( $conversation_id, 0, true ) . ": $response_code\n";
+	if ( is_wp_error( $result ) ) {
+		echo "\tCouldn't close " . Helpdesk::conversation_url( $conversation_id, 0, true ) . ': ' . $result->get_error_message() . "\n";
 	}
 }
 
