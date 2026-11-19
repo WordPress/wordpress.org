@@ -1289,13 +1289,27 @@ class Hooks {
 			return $url;
 		}
 
-		$topic_id = bbp_get_reply_topic_id( $reply_id );
-		$replies  = array_reverse( array_map( 'intval', bbp_get_public_child_ids( $topic_id, bbp_get_reply_post_type() ) ) );
-		$position = array_search( (int) $reply_id, $replies, true );
-
-		if ( false === $position ) {
+		$public_statuses = bbp_get_public_reply_statuses();
+		$reply           = get_post( $reply_id );
+		if ( ! $reply || ! in_array( $reply->post_status, $public_statuses, true ) ) {
 			return $url;
 		}
+
+		// Count rather than list the earlier replies, as topics can have thousands.
+		global $wpdb;
+		$position = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts}
+				WHERE post_parent = %d AND post_type = %s
+				AND post_status IN (" . implode( ', ', array_fill( 0, count( $public_statuses ), '%s' ) ) . ')
+				AND ( post_date < %s OR ( post_date = %s AND ID < %d ) )',
+				array_merge(
+					array( bbp_get_reply_topic_id( $reply_id ), bbp_get_reply_post_type() ),
+					$public_statuses,
+					array( $reply->post_date, $reply->post_date, $reply->ID )
+				)
+			)
+		);
 
 		++$position;
 		if ( ! bbp_show_lead_topic() ) {
