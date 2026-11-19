@@ -43,12 +43,14 @@
 .footer-meta-wrap .footer-meta {
 	margin: 0 auto;
 	width: 960px;
+	max-width: 100%;
 	padding: 24px 0;
 	overflow: auto;
 	color: #555;
 	font-family: 'Source Sans Pro', 'HelveticaNeue', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 .footer-meta-wrap .footer-meta .col-half {
+	box-sizing: border-box;
 	float: left;
 	width: 50%;
 }
