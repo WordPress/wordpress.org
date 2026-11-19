@@ -57,6 +57,20 @@ if ( ! $user ) {
 			</tbody>
 		</table>
 
-		<?php submit_button( _x( 'Update', 'translation editor', 'rosetta' ) ); ?>
+		<noscript>
+			<div class="notice notice-error">
+				<p><?php esc_html_e( 'JavaScript is required to load projects and save changes.', 'rosetta' ); ?></p>
+			</div>
+		</noscript>
+
+		<?php
+		submit_button(
+			_x( 'Update', 'translation editor', 'rosetta' ),
+			'primary',
+			'submit',
+			true,
+			array( 'disabled' => 'disabled' )
+		);
+		?>
 	</form>
 </div>
