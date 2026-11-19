@@ -33,7 +33,7 @@ if ( 'cli' != php_sapi_name() ) {
 die( 'Please check the source, and validate this will work as you anticipate.' );
 // phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable
 
-$opts = getopt( '', array( 'url:', 'abspath:', 'csv:', 'only-warn', 'doit', 'from:', 'assign:' ) );
+$opts = getopt( '', array( 'url:', 'abspath:', 'csv:', 'only-warn', 'doit', 'assign:' ) );
 
 if ( empty( $opts['url'] ) ) {
 	$opts['url'] = 'https://wordpress.org/plugins/';
@@ -79,15 +79,12 @@ if ( 'live' == OPERATION_MODE ) {
 // Set a user to run as.
 wp_set_current_user( get_user_by( 'slug', 'wordpressdotorg' )->ID );
 
-foreach ( array( 'from', 'assign' ) as $opt ) {
-	if ( isset( $opts[ $opt ] ) && ! ctype_digit( (string) $opts[ $opt ] ) ) {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
-		die( "--$opt must be a numeric FreeScout ID.\n" );
-	}
+if ( isset( $opts['assign'] ) && ! ctype_digit( (string) $opts['assign'] ) ) {
+	die( "--assign must be a numeric FreeScout ID.\n" );
 }
 
-// FreeScout agent the emails come from; wordpressdotorg's by default.
-define( __NAMESPACE__ . '\ATTRIBUTE_TO_USER', (int) ( $opts['from'] ?? Helpdesk::FREESCOUT_USER_ID ) );
+// FreeScout agent the emails come from: wordpressdotorg, as FreeScout lets the API key act only as its owner.
+const ATTRIBUTE_TO_USER = Helpdesk::FREESCOUT_USER_ID;
 // FreeScout user or team to assign the conversations to; unassigned by default.
 define( __NAMESPACE__ . '\ASSIGN_TO_USER', (int) ( $opts['assign'] ?? 0 ) );
 const WARN_THRESHOLD = 10000;  // active installs to go from instant close => warn w/ 30days.
