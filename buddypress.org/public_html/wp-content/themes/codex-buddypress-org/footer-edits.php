@@ -24,7 +24,7 @@ if ( is_singular( 'page' ) ) : ?>
                         endif; ?>
 
                         <div class="contributor">
-                            <a href="#">
+                            <a href="<?php echo esc_url( 'https://profiles.wordpress.org/' . $userdata->user_nicename . '/' ); ?>">
                                 <div class="contributor-avatar float-left">
                                     <?php echo get_avatar( $contributor_id, 48 ); ?>
                                     <?php echo '<div class="revision-count">' . esc_html( $count ) . '</div>'; ?>
