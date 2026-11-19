@@ -221,6 +221,7 @@ class Audit_Log {
 	 * @return string[] The matched words.
 	 */
 	public function get_matched_moderation_keys( $post ) {
+		/** This filter is documented in bbpress/includes/common/functions.php */
 		$moderation = apply_filters( 'bbp_moderation_keys', trim( get_option( 'moderation_keys' ) ) );
 		if ( ! $moderation ) {
 			return [];
