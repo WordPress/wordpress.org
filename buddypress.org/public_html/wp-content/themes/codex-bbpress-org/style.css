@@ -31,6 +31,16 @@
   margin-top: .5em;
 }
 
+.codex-taxonomy-columns {
+	display: grid;
+	grid-template-columns: repeat( auto-fit, minmax( 150px, 1fr ) );
+	gap: 20px;
+}
+
+.codex-taxonomy-column {
+	min-width: 0;
+}
+
 /* =Footer
 -------------------------------------------------------------- */
 
