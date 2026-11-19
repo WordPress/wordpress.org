@@ -2208,6 +2208,23 @@ h5 {
 	margin: 0 0 10px 0;
 }
 
+/* Keep the theme's list and heading styles out of the Jetpack Instant Search overlay. */
+.jetpack-instant-search__overlay li {
+	list-style: none;
+}
+
+.jetpack-instant-search__overlay h3 {
+	border-bottom: 0;
+	padding-bottom: 0;
+}
+
+/* Matches Jetpack's breakpoint for stacking a result's image below its text. */
+@media screen and ( max-width: 575.98px ) {
+	.jetpack-instant-search__search-result-expanded__image-container {
+		margin-top: 1em;
+	}
+}
+
 .archive .video-events {
 	text-transform: uppercase;
 	font-size: 12px;
