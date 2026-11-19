@@ -2060,6 +2060,10 @@ div.plugin-meta img {
 
 /* Do not fix #header for non-desktops */
 @media screen and ( max-width: 782px ) {
+	#bbp-search-form {
+		position: static;
+		margin: 0 0 20px;
+	}
 	#footer-inner {
 		display: block;
 		padding: 20px;
