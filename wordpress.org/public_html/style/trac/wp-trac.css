@@ -483,11 +483,13 @@ h2.report-result {
 	margin: 0;
 }
 
+#content.query #query > fieldset.collapsed,
 #content.query #batchmod_form > fieldset.collapsed {
 	border: 1px solid #d7d7d7;
 	padding: 6px 14px 10px;
 }
 
+#content.query #query > fieldset.collapsed > legend.foldable,
 #content.query #batchmod_form > fieldset.collapsed > legend.foldable {
 	background: #fafafa;
 }
