@@ -167,7 +167,9 @@ class Audit_Log {
 			// bbPress doesn't re-check a post that was already held, so this edit didn't hold it.
 			in_array( $post->ID, $this->pending_before_edit, true ) ||
 			// Only the author's own posts, not a moderator editing someone else's.
-			get_current_user_id() !== (int) $post->post_author
+			get_current_user_id() !== (int) $post->post_author ||
+			// bbPress skips the word check for moderators, so a word didn't hold their post.
+			user_can( $post->post_author, 'moderate' )
 		) {
 			return;
 		}
