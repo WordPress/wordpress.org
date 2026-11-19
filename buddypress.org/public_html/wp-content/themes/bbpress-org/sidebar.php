@@ -88,9 +88,18 @@ endif;
 
 			<div>
 				<h2><?php esc_html_e( 'Feeds', 'bbporg' ); ?></h2>
+				<?php
+				$topics_feed_url = add_query_arg(
+					array(
+						'post_type' => bbp_get_topic_post_type(),
+						'feed'      => 'rss2',
+					),
+					home_url( '/' )
+				);
+				?>
 				<ul>
 					<li><a class="feed" href="<?php bbp_forums_url(); ?>feed/"><?php esc_html_e( 'All Recent Posts', 'bbporg' ); ?></a></li>
-					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/"><?php esc_html_e( 'All Recent Topics', 'bbporg' ); ?></a></li>
+					<li><a class="feed" href="<?php echo esc_url( $topics_feed_url ); ?>"><?php esc_html_e( 'All Recent Topics', 'bbporg' ); ?></a></li>
 				</ul>
 			</div>
 
