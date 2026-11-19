@@ -313,12 +313,30 @@ class Translation_Memory extends Suggestions_Route {
 			'cs'    => 'CS',
 			'da'    => 'DA',
 			'de'    => 'DE',
+			'de-ch' => 'DE-CH',
 			'el'    => 'EL',
+			'el-po' => '', // DeepL only writes monotonic Greek.
 			'en-gb' => 'EN-GB',
 			'es'    => 'ES',
+			'es-ar' => 'ES-419',
+			'es-cl' => 'ES-419',
+			'es-co' => 'ES-419',
+			'es-cr' => 'ES-419',
+			'es-do' => 'ES-419',
+			'es-ec' => 'ES-419',
+			'es-gt' => 'ES-419',
+			'es-hn' => 'ES-419',
+			'es-mx' => 'ES-419',
+			'es-pa' => 'ES-419',
+			'es-pe' => 'ES-419',
+			'es-pr' => 'ES-419',
+			'es-us' => 'ES-419',
+			'es-uy' => 'ES-419',
+			'es-ve' => 'ES-419',
 			'et'    => 'ET',
 			'fi'    => 'FI',
 			'fr'    => 'FR',
+			'fr-ca' => 'FR-CA',
 			'hu'    => 'HU',
 			'id'    => 'ID',
 			'it'    => 'IT',
@@ -339,9 +357,18 @@ class Translation_Memory extends Suggestions_Route {
 			'tr'    => 'TR',
 			'uk'    => 'UK',
 			'zh-cn' => 'ZH',
+			'zh-hk' => 'ZH-HANT',
+			'zh-sg' => 'ZH',
+			'zh-tw' => 'ZH-HANT',
 		);
 		if ( array_key_exists( $locale, $available_locales ) ) {
 			return $available_locales[ $locale ];
+		}
+
+		// Other regional variants use their base language, e.g. de-at gets DE.
+		$base_locale = explode( '-', $locale )[0];
+		if ( array_key_exists( $base_locale, $available_locales ) ) {
+			return $available_locales[ $base_locale ];
 		}
 		return '';
 	}
@@ -360,6 +387,7 @@ class Translation_Memory extends Suggestions_Route {
 			'CS'    => 'prefer_less',
 			'DA'    => 'prefer_less',
 			'DE'    => 'prefer_less',
+			'DE-CH' => 'prefer_more',
 			'EL'    => 'prefer_more',
 			'EN-GB' => 'prefer_less',
 			'ES'    => 'prefer_less',
@@ -391,8 +419,17 @@ class Translation_Memory extends Suggestions_Route {
 		if ( ( 'DE' == $locale || 'NL' == $locale ) && 'formal' == $set_slug ) {
 			return 'prefer_more';
 		}
+		if ( 'DE-CH' === $locale && 'informal' === $set_slug ) {
+			return 'prefer_less';
+		}
 		if ( array_key_exists( $locale, $lang_informality ) ) {
 			return $lang_informality[ $locale ];
+		}
+
+		// Regional targets like ES-419 and FR-CA share their base language's register.
+		$base_locale = explode( '-', $locale )[0];
+		if ( array_key_exists( $base_locale, $lang_informality ) ) {
+			return $lang_informality[ $base_locale ];
 		}
 
 		return 'default';
