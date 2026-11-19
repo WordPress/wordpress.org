@@ -37,7 +37,7 @@ const CACHE_PREFIX        = '5ftf_contrib_metrics_v1_';
  *   2. Wire the data source into get_team_contribution_metrics().
  *   3. Add the team's post_name slug to this list.
  */
-const TEAMS_WITH_DATA = array( 'core', 'meta', 'flow' /* test */ );
+const TEAMS_WITH_DATA = array( 'core', 'core-ai', 'meta', 'flow' /* test */ );
 
 /**
  * Whether the given team has wired-up contribution tracking.
@@ -91,8 +91,22 @@ function team_to_trac( string $slug ): string {
  */
 function team_to_github_repos( string $slug ): array {
 	$map = array(
-		'core' => array( 'WordPress/gutenberg', 'WordPress/wordpress-develop' ),
-		'meta' => array(
+		'core'    => array( 'WordPress/gutenberg', 'WordPress/wordpress-develop' ),
+		'core-ai' => array( // Core AI team, at make.wordpress.org/ai/.
+			'WordPress/abilities-api',
+			'WordPress/agent-skills',
+			'WordPress/ai',
+			'WordPress/ai-provider-for-anthropic',
+			'WordPress/ai-provider-for-google',
+			'WordPress/ai-provider-for-ollama',
+			'WordPress/ai-provider-for-openai',
+			'WordPress/mcp-adapter',
+			'WordPress/php-ai-client',
+			'WordPress/php-mcp-schema',
+			'WordPress/wp-ai-client',
+			'WordPress/wp-bench',
+		),
+		'meta'    => array(
 			'WordPress/five-for-the-future',
 			'WordPress/meeting-calendar',
 			'WordPress/pattern-directory',
@@ -114,7 +128,7 @@ function team_to_github_repos( string $slug ): array {
 			'WordPress/wporg-theme-directory',
 			'WordPress/wporg-two-factor',
 		),
-		'flow' => array( 'WordPress/test-handbook' ), // Test team, formerly Flow.
+		'flow'    => array( 'WordPress/test-handbook' ), // Test team, formerly Flow.
 	);
 	return isset( $map[ $slug ] ) ? $map[ $slug ] : array();
 }
