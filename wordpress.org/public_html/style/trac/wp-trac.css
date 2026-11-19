@@ -467,6 +467,24 @@ h2.report-result {
 	box-shadow: none;
 }
 
+#content.query table.tickets caption.trac-group {
+	padding: 0 0 8px;
+	border: 0;
+}
+
+#content.query table.tickets .trac-group h2.report-result {
+	margin: 0;
+}
+
+#content.query #batchmod_form > fieldset.collapsed {
+	border: 1px solid #d7d7d7;
+	padding: 6px 14px 10px;
+}
+
+#content.query #batchmod_form > fieldset.collapsed > legend.foldable {
+	background: #fafafa;
+}
+
 /* =roadmap.css */
 table.progress {
 	-webkit-box-shadow: none;
