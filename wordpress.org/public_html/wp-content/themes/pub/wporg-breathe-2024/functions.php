@@ -909,6 +909,7 @@ add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\modify_site_title_
  * Inject a script to trigger Prism (syntax highlighter) after o2 content is rendered.
  *
  * Runs again on `pd-script-load`, which o2 fires each time it re-renders a post, for example after Follow.
+ * Each code element is highlighted once, so blocks o2 left alone keep their DOM.
  */
 add_action(
 	'wp_footer',
@@ -918,7 +919,12 @@ add_action(
 			'jQuery( document ).on(
 				"ready.o2 pd-script-load",
 				function () {
-					setTimeout( () => Prism.highlightAll(), 10 );
+					setTimeout( () => {
+						document.querySelectorAll( "code[class*=language-]:not([data-o2-prism]), [class*=language-] code:not([data-o2-prism])" ).forEach( ( el ) => {
+							el.dataset.o2Prism = "1";
+							Prism.highlightElement( el );
+						} );
+					}, 10 );
 				}
 			);',
 			'after'
