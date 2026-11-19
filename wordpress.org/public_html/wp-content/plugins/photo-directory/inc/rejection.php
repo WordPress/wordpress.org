@@ -640,7 +640,7 @@ class Rejection {
 		}
 
 		// Bail if nonce check fails.
-		if ( ! wp_verify_nonce( $_POST[ $nonce_field ], 'photo-rejection-post-save-' . (int) $_POST['post_ID'] ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $nonce_field ] ) ), 'photo-rejection-post-save-' . (int) $_POST['post_ID'] ) ) {
 			return;
 		}
 
@@ -1098,7 +1098,7 @@ JS;
 		}
 
 		// Bail if nonce check fails.
-		if ( ! wp_verify_nonce( $_POST[ $nonce_field ], 'photo-rejection-post-save-' . $post_id ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[ $nonce_field ] ) ), 'photo-rejection-post-save-' . $post_id ) ) {
 			return;
 		}
 
@@ -1119,14 +1119,11 @@ JS;
 				continue;
 			}
 
-			$value = $_POST[ $meta_key ] ?? '';
+			// Strip markup without removing percent-encoded URLs from the note.
+			$value = wp_strip_all_tags( wp_unslash( $_POST[ $meta_key ] ?? '' ) );
 
 			if ( $value ) {
-				$value = wp_strip_all_tags( $value );
-			}
-
-			if ( $value ) {
-				update_post_meta( $post_id, $meta_key, $value );
+				update_post_meta( $post_id, $meta_key, wp_slash( $value ) );
 			} else {
 				delete_post_meta( $post_id, $meta_key );
 			}

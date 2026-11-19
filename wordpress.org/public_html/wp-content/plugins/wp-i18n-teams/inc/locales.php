@@ -152,7 +152,7 @@ function render_wp_locales_shortcode(): string {
 				sprintf(
 					/* translators: %s: Locale slug. */
 					esc_html__( 'Locale %s doesn&#8217;t exist.', 'wporg' ),
-					'<code>' . esc_html( $_GET['locale'] ) . '</code>'
+					'<code>' . esc_html( sanitize_text_field( wp_unslash( $_GET['locale'] ) ) ) . '</code>'
 				),
 				esc_url( get_permalink() ),
 				esc_html__( 'Return to All Locales', 'wporg' )

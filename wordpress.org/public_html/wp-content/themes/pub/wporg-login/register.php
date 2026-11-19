@@ -2,10 +2,18 @@
 /**
  * The new registration Template
  *
+ * The submitted login and email are kept exactly as typed. sanitize_user() and
+ * sanitize_email() would quietly rewrite them instead of rejecting them, so
+ * "jose" would be registered for someone who typed an accented name and the
+ * visitor would never see an error. Validation happens further down, and every
+ * echo of these escapes.
+ *
  * @package wporg-login
  */
 
+// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited, WordPress.Security.ValidatedSanitizedInput -- Public registration form with no nonce; these hold the submitted values, not the logged-in user.
 $user_login       = isset( $_POST['user_login'] ) && is_string( $_POST['user_login'] ) ? trim( wp_unslash( $_POST['user_login'] ) ) : '';
+// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.WP.GlobalVariablesOverride.Prohibited, WordPress.Security.ValidatedSanitizedInput -- Public registration form with no nonce; these hold the submitted values, not the logged-in user.
 $user_email       = isset( $_POST['user_email'] ) && is_string( $_POST['user_email'] ) ? trim( wp_unslash( $_POST['user_email'] ) ) : '';
 $user_mailinglist = isset( $_POST['user_mailinglist'] ) && 'true' == $_POST['user_mailinglist'];
 $terms_of_service = isset( $_POST['terms_of_service'] ) ? intval( $_POST['terms_of_service'] ) : false;
@@ -21,7 +29,7 @@ if ( is_user_logged_in() ) {
 }
 
 $user_registration_available = true;
-$registration_source         = $_COOKIE['wporg_came_from'] ?? ( $_REQUEST['from'] ?? '' );
+$registration_source         = esc_url_raw( wp_unslash( $_COOKIE['wporg_came_from'] ?? ( $_REQUEST['from'] ?? '' ) ) );
 $is_wordcamp_registration    = (
 	str_contains( $registration_source, '.wordcamp.org' ) ||
 	str_contains( $registration_source, 'events.wordpress.org')

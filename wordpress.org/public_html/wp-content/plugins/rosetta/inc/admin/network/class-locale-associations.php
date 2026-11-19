@@ -68,9 +68,13 @@ class Locale_Associations implements Admin_Page {
 	 * Handles actions like adding/deleting locale associations.
 	 */
 	public function action() {
-		if ( ! isset( $_POST['_wpnonce'] ) || ! isset( $_POST['action'] ) || ! in_array( $_POST['action'], [ 'add-association', 'delete-association' ], true ) ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- This only picks which handler runs; each one verifies its own nonce before changing anything.
+		$current_action = sanitize_key( $_POST['action'] ?? '' );
+
+		if ( ! isset( $_POST['_wpnonce'] ) || ! in_array( $current_action, [ 'add-association', 'delete-association' ], true ) ) {
 			return;
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! current_user_can( 'manage_sites' ) ) {
 			wp_die(
@@ -79,7 +83,6 @@ class Locale_Associations implements Admin_Page {
 			);
 		}
 
-		$current_action = $_POST['action'];
 		$result = null;
 
 		switch ( $current_action ) {
@@ -115,7 +118,7 @@ class Locale_Associations implements Admin_Page {
 	private function action_add_association() {
 		global $wpdb;
 
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'add-association' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'add-association' ) ) {
 			return new WP_Error( 'nonce_failure' );
 		}
 
@@ -173,7 +176,7 @@ class Locale_Associations implements Admin_Page {
 
 		$id = (int) $_POST['id'];
 
-		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'delete-association-' . $id ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'delete-association-' . $id ) ) {
 			return new WP_Error( 'nonce_failure' );
 		}
 

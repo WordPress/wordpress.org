@@ -36,7 +36,7 @@ class Committers {
 	 * Ajax handler for adding a new committer.
 	 */
 	public static function add_committer() {
-		$login   = isset( $_POST['add_committer'] ) ? sanitize_user( $_POST['add_committer'] ) : '';
+		$login   = isset( $_POST['add_committer'] ) ? sanitize_user( wp_unslash( $_POST['add_committer'] ) ) : '';
 		$post_id = isset( $_POST['post_id'] ) ? (int) $_POST['post_id'] : 0;
 
 		check_ajax_referer( 'add-committer' );

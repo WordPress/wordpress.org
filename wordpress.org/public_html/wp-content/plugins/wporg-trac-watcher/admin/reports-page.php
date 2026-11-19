@@ -3,11 +3,12 @@ namespace WordPressdotorg\Trac\Watcher;
 
 function display_reports_page( $details ) {
 	global $wpdb;
-	$url       = add_query_arg( 'page', $_REQUEST['page'], admin_url( 'admin.php' ) );
-	$what      = $_REQUEST['what'] ?? '';
-	$version   = $_REQUEST['version'] ?? null;
-	$revisions = $_REQUEST['revisions'] ?? '';
-	$branch    = $_REQUEST['branch'] ?? '';
+	$page      = sanitize_key( $_REQUEST['page'] ?? '' );
+	$url       = add_query_arg( 'page', $page, admin_url( 'admin.php' ) );
+	$what      = sanitize_key( $_REQUEST['what'] ?? '' );
+	$version   = isset( $_REQUEST['version'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['version'] ) ) : null;
+	$revisions = sanitize_text_field( wp_unslash( $_REQUEST['revisions'] ?? '' ) );
+	$branch    = sanitize_text_field( wp_unslash( $_REQUEST['branch'] ?? '' ) );
 	$is_core   = ( 'core' === $details['slug'] );
 
 	// Default to the latest version for core. The constant is optional, as it is everywhere else in the plugin.
@@ -33,7 +34,7 @@ function display_reports_page( $details ) {
 		</ol>
 
 		<form>
-			<input type="hidden" name="page" value="<?php echo esc_attr( $_REQUEST['page'] ); ?>">
+			<input type="hidden" name="page" value="<?php echo esc_attr( $page ); ?>">
 			<input type="hidden" name="what" value="<?php echo esc_attr( $what ); ?>">
 
 		<?php
@@ -105,10 +106,10 @@ function display_reports_page( $details ) {
 				$counts = [];
 				foreach ( $details as $r ) {
 					$counts[] = (object)[
-						'id' => $r->ID,
-						'name' => $r->display_name ?: $r->user_nicename,
-						'slug' => $r->user_nicename,
-						'link' => 'https://profiles.wordpress.org/' . $r->user_nicename . '/',
+						'id'    => $r->ID,
+						'name'  => $r->display_name ?: $r->user_nicename,
+						'slug'  => $r->user_nicename,
+						'link'  => 'https://profiles.wordpress.org/' . $r->user_nicename . '/',
 						'count' => $r->count
 					];
 				}
@@ -130,7 +131,7 @@ function display_reports_page( $details ) {
 				foreach ( $details as $c ) {
 					$link = add_query_arg(
 						[
-							'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
+							'page'   => str_replace( 'reports', 'edit', $page ),
 							'author' => $c->user_login,
 						],
 						admin_url( 'admin.php' )
@@ -166,7 +167,7 @@ function display_reports_page( $details ) {
 				foreach ( $details as $c ) {
 					$link = add_query_arg(
 						[
-							'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
+							'page'      => str_replace( 'reports', 'edit', $page ),
 							'revisions' => $c->revisions
 						],
 						admin_url( 'admin.php' )
@@ -296,8 +297,8 @@ function display_reports_page( $details ) {
 				foreach ( $details as $p ) {
 					$link = add_query_arg(
 						[
-							'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
-							's' => $p->prop_name,
+							'page' => str_replace( 'reports', 'edit', $page ),
+							's'    => $p->prop_name,
 						],
 						admin_url( 'admin.php' )
 					);
@@ -349,7 +350,7 @@ function display_reports_page( $details ) {
 				foreach ( $details as $c ) {
 					$link = add_query_arg(
 						[
-							'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
+							'page'      => str_replace( 'reports', 'edit', $page ),
 							'revisions' => $c->revisions
 						],
 						admin_url( 'admin.php' )
@@ -384,7 +385,7 @@ function display_reports_page( $details ) {
 				foreach ( $details as $c ) {
 					$link = add_query_arg(
 						[
-							'page' => str_replace( 'reports', 'edit', $_REQUEST['page'] ),
+							'page'      => str_replace( 'reports', 'edit', $page ),
 							'revisions' => $c->revisions
 						],
 						admin_url( 'admin.php' )
