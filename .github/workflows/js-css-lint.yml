@@ -72,7 +72,7 @@ jobs:
 
     - name: Check formatting
       if: matrix.prettier
-      run: npx --no prettier --check .
+      run: ./node_modules/.bin/prettier --check .
 
     # Build output is committed, so a source edit without a rebuild ships stale assets.
     - name: Check build output is up to date
