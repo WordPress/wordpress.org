@@ -216,6 +216,8 @@ function extract_bounce_message( $email ) {
 	}
 
 	$body = preg_replace( '#<br\s*/?>#i', "\n", $body );
+	// FreeScout stores plain-text emails HTML-escaped; the sinks escape again.
+	$body = html_entity_decode( $body );
 	$body = str_replace( "\r", '', $body );
 
 	// Trim the body to header-like lines.
@@ -404,7 +406,7 @@ foreach ( $actions_to_take as $post_id => $data ) {
 	foreach ( $data['users'] as $user_id => $bounce_message ) {
 		$user = get_user_by( 'id', $user_id );
 
-		$bounce_message = $bounce_message ? "<pre>{$bounce_message}</pre>\n" : '';
+		$bounce_message = $bounce_message ? '<pre>' . esc_html( $bounce_message ) . "</pre>\n" : '';
 
 		echo "\tRemoved Commit for {$user->user_login}\n";
 
