@@ -500,7 +500,12 @@ abstract class Directory_Compat {
 			is_tax( 'topic-tag' )
 		||
 			// bbPress renders feeds in the `request` filter, where is_feed() isn't always set.
-			did_action( 'bbp_feed' )
+			(
+				did_action( 'bbp_feed' )
+			&&
+				// The compat term stays on topics moved out of the plugin or theme forum.
+				in_array( bbp_get_topic_forum_id( $topic_id ), array( $this->forum_id(), Plugin::REVIEWS_FORUM_ID ), true )
+			)
 		) {
 			$terms = get_the_terms( $topic_id, $this->taxonomy() );
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
