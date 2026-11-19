@@ -31,6 +31,7 @@ if ( 'cli' != php_sapi_name() ) {
 
 // Comment out once you're sure you know what you're doing :)
 die( 'Please check the source, and validate this will work as you anticipate.' );
+// phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable
 
 $opts = getopt( '', array( 'url:', 'abspath:', 'csv:', 'only-warn', 'doit', 'from:', 'assign:' ) );
 
@@ -118,12 +119,14 @@ function get_saved_reply( $name ) {
 		return null;
 	}
 
-	$body = (string) wp_json_encode( [
-		'mailbox_id' => Helpdesk::freescout_mailbox_id(),
-		'name'       => $name,
-		'endpoint'   => 'saved-reply',
-		'sent_at'    => time(),
-	] );
+	$body = (string) wp_json_encode(
+		[
+			'mailbox_id' => Helpdesk::freescout_mailbox_id(),
+			'name'       => $name,
+			'endpoint'   => 'saved-reply',
+			'sent_at'    => time(),
+		]
+	);
 
 	$response = wp_remote_post(
 		FreeScout::URL . '/wporgapi/saved-reply',
@@ -335,7 +338,7 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 		}
 
 		if ( ! send_email( compact( 'subject', 'to', 'name', 'cc', 'bcc', 'body' ) ) ) {
-			$stats['error']++;
+			++$stats['error'];
 			continue;
 		}
 
@@ -369,7 +372,7 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 
 		// Don't close a plugin without telling its author.
 		if ( ! send_email( compact( 'subject', 'to', 'cc', 'bcc', 'body' ) ) ) {
-			$stats['error']++;
+			++$stats['error'];
 			continue;
 		}
 

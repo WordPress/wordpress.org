@@ -10,7 +10,7 @@ use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
 use function WordPressdotorg\API\FreeScout\{ get_user_email_for_email };
 
-// phpcs:disable WordPress.Security.EscapeOutput
+// phpcs:disable WordPress.Security.EscapeOutput, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, Squiz.PHP.NonExecutableCode.Unreachable
 
 /**
  * This script will process all the bounced emails in FreeScout's Plugins mailbox and take the appropriate action.
@@ -97,13 +97,15 @@ function get_bounces() {
 	do {
 		// The shared FreeScout client doesn't list conversations.
 		$response = wp_remote_get(
-			FreeScout::URL . '/api/conversations?' . http_build_query( [
-				'mailboxId' => Helpdesk::freescout_mailbox_id(),
-				'embed'     => 'threads',
-				'status'    => 'pending',
-				'tag'       => 'auto-bounce',
-				'page'      => $page,
-			] ),
+			FreeScout::URL . '/api/conversations?' . http_build_query(
+				[
+					'mailboxId' => Helpdesk::freescout_mailbox_id(),
+					'embed'     => 'threads',
+					'status'    => 'pending',
+					'tag'       => 'auto-bounce',
+					'page'      => $page,
+				]
+			),
 			[
 				'timeout' => TIMEOUT,
 				'headers' => [
@@ -200,7 +202,7 @@ function extract_bounce_message( $email ) {
 	$message = '';
 
 	foreach ( $email['_embedded']['threads'] ?? [] as $reply ) {
-		if ( 'customer' != $reply['type'] ) {
+		if ( 'customer' !== $reply['type'] ) {
 			continue;
 		}
 
@@ -347,7 +349,7 @@ foreach ( get_bounces() as $bounce ) {
 	foreach ( $plugins as $plugin ) {
 		$actions_to_take[ $plugin->ID ] ??= [ 'id' => [], 'users' => [], 'action' => '' ];
 
-		$actions_to_take[ $plugin->ID ]['id'][]  = (int) $bounce['id'];
+		$actions_to_take[ $plugin->ID ]['id'][]               = (int) $bounce['id'];
 		$actions_to_take[ $plugin->ID ]['users'][ $user->ID ] = $bounce_message;
 	}
 
@@ -502,7 +504,7 @@ foreach ( $actions_to_take as $post_id => $data ) {
 }
 
 foreach ( $just_close_it as $conversation_id ) {
-	$stats['conversations-closed']++;
+	++$stats['conversations-closed'];
 
 	echo 'Marking ' . Helpdesk::conversation_url( $conversation_id, 0, true ) . " as closed as all plugins are closed.\n";
 
