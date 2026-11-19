@@ -4,7 +4,7 @@
 		<p><?php esc_html_e( 'Forum software from the creators of WordPress. Asyncronous discussion, user profiles, subscriptions, and more!', 'bbporg' ); ?></p>
 		<div>
 			<a href="//bbpress.org/download/" id="big-demo-button" class="button"><?php esc_html_e( 'Download &rarr;', 'bbporg' ); ?></a>
-			<img src="<?php echo esc_url( get_theme_file_uri( 'images/screenshots.png' ) . '?v=6' ); ?>" srcset="<?php echo esc_url( get_theme_file_uri( 'images/screenshots.png' ) . '?v=6' ); ?> 1x, <?php echo esc_url( get_theme_file_uri( 'images/screenshots-2x.png' ) . '?v=6' ); ?> 2x" alt="">
+			<img src="<?php echo esc_url( get_theme_file_uri( 'images/support-forums-2026.jpg' ) ); ?>" alt="">
 		</div>
 	</div></div>
 	<hr class="hidden" />
