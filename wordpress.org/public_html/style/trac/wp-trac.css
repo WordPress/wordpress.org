@@ -1089,6 +1089,19 @@ div.trac-content {
 	background: #eaf2fa; /* current TOC item */
 }
 
+@media (max-width: 600px) {
+	#content.wiki .wiki-toc {
+		box-sizing: border-box;
+		float: none;
+		width: 100%;
+		margin: 0 0 1em;
+	}
+
+	#content.wiki .wikipage {
+		overflow-wrap: anywhere;
+	}
+}
+
 /* There's already a border on the title, no need for a border on links in titles */
 .wikipage h2 :link, .wikipage h2 :visited,
 .wikipage h3 :link, .wikipage h3 :visited {
