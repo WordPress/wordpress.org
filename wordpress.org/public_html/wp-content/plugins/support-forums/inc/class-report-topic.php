@@ -18,6 +18,8 @@ class Report_Topic {
 		add_action( 'add_meta_boxes_reported_topics', array( $this, 'add_report_meta_boxes' ) );
 
 		add_action( 'set_object_terms', array( $this, 'detect_manual_modlook' ), 10, 6 );
+		// After bbp_map_topic_tag_meta_caps(), which replaces the caps for `remove_topic_tag`.
+		add_filter( 'bbp_map_meta_caps', array( $this, 'restrict_modlook_removal' ), 20, 4 );
 		add_action( 'init', array( $this, 'capture_topic_report' ) );
 		add_action( 'wp', array( $this, 'capture_topic_report_response' ) );
 
@@ -507,6 +509,32 @@ The WordPress.org Team',
 
 		// Translators: Default string to show when a topic is reported outside the report form feature.
 		$this->add_modlook_history( $object_id, __( '[This report was manually submitted using a topic-tag while submitting a reply]', 'wporg-forums' ) );
+	}
+
+	/**
+	 * Only let moderators remove the `modlook` tag from a topic.
+	 *
+	 * When saving the topic and reply forms, bbPress keeps any tag a user can't remove,
+	 * so a report stays open until a moderator clears it.
+	 *
+	 * @param array  $caps    The capabilities the user needs.
+	 * @param string $cap     The capability being checked.
+	 * @param int    $user_id The user ID.
+	 * @param array  $args    The topic ID and the topic-tag term ID.
+	 * @return array
+	 */
+	public function restrict_modlook_removal( $caps, $cap, $user_id, $args ) {
+		if ( 'remove_topic_tag' !== $cap || empty( $args[1] ) ) {
+			return $caps;
+		}
+
+		$tag = get_term( (int) $args[1], bbp_get_topic_tag_tax_id() );
+
+		if ( $tag instanceof \WP_Term && 'modlook' === $tag->slug && ! user_can( $user_id, 'moderate', $args[0] ) ) {
+			return array( 'do_not_allow' );
+		}
+
+		return $caps;
 	}
 
 	/**
