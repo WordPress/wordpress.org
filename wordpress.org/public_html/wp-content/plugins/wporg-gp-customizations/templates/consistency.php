@@ -108,6 +108,7 @@ if ( $performed_search && ! $results ) {
 	}
 
 	$project_cache = [];
+	$parent_cache  = [];
 	?>
 	<table class="gp-table consistency-table">
 		<thead>
@@ -121,24 +122,19 @@ if ( $performed_search && ! $results ) {
 		foreach ( $translations_unique as $translation_index => $translation ) {
 			$prev_translation = $translations_unique[ $translation_index - 1 ] ?? false;
 			$next_translation = $translations_unique[ $translation_index + 1 ] ?? false;
-
-			$prev_arrow = false !== $prev_translation
-				? '<a class="anchor-jumper with-tooltip" aria-label="Go to previous translation" href="' . esc_attr( '#t-' . md5( $prev_translation ) ) . '">&uarr;</a>'
-				: '';
-
-			$next_arrow = false !== $next_translation
-				? '<a class="anchor-jumper with-tooltip" aria-label="Go to next translation" href="' . esc_attr( '#t-' . md5( $next_translation ) ) . '">&darr;</a>'
-				: '';
-
-			printf(
-				'<tr id="%s" class="new-translation"><th colspan="2" scope="rowgroup"><strong>%s</strong> %s %s</th></tr>',
-				esc_attr( 't-' . md5( $translation ) ),
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
-				esc_translation( $translation ),
-				wp_kses_post( $next_arrow ),
-				wp_kses_post( $prev_arrow )
-			);
-
+			?>
+			<tr id="<?php echo esc_attr( 't-' . md5( $translation ) ); ?>" class="new-translation">
+				<th colspan="2" scope="rowgroup">
+					<strong><?php echo esc_translation( $translation ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></strong>
+					<?php if ( false !== $next_translation ) : ?>
+						<a class="anchor-jumper with-tooltip" aria-label="Go to next translation" href="<?php echo esc_attr( '#t-' . md5( $next_translation ) ); ?>">&darr;</a>
+					<?php endif; ?>
+					<?php if ( false !== $prev_translation ) : ?>
+						<a class="anchor-jumper with-tooltip" aria-label="Go to previous translation" href="<?php echo esc_attr( '#t-' . md5( $prev_translation ) ); ?>">&uarr;</a>
+					<?php endif; ?>
+				</th>
+			</tr>
+			<?php
 			$matching_results = $results_by_translation[ $translation ] ?? [];
 
 			foreach ( $matching_results as $result ) {
@@ -149,7 +145,11 @@ if ( $performed_search && ! $results ) {
 					$is_active   = true;
 
 					while ( $p_parent_id ) {
-						$parent_project = GP::$project->get( $p_parent_id );
+						if ( ! array_key_exists( $p_parent_id, $parent_cache ) ) {
+							$parent_cache[ $p_parent_id ] = GP::$project->get( $p_parent_id );
+						}
+
+						$parent_project = $parent_cache[ $p_parent_id ];
 						if ( ! $parent_project ) {
 							break;
 						}
@@ -160,31 +160,16 @@ if ( $performed_search && ! $results ) {
 						$is_active   = $is_active && $parent_project->active;
 					}
 
+					$top_name = $top_parent->name ?? $result->project_name;
+
 					$project_cache[ $result->project_id ] = [
 						'name'      => $p_name,
 						'is_active' => $is_active,
-						'css_class' => isset( $top_parent->name ) ? sanitize_title( 'project-' . $top_parent->name ) : '',
+						'css_class' => sanitize_title( 'project-' . $top_name ),
 					];
 				}
 
 				$cached_project = $project_cache[ $result->project_id ];
-
-				$original_context = '';
-				if ( $result->original_context ) {
-					$original_context = sprintf(
-						' <span class="context">%s</span>',
-						esc_translation( $result->original_context )
-					);
-				}
-
-				if ( $cached_project['is_active'] ) {
-					$active_text = '';
-				} else {
-					$active_text = sprintf(
-						' <span class="dashicons dashicons-flag"></span><span class="inactive">%s</span>',
-						esc_translation( '(inactive)' )
-					);
-				}
 
 				$project_url = sprintf( '/projects/%s/%s/', $result->project_path, $set );
 				$source_url  = sprintf(
@@ -194,33 +179,34 @@ if ( $performed_search && ! $results ) {
 					(int) $result->original_id,
 					(int) $result->translation_id
 				);
-
-				printf(
-					'<tr class="%s"><td>%s</td><td>%s</td></tr>',
-					esc_attr( $cached_project['css_class'] ),
-					sprintf(
-						'<div class="string">%s%s</div>
-						<div class="meta">Project: <a href="%s">%s</a>%s</div>',
+				?>
+				<tr class="<?php echo esc_attr( $cached_project['css_class'] ); ?>">
+					<td>
+						<?php
+						echo '<div class="string">';
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
-						esc_translation( $result->original_singular ),
-						wp_kses_post( $original_context ),
-						esc_url( $project_url ),
-						esc_html( $cached_project['name'] ),
-						wp_kses_post( $active_text )
-					),
-					sprintf(
-						'<div class="string%s">%s</div>
+						echo esc_translation( $result->original_singular );
+						if ( $result->original_context ) {
+							echo ' <span class="context">';
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
+							echo esc_translation( $result->original_context );
+							echo '</span>';
+						}
+						echo '</div>';
+						?>
 						<div class="meta">
-							<a href="%s">Source</a> |
-							Added: %s
-						</div>',
-						$locale_is_rtl ? ' rtl' : '',
-						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written.
-						esc_translation( $result->translation ),
-						esc_url( $source_url ),
-						esc_html( $result->translation_added )
-					)
-				);
+							Project: <a href="<?php echo esc_url( $project_url ); ?>"><?php echo esc_html( $cached_project['name'] ); ?></a><?php if ( ! $cached_project['is_active'] ) : ?> <span class="dashicons dashicons-flag"></span><span class="inactive">(inactive)</span><?php endif; ?>
+						</div>
+					</td>
+					<td>
+						<div class="string<?php echo $locale_is_rtl ? ' rtl' : ''; ?>"><?php echo esc_translation( $result->translation ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_translation() escapes the markup and double-encodes existing entities so the translation renders exactly as written. ?></div>
+						<div class="meta">
+							<a href="<?php echo esc_url( $source_url ); ?>">Source</a> |
+							Added: <?php echo esc_html( $result->translation_added ); ?>
+						</div>
+					</td>
+				</tr>
+				<?php
 			}
 		}
 		?>
@@ -228,9 +214,7 @@ if ( $performed_search && ! $results ) {
 	</table>
 	<?php
 }
-?>
 
-<?php
 wp_print_inline_script_tag(
 	<<<'JS'
 	jQuery( document ).ready( function( $ ) {
@@ -240,10 +224,8 @@ wp_print_inline_script_tag(
 			$list.toggleClass( 'hidden' );
 			$( this ).text( $list.hasClass( 'hidden' ) ? 'View' : 'Hide' );
 		});
-
 	});
 	JS
 );
-?>
 
-<?php gp_tmpl_footer();
+gp_tmpl_footer();
