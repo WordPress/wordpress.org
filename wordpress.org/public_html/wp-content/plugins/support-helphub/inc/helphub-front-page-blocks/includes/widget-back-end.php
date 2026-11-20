@@ -42,7 +42,7 @@
 		printf(
 			'<option value="%s" %s>%s</option>',
 			esc_attr( $category->term_id ),
-			selected( $instance['categoryid'], $category->term_id ),
+			selected( $instance['categoryid'] ?? '', $category->term_id, false ),
 			esc_html( $category->name )
 		);
 	}
@@ -62,7 +62,7 @@
 			printf(
 				'<option value="%s" %s>%s</option>',
 				esc_attr( $nav_menu->term_id ),
-				selected( $instance['menu'], $nav_menu->term_id ),
+				selected( $instance['menu'] ?? '', $nav_menu->term_id, false ),
 				esc_html( $nav_menu->name )
 			);
 		}
