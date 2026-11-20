@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName -- Follows the plugin's file naming, like the other files in inc/.
 /**
  * Profile activity handling.
  *
