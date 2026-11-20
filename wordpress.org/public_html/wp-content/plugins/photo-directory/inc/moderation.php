@@ -605,6 +605,11 @@ https://wordpress.org/photos/
 
 		$user = get_user_by( 'id', $post->post_author );
 
+		// Bail if user doesn't exist.
+		if ( ! $user ) {
+			return;
+		}
+
 		$rejection_message = '';
 
 		// Check for specifics provided by the moderator regarding the rejection.
