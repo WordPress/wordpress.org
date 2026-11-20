@@ -72,7 +72,6 @@ class Moderation {
 		add_filter( 'user_has_cap',                  [ __CLASS__, 'maybe_grant_photo_moderator_caps' ], 11 );
 		add_action( 'wporg_photos_flag_column_data', [ __CLASS__, 'show_flags' ] );
 		add_action( 'wporg_photos_moderation_email_sent', [ __CLASS__, 'sent_user_email' ] );
-		add_filter( 'wporg_photos_pre_upload_form',       [ __CLASS__, 'output_list_of_pending_submissions_for_user' ] );
 
 		// Disable moderating own posts.
 		add_filter( 'user_has_cap',                       [ __CLASS__, 'disable_own_post_editing' ], 10, 4 );
@@ -738,56 +737,6 @@ https://wordpress.org/photos/
 		}
 
 		echo wp_kses_post( self::format_flags( $flags ) );
-	}
-
-	/**
-	 * Amends content with a list of submissions in the queue for a user.
-	 *
-	 * @param string $output  The content of the page so far.
-	 * @param int    $user_id Optional. The user ID. Current user ID is used if not specified. Default ''.
-	 * @return string
-	 */
-	public static function output_list_of_pending_submissions_for_user( $content, $user_id = '' ) {
-		if ( ! $user_id ) {
-			$user_id = get_current_user_id();
-		}
-
-		// Bail if no user.
-		if ( ! $user_id ) {
-			return $content;
-		}
-
-		$pending = User::get_pending_photos( $user_id, '' );
-
-		// Bail if user does not have any pending posts.
-		if ( ! $pending ) {
-			return $content;
-		}
-
-		$content .= '<h3>' . __( 'Submissions awaiting moderation', 'wporg-photos' ) . "</h3>\n";
-		$content .= '<p>';
-		$max_pending_submissions = User::get_concurrent_submission_limit( $user_id );
-		$content .= sprintf(
-			_n( 'You can have up to <strong>%d</strong> photo in the moderation queue at a time. You currently have <strong>%d</strong>.', 'You can have up to <strong>%d</strong> photos in the moderation queue at a time. You currently have <strong>%d</strong>.', $max_pending_submissions,'wporg-photos' ),
-			$max_pending_submissions,
-			count( $pending )
-		);
-		$content .= "</p>\n";
-		$content .= '<table id="wporg_photos_pending_submissions"><tr>';
-		$content .= '<th>' . __( 'File', 'wporg-photos' ) . '</th>';
-		$content .= '<th>' . __( 'Submission Date', 'wporg-photos' ) . '</th>';
-		$content .= '<th>' . __( 'Caption', 'wporg-photos' ) . "</th></tr>\n";
-		foreach ( $pending as $post ) {
-			$content .= sprintf(
-				"<tr><td>%s</td><td>%s</td><td>%s</td></tr>\n",
-				esc_html( get_post_meta( $post->ID, Registrations::get_meta_key( 'original_filename' ), true ) ?: __( '(unknown)', 'wporg-photos' ) ),
-				esc_html( get_the_date( 'Y-m-d', $post ) ),
-				esc_html( get_the_content( null, false, $post ) ?: __( '(none provided)', 'wporg-photos' ) ),
-			);
-		}
-		$content .= "</table>\n";
-
-		return $content;
 	}
 
 	/**
