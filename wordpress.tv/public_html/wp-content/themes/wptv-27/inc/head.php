@@ -1,6 +1,6 @@
 <?php
 /**
- * Document head output: canonical, rel prev/next, JSON-LD.
+ * Document head output: canonical, robots, rel prev/next, JSON-LD.
  *
  * Core still prints its own canonical on singular views (rel_canonical()).
  *
@@ -41,6 +41,29 @@ function canonical() {
 	}
 }
 add_action( 'wp_head', __NAMESPACE__ . '\canonical' );
+
+/**
+ * Keeps tag, speaker and year archives out of search results.
+ *
+ * Search results are already noindexed by core.
+ *
+ * @param array $robots Associative array of robots directives.
+ * @return array
+ */
+function robots( $robots ) {
+	$year = is_category() ? get_category_by_slug( 'year' ) : false;
+
+	if (
+		is_tag() ||
+		is_tax( 'speakers' ) ||
+		( $year && ( is_category( $year->term_id ) || cat_is_ancestor_of( $year, get_queried_object() ) ) )
+	) {
+		$robots = wp_robots_no_robots( $robots );
+	}
+
+	return $robots;
+}
+add_filter( 'wp_robots', __NAMESPACE__ . '\robots' );
 
 /**
  * Prints `<link rel="prev">` and `<link rel="next">` on archives and search results.

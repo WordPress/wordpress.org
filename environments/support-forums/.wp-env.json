@@ -26,7 +26,7 @@
 		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
 		"wp-content/plugins/plugin-directory": "../wordpress.org/public_html/wp-content/plugins/plugin-directory",
 		"wp-content/plugins/theme-directory": "../wordpress.org/public_html/wp-content/plugins/theme-directory",
-		"wp-content/plugins/wporg-ratings/wporg-ratings.php": "./support-forums/plugins/wporg-ratings.php",
+		"wp-content/plugins/wporg-ratings": "./support-forums/plugins/wporg-ratings",
 		"wp-content/plugins/jetpack": "https://downloads.wordpress.org/plugin/jetpack.zip",
 		"wp-content/env-bin": "./support-forums/bin",
 		"style": "../wordpress.org/public_html/style"

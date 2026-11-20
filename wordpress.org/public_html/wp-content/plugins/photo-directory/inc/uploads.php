@@ -97,8 +97,6 @@ class Uploads {
 
 		// Enqueue scripts.
 		add_action( 'wp_enqueue_scripts',               [ __CLASS__, 'wp_enqueue_scripts' ] );
-		// Adds user's recent submissions above upload form.
-		add_filter( 'wporg_photos_pre_upload_form',     [ __CLASS__, 'output_user_recent_submissions' ] );
 		// Disable upload form and show message if user not allowed to upload.
 		add_filter( 'the_content',                      [ __CLASS__, 'insert_upload_disallowed_notice' ], 1 );
 		// Insert upload form into submit page.
@@ -1083,9 +1081,19 @@ class Uploads {
 					esc_attr( __( 'Photo', 'wporg-photos' ) )
 				)
 				. sprintf(
-					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" accept="%s">' . "\n",
+					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" aria-describedby="ug-photo-help" accept="%s">' . "\n",
 					esc_attr( $valid_upload_mimetypes )
 				)
+				. '<p class="ugc-help" id="ug-photo-help">'
+				. sprintf(
+					/* translators: 1: minimum width/height in pixels, 2: maximum width/height in pixels, 3: minimum file size in megabytes, 4: maximum file size in megabytes. */
+					esc_html__( 'Select a JPEG image of high quality (in terms of resolution and composition). Width and height must each be between %1$s and %2$s pixels. File size must be between %3$s MB and %4$s MB.', 'wporg-photos' ),
+					number_format_i18n( self::get_minimum_photo_dimension() ),
+					number_format_i18n( self::big_image_size_threshold( 0 ) ),
+					number_format_i18n( self::get_minimum_photo_file_size( false ) ),
+					number_format_i18n( self::get_maximum_photo_file_size( false ) )
+				)
+				. '</p>' . "\n"
 				. '<div id="ug_photo_preview_wrap" class="ugc-photo-preview" hidden>' . "\n"
 				. sprintf(
 					'<button type="button" id="ug_photo_preview_button" class="ugc-photo-preview__button" aria-haspopup="dialog" aria-controls="ug_photo_preview_dialog" title="%1$s" aria-label="%1$s">' . "\n",
@@ -1205,40 +1213,6 @@ class Uploads {
 
 		return $transforms;
 	}
-
-	/**
-	 * Adds current user's 6 most recent photo submissions above upload form.
-	 *
-	 * @param string $content Existing content before the upload form.
-	 * @return string
-	 */
-	public static function output_user_recent_submissions( $content ) {
-		// Bail if user does not have any published photos.
-		if ( ! User::count_published_photos( get_current_user_id() ) ) {
-			return $content;
-		}
-
-		$recent_photos = User::get_recent_photos( get_current_user_id(), 6, false );
-		if ( $recent_photos ) {
-			$content .= '<h2 class="latest-photos">' . esc_html__( 'Your latest published photos', 'wporg-photos' ) . '</h2>' . "\n";
-			$content .= '<div class="photos-grid">' . "\n";
-
-			foreach ( $recent_photos as $photo ) {
-				$content .= Template_Tags\get_photo_as_grid_item( $photo, 'medium', 'post' );
-			}
-
-			$content .= "</div>\n";
-		}
-
-		$content .= sprintf(
-			/* translators: %s: URL to current user's photo archive. */
-			'<p>' . __( 'View <a href="%s">your archive of photos</a> to see everything you&#8217;ve already had published.', 'wporg-photos' ) . '</p>',
-			esc_url( get_author_posts_url( get_current_user_id() ) )
-		);
-
-		return $content;
-	}
-
 }
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\Uploads', 'init' ] );

@@ -13,6 +13,13 @@ class Core extends Trac {
 	protected $primary_channel_ticket_format = 'title';
 
 	/**
+	 * Post only the first line of each commit message to #core.
+	 *
+	 * @var string
+	 */
+	protected $primary_channel_commit_format = 'summary';
+
+	/**
 	 * File paths that cause commits to be piped to particular channels.
 	 * Start regex matches with # as your delimiter.
 	 */
@@ -28,7 +35,6 @@ class Core extends Trac {
 		'wp-includes/css/editor.css'       => '#core-editor',
 		'wp-includes/js/tinymce'           => '#core-editor',
 		'class-wp-editor.php'              => '#core-editor',
-		'press-this.php'                   => '#core-pressthis',
 		'#wp-(admin|includes)/ms-#'        => '#core-multisite',
 		'wp-admin/network'                 => '#core-multisite',
 		'#wp-admin/includes/(ms|network)#' => '#core-multisite',
@@ -39,8 +45,14 @@ class Core extends Trac {
 		'wp-includes/sitemaps'             => '#core-sitemaps',
 		'#wp-admin/includes/.*upgrader#'   => '#core-upgrade-install',
 		'#wp-admin/includes/.*install#'    => '#core-upgrade-install',
-		'application-passwords'            => '#core-passwords',
-		'auth-app'                         => '#core-passwords',
+		'application-passwords'            => array(
+			'#core-passwords' => true,
+			'#core-restapi'   => true,
+		),
+		'auth-app'                         => array(
+			'#core-passwords' => true,
+			'#core-restapi'   => true,
+		),
 		'wp-includes/interactivity-api'    => '#core-interactivity-api',
 		'wp-includes/html-api'             => '#core-html-api',
 		'.devcontainer'                    => '#core-build-test-tools',
@@ -54,7 +66,7 @@ class Core extends Trac {
 		'webpack.config.js'                => '#core-build-test-tools',
 		'wp-tests-config-sample.php'       => '#core-build-test-tools',
 		'#\.n(v|p)mrc#'                    => '#core-build-test-tools',
-		'#\.version-support-[a-z]+\.json'  => '#core-build-test-tools',
+		'#\.version-support-[a-z]+\.json#' => '#core-build-test-tools',
 		'#^package(-lock)?\.json$#'        => '#core-build-test-tools',
 		'#^php[a-z]+\.xml\.dist$#'         => '#core-build-test-tools',
 	);
@@ -70,34 +82,167 @@ class Core extends Trac {
 	);
 
 	/**
-	 * Components or focuses that cause new tickets to be piped to particular channels.
+	 * Focuses that cause new tickets to be piped to particular channels.
+	 * These also match commit messages that start with the focus.
+	 *
+	 * Unlike components, focuses post to the focus channel itself.
+	 *
+	 * @var array
 	 */
 	protected $ticket_component_filters = array(
+		'coding-standards' => '#core-coding-standards',
+		'css'              => '#core-css',
+		'docs'             => '#core-docs',
+		'javascript'       => '#core-js',
+		'multisite'        => '#core-multisite',
+		'performance'      => '#core-performance',
+		'privacy'          => '#core-privacy',
+		'rest-api'         => '#core-restapi',
+	);
+
+	/**
+	 * Maps each Core Trac component to its component specific channel.
+	 *
+	 * Notifications for a component go to that channel's -firehose, -newtickets and -commits
+	 * channels, not to the channel itself.
+	 *
+	 * Subcomponents map to their parent's channel, unless they have their own. Components
+	 * that belong to more than one area map to an array of channels.
+	 *
+	 * Some components have no discussion channel, or an archived one, but still have
+	 * -firehose, -newtickets and -commits channels.
+	 *
+	 * Commit messages are matched against every key, so keys can also be commit message prefixes
+	 * that differ from the component name, such as "Customizer" or "Bundled Themes".
+	 *
+	 * Retired components have an empty value, and only post to the global channels.
+	 *
+	 * @var array
+	 */
+	protected $component_channels = array(
+		'AI'                     => '#core-ai',
 		'Build/Test Tools'       => '#core-build-test-tools',
 		'Bundled Theme'          => '#core-themes',
+		'Editor'                 => '#core-editor',
+		'HTML API'               => '#core-html-api',
+		'I18N'                   => '#core-i18n',
+		'Import'                 => '#core-importers',
+		'Interactivity API'      => '#core-interactivity-api',
+		'Media'                  => '#core-media',
+		'Networks and Sites'     => '#core-multisite',
+		'Privacy'                => '#core-privacy',
+		'REST API'               => '#core-restapi',
+		'Themes'                 => '#core-themes',
+		'Upgrade/Install'        => '#core-upgrade-install',
+
+		// Subcomponents.
+		'Abilities API'          => '#core-ai',
+		'Application Passwords'  => array( '#core-passwords', '#core-restapi' ),
+		'Autosave'               => '#core-editor',
+		'Canonical'              => '#core-permalinks',
+		'Charset'                => '#core-formatting',
+		'Embeds'                 => '#core-media',
+		'Emoji'                  => '#core-formatting',
+		'Gallery'                => '#core-media',
+		'Login and Registration' => array( '#core-passwords', '#core-users' ),
+		'Menus'                  => '#core-themes',
+		'Notes'                  => '#core-notes',
+		'Pings/Trackbacks'       => '#core-comments',
+		'Post Formats'           => '#core-posts-post-types',
+		'Post Thumbnails'        => '#core-posts-post-types',
+		'Quick/Bulk Edit'        => '#core-editor',
+		'Revisions'              => '#core-posts-post-types',
+		'Rewrite Rules'          => '#core-permalinks',
+		'Role/Capability'        => '#core-users',
+		'Shortcodes'             => '#core-formatting',
+		'TinyMCE'                => '#core-editor', // #core-tinymce has been archived since 2025-06-24.
+		'Upload'                 => '#core-media',
+		'Widgets'                => '#core-themes',
+
+		// Components with an archived component specific channel.
+		'Bootstrap/Load'         => '#core-bootstrap',
+		'Comments'               => '#core-comments',
 		'Customize'              => '#core-customize',
 		'Date/Time'              => '#core-datetime',
-		'Press This'             => '#core-pressthis',
-		'multisite'              => '#core-multisite',
-		'Networks and Sites'     => '#core-multisite',
-		'REST API'               => '#core-restapi',
-		'rest-api'               => '#core-restapi',
-		'I18N'                   => '#core-i18n',
-		'Media'                  => '#core-media',
-		'docs'                   => '#core-docs',
-		'css'                    => '#core-css',
-		'javascript'             => '#core-js',
-		'coding-standards'       => '#core-coding-standards',
-		'performance'            => '#core-performance',
-		'Privacy'                => '#core-privacy',
-		'privacy'                => '#core-privacy',
+		'HTTP API'               => '#core-http-api',
 		'Site Health'            => '#core-site-health',
 		'Sitemaps'               => '#core-sitemaps',
-		'Upgrade/Install'        => '#core-upgrade-install',
-		'Application Passwords'  => [ '#core-passwords' => true, '#core-restapi' => true ],
-		'Login and Registration' => '#core-passwords',
-		'HTML API'               => '#core-html-api',
-		'Interactivity API'      => '#core-interactivity-api',
+
+		// Components that have never had a component specific channel.
+		'Administration'         => '#core-administration',
+		'Cache API'              => '#core-cache-api',
+		'Cron API'               => '#core-cron-api',
+		'Database'               => '#core-database',
+		'Export'                 => '#core-export',
+		'External Libraries'     => '#core-external-libraries',
+		'Feeds'                  => '#core-feeds',
+		'Filesystem API'         => '#core-filesystem-api',
+		'Formatting'             => '#core-formatting',
+		'General'                => '#core-general',
+		'Help/About'             => '#core-help-about',
+		'Mail'                   => '#core-mail',
+		'Options, Meta APIs'     => '#core-options-meta-apis',
+		'Permalinks'             => '#core-permalinks',
+		'Plugins'                => '#core-plugins',
+		'Posts, Post Types'      => '#core-posts-post-types',
+		'Query'                  => '#core-query',
+		'Script Loader'          => '#core-script-loader',
+		'Security'               => '#core-security',
+		'Taxonomy'               => '#core-taxonomy',
+		'Toolbar'                => '#core-toolbar',
+		'Users'                  => '#core-users',
+		'XML-RPC'                => '#core-xml-rpc',
+
+		// Commit message prefixes that differ from the component name.
+		'About'                  => '#core-help-about',
+		'Admin'                  => '#core-administration',
+		'Admin Bar'              => '#core-toolbar',
+		'App Passwords'          => array( '#core-passwords', '#core-restapi' ),
+		'Block'                  => '#core-editor',
+		'Blocks'                 => '#core-editor',
+		'Bootstrap'              => '#core-bootstrap',
+		'Build'                  => '#core-build-test-tools',
+		'Bundled Themes'         => '#core-themes',
+		'Cache'                  => '#core-cache-api',
+		'Cron'                   => '#core-cron-api',
+		'Customizer'             => '#core-customize',
+		'Default Themes'         => '#core-themes',
+		'Email'                  => '#core-mail',
+		'Feed'                   => '#core-feeds',
+		'Filesystem'             => '#core-filesystem-api',
+		'Global Styles'          => '#core-editor',
+		'HTTP'                   => '#core-http-api',
+		'Importer'               => '#core-importers',
+		'Importers'              => '#core-importers',
+		'Install'                => '#core-upgrade-install',
+		'KSES'                   => '#core-formatting',
+		'L10n'                   => '#core-i18n',
+		'List Tables'            => '#core-administration',
+		'Load'                   => '#core-bootstrap',
+		'Nav Menus'              => '#core-themes',
+		'Network'                => '#core-multisite',
+		'oEmbed'                 => '#core-media',
+		'Options'                => '#core-options-meta-apis',
+		'Post Types'             => '#core-posts-post-types',
+		'Posts'                  => '#core-posts-post-types',
+		'Rewrite'                => '#core-permalinks',
+		'Script Modules'         => '#core-script-loader',
+		'Scripts'                => '#core-script-loader',
+		'Site Editor'            => '#core-editor',
+		'Tests/Build'            => '#core-build-test-tools',
+		'Theme JSON'             => '#core-editor',
+		'Update/Install'         => '#core-upgrade-install',
+		'Updates'                => '#core-upgrade-install',
+		'Upgrade'                => '#core-upgrade-install',
+		'Upgrader'               => '#core-upgrade-install',
+		'Upgrades'               => '#core-upgrade-install',
+		'Uploads'                => '#core-media',
+		'WP_Debug_Data'          => '#core-site-health',
+		'WPDB'                   => '#core-database',
+
+		// Retired components.
+		'Text Changes'           => '',
+		'WordPress.org Site'     => '',
 	);
 }
 

@@ -250,7 +250,7 @@ p.site-title a {
 }
 
 .site-description {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	font-size: 1.25rem;
 	font-weight: 300;
 	margin: -0.4rem auto 2rem;
@@ -316,8 +316,9 @@ p.site-title a {
 }
 
 .navigation-main a {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	font-size: 14px;
+	text-decoration: none;
 }
 
 .wporg-make .site-title a:before,
@@ -397,6 +398,12 @@ body.wporg-make #headline h2 a:before {
 	.navigation-main ul li.current-menu-item a:after,
 	.navigation-main ul li.current-menu-item:hover a:after {
 		display: none;
+	}
+
+	.navigation-main ul li:hover > a,
+	.navigation-main ul li.current-menu-item a,
+	.navigation-main ul li.current-menu-item:hover a {
+		text-decoration: underline;
 	}
 }
 
@@ -2288,7 +2295,10 @@ ul.ct-legend {
 .editor .translation,
 span.context,
 table.translations td.original,
-table.translations td.translation {
+table.translations td.translation,
+.consistency-table td,
+.consistency-table th,
+.translations-unique li {
 	word-break: normal;
 	word-wrap: break-word;
 	overflow-wrap: break-word;

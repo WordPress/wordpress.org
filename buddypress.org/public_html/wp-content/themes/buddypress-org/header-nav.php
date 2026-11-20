@@ -9,7 +9,7 @@ $_is_download = is_page( 'download' );
 
 ?>
 <div id="nav">
-	<a href="#" id="bb-menu-icon"></a>
+	<button type="button" id="bb-menu-icon" aria-controls="bb-nav" aria-expanded="false"><span class="screen-reader-text"><?php esc_html_e( 'Menu', 'bborg' ); ?></span></button>
 	<ul id="bb-nav" class="menu">
 		<li class="menu-item<?php if ( true === $_is_about ) : ?> current <?php endif; ?>">
 			<a href="https://buddypress.org/about/">

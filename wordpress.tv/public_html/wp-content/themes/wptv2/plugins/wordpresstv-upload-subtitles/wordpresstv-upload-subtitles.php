@@ -17,6 +17,7 @@ class WordPressTV_Subtitles_Upload {
 		add_action( 'admin_post_nopriv_wptv_video_upload_subtitles', array( $this, 'post' ) );
 		add_action( 'edit_form_after_title', array( $this, 'in_post_edit_form' ) );
 		add_action( 'all_admin_notices', array( $this, 'pending_notice' ) );
+		add_action( 'delete_attachment', array( $this, 'remove_deleted_track' ) );
 
 		add_filter( 'attachment_fields_to_save', array( $this, 'moderate' ) );
 		add_filter( 'views_upload', array( $this, 'views_links' ) );
@@ -430,6 +431,45 @@ class WordPressTV_Subtitles_Upload {
 		return $post_data;
 	}
 
+	/**
+	 * Removes a deleted subtitles file from its video's approved tracks.
+	 *
+	 * Otherwise the video keeps listing the language and links to a track that no longer exists.
+	 *
+	 * @param int $attachment_id ID of the attachment being deleted.
+	 */
+	public function remove_deleted_track( $attachment_id ) {
+		$attachment_meta = get_post_meta( $attachment_id, '_wptv_submitted_subtitles', true );
+
+		if ( empty( $attachment_meta['video_attachment_id'] ) ) {
+			return;
+		}
+
+		$video_attachment_id = (int) $attachment_meta['video_attachment_id'];
+		$subtitles           = get_post_meta( $video_attachment_id, '_videopress_subtitles', true );
+
+		if ( empty( $subtitles ) || ! is_array( $subtitles ) ) {
+			return;
+		}
+
+		$remaining = array_filter(
+			$subtitles,
+			function ( $track ) use ( $attachment_id ) {
+				return (int) ( $track['subtitles_post_id'] ?? 0 ) !== (int) $attachment_id;
+			}
+		);
+
+		if ( count( $remaining ) === count( $subtitles ) ) {
+			return;
+		}
+
+		if ( empty( $remaining ) ) {
+			delete_post_meta( $video_attachment_id, '_videopress_subtitles' );
+		} else {
+			update_post_meta( $video_attachment_id, '_videopress_subtitles', $remaining );
+		}
+	}
+
 	// Output the HTML for moderation
 	function in_post_edit_form( $attachment_post ) {
 		if ( $attachment_post->post_type != 'attachment' || $attachment_post->post_mime_type != 'application/ttml+xml' ) {
@@ -598,8 +638,9 @@ class WordPressTV_Subtitles_Upload {
 			$pending_subs = $wpdb->get_var( "SELECT COUNT( 1 ) FROM $wpdb->posts WHERE post_type = 'attachment' AND post_status != 'trash' AND post_parent = 0 AND post_mime_type = 'application/ttml+xml'" );
 
 			if ( $pending_subs ) {
+				// The grid view ignores the detached filter, so pending subtitles only show in the list view.
 				echo '<div class="updated"><p><a href="upload.php?post_mime_type=' . urlencode( 'application/ttml+xml' ) .
-					'&amp;detached=1">Subtitles awaiting moderation (' . (int) $pending_subs . ')</a></p></div>';
+					'&amp;detached=1&amp;mode=list">Subtitles awaiting moderation (' . (int) $pending_subs . ')</a></p></div>';
 			}
 		}
 	}

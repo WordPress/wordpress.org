@@ -37,12 +37,25 @@ function fetch_partial_pr_data( $repo, $pr ) {
 		return false;
 	}
 
-	$raw_check_runs = api_request(
-		'/repos/' . $repo . '/commits/' . $data->head->sha . '/check-runs',
-		null,
-		[ 'Accept: application/vnd.github.antiope-preview+json' ]
-	);
-	$_check_runs = $raw_check_runs->check_runs ?? null;
+	// A core PR has more check runs than fit on one page, and a failure can be on any of them.
+	$_check_runs = [];
+	$page        = 0;
+	do {
+		++$page;
+		$raw_check_runs = api_request(
+			'/repos/' . $repo . '/commits/' . $data->head->sha . '/check-runs?per_page=100&page=' . $page,
+			null,
+			[ 'Accept: application/vnd.github.antiope-preview+json' ]
+		);
+
+		if ( ! is_array( $raw_check_runs->check_runs ?? null ) ) {
+			$_check_runs = null;
+			break;
+		}
+
+		$_check_runs = array_merge( $_check_runs, $raw_check_runs->check_runs );
+		$more_pages  = $raw_check_runs->check_runs && count( $_check_runs ) < ( $raw_check_runs->total_count ?? 0 );
+	} while ( $more_pages );
 
 	$_reviews = api_request(
 		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/reviews',
@@ -56,26 +69,44 @@ function fetch_partial_pr_data( $repo, $pr ) {
 		[ 'Accept: application/vnd.github.antiope-preview+json' ]
 	);
 
-	// Get Travis CI State.
-	$check_runs = [];
+	// Each app's runs share one state, so the worst of them wins: failed, then action required, then running.
+	$precedence     = [
+		'success'     => 0,
+		'in_progress' => 1,
+		'failed'      => 3,
+	];
+	$check_runs     = [];
+	$checks_running = false;
 	foreach ( is_array( $_check_runs ) ? $_check_runs : [] as $check ) {
+		$state = null;
 		switch ( $check->status ) {
 			case 'queued':
 			case 'in_progress':
-				$check_runs[ $check->app->name ] = 'in_progress';
+				$state          = 'in_progress';
+				$checks_running = true;
 				break;
 			case 'completed':
 				switch ( $check->conclusion ) {
 					case 'success':
-						$check_runs[ $check->app->name ] = 'success';
+						$state = 'success';
 						break;
 					case 'failure':
-						$check_runs[ $check->app->name ] = 'failed';
+					case 'timed_out':
+						$state = 'failed';
 						break;
 					case 'action_required':
-						$check_runs[ $check->app->name ] = $check->output->title;
+						$state = $check->output->title;
 						break;
 				}
+		}
+
+		if ( null === $state ) {
+			continue;
+		}
+
+		$app = $check->app->name;
+		if ( ! isset( $check_runs[ $app ] ) || ( $precedence[ $state ] ?? 2 ) > ( $precedence[ $check_runs[ $app ] ] ?? 2 ) ) {
+			$check_runs[ $app ] = $state;
 		}
 	}
 
@@ -108,6 +139,7 @@ function fetch_partial_pr_data( $repo, $pr ) {
 		'closed_at'       => $data->closed_at,
 		'mergeable_state' => $data->mergeable_state,
 		'check_runs'      => $check_runs,
+		'checks_running'  => $checks_running,
 		'reviews'         => $reviews,
 		'touches_tests'   => $touches_tests,
 		'body'            => $data->body,
@@ -130,7 +162,7 @@ function fetch_partial_pr_data( $repo, $pr ) {
 /**
  * Picks the linked PRs whose data is due a refresh from GitHub.
  *
- * Each refresh is four GitHub API requests, so a ticket with many PRs refreshes only the stalest few per request.
+ * Each refresh is at least four GitHub API requests, so a ticket with many PRs refreshes only the stalest few per request.
  *
  * @param array $prs           Rows of `trac_github_prs`, with `data` decoded.
  * @param bool  $authenticated Whether the request is from a logged in user.
@@ -159,7 +191,8 @@ function select_prs_to_refresh( $prs, $authenticated, $limit = 10 ) {
 
 			// Every two minutes while the PR was created/updated in the last half hour, or its unit tests are running.
 			$recently_updated = strtotime( $data->data->updated_at ) > time() - 30 * 60;
-			$tests_running    = in_array( 'in_progress', (array) $data->data->check_runs, true );
+			// A failed run hides a running one in `check_runs`. Rows stored before `checks_running` lack it.
+			$tests_running = $data->data->checks_running ?? in_array( 'in_progress', (array) $data->data->check_runs, true );
 
 			return $checked_ago >= 2 * 60 && ( $recently_updated || $tests_running );
 		}

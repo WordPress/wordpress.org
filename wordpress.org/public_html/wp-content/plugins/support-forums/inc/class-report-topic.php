@@ -636,10 +636,10 @@ The WordPress.org Team',
 
 		$topic_id = bbp_get_topic_id();
 
-		// Disallow closed support topics to be modlook reported after 6 months.
+		// Disallow closed support topics to be modlook reported after 6 months, but keep the moderator tools.
 		$last_active_post_date = get_post_field( 'post_date', bbp_get_topic_last_active_id( $topic_id ) );
 
-		if ( ( time() - strtotime( $last_active_post_date ) ) / MONTH_IN_SECONDS >= 6 ) {
+		if ( ! current_user_can( 'moderate' ) && ( time() - strtotime( $last_active_post_date ) ) / MONTH_IN_SECONDS >= 6 ) {
 			return;
 		}
 

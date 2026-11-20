@@ -49,6 +49,20 @@ function wporg_badge_management_manually_load_plugins() {
 }
 tests_add_filter( 'muplugins_loaded', 'wporg_badge_management_manually_load_plugins' );
 
+// Match WordPress's test bcrypt cost for suites using PHPUnit's TestCase directly.
+tests_add_filter(
+	'wp_hash_password_options',
+	static function ( array $options, string $algorithm ): array {
+		if ( PASSWORD_BCRYPT === $algorithm ) {
+			$options['cost'] = 5;
+		}
+
+		return $options;
+	},
+	1,
+	2
+);
+
 // Start up the WP testing environment.
 require $_tests_dir . '/includes/bootstrap.php';
 

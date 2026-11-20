@@ -44,6 +44,11 @@ class Committers extends \WP_Widget {
 				'pluginSlug'         => $post->post_name,
 				'removeCommitterAYS' => __( 'Are you sure you want to remove %s as a committer?', 'wporg-plugins' ),
 			) );
+
+			// Adding or removing a committer needs a recent two-factor check; this loads the prompt for it.
+			if ( function_exists( 'WordPressdotorg\Two_Factor\Revalidation\enqueue_assets' ) ) {
+				\WordPressdotorg\Two_Factor\Revalidation\enqueue_assets();
+			}
 		}
 
 		$title = apply_filters( 'widget_title', empty( $instance['title'] ) ? __( 'Committers', 'wporg-plugins' ) : $instance['title'], $instance, $this->id_base );
@@ -79,7 +84,7 @@ class Committers extends \WP_Widget {
 						<input type="text" name="committer" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
 						<span class="screen-reader-text"><?php esc_html_e( 'Add a new committer', 'wporg-plugins' ); ?></span>
 					</label>
-					<button type="submit" class="button button-secondary button-small"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
+					<span class="wp-block-button is-small"><button type="submit" class="wp-block-button__link"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button></span>
 				</form>
 
 				<script id="tmpl-new-committer" type="text/template">

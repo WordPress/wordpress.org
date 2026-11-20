@@ -699,6 +699,13 @@ let wpTrac,
 			// Add custom buttons to the formatting toolbar.
 			wpTrac.wikiToolbar();
 
+			// Trac's positive tabindex values on toolbar buttons and WikiFormatting links put them ahead of the whole page.
+			$( '[tabindex]' )
+				.filter( function () {
+					return this.tabIndex > 0;
+				} )
+				.removeAttr( 'tabindex' );
+
 			wpTrac.linkPastedUrls();
 
 			// Force 'Attachments' and 'Modify Ticket' to be shown.
@@ -1007,6 +1014,14 @@ let wpTrac,
 			$( '#metanav form#logout' ).replaceWith(
 				`<a href="https://login.wordpress.org/logout?redirect_to=${ currentUrl }">Logout</a>`
 			);
+
+			// For signed-in users, Trac routes feed links through /login?referer=…, which drops the feed.
+			$( '#altlinks a[href^="/login?"], link[rel="alternate"][href^="/login?"]' ).each( function () {
+				const referer = new URLSearchParams( this.getAttribute( 'href' ).split( '?' )[ 1 ] ).get( 'referer' );
+				if ( referer && referer.startsWith( '/' ) && ! referer.startsWith( '//' ) ) {
+					this.setAttribute( 'href', referer );
+				}
+			} );
 		},
 
 		/**
@@ -1246,7 +1261,6 @@ let wpTrac,
 					href: '#',
 					id,
 					title,
-					tabIndex: 400,
 				} );
 				$button.on( 'click', function () {
 					if ( false === $textarea.prop( 'disabled' ) && false === $textarea.prop( 'readonly' ) ) {

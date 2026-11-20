@@ -4,15 +4,17 @@
 	"testsEnvironment": false,
 	"plugins": [
 		"https://downloads.wordpress.org/plugin/jetpack.zip",
-		"../jobs.wordpress.net/public_html/wp-content/plugins/jobswp"
+		"../jobs.wordpress.net/public_html/wp-content/plugins/jobswp",
+		"../jobs.wordpress.net/public_html/wp-content/plugins/wporg-jobs-blocks"
 	],
 	"themes": [
-		"../jobs.wordpress.net/public_html/wp-content/themes/jobswp"
+		"../jobs.wordpress.net/public_html/wp-content/themes/jobswp",
+		"../jobs.wordpress.net/public_html/wp-content/themes/wporg-jobs-2026"
 	],
 	"mappings": {
-		"wp-content/mu-plugins/wporg-dev-login.php": "./mocks/mu-plugins/wporg-dev-login.php",
-		"wp-content/mu-plugins/jetpack-offline-subscriptions.php": "./mocks/jetpack-offline-subscriptions.php",
-		"wp-content/mu-plugins/jobs-open-to-work.php": "./mocks/jobs-open-to-work.php"
+		"wp-content/mu-plugins": "./jobs/mu-plugins",
+		"wp-content/env-pages": "./jobs/pages",
+		"wp-content/env-mocks": "./mocks"
 	},
 	"lifecycleScripts": {
 		"afterStart": "bash jobs/bin/after-start.sh"

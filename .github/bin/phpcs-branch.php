@@ -107,7 +107,7 @@ function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
 	$test_file = escapeshellarg( ".phpcs-branch/$file" );
 	exec( 'mkdir -p ' . escapeshellarg( dirname( ".phpcs-branch/$file" ) ) );
 
-	exec( "$git diff $branch_arg $file_arg > $diff" );
+	exec( "$git diff $branch_arg -- $file_arg > $diff" );
 
 	exec( "$git show " . escapeshellarg( "$base_branch:$file" ) . " > $test_file" );
 	exec( "$bin_dir/phpcs $test_file --standard=./phpcs.xml.dist --report=json -sq > $orig_json" );
@@ -131,17 +131,31 @@ function run_phpcs_changed( $file, $git, $base_branch, $bin_dir ) {
 }
 
 function main() {
-	$base_branch = 'remotes/origin/' . getenv( 'BASE_REF' );
+	$base_branch = getenv( 'BASE_REF' );
 	$git_dir     = dirname( dirname( __DIR__ ) );
 	$bin_dir     = dirname( dirname( __DIR__ ) ) . '/vendor/bin';
-	$git         = "git -C $git_dir";
+	$git         = 'git -C ' . escapeshellarg( $git_dir );
 
 	try {
+		if ( ! $base_branch ) {
+			throw new \RuntimeException( 'BASE_REF must identify the branch or commit to compare against.' );
+		}
+
+		// Preserve BASE_REF=trunk for local use, while accepting CI's explicit refs and SHAs.
+		$remote_branch = 'refs/remotes/origin/' . $base_branch;
+		exec( "$git show-ref --verify --quiet " . escapeshellarg( $remote_branch ), $unused, $remote_status );
+		if ( 'HEAD' !== $base_branch && 0 === $remote_status ) {
+			$base_branch = $remote_branch;
+		}
+
 		echo "\nScanning changed files...\n";
 		$status = 0;
 
-		$affected_files = shell_exec( "$git diff $base_branch --name-status --diff-filter=AM 2>&1 | grep .php$" );
-		$affected_files = explode( "\n", trim( $affected_files ) );
+		exec( "$git diff " . escapeshellarg( $base_branch ) . " --name-status --diff-filter=AM -- '*.php'", $affected_files, $diff_status );
+		if ( 0 !== $diff_status ) {
+			throw new \RuntimeException( "Unable to compare changed files against $base_branch." );
+		}
+
 		$new_files      = array();
 		$modified_count = 0;
 

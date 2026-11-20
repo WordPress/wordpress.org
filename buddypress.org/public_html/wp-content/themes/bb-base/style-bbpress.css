@@ -34,3 +34,87 @@
 	/* Lists */
 	--bbbase-list-hover-helper-background: rgba(235, 255, 235, 1);
 }
+
+.bbp-about-links {
+	box-sizing: border-box;
+	padding: 20px;
+	border: 1px solid var(--bbbase-grey-border-color-low-contrast);
+	border-radius: var(--bbbase-border-radius);
+	background-color: var(--bbbase-light-background-color-low-contrast) !important;
+}
+
+#main .content:has(.bbp-about-links) > h2 {
+	font-size: 28px;
+	line-height: 1.25;
+	margin-bottom: 24px;
+}
+
+#main .content:has(.bbp-about-links) .wp-block-column:first-child > h2 {
+	font-size: 22px;
+	line-height: 1.35;
+	margin-bottom: 16px;
+}
+
+#main .content:has(.bbp-about-links) .wp-block-column:first-child > h3 {
+	font-size: 18px;
+	line-height: 1.4;
+	margin: 24px 0 12px;
+}
+
+.bbp-about-links h3,
+.bbp-about-links h4 {
+	font-size: 17px;
+	line-height: 1.4;
+	margin: 24px 0 8px;
+}
+
+.bbp-about-links h3:first-child,
+.bbp-about-links h4:first-child {
+	margin-top: 0;
+}
+
+.bbp-about-links ul {
+	margin: 0;
+	padding: 0;
+}
+
+.bbp-about-links li {
+	list-style: none;
+	margin: 0 0 6px;
+}
+
+/* Keep page columns inset until the centered layout provides enough space. */
+@media screen and ( min-width: 960px ) and ( max-width: 999px ) {
+	body.page-template-default #main {
+		box-sizing: border-box;
+		padding-right: calc(500px - 50vw);
+		padding-left: calc(500px - 50vw);
+	}
+	body.page-template-default #main > div.content {
+		width: calc(100vw - 300px);
+	}
+}
+
+/* Allow forum-list author names to wrap inside the narrow freshness column. */
+@media screen and ( max-width: 782px ) {
+	#bbpress-forums p.bbp-topic-meta > span.bbp-topic-freshness-author,
+	#bbpress-forums p.bbp-forum-meta > span.bbp-forum-freshness-author {
+		overflow: visible;
+		overflow-wrap: anywhere;
+		white-space: normal;
+	}
+
+	#bbpress-forums p.bbp-topic-meta > span.bbp-topic-freshness-author .bbp-author-link,
+	#bbpress-forums p.bbp-forum-meta > span.bbp-forum-freshness-author .bbp-author-link {
+		display: inline-block;
+		max-width: 100%;
+		overflow: visible;
+		overflow-wrap: anywhere;
+		white-space: normal;
+	}
+
+	#bbpress-forums p.bbp-topic-meta > span.bbp-topic-freshness-author .bbp-author-name,
+	#bbpress-forums p.bbp-forum-meta > span.bbp-forum-freshness-author .bbp-author-name {
+		white-space: normal;
+	}
+}

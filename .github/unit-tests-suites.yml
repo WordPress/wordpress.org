@@ -100,6 +100,8 @@ suites:
     paths:
       - 'environments/plugin-directory/**'
       - 'wordpress.org/public_html/wp-content/themes/pub/wporg-plugins-2024/**'
+      # Mounted for its suite but not activated, so not read from the environment's plugin list.
+      - 'wordpress.org/public_html/wp-content/plugins/wporg-abilities/**'
 
   theme-directory:
     type: wordpress

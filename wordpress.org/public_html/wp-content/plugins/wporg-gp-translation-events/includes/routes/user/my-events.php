@@ -40,7 +40,7 @@ class My_Events_Route extends Route {
 		if ( isset( $_GET['page'] ) ) {
 			$value = sanitize_text_field( wp_unslash( $_GET['page'] ) );
 			if ( is_numeric( $value ) ) {
-				$page = (int) $value;
+				$page = max( 1, (int) $value );
 			}
 		}
 		// phpcs:enable

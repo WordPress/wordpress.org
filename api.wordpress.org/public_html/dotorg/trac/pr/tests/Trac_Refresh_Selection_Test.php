@@ -127,6 +127,24 @@ class Trac_Refresh_Selection_Test extends TestCase {
 	}
 
 	/**
+	 * An open PR with a failed check and another still running is refreshed every two minutes.
+	 *
+	 * @return void
+	 */
+	public function test_a_pr_with_a_failed_and_a_running_check_is_refreshed_every_two_minutes(): void {
+		$pr = $this->pr(
+			3 * 60,
+			'open',
+			array(
+				'check_runs'     => (object) array( 'GitHub Actions' => 'failed' ),
+				'checks_running' => true,
+			)
+		);
+
+		$this->assertSame( array( $pr ), select_prs_to_refresh( array( $pr ), false ) );
+	}
+
+	/**
 	 * A closed PR is refreshed once a day, however recently it changed.
 	 *
 	 * @return void

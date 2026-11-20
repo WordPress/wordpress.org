@@ -25,14 +25,17 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
   ```bash
   BASE_REF=trunk php .github/bin/phpcs-branch.php
   ```
+  `BASE_REF` accepts a Git branch, ref, or commit. CI compares PR merge commits
+  against `HEAD^1`, and trunk pushes against the push's previous commit. An
+  unset or invalid comparison ref fails the check.
 
 ---
 
 ## GitHub Actions Workflows (`.github/workflows/`)
 
 ### 1. [Static Analysis (PHP Linting)](workflows/phpcs.yml) (`phpcs.yml`)
-- **Trigger:** Runs on pull requests that modify PHP files, `phpcs.xml.dist`, `composer.json`, or the workflow files themselves.
-- **Actions:** Sets up PHP 8.4, installs composer tools, and executes the `phpcs-branch.php` helper script to report PHPCS syntax/standard compliance on PR diffs.
+- **Trigger:** Runs on pull requests and pushes to `trunk` that modify PHP files, either PHPCS ruleset, the root Composer manifest or lockfile, or the lint workflow/helper.
+- **Actions:** Sets up PHP 8.4, installs composer tools, and executes the `phpcs-branch.php` helper script to report PHPCS syntax/standard compliance on changed lines. FreeScout's separate full scan only runs when FreeScout files, Composer dependencies, or this workflow change.
 
 ### 2. [Unit Tests](workflows/unit-tests.yml) (`unit-tests.yml`)
 - **Trigger:** Runs on pull requests and pushes to `trunk` (only the suites affected by the changed files), plus a daily scheduled run and manual dispatch (all suites).
@@ -55,5 +58,5 @@ This folder contains the repository's configuration for GitHub, automated CI/CD 
 - **Purpose:** Audits one representative page per site template on the live network (performance, accessibility, best practices, SEO) and posts the category scores to the site-quality stats endpoint, so regressions show up as a trend. Settings live in [lighthouserc.json](lighthouserc.json).
 
 ### 6. [Static Analysis (JS/CSS)](workflows/js-css-lint.yml) (`js-css-lint.yml`)
-- **Trigger:** Runs on pull requests and pushes to `trunk` that touch `wordpress.org/public_html/style/`, the Plugin Directory theme (`wporg-plugins-2024`), or the Support theme (`wporg-support-2024`). Any of them runs the job for all three.
+- **Trigger:** Runs on pull requests and pushes to `trunk` that touch `wordpress.org/public_html/style/`, the Documentation theme (`wporg-documentation-2022`), the Plugin Directory theme (`wporg-plugins-2024`), or the Support theme (`wporg-support-2024`). Any of them runs the job for all four.
 - **Actions:** Installs each package from its committed `package-lock.json`, runs its `lint:js` and `lint:css` scripts (and Prettier for `style/`), then rebuilds and fails if the committed build output differs. To cover another package with a committed build, commit its lockfile, add it to the matrix, and add its path to both triggers.

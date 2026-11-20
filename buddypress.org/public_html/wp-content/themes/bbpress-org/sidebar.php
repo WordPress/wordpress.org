@@ -43,7 +43,7 @@ endif;
 
 			<div>
 				<?php bbp_topic_tag_list( 0, array(
-					'before' => '<h2>' . __( 'Topic Tags', 'bbporg' ) . '</h2><ul class="topic-tags"><li>',
+					'before' => '<h2>' . esc_html__( 'Topic Tags', 'bbporg' ) . '</h2><ul class="topic-tags"><li>',
 					'after'  => '</li></ul>',
 					'sep'    => '</li><li>',
 				) ); ?>
@@ -56,7 +56,7 @@ endif;
 				<div>
 					<?php bbp_topic_admin_links( array (
 						'id'     => bbp_get_topic_id(),
-						'before' => '<h2>' . __( 'Topic Admin', 'bbporg' ) . '</h2><ul class="topic-admin-links"><li>',
+						'before' => '<h2>' . esc_html__( 'Topic Admin', 'bbporg' ) . '</h2><ul class="topic-admin-links"><li>',
 						'after'  => '</li></ul>',
 						'sep'    => '</li><li>',
 						'links'  => array()
@@ -88,9 +88,18 @@ endif;
 
 			<div>
 				<h2><?php esc_html_e( 'Feeds', 'bbporg' ); ?></h2>
+				<?php
+				$topics_feed_url = add_query_arg(
+					array(
+						'post_type' => bbp_get_topic_post_type(),
+						'feed'      => 'rss2',
+					),
+					home_url( '/' )
+				);
+				?>
 				<ul>
 					<li><a class="feed" href="<?php bbp_forums_url(); ?>feed/"><?php esc_html_e( 'All Recent Posts', 'bbporg' ); ?></a></li>
-					<li><a class="feed" href="<?php bbp_topics_url(); ?>feed/"><?php esc_html_e( 'All Recent Topics', 'bbporg' ); ?></a></li>
+					<li><a class="feed" href="<?php echo esc_url( $topics_feed_url ); ?>"><?php esc_html_e( 'All Recent Topics', 'bbporg' ); ?></a></li>
 				</ul>
 			</div>
 
@@ -103,7 +112,9 @@ endif;
 
 	<?php elseif ( is_page( array( 'plugins', 116247 ) ) ) : ?>
 
-		<?php bb_base_plugin_search_form(); ?>
+		<?php if ( is_page( 'plugins' ) ) : ?>
+			<?php bb_base_plugin_search_form(); ?>
+		<?php endif; ?>
 
 		<div>
 			<h2><?php esc_html_e( 'Legacy', 'bbporg' ); ?></h2>

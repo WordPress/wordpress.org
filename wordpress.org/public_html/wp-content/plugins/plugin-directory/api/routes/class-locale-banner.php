@@ -93,8 +93,8 @@ class Locale_Banner extends Base {
 			return \GP_Locales::by_field( 'wp_locale', $locale );
 		} );
 
-		// Build a list of WordPress locales which we'll suggest to the user.
-		$suggest_locales              = array_values( array_intersect( $locales_from_header, $translated_locales ) );
+		// Map against translated locales so a same-language variant (nl_BE for "nl") can be suggested.
+		$suggest_locales              = array_values( $this->get_locale_from_header( array_intersect( $translated_locales, $all_locales ) ) );
 		$current_locale_is_suggested  = in_array( $current_locale, $suggest_locales );
 		$current_locale_is_translated = in_array( $current_locale, $translated_locales );
 
@@ -117,10 +117,34 @@ class Locale_Banner extends Base {
 			$suggest_named_locales[ $locale ] = \GP_Locales::by_field( 'wp_locale', $locale )->native_name;
 		}
 
-		$suggest_string = '';
+		$suggest_string       = '';
+		$is_english_directory = 'en_US' === $current_locale || ! $current_gp_locale;
 
-		// English directory.
-		if ( 'en_US' === $current_locale || ! $current_gp_locale ) {
+		// A localized directory only points readers elsewhere when their languages don't include its own.
+		if ( ! $is_english_directory ) {
+			$http_locales  = $this->get_http_locales( (string) $request->get_header( 'accept-language' ) );
+			$reads_english = (bool) preg_grep( '/^en(-|$)/i', $http_locales );
+
+			// Browsers send ISO 639 codes, which aren't always the wp_locale prefix: `bel` is `be`.
+			$directory_languages = array_filter(
+				array(
+					strtok( $current_locale, '_' ),
+					$current_gp_locale->lang_code_iso_639_1,
+					$current_gp_locale->lang_code_iso_639_2,
+					$current_gp_locale->lang_code_iso_639_3,
+				)
+			);
+
+			// Match the language, not the locale: map_locale() turns `es-419` or `pt` into a sibling regional locale.
+			if ( preg_grep( '/^(' . implode( '|', $directory_languages ) . ')(-|$)/i', $http_locales ) ) {
+				$suggest_named_locales = array();
+			} elseif ( ! $suggest_named_locales && $reads_english ) {
+				$suggest_named_locales = array( 'en_US' => \GP_Locales::by_field( 'wp_locale', 'en_US' )->native_name );
+			}
+		}
+
+		// English directory, or a localized directory with suggestions for its reader.
+		if ( $is_english_directory || $suggest_named_locales ) {
 			$current_path   = function_exists( 'get_site' ) && get_site() ? get_site()->path : '/';
 			$referring_path = wp_parse_url( $request->get_header( 'referer' ), PHP_URL_PATH );
 
@@ -143,14 +167,15 @@ class Locale_Banner extends Base {
 				$suggestions = array();
 				foreach ( $suggest_named_locales as $locale => $language ) {
 					$suggestions[] = sprintf(
-						'<a href="https://%s.wordpress.org%s">%s</a>',
-						$locale_subdomain_assoc[ $locale ]->subdomain,
+						'<a href="https://%s%s">%s</a>',
+						'en_US' === $locale ? 'wordpress.org' : $locale_subdomain_assoc[ $locale ]->subdomain . '.wordpress.org',
 						esc_url( $current_path ),
 						$language
 					);
 				}
 
-				if ( $is_plugin_request ) {
+				// English is the source language, so there is no translation to improve.
+				if ( $is_plugin_request && 'en_US' !== $primary_locale ) {
 					$suggest_string = sprintf(
 						$this->translate( 'This plugin is also available in %1$s. <a href="%2$s">Help improve the translation!</a>', $primary_locale ),
 						wp_sprintf_l( '%l', $suggestions ),

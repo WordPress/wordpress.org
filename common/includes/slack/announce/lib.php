@@ -222,9 +222,14 @@ function run( $data ) {
 	if ( 'privategroup' !== $channel ) {
 		$channel_info = get_channel_info( $channel_id );
 
+		// Slack omits the is_* flags that don't apply to a conversation type, so treat a missing flag as false.
 		if (
 			$channel_info &&
-			( $channel_info['is_private'] || $channel_info['is_group'] || $channel_info['is_mpim'] )
+			(
+				! empty( $channel_info['is_private'] ) ||
+				! empty( $channel_info['is_group'] ) ||
+				! empty( $channel_info['is_mpim'] )
+			)
 		) {
 			$channel = 'privategroup';
 		}

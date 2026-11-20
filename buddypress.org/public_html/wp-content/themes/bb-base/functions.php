@@ -54,7 +54,7 @@ if ( bb_base_is_codex() ) {
 function bb_base_register_stylesheets() {
 
 	// Version of CSS
-	$version = '202508050001';
+	$version = '202611200055';
 
 	// Base theme styling
 	wp_enqueue_style( 'bb-base',   get_template_directory_uri()   . '/style.css', false,                         $version, 'screen' );
@@ -71,6 +71,11 @@ function bb_base_register_stylesheets() {
 	wp_enqueue_style( 'bb-child',  get_stylesheet_directory_uri() . '/style.css', array( 'bb-base', 'bb-root' ), $version, 'screen' );
 }
 add_action( 'wp_enqueue_scripts', 'bb_base_register_stylesheets' );
+
+function bb_base_register_scripts() {
+	wp_enqueue_script( 'bb-base-mobile-menu', get_template_directory_uri() . '/js/mobile-menu.js', array(), '202611180001', true );
+}
+add_action( 'wp_enqueue_scripts', 'bb_base_register_scripts' );
 
 function bb_base_topic_search_form() {
 ?>

@@ -8,7 +8,7 @@
  * @since 1.0.0
  */
 ?>
-<!DOCTYPE html><html>
+<!DOCTYPE html>
 
 <?php get_template_part( 'template-parts/header', 'head' ); ?>
 
@@ -24,10 +24,9 @@
 		<?php get_template_part( 'template-parts/header', 'nav' ); ?>
 
 		<div id="network-title">
-			<a href="https://buddypress.org"><?php bloginfo( 'name' ); ?></a>
+			<a href="https://buddypress.org/" aria-label="<?php esc_attr_e( 'BuddyPress.org', 'bporg-developer' ); ?>"></a>
 		</div>
 	</div>
-	<div style="clear:both"></div>
 </div>
 
 <header id="masthead" class="site-header<?php if ( is_front_page() ) { echo ' home'; } ?>" role="banner">
@@ -66,11 +65,6 @@
 	if ( DevHub\should_show_search_bar() ) : ?>
 		<div id="inner-search">
 			<?php get_search_form(); ?>
-			<div id="inner-search-icon-container">
-				<div id="inner-search-icon">
-					<div class="dashicons dashicons-search"><span class="screen-reader-text"><?php esc_html_e( 'Search', 'bporg-developer' ); ?></span></div>
-				</div>
-			</div>
 		</div>
 
 	<?php endif; ?>

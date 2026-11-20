@@ -7,7 +7,13 @@ $table_headings = [
 ];
 
 gp_title( sprintf( __( '%s &lt; GlotPress' ), esc_html( $project->name ) ) );
-gp_breadcrumb_project( $project );
+// The Themes archive redirects to the homepage, so its crumb is merged into the project name.
+gp_breadcrumb(
+	array(
+		gp_link_get( gp_url( '/projects' ), __( 'Projects', 'glotpress' ) ),
+		'Themes: ' . esc_html( $project->name ),
+	)
+);
 
 gp_enqueue_script( 'common' );
 gp_enqueue_script( 'tablesorter' );
@@ -117,7 +123,9 @@ gp_tmpl_header();
 	</table>
 </div>
 
-<script type="text/javascript">
+<?php
+wp_print_inline_script_tag(
+	<<<'JS'
 jQuery( function( $ ) {
 	$( '#stats-table' ).tablesorter( {
 		theme: 'wporg-translate',
@@ -133,6 +141,8 @@ jQuery( function( $ ) {
 		$( this ).parent( '.projects-dropdown' ).toggleClass( 'open' );
 	});
 });
-</script>
+JS
+);
+?>
 
 <?php gp_tmpl_footer();

@@ -8,6 +8,7 @@ use WordPressdotorg\Plugin_Directory\API\Base;
 use WP_REST_Server;
 use WP_Error;
 use WP_User;
+use function WordPressdotorg\Two_Factor\Revalidation\get_status as get_revalidation_status;
 
 
 /**
@@ -38,7 +39,7 @@ class Plugin_Committers extends Base {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'add_committer' ),
-				'permission_callback' => array( $this, 'permission_check_action' ),
+				'permission_callback' => array( $this, 'permission_check_revalidated_action' ),
 				'wporg_capability'    => 'plugin_add_committer',
 				'wporg_action'        => 'add_committer',
 				'args'                => array(
@@ -53,7 +54,7 @@ class Plugin_Committers extends Base {
 		register_rest_route( 'plugins/v1', '/plugin/(?P<plugin_slug>[^/]+)/committers/(?P<committer>[^/]+)/?', array(
 			'methods'             => WP_REST_Server::DELETABLE,
 			'callback'            => array( $this, 'revoke_committer' ),
-			'permission_callback' => array( $this, 'permission_check_action' ),
+			'permission_callback' => array( $this, 'permission_check_revalidated_action' ),
 			'wporg_capability'    => 'plugin_remove_committer',
 			'wporg_action'        => 'remove_committer',
 			'args'                => array(
@@ -67,6 +68,39 @@ class Plugin_Committers extends Base {
 				),
 			),
 		) );
+	}
+
+	/**
+	 * Requires a recent two-factor check on top of the route's capability and action.
+	 *
+	 * Whoever can commit can release, so changing the committers asks for the same proof
+	 * as confirming a release.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool|WP_Error True when all hold, false or WP_Error upon failure.
+	 */
+	public function permission_check_revalidated_action( $request ) {
+		$verified = $this->permission_check_action( $request );
+
+		if ( true !== $verified ) {
+			return $verified;
+		}
+
+		if ( ! function_exists( 'WordPressdotorg\Two_Factor\Revalidation\get_status' ) ) {
+			return true;
+		}
+
+		$status = get_revalidation_status();
+
+		if ( $status && $status['can_save'] ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'revalidation_required',
+			__( 'Please verify your two-factor authentication, then try again.', 'wporg-plugins' ),
+			array( 'status' => \WP_Http::FORBIDDEN )
+		);
 	}
 
 	/**

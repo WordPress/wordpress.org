@@ -276,6 +276,21 @@ function wporg_breathe_add_site_navigation_menus( $menus ) {
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\wporg_breathe_add_site_navigation_menus' );
 
 /**
+ * Drops page-pledges.php from the page template hierarchy on sites without a team.
+ *
+ * @param array $templates Page template file names, in order of preference.
+ * @return array Page template file names.
+ */
+function remove_pledges_template_without_team( $templates ) {
+	if ( function_exists( 'WordPressdotorg\\Make\\Pledges\\get_current_team' ) && \WordPressdotorg\Make\Pledges\get_current_team() ) {
+		return $templates;
+	}
+
+	return array_values( array_diff( $templates, array( 'page-pledges.php' ) ) );
+}
+add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\remove_pledges_template_without_team' );
+
+/**
  * Add postMessage support for site title and description in the customizer.
  *
  * @param WP_Customize_Manager $wp_customize The customizer object.
@@ -316,6 +331,101 @@ function no_robots( $noindex ) {
 add_filter( 'wporg_noindex_request', __NAMESPACE__ . '\no_robots' );
 
 /**
+ * Gets the user an author or mentions archive belongs to.
+ *
+ * @param \WP_Query $query The query to check.
+ * @return \WP_User|null The user, or null when the query isn't an existing user's archive.
+ */
+function get_archive_user( $query ) {
+	$user = null;
+
+	// The To Do and Done filters narrow the archive, so an empty one doesn't mean the user has no posts.
+	if ( $query->get( 'resolved' ) ) {
+		return null;
+	}
+
+	if ( $query->is_author() ) {
+		$user = $query->get_queried_object();
+	} elseif ( $query->is_tax() ) {
+		// is_tax( 'mentions' ) is false until someone is mentioned, as there's no term yet.
+		$mentions = $query->get( 'mentions' );
+
+		if ( is_string( $mentions ) && '' !== $mentions ) {
+			$user = get_user_by( 'login', $mentions );
+		}
+	}
+
+	return $user instanceof \WP_User ? $user : null;
+}
+
+/**
+ * Shows an empty archive instead of a 404 for users without posts or mentions.
+ *
+ * Core only does this for author archives of site members, which most people
+ * following "My Posts" and "My @Mentions" aren't.
+ *
+ * @param bool      $preempt Whether to short-circuit default header status handling.
+ * @param \WP_Query $query   The main query.
+ * @return bool
+ */
+function prevent_empty_user_archive_404( $preempt, $query ) {
+	if ( $preempt || ! $query->is_main_query() || $query->is_404() || $query->is_paged() || $query->posts ) {
+		return $preempt;
+	}
+
+	if ( get_archive_user( $query ) ) {
+		status_header( 200 );
+
+		return true;
+	}
+
+	return $preempt;
+}
+add_filter( 'pre_handle_404', __NAMESPACE__ . '\prevent_empty_user_archive_404', 10, 2 );
+
+/**
+ * Gets the message for an author or mentions archive without posts.
+ *
+ * @param \WP_User $user The user the archive belongs to.
+ * @return string
+ */
+function get_empty_archive_message( $user ) {
+	if ( is_author() ) {
+		/* translators: %s: User display name. */
+		return sprintf( __( '%s hasn’t published any posts here yet.', 'wporg' ), $user->display_name );
+	}
+
+	/* translators: %s: Username. */
+	return sprintf( __( 'No posts here mention @%s yet.', 'wporg' ), $user->user_login );
+}
+
+/**
+ * Shows the empty archive message in o2, which replaces the page content when it loads.
+ *
+ * The o2 app only renders an empty state for search and 404 views, so the archive borrows the search one.
+ *
+ * @param array $options The o2 options.
+ * @return array
+ */
+function o2_empty_user_archive_message( $options ) {
+	global $wp_query;
+
+	if ( $wp_query->posts || $wp_query->is_404() ) {
+		return $options;
+	}
+
+	$user = get_archive_user( $wp_query );
+
+	if ( $user ) {
+		$options['options']['viewType']     = 'search';
+		$options['strings']['searchFailed'] = esc_html( get_empty_archive_message( $user ) );
+	}
+
+	return $options;
+}
+add_filter( 'o2_options', __NAMESPACE__ . '\o2_empty_user_archive_message' );
+
+/**
  * Renders the site title for the selective refresh partial.
  */
 function customize_partial_blogname() {
@@ -329,8 +439,9 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\scripts', 11 );
 
 function inline_scripts() {
 	$current_site = get_site();
-	?>
-	<script type="text/javascript">
+	wp_print_inline_script_tag(
+		sprintf(
+			<<<'JS'
 		var el = document.getElementById( 'make-welcome-toggle' );
 		if ( el ) {
 			el.addEventListener( 'click', function( e ) {
@@ -349,12 +460,27 @@ function inline_scripts() {
 				document.cookie = $content.data( 'cookie' ) + '=' +
 					( isHide ? $content.data( 'hash' ) : '' ) +
 					'; expires=Fri, 31 Dec 9999 23:59:59 GMT' +
-					'; domain=<?php echo esc_js( $current_site->domain ); ?>' +
-					'; path=<?php echo esc_js( $current_site->path ); ?>';
+					'; domain=' + %s +
+					'; path=' + %s;
 			} );
 		}
-	</script>
-	<?php
+
+		var closeButton = document.getElementById( 'secondary-close' );
+		if ( closeButton ) {
+			closeButton.addEventListener( 'click', function() {
+				document.body.classList.remove( 'responsive-show' );
+
+				var toggle = document.getElementById( 'secondary-toggle' );
+				if ( toggle ) {
+					toggle.focus();
+				}
+			} );
+		}
+		JS,
+			wp_json_encode( $current_site->domain ),
+			wp_json_encode( $current_site->path )
+		)
+	);
 }
 add_action( 'wp_footer', __NAMESPACE__ . '\inline_scripts' );
 
@@ -383,7 +509,7 @@ function welcome_box() {
 	add_filter( 'o2_post_fragment', '__return_empty_array' );
 	?>
 	<div class="make-welcome">
-		<a href="#" id="secondary-toggle" onclick="return false;"><strong><?php esc_html_e( 'Menu', 'wporg' ); ?></strong></a>
+		<button type="button" id="secondary-toggle" aria-label="<?php esc_attr_e( 'Open menu', 'wporg' ); ?>"></button>
 		<div class="entry-meta">
 			<?php edit_post_link( __( 'Edit', 'wporg' ), '', '', $welcome->ID, 'post-edit-link make-welcome-edit-post-link' ); ?>
 			<button
@@ -394,12 +520,15 @@ function welcome_box() {
 			><span><?php esc_html_e( 'Hide welcome box', 'wporg' ); ?></span></button>
 		</div>
 		<div class="entry-content clear" id="make-welcome-content" data-cookie="<?php echo esc_attr( $cookie ); ?>" data-hash="<?php echo esc_attr( $content_hash ); ?>">
-			<script type="text/javascript">
+			<?php
+			wp_print_inline_script_tag(
+				sprintf(
+					<<<'JS'
 				const elContent = document.getElementById( 'make-welcome-content' );
 
 				if ( elContent ) {
 					const hasCookieSetToHidden = -1 !== document.cookie.indexOf( elContent.dataset.cookie + '=' + elContent.dataset.hash );
-					const isHome = window.location.pathname === '<?php echo esc_js( $path ); ?>';
+					const isHome = window.location.pathname === %s;
 
 					if ( hasCookieSetToHidden || ! isHome ) {
 						const elToggle = document.getElementById( 'make-welcome-toggle' );
@@ -418,7 +547,11 @@ function welcome_box() {
 						}
 					}
 				}
-			</script>
+				JS,
+					wp_json_encode( $path )
+				)
+			);
+			?>
 			<?php the_content(); ?>
 		</div>
 	</div>
@@ -774,6 +907,9 @@ add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\modify_site_title_
 
 /**
  * Inject a script to trigger Prism (syntax highlighter) after o2 content is rendered.
+ *
+ * Runs again on `pd-script-load`, which o2 fires each time it re-renders a post, for example after Follow.
+ * Each code element is highlighted once, so blocks o2 left alone keep their DOM.
  */
 add_action(
 	'wp_footer',
@@ -781,9 +917,14 @@ add_action(
 		wp_add_inline_script(
 			'mkaz-code-syntax-prism-js',
 			'jQuery( document ).on(
-				"ready.o2",
+				"ready.o2 pd-script-load",
 				function () {
-					setTimeout( () => Prism.highlightAll(), 10 );
+					setTimeout( () => {
+						document.querySelectorAll( "code[class*=language-]:not([data-o2-prism]), [class*=language-] code:not([data-o2-prism])" ).forEach( ( el ) => {
+							el.dataset.o2Prism = "1";
+							Prism.highlightElement( el );
+						} );
+					}, 10 );
 				}
 			);',
 			'after'
@@ -792,3 +933,71 @@ add_action(
 );
 // Ensure assets are loaded, regardless of what's there on page load.
 add_filter( 'mkaz_code_syntax_force_loading', '__return_true' );
+
+/**
+ * Re-initializes Jetpack sharing buttons after o2 renders posts.
+ *
+ * Jetpack sharing only listens for the native `is.post-load` event, while o2 fires
+ * jQuery events. Without it, share links miss the `nb=1` flag and the Mastodon modal.
+ *
+ * @see https://meta.trac.wordpress.org/ticket/7877
+ */
+function jetpack_sharing_o2_compat() {
+	wp_add_inline_script(
+		'sharing-js',
+		<<<'JS'
+		jQuery( document.body ).on( 'post-load ready.o2 post-post-save.o2', function() {
+			document.body.dispatchEvent( new CustomEvent( 'is.post-load' ) );
+		} );
+		JS,
+		'after'
+	);
+}
+add_action( 'wp_footer', __NAMESPACE__ . '\jetpack_sharing_o2_compat' );
+
+/**
+ * Attaches Gravatar hovercards to avatars that o2 renders.
+ *
+ * Jetpack attaches hovercards once, on page load, but o2 then replaces the page content
+ * with its own rendering and keeps adding comments, so those avatars never got a card.
+ *
+ * @see https://meta.trac.wordpress.org/ticket/7956
+ */
+function gravatar_hovercards_o2_compat() {
+	wp_add_inline_script(
+		'wpgroho',
+		<<<'JS'
+		( function() {
+			function attachHovercards() {
+				document.querySelectorAll( 'img[src*="gravatar.com/avatar/"]:not(.grav-hashed):not([data-o2-hovercard])' ).forEach( function( avatar ) {
+					if ( avatar.closest( '#wpadminbar, .gravatar-hovercard' ) ) {
+						return;
+					}
+
+					// Gravatar.init() takes a selector, so flag the avatar to attach to it alone.
+					avatar.setAttribute( 'data-o2-hovercard', 'pending' );
+					Gravatar.init( 'img[data-o2-hovercard="pending"]' );
+					avatar.setAttribute( 'data-o2-hovercard', '' );
+				} );
+			}
+
+			function init() {
+				if ( 'undefined' === typeof Gravatar ) {
+					return;
+				}
+
+				attachHovercards();
+				new MutationObserver( attachHovercards ).observe( document.body, { childList: true, subtree: true } );
+			}
+
+			if ( 'loading' === document.readyState ) {
+				document.addEventListener( 'DOMContentLoaded', init );
+			} else {
+				init();
+			}
+		} )();
+		JS,
+		'after'
+	);
+}
+add_action( 'wp_footer', __NAMESPACE__ . '\gravatar_hovercards_o2_compat' );

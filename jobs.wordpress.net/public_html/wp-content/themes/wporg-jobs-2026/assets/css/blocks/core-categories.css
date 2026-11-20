@@ -1,0 +1,7 @@
+ul.wp-block-categories.is-style-plain {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--preset--spacing--10);
+	padding-inline-start: 0;
+	list-style: none;
+}

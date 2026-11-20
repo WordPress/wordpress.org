@@ -17,11 +17,25 @@ class Comment_Handler {
 	protected $comment_url;
 
 	/**
+	 * The ticket's component, read from the notification's ticket properties table.
+	 *
+	 * @var string
+	 */
+	protected $component;
+
+	/**
 	 * Workflow keywords added to the ticket by this change.
 	 *
 	 * @var string[]
 	 */
 	protected $keywords_added = array();
+
+	/**
+	 * Characters Trac's text wrapper breaks between, mirroring UnicodeTextWrapper::breakable_char_ranges.
+	 *
+	 * @var string
+	 */
+	const BREAKABLE_CHARS = '[\x{1100}-\x{11FF}\x{2E80}-\x{2EFF}\x{3000}-\x{30FF}\x{3130}-\x{319F}\x{31C0}-\x{31EF}\x{3200}-\x{4DBF}\x{4E00}-\x{9FFF}\x{A960}-\x{A97F}\x{AC00}-\x{D7FF}\x{F900}-\x{FAFF}\x{FE30}-\x{FE4F}\x{FF00}-\x{FFEF}\x{20000}-\x{3FFFF}]';
 
 	function __construct( \Dotorg\Slack\Send $send, array $email_message ) {
 		$this->send  = $send;
@@ -61,6 +75,10 @@ class Comment_Handler {
 		// is specified, as we may use it to process mentions and such.
 		if ( $firehose ) {
 			$this->send->send( $firehose );
+		}
+
+		foreach ( $this->trac->get_component_firehose_channels( $this->component ) as $component_firehose ) {
+			$this->send->send( $component_firehose );
 		}
 
 		// Send notifications for Workflow Keyword additions.
@@ -198,12 +216,14 @@ class Comment_Handler {
 		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
 			array_shift( $lines );
 		}
-		// Remove top border of table.
-		array_shift( $lines );
-		// Remove ticket properties table.
+		// Remove top border of table, which shows where the columns are split.
+		$border = (string) array_shift( $lines );
+		// Remove ticket properties table, keeping the component.
+		$rows = array();
 		while ( $lines && 0 !== strpos( current( $lines ), '------' ) ) {
-			array_shift( $lines );
+			$rows[] = array_shift( $lines );
 		}
+		$component = $this->get_component_from_properties( $rows, $border );
 		// Remove bottom border of table.
 		array_shift( $lines );
 
@@ -242,7 +262,22 @@ class Comment_Handler {
 			while ( $lines && '' !== current( $lines ) ) {
 				$line = array_shift( $lines );
 
-				if ( preg_match( '~Attachment "([^"]+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
+				// Trac wraps long file names onto indented lines.
+				if ( 0 === strpos( $line, ' * Attachment "' ) ) {
+					while ( $lines && '' !== current( $lines ) && 0 !== strpos( current( $lines ), ' * ' ) ) {
+						$next_line = ltrim( array_shift( $lines ) );
+
+						// Trac also breaks between CJK characters, where there is no space to restore.
+						$cjk_break = preg_match( '/' . self::BREAKABLE_CHARS . '$/u', $line ) && preg_match( '/^' . self::BREAKABLE_CHARS . '/u', $next_line );
+
+						if ( '-' !== substr( $line, -1 ) && ! $cjk_break ) {
+							$line .= ' ';
+						}
+						$line .= $next_line;
+					}
+				}
+
+				if ( preg_match( '~Attachment "(.+)" (added|removed)\.$~', $line, $matches ) ) { // * Attachment "test.txt" added/removed.
 					$changes[] = "_*attachment:*_ `{$matches[1]}` {$matches[2]}";
 				} else {
 					if ( 0 === strpos( $line, ' * keywords:' ) ) {
@@ -290,10 +325,60 @@ class Comment_Handler {
 		$this->author  = $author;
 		$this->comment = $comment;
 		$this->changes = $changes;
+		$this->component   = $component;
 		$this->ticket_id   = $ticket_id;
 		$this->ticket_url  = $ticket_url;
 		$this->comment_id  = $comment_id;
 		$this->comment_url = $comment_url;
+	}
+
+	/**
+	 * Reads the component from the rows of a notification's ticket properties table.
+	 *
+	 * Trac lays the table out in two columns, and wraps a long value onto the following
+	 * lines of the same column. Each row is split into its columns where the top border
+	 * has a +, so text inside another field's value, such as keywords, isn't read as a field.
+	 *
+	 * @param string[] $rows   Table rows, without the borders.
+	 * @param string   $border Top border of the table.
+	 * @return string Component, or an empty string if the table has none.
+	 */
+	protected function get_component_from_properties( array $rows, $border ) {
+		$split  = strpos( $border, '+' );
+		$column = null;
+		$value  = '';
+
+		foreach ( $rows as $row ) {
+			$cells = array( $row );
+			if ( false !== $split ) {
+				// The left column is padded to a display width, so cut it by width, not bytes.
+				$left  = function_exists( 'mb_strimwidth' ) ? mb_strimwidth( $row, 0, $split, '', 'UTF-8' ) : substr( $row, 0, $split );
+				$cells = array( $left, (string) substr( $row, strlen( $left ) + 1 ) );
+			}
+
+			// Find the first Component field. It comes before keywords, the only free text field.
+			if ( null === $column ) {
+				foreach ( $cells as $i => $cell ) {
+					if ( preg_match( '/^\s*Component:\s+(.*)$/', $cell, $matches ) ) {
+						$column = $i;
+						$value  = trim( $matches[1] );
+						break;
+					}
+				}
+				continue;
+			}
+
+			// A wrapped value continues on the next lines of its column, until a blank cell or the next field.
+			$cell = isset( $cells[ $column ] ) ? trim( $cells[ $column ] ) : '';
+			if ( '' === $cell || preg_match( '/^[^:]+:(\s|$)/', $cell ) ) {
+				break;
+			}
+
+			// Trac wraps after hyphens too, which needs no space when rejoined.
+			$value .= ( '-' === substr( $value, -1 ) ? '' : ' ' ) . $cell;
+		}
+
+		return $value;
 	}
 
 	function format_comment_for_slack() {

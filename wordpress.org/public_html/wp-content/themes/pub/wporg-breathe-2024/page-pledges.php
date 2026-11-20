@@ -1,8 +1,6 @@
 <?php
 
 /*
- * Template Name: Pledges
- *
  * Note: Pledges is a simulated page, rather than actually existing in the database; see `mu-plugins/make-network/team-pledges.php`.
  *
  * Page 1 of the Five for the Future redesign — team contributor directory.
@@ -48,8 +46,9 @@ $current_team = Pledges\get_current_team();
 // help bring contribution tracking to the team.
 // ------------------------------------------------------------------
 if ( ! ContributionMetrics\team_has_tracking_data( $current_team->post_name ) ) {
+	// The team slug can differ from the site path (the Core AI team lives at /ai/), so link the handbook relative to this site.
 	$team_slug    = $current_team->post_name;
-	$handbook_url = 'https://make.wordpress.org/' . $team_slug . '/handbook/';
+	$handbook_url = home_url( '/handbook/' );
 	/* translators: %s: team name */
 	$handbook_label = sprintf( __( 'Open the %s Handbook', 'wporg-5ftf' ), $current_team->post_title );
 	?>

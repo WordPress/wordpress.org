@@ -23,6 +23,15 @@ class Trac implements User {
 	// 'title', 'fields', 'description'
 	protected $primary_channel_ticket_format = 'description';
 
+	/**
+	 * How much of the commit message to post to the primary channel.
+	 *
+	 * 'full' posts the whole commit message, 'summary' only its first line.
+	 *
+	 * @var string
+	 */
+	protected $primary_channel_commit_format = 'full';
+
 	protected $bypass_primary_channel_for_commit_filter_matches = false;
 	protected $bypass_primary_channel_for_ticket_filter_matches = false;
 
@@ -35,6 +44,20 @@ class Trac implements User {
 	 * @var array
 	 */
 	protected $ticket_keyword_filters = array();
+
+	/**
+	 * Maps Trac components (or commit message prefixes) to component specific channels.
+	 *
+	 * Notifications for a component go to that channel's -firehose, -newtickets and -commits
+	 * channels, not to the channel itself. This includes commits that $commit_path_filters
+	 * sends to one of these channels.
+	 *
+	 * A value can be one channel, or an array of channels for a component that belongs to
+	 * more than one area. Components with an empty value have no component channels.
+	 *
+	 * @var array
+	 */
+	protected $component_channels = array();
 
 	protected $color = '#0073aa';
 	protected $icon  = ':wordpress:';
@@ -250,6 +273,24 @@ class Trac implements User {
 			}
 		}
 
+		// The component must be followed by a word boundary, so "AI" doesn't match "AIX".
+		foreach ( array_keys( $this->component_channels ) as $component ) {
+			if ( preg_match( '/^' . preg_quote( $component, '/' ) . '\b/i', $log_text ) ) {
+				foreach ( $this->get_component_base_channels( $component ) as $channel ) {
+					$channels[ $channel ] = true;
+				}
+			}
+		}
+
+		// Commits for a component go to its -commits and -firehose channels rather than the component channel itself.
+		foreach ( $this->get_all_component_base_channels() as $channel ) {
+			if ( ! empty( $channels[ $channel ] ) ) {
+				unset( $channels[ $channel ] );
+				$channels[ $channel . '-commits' ]  = true;
+				$channels[ $channel . '-firehose' ] = true;
+			}
+		}
+
 		if ( $this->firehose_channel ) {
 			$channels[ $this->firehose_channel ] = true;
 		}
@@ -291,6 +332,14 @@ class Trac implements User {
 			}
 		}
 
+		// New tickets in a component with channels go to each channel's -newtickets and -firehose channels.
+		if ( isset( $ticket->component ) ) {
+			foreach ( $this->get_component_base_channels( $ticket->component ) as $channel ) {
+				$channels[ $channel . '-newtickets' ] = true;
+				$channels[ $channel . '-firehose' ]   = true;
+			}
+		}
+
 		if ( $this->firehose_channel ) {
 			$channels[ $this->firehose_channel ] = true;
 		}
@@ -300,6 +349,47 @@ class Trac implements User {
 
 	function get_firehose_channel() {
 		return $this->firehose_channel;
+	}
+
+	/**
+	 * Gets the firehose channels for a component.
+	 *
+	 * @param string $component Trac component name.
+	 * @return string[] Channel names. Empty if the component has no channels.
+	 */
+	public function get_component_firehose_channels( $component ) {
+		return array_map(
+			function ( $channel ) {
+				return $channel . '-firehose';
+			},
+			$this->get_component_base_channels( $component )
+		);
+	}
+
+	/**
+	 * Gets the component specific channels a component maps to, without a suffix.
+	 *
+	 * @param string $component Trac component name, or commit message prefix.
+	 * @return string[] Channel names. Empty if the component has no channels.
+	 */
+	protected function get_component_base_channels( $component ) {
+		if ( empty( $this->component_channels[ $component ] ) ) {
+			return array();
+		}
+		return array_values( array_filter( (array) $this->component_channels[ $component ] ) );
+	}
+
+	/**
+	 * Gets every component specific channel, without a suffix.
+	 *
+	 * @return string[] Channel names.
+	 */
+	protected function get_all_component_base_channels() {
+		$channels = array();
+		foreach ( array_keys( $this->component_channels ) as $component ) {
+			$channels = array_merge( $channels, $this->get_component_base_channels( $component ) );
+		}
+		return array_unique( $channels );
 	}
 
 	/**
@@ -321,6 +411,19 @@ class Trac implements User {
 			return $this->primary_channel_ticket_format;
 		}
 		return 'description';
+	}
+
+	/**
+	 * Gets how much of the commit message to post to a channel.
+	 *
+	 * @param string $channel Channel name.
+	 * @return string 'full' or 'summary'.
+	 */
+	public function get_commit_format( $channel ) {
+		if ( $channel === $this->primary_channel ) {
+			return $this->primary_channel_commit_format;
+		}
+		return 'full';
 	}
 
 	/**
