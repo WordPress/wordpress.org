@@ -3,13 +3,14 @@ namespace WordPressdotorg\Plugin_Directory\Bin\BulkSecurityEmails;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Tools;
 
-use WordPressdotorg\MU_Plugins\Utilities\HelpScout; // NOTE: NOT the same as the HelpScout class in this plugin.
+use WordPressdotorg\MU_Plugins\Utilities\FreeScout;
+use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 
 /**
  * This script will process a given CSV and close/email plugin authors.
  *
- * NOTE: The emails created in HelpScout will not be sent. We must also send it (Which this script does).
- *       As a result, replies to the email will NOT thread properly.
+ * The emails are sent from FreeScout's Plugins mailbox, as new conversations, so replies thread there.
+ * Their texts are the mailbox's saved replies, which the WPOrgApi module hands over.
  *
  * The CSV should contain multiple fields.
  *  - At least one must be the 'slug', this is the plugin it will be looking for.
@@ -30,8 +31,9 @@ if ( 'cli' != php_sapi_name() ) {
 
 // Comment out once you're sure you know what you're doing :)
 die( 'Please check the source, and validate this will work as you anticipate.' );
+// phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable
 
-$opts = getopt( '', array( 'url:', 'abspath:', 'csv:', 'only-warn', 'doit' ) );
+$opts = getopt( '', array( 'url:', 'abspath:', 'csv:', 'only-warn', 'doit', 'assign:' ) );
 
 if ( empty( $opts['url'] ) ) {
 	$opts['url'] = 'https://wordpress.org/plugins/';
@@ -62,6 +64,10 @@ if ( empty( $opts['csv'] ) ) {
 	die( "Need a --csv param." );
 }
 
+if ( ! Helpdesk::is_freescout() || ! defined( 'FREESCOUT_API_KEY' ) ) {
+	die( "Define FREESCOUT_PLUGINS_MAILBOX_ID and FREESCOUT_API_KEY first.\n" );
+}
+
 if ( 'live' == OPERATION_MODE ) {
 	echo "Running in live mode. Changes will be made.\nProceeding in 10s...\n";
 	sleep( 10 );
@@ -70,28 +76,85 @@ if ( 'live' == OPERATION_MODE ) {
 	echo "Running in dry-run mode. No changes will be made. Pass --doit parameter to make changes.\n";
 }
 
-// Load the HelpScout API helper methods.
-require_once API_WPORGPATH . '/dotorg/helpscout/common.php';
-
 // Set a user to run as.
 wp_set_current_user( get_user_by( 'slug', 'wordpressdotorg' )->ID );
 
-const ATTRIBUTE_TO_USER = 544543; // dd32 - This is who should show as having sent it. Fetch it from your HS profile edit url.
-const ASSIGN_TO_USER    = 433937; // plugin security team - this is who should be assigned for responses
-const WARN_THRESHOLD    = 10000;  // active installs to go from instant close => warn w/ 30days.
+if ( isset( $opts['assign'] ) && ! ctype_digit( (string) $opts['assign'] ) ) {
+	die( "--assign must be a numeric FreeScout ID.\n" );
+}
+
+// FreeScout agent the emails come from: wordpressdotorg, as FreeScout lets the API key act only as its owner.
+const ATTRIBUTE_TO_USER = Helpdesk::FREESCOUT_USER_ID;
+// FreeScout user or team to assign the conversations to; unassigned by default.
+define( __NAMESPACE__ . '\ASSIGN_TO_USER', (int) ( $opts['assign'] ?? 0 ) );
+const WARN_THRESHOLD = 10000;  // active installs to go from instant close => warn w/ 30days.
+const TIMEOUT        = 30;     // seconds a request to FreeScout may take.
 
 /**
- * Fetch the email template from HelpScout.
+ * Each saved reply's placeholder for the vulnerability details; FreeScout's editor may write the line breaks differently.
+ */
+const DETAILS_PLACEHOLDERS = [
+	'Warning: Security Issue (NOT CLOSED)' => '#LINK(\s*<br\s*/?>\s*)+DETAILS#i',
+	'Closed: Security Exploit'             => '#REPORT(\s*<br\s*/?>\s*)+OPTIONAL_ADDITIONAL#i',
+];
+
+/**
+ * Fetch the email template, a saved reply of FreeScout's Plugins mailbox.
+ *
+ * @param string $name The saved reply's name.
+ * @return string Its HTML; dies if it couldn't be read.
  */
 function get_email_template( $name ) {
-	static $ids;
 	static $cache = [];
 
-	$api = HelpScout::instance();
-	$ids            ??= wp_list_pluck( $api->get( '/v2/mailboxes/' . $api->get_mailbox_id( 'plugins' ) . '/saved-replies' ), 'id', 'name' );
-	$cache[ $name ] ??= $api->get( '/v2/mailboxes/' . $api->get_mailbox_id( 'plugins' ) . '/saved-replies/' . $ids[ $name ] );
+	$cache[ $name ] ??= get_saved_reply( $name );
+	if ( null === $cache[ $name ] ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
+		die( "Couldn't fetch the saved reply \"$name\" from FreeScout.\n" );
+	}
 
-	return $cache[ $name ]->text ?? false;
+	return $cache[ $name ];
+}
+
+/**
+ * A saved reply of the Plugins mailbox, by name, from FreeScout's WPOrgApi module, as the API has none.
+ *
+ * @param string $name The saved reply's name.
+ * @return string|null Its HTML; null if there's no such reply, or it couldn't be read.
+ */
+function get_saved_reply( $name ) {
+	if ( ! defined( 'FREESCOUT_SECRET' ) || '' === (string) FREESCOUT_SECRET ) {
+		return null;
+	}
+
+	$body = (string) wp_json_encode(
+		[
+			'mailbox_id' => Helpdesk::freescout_mailbox_id(),
+			'name'       => $name,
+			'endpoint'   => 'saved-reply',
+			'sent_at'    => time(),
+		]
+	);
+
+	$response = wp_remote_post(
+		FreeScout::URL . '/wporgapi/saved-reply',
+		[
+			'timeout' => TIMEOUT,
+			'headers' => [
+				'Accept'            => 'application/json',
+				'Content-Type'      => 'application/json',
+				'X-WPOrg-Signature' => hash_hmac( 'sha256', $body, (string) FREESCOUT_SECRET ),
+			],
+			'body'    => $body,
+		]
+	);
+
+	$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+	if ( 200 !== (int) wp_remote_retrieve_response_code( $response ) || ! isset( $data['text'] ) ) {
+		return null;
+	}
+
+	return (string) $data['text'];
 }
 
 function fetch_all_from_csv() {
@@ -140,64 +203,69 @@ function format_vulns_for_email( $vulns, $plugin ) {
 }
 
 /**
- * Send an email, both by wp_mail() and log it into HelpScout.
- *
- * HelpScout allows creation of emails through the API, but does not actually allow you to send an email.
- * Therefor, we send the email, and create it within HS.
- * Unfortunately, replies do not thread to the created email.. but at least we have a log..
+ * Send an email, as a new conversation in FreeScout's Plugins mailbox, which sends it.
  */
 function send_email( $args ) {
 	global $opts;
 
-	$filter = function() { return 'text/html'; };
-	add_filter( 'wp_mail_content_type', $filter );
-
-	wp_mail(
-		$args['to'] ?? '',
-		$args['subject'] ?? '',
-		str_replace( "<br />", "<br />\n", $args['body'] ?? '' ),
-		array_filter( [
-			'From: WordPress.org Plugin Directory <plugins@wordpress.org>',
-			'Return-Path: <plugins@wordpress.org>',
-			( $args['cc'] ? 'CC: ' . implode( ', ', $args['cc'] ) : '' ),
-			( $args['bcc'] ? 'BCC: ' . implode( ', ', (array) $args['bcc'] ) : '' ),
-		] )
-	);
-	remove_filter( 'wp_mail_content_type', $filter );
-
-	$api = HelpScout::instance();
 	$payload = [
 		'type'      => 'email',
-		'assignTo'  => ASSIGN_TO_USER,
-		'mailboxId' => $api->get_mailbox_id( 'plugins' ),
+		'mailboxId' => Helpdesk::freescout_mailbox_id(),
 		'status'    => 'closed',
-		'imported'  => true,
 		'customer'  => array_filter( [
 			'email'     => $args['to'] ?? '',
 			'firstName' => explode( ' ', $args['name'] ?? '', 2 )[0] ?? '',
 			'lastName'  => explode( ' ', $args['name'] ?? '', 2 )[1] ?? '',
 		] ),
 		'subject'   => $args['subject'] ?? '',
+		// The API takes threads newest first.
 		'threads'   => [
 			[
 				'type' => 'note',
-				'text' => 'This was automated by <code>bin/email-bulk-security-vulnerabilities.php</code> processing a CSV file: <code>' . ( $opts['csv'] ?? '' ) . '</code>',
-				'user' => ATTRIBUTE_TO_USER
+				// FreeScout replaces the conversation's CC with every new thread's, notes included.
+				'cc'   => (array) ( $args['cc'] ?? [] ),
+				'text' => 'This was automated by <code>bin/email-bulk-security-vulnerabilities.php</code> processing a CSV file: <code>' . esc_html( $opts['csv'] ?? '' ) . '</code>',
+				'user' => ATTRIBUTE_TO_USER,
 			],
 			[
-				'type'  => 'reply',
-				'cc'    => (array) ( $args['cc'] ?? [] ),
-				'bcc'   => (array) ( $args['bcc'] ?? [] ),
-				'text'  => $args['body'] ?? '',
-				'customer' => [
-					'email' => 'plugins@wordpress.org',
-				],
-				'user' => ATTRIBUTE_TO_USER
-			]
-		]
+				'type' => 'message',
+				'cc'   => (array) ( $args['cc'] ?? [] ),
+				'bcc'  => (array) ( $args['bcc'] ?? [] ),
+				'text' => $args['body'] ?? '',
+				'user' => ATTRIBUTE_TO_USER,
+			],
+		],
 	];
 
-	return $api->post( '/v2/conversations', $payload );
+	if ( ASSIGN_TO_USER ) {
+		$payload['assignTo'] = ASSIGN_TO_USER;
+	}
+
+	// The shared FreeScout client can't BCC, or add the note.
+	$response = wp_remote_post(
+		FreeScout::URL . '/api/conversations',
+		[
+			'timeout' => TIMEOUT,
+			'headers' => [
+				'Accept'              => 'application/json',
+				'Content-Type'        => 'application/json',
+				'X-FreeScout-API-Key' => FREESCOUT_API_KEY,
+			],
+			'body'    => wp_json_encode( $payload ),
+		]
+	);
+
+	$response_code = (int) wp_remote_retrieve_response_code( $response );
+	$result        = is_wp_error( $response ) ? $response->get_error_message() : json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( is_wp_error( $response ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
+		echo "ERROR: FreeScout didn't respond, but may have sent the email; check the mailbox before running this again: $result\n";
+	} elseif ( 201 !== $response_code ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
+		echo "ERROR: FreeScout didn't create the conversation: $response_code " . wp_json_encode( $result ) . "\n";
+	}
+
+	return 201 === $response_code;
 }
 
 $stats = [
@@ -223,6 +291,14 @@ $all_csv_vulns = [
 */
 
 $only_warn = isset( $opts['only-warn'] );
+
+// Before anything is sent, so a rerun doesn't email the same authors again.
+foreach ( DETAILS_PLACEHOLDERS as $template_name => $placeholder ) {
+	if ( ! preg_match( $placeholder, get_email_template( $template_name ) ) ) {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
+		die( "The saved reply \"$template_name\" has no placeholder for the details.\n" );
+	}
+}
 
 foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 	$plugin = Plugin_Directory::get_plugin_post( $plugin_slug );
@@ -266,7 +342,8 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 
 		$body = $email_template;
 		$body = str_replace( 'PLUGIN_LINK', get_permalink( $plugin ), $body );
-		$body = str_replace( 'LINK<br /><br />DETAILS', '<pre>' . $vuln_desc . '</pre>', $body );
+		// A callback, as the details may hold a "$1".
+		$body = preg_replace_callback( DETAILS_PLACEHOLDERS['Warning: Security Issue (NOT CLOSED)'], fn() => '<pre>' . $vuln_desc . '</pre>', $body );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "Subject: $subject\n\n";
@@ -281,7 +358,10 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 			continue;
 		}
 
-		send_email( compact( 'subject', 'to', 'name', 'cc', 'bcc', 'body' ) );
+		if ( ! send_email( compact( 'subject', 'to', 'name', 'cc', 'bcc', 'body' ) ) ) {
+			++$stats['error'];
+			continue;
+		}
 
 		$stats['warned']++;
 
@@ -296,7 +376,7 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 
 		$body = $email_template;
 		$body = str_replace( 'PLUGIN_LINK', get_permalink( $plugin ), $body );
-		$body = str_replace( 'REPORT<br /><br />OPTIONAL_ADDITIONAL', '<pre>' . $vuln_desc . '</pre>', $body );
+		$body = preg_replace_callback( DETAILS_PLACEHOLDERS['Closed: Security Exploit'], fn() => '<pre>' . $vuln_desc . '</pre>', $body );
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI script; the php_sapi_name() guard above exits for web requests and this is console output.
 		echo "Subject: $subject\n\n";
@@ -311,7 +391,11 @@ foreach ( $all_csv_vulns as $plugin_slug => $vulns ) {
 			continue;
 		}
 
-		send_email( compact( 'subject', 'to', 'cc', 'bcc', 'body' ) );
+		// Don't close a plugin without telling its author.
+		if ( ! send_email( compact( 'subject', 'to', 'cc', 'bcc', 'body' ) ) ) {
+			++$stats['error'];
+			continue;
+		}
 
 		// Record why it's closed
 		update_post_meta( $plugin->ID, '_close_reason', 'security-issue' );
