@@ -125,7 +125,6 @@ class HelpHub_Post_Types_Post_Type {
 			add_action( 'admin_menu', array( $this, 'meta_box_setup' ), 20 );
 			add_action( 'save_post', array( $this, 'meta_box_save' ), 50 );
 			add_filter( 'enter_title_here', array( $this, 'enter_title_here' ) );
-			add_filter( 'post_updated_messages', array( $this, 'updated_messages' ) );
 
 			if ( 'post' !== $this->post_type ) {
 				$screen_id = 'edit-' . $this->post_type;
@@ -152,27 +151,8 @@ class HelpHub_Post_Types_Post_Type {
 		}
 
 		$labels = array(
-			'name'               => $this->plural,
-			'singular_name'      => $this->singular,
-			'add_new'            => _x( 'Add New', 'add new helphub post', 'wporg-forums' ),
-			/* translators: %s: Post type name. */
-			'add_new_item'       => sprintf( __( 'Add New %s', 'wporg-forums' ), $this->singular ),
-			/* translators: %s: Post type name. */
-			'edit_item'          => sprintf( __( 'Edit %s', 'wporg-forums' ), $this->singular ),
-			/* translators: %s: Post type name. */
-			'new_item'           => sprintf( __( 'New %s', 'wporg-forums' ), $this->singular ),
-			/* translators: %s: Plural post type name. */
-			'all_items'          => sprintf( __( 'All %s', 'wporg-forums' ), $this->plural ),
-			/* translators: %s: Post type name. */
-			'view_item'          => sprintf( __( 'View %s', 'wporg-forums' ), $this->singular ),
-			/* translators: %s: Plural post type name. */
-			'search_items'       => sprintf( __( 'Search %s', 'wporg-forums' ), $this->plural ),
-			/* translators: %s: Plural post type name. */
-			'not_found'          => sprintf( __( 'No %s Found', 'wporg-forums' ), $this->plural ),
-			/* translators: %s: Plural post type name. */
-			'not_found_in_trash' => sprintf( __( 'No %s Found In Trash', 'wporg-forums' ), $this->plural ),
-			'parent_item_colon'  => '',
-			'menu_name'          => $this->plural,
+			'name'          => $this->plural,
+			'singular_name' => $this->singular,
 		);
 
 		$defaults = array(
@@ -297,47 +277,6 @@ class HelpHub_Post_Types_Post_Type {
 
 		return $cols;
 	} // End register_custom_column_sorts()
-
-	/**
-	 * Update messages for the post type admin.
-	 *
-	 * @since  1.0.0
-	 *
-	 * @param  array $messages Array of messages for all post types.
-	 *
-	 * @return array           Modified array.
-	 */
-	public function updated_messages( $messages ) {
-		global $post, $post_ID; /* @codingStandardsIgnoreLine */
-
-		$permalink = get_permalink( $post_ID ); /* @codingStandardsIgnoreLine */
-
-		$messages[ $this->post_type ] = array(
-			0  => '',
-			// Unused. Messages start at index 1.
-			/* translators: %1$s: Post link tag. %2$s: Close post link tag. %3$s: Post type name. %4$s: Lowercase post type name. */
-			1  => sprintf( __( '%3$s updated. %1$sView %4$s%2$s', 'wporg-forums' ), '<a href="' . esc_url( $permalink ) . '">', '</a>', $this->singular, strtolower( $this->singular ) ),
-			2  => __( 'Custom field updated.', 'wporg-forums' ),
-			3  => __( 'Custom field deleted.', 'wporg-forums' ),
-			/* translators: %s: Post type name. */
-			4  => sprintf( __( '%s updated.', 'wporg-forums' ), $this->singular ),
-			/* translators: %s: date and time of the revision */
-			5  => isset( $_GET['revision'] ) ? sprintf( __( '%1$s restored to revision from %2$s', 'wporg-forums' ), $this->singular, wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			// WPCS: CSRF ok; input var ok.
-			/* translators: %1$s Post type name. %2$s: Lowercase post type name. %3$s: Post link tag. %4$s: Close post link tag. */
-			6  => sprintf( __( '%1$s published. %3$sView %2$s%4$s', 'wporg-forums' ), $this->singular, strtolower( $this->singular ), '<a href="' . esc_url( $permalink ) . '">', '</a>' ),
-			/* translators: %s: Post type name. */
-			7  => sprintf( __( '%s saved.', 'wporg-forums' ), $this->singular ),
-			/* translators: %1$s: Post type name. %2$s: Lowercase post type name. %3$s: Post link tag. %4$s: Close post link tag. */
-			8  => sprintf( __( '%1$s submitted. %2$sPreview %3$s%4$s', 'wporg-forums' ), $this->singular, '<a target="_blank" href="' . esc_url( add_query_arg( 'preview', 'true', $permalink ) ) . '">', strtolower( $this->singular ), '</a>' ),
-			/* translators: %1$s: Post type name. %2$s: Lowercase post type name. %3$s: Date. %4$s: Post link tag. %5$s: Close post link tag. */
-			9  => sprintf( __( '%1$s scheduled for: %3$s. %4$sPreview %2$s%5$s', 'wporg-forums' ), $this->singular, strtolower( $this->singular ), '<strong>' . date_i18n( __( 'M j, Y @ G:i', 'wporg-forums' ), strtotime( $post->post_date ) ) . '</strong>', '<a target="_blank" href="' . esc_url( $permalink ) . '">', '</a>' ),
-			/* translators: %1$s: Post type name. %2$s: Lowercase post type name. %3$s: Post link tag. %4$s: Close post link tag. */
-			10 => sprintf( __( '%1$s draft updated. %3$sPreview %2$s%4$s', 'wporg-forums' ), $this->singular, strtolower( $this->singular ), '<a target="_blank" href="' . esc_url( add_query_arg( 'preview', 'true', $permalink ) ) . '">', '</a>' ),
-		);
-
-		return $messages;
-	} // End updated_messages()
 
 	/**
 	 * Setup the meta box.
@@ -554,7 +493,6 @@ class HelpHub_Post_Types_Post_Type {
 			$html .= '</table>' . "\n";
 		} // End if().
 
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Markup assembled above from escaped parts.
 		echo $html;
 		/* @codingStandardsIgnoreLine */
 	} // End meta_box_content()

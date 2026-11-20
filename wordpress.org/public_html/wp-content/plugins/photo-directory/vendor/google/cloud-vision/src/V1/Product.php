@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * A Product contains ReferenceImages.
@@ -23,30 +23,31 @@ class Product extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string name = 1;</code>
      */
-    private $name = '';
+    protected $name = '';
     /**
      * The user-provided name for this Product. Must not be empty. Must be at most
      * 4096 characters long.
      *
      * Generated from protobuf field <code>string display_name = 2;</code>
      */
-    private $display_name = '';
+    protected $display_name = '';
     /**
      * User-provided metadata to be stored with this product. Must be at most 4096
      * characters long.
      *
      * Generated from protobuf field <code>string description = 3;</code>
      */
-    private $description = '';
+    protected $description = '';
     /**
-     * Immutable. The category for the product identified by the reference image. This should
-     * be one of "homegoods-v2", "apparel-v2", "toys-v2", "packagedgoods-v1" or
-     * "general-v1". The legacy categories "homegoods", "apparel", and "toys" are
-     * still supported, but these should not be used for new products.
+     * Immutable. The category for the product identified by the reference image.
+     * This should be one of "homegoods-v2", "apparel-v2", "toys-v2",
+     * "packagedgoods-v1" or "general-v1". The legacy categories "homegoods",
+     * "apparel", and "toys" are still supported, but these should not be used for
+     * new products.
      *
      * Generated from protobuf field <code>string product_category = 4 [(.google.api.field_behavior) = IMMUTABLE];</code>
      */
-    private $product_category = '';
+    protected $product_category = '';
     /**
      * Key-value pairs that can be attached to a product. At query time,
      * constraints can be specified based on the product_labels.
@@ -81,11 +82,12 @@ class Product extends \Google\Protobuf\Internal\Message
      *           User-provided metadata to be stored with this product. Must be at most 4096
      *           characters long.
      *     @type string $product_category
-     *           Immutable. The category for the product identified by the reference image. This should
-     *           be one of "homegoods-v2", "apparel-v2", "toys-v2", "packagedgoods-v1" or
-     *           "general-v1". The legacy categories "homegoods", "apparel", and "toys" are
-     *           still supported, but these should not be used for new products.
-     *     @type \Google\Cloud\Vision\V1\Product\KeyValue[]|\Google\Protobuf\Internal\RepeatedField $product_labels
+     *           Immutable. The category for the product identified by the reference image.
+     *           This should be one of "homegoods-v2", "apparel-v2", "toys-v2",
+     *           "packagedgoods-v1" or "general-v1". The legacy categories "homegoods",
+     *           "apparel", and "toys" are still supported, but these should not be used for
+     *           new products.
+     *     @type \Google\Cloud\Vision\V1\Product\KeyValue[] $product_labels
      *           Key-value pairs that can be attached to a product. At query time,
      *           constraints can be specified based on the product_labels.
      *           Note that integer values can be provided as strings, e.g. "1199". Only
@@ -192,10 +194,11 @@ class Product extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Immutable. The category for the product identified by the reference image. This should
-     * be one of "homegoods-v2", "apparel-v2", "toys-v2", "packagedgoods-v1" or
-     * "general-v1". The legacy categories "homegoods", "apparel", and "toys" are
-     * still supported, but these should not be used for new products.
+     * Immutable. The category for the product identified by the reference image.
+     * This should be one of "homegoods-v2", "apparel-v2", "toys-v2",
+     * "packagedgoods-v1" or "general-v1". The legacy categories "homegoods",
+     * "apparel", and "toys" are still supported, but these should not be used for
+     * new products.
      *
      * Generated from protobuf field <code>string product_category = 4 [(.google.api.field_behavior) = IMMUTABLE];</code>
      * @return string
@@ -206,10 +209,11 @@ class Product extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Immutable. The category for the product identified by the reference image. This should
-     * be one of "homegoods-v2", "apparel-v2", "toys-v2", "packagedgoods-v1" or
-     * "general-v1". The legacy categories "homegoods", "apparel", and "toys" are
-     * still supported, but these should not be used for new products.
+     * Immutable. The category for the product identified by the reference image.
+     * This should be one of "homegoods-v2", "apparel-v2", "toys-v2",
+     * "packagedgoods-v1" or "general-v1". The legacy categories "homegoods",
+     * "apparel", and "toys" are still supported, but these should not be used for
+     * new products.
      *
      * Generated from protobuf field <code>string product_category = 4 [(.google.api.field_behavior) = IMMUTABLE];</code>
      * @param string $var
@@ -236,7 +240,7 @@ class Product extends \Google\Protobuf\Internal\Message
      * will refuse to work for that ProductSet.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.Product.KeyValue product_labels = 5;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Cloud\Vision\V1\Product\KeyValue>
      */
     public function getProductLabels()
     {
@@ -256,7 +260,7 @@ class Product extends \Google\Protobuf\Internal\Message
      * will refuse to work for that ProductSet.
      *
      * Generated from protobuf field <code>repeated .google.cloud.vision.v1.Product.KeyValue product_labels = 5;</code>
-     * @param \Google\Cloud\Vision\V1\Product\KeyValue[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Cloud\Vision\V1\Product\KeyValue[] $var
      * @return $this
      */
     public function setProductLabels($var)

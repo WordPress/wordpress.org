@@ -14,22 +14,9 @@ class LogSeverity
         if (static::$is_initialized == true) {
           return;
         }
-        \GPBMetadata\Google\Api\Annotations::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0aec020a26676f6f676c652f6c6f6767696e672f747970652f6c6f675f73" .
-            "657665726974792e70726f746f1213676f6f676c652e6c6f6767696e672e" .
-            "747970652a82010a0b4c6f675365766572697479120b0a0744454641554c" .
-            "54100012090a054445425547106412090a04494e464f10c801120b0a064e" .
-            "4f5449434510ac02120c0a075741524e494e47109003120a0a054552524f" .
-            "5210f403120d0a08435249544943414c10d804120a0a05414c45525410bc" .
-            "05120e0a09454d455247454e435910a006429f010a17636f6d2e676f6f67" .
-            "6c652e6c6f6767696e672e7479706542104c6f6753657665726974795072" .
-            "6f746f50015a38676f6f676c652e676f6c616e672e6f72672f67656e7072" .
-            "6f746f2f676f6f676c65617069732f6c6f6767696e672f747970653b6c74" .
-            "797065aa0219476f6f676c652e436c6f75642e4c6f6767696e672e547970" .
-            "65ca0219476f6f676c655c436c6f75645c4c6f6767696e675c5479706562" .
-            "0670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\x92\x03\x0A&google/logging/type/log_severity.proto\x12\x13google.logging.type*\x82\x01\x0A\x0BLogSeverity\x12\x0B\x0A\x07DEFAULT\x10\x00\x12\x09\x0A\x05DEBUG\x10d\x12\x09\x0A\x04INFO\x10\xC8\x01\x12\x0B\x0A\x06NOTICE\x10\xAC\x02\x12\x0C\x0A\x07WARNING\x10\x90\x03\x12\x0A\x0A\x05ERROR\x10\xF4\x03\x12\x0D\x0A\x08CRITICAL\x10\xD8\x04\x12\x0A\x0A\x05ALERT\x10\xBC\x05\x12\x0E\x0A\x09EMERGENCY\x10\xA0\x06B\xC5\x01\x0A\x17com.google.logging.typeB\x10LogSeverityProtoP\x01Z8google.golang.org/genproto/googleapis/logging/type;ltype\xA2\x02\x04GLOG\xAA\x02\x19Google.Cloud.Logging.Type\xCA\x02\x19Google\\Cloud\\Logging\\Type\xEA\x02\x1CGoogle::Cloud::Logging::Typeb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

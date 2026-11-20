@@ -27,7 +27,7 @@ use Google\Auth\FetchAuthTokenInterface;
 class InsecureCredentials implements FetchAuthTokenInterface
 {
     /**
-     * @var array
+     * @var array{access_token:string}
      */
     private $token = [
         'access_token' => ''
@@ -36,12 +36,10 @@ class InsecureCredentials implements FetchAuthTokenInterface
     /**
      * Fetches the auth token. In this case it returns an empty string.
      *
-     * @param callable $httpHandler
-     * @return array A set of auth related metadata, containing the following
-     * keys:
-     *   - access_token (string)
+     * @param callable|null $httpHandler
+     * @return array{access_token:string} A set of auth related metadata
      */
-    public function fetchAuthToken(callable $httpHandler = null)
+    public function fetchAuthToken(?callable $httpHandler = null)
     {
         return $this->token;
     }
@@ -61,7 +59,7 @@ class InsecureCredentials implements FetchAuthTokenInterface
      * Fetches the last received token. In this case, it returns the same empty string
      * auth token.
      *
-     * @return array
+     * @return array{access_token:string}
      */
     public function getLastReceivedToken()
     {

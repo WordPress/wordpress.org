@@ -89,7 +89,7 @@ class Plugin {
 
 		if ( 'yes' == $this->get_topic_resolution( array( 'id' => $topic_id ) ) ) {
 			$title = sprintf(
-				'<span class="resolved" aria-label="%s" title="%s"></span>',
+				'<span class="resolved" role="img" aria-label="%s" title="%s"></span>',
 				esc_attr__( 'Resolved', 'wporg-forums' ),
 				esc_attr__( 'Topic is resolved.', 'wporg-forums' )
 			) . $title;

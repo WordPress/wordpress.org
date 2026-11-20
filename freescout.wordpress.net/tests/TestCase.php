@@ -75,11 +75,17 @@ abstract class TestCase extends BaseTestCase {
 	/**
 	 * Creates a mailbox.
 	 *
-	 * @param string $name Mailbox name.
+	 * @param string $name  Mailbox name.
+	 * @param string $email Mailbox address; unique by default.
 	 * @return Mailbox
 	 */
-	protected function create_mailbox( string $name = 'Plugins' ): Mailbox {
-		return factory( Mailbox::class )->create( array( 'name' => $name ) );
+	protected function create_mailbox( string $name = 'Plugins', string $email = '' ): Mailbox {
+		$attributes = array(
+			'name'  => $name,
+			'email' => $email,
+		);
+
+		return factory( Mailbox::class )->create( array_filter( $attributes ) );
 	}
 
 	/**

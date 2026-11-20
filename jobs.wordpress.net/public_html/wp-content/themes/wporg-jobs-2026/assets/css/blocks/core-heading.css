@@ -1,0 +1,6 @@
+.wp-block-heading.is-style-highlight mark,
+.wp-block-heading.is-style-highlight .has-inline-color {
+	padding-inline: 4px;
+	background: linear-gradient(to top, var(--wp--preset--color--mint-mid) 40%, transparent 40%);
+	color: var(--wp--preset--color--ink);
+}

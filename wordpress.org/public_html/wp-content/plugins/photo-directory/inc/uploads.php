@@ -10,6 +10,16 @@ namespace WordPressdotorg\Photo_Directory;
 class Uploads {
 
 	/**
+	 * Minimum number of words for a photo's description.
+	 *
+	 * Enforced when a photo is submitted. Moderators editing a photo in
+	 * wp-admin do not pass through that check.
+	 *
+	 * @var int
+	 */
+	const MIN_WORDS_DESCRIPTION = 10;
+
+	/**
 	 * Maximum number of characters for a photo's description.
 	 *
 	 * @var int
@@ -87,8 +97,6 @@ class Uploads {
 
 		// Enqueue scripts.
 		add_action( 'wp_enqueue_scripts',               [ __CLASS__, 'wp_enqueue_scripts' ] );
-		// Adds user's recent submissions above upload form.
-		add_filter( 'wporg_photos_pre_upload_form',     [ __CLASS__, 'output_user_recent_submissions' ] );
 		// Disable upload form and show message if user not allowed to upload.
 		add_filter( 'the_content',                      [ __CLASS__, 'insert_upload_disallowed_notice' ], 1 );
 		// Insert upload form into submit page.
@@ -272,6 +280,14 @@ class Uploads {
 					// Field required.
 					'err_field_required'    => __( 'This field is required.', 'wporg-photos' ),
 
+					// Description length.
+					'min_description_words'     => self::MIN_WORDS_DESCRIPTION,
+					'err_description_too_short' => sprintf(
+						/* translators: %d: minimum number of words. */
+						__( 'Please describe the photo in at least %d words.', 'wporg-photos' ),
+						self::MIN_WORDS_DESCRIPTION
+					),
+
 					// File extension.
 					'err_invalid_mimetype' => __( 'Please select a JPEG image.', 'wporg-photos' ),
 
@@ -440,8 +456,18 @@ class Uploads {
 				case 'concurrent-submission-limit':
 					$rejection = __( 'You already have a submission awaiting moderation.', 'wporg-photos' );
 					break;
+				case 'description-too-short':
+					$rejection = sprintf(
+						/* translators: %d: minimum number of words. */
+						__( 'Your description is too short. Please describe the photo in at least %d words.', 'wporg-photos' ),
+						self::MIN_WORDS_DESCRIPTION
+					);
+					break;
 				case 'duplicate-file':
 					$rejection = __( 'Your submission appears to be a duplicate of something uploaded before.', 'wporg-photos' );
+					break;
+				case 'duplicate-pending-file-name':
+					$rejection = __( 'You already have a pending submission with this file name.', 'wporg-photos' );
 					break;
 				case 'file-not-jpg':
 					$rejection = __( 'Your submission must be an image in the JPEG format.', 'wporg-photos' );
@@ -679,6 +705,12 @@ class Uploads {
 			return 'too-many-files';
 		}
 
+		// The browser compares the raw file name, but pending file names are stored sanitized.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by has_pending_file_name() the same way the name is stored.
+		if ( User::has_pending_file_name( $_FILES['files']['name'][0] ?? '' ) ) {
+			return 'duplicate-pending-file-name';
+		}
+
 		// Check file size.
 		if ( ! empty( $_FILES['files']['size'][0] ) ) {
 			$file_size = $_FILES['files']['size'][0];
@@ -742,7 +774,34 @@ class Uploads {
 			}
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by count_description_words() the same way the description is stored.
+		$description = isset( $_POST['post_content'] ) ? wp_unslash( $_POST['post_content'] ) : '';
+		if ( self::count_description_words( $description ) < self::MIN_WORDS_DESCRIPTION ) {
+			return 'description-too-short';
+		}
+
 		return false;
+	}
+
+	/**
+	 * Counts words in a photo description.
+	 *
+	 * A word is a run of letters or numbers. Internal apostrophes and hyphens
+	 * remain part of the word. The description is sanitized exactly as it will
+	 * be before storage, and encoded HTML characters do not count as words.
+	 *
+	 * @param mixed $text Submitted description.
+	 * @return int
+	 */
+	public static function count_description_words( $text ) {
+		if ( ! is_string( $text ) || '' === $text ) {
+			return 0;
+		}
+
+		$text  = html_entity_decode( sanitize_textarea_field( $text ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$count = preg_match_all( '/[\p{L}\p{N}]+(?:[\'\x{2019}-][\p{L}\p{N}]+)*/u', $text );
+
+		return false === $count ? 0 : $count;
 	}
 
 	 /**
@@ -1022,9 +1081,19 @@ class Uploads {
 					esc_attr( __( 'Photo', 'wporg-photos' ) )
 				)
 				. sprintf(
-					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" accept="%s">' . "\n",
+					'<input type="file" name="files[]" id="ug_photo" value="" required="true" aria-required="true" aria-describedby="ug-photo-help" accept="%s">' . "\n",
 					esc_attr( $valid_upload_mimetypes )
 				)
+				. '<p class="ugc-help" id="ug-photo-help">'
+				. sprintf(
+					/* translators: 1: minimum width/height in pixels, 2: maximum width/height in pixels, 3: minimum file size in megabytes, 4: maximum file size in megabytes. */
+					esc_html__( 'Select a JPEG image of high quality (in terms of resolution and composition). Width and height must each be between %1$s and %2$s pixels. File size must be between %3$s MB and %4$s MB.', 'wporg-photos' ),
+					number_format_i18n( self::get_minimum_photo_dimension() ),
+					number_format_i18n( self::big_image_size_threshold( 0 ) ),
+					number_format_i18n( self::get_minimum_photo_file_size( false ) ),
+					number_format_i18n( self::get_maximum_photo_file_size( false ) )
+				)
+				. '</p>' . "\n"
 				. '<div id="ug_photo_preview_wrap" class="ugc-photo-preview" hidden>' . "\n"
 				. sprintf(
 					'<button type="button" id="ug_photo_preview_button" class="ugc-photo-preview__button" aria-haspopup="dialog" aria-controls="ug_photo_preview_dialog" title="%1$s" aria-label="%1$s">' . "\n",
@@ -1052,14 +1121,16 @@ class Uploads {
 				. "</dialog>\n"
 				. "</div>\n"
 				. sprintf(
-					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" maxlength="%d"]' . "\n",
+					'[%s name="post_content" class="textarea" id="ug_content" description="%s" required="required" aria-required="true" aria-describedby="ug_content_help" maxlength="%d"]' . "\n",
 					$description_shortcode,
 					esc_attr( __( 'Alternative Text (required)', 'wporg-photos' ) ),
 					self::MAX_LENGTH_DESCRIPTION
 				)
-				. '<p class="ugc-help">'
+				. '<p class="ugc-help" id="ug_content_help">'
 				. sprintf(
-					__( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Maximum of %d characters. No HTML. <a href="%s">Learn more about alternative text.</a>', 'wporg-photos' ),
+					/* translators: 1: minimum number of words, 2: maximum number of characters, 3: URL to alternative text guidance. */
+					__( 'Describe what can be seen in the photo for the benefit of those without sight. May be edited by moderators. Minimum of %1$d words. Maximum of %2$d characters. No HTML. <a href="%3$s">Learn more about alternative text.</a>', 'wporg-photos' ),
+					self::MIN_WORDS_DESCRIPTION,
 					self::MAX_LENGTH_DESCRIPTION,
 					'https://make.wordpress.org/photos/2024/02/02/alt-text-for-wordpress-photos/'
 				)
@@ -1142,40 +1213,6 @@ class Uploads {
 
 		return $transforms;
 	}
-
-	/**
-	 * Adds current user's 6 most recent photo submissions above upload form.
-	 *
-	 * @param string $content Existing content before the upload form.
-	 * @return string
-	 */
-	public static function output_user_recent_submissions( $content ) {
-		// Bail if user does not have any published photos.
-		if ( ! User::count_published_photos( get_current_user_id() ) ) {
-			return $content;
-		}
-
-		$recent_photos = User::get_recent_photos( get_current_user_id(), 6, false );
-		if ( $recent_photos ) {
-			$content .= '<h2 class="latest-photos">' . esc_html__( 'Your latest published photos', 'wporg-photos' ) . '</h2>' . "\n";
-			$content .= '<div class="photos-grid">' . "\n";
-
-			foreach ( $recent_photos as $photo ) {
-				$content .= Template_Tags\get_photo_as_grid_item( $photo, 'medium', 'post' );
-			}
-
-			$content .= "</div>\n";
-		}
-
-		$content .= sprintf(
-			/* translators: %s: URL to current user's photo archive. */
-			'<p>' . __( 'View <a href="%s">your archive of photos</a> to see everything you&#8217;ve already had published.', 'wporg-photos' ) . '</p>',
-			esc_url( get_author_posts_url( get_current_user_id() ) )
-		);
-
-		return $content;
-	}
-
 }
 
 add_action( 'plugins_loaded', [ __NAMESPACE__ . '\Uploads', 'init' ] );

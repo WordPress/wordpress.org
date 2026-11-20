@@ -1013,6 +1013,11 @@ class Moderators {
 	 */
 	public function convert_toggles_to_actions( $link, $r, $args = array() ) {
 		if ( false !== strpos( $link, 'bbp_toggle_topic_close' ) ) {
+			// Auto-closed topics keep their stored status, so bbp_open_topic() can't open them.
+			if ( bbp_is_topic_closed( $r['id'] ) && bbp_get_closed_status_id() !== bbp_get_topic_status( $r['id'] ) ) {
+				return '';
+			}
+
 			$action = ( bbp_is_topic_closed( $r['id'] ) ) ? 'wporg_bbp_open_topic' : 'wporg_bbp_close_topic';
 			$link   = str_replace( 'bbp_toggle_topic_close', $action, $link );
 

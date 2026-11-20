@@ -33,28 +33,28 @@ class List_Route extends Route {
 		if ( isset( $_GET['current_events_paged'] ) ) {
 			$value = sanitize_text_field( wp_unslash( $_GET['current_events_paged'] ) );
 			if ( is_numeric( $value ) ) {
-				$_current_events_paged = (int) $value;
+				$_current_events_paged = max( 1, (int) $value );
 				$filter_key            = 'current_events_query';
 			}
 		}
 		if ( isset( $_GET['upcoming_events_paged'] ) ) {
 			$value = sanitize_text_field( wp_unslash( $_GET['upcoming_events_paged'] ) );
 			if ( is_numeric( $value ) ) {
-				$_upcoming_events_paged = (int) $value;
+				$_upcoming_events_paged = max( 1, (int) $value );
 				$filter_key             = 'upcoming_events_query';
 			}
 		}
 		if ( isset( $_GET['past_events_paged'] ) ) {
 			$value = sanitize_text_field( wp_unslash( $_GET['past_events_paged'] ) );
 			if ( is_numeric( $value ) ) {
-				$_past_events_paged = (int) $value;
+				$_past_events_paged = max( 1, (int) $value );
 				$filter_key         = 'past_events_query';
 			}
 		}
 		if ( isset( $_GET['user_attending_events_paged'] ) ) {
 			$value = sanitize_text_field( wp_unslash( $_GET['user_attending_events_paged'] ) );
 			if ( is_numeric( $value ) ) {
-				$_user_attending_events_paged = (int) $value;
+				$_user_attending_events_paged = max( 1, (int) $value );
 				$filter_key                   = 'user_attending_events_query';
 			}
 		}

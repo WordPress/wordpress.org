@@ -15,20 +15,15 @@ class Hooks {
 		add_filter( 'bbp_get_form_topic_subscribed',   array( $this, 'check_topic_subscription_checkbox' ) );
 		add_action( 'pre_get_posts',                   array( $this, 'hide_non_public_forums' ) );
 		add_filter( 'pre_option__bbp_edit_lock',       array( $this, 'increase_edit_lock_time' ) );
+		add_filter( 'bbp_past_edit_lock', array( $this, 'allow_review_topic_edits' ), 10, 2 );
 		add_filter( 'pre_option__bbp_topics_per_page', array( $this, 'increase_topics_per_page' ) );
-		add_filter( 'bbp_map_meta_caps',               array( $this, 'disallow_editing_past_lock_time' ), 10, 4 );
-		add_filter( 'redirect_canonical',              array( $this, 'disable_redirect_guess_404_permalink' ) );
-		add_filter( 'redirect_canonical',              array( $this, 'handle_bbpress_root_pages' ), 10, 2 );
-		add_filter( 'old_slug_redirect_post_id',       array( $this, 'disable_wp_old_slug_redirect' ) );
+		add_filter( 'redirect_canonical',              array( $this, 'disable_update_php_old_slug_redirect' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_update_php_page' ) );
 		add_action( 'template_redirect',               array( $this, 'redirect_legacy_urls' ), 5 );
 		add_action( 'template_redirect',               array( $this, 'redirect_ask_question_plugin_forum' ) );
 		add_action( 'wp_print_footer_scripts',         array( $this, 'replace_quicktags_blockquote_button' ) );
 		add_filter( 'bbp_show_user_profile',           array( $this, 'allow_mods_to_view_inactive_users' ), 10, 2 );
 		add_action( 'init',                            array( $this, 'add_rewrite_rules' ) );
-
-		// Run after bbp_parse_query() (priority 2) has flagged user pages.
-		add_action( 'parse_query', array( $this, 'reset_singular_flags_on_user_pages' ), 20 );
 
 		// Add bbPress support to the WordPress.org SEO plugin.
 		add_filter( 'wporg_canonical_base_url', array( $this, 'wporg_canonical_base_url' ) );
@@ -40,6 +35,7 @@ class Hooks {
 
 		// Output meta description.
 		add_action( 'wp_head', array( $this, 'meta_description' ) );
+		add_filter( 'jetpack_open_graph_tags', array( $this, 'open_graph_tags' ) );
 
 		// Link to create new topics atop topic list.
 		add_filter( 'bbp_template_before_pagination_loop', array( $this, 'new_topic_link' ) );
@@ -55,19 +51,6 @@ class Hooks {
 		// remove nofollow filter from topic and reply author links, since those are wordpress.org profile urls, not user inputs
 		remove_filter( 'bbp_get_topic_author_link', 'bbp_rel_nofollow' );
 		remove_filter( 'bbp_get_reply_author_link', 'bbp_rel_nofollow' );
-
-		/*
-		 * Remove the nofollow filter from topic and reply content. It parses attributes with
-		 * shortcode_parse_atts(), which runs stripcslashes() over every value, and then re-emits
-		 * them without escaping. add_rel_ugc() below adds nofollow via wp_rel_callback(), which
-		 * escapes, so dropping this loses no behaviour.
-		 */
-		remove_filter( 'bbp_get_reply_content', 'bbp_rel_nofollow', 60 );
-		remove_filter( 'bbp_get_topic_content', 'bbp_rel_nofollow', 60 );
-
-		// add nofollow and ugc to links in topics and replies
-		add_filter( 'bbp_get_reply_content', array( $this, 'add_rel_ugc' ), 80 );
-		add_filter( 'bbp_get_topic_content', array( $this, 'add_rel_ugc' ), 80 );
 
 		// oEmbed.
 		add_filter( 'oembed_discovery_links', array( $this, 'disable_oembed_discovery_links' ) );
@@ -85,6 +68,10 @@ class Hooks {
 
 		// Auto-close topics after a certain number of months since the last reply.
 		add_filter( 'bbp_is_topic_closed', array( $this, 'auto_close_old_topics' ), 10, 2 );
+		add_filter( 'bbp_get_topic_class', array( $this, 'add_closed_class_to_auto_closed_topics' ), 10, 2 );
+
+		// Hide the reply form on closed topics from users who can't reply to them.
+		add_filter( 'bbp_current_user_can_access_create_reply_form', array( $this, 'hide_reply_form_on_closed_topics' ) );
 
 		// Limit no-replies view to a certain number of days and hide resolved topics.
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'limit_no_replies_view' ) );
@@ -126,11 +113,6 @@ class Hooks {
 
 		// Deindex Support Forum Feeds. bbPress hooks in way earlier than most Core feed functions..
 		add_filter( 'request', array( $this, 'deindex_forum_feeds' ), 5 );
-
-		// Don't run shortcodes in topics and replies rendered by Core feeds. Runs before shortcode_unautop() at 10, so wpautop() still wraps them.
-		add_filter( 'the_content', array( $this, 'escape_shortcodes_in_feeds' ), 9 );
-
-		add_filter( 'request', array( $this, 'ignore_empty_query_vars' ) );
 
 		// Support ```...``` and {{{...}}} for code blocks.
 		add_filter( 'bbp_new_reply_pre_content',  array( $this, 'support_slack_trac_code_trick' ),  19 );
@@ -191,23 +173,6 @@ class Hooks {
 	}
 
 	/**
-	 * Clear the singular flags on bbPress user pages.
-	 *
-	 * A stray `?page_id=` or `?pagename=` makes WP_Query flag the request as a page,
-	 * and bbPress keeps those flags when it takes over the query for a user page.
-	 * With no post to back them, get_body_class() then reads a null queried object.
-	 *
-	 * @param WP_Query $query Current query object.
-	 */
-	public function reset_singular_flags_on_user_pages( $query ) {
-		if ( $query->is_main_query() && ! empty( $query->bbp_is_single_user ) ) {
-			$query->is_page     = false;
-			$query->is_singular = false;
-			$query->is_single   = false;
-		}
-	}
-
-	/**
 	 * Increase bbPress' default edit lock time from 5 minutes to 1 hour.
 	 *
 	 * @return int Filtered edit lock time.
@@ -217,51 +182,70 @@ class Hooks {
 	}
 
 	/**
+	 * Keep review topics editable by their authors after the normal edit window.
+	 *
+	 * The review form submits from a directory view, where bbPress now checks
+	 * the edit window again in the topic handler. Only the review topic being
+	 * edited is exempt; replies and other forum topics keep the one-hour limit.
+	 *
+	 * @param bool   $past_edit_lock Whether the edit window has expired.
+	 * @param string $datetime       Post date in GMT.
+	 * @return bool Whether the edit window has expired.
+	 */
+	public function allow_review_topic_edits( $past_edit_lock, $datetime ) {
+		if (
+			! $past_edit_lock
+			|| ! bbp_allow_content_edit()
+			|| ! get_current_user_id()
+			|| ! defined( 'WPORG_SUPPORT_FORUMS_BLOGID' )
+			|| (int) WPORG_SUPPORT_FORUMS_BLOGID !== get_current_blog_id()
+		) {
+			return $past_edit_lock;
+		}
+
+		// Directory submissions identify the topic by POST; edit URLs use the query.
+		if ( bbp_is_post_request() ) {
+			// phpcs:disable WordPress.Security.NonceVerification.Missing -- Read request context only; bbPress verifies the nonce before saving.
+			if (
+				empty( $_POST['action'] )
+				|| ! is_string( $_POST['action'] )
+				|| 'bbp-edit-topic' !== sanitize_key( $_POST['action'] )
+				|| empty( $_POST['bbp_topic_id'] )
+				|| ! is_numeric( $_POST['bbp_topic_id'] )
+			) {
+				return $past_edit_lock;
+			}
+
+			$topic_id = (int) $_POST['bbp_topic_id'];
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		} elseif ( bbp_is_topic_edit() ) {
+			$topic_id = bbp_get_topic_id();
+		} else {
+			return $past_edit_lock;
+		}
+
+		$topic = bbp_get_topic( $topic_id );
+		if (
+			! $topic
+			|| bbp_get_topic_post_type() !== $topic->post_type
+			|| Plugin::REVIEWS_FORUM_ID !== (int) bbp_get_topic_forum_id( $topic_id )
+			|| get_current_user_id() !== (int) $topic->post_author
+			|| $datetime !== $topic->post_date_gmt
+		) {
+			return $past_edit_lock;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Increase bbPress' default topics per page setting from 15 to 30.
 	 *
 	 * @return int Filtered topics per page setting.
 	 */
 	public function increase_topics_per_page() {
 		return 30;
-	}
-
-	/**
-	 * Disallow editing topics or replies past edit lock time for non-moderators.
-	 *
-	 * @see https://bbpress.trac.wordpress.org/ticket/3164
-	 *
-	 * @param array  $caps    User's actual capabilities.
-	 * @param string $cap     Capability name.
-	 * @param int    $user_id Current user ID.
-	 * @param array  $args    Capability context, typically the object ID.
-	 * @return array Filtered capabilities.
-	 */
-	function disallow_editing_past_lock_time( $caps, $cap, $user_id, $args ) {
-		switch ( $cap ) {
-			case 'edit_topic':
-			case 'edit_reply':
-				$post = get_post( $args[0] );
-				if ( ! $post ) {
-					break;
-				}
-
-				// Reviews can be edited at any time.
-				if ( 'topic' === $post->post_type && Plugin::REVIEWS_FORUM_ID == $post->post_parent ) {
-					break;
-				}
-
-				if (
-					bbp_past_edit_lock( $post->post_date_gmt )
-				&&
-					! user_can( $user_id, 'moderate', $post->ID )
-				) {
-					$caps = array( 'do_not_allow' );
-				}
-
-				break;
-		}
-
-		return $caps;
 	}
 
 	/**
@@ -286,10 +270,6 @@ class Hooks {
 	 * the `template` / `stylesheet` callbacks above.
 	 */
 	function add_rewrite_rules() {
-		if ( ! function_exists( 'bbp_get_user_slug' ) ) {
-			return;
-		}
-
 		// e.g., https://wordpress.org/support/users/foo/edit/account/
 		add_rewrite_rule(
 			bbp_get_user_slug() . '/([^/]+)/' . bbp_get_edit_slug() . '/account/?$',
@@ -299,71 +279,17 @@ class Hooks {
 	}
 
 	/**
-	 * Disable redirect_guess_404_permalink() for hidden topics.
-	 *
-	 * Prevents Spam, Pending, or Archived topics that the current user cannot view
-	 * from performing a redirect to other unrelated topics.
+	 * Avoid redirecting the old slug of the "Update PHP" page to a forum topic.
 	 *
 	 * @param string $redirect_url The redirect URL.
 	 * @return string Filtered redirect URL.
 	 */
-	public function disable_redirect_guess_404_permalink( $redirect_url ) {
-		if ( is_404() && 'topic' === get_query_var( 'post_type' ) && get_query_var( 'name' ) ) {
-			$hidden_topic = get_posts( array(
-				'name'        => get_query_var( 'name' ),
-				'post_type'   => 'topic',
-				'post_status' => array( 'spam', 'pending', 'archived' ),
-			) );
-			$hidden_topic = reset( $hidden_topic );
-
-			if ( $hidden_topic && ! current_user_can( 'read_topic', $hidden_topic->ID ) ) {
-				$redirect_url = false;
-			}
-		}
-
-		// Avoid redirecting the old slug of "Update PHP" page to a forum topic.
+	public function disable_update_php_old_slug_redirect( $redirect_url ) {
 		if ( is_404() && 'upgrade-php' === get_query_var( 'pagename' ) ) {
 			$redirect_url = false;
 		}
 
 		return $redirect_url;
-	}
-
-	/**
-	 * Prevent a redirect for some base bbPress pages to random topics.
-	 */
-	public function handle_bbpress_root_pages( $redirect_url, $requested_url ) {
-		$url = str_replace( home_url('/'), '', $requested_url );
-
-		if ( $url && preg_match( '!^(topic|topic-[^/]+|reply|users|view)(/[?]|/?$)!i', $url ) ) {
-			$redirect_url = false;
-		}
-
-		return $redirect_url;
-	}
-
-	/**
-	 * Disable wp_old_slug_redirect() for hidden topics.
-	 *
-	 * Prevents Spam, Pending, or Archived topics that the current user cannot view
-	 * from performing a redirect loop.
-	 *
-	 * @param int $post_id The redirect post ID.
-	 * @return int Filtered redirect post ID.
-	 */
-	public function disable_wp_old_slug_redirect( $post_id ) {
-		if ( is_404() && 'topic' === get_query_var( 'post_type' ) && get_query_var( 'name' ) ) {
-			$hidden_topic = get_post( $post_id );
-
-			if ( $hidden_topic &&
-				 in_array( $hidden_topic->post_status, array( 'spam', 'pending', 'archived' ) ) &&
-				 ! current_user_can( 'read_topic', $hidden_topic->ID )
-			   ) {
-				$post_id = 0;
-			}
-		}
-
-		return $post_id;
 	}
 
 	/**
@@ -463,8 +389,8 @@ class Hooks {
 		if ( ! wp_script_is( 'quicktags' ) ) {
 			return;
 		}
-		?>
-		<script type="text/javascript">
+		wp_print_inline_script_tag(
+			<<<'JS'
 			if ( 'undefined' !== typeof edButtons && 'undefined' !== QTags ) {
 				// Replace Quicktags' blockquote button.
 				edButtons[40]  = new QTags.TagButton(
@@ -481,8 +407,8 @@ class Hooks {
 					}
 				);
 			}
-		</script>
-		<?php
+			JS
+		);
 	}
 
 	/**
@@ -655,9 +581,11 @@ class Hooks {
 	}
 
 	/**
-	 * Outputs meta description tags.
+	 * Builds the meta description for the current page.
+	 *
+	 * @return string The description, or an empty string when the page has none.
 	 */
-	public function meta_description() {
+	public function get_meta_description() {
 		$description = '';
 		$max_length  = 150;
 
@@ -689,7 +617,7 @@ class Hooks {
 			// word or sentence.
 			if ( mb_strlen( $excerpt ) > $length ) {
 				// Truncate string at max length.
-				$excerpt = substr( $excerpt, 0, $length );
+				$excerpt = mb_substr( $excerpt, 0, $length );
 				// Reverse string for easier handling.
 				$rev = strrev( $excerpt );
 				// Find first reasonable and natural break.
@@ -704,13 +632,37 @@ class Hooks {
 			$description = sprintf( $description, $excerpt );
 		}
 
-		// Output description meta tags if a description has been set.
-		if ( $description ) {
-			$description = trim( $description );
+		return trim( $description );
+	}
 
-			printf( '<meta name="og:description" content="%s" />' . "\n", esc_attr( $description ) );
+	/**
+	 * Outputs the meta description tag.
+	 */
+	public function meta_description() {
+		$description = $this->get_meta_description();
+
+		if ( $description ) {
 			printf( '<meta name="description" content="%s" />' . "\n", esc_attr( $description ) );
 		}
+	}
+
+	/**
+	 * Uses the meta description for social sharing cards.
+	 *
+	 * Without it, Jetpack builds the description from the rendered topic, which leads with its title, author and date.
+	 *
+	 * @param array $tags Open Graph and Twitter Card tags.
+	 * @return array
+	 */
+	public function open_graph_tags( $tags ) {
+		$description = $this->get_meta_description();
+
+		if ( $description ) {
+			$tags['og:description']      = $description;
+			$tags['twitter:description'] = $description;
+		}
+
+		return $tags;
 	}
 
 	/**
@@ -845,20 +797,6 @@ class Hooks {
 	}
 
 	/**
-	 * Add nofollow ugc to links in content, for post-save processing. Compare to wp_rel_ugc().
-	 */
-	public function add_rel_ugc( $text ) {
-		$text = preg_replace_callback(
-			'|<a (.+?)>|i',
-			function( $matches ) {
-				return wp_rel_callback( $matches, 'nofollow ugc' );
-			},
-			$text
-		);
-		return $text;
-	}
-
-	/**
 	 * Adjust the login URL to point back to whatever part of the support forums we're
 	 * currently looking at. This allows the redirect to come back to the same place
 	 * instead of the main /support URL by default.
@@ -905,6 +843,51 @@ class Hooks {
 		}
 
 		return $is_topic_closed;
+	}
+
+	/**
+	 * Add the `status-closed` class to auto-closed topics.
+	 *
+	 * Auto-closed topics keep the `publish` status, so they would otherwise
+	 * miss the closed styling and lock icon that closed topics get.
+	 *
+	 * @param string[] $classes  Topic classes.
+	 * @param int      $topic_id Topic ID.
+	 * @return string[]
+	 */
+	public function add_closed_class_to_auto_closed_topics( $classes, $topic_id ) {
+		if ( Plugin::REVIEWS_FORUM_ID === (int) bbp_get_topic_forum_id( $topic_id ) ) {
+			return $classes;
+		}
+
+		if ( ! in_array( 'status-closed', $classes, true ) && bbp_is_topic_closed( $topic_id ) ) {
+			$classes[] = 'status-closed';
+		}
+
+		return $classes;
+	}
+
+	/**
+	 * Hides the new reply form on closed topics from users who can't reply to them.
+	 *
+	 * The form shows to anyone who can edit the topic, while bbp_new_reply_handler()
+	 * rejects replies to closed topics from non-moderators. This applies the same check.
+	 *
+	 * @param bool $can_access Whether the current user can access the reply form.
+	 * @return bool
+	 */
+	public function hide_reply_form_on_closed_topics( $can_access ) {
+		if ( ! $can_access || bbp_is_reply_edit() ) {
+			return $can_access;
+		}
+
+		$topic_id = bbp_get_topic_id();
+
+		if ( $topic_id && bbp_is_topic_closed( $topic_id ) && ! current_user_can( 'moderate', $topic_id ) ) {
+			$can_access = false;
+		}
+
+		return $can_access;
 	}
 
 	/**
@@ -1206,6 +1189,20 @@ class Hooks {
 						);
 				}
 			}
+
+			if ( bbp_is_single_view() && 'reviews' === bbp_get_view_id() ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only view filter.
+				$filter = isset( $_GET['filter'] ) ? absint( $_GET['filter'] ) : 0;
+
+				if ( $filter >= 1 && $filter <= 5 ) {
+					$title['text'] = sprintf(
+						/* translators: 1: Reviews page title, like "[Gutenberg] Reviews". 2: Number of stars. */
+						_n( '%1$s (%2$d star only)', '%1$s (%2$d stars only)', $filter, 'wporg-forums' ),
+						$title['text'],
+						$filter
+					);
+				}
+			}
 		}
 
 		return $title;
@@ -1219,46 +1216,6 @@ class Hooks {
 	function deindex_forum_feeds( $query_vars ) {
 		if ( isset( $query_vars['feed'] ) ) {
 			header( 'X-Robots-Tag: noindex, follow' );
-		}
-
-		return $query_vars;
-	}
-
-	/**
-	 * Escape shortcodes in topics and replies rendered by Core feeds.
-	 *
-	 * Core feeds such as /support/topic-tag/foo/feed/ pass user content through
-	 * `the_content`, which runs shortcodes, though bbPress never does. Encoding
-	 * the brackets shows the shortcode as typed instead.
-	 *
-	 * @param string $content Post content.
-	 * @return string
-	 */
-	public function escape_shortcodes_in_feeds( $content ) {
-		if (
-			is_feed() &&
-			in_array( get_post_type(), array( bbp_get_topic_post_type(), bbp_get_reply_post_type() ), true )
-		) {
-			$content = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $content );
-		}
-
-		return $content;
-	}
-
-	/**
-	 * Ignore certain empty set query vars.
-	 *
-	 * TODO: This is probably a bbPress bug in that it doesn't handle "empty" QVs well.
-	 */
-	function ignore_empty_query_vars( $query_vars ) {
-		// bbPress query vars that sometimes have weird urls as a result.
-		$ignore_emptyish_values = [ 'topic', 'reply', 'forum', 'topic-tag', 'bbp_view' ];
-
-		foreach ( $ignore_emptyish_values as $q ) {
-			if ( isset( $query_vars[ $q ] ) && empty( $query_vars[ $q ] ) ) {
-				// It's set, but empty so not a useful QV?
-				unset( $query_vars[ $q ] );
-			}
 		}
 
 		return $query_vars;

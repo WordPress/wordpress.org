@@ -47,6 +47,10 @@ require_once $_tests_dir . '/includes/functions.php';
  * Manually load the plugin being tested.
  */
 function manually_load_plugin() {
+	// Shared utilities, like the FreeScout client, autoload from wporg-mu-plugins, as on production.
+	require_once WPMU_PLUGIN_DIR . '/wporg-mu-plugins/mu-plugins/autoloader/class-autoloader.php';
+	\WordPressdotorg\Autoload\register_class_path( 'WordPressdotorg\MU_Plugins', WPMU_PLUGIN_DIR . '/wporg-mu-plugins/mu-plugins' );
+
 	require_once dirname( __DIR__ ) . '/plugin-directory.php';
 }
 tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );

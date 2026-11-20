@@ -38,7 +38,7 @@ class List_Trashed_Route extends Route {
 		if ( isset( $_GET['page'] ) ) {
 			$value = sanitize_text_field( wp_unslash( $_GET['page'] ) );
 			if ( is_numeric( $value ) ) {
-				$current_page = (int) $value;
+				$current_page = max( 1, (int) $value );
 			}
 		}
 		// phpcs:enable

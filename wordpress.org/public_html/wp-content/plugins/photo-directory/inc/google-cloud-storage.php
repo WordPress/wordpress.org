@@ -11,8 +11,6 @@ require_once WPORG_PHOTO_DIRECTORY_DIRECTORY . '/vendor/autoload.php';
 
 // Import Google libraries.
 use Google\Cloud\Storage\StorageClient;
-use Google\Cloud\Storage\StreamWrapper;
-use Google\Cloud\Storage\WPORG_StreamWrapper;
 use Google\Auth\HttpHandler\HttpHandlerFactory;
 
 class GoogleCloudStorage {
@@ -60,11 +58,7 @@ class GoogleCloudStorage {
 		}
 
 		self::$gs_client = $gs_client;
-		// The default way of registering a stream wrapper...
-		//self::$gs_client->registerStreamWrapper();
-		// But instead, register an extended version of the StreamWrapper that
-		// handles `stream_metadata()` to avoid PHP warnings.
-		WPORG_StreamWrapper::register( self::$gs_client );
+		self::$gs_client->registerStreamWrapper();
 
 		add_filter( 'upload_dir', [ __CLASS__, 'filter_upload_dir' ] );
 		add_filter( 'wp_get_attachment_url', [ __CLASS__, 'filter_wp_get_attachment_url' ], 10, 2 );

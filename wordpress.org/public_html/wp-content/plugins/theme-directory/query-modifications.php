@@ -173,9 +173,11 @@ function wporg_themes_pre_get_posts( $query ) {
 		);
 	}
 
-	// Prioritize translated themes for localized requests, except when viewing a specific ordered themes.
+	// Prioritize translated themes for localized requests, except when viewing specifically ordered themes or an author's themes.
 	if (
 		'en_US' !== get_locale() &&
+		empty( $query->query_vars['author_name'] ) &&
+		empty( $query->query_vars['author'] ) &&
 		! in_array( $query->query_vars['browse'], array( 'favorites', 'new', 'updated' ) )
 	) {
 		add_filter( 'posts_clauses', 'wporg_themes_prioritize_translated_posts_clauses', 11 );

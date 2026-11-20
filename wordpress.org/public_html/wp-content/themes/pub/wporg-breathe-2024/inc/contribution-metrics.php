@@ -37,7 +37,7 @@ const CACHE_PREFIX        = '5ftf_contrib_metrics_v1_';
  *   2. Wire the data source into get_team_contribution_metrics().
  *   3. Add the team's post_name slug to this list.
  */
-const TEAMS_WITH_DATA = array( 'core', 'meta' );
+const TEAMS_WITH_DATA = array( 'core', 'core-ai', 'meta', 'flow' /* test */ );
 
 /**
  * Whether the given team has wired-up contribution tracking.
@@ -91,8 +91,22 @@ function team_to_trac( string $slug ): string {
  */
 function team_to_github_repos( string $slug ): array {
 	$map = array(
-		'core' => array( 'WordPress/gutenberg', 'WordPress/wordpress-develop' ),
-		'meta' => array(
+		'core'    => array( 'WordPress/gutenberg', 'WordPress/wordpress-develop' ),
+		'core-ai' => array( // Core AI team, at make.wordpress.org/ai/.
+			'WordPress/abilities-api',
+			'WordPress/agent-skills',
+			'WordPress/ai',
+			'WordPress/ai-provider-for-anthropic',
+			'WordPress/ai-provider-for-google',
+			'WordPress/ai-provider-for-ollama',
+			'WordPress/ai-provider-for-openai',
+			'WordPress/mcp-adapter',
+			'WordPress/php-ai-client',
+			'WordPress/php-mcp-schema',
+			'WordPress/wp-ai-client',
+			'WordPress/wp-bench',
+		),
+		'meta'    => array(
 			'WordPress/five-for-the-future',
 			'WordPress/meeting-calendar',
 			'WordPress/pattern-directory',
@@ -114,6 +128,7 @@ function team_to_github_repos( string $slug ): array {
 			'WordPress/wporg-theme-directory',
 			'WordPress/wporg-two-factor',
 		),
+		'flow'    => array( 'WordPress/test-handbook' ), // Test team, formerly Flow.
 	);
 	return isset( $map[ $slug ] ) ? $map[ $slug ] : array();
 }
@@ -293,7 +308,6 @@ function get_team_contribution_metrics( array $user_ids, string $team_slug, int 
 	foreach ( $metrics as $uid => &$m ) {
 		$m['weighted_volume'] = ( 3 * $m['high_count'] ) + ( 1 * $m['medium_count'] );
 		arsort( $m['top_repos'] );
-		$m['top_repos'] = array_slice( $m['top_repos'], 0, 2, true );
 	}
 	unset( $m );
 
@@ -316,7 +330,7 @@ function get_team_contribution_metrics( array $user_ids, string $team_slug, int 
 function format_active_bucket( $last_activity_ts ): array {
 	if ( ! $last_activity_ts ) {
 		return array(
-			'bucket' => __( 'over 6 months ago', 'wporg-5ftf' ),
+			'bucket' => __( 'active over 6 months ago', 'wporg-5ftf' ),
 			'class'  => 'active-stale',
 		);
 	}
@@ -325,14 +339,14 @@ function format_active_bucket( $last_activity_ts ): array {
 
 	if ( $days_since <= 1 ) {
 		return array(
-			'bucket' => __( 'today', 'wporg-5ftf' ),
+			'bucket' => __( 'active today', 'wporg-5ftf' ),
 			'class'  => 'active-recent',
 		);
 	}
 
 	if ( $days_since <= 7 ) {
 		// translators: %d: number of days
-		$bucket = sprintf( _n( '%d day ago', '%d days ago', $days_since, 'wporg-5ftf' ), $days_since );
+		$bucket = sprintf( _n( 'active %d day ago', 'active %d days ago', $days_since, 'wporg-5ftf' ), $days_since );
 		return array(
 			'bucket' => $bucket,
 			'class'  => 'active-recent',
@@ -342,7 +356,7 @@ function format_active_bucket( $last_activity_ts ): array {
 	if ( $days_since <= 30 ) {
 		$weeks = max( 1, (int) round( $days_since / 7 ) );
 		// translators: %d: number of weeks
-		$bucket = sprintf( _n( '%d week ago', '%d weeks ago', $weeks, 'wporg-5ftf' ), $weeks );
+		$bucket = sprintf( _n( 'active %d week ago', 'active %d weeks ago', $weeks, 'wporg-5ftf' ), $weeks );
 		return array(
 			'bucket' => $bucket,
 			'class'  => 'active-month',
@@ -352,7 +366,7 @@ function format_active_bucket( $last_activity_ts ): array {
 	if ( $days_since <= 180 ) {
 		$months = max( 1, (int) round( $days_since / 30 ) );
 		// translators: %d: number of months
-		$bucket = sprintf( _n( '%d month ago', '%d months ago', $months, 'wporg-5ftf' ), $months );
+		$bucket = sprintf( _n( 'active %d month ago', 'active %d months ago', $months, 'wporg-5ftf' ), $months );
 		return array(
 			'bucket' => $bucket,
 			'class'  => 'active-quarter',
@@ -360,7 +374,7 @@ function format_active_bucket( $last_activity_ts ): array {
 	}
 
 	return array(
-		'bucket' => __( 'over 6 months ago', 'wporg-5ftf' ),
+		'bucket' => __( 'active over 6 months ago', 'wporg-5ftf' ),
 		'class'  => 'active-stale',
 	);
 }

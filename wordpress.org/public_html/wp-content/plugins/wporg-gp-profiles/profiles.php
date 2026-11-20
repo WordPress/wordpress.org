@@ -91,10 +91,12 @@ function add_single_translation_activity( GP_Translation $new_translation, ?GP_T
 		return;
 	}
 
+	$translation_set = GP::$translation_set->get( $new_translation->translation_set_id );
+
 	$request_body = array(
 		'action'    => 'wporg_handle_activity',
 		'component' => 'glotpress',
-		'activities' => $activities,
+		'activities' => add_project_details( $activities, $translation_set ),
 	);
 
 	Profiles_API\queue( $request_body );
@@ -171,7 +173,7 @@ function add_bulk_translation_activity( GP_Project $project, GP_Locale $locale, 
 	$request_body = array(
 		'action'     => 'wporg_handle_activity',
 		'component'  => 'glotpress',
-		'activities' => $activities,
+		'activities' => add_project_details( $activities, $translation_set ),
 	);
 
 	Profiles_API\queue( $request_body );
@@ -217,4 +219,80 @@ function get_bulk_approve_activities( array $translations ) : array {
 	}
 
 	return $activities;
+}
+
+/**
+ * Add the project and locale to each activity, so the profile can name and link them.
+ *
+ * @param array                    $activities      The activities to send.
+ * @param GP_Translation_Set|false $translation_set The translation set of the strings.
+ * @return array The activities.
+ */
+function add_project_details( array $activities, $translation_set ): array {
+	$details = get_project_details( $translation_set );
+
+	if ( ! $details ) {
+		return $activities;
+	}
+
+	foreach ( $activities as $key => $activity ) {
+		$activities[ $key ] = array_merge( $activity, $details );
+
+		// Reviewing doesn't add someone to the project's contributors, so only translators get a link to their row.
+		if ( 'glotpress_translation_reviewed' !== $activity['type'] ) {
+			$user = get_userdata( $activity['user_id'] );
+
+			if ( $user ) {
+				$activities[ $key ]['project_url'] .= '#contributor-' . $user->user_nicename;
+			}
+		}
+	}
+
+	return $activities;
+}
+
+/**
+ * Get the project a translation set belongs to, the same way the Translations section on profiles lists it.
+ *
+ * @param GP_Translation_Set|false $translation_set The translation set of the strings.
+ * @return array Empty if the project isn't found.
+ */
+function get_project_details( $translation_set ): array {
+	if ( empty( $translation_set->project_id ) ) {
+		return array();
+	}
+
+	$project = GP::$project->get( $translation_set->project_id );
+
+	if ( ! $project ) {
+		return array();
+	}
+
+	// Use the parent project, like wp-plugins/akismet instead of wp-plugins/akismet/stable.
+	$root_path = implode( '/', array_slice( explode( '/', $project->path ), 0, 2 ) );
+
+	// A locale page lists the contributors of its project and its direct sub-projects, so link a sub-project's parent.
+	$link_path = $root_path === $project->path ? $root_path : dirname( $project->path );
+
+	if ( $root_path !== $project->path ) {
+		$project = GP::$project->by_path( $root_path );
+
+		if ( ! $project ) {
+			return array();
+		}
+	}
+
+	$name = $project->name;
+
+	// Core projects are named after the branch, like "7.1.x - Development".
+	if ( str_starts_with( $project->path, 'wp/' ) ) {
+		$name = 'WordPress ' . $name;
+	}
+
+	return array(
+		'project_name'   => $name,
+		'project_key'    => $root_path . '/' . $translation_set->locale . '/' . $translation_set->slug,
+		'project_url'    => gp_url_join( gp_url_public_root(), 'locale', $translation_set->locale, $translation_set->slug, $link_path ),
+		'project_locale' => $translation_set->name,
+	);
 }

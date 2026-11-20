@@ -68,7 +68,7 @@
 # .site-description
 --------------------------------------------------------------*/
 .site-description {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	font-size: ms(2);
 	font-weight: 300;
 	margin: -0.4rem auto 2rem;
@@ -131,7 +131,7 @@
 	}
 
 	a {
-		color: rgba(255, 255, 255, 0.8);
+		color: rgba(255, 255, 255, 0.9);
 		display: block;
 		font-size: ms(-2);
 		text-decoration: none;
@@ -139,6 +139,10 @@
 		&:hover,
 		&.active {
 			color: #fff;
+		}
+
+		&:hover {
+			text-decoration: underline;
 		}
 
 		@media screen and (min-width: $ms-breakpoint) {
@@ -236,31 +240,8 @@
 # Override original styles
 --------------------------------------------------------------*/
 
-body:not(.trac):not(.home-page):not(.home) #main {
-	margin-top: 0;
-}
-
 body:not(.trac):not(.home-page) #main {
 	padding: var(--wp--preset--spacing--40) var(--wp--preset--spacing--edge-space) var(--wp--preset--spacing--10);
-}
-
-@media screen and (max-width: 460px) {
-
-	#main {
-		margin: unset;
-	}
-}
-
-@media screen and (min-width: 960px) {
-
-	#header-inner,
-	#headline-inner,
-	#subnav-inner,
-	#showcase-inner,
-	#main,
-	#footer {
-		width: unset;
-	}
 }
 
 
@@ -357,8 +338,9 @@ body:not(.trac):not(.home-page) #main {
 		border: none;
 		border-radius: 0;
 		box-shadow: none;
+		align-items: center;
 		color: #32373c;
-		display: block;
+		display: flex;
 		height: 100%;
 		padding-inline: var(--wp--custom--form--padding--block);
 		padding-block: var(--wp--custom--form--padding--block);
@@ -387,6 +369,11 @@ body:not(.trac):not(.home-page) #main {
 
 .forums-homepage-footer .wp-block-heading a {
 	text-decoration: none;
+
+	&:hover,
+	&:focus {
+		text-decoration: underline;
+	}
 }
 
 .forums-homepage-topics {
@@ -500,6 +487,11 @@ body.error404 {
 
 	a {
 		color: var(--wp--preset--color--blueberry-1);
+	}
+
+	/* The parent theme unsets it, relying on its charcoal body. */
+	.wp-block-wporg-global-footer {
+		background-color: var(--wp-global-header--background-color);
 	}
 }
 

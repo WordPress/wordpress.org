@@ -24,7 +24,8 @@ class Performance_Optimizations {
 		add_filter( 'bbp_after_has_topics_parse_args', array( $this, 'has_topics' ) );
 		add_filter( 'bbp_after_has_replies_parse_args', array( $this, 'has_replies' ) );
 		add_filter( 'bbp_register_view_no_replies', array( $this, 'exclude_compat_forums' ) );
-		add_filter( 'bbp_register_view_all_topics', array( $this, 'exclude_compat_forums' ) );
+		add_filter( 'bbp_get_view_query_args', array( $this, 'all_topics_view_query_args' ), 10, 2 );
+		add_filter( 'bbp_request', array( $this, 'view_feed_request' ), 9 );
 
 		// Editor.
 		add_action( 'wp_ajax_wp-link-ajax', array( $this, 'disable_wp_link_ajax' ), -1 );
@@ -36,14 +37,17 @@ class Performance_Optimizations {
 		// Redirect (.+)/page/[01]/ and (.+)?paged=[01] to $1
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_page_zero_one' ) );
 
+		// 404 topic pages past the last page of replies.
+		add_action( 'bbp_template_redirect', array( $this, 'topic_page_out_of_range_404' ) );
+
+		// Add the trailing slash to paginated topic and forum URLs, bbPress disables redirect_canonical() for them.
+		add_action( 'bbp_template_redirect', array( $this, 'redirect_paged_trailing_slash' ) );
+
 		// Redirect Attachments to their file
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_attachments' ) );
 
 		// Disable post meta key lookup, see https://core.trac.wordpress.org/ticket/33885.
 		add_filter( 'postmeta_form_keys', '__return_empty_array' );
-
-		// Disable canonical redirects for short post_names
-		add_filter( 'template_redirect', array( $this, 'maybe_disable_404_canonical' ), 9 );
 
 		// Disable the 'popular' view.
 		add_filter( 'bbp_register_views', array( $this, 'disable_popular_view' ) );
@@ -64,18 +68,10 @@ class Performance_Optimizations {
 		// ..and don't do expensive orderbys & counting for user queries that don't need it.
 		add_action( 'pre_get_users', array( $this, 'pre_get_users' ) );
 
-	}
+		// The Dashboard glance widget does not need an expensive forum user count.
+		add_filter( 'bbp_after_get_statistics_parse_args', array( $this, 'skip_dashboard_forum_user_count' ) );
+		add_filter( 'bbp_get_statistics', array( $this, 'remove_dashboard_forum_user_count' ) );
 
-	/**
-	 * Disables Canonical redirects on 404 pages when a short (<5char) name is provided.
-	 *
-	 * This is used to avoid really bad queries in redirect_guess_404_permalink() on urls such as:
-	 * https://wordpress.org/support/topic/test/*1*
-	 */
-	public function maybe_disable_404_canonical() {
-		if ( is_404() && get_query_var( 'name' ) && strlen( get_query_var( 'name' ) ) < 5 ) {
-			remove_filter( 'template_redirect', 'redirect_canonical' );
-		}
 	}
 
 	/**
@@ -102,7 +98,7 @@ class Performance_Optimizations {
 		}
 
 		if ( isset( $_GET['intext'] ) ) {
-			$search_terms .= ' intext:"' . esc_attr( $_GET['intext'] ) . '"';
+			$search_terms .= ' "' . sanitize_text_field( wp_unslash( $_GET['intext'] ) ) . '"';
 		}
 
 		if ( $search_terms ) {
@@ -146,6 +142,58 @@ class Performance_Optimizations {
 				wp_safe_redirect( $pageless_url, 301 );
 				exit;
 			}
+		}
+	}
+
+	/**
+	 * Sets a 404 for single topic pages beyond the last page of replies the current user can see.
+	 *
+	 * Mirrors the page count of bbp_get_topic_pagination(), plus the hidden replies that
+	 * bbp_has_replies() includes when viewing all replies.
+	 */
+	public function topic_page_out_of_range_404() {
+		if ( ! bbp_is_single_topic() || bbp_thread_replies() || bbp_get_paged() < 2 ) {
+			return;
+		}
+
+		// Moderators' reply loop also holds topic reports, which no stored count tracks.
+		if ( current_user_can( 'moderate' ) ) {
+			return;
+		}
+
+		$topic_id    = bbp_get_topic_id();
+		$reply_count = bbp_get_topic_reply_count( $topic_id, true );
+
+		if ( bbp_get_view_all( 'edit_others_replies' ) ) {
+			$reply_count += bbp_get_topic_reply_count_hidden( $topic_id, true );
+		}
+
+		if ( ! bbp_show_lead_topic() ) {
+			++$reply_count;
+		}
+
+		$last_page = max( 1, (int) ceil( $reply_count / bbp_get_replies_per_page() ) );
+
+		if ( bbp_get_paged() > $last_page ) {
+			bbp_set_404();
+		}
+	}
+
+	/**
+	 * Redirects paginated single topic and forum URLs without a trailing slash, like /topic/<slug>/page/2.
+	 */
+	public function redirect_paged_trailing_slash() {
+		if ( ! ( bbp_is_single_topic() || bbp_is_single_forum() ) || bbp_get_paged() < 2 || bbp_is_post_request() ) {
+			return;
+		}
+
+		$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
+		$path        = strtok( $request_uri, '?' );
+		$slashed     = user_trailingslashit( $path, 'paged' );
+
+		if ( $slashed !== $path ) {
+			wp_safe_redirect( $slashed . substr( $request_uri, strlen( $path ) ), 301 );
+			exit;
 		}
 	}
 
@@ -317,6 +365,55 @@ class Performance_Optimizations {
 	public function exclude_compat_forums( $r ) {
 		$r['post_parent__not_in'] = array( Plugin::THEMES_FORUM_ID, Plugin::PLUGINS_FORUM_ID, Plugin::REVIEWS_FORUM_ID );
 		return $r;
+	}
+
+	/**
+	 * Exclude plugin, theme, and review topics from the all-topics view and its feed.
+	 *
+	 * The theme registers this view without a `bbp_register_view_all_topics` filter.
+	 *
+	 * @param array  $args Query args for the view.
+	 * @param string $view View ID.
+	 * @return array Filtered query args.
+	 */
+	public function all_topics_view_query_args( $args, $view ) {
+		if ( 'all-topics' === $view ) {
+			$args = $this->exclude_compat_forums( $args );
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Skip counting the matching topics in view feeds.
+	 *
+	 * View feeds are queried with the view's own args before is_feed() is set,
+	 * so they miss the feed handling in pre_get_posts() and has_topics().
+	 *
+	 * @param array $query_vars Request query vars.
+	 * @return array Unchanged query vars.
+	 */
+	public function view_feed_request( $query_vars ) {
+		if ( isset( $query_vars['feed'], $query_vars[ bbp_get_view_rewrite_id() ] ) ) {
+			add_filter( 'bbp_get_view_query_args', array( $this, 'view_feed_query_args' ), 20 );
+		}
+
+		return $query_vars;
+	}
+
+	/**
+	 * Don't calculate found rows for a view feed's topic query.
+	 *
+	 * @param array $args Query args for the view.
+	 * @return array Filtered query args.
+	 */
+	public function view_feed_query_args( $args ) {
+		// Empty args mean an unregistered view, which bbPress must still 404.
+		if ( $args ) {
+			$args['no_found_rows'] = true;
+		}
+
+		return $args;
 	}
 
 	/**
@@ -602,6 +699,34 @@ class Performance_Optimizations {
 		restore_current_blog();
 
 		return $result;
+	}
+
+	/**
+	 * Avoid counting every forum-role holder for the Dashboard glance widget.
+	 *
+	 * @param array $args Parsed bbPress statistics arguments.
+	 * @return array Statistics arguments.
+	 */
+	public function skip_dashboard_forum_user_count( $args ) {
+		if ( doing_filter( 'dashboard_glance_items' ) ) {
+			$args['count_users'] = false;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Hide the zero user count produced when Dashboard counting is disabled.
+	 *
+	 * @param array $statistics Formatted bbPress statistics.
+	 * @return array Statistics without the Dashboard user count.
+	 */
+	public function remove_dashboard_forum_user_count( $statistics ) {
+		if ( doing_filter( 'dashboard_glance_items' ) ) {
+			unset( $statistics['user_count'], $statistics['user_count_int'] );
+		}
+
+		return $statistics;
 	}
 
 	/**

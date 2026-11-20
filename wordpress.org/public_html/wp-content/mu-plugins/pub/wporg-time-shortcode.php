@@ -22,6 +22,7 @@ function init() {
 
 	add_shortcode( 'time', __NAMESPACE__ . '\time_shortcode' );
 	add_filter( 'comment_text', __NAMESPACE__ . '\time_shortcode_in_comments', 1 );
+	add_filter( 'widget_custom_html_content', __NAMESPACE__ . '\time_shortcode_in_widgets' );
 }
 add_action( 'init', __NAMESPACE__ . '\init' );
 
@@ -49,8 +50,8 @@ function time_shortcode( $attr, $content = '' ) {
 	// Remove the word "at" from the string, if present. Allows strings like "Monday, April 6 at 19:00 UTC" to work.
 	$gmtcontent = str_replace( ' at ', ' ', $gmtcontent );
 
-	// Try to parse the time, relative to the post time. Or current time, if an attr is set.
-	$timestamp = ! isset( $attr[0] ) ? get_the_date( 'U' ) : time();
+	// Try to parse the time, relative to the post time. Or current time, if an attr is set or in a widget.
+	$timestamp = isset( $attr[0] ) || doing_filter( 'widget_custom_html_content' ) ? time() : get_the_date( 'U' );
 	$time      = strtotime( $gmtcontent, $timestamp );
 
 	// If that didn't work, give up.
@@ -74,8 +75,8 @@ function time_shortcode( $attr, $content = '' ) {
  * Prints script to convert time in the viewers local time zone.
  */
 function time_converter_script() {
-	?>
-	<script type="text/javascript">
+	wp_print_inline_script_tag(
+		<<<'JS'
 		( function( $ ) {
 			function convertTime() {
 				var parseDate, formatTime, formatDate, toLocaleTimeStringSupportsLocales;
@@ -139,8 +140,8 @@ function time_converter_script() {
 			convertTime();
 			$( document.body ).on( 'post-load ready.o2', convertTime );
 		})( jQuery );
-	</script>
-<?php
+		JS
+	);
 }
 
 /**
@@ -167,4 +168,21 @@ function time_shortcode_in_comments( $comment ) {
 	$shortcode_tags = $saved_tags;
 
 	return $comment;
+}
+
+/**
+ * Adds support for the time shortcode in Custom HTML widgets.
+ *
+ * Text widgets already process shortcodes in core.
+ *
+ * @param string $text Widget text.
+ * @return string Widget text.
+ */
+function time_shortcode_in_widgets( $text ) {
+	if ( has_shortcode( $text, 'time' ) ) {
+		$pattern = get_shortcode_regex( array( 'time' ) );
+		$text    = preg_replace_callback( "/$pattern/", 'do_shortcode_tag', $text );
+	}
+
+	return $text;
 }

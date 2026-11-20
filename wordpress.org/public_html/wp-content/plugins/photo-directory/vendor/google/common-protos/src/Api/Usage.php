@@ -5,8 +5,8 @@
 namespace Google\Api;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Configuration controlling usage of a service.
@@ -19,6 +19,11 @@ class Usage extends \Google\Protobuf\Internal\Message
      * Requirements that must be satisfied before a consumer project can use the
      * service. Each requirement is of the form <service.name>/<requirement-id>;
      * for example 'serviceusage.googleapis.com/billing-enabled'.
+     * For Google APIs, a Terms of Service requirement must be included here.
+     * Google Cloud APIs must include "serviceusage.googleapis.com/tos/cloud".
+     * Other Google APIs should include
+     * "serviceusage.googleapis.com/tos/universal". Additional ToS can be
+     * included based on the business needs.
      *
      * Generated from protobuf field <code>repeated string requirements = 1;</code>
      */
@@ -41,7 +46,7 @@ class Usage extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string producer_notification_channel = 7;</code>
      */
-    private $producer_notification_channel = '';
+    protected $producer_notification_channel = '';
 
     /**
      * Constructor.
@@ -49,11 +54,16 @@ class Usage extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
-     *     @type string[]|\Google\Protobuf\Internal\RepeatedField $requirements
+     *     @type string[] $requirements
      *           Requirements that must be satisfied before a consumer project can use the
      *           service. Each requirement is of the form <service.name>/<requirement-id>;
      *           for example 'serviceusage.googleapis.com/billing-enabled'.
-     *     @type \Google\Api\UsageRule[]|\Google\Protobuf\Internal\RepeatedField $rules
+     *           For Google APIs, a Terms of Service requirement must be included here.
+     *           Google Cloud APIs must include "serviceusage.googleapis.com/tos/cloud".
+     *           Other Google APIs should include
+     *           "serviceusage.googleapis.com/tos/universal". Additional ToS can be
+     *           included based on the business needs.
+     *     @type \Google\Api\UsageRule[] $rules
      *           A list of usage rules that apply to individual API methods.
      *           **NOTE:** All service configuration rules follow "last one wins" order.
      *     @type string $producer_notification_channel
@@ -75,9 +85,14 @@ class Usage extends \Google\Protobuf\Internal\Message
      * Requirements that must be satisfied before a consumer project can use the
      * service. Each requirement is of the form <service.name>/<requirement-id>;
      * for example 'serviceusage.googleapis.com/billing-enabled'.
+     * For Google APIs, a Terms of Service requirement must be included here.
+     * Google Cloud APIs must include "serviceusage.googleapis.com/tos/cloud".
+     * Other Google APIs should include
+     * "serviceusage.googleapis.com/tos/universal". Additional ToS can be
+     * included based on the business needs.
      *
      * Generated from protobuf field <code>repeated string requirements = 1;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<string>
      */
     public function getRequirements()
     {
@@ -88,9 +103,14 @@ class Usage extends \Google\Protobuf\Internal\Message
      * Requirements that must be satisfied before a consumer project can use the
      * service. Each requirement is of the form <service.name>/<requirement-id>;
      * for example 'serviceusage.googleapis.com/billing-enabled'.
+     * For Google APIs, a Terms of Service requirement must be included here.
+     * Google Cloud APIs must include "serviceusage.googleapis.com/tos/cloud".
+     * Other Google APIs should include
+     * "serviceusage.googleapis.com/tos/universal". Additional ToS can be
+     * included based on the business needs.
      *
      * Generated from protobuf field <code>repeated string requirements = 1;</code>
-     * @param string[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param string[] $var
      * @return $this
      */
     public function setRequirements($var)
@@ -106,7 +126,7 @@ class Usage extends \Google\Protobuf\Internal\Message
      * **NOTE:** All service configuration rules follow "last one wins" order.
      *
      * Generated from protobuf field <code>repeated .google.api.UsageRule rules = 6;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Api\UsageRule>
      */
     public function getRules()
     {
@@ -118,7 +138,7 @@ class Usage extends \Google\Protobuf\Internal\Message
      * **NOTE:** All service configuration rules follow "last one wins" order.
      *
      * Generated from protobuf field <code>repeated .google.api.UsageRule rules = 6;</code>
-     * @param \Google\Api\UsageRule[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Api\UsageRule[] $var
      * @return $this
      */
     public function setRules($var)

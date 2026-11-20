@@ -95,6 +95,17 @@
 								<li><?php echo wp_kses_post( __( '<strong>Update your plugins, themes, and WordPress site</strong> to the latest versions.', 'wporg-forums' ) ); ?></li>
 								<li><?php echo wp_kses_post( __( '<strong>Describe the steps</strong> needed to reproduce an issue.', 'wporg-forums' ) ); ?></li>
 								<li><?php echo wp_kses_post( __( '<strong>Provide relevant information</strong>, such as your browser, operating system, or server environment.', 'wporg-forums' ) ); ?></li>
+								<?php if ( class_exists( 'Automattic\Blocks_Everywhere\Blocks_Everywhere' ) && apply_filters( 'blocks_everywhere_bbpress_editor', true ) ) : ?>
+								<li>
+									<?php
+									printf(
+										/* translators: %s: Forum user guide URL for the Code block. */
+										wp_kses_post( __( '<strong>Sharing code?</strong> Insert a <a href="%s">Code block</a> first, then paste your code into it.', 'wporg-forums' ) ),
+										esc_url( __( 'https://wordpress.org/support/forum-user-guide/block-editor/#code-block', 'wporg-forums' ) )
+									);
+									?>
+								</li>
+								<?php endif; ?>
 								<?php if ( ! bbp_is_single_view() || ! in_array( bbp_get_view_id(), array( 'theme', 'plugin' ) ) ) : ?>
 								<li><?php
 									printf(
@@ -173,7 +184,15 @@
 					<p>
 						<label for="bbp_topic_tags"><?php esc_html_e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
 						<input type="text" value="<?php bbp_form_topic_tags(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" aria-describedby="bbp_topic_tags_description" <?php disabled( bbp_is_topic_spam() ); ?> /><br />
-						<em id="bbp_topic_tags_description"><?php esc_html_e( 'Separate tags with commas', 'wporg-forums' ); ?></em>
+						<em id="bbp_topic_tags_description">
+							<?php
+							if ( WordPressdotorg\Forums\Plugin::get_instance()->is_main_forums && ! current_user_can( 'moderate' ) ) {
+								esc_html_e( 'Separate tags with commas. Only existing tags can be added.', 'wporg-forums' );
+							} else {
+								esc_html_e( 'Separate tags with commas', 'wporg-forums' );
+							}
+							?>
+						</em>
 					</p>
 					<?php endif; ?>
 

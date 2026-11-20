@@ -12,12 +12,18 @@ namespace Modules\WPOrgSite\Providers;
 use App\Conversation;
 use App\Thread;
 use App\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
+use Modules\WPOrgSite\Http\Middleware\LimitRecipients;
 use Modules\WPOrgSite\Http\Middleware\LockModules;
+use Modules\WPOrgSite\Http\Middleware\RedirectHelpScoutLinks;
 use Modules\WPOrgSite\Services\AltConversation;
+use Modules\WPOrgSite\Services\Assets;
 use Modules\WPOrgSite\Services\EnvSettings;
+use Modules\WPOrgSite\Services\HelpScoutLinks;
+use Modules\WPOrgSite\Services\PartialSends;
 use Modules\WPOrgSite\Services\PinnedNote;
 use Modules\WPOrgSite\Services\UserChoice;
 
@@ -63,8 +69,12 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	 * @return void
 	 */
 	public function boot(): void {
+		$this->app['router']->pushMiddlewareToGroup( 'web', LimitRecipients::class );
 		$this->app['router']->pushMiddlewareToGroup( 'web', LockModules::class );
+		$this->app['router']->pushMiddlewareToGroup( 'web', RedirectHelpScoutLinks::class );
 		$this->loadViewsFrom( __DIR__ . '/../Resources/views', self::ALIAS );
+		$this->loadRoutesFrom( __DIR__ . '/../Http/routes.php' );
+		$this->loadMigrationsFrom( __DIR__ . '/../Database/Migrations' );
 
 		// Modules come with deploys, so the Modules page only lists installed ones; site.css hides the empty directory.
 		\View::composer(
@@ -110,10 +120,28 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/header.js';
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/discard.js';
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/settings.js';
+				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/users.js';
 
 				return $javascripts;
 			}
 		);
+
+		// Last, after every module has added its files.
+		foreach ( array( 'stylesheets', 'javascripts' ) as $bundle ) {
+			\Eventy::addFilter(
+				$bundle,
+				static function ( mixed $files = array() ) use ( $bundle ): mixed {
+					try {
+						return is_array( $files ) ? Assets::existing( $files ) : $files;
+					} catch ( \Throwable $e ) {
+						\Log::error( '[WPOrgSite] Could not check the files of the ' . $bundle . ' bundle: ' . $e->getMessage() );
+
+						return $files;
+					}
+				},
+				PHP_INT_MAX
+			);
+		}
 
 		// Core loads scripts at the end of the page, which would show the sidebar expanded, and the header unpinned, first.
 		\Eventy::addAction(
@@ -126,6 +154,8 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		self::register_profile_hooks();
 		self::register_settings_hooks();
 		self::register_pinned_note_hooks();
+		self::register_helpscout_link_hooks();
+		self::register_partial_sends_hooks();
 
 		// For alt-conversation.js, which lays the conversation out.
 		\Eventy::addAction(
@@ -165,16 +195,16 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 		return array(
 			array(
 				'field'   => PinnedNote::FIELD,
-				'label'   => __( 'Latest note' ),
-				'text'    => __( 'Pin it to the top of the conversation' ),
-				'help'    => __( 'Once newer emails push a conversation\'s latest note down, a copy of it shows above them, so its context stays in sight. The note itself is dimmed where it is.' ),
+				'label'   => __( 'Pinned note' ),
+				'text'    => __( 'Keep the latest note at the top of conversations' ),
+				'help'    => __( 'When emails come in after a note, a copy of the note shows at the top of the conversation, so you don’t have to scroll to find it.' ),
 				'enabled' => UserChoice::get( $user, PinnedNote::OPTION ),
 			),
 			array(
 				'field'   => AltConversation::FIELD,
-				'label'   => __( 'Conversation design' ),
-				'text'    => __( 'Alternate conversation design' ),
-				'help'    => __( 'The subject, tags, and actions stay in view at the top; the number, assignee, and status are at the top of the sidebar, which scrolls on its own; the emails go oldest first, opening at the newest; and Reply and Note buttons wait at the bottom, where the forms open.' ),
+				'label'   => __( 'Conversation layout' ),
+				'text'    => __( 'Oldest email first, with Reply at the bottom' ),
+				'help'    => __( 'Read conversations like a chat: the oldest email at the top, the newest at the bottom, with the Reply and Note buttons below it. The subject and actions stay at the top as you scroll, and the assignee and status are in the sidebar.' ),
 				'enabled' => UserChoice::get( $user, AltConversation::OPTION ),
 			),
 		);
@@ -340,6 +370,50 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgSite] Could not label a pinned note: ' . $e->getMessage() );
 				}
+			}
+		);
+	}
+
+	/**
+	 * Records the HelpScout ID of each conversation the importer imports, for HelpScout's links.
+	 *
+	 * The importer's model is named rather than used: the importer goes once every mailbox has moved.
+	 *
+	 * @return void
+	 */
+	private static function register_helpscout_link_hooks(): void {
+		\Event::listen(
+			'eloquent.saved: ' . HelpScoutLinks::IMPORTER_MODEL,
+			static function ( mixed $imported = null ): void {
+				try {
+					if ( $imported instanceof Model ) {
+						HelpScoutLinks::record( (int) $imported->getAttribute( 'helpscout_id' ), (int) $imported->getAttribute( 'conversation_id' ) );
+					}
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not record the HelpScout ID of an imported conversation: ' . $e->getMessage() );
+				}
+			}
+		);
+	}
+
+	/**
+	 * Watches each reply as it's sent, so one Gmail stopped partway through isn't sent again.
+	 *
+	 * @return void
+	 */
+	private static function register_partial_sends_hooks(): void {
+		$listener = new PartialSends( (string) config( 'app.no_retry_mail_errors' ) );
+
+		\Eventy::addFilter(
+			'email.reply_to_customer.threads',
+			static function ( mixed $threads ) use ( $listener ): mixed {
+				try {
+					$listener->start( is_iterable( $threads ) ? collect( $threads )->first() : null );
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not watch a reply as it’s sent: ' . $e->getMessage() );
+				}
+
+				return $threads;
 			}
 		);
 	}

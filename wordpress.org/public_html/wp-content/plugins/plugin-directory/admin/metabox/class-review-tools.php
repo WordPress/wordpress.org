@@ -9,6 +9,7 @@ namespace WordPressdotorg\Plugin_Directory\Admin\Metabox;
 
 use WordPressdotorg\Plugin_Directory\Template;
 use WordPressdotorg\Plugin_Directory\Tools;
+use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_Import;
 use WordPressdotorg\Plugin_Directory\Jobs\Plugin_i18n_Import;
 
@@ -420,7 +421,7 @@ class Review_Tools {
 			}, $committers );
 
 			$cc_emails = wp_list_pluck( $committers, 'user_email' );
-			$cc_emails = implode( ',', array_diff( $cc_emails, array( $author->user_email ) ) );
+			$cc_emails = array_values( array_diff( $cc_emails, array( $author->user_email ) ) );
 
 			if ( 'new' === $post->post_status || 'pending' === $post->post_status ) {
 				/* translators: %s: Plugin Title */
@@ -448,8 +449,7 @@ class Review_Tools {
 				$subject = sprintf( __( '[WordPress Plugin Directory] Notice: %s', 'wporg-plugins' ), $post->post_title );
 			}
 
-			// HelpScout requires urlencode() because it wants spaces as + signs.
-			$contact_author = 'https://secure.helpscout.net/mailbox/ad3e85554c5bd064/new-ticket/?name=' . $author->display_name . '&email=' . urlencode( $author->user_email ) . '&cc=' . urlencode( $cc_emails ) . '&subject=' . urlencode( $subject );
+			$contact_author = Helpdesk::new_conversation_url( $author, $cc_emails, $subject );
 			?>
 			<a id="contact-author" class="button button-primary" href="<?php echo esc_url( $contact_author ); ?>">Contact plugin committer(s)</a>
 			<?php

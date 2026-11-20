@@ -171,6 +171,9 @@ class Consistency extends GP_Route {
 		$project_where = '';
 		$query_params  = [];
 
+		// Hidden originals are for project writers only; results span projects, so only admins see them here.
+		$priority_where = GP::$permission->current_user_can( 'admin' ) ? '' : 'AND o.priority > -2';
+
 		if ( ! empty( $args['project'] ) ) {
 			$project = GP::$project->get( (int) $args['project'] );
 			if ( $project && ! empty( $project->path ) ) {
@@ -208,6 +211,7 @@ class Consistency extends GP_Route {
 				AND o.singular = {$collation} %s
 				AND ts.locale = %s
 				AND ts.slug = %s
+				{$priority_where}
 				{$project_where}
 			LIMIT 0, 500
 		";

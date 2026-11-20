@@ -347,14 +347,16 @@ function wporg_login_language_switcher( $display = true ) {
 			</select>
 		</form>
 	</div>
-	<script>
+	<?php
+	wp_print_inline_script_tag(
+		<<<'JS'
 		var switcherForm  = document.getElementById( 'language-switcher' );
 		var localesSelect = document.getElementById( 'language-switcher-locales' );
 		localesSelect.addEventListener( 'change', function() {
 			switcherForm.submit()
 		} );
-	</script>
-	<?php
+		JS
+	);
 
 	return false; // For the login_display_language_dropdown filter.
 }
@@ -405,6 +407,8 @@ add_action( 'admin_init', 'wporg_login_cron_tasks' );
 
 /**
  * Clears the Pending Registrations table reguarly.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
  */
 function wporg_login_purge_pending_registrations() {
 	global $wpdb;
@@ -566,8 +570,11 @@ function wporg_remember_where_user_came_from() {
 		return;
 	}
 
-	// Make sure value is a string, since setcookie requires it to be.
-	$came_from = sanitize_text_field( $_REQUEST['redirect_to'] ?? ( $_SERVER['HTTP_REFERER'] ?? '' ) );
+	if ( isset( $_REQUEST['redirect_to'] ) ) {
+		$came_from = is_string( $_REQUEST['redirect_to'] ) ? wp_sanitize_redirect( wp_unslash( $_REQUEST['redirect_to'] ) ) : '';
+	} else {
+		$came_from = wp_sanitize_redirect( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) );
+	}
 	if ( ! $came_from ) {
 		return;
 	}

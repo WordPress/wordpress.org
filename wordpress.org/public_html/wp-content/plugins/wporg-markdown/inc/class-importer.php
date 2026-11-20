@@ -515,6 +515,15 @@ abstract class Importer {
 		$parser->preserve_shortcodes = false;
 		$html = $parser->transform( $markdown );
 
+		// GFM unescapes `\|` anywhere in a table cell, but Jetpack leaves it in code spans.
+		$html = preg_replace_callback(
+			'#<(td|th)\b[^>]*>.*?</\1>#s',
+			function ( $matches ) {
+				return str_replace( '\|', '|', $matches[0] );
+			},
+			$html
+		);
+
 		$html = apply_filters( 'wporg_markdown_after_transform', $html, $this->get_post_type() );
 
 		// Use the first line as the excerpt, but first strip any HTML.

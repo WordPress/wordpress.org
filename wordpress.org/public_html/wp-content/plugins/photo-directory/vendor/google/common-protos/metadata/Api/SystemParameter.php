@@ -14,22 +14,9 @@ class SystemParameter
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0aa0030a21676f6f676c652f6170692f73797374656d5f706172616d6574" .
-            "65722e70726f746f120a676f6f676c652e61706922420a1053797374656d" .
-            "506172616d6574657273122e0a0572756c657318012003280b321f2e676f" .
-            "6f676c652e6170692e53797374656d506172616d6574657252756c652258" .
-            "0a1353797374656d506172616d6574657252756c6512100a0873656c6563" .
-            "746f72180120012809122f0a0a706172616d657465727318022003280b32" .
-            "1b2e676f6f676c652e6170692e53797374656d506172616d657465722251" .
-            "0a0f53797374656d506172616d65746572120c0a046e616d651801200128" .
-            "0912130a0b687474705f686561646572180220012809121b0a1375726c5f" .
-            "71756572795f706172616d6574657218032001280942760a0e636f6d2e67" .
-            "6f6f676c652e617069421453797374656d506172616d6574657250726f74" .
-            "6f50015a45676f6f676c652e676f6c616e672e6f72672f67656e70726f74" .
-            "6f2f676f6f676c65617069732f6170692f73657276696365636f6e666967" .
-            "3b73657276696365636f6e666967a2020447415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xA0\x03\x0A!google/api/system_parameter.proto\x12\x0Agoogle.api\"B\x0A\x10SystemParameters\x12.\x0A\x05rules\x18\x01 \x03(\x0B2\x1F.google.api.SystemParameterRule\"X\x0A\x13SystemParameterRule\x12\x10\x0A\x08selector\x18\x01 \x01(\x09\x12/\x0A\x0Aparameters\x18\x02 \x03(\x0B2\x1B.google.api.SystemParameter\"Q\x0A\x0FSystemParameter\x12\x0C\x0A\x04name\x18\x01 \x01(\x09\x12\x13\x0A\x0Bhttp_header\x18\x02 \x01(\x09\x12\x1B\x0A\x13url_query_parameter\x18\x03 \x01(\x09Bv\x0A\x0Ecom.google.apiB\x14SystemParameterProtoP\x01ZEgoogle.golang.org/genproto/googleapis/api/serviceconfig;serviceconfig\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

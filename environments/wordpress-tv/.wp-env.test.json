@@ -1,0 +1,12 @@
+{
+	"core": "https://wordpress.org/nightly-builds/wordpress-latest.zip",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [],
+	"themes": [
+		"../wordpress.tv/public_html/wp-content/themes/wptv-27"
+	],
+	"lifecycleScripts": {
+		"afterStart": "bash wordpress-tv/bin/after-start-test.sh"
+	}
+}

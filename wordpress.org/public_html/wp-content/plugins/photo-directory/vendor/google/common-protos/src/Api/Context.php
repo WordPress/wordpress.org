@@ -5,8 +5,8 @@
 namespace Google\Api;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * `Context` defines which contexts an API requests.
@@ -22,6 +22,21 @@ use Google\Protobuf\Internal\GPBUtil;
  * `google.rpc.context.OriginContext`.
  * Available context types are defined in package
  * `google.rpc.context`.
+ * This also provides mechanism to allowlist any protobuf message extension that
+ * can be sent in grpc metadata using “x-goog-ext-<extension_id>-bin” and
+ * “x-goog-ext-<extension_id>-jspb” format. For example, list any service
+ * specific protobuf types that can appear in grpc metadata as follows in your
+ * yaml file:
+ * Example:
+ *     context:
+ *       rules:
+ *        - selector: "google.example.library.v1.LibraryService.CreateBook"
+ *          allowed_request_extensions:
+ *          - google.foo.v1.NewExtension
+ *          allowed_response_extensions:
+ *          - google.foo.v1.NewExtension
+ * You can also specify extension ID instead of fully qualified extension name
+ * here.
  *
  * Generated from protobuf message <code>google.api.Context</code>
  */
@@ -41,7 +56,7 @@ class Context extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
-     *     @type \Google\Api\ContextRule[]|\Google\Protobuf\Internal\RepeatedField $rules
+     *     @type \Google\Api\ContextRule[] $rules
      *           A list of RPC context rules that apply to individual API methods.
      *           **NOTE:** All service configuration rules follow "last one wins" order.
      * }
@@ -56,7 +71,7 @@ class Context extends \Google\Protobuf\Internal\Message
      * **NOTE:** All service configuration rules follow "last one wins" order.
      *
      * Generated from protobuf field <code>repeated .google.api.ContextRule rules = 1;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField
+     * @return RepeatedField<\Google\Api\ContextRule>
      */
     public function getRules()
     {
@@ -68,7 +83,7 @@ class Context extends \Google\Protobuf\Internal\Message
      * **NOTE:** All service configuration rules follow "last one wins" order.
      *
      * Generated from protobuf field <code>repeated .google.api.ContextRule rules = 1;</code>
-     * @param \Google\Api\ContextRule[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @param \Google\Api\ContextRule[] $var
      * @return $this
      */
     public function setRules($var)

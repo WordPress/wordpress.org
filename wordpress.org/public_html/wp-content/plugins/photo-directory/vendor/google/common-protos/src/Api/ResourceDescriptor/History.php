@@ -63,6 +63,3 @@ class History
     }
 }
 
-// Adding a class alias for backwards compatibility with the previous class name.
-class_alias(History::class, \Google\Api\ResourceDescriptor_History::class);
-

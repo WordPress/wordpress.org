@@ -1,17 +1,10 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\Tools;
 
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 
 class Helpscout {
-
-	/**
-	 * The namespace a rejected plugin's slug is wrapped in.
-	 *
-	 * The trailing digits are the suffix `wp_update_post()` adds when the wrapped slug
-	 * is itself taken.
-	 */
-	const REJECTED_SLUG_REGEX = '/^rejected-(.+)-rejected(-\d+)?$/i';
 
 	/**
 	 * Fetch the slug a post's emails may also be recorded against.
@@ -25,7 +18,7 @@ class Helpscout {
 	 * @return string The unwrapped slug, or $post_name if it isn't this post's to claim.
 	 */
 	protected static function get_unwrapped_slug( $post_name, $post_id ) {
-		$unwrapped = preg_replace( self::REJECTED_SLUG_REGEX, '$1', $post_name );
+		$unwrapped = preg_replace( Status_Transitions::REJECTED_SLUG_REGEX, '$1', $post_name );
 		if ( ! $unwrapped || $unwrapped === $post_name ) {
 			return $post_name;
 		}
@@ -40,6 +33,9 @@ class Helpscout {
 
 	/**
 	 * Fetch the list of known Helpscout emails for a given post.
+	 *
+	 * These are the conversations that mention the plugin, in their subject or any message, whoever wrote it. That
+	 * doesn't make them the plugin's: use get_review_emails() for anything shown or sent to its author.
 	 *
 	 * @param \WP_Post $post The post to fetch emails for.
 	 * @return array
@@ -57,18 +53,26 @@ class Helpscout {
 		$slug   = self::get_unwrapped_slug( $post->post_name, $post->ID );
 		$wheres = '';
 
-		foreach ( $filters as $key => $value ) { 
-			$wheres .= $wpdb->prepare( 'AND emails.%i LIKE %s ', $key, '%' . $value . '%' );
+		foreach ( $filters as $key => $value ) {
+			$wheres .= 'user_id' === $key
+				? $wpdb->prepare( 'AND emails.user_id = %d ', $value )
+				: $wpdb->prepare( 'AND emails.%i LIKE %s ', $key, '%' . $value . '%' );
 		}
 
+		/*
+		 * Newest first. An imported conversation shares `created` with its lingering HelpScout copy, so FreeScout's comes
+		 * first, then the higher ID.
+		 */
 		$emails = $wpdb->get_results( $wpdb->prepare(
-			"SELECT emails.*
+			"SELECT emails.*,
+					EXISTS( SELECT 1 FROM %i helpdesk WHERE helpdesk.helpscout_id = emails.id AND helpdesk.meta_key = 'helpdesk' AND helpdesk.meta_value = 'freescout' ) AS freescout
 				FROM %i emails
 					JOIN %i meta ON emails.id = meta.helpscout_id
 				WHERE meta.meta_key = 'plugins' AND meta.meta_value IN( %s, %s )
 					$wheres
-				ORDER BY `created` DESC
+				ORDER BY emails.`created` DESC, `freescout` DESC, emails.`id` DESC
 				LIMIT %d",
+			"{$wpdb->base_prefix}helpscout_meta",
 			"{$wpdb->base_prefix}helpscout",
 			"{$wpdb->base_prefix}helpscout_meta",
 			$slug,
@@ -77,7 +81,8 @@ class Helpscout {
 		) );
 
 		foreach ( $emails as &$email ) {
-			$email->url = 'https://secure.helpscout.net/conversation/' . $email->id . '/' . $email->number;
+			$email->freescout = (bool) $email->freescout;
+			$email->url       = Helpdesk::conversation_url( (int) $email->id, (int) $email->number, $email->freescout );
 		}
 
 		if ( 1 === $limit ) {
@@ -85,6 +90,28 @@ class Helpscout {
 		}
 
 		return $emails;
+	}
+
+	/**
+	 * Fetch a plugin's review conversations: the "Review in Progress" ones with its author, newest first.
+	 *
+	 * @param \WP_Post $post    The plugin post.
+	 * @param array    $filters Further filters, as for get_emails(); the subject and the author can't be changed.
+	 * @return array|object|false The conversations; with a limit of 1, the newest, or false.
+	 */
+	public static function get_review_emails( $post, $filters = [] ) {
+		// Conversations whose sender has no account are recorded with a user ID of 0.
+		if ( ! (int) $post->post_author ) {
+			return 1 === absint( $filters['limit'] ?? 999 ) ? false : [];
+		}
+
+		return self::get_emails(
+			$post,
+			[
+				'subject' => 'Review in Progress:',
+				'user_id' => (int) $post->post_author,
+			] + $filters
+		);
 	}
 
 	/**

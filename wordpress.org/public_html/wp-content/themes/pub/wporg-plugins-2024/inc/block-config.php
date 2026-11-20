@@ -30,7 +30,7 @@ function add_site_navigation_menus( $menus ) {
 	$scheme = wp_parse_url( home_url(), PHP_URL_SCHEME ) ?: 'https';
 	$host   = $_SERVER['HTTP_HOST'] ?? wp_parse_url( home_url(), PHP_URL_HOST ) ?: 'localhost';
 	$path   = parse_url( ( $_SERVER['REQUEST_URI'] ?? '/' ) ?: '/', PHP_URL_PATH );
-	$url    = $scheme . '://' . $host . $path;
+	$url    = is_search() ? get_search_link() : $scheme . '://' . $host . $path;
 
 	$items = array(
 		'plugins' => array(
@@ -47,16 +47,16 @@ function add_site_navigation_menus( $menus ) {
 		'section-bar' => array(
 			array(
 				'label' => __( 'All', 'wporg-plugins' ),
-				'url'   => is_search() ? get_search_link() : home_url( '/' ),
+				'url'   => $url,
 			),
 			array(
 				'label' => __( 'Community', 'wporg-plugins' ),
-				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=community' ) :  esc_url( $url . '?plugin_business_model=community' ),
+				'url'   => add_query_arg( 'plugin_business_model', 'community', $url ),
 				'term'  => get_term_by( 'slug', 'community', 'plugin_business_model' ),
 			),
 			array(
 				'label' => __( 'Commercial', 'wporg-plugins' ),
-				'url'   => is_search() ? esc_url( get_search_link() . '?plugin_business_model=commercial' ) : esc_url( $url . '?plugin_business_model=commercial' ),
+				'url'   => add_query_arg( 'plugin_business_model', 'commercial', $url ),
 				'term'  => get_term_by( 'slug', 'commercial', 'plugin_business_model' ),
 			),
 			/*

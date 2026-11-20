@@ -14,16 +14,9 @@ class Expr
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0adb010a16676f6f676c652f747970652f657870722e70726f746f120b67" .
-            "6f6f676c652e7479706522500a044578707212120a0a6578707265737369" .
-            "6f6e180120012809120d0a057469746c6518022001280912130a0b646573" .
-            "6372697074696f6e18032001280912100a086c6f636174696f6e18042001" .
-            "2809425a0a0f636f6d2e676f6f676c652e7479706542094578707250726f" .
-            "746f50015a34676f6f676c652e676f6c616e672e6f72672f67656e70726f" .
-            "746f2f676f6f676c65617069732f747970652f657870723b65787072a202" .
-            "03475450620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xDB\x01\x0A\x16google/type/expr.proto\x12\x0Bgoogle.type\"P\x0A\x04Expr\x12\x12\x0A\x0Aexpression\x18\x01 \x01(\x09\x12\x0D\x0A\x05title\x18\x02 \x01(\x09\x12\x13\x0A\x0Bdescription\x18\x03 \x01(\x09\x12\x10\x0A\x08location\x18\x04 \x01(\x09BZ\x0A\x0Fcom.google.typeB\x09ExprProtoP\x01Z4google.golang.org/genproto/googleapis/type/expr;expr\xA2\x02\x03GTPb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

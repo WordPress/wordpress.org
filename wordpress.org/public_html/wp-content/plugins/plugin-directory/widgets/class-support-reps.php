@@ -79,8 +79,11 @@ class Support_Reps extends \WP_Widget {
 			<?php if ( current_user_can( 'plugin_add_support_rep', $post ) ) : ?>
 			<li class="new">
 				<form id="add-support-rep" action="POST">
-					<input type="text" name="support_rep" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
-					<button type="submit" class="button button-secondary button-small"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button>
+					<label>
+						<input type="text" name="support_rep" placeholder="<?php esc_attr_e( 'Login, Slug, or Email.', 'wporg-plugins' ); ?>">
+						<span class="screen-reader-text"><?php esc_html_e( 'Add a new support rep', 'wporg-plugins' ); ?></span>
+					</label>
+					<span class="wp-block-button is-small"><button type="submit" class="wp-block-button__link"><?php esc_attr_e( 'Add', 'wporg-plugins' ); ?></button></span>
 				</form>
 
 				<script id="tmpl-new-support-rep" type="text/template">

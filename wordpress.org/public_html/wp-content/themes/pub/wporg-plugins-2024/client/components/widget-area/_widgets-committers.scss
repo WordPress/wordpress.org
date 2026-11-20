@@ -48,5 +48,19 @@
 
 	.new {
 		margin-top: var(--wp--style--block-gap);
+
+		form {
+			display: flex;
+			align-items: center;
+			gap: var(--wp--preset--spacing--10);
+		}
+
+		label {
+			flex: 1;
+		}
+
+		input {
+			width: 100%;
+		}
 	}
 }

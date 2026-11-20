@@ -204,4 +204,32 @@ class Test_Readme_Parser extends TestCase {
 		$parser = new Parser( '' );
 		$this->assertSame( $expected, $parser->filter_text( $input ) );
 	}
+
+	/**
+	 * Data provider for {@see test_faq_code_block_lines_are_not_questions()}.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public static function faq_code_block_provider(): array {
+		$code = "`body {\ncolor: #f1f1f1;\n}\n#wpwrap {\nbackground: red;\n}`";
+
+		return array(
+			'heading questions'         => array( "= How do I style it? =\n\n$code\n\n= Is that all? =\n\nYes." ),
+			'bold questions'            => array( "**How do I style it?**\n\n$code\n\n**Is that all?**\n\nYes." ),
+			'inline code after close'   => array( "= How do I style it? =\n\n$code in `style.css`.\n\n= Is that all? =\n\n$code" ),
+			'unclosed backtick ignored' => array( "= How do I style it? =\n\n`body is a typo\n\n= Is that all? =\n\nYes, see `wp-config.php`." ),
+		);
+	}
+
+	/**
+	 * A `#` or `=` line inside a `...` code block in an FAQ answer is code, not the start
+	 * of a new question, whichever heading style the FAQ uses.
+	 *
+	 * @param string $faq FAQ section contents.
+	 */
+	#[DataProvider( 'faq_code_block_provider' )]
+	public function test_faq_code_block_lines_are_not_questions( string $faq ): void {
+		$parser = new Parser( self::readme_with( 'License: GPLv2' ) . "\n== Frequently Asked Questions ==\n\n$faq\n" );
+		$this->assertSame( array( 'How do I style it?', 'Is that all?' ), array_keys( $parser->faq ) );
+	}
 }

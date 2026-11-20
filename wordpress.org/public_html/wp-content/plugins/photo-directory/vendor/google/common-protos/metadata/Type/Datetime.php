@@ -15,23 +15,9 @@ class Datetime
           return;
         }
         \GPBMetadata\Google\Protobuf\Duration::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0aa8030a1a676f6f676c652f747970652f6461746574696d652e70726f74" .
-            "6f120b676f6f676c652e7479706522e0010a084461746554696d65120c0a" .
-            "0479656172180120012805120d0a056d6f6e7468180220012805120b0a03" .
-            "646179180320012805120d0a05686f757273180420012805120f0a076d69" .
-            "6e75746573180520012805120f0a077365636f6e6473180620012805120d" .
-            "0a056e616e6f73180720012805122f0a0a7574635f6f6666736574180820" .
-            "01280b32192e676f6f676c652e70726f746f6275662e4475726174696f6e" .
-            "4800122a0a0974696d655f7a6f6e6518092001280b32152e676f6f676c65" .
-            "2e747970652e54696d655a6f6e654800420d0a0b74696d655f6f66667365" .
-            "7422270a0854696d655a6f6e65120a0a026964180120012809120f0a0776" .
-            "657273696f6e18022001280942690a0f636f6d2e676f6f676c652e747970" .
-            "65420d4461746554696d6550726f746f50015a3c676f6f676c652e676f6c" .
-            "616e672e6f72672f67656e70726f746f2f676f6f676c65617069732f7479" .
-            "70652f6461746574696d653b6461746574696d65f80101a2020347545062" .
-            "0670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xA5\x03\x0A\x1Agoogle/type/datetime.proto\x12\x0Bgoogle.type\"\xE0\x01\x0A\x08DateTime\x12\x0C\x0A\x04year\x18\x01 \x01(\x05\x12\x0D\x0A\x05month\x18\x02 \x01(\x05\x12\x0B\x0A\x03day\x18\x03 \x01(\x05\x12\x0D\x0A\x05hours\x18\x04 \x01(\x05\x12\x0F\x0A\x07minutes\x18\x05 \x01(\x05\x12\x0F\x0A\x07seconds\x18\x06 \x01(\x05\x12\x0D\x0A\x05nanos\x18\x07 \x01(\x05\x12/\x0A\x0Autc_offset\x18\x08 \x01(\x0B2\x19.google.protobuf.DurationH\x00\x12*\x0A\x09time_zone\x18\x09 \x01(\x0B2\x15.google.type.TimeZoneH\x00B\x0D\x0A\x0Btime_offset\"'\x0A\x08TimeZone\x12\x0A\x0A\x02id\x18\x01 \x01(\x09\x12\x0F\x0A\x07version\x18\x02 \x01(\x09Bf\x0A\x0Fcom.google.typeB\x0DDateTimeProtoP\x01Z<google.golang.org/genproto/googleapis/type/datetime;datetime\xA2\x02\x03GTPb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

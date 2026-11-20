@@ -57,12 +57,14 @@ do_blocks( '<!-- wp:post-title {"level":1,"style":{"spacing":{"margin":{"bottom"
 
 	<h3><?php esc_html_e( 'Submission is simple', 'wporg-plugins' ); ?></h3>
 	<ol>
+		<?php if ( ! is_user_logged_in() ) : ?>
 		<li>
 			<?php
 			/* translators: URL to registration form. */
 			printf( wp_kses_post( __( '<a href="%s">Sign up</a> for an account on WordPress.org.', 'wporg-plugins' ) ), esc_url( wp_registration_url() ) );
 			?>
 		</li>
+		<?php endif; ?>
 		<li>
 			<?php
 			/* translators: URL to plugin submission form. */

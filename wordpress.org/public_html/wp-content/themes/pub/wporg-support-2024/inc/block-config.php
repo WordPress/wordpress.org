@@ -11,6 +11,11 @@ namespace WordPressdotorg\Forums\Block_Config;
 add_filter( 'render_block_context', __NAMESPACE__ . '\wporg_render_block_context', 10, 3 );
 add_filter( 'wporg_ratings_data', __NAMESPACE__ . '\wporg_set_rating_data', 10, 2 );
 
+// Gutenberg 17.9 misses core's 6.6 elements filter, so both add a class and the markup keeps the unstyled one.
+if ( has_filter( 'render_block_data', 'gutenberg_render_elements_support_styles' ) ) {
+	remove_filter( 'render_block_data', 'wp_render_elements_support_styles' );
+}
+
 /**
  * Update ratings blocks with real rating data.
  *

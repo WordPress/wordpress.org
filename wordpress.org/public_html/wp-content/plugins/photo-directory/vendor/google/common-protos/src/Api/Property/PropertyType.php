@@ -73,6 +73,3 @@ class PropertyType
     }
 }
 
-// Adding a class alias for backwards compatibility with the previous class name.
-class_alias(PropertyType::class, \Google\Api\Property_PropertyType::class);
-

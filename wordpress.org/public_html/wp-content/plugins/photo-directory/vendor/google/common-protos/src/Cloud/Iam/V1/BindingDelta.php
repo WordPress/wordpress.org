@@ -5,8 +5,8 @@
 namespace Google\Cloud\Iam\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * One delta entry for Binding. Each individual change (only one member in each
@@ -22,7 +22,7 @@ class BindingDelta extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.iam.v1.BindingDelta.Action action = 1;</code>
      */
-    private $action = 0;
+    protected $action = 0;
     /**
      * Role that is assigned to `members`.
      * For example, `roles/viewer`, `roles/editor`, or `roles/owner`.
@@ -30,21 +30,21 @@ class BindingDelta extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string role = 2;</code>
      */
-    private $role = '';
+    protected $role = '';
     /**
-     * A single identity requesting access for a Cloud Platform resource.
+     * A single identity requesting access for a Google Cloud resource.
      * Follows the same format of Binding.members.
      * Required
      *
      * Generated from protobuf field <code>string member = 3;</code>
      */
-    private $member = '';
+    protected $member = '';
     /**
      * The condition that is associated with this binding.
      *
      * Generated from protobuf field <code>.google.type.Expr condition = 4;</code>
      */
-    private $condition = null;
+    protected $condition = null;
 
     /**
      * Constructor.
@@ -60,7 +60,7 @@ class BindingDelta extends \Google\Protobuf\Internal\Message
      *           For example, `roles/viewer`, `roles/editor`, or `roles/owner`.
      *           Required
      *     @type string $member
-     *           A single identity requesting access for a Cloud Platform resource.
+     *           A single identity requesting access for a Google Cloud resource.
      *           Follows the same format of Binding.members.
      *           Required
      *     @type \Google\Type\Expr $condition
@@ -94,7 +94,7 @@ class BindingDelta extends \Google\Protobuf\Internal\Message
      */
     public function setAction($var)
     {
-        GPBUtil::checkEnum($var, \Google\Cloud\Iam\V1\BindingDelta_Action::class);
+        GPBUtil::checkEnum($var, \Google\Cloud\Iam\V1\BindingDelta\Action::class);
         $this->action = $var;
 
         return $this;
@@ -131,7 +131,7 @@ class BindingDelta extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * A single identity requesting access for a Cloud Platform resource.
+     * A single identity requesting access for a Google Cloud resource.
      * Follows the same format of Binding.members.
      * Required
      *
@@ -144,7 +144,7 @@ class BindingDelta extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * A single identity requesting access for a Cloud Platform resource.
+     * A single identity requesting access for a Google Cloud resource.
      * Follows the same format of Binding.members.
      * Required
      *
@@ -164,11 +164,21 @@ class BindingDelta extends \Google\Protobuf\Internal\Message
      * The condition that is associated with this binding.
      *
      * Generated from protobuf field <code>.google.type.Expr condition = 4;</code>
-     * @return \Google\Type\Expr
+     * @return \Google\Type\Expr|null
      */
     public function getCondition()
     {
         return $this->condition;
+    }
+
+    public function hasCondition()
+    {
+        return isset($this->condition);
+    }
+
+    public function clearCondition()
+    {
+        unset($this->condition);
     }
 
     /**

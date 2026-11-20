@@ -38,7 +38,7 @@ register_block_type(
 			}
 			$event_id = $block->context['postId'];
 			$event = Translation_Events::get_event_repository()->get_event( $event_id );
-			if ( ! $event ) {
+			if ( ! $event || $event->end()->is_open_ended() ) {
 				return '';
 			}
 			$end = $event->end()->format( 'F j, Y' );

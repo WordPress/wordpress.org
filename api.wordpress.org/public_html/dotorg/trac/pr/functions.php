@@ -3,8 +3,32 @@ namespace WordPressdotorg\API\Trac\GithubPRs;
 
 /**
  * Fetches and reformats the Github PR API response to the details we need.
+ *
+ * @param string $repo The repository, as `owner/name`.
+ * @param int    $pr   The PR number.
+ * @return object|false The PR's details, or false if any of them could not be fetched.
  */
 function fetch_pr_data( $repo, $pr ) {
+	$details = fetch_partial_pr_data( $repo, $pr );
+	if ( ! $details || $details->partial ) {
+		return false;
+	}
+
+	unset( $details->partial );
+
+	return $details;
+}
+
+/**
+ * Fetches a PR's details, even if only the PR itself could be fetched.
+ *
+ * The lists that failed are then empty and `partial` is set, so the details must not replace stored ones.
+ *
+ * @param string $repo The repository, as `owner/name`.
+ * @param int    $pr   The PR number.
+ * @return object|false The PR's details, or false if the PR could not be fetched.
+ */
+function fetch_partial_pr_data( $repo, $pr ) {
 	$url = '/repos/' . $repo . '/pulls/' . intval( $pr );
 	$data = api_request( $url );
 
@@ -13,65 +37,94 @@ function fetch_pr_data( $repo, $pr ) {
 		return false;
 	}
 
-	// Get Travis CI State.
-	$check_runs = [];
-	$raw_check_runs = api_request(
-		'/repos/' . $repo . '/commits/' . $data->head->sha . '/check-runs',
-		null,
-		[ 'Accept: application/vnd.github.antiope-preview+json' ]
-	);
-	if ( ! empty( $raw_check_runs->check_runs ) ) {
-		foreach ( $raw_check_runs->check_runs as $check ) {
-			switch ( $check->status ) {
-				case 'queued':
-				case 'in_progress':
-					$check_runs[ $check->app->name ] = 'in_progress';
-					break;
-				case 'completed':
-					switch( $check->conclusion ) {
-						case 'success':
-							$check_runs[ $check->app->name ] = 'success';
-							break;
-						case 'failure':
-							$check_runs[ $check->app->name ] = 'failed';
-							break;
-						case 'action_required':
-							$check_runs[ $check->app->name ] = $check->output->title;
-							break;
-					}
-			}
+	// A core PR has more check runs than fit on one page, and a failure can be on any of them.
+	$_check_runs = [];
+	$page        = 0;
+	do {
+		++$page;
+		$raw_check_runs = api_request(
+			'/repos/' . $repo . '/commits/' . $data->head->sha . '/check-runs?per_page=100&page=' . $page,
+			null,
+			[ 'Accept: application/vnd.github.antiope-preview+json' ]
+		);
+
+		if ( ! is_array( $raw_check_runs->check_runs ?? null ) ) {
+			$_check_runs = null;
+			break;
 		}
-	}
+
+		$_check_runs = array_merge( $_check_runs, $raw_check_runs->check_runs );
+		$more_pages  = $raw_check_runs->check_runs && count( $_check_runs ) < ( $raw_check_runs->total_count ?? 0 );
+	} while ( $more_pages );
 
 	$_reviews = api_request(
 		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/reviews',
 		null,
 		[ 'Accept: application/vnd.github.antiope-preview+json' ]
 	);
+
+	$_files = api_request(
+		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/files?per_page=100',
+		null,
+		[ 'Accept: application/vnd.github.antiope-preview+json' ]
+	);
+
+	// Each app's runs share one state, so the worst of them wins: failed, then action required, then running.
+	$precedence     = [
+		'success'     => 0,
+		'in_progress' => 1,
+		'failed'      => 3,
+	];
+	$check_runs     = [];
+	$checks_running = false;
+	foreach ( is_array( $_check_runs ) ? $_check_runs : [] as $check ) {
+		$state = null;
+		switch ( $check->status ) {
+			case 'queued':
+			case 'in_progress':
+				$state          = 'in_progress';
+				$checks_running = true;
+				break;
+			case 'completed':
+				switch ( $check->conclusion ) {
+					case 'success':
+						$state = 'success';
+						break;
+					case 'failure':
+					case 'timed_out':
+						$state = 'failed';
+						break;
+					case 'action_required':
+						$state = $check->output->title;
+						break;
+				}
+		}
+
+		if ( null === $state ) {
+			continue;
+		}
+
+		$app = $check->app->name;
+		if ( ! isset( $check_runs[ $app ] ) || ( $precedence[ $state ] ?? 2 ) > ( $precedence[ $check_runs[ $app ] ] ?? 2 ) ) {
+			$check_runs[ $app ] = $state;
+		}
+	}
+
 	$reviews = [];
-	if ( $_reviews ) {
-		foreach ( $_reviews as $r ) {
-			if (
-				in_array( $r->state, [ 'CHANGES_REQUESTED', 'APPROVED' ] ) &&
-				! in_array( $r->user->login, $reviews[ $r->state ] ?? [], true )
-			) {
-				$reviews[ $r->state ][] = $r->user->login;
-			}
+	foreach ( is_array( $_reviews ) ? $_reviews : [] as $r ) {
+		if (
+			in_array( $r->state, [ 'CHANGES_REQUESTED', 'APPROVED' ] ) &&
+			! in_array( $r->user->login, $reviews[ $r->state ] ?? [], true )
+		) {
+			$reviews[ $r->state ][] = $r->user->login;
 		}
 	}
 
 	$touches_tests = false;
-	$_files = api_request(
-		'/repos/' . $repo . '/pulls/' . intval( $pr ) . '/files?per_page=999',
-		null,
-		[ 'Accept: application/vnd.github.antiope-preview+json' ]
-	);
-	if ( $_files ) {
-		foreach ( $_files as $f ) {
-			if ( preg_match( '!(^tests/|/tests/)!', $f->filename ) ) {
-				$touches_tests = true;
-				break;
-			}
+	foreach ( is_array( $_files ) ? $_files : [] as $f ) {
+		if ( preg_match( '!(^tests/|/tests/)!', $f->filename ) ) {
+			$touches_tests = true;
+			break;
 		}
 	}
 
@@ -86,6 +139,7 @@ function fetch_pr_data( $repo, $pr ) {
 		'closed_at'       => $data->closed_at,
 		'mergeable_state' => $data->mergeable_state,
 		'check_runs'      => $check_runs,
+		'checks_running'  => $checks_running,
 		'reviews'         => $reviews,
 		'touches_tests'   => $touches_tests,
 		'body'            => $data->body,
@@ -100,7 +154,58 @@ function fetch_pr_data( $repo, $pr ) {
 			'html_url'  => $data->html_url,
 		],
 		'trac_ticket'    => determine_trac_ticket( $data ),
+		// A failed request returns GitHub's error object instead of a list.
+		'partial'         => ! is_array( $_check_runs ) || ! is_array( $_reviews ) || ! is_array( $_files ),
 	];
+}
+
+/**
+ * Picks the linked PRs whose data is due a refresh from GitHub.
+ *
+ * Each refresh is at least four GitHub API requests, so a ticket with many PRs refreshes only the stalest few per request.
+ *
+ * @param array $prs           Rows of `trac_github_prs`, with `data` decoded.
+ * @param bool  $authenticated Whether the request is from a logged in user.
+ * @param int   $limit         The most PRs to pick.
+ * @return array The PRs to refresh, never fetched ones first, then the stalest.
+ */
+function select_prs_to_refresh( $prs, $authenticated, $limit = 10 ) {
+	$stale = array_filter(
+		$prs,
+		function ( $data ) use ( $authenticated ) {
+			if ( ! $data->data ) {
+				return true;
+			}
+
+			$checked_ago = time() - strtotime( $data->last_checked );
+
+			// Once a day, the webhook refreshes them when they're reopened.
+			if ( 'closed' === $data->data->state ) {
+				return $checked_ago >= 24 * 60 * 60;
+			}
+
+			// 5 minutes for logged in requests, 60 mins for unauthenticated.
+			if ( $checked_ago >= ( $authenticated ? 5 * 60 : 60 * 60 ) ) {
+				return true;
+			}
+
+			// Every two minutes while the PR was created/updated in the last half hour, or its unit tests are running.
+			$recently_updated = strtotime( $data->data->updated_at ) > time() - 30 * 60;
+			// A failed run hides a running one in `check_runs`. Rows stored before `checks_running` lack it.
+			$tests_running = $data->data->checks_running ?? in_array( 'in_progress', (array) $data->data->check_runs, true );
+
+			return $checked_ago >= 2 * 60 && ( $recently_updated || $tests_running );
+		}
+	);
+
+	usort(
+		$stale,
+		function ( $a, $b ) {
+			return ( $a->data ? strtotime( $a->last_checked ) : 0 ) <=> ( $b->data ? strtotime( $b->last_checked ) : 0 );
+		}
+	);
+
+	return array_slice( $stale, 0, $limit );
 }
 
 /**

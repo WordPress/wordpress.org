@@ -16,13 +16,30 @@ document.addEventListener( 'DOMContentLoaded' , function() {
 					alert( result.message );
 				}
 			};
+
+			// Opens the two-factor prompt when the session needs one; the prompt replays the event once verified.
+			var needsRevalidation = function( event ) {
+				var revalidation = wp.wporg2faRevalidation;
+
+				if ( ! revalidation || ! revalidation.revalidateRequired() ) {
+					return false;
+				}
+
+				revalidation.maybeRevalidateOnLinkNavigate( event.originalEvent );
+
+				return true;
+			};
 	
 			$( '#committer-list' )
-				.on( 'click', '.remove', function() {
+				.on( 'click', '.remove', function( event ) {
 					var $this = $( this ),
 						$row = $this.parents( 'li' ),
 						user_id = $row.data( 'user' ),
 						url;
+
+					if ( needsRevalidation( event ) ) {
+						return;
+					}
 	
 					if (
 						! window.confirm(
@@ -53,10 +70,14 @@ document.addEventListener( 'DOMContentLoaded' , function() {
 				} )
 				.on( 'submit', '#add-committer', function( event ) {
 					event.preventDefault();
+
+					if ( needsRevalidation( event ) ) {
+						return;
+					}
 	
 					var $row = $( this ).parents( 'li' ),
 						$newUserInput = $row.find( 'input[name="committer"]' ),
-						$button = $row.find( '.button-small' ).addClass( 'spinner' ),
+						$button = $row.find( 'button[type="submit"]' ).addClass( 'spinner' ),
 						url = pluginDir.restUrl + 'plugins/v1/plugin/' + pluginDir.pluginSlug + '/committers/?_wpnonce=' + pluginDir.restNonce
 						+ '&_wporg_action=' + pluginDir.addNonce;
 	

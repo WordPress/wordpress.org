@@ -1,6 +1,7 @@
 <?php
 namespace WordPressdotorg\Plugin_Directory\API\Routes;
 
+use WordPressdotorg\Plugin_Directory\Guideline_Labels;
 use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Plugin_i18n;
 use WordPressdotorg\Plugin_Directory\Template;
@@ -248,6 +249,18 @@ class Plugin extends Base {
 			}
 		}
 
+		$result['guideline_labels'] = array();
+		foreach ( Guideline_Labels::get( $post ) as $label ) {
+			$result['guideline_labels'][] = array(
+				'guideline' => $label['guideline'],
+				'reason'    => $label['reason'],
+				'message'   => $label['message'],
+				'url'       => $label['url'],
+				'since'     => $label['since_version'],
+				'date'      => gmdate( 'Y-m-d', $label['labeled_at'] ),
+			);
+		}
+
 		$result['donate_link'] = get_post_meta( $post_id, 'donate_link', true ) ?: '';
 
 		$result['banners'] = array();
@@ -448,9 +461,11 @@ class Plugin extends Base {
 	 * @return string Them markup with `<dt>` replaced with `<h4>` and `<dd>` with `<p>`.
 	 */
 	protected function get_simplified_faq_markup( $markup ) {
+		// The readme parser gives each `<dt>` an id attribute.
+		$markup = preg_replace( '/<dt\b[^>]*>/', '<h4>', $markup );
 		$markup = str_replace(
-			array( '<dl>', '</dl>', '<dt>', '</dt>', '<h3>', '</h3>', '<dd>', '</dd>' ),
-			array( '',     '',      '<h4>', '</h4>', '',      '',     '<p>',  '</p>'  ),
+			array( '<dl>', '</dl>', '</dt>', '<h3>', '</h3>', '<dd>', '</dd>' ),
+			array( '', '', '</h4>', '', '', '<p>', '</p>' ),
 			$markup
 		);
 

@@ -46,6 +46,7 @@ class Plugins_Info_API_Request {
 		'repository_url'         => false,
 		'support_url'            => false,
 		'commercial_support_url' => false,
+		'guideline_labels'       => false,
 	);
 
 	static $plugins_info_fields_defaults = array(
@@ -85,6 +86,7 @@ class Plugins_Info_API_Request {
 		'repository_url'         => true,
 		'support_url'            => true,
 		'commercial_support_url' => true,
+		'guideline_labels'       => true,
 	);
 
 	static $query_plugins_fields_defaults = array(
@@ -222,6 +224,11 @@ class Plugins_Info_API_Request {
 		$requested_fields = array();
 		foreach ( $fields as $field => $include ) {
 			if ( is_int( $field ) ) {
+				// A list entry is the field name, so skip one that isn't a string (like `fields[0][]=x`).
+				if ( ! is_string( $include ) ) {
+					continue;
+				}
+
 				$field   = $include;
 				$include = true;
 				if ( '-' == substr( $field, 0, 1 ) ) {
@@ -331,6 +338,14 @@ class Plugins_Info_API_Request {
 				return false;
 			}
 
+			// Each entry of `slugs` is trim()'d, so a nested one (like `slugs[foo][slug]=foo`) fatals.
+			if ( isset( $this->args->slugs ) && is_array( $this->args->slugs ) ) {
+				foreach ( $this->args->slugs as $slug ) {
+					if ( is_array( $slug ) || is_object( $slug ) ) {
+						return false;
+					}
+				}
+			}
 		}
 
 		/*

@@ -16,44 +16,9 @@ class Distribution
         }
         \GPBMetadata\Google\Protobuf\Any::initOnce();
         \GPBMetadata\Google\Protobuf\Timestamp::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0aa3080a1d676f6f676c652f6170692f646973747269627574696f6e2e70" .
-            "726f746f120a676f6f676c652e6170691a1f676f6f676c652f70726f746f" .
-            "6275662f74696d657374616d702e70726f746f22d9060a0c446973747269" .
-            "627574696f6e120d0a05636f756e74180120012803120c0a046d65616e18" .
-            "022001280112200a1873756d5f6f665f737175617265645f646576696174" .
-            "696f6e180320012801122d0a0572616e676518042001280b321e2e676f6f" .
-            "676c652e6170692e446973747269627574696f6e2e52616e6765123e0a0e" .
-            "6275636b65745f6f7074696f6e7318062001280b32262e676f6f676c652e" .
-            "6170692e446973747269627574696f6e2e4275636b65744f7074696f6e73" .
-            "12150a0d6275636b65745f636f756e747318072003280312340a09657865" .
-            "6d706c617273180a2003280b32212e676f6f676c652e6170692e44697374" .
-            "7269627574696f6e2e4578656d706c61721a210a0552616e6765120b0a03" .
-            "6d696e180120012801120b0a036d61781802200128011ab5030a0d427563" .
-            "6b65744f7074696f6e7312470a0e6c696e6561725f6275636b6574731801" .
-            "2001280b322d2e676f6f676c652e6170692e446973747269627574696f6e" .
-            "2e4275636b65744f7074696f6e732e4c696e656172480012510a13657870" .
-            "6f6e656e7469616c5f6275636b65747318022001280b32322e676f6f676c" .
-            "652e6170692e446973747269627574696f6e2e4275636b65744f7074696f" .
-            "6e732e4578706f6e656e7469616c4800124b0a106578706c696369745f62" .
-            "75636b65747318032001280b322f2e676f6f676c652e6170692e44697374" .
-            "7269627574696f6e2e4275636b65744f7074696f6e732e4578706c696369" .
-            "7448001a430a064c696e656172121a0a126e756d5f66696e6974655f6275" .
-            "636b657473180120012805120d0a057769647468180220012801120e0a06" .
-            "6f66667365741803200128011a4f0a0b4578706f6e656e7469616c121a0a" .
-            "126e756d5f66696e6974655f6275636b65747318012001280512150a0d67" .
-            "726f7774685f666163746f72180220012801120d0a057363616c65180320" .
-            "0128011a1a0a084578706c69636974120e0a06626f756e64731801200328" .
-            "0142090a076f7074696f6e731a730a084578656d706c6172120d0a057661" .
-            "6c7565180120012801122d0a0974696d657374616d7018022001280b321a" .
-            "2e676f6f676c652e70726f746f6275662e54696d657374616d7012290a0b" .
-            "6174746163686d656e747318032003280b32142e676f6f676c652e70726f" .
-            "746f6275662e416e7942710a0e636f6d2e676f6f676c652e617069421144" .
-            "6973747269627574696f6e50726f746f50015a43676f6f676c652e676f6c" .
-            "616e672e6f72672f67656e70726f746f2f676f6f676c65617069732f6170" .
-            "692f646973747269627574696f6e3b646973747269627574696f6ea20204" .
-            "47415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xA3\x08\x0A\x1Dgoogle/api/distribution.proto\x12\x0Agoogle.api\x1A\x1Fgoogle/protobuf/timestamp.proto\"\xD9\x06\x0A\x0CDistribution\x12\x0D\x0A\x05count\x18\x01 \x01(\x03\x12\x0C\x0A\x04mean\x18\x02 \x01(\x01\x12 \x0A\x18sum_of_squared_deviation\x18\x03 \x01(\x01\x12-\x0A\x05range\x18\x04 \x01(\x0B2\x1E.google.api.Distribution.Range\x12>\x0A\x0Ebucket_options\x18\x06 \x01(\x0B2&.google.api.Distribution.BucketOptions\x12\x15\x0A\x0Dbucket_counts\x18\x07 \x03(\x03\x124\x0A\x09exemplars\x18\x0A \x03(\x0B2!.google.api.Distribution.Exemplar\x1A!\x0A\x05Range\x12\x0B\x0A\x03min\x18\x01 \x01(\x01\x12\x0B\x0A\x03max\x18\x02 \x01(\x01\x1A\xB5\x03\x0A\x0DBucketOptions\x12G\x0A\x0Elinear_buckets\x18\x01 \x01(\x0B2-.google.api.Distribution.BucketOptions.LinearH\x00\x12Q\x0A\x13exponential_buckets\x18\x02 \x01(\x0B22.google.api.Distribution.BucketOptions.ExponentialH\x00\x12K\x0A\x10explicit_buckets\x18\x03 \x01(\x0B2/.google.api.Distribution.BucketOptions.ExplicitH\x00\x1AC\x0A\x06Linear\x12\x1A\x0A\x12num_finite_buckets\x18\x01 \x01(\x05\x12\x0D\x0A\x05width\x18\x02 \x01(\x01\x12\x0E\x0A\x06offset\x18\x03 \x01(\x01\x1AO\x0A\x0BExponential\x12\x1A\x0A\x12num_finite_buckets\x18\x01 \x01(\x05\x12\x15\x0A\x0Dgrowth_factor\x18\x02 \x01(\x01\x12\x0D\x0A\x05scale\x18\x03 \x01(\x01\x1A\x1A\x0A\x08Explicit\x12\x0E\x0A\x06bounds\x18\x01 \x03(\x01B\x09\x0A\x07options\x1As\x0A\x08Exemplar\x12\x0D\x0A\x05value\x18\x01 \x01(\x01\x12-\x0A\x09timestamp\x18\x02 \x01(\x0B2\x1A.google.protobuf.Timestamp\x12)\x0A\x0Battachments\x18\x03 \x03(\x0B2\x14.google.protobuf.AnyBq\x0A\x0Ecom.google.apiB\x11DistributionProtoP\x01ZCgoogle.golang.org/genproto/googleapis/api/distribution;distribution\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

@@ -1,0 +1,55 @@
+name: OSS Scanner Image
+
+on:
+  pull_request:
+    paths:
+      - '.oss-scanner/**'
+      - '.dockerignore'
+      - 'environments/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/unit-tests-suites.yml'
+      - '.github/workflows/oss-scanner.yml'
+  push:
+    branches: [ trunk ]
+    paths:
+      - '.oss-scanner/**'
+      - '.dockerignore'
+      - 'environments/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/unit-tests-suites.yml'
+      - '.github/workflows/oss-scanner.yml'
+  # The image builds from unpinned sources (nightly WordPress, plugin zips, live WordPress.org content); catch breakage
+  # before the scanner's next build does, which reports it to the security team.
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+# Cancel superseded runs, on trunk too: only the newest image matters, and the daily run backs it up.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Build and check
+    if: github.event_name == 'pull_request' || github.repository == 'WordPress/wordpress.org'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      # Without persisted credentials: the checkout, .git included, is copied into the image.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # As the scanner builds it: the checkout is the build context, with network access.
+      - name: Build the image
+        run: docker build --progress=plain --file .oss-scanner/Dockerfile --tag wporg-oss-scanner .
+
+      # As the scanner runs it: no network. Every site must answer and every test suite must pass.
+      - name: Check every site and test suite offline
+        run: docker run --rm --network none wporg-oss-scanner wporg check --tests

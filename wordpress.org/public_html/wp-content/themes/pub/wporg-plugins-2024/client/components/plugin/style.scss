@@ -54,16 +54,9 @@
 				margin-inline-start: 1rem;
 			}
 
-			> div,
-			> .button {
+			> div {
 				display: inline-block;
 				text-align: center;
-			}
-
-			@media screen and (max-width: 34em) {
-				> .button.download-button {
-					display: none;
-				}
 			}
 
 		}

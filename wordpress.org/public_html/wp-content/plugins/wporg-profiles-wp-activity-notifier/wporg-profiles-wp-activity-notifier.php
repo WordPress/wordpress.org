@@ -65,6 +65,7 @@ class WPOrg_WP_Activity_Notifier {
 
 		// bbPress 2.x topic support.
 		add_action( 'bbp_new_topic',             array( $this, 'notify_forum_new_topic' ),               12 );
+		add_action( 'bbp_edit_topic', array( $this, 'notify_forum_edit_topic' ), 12 );
 		add_action( 'bbp_spammed_topic',         array( $this, 'notify_forum_remove_topic' )                );
 		add_action( 'bbp_unspammed_topic',       array( $this, 'notify_forum_new_topic' )                   );
 		add_action( 'bbp_trashed_topic',         array( $this, 'notify_forum_remove_topic' )                );
@@ -75,6 +76,7 @@ class WPOrg_WP_Activity_Notifier {
 
 		// bbPress 2.x reply support.
 		add_action( 'bbp_new_reply',             array( $this, 'notify_forum_new_reply' ),               12 );
+		add_action( 'bbp_edit_reply', array( $this, 'notify_forum_edit_reply' ), 12 );
 		add_action( 'bbp_spammed_reply',         array( $this, 'notify_forum_remove_reply' )                );
 		add_action( 'bbp_unspammed_reply',       array( $this, 'notify_forum_new_reply' )                   );
 		add_action( 'bbp_approved_reply',        array( $this, 'notify_forum_new_reply' )                   );
@@ -295,7 +297,7 @@ class WPOrg_WP_Activity_Notifier {
 	 *
 	 * @access private
 	 *
-	 * @param string $activity The activity type. One of: create-topic, remove-topic.
+	 * @param string $activity The activity type. One of: create-topic, update-topic, remove-topic.
 	 * @param int    $topic_id Topic ID.
 	 */
 	private function notify_forum_topic_payload( $activity, $topic_id ) {
@@ -307,7 +309,7 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
-		if ( ! in_array( $activity, array( 'create-topic', 'remove-topic' ), true ) ) {
+		if ( ! in_array( $activity, array( 'create-topic', 'update-topic', 'remove-topic' ), true ) ) {
 			return;
 		}
 
@@ -351,6 +353,20 @@ class WPOrg_WP_Activity_Notifier {
 	}
 
 	/**
+	 * Handler for bbPress 2.x topic edits.
+	 *
+	 * @param int $topic_id Topic ID.
+	 */
+	public function notify_forum_edit_topic( $topic_id ) {
+		// An edit can hide the topic: pending, spam, or trash.
+		if ( ! bbp_is_topic_public( $topic_id ) ) {
+			$this->notify_forum_remove_topic( $topic_id );
+		} else {
+			$this->notify_forum_topic_payload( 'update-topic', $topic_id );
+		}
+	}
+
+	/**
 	 * Handler for bbPress 2.x topic removal.
 	 *
 	 * @param int $topic_id Topic ID.
@@ -364,7 +380,7 @@ class WPOrg_WP_Activity_Notifier {
 	 *
 	 * @access private
 	 *
-	 * @param string $activity The activity type. One of: create-reply, remove-reply.
+	 * @param string $activity The activity type. One of: create-reply, update-reply, remove-reply.
 	 * @param int    $reply_id Reply ID.
 	 */
 	private function notify_forum_reply_payload( $activity, $reply_id ) {
@@ -376,7 +392,7 @@ class WPOrg_WP_Activity_Notifier {
 			return;
 		}
 
-		if ( ! in_array( $activity, array( 'create-reply', 'remove-reply' ), true ) ) {
+		if ( ! in_array( $activity, array( 'create-reply', 'update-reply', 'remove-reply' ), true ) ) {
 			return;
 		}
 
@@ -417,6 +433,20 @@ class WPOrg_WP_Activity_Notifier {
 	 */
 	public function notify_forum_new_reply( $reply_id ) {
 		$this->notify_forum_reply_payload( 'create-reply', $reply_id );
+	}
+
+	/**
+	 * Handler for bbPress 2.x topic reply edits.
+	 *
+	 * @param int $reply_id Reply ID.
+	 */
+	public function notify_forum_edit_reply( $reply_id ) {
+		// An edit can hide the reply: pending, spam, trash, or archived.
+		if ( ! bbp_is_reply_public( $reply_id ) ) {
+			$this->notify_forum_remove_reply( $reply_id );
+		} else {
+			$this->notify_forum_reply_payload( 'update-reply', $reply_id );
+		}
 	}
 
 	/**

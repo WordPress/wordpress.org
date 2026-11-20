@@ -74,6 +74,17 @@ class WPorg_Trac_Components_Rendering_Test extends WPorg_Trac_Components_TestCas
 	}
 
 	/**
+	 * Clears the breakdowns memoized on the shared instance, so no test inherits another's.
+	 */
+	public function tearDown(): void {
+		$this->components->breakdown_component_type           = null;
+		$this->components->breakdown_component_milestone_type = null;
+		$this->components->breakdown_component_unreplied      = null;
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Stores the maintainer's display name directly, bypassing profile write filters,
 	 * to exercise the render path in isolation.
 	 *
@@ -138,8 +149,8 @@ class WPorg_Trac_Components_Rendering_Test extends WPorg_Trac_Components_TestCas
 		$html = $this->render_component();
 
 		$this->assertStringContainsString( '<p>Component maintainers:</p>', $html );
-		$this->assertStringContainsString( '<p>Many contributors help maintain', $html );
-		$this->assertStringContainsString( '<p><strong>Want to help?', $html );
+		$this->assertStringContainsString( '<p>Component maintainers are vital', $html );
+		$this->assertStringContainsString( '<p>Want to help maintain this component?', $html );
 	}
 
 	/**
@@ -164,6 +175,30 @@ class WPorg_Trac_Components_Rendering_Test extends WPorg_Trac_Components_TestCas
 
 		$this->assertStringContainsString( '[caption width=300 caption=CAP]body[/caption]', $html );
 		$this->assertStringNotContainsString( 'wp-caption', $html );
+	}
+
+	/**
+	 * The ticket table leads with the milestones most in need of triage, starting with
+	 * the tickets that have none under a label of their own, then lists releases from
+	 * the furthest out to the soonest.
+	 */
+	public function test_ticket_table_orders_and_labels_milestones(): void {
+		$rows = array();
+		foreach ( array( 'Future Release', '7.9', '', 'WordPress.org', '7.10', 'Awaiting Review' ) as $milestone ) {
+			$rows[] = array(
+				'component' => 'Media',
+				'type'      => 'defect (bug)',
+				'milestone' => $milestone,
+				'count'     => 1,
+			);
+		}
+		wp_cache_set( 'trac_tickets_by_component_type_milestone', $rows );
+
+		$html = $this->render_component();
+
+		preg_match( '#<tbody>.*</tbody>#s', $html, $tbody );
+		preg_match_all( '#<th scope="row"><a [^>]+>([^<]+)</a></th>#', $tbody[0], $labels );
+		$this->assertSame( array( 'No milestone', 'WordPress.org', 'Awaiting Review', 'Future Release', '7.10', '7.9' ), $labels[1] );
 	}
 
 	/**

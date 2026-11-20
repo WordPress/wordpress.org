@@ -136,7 +136,8 @@
 	color: #1d2327;
 }
 
-/* Tighter padding on narrow screens. */
+/* Tighter padding on narrow screens, where the admin bar scrolls away with the page. */
 @media screen and ( max-width: 600px ) {
 	.translation-editor-topbar__inner { padding: 6px 12px; gap: 8px; }
+	.admin-bar .translation-editor-topbar { top: 0; }
 }

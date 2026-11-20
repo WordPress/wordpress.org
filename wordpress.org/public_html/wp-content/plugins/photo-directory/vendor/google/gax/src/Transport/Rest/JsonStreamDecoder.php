@@ -38,11 +38,12 @@ use RuntimeException;
 class JsonStreamDecoder
 {
     const ESCAPE_CHAR = '\\';
-    private $stream;
-    private $closeCalled = false;
-    private $decodeType;
-    private $ignoreUnknown = true;
-    private $readChunkSize = 1024;
+
+    private StreamInterface $stream;
+    private bool $closeCalled = false;
+    private string $decodeType;
+    private bool $ignoreUnknown = true;
+    private int $readChunkSize = 1024;
 
     /**
      * JsonStreamDecoder is a HTTP-JSON response stream decoder for JSON-ecoded
@@ -53,7 +54,7 @@ class JsonStreamDecoder
      *
      * @param StreamInterface $stream The stream to decode.
      * @param string $decodeType The type name of response messages to decode.
-     * @param array $options {
+     * @param array<mixed> $options {
      *     An array of optional arguments.
      *
      *     @type bool $ignoreUnknown
@@ -66,7 +67,7 @@ class JsonStreamDecoder
      *
      * @experimental
      */
-    public function __construct(StreamInterface $stream, $decodeType, $options = [])
+    public function __construct(StreamInterface $stream, string $decodeType, array $options = [])
     {
         $this->stream = $stream;
         $this->decodeType = $decodeType;
@@ -91,7 +92,7 @@ class JsonStreamDecoder
     public function decode()
     {
         try {
-            foreach ($this->_decode() as $response) {
+            foreach ($this->doDecode() as $response) {
                 yield $response;
             }
         } catch (RuntimeException $re) {
@@ -99,7 +100,7 @@ class JsonStreamDecoder
             $streamClosedException =
                 strpos($msg, 'Stream is detached') !== false ||
                 strpos($msg, 'Unexpected stream close') !== false;
-            
+
             // Only throw the exception if close() was not called and it was not
             // a closing-related exception.
             if (!$this->closeCalled || !$streamClosedException) {
@@ -108,7 +109,10 @@ class JsonStreamDecoder
         }
     }
 
-    private function _decode()
+    /**
+     * @return \Generator
+     */
+    private function doDecode()
     {
         $decodeType = $this->decodeType;
         $str = false;
@@ -117,14 +121,14 @@ class JsonStreamDecoder
         while ($chunk !== '' || !$this->stream->eof()) {
             // Read up to $readChunkSize bytes from the stream.
             $chunk .= $this->stream->read($this->readChunkSize);
-            
+
             // If the response stream has been closed and the only byte
             // remaining is the closing array bracket, we are done.
             if ($this->stream->eof() && $chunk === ']') {
                 $level--;
                 break;
             }
-            
+
             // Parse the freshly read data available in $chunk.
             $chunkLength = strlen($chunk);
             while ($cursor < $chunkLength) {
@@ -160,7 +164,7 @@ class JsonStreamDecoder
                 if ($b === '}' && !$str) {
                     $level--;
                     if ($level === 1) {
-                        $end = $cursor+1;
+                        $end = $cursor + 1;
                     }
                 }
                 // Track the closing of an array if not in a string value.
@@ -181,25 +185,26 @@ class JsonStreamDecoder
                 // are encoded as primitives and separated by commas.
                 if ($end !== 0) {
                     $length = $end - $start;
+                    /** @var \Google\Protobuf\Internal\Message $return */
                     $return = new $decodeType();
                     $return->mergeFromJsonString(
                         substr($chunk, $start, $length),
                         $this->ignoreUnknown
                     );
                     yield $return;
-                    
+
                     // Dump the part of the chunk used for parsing the message
                     // and use the remaining for the next message.
-                    $remaining = $chunkLength-$length;
+                    $remaining = $chunkLength - $length;
                     $chunk = substr($chunk, $end, $remaining);
-                    
+
                     // Reset all indices and exit chunk processing.
                     $start = 0;
                     $end = 0;
                     $cursor = 0;
                     break;
                 }
-                
+
                 $cursor++;
 
                 // An escaped back slash should not escape the following character.
@@ -222,6 +227,8 @@ class JsonStreamDecoder
     /**
      * Closes the underlying stream. If the stream is actively being decoded, an
      * exception will not be thrown due to the interruption.
+     *
+     * @return void
      */
     public function close()
     {
