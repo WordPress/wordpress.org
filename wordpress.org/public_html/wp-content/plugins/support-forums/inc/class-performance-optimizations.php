@@ -40,8 +40,8 @@ class Performance_Optimizations {
 		// 404 topic pages past the last page of replies.
 		add_action( 'bbp_template_redirect', array( $this, 'topic_page_out_of_range_404' ) );
 
-		// Add the trailing slash to paginated topic URLs, bbPress disables redirect_canonical() for them.
-		add_action( 'bbp_template_redirect', array( $this, 'redirect_topic_page_trailing_slash' ) );
+		// Add the trailing slash to paginated topic and forum URLs, bbPress disables redirect_canonical() for them.
+		add_action( 'bbp_template_redirect', array( $this, 'redirect_paged_trailing_slash' ) );
 
 		// Redirect Attachments to their file
 		add_action( 'bbp_template_redirect', array( $this, 'redirect_attachments' ) );
@@ -180,10 +180,10 @@ class Performance_Optimizations {
 	}
 
 	/**
-	 * Redirects paginated single topic URLs without a trailing slash, like /topic/<slug>/page/2.
+	 * Redirects paginated single topic and forum URLs without a trailing slash, like /topic/<slug>/page/2.
 	 */
-	public function redirect_topic_page_trailing_slash() {
-		if ( ! bbp_is_single_topic() || bbp_get_paged() < 2 || bbp_is_post_request() ) {
+	public function redirect_paged_trailing_slash() {
+		if ( ! ( bbp_is_single_topic() || bbp_is_single_forum() ) || bbp_get_paged() < 2 || bbp_is_post_request() ) {
 			return;
 		}
 
