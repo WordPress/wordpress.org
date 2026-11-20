@@ -9,6 +9,21 @@ use WordPressdotorg\GlotPress\Plugin_Directory\Plugin;
 
 class Translation_Sync {
 
+	/**
+	 * Only statuses GlotPress gates on `approve`; one a user can set without it must not cross projects.
+	 */
+	private const ALLOWED_STATUSES = [ 'current', 'rejected', 'changesrequested' ];
+
+	/**
+	 * Maximum seconds to wait for a MySQL sync lock.
+	 */
+	private const LOCK_TIMEOUT = 2;
+
+	/**
+	 * Maximum number of deferred WP-Cron retry attempts after a lock timeout.
+	 */
+	private const MAX_RETRY_ATTEMPTS = 3;
+
 	private $queue = [];
 
 	public $project_mapping = [
@@ -24,6 +39,7 @@ class Translation_Sync {
 		add_action( 'gp_originals_imported', [ $this, 'trigger_translation_sync_on_originals_import' ], 5, 5 );
 
 		add_action( 'wporg_translate_sync_plugin_translations', [ $this, 'sync_plugin_translations_on_commit' ] );
+		add_action( 'wporg_translate_retry_translation_sync', [ $this, 'retry_translation_sync' ], 10, 3 );
 
 		add_action( 'shutdown', [ $this, 'sync_translations' ] );
 	}
@@ -52,16 +68,24 @@ class Translation_Sync {
 			return;
 		}
 
-		$project_parts  = explode( '/', $project->path ); // wp-plugins/$plugin_slug/$branch
-		$plugin_slug    = $project_parts[1];
-		$plugin_project = $project_parts[1] . '/' . $this->project_mapping[ $project_parts[2] ];
+		$project_parts = explode( '/', $project->path ); // wp-plugins/$plugin_slug/$branch
+		if ( count( $project_parts ) < 3 || ! isset( $this->project_mapping[ $project_parts[2] ] ) ) {
+			return;
+		}
 
-		wp_schedule_single_event( time() + 5, 'wporg_translate_sync_plugin_translations', [
+		$plugin_slug    = $project_parts[1];
+		$plugin_project = $plugin_slug . '/' . $this->project_mapping[ $project_parts[2] ];
+
+		wp_schedule_single_event(
+			time() + 5,
+			'wporg_translate_sync_plugin_translations',
 			[
-				'plugin'     => $plugin_slug,
-				'gp_project' => $plugin_project,
-			],
-		] );
+				[
+					'plugin'     => $plugin_slug,
+					'gp_project' => $plugin_project,
+				],
+			]
+		);
 	}
 
 	/**
@@ -74,6 +98,10 @@ class Translation_Sync {
 	 * @return bool False on failure, true on success.
 	 */
 	public function sync_plugin_translations_on_commit( $args ) {
+		if ( empty( $args['gp_project'] ) || empty( $args['plugin'] ) || ! defined( 'WPORGTRANSLATE_WPCLI' ) ) {
+			return false;
+		}
+
 		$project = GP::$project->by_path( Plugin::GP_MASTER_PROJECT . '/' . $args['gp_project'] );
 		if ( ! $project ) {
 			return false;
@@ -110,7 +138,7 @@ class Translation_Sync {
 			$message = 'No translations are available to sync.';
 		}
 
-		$type = str_ends_with( $project->path, '/dev-readme' ) ? 'readme' : 'code';
+		$type = str_ends_with( $project->path, '-readme' ) ? 'readme' : 'code';
 
 		$attachment = [
 			'title'      => "Translation sync for {$type} of {$args['plugin']}",
@@ -127,7 +155,7 @@ class Translation_Sync {
 	}
 
 	/**
-	 * Adds a translation to a cache purge queue when a translation was created
+	 * Adds a translation to the sync queue when a translation was created
 	 * or updated.
 	 *
 	 * @param \GP_Translation $translation Created/updated translation.
@@ -135,11 +163,8 @@ class Translation_Sync {
 	public function queue_translation_for_sync( $translation ) {
 		global $wpdb;
 
-		// Only statuses GlotPress gates on `approve`; one a user can set without it must not cross projects.
-		$allowed_statuses = array( 'current', 'rejected', 'changesrequested' );
-		
 		// Do not propagate waiting translations and other translations with warnings.
-		if ( ! in_array( $translation->status, $allowed_statuses ) || ! empty( $translation->warnings ) ) {
+		if ( ! in_array( $translation->status, self::ALLOWED_STATUSES, true ) || ! empty( $translation->warnings ) ) {
 			return;
 		}
 
@@ -160,57 +185,117 @@ class Translation_Sync {
 	}
 
 	/**
-	 * Syncs translations between two plugin projects.
+	 * Syncs queued translations between two plugin projects.
 	 */
 	public function sync_translations() {
 		if ( empty( $this->queue ) ) {
 			return;
 		}
 
+		$queue       = $this->queue;
+		$this->queue = [];
+
 		// Avoid recursion.
 		remove_action( 'gp_translation_created', [ $this, 'queue_translation_for_sync' ], 5 );
 		remove_action( 'gp_translation_saved', [ $this, 'queue_translation_for_sync' ], 5 );
 
-		foreach ( $this->queue as $project_path => $translations ) {
-			$project = $this->get_dev_or_stable_project( $project_path );
-			if ( ! $project ) {
-				continue;
+		try {
+			foreach ( $queue as $project_path => $translations ) {
+				$project = $this->get_dev_or_stable_project( $project_path );
+				if ( ! $project ) {
+					continue;
+				}
+
+				foreach ( $translations as $translation ) {
+					$this->sync_single_translation( $translation, $project, $project_path );
+				}
 			}
-
-			foreach ( $translations as $translation ) {
-				$original = GP::$original->get( $translation->original_id );
-				if ( ! $original ) {
-					continue;
-				}
-
-				$translation_set = GP::$translation_set->get( $translation->translation_set_id );
-				if ( ! $translation_set ) {
-					continue;
-				}
-
-				$original_counterpart = GP::$original->by_project_id_and_entry(
-					$project->id,
-					$original,
-					'+active'
-				);
-
-				if ( ! $original_counterpart ) {
-					continue;
-				}
-
-				$translation_set_counterpart = GP::$translation_set->by_project_id_slug_and_locale(
-					$project->id,
-					$translation_set->slug,
-					$translation_set->locale
-				);
-
-				if ( ! $translation_set_counterpart ) {
-					continue;
-				}
-
-				$this->copy_translation_into_set( $translation, $translation_set_counterpart, $original_counterpart );
-			}
+		} finally {
+			add_action( 'gp_translation_created', [ $this, 'queue_translation_for_sync' ], 5 );
+			add_action( 'gp_translation_saved', [ $this, 'queue_translation_for_sync' ], 5 );
 		}
+	}
+
+	/**
+	 * Retries syncing a single translation after a lock acquisition timeout.
+	 *
+	 * @param int    $translation_id ID of the source translation.
+	 * @param string $project_path   Source project path.
+	 * @param int    $attempt        Current retry attempt (1-based).
+	 */
+	public function retry_translation_sync( $translation_id, $project_path, $attempt = 1 ) {
+		$translation = GP::$translation->get( (int) $translation_id );
+		if ( ! $translation || ! in_array( $translation->status, self::ALLOWED_STATUSES, true ) || ! empty( $translation->warnings ) ) {
+			return;
+		}
+
+		$project = $this->get_dev_or_stable_project( $project_path );
+		if ( ! $project ) {
+			return;
+		}
+
+		remove_action( 'gp_translation_created', [ $this, 'queue_translation_for_sync' ], 5 );
+		remove_action( 'gp_translation_saved', [ $this, 'queue_translation_for_sync' ], 5 );
+
+		try {
+			$this->sync_single_translation( $translation, $project, $project_path, (int) $attempt );
+		} finally {
+			add_action( 'gp_translation_created', [ $this, 'queue_translation_for_sync' ], 5 );
+			add_action( 'gp_translation_saved', [ $this, 'queue_translation_for_sync' ], 5 );
+		}
+	}
+
+	/**
+	 * Resolves counterparts and syncs a single translation into the destination project.
+	 *
+	 * @param \GP_Translation $translation  Source translation.
+	 * @param \GP_Project     $project      Destination project.
+	 * @param string          $project_path Source project path.
+	 * @param int             $attempt      Current retry attempt.
+	 * @return bool False on failure, true on success or intentional skip.
+	 */
+	private function sync_single_translation( $translation, $project, $project_path, $attempt = 0 ) {
+		if ( ! in_array( $translation->status, self::ALLOWED_STATUSES, true ) || ! empty( $translation->warnings ) ) {
+			return true;
+		}
+
+		$original = GP::$original->get( $translation->original_id );
+		if ( ! $original ) {
+			return true;
+		}
+
+		$translation_set = GP::$translation_set->get( $translation->translation_set_id );
+		if ( ! $translation_set ) {
+			return true;
+		}
+
+		$original_counterpart = GP::$original->by_project_id_and_entry(
+			$project->id,
+			$original,
+			'+active'
+		);
+
+		if ( ! $original_counterpart ) {
+			return true;
+		}
+
+		$translation_set_counterpart = GP::$translation_set->by_project_id_slug_and_locale(
+			$project->id,
+			$translation_set->slug,
+			$translation_set->locale
+		);
+
+		if ( ! $translation_set_counterpart ) {
+			return true;
+		}
+
+		return $this->copy_translation_into_set(
+			$translation,
+			$translation_set_counterpart,
+			$original_counterpart,
+			$project_path,
+			$attempt
+		);
 	}
 
 	/**
@@ -219,14 +304,15 @@ class Translation_Sync {
 	 * @param \GP_Translation     $translation         The translation which should be duplicated.
 	 * @param \GP_Translation_Set $new_translation_set The new translation set.
 	 * @param \GP_Original        $new_original        The new original.
-	 * @return bool False on failure, true on success.
+	 * @param string              $project_path        Source project path (used for deferred retries).
+	 * @param int                 $attempt             Current retry attempt.
+	 * @return bool False on failure, true on success or intentional skip.
 	 */
-	private function copy_translation_into_set( $translation, $new_translation_set, $new_original ) {
+	private function copy_translation_into_set( $translation, $new_translation_set, $new_original, $project_path = '', $attempt = 0 ) {
 		global $wpdb;
 
-		// Re-validate in case the queued translation object was mutated before shutdown.
-		$allowed_statuses = [ 'current', 'rejected', 'changesrequested' ];
-		if ( ! in_array( $translation->status, $allowed_statuses, true ) || ! empty( $translation->warnings ) ) {
+		// Quick pre-lock check to avoid unnecessary lock contention.
+		if ( ! in_array( $translation->status, self::ALLOWED_STATUSES, true ) || ! empty( $translation->warnings ) ) {
 			return true;
 		}
 
@@ -246,18 +332,25 @@ class Translation_Sync {
 		sort( $ids );
 		$lock_key = 'gp_sync_' . md5( implode( '_', $ids ) . '_' . $new_translation_set->locale . '_' . $new_translation_set->slug );
 
-		// Ensure GET_LOCK and RELEASE_LOCK run on the same primary connection (e.g. HyperDB).
+		// Ensure GET_LOCK, the post-lock reload, and RELEASE_LOCK run on the same primary connection (e.g. HyperDB).
 		if ( method_exists( $wpdb, 'send_reads_to_masters' ) ) {
 			$wpdb->send_reads_to_masters();
 		}
 
-		// Wait a maximum of 3 seconds.
-		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 3)', $lock_key ) );
+		// Wait a maximum of LOCK_TIMEOUT seconds.
+		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $lock_key, self::LOCK_TIMEOUT ) );
 		if ( '1' !== (string) $acquired ) {
+			$this->schedule_retry( (int) $translation->id, $project_path, $attempt );
 			return false;
 		}
 
 		try {
+			// Reload the translation inside the lock to avoid syncing a stale pre-lock snapshot.
+			$translation = GP::$translation->get( $translation->id );
+			if ( ! $translation || ! in_array( $translation->status, self::ALLOWED_STATUSES, true ) || ! empty( $translation->warnings ) ) {
+				return true;
+			}
+
 			$new_translation = [];
 			for ( $i = 0; $i < $locale->nplurals; $i++ ) {
 				$new_translation[] = $translation->{"translation_{$i}"};
@@ -297,12 +390,18 @@ class Translation_Sync {
 
 				if ( $_existing_translation->status !== $translation->status ) {
 					if ( 'current' === $translation->status ) {
-						$_existing_translation->set_as_current();
+						$updated = $_existing_translation->set_as_current();
 					} elseif ( 'changesrequested' === $translation->status ) {
-						$_existing_translation->set_as_changesrequested();
+						$updated = $_existing_translation->set_as_changesrequested();
 					} else {
-						$_existing_translation->set_status( $translation->status );
+						$updated = $_existing_translation->set_status( $translation->status );
 					}
+
+					if ( ! $updated ) {
+						gp_clean_translation_set_cache( $new_translation_set->id );
+						return false;
+					}
+
 					$cache_needs_clean = true;
 				}
 
@@ -325,7 +424,7 @@ class Translation_Sync {
 				return true;
 			}
 
-			// Create a new translation.
+			// Create a new translation as waiting first, then promote atomically inside the lock.
 			$copy                     = new GP_Translation( $translation->fields() );
 			$copy->original_id        = $new_original->id;
 			$copy->translation_set_id = $new_translation_set->id;
@@ -336,7 +435,11 @@ class Translation_Sync {
 				return false;
 			}
 
-			$created_translation->set_as_current();
+			if ( ! $created_translation->set_as_current() ) {
+				gp_clean_translation_set_cache( $new_translation_set->id );
+				return false;
+			}
+
 			$copy->status = $translation->status;
 
 			do_action( 'wporg_translate_translation_synced', $copy, $created_translation );
@@ -350,39 +453,62 @@ class Translation_Sync {
 	}
 
 	/**
+	 * Schedules a deferred retry when lock acquisition fails.
+	 *
+	 * @param int    $translation_id ID of the translation to retry.
+	 * @param string $project_path   Source project path.
+	 * @param int    $attempt        Current attempt count (0 for initial run).
+	 */
+	private function schedule_retry( $translation_id, $project_path, $attempt ) {
+		if ( $attempt >= self::MAX_RETRY_ATTEMPTS || empty( $project_path ) || $translation_id <= 0 ) {
+			return;
+		}
+
+		$next_attempt = $attempt + 1;
+		$delay        = 10 * ( 3 ** $attempt ); // 10s, 30s, 90s.
+
+		wp_schedule_single_event(
+			time() + $delay,
+			'wporg_translate_retry_translation_sync',
+			[ $translation_id, $project_path, $next_attempt ]
+		);
+	}
+
+	/**
 	 * Retrieves the counterpart of a plugin project.
 	 *
 	 * @param string $project_path The path of a plugin project.
 	 * @return \GP_Project|null A project on success, null on failure.
 	 */
 	public function get_dev_or_stable_project( $project_path ) {
-		static $project_cache;
+		static $project_cache = [];
 
-		if ( null === $project_cache ) {
-			$project_cache = [];
-		}
-
-		if ( isset( $project_cache[ $project_path ] ) ) {
+		if ( array_key_exists( $project_path, $project_cache ) ) {
 			return $project_cache[ $project_path ];
 		}
 
 		$project = basename( $project_path );
-		$counterpart = $this->project_mapping[ $project ];
-		$new_project_path = preg_replace( "#/{$project}$#", "/$counterpart", $project_path, 1 );
+		if ( ! isset( $this->project_mapping[ $project ] ) ) {
+			$project_cache[ $project_path ] = null;
+			return null;
+		}
 
-		$project = GP::$project->by_path( $new_project_path );
-		$project_cache[ $project_path ] = $project;
+		$counterpart      = $this->project_mapping[ $project ];
+		$new_project_path = preg_replace( "#/{$project}$#", "/{$counterpart}", $project_path, 1 );
 
-		return $project;
+		$counterpart_project            = GP::$project->by_path( $new_project_path ) ?: null;
+		$project_cache[ $project_path ] = $counterpart_project;
+
+		return $counterpart_project;
 	}
 
 	/**
-	 * Sends a notifcation to the Slack channel.
+	 * Sends a notification to the Slack channel.
 	 *
 	 * @param array $attachment The attachment of a notification.
 	 */
 	private function slack( $attachment ) {
-		if ( ! defined( 'GLOTPRESS_SLACK_WEBHOOK' ) ) {
+		if ( ! defined( 'GLOTPRESS_SLACK_WEBHOOK' ) || ! defined( 'API_WPORGPATH' ) ) {
 			return;
 		}
 
