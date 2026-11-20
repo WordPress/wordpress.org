@@ -224,27 +224,41 @@ class Translation_Sync {
 	private function copy_translation_into_set( $translation, $new_translation_set, $new_original ) {
 		global $wpdb;
 
+		// Re-validate in case the queued translation object was mutated before shutdown.
+		$allowed_statuses = [ 'current', 'rejected', 'changesrequested' ];
+		if ( ! in_array( $translation->status, $allowed_statuses, true ) || ! empty( $translation->warnings ) ) {
+			return true;
+		}
+
 		// Only propagate what the acting user could do in the destination; cron and CLI aren't acting for anyone.
 		$is_system_run = ( defined( 'WP_CLI' ) && WP_CLI ) || wp_doing_cron();
 		if ( ! $is_system_run && ! GP::$permission->current_user_can( 'approve', 'translation-set', $new_translation_set->id ) ) {
 			return true;
 		}
 
-		// Generate a lock key from the sorted IDs of both originals.
+		$locale = GP_Locales::by_slug( $new_translation_set->locale );
+		if ( ! $locale ) {
+			return false;
+		}
+
+		// Generate a lock key from the sorted IDs of both originals, locale, and set slug.
 		$ids = [ (int) $translation->original_id, (int) $new_original->id ];
 		sort( $ids );
 		$lock_key = 'gp_sync_' . md5( implode( '_', $ids ) . '_' . $new_translation_set->locale . '_' . $new_translation_set->slug );
 
+		// Ensure GET_LOCK and RELEASE_LOCK run on the same primary connection (e.g. HyperDB).
+		if ( method_exists( $wpdb, 'send_reads_to_masters' ) ) {
+			$wpdb->send_reads_to_masters();
+		}
+
 		// Wait a maximum of 3 seconds.
 		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 3)', $lock_key ) );
-		if ( ! $acquired ) {
+		if ( '1' !== (string) $acquired ) {
 			return false;
 		}
 
 		try {
-			$locale = GP_Locales::by_slug( $new_translation_set->locale );
 			$new_translation = [];
-
 			for ( $i = 0; $i < $locale->nplurals; $i++ ) {
 				$new_translation[] = $translation->{"translation_{$i}"};
 			}
@@ -258,34 +272,52 @@ class Translation_Sync {
 				]
 			);
 
+			$matched           = false;
+			$cache_needs_clean = false;
+
 			foreach ( $existing_translations as $_existing_translation ) {
 				$existing_translation = [];
 				for ( $i = 0; $i < $locale->nplurals; $i++ ) {
 					$existing_translation[] = $_existing_translation->{"translation_{$i}"};
 				}
 
-				if ( $existing_translation === $new_translation ) {
-					// Translations are only synced if they have no warnings.
-					// If the existing translation still has warnings discard them automatically.
-					if ( $_existing_translation->warnings ) {
-						$_existing_translation->warnings = null;
-						$_existing_translation->save();
-					}
+				if ( $existing_translation !== $new_translation ) {
+					continue;
+				}
 
-					if ( 'current' == $translation->status ) {
+				$matched = true;
+
+				// Translations are only synced if they have no warnings.
+				// If the existing translation still has warnings discard them automatically.
+				if ( $_existing_translation->warnings ) {
+					$_existing_translation->warnings = null;
+					$_existing_translation->save();
+					$cache_needs_clean = true;
+				}
+
+				if ( $_existing_translation->status !== $translation->status ) {
+					if ( 'current' === $translation->status ) {
 						$_existing_translation->set_as_current();
-
-					} elseif ( 'changesrequested' == $translation->status ) {
+					} elseif ( 'changesrequested' === $translation->status ) {
 						$_existing_translation->set_as_changesrequested();
-
 					} else {
 						$_existing_translation->set_status( $translation->status );
 					}
-
-					gp_clean_translation_set_cache( $new_translation_set->id );
-
-					return true;
+					$cache_needs_clean = true;
 				}
+
+				// Only one translation can be current; for rejected/changesrequested, update all matching duplicates.
+				if ( 'current' === $translation->status ) {
+					break;
+				}
+			}
+
+			if ( $matched ) {
+				if ( $cache_needs_clean ) {
+					gp_clean_translation_set_cache( $new_translation_set->id );
+				}
+
+				return true;
 			}
 
 			// Do not create a new translation if it is not current.
@@ -294,19 +326,21 @@ class Translation_Sync {
 			}
 
 			// Create a new translation.
-			$copy = new GP_Translation( $translation->fields() );
-			$copy->original_id = $new_original->id;
-			$copy->translation_set_id = $new_translation_set->id;
-			$copy->status = $translation->status;
+			$copy                       = new GP_Translation( $translation->fields() );
+			$copy->original_id          = $new_original->id;
+			$copy->translation_set_id   = $new_translation_set->id;
+			$copy->status               = 'waiting';
 
-			$translation = GP::$translation->create( $copy );
-			if ( ! $translation ) {
+			$created_translation = GP::$translation->create( $copy );
+			if ( ! $created_translation ) {
 				return false;
 			}
 
-			do_action( 'wporg_translate_translation_synced', $copy, $translation );
+			$created_translation->set_as_current();
+			$copy->status = $translation->status;
 
-			$translation->set_status( $copy->status );
+			do_action( 'wporg_translate_translation_synced', $copy, $created_translation );
+
 			gp_clean_translation_set_cache( $new_translation_set->id );
 
 			return true;
