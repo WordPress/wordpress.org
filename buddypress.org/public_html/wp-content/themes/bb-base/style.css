@@ -1606,13 +1606,6 @@ div.bbp-template-notice p {
 	position: relative;
 }
 
-#bbpress-forums #bbp-user-body .bbp-search-form {
-	float: none;
-	position: absolute;
-	right: 0;
-	top: 0;
-}
-
 #bbpress-forums #bbp-your-profile fieldset {
 	padding: var(--bbbase-default-gap);
 	margin-bottom: var(--bbbase-default-gap);
@@ -2124,6 +2117,30 @@ div.plugin-meta img {
 		width: 100%;
 		margin-left: 0;
 	}
+	body.bbp-user-page #bbpress-forums #bbp-user-wrapper #bbp-user-body {
+		margin-top: var(--bbbase-default-gap);
+	}
+	body.bbp-user-page #bbpress-forums #bbp-user-wrapper #bbp-single-user-details {
+		display: flex;
+		gap: 20px;
+		overflow: visible;
+	}
+	body.bbp-user-page #bbpress-forums #bbp-single-user-details #bbp-user-avatar,
+	body.bbp-user-page #bbpress-forums #bbp-single-user-details #bbp-user-avatar img.avatar {
+		flex: 0 0 120px;
+		height: 120px;
+		width: 120px;
+	}
+	body.bbp-user-page #bbpress-forums #bbp-single-user-details #bbp-user-navigation {
+		flex: 1;
+		min-width: 0;
+		margin-top: 0;
+	}
+	body.bbp-user-page #bbpress-forums #bbp-single-user-details #bbp-user-navigation ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 8px;
+	}
 }
 
 /* Keep the profile menu compact after the form moves below it. */
@@ -2154,16 +2171,20 @@ div.plugin-meta img {
 }
 
 @media screen and ( max-width: 400px ) {
+	body.bbp-user-page #bbpress-forums #bbp-user-wrapper #bbp-single-user-details,
 	body.bbp-user-edit #bbpress-forums #bbp-user-wrapper #bbp-single-user-details {
 		flex-wrap: wrap;
 		gap: 12px;
 	}
+	body.bbp-user-page #bbpress-forums #bbp-single-user-details #bbp-user-avatar,
+	body.bbp-user-page #bbpress-forums #bbp-single-user-details #bbp-user-avatar img.avatar,
 	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-avatar,
 	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-avatar img.avatar {
 		flex-basis: 80px;
 		height: 80px;
 		width: 80px;
 	}
+	body.bbp-user-page #bbpress-forums #bbp-single-user-details #bbp-user-navigation,
 	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-navigation {
 		flex-basis: 100%;
 	}
