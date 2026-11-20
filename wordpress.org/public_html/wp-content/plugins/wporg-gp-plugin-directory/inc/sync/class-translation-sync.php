@@ -68,7 +68,7 @@ class Translation_Sync {
 			return;
 		}
 
-		$project_parts = explode( '/', $project->path ); // wp-plugins/$plugin_slug/$branch
+		$project_parts = explode( '/', $project->path ); // wp-plugins/$plugin_slug/$branch.
 		if ( count( $project_parts ) < 3 || ! isset( $this->project_mapping[ $project_parts[2] ] ) ) {
 			return;
 		}
