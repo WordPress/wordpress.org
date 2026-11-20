@@ -83,11 +83,19 @@ if ( $howtoapply_raw ) {
 
 	<aside class="job-sidebar">
 		<div class="job-sidebar__card">
-			<?php if ( $apply_url ) : ?>
+			<?php $can_report = class_exists( 'Jobs_Dot_WP_Contact_Form' ); ?>
+			<?php if ( $apply_url || $can_report ) : ?>
 				<div class="job-sidebar__apply">
-					<a href="<?php echo esc_attr( $apply_url ); ?>" class="btn btn-primary" rel="nofollow ugc noopener" <?php echo 'web' === $howtoapply_method ? 'target="_blank"' : ''; ?>>
-						<?php echo esc_html( $apply_text ); ?>
-					</a>
+					<?php if ( $apply_url ) : ?>
+						<a href="<?php echo esc_attr( $apply_url ); ?>" class="btn btn-primary" rel="nofollow ugc noopener" <?php echo 'web' === $howtoapply_method ? 'target="_blank"' : ''; ?>>
+							<?php echo esc_html( $apply_text ); ?>
+						</a>
+					<?php endif; ?>
+					<?php if ( $can_report ) : ?>
+						<p class="job-sidebar__report">
+							<a href="<?php echo esc_url( Jobs_Dot_WP_Contact_Form::get_report_url( get_the_ID() ) ); ?>" rel="nofollow"><?php esc_html_e( 'Report this job', 'jobswp' ); ?></a>
+						</p>
+					<?php endif; ?>
 				</div>
 			<?php endif; ?>
 			<h3><?php esc_html_e( 'Job Details', 'jobswp' ); ?></h3>
