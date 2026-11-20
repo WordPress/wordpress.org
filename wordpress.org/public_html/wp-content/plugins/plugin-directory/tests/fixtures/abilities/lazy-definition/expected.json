@@ -1,0 +1,7 @@
+{
+	"description": "A definition object memoised in a property, built in a subclass, registered from the base class (modelled on Elementor).",
+	"abilities": [
+		{ "name": "lazy/list-posts", "label": "List posts", "description": "Lists recent posts." },
+		{ "name": "lazy/read-prompt", "label": "Read prompt", "description": null }
+	]
+}

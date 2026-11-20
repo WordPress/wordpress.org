@@ -1,0 +1,8 @@
+{
+	"description": "Args built in a variable and labels built with sprintf() are followed; args from an unknown helper are listed with null label and description.",
+	"abilities": [
+		{ "name": "vars/variable-args", "label": "Variable args", "description": "The args are built before the call." },
+		{ "name": "vars/helper-args", "label": null, "description": null },
+		{ "name": "vars/sprintf-label", "label": "Hello world", "description": null }
+	]
+}

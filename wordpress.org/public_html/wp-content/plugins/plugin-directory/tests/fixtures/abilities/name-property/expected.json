@@ -1,0 +1,7 @@
+{
+	"description": "A list of definitions that each carry a 'name' key, in a class constant using short array syntax.",
+	"abilities": [
+		{ "name": "name-prop/list-orders", "label": "List orders", "description": "Lists recent orders." },
+		{ "name": "name-prop/refund-order", "label": "Refund order", "description": "Refunds an order." }
+	]
+}

@@ -1,0 +1,6 @@
+{
+	"description": "Metadata copied into properties by the constructor, read through getters, with the name built from a static method (modelled on the AI plugin).",
+	"abilities": [
+		{ "name": "meta/title-generation", "label": "Title Generation", "description": "Suggests titles." }
+	]
+}

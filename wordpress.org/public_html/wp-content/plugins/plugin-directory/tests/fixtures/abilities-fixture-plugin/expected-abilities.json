@@ -1,0 +1,274 @@
+{
+	"_comment": "What WordPress registers when this plugin runs, from wp_get_abilities() and wp_get_ability_categories() on WordPress 7.2-beta4. 'abilities' and 'categories' are what a static scanner should report. 'vendored' comes from a bundled library; whether to list it is undecided. 'runtime_only' names come from the site's public built-in post types, so no scanner can recover them; the list is what a default install registers. 'requires_woocommerce' registers only with WooCommerce active and was not checked at runtime. 'must_not_report' are look-alikes. Fields listed in an ability's 'unreadable' exist only at runtime, so a scanner should report them as null.",
+	"categories": {
+		"abilities-fixture": {
+			"label": "Abilities Fixture",
+			"description": "Abilities registered by the fixture plugin.",
+			"pattern": "direct-literal"
+		},
+		"abilities-fixture-ai": {
+			"label": "Abilities Fixture AI",
+			"description": "Abilities that generate content.",
+			"pattern": "ability-class"
+		},
+		"abilities-fixture-commerce": {
+			"label": "Abilities Fixture Commerce",
+			"description": "Abilities for orders and store information.",
+			"pattern": "getter-methods"
+		},
+		"abilities-fixture-content": {
+			"label": "Abilities Fixture Content",
+			"description": "Abilities in the Abilities Fixture Content group.",
+			"pattern": "loops-and-variables"
+		},
+		"abilities-fixture-courses": {
+			"label": "Abilities Fixture Courses",
+			"description": "Abilities for courses and lessons.",
+			"pattern": "wrapper-functions"
+		},
+		"abilities-fixture-forms": {
+			"label": "Abilities Fixture Forms",
+			"description": "Abilities for forms and entries.",
+			"pattern": "inherited-const"
+		},
+		"abilities-fixture-seo": {
+			"label": "Abilities Fixture SEO",
+			"description": "Abilities for SEO data.",
+			"pattern": "const-concat-name"
+		},
+		"abilities-fixture-settings": {
+			"label": "Abilities Fixture Settings",
+			"description": "Abilities for reading plugin settings.",
+			"pattern": "injected-category"
+		},
+		"abilities-fixture-shortlinks": {
+			"label": "Abilities Fixture Shortlinks",
+			"description": "Abilities for reading and creating shortlinks.",
+			"pattern": "registrar-map"
+		},
+		"abilities-fixture-site": {
+			"label": "Abilities Fixture Site",
+			"description": "Abilities in the Abilities Fixture Site group.",
+			"pattern": "loops-and-variables"
+		},
+		"abilities-fixture-tools": {
+			"label": "Abilities Fixture Tools",
+			"description": "Utility abilities for Abilities Fixture.",
+			"pattern": "direct-literal"
+		},
+		"forms": {
+			"label": "Forms",
+			"description": "Abilities for building and managing forms.",
+			"pattern": "plain-strings"
+		}
+	},
+	"abilities": {
+		"abilities-fixture-forms/list-forms": {
+			"label": "List forms",
+			"description": "Lists every form with its entry count.",
+			"category": "abilities-fixture-forms",
+			"pattern": "inherited-const"
+		},
+		"abilities-fixture-seo/update-term-seo-data": {
+			"label": "Update term SEO data",
+			"description": "Updates the SEO title and description of a category or tag.",
+			"category": "abilities-fixture-seo",
+			"pattern": "const-concat-name"
+		},
+		"abilities-fixture-shortlinks/get-shortlinks": {
+			"label": "Get shortlinks",
+			"description": "Returns shortlinks for the given posts.",
+			"category": "abilities-fixture-shortlinks",
+			"pattern": "registrar-map"
+		},
+		"abilities-fixture/create-page": {
+			"label": "Create page",
+			"description": "Creates a new draft page and returns its ID and edit link.",
+			"category": "abilities-fixture",
+			"pattern": "definition-object"
+		},
+		"abilities-fixture/excerpt-generation": {
+			"label": "Excerpt Generation",
+			"description": "Writes an excerpt from the post content.",
+			"category": "abilities-fixture-ai",
+			"pattern": "ability-class",
+			"note": "Category comes from the ability class, not the arguments."
+		},
+		"abilities-fixture/export-entries": {
+			"label": "abilities-fixture/export-entries",
+			"description": "Exports form entries as CSV.",
+			"category": "abilities-fixture",
+			"pattern": "injected-category",
+			"note": "No label in the code; the registrar uses the name."
+		},
+		"abilities-fixture/get-courses": {
+			"label": "Get courses",
+			"description": "Lists courses, newest first.",
+			"category": "abilities-fixture-courses",
+			"pattern": "wrapper-functions"
+		},
+		"abilities-fixture/get-environment": {
+			"label": "Get environment",
+			"description": "Returns the WordPress and PHP versions.",
+			"category": "abilities-fixture-site",
+			"pattern": "loops-and-variables"
+		},
+		"abilities-fixture/get-order": {
+			"label": "Get order",
+			"description": "Returns one order by ID.",
+			"category": "abilities-fixture-commerce",
+			"pattern": "getter-methods"
+		},
+		"abilities-fixture/get-sending-status": {
+			"label": "Get sending status",
+			"description": "Reports whether email sending is working.",
+			"category": "abilities-fixture",
+			"pattern": "wrapper-functions"
+		},
+		"abilities-fixture/get-settings": {
+			"label": "Get settings",
+			"description": "Returns the plugin settings.",
+			"category": "abilities-fixture-settings",
+			"pattern": "injected-category"
+		},
+		"abilities-fixture/get-site-summary": {
+			"label": "Get site summary",
+			"description": "Returns the site title, tagline and number of published posts.",
+			"category": "abilities-fixture",
+			"pattern": "direct-literal"
+		},
+		"abilities-fixture/get-store-info": {
+			"label": "Get store info",
+			"description": "Returns the store name, currency and address.",
+			"category": "abilities-fixture-commerce",
+			"pattern": "getter-methods"
+		},
+		"abilities-fixture/list-entries": {
+			"label": "List entries",
+			"description": "Lists form entries, newest first.",
+			"category": "abilities-fixture",
+			"pattern": "injected-category"
+		},
+		"abilities-fixture/list-forms": {
+			"label": "List forms",
+			"description": "Lists the forms on the site.",
+			"category": "abilities-fixture",
+			"pattern": "wrapper-functions"
+		},
+		"abilities-fixture/order-read": {
+			"label": "Read order items",
+			"description": "Returns the line items of one order.",
+			"category": "abilities-fixture-commerce",
+			"pattern": "getter-methods"
+		},
+		"abilities-fixture/product-update": {
+			"label": "Update a product",
+			"description": "Updates the title, price or stock of a product.",
+			"category": "abilities-fixture",
+			"pattern": "static-definition"
+		},
+		"abilities-fixture/products-query": {
+			"label": "Query products",
+			"description": "Finds products by ID or common catalog filters.",
+			"category": "abilities-fixture",
+			"pattern": "static-definition"
+		},
+		"abilities-fixture/search-orders": {
+			"label": "Orders",
+			"description": "Searches Orders by keyword.",
+			"category": "abilities-fixture",
+			"pattern": "wrapper-functions",
+			"note": "No description in the code; the wrapper builds it from the label."
+		},
+		"abilities-fixture/set-shortlinks-status": {
+			"label": "Turn shortlinks on or off",
+			"description": "Turns the shortlinks module on or off.",
+			"category": "abilities-fixture",
+			"pattern": "registrar-map"
+		},
+		"abilitiesfixture/create-form": {
+			"label": "Create Form",
+			"description": "Creates a form from a list of fields.",
+			"category": "forms",
+			"pattern": "plain-strings",
+			"note": "The input schema also has a \"label\" key, which is not the ability label."
+		},
+		"abilities-fixture/get-report": {
+			"label": "Get report",
+			"description": "Returns entry counts by day.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions"
+		},
+		"abilities-fixture/export-report": {
+			"label": "abilities-fixture/export-report",
+			"description": "Exports the report as CSV.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "No label in the code; the registrar uses the name."
+		},
+		"abilities-fixture/coupon-create": {
+			"label": "Create coupon",
+			"description": "Creates a discount coupon.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "The name is a ternary between a class constant and a method."
+		},
+		"abilities-fixture/coupons-query": {
+			"label": "Query coupons",
+			"description": "Lists coupons, newest first.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "The name is a ternary between a class constant and a method."
+		},
+		"abilities-fixture/get-bounce-rate": {
+			"label": "Get bounce rate",
+			"description": "Returns the share of emails that bounced this month.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "Built by a dependency injection container, never with new in the plugin."
+		},
+		"abilities-fixture/summarize-site": {
+			"label": "Summarize site",
+			"description": "Summarizes the site's purpose and its most recent posts.",
+			"category": "abilities-fixture",
+			"pattern": "assembled-definitions",
+			"note": "The description is read from a file, so a scanner reports it as unknown.",
+			"unreadable": [
+				"description"
+			]
+		}
+	},
+	"vendored": {
+		"categories": {
+			"acme-mcp-tools": {
+				"label": "Acme MCP Tools",
+				"description": "Abilities for discovering other abilities."
+			}
+		},
+		"abilities": {
+			"acme-mcp-tools/discover-abilities": {
+				"label": "Discover Abilities",
+				"description": "Lists the abilities available on this site.",
+				"category": "acme-mcp-tools",
+				"path": "jetpack_vendor/acme/mcp-tools/register.php"
+			}
+		}
+	},
+	"runtime_only": [
+		"abilities-fixture/count-attachments",
+		"abilities-fixture/count-pages",
+		"abilities-fixture/count-posts"
+	],
+	"requires_woocommerce": {
+		"abilities-fixture/woocommerce-marketing-status": {
+			"label": "Get marketing status",
+			"description": "Reports which store marketing emails are switched on.",
+			"category": "woocommerce",
+			"pattern": "other-plugin-hooks"
+		}
+	},
+	"must_not_report": [
+		"abilities-fixture/v1",
+		"abilities-fixture/commented-out"
+	]
+}
