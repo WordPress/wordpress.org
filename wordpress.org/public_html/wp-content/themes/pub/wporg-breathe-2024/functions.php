@@ -488,7 +488,7 @@ function welcome_box() {
 	$welcome      = get_page_by_path( 'welcome' );
 	$cookie       = 'welcome-' . get_current_blog_id();
 	$path         = get_site()->path;
-	$hash         = isset( $_COOKIE[ $cookie ] ) ? $_COOKIE[ $cookie ] : '';
+	$hash         = sanitize_text_field( wp_unslash( $_COOKIE[ $cookie ] ?? '' ) );
 	$content_hash = $welcome ? md5( $welcome->post_content ) : '';
 
 	if ( ! $welcome ) {

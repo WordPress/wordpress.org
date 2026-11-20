@@ -22,7 +22,7 @@ class WPTV_Anon_Upload {
 			empty( $_POST['wptvvideon'] ) ||
 			(
 				empty( $_POST['wptv_uploaded_by'] ) &&
-				! wp_verify_nonce( $_POST['wptvvideon'], 'wptv-upload-video' )
+				! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wptvvideon'] ?? '' ) ), 'wptv-upload-video' )
 			)
 		) {
 			$this->errors = 15; /* no-nonce / invalid nonce */
@@ -102,7 +102,8 @@ class WPTV_Anon_Upload {
 			return $this->error( 13 );
 		}
 
-		if ( ! empty( $_POST['wptv_producer_username'] ) && ! wporg_username_exists( $_POST['wptv_producer_username'] ) ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- init() checks the upload nonce before dispatching here; the name is recorded as it was posted, so the account has to exist under that name and not under a repaired version of it.
+		if ( ! empty( $_POST['wptv_producer_username'] ) && ! wporg_username_exists( is_string( $_POST['wptv_producer_username'] ) ? wp_unslash( $_POST['wptv_producer_username'] ) : '' ) ) {
 			return $this->error( 14 );
 		}
 
@@ -111,9 +112,12 @@ class WPTV_Anon_Upload {
 				return $this->error( 10 );
 			}
 
-			if ( empty( $_POST['wptv_email'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- init() checks the upload nonce before dispatching here; the address stored further down is the one that was posted, so this is the value that has to pass is_email().
+			$posted_email = isset( $_POST['wptv_email'] ) && is_string( $_POST['wptv_email'] ) ? wp_unslash( $_POST['wptv_email'] ) : '';
+
+			if ( '' === $posted_email ) {
 				return $this->error( 11 );
-			} elseif ( ! is_email( $_POST['wptv_email'] ) ) {
+			} elseif ( ! is_email( $posted_email ) ) {
 				return $this->error( 12 );
 			}
 
@@ -150,7 +154,8 @@ class WPTV_Anon_Upload {
 			return new WP_Error( 'upload_error', 'Invalid file name.' );
 		}
 
-		$name = $_FILES['wptv_file']['name'];
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- init() checks the upload nonce before dispatching here.
+		$name = sanitize_file_name( wp_unslash( $_FILES['wptv_file']['name'] ?? '' ) );
 		add_filter( 'wp_handle_upload_prefilter', array( &$this, 'video_filename' ), 5 );
 
 		$file = wp_handle_upload( $_FILES['wptv_file'], $overrides );
@@ -229,8 +234,8 @@ class WPTV_Anon_Upload {
 			return $this->error( 1 );
 		}
 
-		// quick file extension check
-		$name_parts = pathinfo( $_FILES['wptv_file']['name'] );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- quick file extension check init() checks the upload nonce before dispatching here.
+		$name_parts = pathinfo( sanitize_file_name( wp_unslash( $_FILES['wptv_file']['name'] ?? '' ) ) );
 
 		if ( ! empty( $name_parts['extension'] ) ) {
 			// Changes to this must be synced with the anonymous JavaScript function in anon-upload-template.php
@@ -314,7 +319,7 @@ class WPTV_Anon_Upload {
 		$language          = $this->sanitize_text( $_posted['wptv_language'] );
 		$slides            = $this->sanitize_text( $_posted['wptv_slides_url'] );
 		$recorded          = $this->sanitize_text( $_posted['wptv_date'] ); // yyyy-mm-dd
-		$ip                = $_SERVER['REMOTE_ADDR'];
+		$ip                = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '' ) );
 
 		$categories = '';
 		if ( ! empty( $_posted['post_category'] ) && is_array( $_posted['post_category'] ) ) {

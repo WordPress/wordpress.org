@@ -2,7 +2,8 @@
 
 // Version 1.2+ only accepts GET requests
 if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'POST' ) {
-	header( $_SERVER['SERVER_PROTOCOL'] . ' 405 Method not allowed' );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here.
+	header( ( $_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.0' ) . ' 405 Method not allowed' );
 	header( 'Allow: GET' );
 	header( 'Content-Type: text/plain' );
 
@@ -16,6 +17,7 @@ if ( ! defined( 'THEMES_API_VERSION' ) ) {
 // Support "flat" requests, ie. no '?request[slug]=..` needed, just '?slug=...'
 if ( ! isset( $_GET['request'] ) ) {
 	$_GET = $_REQUEST = array(
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Standalone endpoint; WordPress is not loaded until the bootstrap further down, so its sanitizers are unavailable here.
 		'action'  => $_GET['action'] ?? '', // 1.2 only supports GET requests
 		'request' => array_diff_key( $_GET, [ 'action' => false, 'callback' => false ] ),
 	);

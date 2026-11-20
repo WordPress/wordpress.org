@@ -20,7 +20,8 @@ wp_enqueue_script( 'jquery' );
 get_header( 'top-level-page' );
 the_post();
 
-$terms = urldecode( wp_unslash( $_GET['s'] ?? '' ) );
+// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve literal search terms; HTML-safe JSON encoding protects the script output below.
+$terms = isset( $_GET['s'] ) && is_string( $_GET['s'] ) ? urldecode( wp_unslash( $_GET['s'] ) ) : '';
 $terms = htmlspecialchars_decode( $terms );
 $terms = explode( '?', $terms )[0];
 $terms = trim( $terms, "/ \r\n\t" );
@@ -36,8 +37,9 @@ $search_config = array(
 	),
 );
 
-if ( isset( $_REQUEST['in'] ) && in_array( $_REQUEST['in'], [ 'support_forums', 'support_docs', 'developer_documentation' ] ) ) {
-	$search_config['attributes']['defaultToRefinement'] = $_REQUEST['in'];
+$refinement = sanitize_key( $_REQUEST['in'] ?? '' );
+if ( in_array( $refinement, [ 'support_forums', 'support_docs', 'developer_documentation' ], true ) ) {
+	$search_config['attributes']['defaultToRefinement'] = $refinement;
 }
 
 ?>
@@ -57,7 +59,7 @@ if ( isset( $_REQUEST['in'] ) && in_array( $_REQUEST['in'], [ 'support_forums', 
 			var executeSearch = function() {
 				document.getElementById( 'gsce-search' ).innerHTML = '';
 				google.search.cse.element.render(<?php echo json_encode( $search_config, true ); ?>);
-				google.search.cse.element.getElement('wordpressorg-search').execute( <?php echo json_encode( $terms ); ?> );
+				google.search.cse.element.getElement('wordpressorg-search').execute( <?php echo wp_json_encode( $terms, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?> );
 			}
 
 			if ( document.readyState == 'complete' ) {

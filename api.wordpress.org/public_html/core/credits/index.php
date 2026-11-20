@@ -1,4 +1,15 @@
 <?php
+/**
+ * Serves the core credits API: the contributor list for a given WordPress
+ * version and locale.
+ *
+ * Standalone endpoint; WordPress is not loaded here, so its sanitizers
+ * are unavailable.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput
+ *
+ * @package WordPressdotorg\API\Credits
+ */
 
 $api_root = dirname( dirname( __DIR__ ) );
 
@@ -32,6 +43,7 @@ function like_escape( $text ) {
 endif;
 
 if ( ! empty( $_GET['version'] ) ) {
+	// The pattern reduces the value to digits and dots.
 	$version = preg_replace( '/^([.0-9]+).*/', '$1', $_GET['version'] );
 } elseif ( 'cli' == php_sapi_name() && isset( $argv[1] ) ) {
 	$version = preg_replace( '/^([.0-9]+).*/', '$1', $argv[1] );
@@ -53,6 +65,7 @@ $locale = false;
 if ( ( isset( $_GET['locale'] ) && 'en_US' != $_GET['locale'] ) || ( 'cli' == php_sapi_name() && isset( $argv[2] ) ) ) {
 	require GLOTPRESS_LOCALES_PATH;
 
+	// The locale only matters if GP_Locales knows it.
 	$gp_locale = GP_Locales::by_field( 'wp_locale', isset( $argv[2] ) ? $argv[2] : $_GET['locale'] );
 	if ( $gp_locale ) {
 		$locale = $gp_locale;

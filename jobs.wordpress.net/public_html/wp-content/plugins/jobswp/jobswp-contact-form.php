@@ -196,7 +196,7 @@ class Jobs_Dot_WP_Contact_Form {
 			return null;
 		}
 
-		$token = preg_replace( '/[^a-zA-Z0-9]/', '', wp_unslash( $_GET['jobswp_cf'] ) );
+		$token = preg_replace( '/[^a-zA-Z0-9]/', '', sanitize_text_field( wp_unslash( $_GET['jobswp_cf'] ) ) );
 		if ( ! $token ) {
 			return null;
 		}

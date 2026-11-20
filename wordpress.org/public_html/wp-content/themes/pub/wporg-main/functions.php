@@ -267,8 +267,8 @@ function old_page_redirects() {
 
 	// Old WordPress.org/about/* pages:
 	if (
-		'wordpress.org' == $_SERVER['HTTP_HOST'] &&
-		preg_match( '!^/about/(books|fanart|screenshots)!i', $_SERVER['REQUEST_URI'] )
+		'wordpress.org' === sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) &&
+		preg_match( '!^/about/(books|fanart|screenshots)!i', wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) )
 	) {
 		wp_safe_redirect( '/about/', 301 );
 		die();
@@ -276,15 +276,15 @@ function old_page_redirects() {
 
 	// WordPress.org/about/gpl -> about/license
 	if (
-		'wordpress.org' == $_SERVER['HTTP_HOST'] &&
-		preg_match( '!^/about/gpl/!i', $_SERVER['REQUEST_URI'] )
+		'wordpress.org' === sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ) &&
+		preg_match( '!^/about/gpl/!i', wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) )
 	) {
 		wp_safe_redirect( '/about/license/', 301 );
 		die();
 	}
 
 	// https://*/license.txt > about/license
-	if ( '/license.txt' === $_SERVER['REQUEST_URI'] ) {
+	if ( '/license.txt' === wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) {
 		wp_safe_redirect( '/about/license/', 301 );
 		die();
 	}

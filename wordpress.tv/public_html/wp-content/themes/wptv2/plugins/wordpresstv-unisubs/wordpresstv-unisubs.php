@@ -82,7 +82,7 @@ class WordCampTV_Unisubs {
 		$post_id = 0;
 
 		if ( isset( $_GET['guid'] ) ) {
-			$post = $this->get_post_by_guid( $_GET['guid'] );
+			$post = $this->get_post_by_guid( sanitize_text_field( wp_unslash( $_GET['guid'] ?? '' ) ) );
 			if ( ! $post ) {
 				$this->fourohfour();
 			}
@@ -90,11 +90,11 @@ class WordCampTV_Unisubs {
 
 		if ( isset( $_GET['url'] ) ) {
 			// Do a quick check to see if the URL starts with the blog's URL
-			if ( home_url() != substr( $_GET['url'], 0, strlen( home_url() ) ) ) {
+			if ( home_url() !== substr( esc_url_raw( wp_unslash( $_GET['url'] ?? '' ) ), 0, strlen( home_url() ) ) ) {
 				$this->fourohfour();
 			}
 
-			$post_id = url_to_postid( $_GET['url'] );
+			$post_id = url_to_postid( esc_url_raw( wp_unslash( $_GET['url'] ?? '' ) ) );
 			if ( empty( $post_id ) || ! $post = get_post( $post_id ) ) {
 				$this->fourohfour();
 			}
@@ -152,7 +152,7 @@ class WordCampTV_Unisubs {
 
 		$format = 'json';
 		if ( ! empty( $_GET['format'] ) ) {
-			$format = strtolower( $_GET['format'] );
+			$format = strtolower( sanitize_key( $_GET['format'] ?? '' ) );
 		}
 
 		// Output the response based on $format.

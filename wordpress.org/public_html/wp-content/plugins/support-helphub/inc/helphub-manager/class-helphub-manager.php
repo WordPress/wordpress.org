@@ -249,13 +249,14 @@ class HelpHub_Manager {
 		}
 
 		// Check that the nonce is valid.
-		if ( ! wp_verify_nonce( $_POST['_helphub_manage'], 'helphub-change-user-role-' . $user_id ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_helphub_manage'] ?? '' ) ), 'helphub-change-user-role-' . $user_id ) ) {
 			return;
 		}
 
 		// Make sure the new role is a HelpHub one, or is being reset to nothing.
 		$roles = $this->get_helphub_roles();
-		if ( ! empty( $_POST['role'] ) && ! isset( $roles[ $_POST['role'] ] ) ) {
+		$role  = sanitize_key( $_POST['role'] ?? '' );
+		if ( '' !== $role && ! isset( $roles[ $role ] ) ) {
 			return;
 		}
 
@@ -264,7 +265,7 @@ class HelpHub_Manager {
 		$user = new stdClass();
 
 		$user->ID   = (int) $user_id;
-		$user->role = $_POST['role'];
+		$user->role = $role;
 
 		$edit_user = wp_update_user( $user );
 

@@ -168,7 +168,7 @@ function wporg_learn_redirect_old_urls() {
 	$redirects = array_merge( $pages, $tutorials, $courses );
 
 	// Use `REQUEST_URI` rather than `$wp->request`, to get the entire source URI including url parameters.
-	$request = $_SERVER['REQUEST_URI'] ?? '';
+	$request = wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) );
 
 	foreach ( $redirects as $source => $destination ) {
 		if ( str_starts_with( $request, $source ) ) {
