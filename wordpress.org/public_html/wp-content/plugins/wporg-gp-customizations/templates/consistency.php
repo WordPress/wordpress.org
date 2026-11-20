@@ -195,7 +195,10 @@ if ( $performed_search && ! $results ) {
 						echo '</div>';
 						?>
 						<div class="meta">
-							Project: <a href="<?php echo esc_url( $project_url ); ?>"><?php echo esc_html( $cached_project['name'] ); ?></a><?php if ( ! $cached_project['is_active'] ) : ?> <span class="dashicons dashicons-flag"></span><span class="inactive">(inactive)</span><?php endif; ?>
+							Project: <a href="<?php echo esc_url( $project_url ); ?>"><?php echo esc_html( $cached_project['name'] ); ?></a>
+							<?php if ( ! $cached_project['is_active'] ) : ?>
+								<span class="dashicons dashicons-flag"></span><span class="inactive">(inactive)</span>
+							<?php endif; ?>
 						</div>
 					</td>
 					<td>
