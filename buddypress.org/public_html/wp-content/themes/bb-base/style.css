@@ -2039,7 +2039,7 @@ div.plugin-meta img {
 	#footer-inner {
 		width: 960px;
 	}
-	body:not(.page-template-page-homepage):not(.bbp-user-page) div.content {
+	body:not(.page-template-page-homepage):not(.bbp-user-page):not(.bbp-user-edit) div.content {
 		width: 700px;
 	}
 	div.leftcol {
@@ -2100,6 +2100,14 @@ div.plugin-meta img {
 	#header-inner {
 		background-position: var(--bbbase-header-image-small-screen-position);
 	}
+	#bbpress-forums #bbp-user-wrapper {
+		flex-direction: column;
+	}
+	#bbpress-forums #bbp-user-wrapper #bbp-single-user-details,
+	#bbpress-forums #bbp-user-wrapper #bbp-user-body {
+		width: 100%;
+		margin-left: 0;
+	}
 }
 
 /* Do not fix #header for non-desktops */
@@ -2107,6 +2115,28 @@ div.plugin-meta img {
 	#bbp-search-form {
 		position: static;
 		margin: 0 0 20px;
+	}
+	#bbpress-forums #bbp-your-profile fieldset label[for] {
+		float: none;
+		display: block;
+		width: auto;
+		padding: 0 0 5px;
+		text-align: left;
+		white-space: normal;
+	}
+	#bbpress-forums #bbp-your-profile fieldset input[type="text"],
+	#bbpress-forums #bbp-your-profile fieldset input[type="email"],
+	#bbpress-forums #bbp-your-profile fieldset input[type="password"],
+	#bbpress-forums #bbp-your-profile fieldset select,
+	#bbpress-forums #bbp-your-profile fieldset textarea {
+		box-sizing: border-box;
+		min-width: 0;
+		width: 100%;
+	}
+	#bbpress-forums #bbp-your-profile fieldset p.description {
+		float: none;
+		width: auto;
+		margin-left: 0;
 	}
 	#bbpress-forums .bbp-pagination {
 		flex-direction: column;
