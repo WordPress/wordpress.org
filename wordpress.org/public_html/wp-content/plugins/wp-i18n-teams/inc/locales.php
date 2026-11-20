@@ -223,6 +223,8 @@ function get_locales_data() {
 			[
 				'locale'     => $locale->wp_locale,
 				'network_id' => WPORG_GLOBAL_NETWORK_ID,
+				'archived'   => 0,
+				'deleted'    => 0,
 				'orderby'    => 'path_length',
 				'number'     => '',
 			]
@@ -426,6 +428,8 @@ function get_locale_site_id( GP_Locale $locale ): ?int {
 			'locale'     => $locale->wp_locale,
 			'network_id' => WPORG_GLOBAL_NETWORK_ID,
 			'path'       => '/',
+			'archived'   => 0,
+			'deleted'    => 0,
 			'fields'     => 'ids',
 			'number'     => '1',
 		]
