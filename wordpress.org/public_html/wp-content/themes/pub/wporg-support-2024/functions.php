@@ -899,7 +899,7 @@ function wporg_support_is_single_user_reported_topics() {
  * @return array Array of compat views.
  */
 function wporg_support_get_compat_views() {
-	return array( 'theme', 'plugin', 'reviews', 'active', 'unresolved' );
+	return array( 'theme', 'plugin', 'reviews', 'active', 'unresolved', 'unresolved-active' );
 }
 
 /**

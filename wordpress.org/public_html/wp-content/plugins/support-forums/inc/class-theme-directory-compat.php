@@ -14,7 +14,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 	}
 
 	function compat_views() {
-		return array( self::COMPAT, 'reviews', 'active', 'unresolved' );
+		return array( self::COMPAT, 'reviews', 'active', 'unresolved', 'unresolved-active' );
 	}
 
 	function compat_title() {
@@ -35,6 +35,16 @@ class Theme_Directory_Compat extends Directory_Compat {
 	function unresolved_title() {
 		/* translators: %s: theme title */
 		return sprintf( _x( '[%s] Unresolved Topics', 'theme', 'wporg-forums' ), $this->title() );
+	}
+
+	/**
+	 * Get the title of the unresolved topics view ordered by last activity.
+	 *
+	 * @return string View title.
+	 */
+	public function unresolved_active_title() {
+		/* translators: %s: theme title */
+		return sprintf( _x( '[%s] Unresolved Topics by Activity', 'theme', 'wporg-forums' ), $this->title() );
 	}
 
 	function slug() {
@@ -128,13 +138,14 @@ class Theme_Directory_Compat extends Directory_Compat {
 			return;
 		}
 
-		$icon       = ''; 
-		$theme      = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
-		$support    = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
-		$active     = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/active/' ), __( 'Active Topics', 'wporg-forums' ) );
-		$unresolved = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/unresolved/' ), __( 'Unresolved Topics', 'wporg-forums' ) );
-		$reviews    = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/reviews/' ), __( 'Reviews', 'wporg-forums' ) );
-		$create     = '';
+		$icon              = '';
+		$theme             = sprintf( '<a href="//wordpress.org/themes/%s/">%s</a>', esc_attr( $this->slug() ), esc_html( $this->theme->post_title ) );
+		$support           = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/' ), __( 'Support Threads', 'wporg-forums' ) );
+		$active            = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/active/' ), __( 'Active Topics', 'wporg-forums' ) );
+		$unresolved        = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/unresolved/' ), __( 'Unresolved Topics', 'wporg-forums' ) );
+		$unresolved_active = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/unresolved-active/' ), __( 'Unresolved Topics by Activity', 'wporg-forums' ) );
+		$reviews           = sprintf( '<a href="%s">%s</a>', home_url( '/theme/' . esc_attr( $this->slug() ) . '/reviews/' ), __( 'Reviews', 'wporg-forums' ) );
+		$create            = '';
 
 		$create_label = '';
 		if ( isset( $this->ratings ) && $this->ratings->is_rating_view() && bbp_current_user_can_access_create_topic_form() ) {
@@ -169,6 +180,7 @@ class Theme_Directory_Compat extends Directory_Compat {
 				<li><?php echo wp_kses_post( $support ); ?></li>
 				<li><?php echo wp_kses_post( $active ); ?></li>
 				<li><?php echo wp_kses_post( $unresolved ); ?></li>
+				<li><?php echo wp_kses_post( $unresolved_active ); ?></li>
 				<li><?php echo wp_kses_post( $reviews ); ?></li>
 				<?php if ( $create ) : ?>
 				<li class="create-topic"><?php echo wp_kses_post( $create ); ?></li>
