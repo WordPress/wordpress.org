@@ -233,9 +233,9 @@ class Translation_Sync {
 		// Generate a lock key from the sorted IDs of both originals.
 		$ids = [ (int) $translation->original_id, (int) $new_original->id ];
 		sort( $ids );
-		$lock_key = 'gp_sync_' . implode( '_', $ids ) . '_' . $new_translation_set->locale;
+		$lock_key = 'gp_sync_' . md5( implode( '_', $ids ) . '_' . $new_translation_set->locale . '_' . $new_translation_set->slug );
 
-		// Wait a maximum of 2 seconds.
+		// Wait a maximum of 3 seconds.
 		$acquired = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 3)', $lock_key ) );
 		if ( ! $acquired ) {
 			return false;
