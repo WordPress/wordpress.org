@@ -448,6 +448,11 @@ class Moderation {
 
 		$user = get_user_by( 'id', $post->post_author );
 
+		// Bail if user doesn't exist.
+		if ( ! $user ) {
+			return;
+		}
+
 		// Check for moderator's note to user.
 		$mod_note = '';
 		$mod_note_to_user = Rejection::get_moderator_note_to_user( $post, 'publish' );
@@ -507,6 +512,11 @@ https://wordpress.org/photos/
 		}
 
 		$user = get_user_by( 'id', $post->post_author );
+
+		// Bail if user doesn't exist.
+		if ( ! $user ) {
+			return;
+		}
 
 		$rejection_message = '';
 
