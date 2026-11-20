@@ -111,40 +111,37 @@ class Consistency extends GP_Route {
 	/**
 	 * Retrieves a list of unique translation sets.
 	 *
+	 * Every locale and variant gets a set on wp/dev, so its sets stand in for
+	 * the whole table, which is too large to group on a page load.
+	 *
 	 * @return array Array of translation sets keyed by 'locale/slug'.
 	 */
 	private function get_translation_sets() {
-		global $wpdb;
-
 		$sets = wp_cache_get( 'translation-sets-v2', $this->cache_group );
 
 		if ( empty( $sets ) ) {
-			$_sets = $wpdb->get_results(
-				"SELECT name, locale, slug
-				FROM {$wpdb->gp_translation_sets}
-				GROUP BY locale, slug
-				ORDER BY name ASC"
-			);
+			$wp_dev = GP::$project->by_path( 'wp/dev' );
+			$_sets  = $wp_dev ? GP::$translation_set->by_project_id( $wp_dev->id ) : array();
 
 			$sets = array();
-			if ( $_sets ) {
-				foreach ( $_sets as $set ) {
-					if ( ! GP_Locales::exists( $set->locale ) ) {
-						continue;
-					}
-
-					$key = "{$set->locale}/{$set->slug}";
-
-					// Hide duplicate entries with more than one slash (e.g. nl/formal/default).
-					if ( substr_count( $key, '/' ) > 1 ) {
-						continue;
-					}
-
-					$sets[ $key ] = $set->name;
+			foreach ( $_sets as $set ) {
+				if ( ! GP_Locales::exists( $set->locale ) ) {
+					continue;
 				}
+
+				$key = "{$set->locale}/{$set->slug}";
+
+				// Hide duplicate entries with more than one slash (e.g. nl/formal/default).
+				if ( substr_count( $key, '/' ) > 1 ) {
+					continue;
+				}
+
+				$sets[ $key ] = $set->name;
 			}
 
-			wp_cache_set( 'translation-sets-v2', $sets, $this->cache_group, DAY_IN_SECONDS );
+			if ( $sets ) {
+				wp_cache_set( 'translation-sets-v2', $sets, $this->cache_group, DAY_IN_SECONDS );
+			}
 		}
 
 		return $sets;
