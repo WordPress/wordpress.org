@@ -1652,6 +1652,22 @@ body.bbp-user-edit #bbp-user-wrapper #bbp-user-body {
 	margin-left: auto;
 }
 
+body.bbp-user-edit #bbp-user-wrapper {
+	flex-wrap: wrap;
+	gap: var(--bbbase-default-gap);
+}
+
+body.bbp-user-edit #bbp-user-wrapper #bbp-single-user-details {
+	flex: 0 0 200px;
+}
+
+body.bbp-user-edit #bbp-user-wrapper #bbp-user-body {
+	flex: 1 1 480px;
+	min-width: 0;
+	width: auto;
+	margin-left: 0;
+}
+
 #bbp-user-profile h2 {
 	display: none;
 }
@@ -2100,13 +2116,56 @@ div.plugin-meta img {
 	#header-inner {
 		background-position: var(--bbbase-header-image-small-screen-position);
 	}
-	#bbpress-forums #bbp-user-wrapper {
+	body.bbp-user-page #bbpress-forums #bbp-user-wrapper {
 		flex-direction: column;
 	}
-	#bbpress-forums #bbp-user-wrapper #bbp-single-user-details,
-	#bbpress-forums #bbp-user-wrapper #bbp-user-body {
+	body.bbp-user-page #bbpress-forums #bbp-user-wrapper #bbp-single-user-details,
+	body.bbp-user-page #bbpress-forums #bbp-user-wrapper #bbp-user-body {
 		width: 100%;
 		margin-left: 0;
+	}
+}
+
+/* Keep the profile menu compact after the form moves below it. */
+@media screen and ( max-width: 749px ) {
+	body.bbp-user-edit #bbpress-forums #bbp-user-wrapper #bbp-single-user-details {
+		display: flex;
+		flex: 1 1 100%;
+		gap: 20px;
+		width: 100%;
+		overflow: visible;
+	}
+	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-avatar,
+	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-avatar img.avatar {
+		flex: 0 0 120px;
+		height: 120px;
+		width: 120px;
+	}
+	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-navigation {
+		flex: 1;
+		min-width: 0;
+		margin-top: 0;
+	}
+	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-navigation ul {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 8px;
+	}
+}
+
+@media screen and ( max-width: 400px ) {
+	body.bbp-user-edit #bbpress-forums #bbp-user-wrapper #bbp-single-user-details {
+		flex-wrap: wrap;
+		gap: 12px;
+	}
+	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-avatar,
+	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-avatar img.avatar {
+		flex-basis: 80px;
+		height: 80px;
+		width: 80px;
+	}
+	body.bbp-user-edit #bbpress-forums #bbp-single-user-details #bbp-user-navigation {
+		flex-basis: 100%;
 	}
 }
 
