@@ -326,10 +326,10 @@ class Translation_Sync {
 			}
 
 			// Create a new translation.
-			$copy                       = new GP_Translation( $translation->fields() );
-			$copy->original_id          = $new_original->id;
-			$copy->translation_set_id   = $new_translation_set->id;
-			$copy->status               = 'waiting';
+			$copy                     = new GP_Translation( $translation->fields() );
+			$copy->original_id        = $new_original->id;
+			$copy->translation_set_id = $new_translation_set->id;
+			$copy->status             = 'waiting';
 
 			$created_translation = GP::$translation->create( $copy );
 			if ( ! $created_translation ) {
