@@ -1354,6 +1354,11 @@ body.reply-edit #bbpress-forums fieldset legend {
 	text-decoration: none;
 }
 
+#bbpress-forums p.bbp-topic-meta > .bbp-topic-started-by,
+#bbpress-forums p.bbp-topic-meta > .bbp-topic-started-in {
+	vertical-align: middle;
+}
+
 #bbpress-forums p.bbp-topic-meta .bbp-topic-started-in a {
 	display: inline-block;
 	box-sizing: border-box;
@@ -1367,7 +1372,6 @@ body.reply-edit #bbpress-forums fieldset legend {
 	font-size: 12px;
 	font-weight: 500;
 	line-height: 1.5;
-	vertical-align: middle;
 	overflow-wrap: anywhere;
 }
 
