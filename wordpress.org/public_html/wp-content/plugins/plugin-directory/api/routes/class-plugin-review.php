@@ -73,6 +73,30 @@ class Plugin_Review extends Base {
 			)
 		);
 
+		// An API Endpoint to reject a new plugin.
+		register_rest_route(
+			'plugins/v1',
+			$plugin_route . '/reject',
+			array(
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'reject_plugin' ),
+				'permission_callback' => array( $this, 'plugin_change_permission_check' ),
+				'args'                => $user_id_arg + array(
+					'reason' => array(
+						'description' => 'The reason for rejecting the plugin.',
+						'type'        => 'string',
+						'enum'        => array_keys( Template::get_rejection_reasons() ),
+						'required'    => true,
+					),
+					'notify' => array(
+						'description' => 'Whether to email the plugin author about the rejection. Leave it off when the caller sends its own email.',
+						'type'        => 'boolean',
+						'default'     => false,
+					),
+				),
+			)
+		);
+
 		// An API Endpoint to change the slug of a plugin which hasn't been approved yet.
 		register_rest_route(
 			'plugins/v1',
@@ -383,6 +407,41 @@ class Plugin_Review extends Base {
 		}
 
 		return $this->set_plugin_status( $post, 'approved' );
+	}
+
+	/**
+	 * Endpoint to reject a new plugin.
+	 *
+	 * Rejecting a plugin frees its slug, saves the reason and clears the reviewer, all of
+	 * which is handled by `Status_Transitions`. The author is only emailed when `notify` is
+	 * set, as the callers send their own email.
+	 *
+	 * @param \WP_REST_Request $request The Rest API Request.
+	 * @return bool|WP_Error
+	 */
+	public function reject_plugin( $request ) {
+		$post = $this->get_plugin( $request );
+		if ( is_wp_error( $post ) ) {
+			return $post;
+		}
+
+		if ( 'new' !== $post->post_status ) {
+			return new WP_Error( 'invalid_status', 'Plugin is not in "new" status', [ 'status' => 400 ] );
+		}
+
+		$user = $this->get_acting_user( $request, 'plugin_reject' );
+		if ( is_wp_error( $user ) ) {
+			return $user;
+		}
+
+		Status_Transitions::set_rejection( $request['reason'], (bool) $request['notify'] );
+
+		$result = $this->set_plugin_status( $post, 'rejected' );
+
+		// Don't let a failed change leak its reason or its notification into the next one.
+		Status_Transitions::clear_rejection();
+
+		return $result;
 	}
 
 	/**

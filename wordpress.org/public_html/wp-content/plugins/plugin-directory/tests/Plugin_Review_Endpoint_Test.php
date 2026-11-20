@@ -215,7 +215,7 @@ class Plugin_Review_Endpoint_Test extends TestCase {
 	/**
 	 * Dispatch a request to one of the review endpoints.
 	 *
-	 * @param string      $action    The route action: 'assign', 'approve' or 'slug'.
+	 * @param string      $action    The route action: 'assign', 'approve', 'reject' or 'slug'.
 	 * @param array       $body      Optional. The request parameters.
 	 * @param string|null $bearer    Optional. The bearer token; null for the shared secret, '' to omit the header.
 	 * @param string|null $token     Optional. The per-plugin token; null for the fixture plugin's.
@@ -328,7 +328,7 @@ class Plugin_Review_Endpoint_Test extends TestCase {
 	 * Every changing route is behind the shared secret.
 	 */
 	public function test_every_route_requires_the_secret(): void {
-		foreach ( array( 'assign', 'approve', 'slug' ) as $action ) {
+		foreach ( array( 'assign', 'approve', 'reject', 'slug' ) as $action ) {
 			$response = $this->dispatch(
 				$action,
 				array(
@@ -552,6 +552,222 @@ class Plugin_Review_Endpoint_Test extends TestCase {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'approved', get_post( $this->plugin->ID )->post_status );
+	}
+
+	/*
+	 * Rejecting a plugin.
+	 */
+
+	/**
+	 * Create a user who can review and reject plugins.
+	 *
+	 * @return int User ID.
+	 */
+	private function create_rejecter(): int {
+		return $this->create_user( 'rejecter', array( 'plugin_review', 'plugin_reject' ) );
+	}
+
+	/**
+	 * Capture the emails sent while a callback runs, without sending them.
+	 *
+	 * @param callable $callback What to run.
+	 * @return array The `wp_mail()` arguments of every email.
+	 */
+	private function capture_emails( callable $callback ): array {
+		$emails = array();
+		$filter = static function ( $return, $atts ) use ( &$emails ) {
+			$emails[] = $atts;
+			return true;
+		};
+
+		add_filter( 'pre_wp_mail', $filter, 10, 2 );
+		$callback();
+		remove_filter( 'pre_wp_mail', $filter, 10 );
+
+		return $emails;
+	}
+
+	/**
+	 * Rejecting moves a new plugin to rejected, frees its slug and saves the reason.
+	 */
+	public function test_reject_rejects_the_plugin(): void {
+		$rejecter = $this->create_rejecter();
+		$slug     = $this->plugin->post_name;
+
+		$response = $this->dispatch(
+			'reject',
+			array(
+				'user_id' => $rejecter,
+				'reason'  => 'banned',
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data() );
+
+		$plugin = get_post( $this->plugin->ID );
+		$this->assertSame( 'rejected', $plugin->post_status );
+		$this->assertSame( "rejected-{$slug}-rejected", $plugin->post_name );
+		$this->assertSame( 'banned', get_post_meta( $plugin->ID, '_rejection_reason', true ) );
+		$this->assertNotEmpty( get_post_meta( $plugin->ID, 'plugin_rejected_date', true ) );
+	}
+
+	/**
+	 * The rejection is logged against the user who made it.
+	 */
+	public function test_reject_is_logged(): void {
+		$rejecter = $this->create_rejecter();
+
+		$this->dispatch(
+			'reject',
+			array(
+				'user_id' => $rejecter,
+				'reason'  => 'security',
+			)
+		);
+
+		$notes = array_map(
+			static fn ( $note ) => $note->comment_content,
+			$this->audit_log( $this->plugin->ID )
+		);
+		$this->assertContains( 'Plugin rejected. Reason: security', $notes );
+	}
+
+	/**
+	 * The author is not emailed unless the caller asks for it.
+	 */
+	public function test_reject_does_not_email_the_author_by_default(): void {
+		$rejecter = $this->create_rejecter();
+
+		$emails = $this->capture_emails(
+			function () use ( $rejecter ) {
+				$response = $this->dispatch(
+					'reject',
+					array(
+						'user_id' => $rejecter,
+						'reason'  => 'banned',
+					)
+				);
+				$this->assertSame( 200, $response->get_status() );
+			}
+		);
+
+		$this->assertCount( 0, $emails, 'The author was emailed.' );
+	}
+
+	/**
+	 * With `notify` the author is emailed, as a rejection from the Edit Plugin screen does.
+	 */
+	public function test_reject_emails_the_author_when_asked_to(): void {
+		$rejecter = $this->create_rejecter();
+
+		$emails = $this->capture_emails(
+			function () use ( $rejecter ) {
+				$response = $this->dispatch(
+					'reject',
+					array(
+						'user_id' => $rejecter,
+						'reason'  => 'banned',
+						'notify'  => true,
+					)
+				);
+				$this->assertSame( 200, $response->get_status() );
+			}
+		);
+
+		$this->assertCount( 1, $emails );
+	}
+
+	/**
+	 * A notification turned off for one rejection does not carry over to the next.
+	 */
+	public function test_reject_does_not_leak_into_the_next_rejection(): void {
+		$rejecter = $this->create_rejecter();
+		$second   = $this->create_plugin( 'new' );
+
+		$this->dispatch(
+			'reject',
+			array(
+				'user_id' => $rejecter,
+				'reason'  => 'banned',
+			)
+		);
+
+		$emails = $this->capture_emails(
+			function () use ( $rejecter, $second ) {
+				$this->dispatch(
+					'reject',
+					array(
+						'user_id' => $rejecter,
+						'reason'  => 'security',
+						'notify'  => true,
+					),
+					null,
+					null,
+					$second->ID
+				);
+			}
+		);
+
+		$this->assertCount( 1, $emails );
+		$this->assertSame( 'security', get_post_meta( $second->ID, '_rejection_reason', true ) );
+	}
+
+	/**
+	 * Only a new plugin can be rejected.
+	 */
+	public function test_reject_only_accepts_a_new_plugin(): void {
+		$rejecter = $this->create_rejecter();
+
+		foreach ( array( 'pending', 'approved', 'publish', 'rejected', 'closed', 'disabled' ) as $status ) {
+			$plugin = $this->create_plugin( $status );
+
+			$response = $this->dispatch(
+				'reject',
+				array(
+					'user_id' => $rejecter,
+					'reason'  => 'banned',
+				),
+				null,
+				null,
+				$plugin->ID
+			);
+
+			$this->assertSame( 400, $response->get_status(), "A '{$status}' plugin was rejected." );
+			$this->assertSame( 'invalid_status', $response->get_data()['code'] );
+			$this->assertSame( $status, get_post( $plugin->ID )->post_status );
+		}
+	}
+
+	/**
+	 * The reason is required and has to be one of the directory's.
+	 */
+	public function test_reject_requires_a_known_reason(): void {
+		$rejecter = $this->create_rejecter();
+
+		foreach ( array( array(), array( 'reason' => 'not-a-reason' ) ) as $params ) {
+			$response = $this->dispatch( 'reject', array( 'user_id' => $rejecter ) + $params );
+
+			$this->assertSame( 400, $response->get_status() );
+			$this->assertSame( 'new', get_post( $this->plugin->ID )->post_status );
+		}
+	}
+
+	/**
+	 * Rejecting needs the reject capability, which reviewing does not include.
+	 */
+	public function test_reject_requires_the_reject_capability(): void {
+		$response = $this->dispatch(
+			'reject',
+			array(
+				'user_id' => $this->reviewer_id,
+				'reason'  => 'banned',
+			)
+		);
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'user_cannot_do_that', $response->get_data()['code'] );
+		$this->assertSame( 'new', get_post( $this->plugin->ID )->post_status );
 	}
 
 	/*
@@ -812,7 +1028,7 @@ class Plugin_Review_Endpoint_Test extends TestCase {
 	public function test_the_routes_do_not_answer_get(): void {
 		$token = wp_hash( $this->plugin->ID, 'plugin-review' );
 
-		foreach ( array( 'assign', 'approve', 'slug' ) as $action ) {
+		foreach ( array( 'assign', 'approve', 'reject', 'slug' ) as $action ) {
 			$request = new \WP_REST_Request( 'GET', "/plugins/v1/plugin-review/{$this->plugin->ID}-{$token}/{$action}" );
 			$request->set_header( 'Authorization', 'Bearer ' . PLUGIN_REVIEW_ENDPOINT_SECRET );
 
