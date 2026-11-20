@@ -14,6 +14,7 @@ function bootstrap() {
 	add_filter( 'term_link', __NAMESPACE__ . '\link_locales', 10, 3 );
 
 	Locales\bootstrap();
+	Editor_Requests\bootstrap();
 }
 
 /**
