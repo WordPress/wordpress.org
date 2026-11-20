@@ -829,6 +829,10 @@ class Hooks {
 	 * @return string[]
 	 */
 	public function add_closed_class_to_auto_closed_topics( $classes, $topic_id ) {
+		if ( Plugin::REVIEWS_FORUM_ID === (int) bbp_get_topic_forum_id( $topic_id ) ) {
+			return $classes;
+		}
+
 		if ( ! in_array( 'status-closed', $classes, true ) && bbp_is_topic_closed( $topic_id ) ) {
 			$classes[] = 'status-closed';
 		}
