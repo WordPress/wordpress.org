@@ -15,6 +15,7 @@ namespace WordPressdotorg\Photo_Directory;
 define( 'WPORG_PHOTO_DIRECTORY_DIRECTORY', __DIR__ );
 define( 'WPORG_PHOTO_DIRECTORY_MAIN_FILE', __FILE__ );
 
+require_once __DIR__ . '/inc/activity.php';
 require_once __DIR__ . '/inc/admin.php';
 require_once __DIR__ . '/inc/badges.php';
 require_once __DIR__ . '/inc/favorites.php';

@@ -47,7 +47,9 @@ function manually_load_plugin(): void {
 	if ( ! defined( 'WPORG_PHOTO_DIRECTORY_DIRECTORY' ) ) {
 		define( 'WPORG_PHOTO_DIRECTORY_DIRECTORY', dirname( __DIR__ ) );
 	}
+	require_once dirname( __DIR__ ) . '/inc/activity.php';
 	require_once dirname( __DIR__ ) . '/inc/registrations.php';
+	require_once dirname( __DIR__ ) . '/inc/rejection.php';
 	require_once dirname( __DIR__ ) . '/inc/photo.php';
 	require_once dirname( __DIR__ ) . '/inc/favorites.php';
 	require_once dirname( __DIR__ ) . '/inc/user.php';
