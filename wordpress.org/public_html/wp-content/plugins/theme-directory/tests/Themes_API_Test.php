@@ -351,20 +351,21 @@ class Themes_API_Test extends TestCase {
 		global $wpdb;
 
 		$prev_error = $wpdb->last_error ?? '';
-		add_filter(
-			'posts_pre_query',
-			$simulate_error = static function ( $posts, $wp_query ) use ( &$wpdb ) {
-				if ( 'publish' === ( $wp_query->query_vars['post_status'] ?? '' ) ) {
-					$wpdb->last_error = 'Simulated database failure on published theme lookup';
-					return array();
-				}
-				// The suspension query succeeds with no error and no results.
-				$wpdb->last_error = '';
+
+		$simulate_error = static function ( $posts, $wp_query ) use ( &$wpdb ) {
+			$post_status = (array) ( $wp_query->query_vars['post_status'] ?? array() );
+
+			if ( in_array( 'publish', $post_status, true ) ) {
+				$wpdb->last_error = 'Simulated database failure on published theme lookup';
 				return array();
-			},
-			10,
-			2
-		);
+			}
+
+			// The suspension query succeeds with no error and no results.
+			$wpdb->last_error = '';
+			return array();
+		};
+
+		add_filter( 'posts_pre_query', $simulate_error, 10, 2 );
 
 		try {
 			$api = $this->make_api( array( 'slug' => 'test-error-slug' ), 'theme_information' );
