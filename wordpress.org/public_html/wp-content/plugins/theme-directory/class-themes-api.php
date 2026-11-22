@@ -462,7 +462,7 @@ class Themes_API {
 	 * Retrieve specific information about a theme.
 	 */
 	public function theme_information() {
-		global $post;
+		global $post, $wpdb;
 
 		// Support the 'slugs' parameter to fetch multiple themes at once.
 		if ( ! empty( $this->request->slugs ) ) {
@@ -524,6 +524,8 @@ class Themes_API {
 				'post_status' => 'publish', // delist will be added by query-modifications.
 			) );
 
+			$published_lookup_error = ! empty( $wpdb->last_error ) ? $wpdb->last_error : '';
+
 			if ( $themes ) {
 				$this->response = $this->fill_theme( $themes[0] );
 			} else {
@@ -562,6 +564,10 @@ class Themes_API {
 					);
 				} else {
 					$this->response = (object) array( 'error' => 'Theme not found' ); // Check get_result() if changing this string.
+				}
+
+				if ( $published_lookup_error && empty( $wpdb->last_error ) ) {
+					$wpdb->last_error = $published_lookup_error;
 				}
 			}
 		}

@@ -343,4 +343,37 @@ class Themes_API_Test extends TestCase {
 			$api->request->fields
 		);
 	}
+
+	/**
+	 * Tests that database error on published theme lookup is preserved across the suspension check.
+	 */
+	public function test_theme_information_preserves_db_error_state() {
+		global $wpdb;
+
+		$prev_error = $wpdb->last_error ?? '';
+		add_filter(
+			'posts_pre_query',
+			$simulate_error = static function ( $posts, $wp_query ) use ( &$wpdb ) {
+				if ( 'publish' === ( $wp_query->query_vars['post_status'] ?? '' ) ) {
+					$wpdb->last_error = 'Simulated database failure on published theme lookup';
+					return array();
+				}
+				// The suspension query succeeds with no error and no results.
+				$wpdb->last_error = '';
+				return array();
+			},
+			10,
+			2
+		);
+
+		try {
+			$api = $this->make_api( array( 'slug' => 'test-error-slug' ), 'theme_information' );
+
+			$this->assertSame( 'Theme not found', $api->response->error );
+			$this->assertSame( 'Simulated database failure on published theme lookup', $wpdb->last_error );
+		} finally {
+			remove_filter( 'posts_pre_query', $simulate_error );
+			$wpdb->last_error = $prev_error;
+		}
+	}
 }
