@@ -149,7 +149,7 @@ the_post();
 							<div class="ctl-row">
 								<div class="ctl-col-6">
 									<div class="story-details">
-										<h3><a href="#2004-i18n"><?php _e( 'Internationalization (i18n)', 'wporg' ); ?><em>+</em></a></h3>
+										<h3><a href="#2004-i18n"><?php _e( 'WordPress Supports Translation', 'wporg' ); ?><em>+</em></a></h3>
 									</div>
 								</div>
 								<div class="ctl-col-6">
@@ -702,11 +702,13 @@ the_post();
 					</p>
 
 					<p class="has-text-align-center _40p-milestones-back-link"><a id="2004-i18n" href="#2004-ms-hello-dolly">⌃<span class="screen-reader-text"><?php _e( 'Back to milestone marker.', 'wporg' ); ?></span></a></p>
-					<h3><a href="https://wordpress.org/news/2003/05/wordpress-now-available/"><?php _e( 'Internationalization (i18n)', 'wporg' ); ?></a></h3>
+					<h3><a href="https://wordpress.org/news/2003/05/wordpress-now-available/"><?php _e( 'WordPress Supports Translation', 'wporg' ); ?></a></h3>
 					<p>
 						<?php
 						printf(
-							__( 'To internationalize WordPress in 2004, Ryan Boren <a href="%s">wrapped</a> translatable strings with the <code>__()</code> translation function. He went through the code, one line at a time, found everything that could be translated, and marked it up. This meant that when WordPress v1.2 was released, it not only contained the plugin API but was fully internationalized.', 'wporg' ),
+							/* translators: 1: Changeset URL for the first internationalization work, 2: Changeset URL for wrapping strings in translation functions. */
+							__( 'To internationalize WordPress in 2004, Alex King <a href="%1$s">kicked off the efforts</a> before Ryan Boren <a href="%2$s">wrapped</a> translatable strings with the <code>__()</code> translation function. He went through the code, one line at a time, found everything that could be translated, and marked it up. This meant that when WordPress v1.2 was released, it not only contained the plugin API but was fully internationalized.', 'wporg' ),
+							'https://core.trac.wordpress.org/changeset/1057',
 							'https://core.trac.wordpress.org/changeset/1106'
 						);
 						?>

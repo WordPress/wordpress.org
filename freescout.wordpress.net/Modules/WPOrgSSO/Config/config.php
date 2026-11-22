@@ -18,7 +18,7 @@ return array(
 
 	// The WordPress.org SAML identity provider, as its settings page lists it.
 	'idp'            => array(
-		'entity_id' => env( 'WPORG_SSO_IDP_ENTITY_ID', 'https://login.wordpress.org' ),
+		'entity_id' => env( 'WPORG_SSO_IDP_ENTITY_ID', 'https://wordpress.org' ),
 		'url'       => env( 'WPORG_SSO_IDP_URL', 'https://login.wordpress.org/wp-login.php?action=idp' ),
 
 		// Its signing certificate, on one line: .env values can't span lines. The BEGIN/END markers are optional.

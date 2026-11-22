@@ -197,6 +197,8 @@ if ( $deepl_key ) {
 				echo '</small>';
 			}
 			?>
+			<br>
+			<a href="https://platform.openai.com/api-keys" target="_blank"><small><?php esc_html_e( 'Get an OpenAI API key', 'glotpress' ); ?></small></a>
 		</td>
 	</tr>
 	<tr>
@@ -265,6 +267,8 @@ if ( $deepl_key ) {
 				echo '</small>';
 			}
 			?>
+			<br>
+			<a href="https://www.deepl.com/your-account/keys" target="_blank"><small><?php esc_html_e( 'Get a DeepL API key', 'glotpress' ); ?></small></a>
 		</td>
 	</tr>
 	<?php if ( wporg_translate_user_is_validator_anywhere( get_current_user_id() ) ) : ?>

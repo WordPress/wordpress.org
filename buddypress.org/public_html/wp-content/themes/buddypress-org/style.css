@@ -11,3 +11,53 @@
 /**
  * See bb-base/style-buddypress.css
  */
+
+#headline-inner .profile-hero-crop {
+	position: absolute;
+	bottom: 0;
+	right: 24px;
+	width: 540px;
+	aspect-ratio: 3 / 2;
+	overflow: hidden;
+	border-radius: 4px 4px 0 0;
+	box-shadow: 0 6px 22px rgba( 0, 0, 0, .1 );
+}
+
+#headline-inner .profile-hero-crop img {
+	position: absolute;
+	top: 0;
+	left: -2px;
+	display: block;
+	width: calc( 100% + 4px );
+	max-width: none;
+	height: auto;
+}
+
+#headline-inner .profile-hero-crop::after {
+	position: absolute;
+	top: 68%;
+	left: 45%;
+	width: 30%;
+	height: 20%;
+	background: #fff;
+	content: '';
+}
+
+@media screen and ( min-width: 783px ) and ( max-width: 959px ) {
+	#headline-inner .profile-hero-crop {
+		right: 20px;
+		width: calc( 100% - 420px );
+	}
+
+	#headline-inner h2.graphic,
+	#headline-inner p,
+	#big-demo-button {
+		left: 20px;
+	}
+}
+
+@media screen and ( max-width: 782px ) {
+	#headline-inner .profile-hero-crop {
+		display: none;
+	}
+}

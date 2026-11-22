@@ -187,13 +187,7 @@ class Plugin_Review extends Base {
 		if ( in_array( $post->post_status, [ 'new', 'pending', 'approved' ], true ) ) {
 			$details['download_link'] = null;
 			$details['preview_link']  = null;
-			$details['helpscout']     = Helpscout::get_emails(
-				$post,
-				[
-					'subject' => 'Review in Progress:',
-					'limit'   => 1,
-				]
-			);
+			$details['helpscout']     = Helpscout::get_review_emails( $post, [ 'limit' => 1 ] );
 		} else {
 			$details['helpscout'] = Helpscout::get_emails( $post, [ 'limit' => 1 ] );
 		}

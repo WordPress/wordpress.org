@@ -13,11 +13,11 @@ class Audit_Log {
 	var $edited_notes = [];
 
 	/**
-	 * Keeps track of the role changes for each user.
+	 * IDs of topics and replies that were already pending before this request edited them.
 	 *
-	 * @var array
+	 * @var int[]
 	 */
-	var $last_role_change = [];
+	protected $pending_before_edit = [];
 
 	function __construct() {
 		// Audit-log entries for Term subscriptions (add/remove)
@@ -25,13 +25,19 @@ class Audit_Log {
 		add_action( 'wporg_bbp_remove_user_term_subscription', [ $this, 'term_subscriptions' ], 10, 2 );
 
 		// Add a user note for forum role changes.
-		add_action( 'add_user_role',     [ $this, 'monitor_role_changes' ], 10, 2 );
-		add_action( 'remove_user_role',  [ $this, 'monitor_role_changes' ], 10, 2 );
-		add_filter( 'bbp_set_user_role', [ $this, 'bbp_set_user_role' ],    10, 3 );
+		add_action( 'bbp_transition_user_role', [ $this, 'bbp_transition_user_role' ], 10, 3 );
 
 		// Add a user note when flagging/unflagging a user.
 		add_action( 'wporg_bbp_flag_user',   [ $this, 'log_user_flag_changes' ], 10, 1 );
 		add_action( 'wporg_bbp_unflag_user', [ $this, 'log_user_flag_changes' ], 10, 1 );
+
+		// Add a user note when a user's topic, reply, or review is held for moderation.
+		add_action( 'bbp_new_topic', [ $this, 'log_pending_post' ], 20 );
+		add_action( 'bbp_edit_topic', [ $this, 'log_pending_post' ], 20 );
+		add_action( 'bbp_new_reply', [ $this, 'log_pending_post' ], 20 );
+		add_action( 'bbp_edit_reply', [ $this, 'log_pending_post' ], 20 );
+		add_action( 'bbp_edit_topic_pre_extras', [ $this, 'remember_pending_before_edit' ] );
+		add_action( 'bbp_edit_reply_pre_extras', [ $this, 'remember_pending_before_edit' ] );
 
 		// Slack logs for Moderation notes.
 		add_action( 'wporg_bbp_note_added', [ $this, 'forums_notes_added' ], 10, 2 );
@@ -70,22 +76,19 @@ class Audit_Log {
 
 
 	/**
-	 * Keep track of the role changes that happen via bbp_set_user_role.
-	 *
-	 * TODO: Check if this is still needed, bbPress might pass context via bbp_set_user_role.
-	 */
-	function monitor_role_changes( $user_id, $role ) {
-		$this->last_role_change[ $user_id ] ??= [];
-		$this->last_role_change[ $user_id ][ current_filter() ] = $role;
-	}
-
-	/**
 	 * Monitor for role changes, and log as appropriate.
 	 *
 	 * NOTE: This is also triggered on Locale forums. We may need to revisit that at some point.
+	 *
+	 * @param string|bool $new_role      New forum role, or false for no role.
+	 * @param string|bool $previous_role Previous forum role, or false for no role.
+	 * @param WP_User     $user          User whose forum role changed.
 	 */
-	function bbp_set_user_role( $new_role, $user_id, WP_User $user ) {
-		$previous_role = $this->last_role_change[ $user_id ][ 'remove_user_role' ] ?? false;
+	public function bbp_transition_user_role( $new_role, $previous_role, WP_User $user ) {
+		// Preserve the existing policy of not logging role removals.
+		if ( ! $new_role ) {
+			return;
+		}
 
 		// For the purposes of this function, a previous participant role is irrelevant.
 		if ( bbp_get_participant_role() == $previous_role ) {
@@ -106,7 +109,7 @@ class Audit_Log {
 			// If we can't detect any change, bail.
 			$new_role === $previous_role
 		) {
-			return $new_role; // We're on a filter.
+			return;
 		}
 
 		// Determine what triggered this change.
@@ -117,8 +120,8 @@ class Audit_Log {
 		// Add a user note about this action.
 		$note_text = sprintf(
 			'Forum role changed to %s%s%s.',
-			get_role( $new_role )->name,
-			$previous_role ? sprintf( ' from %s', get_role( $previous_role )->name ) : '',
+			$new_role,
+			$previous_role ? sprintf( ' from %s', $previous_role ) : '',
 			$where_from ?    sprintf( ' via %s', $where_from ) : ''
 		);
 
@@ -130,9 +133,6 @@ class Audit_Log {
 			$user->ID,
 			$note_text
 		);
-
-		// It's a filter, so we need to return the value.
-		return $new_role;
 	}
 
 	/**
@@ -149,6 +149,113 @@ class Audit_Log {
 			$user_id,
 			$note_text
 		);
+	}
+
+	/**
+	 * Add a user note when a user's own topic, reply, or review is held for moderation,
+	 * naming the Comment Moderation words it matched.
+	 *
+	 * @param int $post_id The topic or reply ID.
+	 */
+	public function log_pending_post( $post_id ) {
+		$post = get_post( $post_id );
+
+		if (
+			! $post ||
+			bbp_get_pending_status_id() !== $post->post_status ||
+			! $post->post_author ||
+			// bbPress doesn't re-check a post that was already held, so this edit didn't hold it.
+			in_array( $post->ID, $this->pending_before_edit, true ) ||
+			// Only the author's own posts, not a moderator editing someone else's.
+			get_current_user_id() !== (int) $post->post_author ||
+			// bbPress skips the word check for moderators, so a word didn't hold their post.
+			user_can( $post->post_author, 'moderate' )
+		) {
+			return;
+		}
+
+		// Only log the holds a moderator can act on.
+		$words = $this->get_matched_moderation_keys( $post );
+		if ( ! $words ) {
+			return;
+		}
+
+		if ( bbp_get_reply_post_type() === $post->post_type ) {
+			$type = 'reply';
+		} elseif ( Plugin::REVIEWS_FORUM_ID === (int) $post->post_parent ) {
+			$type = 'review';
+		} else {
+			$type = 'topic';
+		}
+
+		$note_text = sprintf(
+			'%s held for moderation: matched %s.',
+			str_starts_with( current_action(), 'bbp_edit_' ) ? 'Edited ' . $type : ucfirst( $type ),
+			implode( ', ', array_map( fn( $word ) => '“' . $word . '”', $words ) )
+		);
+
+		// A separate note for each hold, so each one links to its own post.
+		Plugin::get_instance()->user_notes->add_user_note(
+			$post->post_author,
+			$note_text,
+			$post->ID
+		);
+	}
+
+	/**
+	 * Remember a topic or reply that is still pending as its edit is about to be saved.
+	 *
+	 * @param int $post_id The topic or reply ID.
+	 */
+	public function remember_pending_before_edit( $post_id ) {
+		if ( bbp_get_pending_status_id() === get_post_status( $post_id ) ) {
+			$this->pending_before_edit[] = (int) $post_id;
+		}
+	}
+
+	/**
+	 * Find the Comment Moderation words a topic or reply matches, the same way
+	 * bbp_check_for_moderation() looks for them.
+	 *
+	 * @param \WP_Post $post The topic or reply.
+	 * @return string[] The matched words.
+	 */
+	public function get_matched_moderation_keys( $post ) {
+		/** This filter is documented in bbpress/includes/common/functions.php */
+		$moderation = apply_filters( 'bbp_moderation_keys', trim( get_option( 'moderation_keys' ) ) );
+		if ( ! $moderation ) {
+			return [];
+		}
+
+		$user   = get_userdata( $post->post_author );
+		$fields = [
+			$user->display_name,
+			$user->user_email,
+			$user->user_url,
+			bbp_current_author_ip(),
+			bbp_current_author_ua(),
+			$post->post_title,
+			$post->post_content,
+			wp_strip_all_tags( $post->post_content ),
+		];
+
+		$matched = [];
+		foreach ( explode( "\n", $moderation ) as $word ) {
+			$word = trim( $word );
+			if ( ! $word ) {
+				continue;
+			}
+
+			$pattern = '#' . preg_quote( $word, '#' ) . '#iu';
+			foreach ( $fields as $field ) {
+				if ( preg_match( $pattern, (string) $field ) ) {
+					$matched[] = $word;
+					break;
+				}
+			}
+		}
+
+		return $matched;
 	}
 
 	/**

@@ -78,7 +78,7 @@ final class SsoController extends Controller {
 		try {
 			$result = Saml::from_config()->validate( (string) $request->input( 'SAMLResponse', '' ) );
 		} catch ( \Throwable $e ) {
-			\Log::warning( '[WPOrgSSO] ' . $e->getMessage() );
+			\Log::error( '[WPOrgSSO] ' . $e->getMessage() );
 
 			return redirect()->away( $complete, 303 );
 		}

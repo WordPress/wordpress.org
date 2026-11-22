@@ -472,24 +472,16 @@ class Template {
 
 	/**
 	 * Retrieve the Geopattern SVG URL for a given plugin.
+	 *
+	 * The pattern color is derived from the slug.
+	 *
+	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
+	 * @return string The Geopattern SVG URL.
 	 */
-	public static function get_geopattern_icon_url( $post = null, $color = null ) {
+	public static function get_geopattern_icon_url( $post = null ) {
 		$plugin = get_post( $post );
 
-		if ( is_null( $color ) ) {
-			$color = get_post_meta( $plugin->ID, 'assets_banners_color', true );
-		}
-
-		if ( strlen( $color ) === 6 && strspn( $color, 'abcdef0123456789' ) === 6 ) {
-			$color = "_{$color}";
-		} else {
-			$color = '';
-		}
-
-		// This is a cached resource. The slug + color combine to form the cache buster.
-		$url = "https://s.w.org/plugins/geopattern-icon/{$plugin->post_name}{$color}.svg";
-
-		return $url;
+		return "https://s.w.org/plugins/geopattern-icon/{$plugin->post_name}.svg";
 	}
 
 	/**
@@ -725,7 +717,7 @@ class Template {
 		$args = is_numeric( $args ) ? array( 'rating' => $args ) : $args;
 		$args = wp_parse_args( $args, array(
 			'rating'   => 0,
-			'template' => '<span class="%1$s"></span>',
+			'template' => '<span class="%1$s" aria-hidden="true"></span>',
 		) );
 
 		$rating         = round( $args['rating'] / 0.5 ) * 0.5;
@@ -733,7 +725,7 @@ class Template {
 		$title_template = __( '%s out of 5 stars', 'wporg-plugins' );
 		$title          = sprintf( $title_template, $rating );
 
-		$output  = '<div class="wporg-ratings" aria-label="' . esc_attr( $title ) . '" data-title-template="' . esc_attr( $title_template ) . '" data-rating="' . esc_attr( $rating ) . '" style="color:#ffb900;">';
+		$output  = '<div class="wporg-ratings" role="img" aria-label="' . esc_attr( $title ) . '" data-title-template="' . esc_attr( $title_template ) . '" data-rating="' . esc_attr( $rating ) . '" style="color:#ffb900;">';
 		$counter = round( $rating * 2 );
 		for ( $i = 1; $i <= 5; $i++ ) {
 			switch ( $counter ) {
@@ -1105,7 +1097,9 @@ class Template {
 			'banned'               => 'Banned developer trying to sneak back in',
 			'author-request'       => 'Author requested not to continue',
 			'security'             => 'Security concerns',
+			'remote-admin'         => 'Remote administration',
 			'common-plugin'        => 'Common plugin',
+			'multiple'             => 'Multiple accounts',
 			'other'                => 'OTHER: See notes',
 		);
 	}

@@ -39,7 +39,7 @@ class Release_Confirmation {
 			}
 
 			// Redirect via JS too, as technically the page output should've already started.
-			echo '<script>document.location=' . json_encode( home_url( '/developers/' ) ) . '</script>';
+			wp_print_inline_script_tag( 'document.location=' . wp_json_encode( home_url( '/developers/' ) ) . ';' );
 			exit;
 		}
 
@@ -293,6 +293,7 @@ class Release_Confirmation {
 		}
 
 		self::render_cooldown_status( $plugin, $data, $current_release );
+		self::render_not_stable_status( $plugin, $data );
 
 		echo '</div>';
 
@@ -307,6 +308,43 @@ class Release_Confirmation {
 		 * @return string
 		 */
 		return apply_filters( 'wporg_plugins_release_approval_text', $text, $plugin, $data );
+	}
+
+	/**
+	 * Render a line explaining why a confirmed release newer than the stable tag isn't
+	 * being released: only the tag named by the trunk readme's Stable tag is released.
+	 *
+	 * @param \WP_Post $plugin The plugin post object.
+	 * @param array    $data   The release row from Plugin_Directory::get_releases().
+	 */
+	protected static function render_not_stable_status( $plugin, $data ) {
+		// Until the import has processed the release, the stored stable tag may predate the readme.
+		if ( ! $data['confirmations_required'] || ! $data['confirmed'] || ! $data['zips_built'] || ! empty( $data['discarded'] ) ) {
+			return;
+		}
+
+		$stable_tag = (string) get_post_meta( $plugin->ID, 'stable_tag', true );
+		$tag        = (string) ( $data['tag'] ?? '' );
+
+		// Older confirmed releases were superseded, not forgotten.
+		if ( ! $stable_tag || 'trunk' === $stable_tag || ! version_compare( $tag, $stable_tag, '>' ) ) {
+			return;
+		}
+
+		printf(
+			'<span>%s</span><br>',
+			wp_kses(
+				sprintf(
+					/* translators: 1: 'Stable tag', 2: 'trunk/readme.txt', 3: The current stable tag, 4: This release's tag. */
+					__( 'Not released yet: the %1$s in %2$s is %3$s. Change it to %4$s to release this version.', 'wporg-plugins' ),
+					'<code>Stable tag</code>',
+					'<code>trunk/readme.txt</code>',
+					'<code>' . esc_html( $stable_tag ) . '</code>',
+					'<code>' . esc_html( $tag ) . '</code>'
+				),
+				array( 'code' => array() )
+			)
+		);
 	}
 
 	/**
@@ -386,7 +424,7 @@ class Release_Confirmation {
 				$discard_link = get_revalidation_js_url( $discard_link );
 
 				$buttons[] = sprintf(
-					'<button formaction="%s" class="wp-element-button button approve-release" data-2fa-required data-2fa-message="%s">%s</button>',
+					'<span class="wp-block-button is-small"><button formaction="%s" class="wp-block-button__link approve-release" data-2fa-required data-2fa-message="%s">%s</button></span>',
 					esc_attr( $confirm_link ),
 					esc_attr(
 						sprintf(
@@ -400,7 +438,7 @@ class Release_Confirmation {
 				);
 
 				$buttons[] = sprintf(
-					'<button formaction="%s" class="wp-element-button button discard-release has-very-light-gray-background-color has-charcoal-1-color" data-2fa-required data-2fa-message="%s">%s</button>',
+					'<span class="wp-block-button is-small is-style-outline"><button formaction="%s" class="wp-block-button__link discard-release" data-2fa-required data-2fa-message="%s">%s</button></span>',
 					esc_attr( $discard_link ),
 					esc_attr(
 						sprintf(
@@ -421,7 +459,7 @@ class Release_Confirmation {
 		) {
 			// Plugin reviewers can undo a discard within 48hrs.
 			$buttons[] = sprintf(
-				'<button formaction="%s" class="wp-element-button button undo-discard">%s</buttona>',
+				'<span class="wp-block-button is-small"><button formaction="%s" class="wp-block-button__link undo-discard">%s</button></span>',
 				esc_url( Template::get_release_confirmation_link( $data['tag'], $plugin, 'undo-discard' ) ),
 				esc_html__( 'Undo Discard', 'wporg-plugins' )
 			);

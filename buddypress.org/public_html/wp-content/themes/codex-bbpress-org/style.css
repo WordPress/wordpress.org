@@ -25,10 +25,24 @@
 /* Typography
 --------------------------------------------------------------------*/
 
+.content {
+	overflow-wrap: anywhere;
+}
+
 .content h1 {
   font-size: 24px;
   margin-bottom: .5em;
   margin-top: .5em;
+}
+
+.codex-taxonomy-columns {
+	display: grid;
+	grid-template-columns: repeat( auto-fit, minmax( 150px, 1fr ) );
+	gap: 20px;
+}
+
+.codex-taxonomy-column {
+	min-width: 0;
 }
 
 /* =Footer
@@ -43,12 +57,14 @@
 .footer-meta-wrap .footer-meta {
 	margin: 0 auto;
 	width: 960px;
+	max-width: 100%;
 	padding: 24px 0;
 	overflow: auto;
 	color: #555;
 	font-family: 'Source Sans Pro', 'HelveticaNeue', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 .footer-meta-wrap .footer-meta .col-half {
+	box-sizing: border-box;
 	float: left;
 	width: 50%;
 }
@@ -101,6 +117,10 @@
 	width: 200px;
 	z-index: 3;
 	text-align: center;
+}
+.footer-meta-wrap .footer-meta .contributor:first-child .contributor-name {
+	left: 0;
+	text-align: left;
 }
 .footer-meta-wrap .footer-meta .contributor-avatar .contributor-name span {
 	color: #fff;
@@ -211,6 +231,10 @@
 }
 
 @media screen and ( max-width: 782px ) {
+	body.page-id-4797 .wp-block-table table.has-fixed-layout {
+		min-width: 700px;
+	}
+
 	.footer-meta-wrap .footer-meta {
 		width: auto;
 		padding: 0;

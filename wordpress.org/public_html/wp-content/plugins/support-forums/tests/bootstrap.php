@@ -68,10 +68,10 @@ if ( ! defined( 'WP_TESTS_PHPUNIT_POLYFILLS_PATH' ) && file_exists( $_tests_dir 
 require_once $_tests_dir . 'includes/functions.php';
 
 /**
- * Load bbPress and then the plugin under test.
+ * Load bbPress and then the plugins under test.
  *
  * The plugin returns early unless bbPress is already loaded, so the order
- * matters here.
+ * matters here. Term subscriptions load after it, as they do in production.
  *
  * @return void
  */
@@ -82,6 +82,7 @@ function manually_load_plugin(): void {
 	}
 
 	require_once dirname( __DIR__ ) . '/support-forums.php';
+	require_once WP_PLUGIN_DIR . '/wporg-bbp-term-subscription/wporg-bbp-term-subscription.php';
 }
 tests_add_filter( 'muplugins_loaded', __NAMESPACE__ . '\manually_load_plugin' );
 

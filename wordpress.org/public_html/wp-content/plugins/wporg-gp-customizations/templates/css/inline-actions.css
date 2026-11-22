@@ -21,6 +21,14 @@ table.translations td.inline-actions {
 	text-align: center;
 }
 
+/* Same breakpoint GlotPress hides the top bulk actions at; the row editor keeps these actions. */
+@media (max-width: 799px) {
+	table.translations th.gp-column-inline-actions,
+	table.translations td.inline-actions {
+		display: none;
+	}
+}
+
 td.inline-actions {
 	white-space: nowrap;
 	vertical-align: middle;

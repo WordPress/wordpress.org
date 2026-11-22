@@ -46,6 +46,19 @@ abstract class TestCase extends BaseTestCase {
 
 		$app->make( Kernel::class )->bootstrap();
 
+		// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- FreeScout's dev dependencies, like PHPUnit, predate PHP 8.4, and Laravel would turn their deprecations into exceptions.
+		$handler = set_error_handler( null );
+		set_error_handler(
+			static function ( int $level, string $message, string $file = '', int $line = 0 ) use ( $handler ): ?bool {
+				if ( E_DEPRECATED === $level && str_starts_with( $file, FREESCOUT_PATH . '/vendor/' ) ) {
+					return true;
+				}
+
+				return $handler( $level, $message, $file, $line );
+			}
+		);
+		// phpcs:enable
+
 		return $app;
 	}
 
@@ -62,11 +75,17 @@ abstract class TestCase extends BaseTestCase {
 	/**
 	 * Creates a mailbox.
 	 *
-	 * @param string $name Mailbox name.
+	 * @param string $name  Mailbox name.
+	 * @param string $email Mailbox address; unique by default.
 	 * @return Mailbox
 	 */
-	protected function create_mailbox( string $name = 'Plugins' ): Mailbox {
-		return factory( Mailbox::class )->create( array( 'name' => $name ) );
+	protected function create_mailbox( string $name = 'Plugins', string $email = '' ): Mailbox {
+		$attributes = array(
+			'name'  => $name,
+			'email' => $email,
+		);
+
+		return factory( Mailbox::class )->create( array_filter( $attributes ) );
 	}
 
 	/**

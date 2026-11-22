@@ -50,7 +50,7 @@ class RequestBuilder
     use UriTrait;
     use ValidationTrait;
 
-    private $baseUri;
+    protected $baseUri;
     private $restConfig;
 
     /**
@@ -58,7 +58,7 @@ class RequestBuilder
      * @param string $restConfigPath
      * @throws ValidationException
      */
-    public function __construct($baseUri, $restConfigPath)
+    public function __construct(string $baseUri, string $restConfigPath)
     {
         self::validateFileExists($restConfigPath);
         $this->baseUri = $baseUri;
@@ -69,7 +69,7 @@ class RequestBuilder
      * @param string $path
      * @return bool
      */
-    public function pathExists($path)
+    public function pathExists(string $path)
     {
         list($interface, $method) = explode('/', $path);
         return isset($this->restConfig['interfaces'][$interface][$method]);
@@ -82,7 +82,7 @@ class RequestBuilder
      * @return RequestInterface
      * @throws ValidationException
      */
-    public function build($path, Message $message, array $headers = [])
+    public function build(string $path, Message $message, array $headers = [])
     {
         list($interface, $method) = explode('/', $path);
 
@@ -92,6 +92,7 @@ class RequestBuilder
             );
         }
 
+        $numericEnums = isset($this->restConfig['numericEnums']) && $this->restConfig['numericEnums'];
         $methodConfig = $this->restConfig['interfaces'][$interface][$method] + [
             'placeholders' => [],
             'body' => null,
@@ -107,10 +108,16 @@ class RequestBuilder
                 // We found a valid uriTemplate - now build and return the Request
 
                 list($body, $queryParams) = $this->constructBodyAndQueryParameters($message, $config);
+
+                // Request enum fields will be encoded as numbers rather than strings  (in the response).
+                if ($numericEnums) {
+                    $queryParams['$alt'] = 'json;enum-encoding=int';
+                }
+
                 $uri = $this->buildUri($pathTemplate, $queryParams);
 
                 return new Request(
-                    $config['method'],
+                    strtoupper($config['method']),
                     $uri,
                     ['Content-Type' => 'application/json'] + $headers,
                     $body
@@ -125,8 +132,8 @@ class RequestBuilder
         }
 
         throw new ValidationException("Could not map bindings for $path to any Uri template.\n" .
-            "Bindings: " . print_r($bindings, true) .
-            "UriTemplates: " . print_r($uriTemplates, true));
+            'Bindings: ' . print_r($bindings, true) .
+            'UriTemplates: ' . print_r($uriTemplates, true));
     }
 
     /**
@@ -135,7 +142,7 @@ class RequestBuilder
      * @param array $config
      * @return array[] An array of configs
      */
-    private function getConfigsForUriTemplates($config)
+    private function getConfigsForUriTemplates(array $config)
     {
         $configs = [$config];
 
@@ -149,11 +156,11 @@ class RequestBuilder
     }
 
     /**
-     * @param $message
-     * @param $config
+     * @param Message $message
+     * @param array $config
      * @return array Tuple [$body, $queryParams]
      */
-    private function constructBodyAndQueryParameters(Message $message, $config)
+    private function constructBodyAndQueryParameters(Message $message, array $config)
     {
         $messageDataJson = $message->serializeToJsonString();
 
@@ -194,7 +201,20 @@ class RequestBuilder
                 $requiredQueryParam = Serializer::toCamelCase($requiredQueryParam);
                 if (!array_key_exists($requiredQueryParam, $queryParams)) {
                     $getter = Serializer::getGetter($requiredQueryParam);
-                    $queryParams[$requiredQueryParam] = $message->$getter();
+                    $queryParamValue = $message->$getter();
+                    if ($queryParamValue instanceof Message) {
+                        // Decode message for the query parameter.
+                        $queryParamValue = json_decode($queryParamValue->serializeToJsonString(), true);
+                    }
+                    if (is_array($queryParamValue)) {
+                        // If the message has properties, add them as nested querystring values.
+                        // NOTE: This only supports nesting at one level of depth.
+                        foreach ($queryParamValue as $key => $value) {
+                            $queryParams[$requiredQueryParam . '.' . $key] = $value;
+                        }
+                    } else {
+                        $queryParams[$requiredQueryParam] = $queryParamValue;
+                    }
                 }
             }
         }
@@ -213,8 +233,8 @@ class RequestBuilder
         foreach ($placeholders as $placeholder => $metadata) {
             $value = array_reduce(
                 $metadata['getters'],
-                function (Message $result = null, $getter) {
-                    if ($result) {
+                function (?Message $result = null, $getter = null) {
+                    if ($result && $getter) {
                         return $result->$getter();
                     }
                 },
@@ -229,28 +249,28 @@ class RequestBuilder
     /**
      * Try to render the resource name. The rendered resource name will always contain a leading '/'
      *
-     * @param $uriTemplate
+     * @param string $uriTemplate
      * @param array $bindings
      * @return null|string
      * @throws ValidationException
      */
-    private function tryRenderPathTemplate($uriTemplate, array $bindings)
+    private function tryRenderPathTemplate(string $uriTemplate, array $bindings)
     {
         $template = new AbsoluteResourceTemplate($uriTemplate);
 
         try {
-            return $template->render($bindings);
+            return $template->render($bindings, true);
         } catch (ValidationException $e) {
             return null;
         }
     }
 
     /**
-     * @param $path
-     * @param $queryParams
+     * @param string $path
+     * @param array $queryParams
      * @return UriInterface
      */
-    private function buildUri($path, $queryParams)
+    protected function buildUri(string $path, array $queryParams)
     {
         $uri = Utils::uriFor(
             sprintf(

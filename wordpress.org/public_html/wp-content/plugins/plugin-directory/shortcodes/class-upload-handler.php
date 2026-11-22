@@ -9,10 +9,13 @@ use WordPressdotorg\Plugin_Directory\Plugin_Directory;
 use WordPressdotorg\Plugin_Directory\Readme\Validator as Readme_Validator;
 use WordPressdotorg\Plugin_Directory\Tools;
 use WordPressdotorg\Plugin_Directory\Tools\Filesystem;
+use WordPressdotorg\Plugin_Directory\Tools\Helpdesk;
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 use WordPressdotorg\Plugin_Directory\Trademarks;
+use WordPressdotorg\Plugin_Directory\Admin\Status_Transitions;
 use WordPressdotorg\Plugin_Directory\Admin\Tools\Upload_Token;
 use WordPressdotorg\Plugin_Directory\Clients\Helpscout as Helpscout_Client;
+use WordPressdotorg\MU_Plugins\Utilities\FreeScout as FreeScout_Client;
 use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submission_Email;
 
 /**
@@ -21,6 +24,13 @@ use WordPressdotorg\Plugin_Directory\Email\Plugin_Submission as Plugin_Submissio
  * @package WordPressdotorg\Plugin_Directory\Shortcodes
  */
 class Upload_Handler {
+
+	/**
+	 * How the reply confirming an author's upload starts, in the review conversation.
+	 *
+	 * @var string
+	 */
+	const UPLOAD_CONFIRMATION = 'This is an automated message to confirm that we have received your updated plugin file.';
 
 	/**
 	 * Path to temporary plugin folder.
@@ -574,7 +584,6 @@ class Upload_Handler {
 				'assets_screenshots'       => array(),
 				'assets_icons'             => array(),
 				'assets_banners'           => array(),
-				'assets_banners_color'     => false,
 				'support_threads'          => 0,
 				'support_threads_resolved' => 0,
 				'downloads'                => 0,
@@ -652,8 +661,6 @@ class Upload_Handler {
 		do_action( 'plugin_upload', $this->plugin, $plugin_post );
 
 		if ( $updating_existing ) {
-
-			// Update HelpScout, if in review.
 			$this->update_review_email( $plugin_post, $attachment );
 
 			$message = sprintf(
@@ -761,7 +768,7 @@ class Upload_Handler {
 		);
 
 		// Slugs in the namespace used internally for rejected plugins.
-		if ( preg_match( Helpscout::REJECTED_SLUG_REGEX, $this->plugin_slug ) ) {
+		if ( preg_match( Status_Transitions::REJECTED_SLUG_REGEX, $this->plugin_slug ) ) {
 			return true;
 		}
 
@@ -804,7 +811,7 @@ class Upload_Handler {
 		if ( $results ) {
 			$html .= '<ul class="pc-result" style="list-style: disc">';
 			// Display errors, and then warnings.
-			foreach ( [ 'ERROR', 'ERRORS_LOW_SEVERITY', 'WARNING', 'WARNING_LOW_SEVERITY' ] as $result_type ) {
+			foreach ( [ 'ERROR', 'ERROR_LOW_SEVERITY', 'WARNING', 'WARNING_LOW_SEVERITY' ] as $result_type ) {
 				$result_set = $results_by_type[ $result_type ] ?? [];
 				if ( empty( $result_set ) ) {
 					continue;
@@ -995,11 +1002,57 @@ class Upload_Handler {
 			return false;
 		}
 
-		return Helpscout::get_emails( $post, [ 'subject' => 'Review in Progress:', 'limit' => 1 ] );
+		return Helpscout::get_review_emails( $post, [ 'limit' => 1 ] );
 	}
 
 	/**
-	 * Update the HelpScout review email.
+	 * Locate the review conversation an upload is confirmed in: the newest one the plugins team started.
+	 *
+	 * Authors also write in under a similar subject, which starts a conversation of their own, and a sender's could
+	 * name any plugin and CC anyone. Only its helpdesk knows who started a conversation.
+	 *
+	 * @param WP_Post $post The plugin post.
+	 *
+	 * @return object|false The conversation, from WordPress.org's copy.
+	 */
+	protected static function find_team_review_email( $post ) {
+		if ( ! self::find_review_email( $post ) ) {
+			return false;
+		}
+
+		// Each is a request to its helpdesk; the newest is usually the team's.
+		foreach ( Helpscout::get_review_emails( $post ) as $review_email ) {
+			if ( $review_email->freescout ) {
+				$conversation = FreeScout_Client::get( (int) $review_email->id );
+				$failed       = is_wp_error( $conversation );
+				$qualifies    = ! $failed && 'user' === ( $conversation['createdBy']['type'] ?? '' );
+			} else {
+				$conversation = Helpscout_Client::api( '/v2/conversations/' . $review_email->id, null, 'GET', $http_response_code );
+				$failed       = 200 !== $http_response_code;
+
+				// HelpScout's stored owner can come from a subject line, so its customer has to be the author too.
+				$qualifies = ! $failed &&
+					'user' === ( $conversation->createdBy->type ?? '' ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+					0 === strcasecmp( (string) ( $conversation->primaryCustomer->email ?? '' ), wp_get_current_user()->user_email ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- HelpScout's field.
+			}
+
+			// Without it, there's no telling whether an older one is the newest the team started.
+			if ( $failed ) {
+				trigger_error( "Review email update failed: couldn't read conversation {$review_email->id}.", E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.Security.EscapeOutput.OutputNotEscaped -- Logged, not shown.
+
+				return false;
+			}
+
+			if ( $qualifies ) {
+				return $review_email;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Update the review email, in its helpdesk.
 	 *
 	 * @param WP_Post $post       The plugin post.
 	 * @param WP_Post $attachment The uploaded attachment post.
@@ -1007,17 +1060,17 @@ class Upload_Handler {
 	 * @return bool True if the email was updated, false otherwise.
 	 */
 	public static function update_review_email( $post, $attachment ) {
-		$review_email = self::find_review_email( $post );
+		// Don't update the review email if the plugin author isn't the one who uploaded the ZIP.
+		if ( get_current_user_id() !== (int) $post->post_author ) {
+			return false;
+		}
+
+		$review_email = self::find_team_review_email( $post );
 		if ( ! $review_email ) {
 			return false;
 		}
 
-		// Don't update the review email if the plugin author isn't the one who uploaded the ZIP.
-		if ( $post->post_author != get_current_user_id() ) {
-			return false;
-		}
-
-		$text = "This is an automated message to confirm that we have received your updated plugin file.\n\n";
+		$text = self::UPLOAD_CONFIRMATION . "\n\n";
 		$text .= sprintf(
 			"File updated by %s, version %s.\n",
 			wp_get_current_user()->user_login,
@@ -1032,11 +1085,15 @@ class Upload_Handler {
 		// Append the ZIP URL.
 		$text .= "\n" . wp_get_attachment_url( $attachment->ID );
 
+		if ( $review_email->freescout ) {
+			return self::reply_in_freescout( (int) $review_email->id, $text );
+		}
+
 		$name = wp_get_current_user()->display_name ?: wp_get_current_user()->user_login;
 		$payload = [
 			'customer' => array_filter( [
-				'firstName' => substr( explode( ' ', $name, 2 )[0], 0, 39 ),
-				'lastName'  => trim( substr( explode( ' ', "{$name} ", 2 )[1], 0, 39 ) ),
+				'firstName' => mb_substr( explode( ' ', $name, 2 )[0], 0, 39 ),
+				'lastName'  => trim( mb_substr( explode( ' ', "{$name} ", 2 )[1], 0, 39 ) ),
 				'email'     => wp_get_current_user()->user_email,
 			] ),
 			'text'   => $text,
@@ -1058,5 +1115,33 @@ class Upload_Handler {
 		}
 
 		return $success;
+	}
+
+	/**
+	 * Replies to the author in the review conversation in FreeScout, as wordpressdotorg, and makes it active again, so the
+	 * plugins team sees there's something new to review.
+	 *
+	 * @param int    $conversation_id The review conversation's ID in FreeScout.
+	 * @param string $text            The reply, as text.
+	 * @return bool Whether it was sent.
+	 */
+	protected static function reply_in_freescout( int $conversation_id, string $text ): bool {
+		$result = FreeScout_Client::reply(
+			$conversation_id,
+			nl2br( make_clickable( esc_html( $text ) ) ),
+			array(
+				'status' => 'active',
+				'user'   => Helpdesk::FREESCOUT_USER_ID,
+			)
+		);
+
+		if ( is_wp_error( $result ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions -- Logs the failure, like the HelpScout update; not rendered.
+			trigger_error( 'FreeScout update failed: ' . $result->get_error_code() . ': ' . $result->get_error_message(), E_USER_WARNING );
+
+			return false;
+		}
+
+		return true;
 	}
 }

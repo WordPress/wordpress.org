@@ -138,8 +138,9 @@ final class IdentityProvider {
 		$response = '_' . bin2hex( random_bytes( 16 ) );
 		$id       = '_' . bin2hex( random_bytes( 16 ) );
 
+		// Like wp-saml-idp, only the bearer confirmation names the login request, not the response itself.
 		$xml = sprintf(
-			'<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="%1$s" Version="2.0" IssueInstant="%3$s" Destination="%6$s" InResponseTo="%8$s">' .
+			'<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="%1$s" Version="2.0" IssueInstant="%3$s" Destination="%6$s">' .
 				'<saml:Issuer>%5$s</saml:Issuer>' .
 				'<samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/></samlp:Status>' .
 				'<saml:Assertion ID="%2$s" Version="2.0" IssueInstant="%3$s">' .

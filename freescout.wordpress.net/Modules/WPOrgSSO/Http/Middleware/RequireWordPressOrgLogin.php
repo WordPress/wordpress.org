@@ -27,6 +27,7 @@ use Symfony\Component\HttpFoundation\Response;
  * - Fills in new users from their WordPress.org account, and connects the account.
  * - Keeps what comes from WordPress.org, and passwords, out of the profile form.
  * - Deletes a mailbox only when its name was typed in to confirm, since users don't know a FreeScout password.
+ * - Refuses to delete users; they're disabled instead.
  */
 final class RequireWordPressOrgLogin {
 
@@ -165,6 +166,16 @@ final class RequireWordPressOrgLogin {
 					'msg'    => __( 'The photo is the WordPress.org avatar.' ),
 				),
 				403
+			);
+		}
+
+		if ( 'App\Http\Controllers\UsersController@ajax' === $action && 'delete_user' === $request->input( 'action' ) ) {
+			// A 200, like core's own errors: the dialog only shows the message of those.
+			return response()->json(
+				array(
+					'status' => 'error',
+					'msg'    => __( 'Users can’t be deleted. Please disable them instead and remove their mailbox permissions.' ),
+				)
 			);
 		}
 

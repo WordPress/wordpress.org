@@ -99,7 +99,15 @@ if ( bbp_is_reply_edit() ) : ?>
 						<p>
 							<label for="bbp_topic_tags"><?php esc_html_e( 'Topic Tags:', 'wporg-forums' ); ?></label><br />
 							<input type="text" value="<?php bbp_form_topic_tags(); ?>" size="40" name="bbp_topic_tags" id="bbp_topic_tags" aria-describedby="bbp_topic_tags_description" <?php disabled( bbp_is_topic_spam() ); ?> /><br />
-							<em id="bbp_topic_tags_description"><?php esc_html_e( 'Separate tags with commas', 'wporg-forums' ); ?></em>
+							<em id="bbp_topic_tags_description">
+								<?php
+								if ( WordPressdotorg\Forums\Plugin::get_instance()->is_main_forums && ! current_user_can( 'moderate' ) ) {
+									esc_html_e( 'Separate tags with commas. Only existing tags can be added.', 'wporg-forums' );
+								} else {
+									esc_html_e( 'Separate tags with commas', 'wporg-forums' );
+								}
+								?>
+							</em>
 						</p>
 						<?php endif; ?>
 

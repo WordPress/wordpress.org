@@ -21,6 +21,7 @@ use Modules\WPOrgHelpScoutImport\Entities\Agent;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedConversation;
 use Modules\WPOrgHelpScoutImport\Entities\ImportedThread;
 use Modules\WPOrgHelpScoutImport\Entities\Person;
+use Modules\WPOrgHelpScoutImport\Providers\WPOrgHelpScoutImportServiceProvider;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
@@ -392,6 +393,19 @@ final class ImporterTest extends ImportTestCase {
 
 		$this->assertSame( (int) $themes->id, (int) $this->imported_conversation()->mailbox_id );
 		$this->assertSame( 0, (int) $themes->folders()->where( 'type', Folder::TYPE_UNASSIGNED )->value( 'active_count' ) );
+	}
+
+	/**
+	 * An imported conversation's events name its HelpScout conversation, for WordPress.org's copy.
+	 *
+	 * @return void
+	 */
+	public function test_names_the_helpscout_conversation_of_imported_ones(): void {
+		$this->app->register( WPOrgHelpScoutImportServiceProvider::class );
+		$source = $this->conversation();
+		$this->importer->import( $source, $this->mailbox );
+
+		$this->assertSame( (int) $source['id'], \Eventy::filter( 'wporgwebhooks.helpscout_id', 0, $this->imported_conversation() ) );
 	}
 
 	/**

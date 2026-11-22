@@ -14,32 +14,9 @@ class Quota
         if (static::$is_initialized == true) {
           return;
         }
-        \GPBMetadata\Google\Api\Annotations::initOnce();
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0aa5050a16676f6f676c652f6170692f71756f74612e70726f746f120a67" .
-            "6f6f676c652e617069225d0a0551756f746112260a066c696d6974731803" .
-            "2003280b32162e676f6f676c652e6170692e51756f74614c696d6974122c" .
-            "0a0c6d65747269635f72756c657318042003280b32162e676f6f676c652e" .
-            "6170692e4d657472696352756c652291010a0a4d657472696352756c6512" .
-            "100a0873656c6563746f72180120012809123d0a0c6d65747269635f636f" .
-            "73747318022003280b32272e676f6f676c652e6170692e4d657472696352" .
-            "756c652e4d6574726963436f737473456e7472791a320a104d6574726963" .
-            "436f737473456e747279120b0a036b6579180120012809120d0a0576616c" .
-            "75651802200128033a0238012295020a0a51756f74614c696d6974120c0a" .
-            "046e616d6518062001280912130a0b6465736372697074696f6e18022001" .
-            "280912150a0d64656661756c745f6c696d697418032001280312110a096d" .
-            "61785f6c696d697418042001280312110a09667265655f74696572180720" .
-            "01280312100a086475726174696f6e180520012809120e0a066d65747269" .
-            "63180820012809120c0a04756e697418092001280912320a0676616c7565" .
-            "73180a2003280b32222e676f6f676c652e6170692e51756f74614c696d69" .
-            "742e56616c756573456e74727912140a0c646973706c61795f6e616d6518" .
-            "0c200128091a2d0a0b56616c756573456e747279120b0a036b6579180120" .
-            "012809120d0a0576616c75651802200128033a023801426c0a0e636f6d2e" .
-            "676f6f676c652e617069420a51756f746150726f746f50015a45676f6f67" .
-            "6c652e676f6c616e672e6f72672f67656e70726f746f2f676f6f676c6561" .
-            "7069732f6170692f73657276696365636f6e6669673b7365727669636563" .
-            "6f6e666967a2020447415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xA5\x05\x0A\x16google/api/quota.proto\x12\x0Agoogle.api\"]\x0A\x05Quota\x12&\x0A\x06limits\x18\x03 \x03(\x0B2\x16.google.api.QuotaLimit\x12,\x0A\x0Cmetric_rules\x18\x04 \x03(\x0B2\x16.google.api.MetricRule\"\x91\x01\x0A\x0AMetricRule\x12\x10\x0A\x08selector\x18\x01 \x01(\x09\x12=\x0A\x0Cmetric_costs\x18\x02 \x03(\x0B2'.google.api.MetricRule.MetricCostsEntry\x1A2\x0A\x10MetricCostsEntry\x12\x0B\x0A\x03key\x18\x01 \x01(\x09\x12\x0D\x0A\x05value\x18\x02 \x01(\x03:\x028\x01\"\x95\x02\x0A\x0AQuotaLimit\x12\x0C\x0A\x04name\x18\x06 \x01(\x09\x12\x13\x0A\x0Bdescription\x18\x02 \x01(\x09\x12\x15\x0A\x0Ddefault_limit\x18\x03 \x01(\x03\x12\x11\x0A\x09max_limit\x18\x04 \x01(\x03\x12\x11\x0A\x09free_tier\x18\x07 \x01(\x03\x12\x10\x0A\x08duration\x18\x05 \x01(\x09\x12\x0E\x0A\x06metric\x18\x08 \x01(\x09\x12\x0C\x0A\x04unit\x18\x09 \x01(\x09\x122\x0A\x06values\x18\x0A \x03(\x0B2\".google.api.QuotaLimit.ValuesEntry\x12\x14\x0A\x0Cdisplay_name\x18\x0C \x01(\x09\x1A-\x0A\x0BValuesEntry\x12\x0B\x0A\x03key\x18\x01 \x01(\x09\x12\x0D\x0A\x05value\x18\x02 \x01(\x03:\x028\x01Bl\x0A\x0Ecom.google.apiB\x0AQuotaProtoP\x01ZEgoogle.golang.org/genproto/googleapis/api/serviceconfig;serviceconfig\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

@@ -249,10 +249,21 @@
 		}
 		function selectUserTimezone() {
 			const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-			// phpcs:disable WordPress.WhiteSpace.OperatorSpacing.NoSpaceBefore
-			// phpcs:disable WordPress.WhiteSpace.OperatorSpacing.NoSpaceAfter
-			document.querySelector( `#event-timezone option[value="${timezone}"]` ).selected = true
-			// phpcs:enable
+			const options  = Array.from( document.querySelectorAll( '#event-timezone option' ) );
+
+			// Browsers can report a legacy alias (Chrome says Asia/Calcutta for Asia/Kolkata), so fall back to comparing resolved names.
+			const option = options.find( ( timezoneOption ) => timezoneOption.value === timezone ) || options.find(
+				function ( timezoneOption ) {
+					try {
+						return Intl.DateTimeFormat( 'en', { timeZone: timezoneOption.value } ).resolvedOptions().timeZone === timezone;
+					} catch ( e ) {
+						return false;
+					}
+				}
+			);
+			if ( option ) {
+				option.selected = true;
+			}
 		}
 
 		function convertToUserLocalTime() {
@@ -269,10 +280,6 @@
 					const eventDateObj = new Date( datetime );
 					timeEl.title       = eventDateObj.toUTCString();
 					const timeContent  = timeEl.querySelector( 'span' ) ? timeEl.querySelector( 'span' ) : timeEl;
-
-					const userTimezoneOffset   = new Date().getTimezoneOffset();
-					const userTimezoneOffsetMs = userTimezoneOffset * 60 * 1000;
-					const userLocalDateTime    = new Date( eventDateObj.getTime() - userTimezoneOffsetMs );
 
 					const options = {
 						weekday: 'short',
@@ -296,13 +303,13 @@
 								options.month = 'numeric';
 							}
 						}
-						timeContent.textContent = userLocalDateTime.toLocaleTimeString( navigator.language, options );
+						timeContent.textContent = eventDateObj.toLocaleTimeString( navigator.language, options );
 					}
 
 					if ( timeEl.classList.contains( 'relative' ) ) {
 						// Display the relative time.
 						const now    = new Date();
-						let diff     = userLocalDateTime - now;
+						let diff     = eventDateObj - now;
 						let in_text  = 'in ';
 						let ago_text = '';
 						if ( diff < 0 ) {

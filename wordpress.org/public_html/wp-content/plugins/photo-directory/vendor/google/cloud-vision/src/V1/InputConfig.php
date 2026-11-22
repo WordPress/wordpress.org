@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * The desired input location and metadata.
@@ -20,7 +20,7 @@ class InputConfig extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.cloud.vision.v1.GcsSource gcs_source = 1;</code>
      */
-    private $gcs_source = null;
+    protected $gcs_source = null;
     /**
      * File content, represented as a stream of bytes.
      * Note: As with all `bytes` fields, protobuffers use a pure binary
@@ -30,14 +30,14 @@ class InputConfig extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>bytes content = 3;</code>
      */
-    private $content = '';
+    protected $content = '';
     /**
      * The type of the file. Currently only "application/pdf", "image/tiff" and
      * "image/gif" are supported. Wildcards are not supported.
      *
      * Generated from protobuf field <code>string mime_type = 2;</code>
      */
-    private $mime_type = '';
+    protected $mime_type = '';
 
     /**
      * Constructor.

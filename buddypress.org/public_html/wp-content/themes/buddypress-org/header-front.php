@@ -5,7 +5,7 @@
 		<p><?php esc_html_e( 'The open source community platform of choice worldwide — from creators & small businesses to enterprises & governments.', 'bporg' ); ?></p>
 		<div>
 			<a href="<?php bloginfo( 'url' ); ?>/download/" id="big-demo-button" class="button"><?php esc_html_e( 'Download &rarr;', 'bporg' ); ?></a>
-			<img src="<?php echo esc_url( get_theme_file_uri( 'images/screenshots.png' ) . '?v=6' ); ?>" srcset="<?php echo esc_url( get_theme_file_uri( 'images/screenshots.png' ) . '?v=6' ); ?> 1x, <?php echo esc_url( get_theme_file_uri( 'images/screenshots-2x.png' ) . '?v=6' ); ?> 2x" alt="">
+			<span class="profile-hero-crop" aria-hidden="true"><img src="<?php echo esc_url( get_theme_file_uri( 'images/profile-2026-source.png' ) ); ?>" alt=""></span>
 		</div>
 	</div></div>
 	<hr class="hidden" />

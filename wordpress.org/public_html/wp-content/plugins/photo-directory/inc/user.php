@@ -505,6 +505,24 @@ class User {
 	}
 
 	/**
+	 * Determines if a user already has a pending submission with the given file name.
+	 *
+	 * Pending file names are stored after `sanitize_file_name()`, so the given
+	 * name is sanitized the same way before it is compared.
+	 *
+	 * @param string $file_name Original name of the uploaded file.
+	 * @param int    $user_id   Optional. The user ID. If false, then assumes current user. Default false.
+	 * @return bool True if one of the user's pending submissions has the same file name, else false.
+	 */
+	public static function has_pending_file_name( $file_name, $user_id = false ) {
+		if ( ! is_string( $file_name ) ) {
+			return false;
+		}
+
+		return in_array( sanitize_file_name( $file_name ), self::get_pending_file_names( $user_id ), true );
+	}
+
+	/**
 	 * Determines if user has reached concurrent submission limit for pending
 	 * uploads (e.g. max number of photos awaiting moderation).
 	 *

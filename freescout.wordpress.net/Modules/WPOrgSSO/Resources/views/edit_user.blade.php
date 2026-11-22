@@ -3,7 +3,7 @@
 
 	<div class="col-sm-6">
 		@if ( $username )
-			<p class="form-control-static">{{ $username }}</p>
+			<p class="form-control-static"><a href="https://profiles.wordpress.org/{{ rawurlencode( $username ) }}/" target="_blank" rel="noopener">{{ $username }}</a></p>
 		@elseif ( $can_connect )
 			<input id="wporgsso-username" type="text" class="form-control input-sized" name="wporg_username" value="{{ old( 'wporg_username', '' ) }}" maxlength="60" autocomplete="off">
 			<p class="help-block">{{ __( 'Connect this user to their WordPress.org account, so they can log in. This can’t be changed later.' ) }}</p>

@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Request message for the `ListReferenceImages` method.
@@ -22,13 +22,13 @@ class ListReferenceImagesRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string parent = 1 [(.google.api.field_behavior) = REQUIRED, (.google.api.resource_reference) = {</code>
      */
-    private $parent = '';
+    protected $parent = '';
     /**
      * The maximum number of items to return. Default 10, maximum 100.
      *
      * Generated from protobuf field <code>int32 page_size = 2;</code>
      */
-    private $page_size = 0;
+    protected $page_size = 0;
     /**
      * A token identifying a page of results to be returned. This is the value
      * of `nextPageToken` returned in a previous reference image list request.
@@ -36,7 +36,24 @@ class ListReferenceImagesRequest extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string page_token = 3;</code>
      */
-    private $page_token = '';
+    protected $page_token = '';
+
+    /**
+     * @param string $parent Required. Resource name of the product containing the reference images.
+     *
+     *                       Format is
+     *                       `projects/PROJECT_ID/locations/LOC_ID/products/PRODUCT_ID`. Please see
+     *                       {@see ProductSearchClient::productName()} for help formatting this field.
+     *
+     * @return \Google\Cloud\Vision\V1\ListReferenceImagesRequest
+     *
+     * @experimental
+     */
+    public static function build(string $parent): self
+    {
+        return (new self())
+            ->setParent($parent);
+    }
 
     /**
      * Constructor.

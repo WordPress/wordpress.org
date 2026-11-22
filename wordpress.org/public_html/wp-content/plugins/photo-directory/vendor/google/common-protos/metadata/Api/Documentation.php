@@ -14,25 +14,9 @@ class Documentation
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0af6030a1e676f6f676c652f6170692f646f63756d656e746174696f6e2e" .
-            "70726f746f120a676f6f676c652e61706922a1010a0d446f63756d656e74" .
-            "6174696f6e120f0a0773756d6d617279180120012809121f0a0570616765" .
-            "7318052003280b32102e676f6f676c652e6170692e50616765122c0a0572" .
-            "756c657318032003280b321d2e676f6f676c652e6170692e446f63756d65" .
-            "6e746174696f6e52756c65121e0a16646f63756d656e746174696f6e5f72" .
-            "6f6f745f75726c18042001280912100a086f766572766965771802200128" .
-            "09225b0a11446f63756d656e746174696f6e52756c6512100a0873656c65" .
-            "63746f7218012001280912130a0b6465736372697074696f6e1802200128" .
-            "09121f0a176465707265636174696f6e5f6465736372697074696f6e1803" .
-            "2001280922490a0450616765120c0a046e616d65180120012809120f0a07" .
-            "636f6e74656e7418022001280912220a0873756270616765731803200328" .
-            "0b32102e676f6f676c652e6170692e5061676542740a0e636f6d2e676f6f" .
-            "676c652e6170694212446f63756d656e746174696f6e50726f746f50015a" .
-            "45676f6f676c652e676f6c616e672e6f72672f67656e70726f746f2f676f" .
-            "6f676c65617069732f6170692f73657276696365636f6e6669673b736572" .
-            "76696365636f6e666967a2020447415049620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\x90\x04\x0A\x1Egoogle/api/documentation.proto\x12\x0Agoogle.api\"\xBB\x01\x0A\x0DDocumentation\x12\x0F\x0A\x07summary\x18\x01 \x01(\x09\x12\x1F\x0A\x05pages\x18\x05 \x03(\x0B2\x10.google.api.Page\x12,\x0A\x05rules\x18\x03 \x03(\x0B2\x1D.google.api.DocumentationRule\x12\x1E\x0A\x16documentation_root_url\x18\x04 \x01(\x09\x12\x18\x0A\x10service_root_url\x18\x06 \x01(\x09\x12\x10\x0A\x08overview\x18\x02 \x01(\x09\"[\x0A\x11DocumentationRule\x12\x10\x0A\x08selector\x18\x01 \x01(\x09\x12\x13\x0A\x0Bdescription\x18\x02 \x01(\x09\x12\x1F\x0A\x17deprecation_description\x18\x03 \x01(\x09\"I\x0A\x04Page\x12\x0C\x0A\x04name\x18\x01 \x01(\x09\x12\x0F\x0A\x07content\x18\x02 \x01(\x09\x12\"\x0A\x08subpages\x18\x03 \x03(\x0B2\x10.google.api.PageBt\x0A\x0Ecom.google.apiB\x12DocumentationProtoP\x01ZEgoogle.golang.org/genproto/googleapis/api/serviceconfig;serviceconfig\xA2\x02\x04GAPIb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

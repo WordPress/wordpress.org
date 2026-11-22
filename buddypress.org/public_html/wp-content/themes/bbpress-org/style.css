@@ -11,3 +11,27 @@
 /**
  * See bb-base/style-bbpress.css
  */
+
+#headline-inner > div > img {
+	position: absolute;
+	top: 40px;
+	right: 24px;
+	width: 540px;
+	height: auto;
+	border: 1px solid #dcdcde;
+	border-radius: 4px 4px 0 0;
+	box-shadow: 0 6px 22px rgba( 0, 0, 0, .1 );
+}
+
+@media screen and ( min-width: 783px ) and ( max-width: 959px ) {
+	#headline-inner > div > img {
+		right: 20px;
+		width: calc(100% - 420px);
+	}
+
+	#headline-inner h2.graphic,
+	#headline-inner p,
+	#big-demo-button {
+		left: 20px;
+	}
+}

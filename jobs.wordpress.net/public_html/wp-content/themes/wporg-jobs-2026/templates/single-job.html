@@ -1,0 +1,117 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<!-- wp:group {"metadata":{"name":"Main"},"tagName":"main","style":{"spacing":{"blockGap":"0"}},"layout":{"type":"constrained"}} -->
+<main class="wp-block-group"><!-- wp:group {"metadata":{"name":"Breadcrumb"},"align":"wide","style":{"spacing":{"padding":{"top":"20px","bottom":"20px"},"blockGap":"10px"},"elements":{"link":{"color":{"text":"var:preset|color|muted"}}}},"textColor":"muted","fontSize":"small","layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
+<div class="wp-block-group alignwide has-muted-color has-text-color has-link-color has-small-font-size" style="padding-top:20px;padding-bottom:20px"><!-- wp:paragraph -->
+<p><a href="/">Jobs</a></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"textColor":"hairline"} -->
+<p class="has-hairline-color has-text-color">/</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:post-title {"level":0} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"metadata":{"name":"Job detail"},"align":"wide","style":{"spacing":{"padding":{"bottom":"var:preset|spacing|60"},"blockGap":"var:preset|spacing|50"},"@tablet":{"layout":{"orientation":"vertical","justifyContent":"stretch"}},"@mobile":{"layout":{"orientation":"vertical","justifyContent":"stretch"}}},"layout":{"type":"flex","flexWrap":"nowrap","verticalAlignment":"top"}} -->
+<div class="wp-block-group alignwide" style="padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:group {"metadata":{"name":"Job main"},"style":{"layout":{"selfStretch":"fill","flexSize":null},"dimensions":{"minWidth":"0px"},"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group" style="min-width:0px"><!-- wp:group {"metadata":{"name":"Job header"},"style":{"spacing":{"blockGap":"20px"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group"><!-- wp:post-title {"level":1,"fontSize":"h-2"} /-->
+
+<!-- wp:group {"metadata":{"name":"Job meta"},"style":{"spacing":{"blockGap":"20px"}},"textColor":"muted","fontSize":"small","layout":{"type":"flex","flexWrap":"wrap"}} -->
+<div class="wp-block-group has-muted-color has-text-color has-small-font-size"><!-- wp:group {"metadata":{"name":"Posted on"},"style":{"spacing":{"blockGap":"6px"},"typography":{"fontStyle":"italic"}},"textColor":"muted","layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group has-muted-color has-text-color" style="font-style:italic"><!-- wp:paragraph -->
+<p>Posted</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:post-date {"isLink":true,"style":{"elements":{"link":{"color":{"text":"var:preset|color|muted"},"typography":{"textDecoration":"none"}}}}} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:post-terms {"term":"job_category","className":"is-style-badge","style":{"border":{"left":{"color":"var:preset|color|hairline","style":"solid","width":"1px"}},"spacing":{"padding":{"left":"10px"},"margin":{"left":"10px"}}}} /--></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:post-content {"className":"is-style-job-description","layout":{"type":"constrained","contentSize":"100%"}} /--></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"metadata":{"name":"Job sidebar"},"tagName":"aside","className":"is-style-sticky-aside","style":{"layout":{"selfStretch":"fixedNoShrink","flexSize":"340px"},"@tablet":{"layout":{"selfStretch":"fit"}},"@mobile":{"layout":{"selfStretch":"fit"}}},"layout":{"type":"default"}} -->
+<aside class="wp-block-group is-style-sticky-aside"><!-- wp:group {"metadata":{"name":"Job card"},"style":{"border":{"width":"1px","radius":"var:preset|border-radius|small"},"spacing":{"padding":{"top":"30px","bottom":"30px","left":"30px","right":"30px"},"blockGap":"20px"}},"backgroundColor":"base","borderColor":"hairline","layout":{"type":"default"}} -->
+<div class="wp-block-group has-border-color has-hairline-border-color has-base-background-color has-background" style="border-width:1px;border-radius:var(--wp--preset--border-radius--small);padding-top:30px;padding-right:30px;padding-bottom:30px;padding-left:30px"><!-- wp:group {"metadata":{"name":"Apply"},"style":{"spacing":{"padding":{"bottom":"20px"},"blockGap":"10px"},"border":{"bottom":{"color":"var:preset|color|surface","style":"solid","width":"1px"}}},"layout":{"type":"default"}} -->
+<div class="wp-block-group" style="border-bottom-color:var(--wp--preset--color--surface);border-bottom-style:solid;border-bottom-width:1px;padding-bottom:20px"><!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"rel":"nofollow ugc noopener","style":{"dimensions":{"width":"100%"}},"metadata":{"bindings":{"url":{"source":"wporg-jobs/job-field","args":{"key":"apply_url"}},"text":{"source":"wporg-jobs/job-field","args":{"key":"apply_label"}}}}} -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" rel="nofollow ugc noopener">Apply Now</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons -->
+
+<!-- wp:group {"metadata":{"name":"Job views"},"className":"is-style-hide-when-empty","layout":{"type":"default"}} -->
+<div class="wp-block-group is-style-hide-when-empty"><!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"wporg-jobs/job-field","args":{"key":"views_label"}}}},"style":{"typography":{"textAlign":"center"}},"textColor":"muted","fontSize":"small"} -->
+<p class="has-text-align-center has-muted-color has-text-color has-small-font-size">Seen by candidates</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:heading {"level":3,"style":{"typography":{"fontWeight":"700"}},"fontFamily":"body","fontSize":"medium"} -->
+<h3 class="wp-block-heading has-body-font-family has-medium-font-size" style="font-weight:700">Job Details</h3>
+<!-- /wp:heading -->
+
+<!-- wp:group {"metadata":{"name":"Job details"},"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group"><!-- wp:group {"metadata":{"name":"Job detail row"},"className":"is-style-hide-when-empty","style":{"spacing":{"padding":{"top":"10px","bottom":"10px"}},"border":{"bottom":{"color":"var:preset|color|surface","style":"solid","width":"1px"}}},"fontSize":"small","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between","verticalAlignment":"top"}} -->
+<div class="wp-block-group is-style-hide-when-empty has-small-font-size" style="border-bottom-color:var(--wp--preset--color--surface);border-bottom-style:solid;border-bottom-width:1px;padding-top:10px;padding-bottom:10px"><!-- wp:paragraph {"textColor":"muted"} -->
+<p class="has-muted-color has-text-color">Company</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"wporg-jobs/job-field","args":{"key":"company"}}}},"style":{"typography":{"textAlign":"right","fontWeight":"600"}}} -->
+<p class="has-text-align-right" style="font-weight:600">Company</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"metadata":{"name":"Job detail row"},"className":"is-style-hide-when-empty","style":{"spacing":{"padding":{"top":"10px","bottom":"10px"}},"border":{"bottom":{"color":"var:preset|color|surface","style":"solid","width":"1px"}}},"fontSize":"small","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between","verticalAlignment":"top"}} -->
+<div class="wp-block-group is-style-hide-when-empty has-small-font-size" style="border-bottom-color:var(--wp--preset--color--surface);border-bottom-style:solid;border-bottom-width:1px;padding-top:10px;padding-bottom:10px"><!-- wp:paragraph {"textColor":"muted"} -->
+<p class="has-muted-color has-text-color">Job Type</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"wporg-jobs/job-field","args":{"key":"jobtype"}}}},"style":{"typography":{"textAlign":"right","fontWeight":"600"}}} -->
+<p class="has-text-align-right" style="font-weight:600">Job type</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"metadata":{"name":"Job detail row"},"className":"is-style-hide-when-empty","style":{"spacing":{"padding":{"top":"10px","bottom":"10px"}},"border":{"bottom":{"color":"var:preset|color|surface","style":"solid","width":"1px"}}},"fontSize":"small","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between","verticalAlignment":"top"}} -->
+<div class="wp-block-group is-style-hide-when-empty has-small-font-size" style="border-bottom-color:var(--wp--preset--color--surface);border-bottom-style:solid;border-bottom-width:1px;padding-top:10px;padding-bottom:10px"><!-- wp:paragraph {"textColor":"muted"} -->
+<p class="has-muted-color has-text-color">Location</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"wporg-jobs/job-field","args":{"key":"location"}}}},"style":{"typography":{"textAlign":"right","fontWeight":"600"}}} -->
+<p class="has-text-align-right" style="font-weight:600">Location</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"metadata":{"name":"Job detail row"},"className":"is-style-hide-when-empty","style":{"spacing":{"padding":{"top":"10px","bottom":"10px"}}},"fontSize":"small","layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between","verticalAlignment":"top"}} -->
+<div class="wp-block-group is-style-hide-when-empty has-small-font-size" style="padding-top:10px;padding-bottom:10px"><!-- wp:paragraph {"textColor":"muted"} -->
+<p class="has-muted-color has-text-color">Budget</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"metadata":{"bindings":{"content":{"source":"wporg-jobs/job-field","args":{"key":"budget"}}}},"style":{"typography":{"textAlign":"right","fontWeight":"600"}}} -->
+<p class="has-text-align-right" style="font-weight:600">Budget</p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></aside>
+<!-- /wp:group --></div>
+<!-- /wp:group -->
+
+<!-- wp:group {"metadata":{"name":"Open to work"},"align":"wide","style":{"spacing":{"padding":{"bottom":"var:preset|spacing|60"}}},"layout":{"type":"default"}} -->
+<div class="wp-block-group alignwide" style="padding-bottom:var(--wp--preset--spacing--60)"><!-- wp:group {"metadata":{"name":"Candidates panel"},"style":{"border":{"radius":"var:preset|border-radius|small"},"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40","left":"var:preset|spacing|40","right":"var:preset|spacing|40"},"blockGap":"20px"}},"backgroundColor":"surface","layout":{"type":"default"}} -->
+<div class="wp-block-group has-surface-background-color has-background" style="border-radius:var(--wp--preset--border-radius--small);padding-top:var(--wp--preset--spacing--40);padding-right:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40);padding-left:var(--wp--preset--spacing--40)"><!-- wp:heading {"level":3,"fontSize":"h-5"} -->
+<h3 class="wp-block-heading has-h-5-font-size">WordPress Professionals Open to Work</h3>
+<!-- /wp:heading -->
+
+<!-- wp:wporg-jobs/open-to-work {"variant":"compact","perPage":4,"showPagination":false} /-->
+
+<!-- wp:paragraph {"style":{"typography":{"textAlign":"center","fontWeight":"600"},"elements":{"link":{"color":{"text":"var:preset|color|blueberry"},"typography":{"textDecoration":"none"},":hover":{"color":{"text":"var:preset|color|blueberry"},"typography":{"textDecoration":"underline"}}}}},"fontSize":"small"} -->
+<p class="has-text-align-center has-link-color has-small-font-size" style="font-weight:600"><a href="/#candidates">View all candidates →</a></p>
+<!-- /wp:paragraph --></div>
+<!-- /wp:group --></div>
+<!-- /wp:group --></main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

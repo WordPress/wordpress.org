@@ -4,6 +4,11 @@
 		grid-auto-rows: unset;
 	}
 
+	// Core only pads background groups when the theme opts in to wp-block-styles.
+	.entry-content &.has-background {
+		padding: var(--wp--preset--spacing--20);
+	}
+
 	.wp-block-wporg-link-wrapper {
 
 		#bbpress-forums & {

@@ -1,8 +1,10 @@
 
 	<div id="subnav"><div id="subnav-inner">
 		<ul id="nav-secondary" class="menu">
-			<?php if ( is_user_logged_in() ) : ?>
+			<?php if ( current_user_can( 'edit_pages' ) ) : ?>
 				<li><a href="<?php bloginfo( 'url' ); ?>/wp-admin/post-new.php?post_type=page">Create New Page</a></li>
+			<?php endif; ?>
+			<?php if ( is_user_logged_in() ) : ?>
 				<li><?php edit_post_link( __( 'Edit This Page', 'bborg' ) ); ?></li>
 			<?php endif; ?>
 		</ul>

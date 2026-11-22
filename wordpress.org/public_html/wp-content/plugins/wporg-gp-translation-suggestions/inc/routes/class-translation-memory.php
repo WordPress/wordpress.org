@@ -4,13 +4,15 @@ namespace WordPressdotorg\GlotPress\TranslationSuggestions\Routes;
 
 use GP;
 use GP_Locales;
-use GP_Route;
 use WordPressdotorg\GlotPress\TranslationSuggestions\Translation_Memory_Client;
 use WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Client;
 use WordPressdotorg\GlotPress\Customizations\AI\OpenAI_Messages;
 use const WordPressdotorg\GlotPress\TranslationSuggestions\PLUGIN_DIR;
 
-class Translation_Memory extends GP_Route {
+/**
+ * Serves Translation Memory, OpenAI, and DeepL suggestions for an original.
+ */
+class Translation_Memory extends Suggestions_Route {
 
 	/**
 	 * Get the suggestions from the translation memory and return a JSON template.
@@ -22,22 +24,9 @@ class Translation_Memory extends GP_Route {
 	 * @return void
 	 */
 	public function get_suggestions( $project_path, $locale_slug, $set_slug ) {
-		$type        = 'Translation';
-		$original_id = gp_get( 'original' );
-		$nonce       = gp_get( 'nonce' );
+		$type = 'Translation';
 
-		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
-			wp_send_json_error( 'invalid_nonce' );
-		}
-
-		if ( empty( $original_id ) ) {
-			wp_send_json_error( 'no_original' );
-		}
-
-		$original = GP::$original->get( $original_id );
-		if ( ! $original ) {
-			wp_send_json_error( 'invalid_original' );
-		}
+		list( $original ) = $this->authorize_original( 'translation-memory-suggestions-', $project_path, $locale_slug, $set_slug );
 
 		$locale = $locale_slug;
 		if ( 'default' !== $set_slug ) {
@@ -70,26 +59,13 @@ class Translation_Memory extends GP_Route {
 	 */
 	public function get_openai_suggestions( $project_path, $locale_slug, $set_slug ) {
 		$type                                  = 'OpenAI';
-		$original_id                           = gp_get( 'original' );
 		$translation_id                        = gp_get( 'translation', 0 );
-		$nonce                                 = gp_get( 'nonce' );
 		$gp_default_sort                       = get_user_option( 'gp_default_sort' );
 		$external_services_exclude_some_status = gp_array_get( $gp_default_sort, 'external_services_exclude_some_status', 0 );
 		$translation                           = null;
 		$suggestions                           = array();
 
-		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
-			wp_send_json_error( 'invalid_nonce' );
-		}
-
-		if ( empty( $original_id ) ) {
-			wp_send_json_error( 'no_original' );
-		}
-
-		$original = GP::$original->get( $original_id );
-		if ( ! $original ) {
-			wp_send_json_error( 'invalid_original' );
-		}
+		list( $original ) = $this->authorize_original( 'translation-memory-suggestions-', $project_path, $locale_slug, $set_slug );
 
 		$current_set_slug                = 'default';
 		$locale_glossary_translation_set = GP::$translation_set->by_project_id_slug_and_locale( 0, $current_set_slug, $locale_slug );
@@ -126,26 +102,13 @@ class Translation_Memory extends GP_Route {
 	 */
 	public function get_deepl_suggestions( $project_path, $locale_slug, $set_slug ) {
 		$type                                  = 'DeepL';
-		$original_id                           = gp_get( 'original' );
 		$translation_id                        = gp_get( 'translation', 0 );
-		$nonce                                 = gp_get( 'nonce' );
 		$gp_default_sort                       = get_user_option( 'gp_default_sort' );
 		$external_services_exclude_some_status = gp_array_get( $gp_default_sort, 'external_services_exclude_some_status', 0 );
 		$translation                           = null;
 		$suggestions                           = array();
 
-		if ( ! wp_verify_nonce( $nonce, 'translation-memory-suggestions-' . $original_id ) ) {
-			wp_send_json_error( 'invalid_nonce' );
-		}
-
-		if ( empty( $original_id ) ) {
-			wp_send_json_error( 'no_original' );
-		}
-
-		$original = GP::$original->get( $original_id );
-		if ( ! $original ) {
-			wp_send_json_error( 'invalid_original' );
-		}
+		list( $original ) = $this->authorize_original( 'translation-memory-suggestions-', $project_path, $locale_slug, $set_slug );
 
 		$locale = $locale_slug;
 		if ( 'default' !== $set_slug ) {
@@ -350,12 +313,30 @@ class Translation_Memory extends GP_Route {
 			'cs'    => 'CS',
 			'da'    => 'DA',
 			'de'    => 'DE',
+			'de-ch' => 'DE-CH',
 			'el'    => 'EL',
+			'el-po' => '', // DeepL only writes monotonic Greek.
 			'en-gb' => 'EN-GB',
 			'es'    => 'ES',
+			'es-ar' => 'ES-419',
+			'es-cl' => 'ES-419',
+			'es-co' => 'ES-419',
+			'es-cr' => 'ES-419',
+			'es-do' => 'ES-419',
+			'es-ec' => 'ES-419',
+			'es-gt' => 'ES-419',
+			'es-hn' => 'ES-419',
+			'es-mx' => 'ES-419',
+			'es-pa' => 'ES-419',
+			'es-pe' => 'ES-419',
+			'es-pr' => 'ES-419',
+			'es-us' => 'ES-419',
+			'es-uy' => 'ES-419',
+			'es-ve' => 'ES-419',
 			'et'    => 'ET',
 			'fi'    => 'FI',
 			'fr'    => 'FR',
+			'fr-ca' => 'FR-CA',
 			'hu'    => 'HU',
 			'id'    => 'ID',
 			'it'    => 'IT',
@@ -376,9 +357,18 @@ class Translation_Memory extends GP_Route {
 			'tr'    => 'TR',
 			'uk'    => 'UK',
 			'zh-cn' => 'ZH',
+			'zh-hk' => 'ZH-HANT',
+			'zh-sg' => 'ZH',
+			'zh-tw' => 'ZH-HANT',
 		);
 		if ( array_key_exists( $locale, $available_locales ) ) {
 			return $available_locales[ $locale ];
+		}
+
+		// Other regional variants use their base language, e.g. de-at gets DE.
+		$base_locale = explode( '-', $locale )[0];
+		if ( array_key_exists( $base_locale, $available_locales ) ) {
+			return $available_locales[ $base_locale ];
 		}
 		return '';
 	}
@@ -397,6 +387,7 @@ class Translation_Memory extends GP_Route {
 			'CS'    => 'prefer_less',
 			'DA'    => 'prefer_less',
 			'DE'    => 'prefer_less',
+			'DE-CH' => 'prefer_more',
 			'EL'    => 'prefer_more',
 			'EN-GB' => 'prefer_less',
 			'ES'    => 'prefer_less',
@@ -428,8 +419,17 @@ class Translation_Memory extends GP_Route {
 		if ( ( 'DE' == $locale || 'NL' == $locale ) && 'formal' == $set_slug ) {
 			return 'prefer_more';
 		}
+		if ( 'DE-CH' === $locale && 'informal' === $set_slug ) {
+			return 'prefer_less';
+		}
 		if ( array_key_exists( $locale, $lang_informality ) ) {
 			return $lang_informality[ $locale ];
+		}
+
+		// Regional targets like ES-419 and FR-CA share their base language's register.
+		$base_locale = explode( '-', $locale )[0];
+		if ( array_key_exists( $base_locale, $lang_informality ) ) {
+			return $lang_informality[ $base_locale ];
 		}
 
 		return 'default';

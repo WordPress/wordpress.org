@@ -24,6 +24,14 @@
 	}
 }
 
+/* Push the header icons right; the global header only does this for html[lang=en-US], Trac is lang=en. */
+@media (max-width: 889px) {
+
+	.wp-block-group.global-header .wp-block-image.global-header__wporg-logo-mark {
+		flex-basis: 100%;
+	}
+}
+
 #main {
 	clear: both;
 }
@@ -89,6 +97,18 @@ footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 	background: 0;
 }
 
+/* Trac's stock link hover ring reads as a thick outline on the site headers, footers, and nav bars. */
+header :link:hover, header :visited:hover,
+footer :link:hover, footer :visited:hover,
+#headline :link:hover, #headline :visited:hover,
+#metanav :link:hover, #metanav :visited:hover,
+#metanav form.trac-logout button:hover,
+#wporg-header :link:hover, #wporg-header :visited:hover,
+#footer :link:hover, #footer :visited:hover {
+	border-radius: 0;
+	box-shadow: none;
+}
+
 #headline .menu {
 	list-style: none;
 	float: right;
@@ -106,7 +126,7 @@ footer :link, footer :visited, footer :link:hover, footer :visited:hover,
 
 #headline .menu a,
 #headline .menu a:visited {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 }
 
 #headline .menu a:hover,
@@ -230,7 +250,7 @@ h3.change a {
 #metanav.nav a,
 #metanav.nav a:visited,
 #metanav form.trac-logout button {
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.9);
 	background: inherit;
 	border: inherit;
 }
@@ -275,6 +295,7 @@ form#search input {
 
 #content.report {
 	max-width: 98%;
+	overflow-x: auto; /* Wide report tables scroll here instead of widening the page. */
 	width: auto;
 }
 
@@ -292,12 +313,10 @@ form#search input {
 	margin-right: auto;
 }
 
-#content.report form#prefs {
-	float: none;
-	border: 0;
-	background: none;
-	margin-left: auto;
-	margin-right: auto;
+#content.report form#trac-report-prefs {
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0 auto 24px;
 }
 
 /* When blame displays a changeset inline, override the inline style set by blame.js */
@@ -425,9 +444,21 @@ div.attachment #preview .diff .entry h2 a {
 	display: none;
 }
 
+/* Undo the inline 60% width on the Syntax Highlighting preview. */
+#content.prefs div.code pre {
+	width: auto;
+}
+
 /* =report.css */
 #content.report .tickets tbody tr:hover {
 	background: #eee;
+}
+
+/* Keep wide report columns scrollable instead of clipping them at the page edge. */
+#content.report table.tickets {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
 }
 
 .report div.reports h2 {
@@ -439,6 +470,26 @@ div.attachment #preview .diff .entry h2 a {
 h2.report-result {
 	-webkit-box-shadow: none;
 	box-shadow: none;
+}
+
+#content.query table.tickets caption.trac-group {
+	padding: 0 0 8px;
+	border: 0;
+}
+
+#content.query table.tickets .trac-group h2.report-result {
+	margin: 0;
+}
+
+#content.query #query > fieldset.collapsed,
+#content.query #batchmod_form > fieldset.collapsed {
+	border: 1px solid #d7d7d7;
+	padding: 6px 14px 10px;
+}
+
+#content.query #query > fieldset.collapsed > legend.foldable,
+#content.query #batchmod_form > fieldset.collapsed > legend.foldable {
+	background: #fafafa;
 }
 
 /* =roadmap.css */
@@ -534,7 +585,8 @@ table.progress td.closed {
 }
 
 #ticket img,
-.comment img {
+.comment img,
+.tickets .fullrow img {
 	max-width: 100%;
 	height: auto;
 }
@@ -644,6 +696,7 @@ h2 {
 }
 
 #content.timeline h2 {
+	display: flow-root; /* Stop the date bar at the floated #prefs form instead of running under it. */
 	padding: 3px 5px;
 	font-size: 105%;
 	-webkit-box-shadow: none;
@@ -653,10 +706,6 @@ h2 {
 /* =trac.css */
 #main, #main th, #main tr, #main h1, #main h2, #main h3, #main h4 {
 	font-family: "Open Sans", sans-serif;
-}
-
-body {
-	min-width: 48.5em; /* don't let it get ugly unless responsive */
 }
 
 body, th, tr {
@@ -719,12 +768,20 @@ blockquote.citation {
 /*	width: 100%; /* for IE, surprise */
 }
 
+/* Contain the floated menu, and the search form floated beside it. */
+#mainnav::after {
+	clear: both;
+	content: "";
+	display: table;
+}
+
 #mainnav .first, #mainnav .first :link,
 #mainnav .last, #mainnav .last :link {
 	border-radius: 0;
 }
 
 #mainnav ul {
+	margin-bottom: 8px;
 	margin-left: 5px;
 	float: left;
 	font-size: 11px;
@@ -746,7 +803,6 @@ blockquote.citation {
 	border: 0;
 	color: #000;
 	display: block;
-	padding: 6px 19px;
 }
 
 #mainnav :link:hover, #mainnav :visited:hover {
@@ -1029,6 +1085,19 @@ div.trac-content {
 
 #content.wiki .wiki-toc .active {
 	background: #eaf2fa; /* current TOC item */
+}
+
+@media (max-width: 600px) {
+	#content.wiki .wiki-toc {
+		box-sizing: border-box;
+		float: none;
+		width: 100%;
+		margin: 0 0 1em;
+	}
+
+	#content.wiki .wikipage {
+		overflow-wrap: anywhere;
+	}
 }
 
 /* There's already a border on the title, no need for a border on links in titles */
@@ -2349,7 +2418,7 @@ table.listing th.desc a::after {
 
 /* =Report screens */
 .create-new-ticket.button {
-	margin: 10px 10px 0;
+	margin: 10px 6px 0; /* Line up with the header search form, inset by #banner's padding. */
 	float: right;
 	clear: right;
 	font-size: 15px;
@@ -2364,7 +2433,6 @@ table.listing th.desc a::after {
 	border: none !important;
 	display: block;
 	height: 100%;
-	width: 100%;
 	padding: 0 12px 2px;
 }
 
@@ -2376,16 +2444,106 @@ table.listing th.desc a::after {
 	color: rgba(255,255,255,0.95) !important;
 }
 
-#content.report #prefs {
-	margin: -20px 0 2px 10px;
-	padding-right: 4px;
-	background: none;
-	border: none;
-	text-align: right;
+body.trac #content.report #prefs {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 12px;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 12px 16px;
+	border: 1px solid #d7d7d7;
+	border-radius: 4px;
+	background: #fafafa;
 }
 
 #content.report #prefs div {
-	display: inline;
+	display: block;
+}
+
+#content.report #prefs label {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+#content.report #prefs input[type="text"] {
+	box-sizing: border-box;
+	width: 100px;
+	margin: 0;
+}
+
+#content.report #prefs .buttons {
+	float: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* Keep query options together without the theme's paragraph margins. */
+body.trac #main #query {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px 16px;
+}
+
+body.trac #main #query > fieldset,
+body.trac #main #query > hr {
+	box-sizing: border-box;
+	flex-basis: 100%;
+}
+
+body.trac #main #query > p.option {
+	box-sizing: border-box;
+	display: inline-flex;
+	float: none;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+	max-width: 100%;
+	margin: 0;
+	padding: 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fafafa;
+}
+
+body.trac #main #query > .buttons {
+	display: inline-flex;
+	float: none;
+	align-items: center;
+	justify-content: flex-end;
+	flex-basis: 100%;
+	margin: 0;
+}
+
+#query > .buttons input[type="submit"] {
+	margin: 0;
+}
+
+@media (max-width: 959px) {
+	body.trac #main #query {
+		box-sizing: border-box;
+		padding: 0 10px;
+	}
+}
+
+@media (max-width: 600px) {
+	body.trac #main #query > p.option {
+		flex-basis: 100%;
+	}
+
+	body.trac #main #query > p.option:has(#group) {
+		display: grid;
+		grid-template-columns: max-content minmax(0, 1fr);
+		gap: 6px 8px;
+	}
+
+	body.trac #main #query > p.option #groupdesc {
+		justify-self: end;
+		margin: 0;
+	}
 }
 
 body.core #ctxtnav a[href="/report"] {
@@ -2489,7 +2647,7 @@ a.mention.me {
 @media (max-width: 960px) {
 
 	#main {
-		overflow-x: auto;
+		overflow-x: initial;
 	}
 }
 
@@ -2690,7 +2848,6 @@ a.mention.me {
 @media (max-width: 640px) {
 
 	body {
-		min-width: 1em; /* small value to override previous min-width */
 		-webkit-text-size-adjust: 100%;
 	}
 
@@ -2738,7 +2895,6 @@ a.mention.me {
 	}
 
 	#mainnav :link, #mainnav :visited { /* bigger tap target */
-		padding: .5em 20px;
 		-webkit-text-size-adjust: 120%;
 	}
 
@@ -2865,14 +3021,18 @@ a.mention.me {
 
 @media (max-width: 550px) {
 
-	.create-new-ticket.button {
+	body.trac .create-new-ticket.button {
+		display: block;
 		float: none;
+		width: max-content;
+		max-width: 100%;
 		margin: 20px 0 0 !important; /* Override inline styles */
-		padding: 0 20px;
+		padding: 0;
 	}
 
-	.create-new-ticket a {
-		padding: 0;
+	body.trac .create-new-ticket a {
+		display: block;
+		padding: 0 20px;
 	}
 
 	#ticket .date {

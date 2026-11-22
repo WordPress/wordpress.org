@@ -7,13 +7,19 @@ on:
     - phpcs.xml.dist
     - freescout.wordpress.net/phpcs.xml.dist
     - composer.json
+    - composer.lock
     - .github/workflows/phpcs.yml
     - .github/bin/phpcs-branch.php
   push:
     branches: [trunk]
     paths:
     - '**.php'
+    - phpcs.xml.dist
     - freescout.wordpress.net/phpcs.xml.dist
+    - composer.json
+    - composer.lock
+    - .github/workflows/phpcs.yml
+    - .github/bin/phpcs-branch.php
 
 # Cancel superseded PR runs; trunk pushes get per-commit groups so queued mirrored commits aren't cancelled.
 concurrency:
@@ -27,12 +33,31 @@ jobs:
   phpcs:
     name: PHP Coding Standards
     runs-on: ubuntu-latest
+    env:
+      BASE_REF: ${{ github.event_name == 'pull_request' && 'HEAD^1' || github.event.before }}
 
     steps:
     - uses: actions/checkout@v7
       with:
-        fetch-depth: 0
+        fetch-depth: 2
         persist-credentials: false
+
+    - name: Prepare changed-file checks
+      id: changes
+      run: |
+        # PR merge commits already include the base tip as their first parent.
+        if [ "$GITHUB_EVENT_NAME" = push ]; then
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+        fi
+
+        # Keep FreeScout's full scan out of unrelated PHP changes. A failed diff
+        # must fail the job rather than silently skipping the check.
+        files=$( git diff --name-only "$BASE_REF" -- freescout.wordpress.net/ environments/freescout/ composer.json composer.lock .github/workflows/phpcs.yml )
+        if [ -n "$files" ]; then
+          echo "freescout=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "freescout=false" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
@@ -54,12 +79,10 @@ jobs:
 
     - name: Lint PHP
       run: php .github/bin/phpcs-branch.php
-      env:
-        BASE_REF: ${{ github.base_ref }}
 
     # Excluded from the root ruleset; FreeScout code has its own standard.
     - name: Lint FreeScout PHP
-      if: ${{ !cancelled() }}
+      if: ${{ !cancelled() && steps.changes.outputs.freescout == 'true' }}
       # The checkstyle report becomes inline annotations on the PR.
       run: |
         STATUS=0

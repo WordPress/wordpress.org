@@ -14,19 +14,9 @@ class Month
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0ac0020a17676f6f676c652f747970652f6d6f6e74682e70726f746f120b" .
-            "676f6f676c652e747970652ab0010a054d6f6e746812150a114d4f4e5448" .
-            "5f554e5350454349464945441000120b0a074a414e554152591001120c0a" .
-            "084645425255415259100212090a054d41524348100312090a0541505249" .
-            "4c100412070a034d4159100512080a044a554e45100612080a044a554c59" .
-            "1007120a0a064155475553541008120d0a0953455054454d424552100912" .
-            "0b0a074f43544f424552100a120c0a084e4f56454d424552100b120c0a08" .
-            "444543454d424552100c425d0a0f636f6d2e676f6f676c652e7479706542" .
-            "0a4d6f6e746850726f746f50015a36676f6f676c652e676f6c616e672e6f" .
-            "72672f67656e70726f746f2f676f6f676c65617069732f747970652f6d6f" .
-            "6e74683b6d6f6e7468a20203475450620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xC0\x02\x0A\x17google/type/month.proto\x12\x0Bgoogle.type*\xB0\x01\x0A\x05Month\x12\x15\x0A\x11MONTH_UNSPECIFIED\x10\x00\x12\x0B\x0A\x07JANUARY\x10\x01\x12\x0C\x0A\x08FEBRUARY\x10\x02\x12\x09\x0A\x05MARCH\x10\x03\x12\x09\x0A\x05APRIL\x10\x04\x12\x07\x0A\x03MAY\x10\x05\x12\x08\x0A\x04JUNE\x10\x06\x12\x08\x0A\x04JULY\x10\x07\x12\x0A\x0A\x06AUGUST\x10\x08\x12\x0D\x0A\x09SEPTEMBER\x10\x09\x12\x0B\x0A\x07OCTOBER\x10\x0A\x12\x0C\x0A\x08NOVEMBER\x10\x0B\x12\x0C\x0A\x08DECEMBER\x10\x0CB]\x0A\x0Fcom.google.typeB\x0AMonthProtoP\x01Z6google.golang.org/genproto/googleapis/type/month;month\xA2\x02\x03GTPb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

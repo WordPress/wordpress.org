@@ -28,7 +28,7 @@
 			<?php if ( bbp_is_subscriptions()                           ) bbp_get_template_part( 'user', 'subscriptions'     ); ?>
 
 			<?php
-				if ( function_exists( 'bbp_is_single_user_engagements' ) && bbp_is_single_user_engagements() ) {
+				if ( bbp_is_single_user_engagements() ) {
 					bbp_get_template_part( 'user', 'engagements' );
 				}
 			?>

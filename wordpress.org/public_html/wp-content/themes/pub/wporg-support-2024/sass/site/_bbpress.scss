@@ -173,10 +173,6 @@ $paginationBreakPoint: "600px";
 			color: var(--wp--custom--link--color--text);
 		}
 
-		.bbp-topics ul.sticky {
-			background-color: var(--wp--preset--color--lemon-3) !important;
-		}
-
 		.bbp-forums,
 		.bbp-topics {
 			border: 1px solid var(--wp--custom--color--border);
@@ -257,7 +253,9 @@ $paginationBreakPoint: "600px";
 			text-align: left;
 			width: 100%;
 			margin: 0 0 var(--wp--preset--spacing--20);
-			padding-left: 0;
+
+			// RTL pages load both bbPress stylesheets, so reset both sides.
+			padding-inline: 0;
 
 			@media screen and ( max-width: 480px ) {
 				min-height: auto;
@@ -434,7 +432,6 @@ $paginationBreakPoint: "600px";
 		p.wporg-bbp-topic-site-url::before {
 			content: "\f103";
 			color: #000;
-			font-family: dashicons;
 			font: 400 16px/1 dashicons;
 			margin-right: 5px;
 			float: left;
@@ -833,6 +830,7 @@ body.single-forum #bbpress-forums .bbp-topic-form,
 body.reply-edit #bbpress-forums fieldset.bbp-form,
 body.topic-edit #bbpress-forums fieldset.bbp-form {
 	border: none;
+	padding: 0;
 	margin: 0 0 var(--wp--style--block-gap);
 }
 
@@ -880,7 +878,14 @@ body.topic-edit #bbpress-forums fieldset.bbp-form {
 }
 
 select {
-	-webkit-appearance: menulist; // Get those arrows back into the select box.
+	appearance: none;
+
+	/* The SVG is arrow-down-alt2 from Dashicons. */
+	background-image: url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%231e1e1e%22%2F%3E%3C%2Fsvg%3E);
+	background-position: right 8px top 55%;
+	background-repeat: no-repeat;
+	background-size: 16px 16px;
+	padding-right: 24px;
 }
 
 /*--------------------------------------------------------------

@@ -17,6 +17,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Modules\WPOrgHelpScoutImport\Entities\Run;
 use Modules\WPOrgHelpScoutImport\Exceptions\ApiError;
 use Modules\WPOrgHelpScoutImport\Exceptions\RateLimited;
+use Modules\WPOrgHelpScoutImport\Services\Copies;
 use Modules\WPOrgHelpScoutImport\Services\HelpScout;
 use Modules\WPOrgHelpScoutImport\Services\Importer;
 use Modules\WPOrgHelpScoutImport\Services\People;
@@ -260,7 +261,10 @@ final class ImportPage implements ShouldQueue {
 		if ( $run->is_retry() || ! $page['conversations'] ) {
 			$run->status      = Run::STATUS_DONE;
 			$run->finished_at = Carbon::now();
-			$this->save( $run );
+			if ( $this->save( $run ) ) {
+				// Send what this run imported, if the mailbox switched.
+				Copies::send_again( (int) $run->mailbox_id );
+			}
 
 			return;
 		}

@@ -4,8 +4,27 @@ Local development environments for WordPress.org projects, powered by [`wp-env`]
 
 ## Prerequisites
 
-- [Docker](https://www.docker.com/products/docker-desktop/) installed and running
+- A Docker runtime, installed and running (see below)
 - [Node.js](https://nodejs.org/) — the version in [.nvmrc](.nvmrc) (`nvm use`)
+
+### Docker runtime
+
+On macOS, use [Colima](https://github.com/abiosoft/colima). It's free and open source and needs no account.
+
+```bash
+brew install colima docker docker-buildx docker-compose
+colima start --cpu 4 --memory 4
+```
+
+Homebrew installs Buildx and Compose as Docker CLI plugins outside the CLI's search path. On Apple Silicon, point the CLI at them by adding this property to `~/.docker/config.json`, keeping whatever else is already in the file:
+
+```json
+"cliPluginsExtraDirs": [ "/opt/homebrew/lib/docker/cli-plugins" ]
+```
+
+Colima remembers the CPU and memory settings, so later starts are just `colima start`. To start it at login instead, run `brew services start colima`.
+
+On Windows, consider using [Rancher Desktop](https://rancherdesktop.io/) with its dockerd (moby) engine, or [Docker Desktop](https://www.docker.com/products/docker-desktop/). On Linux, use [Docker Engine](https://docs.docker.com/engine/install/).
 
 ## Setup
 
@@ -91,7 +110,7 @@ npm run themes:test
 
 ### Jobs
 
-A local instance of jobs.wordpress.net with the JobsWP plugin, theme, sample job categories, and sample job posts.
+A local instance of jobs.wordpress.net with the JobsWP plugin, the block theme and its plugin, sample job categories, and sample job posts. The pages are created from `jobs/pages/`.
 
 **Start:**
 
@@ -107,6 +126,12 @@ npm run jobs:env start
 npm run jobs:env -- run cli -- wp <command>
 ```
 
+**Run tests** (the JobsWP plugin's PHPUnit suite, in a dedicated test environment):
+
+```bash
+npm run jobs:test
+```
+
 ### Browse Happy
 
 A local instance of [browsehappy.com](https://browsehappy.com) with the theme.
@@ -118,6 +143,40 @@ npm run browsehappy:env start
 ```
 
 **Access:** `http://localhost:8888`
+
+### Documentation
+
+A local instance of [WordPress.org/documentation](https://wordpress.org/documentation/) with the `wporg-documentation-2022` theme and the Support HelpHub plugin.
+
+**Start:**
+
+```bash
+npm run documentation:env start
+```
+
+First start imports the categories, pages, articles, and WordPress version pages from the live site's REST API, keeping their production IDs. The API only serves rendered content to logged-out requests, so the posts are imported as rendered HTML rather than block markup.
+
+**Re-seed** (clears the import flag, then imports whatever is missing locally; existing posts and terms are not updated):
+
+```bash
+npm run documentation:refresh
+```
+
+**Access:** `http://localhost:8888`
+
+**WP CLI:**
+
+```bash
+npm run documentation:env -- run cli -- wp <command>
+```
+
+**Theme assets:** the theme's `build/` directory is committed. After changing anything in `src/`, rebuild from the theme directory:
+
+```bash
+cd ../wordpress.org/public_html/wp-content/themes/pub/wporg-documentation-2022
+npm install
+npm run build
+```
 
 ### Translate
 
@@ -242,6 +301,55 @@ All accounts use the password `password`.
 
 **Block editor:** the forums use the block editor through [Blocks Everywhere](https://github.com/Automattic/blocks-everywhere), which is not installed here — it needs a Gutenberg old enough to break against WordPress trunk until [Automattic/blocks-everywhere#211](https://github.com/Automattic/blocks-everywhere/pull/211) lands. `Plugin::__construct()` loads the block support only when that plugin is present, so the environment runs on bbPress' plain editor until then.
 
+### WordPress.tv
+
+A local instance of [WordPress.tv](https://wordpress.tv/) with the `wptv-27` block theme and Jetpack, which provides the VideoPress player and the sharing buttons.
+
+**Start:**
+
+```bash
+npm run wptv:env start
+```
+
+The first start imports about 60 recent, featured, Education and How-To videos from WordPress.tv. It brings their speakers, events, languages, categories and producers, plus the site's pages. Each video embeds its real VideoPress video, so the players stream and the thumbnails load. A pending submission is added for the moderation tools.
+
+**Access:** `http://localhost:8888`. Log in with `admin` / `password` to edit videos or moderate submissions.
+
+**Import new videos** (clears the import flag, then imports the videos that are missing):
+
+```bash
+npm run wptv:refresh
+```
+
+**WP CLI:**
+
+```bash
+npm run wptv:env -- run cli -- wp <command>
+```
+
+**Run tests** (the theme's PHPUnit suite, in a dedicated test environment):
+
+```bash
+npm run wptv:test
+```
+
+**What differs from production.** WordPress.tv runs on WordPress.com, which provides VideoPress internals that Jetpack doesn't have. Without them, the theme leaves out what it builds from them:
+
+- Download links, subtitle tracks, and the video data in JSON-LD and Open Graph tags are missing, and `/api/videos.json` lists no video files.
+- `/oembed/` and `/unisubs/` answer with an error for every video.
+- Jetpack runs in offline mode. `wordpress-tv/mu-plugins/wptv-local.php` turns on the VideoPress and Sharing modules anyway, so the players and sharing buttons render. The Like button needs a connection, so it doesn't show, and the editor asks to connect Jetpack.
+- Uploads from the submission form stay local instead of going to VideoPress, so every submission gets the State of the Word 2024 video.
+
+### Photo Directory
+
+A test-only environment for the Photo Directory plugin in `wordpress.org/public_html/wp-content/plugins/photo-directory/`. The plugin is mounted at `wp-content/plugins/photo-directory` but not activated: its test bootstrap loads only the classes under test, so the suite runs without Google Cloud credentials.
+
+**Run tests:**
+
+```bash
+npm run photo-directory:test
+```
+
 ### WordPress.org SSO
 
 A test-only environment for the shared single sign-on code in `common/includes/wporg-sso/`. The SSO is a library rather than a plugin, so it is mounted at `wp-content/wporg-sso` instead of being activated, and its PHPUnit suite runs from there.
@@ -287,15 +395,15 @@ What's running:
 
 | Service | Purpose |
 |---|---|
-| `app` | FreeScout's latest release on nginx and PHP-FPM 8.3 (FreeScout's recommended nginx config), with the scheduler and queue worker production would run from cron. |
-| `db` | MariaDB, with a separate `freescout-test` database for the tests. |
+| `app` | FreeScout's latest release on nginx and PHP-FPM 8.4, with the scheduler and queue worker production would run from cron. |
+| `db` | MariaDB 11.4, with a separate `freescout-test` database for the tests. |
 | `greenmail` | Mail server FreeScout fetches the **Plugins** and **Themes** mailboxes from, over IMAP. Two sample emails are delivered on first start. |
 | `mailpit` | Catches outgoing mail. |
 | `mock-api` | Stands in for `api.wordpress.org/dotorg/freescout/`: checks request signatures, answers sidebar requests with panels recorded from the real endpoints for a real account (`obenland`'s), and logs webhook events (`npm run freescout:logs`). Also stands in for login.wordpress.org's SAML identity provider at http://127.0.0.1:8892/idp, signing with a key that's only for local development. |
 
 `freescout.wordpress.net/Modules/` is mounted as FreeScout's `Modules/` folder, like production's checkout. Every start switches all modules on and runs `freescout:after-app-update`, as production does after a deploy. After switching branches, run `npm run freescout:setup`: FreeScout errors on every page while it still has a removed module cached.
 
-Setup also adds sample data, set up like the HelpScout helpdesk but with made-up people and conversations. It adds the **Learn WordPress** mailbox, without incoming email. It also adds four made-up agents and 34 made-up conversations in Plugins, Themes and Learn WordPress from the last eight weeks, with replies, notes, and closed, pending, and spam conversations. It only adds what's missing, and only to a FreeScout on 127.0.0.1 or localhost.
+Setup also adds sample data, set up like the HelpScout helpdesk but with made-up people and conversations. It adds the **Learn WordPress** mailbox, without incoming email. It also adds four made-up agents and 39 made-up conversations in Plugins, Themes and Learn WordPress from the last eight weeks, with replies, notes, and closed, pending, and spam conversations. Five of the Plugins ones are plugin reviews, one for each state of the Plugin Review panel: issues waiting for an update, a rename, an ownership check, an update uploaded, and an approval. It only adds what's missing, and only to a FreeScout on 127.0.0.1 or localhost.
 
 **Premium modules:** to try them, copy them in from a clone of the private [freescout-paid-modules](https://github.com/WordPress/freescout-paid-modules) repository. They must never be committed here, so exclude each one first. From `environments/`:
 
@@ -315,7 +423,7 @@ Setup switches them on, and adds sample data for each one that's there, with Hel
 - **Tags:** some of HelpScout's tags and colors, on conversations.
 - **Custom Fields:** the Learn WordPress fields, with values. Plugins and Themes have none.
 - **Saved Replies:** some of HelpScout's saved replies in Plugins and Themes, with short made-up texts.
-- **Teams:** the Plugin, Themes and Learn teams, with conversations assigned to some. Names longer than FreeScout's 20 characters are shortened.
+- **Teams:** the Plugin, Themes and Learn teams, with conversations assigned to some. The admin is in Plugin Reviews, so they get the Plugin Review panel. Names longer than FreeScout's 20 characters are shortened.
 - **Custom Folders:** "New WordPress" in Plugins, for replies to new WordPress version emails.
 - **Mentions:** a note in which one agent mentions another.
 - **Workflows:** some of HelpScout's workflows, with made-up rules. Automatic ones only run for new email with matching subjects, or a tag an agent adds; none run for the sample conversations.

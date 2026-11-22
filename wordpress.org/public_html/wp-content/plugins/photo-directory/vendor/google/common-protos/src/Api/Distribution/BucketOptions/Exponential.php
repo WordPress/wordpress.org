@@ -5,8 +5,8 @@
 namespace Google\Api\Distribution\BucketOptions;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Specifies an exponential sequence of buckets that have a width that is
@@ -26,19 +26,19 @@ class Exponential extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>int32 num_finite_buckets = 1;</code>
      */
-    private $num_finite_buckets = 0;
+    protected $num_finite_buckets = 0;
     /**
      * Must be greater than 1.
      *
      * Generated from protobuf field <code>double growth_factor = 2;</code>
      */
-    private $growth_factor = 0.0;
+    protected $growth_factor = 0.0;
     /**
      * Must be greater than 0.
      *
      * Generated from protobuf field <code>double scale = 3;</code>
      */
-    private $scale = 0.0;
+    protected $scale = 0.0;
 
     /**
      * Constructor.
@@ -138,7 +138,4 @@ class Exponential extends \Google\Protobuf\Internal\Message
     }
 
 }
-
-// Adding a class alias for backwards compatibility with the previous class name.
-class_alias(Exponential::class, \Google\Api\Distribution_BucketOptions_Exponential::class);
 

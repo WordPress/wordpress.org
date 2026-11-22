@@ -20,11 +20,13 @@ namespace Google\Cloud\Core;
 /**
  * Retry implementation.
  *
- * Unlike {@see Google\Cloud\Core\ExponentialBackoff}, Retry requires an implementor
+ * Unlike {@see \Google\Cloud\Core\ExponentialBackoff}, Retry requires an implementor
  * to supply wait times for each iteration.
  */
 class Retry
 {
+    const RETRY_HEADER_KEY = 'x-goog-api-client';
+
     /**
      * @var int
      */
@@ -52,7 +54,7 @@ class Retry
     public function __construct(
         $retries,
         callable $delayFunction,
-        callable $retryFunction = null
+        ?callable $retryFunction = null
     ) {
         $this->retries = $retries !== null ? (int) $retries : 3;
         $this->delayFunction = $delayFunction;

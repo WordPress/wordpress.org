@@ -26,6 +26,14 @@ function bporg_developer_enqueue_styles() {
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\bporg_developer_enqueue_styles', 20 );
 
 /**
+ * Support the shared BuddyPress.org mobile navigation pattern.
+ */
+function bporg_developer_enqueue_navigation() {
+	wp_enqueue_script( 'bporg-developer-navigation', get_stylesheet_directory_uri() . '/js/mobile-menu.js', array(), wp_get_theme()->get( 'Version' ), true );
+}
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\\bporg_developer_enqueue_navigation' );
+
+/**
  * Add the BP REST API handbook post type.
  *
  * @since 1.0.0

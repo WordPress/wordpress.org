@@ -5,6 +5,10 @@
  * @package Rosetta
  */
 
+$user = get_user_by( 'id', $user_id );
+if ( ! $user ) {
+	return;
+}
 ?>
 <div class="wrap">
 	<h2><?php esc_html_e( 'Edit Translation Editor', 'rosetta' ); ?></h2>
@@ -12,7 +16,6 @@
 	<?php echo $feedback_message; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Notice markup assembled by get_feedback_message() from escaped parts. ?>
 
 	<p><?php
-		$user = get_user_by( 'id', $user_id );
 		printf(
 			/* translators: %s: WP.org profile link */
 			esc_html__( 'You are currently editing the user %s.', 'rosetta' ),
@@ -37,7 +40,7 @@
 							<ul id="projects-list" class="projects-list">
 								<li id="project-all" class="active">
 									<label>
-										<input type="checkbox"<?php checked( in_array( 'all', $project_access_list ) ); ?>> <?php esc_html_e( 'All projects', 'rosetta' ); ?>
+										<input type="checkbox"<?php checked( in_array( 'all', (array) $project_access_list, true ) ); ?>> <?php esc_html_e( 'All projects', 'rosetta' ); ?>
 									</label>
 									<div class="sub-projects-wrapper">
 										<?php esc_html_e( 'The translation editor has validation permissions for all projects, including newly-added projects.', 'rosetta' ); ?>
@@ -54,7 +57,7 @@
 			</tbody>
 		</table>
 
-		<input type="hidden" id="project-access-list" name="projects" value="<?php esc_attr( implode( ',', $project_access_list ) ); ?>">
+		<input type="hidden" id="project-access-list" name="projects" value="<?php echo esc_attr( implode( ',', $project_access_list ) ); ?>">
 		<input type="hidden" name="action" value="update-translation-editor">
 		<input type="hidden" name="user_id" value="<?php echo esc_attr( $user_id ); ?>">
 		<?php

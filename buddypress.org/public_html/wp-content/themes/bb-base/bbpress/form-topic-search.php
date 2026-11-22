@@ -9,7 +9,7 @@
 // Exit if accessed directly
 defined( 'ABSPATH' ) || exit;
 
-if ( bbp_allow_search() ) : ?>
+if ( bbp_allow_search() && ! bbp_is_single_user() ) : ?>
 
 	<div class="bbp-search-form">
 		<form role="search" method="get" id="bbp-topic-search-form">

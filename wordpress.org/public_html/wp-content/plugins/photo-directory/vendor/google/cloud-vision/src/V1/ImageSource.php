@@ -5,8 +5,8 @@
 namespace Google\Cloud\Vision\V1;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * External image source (Google Cloud Storage or web URL image location).
@@ -24,7 +24,7 @@ class ImageSource extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string gcs_image_uri = 1;</code>
      */
-    private $gcs_image_uri = '';
+    protected $gcs_image_uri = '';
     /**
      * The URI of the source image. Can be either:
      * 1. A Google Cloud Storage URI of the form
@@ -43,7 +43,7 @@ class ImageSource extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>string image_uri = 2;</code>
      */
-    private $image_uri = '';
+    protected $image_uri = '';
 
     /**
      * Constructor.

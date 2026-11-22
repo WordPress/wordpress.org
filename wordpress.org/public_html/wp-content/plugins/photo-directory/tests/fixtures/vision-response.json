@@ -1,0 +1,48 @@
+{
+	"responses": [
+		{
+			"faceAnnotations": [
+				{
+					"boundingPoly": {
+						"vertices": [ { "x": 1913, "y": 1463 }, { "x": 2108, "y": 1463 }, { "x": 2108, "y": 1689 }, { "x": 1913, "y": 1689 } ]
+					},
+					"fdBoundingPoly": {
+						"vertices": [ { "x": 1931, "y": 1512 }, { "x": 2095, "y": 1512 }, { "x": 2095, "y": 1673 }, { "x": 1931, "y": 1673 } ]
+					},
+					"landmarks": [
+						{ "type": 1, "position": { "x": 2009.75, "y": 1569.5, "z": -0.5 } },
+						{ "type": 2, "position": { "x": 2066.5, "y": 1578, "z": 26.75 } }
+					],
+					"rollAngle": 7.75,
+					"panAngle": 25.875,
+					"tiltAngle": 1.25,
+					"detectionConfidence": 0.8046875,
+					"landmarkingConfidence": 0.625,
+					"joyLikelihood": 5,
+					"sorrowLikelihood": 1,
+					"angerLikelihood": 1,
+					"surpriseLikelihood": 1,
+					"underExposedLikelihood": 1,
+					"blurredLikelihood": 1,
+					"headwearLikelihood": 1
+				}
+			],
+			"labelAnnotations": [
+				{ "mid": "/m/07j7r", "description": "Tree", "score": 0.96875, "topicality": 0.96875 },
+				{ "mid": "/m/05s2s", "description": "Plant", "score": 0.9375, "topicality": 0.9375 },
+				{ "mid": "/m/01bqvp", "description": "Sky", "score": 0.8125, "topicality": 0.8125 },
+				{ "mid": "/m/0csby", "description": "Cloud", "score": 0.75, "topicality": 0.75 }
+			],
+			"imagePropertiesAnnotation": {
+				"dominantColors": {
+					"colors": [
+						{ "color": { "red": 34, "green": 85, "blue": 51 }, "score": 0.4375, "pixelFraction": 0.25 },
+						{ "color": { "red": 200, "green": 220, "blue": 240 }, "score": 0.25, "pixelFraction": 0.375 },
+						{ "color": { "green": 12, "blue": 3 }, "score": 0.125, "pixelFraction": 0.0625 }
+					]
+				}
+			},
+			"safeSearchAnnotation": { "adult": 1, "spoof": 2, "medical": 1, "violence": 2, "racy": 3 }
+		}
+	]
+}

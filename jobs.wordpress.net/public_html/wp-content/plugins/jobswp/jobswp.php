@@ -9,6 +9,7 @@ Description: Functionality for jobs.wordpress.net
 
 defined( 'ABSPATH' ) or die();
 
+require_once __DIR__ . '/class-jobs-dot-wp-digest.php';
 require_once( dirname( __FILE__ ) . '/jobswp-captcha.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-contact-form.php' );
 require_once( dirname( __FILE__ ) . '/jobswp-moderation.php' );
@@ -123,6 +124,9 @@ class Jobs_Dot_WP {
 		foreach ( [ 'the_content', 'the_title', 'single_post_title' ] as $filter ) {
 			add_filter( $filter,                  array( $this, 'proper_project_names_dangit' ) );
 		}
+
+		add_filter( 'the_content', array( $this, 'escape_job_content_syntax' ), PHP_INT_MIN );
+		add_filter( 'wp_insert_post_data', array( $this, 'store_job_content_escaped' ), PHP_INT_MAX );
 
 		add_action( 'save_post_job',                  array( $this, 'email_job_poster' ), 10, 3 );
 		add_action( 'wp',                             array( $this, 'maybe_remove_job' ) );
@@ -621,6 +625,53 @@ class Jobs_Dot_WP {
 	}
 
 	/**
+	 * Keeps shortcode, block and embed syntax in a job description as visible text.
+	 *
+	 * Descriptions are plain text with a few allowed tags; shortcodes, block
+	 * delimiters and embeddable URLs are not part of that format, so the_content
+	 * must not interpret them.
+	 *
+	 * @param string $content Job description.
+	 * @return string
+	 */
+	private static function escape_content_syntax( $content ) {
+		return str_replace( array( '[', '<!--', '://' ), array( '&#91;', '&lt;!--', '&#58;//' ), $content );
+	}
+
+	/**
+	 * Escapes job content syntax on output, ahead of every other the_content filter.
+	 *
+	 * @param string $content Post content.
+	 * @return string
+	 */
+	public function escape_job_content_syntax( $content ) {
+		if ( 'job' !== get_post_type() ) {
+			return $content;
+		}
+
+		return self::escape_content_syntax( $content );
+	}
+
+	/**
+	 * Stores job descriptions with their syntax already escaped.
+	 *
+	 * Must run after kses, which decodes entities back to the characters they stand
+	 * for. No unslashing needed: neither side of the replacement has a quote or backslash.
+	 *
+	 * @param array $data Slashed, sanitized post data.
+	 * @return array
+	 */
+	public function store_job_content_escaped( $data ) {
+		if ( 'job' !== $data['post_type'] ) {
+			return $data;
+		}
+
+		$data['post_content'] = self::escape_content_syntax( $data['post_content'] );
+
+		return $data;
+	}
+
+	/**
 	 * Adds job postings to the feed.
 	 *
 	 * @param WP_Query $query The query object.
@@ -659,6 +710,10 @@ class Jobs_Dot_WP {
 			$template = $this->success ? 'single' : 'post-job';
 			$this->success = false;
 			$content .= get_template_part( 'content', $template );
+
+			if ( 'single' === $template ) {
+				wp_reset_postdata();
+			}
 		}
 		return $content;
 	}
@@ -813,14 +868,22 @@ EMAIL;
 			}
 			// Validate syntax of certain fields
 			if ( ! $has_errors ) :
+				$howtoapply_methods = jobswp_get_howtoapply_methods();
 				if ( ! is_email( $_POST['email'] ) ) {
 					$has_errors = __( 'The provided "Email Address" is not a proper email address.', 'jobswp' );
 					unset( $_POST['email'] );
+				} elseif ( ! isset( $howtoapply_methods[ $_POST['howtoapply_method'] ] ) ) {
+					$has_errors = __( 'The provided "How to Apply" method is not valid.', 'jobswp' );
+					unset( $_POST['howtoapply_method'] );
 				} elseif ( 'email' == $_POST['howtoapply_method'] && ! is_email( $_POST['howtoapply'] ) ) {
 					$has_errors = __( 'The provided "How to Apply" email address is not a proper email address.', 'jobswp' );
 					unset( $_POST['howtoapply'] );
 				} elseif ( 'web' == $_POST['howtoapply_method'] && is_email( $_POST['howtoapply'] ) ) {
-					$has_errors = __( 'The provided "How to Apply" online form address appear to be an email address. Either supply a website address or change the dropdown to "Email Address".', 'jobswp' );
+					$has_errors = sprintf(
+						/* translators: %s: Label for the email how-to-apply method. */
+						__( 'The provided "How to Apply" online form address appears to be an email address. Either supply a website address or change the dropdown to "%s".', 'jobswp' ),
+						$howtoapply_methods['email']
+					);
 				} elseif ( 'web' == $_POST['howtoapply_method'] && ! wp_http_validate_url( esc_url_raw( $_POST['howtoapply'] ) ) ) {
 					$has_errors = __( 'The provided "How to Apply" online form address is not a proper URL.', 'jobswp' );
 				}
@@ -1019,7 +1082,7 @@ EMAIL;
 	/**
 	 * Schedules job pruning if it isn't already scheduled.
 	 *
-	 * Jobs are scheduled to be pruned daily.
+	 * Jobs are scheduled to be pruned hourly.
 	 */
 	private function schedule_job_pruning() {
 		if ( ! wp_next_scheduled( 'jobswp_scheduled_job_pruning' ) && ! defined( 'WP_INSTALLING' ) )
@@ -1032,12 +1095,39 @@ EMAIL;
 	public function scheduled_job_pruning() {
 		global $wpdb;
 
-		$wpdb->query( $wpdb->prepare(
-			"UPDATE {$wpdb->prefix}posts
-			 SET post_status = 'pruned'
-			 WHERE DateDiff(NOW(), post_date) > %d AND post_type = 'job' AND post_status = 'publish'",
-			self::get_days_until_pruning()
-		) );
+		$cutoff = gmdate( 'Y-m-d H:i:s', time() - self::get_days_until_pruning() * DAY_IN_SECONDS );
+
+		$job_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts}
+				WHERE post_type = 'job' AND post_status = 'publish' AND post_date_gmt < %s",
+				$cutoff
+			)
+		);
+
+		// Set the status directly, since wp_update_post() would re-filter the content without a user's unfiltered_html.
+		wp_defer_term_counting( true );
+
+		foreach ( $job_ids as $job_id ) {
+			// A job closed or extended since the query above no longer matches, and must not be transitioned.
+			$pruned = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->posts} SET post_status = 'pruned'
+					WHERE ID = %d AND post_status = 'publish' AND post_date_gmt < %s",
+					$job_id,
+					$cutoff
+				)
+			);
+
+			if ( ! $pruned ) {
+				continue;
+			}
+
+			clean_post_cache( $job_id );
+			wp_transition_post_status( 'pruned', 'publish', get_post( $job_id ) );
+		}
+
+		wp_defer_term_counting( false );
 	}
 
 	/**
@@ -1052,6 +1142,7 @@ EMAIL;
 	 *
 	 * Currently:
 	 *   for 'email' : sanitizes the value as an email
+	 *   for 'howtoapply_method' : ensures the value is a recognized apply-to method
 	 *   for 'howtoapply' : depending on 'howtoapply_method', sanitizes the value as
 	 *     email or URL
 	 *
@@ -1064,6 +1155,12 @@ EMAIL;
 		switch ( $field ) {
 			case 'email':
 				$value = sanitize_email( $value );
+				break;
+			case 'howtoapply_method':
+				$howtoapply_methods = jobswp_get_howtoapply_methods();
+				if ( ! isset( $howtoapply_methods[ $value ] ) ) {
+					$value = '';
+				}
 				break;
 			case 'howtoapply':
 				if ( isset( $extra_data['howtoapply_method'] ) ) {

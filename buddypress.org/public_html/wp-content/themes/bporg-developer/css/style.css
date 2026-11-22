@@ -349,3 +349,211 @@ body .meta a,
 		color: #fff;
 	}
 }
+
+/* Match the current BuddyPress.org header and footer. */
+#header {
+	position: relative;
+	border: 0;
+	background: #dd823b;
+	font-size: 16px;
+}
+
+#header-inner {
+	max-width: 960px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+#header #network-title {
+	order: 1;
+	flex: 0 0 269px;
+	width: 269px;
+}
+
+#header #network-title a {
+	display: block;
+	float: none;
+	width: 269px;
+	height: 80px;
+	margin: 0;
+	background-position: left center;
+	background-size: 269px 65px;
+}
+
+#header #nav {
+	order: 2;
+	float: none;
+	margin: 0 0 0 auto;
+}
+
+#header #bb-nav {
+	display: flex;
+	align-items: center;
+	margin: 0;
+	padding: 0;
+}
+
+#header #bb-nav li {
+	display: flex;
+	align-items: center;
+	height: 80px;
+	margin: 0;
+}
+
+#header #nav #bb-nav li a {
+	display: flex;
+	align-items: center;
+	height: 80px;
+	padding: 0 13px;
+	border: 0;
+	border-radius: 0;
+	color: #fff;
+	line-height: 1;
+}
+
+#header #nav #bb-nav li a:hover {
+	background: rgba(255, 255, 255, .3);
+	color: #fff;
+}
+
+#header #nav #bb-nav li.current a {
+	background: #fff;
+	color: #222;
+}
+
+body.admin-bar header#masthead {
+	margin-top: 0;
+}
+
+.site-header,
+.menu-container,
+.devhub-wrap div#inner-search {
+	background-color: #dd823b;
+}
+
+#footer {
+	max-width: none;
+	margin: 0;
+	padding: 0;
+	background: #fafafa;
+	color: #777;
+}
+
+#footer-inner {
+	max-width: 960px;
+	min-height: 96px;
+	display: flex;
+	align-items: center;
+	gap: 24px;
+}
+
+#footer div.links {
+	order: 2;
+	float: none;
+	margin-left: auto;
+}
+
+#footer div.details {
+	order: 1;
+}
+
+#footer p a {
+	color: #777;
+}
+
+@media screen and (max-width: 959px) {
+	#header-inner,
+	#footer-inner {
+		box-sizing: border-box;
+		padding-right: 20px;
+		padding-left: 20px;
+	}
+}
+
+@media screen and (max-width: 899px) {
+	#header {
+		position: relative;
+		z-index: 100;
+	}
+
+	#header #network-title a {
+		width: 269px !important;
+	}
+
+	#bb-menu-icon {
+		display: block;
+		width: 60px;
+		height: 80px;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+	}
+
+	#bb-menu-icon:before {
+		color: #fff;
+	}
+
+	#header #bb-nav,
+	#header #nav:hover #bb-nav,
+	#header #nav:focus #bb-nav {
+		display: none !important;
+	}
+
+	#header #nav #bb-menu-icon[aria-expanded="true"] + #bb-nav {
+		display: block !important;
+		position: absolute;
+		top: 80px;
+		left: 0;
+		right: 0;
+		width: 100%;
+		background: #fff;
+		box-shadow: 0 8px 20px rgba(0, 0, 0, .12);
+	}
+
+	#header #bb-nav li {
+		display: block;
+		height: auto;
+	}
+
+	#header #nav #bb-nav li a {
+		height: auto;
+		margin: 0;
+		padding: 14px 20px;
+		color: #222;
+		text-align: left;
+	}
+
+	#header #nav #bb-nav li a:hover,
+	#header #nav #bb-nav li.current a {
+		background: #f4f4f4;
+		color: #222;
+	}
+
+	#footer-inner {
+		min-height: 0;
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 12px;
+		padding-top: 24px;
+		padding-bottom: 24px;
+	}
+
+	#footer div.links,
+	#footer div.details {
+		margin: 0;
+	}
+}
+
+@media screen and (max-width: 480px) {
+	#header #network-title,
+	#header #network-title a {
+		flex-basis: 210px;
+		width: 210px !important;
+	}
+
+	#header #network-title a {
+		background-size: 210px auto;
+	}
+}

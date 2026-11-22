@@ -5,8 +5,8 @@
 namespace Google\Iam\V1\Logging;
 
 use Google\Protobuf\Internal\GPBType;
-use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
+use Google\Protobuf\RepeatedField;
 
 /**
  * Audit log information specific to Cloud IAM. This message is serialized
@@ -22,7 +22,7 @@ class AuditData extends \Google\Protobuf\Internal\Message
      *
      * Generated from protobuf field <code>.google.iam.v1.PolicyDelta policy_delta = 2;</code>
      */
-    private $policy_delta = null;
+    protected $policy_delta = null;
 
     /**
      * Constructor.
@@ -43,11 +43,21 @@ class AuditData extends \Google\Protobuf\Internal\Message
      * Policy delta between the original policy and the newly set policy.
      *
      * Generated from protobuf field <code>.google.iam.v1.PolicyDelta policy_delta = 2;</code>
-     * @return \Google\Cloud\Iam\V1\PolicyDelta
+     * @return \Google\Cloud\Iam\V1\PolicyDelta|null
      */
     public function getPolicyDelta()
     {
         return $this->policy_delta;
+    }
+
+    public function hasPolicyDelta()
+    {
+        return isset($this->policy_delta);
+    }
+
+    public function clearPolicyDelta()
+    {
+        unset($this->policy_delta);
     }
 
     /**

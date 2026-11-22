@@ -590,10 +590,6 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 			) )
 		);
 
-		// SVN commits skip the upload's shortcode check, so make the delimiters inert here.
-		$theme_post_name           = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_post_name );
-		$theme_data['Description'] = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $theme_data['Description'] );
-
 		wp_update_post( array(
 			'ID'           => $post_id,
 			'post_title'   => $theme_post_name,
@@ -671,6 +667,25 @@ function wporg_themes_approve_version( $post_id, $version, $old_status ) {
 	update_user_meta( $post->post_author, 'has_themes', time() );
 }
 add_action( 'wporg_themes_update_version_live', 'wporg_themes_approve_version', 10, 3 );
+
+/**
+ * Stores a theme's name and description with their square brackets encoded.
+ *
+ * @param array $data Slashed, sanitized post data.
+ * @return array
+ */
+function wporg_themes_encode_header_delimiters( $data ) {
+	if ( 'repopackage' !== $data['post_type'] ) {
+		return $data;
+	}
+
+	foreach ( array( 'post_title', 'post_content' ) as $field ) {
+		$data[ $field ] = str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $data[ $field ] );
+	}
+
+	return $data;
+}
+add_filter( 'wp_insert_post_data', 'wporg_themes_encode_header_delimiters', PHP_INT_MAX );
 
 /**
  * Closes a theme.

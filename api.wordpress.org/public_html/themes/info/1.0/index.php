@@ -76,7 +76,7 @@ if ( defined( 'JSON_RESPONSE' ) && JSON_RESPONSE ) {
 		}
 	}
 
-	$request = unserialize( $post_request, [ 'allowed_classes' => [ 'stdClass' ] ] );
+	$request = @unserialize( $post_request, [ 'allowed_classes' => [ 'stdClass' ] ] );
 
 	$format = 'php';
 }

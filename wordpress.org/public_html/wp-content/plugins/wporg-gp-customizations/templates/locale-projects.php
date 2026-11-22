@@ -269,7 +269,9 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 }
 ?>
 
-<script>
+<?php
+wp_print_inline_script_tag(
+	<<<'JS'
 	jQuery( document ).ready( function( $ ) {
 		// Don't filter if there's an existing search term, or if we're paginated
 		// Fall back to a full page reload for those cases.
@@ -309,6 +311,8 @@ if ( isset( $pages ) && $pages['pages'] > 1 ) {
 			}
 		});
 	});
-</script>
+	JS
+);
+?>
 
 <?php gp_tmpl_footer();

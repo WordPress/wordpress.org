@@ -14,19 +14,9 @@ class CalendarPeriod
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0ab3020a21676f6f676c652f747970652f63616c656e6461725f70657269" .
-            "6f642e70726f746f120b676f6f676c652e747970652a7f0a0e43616c656e" .
-            "646172506572696f64121f0a1b43414c454e4441525f504552494f445f55" .
-            "4e535045434946494544100012070a03444159100112080a045745454b10" .
-            "02120d0a09464f52544e49474854100312090a054d4f4e54481004120b0a" .
-            "0751554152544552100512080a0448414c46100612080a04594541521007" .
-            "42780a0f636f6d2e676f6f676c652e74797065421343616c656e64617250" .
-            "6572696f6450726f746f50015a48676f6f676c652e676f6c616e672e6f72" .
-            "672f67656e70726f746f2f676f6f676c65617069732f747970652f63616c" .
-            "656e646172706572696f643b63616c656e646172706572696f64a2020347" .
-            "5450620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xB3\x02\x0A!google/type/calendar_period.proto\x12\x0Bgoogle.type*\x7F\x0A\x0ECalendarPeriod\x12\x1F\x0A\x1BCALENDAR_PERIOD_UNSPECIFIED\x10\x00\x12\x07\x0A\x03DAY\x10\x01\x12\x08\x0A\x04WEEK\x10\x02\x12\x0D\x0A\x09FORTNIGHT\x10\x03\x12\x09\x0A\x05MONTH\x10\x04\x12\x0B\x0A\x07QUARTER\x10\x05\x12\x08\x0A\x04HALF\x10\x06\x12\x08\x0A\x04YEAR\x10\x07Bx\x0A\x0Fcom.google.typeB\x13CalendarPeriodProtoP\x01ZHgoogle.golang.org/genproto/googleapis/type/calendarperiod;calendarperiod\xA2\x02\x03GTPb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

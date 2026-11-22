@@ -14,6 +14,7 @@ services:
       # Not localhost: FreeScout treats that as "not installed" and guesses its URL prefix from the running script.
       APP_URL: http://127.0.0.1:${FREESCOUT_PORT:-8890}
       APP_DEBUG: "true"
+      APP_TIMEZONE: UTC
       # Installed with PHPUnit as a dev dependency; it would otherwise overlay every page.
       DEBUGBAR_ENABLED: "false"
       APP_KEY_FILE: /var/www/html/storage/app-key
@@ -52,7 +53,7 @@ services:
         condition: service_started
 
   db:
-    image: mariadb:11
+    image: mariadb:11.4
     environment:
       MARIADB_ROOT_PASSWORD: root
       MARIADB_DATABASE: freescout

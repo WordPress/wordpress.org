@@ -1,0 +1,118 @@
+/*
+Theme Name: Jobs Theme 2026
+Theme URI: https://jobs.wordpress.net/
+Author: WordPress Meta Team
+Description: Block theme for jobs.wordpress.net. Successor to the classic Jobs theme. Pair with the Jobs and wporg-jobs-blocks plugins.
+Version: 2.0.0
+Requires at least: 7.1
+Tested up to: 7.1
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: LICENSE
+Text Domain: wporg-jobs-2026
+Tags: block-theme
+
+Based in part on the classic Jobs theme (Automattic / melchoyce / coffee2code) and wporg-main-2022.
+Licensed under the GPL.
+*/
+
+.wp-site-blocks {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.wp-site-blocks > main {
+	flex: 1 0 auto;
+}
+
+.wp-site-blocks > header.wp-block-template-part + *,
+.wp-site-blocks > * + footer.wp-block-template-part {
+	margin-block-start: 0;
+}
+
+.wp-site-blocks > header.wp-block-template-part:has(> .is-position-sticky) {
+	position: sticky;
+	top: var(--wp-admin--admin-bar--height, 0px);
+	z-index: 100;
+}
+
+@media screen and (max-width: 600px) {
+	.wp-site-blocks > header.wp-block-template-part:has(> .is-position-sticky) {
+		top: 0;
+	}
+}
+
+html:has(.wp-site-blocks > header.wp-block-template-part > .is-position-sticky) {
+	scroll-padding-top: calc(var(--wp-admin--admin-bar--height, 0px) + 70px);
+}
+
+@media screen and (max-width: 600px) {
+	html:has(.wp-site-blocks > header.wp-block-template-part > .is-position-sticky) {
+		scroll-padding-top: 77px;
+	}
+}
+
+:is(.wp-block-post-content, .is-root-container) > .alignfull + .alignfull {
+	margin-block-start: 0;
+}
+
+:where(h1, h2, h3, h4, h5, h6) {
+	text-wrap-style: balance;
+}
+
+:where(p, li, blockquote, figcaption) {
+	text-wrap-style: pretty;
+}
+
+@supports not (text-wrap-style: pretty) {
+	:where(p, li, blockquote, figcaption) {
+		text-wrap-style: balance;
+	}
+}
+
+a:where(:not(.wp-element-button)) {
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.15em;
+}
+
+:where(input:not([type="submit"], [type="button"], [type="checkbox"], [type="radio"], .wp-block-search__input), select, textarea) {
+	box-sizing: border-box;
+	width: 100%;
+}
+
+:where(input, select, textarea):focus {
+	outline: 2px solid transparent;
+	border-color: var(--wp--preset--color--blueberry);
+	box-shadow: 0 0 0 1px var(--wp--preset--color--blueberry);
+}
+
+:where(textarea) {
+	min-height: 150px;
+	resize: vertical;
+}
+
+:where(label) {
+	display: block;
+	margin-bottom: 4px;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 600;
+	color: var(--wp--preset--color--ink);
+}
+
+.post-job label span {
+	font-style: italic;
+	font-weight: 400;
+	color: var(--wp--preset--color--muted);
+}
+
+.post-job .accept label {
+	display: inline-block;
+	margin-left: 8px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	:where(a, .wp-element-button, input, select, textarea) {
+		transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+	}
+}

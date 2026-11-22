@@ -80,7 +80,7 @@ input[type="submit"]::-moz-focus-inner {
 
 .button.button-small,
 .button-group.button-small .button {
-	font-size: ms( -4 );
+	font-size: ms(-4);
 	height: ms(2);
 	line-height: 1;
 	padding: 0 0.5rem;
@@ -267,7 +267,7 @@ button[type="submit"] {
 		padding-bottom: var(--wp--custom--button--spacing--padding--bottom);
 		padding-left: var(--wp--custom--button--spacing--padding--left);
 		padding-right: var(--wp--custom--button--spacing--padding--right);
-		border: var(--wp--custom--button--border--width) solid currentColor;
+		border: var(--wp--custom--button--border--width) solid currentcolor;
 		color: var(--wp--custom--button--active--color--text);
 		background-color: var(--wp--custom--button--active--color--background);
 	}

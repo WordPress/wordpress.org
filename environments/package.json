@@ -3,7 +3,7 @@
 	"private": true,
 	"description": "Local development environments for WordPress.org",
 	"engines": {
-		"node": ">=20"
+		"node": ">=24"
 	},
 	"scripts": {
 		"plugins:env": "wp-env --config plugin-directory/.wp-env.json",
@@ -26,7 +26,13 @@
 		"make:test:cli": "npm run make:test:env -- run cli --env-cwd=wp-content/plugins/wporg-cli phpunit",
 		"make:test": "npm run make:test:env -- start && npm run make:test:posting-access && npm run make:test:badge-management && npm run make:test:trac-watcher && npm run make:test:trac-notifications && npm run make:test:cli",
 		"jobs:env": "wp-env --config jobs/.wp-env.json",
+		"jobs:test:env": "wp-env --config jobs/.wp-env.test.json",
+		"jobs:test": "npm run jobs:test:env -- start && npm run jobs:test:env -- run cli --env-cwd=wp-content/plugins/jobswp phpunit",
+		"photo-directory:test:env": "wp-env --config photo-directory/.wp-env.test.json",
+		"photo-directory:test": "npm run photo-directory:test:env -- start && npm run photo-directory:test:env -- run cli --env-cwd=wp-content/plugins/photo-directory phpunit",
 		"browsehappy:env": "wp-env --config browsehappy/.wp-env.json",
+		"documentation:env": "wp-env --config documentation/.wp-env.json",
+		"documentation:refresh": "npm run documentation:env -- run cli -- wp option delete wporg_docs_env_imported; npm run documentation:env -- run cli -- wp eval-file wp-content/env-bin/import-content.php --user=admin",
 		"openverse:test:env": "wp-env --config openverse/.wp-env.test.json",
 		"openverse:test": "npm run openverse:test:env -- start && npm run openverse:test:env -- run cli --env-cwd=wp-content/themes/wporg-openverse phpunit",
 		"translate:env": "wp-env --config translate/.wp-env.json",
@@ -41,6 +47,10 @@
 		"support:refresh": "npm run support:env -- run cli -- wp option delete wporg_support_env_seeded; bash support-forums/bin/after-start.sh",
 		"support:test:env": "wp-env --config support-forums/.wp-env.test.json",
 		"support:test": "npm run support:test:env -- start && npm run support:test:env -- run cli --env-cwd=wp-content/plugins/support-forums phpunit",
+		"wptv:env": "wp-env --config wordpress-tv/.wp-env.json",
+		"wptv:refresh": "npm run wptv:env -- run cli -- wp option delete wptv_env_imported; npm run wptv:env -- run cli -- wp eval-file wp-content/env-bin/import-videos.php",
+		"wptv:test:env": "wp-env --config wordpress-tv/.wp-env.test.json",
+		"wptv:test": "npm run wptv:test:env -- start && npm run wptv:test:env -- run cli --env-cwd=wp-content/themes/wptv-27 phpunit",
 		"freescout:env": "docker compose --file freescout/docker-compose.yml",
 		"freescout:start": "npm run freescout:env -- up --detach --build --wait && npm run freescout:setup",
 		"freescout:setup": "npm run freescout:env -- exec -T --user www-data app bash /srv/env/bin/setup.sh",
@@ -51,6 +61,6 @@
 		"freescout:test": "npm run freescout:env -- exec -T --user www-data app bash /srv/env/bin/test.sh"
 	},
 	"devDependencies": {
-		"@wordpress/env": "^11"
+		"@wordpress/env": "^11.9.0"
 	}
 }

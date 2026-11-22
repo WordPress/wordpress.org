@@ -530,8 +530,13 @@ class Import {
 		// Set tags from the readme
 		wp_set_object_terms( $plugin->ID, $readme->tags, 'plugin_tags' );
 
-		// Update the contributors list
-		wp_set_object_terms( $plugin->ID, $readme->contributors, 'plugin_contributors' );
+		// Update the contributors list, which always includes the plugin owner.
+		$contributors = $readme->contributors;
+		$owner        = get_user_by( 'id', $plugin->post_author );
+		if ( $owner && ! in_array( $owner->user_nicename, $contributors, true ) ) {
+			array_unshift( $contributors, $owner->user_nicename );
+		}
+		wp_set_object_terms( $plugin->ID, $contributors, 'plugin_contributors' );
 
 		// Update the committers list
 		Tools::sync_plugin_committers_with_taxonomy( $plugin->post_name );
@@ -595,14 +600,6 @@ class Import {
 		update_post_meta( $plugin->ID, 'assets_icons',       wp_slash( $assets['icon'] ) );
 		update_post_meta( $plugin->ID, 'assets_banners',     wp_slash( $assets['banner'] ) );
 		update_post_meta( $plugin->ID, 'last_updated',       wp_slash( $plugin->post_modified_gmt ) );
-
-		// Calculate the 'plugin color' from the average color of the banner if provided. This is used for fallback icons.
-		$banner_average_color = '';
-		if ( $first_banner = reset( $assets['banner'] ) ) {
-			// The Banners are not stored locally, which is why a URL is used here
-			$banner_average_color = Tools::get_image_average_color( Template::get_asset_url( $plugin, $first_banner, false /* no CDN */ ) );
-		}
-		update_post_meta( $plugin->ID, 'assets_banners_color', wp_slash( $banner_average_color ) );
 
 		// Store the content of blueprint files, if they're available and valid.
 		if ( isset( $assets['blueprint'] ) && count( $assets['blueprint'] ) > 0 ) {
@@ -1135,22 +1132,25 @@ class Import {
 					}
 				}
 			}
-		} else {
-			foreach ( Filesystem::list_files( $base_dir, true, '!\.(?:php|js|jsx)$!i' ) as $filename ) {
-				$blocks_in_file = $this->find_blocks_in_file( $filename );
-				if ( ! empty( $blocks_in_file ) ) {
-					$relative_filename = str_replace( "$base_dir/", '', $filename );
-					$potential_block_directories[] = dirname( $relative_filename );
-					foreach ( $blocks_in_file as $block ) {
-						if ( isset( $blocks[ $block->name ] ) ) {
-							$blocks[ $block->name ] = (object) array_merge( (array) $blocks[ $block->name ], array_filter( (array) $block ) );
-						} else {
-							$blocks[ $block->name ] = $block;
-						}
+		}
+
+		// Also list blocks registered only in code; block.json data takes precedence.
+		$code_blocks = array();
+		foreach ( Filesystem::list_files( $base_dir, true, '!\.(?:php|js|jsx)$!i' ) as $filename ) {
+			$blocks_in_file = $this->find_blocks_in_file( $filename );
+			if ( ! empty( $blocks_in_file ) ) {
+				$relative_filename             = str_replace( "$base_dir/", '', $filename );
+				$potential_block_directories[] = dirname( $relative_filename );
+				foreach ( $blocks_in_file as $block ) {
+					if ( isset( $code_blocks[ $block->name ] ) ) {
+						$code_blocks[ $block->name ] = (object) array_merge( (array) $code_blocks[ $block->name ], array_filter( (array) $block ) );
+					} else {
+						$code_blocks[ $block->name ] = $block;
 					}
 				}
 			}
 		}
+		$blocks += $code_blocks;
 
 		// Set the fallback name for the blocks.
 		foreach ( $blocks as $block_name => &$block ) {

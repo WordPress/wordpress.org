@@ -7,6 +7,8 @@
  * @package WordPressdotorg\Plugin_Directory\Theme
  */
 
+use WordPressdotorg\Plugin_Directory\Plugin_I18n;
+
 global $section_slug, $section_title, $section_content;
 
 $prefix = in_array( $section_slug, array( 'screenshots', 'faq', 'blocks' ), true ) ? '' : 'tab-';
@@ -14,24 +16,69 @@ $prefix = in_array( $section_slug, array( 'screenshots', 'faq', 'blocks' ), true
 $classes = [ 'plugin-' . $section_slug, 'section' ];
 $classes = implode( ' ', $classes );
 
+// Presentation attributes allowed on every SVG shape and group.
+$svg_presentation_attributes = array(
+	'fill'              => true,
+	'fill-rule'         => true,
+	'fill-opacity'      => true,
+	'clip-rule'         => true,
+	'stroke'            => true,
+	'stroke-width'      => true,
+	'stroke-linecap'    => true,
+	'stroke-linejoin'   => true,
+	'stroke-miterlimit' => true,
+	'stroke-dasharray'  => true,
+	'stroke-opacity'    => true,
+	'opacity'           => true,
+	'transform'         => true,
+);
+
 $allowed_svg = array(
-	'svg'   => array(
-		'class' => true,
-		'aria-hidden' => true,
+	'svg'      => array(
+		'class'           => true,
+		'aria-hidden'     => true,
 		'aria-labelledby' => true,
-		'role' => true,
-		'xmlns' => true,
-		'width' => true,
+		'role'            => true,
+		'focusable'       => true,
+		'xmlns'           => true,
+		'width'           => true,
+		'height'          => true,
+		'viewbox'         => true,
+	) + $svg_presentation_attributes,
+	'g'        => $svg_presentation_attributes,
+	'title'    => array( 'title' => true ),
+	'path'     => array( 'd' => true ) + $svg_presentation_attributes,
+	'circle'   => array(
+		'cx' => true,
+		'cy' => true,
+		'r'  => true,
+	) + $svg_presentation_attributes,
+	'ellipse'  => array(
+		'cx' => true,
+		'cy' => true,
+		'rx' => true,
+		'ry' => true,
+	) + $svg_presentation_attributes,
+	'rect'     => array(
+		'x'      => true,
+		'y'      => true,
+		'width'  => true,
 		'height' => true,
-		'viewbox' => true,
-	),
-	'g'     => array( 'fill' => true ),
-	'title' => array( 'title' => true ),
-	'path'  => array(
-		'd' => true,
-		'fill' => true,
-		'transform' => true,
-	),
+		'rx'     => true,
+		'ry'     => true,
+	) + $svg_presentation_attributes,
+	'line'     => array(
+		'x1' => true,
+		'y1' => true,
+		'x2' => true,
+		'y2' => true,
+	) + $svg_presentation_attributes,
+	'polyline' => array( 'points' => true ) + $svg_presentation_attributes,
+	'polygon'  => array( 'points' => true ) + $svg_presentation_attributes,
+	// Keep clip and mask definitions so their shapes are not drawn as content.
+	'defs'     => array(),
+	'clippath' => array(),
+	'mask'     => array(),
 );
 ?>
 
@@ -42,7 +89,7 @@ $allowed_svg = array(
 	<ul class="plugin-blocks-list">
 		<?php
 		foreach ( $section_content as $block ) :
-			$block_name = isset( $block->title ) ? $block->title : false;
+			$block_name = isset( $block->title ) ? Plugin_I18n::instance()->translate( 'block_title:' . md5( $block->title ), $block->title, array( 'code_i18n' => true ) ) : false;
 			if ( ! $block_name ) {
 				$block_name = isset( $block->name ) ? $block->name : false;
 			}
@@ -84,7 +131,7 @@ $allowed_svg = array(
 				<?php endif; ?>
 				<span class="block-title"><?php echo esc_html( $block_name ); ?></span>
 				<?php if ( isset( $block->description ) ) : ?>
-					<span class="block-description"><?php echo esc_html( $block->description ); ?></dd>
+					<span class="block-description"><?php echo esc_html( Plugin_I18n::instance()->translate( 'block_description:' . md5( $block->description ), $block->description, array( 'code_i18n' => true ) ) ); ?></span>
 				<?php endif; ?>
 			</li>
 		<?php endforeach; ?>

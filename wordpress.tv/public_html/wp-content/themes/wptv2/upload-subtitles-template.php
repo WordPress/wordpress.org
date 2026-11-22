@@ -7,30 +7,9 @@ function subtitles_upload_css() {
 	?>
 	<style type="text/css">
 	<?php // theme structural css ?>
-	html,
-	body {
-		width: 100%;
-		height: 100%;
-		margin: 0;
-	}
-
-	#page {
-		height: auto;
-		min-height: 100%;
-		position: relative;
-		width: 100%;
-	}
-
 	#header {
 		margin: 0;
 		padding-top: 10px;
-	}
-
-	#footer {
-		position: absolute;
-		bottom: 0;
-		right: 0;
-		left: 0;
 	}
 
 	.video-upload {
@@ -267,7 +246,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 				<tr>
 					<th><label for="wptv_author_email"><?php esc_html_e( 'Email Address', 'wptv' ); ?><span class="required"> * </span></label></th>
 					<td>
-						<input type="text" id="wptv_author_email" name="wptv_author_email" />
+						<input type="email" id="wptv_author_email" name="wptv_author_email" />
 					</td>
 				</tr>
 
@@ -289,7 +268,7 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 				</tr>
 
 				<tr>
-					<td colspan="2"><em>* All field are required</em></td>
+					<td colspan="2"><em>* All fields are required</em></td>
 				</tr>
 
 				<tr>
@@ -303,10 +282,12 @@ if ( ! empty( $_REQUEST['error'] ) ) {
 		<h3><?php esc_html_e( 'Instructions', 'wptv' ); ?></h3>
 
 		<?php
-			$instructions = get_post( 17639 );
-			setup_postdata( $instructions );
+		$instructions_post = get_post( 17639 );
+		if ( $instructions_post instanceof WP_Post ) {
+			setup_postdata( $instructions_post );
 			the_content();
 			wp_reset_postdata();
+		}
 		?>
 	</div>
 </div>

@@ -12,6 +12,13 @@ class Commit_Handler {
 	protected $test_mode = false;
 	protected $svnlook = '/usr/bin/svnlook';
 
+	/**
+	 * Output of each svnlook subcommand already run, keyed by subcommand.
+	 *
+	 * @var string[]
+	 */
+	protected $svnlook_cache = array();
+
 	public function __construct( Send $send, $trac, $repo, $rev ) {
 		$this->send = $send;
 		$this->trac = Trac::get( $trac );
@@ -20,9 +27,14 @@ class Commit_Handler {
 	}
 
 	public function run() {
-		$this->generate_payload();
+		// One payload per commit format, so each channel gets the full message or just the summary.
+		$payloads = array();
 		foreach ( $this->trac->get_commit_channels( $this->svnlook( 'changed' ), $this->svnlook( 'log' ) ) as $channel ) {
-			$this->send->send( $channel );
+			$format = $this->trac->get_commit_format( $channel );
+			if ( ! isset( $payloads[ $format ] ) ) {
+				$payloads[ $format ] = $this->generate_payload( $format );
+			}
+			$payloads[ $format ]->send( $channel );
 		}
 	}
 
@@ -34,9 +46,20 @@ class Commit_Handler {
 		$this->svnlook = $path;
 	}
 
-	protected function generate_payload() {
+	/**
+	 * Builds the Slack message for the commit.
+	 *
+	 * @param string $format 'full' for the whole commit message, 'summary' for its first line.
+	 * @return Send A copy of the Send object with the commit attached.
+	 */
+	protected function generate_payload( $format = 'full' ) {
+		$log = $this->svnlook( 'log' );
+		if ( 'summary' === $format ) {
+			$log = Commit::get_summary( $log );
+		}
+
 		$author   = $this->svnlook( 'author' );
-		$message  = Commit::format_commit_for_slack( $this->trac, $this->svnlook( 'log' ) );
+		$message  = Commit::format_commit_for_slack( $this->trac, $log );
 		$date     = $this->svnlook( 'date' );
 		$url      = $this->trac->get_commit_template( $this->rev );
 		$revision = 'r' . $this->rev;
@@ -46,24 +69,50 @@ class Commit_Handler {
 		$title    = "$username $revision";
 		$fallback = "$username $revision by $author";
 
-		$this->send->set_username( $username );
-		$this->send->set_icon( $icon );
-		$this->send->add_attachment( array(
-			'title'       => $title,
-			'title_link'  => $url,
-			'author_name' => $author,
-			'author_icon' => sprintf( 'https://wordpress.org/grav-redirect.php?user=%s&s=32', $author ),
-			'color'       => $color,
-			'text'        => $message,
-			'fallback'    => $fallback,
-			'mrkdwn_in'   => array( 'text' ),
-			'ts'          => $date,
-			'footer'      => sprintf( '<%s|%s>', $this->trac->get_url(), $this->trac->get_name() ),
-			'footer_icon' => sprintf( '%s/chrome/common/trac.ico', $this->trac->get_url() ),
-		) );
+		$send = clone $this->send;
+		$send->set_username( $username );
+		$send->set_icon( $icon );
+		$send->add_attachment(
+			array(
+				'title'       => $title,
+				'title_link'  => $url,
+				'author_name' => $author,
+				'author_icon' => sprintf( 'https://wordpress.org/grav-redirect.php?user=%s&s=32', $author ),
+				'color'       => $color,
+				'text'        => $message,
+				'fallback'    => $fallback,
+				'mrkdwn_in'   => array( 'text' ),
+				'ts'          => $date,
+				'footer'      => sprintf( '<%s|%s>', $this->trac->get_url(), $this->trac->get_name() ),
+				'footer_icon' => sprintf( '%s/chrome/common/trac.ico', $this->trac->get_url() ),
+			)
+		);
+
+		return $send;
 	}
 
+	/**
+	 * Gets the output of an svnlook subcommand for this revision.
+	 *
+	 * Each subcommand runs once, as the same output is needed for every channel's payload.
+	 *
+	 * @param string $subcommand svnlook subcommand.
+	 * @return string
+	 */
 	protected function svnlook( $subcommand ) {
+		if ( ! isset( $this->svnlook_cache[ $subcommand ] ) ) {
+			$this->svnlook_cache[ $subcommand ] = $this->run_svnlook( $subcommand );
+		}
+		return $this->svnlook_cache[ $subcommand ];
+	}
+
+	/**
+	 * Runs an svnlook subcommand for this revision.
+	 *
+	 * @param string $subcommand svnlook subcommand.
+	 * @return string
+	 */
+	protected function run_svnlook( $subcommand ) {
 		$args = array(
 			$subcommand,
 			'-r' . $this->rev,

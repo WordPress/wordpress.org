@@ -3,7 +3,7 @@ namespace WordPressdotorg\Plugin_Directory;
 
 use WordPressdotorg\Plugin_Directory\Admin\Customizations;
 use WordPressdotorg\Plugin_Directory\Tools;
-use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Elasticsearch_Status, Stats_Report, Upload_Token };
+use WordPressdotorg\Plugin_Directory\Admin\Tools\{ Author_Cards, Elasticsearch_Status, Related_Submissions, Stats_Report, Upload_Token };
 use WordPressdotorg\Plugin_Directory\Tools\Helpscout;
 
 /**
@@ -43,6 +43,7 @@ class Plugin_Directory {
 		add_filter( 'jetpack_sitemap_post_types', array( $this, 'jetpack_sitemap_post_types' ) );
 		add_filter( 'jetpack_sitemap_skip_post', array( $this, 'jetpack_sitemap_skip_post' ), 10, 2 );
 		add_action( 'template_redirect', array( $this, 'prevent_canonical_for_plugins' ), 9 );
+		add_filter( 'redirect_canonical', array( $this, 'keep_feed_like_term_slugs' ) );
 		add_action( 'template_redirect', array( $this, 'custom_redirects' ), 1 );
 		add_action( 'template_redirect', array( $this, 'geopattern_icon_route' ), 0 );
 		add_filter( 'query_vars', array( $this, 'filter_query_vars' ), 1 );
@@ -87,6 +88,9 @@ class Plugin_Directory {
 		// Allow post_modified not to be modified when we don't specifically bump it, and slugs for pending plugins.
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_wp_insert_post_data' ), 10, 2 );
 
+		// Keep the plugin owner in the contributors list, which author queries search.
+		add_action( 'post_updated', array( $this, 'update_owner_contributor' ), 10, 3 );
+
 		add_filter( 'jetpack_active_modules', function( $modules ) {
 			// Enable Jetpack Search
 			#$modules[] = 'search';
@@ -112,6 +116,7 @@ class Plugin_Directory {
 			Customizations::instance();
 			Author_Cards::instance();
 			Elasticsearch_Status::instance();
+			Related_Submissions::instance();
 			Stats_Report::instance();
 			Upload_Token::instance();
 
@@ -165,6 +170,49 @@ class Plugin_Directory {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Moves the plugin owner's contributor term to the new owner when ownership changes.
+	 *
+	 * A new owner who isn't a contributor yet is listed first, like in the Contributors widget.
+	 * The import adds the owner to the contributors listed in the readme, and
+	 * restores the previous owner on the next run if the readme lists them.
+	 *
+	 * @param int      $post_id     Post ID.
+	 * @param \WP_Post $post_after  Post object following the update.
+	 * @param \WP_Post $post_before Post object before the update.
+	 */
+	public function update_owner_contributor( $post_id, $post_after, $post_before ) {
+		if ( 'plugin' !== $post_after->post_type || $post_after->post_author === $post_before->post_author ) {
+			return;
+		}
+
+		$contributors = wp_get_object_terms(
+			$post_id,
+			'plugin_contributors',
+			array(
+				'orderby' => 'term_order',
+				'fields'  => 'names',
+			)
+		);
+		if ( is_wp_error( $contributors ) ) {
+			return;
+		}
+
+		$previous_owner = get_user_by( 'id', $post_before->post_author );
+		if ( $previous_owner ) {
+			$contributors = array_diff( $contributors, array( $previous_owner->user_nicename ) );
+		}
+
+		$new_owner = get_user_by( 'id', $post_after->post_author );
+		if ( $new_owner && ! in_array( $new_owner->user_nicename, $contributors, true ) ) {
+			array_unshift( $contributors, $new_owner->user_nicename );
+		}
+
+		wp_set_object_terms( $post_id, $contributors, 'plugin_contributors' );
+
+		Standalone\Plugins_Info_API::flush_plugin_information_cache( $post_after->post_name );
 	}
 
 	/**
@@ -340,6 +388,28 @@ class Plugin_Directory {
 				'assign_terms' => 'plugin_set_category',
 			),
 		) );
+
+		// Public for the search index only; written through Guideline_Labels, which keeps the post meta in sync.
+		register_taxonomy(
+			Guideline_Labels::TAXONOMY,
+			'plugin',
+			array(
+				'hierarchical'       => false,
+				'rewrite'            => false,
+				'labels'             => array(
+					'name'          => __( 'Guideline Labels', 'wporg-plugins' ),
+					'singular_name' => __( 'Guideline Label', 'wporg-plugins' ),
+				),
+				'public'             => true,
+				'publicly_queryable' => false, // Keeps the query var for the admin list filter, without a front-end archive.
+				'show_ui'            => false,
+				'show_admin_column'  => false,
+				'meta_box_cb'        => false,
+				'capabilities'       => array(
+					'assign_terms' => 'plugin_label',
+				),
+			)
+		);
 
 		register_taxonomy( 'plugin_committers', array( 'plugin', 'force-count-to-include-all-post_status' ), array(
 			'hierarchical'      => false,
@@ -1299,6 +1369,49 @@ class Plugin_Directory {
 	}
 
 	/**
+	 * Keeps Canonical from stripping a term slug that looks like a feed endpoint.
+	 *
+	 * On paginated archives, Core removes a trailing `feed`, `rss`, `rss2`, `rdf` or `atom`
+	 * segment as if it were a feed, so `/tags/feed/page/2/` redirects to `/tags/page/2/`.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/46061
+	 *
+	 * @param string|false $redirect_url The redirect URL.
+	 * @return string|false The redirect URL, or false to stay on the requested URL.
+	 */
+	public function keep_feed_like_term_slugs( $redirect_url ) {
+		$term = get_queried_object();
+
+		if (
+			! $redirect_url ||
+			! is_tax( 'plugin_tags' ) ||
+			! ( $term instanceof \WP_Term ) ||
+			! in_array( $term->slug, array( 'feed', 'rss', 'rss2', 'rdf', 'atom' ), true )
+		) {
+			return $redirect_url;
+		}
+
+		$term_link = get_term_link( $term );
+		if ( is_wp_error( $term_link ) ) {
+			return $redirect_url;
+		}
+
+		// Canonical keeps the request's scheme, which can differ from the home URL's.
+		$term_link = set_url_scheme( $term_link, wp_parse_url( $redirect_url, PHP_URL_SCHEME ) );
+		if ( str_starts_with( $redirect_url, $term_link ) ) {
+			return $redirect_url;
+		}
+
+		// Only cancel the redirect that dropped the slug, e.g. to `/tags/page/2/`.
+		$tag_base = trailingslashit( dirname( untrailingslashit( $term_link ) ) );
+		if ( ! str_starts_with( $redirect_url, $tag_base ) ) {
+			return $redirect_url;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Handles all the custom redirects needed in the Plugin Directory.
 	 */
 	function custom_redirects() {
@@ -1306,6 +1419,12 @@ class Plugin_Directory {
 
 		// Handle a redirect for /$plugin/$tab_name/ to /$plugin/#$tab_name.
 		if ( get_query_var( 'redirect_plugin' ) && get_query_var( 'redirect_plugin_tab' ) ) {
+			// The old developer FAQ at /about/faq/ matches the plugin tab rule.
+			if ( 'about' === get_query_var( 'redirect_plugin' ) && 'faq' === get_query_var( 'redirect_plugin_tab' ) ) {
+				wp_safe_redirect( 'https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/', 301 );
+				die();
+			}
+
 			wp_safe_redirect( site_url( get_query_var( 'redirect_plugin' ) . '/#' . get_query_var( 'redirect_plugin_tab' ) ), 301 );
 			die();
 		}
@@ -1335,6 +1454,10 @@ class Plugin_Directory {
 					wp_safe_redirect( home_url( '/developers/add/' ), 301 );
 				} elseif ( isset( $path[1] ) && 'validator' == $path[1] ) {
 					wp_safe_redirect( home_url( '/developers/readme-validator/' ), 301 );
+				} elseif ( isset( $path[1] ) && 'readme.txt' === $path[1] ) {
+					wp_safe_redirect( home_url( '/readme.txt' ), 301 );
+				} elseif ( isset( $path[1] ) && 'svn' === $path[1] ) {
+					wp_safe_redirect( 'https://developer.wordpress.org/plugins/wordpress-org/how-to-use-subversion/', 301 );
 				} else {
 					wp_safe_redirect( home_url( '/developers/' ), 301 );
 				}
@@ -1478,6 +1601,7 @@ class Plugin_Directory {
 	 */
 	function filter_redirect_hosts( $hosts ) {
 		$hosts[] = 'playground.wordpress.net';
+		$hosts[] = 'developer.wordpress.org';
 
 		return $hosts;
 	}

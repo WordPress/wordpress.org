@@ -9,6 +9,7 @@
 				<h2 id="post-<?php the_ID(); ?>"><?php the_title(); ?></h2>
 
 				<?php the_content(); ?>
+				<div class="codex-taxonomy-columns">
 
 				<?php
 					// Components
@@ -16,7 +17,7 @@
 					$count = count( $terms );
 
 					if ( $count > 0 ) {
-						echo '<div style="width: 24%; float: left;">';
+						echo '<div class="codex-taxonomy-column">';
 						echo '<h2>Components</h2>';
 						echo '<ul>';
 						foreach ( $terms as $term ) {
@@ -34,7 +35,7 @@
 					$count = count( $terms );
 
 					if ( $count > 0 ) {
-						echo '<div style="width: 24%; float: left;">';
+						echo '<div class="codex-taxonomy-column">';
 						echo '<h2>Versions</h2>';
 						echo '<ul>';
 						foreach ( $terms as $term ) {
@@ -52,7 +53,7 @@
 					$count = count( $terms );
 
 					if ( $count > 0 ) {
-						echo '<div style="width: 24%; float: left;">';
+						echo '<div class="codex-taxonomy-column">';
 						echo '<h2>Types</h2>';
 						echo '<ul>';
 						foreach ( $terms as $term ) {
@@ -70,7 +71,7 @@
 					$count = count( $terms );
 
 					if ( $count > 0 ) {
-						echo '<div style="width: 24%; float: left;">';
+						echo '<div class="codex-taxonomy-column">';
 						echo '<h2>Contexts</h2>';
 						echo '<ul>';
 						foreach ( $terms as $term ) {
@@ -81,6 +82,7 @@
 					}
 
 				?>
+				</div>
 
 			</div>
 

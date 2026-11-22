@@ -14,18 +14,9 @@ class Dayofweek
         if (static::$is_initialized == true) {
           return;
         }
-        $pool->internalAddGeneratedFile(hex2bin(
-            "0aa4020a1b676f6f676c652f747970652f6461796f667765656b2e70726f" .
-            "746f120b676f6f676c652e747970652a84010a094461794f665765656b12" .
-            "1b0a174441595f4f465f5745454b5f554e5350454349464945441000120a" .
-            "0a064d4f4e4441591001120b0a07545545534441591002120d0a09574544" .
-            "4e45534441591003120c0a0854485552534441591004120a0a0646524944" .
-            "41591005120c0a0853415455524441591006120a0a0653554e4441591007" .
-            "42690a0f636f6d2e676f6f676c652e74797065420e4461794f665765656b" .
-            "50726f746f50015a3e676f6f676c652e676f6c616e672e6f72672f67656e" .
-            "70726f746f2f676f6f676c65617069732f747970652f6461796f66776565" .
-            "6b3b6461796f667765656ba20203475450620670726f746f33"
-        ), true);
+        $pool->internalAddGeneratedFile(
+            "\x0A\xA4\x02\x0A\x1Bgoogle/type/dayofweek.proto\x12\x0Bgoogle.type*\x84\x01\x0A\x09DayOfWeek\x12\x1B\x0A\x17DAY_OF_WEEK_UNSPECIFIED\x10\x00\x12\x0A\x0A\x06MONDAY\x10\x01\x12\x0B\x0A\x07TUESDAY\x10\x02\x12\x0D\x0A\x09WEDNESDAY\x10\x03\x12\x0C\x0A\x08THURSDAY\x10\x04\x12\x0A\x0A\x06FRIDAY\x10\x05\x12\x0C\x0A\x08SATURDAY\x10\x06\x12\x0A\x0A\x06SUNDAY\x10\x07Bi\x0A\x0Fcom.google.typeB\x0EDayOfWeekProtoP\x01Z>google.golang.org/genproto/googleapis/type/dayofweek;dayofweek\xA2\x02\x03GTPb\x06proto3"
+        , true);
 
         static::$is_initialized = true;
     }

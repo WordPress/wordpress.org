@@ -1,10 +1,11 @@
 {
-	"core": "WordPress/WordPress#master",
+	"core": "https://wordpress.org/nightly-builds/wordpress-latest.zip",
 	"phpVersion": "8.4",
 	"testsEnvironment": false,
 	"plugins": [
 		"https://downloads.wordpress.org/plugin/bbpress.zip",
-		"../wordpress.org/public_html/wp-content/plugins/support-forums"
+		"../wordpress.org/public_html/wp-content/plugins/support-forums",
+		"../wordpress.org/public_html/wp-content/plugins/wporg-bbp-term-subscription"
 	],
 	"mappings": {
 		"wp-content/env-bin": "./support-forums/bin"

@@ -48,7 +48,7 @@ class Plugin_I18n_Sanitization_Test extends TestCase {
 			'script in a section'               => array(
 				'description',
 				'Bonjour <script>alert(1)</script>',
-				'Bonjour alert(1)',
+				'Bonjour',
 			),
 			'directives in a section'           => array(
 				'faq',
@@ -97,9 +97,10 @@ class Plugin_I18n_Sanitization_Test extends TestCase {
 	 */
 	public static function plain_text_field_provider(): array {
 		return array(
-			'title'       => array( 'title' ),
-			'excerpt'     => array( 'excerpt' ),
-			'block title' => array( 'block_title:' . md5( 'Block' ) ),
+			'title'             => array( 'title' ),
+			'excerpt'           => array( 'excerpt' ),
+			'block title'       => array( 'block_title:' . md5( 'Block' ) ),
+			'block description' => array( 'block_description:' . md5( 'Block' ) ),
 		);
 	}
 

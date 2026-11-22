@@ -1,0 +1,12 @@
+{
+	"core": "https://wordpress.org/nightly-builds/wordpress-latest.zip",
+	"phpVersion": "8.4",
+	"testsEnvironment": false,
+	"plugins": [],
+	"mappings": {
+		"wp-content/plugins/photo-directory": "../wordpress.org/public_html/wp-content/plugins/photo-directory"
+	},
+	"lifecycleScripts": {
+		"afterStart": "bash photo-directory/bin/after-start-test.sh"
+	}
+}

@@ -11,4 +11,5 @@ app=/var/www/html
 trap 'php "$app/artisan" --no-interaction freescout:clear-cache > /dev/null' EXIT
 php "$app/artisan" --no-interaction migrate --database=testing --force > /dev/null
 
-"$app/vendor/bin/phpunit" --configuration /srv/wporg/phpunit.xml.dist "$@"
+# Hides PHPUnit's PHP 8.4 deprecations until FreeScout boots; tests/TestCase.php filters them after that.
+php -d error_reporting='E_ALL & ~E_DEPRECATED' "$app/vendor/bin/phpunit" --configuration /srv/wporg/phpunit.xml.dist "$@"

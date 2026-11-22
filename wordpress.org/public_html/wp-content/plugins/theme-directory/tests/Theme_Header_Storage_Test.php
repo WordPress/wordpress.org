@@ -405,8 +405,15 @@ class Theme_Header_Storage_Test extends TestCase {
 	 * @return void
 	 */
 	public function test_live_version_encodes_an_already_stored_name(): void {
+		global $wpdb;
+
 		$name    = 'Fixture ' . self::ESCAPED_TWIN . ' Theme';
 		$post_id = $this->create_theme_post( $name, 'fixture-theme' );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Seeds the raw title past the save filter, as rows from before it hold it.
+		$wpdb->update( $wpdb->posts, array( 'post_title' => $name ), array( 'ID' => $post_id ) );
+		clean_post_cache( $post_id );
+		$this->assertSame( $name, get_post( $post_id )->post_title );
 
 		$this->serve_style_css( $name );
 		wporg_themes_approve_version( $post_id, '1.0', 'old' );

@@ -7,7 +7,7 @@ gp_enqueue_styles( array( 'gp-jquery-webui-popover', 'driver-js' ) );
 gp_enqueue_scripts( array( 'gp-tour' ) );
 
 ?>
-<script type="text/javascript">document.body.className = document.body.className.replace('no-js','js');</script>
+<?php wp_print_inline_script_tag( "document.body.className = document.body.className.replace('no-js','js');" ); ?>
 
 <header id="masthead" class="site-header <?php echo wporg_gp_is_index() ? 'home' : ''; ?>" role="banner">
 	<div class="site-branding">
@@ -40,16 +40,24 @@ gp_enqueue_scripts( array( 'gp-tour' ) );
 	<?php
 	if ( gp_notice( 'error' ) ) :
 		?>
-		<div class="error">
-			<?php echo wp_kses_post( gp_notice( 'error' ) ); ?>
+		<div class="notice notice-error notice-alt">
+			<p><?php echo wp_kses_post( gp_notice( 'error' ) ); ?></p>
+		</div>
+		<?php
+	endif;
+
+	if ( gp_notice( 'success' ) ) :
+		?>
+		<div class="notice notice-success notice-alt">
+			<p><?php echo wp_kses_post( gp_notice( 'success' ) ); ?></p>
 		</div>
 		<?php
 	endif;
 
 	if ( gp_notice() ) :
 		?>
-		<div class="notice">
-			<?php echo wp_kses_post( gp_notice() ); ?>
+		<div class="notice notice-info notice-alt">
+			<p><?php echo wp_kses_post( gp_notice() ); ?></p>
 		</div>
 		<?php
 	endif;

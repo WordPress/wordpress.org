@@ -31,6 +31,25 @@ add_action( 'login_init', function() {
 } );
 
 /**
+ * Serve a 404 for a non-numeric `p`, such as `?p=job/abc123`.
+ *
+ * @param array $query_vars The parsed query variables.
+ * @return array The query variables.
+ */
+function not_found_for_non_numeric_p( $query_vars ) {
+	$p = $query_vars['p'] ?? '';
+
+	// `p=12345/` is valid, see check_for_invalid_query_vars().
+	if ( is_string( $p ) && ! empty( $p ) && ! is_numeric( $p ) && intval( $p ) . '/' !== $p ) {
+		unset( $query_vars['p'] );
+		$query_vars['error'] = '404';
+	}
+
+	return $query_vars;
+}
+add_filter( 'request', __NAMESPACE__ . '\not_found_for_non_numeric_p', 0 );
+
+/**
  * Detect invalid query parameters being passed in Core query fields.
  * Generally causes WP_Query to throw a PHP Warning.
  *
@@ -251,6 +270,24 @@ add_action( 'xmlrpc_call', function() {
 		die_bad_request( 'pingback.ping inside a system.multicall' );
 	}
 }, 1 );
+
+/**
+ * Detect pingback.ping requests without a source and target URL.
+ * Core reads both without checking they exist.
+ *
+ * @param string $method The XML-RPC method name.
+ * @param mixed  $args   The method arguments. IXR unwraps a single param to a bare value.
+ */
+function check_pingback_args( $method, $args = null ) {
+	if ( 'pingback.ping' !== $method ) {
+		return;
+	}
+
+	if ( ! is_array( $args ) || ! isset( $args[0], $args[1] ) || ! is_scalar( $args[0] ) || ! is_scalar( $args[1] ) ) {
+		die_bad_request( 'pingback.ping without a source and target URL' );
+	}
+}
+add_action( 'xmlrpc_call', __NAMESPACE__ . '\check_pingback_args', 1, 2 );
 
 /**
  * Disable Demo XMLRPC endpoints that are easy to trigger noisy fatals with invalid inputs.

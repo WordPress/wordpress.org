@@ -181,11 +181,11 @@ class Block_Validator {
 		if ( self::plugin_is_in_block_directory( $plugin->post_name ) ) {
 			wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
 			// translators: %s plugin title.
-			echo '<button class="button button-secondary button-large" type="submit" name="block-directory-edit" value="remove">' . sprintf( esc_html__( 'Remove %s from Block Directory', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</button>';
+			echo '<span class="wp-block-button is-style-outline"><button class="wp-block-button__link" type="submit" name="block-directory-edit" value="remove">' . sprintf( esc_html__( 'Remove %s from Block Directory', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</button></span>';
 		} else if ( ! $has_errors ) {
 			wp_nonce_field( 'block-directory-edit-' . $plugin->ID, 'block-directory-nonce' );
 			// translators: %s plugin title.
-			echo '<button class="button button-primary button-large" type="submit" name="block-directory-edit" value="add">' . sprintf( esc_html__( 'Add %s to Block Directory', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</button>';
+			echo '<span class="wp-block-button"><button class="wp-block-button__link" type="submit" name="block-directory-edit" value="add">' . sprintf( esc_html__( 'Add %s to Block Directory', 'wporg-plugins' ), esc_html( $plugin->post_title ) ) . '</button></span>';
 		}
 
 		echo '</p>';

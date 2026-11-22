@@ -88,13 +88,16 @@ class Event_Form_Handler {
 				wp_send_json_error( esc_html__( 'Event has stats so it cannot be deleted.', 'gp-translation-events' ), 422 );
 			}
 
+			// The client redirects to My Events either way, so the result is shown there.
 			if ( false === $this->event_repository->trash_event( $event ) ) {
 				$response_message = esc_html__( 'Failed to delete event.', 'gp-translation-events' );
 				$event_status     = $event->status();
+				gp_notice_set( $response_message, 'error' );
 			} else {
-				$response_message = esc_html__( 'Event deleted successfully.', 'gp-translation-events' );
+				$response_message = esc_html__( 'Event moved to the trash.', 'gp-translation-events' );
 				$event_status     = 'trashed';
 				$this->notifications_schedule->delete_scheduled_emails( $event_id );
+				gp_notice_set( $response_message, 'success' );
 			}
 		} else {
 			// Create or update event.

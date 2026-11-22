@@ -35,7 +35,7 @@ abstract class Directory_Compat {
 
 	public function init() {
 		if ( defined( 'WPORG_SUPPORT_FORUMS_BLOGID' ) && get_current_blog_id() == WPORG_SUPPORT_FORUMS_BLOGID ) {
-			// Intercept feed requests prior to bbp_request_feed_trap at 10, before Performance::bbp_request_disable_missing_view_feeds at 9
+			// Intercept feed requests before bbp_request_feed_trap() at priority 10.
 			add_filter( 'bbp_request', array( $this, 'request' ), 5 );
 
 			// Add feed links to head.
@@ -498,12 +498,23 @@ abstract class Directory_Compat {
 			get_query_var( 'wporg_single_user_topics_replied_to' )
 		||
 			is_tax( 'topic-tag' )
+		||
+			// bbPress renders feeds in the `request` filter, where is_feed() isn't always set.
+			(
+				did_action( 'bbp_feed' )
+			&&
+				// The compat term stays on topics moved out of the plugin or theme forum.
+				in_array( bbp_get_topic_forum_id( $topic_id ), array( $this->forum_id(), Plugin::REVIEWS_FORUM_ID ), true )
+			)
 		) {
 			$terms = get_the_terms( $topic_id, $this->taxonomy() );
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
 				$term = $terms[0];
 				$object = $this->get_object( $term->slug );
-				if ( $object ) {
+				if ( $object && did_action( 'bbp_feed' ) ) {
+					// the_title_rss strips tags and escapes; escaping first would show tags as text.
+					$title = sprintf( '[%s] %s', $object->post_title, $title );
+				} elseif ( $object ) {
 					$title = sprintf( "[%s] %s", esc_html( $object->post_title ), esc_html( $title ) );
 				}
 			}

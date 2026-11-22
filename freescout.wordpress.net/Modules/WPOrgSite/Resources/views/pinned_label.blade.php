@@ -1,0 +1,2 @@
+{{-- On the note pinned to the top, or the bottom in the alternate design, which site.css dims: that it's the one there. --}}
+<a href="#wporgsite-pinned-note" class="wporgsite-pinned-label" data-toggle="tooltip" title="{{ $bottom ? __( 'A copy of this note is pinned to the bottom of the conversation' ) : __( 'A copy of this note is pinned to the top of the conversation' ) }}"><i class="glyphicon glyphicon-pushpin" aria-hidden="true"></i> {{ $bottom ? __( 'Pinned to the bottom' ) : __( 'Pinned to the top' ) }}</a><br/>

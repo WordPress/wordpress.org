@@ -285,10 +285,10 @@ class Rejection {
 	 *
 	 * @param int|WP_Post The post or post ID.
 	 * @param string      Format of the date to return (using PHP date format
-	 *                    syntax). Default 'Y/m/d g:s a'.
+	 *                    syntax). Default 'Y/m/d g:i a'.
 	 * @return string
 	 */
-	public static function get_rejection_date( $post, $format = 'Y/m/d g:s a' ) {
+	public static function get_rejection_date( $post, $format = 'Y/m/d g:i a' ) {
 		$post = get_post( $post );
 
 		if ( ! $post ) {
@@ -862,7 +862,7 @@ class Rejection {
 		}
 
 		$rejection_user = self::get_rejection_user( $post, 'link' );
-		$rejection_date = self::get_rejection_date( $post, 'Y-m-d H:m:s' );
+		$rejection_date = self::get_rejection_date( $post, 'Y-m-d H:i:s' );
 
 		if ( ! $rejection_user ) {
 			$rejection_user = __( 'unknown', 'wporg-photos' );
