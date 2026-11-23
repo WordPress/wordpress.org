@@ -39,6 +39,31 @@ class Markdown extends \Michelf\MarkdownExtra {
 	}
 
 	/**
+	 * Hashes block-level HTML so Markdown leaves it alone.
+	 *
+	 * An empty enclosing tag pattern lets any `<` followed by a non-space character open a tag, so text like
+	 * `<35KB` with no `>` after it makes the tag regex run out of PCRE stack. A never-matching pattern avoids that,
+	 * and a failed regex leaves the text unhashed instead of a fatal error.
+	 *
+	 * @param string $text Markdown text.
+	 * @return string
+	 */
+	protected function hashHTMLBlocks( $text ) {
+		if ( $this->no_markup ) {
+			return $text;
+		}
+
+		try {
+			list( $hashed, ) = $this->_hashHTMLBlocks_inMarkdown( $text, 0, '(?!)' );
+		} catch ( \TypeError $e ) {
+			// preg_split() returned false.
+			return $text;
+		}
+
+		return $hashed;
+	}
+
+	/**
 	 * @access protected
 	 *
 	 * @param string $text
