@@ -14,6 +14,8 @@ declare( strict_types = 1 );
 
 defined( 'ABSPATH' ) || die();
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 /**
  * Covers minting, validating, claiming, and redeeming remote SSO tokens.
  */
@@ -261,16 +263,30 @@ class WPOrg_SSO_Remote_Tokens_Test extends WPOrg_SSO_TestCase {
 	/**
 	 * The remember-me flag is signed, so a short session cannot be promoted.
 	 *
+	 * @param string $flag What the token's remember-me field is rewritten to.
 	 * @return void
 	 */
-	public function test_the_remember_me_flag_is_signed(): void {
+	#[DataProvider( 'get_remember_me_flags_that_read_as_set' )]
+	public function test_the_remember_me_flag_is_signed( string $flag ): void {
 		$token = $this->make_sso( 'login.wordpress.org' )->generate_remote_token( $this->user, 'wordcamp.org' );
 
 		$parts    = explode( '|', $token );
-		$parts[3] = '1';
+		$parts[3] = $flag;
 
 		$this->assertSame( '', explode( '|', $token )[3], 'The token under test has to start out not-remembered.' );
 		$this->assertFalse( $this->make_sso( 'wordcamp.org' )->validate_remote_token( implode( '|', $parts ) )['valid'] );
+	}
+
+	/**
+	 * Values a login reads as remember-me.
+	 *
+	 * @return array[]
+	 */
+	public static function get_remember_me_flags_that_read_as_set(): array {
+		return array(
+			'the flag itself'         => array( '1' ),
+			'text that counts as set' => array( 'false' ),
+		);
 	}
 
 	/**
