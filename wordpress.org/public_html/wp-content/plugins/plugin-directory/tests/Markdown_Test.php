@@ -7,6 +7,7 @@
 
 declare( strict_types = 1 );
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use WordPressdotorg\Plugin_Directory\Markdown;
@@ -35,13 +36,29 @@ class Markdown_Test extends TestCase {
 	/**
 	 * A stray `<` must not swallow text up to the next tag, which kept the heading after it
 	 * from being treated as a block.
+	 *
+	 * @dataProvider stray_angle_bracket_provider
+	 * @param string $stray Text starting with a `<` that isn't a tag.
 	 */
-	public function test_stray_angle_bracket_before_heading(): void {
-		$html = ( new Markdown() )->transform( "* No longer needed for <PHP7\n\n= 1.0 =\n\n* Initial release" );
+	#[DataProvider( 'stray_angle_bracket_provider' )]
+	public function test_stray_angle_bracket_before_heading( string $stray ): void {
+		$html = ( new Markdown() )->transform( "* No longer needed for {$stray}\n\n= 1.0 =\n\n* Initial release" );
 
-		$this->assertStringContainsString( 'needed for &lt;PHP7', $html );
+		$this->assertStringContainsString( 'needed for &lt;' . substr( $stray, 1 ), $html );
 		$this->assertStringContainsString( "\n<h4>1.0</h4>\n", $html );
 		$this->assertStringNotContainsString( '<p><h4>', $html );
+	}
+
+	/**
+	 * Stray `<` text, with and without a block tag name as its prefix.
+	 *
+	 * @return array
+	 */
+	public static function stray_angle_bracket_provider(): array {
+		return array(
+			'no tag name'        => array( '<PHP7' ),
+			'tag name as prefix' => array( '<php7' ),
+		);
 	}
 
 	/**
