@@ -602,6 +602,17 @@ function polyfill_wp_customize_manager() {
 		// Define a constructor, for components that call `parent::__construct()`.
 		function __construct() {}
 
+		/**
+		 * Returns no incoming Customizer values.
+		 *
+		 * WP_Customize_Widgets::register_settings() passes this to array_keys().
+		 *
+		 * @return array
+		 */
+		public function unsanitized_post_values() {
+			return array();
+		}
+
 		// Ensure that any calls return false too.
 		function __get( $property ) {
 			return false;
