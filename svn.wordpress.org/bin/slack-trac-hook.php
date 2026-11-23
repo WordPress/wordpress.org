@@ -55,6 +55,13 @@ if ( $type === 'ticket' ) {
 	$new_ticket = new \Dotorg\Slack\Trac\New_Ticket( $trac, $ticket );
 	$new_ticket->fetch();
 
+	/*
+	 * New Core tickets from these reporters are flagged as urgent. Keep in sync with wp-trac.js.
+	 * See https://wordpress.slack.com/archives/C02QB8GMM/p1795226330135979 for context.
+	 */
+	$escalated_reporters = array( 'barry' );
+	$escalate            = 'core' === $trac->get_slug() && in_array( $new_ticket->reporter, $escalated_reporters, true );
+
 	foreach ( $trac->get_ticket_channels( $new_ticket ) as $channel ) {
 		$send = new \Dotorg\Slack\Send( WEBHOOK );
 		$send->set_user( $new_ticket );
@@ -63,6 +70,11 @@ if ( $type === 'ticket' ) {
 			$send->set_text( $new_ticket->get_text() );
 		} else {
 			$send->add_attachment( $new_ticket->get_attachment() );
+		}
+
+		if ( $escalate && '#core' === $channel ) {
+			$send->set_link_names( true );
+			$send->set_text( $send->get_text() . "\n@core-committers: Please prioritize this ticket and claim it on Trac when you start." );
 		}
 
 		$send->send( $channel );
