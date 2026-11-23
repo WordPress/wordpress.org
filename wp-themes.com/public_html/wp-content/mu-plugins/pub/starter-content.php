@@ -79,9 +79,7 @@ class Starter_Content {
 		}
 
 		// If a theme causes problems, this can block loading.
-		$blocked_themes = array(
-			'finedine',  // Customizer polyfill causes E_ERROR: Uncaught Error: Call to a member function add_partial() on bool
-		);
+		$blocked_themes = array();
 
 		// If a theme authors themes often cause a problem, just block them all.
 		$blocked_authors = array(
@@ -604,6 +602,11 @@ function polyfill_wp_customize_manager() {
 
 		// Ensure that any calls return false too.
 		function __get( $property ) {
+			// Themes call `$wp_customize->selective_refresh->add_partial()` outside `customize_register`.
+			if ( 'selective_refresh' === $property ) {
+				return $this;
+			}
+
 			return false;
 		}
 		function __call( $method, $args ) {
