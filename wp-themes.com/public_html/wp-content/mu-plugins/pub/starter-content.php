@@ -88,7 +88,8 @@ class Starter_Content {
 				// 'barter', // E_COMPILE_ERROR: Cannot redeclare barter_get_user_css()
 		);
 
-		$theme_author = wp_get_theme()['Author'];
+		// Strip spaces so the author name matches too, not just a linked Author URI.
+		$theme_author = str_replace( ' ', '', wp_get_theme()['Author'] );
 		foreach ( $blocked_authors as $author ) {
 			if ( false !== stripos( $theme_author, str_replace( ' ', '', $author ) ) ) {
 				$blocked_themes[] = get_stylesheet();
