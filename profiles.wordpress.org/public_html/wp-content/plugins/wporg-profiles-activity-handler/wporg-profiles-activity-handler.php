@@ -291,6 +291,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				case 'wordcamp':
 					$activity_id = $this->handle_wordcamp_activity( $data );
 					break;
+				case 'groups':
+					$activity_id = $this->handle_groups_activity( $data );
+					break;
 				case 'wordpress':
 					$activity_id = $this->handle_wordpress_activity( $data );
 					break;
@@ -314,7 +317,10 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				return new WP_Error( 'activity_failed', 'Unable to save activity', [ 'status' => 500 ] );
 			}
 
-			$this->maybe_update_last_activity( $data );
+			// Organizers add event speakers, so a groups activity says nothing about when the speaker was last active.
+			if ( 'groups' !== $source ) {
+				$this->maybe_update_last_activity( $data );
+			}
 
 			return true;
 		}
@@ -813,6 +819,128 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			}
 
 			return $number . $suffix;
+		}
+
+		/**
+		 * Handles incoming activities for WordPress Groups events on events.wordpress.org.
+		 *
+		 * One activity is kept per user, role, event and group. `add` creates it, or refreshes
+		 * and restores an existing one. `remove` marks it as spam, so a later `add` can restore it.
+		 *
+		 * Recognized roles:
+		 *  - speaker
+		 *
+		 * @param array $data The request data.
+		 * @return int|bool|WP_Error The activity ID or true on success.
+		 */
+		private function handle_groups_activity( array $data ) {
+			// Hosts and volunteers are reserved for later.
+			$types = array(
+				'speaker' => 'group_speaker_add',
+			);
+
+			foreach ( array( 'user', 'command', 'role', 'event_id', 'group_id', 'event_title', 'group_name', 'url', 'group_url' ) as $key ) {
+				if ( isset( $data[ $key ] ) && ! is_scalar( $data[ $key ] ) ) {
+					return new WP_Error( 'invalid_arg', 'Invalid argument: ' . $key, array( 'status' => 400 ) );
+				}
+			}
+
+			$user = self::get_user( $data['user'] ?? '' );
+			if ( ! $user ) {
+				return new WP_Error( 'unknown_user', 'Activity reported for unrecognized user: ' . sanitize_text_field( $data['user'] ?? '' ), array( 'status' => 400 ) );
+			}
+
+			$command = $data['command'] ?? '';
+			if ( ! in_array( $command, array( 'add', 'remove' ), true ) ) {
+				return new WP_Error( 'unknown_command', 'Unrecognized groups command.', array( 'status' => 400 ) );
+			}
+
+			$role = (string) ( $data['role'] ?? '' );
+			if ( ! isset( $types[ $role ] ) ) {
+				return new WP_Error( 'unknown_role', 'Unrecognized groups role.', array( 'status' => 400 ) );
+			}
+
+			$required_args = array( 'event_id', 'group_id' );
+			if ( 'add' === $command ) {
+				$required_args = array_merge( $required_args, array( 'event_title', 'group_name', 'url', 'group_url' ) );
+			}
+
+			$has_required_args = $this->require_args( $required_args, $data );
+			if ( is_wp_error( $has_required_args ) ) {
+				return $has_required_args;
+			}
+
+			$event_id = absint( $data['event_id'] );
+			$group_id = absint( $data['group_id'] );
+			if ( ! $event_id || ! $group_id ) {
+				return new WP_Error( 'invalid_ids', 'The event and group IDs must be positive integers.', array( 'status' => 400 ) );
+			}
+
+			// The type, event and group identify the activity, so a removed one can be found and restored.
+			$args = array(
+				'user_id'           => $user->ID,
+				'component'         => 'community-events',
+				'type'              => $types[ $role ],
+				'item_id'           => $event_id,
+				'secondary_item_id' => $group_id,
+			);
+
+			$activity_id  = bp_activity_get_activity_id( $args );
+			$activity_obj = $activity_id ? new BP_Activity_Activity( $activity_id ) : false;
+
+			if ( 'remove' === $command ) {
+				// Nothing to remove. The sender retries errors, so this isn't one.
+				if ( ! $activity_obj ) {
+					return true;
+				}
+
+				bp_activity_mark_as_spam( $activity_obj, 'by_source' );
+
+				return $activity_obj->save();
+			}
+
+			$url       = sanitize_url( $data['url'] );
+			$group_url = sanitize_url( $data['group_url'] );
+
+			foreach ( array( $url, $group_url ) as $link ) {
+				$scheme = wp_parse_url( $link, PHP_URL_SCHEME );
+				$host   = wp_parse_url( $link, PHP_URL_HOST );
+
+				if ( ! in_array( $scheme, array( 'http', 'https' ), true ) || 'events.wordpress.org' !== strtolower( (string) $host ) ) {
+					return new WP_Error( 'invalid_url', 'Groups URLs must be on events.wordpress.org.', array( 'status' => 400 ) );
+				}
+			}
+
+			$action = sprintf(
+				'Confirmed as a speaker for <a href="%s">%s</a> with <a href="%s">%s</a>',
+				esc_url( $url ),
+				esc_html( $data['event_title'] ),
+				esc_url( $group_url ),
+				esc_html( $data['group_name'] )
+			);
+
+			if ( $activity_obj ) {
+				bp_activity_mark_as_ham( $activity_obj, 'by_source' );
+
+				// The event or group may have been renamed or moved since the activity was recorded.
+				$activity_obj->action       = $action;
+				$activity_obj->primary_link = $url;
+
+				return $activity_obj->save();
+			}
+
+			return bp_activity_add(
+				array_merge(
+					$args,
+					array(
+						'action'        => $action,
+						'content'       => '',
+						'primary_link'  => $url,
+						'hide_sitewide' => false,
+						'error_type'    => 'wp_error',
+					)
+				)
+			);
 		}
 
 		/**
