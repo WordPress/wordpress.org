@@ -920,7 +920,7 @@ add_action(
 				"ready.o2 pd-script-load",
 				function () {
 					setTimeout( () => {
-						document.querySelectorAll( "code[class*=language-]:not([data-o2-prism]), [class*=language-] code:not([data-o2-prism])" ).forEach( ( el ) => {
+						document.querySelectorAll( "code[class*=language-]:not([data-o2-prism]), [class*=language-] code:not([data-o2-prism]), code[class*=lang-]:not([data-o2-prism]), [class*=lang-] code:not([data-o2-prism])" ).forEach( ( el ) => {
 							el.dataset.o2Prism = "1";
 							Prism.highlightElement( el );
 						} );
