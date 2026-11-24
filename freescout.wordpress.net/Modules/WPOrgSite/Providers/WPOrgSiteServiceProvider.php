@@ -149,7 +149,8 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				}
 
 				try {
-					return $user->hasManageMailboxAccess() ? null : false;
+					// Modules like Saved Replies have the page list every mailbox for agents they let in.
+					return \Eventy::filter( 'user.can_view_mailbox_menu', false, $user ) || $user->hasManageMailboxAccess() ? null : false;
 				} catch ( \Throwable $e ) {
 					\Log::error( '[WPOrgSite] Could not tell whether user ' . $user->id . ' manages a mailbox: ' . $e->getMessage() );
 
