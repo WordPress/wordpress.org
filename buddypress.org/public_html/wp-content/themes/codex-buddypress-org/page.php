@@ -5,9 +5,9 @@
 
 				<?php if ( get_the_content() ) :
 
-						the_content( __( '<p class="serif">Read the rest of this page &rarr;</p>', 'buddypress' ) );
+						the_content( wp_kses_post( __( '<p class="serif">Read the rest of this page &rarr;</p>', 'buddypress' ) ) );
 
-						wp_link_pages( array( 'before' => __( '<p><strong>Pages:</strong> ', 'buddypress' ), 'after' => '</p>', 'next_or_number' => 'number') );
+						wp_link_pages( array( 'before' => wp_kses_post( __( '<p><strong>Pages:</strong> ', 'buddypress' ) ), 'after' => '</p>', 'next_or_number' => 'number') );
 
 					else : ?>
 

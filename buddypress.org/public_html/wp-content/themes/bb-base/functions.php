@@ -378,36 +378,36 @@ function bb_base_get_plugin_rating_html( $rating = false, $num_ratings = 0 ) {
 	$rating_html = '
 	<span class="star-holder" title="' . esc_attr( sprintf( _n( '(based on %s rating)', '(based on %s ratings)', $num_ratings ), number_format_i18n( $num_ratings ) ) ) . '">';
 
-	$star1 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . __('1 stars') . '" />';
-	$star2 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . __('2 stars') . '" />';
-	$star3 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . __('3 stars') . '" />';
-	$star4 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . __('4 stars') . '" />';
-	$star5 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . __('5 stars') . '" />';
+	$star1 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . esc_attr__( '1 stars' ) . '" />';
+	$star2 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . esc_attr__( '2 stars' ) . '" />';
+	$star3 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . esc_attr__( '3 stars' ) . '" />';
+	$star4 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . esc_attr__( '4 stars' ) . '" />';
+	$star5 = '<img src="' . $bb_base_uri . '/images/star_off.png' . '" alt="' . esc_attr__( '5 stars' ) . '" />';
 
 	if ( $rating <= 7 )
-		$star1 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . __('1 stars') . '" />';
+		$star1 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . esc_attr__( '1 stars' ) . '" />';
 	else if ( $rating >= 20 )
-		$star1 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . __('1 stars') . '" />';
+		$star1 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . esc_attr__( '1 stars' ) . '" />';
 
 	if ( $rating > 20 && $rating <= 27 )
-		$star2 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . __('2 stars') . '" />';
+		$star2 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . esc_attr__( '2 stars' ) . '" />';
 	else if ( $rating >= 40 )
-		$star2 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . __('2 stars') . '" />';
+		$star2 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . esc_attr__( '2 stars' ) . '" />';
 
 	if ( $rating > 40 && $rating <= 47 )
-		$star3 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . __('3 stars') . '" />';
+		$star3 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . esc_attr__( '3 stars' ) . '" />';
 	else if ( $rating >= 60 )
-		$star3 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . __('3 stars') . '" />';
+		$star3 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . esc_attr__( '3 stars' ) . '" />';
 
 	if ( $rating > 60 && $rating <= 67 )
-		$star4 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . __('4 stars') . '" />';
+		$star4 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . esc_attr__( '4 stars' ) . '" />';
 	else if ( $rating >= 80 )
-		$star4 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . __('4 stars') . '" />';
+		$star4 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . esc_attr__( '4 stars' ) . '" />';
 
 	if ( $rating > 80 && $rating <= 87 )
-		$star5 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . __('5 stars') . '" />';
+		$star5 = '<img src="' . $bb_base_uri . '/images/star_half.png' . '" alt="' . esc_attr__( '5 stars' ) . '" />';
 	else if ( $rating >= 93 )
-		$star5 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . __('5 stars') . '" />';
+		$star5 = '<img src="' . $bb_base_uri . '/images/star.png' . '" alt="' . esc_attr__( '5 stars' ) . '" />';
 
 	$rating_html .= '<span class="star star1">' . $star1 . '</span>';
 	$rating_html .= '<span class="star star2">' . $star2 . '</span>';

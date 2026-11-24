@@ -62,7 +62,7 @@
 		<ul>
 			<?php if ( is_user_logged_in() ) : ?>
 				<li><a href="<?php bloginfo( 'url' ); ?>/wp-admin/post-new.php?post_type=page">Create New Page</a></li>
-				<li><?php edit_post_link( __( 'Edit This Page', 'bborg' ) ); ?></li>
+				<li><?php edit_post_link( esc_html__( 'Edit This Page', 'bborg' ) ); ?></li>
 			<?php endif; ?>
 			<?php if ( ! is_user_logged_in() ) : ?>
 				<li><a href="<?php echo esc_url( wp_login_url() ); ?>">Log In</a></li>

@@ -50,7 +50,7 @@
 
 			<div>
 				<?php bbp_topic_tag_list( 0, array(
-					'before' => '<h2>' . __( 'Topic Tags', 'bporg' ) . '</h2><ul class="topic-tags"><li>',
+					'before' => '<h2>' . esc_html__( 'Topic Tags', 'bporg' ) . '</h2><ul class="topic-tags"><li>',
 					'after'  => '</li></ul>',
 					'sep'    => '</li><li>',
 				) ); ?>
@@ -63,7 +63,7 @@
 				<div>
 					<?php bbp_topic_admin_links( array (
 						'id'     => bbp_get_topic_id(),
-						'before' => '<h2>' . __( 'Topic Admin', 'bporg' ) . '</h2><ul class="topic-admin-links"><li>',
+						'before' => '<h2>' . esc_html__( 'Topic Admin', 'bporg' ) . '</h2><ul class="topic-admin-links"><li>',
 						'after'  => '</li></ul>',
 						'sep'    => '</li><li>',
 						'links'  => array()

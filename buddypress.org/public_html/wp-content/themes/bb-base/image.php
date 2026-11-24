@@ -26,7 +26,7 @@ if ( have_posts() ) :
 			<?php the_tags( "\t\t\t\t\t<dt>" . esc_html__( 'Tagged as', 'bborg' ) . "</dt>\n\t\t\t\t\t<dd>", "</dd>\t\t\t\t\t<dd>", "</dd>\n" ); ?>
 			<dt><?php esc_html_e( 'Categorized under', 'bbporg' ); ?></dt>
 			<dd><?php the_category(', '); ?></dd>
-			<?php comments_popup_link( __( '<dt>Feedback has</dt><dd>not been left</dd>', 'bborg' ), __( '<dt>Feedback has</dt><dd>been left once</dd>', 'bborg' ),  __( '<dt>Feedback has</dt><dd>been left % times</dd>', 'bborg' ), "", __( '<dt>Feedback has</dt><dd>been turned off</dd>', 'bborg' ) ); ?>
+			<?php comments_popup_link( wp_kses_post( __( '<dt>Feedback has</dt><dd>not been left</dd>', 'bborg' ) ), wp_kses_post( __( '<dt>Feedback has</dt><dd>been left once</dd>', 'bborg' ) ),  wp_kses_post( __( '<dt>Feedback has</dt><dd>been left % times</dd>', 'bborg' ) ), "", wp_kses_post( __( '<dt>Feedback has</dt><dd>been turned off</dd>', 'bborg' ) ) ); ?>
 			<dt><?php esc_html_e( 'Syndication through', 'bbporg' ); ?></dt>
 			<dd><?php comments_rss_link('RSS 2.0'); ?></dd>
 			<?php if ('open' == $post->ping_status) : ?>

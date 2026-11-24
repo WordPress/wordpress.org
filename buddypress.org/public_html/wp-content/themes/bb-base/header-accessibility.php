@@ -18,8 +18,8 @@
 <?php endif; ?>
 		<dd class="separator"><a href="#top" title="Skip to top"><?php esc_html_e( 'Top', 'bborg' ); ?></a></dd>
 <?php if ( is_category() || is_post_type_archive( 'post' ) || is_singular( 'post' ) ) : ?>
-		<?php previous_post_link( "\t\t\t\t<dd>%link</dd>\n", __( 'Previous Post', 'bbporg' ) ); ?>
-		<?php next_post_link( "\t\t\t\t<dd>%link</dd>\n", __( 'Next Post', 'bbporg' ) ); ?>
+		<?php previous_post_link( "\t\t\t\t<dd>%link</dd>\n", esc_html__( 'Previous Post', 'bbporg' ) ); ?>
+		<?php next_post_link( "\t\t\t\t<dd>%link</dd>\n", esc_html__( 'Next Post', 'bbporg' ) ); ?>
 <?php endif; ?>
 		<dd><a href="#bottom" title="Skip to bottom"><?php esc_html_e( 'Bottom', 'bborg' ); ?></a></dd>
 	</dl>
