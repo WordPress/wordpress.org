@@ -126,6 +126,23 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 			}
 		);
 
+		// Core always shows Manage » Mailboxes, which lists only the mailboxes an agent can manage, so it's often empty.
+		\Gate::before(
+			static function ( $user, $ability ) {
+				if ( 'viewMailboxMenu' !== $ability || ! $user instanceof User || $user->isAdmin() ) {
+					return null;
+				}
+
+				try {
+					return $user->hasManageMailboxAccess() ? null : false;
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not tell whether user ' . $user->id . ' manages a mailbox: ' . $e->getMessage() );
+
+					return null;
+				}
+			}
+		);
+
 		// Last, after every module has added its files.
 		foreach ( array( 'stylesheets', 'javascripts' ) as $bundle ) {
 			\Eventy::addFilter(
