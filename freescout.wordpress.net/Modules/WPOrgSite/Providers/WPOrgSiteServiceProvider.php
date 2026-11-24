@@ -54,6 +54,13 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	public const HEADER_KEY = 'wporgsite.header';
 
 	/**
+	 * Request attribute set once the page's layout renders.
+	 *
+	 * @var string
+	 */
+	private const REQUEST_LAYOUT = 'wporgsite.layout';
+
+	/**
 	 * The choices in an agent's profile: each field, and the option it's kept in.
 	 *
 	 * @var array<string, string>
@@ -126,10 +133,18 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 			}
 		);
 
+		// The layout renders after the page, so the Mailbox Settings menus of the sidebar and dashboard, which check it too, stay.
+		\View::composer(
+			'layouts.app',
+			static function (): void {
+				request()->attributes->set( self::REQUEST_LAYOUT, true );
+			}
+		);
+
 		// Core always shows Manage » Mailboxes, which lists only the mailboxes an agent can manage, so it's often empty.
 		\Gate::before(
 			static function ( $user, $ability ) {
-				if ( 'viewMailboxMenu' !== $ability || ! $user instanceof User || $user->isAdmin() ) {
+				if ( 'viewMailboxMenu' !== $ability || ! request()->attributes->get( self::REQUEST_LAYOUT ) || ! $user instanceof User || $user->isAdmin() ) {
 					return null;
 				}
 

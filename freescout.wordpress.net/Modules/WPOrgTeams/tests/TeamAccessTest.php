@@ -101,6 +101,25 @@ final class TeamAccessTest extends TestCase {
 	}
 
 	/**
+	 * An administrator made a user keeps only their teams' mailboxes, not core's rows for every mailbox.
+	 *
+	 * @return void
+	 */
+	public function test_demoted_administrator_gets_their_teams_access(): void {
+		$mailbox = $this->create_mailbox();
+		$admin   = $this->create_user( User::ROLE_ADMIN );
+		$admin->mailboxes()->sync( array( $mailbox->id, $this->create_mailbox( 'Photos' )->id ) );
+		$this->create_team( 'Reviewers', array( (int) $admin->id ), array( $mailbox ), array() );
+		app( Pending::class )->flush();
+
+		$admin->role = User::ROLE_USER;
+		$admin->save();
+		app( Pending::class )->flush();
+
+		$this->assertSame( array( (int) $mailbox->id ), $this->mailbox_ids( $admin->fresh() ) );
+	}
+
+	/**
 	 * Those allowed to manage users through a team add users to the teams they're in, and so give them access; not
 	 * to other teams.
 	 *

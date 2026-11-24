@@ -5,7 +5,7 @@ Grants mailbox access and user permissions through the Teams module's teams, so 
 ## How it works
 
 - **A team's page** (Manage » Teams) gets a Permissions group under its mailboxes, with core's user permissions, those of modules like Workflows included. A team's mailboxes and permissions are what its members get.
-- **Members' access is written to them.** Core reads mailbox access from `mailbox_user` and permissions from the user's `permissions` column, without a hook, so each member's rows are updated whenever a team's members, mailboxes, or permissions change, or the team is deleted. A mailbox a member keeps keeps its settings, like hiding it.
+- **Members' access is written to them.** Core reads mailbox access from `mailbox_user` and permissions from the user's `permissions` column, without a hook, so each member's rows are updated whenever a team's members, mailboxes, or permissions change, the team is deleted, or the member's role changes. A mailbox a member keeps keeps its settings, like hiding it.
 - **Teams only.** Users get nothing beyond what their teams grant: someone in no team has no mailboxes. Permissions a team doesn't grant are left unset, so Manage » Settings' defaults for all users still apply. "Can see only assigned conversations" isn't a team permission and stays as it is. Administrators aren't changed: they have everything anyway.
 - **A user's Teams page** replaces core's Permissions page, which redirects to it. Administrators, and members of a team with "Users are allowed to manage users", change a user's teams there; those allowed to manage users can't change administrators'. It also lists what the teams give.
 - **Create a New User** asks for teams instead of mailboxes.

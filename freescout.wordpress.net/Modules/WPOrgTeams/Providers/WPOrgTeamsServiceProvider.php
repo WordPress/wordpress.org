@@ -106,6 +106,16 @@ final class WPOrgTeamsServiceProvider extends ServiceProvider {
 			}
 		);
 
+		// An administrator made a user keeps core's rows for every mailbox until their teams' access replaces them.
+		\Event::listen(
+			'eloquent.saving: ' . User::class,
+			static function ( User $user ): void {
+				if ( $user->exists && $user->isDirty( 'role' ) && Teams::active() ) {
+					app( Pending::class )->add( array( (int) $user->id ) );
+				}
+			}
+		);
+
 		\Event::listen(
 			'eloquent.created: ' . User::class,
 			static function ( User $user ): void {
