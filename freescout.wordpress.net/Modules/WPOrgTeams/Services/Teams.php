@@ -150,6 +150,34 @@ final class Teams {
 	}
 
 	/**
+	 * Changes a team's members, with the team locked from reading them to saving them, so changes at the same time
+	 * don't undo each other.
+	 *
+	 * @param int      $team_id Team ID.
+	 * @param callable $change  Gets the members' IDs, and returns the new ones.
+	 * @return void
+	 */
+	public static function change_members( int $team_id, callable $change ): void {
+		\DB::transaction(
+			static function () use ( $team_id, $change ): void {
+				$team = User::query()->whereKey( $team_id )->lockForUpdate()->first();
+				if ( ! $team || ! self::is_team( $team ) || self::is_deleted( $team ) ) {
+					return;
+				}
+
+				$member_ids = self::member_ids( $team );
+				$new_ids    = array_values( array_unique( array_map( 'intval', $change( $member_ids ) ) ) );
+				if ( $new_ids === $member_ids ) {
+					return;
+				}
+
+				self::set_member_ids( $team, $new_ids );
+				$team->save();
+			}
+		);
+	}
+
+	/**
 	 * Sets a team's members; the caller saves the team.
 	 *
 	 * @param User  $team       Team.

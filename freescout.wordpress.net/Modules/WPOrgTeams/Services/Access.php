@@ -61,6 +61,28 @@ final class Access {
 	 * @return array{mailboxes_added: int[], mailboxes_removed: int[], permissions_added: array, permissions_removed: array}
 	 */
 	public static function apply( User $user, bool $dry_run = false ): array {
+		if ( $dry_run ) {
+			return self::update( $user, true );
+		}
+
+		// Locked, so a request that read the teams earlier can't write back access they no longer grant.
+		return \DB::transaction(
+			static function () use ( $user ): array {
+				$locked = User::query()->whereKey( $user->id )->lockForUpdate()->first();
+
+				return $locked ? self::update( $locked, false ) : self::update( $user, true );
+			}
+		);
+	}
+
+	/**
+	 * Works out, and unless it's a dry run makes, the changes that give a user what their teams grant.
+	 *
+	 * @param User $user    User.
+	 * @param bool $dry_run Whether to only tell what would change.
+	 * @return array{mailboxes_added: int[], mailboxes_removed: int[], permissions_added: array, permissions_removed: array}
+	 */
+	private static function update( User $user, bool $dry_run ): array {
 		$changes = array(
 			'mailboxes_added'     => array(),
 			'mailboxes_removed'   => array(),

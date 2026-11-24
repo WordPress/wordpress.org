@@ -230,11 +230,8 @@ final class WPOrgTeamsServiceProvider extends ServiceProvider {
 		$team_ids                   = $pending->new_user_team_ids;
 		$pending->new_user_team_ids = null;
 
-		foreach ( Teams::all() as $team ) {
-			if ( in_array( (int) $team->id, $team_ids, true ) ) {
-				Teams::set_member_ids( $team, array_merge( Teams::member_ids( $team ), array( (int) $user->id ) ) );
-				$team->save();
-			}
+		foreach ( $team_ids as $team_id ) {
+			Teams::change_members( (int) $team_id, static fn ( array $member_ids ): array => array_merge( $member_ids, array( (int) $user->id ) ) );
 		}
 		$pending->add( array( (int) $user->id ) );
 	}

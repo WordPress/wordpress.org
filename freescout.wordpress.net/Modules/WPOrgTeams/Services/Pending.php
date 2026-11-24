@@ -51,24 +51,30 @@ final class Pending {
 	}
 
 	/**
-	 * Updates the access of the users collected so far.
+	 * Updates the access of the users collected so far; those it fails for stay collected, for the next try.
 	 *
-	 * @return void
+	 * @return int[] IDs of the users whose access couldn't be updated.
 	 */
-	public function flush(): void {
+	public function flush(): array {
 		$user_ids       = $this->user_ids;
 		$this->user_ids = array();
 
 		if ( ! $user_ids ) {
-			return;
+			return array();
 		}
 
+		$failed = array();
 		foreach ( User::query()->whereKey( $user_ids )->get() as $user ) {
 			try {
 				Access::apply( $user );
 			} catch ( \Throwable $e ) {
+				$failed[] = (int) $user->id;
 				\Log::error( '[WPOrgTeams] Could not update the access of user ' . $user->id . ': ' . $e->getMessage() );
 			}
 		}
+
+		$this->add( $failed );
+
+		return $failed;
 	}
 }

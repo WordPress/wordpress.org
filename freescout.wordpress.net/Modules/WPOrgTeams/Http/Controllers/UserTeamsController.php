@@ -65,26 +65,21 @@ final class UserTeamsController extends Controller {
 
 		// Only the teams they may give out; the user's other teams stay as they are.
 		foreach ( Teams::assignable_by( auth()->user() ) as $team ) {
-			$member_ids = Teams::member_ids( $team );
-			$is_member  = in_array( (int) $user->id, $member_ids, true );
-			$wanted     = in_array( (int) $team->id, $selected, true );
-
-			if ( $wanted && ! $is_member ) {
-				$member_ids[] = (int) $user->id;
-			} elseif ( ! $wanted && $is_member ) {
-				$member_ids = array_diff( $member_ids, array( (int) $user->id ) );
-			} else {
-				continue;
-			}
-
-			Teams::set_member_ids( $team, $member_ids );
-			$team->save();
+			$wanted = in_array( (int) $team->id, $selected, true );
+			Teams::change_members(
+				(int) $team->id,
+				static fn ( array $member_ids ): array => $wanted
+					? array_merge( $member_ids, array( (int) $user->id ) )
+					: array_diff( $member_ids, array( (int) $user->id ) )
+			);
 		}
 
 		app( Pending::class )->add( array( (int) $user->id ) );
-		app( Pending::class )->flush();
-
-		\Session::flash( 'flash_success_floating', __( 'Teams saved' ) );
+		if ( app( Pending::class )->flush() ) {
+			\Session::flash( 'flash_error_floating', __( 'The teams were saved, but the access they give couldn’t be updated. Try saving again.' ) );
+		} else {
+			\Session::flash( 'flash_success_floating', __( 'Teams saved' ) );
+		}
 
 		return redirect()->route( 'wporgteams.user', array( 'id' => $user->id ) );
 	}
