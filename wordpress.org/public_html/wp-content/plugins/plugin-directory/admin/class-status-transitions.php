@@ -26,6 +26,41 @@ class Status_Transitions {
 	const REJECTED_SLUG_REGEX = '/^rejected-(.+)-rejected(-\d+)?$/i';
 
 	/**
+	 * The rejection a caller outside of the Edit Plugin screen is about to make.
+	 *
+	 * The admin passes the reason with the form in `$_REQUEST`. Other callers, like the
+	 * review REST endpoints, set it with `set_rejection()` before changing the status.
+	 *
+	 * @var array|null {
+	 *     @type string $reason The rejection reason key, see `Template::get_rejection_reasons()`.
+	 *     @type bool   $notify Whether the author is emailed about the rejection.
+	 * }
+	 */
+	private static $rejection = null;
+
+	/**
+	 * Set the reason and the notification of the rejection about to be made.
+	 *
+	 * The next transition to 'rejected' uses it, and clears it.
+	 *
+	 * @param string $reason The rejection reason key.
+	 * @param bool   $notify Optional. Whether to email the author. Default true.
+	 */
+	public static function set_rejection( $reason, $notify = true ) {
+		self::$rejection = array(
+			'reason' => sanitize_key( $reason ),
+			'notify' => (bool) $notify,
+		);
+	}
+
+	/**
+	 * Forget the rejection set with `set_rejection()`.
+	 */
+	public static function clear_rejection() {
+		self::$rejection = null;
+	}
+
+	/**
 	 * Fetch the instance of the Status_Transitions class.
 	 */
 	public static function instance() {
@@ -177,6 +212,7 @@ class Status_Transitions {
 				$this->save_rejected_reason( $post->ID );
 				$this->rejected( $post->ID, $post );
 				$this->clear_reviewer( $post );
+				self::clear_rejection();
 				break;
 
 			case 'publish':
@@ -351,6 +387,11 @@ class Status_Transitions {
 		// Update last_updated to now.
 		update_post_meta( $post_id, 'last_updated', gmdate( 'Y-m-d H:i:s' ) );
 
+		// The caller may send its own email, so the author isn't emailed twice.
+		if ( null !== self::$rejection && ! self::$rejection['notify'] ) {
+			return;
+		}
+
 		// Send email.
 		$email = new Plugin_Rejected_Email(
 			$post,
@@ -454,15 +495,17 @@ class Status_Transitions {
 	 * @param int $post_id Post ID.
 	 */
 	public function save_rejected_reason( $post_id ) {
-		if ( ! isset( $_REQUEST['rejection_reason'] ) ) {
+		if ( null !== self::$rejection ) {
+			$rejection_reason = self::$rejection['reason'];
+		} elseif ( isset( $_REQUEST['rejection_reason'] ) ) {
+			$rejection_reason = sanitize_key( $_REQUEST['rejection_reason'] );
+		} else {
 			return;
 		}
 
 		if ( ! current_user_can( 'plugin_reject', $post_id ) ) {
 			return;
 		}
-
-		$rejection_reason = sanitize_key( $_REQUEST['rejection_reason'] );
 
 		update_post_meta( $post_id, '_rejection_reason', $rejection_reason );
 		update_post_meta( $post_id, 'plugin_rejected_date', current_time( 'mysql' ) );
