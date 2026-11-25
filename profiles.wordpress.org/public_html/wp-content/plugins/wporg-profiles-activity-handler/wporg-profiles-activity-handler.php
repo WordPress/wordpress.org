@@ -279,6 +279,9 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 				case 'glotpress':
 					$activity_id = $this->handle_glotpress_activity( $data );
 					break;
+				case 'photos':
+					$activity_id = $this->handle_photos_activity( $data );
+					break;
 				case 'plugin':
 					$activity_id = $this->handle_plugin_activity( $data );
 					break;
@@ -1247,6 +1250,38 @@ if ( ! class_exists( 'WPOrg_Profiles_Activity_Handler' ) ) {
 			$last = array_pop( $links );
 
 			return $links ? implode( ', ', $links ) . ' and ' . $last : $last;
+		}
+
+		/**
+		 * Process activity from the Photo Directory (wordpress.org/photos/).
+		 *
+		 * Recognized activities:
+		 *  - Reviewing a photo: approving or rejecting it. Kept as a daily digest per moderator.
+		 *
+		 * Published photos are sent through the `generic` source, one entry per photo.
+		 *
+		 * @param array $data The request data.
+		 * @return int|WP_Error The activity ID.
+		 * @throws Exception When the user ID is not recognized.
+		 */
+		protected function handle_photos_activity( array $data ) {
+			$activity = $this->sanitize_activity( $data );
+
+			if ( 'photos_photo_reviewed' !== $activity['type'] ) {
+				return new WP_Error( 'unknown_type', 'Unrecognized Photo Directory activity.', [ 'status' => 400 ] );
+			}
+
+			$activity['component']    = 'photos';
+			$activity['primary_link'] = 'https://wordpress.org/photos/';
+
+			$where = ' on <a href="https://wordpress.org/photos/">wordpress.org/photos/</a>.';
+
+			return $this->digest_bump(
+				$activity,
+				1,
+				'Reviewed %d photo' . $where,
+				'Reviewed %d photos' . $where
+			);
 		}
 
 		/**
