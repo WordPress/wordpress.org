@@ -1,0 +1,7 @@
+{
+	"description": "Declarations, comments, strings, method calls, invalid names and unresolvable names are ignored; a name built with sprintf() from literals is a real registration.",
+	"abilities": [
+		{ "name": "prefix/formatted", "label": null, "description": null },
+		{ "name": "real/registration", "label": "Real", "description": null }
+	]
+}

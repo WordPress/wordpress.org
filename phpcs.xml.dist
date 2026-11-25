@@ -21,6 +21,9 @@
 	<exclude-pattern>*/plugins/theme-directory/lib/*</exclude-pattern>
 	<exclude-pattern>*/plugins/wpf-stripe/stripe-php/*</exclude-pattern>
 
+	<!-- Plugin Directory test fixtures stand in for third-party plugins, so they copy those plugins' code style. -->
+	<exclude-pattern>*/plugins/plugin-directory/tests/fixtures/*</exclude-pattern>
+
 	<!-- Exclude generated wp-scripts asset files. -->
 	<exclude-pattern>*\.asset\.php$</exclude-pattern>
 

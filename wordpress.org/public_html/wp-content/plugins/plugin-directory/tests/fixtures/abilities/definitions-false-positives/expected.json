@@ -1,0 +1,6 @@
+{
+	"description": "In a plugin that registers dynamically, only valid, non-core names with both label and description count.",
+	"abilities": [
+		{ "name": "fp/real", "label": "Real", "description": "A real ability." }
+	]
+}

@@ -1,0 +1,9 @@
+{
+	"description": "Definitions spread across files via a filter, written as array literals and as one-key-at-a-time assignments, registered through the plugin's own wrapper (modelled on agent-abilities-for-mcp).",
+	"abilities": [
+		{ "name": "regf/get-posts", "label": "Get posts", "description": "List posts." },
+		{ "name": "regf/create-post", "label": "Create a post", "description": "Create a post with a title and content. It's saved as a draft." },
+		{ "name": "regf/get-user", "label": "Get user", "description": "Read one user." },
+		{ "name": "regf/delete-user", "label": "Delete user", "description": "Delete a user." }
+	]
+}

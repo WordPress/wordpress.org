@@ -1,0 +1,6 @@
+{
+	"description": "Registering through the registry object instead of wp_register_ability().",
+	"abilities": [
+		{ "name": "registry/direct", "label": "Direct registry call", "description": null }
+	]
+}
