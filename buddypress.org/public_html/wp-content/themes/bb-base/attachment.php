@@ -15,9 +15,9 @@ if ( have_posts() ) :
 			<label class="date"><?php the_time( 'F jS, Y' ); ?></label>
 			<p class="<?php echo esc_attr( $classname ); ?>"><?php echo wp_kses_post( $attachment_link ); ?><br /><?php echo esc_html( basename( $post->guid ) ); ?></p>
 			<?php
-				the_content( __( 'Check it out!', 'bborg' ) );
+				the_content( esc_html__( 'Check it out!', 'bborg' ) );
 				wp_link_pages( array(
-					'before' => __( 'Pages: ', 'bborg' ),
+					'before' => esc_html__( 'Pages: ', 'bborg' ),
 					'after' => '',
 					'next_or_number' => 'number',
 				) );

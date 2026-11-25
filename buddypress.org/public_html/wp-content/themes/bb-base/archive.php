@@ -21,9 +21,9 @@ if ( have_posts() ) :
 
 	the_posts_pagination( array(
 		'mid_size'           => 2,
-		'prev_text'          => '<span class="screen-reader-text">' . __( 'Previous page', 'bborg' ) . '</span> &larr;',
-		'next_text'          => '<span class="screen-reader-text">' . __( 'Next page', 'bborg' ) . '</span> &rarr;',
-		'before_page_number' => '<span class="screen-reader-text">' . __( 'Page', 'bborg' ) . ' </span>',
+		'prev_text'          => '<span class="screen-reader-text">' . esc_html__( 'Previous page', 'bborg' ) . '</span> &larr;',
+		'next_text'          => '<span class="screen-reader-text">' . esc_html__( 'Next page', 'bborg' ) . '</span> &rarr;',
+		'before_page_number' => '<span class="screen-reader-text">' . esc_html__( 'Page', 'bborg' ) . ' </span>',
 	) );
 else : ?>
 	<p><em><?php esc_html_e( 'Sorry, no posts matched your criteria.', 'bborg' ); ?></em></p>

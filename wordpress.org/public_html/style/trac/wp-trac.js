@@ -366,6 +366,7 @@ let wpTrac,
 			wpTrac.addContributorAvatars();
 			wpTrac.requestReporterFeedback();
 			wpTrac.addNewTicketGuidance();
+			wpTrac.defaultEscalatedPriority();
 			wpTrac.requireContributionLicense();
 			wpTrac.markUgcLinks();
 
@@ -1156,6 +1157,25 @@ let wpTrac,
 					<a href="https://hackerone.com/wordpress">WordPress HackerOne program</a>.</p>
 					</div>`
 				);
+			}
+		},
+
+		/**
+		 * Defaults the priority of a new ticket from an escalated reporter to the highest.
+		 *
+		 * @see https://wordpress.slack.com/archives/C02QB8GMM/p1795226330135979
+		 */
+		defaultEscalatedPriority() {
+			// Keep in sync with svn.wordpress.org/bin/slack-trac-hook.php.
+			const escalatedReporters = [ 'barry' ];
+
+			// A preview keeps whatever priority the reporter picked.
+			if ( ! wpTrac.isNewTicket() || $( '#ticketbox.ticketdraft' ).length ) {
+				return;
+			}
+
+			if ( escalatedReporters.includes( wpTrac.currentUser ) ) {
+				$( '#field-priority option[value="highest omg bbq"]' ).prop( 'selected', true );
 			}
 		},
 

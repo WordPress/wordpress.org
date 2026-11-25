@@ -1072,6 +1072,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			list( $user_id, $sso_hash, $valid_until, $remember_me, $session_token ) = explode( '|', $sso_token, 5 );
 
+			// The login treats this as a boolean, so it is one from here on.
+			$remember_me = (bool) $remember_me;
+
 			$expiration_valid = (
 				$valid_until >= time() &&
 				$valid_until <= ( time() + self::REMOTE_TOKEN_TIMEOUT + self::REMOTE_TOKEN_CLOCK_SKEW )

@@ -15,6 +15,6 @@
 <?php else : ?>
 			<p><em><?php esc_html_e( 'Sorry, no posts matched your criteria.' ); ?></em></p>
 <?php endif; ?>
-			<?php posts_nav_link(' &#8212; ', __('Newer &rarr;'), __('&larr; Older') ); ?>
+			<?php posts_nav_link(' &#8212; ', esc_html__( 'Newer &rarr;' ), esc_html__( '&larr; Older' ) ); ?>
 			<hr class="hidden" />
 <?php get_sidebar(); get_footer(); ?>

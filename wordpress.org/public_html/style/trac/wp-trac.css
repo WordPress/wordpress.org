@@ -1088,6 +1088,7 @@ div.trac-content {
 }
 
 @media (max-width: 600px) {
+
 	#content.wiki .wiki-toc {
 		box-sizing: border-box;
 		float: none;
@@ -2523,6 +2524,7 @@ body.trac #main #query > .buttons {
 }
 
 @media (max-width: 959px) {
+
 	body.trac #main #query {
 		box-sizing: border-box;
 		padding: 0 10px;
@@ -2530,6 +2532,7 @@ body.trac #main #query > .buttons {
 }
 
 @media (max-width: 600px) {
+
 	body.trac #main #query > p.option {
 		flex-basis: 100%;
 	}

@@ -9,7 +9,7 @@
 			wp_kses_post( get_the_author_link() )
 		);
 	?></cite>
-	<div class="single-post" id="post-<?php the_ID(); ?>"><?php the_content( __( 'Read more &rarr;', 'bborg' ) ); ?></div>
+	<div class="single-post" id="post-<?php the_ID(); ?>"><?php the_content( esc_html__( 'Read more &rarr;', 'bborg' ) ); ?></div>
 
 	<hr class="hidden" />
 

@@ -2,7 +2,7 @@
 namespace WordPressdotorg\Plugin_Directory;
 
 if ( ! class_exists( '\Michelf\MarkdownExtra' ) ) {
-	include __DIR__ . '/libs/michelf-php-markdown-1.6.0/Michelf/MarkdownExtra.inc.php';
+	include __DIR__ . '/libs/michelf-php-markdown-2.0.0/Michelf/MarkdownExtra.inc.php';
 }
 
 /**
@@ -15,10 +15,30 @@ if ( ! class_exists( '\Michelf\MarkdownExtra' ) ) {
 class Markdown extends \Michelf\MarkdownExtra {
 
 	/**
+	 * Block-level tags, as of 1.6.0.
+	 *
+	 * 1.9.1 added `details` and `summary`, which stops Markdown inside them from rendering.
+	 *
+	 * @var string
+	 */
+	protected string $block_tags_re = 'p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|address|form|fieldset|iframe|hr|legend|article|section|nav|aside|hgroup|header|footer|figcaption|figure';
+
+	/**
+	 * Requires a whole tag name, so text like `<php7` isn't read as an opening `<p` tag.
+	 */
+	public function __construct() {
+		parent::__construct();
+
+		foreach ( array( 'block_tags_re', 'context_block_tags_re', 'clean_tags_re' ) as $tags_re ) {
+			$this->$tags_re = "(?:{$this->$tags_re})\b";
+		}
+	}
+
+	/**
 	 * @param string $text
 	 * @return string
 	 */
-	public function transform( $text ) {
+	public function transform( $text ): string {
 		$text = $this->code_trick( trim( $text ) );
 
 		// Convert any `= Section =` headers into a real header.
@@ -27,6 +47,32 @@ class Markdown extends \Michelf\MarkdownExtra {
 		$text = parent::transform( trim( $text ) );
 
 		return trim( $text );
+	}
+
+	/**
+	 * Hashes block-level HTML so Markdown leaves it alone.
+	 *
+	 * An empty enclosing tag pattern lets any `<` followed by a non-space character open a tag, so text like
+	 * `<35KB` with no `>` after it makes the tag regex run out of PCRE stack. A never-matching pattern avoids that
+	 * (together with the whole-name tag patterns set in the constructor), and a failed regex leaves the text
+	 * unhashed instead of a fatal error.
+	 *
+	 * @param string $text Markdown text.
+	 * @return string
+	 */
+	protected function hashHTMLBlocks( $text ) {
+		if ( $this->no_markup ) {
+			return $text;
+		}
+
+		try {
+			list( $hashed, ) = $this->_hashHTMLBlocks_inMarkdown( $text, 0, '(?!)' );
+		} catch ( \TypeError $e ) {
+			// preg_split() returned false.
+			return $text;
+		}
+
+		return $hashed;
 	}
 
 	/**

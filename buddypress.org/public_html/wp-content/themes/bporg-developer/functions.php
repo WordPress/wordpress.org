@@ -92,7 +92,7 @@ function bporg_developer_starter_content() {
 					'text',
 					array(
 						'title'  => __( 'More resources', 'bporg-developer' ),
-						'text'   => sprintf( '<a href="https://codex.buddypress.org/">%s</a>', __( 'BuddyPress Codex', 'bporg-developer' ) ),
+						'text'   => sprintf( '<a href="https://codex.buddypress.org/">%s</a>', esc_html__( 'BuddyPress Codex', 'bporg-developer' ) ),
 						'filter' => true,
 						'visual' => true,
 					),
@@ -104,7 +104,7 @@ function bporg_developer_starter_content() {
 					'text',
 					array(
 						'title'  => __( 'Need help?', 'bporg-developer' ),
-						'text'   => sprintf( '<a href="https://buddypress.org/support/">%s</a>', __( 'BuddyPress support forums', 'bporg-developer' ) ),
+						'text'   => sprintf( '<a href="https://buddypress.org/support/">%s</a>', esc_html__( 'BuddyPress support forums', 'bporg-developer' ) ),
 						'filter' => true,
 						'visual' => true,
 					),

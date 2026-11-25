@@ -15,19 +15,19 @@ if ( have_posts() ) :
 			);
 			?>
 		</cite>
-		<div class="single-post" id="post-<?php the_ID(); ?>"><?php the_content( __( 'Read more &rarr;', 'bborg' ) ); ?></div>
+		<div class="single-post" id="post-<?php the_ID(); ?>"><?php the_content( esc_html__( 'Read more &rarr;', 'bborg' ) ); ?></div>
 <?php
 	endwhile;
 
 	if ( get_next_posts_link() ) :
 		?>
-		<div class="nav-previous alignleft"><?php next_posts_link( __( '<span class="meta-nav">&larr;</span> Older posts', 'bborg' ) ); ?></div>
+		<div class="nav-previous alignleft"><?php next_posts_link( wp_kses_post( __( '<span class="meta-nav">&larr;</span> Older posts', 'bborg' ) ) ); ?></div>
 		<?php
 	endif;
 
 	if ( get_previous_posts_link() ) :
 		?>
-		<div class="nav-next alignright"><?php previous_posts_link( __( 'Newer posts <span class="meta-nav">&rarr;</span>', 'bborg' ) ); ?></div>
+		<div class="nav-next alignright"><?php previous_posts_link( wp_kses_post( __( 'Newer posts <span class="meta-nav">&rarr;</span>', 'bborg' ) ) ); ?></div>
 		<?php
 	endif;
 else :

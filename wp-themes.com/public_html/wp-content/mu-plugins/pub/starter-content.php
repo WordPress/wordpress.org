@@ -79,9 +79,7 @@ class Starter_Content {
 		}
 
 		// If a theme causes problems, this can block loading.
-		$blocked_themes = array(
-			'finedine',  // Customizer polyfill causes E_ERROR: Uncaught Error: Call to a member function add_partial() on bool
-		);
+		$blocked_themes = array();
 
 		// If a theme authors themes often cause a problem, just block them all.
 		$blocked_authors = array(
@@ -90,7 +88,8 @@ class Starter_Content {
 				// 'barter', // E_COMPILE_ERROR: Cannot redeclare barter_get_user_css()
 		);
 
-		$theme_author = wp_get_theme()['Author'];
+		// Strip spaces so the author name matches too, not just a linked Author URI.
+		$theme_author = str_replace( ' ', '', wp_get_theme()['Author'] );
 		foreach ( $blocked_authors as $author ) {
 			if ( false !== stripos( $theme_author, str_replace( ' ', '', $author ) ) ) {
 				$blocked_themes[] = get_stylesheet();
@@ -602,8 +601,24 @@ function polyfill_wp_customize_manager() {
 		// Define a constructor, for components that call `parent::__construct()`.
 		function __construct() {}
 
+		/**
+		 * Returns no incoming Customizer values.
+		 *
+		 * WP_Customize_Widgets::register_settings() passes this to array_keys().
+		 *
+		 * @return array
+		 */
+		public function unsanitized_post_values() {
+			return array();
+		}
+
 		// Ensure that any calls return false too.
 		function __get( $property ) {
+			// Themes call `$wp_customize->selective_refresh->add_partial()` outside `customize_register`.
+			if ( 'selective_refresh' === $property ) {
+				return $this;
+			}
+
 			return false;
 		}
 		function __call( $method, $args ) {
