@@ -37,7 +37,7 @@ function send_error( $error, $code = 404 ) {
 	// Back-compat behaviour for the 1.0/1.1 API's
 	if (
 		defined( 'THEMES_API_VERSION' ) && THEMES_API_VERSION < 1.2 &&
-		'Theme not found' == $response->error
+		in_array( $response->error, [ 'Theme not found', 'closed' ], true )
 	) {
 		$response = false;
 	}
@@ -150,6 +150,7 @@ if (
 	'theme_information' == $action &&
 	isset( $slug ) &&
 	404 == http_response_code() &&
+	( ! isset( $api->response->error ) || 'closed' !== $api->response->error ) &&
 	// Validate that the theme doesn't exist for update-checks, as a sanity check.
 	! wp_cache_get( $slug, 'theme-update-check' ) &&
 	// And that there were no DB errors.

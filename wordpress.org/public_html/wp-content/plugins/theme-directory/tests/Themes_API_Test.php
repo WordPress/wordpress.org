@@ -287,4 +287,94 @@ class Themes_API_Test extends TestCase {
 			$api->request->fields
 		);
 	}
+
+	/**
+	 * Closure and outdated fields are preserved and properly cast in the fields array.
+	 */
+	public function test_closure_and_outdated_fields_cast_to_booleans() {
+		$request = array(
+			'fields' => array(
+				'is_closed'       => 1,
+				'closed'          => 'true',
+				'status'          => 1,
+				'is_suspended'    => 'true',
+				'is_outdated'     => 1,
+				'outdated_notice' => 'true',
+				'closed_date'     => 1,
+				'reason'          => 'true',
+				'reason_text'     => 1,
+			),
+		);
+		$api     = $this->make_api( $request );
+
+		$this->assertSame(
+			array(
+				'is_closed'       => true,
+				'closed'          => true,
+				'status'          => true,
+				'is_suspended'    => true,
+				'is_outdated'     => true,
+				'outdated_notice' => true,
+				'closed_date'     => true,
+				'reason'          => true,
+				'reason_text'     => true,
+			),
+			$api->request->fields
+		);
+	}
+
+	/**
+	 * When fields are passed as a list of strings, closure and outdated fields are mapped to true.
+	 */
+	public function test_closure_and_outdated_fields_in_list_mapped_to_true() {
+		$request = array(
+			'fields' => array( 'closed', 'is_closed', 'is_outdated', 'status', 'reason' ),
+		);
+		$api     = $this->make_api( $request );
+
+		$this->assertSame(
+			array(
+				'closed'      => true,
+				'is_closed'   => true,
+				'is_outdated' => true,
+				'status'      => true,
+				'reason'      => true,
+			),
+			$api->request->fields
+		);
+	}
+
+	/**
+	 * Tests that database error on published theme lookup is preserved across the suspension check.
+	 */
+	public function test_theme_information_preserves_db_error_state() {
+		global $wpdb;
+
+		$prev_error = $wpdb->last_error ?? '';
+
+		$simulate_error = static function ( $posts, $wp_query ) use ( &$wpdb ) {
+			$post_status = (array) ( $wp_query->query_vars['post_status'] ?? array() );
+
+			if ( in_array( 'publish', $post_status, true ) ) {
+				$wpdb->last_error = 'Simulated database failure on published theme lookup';
+				return array();
+			}
+
+			// The suspension query succeeds with no error and no results.
+			$wpdb->last_error = '';
+			return array();
+		};
+
+		add_filter( 'posts_pre_query', $simulate_error, 10, 2 );
+
+		try {
+			$api = $this->make_api( array( 'slug' => 'test-error-slug' ), 'theme_information' );
+
+			$this->assertSame( 'Theme not found', $api->response->error );
+			$this->assertSame( 'Simulated database failure on published theme lookup', $wpdb->last_error );
+		} finally {
+			remove_filter( 'posts_pre_query', $simulate_error );
+			$wpdb->last_error = $prev_error;
+		}
+	}
 }
