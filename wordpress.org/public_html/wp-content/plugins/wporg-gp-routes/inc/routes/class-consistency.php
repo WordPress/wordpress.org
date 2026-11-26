@@ -164,9 +164,17 @@ class Consistency extends GP_Route {
 	private function query( $args ) {
 		global $wpdb;
 
-		$collation     = $args['case_sensitive'] ? 'BINARY' : '';
-		$project_where = '';
-		$query_params  = [];
+		$case_sensitive_where = '';
+		$project_where        = '';
+		$query_params         = [ $args['search'] ];
+
+		if ( $args['case_sensitive'] ) {
+			$case_sensitive_where = 'AND CAST( o.singular AS CHAR CHARACTER SET binary ) = CAST( %s AS CHAR CHARACTER SET binary )';
+			$query_params[]       = $args['search'];
+		}
+
+		$query_params[] = $args['locale'];
+		$query_params[] = $args['set_slug'];
 
 		// Hidden originals are for project writers only; results span projects, so only admins see them here.
 		$priority_where = GP::$permission->current_user_can( 'admin' ) ? '' : 'AND o.priority > -2';
@@ -178,8 +186,6 @@ class Consistency extends GP_Route {
 				$query_params[] = $wpdb->esc_like( $project->path ) . '/%';
 			}
 		}
-
-		array_unshift( $query_params, $args['search'], $args['locale'], $args['set_slug'] );
 
 		$query = "
 			SELECT
@@ -200,12 +206,13 @@ class Consistency extends GP_Route {
 			JOIN
 				{$wpdb->gp_translations} AS t ON o.id = t.original_id
 			JOIN
-				{$wpdb->gp_translation_sets} AS ts ON ts.id = t.translation_set_id
+				{$wpdb->gp_translation_sets} AS ts ON ts.id = t.translation_set_id AND ts.project_id = o.project_id
 			WHERE
 				p.active = 1
 				AND t.status = 'current'
 				AND o.status = '+active'
-				AND o.singular = {$collation} %s
+				AND o.singular = %s
+				{$case_sensitive_where}
 				AND ts.locale = %s
 				AND ts.slug = %s
 				{$priority_where}
