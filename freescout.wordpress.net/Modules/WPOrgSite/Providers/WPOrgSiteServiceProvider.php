@@ -54,6 +54,13 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 	public const HEADER_KEY = 'wporgsite.header';
 
 	/**
+	 * Request attribute set once the page's layout renders.
+	 *
+	 * @var string
+	 */
+	private const REQUEST_LAYOUT = 'wporgsite.layout';
+
+	/**
 	 * The choices in an agent's profile: each field, and the option it's kept in.
 	 *
 	 * @var array<string, string>
@@ -123,6 +130,32 @@ final class WPOrgSiteServiceProvider extends ServiceProvider {
 				$javascripts[] = \Module::getPublicPath( self::ALIAS ) . '/js/users.js';
 
 				return $javascripts;
+			}
+		);
+
+		// The layout renders after the page, so the Mailbox Settings menus of the sidebar and dashboard, which check it too, stay.
+		\View::composer(
+			'layouts.app',
+			static function (): void {
+				request()->attributes->set( self::REQUEST_LAYOUT, true );
+			}
+		);
+
+		// Core always shows Manage » Mailboxes, which lists only the mailboxes an agent can manage, so it's often empty.
+		\Gate::before(
+			static function ( $user, $ability ) {
+				if ( 'viewMailboxMenu' !== $ability || ! request()->attributes->get( self::REQUEST_LAYOUT ) || ! $user instanceof User || $user->isAdmin() ) {
+					return null;
+				}
+
+				try {
+					// Modules like Saved Replies have the page list every mailbox for agents they let in.
+					return \Eventy::filter( 'user.can_view_mailbox_menu', false, $user ) || $user->hasManageMailboxAccess() ? null : false;
+				} catch ( \Throwable $e ) {
+					\Log::error( '[WPOrgSite] Could not tell whether user ' . $user->id . ' manages a mailbox: ' . $e->getMessage() );
+
+					return null;
+				}
 			}
 		);
 

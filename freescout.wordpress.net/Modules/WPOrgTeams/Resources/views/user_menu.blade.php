@@ -1,0 +1,1 @@
+<li id="wporgteams-user-menu" @if ( Route::currentRouteName() === 'wporgteams.user' ) class="active" @endif><a href="{{ route( 'wporgteams.user', array( 'id' => $user->id ) ) }}"><i class="glyphicon glyphicon-th-large"></i> {{ __('Teams') }}</a></li>

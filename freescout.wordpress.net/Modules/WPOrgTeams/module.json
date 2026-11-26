@@ -1,0 +1,24 @@
+{
+    "name": "WP.org Teams",
+    "alias": "wporgteams",
+    "img": "/modules/wporgteams/img/icon.svg",
+    "description": "Grants mailbox access and user permissions through teams: each member gets what their teams have.",
+    "version": "1.0.0",
+    "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgTeams",
+    "author": "WordPress.org",
+    "authorUrl": "https://wordpress.org/",
+    "requiredAppVersion": "1.8.243",
+    "requiredModules": {
+        "teams": "1.0.33"
+    },
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\WPOrgTeams\\Providers\\WPOrgTeamsServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
