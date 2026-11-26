@@ -196,6 +196,8 @@ class Import {
 			];
 		}
 
+		$this->warnings = array_merge( $this->warnings, self::requires_header_warnings( $headers, $readme ) );
+
 		/*
 		 * Check to see if the plugin is using the `Update URI` header.
 		 *
@@ -1494,6 +1496,55 @@ class Import {
 		// Flag any inequality. The common case is "forgot to bump the header" (tag ahead of
 		// version), but the inverse is also worth flagging — it's allowable yet usually unintended.
 		return version_compare( $normalized_tag, $normalized_version, '==' );
+	}
+
+	/**
+	 * Check the plugin's Requires at least and Requires PHP headers.
+	 *
+	 * WordPress enforces these headers from the main plugin file, so unlike the readme fields
+	 * they can't be ignored when invalid. Warn when a header isn't a valid version, is higher
+	 * than the readme allows, or disagrees with the readme.
+	 *
+	 * @param object $headers The plugin headers, with `RequiresWP` and `RequiresPHP` properties.
+	 * @param object $readme  The parsed readme, with `requires` and `requires_php` properties.
+	 * @return array Import warnings, keyed by warning code.
+	 */
+	public static function requires_header_warnings( $headers, $readme ) {
+		$warnings = [];
+
+		// `6.0` and `6.0.0` are the same requirement.
+		$normalize = static function ( $v ) {
+			return preg_replace( '/(\.0)+$/', '', $v );
+		};
+
+		$stable_branch = defined( 'WP_CORE_STABLE_BRANCH' ) ? WP_CORE_STABLE_BRANCH : $GLOBALS['wp_version'];
+
+		$requires = $headers->RequiresWP ?? ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Plugin header key.
+		if ( $requires ) {
+			// Same rules the readme parser applies to its Requires at least field.
+			if ( ! preg_match( '!^\d+\.\d(\.\d+)?$!', $requires ) || (float) $requires > round( (float) $stable_branch + 0.1, 1 ) ) {
+				$warnings['plugin_requires_header_invalid'] = $requires;
+			} elseif ( ! empty( $readme->requires ) && $normalize( $requires ) !== $normalize( $readme->requires ) ) {
+				$warnings['requires_header_mismatch'] = [
+					'plugin' => $requires,
+					'readme' => $readme->requires,
+				];
+			}
+		}
+
+		$requires_php = $headers->RequiresPHP ?? ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Plugin header key.
+		if ( $requires_php ) {
+			if ( ! preg_match( '!^\d+(\.\d+){1,2}$!', $requires_php ) ) {
+				$warnings['plugin_requires_php_header_invalid'] = $requires_php;
+			} elseif ( ! empty( $readme->requires_php ) && $normalize( $requires_php ) !== $normalize( $readme->requires_php ) ) {
+				$warnings['requires_php_header_mismatch'] = [
+					'plugin' => $requires_php,
+					'readme' => $readme->requires_php,
+				];
+			}
+		}
+
+		return $warnings;
 	}
 
 	/**

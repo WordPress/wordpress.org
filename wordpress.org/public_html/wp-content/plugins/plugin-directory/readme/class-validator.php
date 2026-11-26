@@ -335,6 +335,36 @@ class Validator {
 					__( 'The %s field is missing. It should be defined here, or in your main plugin file.', 'wporg-plugins' ),
 					'<code>Requires PHP</code>'
 				);
+			case 'plugin_requires_header_invalid':
+				$latest_wordpress_version = defined( 'WP_CORE_STABLE_BRANCH' ) ? WP_CORE_STABLE_BRANCH : '6.5';
+
+				return sprintf(
+					/* translators: 1: plugin header tag; 2: the header value; 3: Example version 5.0. 4: Example version 4.9. */
+					__( 'The %1$s header in your main plugin file (%2$s) is not a valid WordPress version. WordPress checks this header before activating your plugin, so it should only contain a WordPress version such as %3$s or %4$s.', 'wporg-plugins' ),
+					'<code>Requires at least</code>',
+					'<code>' . esc_html( $data ) . '</code>',
+					'<code>' . number_format( $latest_wordpress_version, 1 ) . '</code>',
+					'<code>' . number_format( $latest_wordpress_version - 0.1, 1 ) . '</code>'
+				);
+			case 'plugin_requires_php_header_invalid':
+				global $required_php_version; // WP wp-includes/version.php.
+				return sprintf(
+					/* translators: 1: plugin header tag; 2: the header value; 3: Example version 7.0. 4: Example version 8.2. */
+					__( 'The %1$s header in your main plugin file (%2$s) is not a valid PHP version. WordPress checks this header before activating your plugin, so it should only contain a PHP version such as %3$s or %4$s.', 'wporg-plugins' ),
+					'<code>Requires PHP</code>',
+					'<code>' . esc_html( $data ) . '</code>',
+					'<code>' . esc_html( $required_php_version ?? '7.0' ) . '</code>',
+					'<code>8.2</code>'
+				);
+			case 'requires_header_mismatch':
+			case 'requires_php_header_mismatch':
+				return sprintf(
+					/* translators: 1: plugin header tag; 2: the value in the main plugin file; 3: the value in the readme. */
+					__( 'The %1$s header in your main plugin file (%2$s) does not match the one in your readme (%3$s). The value from your main plugin file is used, so update your readme to match.', 'wporg-plugins' ),
+					'<code>' . ( 'requires_header_mismatch' === $error_code ? 'Requires at least' : 'Requires PHP' ) . '</code>',
+					'<code>' . esc_html( is_array( $data ) ? ( $data['plugin'] ?? '' ) : '' ) . '</code>',
+					'<code>' . esc_html( is_array( $data ) ? ( $data['readme'] ?? '' ) : '' ) . '</code>'
+				);
 			case 'stable_tag_invalid':
 				return sprintf(
 					/* translators: 1: 'Stable tag', 2: /trunk/ SVN directory */
