@@ -970,6 +970,9 @@ class Moderators {
 				}
 				$retval['view_all'] = false;
 
+				// Rebuild the URL now that the reply is public, so its page no longer counts it as hidden.
+				$retval['redirect_to'] = bbp_get_reply_url( $r['id'], bbp_get_redirect_to() );
+
 				break;
 
 			case 'wporg_bbp_unapprove_reply':
@@ -992,12 +995,18 @@ class Moderators {
 				}
 				$retval['view_all'] = false;
 
+				// Rebuild the URL now that the reply is public, so its page no longer counts it as hidden.
+				$retval['redirect_to'] = bbp_get_reply_url( $r['id'], bbp_get_redirect_to() );
+
 				break;
 		}
 
-		// Add 'view=all' if needed
+		// Add 'view=all' if needed, rebuilding the URL with bbPress's page since that view counts hidden replies.
 		if ( ! empty( $retval['view_all'] ) ) {
-			$retval['redirect_to'] = bbp_add_view_all( $retval['redirect_to'], true );
+			$hooks = Plugin::get_instance()->hooks;
+			remove_filter( 'bbp_get_reply_url', array( $hooks, 'correct_reply_url_page' ), 20 );
+			$retval['redirect_to'] = bbp_add_view_all( bbp_get_reply_url( $r['id'], bbp_get_redirect_to() ), true );
+			add_filter( 'bbp_get_reply_url', array( $hooks, 'correct_reply_url_page' ), 20, 3 );
 		}
 
 		return $retval;
