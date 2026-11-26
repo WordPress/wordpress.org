@@ -217,7 +217,7 @@ function parse_request() {
 		 * as the dev's browser IP.
 		 */
 		$public_ip = filter_var(
-			$_REQUEST['ip'],
+			is_string( $_REQUEST['ip'] ) ? $_REQUEST['ip'] : '',
 			FILTER_VALIDATE_IP,
 			FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
 		);
@@ -339,7 +339,7 @@ function build_response( $location, $location_args ) {
 			$event_args['number'] = (int) $_REQUEST['number'];
 		}
 
-		if ( ! empty( $location['latitude'] ) ) {
+		if ( isset( $location['latitude'], $location['longitude'] ) && is_numeric( $location['latitude'] ) && is_numeric( $location['longitude'] ) ) {
 			$event_args['nearby'] = array(
 				'latitude'  => $location['latitude'],
 				'longitude' => $location['longitude'],
@@ -692,8 +692,8 @@ function get_location( $args = array() ) {
 	// Coordinates provided
 	if (
 		! $location && (
-			! empty( $args['latitude'] )  && is_numeric( $args['latitude'] ) &&
-			! empty( $args['longitude'] ) && is_numeric( $args['longitude'] )
+			isset( $args['latitude'], $args['longitude'] ) &&
+			is_numeric( $args['latitude'] ) && is_numeric( $args['longitude'] )
 		)
 	) {
 		$location = array(

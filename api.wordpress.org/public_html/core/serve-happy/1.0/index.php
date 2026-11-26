@@ -1,4 +1,15 @@
 <?php
+/**
+ * Serve Happy API: reports whether a site's PHP version is still supported.
+ *
+ * Standalone endpoint; WordPress is not loaded here, so its sanitizers are
+ * unavailable. The JSONP callback name is restricted to [a-zA-Z0-9_.] inline.
+ *
+ * phpcs:disable WordPress.Security.ValidatedSanitizedInput
+ *
+ * @package WordPressdotorg\API\Serve_Happy
+ */
+
 namespace WordPressdotorg\API\Serve_Happy;
 
 define( 'API_VERSION', '1.0' );
@@ -43,7 +54,7 @@ function output_response( $data ) {
 		call_headers( 'application/javascript' );
 
 		echo '/**/' .
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSONP callback name, restricted to [a-zA-Z0-9_.] inline.
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The callback name is restricted to [a-zA-Z0-9_.] inline.
 			preg_replace('/[^a-zA-Z0-9_.]/', '', $_GET['callback'] ) .
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSONP response body; json_encode() output, which an HTML escaper would corrupt.
 			'(' . $json_data . ')';

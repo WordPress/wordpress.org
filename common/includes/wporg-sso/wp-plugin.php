@@ -299,7 +299,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$this->_maybe_perform_remote_login();
 			$this->_maybe_perform_remote_logout();
 
-			if ( preg_match( '!/wp-signup\.php$!', $_SERVER['REQUEST_URI'] ) ) {
+			if ( preg_match( '!/wp-signup\.php$!', wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) ) {
 				// Note: wp-signup.php is not a physical file, and so it's matched on it's request uri.
 				// If we're on any WP signup screen, redirect to the SSO host one,respecting the user's redirect_to request
 				$this->_safe_redirect( add_query_arg( 'redirect_to', urlencode( $redirect_req ), $this->sso_signup_url ), 301 );
@@ -368,7 +368,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 					self::$matched_route_params = array();
 					foreach ( $this->valid_sso_paths as $route => $regex ) {
 						// Process the URI with trailing `/.`, `/..`, `/. ` and `/.%20` normalised to `/`.
-						$request_uri = preg_replace( '!/[ .]+$!', '/', urldecode( $_SERVER['REQUEST_URI'] ) );
+						$request_uri = preg_replace( '!/[ .]+$!', '/', urldecode( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) );
 						if ( preg_match( '!^' . $regex . '(?:[/?]{1,2}.*)?$!', $request_uri, $matches ) ) {
 							self::$matched_route        = $route;
 							self::$matched_route_regex  = $regex;
@@ -382,7 +382,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 						// Add a custom filter others can apply (theme, etc).
 						add_filter( 'is_valid_wporg_sso_path' , '__return_true' );
 
-						if ( preg_match( '!^/(\?.*)?$!', $_SERVER['REQUEST_URI'] ) ) {
+						if ( preg_match( '!^/(\?.*)?$!', wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) ) {
 
 							// If at host root (/)
 							if ( ! empty( $_GET['action'] ) ) {
@@ -411,9 +411,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 							( is_admin() || wp_installing() ) &&
 							( is_super_admin() || is_user_member_of_blog() )
 						) ||
-						0 === strpos( $_SERVER['REQUEST_URI'], '/wp-json' ) ||
-						0 === strpos( $_SERVER['REQUEST_URI'], '/?rest_route=' ) ||
-						0 === strpos( $_SERVER['REQUEST_URI'], '/xmlrpc.php' )
+						0 === strpos( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/wp-json' ) ||
+						0 === strpos( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/?rest_route=' ) ||
+						0 === strpos( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), '/xmlrpc.php' )
 					) {
 						// Do nothing, allow access to wp-admin, wp-json and xmlrpc.php on login.wordpress.org
 					} elseif ( is_user_logged_in() ) {
@@ -496,7 +496,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		 */
 		public function login_form_defaults( $defaults ) {
 			if ( ! empty( $_GET['redirect_to'] ) ) {
-				$defaults['redirect'] = $_GET['redirect_to']; // always ultimately checked for safety at redir time
+				$defaults['redirect'] = isset( $_GET['redirect_to'] ) && is_string( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : ''; // Always ultimately checked for safety at redir time.
 			} elseif ( $referer = wp_get_referer() ) {
 				$_GET['redirect_to'] = $referer;
 				$defaults['redirect'] = $referer;
@@ -574,7 +574,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			$user = wp_get_current_user();
 
 			// Redirect back to the requested location.. the referer.. or failing that, the current sites front page after it's all done.
-			$logout_redirect = ( wp_unslash( $_REQUEST['redirect_to'] ?? '' ) ?: wp_get_referer() ) ?: home_url( '/' );
+			$logout_redirect = ( ( isset( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) ) : '' ) ?: wp_get_referer() ) ?: home_url( '/' );
 
 			// Never to wp-admin.
 			if ( str_contains( $logout_redirect, '/wp-admin/' ) ) {
@@ -647,7 +647,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 
 			$bounce       = $this->_current_bounce_fingerprint();
 			$landing_url  = $this->_remote_login_landing_url();
-			$remote_token = wp_unslash( $_GET['sso_token'] );
+			$remote_token = sanitize_text_field( wp_unslash( $_GET['sso_token'] ) );
 			$remote_token = $this->_validate_remote_token( $remote_token, $bounce );
 
 			/*
@@ -685,9 +685,9 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 		protected function _remote_login_landing_url() {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- No nonce is possible cross-domain; is_string() keeps `redirect_to[]=` from reaching str_contains() as an array.
 			if ( isset( $_GET['redirect_to'] ) && is_string( $_GET['redirect_to'] ) ) {
-				$redirect_to = wp_unslash( $_GET['redirect_to'] );
+				$redirect_to = esc_url_raw( wp_unslash( $_GET['redirect_to'] ) );
 			} else {
-				$redirect_to = set_url_scheme( 'http://' . $this->host . ( $_SERVER['REQUEST_URI'] ?? '/' ) );
+				$redirect_to = set_url_scheme( 'http://' . $this->host . ( wp_strip_all_tags( wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ) ) ) );
 
 				$redirect_to = remove_query_arg( array( 'sso_token', 'sso_bounce', 'sso_retry' ), $redirect_to );
 			}
@@ -793,7 +793,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			}
 
 			// Validate the logout token.
-			$remote_token = wp_unslash( $_GET['sso_logout'] );
+			$remote_token = sanitize_text_field( wp_unslash( $_GET['sso_logout'] ) );
 			$remote_token = $this->_validate_remote_token( $remote_token );
 			if ( ! $remote_token || ! $remote_token['valid'] ) {
 				return;
@@ -819,7 +819,7 @@ if ( class_exists( 'WPOrg_SSO' ) && ! class_exists( 'WP_WPOrg_SSO' ) ) {
 			// Default to the logout confirmation screen, or back to the source site if possible.
 			$redirect_to = $this->sso_host_url . '/loggedout';
 			if ( ! empty( $_REQUEST['redirect_to'] ) ) {
-				$requested_redirect_to = wp_unslash( $_REQUEST['redirect_to'] );
+				$requested_redirect_to = isset( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) ) : '';
 				$redirect_to           = add_query_arg( 'redirect_to', urlencode( $requested_redirect_to ), $redirect_to );
 
 				// If the requested redirect_to is valid, use it.

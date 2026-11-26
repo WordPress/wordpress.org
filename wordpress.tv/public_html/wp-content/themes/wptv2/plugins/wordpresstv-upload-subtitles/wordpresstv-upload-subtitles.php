@@ -138,7 +138,8 @@ class WordPressTV_Subtitles_Upload {
 			return new WP_Error( 'upload_error', 'Invalid file name.' );
 		}
 
-		$name = $_FILES['wptv_subtitles_file']['name'];
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- post() verifies the upload nonce before calling this.
+		$name = sanitize_text_field( wp_unslash( $_FILES['wptv_subtitles_file']['name'] ?? '' ) );
 		add_filter( 'wp_handle_upload_prefilter', array( $this, 'generate_filename' ), 5 );
 
 		$file = wp_handle_upload( $_FILES['wptv_subtitles_file'], $overrides );
@@ -150,7 +151,7 @@ class WordPressTV_Subtitles_Upload {
 		$filepath = $file['file'];
 
 		$attachment = array(
-			'post_title'     => sanitize_text_field( wp_unslash( $name ) ),
+			'post_title'     => $name,
 			'guid'           => $file['url'],
 			'post_mime_type' => $file['type'],
 			'post_content'   => '',
@@ -219,7 +220,7 @@ class WordPressTV_Subtitles_Upload {
 			wp_die( 'You can only subtitle videos.' );
 		}
 
-		if ( empty( $_POST['wptv_wporg_username'] ) || empty( $_POST['wptv_author_email'] ) || ! is_email( $_POST['wptv_author_email'] ) ) {
+		if ( empty( $_POST['wptv_wporg_username'] ) || empty( $_POST['wptv_author_email'] ) || ! is_email( wp_unslash( $_POST['wptv_author_email'] ) ) ) {
 			$this->error( 4 );
 		}
 
@@ -230,7 +231,7 @@ class WordPressTV_Subtitles_Upload {
 			$this->error( 7 );
 		}
 
-		$language            = $_POST['wptv_language'];
+		$language            = sanitize_text_field( wp_unslash( $_POST['wptv_language'] ?? '' ) );
 		$available_languages = class_exists( 'VideoPress_Subtitles' ) ? VideoPress_Subtitles::get_languages() : array();
 
 		if ( ! array_key_exists( $language, $available_languages ) ) {

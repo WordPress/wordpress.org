@@ -18,8 +18,8 @@ if ( ! empty( $sso::$matched_route_params['confirm_user'] ) ) {
 	die();
 }
 
-$activation_user = is_string( $_COOKIE['wporg_confirm_user'] ?? null ) ? $_COOKIE['wporg_confirm_user'] : '';
-$activation_key  = is_string( $_COOKIE['wporg_confirm_key']  ?? null ) ? $_COOKIE['wporg_confirm_key']  : '';
+$activation_user = is_string( $_COOKIE['wporg_confirm_user'] ?? null ) ? sanitize_text_field( wp_unslash( $_COOKIE['wporg_confirm_user'] ) ) : '';
+$activation_key  = is_string( $_COOKIE['wporg_confirm_key'] ?? null ) ? sanitize_text_field( wp_unslash( $_COOKIE['wporg_confirm_key'] ) ) : '';
 
 $pending_user = wporg_get_pending_user( $activation_user );
 if ( ! $pending_user ) {
@@ -75,7 +75,8 @@ if ( isset( $_POST['user_pass'] ) && 2 !== $pending_user['cleared'] ) {
 	// Store for reference.
 	if ( isset( $_POST['_reCaptcha_v3_token'] ) ) {
 		$recaptcha_api = wporg_login_recaptcha_api(
-			$_POST['_reCaptcha_v3_token'],
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public login and registration forms are served to logged-out visitors; reCAPTCHA is the anti-automation check here, not a nonce.
+			sanitize_text_field( wp_unslash( $_POST['_reCaptcha_v3_token'] ?? '' ) ),
 			RECAPTCHA_V3_PRIVKEY
 		);
 		if ( $recaptcha_api && $recaptcha_api['success'] && 'pending_create' == $recaptcha_api['action'] ) {
@@ -106,7 +107,8 @@ if ( ! $pending_user['cleared'] ) {
 }
 
 if ( isset( $_POST['user_pass'] ) ) {
-	$user_pass = wp_unslash( $_POST['user_pass'] );
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- A password must reach wp_set_password() byte for byte, so it is only unslashed; the form is a public one with no nonce.
+	$user_pass = wp_unslash( $_POST['user_pass'] ?? '' );
 
 	if ( $pending_user && ! $pending_user['created'] ) {
 		$user = wporg_login_create_user_from_pending( $pending_user, $user_pass );
@@ -129,7 +131,7 @@ if ( isset( $_POST['user_pass'] ) ) {
 		wp_safe_redirect( home_url() );
 	} else {
 		if ( ! empty( $_COOKIE['wporg_came_from'] ) ) {
-			wp_safe_redirect( $_COOKIE['wporg_came_from'] );
+			wp_safe_redirect( esc_url_raw( wp_unslash( $_COOKIE['wporg_came_from'] ?? '' ) ) );
 		} else {
 			wp_safe_redirect( 'https://wordpress.org/support/' );
 		}

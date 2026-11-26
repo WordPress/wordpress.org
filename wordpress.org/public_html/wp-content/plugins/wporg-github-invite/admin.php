@@ -59,7 +59,7 @@ function render() {
 		}
 
 		if ( $message && isset( $_GET['message'] ) ) {
-			$message .= '<br><em>' . esc_html( $_GET['message'] ) . '</em>';
+			$message .= '<br><em>' . esc_html( sanitize_text_field( wp_unslash( $_GET['message'] ) ) ) . '</em>';
 		}
 
 		if ( $message ) {

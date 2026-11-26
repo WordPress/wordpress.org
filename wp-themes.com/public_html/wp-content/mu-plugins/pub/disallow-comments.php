@@ -12,7 +12,7 @@ add_filter( 'pre_comment_content', function( $text ) {
 	}
 
 	if ( ! empty( $_SERVER['HTTP_REFERER'] ) ) {
-		wp_safe_redirect( $_SERVER['HTTP_REFERER'] );
+		wp_safe_redirect( esc_url_raw( wp_unslash( $_SERVER['HTTP_REFERER'] ?? '' ) ) );
 	}
 
 	die( '<h1>Comments are disabled.</h1>' );

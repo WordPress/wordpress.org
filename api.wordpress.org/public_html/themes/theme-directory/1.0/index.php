@@ -17,13 +17,14 @@ require dirname( dirname( dirname( __DIR__ ) ) ) . '/wp-init.php';
 
 function api_send_json( $data ) {
 	// Allow cross-domain calls from *.wordpress.org
-	if ( isset( $_SERVER['HTTP_ORIGIN'] ) && preg_match( '!^https?://([^.]+\.)?wordpress\.org/?$!i', $_SERVER['HTTP_ORIGIN'] ) ) {
-		header( 'Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN'] );
+	// phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledInText -- Hostname pattern, correctly lowercase.
+	if ( isset( $_SERVER['HTTP_ORIGIN'] ) && preg_match( '!^https?://([^.]+\.)?wordpress\.org/?$!i', sanitize_text_field( wp_unslash( $_SERVER['HTTP_ORIGIN'] ?? '' ) ) ) ) {
+		header( 'Access-Control-Allow-Origin: ' . sanitize_text_field( wp_unslash( $_SERVER['HTTP_ORIGIN'] ?? '' ) ) );
 		header( 'Access-Control-Allow-Credentials: true' ); // Allow cookies to be used.
 	}
 
 	if ( isset( $_GET['callback'] ) ) {
-		$callback = preg_replace( '/[^a-z0-9_]/i', '', $_GET['callback'] );
+		$callback = preg_replace( '/[^a-z0-9_]/i', '', sanitize_text_field( wp_unslash( $_GET['callback'] ?? '' ) ) );
 	} else {
 		$callback = false;
 	}
@@ -48,18 +49,18 @@ if ( ! is_user_logged_in() ) {
 	) );
 }
 
-switch ( $_REQUEST['action'] ) {
+switch ( sanitize_key( $_REQUEST['action'] ?? '' ) ) {
 	case 'add-favorite':
 	case 'remove-favorite':
-		if ( ! isset( $_REQUEST['theme'] ) || ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'modify-theme-favorite' ) ) {
+		if ( ! isset( $_REQUEST['theme'] ) || ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'modify-theme-favorite' ) ) {
 			api_send_json( array(
 				'error' => 'bad_request'
 			) );
 		}
 
-		$theme_slug = wp_unslash( $_REQUEST['theme'] );
+		$theme_slug = sanitize_key( wp_unslash( $_REQUEST['theme'] ?? '' ) );
 
-		if ( 'add-favorite' == $_REQUEST['action'] ) {
+		if ( 'add-favorite' === sanitize_key( $_REQUEST['action'] ?? '' ) ) {
 			$result = wporg_themes_add_favorite( $theme_slug );
 		} else {
 			$result = wporg_themes_remove_favorite( $theme_slug );

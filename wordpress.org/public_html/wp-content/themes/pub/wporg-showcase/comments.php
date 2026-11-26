@@ -1,4 +1,14 @@
-<?php if ( !empty($post->post_password) && $_COOKIE['wp-postpass_' . COOKIEHASH] != $post->post_password) : ?>
+<?php
+/**
+ * Comments template for the showcase theme.
+ *
+ * @package wporg-showcase
+ */
+
+$wporg_showcase_postpass = sanitize_text_field( wp_unslash( $_COOKIE[ 'wp-postpass_' . COOKIEHASH ] ?? '' ) );
+
+if ( ! empty( $post->post_password ) && $wporg_showcase_postpass !== $post->post_password ) :
+	?>
 <p><?php esc_html_e( 'Enter your password to view comments.', 'wporg-showcase' ); ?></p>
 <?php return; endif; ?>
 

@@ -89,7 +89,7 @@ defined( 'ABSPATH' ) || die();
 <?php
 $redirect_uri = home_url( '/' );
 if ( isset( $_GET['locale'] ) )
-	$redirect_uri = add_query_arg( 'locale', urlencode( $_GET['locale'] ), $redirect_uri );
+	$redirect_uri = add_query_arg( 'locale', rawurlencode( sanitize_text_field( wp_unslash( $_GET['locale'] ) ) ), $redirect_uri );
 
 $facebook_args = array(
 	'app_id'       => '180651631983617', // Browse Happy app.
