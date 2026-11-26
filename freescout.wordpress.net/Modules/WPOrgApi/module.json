@@ -1,0 +1,21 @@
+{
+    "name": "WP.org API",
+    "alias": "wporgapi",
+    "img": "/modules/wporgapi/img/icon.svg",
+    "description": "Answers WordPress.org's signed requests, like for a mailbox's saved replies.",
+    "version": "1.0.0",
+    "detailsUrl": "https://github.com/WordPress/wordpress.org/tree/trunk/freescout.wordpress.net/Modules/WPOrgApi",
+    "author": "WordPress.org",
+    "authorUrl": "https://wordpress.org/",
+    "requiredAppVersion": "1.8.243",
+    "license": "GPL-2.0-or-later",
+    "keywords": [],
+    "active": 0,
+    "order": 0,
+    "providers": [
+        "Modules\\WPOrgApi\\Providers\\WPOrgApiServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
