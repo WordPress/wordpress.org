@@ -8,7 +8,6 @@
 | [WPOrgFreeScoutImport](Modules/WPOrgFreeScoutImport) | Imports other FreeScouts' mailboxes, like WordCamp US's, so their history moves here. Administrators run it under Manage » FreeScout Import. |
 | [WPOrgHelpScoutImport](Modules/WPOrgHelpScoutImport) | Imports HelpScout mailboxes' conversations, so their history moves to FreeScout. Administrators run it under Manage » HelpScout Import. |
 | [WPOrgPluginReview](Modules/WPOrgPluginReview) | Shows the plugins team a conversation's latest plugin review in its sidebar: its details, flags, issues, and the plugin as it is now on WordPress.org. |
-| [WPOrgSearch](Modules/WPOrgSearch) | Speeds up conversation search: an After date for searches without other filters, and one query instead of two. |
 | [WPOrgSidebar](Modules/WPOrgSidebar) | Shows the sender's WordPress.org profile, forum notes, plugins and themes, and privacy requests next to each conversation. |
 | [WPOrgSite](Modules/WPOrgSite) | Adapts FreeScout to how WordPress.org runs it: WordPress.org branding, a Modules page that only lists installed modules, and conversation UX for agents, like keyboard shortcuts, `/` for saved replies, a collapsible sidebar, and pinned notes and headers. |
 | [WPOrgSSO](Modules/WPOrgSSO) | Agents log in with their WordPress.org account, through login.wordpress.org; there's no other way in. Every user is connected to a WordPress.org account, and new users are created from one. Name, email, and avatar are updated from it at every login. |
@@ -35,7 +34,7 @@ Contributions follow the usual Meta workflow: open a pull request on the GitHub 
 
 FreeScout core is installed and updated by the systems team. This folder only adds modules:
 
-1. Check out `freescout.wordpress.net/Modules/` as FreeScout's `Modules/` folder. Premium modules come from the private `WordPress/freescout-paid-modules` repository and sit next to ours as unversioned folders.
+1. Check out `freescout.wordpress.net/Modules/` as FreeScout's `Modules/` folder. Paid modules come from the private `WordPress/freescout-paid-modules` repository and sit next to ours as unversioned folders.
 2. After every deploy, and after every FreeScout core update, run `php artisan freescout:after-app-update` as the web server user. It clears FreeScout's caches, runs migrations, and restarts the queue worker.
 3. An admin switches new modules on under Manage » Modules. To remove a module, switch it off there first, and remove its code in a later deploy.
 
@@ -59,5 +58,7 @@ Optional:
 | `WPORG_SSO_PASSWORD_LOGIN` | `false` | Break-glass: `true` lets administrators log in with a FreeScout password at `/login?password=1`. `php artisan wporgsso:password <email>` gives them one; password reset emails stay closed. Every such login is logged. |
 
 FreeScout's queue worker must be running (FreeScout's standard cron entry starts it), since `WPOrgWebhooks` sends events, `WPOrgSSO` updates avatars, `WPOrgAkismet` reports to Akismet, and `WPOrgHelpScoutImport` and `WPOrgFreeScoutImport` import from the queue.
+
+The mail server deletes email that FreeScout has read after 30 days. After that, Show Original falls back to FreeScout's own, truncated copy (headers are kept), and skipped emails, listed under Manage » Logs » Fetch Errors, are gone. A module that needs more from the original email must save it when the email is fetched.
 
 Behind a proxy, set core's `APP_TRUSTED_PROXIES`, so `WPOrgSSO` rate-limits its login endpoints per visitor rather than for everyone at once. Leave `SESSION_SAME_SITE` unset or `lax`: with `strict`, the browser drops the session cookie on the way back from login.wordpress.org, and every login fails. `WPOrgSSO` also hands logins over and forgets connections through FreeScout's cache, so every web server and `artisan` need the same cache store, and `artisan` runs as the web server user.
