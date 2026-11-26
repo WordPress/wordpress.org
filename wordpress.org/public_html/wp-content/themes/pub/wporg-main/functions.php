@@ -292,17 +292,17 @@ function old_page_redirects() {
 add_filter( 'template_redirect', __NAMESPACE__ . '\old_page_redirects' );
 
 /**
- * Disables hreflang tags on instances of this theme, unless it's a page that has localised variants.
+ * Enables hreflang tags on the pages that have localized variants.
  *
- * This takes the reverse approach of the function name.
- * Instead of maybe removing it, it removes it unless a specific criteria is met.
- * 
  * The criteria is that...
  *  - It's a page
  *  - It's not the hosting page
  *  - It's not a rosetta page owned by anyone other than wordpressdotorg (These are the globally synced pages).
+ *
+ * @param bool $enabled Whether the hreflang tags are output.
+ * @return bool
  */
-function maybe_remove_hreflang_tags() {
+function enable_hreflang_tags( $enabled ) {
 	$post = get_post();
 
 	if (
@@ -315,10 +315,12 @@ function maybe_remove_hreflang_tags() {
 			( ! $post || get_user_by( 'slug', 'wordpressdotorg' )->ID != $post->post_author )
 		)
 	) {
-		remove_action( 'wp_head', 'WordPressdotorg\Theme\hreflang_link_attributes' );
+		return $enabled;
 	}
+
+	return true;
 }
-add_action( 'wp_head', __NAMESPACE__ . '\maybe_remove_hreflang_tags', 1 );
+add_filter( 'wporg_hreflang_enabled', __NAMESPACE__ . '\enable_hreflang_tags' );
 
 /**
  * Custom template tags.
