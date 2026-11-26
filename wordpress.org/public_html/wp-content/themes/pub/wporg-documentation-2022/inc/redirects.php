@@ -14,6 +14,7 @@ namespace WordPressdotorg\Theme\Documentation_2022\Redirects;
 
 add_action( 'template_redirect', __NAMESPACE__ . '\redirect_to_global_search' );
 add_action( 'template_redirect', __NAMESPACE__ . '\redirect_old_content', 9 ); // Before redirect_canonical().
+add_action( 'template_redirect', __NAMESPACE__ . '\redirect_mixed_case_urls', 11 ); // After wp_old_slug_redirect().
 
 /**
  * Redirects search results to the global WordPress.org search.
@@ -131,6 +132,35 @@ function redirect_old_content(): void {
 			do_redirect_and_exit( $new_url );
 		}
 	}
+}
+
+/**
+ * Redirects mixed-case URLs to their lowercase equivalent.
+ *
+ * Slugs on this site are always lowercase, and so are canonical URLs.
+ *
+ * @return void
+ */
+function redirect_mixed_case_urls(): void {
+	if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) ) {
+		return;
+	}
+
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/documentation/';
+	$path        = explode( '?', $request_uri )[0];
+
+	// Compare decoded paths, so that uppercase percent-encoding doesn't cause a redirect loop.
+	$decoded_path   = rawurldecode( $path );
+	$lowercase_path = mb_strtolower( $decoded_path, 'UTF-8' );
+
+	if ( $decoded_path === $lowercase_path ) {
+		return;
+	}
+
+	$location  = implode( '/', array_map( 'rawurlencode', explode( '/', $lowercase_path ) ) );
+	$location .= substr( $request_uri, strlen( $path ) );
+
+	do_redirect_and_exit( $location );
 }
 
 /**
