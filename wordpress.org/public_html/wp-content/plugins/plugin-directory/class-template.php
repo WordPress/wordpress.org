@@ -230,16 +230,16 @@ class Template {
 	}
 
 	/**
-	 * Checks if the plugin was tested with the latest 3 major releases of WordPress.
+	 * Checks if the plugin was not tested with any of the latest 5 major releases of WordPress.
 	 *
 	 * @static
 	 *
 	 * @param int|\WP_Post|null $post Optional. Post ID or post object. Defaults to global $post.
-	 * @return bool True if the plugin is marked as tested, false otherwise.
+	 * @return bool True if the plugin is outdated, false otherwise.
 	 */
 	public static function is_plugin_outdated( $post = null ) {
 		$tested_up_to             = (string) get_post_meta( get_post( $post )->ID, 'tested', true );
-		$version_to_check_against = (string) ( self::get_current_major_wp_version() - 0.2 );
+		$version_to_check_against = (string) ( self::get_current_major_wp_version() - 0.4 );
 
 		return version_compare( $version_to_check_against, $tested_up_to, '>' );
 	}
