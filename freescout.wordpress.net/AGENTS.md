@@ -85,7 +85,7 @@ Modules aren't active in the test database, so each test registers the provider 
 - **Public files:** FreeScout serves a module's `Public/` from `public/modules/<alias>`, a symlink that `php artisan freescout:module-install <alias>` creates, as activating the module does. A copy instead of the symlink goes out of date: files added later are missing, and core leaves out every script on the page when one is (WPOrgSite now leaves out only the missing one).
 - **Routes:** register them in the provider with `loadRoutesFrom()`, and pass URLs to JavaScript through `data-` attributes rather than FreeScout's generated laroute files.
 - **Search:** production searches through a paid module, Faster Search, which keeps its own Meilisearch index and updates it from FreeScout's events. A write to an existing conversation that skips those events, like `toBase()->update()` or `\DB::table()`, can leave search out of date until the conversation changes again.
-- **Original email:** the mail server deletes email that FreeScout has read after 30 days, so `Thread::fetchBody()` and core's Show Original only work until then. Read what a module needs from the stored `headers`, or save it when the email is fetched.
+- **Original email:** the mail server deletes email that FreeScout has read after 30 days, so `Thread::fetchBody()` only works until then, and core's Show Original falls back to the stored, truncated copy. Read what a module needs from the stored `headers`, or save it when the email is fetched.
 
 ---
 
